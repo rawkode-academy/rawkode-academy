@@ -27,7 +27,7 @@ export const deployStack = (
       stack: project,
       projectRepo: "https://github.com/rawkode-academy/rawkode-academy",
       branch: "refs/heads/main",
-      repoDir: `projects/${project}`,
+      repoDir: `projects/${project}/deploy`,
       destroyOnFinalize: true,
       backend: "file:///state",
       envRefs: {
