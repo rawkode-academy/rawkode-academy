@@ -12,8 +12,11 @@ export const deployStack = (
   );
 
   const kubernetesSecret = new kubernetes.core.v1.Secret(
-    `${project}-password`,
+    `${project}-stack-password`,
     {
+      metadata: {
+        name: `${project}-stack-password`,
+      },
       stringData: {
         password: stackSecret.result,
       },
