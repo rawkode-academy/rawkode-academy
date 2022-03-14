@@ -22,4 +22,6 @@ new kx.Deployment("data-embassy", {
       },
     },
   },
-}).createService();
+}).createService({
+  ports: [{ port: 8080 }],
+});
