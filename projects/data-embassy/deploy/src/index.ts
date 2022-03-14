@@ -1,8 +1,9 @@
-import * as kx from "@pulumi/kubernetesx";
+import * as kubernetes from "@pulumi/kubernetes";
+import * as kubernetesx from "@pulumi/kubernetesx";
 
 const appLabels = { app: "data-embassy" };
 
-new kx.Deployment("data-embassy", {
+const deploy = new kubernetesx.Deployment("data-embassy", {
   metadata: {
     labels: appLabels,
   },
@@ -24,4 +25,28 @@ new kx.Deployment("data-embassy", {
   },
 }).createService({
   ports: [{ port: 8080 }],
+});
+
+const apiIngress = new kubernetes.apiextensions.CustomResource("api", {
+  apiVersion: "projectcontour.io/v1",
+  kind: "HTTPProxy",
+  metadata: {
+    name: "api.rawkode.academy",
+  },
+  spec: {
+    virtualhost: {
+      fqdn: "api.rawkode.academy",
+    },
+    routes: [
+      {
+        conditions: [{ prefix: "/" }],
+        services: [
+          {
+            name: deploy.metadata.name,
+            port: 8080,
+          },
+        ],
+      },
+    ],
+  },
 });
