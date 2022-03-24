@@ -2,7 +2,6 @@ import * as kubernetes from "@pulumi/kubernetes";
 import * as kubernetesx from "@pulumi/kubernetesx";
 
 const appLabels = { app: "data-embassy" };
-const nginxLabels = { app: "nginx" };
 
 const deploy = new kubernetesx.Deployment("data-embassy", {
   metadata: {
