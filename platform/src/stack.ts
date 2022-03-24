@@ -32,6 +32,9 @@ export const deployStack = (
       branch: "refs/heads/main",
       repoDir: `projects/${project}/deploy`,
       destroyOnFinalize: true,
+      continueResyncOnCommitMatch: true,
+      resyncFrequencySeconds: 60,
+      refresh: true,
       backend: "file:///state",
       envRefs: {
         PULUMI_CONFIG_PASSPHRASE: {
