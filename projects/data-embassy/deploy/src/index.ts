@@ -53,15 +53,20 @@ const nginx = new kubernetes.apps.v1.Deployment("nginx", {
   },
 });
 
+const environment = kubernetes.core.v1.ConfigMap.get(
+  "environment",
+  "environment"
+);
+
 const apiIngress = new kubernetes.apiextensions.CustomResource("api", {
   apiVersion: "projectcontour.io/v1",
   kind: "HTTPProxy",
   metadata: {
-    name: "api.rawkode.academy",
+    name: environment.data["apiDomain"],
   },
   spec: {
     virtualhost: {
-      fqdn: "api.rawkode.academy",
+      fqdn: environment.data["apiDomain"],
     },
     routes: [
       {
