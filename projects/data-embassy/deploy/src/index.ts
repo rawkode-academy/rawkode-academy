@@ -62,11 +62,11 @@ const apiIngress = new kubernetes.apiextensions.CustomResource("api", {
   apiVersion: "projectcontour.io/v1",
   kind: "HTTPProxy",
   metadata: {
-    name: environment.data["apiDomain"],
+    name: "api.rawkode.academy",
   },
   spec: {
     virtualhost: {
-      fqdn: environment.data["apiDomain"],
+      fqdn: "api.rawkode.academy",
     },
     routes: [
       {
