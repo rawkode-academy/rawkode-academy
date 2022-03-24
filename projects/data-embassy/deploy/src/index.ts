@@ -2,6 +2,7 @@ import * as kubernetes from "@pulumi/kubernetes";
 import * as kubernetesx from "@pulumi/kubernetesx";
 
 const appLabels = { app: "data-embassy" };
+const nginxLabels = { app: "nginx" };
 
 const deploy = new kubernetesx.Deployment("data-embassy", {
   metadata: {
@@ -25,6 +26,31 @@ const deploy = new kubernetesx.Deployment("data-embassy", {
   },
 }).createService({
   ports: [{ port: 8080 }],
+});
+
+const nginx = new kubernetes.apps.v1.Deployment("nginx", {
+  metadata: {
+    name: "nginx",
+  },
+  spec: {
+    replicas: 1,
+    selector: {
+      matchLabels: nginxLabels,
+    },
+    template: {
+      metadata: {
+        labels: nginxLabels,
+      },
+      spec: {
+        containers: [
+          {
+            name: "nginx",
+            image: "nginx",
+          },
+        ],
+      },
+    },
+  },
 });
 
 const apiIngress = new kubernetes.apiextensions.CustomResource("api", {
