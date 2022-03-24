@@ -28,36 +28,6 @@ const deploy = new kubernetesx.Deployment("data-embassy", {
   ports: [{ port: 8080 }],
 });
 
-const nginx = new kubernetes.apps.v1.Deployment("nginx", {
-  metadata: {
-    name: "nginx",
-  },
-  spec: {
-    replicas: 1,
-    selector: {
-      matchLabels: nginxLabels,
-    },
-    template: {
-      metadata: {
-        labels: nginxLabels,
-      },
-      spec: {
-        containers: [
-          {
-            name: "nginx",
-            image: "nginx",
-          },
-        ],
-      },
-    },
-  },
-});
-
-const environment = kubernetes.core.v1.ConfigMap.get(
-  "environment",
-  "environment"
-);
-
 const apiIngress = new kubernetes.apiextensions.CustomResource("api", {
   apiVersion: "projectcontour.io/v1",
   kind: "HTTPProxy",
