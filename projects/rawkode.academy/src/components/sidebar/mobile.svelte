@@ -73,9 +73,9 @@
 
         <div class="flex-shrink-0 flex items-center px-4">
           <img
-            class="h-8 w-auto"
-            src="https://tailwindui.com/img/logos/workflow-logo-indigo-300-mark-white-text.svg"
-            alt="Workflow"
+            class="h-12 w-auto"
+            src="/logo-white.png"
+            alt="Rawkode Academy"
           />
         </div>
         <div class="mt-5 flex-1 h-0 overflow-y-auto">

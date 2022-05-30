@@ -1,14 +1,23 @@
 ---
 import Nav from "@components/nav.svelte";
-import Breadcrumbs from "@components/breadcrumbs.svelte";
 import DesktopSidebar from "@components/sidebar/desktop.svelte";
 import MobileSidebar from "@components/sidebar/mobile.svelte";
+import Breadcrumbs from "@components/breadcrumbs.svelte";
 import CommandK from "@components/commandk.svelte";
-export interface Props {
+
+import './base.css';
+
+export interface Breadcrumb {
   title: string;
+  href: string;
 }
 
-const { title } = Astro.props as Props;
+export interface Props {
+  title: string;
+  breadcrumbs?: Breadcrumb[];
+}
+
+const { title, breadcrumbs } = Astro.props as Props;
 ---
 
 <!DOCTYPE html>
@@ -20,10 +29,11 @@ const { title } = Astro.props as Props;
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <title>{title}</title>
 
-  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet" rel="preload"
+    as="style">
 </head>
 
-<body class="h-full">
+<body class="h-full theme-rawkode-academy">
   <CommandK client:only />
 
   <div>
@@ -31,8 +41,8 @@ const { title } = Astro.props as Props;
     <DesktopSidebar client:load />
     <div class="md:pl-64 flex flex-col flex-1">
       <Nav client:load />
-      <Breadcrumbs client:load />
 
+      <Breadcrumbs slot="breadcrumbs" title={title} breadcrumbs={breadcrumbs} />
 
       <main>
         <div class="py-6">
