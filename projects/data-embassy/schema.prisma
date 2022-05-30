@@ -27,6 +27,8 @@ model Link {
   technologies Technology[]
   shows        Show[]
   episodes     Episode[]
+
+  @@map(name: "links")
 }
 
 model Person {
@@ -38,6 +40,8 @@ model Person {
   links         Link[]
   shows         Show[]
   episodes      Episode[]
+
+  @@map(name: "people")
 }
 
 model Show {
@@ -48,6 +52,8 @@ model Show {
   links    Link[]
   tags     Tag[]
   episodes Episode[]
+
+  @@map(name: "shows")
 }
 
 model Technology {
@@ -56,6 +62,8 @@ model Technology {
   openSource Boolean   @default(false)
   episodes   Episode[]
   tags       Tag[]
+
+  @@map(name: "technologies")
 }
 
 model Tag {
@@ -63,6 +71,8 @@ model Tag {
   episodes     Episode[]
   technologies Technology[]
   shows        Show[]
+
+  @@map(name: "tags")
 }
 
 model Chapter {
@@ -70,6 +80,8 @@ model Chapter {
   episodeId String  @unique
   title     String
   episode   Episode @relation(fields: [episodeId], references: [id])
+
+  @@map(name: "chapters")
 }
 
 model Episode {
@@ -88,4 +100,6 @@ model Episode {
   youTubeCategory Int
   youTubeId       String
   description     String?
+
+  @@map(name: "episodes")
 }
