@@ -12,12 +12,12 @@ export const menuItems: MenuItem[] = [
   },
   {
     title: "Shows",
-    href: "/shows",
+    href: "/shows/",
     icon: "mdi-light:home",
   },
   {
     title: "Contact",
-    href: "/contact",
+    href: "/contact/",
     icon: "mdi-light:home",
   },
 ];
