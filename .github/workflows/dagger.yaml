@@ -41,6 +41,7 @@ jobs:
             do build
         env:
           DAGGER_LOG_LEVEL: "debug"
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
       - name: Print Buildkitd Logs
         if: ${{ failure() }}
