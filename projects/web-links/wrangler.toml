@@ -1,6 +1,6 @@
 name = "web-links"
 compatibility_date = "2022-01-20"
-workers_dev = true
+workers_dev = false
 main = "src/index.ts"
 routes = [
   { pattern = "rawkode.academy", custom_domain = true },
