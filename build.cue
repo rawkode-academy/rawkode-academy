@@ -3,8 +3,8 @@ package build
 import (
 	"dagger.io/dagger"
 	"dagger.io/dagger/core"
-	"github.com/rawkode-academy/rawkode-academy/projects/web-links:web_links"
-	"github.com/rawkode-academy/rawkode-academy/projects/domains-and-dns:domains_dns"
+	"github.com/RawkodeAcademy/RawkodeAcademy/projects/web-links:web_links"
+	"github.com/RawkodeAcademy/RawkodeAcademy/projects/domains-and-dns:domains_dns"
 )
 
 globalConfig: {

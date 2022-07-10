@@ -1,1 +1,1 @@
-module: "github.com/rawkode-academy/rawkode-academy"
+module: "github.com/RawkodeAcademy/RawkodeAcademy"
