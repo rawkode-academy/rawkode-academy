@@ -28,7 +28,7 @@ dagger.#Plan & {
 			format: "yaml"
 		}
 
-		projects: {
+		build: {
 			domainsDns: (domains_dns & {
 				config: {
 					cloudflare: {
