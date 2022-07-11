@@ -16,7 +16,7 @@ config: {
 	}
 }
 
-actions: {
+build: {
 	_codePulumi: core.#Source & {
 		path: "."
 		exclude: [
