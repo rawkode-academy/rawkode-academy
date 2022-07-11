@@ -13,7 +13,7 @@ config: {
 	}
 }
 
-actions: {
+build: {
 	_codeWorker: core.#Source & {
 		path: "."
 		exclude: [

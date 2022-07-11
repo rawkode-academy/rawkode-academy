@@ -12,6 +12,29 @@ globalConfig: {
 		accountId: "0aeb879de8e3cdde5fb3d413025222ce"
 }
 
+projects: {
+	domainsDns: (domains_dns & {
+		config: {
+			cloudflare: {
+				accountId: globalConfig.cloudflare.accountId
+				apiToken:  secrets.output.cloudflare.apiToken.contents
+			}
+			pulumi: {
+				accessToken: secrets.output.pulumi.apiToken.contents
+			}
+		}
+	})
+
+	webLinks: (web_links & {
+		config: {
+			cloudflare: {
+				accountId: globalConfig.cloudflare.accountId
+				apiToken:  secrets.output.cloudflare.apiToken.contents
+			}
+		}
+	})
+}
+
 dagger.#Plan & {
 	client: env: SOPS_AGE_KEY: dagger.#Secret
 
@@ -29,26 +52,8 @@ dagger.#Plan & {
 		}
 
 		build: {
-			domainsDns: (domains_dns & {
-				config: {
-					cloudflare: {
-						accountId: globalConfig.cloudflare.accountId
-						apiToken:  secrets.output.cloudflare.apiToken.contents
-					}
-					pulumi: {
-						accessToken: secrets.output.pulumi.apiToken.contents
-					}
-				}
-			}).actions
-
-			webLinks: (web_links & {
-				config: {
-					cloudflare: {
-						accountId: globalConfig.cloudflare.accountId
-						apiToken:  secrets.output.cloudflare.apiToken.contents
-					}
-				}
-			}).actions
+			domainsDns: projects.domainsDns.build
+			webLinks:   projects.webLinks.build
 		}
 	}
 }
