@@ -23,6 +23,7 @@ build: {
 
 	deploy: yarn.#Script & {
 		name:   "publish"
+                project: "web-links"
 		source: _codeWorker.output
 
 		container: env: {
