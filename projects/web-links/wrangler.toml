@@ -3,8 +3,6 @@ compatibility_date = "2022-01-20"
 workers_dev = false
 main = "src/index.ts"
 routes = [
-  { pattern = "rawkode.academy", custom_domain = true },
-  { pattern = "rawkode.academy/*", zone_name = "rawkode.academy" },
   { pattern = "rawkode.community", custom_domain = true },
   { pattern = "rawkode.community/*", zone_name = "rawkode.community" },
   { pattern = "rawkode.link", custom_domain = true },
