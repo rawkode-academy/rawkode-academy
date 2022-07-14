@@ -8,4 +8,4 @@ routes = [
 ]
 
 [build]
-command = "yarn install && yarn run build"
+command = "yarn run build"
