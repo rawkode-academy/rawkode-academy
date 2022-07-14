@@ -4,7 +4,7 @@ import (
 	"dagger.io/dagger"
 	"dagger.io/dagger/core"
 	"github.com/RawkodeAcademy/RawkodeAcademy/projects/domains-and-dns:domains_dns"
-	"github.com/RawkodeAcademy/RawkodeAcademy/projects/web-links:web_links"
+	"github.com/RawkodeAcademy/RawkodeAcademy/projects/web-links:weblinks"
 	"github.com/RawkodeAcademy/RawkodeAcademy/projects/website"
 )
 
@@ -42,7 +42,7 @@ dagger.#Plan & {
 				}
 			}).build
 
-			webLinks: web_links.#Build & {
+			"webLinks": weblinks.#Build & {
 				config: {
 					cloudflare: {
 						accountId: globalConfig.cloudflare.accountId

@@ -1,4 +1,4 @@
-package web_links
+package weblinks
 
 import (
 	"dagger.io/dagger"
