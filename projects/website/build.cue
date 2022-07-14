@@ -33,7 +33,7 @@ import (
 	}
 
 	_deploy: yarn.#Script & {
-		name:    "publish"
+		name:    "deploy"
 		project: "website"
 		source:  _websiteCode.output
 
