@@ -3,10 +3,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        black: withOpacityValue("--color-black"),
         primary: withOpacityValue("--color-primary"),
         secondary: withOpacityValue("--color-secondary"),
-        tertiary: withOpacityValue("--color-tertiary"),
-        rblack: withOpacityValue("--color-black"),
       },
     },
   },

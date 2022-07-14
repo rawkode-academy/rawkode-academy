@@ -1,0 +1,32 @@
+{
+  "name": "@rawkode-academy/website",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "publish": "wrangler pages publish --project-name rawkode-academy dist"
+  },
+  "devDependencies": {
+    "@astrojs/lit": "^0.3.1",
+    "@astrojs/preact": "0.4.1",
+    "@astrojs/react": "^0.3.1",
+    "@astrojs/svelte": "^0.3.1",
+    "@astrojs/tailwind": "^0.2.4",
+    "@iconify/svelte": "^2.2.1",
+    "@webcomponents/template-shadowroot": "^0.1.0",
+    "astro": "^1.0.0-beta.69",
+    "lit": "^2.2.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "svelte": "^3.49.0",
+    "wrangler": "^2.0.19"
+  },
+  "dependencies": {
+    "@iconify-icons/carbon": "^1.2.7",
+    "kbar": "^0.1.0-beta.35",
+    "ninja-keys": "^1.2.1"
+  }
+}

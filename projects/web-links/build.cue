@@ -8,17 +8,17 @@ import (
 	"universe.dagger.io/yarn"
 )
 
-config: {
-	cloudflare: {
-		accountId: string
-		apiToken:  dagger.#Secret
+#Build: {
+	config: {
+		cloudflare: {
+			accountId: string
+			apiToken:  dagger.#Secret
+		}
+		rudderStack: {
+			basicAuth: dagger.#Secret
+		}
 	}
-	rudderStack: {
-		basicAuth: dagger.#Secret
-	}
-}
 
-build: {
 	_workerCode: core.#Source & {
 		path: "."
 		exclude: [

@@ -1,11 +1,11 @@
 import { Redirects } from "./types";
-import rawkodeAcademy from "./rawkode.academy";
+import rawkodeLink from "./rawkode.link";
 import rawkodeCommunity from "./rawkode.community";
 
 const redirects: Redirects = {
   defaultRedirect: "https://twitter.com/rawkode",
   domains: {
-    "rawkode.academy": rawkodeAcademy,
+    "rawkode.link": rawkodeLink,
     "rawkode.community": rawkodeCommunity,
   },
 };

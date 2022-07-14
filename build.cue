@@ -3,8 +3,9 @@ package build
 import (
 	"dagger.io/dagger"
 	"dagger.io/dagger/core"
-	"github.com/RawkodeAcademy/RawkodeAcademy/projects/web-links:web_links"
 	"github.com/RawkodeAcademy/RawkodeAcademy/projects/domains-and-dns:domains_dns"
+	"github.com/RawkodeAcademy/RawkodeAcademy/projects/web-links:web_links"
+	"github.com/RawkodeAcademy/RawkodeAcademy/projects/website"
 )
 
 globalConfig: {
@@ -41,7 +42,7 @@ dagger.#Plan & {
 				}
 			}).build
 
-			webLinks: (web_links & {
+			webLinks: web_links.#Build & {
 				config: {
 					cloudflare: {
 						accountId: globalConfig.cloudflare.accountId
@@ -51,7 +52,16 @@ dagger.#Plan & {
 						basicAuth: secrets.output.rudderStack.basicAuth.contents
 					}
 				}
-			}).build
+			}
+
+			"website": website.#Build & {
+				config: {
+					cloudflare: {
+						accountId: globalConfig.cloudflare.accountId
+						apiToken:  secrets.output.cloudflare.apiToken.contents
+					}
+				}
+			}
 		}
 	}
 }
