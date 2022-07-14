@@ -47,6 +47,9 @@ dagger.#Plan & {
 						accountId: globalConfig.cloudflare.accountId
 						apiToken:  secrets.output.cloudflare.apiToken.contents
 					}
+					rudderStack: {
+						basicAuth: secrets.output.rudderStack.basicAuth.contents
+					}
 				}
 			}).build
 		}
