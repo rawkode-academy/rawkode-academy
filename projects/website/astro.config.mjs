@@ -6,5 +6,10 @@ import lit from "@astrojs/lit";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [tailwind(), react(), svelte(), lit()],
+  integrations: [
+    tailwind({ config: { applyBaseStyles: false } }),
+    react(),
+    svelte(),
+    lit(),
+  ],
 });

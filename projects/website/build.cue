@@ -3,7 +3,7 @@ package website
 import (
 	"dagger.io/dagger"
 	"dagger.io/dagger/core"
-	"universe.dagger.io/alpine"
+	"universe.dagger.io/docker"
 	"universe.dagger.io/yarn"
 )
 
@@ -18,18 +18,13 @@ import (
 	_websiteCode: core.#Source & {
 		path: "."
 		exclude: [
+			"./dist",
 			"./node_modules",
 		]
 	}
 
-	_websiteImage: alpine.#Build & {
-		version: "edge"
-		packages: {
-			bash: {}
-			nodejs: {}
-			npm: {}
-			yarn: {}
-		}
+	_websiteImage: docker.#Pull & {
+		source: "node:current-slim"
 	}
 
 	_deploy: yarn.#Script & {

@@ -7,7 +7,7 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "deploy": "yarn run build && wrangler pages publish --project-name rawkode-academy dist"
+    "deploy": "node --version && yarn run build && wrangler pages publish --project-name rawkode-academy dist"
   },
   "devDependencies": {
     "@astrojs/lit": "^0.3.1",
@@ -17,16 +17,12 @@
     "@astrojs/tailwind": "^0.2.4",
     "@iconify/svelte": "^2.2.1",
     "@webcomponents/template-shadowroot": "^0.1.0",
-    "astro": "^1.0.0-beta.69",
+    "astro": "^1.0.0-beta.72",
     "lit": "^2.2.7",
-    "react": "^18.2.0",
+    "ninja-keys": "^1.2.1",
     "react-dom": "^18.2.0",
+    "react": "^18.2.0",
     "svelte": "^3.49.0",
     "wrangler": "^2.0.19"
-  },
-  "dependencies": {
-    "@iconify-icons/carbon": "^1.2.7",
-    "kbar": "^0.1.0-beta.35",
-    "ninja-keys": "^1.2.1"
   }
 }
