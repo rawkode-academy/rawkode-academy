@@ -6,6 +6,9 @@ const redirects: Domain = {
     "metal": {
       to: "https://eqix.it/3tKSpuh",
     },
+    "klustered": {
+      to: "https://savvycal.com/RawkodeAcademy/Klustered",
+    },
     "teleport": {
       to: "https://goteleport.com/?utm_campaign=eg&utm_medium=partner&utm_source=rawkode",
     },
