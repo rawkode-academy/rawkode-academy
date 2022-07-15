@@ -3,16 +3,19 @@ import { Domain } from "../types";
 const redirects: Domain = {
   defaultRedirect: "https://youtube.com/c/rawkode",
   redirects: {
-    "metal": {
+    "office-hours": {
+      to: "https://savvycal.com/rawkode/office-hours",
+    },
+    metal: {
       to: "https://eqix.it/3tKSpuh",
     },
-    "klustered": {
+    klustered: {
       to: "https://savvycal.com/RawkodeAcademy/Klustered",
     },
-    "teleport": {
+    teleport: {
       to: "https://goteleport.com/?utm_campaign=eg&utm_medium=partner&utm_source=rawkode",
     },
-    "shareyourproject": {
+    shareyourproject: {
       to: "https://savvycal.com/RawkodeAcademy/share-your-project",
     },
     "share-your-project": {
