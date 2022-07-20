@@ -3,6 +3,7 @@ package build
 import (
 	"dagger.io/dagger"
 	"dagger.io/dagger/core"
+	"github.com/RawkodeAcademy/RawkodeAcademy/projects/cms"
 	"github.com/RawkodeAcademy/RawkodeAcademy/projects/domains-and-dns:domains_dns"
 	"github.com/RawkodeAcademy/RawkodeAcademy/projects/web-links:weblinks"
 	"github.com/RawkodeAcademy/RawkodeAcademy/projects/website"
@@ -11,6 +12,10 @@ import (
 globalConfig: {
 	cloudflare:
 		accountId: "0aeb879de8e3cdde5fb3d413025222ce"
+	mongodb: atlas: {
+		username:  "rawkodeacademy"
+		publicKey: "bvjadywy"
+	}
 }
 
 dagger.#Plan & {
@@ -30,6 +35,10 @@ dagger.#Plan & {
 		}
 
 		build: {
+			"cms": cms.#Build & {
+				config: github: token: secrets.output.github.token.contents
+			}
+
 			domainsDns: (domains_dns & {
 				config: {
 					cloudflare: {
