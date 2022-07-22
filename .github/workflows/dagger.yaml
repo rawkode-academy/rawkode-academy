@@ -43,7 +43,7 @@ jobs:
             project update
             do build
         env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
       - name: Print Buildkitd Logs
         if: ${{ failure() }}
