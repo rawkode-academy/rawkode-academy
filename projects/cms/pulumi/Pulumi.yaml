@@ -1,3 +1,4 @@
 name: cms
 runtime: nodejs
 description: A minimal TypeScript Pulumi program
+main: src

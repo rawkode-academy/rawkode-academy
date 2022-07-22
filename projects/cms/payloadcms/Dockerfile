@@ -3,13 +3,15 @@ FROM node:18 AS build
 WORKDIR /app
 COPY . /app
 
-RUN npm install
-RUN npm run build:server
+RUN yarn install
+RUN yarn run build:server
 
 FROM node:18
 
 WORKDIR /app
+
 COPY --from=build /app/dist /app
+COPY --from=build /app/node_modules /app/node_modules
 
 ENTRYPOINT [ "node" ]
-CMD [ "/app/server.js" ]
+CMD [ "server.js" ]

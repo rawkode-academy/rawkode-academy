@@ -4,7 +4,6 @@ import (
 	"dagger.io/dagger"
 	"dagger.io/dagger/core"
 	"universe.dagger.io/docker"
-	"universe.dagger.io/yarn"
 	"universe.dagger.io/alpha/doppler"
 )
 
@@ -33,37 +32,49 @@ dagger.#Plan & {
 		]
 	}
 
-	buildCmd: yarn.#Script & {
-		source:  _cmsCode.output
-		project: "cms"
-		name:    "build:server"
-		container: env: YARN_OUTPUT_FOLDER: "dist"
+	_buildImage: docker.#Dockerfile & {
+		source: _cmsCode.output
+		platforms: ["linux/amd64"]
 	}
 
-	buildImage: docker.#Build & {
-		steps: [
-			docker.#Pull & {
-				source: "node:18"
-			},
-
-			docker.#Copy & {
-				contents: buildCmd.container.export.directories."/output"
-				dest:     "/app"
-			},
-
-			docker.#Set & {
-				config: cmd: ["node", "/app/server.js"]
-			},
-		]
-	}
-
-	pushImage: docker.#Push & {
-		image: buildImage.output
+	_pushImage: docker.#Push & {
+		image: _buildImage.output
 		dest:  "ghcr.io/rawkodeacademy/cms:latest"
 
 		auth: {
 			username: "rawkode"
 			secret:   secrets.output.GITHUB_TOKEN.computed.contents
+		}
+	}
+
+	_codePulumi: core.#Source & {
+		path: "./pulumi"
+		exclude: [
+			"./node_modules",
+		]
+	}
+
+	pulumiUp: pulumi.#Up & {
+		// cacheKey: "platform-production"
+		stack:   "production"
+		runtime: "nodejs"
+
+		if secrets.output.PULUMI_ACCESS_TOKEN.computed != _|_ {
+			accessToken: secrets.output.PULUMI_ACCESS_TOKEN.computed.contents
+		}
+
+		source: _codePulumi.output
+
+		container: env: {
+			if secrets.output.MONGODB_ATLAS_ORG_ID.computed != _|_ {
+				MONGODB_ATLAS_ORG_ID: secrets.output.MONGODB_ATLAS_ORG_ID.computed.contents
+			}
+			if secrets.output.MONGODB_ATLAS_PUBLIC_KEY.computed != _|_ {
+				MONGODB_ATLAS_PUBLIC_KEY: secrets.output.MONGODB_ATLAS_PUBLIC_KEY.computed.contents
+			}
+			if secrets.output.MONGODB_ATLAS_PRIVATE_KEY.computed != _|_ {
+				MONGODB_ATLAS_PRIVATE_KEY: secrets.output.MONGODB_ATLAS_PRIVATE_KEY.computed.contents
+			}
 		}
 	}
 }
