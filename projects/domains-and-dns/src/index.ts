@@ -69,6 +69,19 @@ const rawkodeAcademy: Domain = {
   },
 };
 
+const rawkodeLink: Domain = {
+  name: "rawkode-link",
+  domain: "rawkode.link",
+  records: {
+    txt1: {
+      name: "@",
+      type: "TXT",
+      value: '"v=spf1 ~all"',
+      proxied: false,
+    },
+  },
+};
+
 const rawkodeCommunity: Domain = {
   name: "rawkode-community",
   domain: "rawkode.community",
@@ -126,4 +139,5 @@ const reconcileDomain = (domain: Domain) => {
 };
 
 reconcileDomain(rawkodeAcademy);
+reconcileDomain(rawkodeLink);
 reconcileDomain(rawkodeCommunity);

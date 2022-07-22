@@ -51,7 +51,7 @@ dagger.#Plan & {
 				}
 			}).build
 
-			"webLinks": weblinks.#Build & {
+			w2: weblinks.#Build & {
 				config: {
 					cloudflare: {
 						accountId: globalConfig.cloudflare.accountId

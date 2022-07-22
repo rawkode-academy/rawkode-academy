@@ -80,7 +80,7 @@ const logRequest = async (request: Request, hostname: string, path: string) => {
           referrer: request.headers.get("Referer") || "",
         },
         context: {
-          verifiedBot: request.cf?.botManagement?.verifiedBot,
+          verifiedBot: request.cf?.botManagement?.verifiedBot || false,
           // If we don't have a score, we'll pretend it's human
           likelyBot:
             (request.cf?.botManagement?.score || 30) >= 30 ? false : true,
