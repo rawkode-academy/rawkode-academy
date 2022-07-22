@@ -8,6 +8,7 @@ import Technologies from "./collections/technologies";
 import LiveStreams from "./collections/live-streams";
 import Media from "./collections/media";
 
+//
 export default buildConfig({
   serverURL: "http://localhost:3000",
   admin: {

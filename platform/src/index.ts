@@ -1,3 +1,1 @@
-import { deployStack } from "./stack";
-
-deployStack("data-embassy");
+import * as scaleway from "@jaxxstorm/pulumi-scaleway";

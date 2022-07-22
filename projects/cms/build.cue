@@ -5,11 +5,24 @@ import (
 	"dagger.io/dagger/core"
 	"universe.dagger.io/docker"
 	"universe.dagger.io/yarn"
+	"universe.dagger.io/alpha/doppler"
 )
 
+dagger.#Plan & {
+	client: env: DOPPLER_TOKEN: dagger.#Secret
+
+	actions: build: #Build & {
+		config: doppler: token: client.env.DOPPLER_TOKEN
+	}
+}
+
 #Build: {
-	config: {
-		github: token: dagger.#Secret
+	config: doppler: token: dagger.#Secret
+
+	secrets: doppler.#FetchConfig & {
+		apiToken: config.doppler.token
+		project:  "cms"
+		"config": "production"
 	}
 
 	_cmsCode: core.#Source & {
@@ -50,7 +63,7 @@ import (
 
 		auth: {
 			username: "rawkode"
-			secret:   config.github.token
+			secret:   secrets.output.GITHUB_TOKEN.computed.contents
 		}
 	}
 }

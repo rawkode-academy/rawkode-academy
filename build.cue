@@ -2,74 +2,31 @@ package build
 
 import (
 	"dagger.io/dagger"
-	"dagger.io/dagger/core"
+	"github.com/RawkodeAcademy/RawkodeAcademy/platform"
 	"github.com/RawkodeAcademy/RawkodeAcademy/projects/cms"
-	"github.com/RawkodeAcademy/RawkodeAcademy/projects/domains-and-dns:domains_dns"
+	"github.com/RawkodeAcademy/RawkodeAcademy/projects/domains-and-dns:domains"
 	"github.com/RawkodeAcademy/RawkodeAcademy/projects/web-links:weblinks"
-	"github.com/RawkodeAcademy/RawkodeAcademy/projects/website"
 )
 
-globalConfig: {
-	cloudflare:
-		accountId: "0aeb879de8e3cdde5fb3d413025222ce"
-	mongodb: atlas: {
-		username:  "rawkodeacademy"
-		publicKey: "bvjadywy"
-	}
-}
-
 dagger.#Plan & {
-	client: env: SOPS_AGE_KEY: dagger.#Secret
+	client: env: DOPPLER_TOKEN: dagger.#Secret
 
-	client: commands: sops: {
-		name: "sops"
-		env: SOPS_AGE_KEY: client.env.SOPS_AGE_KEY
-		args: ["-d", "secrets.yaml"]
-		stdout: dagger.#Secret
-	}
-
-	actions: {
-		secrets: core.#DecodeSecret & {
-			input:  client.commands.sops.stdout
-			format: "yaml"
+	actions: build: {
+		"platform": platform.#Build & {
+			config: doppler: token: client.env.DOPPLER_TOKEN
 		}
 
-		build: {
+		projects: {
 			"cms": cms.#Build & {
-				config: github: token: secrets.output.github.token.contents
+				config: doppler: token: client.env.DOPPLER_TOKEN
 			}
 
-			domainsDns: (domains_dns & {
-				config: {
-					cloudflare: {
-						accountId: globalConfig.cloudflare.accountId
-						apiToken:  secrets.output.cloudflare.apiToken.contents
-					}
-					pulumi: {
-						accessToken: secrets.output.pulumi.apiToken.contents
-					}
-				}
-			}).build
-
-			w2: weblinks.#Build & {
-				config: {
-					cloudflare: {
-						accountId: globalConfig.cloudflare.accountId
-						apiToken:  secrets.output.cloudflare.apiToken.contents
-					}
-					rudderStack: {
-						basicAuth: secrets.output.rudderStack.basicAuth.contents
-					}
-				}
+			domainsDns: domains.#Build & {
+				config: doppler: token: client.env.DOPPLER_TOKEN
 			}
 
-			"website": website.#Build & {
-				config: {
-					cloudflare: {
-						accountId: globalConfig.cloudflare.accountId
-						apiToken:  secrets.output.cloudflare.apiToken.contents
-					}
-				}
+			webLinks: weblinks.#Build & {
+				config: doppler: token: client.env.DOPPLER_TOKEN
 			}
 		}
 	}
