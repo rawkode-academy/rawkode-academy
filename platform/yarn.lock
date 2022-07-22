@@ -121,6 +121,13 @@
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
 
+"@pulumiverse/doppler@^0.0.4":
+  "integrity" "sha512-Qqge3QrxNsn6ksXrWKKp1MwlAOiSpoDtHw8+LN0erTawXUbSRa7PtCwfBfOjG/RUU2hANdfhFWbve38QsW5zYQ=="
+  "resolved" "https://registry.npmjs.org/@pulumiverse/doppler/-/doppler-0.0.4.tgz"
+  "version" "0.0.4"
+  dependencies:
+    "@pulumi/pulumi" "^3.0.0"
+
 "@types/glob@^5.0.35":
   "integrity" "sha512-ATA/xrS7CZ3A2WCPVY4eKdNpybq56zqlTirnHhhyOztZM/lPxJzusOBI3BsaXbu6FrUluqzvMlI4sZ6BDYMlMg=="
   "resolved" "https://registry.npmjs.org/@types/glob/-/glob-5.0.37.tgz"
