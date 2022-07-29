@@ -10,17 +10,16 @@ export class Contour extends Component implements IngressComponent {
   protected ipAddress: pulumi.Output<string>;
 
   static getComponentName(): string {
-    return "contour";
+    return "ingress-controller";
   }
 
-  constructor(name: string, args: ComponentArgs) {
-    super(name, args);
+  constructor(args: ComponentArgs) {
+    super(args);
 
     const ingressController = new kubernetes.helm.v3.Release(
-      this.name,
+      "ingress-controller",
       {
         chart: "contour",
-        name: "contour",
         repositoryOpts: {
           repo: "https://charts.bitnami.com/bitnami",
         },
@@ -46,8 +45,8 @@ export class Contour extends Component implements IngressComponent {
     this.resources.push(ingressController);
 
     const ingressService = kubernetes.core.v1.Service.get(
-      `${this.name}-contour-service`,
-      pulumi.interpolate`${ingressController.status.namespace}/${ingressController.status.name}-envoy`,
+      "ingress-controller-service",
+      pulumi.interpolate`${ingressController.status.namespace}/${ingressController.status.name}-contour-envoy`,
       {
         provider: args.provider,
         parent: this,

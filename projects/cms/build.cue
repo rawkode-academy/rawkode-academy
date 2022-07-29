@@ -5,6 +5,7 @@ import (
 	"dagger.io/dagger/core"
 	"universe.dagger.io/docker"
 	"universe.dagger.io/alpha/doppler"
+	"universe.dagger.io/alpha/pulumi"
 )
 
 dagger.#Plan & {

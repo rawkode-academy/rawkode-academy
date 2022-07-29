@@ -18,16 +18,14 @@ export abstract class Component extends pulumi.ComponentResource {
     throw new Error(`getComponentName not implemented for ${this.name}`);
   }
 
-  protected readonly name: string;
   protected readonly provider: kubernetes.Provider;
   protected readonly namespace: string | pulumi.Output<String>;
 
   protected resources: pulumi.Resource[] = [];
 
-  constructor(name: string, args: ComponentArgs) {
-    super(`platform:component:${name}`, name);
+  constructor(args: ComponentArgs) {
+    super(`rawkode:platform:ingress-controller`, "ingress-controller");
 
-    this.name = name;
     this.namespace = args.namespace;
     this.provider = args.provider;
   }
