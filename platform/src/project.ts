@@ -1,6 +1,7 @@
 import { RandomPassword } from "@pulumi/random";
 import * as kubernetes from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
+import * as doppler from "@pulumiverse/doppler";
 import * as slug from "slug";
 
 export interface ProjectArgs {
@@ -8,6 +9,7 @@ export interface ProjectArgs {
   directory: string;
   platformDependency: pulumi.Resource[];
   provider: kubernetes.Provider;
+  requireSecrets: string[];
   environment: { [key: string]: string };
 }
 
@@ -33,6 +35,28 @@ export class Project extends pulumi.ComponentResource {
     const slugName = slug(name);
     const provider = args.provider;
 
+    // Create Doppler Project
+    const dopplerProject = new doppler.Project(name, {
+      name,
+      description: "Project Created by Rawkode Academy Platform",
+    });
+
+    const dopplerEnvironment = new doppler.Environment(`${name}-production`, {
+      name: "Production",
+      slug: "production",
+      project: dopplerProject.id,
+    });
+
+    args.requireSecrets.forEach(
+      (secret) =>
+        new doppler.Secret(`${name}-production-${slug(secret)}`, {
+          name: secret,
+          project: dopplerProject.id,
+          config: "production",
+          value: `\${core.global.${secret}}`,
+        })
+    );
+
     this.namespace = new kubernetes.core.v1.Namespace(
       slugName,
       {
@@ -45,44 +69,44 @@ export class Project extends pulumi.ComponentResource {
     );
     const namespace = this.namespace.metadata.name;
 
-    const cmsDopplerOperatorToken = process.env.CMS_DOPPLER_OPERATOR_TOKEN!;
+    // const cmsDopplerOperatorToken = process.env.CMS_DOPPLER_OPERATOR_TOKEN!;
 
-    const dopplerCmsToken = new kubernetes.core.v1.Secret(
-      "cms-doppler-operator",
-      {
-        metadata: {
-          namespace: this.namespace.metadata.name,
-        },
-        data: {
-          serviceToken: Buffer.from(cmsDopplerOperatorToken).toString("base64"),
-        },
-      },
-      {
-        provider,
-      }
-    );
+    // const dopplerCmsToken = new kubernetes.core.v1.Secret(
+    //   "cms-doppler-operator",
+    //   {
+    //     metadata: {
+    //       namespace: this.namespace.metadata.name,
+    //     },
+    //     data: {
+    //       serviceToken: Buffer.from(cmsDopplerOperatorToken).toString("base64"),
+    //     },
+    //   },
+    //   {
+    //     provider,
+    //   }
+    // );
 
-    const dopplerSecret = new kubernetes.apiextensions.CustomResource(
-      "doppler-cms",
-      {
-        apiVersion: "secrets.doppler.com/v1alpha1",
-        kind: "DopplerSecret",
-        metadata: {
-          namespace: this.namespace.metadata.name,
-        },
-        spec: {
-          tokenSecret: {
-            name: dopplerCmsToken.metadata.name,
-          },
-          managedSecret: {
-            name: "doppler-cms",
-          },
-        },
-      },
-      {
-        provider,
-      }
-    );
+    // const dopplerSecret = new kubernetes.apiextensions.CustomResource(
+    //   "doppler-cms",
+    //   {
+    //     apiVersion: "secrets.doppler.com/v1alpha1",
+    //     kind: "DopplerSecret",
+    //     metadata: {
+    //       namespace: this.namespace.metadata.name,
+    //     },
+    //     spec: {
+    //       tokenSecret: {
+    //         name: dopplerCmsToken.metadata.name,
+    //       },
+    //       managedSecret: {
+    //         name: "doppler-cms",
+    //       },
+    //     },
+    //   },
+    //   {
+    //     provider,
+    //   }
+    // );
 
     this.configMap = new kubernetes.core.v1.ConfigMap(
       `${slugName}-environment`,

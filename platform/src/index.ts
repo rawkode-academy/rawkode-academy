@@ -89,4 +89,10 @@ const cmsProject = new Project("cms", {
   platformDependency: [],
   environment: {},
   provider: kubernetesProvider,
+  requireSecrets: [
+    "GITHUB_TOKEN_WRITE_PACKAGES",
+    "MONGODB_ATLAS_ORG_ID",
+    "MONGODB_ATLAS_PRIVATE_KEY",
+    "MONGODB_ATLAS_PUBLIC_KEY",
+  ],
 });
