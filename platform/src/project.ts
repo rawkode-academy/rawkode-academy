@@ -382,6 +382,7 @@ export class Project extends pulumi.ComponentResource {
           branch: "refs/heads/main",
           destroyOnFinalize: true,
           repoDir: args.directory,
+          refresh: true,
           continueResyncOnCommitMatch: true,
           resyncFrequencySeconds: 60,
           backend: "file:///state",
