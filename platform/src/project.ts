@@ -36,25 +36,66 @@ export class Project extends pulumi.ComponentResource {
     const provider = args.provider;
 
     // Create Doppler Project
-    const dopplerProject = new doppler.Project(name, {
+    const dopplerProject = new doppler.Project(slugName, {
       name,
       description: "Project Created by Rawkode Academy Platform",
     });
 
-    const dopplerEnvironment = new doppler.Environment(`${name}-production`, {
-      name: "Production",
-      slug: "production",
-      project: dopplerProject.id,
-    });
+    const dopplerEnvironment = new doppler.Environment(
+      `${slugName}-production`,
+      {
+        name: "Production",
+        slug: "production",
+        project: dopplerProject.id,
+      },
+      { parent: dopplerProject, deleteBeforeReplace: true }
+    );
 
     args.requireSecrets.forEach(
       (secret) =>
-        new doppler.Secret(`${name}-production-${slug(secret)}`, {
-          name: secret,
-          project: dopplerProject.id,
-          config: "production",
-          value: `\${core.global.${secret}}`,
-        })
+        new doppler.Secret(
+          `${slugName}-production-${slug(secret)}`,
+          {
+            name: secret,
+            project: dopplerProject.id,
+            config: "production",
+            value: `\${core.global.${secret}}`,
+          },
+          { parent: dopplerEnvironment }
+        )
+    );
+
+    const dopplerServiceTokenR = new doppler.ServiceToken(
+      `${slugName}-production-service-token-r`,
+      {
+        name: "doppler-operator",
+        project: dopplerProject.id,
+        config: "production",
+        access: "read",
+      },
+      { parent: dopplerEnvironment }
+    );
+
+    const dopplerServiceTokenRW = new doppler.ServiceToken(
+      `${slugName}-production-service-token-rw`,
+      {
+        name: "pulumi",
+        project: dopplerProject.id,
+        config: "production",
+        access: "read/write",
+      },
+      { parent: dopplerEnvironment }
+    );
+
+    const dopplerSecretServiceToken = new doppler.Secret(
+      `${slugName}-production-service-token-rw-inception`,
+      {
+        name: "DOPPLER_TOKEN",
+        project: dopplerProject.id,
+        config: "production",
+        value: dopplerServiceTokenRW.key,
+      },
+      { parent: dopplerEnvironment }
     );
 
     this.namespace = new kubernetes.core.v1.Namespace(
@@ -69,44 +110,44 @@ export class Project extends pulumi.ComponentResource {
     );
     const namespace = this.namespace.metadata.name;
 
-    // const cmsDopplerOperatorToken = process.env.CMS_DOPPLER_OPERATOR_TOKEN!;
+    const dopplerCmsToken = new kubernetes.core.v1.Secret(
+      `${slugName}-doppler-operator`,
+      {
+        metadata: {
+          namespace: this.namespace.metadata.name,
+        },
+        data: {
+          serviceToken: dopplerServiceTokenR.key.apply((key) =>
+            Buffer.from(key).toString("base64")
+          ),
+        },
+      },
+      {
+        provider,
+      }
+    );
 
-    // const dopplerCmsToken = new kubernetes.core.v1.Secret(
-    //   "cms-doppler-operator",
-    //   {
-    //     metadata: {
-    //       namespace: this.namespace.metadata.name,
-    //     },
-    //     data: {
-    //       serviceToken: Buffer.from(cmsDopplerOperatorToken).toString("base64"),
-    //     },
-    //   },
-    //   {
-    //     provider,
-    //   }
-    // );
-
-    // const dopplerSecret = new kubernetes.apiextensions.CustomResource(
-    //   "doppler-cms",
-    //   {
-    //     apiVersion: "secrets.doppler.com/v1alpha1",
-    //     kind: "DopplerSecret",
-    //     metadata: {
-    //       namespace: this.namespace.metadata.name,
-    //     },
-    //     spec: {
-    //       tokenSecret: {
-    //         name: dopplerCmsToken.metadata.name,
-    //       },
-    //       managedSecret: {
-    //         name: "doppler-cms",
-    //       },
-    //     },
-    //   },
-    //   {
-    //     provider,
-    //   }
-    // );
+    const dopplerSecret = new kubernetes.apiextensions.CustomResource(
+      `${slugName}-doppler-operator-secret`,
+      {
+        apiVersion: "secrets.doppler.com/v1alpha1",
+        kind: "DopplerSecret",
+        metadata: {
+          namespace: this.namespace.metadata.name,
+        },
+        spec: {
+          tokenSecret: {
+            name: dopplerCmsToken.metadata.name,
+          },
+          managedSecret: {
+            name: "doppler-cms",
+          },
+        },
+      },
+      {
+        provider,
+      }
+    );
 
     this.configMap = new kubernetes.core.v1.ConfigMap(
       `${slugName}-environment`,

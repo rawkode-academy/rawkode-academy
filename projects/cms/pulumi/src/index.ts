@@ -1,5 +1,4 @@
 import * as random from "@pulumi/random";
-import * as kubernetes from "@pulumi/kubernetes";
 import * as atlas from "@pulumi/mongodbatlas";
 import * as doppler from "@pulumiverse/doppler";
 
@@ -7,12 +6,6 @@ const orgId = process.env.MONGODB_ATLAS_ORG_ID!;
 
 const project = new atlas.Project("cms", {
   orgId,
-});
-
-const configmap = new kubernetes.core.v1.ConfigMap("test", {
-  data: {
-    abc: "123",
-  },
 });
 
 const database = new atlas.ServerlessInstance("cms", {
@@ -23,7 +16,7 @@ const database = new atlas.ServerlessInstance("cms", {
 });
 
 const password = new random.RandomPassword("cms", {
-  length: 31,
+  length: 32,
 });
 
 const user = new atlas.DatabaseUser("cms", {
@@ -48,16 +41,16 @@ const user = new atlas.DatabaseUser("cms", {
 const dopplerConnectionString = new doppler.Secret(
   "doppler-connection-string",
   {
-    project: "cms",
-    config: "production",
+    project: process.env.DOPPLER_PROJECT!,
+    config: process.env.DOPPLER_ENVIRONMENT!,
     name: "MONGODB_CONNECTION_STRING",
     value: database.connectionStringsStandardSrv,
   }
 );
 
 const dopplerPassword = new doppler.Secret("doppler-password", {
-  project: "cms",
-  config: "production",
+  project: process.env.DOPPLER_PROJECT!,
+  config: process.env.DOPPLER_ENVIRONMENT!,
   name: "MONGODB_PASSWORD",
   value: password.result,
 });
