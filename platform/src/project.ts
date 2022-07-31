@@ -265,7 +265,7 @@ export class Project extends pulumi.ComponentResource {
     );
 
     this.operator = new kubernetes.apps.v1.Deployment(
-      `${slugName}-pulumi-kubernetes-operator`,
+      `${slugName}-pulumi-operator`,
       {
         metadata: {
           namespace,
@@ -303,7 +303,7 @@ export class Project extends pulumi.ComponentResource {
               containers: [
                 {
                   name: "operator",
-                  image: "pulumi/pulumi-kubernetes-operator:v1.5.0",
+                  image: "pulumi/pulumi-kubernetes-operator:v1.7.0",
                   args: ["--zap-level=error", "--zap-time-encoding=iso8601"],
                   imagePullPolicy: "Always",
                   volumeMounts: [
