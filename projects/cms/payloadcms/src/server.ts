@@ -11,8 +11,12 @@ app.get("/", (_, res) => {
 
 // Initialize Payload
 payload.init({
-  secret: process.env.PAYLOADCMS_SECRET,
-  mongoURL: process.env.MONGODB_URI,
+  secret: process.env.PAYLOADCMS_SECRET!,
+  mongoURL: process.env.MONGODB_CONNECTION_STRING!,
+  mongoOptions: {
+    user: "cms",
+    pass: process.env.MONGODB_PASSWORD!,
+  },
   express: app,
   onInit: () => {
     payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`);

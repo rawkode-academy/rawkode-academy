@@ -90,6 +90,7 @@ const payloadCmsDeployment = new kubernetes.apps.v1.Deployment(
             {
               name: "payloadcms",
               image: "ghcr.io/rawkodeacademy/cms:latest",
+              imagePullPolicy: "Always",
               envFrom: [
                 {
                   secretRef: {
