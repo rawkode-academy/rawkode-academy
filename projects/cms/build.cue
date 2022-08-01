@@ -40,7 +40,8 @@ dagger.#Plan & {
 
 	_pushImage: docker.#Push & {
 		image: _buildImage.output
-		dest:  "ghcr.io/rawkodeacademy/cms:latest"
+		// Tag this image correctly and pass to Pulumi
+		dest: "ghcr.io/rawkodeacademy/cms:latest"
 
 		auth: {
 			username: "rawkode"

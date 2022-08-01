@@ -1,7 +1,6 @@
 import express from "express";
 import payload from "payload";
 
-const a = 1;
 require("dotenv").config();
 const app = express();
 
@@ -12,7 +11,7 @@ app.get("/", (_, res) => {
 
 // Initialize Payload
 payload.init({
-  secret: process.env.PAYLOAD_SECRET,
+  secret: process.env.PAYLOADCMS_SECRET,
   mongoURL: process.env.MONGODB_URI,
   express: app,
   onInit: () => {

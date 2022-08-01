@@ -1,6 +1,7 @@
 import * as random from "@pulumi/random";
 import * as atlas from "@pulumi/mongodbatlas";
 import * as doppler from "@pulumiverse/doppler";
+import * as kubernetes from "@pulumi/kubernetes";
 
 const orgId = process.env.MONGODB_ATLAS_ORG_ID!;
 
@@ -54,3 +55,52 @@ const dopplerPassword = new doppler.Secret("doppler-password", {
   name: "MONGODB_PASSWORD",
   value: password.result,
 });
+
+const payloadCmsSecretKey = new random.RandomPassword("payloadcms-secret", {
+  length: 64,
+});
+
+const dopplerPayloadCmsSecret = new doppler.Secret(
+  "doppler-payloadcms-secret",
+  {
+    project: process.env.DOPPLER_PROJECT!,
+    config: process.env.DOPPLER_ENVIRONMENT!,
+    name: "PAYLOADCMS_SECRET",
+    value: payloadCmsSecretKey.result,
+  }
+);
+
+const payloadCmsDeployment = new kubernetes.apps.v1.Deployment(
+  "payloadcms-deployment",
+  {
+    spec: {
+      selector: {
+        matchLabels: {
+          app: "payloadcms",
+        },
+      },
+      template: {
+        metadata: {
+          labels: {
+            app: "payloadcms",
+          },
+        },
+        spec: {
+          containers: [
+            {
+              name: "payloadcms",
+              image: "ghcr.io/rawkodeacademy/cms:latest",
+              envFrom: [
+                {
+                  secretRef: {
+                    name: "doppler-cms",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
+  }
+);
