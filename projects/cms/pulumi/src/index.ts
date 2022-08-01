@@ -78,7 +78,7 @@ const dopplerPayloadCmsSecret = new doppler.Secret(
 );
 
 const payloadCmsDeployment = new kubernetes.apps.v1.Deployment(
-  "payloadcms-deployment",
+  "payloadcms",
   {
     spec: {
       selector: {
@@ -110,5 +110,8 @@ const payloadCmsDeployment = new kubernetes.apps.v1.Deployment(
         },
       },
     },
+  },
+  {
+    deleteBeforeReplace: true,
   }
 );
