@@ -49,6 +49,13 @@ const dopplerConnectionString = new doppler.Secret(
   }
 );
 
+const dopplerMongoDBName = new doppler.Secret("doppler-mongodb-name", {
+  project: process.env.DOPPLER_PROJECT!,
+  config: process.env.DOPPLER_ENVIRONMENT!,
+  name: "MONGODB_DB_NAME",
+  value: database.name,
+});
+
 const dopplerPassword = new doppler.Secret("doppler-password", {
   project: process.env.DOPPLER_PROJECT!,
   config: process.env.DOPPLER_ENVIRONMENT!,

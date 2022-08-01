@@ -16,6 +16,7 @@ payload.init({
   mongoOptions: {
     user: "cms",
     pass: process.env.MONGODB_PASSWORD!,
+    dbName: process.env.MONGODB_DB_NAME!,
   },
   express: app,
   onInit: () => {
