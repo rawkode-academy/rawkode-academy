@@ -5,7 +5,6 @@ import (
 	"dagger.io/dagger/core"
 	"universe.dagger.io/docker"
 	"universe.dagger.io/alpha/doppler"
-	"universe.dagger.io/alpha/pulumi"
 )
 
 dagger.#Plan & {
@@ -56,27 +55,6 @@ dagger.#Plan & {
 		]
 	}
 
-	pulumiUp: pulumi.#Up & {
-		// cacheKey: "platform-production"
-		stack:   "production"
-		runtime: "nodejs"
-
-		if secrets.output.PULUMI_ACCESS_TOKEN.computed != _|_ {
-			accessToken: secrets.output.PULUMI_ACCESS_TOKEN.computed.contents
-		}
-
-		source: _codePulumi.output
-
-		container: env: {
-			if secrets.output.MONGODB_ATLAS_ORG_ID.computed != _|_ {
-				MONGODB_ATLAS_ORG_ID: secrets.output.MONGODB_ATLAS_ORG_ID.computed.contents
-			}
-			if secrets.output.MONGODB_ATLAS_PUBLIC_KEY.computed != _|_ {
-				MONGODB_ATLAS_PUBLIC_KEY: secrets.output.MONGODB_ATLAS_PUBLIC_KEY.computed.contents
-			}
-			if secrets.output.MONGODB_ATLAS_PRIVATE_KEY.computed != _|_ {
-				MONGODB_ATLAS_PRIVATE_KEY: secrets.output.MONGODB_ATLAS_PRIVATE_KEY.computed.contents
-			}
-		}
-	}
+	// We never run the Pulumi within Dagger
+	// as it's expected to run in a GitOps workflow
 }
