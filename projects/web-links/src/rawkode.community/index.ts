@@ -4,7 +4,7 @@ const redirects: Domain = {
   defaultRedirect: "https://discord.gg/rawkode",
   redirects: {
     hackdays: {
-      to: "https://github.com/rawkode-academy/hackdays",
+      to: "https://github.com/RawkodeAcademy/hackdays",
     },
   },
 };

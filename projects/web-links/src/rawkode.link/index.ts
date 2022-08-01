@@ -22,7 +22,7 @@ const redirects: Domain = {
       to: "https://savvycal.com/RawkodeAcademy/share-your-project",
     },
     hackdays: {
-      to: "https://github.com/rawkode-academy/hackdays",
+      to: "https://github.com/RawkodeAcademy/hackdays",
     },
   },
 };

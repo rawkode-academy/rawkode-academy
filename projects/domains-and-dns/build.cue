@@ -32,7 +32,7 @@ dagger.#Plan & {
 	}
 
 	pulumiUp: pulumi.#Up & {
-		stack:       "rawkode-academy/production"
+		stack:       "RawkodeAcademy/production"
 		stackCreate: true
 		runtime:     "nodejs"
 		accessToken: secrets.output.PULUMI_ACCESS_TOKEN.computed.contents
