@@ -303,7 +303,8 @@ export class Project extends pulumi.ComponentResource {
               containers: [
                 {
                   name: "operator",
-                  image: "pulumi/pulumi-kubernetes-operator:v1.7.0",
+                  image:
+                    "ghcr.io/rawkodeacademy/pulumi-kubernetes-operator:nightly",
                   args: ["--zap-level=error", "--zap-time-encoding=iso8601"],
                   imagePullPolicy: "Always",
                   volumeMounts: [
@@ -369,7 +370,7 @@ export class Project extends pulumi.ComponentResource {
     );
 
     this.stack = new kubernetes.apiextensions.CustomResource(
-      `${slugName}-stack`,
+      `${slugName}-pulumi-stack`,
       {
         apiVersion: "pulumi.com/v1",
         kind: "Stack",
