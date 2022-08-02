@@ -6,7 +6,7 @@ on:
 
 env:
   DAGGER_LOG_FORMAT: plain
-  DAGGER_CACHE_BASE: dagger-ci-build
+  DAGGER_CACHE_BASE: main-build
 
 jobs:
   build:
