@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonAnnotations:
+  pulumi.com/skipAwait: "true"
+
+namespace: platform
+resources:
+  - namespace.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.4.11/manifests/ha/install.yaml
+  - platform.yaml
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: argocd-repo-server
+    spec:
+      template:
+        spec:
+          containers:
+            - name: argocd-repo-server
+              image: ghcr.io/rawkodeacademy/argocdk8s:latest
+  - |-
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: argocd-cm
+    data:
+      configManagementPlugins: |
+        - name: cdk8s-typescript
+        init:
+          command: ["bash"]
+          args: ["-c", "npm install && cdk8s synth"]
+        generate:
+          command: ["bash"]
+          args: ["-c", "cat dist/*"]

@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform
+  namespace: platform
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: platform
+  project: default
+  source:
+    path: platform
+    repoURL: https://github.com/RawkodeAcademy/RawkodeAcademy

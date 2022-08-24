@@ -25,6 +25,27 @@ dagger.#Plan & {
 		"config": "production"
 	}
 
+	argoCdk8s: {
+		source: core.#Source & {
+			path: "./argoCdk8s"
+		}
+
+		build: docker.#Dockerfile & {
+			"source": source.output
+			platforms: ["linux/amd64"]
+		}
+
+		push: docker.#Push & {
+			image: build.output
+			dest:  "ghcr.io/rawkodeacademy/argocdk8s:latest"
+
+			auth: {
+				username: "rawkode"
+				secret:   secrets.output.GITHUB_TOKEN.computed.contents
+			}
+		}
+	}
+
 	_codePulumi: core.#Source & {
 		path: "."
 		exclude: [
