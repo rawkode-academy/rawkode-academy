@@ -7,14 +7,13 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: platform
-  namespace: platform
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
+  project: default
   destination:
     server: https://kubernetes.default.svc
     namespace: platform
-  project: default
   source:
     path: ./projects/platform/platform
     repoURL: https://github.com/RawkodeAcademy/RawkodeAcademy
