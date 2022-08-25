@@ -1,3 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: platform
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -11,5 +16,7 @@ spec:
     namespace: platform
   project: default
   source:
-    path: ./projetcs/platform/platform
+    path: ./projects/platform/platform
     repoURL: https://github.com/RawkodeAcademy/RawkodeAcademy
+    plugin:
+      name: argcdk8s-typescript

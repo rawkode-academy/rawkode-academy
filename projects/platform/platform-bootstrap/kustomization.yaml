@@ -4,10 +4,10 @@ kind: Kustomization
 commonAnnotations:
   pulumi.com/skipAwait: "true"
 
-namespace: platform
+namespace: argocd
 resources:
   - namespace.yaml
-  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.4.11/manifests/ha/install.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   - platform.yaml
 
 patchesStrategicMerge:
@@ -21,7 +21,7 @@ patchesStrategicMerge:
         spec:
           containers:
             - name: argocd-repo-server
-              image: ghcr.io/rawkodeacademy/argocdk8s:latest
+              image: ghcr.io/rawkodeacademy/argocdk8s:latest@sha256:00651c4a9d34dc14981f38667f01e7660e76b9676b38ec8c113b8e466c7ae163
   - |-
     apiVersion: v1
     kind: ConfigMap
@@ -29,10 +29,10 @@ patchesStrategicMerge:
       name: argocd-cm
     data:
       configManagementPlugins: |
-        - name: cdk8s-typescript
-        init:
-          command: ["bash"]
-          args: ["-c", "npm run build"]
-        generate:
-          command: ["bash"]
-          args: ["-c", "cat dist/*"]
+        - name: argcdk8s-typescript
+          init:
+            command: ["bash"]
+            args: ["-c", "npm config set -L project cache /tmp/npm && npm install && npm run build"]
+          generate:
+            command: ["bash"]
+            args: ["-c", "cat dist/*"]
