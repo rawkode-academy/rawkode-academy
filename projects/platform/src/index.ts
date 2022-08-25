@@ -42,7 +42,7 @@ const kubernetesProvider = new kubernetes.Provider("platform", {
 const platformBootstrap = new kubernetes.kustomize.Directory(
   "bootstrap",
   {
-    directory: "../platform-bootstrap",
+    directory: "../onboard",
   },
   {
     provider: kubernetesProvider,

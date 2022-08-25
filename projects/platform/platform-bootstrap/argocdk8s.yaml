@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocdk8s
+data:
+  plugin.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: argocdk8s-typescript
+    spec:
+      version: v1.0
+      init:
+        command: ["ash"]
+        args: ["-c", "npm install && npm run build"]
+      generate:
+        command: ["ash"]
+        args: ["-c", "cat dist/*"]
+      discover:
+        filename: cdk8s.yaml

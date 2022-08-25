@@ -17,5 +17,4 @@ spec:
   source:
     path: ./projects/platform/platform
     repoURL: https://github.com/RawkodeAcademy/RawkodeAcademy
-    plugin:
-      name: argcdk8s-typescript
+    plugin: {}
