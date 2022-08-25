@@ -1,6 +1,4 @@
-import * as doppler from "@pulumiverse/doppler";
 import * as kubernetes from "@pulumi/kubernetes";
-import * as argocd from "@pulumiverse/kubernetes-argocd";
 
 import { Cluster, NodeType, Region } from "./cluster/scaleway";
 
