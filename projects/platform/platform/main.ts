@@ -1,17 +1,16 @@
-import { Construct } from "constructs";
-import { App, Chart, ChartProps } from "cdk8s";
-import * as kplus from "cdk8s-plus-24";
+import * as kplus from "cdk8s-plus-22";
+import * as cdk8s from "cdk8s";
 
-export class MyChart extends Chart {
-  constructor(scope: Construct, id: string, props: ChartProps = {}) {
-    super(scope, id, props);
+const app = new cdk8s.App();
+const chart = new cdk8s.Chart(app, "Chart");
 
-    new kplus.Deployment(this, "nginx", {
-      containers: [{ image: "nginx" }],
-    });
-  }
-}
+new kplus.Deployment(chart, "Deployment", {
+  replicas: 3,
+  containers: [
+    {
+      image: "nginx",
+    },
+  ],
+});
 
-const app = new App();
-new MyChart(app, "platform");
 app.synth();

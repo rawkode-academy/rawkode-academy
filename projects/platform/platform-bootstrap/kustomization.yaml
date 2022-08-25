@@ -32,7 +32,7 @@ patchesStrategicMerge:
         - name: cdk8s-typescript
         init:
           command: ["bash"]
-          args: ["-c", "npm install && cdk8s synth"]
+          args: ["-c", "npm run build"]
         generate:
           command: ["bash"]
           args: ["-c", "cat dist/*"]

@@ -7,8 +7,9 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
+    server: https://kubernetes.default.svc
     namespace: platform
   project: default
   source:
-    path: platform
+    path: ./projetcs/platform/platform
     repoURL: https://github.com/RawkodeAcademy/RawkodeAcademy

@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM argoproj/argocd:v2.4.11 as build
+FROM argoproj/argocd:v2.4.11 as build
 
 USER root
 
@@ -17,4 +17,4 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     apt-get update && apt-get install -y yarn && \
     yarn --ignore-engines global add npm cdk8s-cli
 
-USER argocd
+USER 999
