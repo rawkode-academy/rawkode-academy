@@ -4,7 +4,7 @@ import { Application } from "./imports/argoproj.io";
 const app = new cdk8s.App();
 const chart = new cdk8s.Chart(app, "Chart");
 
-const contourIngress = new Application(chart, "contour-ingress", {
+new Application(chart, "contour-ingress", {
   metadata: {
     name: "contour-ingress",
   },
