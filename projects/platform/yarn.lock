@@ -88,7 +88,7 @@
     "shell-quote" "^1.6.1"
     "tmp" "^0.0.33"
 
-"@pulumi/pulumi@^3.0.0":
+"@pulumi/pulumi@^3.0.0", "@pulumi/pulumi@latest":
   "integrity" "sha512-tsj2WR43b8+uMvJq9LNHNxSKfI3HNP+rE2fAAP7cZ/7YLGxBXAA/Y9X/8MbiIqkN03QtKY5q0l7/djTTBW7FPQ=="
   "resolved" "https://registry.npmjs.org/@pulumi/pulumi/-/pulumi-3.26.1.tgz"
   "version" "3.26.1"
@@ -127,6 +127,11 @@
   "version" "0.0.5"
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
+
+"@pulumiverse/kubernetes-argocd@2.4.3":
+  "integrity" "sha512-EV169sY912OrJmsDbiXy5AJvcIlFmor0JYhfQNlAydBVQnsAuC+Ftqq0nNpMBBb9vL7g7t5P4VGCdf9FuvEQtA=="
+  "resolved" "https://registry.npmjs.org/@pulumiverse/kubernetes-argocd/-/kubernetes-argocd-2.4.3.tgz"
+  "version" "2.4.3"
 
 "@types/glob@^5.0.35":
   "integrity" "sha512-ATA/xrS7CZ3A2WCPVY4eKdNpybq56zqlTirnHhhyOztZM/lPxJzusOBI3BsaXbu6FrUluqzvMlI4sZ6BDYMlMg=="
