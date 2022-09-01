@@ -8,6 +8,7 @@ archs:
 contents:
   repositories:
     - https://dl-cdn.alpinelinux.org/alpine/edge/main
+    - https://dl-cdn.alpinelinux.org/alpine/edge/community
     - https://dl-cdn.alpinelinux.org/alpine/edge/testing
   packages:
     - ca-certificates-bundle
@@ -15,6 +16,7 @@ contents:
     - busybox
     - helm
     - kustomize
+    - yarn
 
 # We're matching the ArgoCD image non-root user
 accounts:
