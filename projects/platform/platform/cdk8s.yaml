@@ -2,4 +2,3 @@ language: typescript
 app: node main.js
 imports:
   - k8s
-  - https://doc.crds.dev/raw/github.com/argoproj/argo-cd@v2.4.4
