@@ -1,24 +1,12 @@
-import { RawkodeAcademy } from "./rawkode.academy";
-
-interface DnsRecord {
-  name: string;
-  type: "A" | "CNAME" | "TXT" | "MX";
-  value: string;
-  proxied: boolean;
-}
-
-interface MxRecord extends DnsRecord {
-  type: "MX";
-  proxied: false;
-  priority: number;
-}
-
-export interface Domain {
-  name: string;
-  domain: string;
-  records: {
-    [name: string]: DnsRecord | MxRecord;
-  };
-}
-
-export const Domains: Domain[] = [RawkodeAcademy];
+export * from "./chappaai.dev";
+export * from "./klustered.live";
+export * from "./rawko.de";
+export * from "./rawkode.academy";
+export * from "./rawkode.chat";
+export * from "./rawkode.com";
+export * from "./rawkode.community";
+export * from "./rawkode.dev";
+// export * from "./rawkode.email";
+export * from "./rawkode.link";
+export * from "./rawkode.news";
+// export * from "./rawkode.sh";

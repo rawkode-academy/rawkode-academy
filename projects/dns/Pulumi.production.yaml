@@ -1,0 +1,6 @@
+secretsprovider: gcpkms://projects/rawkode-academy/locations/europe-west2/keyRings/automation/cryptoKeys/dns
+encryptedkey: CiQAm67iEfOJhA60JmEh/yxCaOppJWqTvVtr4oBq7XIZVuWEYWoSSQDIhTDrqrrAwRuP95EKqZxcwElsk3KLtjjt94Ouk4ZgTrzNx/tR33CHjAsCM4JNaMLZRwbM6MM12pNg5UVzGfEgT0YKRYV/9Fk=
+config:
+  gcp:project: rawkode-academy
+  google-native:project: rawkode-academy
+  google-native:region: europe-west2

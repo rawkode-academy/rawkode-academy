@@ -1,29 +1,16 @@
 {
   "compilerOptions": {
-    "alwaysStrict": true,
-    "charset": "utf8",
-    "declaration": true,
-    "experimentalDecorators": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "lib": ["es2018"],
-    "module": "CommonJS",
-    "noEmitOnError": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "resolveJsonModule": true,
     "strict": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "stripInternal": true,
-    "target": "ES2018",
-    "incremental": true,
-    "skipLibCheck": true
+    "outDir": "bin",
+    "target": "es2016",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "pretty": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "cdktf.out"]
+  "files": ["src/index.ts"]
 }

@@ -1,9 +1,11 @@
 import { Domain } from "../types";
 import { GSuite } from "../integrations";
 
-export const RawkodeAcademy: Domain = {
-  name: "rawkode.academy",
+const domain: Domain = {
+  name: "rawkode.dev",
   records: {
     ...GSuite,
   },
 };
+
+export default domain;

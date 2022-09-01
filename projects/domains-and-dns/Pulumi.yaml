@@ -1,4 +1,0 @@
-name: domains-and-dns
-runtime: nodejs
-description: Management of Domains & DNS
-main: src
