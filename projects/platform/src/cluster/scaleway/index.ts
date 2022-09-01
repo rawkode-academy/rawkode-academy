@@ -116,4 +116,8 @@ export class Cluster extends pulumi.ComponentResource {
       )
     );
   }
+
+  getNodePools(): scaleway.KubernetesNodePool[] {
+    return Array.from(this.nodePools.values());
+  }
 }

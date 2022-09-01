@@ -34,9 +34,15 @@ cluster.addNodePool("ephemeral", {
 
 const kubeconfig = cluster.kubeconfig;
 
-const kubernetesProvider = new kubernetes.Provider("platform", {
-  kubeconfig,
-});
+const kubernetesProvider = new kubernetes.Provider(
+  "platform",
+  {
+    kubeconfig,
+  },
+  {
+    dependsOn: cluster.getNodePools(),
+  }
+);
 
 const platformSystemNamespace = new kubernetes.core.v1.Namespace(
   "platform-system",
@@ -194,7 +200,7 @@ const bootstrapApp = new kubernetes.apiextensions.CustomResource(
       project: "default",
       destination: {
         server: "https://kubernetes.default.svc",
-        namespace: platformNamespace.metadata.name,
+        namespace: platformSystemNamespace.metadata.name,
       },
       source: {
         path: "./projects/platform/platform",

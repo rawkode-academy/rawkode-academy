@@ -12,6 +12,7 @@ new Application(chart, "contour-ingress", {
     project: "default",
     destination: {
       server: "https://kubernetes.default.svc",
+      namespace: "platform",
     },
     source: {
       chart: "contour",
