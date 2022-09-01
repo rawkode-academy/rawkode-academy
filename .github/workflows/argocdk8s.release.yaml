@@ -11,7 +11,7 @@ on:
 concurrency: release
 
 env:
-  IMAGE_NAME: ghcr.io/rawkodeacademy/cdk8s
+  IMAGE_NAME: ghcr.io/rawkodeacademy/argocdk8s
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
       - id: apko
         uses: distroless/actions/apko-snapshot@main
         with:
-          config: apko.yaml
+          config: ./projects/argocdk8s/apko.yaml
           image_refs: apko.images
           base-tag: ${{ env.IMAGE_NAME }}
 
