@@ -13,6 +13,11 @@ concurrency: release
 env:
   IMAGE_NAME: ghcr.io/rawkodeacademy/argocdk8s
 
+permissions:
+  id-token: write
+  packages: write
+  contents: read
+
 jobs:
   build:
     name: Release OCI image
@@ -20,11 +25,6 @@ jobs:
 
     outputs:
       image-refs: ${{ steps.emit-refs.outputs.image-refs }}
-
-    permissions:
-      id-token: write
-      packages: write
-      contents: read
 
     steps:
       - uses: actions/checkout@v3
