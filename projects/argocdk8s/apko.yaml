@@ -1,0 +1,19 @@
+contents:
+  repositories:
+    - https://dl-cdn.alpinelinux.org/alpine/edge/main
+    - https://dl-cdn.alpinelinux.org/alpine/edge/testing
+  packages:
+    - ca-certificates-bundle
+    - alpine-baselayout-data
+    - helm
+    - kustomize
+
+# We're matching the ArgoCD image non-root user
+accounts:
+  groups:
+    - groupname: argocdk8s
+      gid: 999
+  users:
+    - username: argocdk8s
+      uid: 999
+  run-as: 999
