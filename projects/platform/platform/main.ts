@@ -3,7 +3,7 @@ import * as cdk8s from "cdk8s";
 const app = new cdk8s.App();
 const chart = new cdk8s.Chart(app, "Chart");
 
-new cdk8s.Helm(chart, "redis", {
+new cdk8s.Helm(chart, "contour", {
   chart: "bitnami/contour",
   values: {
     defaultBackend: {
