@@ -10,7 +10,9 @@ new Application(chart, "contour-ingress", {
   },
   spec: {
     project: "default",
-    destination: {},
+    destination: {
+      server: "https://kubernetes.default.svc",
+    },
     source: {
       chart: "contour",
       repoUrl: "https://charts.bitnami.com/bitnami",

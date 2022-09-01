@@ -82,7 +82,10 @@ const argoCdk8s = new kubernetes.core.v1.ConfigMap(
           version: "v1.0",
           init: {
             command: ["ash"],
-            args: ["-c", "npm install && npm run build"],
+            args: [
+              "-c",
+              "npm install && yarn run cdk8s import && npm run build",
+            ],
           },
           generate: {
             command: ["ash"],
