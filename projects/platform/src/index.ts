@@ -87,14 +87,14 @@ const argoCdk8s = new kubernetes.core.v1.ConfigMap(
         spec: {
           version: "v1.0",
           init: {
-            command: ["ash"],
+            command: ["dash"],
             args: [
               "-c",
               "yarn install && yarn run cdk8s import && yarn run build",
             ],
           },
           generate: {
-            command: ["ash"],
+            command: ["dash"],
 
             args: ["-c", "cat dist/*"],
           },
@@ -137,10 +137,10 @@ const argoCdRelease = new kubernetes.helm.v3.Release(
         extraContainers: [
           {
             name: "argocdk8s",
-            image: "node:current-alpine",
-            command: ["ash", "-c"],
+            image: "ghcr.io/rawkodeacademy/argocdk8s:latest",
+            command: ["sh", "-c"],
             args: [
-              "curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | ash && yarn global add cdk8s-cli && /var/run/argocd/argocd-cmp-server",
+              "yarn global add cdk8s-cli && /var/run/argocd/argocd-cmp-server",
             ],
             securityContext: {
               runAsNonRoot: true,
