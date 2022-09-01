@@ -1,3 +1,10 @@
+archs:
+  - amd64
+  - x86_64
+  - aarch64
+  - armv7
+  - riscv64
+
 contents:
   repositories:
     - https://dl-cdn.alpinelinux.org/alpine/edge/main
