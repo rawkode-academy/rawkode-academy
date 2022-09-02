@@ -1,24 +1,29 @@
 import * as cdk8s from "cdk8s";
 import * as gateway from "./imports/gateway.networking.k8s.io";
-import * as contour from "./imports/projectcontour.io";
 
 const app = new cdk8s.App();
 const chart = new cdk8s.Chart(app, "Chart");
 
-cdk8s.Yaml.load(
-  "https://projectcontour.io/quickstart/contour-gateway-provisioner.yaml"
-);
-
-new gateway.GatewayClass(chart, "contour", {
-  metadata: {
-    name: "contour",
-  },
-  spec: {
-    controllerName: "projectcontour.io/gateway-controller",
-  },
+const crds = new cdk8s.Include(chart, "contour-gateway-api-crds", {
+  url: "https://raw.githubusercontent.com/projectcontour/contour/v1.22.0/examples/gateway/00-crds.yaml",
 });
 
-new gateway.Gateway(chart, "contour", {
+const contourGatewayClass = new gateway.GatewayClass(
+  chart,
+  "contour-gateway-class",
+  {
+    metadata: {
+      name: "contour",
+    },
+    spec: {
+      controllerName: "projectcontour.io/gateway-controller",
+    },
+  }
+);
+
+contourGatewayClass.addDependency(crds);
+
+const contourGateway = new gateway.Gateway(chart, "contour-gateway", {
   metadata: {
     name: "contour",
   },
@@ -38,3 +43,33 @@ new gateway.Gateway(chart, "contour", {
     ],
   },
 });
+
+contourGateway.addDependency(contourGatewayClass);
+
+new cdk8s.Helm(chart, "contour", {
+  chart: "bitnami/contour",
+  releaseName: "contour",
+  values: {
+    defaultBackend: {
+      enabled: true,
+      containerPorts: {
+        http: 8080,
+      },
+    },
+    envoy: {
+      useHostPort: false,
+    },
+    configInline: {
+      disablePermitInsecure: false,
+      tls: {
+        "fallback-certificate": {},
+        "accesslog-format": "envoy",
+      },
+      gateway: {
+        controllerName: "projectcontour.io/gateway-controller",
+      },
+    },
+  },
+});
+
+app.synth();
