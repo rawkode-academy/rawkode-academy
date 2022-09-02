@@ -31,7 +31,7 @@ const reconcileDomain = (domain: Domain) => {
         },
       ],
       nonExistence: ManagedZoneDnsSecConfigNonExistence.Nsec3,
-      state: ManagedZoneDnsSecConfigState.Transfer,
+      state: ManagedZoneDnsSecConfigState.On,
     },
   });
 
