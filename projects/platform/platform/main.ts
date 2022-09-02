@@ -1,5 +1,5 @@
 import * as cdk8s from "cdk8s";
-import * as gateway from "./imports/gateway.networking.k8s.io";
+// import * as gateway from "./imports/gateway.networking.k8s.io";
 
 const app = new cdk8s.App();
 const chart = new cdk8s.Chart(app, "Chart");
@@ -8,47 +8,50 @@ new cdk8s.Include(chart, "contour-crds", {
   url: "https://raw.githubusercontent.com/projectcontour/contour/v1.22.0/examples/contour/01-crds.yaml",
 });
 
-const gatewayApiCRDs = new cdk8s.Include(chart, "contour-gateway-api-crds", {
-  url: "https://raw.githubusercontent.com/projectcontour/contour/v1.22.0/examples/gateway/00-crds.yaml",
-});
+// Can't hookup Gateway API support as the Helm chart doesn't have an option to enable it, which creates the required RBAC resources.
+// Maybe do this myself, but not just now.
 
-const contourGatewayClass = new gateway.GatewayClass(
-  chart,
-  "contour-gateway-class",
-  {
-    metadata: {
-      name: "contour",
-    },
-    spec: {
-      controllerName: "projectcontour.io/gateway-controller",
-    },
-  }
-);
+// const gatewayApiCRDs = new cdk8s.Include(chart, "contour-gateway-api-crds", {
+//   url: "https://raw.githubusercontent.com/projectcontour/contour/v1.22.0/examples/gateway/00-crds.yaml",
+// });
 
-contourGatewayClass.addDependency(gatewayApiCRDs);
+// const contourGatewayClass = new gateway.GatewayClass(
+//   chart,
+//   "contour-gateway-class",
+//   {
+//     metadata: {
+//       name: "contour",
+//     },
+//     spec: {
+//       controllerName: "projectcontour.io/gateway-controller",
+//     },
+//   }
+// );
 
-const contourGateway = new gateway.Gateway(chart, "contour-gateway", {
-  metadata: {
-    name: "contour",
-  },
-  spec: {
-    gatewayClassName: "contour",
-    listeners: [
-      {
-        name: "http",
-        protocol: "HTTP",
-        port: 80,
-        allowedRoutes: {
-          namespaces: {
-            from: gateway.GatewaySpecListenersAllowedRoutesNamespacesFrom.ALL,
-          },
-        },
-      },
-    ],
-  },
-});
+// contourGatewayClass.addDependency(gatewayApiCRDs);
 
-contourGateway.addDependency(contourGatewayClass);
+// const contourGateway = new gateway.Gateway(chart, "contour-gateway", {
+//   metadata: {
+//     name: "contour",
+//   },
+//   spec: {
+//     gatewayClassName: "contour",
+//     listeners: [
+//       {
+//         name: "http",
+//         protocol: "HTTP",
+//         port: 80,
+//         allowedRoutes: {
+//           namespaces: {
+//             from: gateway.GatewaySpecListenersAllowedRoutesNamespacesFrom.ALL,
+//           },
+//         },
+//       },
+//     ],
+//   },
+// });
+
+// contourGateway.addDependency(contourGatewayClass);
 
 new cdk8s.Helm(chart, "contour", {
   releaseName: "contour",
@@ -73,9 +76,9 @@ new cdk8s.Helm(chart, "contour", {
       tls: {
         "fallback-certificate": {},
       },
-      gateway: {
-        controllerName: "projectcontour.io/gateway-controller",
-      },
+      // gateway: {
+      //   controllerName: "projectcontour.io/gateway-controller",
+      // },
     },
   },
 });
