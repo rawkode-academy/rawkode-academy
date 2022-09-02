@@ -47,9 +47,13 @@ const contourGateway = new gateway.Gateway(chart, "contour-gateway", {
 contourGateway.addDependency(contourGatewayClass);
 
 new cdk8s.Helm(chart, "contour", {
-  chart: "bitnami/contour",
   releaseName: "contour",
+  chart: "bitnami/contour",
+  helmFlags: ["--skip-crds"],
   values: {
+    contour: {
+      manageCRDs: false,
+    },
     defaultBackend: {
       enabled: true,
       containerPorts: {
