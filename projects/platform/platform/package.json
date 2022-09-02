@@ -11,7 +11,7 @@
     "compile": "./node_modules/typescript/bin/tsc",
     "watch": "./node_modules/typescript/bin/tsc -w",
     "test": "jest",
-    "helm": "helm repo add bitnami https://charts.bitnami.com/bitnami",
+    "helm": "helm repo add datawire https://app.getambassador.io",
     "build": "yarn run helm && yarn run compile && yarn run synth",
     "upgrade": "yarn i cdk8s@latest cdk8s-cli@latest",
     "upgrade:next": "yarn i cdk8s@next cdk8s-cli@next"

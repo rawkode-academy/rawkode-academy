@@ -2,3 +2,4 @@ language: typescript
 app: node main.js
 imports:
   - k8s
+  - https://projectcontour.io/quickstart/contour-gateway-provisioner.yaml
