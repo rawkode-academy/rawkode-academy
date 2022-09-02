@@ -4,7 +4,11 @@ import * as gateway from "./imports/gateway.networking.k8s.io";
 const app = new cdk8s.App();
 const chart = new cdk8s.Chart(app, "Chart");
 
-const crds = new cdk8s.Include(chart, "contour-gateway-api-crds", {
+new cdk8s.Include(chart, "contour-crds", {
+  url: "https://raw.githubusercontent.com/projectcontour/contour/v1.22.0/examples/contour/01-crds.yaml",
+});
+
+const gatewayApiCRDs = new cdk8s.Include(chart, "contour-gateway-api-crds", {
   url: "https://raw.githubusercontent.com/projectcontour/contour/v1.22.0/examples/gateway/00-crds.yaml",
 });
 
@@ -21,7 +25,7 @@ const contourGatewayClass = new gateway.GatewayClass(
   }
 );
 
-contourGatewayClass.addDependency(crds);
+contourGatewayClass.addDependency(gatewayApiCRDs);
 
 const contourGateway = new gateway.Gateway(chart, "contour-gateway", {
   metadata: {
