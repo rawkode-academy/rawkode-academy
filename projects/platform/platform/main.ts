@@ -65,9 +65,9 @@ new cdk8s.Helm(chart, "contour", {
     },
     configInline: {
       disablePermitInsecure: false,
+      "accesslog-format": "envoy",
       tls: {
         "fallback-certificate": {},
-        "accesslog-format": "envoy",
       },
       gateway: {
         controllerName: "projectcontour.io/gateway-controller",
