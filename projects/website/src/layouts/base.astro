@@ -5,7 +5,7 @@ import MobileSidebar from "@components/sidebar/mobile.svelte";
 import Breadcrumbs from "@components/breadcrumbs.svelte";
 import CommandK from "@components/commandk.svelte";
 
-import './base.css';
+import "./base.css";
 
 export interface Breadcrumb {
   title: string;
@@ -22,41 +22,59 @@ const { title, breadcrumbs } = Astro.props as Props;
 
 <!DOCTYPE html>
 <html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <title>{title}</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-  <title>{title}</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
+      rel="stylesheet"
+      rel="preload"
+      as="style"
+    />
+  </head>
 
-  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet" rel="preload"
-    as="style">
-</head>
+  <body class="h-full theme-rawkode-academy">
+    <CommandK client:only />
 
-<body class="h-full theme-rawkode-academy">
-  <CommandK client:only />
+    <div>
+      <MobileSidebar client:load />
+      <DesktopSidebar client:load />
+      <div class="md:pl-64 flex flex-col flex-1">
+        <Nav client:load />
 
-  <div>
-    <MobileSidebar client:load />
-    <DesktopSidebar client:load />
-    <div class="md:pl-64 flex flex-col flex-1">
-      <Nav client:load />
+        <Breadcrumbs
+          slot="breadcrumbs"
+          title={title}
+          breadcrumbs={breadcrumbs}
+        />
 
-      <Breadcrumbs slot="breadcrumbs" title={title} breadcrumbs={breadcrumbs} />
-
-      <main>
-        <div class="py-6">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-            <h1 class="text-2xl font-semibold text-gray-900">{title}</h1>
+        <main>
+          <div class="py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+              <h1 class="text-2xl font-semibold text-gray-900">{title}</h1>
+            </div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+              <slot />
+            </div>
           </div>
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-            <slot />
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
-  </div>
 
-</body>
-
+    <script
+      type="text/javascript"
+      id="hs-script-loader"
+      async
+      defer
+      src="//js-eu1.hs-scripts.com/26236635.js"
+    ></script>
+    <script
+      charset="utf-8"
+      type="text/javascript"
+      src="//js-eu1.hsforms.net/forms/v2.js"
+    ></script>
+  </body>
 </html>

@@ -37,7 +37,7 @@
       To: "-translate-x-full"
   -->
       <div
-        class="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-primary"
+        class="relative flex-1 flex flex-col max-w-xs w-full pt-5 pb-4 bg-black"
       >
         <!--
       Entering: "ease-in-out duration-300"
@@ -89,10 +89,10 @@
             {#each menuItems as menuItem}
               <a
                 href={menuItem.href}
-                class="text-white group flex items-center px-2 py-2 text-base font-medium rounded-md {url ==
+                class="text-white group flex items-center px-2 py-2 text-base font-medium rounded-md bg-black hover:bg-primary hover:text-white {url ==
                 menuItem.href
-                  ? 'bg-secondary'
-                  : 'bg-primary'}"
+                  ? 'text-black font-semibold bg-gradient-to-br from-primary to-secondary'
+                  : 'text-white'}"
               >
                 <Icon icon={menuItem.icon} class="w-5 h-5 mr-3" />
                 {menuItem.title}

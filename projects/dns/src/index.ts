@@ -51,6 +51,7 @@ const reconcileDomain = (domain: Domain) => {
     },
     {
       parent: zone,
+      dependsOn: [dnsPublicKey],
     }
   );
 
@@ -64,6 +65,7 @@ const reconcileDomain = (domain: Domain) => {
     },
     {
       parent: nameservers,
+      dependsOn: [dnsPublicKey],
     }
   );
 
@@ -77,6 +79,7 @@ const reconcileDomain = (domain: Domain) => {
     },
     {
       parent: nameservers,
+      dependsOn: [dnsPublicKey],
     }
   );
 

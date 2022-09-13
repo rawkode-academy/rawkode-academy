@@ -10,11 +10,11 @@ export const menuItems: MenuItem[] = [
     href: "/",
     icon: "mdi-light:home",
   },
-  {
-    title: "Shows",
-    href: "/shows/",
-    icon: "mdi-light:home",
-  },
+  // {
+  //   title: "Shows",
+  //   href: "/shows/",
+  //   icon: "mdi-light:home",
+  // },
   {
     title: "Contact",
     href: "/contact/",
