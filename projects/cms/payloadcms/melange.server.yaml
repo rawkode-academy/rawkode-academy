@@ -1,0 +1,40 @@
+package:
+  name: payloadcms-server
+  version: 0.0.1
+  description: Rawkode Academy Payload CMS Server
+  target-architecture:
+    - amd64
+  copyright:
+    - license: MIT
+      paths:
+        - "*"
+  dependencies:
+    runtime:
+      - nodejs
+
+environment:
+  contents:
+    repositories:
+      - https://dl-cdn.alpinelinux.org/alpine/edge/main
+      - https://dl-cdn.alpinelinux.org/alpine/edge/community
+      - https://dl-cdn.alpinelinux.org/alpine/edge/testing
+    packages:
+      - alpine-baselayout-data
+      - ca-certificates-bundle
+      - busybox
+      - nodejs
+      - yarn
+
+pipeline:
+  - name: Build
+    runs: |
+      APPDIR="${{targets.destdir}}/usr/share/payloadcms"
+      mkdir -p "${APPDIR}"
+
+      yarn install
+      yarn run build
+
+      cp package.json ${APPDIR}
+      cp yarn.lock ${APPDIR}
+      cp dist/* ${APPDIR}
+      (cd "${APPDIR}" && yarn install --prod)

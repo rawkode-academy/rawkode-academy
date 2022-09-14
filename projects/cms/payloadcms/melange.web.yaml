@@ -1,0 +1,42 @@
+package:
+  name: payloadcms
+  version: 0.0.1
+  description: Rawkode Academy Payload CMS
+  target-architecture:
+    - all
+  copyright:
+    - license: MIT
+      paths:
+        - "*"
+  dependencies:
+    runtime:
+      - nodejs
+
+environment:
+  contents:
+    repositories:
+      - https://dl-cdn.alpinelinux.org/alpine/edge/main
+      - https://dl-cdn.alpinelinux.org/alpine/edge/community
+      - https://dl-cdn.alpinelinux.org/alpine/edge/testing
+    packages:
+      - alpine-baselayout-data
+      - ca-certificates-bundle
+      - busybox
+      - nodejs
+      - yarn
+
+pipeline:
+  - name: Build
+    runs: |
+      EXECDIR="${{targets.destdir}}/usr/bin"
+      WEBAPPDIR="${{targets.destdir}}/usr/share/payloadcms"
+      mkdir -p "${EXECDIR}" "${WEBAPPDIR}"
+
+      echo "#!/usr/bin/env node" > "${EXECDIR}/payloadcms"
+      echo "process.env.NODE_PATH = '/usr/share/webapps/payloadcms/node_modules';" >> "${EXECDIR}/payloadcms"
+      echo "require('module').Module._initPaths();" >> "${EXECDIR}/payloadcms"
+      cat main.js >> "${EXECDIR}/payloadcms"
+      chmod +x "${EXECDIR}/payloadcms"
+      cp package.json "${WEBAPPDIR}"
+      cp package-lock.json "${WEBAPPDIR}"
+      (cd "${WEBAPPDIR}" && yarn install && yarn run build)
