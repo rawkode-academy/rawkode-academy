@@ -8,6 +8,9 @@ import Layout from "../layouts/base.astro";
 
     <div id="my-reform"></div>
 
+    <script id="reform-script" src="https://embed.reform.app/v1/embed.js"
+    ></script>
+
     <script>
       window.Reform =
         window.Reform ||
@@ -15,11 +18,9 @@ import Layout from "../layouts/base.astro";
           (Reform.q = Reform.q || []).push(arguments);
         };
     </script>
-    <script id="reform-script" async src="https://embed.reform.app/v1/embed.js"
-    ></script>
     <script>
       Reform("init", {
-        url: "https://forms.reform.app/1gLM6Z/lets-work-together/f4ecca",
+        url: "https://forms.reform.app/rawkode/lets-work-together/f4ecca",
         target: "#my-reform",
         background: "transparent",
       });
