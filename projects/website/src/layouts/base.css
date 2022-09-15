@@ -2,18 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.theme-rawkode-academy {
-  --color-primary: 004 181 156;
-  --color-secondary: 133 259 149;
-  --color-black: 35 40 45;
-}
-
-.theme-rawkode {
-  --color-primary: 95 94 215;
-  --color-secondary: 0 206 255;
-  --color-black: 35 40 45;
-}
-
 :root {
   --font-size-base: clamp(1rem, 0.34vw + 0.91rem, 1.19rem);
   --font-size-lg: clamp(1.2rem, 0.7vw + 1.2rem, 1.5rem);

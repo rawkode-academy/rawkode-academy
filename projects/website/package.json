@@ -10,19 +10,18 @@
     "deploy": "node --version && yarn run build && wrangler pages publish --project-name rawkode-academy dist"
   },
   "devDependencies": {
-    "@astrojs/lit": "^0.3.1",
-    "@astrojs/preact": "0.4.1",
-    "@astrojs/react": "^0.3.1",
-    "@astrojs/svelte": "^0.3.1",
-    "@astrojs/tailwind": "^0.2.4",
-    "@iconify/svelte": "^2.2.1",
+    "@astrojs/lit": "^1.0.1",
+    "@astrojs/preact": "^1.1.0",
+    "@astrojs/react": "^1.1.3",
+    "@astrojs/svelte": "^1.0.0",
+    "@astrojs/tailwind": "^2.0.0",
+    "@iconify/svelte": "^3.0.0",
     "@webcomponents/template-shadowroot": "^0.1.0",
-    "astro": "^1.0.0-beta.72",
-    "lit": "^2.2.7",
-    "ninja-keys": "^1.2.1",
+    "astro": "^1.2.4",
+    "lit": "^2.3.1",
+    "ninja-keys": "^1.2.2",
     "react-dom": "^18.2.0",
     "react": "^18.2.0",
-    "svelte": "^3.49.0",
-    "wrangler": "^2.0.19"
+    "svelte": "^3.50.1"
   }
 }

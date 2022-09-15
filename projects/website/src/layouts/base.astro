@@ -1,5 +1,4 @@
 ---
-import Nav from "@components/nav.svelte";
 import DesktopSidebar from "@components/sidebar/desktop.svelte";
 import MobileSidebar from "@components/sidebar/mobile.svelte";
 import Breadcrumbs from "@components/breadcrumbs.svelte";
@@ -14,7 +13,7 @@ export interface Breadcrumb {
 
 export interface Props {
   title: string;
-  breadcrumbs?: Breadcrumb[];
+  breadcrumbs: Breadcrumb[];
 }
 
 const { title, breadcrumbs } = Astro.props as Props;
@@ -42,10 +41,10 @@ const { title, breadcrumbs } = Astro.props as Props;
     <div>
       <MobileSidebar client:load />
       <DesktopSidebar client:load />
-      <div class="md:pl-64 flex flex-col flex-1">
-        <Nav client:load />
 
+      <div class="md:pl-64 flex flex-col flex-1">
         <Breadcrumbs
+          client:load
           slot="breadcrumbs"
           title={title}
           breadcrumbs={breadcrumbs}
@@ -63,6 +62,5 @@ const { title, breadcrumbs } = Astro.props as Props;
         </main>
       </div>
     </div>
-
   </body>
 </html>

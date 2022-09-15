@@ -5,45 +5,27 @@
   const hotkeys = [
     {
       id: "Home",
-      title: "Open Home",
-      hotkey: "cmd+h",
+      title: "Home",
       mdIcon: "home",
       handler: () => {
-        console.log("navigation to home");
+        window.location.assign("/");
       },
     },
     {
-      id: "Open Projects",
-      title: "Open Projects",
-      hotkey: "cmd+p",
-      mdIcon: "apps",
+      id: "Contact Us",
+      title: "Contact Us",
+      mdIcon: "email",
       handler: () => {
-        console.log("navigation to projects");
+        window.location.assign("/contact/");
       },
     },
     {
-      id: "Theme",
-      title: "Change theme...",
-      mdIcon: "desktop_windows",
-      children: [
-        {
-          id: "Light Theme",
-          title: "Change theme to Light",
-          mdIcon: "light_mode",
-          handler: () => {
-            console.log("theme light");
-          },
-        },
-        {
-          id: "Dark Theme",
-          title: "Change theme to Dark",
-          mdIcon: "dark_mode",
-          keywords: "lol",
-          handler: () => {
-            console.log("theme dark");
-          },
-        },
-      ],
+      id: "Work Together",
+      title: "Let's Work Together?",
+      mdIcon: "handshake",
+      handler: () => {
+        window.location.assign("/work-together/");
+      },
     },
   ];
 
