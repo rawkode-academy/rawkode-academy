@@ -9,7 +9,27 @@ import {
 import * as gcp from "@pulumi/gcp";
 
 import { Domain } from "./types";
-import * as allDomains from "./domains";
+import { AllDomains } from "./domains";
+
+import { ManagedDomain } from "./domains";
+
+const rawkodeAcademy = new ManagedDomain("rawkode-academy", {
+  domain: "rawkode.academy",
+  enableDnssec: true,
+});
+
+rawkodeAcademy
+  .enableGSuite()
+  .addTxtRecord(["TXT", "@"], ["ABC"])
+  .addTxtRecord(["TXT", "@"], ["DEF"]);
+
+console.debug(rawkodeAcademy);
+
+// urn:pulumi:production::dns::rawkode:managed-domain$gcp:dns/managedZone:ManagedZone::fbom-dev
+const fbomDev = new ManagedDomain("fbom-dev", {
+  domain: "fbom.dev",
+  enableDnssec: false,
+});
 
 const reconcileDomain = (domain: Domain) => {
   const resourceName = domain.name.replace(/\./g, "-");
@@ -31,15 +51,9 @@ const reconcileDomain = (domain: Domain) => {
         },
       ],
       nonExistence: ManagedZoneDnsSecConfigNonExistence.Nsec3,
-      state: ManagedZoneDnsSecConfigState.On,
+      state: ManagedZoneDnsSecConfigState.Off,
     },
   });
-
-  const dnsPublicKey = zone.name.apply((name) =>
-    gcp.dns.getKeys({
-      managedZone: name,
-    })
-  );
 
   const nameservers = new gandi.domains.Nameservers(
     resourceName,
@@ -51,40 +65,48 @@ const reconcileDomain = (domain: Domain) => {
     },
     {
       parent: zone,
-      dependsOn: [dnsPublicKey],
     }
   );
 
-  new gandi.domains.DNSSecKey(
-    `${resourceName}-zsk`,
-    {
-      domain: domain.name,
-      publicKey: dnsPublicKey.zoneSigningKeys[0].publicKey,
-      type: "zsk",
-      algorithm: 13, // 13 is ECDSA-P256-SHA256
-    },
-    {
-      parent: nameservers,
-      dependsOn: [dnsPublicKey],
-    }
-  );
+  // const dnsPublicKey = zone.name.apply((name) =>
+  //   gcp.dns.getKeysOutput({
+  //     managedZone: name,
+  //   })
+  // );
 
-  new gandi.domains.DNSSecKey(
-    `${resourceName}-psk`,
-    {
-      domain: domain.name,
-      publicKey: dnsPublicKey.keySigningKeys[0].publicKey,
-      type: "ksk",
-      algorithm: 13, // 13 is ECDSA-P256-SHA256
-    },
-    {
-      parent: nameservers,
-      dependsOn: [dnsPublicKey],
-    }
-  );
+  // dnsPublicKey.zoneSigningKeys.apply((publicKey) => {
+  //   new gandi.domains.DNSSecKey(
+  //     `${resourceName}-zsk`,
+  //     {
+  //       domain: domain.name,
+  //       publicKey: publicKey[0].publicKey,
+  //       type: "zsk",
+  //       algorithm: 13, // 13 is ECDSA-P256-SHA256
+  //     },
+  //     {
+  //       parent: nameservers,
+  //       dependsOn: [nameservers, zone],
+  //     }
+  //   );
+  // });
 
-  const recordKeys = Object.keys(domain.records);
-  recordKeys.forEach((key) => {
+  // dnsPublicKey.keySigningKeys.apply((publicKey) => {
+  //   new gandi.domains.DNSSecKey(
+  //     `${resourceName}-psk`,
+  //     {
+  //       domain: domain.name,
+  //       publicKey: publicKey[0].publicKey,
+  //       type: "ksk",
+  //       algorithm: 13, // 13 is ECDSA-P256-SHA256
+  //     },
+  //     {
+  //       parent: nameservers,
+  //       dependsOn: [nameservers, zone],
+  //     }
+  //   );
+  // });
+
+  Object.keys(domain.records).forEach((key) => {
     const record = domain.records[key];
 
     new google.dns.v1.ResourceRecordSet(
@@ -108,6 +130,6 @@ const reconcileDomain = (domain: Domain) => {
   });
 };
 
-Object.values(allDomains).forEach((domain) => {
+Object.values(AllDomains).forEach((domain) => {
   reconcileDomain(domain);
 });
