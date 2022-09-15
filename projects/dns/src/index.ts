@@ -11,25 +11,10 @@ import * as gcp from "@pulumi/gcp";
 import { Domain } from "./types";
 import { AllDomains } from "./domains";
 
-import { ManagedDomain } from "./domains";
+import { rawkodeAcademy } from "./domains/rawkode.academy";
+import { createZone } from "./cloudDns";
 
-const rawkodeAcademy = new ManagedDomain("rawkode-academy", {
-  domain: "rawkode.academy",
-  enableDnssec: true,
-});
-
-rawkodeAcademy
-  .enableGSuite()
-  .addTxtRecord(["TXT", "@"], ["ABC"])
-  .addTxtRecord(["TXT", "@"], ["DEF"]);
-
-console.debug(rawkodeAcademy);
-
-// urn:pulumi:production::dns::rawkode:managed-domain$gcp:dns/managedZone:ManagedZone::fbom-dev
-const fbomDev = new ManagedDomain("fbom-dev", {
-  domain: "fbom.dev",
-  enableDnssec: false,
-});
+createZone(rawkodeAcademy);
 
 const reconcileDomain = (domain: Domain) => {
   const resourceName = domain.name.replace(/\./g, "-");

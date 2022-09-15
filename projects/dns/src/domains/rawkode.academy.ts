@@ -1,13 +1,16 @@
-import { Domain } from "../types";
-import { GSuite } from "../integrations";
+import { ManagedZone } from "../domains";
 
-export const RawkodeAcademy: Domain = {
-  name: "rawkode.academy",
-  records: {
-    ...GSuite,
-  },
-};
-
-// ❯ dog rawkode.academy TXT
-// TXT rawkode.academy. 5m00s   "v=spf1 include:_spf.google.com ~all"
-// TXT rawkode.academy. 5m00s   "google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU"
+export const rawkodeAcademy = new ManagedZone("rawkode-academy", {
+  domain: "rawkode.academy",
+  description: "Managed by Pulumi",
+})
+  .enableGSuite()
+  .mergeRecord({
+    type: "TXT",
+    name: "@",
+    ttl: 300,
+    values: [
+      "google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU",
+    ],
+  })
+  .addRecord({ type: "A", name: "@", ttl: 300, values: ["199.36.158.100"] });

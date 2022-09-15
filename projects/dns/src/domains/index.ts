@@ -4,7 +4,6 @@ import { ChappaaiDev } from "./chappaai.dev";
 import { FBOMDev } from "./fbom.dev";
 import { KlusteredLive } from "./klustered.live";
 import { RawkoDe } from "./rawko.de";
-import { RawkodeAcademy } from "./rawkode.academy";
 import { RawkodeChat } from "./rawkode.chat";
 import { RawkodeCom } from "./rawkode.com";
 import { RawkodeCommunity } from "./rawkode.community";
@@ -19,7 +18,6 @@ export const AllDomains = [
   // FBOMDev,
   KlusteredLive,
   RawkoDe,
-  RawkodeAcademy,
   RawkodeChat,
   RawkodeCom,
   RawkodeCommunity,
@@ -28,75 +26,70 @@ export const AllDomains = [
   RawkodeNews,
 ];
 
-interface ManagedDomainArgs {
-  domain: string;
-  enableDnssec: boolean;
-}
-
-type RecordType = "A" | "CNAME" | "MX" | "TXT";
-type RecordID = [RecordType, string];
-
 interface Zone {
-  name: string;
+  domain: string;
   description: string;
 }
 
+type RecordType = "A" | "CNAME" | "MX" | "TXT";
+
 interface Record {
-  values: string[];
+  name: string;
+  type: RecordType;
   ttl: number;
+  values: string[];
 }
 
-export class ManagedDomain extends pulumi.ComponentResource {
-  private name: string;
-  private zone: Zone;
+export class ManagedZone extends pulumi.ComponentResource {
+  public readonly name: string;
+  public readonly zone: Zone;
   private records: Map<string, Record> = new Map();
 
   constructor(
     name: string,
-    args: ManagedDomainArgs,
+    zone: Zone,
     opts?: pulumi.ComponentResourceOptions
   ) {
-    super("rawkode:managed-domain", name, args, opts);
+    super("dns:managed-zone", name, zone, opts);
 
     this.name = name;
-    this.zone = {
-      name: `${args.domain}.`,
-      description: "Managed DNS by Pulumi",
-    };
+    this.zone = zone;
   }
 
-  private addRecord(recordID: RecordID, newValues: Record): void {
-    if (this.records.has(`${recordID[0]}:${recordID[1]}`)) {
-      throw new Error(`Record ${recordID} already exists`);
+  public getRecords(): Record[] {
+    return Array.from(this.records.values());
+  }
+
+  public addRecord(newRecord: Record): ManagedZone {
+    if (this.records.has(`${newRecord.type}:${newRecord.name}`)) {
+      throw new Error(
+        `${newRecord.type} record for ${newRecord.name} already exists`
+      );
     }
 
-    this.records.set(`${recordID[0]}:${recordID[1]}`, {
-      ttl: newValues.ttl,
-      values: newValues.values,
-    });
+    this.records.set(`${newRecord.type}:${newRecord.name}`, newRecord);
+    return this;
   }
 
-  private mergeRecord(recordID: RecordID, newValues: Record): void {
-    console.debug(this.records);
-    console.log(`Checking for ${recordID[0]} - ${recordID[1]}`);
-    const record = this.records.get(`${recordID[0]}:${recordID[1]}`);
+  public mergeRecord(newRecord: Record): ManagedZone {
+    const record = this.records.get(`${newRecord.type}:${newRecord.name}`);
 
     if (undefined === record) {
-      console.log("Doesn't exist");
-      this.addRecord(recordID, newValues);
-      return;
+      return this.addRecord(newRecord);
     }
 
-    console.log("Exists");
+    record.ttl = newRecord.ttl < record.ttl ? newRecord.ttl : record.ttl;
+    record.values = [...record.values, ...newRecord.values];
 
-    record.ttl = newValues.ttl < record.ttl ? newValues.ttl : record.ttl;
-    record.values = [...record.values, ...newValues.values];
+    this.records.set(`${record.type}:${record.name}`, record);
 
-    this.records.set(`${recordID[0]}:${recordID[1]}`, record);
+    return this;
   }
 
-  public enableGSuite(): ManagedDomain {
-    this.addRecord(["MX", "@"], {
+  public enableGSuite(): ManagedZone {
+    this.addRecord({
+      name: "@",
+      type: "MX",
       ttl: 3600,
       values: [
         "1 aspmx.l.google.com.",
@@ -107,7 +100,9 @@ export class ManagedDomain extends pulumi.ComponentResource {
       ],
     });
 
-    this.addRecord(["TXT", "google._domainkey"], {
+    this.addRecord({
+      name: "google._domainkey",
+      type: "TXT",
       ttl: 300,
       values: [
         // TXT records need split into 255 byte chunks
@@ -116,18 +111,11 @@ export class ManagedDomain extends pulumi.ComponentResource {
       ],
     });
 
-    this.mergeRecord(["TXT", "@"], {
+    this.mergeRecord({
+      name: "@",
+      type: "TXT",
       ttl: 300,
       values: ['"v=spf1 include:_spf.google.com ~all"'],
-    });
-
-    return this;
-  }
-
-  public addTxtRecord(recordID: RecordID, values: string[]): ManagedDomain {
-    this.mergeRecord(recordID, {
-      ttl: 300,
-      values,
     });
 
     return this;
