@@ -10,11 +10,14 @@ import * as gcp from "@pulumi/gcp";
 
 import { Domain } from "./types";
 import { AllDomains } from "./domains";
+import { createZone } from "./dnsProviders/cloudDns";
 
 import { rawkodeAcademy } from "./domains/rawkode.academy";
-import { createZone } from "./cloudDns";
-
 createZone(rawkodeAcademy);
+import { rawkodeDev } from "./domains/rawkode.dev";
+createZone(rawkodeDev);
+import { rawkodeCom } from "./domains/rawkode.com";
+createZone(rawkodeCom);
 
 const reconcileDomain = (domain: Domain) => {
   const resourceName = domain.name.replace(/\./g, "-");

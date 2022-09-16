@@ -5,9 +5,7 @@ import { FBOMDev } from "./fbom.dev";
 import { KlusteredLive } from "./klustered.live";
 import { RawkoDe } from "./rawko.de";
 import { RawkodeChat } from "./rawkode.chat";
-import { RawkodeCom } from "./rawkode.com";
 import { RawkodeCommunity } from "./rawkode.community";
-import { rawkodeDev } from "./rawkode.dev";
 import { RawkodeLink } from "./rawkode.link";
 import { RawkodeNews } from "./rawkode.news";
 // export * from "./rawkode.email";
@@ -19,9 +17,7 @@ export const AllDomains = [
   KlusteredLive,
   RawkoDe,
   RawkodeChat,
-  RawkodeCom,
   RawkodeCommunity,
-  rawkodeDev,
   RawkodeLink,
   RawkodeNews,
 ];
@@ -97,17 +93,6 @@ export class ManagedZone extends pulumi.ComponentResource {
         "5 alt2.aspmx.l.google.com.",
         "10 alt3.aspmx.l.google.com.",
         "10 alt4.aspmx.l.google.com.",
-      ],
-    });
-
-    this.addRecord({
-      name: "google._domainkey",
-      type: "TXT",
-      ttl: 300,
-      values: [
-        // TXT records need split into 255 byte chunks
-        "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0htq+un78kY5mLFMLYmkb0Dl9uzX5P0RwhwY6ADVCpL+SI7zZYOyY4uPpRq44nm+H1iqet8wfjLlvnn1VrxB5ivwJisNsaleMZnkNPPXOZ+Y9lDFxqQLHUBzEB3dmHm7/HD2wcEHiConR2CFZ7888dDfMoBzpCifGdqDPsGJR2vCVNYHPDvd9fs6wwZQszJAS",
-        "WWxeMWV1U7rN9GqPHBMvgGJ4HfyWqOPrGEzWAdJ8+y98fhzDchejEnFOP7AtccqifoM7jpOwRDitjW+RL6gofYOJrJG48lSFSSEw25KWQ6yqEaT/Q1cXzIyOsvXuMNQ9UcPUpg8jDboor9vj852dwIDAQAB",
       ],
     });
 
