@@ -1,27 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
 
-import { ChappaaiDev } from "./chappaai.dev";
-import { FBOMDev } from "./fbom.dev";
-import { KlusteredLive } from "./klustered.live";
-import { RawkoDe } from "./rawko.de";
-import { RawkodeChat } from "./rawkode.chat";
-import { RawkodeCommunity } from "./rawkode.community";
-import { RawkodeLink } from "./rawkode.link";
-import { RawkodeNews } from "./rawkode.news";
-// export * from "./rawkode.email";
-// export * from "./rawkode.sh";
-
-export const AllDomains = [
-  ChappaaiDev,
-  // FBOMDev,
-  KlusteredLive,
-  RawkoDe,
-  RawkodeChat,
-  RawkodeCommunity,
-  RawkodeLink,
-  RawkodeNews,
-];
-
 interface Zone {
   domain: string;
   description: string;
@@ -82,6 +60,17 @@ export class ManagedZone extends pulumi.ComponentResource {
     return this;
   }
 
+  public disableEmail(): ManagedZone {
+    this.mergeRecord({
+      name: "@",
+      type: "TXT",
+      ttl: 300,
+      values: ['"v=spf1 ~all"'],
+    });
+
+    return this;
+  }
+
   public enableGSuite(): ManagedZone {
     this.addRecord({
       name: "@",
@@ -101,6 +90,28 @@ export class ManagedZone extends pulumi.ComponentResource {
       type: "TXT",
       ttl: 300,
       values: ['"v=spf1 include:_spf.google.com ~all"'],
+    });
+
+    return this;
+  }
+
+  public setupRebrandly(name: string): ManagedZone {
+    this.addRecord({
+      name,
+      type: "A",
+      ttl: 300,
+      values: ["52.72.49.79"],
+    });
+
+    return this;
+  }
+
+  public setupShortiO(name: string): ManagedZone {
+    this.addRecord({
+      name,
+      type: "A",
+      ttl: 300,
+      values: ["52.21.33.16", "52.59.165.42"],
     });
 
     return this;

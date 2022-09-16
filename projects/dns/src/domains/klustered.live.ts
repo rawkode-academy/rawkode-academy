@@ -1,10 +1,8 @@
-import { Domain } from "../types";
-import { DisableEmail, setupRebrandly } from "../integrations";
+import { ManagedZone } from "../domains";
 
-export const KlusteredLive: Domain = {
-  name: "klustered.live",
-  records: {
-    ...DisableEmail,
-    ...setupRebrandly("@"),
-  },
-};
+export const klusteredLive = new ManagedZone("klustered-live", {
+  domain: "klustered.live",
+  description: "Managed by Pulumi",
+})
+  .disableEmail()
+  .setupRebrandly("@");

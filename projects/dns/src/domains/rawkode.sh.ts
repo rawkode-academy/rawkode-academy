@@ -1,9 +1,6 @@
-import { Domain } from "../types";
-import { DisableEmail } from "../integrations";
+import { ManagedZone } from "../domains";
 
-export const RawkodeSh: Domain = {
-  name: "rawkode.sh",
-  records: {
-    ...DisableEmail,
-  },
-};
+export const rawkodeSh = new ManagedZone("rawkode-sh", {
+  domain: "rawkode.sh",
+  description: "Managed by Pulumi",
+}).disableEmail();

@@ -1,9 +1,6 @@
-import { Domain } from "../types";
-import { DisableEmail } from "../integrations";
+import { ManagedZone } from "../domains";
 
-export const RawkodeNews: Domain = {
-  name: "rawkode.news",
-  records: {
-    ...DisableEmail,
-  },
-};
+export const rawkodeNews = new ManagedZone("rawkode-news", {
+  domain: "rawkode.news",
+  description: "Managed by Pulumi",
+}).disableEmail();

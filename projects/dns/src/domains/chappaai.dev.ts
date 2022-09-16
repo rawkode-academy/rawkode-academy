@@ -1,9 +1,6 @@
-import { Domain } from "../types";
-import { DisableEmail } from "../integrations";
+import { ManagedZone } from "../domains";
 
-export const ChappaaiDev: Domain = {
-  name: "chappaai.dev",
-  records: {
-    ...DisableEmail,
-  },
-};
+export const chappaaiDev = new ManagedZone("chappaai-dev", {
+  domain: "chappaai.dev",
+  description: "Managed by Pulumi",
+}).disableEmail();

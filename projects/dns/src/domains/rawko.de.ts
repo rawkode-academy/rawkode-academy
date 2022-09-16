@@ -1,10 +1,8 @@
-import { Domain } from "../types";
-import { DisableEmail, setupShortIO } from "../integrations";
+import { ManagedZone } from "../domains";
 
-export const RawkoDe: Domain = {
-  name: "rawko.de",
-  records: {
-    ...DisableEmail,
-    ...setupShortIO("@"),
-  },
-};
+export const rawkodeDe = new ManagedZone("rawko-de", {
+  domain: "rawko.de",
+  description: "Managed by Pulumi",
+})
+  .disableEmail()
+  .setupShortiO("@");
