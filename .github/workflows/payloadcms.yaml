@@ -1,0 +1,51 @@
+name: PayloadCMS Image Build
+
+on:
+  push:
+  schedule:
+    - cron: "15 2 * * *"
+
+jobs:
+  build:
+    name: Build Container Image
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+
+    steps:
+      - name: Generate snapshot date
+        id: snapshot-date
+        run: |
+          echo ::set-output name=date::$(date -u +%Y%m%d)
+          echo ::set-output name=epoch::$(date -u +%s)
+        shell: bash
+
+      - uses: actions/checkout@main
+      - uses: sigstore/cosign-installer@main
+      - uses: chainguard-dev/actions/melange-build@main
+        with:
+          config: melange.server.yaml
+          sign-with-temporary-key: true
+          empty-workspace: true
+
+      - uses: chainguard-dev/actions/apko-build@main
+        id: apko
+        with:
+          config: apko.yaml
+          tag: ghcr.io/rawkodeacademy/payloadcms-server:latest
+          keyring-append: /github/workspace/melange.rsa.pub
+          archs: x86_64
+          source-date-epoch: ${{ steps.snapshot-date.outputs.epoch }}
+
+      - uses: docker/login-action@bb984efc561711aaa26e433c32c3521176eae55b # v1.13.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+
+      - shell: bash
+        run: |
+          COSIGN_EXPERIMENTAL=true cosign sign ${{ steps.apko.outputs.digest }}
