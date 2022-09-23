@@ -21,14 +21,13 @@ jobs:
       contents: read
 
     steps:
+      - uses: actions/checkout@main
       - name: Generate snapshot date
         id: snapshot-date
         run: |
           echo ::set-output name=date::$(date -u +%Y%m%d)
           echo ::set-output name=epoch::$(date -u +%s)
         shell: bash
-
-      - uses: actions/checkout@main
       - uses: sigstore/cosign-installer@main
       - uses: chainguard-dev/actions/melange-build@main
         with:
