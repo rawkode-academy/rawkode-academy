@@ -1,55 +1,28 @@
-name: PayloadCMS Image Build
+name: PayloadCMS Images Build
 
 on:
   push:
+    branches:
+      - "main"
   schedule:
     - cron: "15 2 * * *"
 
-defaults:
-  run:
-    shell: bash
-    working-directory: projects/cms/payloadcms
-
 jobs:
-  build:
-    name: Build Container Image
+  docker:
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      packages: write
-      contents: read
-
     steps:
-      - uses: actions/checkout@main
-      - name: Generate snapshot date
-        id: snapshot-date
-        run: |
-          echo ::set-output name=date::$(date -u +%Y%m%d)
-          echo ::set-output name=epoch::$(date -u +%s)
-        shell: bash
-      - uses: sigstore/cosign-installer@main
-      - uses: chainguard-dev/actions/melange-build@main
-        with:
-          config: melange.server.yaml
-          sign-with-temporary-key: true
-          empty-workspace: true
-
-      - uses: chainguard-dev/actions/apko-build@main
-        id: apko
-        with:
-          config: apko.yaml
-          tag: ghcr.io/rawkodeacademy/payloadcms-server:latest
-          keyring-append: /github/workspace/melange.rsa.pub
-          archs: x86_64
-          source-date-epoch: ${{ steps.snapshot-date.outputs.epoch }}
-
-      - uses: docker/login-action@bb984efc561711aaa26e433c32c3521176eae55b # v1.13.0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Github Packages
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ github.token }}
-
-      - shell: bash
-        run: |
-          COSIGN_EXPERIMENTAL=true cosign sign ${{ steps.apko.outputs.digest }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ghcr.io/rawkodeacademy/payloadcms-server:latest

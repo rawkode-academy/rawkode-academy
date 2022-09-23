@@ -1,8 +1,9 @@
 FROM node:18 AS build
 
 WORKDIR /app
-COPY . /app
 
+# Yes, I know I can optimise this
+COPY . /app
 RUN yarn install
 RUN yarn run build:server
 
