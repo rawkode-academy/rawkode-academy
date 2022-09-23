@@ -7,6 +7,7 @@ on:
 
 defaults:
   run:
+    shell: bash
     working-directory: projects/cms/payloadcms
 
 jobs:
