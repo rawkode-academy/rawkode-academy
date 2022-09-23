@@ -27,14 +27,14 @@ jobs:
       - uses: sigstore/cosign-installer@main
       - uses: chainguard-dev/actions/melange-build@main
         with:
-          config: melange.server.yaml
+          config: ./projects/cms/payloadcms/melange.server.yaml
           sign-with-temporary-key: true
           empty-workspace: true
 
       - uses: chainguard-dev/actions/apko-build@main
         id: apko
         with:
-          config: apko.yaml
+          config: ./projects/cms/payloadcms/apko.yaml
           tag: ghcr.io/rawkodeacademy/payloadcms-server:latest
           keyring-append: /github/workspace/melange.rsa.pub
           archs: x86_64
