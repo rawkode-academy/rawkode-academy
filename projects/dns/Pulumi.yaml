@@ -4,6 +4,3 @@ description: Management of DNS
 main: src
 backend:
   url: gs://rawkode-academy-automation/dns
-options:
-  refresh: true
-
