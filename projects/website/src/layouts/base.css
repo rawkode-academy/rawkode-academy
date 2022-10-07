@@ -2,33 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-size-base: clamp(1rem, 0.34vw + 0.91rem, 1.19rem);
-  --font-size-lg: clamp(1.2rem, 0.7vw + 1.2rem, 1.5rem);
-  --font-size-xl: clamp(2.44rem, 2.38vw + 1.85rem, 3.75rem);
-
-  --color-text: hsl(12, 5%, 4%);
-  --color-bg: hsl(10, 21%, 95%);
-  --color-border: hsl(17, 24%, 90%);
-}
-
-html {
-  font-family: system-ui, sans-serif;
-  font-size: var(--font-size-base);
-  color: var(--color-text);
-  background-color: var(--color-bg);
-}
-
 body {
   margin: 0;
 }
 
-:global(h1) {
-  font-size: var(--font-size-xl);
+html {
+  font-family: "Avenir Light", system-ui, sans-serif;
 }
 
-:global(h2) {
-  font-size: var(--font-size-lg);
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Orbitron", system-ui, sans-serif;
+}
+
+h1 {
+  @apply font-extrabold tracking-wider text-4xl md:text-5xl mt-4 mb-4
+}
+
+h2 {
+  @apply font-bold tracking-wide text-2xl md:text-3xl mt-4 mb-4
+}
+
+h3 {
+  @apply font-semibold tracking-normal text-lg md:text-xl mt-4 mb-4
+}
+
+ul {
+  @apply list-disc list-inside
+}
+
+ol {
+  @apply list-decimal list-inside
+}
+
+strong {
+  @apply font-semibold
 }
 
 :global(code) {

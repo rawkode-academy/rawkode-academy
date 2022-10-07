@@ -1,4 +1,5 @@
 interface MenuItem {
+  exact: boolean;
   title: string;
   href: string;
   icon: string;
@@ -7,17 +8,20 @@ interface MenuItem {
 export const menuItems: MenuItem[] = [
   {
     title: "Home",
-    href: "/",
+    exact: true,
+    href: "/#",
     icon: "mdi-light:home",
   },
-  // {
-  //   title: "Shows",
-  //   href: "/shows/",
-  //   icon: "mdi-light:home",
-  // },
+  {
+    title: "Shows",
+    exact: false,
+    href: "/shows",
+    icon: "mdi-light:home",
+  },
   {
     title: "Contact",
-    href: "/contact/",
+    exact: false,
+    href: "/contact",
     icon: "mdi-light:home",
   },
 ];

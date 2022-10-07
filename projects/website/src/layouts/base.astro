@@ -16,7 +16,7 @@ export interface Props {
   breadcrumbs: Breadcrumb[];
 }
 
-const { title, breadcrumbs } = Astro.props as Props;
+const meta = Astro.props.frontmatter as Props || Astro.props as Props;
 ---
 
 <!DOCTYPE html>
@@ -25,7 +25,7 @@ const { title, breadcrumbs } = Astro.props as Props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <title>{title}</title>
+    <title>{meta.title}</title>
 
     <link
       href="https://fonts.googleapis.com/css?family=Material+Icons&display=block"
@@ -46,14 +46,14 @@ const { title, breadcrumbs } = Astro.props as Props;
         <Breadcrumbs
           client:load
           slot="breadcrumbs"
-          title={title}
-          breadcrumbs={breadcrumbs}
+          title={meta.title}
+          breadcrumbs={meta.breadcrumbs}
         />
 
         <main>
           <div class="py-6">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              <h1 class="text-2xl font-semibold text-gray-900">{title}</h1>
+              <h1 >{meta.title}</h1>
             </div>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
               <slot />

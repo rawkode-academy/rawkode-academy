@@ -18,9 +18,10 @@
         {#each menuItems as menuItem}
           <a
             href={menuItem.href}
-            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md bg-black hover:bg-emerald-400 hover:text-white {url ==
-            menuItem.href
-              ? 'text-black font-semibold bg-gradient-to-br from-emerald-300 to-emerald-600'
+            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md bg-black hover:bg-emerald-400 hover:text-white {url.startsWith(
+              menuItem.href
+            )
+              ? 'text-black font-semibold bg-gradient-to-br from-primary to-secondary'
               : 'text-white'}"
           >
             {menuItem.title}

@@ -91,7 +91,7 @@
                 href={menuItem.href}
                 class="text-white group flex items-center px-2 py-2 text-base font-medium rounded-md bg-black hover:bg-emerald-400 hover:text-white {url ==
                 menuItem.href
-                  ? 'text-black font-semibold bg-gradient-to-br from-emerald-300 to-emerald-600'
+                  ? 'text-black font-semibold bg-gradient-to-br from-primary to-secondary'
                   : 'text-white'}"
               >
                 <Icon icon={menuItem.icon} class="w-5 h-5 mr-3" />

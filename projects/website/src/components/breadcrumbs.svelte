@@ -5,26 +5,18 @@
   }
 
   import { isOpen } from "@components/sidebar/store";
-  import { empty, end_hydrating } from "svelte/internal";
 
   const toggleMenu = () => {
-    console.log(`Setting isOpen to ${!$isOpen}`);
     isOpen.set(!$isOpen);
   };
 
   const showCommandPalette = () => {
-    console.log("got it");
     const ninja = document.querySelector("ninja-keys");
     ninja.open();
   };
 
   export let title: string;
-  export let breadcrumbs: Breadcrumb[] = [
-    {
-      title: "BN1",
-      href: "/",
-    },
-  ];
+  export let breadcrumbs: Breadcrumb[] = [];
 </script>
 
 <div class="bg-white border-b border-purple-200 flex" aria-label="Breadcrumb">
@@ -56,7 +48,7 @@
 
     <li class="flex">
       <div class="flex items-center">
-        <a href="/" class="text-gray-400 hover:text-gray-500">
+        <a href="/#" class="text-gray-400 hover:text-gray-500">
           <svg
             class="flex-shrink-0 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
@@ -74,7 +66,7 @@
     </li>
 
     <!-- this causes an HMR error? -->
-    <!-- {#each breadcrumbs as breadcrumb}
+    {#each breadcrumbs as breadcrumb}
       <li class="flex">
         <div class="flex items-center">
           <svg
@@ -94,9 +86,9 @@
           >
         </div>
       </li>
-    {/each} -->
+    {/each}
 
-    <li class="flex-grow">
+    <li class="flex flex-grow">
       <div class="flex items-center">
         <svg
           class="flex-shrink-0 w-6 h-full text-gray-200"
@@ -108,9 +100,9 @@
         >
           <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
         </svg>
-        <p class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+        <a class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
           {title}
-        </p>
+        </a>
       </div>
     </li>
 

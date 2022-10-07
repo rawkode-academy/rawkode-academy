@@ -1,0 +1,19 @@
+---
+import Layout from '../../layouts/base.astro';
+
+const shows = await Astro.glob('./*/index.md');
+---
+
+<Layout title="Shows">
+  <main>
+    <div>
+      {shows.map((show) => (
+        <ul>
+          <a href={show.url}><li>{show.frontmatter.title}</li></a>
+        </ul>
+      ))}
+      </div>
+
+  </main>
+</Layout>
+
