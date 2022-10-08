@@ -18,4 +18,4 @@ The podcast will be recorded live and streamed to YouTube, Twitter, and LinkedIn
 
 ### Want to Join Us?
 
-Check out the [prospectus](./fbom/prospectus).
+Check out the [prospectus](./prospectus).

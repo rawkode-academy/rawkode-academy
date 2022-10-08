@@ -66,7 +66,7 @@
     </li>
 
     <!-- this causes an HMR error? -->
-    {#each breadcrumbs as breadcrumb}
+    <!-- {#each breadcrumbs as breadcrumb}
       <li class="flex">
         <div class="flex items-center">
           <svg
@@ -86,7 +86,7 @@
           >
         </div>
       </li>
-    {/each}
+    {/each} -->
 
     <li class="flex flex-grow">
       <div class="flex items-center">
