@@ -1,24 +1,24 @@
 ---
-title: "FBOM Prospectus"
+title: "CommitOps Prospectus"
 layout: "../../../layouts/base.astro"
 breadcrumbs:
   - title: "Shows"
     href: "/shows"
-  - title: "FBOM"
-    href: "/shows/fbom"
+  - title: "CommitOps"
+    href: "/shows/commitops"
 ---
 
-Welcome to the FBOM prospectus. If you wish to join us on FBOM, please fill out the form below.
+Welcome to the CommitOps prospectus. If you wish to join us on CommitOps, please fill out the form below.
 
-## What is FBOM?
+## What is CommitOps?
 
-FBOM is a monthly DevSecOps podcast that features four amazing guests, every month, from the best security companies in the Cloud Native community.
+CommitOps is a monthly CICD and GitOps podcast that features four amazing guests, every month, from the best CICD companies in the Cloud Native community.
 
-We meet on last Wednesday of every month with our panel to discuss a topic within the Cloud Native security space.
+We meet on first Wednesday of every month with our panel to discuss a topic within the Cloud Native security space.
 
-The sessions will be live streamed to YouTube, Twitter, and LinkedIn, with an edited version also released as a podcast to all major podcast platforms.
+The podcast will be recorded live and streamed to YouTube, Twitter, and LinkedIn. The podcast will also be published to all major podcast platforms.
 
-## Why Should I Join FBOM?
+## Why Should I Join CommitOps?
 
 The Rawkode Academy has built an audience of senior, staff, and principal engineers within the Cloud Native community. By joining us, you get to represent your organization, your product, and your brand to this extremely well targeted senior engineer audience.
 
@@ -53,7 +53,7 @@ To join us for a single episode, the cost depends on your commitment. If you com
 
 <script>
   Reform("init", {
-    url: "https://forms.reform.app/rawkode/fbom-join/vslwft",
+    url: "https://forms.reform.app/rawkode/commitops-join/vslwft",
     target: "#my-reform",
     background: "transparent",
   });
