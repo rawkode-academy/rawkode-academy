@@ -95,6 +95,27 @@ export class ManagedZone extends pulumi.ComponentResource {
     return this;
   }
 
+  public enableFastmail(): ManagedZone {
+    this.addRecord({
+      name: "@",
+      type: "MX",
+      ttl: 3600,
+      values: [
+        "10 in1-smtp.messagingengine.com.",
+        "20 in2-smtp.messagingengine.com.",
+      ],
+    });
+
+    this.mergeRecord({
+      name: "@",
+      type: "TXT",
+      ttl: 300,
+      values: ['"v=spf1 include:spf.messagingengine.com ?all"'],
+    });
+
+    return this;
+  }
+
   public setupRebrandly(name: string): ManagedZone {
     this.addRecord({
       name,
