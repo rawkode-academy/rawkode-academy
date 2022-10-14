@@ -3,9 +3,6 @@ import { createZone } from "./dnsProviders/cloudDns";
 import { rawkodeAcademy } from "./domains/rawkode.academy";
 createZone(rawkodeAcademy);
 
-import { rawkodeDev } from "./domains/rawkode.dev";
-createZone(rawkodeDev);
-
 import { rawkodeCom } from "./domains/rawkode.com";
 createZone(rawkodeCom);
 
