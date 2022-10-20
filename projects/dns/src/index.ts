@@ -12,6 +12,9 @@ createZone(chappaaiDev);
 import { fbomDev } from "./domains/fbom.dev";
 createZone(fbomDev);
 
+import { fbomLive } from "./domains/fbom.live";
+createZone(fbomLive);
+
 import { klusteredLive } from "./domains/klustered.live";
 createZone(klusteredLive);
 
