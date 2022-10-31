@@ -1,0 +1,7 @@
+secretsprovider: gcpkms://projects/rawkode-academy/locations/europe-west2/keyRings/automation/cryptoKeys/workshops
+encryptedkey: CiQA+D173UaadrtczE8jM1yhf8ivCOIEfQI8CKjBR1RMPFL4aKcSSQCFVxtLjrMt07m5OoOuZINj0M0zpA+ebSURElmAF/adWT3YKhfm/eED+3wStj0fven/s5EOeYhdElGvvhpubry0C7REJtyxcp0=
+config:
+  gcp:project: rawkode-academy
+  github:owner: RawkodeAcademy
+  google-native:project: rawkode-academy
+  kubernetes-course:name: ldn

@@ -1,0 +1,6 @@
+name: kubernetes-course
+description: The Complete Guide to Kubernetes
+runtime: nodejs
+main: src
+backend:
+  url: gs://rawkode-academy-automation/kubernetes-workshops
