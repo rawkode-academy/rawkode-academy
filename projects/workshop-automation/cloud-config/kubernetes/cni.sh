@@ -4,6 +4,8 @@ set -xeuo pipefail
 export KUBECONFIG=/etc/kubernetes/admin.conf
 sleep 30
 
+kubectl taint node --all node-role.kubernetes.io/control-plane:NoSchedule-
+
 CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/master/stable.txt)
 CLI_ARCH=amd64
 if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi

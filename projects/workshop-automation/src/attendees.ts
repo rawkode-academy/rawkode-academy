@@ -1,1 +1,18 @@
-export const attendees = [];
+export const attendees = [
+  "rawkode",
+  "Matt-bartlett",
+  "Tabassummulla",
+  "jturner-uw",
+  "Dszita",
+  "scukonick",
+  "MaxAdcock",
+  "biscuitNinja",
+  "cdempsie",
+  "Faizanjoya",
+  "Hadooping",
+  "Joepk90",
+  "AliAbbasUW",
+  "DavianRobinson",
+  "Valeriocappuccio-bud",
+  "denisnikulin",
+];

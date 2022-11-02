@@ -25,7 +25,7 @@ const firewall = new google.compute.v1.Firewall("firewall", {
   allowed: [
     {
       ipProtocol: "tcp",
-      ports: ["443", "22", "3021", "3022", "3025", "3028"],
+      ports: ["443", "22", "3021", "3022", "3025", "3028", "16000", "33000"],
     },
   ],
 });
@@ -56,9 +56,14 @@ attendees.forEach((attendee) => {
     role: "member",
   });
 
+  const ipAddress = new google.compute.v1.Address(handle, {
+    region,
+  });
+
   provisionMachine({
     name: handle,
     networkId: network.selfLink,
+    ipAddress: ipAddress.address,
     zone: "europe-west2-c",
     machineType: "e2-standard-4",
     userData: renderUserData(

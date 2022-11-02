@@ -84,5 +84,12 @@ export const userData = (config: Config): GetConfigPart[] => {
         )
       ),
     },
+    {
+      contentType: "text/x-shellscript",
+      content: fs.readFileSync(
+        path.resolve(__dirname, `${cloudConfigPath}/code-server/install.sh`),
+        "utf-8"
+      ),
+    },
   ];
 };
