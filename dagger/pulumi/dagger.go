@@ -21,6 +21,7 @@ type Config struct {
 	Passphrase           string
 	EnvironmentVariables map[string]string
 	ProgramDir           dagger.DirectoryID
+	GCloudGke            bool
 }
 
 type Outputs map[string]interface{}
@@ -55,6 +56,10 @@ func Up(config Config, ctx context.Context, client *dagger.Client) (Outputs, err
 
 	for key, value := range config.EnvironmentVariables {
 		pulumi = pulumi.WithEnvVariable(key, value)
+	}
+
+	if config.GCloudGke {
+		pulumi = pulumi.WithEnvVariable("GCLOUD_GKE", "YES")
 	}
 
 	result := pulumi.Exec(dagger.ContainerExecOpts{

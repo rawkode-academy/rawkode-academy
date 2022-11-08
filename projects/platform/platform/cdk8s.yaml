@@ -1,5 +1,0 @@
-language: typescript
-app: node main.js
-imports:
-  - k8s
-  - https://raw.githubusercontent.com/projectcontour/contour/v1.22.0/examples/gateway/00-crds.yaml

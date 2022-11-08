@@ -1,7 +1,0 @@
-accesslog-format: envoy
-disablePermitInsecure: false
-gateway:
-  controllerName: projectcontour.io/gateway-controller
-tls:
-  accesslog-format: envoy
-  fallback-certificate: {}
