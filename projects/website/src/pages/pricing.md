@@ -9,8 +9,6 @@ When you're ready to start a conversation, [get in touch here](/contact).
 
 **Hourly rates start at 400 USD.**
 
-I like to be completely transparent, as I'm a terrible negotiator. I will bring this pricing down a little depending on the number of hours and term of commitment.
-
 We have a few different options for you to choose from.
 
 ## Retainer Model (Preferred)
@@ -51,6 +49,6 @@ Training is delivered at a fixed price per head at **1000 USD per day per person
 - Introduction to Kubernetes for Operators (1 Day) (Beginner)
 - Building a Platform on Kubernetes (2 Days) (Intermediate)
 - Deploying Real World Applications to Kubernetes (1 Day) (Intermediate)
-- GitOps for Kuberneets (1 Day) (Intermediate)
+- GitOps for Kubernetes (1 Day) (Intermediate)
 - Klustered for Operators (1 or 2 Days) (Advanced)
 - Klustered for Developers (1 or 2 Days) (Advanced)
