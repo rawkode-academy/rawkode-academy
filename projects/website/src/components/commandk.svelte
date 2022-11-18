@@ -20,6 +20,14 @@
       },
     },
     {
+      id: "Pricing Information",
+      title: "Pricing Information",
+      mdIcon: "attach_money",
+      handler: () => {
+        window.location.assign("/pricing/");
+      },
+    },
+    {
       id: "Work Together",
       title: "Let's Work Together?",
       mdIcon: "handshake",

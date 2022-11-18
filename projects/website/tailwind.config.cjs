@@ -7,6 +7,8 @@ module.exports = {
       colors: {
         primary: "#04B59C",
         secondary: "#85FF95",
+        tertiary: "#5F5ED7",
+        quaternary: "00CEFF",
       },
       fontFamily: {
         sans: ["'Avenir Light'", ...defaultTheme.fontFamily.sans],

@@ -6,8 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "deploy": "node --version && yarn run build && wrangler pages publish --project-name rawkode-academy dist"
+    "preview": "astro preview"
   },
   "devDependencies": {
     "@astrojs/lit": "^1.0.1",
