@@ -1,8 +1,0 @@
-go 1.19
-
-use (
-	./dagger/doppler
-	./dagger/pulumi
-	./projects/platform
-	./projects/rawkode.cloud
-)

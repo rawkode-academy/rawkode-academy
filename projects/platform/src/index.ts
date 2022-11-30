@@ -73,49 +73,21 @@ const kubernetesProvider = new kubernetes.Provider("provider", {
   kubeconfig: kubernetesCluster.getKubeconfig(),
 });
 
-const porchInstall = new kubernetes.yaml.ConfigFile(
-  "porch-install",
-  {
-    file: "../bootstrap/porch.yaml",
-  },
-  {
-    provider: kubernetesProvider,
-  }
-);
+import { Platform } from "./platform";
+import { FluxCD, MongoDbOperator, PulumiOperator } from "./components";
 
-// const gkehubMembership = new gcp.gkehub.Membership("membership", {
-//   membershipId: stackName("platform"),
-//   endpoint: {
-//     gkeCluster: {
-//       resourceLink: `//container.googleapis.com/${kubernetesCluster.id}`,
-//     },
-//   },
-//   authority: {
-//     issuer: `https://container.googleapis.com/v1/${kubernetesCluster.id}`,
-//   },
-// });
+const platform = new Platform("platform", {
+  provider: kubernetesProvider,
+});
 
-// const gkehubConfigManagement = new gcp.gkehub.Feature("configmanagement", {
-//   name: "configmanagement",
-//   location: "global",
-// });
-
-// const gkehubConfigManagementMembership = new gcp.gkehub.FeatureMembership(
-//   "configmanagement",
-//   {
-//     location: "global",
-//     feature: gkehubConfigManagement.name,
-//     membership: gkehubMembership.id,
-//     configmanagement: {
-//       version: "1.6.2",
-//       configSync: {
-
-//         git: {
-//           syncRepo: "https://github.com/RawkodeAcademy/RawkodeAcademy",
-//           syncBranch: "main",
-//           policyDir: "./projects/platform/gitops",
-//         },
-//       },
-//     },
-//   }
-// );
+platform
+  .addComponent("fluxcd", FluxCD)
+  .addComponent("pulumi-operator", PulumiOperator)
+  .addComponent("mongodb-operator", MongoDbOperator)
+  .addProject("cms-server", {
+    repository: "oci://ghcr.io/rawkodeacademy/cms-server-deploy",
+    directory: "deploy",
+    environment: {
+      domain: "cms-server.rawkode.com",
+    },
+  });

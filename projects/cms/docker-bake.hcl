@@ -3,7 +3,7 @@ group "default" {
 }
 
 target "server" {
-    context = "payloadcms"
-    platforms = ["linux/amd64", "linux/arm64"]
-    tags = ["ghcr.io/rawkodeacademy/payloadcms-server"]
+    context = "."
+    platforms = ["linux/amd64"]
+    tags = ["ghcr.io/rawkodeacademy/cms-server"]
 }
