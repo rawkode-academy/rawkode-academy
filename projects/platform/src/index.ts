@@ -35,7 +35,6 @@ const nodeServiceAccount = new gcp.serviceaccount.Account(
 const kubernetesCluster = new google.container.v1.Cluster("cluster", {
   name: stackName("platform"),
   location: "europe-west2",
-  initialNodeCount: 1,
   network: network.name,
   monitoringService: "none",
   loggingService: "none",
@@ -60,10 +59,11 @@ const kubernetesCluster = new google.container.v1.Cluster("cluster", {
 
 const primaryNodePool = new gcp.container.NodePool("primary", {
   cluster: kubernetesCluster.id,
+  location: "europe-west2-b",
   nodeCount: 2,
   nodeConfig: {
     preemptible: true,
-    machineType: "e2-medium",
+    machineType: "e2-standard-4",
     serviceAccount: nodeServiceAccount.email,
     oauthScopes: ["https://www.googleapis.com/auth/cloud-platform"],
   },

@@ -9,11 +9,18 @@ const password = new random.RandomPassword("cms", {
   length: 32,
 });
 
-const passwordSecret = new kubernetes.core.v1.Secret(
+const payloadCmsSecretKey = new random.RandomPassword("payloadcms-secret", {
+  length: 64,
+});
+
+const cmsServerSecret = new kubernetes.core.v1.Secret(
   "cms-server",
   {
     data: {
       password: password.result.apply((result) =>
+        Buffer.from(result).toString("base64")
+      ),
+      payloadSecret: payloadCmsSecretKey.result.apply((result) =>
         Buffer.from(result).toString("base64")
       ),
     },
@@ -22,10 +29,6 @@ const passwordSecret = new kubernetes.core.v1.Secret(
     provider: kubernetesProvider,
   }
 );
-
-const payloadCmsSecretKey = new random.RandomPassword("payloadcms-secret", {
-  length: 64,
-});
 
 const mongoDbRbac = new kubernetes.yaml.ConfigGroup(
   "mongodb-rbac",
@@ -68,7 +71,7 @@ const mongoDbDeployment = new kubernetes.apiextensions.CustomResource(
           name: "cms",
           db: "admin",
           passwordSecretRef: {
-            name: passwordSecret.metadata.name,
+            name: cmsServerSecret.metadata.name,
           },
           roles: [
             {
@@ -116,6 +119,15 @@ const payloadCmsDeployment = new kubernetes.apps.v1.Deployment(
               imagePullPolicy: "Always",
               env: [
                 {
+                  name: "PAYLOAD_SECRET",
+                  valueFrom: {
+                    secretKeyRef: {
+                      name: cmsServerSecret.metadata.name,
+                      key: "payloadSecret",
+                    },
+                  },
+                },
+                {
                   name: "MONGODB_URI",
                   value: "mongodb://mongodb",
                 },
@@ -125,7 +137,12 @@ const payloadCmsDeployment = new kubernetes.apps.v1.Deployment(
                 },
                 {
                   name: "MONGODB_PASSWORD",
-                  value: "cms",
+                  valueFrom: {
+                    secretKeyRef: {
+                      name: cmsServerSecret.metadata.name,
+                      key: "password",
+                    },
+                  },
                 },
               ],
             },
