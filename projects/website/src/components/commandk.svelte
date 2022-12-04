@@ -12,19 +12,27 @@
       },
     },
     {
+      id: "Shows",
+      title: "Shows",
+      mdIcon: "attach_money",
+      handler: () => {
+        window.location.assign("/shows");
+      },
+    },
+    {
+      id: "Prices",
+      title: "Prices",
+      mdIcon: "attach_money",
+      handler: () => {
+        window.location.assign("/pricing");
+      },
+    },
+    {
       id: "Contact Us",
       title: "Contact Us",
       mdIcon: "email",
       handler: () => {
-        window.location.assign("/contact/");
-      },
-    },
-    {
-      id: "Pricing Information",
-      title: "Pricing Information",
-      mdIcon: "attach_money",
-      handler: () => {
-        window.location.assign("/pricing/");
+        window.location.assign("/contact");
       },
     },
     {
@@ -32,7 +40,7 @@
       title: "Let's Work Together?",
       mdIcon: "handshake",
       handler: () => {
-        window.location.assign("/work-together/");
+        window.location.assign("/work-together");
       },
     },
   ];

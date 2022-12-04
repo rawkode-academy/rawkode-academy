@@ -51,3 +51,14 @@ a {
   font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono,
     Bitstream Vera Sans Mono, Courier New, monospace;
 }
+
+.header {
+  display: flex;
+  padding: 1rem 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggler {
+  padding: 1rem;
+}

@@ -8,7 +8,7 @@
   onMount(() => (url = window.location.pathname));
 </script>
 
-<div class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-black">
+<div class="hidden md:w-64 md:flex-col md:fixed md:inset-y-0 bg-black">
   <div class="flex flex-col flex-grow pt-5 overflow-y-auto">
     <div class="flex items-center flex-shrink-0 px-4">
       <img class="h-12 w-auto" src="/logo-white.png" alt="Rawkode Academy" />
@@ -18,8 +18,8 @@
         {#each menuItems as menuItem}
           <a
             href={menuItem.href}
-            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md bg-black hover:bg-emerald-400 hover:text-white {url.startsWith(
-              menuItem.href
+            class="group flex items-center px-2 py-2 text-sm font-medium rounded-md bg-black hover:bg-emerald-400 hover:text-white {url.match(
+              menuItem.regex
             )
               ? 'text-black font-semibold bg-gradient-to-br from-primary to-secondary'
               : 'text-white'}"

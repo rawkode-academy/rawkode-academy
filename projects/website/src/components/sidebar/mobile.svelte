@@ -12,7 +12,7 @@
 
 {#if $isOpen}
   <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
-  <div class="relative z-40 md:hidden" role="dialog" aria-modal="true">
+  <div class="relative z-40" role="dialog" aria-modal="true">
     <!--
   Off-canvas menu backdrop, show/hide based on off-canvas menu state.
 
@@ -51,10 +51,7 @@
         <div class="absolute top-0 right-0 -mr-12 pt-2">
           <button
             type="button"
-            on:click={() => {
-              console.log("cliocked");
-              isOpen.set(false);
-            }}
+            on:click={() => isOpen.set(false)}
             class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
           >
             <span class="sr-only">Close sidebar</span>
@@ -79,9 +76,10 @@
 
         <div class="flex-shrink-0 flex items-center px-4">
           <img
-            class="h-12 w-auto"
             src="/logo-white.png"
-            alt="Rawkode Academy"
+            alt="Rawkode Academy logo"
+            width="150"
+            height="40"
           />
         </div>
         <div class="mt-5 flex-1 h-0 overflow-y-auto">

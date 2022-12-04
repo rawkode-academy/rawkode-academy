@@ -3,6 +3,8 @@ import DesktopSidebar from "@components/sidebar/desktop.svelte";
 import MobileSidebar from "@components/sidebar/mobile.svelte";
 import Breadcrumbs from "@components/breadcrumbs.svelte";
 import CommandK from "@components/commandk.svelte";
+import NavToggler from "@components/nav-toggler.svelte";
+import CommandToggler from "@components/command-toggler.svelte";
 
 import "./base.css";
 
@@ -44,30 +46,31 @@ const meta = Astro.props.frontmatter as Props || Astro.props as Props;
 
   <body class="h-full theme-rawkode-academy">
     <CommandK client:only />
-
     <div>
       <MobileSidebar client:load />
-      <DesktopSidebar client:load />
-
-      <div class="md:pl-64 flex flex-col flex-1">
-        <Breadcrumbs
-          client:load
-          slot="breadcrumbs"
-          title={meta.title}
-          breadcrumbs={meta.breadcrumbs}
-        />
-
-        <main>
-          <div class="py-6">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              <h1 >{meta.title}</h1>
-            </div>
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              <slot />
-            </div>
-          </div>
-        </main>
-      </div>
     </div>
+
+    <div class="header">
+      <NavToggler client:load />
+      <img src="/logo-primary.png" alt="Rawkode Academy logo" width="150" height="40" />
+      <CommandToggler client:load />
+    </div>
+    <Breadcrumbs
+      client:load
+      slot="breadcrumbs"
+      title={meta.title}
+      breadcrumbs={meta.breadcrumbs}
+    />
+
+    <main>
+      <div class="py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <h1 >{meta.title}</h1>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <slot />
+        </div>
+      </div>
+    </main>
   </body>
 </html>
