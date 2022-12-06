@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { isOpen } from "@components/sidebar/store";
+  import Icon from "@iconify/svelte";
+  import { isOpen } from "@components/navigation/store";
 
   const toggleMenu = () => {
     isOpen.set(!$isOpen);
@@ -9,22 +10,8 @@
 <button
   type="button"
   on:click={toggleMenu}
-  class="toggler"
+  class="nav-toggler"
 >
   <span class="sr-only">Open sidebar</span>
-  <svg
-    class="h-6 w-6"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke-width="2"
-    stroke="currentColor"
-    aria-hidden="true"
-  >
-    <path
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      d="M4 6h16M4 12h16M4 18h7"
-    />
-  </svg>
+  <Icon icon="mdi:menu" class="w-7 h-7" />
 </button>

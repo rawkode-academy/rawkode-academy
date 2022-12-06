@@ -1,6 +1,6 @@
 ---
-import DesktopSidebar from "@components/sidebar/desktop.svelte";
-import MobileSidebar from "@components/sidebar/mobile.svelte";
+import DesktopNavigation from "@components/navigation/desktop.svelte";
+import MobileNavigation from "@components/navigation/mobile.svelte";
 import Breadcrumbs from "@components/breadcrumbs.svelte";
 import CommandK from "@components/commandk.svelte";
 import NavToggler from "@components/nav-toggler.svelte";
@@ -47,12 +47,17 @@ const meta = Astro.props.frontmatter as Props || Astro.props as Props;
   <body class="h-full theme-rawkode-academy">
     <CommandK client:only />
     <div>
-      <MobileSidebar client:load />
+      <MobileNavigation client:load />
     </div>
 
     <div class="header">
       <NavToggler client:load />
-      <img src="/logo-primary.png" alt="Rawkode Academy logo" width="150" height="40" />
+      <div class="navigation">
+        <a href="/">
+          <img src="/logo-primary.png" alt="Rawkode Academy logo" width="150" height="40" />
+        </a>
+        <DesktopNavigation client:load />
+      </div>
       <CommandToggler client:load />
     </div>
     <Breadcrumbs

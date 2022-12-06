@@ -59,6 +59,38 @@ a {
   justify-content: space-between;
 }
 
+.nav-toggler,
 .toggler {
   padding: 1rem;
+}
+
+.desktop-navigation {
+  display: none;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+@media only screen and (min-width: 768px) {
+
+  .header {
+    padding: 1.5rem;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .toggler {
+    justify-self: flex-end;
+  }
+
+  .nav-toggler {
+    display: none;
+  }
+
+  .desktop-navigation {
+    display: flex;
+  }
 }
