@@ -16,10 +16,17 @@ impl Entity for Show {
     }
 
     fn create_sql() -> &'static str {
-        r#"CREATE TABLE IF NOT EXISTS shows (
+        r#"
+          CREATE TABLE shows (
             name VARCHAR(255) NOT NULL PRIMARY KEY,
-            description TEXT,
-            hosts JSONB
-        );"#
+            description TEXT
+          );
+
+          CREATE TABLE show_hosts (
+            show VARCHAR(255) NOT NULL REFERENCES shows(name),
+            host VARCHAR(255) NOT NULL REFERENCES people(github_handle),
+            PRIMARY KEY (show, host)
+          );
+        "#
     }
 }
