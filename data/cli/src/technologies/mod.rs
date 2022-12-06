@@ -1,4 +1,4 @@
-use crate::loader::ID;
+use crate::schema::Entity;
 use serde::Deserialize;
 use validator::Validate;
 
@@ -26,8 +26,21 @@ pub struct Technology {
     pub youtube_handle: Option<String>,
 }
 
-impl ID for Technology {
+impl Entity for Technology {
     fn id(&self) -> String {
         self.name.clone()
+    }
+
+    fn create_sql() -> &'static str {
+        r#"
+            CREATE TABLE IF NOT EXISTS technologies (
+                name VARCHAR(255) NOT NULL PRIMARY KEY,
+                description TEXT,
+                code_repository VARCHAR(255),
+                website VARCHAR(255),
+                documentation VARCHAR(255),
+                twitter_handle VARCHAR(15),
+                youtube_handle VARCHAR(30)
+            );"#
     }
 }

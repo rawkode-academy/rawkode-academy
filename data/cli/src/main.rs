@@ -3,6 +3,7 @@ use std::fmt::Display;
 
 mod loader;
 mod people;
+mod schema;
 mod shows;
 mod sync;
 use sync::sync;

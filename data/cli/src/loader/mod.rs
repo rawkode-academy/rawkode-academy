@@ -1,13 +1,10 @@
+use crate::schema::Entity;
 use serde::de::DeserializeOwned;
 use std::collections::BTreeMap;
 use std::fs;
 use validator::Validate;
 
-pub trait ID {
-    fn id(&self) -> String;
-}
-
-pub fn load<T: DeserializeOwned + ID + Validate>(directory: &str) -> BTreeMap<String, T> {
+pub fn load<T: DeserializeOwned + Entity + Validate>(directory: &str) -> BTreeMap<String, T> {
     let mut collection: BTreeMap<String, T> = BTreeMap::new();
 
     for entry in std::fs::read_dir(directory).unwrap() {

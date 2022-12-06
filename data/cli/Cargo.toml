@@ -5,14 +5,9 @@ edition = "2021"
 
 [dependencies]
 inquire = "0.5.2"
-migrations = { path = "../migrations" }
 tokio = { version = "1", features = ["full"] }
 anyhow = "1.0.66"
 serde_yaml = "0.9.14"
 serde = { version = "1.0.149", features = ["derive"] }
-sea-query = "0.27.2"
+sqlx = { version = "0.6", features = ["postgres", "runtime-tokio-rustls"] }
 validator = { version = "0.15", features = ["derive"] }
-
-[dependencies.sea-orm]
-version = "^0.10.0"
-features = ["runtime-tokio-rustls", "sqlx-postgres"]

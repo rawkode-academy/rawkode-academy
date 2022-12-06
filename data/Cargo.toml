@@ -1,5 +1,2 @@
 [workspace]
-members = [
-    "cli",
-    "migrations"
-]
+members = ["cli"]

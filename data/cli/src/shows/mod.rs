@@ -1,4 +1,4 @@
-use crate::loader::ID;
+use crate::schema::Entity;
 use serde::Deserialize;
 use validator::Validate;
 
@@ -10,8 +10,16 @@ pub struct Show {
     pub hosts: Vec<String>,
 }
 
-impl ID for Show {
+impl Entity for Show {
     fn id(&self) -> String {
         self.name.clone()
+    }
+
+    fn create_sql() -> &'static str {
+        r#"CREATE TABLE IF NOT EXISTS shows (
+            name VARCHAR(255) NOT NULL PRIMARY KEY,
+            description TEXT,
+            hosts JSONB
+        );"#
     }
 }

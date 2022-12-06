@@ -1,4 +1,4 @@
-use crate::loader::ID;
+use crate::schema::Entity;
 use serde::Deserialize;
 use validator::Validate;
 
@@ -25,8 +25,20 @@ pub struct Person {
     pub youtube_handle: Option<String>,
 }
 
-impl ID for Person {
+impl Entity for Person {
     fn id(&self) -> String {
         self.github_handle.clone()
+    }
+
+    fn create_sql() -> &'static str {
+        r#"
+            CREATE TABLE IF NOT EXISTS people (
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255),
+                biography TEXT,
+                github_handle VARCHAR(39) NOT NULL PRIMARY KEY,
+                twitter_handle VARCHAR(15),
+                youtube_handle VARCHAR(30)
+            );"#
     }
 }
