@@ -1,74 +1,17 @@
-use sea_orm::entity::prelude::*;
+use crate::loader::ID;
 use serde::Deserialize;
+use validator::Validate;
 
-pub mod hosts;
-
-#[derive(Copy, Clone, Default, Debug, DeriveEntity)]
-pub struct Entity;
-
-impl EntityName for Entity {
-    fn table_name(&self) -> &str {
-        "shows"
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, DeriveModel, DeriveActiveModel, Deserialize)]
-pub struct Model {
+#[derive(Clone, Debug, Deserialize, Validate)]
+pub struct Show {
+    #[validate(length(min = 1, max = 255))]
     pub name: String,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
-pub struct YamlModel {
-    #[serde(flatten)]
-    pub model: Model,
+    pub description: String,
     pub hosts: Vec<String>,
 }
 
-impl Into<Model> for YamlModel {
-    fn into(self) -> Model {
-        self.model
+impl ID for Show {
+    fn id(&self) -> String {
+        self.name.clone()
     }
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
-pub enum Column {
-    Name,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
-pub enum PrimaryKey {
-    Name,
-}
-
-impl PrimaryKeyTrait for PrimaryKey {
-    type ValueType = String;
-
-    fn auto_increment() -> bool {
-        false
-    }
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
-
-impl Related<super::people::Entity> for Entity {
-    fn to() -> RelationDef {
-        hosts::Relation::Person.def()
-    }
-
-    fn via() -> Option<RelationDef> {
-        Some(hosts::Relation::Show.def().rev())
-    }
-}
-
-impl ColumnTrait for Column {
-    type EntityName = Entity;
-
-    fn def(&self) -> ColumnDef {
-        match self {
-            Self::Name => ColumnType::String(Some(64)).def(),
-        }
-    }
-}
-
-impl ActiveModelBehavior for ActiveModel {}

@@ -1,93 +1,32 @@
-use sea_orm::entity::prelude::*;
+use crate::loader::ID;
 use serde::Deserialize;
+use validator::Validate;
 
-#[derive(Copy, Clone, Default, Debug, DeriveEntity)]
-pub struct Entity;
-
-impl EntityName for Entity {
-    fn schema_name(&self) -> Option<&str> {
-        Some("public")
-    }
-
-    fn table_name(&self) -> &str {
-        "people"
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, DeriveModel, DeriveActiveModel, Deserialize)]
-pub struct Model {
+#[derive(Clone, Debug, Deserialize, Validate)]
+pub struct Person {
+    #[validate(length(min = 1, max = 255))]
     pub name: String,
+
+    #[validate(email)]
     pub email: Option<String>,
+
     pub biography: Option<String>,
+
+    #[validate(length(min = 1, max = 39))]
     #[serde(alias = "github")]
     pub github_handle: String,
+
+    #[validate(length(min = 4, max = 15))]
     #[serde(alias = "twitter")]
     pub twitter_handle: Option<String>,
+
+    #[validate(length(min = 3, max = 30))]
     #[serde(alias = "youtube")]
     pub youtube_handle: Option<String>,
 }
 
-#[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
-pub enum Column {
-    Name,
-    Email,
-    Biography,
-    GithubHandle,
-    TwitterHandle,
-    YoutubeHandle,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
-pub enum PrimaryKey {
-    GithubHandle,
-}
-
-impl PrimaryKeyTrait for PrimaryKey {
-    type ValueType = String;
-
-    fn auto_increment() -> bool {
-        false
+impl ID for Person {
+    fn id(&self) -> String {
+        self.github_handle.clone()
     }
 }
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
-
-impl Related<super::shows::Entity> for Entity {
-    fn to() -> RelationDef {
-        super::shows::hosts::Relation::Show.def()
-    }
-
-    fn via() -> Option<RelationDef> {
-        Some(super::shows::hosts::Relation::Person.def().rev())
-    }
-}
-
-impl ColumnTrait for Column {
-    type EntityName = Entity;
-
-    fn def(&self) -> ColumnDef {
-        match self {
-            Self::Name => ColumnType::String(Some(64)).def(),
-            Self::Email => ColumnType::String(Some(255))
-                .def()
-                .indexed()
-                .unique()
-                .nullable(),
-            Self::Biography => ColumnType::Text.def().nullable(),
-            Self::GithubHandle => ColumnType::String(Some(64)).def().indexed().unique(),
-            Self::TwitterHandle => ColumnType::String(Some(64))
-                .def()
-                .indexed()
-                .unique()
-                .nullable(),
-            Self::YoutubeHandle => ColumnType::String(Some(64))
-                .def()
-                .indexed()
-                .unique()
-                .nullable(),
-        }
-    }
-}
-
-impl ActiveModelBehavior for ActiveModel {}

@@ -1,0 +1,8 @@
+name: "Rust"
+website: https://www.rust-lang.org/
+documentation: https://doc.rust-lang.org/
+codeRepository: https://github.com/rust-lang/rust
+description: |
+  Rust is a systems programming language that runs
+  blazingly fast, prevents segfaults, and guarantees
+  thread safety.

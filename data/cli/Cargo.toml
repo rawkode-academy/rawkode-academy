@@ -11,6 +11,7 @@ anyhow = "1.0.66"
 serde_yaml = "0.9.14"
 serde = { version = "1.0.149", features = ["derive"] }
 sea-query = "0.27.2"
+validator = { version = "0.15", features = ["derive"] }
 
 [dependencies.sea-orm]
 version = "^0.10.0"
