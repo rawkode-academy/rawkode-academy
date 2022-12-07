@@ -9,9 +9,14 @@ tokio = { version = "1", features = ["full"] }
 anyhow = "1.0.66"
 serde_yaml = "0.9.14"
 serde = { version = "1.0.149", features = ["derive"] }
-sqlx = { version = "0.6.2", features = [
-  "postgres",
-  "runtime-tokio-rustls",
-  "sqlite"
-] }
+sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "sqlite"] }
 validator = { version = "0.15", features = ["derive"] }
+async-graphql = { version = "5.0.2", features = [
+  "chrono",
+  "email-validator",
+  "opentelemetry",
+  "tokio",
+  "url"
+] }
+async-graphql-axum = "5.0.2"
+axum = { version = "0.6.0", features = ["headers"] }

@@ -1,8 +1,12 @@
 use crate::schema::Entity;
+use async_graphql::SimpleObject;
 use serde::Deserialize;
+use sqlx::FromRow;
 use validator::Validate;
 
-#[derive(Clone, Debug, Deserialize, Validate)]
+pub(crate) mod graphql;
+
+#[derive(Clone, Debug, Deserialize, FromRow, SimpleObject, Validate)]
 pub struct Person {
     #[validate(length(min = 1, max = 255))]
     pub name: String,

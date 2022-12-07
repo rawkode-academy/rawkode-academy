@@ -1,13 +1,28 @@
-use crate::schema::Entity;
+use crate::{people::Person, schema::Entity};
+use async_graphql::SimpleObject;
 use serde::Deserialize;
+use sqlx::{sqlite::SqliteRow, FromRow, Row};
 use validator::Validate;
 
-#[derive(Clone, Debug, Deserialize, Validate)]
+pub(crate) mod graphql;
+
+#[derive(Clone, Debug, Deserialize, SimpleObject, Validate)]
 pub struct Show {
     #[validate(length(min = 1, max = 255))]
     pub name: String,
     pub description: String,
     pub hosts: Vec<String>,
+    pub host: Vec<Person>,
+}
+
+impl FromRow<'_, SqliteRow> for Show {
+    fn from_row(row: &SqliteRow) -> sqlx::Result<Self> {
+        Ok(Self {
+            name: row.try_get("name")?,
+            description: row.try_get("description")?,
+            hosts: vec![],
+        })
+    }
 }
 
 impl Entity for Show {

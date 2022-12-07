@@ -3,21 +3,11 @@ use crate::people::Person;
 use crate::schema::Entity;
 use crate::shows::Show;
 use crate::technologies::Technology;
-use sqlx::{
-    database::HasArguments, Database, Encode, Execute, Executor, IntoArguments, Pool, QueryBuilder,
-    SqliteExecutor, SqlitePool, Type, Value,
-};
+use sqlx::{Executor, QueryBuilder, Sqlite, SqlitePool};
 
-pub async fn sync<T: Database>(pool: Pool<T>) -> Result<(), anyhow::Error>
-where
-    for<'c> &'c mut T::Connection: Executor<'c, Database = T>,
-    for<'c> &'c mut T::Connection: Executor<'c, Database = T>,
-    for<'p> std::string::String: Encode<'p, T>,
-    for<'p> T: 'p + Encode<'p, T> + Send + Type<T>,
-    for<'p> <T as HasArguments<'p>>::Arguments: IntoArguments<'p, T>,
-    for<'p> std::option::Option<std::string::String>: Encode<'p, T>,
-    std::string::String: Type<T>,
-{
+pub async fn sync(pool: &SqlitePool) -> Result<(), anyhow::Error> {
+    type T = Sqlite;
+
     let people = load::<Person>("people");
     let shows = load::<Show>("shows");
     let technologies = load::<Technology>("technologies");
@@ -47,7 +37,7 @@ where
             .push_bind(person.youtube_handle);
     });
 
-    query_builder.build().execute(&pool).await?;
+    query_builder.build().execute(pool).await?;
 
     // Sync Shows
     let mut query_builder: QueryBuilder<T> = QueryBuilder::new("INSERT INTO shows (name) ");
@@ -56,7 +46,7 @@ where
         b.push_bind(show.name);
     });
 
-    query_builder.build().execute(&pool).await?;
+    query_builder.build().execute(pool).await?;
 
     // Sync Show Hosts
     let mut query_builder: QueryBuilder<T> =
@@ -70,7 +60,7 @@ where
         });
     });
 
-    query_builder.build().execute(&pool).await?;
+    query_builder.build().execute(pool).await?;
 
     // Sync Technologies
     let mut query_builder: QueryBuilder<T> =
@@ -86,7 +76,7 @@ where
             .push_bind(technology.youtube_handle);
     });
 
-    query_builder.build().execute(&pool).await?;
+    query_builder.build().execute(pool).await?;
 
     Ok(())
 }

@@ -2,6 +2,8 @@ use crate::schema::Entity;
 use serde::Deserialize;
 use validator::Validate;
 
+mod graphql;
+
 #[derive(Clone, Debug, Deserialize, Validate)]
 pub struct Technology {
     #[validate(length(min = 1, max = 255))]
