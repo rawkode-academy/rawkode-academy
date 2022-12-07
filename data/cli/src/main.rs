@@ -1,4 +1,5 @@
 use inquire::Select;
+use sqlx::sqlite::SqlitePoolOptions;
 use std::fmt::Display;
 
 mod loader;
@@ -26,7 +27,11 @@ async fn main() -> Result<(), anyhow::Error> {
     let command_list: Vec<Commands> = vec![Commands::Sync];
 
     match Select::new("What would you like to do?", command_list).prompt() {
-        Ok(Commands::Sync) => sync().await?,
+        Ok(Commands::Sync) => {
+            let pool = SqlitePoolOptions::new().connect(":memory:").await?;
+
+            sync().await?
+        }
         Err(_) => println!("I'm a little confused. Let's try again later."),
     }
 

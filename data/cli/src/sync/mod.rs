@@ -3,47 +3,62 @@ use crate::people::Person;
 use crate::schema::Entity;
 use crate::shows::Show;
 use crate::technologies::Technology;
-use sqlx::postgres::PgPoolOptions;
-use sqlx::{Executor, Postgres, QueryBuilder};
+use sqlx::{
+    database::HasArguments, Database, Encode, Execute, Executor, Pool, QueryBuilder, SqlitePool,
+    Type,
+};
 
-pub async fn sync() -> Result<(), anyhow::Error> {
+// = note: the following trait bounds were not satisfied:
+// `<&'c mut <T as sqlx::Database>::Connection as Executor<'c>>::Database = T`
+// which is required by `&Pool<T>: Executor`
+// `&'c mut <T as sqlx::Database>::Connection: Executor<'c>`
+// which is required by `&Pool<T>: Executor`
+//`<T as HasArguments<'_>>::Arguments: IntoArguments<T>`
+pub async fn sync<'c, 'q, E, T>(pool: Pool<T>) -> Result<(), anyhow::Error>
+where
+    // T: Database + for<'p> HasArguments<'p>,
+    // T: HasArguments<'q, Database = T>,
+    E: Execute<'q, T>,
+    T: Database + Executor<'c, Database = T>,
+    //77 |     + for<'q> HasArguments<'q, Database = Self>
+    std::option::Option<std::string::String>: Encode<'q, T>,
+{
     let people = load::<Person>("people");
     let shows = load::<Show>("shows");
     let technologies = load::<Technology>("technologies");
 
     shows.iter().for_each(|(_, show)| {
-        println!("Validating {} hosts {:?}", show.name, show.hosts);
-
         show.hosts.iter().for_each(|host| {
             people
                 .iter()
-                .find(|(_, person)| {
-                    println!("Checking if {} == {}", person.github_handle, host);
-                    person.github_handle == *host
-                })
+                .find(|(_, person)| person.github_handle == *host)
                 .expect(format!("Host '{}' not found on show '{}'", host, show.name).as_str());
         });
     });
 
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(
-            std::env::var("POSTGRESQL_CONNECTION_STRING")
-                .expect("POSTGRESQL_CONNECTION_STRING not set")
-                .as_str(),
-        )
-        .await?;
+    // Postgres
+    // let pool = PgPoolOptions::new()
+    //     .max_connections(5)
+    //     .connect(
+    //         std::env::var("POSTGRESQL_CONNECTION_STRING")
+    //             .expect("POSTGRESQL_CONNECTION_STRING not set")
+    //             .as_str(),
+    //     )
+    //     .await?;
 
     // Clear Database
-    let _ = &pool
-        .execute("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;")
-        .await?;
+    // let _ = &pool
+    //     .execute("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;")
+    //     .await?;
+
+    // Agnostic
+
     let _ = &pool.execute(Person::create_sql()).await?;
     let _ = &pool.execute(Show::create_sql()).await?;
     let _ = &pool.execute(Technology::create_sql()).await?;
 
     // Sync People
-    let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
+    let mut query_builder: QueryBuilder<T> = QueryBuilder::new(
         "INSERT INTO people (name, github_handle, twitter_handle, youtube_handle) ",
     );
 
@@ -57,7 +72,7 @@ pub async fn sync() -> Result<(), anyhow::Error> {
     query_builder.build().execute(&pool).await?;
 
     // Sync Shows
-    let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new("INSERT INTO shows (name) ");
+    let mut query_builder: QueryBuilder<T> = QueryBuilder::new("INSERT INTO shows (name) ");
 
     query_builder.push_values(&shows, |mut b, (_, show)| {
         b.push_bind(&show.name);
@@ -66,7 +81,7 @@ pub async fn sync() -> Result<(), anyhow::Error> {
     query_builder.build().execute(&pool).await?;
 
     // Sync Show Hosts
-    let mut query_builder: QueryBuilder<Postgres> =
+    let mut query_builder: QueryBuilder<T> =
         QueryBuilder::new("INSERT INTO show_hosts (show, host) ");
 
     query_builder.push_values(&shows, |mut b, (_, show)| {
@@ -80,7 +95,7 @@ pub async fn sync() -> Result<(), anyhow::Error> {
     query_builder.build().execute(&pool).await?;
 
     // Sync Technologies
-    let mut query_builder: QueryBuilder<Postgres> =
+    let mut query_builder: QueryBuilder<T> =
         QueryBuilder::new("INSERT INTO technologies (name, description, website, documentation, code_repository, twitter_handle, youtube_handle) ");
 
     query_builder.push_values(technologies, |mut b, (_, technology)| {
