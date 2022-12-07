@@ -4,24 +4,19 @@ use crate::schema::Entity;
 use crate::shows::Show;
 use crate::technologies::Technology;
 use sqlx::{
-    database::HasArguments, Database, Encode, Execute, Executor, Pool, QueryBuilder, SqlitePool,
-    Type,
+    database::HasArguments, Database, Encode, Execute, Executor, IntoArguments, Pool, QueryBuilder,
+    SqliteExecutor, SqlitePool, Type, Value,
 };
 
-// = note: the following trait bounds were not satisfied:
-// `<&'c mut <T as sqlx::Database>::Connection as Executor<'c>>::Database = T`
-// which is required by `&Pool<T>: Executor`
-// `&'c mut <T as sqlx::Database>::Connection: Executor<'c>`
-// which is required by `&Pool<T>: Executor`
-//`<T as HasArguments<'_>>::Arguments: IntoArguments<T>`
-pub async fn sync<'c, 'q, E, T>(pool: Pool<T>) -> Result<(), anyhow::Error>
+pub async fn sync<T: Database>(pool: Pool<T>) -> Result<(), anyhow::Error>
 where
-    // T: Database + for<'p> HasArguments<'p>,
-    // T: HasArguments<'q, Database = T>,
-    E: Execute<'q, T>,
-    T: Database + Executor<'c, Database = T>,
-    //77 |     + for<'q> HasArguments<'q, Database = Self>
-    std::option::Option<std::string::String>: Encode<'q, T>,
+    for<'c> &'c mut T::Connection: Executor<'c, Database = T>,
+    for<'c> &'c mut T::Connection: Executor<'c, Database = T>,
+    for<'p> std::string::String: Encode<'p, T>,
+    for<'p> T: 'p + Encode<'p, T> + Send + Type<T>,
+    for<'p> <T as HasArguments<'p>>::Arguments: IntoArguments<'p, T>,
+    for<'p> std::option::Option<std::string::String>: Encode<'p, T>,
+    std::string::String: Type<T>,
 {
     let people = load::<Person>("people");
     let shows = load::<Show>("shows");
@@ -36,23 +31,6 @@ where
         });
     });
 
-    // Postgres
-    // let pool = PgPoolOptions::new()
-    //     .max_connections(5)
-    //     .connect(
-    //         std::env::var("POSTGRESQL_CONNECTION_STRING")
-    //             .expect("POSTGRESQL_CONNECTION_STRING not set")
-    //             .as_str(),
-    //     )
-    //     .await?;
-
-    // Clear Database
-    // let _ = &pool
-    //     .execute("DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;")
-    //     .await?;
-
-    // Agnostic
-
     let _ = &pool.execute(Person::create_sql()).await?;
     let _ = &pool.execute(Show::create_sql()).await?;
     let _ = &pool.execute(Technology::create_sql()).await?;
@@ -62,11 +40,11 @@ where
         "INSERT INTO people (name, github_handle, twitter_handle, youtube_handle) ",
     );
 
-    query_builder.push_values(&people, |mut b, (_, person)| {
-        b.push_bind(&person.name)
-            .push_bind(&person.github_handle)
-            .push_bind(&person.twitter_handle)
-            .push_bind(&person.youtube_handle);
+    query_builder.push_values(people, |mut b, (_, person)| {
+        b.push_bind(person.name)
+            .push_bind(person.github_handle)
+            .push_bind(person.twitter_handle)
+            .push_bind(person.youtube_handle);
     });
 
     query_builder.build().execute(&pool).await?;
@@ -74,8 +52,8 @@ where
     // Sync Shows
     let mut query_builder: QueryBuilder<T> = QueryBuilder::new("INSERT INTO shows (name) ");
 
-    query_builder.push_values(&shows, |mut b, (_, show)| {
-        b.push_bind(&show.name);
+    query_builder.push_values(shows.clone(), |mut b, (_, show)| {
+        b.push_bind(show.name);
     });
 
     query_builder.build().execute(&pool).await?;
@@ -84,9 +62,9 @@ where
     let mut query_builder: QueryBuilder<T> =
         QueryBuilder::new("INSERT INTO show_hosts (show, host) ");
 
-    query_builder.push_values(&shows, |mut b, (_, show)| {
-        show.hosts.iter().for_each(|host| {
-            b.push_bind(&show.name).push_bind(host);
+    query_builder.push_values(shows.clone(), |mut b, (_, show)| {
+        show.hosts.into_iter().for_each(|host| {
+            b.push_bind(show.name.clone()).push_bind(host);
 
             ()
         });
