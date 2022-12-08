@@ -1,0 +1,16 @@
+version: "3.7"
+
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    command:
+    - start
+    - --log
+    - debug
+    - --user
+    - root
+    - --pass
+    - root
+    - memory
+    ports:
+      - "8000:8000"

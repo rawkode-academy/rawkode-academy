@@ -1,0 +1,31 @@
+#V2
+DEFINE TABLE people SCHEMAFULL;\nDEFINE FIELD name ON TABLE people TYPE string;
+use rawkode.academy;
+create namespace rawkode;
+use rawkode;
+help use;
+use;
+use NS @RawkodeAcademy DB data
+use NS @RawkodeAcademy
+use ns rawkode db data
+use ns rawkode.academy db data
+---\nUSE NS rawkode DB data\n\n-- People\nDEFINE TABLE people SCHEMAFULL;\nDEFINE FIELD name ON TABLE people TYPE string;
+DEFINE TABLE people SCHEMAFULL;
+USE NS rawkode DB data;
+DEFINE TABLE people SCHEMAFULL;
+USE NS rawkode DB data DEFINE TABLE people SCHEMAFULL;
+DEFINE NAMESPACE rawkode;
+DEFINE DB data;
+use ns rawkode;
+DEFINE DB data;
+info
+DEFINE TABLE people SCHEMAFULL;
+info for db;
+USE NS rawkode DB Data; DEFINE TABLE people SCHEMAFULL;
+---\nUSE NS rawkode DB data;\n\n-- People\nDEFINE TABLE people SCHEMAFULL;\nDEFINE FIELD name ON TABLE people TYPE string;\n\nDEFINE FIELD github ON TABLE people TYPE object;\nDEFINE FIELD github.handle ON TABLE people TYPE string ASSERT string::length(%$value) > 1 AND string::length(%$value) < 39;\nDEFINE FIELD github.url ON TABLE people TYPE string AS 'hello';\n\nDEFINE FIELD email ON TABLE people TYPE string ASSERT is::email($value);\nDEFINE INDEX email ON TABLE people COLUMNS email UNIQUE;\n
+---\nUSE NS rawkode DB data;\n\n-- People\nDEFINE TABLE people SCHEMAFULL;\nDEFINE FIELD name ON TABLE people TYPE string;\n\nDEFINE FIELD github ON TABLE people TYPE object;\nDEFINE FIELD github.handle ON TABLE people TYPE string ASSERT string::length($value) > 1 AND string::length($value) < 39;\nDEFINE FIELD github.url ON TABLE people TYPE string AS 'hello';\n\nDEFINE FIELD email ON TABLE people TYPE string ASSERT is::email($value);\nDEFINE INDEX email ON TABLE people COLUMNS email UNIQUE;\n
+---\nUSE NS rawkode DB data;\n\n-- People\nDEFINE TABLE people SCHEMAFULL;\nDEFINE FIELD name ON TABLE people TYPE string;\n\nDEFINE FIELD github ON TABLE people TYPE object;\nDEFINE FIELD github.handle ON TABLE people TYPE string ASSERT string::length($value) > 1 AND string::length($value) < 39;\nDEFINE FIELD github.url ON TABLE people TYPE string;\n\nDEFINE FIELD email ON TABLE people TYPE string ASSERT is::email($value);\nDEFINE INDEX email ON TABLE people COLUMNS email UNIQUE;\n
+USE NS rawkode DB data; INFO FOR DB;
+USE NS rawkode DB data;\n\nDEFINE TABLE people SCHEMAFULL;\n    PERMISSIONS\n        FOR select FULL\n        FOR create, update, delete NONE;
+USE NS rawkode DB data;\n\nDEFINE TABLE people SCHEMAFULL;\n    PERMISSIONS\n        FOR create, update, delete NONE;
+USE NS rawkode DB data;\n\nDEFINE TABLE people SCHEMAFULL\n    PERMISSIONS\n        FOR select FULL\n        FOR create, update, delete NONE;
