@@ -64,8 +64,7 @@ export const deploy = async (client: Client, pullRequest: PullRequest) => {
       })
       .withEnvVariable("GOOGLE_APPLICATION_CREDENTIALS", "/gcloud.json")
       .withExec([
-        "npx",
-        "firebase",
+        "./node_modules/.bin/firebase",
         "hosting:channel:deploy",
         pullRequest.headRef,
       ]);
@@ -75,7 +74,7 @@ export const deploy = async (client: Client, pullRequest: PullRequest) => {
         contents: secrets["FIREBASE_TOKEN"].computed,
       })
       .withEnvVariable("GOOGLE_APPLICATION_CREDENTIALS", "/gcloud.json")
-      .withExec(["npx", "firebase", "deploy", "--only=hosting"]);
+      .withExec(["./node_modules/.bin/firebase", "deploy", "--only=hosting"]);
   }
 
   const output = await result.stdout();
