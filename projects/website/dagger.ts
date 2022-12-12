@@ -4,6 +4,7 @@ import { getSourceDir } from "../../dagger/utils/index.js";
 import { getSecrets } from "../../dagger/doppler/index.js";
 import { PullRequest } from "../../dagger/github/index.js";
 import { Container } from "@dagger.io/dagger/dist/api/client.gen.js";
+import { Octokit } from "@octokit/rest";
 
 export const deploy = async (client: Client, pullRequest: PullRequest) => {
   const uuid = uuidv4();
@@ -61,7 +62,12 @@ export const deploy = async (client: Client, pullRequest: PullRequest) => {
         contents: secrets["FIREBASE_TOKEN"].computed,
       })
       .withEnvVariable("GOOGLE_APPLICATION_CREDENTIALS", "/gcloud.json")
-      .withExec(["npx", "firebase", "hosting:channel:deploy", pullRequest.ref]);
+      .withExec([
+        "npx",
+        "firebase",
+        "hosting:channel:deploy",
+        pullRequest.headRef,
+      ]);
   } else {
     let result = await build
       .withNewFile("/gcloud.json", {
@@ -71,5 +77,21 @@ export const deploy = async (client: Client, pullRequest: PullRequest) => {
       .withExec(["npx", "firebase", "deploy", "--only=hosting"]);
   }
 
-  console.log(await result.stdout());
+  const output = await result.stdout();
+
+  if (pullRequest.isIt) {
+    const previewUrl = output.match(
+      /(https:\/\/rawkode-academy-.*.web.app)/
+    )[1];
+
+    const octokit = new Octokit();
+    octokit.issues.createComment({
+      repo: "RawkodeAcademy",
+      owner: "RawkodeAcademy",
+      issue_number: parseInt(
+        pullRequest.ref.match(/refs\/pull\/(\d+)\/merge/)[1]
+      ),
+      body: `Preview URL: ${previewUrl}`,
+    });
+  }
 };

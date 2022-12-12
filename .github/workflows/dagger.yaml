@@ -31,5 +31,7 @@ jobs:
           FORCE_COLOR: 3
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           node --loader ts-node/esm dagger.ts

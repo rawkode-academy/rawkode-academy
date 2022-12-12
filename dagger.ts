@@ -12,7 +12,8 @@ connect(
 
     const pullRequest: PullRequest = {
       isIt: pullRequestRef !== undefined,
-      ref: pullRequestRef,
+      headRef: pullRequestRef,
+      ref: await client.host().envVariable("GITHUB_REF").value(),
     };
 
     await website.deploy(client, pullRequest);
