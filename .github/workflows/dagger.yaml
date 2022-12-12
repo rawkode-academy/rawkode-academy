@@ -12,6 +12,12 @@ env:
   DAGGER_CACHE_BASE: main-build
 
 jobs:
+  dump_contexts_to_log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        id: github_context_step
+        run: echo '${{ toJSON(github) }}'
   build:
     name: "Build"
     runs-on: ubuntu-latest
