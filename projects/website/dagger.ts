@@ -3,15 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 import { getSourceDir } from "../../dagger/utils/index.js";
 import { getSecrets } from "../../dagger/doppler/index.js";
 
-connect(
-  async (client: Client) => {
-    await deploy(client);
-  },
-  {
-    LogOutput: process.stdout,
-  }
-);
-
 export const deploy = async (client: Client) => {
   const uuid = uuidv4();
 
