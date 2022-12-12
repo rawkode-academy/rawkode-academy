@@ -7,9 +7,25 @@ on:
   pull_request: {}
   workflow_dispatch: {}
 
-env:
-  DAGGER_LOG_FORMAT: plain
-  DAGGER_CACHE_BASE: main-build
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  # We use this for commenting on PRs
+  issues: write
+  actions: none
+  checks: none
+  contents: none
+  deployments: none
+  id-token: none
+  discussions: none
+  packages: none
+  pages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
+  statuses: none
 
 jobs:
   build:
