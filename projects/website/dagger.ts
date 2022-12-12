@@ -5,6 +5,7 @@ import { getSecrets } from "../../dagger/doppler/index.js";
 import { PullRequest } from "../../dagger/github/index.js";
 import { Container } from "@dagger.io/dagger/dist/api/client.gen.js";
 import { Octokit } from "@octokit/rest";
+import { createActionAuth } from "@octokit/auth-action";
 
 export const deploy = async (client: Client, pullRequest: PullRequest) => {
   const uuid = uuidv4();
@@ -84,7 +85,10 @@ export const deploy = async (client: Client, pullRequest: PullRequest) => {
       /(https:\/\/rawkode-academy-.*.web.app)/
     )[1];
 
-    const octokit = new Octokit();
+    const octokit = new Octokit({
+      authStrategy: createActionAuth,
+    });
+
     octokit.issues.createComment({
       repo: "RawkodeAcademy",
       owner: "RawkodeAcademy",

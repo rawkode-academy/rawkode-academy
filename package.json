@@ -3,7 +3,8 @@
   "type": "module",
   "devDependencies": {
     "@dagger.io/dagger": "^0.3.0",
-    "@octokit/rest": "19.0.5",
+    "@octokit/rest": "^19.0.5",
+    "@octokit/auth-action": "^2.0.2",
     "@types/uuid": "^9.0.0",
     "ts-node": "^10.9.1",
     "uuid": "^9.0.0"
