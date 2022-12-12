@@ -1,8 +1,6 @@
 name: "Dagger"
 
-on:
-  push:
-    branches: [main]
+on: {}
 
 env:
   DAGGER_LOG_FORMAT: plain
@@ -27,5 +25,6 @@ jobs:
         env:
           FORCE_COLOR: 3
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: |
           node --loader ts-node/esm dagger.ts
