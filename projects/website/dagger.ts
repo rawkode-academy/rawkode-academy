@@ -69,7 +69,7 @@ export const deploy = async (client: Client, pullRequest: PullRequest) => {
         pullRequest.headRef,
       ]);
   } else {
-    let result = await build
+    result = await build
       .withNewFile("/gcloud.json", {
         contents: secrets["FIREBASE_TOKEN"].computed,
       })
