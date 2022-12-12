@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "firebase:deploy": "firebase deploy --only hosting"
   },
   "devDependencies": {
     "@astrojs/lit": "^1.0.1",
@@ -16,13 +17,21 @@
     "@astrojs/tailwind": "^2.0.2",
     "@iconify/svelte": "^3.0.0",
     "@tailwindcss/typography": "^0.5.7",
+    "@types/uuid": "^9.0.0",
     "@webcomponents/template-shadowroot": "^0.1.0",
     "astro": "^1.4.6",
+    "firebase-tools": "^11.17.0",
     "lit": "^2.3.1",
     "ninja-keys": "^1.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "svelte": "^3.50.1",
-    "tailwindcss": "^3.1.8"
-  }
+    "tailwindcss": "^3.1.8",
+    "uuid": "^9.0.0"
+  },
+  "dependencies": {
+    "@dagger.io/dagger": "^0.3.0",
+    "ts-node": "^10.9.1"
+  },
+  "type": "module"
 }

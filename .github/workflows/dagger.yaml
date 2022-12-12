@@ -1,0 +1,31 @@
+name: "Dagger"
+
+on:
+  push:
+    branches: [main]
+
+env:
+  DAGGER_LOG_FORMAT: plain
+  DAGGER_CACHE_BASE: main-build
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - run: npm install
+
+      - name: Dagger
+        env:
+          FORCE_COLOR: 3
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: |
+          node --loader ts-node/esm dagger.ts

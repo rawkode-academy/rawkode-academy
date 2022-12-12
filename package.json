@@ -1,0 +1,8 @@
+{
+  "name": "@RawkodeAcademy/RawkodeAcademy",
+  "type": "module",
+  "devDependencies": {
+    "@dagger.io/dagger": "^0.3.0",
+    "ts-node": "^10.9.1"
+  }
+}
