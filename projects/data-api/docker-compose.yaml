@@ -11,6 +11,7 @@ services:
     - root
     - --pass
     - root
+    - --strict
     - memory
     ports:
       - "8000:8000"
