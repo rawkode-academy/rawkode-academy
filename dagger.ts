@@ -11,7 +11,7 @@ connect(
       .value();
 
     const pullRequest: PullRequest = {
-      isIt: pullRequestRef !== undefined,
+      isIt: pullRequestRef !== "",
       headRef: pullRequestRef,
       ref: await client.host().envVariable("GITHUB_REF").value(),
     };
