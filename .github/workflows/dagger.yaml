@@ -1,6 +1,11 @@
 name: "Dagger"
 
-on: {}
+on:
+  push:
+    branches:
+      - main
+  pull_request: {}
+  workflow_dispatch: {}
 
 env:
   DAGGER_LOG_FORMAT: plain
