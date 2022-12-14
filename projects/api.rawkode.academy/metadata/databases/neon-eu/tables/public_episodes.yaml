@@ -31,4 +31,12 @@ select_permissions:
     permission:
       columns:
         - title
+        - show
+        - live
+        - scheduledFor
+        - startedAt
+        - finishedAt
+        - youtubeId
+        - chapters
+        - links
       filter: {}
