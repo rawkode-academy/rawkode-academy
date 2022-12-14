@@ -2,6 +2,7 @@ import pkg from "knex";
 const { knex } = pkg;
 import { updateTypes } from "knex-types";
 import { config } from "./knexfile.js";
+import { main } from "./cli/mod.js";
 
 const database = knex(config);
 
@@ -10,5 +11,4 @@ const database = knex(config);
 //     process.exit(1);
 // });
 
-import { main } from "./cli/mod.js";
 await main(database);

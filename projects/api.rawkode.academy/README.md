@@ -1,5 +1,15 @@
 # @RawkodeAcademy Show Data
 
+## Running the CLI
+
+You'll need to uncomment `updateTypes` in `main.ts` to generate the types, then comment that out and uncomment the main function.
+
+I'll work this out later.
+
+```shell
+doppler run -- node --loader ts-node/esm ./main.ts
+```
+
 ## Why Am I Not Using Prisma?
 
 - Prisma currently doesn't support PostgreSQL `GENERATED ALWAYS AS ... STORED`
