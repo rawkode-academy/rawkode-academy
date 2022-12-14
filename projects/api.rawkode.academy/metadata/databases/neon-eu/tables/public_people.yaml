@@ -25,6 +25,15 @@ array_relationships:
         remote_table:
           name: host_shows_view
           schema: public
+  - name: episodes
+    using:
+      manual_configuration:
+        column_mapping:
+          id: guest
+        insertion_order: null
+        remote_table:
+          name: guest_episodes_view
+          schema: public
 select_permissions:
   - role: Anonymous
     permission:

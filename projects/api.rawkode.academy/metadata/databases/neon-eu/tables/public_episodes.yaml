@@ -1,0 +1,34 @@
+table:
+  name: episodes
+  schema: public
+configuration:
+  column_config: {}
+  custom_column_names: {}
+  custom_name: episodes
+  custom_root_fields:
+    delete: deleteEpisodes
+    delete_by_pk: deleteEpisode
+    insert: newEpisodes
+    insert_one: newEpisode
+    select: getEpisodes
+    select_aggregate: aggregateEpisodes
+    select_by_pk: getEpisode
+    select_stream: streamEpisodes
+    update: updateEpisodes
+    update_by_pk: updateEpisode
+array_relationships:
+  - name: guests
+    using:
+      manual_configuration:
+        column_mapping:
+          id: episode
+        insertion_order: null
+        remote_table:
+          name: episode_guests_view
+          schema: public
+select_permissions:
+  - role: Anonymous
+    permission:
+      columns:
+        - title
+      filter: {}

@@ -130,15 +130,22 @@ CREATE TABLE "episodes" (
     "id" TEXT NOT NULL GENERATED ALWAYS AS (slugify(show || ' ' || title)) STORED,
     "title" TEXT NOT NULL,
     "show" TEXT NOT NULL,
+    "live" BOOLEAN NOT NULL DEFAULT true,
     "scheduledFor" TIMESTAMP,
+    CONSTRAINT is_live CHECK (
+        (NOT "live")
+        OR ("scheduledFor" IS NOT NULL)
+    ),
     "startedAt" TIMESTAMP,
     "finishedAt" TIMESTAMP,
     "youtubeId" TEXT,
     "youtubeCategory" INTEGER,
-    "chapters" chapter ARRAY DEFAULT array []::chapter [],
+    "chapters" chapter [] DEFAULT array []::chapter [],
+    "links" TEXT [] DEFAULT array []::TEXT [],
     CONSTRAINT episode_show FOREIGN KEY(show) REFERENCES shows("id"),
     CONSTRAINT "episode_id" PRIMARY KEY ("id")
 );
+
 
 -- Episode Guests
 CREATE TABLE "episode_guests" (
