@@ -16,15 +16,6 @@ configuration:
     update: updatePeople
     update_by_pk: updatePerson
 array_relationships:
-  - name: shows
-    using:
-      manual_configuration:
-        column_mapping:
-          id: host
-        insertion_order: null
-        remote_table:
-          name: host_shows_view
-          schema: public
   - name: episodes
     using:
       manual_configuration:
@@ -33,6 +24,15 @@ array_relationships:
         insertion_order: null
         remote_table:
           name: guest_episodes_view
+          schema: public
+  - name: shows
+    using:
+      manual_configuration:
+        column_mapping:
+          id: host
+        insertion_order: null
+        remote_table:
+          name: host_shows_view
           schema: public
 select_permissions:
   - role: Anonymous
