@@ -1,0 +1,5 @@
+- "!include public_host_shows_view.yaml"
+- "!include public_people.yaml"
+- "!include public_show_hosts_view.yaml"
+- "!include public_shows.yaml"
+- "!include public_technologies.yaml"
