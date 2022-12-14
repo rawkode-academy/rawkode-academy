@@ -122,3 +122,46 @@ CREATE TABLE "technologies" (
     ),
     CONSTRAINT "technology_id" PRIMARY KEY ("id")
 );
+
+-- Episodes
+CREATE TYPE "chapter" AS ("time" INTERVAL, "title" TEXT);
+
+CREATE TABLE "episodes" (
+    "id" TEXT NOT NULL GENERATED ALWAYS AS (slugify(show || ' ' || title)) STORED,
+    "title" TEXT NOT NULL,
+    "show" TEXT NOT NULL,
+    "scheduledFor" TIMESTAMP,
+    "startedAt" TIMESTAMP,
+    "finishedAt" TIMESTAMP,
+    "youtubeId" TEXT,
+    "youtubeCategory" INTEGER,
+    "chapters" chapter ARRAY DEFAULT array []::chapter [],
+    CONSTRAINT episode_show FOREIGN KEY(show) REFERENCES shows("id"),
+    CONSTRAINT "episode_id" PRIMARY KEY ("id")
+);
+
+-- Episode Guests
+CREATE TABLE "episode_guests" (
+    "episode" TEXT NOT NULL,
+    "guest" TEXT NOT NULL,
+    CONSTRAINT "episode_guests_id" PRIMARY KEY ("episode", "guest")
+);
+
+ALTER TABLE "episode_guests"
+ADD CONSTRAINT "episode_guests_episode" FOREIGN KEY ("episode") REFERENCES "episodes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE "episode_guests"
+ADD CONSTRAINT "episode_guests_guest" FOREIGN KEY ("guest") REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- Hasura Flattening Views
+CREATE VIEW episode_guests_view AS
+SELECT episode,
+    people.*
+FROM episode_guests
+    LEFT JOIN people ON episode_guests.guest = people.id;
+
+CREATE VIEW guest_episodes_view AS
+SELECT guest,
+    episodes.*
+FROM episode_guests
+    LEFT JOIN episodes ON episode_guests.episode = episodes.id;
