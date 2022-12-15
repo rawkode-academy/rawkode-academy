@@ -1,5 +1,6 @@
 import { default as inquirer } from "inquirer";
 import * as technologies from "./technologies/mod.js";
+import * as dataMigrations from "./data-migrations/mod.js";
 import pkg from "knex";
 
 export const main = async (db: pkg.Knex<any, unknown[]>) => {
@@ -8,13 +9,17 @@ export const main = async (db: pkg.Knex<any, unknown[]>) => {
             type: "list",
             name: "command",
             message: "What do you want to do?",
-            choices: ["Create a Technology"],
+            choices: ["Create a Technology", "Migrate old data"],
         },
     ]);
 
     switch (answers.command) {
         case "Create a Technology":
             await technologies.create(db);
+            break;
+
+        case "Migrate old data":
+            await dataMigrations.migrate(db);
             break;
 
         default:

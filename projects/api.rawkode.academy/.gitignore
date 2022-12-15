@@ -1,3 +1,4 @@
 /node_modules
 /prisma/generated
 /types.ts
+episodes.sql
