@@ -142,7 +142,7 @@ CREATE TABLE "episodes" (
     "youtubeCategory" INTEGER,
     "chapters" chapter [] DEFAULT array []::chapter [],
     "links" TEXT [] DEFAULT array []::TEXT [],
-    CONSTRAINT episode_show FOREIGN KEY(show) REFERENCES shows("id"),
+    CONSTRAINT episode_show FOREIGN KEY(show) REFERENCES shows("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "episode_id" PRIMARY KEY ("id")
 );
 
