@@ -20,7 +20,7 @@ array_relationships:
     using:
       manual_configuration:
         column_mapping:
-          id: guest
+          id: personId
         insertion_order: null
         remote_table:
           name: guest_episodes_view
@@ -29,7 +29,7 @@ array_relationships:
     using:
       manual_configuration:
         column_mapping:
-          id: host
+          id: personId
         insertion_order: null
         remote_table:
           name: host_shows_view

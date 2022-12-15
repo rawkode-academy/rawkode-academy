@@ -72,34 +72,28 @@ CREATE UNIQUE INDEX "show_name" ON "shows"("name");
 
 -- Show Hosts Function Table
 CREATE TABLE "show_hosts" (
-    "show" TEXT NOT NULL,
-    "host" TEXT NOT NULL,
-    CONSTRAINT "show_hosts_id" PRIMARY KEY ("show", "host")
+    "showId" TEXT NOT NULL REFERENCES "shows"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    "personId" TEXT NOT NULL REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "show_hosts_id" PRIMARY KEY ("showId", "personId")
 );
-
-ALTER TABLE "show_hosts"
-ADD CONSTRAINT "show_hosts_host" FOREIGN KEY ("host") REFERENCES "shows"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
-ALTER TABLE "show_hosts"
-ADD CONSTRAINT "show_hosts_show" FOREIGN KEY ("show") REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- Hasura Flattening Views
 CREATE VIEW show_hosts_view AS
-SELECT show,
+SELECT "showId",
     people.*
 FROM show_hosts
-    LEFT JOIN people ON show_hosts.host = people.id;
+    LEFT JOIN people ON show_hosts."personId" = people.id;
 
 CREATE VIEW host_shows_view AS
-SELECT host,
+SELECT "personId",
     shows.*
 FROM show_hosts
-    LEFT JOIN shows ON show_hosts.show = shows.id;
+    LEFT JOIN shows ON show_hosts."showId" = shows.id;
 
 
 -- Technologies
 CREATE TABLE "technologies" (
-    "id" TEXT NOT NULL GENERATED ALWAYS AS (slugify(name)) STORED,
+    "id" TEXT NOT NULL PRIMARY KEY GENERATED ALWAYS AS (slugify(name)) STORED,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "website" TEXT NOT NULL,
@@ -119,17 +113,16 @@ CREATE TABLE "technologies" (
             char_length("youtubeHandle") >= 3
             AND char_length("youtubeHandle") <= 30
         )
-    ),
-    CONSTRAINT "technology_id" PRIMARY KEY ("id")
+    )
 );
 
 -- Episodes
 CREATE TYPE "chapter" AS ("time" INTERVAL, "title" TEXT);
 
 CREATE TABLE "episodes" (
-    "id" TEXT NOT NULL GENERATED ALWAYS AS (slugify(show || ' ' || title)) STORED,
+    "id" TEXT NOT NULL PRIMARY KEY GENERATED ALWAYS AS (slugify("showId" || ' ' || title)) STORED,
     "title" TEXT NOT NULL,
-    "show" TEXT NOT NULL,
+    "showId" TEXT NOT NULL REFERENCES shows("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     "live" BOOLEAN NOT NULL DEFAULT true,
     "scheduledFor" TIMESTAMP,
     CONSTRAINT is_live CHECK (
@@ -141,34 +134,26 @@ CREATE TABLE "episodes" (
     "youtubeId" TEXT,
     "youtubeCategory" INTEGER,
     "chapters" chapter [] DEFAULT array []::chapter [],
-    "links" TEXT [] DEFAULT array []::TEXT [],
-    CONSTRAINT episode_show FOREIGN KEY(show) REFERENCES shows("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "episode_id" PRIMARY KEY ("id")
+    "links" TEXT [] DEFAULT array []::TEXT []
 );
 
 
 -- Episode Guests
 CREATE TABLE "episode_guests" (
-    "episode" TEXT NOT NULL,
-    "guest" TEXT NOT NULL,
-    CONSTRAINT "episode_guests_id" PRIMARY KEY ("episode", "guest")
+    "episodeId" TEXT NOT NULL REFERENCES "episodes"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    "personId" TEXT NOT NULL REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "episode_guests_id" PRIMARY KEY ("episodeId", "personId")
 );
-
-ALTER TABLE "episode_guests"
-ADD CONSTRAINT "episode_guests_episode" FOREIGN KEY ("episode") REFERENCES "episodes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
-ALTER TABLE "episode_guests"
-ADD CONSTRAINT "episode_guests_guest" FOREIGN KEY ("guest") REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- Hasura Flattening Views
 CREATE VIEW episode_guests_view AS
-SELECT episode,
+SELECT "episodeId",
     people.*
 FROM episode_guests
-    LEFT JOIN people ON episode_guests.guest = people.id;
+    LEFT JOIN people ON episode_guests."personId" = people.id;
 
 CREATE VIEW guest_episodes_view AS
-SELECT guest,
+SELECT "personId",
     episodes.*
 FROM episode_guests
-    LEFT JOIN episodes ON episode_guests.episode = episodes.id;
+    LEFT JOIN episodes ON episode_guests."episodeId" = episodes.id;

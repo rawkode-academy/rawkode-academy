@@ -20,7 +20,7 @@ array_relationships:
     using:
       manual_configuration:
         column_mapping:
-          id: show
+          id: showId
         insertion_order: null
         remote_table:
           name: show_hosts_view
