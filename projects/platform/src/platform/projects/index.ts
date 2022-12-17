@@ -130,6 +130,10 @@ export class Project extends pulumi.ComponentResource {
             verbs: ["get", "list", "watch"],
           },
         ],
+      },
+      {
+        provider,
+        parent: this,
       }
     );
 
@@ -147,6 +151,10 @@ export class Project extends pulumi.ComponentResource {
           kind: "Role",
           name: fluxRole.metadata.name,
         },
+      },
+      {
+        provider,
+        parent: this,
       }
     );
 
@@ -303,6 +311,10 @@ export class Project extends pulumi.ComponentResource {
           url: args.repository,
           ref: { tag: "latest" },
         },
+      },
+      {
+        provider,
+        parent: this,
       }
     );
 

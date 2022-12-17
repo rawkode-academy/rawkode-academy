@@ -23,14 +23,16 @@ interface ComponentConstructGlue<T> {
 }
 
 export class Platform extends pulumi.ComponentResource {
+  private readonly name: string;
   private provider: kubernetes.Provider;
   private namespace: kubernetes.core.v1.Namespace;
   private components: Map<string, Component> = new Map();
   // private ingressComponents: Map<string, IngressComponent> = new Map();
 
   constructor(name: string, args: PlatformArgs) {
-    super("rawkode:platform:Platform", name);
+    super("rawkode:platform:Platform", name, {}, { parent: args.provider });
 
+    this.name = name;
     this.provider = args.provider;
 
     this.namespace = new kubernetes.core.v1.Namespace(
@@ -83,10 +85,7 @@ export class Platform extends pulumi.ComponentResource {
   //   return this;
   // }
 
-  public addComponent<T extends Component>(
-    name: string,
-    c: ComponentConstructGlue<T>
-  ): this {
+  public addComponent<T extends Component>(c: ComponentConstructGlue<T>): this {
     const componentName = c.getComponentName();
     const dependencies = c.getDependencies();
 
@@ -107,10 +106,10 @@ export class Platform extends pulumi.ComponentResource {
 
     this.components.set(
       componentName,
-      new c(name, {
-        parent: this,
+      new c(`${this.name}-${componentName}`, {
         dependsOn,
-        namespace: this.namespace.metadata.name,
+        namespace: this.namespace,
+        parent: this.namespace,
         provider: this.provider,
       })
     );

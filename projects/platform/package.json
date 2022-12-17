@@ -9,6 +9,7 @@
     "@pulumi/kubernetes": "^3.22.1",
     "@pulumi/pulumi": "^3.46.0",
     "@pulumi/random": "^4.8.2",
+    "@types/slug": "^5.0.3",
     "slug": "^8.2.2"
   }
 }
