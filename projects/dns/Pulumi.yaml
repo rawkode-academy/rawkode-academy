@@ -1,6 +1,6 @@
 name: dns
-runtime: nodejs
 description: Management of DNS
+runtime: nodejs
 main: src
 backend:
   url: gs://rawkode-academy-automation/dns

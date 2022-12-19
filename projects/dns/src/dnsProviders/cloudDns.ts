@@ -8,7 +8,9 @@ const chunkString = (value: string, length: number): string[] => {
   return Array.from(value.match(/.{1,254}/g)?.values() ?? []);
 };
 
-export const createZone = (managedZone: ManagedZone): pulumi.Resource[] => {
+export const createZone = (
+  managedZone: ManagedZone
+): [string, google.dns.v1.ManagedZone] => {
   const zone = new google.dns.v1.ManagedZone(
     managedZone.name,
     {
@@ -25,7 +27,7 @@ export const createZone = (managedZone: ManagedZone): pulumi.Resource[] => {
     managedZone.name,
     {
       domain: managedZone.zone.domain,
-      servers: zone.nameServers.apply((ns) =>
+      nameservers: zone.nameServers.apply((ns) =>
         ns.map((n) => n.replace(/\.$/, ""))
       ),
     },
@@ -60,5 +62,5 @@ export const createZone = (managedZone: ManagedZone): pulumi.Resource[] => {
     );
   });
 
-  return [zone, nameservers, ...records];
+  return [managedZone.zone.domain, zone];
 };

@@ -42,3 +42,12 @@ export const getSecrets = async (client: Client, config: Config) => {
   const stdout = await result.stdout();
   return JSON.parse(stdout) as Secrets;
 };
+
+export const toSimpleMap = (secrets: Secrets) => {
+  const map: { [key: string]: string } = {};
+
+  for (const key in secrets) {
+    map[key] = secrets[key].computed;
+  }
+  return map;
+};

@@ -1,39 +1,49 @@
+import * as pulumi from "@pulumi/pulumi";
+import * as google from "@pulumi/google-native";
 import { createZone } from "./dnsProviders/cloudDns";
 
+let allZones: [string, google.dns.v1.ManagedZone][] = [];
+
 import { rawkodeAcademy } from "./domains/rawkode.academy";
-createZone(rawkodeAcademy);
+allZones.push(createZone(rawkodeAcademy));
 
 import { rawkodeCom } from "./domains/rawkode.com";
-createZone(rawkodeCom);
+allZones.push(createZone(rawkodeCom));
 
 import { chappaaiDev } from "./domains/chappaai.dev";
-createZone(chappaaiDev);
+allZones.push(createZone(chappaaiDev));
 
 import { fbomDev } from "./domains/fbom.dev";
-createZone(fbomDev);
+allZones.push(createZone(fbomDev));
 
 import { fbomLive } from "./domains/fbom.live";
-createZone(fbomLive);
+allZones.push(createZone(fbomLive));
 
 import { klusteredLive } from "./domains/klustered.live";
-createZone(klusteredLive);
+allZones.push(createZone(klusteredLive));
 
 import { rawkodeDe } from "./domains/rawko.de";
-createZone(rawkodeDe);
+allZones.push(createZone(rawkodeDe));
 
 import { rawkodeChat } from "./domains/rawkode.chat";
-createZone(rawkodeChat);
+allZones.push(createZone(rawkodeChat));
 
 // Not migrated to Gandi yet (ever?)
 // import { rawkodeEmail } from "./domains/rawkode.email";
 // createZone(rawkodeEmail);
 
 import { rawkodeLink } from "./domains/rawkode.link";
-createZone(rawkodeLink);
+allZones.push(createZone(rawkodeLink));
 
 import { rawkodeNews } from "./domains/rawkode.news";
-createZone(rawkodeNews);
+allZones.push(createZone(rawkodeNews));
 
 // Not migrated to Gandi yet (ever?)
 // import { rawkodeSh } from "./domains/rawkode.sh";
 // createZone(rawkodeSh);
+
+export const zoneNameMap = allZones.reduce<
+  Record<string, pulumi.Output<string>>
+>((zoneNameMap, [domain, zone]) => {
+  return { ...zoneNameMap, [domain]: zone.name };
+}, {});
