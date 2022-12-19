@@ -2,9 +2,9 @@
   "compilerOptions": {
     "strict": true,
     "outDir": "dist",
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "sourceMap": true,
     "experimentalDecorators": true,
     "pretty": true,

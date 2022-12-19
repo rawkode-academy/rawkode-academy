@@ -1,4 +1,5 @@
 packages:
   - "./dagger"
   - "./projects/dns"
+  - "./projects/rawkode.cloud"
   # - '**'

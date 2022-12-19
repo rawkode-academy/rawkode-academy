@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
 set -xeo pipefail
 
+corepack enable
+corepack prepare pnpm@latest --activate
+
+## If a CONFIG_PASSPHRASE, or _FILE, is set: we need to use a local login
+if test -v PULUMI_CONFIG_PASSPHRASE || test -v PULUMI_CONFIG_PASSPHRASE_FILE; then
+  echo "PULUMI_CONFIG_PASSPHRASE is set, using a local login"
+  pulumi login --local
+fi
+
+## If this Pulumi Stack uses GCLOUD_GKE, we need to install the gcloud auth plugin
 if test -v GCLOUD_GKE; then
   apt update && apt install --yes curl gnupg 
   echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
   curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
   apt update && apt install --yes google-cloud-sdk-gke-gcloud-auth-plugin
-fi
-
-if test -v PULUMI_CONFIG_PASSPHRASE || test -v PULUMI_CONFIG_PASSPHRASE_FILE; then
-  echo "PULUMI_CONFIG_PASSPHRASE is set, using a local login"
-  pulumi login --local
 fi
 
 # Using Pulumi SaaS
@@ -37,13 +42,15 @@ fi
 
 case "$PULUMI_RUNTIME" in
   nodejs)
-    npm install
+    pnpm install --prod --frozen-lockfile --force
     ;;
 
   *)
     echo -n "unknown"
     ;;
 esac
+
+env
 
 pulumi up --stack "${PULUMI_STACK}" --yes --suppress-outputs
 

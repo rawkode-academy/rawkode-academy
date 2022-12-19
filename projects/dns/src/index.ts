@@ -7,6 +7,9 @@ let allZones: [string, google.dns.v1.ManagedZone][] = [];
 import { rawkodeAcademy } from "./domains/rawkode.academy";
 allZones.push(createZone(rawkodeAcademy));
 
+import { rawkodeCloud } from "./domains/rawkode.cloud";
+allZones.push(createZone(rawkodeCloud));
+
 import { rawkodeCom } from "./domains/rawkode.com";
 allZones.push(createZone(rawkodeCom));
 

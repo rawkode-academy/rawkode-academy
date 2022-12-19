@@ -1,5 +1,10 @@
 {
   "name": "@RawkodeAcademy/dagger",
+  "type": "module",
   "version": "0.0.1",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@dagger.io/dagger": "^0.3.0",
+    "zod": "^3.20.2"
+  }
 }

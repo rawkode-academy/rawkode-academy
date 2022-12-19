@@ -1,5 +1,5 @@
 import Client from "@dagger.io/dagger";
-import { getSourceDir } from "../utils";
+import { getSourceDir } from "../utils/index.js";
 import { Directory } from "@dagger.io/dagger/dist/api/client.gen";
 
 interface Config {
@@ -16,10 +16,11 @@ interface Config {
 }
 
 export const up = async (client: Client, config: Config): Promise<Object> => {
-  const localDir = getSourceDir(import.meta.url);
-  const entrypointDir = `${localDir}/scripts`;
+  const entrypointDir = client
+    .host()
+    .directory(`${getSourceDir(import.meta.url)}/scripts`);
 
-  const pulumi = client
+  let pulumi = client
     .container()
     .from(`pulumi/pulumi-${config.runtime}:${config.version}`)
     .withMountedDirectory("/entrypoint", entrypointDir)
@@ -33,11 +34,11 @@ export const up = async (client: Client, config: Config): Promise<Object> => {
     );
 
   for (const key in config.environmentVariables) {
-    pulumi.withEnvVariable(key, config.environmentVariables[key]);
+    pulumi = pulumi.withEnvVariable(key, config.environmentVariables[key]);
   }
 
   if (config.googleCloudGkeCluster) {
-    pulumi.withEnvVariable("GCLOUD_GKE", "YES");
+    pulumi = pulumi.withEnvVariable("GCLOUD_GKE", "YES");
   }
 
   const result = await pulumi.withExec(["/entrypoint/up.sh"]);

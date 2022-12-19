@@ -1,12 +1,15 @@
 {
-    "name": "rawkode.cloud",
-    "main": "index.ts",
-    "devDependencies": {
-        "@types/node": "^14"
-    },
-    "dependencies": {
-        "@dagger.io/dagger": "^0.3.0",
-        "@pulumi/gcp": "^6.0.0",
-        "@pulumi/pulumi": "^3.0.0"
-    }
+  "name": "rawkode.cloud",
+  "type": "module",
+  "devDependencies": {
+    "@dagger.io/dagger": "^0.3.0",
+    "@RawkodeAcademy/dns": "workspace:*"
+  },
+  "dependencies": {
+    "@pulumi/gcp": "^6.45.0",
+    "@pulumi/pulumi": "^3.49.0",
+    "@types/node": "^18.11.17",
+    "typescript": "^4.9.4",
+    "ts-node": "^10.9.1"
+  }
 }
