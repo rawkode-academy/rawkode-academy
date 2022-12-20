@@ -2,8 +2,9 @@
   "name": "@RawkodeAcademy/dns",
   "type": "module",
   "devDependencies": {
+    "@RawkodeAcademy/dagger": "workspace:*",
     "@dagger.io/dagger": "^0.3.0",
-    "@RawkodeAcademy/dagger": "workspace:*"
+    "ora": "^6.1.2"
   },
   "dependencies": {
     "@pulumi/cloudflare": "^4.8.0",

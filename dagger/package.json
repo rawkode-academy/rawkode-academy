@@ -6,7 +6,9 @@
   "bin": "index.ts",
   "devDependencies": {
     "@dagger.io/dagger": "^0.3.0",
+    "chalk": "^5.2.0",
     "commander": "^9.4.1",
+    "ora": "^6.1.2",
     "zod": "^3.20.2"
   },
   "dependencies": {

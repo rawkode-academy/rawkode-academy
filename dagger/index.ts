@@ -2,6 +2,7 @@
 import Client, { connect } from "@dagger.io/dagger";
 import { Command } from "commander";
 import { default as inquirer } from "inquirer";
+import { oraPromise } from "ora";
 import * as fs from "fs";
 
 export interface DaggerCommand {
@@ -10,11 +11,17 @@ export interface DaggerCommand {
   execute: (client: Client) => any;
 }
 
+const dagger = new Command();
+dagger
+  .name("dagger")
+  .description("Dagger CLI")
+  .version("0.0.1")
+  .option("-L, --log-all", "Log All Output", false);
+
+const globalOptions = dagger.parse(process.argv).optsWithGlobals();
+
 connect(
   async (client: Client) => {
-    const dagger = new Command();
-    dagger.name("dagger").description("Dagger CLI").version("0.0.1");
-
     const commands = findLoadCommands();
     const localCommands: DaggerCommand[] = [];
 
@@ -27,7 +34,13 @@ connect(
       dagger
         .command(localCommand.name)
         .description(localCommand.description)
-        .action(() => localCommand.execute(client));
+        .action(async () => {
+          await oraPromise(async () => await localCommand.execute(client), {
+            text: `Executing ${localCommand.name}`,
+            failText: `Failed to execute ${localCommand.name}`,
+            successText: `Executed ${localCommand.name}`,
+          });
+        });
     }
 
     const defaultCommand = dagger
@@ -60,7 +73,7 @@ connect(
     await dagger.parseAsync();
   },
   {
-    LogOutput: process.stdout,
+    LogOutput: globalOptions.logAll ? process.stdout : undefined,
   }
 );
 
