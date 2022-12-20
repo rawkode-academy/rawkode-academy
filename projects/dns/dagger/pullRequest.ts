@@ -4,19 +4,10 @@ import {
   toSimpleMap,
 } from "@RawkodeAcademy/dagger/doppler/index.js";
 import { getSourceDir } from "@RawkodeAcademy/dagger/utils/index.js";
-import { up } from "@RawkodeAcademy/dagger/pulumi/dagger.js";
-import { z } from "zod";
+import { preview } from "@RawkodeAcademy/dagger/pulumi/dagger.js";
 import { DaggerCommand } from "@RawkodeAcademy/dagger/index.js";
 
-const ZoneMap = z.record(z.string());
-type ZoneMap = z.infer<typeof ZoneMap>;
-
-const PulumiOutput = z.object({
-  zoneNameMap: ZoneMap,
-});
-type PulumiOutput = z.infer<typeof PulumiOutput>;
-
-const deploy = async (client: Client): Promise<PulumiOutput> => {
+const pullRequest = async (client: Client): Promise<string> => {
   const sourcePath = getSourceDir(`${import.meta.url}/..`);
 
   const secrets = await getSecrets(client, {
@@ -29,7 +20,7 @@ const deploy = async (client: Client): Promise<PulumiOutput> => {
     exclude: [".git", ".pnpm-store", "dagger", "dagger.ts", "node_modules"],
   });
 
-  const returnedJson = await up(client, {
+  const result = await preview(client, {
     version: "3.49.0",
     runtime: "nodejs",
     stackCreate: false,
@@ -38,19 +29,12 @@ const deploy = async (client: Client): Promise<PulumiOutput> => {
     environmentVariables: toSimpleMap(secrets),
   });
 
-  console.debug(returnedJson);
-
-  const pulumiOutput = PulumiOutput.safeParse(returnedJson);
-  if (!pulumiOutput.success) {
-    throw new Error("pulumi up for DNS did not return a valid zone map");
-  }
-
-  return pulumiOutput.data;
+  return result;
 };
 
 const command: DaggerCommand = {
-  name: "deploy",
-  description: "Deploy the DNS infrastructure",
-  execute: deploy,
+  name: "pullRequest",
+  description: "Preview the Pulumi Diff",
+  execute: pullRequest,
 };
 export default command;

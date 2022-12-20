@@ -50,7 +50,4 @@ case "$PULUMI_RUNTIME" in
     ;;
 esac
 
-pulumi up --stack "${PULUMI_STACK}" --yes --suppress-outputs
-
-mkdir -p /output
-pulumi --stack "${PULUMI_STACK}" stack output --json --show-secrets > /output/json
+pulumi preview --stack "${PULUMI_STACK}"
