@@ -5,12 +5,9 @@ import {
 } from "@RawkodeAcademy/dagger/doppler/index.js";
 import { getSourceDir } from "@RawkodeAcademy/dagger/utils/index.js";
 import { up } from "@RawkodeAcademy/dagger/pulumi/dagger.js";
-import { deploy as DnsDeploy } from "@RawkodeAcademy/dns/dagger/deploy.js";
+import { DaggerCommand } from "@RawkodeAcademy/dagger/index.js";
 
-const deploy = async (client: Client): Promise<void> => {
-  const dnsOutput = await DnsDeploy(client);
-  const rawkodeCloudZoneName = dnsOutput.zoneNameMap["rawkode.cloud"];
-
+const deploy = async (client: Client): Promise<Object> => {
   const sourcePath = getSourceDir(`${import.meta.url}/..`);
 
   const secrets = await getSecrets(client, {
@@ -23,19 +20,21 @@ const deploy = async (client: Client): Promise<void> => {
     exclude: [".git", ".pnpm-store", "dagger", "dagger.ts", "node_modules"],
   });
 
-  await up(client, {
+  const returnedJson = await up(client, {
     version: "3.49.0",
     runtime: "nodejs",
     stackCreate: false,
     stack: "production",
     programDirectory: sourceDirectory,
-    environmentVariables: {
-      ...toSimpleMap(secrets),
-      DNS_ZONE_NAME: rawkodeCloudZoneName,
-    },
+    environmentVariables: toSimpleMap(secrets),
   });
 
-  return;
+  return returnedJson;
 };
 
-export default deploy;
+const command: DaggerCommand = {
+  name: "deploy",
+  description: "Deploy Rawkode Cloud infrastructure",
+  execute: deploy,
+};
+export default command;
