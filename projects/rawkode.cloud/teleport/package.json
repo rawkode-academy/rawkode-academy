@@ -4,7 +4,8 @@
   "devDependencies": {
     "@RawkodeAcademy/dagger": "workspace:^0.0.1",
     "@RawkodeAcademy/dns": "workspace:*",
-    "@dagger.io/dagger": "^0.3.0"
+    "@dagger.io/dagger": "^0.3.0",
+    "ora": "^6.1.2"
   },
   "dependencies": {
     "@pulumi/gcp": "^6.45.0",

@@ -1,0 +1,5 @@
+secretsprovider: gcpkms://projects/rawkode-academy/locations/europe-west2/keyRings/automation/cryptoKeys/google-cloud
+encryptedkey: CiQAfxmDjIBhdrFVpa62wt9Blc4HdWyJKAjX4SsVOMWofHpwP6gSSAC96s8mCKwQC9IMfMkFKeEIsL2IGte2AdBFRPe03i1voU3uxLg/EILcVDE/eQOvYr8pUyIssrZRZ9uBr8QpcXefvASUCBZ6Zw==
+config:
+  gcp:project: rawkode-academy
+  google-native:project: rawkode-academy

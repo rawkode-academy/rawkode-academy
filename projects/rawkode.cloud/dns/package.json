@@ -3,6 +3,7 @@
   "type": "module",
   "devDependencies": {
     "@RawkodeAcademy/dagger": "workspace:*",
+    "@RawkodeAcademy/google-cloud": "workspace:*",
     "@dagger.io/dagger": "^0.3.0",
     "ora": "^6.1.2"
   },

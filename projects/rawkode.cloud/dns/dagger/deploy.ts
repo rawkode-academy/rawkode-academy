@@ -1,13 +1,9 @@
 import Client from "@dagger.io/dagger";
-import {
-  getSecrets,
-  toSimpleMap,
-} from "@RawkodeAcademy/dagger/doppler/index.js";
+import { DaggerCommand, SecretApi } from "@RawkodeAcademy/dagger/index.js";
 import { getSourceDir } from "@RawkodeAcademy/dagger/utils/index.js";
 import { up } from "@RawkodeAcademy/dagger/pulumi/dagger.js";
-import { z } from "zod";
-import { DaggerCommand } from "@RawkodeAcademy/dagger/index.js";
 import { oraPromise } from "ora";
+import { z } from "zod";
 
 const ZoneMap = z.record(z.string());
 type ZoneMap = z.infer<typeof ZoneMap>;
@@ -17,16 +13,18 @@ const PulumiOutput = z.object({
 });
 type PulumiOutput = z.infer<typeof PulumiOutput>;
 
-const deploy = async (client: Client): Promise<PulumiOutput> => {
+export const deploy = async (
+  client: Client,
+  getSecrets: SecretApi
+): Promise<PulumiOutput> => {
   const sourcePath = getSourceDir(`${import.meta.url}/..`);
 
   const secrets = await oraPromise(
     async () =>
-      await getSecrets(client, {
-        project: "dns",
-        config: "production",
-        seed: "seed",
-      }),
+      await getSecrets("dns", "production", [
+        "GANDI_KEY",
+        "GOOGLE_CREDENTIALS",
+      ]),
     {
       text: "Fetching Secrets ...",
     }
@@ -44,7 +42,7 @@ const deploy = async (client: Client): Promise<PulumiOutput> => {
         stackCreate: false,
         stack: "production",
         programDirectory: sourceDirectory,
-        environmentVariables: toSimpleMap(secrets),
+        environmentVariables: secrets,
       }),
     {
       text: "Running Pulumi Up",

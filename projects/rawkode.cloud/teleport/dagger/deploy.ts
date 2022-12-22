@@ -1,21 +1,24 @@
 import Client from "@dagger.io/dagger";
-import {
-  getSecrets,
-  toSimpleMap,
-} from "@RawkodeAcademy/dagger/doppler/index.js";
+import { oraPromise } from "ora";
 import { getSourceDir } from "@RawkodeAcademy/dagger/utils/index.js";
 import { up } from "@RawkodeAcademy/dagger/pulumi/dagger.js";
-import { DaggerCommand } from "@RawkodeAcademy/dagger/index.js";
+import { DaggerCommand, SecretApi } from "@RawkodeAcademy/dagger/index.js";
+import { deploy as deployDns } from "@RawkodeAcademy/dns/dagger/deploy.js";
 
-const deploy = async (client: Client): Promise<Object> => {
+const deploy = async (client: Client, getSecrets: SecretApi): Promise<void> => {
+  const domain = "rawkode.cloud";
+
+  const dnsOutput = await deployDns(client, getSecrets);
+  const dnsZoneName = dnsOutput.zoneNameMap[domain];
+
   const sourcePath = getSourceDir(`${import.meta.url}/..`);
 
-  const secrets = await getSecrets(client, {
-    project: "cloud",
-    config: "production",
-    seed: "seed",
-  });
-
+  const secrets = await oraPromise(
+    async () => await getSecrets("cloud", "production", ["GOOGLE_CREDENTIALS"]),
+    {
+      text: "Fetching Secrets ...",
+    }
+  );
   const sourceDirectory = await client.host().directory(sourcePath, {
     exclude: [".git", ".pnpm-store", "dagger", "dagger.ts", "node_modules"],
   });
@@ -26,10 +29,13 @@ const deploy = async (client: Client): Promise<Object> => {
     stackCreate: false,
     stack: "production",
     programDirectory: sourceDirectory,
-    environmentVariables: toSimpleMap(secrets),
+    environmentVariables: {
+      DNS_ZONE_NAME: dnsZoneName,
+      ...secrets,
+    },
   });
 
-  return returnedJson;
+  return;
 };
 
 const command: DaggerCommand = {
