@@ -1,0 +1,15 @@
+[package]
+name = "rawkode-studio-episode-linter"
+description = "Lint rawkode.studio episode files"
+authors = [
+    "David Flanagan <david@rawkode.dev>",
+    "Stefan Ruzitschka <stefan@icepuma.dev>",
+]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.0.30", features = ["derive"] }
+knuffel = "2.0.0"
+miette = { version = "5.5.0", features = ["fancy"] }
+chrono = { version = "0.4.23" }
