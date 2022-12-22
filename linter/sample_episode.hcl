@@ -1,8 +1,8 @@
 episode "BDD Test Automation" {
   show             = "rawkode-live"
-  published-at     = "2021-01-19T13:00:00+00:00"
-  youtube-id       = "dc6A930goAU"
-  youtube-category = 24
+  published_at     = "2021-01-19T13:00:00+00:00"
+  youtube_id       = "dc6A930goAU"
+  youtube_category = 24
   links = [
     "rawkode.live",
     "rawkode.live/chat",
