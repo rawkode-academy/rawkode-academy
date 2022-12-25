@@ -1,6 +1,7 @@
 use crate::cli::Cli;
 use clap::Parser;
-use format::Episode;
+use format::Episodes;
+use hcl::from_str;
 use miette::{miette, IntoDiagnostic, Result};
 use std::fs;
 
@@ -12,8 +13,7 @@ fn main() -> Result<()> {
 
     if cli.file_path.exists() {
         let content = fs::read_to_string(&cli.file_path).into_diagnostic()?;
-        knuffel::parse::<Episode>(cli.file_path.display().to_string().as_str(), &content)
-            .into_diagnostic()?;
+        from_str::<Episodes>(&content).into_diagnostic()?;
     } else {
         return Err(miette!(
             "The file with path {:?} does not exist.",
