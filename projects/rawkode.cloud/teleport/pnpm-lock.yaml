@@ -1,11 +1,11 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@RawkodeAcademy/dagger': workspace:^0.0.1
-  '@RawkodeAcademy/dns': workspace:*
   '@dagger.io/dagger': ^0.3.0
   '@pulumi/gcp': ^6.45.0
   '@pulumi/pulumi': ^3.49.0
+  '@rawkode.academy/dagger': workspace:^0.0.1
+  '@rawkode.academy/dns': workspace:*
   '@types/node': ^18.11.17
   ora: ^6.1.2
   ts-node: ^10.9.1
@@ -19,9 +19,9 @@ dependencies:
   typescript: 4.9.4
 
 devDependencies:
-  '@RawkodeAcademy/dagger': link:../../../dagger
-  '@RawkodeAcademy/dns': link:../dns
   '@dagger.io/dagger': 0.3.0
+  '@rawkode.academy/dagger': link:../../../dagger
+  '@rawkode.academy/dns': link:../dns
   ora: 6.1.2
 
 packages:

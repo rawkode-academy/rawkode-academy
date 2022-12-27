@@ -1,7 +1,7 @@
 import Client from "@dagger.io/dagger";
-import { DaggerCommand, SecretApi } from "@RawkodeAcademy/dagger/index.js";
-import { getSourceDir } from "@RawkodeAcademy/dagger/utils/index.js";
-import { pushArtifact } from "@RawkodeAcademy/dagger/fluxcd/index.js";
+import { DaggerCommand, SecretApi } from "@rawkode.academy/dagger/index.js";
+import { getSourceDir } from "@rawkode.academy/dagger/utils/index.js";
+import { pushArtifact } from "@rawkode.academy/dagger/fluxcd/index.js";
 
 export const deploy = async (
   client: Client,

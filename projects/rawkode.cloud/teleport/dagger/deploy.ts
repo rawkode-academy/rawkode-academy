@@ -1,9 +1,9 @@
 import Client from "@dagger.io/dagger";
 import { oraPromise } from "ora";
-import { getSourceDir } from "@RawkodeAcademy/dagger/utils/index.js";
-import { up } from "@RawkodeAcademy/dagger/pulumi/dagger.js";
-import { DaggerCommand, SecretApi } from "@RawkodeAcademy/dagger/index.js";
-import { deploy as deployDns } from "@RawkodeAcademy/dns/dagger/deploy.js";
+import { getSourceDir } from "@rawkode.academy/dagger/utils/index.js";
+import { up } from "@rawkode.academy/dagger/pulumi/dagger.js";
+import { DaggerCommand, SecretApi } from "@rawkode.academy/dagger/index.js";
+import { deploy as deployDns } from "@rawkode.academy/dns/dagger/deploy.js";
 
 const deploy = async (client: Client, getSecrets: SecretApi): Promise<void> => {
   const domain = "rawkode.cloud";

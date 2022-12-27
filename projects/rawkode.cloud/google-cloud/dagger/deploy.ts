@@ -1,10 +1,13 @@
 import Client from "@dagger.io/dagger";
-import { getSourceDir } from "@RawkodeAcademy/dagger/utils/index.js";
-import { up } from "@RawkodeAcademy/dagger/pulumi/dagger.js";
-import { DaggerCommand, SecretApi } from "@RawkodeAcademy/dagger/index.js";
+import { getSourceDir } from "@rawkode.academy/dagger/utils/index.js";
+import { up } from "@rawkode.academy/dagger/pulumi/dagger.js";
+import { DaggerCommand, SecretApi } from "@rawkode.academy/dagger/index.js";
 import { oraPromise } from "ora";
 
-export const deploy = async (client: Client, getSecrets: SecretApi): Promise<void> => {
+export const deploy = async (
+  client: Client,
+  getSecrets: SecretApi
+): Promise<void> => {
   const sourcePath = getSourceDir(`${import.meta.url}/..`);
 
   const secrets = await oraPromise(

@@ -1,10 +1,10 @@
 {
-    "name": "@RawkodeAcademy/google-cloud",
+    "name": "@rawkode.academy/google-cloud",
     "type": "module",
     "main": "index.ts",
     "devDependencies": {
         "@dagger.io/dagger": "^0.3.0",
-        "@RawkodeAcademy/dagger": "workspace:*",
+        "@rawkode.academy/dagger": "workspace:*",
         "@types/node": "^14",
         "ora": "^6.1.2"
     },

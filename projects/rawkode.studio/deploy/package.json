@@ -1,5 +1,5 @@
 {
-    "name": "@RawkodeAcademy/studio-deploy",
+    "name": "@rawkode.academy/studio-deploy",
     "type": "module",
     "devDependencies": {
         "@pulumi/kubernetes": "^3",

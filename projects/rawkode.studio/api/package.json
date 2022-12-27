@@ -1,26 +1,26 @@
 {
-  "name": "@RawkodeAcademy/show-data",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "@prisma/client": "^4.7.1",
-    "@types/inquirer": "^9.0.3",
-    "@types/inquirer-autocomplete-prompt": "^3.0.0",
-    "@types/js-yaml": "^4.0.5",
-    "@types/node": "^18.11.15",
-    "dayjs": "^1.11.7",
-    "fast-glob": "^3.2.12",
-    "inquirer": "^9.1.4",
-    "inquirer-autocomplete-prompt": "^3.0.0",
-    "js-yaml": "^4.1.0",
-    "knex": "^2.3.0",
-    "knex-types": "^0.5.0",
-    "pg": "^8.8.0",
-    "prisma": "^4.7.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.4"
-  },
-  "devDependencies": {
-    "rome": "^11.0.0"
-  }
+    "name": "@rawkode.academy/show-data",
+    "version": "1.0.0",
+    "type": "module",
+    "dependencies": {
+        "@prisma/client": "^4.7.1",
+        "@types/inquirer": "^9.0.3",
+        "@types/inquirer-autocomplete-prompt": "^3.0.0",
+        "@types/js-yaml": "^4.0.5",
+        "@types/node": "^18.11.15",
+        "dayjs": "^1.11.7",
+        "fast-glob": "^3.2.12",
+        "inquirer": "^9.1.4",
+        "inquirer-autocomplete-prompt": "^3.0.0",
+        "js-yaml": "^4.1.0",
+        "knex": "^2.3.0",
+        "knex-types": "^0.5.0",
+        "pg": "^8.8.0",
+        "prisma": "^4.7.1",
+        "ts-node": "^10.9.1",
+        "typescript": "^4.9.4"
+    },
+    "devDependencies": {
+        "rome": "^11.0.0"
+    }
 }

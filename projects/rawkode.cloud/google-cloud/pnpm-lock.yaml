@@ -1,12 +1,12 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@RawkodeAcademy/dagger': workspace:*
   '@dagger.io/dagger': ^0.3.0
   '@pulumi/gcp': ^6.0.0
   '@pulumi/google-native': ^0.27.0
   '@pulumi/pulumi': ^3.0.0
   '@pulumiverse/doppler': 0.0.10
+  '@rawkode.academy/dagger': workspace:*
   '@types/node': ^14
   ora: ^6.1.2
   ts-node: ^10.9.1
@@ -21,8 +21,8 @@ dependencies:
   typescript: 4.9.4
 
 devDependencies:
-  '@RawkodeAcademy/dagger': link:../../../dagger
   '@dagger.io/dagger': 0.3.0
+  '@rawkode.academy/dagger': link:../../../dagger
   '@types/node': 14.18.35
   ora: 6.1.2
 

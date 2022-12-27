@@ -1,7 +1,7 @@
 import Client from "@dagger.io/dagger";
-import { DaggerCommand, SecretApi } from "@RawkodeAcademy/dagger/index.js";
-import { getSourceDir } from "@RawkodeAcademy/dagger/utils/index.js";
-import { up } from "@RawkodeAcademy/dagger/pulumi/dagger.js";
+import { DaggerCommand, SecretApi } from "@rawkode.academy/dagger/index.js";
+import { getSourceDir } from "@rawkode.academy/dagger/utils/index.js";
+import { up } from "@rawkode.academy/dagger/pulumi/dagger.js";
 import { oraPromise } from "ora";
 import { z } from "zod";
 
