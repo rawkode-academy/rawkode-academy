@@ -185,6 +185,9 @@ export class Project extends pulumi.ComponentResource {
       {
         metadata: {
           namespace,
+          annotations: {
+            "pulumi.com/skipAwait": "true",
+          },
         },
         spec: {
           accessModes: ["ReadWriteOnce"],

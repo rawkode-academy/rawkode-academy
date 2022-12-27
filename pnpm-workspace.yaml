@@ -3,4 +3,5 @@ packages:
   - "./projects/rawkode.cloud/dns"
   - "./projects/rawkode.cloud/google-cloud"
   - "./projects/rawkode.cloud/teleport"
-
+  - "./projects/rawkode.studio"
+  - "./projects/rawkode.studio/deploy"

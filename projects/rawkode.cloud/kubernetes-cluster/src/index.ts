@@ -18,9 +18,9 @@ platform
   .addComponent(FluxCD)
   .addComponent(PulumiOperator)
   .addComponent(CertManager)
-  .addComponent(Redpanda);
-// .addProject("example", {
-//   repository: "oci://ghcr.io/rawkodeacademy/cms-server-deploy",
-//   directory: "deploy",
-//   environment: {},
-// });
+  .addComponent(Redpanda)
+  .addProject("studio", {
+    repository: "oci://ghcr.io/rawkodeacademy/studio-deploy",
+    directory: ".",
+    environment: {},
+  });

@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "strict": true,
-    "target": "esnext",
-    "module": "esnext",
+    "outDir": "bin",
+    "target": "es2016",
+    "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
     "experimentalDecorators": true,
@@ -10,5 +11,6 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true
-  }
+  },
+  "files": ["index.ts"]
 }
