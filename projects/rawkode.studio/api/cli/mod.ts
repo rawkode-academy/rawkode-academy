@@ -23,7 +23,7 @@ export const main = async (db: pkg.Knex<any, unknown[]>) => {
 			break;
 
 		case "Episodes: YAML -> SQL":
-			await dataMigrations.migrate();
+			await dataMigrations.migrateYamlToSql();
 			break;
 
 		case "Episodes: YAML -> HCL":

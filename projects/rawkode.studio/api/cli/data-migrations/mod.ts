@@ -78,7 +78,7 @@ export const migrateYamlToHcl = async () => {
     console.log("Done writing HCL files");
 };
 
-export const migrate = async () => {
+export const migrateYamlToSql = async () => {
     dayjs.extend(duration);
 
     await inquirer.prompt([
@@ -92,6 +92,8 @@ export const migrate = async () => {
     const episodes = await loadEpisodes();
 
     const insertStatements = episodes.map((episode) => {
+        const id = slugify(`${episode.show} ${episode.title}`);
+
         const chapters = episode.chapters.map((chapter) => {
             const time = chapter.time.split(":");
             const title = escapeForSql(chapter.title);
@@ -127,7 +129,7 @@ export const migrate = async () => {
                 ? `array[${chapters.join(", ")}]`
                 : "array[]::chapter[]";
 
-        return `INSERT INTO episodes ("title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters") VALUES ('${title}', '${show}', '${episode.publishedAt}', '${episode.youtubeId}', ${episode.youtubeCategory}, ${linksArray}, ${chaptersArray}) ON CONFLICT(id) DO NOTHING;`;
+        return `INSERT INTO episodes ("id", "title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters") VALUES ('${id}', '${title}', '${show}', '${episode.publishedAt}', '${episode.youtubeId}', ${episode.youtubeCategory}, ${linksArray}, ${chaptersArray}) ON CONFLICT(id) DO NOTHING;`;
     });
 
     if (existsSync("output") === false) {
