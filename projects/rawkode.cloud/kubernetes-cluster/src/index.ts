@@ -7,9 +7,18 @@ const platform = new Platform("platform", {
   provider: infrastructure.kubernetesProvider,
 });
 
-import { FluxCD, PulumiOperator } from "./platform/components";
+import {
+  CertManager,
+  FluxCD,
+  PulumiOperator,
+  Redpanda,
+} from "./platform/components";
 
-platform.addComponent(FluxCD).addComponent(PulumiOperator);
+platform
+  .addComponent(FluxCD)
+  .addComponent(PulumiOperator)
+  .addComponent(CertManager)
+  .addComponent(Redpanda);
 // .addProject("example", {
 //   repository: "oci://ghcr.io/rawkodeacademy/cms-server-deploy",
 //   directory: "deploy",

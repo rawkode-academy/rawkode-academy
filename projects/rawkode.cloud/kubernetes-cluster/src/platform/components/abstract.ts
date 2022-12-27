@@ -13,7 +13,6 @@ export interface IngressComponent {
 }
 
 export abstract class Component extends pulumi.ComponentResource {
-  protected abstract readonly crdUrls?: string[];
   protected abstract readonly version: string;
 
   static getComponentName(): string {
@@ -25,11 +24,10 @@ export abstract class Component extends pulumi.ComponentResource {
   }
 
   protected readonly name: string;
+  protected readonly crdUrls: string[] = [];
   protected readonly parent: pulumi.Resource;
   protected readonly provider: kubernetes.Provider;
   protected readonly namespace: kubernetes.core.v1.Namespace;
-
-  protected resources: pulumi.Resource[] = [];
 
   constructor(name: string, args: ComponentArgs) {
     super(`platform:component:${name}`, name, {}, args);
@@ -48,9 +46,7 @@ export abstract class Component extends pulumi.ComponentResource {
     return new kubernetes.yaml.ConfigGroup(
       `${this.name}-crds`,
       {
-        files: this.crdUrls?.map((url) =>
-          url.replace("${VERSION}", this.version)
-        ),
+        files: this.crdUrls,
       },
       { provider: this.provider, parent: this }
     );
@@ -64,6 +60,27 @@ export abstract class Component extends pulumi.ComponentResource {
       `${this.name}-${name}`,
       {
         file: location,
+        transformations: [
+          (obj: any) => {
+            obj.metadata.namespace = this.namespace.metadata.name;
+            obj.metadata.annotations = {
+              "pulumi.com/skipAwait": "true",
+            };
+          },
+        ],
+      },
+      { provider: this.provider, parent: this }
+    );
+  }
+
+  protected applyKustomization(
+    name: string,
+    location: string
+  ): kubernetes.kustomize.Directory {
+    return new kubernetes.kustomize.Directory(
+      `${this.name}-${name}`,
+      {
+        directory: `${location}`,
         transformations: [
           (obj: any) => {
             obj.metadata.namespace = this.namespace.metadata.name;
@@ -99,9 +116,5 @@ export abstract class Component extends pulumi.ComponentResource {
 
   public getDependencies(): string[] {
     return [];
-  }
-
-  public getResources(): pulumi.Resource[] {
-    return this.resources;
   }
 }

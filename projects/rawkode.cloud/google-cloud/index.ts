@@ -2,12 +2,12 @@ import * as pulumi from "@pulumi/pulumi";
 import * as doppler from "@pulumiverse/doppler";
 import * as gcp from "@pulumi/gcp";
 import * as google_native from "@pulumi/google-native";
-import { TransitionRouteGroup } from "@pulumi/google-native/dialogflow/v3";
 
 interface ProjectArgs {
   isPulumiProject: boolean;
   includedPermissions: string[];
 }
+
 const createProject = (name: string, args: ProjectArgs) => {
   let includedPermissions = args.includedPermissions;
 

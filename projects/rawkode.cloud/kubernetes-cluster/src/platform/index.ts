@@ -94,7 +94,7 @@ export class Platform extends pulumi.ComponentResource {
         const componentResource = this.components.get(dependency);
 
         if (componentResource) {
-          return acc.concat(componentResource.getResources());
+          return acc.concat(componentResource);
         } else {
           throw new Error(
             `Component ${componentName} depends on ${dependency} but it has not been added to the platform`
@@ -119,8 +119,7 @@ export class Platform extends pulumi.ComponentResource {
 
   private getPlatformResources(): pulumi.Resource[] {
     return Array.from(this.components.values()).reduce(
-      (acc: pulumi.Resource[], component) =>
-        acc.concat(component.getResources()),
+      (acc: pulumi.Resource[], component) => acc.concat(component),
       []
     );
   }

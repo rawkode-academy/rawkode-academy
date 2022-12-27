@@ -5,8 +5,8 @@ import { Component, ComponentArgs } from "./abstract";
 export class PulumiOperator extends Component {
   protected readonly version = "1.10.1";
   protected readonly crdUrls = [
-    "https://raw.githubusercontent.com/pulumi/pulumi-kubernetes-operator/v${VERSION}/deploy/crds/pulumi.com_stacks.yaml",
-    "https://raw.githubusercontent.com/pulumi/pulumi-kubernetes-operator/v${VERSION}/deploy/crds/pulumi.com_programs.yaml",
+    `https://raw.githubusercontent.com/pulumi/pulumi-kubernetes-operator/v${this.version}/deploy/crds/pulumi.com_stacks.yaml`,
+    `https://raw.githubusercontent.com/pulumi/pulumi-kubernetes-operator/v${this.version}/deploy/crds/pulumi.com_programs.yaml`,
   ];
 
   static getComponentName(): string {
