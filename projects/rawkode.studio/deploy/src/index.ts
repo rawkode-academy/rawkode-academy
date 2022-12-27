@@ -11,15 +11,15 @@ const redpandaCluster = new kubernetes.apiextensions.CustomResource("cluster", {
   spec: {
     image: "vectorized/redpanda",
     version: "latest",
-    replicas: 1,
+    replicas: 3,
     resources: {
       requests: {
-        cpu: 1,
-        memory: "1.2G",
+        cpu: "1000m",
+        memory: "2G",
       },
       limits: {
-        cpu: 1,
-        memory: "1.2G",
+        cpu: "1000m",
+        memory: "2G",
       },
     },
     configuration: {
@@ -60,7 +60,7 @@ const redpandaCluster = new kubernetes.apiextensions.CustomResource("cluster", {
           },
         },
       ],
-      developerMode: false,
+      developerMode: true,
     },
   },
 });

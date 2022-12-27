@@ -10,9 +10,11 @@ export const deploy = async (
   const secrets = await getSecrets("studio", "production", ["GITHUB_TOKEN"]);
 
   const sourcePath = getSourceDir(`${import.meta.url}/..`);
-  const sourceDirectory = await client.host().directory(sourcePath, {
-    exclude: [".git", ".pnpm-store", "dagger", "dagger.ts", "node_modules"],
-  });
+  const sourceDirectory = await client
+    .host()
+    .directory(`${sourcePath}/deploy`, {
+      exclude: [".git", ".pnpm-store", "dagger", "dagger.ts", "node_modules"],
+    });
 
   await pushArtifact(client, {
     artifactName: "studio-deploy",
