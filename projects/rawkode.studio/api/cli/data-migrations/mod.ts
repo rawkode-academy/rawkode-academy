@@ -5,6 +5,7 @@ import { load } from "js-yaml";
 import { mkdir, readFile } from "fs/promises";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration.js";
+import { slugify } from "../utils/mod.js";
 
 const dataBasePath = "../../../data/episodes";
 
@@ -43,7 +44,7 @@ export const migrateYamlToHcl = async () => {
     const episodes = await loadEpisodes();
 
     const hcl = episodes.map((episode) => {
-        return `episode "${escapeForHcl(episode.title)}" {
+        const hclContent = `episode "${escapeForHcl(episode.title)}" {
     show = "${escapeForHcl(episode.show)}"
     published_at = "${episode.publishedAt}"
     youtube_id = "${episode.youtubeId}"
@@ -56,21 +57,25 @@ export const migrateYamlToHcl = async () => {
                 })
                 .join(", ")}]
 }`;
+
+        return [slugify(`${episode.show} ${episode.title}`), hclContent]
     });
 
-    if (existsSync("output") === false) {
+    if (existsSync("output/episodes") === false) {
         console.log("Creating 'output' directory");
-        await mkdir("output");
+        await mkdir("output/episodes");
     }
 
-    writeFile("output/episodes.hcl", hcl.join("\n"), (err) => {
-        if (err) {
-            console.error(err);
-            process.exit(1);
-        }
+    hcl.forEach(([slug, content]) => {
+        writeFile(`output/episodes/${slug}.hcl`, content, (err) => {
+            if (err) {
+                console.error(err);
+                process.exit(1);
+            }
+        })
     });
 
-    console.log("Done writing 'episodes.hcl'!");
+    console.log("Done writing HCL files");
 };
 
 export const migrate = async () => {
