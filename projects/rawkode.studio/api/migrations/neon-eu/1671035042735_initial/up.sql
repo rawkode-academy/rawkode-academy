@@ -1,36 +1,3 @@
--- Slugify
--- Source: https://www.kdobson.net/2019/ultimate-postgresql-slug-function/
-CREATE EXTENSION IF NOT EXISTS "unaccent";
-
-CREATE OR REPLACE FUNCTION slugify("value" TEXT) RETURNS TEXT AS $$ -- removes accents (diacritic signs) from a given string --
-    WITH "unaccented" AS (
-        SELECT unaccent("value") AS "value"
-    ),
-    -- lowercases the string
-    "lowercase" AS (
-        SELECT lower("value") AS "value"
-        FROM "unaccented"
-    ),
-    -- remove single and double quotes
-    "removed_quotes" AS (
-        SELECT regexp_replace("value", '[''"]+', '', 'gi') AS "value"
-        FROM "lowercase"
-    ),
-    -- replaces anything that's not a letter, number, hyphen('-'), or underscore('_') with a hyphen('-')
-    "hyphenated" AS (
-        SELECT regexp_replace("value", '[^a-z0-9\\-_]+', '-', 'gi') AS "value"
-        FROM "removed_quotes"
-    ),
-    -- trims hyphens('-') if they exist on the head or tail of the string
-    "trimmed" AS (
-        SELECT regexp_replace(regexp_replace("value", '\-+$', ''), '^\-', '') AS "value"
-        FROM "hyphenated"
-    )
-SELECT "value"
-FROM "trimmed";
-
-$$ LANGUAGE SQL STRICT IMMUTABLE;
-
 -- People
 CREATE TABLE "people" (
     "id" TEXT NOT NULL GENERATED ALWAYS AS ("githubHandle") STORED,
@@ -63,9 +30,8 @@ CREATE UNIQUE INDEX "person_email" ON "people"("email");
 
 -- Shows
 CREATE TABLE "shows" (
-    "id" TEXT NOT NULL GENERATED ALWAYS AS (slugify(name)) STORED,
-    "name" TEXT NOT NULL,
-    CONSTRAINT "shows_id" PRIMARY KEY ("id")
+    "id" TEXT PRIMARY KEY,
+    "name" TEXT NOT NULL
 );
 
 CREATE UNIQUE INDEX "show_name" ON "shows"("name");
@@ -93,7 +59,7 @@ FROM show_hosts
 
 -- Technologies
 CREATE TABLE "technologies" (
-    "id" TEXT NOT NULL PRIMARY KEY GENERATED ALWAYS AS (slugify(name)) STORED,
+    "id" TEXT PRIMARY KEY,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "website" TEXT NOT NULL,
@@ -120,7 +86,7 @@ CREATE TABLE "technologies" (
 CREATE TYPE "chapter" AS ("time" INTERVAL, "title" TEXT);
 
 CREATE TABLE "episodes" (
-    "id" TEXT NOT NULL PRIMARY KEY GENERATED ALWAYS AS (slugify("showId" || ' ' || title)) STORED,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "title" TEXT NOT NULL,
     "showId" TEXT NOT NULL REFERENCES shows("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     "live" BOOLEAN NOT NULL DEFAULT true,
