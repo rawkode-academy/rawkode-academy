@@ -668,7 +668,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rawkode-studio-episode-linter"
+name = "rawkode-studio-linter"
 version = "0.1.0"
 dependencies = [
  "chrono",

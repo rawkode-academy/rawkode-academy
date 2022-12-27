@@ -1,6 +1,6 @@
 [package]
-name = "rawkode-studio-episode-linter"
-description = "Lint rawkode.studio episode files"
+name = "rawkode-studio-linter"
+description = "Lint rawkode.studio (episode|show|technology|person) files"
 authors = [
     "David Flanagan <david@rawkode.dev>",
     "Stefan Ruzitschka <stefan@icepuma.dev>",
