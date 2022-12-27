@@ -1,12 +1,13 @@
 use chrono::{DateTime, Duration, Utc};
 use hcl::ser::LabeledBlock;
+use hhmmss::Hhmmss;
 use indexmap::IndexMap;
 use regex::Regex;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 const DURATION_REGEX: &str = r"([0-9]{1,2}):([0-9]{1,2}):?([0-9]{1,2})?";
 
-fn chapter_duration<'de, D>(deserializer: D) -> Result<Duration, D::Error>
+fn chapter_duration_de<'de, D>(deserializer: D) -> Result<Duration, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
@@ -53,14 +54,24 @@ where
     }
 }
 
-#[derive(Deserialize, Debug)]
+fn chapter_duration_ser<S>(duration: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_str(duration.hhmmss().as_str())
+}
+
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Chapter {
-    #[serde(deserialize_with = "chapter_duration")]
+    #[serde(
+        deserialize_with = "chapter_duration_de",
+        serialize_with = "chapter_duration_ser"
+    )]
     pub time: Duration,
     pub title: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Episode {
     pub show: String,
     pub published_at: DateTime<Utc>,
@@ -71,12 +82,12 @@ pub struct Episode {
     pub chapters: Vec<Chapter>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Episodes {
     pub episode: LabeledBlock<IndexMap<String, Episode>>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Person {
     pub name: String,
     pub twitter: Option<String>,
@@ -84,12 +95,12 @@ pub struct Person {
     pub youtube: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct People {
     pub person: LabeledBlock<IndexMap<String, Person>>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Technology {
     pub website: String,
     pub documentation: String,
@@ -97,15 +108,15 @@ pub struct Technology {
     pub description: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Technologies {
     pub technology: LabeledBlock<IndexMap<String, Technology>>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Show {}
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Shows {
     pub show: LabeledBlock<IndexMap<String, Show>>,
 }

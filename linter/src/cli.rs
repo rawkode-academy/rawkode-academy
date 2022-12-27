@@ -14,6 +14,9 @@ pub enum FileFormat {
 pub struct Format {
     #[arg(short, long)]
     pub path: PathBuf,
+
+    #[arg(short, long, default_value_t = false)]
+    pub apply: bool,
 }
 
 #[derive(Debug, Parser)]
