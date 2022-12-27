@@ -1,0 +1,8 @@
+episode "Introduction to Kyverno" {
+    show = "rawkode-live"
+    published_at = "2021-02-18T17:00:00+00:00"
+    youtube_id = "GlqCW7uJ-7Q"
+    youtube_category = 24
+    links = ["twitter.com/rawkode", "rawkode.live", "rawkode.live/chat", "twitter.com/jimbugwadia", "github.com/JimBugwadia", "nirmata.com/", "twitter.com/ShutingZhao2", "github.com/realshuting", "www.linkedin.com/in/shuting-zhao-1a1aa912b/", "kyverno.io/", "twitter.com/kyverno", "github.com/kyverno/kyverno"]
+    chapters = [{ time = "00:00", title = "Holding Screen" }, { time = "00:15", title = "Introductions" }, { time = "01:30", title = "What is Kyverno?" }, { time = "09:20", title = "Kyverno vs. PodSecurityPolicies" }, { time = "15:20", title = "Installing Kyverno" }, { time = "18:30", title = "Applying our first policy" }, { time = "24:40", title = "Can we all use the same prepackaged policies?" }, { time = "29:55", title = "Applying the PodSecurityPolicy policies" }, { time = "40:00", title = "Writing Kyverno policies" }, { time = "48:50", title = "Audit reports" }, { time = "57:20", title = "Generating policies" }, { time = "01:08:00", title = "Variables" }, { time = "01:10:00", title = "External data sources (API Server)" }]
+}

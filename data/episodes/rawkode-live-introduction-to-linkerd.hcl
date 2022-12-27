@@ -1,0 +1,8 @@
+episode "Introduction to Linkerd" {
+    show = "rawkode-live"
+    published_at = "2020-11-03T17:00:00+00:00"
+    youtube_id = "YjKpukXTQsI"
+    youtube_category = 24
+    links = ["linkerd.io", "twitter.com/grampelberg"]
+    chapters = [{ time = "00:00", title = "Holding screen" }, { time = "01:25", title = "Introductions" }, { time = "03:10", title = "What is a service mesh?" }, { time = "06:50", title = "What are we working with?" }, { time = "07:30", title = "Installing Linkerd" }, { time = "12:50", title = "Linkerd dashboard" }, { time = "15:40", title = "Linkerd top" }, { time = "18:10", title = "Deploying the demo app" }, { time = "20:40", title = "Injecting the Linkerd sidecar" }, { time = "24:15", title = "Stat command" }, { time = "28:20", title = "Tap command" }, { time = "31:30", title = "Fault injection / TrafficSplit / Canary Deploys" }, { time = "40:50", title = "Time outs and retries" }, { time = "49:20", title = "mTLS" }, { time = "55:30", title = "Multi-cluster" }, { time = "09:00", title = "Closing" }]
+}

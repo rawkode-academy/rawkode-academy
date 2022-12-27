@@ -1,0 +1,8 @@
+episode "Profiling PHP Applications with Xdebug" {
+    show = "rawkode-live"
+    published_at = "2020-09-17T14:00:00+00:00"
+    youtube_id = "mNc_tcomrVs"
+    youtube_category = 24
+    links = ["twitter.com/derickr", "xdebug.org/"]
+    chapters = [{ time = "00:00", title = "Holding Screen" }, { time = "01:55", title = "Introductions" }, { time = "06:30", title = "What are we going to profile?" }, { time = "11:30", title = "Installing and enabling Xdebug extension with Pecl" }, { time = "17:40", title = "Profiling our hello-world example" }, { time = "28:20", title = "Profiling our factorial example" }, { time = "46:20", title = "Profiling our simple composer configuration" }, { time = "57:30", title = "Profiling our complex composer configuration" }, { time = "09:00", title = "Compiling Xdebug 3 for the performance gains!" }, { time = "13:00", title = "Profiling our complex composer configuration with much gains" }]
+}
