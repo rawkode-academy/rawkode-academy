@@ -9,11 +9,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.0.30", features = ["derive"] }
+clap = { version = "4.0.32", features = ["derive"] }
 miette = { version = "5.5.0", features = ["fancy"] }
 chrono = { version = "0.4.23", features = ["serde"] }
 hcl-rs = "0.11.0"
-serde = "1.0.151"
+serde = "1.0.152"
 indexmap = "1.9.2"
 url = { version = "2.3.1", features = ["serde"] }
 regex = "1.7.0"
+glob = "0.3.0"

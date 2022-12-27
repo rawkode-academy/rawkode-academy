@@ -76,6 +76,40 @@ pub struct Episodes {
     pub episode: LabeledBlock<IndexMap<String, Episode>>,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct Person {
+    pub name: String,
+    pub twitter: Option<String>,
+    pub github: Option<String>,
+    pub youtube: Option<String>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct People {
+    pub person: LabeledBlock<IndexMap<String, Person>>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Technology {
+    pub website: String,
+    pub documentation: String,
+    pub repository: String,
+    pub description: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Technologies {
+    pub technology: LabeledBlock<IndexMap<String, Technology>>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Show {}
+
+#[derive(Deserialize, Debug)]
+pub struct Shows {
+    pub show: LabeledBlock<IndexMap<String, Show>>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
