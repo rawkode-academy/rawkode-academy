@@ -13,16 +13,25 @@ mod cli;
 mod format;
 
 fn check<T: DeserializeOwned>(files: Vec<PathBuf>) {
+    let mut errors = false;
+
     for file in files {
         if let Ok(content) = fs::read_to_string(&file) {
             if let Err(err) = from_str::<T>(&content).into_diagnostic() {
                 eprintln!("{} - NOT OK\n {:?}", file.display(), err);
+
+                // only parsing errors count towards exit code = 1
+                errors = true;
             } else {
                 println!("{} - OK", file.display());
             }
         } else {
             eprintln!("{} - Cannot read file", file.display());
         }
+    }
+
+    if errors {
+        std::process::exit(1);
     }
 }
 
