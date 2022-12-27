@@ -6,6 +6,7 @@ import { mkdir, readFile } from "fs/promises";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration.js";
 import { slugify } from "../utils/mod.js";
+import hcl from "hcl2-parser";
 
 const dataBasePath = "../../../data/episodes";
 
@@ -24,7 +25,7 @@ interface Episode {
     chapters: Chapter[];
 }
 
-const loadEpisodes = async () => {
+const loadEpisodesFromYaml = async () => {
     const yamlFiles = await fastGlob([`${dataBasePath}/**/*.yaml`], {
         dot: false,
     });
@@ -40,8 +41,50 @@ const loadEpisodes = async () => {
     return episodes;
 };
 
+const loadEpisodesFromHcl = async () => {
+    const hclFiles = await fastGlob(['output/episodes/**/*.hcl'], {
+        dot: false,
+    });
+
+    const episodeLists: Episode[][] = await Promise.all(
+        hclFiles.map(async (file) => {
+            const hclContent = hcl.parseToObject(await readFile(file, 'utf8'))
+            const hclEpisodes = hclContent[0]?.episode
+
+            const episodes: Episode[] = []
+
+            if (hclEpisodes !== undefined) {
+                Object.entries(hclEpisodes).map((hclEpisode: any) => {
+                    const title = hclEpisode[0] // episode title
+                    const episode = hclEpisode[1]?.[0] // episode data
+
+                    if (title !== undefined && episode !== undefined) {
+                        episodes.push({
+                            title: title,
+                            show: episode.show,
+                            publishedAt: new Date(episode.published_at),
+                            youtubeId: episode.youtube_id,
+                            youtubeCategory: episode.youtube_category,
+                            links: episode.links,
+                            chapters: episode.chapters,
+                        });
+                    }
+                })
+            }
+
+            return episodes;
+        }),
+    );
+
+    const episodes = episodeLists.flat()
+
+    console.log("Found", episodes.length, "episodes");
+
+    return episodes;
+};
+
 export const migrateYamlToHcl = async () => {
-    const episodes = await loadEpisodes();
+    const episodes = await loadEpisodesFromYaml();
 
     const hcl = episodes.map((episode) => {
         const hclContent = `episode "${escapeForHcl(episode.title)}" {
@@ -63,7 +106,7 @@ export const migrateYamlToHcl = async () => {
 
     if (existsSync("output/episodes") === false) {
         console.log("Creating 'output' directory");
-        await mkdir("output/episodes");
+        await mkdir("output/episodes", { recursive: true });
     }
 
     hcl.forEach(([slug, content]) => {
@@ -78,18 +121,10 @@ export const migrateYamlToHcl = async () => {
     console.log("Done writing HCL files");
 };
 
-export const migrateYamlToSql = async () => {
+export const migrateHclToSql = async () => {
     dayjs.extend(duration);
 
-    await inquirer.prompt([
-        {
-            type: "confirm",
-            name: "confirm",
-            message: "Are you sure you want to migrate data?",
-        },
-    ]);
-
-    const episodes = await loadEpisodes();
+    const episodes = await loadEpisodesFromHcl();
 
     const insertStatements = episodes.map((episode) => {
         const id = slugify(`${episode.show} ${episode.title}`);
@@ -121,6 +156,7 @@ export const migrateYamlToSql = async () => {
 
         const title = escapeForSql(episode.title);
         const show = escapeForSql(episode.show);
+        const published_at = episode.publishedAt.toISOString();
 
         const linksArray =
             links.length > 0 ? `array[${links.join(", ")}]` : "array[]::text[]";
@@ -129,7 +165,7 @@ export const migrateYamlToSql = async () => {
                 ? `array[${chapters.join(", ")}]`
                 : "array[]::chapter[]";
 
-        return `INSERT INTO episodes ("id", "title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters") VALUES ('${id}', '${title}', '${show}', '${episode.publishedAt}', '${episode.youtubeId}', ${episode.youtubeCategory}, ${linksArray}, ${chaptersArray}) ON CONFLICT(id) DO NOTHING;`;
+        return `INSERT INTO episodes ("id", "title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters") VALUES ('${id}', '${title}', '${show}', '${published_at}', '${episode.youtubeId}', ${episode.youtubeCategory}, ${linksArray}, ${chaptersArray}) ON CONFLICT(id) DO NOTHING;`;
     });
 
     if (existsSync("output") === false) {

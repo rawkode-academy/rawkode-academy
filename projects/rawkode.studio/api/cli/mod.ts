@@ -11,8 +11,8 @@ export const main = async (db: pkg.Knex<any, unknown[]>) => {
 			message: "What do you want to do?",
 			choices: [
 				"Create a Technology",
-				"Episodes: YAML -> SQL",
 				"Episodes: YAML -> HCL",
+				"Episodes: HCL -> SQL",
 			],
 		},
 	]);
@@ -22,12 +22,12 @@ export const main = async (db: pkg.Knex<any, unknown[]>) => {
 			await technologies.create(db);
 			break;
 
-		case "Episodes: YAML -> SQL":
-			await dataMigrations.migrateYamlToSql();
-			break;
-
 		case "Episodes: YAML -> HCL":
 			await dataMigrations.migrateYamlToHcl();
+			break;
+
+		case "Episodes: HCL -> SQL":
+			await dataMigrations.migrateHclToSql();
 			break;
 
 		default:
