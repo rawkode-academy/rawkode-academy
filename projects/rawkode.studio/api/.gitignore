@@ -2,3 +2,4 @@
 /prisma/generated
 /types.ts
 episodes.sql
+/output

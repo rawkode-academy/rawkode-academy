@@ -1,11 +1,12 @@
-import { writeFile } from "fs";
+import { existsSync, writeFile } from "fs";
 import { default as fastGlob } from "fast-glob";
 import { default as inquirer } from "inquirer";
 import { load } from "js-yaml";
-import { readFile } from "fs/promises";
-import { Knex } from "knex";
+import { mkdir, readFile } from "fs/promises";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration.js";
+
+const dataBasePath = "../../../data/episodes";
 
 interface Chapter {
     time: string;
@@ -22,7 +23,57 @@ interface Episode {
     chapters: Chapter[];
 }
 
-export const migrate = async (db: Knex<any, unknown[]>) => {
+const loadEpisodes = async () => {
+    const yamlFiles = await fastGlob([`${dataBasePath}/**/*.yaml`], {
+        dot: false,
+    });
+
+    const episodes: Episode[] = await Promise.all(
+        yamlFiles.map(async (file) => {
+            return load(await readFile(file, "utf8")) as Episode;
+        }),
+    );
+
+    console.log("Found", episodes.length, "episodes");
+
+    return episodes;
+};
+
+export const migrateYamlToHcl = async () => {
+    const episodes = await loadEpisodes();
+
+    const hcl = episodes.map((episode) => {
+        return `episode "${escapeForHcl(episode.title)}" {
+    show = "${escapeForHcl(episode.show)}"
+    published_at = "${episode.publishedAt}"
+    youtube_id = "${episode.youtubeId}"
+    youtube_category = ${episode.youtubeCategory}
+    links = [${episode.links.map((link) => `"${link}"`).join(", ")}]
+    chapters = [${episode.chapters
+                .map((chapter) => {
+                    return `{ time = "${chapter.time
+                        }", title = "${escapeForHcl(chapter.title)}" }`;
+                })
+                .join(", ")}]
+}`;
+    });
+
+    if (existsSync("output") === false) {
+        console.log("Creating 'output' directory");
+        await mkdir("output");
+    }
+
+    writeFile("output/episodes.hcl", hcl.join("\n"), (err) => {
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
+    });
+
+    console.log("Done writing 'episodes.hcl'!");
+};
+
+export const migrate = async () => {
     dayjs.extend(duration);
 
     await inquirer.prompt([
@@ -33,22 +84,12 @@ export const migrate = async (db: Knex<any, unknown[]>) => {
         },
     ]);
 
-    const yamlFiles = await fastGlob(["../../data/episodes/**/*.yaml"], {
-        dot: false,
-    });
-
-    const episodes: Episode[] = await Promise.all(
-        yamlFiles.map(async (file) => {
-            return load(await readFile(file, "utf8")) as Episode;
-        })
-    );
-
-    console.log("Found", episodes.length, "episodes");
+    const episodes = await loadEpisodes();
 
     const insertStatements = episodes.map((episode) => {
         const chapters = episode.chapters.map((chapter) => {
             const time = chapter.time.split(":");
-            const title = escape(chapter.title);
+            const title = escapeForSql(chapter.title);
 
             if (time.length === 2) {
                 return `row('${dayjs
@@ -64,15 +105,15 @@ export const migrate = async (db: Knex<any, unknown[]>) => {
                     .toISOString()}', '${title}')::chapter`;
             }
 
-            throw new Error("Invalid time format: " + chapter.time);
+            throw new Error(`Invalid time format: ${chapter.time}`);
         });
 
         const links = episode.links.map((link) => {
             return `'${link}'`;
         });
 
-        const title = escape(episode.title);
-        const show = escape(episode.show);
+        const title = escapeForSql(episode.title);
+        const show = escapeForSql(episode.show);
 
         const linksArray =
             links.length > 0 ? `array[${links.join(", ")}]` : "array[]::text[]";
@@ -84,7 +125,12 @@ export const migrate = async (db: Knex<any, unknown[]>) => {
         return `INSERT INTO episodes ("title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters") VALUES ('${title}', '${show}', '${episode.publishedAt}', '${episode.youtubeId}', ${episode.youtubeCategory}, ${linksArray}, ${chaptersArray}) ON CONFLICT(id) DO NOTHING;`;
     });
 
-    writeFile("episodes.sql", insertStatements.join("\n"), (err) => {
+    if (existsSync("output") === false) {
+        console.log("Creating 'output' directory");
+        await mkdir("output");
+    }
+
+    writeFile("output/episodes.sql", insertStatements.join("\n"), (err) => {
         if (err) {
             console.error(err);
             process.exit(1);
@@ -94,6 +140,10 @@ export const migrate = async (db: Knex<any, unknown[]>) => {
     console.log("Done writing 'episodes.sql'!");
 };
 
-function escape(str: string) {
+function escapeForSql(str: string) {
     return str.replace(/'/g, "''");
+}
+
+function escapeForHcl(str: string) {
+    return str.replace(/"/g, '\\"');
 }

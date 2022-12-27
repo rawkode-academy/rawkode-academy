@@ -4,25 +4,33 @@ import * as dataMigrations from "./data-migrations/mod.js";
 import pkg from "knex";
 
 export const main = async (db: pkg.Knex<any, unknown[]>) => {
-    const answers = await inquirer.prompt([
-        {
-            type: "list",
-            name: "command",
-            message: "What do you want to do?",
-            choices: ["Create a Technology", "Migrate old data"],
-        },
-    ]);
+	const answers = await inquirer.prompt([
+		{
+			type: "list",
+			name: "command",
+			message: "What do you want to do?",
+			choices: [
+				"Create a Technology",
+				"Episodes: YAML -> SQL",
+				"Episodes: YAML -> HCL",
+			],
+		},
+	]);
 
-    switch (answers.command) {
-        case "Create a Technology":
-            await technologies.create(db);
-            break;
+	switch (answers.command) {
+		case "Create a Technology":
+			await technologies.create(db);
+			break;
 
-        case "Migrate old data":
-            await dataMigrations.migrate(db);
-            break;
+		case "Episodes: YAML -> SQL":
+			await dataMigrations.migrate();
+			break;
 
-        default:
-            console.log("Unknown command");
-    }
+		case "Episodes: YAML -> HCL":
+			await dataMigrations.migrateYamlToHcl();
+			break;
+
+		default:
+			console.log("Unknown command");
+	}
 };
