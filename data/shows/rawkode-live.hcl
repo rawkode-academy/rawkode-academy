@@ -1,3 +1,1 @@
-show "rawkode-live" {
-    name = "Rawkode Live"
-}
+show "Rawkode Live" {}

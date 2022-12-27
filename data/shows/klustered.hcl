@@ -1,3 +1,1 @@
-show "klustered" {
-    name = "Klustered"
-}
+show "Klustered" {}

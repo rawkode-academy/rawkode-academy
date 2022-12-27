@@ -1,3 +1,1 @@
-show "metal-monday" {
-    name = "Metal Monday"
-}
+show "Metal Monday" {}

@@ -1,5 +1,4 @@
-technology "rust" {
-    name = "Rust"
+technology "Rust" {
     website = "https://www.rust-lang.org/"
     documentation = "https://doc.rust-lang.org/book/"
     repository = "https://github.com/rust-lang/rust"
