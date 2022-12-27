@@ -7,5 +7,5 @@ The episode file linter resides in [linter](linter). When an episode file is val
 A sample episode file is provided via [sample_episode.hcl](linter/sample_episode.hcl).
 
 ```shell
-cargo run --manifest-path=linter/Cargo.toml -- linter/sample_episode.hcl
+cargo run --manifest-path=linter/Cargo.toml -- lint -f episode -p data/episodes/
 ```
