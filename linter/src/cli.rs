@@ -21,9 +21,6 @@ pub struct Format {
 
 #[derive(Debug, Parser)]
 pub struct Lint {
-    #[arg(short, long, value_enum, default_value_t = FileFormat::Episode)]
-    pub file_format: FileFormat,
-
     #[arg(short, long)]
     pub path: PathBuf,
 }

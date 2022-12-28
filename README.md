@@ -11,7 +11,7 @@ A sample episode file is provided via [sample_episode.hcl](linter/sample_episode
 To run the linter, use the following command:
 
 ```shell
-cargo run --manifest-path=linter/Cargo.toml -- lint -f episode -p data/episodes/
+cargo run --manifest-path=linter/Cargo.toml -- lint --path data/episodes/
 ```
 
 To format all files, use the following command:

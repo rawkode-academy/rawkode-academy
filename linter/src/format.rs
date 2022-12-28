@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
-use hcl::ser::LabeledBlock;
+use hcl::{ser::LabeledBlock, Value};
 use hhmmss::Hhmmss;
 use indexmap::IndexMap;
 use regex::Regex;
@@ -88,6 +88,11 @@ pub struct Episodes {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+pub struct MinimalEpisodes {
+    pub episode: Value,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Person {
     pub name: String,
     pub twitter: Option<String>,
@@ -98,6 +103,11 @@ pub struct Person {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct People {
     pub person: LabeledBlock<IndexMap<String, Person>>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct MinimalPeople {
+    pub person: Value,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -114,11 +124,21 @@ pub struct Technologies {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
+pub struct MinimalTechnologies {
+    pub technology: Value,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Show {}
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Shows {
     pub show: LabeledBlock<IndexMap<String, Show>>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct MinimalShows {
+    pub show: Value,
 }
 
 #[cfg(test)]
