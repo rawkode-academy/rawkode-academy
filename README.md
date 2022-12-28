@@ -1,5 +1,16 @@
 # Content Management
 
+## Data
+
+The data resides in [data](data). The data is split into four directories:
+
+* [Episodes](data/episodes/)
+* [People](data/people/)
+* [Shows](data/shows/)
+* [Technologies](data/technologies/)
+
+The data exists to feed the YouTube channel of [Rawkode Academy](https://www.youtube.com/c/rawkode).
+
 ## Linter
 
 The file linter resides in [linter](linter). When a file is valid, it exits with a status code of 0. When a file is invalid, it exits with a status code of 1 and prints the errors to standard error.
