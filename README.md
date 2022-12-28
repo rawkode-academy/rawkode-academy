@@ -6,6 +6,16 @@ The episode file linter resides in [linter](linter). When a file is valid, it ex
 
 A sample episode file is provided via [sample_episode.hcl](linter/sample_episode.hcl).
 
+### Usage
+
+To run the linter, use the following command:
+
 ```shell
 cargo run --manifest-path=linter/Cargo.toml -- lint -f episode -p data/episodes/
+```
+
+To format all files, use the following command:
+
+```shell
+cargo run --manifest-path=linter/Cargo.toml -- format --path data/ [--apply]
 ```
