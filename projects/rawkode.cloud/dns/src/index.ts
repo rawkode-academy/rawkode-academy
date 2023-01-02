@@ -10,6 +10,9 @@ allZones.push(createZone(rawkodeAcademy));
 import { rawkodeCloud } from "./domains/rawkode.cloud";
 allZones.push(createZone(rawkodeCloud));
 
+import { rawkodeStudio } from "./domains/rawkode.studio";
+allZones.push(createZone(rawkodeStudio));
+
 import { rawkodeCom } from "./domains/rawkode.com";
 allZones.push(createZone(rawkodeCom));
 
@@ -46,7 +49,7 @@ allZones.push(createZone(rawkodeNews));
 // createZone(rawkodeSh);
 
 export const zoneNameMap = allZones.reduce<
-  Record<string, pulumi.Output<string>>
+	Record<string, pulumi.Output<string>>
 >((zoneNameMap, [domain, zone]) => {
-  return { ...zoneNameMap, [domain]: zone.name };
+	return { ...zoneNameMap, [domain]: zone.name };
 }, {});
