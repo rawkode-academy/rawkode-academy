@@ -12,6 +12,6 @@ fn main() -> Result<()> {
     match cli.subcommand {
         cli::SubCommand::Format(cli::Format { path, apply }) => command::format(path, apply),
         cli::SubCommand::Lint(cli::Lint { path }) => command::lint(path),
-        cli::SubCommand::Sync(_) => todo!(),
+        cli::SubCommand::Sync(cli::Sync { path, apply }) => command::sync(path, apply),
     }
 }

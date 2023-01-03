@@ -1,7 +1,12 @@
 use chrono::Duration;
+use diacritics::remove_diacritics;
 use hhmmss::Hhmmss;
+use lazy_static::lazy_static;
+use miette::Result;
+use postgres::Client;
 use regex::Regex;
 use serde::Deserialize;
+use unicode_normalization::UnicodeNormalization;
 
 pub mod episode;
 pub mod people;
@@ -13,7 +18,13 @@ pub use people::*;
 pub use show::*;
 pub use technology::*;
 
-const DURATION_REGEX: &str = r"([0-9]{1,2}):([0-9]{1,2}):?([0-9]{1,2})?";
+lazy_static! {
+    static ref QUOTES: Regex = Regex::new(r#"["']+"#).unwrap();
+    static ref NON_ALPHANUMERIC: Regex = Regex::new(r#"[^a-z0-9]+"#).unwrap();
+    static ref LEADING_DASHES: Regex = Regex::new(r#"^-+"#).unwrap();
+    static ref TRAILING_DASHES: Regex = Regex::new(r#"-+$"#).unwrap();
+    static ref DURATION: Regex = Regex::new(r#"([0-9]{1,2}):([0-9]{1,2}):?([0-9]{1,2})?"#).unwrap();
+}
 
 pub(crate) fn chapter_duration_de<'de, D>(deserializer: D) -> Result<Duration, D::Error>
 where
@@ -21,10 +32,7 @@ where
 {
     let value = String::deserialize(deserializer)?;
 
-    let regex = Regex::new(DURATION_REGEX)
-        .map_err(|_| serde::de::Error::custom("Cannot create regex for Duration"))?;
-
-    let captures = regex
+    let captures = DURATION
         .captures(value.as_str())
         .ok_or_else(|| serde::de::Error::custom(format!("Cannot parse Duration from {}", value)))?;
 
@@ -67,4 +75,56 @@ where
     S: serde::Serializer,
 {
     serializer.serialize_str(duration.hhmmss().as_str())
+}
+
+fn slugify(value: &str) -> String {
+    let slug = value.nfd().collect::<String>();
+    let slug = remove_diacritics(&slug);
+    let slug = slug.to_lowercase();
+
+    let slug = QUOTES.replace_all(&slug, "").to_string();
+    let slug = NON_ALPHANUMERIC.replace_all(&slug, "-").to_string();
+    let slug = LEADING_DASHES.replace_all(&slug, "").to_string();
+    let slug = TRAILING_DASHES.replace_all(&slug, "").to_string();
+
+    slug
+}
+
+pub(crate) trait Insert {
+    fn insert(&self, client: &mut Client) -> Vec<Result<()>>;
+}
+
+fn escape_sql(value: &str) -> String {
+    value.replace('\'', "''")
+}
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_slugify() {
+        assert_eq!(slugify("Hello World"), "hello-world");
+
+        assert_eq!(
+            slugify("Part 2 - Tutorial 1: Installation"),
+            "part-2-tutorial-1-installation"
+        );
+
+        assert_eq!(
+            slugify("Infrastructure as Code & GitOps"),
+            "infrastructure-as-code-gitops"
+        );
+
+        assert_eq!(
+            slugify("Introduction to Prometheus, PromQL, & PromLens"),
+            "introduction-to-prometheus-promql-promlens"
+        );
+
+        assert_eq!(
+            slugify("Live Debugging the Changelog's Production Kubernetes"),
+            "live-debugging-the-changelogs-production-kubernetes"
+        );
+    }
 }

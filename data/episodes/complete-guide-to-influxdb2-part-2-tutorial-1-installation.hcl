@@ -1,5 +1,5 @@
 episode "Part 2 - Tutorial 1: Installation" {
-  show = "complete-guide-to-influxdb2"
+  show = "complete-guide-to-influxdb-2"
   published_at = "2022-01-26T23:20:03Z"
   youtube_id = "G0OM6ZNV2rQ"
   youtube_category = 24

@@ -1,6 +1,5 @@
-use std::path::PathBuf;
-
 use clap::{Parser, Subcommand, ValueEnum};
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, ValueEnum)]
 pub enum FileFormat {
@@ -27,6 +26,9 @@ pub struct Lint {
 
 #[derive(Debug, Parser)]
 pub struct Sync {
+    #[arg(short, long)]
+    pub path: PathBuf,
+
     #[arg(short, long, default_value_t = false)]
     pub apply: bool,
 }
