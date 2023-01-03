@@ -18,20 +18,24 @@ const redpandaCluster = new kubernetes.helm.v3.Chart("redpanda", {
 	},
 });
 
-// const redpandaConsole = new kubernetes.helm.v3.Chart("redpanda-console", {
-// 	fetchOpts: {
-// 		repo: "https://charts.redpanda.com/",
-// 	},
-// 	chart: "console",
-// 	version: "2.4.0",
-// 	skipAwait: true,
-// 	values: {
-// 		console: {
-// 			config: {
-// 				kafka: {
-// 					brokers: ["bootstrap.mybrokers.com:9092"],
-// 				},
-// 			},
-// 		},
-// 	},
-// });
+const redpandaConsole = new kubernetes.helm.v3.Chart("redpanda-console", {
+	fetchOpts: {
+		repo: "https://charts.redpanda.com/",
+	},
+	chart: "console",
+	version: "2.4.0",
+	skipAwait: true,
+	values: {
+		console: {
+			config: {
+				kafka: {
+					clientId: "console",
+					brokers: ["redpanda:9092"],
+					tls: {
+						enabled: true,
+					},
+				},
+			},
+		},
+	},
+});
