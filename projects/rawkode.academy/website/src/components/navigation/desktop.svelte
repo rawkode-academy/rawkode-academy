@@ -12,7 +12,7 @@
   {#each menuItems as menuItem}
     <a
       href={menuItem.href}
-      class="group flex items-center px-2 py-2 text-sm font-medium text-black {url.match(
+      class="group flex items-center px-2 py-2 font-medium text-black {url.match(
         menuItem.regex
       )
         ? 'underline'

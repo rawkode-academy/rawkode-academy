@@ -1,30 +1,26 @@
 ---
-import Layout from "../layouts/base.astro";
+import Layout from "../layouts/page.astro";
 ---
 
-<Layout title="Contact">
-  <main>
-    <h2>Want to chat?</h2>
+<Layout title="Want to chat?">
+  <div id="my-reform"></div>
 
-    <div id="my-reform"></div>
+  <script id="reform-script" src="https://embed.reform.app/v1/embed.js"
+  ></script>
 
-    <script id="reform-script" src="https://embed.reform.app/v1/embed.js"
-    ></script>
+  <script>
+    window.Reform =
+      window.Reform ||
+      function () {
+        (Reform.q = Reform.q || []).push(arguments);
+      };
+  </script>
 
-    <script>
-      window.Reform =
-        window.Reform ||
-        function () {
-          (Reform.q = Reform.q || []).push(arguments);
-        };
-    </script>
-
-    <script>
-      Reform("init", {
-        url: "https://forms.reform.app/rawkode/contact-us/akd2rz",
-        target: "#my-reform",
-        background: "transparent",
-      });
-    </script>
-  </main>
+  <script>
+    Reform("init", {
+      url: "https://forms.reform.app/rawkode/contact-us/akd2rz",
+      target: "#my-reform",
+      background: "transparent",
+    });
+  </script>
 </Layout>

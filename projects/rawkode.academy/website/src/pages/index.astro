@@ -1,0 +1,75 @@
+---
+import Layout from "../layouts/base.astro";
+import Header from "../layouts/header.astro";
+import "../styles/homepage.css";
+interface Show {
+  name: string;
+  id: string;
+}
+const response = await fetch("https://api.rawkode.academy/v1/graphql",
+  {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      query: `
+        query MyQuery {
+            getShows {
+              id
+              name
+            }
+          }
+        `
+    }),
+  });
+const json = await response.json();
+const shows = json.data ? json.data.getShows : [];
+---
+
+<Layout title="Rawkode Academy - The Cloud Native Education Platform">
+  <div class="background">
+    <Header style="alternative" />
+    <section class="section--hero">
+      <h1>The Cloud Native Education Platform</h1>
+    </section>
+  </div>
+  <section class="section--technologies">
+    <h2>Technologies</h2>
+    <div class="technologies__container">
+      <img src="/kubernetes-icon.svg" height="100" width="100" />
+      <img src="/docker-icon.svg" height="100" width="100" />
+      <img src="/rust-icon.svg" height="100" width="100" />
+      <img src="/elixir-icon.svg" height="100" width="100" />
+      <img src="/argo-icon.svg" height="100" width="100" />
+      <img src="/envoy-icon.svg" height="100" width="100" />
+      <img src="/telepresence-icon.svg" height="100" width="100" />
+      <img src="/linkerd-icon.svg" height="100" width="100" />
+      <img src="/pulumi-icon.svg" height="100" width="100" />
+    </div>
+  </section>
+  <hr />
+  <section class="section--shows">
+    <h2>Shows</h2>
+    <div class="shows__container">
+      {shows.map(
+        (show: Show) => (
+          <a href={`/shows/${show.id}`} class="shows__card">
+            <img src="/academy-logo-circular.svg" height="64" width="64" />
+            <p>{show.name}</p>
+          </a>
+        )
+      )}
+    </div>
+  </section>
+  <section class="section--testimonial">
+    <p>"Rawkode has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services."</p>
+    <p>Mikkel Mork Hegnhoj - <a href="https://fermyon.com" target="_blank" rel="noopener noreferrer">Fermyon</a></p>
+  </section>
+  <section class="section--endorsements">
+    <h2>Trusted by:</h2>
+  </section>
+  <section class="section--work-together">
+    <h2>Lets work together</h2>
+    <p>With an insatiable love for technology, we are always on the hunt to learn and share knowledge with others in fun and exciting ways.</p>
+    <a href="/work-together">Get in touch</a>
+  </section>
+</Layout>

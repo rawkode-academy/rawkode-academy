@@ -1,0 +1,17 @@
+---
+import DesktopNavigation from "@components/navigation/desktop.svelte";
+import NavToggler from "@components/nav-toggler.svelte";
+import CommandToggler from "@components/command-toggler.svelte";
+const { style } = Astro.props;
+---
+
+<header class={style === "alternative" ? 'alternative' : ''}>
+  <NavToggler client:load />
+  <div class="navigation">
+    <a href="/">
+      <img src={`/logo-${style === "alternative" ? 'dark' : 'primary'}.svg`} alt="Rawkode Academy logo" width="150" height="40" />
+    </a>
+    <DesktopNavigation client:load />
+  </div>
+  <CommandToggler client:load />
+</header>

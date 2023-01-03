@@ -12,5 +12,5 @@
   on:click={showCommandPalette}
   class="toggler"
 >
-  <Icon icon="mdi:magnify" class="w-7 h-7" />
+  <Icon icon="mdi:magnify" height="28" width="28" />
 </button>

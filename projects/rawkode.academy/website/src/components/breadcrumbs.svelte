@@ -6,7 +6,7 @@
   }
 
   export let title: string;
-  export let breadcrumbs: Breadcrumb[] = [];
+  export let breadcrumbs: Breadcrumb[];
 </script>
 
 <div class="bg-white flex" aria-label="Breadcrumb">
@@ -21,7 +21,7 @@
     </li>
 
     <!-- this causes an HMR error? -->
-    <!-- {#each breadcrumbs as breadcrumb}
+    {#each breadcrumbs as breadcrumb}
       <li class="flex">
         <div class="flex items-center">
           <svg
@@ -41,7 +41,7 @@
           >
         </div>
       </li>
-    {/each} -->
+    {/each}
 
     <li class="flex flex-grow">
       <div class="flex items-center">
@@ -55,9 +55,9 @@
         >
           <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
         </svg>
-        <a class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+        <p class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
           {title}
-        </a>
+        </p>
       </div>
     </li>
   </ol>

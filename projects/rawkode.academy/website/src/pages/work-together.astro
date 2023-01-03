@@ -1,29 +1,29 @@
 ---
-import Layout from "../layouts/base.astro";
+import Layout from "../layouts/page.astro";
+const breadcrumbs = [{
+  title: 'Want To Work Together?',
+  href: '/work-together'
+}]
 ---
 
-<Layout title="Work Together">
-  <main>
-    <h2>Want to Work Together?</h2>
+<Layout title="Want to Work Together?" breadcrumbs={breadcrumbs}>
+  <div id="my-reform"></div>
 
-    <div id="my-reform"></div>
+  <script id="reform-script" src="https://embed.reform.app/v1/embed.js"
+  ></script>
 
-    <script id="reform-script" src="https://embed.reform.app/v1/embed.js"
-    ></script>
-
-    <script>
-      window.Reform =
-        window.Reform ||
-        function () {
-          (Reform.q = Reform.q || []).push(arguments);
-        };
-    </script>
-    <script>
-      Reform("init", {
-        url: "https://forms.reform.app/rawkode/lets-work-together/f4ecca",
-        target: "#my-reform",
-        background: "transparent",
-      });
-    </script>
-  </main>
+  <script>
+    window.Reform =
+      window.Reform ||
+      function () {
+        (Reform.q = Reform.q || []).push(arguments);
+      };
+  </script>
+  <script>
+    Reform("init", {
+      url: "https://forms.reform.app/rawkode/lets-work-together/f4ecca",
+      target: "#my-reform",
+      background: "transparent",
+    });
+  </script>
 </Layout>

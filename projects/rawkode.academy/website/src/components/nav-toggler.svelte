@@ -13,5 +13,5 @@
   class="nav-toggler"
 >
   <span class="sr-only">Open sidebar</span>
-  <Icon icon="mdi:menu" class="w-7 h-7" />
+  <Icon icon="mdi:menu" height="28" width="28" />
 </button>

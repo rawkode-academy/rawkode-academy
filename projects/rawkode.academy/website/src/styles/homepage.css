@@ -1,0 +1,161 @@
+section {
+  padding: 2.5rem 1.5rem;
+}
+
+.background {
+  background: linear-gradient(91.97deg, var(--academy-green) 0%, var(--academy-teal) 100%);
+}
+
+.section--hero {
+  background-image: url('/academy-logo-circular.svg');
+  background-repeat: no-repeat;
+  background-position: 50% 0;
+  background-attachment: fixed;
+  background-size: 75% 75%;
+  height: 50vh;
+  color: var(--white);
+}
+
+.section--hero h1 {
+  text-align: center;
+  text-shadow: 4px 4px rgb(0 0 0 / 5%);
+}
+
+@media only screen and (min-width: 768px) {
+
+  section {
+    padding: 5rem 2.5rem;
+  }
+
+  .section--hero {
+    height: 65vh;
+    background-position: 50% 50%;
+    background-size: 75% 75%;
+  }
+
+  .section--hero h1 {
+    text-align: left;
+  }
+}
+
+.section--work-together {
+  /* background-image: url("../../public/gradient.jpeg"); */
+  background-color: var(--light-grey);
+  background-repeat: no-repeat;
+  background-position: 100%;
+  height: 50vh;
+}
+
+.section--work-together a {
+  background-color: var(--rawkode-purple);
+  padding: 1rem 1.75rem;
+  border-radius: 100px;
+  color: var(--white);
+  display: flex;
+  justify-content: center;
+  width: fit-content;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+
+.shows__container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.shows__card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  border-radius: 1.5rem;
+  padding: 2.5rem 0;
+  background-color: var(--light-grey);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  transition: all 0.3s ease-in-out;
+  width: calc(50% - 0.5rem);
+}
+
+.shows__card p {
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.section--technologies {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.section--technologies h2 {
+  padding-left: 1.5rem;
+}
+
+.technologies__container {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 1.5rem;
+  padding: 0 1.5rem;
+  overflow: scroll;
+  scrollbar-width: none;
+}
+
+.technologies__container::-webkit-scrollbar {
+  display: none;
+}
+
+.technologies__container img {
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.section--testimonial {
+  text-align: center;
+  background: linear-gradient(91.97deg, #04B59C 0%, #85FF95 100%);
+}
+
+.section--testimonial p {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.section--testimonial p:last-of-type {
+  margin: 1.5rem auto 0;
+  font-weight: 500;
+}
+
+hr {
+  border-top: 2px solid var(--light-grey);
+  margin: 0 1.5rem;
+}
+
+@media only screen and (min-width: 768px) {
+
+  .shows__card {
+    width: 330px;
+  }
+
+  .section--work-together p {
+    width: 33%;
+  }
+
+  .section--technologies h2 {
+    padding-left: 2.5rem;
+  }
+
+  .technologies__container {
+    padding: 0 2.5rem;
+  }
+
+  hr {
+    margin: 0 2.5rem;
+  }
+
+  .section--testimonial p {
+    max-width: 50%;
+    margin: 0 auto;
+  }
+}
