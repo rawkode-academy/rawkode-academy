@@ -19,7 +19,8 @@
       "old": null,
       "new": {
         "id": "oneill",
-        "name": "Jack O'Neill"
+        "name": "Jack O'Neill",
+        "github_handle": "oneill"
       }
     }
   }
