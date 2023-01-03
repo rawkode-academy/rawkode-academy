@@ -4,7 +4,9 @@ use crate::{
 };
 use hcl::from_str;
 use miette::{miette, ErrReport, IntoDiagnostic, Result};
-use postgres::{Client, Config, NoTls};
+use native_tls::TlsConnector;
+use postgres::{config::SslMode, Client, Config, NoTls};
+use postgres_native_tls::MakeTlsConnector;
 use std::{fs::read_to_string, path::PathBuf, str::FromStr};
 
 pub fn sync(path: PathBuf, apply: bool) -> Result<()> {
@@ -21,10 +23,18 @@ pub fn sync(path: PathBuf, apply: bool) -> Result<()> {
     println!("Syncing {} files", files.len());
     println!();
 
-    let mut client = if let Ok(database_string) = std::env::var("DATABASE_STRING") {
+    let mut client = if let Ok(database_string) = std::env::var("POSTGRESQL_CONNECTION_STRING") {
         let config = Config::from_str(&database_string).into_diagnostic()?;
 
-        config.connect(NoTls).into_diagnostic()?
+        match config.get_ssl_mode() {
+            SslMode::Require | SslMode::Prefer => {
+                let connector = TlsConnector::builder().build().into_diagnostic()?;
+                let connector = MakeTlsConnector::new(connector);
+
+                config.connect(connector).into_diagnostic()?
+            }
+            _ => config.connect(NoTls).into_diagnostic()?,
+        }
     } else {
         let database_string = "postgres://academy:academy@localhost:5432/academy";
 

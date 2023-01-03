@@ -47,6 +47,7 @@ The sync tool is part of the [CLI](cli). It syncs the data with the YouTube chan
 To run the sync, use the following command:
 
 ```shell
+export POSTGRESQL_CONNECTION_STRING="postgres://academy:academy@localhost:5432/academy" # or something else
 cargo run --manifest-path=cli/Cargo.toml -- sync --path data/ [--apply]
 ```
 
