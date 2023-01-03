@@ -23,7 +23,7 @@ const redpandaConsole = new kubernetes.helm.v3.Chart("redpanda-console", {
 		repo: "https://charts.redpanda.com/",
 	},
 	chart: "console",
-	version: "2.4.0",
+	version: "0.3.3",
 	skipAwait: true,
 	values: {
 		console: {
