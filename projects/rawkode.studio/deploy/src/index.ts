@@ -6,7 +6,6 @@ const redpandaCluster = new kubernetes.helm.v3.Chart("redpanda", {
 	},
 	chart: "redpanda",
 	version: "2.4.0",
-	namespace: "studio",
 	skipAwait: true,
 	values: {
 		tls: {
