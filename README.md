@@ -11,9 +11,11 @@ The data resides in [data](data). The data is split into four directories:
 
 The data exists to feed the YouTube channel of [Rawkode Academy](https://www.youtube.com/c/rawkode).
 
-## Linter
+## CLI
 
-The file linter resides in [linter](linter). When a file is valid, it exits with a status code of 0. When a file is invalid, it exits with a status code of 1 and prints the errors to standard error.
+### Linter
+
+The file linter is part of the [CLI](cli). When a file is valid, it exits with a status code of 0. When a file is invalid, it exits with a status code of 1 and prints the errors to standard error.
 
 Supported file formats (links to their respective directories including examples):
 
@@ -27,11 +29,11 @@ Supported file formats (links to their respective directories including examples
 To run the linter, use the following command:
 
 ```shell
-cargo run --manifest-path=linter/Cargo.toml -- lint --path data/episodes/
+cargo run --manifest-path=cli/Cargo.toml -- lint --path data/episodes/
 ```
 
 To format all files, use the following command:
 
 ```shell
-cargo run --manifest-path=linter/Cargo.toml -- format --path data/ [--apply]
+cargo run --manifest-path=cli/Cargo.toml -- format --path data/ [--apply]
 ```
