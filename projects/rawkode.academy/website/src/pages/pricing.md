@@ -1,6 +1,7 @@
 ---
 title: "Pricing Information"
-layout: '../layouts/base.astro'
+breadcrumbs: []
+layout: '../layouts/page.astro'
 ---
 
 Thanks for taking the time to look at my pricing information. As someone that's just gone out on their own away from the support of a large organisation, I'd excited to know that you're interested in working together.

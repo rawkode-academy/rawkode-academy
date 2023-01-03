@@ -1,8 +1,12 @@
 ---
 import Layout from "../layouts/page.astro";
+const breadcrumbs = [{
+  title: 'Contact',
+  href: '/contact'
+}]
 ---
 
-<Layout title="Want to chat?">
+<Layout title="Want to chat?" breadcrumbs={breadcrumbs}>
   <div id="my-reform"></div>
 
   <script id="reform-script" src="https://embed.reform.app/v1/embed.js"
