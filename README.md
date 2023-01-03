@@ -24,7 +24,7 @@ Supported file formats (links to their respective directories including examples
 * [Shows](data/shows/)
 * [Technologies](data/technologies/)
 
-### Usage
+#### Usage (linter)
 
 To run the linter, use the following command:
 
@@ -36,4 +36,25 @@ To format all files, use the following command:
 
 ```shell
 cargo run --manifest-path=cli/Cargo.toml -- format --path data/ [--apply]
+```
+
+### Sync
+
+The sync tool is part of the [CLI](cli). It syncs the data with the YouTube channel of [Rawkode Academy](https://www.youtube.com/c/rawkode).
+
+#### Usage (sync)
+
+To run the sync, use the following command:
+
+```shell
+cargo run --manifest-path=cli/Cargo.toml -- sync --path data/ [--apply]
+```
+
+## Local testing
+
+```shell
+cd cli
+docker-compose up
+
+cargo run --manifest-path=cli/Cargo.toml -- sync --path data/ --apply
 ```
