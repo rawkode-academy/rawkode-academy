@@ -702,7 +702,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rawkode-studio-linter"
+name = "rawkode-studio-cli"
 version = "0.1.0"
 dependencies = [
  "chrono",

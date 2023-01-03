@@ -1,6 +1,6 @@
 [package]
-name = "rawkode-studio-linter"
-description = "Lint rawkode.studio (episode|show|technology|person) files"
+name = "rawkode-studio-cli"
+description = "rawkode.studio CLI"
 authors = [
     "David Flanagan <david@rawkode.dev>",
     "Stefan Ruzitschka <stefan@icepuma.dev>",

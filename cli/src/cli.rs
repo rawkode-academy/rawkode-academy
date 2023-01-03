@@ -25,8 +25,15 @@ pub struct Lint {
     pub path: PathBuf,
 }
 
+#[derive(Debug, Parser)]
+pub struct Sync {
+    #[arg(short, long, default_value_t = false)]
+    pub apply: bool,
+}
+
 #[derive(Debug, Subcommand)]
 pub(crate) enum SubCommand {
+    Sync(Sync),
     Format(Format),
     Lint(Lint),
 }
