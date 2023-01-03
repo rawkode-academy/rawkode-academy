@@ -1,66 +1,33 @@
 import * as kubernetes from "@pulumi/kubernetes";
 
-const redpandaCluster = new kubernetes.apiextensions.CustomResource("cluster", {
-  apiVersion: "redpanda.vectorized.io/v1alpha1",
-  kind: "Cluster",
-  metadata: {
-    annotations: {
-      "pulumi.com/skipAwait": "true",
-    },
-  },
-  spec: {
-    image: "vectorized/redpanda",
-    version: "latest",
-    replicas: 3,
-    resources: {
-      requests: {
-        cpu: "1000m",
-        memory: "2G",
-      },
-      limits: {
-        cpu: "1000m",
-        memory: "2G",
-      },
-    },
-    configuration: {
-      rpcServer: {
-        port: 33145,
-      },
-      kafkaApi: [
-        {
-          port: 9092,
-          tls: {
-            enabled: true,
-            requireClientAuth: true,
-          },
-        },
-      ],
-      pandaproxyApi: [
-        {
-          port: 8082,
-          tls: {
-            enabled: true,
-            requireClientAuth: true,
-          },
-        },
-      ],
-      schemaRegistry: {
-        port: 8081,
-        tls: {
-          enabled: true,
-          requireClientAuth: true,
-        },
-      },
-      adminApi: [
-        {
-          port: 9644,
-          tls: {
-            enabled: true,
-            requireClientAuth: true,
-          },
-        },
-      ],
-      developerMode: true,
-    },
-  },
+const redpandaCluster = new kubernetes.helm.v3.Chart("redpanda", {
+	fetchOpts: {
+		repo: "https://charts.redpanda.com/",
+	},
+	chart: "redpanda",
+	version: "2.4.0",
+	skipAwait: true,
+	values: {
+		external: {
+			enabled: false,
+		},
+	},
 });
+
+// const redpandaConsole = new kubernetes.helm.v3.Chart("redpanda-console", {
+// 	fetchOpts: {
+// 		repo: "https://charts.redpanda.com/",
+// 	},
+// 	chart: "console",
+// 	version: "2.4.0",
+// 	skipAwait: true,
+// 	values: {
+// 		console: {
+// 			config: {
+// 				kafka: {
+// 					brokers: ["bootstrap.mybrokers.com:9092"],
+// 				},
+// 			},
+// 		},
+// 	},
+// });
