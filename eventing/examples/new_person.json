@@ -1,0 +1,27 @@
+{
+  "id": "UUID",
+  "created_at": "2001-01-01T01:01:01.000001Z",
+  "trigger": {
+    "name": "ignored"
+  },
+  "table": {
+    "schema": "public",
+    "name": "people"
+  },
+  "event": {
+    "session_variables": {
+      "x-hasura-role": "admin",
+      "x-hasura-allowed-roles": "['user', 'boo', 'admin']",
+      "x-hasura-user-id": "1"
+    },
+    "op": "INSERT",
+    "data": {
+      "old": null,
+      "new": {
+        "id": "oneill",
+        "name": "Jack O'Neill",
+        "github_handle": "oneill"
+      }
+    }
+  }
+}
