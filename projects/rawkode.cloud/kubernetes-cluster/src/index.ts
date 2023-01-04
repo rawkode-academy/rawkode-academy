@@ -7,14 +7,15 @@ const platform = new Platform("platform", {
 	provider: infrastructure.kubernetesProvider,
 });
 
-import { CertManager, FluxCD, PulumiOperator } from "./platform/components";
+import {
+	CertManager,
+	CloudNativePG,
+	FluxCD,
+	PulumiOperator,
+} from "./platform/components";
 
 platform
-	.addComponent(FluxCD)
-	.addComponent(PulumiOperator)
 	.addComponent(CertManager)
-	.addProject("studio", {
-		repository: "oci://ghcr.io/rawkodeacademy/studio-deploy",
-		directory: ".",
-		environment: {},
-	});
+	.addComponent(CloudNativePG)
+	.addComponent(FluxCD)
+	.addComponent(PulumiOperator);
