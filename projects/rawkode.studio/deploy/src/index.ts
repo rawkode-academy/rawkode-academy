@@ -8,7 +8,7 @@ new kubernetes.apiextensions.CustomResource("postgresql", {
 	},
 	spec: {
 		instances: 3,
-		imageName: "ghcr.io/cloudnative-pg/postgresql:13.4",
+		imageName: "ghcr.io/cloudnative-pg/postgresql:15",
 		primaryUpdateStrategy: "unsupervised",
 		storage: {
 			size: "10Gi",
