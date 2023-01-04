@@ -1,7 +1,7 @@
 import * as kubernetes from "@pulumi/kubernetes";
 import * as random from "@pulumi/random";
 
-const postgreSQLClusterName = "temporal";
+const postgreSQLClusterName = "temporal-postgresql";
 const postgreSQLUsername = "temporal";
 
 const postgreSQLPassword = new random.RandomPassword("postgresql-password", {
@@ -54,7 +54,7 @@ new kubernetes.apiextensions.CustomResource("temporal-cluster", {
 		name: "temporal",
 	},
 	spec: {
-		version: "1.19.0",
+		version: "1.18.5",
 		numHistoryShards: 1,
 		jobTtlSecondsAfterFinished: 300,
 		persistence: {
