@@ -43,7 +43,11 @@ new kubernetes.apiextensions.CustomResource("temporal-cluster", {
 	apiVersion: "temporal.io/v1beta1",
 	kind: "TemporalCluster",
 	metadata: {
-		name: "temporal",
+		// We call this temporalio to avoid conflicts during the UI config rendering.
+		// The temporalio/ui container uses `TEMPORAL_UI_PORT` to configure the listening
+		// port, which causes a collision with any service called temporal-ui.
+		// Let's avoid that
+		name: "temporalio",
 	},
 	spec: {
 		version: "1.18.5",
