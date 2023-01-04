@@ -18,4 +18,9 @@ platform
 	.addComponent(CertManager)
 	.addComponent(CloudNativePG)
 	.addComponent(FluxCD)
-	.addComponent(PulumiOperator);
+	.addComponent(PulumiOperator)
+	.addProject("studio", {
+		repository: "oci://ghcr.io/rawkodeacademy/studio-deploy",
+		directory: ".",
+		environment: {},
+	});
