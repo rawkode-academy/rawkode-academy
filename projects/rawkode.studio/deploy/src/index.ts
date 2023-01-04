@@ -1,8 +1,9 @@
 import * as kubernetes from "@pulumi/kubernetes";
 import * as random from "@pulumi/random";
 
+//
 const postgreSQLClusterName = "temporal-postgresql";
-const postgreSQLUsername = "temporal";
+const postgreSQLUsername = "postgres";
 
 const postgreSQLPassword = new random.RandomPassword("postgresql-password", {
 	length: 32,
@@ -28,21 +29,12 @@ new kubernetes.apiextensions.CustomResource("postgresql", {
 		instances: 3,
 		imageName: "ghcr.io/cloudnative-pg/postgresql:15",
 		primaryUpdateStrategy: "unsupervised",
+		enableSuperuserAccess: true,
+		superuserSecret: {
+			name: secret.metadata.name,
+		},
 		storage: {
 			size: "10Gi",
-		},
-		bootstrap: {
-			initdb: {
-				database: postgreSQLUsername,
-				owner: postgreSQLUsername,
-				secret: {
-					name: secret.metadata.name,
-				},
-				postInitSQL: [
-					`CREATE DATABASE ${postgreSQLUsername}_visibility;`,
-					`GRANT ALL PRIVILEGES ON DATABASE ${postgreSQLUsername}_visibility TO ${postgreSQLUsername};`,
-				],
-			},
 		},
 	},
 });
