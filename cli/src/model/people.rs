@@ -1,10 +1,7 @@
-use crate::model::escape_sql;
-
-use super::Insert;
+use super::InsertStatement;
 use hcl::{ser::LabeledBlock, Value};
 use indexmap::IndexMap;
-use miette::{IntoDiagnostic, Result};
-use postgres::Client;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -25,56 +22,22 @@ pub struct MinimalPeople {
     pub person: Value,
 }
 
-const INSERT_STATEMENT: &str = r#"
-INSERT INTO people ("name", "githubHandle", "twitterHandle", "youtubeHandle")
-VALUES (
-    '{name}',
-    '{githubHandle}',
-    '{twitterHandle}',
-    '{youtubeHandle}'
-)
-ON CONFLICT ("id") DO UPDATE
-SET
-    "name" = '{name}',
-    "githubHandle" = '{githubHandle}',
-    "twitterHandle" = '{twitterHandle}',
-    "youtubeHandle" = '{youtubeHandle}';
-"#;
-
-impl Insert for People {
-    fn insert(&self, client: &mut Client) -> Vec<Result<()>> {
-        let mut results = vec![];
-
-        for (_, person) in self.person.iter() {
-            let github_handle = match &person.github {
-                Some(github) => github,
-                None => "<no handle defined>",
-            };
-
-            let twitter_handle = match &person.twitter {
-                Some(twitter) => twitter,
-                None => "<no handle defined>",
-            };
-
-            let youtube_handle = match &person.youtube {
-                Some(youtube) => youtube,
-                None => "<no handle defined>",
-            };
-
-            let query = INSERT_STATEMENT
-                .replace("{name}", &escape_sql(&person.name))
-                .replace("{githubHandle}", github_handle)
-                .replace("{twitterHandle}", twitter_handle)
-                .replace("{youtubeHandle}", youtube_handle);
-
-            results.push(
-                client
-                    .simple_query(query.as_str())
-                    .map(|_| ())
-                    .into_diagnostic(),
-            )
-        }
-
-        results
+impl InsertStatement for People {
+    fn statement() -> &'static str {
+        r#"
+        INSERT INTO people ("name", "githubHandle", "twitterHandle", "youtubeHandle")
+        VALUES (
+            $1,
+            $2,
+            $3,
+            $4
+        )
+        ON CONFLICT ("id") DO UPDATE
+        SET
+            "name" = $1,
+            "githubHandle" = $2,
+            "twitterHandle" = $3,
+            "youtubeHandle" = $4;
+        "#
     }
 }

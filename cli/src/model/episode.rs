@@ -1,20 +1,28 @@
-use super::{slugify, Insert};
-use crate::model::{chapter_duration_de, chapter_duration_ser, escape_sql};
-use chrono::{DateTime, Duration, Utc};
+use super::InsertStatement;
+use crate::model::{chapter_duration_de, chapter_duration_ser};
+use chrono::{DateTime, Utc};
 use hcl::{ser::LabeledBlock, Value};
 use indexmap::IndexMap;
-use miette::{IntoDiagnostic, Result};
-use postgres::Client;
 use serde::{Deserialize, Serialize};
+use sqlx::{
+    postgres::{types::PgInterval, PgHasArrayType},
+    Type,
+};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Type)]
 pub struct Chapter {
     #[serde(
-        deserialize_with = "chapter_duration_de",
-        serialize_with = "chapter_duration_ser"
+        serialize_with = "chapter_duration_ser",
+        deserialize_with = "chapter_duration_de"
     )]
-    pub time: Duration,
+    pub time: PgInterval, // The chrono::Duration support is not that great, so we use the internal interval type instead
     pub title: String,
+}
+
+impl PgHasArrayType for Chapter {
+    fn array_type_info() -> sqlx::postgres::PgTypeInfo {
+        sqlx::postgres::PgTypeInfo::with_name("_chapter")
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -38,89 +46,29 @@ pub struct MinimalEpisodes {
     pub episode: Value,
 }
 
-const INSERT_STATEMENT: &str = r#"
-INSERT INTO episodes ("id", "title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters")
-VALUES (
-    '{id}',
-    '{title}',
-    '{showId}',
-    '{scheduledFor}',
-    '{youtubeId}',
-    {youtubeCategory},
-    {links},
-    {chapters}
-)
-ON CONFLICT ("id") DO UPDATE
-SET
-    "title" = '{title}',
-    "showId" = '{showId}',
-    "scheduledFor" = '{scheduledFor}',
-    "youtubeId" = '{youtubeId}',
-    "youtubeCategory" = {youtubeCategory},
-    "links" = {links},
-    "chapters" = {chapters};
-"#;
-
-impl Insert for Episodes {
-    fn insert(&self, client: &mut Client) -> Vec<Result<()>> {
-        let mut results = vec![];
-
-        for (id, episode) in self.episode.iter() {
-            let links = if episode.links.is_empty() {
-                "array[]::text[]".to_string()
-            } else {
-                format!(
-                    "array[{}]",
-                    episode
-                        .links
-                        .iter()
-                        .map(|link| format!("'{}'", link))
-                        .collect::<Vec<String>>()
-                        .join(", ")
-                )
-            };
-
-            let chapters = if episode.chapters.is_empty() {
-                "array[]::chapter[]".to_string()
-            } else {
-                format!(
-                    "array[{}]",
-                    episode
-                        .chapters
-                        .iter()
-                        .map(|chapter| format!(
-                            "row('{}', '{}')::chapter",
-                            chapter.time,
-                            escape_sql(&chapter.title)
-                        ))
-                        .collect::<Vec<String>>()
-                        .join(", ")
-                )
-            };
-
-            let query = INSERT_STATEMENT
-                .replace("{id}", &slugify(id))
-                .replace("{title}", &escape_sql(id))
-                .replace("{showId}", &slugify(&episode.show))
-                .replace(
-                    "{scheduledFor}",
-                    &episode
-                        .published_at
-                        .to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
-                )
-                .replace("{youtubeId}", &episode.youtube_id)
-                .replace("{youtubeCategory}", &episode.youtube_category.to_string())
-                .replace("{links}", &links)
-                .replace("{chapters}", &chapters);
-
-            results.push(
-                client
-                    .simple_query(query.as_str())
-                    .map(|_| ())
-                    .into_diagnostic(),
-            )
-        }
-
-        results
+impl InsertStatement for Episodes {
+    fn statement() -> &'static str {
+        r#"
+        INSERT INTO episodes ("id", "title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters")
+        VALUES (
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8
+        )
+        ON CONFLICT ("id") DO UPDATE
+        SET
+            "title" = $2,
+            "showId" = $3,
+            "scheduledFor" = $4,
+            "youtubeId" = $5,
+            "youtubeCategory" = $6,
+            "links" = $7,
+            "chapters" = $8;
+        "#
     }
 }

@@ -1,15 +1,13 @@
 use crate::{
     command::get_paths,
-    model::{Episodes, Insert, People, Shows, Technologies},
+    model::{slugify, Episodes, InsertStatement, People, Shows, Technologies},
 };
 use hcl::from_str;
-use miette::{miette, ErrReport, IntoDiagnostic, Result};
-use native_tls::TlsConnector;
-use postgres::{config::SslMode, Client, Config, NoTls};
-use postgres_native_tls::MakeTlsConnector;
-use std::{fs::read_to_string, path::PathBuf, str::FromStr};
+use miette::{miette, IntoDiagnostic, Result};
+use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use std::{fs::read_to_string, path::PathBuf};
 
-pub fn sync(path: PathBuf, apply: bool) -> Result<()> {
+pub async fn sync(path: PathBuf, apply: bool) -> Result<()> {
     // add shows first, because they are referenced by episodes
     let files = vec![
         get_paths(path.join("shows")),
@@ -23,39 +21,24 @@ pub fn sync(path: PathBuf, apply: bool) -> Result<()> {
     println!("Syncing {} files", files.len());
     println!();
 
-    let mut client = if let Ok(database_string) = std::env::var("POSTGRESQL_CONNECTION_STRING") {
-        let config = Config::from_str(&database_string).into_diagnostic()?;
+    let connection_string = std::env::var("POSTGRESQL_CONNECTION_STRING")
+        .unwrap_or_else(|_| "postgres://academy:academy@localhost:5432/academy".to_string());
 
-        match config.get_ssl_mode() {
-            SslMode::Require | SslMode::Prefer => {
-                let connector = TlsConnector::builder().build().into_diagnostic()?;
-                let connector = MakeTlsConnector::new(connector);
-
-                config.connect(connector).into_diagnostic()?
-            }
-            _ => config.connect(NoTls).into_diagnostic()?,
-        }
-    } else {
-        let database_string = "postgres://academy:academy@localhost:5432/academy";
-
-        let config = Config::from_str(database_string).into_diagnostic()?;
-
-        config.connect(NoTls).into_diagnostic()?
-    };
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&connection_string)
+        .await
+        .into_diagnostic()?;
 
     for file in files {
         if let Ok(content) = read_to_string(&file) {
-            if let Ok(insert_trait) = try_parse(&content) {
-                if apply {
-                    match insert(&mut client, insert_trait) {
-                        Ok(_) => println!("{} - OK", file.display()),
-                        Err(error) => eprintln!("{} - NOT OK: {:#?}", file.display(), error),
-                    }
-                } else {
-                    println!("{} - DRY RUN", file.display());
+            if apply {
+                match try_insert(&content, &pool).await {
+                    Ok(_) => println!("{} - OK", file.display()),
+                    Err(error) => eprintln!("{} - NOT OK: {:#?}", file.display(), error),
                 }
             } else {
-                eprintln!("{} - NOT OK", file.display());
+                println!("{} - DRY RUN", file.display());
             }
         }
     }
@@ -63,35 +46,71 @@ pub fn sync(path: PathBuf, apply: bool) -> Result<()> {
     Ok(())
 }
 
-fn insert(client: &mut Client, insert: Box<dyn Insert>) -> Result<()> {
-    let (results, errors): (Vec<_>, Vec<_>) =
-        insert.insert(client).into_iter().partition(Result::is_ok);
+async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
+    if let Ok(shows) = from_str::<Shows>(content) {
+        let statement = <Shows as InsertStatement>::statement();
 
-    for result in results {
-        result.unwrap();
-    }
+        for (title, _) in shows.show.iter() {
+            sqlx::query(statement)
+                .bind(slugify(title))
+                .bind(title)
+                .execute(pool)
+                .await
+                .into_diagnostic()?;
+        }
 
-    if errors.is_empty() {
         Ok(())
-    } else {
-        let errors = errors
-            .into_iter()
-            .map(|result| result.err().unwrap())
-            .collect::<Vec<ErrReport>>();
+    } else if let Ok(technologies) = from_str::<Technologies>(content) {
+        let statement = <Technologies as InsertStatement>::statement();
 
-        Err(miette!("{:#?}", errors))
-    }
-}
+        for (title, technology) in technologies.technology.iter() {
+            sqlx::query(statement)
+                .bind(slugify(title))
+                .bind(title)
+                .bind(&technology.description)
+                .bind(&technology.website)
+                .bind(&technology.repository)
+                .bind(&technology.documentation)
+                .execute(pool)
+                .await
+                .into_diagnostic()?;
+        }
 
-fn try_parse(content: &str) -> Result<Box<dyn Insert>> {
-    if let Ok(content) = from_str::<Shows>(content) {
-        Ok(Box::new(content))
-    } else if let Ok(content) = from_str::<Technologies>(content) {
-        Ok(Box::new(content))
-    } else if let Ok(content) = from_str::<People>(content) {
-        Ok(Box::new(content))
-    } else if let Ok(content) = from_str::<Episodes>(content) {
-        Ok(Box::new(content))
+        Ok(())
+    } else if let Ok(people) = from_str::<People>(content) {
+        let statement = <People as InsertStatement>::statement();
+
+        for (_, person) in people.person.iter() {
+            sqlx::query(statement)
+                .bind(&person.name)
+                .bind(person.github.as_deref().unwrap_or("<no handle defined>"))
+                .bind(person.twitter.as_deref().unwrap_or("<no handle defined>"))
+                .bind(person.youtube.as_deref().unwrap_or("<no handle defined>"))
+                .execute(pool)
+                .await
+                .into_diagnostic()?;
+        }
+
+        Ok(())
+    } else if let Ok(episodes) = from_str::<Episodes>(content) {
+        let statement = <Episodes as InsertStatement>::statement();
+
+        for (title, episode) in episodes.episode.iter() {
+            sqlx::query(statement)
+                .bind(slugify(&format!("{} {}", episode.show, title)))
+                .bind(title)
+                .bind(&episode.show)
+                .bind(episode.published_at)
+                .bind(&episode.youtube_id)
+                .bind(episode.youtube_category)
+                .bind(&episode.links)
+                .bind(&episode.chapters)
+                .execute(pool)
+                .await
+                .into_diagnostic()?;
+        }
+
+        Ok(())
     } else {
         Err(miette!("Format of file is not supported"))
     }

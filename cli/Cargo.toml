@@ -22,9 +22,12 @@ hhmmss = "0.1"
 unicode-normalization = "0.1"
 diacritics = "0.1"
 lazy_static = "1"
-postgres = { version = "0.19" }
-postgres-native-tls = "0.5"
-native-tls = { version = "0.2", features = ["vendored"] }
+sqlx = { version = "0.6", features = [
+    "runtime-tokio-rustls",
+    "postgres",
+    "chrono",
+] }
+tokio = { version = "1", features = ["macros"] }
 
 [dev-dependencies]
 pretty_assertions = "1"
