@@ -5,3 +5,4 @@ packages:
   - "./projects/rawkode.cloud/teleport"
   - "./projects/rawkode.studio"
   - "./projects/rawkode.studio/deploy"
+  - "./projects/rawkode.studio/workflows-youtube"
