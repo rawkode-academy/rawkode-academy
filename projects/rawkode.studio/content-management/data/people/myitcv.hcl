@@ -1,5 +1,4 @@
-person "myitcv" {
-  name = "Paul Jolly"
+person "Paul Jolly" {
   twitter = "myitcv"
   github = "myitcv"
   youtube = null

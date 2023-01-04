@@ -1,5 +1,4 @@
-person "rawkode" {
-  name = "David Flanagan"
+person "David Flanagan" {
   twitter = "rawkode"
   github = "rawkode"
   youtube = "@RawkodeAcademy"

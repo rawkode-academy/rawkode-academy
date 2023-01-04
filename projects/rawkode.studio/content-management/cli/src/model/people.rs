@@ -6,9 +6,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Person {
-    pub name: String,
     pub twitter: Option<String>,
-    pub github: Option<String>,
+    pub github: String,
     pub youtube: Option<String>,
 }
 

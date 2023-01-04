@@ -10,6 +10,5 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ../../RawkodeAcademy/projects/rawkode.studio/api/migrations/neon-eu:/migrations
-      # - ../../api/migrations/neon-eu:/migrations TODO: change after being merged to monorepo
+      - ../../content-management/api/migrations/neon-eu:/migrations
       - ./scripts/migrate.sh:/docker-entrypoint-initdb.d/migrate.sh

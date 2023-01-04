@@ -80,12 +80,12 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
     } else if let Ok(people) = from_str::<People>(content) {
         let statement = <People as InsertStatement>::statement();
 
-        for (_, person) in people.person.iter() {
+        for (name, person) in people.person.iter() {
             sqlx::query(statement)
-                .bind(&person.name)
-                .bind(person.github.as_deref().unwrap_or("<no handle defined>"))
-                .bind(person.twitter.as_deref().unwrap_or("<no handle defined>"))
-                .bind(person.youtube.as_deref().unwrap_or("<no handle defined>"))
+                .bind(&name)
+                .bind(&person.github)
+                .bind(&person.twitter)
+                .bind(&person.youtube)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;
