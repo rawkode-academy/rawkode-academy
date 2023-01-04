@@ -1,0 +1,11 @@
+table:
+  name: host_shows_view
+  schema: public
+select_permissions:
+  - role: Anonymous
+    permission:
+      columns:
+        - name
+      filter: {}
+      query_root_fields: []
+      subscription_root_fields: []

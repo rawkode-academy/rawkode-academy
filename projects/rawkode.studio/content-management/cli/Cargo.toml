@@ -1,0 +1,33 @@
+[package]
+name = "rawkode-studio-cli"
+description = "rawkode.studio CLI"
+authors = [
+    "David Flanagan <david@rawkode.dev>",
+    "Stefan Ruzitschka <stefan@icepuma.dev>",
+]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+miette = { version = "5", features = ["fancy"] }
+chrono = { version = "0.4", features = ["serde"] }
+hcl-rs = "0.11"
+serde = "1"
+indexmap = "1"
+url = { version = "2", features = ["serde"] }
+regex = "1"
+glob = "0.3"
+hhmmss = "0.1"
+unicode-normalization = "0.1"
+diacritics = "0.1"
+lazy_static = "1"
+sqlx = { version = "0.6", features = [
+    "runtime-tokio-rustls",
+    "postgres",
+    "chrono",
+] }
+tokio = { version = "1", features = ["macros"] }
+
+[dev-dependencies]
+pretty_assertions = "1"

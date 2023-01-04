@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+message EventTrigger {
+    Event event = 1;
+    string created_at = 2;
+    string id = 3;
+    Trigger trigger = 4;
+    Table table = 5;
+}
+
+enum Operation {
+    INSERT = 0;
+    UPDATE = 1;
+    DELETE = 2;
+    MANUAL = 3;
+}
+
+message Patch {
+    map<string, string> old = 1;
+    map<string, string> new = 2;
+}
+
+message Event {
+    map<string, string> session_variables = 1;
+    Operation op = 2;
+    Patch data = 3;
+}
+
+
+message Trigger {
+    string name = 1;
+}
+
+message Table {
+    string schema = 1;
+    string name = 2;
+}
