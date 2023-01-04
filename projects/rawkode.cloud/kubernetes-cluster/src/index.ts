@@ -12,6 +12,7 @@ import {
 	CloudNativePG,
 	FluxCD,
 	PulumiOperator,
+	TemporalOperator,
 } from "./platform/components";
 
 platform
@@ -19,6 +20,7 @@ platform
 	.addComponent(CloudNativePG)
 	.addComponent(FluxCD)
 	.addComponent(PulumiOperator)
+	.addComponent(TemporalOperator)
 	.addProject("studio", {
 		repository: "oci://ghcr.io/rawkodeacademy/studio-deploy",
 		directory: ".",

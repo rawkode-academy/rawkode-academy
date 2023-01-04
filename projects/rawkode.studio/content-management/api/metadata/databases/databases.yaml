@@ -1,9 +1,0 @@
-- name: neon-eu
-  kind: postgres
-  configuration:
-    connection_info:
-      database_url:
-        from_env: NEON_DATABASE_URL
-      isolation_level: read-committed
-      use_prepared_statements: false
-  tables: "!include neon-eu/tables/tables.yaml"

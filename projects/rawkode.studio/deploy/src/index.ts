@@ -1,10 +1,28 @@
 import * as kubernetes from "@pulumi/kubernetes";
+import * as random from "@pulumi/random";
+
+const postgreSQLClusterName = "temporal";
+const postgreSQLUsername = "temporal";
+
+const postgreSQLPassword = new random.RandomPassword("postgresql-password", {
+	length: 32,
+});
+
+const secret = new kubernetes.core.v1.Secret("postgresql-temporal", {
+	type: "kubernetes.io/basic-auth",
+	data: {
+		username: Buffer.from(postgreSQLUsername).toString("base64"),
+		password: postgreSQLPassword.result.apply((password) =>
+			Buffer.from(password).toString("base64"),
+		),
+	},
+});
 
 new kubernetes.apiextensions.CustomResource("postgresql", {
 	apiVersion: "postgresql.cnpg.io/v1",
 	kind: "Cluster",
 	metadata: {
-		name: "temporal-postgresql",
+		name: postgreSQLClusterName,
 	},
 	spec: {
 		instances: 3,
@@ -12,6 +30,89 @@ new kubernetes.apiextensions.CustomResource("postgresql", {
 		primaryUpdateStrategy: "unsupervised",
 		storage: {
 			size: "10Gi",
+		},
+		bootstrap: {
+			initdb: {
+				database: postgreSQLUsername,
+				owner: postgreSQLUsername,
+				secret: {
+					name: secret.metadata.name,
+				},
+				postInitSQL: [
+					`CREATE DATABASE ${postgreSQLUsername}_visibility;`,
+					`GRANT ALL PRIVILEGES ON DATABASE ${postgreSQLUsername}_visibility TO ${postgreSQLUsername};`,
+				],
+			},
+		},
+	},
+});
+
+new kubernetes.apiextensions.CustomResource("temporal-cluster", {
+	apiVersion: "temporal.io/v1beta1",
+	kind: "TemporalCluster",
+	metadata: {
+		name: "temporal",
+	},
+	spec: {
+		version: "1.19.0",
+		numHistoryShards: 1,
+		jobTtlSecondsAfterFinished: 300,
+		persistence: {
+			defaultStore: {
+				sql: {
+					user: postgreSQLUsername,
+					databaseName: postgreSQLUsername,
+					pluginName: "postgres",
+					connectAddr: `${postgreSQLClusterName}-rw:5432`,
+					connectProtocol: "tcp",
+				},
+				passwordSecretRef: {
+					name: secret.metadata.name,
+					key: "password",
+				},
+			},
+			visibilityStore: {
+				sql: {
+					user: postgreSQLUsername,
+					databaseName: `${postgreSQLUsername}_visibility`,
+					pluginName: "postgres",
+					connectAddr: `${postgreSQLClusterName}-rw:5432`,
+					connectProtocol: "tcp",
+				},
+				passwordSecretRef: {
+					name: secret.metadata.name,
+					key: "password",
+				},
+			},
+		},
+		mTLS: {
+			provider: "cert-manager",
+			internode: {
+				enabled: true,
+			},
+			frontend: {
+				enabled: true,
+			},
+			certificatesDuration: {
+				rootCACertificate: "2h",
+				intermediateCAsCertificates: "1h30m",
+				clientCertificates: "1h",
+				frontendCertificate: "1h",
+				internodeCertificate: "1h",
+			},
+			refreshInterval: "5m",
+		},
+		ui: {
+			enabled: true,
+		},
+		admintools: {
+			enabled: true,
+		},
+		metrics: {
+			enabled: true,
+			prometheusConfig: {
+				listenPort: 9090,
+			},
 		},
 	},
 });

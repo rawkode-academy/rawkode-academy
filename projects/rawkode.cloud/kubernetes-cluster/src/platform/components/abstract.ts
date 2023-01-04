@@ -73,6 +73,19 @@ export abstract class Component extends pulumi.ComponentResource {
 		);
 	}
 
+	protected applyYamlNoTransformations(
+		name: string,
+		location: string,
+	): kubernetes.yaml.ConfigFile {
+		return new kubernetes.yaml.ConfigFile(
+			this.name,
+			{
+				file: location,
+			},
+			{ provider: this.provider, parent: this },
+		);
+	}
+
 	protected applyKustomization(
 		name: string,
 		location: string,
