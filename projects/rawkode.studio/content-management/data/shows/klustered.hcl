@@ -1,1 +1,3 @@
-show "Klustered" {}
+show "Klustered" {
+  draft = false
+}

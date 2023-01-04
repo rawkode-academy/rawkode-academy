@@ -1,4 +1,5 @@
 episode "Introduction to Kubeflow" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-03-29T16:00:00Z"
   youtube_id = "MB6Dudf0Pbw"

@@ -1,1 +1,3 @@
-show "Rawkode Live" {}
+show "Rawkode Live" {
+  draft = false
+}

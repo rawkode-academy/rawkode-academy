@@ -1,4 +1,5 @@
 episode "Introduction to Open Policy Agent" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-11-18T16:00:00Z"
   youtube_id = "ejH4EzmL7e0"

@@ -1,4 +1,5 @@
 episode "Introduction to Crossplane" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-10-13T16:30:00Z"
   youtube_id = "c_ZU8ZxR00E"

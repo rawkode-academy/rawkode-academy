@@ -1,4 +1,5 @@
 episode "Introduction to n8n" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-11-05T14:00:00Z"
   youtube_id = "AcgkvxismG0"

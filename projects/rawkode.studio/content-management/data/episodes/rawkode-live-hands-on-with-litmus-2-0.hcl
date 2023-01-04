@@ -1,4 +1,5 @@
 episode "Hands-on with Litmus 2.0" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-07-27T13:35:00Z"
   youtube_id = "D0t3emVLLko"

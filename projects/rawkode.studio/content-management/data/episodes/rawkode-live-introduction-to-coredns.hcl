@@ -1,4 +1,5 @@
 episode "Introduction to CoreDNS" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-11-04T18:00:00Z"
   youtube_id = "um1ODpLrvsw"

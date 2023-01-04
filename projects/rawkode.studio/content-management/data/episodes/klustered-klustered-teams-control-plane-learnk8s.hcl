@@ -1,4 +1,5 @@
 episode "Klustered Teams: Control Plane & Learnk8s" {
+  draft = false
   show = "klustered"
   published_at = "2021-09-16T16:30:00Z"
   youtube_id = "FClIbQ8hdxY"

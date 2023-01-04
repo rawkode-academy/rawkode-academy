@@ -1,4 +1,5 @@
 episode "Hands-on Introduction to Kubescape" {
+  draft = false
   show = "rawkode-live"
   published_at = "2022-02-21T12:30:00Z"
   youtube_id = "xp1e34SF-4M"

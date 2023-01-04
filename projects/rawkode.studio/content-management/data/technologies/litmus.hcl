@@ -1,4 +1,5 @@
 technology "Litmus" {
+  draft = false
   website = "https://litmuschaos.io/"
   documentation = "https://docs.litmuschaos.io/"
   repository = "https://github.com/litmuschaos/litmus"

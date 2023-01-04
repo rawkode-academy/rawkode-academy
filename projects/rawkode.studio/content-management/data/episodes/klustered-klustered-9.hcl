@@ -1,4 +1,5 @@
 episode "Klustered #9" {
+  draft = false
   show = "klustered"
   published_at = "2021-04-15T15:30:00Z"
   youtube_id = "RGaUhqgrsXE"

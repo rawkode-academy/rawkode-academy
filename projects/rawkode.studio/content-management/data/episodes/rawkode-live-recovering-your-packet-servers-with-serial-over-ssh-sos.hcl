@@ -1,4 +1,5 @@
 episode "Recovering Your Packet Servers with Serial Over SSH (SOS)" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-08-18T11:00:00Z"
   youtube_id = "O8fRpelmg1k"

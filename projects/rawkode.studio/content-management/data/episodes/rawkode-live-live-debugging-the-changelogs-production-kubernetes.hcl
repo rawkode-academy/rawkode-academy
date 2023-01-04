@@ -1,4 +1,5 @@
 episode "Live Debugging the Changelog's Production Kubernetes" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-09-10T16:30:00Z"
   youtube_id = "7zmRhHd-ohk"

@@ -1,1 +1,3 @@
-show "Complete Guide to InfluxDB 2" {}
+show "Complete Guide to InfluxDB 2" {
+  draft = false
+}

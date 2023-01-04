@@ -1,4 +1,5 @@
 episode "Introduction to Grafana" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-10-28T14:00:00Z"
   youtube_id = "jA_rxeUftQQ"

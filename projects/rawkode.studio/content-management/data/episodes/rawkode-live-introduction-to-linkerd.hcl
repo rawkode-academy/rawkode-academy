@@ -1,4 +1,5 @@
 episode "Introduction to Linkerd" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-11-03T17:00:00Z"
   youtube_id = "YjKpukXTQsI"

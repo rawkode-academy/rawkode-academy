@@ -1,4 +1,5 @@
 episode "Managing GitHub with Pulumi" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-08-04T14:00:00Z"
   youtube_id = "FoBcxawkkzc"

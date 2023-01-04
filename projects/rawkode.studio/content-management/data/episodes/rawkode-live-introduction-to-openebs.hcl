@@ -1,4 +1,5 @@
 episode "Introduction to OpenEBS" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-10-20T16:00:00Z"
   youtube_id = "EpDxWwiQp3Q"

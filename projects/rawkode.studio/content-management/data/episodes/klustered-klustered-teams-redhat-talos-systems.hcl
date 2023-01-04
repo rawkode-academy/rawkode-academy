@@ -1,4 +1,5 @@
 episode "Klustered Teams: RedHat & Talos Systems" {
+  draft = false
   show = "klustered"
   published_at = "2021-07-15T16:30:00Z"
   youtube_id = "IWz1XJnOR_g"

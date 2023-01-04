@@ -27,6 +27,7 @@ impl PgHasArrayType for Chapter {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Episode {
+    pub draft: bool,
     pub show: String,
     pub published_at: DateTime<Utc>,
     pub youtube_id: String,
@@ -49,7 +50,7 @@ pub struct MinimalEpisodes {
 impl InsertStatement for Episodes {
     fn statement() -> &'static str {
         r#"
-        INSERT INTO episodes ("id", "title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters")
+        INSERT INTO episodes ("id", "title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters", "draft")
         VALUES (
             $1,
             $2,
@@ -58,7 +59,8 @@ impl InsertStatement for Episodes {
             $5,
             $6,
             $7,
-            $8
+            $8,
+            $9
         )
         ON CONFLICT ("id") DO UPDATE
         SET
@@ -68,7 +70,8 @@ impl InsertStatement for Episodes {
             "youtubeId" = $5,
             "youtubeCategory" = $6,
             "links" = $7,
-            "chapters" = $8;
+            "chapters" = $8,
+            "draft" = $9;
         "#
     }
 }

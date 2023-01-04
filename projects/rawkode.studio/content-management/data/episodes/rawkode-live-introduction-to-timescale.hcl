@@ -1,4 +1,5 @@
 episode "Introduction to Timescale" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-02-08T17:30:00Z"
   youtube_id = "C4j5ClqGrCE"

@@ -1,4 +1,5 @@
 episode "Introduction to OpenTelemetry" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-11-02T16:00:00Z"
   youtube_id = "VgtTGU4UrKo"

@@ -1,4 +1,5 @@
 episode "Spinning up Equinix Metal" {
+  draft = false
   show = "metal-monday"
   published_at = "2020-10-26T17:24:01Z"
   youtube_id = "0XTefee6WYg"

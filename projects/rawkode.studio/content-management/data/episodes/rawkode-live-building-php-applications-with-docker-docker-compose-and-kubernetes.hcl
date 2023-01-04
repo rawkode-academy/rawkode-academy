@@ -1,4 +1,5 @@
 episode "Building PHP Applications with Docker, Docker Compose, and Kubernetes" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-09-08T11:00:00Z"
   youtube_id = "LteLJ99oJMs"

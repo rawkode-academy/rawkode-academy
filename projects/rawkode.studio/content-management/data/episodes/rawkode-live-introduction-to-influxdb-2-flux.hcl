@@ -1,4 +1,5 @@
 episode "Introduction to InfluxDB 2 & Flux" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-11-17T18:00:00Z"
   youtube_id = "LfWVZHuCCnE"

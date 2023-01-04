@@ -1,4 +1,5 @@
 episode "Kubernetes Security Lab" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-04-14T16:00:00Z"
   youtube_id = "Srd1qqxDReA"

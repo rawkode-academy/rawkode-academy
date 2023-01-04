@@ -1,4 +1,5 @@
 episode "Newcomers #1" {
+  draft = false
   show = "klustered"
   published_at = "2021-05-27T16:00:00Z"
   youtube_id = "H2227nrkhOg"

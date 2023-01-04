@@ -5,7 +5,9 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct Show {}
+pub struct Show {
+    pub draft: bool,
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Shows {
@@ -20,14 +22,16 @@ pub struct MinimalShows {
 impl InsertStatement for Shows {
     fn statement() -> &'static str {
         r#"
-        INSERT INTO shows ("id", "name")
+        INSERT INTO shows ("id", "name", "draft")
         VALUES (
             $1,
-            $2
+            $2,
+            $3
         )
         ON CONFLICT ("id") DO UPDATE
         SET
-            "name" = $2;
+            "name" = $2,
+            "draft" = $3;
         "#
     }
 }

@@ -1,4 +1,5 @@
 episode "Hands-on Introduction to Snyk" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-06-30T15:00:00Z"
   youtube_id = "ZEZcCA0BbVk"

@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Technology {
+    pub draft: bool,
     pub website: String,
     pub documentation: String,
     pub repository: String,
@@ -25,14 +26,15 @@ pub struct MinimalTechnologies {
 impl InsertStatement for Technologies {
     fn statement() -> &'static str {
         r#"
-INSERT INTO technologies ("id", "name", "description", "website", "repository", "documentation")
+INSERT INTO technologies ("id", "name", "description", "website", "repository", "documentation", "draft")
 VALUES (
     $1,
     $2,
     $3,
     $4,
     $5,
-    $6
+    $6,
+    $7
 )
 ON CONFLICT ("id") DO UPDATE
 SET
@@ -40,7 +42,8 @@ SET
     "description" = $3,
     "website" = $4,
     "repository" = $5,
-    "documentation" = $6;
+    "documentation" = $6,
+    "draft" = $7;
 "#
     }
 }

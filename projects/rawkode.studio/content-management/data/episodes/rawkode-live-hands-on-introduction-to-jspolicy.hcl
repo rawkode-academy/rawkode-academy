@@ -1,4 +1,5 @@
 episode "Hands-on Introduction to jsPolicy" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-09-13T16:30:00Z"
   youtube_id = "oM1WU7HFCdA"

@@ -1,4 +1,5 @@
 episode "Hands-on with Rust: Async / Await" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-08-17T16:00:00Z"
   youtube_id = "qy6CiixMahw"

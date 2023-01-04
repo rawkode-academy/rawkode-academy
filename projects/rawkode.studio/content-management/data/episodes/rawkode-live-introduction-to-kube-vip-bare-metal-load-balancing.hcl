@@ -1,4 +1,5 @@
 episode "Introduction to kube-vip: Bare Metal Load Balancing" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-09-02T12:00:00Z"
   youtube_id = "gJCumFZQt1M"

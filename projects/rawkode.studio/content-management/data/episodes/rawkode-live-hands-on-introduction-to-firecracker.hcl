@@ -1,4 +1,5 @@
 episode "Hands-on Introduction to Firecracker" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-05-24T12:00:00Z"
   youtube_id = "dCa7qD2zGXs"

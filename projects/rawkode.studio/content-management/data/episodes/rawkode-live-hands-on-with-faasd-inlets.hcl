@@ -1,4 +1,5 @@
 episode "Hands-on with faasd & Inlets" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-11-19T14:00:00Z"
   youtube_id = "AFx0Wap3Z8E"

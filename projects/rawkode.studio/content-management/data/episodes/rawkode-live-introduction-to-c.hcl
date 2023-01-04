@@ -1,4 +1,5 @@
 episode "Introduction to C++" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-07-12T11:30:00Z"
   youtube_id = "zaiFlc0Bw3o"

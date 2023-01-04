@@ -1,4 +1,5 @@
 episode "Hands-on Introduction to CueBlox" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-09-07T17:00:00Z"
   youtube_id = "xMj8Is0Agq0"

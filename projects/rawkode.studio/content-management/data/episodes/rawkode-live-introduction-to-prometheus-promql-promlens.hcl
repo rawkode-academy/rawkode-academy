@@ -1,4 +1,5 @@
 episode "Introduction to Prometheus, PromQL, & PromLens" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-10-09T11:00:00Z"
   youtube_id = "GDWZisTxnQ8"

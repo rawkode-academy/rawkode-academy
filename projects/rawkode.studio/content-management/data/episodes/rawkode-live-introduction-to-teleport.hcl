@@ -1,4 +1,5 @@
 episode "Introduction to Teleport" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-12-03T17:00:00Z"
   youtube_id = "PAG7I-4FbeY"

@@ -1,4 +1,5 @@
 episode "Hands-on Introduction to Pixie" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-07-07T16:00:00Z"
   youtube_id = "pS0hxXyRL0E"

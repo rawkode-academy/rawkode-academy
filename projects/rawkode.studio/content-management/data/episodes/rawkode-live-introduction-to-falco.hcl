@@ -1,4 +1,5 @@
 episode "Introduction to Falco" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-10-29T12:30:00Z"
   youtube_id = "4jJaDf6BYJQ"

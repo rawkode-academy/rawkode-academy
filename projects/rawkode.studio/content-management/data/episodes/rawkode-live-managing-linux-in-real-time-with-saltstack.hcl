@@ -1,4 +1,5 @@
 episode "Managing Linux in Real Time with SaltStack" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-09-16T14:00:00Z"
   youtube_id = "E6LoyB1l8QQ"

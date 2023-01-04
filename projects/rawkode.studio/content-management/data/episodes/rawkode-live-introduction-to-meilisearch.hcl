@@ -1,4 +1,5 @@
 episode "Introduction to Meilisearch" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-02-16T17:00:00Z"
   youtube_id = "SJl2UWfy1nk"

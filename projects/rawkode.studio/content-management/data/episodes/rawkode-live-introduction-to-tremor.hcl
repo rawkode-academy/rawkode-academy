@@ -1,4 +1,5 @@
 episode "Introduction to Tremor" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-03-23T17:30:00Z"
   youtube_id = "KeQxS6vmiWs"

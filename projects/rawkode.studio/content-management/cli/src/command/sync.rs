@@ -50,10 +50,11 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
     if let Ok(shows) = from_str::<Shows>(content) {
         let statement = <Shows as InsertStatement>::statement();
 
-        for (title, _) in shows.show.iter() {
+        for (title, show) in shows.show.iter() {
             sqlx::query(statement)
                 .bind(slugify(title))
                 .bind(title)
+                .bind(&show.draft)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;
@@ -71,6 +72,7 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
                 .bind(&technology.website)
                 .bind(&technology.repository)
                 .bind(&technology.documentation)
+                .bind(&technology.draft)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;
@@ -86,6 +88,7 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
                 .bind(&person.github)
                 .bind(&person.twitter)
                 .bind(&person.youtube)
+                .bind(&person.draft)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;
@@ -105,6 +108,7 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
                 .bind(episode.youtube_category)
                 .bind(&episode.links)
                 .bind(&episode.chapters)
+                .bind(&episode.draft)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;

@@ -1,4 +1,5 @@
 technology "Rust" {
+  draft = false
   website = "https://www.rust-lang.org/"
   documentation = "https://doc.rust-lang.org/book/"
   repository = "https://github.com/rust-lang/rust"

@@ -1,4 +1,5 @@
 episode "Hands-on Introduction to sigstore" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-08-03T14:00:00Z"
   youtube_id = "fZfd4orrn8Y"

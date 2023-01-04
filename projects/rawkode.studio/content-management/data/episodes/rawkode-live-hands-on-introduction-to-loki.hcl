@@ -1,4 +1,5 @@
 episode "Hands-on Introduction to Loki" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-04-28T12:00:00Z"
   youtube_id = "sg-o8UECSQA"

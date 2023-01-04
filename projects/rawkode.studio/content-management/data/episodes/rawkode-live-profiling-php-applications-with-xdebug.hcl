@@ -1,4 +1,5 @@
 episode "Profiling PHP Applications with Xdebug" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-09-17T14:00:00Z"
   youtube_id = "mNc_tcomrVs"

@@ -1,4 +1,5 @@
 episode "Introduction to Kyverno" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-02-18T17:00:00Z"
   youtube_id = "GlqCW7uJ-7Q"

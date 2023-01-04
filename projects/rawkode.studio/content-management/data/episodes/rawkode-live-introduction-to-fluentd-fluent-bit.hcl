@@ -1,4 +1,5 @@
 episode "Introduction to Fluentd & Fluent Bit" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-01-15T17:30:00Z"
   youtube_id = "fcxhLbuEZXA"

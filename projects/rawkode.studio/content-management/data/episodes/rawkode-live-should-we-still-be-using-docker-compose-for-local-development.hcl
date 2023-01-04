@@ -1,4 +1,5 @@
 episode "Should we still be using docker-compose for local development?" {
+  draft = false
   show = "rawkode-live"
   published_at = "2021-08-31T16:30:00Z"
   youtube_id = "cO1aE1KAI6E"

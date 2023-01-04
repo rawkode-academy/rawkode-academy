@@ -1,4 +1,5 @@
 episode "Kubernetes 1.19: Accentuate the Paw-sitive" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-09-14T16:30:00Z"
   youtube_id = "OReOSuX-3YE"

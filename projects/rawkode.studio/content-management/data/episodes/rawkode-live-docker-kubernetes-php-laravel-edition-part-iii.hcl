@@ -1,4 +1,5 @@
 episode "Docker, Kubernetes, & PHP: Laravel Edition (Part III)" {
+  draft = false
   show = "rawkode-live"
   published_at = "2020-10-05T12:00:00Z"
   youtube_id = "z_LWJPLhD6g"
