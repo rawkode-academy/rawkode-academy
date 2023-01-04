@@ -1,6 +1,7 @@
 -- People
 CREATE TABLE "people" (
     "id" TEXT NOT NULL GENERATED ALWAYS AS ("githubHandle") STORED,
+    "draft" BOOLEAN NOT NULL DEFAULT TRUE,
     "name" TEXT NOT NULL,
     "email" TEXT,
     "biography" TEXT,
@@ -31,7 +32,8 @@ CREATE UNIQUE INDEX "person_email" ON "people"("email");
 -- Shows
 CREATE TABLE "shows" (
     "id" TEXT PRIMARY KEY,
-    "name" TEXT NOT NULL
+    "name" TEXT NOT NULL,
+    "draft" BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE UNIQUE INDEX "show_name" ON "shows"("name");
@@ -60,6 +62,7 @@ FROM show_hosts
 -- Technologies
 CREATE TABLE "technologies" (
     "id" TEXT PRIMARY KEY,
+    "draft" BOOLEAN NOT NULL DEFAULT TRUE,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "website" TEXT NOT NULL,
@@ -87,6 +90,7 @@ CREATE TYPE "chapter" AS ("time" INTERVAL, "title" TEXT);
 
 CREATE TABLE "episodes" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "draft" BOOLEAN NOT NULL DEFAULT TRUE,
     "title" TEXT NOT NULL,
     "showId" TEXT NOT NULL REFERENCES shows("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     "live" BOOLEAN NOT NULL DEFAULT true,
