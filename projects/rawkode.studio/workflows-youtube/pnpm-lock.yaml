@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@rawkode.academy/dagger': ^0.0.1
   '@temporalio/activity': ^1.5.2
   '@temporalio/client': ^1.5.2
   '@temporalio/worker': ^1.5.2
@@ -24,6 +25,7 @@ dependencies:
   '@temporalio/workflow': 1.5.2
 
 devDependencies:
+  '@rawkode.academy/dagger': link:../../../dagger
   '@tsconfig/node16': 1.0.3
   '@types/node': 16.18.11
   '@typescript-eslint/eslint-plugin': 5.48.0_ok4yz3nlxocs25pqomcnr7cmcu
