@@ -1,4 +1,4 @@
-use chrono::{Duration};
+use chrono::Duration;
 use diacritics::remove_diacritics;
 
 use hhmmss::Hhmmss;
@@ -7,7 +7,6 @@ use miette::Result;
 
 use regex::Regex;
 use serde::Deserialize;
-
 
 use unicode_normalization::UnicodeNormalization;
 
@@ -91,10 +90,6 @@ pub(crate) fn slugify(value: &str) -> String {
     let slug = TRAILING_DASHES.replace_all(&slug, "").to_string();
 
     slug
-}
-
-pub(crate) trait InsertStatement {
-    fn statement() -> &'static str;
 }
 
 #[cfg(test)]

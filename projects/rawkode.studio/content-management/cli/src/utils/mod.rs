@@ -26,7 +26,7 @@ pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Database {
     let mut people: HashMap<String, Person> = HashMap::new();
 
     for file in files {
-        if let Ok(content) = read_to_string(&file) {
+        if let Ok(content) = read_to_string(file) {
             let content = content.as_str();
 
             let file_objects: hcl::Body = match hcl::from_str(content) {
@@ -36,7 +36,7 @@ pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Database {
 
             file_objects.into_iter().for_each(|object| {
                 if !object.is_block() {
-                    return ();
+                    return ;
                 }
 
                 let block = object.as_block().unwrap();
@@ -128,7 +128,7 @@ impl Database {
                 .push_bind(&person.github)
                 .push_bind(&person.twitter)
                 .push_bind(&person.youtube)
-                .push_bind(&person.draft);
+                .push_bind(person.draft);
         });
 
         query_builder.push(
@@ -158,7 +158,7 @@ impl Database {
             q.push_bind(slugify(name))
                 .push_bind(name)
                 .push_bind(&show.description)
-                .push_bind(&show.draft);
+                .push_bind(show.draft);
         });
 
         query_builder.push(
@@ -188,12 +188,12 @@ impl Database {
                 .push_bind(name)
                 .push_bind(&technology.description)
                 .push_bind(&technology.website)
-                .push_bind(&technology.open_source)
+                .push_bind(technology.open_source)
                 .push_bind(&technology.repository)
                 .push_bind(&technology.documentation)
                 .push_bind(&technology.twitter)
                 .push_bind(&technology.youtube)
-                .push_bind(&technology.draft);
+                .push_bind(technology.draft);
         });
 
         query_builder.push(
@@ -254,13 +254,13 @@ impl Database {
             q.push_bind(slugify(name))
                 .push_bind(name)
                 .push_bind(&episode.show)
-                .push_bind(&episode.live)
-                .push_bind(&episode.scheduled_for)
+                .push_bind(episode.live)
+                .push_bind(episode.scheduled_for)
                 .push_bind(&episode.youtube_id)
-                .push_bind(&episode.youtube_category)
+                .push_bind(episode.youtube_category)
                 .push_bind(links)
                 .push_bind(chapters)
-                .push_bind(&episode.draft);
+                .push_bind(episode.draft);
         });
 
         query_builder.push(

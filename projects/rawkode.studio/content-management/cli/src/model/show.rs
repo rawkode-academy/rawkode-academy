@@ -1,4 +1,3 @@
-use super::InsertStatement;
 use hcl::{ser::LabeledBlock, Value};
 use indexmap::IndexMap;
 
@@ -19,21 +18,4 @@ pub struct Shows {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct MinimalShows {
     pub show: Value,
-}
-
-impl InsertStatement for Shows {
-    fn statement() -> &'static str {
-        r#"
-        INSERT INTO shows ("id", "name", "draft")
-        VALUES (
-            $1,
-            $2,
-            $3
-        )
-        ON CONFLICT ("id") DO UPDATE
-        SET
-            "name" = $2,
-            "draft" = $3;
-        "#
-    }
 }
