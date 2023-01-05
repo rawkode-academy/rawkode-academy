@@ -5,31 +5,29 @@ episode "Hands-on with Litmus 2.0" {
   youtube_id = "D0t3emVLLko"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/ksatchit",
-    "github.com/ksatchit",
-    "litmuschaos.io/",
-    "twitter.com/LitmusChaos",
-    "github.com/litmuschaos/litmus"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/ksatchit",
+    "https://github.com/ksatchit",
+    "https://litmuschaos.io/",
+    "https://twitter.com/LitmusChaos",
+    "https://github.com/litmuschaos/litmus"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:00"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:05:25"
-      "title" = "What's new in Litmus 2.0?"
-    },
-    {
-      "time" = "00:15:00"
-      "title" = "Demo"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:00"
+  }
+
+  chapter "What's new in Litmus 2.0?" {
+    time = "00:05:25"
+  }
+
+  chapter "Demo" {
+    time = "00:15:00"
+  }
 }

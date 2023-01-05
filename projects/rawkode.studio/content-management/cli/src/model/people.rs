@@ -7,8 +7,10 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Person {
     pub draft: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub twitter: Option<String>,
     pub github: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub youtube: Option<String>,
 }
 

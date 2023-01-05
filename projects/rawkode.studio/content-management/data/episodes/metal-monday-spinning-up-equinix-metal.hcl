@@ -5,26 +5,24 @@ episode "Spinning up Equinix Metal" {
   youtube_id = "0XTefee6WYg"
   youtube_category = 24
   links = []
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:00:30"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:02:30"
-      "title" = "Spinning up your first server with the console UI"
-    },
-    {
-      "time" = "00:10:00"
-      "title" = "Using the Equinix Metal API"
-    },
-    {
-      "time" = "00:20:00"
-      "title" = "Using the Equinix Metal CLI"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:30"
+  }
+
+  chapter "Spinning up your first server with the console UI" {
+    time = "00:02:30"
+  }
+
+  chapter "Using the Equinix Metal API" {
+    time = "00:10:00"
+  }
+
+  chapter "Using the Equinix Metal CLI" {
+    time = "00:20:00"
+  }
 }

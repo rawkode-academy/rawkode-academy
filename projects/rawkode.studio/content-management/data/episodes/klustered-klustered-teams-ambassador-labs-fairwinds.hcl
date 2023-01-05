@@ -5,18 +5,16 @@ episode "Klustered Teams - Ambassador Labs & Fairwinds" {
   youtube_id = "qgu0MVhBjeg"
   youtube_category = 24
   links = [
-    "rawkode.live/teleport",
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "kubernetes.io/",
-    "twitter.com/kubernetesio",
-    "github.com/kubernetes/kubernetes"
+    "https://rawkode.live/teleport",
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://kubernetes.io/",
+    "https://twitter.com/kubernetesio",
+    "https://github.com/kubernetes/kubernetes"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
 }

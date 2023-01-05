@@ -5,52 +5,50 @@ episode "Hands-on Introduction to Promscale" {
   youtube_id = "Rp_ofsIm00U"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/VineethReddy02",
-    "github.com/VineethReddy02",
-    "www.vineethweb.com/",
-    "twitter.com/cevianNY",
-    "github.com/cevian",
-    "github.com/timescale/promscale"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/VineethReddy02",
+    "https://github.com/VineethReddy02",
+    "https://www.vineethweb.com/",
+    "https://twitter.com/cevianNY",
+    "https://github.com/cevian",
+    "https://github.com/timescale/promscale"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:00:30"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:03:40"
-      "title" = "Introduction to Promscale (Slides)"
-    },
-    {
-      "time" = "00:20:40"
-      "title" = "Installing Promscale with TOBS"
-    },
-    {
-      "time" = "00:40:00"
-      "title" = "Promscale's Vision (Slides)"
-    },
-    {
-      "time" = "00:30:20"
-      "title" = "Q&A"
-    },
-    {
-      "time" = "00:41:30"
-      "title" = "The TOBs CLI"
-    },
-    {
-      "time" = "00:44:00"
-      "title" = "Dashboards"
-    },
-    {
-      "time" = "00:53:00"
-      "title" = "SQL for Prometheus"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:30"
+  }
+
+  chapter "Introduction to Promscale (Slides)" {
+    time = "00:03:40"
+  }
+
+  chapter "Installing Promscale with TOBS" {
+    time = "00:20:40"
+  }
+
+  chapter "Promscale's Vision (Slides)" {
+    time = "00:40:00"
+  }
+
+  chapter "Q&A" {
+    time = "00:30:20"
+  }
+
+  chapter "The TOBs CLI" {
+    time = "00:41:30"
+  }
+
+  chapter "Dashboards" {
+    time = "00:44:00"
+  }
+
+  chapter "SQL for Prometheus" {
+    time = "00:53:00"
+  }
 }

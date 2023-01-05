@@ -5,58 +5,56 @@ episode "Hands-on Introduction to Loki" {
   youtube_id = "sg-o8UECSQA"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/Kuqd",
-    "github.com/cyriltovena",
-    "grafana.com/oss/loki/",
-    "github.com/grafana/loki"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/Kuqd",
+    "https://github.com/cyriltovena",
+    "https://grafana.com/oss/loki/",
+    "https://github.com/grafana/loki"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    },
-    {
-      "time" = "00:00:50"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:05:30"
-      "title" = "What is Loki?"
-    },
-    {
-      "time" = "00:10:00"
-      "title" = "Deploying Loki"
-    },
-    {
-      "time" = "00:21:45"
-      "title" = "Introduction to LogQL"
-    },
-    {
-      "time" = "00:30:20"
-      "title" = "Grafana's Log Browser"
-    },
-    {
-      "time" = "00:41:20"
-      "title" = "Aggregations with LogQL"
-    },
-    {
-      "time" = "00:45:00"
-      "title" = "Searching with LogQL"
-    },
-    {
-      "time" = "00:54:00"
-      "title" = "Dashboards and Panels with Loki"
-    },
-    {
-      "time" = "00:04:00"
-      "title" = "Parsing Logs with LogQL"
-    },
-    {
-      "time" = "00:25:00"
-      "title" = "Metrics from Logs"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:50"
+  }
+
+  chapter "What is Loki?" {
+    time = "00:05:30"
+  }
+
+  chapter "Deploying Loki" {
+    time = "00:10:00"
+  }
+
+  chapter "Introduction to LogQL" {
+    time = "00:21:45"
+  }
+
+  chapter "Grafana's Log Browser" {
+    time = "00:30:20"
+  }
+
+  chapter "Aggregations with LogQL" {
+    time = "00:41:20"
+  }
+
+  chapter "Searching with LogQL" {
+    time = "00:45:00"
+  }
+
+  chapter "Dashboards and Panels with Loki" {
+    time = "00:54:00"
+  }
+
+  chapter "Parsing Logs with LogQL" {
+    time = "00:04:00"
+  }
+
+  chapter "Metrics from Logs" {
+    time = "00:25:00"
+  }
 }

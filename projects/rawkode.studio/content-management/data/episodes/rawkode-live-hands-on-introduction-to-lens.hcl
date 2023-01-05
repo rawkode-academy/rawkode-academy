@@ -5,31 +5,29 @@ episode "Hands-on Introduction to Lens" {
   youtube_id = "IX4qUr_XwK8"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/IonelEdward",
-    "github.com/Eionel",
-    "k8slens.dev",
-    "twitter.com/k8slens",
-    "github.com/lensapp/lens"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/IonelEdward",
+    "https://github.com/Eionel",
+    "https://k8slens.dev/",
+    "https://twitter.com/k8slens",
+    "https://github.com/lensapp/lens"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:12"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:04:55"
-      "title" = "What is Lens: The Kubernetes IDE"
-    },
-    {
-      "time" = "00:45:20"
-      "title" = "Sharing Cluster Access Through Spaces"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:12"
+  }
+
+  chapter "What is Lens: The Kubernetes IDE" {
+    time = "00:04:55"
+  }
+
+  chapter "Sharing Cluster Access Through Spaces" {
+    time = "00:45:20"
+  }
 }

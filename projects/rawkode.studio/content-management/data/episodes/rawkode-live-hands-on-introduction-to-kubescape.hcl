@@ -5,5 +5,4 @@ episode "Hands-on Introduction to Kubescape" {
   youtube_id = "xp1e34SF-4M"
   youtube_category = 24
   links = []
-  chapters = []
 }

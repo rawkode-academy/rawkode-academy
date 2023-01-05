@@ -5,40 +5,38 @@ episode "Hands-on Introduction to Velero" {
   youtube_id = "9Y9ApnAcExM"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/carlisia",
-    "github.com/carlisia",
-    "grokkingtech.io/",
-    "velero.io/",
-    "twitter.com/https://twitter.com/projectvelero",
-    "github.com/vmware-tanzu/velero"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/carlisia",
+    "https://github.com/carlisia",
+    "https://grokkingtech.io/",
+    "https://velero.io/",
+    "https://twitter.com/https://twitter.com/projectvelero",
+    "https://github.com/vmware-tanzu/velero"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    },
-    {
-      "time" = "00:00:49"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:03:45"
-      "title" = "What is Velero?"
-    },
-    {
-      "time" = "00:08:25"
-      "title" = "Installing Velero"
-    },
-    {
-      "time" = "00:25:30"
-      "title" = "Creating a Backup"
-    },
-    {
-      "time" = "00:58:00"
-      "title" = "Restoring a Backup"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:49"
+  }
+
+  chapter "What is Velero?" {
+    time = "00:03:45"
+  }
+
+  chapter "Installing Velero" {
+    time = "00:08:25"
+  }
+
+  chapter "Creating a Backup" {
+    time = "00:25:30"
+  }
+
+  chapter "Restoring a Backup" {
+    time = "00:58:00"
+  }
 }

@@ -5,59 +5,57 @@ episode "Hands-on Introduction to Skaffold" {
   youtube_id = "U7ybnPmwKik"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/vicnastea",
-    "github.com/viglesiasce",
-    "testingclouds.wordpress.com/",
-    "skaffold.dev/",
-    "github.com/GoogleContainerTools/skaffold"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/vicnastea",
+    "https://github.com/viglesiasce",
+    "https://testingclouds.wordpress.com/",
+    "https://skaffold.dev/",
+    "https://github.com/GoogleContainerTools/skaffold"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    },
-    {
-      "time" = "00:00:50"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:03:00"
-      "title" = "WHat is Skaffold? (Slides)"
-    },
-    {
-      "time" = "00:15:00"
-      "title" = "Microservice Demo"
-    },
-    {
-      "time" = "00:22:30"
-      "title" = "TypeScript Demo"
-    },
-    {
-      "time" = "00:31:30"
-      "title" = "CloudNative BuildPacks Demo"
-    },
-    {
-      "time" = "00:40:00"
-      "title" = "Multiple Config Demo"
-    },
-    {
-      "time" = "00:51:00"
-      "title" = "Helm Demo"
-    },
-    {
-      "time" = "00:53:00"
-      "title" = "React Hot Reload Demo"
-    },
-    {
-      "time" = "00:58:20"
-      "title" = "Custom Command / Test Demo"
-    },
-    {
-      "time" = "00:02:00"
-      "title" = "Advanced Demo (Using it all together)"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:50"
+  }
+
+  chapter "WHat is Skaffold? (Slides)" {
+    time = "00:03:00"
+  }
+
+  chapter "Microservice Demo" {
+    time = "00:15:00"
+  }
+
+  chapter "TypeScript Demo" {
+    time = "00:22:30"
+  }
+
+  chapter "CloudNative BuildPacks Demo" {
+    time = "00:31:30"
+  }
+
+  chapter "Multiple Config Demo" {
+    time = "00:40:00"
+  }
+
+  chapter "Helm Demo" {
+    time = "00:51:00"
+  }
+
+  chapter "React Hot Reload Demo" {
+    time = "00:53:00"
+  }
+
+  chapter "Custom Command / Test Demo" {
+    time = "00:58:20"
+  }
+
+  chapter "Advanced Demo (Using it all together)" {
+    time = "00:02:00"
+  }
 }

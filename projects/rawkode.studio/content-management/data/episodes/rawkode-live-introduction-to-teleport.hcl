@@ -5,46 +5,44 @@ episode "Introduction to Teleport" {
   youtube_id = "PAG7I-4FbeY"
   youtube_category = 24
   links = [
-    "equinixmetal.com",
-    "twitter.com/StevenMGravy",
-    "goteleport.com/teleport/"
+    "https://equinixmetal.com/",
+    "https://twitter.com/StevenMGravy",
+    "https://goteleport.com/teleport/"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding"
-    },
-    {
-      "time" = "00:00:20"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:02:45"
-      "title" = "What is Teleport?"
-    },
-    {
-      "time" = "00:08:00"
-      "title" = "Installing Teleport"
-    },
-    {
-      "time" = "00:19:00"
-      "title" = "Creating our first user"
-    },
-    {
-      "time" = "00:26:30"
-      "title" = "SSH Recordings and Auditing"
-    },
-    {
-      "time" = "00:31:30"
-      "title" = "Using Teleport locally with the CLI"
-    },
-    {
-      "time" = "00:44:00"
-      "title" = "Installing Teleport to Kubernetes"
-    },
-    {
-      "time" = "00:02:00"
-      "title" = "Teleport on Kubernetes demo"
-    }
-  ]
+
+  chapter "Holding" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:20"
+  }
+
+  chapter "What is Teleport?" {
+    time = "00:02:45"
+  }
+
+  chapter "Installing Teleport" {
+    time = "00:08:00"
+  }
+
+  chapter "Creating our first user" {
+    time = "00:19:00"
+  }
+
+  chapter "SSH Recordings and Auditing" {
+    time = "00:26:30"
+  }
+
+  chapter "Using Teleport locally with the CLI" {
+    time = "00:31:30"
+  }
+
+  chapter "Installing Teleport to Kubernetes" {
+    time = "00:44:00"
+  }
+
+  chapter "Teleport on Kubernetes demo" {
+    time = "00:02:00"
+  }
 }

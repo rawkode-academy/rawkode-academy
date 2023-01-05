@@ -5,5 +5,4 @@ episode "Hands-on Introduction to SchemaHero" {
   youtube_id = "iCaowbztFAs"
   youtube_category = 24
   links = []
-  chapters = []
 }

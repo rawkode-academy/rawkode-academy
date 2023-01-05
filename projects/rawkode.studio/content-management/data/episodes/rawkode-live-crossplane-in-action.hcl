@@ -5,19 +5,17 @@ episode "Crossplane in Action" {
   youtube_id = "tz698kZByyw"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/vfarcic",
-    "github.com/vfarcic",
-    "crossplane.io/",
-    "twitter.com/crossplane_io",
-    "github.com/crossplane/crossplane"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/vfarcic",
+    "https://github.com/vfarcic",
+    "https://crossplane.io/",
+    "https://twitter.com/crossplane_io",
+    "https://github.com/crossplane/crossplane"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
 }

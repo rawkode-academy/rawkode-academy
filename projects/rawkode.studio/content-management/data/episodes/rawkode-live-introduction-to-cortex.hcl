@@ -5,45 +5,43 @@ episode "Introduction to Cortex" {
   youtube_id = "lI-4jHKv2Y0"
   youtube_category = 24
   links = [
-    "twitter.com/_codesome",
-    "cortex.io"
+    "https://twitter.com/_codesome",
+    "https://cortex.io/"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:25"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:03:45"
-      "title" = "What problem is Cortex solving?"
-    },
-    {
-      "time" = "00:07:20"
-      "title" = "What was prepared upfront?"
-    },
-    {
-      "time" = "00:08:15"
-      "title" = "Building Cortex from source"
-    },
-    {
-      "time" = "00:14:30"
-      "title" = "Running Prometheus with Cortex"
-    },
-    {
-      "time" = "00:25:20"
-      "title" = "Slides and demo - Cortex architecture and scaling"
-    },
-    {
-      "time" = "00:45:00"
-      "title" = "Walking through the demo ourselves"
-    },
-    {
-      "time" = "00:54:00"
-      "title" = "Cortex architecture"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:25"
+  }
+
+  chapter "What problem is Cortex solving?" {
+    time = "00:03:45"
+  }
+
+  chapter "What was prepared upfront?" {
+    time = "00:07:20"
+  }
+
+  chapter "Building Cortex from source" {
+    time = "00:08:15"
+  }
+
+  chapter "Running Prometheus with Cortex" {
+    time = "00:14:30"
+  }
+
+  chapter "Slides and demo - Cortex architecture and scaling" {
+    time = "00:25:20"
+  }
+
+  chapter "Walking through the demo ourselves" {
+    time = "00:45:00"
+  }
+
+  chapter "Cortex architecture" {
+    time = "00:54:00"
+  }
 }

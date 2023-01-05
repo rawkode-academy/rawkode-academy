@@ -5,38 +5,36 @@ episode "Introduction to Open Policy Agent" {
   youtube_id = "ejH4EzmL7e0"
   youtube_category = 24
   links = [
-    "twitter.com/sometorin)",
-    "twitter.com/sometorin",
-    "www.openpolicyagent.org/"
+    "https://twitter.com/sometorin)",
+    "https://twitter.com/sometorin",
+    "https://www.openpolicyagent.org/"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:04:00"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:10:00"
-      "title" = "Introduction to Rego, the policy language"
-    },
-    {
-      "time" = "00:13:45"
-      "title" = "Our first Rego policy"
-    },
-    {
-      "time" = "00:23:40"
-      "title" = "Simple Kubernetes policy - label validation"
-    },
-    {
-      "time" = "00:31:00"
-      "title" = "Complex Kubernetes policy - image source validation"
-    },
-    {
-      "time" = "00:38:40"
-      "title" = "Running Open Policy Agent (OPA) locally with CLI and VSCode"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:04:00"
+  }
+
+  chapter "Introduction to Rego, the policy language" {
+    time = "00:10:00"
+  }
+
+  chapter "Our first Rego policy" {
+    time = "00:13:45"
+  }
+
+  chapter "Simple Kubernetes policy - label validation" {
+    time = "00:23:40"
+  }
+
+  chapter "Complex Kubernetes policy - image source validation" {
+    time = "00:31:00"
+  }
+
+  chapter "Running Open Policy Agent (OPA) locally with CLI and VSCode" {
+    time = "00:38:40"
+  }
 }

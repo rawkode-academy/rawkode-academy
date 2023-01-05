@@ -5,51 +5,49 @@ episode "Introduction to Carvel" {
   youtube_id = "LBCmMTofNxw"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawko.de/office-hours",
-    "twitter.com/dmitriykalinin",
-    "carvel.dev"
+    "https://twitter.com/rawkode",
+    "https://rawko.de/office-hours",
+    "https://twitter.com/dmitriykalinin",
+    "https://carvel.dev/"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:15"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:02:00"
-      "title" = "What is Carvel?"
-    },
-    {
-      "time" = "00:06:40"
-      "title" = "Installing Carvel"
-    },
-    {
-      "time" = "00:08:20"
-      "title" = "Why did it change name from k14s to Carvel?"
-    },
-    {
-      "time" = "00:11:20"
-      "title" = "Hands on with kapp"
-    },
-    {
-      "time" = "00:25:00"
-      "title" = "Introduction to kapp-controller"
-    },
-    {
-      "time" = "00:30:00"
-      "title" = "Hands on with ytt"
-    },
-    {
-      "time" = "00:00:00"
-      "title" = "Introduction to kbld"
-    },
-    {
-      "time" = "00:03:30"
-      "title" = "Introduction to imgpkg"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:15"
+  }
+
+  chapter "What is Carvel?" {
+    time = "00:02:00"
+  }
+
+  chapter "Installing Carvel" {
+    time = "00:06:40"
+  }
+
+  chapter "Why did it change name from k14s to Carvel?" {
+    time = "00:08:20"
+  }
+
+  chapter "Hands on with kapp" {
+    time = "00:11:20"
+  }
+
+  chapter "Introduction to kapp-controller" {
+    time = "00:25:00"
+  }
+
+  chapter "Hands on with ytt" {
+    time = "00:30:00"
+  }
+
+  chapter "Introduction to kbld" {
+    time = "00:00:00"
+  }
+
+  chapter "Introduction to imgpkg" {
+    time = "00:03:30"
+  }
 }

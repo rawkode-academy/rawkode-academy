@@ -5,39 +5,37 @@ episode "Hands-on Introduction to K0s" {
   youtube_id = "pXbJwlUDnUI"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/JNummelin",
-    "github.com/jnummelin",
-    "k0sproject.io/",
-    "twitter.com/k0sproject",
-    "github.com/k0sproject/k0s"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/JNummelin",
+    "https://github.com/jnummelin",
+    "https://k0sproject.io/",
+    "https://twitter.com/k0sproject",
+    "https://github.com/k0sproject/k0s"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:00"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:04:40"
-      "title" = "What is k0s?"
-    },
-    {
-      "time" = "00:22:15"
-      "title" = "Installing k0s"
-    },
-    {
-      "time" = "00:36:00"
-      "title" = "Installing with k0sctl"
-    },
-    {
-      "time" = "00:49:00"
-      "title" = "k0sctl with Terraform"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:00"
+  }
+
+  chapter "What is k0s?" {
+    time = "00:04:40"
+  }
+
+  chapter "Installing k0s" {
+    time = "00:22:15"
+  }
+
+  chapter "Installing with k0sctl" {
+    time = "00:36:00"
+  }
+
+  chapter "k0sctl with Terraform" {
+    time = "00:49:00"
+  }
 }

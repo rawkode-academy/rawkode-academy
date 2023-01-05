@@ -5,37 +5,35 @@ episode "Hands-on Introduction to Kaniko" {
   youtube_id = "7J_j42jddDg"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/tejal29",
-    "github.com/tejal29",
-    "github.com/GoogleContainerTools/kaniko"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/tejal29",
+    "https://github.com/tejal29",
+    "https://github.com/GoogleContainerTools/kaniko"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:00:30"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:02:55"
-      "title" = "What is Kaniko?"
-    },
-    {
-      "time" = "00:08:20"
-      "title" = "Building an Image"
-    },
-    {
-      "time" = "00:27:30"
-      "title" = "Build Caching"
-    },
-    {
-      "time" = "00:40:00"
-      "title" = "Image Snapshotting"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:30"
+  }
+
+  chapter "What is Kaniko?" {
+    time = "00:02:55"
+  }
+
+  chapter "Building an Image" {
+    time = "00:08:20"
+  }
+
+  chapter "Build Caching" {
+    time = "00:27:30"
+  }
+
+  chapter "Image Snapshotting" {
+    time = "00:40:00"
+  }
 }

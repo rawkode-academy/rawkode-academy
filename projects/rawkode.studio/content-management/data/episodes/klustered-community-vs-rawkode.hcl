@@ -5,55 +5,53 @@ episode "Community vs. Rawkode" {
   youtube_id = "_BFbrrXKMOM"
   youtube_category = 24
   links = [
-    "github.com/rawkode/klustered",
-    "rawkode.live/teleport",
-    "youtu.be/teB22ZuV_z8",
-    "youtu.be/JzGv36Pcq3g",
-    "youtu.be/Ps2CQm6_aZU",
-    "youtu.be/Cp6zvBIo5KM",
-    "youtu.be/Ju1WmHfK6t8",
-    "youtu.be/tmsqYWBTxEQ",
-    "youtu.be/Pd90XGptVec",
-    "youtu.be/QFxJWPF-QDk",
-    "youtu.be/1f6KTDo5WEo",
-    "youtu.be/RGaUhqgrsXE",
-    "youtu.be/K72fOdbxXu8",
-    "youtu.be/ysfUgYs4YYY",
-    "youtu.be/H2227nrkhOg",
-    "youtu.be/akJCvD0ASmw",
-    "youtu.be/5Rw7_1Yvm0U",
-    "youtu.be/4lMxlQ64Z7I",
-    "youtu.be/ozbE25Y_rcM",
-    "youtu.be/IWz1XJnOR_g",
-    "youtu.be/JvgpDTx1AZ0",
-    "youtu.be/_GZ8UuEZxbY",
-    "youtu.be/z0Lf303tKtQ",
-    "youtu.be/-k5y2C6HNa0",
-    "youtu.be/FClIbQ8hdxY",
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat"
+    "https://github.com/rawkode/klustered",
+    "https://rawkode.live/teleport",
+    "https://youtu.be/teB22ZuV_z8",
+    "https://youtu.be/JzGv36Pcq3g",
+    "https://youtu.be/Ps2CQm6_aZU",
+    "https://youtu.be/Cp6zvBIo5KM",
+    "https://youtu.be/Ju1WmHfK6t8",
+    "https://youtu.be/tmsqYWBTxEQ",
+    "https://youtu.be/Pd90XGptVec",
+    "https://youtu.be/QFxJWPF-QDk",
+    "https://youtu.be/1f6KTDo5WEo",
+    "https://youtu.be/RGaUhqgrsXE",
+    "https://youtu.be/K72fOdbxXu8",
+    "https://youtu.be/ysfUgYs4YYY",
+    "https://youtu.be/H2227nrkhOg",
+    "https://youtu.be/akJCvD0ASmw",
+    "https://youtu.be/5Rw7_1Yvm0U",
+    "https://youtu.be/4lMxlQ64Z7I",
+    "https://youtu.be/ozbE25Y_rcM",
+    "https://youtu.be/IWz1XJnOR_g",
+    "https://youtu.be/JvgpDTx1AZ0",
+    "https://youtu.be/_GZ8UuEZxbY",
+    "https://youtu.be/z0Lf303tKtQ",
+    "https://youtu.be/-k5y2C6HNa0",
+    "https://youtu.be/FClIbQ8hdxY",
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:45"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:08:00"
-      "title" = "Rawkode vs Russel W"
-    },
-    {
-      "time" = "00:42:50"
-      "title" = "Rawkode vs Noel Georgi / frezbo"
-    },
-    {
-      "time" = "01:07:00"
-      "title" = "Rawkode vs The Internet"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:45"
+  }
+
+  chapter "Rawkode vs Russel W" {
+    time = "00:08:00"
+  }
+
+  chapter "Rawkode vs Noel Georgi / frezbo" {
+    time = "00:42:50"
+  }
+
+  chapter "Rawkode vs The Internet" {
+    time = "01:07:00"
+  }
 }

@@ -5,5 +5,4 @@ episode "Introducing apko & melange" {
   youtube_id = "N6iNLZi42MA"
   youtube_category = 24
   links = []
-  chapters = []
 }

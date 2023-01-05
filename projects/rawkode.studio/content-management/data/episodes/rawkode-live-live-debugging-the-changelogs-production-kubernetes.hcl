@@ -5,22 +5,20 @@ episode "Live Debugging the Changelog's Production Kubernetes" {
   youtube_id = "7zmRhHd-ohk"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/displague",
-    "github.com/displague",
-    "twitter.com/gerhardlazu",
-    "github.com/gerhard",
-    "gerhard.io/",
-    "kubernetes.io/",
-    "twitter.com/kubernetesio",
-    "github.com/kubernetes/kubernetes"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/displague",
+    "https://github.com/displague",
+    "https://twitter.com/gerhardlazu",
+    "https://github.com/gerhard",
+    "https://gerhard.io/",
+    "https://kubernetes.io/",
+    "https://twitter.com/kubernetesio",
+    "https://github.com/kubernetes/kubernetes"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
 }

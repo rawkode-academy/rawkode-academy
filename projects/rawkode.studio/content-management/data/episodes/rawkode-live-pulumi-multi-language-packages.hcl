@@ -5,32 +5,30 @@ episode "Pulumi: Multi Language Packages" {
   youtube_id = "_RXvNS5N8A8"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/briggsl",
-    "github.com/jaxxstorm",
-    "www.leebriggs.co.uk/",
-    "pulumi.com/",
-    "twitter.com/PulumiCorp",
-    "github.com/pulumi/pulumi"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/briggsl",
+    "https://github.com/jaxxstorm",
+    "https://www.leebriggs.co.uk/",
+    "https://pulumi.com/",
+    "https://twitter.com/PulumiCorp",
+    "https://github.com/pulumi/pulumi"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:00:40"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:02:20"
-      "title" = "What are Pulumi Multi Language Components?"
-    },
-    {
-      "time" = "00:07:00"
-      "title" = "Building a Multi Language Component"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:40"
+  }
+
+  chapter "What are Pulumi Multi Language Components?" {
+    time = "00:02:20"
+  }
+
+  chapter "Building a Multi Language Component" {
+    time = "00:07:00"
+  }
 }

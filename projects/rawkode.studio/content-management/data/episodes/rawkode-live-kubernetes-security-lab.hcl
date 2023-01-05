@@ -5,52 +5,50 @@ episode "Kubernetes Security Lab" {
   youtube_id = "Srd1qqxDReA"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/raesene",
-    "github.com/raesene",
-    "raesene.github.io/",
-    "kubernetes.io/",
-    "twitter.com/kubernetesio",
-    "github.com/kubernetes/kubernetes"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/raesene",
+    "https://github.com/raesene",
+    "https://raesene.github.io/",
+    "https://kubernetes.io/",
+    "https://twitter.com/kubernetesio",
+    "https://github.com/kubernetes/kubernetes"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:00:30"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:02:00"
-      "title" = "What is the Security Lab?"
-    },
-    {
-      "time" = "00:06:20"
-      "title" = "Launching the Client Machine"
-    },
-    {
-      "time" = "00:11:00"
-      "title" = "Lab 1: APIServer Insecure Port"
-    },
-    {
-      "time" = "00:26:40"
-      "title" = "Lab 2: Kubelet NoAuth"
-    },
-    {
-      "time" = "00:40:00"
-      "title" = "Lab 3: Etcd NoAuth"
-    },
-    {
-      "time" = "00:57:00"
-      "title" = "Lab 4: Privileged Pod"
-    },
-    {
-      "time" = "00:09:00"
-      "title" = "Lab 5: Helm 2's Tiller"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:30"
+  }
+
+  chapter "What is the Security Lab?" {
+    time = "00:02:00"
+  }
+
+  chapter "Launching the Client Machine" {
+    time = "00:06:20"
+  }
+
+  chapter "Lab 1: APIServer Insecure Port" {
+    time = "00:11:00"
+  }
+
+  chapter "Lab 2: Kubelet NoAuth" {
+    time = "00:26:40"
+  }
+
+  chapter "Lab 3: Etcd NoAuth" {
+    time = "00:40:00"
+  }
+
+  chapter "Lab 4: Privileged Pod" {
+    time = "00:57:00"
+  }
+
+  chapter "Lab 5: Helm 2's Tiller" {
+    time = "00:09:00"
+  }
 }

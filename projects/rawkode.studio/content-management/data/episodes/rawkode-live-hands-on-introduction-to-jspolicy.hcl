@@ -5,20 +5,18 @@ episode "Hands-on Introduction to jsPolicy" {
   youtube_id = "oM1WU7HFCdA"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/richburroughs",
-    "github.com/richburroughs",
-    "twitter.com/LukasGentele",
-    "github.com/LukasGentele",
-    "www.jspolicy.com/",
-    "github.com/loft-sh/jspolicy"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/richburroughs",
+    "https://github.com/richburroughs",
+    "https://twitter.com/LukasGentele",
+    "https://github.com/LukasGentele",
+    "https://www.jspolicy.com/",
+    "https://github.com/loft-sh/jspolicy"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
 }

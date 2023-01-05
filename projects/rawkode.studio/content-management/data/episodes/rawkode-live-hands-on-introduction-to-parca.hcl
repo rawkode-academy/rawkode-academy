@@ -5,5 +5,4 @@ episode "Hands-on Introduction to Parca" {
   youtube_id = "z3cEYklFdyo"
   youtube_category = 24
   links = []
-  chapters = []
 }

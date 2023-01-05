@@ -5,38 +5,36 @@ episode "Buiding a WebAssembly GraphQL Client" {
   youtube_id = "UWcBNxrQLy8"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/cohix",
-    "github.com/cohix",
-    "twitter.com/reconbot",
-    "github.com/reconbot",
-    "suborbital.dev",
-    "twitter.com/SuborbitalDev",
-    "github.com/suborbital",
-    "webassembly.org/",
-    "github.com/WebAssembly",
-    "graphql.org/",
-    "twitter.com/graphql",
-    "github.com/graphql"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/cohix",
+    "https://github.com/cohix",
+    "https://twitter.com/reconbot",
+    "https://github.com/reconbot",
+    "https://suborbital.dev/",
+    "https://twitter.com/SuborbitalDev",
+    "https://github.com/suborbital",
+    "https://webassembly.org/",
+    "https://github.com/WebAssembly",
+    "https://graphql.org/",
+    "https://twitter.com/graphql",
+    "https://github.com/graphql"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    },
-    {
-      "time" = "00:00:40"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:07:00"
-      "title" = "What is Suborbital?"
-    },
-    {
-      "time" = "00:11:45"
-      "title" = "Live Coding a GraphQL WebAssembly (WASM) Client"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:40"
+  }
+
+  chapter "What is Suborbital?" {
+    time = "00:07:00"
+  }
+
+  chapter "Live Coding a GraphQL WebAssembly (WASM) Client" {
+    time = "00:11:45"
+  }
 }

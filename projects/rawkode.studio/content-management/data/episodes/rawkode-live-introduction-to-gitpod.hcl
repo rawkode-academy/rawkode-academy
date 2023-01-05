@@ -5,5 +5,4 @@ episode "Introduction to Gitpod" {
   youtube_id = "lJWO_kAL3kQ"
   youtube_category = 24
   links = []
-  chapters = []
 }

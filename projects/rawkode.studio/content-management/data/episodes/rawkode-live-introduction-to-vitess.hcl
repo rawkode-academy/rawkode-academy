@@ -5,55 +5,53 @@ episode "Introduction to Vitess" {
   youtube_id = "Cwpu0y119I0"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/ATechGirl",
-    "github.com/deepthi",
-    "github.com/deepthi",
-    "twitter.com/ask_dba",
-    "github.com/askdba",
-    "askdbablog.wordpress.com/blog/",
-    "vitess.io/",
-    "twitter.com/vitessio",
-    "github.com/vitessio/vitess"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/ATechGirl",
+    "https://github.com/deepthi",
+    "https://github.com/deepthi",
+    "https://twitter.com/ask_dba",
+    "https://github.com/askdba",
+    "https://askdbablog.wordpress.com/blog/",
+    "https://vitess.io/",
+    "https://twitter.com/vitessio",
+    "https://github.com/vitessio/vitess"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:00:45"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:04:00"
-      "title" = "What is Vitess?"
-    },
-    {
-      "time" = "00:18:00"
-      "title" = "Installing Vitess"
-    },
-    {
-      "time" = "00:25:00"
-      "title" = "Creating MySQL Cluster"
-    },
-    {
-      "time" = "00:39:00"
-      "title" = "Deploying WordPress"
-    },
-    {
-      "time" = "00:49:00"
-      "title" = "Vitess UI"
-    },
-    {
-      "time" = "00:53:20"
-      "title" = "Scaling Our MySQL Cluster"
-    },
-    {
-      "time" = "00:09:50"
-      "title" = "Chatting about Sharding, Backup/Restore, & Misc."
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:45"
+  }
+
+  chapter "What is Vitess?" {
+    time = "00:04:00"
+  }
+
+  chapter "Installing Vitess" {
+    time = "00:18:00"
+  }
+
+  chapter "Creating MySQL Cluster" {
+    time = "00:25:00"
+  }
+
+  chapter "Deploying WordPress" {
+    time = "00:39:00"
+  }
+
+  chapter "Vitess UI" {
+    time = "00:49:00"
+  }
+
+  chapter "Scaling Our MySQL Cluster" {
+    time = "00:53:20"
+  }
+
+  chapter "Chatting about Sharding, Backup/Restore, & Misc." {
+    time = "00:09:50"
+  }
 }

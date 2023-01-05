@@ -5,5 +5,4 @@ episode "Hands-on Introduction to Robusta" {
   youtube_id = "NMlWU72FKwY"
   youtube_category = 24
   links = []
-  chapters = []
 }

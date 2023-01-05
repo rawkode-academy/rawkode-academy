@@ -1,4 +1,4 @@
-use chrono::Duration;
+use chrono::{Duration};
 use diacritics::remove_diacritics;
 
 use hhmmss::Hhmmss;
@@ -8,7 +8,7 @@ use miette::Result;
 use regex::Regex;
 use serde::Deserialize;
 
-use sqlx::postgres::types::PgInterval;
+
 use unicode_normalization::UnicodeNormalization;
 
 pub mod episode;
@@ -29,7 +29,7 @@ lazy_static! {
     static ref DURATION: Regex = Regex::new(r#"([0-9]{1,2}):([0-9]{1,2}):?([0-9]{1,2})?"#).unwrap();
 }
 
-pub(crate) fn chapter_duration_de<'de, D>(deserializer: D) -> Result<PgInterval, D::Error>
+pub(crate) fn chapter_duration_de<'de, D>(deserializer: D) -> Result<Duration, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
@@ -53,10 +53,7 @@ where
                 serde::de::Error::custom(format!("Cannot parse seconds from {:?}", seconds))
             })?;
 
-            PgInterval::try_from(
-                Duration::hours(hours) + Duration::minutes(minutes) + Duration::seconds(seconds),
-            )
-            .map_err(|_| serde::de::Error::custom(format!("Cannot parse Duration from {}", value)))
+            Ok(Duration::hours(hours) + Duration::minutes(minutes) + Duration::seconds(seconds))
         }
         (Some(minutes), Some(seconds), None) => {
             let minutes = minutes.as_str().parse::<i64>().map_err(|_| {
@@ -67,9 +64,7 @@ where
                 serde::de::Error::custom(format!("Cannot parse seconds from {:?}", seconds))
             })?;
 
-            PgInterval::try_from(Duration::minutes(minutes) + Duration::seconds(seconds)).map_err(
-                |_| serde::de::Error::custom(format!("Cannot parse Duration from {}", value)),
-            )
+            Ok(Duration::minutes(minutes) + Duration::seconds(seconds))
         }
         _ => Err(serde::de::Error::custom(format!(
             "Cannot parse Duration from {}",
@@ -78,15 +73,10 @@ where
     }
 }
 
-pub(crate) fn chapter_duration_ser<S>(
-    duration: &PgInterval,
-    serializer: S,
-) -> Result<S::Ok, S::Error>
+pub(crate) fn chapter_duration_ser<S>(duration: &Duration, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
 {
-    let duration = Duration::microseconds(duration.microseconds);
-
     serializer.serialize_str(duration.hhmmss().as_str())
 }
 

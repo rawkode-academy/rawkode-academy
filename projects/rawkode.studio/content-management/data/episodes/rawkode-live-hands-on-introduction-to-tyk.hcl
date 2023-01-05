@@ -5,21 +5,19 @@ episode "Hands-on Introduction to Tyk" {
   youtube_id = "HTmGf-1FsG4"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/hellobudha",
-    "github.com/hellobudha",
-    "twitter.com/tyk_io",
-    "github.com/rewsmith",
-    "tyk.io/open-source/",
-    "twitter.com/tyk_io",
-    "github.com/TykTechnologies/tyk"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/hellobudha",
+    "https://github.com/hellobudha",
+    "https://twitter.com/tyk_io",
+    "https://github.com/rewsmith",
+    "https://tyk.io/open-source/",
+    "https://twitter.com/tyk_io",
+    "https://github.com/TykTechnologies/tyk"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
 }

@@ -5,36 +5,34 @@ episode "Introduction to Keptn (Part II)" {
   youtube_id = "pMkjE_uvJoo"
   youtube_category = 24
   links = [
-    "youtu.be/fjfj97Vb4ds",
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/jetzlstorfer",
-    "github.com/jetzlstorfer",
-    "keptn.sh",
-    "twitter.com/keptnProject",
-    "github.com/keptn/keptn"
+    "https://youtu.be/fjfj97Vb4ds",
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/jetzlstorfer",
+    "https://github.com/jetzlstorfer",
+    "https://keptn.sh/",
+    "https://twitter.com/keptnProject",
+    "https://github.com/keptn/keptn"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    },
-    {
-      "time" = "00:00:37"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:03:15"
-      "title" = "Overview of Part I (Slides)"
-    },
-    {
-      "time" = "00:16:30"
-      "title" = "Quality Gates for Continuous Delivery"
-    },
-    {
-      "time" = "00:53:00"
-      "title" = "Automatic Remediation"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:37"
+  }
+
+  chapter "Overview of Part I (Slides)" {
+    time = "00:03:15"
+  }
+
+  chapter "Quality Gates for Continuous Delivery" {
+    time = "00:16:30"
+  }
+
+  chapter "Automatic Remediation" {
+    time = "00:53:00"
+  }
 }

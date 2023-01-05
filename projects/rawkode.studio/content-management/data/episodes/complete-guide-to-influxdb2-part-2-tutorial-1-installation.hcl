@@ -5,32 +5,30 @@ episode "Part 2 - Tutorial 1: Installation" {
   youtube_id = "G0OM6ZNV2rQ"
   youtube_category = 24
   links = [
-    "rawkode.chat"
+    "https://rawkode.chat/"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Introduction"
-    },
-    {
-      "time" = "00:00:50"
-      "title" = "Install on macOS with brew"
-    },
-    {
-      "time" = "00:01:50"
-      "title" = "Install on Debian (+derivatives) with apt"
-    },
-    {
-      "time" = "00:04:12"
-      "title" = "Install on RedHat with dnf"
-    },
-    {
-      "time" = "00:05:25"
-      "title" = "Install with Docker"
-    },
-    {
-      "time" = "00:06:30"
-      "title" = "Install with Helm on Kubernetes"
-    }
-  ]
+
+  chapter "Introduction" {
+    time = "00:00:00"
+  }
+
+  chapter "Install on macOS with brew" {
+    time = "00:00:50"
+  }
+
+  chapter "Install on Debian (+derivatives) with apt" {
+    time = "00:01:50"
+  }
+
+  chapter "Install on RedHat with dnf" {
+    time = "00:04:12"
+  }
+
+  chapter "Install with Docker" {
+    time = "00:05:25"
+  }
+
+  chapter "Install with Helm on Kubernetes" {
+    time = "00:06:30"
+  }
 }

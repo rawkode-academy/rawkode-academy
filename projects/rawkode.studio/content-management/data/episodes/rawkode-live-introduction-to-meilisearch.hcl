@@ -5,22 +5,20 @@ episode "Introduction to Meilisearch" {
   youtube_id = "SJl2UWfy1nk"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/fharper",
-    "github.com/fharper",
-    "fred.dev/",
-    "twitter.com/CarolainFG",
-    "github.com/CaroFG",
-    "www.meilisearch.com/",
-    "twitter.com/meilisearch",
-    "github.com/meilisearch/MeiliSearch"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/fharper",
+    "https://github.com/fharper",
+    "https://fred.dev/",
+    "https://twitter.com/CarolainFG",
+    "https://github.com/CaroFG",
+    "https://www.meilisearch.com/",
+    "https://twitter.com/meilisearch",
+    "https://github.com/meilisearch/MeiliSearch"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
 }

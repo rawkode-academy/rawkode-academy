@@ -5,40 +5,38 @@ episode "Hands-on with Policy Reporter" {
   youtube_id = "ZrOtTELNLyg"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/FrankJogeleit",
-    "github.com/fjogeleit",
-    "kyverno.io/",
-    "twitter.com/kyverno",
-    "github.com/kyverno/kyverno",
-    "github.com/fjogeleit/policy-reporter"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/FrankJogeleit",
+    "https://github.com/fjogeleit",
+    "https://kyverno.io/",
+    "https://twitter.com/kyverno",
+    "https://github.com/kyverno/kyverno",
+    "https://github.com/fjogeleit/policy-reporter"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:00"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:04:20"
-      "title" = "What is Policy Reporter?"
-    },
-    {
-      "time" = "00:11:00"
-      "title" = "Installing Policy Reporter"
-    },
-    {
-      "time" = "00:13:20"
-      "title" = "Policy Reporter UI"
-    },
-    {
-      "time" = "00:24:00"
-      "title" = "Integrating with Prometheus and Grafana"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:00"
+  }
+
+  chapter "What is Policy Reporter?" {
+    time = "00:04:20"
+  }
+
+  chapter "Installing Policy Reporter" {
+    time = "00:11:00"
+  }
+
+  chapter "Policy Reporter UI" {
+    time = "00:13:20"
+  }
+
+  chapter "Integrating with Prometheus and Grafana" {
+    time = "00:24:00"
+  }
 }

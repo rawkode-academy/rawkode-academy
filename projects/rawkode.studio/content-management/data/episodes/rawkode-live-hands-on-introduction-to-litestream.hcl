@@ -5,47 +5,45 @@ episode "Hands-on Introduction to Litestream" {
   youtube_id = "UovUdIKaAgI"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/benbjohnson",
-    "github.com/benbjohnson",
-    "litestream.io/",
-    "twitter.com/litestreamio",
-    "github.com/benbjohnson/litestream"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/benbjohnson",
+    "https://github.com/benbjohnson",
+    "https://litestream.io/",
+    "https://twitter.com/litestreamio",
+    "https://github.com/benbjohnson/litestream"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    },
-    {
-      "time" = "00:01:30"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:09:45"
-      "title" = "Slides: SQLite Streaming Replication with Litestream"
-    },
-    {
-      "time" = "00:25:00"
-      "title" = "Creating a SQLite Database"
-    },
-    {
-      "time" = "00:28:40"
-      "title" = "Replicating SQLite with Litestream"
-    },
-    {
-      "time" = "00:34:30"
-      "title" = "Litestream Subcommands"
-    },
-    {
-      "time" = "00:44:30"
-      "title" = "Restoring SQLite with Litestream"
-    },
-    {
-      "time" = "00:50:00"
-      "title" = "Summary"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:30"
+  }
+
+  chapter "Slides: SQLite Streaming Replication with Litestream" {
+    time = "00:09:45"
+  }
+
+  chapter "Creating a SQLite Database" {
+    time = "00:25:00"
+  }
+
+  chapter "Replicating SQLite with Litestream" {
+    time = "00:28:40"
+  }
+
+  chapter "Litestream Subcommands" {
+    time = "00:34:30"
+  }
+
+  chapter "Restoring SQLite with Litestream" {
+    time = "00:44:30"
+  }
+
+  chapter "Summary" {
+    time = "00:50:00"
+  }
 }

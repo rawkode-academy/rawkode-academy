@@ -5,47 +5,45 @@ episode "Building PHP Applications with Docker, Docker Compose, and Kubernetes" 
   youtube_id = "LteLJ99oJMs"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawko.de/office-hours",
-    "twitter.com/CiaranMcNulty",
-    "gitlab.com/rawkode/php-examples/-/tree/main/docker-and-kubernetes"
+    "https://twitter.com/rawkode",
+    "https://rawko.de/office-hours",
+    "https://twitter.com/CiaranMcNulty",
+    "https://gitlab.com/rawkode/php-examples/-/tree/main/docker-and-kubernetes"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:00:50"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:09:30"
-      "title" = "Creating a Slim Framework application"
-    },
-    {
-      "time" = "00:14:50"
-      "title" = "Checking out the docker-compose.yml ... oh, did I write this? 😮"
-    },
-    {
-      "time" = "00:30:15"
-      "title" = "Adding a damn .editorconfig"
-    },
-    {
-      "time" = "00:31:15"
-      "title" = "Replacing the PHP dev server with nginx and php-fpm"
-    },
-    {
-      "time" = "00:55:00"
-      "title" = "Ditching compose 3.x for 2.x: leveraging complex dependencies with health-checks"
-    },
-    {
-      "time" = "00:11:00"
-      "title" = "Adding a multi-layer Dockerfile for build cache goodness"
-    },
-    {
-      "time" = "00:29:00"
-      "title" = "Deploying our application to Kubernetes"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:50"
+  }
+
+  chapter "Creating a Slim Framework application" {
+    time = "00:09:30"
+  }
+
+  chapter "Checking out the docker-compose.yml ... oh, did I write this? 😮" {
+    time = "00:14:50"
+  }
+
+  chapter "Adding a damn .editorconfig" {
+    time = "00:30:15"
+  }
+
+  chapter "Replacing the PHP dev server with nginx and php-fpm" {
+    time = "00:31:15"
+  }
+
+  chapter "Ditching compose 3.x for 2.x: leveraging complex dependencies with health-checks" {
+    time = "00:55:00"
+  }
+
+  chapter "Adding a multi-layer Dockerfile for build cache goodness" {
+    time = "00:11:00"
+  }
+
+  chapter "Deploying our application to Kubernetes" {
+    time = "00:29:00"
+  }
 }

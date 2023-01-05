@@ -5,60 +5,58 @@ episode "IPv6 ONLY Kubernetes Clusters" {
   youtube_id = "ohwHzr4O6Fo"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawko.de/office-hours",
-    "twitter.com/ProgrammerDude",
-    "www.packet.com",
-    "www.projectcalico.org/"
+    "https://twitter.com/rawkode",
+    "https://rawko.de/office-hours",
+    "https://twitter.com/ProgrammerDude",
+    "https://www.packet.com/",
+    "https://www.projectcalico.org/"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:30"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:04:40"
-      "title" = "Why are we deploying an IPv6 ONLY Kubernetes cluster?"
-    },
-    {
-      "time" = "00:09:40"
-      "title" = "Is this secure?!"
-    },
-    {
-      "time" = "00:11:50"
-      "title" = "Tutorial begins"
-    },
-    {
-      "time" = "00:13:55"
-      "title" = "Creating our servers with Pulumi and TypeScript"
-    },
-    {
-      "time" = "00:30:00"
-      "title" = "Refactoring server provisioning with TypeScript (Why I love Pulumi)"
-    },
-    {
-      "time" = "00:34:00"
-      "title" = "Installing Kubernetes with kubeadm"
-    },
-    {
-      "time" = "00:49:30"
-      "title" = "Installing CNI Calico"
-    },
-    {
-      "time" = "00:59:30"
-      "title" = "Deploying nginx"
-    },
-    {
-      "time" = "00:00:00"
-      "title" = "Announcing Kubernetes pod IPv6 addresses with BGP"
-    },
-    {
-      "time" = "00:11:16"
-      "title" = "Announcing Kubernetes service IPv6 addresses with BGP"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:30"
+  }
+
+  chapter "Why are we deploying an IPv6 ONLY Kubernetes cluster?" {
+    time = "00:04:40"
+  }
+
+  chapter "Is this secure?!" {
+    time = "00:09:40"
+  }
+
+  chapter "Tutorial begins" {
+    time = "00:11:50"
+  }
+
+  chapter "Creating our servers with Pulumi and TypeScript" {
+    time = "00:13:55"
+  }
+
+  chapter "Refactoring server provisioning with TypeScript (Why I love Pulumi)" {
+    time = "00:30:00"
+  }
+
+  chapter "Installing Kubernetes with kubeadm" {
+    time = "00:34:00"
+  }
+
+  chapter "Installing CNI Calico" {
+    time = "00:49:30"
+  }
+
+  chapter "Deploying nginx" {
+    time = "00:59:30"
+  }
+
+  chapter "Announcing Kubernetes pod IPv6 addresses with BGP" {
+    time = "00:00:00"
+  }
+
+  chapter "Announcing Kubernetes service IPv6 addresses with BGP" {
+    time = "00:11:16"
+  }
 }

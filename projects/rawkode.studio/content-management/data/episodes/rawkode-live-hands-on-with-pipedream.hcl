@@ -5,5 +5,4 @@ episode "Hands-on with Pipedream" {
   youtube_id = "Q8ZJ_5zxfmo"
   youtube_category = 24
   links = []
-  chapters = []
 }

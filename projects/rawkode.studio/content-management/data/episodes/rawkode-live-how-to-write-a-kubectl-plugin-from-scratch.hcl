@@ -5,36 +5,34 @@ episode "How to Write a kubectl Plugin from Scratch" {
   youtube_id = "9FGA5vDeaOk"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/mt165",
-    "github.com/mt165",
-    "mt165.co.uk/",
-    "kubernetes.io/",
-    "twitter.com/kubernetesio",
-    "github.com/kubernetes/kubernetes"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/mt165",
+    "https://github.com/mt165",
+    "https://mt165.co.uk/",
+    "https://kubernetes.io/",
+    "https://twitter.com/kubernetesio",
+    "https://github.com/kubernetes/kubernetes"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:00:50"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:02:00"
-      "title" = "Context: Why is Kubernetes wrong"
-    },
-    {
-      "time" = "00:06:20"
-      "title" = "What is a kubectl plugin?"
-    },
-    {
-      "time" = "00:32:00"
-      "title" = "Publishing our plugin with Krew"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:50"
+  }
+
+  chapter "Context: Why is Kubernetes wrong" {
+    time = "00:02:00"
+  }
+
+  chapter "What is a kubectl plugin?" {
+    time = "00:06:20"
+  }
+
+  chapter "Publishing our plugin with Krew" {
+    time = "00:32:00"
+  }
 }

@@ -5,38 +5,36 @@ episode "BDD Test Automation" {
   youtube_id = "dc6A930goAU"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/ciaranmcnulty",
-    "github.com/ciaranmcnulty",
-    "ciaranmcnulty.com",
-    "www.rust-lang.org/",
-    "twitter.com/rustlang",
-    "github.com/rust-lang/rust",
-    "gitlab.com/rawkode/gitsync",
-    "github.com/bbqsrc/cucumber-rust"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/ciaranmcnulty",
+    "https://github.com/ciaranmcnulty",
+    "https://ciaranmcnulty.com/",
+    "https://www.rust-lang.org/",
+    "https://twitter.com/rustlang",
+    "https://github.com/rust-lang/rust",
+    "https://gitlab.com/rawkode/gitsync",
+    "https://github.com/bbqsrc/cucumber-rust"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    },
-    {
-      "time" = "00:00:45"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:02:00"
-      "title" = "Background / Context"
-    },
-    {
-      "time" = "00:08:20"
-      "title" = "Reviewing Our Feature File"
-    },
-    {
-      "time" = "00:15:30"
-      "title" = "Writing Acceptance Tests with Cucumber Rust"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:00:45"
+  }
+
+  chapter "Background / Context" {
+    time = "00:02:00"
+  }
+
+  chapter "Reviewing Our Feature File" {
+    time = "00:08:20"
+  }
+
+  chapter "Writing Acceptance Tests with Cucumber Rust" {
+    time = "00:15:30"
+  }
 }

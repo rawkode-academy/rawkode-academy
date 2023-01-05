@@ -5,5 +5,4 @@ episode "Hands-on Introduction to Trivy" {
   youtube_id = "4jHmTEghEYU"
   youtube_category = 24
   links = []
-  chapters = []
 }

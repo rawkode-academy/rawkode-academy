@@ -5,63 +5,61 @@ episode "The Newcomers Guide to Kubernetes" {
   youtube_id = "YJXapoJY0xE"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawko.de/office-hours",
-    "twitter.com/davidgsiot",
-    "kubernetes.io"
+    "https://twitter.com/rawkode",
+    "https://rawko.de/office-hours",
+    "https://twitter.com/davidgsiot",
+    "https://kubernetes.io/"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding Screen"
-    },
-    {
-      "time" = "00:01:00"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:01:50"
-      "title" = "What is David's knowledge of Kubernetes?"
-    },
-    {
-      "time" = "00:05:20"
-      "title" = "kubectl"
-    },
-    {
-      "time" = "00:05:30"
-      "title" = "Containers"
-    },
-    {
-      "time" = "00:07:40"
-      "title" = "Pods"
-    },
-    {
-      "time" = "00:16:00"
-      "title" = "Deployments"
-    },
-    {
-      "time" = "00:27:00"
-      "title" = "Multi-container Pods"
-    },
-    {
-      "time" = "00:28:50"
-      "title" = "Services and Load Balancing"
-    },
-    {
-      "time" = "00:43:15"
-      "title" = "ConfigMaps & Secrets"
-    },
-    {
-      "time" = "00:56:00"
-      "title" = "Namespaces"
-    },
-    {
-      "time" = "00:02:30"
-      "title" = "Port Forwarding"
-    },
-    {
-      "time" = "00:05:50"
-      "title" = "DaemonSets"
-    }
-  ]
+
+  chapter "Holding Screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:00"
+  }
+
+  chapter "What is David's knowledge of Kubernetes?" {
+    time = "00:01:50"
+  }
+
+  chapter "kubectl" {
+    time = "00:05:20"
+  }
+
+  chapter "Containers" {
+    time = "00:05:30"
+  }
+
+  chapter "Pods" {
+    time = "00:07:40"
+  }
+
+  chapter "Deployments" {
+    time = "00:16:00"
+  }
+
+  chapter "Multi-container Pods" {
+    time = "00:27:00"
+  }
+
+  chapter "Services and Load Balancing" {
+    time = "00:28:50"
+  }
+
+  chapter "ConfigMaps & Secrets" {
+    time = "00:43:15"
+  }
+
+  chapter "Namespaces" {
+    time = "00:56:00"
+  }
+
+  chapter "Port Forwarding" {
+    time = "00:02:30"
+  }
+
+  chapter "DaemonSets" {
+    time = "00:05:50"
+  }
 }

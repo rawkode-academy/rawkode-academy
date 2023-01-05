@@ -1,10 +1,13 @@
 use crate::{
     command::get_paths,
-    model::{slugify, Episodes, InsertStatement, People, Shows, Technologies},
+    model::{slugify, Episodes, InsertStatement, People, PgChapter, Shows, Technologies},
 };
 use hcl::from_str;
 use miette::{miette, IntoDiagnostic, Result};
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use sqlx::{
+    postgres::{types::PgInterval, PgPoolOptions},
+    Pool, Postgres,
+};
 use std::{fs::read_to_string, path::PathBuf};
 
 pub async fn sync(path: PathBuf, apply: bool) -> Result<()> {
@@ -54,7 +57,7 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
             sqlx::query(statement)
                 .bind(slugify(title))
                 .bind(title)
-                .bind(&show.draft)
+                .bind(show.draft)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;
@@ -72,7 +75,7 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
                 .bind(&technology.website)
                 .bind(&technology.repository)
                 .bind(&technology.documentation)
-                .bind(&technology.draft)
+                .bind(technology.draft)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;
@@ -84,11 +87,11 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
 
         for (name, person) in people.person.iter() {
             sqlx::query(statement)
-                .bind(&name)
+                .bind(name)
                 .bind(&person.github)
                 .bind(&person.twitter)
                 .bind(&person.youtube)
-                .bind(&person.draft)
+                .bind(person.draft)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;
@@ -99,6 +102,32 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
         let statement = <Episodes as InsertStatement>::statement();
 
         for (title, episode) in episodes.episode.iter() {
+            let links = episode
+                .links
+                .iter()
+                .map(|link| link.to_string())
+                .collect::<Vec<String>>();
+
+            let chapters = episode
+                .chapter
+                .as_ref()
+                .map(|chapter| {
+                    chapter
+                        .iter()
+                        .filter_map(|(title, chapter)| {
+                            chapter
+                                .time
+                                .try_into()
+                                .ok()
+                                .map(|time: PgInterval| PgChapter {
+                                    title: title.to_string(),
+                                    time,
+                                })
+                        })
+                        .collect::<Vec<PgChapter>>()
+                })
+                .unwrap_or_default();
+
             sqlx::query(statement)
                 .bind(slugify(&format!("{} {}", episode.show, title)))
                 .bind(title)
@@ -106,9 +135,9 @@ async fn try_insert(content: &str, pool: &Pool<Postgres>) -> Result<()> {
                 .bind(episode.published_at)
                 .bind(&episode.youtube_id)
                 .bind(episode.youtube_category)
-                .bind(&episode.links)
-                .bind(&episode.chapters)
-                .bind(&episode.draft)
+                .bind(&links)
+                .bind(&chapters)
+                .bind(episode.draft)
                 .execute(pool)
                 .await
                 .into_diagnostic()?;

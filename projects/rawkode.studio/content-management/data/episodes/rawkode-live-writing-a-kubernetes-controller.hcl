@@ -5,73 +5,71 @@ episode "Writing a Kubernetes Controller" {
   youtube_id = "RLpzsAQtZ7M"
   youtube_category = 24
   links = [
-    "twitter.com/rawkode",
-    "rawkode.live",
-    "rawkode.live/chat",
-    "twitter.com/suhailpatel",
-    "github.com/suhailpatel",
-    "suhailpatel.com/",
-    "kubernetes.io/",
-    "twitter.com/kubernetesio",
-    "github.com/kubernetes/kubernetes",
-    "gitlab.com/rawkode/kubernetes-semantic-image-controller"
+    "https://twitter.com/rawkode",
+    "https://rawkode.live/",
+    "https://rawkode.live/chat",
+    "https://twitter.com/suhailpatel",
+    "https://github.com/suhailpatel",
+    "https://suhailpatel.com/",
+    "https://kubernetes.io/",
+    "https://twitter.com/kubernetesio",
+    "https://github.com/kubernetes/kubernetes",
+    "https://gitlab.com/rawkode/kubernetes-semantic-image-controller"
   ]
-  chapters = [
-    {
-      "time" = "00:00:00"
-      "title" = "Holding screen"
-    },
-    {
-      "time" = "00:01:00"
-      "title" = "Introductions"
-    },
-    {
-      "time" = "00:03:00"
-      "title" = "What is a Kubernetes controller?"
-    },
-    {
-      "time" = "00:05:30"
-      "title" = "What are we going to build?"
-    },
-    {
-      "time" = "00:15:10"
-      "title" = "Question: Controller vs Operator?"
-    },
-    {
-      "time" = "00:18:20"
-      "title" = "Question: Build from scratch or SDKs?"
-    },
-    {
-      "time" = "00:21:00"
-      "title" = "Building the boilerplate for our admission controller"
-    },
-    {
-      "time" = "00:42:00"
-      "title" = "Building a container image"
-    },
-    {
-      "time" = "00:45:00"
-      "title" = "Creating the Kubernetes manifests"
-    },
-    {
-      "time" = "00:48:00"
-      "title" = "Generating the certificates"
-    },
-    {
-      "time" = "00:20:00"
-      "title" = "Creating our MutatingWebhook configuration"
-    },
-    {
-      "time" = "00:34:00"
-      "title" = "Deploying our admission controller"
-    },
-    {
-      "time" = "00:36:00"
-      "title" = "Modifying the Pod spec"
-    },
-    {
-      "time" = "00:49:00"
-      "title" = "Resolving the semantic version constraint"
-    }
-  ]
+
+  chapter "Holding screen" {
+    time = "00:00:00"
+  }
+
+  chapter "Introductions" {
+    time = "00:01:00"
+  }
+
+  chapter "What is a Kubernetes controller?" {
+    time = "00:03:00"
+  }
+
+  chapter "What are we going to build?" {
+    time = "00:05:30"
+  }
+
+  chapter "Question: Controller vs Operator?" {
+    time = "00:15:10"
+  }
+
+  chapter "Question: Build from scratch or SDKs?" {
+    time = "00:18:20"
+  }
+
+  chapter "Building the boilerplate for our admission controller" {
+    time = "00:21:00"
+  }
+
+  chapter "Building a container image" {
+    time = "00:42:00"
+  }
+
+  chapter "Creating the Kubernetes manifests" {
+    time = "00:45:00"
+  }
+
+  chapter "Generating the certificates" {
+    time = "00:48:00"
+  }
+
+  chapter "Creating our MutatingWebhook configuration" {
+    time = "00:20:00"
+  }
+
+  chapter "Deploying our admission controller" {
+    time = "00:34:00"
+  }
+
+  chapter "Modifying the Pod spec" {
+    time = "00:36:00"
+  }
+
+  chapter "Resolving the semantic version constraint" {
+    time = "00:49:00"
+  }
 }
