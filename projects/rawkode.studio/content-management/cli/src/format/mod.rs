@@ -1,6 +1,6 @@
 use crate::utils::find_hcl_files;
 use hcl::{format::Formatter, ser::Serializer};
-use miette::{IntoDiagnostic, Result};
+use miette::Result;
 use std::{
     fs::{read_to_string, write},
     path::PathBuf,
@@ -29,19 +29,27 @@ pub fn command(path: PathBuf, apply: bool) -> Result<()> {
 
                         let mut ser = Serializer::with_formatter(formatter);
 
-                        ser.serialize(object.as_block().unwrap()).unwrap();
-
-                        let formatted = String::from_utf8(writer).unwrap();
-
-                        if content.eq(&formatted) {
-                            return;
+                        if let Some(object) = object.as_block() {
+                            if ser.serialize(object).is_err() {
+                                eprintln!("{} - Failed to serialize HCL", file.display());
+                                return;
+                            };
                         }
 
-                        if apply {
-                            let _ = write(&file, formatted).into_diagnostic();
-                            println!("{} - FIXED", file.display())
+                        if let Ok(formatted) = String::from_utf8(writer) {
+                            if content.eq(&formatted) {
+                                println!("{} - OK", file.display());
+                                return;
+                            }
+
+                            if apply {
+                                let _ = write(&file, formatted);
+                                println!("{} - FIXED", file.display())
+                            } else {
+                                println!("{} - NEEDS FIX", file.display())
+                            }
                         } else {
-                            println!("{} - NEEDS FIX", file.display())
+                            eprintln!("{} - Failed to serialize HCL", file.display());
                         }
                     });
                 }

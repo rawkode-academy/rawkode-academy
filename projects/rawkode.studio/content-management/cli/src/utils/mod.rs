@@ -36,7 +36,7 @@ pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Database {
 
             file_objects.into_iter().for_each(|object| {
                 if !object.is_block() {
-                    return ;
+                    return;
                 }
 
                 let block = object.as_block().unwrap();
