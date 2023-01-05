@@ -152,11 +152,12 @@ impl Database {
 
     pub async fn sync_shows(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
         let mut query_builder: QueryBuilder<Postgres> =
-            QueryBuilder::new(r#"INSERT INTO shows ("id", "name", "draft")"#);
+            QueryBuilder::new(r#"INSERT INTO shows ("id", "name", "description", "draft")"#);
 
         query_builder.push_values(self.shows.iter(), |mut q, (name, show)| {
             q.push_bind(slugify(name))
                 .push_bind(name)
+                .push_bind(&show.description)
                 .push_bind(&show.draft);
         });
 
@@ -164,6 +165,7 @@ impl Database {
             r#" ON CONFLICT ("id") DO UPDATE
             SET
                 "name" = EXCLUDED."name",
+                "description" = EXCLUDED."description",
                 "draft" = EXCLUDED."draft"
             ;
             "#,

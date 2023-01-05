@@ -33,6 +33,7 @@ CREATE UNIQUE INDEX "person_email" ON "people"("email");
 CREATE TABLE "shows" (
     "id" TEXT PRIMARY KEY,
     "name" TEXT NOT NULL,
+    "description" TEXT,
     "draft" BOOLEAN NOT NULL DEFAULT TRUE
 );
 

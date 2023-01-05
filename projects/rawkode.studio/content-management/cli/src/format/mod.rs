@@ -1,7 +1,6 @@
-use crate::model::{Episodes, People, Shows, Technologies};
 use crate::utils::find_hcl_files;
-use hcl::from_str;
-use miette::{miette, IntoDiagnostic, Result};
+use hcl::{format::Formatter, ser::Serializer};
+use miette::{IntoDiagnostic, Result};
 use std::{
     fs::{read_to_string, write},
     path::PathBuf,
@@ -15,32 +14,41 @@ pub fn command(path: PathBuf, apply: bool) -> Result<()> {
 
     for file in files {
         if let Ok(content) = read_to_string(&file) {
-            if let Ok(formatted_content) = try_parse(&content) {
-                if apply {
-                    write(&file, formatted_content).into_diagnostic()?;
-                    println!("{} - OK", file.display())
-                } else {
-                    println!("{} - DRY RUN", file.display())
+            match hcl::from_str::<hcl::Body>(&content) {
+                Ok(value) => {
+                    value.into_iter().for_each(|object| {
+                        let mut writer = Vec::new();
+                        let formatter = Formatter::builder()
+                            .indent(b"  ")
+                            .dense(false)
+                            .compact(false)
+                            .compact_arrays(false)
+                            .compact_objects(false)
+                            .prefer_ident_keys(true)
+                            .build(&mut writer);
+
+                        let mut ser = Serializer::with_formatter(formatter);
+
+                        ser.serialize(object.as_block().unwrap()).unwrap();
+
+                        let formatted = String::from_utf8(writer).unwrap();
+
+                        if content.eq(&formatted) {
+                            return;
+                        }
+
+                        if apply {
+                            let _ = write(&file, formatted).into_diagnostic();
+                            println!("{} - FIXED", file.display())
+                        } else {
+                            println!("{} - NEEDS FIX", file.display())
+                        }
+                    });
                 }
-            } else {
-                eprintln!("{} - NOT OK", file.display());
-            }
+                Err(_) => eprintln!("{} - Failed to parse HCL", file.display()),
+            };
         }
     }
 
     Ok(())
-}
-
-fn try_parse(content: &str) -> Result<String> {
-    if let Ok(content) = from_str::<Episodes>(content) {
-        hcl::to_string(&content).into_diagnostic()
-    } else if let Ok(content) = from_str::<Shows>(content) {
-        hcl::to_string(&content).into_diagnostic()
-    } else if let Ok(content) = from_str::<Technologies>(content) {
-        hcl::to_string(&content).into_diagnostic()
-    } else if let Ok(content) = from_str::<People>(content) {
-        hcl::to_string(&content).into_diagnostic()
-    } else {
-        Err(miette!("Format of file is not supported"))
-    }
 }
