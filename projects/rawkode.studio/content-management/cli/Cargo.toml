@@ -1,5 +1,5 @@
 [package]
-name = "rawkode-studio-cli"
+name = "rks"
 description = "rawkode.studio CLI"
 authors = [
     "David Flanagan <david@rawkode.dev>",

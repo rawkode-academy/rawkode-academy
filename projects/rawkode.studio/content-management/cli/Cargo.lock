@@ -1093,28 +1093,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rawkode-studio-cli"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "clap",
- "diacritics",
- "glob",
- "hcl-rs",
- "hhmmss",
- "indexmap",
- "lazy_static",
- "miette",
- "pretty_assertions",
- "regex",
- "serde",
- "sqlx",
- "tokio",
- "unicode-normalization",
- "url",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1164,6 +1142,28 @@ dependencies = [
  "untrusted",
  "web-sys",
  "winapi",
+]
+
+[[package]]
+name = "rks"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "diacritics",
+ "glob",
+ "hcl-rs",
+ "hhmmss",
+ "indexmap",
+ "lazy_static",
+ "miette",
+ "pretty_assertions",
+ "regex",
+ "serde",
+ "sqlx",
+ "tokio",
+ "unicode-normalization",
+ "url",
 ]
 
 [[package]]
