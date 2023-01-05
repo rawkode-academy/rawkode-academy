@@ -1,7 +1,8 @@
 episode "Klustered Teams: Carta & Fairwinds" {
   draft = false
   show = "klustered"
-  published_at = "2021-08-05T16:30:00Z"
+  live = true
+  scheduled_for = "2021-08-05T16:30:00Z"
   youtube_id = "_GZ8UuEZxbY"
   youtube_category = 24
   links = [

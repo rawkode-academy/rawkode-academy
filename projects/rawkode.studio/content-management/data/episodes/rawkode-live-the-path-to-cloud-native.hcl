@@ -1,7 +1,8 @@
 episode "The Path to Cloud Native" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-10-19T14:30:00Z"
+  live = true
+  scheduled_for = "2020-10-19T14:30:00Z"
   youtube_id = "QuMWcA15UWc"
   youtube_category = 24
   links = [

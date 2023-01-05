@@ -1,7 +1,8 @@
 episode "Introduction to Tilt" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-09-22T13:00:00Z"
+  live = true
+  scheduled_for = "2020-09-22T13:00:00Z"
   youtube_id = "I9k0eWQEWAE"
   youtube_category = 24
   links = [

@@ -1,7 +1,8 @@
 episode "Klustered Teams - Ambassador Labs & Fairwinds" {
   draft = false
   show = "klustered"
-  published_at = "2022-03-03T18:00:00Z"
+  live = true
+  scheduled_for = "2022-03-03T18:00:00Z"
   youtube_id = "qgu0MVhBjeg"
   youtube_category = 24
   links = [

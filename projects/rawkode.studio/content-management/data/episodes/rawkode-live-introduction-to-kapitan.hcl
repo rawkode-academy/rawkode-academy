@@ -1,7 +1,8 @@
 episode "Introduction to Kapitan" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-02-04T13:00:00Z"
+  live = true
+  scheduled_for = "2021-02-04T13:00:00Z"
   youtube_id = "8QZvgJi0vII"
   youtube_category = 24
   links = [

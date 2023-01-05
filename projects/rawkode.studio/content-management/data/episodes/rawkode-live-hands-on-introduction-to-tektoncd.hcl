@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to TektonCD" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-12-10T14:00:00Z"
+  live = true
+  scheduled_for = "2020-12-10T14:00:00Z"
   youtube_id = "yALp4x4AK9s"
   youtube_category = 24
   links = [

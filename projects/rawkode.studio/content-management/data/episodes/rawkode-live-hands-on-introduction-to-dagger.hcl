@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to Dagger" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-06-28T16:00:00Z"
+  live = true
+  scheduled_for = "2021-06-28T16:00:00Z"
   youtube_id = "0KwAjTZ-CSg"
   youtube_category = 24
   links = [

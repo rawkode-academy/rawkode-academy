@@ -1,7 +1,8 @@
 episode "Introduction to Vitess" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-02-25T17:00:00Z"
+  live = true
+  scheduled_for = "2021-02-25T17:00:00Z"
   youtube_id = "Cwpu0y119I0"
   youtube_category = 24
   links = [

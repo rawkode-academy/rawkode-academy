@@ -1,7 +1,8 @@
 episode "Kubernetes Cluster API for Equinix Metal (Formely Packet)" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-08-26T15:30:00Z"
+  live = true
+  scheduled_for = "2020-08-26T15:30:00Z"
   youtube_id = "BfCcXd8Xrj8"
   youtube_category = 24
   links = [

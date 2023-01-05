@@ -1,7 +1,8 @@
 episode "High Availability with BGP" {
   draft = false
   show = "metal-monday"
-  published_at = "2020-11-16T15:00:00Z"
+  live = true
+  scheduled_for = "2020-11-16T15:00:00Z"
   youtube_id = "ku786TprTD8"
   youtube_category = 24
   links = [

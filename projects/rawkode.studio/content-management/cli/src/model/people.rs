@@ -1,4 +1,3 @@
-use super::InsertStatement;
 use hcl::{ser::LabeledBlock, Value};
 use indexmap::IndexMap;
 
@@ -7,9 +6,19 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Person {
     pub draft: bool,
+    pub github: String,
+
+    // Email is not allowed in the Git repository,
+    // for privacy reasons
+    // #[serde(skip)]
+    // pub email: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub biography: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub website: Option<String>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub twitter: Option<String>,
-    pub github: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub youtube: Option<String>,
 }
@@ -22,26 +31,4 @@ pub struct People {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct MinimalPeople {
     pub person: Value,
-}
-
-impl InsertStatement for People {
-    fn statement() -> &'static str {
-        r#"
-        INSERT INTO people ("name", "githubHandle", "twitterHandle", "youtubeHandle", "draft")
-        VALUES (
-            $1,
-            $2,
-            $3,
-            $4,
-            $5
-        )
-        ON CONFLICT ("id") DO UPDATE
-        SET
-            "name" = $1,
-            "githubHandle" = $2,
-            "twitterHandle" = $3,
-            "youtubeHandle" = $4,
-            "draft" = $5;
-        "#
-    }
 }

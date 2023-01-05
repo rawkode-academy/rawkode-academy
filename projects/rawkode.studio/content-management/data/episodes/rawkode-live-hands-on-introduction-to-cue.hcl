@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to CUE" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-04-27T13:00:00Z"
+  live = true
+  scheduled_for = "2021-04-27T13:00:00Z"
   youtube_id = "fR_yApIf6jU"
   youtube_category = 24
   links = [

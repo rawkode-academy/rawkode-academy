@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to Waypoint" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-08-13T16:00:00Z"
+  live = true
+  scheduled_for = "2021-08-13T16:00:00Z"
   youtube_id = "LqhLz6XPDsU"
   youtube_category = 24
   links = [

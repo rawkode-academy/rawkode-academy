@@ -1,7 +1,8 @@
 episode "Introduction to Dgraph" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-11-09T10:00:00Z"
+  live = true
+  scheduled_for = "2020-11-09T10:00:00Z"
   youtube_id = "XHhqC1k4C44"
   youtube_category = 24
   links = [

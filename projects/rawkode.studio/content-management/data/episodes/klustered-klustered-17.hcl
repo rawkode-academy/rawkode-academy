@@ -1,7 +1,8 @@
 episode "Klustered #17" {
   draft = false
   show = "klustered"
-  published_at = "2021-08-19T16:30:00Z"
+  live = true
+  scheduled_for = "2021-08-19T16:30:00Z"
   youtube_id = "GB0tjHy_7x4"
   youtube_category = 24
   links = [

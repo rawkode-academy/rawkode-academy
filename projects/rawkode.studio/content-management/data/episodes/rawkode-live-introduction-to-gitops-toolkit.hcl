@@ -1,7 +1,8 @@
 episode "Introduction to GitOps Toolkit" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-10-12T11:00:00Z"
+  live = true
+  scheduled_for = "2020-10-12T11:00:00Z"
   youtube_id = "HqTzuOBP0eY"
   youtube_category = 24
   links = [

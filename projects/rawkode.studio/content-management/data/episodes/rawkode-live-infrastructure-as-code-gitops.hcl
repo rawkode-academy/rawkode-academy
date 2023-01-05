@@ -1,7 +1,8 @@
 episode "Infrastructure as Code & GitOps" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-02-24T17:00:00Z"
+  live = true
+  scheduled_for = "2021-02-24T17:00:00Z"
   youtube_id = "s9zjayZ1oxA"
   youtube_category = 24
   links = [

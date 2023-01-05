@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to Okteto" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-05-18T17:00:00Z"
+  live = true
+  scheduled_for = "2021-05-18T17:00:00Z"
   youtube_id = "AreUA16UU34"
   youtube_category = 24
   links = [

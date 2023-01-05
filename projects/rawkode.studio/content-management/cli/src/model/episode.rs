@@ -1,4 +1,3 @@
-use super::InsertStatement;
 use crate::model::{chapter_duration_de, chapter_duration_ser};
 use chrono::{DateTime, Duration, Utc};
 use hcl::{ser::LabeledBlock, Value};
@@ -36,10 +35,19 @@ pub struct Chapter {
 pub struct Episode {
     pub draft: bool,
     pub show: String,
-    pub published_at: DateTime<Utc>,
-    pub youtube_id: String,
-    pub youtube_category: i32,
+    pub live: bool,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scheduled_for: Option<DateTime<Utc>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub youtube_id: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub youtube_category: Option<i32>,
+
     pub links: Vec<Url>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub chapter: Option<LabeledBlock<IndexMap<String, Chapter>>>,
 }
@@ -52,33 +60,4 @@ pub struct Episodes {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct MinimalEpisodes {
     pub episode: Value,
-}
-
-impl InsertStatement for Episodes {
-    fn statement() -> &'static str {
-        r#"
-        INSERT INTO episodes ("id", "title", "showId", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters", "draft")
-        VALUES (
-            $1,
-            $2,
-            $3,
-            $4,
-            $5,
-            $6,
-            $7,
-            $8,
-            $9
-        )
-        ON CONFLICT ("id") DO UPDATE
-        SET
-            "title" = $2,
-            "showId" = $3,
-            "scheduledFor" = $4,
-            "youtubeId" = $5,
-            "youtubeCategory" = $6,
-            "links" = $7,
-            "chapters" = $8,
-            "draft" = $9;
-        "#
-    }
 }

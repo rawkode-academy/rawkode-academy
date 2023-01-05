@@ -1,7 +1,8 @@
 episode "Introduction to Thanos" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-11-10T13:00:00Z"
+  live = true
+  scheduled_for = "2020-11-10T13:00:00Z"
   youtube_id = "j4TAGO019HU"
   youtube_category = 24
   links = [

@@ -1,7 +1,8 @@
 episode "Klustered Teams - Giant Swarm & Wildlife Studios" {
   draft = false
   show = "klustered"
-  published_at = "2022-02-16T17:30:00Z"
+  live = true
+  scheduled_for = "2022-02-16T17:30:00Z"
   youtube_id = "a1DgbDQT1RM"
   youtube_category = 24
   links = [

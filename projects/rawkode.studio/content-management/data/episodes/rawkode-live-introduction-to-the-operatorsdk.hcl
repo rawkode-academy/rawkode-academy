@@ -1,7 +1,8 @@
 episode "Introduction to the OperatorSDK" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-12-08T17:30:00Z"
+  live = true
+  scheduled_for = "2020-12-08T17:30:00Z"
   youtube_id = "QFSN3cfgOhE"
   youtube_category = 24
   links = [

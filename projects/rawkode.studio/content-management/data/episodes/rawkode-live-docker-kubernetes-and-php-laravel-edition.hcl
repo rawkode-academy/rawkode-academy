@@ -1,7 +1,8 @@
 episode "Docker, Kubernetes, and PHP: Laravel Edition" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-09-15T11:00:00Z"
+  live = true
+  scheduled_for = "2020-09-15T11:00:00Z"
   youtube_id = "CneJf4Amv0U"
   youtube_category = 24
   links = [

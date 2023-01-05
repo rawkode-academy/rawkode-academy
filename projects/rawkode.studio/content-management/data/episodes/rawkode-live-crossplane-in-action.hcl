@@ -1,7 +1,8 @@
 episode "Crossplane in Action" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-09-08T14:00:00Z"
+  live = true
+  scheduled_for = "2021-09-08T14:00:00Z"
   youtube_id = "tz698kZByyw"
   youtube_category = 24
   links = [

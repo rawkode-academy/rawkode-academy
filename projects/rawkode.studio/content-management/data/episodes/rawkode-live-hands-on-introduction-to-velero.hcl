@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to Velero" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-04-19T17:00:00Z"
+  live = true
+  scheduled_for = "2021-04-19T17:00:00Z"
   youtube_id = "9Y9ApnAcExM"
   youtube_category = 24
   links = [

@@ -1,7 +1,8 @@
 episode "Klustered Teams: Raft & RX-M" {
   draft = false
   show = "klustered"
-  published_at = "2021-12-09T17:00:00Z"
+  live = true
+  scheduled_for = "2021-12-09T17:00:00Z"
   youtube_id = "B-EhbctQBDs"
   youtube_category = 24
   links = [

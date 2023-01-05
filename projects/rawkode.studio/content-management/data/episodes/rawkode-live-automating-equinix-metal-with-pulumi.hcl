@@ -1,7 +1,8 @@
 episode "Automating Equinix Metal with Pulumi" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-11-16T17:00:00Z"
+  live = true
+  scheduled_for = "2020-11-16T17:00:00Z"
   youtube_id = "GbLMQslgtGY"
   youtube_category = 24
   links = [

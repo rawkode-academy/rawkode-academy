@@ -1,7 +1,8 @@
 episode "Example Mapping by Example" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-12-01T13:00:00Z"
+  live = true
+  scheduled_for = "2020-12-01T13:00:00Z"
   youtube_id = "NPVRFMQ8CkA"
   youtube_category = 24
   links = [

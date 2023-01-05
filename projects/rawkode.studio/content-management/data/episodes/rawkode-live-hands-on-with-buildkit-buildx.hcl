@@ -1,7 +1,8 @@
 episode "Hands-on with BuildKit & buildx" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-08-24T16:00:00Z"
+  live = true
+  scheduled_for = "2021-08-24T16:00:00Z"
   youtube_id = "0iN4dJB3OLk"
   youtube_category = 24
   links = [

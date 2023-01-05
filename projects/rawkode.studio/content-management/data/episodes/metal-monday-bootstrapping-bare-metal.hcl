@@ -1,7 +1,8 @@
 episode "Bootstrapping Bare Metal" {
   draft = false
   show = "metal-monday"
-  published_at = "2020-11-09T15:00:00Z"
+  live = true
+  scheduled_for = "2020-11-09T15:00:00Z"
   youtube_id = "uD7856as8_A"
   youtube_category = 24
   links = [

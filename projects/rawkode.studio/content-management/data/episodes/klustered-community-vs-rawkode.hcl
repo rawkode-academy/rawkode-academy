@@ -1,7 +1,8 @@
 episode "Community vs. Rawkode" {
   draft = false
   show = "klustered"
-  published_at = "2021-08-12T16:30:00Z"
+  live = true
+  scheduled_for = "2021-08-12T16:30:00Z"
   youtube_id = "_BFbrrXKMOM"
   youtube_category = 24
   links = [

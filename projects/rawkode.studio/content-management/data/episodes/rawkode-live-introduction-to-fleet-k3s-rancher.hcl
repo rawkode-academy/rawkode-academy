@@ -1,7 +1,8 @@
 episode "Introduction to Fleet, k3s, & Rancher" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-09-30T11:00:00Z"
+  live = true
+  scheduled_for = "2020-09-30T11:00:00Z"
   youtube_id = "BA6CpPILi-I"
   youtube_category = 24
   links = [

@@ -1,7 +1,8 @@
 episode "Introduction to Carvel" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-09-29T14:00:00Z"
+  live = true
+  scheduled_for = "2020-09-29T14:00:00Z"
   youtube_id = "LBCmMTofNxw"
   youtube_category = 24
   links = [

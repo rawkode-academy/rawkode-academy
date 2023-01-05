@@ -1,7 +1,8 @@
 episode "Introduction to Rust (Part III)" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-12-10T18:00:00Z"
+  live = true
+  scheduled_for = "2020-12-10T18:00:00Z"
   youtube_id = "gpgkizNS-hs"
   youtube_category = 24
   links = [

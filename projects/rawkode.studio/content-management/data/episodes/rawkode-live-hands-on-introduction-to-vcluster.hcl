@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to vcluster" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-06-22T16:00:00Z"
+  live = true
+  scheduled_for = "2021-06-22T16:00:00Z"
   youtube_id = "IMdMvn2_LeI"
   youtube_category = 24
   links = [

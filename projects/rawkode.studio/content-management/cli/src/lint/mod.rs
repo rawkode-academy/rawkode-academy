@@ -1,16 +1,14 @@
-use crate::{
-    command::get_paths,
-    model::{
-        Episodes, MinimalEpisodes, MinimalPeople, MinimalShows, MinimalTechnologies, People, Shows,
-        Technologies,
-    },
+use crate::model::{
+    Episodes, MinimalEpisodes, MinimalPeople, MinimalShows, MinimalTechnologies, People, Shows,
+    Technologies,
 };
+use crate::utils::find_hcl_files;
 use hcl::from_str;
 use miette::{miette, IntoDiagnostic, Result};
 use std::{fs::read_to_string, path::PathBuf};
 
-pub fn lint(path: PathBuf) -> Result<()> {
-    let files = get_paths(path);
+pub fn command(path: PathBuf) -> Result<()> {
+    let files = find_hcl_files(path);
 
     println!("Linting {} files", files.len());
     println!();

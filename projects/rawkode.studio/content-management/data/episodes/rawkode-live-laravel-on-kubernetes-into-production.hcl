@@ -1,7 +1,8 @@
 episode "Laravel on Kubernetes: Into Production" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-01-22T17:00:00Z"
+  live = true
+  scheduled_for = "2021-01-22T17:00:00Z"
   youtube_id = "rw5bAjur79k"
   youtube_category = 24
   links = [

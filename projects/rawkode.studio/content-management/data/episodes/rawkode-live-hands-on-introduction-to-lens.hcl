@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to Lens" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-08-10T15:30:00Z"
+  live = true
+  scheduled_for = "2021-08-10T15:30:00Z"
   youtube_id = "IX4qUr_XwK8"
   youtube_category = 24
   links = [

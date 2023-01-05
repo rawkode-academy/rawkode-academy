@@ -1,7 +1,8 @@
 episode "Buiding a WebAssembly GraphQL Client" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-07-05T16:30:00Z"
+  live = true
+  scheduled_for = "2021-07-05T16:30:00Z"
   youtube_id = "UWcBNxrQLy8"
   youtube_category = 24
   links = [

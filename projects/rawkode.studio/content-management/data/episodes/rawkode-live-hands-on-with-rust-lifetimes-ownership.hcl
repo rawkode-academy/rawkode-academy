@@ -1,7 +1,8 @@
 episode "Hands-on with Rust: Lifetimes & Ownership" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-06-09T17:30:00Z"
+  live = true
+  scheduled_for = "2021-06-09T17:30:00Z"
   youtube_id = "qf1HHauZ-zs"
   youtube_category = 24
   links = [

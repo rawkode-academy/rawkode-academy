@@ -1,7 +1,8 @@
 episode "IPv6 ONLY Kubernetes Clusters" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-09-07T11:00:00Z"
+  live = true
+  scheduled_for = "2020-09-07T11:00:00Z"
   youtube_id = "ohwHzr4O6Fo"
   youtube_category = 24
   links = [

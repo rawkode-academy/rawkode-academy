@@ -1,6 +1,6 @@
 person "David Flanagan" {
   draft = false
-  twitter = "rawkode"
   github = "rawkode"
+  twitter = "rawkode"
   youtube = "@RawkodeAcademy"
 }

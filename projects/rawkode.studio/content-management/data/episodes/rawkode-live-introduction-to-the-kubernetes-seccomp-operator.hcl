@@ -1,7 +1,8 @@
 episode "Introduction to the Kubernetes Seccomp Operator" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-09-09T14:00:00Z"
+  live = true
+  scheduled_for = "2020-09-09T14:00:00Z"
   youtube_id = "7S3w4S3Zl2k"
   youtube_category = 24
   links = [

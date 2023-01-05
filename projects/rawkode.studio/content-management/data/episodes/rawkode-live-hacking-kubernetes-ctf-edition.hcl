@@ -1,7 +1,8 @@
 episode "Hacking Kubernetes: CTF Edition" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-05-13T16:00:00Z"
+  live = true
+  scheduled_for = "2021-05-13T16:00:00Z"
   youtube_id = "e1JQ3iZt76Q"
   youtube_category = 24
   links = [

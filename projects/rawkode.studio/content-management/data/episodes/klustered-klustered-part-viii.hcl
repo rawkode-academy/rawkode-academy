@@ -1,7 +1,8 @@
 episode "Klustered (Part VIII)" {
   draft = false
   show = "klustered"
-  published_at = "2021-04-08T16:00:00Z"
+  live = true
+  scheduled_for = "2021-04-08T16:00:00Z"
   youtube_id = "QFxJWPF-QDk"
   youtube_category = 24
   links = [

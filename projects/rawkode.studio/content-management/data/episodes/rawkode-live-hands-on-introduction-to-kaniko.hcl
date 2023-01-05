@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to Kaniko" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-04-22T17:00:00Z"
+  live = true
+  scheduled_for = "2021-04-22T17:00:00Z"
   youtube_id = "7J_j42jddDg"
   youtube_category = 24
   links = [

@@ -1,7 +1,8 @@
 episode "CKA Tutorial with Killer.sh (Part 1)" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-06-09T10:30:00Z"
+  live = true
+  scheduled_for = "2021-06-09T10:30:00Z"
   youtube_id = "KfrZd9YCftU"
   youtube_category = 24
   links = [

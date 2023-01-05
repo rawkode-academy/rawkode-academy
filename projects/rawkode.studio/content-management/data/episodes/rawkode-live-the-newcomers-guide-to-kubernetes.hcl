@@ -1,7 +1,8 @@
 episode "The Newcomers Guide to Kubernetes" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-09-23T13:00:00Z"
+  live = true
+  scheduled_for = "2020-09-23T13:00:00Z"
   youtube_id = "YJXapoJY0xE"
   youtube_category = 24
   links = [

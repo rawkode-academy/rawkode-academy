@@ -1,7 +1,8 @@
 episode "Introduction to Keptn (Part I)" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-12-02T14:00:00Z"
+  live = true
+  scheduled_for = "2020-12-02T14:00:00Z"
   youtube_id = "fjfj97Vb4ds"
   youtube_category = 24
   links = [

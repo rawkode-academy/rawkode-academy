@@ -1,7 +1,8 @@
 episode "Monitoring & Scaling Laravel on Kubernetes (Part II)" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-03-02T14:00:00Z"
+  live = true
+  scheduled_for = "2021-03-02T14:00:00Z"
   youtube_id = "2l869rxotb0"
   youtube_category = 24
   links = [

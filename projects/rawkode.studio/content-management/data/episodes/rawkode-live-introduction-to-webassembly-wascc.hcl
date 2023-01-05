@@ -1,7 +1,8 @@
 episode "Introduction to WebAssembly & waSCC" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-10-21T14:00:00Z"
+  live = true
+  scheduled_for = "2020-10-21T14:00:00Z"
   youtube_id = "mrSbXSX0Xds"
   youtube_category = 24
   links = [

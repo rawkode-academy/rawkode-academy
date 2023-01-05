@@ -1,7 +1,8 @@
 episode "Klustered (Part V)" {
   draft = false
   show = "klustered"
-  published_at = "2021-03-18T17:00:00Z"
+  live = true
+  scheduled_for = "2021-03-18T17:00:00Z"
   youtube_id = "Ju1WmHfK6t8"
   youtube_category = 24
   links = [

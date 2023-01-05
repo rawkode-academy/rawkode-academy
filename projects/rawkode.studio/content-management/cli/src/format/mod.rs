@@ -1,7 +1,5 @@
-use crate::{
-    command::get_paths,
-    model::{Episodes, People, Shows, Technologies},
-};
+use crate::model::{Episodes, People, Shows, Technologies};
+use crate::utils::find_hcl_files;
 use hcl::from_str;
 use miette::{miette, IntoDiagnostic, Result};
 use std::{
@@ -9,8 +7,8 @@ use std::{
     path::PathBuf,
 };
 
-pub fn format(path: PathBuf, apply: bool) -> Result<()> {
-    let files = get_paths(path);
+pub fn command(path: PathBuf, apply: bool) -> Result<()> {
+    let files = find_hcl_files(path);
 
     println!("Formatting {} files", files.len());
     println!();

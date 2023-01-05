@@ -1,7 +1,8 @@
 episode "Introduction to Suborbital" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-01-26T12:30:00Z"
+  live = true
+  scheduled_for = "2021-01-26T12:30:00Z"
   youtube_id = "d0UT5WghFpQ"
   youtube_category = 24
   links = [

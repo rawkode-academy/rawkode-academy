@@ -1,7 +1,8 @@
 episode "Building Custom Images for Packet" {
   draft = false
   show = "rawkode-live"
-  published_at = "2020-08-06T13:15:00Z"
+  live = true
+  scheduled_for = "2020-08-06T13:15:00Z"
   youtube_id = "IWt_uHk9dMg"
   youtube_category = 24
   links = [

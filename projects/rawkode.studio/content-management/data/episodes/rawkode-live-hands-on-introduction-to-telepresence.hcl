@@ -1,7 +1,8 @@
 episode "Hands-on Introduction to Telepresence" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-05-17T15:30:00Z"
+  live = true
+  scheduled_for = "2021-05-17T15:30:00Z"
   youtube_id = "hvVThTi-o1E"
   youtube_category = 24
   links = [

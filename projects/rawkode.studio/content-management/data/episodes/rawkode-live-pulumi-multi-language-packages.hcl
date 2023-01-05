@@ -1,7 +1,8 @@
 episode "Pulumi: Multi Language Packages" {
   draft = false
   show = "rawkode-live"
-  published_at = "2021-05-26T17:00:00Z"
+  live = true
+  scheduled_for = "2021-05-26T17:00:00Z"
   youtube_id = "_RXvNS5N8A8"
   youtube_category = 24
   links = [
