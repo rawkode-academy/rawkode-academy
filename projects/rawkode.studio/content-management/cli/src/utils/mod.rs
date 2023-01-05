@@ -12,7 +12,7 @@ pub(crate) fn find_hcl_files(path: PathBuf) -> Result<Vec<PathBuf>> {
         .collect::<Vec<PathBuf>>())
 }
 
-pub(crate) struct Database {
+pub(crate) struct InMemoryDatabase {
     pub(crate) episodes: HashMap<String, Episode>,
     pub(crate) shows: HashMap<String, Show>,
     pub(crate) technologies: HashMap<String, Technology>,
@@ -32,7 +32,7 @@ fn insert<T: DeserializeOwned>(block: &hcl::Block, map: &mut HashMap<String, T>)
     Ok(())
 }
 
-pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Result<Database> {
+pub(crate) fn build_in_memory_database(files: Vec<PathBuf>) -> Result<InMemoryDatabase> {
     let mut episodes: HashMap<String, Episode> = HashMap::new();
     let mut shows: HashMap<String, Show> = HashMap::new();
     let mut technologies: HashMap<String, Technology> = HashMap::new();
@@ -80,7 +80,7 @@ pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Result<Database> {
         }
     }
 
-    Ok(Database {
+    Ok(InMemoryDatabase {
         episodes,
         shows,
         technologies,
@@ -88,7 +88,7 @@ pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Result<Database> {
     })
 }
 
-impl Database {
+impl InMemoryDatabase {
     pub async fn sync_all(self, pool: sqlx::Pool<Postgres>) -> Result<()> {
         self.sync_technologies(&pool)
             .await?
