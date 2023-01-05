@@ -24,7 +24,7 @@ pub async fn sync(path: PathBuf, apply: bool) -> Result<()> {
     println!("Syncing {} files", files.len());
     println!();
 
-    let connection_string = std::env::var("POSTGRESQL_CONNECTION_STRING")
+    let connection_string = std::env::var("DATABASE_DSN")
         .unwrap_or_else(|_| "postgres://academy:academy@localhost:5432/academy".to_string());
 
     let pool = PgPoolOptions::new()

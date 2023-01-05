@@ -10,5 +10,5 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ../api/migrations/neon-eu:/migrations
+      - ../api/migrations/data:/migrations
       - ./scripts/migrate.sh:/docker-entrypoint-initdb.d/migrate.sh
