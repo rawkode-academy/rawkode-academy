@@ -4,10 +4,10 @@ use sqlx::postgres::PgPoolOptions;
 use std::path::PathBuf;
 
 pub async fn command(path: PathBuf, _apply: bool) -> Result<()> {
-    let files = find_hcl_files(path);
+    let files = find_hcl_files(path)?;
 
     println!("Syncing {} files", files.len());
-    let database = build_inmem_database(files);
+    let database = build_inmem_database(files)?;
 
     let connection_string = std::env::var("DATABASE_DSN")
         .unwrap_or_else(|_| "postgres://academy:academy@localhost:5432/academy".to_string());

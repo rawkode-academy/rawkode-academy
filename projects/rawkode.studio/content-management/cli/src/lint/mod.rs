@@ -8,7 +8,7 @@ use miette::{miette, IntoDiagnostic, Result};
 use std::{fs::read_to_string, path::PathBuf};
 
 pub fn command(path: PathBuf) -> Result<()> {
-    let files = find_hcl_files(path);
+    let files = find_hcl_files(path)?;
 
     println!("Linting {} files", files.len());
     println!();

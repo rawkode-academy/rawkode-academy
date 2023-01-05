@@ -7,7 +7,7 @@ use std::{
 };
 
 pub fn command(path: PathBuf, apply: bool) -> Result<()> {
-    let files = find_hcl_files(path);
+    let files = find_hcl_files(path)?;
 
     println!("Formatting {} files", files.len());
     println!();

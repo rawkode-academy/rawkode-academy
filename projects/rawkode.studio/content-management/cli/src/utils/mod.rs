@@ -1,15 +1,15 @@
 use crate::model::*;
 use glob::glob;
-use miette::{IntoDiagnostic, Result};
+use miette::{miette, IntoDiagnostic, Result};
+use serde::de::DeserializeOwned;
 use sqlx::{postgres::types::PgInterval, Postgres, QueryBuilder};
 use std::{collections::HashMap, fs::read_to_string, path::PathBuf};
 
-pub(crate) fn find_hcl_files(path: PathBuf) -> Vec<PathBuf> {
-    glob(&format!("{}/**/*.hcl", path.display()))
-        .into_diagnostic()
-        .unwrap()
+pub(crate) fn find_hcl_files(path: PathBuf) -> Result<Vec<PathBuf>> {
+    Ok(glob(&format!("{}/**/*.hcl", path.display()))
+        .into_diagnostic()?
         .flatten()
-        .collect::<Vec<PathBuf>>()
+        .collect::<Vec<PathBuf>>())
 }
 
 pub(crate) struct Database {
@@ -19,7 +19,20 @@ pub(crate) struct Database {
     pub(crate) people: HashMap<String, Person>,
 }
 
-pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Database {
+fn insert<T: DeserializeOwned>(block: &hcl::Block, map: &mut HashMap<String, T>) -> Result<()> {
+    let value: T = hcl::from_body(block.body().to_owned()).into_diagnostic()?;
+    let label = block
+        .labels()
+        .first()
+        .map(|label| label.as_str().to_string())
+        .ok_or_else(|| miette!("Block {} does not have a label", block.identifier()))?;
+
+    map.insert(label, value);
+
+    Ok(())
+}
+
+pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Result<Database> {
     let mut episodes: HashMap<String, Episode> = HashMap::new();
     let mut shows: HashMap<String, Show> = HashMap::new();
     let mut technologies: HashMap<String, Technology> = HashMap::new();
@@ -29,76 +42,50 @@ pub(crate) fn build_inmem_database(files: Vec<PathBuf>) -> Database {
         if let Ok(content) = read_to_string(file) {
             let content = content.as_str();
 
-            let file_objects: hcl::Body = match hcl::from_str(content) {
-                Ok(value) => value,
-                Err(_) => panic!("Failed"),
-            };
+            let file_objects = hcl::from_str::<hcl::Body>(content).into_diagnostic()?;
 
             file_objects.into_iter().for_each(|object| {
-                if !object.is_block() {
+                let Some(block) = object.as_block() else {
                     return;
-                }
-
-                let block = object.as_block().unwrap();
+                };
 
                 match block.identifier() {
                     "person" => {
-                        let body = block.body().clone();
-
-                        let person: Person = match hcl::from_body(body) {
-                            Ok(value) => value,
-                            Err(err) => panic!("Failed: {}", err),
-                        };
-
-                        people.insert(block.labels().first().unwrap().as_str().into(), person);
+                        if insert(block, &mut people).is_err() {
+                            eprintln!("Failed to parse person");
+                        }
                     }
 
                     "show" => {
-                        let body = block.body().clone();
-
-                        let show: Show = match hcl::from_body(body) {
-                            Ok(value) => value,
-                            Err(err) => panic!("Failed: {}", err),
-                        };
-
-                        shows.insert(block.labels().first().unwrap().as_str().into(), show);
+                        if insert(block, &mut shows).is_err() {
+                            eprintln!("Failed to parse show");
+                        }
                     }
 
                     "technology" => {
-                        let body = block.body().clone();
-
-                        let technology: Technology = match hcl::from_body(body) {
-                            Ok(value) => value,
-                            Err(err) => panic!("Failed: {}", err),
-                        };
-
-                        technologies
-                            .insert(block.labels().first().unwrap().as_str().into(), technology);
+                        if insert(block, &mut technologies).is_err() {
+                            eprintln!("Failed to parse technology");
+                        }
                     }
 
                     "episode" => {
-                        let body = block.body().clone();
-
-                        let episode: Episode = match hcl::from_body(body) {
-                            Ok(value) => value,
-                            Err(err) => panic!("Failed: {}", err),
-                        };
-
-                        episodes.insert(block.labels().first().unwrap().as_str().into(), episode);
+                        if insert(block, &mut episodes).is_err() {
+                            eprintln!("Failed to parse episode");
+                        }
                     }
 
                     _ => (),
-                };
+                }
             });
         }
     }
 
-    Database {
+    Ok(Database {
         episodes,
         shows,
         technologies,
         people,
-    }
+    })
 }
 
 impl Database {
