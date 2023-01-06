@@ -6,6 +6,75 @@ new kubernetes.kustomize.Directory("chappaai", {
 	directory: "https://github.com/rawkode/chappaai/tree/main/deploy",
 });
 
+const oauthApiYouTube = new kubernetes.apiextensions.CustomResource(
+	"youtube-oauth-api",
+	{
+		kind: "OAuthApi",
+		apiVersion: "chappaai.dev/v1",
+		metadata: {
+			name: "youtube",
+		},
+		spec: {
+			http: {
+				baseUrl: "https://www.googleapis.com/youtube/v3",
+				authorizationHeaderPrefix: "Bearer",
+				headers: [
+					{
+						key: "Accept",
+						value: "application/json",
+					},
+					{
+						key: "User-Agent",
+						value: "chappaai",
+					},
+				],
+			},
+			auth: {
+				oAuth2: {
+					authorizationUrl: "",
+					tokenUrl: "",
+					authorizationParams: [
+						{
+							key: "prompt",
+							value: "consent",
+						},
+						{
+							key: "access_type",
+							value: "offline",
+						},
+						{
+							key: "response_type",
+							value: "code",
+						},
+					],
+					tokenParams: {
+						grantType: "authorization_code",
+					},
+				},
+			},
+		},
+	},
+);
+
+new kubernetes.apiextensions.CustomResource("youtube-oauth-connection", {
+	kind: "OAuthApi",
+	apiVersion: "chappaai.dev/v1",
+	metadata: {
+		name: "youtube",
+	},
+	spec: {
+		api: oauthApiYouTube.metadata.name,
+		scopes: ["https://www.googleapis.com/auth/youtube"],
+		credentials: {
+			secretRef: {
+				name: "youtube-oauth-credentials",
+				idKey: "clientId",
+				secretKey: "clientSecret",
+			},
+		},
+	},
+});
+
 const postgreSQLClusterName = "temporal-postgresql";
 const postgreSQLUsername = "postgres";
 
