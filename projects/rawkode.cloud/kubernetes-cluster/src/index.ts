@@ -11,6 +11,7 @@ import {
 	CertManager,
 	Chappaai,
 	CloudNativePG,
+	ExternalSecrets,
 	FluxCD,
 	PulumiOperator,
 	TemporalOperator,
@@ -20,6 +21,7 @@ platform
 	.addComponent(CertManager)
 	.addComponent(Chappaai)
 	.addComponent(CloudNativePG)
+	.addComponent(ExternalSecrets)
 	.addComponent(FluxCD)
 	.addComponent(PulumiOperator)
 	.addComponent(TemporalOperator)
