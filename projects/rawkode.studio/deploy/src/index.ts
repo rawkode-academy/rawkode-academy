@@ -57,7 +57,7 @@ const oauthApiYouTube = new kubernetes.apiextensions.CustomResource(
 );
 
 new kubernetes.apiextensions.CustomResource("youtube-oauth-connection", {
-	kind: "OAuthApi",
+	kind: "OAuthConnection",
 	apiVersion: "chappaai.dev/v1",
 	metadata: {
 		name: "youtube",
