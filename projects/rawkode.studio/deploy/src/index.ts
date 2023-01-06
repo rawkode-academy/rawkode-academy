@@ -3,7 +3,7 @@ import * as random from "@pulumi/random";
 
 //
 new kubernetes.kustomize.Directory("chappaai", {
-	directory: "https://github.com/rawkode/chappaai.git/deploy",
+	directory: "https://github.com/rawkode/chappaai/tree/0.0.5/deploy",
 });
 
 const postgreSQLClusterName = "temporal-postgresql";
