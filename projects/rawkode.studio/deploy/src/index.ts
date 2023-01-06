@@ -2,6 +2,10 @@ import * as kubernetes from "@pulumi/kubernetes";
 import * as random from "@pulumi/random";
 
 //
+new kubernetes.kustomize.Directory("chappaai", {
+	directory: "https://github.com/rawkode/chappaai.git/deploy",
+});
+
 const postgreSQLClusterName = "temporal-postgresql";
 const postgreSQLUsername = "postgres";
 
