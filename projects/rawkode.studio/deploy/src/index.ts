@@ -61,7 +61,7 @@ const oauthApiYouTube = new kubernetes.apiextensions.CustomResource(
 		},
 		spec: {
 			http: {
-				baseUrl: "https://www.googleapis.com/youtube/v3",
+				baseUrl: "",
 				authorizationHeaderPrefix: "Bearer",
 				headers: [
 					{
@@ -86,10 +86,6 @@ const oauthApiYouTube = new kubernetes.apiextensions.CustomResource(
 						{
 							key: "access_type",
 							value: "offline",
-						},
-						{
-							key: "response_type",
-							value: "code",
 						},
 					],
 					tokenParams: {
