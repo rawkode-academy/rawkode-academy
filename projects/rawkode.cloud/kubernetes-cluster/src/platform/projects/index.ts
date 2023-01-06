@@ -2,6 +2,7 @@ import { RandomPassword } from "@pulumi/random";
 import * as kubernetes from "@pulumi/kubernetes";
 import * as pulumi from "@pulumi/pulumi";
 import * as slug from "slug";
+import { Output } from "@pulumi/pulumi";
 // import { IngressComponent } from "../components/abstract";
 // import { getController } from "../../dns";
 
@@ -12,6 +13,7 @@ export interface ProjectArgs {
 	provider: kubernetes.Provider;
 	// ingressComponent?: IngressComponent;
 	environment: { [key: string]: string };
+	secrets: { [key: string]: Output<string> };
 }
 
 export class Project extends pulumi.ComponentResource {
@@ -47,6 +49,14 @@ export class Project extends pulumi.ComponentResource {
 			{ provider, parent: this },
 		);
 		const namespace = this.namespace.metadata.name;
+
+		new kubernetes.core.v1.Secret(`${slugName}-secrets`, {
+			metadata: {
+				namespace,
+				name: "platform",
+			},
+			stringData: args.secrets,
+		});
 
 		this.configMap = new kubernetes.core.v1.ConfigMap(
 			`${slugName}-environment`,

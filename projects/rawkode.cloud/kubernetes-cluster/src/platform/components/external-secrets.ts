@@ -20,7 +20,9 @@ export class ExternalSecrets extends Component {
 			repositoryOpts: {
 				repo: "https://charts.external-secrets.io",
 			},
-			values: {},
+			values: {
+				installCRDs: false,
+			},
 		});
 	}
 }

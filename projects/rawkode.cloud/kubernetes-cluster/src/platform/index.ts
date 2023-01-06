@@ -3,6 +3,7 @@ import * as kubernetes from "@pulumi/kubernetes";
 
 import { Component, ComponentArgs } from "./components/abstract";
 import { Project } from "./projects";
+import { Output } from "@pulumi/pulumi";
 
 interface PlatformArgs {
 	provider: kubernetes.Provider;
@@ -13,6 +14,7 @@ interface AddProjectArgs {
 	directory: string;
 	ingressComponent?: string;
 	environment: { [key: string]: string };
+	secrets: { [key: string]: Output<string> };
 }
 
 interface ComponentConstructGlue<T> {

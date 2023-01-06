@@ -1,3 +1,4 @@
+import { secret } from "@pulumi/pulumi";
 import { Infrastructure } from "./infrastructure";
 import { Platform } from "./platform";
 
@@ -29,4 +30,7 @@ platform
 		repository: "oci://ghcr.io/rawkodeacademy/studio-deploy",
 		directory: ".",
 		environment: {},
+		secrets: {
+			dopplerToken: secret(process.env.STUDIO_DOPPLER_SERVICE_TOKEN || ""),
+		},
 	});
