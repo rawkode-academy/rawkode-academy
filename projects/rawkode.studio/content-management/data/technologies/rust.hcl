@@ -1,8 +1,14 @@
-technology "Rust" {
+technology "rust" {
+  name = "Rust"
   draft = false
-  description = "A systems programming language that runs blazingly fast, prevents segfaults, and guarantees thread safety."
+
+  tagline = "A systems programming language that runs blazingly fast, prevents segfaults, and guarantees thread safety."
+  description = ""
+
   website = "https://www.rust-lang.org/"
-  open_source = true
-  repository = "https://github.com/rust-lang/rust"
   documentation = "https://doc.rust-lang.org/book/"
+  
+  open_source {
+    repository = "https://github.com/rust-lang/rust"
+  }
 }

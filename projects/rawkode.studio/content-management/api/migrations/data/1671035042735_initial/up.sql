@@ -62,26 +62,40 @@ FROM show_hosts
 
 -- Technologies
 CREATE TABLE "technologies" (
-    "id" TEXT PRIMARY KEY,
-    "draft" BOOLEAN NOT NULL DEFAULT TRUE,
-    "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "website" TEXT NOT NULL,
-    "openSource" BOOLEAN NOT NULL DEFAULT FALSE,
-    "repository" TEXT NOT NULL,
-    "documentation" TEXT NOT NULL,
-    "twitterHandle" TEXT CHECK (
-        "twitterHandle" IS NULL
+    id TEXT PRIMARY KEY,
+
+    name TEXT NOT NULL,
+    aliases TEXT [] DEFAULT array []::TEXT [],
+
+    tags TEXT [] DEFAULT array []::TEXT [],
+
+    draft BOOLEAN NOT NULL DEFAULT TRUE,
+
+    tagline TEXT NOT NULL,
+    description TEXT NOT NULL,
+    website TEXT NOT NULL,
+    documentation TEXT NOT NULL,
+    logo_url TEXT,
+
+    open_source BOOLEAN NOT NULL DEFAULT FALSE,
+    repository TEXT,
+
+    CONSTRAINT open_source_check CHECK (
+        open_source IS FALSE OR repository IS NOT NULL
+    ),
+
+    twitter_handle TEXT CHECK (
+        twitter_handle IS NULL
         OR (
-            char_length("twitterHandle") >= 4
-            AND char_length("twitterHandle") <= 15
+            char_length(twitter_handle) >= 4
+            AND char_length(twitter_handle) <= 15
         )
     ),
-    "youtubeHandle" TEXT CHECK (
-        "youtubeHandle" IS NULL
+    youtube_handle TEXT CHECK (
+        youtube_handle IS NULL
         OR (
-            char_length("youtubeHandle") >= 3
-            AND char_length("youtubeHandle") <= 30
+            char_length(youtube_handle) >= 3
+            AND char_length(youtube_handle) <= 30
         )
     )
 );

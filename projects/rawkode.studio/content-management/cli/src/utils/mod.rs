@@ -167,16 +167,23 @@ impl InMemoryDatabase {
 
     pub async fn sync_technologies(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            r#"INSERT INTO technologies ("id", "name", "description", "website", "openSource", "repository", "documentation", "twitterHandle", "youtubeHandle", "draft")"#,
+            r#"INSERT INTO technologies ("id", "name", "aliases", "tagline", "description", "website", "open_source", "repository", "documentation", "twitter_handle", "youtube_handle", "draft")"#,
         );
 
-        query_builder.push_values(self.technologies.iter(), |mut q, (name, technology)| {
-            q.push_bind(slugify(name))
-                .push_bind(name)
+        query_builder.push_values(self.technologies.iter(), |mut q, (id, technology)| {
+            let (open_source, repository) = match &technology.open_source {
+                Some(os) => (true, os.repository.clone()),
+                None => (false, None),
+            };
+
+            q.push_bind(id)
+                .push_bind(&technology.name)
+                .push_bind(&technology.aliases)
+                .push_bind(&technology.tagline)
                 .push_bind(&technology.description)
                 .push_bind(&technology.website)
-                .push_bind(technology.open_source)
-                .push_bind(&technology.repository)
+                .push_bind(open_source)
+                .push_bind(repository)
                 .push_bind(&technology.documentation)
                 .push_bind(&technology.twitter)
                 .push_bind(&technology.youtube)
@@ -187,13 +194,20 @@ impl InMemoryDatabase {
             r#" ON CONFLICT ("id") DO UPDATE
             SET
                 "name" = EXCLUDED."name",
+                "aliases" = EXCLUDED."aliases",
+
+                "tagline" = EXCLUDED."tagline",
                 "description" = EXCLUDED."description",
+
                 "website" = EXCLUDED."website",
-                "openSource" = EXCLUDED."openSource",
-                "repository" = EXCLUDED."repository",
                 "documentation" = EXCLUDED."documentation",
-                "twitterHandle" = EXCLUDED."twitterHandle",
-                "youtubeHandle" = EXCLUDED."youtubeHandle",
+
+                "open_source" = EXCLUDED."open_source",
+                "repository" = EXCLUDED."repository",
+                
+                "twitter_handle" = EXCLUDED."twitter_handle",
+                "youtube_handle" = EXCLUDED."youtube_handle",
+                
                 "draft" = EXCLUDED."draft"
             ;
             "#,
