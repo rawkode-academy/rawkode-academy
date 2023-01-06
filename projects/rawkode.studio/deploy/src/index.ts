@@ -1,7 +1,52 @@
 import * as kubernetes from "@pulumi/kubernetes";
 import * as random from "@pulumi/random";
 
-//
+new kubernetes.apiextensions.CustomResource("doppler-secret-store", {
+	kind: "SecretStore",
+	apiVersion: "external-secrets.io/v1beta1",
+	metadata: {
+		name: "doppler",
+	},
+	spec: {
+		provider: {
+			doppler: {
+				auth: {
+					secretRef: {
+						dopplerToken: {
+							name: "platform",
+							key: "dopplerToken",
+						},
+					},
+				},
+			},
+		},
+	},
+});
+
+new kubernetes.apiextensions.CustomResource("youtube-oauth-client", {
+	kind: "ExternalSecret",
+	apiVersion: "external-secrets.io/v1beta1",
+	metadata: {
+		name: "youtube-oauth-client",
+	},
+	spec: {
+		secretStoreRef: {
+			kind: "SecretStore",
+			name: "doppler",
+		},
+		target: {
+			name: "youtube-oauth-credentials",
+		},
+		dataFrom: [
+			{
+				find: {
+					path: "YOUTUBE_OAUTH",
+				},
+			},
+		],
+	},
+});
+
 new kubernetes.kustomize.Directory("chappaai", {
 	directory: "https://github.com/rawkode/chappaai/tree/main/deploy",
 });
@@ -31,8 +76,8 @@ const oauthApiYouTube = new kubernetes.apiextensions.CustomResource(
 			},
 			auth: {
 				oAuth2: {
-					authorizationUrl: "",
-					tokenUrl: "",
+					authorizationUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+					tokenUrl: "https://oauth2.googleapis.com/token",
 					authorizationParams: [
 						{
 							key: "prompt",
@@ -64,12 +109,18 @@ new kubernetes.apiextensions.CustomResource("youtube-oauth-connection", {
 	},
 	spec: {
 		api: oauthApiYouTube.metadata.name,
-		scopes: ["https://www.googleapis.com/auth/youtube"],
+		scopes: [
+			"https://www.googleapis.com/auth/youtube",
+			"https://www.googleapis.com/auth/youtube.channel-memberships.creator",
+			"https://www.googleapis.com/auth/youtube.force-ssl",
+			"https://www.googleapis.com/auth/youtube.upload",
+			"https://www.googleapis.com/auth/youtubepartner",
+		],
 		credentials: {
 			secretRef: {
 				name: "youtube-oauth-credentials",
-				idKey: "clientId",
-				secretKey: "clientSecret",
+				idKey: "YOUTUBE_OAUTH_CLIENT_ID",
+				secretKey: "YOUTUBE_OAUTH_CLIENT_SECRET",
 			},
 		},
 	},
