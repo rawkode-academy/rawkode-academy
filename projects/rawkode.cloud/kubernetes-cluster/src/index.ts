@@ -9,6 +9,7 @@ const platform = new Platform("platform", {
 
 import {
 	CertManager,
+	Chappaai,
 	CloudNativePG,
 	FluxCD,
 	PulumiOperator,
@@ -17,6 +18,7 @@ import {
 
 platform
 	.addComponent(CertManager)
+	.addComponent(Chappaai)
 	.addComponent(CloudNativePG)
 	.addComponent(FluxCD)
 	.addComponent(PulumiOperator)
