@@ -4,8 +4,10 @@ specifiers:
   '@dagger.io/dagger': ^0.3.0
   '@pulumi/gcp': ^6.45.0
   '@pulumi/pulumi': ^3.49.0
+  '@pulumi/random': ^4.8.2
   '@rawkode.academy/dagger': workspace:^0.0.1
   '@rawkode.academy/dns': workspace:*
+  '@rawkode.academy/google-cloud': workspace:*
   '@types/node': ^18.11.17
   ora: ^6.1.2
   ts-node: ^10.9.1
@@ -14,6 +16,7 @@ specifiers:
 dependencies:
   '@pulumi/gcp': 6.45.0
   '@pulumi/pulumi': 3.49.0
+  '@pulumi/random': 4.8.2
   '@types/node': 18.11.17
   ts-node: 10.9.1_moeqx3xmzxqxagf2sz6mqkbb7m
   typescript: 4.9.4
@@ -22,6 +25,7 @@ devDependencies:
   '@dagger.io/dagger': 0.3.0
   '@rawkode.academy/dagger': link:../../../dagger
   '@rawkode.academy/dns': link:../dns
+  '@rawkode.academy/google-cloud': link:../google-cloud
   ora: 6.1.2
 
 packages:
@@ -278,6 +282,15 @@ packages:
 
   /@pulumi/query/0.3.0:
     resolution: {integrity: sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==}
+    dev: false
+
+  /@pulumi/random/4.8.2:
+    resolution: {integrity: sha512-XDQ2OV+VW5Bpn9nxVqsEiKD3DAEeMd8ngZPLpioJWCiHzsBMSrYfP97MkdGDaBsDvS6/NL1Bvk0VQXXooFl3Yw==}
+    requiresBuild: true
+    dependencies:
+      '@pulumi/pulumi': 3.49.0
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /@tsconfig/node10/1.0.9:

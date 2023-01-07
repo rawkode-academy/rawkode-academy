@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
+apt update && apt install -y jq
 DNS_NAME=$(curl -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?recursive=true" | jq -r '.DNS_NAME')
 
 curl https://deb.releases.teleport.dev/teleport-pubkey.asc | apt-key add -
-add-apt-repository 'deb https://deb.releases.teleport.dev/ stable main'
+add-apt-repository --yes 'deb https://deb.releases.teleport.dev/ stable main'
 DEBIAN_FRONTEND=noninteractive apt update && apt install -y teleport
 
 GITHUB_CLIENT_ID=$(gcloud secrets versions access 1 --secret=doppler-cloud | jq -r ".GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET=$(gcloud secrets versions access 1 --secret=doppler-cloud | jq -r ".GITHUB_CLIENT_SECRET")
+TELEPORT_JOIN_TOKEN=$(gcloud secrets versions access 1 --secret=rawkode-cloud-shared | jq -r ".TELEPORT_JOIN_TOKEN")
 
 cat > /etc/teleport.yaml <<EOCAT
 teleport:
@@ -20,6 +22,8 @@ auth_service:
     type: github
   listen_addr: 0.0.0.0:3025
   cluster_name: ${DNS_NAME}
+  tokens:
+  - "proxy,node:${TELEPORT_JOIN_TOKEN}"
 
 ssh_service:
   enabled: true

@@ -17,6 +17,10 @@ const createProject = (name: string, args: ProjectArgs) => {
 			"cloudkms.cryptoKeys.get",
 			"cloudkms.cryptoKeyVersions.useToDecrypt",
 			"cloudkms.cryptoKeyVersions.useToEncrypt",
+			// SecretsManager
+			"secretmanager.secrets.create",
+			"secretmanager.secrets.get",
+			"secretmanager.versions.access",
 			// storage for state
 			"storage.objects.create",
 			"storage.objects.get",
