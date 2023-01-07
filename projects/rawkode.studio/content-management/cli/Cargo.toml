@@ -12,7 +12,7 @@ edition = "2021"
 clap = { version = "4", features = ["derive"] }
 miette = { version = "5", features = ["fancy"] }
 chrono = { version = "0.4", features = ["serde"] }
-hcl-rs = "0.11"
+hcl-rs = "0.12"
 serde = "1"
 indexmap = "1"
 url = { version = "2", features = ["serde"] }
