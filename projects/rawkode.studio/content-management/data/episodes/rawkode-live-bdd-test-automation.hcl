@@ -5,6 +5,11 @@ episode "BDD Test Automation" {
   scheduled_for = "2021-01-19T13:00:00Z"
   youtube_id = "dc6A930goAU"
   youtube_category = 24
+
+  guests = [
+    "ciaranmcnulty"
+  ]
+
   links = [
     "https://twitter.com/rawkode",
     "https://rawkode.live/",
