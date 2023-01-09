@@ -204,10 +204,10 @@ impl InMemoryDatabase {
 
                 "open_source" = EXCLUDED."open_source",
                 "repository" = EXCLUDED."repository",
-                
+
                 "twitter_handle" = EXCLUDED."twitter_handle",
                 "youtube_handle" = EXCLUDED."youtube_handle",
-                
+
                 "draft" = EXCLUDED."draft"
             ;
             "#,
@@ -280,10 +280,99 @@ impl InMemoryDatabase {
             "#,
         );
 
-        let query = query_builder.build();
+        let mut transaction = pool.begin().await.into_diagnostic()?;
 
-        query.execute(pool).await.into_diagnostic()?;
+        let episodes_query = query_builder.build();
+
+        episodes_query
+            .execute(&mut transaction)
+            .await
+            .into_diagnostic()?;
+
+        if let Some(mut quests_query_builder) = self.episode_quests_query() {
+            let query = quests_query_builder.build();
+
+            query.execute(&mut transaction).await.into_diagnostic()?;
+        }
+
+        if let Some(mut technologies_query_builder) = self.episode_technologies_query() {
+            let query = technologies_query_builder.build();
+
+            query.execute(&mut transaction).await.into_diagnostic()?;
+        }
+
+        transaction.commit().await.into_diagnostic()?;
 
         Ok(self)
+    }
+
+    fn episode_quests_query(&self) -> Option<QueryBuilder<Postgres>> {
+        let episodes_with_guests = self
+            .episodes
+            .iter()
+            .flat_map(|(name, episode)| {
+                episode
+                    .guests
+                    .as_deref()
+                    .unwrap_or_default()
+                    .iter()
+                    .map(|guest| (name, guest))
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+
+        if episodes_with_guests.is_empty() {
+            None
+        } else {
+            let mut query_builder =
+                QueryBuilder::new(r#"INSERT INTO episode_guests ("episodeId", "personId")"#);
+
+            query_builder.push_values(episodes_with_guests.clone(), |mut q, (name, guest)| {
+                let episode_id = slugify(name);
+
+                q.push_bind(episode_id).push_bind(guest);
+            });
+
+            query_builder.push(r#" ON CONFLICT ("episodeId", "personId") DO NOTHING;"#);
+
+            Some(query_builder)
+        }
+    }
+
+    fn episode_technologies_query(&self) -> Option<QueryBuilder<Postgres>> {
+        let episodes_with_technologies = self
+            .episodes
+            .iter()
+            .flat_map(|(name, episode)| {
+                episode
+                    .technologies
+                    .as_deref()
+                    .unwrap_or_default()
+                    .iter()
+                    .map(|technology| (name, technology))
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+
+        if episodes_with_technologies.is_empty() {
+            None
+        } else {
+            let mut query_builder = QueryBuilder::new(
+                r#"INSERT INTO episode_technologies ("episodeId", "technologyId")"#,
+            );
+
+            query_builder.push_values(
+                episodes_with_technologies.clone(),
+                |mut q, (name, technology)| {
+                    let episode_id = slugify(name);
+
+                    q.push_bind(episode_id).push_bind(technology);
+                },
+            );
+
+            query_builder.push(r#" ON CONFLICT ("episodeId", "technologyId") DO NOTHING;"#);
+
+            Some(query_builder)
+        }
     }
 }

@@ -50,6 +50,12 @@ pub struct Episode {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub chapter: Option<LabeledBlock<IndexMap<String, Chapter>>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub guests: Option<Vec<String>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub technologies: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
