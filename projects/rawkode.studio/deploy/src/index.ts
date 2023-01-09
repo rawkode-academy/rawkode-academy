@@ -160,76 +160,115 @@ new kubernetes.apiextensions.CustomResource("postgresql", {
 	},
 });
 
-new kubernetes.apiextensions.CustomResource("temporal-cluster", {
+const temporalCluster = new kubernetes.apiextensions.CustomResource(
+	"temporal-cluster",
+	{
+		apiVersion: "temporal.io/v1beta1",
+		kind: "TemporalCluster",
+		metadata: {
+			// We call this temporalio to avoid conflicts during the UI config rendering.
+			// The temporalio/ui container uses `TEMPORAL_UI_PORT` to configure the listening
+			// port, which causes a collision with any service called temporal-ui.
+			// Let's avoid that
+			name: "temporalio",
+		},
+		spec: {
+			version: "1.18.5",
+			numHistoryShards: 1,
+			jobTtlSecondsAfterFinished: 300,
+			persistence: {
+				defaultStore: {
+					sql: {
+						user: postgreSQLUsername,
+						databaseName: postgreSQLUsername,
+						pluginName: "postgres",
+						connectAddr: `${postgreSQLClusterName}-rw:5432`,
+						connectProtocol: "tcp",
+					},
+					passwordSecretRef: {
+						name: secret.metadata.name,
+						key: "password",
+					},
+				},
+				visibilityStore: {
+					sql: {
+						user: postgreSQLUsername,
+						databaseName: `${postgreSQLUsername}_visibility`,
+						pluginName: "postgres",
+						connectAddr: `${postgreSQLClusterName}-rw:5432`,
+						connectProtocol: "tcp",
+					},
+					passwordSecretRef: {
+						name: secret.metadata.name,
+						key: "password",
+					},
+				},
+			},
+			mTLS: {
+				provider: "cert-manager",
+				internode: {
+					enabled: true,
+				},
+				frontend: {
+					enabled: true,
+				},
+				certificatesDuration: {
+					rootCACertificate: "2h",
+					intermediateCAsCertificates: "1h30m",
+					clientCertificates: "1h",
+					frontendCertificate: "1h",
+					internodeCertificate: "1h",
+				},
+				refreshInterval: "5m",
+			},
+			ui: {
+				enabled: true,
+			},
+			admintools: {
+				enabled: true,
+			},
+			metrics: {
+				enabled: true,
+				prometheusConfig: {
+					listenPort: 9090,
+				},
+			},
+		},
+	},
+);
+
+const temporalNamespace = new kubernetes.apiextensions.CustomResource(
+	"youtube-namespace",
+	{
+		apiVersion: "temporal.io/v1beta1",
+		kind: "TemporalNamespace",
+		metadata: {
+			name: "youtube",
+		},
+		spec: {
+			clusterRef: {
+				name: temporalCluster.metadata.name,
+			},
+			retentionPeriod: "168h",
+		},
+	},
+);
+
+new kubernetes.apiextensions.CustomResource("youtube-worker", {
 	apiVersion: "temporal.io/v1beta1",
-	kind: "TemporalCluster",
+	kind: "TemporalWorkerProcess",
 	metadata: {
-		// We call this temporalio to avoid conflicts during the UI config rendering.
-		// The temporalio/ui container uses `TEMPORAL_UI_PORT` to configure the listening
-		// port, which causes a collision with any service called temporal-ui.
-		// Let's avoid that
-		name: "temporalio",
+		name: "workflows-youtube",
 	},
 	spec: {
-		version: "1.18.5",
-		numHistoryShards: 1,
+		clusterRef: {
+			name: temporalCluster.metadata.name,
+		},
+		image: "ghcr.io/rawkodeacademy/studio-workflows-youtube",
 		jobTtlSecondsAfterFinished: 300,
-		persistence: {
-			defaultStore: {
-				sql: {
-					user: postgreSQLUsername,
-					databaseName: postgreSQLUsername,
-					pluginName: "postgres",
-					connectAddr: `${postgreSQLClusterName}-rw:5432`,
-					connectProtocol: "tcp",
-				},
-				passwordSecretRef: {
-					name: secret.metadata.name,
-					key: "password",
-				},
-			},
-			visibilityStore: {
-				sql: {
-					user: postgreSQLUsername,
-					databaseName: `${postgreSQLUsername}_visibility`,
-					pluginName: "postgres",
-					connectAddr: `${postgreSQLClusterName}-rw:5432`,
-					connectProtocol: "tcp",
-				},
-				passwordSecretRef: {
-					name: secret.metadata.name,
-					key: "password",
-				},
-			},
-		},
-		mTLS: {
-			provider: "cert-manager",
-			internode: {
-				enabled: true,
-			},
-			frontend: {
-				enabled: true,
-			},
-			certificatesDuration: {
-				rootCACertificate: "2h",
-				intermediateCAsCertificates: "1h30m",
-				clientCertificates: "1h",
-				frontendCertificate: "1h",
-				internodeCertificate: "1h",
-			},
-			refreshInterval: "5m",
-		},
-		ui: {
-			enabled: true,
-		},
-		admintools: {
-			enabled: true,
-		},
-		metrics: {
-			enabled: true,
-			prometheusConfig: {
-				listenPort: 9090,
-			},
-		},
+		pullPolicy: "Always",
+		replicas: 1,
+		temporalNamespace: temporalNamespace.metadata.name,
+		version: "latest",
 	},
 });

@@ -6,8 +6,10 @@ import { getConnection } from "./tls";
 
 async function run() {
 	const env = getEnv();
+	console.debug(env);
 
 	const connection: NativeConnection | undefined = await getConnection();
+	console.debug(connection);
 
 	const worker = await Worker.create({
 		connection,

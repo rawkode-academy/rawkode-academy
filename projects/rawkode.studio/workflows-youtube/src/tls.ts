@@ -8,6 +8,7 @@ import { ConnectionLike } from "@temporalio/client";
 export const getConnection = async (): Promise<
 	NativeConnection | undefined
 > => {
+	console.log("getConnection");
 	const env = getEnv();
 
 	if (!env.useTls) {
@@ -18,6 +19,19 @@ export const getConnection = async (): Promise<
 	if (env.serverRootCACertificatePath) {
 		serverRootCACertificate = fs.readFileSync(env.serverRootCACertificatePath);
 	}
+
+	console.debug(serverRootCACertificate);
+	console.debug({
+		address: env.address,
+		tls: {
+			serverNameOverride: env.serverNameOverride,
+			serverRootCACertificate,
+			clientCertPair: {
+				crt: fs.readFileSync(env.clientCertPath!),
+				key: fs.readFileSync(env.clientKeyPath!),
+			},
+		},
+	});
 
 	return await NativeConnection.connect({
 		address: env.address,
@@ -35,6 +49,7 @@ export const getConnection = async (): Promise<
 export const getClientConnection = async (): Promise<
 	ConnectionLike | undefined
 > => {
+	console.log("getClientConnection");
 	const env = getEnv();
 
 	if (!env.useTls) {
@@ -45,6 +60,20 @@ export const getClientConnection = async (): Promise<
 	if (env.serverRootCACertificatePath) {
 		serverRootCACertificate = fs.readFileSync(env.serverRootCACertificatePath);
 	}
+
+	console.debug(serverRootCACertificate);
+	console.debug({
+		address: env.address,
+		tls: {
+			serverNameOverride: env.serverNameOverride,
+			serverRootCACertificate,
+			clientCertPair: {
+				crt: fs.readFileSync(env.clientCertPath!),
+				key: fs.readFileSync(env.clientKeyPath!),
+			},
+		},
+	});
+
 	return await Connection.connect({
 		address: env.address,
 		tls: {
