@@ -29,7 +29,7 @@ export const buildAndPush = async (
 		.withDirectory("/app", builder.directory("/src/lib"))
 		.withDirectory("/app/node_modules", builder.directory("/src/node_modules"))
 		.withDefaultArgs({
-			args: ["worker.js"],
+			args: ["/app/worker.js"],
 		})
 		.publish("ghcr.io/rawkodeacademy/studio-workflows-youtube:latest");
 };
