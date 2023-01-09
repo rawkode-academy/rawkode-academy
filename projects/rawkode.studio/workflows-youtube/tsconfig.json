@@ -4,11 +4,9 @@
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "target": "ESNext",
-    "module": "ESNext",
     "sourceMap": true,
     "rootDir": "./src",
     "outDir": "./lib"
   },
-  "include": ["src/**/*.ts", "dagger/build-and-push.mts"]
+  "include": ["src/**/*.ts"]
 }
