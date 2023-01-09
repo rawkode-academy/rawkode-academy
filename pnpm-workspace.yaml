@@ -1,6 +1,8 @@
 packages:
   - "./dagger"
-  - "./projects/rawkode.academy/website"
+  - "./gcp-control-plane"
+# re2 takes 2 mins on EVERY install
+#  - "./projects/rawkode.academy/website"
   - "./projects/rawkode.cloud/dns"
   - "./projects/rawkode.cloud/google-cloud"
   - "./projects/rawkode.cloud/teleport"
