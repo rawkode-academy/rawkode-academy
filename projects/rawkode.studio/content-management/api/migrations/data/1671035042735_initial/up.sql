@@ -142,3 +142,24 @@ SELECT "personId",
     episodes.*
 FROM episode_guests
     LEFT JOIN episodes ON episode_guests."episodeId" = episodes.id;
+
+
+-- Episode Technologies
+CREATE TABLE "episode_technologies" (
+    "episodeId" TEXT NOT NULL REFERENCES "episodes"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    "technologyId" TEXT NOT NULL REFERENCES "technologies"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "episode_technologies_id" PRIMARY KEY ("episodeId", "technologyId")
+);
+
+-- Hasura Flattening Views
+CREATE VIEW episode_technologies_view AS
+SELECT "episodeId",
+    technologies.*
+FROM episode_technologies
+    LEFT JOIN technologies ON episode_technologies."technologyId" = technologies.id;
+
+CREATE VIEW technology_episodes_view AS
+SELECT "technologyId",
+    episodes.*
+FROM episode_technologies
+    LEFT JOIN episodes ON episode_technologies."episodeId" = episodes.id;
