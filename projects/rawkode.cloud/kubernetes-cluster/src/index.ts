@@ -15,6 +15,7 @@ import {
 	ExternalSecrets,
 	FluxCD,
 	PulumiOperator,
+	Teleport,
 	TemporalOperator,
 } from "./platform/components";
 
@@ -25,6 +26,7 @@ platform
 	.addComponent(ExternalSecrets)
 	.addComponent(FluxCD)
 	.addComponent(PulumiOperator)
+	.addComponent(Teleport)
 	.addComponent(TemporalOperator)
 	.addProject("studio", {
 		repository: "oci://ghcr.io/rawkodeacademy/studio-deploy",

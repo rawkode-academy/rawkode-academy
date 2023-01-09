@@ -1,0 +1,29 @@
+kind: role
+metadata:
+  name: kube-access
+version: v5
+spec:
+  allow:
+    kubernetes_labels:
+      "*": "*"
+    kubernetes_groups:
+      - viewers
+    kubernetes_users:
+      - gke_rawkode-academy_europe-west2_production-infrastructure
+  deny: {}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: viewers-crb
+subjects:
+  - kind: Group
+    # Bind the group "viewers", corresponding to the kubernetes_groups we assigned our "kube-access" role above
+    name: viewers
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  # "view" is a default ClusterRole that grants read-only access to resources
+  # See: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+  name: view
+  apiGroup: rbac.authorization.k8s.io

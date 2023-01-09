@@ -78,6 +78,7 @@ export class Project extends pulumi.ComponentResource {
 			{
 				metadata: {
 					namespace,
+					name: "pulumi-operator",
 				},
 			},
 			{
@@ -91,6 +92,7 @@ export class Project extends pulumi.ComponentResource {
 			{
 				metadata: {
 					namespace,
+					name: "pulumi-operator",
 				},
 				rules: [
 					{
@@ -111,6 +113,7 @@ export class Project extends pulumi.ComponentResource {
 			{
 				metadata: {
 					namespace,
+					name: "pulumi-operator",
 				},
 				subjects: [
 					{
@@ -133,6 +136,10 @@ export class Project extends pulumi.ComponentResource {
 		const fluxRole = new kubernetes.rbac.v1.Role(
 			`${slugName}-pulumi-operator-flux-role`,
 			{
+				metadata: {
+					namespace,
+					name: "pulumi-operator-flux",
+				},
 				rules: [
 					{
 						apiGroups: ["source.toolkit.fluxcd.io"],
@@ -150,6 +157,10 @@ export class Project extends pulumi.ComponentResource {
 		const fluxRoleBinding = new kubernetes.rbac.v1.RoleBinding(
 			`${slugName}-pulumi-operator-flux-role-binding`,
 			{
+				metadata: {
+					namespace,
+					name: "pulumi-operator-flux",
+				},
 				subjects: [
 					{
 						kind: "ServiceAccount",
@@ -168,8 +179,6 @@ export class Project extends pulumi.ComponentResource {
 			},
 		);
 
-		const operatorName = `${slugName}-operator`;
-
 		this.stackSecret = new RandomPassword(`${slugName}-pulumi-stack-secret`, {
 			length: 32,
 		});
@@ -179,6 +188,7 @@ export class Project extends pulumi.ComponentResource {
 			{
 				metadata: {
 					namespace,
+					name: "pulumi-operator",
 				},
 				stringData: {
 					password: this.stackSecret.result,
@@ -195,6 +205,7 @@ export class Project extends pulumi.ComponentResource {
 			{
 				metadata: {
 					namespace,
+					name: "pulumi-operator",
 					annotations: {
 						"pulumi.com/skipAwait": "true",
 					},
@@ -219,6 +230,7 @@ export class Project extends pulumi.ComponentResource {
 			{
 				metadata: {
 					namespace,
+					name: "pulumi-operator",
 				},
 				spec: {
 					replicas: 1,
@@ -227,14 +239,14 @@ export class Project extends pulumi.ComponentResource {
 					},
 					selector: {
 						matchLabels: {
-							name: operatorName,
+							name: "pulumi-operator",
 						},
 					},
 
 					template: {
 						metadata: {
 							labels: {
-								name: operatorName,
+								name: "pulumi-operator",
 							},
 						},
 						spec: {
@@ -254,7 +266,7 @@ export class Project extends pulumi.ComponentResource {
 								{
 									name: "operator",
 									image: "pulumi/pulumi-kubernetes-operator:v1.10.1",
-									args: ["--zap-level=error", "--zap-time-encoding=iso8601"],
+									args: ["--zap-level=debug", "--zap-time-encoding=iso8601"],
 									imagePullPolicy: "Always",
 									volumeMounts: [
 										{
@@ -318,6 +330,7 @@ export class Project extends pulumi.ComponentResource {
 				kind: "OCIRepository",
 				metadata: {
 					namespace,
+					name: "deploy",
 				},
 				spec: {
 					interval: "5m0s",
@@ -338,6 +351,7 @@ export class Project extends pulumi.ComponentResource {
 				kind: "Stack",
 				metadata: {
 					namespace,
+					name: "deploy",
 				},
 				spec: {
 					stack: slugName,

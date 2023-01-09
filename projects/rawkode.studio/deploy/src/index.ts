@@ -1,3 +1,4 @@
+//cachebuster
 import * as kubernetes from "@pulumi/kubernetes";
 import * as random from "@pulumi/random";
 

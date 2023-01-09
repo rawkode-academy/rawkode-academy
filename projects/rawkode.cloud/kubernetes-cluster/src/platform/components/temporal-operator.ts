@@ -1,7 +1,7 @@
 import { Component, ComponentArgs } from "./abstract";
 
 export class TemporalOperator extends Component {
-	protected readonly version = "0.9.1";
+	protected readonly version = "0.10.0";
 	protected crdUrls = [
 		`https://github.com/alexandrevilain/temporal-operator/releases/download/v${this.version}/temporal-operator.crds.yaml`,
 	];

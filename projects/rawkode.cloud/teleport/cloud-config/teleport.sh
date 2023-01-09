@@ -13,6 +13,8 @@ GITHUB_CLIENT_SECRET=$(gcloud secrets versions access 1 --secret=doppler-cloud |
 TELEPORT_JOIN_TOKEN=$(gcloud secrets versions access 1 --secret=rawkode-cloud-shared | jq -r ".TELEPORT_JOIN_TOKEN")
 
 cat > /etc/teleport.yaml <<EOCAT
+version: v2
+
 teleport:
   data_dir: /var/lib/teleport
 
@@ -20,10 +22,11 @@ auth_service:
   enabled: true
   authentication:
     type: github
+  proxy_listener_mode: multiplex
   listen_addr: 0.0.0.0:3025
   cluster_name: ${DNS_NAME}
   tokens:
-  - "proxy,node:${TELEPORT_JOIN_TOKEN}"
+  - "proxy,kube,app,db:${TELEPORT_JOIN_TOKEN}"
 
 ssh_service:
   enabled: true
@@ -32,9 +35,6 @@ proxy_service:
   enabled: true
   public_addr: ${DNS_NAME}:443
   web_listen_addr: ":443"
-  listen_addr: 0.0.0.0:3023
-  kube_listen_addr: 0.0.0.0:3026
-  tunnel_listen_addr: 0.0.0.0:3024
   acme:
     enabled: "yes"
     email: david@rawkode.academy
@@ -52,7 +52,7 @@ spec:
   display: Github
   redirect_url: https://${DNS_NAME}/v1/webapi/github/callback
   teams_to_roles:
-  - organization: rawkode-academy
+  - organization: RawkodeAcademy
     team: platform
     roles:
     - access
