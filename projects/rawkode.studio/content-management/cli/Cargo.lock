@@ -1161,6 +1161,7 @@ dependencies = [
  "regex",
  "serde",
  "sqlx",
+ "thiserror",
  "tokio",
  "unicode-normalization",
  "url",

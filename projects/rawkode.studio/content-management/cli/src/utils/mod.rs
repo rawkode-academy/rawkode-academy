@@ -1,6 +1,6 @@
 use crate::model::*;
 use glob::glob;
-use miette::{miette, IntoDiagnostic, Result};
+use miette::{miette, ErrReport, IntoDiagnostic, Result};
 use serde::de::DeserializeOwned;
 use sqlx::{postgres::types::PgInterval, Postgres, QueryBuilder};
 use std::{collections::HashMap, fs::read_to_string, path::PathBuf};
@@ -89,6 +89,97 @@ pub(crate) fn build_in_memory_database(files: Vec<PathBuf>) -> Result<InMemoryDa
 }
 
 impl InMemoryDatabase {
+    pub async fn validate_dependencies(self) -> Result<Self> {
+        let mut errors: Vec<DependencyError> = vec![];
+
+        for (name, episode) in self.episodes.iter() {
+            let slug = slugify(name);
+
+            // Check if the show exists
+            if !self
+                .shows
+                .iter()
+                .any(|(show_name, _)| slugify(show_name) == episode.show)
+            {
+                errors.push(DependencyError {
+                    source_code: format!(
+                        "Cannot find show '{}' for episode '{}'.",
+                        episode.show, slug
+                    ),
+                    model_name: "show".to_string(),
+                    help: format!("Add a show with the name '{}'.", episode.show),
+                })
+            }
+
+            // Check if the person exists
+            for guest in episode
+                .guests
+                .as_ref()
+                .unwrap_or(&Vec::<String>::new())
+                .iter()
+            {
+                if !self
+                    .people
+                    .iter()
+                    .any(|(_, person)| *guest == person.github)
+                {
+                    errors.push(DependencyError {
+                        source_code: format!(
+                            "Cannot find person '{}' for episode '{}'.",
+                            guest, slug
+                        ),
+                        model_name: "person".to_string(),
+                        help: format!("Add a person with the name '{}'.", guest),
+                    })
+                }
+            }
+
+            // Check if the technology exists
+            for technology in episode
+                .technologies
+                .as_ref()
+                .unwrap_or(&Vec::<String>::new())
+                .iter()
+            {
+                if !self
+                    .technologies
+                    .iter()
+                    .any(|(technology_id, _)| technology_id == technology)
+                {
+                    errors.push(DependencyError {
+                        source_code: format!(
+                            "Cannot find technology '{}' for episode '{}'.",
+                            technology, slug
+                        ),
+                        model_name: "technology".to_string(),
+                        help: format!("Add a technology with the name '{}'.", technology),
+                    })
+                }
+            }
+        }
+
+        for (name, show) in self.shows.iter() {
+            let slug = slugify(name);
+
+            // Check if the person exists
+            for host in show.hosts.as_ref().unwrap_or(&Vec::<String>::new()).iter() {
+                if !self.people.iter().any(|(_, person)| *host == person.github) {
+                    errors.push(DependencyError {
+                        source_code: format!("Cannot find person '{}' for show '{}'.", host, slug),
+                        model_name: "person".to_string(),
+                        help: format!("Add a person with the name '{}'.", host),
+                    })
+                }
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(self)
+        } else {
+            Err(ErrReport::from(DependencyErrors { errors }))?
+        }
+    }
+
     pub async fn sync_all(self, pool: sqlx::Pool<Postgres>) -> Result<()> {
         self.sync_technologies(&pool)
             .await?

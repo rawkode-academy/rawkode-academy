@@ -11,11 +11,13 @@ use serde::Deserialize;
 use unicode_normalization::UnicodeNormalization;
 
 pub mod episode;
+pub mod error;
 pub mod people;
 pub mod show;
 pub mod technology;
 
 pub use episode::*;
+pub use error::*;
 pub use people::*;
 pub use show::*;
 pub use technology::*;

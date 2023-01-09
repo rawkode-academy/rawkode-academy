@@ -18,7 +18,11 @@ pub async fn command(path: PathBuf, _apply: bool) -> Result<()> {
         .await
         .into_diagnostic()?;
 
-    database.sync_all(pool).await?;
+    database
+        .validate_dependencies()
+        .await?
+        .sync_all(pool)
+        .await?;
 
     Ok(())
 }

@@ -28,6 +28,7 @@ sqlx = { version = "0.6", features = [
     "chrono",
 ] }
 tokio = { version = "1", features = ["macros"] }
+thiserror = "1"
 
 [dev-dependencies]
 pretty_assertions = "1"
