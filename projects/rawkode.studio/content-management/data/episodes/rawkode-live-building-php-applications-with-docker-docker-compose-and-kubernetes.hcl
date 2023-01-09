@@ -1,4 +1,5 @@
-episode "Building PHP Applications with Docker, Docker Compose, and Kubernetes" {
+episode "rawkode-live-building-php-applications-with-docker-docker-compose-and-kubernetes" {
+  title = "Building PHP Applications with Docker, Docker Compose, and Kubernetes"
   draft = false
   show = "rawkode-live"
   live = true

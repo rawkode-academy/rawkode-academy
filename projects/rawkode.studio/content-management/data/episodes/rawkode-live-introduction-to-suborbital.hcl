@@ -1,4 +1,5 @@
-episode "Introduction to Suborbital" {
+episode "rawkode-live-introduction-to-suborbital" {
+  title = "Introduction to Suborbital"
   draft = false
   show = "rawkode-live"
   live = true

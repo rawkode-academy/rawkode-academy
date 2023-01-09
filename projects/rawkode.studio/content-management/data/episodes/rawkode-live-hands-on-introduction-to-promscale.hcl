@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to Promscale" {
+episode "rawkode-live-hands-on-introduction-to-promscale" {
+  title = "Hands-on Introduction to Promscale"
   draft = false
   show = "rawkode-live"
   live = true

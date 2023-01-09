@@ -1,4 +1,5 @@
-episode "Pulumi: Multi Language Packages" {
+episode "rawkode-live-pulumi-multi-language-packages" {
+  title = "Pulumi: Multi Language Packages"
   draft = false
   show = "rawkode-live"
   live = true

@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to sigstore" {
+episode "rawkode-live-hands-on-introduction-to-sigstore" {
+  title = "Hands-on Introduction to sigstore"
   draft = false
   show = "rawkode-live"
   live = true

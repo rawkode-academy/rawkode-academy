@@ -1,4 +1,5 @@
-show "Rawkode Live" {
+show "rawkode-live" {
+  name = "Rawkode Live"
   draft = false
   hosts = [
     "rawkode"

@@ -1,4 +1,5 @@
-episode "CKA Tutorial with Killer.sh (Part 1)" {
+episode "rawkode-live-cka-tutorial-with-killer-sh-part-1" {
+  title = "CKA Tutorial with Killer.sh (Part 1)"
   draft = false
   show = "rawkode-live"
   live = true

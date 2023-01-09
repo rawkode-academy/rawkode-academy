@@ -1,4 +1,5 @@
-episode "Introduction to Fleet, k3s, & Rancher" {
+episode "rawkode-live-introduction-to-fleet-k3s-rancher" {
+  title = "Introduction to Fleet, k3s, & Rancher"
   draft = false
   show = "rawkode-live"
   live = true

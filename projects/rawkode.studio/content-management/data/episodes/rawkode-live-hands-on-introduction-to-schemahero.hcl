@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to SchemaHero" {
+episode "rawkode-live-hands-on-introduction-to-schemahero" {
+  title = "Hands-on Introduction to SchemaHero"
   draft = false
   show = "rawkode-live"
   live = true

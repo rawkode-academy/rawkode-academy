@@ -1,4 +1,5 @@
-episode "Hands-on with Rust: Lifetimes & Ownership" {
+episode "rawkode-live-hands-on-with-rust-lifetimes-ownership" {
+  title = "Hands-on with Rust: Lifetimes & Ownership"
   draft = false
   show = "rawkode-live"
   live = true

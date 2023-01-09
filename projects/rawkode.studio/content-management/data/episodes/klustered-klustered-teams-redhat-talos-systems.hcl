@@ -1,4 +1,5 @@
-episode "Klustered Teams: RedHat & Talos Systems" {
+episode "klustered-klustered-teams-redhat-talos-systems" {
+  title = "Klustered Teams: RedHat & Talos Systems"
   draft = false
   show = "klustered"
   live = true

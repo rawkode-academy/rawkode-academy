@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to jsPolicy" {
+episode "rawkode-live-hands-on-introduction-to-jspolicy" {
+  title = "Hands-on Introduction to jsPolicy"
   draft = false
   show = "rawkode-live"
   live = true

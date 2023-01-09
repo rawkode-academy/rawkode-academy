@@ -1,7 +1,7 @@
 # Technology
 
 ```hcl
-technology "<technology name>" {
+technology "<unique id>" {
     draft = <true | false>
 
     name = "<name>"

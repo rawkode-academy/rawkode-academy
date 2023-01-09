@@ -1,4 +1,5 @@
-episode "Hands-on with Litmus 2.0" {
+episode "rawkode-live-hands-on-with-litmus-2-0" {
+  title = "Hands-on with Litmus 2.0"
   draft = false
   show = "rawkode-live"
   live = true

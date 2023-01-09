@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to K0s" {
+episode "rawkode-live-hands-on-introduction-to-k0s" {
+  title = "Hands-on Introduction to K0s"
   draft = false
   show = "rawkode-live"
   live = true

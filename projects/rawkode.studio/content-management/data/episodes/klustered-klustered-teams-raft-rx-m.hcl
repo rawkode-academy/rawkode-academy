@@ -1,4 +1,5 @@
-episode "Klustered Teams: Raft & RX-M" {
+episode "klustered-klustered-teams-raft-rx-m" {
+  title = "Klustered Teams: Raft & RX-M"
   draft = false
   show = "klustered"
   live = true

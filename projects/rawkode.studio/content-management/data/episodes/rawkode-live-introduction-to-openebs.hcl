@@ -1,4 +1,5 @@
-episode "Introduction to OpenEBS" {
+episode "rawkode-live-introduction-to-openebs" {
+  title = "Introduction to OpenEBS"
   draft = false
   show = "rawkode-live"
   live = true

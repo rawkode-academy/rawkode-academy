@@ -1,4 +1,5 @@
-episode "Klustered Teams - Ambassador Labs & Fairwinds" {
+episode "klustered-klustered-teams-ambassador-labs-fairwinds" {
+  title = "Klustered Teams - Ambassador Labs & Fairwinds"
   draft = false
   show = "klustered"
   live = true

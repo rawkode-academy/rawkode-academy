@@ -1,4 +1,5 @@
-episode "Hacking Kubernetes: CTF Edition" {
+episode "rawkode-live-hacking-kubernetes-ctf-edition" {
+  title = "Hacking Kubernetes: CTF Edition"
   draft = false
   show = "rawkode-live"
   live = true

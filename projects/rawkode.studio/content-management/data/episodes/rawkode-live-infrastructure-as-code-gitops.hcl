@@ -1,4 +1,5 @@
-episode "Infrastructure as Code & GitOps" {
+episode "rawkode-live-infrastructure-as-code-gitops" {
+  title = "Infrastructure as Code & GitOps"
   draft = false
   show = "rawkode-live"
   live = true

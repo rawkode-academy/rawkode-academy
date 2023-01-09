@@ -92,19 +92,17 @@ impl InMemoryDatabase {
     pub async fn validate_dependencies(self) -> Result<Self> {
         let mut errors: Vec<DependencyError> = vec![];
 
-        for (name, episode) in self.episodes.iter() {
-            let slug = slugify(name);
-
+        for (id, episode) in self.episodes.iter() {
             // Check if the show exists
             if !self
                 .shows
                 .iter()
-                .any(|(show_name, _)| slugify(show_name) == episode.show)
+                .any(|(show_id, _)| *show_id == episode.show)
             {
                 errors.push(DependencyError {
                     source_code: format!(
                         "Cannot find show '{}' for episode '{}'.",
-                        episode.show, slug
+                        episode.show, id
                     ),
                     model_name: "show".to_string(),
                     help: format!("Add a show with the name '{}'.", episode.show),
@@ -126,7 +124,7 @@ impl InMemoryDatabase {
                     errors.push(DependencyError {
                         source_code: format!(
                             "Cannot find person '{}' for episode '{}'.",
-                            guest, slug
+                            guest, id
                         ),
                         model_name: "person".to_string(),
                         help: format!("Add a person with the name '{}'.", guest),
@@ -149,7 +147,7 @@ impl InMemoryDatabase {
                     errors.push(DependencyError {
                         source_code: format!(
                             "Cannot find technology '{}' for episode '{}'.",
-                            technology, slug
+                            technology, id
                         ),
                         model_name: "technology".to_string(),
                         help: format!("Add a technology with the name '{}'.", technology),
@@ -158,14 +156,12 @@ impl InMemoryDatabase {
             }
         }
 
-        for (name, show) in self.shows.iter() {
-            let slug = slugify(name);
-
+        for (id, show) in self.shows.iter() {
             // Check if the person exists
             for host in show.hosts.as_ref().unwrap_or(&Vec::<String>::new()).iter() {
                 if !self.people.iter().any(|(_, person)| *host == person.github) {
                     errors.push(DependencyError {
-                        source_code: format!("Cannot find person '{}' for show '{}'.", host, slug),
+                        source_code: format!("Cannot find person '{}' for show '{}'.", host, id),
                         model_name: "person".to_string(),
                         help: format!("Add a person with the name '{}'.", host),
                     })
@@ -194,13 +190,13 @@ impl InMemoryDatabase {
     }
 
     pub async fn sync_people(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
-        // People have no ID. It's generated in the DB by GitHub Handle
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            r#"INSERT INTO people ("name", "biography", "website", "githubHandle", "twitterHandle", "youtubeHandle", "draft")"#,
+            r#"INSERT INTO people ("id", "name", "biography", "website", "githubHandle", "twitterHandle", "youtubeHandle", "draft")"#,
         );
 
-        query_builder.push_values(self.people.iter(), |mut q, (name, person)| {
-            q.push_bind(name)
+        query_builder.push_values(self.people.iter(), |mut q, (id, person)| {
+            q.push_bind(id)
+                .push_bind(&person.name)
                 .push_bind(&person.biography)
                 .push_bind(&person.website)
                 .push_bind(&person.github)
@@ -232,9 +228,9 @@ impl InMemoryDatabase {
         let mut query_builder: QueryBuilder<Postgres> =
             QueryBuilder::new(r#"INSERT INTO shows ("id", "name", "description", "draft")"#);
 
-        query_builder.push_values(self.shows.iter(), |mut q, (name, show)| {
-            q.push_bind(slugify(name))
-                .push_bind(name)
+        query_builder.push_values(self.shows.iter(), |mut q, (id, show)| {
+            q.push_bind(id)
+                .push_bind(&show.name)
                 .push_bind(&show.description)
                 .push_bind(show.draft);
         });
@@ -316,7 +312,7 @@ impl InMemoryDatabase {
             r#"INSERT INTO episodes ("id", "title", "showId", "live", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters", "draft")"#,
         );
 
-        query_builder.push_values(self.episodes.iter(), |mut q, (name, episode)| {
+        query_builder.push_values(self.episodes.iter(), |mut q, (id, episode)| {
             let links = episode
                 .links
                 .iter()
@@ -343,8 +339,8 @@ impl InMemoryDatabase {
                 })
                 .unwrap_or_default();
 
-            q.push_bind(slugify(name))
-                .push_bind(name)
+            q.push_bind(id)
+                .push_bind(&episode.title)
                 .push_bind(&episode.show)
                 .push_bind(episode.live)
                 .push_bind(episode.scheduled_for)
@@ -418,11 +414,12 @@ impl InMemoryDatabase {
             let mut query_builder =
                 QueryBuilder::new(r#"INSERT INTO episode_guests ("episodeId", "personId")"#);
 
-            query_builder.push_values(episodes_with_guests.clone(), |mut q, (name, guest)| {
-                let episode_id = slugify(name);
-
-                q.push_bind(episode_id).push_bind(guest);
-            });
+            query_builder.push_values(
+                episodes_with_guests.clone(),
+                |mut q, (episode_id, guest)| {
+                    q.push_bind(episode_id).push_bind(guest);
+                },
+            );
 
             query_builder.push(r#" ON CONFLICT ("episodeId", "personId") DO NOTHING;"#);
 
@@ -454,9 +451,7 @@ impl InMemoryDatabase {
 
             query_builder.push_values(
                 episodes_with_technologies.clone(),
-                |mut q, (name, technology)| {
-                    let episode_id = slugify(name);
-
+                |mut q, (episode_id, technology)| {
                     q.push_bind(episode_id).push_bind(technology);
                 },
             );

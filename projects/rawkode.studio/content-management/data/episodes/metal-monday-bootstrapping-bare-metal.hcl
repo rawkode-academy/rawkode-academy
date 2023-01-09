@@ -1,4 +1,5 @@
-episode "Bootstrapping Bare Metal" {
+episode "metal-monday-bootstrapping-bare-metal" {
+  title = "Bootstrapping Bare Metal"
   draft = false
   show = "metal-monday"
   live = true

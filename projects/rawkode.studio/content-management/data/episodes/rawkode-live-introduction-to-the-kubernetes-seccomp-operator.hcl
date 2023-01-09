@@ -1,4 +1,5 @@
-episode "Introduction to the Kubernetes Seccomp Operator" {
+episode "rawkode-live-introduction-to-the-kubernetes-seccomp-operator" {
+  title = "Introduction to the Kubernetes Seccomp Operator"
   draft = false
   show = "rawkode-live"
   live = true

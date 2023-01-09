@@ -1,4 +1,5 @@
-episode "Introduction to Fluentd & Fluent Bit" {
+episode "rawkode-live-introduction-to-fluentd-fluent-bit" {
+  title = "Introduction to Fluentd & Fluent Bit"
   draft = false
   show = "rawkode-live"
   live = true

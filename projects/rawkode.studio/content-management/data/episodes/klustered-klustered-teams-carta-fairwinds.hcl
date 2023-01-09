@@ -1,4 +1,5 @@
-episode "Klustered Teams: Carta & Fairwinds" {
+episode "klustered-klustered-teams-carta-fairwinds" {
+  title = "Klustered Teams: Carta & Fairwinds"
   draft = false
   show = "klustered"
   live = true

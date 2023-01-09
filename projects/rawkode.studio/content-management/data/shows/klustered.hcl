@@ -1,4 +1,5 @@
-show "Klustered" {
+show "klustered" {
+  name = "Klustered"
   draft = false
   hosts = [
     "rawkode"

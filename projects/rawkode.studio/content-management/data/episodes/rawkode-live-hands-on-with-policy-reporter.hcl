@@ -1,4 +1,5 @@
-episode "Hands-on with Policy Reporter" {
+episode "rawkode-live-hands-on-with-policy-reporter" {
+  title = "Hands-on with Policy Reporter"
   draft = false
   show = "rawkode-live"
   live = true

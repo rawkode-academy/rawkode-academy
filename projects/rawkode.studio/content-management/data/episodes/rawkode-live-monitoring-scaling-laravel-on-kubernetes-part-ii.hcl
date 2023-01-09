@@ -1,4 +1,5 @@
-episode "Monitoring & Scaling Laravel on Kubernetes (Part II)" {
+episode "rawkode-live-monitoring-scaling-laravel-on-kubernetes-part-ii" {
+  title = "Monitoring & Scaling Laravel on Kubernetes (Part II)"
   draft = false
   show = "rawkode-live"
   live = true

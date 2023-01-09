@@ -1,4 +1,5 @@
-episode "How to Write a kubectl Plugin from Scratch" {
+episode "rawkode-live-how-to-write-a-kubectl-plugin-from-scratch" {
+  title = "How to Write a kubectl Plugin from Scratch"
   draft = false
   show = "rawkode-live"
   live = true

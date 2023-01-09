@@ -1,4 +1,5 @@
-episode "Hands-on Autoscaling with Kubernetes" {
+episode "rawkode-live-hands-on-autoscaling-with-kubernetes" {
+  title = "Hands-on Autoscaling with Kubernetes"
   draft = false
   show = "rawkode-live"
   live = true

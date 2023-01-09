@@ -1,4 +1,5 @@
-episode "Laravel on Kubernetes: Into Production" {
+episode "rawkode-live-laravel-on-kubernetes-into-production" {
+  title = "Laravel on Kubernetes: Into Production"
   draft = false
   show = "rawkode-live"
   live = true

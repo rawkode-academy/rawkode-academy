@@ -1,4 +1,5 @@
-episode "Kubernetes Services" {
+episode "rawkode-live-kubernetes-services" {
+  title = "Kubernetes Services"
   draft = false
   show = "rawkode-live"
   live = true

@@ -1,4 +1,5 @@
-episode "Example Mapping by Example" {
+episode "rawkode-live-example-mapping-by-example" {
+  title = "Example Mapping by Example"
   draft = false
   show = "rawkode-live"
   live = true

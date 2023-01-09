@@ -1,4 +1,5 @@
-episode "Playing with QuestDB on Kubernetes" {
+episode "rawkode-live-playing-with-questdb-on-kubernetes" {
+  title = "Playing with QuestDB on Kubernetes"
   draft = false
   show = "rawkode-live"
   live = true

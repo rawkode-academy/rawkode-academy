@@ -1,4 +1,5 @@
-episode "Community vs. Rawkode" {
+episode "klustered-community-vs-rawkode" {
+  title = "Community vs. Rawkode"
   draft = false
   show = "klustered"
   live = true

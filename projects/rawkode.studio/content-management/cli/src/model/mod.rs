@@ -1,14 +1,9 @@
 use chrono::Duration;
-use diacritics::remove_diacritics;
-
 use hhmmss::Hhmmss;
 use lazy_static::lazy_static;
 use miette::Result;
-
 use regex::Regex;
 use serde::Deserialize;
-
-use unicode_normalization::UnicodeNormalization;
 
 pub mod episode;
 pub mod error;
@@ -23,10 +18,6 @@ pub use show::*;
 pub use technology::*;
 
 lazy_static! {
-    static ref QUOTES: Regex = Regex::new(r#"["']+"#).unwrap();
-    static ref NON_ALPHANUMERIC: Regex = Regex::new(r#"[^a-z0-9]+"#).unwrap();
-    static ref LEADING_DASHES: Regex = Regex::new(r#"^-+"#).unwrap();
-    static ref TRAILING_DASHES: Regex = Regex::new(r#"-+$"#).unwrap();
     static ref DURATION: Regex = Regex::new(r#"([0-9]{1,2}):([0-9]{1,2}):?([0-9]{1,2})?"#).unwrap();
 }
 
@@ -79,48 +70,4 @@ where
     S: serde::Serializer,
 {
     serializer.serialize_str(duration.hhmmss().as_str())
-}
-
-pub(crate) fn slugify(value: &str) -> String {
-    let slug = value.nfd().collect::<String>();
-    let slug = remove_diacritics(&slug);
-    let slug = slug.to_lowercase();
-
-    let slug = QUOTES.replace_all(&slug, "").to_string();
-    let slug = NON_ALPHANUMERIC.replace_all(&slug, "-").to_string();
-    let slug = LEADING_DASHES.replace_all(&slug, "").to_string();
-    let slug = TRAILING_DASHES.replace_all(&slug, "").to_string();
-
-    slug
-}
-
-#[cfg(test)]
-pub mod tests {
-    use super::*;
-    use pretty_assertions::assert_eq;
-
-    #[test]
-    fn test_slugify() {
-        assert_eq!(slugify("Hello World"), "hello-world");
-
-        assert_eq!(
-            slugify("Part 2 - Tutorial 1: Installation"),
-            "part-2-tutorial-1-installation"
-        );
-
-        assert_eq!(
-            slugify("Infrastructure as Code & GitOps"),
-            "infrastructure-as-code-gitops"
-        );
-
-        assert_eq!(
-            slugify("Introduction to Prometheus, PromQL, & PromLens"),
-            "introduction-to-prometheus-promql-promlens"
-        );
-
-        assert_eq!(
-            slugify("Live Debugging the Changelog's Production Kubernetes"),
-            "live-debugging-the-changelogs-production-kubernetes"
-        );
-    }
 }

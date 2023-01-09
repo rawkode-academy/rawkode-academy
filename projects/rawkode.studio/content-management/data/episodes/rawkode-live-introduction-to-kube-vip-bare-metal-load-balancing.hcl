@@ -1,4 +1,5 @@
-episode "Introduction to kube-vip: Bare Metal Load Balancing" {
+episode "rawkode-live-introduction-to-kube-vip-bare-metal-load-balancing" {
+  title = "Introduction to kube-vip: Bare Metal Load Balancing"
   draft = false
   show = "rawkode-live"
   live = true

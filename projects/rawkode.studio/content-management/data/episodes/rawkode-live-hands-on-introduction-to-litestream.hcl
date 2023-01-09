@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to Litestream" {
+episode "rawkode-live-hands-on-introduction-to-litestream" {
+  title = "Hands-on Introduction to Litestream"
   draft = false
   show = "rawkode-live"
   live = true

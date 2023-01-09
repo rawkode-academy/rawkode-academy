@@ -1,4 +1,5 @@
-episode "Automating Equinix Metal with Pulumi" {
+episode "rawkode-live-automating-equinix-metal-with-pulumi" {
+  title = "Automating Equinix Metal with Pulumi"
   draft = false
   show = "rawkode-live"
   live = true

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Person {
+    pub name: String,
     pub draft: bool,
     pub github: String,
 

@@ -33,6 +33,7 @@ pub struct Chapter {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Episode {
+    pub title: String,
     pub draft: bool,
     pub show: String,
     pub live: bool,

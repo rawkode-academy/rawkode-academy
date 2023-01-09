@@ -1,4 +1,5 @@
-episode "Introduction to Keptn (Part I)" {
+episode "rawkode-live-introduction-to-keptn-part-i" {
+  title = "Introduction to Keptn (Part I)"
   draft = false
   show = "rawkode-live"
   live = true

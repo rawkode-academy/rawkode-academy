@@ -1,4 +1,5 @@
-episode "Hands-on with Pipedream" {
+episode "rawkode-live-hands-on-with-pipedream" {
+  title = "Hands-on with Pipedream"
   draft = false
   show = "rawkode-live"
   live = true

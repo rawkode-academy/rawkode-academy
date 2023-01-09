@@ -1,4 +1,5 @@
-episode "22. Borko Vs. Bojan" {
+episode "klustered-22-borko-vs-bojan" {
+  title = "22. Borko Vs. Bojan"
   draft = false
   show = "klustered"
   live = true

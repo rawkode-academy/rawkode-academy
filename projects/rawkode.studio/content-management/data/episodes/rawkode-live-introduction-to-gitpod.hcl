@@ -1,4 +1,5 @@
-episode "Introduction to Gitpod" {
+episode "rawkode-live-introduction-to-gitpod" {
+  title = "Introduction to Gitpod"
   draft = false
   show = "rawkode-live"
   live = true

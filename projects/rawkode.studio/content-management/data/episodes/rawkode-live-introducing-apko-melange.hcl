@@ -1,4 +1,5 @@
-episode "Introducing apko & melange" {
+episode "rawkode-live-introducing-apko-melange" {
+  title = "Introducing apko & melange"
   draft = false
   show = "rawkode-live"
   live = true

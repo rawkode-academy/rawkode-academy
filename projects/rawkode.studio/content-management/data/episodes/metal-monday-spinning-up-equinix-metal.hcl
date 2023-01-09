@@ -1,4 +1,5 @@
-episode "Spinning up Equinix Metal" {
+episode "metal-monday-spinning-up-equinix-metal" {
+  title = "Spinning up Equinix Metal"
   draft = false
   show = "metal-monday"
   live = true

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Show {
+    pub name: String,
     pub draft: bool,
 
     #[serde(skip_serializing_if = "Option::is_none")]

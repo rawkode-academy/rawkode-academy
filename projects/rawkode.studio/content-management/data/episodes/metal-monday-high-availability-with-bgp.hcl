@@ -1,4 +1,5 @@
-episode "High Availability with BGP" {
+episode "metal-monday-high-availability-with-bgp" {
+  title = "High Availability with BGP"
   draft = false
   show = "metal-monday"
   live = true

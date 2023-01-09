@@ -1,4 +1,5 @@
-episode "Docker, Kubernetes, & PHP: Laravel Edition (Part III)" {
+episode "rawkode-live-docker-kubernetes-php-laravel-edition-part-iii" {
+  title = "Docker, Kubernetes, & PHP: Laravel Edition (Part III)"
   draft = false
   show = "rawkode-live"
   live = true

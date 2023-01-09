@@ -1,4 +1,5 @@
-episode "Introduction to CoreDNS" {
+episode "rawkode-live-introduction-to-coredns" {
+  title = "Introduction to CoreDNS"
   draft = false
   show = "rawkode-live"
   live = true

@@ -1,4 +1,5 @@
-episode "Kubernetes Security Lab" {
+episode "rawkode-live-kubernetes-security-lab" {
+  title = "Kubernetes Security Lab"
   draft = false
   show = "rawkode-live"
   live = true

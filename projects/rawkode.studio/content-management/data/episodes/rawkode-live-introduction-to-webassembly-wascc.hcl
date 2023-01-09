@@ -1,4 +1,5 @@
-episode "Introduction to WebAssembly & waSCC" {
+episode "rawkode-live-introduction-to-webassembly-wascc" {
+  title = "Introduction to WebAssembly & waSCC"
   draft = false
   show = "rawkode-live"
   live = true

@@ -1,4 +1,5 @@
-episode "Klustered Teams: Container Solutions & Civo Cloud" {
+episode "klustered-klustered-teams-container-solutions-civo-cloud" {
+  title = "Klustered Teams: Container Solutions & Civo Cloud"
   draft = false
   show = "klustered"
   live = true

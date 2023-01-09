@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to Waypoint" {
+episode "rawkode-live-hands-on-introduction-to-waypoint" {
+  title = "Hands-on Introduction to Waypoint"
   draft = false
   show = "rawkode-live"
   live = true

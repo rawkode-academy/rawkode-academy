@@ -1,4 +1,5 @@
-episode "Introduction to GitOps Toolkit" {
+episode "rawkode-live-introduction-to-gitops-toolkit" {
+  title = "Introduction to GitOps Toolkit"
   draft = false
   show = "rawkode-live"
   live = true

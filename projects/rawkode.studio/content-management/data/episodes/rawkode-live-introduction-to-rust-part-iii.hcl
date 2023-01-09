@@ -1,4 +1,5 @@
-episode "Introduction to Rust (Part III)" {
+episode "rawkode-live-introduction-to-rust-part-iii" {
+  title = "Introduction to Rust (Part III)"
   draft = false
   show = "rawkode-live"
   live = true

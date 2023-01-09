@@ -1,4 +1,5 @@
-episode "Kubernetes Cluster API for Equinix Metal (Formely Packet)" {
+episode "rawkode-live-kubernetes-cluster-api-for-equinix-metal-formely-packet" {
+  title = "Kubernetes Cluster API for Equinix Metal (Formely Packet)"
   draft = false
   show = "rawkode-live"
   live = true

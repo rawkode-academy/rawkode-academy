@@ -1,4 +1,5 @@
-episode "Introduction to Open Policy Agent" {
+episode "rawkode-live-introduction-to-open-policy-agent" {
+  title = "Introduction to Open Policy Agent"
   draft = false
   show = "rawkode-live"
   live = true

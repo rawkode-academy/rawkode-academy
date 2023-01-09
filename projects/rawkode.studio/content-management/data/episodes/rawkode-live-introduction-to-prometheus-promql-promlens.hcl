@@ -1,4 +1,5 @@
-episode "Introduction to Prometheus, PromQL, & PromLens" {
+episode "rawkode-live-introduction-to-prometheus-promql-promlens" {
+  title = "Introduction to Prometheus, PromQL, & PromLens"
   draft = false
   show = "rawkode-live"
   live = true

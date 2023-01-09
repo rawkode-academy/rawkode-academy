@@ -1,3 +1,4 @@
-show "Metal Monday" {
+show "metal-monday" {
+  name = "Metal Monday"
   draft = false
 }

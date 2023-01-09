@@ -1,4 +1,5 @@
-episode "Managing Linux in Real Time with SaltStack" {
+episode "rawkode-live-managing-linux-in-real-time-with-saltstack" {
+  title = "Managing Linux in Real Time with SaltStack"
   draft = false
   show = "rawkode-live"
   live = true

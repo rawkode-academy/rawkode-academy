@@ -1,4 +1,5 @@
-episode "Recovering Your Packet Servers with Serial Over SSH (SOS)" {
+episode "rawkode-live-recovering-your-packet-servers-with-serial-over-ssh-sos" {
+  title = "Recovering Your Packet Servers with Serial Over SSH (SOS)"
   draft = false
   show = "rawkode-live"
   live = true

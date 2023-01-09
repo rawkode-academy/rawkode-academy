@@ -1,4 +1,5 @@
-episode "Introduction to the OperatorSDK" {
+episode "rawkode-live-introduction-to-the-operatorsdk" {
+  title = "Introduction to the OperatorSDK"
   draft = false
   show = "rawkode-live"
   live = true

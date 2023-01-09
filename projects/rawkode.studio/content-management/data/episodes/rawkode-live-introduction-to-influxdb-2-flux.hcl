@@ -1,4 +1,5 @@
-episode "Introduction to InfluxDB 2 & Flux" {
+episode "rawkode-live-introduction-to-influxdb-2-flux" {
+  title = "Introduction to InfluxDB 2 & Flux"
   draft = false
   show = "rawkode-live"
   live = true

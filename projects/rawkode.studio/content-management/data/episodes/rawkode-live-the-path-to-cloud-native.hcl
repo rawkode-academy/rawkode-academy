@@ -1,4 +1,5 @@
-episode "The Path to Cloud Native" {
+episode "rawkode-live-the-path-to-cloud-native" {
+  title = "The Path to Cloud Native"
   draft = false
   show = "rawkode-live"
   live = true

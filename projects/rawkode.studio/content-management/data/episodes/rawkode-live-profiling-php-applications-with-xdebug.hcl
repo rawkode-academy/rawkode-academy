@@ -1,4 +1,5 @@
-episode "Profiling PHP Applications with Xdebug" {
+episode "rawkode-live-profiling-php-applications-with-xdebug" {
+  title = "Profiling PHP Applications with Xdebug"
   draft = false
   show = "rawkode-live"
   live = true

@@ -1,4 +1,5 @@
-episode "Introduction to Cilium (Part II)" {
+episode "rawkode-live-introduction-to-cilium-part-ii" {
+  title = "Introduction to Cilium (Part II)"
   draft = false
   show = "rawkode-live"
   live = true

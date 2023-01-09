@@ -1,4 +1,5 @@
-episode "Building Custom Images for Packet" {
+episode "rawkode-live-building-custom-images-for-packet" {
+  title = "Building Custom Images for Packet"
   draft = false
   show = "rawkode-live"
   live = true

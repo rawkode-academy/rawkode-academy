@@ -1,4 +1,5 @@
-episode "Klustered (Part III)" {
+episode "klustered-klustered-part-iii" {
+  title = "Klustered (Part III)"
   draft = false
   show = "klustered"
   live = true

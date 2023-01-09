@@ -1,4 +1,5 @@
-episode "Introduction to Meilisearch" {
+episode "rawkode-live-introduction-to-meilisearch" {
+  title = "Introduction to Meilisearch"
   draft = false
   show = "rawkode-live"
   live = true

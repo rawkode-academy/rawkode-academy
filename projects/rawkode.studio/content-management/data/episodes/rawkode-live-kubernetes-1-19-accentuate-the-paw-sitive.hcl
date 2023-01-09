@@ -1,4 +1,5 @@
-episode "Kubernetes 1.19: Accentuate the Paw-sitive" {
+episode "rawkode-live-kubernetes-1-19-accentuate-the-paw-sitive" {
+  title = "Kubernetes 1.19: Accentuate the Paw-sitive"
   draft = false
   show = "rawkode-live"
   live = true

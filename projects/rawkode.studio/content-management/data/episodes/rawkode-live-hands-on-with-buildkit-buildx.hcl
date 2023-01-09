@@ -1,4 +1,5 @@
-episode "Hands-on with BuildKit & buildx" {
+episode "rawkode-live-hands-on-with-buildkit-buildx" {
+  title = "Hands-on with BuildKit & buildx"
   draft = false
   show = "rawkode-live"
   live = true

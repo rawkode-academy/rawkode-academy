@@ -1,4 +1,5 @@
-episode "Introduction to Timescale" {
+episode "rawkode-live-introduction-to-timescale" {
+  title = "Introduction to Timescale"
   draft = false
   show = "rawkode-live"
   live = true

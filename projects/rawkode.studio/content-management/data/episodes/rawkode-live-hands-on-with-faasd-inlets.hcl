@@ -1,4 +1,5 @@
-episode "Hands-on with faasd & Inlets" {
+episode "rawkode-live-hands-on-with-faasd-inlets" {
+  title = "Hands-on with faasd & Inlets"
   draft = false
   show = "rawkode-live"
   live = true

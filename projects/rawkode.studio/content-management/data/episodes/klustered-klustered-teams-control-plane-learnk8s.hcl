@@ -1,4 +1,5 @@
-episode "Klustered Teams: Control Plane & Learnk8s" {
+episode "klustered-klustered-teams-control-plane-learnk8s" {
+  title = "Klustered Teams: Control Plane & Learnk8s"
   draft = false
   show = "klustered"
   live = true

@@ -1,4 +1,5 @@
-episode "Live Debugging the Changelog's Production Kubernetes" {
+episode "rawkode-live-live-debugging-the-changelogs-production-kubernetes" {
+  title = "Live Debugging the Changelog's Production Kubernetes"
   draft = false
   show = "rawkode-live"
   live = true

@@ -1,4 +1,5 @@
-episode "Buiding a WebAssembly GraphQL Client" {
+episode "rawkode-live-buiding-a-webassembly-graphql-client" {
+  title = "Buiding a WebAssembly GraphQL Client"
   draft = false
   show = "rawkode-live"
   live = true

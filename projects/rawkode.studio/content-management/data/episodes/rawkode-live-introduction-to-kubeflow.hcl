@@ -1,4 +1,5 @@
-episode "Introduction to Kubeflow" {
+episode "rawkode-live-introduction-to-kubeflow" {
+  title = "Introduction to Kubeflow"
   draft = false
   show = "rawkode-live"
   live = true

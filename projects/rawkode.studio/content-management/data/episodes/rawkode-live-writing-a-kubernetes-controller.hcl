@@ -1,4 +1,5 @@
-episode "Writing a Kubernetes Controller" {
+episode "rawkode-live-writing-a-kubernetes-controller" {
+  title = "Writing a Kubernetes Controller"
   draft = false
   show = "rawkode-live"
   live = true

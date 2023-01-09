@@ -1,4 +1,5 @@
-episode "Introduction to Dgraph" {
+episode "rawkode-live-introduction-to-dgraph" {
+  title = "Introduction to Dgraph"
   draft = false
   show = "rawkode-live"
   live = true

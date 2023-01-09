@@ -1,4 +1,5 @@
-episode "Should we still be using docker-compose for local development?" {
+episode "rawkode-live-should-we-still-be-using-docker-compose-for-local-development" {
+  title = "Should we still be using docker-compose for local development?"
   draft = false
   show = "rawkode-live"
   live = true

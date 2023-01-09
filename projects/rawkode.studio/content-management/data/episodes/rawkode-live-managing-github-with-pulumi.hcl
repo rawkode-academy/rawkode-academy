@@ -1,4 +1,5 @@
-episode "Managing GitHub with Pulumi" {
+episode "rawkode-live-managing-github-with-pulumi" {
+  title = "Managing GitHub with Pulumi"
   draft = false
   show = "rawkode-live"
   live = true

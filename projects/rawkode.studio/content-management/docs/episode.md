@@ -1,7 +1,8 @@
 # Episode
 
 ```hcl
-episode "<episode name>" {
+episode "<unique id>" {
+    title = "<episode title>"
     draft = <true | false>
     show = "<id of a referenced show>"
     live = <true | false>

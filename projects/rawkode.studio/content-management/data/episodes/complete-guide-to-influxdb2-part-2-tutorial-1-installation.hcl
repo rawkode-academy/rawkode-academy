@@ -1,4 +1,5 @@
-episode "Part 2 - Tutorial 1: Installation" {
+episode "complete-guide-to-influxdb2-part-2-tutorial-1-installation" {
+  title = "Part 2 - Tutorial 1: Installation"
   draft = false
   show = "complete-guide-to-influxdb-2"
   live = true

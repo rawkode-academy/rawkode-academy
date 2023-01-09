@@ -1,4 +1,5 @@
-episode "The Newcomers Guide to Kubernetes" {
+episode "rawkode-live-the-newcomers-guide-to-kubernetes" {
+  title = "The Newcomers Guide to Kubernetes"
   draft = false
   show = "rawkode-live"
   live = true

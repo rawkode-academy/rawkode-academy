@@ -1,4 +1,5 @@
-episode "Klustered Teams - Giant Swarm & Wildlife Studios" {
+episode "klustered-klustered-teams-giant-swarm-wildlife-studios" {
+  title = "Klustered Teams - Giant Swarm & Wildlife Studios"
   draft = false
   show = "klustered"
   live = true

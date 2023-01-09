@@ -1,4 +1,5 @@
-episode "Klustered Teams: DigitalOcean & Skyscanner" {
+episode "klustered-klustered-teams-digitalocean-skyscanner" {
+  title = "Klustered Teams: DigitalOcean & Skyscanner"
   draft = false
   show = "klustered"
   live = true

@@ -1,4 +1,5 @@
-episode "Introduction to OpenTelemetry" {
+episode "rawkode-live-introduction-to-opentelemetry" {
+  title = "Introduction to OpenTelemetry"
   draft = false
   show = "rawkode-live"
   live = true

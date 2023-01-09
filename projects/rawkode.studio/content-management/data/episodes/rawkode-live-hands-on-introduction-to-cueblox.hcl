@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to CueBlox" {
+episode "rawkode-live-hands-on-introduction-to-cueblox" {
+  title = "Hands-on Introduction to CueBlox"
   draft = false
   show = "rawkode-live"
   live = true

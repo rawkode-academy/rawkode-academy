@@ -1,4 +1,5 @@
-episode "Introduction to Grafana" {
+episode "rawkode-live-introduction-to-grafana" {
+  title = "Introduction to Grafana"
   draft = false
   show = "rawkode-live"
   live = true

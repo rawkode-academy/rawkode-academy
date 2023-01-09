@@ -1,4 +1,5 @@
-episode "Hands-on with Rust: Async / Await" {
+episode "rawkode-live-hands-on-with-rust-async-await" {
+  title = "Hands-on with Rust: Async / Await"
   draft = false
   show = "rawkode-live"
   live = true

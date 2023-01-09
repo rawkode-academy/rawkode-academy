@@ -1,4 +1,5 @@
-episode "Hands-on Introduction to Telepresence" {
+episode "rawkode-live-hands-on-introduction-to-telepresence" {
+  title = "Hands-on Introduction to Telepresence"
   draft = false
   show = "rawkode-live"
   live = true

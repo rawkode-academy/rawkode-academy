@@ -1,4 +1,5 @@
-episode "IPv6 ONLY Kubernetes Clusters" {
+episode "rawkode-live-ipv6-only-kubernetes-clusters" {
+  title = "IPv6 ONLY Kubernetes Clusters"
   draft = false
   show = "rawkode-live"
   live = true
