@@ -1,5 +1,6 @@
 packages:
   - "./dagger"
+  - "./projects/rawkode.academy/website"
   - "./projects/rawkode.cloud/dns"
   - "./projects/rawkode.cloud/google-cloud"
   - "./projects/rawkode.cloud/teleport"
