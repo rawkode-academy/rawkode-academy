@@ -1,9 +1,8 @@
 {
   "name": "@rawkode.academy/dagger",
-  "type": "module",
   "version": "0.0.1",
   "license": "MIT",
-  "bin": "index.js",
+  "bin": "index.mts",
   "devDependencies": {
     "@dagger.io/dagger": "^0.3.0",
     "@types/inquirer": "^9.0.3",
