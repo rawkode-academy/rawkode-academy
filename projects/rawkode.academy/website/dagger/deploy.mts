@@ -23,7 +23,7 @@ export const deploy = async (client: Client) => {
 
 	const secrets = await resolveSecrets([
 		{
-			vault: "rawkode.academy",
+			vault: "sa.rawkode.academy",
 			item: "website",
 			key: "firebase-token",
 			as: "FIREBASE_TOKEN",
