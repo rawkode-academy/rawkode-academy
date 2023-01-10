@@ -1,12 +1,13 @@
 import Client from "@dagger.io/dagger";
-import { DaggerCommand, SecretApi } from "@rawkode.academy/dagger/index.js";
+import { DaggerCommand } from "@rawkode.academy/dagger/index.js";
+import { resolveSecrets } from "@rawkode.academy/dagger/secrets/index.mjs";
 import { getSourceDir } from "@rawkode.academy/dagger/utils/index.js";
 import { PullRequest } from "@rawkode.academy/dagger/github/index.js";
 import { Container } from "@dagger.io/dagger/dist/api/client.gen.js";
 import { Octokit } from "@octokit/rest";
 import { createActionAuth } from "@octokit/auth-action";
 
-export const deploy = async (client: Client, getSecrets: SecretApi) => {
+export const deploy = async (client: Client) => {
 	const pullRequestRef = await client
 		.host()
 		.envVariable("GITHUB_HEAD_REF")
@@ -20,11 +21,21 @@ export const deploy = async (client: Client, getSecrets: SecretApi) => {
 
 	const sourcePath = getSourceDir(`${import.meta.url}/..`);
 
-	const secrets = await getSecrets("website", "production", ["FIREBASE_TOKEN"]);
+	const secrets = await resolveSecrets([
+		{
+			vault: "rawkode.academy",
+			item: "website",
+			key: "firebase-token",
+			as: "FIREBASE_TOKEN",
+		},
+	]);
 
-	const npmInstallFiles = await client.host().directory(sourcePath, {
-		include: ["package.json", "package-lock.json"],
-	});
+	const npmInstallFiles = await client
+		.host()
+		.directory(sourcePath, {
+			include: ["package.json", "package-lock.json"],
+		})
+		.id();
 
 	// const npmInstallCache = await client.cacheVolume("npm-install-cache").id();
 
@@ -38,9 +49,12 @@ export const deploy = async (client: Client, getSecrets: SecretApi) => {
 		.withExec(["corepack", "prepare", "pnpm@latest", "--activate"])
 		.withExec(["pnpm", "install"]);
 
-	const sourceDirectory = await client.host().directory(sourcePath, {
-		exclude: [".git", "node_modules"],
-	});
+	const sourceDirectory = await client
+		.host()
+		.directory(sourcePath, {
+			exclude: [".git", "node_modules"],
+		})
+		.id();
 
 	const build = await client
 		.container()
@@ -109,7 +123,7 @@ export const deploy = async (client: Client, getSecrets: SecretApi) => {
 
 const command: DaggerCommand = {
 	name: "deploy",
-	description: "Deploy",
+	description: "Build & Deploy Rawkode Academy Website",
 	execute: deploy,
 };
 export default command;
