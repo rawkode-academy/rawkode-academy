@@ -1,6 +1,14 @@
 import { secret } from "@pulumi/pulumi";
 import { Infrastructure } from "./infrastructure";
 import { Platform } from "./platform";
+import { strict } from "assert";
+
+const requireEnvironmentVariable = (name: string): string => {
+	const value = process.env[name];
+	strict.ok(value, `The "${name}" environment variable is required`);
+
+	return value;
+};
 
 const infrastructure = new Infrastructure();
 
@@ -33,6 +41,8 @@ platform
 		directory: ".",
 		environment: {},
 		secrets: {
-			dopplerToken: secret(process.env.STUDIO_DOPPLER_SERVICE_TOKEN || ""),
+			dopplerToken: secret(
+				requireEnvironmentVariable("STUDIO_DOPPLER_SERVICE_TOKEN"),
+			),
 		},
 	});
