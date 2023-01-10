@@ -22,14 +22,9 @@ export const deploy = async (client: Client, getSecrets: SecretApi) => {
 
 	const secrets = await getSecrets("website", "production", ["FIREBASE_TOKEN"]);
 
-	console.debug(secrets);
-
-	const npmInstallFiles = await client
-		.host()
-		.directory(sourcePath, {
-			include: ["package.json", "package-lock.json"],
-		})
-		.id();
+	const npmInstallFiles = await client.host().directory(sourcePath, {
+		include: ["package.json", "package-lock.json"],
+	});
 
 	// const npmInstallCache = await client.cacheVolume("npm-install-cache").id();
 
@@ -43,12 +38,9 @@ export const deploy = async (client: Client, getSecrets: SecretApi) => {
 		.withExec(["corepack", "prepare", "pnpm@latest", "--activate"])
 		.withExec(["pnpm", "install"]);
 
-	const sourceDirectory = await client
-		.host()
-		.directory(sourcePath, {
-			exclude: [".git", "node_modules"],
-		})
-		.id();
+	const sourceDirectory = await client.host().directory(sourcePath, {
+		exclude: [".git", "node_modules"],
+	});
 
 	const build = await client
 		.container()
