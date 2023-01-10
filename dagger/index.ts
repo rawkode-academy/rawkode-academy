@@ -42,9 +42,7 @@ dagger
 	.version("0.0.1")
 	.option("-L, --log-all", "Log All Output", false);
 
-const globalOptions = dagger.optsWithGlobals();
-
-console.log(globalOptions);
+const globalOptions = dagger.parse(process.argv).optsWithGlobals();
 
 connect(
 	async (client: Client) => {
@@ -142,7 +140,7 @@ connect(
 		await dagger.parseAsync();
 	},
 	{
-		LogOutput: globalOptions.logAll ? process.stdout : process.stdout,
+		LogOutput: globalOptions.logAll ? process.stdout : undefined,
 	},
 );
 
