@@ -4,7 +4,7 @@
   "license": "MIT",
   "bin": "index.mts",
   "devDependencies": {
-    "@dagger.io/dagger": "^0.3.0",
+    "@dagger.io/dagger": "^0.3.1",
     "@types/inquirer": "^9.0.3",
     "@types/qs": "^6.9.7",
     "axios": "^1.2.1",

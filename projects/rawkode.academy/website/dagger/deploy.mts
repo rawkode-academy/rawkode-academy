@@ -1,22 +1,19 @@
 import Client from "@dagger.io/dagger";
-import { DaggerCommand } from "@rawkode.academy/dagger/index.js";
+import { DaggerCommand } from "@rawkode.academy/dagger/index.mjs";
 import { resolveSecrets } from "@rawkode.academy/dagger/secrets/index.mjs";
-import { getSourceDir } from "@rawkode.academy/dagger/utils/index.js";
+import { getSourceDir } from "@rawkode.academy/dagger/utils/index.mjs";
 import { PullRequest } from "@rawkode.academy/dagger/github/index.js";
-import { Container } from "@dagger.io/dagger/dist/api/client.gen.js";
 import { Octokit } from "@octokit/rest";
 import { createActionAuth } from "@octokit/auth-action";
+import { Container } from "@dagger.io/dagger/dist/api/client.gen.js";
 
-export const deploy = async (client: Client) => {
-	const pullRequestRef = await client
-		.host()
-		.envVariable("GITHUB_HEAD_REF")
-		.value();
+export const execute = async (client: Client): Promise<void> => {
+	const pullRequestRef = process.env["GITHUB_HEAD_REF"] || "";
 
 	const pullRequest: PullRequest = {
 		isIt: pullRequestRef !== "",
 		headRef: pullRequestRef,
-		ref: await client.host().envVariable("GITHUB_REF").value(),
+		ref: process.env["GITHUB_REF"] || "",
 	};
 
 	const sourcePath = getSourceDir(`${import.meta.url}/..`);
@@ -30,33 +27,24 @@ export const deploy = async (client: Client) => {
 		},
 	]);
 
-	const npmInstallFiles = await client
-		.host()
-		.directory(sourcePath, {
-			include: ["package.json", "package-lock.json"],
-		})
-		.id();
+	const npmInstallFiles = client.host().directory(sourcePath, {
+		include: ["package.json", "package-lock.json"],
+	});
 
-	// const npmInstallCache = await client.cacheVolume("npm-install-cache").id();
-
-	const npmInstall = await client
+	const npmInstall = client
 		.container()
 		.from("node:lts-slim")
 		.withMountedDirectory("/app", npmInstallFiles)
-		// .withMountedCache("/app/node_modules", npmInstallCache)
 		.withWorkdir("/app")
 		.withExec(["corepack", "enable"])
 		.withExec(["corepack", "prepare", "pnpm@latest", "--activate"])
 		.withExec(["pnpm", "install"]);
 
-	const sourceDirectory = await client
-		.host()
-		.directory(sourcePath, {
-			exclude: [".git", "node_modules"],
-		})
-		.id();
+	const sourceDirectory = client.host().directory(sourcePath, {
+		exclude: [".git", "node_modules"],
+	});
 
-	const build = await client
+	const build = client
 		.container()
 		.from("node:lts-slim")
 		.withMountedDirectory("/app", sourceDirectory)
@@ -72,7 +60,7 @@ export const deploy = async (client: Client) => {
 	let result: Container;
 
 	if (pullRequest.isIt === true) {
-		result = await build
+		result = build
 			.withNewFile("/gcloud.json", {
 				contents: secrets["FIREBASE_TOKEN"],
 			})
@@ -83,7 +71,7 @@ export const deploy = async (client: Client) => {
 				pullRequest.headRef,
 			]);
 	} else {
-		result = await build
+		result = build
 			.withNewFile("/gcloud.json", {
 				contents: secrets["FIREBASE_TOKEN"],
 			})
@@ -124,6 +112,6 @@ export const deploy = async (client: Client) => {
 const command: DaggerCommand = {
 	name: "deploy",
 	description: "Build & Deploy Rawkode Academy Website",
-	execute: deploy,
+	execute,
 };
 export default command;
