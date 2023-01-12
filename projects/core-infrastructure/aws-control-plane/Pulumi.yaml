@@ -1,4 +1,0 @@
-name: aws-control-plane
-description: AWS Control Plane
-runtime: nodejs
-main: src/index.ts
