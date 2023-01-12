@@ -1,0 +1,2 @@
+config:
+  pulumi:disable-default-providers: ["*"]

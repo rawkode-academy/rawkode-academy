@@ -20,14 +20,18 @@ dagger
 
 const globalOptions = dagger.parse(process.argv).optsWithGlobals();
 
+const isDaggerCommand = (arg: any): arg is DaggerCommand => arg;
+
 connect(
 	async (client: Client) => {
 		const commands = findLoadCommands();
 		const localCommands: DaggerCommand[] = [];
 
 		for (const command of commands) {
-			const { default: localCommand }: { default: DaggerCommand } =
-				await import(command);
+			const { default: localCommand } = await import(command);
+			if (!isDaggerCommand(localCommand)) {
+				continue;
+			}
 
 			localCommands.push(localCommand);
 

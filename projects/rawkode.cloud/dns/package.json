@@ -1,10 +1,10 @@
 {
   "name": "@rawkode.academy/dns",
+  "private": true,
   "type": "module",
   "devDependencies": {
     "@rawkode.academy/dagger": "workspace:*",
-    "@rawkode.academy/google-cloud": "workspace:*",
-    "@dagger.io/dagger": "^0.3.0",
+    "@dagger.io/dagger": "^0.3.1",
     "ora": "^6.1.2"
   },
   "dependencies": {

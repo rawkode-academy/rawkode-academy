@@ -1,0 +1,18 @@
+{
+  "name": "@p4x-639/aws-control-plane",
+  "private": true,
+  "devDependencies": {
+    "@dagger.io/dagger": "^0.3.1",
+    "@rawkode.academy/dagger": "workspace:^0.0.1"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^5.27.0",
+    "@pulumi/awsx": "^1.0.1",
+    "@pulumi/aws-native": "^0.8.0",
+    "@pulumi/pulumi": "^3.0.0",
+    "@types/node": "^14",
+    "rome": "^11.0.0",
+    "ts-node": "10.9.1",
+    "typescript": "4.9.4"
+  }
+}
