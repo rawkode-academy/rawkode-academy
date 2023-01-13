@@ -22,14 +22,16 @@ const setup = (client: Client, config: ConcreteConfig): Container => {
 		.host()
 		.directory(`${getSourceDir(import.meta.url)}/scripts`);
 
+	const pulumiCache = client.cacheVolume("pulumi");
 	const cacheDir = client.cacheVolume("pnpm");
 
 	let pulumi = client
 		.container()
 		.from(`pulumi/pulumi-${config.runtime}:${config.version}`)
+		.withMountedCache("/root/.pulumi", pulumiCache)
+		.withMountedCache("/work/.pnpm-store", cacheDir)
 		.withMountedDirectory("/entrypoint", entrypointDir)
 		.withMountedDirectory("/work", config.programDirectory)
-		.withMountedCache("/work/.pnpm-store", cacheDir)
 		.withWorkdir("/work")
 		.withEnvVariable("PULUMI_RUNTIME", config.runtime)
 		.withEnvVariable("PULUMI_STACK", config.stack)

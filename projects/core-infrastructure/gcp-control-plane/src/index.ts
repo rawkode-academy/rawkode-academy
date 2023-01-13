@@ -13,4 +13,5 @@ controlPlane.enablePulumiIntegration();
 const coreInfrastructureDns = controlPlane
 	.createProject("core-infrastructure-dns")
 	.createAccessKey()
-	.enablePulumiSupport();
+	.enablePulumiSupport()
+	.bindPredefinedRole("dns.admin");

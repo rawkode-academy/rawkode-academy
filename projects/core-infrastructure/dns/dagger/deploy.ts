@@ -1,6 +1,6 @@
 import Client from "@dagger.io/dagger";
 import { DaggerCommand } from "@rawkode.academy/dagger/index.mjs";
-import { up, preview } from "@rawkode.academy/dagger/pulumi/dagger.mjs";
+import { up } from "@rawkode.academy/dagger/pulumi/dagger.mjs";
 import { resolveSecret } from "@rawkode.academy/dagger/secrets/index.mjs";
 import { getSourceDir } from "@rawkode.academy/dagger/utils/index.mjs";
 import { z } from "zod";
@@ -32,7 +32,7 @@ export const execute = async (client: Client): Promise<PulumiOutput> => {
 		exclude: [".git", ".pnpm-store", "dagger", "dagger.ts", "node_modules"],
 	});
 
-	const returnedJson = await preview(client, {
+	const returnedJson = await up(client, {
 		version: "3.49.0",
 		runtime: "nodejs",
 		stackCreate: false,
@@ -44,9 +44,11 @@ export const execute = async (client: Client): Promise<PulumiOutput> => {
 		},
 	});
 
-	const pulumiOutput = PulumiOutput.safeParse(returnedJson);
+	const pulumiOutput = PulumiOutput.safeParse(JSON.parse(returnedJson));
 	if (!pulumiOutput.success) {
-		throw new Error("pulumi up for DNS did not return a valid zone map");
+		throw new Error(
+			`pulumi up for DNS did not return a valid zone map: ${pulumiOutput.error}`,
+		);
 	}
 
 	return pulumiOutput.data;

@@ -18,6 +18,7 @@ export class RawkodeProject extends pulumi.ComponentResource {
 	private pulumiStorageListRoleBinding?: gcp.projects.IAMBinding;
 	private pulumiStorageAccessRoleBinding?: gcp.projects.IAMBinding;
 	private opKey?: local.Command;
+	private additionalRoles: gcp.projects.IAMBinding[] = [];
 
 	constructor(
 		name: string,
@@ -73,6 +74,20 @@ export class RawkodeProject extends pulumi.ComponentResource {
 				},
 			);
 		});
+
+		return this;
+	}
+
+	bindPredefinedRole(roleName: string): this {
+		this.additionalRoles.push(
+			new gcp.projects.IAMBinding(`${this.name}-${roleName}`, {
+				project: this.controlPlane.gcpProject,
+				role: `roles/${roleName}`,
+				members: [
+					pulumi.interpolate`serviceAccount:${this.serviceAccount.email}`,
+				],
+			}),
+		);
 
 		return this;
 	}
