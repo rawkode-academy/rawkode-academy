@@ -1,0 +1,6 @@
+secretsprovider: gcpkms://projects/rawkode-academy/locations/europe-west2/keyRings/gcp-control-plane-pulumi/cryptoKeys/core-infrastructure-dns
+encryptedkey: CiQAT7+9oF1DVsTmnJEATdmXKFiPXzu+TZW0coZV8T4An2VAMVwSSQAjQfv9BeMHOyJvzUfIP6bUGHgEsnStH3PnUqn6KvkqRkj42YjZ+knpwmqmvMxvQidaL2junHD7A5SJE7e1cGOrrOv+tpum8Js=
+config:
+  gcp:project: rawkode-academy
+  google-native:project: rawkode-academy
+  google-native:region: europe-west2

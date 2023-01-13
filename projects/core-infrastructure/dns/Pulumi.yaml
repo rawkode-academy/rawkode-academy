@@ -3,4 +3,4 @@ description: Management of DNS
 runtime: nodejs
 main: src
 backend:
-  url: gs://rawkode-academy-automation/dns
+  url: gs://gcp-control-plane-pulumi/core-infrastructure-dns/

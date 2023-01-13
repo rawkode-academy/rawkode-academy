@@ -1,0 +1,3 @@
+config:
+  gcp:project: rawkode-academy
+  gcp:region: europe-west2

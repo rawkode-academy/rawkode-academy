@@ -1,8 +1,8 @@
 packages:
   - "./dagger"
-  - "./projects/core-infrastructure/aws-control-plane"
+  - "./projects/core-infrastructure/gcp-control-plane"
+  - "./projects/core-infrastructure/dns"
   - "./projects/rawkode.academy/website"
-  - "./projects/rawkode.cloud/dns"
   - "./projects/rawkode.cloud/google-cloud"
   - "./projects/rawkode.cloud/teleport"
   - "./projects/rawkode.studio"
