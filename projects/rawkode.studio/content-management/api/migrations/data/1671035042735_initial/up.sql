@@ -1,6 +1,6 @@
 -- People
 CREATE TABLE "people" (
-    "id" TEXT NOT NULL GENERATED ALWAYS AS ("githubHandle") STORED,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "draft" BOOLEAN NOT NULL DEFAULT TRUE,
     "name" TEXT NOT NULL,
     "email" TEXT,
@@ -20,8 +20,7 @@ CREATE TABLE "people" (
             char_length("youtubeHandle") >= 3
             AND char_length("youtubeHandle") <= 30
         )
-    ),
-    CONSTRAINT "person_id" PRIMARY KEY ("id")
+    )
 );
 
 CREATE UNIQUE INDEX "person_github_handle" ON "people"("githubHandle");

@@ -89,6 +89,95 @@ pub(crate) fn build_in_memory_database(files: Vec<PathBuf>) -> Result<InMemoryDa
 }
 
 impl InMemoryDatabase {
+    pub async fn cleanup_all(self, pool: &sqlx::Pool<Postgres>) -> Result<()> {
+        self.cleanup_episodes(pool)
+            .await?
+            .cleanup_shows(pool)
+            .await?
+            .cleanup_technologies(pool)
+            .await?
+            .cleanup_people(pool)
+            .await?;
+
+        Ok(())
+    }
+
+    async fn cleanup_episodes(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+        let mut query_builder: QueryBuilder<Postgres> =
+            QueryBuilder::new(r#"DELETE FROM episodes WHERE "id" NOT IN ("#);
+
+        let mut separated = query_builder.separated(", ");
+
+        for (id, _) in self.episodes.iter() {
+            separated.push_bind(id);
+        }
+
+        separated.push_unseparated(");");
+
+        let query = query_builder.build();
+
+        query.execute(pool).await.into_diagnostic()?;
+
+        Ok(self)
+    }
+
+    async fn cleanup_shows(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+        let mut query_builder: QueryBuilder<Postgres> =
+            QueryBuilder::new(r#"DELETE FROM shows WHERE "id" NOT IN ("#);
+
+        let mut separated = query_builder.separated(", ");
+
+        for (id, _) in self.shows.iter() {
+            separated.push_bind(id);
+        }
+
+        separated.push_unseparated(");");
+
+        let query = query_builder.build();
+
+        query.execute(pool).await.into_diagnostic()?;
+
+        Ok(self)
+    }
+
+    async fn cleanup_technologies(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+        let mut query_builder: QueryBuilder<Postgres> =
+            QueryBuilder::new(r#"DELETE FROM technologies WHERE "id" NOT IN ("#);
+
+        let mut separated = query_builder.separated(", ");
+
+        for (id, _) in self.technologies.iter() {
+            separated.push_bind(id);
+        }
+
+        separated.push_unseparated(");");
+
+        let query = query_builder.build();
+
+        query.execute(pool).await.into_diagnostic()?;
+
+        Ok(self)
+    }
+
+    async fn cleanup_people(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+        let mut query_builder: QueryBuilder<Postgres> =
+            QueryBuilder::new(r#"DELETE FROM people WHERE "id" NOT IN ("#);
+
+        let mut separated = query_builder.separated(", ");
+
+        for (id, _) in self.people.iter() {
+            separated.push_bind(id);
+        }
+
+        separated.push_unseparated(");");
+
+        let query = query_builder.build();
+
+        query.execute(pool).await.into_diagnostic()?;
+
+        Ok(self)
+    }
+
     pub async fn validate_dependencies(self) -> Result<Self> {
         let mut errors: Vec<DependencyError> = vec![];
 
@@ -176,20 +265,18 @@ impl InMemoryDatabase {
         }
     }
 
-    pub async fn sync_all(self, pool: sqlx::Pool<Postgres>) -> Result<()> {
-        self.sync_technologies(&pool)
+    pub async fn sync_all(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+        self.sync_technologies(pool)
             .await?
-            .sync_shows(&pool)
+            .sync_shows(pool)
             .await?
-            .sync_people(&pool)
+            .sync_people(pool)
             .await?
-            .sync_episodes(&pool)
-            .await?;
-
-        Ok(())
+            .sync_episodes(pool)
+            .await
     }
 
-    pub async fn sync_people(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+    async fn sync_people(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"INSERT INTO people ("id", "name", "biography", "website", "githubHandle", "twitterHandle", "youtubeHandle", "draft")"#,
         );
@@ -224,7 +311,7 @@ impl InMemoryDatabase {
         Ok(self)
     }
 
-    pub async fn sync_shows(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+    async fn sync_shows(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
         let mut query_builder: QueryBuilder<Postgres> =
             QueryBuilder::new(r#"INSERT INTO shows ("id", "name", "description", "draft")"#);
 
@@ -252,7 +339,7 @@ impl InMemoryDatabase {
         Ok(self)
     }
 
-    pub async fn sync_technologies(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+    async fn sync_technologies(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"INSERT INTO technologies ("id", "name", "aliases", "tagline", "description", "website", "open_source", "repository", "documentation", "twitter_handle", "youtube_handle", "draft")"#,
         );
@@ -307,7 +394,7 @@ impl InMemoryDatabase {
         Ok(self)
     }
 
-    pub async fn sync_episodes(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
+    async fn sync_episodes(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
             r#"INSERT INTO episodes ("id", "title", "showId", "live", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters", "draft")"#,
         );

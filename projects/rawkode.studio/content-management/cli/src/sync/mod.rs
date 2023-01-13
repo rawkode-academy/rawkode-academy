@@ -21,7 +21,9 @@ pub async fn command(path: PathBuf, _apply: bool) -> Result<()> {
     database
         .validate_dependencies()
         .await?
-        .sync_all(pool)
+        .sync_all(&pool)
+        .await?
+        .cleanup_all(&pool)
         .await?;
 
     Ok(())
