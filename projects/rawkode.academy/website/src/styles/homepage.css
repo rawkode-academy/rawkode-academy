@@ -2,8 +2,13 @@ section {
   padding: 2.5rem 1.5rem;
 }
 
+section p {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
 .background {
-  background: linear-gradient(91.97deg, var(--academy-green) 0%, var(--academy-teal) 100%);
+  background: linear-gradient(100deg, var(--academy-teal) 25%, var(--academy-green) 75%);
 }
 
 .section--hero {
@@ -16,8 +21,8 @@ section {
   color: var(--white);
 }
 
-.section--hero h1 {
-  text-align: center;
+.section--hero h1,
+.section--hero p {
   text-shadow: 4px 4px rgb(0 0 0 / 5%);
 }
 
@@ -28,13 +33,21 @@ section {
   }
 
   .section--hero {
+    /* background-image: url('/rawkode-hero.png'); */
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: contain;
     height: 65vh;
-    background-position: 50% 50%;
+    background-position: 100% 35%;
     background-size: 75% 75%;
   }
 
   .section--hero h1 {
-    text-align: left;
+    max-width: 50%;
+  }
+
+  .section--hero p {
+    max-width: 40%;
   }
 }
 
@@ -47,6 +60,7 @@ section {
   background: linear-gradient(91.97deg, var(--academy-green) 0%, var(--academy-teal) 100%);
 }
 
+.section--hero a,
 .section--work-together a {
   background-color: var(--rawkode-purple);
   padding: 1rem 1.75rem;
@@ -113,7 +127,8 @@ section {
   background-color: var(--light-grey);
 }
 
-.section--technologies h2 {
+.section--technologies h2,
+.section--technologies p {
   padding-left: 1.5rem;
 }
 
@@ -154,11 +169,6 @@ section {
   flex-shrink: 0;
   padding: 2.5rem;
   background-color: var(--light-grey);
-}
-
-.testimonials__card p {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
 }
 
 .testimonials__card p:last-of-type {
@@ -215,7 +225,8 @@ hr {
     display: block;
   }
 
-  .section--technologies h2 {
+  .section--technologies h2,
+  .section--technologies p {
     padding-left: 2.5rem;
   }
 
@@ -234,5 +245,13 @@ hr {
 
   .testimonials__card {
     width: 750px;
+  }
+
+  .background--logo {
+    background-image: url('/academy-logo-circular.svg');
+    background-repeat: no-repeat;
+    background-position: right 320% bottom 50%;
+    /* background-attachment: fixed; */
+    background-size: 125% 125%;
   }
 }
