@@ -8,21 +8,35 @@ section p {
 }
 
 .background {
+  position: relative;
   background: linear-gradient(100deg, var(--academy-teal) 25%, var(--academy-green) 75%);
 }
 
-.section--hero {
+/* .background::after {
+  content: '';
   background-image: url('/academy-logo-circular.svg');
   background-repeat: no-repeat;
-  background-position: 50% 0;
-  background-attachment: fixed;
-  background-size: 75% 75%;
+  display: flex;
+  background-size: 350px 350px;
+  height: 350px;
+  width: 350px;
+  position: absolute;
+  top: 25%;
+  right: 0;
+  left: 0;
+  z-index: 0;
+} */
+
+.section--hero {
+  position: inherit;
   height: 50vh;
   color: var(--white);
+  z-index: 5;
 }
 
 .section--hero h1,
 .section--hero p {
+  max-width: 85%;
   text-shadow: 4px 4px rgb(0 0 0 / 5%);
 }
 
@@ -32,15 +46,35 @@ section p {
     padding: 5rem 2.5rem;
   }
 
-  .section--hero {
-    /* background-image: url('/rawkode-hero.png'); */
+  .background::after {
+    content: '';
+    background-image: url('/academy-logo-circular.svg');
     background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-size: contain;
-    height: 65vh;
-    background-position: 100% 35%;
-    background-size: 75% 75%;
+    display: flex;
+    background-size: 750px 750px;
+    height: 750px;
+    width: 750px;
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    z-index: 0;
   }
+
+  .section--hero {
+    height: 65vh;
+  }
+
+  .section--hero h1,
+  .section--hero p {
+    max-width: 85%;
+  }
+
+  .section--shows {
+    padding: 7.5rem 2.5rem;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
 
   .section--hero h1 {
     max-width: 50%;
@@ -71,7 +105,15 @@ section p {
   width: fit-content;
   font-size: 1.25rem;
   font-weight: 600;
-  margin-top: 1.5rem;
+  margin-top: 2.5rem;
+  transition: all 300ms ease-in-out;
+}
+
+.section--hero a:hover,
+.section--work-together a:hover {
+  background-color: var(--rawkode-purple-dark);
+  transition: all 300ms ease-in-out;
+  box-shadow: 0px 0px 15px 10px rgba(0,0,0,0.1);
 }
 
 .section--work-together img {
@@ -137,7 +179,8 @@ section p {
   gap: 2.5rem;
   margin-top: 1.5rem;
   padding: 0 1.5rem;
-  overflow: scroll;
+  overflow-x: scroll;
+  overflow-y: visible;
   scrollbar-width: none;
 }
 
@@ -147,7 +190,22 @@ section p {
 
 .technologies__container img {
   flex-shrink: 0;
-  height: 100%;
+  height: 100px;
+  width: 100px;
+  max-width: fit-content;
+}
+
+.technologies__container div {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.technologies__container div p {
+  padding: 0;
+  white-space: nowrap;
 }
 
 .section--testimonial {
@@ -231,7 +289,7 @@ hr {
   }
 
   .technologies__container {
-    padding: 0 2.5rem;
+    padding: 1rem 2.5rem 0;
   }
 
   hr {
@@ -248,10 +306,9 @@ hr {
   }
 
   .background--logo {
-    background-image: url('/academy-logo-circular.svg');
+    background-image: url('/rawkode-icon.svg');
     background-repeat: no-repeat;
-    background-position: right 320% bottom 50%;
-    /* background-attachment: fixed; */
-    background-size: 125% 125%;
+    background-position: -900px -20px;
+    background-size: 105%;
   }
 }

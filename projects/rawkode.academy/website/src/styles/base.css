@@ -11,6 +11,11 @@
   --rawkode-purple: #5F5ED7;
   --rawkode-blue: #00CEFF;
   --rawkode-pink: #BD00FF;
+  --rawkode-purple-dark: #4443D0;
+}
+
+ninja-keys {
+  --ninja-z-index: 20;
 }
 
 body {
@@ -109,6 +114,7 @@ header.alternative {
   padding: 1rem;
   height: 3.75rem;
   width: 3.75rem;
+  z-index: 15;
 }
 
 .desktop-navigation {
