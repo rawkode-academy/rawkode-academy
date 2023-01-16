@@ -1,55 +1,51 @@
-import * as pulumi from "@pulumi/pulumi";
-import * as google from "@pulumi/google-native";
-import { createZone } from "./dnsProviders/cloudDns";
+import { CloudflareProvider } from "@generatedProviders/cloudflare/provider";
+import { GandiProvider } from "@generatedProviders/gandi/provider";
+import { App, CloudBackend, NamedCloudWorkspace, TerraformStack } from "cdktf";
+import { Construct } from "constructs";
 
-let allZones: [string, google.dns.v1.ManagedZone][] = [];
+import fbomDev from "./domains/fbom.dev";
+import fbomLive from "./domains/fbom.live";
+import klusteredLive from "./domains/klustered.live";
+import rawkoDe from "./domains/rawko.de";
+import rawkodeAcademy from "./domains/rawkode.academy";
+import rawkodeChat from "./domains/rawkode.chat";
+import rawkodeCloud from "./domains/rawkode.cloud";
+import rawkodeStudio from "./domains/rawkode.studio";
+import rawkodeCommunity from "./domains/rawkode.community";
+import rawkodeLink from "./domains/rawkode.link";
+import rawkodeNews from "./domains/rawkode.news";
 
-import { rawkodeAcademy } from "./domains/rawkode.academy";
-allZones.push(createZone(rawkodeAcademy));
+class CoreDns extends TerraformStack {
+	constructor(scope: Construct, id: string) {
+		super(scope, id);
 
-import { rawkodeCloud } from "./domains/rawkode.cloud";
-allZones.push(createZone(rawkodeCloud));
+		new CloudflareProvider(this, "cloudflare");
 
-import { rawkodeStudio } from "./domains/rawkode.studio";
-allZones.push(createZone(rawkodeStudio));
+		new GandiProvider(this, "gandi", {
+			key: process.env.GANDI_KEY || "",
+		});
 
-import { rawkodeCom } from "./domains/rawkode.com";
-allZones.push(createZone(rawkodeCom));
+		fbomDev(this);
+		fbomLive(this);
+		klusteredLive(this);
+		rawkoDe(this);
+		rawkodeAcademy(this);
+		rawkodeChat(this);
+		rawkodeCloud(this);
+		rawkodeCommunity(this);
+		rawkodeLink(this);
+		rawkodeNews(this);
+		rawkodeStudio(this);
+	}
+}
 
-import { chappaaiDev } from "./domains/chappaai.dev";
-allZones.push(createZone(chappaaiDev));
+const app = new App();
+const stack = new CoreDns(app, "dns");
 
-import { fbomDev } from "./domains/fbom.dev";
-allZones.push(createZone(fbomDev));
+new CloudBackend(stack, {
+	hostname: "app.terraform.io",
+	organization: "RawkodeAcademy",
+	workspaces: new NamedCloudWorkspace("core-dns"),
+});
 
-import { fbomLive } from "./domains/fbom.live";
-allZones.push(createZone(fbomLive));
-
-import { klusteredLive } from "./domains/klustered.live";
-allZones.push(createZone(klusteredLive));
-
-import { rawkodeDe } from "./domains/rawko.de";
-allZones.push(createZone(rawkodeDe));
-
-import { rawkodeChat } from "./domains/rawkode.chat";
-allZones.push(createZone(rawkodeChat));
-
-// Not migrated to Gandi yet (ever?)
-// import { rawkodeEmail } from "./domains/rawkode.email";
-// createZone(rawkodeEmail);
-
-import { rawkodeLink } from "./domains/rawkode.link";
-allZones.push(createZone(rawkodeLink));
-
-import { rawkodeNews } from "./domains/rawkode.news";
-allZones.push(createZone(rawkodeNews));
-
-// Not migrated to Gandi yet (ever?)
-// import { rawkodeSh } from "./domains/rawkode.sh";
-// createZone(rawkodeSh);
-
-export const zoneNameMap = allZones.reduce<
-	Record<string, pulumi.Output<string>>
->((zoneNameMap, [domain, zone]) => {
-	return { ...zoneNameMap, [domain]: zone.name };
-}, {});
+app.synth();

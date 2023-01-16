@@ -1,6 +1,13 @@
-import { ManagedZone } from "../domains";
+import { Construct } from "constructs";
+import { ManagedDomain, Account } from "../dnsProvider";
 
-export const rawkodeCloud = new ManagedZone("rawkode-cloud", {
-  domain: "rawkode.cloud",
-  description: "Managed by Pulumi",
-}).disableEmail();
+export default (scope: Construct): ManagedDomain => {
+	const managedDomain = new ManagedDomain(
+		scope,
+		"rawkode.cloud",
+		Account.Academy,
+	);
+
+	managedDomain.discourageEmail();
+	return managedDomain;
+};

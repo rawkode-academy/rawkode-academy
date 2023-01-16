@@ -1,6 +1,0 @@
-name: dns
-description: Management of DNS
-runtime: nodejs
-main: src
-backend:
-  url: gs://gcp-control-plane-pulumi/core-infrastructure-dns/

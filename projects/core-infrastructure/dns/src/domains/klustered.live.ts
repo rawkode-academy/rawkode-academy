@@ -1,8 +1,13 @@
-import { ManagedZone } from "../domains";
+import { Construct } from "constructs";
+import { ManagedDomain, Account } from "../dnsProvider";
 
-export const klusteredLive = new ManagedZone("klustered-live", {
-  domain: "klustered.live",
-  description: "Managed by Pulumi",
-})
-  .disableEmail()
-  .setupRebrandly("@");
+export default (scope: Construct): ManagedDomain => {
+	const managedDomain = new ManagedDomain(
+		scope,
+		"klustered.live",
+		Account.Academy,
+	);
+
+	managedDomain.discourageEmail().setupRebrandly("@");
+	return managedDomain;
+};

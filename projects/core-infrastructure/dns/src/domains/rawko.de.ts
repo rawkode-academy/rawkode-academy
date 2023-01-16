@@ -1,8 +1,9 @@
-import { ManagedZone } from "../domains";
+import { Construct } from "constructs";
+import { ManagedDomain, Account } from "../dnsProvider";
 
-export const rawkodeDe = new ManagedZone("rawko-de", {
-  domain: "rawko.de",
-  description: "Managed by Pulumi",
-})
-  .disableEmail()
-  .setupShortiO("@");
+export default (scope: Construct): ManagedDomain => {
+	const managedDomain = new ManagedDomain(scope, "rawko.de", Account.Academy);
+
+	managedDomain.discourageEmail().setupShortIO("@");
+	return managedDomain;
+};

@@ -1,6 +1,9 @@
-import { ManagedZone } from "../domains";
+import { Construct } from "constructs";
+import { ManagedDomain, Account } from "../dnsProvider";
 
-export const fbomDev = new ManagedZone("fbom-dev", {
-  domain: "fbom.dev",
-  description: "Managed by Pulumi",
-}).disableEmail();
+export default (scope: Construct): ManagedDomain => {
+	const managedDomain = new ManagedDomain(scope, "fbom.dev", Account.Academy);
+
+	managedDomain.discourageEmail();
+	return managedDomain;
+};

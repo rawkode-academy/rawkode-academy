@@ -1,16 +1,36 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "outDir": "dist",
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "sourceMap": true,
+    "alwaysStrict": true,
+    "charset": "utf8",
+    "declaration": true,
     "experimentalDecorators": true,
-    "pretty": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "lib": ["es2018"],
+    "module": "CommonJS",
+    "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
     "noImplicitReturns": true,
-    "forceConsistentCasingInFileNames": true
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "stripInternal": true,
+    "target": "ES2018",
+    "incremental": true,
+    "skipLibCheck": true,
+    "baseUrl": ".gen",
+    "paths": {
+      "@generatedProviders/*": ["providers/*"]
+    }
   },
-  "include": ["./src"]
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "cdktf.out"]
 }
