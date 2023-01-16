@@ -159,6 +159,15 @@ export class ManagedDomain extends Construct {
 			priority: 10,
 			value: "alt4.aspmx.l.google.com.",
 		});
+
+		new Record(this, "spf", {
+			zoneId: this.cloudflareZone.id,
+			name: "@",
+			type: "TXT",
+			ttl: 3600,
+			value: '"v=spf1 include:_spf.google.com ~all"',
+		});
+
 		return this;
 	}
 
