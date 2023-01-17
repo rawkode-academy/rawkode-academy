@@ -2,6 +2,7 @@ packages:
   - "./dagger"
   - "./projects/core-infrastructure/gcp-control-plane"
   - "./projects/core-infrastructure/dns"
+  - "./projects/core-infrastructure/kubernetes-platform"
   - "./projects/rawkode.academy/website"
   - "./projects/rawkode.cloud/google-cloud"
   - "./projects/rawkode.cloud/teleport"

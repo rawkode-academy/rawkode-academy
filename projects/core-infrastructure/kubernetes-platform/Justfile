@@ -1,0 +1,8 @@
+check:
+  pnpm exec rome ci .
+
+format:
+  pnpm exec rome format .
+
+deploy:
+  op run -- cdktf deploy

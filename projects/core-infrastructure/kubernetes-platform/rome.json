@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/rome/configuration_schema.json",
+  "files": {
+    "ignore": [
+      ".gen",
+      "node_modules"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": true,
+    "indentStyle": "tab",
+    "indentSize": 2,
+    "lineWidth": 80,
+    "ignore": []
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
