@@ -3,6 +3,8 @@
   "app": "pnpm exec ts-node src/index.ts",
   "sendCrashReports": "false",
   "terraformProviders": [
+    "helm@~> 2.8",
+    "kubernetes@~> 2.16",
     "scaleway/scaleway@~> 2.9"
   ],
   "terraformModules": [],
