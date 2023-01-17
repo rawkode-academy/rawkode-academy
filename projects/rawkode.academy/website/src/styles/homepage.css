@@ -219,14 +219,20 @@ section p {
   overflow: scroll;
   gap: 2.5rem;
   padding: 0 2.5rem;
+  scrollbar-width: none;
+}
+
+.testimonials__container::-webkit-scrollbar {
+  display: none;
 }
 
 .testimonials__card {
   border-radius: 2.5rem;
   width: 100%;
   flex-shrink: 0;
-  padding: 2.5rem;
-  background-color: var(--light-grey);
+  padding: 1.5rem;
+  border: 1rem solid var(--rawkode-purple);
+  background-color: var(--white);
 }
 
 .testimonials__card p:last-of-type {
@@ -243,23 +249,34 @@ hr {
   text-align: center;
 }
 
-.comapnies__container {
+.companies__container {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1.5rem;
+  gap: 3rem;
   flex-wrap: wrap;
+  padding: 2rem 0;
 }
 
 .company__card {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 10.625rem;
-  width: 10.625rem;
+  height: 50%;
+  width: 50%;
 }
 
 @media only screen and (min-width: 768px) {
+
+  .companies__container {
+    gap: 1.5rem;
+    padding: 0;
+  }
+
+  .company__card {
+    height: 10.625rem;
+    width: 10.625rem;
+  }
 
   .shows__card {
     width: 335px;

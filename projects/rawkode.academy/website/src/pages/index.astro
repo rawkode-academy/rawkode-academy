@@ -61,7 +61,6 @@ const companies = [{
   <div class="background">
     <Header style="alternative" />
     <section class="section--hero">
-      <!-- <h1>The Cloud Native Education Platform</h1> -->
       <h1>Level Up Your Cloud Native and DevOps Technology</h1>
       <p>From one-off projects to in-person training, Rawkode Academy can help harness and enhance your company's technology infrastructure.</p>
       <a href="/work-together">Let's work together</a>
@@ -69,7 +68,7 @@ const companies = [{
   </div>
   <section class="section--shows">
     <h2>Shows</h2>
-    <p>New shows every week with the latest tips and tricks in all things Cloud Native, Kubernetes, DevOps and so much more.</p>
+    <p>New shows every week with the latest tips, tricks and deep dives into all things Cloud Native, Kubernetes, DevOps and so much more.</p>
     <div class="shows__container">
       {shows.map(
         (show: Show) => (
@@ -92,7 +91,7 @@ const companies = [{
     <section class="section--endorsements">
       <h2>Partners</h2>
       <p>These companies have had first-hand expertise delivered to them by Rawkode Academy.</p>
-      <div class="comapnies__container">
+      <div class="companies__container">
         {companies.map(
           (company: Company) => (
             <a href={company.url} class="company__card">
