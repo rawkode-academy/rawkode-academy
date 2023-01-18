@@ -1,8 +1,20 @@
+@default:
+  just --choose
+
+# Get and Generate the Providers
+build-providers:
+  cdktf provider get
+
+# Run the Rome Linter & Formatter
 check:
   pnpm exec rome ci .
 
-format:
-  pnpm exec rome format .
+## CDKTF Commands
+# Run cdktf Plan
+plan stack="":
+  op run -- cdktf plan {{ stack }}
 
-deploy:
-  op run -- cdktf deploy
+
+# Run cdktf Deploy
+deploy stack="":
+  op run -- cdktf deploy {{ stack }}
