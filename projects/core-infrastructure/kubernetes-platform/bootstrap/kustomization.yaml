@@ -4,3 +4,4 @@ namespace: platform
 resources:
   - certManager.yaml
   - weaveGitOps.yaml
+  - 1passwordConnect.yaml

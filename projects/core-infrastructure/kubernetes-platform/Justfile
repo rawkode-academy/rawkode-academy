@@ -18,3 +18,7 @@ plan stack="":
 # Run cdktf Deploy
 deploy stack="":
   op run -- cdktf deploy {{ stack }}
+
+# Bootstrap Kubernetes Cluster with FluxCD
+bootstrap:
+  kustomize build ./bootstrap | op inject | kubectl apply -f -
