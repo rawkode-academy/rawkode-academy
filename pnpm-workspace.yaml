@@ -8,5 +8,6 @@ packages:
   - "./projects/rawkode.cloud/teleport"
   - "./projects/rawkode.community/ics-events"
   - "./projects/rawkode.studio"
+  - "./projects/rawkode.studio/content-management/desktop"
   - "./projects/rawkode.studio/deploy"
   - "./projects/rawkode.studio/workflows-youtube"
