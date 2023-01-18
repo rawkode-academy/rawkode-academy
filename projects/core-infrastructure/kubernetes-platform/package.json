@@ -4,14 +4,16 @@
     "node": ">=18.0"
   },
   "dependencies": {
-    "cdktf": "^0.14.3",
-    "constructs": "^10.1.222"
+    "@cdktf/provider-helm": "^4.0",
+    "@cdktf/provider-kubernetes": "^4.0",
+    "cdktf": "^0.14",
+    "constructs": "^10.1"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18",
-    "rome": "^11.0.0",
-    "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.1.2",
-    "typescript": "^4.9.4"
+    "@types/node": "^18.11",
+    "rome": "^11.0",
+    "ts-node": "^10.9",
+    "tsconfig-paths": "^4.1",
+    "typescript": "^4.9"
   }
 }

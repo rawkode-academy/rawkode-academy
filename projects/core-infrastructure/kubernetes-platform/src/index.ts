@@ -1,21 +1,22 @@
-import { Construct } from "constructs";
-import {
-	App,
-	TerraformStack,
-	CloudBackend,
-	NamedCloudWorkspace,
-	Fn,
-} from "cdktf";
-import { ScalewayProvider } from "@generatedProviders/scaleway/provider";
+import { HelmProvider } from "@cdktf/provider-helm/lib/provider";
+import { Namespace } from "@cdktf/provider-kubernetes/lib/namespace";
+import { KubernetesProvider } from "@cdktf/provider-kubernetes/lib/provider";
 import { AccountProject } from "@generatedProviders/scaleway/account-project";
 import {
 	K8SCluster,
 	K8SClusterKubeconfigOutputReference,
 } from "@generatedProviders/scaleway/k8s-cluster";
 import { K8SPool } from "@generatedProviders/scaleway/k8s-pool";
-import { KubernetesProvider } from "@generatedProviders/kubernetes/provider";
-import { Deployment } from "@generatedProviders/kubernetes/deployment";
-// import { HelmProvider } from "@generatedProviders/helm/provider";
+import { ScalewayProvider } from "@generatedProviders/scaleway/provider";
+import {
+	App,
+	CloudBackend,
+	Fn,
+	NamedCloudWorkspace,
+	TerraformStack,
+} from "cdktf";
+import { Construct } from "constructs";
+import { FluxCD } from "./components/fluxcd";
 
 enum Regions {
 	AMS = "nl-ams",
@@ -35,8 +36,8 @@ class Platform extends TerraformStack {
 	private readonly cluster: K8SCluster;
 	private readonly nodePools: K8SPool[] = [];
 	private readonly kubeconfig: K8SClusterKubeconfigOutputReference;
+	private readonly helmProvider: HelmProvider;
 	private readonly kubernetesProvider: KubernetesProvider;
-	// private readonly helmProvider: HelmProvider;
 
 	constructor(scope: Construct, id: string) {
 		super(scope, id);
@@ -77,44 +78,13 @@ class Platform extends TerraformStack {
 			token: this.kubeconfig.token,
 		});
 
-		// this.helmProvider = new HelmProvider(this, "helm", {
-		// 	kubernetes: {
-		// 		clusterCaCertificate: this.kubeconfig.clusterCaCertificate,
-		// 		host: this.kubeconfig.host,
-		// 		token: this.kubeconfig.token,
-		// 	},
-		// });
-
-		new Deployment(this, "nginx", {
-			provider: this.kubernetesProvider,
-			metadata: {
-				name: "nginx",
-				labels: {
-					app: "nginx",
-				},
-			},
-			spec: {
-				replicas: "1",
-				selector: {
-					matchLabels: {
-						app: "nginx",
-					},
-				},
-				template: {
-					metadata: {
-						labels: {
-							app: "nginx",
-						},
-					},
-					spec: {
-						container: [
-							{
-								name: "nginx",
-								image: "nginx",
-							},
-						],
-					},
-				},
+		this.helmProvider = new HelmProvider(this, "helm", {
+			kubernetes: {
+				clusterCaCertificate: Fn.base64decode(
+					this.kubeconfig.clusterCaCertificate,
+				),
+				host: this.cluster.apiserverUrl,
+				token: this.kubeconfig.token,
 			},
 		});
 
@@ -157,6 +127,18 @@ class Platform extends TerraformStack {
 				containerRuntime: "containerd",
 			}),
 		);
+
+		const namespace = new Namespace(this, "platform", {
+			metadata: {
+				name: "platform",
+			},
+		});
+
+		new FluxCD(this, "fluxcd", {
+			helmProvider: this.helmProvider,
+			kubernetesProvider: this.kubernetesProvider,
+			namespace: namespace,
+		});
 	}
 }
 

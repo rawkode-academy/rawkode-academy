@@ -1,17 +1,21 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@types/node': ^18.11.18
-  cdktf: ^0.14.3
-  constructs: ^10.1.222
-  rome: ^11.0.0
-  ts-node: ^10.9.1
-  tsconfig-paths: ^4.1.2
-  typescript: ^4.9.4
+  '@cdktf/provider-helm': ^4.0
+  '@cdktf/provider-kubernetes': ^4.0
+  '@types/node': ^18.11
+  cdktf: ^0.14
+  constructs: ^10.1
+  rome: ^11.0
+  ts-node: ^10.9
+  tsconfig-paths: ^4.1
+  typescript: ^4.9
 
 dependencies:
-  cdktf: 0.14.3_constructs@10.1.222
-  constructs: 10.1.222
+  '@cdktf/provider-helm': 4.0.1_gx3jmcwjubfdtshbdw76wiw2aq
+  '@cdktf/provider-kubernetes': 4.0.2_gx3jmcwjubfdtshbdw76wiw2aq
+  cdktf: 0.14.3_constructs@10.1.223
+  constructs: 10.1.223
 
 devDependencies:
   '@types/node': 18.11.18
@@ -21,6 +25,28 @@ devDependencies:
   typescript: 4.9.4
 
 packages:
+
+  /@cdktf/provider-helm/4.0.1_gx3jmcwjubfdtshbdw76wiw2aq:
+    resolution: {integrity: sha512-VPpl6F9KxtqT5IRuWyIEP9c2Z1z+kZwz+VpRuVb4S9tsFozZx4gYyIoQWjoZbJ/EIGPK5Tl7HZPSTgTruP7r2g==}
+    engines: {node: '>= 14.17.0'}
+    peerDependencies:
+      cdktf: ^0.14.0
+      constructs: ^10.0.0
+    dependencies:
+      cdktf: 0.14.3_constructs@10.1.223
+      constructs: 10.1.223
+    dev: false
+
+  /@cdktf/provider-kubernetes/4.0.2_gx3jmcwjubfdtshbdw76wiw2aq:
+    resolution: {integrity: sha512-amO0a8BxKP22VxNNQpHqi/5Be+YNaiR0StiNLUnZNdNQWooLkEhCT9i16uD2h0yTS29wF/PNH4VoiHfuEpo8Ow==}
+    engines: {node: '>= 14.17.0'}
+    peerDependencies:
+      cdktf: ^0.14.0
+      constructs: ^10.0.0
+    dependencies:
+      cdktf: 0.14.3_constructs@10.1.223
+      constructs: 10.1.223
+    dev: false
 
   /@cspotcode/source-map-support/0.8.1:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -201,13 +227,13 @@ packages:
       ieee754: 1.2.1
     dev: false
 
-  /cdktf/0.14.3_constructs@10.1.222:
+  /cdktf/0.14.3_constructs@10.1.223:
     resolution: {integrity: sha512-sVxp6xfzEoOCejixLgeaQo9mQPEImFa7JSWoOMIyxlA0NFVPrEWMvPcfM5iONCd1m8tU6w++RZG0Q9bLPn3Lgw==}
     peerDependencies:
       constructs: ^10.0.25
     dependencies:
       archiver: 5.3.1
-      constructs: 10.1.222
+      constructs: 10.1.223
       json-stable-stringify: 1.0.2
       semver: 7.3.8
     dev: false
@@ -230,8 +256,8 @@ packages:
     resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
     dev: false
 
-  /constructs/10.1.222:
-    resolution: {integrity: sha512-ILgomocuxiX5ueouLSGUD6A1nGAYQ/SPWZ6UbMKGvrxDeFh35NvI0T+4WlDJQqDVTotOpHwdlQqIZ4S18/ZSRw==}
+  /constructs/10.1.223:
+    resolution: {integrity: sha512-m/+jkHuVZiHmGpEaNwoB3toYdKu/EOd9xVlZ0uYivnWm7uertOPSTXl/Z1f35DXY518ir8X0VBOREAjtIT4F/g==}
     engines: {node: '>= 14.17.0'}
     dev: false
 
@@ -370,8 +396,8 @@ packages:
       brace-expansion: 1.1.11
     dev: false
 
-  /minimatch/5.1.5:
-    resolution: {integrity: sha512-CI8wwdrll4ehjPAqs8TL8lBPyNnpZlQI02Wn8C1weNz/QbUbjh3OMxgMKSnvqfKFdLlks3EzHB9tO0BqGc3phQ==}
+  /minimatch/5.1.6:
+    resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
     engines: {node: '>=10'}
     dependencies:
       brace-expansion: 2.0.1
@@ -425,7 +451,7 @@ packages:
   /readdir-glob/1.1.2:
     resolution: {integrity: sha512-6RLVvwJtVwEDfPdn6X6Ille4/lxGl0ATOY4FN/B9nxQcgOazvvI0nodiD19ScKq0PvA/29VpaOQML36o5IzZWA==}
     dependencies:
-      minimatch: 5.1.5
+      minimatch: 5.1.6
     dev: false
 
   /rome/11.0.0:
