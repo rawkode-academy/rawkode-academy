@@ -1,0 +1,44 @@
+apiVersion: chappaai.dev/v1
+kind: OAuthApi
+metadata:
+  name: discord
+spec:
+  auth:
+    oAuth2:
+      authorizationUrl: "https://discord.com/api//oauth2/authorize"
+      tokenUrl: "https://discord.com/api//oauth2/token"
+      authorizationParams:
+        - key: responseType
+          value: code
+        - key: grantType
+          value: authorization_code
+  http:
+    baseUrl: ""
+    authorizationHeaderPrefix: Bearer
+    headers:
+      - key: Accept
+        value: application/json
+      - key: User-Agent
+        value: chappaai
+---
+apiVersion: chappaai.dev/v1
+kind: OAuthConnection
+metadata:
+  name: discord
+spec:
+  api: discord
+  scopes:
+    - "identify"
+    - "email"
+  credentials:
+    secretRef:
+      name: "discord-oauth"
+      idKey: "clientId"
+      secretKey: "clientSecret"
+---
+apiVersion: onepassword.com/v1
+kind: OnePasswordItem
+metadata:
+  name: discord-oauth
+spec:
+  itemPath: "vaults/sa.rawkode.community/items/discord"
