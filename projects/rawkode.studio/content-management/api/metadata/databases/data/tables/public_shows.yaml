@@ -16,6 +16,13 @@ configuration:
     update: updateShows
     update_by_pk: updateShow
 array_relationships:
+  - name: episodes
+    using:
+     foreign_key_constraint_on:
+       column: showId
+       table:
+         name: episodes
+         schema: public
   - name: hosts
     using:
       manual_configuration:
