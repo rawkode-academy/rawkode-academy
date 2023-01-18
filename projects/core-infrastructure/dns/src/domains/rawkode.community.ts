@@ -8,6 +8,9 @@ export default (scope: Construct): ManagedDomain => {
 		Account.Academy,
 	);
 
-	managedDomain.discourageEmail().setupShortIO("@");
+	managedDomain
+		.discourageEmail()
+		.addCNameRecord("@", "hashnode.network")
+		.addCNameRecord("www", "hashnode.network");
 	return managedDomain;
 };

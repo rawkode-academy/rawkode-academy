@@ -1,0 +1,24 @@
+@default:
+  just --choose
+
+# Clean up node_modules and generated providers
+clean:
+  rm -rf node_modules .gen
+
+# Get and Generate the Providers
+build-providers:
+  cdktf provider get
+
+# Run the Rome Linter & Formatter
+check:
+  pnpm exec rome ci .
+
+## CDKTF Commands
+# Run cdktf Plan
+plan stack="":
+  op run -- cdktf plan {{ stack }}
+
+
+# Run cdktf Deploy
+deploy stack="":
+  op run -- cdktf deploy {{ stack }}
