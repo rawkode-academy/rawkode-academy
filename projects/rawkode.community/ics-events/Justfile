@@ -1,0 +1,5 @@
+publish-oci:
+  flux push artifact oci://ghcr.io/rawkodeacademy/community-ics-events-deploy:latest \
+        --path="./deploy" \
+        --source="$(git config --get remote.origin.url)" \
+        --revision="$(git branch --show-current)/$(git rev-parse HEAD)"

@@ -6,6 +6,7 @@ packages:
   - "./projects/rawkode.academy/website"
   - "./projects/rawkode.cloud/google-cloud"
   - "./projects/rawkode.cloud/teleport"
+  - "./projects/rawkode.community/ics-events"
   - "./projects/rawkode.studio"
   - "./projects/rawkode.studio/deploy"
   - "./projects/rawkode.studio/workflows-youtube"
