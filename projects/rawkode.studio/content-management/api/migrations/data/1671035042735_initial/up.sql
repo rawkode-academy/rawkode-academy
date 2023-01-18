@@ -6,26 +6,26 @@ CREATE TABLE "people" (
     "email" TEXT,
     "biography" TEXT,
     "website" TEXT,
-    "githubHandle" TEXT NOT NULL CONSTRAINT "github_handle_length" CHECK (char_length("githubHandle") <= 39),
-    "twitterHandle" TEXT CONSTRAINT "twitter_handle_length" CHECK (
-        "twitterHandle" IS NULL
+    "github_handle" TEXT NOT NULL CONSTRAINT "github_handle_length" CHECK (char_length("github_handle") <= 39),
+    "twitter_handle" TEXT CONSTRAINT "twitter_handle_length" CHECK (
+        "twitter_handle" IS NULL
         OR (
-            char_length("twitterHandle") >= 4
-            AND char_length("twitterHandle") <= 15
+            char_length("twitter_handle") >= 4
+            AND char_length("twitter_handle") <= 15
         )
     ),
-    "youtubeHandle" TEXT CONSTRAINT "youtube_handle_length" CHECK (
-        "youtubeHandle" IS NULL
+    "youtube_handle" TEXT CONSTRAINT "youtube_handle_length" CHECK (
+        "youtube_handle" IS NULL
         OR (
-            char_length("youtubeHandle") >= 3
-            AND char_length("youtubeHandle") <= 30
+            char_length("youtube_handle") >= 3
+            AND char_length("youtube_handle") <= 30
         )
     )
 );
 
-CREATE UNIQUE INDEX "person_github_handle" ON "people"("githubHandle");
-CREATE UNIQUE INDEX "person_twitter_handle" ON "people"("twitterHandle");
-CREATE UNIQUE INDEX "person_youtube_handle" ON "people"("youtubeHandle");
+CREATE UNIQUE INDEX "person_github_handle" ON "people"("github_handle");
+CREATE UNIQUE INDEX "person_twitter_handle" ON "people"("twitter_handle");
+CREATE UNIQUE INDEX "person_youtube_handle" ON "people"("youtube_handle");
 CREATE UNIQUE INDEX "person_email" ON "people"("email");
 
 -- Shows

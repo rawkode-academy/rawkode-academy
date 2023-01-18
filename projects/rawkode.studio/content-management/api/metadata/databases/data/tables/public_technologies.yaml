@@ -25,6 +25,6 @@ select_permissions:
         - website
         - repository
         - documentation
-        - twitterHandle
-        - youtubeHandle
+        - twitter_handle
+        - youtube_handle
       filter: {}

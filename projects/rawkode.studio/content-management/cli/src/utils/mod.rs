@@ -278,7 +278,7 @@ impl InMemoryDatabase {
 
     async fn sync_people(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            r#"INSERT INTO people ("id", "name", "biography", "website", "githubHandle", "twitterHandle", "youtubeHandle", "draft")"#,
+            r#"INSERT INTO people ("id", "name", "biography", "website", "github_handle", "twitter_handle", "youtube_handle", "draft")"#,
         );
 
         query_builder.push_values(self.people.iter(), |mut q, (id, person)| {
@@ -298,9 +298,9 @@ impl InMemoryDatabase {
                 "name" = EXCLUDED."name",
                 "biography" = EXCLUDED."biography",
                 "website" = EXCLUDED."website",
-                "githubHandle" = EXCLUDED."githubHandle",
-                "twitterHandle" = EXCLUDED."twitterHandle",
-                "youtubeHandle" = EXCLUDED."youtubeHandle",
+                "github_handle" = EXCLUDED."github_handle",
+                "twitter_handle" = EXCLUDED."twitter_handle",
+                "youtube_handle" = EXCLUDED."youtube_handle",
                 "draft" = EXCLUDED."draft";"#,
         );
 

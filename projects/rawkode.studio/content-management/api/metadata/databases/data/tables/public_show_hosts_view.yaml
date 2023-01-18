@@ -8,9 +8,9 @@ select_permissions:
         - name
         - biography
         - website
-        - githubHandle
-        - twitterHandle
-        - youtubeHandle
+        - github_handle
+        - twitter_handle
+        - youtube_handle
       filter: {}
       query_root_fields: []
       subscription_root_fields: []
