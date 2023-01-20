@@ -22,3 +22,8 @@ deploy stack="":
 # Bootstrap Kubernetes Cluster with FluxCD
 bootstrap:
   kustomize build ./bootstrap | op inject | kubectl apply -f -
+
+# Onboard all the teams
+onboard:
+  kubectl apply -k ./onboard/rawkode.community
+  kubectl apply -k ./onboard/rawkode.studio
