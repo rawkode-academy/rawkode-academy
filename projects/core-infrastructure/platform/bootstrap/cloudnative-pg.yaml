@@ -13,7 +13,7 @@ metadata:
 spec:
   chart:
     spec:
-      chart: https://cloudnative-pg.github.io/charts
+      chart: cloudnative-pg
       sourceRef:
         kind: HelmRepository
         name: cloudnative-pg

@@ -1,5 +1,5 @@
 @default:
-  just --choose
+  just --list
 
 # Get and Generate the Providers
 build-providers:
