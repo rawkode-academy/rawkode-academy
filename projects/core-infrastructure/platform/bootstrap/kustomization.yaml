@@ -6,4 +6,5 @@ resources:
   - weave-gitOps.yaml
   - 1password-connect.yaml
   - cloudnative-pg.yaml
+  - https://github.com/alexandrevilain/temporal-operator/releases/download/v0.10.0/temporal-operator.crds.yaml
   - temporal-operator.yaml
