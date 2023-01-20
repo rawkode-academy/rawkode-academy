@@ -7,6 +7,7 @@
     "@cdktf/provider-helm": "^4.0",
     "@cdktf/provider-kubernetes": "^4.0",
     "cdktf": "^0.14",
+    "cdktf-cli": "^0.14",
     "constructs": "^10.1"
   },
   "devDependencies": {

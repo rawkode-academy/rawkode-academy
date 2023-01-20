@@ -13,6 +13,7 @@ import {
 	CloudBackend,
 	Fn,
 	NamedCloudWorkspace,
+	TerraformOutput,
 	TerraformStack,
 } from "cdktf";
 import { Construct } from "constructs";
@@ -31,6 +32,7 @@ enum Zones {
 	PAR2 = "fr-par-2",
 	WAW1 = "pl-waw-1",
 }
+
 class Platform extends TerraformStack {
 	private readonly project: AccountProject;
 	private readonly cluster: K8SCluster;

@@ -3,7 +3,7 @@
 
 # Get and Generate the Providers
 build-providers:
-  cdktf provider get
+  pnpm exec cdktf provider get
 
 # Run the Rome Linter & Formatter
 check:
@@ -12,12 +12,12 @@ check:
 ## CDKTF Commands
 # Run cdktf Plan
 plan stack="":
-  op run -- cdktf plan {{ stack }}
+  op run -- pnpm exec cdktf plan {{ stack }}
 
 
 # Run cdktf Deploy
 deploy stack="":
-  op run -- cdktf deploy {{ stack }}
+  op run -- pnpm exec cdktf deploy {{ stack }}
 
 # Bootstrap Kubernetes Cluster with FluxCD
 bootstrap:

@@ -1,0 +1,22 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: temporal-operator
+spec:
+  interval: 5m0s
+  url: https://github.com/alexandrevilain/temporal-operator
+  ref:
+    branch: v0.10.0
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: temporal-operator
+spec:
+  interval: 5m
+  targetNamespace: platform
+  sourceRef:
+    kind: GitRepository
+    name: temporal-operator
+  path: "./config/default"
+  prune: true
