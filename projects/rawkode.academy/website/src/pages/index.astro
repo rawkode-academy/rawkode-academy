@@ -77,8 +77,9 @@ const companies = [{
               <img src="/academy-logo-circular.svg" height="128" width="128" />
             </div>
             <div class="card__copy">
-              <p><strong>{show.name}</strong></p>
-              <p>
+              <p class="card__heading"><strong>{show.name}</strong></p>
+              <p class="card__sub-heading">23 episodes</p>
+              <p class="card__description">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed maximus risus ac justo imperdiet, sed pretium neque maximus.
               </p>
             </div>
@@ -87,42 +88,26 @@ const companies = [{
       )}
     </div>
   </section>
-  <div class="background--logo">
-    <section class="section--endorsements">
-      <h2>Partners</h2>
-      <p>These companies have had first-hand expertise delivered to them by Rawkode Academy.</p>
-      <div class="companies__container">
-        {companies.map(
-          (company: Company) => (
-            <a href={company.url} class="company__card">
-              <img src={`/${company.image}`} alt={company.name} height="100%" width="100%" />
-              <p class="sr-only">{company.name}</p>
-            </a>
-          )
-        )}
+  <section class="section--endorsements">
+    <h2>Partners</h2>
+    <p>These companies have had first-hand expertise delivered to them by Rawkode Academy.</p>
+    <div class="companies__container">
+      {companies.map(
+        (company: Company) => (
+          <a href={company.url} class="company__card">
+            <img src={`/${company.image}`} alt={company.name} height="100%" width="100%" />
+            <p class="sr-only">{company.name}</p>
+          </a>
+        )
+      )}
+    </div>
+    <div class="testimonials__container">
+      <div class="testimonials__card">
+        <p>"Rawkode has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services."</p>
+        <p>Mikkel Mork Hegnhoj - <a href="https://fermyon.com" target="_blank" rel="noopener noreferrer">Fermyon</a></p>
       </div>
-    </section>
-    <section class="section--testimonial">
-      <div class="testimonials__container">
-        <div class="testimonials__card">
-          <p>"Rawkode has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services."</p>
-          <p>Mikkel Mork Hegnhoj - <a href="https://fermyon.com" target="_blank" rel="noopener noreferrer">Fermyon</a></p>
-        </div>
-        <div class="testimonials__card">
-          <p>"Rawkode has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services."</p>
-          <p>Mikkel Mork Hegnhoj - <a href="https://fermyon.com" target="_blank" rel="noopener noreferrer">Fermyon</a></p>
-        </div>
-        <div class="testimonials__card">
-          <p>"Rawkode has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services."</p>
-          <p>Mikkel Mork Hegnhoj - <a href="https://fermyon.com" target="_blank" rel="noopener noreferrer">Fermyon</a></p>
-        </div>
-        <div class="testimonials__card">
-          <p>"Rawkode has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services."</p>
-          <p>Mikkel Mork Hegnhoj - <a href="https://fermyon.com" target="_blank" rel="noopener noreferrer">Fermyon</a></p>
-        </div>
-      </div>
-    </section>
-  </div>
+    </div>
+  </section>
   <section class="section--technologies">
     <h2>Technologies</h2>
     <p>A list of the technologies that we use and can train.</p>
