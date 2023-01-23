@@ -5,6 +5,11 @@ import "../styles/homepage.css";
 interface Show {
   name: string;
   id: string;
+  episodes_aggregate: {
+    aggregate: {
+      count: number;
+    }
+  };
 }
 interface Company {
   name: string;
@@ -19,11 +24,16 @@ const response = await fetch("https://api.rawkode.academy/v1/graphql",
     body: JSON.stringify({
       query: `
         query MyQuery {
-            getShows {
-              id
-              name
+          getShows {
+            id
+            name
+            episodes_aggregate {
+              aggregate {
+                count
+              }
             }
           }
+        }
         `
     }),
   });
@@ -61,7 +71,7 @@ const companies = [{
   <div class="background">
     <Header style="alternative" />
     <section class="section--hero">
-      <h1>Level Up Your Cloud Native and DevOps Technology</h1>
+      <h1>Helping Senior Developers, Platform Engineers, and Infrastructure Operators Level Up with Kubernetes.</h1>
       <p>From one-off projects to in-person training, Rawkode Academy can help harness and enhance your company's technology infrastructure.</p>
       <a href="/work-together">Let's work together</a>
     </section>
@@ -72,18 +82,20 @@ const companies = [{
     <div class="shows__container">
       {shows.map(
         (show: Show) => (
-          <a href={`/shows/${show.id}`} class="shows__card">
-            <div class="card__image">
-              <img src="/academy-logo-circular.svg" height="128" width="128" />
+        //  <a href={`/shows/${show.id}`} class="shows__card">
+            <div class="shows__card">
+              <div class="card__image">
+                <img src="/academy-logo-circular.svg" height="128" width="128" />
+              </div>
+              <div class="card__copy">
+                <p class="card__heading"><strong>{show.name}</strong></p>
+                <p class="card__sub-heading">{show.episodes_aggregate.aggregate.count} episodes</p>
+                <p class="card__description">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed maximus risus ac justo imperdiet, sed pretium neque maximus.
+                </p>
+              </div>
             </div>
-            <div class="card__copy">
-              <p class="card__heading"><strong>{show.name}</strong></p>
-              <p class="card__sub-heading">23 episodes</p>
-              <p class="card__description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed maximus risus ac justo imperdiet, sed pretium neque maximus.
-              </p>
-            </div>
-          </a>
+          //</a>
         )
       )}
     </div>

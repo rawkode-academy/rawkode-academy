@@ -14,13 +14,14 @@ export const menuItems: MenuItem[] = [
     icon: "mdi:home",
     regex: /^\/$/,
   },
+  // {
+  //   title: "Shows",
+  //   exact: false,
+  //   href: "/shows",
+  //   icon: "mdi:play-box-outline",
+  //   regex: /^\/shows$/,
+  // },
   {
-    title: "Shows",
-    exact: false,
-    href: "/shows",
-    icon: "mdi:play-box-outline",
-    regex: /^\/shows$/,
-  },{
     title: "Prices",
     exact: false,
     href: "/pricing",
