@@ -1,6 +1,6 @@
 import Client from "@dagger.io/dagger";
 import { DaggerCommand } from "@rawkode.academy/dagger/index.mjs";
-import { resolveSecrets } from "@rawkode.academy/dagger/secrets/index.mjs";
+import { resolveSecret } from "@rawkode.academy/dagger/secrets/index.mjs";
 import { getSourceDir } from "@rawkode.academy/dagger/utils/index.mjs";
 import { PullRequest } from "@rawkode.academy/dagger/github/index.js";
 import { Octokit } from "@octokit/rest";
@@ -18,14 +18,11 @@ export const execute = async (client: Client): Promise<void> => {
 
 	const sourcePath = getSourceDir(`${import.meta.url}/..`);
 
-	const secrets = await resolveSecrets([
-		{
-			vault: "sa.rawkode.academy",
-			item: "website",
-			key: "firebase-token",
-			as: "FIREBASE_TOKEN",
-		},
-	]);
+	const cloudflareApiToken = await resolveSecret({
+		vault: "sa.rawkode.academy",
+		item: "Cloudflare",
+		key: "password",
+	});
 
 	const npmInstallFiles = client.host().directory(sourcePath, {
 		include: ["package.json", "package-lock.json"],
@@ -59,25 +56,20 @@ export const execute = async (client: Client): Promise<void> => {
 
 	let result: Container;
 
-	if (pullRequest.isIt === true) {
-		result = build
-			.withNewFile("/gcloud.json", {
-				contents: secrets["FIREBASE_TOKEN"],
-			})
-			.withEnvVariable("GOOGLE_APPLICATION_CREDENTIALS", "/gcloud.json")
-			.withExec([
-				"./node_modules/.bin/firebase",
-				"hosting:channel:deploy",
-				pullRequest.headRef,
-			]);
-	} else {
-		result = build
-			.withNewFile("/gcloud.json", {
-				contents: secrets["FIREBASE_TOKEN"],
-			})
-			.withEnvVariable("GOOGLE_APPLICATION_CREDENTIALS", "/gcloud.json")
-			.withExec(["./node_modules/.bin/firebase", "deploy", "--only=hosting"]);
-	}
+	result = build
+		.withEnvVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
+		.withEnvVariable(
+			"CLOUDFLARE_ACCOUNT_ID",
+			"0aeb879de8e3cdde5fb3d413025222ce",
+		)
+		.withExec([
+			"./node_modules/.bin/wrangler",
+			"pages",
+			"publish",
+			"dist",
+			"--project-name=rawkode-academy",
+			`--branch=${pullRequest.isIt ? pullRequest.headRef : "main"}`,
+		]);
 
 	const output = await result.stdout();
 
