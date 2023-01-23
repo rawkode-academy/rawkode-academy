@@ -19,13 +19,13 @@ configuration:
 object_relationships:
   - name: show
     using:
-      foreign_key_constraint_on: showId
+      foreign_key_constraint_on: show_id
 array_relationships:
   - name: guests
     using:
       manual_configuration:
         column_mapping:
-          id: episodeId
+          id: episode_id
         insertion_order: null
         remote_table:
           name: episode_guests_view
@@ -36,10 +36,11 @@ select_permissions:
       columns:
         - title
         - live
-        - scheduledFor
+        - scheduled_for
         - startedAt
         - finishedAt
-        - youtubeId
+        - youtube_id
         - chapters
         - links
       filter: {}
+      allow_aggregations: true

@@ -38,25 +38,31 @@ CREATE TABLE "shows" (
 
 CREATE UNIQUE INDEX "show_name" ON "shows"("name");
 
+-- -- Show Episode Count
+-- CREATE VIEW show_episode_count AS
+--   SELECT author_id, avg(rating)
+--     FROM article
+--     GROUP BY show_id
+
 -- Show Hosts Function Table
 CREATE TABLE "show_hosts" (
-    "showId" TEXT NOT NULL REFERENCES "shows"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    "personId" TEXT NOT NULL REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "show_hosts_id" PRIMARY KEY ("showId", "personId")
+    show_id TEXT NOT NULL REFERENCES "shows"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    person_id TEXT NOT NULL REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "show_hosts_id" PRIMARY KEY (show_id, person_id)
 );
 
 -- Hasura Flattening Views
 CREATE VIEW show_hosts_view AS
-SELECT "showId",
+SELECT show_id,
     people.*
 FROM show_hosts
-    LEFT JOIN people ON show_hosts."personId" = people.id;
+    LEFT JOIN people ON show_hosts.person_id = people.id;
 
 CREATE VIEW host_shows_view AS
-SELECT "personId",
+SELECT person_id,
     shows.*
 FROM show_hosts
-    LEFT JOIN shows ON show_hosts."showId" = shows.id;
+    LEFT JOIN shows ON show_hosts.show_id = shows.id;
 
 
 -- Technologies
@@ -106,17 +112,17 @@ CREATE TABLE "episodes" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "draft" BOOLEAN NOT NULL DEFAULT TRUE,
     "title" TEXT NOT NULL,
-    "showId" TEXT NOT NULL REFERENCES shows("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    show_id TEXT NOT NULL REFERENCES shows("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     "live" BOOLEAN NOT NULL DEFAULT true,
-    "scheduledFor" TIMESTAMP,
+    scheduled_for TIMESTAMP,
     CONSTRAINT is_live CHECK (
         (NOT "live")
-        OR ("scheduledFor" IS NOT NULL)
+        OR (scheduled_for IS NOT NULL)
     ),
     "startedAt" TIMESTAMP,
     "finishedAt" TIMESTAMP,
-    "youtubeId" TEXT,
-    "youtubeCategory" INTEGER,
+    youtube_id TEXT,
+    youtube_category INTEGER,
     "chapters" chapter [] DEFAULT array []::chapter [],
     "links" TEXT [] DEFAULT array []::TEXT []
 );
@@ -124,41 +130,41 @@ CREATE TABLE "episodes" (
 
 -- Episode Guests
 CREATE TABLE "episode_guests" (
-    "episodeId" TEXT NOT NULL REFERENCES "episodes"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    "personId" TEXT NOT NULL REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "episode_guests_id" PRIMARY KEY ("episodeId", "personId")
+    episode_id TEXT NOT NULL REFERENCES "episodes"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    person_id TEXT NOT NULL REFERENCES "people"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "episode_guests_id" PRIMARY KEY (episode_id, person_id)
 );
 
 -- Hasura Flattening Views
 CREATE VIEW episode_guests_view AS
-SELECT "episodeId",
+SELECT episode_id,
     people.*
 FROM episode_guests
-    LEFT JOIN people ON episode_guests."personId" = people.id;
+    LEFT JOIN people ON episode_guests.person_id = people.id;
 
 CREATE VIEW guest_episodes_view AS
-SELECT "personId",
+SELECT person_id,
     episodes.*
 FROM episode_guests
-    LEFT JOIN episodes ON episode_guests."episodeId" = episodes.id;
+    LEFT JOIN episodes ON episode_guests.episode_id = episodes.id;
 
 
 -- Episode Technologies
 CREATE TABLE "episode_technologies" (
-    "episodeId" TEXT NOT NULL REFERENCES "episodes"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    "technologyId" TEXT NOT NULL REFERENCES "technologies"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "episode_technologies_id" PRIMARY KEY ("episodeId", "technologyId")
+    episode_id TEXT NOT NULL REFERENCES "episodes"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    technology_id TEXT NOT NULL REFERENCES "technologies"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "episode_technologies_id" PRIMARY KEY (episode_id, technology_id)
 );
 
 -- Hasura Flattening Views
 CREATE VIEW episode_technologies_view AS
-SELECT "episodeId",
+SELECT episode_id,
     technologies.*
 FROM episode_technologies
-    LEFT JOIN technologies ON episode_technologies."technologyId" = technologies.id;
+    LEFT JOIN technologies ON episode_technologies.technology_id = technologies.id;
 
 CREATE VIEW technology_episodes_view AS
-SELECT "technologyId",
+SELECT technology_id,
     episodes.*
 FROM episode_technologies
-    LEFT JOIN episodes ON episode_technologies."episodeId" = episodes.id;
+    LEFT JOIN episodes ON episode_technologies.episode_id = episodes.id;

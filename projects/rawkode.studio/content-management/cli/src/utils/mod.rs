@@ -396,7 +396,7 @@ impl InMemoryDatabase {
 
     async fn sync_episodes(self, pool: &sqlx::Pool<Postgres>) -> Result<Self> {
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            r#"INSERT INTO episodes ("id", "title", "showId", "live", "scheduledFor", "youtubeId", "youtubeCategory", "links", "chapters", "draft")"#,
+            r#"INSERT INTO episodes ("id", "title", "show_id", "live", "scheduled_for", "youtube_id", "youtube_category", "links", "chapters", "draft")"#,
         );
 
         query_builder.push_values(self.episodes.iter(), |mut q, (id, episode)| {
@@ -442,11 +442,11 @@ impl InMemoryDatabase {
             r#" ON CONFLICT ("id") DO UPDATE
             SET
                 "title" = EXCLUDED."title",
-                "showId" = EXCLUDED."showId",
+                "show_id" = EXCLUDED."show_id",
                 "live" = EXCLUDED."live",
-                "scheduledFor" = EXCLUDED."scheduledFor",
-                "youtubeId" = EXCLUDED."youtubeId",
-                "youtubeCategory" = EXCLUDED."youtubeCategory",
+                "scheduled_for" = EXCLUDED."scheduled_for",
+                "youtube_id" = EXCLUDED."youtube_id",
+                "youtube_category" = EXCLUDED."youtube_category",
                 "links" = EXCLUDED."links",
                 "chapters" = EXCLUDED."chapters",
                 "draft" = EXCLUDED."draft"
@@ -499,7 +499,7 @@ impl InMemoryDatabase {
             None
         } else {
             let mut query_builder =
-                QueryBuilder::new(r#"INSERT INTO episode_guests ("episodeId", "personId")"#);
+                QueryBuilder::new(r#"INSERT INTO episode_guests ("episode_id", "person_id")"#);
 
             query_builder.push_values(
                 episodes_with_guests.clone(),
@@ -508,7 +508,7 @@ impl InMemoryDatabase {
                 },
             );
 
-            query_builder.push(r#" ON CONFLICT ("episodeId", "personId") DO NOTHING;"#);
+            query_builder.push(r#" ON CONFLICT ("episode_id", "person_id") DO NOTHING;"#);
 
             Some(query_builder)
         }
@@ -533,7 +533,7 @@ impl InMemoryDatabase {
             None
         } else {
             let mut query_builder = QueryBuilder::new(
-                r#"INSERT INTO episode_technologies ("episodeId", "technologyId")"#,
+                r#"INSERT INTO episode_technologies ("episode_id", "technology_id")"#,
             );
 
             query_builder.push_values(
@@ -543,7 +543,7 @@ impl InMemoryDatabase {
                 },
             );
 
-            query_builder.push(r#" ON CONFLICT ("episodeId", "technologyId") DO NOTHING;"#);
+            query_builder.push(r#" ON CONFLICT ("episode_id", "technology_id") DO NOTHING;"#);
 
             Some(query_builder)
         }

@@ -18,16 +18,16 @@ configuration:
 array_relationships:
   - name: episodes
     using:
-     foreign_key_constraint_on:
-       column: showId
-       table:
-         name: episodes
-         schema: public
+      foreign_key_constraint_on:
+        column: show_id
+        table:
+          name: episodes
+          schema: public
   - name: hosts
     using:
       manual_configuration:
         column_mapping:
-          id: showId
+          id: show_id
         insertion_order: null
         remote_table:
           name: show_hosts_view
