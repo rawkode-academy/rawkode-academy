@@ -14,14 +14,14 @@ section p {
 
 .section--hero {
   position: inherit;
-  height: 50vh;
+  height: auto;
   color: var(--white);
   z-index: 5;
 }
 
 .section--hero h1,
 .section--hero p {
-  max-width: 85%;
+  max-width: 100%;
   text-shadow: 4px 4px rgb(0 0 0 / 5%);
 }
 
@@ -51,7 +51,7 @@ section p {
 
   .section--hero h1,
   .section--hero p {
-    max-width: 85%;
+    max-width: 100%;
   }
 
   .section--shows {
@@ -62,11 +62,11 @@ section p {
 @media only screen and (min-width: 1200px) {
 
   .section--hero h1 {
-    max-width: 50%;
+    max-width: 75%;
   }
 
   .section--hero p {
-    max-width: 40%;
+    max-width: 75%;
   }
 }
 
