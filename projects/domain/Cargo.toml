@@ -1,0 +1,10 @@
+[package]
+name = "domain"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+
+[dependencies]
+serde = { version = "1.0.152", features = ["derive"] }
+typeshare = "1.0.0"

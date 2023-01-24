@@ -1,0 +1,8 @@
+go:
+  typeshare ./ --lang=go --output-file=out/types.go
+
+typescript:
+  typeshare ./ --lang=typescript --output-file=out/types.ts
+
+swift:
+  typeshare ./ --lang=swift --output-file=out/types.swift
