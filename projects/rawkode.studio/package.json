@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "@dagger.io/dagger": "^0.3.0",
+    "@dagger.io/dagger": "^0.3.1",
     "@rawkode.academy/dagger": "^0.0.1",
     "@types/node": "18.11.18",
     "ts-node": "^10.9.1",
