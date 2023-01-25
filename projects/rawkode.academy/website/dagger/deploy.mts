@@ -2,6 +2,7 @@ import Client from "@dagger.io/dagger";
 import { Container } from "@dagger.io/dagger/dist/api/client.gen.js";
 import { createActionAuth } from "@octokit/auth-action";
 import { Octokit } from "@octokit/rest";
+import dnsDeploy from "@rawkode.academy/core-dns/dagger/deploy.mjs";
 import { PullRequest } from "@rawkode.academy/dagger/github/index.js";
 import { DaggerCommand } from "@rawkode.academy/dagger/index.mjs";
 import { resolveSecret } from "@rawkode.academy/dagger/secrets/index.mjs";
@@ -26,22 +27,29 @@ const execute = async (client: Client, tasuku: TaskInnerAPI): Promise<void> => {
 			break;
 	}
 
+	// Dependencies
+	await tasuku.task("Dependencies", async (taskuku) =>
+		taskuku.task.group((task) => [
+			task("Core DNS", async (tasuku) => {
+				dnsDeploy.execute(client, tasuku);
+			}),
+		]),
+	);
+
 	const sourcePath = getSourceDir(`${import.meta.url}/..`);
 
 	const cloudflareApiToken = (
-		await tasuku.task(
-			"Fetching Secrets from 1Password ...",
-			async () =>
-				await resolveSecret({
-					vault: "sa.rawkode.academy",
-					item: "Cloudflare",
-					key: "password",
-				}),
+		await tasuku.task("Fetching Secrets from 1Password ...", async () =>
+			resolveSecret({
+				vault: "sa.rawkode.academy",
+				item: "Cloudflare",
+				key: "password",
+			}),
 		)
 	).result;
 
 	const npmInstallFiles = client.host().directory(sourcePath, {
-		include: ["package.json", "package-lock.json"],
+		include: ["package.json", "pnpm-lock.yaml"],
 	});
 
 	const npmInstall = client
@@ -51,7 +59,7 @@ const execute = async (client: Client, tasuku: TaskInnerAPI): Promise<void> => {
 		.withWorkdir("/app")
 		.withExec(["corepack", "enable"])
 		.withExec(["corepack", "prepare", "pnpm@latest", "--activate"])
-		.withExec(["pnpm", "install"]);
+		.withExec(["pnpm", "install", "--no-optional", "--frozen-lockfile"]);
 
 	const sourceDirectory = client.host().directory(sourcePath, {
 		exclude: [".git", "node_modules"],

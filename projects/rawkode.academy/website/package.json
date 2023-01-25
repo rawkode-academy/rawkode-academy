@@ -10,18 +10,13 @@
     "build": "astro build",
     "preview": "astro preview"
   },
-  "devDependencies": {
+  "dependencies": {
     "@astrojs/lit": "^1.0.1",
     "@astrojs/preact": "^1.1.0",
     "@astrojs/react": "^1.1.3",
     "@astrojs/svelte": "^1.0.0",
     "@astrojs/tailwind": "^2.0.2",
-    "@dagger.io/dagger": "^0.3.1",
     "@iconify/svelte": "^3.0.0",
-    "@octokit/auth-action": "^2.0.2",
-    "@octokit/rest": "^19.0.5",
-    "@octokit/types": "^8.0.0",
-    "@rawkode.academy/dagger": "0.0.1",
     "@tailwindcss/typography": "^0.5.7",
     "@types/node": "18.11.18",
     "@types/react": "18.0.26",
@@ -37,11 +32,21 @@
     "rome": "^11.0.0",
     "svelte": "^3.50.1",
     "tailwindcss": "^3.1.8",
-    "tasuku": "^2.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
     "ts-node": "^10.9.1",
     "typescript": "4.9.4",
-    "uuid": "^9.0.0",
     "vite": "^3.0.0",
     "wrangler": "2.8.1"
+  },
+  "optionalDependencies": {
+    "@dagger.io/dagger": "^0.3.1",
+    "@octokit/auth-action": "^2.0.2",
+    "@octokit/rest": "^19.0.5",
+    "@octokit/types": "^8.0.0",
+    "@rawkode.academy/dagger": "0.0.1",
+    "@rawkode.academy/core-dns": "workspace:*",
+    "tasuku": "^2.0.0"
   }
 }
