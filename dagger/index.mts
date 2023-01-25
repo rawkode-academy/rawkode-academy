@@ -3,12 +3,12 @@ import Client, { connect } from "@dagger.io/dagger";
 import { Command } from "commander";
 import * as fs from "fs";
 import { default as inquirer } from "inquirer";
-import { stringify } from "qs";
+import task, { TaskInnerAPI } from "tasuku";
 
 export interface DaggerCommand {
 	name: string;
 	description: string;
-	execute: (client: Client) => any;
+	execute: (client: Client, task: TaskInnerAPI) => any;
 }
 
 const daggerCli = new Command();
@@ -48,14 +48,19 @@ for (const command of commands) {
 		.command(localCommand.name)
 		.description(localCommand.description)
 		.action(async () => {
-			await connect(
-				async (client: Client) => {
-					await localCommand.execute(client);
-				},
-				{
-					LogOutput: globalOptions.logAll ? process.stdout : undefined,
-				},
-			);
+			task("Connecting to Dagger", async ({ task }) => {
+				await connect(
+					async (client: Client) => {
+						await task(
+							localCommand.description,
+							async (taskApi) => await localCommand.execute(client, taskApi),
+						);
+					},
+					{
+						LogOutput: globalOptions.logAll ? process.stdout : undefined,
+					},
+				);
+			});
 		});
 }
 
@@ -81,14 +86,19 @@ const defaultCommand = daggerCli
 			throw new Error("Couldn't find command");
 		}
 
-		await connect(
-			async (client: Client) => {
-				await c.execute(client);
-			},
-			{
-				LogOutput: globalOptions.logAll ? process.stdout : undefined,
-			},
-		);
+		task("Connecting to Dagger", async ({ task }) => {
+			await connect(
+				async (client: Client) => {
+					await task(
+						c.description,
+						async (taskApi) => await c.execute(client, taskApi),
+					);
+				},
+				{
+					LogOutput: globalOptions.logAll ? process.stdout : undefined,
+				},
+			);
+		});
 	});
 
 await daggerCli.parseAsync();
