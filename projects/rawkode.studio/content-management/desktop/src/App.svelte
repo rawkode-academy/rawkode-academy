@@ -1,39 +1,74 @@
 <script lang="ts">
-  import Greet from './lib/Greet.svelte'
+  import {
+    Header,
+    Content,
+    Row,
+    Column,
+    Grid,
+    Tile,
+    HeaderAction,
+    HeaderNav,
+    HeaderNavItem,
+    HeaderGlobalAction,
+    HeaderNavMenu,
+  } from "carbon-components-svelte";
+  import Episodes from "./pages/Episodes.svelte";
+  import Index from "./pages/Index.svelte";
+  import People from "./pages/People.svelte";
+  import Shows from "./pages/Shows.svelte";
+  import Technologies from "./pages/Technologies.svelte";
+
+  const pages = [
+    "home",
+    "shows",
+    "episodes",
+    "technologies",
+    "people",
+  ] as const;
+
+  type Page = typeof pages[number];
+
+  let selectedPage: Page = "home";
+
+  function changePage(page: Page): void {
+    selectedPage = page;
+  }
+
+  function capitalize(value: string): string {
+    return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+  }
 </script>
 
-<main class="container">
-  <h1>Welcome to Tauri!</h1>
+<Header company="RAWKODE" platformName="studio">
+  <HeaderNav>
+    {#each pages as page}
+      <HeaderNavItem
+        href="#"
+        text={capitalize(page)}
+        on:click={() => changePage(page)}
+      />
+    {/each}
+  </HeaderNav>
+</Header>
 
-  <div class="row">
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-
-  <p>
-    Click on the Tauri, Vite, and Svelte logos to learn more.
-  </p>
-
-  <div class="row">
-    <Greet />
-  </div>
-
-
-</main>
-
-<style>
-  .logo.vite:hover {
-    filter: drop-shadow(0 0 2em #747bff);
-  }
-
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00);
-  }
-</style>
+<Content>
+  <Grid>
+    <Row>
+      <Column>
+        {#if selectedPage === "home"}
+          <Index />
+        {:else if selectedPage === "shows"}
+          <Shows />
+        {:else if selectedPage === "episodes"}
+          <Episodes />
+        {:else if selectedPage === "technologies"}
+          <Technologies />
+        {:else if selectedPage === "people"}
+          <People />
+        {:else}
+          <Index />
+        {/if}
+      </Column>
+    </Row>
+  </Grid>
+</Content>

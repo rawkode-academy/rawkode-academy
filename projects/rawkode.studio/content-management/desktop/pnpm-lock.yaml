@@ -6,6 +6,8 @@ specifiers:
   '@tauri-apps/cli': ^1.2.2
   '@tsconfig/svelte': ^3.0.0
   '@types/node': ^18.7.10
+  carbon-components-svelte: ^0.72.1
+  carbon-icons-svelte: ^11.4.0
   rome: ^11.0.0
   svelte: ^3.54.0
   svelte-check: ^3.0.0
@@ -22,6 +24,8 @@ devDependencies:
   '@tauri-apps/cli': 1.2.2
   '@tsconfig/svelte': 3.0.0
   '@types/node': 18.11.18
+  carbon-components-svelte: 0.72.1
+  carbon-icons-svelte: 11.4.0
   rome: 11.0.0
   svelte: 3.55.1
   svelte-check: 3.0.2_svelte@3.55.1
@@ -494,6 +498,16 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /carbon-components-svelte/0.72.1:
+    resolution: {integrity: sha512-OUpt5ogvDzXo2iSOGwQXxbjIw2Q1W4TC1qm27y1lHyqehy78A9ZodsUP6bUZeVGZ5ZlMMcB2ODXLP6kfZpWKvA==}
+    dependencies:
+      flatpickr: 4.6.9
+    dev: true
+
+  /carbon-icons-svelte/11.4.0:
+    resolution: {integrity: sha512-p/llZde2kP2BI9SOqM+QFKGfQnYrW+4dVxF1rAYriEADXDsjt9EYlh+KpQ5qf4JpXAq+e2+TB/r/lIG1xdUbAQ==}
+    dev: true
+
   /chokidar/3.5.3:
     resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==}
     engines: {node: '>= 8.10.0'}
@@ -591,6 +605,10 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       to-regex-range: 5.0.1
+    dev: true
+
+  /flatpickr/4.6.9:
+    resolution: {integrity: sha512-F0azNNi8foVWKSF+8X+ZJzz8r9sE1G4hl06RyceIaLvyltKvDl6vqk9Lm/6AUUCi5HWaIjiUbk7UpeE/fOXOpw==}
     dev: true
 
   /fs.realpath/1.0.0:
