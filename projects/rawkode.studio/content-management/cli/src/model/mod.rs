@@ -29,38 +29,37 @@ where
 
     let captures = DURATION
         .captures(value.as_str())
-        .ok_or_else(|| serde::de::Error::custom(format!("Cannot parse Duration from {}", value)))?;
+        .ok_or_else(|| serde::de::Error::custom(format!("Cannot parse Duration from {value}")))?;
 
     match (captures.get(1), captures.get(2), captures.get(3)) {
         (Some(hours), Some(minutes), Some(seconds)) => {
             let hours = hours.as_str().parse::<i64>().map_err(|_| {
-                serde::de::Error::custom(format!("Cannot parse hours from {:?}", hours))
+                serde::de::Error::custom(format!("Cannot parse hours from {hours:?}"))
             })?;
 
             let minutes = minutes.as_str().parse::<i64>().map_err(|_| {
-                serde::de::Error::custom(format!("Cannot parse minutes from {:?}", minutes))
+                serde::de::Error::custom(format!("Cannot parse minutes from {minutes:?}"))
             })?;
 
             let seconds = seconds.as_str().parse::<i64>().map_err(|_| {
-                serde::de::Error::custom(format!("Cannot parse seconds from {:?}", seconds))
+                serde::de::Error::custom(format!("Cannot parse seconds from {seconds:?}"))
             })?;
 
             Ok(Duration::hours(hours) + Duration::minutes(minutes) + Duration::seconds(seconds))
         }
         (Some(minutes), Some(seconds), None) => {
             let minutes = minutes.as_str().parse::<i64>().map_err(|_| {
-                serde::de::Error::custom(format!("Cannot parse minutes from {:?}", minutes))
+                serde::de::Error::custom(format!("Cannot parse minutes from {minutes:?}"))
             })?;
 
             let seconds = seconds.as_str().parse::<i64>().map_err(|_| {
-                serde::de::Error::custom(format!("Cannot parse seconds from {:?}", seconds))
+                serde::de::Error::custom(format!("Cannot parse seconds from {seconds:?}"))
             })?;
 
             Ok(Duration::minutes(minutes) + Duration::seconds(seconds))
         }
         _ => Err(serde::de::Error::custom(format!(
-            "Cannot parse Duration from {}",
-            value
+            "Cannot parse Duration from {value}"
         ))),
     }
 }

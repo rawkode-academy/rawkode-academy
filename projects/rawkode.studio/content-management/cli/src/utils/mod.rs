@@ -211,12 +211,9 @@ impl InMemoryDatabase {
                     .any(|(_, person)| *guest == person.github)
                 {
                     errors.push(DependencyError {
-                        source_code: format!(
-                            "Cannot find person '{}' for episode '{}'.",
-                            guest, id
-                        ),
+                        source_code: format!("Cannot find person '{guest}' for episode '{id}'."),
                         model_name: "person".to_string(),
-                        help: format!("Add a person with the name '{}'.", guest),
+                        help: format!("Add a person with the name '{guest}'."),
                     })
                 }
             }
@@ -235,11 +232,10 @@ impl InMemoryDatabase {
                 {
                     errors.push(DependencyError {
                         source_code: format!(
-                            "Cannot find technology '{}' for episode '{}'.",
-                            technology, id
+                            "Cannot find technology '{technology}' for episode '{id}'."
                         ),
                         model_name: "technology".to_string(),
-                        help: format!("Add a technology with the name '{}'.", technology),
+                        help: format!("Add a technology with the name '{technology}'."),
                     })
                 }
             }
@@ -250,9 +246,9 @@ impl InMemoryDatabase {
             for host in show.hosts.as_ref().unwrap_or(&Vec::<String>::new()).iter() {
                 if !self.people.iter().any(|(_, person)| *host == person.github) {
                     errors.push(DependencyError {
-                        source_code: format!("Cannot find person '{}' for show '{}'.", host, id),
+                        source_code: format!("Cannot find person '{host}' for show '{id}'."),
                         model_name: "person".to_string(),
-                        help: format!("Add a person with the name '{}'.", host),
+                        help: format!("Add a person with the name '{host}'."),
                     })
                 }
             }
