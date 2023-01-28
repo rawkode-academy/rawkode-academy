@@ -76,8 +76,8 @@
 
         <div class="flex-shrink-0 flex items-center px-4">
           <img
-            src="/logo-white.png"
-            alt="Rawkode Academy logo"
+            src="/logo-primary.svg"
+            alt="Rawkode Academy"
             width="150"
             height="40"
           />
