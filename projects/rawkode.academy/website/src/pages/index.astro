@@ -82,20 +82,18 @@ const companies = [{
     <div class="shows__container">
       {shows.map(
         (show: Show) => (
-        //  <a href={`/shows/${show.id}`} class="shows__card">
-            <div class="shows__card">
-              <div class="card__image">
-                <img src="/academy-logo-circular.svg" height="128" width="128" />
-              </div>
-              <div class="card__copy">
-                <p class="card__heading"><strong>{show.name}</strong></p>
-                <p class="card__sub-heading">{show.episodes_aggregate.aggregate.count} episodes</p>
-                <p class="card__description">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed maximus risus ac justo imperdiet, sed pretium neque maximus.
-                </p>
-              </div>
+          <a href={`/shows/${show.id}`} class="shows__card">
+            <div class="card__image">
+              <img src="/academy-logo-circular.svg" height="128" width="128" />
             </div>
-          //</a>
+            <div class="card__copy">
+              <p class="card__heading"><strong>{show.name}</strong></p>
+              <p class="card__sub-heading">{show.episodes_aggregate.aggregate.count} episodes</p>
+              <p class="card__description">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed maximus risus ac justo imperdiet, sed pretium neque maximus.
+              </p>
+            </div>
+          </a>
         )
       )}
     </div>
