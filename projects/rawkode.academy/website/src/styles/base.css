@@ -99,10 +99,12 @@ header {
   align-items: center;
   justify-content: space-between;
   background: linear-gradient(100deg, var(--academy-teal) 25%, var(--academy-green) 75%);
+  border-radius: 0 0 1rem 1rem;
 }
 
 header.alternative {
   background: transparent;
+  border-radius: 0;
 }
 
 .content {

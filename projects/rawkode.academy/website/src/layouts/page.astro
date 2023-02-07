@@ -13,7 +13,7 @@ export interface Props {
 const meta = Astro.props.frontmatter as Props || Astro.props as Props;
 ---
 
-<BaseLayout>
+<BaseLayout title={meta.title}>
   <Header style="standard" />
   <Breadcrumbs
     client:load
@@ -21,12 +21,5 @@ const meta = Astro.props.frontmatter as Props || Astro.props as Props;
     title={meta.title}
     breadcrumbs={meta.breadcrumbs}
   />
-  <main class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <h1>{meta.title}</h1>
-    </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <slot />
-    </div>
-  </main>
+  <slot />
 </BaseLayout>

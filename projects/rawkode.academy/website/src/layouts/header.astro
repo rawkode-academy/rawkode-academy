@@ -5,7 +5,7 @@ import CommandToggler from "@components/command-toggler.svelte";
 const { style } = Astro.props;
 ---
 
-<header class={style === "alternative" ? 'alternative' : 'standard'}>
+<header class={style}>
   <NavToggler client:load />
   <div class="navigation">
     <a href="/">

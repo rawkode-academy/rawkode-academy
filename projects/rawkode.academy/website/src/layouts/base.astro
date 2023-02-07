@@ -1,9 +1,9 @@
 ---
 import MobileNavigation from "@components/navigation/mobile.svelte";
 import CommandK from "@components/commandk.svelte";
+import Footer from "./footer.astro";
 import "../styles/base.css";
 const meta = Astro.props.frontmatter || Astro.props;
-const year = new Date().getFullYear();
 ---
 
 <!DOCTYPE html>
@@ -47,8 +47,9 @@ const year = new Date().getFullYear();
     <div>
       <MobileNavigation client:load />
     </div>
-    <div class="content">
+    <main class="content">
       <slot />
+<<<<<<< HEAD
     </div>
     <footer>
       <div class="footer__links">
@@ -64,6 +65,10 @@ const year = new Date().getFullYear();
       </div>
       &copy;{year} Rawkode Academy
     </footer>
+=======
+    </main>
+    <Footer client:load />
+>>>>>>> 6f2aadc (feat: adding in the shows page)
   </body>
   <!-- Start of HubSpot Embed Code -->
   <script
