@@ -5,42 +5,52 @@ episode "klustered-klustered-teams-jetstack-crashbeerbackoff" {
     scheduled_for = "Aug 11, 2022"
     youtube_id = "Hognhpy3XyA"
     youtube_category = 24
-     links = [
+    links = [
     "https://rawkode.live/teleport",
-    "https://youtu.be/teB22ZuV_z8",
-    "https://youtu.be/JzGv36Pcq3g",
-    "https://youtu.be/Ps2CQm6_aZU",
-    "https://youtu.be/Cp6zvBIo5KM",
-    "https://youtu.be/Ju1WmHfK6t8",
-    "https://youtu.be/tmsqYWBTxEQ",
-    "https://youtu.be/Pd90XGptVec",
-    "https://youtu.be/QFxJWPF-QDk",
-    "https://youtu.be/1f6KTDo5WEo",
-    "https://youtu.be/RGaUhqgrsXE",
-    "https://youtu.be/K72fOdbxXu8",
-    "https://youtu.be/ysfUgYs4YYY",
-    "https://youtu.be/H2227nrkhOg",
-    "https://youtu.be/akJCvD0ASmw",
-    "https://youtu.be/5Rw7_1Yvm0U",
-    "https://youtu.be/4lMxlQ64Z7I",
-    "https://youtu.be/ozbE25Y_rcM",
-    "https://youtu.be/_BFbrrXKMOM",
-    "https://youtu.be/JvgpDTx1AZ0",
-    "https://youtu.be/_GZ8UuEZxbY",
-    "https://youtu.be/_BFbrrXKMOM",
-    "https://youtu.be/z0Lf303tKtQ",
-    "https://youtu.be/-k5y2C6HNa0",
-    "https://youtu.be/FClIbQ8hdxY",
     "https://twitter.com/rawkode",
     "https://rawkode.live/",
     "https://rawkode.live/chat",
-    "https://twitter.com/talossystems",
-    "https://github.com/talos-systems",
-    "https://www.talos-systems.com/",
-    "https://twitter.com/redhat",
-    "https://github.com/RedHatOfficial",
-    "https://www.redhat.com/"
-  ]
+    "https://kubernetes.io/",
+    "https://twitter.com/kubernetesio",
+    "https://github.com/kubernetes/kubernetes"
+    ]
+  description = <<-EOF 
+  SUMMARY
+  This episode of Klustered has teams Jetstack and CrashBeerBackOff fighting the API server , troubleshooting iptables and dabbling into `nft`
+
+  LESSONS LEARNED
+  - nftables(`nft`) is the modern Linux kernel packet classification framework, it Simplifies dual stack IPv4/IPv6 administration and has better support for dynamic ruleset updates.
+  - notice something odd? Don't hesitate to call it out, one of the breaks in this episode could have bee fixed a lot faster if this was done.
+  
+  USEFUL COMMANDS
+  The `ps` command + `grep` is a great way to quickly search for process currently running 
+
+  ALL THE BREAKS
+
+  Broken control plane
+  Fixers quickly realized something was limiting the pods ablility to print logs,  this was quickly resolved by editing the `max_container_log_line_size` in the containerd configuration file , this lead them to discover the next break. 
+
+  Broken Kubecontroller 
+  When fixers tried to update the deployment they noticed deployments were not being submitted.
+
+  To fix this the deployment controller was enabled via the static manifests. 
+
+  Outdated deplyoments 
+  after enabling the deployment controller the fixers noticed the changes that deployment were not being applied.
+
+  The cause of this was a man in the middle proxy which kept applying a [dry run](https://kubernetes.io/docs/reference/kubectl/conventions/#kubectl-run) to the request. 
+
+  Missing Certs 
+  while investigating one of the broken nodes, the fixers noticed the kubelet was unable to load CA certificates. 
+
+  The fix was to rename the certificates file. 
+
+  Broken API server 
+  When the fixers tried to run kubectl commands ,the api server seemed to be refusing connections. 
+
+  The fix was to delete a cron job which kept changing the secure port for the API server via the static manifests 
+
+  EOF 
 
   
 }
