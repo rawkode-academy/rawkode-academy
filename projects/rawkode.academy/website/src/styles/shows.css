@@ -63,3 +63,7 @@
     width: 335px;
   }
 }
+
+.shows__container--latest {
+  background-color: var(--light-grey);
+}
