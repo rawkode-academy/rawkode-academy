@@ -16,10 +16,10 @@ episode "klustered-klustered-teams-jetstack-crashbeerbackoff" {
     ]
   description = <<-EOF 
   SUMMARY
-  This episode of Klustered has teams Jetstack and CrashBeerBackOff fighting the API server , troubleshooting iptables and dabbling into `nft`
+  This episode of Klustered has teams Jetstack and CrashBeerBackOff fighting the API server,troubleshooting iptables and dabbling into `nft`
 
   LESSONS LEARNED
-  - nftables(`nft`) is the modern Linux kernel packet classification framework, it Simplifies dual stack IPv4/IPv6 administration and has better support for dynamic ruleset updates.
+  - [nftables](https://wiki.nftables.org/wiki-nftables/index.php/What_is_nftables%3F) (`nft`) is the modern Linux kernel packet classification framework, it Simplifies dual stack IPv4/IPv6 administration and has better support for dynamic ruleset updates.
   - notice something odd? Don't hesitate to call it out, one of the breaks in this episode could have bee fixed a lot faster if this was done.
   
   USEFUL COMMANDS
