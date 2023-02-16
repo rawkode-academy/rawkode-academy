@@ -2,7 +2,7 @@ episode "klustered-klustered-teams-jetstack-crashbeerbackoff" {
     title =  "Klustered Teams: Jetstack & CrashBeerBackOff"
     draft = false 
     show = "klustered"
-    scheduled_for = "Aug 11, 2022"
+    scheduled_for = "2022-08-11"
     youtube_id = "Hognhpy3XyA"
     youtube_category = 24
     links = [
@@ -20,7 +20,7 @@ episode "klustered-klustered-teams-jetstack-crashbeerbackoff" {
 
   LESSONS LEARNED
   - [nftables](https://wiki.nftables.org/wiki-nftables/index.php/What_is_nftables%3F) (`nft`) is the modern Linux kernel packet classification framework, it Simplifies dual stack IPv4/IPv6 administration and has better support for dynamic ruleset updates.
-  - notice something odd? Don't hesitate to call it out, one of the breaks in this episode could have bee fixed a lot faster if this was done.
+  - notice something odd? Don't hesitate to call it out, one of the breaks in this episode could have been fixed a lot faster if this was done.
   
   USEFUL COMMANDS
   The `ps` command + `grep` is a great way to quickly search for process currently running 
