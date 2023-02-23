@@ -2,7 +2,7 @@ episode "klustered-klustered-Marino-Wijay-John-Anderson" {
     title =  "Marino Wijay & John Anderson Klustered"
     draft = false 
     show = "klustered"
-    scheduled_for = "2022-05-12"
+    scheduled_for = "2022-05-12T17:30:00Z"
     youtube_id = "51b2imc6OPM"
     youtube_category = 24
     links = [
