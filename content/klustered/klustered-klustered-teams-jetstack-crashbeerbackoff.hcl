@@ -2,7 +2,7 @@ episode "klustered-klustered-teams-jetstack-crashbeerbackoff" {
     title =  "Klustered Teams: Jetstack & CrashBeerBackOff"
     draft = false 
     show = "klustered"
-    scheduled_for = "2022-08-11"
+    scheduled_for = "2022-08-12T06:03:18Z"
     youtube_id = "Hognhpy3XyA"
     youtube_category = 24
     links = [
