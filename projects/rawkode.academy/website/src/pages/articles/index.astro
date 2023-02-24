@@ -1,0 +1,22 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/page.astro";
+
+const allArticles = await getCollection("articles");
+const pageTitle = "Articles";
+---
+
+<BaseLayout title={pageTitle} breadcrumbs={[]}>
+  <p>Stuff</p>
+  <ul>
+    {
+      allArticles.map((article) => (
+        <a href={article.slug}>
+          <p>
+            <p>SUMMARY</p>
+          </p>
+        </a>
+      ))
+    }
+  </ul>
+</BaseLayout>
