@@ -10,6 +10,7 @@ import rawkoDe from "./domains/rawko.de";
 import rawkodeAcademy from "./domains/rawkode.academy";
 import rawkodeChat from "./domains/rawkode.chat";
 import rawkodeCloud from "./domains/rawkode.cloud";
+import rawkodeEmail from "./domains/rawkode.email";
 import rawkodeStudio from "./domains/rawkode.studio";
 import rawkodeCommunity from "./domains/rawkode.community";
 import rawkodeLink from "./domains/rawkode.link";
@@ -33,6 +34,7 @@ class CoreDns extends TerraformStack {
 		rawkodeChat(this);
 		rawkodeCloud(this);
 		rawkodeCommunity(this);
+		rawkodeEmail(this);
 		rawkodeLink(this);
 		rawkodeNews(this);
 		rawkodeStudio(this);
