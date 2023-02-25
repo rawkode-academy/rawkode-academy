@@ -1,29 +1,31 @@
 ---
 import Layout from "../layouts/page.astro";
-const breadcrumbs = [{
-  title: 'Want To Work Together?',
-  href: '/work-together'
-}]
+const breadcrumbs = [
+  {
+    title: "Want To Work Together?",
+    href: "/work-together",
+  },
+];
 ---
 
 <Layout title="Want to Work Together?" breadcrumbs={breadcrumbs}>
-  <div id="my-reform"></div>
+  <p class="pt-8 pb-8">
+    I'm excited to discuss partnering with you and your organization. Fill in
+    this form and I'll be in touch as asoon as I can.
+  </p>
+  <div id="contact-form"></div>
 
-  <script id="reform-script" src="https://embed.reform.app/v1/embed.js"
+  <script
+    charset="utf-8"
+    type="text/javascript"
+    src="//js-eu1.hsforms.net/forms/embed/v2.js"
   ></script>
-
   <script>
-    window.Reform =
-      window.Reform ||
-      function () {
-        (Reform.q = Reform.q || []).push(arguments);
-      };
-  </script>
-  <script>
-    Reform("init", {
-      url: "https://forms.reform.app/rawkode/lets-work-together/f4ecca",
-      target: "#my-reform",
-      background: "transparent",
+    hbspt.forms.create({
+      region: "eu1",
+      portalId: "26236635",
+      formId: "467fba2f-02cd-4b61-85af-622989bc8b3b",
+      target: "#contact-form",
     });
   </script>
 </Layout>
