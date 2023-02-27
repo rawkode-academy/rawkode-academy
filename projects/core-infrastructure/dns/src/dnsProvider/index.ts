@@ -55,8 +55,12 @@ export class ManagedDomain extends Construct {
 		return this;
 	}
 
-	addTextRecord(name: string, value: string): ManagedDomain {
-		new Record(this, `txt-${name}`, {
+	addTextRecord(
+		name: string,
+		value: string,
+		suffix: string = "",
+	): ManagedDomain {
+		new Record(this, `txt-${name}${suffix}`, {
 			zoneId: this.cloudflareZone.id,
 			type: "TXT",
 			ttl: 300,
@@ -165,7 +169,8 @@ export class ManagedDomain extends Construct {
 			name: "@",
 			type: "TXT",
 			ttl: 3600,
-			value: '"v=spf1 include:_spf.google.com ~all"',
+			value:
+				'"v=spf1 include:_spf.google.com include:26236635.spf08.hubspotemail.net ~all"',
 		});
 
 		return this;
