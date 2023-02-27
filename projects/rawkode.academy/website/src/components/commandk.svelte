@@ -11,14 +11,14 @@
         window.location.assign("/");
       },
     },
-    // {
-    //   id: "Shows",
-    //   title: "Shows",
-    //   mdIcon: "attach_money",
-    //   handler: () => {
-    //     window.location.assign("/shows");
-    //   },
-    // },
+    {
+      id: "Shows",
+      title: "Shows",
+      mdIcon: "attach_money",
+      handler: () => {
+        window.location.assign("/shows");
+      },
+    },
     {
       id: "Prices",
       title: "Prices",

@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/page.astro';
+import EpisodeList from "@components/episode-list.svelte";
 import "../../styles/dynamic-show.css";
 
 const { key } = Astro.params;
@@ -60,28 +61,19 @@ const latest = show.episodes[episodeCount - 1]
   <div class="show__page">
     <div class="show__container">
       <div class="show__heading">
+        <a href="/shows">Back to Shows</a>
         <h1>{show.name}</h1>
         <p>{episodeCount} episodes</p>
-        <!-- <a href={`https://www.youtube.com/watch?v=${latest.youtube_id}`} target="_blank">
-          <h2>{latest.title}</h2>
-        </a> -->
       </div>
       <div class="show__video">
-        <img src={`https://img.youtube.com/vi/${latest.youtube_id}/hqdefault.jpg`} alt={latest.title} />
+        <img src={`https://img.youtube.com/vi/${latest.youtube_id}/maxresdefault.jpg`} alt={latest.title} />
         <!-- <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${latest.youtube_id}?&autoplay=1&mute=1&playsinline=1`} title="YouTube video player" frameborder="0" allowfullscreen></iframe> -->
       </div>
     </div>
     <div class="show__container">
       <h2>Episodes</h2>
       <div class="show__episode-list">
-        {show.episodes.filter((show, index) => index < 10).map(episode =>
-          <a href={`https://www.youtube.com/watch?v=${episode.youtube_id}`} target="_blank" class="episode__card">
-            <div class="episode__content">
-              <p>{episode.title}</p>
-              <img src={`https://img.youtube.com/vi/${episode.youtube_id}/hqdefault.jpg`} alt={episode.title} />
-            </div>
-          </a>
-        )}
+        <!-- <EpisodeList list={show.episdes} /> -->
       </div>
     </div>
   </div>
