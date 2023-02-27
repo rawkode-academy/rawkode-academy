@@ -20,10 +20,10 @@ export const menuItems = [
         regex: /^\/pricing$/,
     },
     {
-        title: "Contact",
+        title: "Let's Collaborate",
         exact: false,
-        href: "/contact",
+        href: "/work-together",
         icon: "mdi:account-box-outline",
-        regex: /^\/contact$/,
+        regex: /^\/work-together$/,
     },
 ];

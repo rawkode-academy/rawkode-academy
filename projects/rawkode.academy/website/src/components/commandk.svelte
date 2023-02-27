@@ -28,15 +28,7 @@
       },
     },
     {
-      id: "Contact Us",
-      title: "Contact Us",
-      mdIcon: "email",
-      handler: () => {
-        window.location.assign("/contact");
-      },
-    },
-    {
-      id: "Work Together",
+      id: "Let's Collaborate",
       title: "Let's Work Together?",
       mdIcon: "handshake",
       handler: () => {

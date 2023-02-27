@@ -1,12 +1,12 @@
 ---
 title: "Pricing Information"
 breadcrumbs: []
-layout: '../layouts/page.astro'
+layout: "../layouts/page.astro"
 ---
 
 Thanks for taking the time to look at my pricing information. As someone that's just gone out on their own away from the support of a large organisation, I'd excited to know that you're interested in working together.
 
-When you're ready to start a conversation, [get in touch here](/contact).
+When you're ready to start a conversation, [get in touch here](/work-together).
 
 **Hourly rates start at 400 USD.**
 
