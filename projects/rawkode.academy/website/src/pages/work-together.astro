@@ -9,23 +9,15 @@ const breadcrumbs = [
 ---
 
 <Layout title="Want to Work Together?" breadcrumbs={breadcrumbs}>
-  <p class="pt-8 pb-8">
-    I'm excited to discuss partnering with you and your organization. Fill in
-    this form and I'll be in touch as asoon as I can.
-  </p>
-  <div id="contact-form"></div>
-
+  <!-- Start of Meetings Embed Script -->
+  <div
+    class="meetings-iframe-container"
+    data-src="http://connect.rawkode.academy/meetings/rawkode/lets-collaborate?embed=true"
+  >
+  </div>
   <script
-    charset="utf-8"
     type="text/javascript"
-    src="//js-eu1.hsforms.net/forms/embed/v2.js"
+    src="https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js"
   ></script>
-  <script>
-    hbspt.forms.create({
-      region: "eu1",
-      portalId: "26236635",
-      formId: "467fba2f-02cd-4b61-85af-622989bc8b3b",
-      target: "#contact-form",
-    });
-  </script>
+  <!-- End of Meetings Embed Script -->
 </Layout>
