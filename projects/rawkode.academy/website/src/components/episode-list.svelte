@@ -1,18 +1,12 @@
 <script>
- import InfiniteScroll from "svelte-infinite-scroll";
   export let list;
 
-  let page = 0;
+  let page = 1;
   let size = 14;
-  let episodes = [];
-
-  $:episodes = [
-    ...episodes,
-    ...list.slice(size * page, size * (page + 1) - 1)
-  ];
 </script>
-<ul>
-  {#each episodes as episode}
+
+<ul class="episodes__list">
+  {#each list.slice(0, (page * size)) as episode}
   <li>
     <a href={`https://www.youtube.com/watch?v=${episode.youtube_id}`} target="_blank" class="episode__card" rel="noreferrer">
       <div class="episode__content">
@@ -21,10 +15,8 @@
       </div>
     </a>
   </li>
-
 {/each}
-
-
-<InfiniteScroll threshold={0} on:loadMore={() => {page++; console.log('LOAD MORE')}} />
 </ul>
-
+{#if (page * size) < list.length}
+<button on:click={() => {page++;}} type="button" class="button--load-more">Load more</button>
+{/if}
