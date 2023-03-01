@@ -1,31 +1,30 @@
 <script>
-  import InfiniteLoading from 'svelte-infinite-loading';
+ import InfiniteScroll from "svelte-infinite-scroll";
   export let list;
 
-  function infiniteHandler({ detail: { loaded, complete } }) {
-		fetch(`${api}&page=${page}`)
-			.then(response => response.json())
-			.then(data => {
-        if (data.hits.length) {
-          page += 1;
-          list = [...list, ...data.hits];
-          loaded();
-        } else {
-          complete();
-        }
-      });
-	}
-</script>
+  let page = 0;
+  let size = 14;
+  let episodes = [];
 
-<div>
-  {#each list as episode}
+  $:episodes = [
+    ...episodes,
+    ...list.slice(size * page, size * (page + 1) - 1)
+  ];
+</script>
+<ul>
+  {#each episodes as episode}
+  <li>
     <a href={`https://www.youtube.com/watch?v=${episode.youtube_id}`} target="_blank" class="episode__card" rel="noreferrer">
       <div class="episode__content">
         <p>{episode.title}</p>
         <img src={`https://img.youtube.com/vi/${episode.youtube_id}/hqdefault.jpg`} alt={episode.title} />
       </div>
     </a>
-  {/each}
+  </li>
 
-  <InfiniteLoading on:infinite={infiniteHandler} />
-</div>
+{/each}
+
+
+<InfiniteScroll threshold={0} on:loadMore={() => {page++; console.log('LOAD MORE')}} />
+</ul>
+

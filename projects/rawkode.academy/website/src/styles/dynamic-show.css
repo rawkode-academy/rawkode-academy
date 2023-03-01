@@ -78,12 +78,7 @@
   display: flex;
   gap: 0.25rem;
   align-items: center;
-  overflow-x: scroll;
-  scrollbar-width: none;
-}
-
-.show__episode-list::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
 }
 
 .episode__card {
