@@ -62,7 +62,7 @@ const latest = show.episodes[episodeCount - 1]
       <div class="show__heading">
         <a href="/shows"><img src="/chevron-left.svg" alt="chevron left" height="24" width="24" />Back to Shows</a>
         <h1>{show.name}</h1>
-        <p>{episodeCount} episodes</p>
+        <p>{episodeCount} episode{episodeCount === 1 ? '' : 's'}</p>
         <p class="show__description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed maximus risus ac justo imperdiet, sed pretium neque maximus.</p>
       </div>
       <div class="show__video">
@@ -73,7 +73,7 @@ const latest = show.episodes[episodeCount - 1]
     <div class="show__container">
       <h2>Episodes</h2>
       <div class="show__episode-list">
-        <EpisodeList list={show.episodes} />
+        <EpisodeList list={show.episodes} client:load />
       </div>
     </div>
   </div>

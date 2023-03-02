@@ -54,7 +54,7 @@ const breadcrumbs = [{
           </div>
           <div class="card__copy">
             <p class="card__heading"><strong>{show.name}</strong></p>
-            <p class="card__sub-heading">{show.episodes_aggregate.aggregate.count} episodes</p>
+            <p class="card__sub-heading">{show.episodes_aggregate.aggregate.count} episode{show.episodes_aggregate.aggregate.count === 1 ? '' : 's'}</p>
             <p class="card__description">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed maximus risus ac justo imperdiet, sed pretium neque maximus.
             </p>

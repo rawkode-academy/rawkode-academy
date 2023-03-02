@@ -94,6 +94,34 @@
   flex-wrap: wrap;
 }
 
+.show__episode-list li {
+  width: 100%;
+}
+
+@media only screen and (min-width: 567px) {
+  .show__episode-list li {
+    width: 50%;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .show__episode-list li {
+    width: 50%;
+  }
+}
+
+@media only screen and (min-width: 992px) {
+  .show__episode-list li {
+    width: 33.33%;
+  }
+}
+
+@media only screen and (min-width: 1540px) {
+  .show__episode-list li {
+    width: 25%;
+  }
+}
+
 .episode__card {
   display: flex;
   position: relative;
@@ -126,6 +154,7 @@
 .episodes__list {
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .button--load-more {
@@ -140,6 +169,12 @@
   font-weight: 600;
   margin: 2.5rem auto;
   transition: all 300ms ease-in-out;
+}
+
+.end-of-episodes {
+  text-align: center;
+  margin: 4rem auto;
+  font-size: 1.25rem;
 }
 
 @keyframes backgroundAnimation {
