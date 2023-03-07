@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@astrojs/cloudflare': ^6.1.3
   '@astrojs/lit': ^1.2.0
   '@astrojs/mdx': ^0.17.2
   '@astrojs/partytown': ^1.0.3
@@ -40,6 +41,7 @@ specifiers:
   wrangler: 2.8.1
 
 dependencies:
+  '@astrojs/cloudflare': 6.1.3_astro@2.0.15
   '@astrojs/lit': 1.2.0_kewr24t7sr7b5nv6q46shpnasu
   '@astrojs/mdx': 0.17.2_astro@2.0.15
   '@astrojs/preact': 2.0.3_preact@10.11.3
@@ -90,6 +92,16 @@ packages:
     dependencies:
       '@jridgewell/gen-mapping': 0.1.1
       '@jridgewell/trace-mapping': 0.3.17
+    dev: false
+
+  /@astrojs/cloudflare/6.1.3_astro@2.0.15:
+    resolution: {integrity: sha512-RKYW6RxFWb6QqcNbMpKl1M87tJ8lDMTBy1iGu/vD4WSJ/XDcTYsXneVYvShikkjv6dGWM7yCOUA3/j/yg0WJwA==}
+    peerDependencies:
+      astro: ^2.0.11
+    dependencies:
+      astro: 2.0.15_@types+node@18.11.18
+      esbuild: 0.15.18
+      tiny-glob: 0.2.9
     dev: false
 
   /@astrojs/compiler/0.31.4:

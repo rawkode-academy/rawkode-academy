@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 
+import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import partytown from "@astrojs/partytown";
 import react from "@astrojs/react";
@@ -8,6 +9,8 @@ import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
+  output: "server",
+  adapter: cloudflare(),
   integrations: [
     mdx(),
     partytown({
@@ -20,5 +23,4 @@ export default defineConfig({
     svelte(),
     tailwind({ config: { applyBaseStyles: false } }),
   ],
-  output: 'server'
 });

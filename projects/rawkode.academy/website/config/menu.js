@@ -12,12 +12,6 @@ export const menuItems = [
         href: "/shows",
         icon: "mdi:play-box-outline",
         regex: /^\/shows$/,
-    }, {
-        title: "Prices",
-        exact: false,
-        href: "/pricing",
-        icon: "mdi:cash",
-        regex: /^\/pricing$/,
     },
     {
         title: "Let's Collaborate",
