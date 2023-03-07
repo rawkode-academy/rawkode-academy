@@ -22,13 +22,6 @@ export const menuItems: MenuItem[] = [
 	//   regex: /^\/shows$/,
 	// },
 	{
-		title: "Prices",
-		exact: false,
-		href: "/pricing",
-		icon: "mdi:cash",
-		regex: /^\/pricing$/,
-	},
-	{
 		title: "Let's Collaborate",
 		exact: false,
 		href: "/work-together",

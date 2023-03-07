@@ -9,15 +9,21 @@ const breadcrumbs = [
 ---
 
 <Layout title="Want to Work Together?" breadcrumbs={breadcrumbs}>
-  <!-- Start of Meetings Embed Script -->
-  <div
-    class="meetings-iframe-container"
-    data-src="https://connect.rawkode.academy/meetings/rawkode/lets-collaborate?embed=true"
-  >
-  </div>
-  <script
-    type="text/javascript"
-    src="https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js"
-  ></script>
-  <!-- End of Meetings Embed Script -->
+  <div id="booking-page"></div>
+
+  <script is:inline>
+    window.SavvyCal =
+      window.SavvyCal ||
+      function () {
+        (SavvyCal.q = SavvyCal.q || []).push(arguments);
+      };
+  </script>
+  <script is:inline async src="https://embed.savvycal.com/v1/embed.js"></script>
+  <script is:inline>
+    SavvyCal("init");
+    SavvyCal("inline", {
+      link: "RawkodeAcademy/3901fffb",
+      selector: "#booking-page",
+    });
+  </script>
 </Layout>
