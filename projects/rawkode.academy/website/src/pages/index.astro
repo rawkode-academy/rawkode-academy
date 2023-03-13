@@ -1,4 +1,5 @@
 ---
+import Typewriter from "typewriter-effect";
 import Layout from "../layouts/base.astro";
 import Header from "../layouts/header.astro";
 import "../styles/homepage.css";
@@ -8,7 +9,7 @@ interface Show {
   episodes_aggregate: {
     aggregate: {
       count: number;
-    }
+    };
   };
 }
 interface Company {
@@ -17,12 +18,11 @@ interface Company {
   image: string;
   url: string;
 }
-const response = await fetch("https://api.rawkode.academy/v1/graphql",
-  {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      query: `
+const response = await fetch("https://api.rawkode.academy/v1/graphql", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    query: `
         query MyQuery {
           getShows {
             id
@@ -34,87 +34,142 @@ const response = await fetch("https://api.rawkode.academy/v1/graphql",
             }
           }
         }
-        `
-    }),
-  });
+        `,
+  }),
+});
 const json = await response.json();
 const shows = json.data ? json.data.getShows : [];
-const companies = [{
-  id: "armo",
-  name: "Armo",
-  image: "armo-logo.svg",
-  url: ""
-}, {
-  id: "equinix-metal",
-  name: "Equinix Metal",
-  image: "equinix-metal-logo.svg",
-  url: ""
-}, {
-  id: "fermyon",
-  name: "Fermyon",
-  image: "fermyon-logo.png",
-  url: ""
-}, {
-  id: "komodor",
-  name: "Komodor",
-  image: "komodor-logo.png",
-  url: ""
-}, {
-  id: "teleport",
-  name: "Teleport",
-  image: "teleport-logo.svg",
-  url: ""
-}]
+const companies = [
+  {
+    id: "armo",
+    name: "Armo",
+    image: "armo-logo.svg",
+    url: "",
+  },
+  {
+    id: "equinix-metal",
+    name: "Equinix Metal",
+    image: "equinix-metal-logo.svg",
+    url: "",
+  },
+  {
+    id: "fermyon",
+    name: "Fermyon",
+    image: "fermyon-logo.png",
+    url: "",
+  },
+  {
+    id: "komodor",
+    name: "Komodor",
+    image: "komodor-logo.png",
+    url: "",
+  },
+  {
+    id: "teleport",
+    name: "Teleport",
+    image: "teleport-logo.svg",
+    url: "",
+  },
+];
 ---
 
 <Layout title="Rawkode Academy - The Cloud Native Education Platform">
   <div class="background">
     <Header style="alternative" />
     <section class="section--hero">
-      <h1>Helping Senior Developers, Platform Engineers, and Infrastructure Operators Level Up with Kubernetes.</h1>
-      <p>From one-off projects to in-person training, Rawkode Academy can help harness and enhance your company's technology infrastructure.</p>
+      <h1>
+        Helping<br />
+        <Typewriter
+          client:load
+          options={{
+            strings: [
+              "Developers",
+              "Platform Engineers",
+              "Infrastructure Operators",
+            ],
+            autoStart: true,
+            loop: true,
+          }}
+        />
+        Level Up with Kubernetes.
+      </h1>
+
+      <p>
+        From one-off projects to in-person training, Rawkode Academy can help
+        harness and enhance your company's technology infrastructure.
+      </p>
       <a href="/work-together">Let's work together</a>
     </section>
   </div>
   <section class="section--shows">
     <h2>Shows</h2>
-    <p>New shows every week with the latest tips, tricks and deep dives into all things Cloud Native, Kubernetes, DevOps and so much more.</p>
+    <p>
+      New shows every week with the latest tips, tricks and deep dives into all
+      things Cloud Native, Kubernetes, DevOps and so much more.
+    </p>
     <div class="shows__container">
-      {shows.map(
-        (show: Show) => (
+      {
+        shows.map((show: Show) => (
           <a href={`/shows/${show.id}`} class="shows__card">
             <div class="card__image">
               <img src="/academy-logo-circular.svg" height="128" width="128" />
             </div>
             <div class="card__copy">
-              <p class="card__heading"><strong>{show.name}</strong></p>
-              <p class="card__sub-heading">{show.episodes_aggregate.aggregate.count} episode{show.episodes_aggregate.aggregate.count === 1 ? '' : 's'}</p>
+              <p class="card__heading">
+                <strong>{show.name}</strong>
+              </p>
+              <p class="card__sub-heading">
+                {show.episodes_aggregate.aggregate.count} episode
+                {show.episodes_aggregate.aggregate.count === 1 ? "" : "s"}
+              </p>
               <p class="card__description">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed maximus risus ac justo imperdiet, sed pretium neque maximus.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+                maximus risus ac justo imperdiet, sed pretium neque maximus.
               </p>
             </div>
           </a>
-        )
-      )}
+        ))
+      }
     </div>
   </section>
   <section class="section--endorsements">
     <h2>Partners</h2>
-    <p>These companies have had first-hand expertise delivered to them by Rawkode Academy.</p>
+    <p>
+      These companies have had first-hand expertise delivered to them by Rawkode
+      Academy.
+    </p>
     <div class="companies__container">
-      {companies.map(
-        (company: Company) => (
+      {
+        companies.map((company: Company) => (
           <a href={company.url} class="company__card">
-            <img src={`/${company.image}`} alt={company.name} height="100%" width="100%" />
+            <img
+              src={`/${company.image}`}
+              alt={company.name}
+              height="100%"
+              width="100%"
+            />
             <p class="sr-only">{company.name}</p>
           </a>
-        )
-      )}
+        ))
+      }
     </div>
     <div class="testimonials__container">
       <div class="testimonials__card">
-        <p>"Rawkode has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services."</p>
-        <p>Mikkel Mork Hegnhoj - <a href="https://fermyon.com" target="_blank" rel="noopener noreferrer">Fermyon</a></p>
+        <p>
+          "Rawkode has done an amazing job helping developers be introduced to
+          the world of server-side WebAssembly, promoting Spin project and
+          Fermyon Cloud. We've heard from many developers, that the Advent of
+          Spin challenges, created by Rawkode, was the perfect opportunity to
+          get hands-on, and we've seen notable results in developers joining our
+          community and using our services."
+        </p>
+        <p>
+          Mikkel Mork Hegnhoj - <a
+            href="https://fermyon.com"
+            target="_blank"
+            rel="noopener noreferrer">Fermyon</a
+          >
+        </p>
       </div>
     </div>
   </section>
@@ -123,7 +178,12 @@ const companies = [{
     <p>A list of the technologies that we use and can train.</p>
     <div class="technologies__container">
       <div>
-        <img src="/kubernetes-icon.svg" height="100" width="100" alt="Kubernetes" />
+        <img
+          src="/kubernetes-icon.svg"
+          height="100"
+          width="100"
+          alt="Kubernetes"
+        />
         <p>Kubernetes</p>
       </div>
       <div>
@@ -151,7 +211,12 @@ const companies = [{
         <p>Fluentd</p>
       </div>
       <div>
-        <img src="/opa-icon.svg" height="100" width="100" alt="Open Policy Agent" />
+        <img
+          src="/opa-icon.svg"
+          height="100"
+          width="100"
+          alt="Open Policy Agent"
+        />
         <p>Open Policy Agent</p>
       </div>
       <div>
@@ -175,11 +240,21 @@ const companies = [{
         <p>Kubscape</p>
       </div>
       <div>
-        <img src="/webassembly-icon.svg" height="100" width="100" alt="WebAssembly" />
+        <img
+          src="/webassembly-icon.svg"
+          height="100"
+          width="100"
+          alt="WebAssembly"
+        />
         <p>WebAssembly</p>
       </div>
       <div>
-        <img src="/telepresence-icon.svg" height="100" width="100" alt="Telepresence" />
+        <img
+          src="/telepresence-icon.svg"
+          height="100"
+          width="100"
+          alt="Telepresence"
+        />
         <p>Telepresence</p>
       </div>
       <div>
@@ -195,7 +270,12 @@ const companies = [{
         <p>Pulumi</p>
       </div>
       <div>
-        <img src="/prometheus-icon.svg" height="100" width="100" alt="Prometheus" />
+        <img
+          src="/prometheus-icon.svg"
+          height="100"
+          width="100"
+          alt="Prometheus"
+        />
         <p>Prometheus</p>
       </div>
       <div>
@@ -227,7 +307,10 @@ const companies = [{
   <section class="section--work-together">
     <div>
       <h2>Lets work together</h2>
-      <p>With an insatiable love for technology, we are always on the hunt to learn and share knowledge with others in fun and exciting ways.</p>
+      <p>
+        With an insatiable love for technology, we are always on the hunt to
+        learn and share knowledge with others in fun and exciting ways.
+      </p>
       <a href="/work-together">Get in touch</a>
     </div>
     <img src="/rawkode-hero.png" width="380" height="500" />
