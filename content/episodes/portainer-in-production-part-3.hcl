@@ -52,7 +52,9 @@ episode "portainer-in-production-part-3" {
 
   In this video we through Portainer ' s Edge APIs for administering remote compute nodes with the Portainer agent.
 
-  Using cdktf to automate the provisioning of some bare metal devices on Equinix Metal, We ' ll also take a look at edge devices and stacks and we will wrap by using edge jobs to perform a routine task.
+  Using cdktf we'll automate the provisioning of baremetal servers. We'll also take a look at edge devices and stacks. 
+  
+  Then we will wrap by taking a look at edge jobs and how we can leverage them to perform routine tasks.
   EOF
 
 }
