@@ -7,6 +7,13 @@ export const menuItems = [
         regex: /^\/$/,
     },
     {
+      title: "Services",
+      exact: true,
+      href: "/services",
+      icon: "mdi:account-box-outline",
+      regex: /^\/services$/,
+    },
+    {
         title: "Shows",
         exact: false,
         href: "/shows",

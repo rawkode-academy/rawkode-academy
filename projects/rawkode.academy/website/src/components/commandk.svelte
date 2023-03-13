@@ -12,19 +12,19 @@
       },
     },
     {
-      id: "Shows",
-      title: "Shows",
-      mdIcon: "attach_money",
+      id: "Services",
+      title: "Services",
+      mdIcon: "info",
       handler: () => {
-        window.location.assign("/shows");
+        window.location.assign("/services");
       },
     },
     {
-      id: "Prices",
-      title: "Prices",
-      mdIcon: "attach_money",
+      id: "Shows",
+      title: "Shows",
+      mdIcon: "tv",
       handler: () => {
-        window.location.assign("/pricing");
+        window.location.assign("/shows");
       },
     },
     {

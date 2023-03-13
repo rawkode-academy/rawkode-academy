@@ -1,0 +1,30 @@
+---
+layout: ../layouts/page.astro
+breadcrumbs: []
+title: About
+---
+
+import Feature3 from "../components/feature3.astro";
+
+<Feature3
+  title="Services"
+  subtitle="Our mission is to level up your Community, Developers, Product, and Teams"
+  features={[
+    {
+      title: "Startup Advisor",
+      subtitle: "Helping your startup find product market fit",
+      icon: "mdi:medal",
+    },
+    {
+      title: "Experienced DevRel",
+      subtitle: "Helping you inspire, educate, and support your developers",
+      icon: "mdi:video-vintage",
+    },
+    {
+      title: "Educator & Trainer",
+      subtitle:
+        "Distilling complex Cloud Native & Kubernetes knowledge for your teams",
+      icon: "mdi:dumbbell",
+    },
+  ]}
+/>
