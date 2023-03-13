@@ -38,7 +38,8 @@ episode "portainer-in-production-part-2" {
   description = < < -EOF
   ### SUMMARY
   Portainer is an open-source container management tool that allows users to easily deploy, manage and monitor Docker containers and Kubernetes clusters.
-  In this video, we will walk through the process of continuously deploying your application from Git with Portainer Stacks.We will show you how to create a Docker Compose file to deploy EdgeDB containers, once our database is up and running we will create a new Portainer stack to deploy our application.
+  In this video, we will walk through the process of continuously deploying your application from Git with Portainer Stacks.
+	We will show you how to create a Docker Compose file to deploy EdgeDB containers, once our database is up and running we will create a new Portainer stack to deploy our application.
   Finally, we will configure webhooks for our stacks, so that Portainer will automatically pull the latest changes from our Git repository and redeploy our application whenever there are new updates.
   EOF
 
