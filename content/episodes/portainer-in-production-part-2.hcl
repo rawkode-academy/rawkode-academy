@@ -1,10 +1,10 @@
 episode "portainer-in-production-part-2" {
-  title = "Continuously Deploy with GitOps | Portainer in Production "
-  draft = false
-  show = ""
-  live = false
-  scheduled_for = "2022-12-09T17:08:49Z"
-  youtube_id = "TeF0wEEUd8c"
+  title            = "Continuously Deploy with GitOps | Portainer in Production "
+  draft            = false
+  show             = ""
+  live             = false
+  scheduled_for    = "2022-12-09T17:08:49Z"
+  youtube_id       = "TeF0wEEUd8c"
   youtube_category = 24
   links = [
     "https://github.com/RawkodeAcademy/portainer-in-production",
@@ -34,12 +34,12 @@ episode "portainer-in-production-part-2" {
     time = "00:14:03"
   }
 
-  
-  description = <<- EOF 
-   ### SUMMARY
-   Portainer is an open-source container management tool that allows users to easily deploy, manage and monitor Docker containers and Kubernetes clusters.
-   In this video, we will walk through the process of continuously deploying your application from Git with Portainer Stacks.We will show you how to create a Docker Compose file to deploy EdgeDB containers,once our database is up and running we will create a new Portainer stack to deploy our application.
-   Finally, we will configure webhooks for our stacks, so that Portainer will automatically pull the latest changes from our Git repository and redeploy our application whenever there are new updates.
+
+  description = < < -EOF
+  ### SUMMARY
+  Portainer is an open-source container management tool that allows users to easily deploy, manage and monitor Docker containers and Kubernetes clusters.
+  In this video, we will walk through the process of continuously deploying your application from Git with Portainer Stacks.We will show you how to create a Docker Compose file to deploy EdgeDB containers, once our database is up and running we will create a new Portainer stack to deploy our application.
+  Finally, we will configure webhooks for our stacks, so that Portainer will automatically pull the latest changes from our Git repository and redeploy our application whenever there are new updates.
   EOF
-    
+
 }
