@@ -12,6 +12,7 @@ import tailwind from "@astrojs/tailwind";
 export default defineConfig({
   output: "server",
   adapter: cloudflare(),
+  site: "https://rawkode.academy",
   integrations: [
     mdx(),
     partytown({
