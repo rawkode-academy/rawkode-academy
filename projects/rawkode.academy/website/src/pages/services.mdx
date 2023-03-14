@@ -4,6 +4,9 @@ breadcrumbs: []
 title: About
 ---
 
+import { BiDumbbell, BiMedal } from "react-icons/bi";
+import { MdOutlineMovieFilter } from "react-icons/md";
+
 import Feature3 from "../components/feature3.astro";
 
 <Feature3
@@ -13,18 +16,18 @@ import Feature3 from "../components/feature3.astro";
     {
       title: "Startup Advisor",
       subtitle: "Helping your startup find product market fit",
-      icon: "mdi:medal",
+      icon: BiMedal,
     },
     {
       title: "Experienced DevRel",
       subtitle: "Helping you inspire, educate, and support your developers",
-      icon: "mdi:video-vintage",
+      icon: MdOutlineMovieFilter,
     },
     {
       title: "Educator & Trainer",
       subtitle:
         "Distilling complex Cloud Native & Kubernetes knowledge for your teams",
-      icon: "mdi:dumbbell",
+      icon: BiDumbbell,
     },
   ]}
 />

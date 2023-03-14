@@ -1,5 +1,5 @@
 ---
-import { Icon } from "astro-icon";
+import { IconType } from "react-icons";
 
 interface Props {
   title: string;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 interface Feature {
-  icon: string;
+  icon: IconType;
   title: string;
   subtitle: string;
 }
@@ -32,10 +32,7 @@ const { title, subtitle, features } = Astro.props;
       {
         features.map((feature) => (
           <div>
-            <Icon
-              class="mx-auto mb-4 w-12 h-12 text-primary-600 dark:text-primary-500"
-              name={feature.icon}
-            />
+            <feature.icon className="mx-auto mb-4 w-12 h-12 text-primary-600 dark:text-primary-500" />
             <h3 class="mb-2 text-xl font-bold dark:text-white">
               {feature.title}
             </h3>
