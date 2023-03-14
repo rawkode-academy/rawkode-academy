@@ -7,6 +7,7 @@ title: About
 import { BiDumbbell, BiMedal } from "react-icons/bi";
 import { MdOutlineMovieFilter } from "react-icons/md";
 
+import ThreeColumns from "../components/three-columns.astro";
 import Feature3 from "../components/feature3.astro";
 
 <Feature3
@@ -14,20 +15,45 @@ import Feature3 from "../components/feature3.astro";
   subtitle="Our mission is to level up your Community, Developers, Product, and Teams"
   features={[
     {
-      title: "Startup Advisor",
-      subtitle: "Helping your startup find product market fit",
+      title: "Startup Consultant",
+      subtitle:
+        "Helping your startup find product market fit and establish a strong foundation",
       icon: BiMedal,
+      activities: [
+        "Persona Development",
+        "Refine Value Proposition",
+        "Establish Customer Feedback Loop",
+        "App & Cloud Architecture Reviews",
+        "Platform Engineering",
+        "CI/CD Pipelines",
+      ],
     },
     {
       title: "Experienced DevRel",
       subtitle: "Helping you inspire, educate, and support your developers",
       icon: MdOutlineMovieFilter,
+      activities: [
+        "Community Building",
+        "Technical Writing",
+        "Video Production",
+        "Live Streams",
+        "Course Development",
+        "Developer Advocacy",
+      ],
     },
     {
       title: "Educator & Trainer",
       subtitle:
         "Distilling complex Cloud Native & Kubernetes knowledge for your teams",
       icon: BiDumbbell,
+      activities: [
+        "Kubernetes (Developers)",
+        "Kubernetes (Operators)",
+        "Service Mesh",
+        "Monitoring & Observability",
+        "Infrastructure as Code",
+        "Platform Engineering",
+      ],
     },
   ]}
 />
