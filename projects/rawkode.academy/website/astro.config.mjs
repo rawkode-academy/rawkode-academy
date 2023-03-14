@@ -4,9 +4,11 @@ import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import partytown from "@astrojs/partytown";
 import react from "@astrojs/react";
-import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
+
+// Doesn't work with SSR
+import sitemap from "@astrojs/sitemap";
 
 
 export default defineConfig({
@@ -21,7 +23,6 @@ export default defineConfig({
       },
     }),
     react(),
-    sitemap(),
     svelte(),
     tailwind({ config: { applyBaseStyles: false } }),
   ],
