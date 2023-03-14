@@ -9,13 +9,15 @@ import { MdOutlineMovieFilter } from "react-icons/md/index.js";
 
 import ThreeColumns from "../components/three-columns.astro";
 import Feature3 from "../components/feature3.astro";
+import Testimonial from "../components/testimonial.astro";
+import LogoCloud from "../components/logo-cloud.astro";
 
 <Feature3
   title="Services"
   subtitle="Our mission is to level up your Community, Developers, Product, and Teams"
   features={[
     {
-      title: "Startup Consultant",
+      title: "Startup Consultancy",
       subtitle:
         "Helping your startup find product market fit and establish a strong foundation",
       icon: BiMedal,
@@ -29,7 +31,7 @@ import Feature3 from "../components/feature3.astro";
       ],
     },
     {
-      title: "Experienced DevRel",
+      title: "Developer Relations",
       subtitle: "Helping you inspire, educate, and support your developers",
       icon: MdOutlineMovieFilter,
       activities: [
@@ -42,7 +44,7 @@ import Feature3 from "../components/feature3.astro";
       ],
     },
     {
-      title: "Educator & Trainer",
+      title: "Private Training",
       subtitle:
         "Distilling complex Cloud Native & Kubernetes knowledge for your teams",
       icon: BiDumbbell,
@@ -57,3 +59,7 @@ import Feature3 from "../components/feature3.astro";
     },
   ]}
 />
+
+<Testimonial />
+
+<LogoCloud />
