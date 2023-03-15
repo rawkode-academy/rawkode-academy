@@ -1,9 +1,10 @@
 import { Construct } from "constructs";
-import { ManagedDomain, Account } from "../dnsProvider";
+import { ManagedDomain, Registrar } from "../dnsProvider";
 
 export default (scope: Construct): ManagedDomain => {
-	const managedDomain = new ManagedDomain(scope, "rawko.de", Account.Academy);
+	const managedDomain = new ManagedDomain(scope, "rawko.de", Registrar.Gandi);
 
 	managedDomain.discourageEmail().setupShortIO("@");
+
 	return managedDomain;
 };

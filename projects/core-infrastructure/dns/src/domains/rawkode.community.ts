@@ -1,16 +1,14 @@
 import { Construct } from "constructs";
-import { ManagedDomain, Account } from "../dnsProvider";
+import { ManagedDomain, Registrar } from "../dnsProvider";
 
 export default (scope: Construct): ManagedDomain => {
 	const managedDomain = new ManagedDomain(
 		scope,
 		"rawkode.community",
-		Account.Academy,
+		Registrar.Gandi,
 	);
 
-	managedDomain
-		.discourageEmail()
-		.addCNameRecord("@", "hashnode.network")
-		.addCNameRecord("www", "hashnode.network");
+	managedDomain.discourageEmail().setupShortIO("@");
+
 	return managedDomain;
 };

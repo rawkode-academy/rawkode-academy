@@ -1,13 +1,14 @@
 import { Construct } from "constructs";
-import { ManagedDomain, Account } from "../dnsProvider";
+import { ManagedDomain, Registrar } from "../dnsProvider";
 
 export default (scope: Construct): ManagedDomain => {
 	const managedDomain = new ManagedDomain(
 		scope,
 		"klustered.live",
-		Account.Academy,
+		Registrar.Gandi,
 	);
 
 	managedDomain.discourageEmail().setupRebrandly("@");
+
 	return managedDomain;
 };

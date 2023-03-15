@@ -1,5 +1,6 @@
 import { Construct } from "constructs";
 import { Zone } from "@generatedProviders/cloudflare/zone";
+import { ZoneDnssec } from "@generatedProviders/cloudflare/zone-dnssec";
 import { Record } from "../../.gen/providers/cloudflare/record";
 import { Nameservers } from "../../.gen/providers/gandi/nameservers";
 
@@ -9,30 +10,45 @@ enum Email {
 	Discouraged,
 }
 
-export enum Account {
-	Academy = "0aeb879de8e3cdde5fb3d413025222ce",
+export enum Registrar {
+	Cloudflare,
+	Gandi,
+}
+
+interface GSuiteConfig {
+	domainKey: string;
+	spfIncludes: string[];
 }
 
 export class ManagedDomain extends Construct {
 	private readonly cloudflareZone: Zone;
 	private email: Email = Email.Unset;
 
-	constructor(scope: Construct, zone: string, accountId: Account) {
+	constructor(scope: Construct, zone: string, registrar: Registrar) {
 		super(scope, zone);
 
 		this.cloudflareZone = new Zone(this, "zone", {
 			zone,
-			accountId,
 		});
 
-		new Nameservers(this, "nameservers", {
-			domain: zone,
-			nameservers: this.cloudflareZone.nameServers,
-		});
+		switch (registrar) {
+			case Registrar.Cloudflare:
+				new ZoneDnssec(this, "dnssec", {
+					zoneId: this.cloudflareZone.id,
+				});
+				break;
+
+			case Registrar.Gandi:
+				new Nameservers(this, "nameservers", {
+					domain: zone,
+					nameservers: this.cloudflareZone.nameServers,
+				});
+				break;
+		}
 	}
 
-	addARecord(name: string, value: string): ManagedDomain {
-		new Record(this, `a-${name}`, {
+	addARecord(id: string, name: string, value: string): ManagedDomain {
+		new Record(this, id, {
 			zoneId: this.cloudflareZone.id,
 			type: "A",
 			ttl: 300,
@@ -43,8 +59,8 @@ export class ManagedDomain extends Construct {
 		return this;
 	}
 
-	addCNameRecord(name: string, value: string): ManagedDomain {
-		new Record(this, `cname-${name}`, {
+	addCNameRecord(id: string, name: string, value: string): ManagedDomain {
+		new Record(this, id, {
 			zoneId: this.cloudflareZone.id,
 			type: "CNAME",
 			ttl: 300,
@@ -55,12 +71,8 @@ export class ManagedDomain extends Construct {
 		return this;
 	}
 
-	addTextRecord(
-		name: string,
-		value: string,
-		suffix: string = "",
-	): ManagedDomain {
-		new Record(this, `txt-${name}${suffix}`, {
+	addTextRecord(id: string, name: string, value: string): ManagedDomain {
+		new Record(this, id, {
 			zoneId: this.cloudflareZone.id,
 			type: "TXT",
 			ttl: 300,
@@ -78,15 +90,7 @@ export class ManagedDomain extends Construct {
 
 			case Email.Unset:
 				this.email = Email.Discouraged;
-
-				new Record(this, "mx", {
-					zoneId: this.cloudflareZone.id,
-					name: "@",
-					type: "TXT",
-					ttl: 300,
-					value: '"v=spf1 ~all"',
-				});
-
+				this.addTextRecord("discourage-email", "@", '"v=spf1 ~all"');
 				return this;
 
 			case Email.Configured:
@@ -115,10 +119,56 @@ export class ManagedDomain extends Construct {
 			value: "in2-smtp.messagingengine.com.",
 		});
 
+		this.addTextRecord(
+			"spf",
+			"@",
+			'"v=spf1 include:spf.messagingengine.com ~all"',
+		);
+
+		for (let i = 1; i <= 3; i++) {
+			this.addCNameRecord(
+				`dkim${i}`,
+				`fm${i}._domainkey`,
+				`fm${i}.${this.cloudflareZone.zone}.dkim.fmhosted.com`,
+			);
+		}
+
+		new Record(this, "srv-submission", {
+			zoneId: this.cloudflareZone.id,
+			name: "_submission._tcp",
+			type: "SRV",
+			ttl: 3600,
+			value: "0 1 587 smtp.fastmail.com",
+		});
+
+		new Record(this, "srv-imap", {
+			zoneId: this.cloudflareZone.id,
+			name: "_imap._tcp",
+			type: "SRV",
+			ttl: 3600,
+			value: "0 0 0 .",
+		});
+
+		new Record(this, "srv-imaps", {
+			zoneId: this.cloudflareZone.id,
+			name: "_imaps._tcp",
+			type: "SRV",
+			ttl: 3600,
+			value: "0 0 0 imap.fastmail.com",
+		});
+
+		new Record(this, "srv-jmap", {
+			zoneId: this.cloudflareZone.id,
+			name: "_jmap._tcp",
+			type: "SRV",
+			ttl: 3600,
+			value: "0 1 443 api.fastmail.com",
+		});
+
 		return this;
 	}
 
-	enableGSuite(): ManagedDomain {
+	enableGSuite(config: GSuiteConfig): ManagedDomain {
 		new Record(this, "mx1", {
 			zoneId: this.cloudflareZone.id,
 			name: "@",
@@ -164,49 +214,32 @@ export class ManagedDomain extends Construct {
 			value: "alt4.aspmx.l.google.com.",
 		});
 
-		new Record(this, "spf", {
-			zoneId: this.cloudflareZone.id,
-			name: "@",
-			type: "TXT",
-			ttl: 3600,
-			value:
-				'"v=spf1 include:_spf.google.com include:26236635.spf08.hubspotemail.net ~all"',
-		});
+		this.addTextRecord(
+			"dkim",
+			"google._domainkey",
+			`"v=DKIM1; k=rsa; p=${config.domainKey}"`,
+		);
+
+		this.addTextRecord(
+			"spf",
+			"@",
+			`"v=spf1 include:_spf.google.com ${config.spfIncludes
+				.map((include) => `include:${include}`)
+				.join(" ")} ~all"`,
+		);
 
 		return this;
 	}
 
 	setupRebrandly(subdomain: string): ManagedDomain {
-		new Record(this, "rebrandly", {
-			zoneId: this.cloudflareZone.id,
-			name: subdomain,
-			type: "A",
-			ttl: 3600,
-			priority: 10,
-			value: "52.72.49.79",
-		});
+		this.addARecord("rebrandly", subdomain, "52.72.49.79");
 
 		return this;
 	}
 
 	setupShortIO(subdomain: string): ManagedDomain {
-		new Record(this, "shortio1", {
-			zoneId: this.cloudflareZone.id,
-			name: subdomain,
-			type: "A",
-			ttl: 3600,
-			priority: 10,
-			value: "52.21.33.16",
-		});
-
-		new Record(this, "shortio2", {
-			zoneId: this.cloudflareZone.id,
-			name: subdomain,
-			type: "A",
-			ttl: 3600,
-			priority: 10,
-			value: "52.59.165.42",
-		});
+		this.addARecord("shortio1", subdomain, "52.21.33.16");
+		this.addARecord("shortio2", subdomain, "52.59.165.42");
 
 		return this;
 	}
