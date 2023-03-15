@@ -21,6 +21,15 @@ export const menuItems = [
         regex: /^\/shows$/,
     },
     {
+        title: "Community",
+        exact: false,
+        href: "https://community.rawkode.academy",
+        icon: "mdi:account-group",
+        // Not used, but stops community getting underlined or marked as active
+        regex: /^\/community$/,
+        target: "_blank",
+    },
+    {
         title: "Let's Collaborate",
         exact: false,
         href: "/work-together",

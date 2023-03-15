@@ -87,6 +87,7 @@
             {#each menuItems as menuItem}
               <a
                 href={menuItem.href}
+                target={menuItem.target || "_self"}
                 class="text-white group flex items-center px-2 py-2 text-base font-medium rounded-md bg-black hover:bg-emerald-400 hover:text-white {url ==
                 menuItem.href
                   ? 'text-black font-semibold bg-gradient-to-br from-primary to-secondary'
