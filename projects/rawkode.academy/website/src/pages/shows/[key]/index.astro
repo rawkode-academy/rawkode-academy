@@ -1,5 +1,5 @@
 ---
-import Layout from "../../layouts/page.astro";
+import Layout from "../../../layouts/page.astro";
 import EpisodeList from "@components/episode-list.svelte";
 import "../../styles/dynamic-show.css";
 
@@ -35,6 +35,9 @@ const response = await fetch("https://api.rawkode.academy/v1/graphql", {
               links
               guests {
                 name
+              }
+              show {
+                id
               }
             }
           }

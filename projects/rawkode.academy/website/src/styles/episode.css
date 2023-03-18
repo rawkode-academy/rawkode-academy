@@ -1,0 +1,145 @@
+/* Episode page */
+.episode__page {
+  padding: 0 0 5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.episode__container {
+  display: flex;
+  flex-wrap: wrap;
+  height: 100%;
+  flex-direction: column;
+  margin-top: 0;
+  position: relative;
+}
+
+@media only screen and (min-width: 992px) {
+  .episode__container {
+    min-height: 50vh;
+  }
+}
+
+.episode__heading {
+  padding: 1.5rem;
+  flex: 1;
+  z-index: 5;
+}
+
+@media only screen and (min-width: 992px) {
+  .episode__heading {
+    padding: 2.5rem 1.5rem;
+    width: 75%;
+    margin: 0 auto;
+  }
+}
+
+.episode__heading h1,
+.episode__heading h2 {
+  color: var(--black);
+}
+
+.episode__heading a {
+  display: flex;
+  color: var(--academy-teal);
+}
+
+.episode__heading a img {
+  filter: brightness(0) saturate(100%) invert(53%) sepia(72%) saturate(2703%) hue-rotate(135deg) brightness(94%) contrast(97%);
+}
+
+.episode__heading a:hover {
+  text-decoration: underline;
+}
+
+.episode__video {
+  z-index: 0;
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  background-color: var(--light-grey);
+}
+
+.episode__video iframe {
+  width: 100%;
+  height: 260px;
+}
+
+@media only screen and (min-width: 992px) {
+  .episode__video {
+    width: 100%;
+    height: 100%;
+  }
+
+  .episode__video iframe {
+    width: 75%;
+    height: 75%;
+    margin: 0 auto;
+    max-width: 1280px;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+.episode__container h2 {
+  padding: 2.5rem 2.5rem 0;
+}
+
+.episode__chapters,
+.episode__links {
+  padding: 2.5rem 1.5rem;
+}
+
+.episode__chapters h2,
+.episode__links h2 {
+  padding: 0;
+}
+
+.episode__chapters {
+  display: flex;
+  flex-direction: column;
+}
+
+.episode__chapter-list {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.episode__chapters button {
+  white-space: nowrap;
+  display: inline-flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background-color: var(--light-grey);
+}
+
+.episode__chapters button:hover {
+  color: var(--white);
+  background-color: var(--academy-teal);
+}
+
+.episode__links {
+  display: flex;
+  flex-direction: column;
+}
+
+.episode__links a {
+  padding: 0.25rem 0;
+  text-decoration: underline;
+}
+
+.episode__links a:hover {
+  color: var(--academy-teal);
+}
+
+@media only screen and (min-width: 992px) {
+  .episode__chapters,
+  .episode__links {
+    width: 75%;
+    margin: 0 auto;
+  }
+}

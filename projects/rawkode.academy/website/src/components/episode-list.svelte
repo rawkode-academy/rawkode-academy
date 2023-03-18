@@ -19,7 +19,7 @@
 <ul class="episodes__list">
   {#each episodes as episode}
     <li>
-      <a href={`https://www.youtube.com/watch?v=${episode.youtube_id}`} target="_blank" class="episode__card" rel="noreferrer">
+      <a href={`/shows/${episode.show.id}/${episode.youtube_id}`} class="episode__card">
         <div class="episode__content">
           <p>{episode.title}</p>
           <img src={`https://img.youtube.com/vi/${episode.youtube_id}/hqdefault.jpg`} alt={episode.title} />
