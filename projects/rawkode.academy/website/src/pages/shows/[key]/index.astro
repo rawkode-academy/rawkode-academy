@@ -3,8 +3,6 @@ import Layout from "../../../layouts/page.astro";
 import EpisodeList from "@components/episode-list.svelte";
 import "../../../styles/dynamic-show.css";
 
-const { key } = Astro.params;
-
 interface Show {
   name: string;
   id: string;
@@ -15,13 +13,14 @@ interface Show {
   };
 }
 
-const response = await fetch("https://api.rawkode.academy/v1/graphql", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    query: `
+export const getStaticPaths = async () => {
+  const response = await fetch("https://api.rawkode.academy/v1/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `
         query MyQuery {
-          getShow(id: "${key}") {
+          getShows {
             id
             name
             episodes_aggregate {
@@ -29,6 +28,7 @@ const response = await fetch("https://api.rawkode.academy/v1/graphql", {
                 count
               }
             }
+
             episodes  {
               youtube_id
               title
@@ -43,17 +43,32 @@ const response = await fetch("https://api.rawkode.academy/v1/graphql", {
           }
         }
         `,
-  }),
-});
-const json = await response.json();
-const show = json.data ? json.data.getShow : null;
-if (!show) return Astro.redirect("/404");
+    }),
+  });
+  const json = await response.json();
+
+  console.debug(json.data);
+
+  return json.data.getShows.map((show) => {
+    return {
+      params: {
+        key: show.name.toLowerCase().replace(/ /g, "-"),
+      },
+      props: {
+        show,
+      },
+    };
+  });
+};
+
 const breadcrumbs = [
   {
     title: "Shows",
     href: "/shows",
   },
 ];
+
+const { show } = Astro.props;
 
 const episodeCount = show.episodes_aggregate.aggregate.count;
 const latest = show.episodes[episodeCount - 1];

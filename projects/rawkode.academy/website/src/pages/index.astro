@@ -3,6 +3,7 @@ import Typewriter from "typewriter-effect";
 import Layout from "../layouts/base.astro";
 import Header from "../layouts/header.astro";
 import "../styles/homepage.css";
+
 interface Show {
   name: string;
   id: string;
@@ -12,12 +13,14 @@ interface Show {
     };
   };
 }
+
 interface Company {
   name: string;
   id: string;
   image: string;
   url: string;
 }
+
 const response = await fetch("https://api.rawkode.academy/v1/graphql", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -37,8 +40,10 @@ const response = await fetch("https://api.rawkode.academy/v1/graphql", {
         `,
   }),
 });
+
 const json = await response.json();
 const shows = json.data ? json.data.getShows : [];
+
 const companies = [
   {
     id: "armo",
