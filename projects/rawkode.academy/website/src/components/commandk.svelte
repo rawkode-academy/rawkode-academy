@@ -32,7 +32,7 @@
       title: "Community",
       mdIcon: "group",
       handler: () => {
-        window.location.assign("https://community.rawkode.academy/c/announcements");
+        window.open('https://community.rawkode.academy', '_blank');
       },
     },
     {
