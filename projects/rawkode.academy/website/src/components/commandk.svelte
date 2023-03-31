@@ -28,8 +28,16 @@
       },
     },
     {
+      id: "Community",
+      title: "Community",
+      mdIcon: "group",
+      handler: () => {
+        window.location.assign("https://community.rawkode.academy/c/announcements");
+      },
+    },
+    {
       id: "Let's Collaborate",
-      title: "Let's Work Together?",
+      title: "Let's Collaborate",
       mdIcon: "handshake",
       handler: () => {
         window.location.assign("/work-together");
