@@ -2,8 +2,8 @@ name: ScribeSecurity
 
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - "main"
 
 jobs:
   scribe-report-test:
