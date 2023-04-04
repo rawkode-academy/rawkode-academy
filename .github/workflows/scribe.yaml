@@ -9,10 +9,6 @@ jobs:
   scribe-report-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
       - uses: actions/checkout@v3
 
       - name: SCM Generate BOM, Upload to Scribe
@@ -40,3 +36,16 @@ jobs:
           path: |
             ${{ steps.valint_bom_scm.outputs.OUTPUT_PATH }}
             ${{ steps.valint_bom_image.outputs.OUTPUT_PATH }}
+
+      - name: Generate SLSA provenance statement
+        id: valint_slsa_statement
+        uses: scribe-security/action-bom@master
+        with:
+          target: "ghcr.io/rawkodeacademy/klustered:v1"
+          format: statement-slsa
+          force: true
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: provenance
+          path: ${{ steps.valint_slsa_statement.outputs.OUTPUT_PATH }}
