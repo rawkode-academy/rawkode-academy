@@ -1,0 +1,42 @@
+name: ScribeSecurity
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  scribe-report-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/checkout@v3
+
+      - name: SCM Generate BOM, Upload to Scribe
+        id: valint_bom_scm
+        uses: scribe-security/action-bom@master
+        with:
+          type: dir
+          target: "projects/rawkode.academy/website"
+          scribe-enable: true
+          scribe-client-id: ${{ secrets.scribeSecurityClientid }}
+          scribe-client-secret: ${{ secrets.scribeSecurityClientsecret }}
+
+      - name: Container Image Generate BOM, Upload to Scribe
+        id: valint_bom_image
+        uses: scribe-security/action-bom@master
+        with:
+          target: "ghcr.io/rawkodeacademy/klustered:v1"
+          scribe-enable: true
+          scribe-client-id: ${{ secrets.scribeSecurityClientid }}
+          scribe-client-secret: ${{ secrets.scribeSecurityClientsecret }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: scribe-reports
+          path: |
+            ${{ steps.valint_bom_scm.outputs.OUTPUT_PATH }}
+            ${{ steps.valint_bom_image.outputs.OUTPUT_PATH }}
