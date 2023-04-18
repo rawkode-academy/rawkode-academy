@@ -1,0 +1,26 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:David Flanagan
+N:Flanagan;David;;;
+NICKNAME:Rawkode
+EMAIL;TYPE=INTERNET;TYPE=WORK:david@rawkode.academy
+item1.TEL:+44 ‪141 674 8547‬
+item1.X-ABLabel:Work
+item2.ADR:;;;Glasgow;;Scotland;UK;Glasgow\nScotland\nUK
+item2.X-ABLabel:
+item3.ORG:Rawkode Academy
+item3.X-ABLabel:
+item4.TITLE:Founder
+item4.X-ABLabel:
+item5.URL:https\://rawkode.academy
+item5.X-ABLabel:Website
+item6.URL:https\://rawkode.link/collaborate
+item6.X-ABLabel:Book Meeting
+item7.URL:https\://twitter.com/rawkode
+item7.X-ABLabel:Twitter
+item8.URL:https\://www.linkedin.com/in/rawkode
+item8.X-ABLabel:LinkedIn
+item9.URL:https\://youtube.com/@RawkodeAcademy
+item9.X-ABLabel:YouTube
+CATEGORIES:myContacts
+END:VCARD
