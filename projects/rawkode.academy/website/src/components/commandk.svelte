@@ -28,14 +28,6 @@
       },
     },
     {
-      id: "Community",
-      title: "Community",
-      mdIcon: "group",
-      handler: () => {
-        window.open('https://community.rawkode.academy', '_blank');
-      },
-    },
-    {
       id: "Let's Collaborate",
       title: "Let's Collaborate",
       mdIcon: "handshake",
