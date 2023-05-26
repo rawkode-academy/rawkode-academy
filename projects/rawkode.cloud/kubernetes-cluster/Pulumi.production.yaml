@@ -1,5 +1,0 @@
-secretsprovider: gcpkms://projects/rawkode-academy/locations/europe-west2/keyRings/automation/cryptoKeys/platform
-encryptedkey: CiQAugE6kY69L/zQi55tq8LbLoq5Uur7Am+DJAs/pNMci/fJUYASSQCmXm4WT3j9BmwK/jF6jqAy8JQk/haa6KhwAQ/VBFJVpbiQt7cCcJ9x9Il5PkBae0EJgliTeEzE4ZbuWnCXHuzmVKCg2WN6cvw=
-config:
-  gcp:project: rawkode-academy
-  google-native:project: rawkode-academy

@@ -1,8 +1,0 @@
-/bin/
-/node_modules/
-/pnpm-lock.yaml
-
-# Devenv
-.devenv*
-devenv.local.nix
-

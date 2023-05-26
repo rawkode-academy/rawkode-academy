@@ -1,6 +1,0 @@
-name: rawkode.cloud
-description: Rawkode Cloud
-runtime: nodejs
-main: src
-backend:
-  url: gs://rawkode-academy-automation/rawkode.cloud

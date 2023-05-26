@@ -1,5 +1,0 @@
-secretsprovider: gcpkms://projects/rawkode-academy/locations/europe-west2/keyRings/automation/cryptoKeys/rawkode-cloud
-encryptedkey: CiQA7jNiGpCCpVDjhW/P64aY5GRKcqMxJE1qsavqrTuCZKGokkYSSQCkRCqov9/RnN7ilQqCzUQrUYDlvhY9Uer55hVJb5+feiVqONUUd4Kizg+QfSdqTniL91/Yl+Jy/jadlknd94T+eIkO6ERcOmw=
-config:
-  gcp:project: rawkode-academy
-  gcp:region: europe-west2

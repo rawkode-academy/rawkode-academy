@@ -1,0 +1,105 @@
+---
+import Layout from "../../layouts/page.astro";
+
+const breadcrumbs = [
+  {
+    title: "KubeCon EU 2023 Giveaway",
+    href: "/win/kubeconeu2023",
+  },
+];
+---
+
+<style>
+  .page {
+    @apply p-4;
+  }
+
+  .container {
+    @apply flex flex-wrap gap-4 mt-4;
+  }
+
+  section {
+    @apply py-8 px-4 mx-auto max-w-screen-xl text-center sm:py-16 lg:px-6;
+  }
+
+  p {
+    @apply pb-2 text-lg;
+  }
+
+  h3 {
+    @apply text-primary text-left;
+  }
+
+  h4 {
+    @apply text-tertiary font-bold uppercase text-right;
+  }
+</style>
+
+<script id="reform-script" async src="https://embed.reform.app/v1/embed.js"
+></script>
+
+<Layout title="KubeCon EU 2023 Giveaway" breadcrumbs={breadcrumbs}>
+  <div class="page">
+    <div class="container">
+      <section>
+        <h1>KubeCon EU 2023 Giveaway</h1>
+
+        <h2>What can you win?</h2>
+
+        <p>Stuff</p>
+
+        <h3>Exclusive Kubernetes (Klustered Style) Training for your team</h3>
+        <h4>Worth 15000USD</h4>
+        <p>Yes</p>
+
+        <h3>5 Hours of Spin &amp; WebAssembly Training for your team</h3>
+        <h4>Worth 10000USD</h4>
+        <p>Yes</p>
+
+        <h3>5 Hours of Dagger training for your team</h3>
+        <h4>Worth 10000USD</h4>
+        <p>Yes</p>
+
+        <h3>5 Hours of Portainer training for your team</h3>
+        <h4>Worth 10000USD</h4>
+        <p>Yes</p>
+
+        <h2>How to win!</h2>
+
+        <p>
+          To enter the prize draw, you need to collect the 7, exclusive, Rawkode
+          stickers.
+        </p>
+        <p>
+          Most are available at sponsors booth, though some are only available
+          from Rawkode.
+        </p>
+        <p>
+          You can submit an entry with each sticker as you find them, or wait
+          until you have them all and submit together.
+        </p>
+        <p>
+          T-shirt winners will be drawn every day, with the training being drawn
+          on the Friday at 1600CEST. Best of luck!
+        </p>
+
+        <div id="my-reform"></div>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<script is:inline>
+  window.Reform =
+    window.Reform ||
+    function () {
+      (Reform.q = Reform.q || []).push(arguments);
+    };
+</script>
+<script is:inline>
+  Reform("init", {
+    url: "https://forms.reform.app/rawkode/untitled-form-1/ogsxtr",
+    target: "#my-reform",
+    background: "transparent",
+  });
+</script>

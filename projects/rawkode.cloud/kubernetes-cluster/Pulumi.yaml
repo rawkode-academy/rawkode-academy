@@ -1,6 +1,0 @@
-name: platform
-runtime: nodejs
-description: A minimal Kubernetes TypeScript Pulumi program
-main: src/index.ts
-backend:
-  url: gs://rawkode-academy-automation/platform
