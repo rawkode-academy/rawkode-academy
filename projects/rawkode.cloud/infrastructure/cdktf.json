@@ -1,9 +1,10 @@
 {
   "language": "typescript",
-  "app": "pnpm exec ts-node src/main.ts",
+  "app": "pnpm exec ts-node -r tsconfig-paths/register src/main.ts",
   "projectId": "d49f6797-f51f-47c8-9dce-5ab230af5794",
   "sendCrashReports": "false",
   "terraformProviders": [
+    "cloudinit@~> 2.3.2",
     "equinix/equinix@~> 1.14.2"
   ],
   "terraformModules": [],

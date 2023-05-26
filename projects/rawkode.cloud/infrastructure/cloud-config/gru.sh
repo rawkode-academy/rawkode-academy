@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
+# Prerequisites
+export DEBIAN_FRONTEND=noninteractive
+apt update && apt install --yes jq python3-pygit2
+
 # Get Private IPv4 Address
 PRIVATE_IPv4=$(curl -s https://metadata.platformequinix.com/metadata | jq -r '.network.addresses | map(select(.public==false and .management==true)) | first | .address')
 
 # Install Salt Master, Binding to Private IPv4 Address
 curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
-sh bootstrap-salt.sh -A ${PRIVATE_IPv4} -i gru -UMPX onedir 3006.1
+sh bootstrap-salt.sh -A $PRIVATE_IPv4 -i gru -a pygit2 -UMPX onedir 3006.1
 
 # Prepare Salt for Self Management
 cat <<EOF >/etc/salt/master.d/master.conf
@@ -26,3 +30,8 @@ ext_pillar:
   - http_json:
       url: https://metadata.platformequinix.com/metadata
 EOF
+
+salt-pip install pygit2
+
+systemctl enable --now salt-master
+systemctl enable --now salt-minion
