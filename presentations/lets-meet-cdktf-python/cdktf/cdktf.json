@@ -1,0 +1,14 @@
+{
+  "language": "python",
+  "app": "pipenv run python main.py",
+  "projectId": "0d5e0d49-5ab4-4c46-aa1e-80aa952e5920",
+  "sendCrashReports": "true",
+  "terraformProviders": [
+    "cloudflare/cloudflare@~> 4.8.0",
+    "scaleway/scaleway@~> 2.22.0",
+    "cloudinit@~> 2.3.2"
+  ],
+  "terraformModules": [],
+  "codeMakerOutput": "imports",
+  "context": {}
+}

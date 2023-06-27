@@ -1,0 +1,15 @@
+{
+  "name": "@rawkodeacademy/lets-meet-cdktf-python",
+  "private": true,
+  "scripts": {
+    "build": "slidev build",
+    "dev": "slidev --open",
+    "export": "slidev export"
+  },
+  "dependencies": {
+    "@slidev/cli": "^0.42.5",
+    "@slidev/theme-default": "latest",
+    "@slidev/theme-seriph": "latest",
+    "@zlict/slidev-theme-zli": "^0.2.4"
+  }
+}
