@@ -1,7 +1,6 @@
 import { cloudStorage } from "@payloadcms/plugin-cloud-storage";
 import { s3Adapter } from "@payloadcms/plugin-cloud-storage/s3";
 import search from "@payloadcms/plugin-search";
-import seo from "@payloadcms/plugin-seo";
 import axios from "axios";
 import path from "path";
 import { oAuthPlugin } from "payload-plugin-oauth";
@@ -45,7 +44,7 @@ export default buildConfig({
 			authorizationURL: `${process.env.OAUTH_BASE_URL}/login/oauth/authorize`,
 			tokenURL: `${process.env.OAUTH_BASE_URL}/login/oauth/access_token`,
 			callbackURL: `${process.env.SERVER_URL}/oauth2/callback`,
-			scope: "user",
+			scope: "basic",
 			userCollection: {
 				slug: People.slug,
 			},
@@ -59,17 +58,11 @@ export default buildConfig({
 				console.debug(user);
 
 				return {
-					sub: user.login,
+					githubHandle: user.login,
 					name: user.name,
 					email: user.email,
 				};
 			},
-		}),
-		seo({
-			collections: allCollections
-				.filter((collection) => (collection.slug === Media.slug ? false : true))
-				.map((collection) => collection.slug),
-			uploadsCollection: Media.slug,
 		}),
 		search({
 			collections: allCollections.map((collection) => collection.slug),
