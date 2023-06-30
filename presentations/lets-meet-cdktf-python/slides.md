@@ -150,7 +150,7 @@ transition: slide-up
 
 # 🐘 in the 🧹
 
-Before I Continue ...
+Before I continue ...
 
 I used to work for Pulumi ... why am I talking about Terraform CDK?
 
@@ -159,7 +159,8 @@ I used to work for Pulumi ... why am I talking about Terraform CDK?
 1. Terraform is ubiquitous, mature, and well adopted
 2. Using code as an intermediatory is actually a good thing
    1. Easier to stick to declarative
-3. I'm not here to sell you anything
+3. Pulumi relies on Terraform providers (atm)
+   1. You can actually use CDK Constructs within Pulumi
 
 ---
 transition: slide-up
@@ -174,6 +175,15 @@ Powered by JSII
 - Go
 - Java
 - More in the future?
+  - Hoping for Rust
+
+---
+
+# TypeScript by Default
+
+You can actually convert, with JSII, TypeScript constructs to any supported language.
+
+So there's a lot of value in writing shared components this way, unless you're an exclusively Python shop.
 
 ---
 transition: slide-up
@@ -207,4 +217,29 @@ transition: slide-up
 
 ---
 
-# Fin
+# Thoughts
+
+Hopefully I showed: get, synth, plan, deploy, destroy
+
+- Terraform CDK is a fantastic interface to Terraform
+- You can still use Terraform CLI
+- JIT providers is a nice touch over precompiled
+- Testing isn't great
+  - But really, there's better tools:
+    - CUE
+    - Rego
+- L1/L2/L3 constructs & the Construct Hub have potential to be powerful
+- Interopt with cdk8s 🤯
+
+---
+
+# Thanks
+
+Until next time
+
+## Any Questions?
+
+- <carbon-logo-twitter /> rawkode
+- <carbon-logo-github /> rawkode
+- <carbon-logo-youtube /> @RawkodeAcademy
+- <carbon-logo-discord /> https://rawkode.chat

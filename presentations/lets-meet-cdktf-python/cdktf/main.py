@@ -18,6 +18,7 @@ class MyStack(TerraformStack):
 
         zone = DataCloudflareZone(self, "zone", name="rawkode.cloud")
 
+
         nginx = InstanceServer(
             self, "nginx", type="DEV1-S", image="ubuntu-focal", enable_dynamic_ip=True, user_data={"nginx": "apt update && apt install --yes nginx"})
 
