@@ -1,0 +1,8 @@
+/.vscode
+/build
+/dist
+/node_modules
+/docker-compose.yaml
+/Dockerfile
+README.md
+rome.json

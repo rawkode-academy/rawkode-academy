@@ -7,9 +7,8 @@ import { oAuthPlugin } from "payload-plugin-oauth";
 import { buildConfig } from "payload/config";
 import { CollectionConfig } from "payload/types";
 import Categories from "./collections/Categories";
-import Media from "./collections/Media";
 import Posts from "./collections/Posts";
-import Tags from "./collections/Tags";
+import { Logo } from "./collections/media";
 import { People } from "./collections/people";
 import { Episodes, Shows } from "./collections/shows";
 import { Technologies } from "./collections/technologies";
@@ -18,15 +17,15 @@ const allCollections: CollectionConfig[] = [
 	People,
 	Categories,
 	Posts,
-	Tags,
-	Media,
 	Shows,
 	Episodes,
 	Technologies,
+	Logo,
 ];
 
 export default buildConfig({
-	serverURL: "http://localhost:3000",
+	serverURL: process.env.SERVER_URL,
+	debug: true,
 	admin: {
 		user: People.slug,
 	},
@@ -48,6 +47,9 @@ export default buildConfig({
 			userCollection: {
 				slug: People.slug,
 			},
+			subField: {
+				name: "github",
+			},
 			async userinfo(accessToken) {
 				const { data: user } = await axios.get("https://api.github.com/user", {
 					headers: {
@@ -55,12 +57,14 @@ export default buildConfig({
 					},
 				});
 
-				console.debug(user);
+				const role = user.login === "rawkode" ? "admin" : "guest";
 
 				return {
-					githubHandle: user.login,
+					sub: user.login,
+					github: user.login,
 					name: user.name,
 					email: user.email,
+					role,
 				};
 			},
 		}),
@@ -70,7 +74,7 @@ export default buildConfig({
 		cloudStorage({
 			enabled: process.env.NODE_ENV === "production",
 			collections: {
-				[Media.slug]: {
+				[Logo.slug]: {
 					adapter: s3Adapter({
 						bucket: "",
 						config: {
