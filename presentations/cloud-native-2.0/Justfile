@@ -1,0 +1,8 @@
+build-wasm-docker:
+  docker buildx build --platform wasi/wasm -t rawkode/docker-wasm-demo .
+
+run-wasm-docker:
+  docker container run \
+    --runtime=io.containerd.wasmedge.v1 \
+    --platform=wasi/wasm \
+    secondstate/rust-example-hello
