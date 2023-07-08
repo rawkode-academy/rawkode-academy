@@ -1,6 +1,7 @@
 packages:
   - "./dagger"
   - "./presentations/lets-meet-cdktf-python"
+  - "./presentations/cloud-native-2.0"
   - "./projects/ci"
   - "./projects/core-infrastructure/gcp-control-plane"
   - "./projects/core-infrastructure/dns"

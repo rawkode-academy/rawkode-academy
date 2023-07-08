@@ -93,7 +93,7 @@ Why this changed?
 - Serverless Adoption Goes 🚀
 - Docker purchases Unikernel Systems (2016)
 - Event-Driven / Workflow based (Cadence) gains momentum (2017)
-- WebAssembly was born (2017)
+- WebAssembly was born (2017), WASI (2019)
 
 
 ---
@@ -109,7 +109,7 @@ transition: slide-up
 
 # WebAssembly
 
-Solomon is less bull-ish these days
+I'm sure Solomon hates this tweet now
 
 <Tweet id="1111004913222324225" />
 
@@ -226,6 +226,70 @@ Containers are great, except when they're not
 - Virtualization / Distribution / Size (GBs!?)
 - Process Limits / Resource Utilization / Pause Containers
 - "Sandbox"
+
+---
+layout: section
+---
+
+# Developer Experience
+
+## Let's Talk About It
+
+---
+layout: fact
+---
+
+# Who uses macOS or Windows?
+
+## 🙋
+
+---
+
+# Linux isn't the answer
+
+Did I mention I run Arch?
+
+You experience these issues much more than people that persist with using Linux as their daily driver.
+
+Don't @ me, I was a desktop Linux user in 2001 and ran Arch Linux daily until 2018.
+
+---
+layout: fact
+---
+
+# It's not important which OS
+
+---
+
+# It's not important which OS
+
+Regardles of OS, local dev isn't actually good enough
+
+## You can't run your full microservice architecture locally
+
+We look to Kubernetes for help via Skaffold, Telepresence, DevSpace, mirrod
+
+---
+layout: fact
+---
+
+# WASM Can though
+
+---
+
+# WASM Choice
+
+WebAssembly runtimes only invoke WASM modules on request, per request.
+
+- Cold start time is under 1ms
+
+- Things get much easier when the runtime supports yours architecture decisions
+
+- Kubernetes doesn't do this
+
+- Deployment vehicle becomes a runtime decision, not a constraint
+
+## Google has seen this, check-out ServiceWeaver too
 
 ---
 layout: section

@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   app:
-    image: secondstate/rust-example-hello
+    image: ghcr.io/rawkode/hello-wasm
     platform: wasi/wasm
     runtime: io.containerd.wasmedge.v1
 

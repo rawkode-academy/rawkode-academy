@@ -1,0 +1,29 @@
+spin_manifest_version = "1"
+authors = ["David Flanagan <david@rawkode.dev>"]
+description = ""
+name = "demo"
+trigger = { type = "http", base = "/" }
+version = "0.1.0"
+
+[[component]]
+id = "demo"
+source = "target/wasm32-wasi/release/demo.wasm"
+allowed_http_hosts = []
+key_value_stores = ["default"]
+
+[component.trigger]
+route = "/..."
+
+[component.build]
+command = "cargo build --target wasm32-wasi --release"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[[component]]
+id = "set-url"
+source = "set_url/target/set-url.wasm"
+[component.trigger]
+route = "/set"
+[component.build]
+command = "npm run build"
+workdir = "set_url"
+
