@@ -4,20 +4,20 @@ import { App, PgBackend, TerraformStack } from "cdktf";
 import { Construct } from "constructs";
 
 import canideployToday from "./domains/canideploy.today";
-// import chappaaiDev from "./domains/chappaai.dev";
-// import cloudnativecompassFm from "./domains/cloudnativecompass.fm";
-// import comtryaDev from "./domains/comtrya.dev";
+import chappaaiDev from "./domains/chappaai.dev";
+import cloudnativecompassFm from "./domains/cloudnativecompass.fm";
+import comtryaDev from "./domains/comtrya.dev";
 import klusteredLive from "./domains/klustered.live";
 import rawkoDe from "./domains/rawko.de";
 import rawkodeAcademy from "./domains/rawkode.academy";
 import rawkodeChat from "./domains/rawkode.chat";
 import rawkodeCloud from "./domains/rawkode.cloud";
-// import rawkodeCom from "./domains/rawkode.com";
+import rawkodeCom from "./domains/rawkode.com";
 import rawkodeCommunity from "./domains/rawkode.community";
-// import rawkodeDev from "./domains/rawkode.dev";
+import rawkodeDev from "./domains/rawkode.dev";
 import rawkodeEmail from "./domains/rawkode.email";
 import rawkodeLink from "./domains/rawkode.link";
-// import rawkodeLive from "./domains/rawkode.live";
+import rawkodeLive from "./domains/rawkode.live";
 import rawkodeNews from "./domains/rawkode.news";
 import rawkodeStudio from "./domains/rawkode.studio";
 
@@ -32,14 +32,20 @@ class CoreDns extends TerraformStack {
     });
 
     canideployToday(this);
+    chappaaiDev(this);
+    cloudnativecompassFm(this);
+    comtryaDev(this);
     klusteredLive(this);
     rawkoDe(this);
     rawkodeAcademy(this);
     rawkodeChat(this);
     rawkodeCloud(this);
+    rawkodeCom(this);
     rawkodeCommunity(this);
+    rawkodeDev(this);
     rawkodeEmail(this);
     rawkodeLink(this);
+    rawkodeLive(this);
     rawkodeNews(this);
     rawkodeStudio(this);
   }
