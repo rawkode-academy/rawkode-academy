@@ -1,18 +1,14 @@
 name = "terraform-state-backend"
 main = "dist/index.mjs"
 
-compatibility_date = "2022-08-30"
-
 workers_dev = true
 
 r2_buckets = [
-    { binding = "TFSTATE_BUCKET", bucket_name = "rawkode-academy-terraform-state" }
+	{ binding = "TFSTATE_BUCKET", bucket_name = "rawkode-academy-terraform-state" },
 ]
 
 [durable_objects]
-bindings = [
-    { name = "TFSTATE_LOCK", class_name = "DurableLock" }
-]
+bindings = [{ name = "TFSTATE_LOCK", class_name = "DurableLock" }]
 
 [vars]
 ACCESS_SUBDOMAIN = "rawkodeacademy"

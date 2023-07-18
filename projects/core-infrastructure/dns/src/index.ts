@@ -1,6 +1,6 @@
 import { CloudflareProvider } from "@generatedProviders/cloudflare/provider";
 import { GandiProvider } from "@generatedProviders/gandi/provider";
-import { App, PgBackend, TerraformStack } from "cdktf";
+import { App, HttpBackend, TerraformStack } from "cdktf";
 import { Construct } from "constructs";
 
 import canideployToday from "./domains/canideploy.today";
@@ -54,8 +54,15 @@ class CoreDns extends TerraformStack {
 const app = new App();
 const stack = new CoreDns(app, "dns");
 
-new PgBackend(stack, {
-  connStr: process.env.PG_CONN_STR || "",
+const baseUrl = "https://terraform-state-backend.rawkode-academy.workers.dev";
+
+new HttpBackend(stack, {
+  address: `${baseUrl}/states/core-infrastructure-dns`,
+  lockMethod: "PUT",
+  unlockMethod: "DELETE",
+  lockAddress: `${baseUrl}/states/core-infrastructure-dns/lock`,
+  unlockAddress: `${baseUrl}/states/core-infrastructure-dns/lock`,
+  username: "rawkodeacademy",
 });
 
 app.synth();
