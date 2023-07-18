@@ -2,9 +2,9 @@ import { Construct } from "constructs";
 import { ManagedDomain, Registrar } from "../dnsProvider";
 
 export default (scope: Construct): ManagedDomain => {
-	const managedDomain = new ManagedDomain(scope, "fbom.dev", Registrar.Gandi);
+  const managedDomain = new ManagedDomain(scope, "chappaai.dev", Registrar.Gandi);
 
-	managedDomain.discourageEmail();
+  managedDomain.discourageEmail();
 
-	return managedDomain;
+  return managedDomain;
 };
