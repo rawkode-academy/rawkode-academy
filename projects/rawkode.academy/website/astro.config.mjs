@@ -7,19 +7,23 @@ import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
 
-
 export default defineConfig({
-  site: "https://rawkode.academy",
-  integrations: [
-    mdx(),
-    partytown({
-      config: {
-        forward: ["dataLayer.push"],
-      },
-    }),
-    react(),
-    sitemap(),
-    svelte(),
-    tailwind({ config: { applyBaseStyles: false } }),
-  ],
+	site: "https://rawkode.academy",
+	integrations: [
+		mdx({
+			syntaxHighlight: "shiki",
+			shikiConfig: {
+				theme: "dracula",
+			},
+		}),
+		partytown({
+			config: {
+				forward: ["dataLayer.push"],
+			},
+		}),
+		react(),
+		sitemap(),
+		svelte(),
+		tailwind({ config: { applyBaseStyles: false } }),
+	],
 });

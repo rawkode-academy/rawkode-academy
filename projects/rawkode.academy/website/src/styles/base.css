@@ -44,7 +44,7 @@ h3,
 h4,
 h5,
 h6 {
-  margin-bottom: 0.5rem;
+    padding: 2rem;
   font-family: "Orbitron", system-ui, sans-serif;
 }
 
@@ -173,4 +173,8 @@ header.alternative {
   .desktop-navigation {
     display: flex;
   }
+}
+
+.astro-code {
+  overflow: visible !important;
 }

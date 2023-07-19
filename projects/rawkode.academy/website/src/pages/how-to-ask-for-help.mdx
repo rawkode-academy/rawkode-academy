@@ -1,8 +1,10 @@
 ---
-layout: ../layouts/page.astro
+layout: ../layouts/mdx-page.astro
 breadcrumbs: []
 title: "How to ask for help"
 ---
+
+# How to Ask for Help
 
 When you are asking a bunch of strangers for help on some chat system like Discord, there are tricks to get people to be more willing to help you. Unless you are paying for support, you need to make it as easy as possible for volunteers to help you. So try these things:
 
@@ -10,7 +12,7 @@ When you are asking a bunch of strangers for help on some chat system like Disco
 
 Learn the chat system so you can convey the information clearly, having to read badly formatted text is not a nice introduction to your problem. Separate your question from the log outputs, most chat systems will have a way to enter code. Use that code format for logs, code, config, etc. and keep each type of sample separate or at least spaced out well enough and with a comment to show what it is, i.e.
 
-```
+```shell
 # dmesg log with error
 
 [331337.438088] hub 4-0:1.0: 2 ports detected
@@ -23,18 +25,16 @@ Learn the chat system so you can convey the information clearly, having to read 
 [331357.956035] xhci_hcd 0000:3e:00.0: PCI post-resume error -19!
 [331357.956037] xhci_hcd 0000:3e:00.0: HC died; cleaning up
 
-
 # partial results from lspci
 
 00:1c.0 PCI bridge: Intel Corporation 100 Series/C230 Series Chipset Family PCI Express Root Port #1 (rev f1)
 00:1c.1 PCI bridge: Intel Corporation 100 Series/C230 Series Chipset Family PCI Express Root Port #2 (rev f1)
-...
-
 ```
+
 
 ## Reproducible issue
 
-Where possible create a minimal reproduction of the issue. This lets people try recreate the issue with your config and prevents you fro leaking secrets that might need to stay secret. Unless you are certain the problem exists in just one file, make people's lives easier by giving as much info as possible. The best way to do that is a cut down, reproducible sample. 
+Where possible create a minimal reproduction of the issue. This lets people try recreate the issue with your config and prevents you fro leaking secrets that might need to stay secret. Unless you are certain the problem exists in just one file, make people's lives easier by giving as much info as possible. The best way to do that is a cut down, reproducible sample.
 
 ## Explain environment
 

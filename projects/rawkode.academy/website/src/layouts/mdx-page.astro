@@ -1,0 +1,16 @@
+---
+import BaseLayout from "./page.astro";
+const { frontmatter } = Astro.props;
+---
+
+<style>
+  .page {
+    @apply grid h-screen place-items-center px-16 md:px-32 lg:px-64;
+  }
+</style>
+
+<BaseLayout title={frontmatter.title} breadcrumbs={frontmatter.breadcrumbs}>
+  <div class="page">
+    <slot />
+  </div>
+</BaseLayout>
