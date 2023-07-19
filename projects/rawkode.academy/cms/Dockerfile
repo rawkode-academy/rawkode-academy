@@ -6,11 +6,10 @@ RUN npm install -g pnpm
 
 COPY package.json pnpm-lock.yaml ./
 
-RUN pnpm install --strict-peer-dependencies --no-optional --prod --prefer-frozen-lockfile
+RUN pnpm install --strict-peer-dependencies --no-optional --prefer-frozen-lockfile
 
 FROM base as build
 
-RUN pnpm install --strict-peer-dependencies --no-optional --prefer-frozen-lockfile
 RUN pnpm install @swc/core
 
 COPY . .
@@ -28,7 +27,8 @@ ENV NODE_ENV=production
 
 COPY --from=build /app/build ./build
 COPY --from=build /app/dist  ./dist
-COPY --from=build /app/node_modules ./node_modules
+
+ENV PAYLOAD_CONFIG_PATH=dist/payload.config.js
 
 EXPOSE 3000
 
