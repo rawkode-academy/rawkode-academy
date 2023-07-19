@@ -24,7 +24,7 @@ const allCollections: CollectionConfig[] = [
 ];
 
 export default buildConfig({
-	serverURL: process.env.APPSETTING_SERVER_URL || "http://localhost:3000",
+	serverURL: process.env.APPSETTING_DNS_NAME || "http://localhost:3000",
 	debug: process.env.NODE_ENV === "production" ? false : true,
 	admin: {
 		user: People.slug,
@@ -47,7 +47,7 @@ export default buildConfig({
 				process.env.APPSETTING_OAUTH_BASE_URL || "http://localhost:3000"
 			}/login/oauth/access_token`,
 			callbackURL: `${
-				process.env.APPSETTING_SERVER_URL || "http://localhost:3000"
+				process.env.APPSETTING_DNS_NAME || "http://localhost:3000"
 			}/oauth2/callback`,
 			scope: "basic",
 			// This needs to be set, but setting it to anything other

@@ -65,6 +65,14 @@ class MyStack extends TerraformStack {
 			tenantId: azureClientConfig.tenantId,
 		});
 
+    new KeyVaultAccessPolicyA(this, "self-key-vault-access-policy", {
+      keyVaultId: keyVault.id,
+      tenantId: azureClientConfig.tenantId,
+      objectId: azureClientConfig.objectId,
+      keyPermissions: ["Get"],
+      secretPermissions: ["Get", "List", "Set", "Delete", "Purge"],
+    });
+
 		const cosmosDbAccount = new CosmosdbAccount(this, "cosmosdb-account", {
 			name: "rawkode-academy-cms",
 			resourceGroupName: resourceGroup.name,
@@ -143,7 +151,7 @@ class MyStack extends TerraformStack {
 			},
 			appSettings: {
 				WEBSITES_PORT: "3000",
-				SERVER_URL: "https://cms.rawkode.academy",
+        DNS_NAME: "https://cms.rawkode.academy",
 				MONGODB_URI: Fn.element(cosmosDbAccount.connectionStrings, 0),
 				OAUTH_BASE_URL: process.env.APPSETTING_OAUTH_BASE_URL || "",
 				OAUTH_CLIENT_ID: process.env.APPSETTING_OAUTH_CLIENT_ID || "",
