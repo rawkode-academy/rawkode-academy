@@ -9,6 +9,7 @@ packages:
   - "./projects/core-infrastructure/terraform-state-backend"
   - "./projects/rawkode.academy/website"
   - "./projects/rawkode.academy/cms"
+  - "./projects/rawkode.academy/cms/deploy"
   - "./projects/rawkode.cloud/tfstate"
   - "./projects/rawkode.community/ics-events"
   - "./projects/rawkode.studio"

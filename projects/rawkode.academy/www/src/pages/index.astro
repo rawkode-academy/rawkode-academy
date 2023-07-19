@@ -1,0 +1,33 @@
+---
+import Banner from "@components/Banner.astro";
+import Features from "@components/Features.astro";
+import LogoSliderSection from "@components/LogoSliderSection.astro";
+import Service from "@components/Service.astro";
+import Testimonial from "@components/Testimonial.astro";
+import VideoSection from "@components/VideoSection.astro";
+import Base from "@layouts/Base.astro";
+import Cta from "@partials/Cta.astro";
+import { getEntryBySlug } from "astro:content";
+
+const homepage = await getEntryBySlug("homepage", "index");
+const { features, intro, service, testimonial } = homepage.data;
+
+const logos = [
+  "/images/brands/01-colored.png",
+  "/images/brands/02-colored.png",
+];
+---
+
+<Base>
+  <Banner
+    title="Level-up with Cloud Native, Kubernetes, and WebAssembly"
+    image="/images/bannerimage.webp"
+    link={{ label: "Free Courses", href: "/" }}
+  />
+  <LogoSliderSection logos={logos} />
+  <Features features={features} />
+  <VideoSection intro={intro} />
+  <Service service={service} />
+  <Testimonial testimonial={testimonial} />
+  <Cta />
+</Base>

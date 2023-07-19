@@ -1,0 +1,46 @@
+---
+import AboutIntro from "@components/about/AboutIntro.astro";
+import AboutService from "@components/about/AboutService.astro";
+import AboutShortVideo from "@components/about/AboutShortVideo.astro";
+import Clients from "@components/about/Clients.astro";
+import Members from "@components/about/Members.astro";
+import OurOffices from "@components/about/OurOffices.astro";
+import PageHeader from "@components/PageHeader.astro";
+import Base from "@layouts/Base.astro";
+import Cta from "@partials/Cta.astro";
+import { getEntryBySlug } from "astro:content";
+
+const about = await getEntryBySlug("about", "index");
+const { title } = about.data;
+const { data } = about;
+const {
+  about_us,
+  description,
+  works,
+  mission,
+  video,
+  clients,
+  our_member,
+  our_office,
+} = data;
+---
+
+<Base title={title} description={description}>
+  <PageHeader title={title} />
+  <!-- about us -->
+  <AboutIntro data={about_us} order="left" />
+  <!-- about service -->
+  <AboutService works={works} />
+  <!-- our mission -->
+  <AboutIntro data={mission} order="right" />
+  <!-- short video section -->
+  <AboutShortVideo video={video} />
+  <!-- our clients -->
+  <Clients clients={clients} />
+  <!-- our members -->
+  <Members members={our_member} />
+  <!-- country -->
+  <OurOffices country={our_office} />
+  <!-- call to action -->
+  <Cta />
+</Base>

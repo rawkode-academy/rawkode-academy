@@ -1,0 +1,72 @@
+---
+import SignUpBanner from "@components/SignUpBanner.astro";
+import Base from "@layouts/Base.astro";
+---
+
+<Base title="Sign in" landingPage={true}>
+  <section class="section user-access">
+    <div class="container">
+      <div class="row items-center justify-around">
+        <SignUpBanner />
+        <div
+          class="user-access-form col-11 mt-24 sm:col-10 md:col-8 lg:col-4 lg:mt-0"
+          data-aos="fade-up"
+          data-aos-delay="150"
+        >
+          <div class="section-title text-center">
+            <h2 class="title">Sign In</h2>
+          </div>
+          <form method="POST">
+            <div class="mb-6">
+              <label
+                class="mb-2 block font-medium text-theme-dark/70"
+                for="subject">Enter Email Address</label
+              >
+              <input
+                class="form-control w-full"
+                name="email"
+                type="email"
+                placeholder="Type Your Email Address"
+              />
+            </div>
+            <div class="mb-6">
+              <label
+                class="mb-2 block font-medium text-theme-dark/70"
+                for="subject">Password</label
+              >
+              <input
+                class="form-control w-full"
+                name="password"
+                type="password"
+                placeholder="Enter Your Password"
+                required
+              />
+            </div>
+
+            <div class="custom-control custom-checkbox">
+              <input
+                type="checkbox"
+                class="cursor-pointer rounded-sm text-[#0d6efd] focus:ring-0 focus:ring-transparent"
+                id="save-info"
+                checked=""
+              />
+              <label
+                for="save-info"
+                class="custom-control-label font-medium text-theme-dark/70"
+                role="button">Remember Me</label
+              >
+            </div>
+
+            <button class="btn btn-primary mt-6 w-full">Submit Now</button>
+          </form>
+          <p class="mb-0 mt-3 text-center">
+            Dont Have An Account? <a
+              class="text-primary hover:underline"
+              href="/signup">Sign Up</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

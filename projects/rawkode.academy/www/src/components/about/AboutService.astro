@@ -1,0 +1,32 @@
+---
+import { markdownify } from "@lib/utils/textConverter";
+const {
+  works: { subtitle, title, list },
+} = Astro.props;
+---
+
+<section>
+  <div class="container">
+    <div class="row justify-center">
+      <div class="col-12">
+        <div class="section-title">
+          <p
+            set:html={markdownify(subtitle)}
+            class="mb-4 text-[0.9rem] uppercase"
+          />
+          <h2 set:html={markdownify(title)} class="title" />
+        </div>
+      </div>
+      {
+        list.map((item: any) => (
+          <div class="col-12 mb-4 lg:col-6 xl:col-5">
+            <div class="mt-6 px-0 text-center md:px-[4.5rem]">
+              <h3 class="mb-3 text-h4  font-semibold">{item.title}</h3>
+              <p class="text-sm leading-6">{item.content}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

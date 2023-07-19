@@ -1,0 +1,88 @@
+---
+import { Image } from "@astrojs/image/components";
+import SimilarPosts from "@components/SimilarPosts.astro";
+import { getSinglePage } from "@lib/contentParser.astro";
+import dateFormat from "@lib/utils/dateFormat";
+import readingTime from "@lib/utils/readingTime";
+import similerItems from "@lib/utils/similarItems";
+import { slugify } from "@lib/utils/textConverter";
+import Cta from "@partials/Cta.astro";
+import Disqus from "../components/Disqus";
+
+const blogs = await getSinglePage("blog");
+const authors = await getSinglePage("authors");
+const addAuthors = blogs.map((blog) => {
+  const author = authors.find(
+    (author) => author.data.title === blog.data.author
+  );
+  return {
+    ...blog,
+    data: {
+      ...blog.data,
+      authorImage: author.data.image,
+    },
+  };
+});
+const { post } = Astro.props;
+const singleAuthor = authors.find(
+  (item) => item.slug === slugify(post.data.author)
+);
+const similarPosts = similerItems(post, addAuthors, post.slug);
+const { Content } = await post.render();
+const { title, author, image, date } = post.data;
+---
+
+<section class="section">
+  <div class="container">
+    <div class="row justify-center">
+      <div class="col-12 mb-12 lg:col-10">
+        <Image
+          alt={title}
+          src={image}
+          width={1126}
+          height={661}
+          class="w-full max-w-full rounded-3xl"
+        />
+      </div>
+      <div class="lg:col-8">
+        <div class="mb-12">
+          <h2 class="font-medium">
+            {title}
+          </h2>
+          <div class="mt-6 flex items-center">
+            <div class="user-image mr-4">
+              <a href={`/authors/${slugify(author)}`} title={author}>
+                <Image
+                  src={singleAuthor.data.image}
+                  alt={singleAuthor.data.title}
+                  class="max-w-full rounded-full"
+                  width={70}
+                  height={70}
+                />
+              </a>
+            </div>
+            <div class="user-info">
+              <p class="mb-0 text-h5 font-medium">
+                <a href={`/authors/${slugify(author)}`}>{author}</a>
+              </p>
+              <span>{dateFormat(date)} - {readingTime(post.body)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <Content />
+        </div>
+        <Disqus client:load />
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2 class="title mb-8 text-center">Related Articles</h2>
+    </div>
+    <SimilarPosts blogs={similarPosts[0].slice(0, 2)} />
+  </div>
+</section>
+<Cta />

@@ -1,0 +1,10 @@
+b,
+strong {
+  @apply font-semibold;
+}
+code {
+  @apply after:border-none;
+}
+.shadow {
+  box-shadow: 0 4px 24px rgb(0, 0, 0, 0.05);
+}

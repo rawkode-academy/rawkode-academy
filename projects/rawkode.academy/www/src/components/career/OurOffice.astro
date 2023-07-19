@@ -1,0 +1,44 @@
+---
+import { Image } from "@astrojs/image/components";
+import { markdownify } from "@lib/utils/textConverter";
+const {
+  gelarry: { title, subtitle, images },
+} = Astro.props;
+---
+
+<section class="section">
+  <div class="container">
+    <div class="row">
+      <div class="lg:col-12">
+        <div class="section-title">
+          <p
+            set:html={markdownify(subtitle)}
+            class="mb-4 text-[0.9rem] uppercase"
+          />
+          <h2 set:html={markdownify(title)} class="title" />
+        </div>
+      </div>
+      <div class="row justify-center">
+        <div class="lg:col-10">
+          <div class="row justify-center">
+            {
+              images.map((item: any) => (
+                <div
+                  class={`lg:col-${item.width} ${item.custom_class} mt-4 sm:col-6 md:col-4`}
+                >
+                  <Image
+                    src={item.image}
+                    width={500}
+                    height={400}
+                    alt={item.image}
+                    class="h-auto w-full max-w-full rounded-2xl"
+                  />
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

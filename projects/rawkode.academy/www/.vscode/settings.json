@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.mdx": "markdown"
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  }
+}

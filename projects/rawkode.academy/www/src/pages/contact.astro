@@ -1,0 +1,165 @@
+---
+import { Image } from "@astrojs/image/components";
+import ContactSocial from "@components/Contact-social.astro";
+import PageHeader from "@components/PageHeader.astro";
+import config from "@config/config.json";
+import social from "@config/social.json";
+import Base from "@layouts/Base.astro";
+import Cta from "@partials/Cta.astro";
+import { getEntryBySlug } from "astro:content";
+
+const entry = await getEntryBySlug("contact", "contact");
+const { contact_form_action } = config.params;
+const { email, phone } = config;
+const { title, description, meta_title, image } = entry.data;
+---
+
+<Base
+  title={title}
+  meta_title={meta_title}
+  description={description}
+  image={image}
+>
+  <PageHeader title={title} />
+  <section class="section">
+    <div class="container">
+      <div class="row items-center justify-center">
+        <div
+          class="mb-12 text-center md:col-8 lg:col-5 lg:mb-0"
+          data-aos="fade-up"
+        >
+          <div class="pr-0 lg:pr-12">
+            <Image
+              src="/images/contact.webp"
+              height={459}
+              width={575}
+              alt="contact image"
+              class="max-w-full"
+            />
+          </div>
+        </div>
+        <div class="md:col-10 lg:col-5" data-aos="fade-up">
+          <div class="rounded-2xl p-8 pb-10 shadow">
+            <div class="mb-6">
+              <h3 class="h5 font-semibold">Send A Message</h3>
+            </div>
+            <form action={contact_form_action} method="post">
+              <div class="mb-6">
+                <label
+                  class="mb-2 block font-medium text-theme-dark/80"
+                  for="name">Full Name</label
+                >
+                <input
+                  class="form-control shadow-none"
+                  id="name"
+                  name="Full Name"
+                  type="text"
+                  placeholder="Full Name"
+                  required=""
+                />
+              </div>
+              <div class="mb-6">
+                <label
+                  class="mb-2 block font-medium text-theme-dark/80"
+                  for="email">Email Address</label
+                >
+                <input
+                  class="form-control shadow-none"
+                  id="email"
+                  name="Email Address"
+                  type="email"
+                  placeholder="Email Address"
+                  required=""
+                />
+              </div>
+              <div class="mb-6">
+                <label
+                  class="mb-2 block font-medium text-theme-dark/80"
+                  for="message">Your Message</label
+                >
+                <textarea
+                  class="form-control h-auto shadow-none"
+                  id="message"
+                  name="Comment"
+                  rows="4"
+                  required=""></textarea>
+              </div>
+              <button
+                class="btn btn-primary mt-6 w-full"
+                type="submit"
+                aria-label="Send Message"
+              >
+                Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="section pb-0">
+        <div class="row justify-center">
+          <div class="col-12">
+            <div class="section-title text-center" data-aos="fade-up">
+              <p class="uppercase">Contact us</p><h2 class="title">
+                Get In Touch
+              </h2>
+            </div>
+          </div>
+          <div
+            class="contact-widget md:col-6 lg:col-4 xl:col-3"
+            data-aos="fade-up"
+          >
+            <div class="rounded-lg px-6 py-12 text-center shadow">
+              <h3 class="mb-6 text-h5">{phone.title}</h3>
+              <ul class="list-unstyled">
+                {
+                  phone.contact.map((item) => (
+                    <li>
+                      <a href="tel:+704-555-0127">
+                        <i class="las la-phone" />
+                        {item}
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+          </div>
+          <div
+            class="contact-widget md:col-6 lg:col-4 xl:col-3"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <div class="rounded-lg px-6 py-12 text-center shadow">
+              <h3 class="mb-6 text-h5">{email.title}</h3>
+              <ul class="list-unstyled">
+                {
+                  email.contact.map((item) => (
+                    <li>
+                      <a href="mailto:info@andromeda.io">
+                        <i class="las la-envelope-open-text" />
+                        {item}
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+          </div>
+          <div
+            class="contact-widget aos-init aos-animate md:col-6 lg:col-4 xl:col-3"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <div class="rounded-lg px-6 py-12 text-center shadow">
+              <h3 class="mb-6 text-h5">Social Media</h3>
+              <ContactSocial source={social} className="contact-social" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Cta />
+</Base>

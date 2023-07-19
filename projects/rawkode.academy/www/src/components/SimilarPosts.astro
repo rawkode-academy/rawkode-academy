@@ -1,0 +1,18 @@
+---
+import Blog from "@components/Blog.astro";
+const { blogs } = Astro.props;
+---
+
+<section>
+  <div class="container">
+    <div class="row justify-center">
+      {
+        blogs.map((blog: any) => (
+          <div class="col-12 mb-8 md:col-6 lg:col-5">
+            <Blog blog={blog} />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,66 @@
+---
+import config from "@config/config.json";
+const { career_form_action } = config.params;
+const { title, job_nature } = Astro.props;
+---
+
+<div class="order-1 mt-12 md:col-10 lg:col-4 lg:order-0 lg:mt-0">
+  <div class="mb-12">
+    <h2 class="h3 mb-2 font-semibold text-black">{title}</h2>
+    <p class="text-primary">{job_nature}</p>
+  </div>
+  <form method="POST" action={career_form_action}>
+    <div class="mb-6">
+      <label class="mb-2 block font-medium text-theme-dark/80" for="name"
+        >First Name<span class="text-primary">{`*`}</span>
+      </label>
+      <input
+        class="form-control w-full"
+        name="first name"
+        type="text"
+        placeholder="First Name"
+        required
+      />
+    </div>
+    <div class="mb-6">
+      <label class="mb-2 block font-medium text-theme-dark/80" for="email"
+        >Last Name<span class="text-primary">{`*`}</span></label
+      >
+      <input
+        class="form-control w-full"
+        type="text"
+        name="last name"
+        placeholder="Last Name"
+        required
+      />
+    </div>
+    <div class="mb-6">
+      <label class="mb-2 block font-medium text-theme-dark/80" for="subject"
+        >Email Address<span class="text-primary">{`*`}</span></label
+      >
+      <input
+        class="form-control w-full"
+        name="email"
+        type="email"
+        placeholder="Email Address"
+        required
+      />
+    </div>
+    <div class="mb-6">
+      <label class="mb-2 block font-medium text-theme-dark/80" for="subject"
+        >Upload Cv<span class="text-primary">{`*`}</span></label
+      >
+      <input
+        class="form-control w-full py-3 pl-1 ring-0"
+        name="file"
+        type="file"
+        required
+      />
+      <small class="block"
+        >only doc, pdf file allowed &amp;amp; file size will be less than 2MB</small
+      >
+    </div>
+
+    <button class="btn btn-primary mt-6 w-full">Submit Now</button>
+  </form>
+</div>

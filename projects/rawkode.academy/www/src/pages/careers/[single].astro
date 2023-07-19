@@ -1,0 +1,39 @@
+---
+import CareerForm from "@components/career/CareerForm.astro";
+import Base from "@layouts/Base.astro";
+import { getSinglePage } from "@lib/contentParser.astro";
+
+export async function getStaticPaths() {
+  const careers = await getSinglePage("careers");
+
+  const paths = careers.map((post) => ({
+    params: {
+      single: post.slug,
+    },
+    props: { post },
+  }));
+  return paths;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const { title, meta_title, description, job_nature } = post.data;
+---
+
+<Base title={title} meta_title={meta_title} description={description}>
+  <section class="section">
+    <div class="container">
+      <div class="row justify-center">
+        <CareerForm title={title} job_nature={job_nature} />
+        <div class="order-0 md:col-10 lg:col-7 lg:order-1">
+          <div class="pl-0 lg:pl-12">
+            <h3 class="mb-6 text-primary">About the role</h3>
+            <div class="content">
+              <Content />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

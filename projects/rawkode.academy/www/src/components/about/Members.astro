@@ -1,0 +1,52 @@
+---
+import { markdownify } from "@lib/utils/textConverter";
+import { Image } from "@astrojs/image/components";
+const {
+  members: { title, subtitle, description, list },
+} = Astro.props;
+---
+
+<section>
+  <div class="container">
+    <div class="row justify-center">
+      <div class="col-12">
+        <div class="section-title">
+          <p
+            set:html={markdownify(subtitle)}
+            class="mb-4 text-[0.9rem] uppercase"
+          />
+          <h2 set:html={markdownify(title)} class="title" />
+          <p
+            set:html={markdownify(description)}
+            class="text-[.9rem] text-text"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="row justify-center">
+      <div class="col-12 lg:col-10">
+        <div class="row justify-around">
+          {
+            list.map((item: any) => (
+              <div class="col-6 md:col-4 lg:col-3">
+                <div class="text-center">
+                  <div class="team-image">
+                    <Image
+                      src={item.image}
+                      width={250}
+                      height={250}
+                      alt={item.name}
+                      class="max-w-full rounded-full"
+                    />
+                  </div>
+                  <h3 class="mb-3 text-h3-sm">{item.name}</h3>
+                  <p class="mb-4">{item.field}</p>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

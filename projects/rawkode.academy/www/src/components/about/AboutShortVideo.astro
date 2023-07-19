@@ -1,0 +1,69 @@
+---
+import Circle from "@components/Circle.astro";
+import VideoComponent from "@components/VideoComponent";
+import { markdownify } from "@lib/utils/textConverter";
+const {
+  video: { title, subtitle, description, thumbnail, video_id },
+} = Astro.props;
+---
+
+<section>
+  <div class="container relative">
+    <div class="row items-center justify-center py-8">
+      <div class="lg:col-5">
+        <div class="section-title text-left" data-aos="fade-up">
+          <p
+            set:html={markdownify(subtitle)}
+            class="mb-4 text-[0.9rem] uppercase"
+          />
+          <h2 set:html={markdownify(title)} class="service-title" />
+          <p
+            set:html={markdownify(description)}
+            class="text-[.9rem] text-text"
+          />
+        </div>
+      </div>
+      <div class="lg:col-5">
+        <VideoComponent
+          client:load
+          src={thumbnail}
+          height={500}
+          width={470}
+          title={title}
+          video_id={video_id}
+          video_height="h-[256px]"
+          video_width="w-[470px]"
+        />
+      </div>
+    </div>
+    <div class="has-circle has-bg-animate h-full" data-aos="fade-in">
+      <Circle classes={"top-[19%] left-[8%] ratio-32"} />
+      <Circle classes={"top-[15%] left-[29%] ratio-20"} />
+      <Circle classes={"bottom-[20%] left-[35%] ratio-20"} />
+      <Circle classes={"bottom-[40%] left-[3%] ratio-20"} />
+      <Circle classes={"bottom-[14%] left-[14%] ratio-37"} />
+      <Circle classes={"top-[6.25rem] right-[12%] ratio-20"} />
+      <Circle classes={"top-[2%] right-[30%] ratio-47"} />
+      <Circle classes={"top-[46%] left-[48%] ratio-37"} />
+
+      <svg
+        class="text-primary"
+        style="opacity:.15"
+        width="100%"
+        height="100%"
+        viewBox="0 0 1401 613"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        ><path
+          d="M2 580C35.1785 462.015 166.359 247.408 425.652 332.866 749.767 439.688 890.318 302.84 946.338 181.583 1002.36 60.3256 1149.41-52.8479 14e2 35.4968"
+          stroke="currentcolor"
+          stroke-width="4"
+          stroke-dasharray="10 10"></path><path
+          d="M1398 .999977C1364.87 125.95 1233.88 353.224 974.955 262.722 651.302 149.594 510.953 294.52 455.013 422.935S252.231 671.203 2.00002 577.644"
+          stroke="currentcolor"
+          stroke-width="4"
+          stroke-dasharray="10 10"></path>
+      </svg>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,24 @@
+---
+import BrandSlider from "@components/LogoSlider";
+import { markdownify } from "@lib/utils/textConverter";
+const {
+  clients: { title, subtitle, brands },
+} = Astro.props;
+---
+
+<section class="section">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="section-title">
+          <p
+            set:html={markdownify(subtitle)}
+            class="mb-4 text-[0.9rem] uppercase"
+          />
+          <h2 set:html={markdownify(title)} class="title" />
+        </div>
+      </div>
+      <BrandSlider brands={brands} client:load />
+    </div>
+  </div>
+</section>@components/LogoSlider

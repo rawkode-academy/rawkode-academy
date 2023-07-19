@@ -1,0 +1,86 @@
+---
+import Logo from "@components/Logo.astro";
+import Social from "@components/Social.astro";
+import config from "@config/config.json";
+import menu from "@config/menu.json";
+import social from "@config/social.json";
+import { markdownify } from "@lib/utils/textConverter";
+const { footer } = menu;
+const { copyright } = config.params;
+const { location, email, contact, description } = config.footer_data;
+---
+
+<footer class="mt-24">
+  <div class="container">
+    <div class="row justify-center pb-12">
+      <div class="col-12">
+        <div class="border-t pb-12"></div>
+      </div>
+      <div class="sm:col-6 md:col-6 lg:col-4">
+        <div class="pr-6">
+          <div class="order-0 mb-6">
+            <Logo />
+          </div>
+          <p class="mb-0">
+            {description}
+          </p>
+        </div>
+      </div><div class="mt-12 sm:col-6 md:col-6 lg:col-3 sm:mt-0">
+        <div class="footer-widget">
+          <h4 class="h5 mb-6">Socials</h4><ul
+            class="footer-links list-unstyled mb-6"
+          >
+            <li>
+              <a
+                class="hover:text-primary hover:underline"
+                href={`mailto:${email}`}>{email}</a
+              >
+            </li>
+          </ul>
+          {/* social icons */}
+          <Social source={social} className="social-icons mb-8" />
+        </div>
+      </div>
+      <div class="mt-12 sm:col-6 md:col-6 lg:col-2 lg:mt-0">
+        <div class="footer-widget">
+          <h4 class="h5 mb-6">Quick Links</h4>
+          <ul class="footer-links list-unstyled">
+            {
+              footer.map((item, i) => (
+                <li class={footer.length - 1 === i ? "mb-0" : "mb-4"}>
+                  <a
+                    class="hover:text-primary hover:underline "
+                    href={item.url}
+                  >
+                    {item.name}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+      <div class="mt-12 sm:col-6 md:col-6 lg:col-3 lg:mt-0">
+        <div class="footer-widget">
+          <h4 class="h5 mb-6">Location &amp; Contact</h4>
+          <ul class="footer-links list-unstyled">
+            <li class="mb-4">
+              {location}
+            </li>
+            <li>
+              <a
+                class="hover:text-primary hover:underline"
+                href={`tel:${contact}`}>{contact}</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-center border-t border-border py-6">
+      <div class="col-12 text-center">
+        <p class="content text-text" set:html={markdownify(copyright)} />
+      </div>
+    </div>
+  </div>
+</footer>

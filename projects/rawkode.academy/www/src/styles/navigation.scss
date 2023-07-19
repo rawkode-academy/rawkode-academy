@@ -1,0 +1,58 @@
+// navbar toggler
+input#nav-toggle:checked ~ label#show-button {
+  @apply hidden;
+}
+
+input#nav-toggle:checked ~ label#hide-button {
+  @apply flex lg:hidden;
+}
+
+input#nav-toggle:checked ~ #nav-menu {
+  @apply block lg:flex;
+}
+
+.header {
+  @apply sticky top-0 z-50 bg-white py-7 transition-all duration-150 ease-out;
+}
+.header-sticky-top {
+  @apply py-6 shadow-sm;
+}
+
+// navbar items
+.navbar {
+  @apply relative flex flex-wrap items-center justify-between;
+}
+
+.navbar-brand {
+  @apply text-xl font-semibold text-dark;
+}
+
+.navbar-nav {
+  @apply text-center lg:text-left;
+}
+
+.nav-link {
+  @apply text-base font-medium text-dark transition hover:text-primary;
+  &.active {
+    @apply text-primary;
+  }
+}
+
+.nav-dropdown {
+  @apply mr-0;
+}
+
+.nav-dropdown-list {
+  @apply z-10 mx-auto mt-4  max-w-[300px] rounded-lg border-0 border-solid  border-primary/25 bg-primary/5  px-[10px] py-3  shadow-sm duration-300  lg:mt-0 lg:border lg:bg-white lg:shadow-[0_0.9rem_1.56rem_rgb(0,0,0,0.1)];
+}
+
+.nav-dropdown-item {
+  @apply mb-1;
+}
+
+.nav-dropdown-link {
+  @apply min-w-[150px] py-1 text-sm font-medium text-dark transition hover:text-primary;
+  &.active {
+    @apply text-primary;
+  }
+}

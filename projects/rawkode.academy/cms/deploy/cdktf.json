@@ -1,0 +1,13 @@
+{
+  "app": "npx ts-node main.ts",
+  "context": {},
+  "language": "typescript",
+  "projectId": "a50eaad7-f318-4b9f-a7b5-76c059b44d67",
+  "sendCrashReports": "false",
+  "terraformModules": [],
+  "terraformProviders": [
+    "hashicorp/azurerm@~>3.65.0",
+    "hashicorp/random",
+    "cloudflare/cloudflare@~>4.10.0"
+  ]
+}

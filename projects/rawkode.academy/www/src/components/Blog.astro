@@ -1,0 +1,59 @@
+---
+import { Image } from "@astrojs/image/components";
+import config from "@config/config.json";
+import dateFormat from "@lib/utils/dateFormat";
+import readingTime from "@lib/utils/readingTime";
+import { plainify, slugify } from "@lib/utils/textConverter";
+
+const { blog } = Astro.props;
+const { summary_length } = config.settings;
+
+const {
+  data: { title, image, author, authorImage, date },
+  slug,
+  body,
+} = blog;
+---
+
+<article class="mt-7 rounded-2xl border-0 shadow">
+  <a href={`/blog/${slug}`}>
+    <Image
+      src={image}
+      alt={title}
+      class="h-auto max-w-full rounded-t-[18px]"
+      width={570}
+      height={335}
+    /></a
+  >
+  <div class="px-[1.875rem] pb-[0.625rem] pt-[2.1rem]">
+    <h3 class="card-title h4 mb-2 font-semibold hover:underline">
+      <a href={`/blog/${slug}`}>{title}</a>
+    </h3>
+    <p class="mb-4 text-text">
+      {plainify(body?.slice(0, Number(summary_length)))}...
+    </p>
+  </div>
+  <div class="card-footer border-t-0 bg-transparent px-[1.875rem] pb-[2.1rem]">
+    <div class="card-author">
+      <div class="flex items-center">
+        <div class="user-image mr-4">
+          <a href={`/authors/${slugify(author)}`}>
+            <Image
+              src={authorImage}
+              alt={author}
+              class="max-w-full rounded-full"
+              width={70}
+              height={70}
+            />
+          </a>
+        </div>
+        <div class="user-info">
+          <p class="mb-0 font-medium">
+            <a href={`/authors/${slugify(author)}`}>{author}</a>
+          </p>
+          <span>{dateFormat(date)} - {readingTime(body)}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
