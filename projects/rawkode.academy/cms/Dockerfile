@@ -1,35 +1,34 @@
-FROM cgr.dev/chainguard/wolfi-base AS base
+FROM node:18 AS base
 
-RUN apk add --update python3 nodejs-20 corepack build-base
+WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm
 
-COPY --chown=node:node package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml ./
 
 RUN pnpm install --strict-peer-dependencies --no-optional --prod --prefer-frozen-lockfile
 
 FROM base as build
 
 RUN pnpm install --strict-peer-dependencies --no-optional --prefer-frozen-lockfile
+RUN pnpm install @swc/core
+
+COPY . .
 RUN pnpm run build
 
-FROM base as backend
+FROM base
 
-RUN adduser -D nonroot
+LABEL org.opencontainers.image.source https://github.com/RawkodeAcademy/RawkodeAcademy
+LABEL org.opencontainers.image.description="Rawkode Academy CMS"
+LABEL org.opencontainers.image.licenses=MIT
+
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-ENV PAYLOAD_CONFIG_PATH=dist/payload.config.js
-
-COPY --chown=nonroot:nonroot --from=build /home/node/app/dist ./
+COPY  --from=build /app/dist ./
+COPY  --from=build /app/node_modules ./node_modules
 
 EXPOSE 3000
 
-USER nonroot
-
 CMD ["node", "server.js"]
-
-FROM base as frontend
-
-COPY --from=build /home/node/app/build ./build

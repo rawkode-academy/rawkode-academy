@@ -24,8 +24,8 @@ const allCollections: CollectionConfig[] = [
 ];
 
 export default buildConfig({
-	serverURL: process.env.SERVER_URL,
-	debug: true,
+	serverURL: process.env.SERVER_URL || "http://localhost:3000",
+	debug: process.env.NODE_ENV === "production" ? false : true,
 	admin: {
 		user: People.slug,
 	},
@@ -38,12 +38,22 @@ export default buildConfig({
 	},
 	plugins: [
 		oAuthPlugin({
-			clientID: process.env.OAUTH_CLIENT_ID,
-			clientSecret: process.env.OAUTH_CLIENT_SECRET,
-			authorizationURL: `${process.env.OAUTH_BASE_URL}/login/oauth/authorize`,
-			tokenURL: `${process.env.OAUTH_BASE_URL}/login/oauth/access_token`,
-			callbackURL: `${process.env.SERVER_URL}/oauth2/callback`,
+			clientID: process.env.OAUTH_CLIENT_ID || "",
+			clientSecret: process.env.OAUTH_CLIENT_SECRET || "",
+			authorizationURL: `${
+				process.env.OAUTH_BASE_URL || "http://localhost:3000"
+			}/login/oauth/authorize`,
+			tokenURL: `${
+				process.env.OAUTH_BASE_URL || "http://localhost:3000"
+			}/login/oauth/access_token`,
+			callbackURL: `${
+				process.env.SERVER_URL || "http://localhost:3000"
+			}/oauth2/callback`,
 			scope: "basic",
+			// This needs to be set, but setting it to anything other
+			// than an empty string will cause it to try and connect
+			// to the database during build
+			mongoUrl: process.env.MONGODB_URI || "",
 			userCollection: {
 				slug: People.slug,
 			},
