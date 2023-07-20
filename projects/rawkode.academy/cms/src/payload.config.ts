@@ -44,7 +44,7 @@ export default buildConfig({
 			clientSecret: process.env.OAUTH_CLIENT_SECRET,
 			authorizationURL: `${process.env.OAUTH_BASE_URL}/login/oauth/authorize`,
 			tokenURL: `${process.env.OAUTH_BASE_URL}/login/oauth/access_token`,
-			callbackPath: "/oauth2/callback",
+			callbackURL: `${process.env.DNS_NAME}/oauth2/callback`,
 			components: {
 				Button: SigninButton,
 			},
