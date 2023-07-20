@@ -20,6 +20,7 @@
     "@payloadcms/plugin-cloud-storage": "^1.0.19",
     "@payloadcms/plugin-search": "^1.0.1",
     "@payloadcms/plugin-seo": "1.0.14-canary.0",
+    "@rawkode.academy/payload-plugin-cloudflare-images": "0.1.13",
     "axios": "^1.2.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",

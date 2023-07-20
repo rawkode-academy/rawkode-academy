@@ -12,9 +12,7 @@ export const People: CollectionConfig = {
 	slug: "people",
 	labels: { singular: "Person", plural: "People" },
 	graphQL: { singularName: "Person", pluralName: "People" },
-	auth: {
-		disableLocalStrategy: true,
-	},
+	auth: {},
 	admin: {
 		useAsTitle: "name",
 	},

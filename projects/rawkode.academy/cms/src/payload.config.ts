@@ -1,6 +1,7 @@
 import { cloudStorage } from "@payloadcms/plugin-cloud-storage";
 import { s3Adapter } from "@payloadcms/plugin-cloud-storage/s3";
 import search from "@payloadcms/plugin-search";
+import { cloudflareImages } from "@rawkode.academy/payload-plugin-cloudflare-images";
 import axios from "axios";
 import path from "path";
 import { oAuthPlugin } from "payload-plugin-oauth";
@@ -39,6 +40,10 @@ export default buildConfig({
 		schemaOutputFile: path.resolve(__dirname, "generated-schema.graphql"),
 	},
 	plugins: [
+		cloudflareImages({
+			enabled: true,
+			collections: [Logo.slug],
+		}),
 		oAuthPlugin({
 			clientID: process.env.OAUTH_CLIENT_ID,
 			clientSecret: process.env.OAUTH_CLIENT_SECRET,
