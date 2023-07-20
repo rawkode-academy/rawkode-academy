@@ -3,6 +3,9 @@ import { GandiProvider } from "@generatedProviders/gandi/provider";
 import { App, HttpBackend, TerraformStack } from "cdktf";
 import { Construct } from "constructs";
 
+import alphabitsFm from "./domains/alphabits.fm";
+import alphabitsShow from "./domains/alphabits.show";
+import alphabitsTv from "./domains/alphabits.tv";
 import canideployToday from "./domains/canideploy.today";
 import chappaaiDev from "./domains/chappaai.dev";
 import cloudnativecompassFm from "./domains/cloudnativecompass.fm";
@@ -31,6 +34,9 @@ class CoreDns extends TerraformStack {
       key: process.env.GANDI_KEY || "",
     });
 
+    alphabitsFm(this);
+    alphabitsShow(this);
+    alphabitsTv(this);
     canideployToday(this);
     chappaaiDev(this);
     cloudnativecompassFm(this);
