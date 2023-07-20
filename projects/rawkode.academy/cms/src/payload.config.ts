@@ -12,6 +12,7 @@ import { Logo } from "./collections/media";
 import { People } from "./collections/people";
 import { Episodes, Shows } from "./collections/shows";
 import { Technologies } from "./collections/technologies";
+import { SigninButton } from "./components/signinButton";
 
 const allCollections: CollectionConfig[] = [
 	People,
@@ -43,7 +44,10 @@ export default buildConfig({
 			clientSecret: process.env.OAUTH_CLIENT_SECRET,
 			authorizationURL: `${process.env.OAUTH_BASE_URL}/login/oauth/authorize`,
 			tokenURL: `${process.env.OAUTH_BASE_URL}/login/oauth/access_token`,
-			callbackURL: `${process.env.DNS_NAME}/oauth2/callback`,
+			callbackPath: "/oauth2/callback",
+			components: {
+				Button: SigninButton,
+			},
 			scope: "basic",
 			mongoUrl: process.env.MONGODB_URI,
 			userCollection: {
