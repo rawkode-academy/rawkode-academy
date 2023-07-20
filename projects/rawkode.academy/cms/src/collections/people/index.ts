@@ -12,7 +12,9 @@ export const People: CollectionConfig = {
 	slug: "people",
 	labels: { singular: "Person", plural: "People" },
 	graphQL: { singularName: "Person", pluralName: "People" },
-	auth: true,
+	auth: {
+		disableLocalStrategy: true,
+	},
 	admin: {
 		useAsTitle: "name",
 	},
@@ -67,7 +69,7 @@ export const People: CollectionConfig = {
 			defaultValue: "guest",
 			required: true,
 			access: {
-				read: isFieldAdminOrSelf,
+				read: () => true,
 				create: isFieldAdmin,
 				update: isFieldAdmin,
 			},
