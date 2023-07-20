@@ -9,8 +9,6 @@ app.get("/", (_, res) => {
 });
 
 const start = async () => {
-  console.debug(process.env);
-
 	await payload.init({
 		secret: process.env.PAYLOAD_SECRET,
 		mongoURL: process.env.MONGODB_URI,
