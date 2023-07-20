@@ -128,7 +128,7 @@ class MyStack extends TerraformStack {
 			{
 				keyVaultId: keyVault.id,
 				name: "github-client-secret",
-				value: process.env.OAUTH_CLIENT_SECRET || "<MISSING>",
+				value: process.env.OAUTH_CLIENT_SECRET || "",
 			},
 		);
 
@@ -154,8 +154,8 @@ class MyStack extends TerraformStack {
 				MONGODB_URI: Fn.element(cosmosDbAccount.connectionStrings, 0),
 				OAUTH_BASE_URL: process.env.OAUTH_BASE_URL || "",
 				OAUTH_CLIENT_ID: process.env.OAUTH_CLIENT_ID || "",
-				OAUTH_CLIENT_SECRET: `@Microsoft.KeyVault(SecretUri=${azureGitHubClientSecret.versionlessId})`,
-				PAYLOAD_SECRET: `@Microsoft.KeyVault(SecretUri=${azurePayloadSecret.versionlessId})`,
+				OAUTH_CLIENT_SECRET: `@Microsoft.KeyVault(SecretUri=${azureGitHubClientSecret.id})`,
+				PAYLOAD_SECRET: `@Microsoft.KeyVault(SecretUri=${azurePayloadSecret.id})`,
 			},
 		});
 

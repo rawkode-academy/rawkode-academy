@@ -42,6 +42,8 @@ export const People: CollectionConfig = {
 				position: "sidebar",
 			},
 			access: {
+				read: () => true,
+				create: readOnlyField,
 				update: readOnlyField,
 			},
 		},
@@ -62,7 +64,7 @@ export const People: CollectionConfig = {
 				position: "sidebar",
 			},
 			hasMany: false,
-			defaultValue: "public",
+			defaultValue: "guest",
 			required: true,
 			access: {
 				read: isFieldAdminOrSelf,

@@ -1,9 +1,9 @@
 import type { Field } from "payload/types";
 import deepMerge from "../utilities/deepMerge";
 
-type Slug = (fieldToUse?: string, overrides?: Partial<Field>) => Field;
+type Slug = (fieldToUse: string, overrides?: Partial<Field>) => Field;
 
-export const slugField: Slug = (fieldToUse = "title", overrides = {}) =>
+export const slugField: Slug = (fieldToUse, overrides = {}) =>
 	deepMerge<Field, Partial<Field>>(
 		{
 			name: "slug",
