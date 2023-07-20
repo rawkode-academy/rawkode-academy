@@ -48,7 +48,7 @@ export default buildConfig({
 			components: {
 				Button: SigninButton,
 			},
-			scope: "basic",
+			scope: "user:email",
 			mongoUrl: process.env.MONGODB_URI,
 			userCollection: {
 				slug: People.slug,
