@@ -24,7 +24,7 @@ const allCollections: CollectionConfig[] = [
 ];
 
 export default buildConfig({
-	serverURL: process.env.APPSETTING_DNS_NAME,
+	serverURL: process.env.DNS_NAME,
 	debug: process.env.NODE_ENV === "production" ? false : true,
 	admin: {
 		user: People.slug,
@@ -39,13 +39,13 @@ export default buildConfig({
 	},
 	plugins: [
 		oAuthPlugin({
-			clientID: process.env.APPSETTING_OAUTH_CLIENT_ID,
-			clientSecret: process.env.APPSETTING_OAUTH_CLIENT_SECRET,
-			authorizationURL: `${process.env.APPSETTING_OAUTH_BASE_URL}/login/oauth/authorize`,
-			tokenURL: `${process.env.APPSETTING_OAUTH_BASE_URL}/login/oauth/access_token`,
-			callbackURL: `${process.env.APPSETTING_DNS_NAME}/oauth2/callback`,
+			clientID: process.env.OAUTH_CLIENT_ID,
+			clientSecret: process.env.OAUTH_CLIENT_SECRET,
+			authorizationURL: `${process.env.OAUTH_BASE_URL}/login/oauth/authorize`,
+			tokenURL: `${process.env.OAUTH_BASE_URL}/login/oauth/access_token`,
+			callbackURL: `${process.env.DNS_NAME}/oauth2/callback`,
 			scope: "basic",
-			mongoUrl: process.env.APPSETTING_MONGODB_URI,
+			mongoUrl: process.env.MONGODB_URI,
 			userCollection: {
 				slug: People.slug,
 			},

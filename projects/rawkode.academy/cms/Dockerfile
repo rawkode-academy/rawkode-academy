@@ -13,6 +13,9 @@ FROM base as build
 RUN pnpm install @swc/core
 
 COPY . .
+# Needed for build, not production
+ENV DNS_NAME http://localhost:3000
+
 RUN pnpm run build
 
 FROM base
