@@ -29,6 +29,7 @@ export default buildConfig({
 	admin: {
 		user: People.slug,
 	},
+	indexSortableFields: true,
 	collections: allCollections,
 	typescript: {
 		outputFile: path.resolve(__dirname, "payload-types.ts"),
