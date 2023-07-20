@@ -39,17 +39,12 @@ export default buildConfig({
 	},
 	plugins: [
 		oAuthPlugin({
-			clientID: process.env.APPSETTING_OAUTH_CLIENT_ID || "",
-			clientSecret: process.env.APPSETTING_OAUTH_CLIENT_SECRET || "",
+			clientID: process.env.APPSETTING_OAUTH_CLIENT_ID,
+			clientSecret: process.env.APPSETTING_OAUTH_CLIENT_SECRET,
 			authorizationURL: `${process.env.APPSETTING_OAUTH_BASE_URL}/login/oauth/authorize`,
 			tokenURL: `${process.env.APPSETTING_OAUTH_BASE_URL}/login/oauth/access_token`,
-			callbackURL: `${
-				process.env.APPSETTING_DNS_NAME || "https://localhost:3000"
-			}/oauth2/callback`,
+			callbackURL: `${process.env.APPSETTING_DNS_NAME}/oauth2/callback`,
 			scope: "basic",
-			// This needs to be set, but setting it to anything other
-			// than an empty string will cause it to try and connect
-			// to the database during build
 			mongoUrl: process.env.APPSETTING_MONGODB_URI,
 			userCollection: {
 				slug: People.slug,
