@@ -10,7 +10,7 @@ packages:
   - "./projects/rawkode.academy/website"
   - "./projects/rawkode.academy/cms"
   - "./projects/rawkode.academy/cms/deploy"
-  - "./projects/rawkode.cloud/tfstate"
+  - "./projects/rawkode.cloud/infrastructure"
   - "./projects/rawkode.community/ics-events"
   - "./projects/rawkode.studio"
   - "./projects/rawkode.studio/content-management/desktop"
