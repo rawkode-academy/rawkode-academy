@@ -13,6 +13,7 @@ import comtryaDev from "./domains/comtrya.dev";
 import klusteredLive from "./domains/klustered.live";
 import rawkoDe from "./domains/rawko.de";
 import rawkodeAcademy from "./domains/rawkode.academy";
+import rawkodeBlog from "./domains/rawkode.blog";
 import rawkodeChat from "./domains/rawkode.chat";
 import rawkodeCloud from "./domains/rawkode.cloud";
 import rawkodeCom from "./domains/rawkode.com";
@@ -22,7 +23,9 @@ import rawkodeEmail from "./domains/rawkode.email";
 import rawkodeLink from "./domains/rawkode.link";
 import rawkodeLive from "./domains/rawkode.live";
 import rawkodeNews from "./domains/rawkode.news";
+import rawkodeSocial from "./domains/rawkode.social";
 import rawkodeStudio from "./domains/rawkode.studio";
+import rawkodeXyz from "./domains/rawkode.xyz";
 
 class CoreDns extends TerraformStack {
   constructor(scope: Construct, id: string) {
@@ -44,6 +47,7 @@ class CoreDns extends TerraformStack {
     klusteredLive(this);
     rawkoDe(this);
     rawkodeAcademy(this);
+    rawkodeBlog(this);
     rawkodeChat(this);
     rawkodeCloud(this);
     rawkodeCom(this);
@@ -53,7 +57,9 @@ class CoreDns extends TerraformStack {
     rawkodeLink(this);
     rawkodeLive(this);
     rawkodeNews(this);
+    rawkodeSocial(this);
     rawkodeStudio(this);
+    rawkodeXyz(this);
   }
 }
 

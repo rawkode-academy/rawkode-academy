@@ -1,6 +1,7 @@
 import { Record } from "@generatedProviders/cloudflare/record";
 import { Zone } from "@generatedProviders/cloudflare/zone";
 import { ZoneDnssec } from "@generatedProviders/cloudflare/zone-dnssec";
+import { ZoneSettingsOverride } from "@generatedProviders/cloudflare/zone-settings-override";
 import { Nameservers } from "@generatedProviders/gandi/nameservers";
 import { Construct } from "constructs";
 
@@ -33,6 +34,23 @@ export class ManagedDomain extends Construct {
       accountId: process.env.CLOUDFLARE_ACCOUNT_ID || "",
       type: "full",
       plan: "free",
+      lifecycle: {
+        preventDestroy: true,
+      },
+    });
+
+    new ZoneSettingsOverride(this, "zone-settings", {
+      zoneId: this.cloudflareZone.id,
+      settings: {
+        cnameFlattening: "flatten_at_root",
+        alwaysUseHttps: "on",
+        automaticHttpsRewrites: "on",
+        opportunisticEncryption: "on",
+        minTlsVersion: "1.2",
+        tls13: "on",
+        ssl: "flexible",
+        universalSsl: "on",
+      },
     });
 
     switch (registrar) {

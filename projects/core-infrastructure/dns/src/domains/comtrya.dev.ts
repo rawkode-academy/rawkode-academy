@@ -2,7 +2,7 @@ import { Construct } from "constructs";
 import { ManagedDomain, Registrar } from "../dnsProvider";
 
 export default (scope: Construct): ManagedDomain => {
-  const managedDomain = new ManagedDomain(scope, "comtrya.dev", Registrar.Gandi);
+  const managedDomain = new ManagedDomain(scope, "comtrya.dev", Registrar.Cloudflare);
 
   managedDomain
     .discourageEmail()
