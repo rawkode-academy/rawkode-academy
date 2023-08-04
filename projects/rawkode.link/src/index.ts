@@ -27,9 +27,9 @@ export default {
 		const hostname = requestUrl.host;
 		const path = requestUrl.pathname.substring(1);
 
-		console.log(`Handling request on domain '${hostname}' for '${path}'`);
-
 		ctx.waitUntil(logRequest(request, env, hostname, path));
+
+		console.log(`Handling request on domain '${hostname}' for '${path}'`);
 
 		if (!(hostname in redirects["domains"])) {
 			console.log("This domain is not managed by rawkode.link");
@@ -94,5 +94,5 @@ const logRequest = async (
 
 	const response = await fetch(logRequest);
 
-	console.debug(response);
+	console.log(JSON.stringify(response.status));
 };
