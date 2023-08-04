@@ -4,6 +4,8 @@ compatibility_date = "2023-08-01"
 
 workers_dev = false
 
+usage_model = "unbound"
+
 routes = [
   { pattern = "rawkode.link", custom_domain = true },
   { pattern = "rawkode.link/*", zone_name = "rawkode.link" },
