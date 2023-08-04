@@ -23,10 +23,16 @@ export default {
 	): Promise<Response> {
 		const requestUrl = new URL(request.url);
 
-		console.log(`Request for ${requestUrl.host}`);
-
 		const hostname = requestUrl.host;
 		const path = requestUrl.pathname.substring(1);
+
+		if (path === "healthcheck") {
+			return new Response("OK", {
+				status: 200,
+			});
+		}
+
+		console.log(`Request for ${requestUrl.host}`);
 
 		ctx.waitUntil(logRequest(request, env, hostname, path));
 
@@ -70,7 +76,9 @@ const logRequest = async (
 		.tag("referrer", referrer)
 		.tag("continentCode", getContinentString(request))
 		.tag("countryCode", getCountryString(request))
-		.intField("count", 1);
+		.intField("count", 1)
+		.intField("longitude", request.cf?.longitude)
+		.intField("latitude", request.cf?.latitude);
 
 	const logRequest = new Request(
 		"https://eu-central-1-1.aws.cloud2.influxdata.com/api/v2/write?bucket=analytics",
