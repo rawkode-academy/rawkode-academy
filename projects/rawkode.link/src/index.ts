@@ -14,37 +14,39 @@ interface Env {
 	RUDDERSTACK_AUTH: string;
 }
 
-const handler = async (
-	request: Request,
-	env: Env,
-	ctx: ExecutionContext,
-): Promise<Response> => {
-	const requestUrl = new URL(request.url);
+export default {
+	async fetch(
+		request: Request,
+		env: Env,
+		ctx: ExecutionContext,
+	): Promise<Response> {
+		const requestUrl = new URL(request.url);
 
-	console.log(`Request for ${requestUrl.host}`);
+		console.log(`Request for ${requestUrl.host}`);
 
-	const hostname = requestUrl.host;
-	const path = requestUrl.pathname.substring(1);
+		const hostname = requestUrl.host;
+		const path = requestUrl.pathname.substring(1);
 
-	console.log(`Handling request on domain '${hostname}' for '${path}'`);
+		console.log(`Handling request on domain '${hostname}' for '${path}'`);
 
-	ctx.waitUntil(logRequest(request, env, hostname, path));
+		ctx.waitUntil(logRequest(request, env, hostname, path));
 
-	if (!(hostname in redirects["domains"])) {
-		console.log("This domain is not managed by rawkode.link");
-		return Response.redirect(redirects.defaultRedirect);
-	}
+		if (!(hostname in redirects["domains"])) {
+			console.log("This domain is not managed by rawkode.link");
+			return Response.redirect(redirects.defaultRedirect);
+		}
 
-	const domain = redirects["domains"][hostname];
+		const domain = redirects["domains"][hostname];
 
-	if (path in domain["redirects"]) {
-		console.log(`Redirecting too '${domain["redirects"][path].to}'`);
-		return Response.redirect(domain["redirects"][path].to);
-	}
+		if (path in domain["redirects"]) {
+			console.log(`Redirecting too '${domain["redirects"][path].to}'`);
+			return Response.redirect(domain["redirects"][path].to);
+		}
 
-	console.log("Path not found, default redirect");
+		console.log("Path not found, default redirect");
 
-	return Response.redirect(domain.defaultRedirect);
+		return Response.redirect(domain.defaultRedirect);
+	},
 };
 
 const logRequest = async (
@@ -94,5 +96,3 @@ const logRequest = async (
 
 	console.debug(response);
 };
-
-export default handler;
