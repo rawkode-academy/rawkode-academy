@@ -1,3 +1,5 @@
+secrets:
+	op run --no-masking -- printenv INFLUXDB_TOKEN | op run -- pnpm exec wrangler secret put INFLUXDB_TOKEN
+
 deploy:
-	op run --no-masking -- printenv RUDDERSTACK_AUTH | op run -- pnpm exec wrangler secret put RUDDERSTACK_AUTH
 	op run -- pnpm exec wrangler deploy

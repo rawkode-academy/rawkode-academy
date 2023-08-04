@@ -1,3 +1,4 @@
+import { Point } from "@influxdata/influxdb-client";
 import { Redirects } from "./types";
 import rawkodeLink from "./rawkode.link";
 import rawkodeCommunity from "./rawkode.community";
@@ -11,7 +12,7 @@ const redirects: Redirects = {
 };
 
 interface Env {
-	RUDDERSTACK_AUTH: string;
+	INFLUXDB_TOKEN: string;
 }
 
 export default {
@@ -55,44 +56,59 @@ const logRequest = async (
 	hostname: string,
 	path: string,
 ) => {
-	console.log("Sending to Rudderstack");
+	console.log("Sending to InfluxDB");
+
+	const referrer = request.headers.get("Referer") || "";
 
 	const headers = new Headers();
 
-	headers.set("Content-Type", "application/json");
-	headers.set("Authorization", `Basic ${env.RUDDERSTACK_AUTH}`);
+	headers.set("Authorization", `Token ${env.INFLUXDB_TOKEN}`);
+
+	const point = new Point("click")
+		.tag("domain", hostname)
+		.tag("path", path)
+		.tag("referrer", referrer)
+		.tag("continentCode", getContinentString(request))
+		.tag("countryCode", getCountryString(request))
+		.intField("count", 1);
 
 	const logRequest = new Request(
-		"https://rawkodedaoo.dataplane.rudderstack.com/v1/track",
+		"https://eu-central-1-1.aws.cloud2.influxdata.com/api/v2/write?bucket=analytics",
 		{
 			method: "POST",
 			headers,
-			body: JSON.stringify({
-				anonymousId: request.headers.get("CF-Connecting-IP") || "IP Unknown",
-				event: "click",
-				properties: {
-					shortDomain: hostname,
-					shortPath: path,
-
-					referrer: request.headers.get("Referer") || "",
-				},
-				context: {
-					ipAddr: request.headers.get("CF-Connecting-IP") || "Unknown IP",
-					geoLatitude: request.cf?.latitude,
-					geoLongitude: request.cf?.longitude,
-					geoContinentCode: request.cf?.continent,
-					geoCountryCode: request.cf?.country,
-					geoCityName: request.cf?.city,
-					geoSubdivision1Code: request.cf?.regionCode,
-					geoSubdivision1Name: request.cf?.region,
-					geopostalCode: request.cf?.postalCode,
-					geoTimezone: request.cf?.timezone,
-				},
-			}),
+			body: point.toLineProtocol(),
 		},
 	);
 
 	const response = await fetch(logRequest);
 
-	console.log(JSON.stringify(response.status));
+	if (response.status !== 204) {
+		console.log(`Analytics Push Failed: ${response.status}`);
+		console.log(await response.text());
+	}
+};
+
+const getCountryString = (request: Request): string => {
+	if (undefined === request.cf) {
+		return "";
+	}
+
+	if (typeof request.cf.country !== "string") {
+		return "";
+	}
+
+	return request.cf.country;
+};
+
+const getContinentString = (request: Request): string => {
+	if (undefined === request.cf) {
+		return "";
+	}
+
+	if (typeof request.cf.continent !== "string") {
+		return "";
+	}
+
+	return request.cf.continent;
 };
