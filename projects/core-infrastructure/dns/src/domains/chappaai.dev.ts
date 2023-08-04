@@ -2,9 +2,13 @@ import { Construct } from "constructs";
 import { ManagedDomain, Registrar } from "../dnsProvider";
 
 export default (scope: Construct): ManagedDomain => {
-  const managedDomain = new ManagedDomain(scope, "chappaai.dev", Registrar.Cloudflare);
+	const managedDomain = new ManagedDomain(
+		scope,
+		"chappaai.dev",
+		Registrar.Cloudflare,
+	);
 
-  managedDomain.discourageEmail();
+	managedDomain.discourageEmail();
 
-  return managedDomain;
+	return managedDomain;
 };

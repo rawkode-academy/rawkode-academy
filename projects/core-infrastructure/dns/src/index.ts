@@ -28,39 +28,39 @@ import rawkodeStudio from "./domains/rawkode.studio";
 import rawkodeXyz from "./domains/rawkode.xyz";
 
 class CoreDns extends TerraformStack {
-  constructor(scope: Construct, id: string) {
-    super(scope, id);
+	constructor(scope: Construct, id: string) {
+		super(scope, id);
 
-    new CloudflareProvider(this, "cloudflare");
+		new CloudflareProvider(this, "cloudflare");
 
-    new GandiProvider(this, "gandi", {
-      key: process.env.GANDI_KEY || "",
-    });
+		new GandiProvider(this, "gandi", {
+			key: process.env.GANDI_KEY || "",
+		});
 
-    alphabitsFm(this);
-    alphabitsShow(this);
-    alphabitsTv(this);
-    canideployToday(this);
-    chappaaiDev(this);
-    cloudnativecompassFm(this);
-    comtryaDev(this);
-    klusteredLive(this);
-    rawkoDe(this);
-    rawkodeAcademy(this);
-    rawkodeBlog(this);
-    rawkodeChat(this);
-    rawkodeCloud(this);
-    rawkodeCom(this);
-    rawkodeCommunity(this);
-    rawkodeDev(this);
-    rawkodeEmail(this);
-    rawkodeLink(this);
-    rawkodeLive(this);
-    rawkodeNews(this);
-    rawkodeSocial(this);
-    rawkodeStudio(this);
-    rawkodeXyz(this);
-  }
+		alphabitsFm(this);
+		alphabitsShow(this);
+		alphabitsTv(this);
+		canideployToday(this);
+		chappaaiDev(this);
+		cloudnativecompassFm(this);
+		comtryaDev(this);
+		klusteredLive(this);
+		rawkoDe(this);
+		rawkodeAcademy(this);
+		rawkodeBlog(this);
+		rawkodeChat(this);
+		rawkodeCloud(this);
+		rawkodeCom(this);
+		rawkodeCommunity(this);
+		rawkodeDev(this);
+		rawkodeEmail(this);
+		rawkodeLink(this);
+		rawkodeLive(this);
+		rawkodeNews(this);
+		rawkodeSocial(this);
+		rawkodeStudio(this);
+		rawkodeXyz(this);
+	}
 }
 
 const app = new App();
@@ -69,12 +69,12 @@ const stack = new CoreDns(app, "dns");
 const baseUrl = "https://terraform-state-backend.rawkode-academy.workers.dev";
 
 new HttpBackend(stack, {
-  address: `${baseUrl}/states/core-infrastructure-dns`,
-  lockMethod: "PUT",
-  unlockMethod: "DELETE",
-  lockAddress: `${baseUrl}/states/core-infrastructure-dns/lock`,
-  unlockAddress: `${baseUrl}/states/core-infrastructure-dns/lock`,
-  username: "rawkodeacademy",
+	address: `${baseUrl}/states/core-infrastructure-dns`,
+	lockMethod: "PUT",
+	unlockMethod: "DELETE",
+	lockAddress: `${baseUrl}/states/core-infrastructure-dns/lock`,
+	unlockAddress: `${baseUrl}/states/core-infrastructure-dns/lock`,
+	username: "rawkodeacademy",
 });
 
 app.synth();

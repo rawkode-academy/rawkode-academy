@@ -2,12 +2,16 @@ import { Construct } from "constructs";
 import { ManagedDomain, Registrar } from "../dnsProvider";
 
 export default (scope: Construct): ManagedDomain => {
-  const managedDomain = new ManagedDomain(scope, "cloudnativecompass.fm", Registrar.Cloudflare);
+	const managedDomain = new ManagedDomain(
+		scope,
+		"cloudnativecompass.fm",
+		Registrar.Cloudflare,
+	);
 
-  managedDomain
-    .discourageEmail()
-    .addCNameRecord("www", "www", "domains.transistor.fm")
-    .addCNameRecord("@", "@", "www.cloudnativecompass.fm");
+	managedDomain
+		.discourageEmail()
+		.addCNameRecord("www", "www", "domains.transistor.fm")
+		.addCNameRecord("@", "@", "www.cloudnativecompass.fm");
 
-  return managedDomain;
+	return managedDomain;
 };
