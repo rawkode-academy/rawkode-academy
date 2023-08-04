@@ -1,0 +1,10 @@
+name = "rawkode-link"
+main = "src/index.ts"
+compatibility_date = "2023-08-01"
+
+workers_dev = false
+
+routes = [
+  { pattern = "rawkode.link", custom_domain = true },
+  { pattern = "rawkode.link/*", zone_name = "rawkode.link" },
+]

@@ -1,0 +1,3 @@
+deploy:
+	op run -- printenv RUDDERSTACK_AUTH | op run -- pnpm exec wrangler secret put RUDDERSTACK_AUTH
+	op run -- pnpm exec wrangler deploy

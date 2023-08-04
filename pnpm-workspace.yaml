@@ -12,6 +12,7 @@ packages:
   - "./projects/rawkode.academy/cms/deploy"
   - "./projects/rawkode.cloud/infrastructure"
   - "./projects/rawkode.community/ics-events"
+  - "./projects/rawkode.link"
   - "./projects/rawkode.studio"
   - "./projects/rawkode.studio/content-management/desktop"
   - "./projects/rawkode.studio/deploy"
