@@ -1,3 +1,7 @@
+import {
+	PageRule,
+	PageRuleActions,
+} from "@generatedProviders/cloudflare/page-rule";
 import { Record } from "@generatedProviders/cloudflare/record";
 import { Zone } from "@generatedProviders/cloudflare/zone";
 import { ZoneDnssec } from "@generatedProviders/cloudflare/zone-dnssec";
@@ -23,11 +27,14 @@ interface GSuiteConfig {
 }
 
 export class ManagedDomain extends Construct {
+	private readonly registrar: Registrar;
 	private readonly cloudflareZone: Zone;
 	private email: Email = Email.Unset;
 
 	constructor(scope: Construct, zone: string, registrar: Registrar) {
 		super(scope, zone);
+
+		this.registrar = registrar;
 
 		this.cloudflareZone = new Zone(this, "zone", {
 			zone,
@@ -67,6 +74,24 @@ export class ManagedDomain extends Construct {
 				});
 				break;
 		}
+	}
+
+	addPageRule(
+		id: string,
+		target: string,
+		actions: PageRuleActions,
+	): ManagedDomain {
+		if (this.registrar !== Registrar.Cloudflare) {
+			throw new Error("Page rules are only supported for Cloudflare domains");
+		}
+
+		new PageRule(this, id, {
+			zoneId: this.cloudflareZone.id,
+			target,
+			actions,
+		});
+
+		return this;
 	}
 
 	addARecord(id: string, name: string, value: string): ManagedDomain {

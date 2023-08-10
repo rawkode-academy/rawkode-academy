@@ -13,7 +13,13 @@ export default (scope: Construct): ManagedDomain => {
 		.addARecord("@1", "@", "104.18.3.117")
 		.addARecord("@2", "@", "104.18.2.117")
 		.addCNameRecord("www", "www", "hosting.gitbook.io")
-		.addCNameRecord("get", "get", "get-comtrya-dev.onrender.com");
+		.addCNameRecord("get", "get", "get-comtrya-dev.onrender.com")
+		.addPageRule("root", "comtrya.dev/*", {
+			forwardingUrl: {
+				url: "https://www.comtrya.dev/$1",
+				statusCode: 301,
+			},
+		});
 
 	return managedDomain;
 };
