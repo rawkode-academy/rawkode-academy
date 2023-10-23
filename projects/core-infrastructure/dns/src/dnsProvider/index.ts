@@ -150,7 +150,7 @@ export class ManagedDomain extends Construct {
 		}
 	}
 
-	enableFastmail(): ManagedDomain {
+  enableFastmail(): ManagedDomain {
 		new Record(this, "mx1", {
 			zoneId: this.cloudflareZone.id,
 			name: "@",
@@ -181,45 +181,152 @@ export class ManagedDomain extends Construct {
 			this.addCNameRecord(
 				`dkim${i}`,
 				`fm${i}._domainkey`,
-				`fm${i}.${this.cloudflareZone.zone}.dkim.fmhosted.com`,
+        `fm${i}.${this.cloudflareZone.zone}.dkim.fmhosted.com`,
 			);
-		}
+    }
+
+    this.addCNameRecord(
+      `dkim-mesmtp`,
+      `mesmtp._domainkey`,
+      `mesmtp.${this.cloudflareZone.zone}.dkim.fmhosted.com`,
+    );
 
 		new Record(this, "srv-submission", {
 			zoneId: this.cloudflareZone.id,
-			name: "_submission._tcp",
+      name: "srv-submission",
 			type: "SRV",
-			ttl: 3600,
-			value: "0 1 587 smtp.fastmail.com",
+      ttl: 3600,
+      data: {
+        name: this.cloudflareZone.zone,
+        service: "_submission",
+        proto: "_tcp",
+        priority: 0,
+        weight: 1,
+        port: 587,
+        target: "smtp.fastmail.com",
+      },
 			comment: "Managed by Terraform",
 		});
 
 		new Record(this, "srv-imap", {
 			zoneId: this.cloudflareZone.id,
-			name: "_imap._tcp",
+      name: "srv-imap",
 			type: "SRV",
 			ttl: 3600,
-			value: "0 0 0 .",
+      data: {
+        name: this.cloudflareZone.zone,
+        service: "_imap",
+        proto: "_tcp",
+        priority: 0,
+        weight: 0,
+        port: 0,
+        target: ".",
+      },
 			comment: "Managed by Terraform",
 		});
 
 		new Record(this, "srv-imaps", {
 			zoneId: this.cloudflareZone.id,
-			name: "_imaps._tcp",
+      name: "srv-imaps",
 			type: "SRV",
 			ttl: 3600,
-			value: "0 0 0 imap.fastmail.com",
+      data: {
+        name: this.cloudflareZone.zone,
+        service: "_imaps",
+        proto: "_tcp",
+        priority: 0,
+        weight: 1,
+        port: 993,
+        target: "imap.fastmail.com",
+      },
 			comment: "Managed by Terraform",
 		});
 
 		new Record(this, "srv-jmap", {
 			zoneId: this.cloudflareZone.id,
-			name: "_jmap._tcp",
-			type: "SRV",
-			ttl: 3600,
-			value: "0 1 443 api.fastmail.com",
-			comment: "Managed by Terraform",
-		});
+      name: "srv-jmap",
+      type: "SRV",
+      ttl: 3600,
+      data: {
+        name: this.cloudflareZone.zone,
+        service: "_jmap",
+        proto: "_tcp",
+        priority: 0,
+        weight: 1,
+        port: 443,
+        target: "api.fastmail.com",
+      },
+      comment: "Managed by Terraform",
+    });
+
+    new Record(this, "srv-carddav", {
+      zoneId: this.cloudflareZone.id,
+      name: "srv-carddav",
+      type: "SRV",
+      ttl: 3600,
+      data: {
+        name: this.cloudflareZone.zone,
+        service: "_carddav",
+        proto: "_tcp",
+        priority: 0,
+        weight: 0,
+        port: 0,
+        target: ".",
+      },
+      comment: "Managed by Terraform",
+    });
+
+    new Record(this, "srv-carddavs", {
+      zoneId: this.cloudflareZone.id,
+      name: "srv-carddavs",
+      type: "SRV",
+      ttl: 3600,
+      data: {
+        name: this.cloudflareZone.zone,
+        service: "_carddavs",
+        proto: "_tcp",
+        priority: 0,
+        weight: 1,
+        port: 443,
+        target: "carddav.fastmail.com",
+      },
+      comment: "Managed by Terraform",
+    });
+
+
+    new Record(this, "srv-caldav", {
+      zoneId: this.cloudflareZone.id,
+      name: "srv-caldav",
+      type: "SRV",
+      ttl: 3600,
+      data: {
+        name: this.cloudflareZone.zone,
+        service: "_caldav",
+        proto: "_tcp",
+        priority: 0,
+        weight: 0,
+        port: 0,
+        target: ".",
+      },
+      comment: "Managed by Terraform",
+    });
+
+    new Record(this, "srv-caldavs", {
+      zoneId: this.cloudflareZone.id,
+      name: "srv-caldavs",
+      type: "SRV",
+      ttl: 3600,
+      data: {
+        name: this.cloudflareZone.zone,
+        service: "_caldavs",
+        proto: "_tcp",
+        priority: 0,
+        weight: 1,
+        port: 443,
+        target: "caldav.fastmail.com",
+      },
+      comment: "Managed by Terraform",
+    });
 
 		return this;
 	}
