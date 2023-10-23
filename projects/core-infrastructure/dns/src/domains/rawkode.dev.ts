@@ -23,7 +23,8 @@ export default (scope: Construct): ManagedDomain => {
 		.addARecord("@2", "@", "3.13.222.255")
 		.addARecord("@3", "@", "3.13.246.91")
 		.addARecord("share1", "share", "104.21.59.78")
-		.addARecord("share2", "share", "172.67.218.165");
+    .addARecord("share2", "share", "172.67.218.165")
+    .addTextRecord("_atproto", "_atproto", "did=did:plc:35bdlgus7hihmup66o265nuy");
 
 	return managedDomain;
 };
