@@ -18,7 +18,8 @@ export default (scope: Construct): ManagedDomain => {
 		.addCNameRecord("api", "api", "rawkodeacademy-api.hasura.app")
 		.addCNameRecord("community", "community", "rawkode-academy.circle.so")
 		.addCNameRecord("connect", "connect", "26236635.sites.hscoscdn-eu1.net.")
-		.addCNameRecord("crm", "crm", "26236635.sites.hscoscdn-eu1.net.");
+    .addCNameRecord("crm", "crm", "26236635.sites.hscoscdn-eu1.net.")
+    .addTextRecord("_atproto", "_atproto", "did=did:plc:qtpysarntxepux4to4dr4hgr");
 
 	return managedDomain;
 };

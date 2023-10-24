@@ -156,7 +156,7 @@ export class ManagedDomain extends Construct {
 			name: "@",
 			type: "MX",
 			ttl: 3600,
-			priority: 10,
+      priority: 1,
 			value: "in1-smtp.messagingengine.com.",
 			comment: "Managed by Terraform",
 		});
@@ -166,7 +166,7 @@ export class ManagedDomain extends Construct {
 			name: "@",
 			type: "MX",
 			ttl: 3600,
-			priority: 20,
+      priority: 5,
 			value: "in2-smtp.messagingengine.com.",
 			comment: "Managed by Terraform",
 		});
