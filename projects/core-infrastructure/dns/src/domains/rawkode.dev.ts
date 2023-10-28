@@ -9,11 +9,13 @@ export default (scope: Construct): ManagedDomain => {
 	);
 
 	managedDomain
-    .enableFastmail()
-		.addTextRecord(
+    .enableGSuite({
+      domainKey: "",
+      spfIncludes: [],
+    }).addTextRecord(
 			"google-site-verification",
 			"@",
-			"google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU",
+      "google-site-verification=RnbvxDOTdobTiAetVoa-U3Xc0Irk76nan_OcRCGuQTM",
 		)
 		.addARecord("@1", "@", "3.130.60.26")
 		.addARecord("@2", "@", "3.13.222.255")

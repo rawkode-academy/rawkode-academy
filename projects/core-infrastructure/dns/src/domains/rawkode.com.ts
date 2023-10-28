@@ -8,7 +8,10 @@ export default (scope: Construct): ManagedDomain => {
 		Registrar.Cloudflare,
 	);
 
-  managedDomain.enableFastmail();
+  managedDomain.enableGSuite({
+    domainKey: "",
+    spfIncludes: [],
+  }).addTextRecord("google-site-verification", "@", "google-site-verification=tLlIPrsVkjMI2Klec6nYm_m6bNNwKOgvQZlyyxg0nBQ");
 
 	return managedDomain;
 };
