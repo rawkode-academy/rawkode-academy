@@ -20,6 +20,8 @@ export default (scope: Construct): ManagedDomain => {
       "google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU",
     )
 		.addCNameRecord("api", "api", "rawkodeacademy-api.hasura.app")
+    .addCNameRecord("wix", "beta", "pointing.wixdns.net")
+    .addCNameRecord("wix-www", "www.beta", "pointing.wixdns.net")
 		.addCNameRecord("community", "community", "rawkode-academy.circle.so")
 		.addCNameRecord("connect", "connect", "26236635.sites.hscoscdn-eu1.net.")
     .addCNameRecord("crm", "crm", "26236635.sites.hscoscdn-eu1.net.")
