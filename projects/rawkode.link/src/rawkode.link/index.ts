@@ -39,6 +39,21 @@ const redirects: Domain = {
 		vcard: {
 			to: "https://vcard-hsbr8blg.fermyon.app",
 		},
+		discord: {
+			to: "https://discord.gg/rawkode",
+		},
+		github: {
+			to: "https://github.com/RawkodeAcademy",
+		},
+		linkedin: {
+			to: "https://uk.linkedin.com/company/rawkodeacademy",
+		},
+		youtube: {
+			to: "https://youtube.com/@RawkodeAcademy",
+		},
+		x: {
+			to: "https://x.com/RawkodeAcademy",
+		},
 	},
 };
 

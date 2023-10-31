@@ -140,7 +140,7 @@ export class ManagedDomain extends Construct {
 
 			case Email.Unset:
 				this.email = Email.Discouraged;
-				this.addTextRecord("discourage-email", "@", '"v=spf1 ~all"');
+        this.addTextRecord("discourage-email", "@", 'v=spf1 ~all');
 				return this;
 
 			case Email.Configured:
@@ -174,7 +174,7 @@ export class ManagedDomain extends Construct {
 		this.addTextRecord(
 			"spf",
 			"@",
-			'"v=spf1 include:spf.messagingengine.com ~all"',
+      'v=spf1 include:spf.messagingengine.com ~all',
 		);
 
 		for (let i = 1; i <= 3; i++) {
@@ -385,15 +385,15 @@ export class ManagedDomain extends Construct {
 		this.addTextRecord(
 			"dkim",
 			"google._domainkey",
-			`"v=DKIM1; k=rsa; p=${config.domainKey}"`,
+      `v=DKIM1; k=rsa; p=${config.domainKey}`,
 		);
 
 		this.addTextRecord(
 			"spf",
 			"@",
-			`"v=spf1 include:_spf.google.com ${config.spfIncludes
+      `v=spf1 include:_spf.google.com ${config.spfIncludes
 				.map((include) => `include:${include}`)
-				.join(" ")} ~all"`,
+        .join(" ")} ~all`,
 		);
 
 		return this;
