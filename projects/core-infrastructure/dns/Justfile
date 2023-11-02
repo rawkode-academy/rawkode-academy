@@ -22,3 +22,6 @@ plan stack="":
 # Run cdktf Deploy
 deploy stack="":
   op run -- cdktf deploy {{ stack }}
+
+deletelock:
+  curl -XDELETE -d '{"ID": ""}' -u 'rawkodeacademy:PASSWORD' https://terraform-state-backend.rawkode-academy.workers.dev/states/core-infrastructure-dns/lock
