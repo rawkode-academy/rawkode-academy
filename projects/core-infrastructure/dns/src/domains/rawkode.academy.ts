@@ -23,6 +23,10 @@ export default (scope: Construct): ManagedDomain => {
     .addCNameRecord("www", "www", "pointing.wixdns.net")
     .addCNameRecord("beta", "beta", "pointing.wixdns.net")
     .addCNameRecord("beta-www", "www.beta", "pointing.wixdns.net")
+    .addCNameRecord("wixdkim1", "sg", "sg.rawkode.academy.s011.ascendbywix.com")
+    .addCNameRecord("wixdkim2", "s1._domainkey", "s1._domainkey.rawkode.academy.s011.ascendbywix.com")
+    .addCNameRecord("wixdkim3", "s2._domainkey", "s2._domainkey.rawkode.academy.s011.ascendbywix.com")
+    .addCNameRecord("wixdkim4", "sel1._domainkey", "sel1._domainkey.rawkode.academy.s011.ascendbywix.com")
     .addTextRecord("_atproto", "_atproto", "did=did:plc:qtpysarntxepux4to4dr4hgr");
 
 	return managedDomain;

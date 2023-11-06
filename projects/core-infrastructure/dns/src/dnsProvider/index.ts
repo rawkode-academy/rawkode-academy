@@ -104,16 +104,17 @@ export class ManagedDomain extends Construct {
 			comment: "Managed by Terraform",
 		});
 
-		return this;
+    return this;
 	}
 
-	addCNameRecord(id: string, name: string, value: string): ManagedDomain {
+  addCNameRecord(id: string, name: string, value: string, proxied?: boolean): ManagedDomain {
 		new Record(this, id, {
 			zoneId: this.cloudflareZone.id,
 			type: "CNAME",
 			ttl: 300,
 			name,
 			value,
+      proxied: proxied || false,
 			comment: "Managed by Terraform",
 		});
 
