@@ -26,6 +26,10 @@ interface GSuiteConfig {
 	spfIncludes: string[];
 }
 
+interface BumpEmailConfig {
+  domainKey: string;
+}
+
 export class ManagedDomain extends Construct {
 	private readonly registrar: Registrar;
 	private readonly cloudflareZone: Zone;
@@ -105,7 +109,7 @@ export class ManagedDomain extends Construct {
 		});
 
     return this;
-	}
+  }
 
   addCNameRecord(id: string, name: string, value: string, proxied?: boolean): ManagedDomain {
 		new Record(this, id, {
@@ -330,7 +334,35 @@ export class ManagedDomain extends Construct {
     });
 
 		return this;
-	}
+  }
+
+  enableBumpEmail(config: BumpEmailConfig): ManagedDomain {
+    new Record(this, "mx1", {
+      zoneId: this.cloudflareZone.id,
+      name: "@",
+      type: "MX",
+      ttl: 3600,
+      priority: 10,
+      value: "mx.bump.email.",
+      comment: "Managed by Terraform",
+    });
+
+    new Record(this, "mx2", {
+      zoneId: this.cloudflareZone.id,
+      name: "@",
+      type: "MX",
+      ttl: 3600,
+      priority: 20,
+      value: "mx2.bump.email.",
+      comment: "Managed by Terraform",
+    });
+
+    this.addTextRecord("spf", "@", "v=spf1 include:spf.bump.email ~all");
+
+    this.addTextRecord("dkim", "bump._domainkey", `v=DKIM1; p=${config.domainKey}`);
+
+    return this;
+  }
 
 	enableGSuite(config: GSuiteConfig): ManagedDomain {
 		new Record(this, "mx1", {
