@@ -1,0 +1,9 @@
+name = "rawkode-academy-api-auth"
+main = "src/worker.ts"
+compatibility_date = "2023-05-18"
+
+[vars]
+GITHUB_CLIENT_ID = "Iv1.f7228dcc6461486a"
+
+[env.production.vars]
+DATABSE_URL = "libsql://api-auth-rawkode.turso.io"
