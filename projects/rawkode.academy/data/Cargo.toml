@@ -1,0 +1,17 @@
+[package]
+name = "dagger-data"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name="data-build"
+path = "./build/main.rs"
+
+[dependencies]
+# color-eyre = { workspace = true }
+dagger-sdk = { workspace = true }
+eyre = { workspace = true }
+# serde = { workspace = true }
+# serde_json = { workspace = true }
+tokio = { workspace = true }
+# thiserror = { workspace = true }
