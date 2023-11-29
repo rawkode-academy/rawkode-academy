@@ -1,0 +1,14 @@
+[build]
+builder = "nixpacks"
+watchPatterns = ["src/**"]
+buildCommand = "bun run build"
+
+[build.nixpacksPlan.phases.install]
+dependsOn = ["setup"]
+cmds = ["bun install"]
+
+[deploy]
+startCommand = "bun run dist/server.ts"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
