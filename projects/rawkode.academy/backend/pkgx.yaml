@@ -1,0 +1,9 @@
+dependencies:
+- supabase
+- atlasgo.io
+
+env:
+  DATABASE_HOST: op://sa.rawkode.academy/supabase-postgresql/host
+  DATABASE_USER: postgres
+  DATABASE_NAME: postgres
+  DATABASE_PASS: op://sa.rawkode.academy/supabase-postgresql/password

@@ -1,0 +1,23 @@
+{
+  "folders": [
+    {
+      "name": "project-root",
+      "path": "./"
+    },
+    {
+      "name": "supabase-functions",
+      "path": "supabase/functions"
+    },
+    {
+      "path": "../frontend/astro-supabase"
+    },
+    {
+      "path": "../api/auth"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "supabase/functions/": true
+    }
+  }
+}

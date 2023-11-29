@@ -1,0 +1,4 @@
+migrate_db:
+  #!/usr/bin/env sh
+  cd database
+  op run -- atlas schema apply --env production
