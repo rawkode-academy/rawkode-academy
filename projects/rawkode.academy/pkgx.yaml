@@ -1,0 +1,14 @@
+dependencies:
+- bun
+- deno
+- supabase
+
+env:
+  SUPABASE_PROJECT_ID: dbdcwdwghzqqnbhszfsk
+  SUPABASE_URL: https://${SUPABASE_PROJECT_ID}.supabase.co
+  SUPABASE_SERVICE_KEY: op://sa.rawkode.academy/supabase/service-key
+  DATABASE_HOST: op://sa.rawkode.academy/supabase/host
+  DATABASE_NAME: postgres
+  DATABASE_USER: postgres
+  DATABASE_PASS: op://sa.rawkode.academy/supabase/password
+

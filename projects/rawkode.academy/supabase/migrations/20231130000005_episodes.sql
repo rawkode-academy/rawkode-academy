@@ -21,13 +21,13 @@ ALTER TABLE episodes ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE "episode_guests" (
   "episode_id" text NOT NULL,
-  "person_id" uuid NOT NULL,
+  "person_id" "github_handle" NOT NULL,
 
   PRIMARY KEY ("episode_id", "person_id"),
 
   CONSTRAINT "episode_guests_episode_id" FOREIGN KEY ("episode_id") REFERENCES "episodes" ("slug") ON UPDATE CASCADE ON DELETE CASCADE,
 
-  CONSTRAINT "episode_guests_person_id" FOREIGN KEY ("person_id") REFERENCES "people" ("id") ON UPDATE CASCADE ON DELETE CASCADE
+  CONSTRAINT "episode_guests_person_id" FOREIGN KEY ("person_id") REFERENCES "people" ("github_handle") ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 ALTER TABLE episode_guests ENABLE ROW LEVEL SECURITY;

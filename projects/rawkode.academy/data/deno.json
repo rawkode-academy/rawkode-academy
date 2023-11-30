@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "sync": "deno run sync.ts"
+  }
+}
