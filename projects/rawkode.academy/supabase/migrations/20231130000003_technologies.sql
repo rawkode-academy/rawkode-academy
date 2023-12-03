@@ -1,24 +1,25 @@
-CREATE TABLE "technologies" (
-  "slug" text NOT NULL,
-  "name" text NOT NULL,
-  "aliases" text [] NULL DEFAULT ARRAY [] :: text [],
-  "tags" text [] NULL DEFAULT ARRAY [] :: text [],
-  "draft" boolean NOT NULL DEFAULT true,
-  "tagline" text NOT NULL,
-  "description" text NOT NULL,
-  "website_url" text NOT NULL,
-  "documentation_url" text NOT NULL,
-  "logo_url" text NULL,
-  "open_source" boolean NOT NULL DEFAULT false,
-  "github_organization" "github_handle" NOT NULL,
-  "repository_url" text NULL,
+create table "technologies" (
+  "slug" text not null primary key,
+  "name" text not null,
 
-  PRIMARY KEY ("slug"),
+  "tagline" text not null,
+  "description" text not null,
 
-  CONSTRAINT "open_source" CHECK (
-    (open_source IS FALSE)
-    OR (repository_url IS NOT NULL)
+  "aliases" text [] null default array [] :: text [],
+  "tags" text [] null default array [] :: text [],
+
+  "logo_url" text null,
+  "website_url" text not null,
+  "documentation_url" text not null,
+
+  "oss_licensed" boolean not null default false,
+  "github_organization" "github_handle" null,
+  "repository_url" text null,
+
+  constraint "oss_licensed" check (
+    (not "oss_licensed")
+    or ("github_organization" is not null and "repository_url" is not null)
   )
 );
 
-ALTER TABLE technologies ENABLE ROW LEVEL SECURITY;
+alter table technologies enable row level security;

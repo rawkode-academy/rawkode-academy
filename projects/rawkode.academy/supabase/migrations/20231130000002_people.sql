@@ -1,36 +1,35 @@
--- People
+-- people
 --- Users of the system are actually stored in the auth.users table,
 --- but we need this representation so that the users themselves can update their
 --- own profiles.
-CREATE TABLE "people" (
-  "github_handle" "github_handle" NOT NULL,
-  "auth_id" uuid NULL,
-  "email" text NULL,
-  "name" text NULL,
-  "avatar_url" text NULL,
-  "biography" text NULL,
-  "website" text NULL,
-  "x_handle" "x_handle" NULL,
-  "youtube_handle" "youtube_handle" NULL,
-
-  PRIMARY KEY ("github_handle")
+create table "people" (
+  "auth_id" uuid null,
+  "github_handle" "github_handle" not null primary key,
+  "email" text null,
+  "name" text null,
+  "avatar_url" text null,
+  "biography" text null,
+  "website" text null,
+  "x_handle" "x_handle" null,
+  "youtube_handle" "youtube_handle" null
 );
 
-ALTER TABLE people ENABLE ROW LEVEL SECURITY;
+alter table people enable row level security;
 
-CREATE UNIQUE INDEX "person_email" ON "people" ("email");
-CREATE UNIQUE INDEX "person_x_handle" ON "people" ("x_handle");
-CREATE UNIQUE INDEX "person_youtube_handle" ON "people" ("youtube_handle");
+create unique index "person_auth_id" on "people" ("auth_id");
+create unique index "person_email" on "people" ("email");
+create unique index "person_x_handle" on "people" ("x_handle");
+create unique index "person_youtube_handle" on "people" ("youtube_handle");
 
--- Sync auth.users to public.people
---- Because auth is handled by Supabase, we need a function and trigger
+-- sync auth.users to public.people
+--- because auth is handled by supabase, we need a function and trigger
 --- to replicate the data from auth.users to public.people.
-CREATE FUNCTION "sync_auth_users_to_public_people" ()
-RETURNS trigger AS $$
-BEGIN
-INSERT INTO
-  public.people (auth_id, email, github_handle, "name", avatar_url)
-VALUES
+create function "sync_auth_users_to_public_people" ()
+returns trigger as $$
+begin
+insert into
+  "people" ("auth_id", "email", "github_handle", "name", "avatar_url")
+values
   (
     new.id,
     new.raw_user_meta_data ->> 'email',
@@ -38,14 +37,15 @@ VALUES
     new.raw_user_meta_data ->> 'full_name',
     new.raw_user_meta_data ->> 'avatar_url'
   )
-ON CONFLICT (github_handle) DO UPDATE SET auth_id = EXCLUDED.auth_id, name = EXCLUDED.name, email = EXCLUDED.email, avatar_url = EXCLUDED.avatar_url;
+on conflict (github_handle) do update set auth_id = excluded.auth_id, name = excluded.name, email = excluded.email, avatar_url = excluded.avatar_url;
 
 return new;
 
 end;
 
-$$ LANGUAGE plpgsql  security definer;
+$$ language plpgsql  security definer;
 
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR each ROW EXECUTE PROCEDURE public.sync_auth_users_to_public_people();
+create trigger on_auth_user_created
+  after insert on "auth"."users"
+  for each row
+    execute function "public"."sync_auth_users_to_public_people"();

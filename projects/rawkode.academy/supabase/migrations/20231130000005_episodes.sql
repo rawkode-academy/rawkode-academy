@@ -1,46 +1,55 @@
-CREATE TABLE "episodes" (
-  "slug" text NOT NULL,
-  "draft" boolean NOT NULL DEFAULT true,
-  "title" text NOT NULL,
-  "show_id" text NOT NULL,
-  "live" boolean NOT NULL DEFAULT true,
-  "scheduled_for" timestamp NULL,
-  "links" text [] NULL DEFAULT ARRAY [] :: text [],
+create table "episodes" (
+  "slug" text not null primary key,
+  "title" text not null,
 
-  PRIMARY KEY ("slug"),
+  "show_id" text null references "shows" ("slug") on update cascade on delete cascade,
 
-  CONSTRAINT "episodes_show_id" FOREIGN KEY ("show_id") REFERENCES "shows" ("slug") ON UPDATE CASCADE ON DELETE CASCADE,
+  "published_at" timestamp null,
+  "scheduled_for" timestamp null,
 
-  CONSTRAINT "is_live" CHECK (
-    (NOT live)
-    OR (scheduled_for IS NOT NULL)
-  )
+  "visibility" text default 'private',
+  constraint "valid_visibility"
+    check (
+      "visibility"
+      in
+      ('private', 'tier-1', 'tier-2', 'tier-3', 'public')
+    ),
+
+  "live" boolean not null,
+  constraint "valid_live_settings"
+    check (
+      (not "live" and "published_at" is not null)
+      or
+      ("scheduled_for" is not null)
+    ),
+
+  "duration" interval null,
+  constraint "valid_duration"
+    check (
+      duration is null
+      or
+      duration >= '00:00:00'::interval
+    ),
+
+  "links" text [] null default array [] :: text []
 );
 
-ALTER TABLE episodes ENABLE ROW LEVEL SECURITY;
+alter table episodes enable row level security;
 
-CREATE TABLE "episode_guests" (
-  "episode_id" text NOT NULL,
-  "person_id" "github_handle" NOT NULL,
+create table "episode_guests" (
+  "episode_id" text not null references "episodes" ("slug") on update cascade on delete cascade,
+  "person_id" "github_handle" not null references "people" ("github_handle") on update cascade on delete cascade,
 
-  PRIMARY KEY ("episode_id", "person_id"),
-
-  CONSTRAINT "episode_guests_episode_id" FOREIGN KEY ("episode_id") REFERENCES "episodes" ("slug") ON UPDATE CASCADE ON DELETE CASCADE,
-
-  CONSTRAINT "episode_guests_person_id" FOREIGN KEY ("person_id") REFERENCES "people" ("github_handle") ON UPDATE CASCADE ON DELETE CASCADE
+  primary key ("episode_id", "person_id")
 );
 
-ALTER TABLE episode_guests ENABLE ROW LEVEL SECURITY;
+alter table episode_guests enable row level security;
 
-CREATE TABLE "episode_technologies" (
-  "episode_id" text NOT NULL,
-  "technology_id" text NOT NULL,
+create table "episode_technologies" (
+  "episode_id" text not null references "episodes" ("slug") on update cascade on delete cascade,
+  "technology_id" text not null references "technologies" ("slug") on update cascade on delete cascade,
 
-  PRIMARY KEY ("episode_id", "technology_id"),
-
-  CONSTRAINT "episode_technologies_episode_id" FOREIGN KEY ("episode_id") REFERENCES "episodes" ("slug") ON UPDATE CASCADE ON DELETE CASCADE,
-
-  CONSTRAINT "episode_technologies_technology_id" FOREIGN KEY ("technology_id") REFERENCES "technologies" ("slug") ON UPDATE CASCADE ON DELETE CASCADE
+  primary key ("episode_id", "technology_id")
 );
 
-ALTER TABLE episode_technologies ENABLE ROW LEVEL SECURITY;
+alter table episode_technologies enable row level security;

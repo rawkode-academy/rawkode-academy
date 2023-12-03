@@ -1,18 +1,32 @@
 -- GitHub Handles
-CREATE DOMAIN "github_handle" AS text CONSTRAINT "github_handle_length" CHECK (length(VALUE) <= 39);
+create domain "github_handle"
+  as text
+  constraint "github_handle_length"
+    check (length(value) <= 39);
 
--- X Handles
-CREATE DOMAIN "x_handle" AS text CONSTRAINT "x_handle_length" CHECK (
-  (length(VALUE) >= 4)
-  AND (length(VALUE) <= 15)
+-- x handles
+create domain "x_handle"
+  as text
+  constraint "x_handle_length"
+    check (
+      (length(value) >= 4)
+      and
+      (length(value) <= 15)
 );
 
--- YouTube Handles
-CREATE DOMAIN "youtube_handle" AS text CONSTRAINT "youtube_handle_length" CHECK (
-  (length(VALUE) >= 3)
-  AND (length(VALUE) <= 30)
+-- youtube handles
+create domain "youtube_handle"
+  as text
+  constraint "youtube_handle_length"
+    check (
+      (length(value) >= 3)
+      and
+      (length(value) <= 30)
 );
 
--- Chapters
---- Primarily used to mark up segments of podcasts and video content
-CREATE TYPE "chapter" AS ("time" INTERVAL, "title" TEXT);
+-- chapters
+-- primarily used to mark up segments of podcasts and video content
+create type "chapter" as (
+  "time" interval,
+  "title" text
+);

@@ -1,26 +1,22 @@
-CREATE TABLE "shows" (
-  "slug" text NOT NULL,
-  "name" text NOT NULL,
-  "description" text NULL,
-  "draft" boolean NOT NULL DEFAULT true,
+create table "shows" (
+  "slug" text not null primary key,
+  "name" text not null,
+  "description" text null,
 
-  PRIMARY KEY ("slug")
+  "visibility" text default 'private' check (
+    "visibility" in ('private', 'public')
+  )
 );
 
-CREATE UNIQUE INDEX "show_name" ON "shows" ("name");
+alter table shows enable row level security;
 
-ALTER TABLE shows ENABLE ROW LEVEL SECURITY;
+create unique index "show_name" on "shows" ("name");
 
-CREATE TABLE "show_hosts" (
-  "show_id" text NOT NULL,
-  "person_id" "github_handle" NOT NULL,
+create table "show_hosts" (
+  "show_id" text not null references "shows" ("slug") on update cascade on delete cascade,
+  "person_id" "github_handle" not null references "people" ("github_handle") on update cascade on delete cascade,
 
-  PRIMARY KEY ("show_id", "person_id"),
-
-  CONSTRAINT "show_hosts_person_id" FOREIGN KEY ("person_id") REFERENCES "people" ("github_handle") ON UPDATE CASCADE ON DELETE CASCADE,
-
-  CONSTRAINT "show_hosts_show_id" FOREIGN KEY ("show_id") REFERENCES "shows" ("slug") ON UPDATE CASCADE ON DELETE CASCADE
+  primary key ("show_id", "person_id")
 );
 
-ALTER TABLE show_hosts ENABLE ROW LEVEL SECURITY;
-
+alter table show_hosts enable row level security;
