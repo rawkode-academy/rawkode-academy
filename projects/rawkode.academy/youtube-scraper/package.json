@@ -1,0 +1,12 @@
+{
+  "name": "youtube-scraper",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": { "@types/gapi": "^0.0.47", "google-auth-library": "^9.4.1", "googleapis": "^129.0.0", "js-yaml": "^4.1.0", "zod": "^3.22.4" }
+}
