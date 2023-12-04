@@ -5,7 +5,6 @@
 create table "people" (
   "auth_id" uuid null,
   "github_handle" "github_handle" not null primary key,
-  "email" text null,
   "name" text null,
   "avatar_url" text null,
   "biography" text null,
@@ -17,7 +16,6 @@ create table "people" (
 alter table people enable row level security;
 
 create unique index "person_auth_id" on "people" ("auth_id");
-create unique index "person_email" on "people" ("email");
 create unique index "person_x_handle" on "people" ("x_handle");
 create unique index "person_youtube_handle" on "people" ("youtube_handle");
 
@@ -28,16 +26,15 @@ create function "sync_auth_users_to_public_people" ()
 returns trigger as $$
 begin
 insert into
-  "people" ("auth_id", "email", "github_handle", "name", "avatar_url")
+  "people" ("auth_id", "github_handle", "name", "avatar_url")
 values
   (
     new.id,
-    new.raw_user_meta_data ->> 'email',
     new.raw_user_meta_data ->> 'user_name',
     new.raw_user_meta_data ->> 'full_name',
     new.raw_user_meta_data ->> 'avatar_url'
   )
-on conflict (github_handle) do update set auth_id = excluded.auth_id, name = excluded.name, email = excluded.email, avatar_url = excluded.avatar_url;
+on conflict (github_handle) do update set auth_id = excluded.auth_id, name = excluded.name, avatar_url = excluded.avatar_url;
 
 return new;
 
@@ -49,3 +46,7 @@ create trigger on_auth_user_created
   after insert on "auth"."users"
   for each row
     execute function "public"."sync_auth_users_to_public_people"();
+
+-- allow self-access
+create policy "people-view-self" on people for select using (auth.uid() = auth_id);
+create policy "people-update-self" on people for update using (auth.uid() = auth_id);

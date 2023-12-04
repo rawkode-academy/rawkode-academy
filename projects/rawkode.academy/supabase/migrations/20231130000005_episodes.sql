@@ -53,3 +53,15 @@ create table "episode_technologies" (
 );
 
 alter table episode_technologies enable row level security;
+
+create function person_was_guest(github_handle "github_handle") returns boolean as $$
+    select (
+        exists (
+            select 1 from "episode_guests" where person_id=$1
+        )
+    )
+$$ stable language sql security definer;
+
+create policy "episodes-public" on "episodes" for select to authenticated, anon using ( true );
+create policy "episode-guests-public" on "episode_guests" for select to authenticated, anon using ( true );
+create policy "episode-guests-public-select" on "people" for select to authenticated, anon using (person_was_guest(github_handle));

@@ -20,3 +20,15 @@ create table "show_hosts" (
 );
 
 alter table show_hosts enable row level security;
+
+create function person_is_host(github_handle "github_handle") returns boolean as $$
+    select (
+        exists (
+            select 1 from "show_hosts" where person_id=$1
+        )
+    )
+$$ stable language sql security definer;
+
+create policy "shows-public" on shows for select to authenticated, anon using ( true );
+create policy "show-hosts-public" on show_hosts for select to authenticated, anon using ( true );
+create policy "show-hosts-public-select" on people for select to authenticated, anon using (person_is_host(github_handle));
