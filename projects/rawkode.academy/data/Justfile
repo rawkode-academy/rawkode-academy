@@ -1,6 +1,0 @@
-gen-types:
-  mkdir -p types
-  supabase gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/supabase.ts
-
-sync:
-  op run -- deno run --allow-env="SUPABASE_URL,SUPABASE_SERVICE_KEY" --allow-net="dbdcwdwghzqqnbhszfsk.supabase.co" sync.ts
