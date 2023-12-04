@@ -1,4 +1,4 @@
-import * as z from "zod";
+import { z } from "zod";
 
 const durationValidator = (value) => {
   const durationPattern = /^P(\d+Y)?(\d+M)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$/;
@@ -19,6 +19,12 @@ const localizedSchema = z.object({
   description: z.string(),
 });
 
+const liveStreamingDetails = z.object({
+  actualStartTime: z.string().datetime(),
+  actualEndTime: z.string().datetime(),
+  scheduledStartTime: z.string().datetime(),
+});
+
 const snippetSchema = z.object({
   publishedAt: z.string(),
   channelId: z.string(),
@@ -29,6 +35,7 @@ const snippetSchema = z.object({
     medium: thumbnailSchema,
     high: thumbnailSchema,
     standard: thumbnailSchema,
+    maxres: thumbnailSchema,
   }),
   channelTitle: z.string(),
   categoryId: z.string(),
@@ -42,13 +49,7 @@ const contentDetailsSchema = z.object({
 });
 
 const statusSchema = z.object({
-  uploadStatus: z.string(),
   privacyStatus: z.string(),
-  license: z.string(),
-  embeddable: z.boolean(),
-  publicStatsViewable: z.boolean(),
-  madeForKids: z.boolean(),
-  selfDeclaredMadeForKids: z.boolean(),
 });
 
 const statisticsSchema = z.object({
@@ -68,11 +69,11 @@ export const unparsedVideo = z.object({
   etag: z.string(),
   id: z.string(),
   snippet: snippetSchema,
-  contentDetailsSchema: contentDetailsSchema,
+  contentDetails: contentDetailsSchema,
   status: statusSchema,
   statistics: statisticsSchema,
-  recordingDetails: z.record({}),
   fileDetails: fileDetailsSchema,
+  liveStreamingDetails: liveStreamingDetails,
 });
 
 export const parsedVideo = z.object({
@@ -83,7 +84,7 @@ export const parsedVideo = z.object({
   description: z.string(),
   duration: z.custom(durationValidator),
 
-  visibility: z.ZodEnum(["private", "tier-1", "tier-2", "tier-3", "public"]),
+  visibility: z.enum(["private", "tier-1", "tier-2", "tier-3", "public"]),
 
   publishedAt: z.string().datetime(),
 
@@ -97,3 +98,5 @@ export const parsedVideo = z.object({
   favoriteCount: z.number(),
   commentCount: z.number(),
 })
+
+export type ParsedVideo = z.infer<typeof parsedVideo>;

@@ -8,5 +8,5 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "dependencies": { "@types/gapi": "^0.0.47", "google-auth-library": "^9.4.1", "googleapis": "^129.0.0", "js-yaml": "^4.1.0", "zod": "^3.22.4" }
+  "dependencies": { "@types/filesystem": "^0.0.35", "@types/gapi": "^0.0.47", "@types/node": "^20.10.3", "fastq": "^1.15.0", "google-auth-library": "^9.4.1", "googleapis": "^129.0.0", "js-yaml": "^4.1.0", "openai": "^4.20.1", "slugify": "^1.6.6", "zod": "^3.22.4" }
 }
