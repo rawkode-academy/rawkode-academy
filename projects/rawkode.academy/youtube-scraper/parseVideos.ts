@@ -3,6 +3,8 @@ import OpenAI from 'openai';
 import * as fastq from "fastq";
 import { queueAsPromised } from "fastq";
 
+const CONCURRENCY = 10;
+
 type Task = {
   filename: string;
   yaml: string;
@@ -49,11 +51,14 @@ interface Video {
 const parseVideo = async (task: Task): Promise<void> => {
   console.log(`Parsing ${task.filename}`);
 
-  const result = await openai.chat.completions.create({
-    model: "gpt-4-1106-preview",
-    messages: [{
-      role: "system",
-      content: `
+  let result;
+
+  try {
+    result = await openai.chat.completions.create({
+      model: "gpt-4-1106-preview",
+      messages: [{
+        role: "system",
+        content: `
 You MUST ONLY EVER respond with RAW and VALID JSON.
 
 You will be given a YAML document that describes a pre-recorded video or live stream.
@@ -108,13 +113,20 @@ Rules:
 - Ensure that any links used for guest or technology properties are removed from link property.
 - Condense the description to remove the metadata capture in other properties of the type
 `,
-    },
-    {
-      role: "user",
-      content: task.yaml,
-    }
-    ],
-  });
+      },
+        {
+          role: "user",
+          content: task.yaml,
+        }
+      ],
+    });
+  } catch (error) {
+    console.log(`Error with ${task.filename}`);
+    console.error(error);
+    return;
+  }
+
+  console.log(`NO ERROR ${task.filename}`);
 
   let cleanResponse = result.choices[0].message.content.replace(/```json/g, "").replace(/```/g, "");
 
@@ -125,7 +137,7 @@ Rules:
 
 // Main
 const openai = new OpenAI({});
-const q: queueAsPromised<Task> = fastq.promise(parseVideo, 20);
+const q: queueAsPromised<Task> = fastq.promise(parseVideo, CONCURRENCY);
 
 const videoFiles = readdirSync("./videos");
 
@@ -136,6 +148,6 @@ videoFiles.forEach((filename) => {
   });
 });
 
-q.drained().then(() => {
-  console.log("Drained")
-});
+await q.drained();
+
+console.log("All done, yo");
