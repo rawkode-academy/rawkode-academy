@@ -128,11 +128,11 @@ Rules:
 
   console.log(`NO ERROR ${task.filename}`);
 
-  let cleanResponse = result.choices[0].message.content.replace(/```json/g, "").replace(/```/g, "");
+  const cleanResponse = result.choices[0].message.content.replace(/```json/g, "").replace(/```/g, "");
 
   const payload = JSON.parse(cleanResponse);
   writeFileSync(`ai/${payload.youtubeId}.json`, cleanResponse);
-  console.log("Done with " + payload.youtubeId);
+  console.log(`Done with ${payload.youtubeId}`);
 }
 
 // Main
@@ -141,12 +141,18 @@ const q: queueAsPromised<Task> = fastq.promise(parseVideo, CONCURRENCY);
 
 const videoFiles = readdirSync("./videos");
 
-videoFiles.forEach((filename) => {
+for (const filename of videoFiles) {
+  // Check if filename exists in ai folder
+  if (readdirSync("./ai").includes(`${filename.replace('yaml', 'json')}`)) {
+    console.log(`Skipping ${filename}`);
+    continue;
+  }
+
   q.push({
     filename,
     yaml: readFileSync(`./videos/${filename}`, "utf8"),
   });
-});
+}
 
 await q.drained();
 
