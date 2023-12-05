@@ -1,11 +1,11 @@
 ---
 import FeatureList from "../components/feature/list.vue";
-import HeroTiles from "../components/hero/typewriter.vue";
-import Page from "../layouts/page.astro";
+import HeroTypewriter from "../components/hero/typewriter.vue";
+import Page from "../wrappers/page.astro";
 ---
 
 <Page title="Home">
-	<HeroTiles
+	<HeroTypewriter
 		client:load
 		highlight="hard"
 		rotatedPrefixes={[

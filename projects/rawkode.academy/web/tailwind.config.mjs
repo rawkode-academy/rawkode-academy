@@ -1,27 +1,22 @@
+import * as colors from "tailwindcss/colors";
+
 /** @type {import('tailwindcss').Config} */
 export default {
-	darkMode: "class",
-	content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
+	darkMode: "media",
+	content: [
+		"./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}",
+		"./node_modules/flowbite/**/*.js",
+	],
 	theme: {
 		extend: {
 			colors: {
-				primary: {
-					50: "#ecfdf5",
-					100: "#d1fae5",
-					200: "#a7f3d0",
-					300: "#6ee7b7",
-					400: "#34d399",
-					500: "#10b981",
-					600: "#059669",
-					700: "#047857",
-					800: "#065f46",
-					900: "#064e3b",
-					950: "#022c22",
-				},
+				primary: colors.green,
+				secondary: colors.teal,
+				tertiary: colors.indigo,
 			},
 			fontFamily: {
 				body: [
-					"Montserrat",
+					"Monasans",
 					"ui-sans-serif",
 					"system-ui",
 					"-apple-system",
@@ -38,7 +33,7 @@ export default {
 					"Noto Color Emoji",
 				],
 				sans: [
-					"Montserrat",
+					"Monasans",
 					"ui-sans-serif",
 					"system-ui",
 					"-apple-system",
@@ -57,5 +52,5 @@ export default {
 			},
 		},
 	},
-	plugins: [require("@tailwindcss/forms")],
+	plugins: [require("flowbite/plugin"), require("flowbite-typography")],
 };
