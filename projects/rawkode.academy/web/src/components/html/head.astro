@@ -1,0 +1,51 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<style is:global>
+	@font-face {
+		font-family: "Monasans";
+		src:
+			url("/fonts/monasans.woff2") format("woff2 supports variations"),
+			url("/fonts/monasans.woff2") format("woff2-variations");
+		font-weight: 200 900;
+		font-stretch: 75% 125%;
+	}
+
+	@font-face {
+		font-family: "Monaspace";
+		src:
+			url("/fonts/monaspaceneon.woff") format("woff2 supports variations"),
+			url("/fonts/monaspaceneon.woff") format("woff2-variations");
+		font-weight: 200 900;
+		font-stretch: 75% 125%;
+	}
+</style>
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<title>{title} | Rawkode Academy</title>
+
+	<link
+		rel="preload"
+		href="/fonts/monasans.woff2"
+		as="font"
+		type="font/woff2"
+		crossorigin
+	/>
+	<link
+		rel="preload"
+		href="/fonts/monaspaceneon.woff"
+		as="font"
+		type="font/woff2"
+		crossorigin
+	/>
+
+	<slot name="extra-head" />
+</head>

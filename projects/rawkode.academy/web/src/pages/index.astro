@@ -1,0 +1,21 @@
+---
+import FeatureList from "../components/feature/list.vue";
+import HeroTiles from "../components/hero/typewriter.vue";
+import Page from "../layouts/page.astro";
+---
+
+<Page title="Home">
+	<HeroTiles
+		client:load
+		highlight="hard"
+		rotatedPrefixes={[
+			"Cloud Native",
+			"Kubernetes",
+			"Microservices",
+			"WebAssembly",
+		]}
+		suffix="may be complex, but it doesn't need to be hard."
+	/>
+
+	<FeatureList />
+</Page>
