@@ -2,7 +2,6 @@
 import LoginButton from "../components/auth/login-button.astro";
 import ProfileMenu from "../components/profile/menu.astro";
 import MenuItems from "../components/sidebar/items.vue";
-import { isAuthenticated } from "../lib/supabase";
 
 import {
 AcademicCapIcon,
@@ -103,7 +102,7 @@ const menuItemsOrgs = [
 				<!-- Apps -->
 
 				<!-- Profile -->
-				{isAuthenticated(Astro.cookies) ? <ProfileMenu /> : <LoginButton />}
+				{Astro.locals.user ? <ProfileMenu /> : <LoginButton />}
 			</div>
 		</div>
 	</nav>

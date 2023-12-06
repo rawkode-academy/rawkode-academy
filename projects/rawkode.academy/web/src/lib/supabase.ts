@@ -3,14 +3,14 @@ import type { AstroCookies } from "astro";
 
 export const supabase = createClient(
 	import.meta.env.SUPABASE_URL,
-	import.meta.env.SUPABASE_ANON_KEY,
+	import.meta.env.SUPABASE_KEY,
 	{
 		auth: {
 			flowType: "pkce",
 		},
 	},
 );
-export const isAuthenticated = (cookies: AstroCookies): boolean => {
+export const isAuthenticated = async (cookies: AstroCookies): Promise<boolean> => {
 	const accessToken = cookies.get("sb-access-token");
 	const refreshToken = cookies.get("sb-refresh-token");
 

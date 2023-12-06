@@ -1,11 +1,12 @@
 ---
-export const prerender = false;
+if (!Astro.locals.user) {
+	console.log("Does this bail on menu?");
+	return;
+}
 
-import { supabase } from "../../lib/supabase.ts";
-
-const token = Astro.cookies.get("sb-access-token")?.value;
-const { data, error } = await supabase.auth.getUser(token);
-
+const name = Astro.locals.user.name;
+const email = Astro.locals.user.email;
+const avatarUrl = Astro.locals.user.avatarUrl;
 ---
 
 <button
@@ -18,7 +19,7 @@ const { data, error } = await supabase.auth.getUser(token);
 	<span class="sr-only">Open user menu</span>
 	<img
 		class="w-8 h-8 rounded-full"
-		src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
+		src={avatarUrl}
 		alt="user photo"
 	/>
 </button>
@@ -29,10 +30,10 @@ const { data, error } = await supabase.auth.getUser(token);
 >
 	<div class="py-3 px-4">
 		<span class="block text-sm font-semibold text-gray-900 dark:text-white"
-			>{data.user.user_metadata.full_name}</span
+			>{name}</span
 		>
 		<span class="block text-sm text-gray-900 truncate dark:text-white"
-			>{data.user.user_metadata.email}</span
+			>{email}</span
 		>
 	</div>
 	<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
