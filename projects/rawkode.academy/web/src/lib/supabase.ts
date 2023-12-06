@@ -14,5 +14,5 @@ export const isAuthenticated = (cookies: AstroCookies): boolean => {
 	const accessToken = cookies.get("sb-access-token");
 	const refreshToken = cookies.get("sb-refresh-token");
 
-	return accessToken && refreshToken ? true :false;
-}
+	return accessToken && refreshToken ? true : false;
+};

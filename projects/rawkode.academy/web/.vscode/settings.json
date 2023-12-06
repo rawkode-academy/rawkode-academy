@@ -1,22 +1,21 @@
 {
-	"editor.formatOnSave": false,
+	"editor.formatOnSave": true,
 	"editor.codeActionsOnSave": {
 		"quickfix.biome": true,
 		"source.organizeImports": "always",
 		"source.fixAll": "always"
 	},
-	"[json]": {
-		"editor.defaultFormatter": "biomejs.biome"
+	"typescript.inlayHints.parameterNames.enabled": "all",
+	"[astro]": {
+		"editor.defaultFormatter": "astro-build.astro-vscode"
 	},
 	"[html]": {
 		"editor.defaultFormatter": "vscode.html-language-features"
 	},
-	"[astro]": {
-		"editor.defaultFormatter": "astro-build.astro-vscode"
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
 	},
-	"typescript.inlayHints.parameterNames.enabled": "all",
 	"[vue]": {
-		"editor.defaultFormatter": "Vue.volar",
-		"editor.formatOnSave": true
+		"editor.defaultFormatter": "Vue.volar"
 	}
 }
