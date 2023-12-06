@@ -24,6 +24,7 @@
             ];
 
             shellHook = ''
+              set -x
               bun install
             '';
           };

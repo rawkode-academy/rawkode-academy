@@ -1,0 +1,2 @@
+supabase-types:
+	supabase gen types typescript --project-id ${SUPABASE_PROJECT_ID} > src/database.types.ts

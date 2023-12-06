@@ -7,3 +7,6 @@ dist
 
 # nodejs
 node_modules
+
+# supabase
+src/database.types.ts

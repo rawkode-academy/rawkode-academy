@@ -1,0 +1,99 @@
+---
+import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+import Layout from "../../layouts/app.astro";
+import { supabase } from "../../lib/supabase";
+
+interface Author {
+	github_handle: string;
+	name: string;
+	avatar_url: string;
+}
+
+type Props = {
+	article: CollectionEntry<"blog">;
+	authorMap: Author[];
+};
+
+export const getStaticPaths: GetStaticPaths =
+	async (): Promise<GetStaticPathsResult> => {
+		const blogEntries = await getCollection("blog");
+
+		const people = await supabase
+			.from("people")
+			.select("github_handle, name, avatar_url");
+
+		return blogEntries.map((article) => {
+			return {
+				params: {
+					slug: article.slug,
+				},
+				props: {
+					article,
+					authorMap: article.data.authors.map((author) =>
+						people.data
+							? people.data.find((person) => person.github_handle === author)
+							: "",
+					),
+				},
+			};
+		});
+	};
+
+const { article, authorMap } = Astro.props;
+const { Content } = await article.render();
+---
+
+<Layout>
+	<article
+		class="mx-auto w-full max-w-full px-16 py-8 format format-sm sm:format-base lg:format-lg format-green dark:format-invert"
+	>
+		<h1>{article.data.title}</h1>
+
+		<header class="mb-4 lg:mb-6 not-format">
+			<address class="flex items-center mb-6 not-italic">
+				<div
+					class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white"
+				>
+					<img
+						class="mr-4 w-16 h-16 rounded-full"
+						src={authorMap[0].avatar_url ||
+							"https:flowbite.com/docs/images/people/profile-picture-2.jpg"}
+					/>
+					<div>
+						<a
+							href="#"
+							rel="author"
+							class="text-xl font-bold text-gray-900 dark:text-white"
+							>{article.data.authors.join(", ")}</a
+						>
+						<p class="text-base text-gray-500 dark:text-gray-400">
+							Work in Progress
+						</p>
+						<p class="text-base text-gray-500 dark:text-gray-400">
+							Published at <time
+								itemprop="datePublished"
+								datetime={article.data.publishedAt.toString()}
+								>{article.data.publishedAt.toDateString()}</time
+							>
+						</p>
+						{
+							article.data.updatedAt && (
+								<p class="text-base text-gray-500 dark:text-gray-400">
+									Updated at{" "}
+									<time
+										itemprop="dateUpdated"
+										datetime={article.data.updatedAt.toString()}
+									>
+										{article.data.updatedAt.toDateString()}
+									</time>
+								</p>
+							)
+						}
+					</div>
+				</div>
+			</address>
+		</header>
+		<Content />
+	</article>
+</Layout>
