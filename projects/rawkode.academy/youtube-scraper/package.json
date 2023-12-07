@@ -14,7 +14,9 @@
     "google-auth-library": "^9.4.1",
     "googleapis": "^129.0.0",
     "js-yaml": "^4.1.0",
+    "@supabase/supabase-js": "^2.39.0",
     "openai": "^4.20.1",
+    "@sindresorhus/slugify": "^2.2.1",
     "zod": "^3.22.4"
   }
 }

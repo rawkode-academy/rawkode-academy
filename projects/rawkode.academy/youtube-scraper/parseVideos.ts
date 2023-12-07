@@ -10,7 +10,7 @@ type Task = {
   yaml: string;
 }
 
-interface Video {
+export interface Video {
   title: string;
   youtubeId: string;
   slug: string;
@@ -18,7 +18,8 @@ interface Video {
   duration: string;
   visibility: string;
   publishedAt: string;
-  isLive: boolean;
+  scheduledStartTime: string;
+  live: boolean;
   thumbnailUrl: string;
   viewCount: number;
   likeCount: number;

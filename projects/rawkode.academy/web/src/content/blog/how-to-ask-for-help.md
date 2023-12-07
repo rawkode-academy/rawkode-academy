@@ -5,7 +5,7 @@ publishedAt: 2023-10-31
 updatedAt: 2023-11-10
 isDraft: false
 authors:
-- rawkode
+- RussellWaite
 ---
 
 When you are asking a bunch of strangers for help on the internet, there are tricks to get people to be more willing to help you.
@@ -13,8 +13,6 @@ When you are asking a bunch of strangers for help on the internet, there are tri
 Unless you are paying for support, you need to make it as easy as possible for volunteers to help you.
 
 Here's some advice to help people help you.
-
-[Help Me](https://google.com)
 
 ## Make it Easy to Read
 

@@ -1,4 +1,3 @@
-import * as colors from "tailwindcss/colors";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -10,45 +9,16 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				primary: colors.green,
-				secondary: colors.teal,
-				tertiary: colors.indigo,
+				primary: "#5F5ED7",
+				secondary: "#00CEFF",
+				tertiary: "#04B59C",
+				quaternary: "#85FF95",
+				black: "#111827",
 			},
 			fontFamily: {
-				body: [
-					"Monasans",
-					"ui-sans-serif",
-					"system-ui",
-					"-apple-system",
-					"system-ui",
-					"Segoe UI",
-					"Roboto",
-					"Helvetica Neue",
-					"Arial",
-					"Noto Sans",
-					"sans-serif",
-					"Apple Color Emoji",
-					"Segoe UI Emoji",
-					"Segoe UI Symbol",
-					"Noto Color Emoji",
-				],
-				sans: [
-					"Monasans",
-					"ui-sans-serif",
-					"system-ui",
-					"-apple-system",
-					"system-ui",
-					"Segoe UI",
-					"Roboto",
-					"Helvetica Neue",
-					"Arial",
-					"Noto Sans",
-					"sans-serif",
-					"Apple Color Emoji",
-					"Segoe UI Emoji",
-					"Segoe UI Symbol",
-					"Noto Color Emoji",
-				],
+				display: ["Quicksand"],
+				body: ["Poppins"],
+				mono: ["Monaspace"],
 			},
 		},
 	},

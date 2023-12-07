@@ -2,17 +2,24 @@
 import FeatureList from "../components/feature/list.vue";
 import HeroTypewriter from "../components/hero/typewriter.vue";
 import Page from "../wrappers/page.astro";
+import HeroImage from "./hero.png";
 ---
 
 <Page title="Home">
 	<HeroTypewriter
 		client:load
 		highlight="hard"
+		image={HeroImage}
 		rotatedPrefixes={[
 			"Cloud Native",
 			"Kubernetes",
 			"Microservices",
 			"WebAssembly",
+			"Platform Engineering",
+			"SRE",
+			"Observability",
+			"DevOps",
+			"Infrastructure as Code",
 		]}
 		suffix="may be complex, but it doesn't need to be hard."
 	/>

@@ -5,17 +5,20 @@ create type "chapter" as (
 
 create table "episodes"(
 	"slug" text not null primary key,
-	"title" text not null,
+  "verified" boolean default false,
+	"title" text not null unique,
 	"show_id" text null references "shows"("slug") on update cascade on delete cascade,
 	"published_at" timestamp null,
 	"scheduled_for" timestamp null,
 	"visibility" text default 'private',
-	constraint "valid_visibility" check ("visibility" in ('private', 'tier-1', 'tier-2', 'tier-3', 'public')),
+  "description" text null,
+	constraint "valid_visibility" check ("visibility" in ('private', 'unlisted', 'tier-1', 'tier-2', 'tier-3', 'public')),
 	"live" boolean not null,
 	constraint "valid_live_settings" check ((not "live" and "published_at" is not null) or ("scheduled_for" is not null)),
 	"duration" interval null,
 	constraint "valid_duration" check (duration is null or duration >= '00:00:00'::interval),
-	"links" text[] null default array[] ::text[]
+	"links" text[] null default array[] ::text[],
+  "chapters" "chapter"[] null default array[] ::"chapter"[]
 );
 
 alter table episodes enable row level security;

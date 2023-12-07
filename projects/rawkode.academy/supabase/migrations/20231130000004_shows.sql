@@ -1,6 +1,6 @@
 create table "shows"(
 	"slug" text not null primary key,
-	"name" text not null,
+	"name" text not null unique,
 	"description" text null,
 	"visibility" text default 'private' check ("visibility" in ('private', 'public'))
 );
