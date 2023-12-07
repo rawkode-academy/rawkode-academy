@@ -28,7 +28,7 @@ create function "sync_auth_users_to_public_people"()
 	returns trigger
 	as $$
 begin
-	insert into "people"("auth_id", "github_handle", "name", "avatar_url")
+	insert into "public"."people"("auth_id", "github_handle", "name", "avatar_url")
 		values(new.id, new.raw_user_meta_data ->> 'user_name', new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'avatar_url')
 	on conflict(github_handle)
 		do update set
@@ -51,4 +51,3 @@ create policy "people-view-self" on people
 create policy "people-update-self" on people
 	for update
 		using (auth.uid() = auth_id);
-

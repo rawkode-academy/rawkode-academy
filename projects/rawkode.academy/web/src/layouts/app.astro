@@ -4,21 +4,26 @@ import ProfileMenu from "../components/profile/menu.astro";
 import MenuItems from "../components/sidebar/items.vue";
 
 import {
+AcademicCapIcon,
+CalendarDaysIcon,
 ChatBubbleLeftEllipsisIcon,
+FilmIcon,
 InformationCircleIcon,
 MegaphoneIcon,
 NewspaperIcon,
 QuestionMarkCircleIcon,
-RocketLaunchIcon
+RocketLaunchIcon,
+UsersIcon,
+VideoCameraIcon
 } from '@heroicons/vue/24/outline';
 
 const menuItems = [
 	{ name: 'Blog', href: '/blog', icon: NewspaperIcon, current: false },
-	// { name: 'Events', href: '#', icon: CalendarDaysIcon, current: false },
-	// { name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
-	// { name: 'Shows', href: '#', icon: FilmIcon, current: false },
-	// { name: 'All Videos', href: '#', icon: VideoCameraIcon, current: false },
-	// { name: 'Community', href: '#', icon: UsersIcon, current: false },
+	{ name: 'Events', href: '#', icon: CalendarDaysIcon, current: false },
+	{ name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
+	{ name: 'Shows', href: '#', icon: FilmIcon, current: false },
+	{ name: 'All Videos', href: '#', icon: VideoCameraIcon, current: false },
+	{ name: 'Community', href: '#', icon: UsersIcon, current: false },
 	{ name: 'About', href: '/about', icon: InformationCircleIcon, current: false },
 	{ name: 'Help', href: '/help', icon: QuestionMarkCircleIcon, current: false },
 ];
