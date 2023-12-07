@@ -1,0 +1,19 @@
+---
+import Hero from "../../components/hero/cover.astro";
+import Page from "../../wrappers/page.astro";
+import BackgroundImage from "./header.png";
+---
+
+<Page title="About">
+	<Hero
+		title="About"
+		paragraph="The Rawkode Academy was founded by David Flanagan"
+		backgroundImage={BackgroundImage}
+	/>
+	<div class="container">
+		<p>
+			This is a simple example of a static site built with Astro and deployed to
+			Netlify.
+		</p>
+	</div>
+</Page>

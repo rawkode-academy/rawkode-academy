@@ -4,40 +4,34 @@ import ProfileMenu from "../components/profile/menu.astro";
 import MenuItems from "../components/sidebar/items.vue";
 
 import {
-AcademicCapIcon,
-BuildingOfficeIcon,
-CalendarDaysIcon,
 ChatBubbleLeftEllipsisIcon,
-FilmIcon,
 InformationCircleIcon,
 MegaphoneIcon,
 NewspaperIcon,
 QuestionMarkCircleIcon,
-RocketLaunchIcon,
-UsersIcon,
-VideoCameraIcon
+RocketLaunchIcon
 } from '@heroicons/vue/24/outline';
 
 const menuItems = [
-	{ name: 'Blog', href: '#', icon: NewspaperIcon, current: false },
-	{ name: 'Events', href: '#', icon: CalendarDaysIcon, current: false },
-	{ name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
-	{ name: 'Shows', href: '#', icon: FilmIcon, current: false },
-	{ name: 'All Videos', href: '#', icon: VideoCameraIcon, current: false },
-	{ name: 'Community', href: '#', icon: UsersIcon, current: false },
-	{ name: 'About', href: '#', icon: InformationCircleIcon, current: false },
-	{ name: 'Help', href: '#', icon: QuestionMarkCircleIcon, current: false },
+	{ name: 'Blog', href: '/blog', icon: NewspaperIcon, current: false },
+	// { name: 'Events', href: '#', icon: CalendarDaysIcon, current: false },
+	// { name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
+	// { name: 'Shows', href: '#', icon: FilmIcon, current: false },
+	// { name: 'All Videos', href: '#', icon: VideoCameraIcon, current: false },
+	// { name: 'Community', href: '#', icon: UsersIcon, current: false },
+	{ name: 'About', href: '/about', icon: InformationCircleIcon, current: false },
+	{ name: 'Help', href: '/help', icon: QuestionMarkCircleIcon, current: false },
 ];
 
 const menuItemsOrgs = [
-	{ name: 'Memberships', href: '#', icon: BuildingOfficeIcon, current: false },
-	{ name: 'Sponsorships', href: '#', icon: MegaphoneIcon, current: false },
-	{ name: 'Collaborations', href: '#', icon: RocketLaunchIcon, current: false },
-	{ name: "Let's Chat", href: '#', icon: ChatBubbleLeftEllipsisIcon, current: false },
+	// { name: 'Memberships', href: '#', icon: BuildingOfficeIcon, current: false },
+	{ name: 'Sponsorships', href: '/organizations/sponsorship', icon: MegaphoneIcon, current: false },
+	{ name: 'Collaborations', href: '/organizations/collaboration', icon: RocketLaunchIcon, current: false },
+	{ name: "Let's Chat", href: '/organizations/lets-chat', icon: ChatBubbleLeftEllipsisIcon, current: false },
 ]
 ---
 
-<div class="antialiased bg-gray-50 dark:bg-gray-900">
+<div class="antialiased">
 	<nav
 		class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
 		<div class="flex flex-wrap justify-between items-center">
@@ -141,7 +135,9 @@ const menuItemsOrgs = [
 		</div>
 	</aside>
 
-	<main class="p-4 md:ml-64 h-auto pt-20">
-		<slot />
+	<main class="bg-white dark:bg-gray-800 p-4 pt-20 ml-0 md:ml-64">
+		<div class="mx-auto max-w-screen-2xl">
+			<slot />
+		</div>
 	</main>
 </div>

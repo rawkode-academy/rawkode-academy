@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FunctionalComponent, HTMLAttributes, VNodeProps } from 'vue';
+import type { FunctionalComponent, HTMLAttributes, VNodeProps } from 'vue';
 
 const props = defineProps<{
 	menuItems: {

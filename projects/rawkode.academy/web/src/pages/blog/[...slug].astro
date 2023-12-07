@@ -46,7 +46,7 @@ const { Content } = await article.render();
 
 <Layout>
 	<article
-		class="mx-auto w-full max-w-full px-16 py-8 format format-sm sm:format-base lg:format-lg format-green dark:format-invert"
+		class="mx-auto w-full px-16 py-8 format format-sm sm:format-base lg:format-lg format-green dark:format-invert"
 	>
 		<h1>{article.data.title}</h1>
 
@@ -57,8 +57,7 @@ const { Content } = await article.render();
 				>
 					<img
 						class="mr-4 w-16 h-16 rounded-full"
-						src={authorMap[0].avatar_url ||
-							"https:flowbite.com/docs/images/people/profile-picture-2.jpg"}
+						src="https:flowbite.com/docs/images/people/profile-picture-2.jpg"}
 					/>
 					<div>
 						<a
