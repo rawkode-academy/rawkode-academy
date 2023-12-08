@@ -5,7 +5,7 @@ import { supabase } from "../../lib/supabase";
 const videos = supabase
 	.from("episodes")
 	.select(
-		"slug, title, people(github_handle), episode_channel(episode_id, channel, remote_id)",
+		"slug, title, people(github_handle), episode_channel(remote_id)",
 	);
 
 type EpisodeWithChannels = QueryData<typeof videos>;
@@ -19,7 +19,7 @@ const episodeWithChannels: EpisodeWithChannels = data;
 ---
 
 {
-	episodeWithChannels?.map((video) => {
+	episodeWithChannels?.slice(0, 10).map((video) => {
 		return (
 			<div>
 				<h1>{video.title}</h1>
@@ -28,7 +28,7 @@ const episodeWithChannels: EpisodeWithChannels = data;
 					height="315"
 					src={
 						"https://www.youtube.com/embed/" +
-						video.youtube_id +
+						video.episode_channel[0].remote_id +
 						"?autoplay=1&mute=1"
 					}
 					title="YouTube video player"

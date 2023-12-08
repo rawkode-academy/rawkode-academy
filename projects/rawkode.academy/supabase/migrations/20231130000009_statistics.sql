@@ -10,4 +10,3 @@ create table "episode_statistics"(
 );
 
 alter table "episode_statistics" enable row level security;
-
