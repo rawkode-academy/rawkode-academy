@@ -1,4 +1,6 @@
 = Rawkode Academy Workspace
+:source-highlighter: highlight.js
+:highlightjs-languages: rust, shell
 
 == Prerequisites
 
@@ -8,3 +10,12 @@ If you prefer not to use `+nix+`, you can manually install the following depende
 
 - supabase-cli
 - bun
+
+== Local Development
+
+I like that I can include other files and this renders to give us "living" documentation.
+
+[source,shell]
+----
+include::Justfile[tag=test]
+----

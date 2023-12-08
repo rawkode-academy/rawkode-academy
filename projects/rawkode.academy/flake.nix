@@ -15,9 +15,11 @@
         with pkgs; {
           devShells.default = mkShell {
             buildInputs = [
+              asciidoctor
               rnix-lsp
               nodejs
               nodePackages.typescript
+              rubyPackages.rouge
               biome
               bun
               supabase-cli

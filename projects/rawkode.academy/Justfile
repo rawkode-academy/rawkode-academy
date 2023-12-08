@@ -1,0 +1,7 @@
+# tag::test[]
+test:
+  echo "Hello, world!"
+# end::test[]
+
+hammer:
+  echo "Time!"
