@@ -1,0 +1,42 @@
+---
+import type { QueryData } from "@supabase/supabase-js";
+import { supabase } from "../../lib/supabase";
+
+const videos = supabase
+	.from("episodes")
+	.select(
+		"slug, title, people(github_handle), episode_channel(episode_id, channel, remote_id)",
+	);
+
+type EpisodeWithChannels = QueryData<typeof videos>;
+
+const { data, error } = await videos;
+if (error) throw error;
+
+console.debug(data);
+
+const episodeWithChannels: EpisodeWithChannels = data;
+---
+
+{
+	episodeWithChannels?.map((video) => {
+		return (
+			<div>
+				<h1>{video.title}</h1>
+				<iframe
+					width="560"
+					height="315"
+					src={
+						"https://www.youtube.com/embed/" +
+						video.youtube_id +
+						"?autoplay=1&mute=1"
+					}
+					title="YouTube video player"
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen
+				/>
+			</div>
+		);
+	})
+}
