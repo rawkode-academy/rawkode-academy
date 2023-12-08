@@ -7,8 +7,8 @@ const { title } = Astro.props;
 ---
 
 <style is:global>
-	@import url('https://fonts.cdnfonts.com/css/quicksand');
-	@import url('https://fonts.cdnfonts.com/css/poppins');
+	@import url("https://fonts.cdnfonts.com/css/quicksand");
+	@import url("https://fonts.cdnfonts.com/css/poppins");
 
 	@font-face {
 		font-family: "Monaspace";
@@ -19,7 +19,12 @@ const { title } = Astro.props;
 		font-stretch: 75% 125%;
 	}
 
-	h1, h2, h3, h4, h5, h6 {
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
 		@apply font-display;
 	}
 
@@ -27,7 +32,11 @@ const { title } = Astro.props;
 		@apply font-body;
 	}
 
-	pre, code, kbd, samp, tt {
+	pre,
+	code,
+	kbd,
+	samp,
+	tt {
 		@apply font-mono;
 	}
 </style>
@@ -38,8 +47,16 @@ const { title } = Astro.props;
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<title>{title} | Rawkode Academy</title>
 
-	<link rel="preload" href="https://fonts.cdnfonts.com/css/avenir" rel="stylesheet">
-	<link rel="preload" href="https://fonts.cdnfonts.com/css/orbitron" rel="stylesheet">
+	<link
+		rel="preload"
+		href="https://fonts.cdnfonts.com/css/avenir"
+		rel="stylesheet"
+	/>
+	<link
+		rel="preload"
+		href="https://fonts.cdnfonts.com/css/orbitron"
+		rel="stylesheet"
+	/>
 
 	<link
 		rel="preload"
@@ -57,4 +74,22 @@ const { title } = Astro.props;
 	/>
 
 	<slot name="extra-head" />
+
+	<script>
+		(function (d, t) {
+			var BASE_URL = "https://app.chatwoot.com";
+			var g = d.createElement(t),
+				s = d.getElementsByTagName(t)[0];
+			g.src = BASE_URL + "/packs/js/sdk.js";
+			g.defer = true;
+			g.async = true;
+			s.parentNode.insertBefore(g, s);
+			g.onload = function () {
+				window.chatwootSDK.run({
+					websiteToken: "e9tsHkpvV7Tm4EVLvJXh2iAN",
+					baseUrl: BASE_URL,
+				});
+			};
+		})(document, "script");
+	</script>
 </head>
