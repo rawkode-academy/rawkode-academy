@@ -18,6 +18,7 @@ export interface Video {
   duration: string;
   visibility: string;
   publishedAt: string;
+  thumbnailUrl: string;
   scheduledStartTime: string;
   live: boolean;
   thumbnailUrl: string;

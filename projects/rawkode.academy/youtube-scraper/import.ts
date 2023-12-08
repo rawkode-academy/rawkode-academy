@@ -104,6 +104,7 @@ fs.readdirSync(directoryPath)
       title: video.title,
       description: video.description,
       duration: video.duration,
+      thumbnail_url: video.thumbnailUrl,
       visibility: video.visibility,
       published_at: video.scheduledStartTime === "" ? video.publishedAt : video.scheduledStartTime,
       scheduled_for: video.scheduledStartTime === "" ? null : video.scheduledStartTime,

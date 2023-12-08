@@ -11,6 +11,7 @@ create table "episodes"(
 	"published_at" timestamp null,
 	"scheduled_for" timestamp null,
 	"visibility" text default 'private',
+  "thumbnail_url" text null,
   "description" text null,
 	constraint "valid_visibility" check ("visibility" in ('private', 'unlisted', 'tier-1', 'tier-2', 'tier-3', 'public')),
 	"live" boolean not null,

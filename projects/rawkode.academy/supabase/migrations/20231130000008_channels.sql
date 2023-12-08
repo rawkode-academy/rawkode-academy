@@ -9,6 +9,6 @@ create table "episode_channel"(
 
 alter table "episode_channel" enable row level security;
 
-create policy "episode_channel" on shows
+create policy "episode_channel" on "episode_channel"
 	for select to authenticated, anon
 		using (true);
