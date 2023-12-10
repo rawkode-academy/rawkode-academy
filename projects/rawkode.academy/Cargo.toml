@@ -1,0 +1,19 @@
+[package]
+name = "rawkode-academy"
+version = "0.0.1"
+description = "Rawkode Academy Platform"
+edition.workspace = true
+license-file.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+dagger-sdk = { workspace = true }
+eyre = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+
+[[bin]]
+name = "rka"
+path = "build/main.rs"

@@ -13,18 +13,19 @@
           };
         in
         with pkgs; {
-          devShells.default = mkShell {
-            buildInputs = [
-              asciidoctor
-              rnix-lsp
-              nodejs
-              nodePackages.typescript
-              rubyPackages.rouge
-              biome
-              bun
-              supabase-cli
-            ];
-          };
+          devShells.default = mkShell
+            {
+              buildInputs = [
+                biome
+                bun
+                libiconv
+                nodejs
+                nodePackages.typescript
+                supabase-cli
+              ] ++ lib.optionals stdenv.isDarwin [
+                darwin.apple_sdk.frameworks.SystemConfiguration
+              ];
+            };
         }
       );
 }

@@ -173,15 +173,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dagger-data"
-version = "0.1.0"
-dependencies = [
- "dagger-sdk",
- "eyre",
- "tokio",
-]
-
-[[package]]
 name = "dagger-sdk"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -931,6 +922,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5267fca4496028628a95160fc423a33e8b2e6af8a5302579e322e4b520293cae"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "rawkode-academy"
+version = "0.0.1"
+dependencies = [
+ "dagger-sdk",
+ "eyre",
+ "serde",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]
