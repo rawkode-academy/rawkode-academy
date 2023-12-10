@@ -17,5 +17,5 @@ I like that I can include other files and this renders to give us "living" docum
 
 [source,shell]
 ----
-include::Justfile[tag=test]
+include::Justfile[tag=local-dev]
 ----

@@ -1,7 +1,19 @@
-# tag::test[]
-test:
-  echo "Hello, world!"
-# end::test[]
 
-hammer:
-  echo "Time!"
+dev:
+  #!/usr/bin/env sh
+  set -x
+
+  # tag::local-dev[]
+  infisical run --command "supabase start"
+
+  # You might need: I patched this bug and it's pending release.
+  #eval $(infisical run -- supabase status -o env --override-name  auth.anon_key=SUPABASE_ANON_KEY | tail -n +2)
+
+  set -o allexport
+  eval $(infisical run -- supabase status -o env --override-name auth.anon_key=SUPABASE_ANON_KEY)
+  set +o allexport
+
+  cd web
+  bun install
+  bun dev
+  # end::local-dev[]
