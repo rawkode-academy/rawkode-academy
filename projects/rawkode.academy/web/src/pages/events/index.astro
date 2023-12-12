@@ -1,0 +1,28 @@
+---
+import List from "../../components/events/list.vue";
+import { supabase } from "../../lib/supabase";
+import Page from "../../wrappers/page.astro";
+
+const { data: events, error: eventsError } = await supabase
+  .from("events")
+  .select("*")
+  .order("start_time", { ascending: true });
+
+const { data: rsvps, error: rsvpsError } = await supabase
+  .from("rsvps")
+  .select("*")
+  .in("event_id", events?.map((event) => event.event_id) ?? []);
+
+const { data: user } = await supabase.auth.getUser();
+---
+
+<Page title="Events">
+  <List
+    client:load
+    events={events}
+    eventsError={eventsError}
+    rsvps={rsvps}
+    rsvpsError={rsvpsError}
+    user={user.user}
+  />
+</Page>
