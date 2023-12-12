@@ -13,6 +13,18 @@ const { data: rsvps, error: rsvpsError } = await supabase
   .select("*")
   .in("event_id", events?.map((event) => event.event_id) ?? []);
 
+const { data: authIdAndAvatarUrls } = await supabase
+  .from("people")
+  .select("auth_id, avatar_url")
+  .in("auth_id", rsvps?.map((rsvp) => rsvp.auth_id) ?? []);
+
+const avatarImages = Object.fromEntries(
+  authIdAndAvatarUrls?.map((item) => [
+    item.auth_id || "",
+    item.avatar_url || "",
+  ]) ?? []
+);
+
 const { data: user } = await supabase.auth.getUser();
 ---
 
@@ -24,5 +36,6 @@ const { data: user } = await supabase.auth.getUser();
     rsvps={rsvps}
     rsvpsError={rsvpsError}
     user={user.user}
+    avatarImages={avatarImages}
   />
 </Page>

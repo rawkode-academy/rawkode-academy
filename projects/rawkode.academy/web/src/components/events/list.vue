@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import type { Database } from '../../database.types';
 import { type User, type PostgrestError } from '@supabase/supabase-js';
 
@@ -8,6 +8,8 @@ export interface Props {
 
 	rsvps: Database['public']['Tables']['rsvps']['Row'][] | null;
 	rsvpsError: PostgrestError | null;
+
+	avatarImages: { [auth_id: string]: string }
 
 	user: User | null;
 }
@@ -61,8 +63,14 @@ async function deleteRsvp(event_id: string) {
 			</time>
 
 			<h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-				{{ event.name }}
+				<a :href="`/events/${event.event_id}`">{{ event.name }}</a>
 			</h3>
+
+			<div class="flex rtl:space-x-reverse">
+				<img v-for="channelInfo in event.channel_info"
+					class="w-10 h-10 border-2 border-white rounded dark:border-gray-800"
+					:src="`/channel-logos/${channelInfo.channel}.svg`" />
+			</div>
 
 			<p v-if="event.description" class="text-base font-normal text-gray-500 dark:text-gray-400">
 				{{ event.description }}
@@ -83,7 +91,8 @@ async function deleteRsvp(event_id: string) {
 			<div v-if="props.user" class="flex -space-x-4 rtl:space-x-reverse">
 				<img v-for="rsvp in props.rsvps?.filter((rsvp) => rsvp.event_id === event.event_id)"
 					class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
-					src="https://placekitten.com/g/200/200" v-bind:alt="rsvp.auth_id" />
+					:src="`${avatarImages[rsvp.auth_id] || 'https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png'}`"
+					v-bind:alt="rsvp.auth_id" />
 			</div>
 		</li>
 
