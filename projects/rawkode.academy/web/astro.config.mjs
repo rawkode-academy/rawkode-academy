@@ -7,7 +7,7 @@ import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
-  output: "server",
+  output: "hybrid",
   integrations: [tailwind(), vue(), react()],
   adapter: cloudflare()
 });

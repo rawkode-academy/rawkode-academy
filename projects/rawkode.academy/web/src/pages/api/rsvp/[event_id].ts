@@ -1,5 +1,18 @@
-import type { APIRoute } from "astro";
+import type { APIRoute, GetStaticPaths, GetStaticPathsResult } from "astro";
 import { supabase } from "../../../lib/supabase";
+
+export const getStaticPaths: GetStaticPaths =
+	async (): Promise<GetStaticPathsResult> => {
+		const { data, error } = await supabase.from("events").select("event_id");
+
+		if (error) throw error;
+
+		return data.map((row) => {
+			return {
+				params: { event_id: row.event_id },
+			};
+		});
+	};
 
 export const POST: APIRoute = async ({ params, redirect }) => {
 	const { data: user, error } = await supabase.auth.getUser();
