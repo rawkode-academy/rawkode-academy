@@ -6,6 +6,7 @@ import Page from "../../wrappers/page.astro";
 const { data: events, error: eventsError } = await supabase
   .from("events")
   .select("*")
+	.gte('start_time', new Date().toISOString())
   .order("start_time", { ascending: true });
 
 const { data: rsvps, error: rsvpsError } = await supabase

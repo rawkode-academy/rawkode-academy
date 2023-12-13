@@ -2,12 +2,18 @@
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "../../wrappers/page.astro";
 import { supabase } from "../../lib/supabase";
+import Event from "../../components/events/event.vue";
+import type { Database } from "../../database.types";
+
+type Event = Database["public"]["Tables"]["events"]["Row"];
+
+type Props = {
+  event: Event;
+};
 
 export const getStaticPaths: GetStaticPaths =
   async (): Promise<GetStaticPathsResult> => {
-    const { data, error } = await supabase
-      .from("events")
-      .select("event_id, name");
+    const { data, error } = await supabase.from("events").select("*");
 
     if (error) throw error;
 
@@ -17,14 +23,13 @@ export const getStaticPaths: GetStaticPaths =
           event_id: row.event_id,
         },
         props: {
-          name: row.name,
-          event_id: row.event_id,
+          event: row,
         },
       };
     });
   };
 
-const { name, event_id } = Astro.props;
+const { event } = Astro.props;
 ---
 
 <Page title="Event">
@@ -56,14 +61,14 @@ const { name, event_id } = Astro.props;
                 d="m1 9 4-4-4-4"></path>
             </svg>
             <a
-              href={`/events/${event_id}`}
+              href={`/events/${event.event_id}`}
               class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
-              >{name}</a
+              >{event.name}</a
             >
           </div>
         </li>
       </li>
     </ol>
-    {name}
+    <Event client:load event={event} />
   </nav>
 </Page>

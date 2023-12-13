@@ -1,4 +1,4 @@
-<script setup lang="tsx">
+<script setup lang="ts">
 import type { Database } from '../../database.types';
 import { type User, type PostgrestError } from '@supabase/supabase-js';
 
