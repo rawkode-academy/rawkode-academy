@@ -30,6 +30,7 @@
     "astro": "^3.6.4",
     "flowbite": "^2.2.0",
     "flowbite-typography": "^1.0",
+    "luxon": "^3.4.4",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-type-animation": "^3.2.0",
@@ -40,7 +41,8 @@
     "vue-writer": "^1.2.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.4.1"
+    "@biomejs/biome": "1.4.1",
+    "@types/luxon": "^3.3.7"
   },
   "trigger.dev": {
     "endpointId": "rawkode-academy-Gpkz"
