@@ -69,6 +69,6 @@ const { event } = Astro.props;
         </li>
       </li>
     </ol>
-    <Event client:load event={event} />
+    <Event client:only="vue" event={event} />
   </nav>
 </Page>

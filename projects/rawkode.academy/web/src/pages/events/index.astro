@@ -31,7 +31,7 @@ const { data: user } = await supabase.auth.getUser();
 
 <Page title="Events">
   <List
-    client:load
+    client:only="vue"
     events={events}
     eventsError={eventsError}
     rsvps={rsvps}
