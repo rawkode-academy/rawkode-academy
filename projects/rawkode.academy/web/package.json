@@ -20,6 +20,11 @@
     "@heroicons/vue": "^2.0.18",
     "@supabase/supabase-js": "^2.39.0",
     "@tailwindcss/forms": "^0.5",
+    "@trigger.dev/astro": "^2.3.5",
+    "@trigger.dev/react": "^2.3.5",
+    "@trigger.dev/resend": "latest",
+    "@trigger.dev/sdk": "^2.3.5",
+    "@trigger.dev/supabase": "^2.3.5",
     "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
     "astro": "^3.6.4",
@@ -34,5 +39,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.4.1"
+  },
+  "trigger.dev": {
+    "endpointId": "rawkode-academy-Gpkz"
   }
 }
