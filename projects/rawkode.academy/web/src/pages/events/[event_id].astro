@@ -2,8 +2,8 @@
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "../../wrappers/page.astro";
 import { supabase } from "../../lib/supabase";
-import Event from "../../components/events/event.vue";
 import type { Database } from "../../database.types";
+import Event from "../../components/events/event.vue";
 
 type Event = Database["public"]["Tables"]["events"]["Row"];
 
@@ -13,23 +13,44 @@ type Props = {
 
 export const getStaticPaths: GetStaticPaths =
   async (): Promise<GetStaticPathsResult> => {
-    const { data, error } = await supabase.from("events").select("*");
+    const { data: events, error: eventsError } = await supabase
+      .from("events")
+      .select("*");
 
-    if (error) throw error;
+    if (eventsError) throw eventsError;
 
-    return data.map((row) => {
+    return events.map((event) => {
       return {
         params: {
-          event_id: row.event_id,
+          event_id: event.event_id,
         },
         props: {
-          event: row,
+          event: event,
         },
       };
     });
   };
 
 const { event } = Astro.props;
+
+const { data: rsvps } = await supabase
+  .from("rsvps")
+  .select("*")
+  .eq("event_id", event.event_id);
+
+const { data: authIdAndAvatarUrls } = await supabase
+  .from("people")
+  .select("auth_id, avatar_url")
+  .in("auth_id", rsvps?.map((rsvp) => rsvp.auth_id) ?? []);
+
+const avatarImages = Object.fromEntries(
+  authIdAndAvatarUrls?.map((item) => [
+    item.auth_id || "",
+    item.avatar_url || "",
+  ]) ?? []
+);
+
+const user = await supabase.auth.getUser();
 ---
 
 <Page title="Event">
@@ -69,6 +90,13 @@ const { event } = Astro.props;
         </li>
       </li>
     </ol>
-    <Event client:only="vue" event={event} />
+
+    <Event
+      client:only="vue"
+      event={event}
+      rsvps={rsvps || []}
+      user={user.data.user}
+      avatarImages={avatarImages}
+    />
   </nav>
 </Page>

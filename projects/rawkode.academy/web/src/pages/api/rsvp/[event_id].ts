@@ -14,7 +14,7 @@ export const getStaticPaths: GetStaticPaths =
 		});
 	};
 
-export const POST: APIRoute = async ({ params, redirect }) => {
+export const POST: APIRoute = async ({ request, params, redirect }) => {
 	const { data: user, error } = await supabase.auth.getUser();
 
 	if (error) {
@@ -37,10 +37,10 @@ export const POST: APIRoute = async ({ params, redirect }) => {
 		}
 	}
 
-	return redirect("/events");
+	return redirect(request.headers.get("referer") || "/", 302);
 };
 
-export const DELETE: APIRoute = async ({ params, redirect }) => {
+export const DELETE: APIRoute = async ({ request, params, redirect }) => {
 	const { data: user, error } = await supabase.auth.getUser();
 
 	if (error) {
@@ -65,5 +65,5 @@ export const DELETE: APIRoute = async ({ params, redirect }) => {
 		}
 	}
 
-	return redirect("/events");
+	return redirect(request.headers.get("referer") || "/", 302);
 };

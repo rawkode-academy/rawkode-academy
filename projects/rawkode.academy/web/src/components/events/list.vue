@@ -2,6 +2,8 @@
 import { DateTime } from "luxon";
 import type { Database } from "../../database.types";
 import { type User, type PostgrestError } from "@supabase/supabase-js";
+import { FwbAlert } from "flowbite-vue";
+import Rsvp from './rsvp.vue';
 
 export interface Props {
 	events: Database["public"]["Tables"]["events"]["Row"][] | null;
@@ -10,70 +12,48 @@ export interface Props {
 	rsvps: Database["public"]["Tables"]["rsvps"]["Row"][] | null;
 	rsvpsError: PostgrestError | null;
 
-	avatarImages: { [auth_id: string]: string };
+	avatarImages: { [authId: string]: string };
 
 	user: User | null;
 }
 
 defineProps<Props>();
 
-async function createRsvp(event_id: string) {
-	try {
-		const response = await fetch(`/api/rsvp/${event_id}`, {
-			method: "POST",
-			redirect: "follow",
-		});
-
-		if (response.redirected) {
-			window.location.href = response.url;
-		}
-	} catch (error) {
-		console.log(error);
-	}
-}
-
-async function deleteRsvp(event_id: string) {
-	try {
-		const response = await fetch(`/api/rsvp/${event_id}`, {
-			method: "DELETE",
-			redirect: "follow",
-		});
-
-		if (response.redirected) {
-			window.location.href = response.url;
-		}
-	} catch (error) {
-		console.log(error);
-	}
-}
 </script>
 
 <template>
 	<section>
 		<div class="gap-8 py-8 px-4 mx-auto lg:gap-16 lg:grid-cols-2 lg:py-16 lg:px-6">
 			<div class="divide-y divide-gray-200 dark:divide-gray-700">
-				<div v-if="eventsError"
-					class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-					<span class="font-medium">Couldn't fetch events:</span>
+				<FwbAlert v-if="eventsError" type="danger">
 					{{ eventsError.message }}
-				</div>
+				</FwbAlert>
 
-				<div v-if="rsvpsError"
-					class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-					<span class="font-medium">Couldn't fetch events:</span>
+				<FwbAlert v-if="rsvpsError" type="danger">
 					{{ rsvpsError.message }}
-				</div>
+				</FwbAlert>
 
 				<article v-for="event in events" class="py-6">
 					<div class="flex justify-between items-center mb-5 text-gray-500">
 						<span
 							class="bg-primary-100 text-primary-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-primary-200 dark:text-primary-800">
+							<svg class="w-4 h-4 text-gray-500 dark:text-white mr-1" aria-hidden="true"
+								xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									d="M10 .5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19ZM8.374 17.4a7.6 7.6 0 0 1-5.9-7.4c0-.83.137-1.655.406-2.441l.239.019a3.887 3.887 0 0 1 2.082 2.5 4.1 4.1 0 0 0 2.441 2.8c1.148.522 1.389 2.007.732 4.522Zm3.6-8.829a.997.997 0 0 0-.027-.225 5.456 5.456 0 0 0-2.811-3.662c-.832-.527-1.347-.854-1.486-1.89a7.584 7.584 0 0 1 8.364 2.47c-1.387.208-2.14 2.237-2.14 3.307a1.187 1.187 0 0 1-1.9 0Zm1.626 8.053-.671-2.013a1.9 1.9 0 0 1 1.771-1.757l2.032.619a7.553 7.553 0 0 1-3.132 3.151Z" />
+							</svg>
+
 							{{ event.channel_info.map((channel_info) => channel_info.channel).join(" | ") }}
 						</span>
 
-						<span class="text-sm">{{ event.start_time &&
-							DateTime.fromISO(event.start_time).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS) }}</span>
+						<span class="text-sm">
+							{{
+								event.start_time &&
+								DateTime.fromISO(event.start_time).toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)
+							}}
+						</span>
 					</div>
+
 					<h2 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
 						<a :href="`/events/${event.event_id}`">{{ event.name }}</a>
 					</h2>
@@ -83,36 +63,8 @@ async function deleteRsvp(event_id: string) {
 					</p>
 
 					<div class="flex justify-between items-stretch">
-						<div class="flex justify-between">
-							<a v-if="user &&
-								rsvps?.find(
-									(rsvp) =>
-										rsvp.event_id === event.event_id &&
-										rsvp.auth_id === user?.id
-								) === undefined
-								" @click="createRsvp(event.event_id)"
-								class="hover:cursor-pointer inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-200 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700">
-								I'm going
-							</a>
+						<Rsvp :event-id="event.event_id" :rsvps="rsvps" :user="user" :avatar-images="avatarImages" horizontal />
 
-							<a v-if="rsvps?.find(
-								(rsvp) =>
-									rsvp.event_id === event.event_id &&
-									rsvp.auth_id === user?.id
-							) !== undefined
-								" @click="deleteRsvp(event.event_id)"
-								class="hover:cursor-pointer inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-200 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700">
-								I'm not going
-							</a>
-
-							<div v-if="user" class="flex -space-x-4 rtl:space-x-reverse">
-								<img v-for="rsvp in rsvps?.filter(
-									(rsvp) => rsvp.event_id === event.event_id
-								)" class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800" :src="`${avatarImages[rsvp.auth_id] ||
-	'https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png'
-	}`" v-bind:alt="rsvp.auth_id" />
-							</div>
-						</div>
 						<a :href="`/events/${event.event_id}`"
 							class="inline-flex items-center font-medium text-primary-600 hover:underline dark:text-primary-500">
 							Read more
