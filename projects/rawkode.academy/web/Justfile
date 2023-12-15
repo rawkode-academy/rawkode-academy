@@ -1,5 +1,0 @@
-supabase-types:
-	supabase gen types typescript --schema public --schema auth --project-id ${SUPABASE_PROJECT_ID} > src/database.types.ts
-
-supabase-types-local:
-	supabase gen types typescript --schema public --schema auth --local > src/database.types.ts

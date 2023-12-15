@@ -19,6 +19,7 @@
                 biome
                 bun
                 libiconv
+                mprocs
                 nodejs
                 nodePackages.typescript
                 supabase-cli

@@ -1,0 +1,7 @@
+procs:
+  supabase: "just supabase"
+  astro:
+    cmd: ["just", "astro"]
+    stop: SIGKILL
+  trigger: "just trigger"
+  shell: "${SHELL}"

@@ -5,6 +5,7 @@ import { client } from "../trigger";
 
 const supabaseManagement = new SupabaseManagement({
 	id: "supabase-management",
+	apiKey: import.meta.env.SUPABASE_SERVICE_KEY!,
 });
 
 const db = supabaseManagement.db<Database>(

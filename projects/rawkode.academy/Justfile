@@ -1,14 +1,28 @@
-
-dev:
-  #!/usr/bin/env sh
-  # tag::local-dev[]
+supabase:
+  infisical run -- supabase stop || true
   infisical run -- supabase start
 
+get-env:
+  #!/usr/bin/env sh
+  while ! infisical run -- supabase status; do
+    echo "Waiting for Supabase ..."
+    sleep 2
+  done
   set -o allexport
-  eval $(infisical run -- supabase status -o env --override-name  auth.anon_key=SUPABASE_ANON_KEY | tail -n +2)
+  eval $(
+    infisical run -l error -- supabase status \
+      -o env \
+      --override-name auth.anon_key=SUPABASE_ANON_KEY \
+      --override-name auth.service_role_key=SUPABASE_SERVICE_KEY \
+  )
   set +o allexport
 
+astro: get-env
+  #!/usr/bin/env sh
   cd web
   bun install
+  infisical run -- supabase gen types typescript --local --schema public --schema auth > src/database.types.ts
   infisical run -- bun dev
-  # end::local-dev[]
+
+trigger: get-env
+  cd web && infisical run -- bun x @trigger.dev/cli@latest dev
