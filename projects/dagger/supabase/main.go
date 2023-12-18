@@ -114,7 +114,6 @@ func (m *Supabase) postgres() *Service {
 	return dag.
 		Container().
 		From("public.ecr.aws/supabase/postgres:aio-15.1.0.152").
-		WithUser("postgres").
 		WithEnvVariable("POSTGRES_PORT", "5432").
 		WithEnvVariable("POSTGRES_USERNAME", POSTGRES_USERNAME).
 		WithEnvVariable("POSTGRES_PASSWORD", POSTGRES_PASSWORD).
@@ -130,6 +129,8 @@ func (m *Supabase) postgres() *Service {
 			"postgres",
 			"-c",
 			"config_file=/etc/postgresql/postgresql.conf",
+			"-c",
+			"search_path=\"$user\",public,extensions",
 			"-c",
 			"log_min_messages=fatal",
 		}).
@@ -230,9 +231,9 @@ func (m *Supabase) kong(studio *Service, auth *Service, meta *Service, postgrest
 		WithServiceBinding("meta", meta).
 		WithServiceBinding("rest", postgrest).
 		WithServiceBinding("studio", studio).
-    WithServiceBinding("storage", storage).
-    WithServiceBinding("functions", functions).
-    WithServiceBinding("realtime", realtime).
+		WithServiceBinding("storage", storage).
+		WithServiceBinding("functions", functions).
+		WithServiceBinding("realtime", realtime).
 		WithEnvVariable("KONG_DATABASE", "off").
 		WithEnvVariable("KONG_DECLARATIVE_CONFIG", "/home/kong/kong.yaml").
 		WithEnvVariable("KONG_DNS_ORDER", "LAST,A,CNAME").
@@ -309,7 +310,7 @@ func (m *Supabase) imgproxy() *Service {
 	return dag.
 		Container().
 		From("public.ecr.aws/supabase/imgproxy:v1.2.0").
-		WithEnvVariable("IMGPROXY_BIND", "5001").
+		WithEnvVariable("IMGPROXY_BIND", "0.0.0.0:5001").
 		WithEnvVariable("IMGPROXY_LOCAL_FILESYSTEM_ROOT", "/").
 		WithEnvVariable("IMGPROXY_USE_ETAG", "true").
 		WithEnvVariable("IMGPROXY_ENABLE_WEBP_DETECTION", "true").
