@@ -144,8 +144,20 @@ func (m *Supabase) analytics(db *Service) *Service {
 	return dag.
 		Container().
 		From("supabase/logflare:1.4.0").
-		WithExposedPort(4000).
 		WithServiceBinding("db", db).
+    WithEnvVariable("LOGFLARE_NODE_HOST", "127.0.0.1").
+    WithEnvVariable("DB_USERNAME", "supabase_admin").
+    WithEnvVariable("DB_DATABASE", "postgres").
+    WithEnvVariable("DB_HOSTNAME", "db").
+    WithEnvVariable("DB_PORT", "5432").
+    WithEnvVariable("DB_SCHEMA", "_analytics").
+    WithEnvVariable("LOGFLARE_API_KEY", LOGFLARE_API_KEY).
+    WithEnvVariable("LOGFLARE_SINGLE_TENANT", "true").
+    WithEnvVariable("LOGFLARE_SUPABASE_MODE", "true").
+    WithEnvVariable("POSTGRES_BACKEND_URL", "postgresql://supabase_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
+    WithEnvVariable("POSTGRES_BACKEND_SCHEMA", "_analytics").
+    WithEnvVariable("LOGFLARE_FEATURE_FLAG_OVERRIDE", "multibackend=true").
+		WithExposedPort(4000).
 		AsService()
 }
 
