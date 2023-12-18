@@ -349,7 +349,6 @@ func (m *Supabase) functions(db *Service) *Service {
 		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_PATH", "/tmp").
 		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_CONFIG", "{}").
 		WithExec([]string{
-			"start",
 			"--main-service",
 			"/tmp",
 		}).
