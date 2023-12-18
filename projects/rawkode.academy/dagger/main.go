@@ -1,6 +1,9 @@
 package main
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 type RawkodeAcademy struct{}
 
@@ -11,6 +14,8 @@ func (m *RawkodeAcademy) Dev(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
+
+  fmt.Printf("Studio available at: %v\n", tunnel.endpoint)
 
 	defer tunnel.Stop(ctx)
   select {}

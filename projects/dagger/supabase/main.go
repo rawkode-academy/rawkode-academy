@@ -221,11 +221,11 @@ func (m *Supabase) kong() *Service {
 		WithEnvVariable("SUPABASE_SERVICE_KEY", SERVICE_ROLE_KEY).
 		WithEnvVariable("DASHBOARD_USERNAME", DASHBOARD_USERNAME).
 		WithEnvVariable("DASHBOARD_PASSWORD", DASHBOARD_PASSWORD).
-		WithMountedFile("/home/kong/temp.yml:ro", dag.Host().File("./config/kong.yaml")).
+		WithMountedFile("/tmp/temp.yaml:ro", dag.Host().File("./config/kong.yaml")).
 		WithExec([]string{
 			"bash",
 			"-c",
-			"eval \"echo \\\"$(cat ~/temp.yml)\\\"\" > ~/kong.yml && /docker-entrypoint.sh kong docker-start",
+			"eval \"echo \\\"$(cat /tmp/temp.yaml)\\\"\" > ~/kong.yml && /docker-entrypoint.sh kong docker-start",
 		}).
 		WithExposedPort(8000).
 		WithExposedPort(8443).
