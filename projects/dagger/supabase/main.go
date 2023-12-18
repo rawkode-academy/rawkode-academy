@@ -1,14 +1,27 @@
 package main
 
-import "strconv"
-
-const POSTGRES_USERNAME = "postgres"
-const POSTGRES_PASSWORD = "postgres"
-
 // Ideally, Dagger would suport using docker-compose.yaml files
 // and we wouldn't need to manually orchestrate all this.
 // https://github.com/supabase/supabase/blob/master/docker/docker-compose.yml
 // Until then, let's go! 🚀
+
+const POSTGRES_USERNAME = "postgres"
+const POSTGRES_PASSWORD = "postgres"
+
+const DASHBOARD_USERNAME = "dash"
+const DASHBOARD_PASSWORD = "board"
+
+const JWT_SECRET = "your-super-secret-jwt-token-with-at-least-32-characters-long"
+const JWT_EXPIRY = "3600"
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE"
+const SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
+
+const STUDIO_PORT = 3000
+const SUPABASE_PUBLIC_URL = "http://localhost:8000"
+
+const LOGFLARE_LOGGER_BACKEND_API_KEY = "your-super-secret-and-long-logflare-key"
+const LOGFLARE_API_KEY = "your-super-secret-and-long-logflare-key"
+
 type Supabase struct {
 	ProjectName string
 	SiteUrl     string
@@ -23,10 +36,13 @@ type Return struct {
 	Meta      *Service
 	Postgres  *Service
 	Postgrest *Service
-	Storage   *Service
+	Studio    *Service
 }
 
-func (m *Supabase) DevStack(stringArg string) *Return {
+func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
+	m.ProjectName = projectName
+	m.SiteUrl = siteUrl
+
 	postgres := m.postgres()
 
 	analytics := m.analytics(postgres)
@@ -34,7 +50,6 @@ func (m *Supabase) DevStack(stringArg string) *Return {
 	kong := m.kong(analytics)
 	meta := m.meta(postgres, analytics)
 	postgrest := m.postgrest(postgres, analytics)
-	storage := m.storage()
 
 	return &Return{
 		Analytics: analytics,
@@ -43,8 +58,30 @@ func (m *Supabase) DevStack(stringArg string) *Return {
 		Meta:      meta,
 		Postgres:  postgres,
 		Postgrest: postgrest,
-		Storage:   storage,
 	}
+}
+
+func (m *Supabase) studio(analytics *Service, kong *Service, meta *Service) *Service {
+	return dag.
+		Container().
+		From("supabase/studio:20231123-64a766a").
+		WithServiceBinding("analytics", analytics).
+		WithServiceBinding("meta", meta).
+		WithServiceBinding("kong", kong).
+		WithEnvVariable("STUDIO_PG_META_URL", "http://meta:8080").
+		WithEnvVariable("POSTGRES_PASSWORD", POSTGRES_PASSWORD).
+		WithEnvVariable("DEFAULT_ORGANIZATION_NAME", "Default Organization").
+		WithEnvVariable("DEFAULT_PROJECT_NAME", "Default Project").
+		WithEnvVariable("SUPABASE_URL", "http://kong:8000").
+		WithEnvVariable("SUPABASE_PUBLIC_URL", SUPABASE_PUBLIC_URL).
+		WithEnvVariable("SUPABASE_ANON_KEY", ANON_KEY).
+		WithEnvVariable("SUPABASE_SERVICE_KEY", SERVICE_ROLE_KEY).
+		WithEnvVariable("LOGFLARE_API_KEY", LOGFLARE_API_KEY).
+		WithEnvVariable("LOGFLARE_URL", "http://analytics:4000").
+		WithEnvVariable("NEXT_PUBLIC_ENABLE_LOGS", "true").
+		WithEnvVariable("NEXT_ANALYTICS_BACKEND_PROVIDER", "postgres").
+		WithExposedPort(STUDIO_PORT).
+		AsService()
 }
 
 func (m *Supabase) postgres() *Service {
@@ -69,8 +106,8 @@ func (m *Supabase) postgres() *Service {
 		WithEnvVariable("POSTGRES_USERNAME", POSTGRES_USERNAME).
 		WithEnvVariable("POSTGRES_PASSWORD", POSTGRES_PASSWORD).
 		WithEnvVariable("POSTGRES_DB", "supabase").
-		WithEnvVariable("JWT_SECRET", m.JwtSecret).
-		WithEnvVariable("JWT_EXP", strconv.Itoa(m.JwtExpiry)).
+		WithEnvVariable("JWT_SECRET", JWT_SECRET).
+		WithEnvVariable("JWT_EXP", JWT_EXPIRY).
 		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z", webhookSql).
 		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z", rolesSql).
 		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z", jwtSql).
@@ -87,15 +124,15 @@ func (m *Supabase) postgrest(db *Service, analytics *Service) *Service {
 		WithExec([]string{
 			"postgrest",
 		}).
-		WithEnvVariable("PGRST_DB_URI", "postgres://authenticator:"+POSTGRES_PASSWORD+"@db:5432/supabase").
-		WithEnvVariable("PGRST_DB_SCHEMAS", "public").
-		WithEnvVariable("PGRST_DB_ANON_ROLE", "anon").
-		WithEnvVariable("PGRST_JWT_SECRET", m.JwtSecret).
-		WithEnvVariable("PGRST_DB_USE_LEGACY_GUCS", "false").
-		WithEnvVariable("PGRST_APP_SETTINGS_JWT_SECRET", m.JwtSecret).
-		WithEnvVariable("PGRST_APP_SETTINGS_JWT_EXP", strconv.Itoa(m.JwtExpiry)).
 		WithServiceBinding("db", db).
 		WithServiceBinding("analytics", analytics).
+		WithEnvVariable("PGRST_DB_URI", "postgres://authenticator:"+POSTGRES_PASSWORD+"@db:5432/postgres").
+		WithEnvVariable("PGRST_DB_SCHEMAS", "public,storage,graphql_public").
+		WithEnvVariable("PGRST_DB_ANON_ROLE", "anon").
+		WithEnvVariable("PGRST_JWT_SECRET", JWT_SECRET).
+		WithEnvVariable("PGRST_DB_USE_LEGACY_GUCS", "false").
+		WithEnvVariable("PGRST_APP_SETTINGS_JWT_SECRET", JWT_SECRET).
+		WithEnvVariable("PGRST_APP_SETTINGS_JWT_EXP", JWT_EXPIRY).
 		WithExposedPort(55432).
 		AsService()
 }
@@ -116,6 +153,8 @@ func (m *Supabase) auth(db *Service, analytics *Service) *Service {
 		WithExec([]string{
 			"gotrue",
 		}).
+		WithServiceBinding("db", db).
+		WithServiceBinding("analytics", analytics).
 		WithEnvVariable("GOTRUE_API_HOST", "0.0.0.0").
 		WithEnvVariable("GOTRUE_API_PORT", "9999").
 		WithEnvVariable("API_EXTERNAL_URL", "http://127.0.0.1:54321").
@@ -127,8 +166,8 @@ func (m *Supabase) auth(db *Service, analytics *Service) *Service {
 		WithEnvVariable("GOTRUE_JWT_ADMIN_ROLES", "service_role").
 		WithEnvVariable("GOTRUE_JWT_AUD", "authenticated").
 		WithEnvVariable("GOTRUE_JWT_DEFAULT_GROUP_NAME", "authenticated").
-		WithEnvVariable("GOTRUE_JWT_EXP", strconv.Itoa(m.JwtExpiry)).
-		WithEnvVariable("GOTRUE_JWT_SECRET", m.JwtSecret).
+		WithEnvVariable("GOTRUE_JWT_EXP", JWT_EXPIRY).
+		WithEnvVariable("GOTRUE_JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("GOTRUE_JWT_ISSUER", "http://127.0.0.1:54321/auth/v1").
 		WithEnvVariable("GOTRUE_EXTERNAL_EMAIL_ENABLED", "true").
 		WithEnvVariable("GOTRUE_MAILER_AUTOCONFIRM", "true").
@@ -146,9 +185,7 @@ func (m *Supabase) auth(db *Service, analytics *Service) *Service {
 		WithEnvVariable("GOTRUE_SECURITY_REFRESH_TOKEN_ROTATION_ENABLED", "true").
 		WithEnvVariable("GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL", "10").
 		WithEnvVariable("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin").
-		WithEnvVariable("GOTRUE_DB_MIGRATIONS_PATH", "/usr/local/etc/gotrue/migrations").
-		WithServiceBinding("db", db).
-		WithServiceBinding("analytics", analytics)
+		WithEnvVariable("GOTRUE_DB_MIGRATIONS_PATH", "/usr/local/etc/gotrue/migrations")
 
 	return m.authGitHub(auth).AsService()
 }
@@ -158,21 +195,6 @@ func (m *Supabase) authGitHub(c *Container) *Container {
 		WithEnvVariable("GOTRUE_EXTERNAL_GITHUB_CLIENT_ID", "").
 		WithEnvVariable("GOTRUE_EXTERNAL_GITHUB_SECRET", "").
 		WithEnvVariable("GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI", "http://localhost:54321/auth/v1/callback")
-}
-
-func (m *Supabase) storage() *Service {
-	return dag.
-		Container().
-		From("minio/minio:RELEASE.2021-04-06T01-49-53Z").
-		WithExec([]string{
-			"minio",
-			"server",
-			"/data",
-		}).
-		WithEnvVariable("MINIO_ACCESS_KEY", "minio").
-		WithEnvVariable("MINIO_SECRET_KEY", "minio123").
-		WithEnvVariable("MINIO_REGION_NAME", "us-east-1").
-		WithEnvVariable("MINIO_DOMAIN", "").AsService()
 }
 
 func (m *Supabase) kong(analytics *Service) *Service {
@@ -193,33 +215,16 @@ func (m *Supabase) kong(analytics *Service) *Service {
 		WithEnvVariable("KONG_PLUGINS", "request-transformer,cors,key-auth,acl,basic-auth").
 		WithEnvVariable("KONG_NGINX_PROXY_PROXY_BUFFER_SIZE", "160k").
 		WithEnvVariable("KONG_NGINX_PROXY_PROXY_BUFFERS", "64 160k").
-		WithEnvVariable("SUPABASE_ANON_KEY", "${ANON_KEY}").
-		WithEnvVariable("SUPABASE_SERVICE_KEY", "${SERVICE_ROLE_KEY}").
-		WithEnvVariable("DASHBOARD_USERNAME", "dash").
-		WithEnvVariable("DASHBOARD_PASSWORD", "board").
+		WithEnvVariable("SUPABASE_ANON_KEY", ANON_KEY).
+		WithEnvVariable("SUPABASE_SERVICE_KEY", SERVICE_ROLE_KEY).
+		WithEnvVariable("DASHBOARD_USERNAME", DASHBOARD_USERNAME).
+		WithEnvVariable("DASHBOARD_PASSWORD", DASHBOARD_PASSWORD).
 		WithMountedFile("/home/kong/temp.yml:ro", dag.Host().File("./config/kong.yaml")).
 		WithExposedPort(8000).
 		WithExposedPort(8443).
 		AsService()
 }
 
-// meta:
-//   container_name: supabase-meta
-//   image: supabase/postgres-meta:v0.75.0
-//   depends_on:
-//     db:
-//       # Disable this if you are using an external Postgres database
-//       condition: service_healthy
-//     analytics:
-//       condition: service_healthy
-//   restart: unless-stopped
-//   environment:
-//     PG_META_PORT: 8080
-//     PG_META_DB_HOST: ${POSTGRES_HOST}
-//     PG_META_DB_PORT: ${POSTGRES_PORT}
-//     PG_META_DB_NAME: ${POSTGRES_DB}
-//     PG_META_DB_USER: supabase_admin
-//     PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
 func (m *Supabase) meta(db *Service, analytics *Service) *Service {
 	return dag.
 		Container().
