@@ -44,10 +44,10 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 	postgres := m.postgres()
 
 	auth := m.auth(postgres)
-	kong := m.kong()
-	meta := m.meta(postgres)
 	postgrest := m.postgrest(postgres)
-	studio := m.studio(kong, meta)
+	studio := m.studio(meta)
+	meta := m.meta(postgres)
+	kong := m.kong(studio, postgrest)
 
 	return &Return{
 		Auth:      auth,
@@ -59,12 +59,11 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 	}
 }
 
-func (m *Supabase) studio(kong *Service, meta *Service) *Service {
+func (m *Supabase) studio(meta *Service) *Service {
 	return dag.
 		Container().
 		From("supabase/studio:20231123-64a766a").
 		WithServiceBinding("meta", meta).
-		WithServiceBinding("kong", kong).
 		WithEnvVariable("STUDIO_PG_META_URL", "http://meta:8080").
 		WithEnvVariable("POSTGRES_PASSWORD", POSTGRES_PASSWORD).
 		WithEnvVariable("DEFAULT_ORGANIZATION_NAME", "Default Organization").
@@ -206,10 +205,12 @@ func (m *Supabase) authGitHub(c *Container) *Container {
 		WithEnvVariable("GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI", "http://localhost:54321/auth/v1/callback")
 }
 
-func (m *Supabase) kong() *Service {
+func (m *Supabase) kong(studio *Service, postgrest *Service) *Service {
 	return dag.
 		Container().
 		From("kong:2.8.1").
+    WithServiceBinding("studio", studio).
+    WithServiceBinding("postgrest", postgrest).
 		WithEnvVariable("KONG_DATABASE", "off").
 		WithEnvVariable("KONG_DECLARATIVE_CONFIG", "/home/kong/kong.yaml").
 		WithEnvVariable("KONG_DNS_ORDER", "LAST,A,CNAME").
