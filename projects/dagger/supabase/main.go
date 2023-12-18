@@ -30,7 +30,6 @@ type Supabase struct {
 }
 
 type Return struct {
-	Analytics *Service
 	Auth      *Service
 	Kong      *Service
 	Meta      *Service
@@ -45,29 +44,26 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 
 	postgres := m.postgres()
 
-	analytics := m.analytics(postgres)
-	auth := m.auth(postgres, analytics)
-	kong := m.kong(analytics)
-	meta := m.meta(postgres, analytics)
-	postgrest := m.postgrest(postgres, analytics)
-  studio := m.studio(analytics, kong, meta)
+	auth := m.auth(postgres)
+	kong := m.kong()
+	meta := m.meta(postgres)
+	postgrest := m.postgrest(postgres)
+	studio := m.studio(kong, meta)
 
 	return &Return{
-		Analytics: analytics,
 		Auth:      auth,
 		Kong:      kong,
 		Meta:      meta,
 		Postgres:  postgres,
 		Postgrest: postgrest,
-    Studio:    studio,
+		Studio:    studio,
 	}
 }
 
-func (m *Supabase) studio(analytics *Service, kong *Service, meta *Service) *Service {
+func (m *Supabase) studio(kong *Service, meta *Service) *Service {
 	return dag.
 		Container().
 		From("supabase/studio:20231123-64a766a").
-		WithServiceBinding("analytics", analytics).
 		WithServiceBinding("meta", meta).
 		WithServiceBinding("kong", kong).
 		WithEnvVariable("STUDIO_PG_META_URL", "http://meta:8080").
@@ -79,9 +75,7 @@ func (m *Supabase) studio(analytics *Service, kong *Service, meta *Service) *Ser
 		WithEnvVariable("SUPABASE_ANON_KEY", ANON_KEY).
 		WithEnvVariable("SUPABASE_SERVICE_KEY", SERVICE_ROLE_KEY).
 		WithEnvVariable("LOGFLARE_API_KEY", LOGFLARE_API_KEY).
-		WithEnvVariable("LOGFLARE_URL", "http://analytics:4000").
 		WithEnvVariable("NEXT_PUBLIC_ENABLE_LOGS", "true").
-		WithEnvVariable("NEXT_ANALYTICS_BACKEND_PROVIDER", "postgres").
 		WithExposedPort(STUDIO_PORT).
 		AsService()
 }
@@ -120,12 +114,11 @@ func (m *Supabase) postgres() *Service {
 		AsService()
 }
 
-func (m *Supabase) postgrest(db *Service, analytics *Service) *Service {
+func (m *Supabase) postgrest(db *Service) *Service {
 	return dag.
 		Container().
 		From("postgrest/postgrest:v11.2.2").
 		WithServiceBinding("db", db).
-		WithServiceBinding("analytics", analytics).
 		WithEnvVariable("PGRST_DB_URI", "postgres://authenticator:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("PGRST_DB_SCHEMAS", "public,storage,graphql_public").
 		WithEnvVariable("PGRST_DB_ANON_ROLE", "anon").
@@ -145,29 +138,28 @@ func (m *Supabase) analytics(db *Service) *Service {
 		Container().
 		From("supabase/logflare:1.4.0").
 		WithServiceBinding("db", db).
-    WithEnvVariable("LOGFLARE_NODE_HOST", "127.0.0.1").
-    WithEnvVariable("DB_HOSTNAME", "db").
-    WithEnvVariable("DB_PORT", "5432").
-    WithEnvVariable("DB_USERNAME", "supabase_admin").
-    WithEnvVariable("DB_PASSWORD", POSTGRES_PASSWORD).
-    WithEnvVariable("DB_DATABASE", "postgres").
-    WithEnvVariable("DB_SCHEMA", "_analytics").
-    WithEnvVariable("LOGFLARE_API_KEY", LOGFLARE_API_KEY).
-    WithEnvVariable("LOGFLARE_SINGLE_TENANT", "true").
-    WithEnvVariable("LOGFLARE_SUPABASE_MODE", "true").
-    WithEnvVariable("POSTGRES_BACKEND_URL", "postgresql://supabase_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
-    WithEnvVariable("POSTGRES_BACKEND_SCHEMA", "_analytics").
-    WithEnvVariable("LOGFLARE_FEATURE_FLAG_OVERRIDE", "multibackend=true").
+		WithEnvVariable("LOGFLARE_NODE_HOST", "127.0.0.1").
+		WithEnvVariable("DB_HOSTNAME", "db").
+		WithEnvVariable("DB_PORT", "5432").
+		WithEnvVariable("DB_USERNAME", "supabase_admin").
+		WithEnvVariable("DB_PASSWORD", POSTGRES_PASSWORD).
+		WithEnvVariable("DB_DATABASE", "postgres").
+		WithEnvVariable("DB_SCHEMA", "_analytics").
+		WithEnvVariable("LOGFLARE_API_KEY", LOGFLARE_API_KEY).
+		WithEnvVariable("LOGFLARE_SINGLE_TENANT", "true").
+		WithEnvVariable("LOGFLARE_SUPABASE_MODE", "true").
+		WithEnvVariable("POSTGRES_BACKEND_URL", "postgresql://supabase_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
+		WithEnvVariable("POSTGRES_BACKEND_SCHEMA", "_analytics").
+		WithEnvVariable("LOGFLARE_FEATURE_FLAG_OVERRIDE", "multibackend=true").
 		WithExposedPort(4000).
 		AsService()
 }
 
-func (m *Supabase) auth(db *Service, analytics *Service) *Service {
+func (m *Supabase) auth(db *Service) *Service {
 	auth := dag.
 		Container().
 		From("supabase/gotrue:v2.125.1").
 		WithServiceBinding("db", db).
-		WithServiceBinding("analytics", analytics).
 		WithEnvVariable("GOTRUE_API_HOST", "0.0.0.0").
 		WithEnvVariable("GOTRUE_API_PORT", "9999").
 		WithEnvVariable("API_EXTERNAL_URL", "http://127.0.0.1:54321").
@@ -215,11 +207,10 @@ func (m *Supabase) authGitHub(c *Container) *Container {
 		WithEnvVariable("GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI", "http://localhost:54321/auth/v1/callback")
 }
 
-func (m *Supabase) kong(analytics *Service) *Service {
+func (m *Supabase) kong() *Service {
 	return dag.
 		Container().
 		From("kong:2.8.1").
-		WithServiceBinding("analytics", analytics).
 		WithEnvVariable("KONG_DATABASE", "off").
 		WithEnvVariable("KONG_DECLARATIVE_CONFIG", "/home/kong/kong.yml").
 		WithEnvVariable("KONG_DNS_ORDER", "LAST,A,CNAME").
@@ -241,12 +232,11 @@ func (m *Supabase) kong(analytics *Service) *Service {
 		AsService()
 }
 
-func (m *Supabase) meta(db *Service, analytics *Service) *Service {
+func (m *Supabase) meta(db *Service) *Service {
 	return dag.
 		Container().
 		From("supabase/postgres-meta:v0.75.0").
 		WithServiceBinding("db", db).
-		WithServiceBinding("analytics", analytics).
 		WithEnvVariable("PG_META_PORT", "8080").
 		WithEnvVariable("PG_META_DB_HOST", "db").
 		WithEnvVariable("PG_META_DB_PORT", "5432").
