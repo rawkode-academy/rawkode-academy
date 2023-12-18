@@ -180,7 +180,7 @@ func (m *Supabase) auth(db *Service) *Service {
 		WithEnvVariable("GOTRUE_API_PORT", "9999").
 		WithEnvVariable("API_EXTERNAL_URL", SUPABASE_URL).
 		WithEnvVariable("GOTRUE_DB_DRIVER", "postgres").
-		WithEnvVariable("GOTRUE_DB_DATABASE_URL", "postgres://supabase_auth_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
+		WithEnvVariable("DATABASE_URL", "postgres://supabase_auth_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("GOTRUE_SITE_URL", m.SiteUrl).
 		WithEnvVariable("GOTRUE_URI_ALLOW_LIST", m.SiteUrl).
 		WithEnvVariable("GOTRUE_DISABLE_SIGNUP", "false").
@@ -349,6 +349,7 @@ func (m *Supabase) functions(db *Service) *Service {
 		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_PATH", "/tmp").
 		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_CONFIG", "{}").
 		WithExec([]string{
+      "start",
 			"--main-service",
 			"/tmp",
 		}).
