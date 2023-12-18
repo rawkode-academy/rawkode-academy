@@ -98,11 +98,11 @@ func (m *Supabase) postgres() *Service {
 		WithEnvVariable("POSTGRES_DB", "supabase").
 		WithEnvVariable("JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("JWT_EXP", JWT_EXPIRY).
-		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z", webhookSql).
-		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z", rolesSql).
-		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z", jwtSql).
-		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z", realtimeSql).
-		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z", logSql).
+		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql", webhookSql).
+		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-roles.sql", rolesSql).
+		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql", jwtSql).
+		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-realtime.sql", realtimeSql).
+		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-logs.sql", logSql).
 		WithExec([]string{
 			"postgres",
 			"-c",
@@ -212,7 +212,7 @@ func (m *Supabase) kong() *Service {
 		Container().
 		From("kong:2.8.1").
 		WithEnvVariable("KONG_DATABASE", "off").
-		WithEnvVariable("KONG_DECLARATIVE_CONFIG", "/home/kong/kong.yml").
+		WithEnvVariable("KONG_DECLARATIVE_CONFIG", "/home/kong/kong.yaml").
 		WithEnvVariable("KONG_DNS_ORDER", "LAST,A,CNAME").
 		WithEnvVariable("KONG_PLUGINS", "request-transformer,cors,key-auth,acl,basic-auth").
 		WithEnvVariable("KONG_NGINX_PROXY_PROXY_BUFFER_SIZE", "160k").
@@ -221,11 +221,11 @@ func (m *Supabase) kong() *Service {
 		WithEnvVariable("SUPABASE_SERVICE_KEY", SERVICE_ROLE_KEY).
 		WithEnvVariable("DASHBOARD_USERNAME", DASHBOARD_USERNAME).
 		WithEnvVariable("DASHBOARD_PASSWORD", DASHBOARD_PASSWORD).
-		WithMountedFile("/tmp/temp.yaml:ro", dag.Host().File("./config/kong.yaml")).
+		WithMountedFile("/tmp/temp.yaml", dag.Host().File("./config/kong.yaml")).
 		WithExec([]string{
 			"bash",
 			"-c",
-			"eval \"echo \\\"$(cat /tmp/temp.yaml)\\\"\" > ~/kong.yml && /docker-entrypoint.sh kong docker-start",
+			"eval \"echo \\\"$(cat /tmp/temp.yaml)\\\"\" > /home/kong/kong.yaml && /docker-entrypoint.sh kong docker-start",
 		}).
 		WithExposedPort(8000).
 		WithExposedPort(8443).
