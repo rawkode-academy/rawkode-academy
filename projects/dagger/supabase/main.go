@@ -94,7 +94,7 @@ func (m *Supabase) postgres() *Service {
 	return dag.
 		Container().
 		From("supabase/postgres:15.1.0.117").
-    WithUser("postgres").
+		WithUser("postgres").
 		WithEnvVariable("POSTGRES_HOST", "/var/run/postgresql").
 		WithEnvVariable("POSTGRES_PORT", "55432").
 		WithEnvVariable("POSTGRES_USERNAME", POSTGRES_USERNAME).
@@ -107,14 +107,14 @@ func (m *Supabase) postgres() *Service {
 		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z", jwtSql).
 		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z", realtimeSql).
 		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z", logSql).
-		WithExposedPort(5432).
-		WithEntrypoint([]string{
+		WithExec([]string{
 			"postgres",
 			"-c",
 			"config_file=/etc/postgresql/postgresql.conf",
 			"-c",
 			"log_min_messages=fatal",
 		}).
+		WithExposedPort(5432).
 		AsService()
 }
 
@@ -122,9 +122,6 @@ func (m *Supabase) postgrest(db *Service, analytics *Service) *Service {
 	return dag.
 		Container().
 		From("postgrest/postgrest:v11.2.2").
-		WithEntrypoint([]string{
-			"postgrest",
-		}).
 		WithServiceBinding("db", db).
 		WithServiceBinding("analytics", analytics).
 		WithEnvVariable("PGRST_DB_URI", "postgres://authenticator:"+POSTGRES_PASSWORD+"@db:5432/postgres").
@@ -134,7 +131,10 @@ func (m *Supabase) postgrest(db *Service, analytics *Service) *Service {
 		WithEnvVariable("PGRST_DB_USE_LEGACY_GUCS", "false").
 		WithEnvVariable("PGRST_APP_SETTINGS_JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("PGRST_APP_SETTINGS_JWT_EXP", JWT_EXPIRY).
-		WithExposedPort(55432).
+		WithExec([]string{
+			"postgrest",
+		}).
+		WithExposedPort(3000).
 		AsService()
 }
 
@@ -151,9 +151,6 @@ func (m *Supabase) auth(db *Service, analytics *Service) *Service {
 	auth := dag.
 		Container().
 		From("supabase/gotrue:v2.125.1").
-		WithEntrypoint([]string{
-			"gotrue",
-		}).
 		WithServiceBinding("db", db).
 		WithServiceBinding("analytics", analytics).
 		WithEnvVariable("GOTRUE_API_HOST", "0.0.0.0").
@@ -188,7 +185,12 @@ func (m *Supabase) auth(db *Service, analytics *Service) *Service {
 		WithEnvVariable("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin").
 		WithEnvVariable("GOTRUE_DB_MIGRATIONS_PATH", "/usr/local/etc/gotrue/migrations")
 
-	return m.authGitHub(auth).AsService()
+	return m.authGitHub(auth).
+		WithExec([]string{
+			"gotrue",
+		}).
+		WithExposedPort(9999).
+		AsService()
 }
 
 func (m *Supabase) authGitHub(c *Container) *Container {
@@ -202,13 +204,6 @@ func (m *Supabase) kong(analytics *Service) *Service {
 	return dag.
 		Container().
 		From("kong:2.8.1").
-		WithEntrypoint([]string{
-			"bash",
-		}).
-		WithEntrypoint([]string{
-			"-c",
-			"eval \"echo \"$$(cat ~/temp.yml)\"\" > ~/kong.yml && /docker-entrypoint.sh kong docker-start",
-		}).
 		WithServiceBinding("analytics", analytics).
 		WithEnvVariable("KONG_DATABASE", "off").
 		WithEnvVariable("KONG_DECLARATIVE_CONFIG", "/home/kong/kong.yml").
@@ -221,6 +216,11 @@ func (m *Supabase) kong(analytics *Service) *Service {
 		WithEnvVariable("DASHBOARD_USERNAME", DASHBOARD_USERNAME).
 		WithEnvVariable("DASHBOARD_PASSWORD", DASHBOARD_PASSWORD).
 		WithMountedFile("/home/kong/temp.yml:ro", dag.Host().File("./config/kong.yaml")).
+		WithExec([]string{
+			"bash",
+			"-c",
+			"eval \"echo \"$$(cat ~/temp.yml)\"\" > ~/kong.yml && /docker-entrypoint.sh kong docker-start",
+		}).
 		WithExposedPort(8000).
 		WithExposedPort(8443).
 		AsService()
