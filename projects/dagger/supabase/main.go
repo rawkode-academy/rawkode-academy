@@ -27,7 +27,7 @@ type Supabase struct {
 }
 
 type Return struct {
-	Analytics  *Service
+	// Analytics  *Service
 	Auth       *Service
 	Functions  *Service
 	ImageProxy *Service
@@ -48,23 +48,22 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 
 	imgproxy := m.imgproxy()
 
-	analytics := m.analytics(postgres)
+	// analytics := m.analytics(postgres)
 	postgrest := m.postgrest(postgres)
 
 	auth := m.auth(postgres)
 	meta := m.meta(postgres)
 
-	functions := m.functions(analytics)
+	functions := m.functions()
 
 	storage := m.storage(imgproxy, postgres, postgrest)
 
-	realtime := m.realtime(analytics, postgres)
+	realtime := m.realtime(postgres)
 
-	studio := m.studio(analytics, meta)
+	studio := m.studio(meta)
 	kong := m.kong(studio, auth, meta, postgrest, storage, functions, realtime)
 
 	return &Return{
-		Analytics:  analytics,
 		Auth:       auth,
 		Functions:  functions,
 		ImageProxy: imgproxy,
@@ -78,11 +77,11 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 	}
 }
 
-func (m *Supabase) studio(analytics *Service, meta *Service) *Service {
+func (m *Supabase) studio(meta *Service) *Service {
 	return dag.
 		Container().
 		From("public.ecr.aws/supabase/studio:20231218-8c2c609").
-		WithServiceBinding("analytics", analytics).
+		// WithServiceBinding("analytics", analytics).
 		WithServiceBinding("meta", meta).
 		WithEnvVariable("DEFAULT_ORGANIZATION_NAME", "Default Organization").
 		WithEnvVariable("DEFAULT_PROJECT_NAME", "Default Project").
@@ -271,11 +270,11 @@ func (m *Supabase) inbucket() *Service {
 		AsService()
 }
 
-func (m *Supabase) realtime(analytics *Service, db *Service) *Service {
+func (m *Supabase) realtime(db *Service) *Service {
 	return dag.
 		Container().
 		From("public.ecr.aws/supabase/realtime:v2.25.44").
-		WithServiceBinding("analytics", analytics).
+		// WithServiceBinding("analytics", analytics).
 		WithServiceBinding("db", db).
 		WithEnvVariable("PORT", "4000").
 		WithEnvVariable("DB_HOST", "db").
@@ -336,11 +335,11 @@ func (m *Supabase) storage(imgproxy *Service, db *Service, rest *Service) *Servi
 		AsService()
 }
 
-func (m *Supabase) functions(analytics *Service) *Service {
+func (m *Supabase) functions() *Service {
 	return dag.
 		Container().
 		From("public.ecr.aws/supabase/edge-runtime:v1.29.1").
-		WithServiceBinding("analytics", analytics).
+		// WithServiceBinding("analytics", analytics).
 		WithEnvVariable("JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("SUPABASE_URL", "http://kong:8000").
 		WithEnvVariable("SUPABASE_ANON_KEY", ANON_KEY).
