@@ -117,8 +117,9 @@ func (m *Supabase) postgres() *Service {
 		WithEnvVariable("POSTGRES_PORT", "5432").
 		WithEnvVariable("POSTGRES_USERNAME", POSTGRES_USERNAME).
 		WithEnvVariable("POSTGRES_PASSWORD", POSTGRES_PASSWORD).
-    WithEnvVariable("ANON_KEY", ANON_KEY).
 		WithEnvVariable("POSTGRES_DB", "supabase").
+    WithEnvVariable("ANON_KEY", ANON_KEY).
+    WithEnvVariable("SERVICE_ROLE_KEY", SERVICE_ROLE_KEY).
 		WithEnvVariable("JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("JWT_EXP", JWT_EXPIRY).
 		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql", webhookSql).
