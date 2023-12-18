@@ -94,13 +94,6 @@ func (m *Supabase) postgres() *Service {
 	return dag.
 		Container().
 		From("supabase/postgres:15.1.0.117").
-		WithExec([]string{
-			"postgres",
-			"-c",
-			"config_file=/etc/postgresql/postgresql.conf",
-			"-c",
-			"log_min_messages=fatal",
-		}).
 		WithEnvVariable("POSTGRES_HOST", "/var/run/postgresql").
 		WithEnvVariable("POSTGRES_PORT", "55432").
 		WithEnvVariable("POSTGRES_USERNAME", POSTGRES_USERNAME).
@@ -114,6 +107,13 @@ func (m *Supabase) postgres() *Service {
 		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z", realtimeSql).
 		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z", logSql).
 		WithExposedPort(5432).
+		WithEntrypoint([]string{
+			"postgres",
+			"-c",
+			"config_file=/etc/postgresql/postgresql.conf",
+			"-c",
+			"log_min_messages=fatal",
+		}).
 		AsService()
 }
 
@@ -121,7 +121,7 @@ func (m *Supabase) postgrest(db *Service, analytics *Service) *Service {
 	return dag.
 		Container().
 		From("postgrest/postgrest:v11.2.2").
-		WithExec([]string{
+		WithEntrypoint([]string{
 			"postgrest",
 		}).
 		WithServiceBinding("db", db).
@@ -150,7 +150,7 @@ func (m *Supabase) auth(db *Service, analytics *Service) *Service {
 	auth := dag.
 		Container().
 		From("supabase/gotrue:v2.125.1").
-		WithExec([]string{
+		WithEntrypoint([]string{
 			"gotrue",
 		}).
 		WithServiceBinding("db", db).
@@ -204,7 +204,7 @@ func (m *Supabase) kong(analytics *Service) *Service {
 		WithEntrypoint([]string{
 			"bash",
 		}).
-		WithExec([]string{
+		WithEntrypoint([]string{
 			"-c",
 			"eval \"echo \"$$(cat ~/temp.yml)\"\" > ~/kong.yml && /docker-entrypoint.sh kong docker-start",
 		}).
