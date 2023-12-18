@@ -15,8 +15,15 @@ func (m *RawkodeAcademy) Dev(ctx context.Context) {
 		panic(err)
 	}
 
-  fmt.Printf("Studio available at: %v\n", tunnel.endpoint)
+  e, err := tunnel.Endpoint(ctx, ServiceEndpointOpts{
+    Port: 3000,
+    Scheme: "http",
+  })
+  	if err != nil {
+		panic(err)
+	}
+  fmt.Println("Studio endpoint is: ", e)
 
 	defer tunnel.Stop(ctx)
-  select {}
+	select {}
 }
