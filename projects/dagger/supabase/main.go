@@ -117,6 +117,7 @@ func (m *Supabase) postgres() *Service {
 		WithEnvVariable("POSTGRES_PORT", "5432").
 		WithEnvVariable("POSTGRES_USERNAME", POSTGRES_USERNAME).
 		WithEnvVariable("POSTGRES_PASSWORD", POSTGRES_PASSWORD).
+    WithEnvVariable("ANON_KEY", ANON_KEY).
 		WithEnvVariable("POSTGRES_DB", "supabase").
 		WithEnvVariable("JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("JWT_EXP", JWT_EXPIRY).
