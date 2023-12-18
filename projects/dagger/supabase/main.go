@@ -146,10 +146,11 @@ func (m *Supabase) analytics(db *Service) *Service {
 		From("supabase/logflare:1.4.0").
 		WithServiceBinding("db", db).
     WithEnvVariable("LOGFLARE_NODE_HOST", "127.0.0.1").
-    WithEnvVariable("DB_USERNAME", "supabase_admin").
-    WithEnvVariable("DB_DATABASE", "postgres").
     WithEnvVariable("DB_HOSTNAME", "db").
     WithEnvVariable("DB_PORT", "5432").
+    WithEnvVariable("DB_USERNAME", "supabase_admin").
+    WithEnvVariable("DB_PASSWORD", POSTGRES_PASSWORD).
+    WithEnvVariable("DB_DATABASE", "postgres").
     WithEnvVariable("DB_SCHEMA", "_analytics").
     WithEnvVariable("LOGFLARE_API_KEY", LOGFLARE_API_KEY).
     WithEnvVariable("LOGFLARE_SINGLE_TENANT", "true").
