@@ -96,7 +96,7 @@ func (m *Supabase) postgres() *Service {
 		From("supabase/postgres:15.1.0.117").
 		WithUser("postgres").
 		WithEnvVariable("POSTGRES_HOST", "/var/run/postgresql").
-		WithEnvVariable("POSTGRES_PORT", "55432").
+		WithEnvVariable("POSTGRES_PORT", "5432").
 		WithEnvVariable("POSTGRES_USERNAME", POSTGRES_USERNAME).
 		WithEnvVariable("POSTGRES_PASSWORD", POSTGRES_PASSWORD).
 		WithEnvVariable("POSTGRES_DB", "supabase").
