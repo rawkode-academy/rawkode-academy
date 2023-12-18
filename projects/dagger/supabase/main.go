@@ -140,11 +140,11 @@ func (m *Supabase) postgrest(db *Service) *Service {
 		WithServiceBinding("db", db).
 		WithEnvVariable("PGRST_DB_URI", "postgres://authenticator:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("PGRST_DB_SCHEMAS", "public,storage,graphql_public").
-    WithEnvVariable("PGRST_DB_EXTRA_SEARCH_PATH", "public,extensions").
+		WithEnvVariable("PGRST_DB_EXTRA_SEARCH_PATH", "public,extensions").
 		WithEnvVariable("PGRST_DB_ANON_ROLE", "anon").
 		WithEnvVariable("PGRST_JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("PGRST_DB_MAX_ROWS", "1000").
-    WithEnvVariable("PGRST_ADMIN_SERVER_PORT", "3001").
+		WithEnvVariable("PGRST_ADMIN_SERVER_PORT", "3001").
 		WithExposedPort(3000).
 		AsService()
 }
@@ -207,6 +207,9 @@ func (m *Supabase) auth(db *Service) *Service {
 		WithEnvVariable("GOTRUE_SECURITY_REFRESH_TOKEN_REUSE_INTERVAL", "10")
 
 	return m.authGitHub(auth).
+		WithExec([]string{
+			"gotrue",
+		}).
 		WithExposedPort(9999).
 		AsService()
 }
@@ -290,10 +293,6 @@ func (m *Supabase) realtime(db *Service) *Service {
 		WithEnvVariable("DNS_NODES", "''").
 		WithEnvVariable("REALTIME_IP_VERSION", "IPv6").
 		WithExec([]string{
-			"-s",
-			"-g",
-			"--",
-			"/app/limits.sh",
 			"/bin/sh",
 			"-c",
 			"/app/bin/migrate && /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)' && /app/bin/server",
@@ -347,12 +346,12 @@ func (m *Supabase) functions(db *Service) *Service {
 		WithEnvVariable("SUPABASE_DB_URL", "postgres://postgres:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("SUPABASE_INTERNAL_JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("SUPABASE_INTERNAL_HOST_PORT", "8000").
-		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_PATH", "/home/deno/functions").
+		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_PATH", "/tmp").
 		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_CONFIG", "{}").
 		WithExec([]string{
 			"start",
 			"--main-service",
-			"/home/deno/functions",
+			"/tmp",
 		}).
 		AsService()
 }
