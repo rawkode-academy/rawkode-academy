@@ -2,11 +2,6 @@ package main
 
 import "fmt"
 
-// Ideally, Dagger would suport using docker-compose.yaml files
-// and we wouldn't need to manually orchestrate all this.
-// https://github.com/supabase/supabase/blob/master/docker/docker-compose.yml
-// Until then, let's go! 🚀
-
 const POSTGRES_USERNAME = "postgres"
 const POSTGRES_PASSWORD = "postgres"
 
