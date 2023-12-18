@@ -140,11 +140,11 @@ func (m *Supabase) postgrest(db *Service) *Service {
 		WithServiceBinding("db", db).
 		WithEnvVariable("PGRST_DB_URI", "postgres://authenticator:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("PGRST_DB_SCHEMAS", "public,storage,graphql_public").
+    WithEnvVariable("PGRST_DB_EXTRA_SEARCH_PATH", "public,extensions").
 		WithEnvVariable("PGRST_DB_ANON_ROLE", "anon").
 		WithEnvVariable("PGRST_JWT_SECRET", JWT_SECRET).
-		WithEnvVariable("PGRST_DB_USE_LEGACY_GUCS", "false").
-		WithEnvVariable("PGRST_APP_SETTINGS_JWT_SECRET", JWT_SECRET).
-		WithEnvVariable("PGRST_APP_SETTINGS_JWT_EXP", JWT_EXPIRY).
+		WithEnvVariable("PGRST_DB_MAX_ROWS", "1000").
+    WithEnvVariable("PGRST_ADMIN_SERVER_PORT", "3001").
 		WithExposedPort(3000).
 		AsService()
 }
@@ -349,5 +349,10 @@ func (m *Supabase) functions(db *Service) *Service {
 		WithEnvVariable("SUPABASE_INTERNAL_HOST_PORT", "8000").
 		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_PATH", "/home/deno/functions").
 		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_CONFIG", "{}").
+		WithExec([]string{
+			"start",
+			"--main-service",
+			"/home/deno/functions",
+		}).
 		AsService()
 }
