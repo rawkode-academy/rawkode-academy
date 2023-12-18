@@ -225,7 +225,7 @@ func (m *Supabase) kong() *Service {
 		WithExec([]string{
 			"bash",
 			"-c",
-			'eval "echo \"$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start',
+			"eval \"echo \\\"$(cat ~/temp.yml)\\\"\" > ~/kong.yml && /docker-entrypoint.sh kong docker-start",
 		}).
 		WithExposedPort(8000).
 		WithExposedPort(8443).
