@@ -4,5 +4,11 @@ type RawkodeAcademy struct {
 }
 
 func (m *RawkodeAcademy) Dev(stringArg string) *Container {
-	return dag.Container().From("alpine:latest").WithExec([]string{"echo", stringArg})
+  supabase := dag.Supabase().DevStack("high")
+
+	return dag.
+    Container().
+    From("alpine:latest").
+    WithServiceBinding("postgres", supabase.Postgres()).
+    WithExec([]string{"echo", stringArg})
 }

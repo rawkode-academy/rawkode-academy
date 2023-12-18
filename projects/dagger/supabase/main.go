@@ -52,7 +52,7 @@ func (m *Supabase) postgres() *Service {
 	logSql := dag.Host().File("./config/sql/logs.sql")
 	jwtSql := dag.Host().File("./config/sql/jwt.sql")
 	rolesSql := dag.Host().File("./config/sql/roles.sql")
-	webhookSql := dag.Host().File("./config/sql/webhook.sql")
+	webhookSql := dag.Host().File("./config/sql/webhooks.sql")
 
 	return dag.
 		Container().
