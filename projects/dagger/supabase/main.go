@@ -45,8 +45,8 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 
 	auth := m.auth(postgres)
 	postgrest := m.postgrest(postgres)
-	studio := m.studio(meta)
 	meta := m.meta(postgres)
+	studio := m.studio(meta)
 	kong := m.kong(studio, postgrest)
 
 	return &Return{
