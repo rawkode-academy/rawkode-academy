@@ -16,7 +16,6 @@ const JWT_EXPIRY = "3600"
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE"
 const SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
 
-const STUDIO_PORT = 3000
 const SUPABASE_PUBLIC_URL = "http://localhost:8000"
 
 const LOGFLARE_LOGGER_BACKEND_API_KEY = "your-super-secret-and-long-logflare-key"
@@ -76,7 +75,7 @@ func (m *Supabase) studio(kong *Service, meta *Service) *Service {
 		WithEnvVariable("SUPABASE_SERVICE_KEY", SERVICE_ROLE_KEY).
 		WithEnvVariable("LOGFLARE_API_KEY", LOGFLARE_API_KEY).
 		WithEnvVariable("NEXT_PUBLIC_ENABLE_LOGS", "true").
-		WithExposedPort(STUDIO_PORT).
+		WithExposedPort("3000").
 		AsService()
 }
 
