@@ -61,7 +61,7 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 	realtime := m.realtime(postgres)
 
 	studio := m.studio(meta)
-	kong := m.kong(studio, auth, meta, postgrest, storage, functions, realtime)
+	kong := m.kong(studio, auth, meta, postgrest, storage, realtime)
 
 	return &Return{
 		Auth:       auth,
@@ -221,7 +221,7 @@ func (m *Supabase) authGitHub(c *Container) *Container {
 		WithEnvVariable("GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI", fmt.Sprintf("%s/auth/v1/callback", SUPABASE_URL))
 }
 
-func (m *Supabase) kong(studio *Service, auth *Service, meta *Service, postgrest *Service, storage *Service, functions *Service, realtime *Service) *Service {
+func (m *Supabase) kong(studio *Service, auth *Service, meta *Service, postgrest *Service, storage *Service, realtime *Service) *Service {
 	return dag.
 		Container().
 		From("public.ecr.aws/supabase/kong:2.8.1").
@@ -230,7 +230,7 @@ func (m *Supabase) kong(studio *Service, auth *Service, meta *Service, postgrest
 		WithServiceBinding("rest", postgrest).
 		WithServiceBinding("studio", studio).
 		WithServiceBinding("storage", storage).
-		WithServiceBinding("functions", functions).
+		// WithServiceBinding("functions", functions).
 		WithServiceBinding("realtime", realtime).
 		WithEnvVariable("KONG_DATABASE", "off").
 		WithEnvVariable("KONG_DECLARATIVE_CONFIG", "/home/kong/kong.yaml").
