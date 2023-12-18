@@ -54,7 +54,7 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 	auth := m.auth(postgres)
 	meta := m.meta(postgres)
 
-	functions := m.functions()
+	functions := m.functions(postgres)
 
 	storage := m.storage(imgproxy, postgres, postgrest)
 
@@ -335,16 +335,19 @@ func (m *Supabase) storage(imgproxy *Service, db *Service, rest *Service) *Servi
 		AsService()
 }
 
-func (m *Supabase) functions() *Service {
+func (m *Supabase) functions(db *Service) *Service {
 	return dag.
 		Container().
 		From("public.ecr.aws/supabase/edge-runtime:v1.29.1").
 		// WithServiceBinding("analytics", analytics).
-		WithEnvVariable("JWT_SECRET", JWT_SECRET).
+		WithServiceBinding("db", db).
 		WithEnvVariable("SUPABASE_URL", "http://kong:8000").
 		WithEnvVariable("SUPABASE_ANON_KEY", ANON_KEY).
 		WithEnvVariable("SUPABASE_SERVICE_ROLE_KEY", SERVICE_ROLE_KEY).
 		WithEnvVariable("SUPABASE_DB_URL", "postgres://postgres:"+POSTGRES_PASSWORD+"@db:5432/postgres").
-		WithEnvVariable("VERIFY_JWT", "false").
+		WithEnvVariable("SUPABASE_INTERNAL_JWT_SECRET", JWT_SECRET).
+		WithEnvVariable("SUPABASE_INTERNAL_HOST_PORT", "8000").
+		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_PATH", "/home/deno/functions").
+		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_CONFIG", "{}").
 		AsService()
 }
