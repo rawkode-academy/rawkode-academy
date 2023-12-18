@@ -1,13 +1,17 @@
 package main
 
-type RawkodeAcademy struct {}
+import "context"
 
-func (m *RawkodeAcademy) Dev() *Container {
-  supabase := dag.Supabase().DevStack("rawkode-academy", "http://localhost:4321")
+type RawkodeAcademy struct{}
 
-	return dag.
-    Container().
-    From("alpine:latest").
-    WithServiceBinding("postgres", supabase.Postgres()).
-    WithExec([]string{"echo", "Hello, world!"})
+func (m *RawkodeAcademy) Dev(ctx context.Context) {
+	supabase := dag.Supabase().DevStack("rawkode-academy", "http://localhost:4321")
+
+	tunnel, err := dag.Host().Tunnel(supabase.Studio()).Start(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	defer tunnel.Stop(ctx)
+  select {}
 }

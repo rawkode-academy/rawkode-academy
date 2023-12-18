@@ -50,6 +50,7 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 	kong := m.kong(analytics)
 	meta := m.meta(postgres, analytics)
 	postgrest := m.postgrest(postgres, analytics)
+  studio := m.studio(analytics, kong, meta)
 
 	return &Return{
 		Analytics: analytics,
@@ -58,6 +59,7 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 		Meta:      meta,
 		Postgres:  postgres,
 		Postgrest: postgrest,
+    Studio:    studio,
 	}
 }
 
