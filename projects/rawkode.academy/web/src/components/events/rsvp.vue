@@ -73,13 +73,13 @@ function isGoing(eventId: string, user: User | null, rsvps: Database['public']['
 </script>
 
 <template>
-	<div v-if="!horizontal" class="flex flex-col gap-1 items-end">
+	<div v-if="user && !horizontal" class="flex flex-col gap-1 items-end">
 		<FwbAvatarStack v-if="rsvpsWithCount && rsvpsWithCount[eventId]">
 			<FwbAvatar v-for="authId in rsvpsWithCount[eventId]?.[0]" :img="`${avatarImages[authId]}`" rounded />
 		</FwbAvatarStack>
 
 		<p class="text-xs">{{ (rsvpsWithCount && rsvpsWithCount[eventId]?.[1] || 0) }} People</p>
-		<FwbButton v-if="!isGoing(eventId, user, rsvps)" @click="createRsvp(eventId)" class="w-full">
+		<FwbButton color="light" v-if="!isGoing(eventId, user, rsvps)" @click="createRsvp(eventId)" class="w-full">
 			I'm going
 		</FwbButton>
 
@@ -89,7 +89,7 @@ function isGoing(eventId: string, user: User | null, rsvps: Database['public']['
 
 	</div>
 
-	<div v-if="horizontal" class="flex flex-row gap-1 items-center">
+	<div v-if="user && horizontal" class="flex flex-row gap-1 items-center">
 		<FwbButton v-if="!isGoing(eventId, user, rsvps)" @click="createRsvp(eventId)">
 			I'm going
 		</FwbButton>
