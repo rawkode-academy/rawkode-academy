@@ -29,7 +29,7 @@ type Supabase struct {
 type Return struct {
 	// Analytics  *Service
 	Auth       *Service
-	Functions  *Service
+	// Functions  *Service
 	ImageProxy *Service
 	Kong       *Service
 	Meta       *Service
@@ -54,7 +54,7 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 	auth := m.auth(postgres)
 	meta := m.meta(postgres)
 
-	functions := m.functions(postgres)
+	// functions := m.functions(postgres)
 
 	storage := m.storage(imgproxy, postgres, postgrest)
 
@@ -65,7 +65,7 @@ func (m *Supabase) DevStack(projectName string, siteUrl string) *Return {
 
 	return &Return{
 		Auth:       auth,
-		Functions:  functions,
+		// Functions:  functions,
 		ImageProxy: imgproxy,
 		Kong:       kong,
 		Meta:       meta,
@@ -138,7 +138,7 @@ func (m *Supabase) postgrest(db *Service) *Service {
 		Container().
 		From("public.ecr.aws/supabase/postgrest:v11.2.2").
 		WithServiceBinding("db", db).
-		WithEnvVariable("PGRST_DB_URI", "postgres://authenticator:"+POSTGRES_PASSWORD+"@db:5432/postgres").
+		WithEnvVariable("PGRST_DB_URI", "postgresql://authenticator:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("PGRST_DB_SCHEMAS", "public,storage,graphql_public").
 		WithEnvVariable("PGRST_DB_EXTRA_SEARCH_PATH", "public,extensions").
 		WithEnvVariable("PGRST_DB_ANON_ROLE", "anon").
@@ -180,7 +180,7 @@ func (m *Supabase) auth(db *Service) *Service {
 		WithEnvVariable("GOTRUE_API_PORT", "9999").
 		WithEnvVariable("API_EXTERNAL_URL", SUPABASE_URL).
 		WithEnvVariable("GOTRUE_DB_DRIVER", "postgres").
-		WithEnvVariable("DATABASE_URL", "postgres://supabase_auth_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
+    WithEnvVariable("GOTRUE_DB_DATABASE_URL", "postgresql://supabase_auth_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("GOTRUE_SITE_URL", m.SiteUrl).
 		WithEnvVariable("GOTRUE_URI_ALLOW_LIST", m.SiteUrl).
 		WithEnvVariable("GOTRUE_DISABLE_SIGNUP", "false").
@@ -322,7 +322,7 @@ func (m *Supabase) storage(imgproxy *Service, db *Service, rest *Service) *Servi
 		WithEnvVariable("SERVICE_KEY", SERVICE_ROLE_KEY).
 		WithEnvVariable("POSTGREST_URL", "http://rest:3000").
 		WithEnvVariable("PGRST_JWT_SECRET", JWT_SECRET).
-		WithEnvVariable("DATABASE_URL", "postgres://supabase_storage_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
+		WithEnvVariable("DATABASE_URL", "postgresql://supabase_storage_admin:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("FILE_SIZE_LIMIT", "52428800").
 		WithEnvVariable("STORAGE_BACKEND", "file").
 		WithEnvVariable("FILE_STORAGE_BACKEND_PATH", "/var/lib/storage").
@@ -343,7 +343,7 @@ func (m *Supabase) functions(db *Service) *Service {
 		WithEnvVariable("SUPABASE_URL", "http://kong:8000").
 		WithEnvVariable("SUPABASE_ANON_KEY", ANON_KEY).
 		WithEnvVariable("SUPABASE_SERVICE_ROLE_KEY", SERVICE_ROLE_KEY).
-		WithEnvVariable("SUPABASE_DB_URL", "postgres://postgres:"+POSTGRES_PASSWORD+"@db:5432/postgres").
+		WithEnvVariable("SUPABASE_DB_URL", "postgresql://postgres:"+POSTGRES_PASSWORD+"@db:5432/postgres").
 		WithEnvVariable("SUPABASE_INTERNAL_JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("SUPABASE_INTERNAL_HOST_PORT", "8000").
 		WithEnvVariable("SUPABASE_INTERNAL_FUNCTIONS_PATH", "/tmp").
