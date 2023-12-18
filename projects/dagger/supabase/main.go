@@ -74,7 +74,7 @@ func (m *Supabase) studio(meta *Service) *Service {
 		WithEnvVariable("SUPABASE_SERVICE_KEY", SERVICE_ROLE_KEY).
 		WithEnvVariable("LOGFLARE_API_KEY", LOGFLARE_API_KEY).
 		WithEnvVariable("NEXT_PUBLIC_ENABLE_LOGS", "true").
-		WithExposedPort("3000").
+		WithExposedPort(3000).
 		AsService()
 }
 
