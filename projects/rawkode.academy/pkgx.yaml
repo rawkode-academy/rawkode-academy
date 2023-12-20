@@ -1,0 +1,6 @@
+dependencies:
+- biome
+- bun
+- go
+- node
+- supabase

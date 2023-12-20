@@ -3,9 +3,9 @@
 --- but we need this representation so that the users themselves can update their
 --- own profiles.
 create table "people"(
-	"auth_id" uuid null,
 	"github_handle" "github_handle" not null primary key,
 	"name" text null,
+	"auth_id" uuid null,
 	"avatar_url" text null,
 	"biography" text null,
 	"website" text null,
@@ -45,9 +45,5 @@ create trigger on_auth_user_created
 
 -- allow self-access
 create policy "people-view-self" on people
-	for select
-		using (auth.uid() = auth_id);
-
-create policy "people-update-self" on people
-	for update
+	for select, update
 		using (auth.uid() = auth_id);
