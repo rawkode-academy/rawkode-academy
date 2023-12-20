@@ -36,6 +36,11 @@ basicauth_credentials:
 ###
 services:
 
+  - name: postgres
+    port: 8432
+    host: db
+    protocol: tcp
+
   ## Open Auth routes
   - name: auth-v1-open
     url: http://auth:9999/verify
