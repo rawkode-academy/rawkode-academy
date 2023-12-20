@@ -8,7 +8,6 @@ create table "videos"(
 	"visibility" text default 'private',
 	constraint "valid_visibility" check ("visibility" in ('private', 'unlisted', 'tier-1', 'tier-2', 'tier-3', 'public')),
 	"live" boolean not null default false,
-	constraint "valid_duration" check (duration is null or duration >= '00:00:00'::interval),
 	"links" text[] null default array[] ::text[],
 	"chapters" "chapter"[] null default array[] ::"chapter"[]
 );

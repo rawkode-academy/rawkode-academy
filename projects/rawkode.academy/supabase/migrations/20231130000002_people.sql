@@ -45,5 +45,6 @@ create trigger on_auth_user_created
 
 -- allow self-access
 create policy "people-view-self" on people
-	for select, update
+	for select
 		using (auth.uid() = auth_id);
+

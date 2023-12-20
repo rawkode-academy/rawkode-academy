@@ -1,11 +1,9 @@
 create table "rsvps"(
-  "event_id" uuid not null references "events"("event_id") on delete cascade,
+  "event_id" text not null references "events"("slug") on delete cascade,
   "auth_id" uuid not null,
   primary key(event_id, auth_id)
 );
 
-alter table rsvps enable row level security;
+alter table "rsvps" enable row level security;
 
-create policy "authenticated access" on rsvps for select to authenticated using(true);
-create policy "authenticated delete" on rsvps for delete using (auth.uid() = auth_id);
-create policy "authenticated insert" on rsvps for insert to authenticated with check (auth.uid() = auth_id);
+create policy "rsvp-self" on rsvps for all to authenticated using (auth.uid() = auth_id);
