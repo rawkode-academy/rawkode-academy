@@ -1,4 +1,6 @@
 ---
+import Posthog from "../analytics/posthog.astro";
+
 interface Props {
 	title: string;
 }
@@ -92,4 +94,6 @@ const { title } = Astro.props;
 			};
 		})(document, "script");
 	</script>
+
+	<Posthog />
 </head>
