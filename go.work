@@ -1,6 +1,6 @@
 go 1.21.3
 
 use (
-	./projects/dagger/supabase
+	./dagger/supabase
 	./projects/rawkode.academy/dagger
 )
