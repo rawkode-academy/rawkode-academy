@@ -1,7 +1,0 @@
-procs:
-  supabase:
-    cwd: ./dagger
-    cmd: ["dagger", "up", "-n", "dev"]
-  astro:
-    shell: "just astro"
-    autostart: false

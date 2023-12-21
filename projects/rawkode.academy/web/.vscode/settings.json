@@ -1,6 +1,7 @@
 {
 	"scss.lint.unknownAtRules": "ignore",
 	"editor.formatOnSave": true,
+	"npm.packageManager": "bun",
 	"editor.codeActionsOnSave": {
 		"quickfix.biome": "explicit",
 		"source.organizeImports": "always",

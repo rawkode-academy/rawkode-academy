@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "astro-build.astro-vscode",
+    "mtxr.sqltools",
+    "biomejs.biome",
+    "oven.bun-vscode",
+    "golang.go",
+    "redhat.vscode-yaml"
+  ]
+}

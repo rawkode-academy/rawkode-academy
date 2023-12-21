@@ -1,0 +1,65 @@
+{
+	"folders": [
+		{
+			"name": "everything",
+			"path": "."
+		},
+		{
+			"name": "dagger",
+			"path": "./dagger"
+		},
+		{
+			"name": "website",
+			"path": "./web"
+		},
+		{
+			"name": "supabase-migrations",
+			"path": "./supabase/migrations"
+		},
+		{
+			"name": "supabase-functions",
+			"path": "./supabase/functions"
+		},
+		{
+			"name": "dagger: supabase",
+			"path": "../dagger/supabase"
+		}
+	],
+	"settings": {},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"type": "shell",
+				"command": "dagger up -n dev",
+				"label": "supabase: local",
+				"isBackground": true,
+				"options": {
+					"cwd": "${workspaceFolder}/dagger"
+				},
+				"problemMatcher": {
+					"pattern": {
+						"regexp": ""
+					},
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": ".*",
+						"endsPattern": "tunnel 0.0.0.0:8000"
+					}
+				}
+			},
+			{
+				"type": "shell",
+				"command": "infisical run -- bun dev",
+				"label": "bun: dev",
+				"options": {
+					"cwd": "${workspaceFolder}/web"
+				},
+				"dependsOrder": "sequence",
+				"dependsOn": [
+					"supabase: local"
+				]
+			}
+		]
+	}
+}

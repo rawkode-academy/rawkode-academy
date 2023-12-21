@@ -1,2 +1,9 @@
 {
+	"editor.formatOnPaste": true,
+	"editor.formatOnSave": true,
+	"editor.formatOnType": true,
+	"[json]": {
+		"editor.defaultFormatter": "vscode.json-language-features",
+	},
+	"npm.autoDetect": "off"
 }
