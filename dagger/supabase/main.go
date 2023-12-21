@@ -29,6 +29,7 @@ func (m *Supabase) DevStack(projectName string, siteUrl string, postgresPassword
 		WithSecretVariable("SERVICE_ROLE_KEY", serviceRoleKey).
 		WithSecretVariable("ADMIN_API_KEY", adminApiKey).
 		WithEnvVariable("MACHINE_TYPE", "shared_cpu_1x_512m").
+		WithEnvVariable("DATA_VOLUME_MOUNTPOINT", "/data").
 		WithExposedPort(5432).
 		WithExposedPort(8000).
 		AsService()
