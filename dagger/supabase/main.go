@@ -50,6 +50,9 @@ func (m *Supabase) DevStack(projectName string, siteUrl string, githubClientId *
 	m.githubClientId = githubClientId
 	m.githubClientSecret = githubClientSecret
 
+	fmt.Println("ANON KEY", ANON_KEY)
+	fmt.Println("SERVICE ROLE KEY", SERVICE_ROLE_KEY)
+
 	m.init()
 
 	return m
@@ -316,9 +319,9 @@ func (m *Supabase) storage() *Service {
 		WithServiceBinding("postgres", m.Postgres).
 		WithServiceBinding("imgproxy", m.ImageProxy).
 		WithServiceBinding("rest", m.Postgrest).
+		WithEnvVariable("POSTGREST_URL", "http://rest:3000").
 		WithEnvVariable("ANON_KEY", ANON_KEY).
 		WithEnvVariable("SERVICE_KEY", SERVICE_ROLE_KEY).
-		WithEnvVariable("POSTGREST_URL", "http://rest:3000").
 		WithEnvVariable("PGRST_JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("DATABASE_URL", "postgresql://supabase_storage_admin:"+POSTGRES_PASSWORD+"@postgres:5432/postgres").
 		WithEnvVariable("FILE_SIZE_LIMIT", "52428800").
