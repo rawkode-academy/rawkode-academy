@@ -38,7 +38,7 @@ services:
 
   - name: postgres
     port: 8432
-    host: db
+    host: postgres
     protocol: tcp
 
   ## Open Auth routes

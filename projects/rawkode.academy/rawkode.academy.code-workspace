@@ -31,7 +31,7 @@
 		"tasks": [
 			{
 				"type": "shell",
-				"command": "dagger up -n dev",
+				"command": "infisical run -- dagger up -n dev",
 				"label": "supabase: local",
 				"isBackground": true,
 				"options": {
