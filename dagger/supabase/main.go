@@ -96,11 +96,7 @@ func (m *Supabase) studio() *Service {
 }
 
 func (m *Supabase) postgres() *Service {
-	realtimeSql := dag.Host().File("./config/sql/realtime.sql")
-	logSql := dag.Host().File("./config/sql/logs.sql")
-	jwtSql := dag.Host().File("./config/sql/jwt.sql")
-	rolesSql := dag.Host().File("./config/sql/roles.sql")
-	webhookSql := dag.Host().File("./config/sql/webhooks.sql")
+	schemaSql := dag.Host().File("./config/schema.sql")
 
 	return dag.
 		Container().
@@ -111,11 +107,7 @@ func (m *Supabase) postgres() *Service {
 		WithEnvVariable("POSTGRES_DB", "supabase").
 		WithEnvVariable("JWT_SECRET", JWT_SECRET).
 		WithEnvVariable("JWT_EXP", JWT_EXPIRY).
-		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql", webhookSql).
-		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-roles.sql", rolesSql).
-		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql", jwtSql).
-		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-realtime.sql", realtimeSql).
-		WithMountedFile("/docker-entrypoint-initdb.d/migrations/99-logs.sql", logSql).
+		WithMountedFile("/docker-entrypoint-initdb.d/init-scripts/99-schema.sql", schemaSql).
 		WithExec([]string{
 			"postgres",
 			"-c",
