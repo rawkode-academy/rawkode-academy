@@ -9,7 +9,8 @@ func (m *Supabase) DevStack(projectName string, siteUrl string, postgresPassword
 	// All in one image it is ...
 	// Want the 'producation' code? Checkout commit
 	//   - dcc6262a11d455c2b987a80434291f37b66e14c6
-	m.Service = dag.Container().From("public.ecr.aws/supabase/postgres:aio-15.1.0.153").
+	m.Service = dag.Container().
+		From("public.ecr.aws/supabase/postgres:aio-15.1.0.153").
 		WithSecretVariable("POSTGRES_PASSWORD", postgresPassword).
 		WithSecretVariable("JWT_SECRET", jwtSecret).
 		WithSecretVariable("ANON_KEY", anonKey).
