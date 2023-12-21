@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"dagger.io/dagger"
 )
 
 const POSTGRES_USERNAME = "postgres"
@@ -42,11 +40,11 @@ type Supabase struct {
 	Storage    *Service
 	Studio     *Service
 
-	githubClientId 	 *dagger.Secret
-	githubClientSecret *dagger.Secret
+	githubClientId 	 *Secret
+	githubClientSecret *Secret
 }
 
-func (m *Supabase) DevStack(projectName string, siteUrl string, githubClientId *dagger.Secret, githubClientSecret *dagger.Secret) *Supabase {
+func (m *Supabase) DevStack(projectName string, siteUrl string, githubClientId *Secret, githubClientSecret *Secret) *Supabase {
 	m.ProjectName = projectName
 	m.SiteUrl = siteUrl
 	m.githubClientId = githubClientId
