@@ -1,18 +1,5 @@
 package main
 
-const POSTGRES_USERNAME = "postgres"
-const POSTGRES_PASSWORD = "postgres"
-
-const DASHBOARD_USERNAME = "dash"
-const DASHBOARD_PASSWORD = "board"
-
-const SUPABASE_URL = "http://localhost:8000"
-
-const JWT_EXPIRY = "3600"
-
-const LOGFLARE_LOGGER_BACKEND_API_KEY = "your-super-secret-and-long-logflare-key"
-const LOGFLARE_API_KEY = "your-super-secret-and-long-logflare-key"
-
 type Supabase struct {
 	Service *Service
 }

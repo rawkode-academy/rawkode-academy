@@ -2,6 +2,6 @@
   "name": "rawkode.academy",
   "sdk": "go",
   "dependencies": [
-    "github.com/RawkodeAcademy/RawkodeAcademy/dagger/supabase@3106719067e6769044411abb9dea14dc5c8ed737"
+    "github.com/RawkodeAcademy/RawkodeAcademy/dagger/supabase@f5c855f64830af40f2c5e54cb586dccb5d7c8f34"
   ]
 }
