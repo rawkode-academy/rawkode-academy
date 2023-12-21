@@ -14,35 +14,22 @@ const LOGFLARE_LOGGER_BACKEND_API_KEY = "your-super-secret-and-long-logflare-key
 const LOGFLARE_API_KEY = "your-super-secret-and-long-logflare-key"
 
 type Supabase struct {
-	ProjectName string
-	SiteUrl     string
-	JwtSecret   string
-	JwtExpiry   int
-
 	Service *Service
-
-	githubClientId 	 *Secret
-	githubClientSecret *Secret
 }
 
-type Config struct {
-	ProjectName string
-	SiteUrl     string
-	PostgresPassword *Secret
-	JwtSecret *Secret
-	AnonKey *Secret
-	ServiceRoleKey *Secret
-	AdminApiKey *Secret
-	GitHubClientId *Secret
+type Configer struct {
+	ProjectName        string
+	SiteUrl            string
+	PostgresPassword   *Secret
+	JwtSecret          *Secret
+	AnonKey            *Secret
+	ServiceRoleKey     *Secret
+	AdminApiKey        *Secret
+	GitHubClientId     *Secret
 	GitHubClientSecret *Secret
 }
 
-func (m *Supabase) DevStack(config *Config) *Supabase {
-	m.ProjectName = config.ProjectName
-	m.SiteUrl = config.SiteUrl
-	m.githubClientId = config.GitHubClientId
-	m.githubClientSecret = config.GitHubClientSecret
-
+func (m *Supabase) DevStack(config *Configer) *Supabase {
 	// Giving up, for now, trying to get this running like producation.
 	// All in one image it is ...
 	// Want the 'producation' code? Checkout commit
