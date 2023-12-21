@@ -47,13 +47,13 @@ func (m *Supabase) DevStack(config *Config) *Supabase {
 	// All in one image it is ...
 	// Want the 'producation' code? Checkout commit
 	//   - dcc6262a11d455c2b987a80434291f37b66e14c6
-	m.Service = dag.Container().from("public.ecr.aws/supabase/postgres:aio-15.1.0.153").
+	m.Service = dag.Container().From("public.ecr.aws/supabase/postgres:aio-15.1.0.153").
 		WithSecretVariable("POSTGRES_PASSWORD", config.PostgresPassword).
 		WithSecretVariable("JWT_SECRET", config.JwtSecret).
 		WithSecretVariable("ANON_KEY", config.AnonKey).
 		WithSecretVariable("SERVICE_ROLE_KEY", config.ServiceRoleKey).
 		WithSecretVariable("ADMIN_API_KEY", config.AdminApiKey).
-		WithSecretVariable("MACHINE_TYPE", "shared_cpu_1x_512m").
+		WithEnvVariable("MACHINE_TYPE", "shared_cpu_1x_512m").
 		WithExposedPort(5432).
 		WithExposedPort(8000).
 		AsService()
