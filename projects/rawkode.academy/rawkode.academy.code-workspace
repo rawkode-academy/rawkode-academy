@@ -22,7 +22,7 @@
 		},
 		{
 			"name": "dagger: supabase",
-			"path": "../dagger/supabase"
+			"path": "../../dagger/supabase"
 		}
 	],
 	"settings": {},

@@ -1,9 +1,0 @@
-title: 'Last Week in Kubernetes: Episode #1'
-publishedAt: '2019-03-01T12:55:12Z'
-youtubeId: ebei2vbn2o8
-youtubeCategory: 24
-links:
-- github.com/kubernetes-sigs/kustomize
-- github.com/kubernetes/kubernetes/pulls?utf8=%E2%9C%93&q=is%3Apr+kustomize
-- github.com/kubernetes/kubernetes/pull/67573
-chapters: []

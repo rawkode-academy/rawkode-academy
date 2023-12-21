@@ -1,8 +1,0 @@
-title: Scaling Kubernetes Resources with InfluxDB & Flux
-publishedAt: '2020-08-03T20:54:49Z'
-youtubeId: CkSFrn_qYws
-youtubeCategory: 24
-links:
-- gitlab.com/rawkode/influxdb-examples
-- github.com/zalando-incubator/kube-metrics-adapter/
-chapters: []
