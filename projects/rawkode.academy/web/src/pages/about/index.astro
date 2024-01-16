@@ -1,19 +1,179 @@
 ---
-import Hero from "../../components/hero/cover.astro";
 import Page from "../../wrappers/page.astro";
-import BackgroundImage from "./header.png";
 ---
 
 <Page title="About">
-	<Hero
-		title="About"
-		paragraph="The Rawkode Academy was founded by David Flanagan"
-		backgroundImage={BackgroundImage}
-	/>
-	<div class="container">
-		<p>
-			This is a simple example of a static site built with Astro and deployed to
-			Netlify.
-		</p>
-	</div>
+	<section>
+		<div class="max-w-screen-lg text-gray-500 sm:text-lg dark:text-gray-400">
+			<h1
+				class="mb-4 text-4xl tracking-tight font-bold text-gray-900 dark:text-white"
+			>
+				About the Rawkode Academy
+			</h1>
+
+			<p class="mb-4 font-light">
+				The Rawkode Academy was founded in 2019 by David Flanagan, née McKay; a
+				developer and operator with over 20 years experience in the industry.
+			</p>
+
+			<div class="mb-8 md:mb-16">
+				<h2
+					class="text-2xl tracking-tight font-extrabold text-gray-900 md:text-4xl dark:text-white"
+				>
+					How's It Going?
+				</h2>
+			</div>
+			<div
+				class="mb-4 space-y-4 md:grid md:grid-cols-3 md:gap-4 xl:gap-16 md:space-y-0 md:mb-8"
+			>
+				<div
+					class="flex justify-center items-center p-6 text-center bg-gray-100 rounded xl:p-12 dark:bg-gray-800"
+				>
+					<div class="text-gray-900 dark:text-white">
+						<p class="mb-2 text-4xl font-extrabold md:text-5xl">1 Million</p>
+						<h3 class="mb-2 text-xl font-semibold">Views</h3>
+						<p class="font-light text-gray-500 dark:text-gray-400">
+							across all channels
+						</p>
+					</div>
+				</div>
+				<div
+					class="flex justify-center items-center p-6 text-center bg-gray-100 rounded xl:p-12 dark:bg-gray-800"
+				>
+					<div class="text-gray-900 dark:text-white">
+						<p class="mb-2 text-4xl font-extrabold md:text-5xl">500</p>
+						<h3 class="mb-2 text-xl font-semibold">Hours</h3>
+						<p class="font-light text-gray-500 dark:text-gray-400">
+							of content
+						</p>
+					</div>
+				</div>
+				<div
+					class="flex justify-center items-center p-6 text-center bg-gray-100 rounded xl:p-12 dark:bg-gray-800"
+				>
+					<div class="text-gray-900 dark:text-white">
+						<p class="mb-2 text-4xl font-extrabold md:text-5xl">90+</p>
+						<h3 class="mb-2 text-xl font-semibold">Projects Covered</h3>
+						<p class="font-light text-gray-500 dark:text-gray-400">
+							from the CNCF Landscape
+						</p>
+					</div>
+				</div>
+			</div>
+			<p
+				class="text-sm font-light text-center text-gray-500 dark:text-gray-400"
+			>
+				<span class="font-medium text-primary-600 dark:text-primary-500">*</span
+				> Numbers accurate as of 9am this morning, GMT.
+			</p>
+
+			<div
+				id="alert-additional-content-1"
+				class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
+				role="alert"
+			>
+				<div class="flex items-center">
+					<svg
+						class="flex-shrink-0 w-4 h-4 me-2"
+						aria-hidden="true"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+					>
+						<path
+							d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+						></path>
+					</svg>
+					<span class="sr-only">Fun Fact</span>
+					<h3 class="text-lg font-medium">Fun Fact</h3>
+				</div>
+				<div class="mt-2 mb-4 text-sm">
+					Before metrics-server, Kubernetes collected monitoring information
+					into a program called Heapster. Heapster was built on top of InfluxDB
+					1.
+				</div>
+			</div>
+
+			<p class="mb-4 font-medium">
+				After moving on from InfluxData, David joined Equinix Metal where he
+				continued to work-on and grow the Rawkode Academy by helping developers
+				and operators learn how to run and use Kubernetes, and other Cloud
+				Native technologies, on bare metal; which comes with a whole host of
+				challenges that are not present when running on a cloud provider.
+			</p>
+
+			<p class="mb-4 font-medium">
+				Throughout his time working with Kubernetes, David was a fan and keen
+				watcher of TGIK, a weekly live stream hosted by Joe Beda, one of the
+				creators of Kubernetes. On TGIK, Joe live streamed himself exploring new
+				Cloud Native technologies, by working through the documentation and
+				examples. Often, he'd rely on the maintainers and contributors to those
+				projects being active in the chat to help him out when he got stuck.
+				This is when David decided that he wanted to carry on TGIK in his own
+				way, by inviting the maintainers and contributors of said projects on a
+				live-stream with him, where they could not only help him when there were
+				issues, but also talk about the project and the problems it solves while
+				sharing its history, flavour, and context.
+			</p>
+
+			<div
+				id="alert-additional-content-1"
+				class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
+				role="alert"
+			>
+				<div class="flex items-center">
+					<svg
+						class="flex-shrink-0 w-4 h-4 me-2"
+						aria-hidden="true"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+					>
+						<path
+							d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+						></path>
+					</svg>
+					<span class="sr-only">Fun Fact</span>
+					<h3 class="text-lg font-medium">Fun Fact</h3>
+				</div>
+				<div class="mt-2 mb-4 text-sm">
+					Before the live-stream was called "Rawkode Live", the name "RTFM" was
+					used; as the premise of the streams was to guide people through open
+					source projects by using the documentation and examples.
+				</div>
+			</div>
+
+			<p class="mb-4 font-medium">
+				Fast-forward to 2021, and David had the worst idea of his career; but
+				through hubris and in the of edutainment, David hosted the first episode
+				of Klustered, along with his guest, Walid Shaari.
+			</p>
+
+			<div
+				id="alert-additional-content-1"
+				class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
+				role="alert"
+			>
+				<div class="flex items-center">
+					<svg
+						class="flex-shrink-0 w-4 h-4 me-2"
+						aria-hidden="true"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+					>
+						<path
+							d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+						></path>
+					</svg>
+					<span class="sr-only">Fun Fact</span>
+					<h3 class="text-lg font-medium">Fun Fact</h3>
+				</div>
+				<div class="mt-2 mb-4 text-sm">
+					The original name for Klustered was "Kluster Fuck", but this was
+					changed prior to the first episode.
+				</div>
+			</div>
+		</div>
+	</section>
 </Page>
