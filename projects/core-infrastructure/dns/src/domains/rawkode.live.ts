@@ -6,9 +6,7 @@ export default (scope: Construct): ManagedDomain => {
 		scope,
 		"rawkode.live",
 		Registrar.Cloudflare,
-	);
-
-	managedDomain.discourageEmail();
+	).discourageEmail();
 
 	return managedDomain;
 };
