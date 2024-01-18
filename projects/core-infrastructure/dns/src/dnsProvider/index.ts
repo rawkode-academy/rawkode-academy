@@ -98,11 +98,11 @@ export class ManagedDomain extends Construct {
     return this;
   }
 
-  addARecord(id: string, name: string, value: string): ManagedDomain {
+  addARecord(id: string, name: string, value: string, ttl = 300): ManagedDomain {
     new Record(this, id, {
       zoneId: this.cloudflareZone.id,
       type: "A",
-      ttl: 300,
+      ttl,
       name,
       value,
       comment: "Managed by Terraform",
@@ -120,7 +120,6 @@ export class ManagedDomain extends Construct {
     new Record(this, id, {
       zoneId: this.cloudflareZone.id,
       type: "CNAME",
-      ttl: 300,
       name,
       value,
       proxied: proxied || false,
@@ -134,7 +133,6 @@ export class ManagedDomain extends Construct {
     new Record(this, id, {
       zoneId: this.cloudflareZone.id,
       type: "TXT",
-      ttl: 300,
       name,
       value,
       comment: "Managed by Terraform",

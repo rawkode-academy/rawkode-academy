@@ -6,7 +6,7 @@ export default (scope: Construct): ManagedDomain => {
 		scope,
 		"rawkode.social",
 		Registrar.Cloudflare,
-	);
+	).addARecord("mastodon", "@", "94.23.75.107");
 
 	return managedDomain;
 };

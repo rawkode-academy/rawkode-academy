@@ -1,3 +1,2 @@
 dependencies:
-  - pnpm
-  - cdktf
+  - bun

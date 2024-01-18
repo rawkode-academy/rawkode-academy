@@ -8,7 +8,7 @@ export default (scope: Construct): ManagedDomain => {
 		Registrar.Cloudflare,
 	);
 
-	managedDomain.discourageEmail().setupShortIO("@");
+	managedDomain.discourageEmail();
 
 	return managedDomain;
 };
