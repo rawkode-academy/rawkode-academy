@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "infrastructure"
+		},
+		{
+			"path": "cloudflare-worker"
+		}
+	],
+	"settings": {}
+}

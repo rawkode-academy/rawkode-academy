@@ -1,0 +1,21 @@
+{
+	"name": "tfstate.rawkode.cloud",
+	"private": true,
+	"type": "module",
+	"module": "dist/index.mjs",
+	"version": "0.0.0",
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20230628.0",
+		"esbuild": "^0.18.11",
+		"wrangler": "^3.1.2"
+	},
+	"scripts": {
+		"build": "node build.mjs",
+		"start": "wrangler dev",
+		"deploy": "wrangler publish"
+	},
+	"dependencies": {
+		"itty-router": "^2.6.1",
+		"jose": "^4.9.1"
+	}
+}

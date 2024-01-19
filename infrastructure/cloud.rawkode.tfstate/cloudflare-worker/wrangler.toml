@@ -1,0 +1,22 @@
+name = "terraform-state-backend"
+main = "dist/index.mjs"
+
+workers_dev = false
+
+[build]
+command = "npm run build"
+
+r2_buckets = [
+	{ binding = "TFSTATE_BUCKET", bucket_name = "rawkode-academy-terraform-state" },
+]
+
+[durable_objects]
+bindings = [{ name = "TFSTATE_LOCK", class_name = "DurableLock" }]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["DurableLock"]
+
+routes = [
+	{ pattern = "tfstate.rawkode.cloud", custom_domain = true }
+]
