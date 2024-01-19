@@ -1,5 +1,5 @@
 {
-	"name": "terraform-state-backend",
+	"name": "tfstate.rawkode.cloud",
 	"private": true,
 	"type": "module",
 	"module": "dist/index.mjs",

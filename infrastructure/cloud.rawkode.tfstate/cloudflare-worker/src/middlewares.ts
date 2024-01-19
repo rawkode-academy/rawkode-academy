@@ -1,8 +1,8 @@
-import { Request as IttyRequest } from 'itty-router';
-import * as jose from 'jose';
+import { Request as IttyRequest } from '.pnpm/itty-router@2.6.1/node_modules/itty-router';
+import * as jose from '.pnpm/jose@4.9.1/node_modules/jose';
 import { Env } from './types/env';
 import { RequestWithIdentity } from './types/request';
-import { KeyLike } from 'jose';
+import { KeyLike } from '.pnpm/jose@4.9.1/node_modules/jose';
 
 export interface RouteParams {
   projectName: string | undefined;

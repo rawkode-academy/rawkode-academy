@@ -1,0 +1,9 @@
+{
+	"language": "typescript",
+	"app": "bun x ts-node main.ts",
+	"projectId": "7c7e585b-35db-4df7-af90-c1b38a308f8a",
+	"sendCrashReports": "false",
+	"terraformProviders": ["cloudflare/cloudflare@~> 4"],
+	"terraformModules": [],
+	"context": {}
+}

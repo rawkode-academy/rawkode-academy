@@ -1,4 +1,4 @@
-import { Router } from 'itty-router';
+import { Router } from '.pnpm/itty-router@2.6.1/node_modules/itty-router';
 import { deleteStateHandler, getStateHandler, lockStateHandler, putStateHandler } from './handlers';
 import { withIdentity, withParams } from './middlewares';
 import { Env } from './types/env';
