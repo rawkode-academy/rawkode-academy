@@ -371,6 +371,22 @@ export class ManagedDomain extends Construct {
 				"microsoft-discover",
 				"autodiscover",
 				"autodiscover.outlook.com",
+			)
+			.addCNameRecord(
+				"microsoft-dkim-1",
+				"selector1._domainkey",
+				`selector1-${this.zoneString.replace(
+					".",
+					"-",
+				)}._domainkey.rawkodeacademy.onmicrosoft.com`,
+			)
+			.addCNameRecord(
+				"microsoft-dkim-2",
+				"selector2._domainkey",
+				`selector2-${this.zoneString.replace(
+					".",
+					"-",
+				)}._domainkey.rawkodeacademy.onmicrosoft.com`,
 			);
 
 		return this;
