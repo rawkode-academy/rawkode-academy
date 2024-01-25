@@ -11,11 +11,11 @@ If you prefer not to use `+nix+`, you can manually install the following depende
 - supabase-cli
 - bun
 
-== Local Development
+== Architecture
 
-I like that I can include other files and this renders to give us "living" documentation.
+d2::architecture.d2[layout=tala, format=png]
 
-[source,shell]
+[d2, layout=tala, format=png]
 ----
-include::Justfile[tag=local-dev]
+include::architecture.d2[]
 ----
