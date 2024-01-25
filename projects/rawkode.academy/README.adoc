@@ -13,9 +13,40 @@ If you prefer not to use `+nix+`, you can manually install the following depende
 
 == Architecture
 
-d2::architecture.d2[layout=tala, format=png]
-
 [d2, layout=tala, format=png]
 ----
-include::architecture.d2[]
+learner: {
+  shape: person
+}
+
+supabase: { shape: rectangle }
+postgres: { shape: cylinder }
+
+supabase <-> postgres
+
+cms -> supabase
+
+website: {
+  shape: rectangle
+  tooltip: |md
+    The website is built with Astro and hosted on Cloudflare Pages. Primarily static, it does use the API Gateway for dynamic content.
+  |
+  style.3d: true
+  style.shadow: true
+  style.double-border: true
+}
+
+# API Gateway
+grafbase: {
+	shape: rectangle
+	tooltip: |md
+		Grafbase is used as our API gateway and aggregator.
+
+		It allows us to provide a single API for all disparate service APIs.
+	|
+}
+
+learner -> website -> grafbase -> postgres
+
+postgres <- restate <- supabase
 ----
