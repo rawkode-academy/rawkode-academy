@@ -7,9 +7,9 @@ import Page from "../../wrappers/page.astro";
 export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
 		const videos = supabase
-			.from("episodes")
+			.from("videos")
 			.select(
-				"slug, title, thumbnail_url, people(github_handle), episode_channel(remote_id)",
+				"slug, title, thumbnail_url, video_guests(person_id), video_channel(remote_id)",
 			);
 
 		type EpisodeWithChannels = QueryData<typeof videos>;
@@ -35,7 +35,6 @@ export const getStaticPaths: GetStaticPaths =
 
 const { video } = Astro.props;
 
-console.log(video);
 ---
 
 <Page title="Video">
@@ -46,7 +45,7 @@ console.log(video);
 		<iframe
 			width="560"
 			height="315"
-			src=`https://www.youtube.com/embed/${video.episode_channel[0].remote_id}`
+			src=`https://www.youtube.com/embed/${video.video_channel[0].remote_id}`
 			title="YouTube video player"
 			frameborder="0"
 			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
