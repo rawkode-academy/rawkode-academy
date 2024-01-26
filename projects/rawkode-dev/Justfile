@@ -1,0 +1,3 @@
+deploy:
+  #!/usr/bin/env sh
+  bun x wrangler pages deploy --project-name=rawkode-dev ./public
