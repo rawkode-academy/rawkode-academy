@@ -3,13 +3,13 @@ import { supabase } from "../../../lib/supabase";
 
 export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
-		const { data, error } = await supabase.from("events").select("event_id");
+		const { data, error } = await supabase.from("events").select("slug");
 
 		if (error) throw error;
 
 		return data.map((row) => {
 			return {
-				params: { event_id: row.event_id },
+				params: { slug: row.slug },
 			};
 		});
 	};
@@ -22,15 +22,15 @@ export const POST: APIRoute = async ({ request, params, redirect }) => {
 	}
 
 	if (user) {
-		const { event_id } = params;
+		const { slug } = params;
 
-		if (!event_id) {
-			return new Response("'event_id' not set.", { status: 400 });
+		if (!slug) {
+			return new Response("'slug' not set.", { status: 400 });
 		}
 
 		const { error } = await supabase
 			.from("rsvps")
-			.insert({ auth_id: user.user.id, event_id: event_id });
+			.insert({ auth_id: user.user.id, slug: slug });
 
 		if (error) {
 			return new Response(error.message, { status: 500 });
@@ -48,16 +48,16 @@ export const DELETE: APIRoute = async ({ request, params, redirect }) => {
 	}
 
 	if (user) {
-		const { event_id } = params;
+		const { slug } = params;
 
-		if (!event_id) {
-			return new Response("'event_id' not set.", { status: 400 });
+		if (!slug) {
+			return new Response("'slug' not set.", { status: 400 });
 		}
 
 		const { error } = await supabase
 			.from("rsvps")
 			.delete()
-			.eq("event_id", event_id)
+			.eq("slug", slug)
 			.eq("auth_id", user.user.id);
 
 		if (error) {

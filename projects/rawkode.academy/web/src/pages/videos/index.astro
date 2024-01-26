@@ -4,9 +4,9 @@ import { supabase } from "../../lib/supabase";
 import Page from "../../wrappers/page.astro";
 
 const videos = supabase
-	.from("episodes")
+	.from("videos")
 	.select(
-		"slug, title, thumbnail_url, people(github_handle), episode_channel(remote_id)",
+		"slug, title, thumbnail_url, video_guests(person_id), video_channel(remote_id)",
 	);
 
 type EpisodeWithChannels = QueryData<typeof videos>;
