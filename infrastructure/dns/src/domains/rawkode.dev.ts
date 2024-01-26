@@ -17,9 +17,6 @@ export default (scope: Construct): ManagedDomain => {
 			"@",
 			"google-site-verification=RnbvxDOTdobTiAetVoa-U3Xc0Irk76nan_OcRCGuQTM",
 		)
-		.addARecord("@1", "@", "3.130.60.26")
-		.addARecord("@2", "@", "3.13.222.255")
-		.addARecord("@3", "@", "3.13.246.91")
 		.addTextRecord(
 			"_atproto",
 			"_atproto",
