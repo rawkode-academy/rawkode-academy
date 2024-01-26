@@ -1,5 +1,6 @@
 import { Point } from "@influxdata/influxdb-client";
 import { Redirects } from "./types";
+import rawkodeChat from "./rawkode.chat";
 import rawkodeCommunity from "./rawkode.community";
 import rawkodeLink from "./rawkode.link";
 import rawkodeLive from "./rawkode.live";
@@ -7,6 +8,7 @@ import rawkodeLive from "./rawkode.live";
 const redirects: Redirects = {
 	defaultRedirect: "https://twitter.com/rawkode",
 	domains: {
+		"rawkode.chat": rawkodeChat,
 		"rawkode.community": rawkodeCommunity,
 		"rawkode.link": rawkodeLink,
 		"rawkode.live": rawkodeLive,
