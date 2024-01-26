@@ -10,7 +10,7 @@ export default function BookTime() {
 	}, [])
 
 	return <Cal
-		calLink="rawkode/office-hours"
+		calLink="RawkodeAcademy/collaborate"
 		style={{ width: "100%", height: "100%", overflow: "scroll" }}
 		config={{ layout: 'month_view' }}
 	/>;

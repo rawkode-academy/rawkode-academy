@@ -33,7 +33,6 @@ export const getStaticPaths: GetStaticPaths =
 				blogEntries.map((entry) => entry.data.authors).flat(),
 			);
 
-		console.debug(people);
 
 		const authors = !people.data
 			? {}
@@ -41,8 +40,6 @@ export const getStaticPaths: GetStaticPaths =
 					acc[author.github_handle] = author;
 					return acc;
 			  }, {} as Authors);
-
-		console.debug(authors);
 
 		return blogEntries.map((article) => {
 			return {

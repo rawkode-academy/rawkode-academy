@@ -4,34 +4,36 @@ import ProfileMenu from "../components/profile/menu.astro";
 import MenuItems from "../components/sidebar/items.vue";
 
 import {
-AcademicCapIcon,
-CalendarDaysIcon,
+// AcademicCapIcon,
+// CalendarDaysIcon,
 ChatBubbleLeftEllipsisIcon,
-FilmIcon,
+HomeIcon,
+// FilmIcon,
 InformationCircleIcon,
 MegaphoneIcon,
 NewspaperIcon,
-QuestionMarkCircleIcon,
+// QuestionMarkCircleIcon,
 RocketLaunchIcon,
-UsersIcon,
+// UsersIcon,
 VideoCameraIcon
 } from '@heroicons/vue/24/outline';
 
 const menuItems = [
+	{ name: 'Home', href: '/', icon: HomeIcon, current: true },
 	{ name: 'Blog', href: '/blog', icon: NewspaperIcon, current: false },
-	{ name: 'Events', href: '/events', icon: CalendarDaysIcon, current: false },
-	{ name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
-	{ name: 'Shows', href: '#', icon: FilmIcon, current: false },
+	// { name: 'Events', href: '/events', icon: CalendarDaysIcon, current: false },
+	// { name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
+	// { name: 'Shows', href: '#', icon: FilmIcon, current: false },
 	{ name: 'All Videos', href: '/videos', icon: VideoCameraIcon, current: false },
-	{ name: 'Community', href: '#', icon: UsersIcon, current: false },
+	// { name: 'Community', href: '#', icon: UsersIcon, current: false },
 	{ name: 'About', href: '/about', icon: InformationCircleIcon, current: false },
-	{ name: 'Help', href: '/help', icon: QuestionMarkCircleIcon, current: false },
+	// { name: 'Help', href: '/help', icon: QuestionMarkCircleIcon, current: false },
 ];
 
 const menuItemsOrgs = [
 	// { name: 'Memberships', href: '#', icon: BuildingOfficeIcon, current: false },
-	{ name: 'Sponsorships', href: '/organizations/sponsorship', icon: MegaphoneIcon, current: false },
-	{ name: 'Collaborations', href: '/organizations/collaboration', icon: RocketLaunchIcon, current: false },
+	{ name: 'Sponsorships', href: '/organizations/lets-chat', icon: MegaphoneIcon, current: false },
+	{ name: 'Collaborations', href: '/organizations/lets-chat', icon: RocketLaunchIcon, current: false },
 	{ name: "Let's Chat", href: '/organizations/lets-chat', icon: ChatBubbleLeftEllipsisIcon, current: false },
 ]
 ---

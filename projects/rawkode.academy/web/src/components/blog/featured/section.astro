@@ -1,0 +1,14 @@
+---
+import { getCollection } from "astro:content";
+import FeaturedArticle from "./article.astro";
+
+const latestBlogPosts = (await getCollection("blog")).slice(0, 3);
+---
+
+<section class="bg-white dark:bg-gray-900">
+	<div class="py-8 px-4 mx-auto lg:py-16 lg:px-6">
+		<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+			{latestBlogPosts.map((article) => <FeaturedArticle article={article} />)}
+		</div>
+	</div>
+</section>
