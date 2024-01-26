@@ -2,27 +2,36 @@
 import Page from "../../wrappers/page.astro";
 ---
 
+<style>
+	h1,
+	h2,
+	h3 {
+		@apply mt-8 mb-4;
+	}
+
+	h1 {
+		@apply text-4xl tracking-tight font-bold text-gray-900 dark:text-white;
+	}
+
+	h2 {
+		@apply text-2xl font-semibold text-gray-900 dark:text-white;
+	}
+
+	h3 {
+		@apply text-xl text-gray-900 dark:text-white;
+	}
+</style>
 <Page title="About">
 	<section>
 		<div class="max-w-screen-lg text-gray-500 sm:text-lg dark:text-gray-400">
-			<h1
-				class="mb-4 text-4xl tracking-tight font-bold text-gray-900 dark:text-white"
-			>
-				About the Rawkode Academy
-			</h1>
+			<h1>About the Rawkode Academy</h1>
 
-			<p class="mb-4 font-light">
+			<p class="mb-4 font-semibold">
 				The Rawkode Academy was founded in 2019 by David Flanagan, née McKay; a
 				developer and operator with over 20 years experience in the industry.
 			</p>
 
-			<div class="mb-8 md:mb-16">
-				<h2
-					class="text-2xl tracking-tight font-extrabold text-gray-900 md:text-4xl dark:text-white"
-				>
-					How's It Going?
-				</h2>
-			</div>
+			<h2>Latest Numbers</h2>
 			<div
 				class="mb-4 space-y-4 md:grid md:grid-cols-3 md:gap-4 xl:gap-16 md:space-y-0 md:mb-8"
 			>
@@ -31,7 +40,7 @@ import Page from "../../wrappers/page.astro";
 				>
 					<div class="text-gray-900 dark:text-white">
 						<p class="mb-2 text-4xl font-extrabold md:text-5xl">1 Million</p>
-						<h3 class="mb-2 text-xl font-semibold">Views</h3>
+						<h4 class="mb-2 text-xl font-semibold">Views</h4>
 						<p class="font-light text-gray-500 dark:text-gray-400">
 							across all channels
 						</p>
@@ -42,7 +51,7 @@ import Page from "../../wrappers/page.astro";
 				>
 					<div class="text-gray-900 dark:text-white">
 						<p class="mb-2 text-4xl font-extrabold md:text-5xl">500</p>
-						<h3 class="mb-2 text-xl font-semibold">Hours</h3>
+						<h4 class="mb-2 text-xl font-semibold">Hours</h4>
 						<p class="font-light text-gray-500 dark:text-gray-400">
 							of content
 						</p>
@@ -53,7 +62,7 @@ import Page from "../../wrappers/page.astro";
 				>
 					<div class="text-gray-900 dark:text-white">
 						<p class="mb-2 text-4xl font-extrabold md:text-5xl">90+</p>
-						<h3 class="mb-2 text-xl font-semibold">Projects Covered</h3>
+						<h4 class="mb-2 text-xl font-semibold">Projects Covered</h4>
 						<p class="font-light text-gray-500 dark:text-gray-400">
 							from the CNCF Landscape
 						</p>
@@ -64,7 +73,79 @@ import Page from "../../wrappers/page.astro";
 				class="text-sm font-light text-center text-gray-500 dark:text-gray-400"
 			>
 				<span class="font-medium text-primary-600 dark:text-primary-500">*</span
-				> Numbers accurate as of 9am this morning, GMT.
+				> These numbers are a rough estimate at the moment and we'll loop in real-time
+				numbers shortly.
+			</p>
+
+			<h2 class="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
+				The History Lesson
+			</h2>
+
+			<h3>The Early Years</h3>
+			<p class="mb-4">
+				Starting his career, back in 2003, David joined a small local
+				development company that specialised in ticketing systems for horse
+				racing tracks across the UK. His favourite thing about working at a
+				smaller shop was the ability to work across the entire product stack;
+				including custom kernel development (C), backend servers (C & PHP),
+				front-end point of sale terminals (C++ with QT3), and even mobile
+				development (C#) ... which wasn't like mobile development today; have
+				you ever tried a Windows CE 4 device? 😅
+			</p>
+
+			<p class="mb-4">
+				Given that this was a small team, David was also responsible for the
+				infrastructure that ran the company's products; primarily due to his
+				extensive Linux knowledge having ran Linux on the desktop since his
+				first Coral Linux install in 2000. Is it they year of the Linux desktop
+				yet? 🤔
+			</p>
+
+			<p class="mb-4">
+				Working with all these technologies from early on in his career, David
+				become a bit of a technology magpie; continually exploring and
+				experimenting with new technologies to better understand the problems
+				they solved and the paradigms they brought. One of the first
+				technologies to capture David's attention was Puppet, back in 2004.
+				Puppet revolutionised the way the company managed their fleet of
+				servers, which where all located at their customer sites across the UK.
+				No more 3 hour drives at 4am in the morning to fix a server that had
+				crashed due to a power outage. 🙌
+			</p>
+
+			<h3>First Real Scaling Challenge</h3>
+
+			<p class="mb-4">
+				David was an early adopter of cloud, containers, and cloud-native
+				technologies. During his time as the Director of Development for a rock
+				and metal media organization called TeamRock (now LouderSound), David
+				was responsible for the software, infrastructure, and website during its
+				biggest test: the unfortunate death of Lemmy Kilmister. Fortunately, due
+				to his desire to experiment and play with new technologies, David and
+				his team had already migrated their slow to provision virtual-machine
+				centric infrastructure to containerised workloads running on Amazon Web
+				Services the year prior, 2014, not long after the public launch of
+				Docker.
+			</p>
+
+			<h3>The Educator</h3>
+
+			<p class="mb-4">
+				As much as David enjoys writing software, scaling infrastructure, and
+				leading teams; he quickly realised that his passion was helping others
+				learn and be successful. David started presenting at local user groups
+				in 2016, slowly working up to conferences, before eventually moving into
+				a full-time Developer Advocacy position at InfluxData
+			</p>
+
+			<p class="mb-4">
+				During his time at Influx, David was a driving force to help make it
+				easier for people operating Kubernetes adopt InfluxDB and Telegraf as
+				their stack of choice for metric collection and storage. This didn't
+				just involve being at conferences and user-groups speaking about
+				monitoring and observing Kubernetes clusters, but actively working with
+				engineering to ensure the project was easier to deploy and manage on top
+				of Kubernetes.
 			</p>
 
 			<div
@@ -85,12 +166,65 @@ import Page from "../../wrappers/page.astro";
 						></path>
 					</svg>
 					<span class="sr-only">Fun Fact</span>
-					<h3 class="text-lg font-medium">Fun Fact</h3>
+					<h4 class="text-lg font-medium">Fun Fact</h4>
 				</div>
 				<div class="mt-2 mb-4 text-sm">
 					Before metrics-server, Kubernetes collected monitoring information
 					into a program called Heapster. Heapster was built on top of InfluxDB
 					1.
+				</div>
+			</div>
+
+			<p class="mb-4">
+				It was during this time that the Rawkode Academy released it's first
+				video ... "Last Week in Kubernetes".
+			</p>
+
+			<div class="mb-4 flex justify-center">
+				<iframe
+					width="560"
+					height="315"
+					src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
+					title="YouTube video player"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen></iframe>
+			</div>
+
+			<p class="mb-4">Let's not forget the first live-stream too ... 😅</p>
+			<div class="mb-4 flex justify-center">
+				<iframe
+					width="560"
+					height="315"
+					src="https://www.youtube-nocookie.com/embed/yGfUunEIBjU?si=oFL_lykTdxH1qmYM"
+					title="YouTube video player"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen></iframe>
+			</div>
+
+			<div
+				id="alert-additional-content-1"
+				class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
+				role="alert"
+			>
+				<div class="flex items-center">
+					<svg
+						class="flex-shrink-0 w-4 h-4 me-2"
+						aria-hidden="true"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+					>
+						<path
+							d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+						></path>
+					</svg>
+					<span class="sr-only">Fun Fact</span>
+					<h4 class="text-lg font-medium">Fun Fact</h4>
+				</div>
+				<div class="mt-2 mb-4 text-sm">
+					This wasn't actually the first stream, it's just the first one on
+					YouTube and that we've got a recording of. There was maybe 3 or 4
+					streams before this one, but they were lost on Twitch.
 				</div>
 			</div>
 
@@ -134,7 +268,7 @@ import Page from "../../wrappers/page.astro";
 						></path>
 					</svg>
 					<span class="sr-only">Fun Fact</span>
-					<h3 class="text-lg font-medium">Fun Fact</h3>
+					<h4 class="text-lg font-medium">Fun Fact</h4>
 				</div>
 				<div class="mt-2 mb-4 text-sm">
 					Before the live-stream was called "Rawkode Live", the name "RTFM" was
@@ -145,9 +279,19 @@ import Page from "../../wrappers/page.astro";
 
 			<p class="mb-4 font-medium">
 				Fast-forward to 2021, and David had the worst idea of his career; but
-				through hubris and in the of edutainment, David hosted the first episode
-				of Klustered, along with his guest, Walid Shaari.
+				through hubris and in the name of edutainment, David hosted the first
+				episode of Klustered, along with his guest, Walid Shaari.
 			</p>
+
+			<div class="mb-4 flex justify-center">
+				<iframe
+					width="560"
+					height="315"
+					src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
+					title="YouTube video player"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen></iframe>
+			</div>
 
 			<div
 				id="alert-additional-content-1"
@@ -167,11 +311,54 @@ import Page from "../../wrappers/page.astro";
 						></path>
 					</svg>
 					<span class="sr-only">Fun Fact</span>
-					<h3 class="text-lg font-medium">Fun Fact</h3>
+					<h4 class="text-lg font-medium">Fun Fact</h4>
 				</div>
 				<div class="mt-2 mb-4 text-sm">
-					The original name for Klustered was "Kluster Fuck", but this was
+					The original name for Klustered was "Klusterfucked", but this was
 					changed prior to the first episode.
+				</div>
+			</div>
+
+			<h3>The Independant</h3>
+			<p class="mb-4">
+				David had been with Pulumi for just under 12 months and it wasn't
+				working out. The role of a Developer Advocate is bridge the company with
+				the community and ensure both sides are represented in a morale and
+				ethical fashion; and when that can't be met - it's time to move on.
+			</p>
+
+			<p class="mb-4">
+				That's why in September, 2022, David went full-time with the Academy and
+				quit his role at Pulumi; and here we are.
+			</p>
+
+			<p class="mb-4 font-semibold">Best. Decision. Ever.</p>
+
+			<p class="mb-4">Thank you, Pulumi.</p>
+
+			<div
+				id="alert-additional-content-1"
+				class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
+				role="alert"
+			>
+				<div class="flex items-center">
+					<svg
+						class="flex-shrink-0 w-4 h-4 me-2"
+						aria-hidden="true"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+					>
+						<path
+							d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+						></path>
+					</svg>
+					<span class="sr-only">Fun Fact</span>
+					<h4 class="text-lg font-medium">Fun Fact</h4>
+				</div>
+				<div class="mt-2 mb-4 text-sm">
+					One of the Pulumi founders once tried to suggest that David wasn't
+					allowed to say "rawkode" any further on the Pulumi YouTube channel.
 				</div>
 			</div>
 		</div>
