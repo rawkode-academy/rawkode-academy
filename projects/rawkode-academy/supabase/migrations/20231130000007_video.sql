@@ -30,7 +30,9 @@ create table "video_technologies"(
 
 alter table video_technologies enable row level security;
 
-create function person_was_guest(github_handle "github_handle")
+create function person_was_guest(
+	github_handle "github_handle"
+)
 	returns boolean
 	as $$
 	select

@@ -25,7 +25,19 @@
 			"path": "../../dagger/supabase"
 		}
 	],
-	"settings": {},
+	"settings": {
+		"editor.formatOnSave": true,
+		"editor.formatOnPaste": true,
+		"editor.formatOnType": true,
+		"pgFormatter.formatType": true,
+		"editor.formatOnSaveMode": "file",
+		"pgFormatter.functionCase": "lowercase",
+		"pgFormatter.keywordCase": "lowercase",
+		"pgFormatter.tabs": true,
+		"[sql]": {
+			"editor.defaultFormatter": "bradymholt.pgformatter"
+		}
+	},
 	"tasks": {
 		"version": "2.0.0",
 		"tasks": [
@@ -56,9 +68,7 @@
 					"cwd": "${workspaceFolder}/web"
 				},
 				"dependsOrder": "sequence",
-				"dependsOn": [
-					"supabase: local"
-				]
+				"dependsOn": ["supabase: local"]
 			}
 		]
 	}

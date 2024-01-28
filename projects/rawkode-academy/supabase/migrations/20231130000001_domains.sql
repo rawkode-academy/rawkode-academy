@@ -8,3 +8,4 @@ create domain "x_handle" as citext constraint "x_handle_length" check ((length(v
 -- YouTube handles
 create domain "youtube_handle" as citext constraint "youtube_handle_length" check ((length(value) >= 3)
 	and (length(value) <= 30));
+
