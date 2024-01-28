@@ -1,5 +1,0 @@
-dependencies:
-  nodejs.org: ^18
-  pnpm.io: ^8
-  terraform.io/cdk: "*"
-  crates.io/exa: "*"

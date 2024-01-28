@@ -1,7 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - https://github.com/rawkode/chappaai/releases/download/0.0.6/crds.yaml
-  # Using main until we publish 0.0.7
-  - https://github.com/rawkode/chappaai/deploy?ref=main
-  - chappaai-discord.yaml
