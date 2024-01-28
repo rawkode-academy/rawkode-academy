@@ -1,4 +1,0 @@
-name: gcp-control-plane
-description: GCP Control Plane
-runtime: nodejs
-main: src/index.ts
