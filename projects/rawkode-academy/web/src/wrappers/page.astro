@@ -9,6 +9,35 @@ interface Props {
 const { title } = Astro.props;
 ---
 
+<style is:global>
+	main {
+		@apply flex flex-col justify-center items-center p-4;
+
+		/* ml-64 for when screens are big enough to show sidebar
+		 * pt-16 to keep the content below the static navbar
+		 */
+		@apply ml-0 pt-16 md:ml-64;
+	}
+
+	h1,
+	h2,
+	h3 {
+		@apply mt-8 mb-4;
+	}
+
+	h1 {
+		@apply text-4xl tracking-tight font-bold text-gray-900 dark:text-white;
+	}
+
+	h2 {
+		@apply text-2xl font-semibold text-gray-900 dark:text-white;
+	}
+
+	h3 {
+		@apply text-xl text-gray-900 dark:text-white;
+	}
+</style>
+
 <html lang="en">
 	<DefaultHead title={title}>
 		<slot name="extra-head" slot="extra-head" />
