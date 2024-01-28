@@ -17,7 +17,9 @@ create table "show_hosts"(
 
 alter table show_hosts enable row level security;
 
-create function person_is_host(github_handle "github_handle")
+create function person_is_host(
+	github_handle "github_handle"
+)
 	returns boolean
 	as $$
 	select

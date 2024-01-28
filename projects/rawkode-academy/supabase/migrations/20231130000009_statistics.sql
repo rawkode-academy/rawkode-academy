@@ -10,3 +10,4 @@ create table "video_statistics"(
 );
 
 alter table "video_statistics" enable row level security;
+
