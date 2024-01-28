@@ -1,14 +1,11 @@
 supabase:
-  infisical run -- supabase stop || true
-  infisical run -- supabase start
+  supabase stop --no-backup || true
+  supabase start
 
 astro:
   #!/usr/bin/env sh
   cd web
   bun install
-  infisical run -- supabase gen types typescript --local --schema public --schema auth > src/database.types.ts
-  infisical run -- bun dev
+  supabase gen types typescript --local --schema public --schema auth > src/database.types.ts
+  bun run dev
 
-trigger:
-  #!/usr/bin/env sh
-  cd web && infisical run -- bun x @trigger.dev/cli@latest dev
