@@ -10,6 +10,8 @@ require (
 )
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.0 // indirect
+	github.com/sethvargo/go-password v0.2.0 // indirect
 	github.com/stretchr/testify v1.8.3 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.6 // indirect
 )

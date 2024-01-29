@@ -1,4 +1,4 @@
 {
-  "name": "supabase",
-  "sdk": "go"
+	"name": "supabase",
+	"sdk": "go"
 }
