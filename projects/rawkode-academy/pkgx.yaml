@@ -3,4 +3,4 @@ dependencies:
 - bun
 - go
 - node
-- supabase
+- supabase@1.138
