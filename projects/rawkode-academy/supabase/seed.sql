@@ -14,11 +14,12 @@ insert into auth.users(instance_id, id, aud, role, email, encrypted_password, em
   "preferred_username": "rawkode"
 }', current_timestamp, current_timestamp, '', '', '', '');
 
-insert into auth.identities(id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)(
+insert into auth.identities(id, user_id, identity_data, provider_id, provider, last_sign_in_at, created_at, updated_at)(
 	select
 		uuid_generate_v4(),
 		id,
 		format('{"sub":"%s","email":"%s"}', id::text, email)::jsonb,
+		'145816',
 		'email',
 		current_timestamp,
 		current_timestamp,
