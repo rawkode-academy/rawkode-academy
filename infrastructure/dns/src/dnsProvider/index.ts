@@ -486,7 +486,7 @@ export class ManagedDomain extends Construct {
 			"@",
 			`v=spf1 include:_spf.google.com ${config.spfIncludes
 				.map((include) => `include:${include}`)
-				.join(" ")} ~all`,
+				.join(" ")} -all`,
 		);
 
 		return this;
