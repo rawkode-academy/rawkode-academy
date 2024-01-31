@@ -25,6 +25,31 @@ export default (scope: Construct): ManagedDomain => {
 			"_atproto",
 			"_atproto",
 			"did=did:plc:qtpysarntxepux4to4dr4hgr",
+		)
+		.addCNameRecord(
+			"clerk-accounts-portal",
+			"accounts",
+			"accounts.clerk.services",
+		)
+		.addCNameRecord(
+			"clerk-frontend-api",
+			"clerk",
+			"frontend-api.clerk.services",
+		)
+		.addCNameRecord(
+			"clerk-dkim-1",
+			"clk._domainkey",
+			"dkim1.yo4jsvea9l19.clerk.services",
+		)
+		.addCNameRecord(
+			"clerk-dkim-2",
+			"clk2._domainkey",
+			"dkim2.yo4jsvea9l19.clerk.services",
+		)
+		.addCNameRecord(
+			"clerk-mail",
+			"clkmail",
+			"mail.yo4jsvea9l19.clerk.services",
 		);
 
 	return managedDomain;
