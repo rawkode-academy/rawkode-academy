@@ -1,27 +1,20 @@
+direction: down
+
 learner: {
   shape: person
 }
 
-supabase: { shape: rectangle }
-postgres: { shape: cylinder }
-
-supabase <-> postgres
-
-cms -> supabase
-
 website: {
-  shape: rectangle
+	shape: document
   tooltip: |md
     The website is built with Astro and hosted on Cloudflare Pages. Primarily static, it does use the API Gateway for dynamic content.
   |
-  style.3d: true
-  style.shadow: true
-  style.double-border: true
 }
+
 
 # API Gateway
 grafbase: {
-	shape: rectangle
+	shape: hexagon
 	tooltip: |md
 		Grafbase is used as our API gateway and aggregator.
 
@@ -29,6 +22,90 @@ grafbase: {
 	|
 }
 
-learner -> website -> grafbase -> postgres
+learner -> website
+website -> grafbase: API Gateway
 
-postgres <- restate <- supabase
+auth-service: {
+	api: {
+		tooltip: |md
+			Register, Login, Token Exchange
+		|
+	}
+
+	api -> turso
+}
+
+auth-service <-> grafbase
+
+profile-service: {
+	api: {
+		tooltip: |md
+			Fetch and Update Profiles
+		|
+	}
+
+	api -> turso
+}
+
+profile-service <-> grafbase
+
+rsvp-service: {
+	api: {
+		tooltip: |md
+			Events RSVPs
+		|
+	}
+
+	api -> turso
+}
+
+rsvp-service <--> grafbase
+
+notification-service: {
+	api: {
+		tooltip: |md
+			Send Notifications
+		|
+	}
+
+	api -> turso
+}
+
+notification-service <-> grafbase
+
+event-service: {
+	api: {
+		tooltip: |md
+			Allow people to browse upcoming, scheduled, events
+		|
+	}
+
+	api -> turso
+}
+
+event-service <-> grafbase
+
+video-service: {
+	api: {
+		tooltip: |md
+			Video hosting, streaming, and transcoding
+		|
+	}
+
+	api -> turso
+	api -> Cloudflare R2
+}
+
+video-service <-> grafbase
+
+course-service: {
+	api: {
+		tooltip: |md
+			Browse courses, lessons, and quizzes
+		|
+	}
+
+	api -> turso
+}
+
+course-service <-> grafbase

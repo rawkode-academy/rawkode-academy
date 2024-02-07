@@ -1,0 +1,26 @@
+{
+	"name": "rsvp-service",
+	"module": "index.ts",
+	"type": "module",
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"@hono/graphql-server": "^0.4.2",
+		"@libsql/client": "^0.4.3",
+		"drizzle-orm": "^0.29.3",
+		"drizzle-typebox": "^0.1.1",
+		"graphql": "^16.8.1",
+		"hono": "^3.12.11"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20240129.0",
+		"@graphql-codegen/cli": "3.3.0",
+		"@graphql-codegen/typescript": "3.0.3",
+		"@graphql-codegen/typescript-operations": "^3.0.3",
+		"@graphql-codegen/typescript-resolvers": "3.2.0",
+		"@types/bun": "latest",
+		"drizzle-kit": "^0.20.14",
+		"wrangler": "^3.25.0"
+	}
+}
