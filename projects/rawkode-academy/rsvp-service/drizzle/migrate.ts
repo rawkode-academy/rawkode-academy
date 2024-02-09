@@ -4,14 +4,14 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 
 const client = createClient({
 	url: process.env.TURSO_URL as string,
-	authToken: process.env.TURSO_AUTH_TOKEN as string,
+	authToken: process.env.TURSO_TOKEN as string,
 });
 
 const db = drizzle(client);
 
 const main = async () => {
 	await migrate(db, {
-		migrationsFolder: "./drizzle/migrations",
+		migrationsFolder: "./migrations",
 	});
 };
 
