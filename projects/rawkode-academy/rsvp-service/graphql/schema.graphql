@@ -1,8 +1,0 @@
-type Rsvps {
-	count: Int
-	latestUserIds: [String]
-}
-
-type Query {
-	rsvpsForEvent(eventId: String!, numberOfUserIds: Int = 5): Rsvps
-}

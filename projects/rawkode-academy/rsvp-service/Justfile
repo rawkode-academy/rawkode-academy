@@ -5,22 +5,13 @@ db-clean:
 	rm local.db
 
 db-gen:
-	bunx drizzle-kit generate:sqlite
+	cd drizzle && bunx drizzle-kit generate:sqlite
 
 db-migrate:
-	bun drizzle/migrate.ts
+	cd drizzle && bun migrate.ts
 
 db-seed:
-	bun drizzle/seed.ts
+	cd drizzle && bun seed.ts
 
 db-studio:
-	bunx drizzle-kit studio
-
-codegen:
-	bunx graphql-codegen --config graphql/codegen.ts
-
-dev: db-clean db-gen db-migrate db-seed
-	bunx wrangler dev src/main.ts
-
-deploy:
-	bunx wrangler deploy --minify src/main.ts
+	cd drizzle && bunx drizzle-kit studio
