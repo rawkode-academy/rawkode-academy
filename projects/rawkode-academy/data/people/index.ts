@@ -5,7 +5,7 @@ export const loadPeople = async () => loader<Person>("people");
 export class Person {
 	public readonly id: string;
 	public readonly name;
-	protected biography = '';
+	protected biography = "";
 	protected socialAccounts: SocialAccounts = {};
 
 	constructor(id: string, name: string) {
@@ -56,7 +56,7 @@ interface SocialAccounts {
 	mastodon?: SocialAccount;
 	x?: SocialAccount;
 	youtube?: SocialAccount;
-};
+}
 
 interface SocialAccount {
 	handle: string;
