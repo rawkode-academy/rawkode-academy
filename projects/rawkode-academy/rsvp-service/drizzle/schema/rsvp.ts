@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
 import {
 	integer,
-	sqliteTable,
 	primaryKey,
+	sqliteTable,
 	text,
 } from "drizzle-orm/sqlite-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
@@ -10,18 +10,18 @@ import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 export const rsvpTable = sqliteTable(
 	"rsvp",
 	{
-		userId: text("userId").notNull(),
-		eventId: text("eventId").notNull(),
-		createdAt: integer("createdAt", { mode: "timestamp" })
+		userId: text("user_id").notNull(),
+		eventId: text("event_id").notNull(),
+		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
-			.default(sql`CURRENT_TIMESTAMP`),
+			.default(sql`current_timestamp`),
 	},
 	(rsvps) => ({
 		primaryKey: primaryKey({
 			name: "rsvp_primary_key",
 			columns: [rsvps.userId, rsvps.eventId],
 		}),
-	}),
+	})
 );
 
 export const rsvpInsertSchema = createInsertSchema(rsvpTable);

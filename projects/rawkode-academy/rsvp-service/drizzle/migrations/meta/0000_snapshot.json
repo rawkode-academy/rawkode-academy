@@ -1,33 +1,41 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "9657e491-f77c-47c4-89e4-fe1c0c654115",
+  "id": "ca8ddf6d-7e53-4569-a01d-ec4c27284e6a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "rsvp": {
       "name": "rsvp",
       "columns": {
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "eventId": {
-          "name": "eventId",
+        "event_id": {
+          "name": "event_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "createdAt": {
-          "name": "createdAt",
+        "created_at": {
+          "name": "created_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "CURRENT_TIMESTAMP"
+          "default": "current_timestamp"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "current_timestamp"
         }
       },
       "indexes": {},
@@ -35,8 +43,8 @@
       "compositePrimaryKeys": {
         "rsvp_primary_key": {
           "columns": [
-            "eventId",
-            "userId"
+            "event_id",
+            "user_id"
           ],
           "name": "rsvp_primary_key"
         }

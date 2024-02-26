@@ -2,7 +2,7 @@ default:
 	just -l
 
 db-clean:
-	rm local.db
+	rm drizzle/local.db
 
 db-gen:
 	cd drizzle && bunx drizzle-kit generate:sqlite

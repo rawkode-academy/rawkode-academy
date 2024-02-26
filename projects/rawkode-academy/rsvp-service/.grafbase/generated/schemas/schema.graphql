@@ -1,0 +1,16 @@
+extend schema
+  @experimental(codegen: true)
+
+extend schema
+  @auth(
+    rules: [
+      { allow: public }
+    ]
+  )type EventRSVPs {
+  count: Int!
+  learnerIds: [String!]!
+}
+
+extend type Query {
+  rsvpsForEvent(eventId: String!): EventRSVPs! @resolver(name: "rsvpsForEvent")
+}
