@@ -1,5 +1,5 @@
-import { auth, config, graph } from "@grafbase/sdk";
-import { getAuthProvider } from "./auth";
+import { config, graph } from "@grafbase/sdk";
+import { getAuthProvider } from "./auth/index.js";
 
 const g = graph.Standalone({ subgraph: true });
 
