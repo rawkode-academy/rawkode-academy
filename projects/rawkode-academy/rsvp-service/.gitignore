@@ -1,3 +1,4 @@
+/.grafbase
 /drizzle/local.db
 /graphql/generated.ts
 /node_modules
