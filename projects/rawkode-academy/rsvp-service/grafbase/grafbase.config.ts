@@ -1,4 +1,5 @@
-import { graph, config } from '@grafbase/sdk'
+import { auth, config, graph } from "@grafbase/sdk";
+import { getAuthProvider } from "./auth";
 
 const g = graph.Standalone({ subgraph: true });
 
@@ -13,14 +14,21 @@ g.query("rsvpsForEvent", {
 	resolver: "rsvpsForEvent",
 });
 
+g.mutation("rsvpForEvent", {
+	args: { eventId: g.string() },
+	returns: g.boolean(),
+	resolver: "rsvpForEvent",
+});
+
 export default config({
 	graph: g,
 	experimental: {
 		codegen: true,
 	},
 	auth: {
+		providers: [getAuthProvider(g)],
 		rules: (rules) => {
-			rules.public()
+			rules.private();
 		},
 	},
-})
+});
