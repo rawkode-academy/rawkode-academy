@@ -1,4 +1,4 @@
-import { createClient } from "@libsql/client/http";
+import { createClient } from "@libsql/client/web";
 import { drizzle } from "drizzle-orm/libsql";
 import { GraphQLError } from "graphql";
 import * as schema from "../../drizzle/schema";
@@ -23,7 +23,7 @@ const resolver: Resolver["Query.rsvpsForEvent"] = async (_, args) => {
 				eventId: false,
 				createdAt: false,
 				userId: true,
-			}
+			},
 		});
 
 		const count = rsvps.length;
