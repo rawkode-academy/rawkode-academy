@@ -27,11 +27,11 @@ const resolver: Resolver["Query.rsvpsForEvent"] = async (_, args) => {
 		});
 
 		const count = rsvps.length;
-		const learnerIds = rsvps.map((rsvp) => rsvp.userId);
+		const userIds = rsvps.map((rsvp) => rsvp.userId);
 
 		return {
 			count,
-			learnerIds,
+			userIds,
 		};
 	} catch (err) {
 		console.log(`Failed to get rsvps for event ${args.eventId}`);
