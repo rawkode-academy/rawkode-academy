@@ -15,3 +15,9 @@ db-seed:
 
 db-studio:
 	cd drizzle && bunx drizzle-kit studio
+
+deploy:
+	grafbase deploy
+
+publish:
+	grafbase introspect https://rsvp-rawkodeacademy.grafbase.app/graphql | grafbase publish --name rsvp --url https://rsvp-rawkodeacademy.grafbase.app/graphql rawkodeacademy/api
