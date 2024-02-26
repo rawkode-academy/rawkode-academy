@@ -1,40 +1,47 @@
-import { createClient } from '@libsql/client/web'
+import { createClient } from "@libsql/client/http";
+import { drizzle } from "drizzle-orm/libsql";
 import { GraphQLError } from "graphql";
-import { type Resolver } from '../generated/index'
+import * as schema from "../../drizzle/schema";
+import { type Resolver } from "../generated/index";
 
-const resolver: Resolver['Query.rsvpsForEvent'] = async (_, args) => {
+const resolver: Resolver["Query.rsvpsForEvent"] = async (_, args) => {
 	if (!args.eventId) {
-		throw new GraphQLError("No event ID provided")
+		throw new GraphQLError("No event ID provided");
 	}
 
 	const client = createClient({
-		url: process.env.TURSO_URL || "",
-		authToken: process.env.TURSO_TOKEN || "",
-	})
+		url: process.env.TURSO_URL as string,
+		authToken: process.env.TURSO_TOKEN as string,
+	});
 
+	const db = drizzle(client, { schema });
 
 	try {
-		const { rows } = await client.execute('select eventID, userID from rsvp')
+		const rsvps = await db.query.rsvpTable.findMany({
+			where: (rsvps, { eq }) => eq(rsvps.eventId, args.eventId),
+			columns: {
+				eventId: false,
+				createdAt: false,
+				userId: true,
+			}
+		});
 
-		const count = rows.length;
-		console.log(count)
-		console.log(rows)
-		const learnerIds = rows.map(row => row.userId)
-		console.log(learnerIds)
+		const count = rsvps.length;
+		const learnerIds = rsvps.map((rsvp) => rsvp.userId);
 
 		return {
 			count,
 			learnerIds,
-		}
+		};
 	} catch (err) {
-		console.log("3")
-		console.log(err)
-		console.log("error reported")
+		console.log(`Failed to get rsvps for event ${args.eventId}`);
+		console.log(err);
+
 		return {
 			count: 0,
 			learnerIds: [],
-		}
+		};
 	}
-}
+};
 
 export default resolver;

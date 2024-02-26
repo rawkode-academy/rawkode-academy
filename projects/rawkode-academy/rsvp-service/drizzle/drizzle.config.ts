@@ -5,6 +5,8 @@ export default ({
 	out: "./migrations",
 	driver: "turso",
 	breakpoints: true,
+	strict: true,
+	verbose: true,
 	dbCredentials: {
 		url: process.env.TURSO_URL as string,
 		authToken: process.env.TURSO_TOKEN as string,
