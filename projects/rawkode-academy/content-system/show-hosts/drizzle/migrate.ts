@@ -1,28 +1,26 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import { migrate } from "drizzle-orm/libsql/migrator";
+import { getSecrets } from "../utils/secrets";
+
+const secrets = await getSecrets();
 
 const client = createClient({
-	url: process.env.TURSO_URL as string,
-	authToken: process.env.TURSO_TOKEN as string,
+	url: secrets.tursoUrl,
+	authToken: secrets.tursoToken,
 });
 
 const db = drizzle(client);
 
-const main = async () => {
+try {
 	await migrate(db, {
 		migrationsFolder: "./migrations",
 	});
-};
-
-try {
-	await main();
+	console.log("Tables migrated!");
+	client.close();
+	process.exit(0);
 } catch (err) {
 	console.error("Error performing migration: ", err);
 	client.close();
 	process.exit(1);
 }
-
-client.close();
-console.log("Tables migrated!");
-process.exit(0);

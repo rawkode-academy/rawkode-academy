@@ -1,0 +1,18 @@
+extend schema
+  @experimental(codegen: true)
+
+extend schema
+  @auth(
+    rules: [
+      { allow: public }
+    ]
+  )extend schema @federation(version: "2.3")
+
+type Show @key(fields: "id" resolvable: true) {
+  id: String!
+  hosts: [String!]! @resolver(name: "hostsForShow")
+}
+
+extend type Query {
+  showHostsHello: String! @resolver(name: "hello")
+}

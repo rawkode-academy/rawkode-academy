@@ -1,10 +1,13 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import { migrate } from "drizzle-orm/libsql/migrator";
+import { getSecrets } from "../utils/secrets";
+
+const secrets = await getSecrets();
 
 const client = createClient({
-	url: process.env.TURSO_URL as string,
-	authToken: process.env.TURSO_TOKEN as string,
+	url: secrets.tursoUrl,
+	authToken: secrets.tursoToken,
 });
 
 const db = drizzle(client);

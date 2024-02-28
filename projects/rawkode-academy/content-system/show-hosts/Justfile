@@ -22,7 +22,7 @@ grafbase-dev:
 	grafbase dev
 
 deploy:
-	cd drizzle && infisical run --path /projects/rawkode-academy/content-system/shows-service --env production -- bun migrate.ts
+	op run -- bun drizzle/migrate.ts
 	grafbase deploy
 
 publish:

@@ -1,10 +1,10 @@
 {
   "name": "show-hosts",
-  "type": "module",
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@infisical/sdk": "^2.1.8",
     "@libsql/client": "^0.4.3",
     "@types/jsonwebtoken": "^9.0.6",
     "drizzle-orm": "^0.29.3",
