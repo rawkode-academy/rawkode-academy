@@ -18,9 +18,7 @@ const resolver: Resolver["Query.hostsForShow"] = async (_, args) => {
 			where: (table, { eq }) => eq(table.showId, showId),
 		});
 
-		return {
-			hostIds: rows.map((row) => row.hostId),
-		};
+		return rows.map((row) => row.hostId);
 	} catch (err) {
 		console.log(err);
 		return [];
