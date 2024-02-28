@@ -22,8 +22,8 @@ grafbase-dev:
 	grafbase dev
 
 deploy:
-	cd drizzle && infisical run --path /projects/rawkode-academy/rsvp-service --env production -- bun migrate.ts
+	cd drizzle && infisical run --path /projects/rawkode-academy/content-system/shows-service --env production -- bun migrate.ts
 	grafbase deploy
 
 publish:
-	grafbase introspect https://rsvp-rawkodeacademy.grafbase.app/graphql | grafbase publish --name rsvp --url https://rsvp-rawkodeacademy.grafbase.app/graphql rawkodeacademy/api
+	grafbase introspect https://shows-rawkodeacademy.grafbase.app/graphql | grafbase publish --name shows --url https://shows-rawkodeacademy.grafbase.app/graphql rawkodeacademy/api
