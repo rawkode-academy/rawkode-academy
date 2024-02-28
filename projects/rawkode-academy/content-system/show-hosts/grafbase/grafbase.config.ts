@@ -2,29 +2,10 @@ import { config, graph } from "@grafbase/sdk";
 
 const g = graph.Standalone({ subgraph: true });
 
-const shows = g.type("ShowList", {
-	showIds: g.string().list(),
-});
-
-const hosts = g.type("HostList", {
-	hostIds: g.string().list(),
-});
-
-g.query("hostsForShow", {
-	args: {
-		showId: g.string(),
-	},
-	returns: g.ref(hosts),
-	resolver: "hostsForShow",
-});
-
-g.query("showsForHost", {
-	args: {
-		hostId: g.string(),
-	},
-	returns: g.ref(shows),
-	resolver: "showsForHost",
-});
+g.type("Show", {
+	id: g.string(),
+	hosts: g.string().list().resolver("hostsForShow"),
+}).key("id");
 
 export default config({
 	graph: g,
