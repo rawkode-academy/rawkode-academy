@@ -1,0 +1,13 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1709128179664,
+      "tag": "0000_kind_hedge_knight",
+      "breakpoints": true
+    }
+  ]
+}
