@@ -1,21 +1,21 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "5f5516d9-c2b9-4b8a-bcd4-3fcb048d6771",
+  "id": "8f4f59b4-259f-4921-9090-8517d49a2309",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "shows": {
-      "name": "shows",
+    "show_hosts": {
+      "name": "show_hosts",
       "columns": {
-        "id": {
-          "name": "id",
+        "show_id": {
+          "name": "show_id",
           "type": "text",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
+        "host_id": {
+          "name": "host_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -24,7 +24,15 @@
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "show_hosts_show_id_host_id_pk": {
+          "columns": [
+            "host_id",
+            "show_id"
+          ],
+          "name": "show_hosts_show_id_host_id_pk"
+        }
+      },
       "uniqueConstraints": {}
     }
   },

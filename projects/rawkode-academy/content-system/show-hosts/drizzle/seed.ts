@@ -1,6 +1,6 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
-import { showsTable } from "./schema";
+import { showHostsTable } from "./schema";
 
 const client = createClient({
 	url: process.env.TURSO_URL as string,
@@ -10,11 +10,11 @@ const client = createClient({
 export const db = drizzle(client);
 
 const seed = async () => {
-	const result = await db
-		.insert(showsTable)
+	await db
+		.insert(showHostsTable)
 		.values({
-			id: "rawkode-live",
-			name: "Rawkode Live",
+			showId: "rawkode-live",
+			hostId: "rawkode",
 		})
 		.returning()
 		.all();

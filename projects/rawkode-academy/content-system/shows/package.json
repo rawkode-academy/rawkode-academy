@@ -1,5 +1,5 @@
 {
-  "name": "shows-service",
+  "name": "shows",
   "type": "module",
   "peerDependencies": {
     "typescript": "^5.0.0"
