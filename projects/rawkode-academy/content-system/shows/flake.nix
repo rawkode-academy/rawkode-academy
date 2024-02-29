@@ -42,7 +42,7 @@
                   ];
 
                   processes = {
-                    turso.exec = "turso dev";
+                    turso.exec = "turso dev --port 4021";
                     grafbase.exec = "just dev";
                   };
 

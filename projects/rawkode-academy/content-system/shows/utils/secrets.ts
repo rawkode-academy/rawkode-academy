@@ -8,7 +8,7 @@ interface Secrets {
 export const getSecrets = async (): Promise<Secrets> => {
 	if (process.env.INFISICAL_MACHINE_ID?.includes("op://")) {
 		return {
-			tursoUrl: "http://127.0.0.1:8080",
+			tursoUrl: "http://127.0.0.1:4021",
 			tursoToken: "",
 		};
 	}

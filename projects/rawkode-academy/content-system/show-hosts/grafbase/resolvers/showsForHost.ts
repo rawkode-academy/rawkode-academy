@@ -1,11 +1,12 @@
 import { createClient } from "@libsql/client/web";
 import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "../../drizzle/schema";
-import { type Resolver } from "../generated/index";
 
-const resolver: Resolver["Query.showsForHost"] = async (_, args) => {
-	const { hostId } = args;
+interface Root {
+	id: string;
+}
 
+const resolver = async ({ id }: Root) => {
 	const client = createClient({
 		url: process.env.TURSO_URL as string,
 		authToken: process.env.TURSO_TOKEN as string,
@@ -15,7 +16,7 @@ const resolver: Resolver["Query.showsForHost"] = async (_, args) => {
 
 	try {
 		const rows = await db.query.showHostsTable.findMany({
-			where: (table, { eq }) => eq(table.hostId, hostId),
+			where: (table, { eq }) => eq(table.hostId, id),
 		});
 
 		return rows.map((row) => row.showId);
