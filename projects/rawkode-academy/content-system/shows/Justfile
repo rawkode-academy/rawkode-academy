@@ -19,7 +19,7 @@ db-studio:
 	cd drizzle && bunx drizzle-kit studio
 
 grafbase-dev:
-	grafbase dev
+	grafbase dev --port 4020
 
 deploy:
 	cd drizzle && infisical run --path /projects/rawkode-academy/content-system/shows-service --env production -- bun migrate.ts
