@@ -3,8 +3,7 @@
 	"editor.formatOnSave": true,
 	"editor.formatOnType": true,
 	"[json]": {
-		"editor.defaultFormatter": "vscode.json-language-features",
+		"editor.defaultFormatter": "vscode.json-language-features"
 	},
-	"npm.autoDetect": "off",
-	"asciidoc.antora.enableAntoraSupport": false
+	"npm.autoDetect": "off"
 }

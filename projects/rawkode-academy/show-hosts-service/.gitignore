@@ -1,6 +1,4 @@
 /.devenv
-.grafbase
-!.grafbase/project.json
 /drizzle/local.db
 /graphql/generated.ts
 /node_modules

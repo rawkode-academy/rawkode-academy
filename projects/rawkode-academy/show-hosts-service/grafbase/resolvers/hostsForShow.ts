@@ -6,7 +6,7 @@ interface Show {
 	id: string;
 }
 
-const resolver = async ({ id }: Show) => {
+const resolver = async ({ id }: Show, args: any) => {
 	const client = createClient({
 		url: process.env.TURSO_URL as string,
 		authToken: process.env.TURSO_TOKEN as string,
@@ -18,7 +18,9 @@ const resolver = async ({ id }: Show) => {
 		where: (table, { eq }) => eq(table.showId, id),
 	});
 
-	return rows.map((row) => row.hostId);
+	return rows.map((row) => ({
+		id: row.hostId,
+	}));
 };
 
 export default resolver;
