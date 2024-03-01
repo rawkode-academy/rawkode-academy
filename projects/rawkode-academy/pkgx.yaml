@@ -1,6 +1,0 @@
-dependencies:
-- biome
-- bun
-- go
-- node
-- supabase@1.138
