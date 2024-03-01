@@ -21,9 +21,11 @@ db-studio:
 grafbase-dev:
 	grafbase dev
 
-deploy:
-	op run -- bun drizzle/migrate.ts
-	grafbase deploy
+migrate:
+	cd drizzle && op run -- bun run migrate.ts
 
 publish:
+	rm -rf .devenv .direnv
+	grafbase deploy
+	sleep 180
 	grafbase introspect https://show-hosts-rawkodeacademy.grafbase.app/graphql | grafbase publish --name show-hosts --url https://show-hosts-rawkodeacademy.grafbase.app/graphql rawkodeacademy/api
