@@ -21,9 +21,11 @@ db-studio:
 grafbase-dev:
 	grafbase dev --port 4020
 
-deploy:
-	cd drizzle && infisical run --path /projects/rawkode-academy/content-system/shows-service --env production -- bun migrate.ts
-	grafbase deploy
+migrate:
+	cd drizzle && op run -- bun run migrate.ts
 
 publish:
+	rm -rf .devenv .direnv
+	grafbase deploy
+	sleep 180
 	grafbase introspect https://shows-rawkodeacademy.grafbase.app/graphql | grafbase publish --name shows --url https://shows-rawkodeacademy.grafbase.app/graphql rawkodeacademy/api
