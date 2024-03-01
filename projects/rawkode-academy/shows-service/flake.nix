@@ -10,48 +10,48 @@
     extra-substituters = "https://devenv.cachix.org";
   };
 
-  outputs = { self, nixpkgs, devenv, systems, ... } @ inputs:
-    let
-      forEachSystem = nixpkgs.lib.genAttrs (import systems);
-    in
-    {
-      packages = forEachSystem (system: {
-        devenv-up = self.devShells.${system}.default.config.procfileScript;
-      });
+  outputs = inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.devenv.flakeModule
+      ];
 
-      devShells = forEachSystem
-        (system:
-          let
-            pkgs = nixpkgs.legacyPackages.${system};
-          in
-          {
-            default = devenv.lib.mkShell {
-              inherit inputs pkgs;
-              modules = [
-                {
-                  languages.nix.enable = true;
+      systems = [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ];
 
-                  packages = with pkgs;  [
-                    bun
-                    nixpkgs-fmt
-
-                    # Grafbase currently uses node under the hood and only 18
-                    # works. We can remove this when Bun support is added.
-                    nodejs_18
-                    turso-cli
-                  ];
-
-                  processes = {
-                    turso.exec = "turso dev --port 4021";
-                    grafbase.exec = "just dev";
-                  };
-
-                  enterShell = ''
-                    turso config set autoupdate off
-                  '';
-                }
-              ];
+      perSystem = { config, self', inputs', pkgs, system, ... }: rec {
+        devenv.shells = {
+          default = {
+            languages = {
+              nix.enable = true;
             };
-          });
+
+            packages = with pkgs; [
+              alejandra
+              bun
+              # Grafbase currently uses node under the hood and only 18
+              # works. We can remove this when Bun support is added.
+              nodejs_18
+              turso-cli
+
+            ];
+
+            process.implementation = "process-compose";
+
+            processes = {
+              turso.exec = "turso dev --port 4021";
+              grafbase.exec = "just dev";
+            };
+
+            enterShell = ''
+              turso config set autoupdate off
+            '';
+
+            scripts.kurl.exec = ''
+              curl "https://httpbin.org/get?$1" | jq '.args'
+            '';
+
+          };
+        };
+      };
     };
 }
