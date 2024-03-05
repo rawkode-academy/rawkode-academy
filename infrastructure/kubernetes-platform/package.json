@@ -1,0 +1,16 @@
+{
+  "name": "kubernetes-platform",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "cdktf": "^0.20.4",
+		"cdktf-cli": "^0.20.4",
+    "constructs": "^10.3.0"
+  },
+	"devDependencies": {
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.3"
+	}
+}

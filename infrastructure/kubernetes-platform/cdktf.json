@@ -1,0 +1,13 @@
+{
+  "language": "typescript",
+  "app": "npx ts-node src/index.ts",
+  "projectId": "eec4a0e1-e65a-407d-bbf9-28c6106e8e63",
+  "sendCrashReports": "false",
+  "terraformProviders": [
+		"registry.opentofu.org/civo/civo@1.0.39"
+	],
+  "terraformModules": [],
+  "context": {
+
+  }
+}

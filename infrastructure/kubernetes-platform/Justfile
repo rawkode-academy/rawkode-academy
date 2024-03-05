@@ -1,0 +1,5 @@
+cdktf-get:
+	dagger call -m terraform-cdk get --source-dir . export --path .gen
+
+cdktf-diff:
+	dagger call -m terraform-cdk diff --source-dir . stdout
