@@ -1,0 +1,12 @@
+{
+  "name": "terraform-cdk",
+  "sdk": "typescript",
+  "dependencies": [
+    {
+      "name": "bun",
+      "source": "../bun"
+    }
+  ],
+  "source": "dagger",
+  "engineVersion": "v0.10.0"
+}
