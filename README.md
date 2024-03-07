@@ -21,3 +21,9 @@ We pay on a sliding scale, with introductory articles starting at $50 and more a
 Payment can only be made if you're willing to invoice with your legal name, address, and contact details.
 
 When you open your pull request, we'll inform you how much we'd be willing to pay after a review. At this stage, you can either accept the terms and we merge or we'll close the pull request and you can publish your article somewhere else.
+
+## CDRs
+
+Community Decision Records take huge inspiration from Architecture Decision Records [ADR](https://github.com/joelparkerhenderson/architecture-decision-record). They're proposals to help the Academy grow and become an inclusive place for all people interested in Kubernetes / Cloud Native and all sorts of technologies.
+
+Have a look at the [cdr](cdr) folder for the records.
