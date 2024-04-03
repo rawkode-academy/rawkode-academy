@@ -6,12 +6,11 @@ const event = g
 	.type("Event", {
 		id: g.string(),
 		name: g.string(),
+		show: g.string().optional(),
 		type: g.string(),
 		description: g.string(),
 		startsAt: g.datetime(),
 		endsAt: g.datetime(),
-		show: g.string().optional(),
-		recurrence: g.string().optional(),
 	})
 	.key("id", { select: "eventById(id: $id)" });
 

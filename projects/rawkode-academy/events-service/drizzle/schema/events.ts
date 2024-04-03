@@ -10,5 +10,4 @@ export const eventsTable = sqliteTable("events", {
 	description: text("description").notNull(),
 	startsAt: text("startTime").notNull(),
 	endsAt: text("endTime").notNull(),
-	recurrence: text("recurrence"),
 });
