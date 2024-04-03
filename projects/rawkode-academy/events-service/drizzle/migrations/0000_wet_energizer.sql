@@ -5,6 +5,5 @@ CREATE TABLE `events` (
 	`type` text NOT NULL,
 	`description` text NOT NULL,
 	`startTime` text NOT NULL,
-	`endTime` text NOT NULL,
-	`recurrence` text
+	`endTime` text NOT NULL
 );
