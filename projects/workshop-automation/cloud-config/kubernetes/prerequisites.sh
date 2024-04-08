@@ -25,10 +25,9 @@ modprobe br_netfilter
 apt-get install --yes socat ebtables cloud-utils prips containerd
 
 systemctl daemon-reload
-systemctl enable containerd
-systemctl start containerd
 
-sleep 5
-
+mkdir -p /etc/containerd/
 containerd config default | tee /etc/containerd/config.toml >/dev/null 2>&1
 sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+
+systemctl enable --now containerd
