@@ -1,7 +1,6 @@
 import { Output } from "@pulumi/pulumi";
 import { GetConfigResult } from "@pulumi/cloudinit";
 import * as gcp from "@pulumi/gcp";
-import * as google from "@pulumi/google-native";
 
 interface Config {
   name: string;
@@ -25,7 +24,7 @@ export const provisionMachine = async (config: Config) => {
     },
   ];
 
-  const instance = new gcp.compute.Instance(
+  new gcp.compute.Instance(
     config.name,
     {
       zone: config.zone,

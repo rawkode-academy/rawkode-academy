@@ -1,17 +1,17 @@
-import { Config } from "@pulumi/pulumi";
+import { Config, getStack } from "@pulumi/pulumi";
 import { getConfig, GetConfigResult } from "@pulumi/cloudinit";
 import { GetConfigPart } from "@pulumi/cloudinit/types/input";
 import * as google from "@pulumi/google-native";
+import { getZone, Record } from "@pulumi/cloudflare";
 
-const config = new Config();
-const workshopName = `workshop-${config.require("name")}`;
+const workshopName = getStack();
 
 const domain = `${workshopName}.rawkode.academy`;
 const region = "europe-west2";
 
 // Common Config
 const image = {
-  family: "ubuntu-2004-lts",
+  family: "ubuntu-2204-lts",
   project: "ubuntu-os-cloud",
 };
 
@@ -20,7 +20,7 @@ const network = new google.compute.v1.Network("network", {
   autoCreateSubnetworks: true,
 });
 
-const firewall = new google.compute.v1.Firewall("firewall", {
+new google.compute.v1.Firewall("firewall", {
   network: network.selfLink,
   allowed: [
     {
@@ -41,7 +41,9 @@ const renderUserData = (parts: GetConfigPart[]): Promise<GetConfigResult> =>
 import * as github from "@pulumi/github";
 import { provisionMachine } from "./common/provisionMachine";
 import { userData as workloadUserData } from "./kubernetes";
-import { attendees } from "./attendees";
+
+const config = new Config();
+const attendees = config.getObject<string[]>("attendees") || [];
 
 attendees.forEach((attendee) => {
   const handle = attendee.toLowerCase();
@@ -50,7 +52,7 @@ attendees.forEach((attendee) => {
     name: `${workshopName}-${handle}`,
   });
 
-  const githubTeamMember = new github.TeamMembership(handle, {
+  new github.TeamMembership(handle, {
     teamId: githubTeam.id,
     username: handle,
     role: "member",
@@ -89,21 +91,26 @@ provisionMachine({
     ClusterUserData({
       workshopName,
       githubClientId: process.env.GITHUB_CLIENT_ID!,
-      githubClientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      githubClientSecret: process.env.GITHUB_CLIENT_ID!,
       attendees,
     })
   ),
   image,
 });
 
-const teleportDns = new google.dns.v1.ResourceRecordSet(
+const zone = getZone({
+  name: "rawkode.academy",
+  accountId: process.env.CLOUDFLARE_ACCOUNT_ID!,
+});
+
+new Record(
   "teleport-dns",
   {
-    managedZone: "rawkode-academy-40f0c90",
-    ttl: 360,
+    zoneId: zone.then((z) => z.id),
+    name: domain,
+    ttl: 300,
+    value: teleportIpAddress.address,
     type: "A",
-    rrdatas: [teleportIpAddress.address],
-    name: `${domain}.`,
   },
   {
     deleteBeforeReplace: true,
