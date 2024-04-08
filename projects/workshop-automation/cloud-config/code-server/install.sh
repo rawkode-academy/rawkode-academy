@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -xeuo pipefail
 
+export USER=root
+export HOME=/root
+
 curl -fsSL https://code-server.dev/install.sh | sh -s -- --prefix=/usr/local
 
 systemctl enable --now code-server@$USER

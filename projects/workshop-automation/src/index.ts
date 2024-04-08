@@ -11,7 +11,7 @@ const region = "europe-west2";
 
 // Common Config
 const image = {
-  family: "ubuntu-2204-lts",
+  family: "ubuntu-2004-lts",
   project: "ubuntu-os-cloud",
 };
 
