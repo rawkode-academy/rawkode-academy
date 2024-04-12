@@ -1,13 +1,12 @@
 import {
 	PageRule,
-	PageRuleActions,
+	type PageRuleActions,
 } from "@generatedProviders/cloudflare/page-rule";
 import { Record } from "@generatedProviders/cloudflare/record";
 import { Zone } from "@generatedProviders/cloudflare/zone";
 import { ZoneDnssec } from "@generatedProviders/cloudflare/zone-dnssec";
 import { ZoneSettingsOverride } from "@generatedProviders/cloudflare/zone-settings-override";
 import { DomainDelegation } from "@generatedProviders/dnsimple/domain-delegation";
-import { Nameservers } from "@generatedProviders/gandi/nameservers";
 import { Construct } from "constructs";
 
 // biome-ignore lint/style/useEnumInitializers: <explanation>
@@ -86,13 +85,6 @@ export class ManagedDomain extends Construct {
 				new DomainDelegation(this, "delegation", {
 					domain: zone,
 					nameServers: this.cloudflareZone.nameServers,
-				});
-				break;
-
-			case Registrar.Gandi:
-				new Nameservers(this, "nameservers", {
-					domain: zone,
-					nameservers: this.cloudflareZone.nameServers,
 				});
 				break;
 		}

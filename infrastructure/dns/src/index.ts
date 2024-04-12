@@ -1,5 +1,5 @@
 import { CloudflareProvider } from "@generatedProviders/cloudflare/provider";
-import { GandiProvider } from "@generatedProviders/gandi/provider";
+import { DnsimpleProvider } from "@generatedProviders/dnsimple/provider";
 import { App, HttpBackend, TerraformStack } from "cdktf";
 import { Construct } from "constructs";
 
@@ -26,17 +26,20 @@ import rawkodeNews from "./domains/rawkode.news";
 import rawkodeSocial from "./domains/rawkode.social";
 import rawkodeStudio from "./domains/rawkode.studio";
 import rawkodeWin from "./domains/rawkode.win";
-import rawkodeVip from "./domains/rawkode.vip";
+// import rawkodeVip from "./domains/rawkode.vip";
 import rawkodeXyz from "./domains/rawkode.xyz";
 
 class CoreDns extends TerraformStack {
 	constructor(scope: Construct, id: string) {
 		super(scope, id);
 
-		new CloudflareProvider(this, "cloudflare");
+		new CloudflareProvider(this, "cloudflare", {
+			apiToken: process.env.CLOUDFLARE_API_TOKEN,
+		});
 
-		new GandiProvider(this, "gandi", {
-			key: process.env.GANDI_KEY || "",
+		new DnsimpleProvider(this, "dnsimple", {
+			account: process.env.DNSIMPLE_ACCOUNT || "",
+			token: process.env.DNSIMPLE_TOKEN || "",
 		});
 
 		alphabitsFm(this);
@@ -62,7 +65,7 @@ class CoreDns extends TerraformStack {
 		rawkodeSocial(this);
 		rawkodeStudio(this);
 		rawkodeWin(this);
-		rawkodeVip(this);
+		// rawkodeVip(this);
 		rawkodeXyz(this);
 	}
 }
