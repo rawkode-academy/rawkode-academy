@@ -5,7 +5,7 @@ export default (scope: Construct): ManagedDomain => {
 	const managedDomain = new ManagedDomain(
 		scope,
 		"rawkode.link",
-		Registrar.Gandi,
+		Registrar.DnsSimple
 	).discourageEmail();
 
 	return managedDomain;
