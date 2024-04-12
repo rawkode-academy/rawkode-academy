@@ -5,6 +5,7 @@
   "sendCrashReports": "false",
   "terraformProviders": [
     "cloudflare/cloudflare@~> 3.32",
+		"dnsimple/dnsimple@~> 1.5.0",
     "go-gandi/gandi@~> 2.2"
   ],
   "terraformModules": [],

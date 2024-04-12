@@ -25,6 +25,8 @@ import rawkodeLive from "./domains/rawkode.live";
 import rawkodeNews from "./domains/rawkode.news";
 import rawkodeSocial from "./domains/rawkode.social";
 import rawkodeStudio from "./domains/rawkode.studio";
+import rawkodeWin from "./domains/rawkode.win";
+import rawkodeVip from "./domains/rawkode.vip";
 import rawkodeXyz from "./domains/rawkode.xyz";
 
 class CoreDns extends TerraformStack {
@@ -59,6 +61,8 @@ class CoreDns extends TerraformStack {
 		rawkodeNews(this);
 		rawkodeSocial(this);
 		rawkodeStudio(this);
+		rawkodeWin(this);
+		rawkodeVip(this);
 		rawkodeXyz(this);
 	}
 }
