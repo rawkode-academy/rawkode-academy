@@ -6,17 +6,21 @@ import { Record } from "@generatedProviders/cloudflare/record";
 import { Zone } from "@generatedProviders/cloudflare/zone";
 import { ZoneDnssec } from "@generatedProviders/cloudflare/zone-dnssec";
 import { ZoneSettingsOverride } from "@generatedProviders/cloudflare/zone-settings-override";
+import { DomainDelegation } from "@generatedProviders/dnsimple/domain-delegation";
 import { Nameservers } from "@generatedProviders/gandi/nameservers";
 import { Construct } from "constructs";
 
+// biome-ignore lint/style/useEnumInitializers: <explanation>
 enum Email {
 	Unset,
 	Configured,
 	Discouraged,
 }
 
+// biome-ignore lint/style/useEnumInitializers: <explanation>
 export enum Registrar {
 	Cloudflare,
+	DnsSimple,
 	Gandi,
 	Dynadot,
 }
@@ -78,6 +82,13 @@ export class ManagedDomain extends Construct {
 				});
 				break;
 
+			case Registrar.DnsSimple:
+				new DomainDelegation(this, "delegation", {
+					domain: zone,
+					nameServers: this.cloudflareZone.nameServers,
+				});
+				break;
+
 			case Registrar.Gandi:
 				new Nameservers(this, "nameservers", {
 					domain: zone,
@@ -90,7 +101,7 @@ export class ManagedDomain extends Construct {
 	addPageRule(
 		id: string,
 		target: string,
-		actions: PageRuleActions,
+		actions: PageRuleActions
 	): ManagedDomain {
 		if (this.registrar !== Registrar.Cloudflare) {
 			throw new Error("Page rules are only supported for Cloudflare domains");
@@ -109,7 +120,7 @@ export class ManagedDomain extends Construct {
 		id: string,
 		name: string,
 		value: string,
-		ttl = 300,
+		ttl = 300
 	): ManagedDomain {
 		new Record(this, id, {
 			zoneId: this.cloudflareZone.id,
@@ -127,7 +138,7 @@ export class ManagedDomain extends Construct {
 		id: string,
 		name: string,
 		value: string,
-		proxied?: boolean,
+		proxied?: boolean
 	): ManagedDomain {
 		new Record(this, id, {
 			zoneId: this.cloudflareZone.id,
@@ -165,7 +176,7 @@ export class ManagedDomain extends Construct {
 
 			case Email.Configured:
 				throw new Error(
-					"Attempting to discourage email, but email has already been enabled",
+					"Attempting to discourage email, but email has already been enabled"
 				);
 		}
 	}
@@ -194,21 +205,21 @@ export class ManagedDomain extends Construct {
 		this.addTextRecord(
 			"spf",
 			"@",
-			"v=spf1 include:spf.messagingengine.com ~all",
+			"v=spf1 include:spf.messagingengine.com ~all"
 		);
 
 		for (let i = 1; i <= 3; i++) {
 			this.addCNameRecord(
 				`dkim${i}`,
 				`fm${i}._domainkey`,
-				`fm${i}.${this.cloudflareZone.zone}.dkim.fmhosted.com`,
+				`fm${i}.${this.cloudflareZone.zone}.dkim.fmhosted.com`
 			);
 		}
 
 		this.addCNameRecord(
 			`dkim-mesmtp`,
 			`mesmtp._domainkey`,
-			`mesmtp.${this.cloudflareZone.zone}.dkim.fmhosted.com`,
+			`mesmtp.${this.cloudflareZone.zone}.dkim.fmhosted.com`
 		);
 
 		new Record(this, "srv-submission", {
@@ -365,28 +376,28 @@ export class ManagedDomain extends Construct {
 			.addTextRecord(
 				"microsoft-spf",
 				"@",
-				"v=spf1 include:spf.protection.outlook.com -all",
+				"v=spf1 include:spf.protection.outlook.com -all"
 			)
 			.addCNameRecord(
 				"microsoft-discover",
 				"autodiscover",
-				"autodiscover.outlook.com",
+				"autodiscover.outlook.com"
 			)
 			.addCNameRecord(
 				"microsoft-dkim-1",
 				"selector1._domainkey",
 				`selector1-${this.zoneString.replace(
 					".",
-					"-",
-				)}._domainkey.rawkodeacademy.onmicrosoft.com`,
+					"-"
+				)}._domainkey.rawkodeacademy.onmicrosoft.com`
 			)
 			.addCNameRecord(
 				"microsoft-dkim-2",
 				"selector2._domainkey",
 				`selector2-${this.zoneString.replace(
 					".",
-					"-",
-				)}._domainkey.rawkodeacademy.onmicrosoft.com`,
+					"-"
+				)}._domainkey.rawkodeacademy.onmicrosoft.com`
 			);
 
 		return this;
@@ -418,7 +429,7 @@ export class ManagedDomain extends Construct {
 		this.addTextRecord(
 			"dkim",
 			"bump._domainkey",
-			`v=DKIM1; p=${config.domainKey}`,
+			`v=DKIM1; p=${config.domainKey}`
 		);
 
 		return this;
@@ -478,7 +489,7 @@ export class ManagedDomain extends Construct {
 		this.addTextRecord(
 			"dkim",
 			"google._domainkey",
-			`v=DKIM1; k=rsa; p=${config.domainKey}`,
+			`v=DKIM1; k=rsa; p=${config.domainKey}`
 		);
 
 		this.addTextRecord(
@@ -486,7 +497,7 @@ export class ManagedDomain extends Construct {
 			"@",
 			`v=spf1 include:_spf.google.com ${config.spfIncludes
 				.map((include) => `include:${include}`)
-				.join(" ")} -all`,
+				.join(" ")} -all`
 		);
 
 		return this;
