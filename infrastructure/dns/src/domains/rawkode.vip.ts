@@ -5,7 +5,7 @@ export default (scope: Construct): ManagedDomain => {
 	const managedDomain = new ManagedDomain(
 		scope,
 		"rawkode.vip",
-		Registrar.Cloudflare
+		Registrar.DnsSimple
 	);
 
 	managedDomain.discourageEmail();
