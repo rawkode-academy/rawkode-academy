@@ -1,73 +1,46 @@
 ---
-import { type CollectionEntry } from "astro:content";
-import { supabase } from "../../../lib/supabase";
-
-interface Author {
-	github_handle: string;
-	name: string | null;
-	avatar_url: string | null;
-}
-
-type Authors = {
-	[key: string]: Author;
-};
+import type { CollectionEntry } from "astro:content";
 
 type Props = {
 	article: CollectionEntry<"blog">;
 };
 
 const { article } = Astro.props;
-
-const people = await supabase
-	.from("people")
-	.select()
-	.in("github_handle", article.data.authors);
-
-const authors: Authors = !people.data
-	? {}
-	: people.data.reduce((acc, author) => {
-			acc[author.github_handle] = author;
-			return acc;
-		}, {} as Authors);
 ---
 
-<article
-	class="p-4 bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700"
->
-	<a href={`/blog/${article.slug}`}>
+<a href={`/blog/${article.slug}`}>
+	<article
+		class="p-4 bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700"
+	>
 		<img
 			class="mb-5 rounded-lg"
 			src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
 			alt="office laptop working"
 		/>
-	</a>
-	<span
-		class="bg-purple-100 text-purple-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-purple-200 dark:text-purple-900"
-		>Article</span
-	>
-	<h2
-		class="my-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-	>
-		<a href="#">{article.data.title}</a>
-	</h2>
-	<p class="mb-4 font-light text-gray-500 dark:text-gray-400">
-		Over the past year, Volosoft has undergone many changes! After months of
-		preparation and some hard work, we moved to our new office.
-	</p>
-	<div class="flex items-center space-x-4">
-		<img
-			class="w-10 h-10 rounded-full"
-			src={(article.data.authors[0] &&
-			authors.hasOwnProperty(article.data.authors[0])
-				? authors[article.data.authors[0]].avatar_url
-				: `https://avatars.githubusercontent.com/${article.data.authors[0]}`) ||
-				"https://pbs.twimg.com/profile_images/1618711146260832262/P7jcoO32_400x400.jpg"}
-		/>
-		<div class="font-medium dark:text-white">
-			<div>{article.data.authors.join(", ")}</div>
-			<div class="text-sm font-normal text-gray-500 dark:text-gray-400">
-				{article.data.publishedAt.toDateString()}
+		<span
+			class="bg-purple-100 text-purple-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-purple-200 dark:text-purple-900"
+			>Article</span
+		>
+		<h2
+			class="my-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+		>
+			{article.data.title}
+		</h2>
+		<p class="mb-4 font-light text-gray-500 dark:text-gray-400">
+			Over the past year, Volosoft has undergone many changes! After months of
+			preparation and some hard work, we moved to our new office.
+		</p>
+		<div class="flex items-center space-x-4">
+			<img
+				class="w-10 h-10 rounded-full"
+				src="https://pbs.twimg.com/profile_images/1618711146260832262/P7jcoO32_400x400.jpg"
+			/>
+			<div class="font-medium dark:text-white">
+				<div>{article.data.authors.join(", ")}</div>
+				<div class="text-sm font-normal text-gray-500 dark:text-gray-400">
+					{article.data.publishedAt.toDateString()}
+				</div>
 			</div>
 		</div>
-	</div>
-</article>
+	</article>
+</a>

@@ -55,6 +55,7 @@
             packages = with pkgs; [
 							biome
 							bun
+nodejs
 						];
 
             enterShell = ''
