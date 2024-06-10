@@ -1,12 +1,9 @@
 # Astro
 .astro
 dist
-
+.direnv
 # NodeJS
 node_modules
-
-# Supabase
-src/database.types.ts
 
 # GraphQL Generated Client
 ./src/gql
