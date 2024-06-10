@@ -1,12 +1,12 @@
-# nix
-.direnv
-
-# astro
+# Astro
 .astro
 dist
 
-# nodejs
+# NodeJS
 node_modules
 
-# supabase
+# Supabase
 src/database.types.ts
+
+# GraphQL Generated Client
+./src/gql

@@ -1,12 +1,11 @@
 {
-	"scss.lint.unknownAtRules": "ignore",
 	"editor.formatOnSave": true,
-	"npm.packageManager": "bun",
 	"editor.codeActionsOnSave": {
 		"quickfix.biome": "explicit",
 		"source.organizeImports": "always",
 		"source.fixAll": "always"
 	},
+	"npm.packageManager": "bun",
 	"typescript.inlayHints.parameterNames.enabled": "all",
 	"[astro]": {
 		"editor.defaultFormatter": "astro-build.astro-vscode"
@@ -15,6 +14,18 @@
 		"editor.defaultFormatter": "vscode.html-language-features"
 	},
 	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescriptreact]": {
 		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"[vue]": {
