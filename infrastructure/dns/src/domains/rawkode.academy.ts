@@ -5,7 +5,7 @@ export default (scope: Construct): ManagedDomain => {
 	const managedDomain = new ManagedDomain(
 		scope,
 		"rawkode.academy",
-		Registrar.Cloudflare,
+		Registrar.Cloudflare
 	);
 
 	managedDomain
@@ -19,6 +19,7 @@ export default (scope: Construct): ManagedDomain => {
 			"@",
 			"google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU"
 		)
+		.addCNameRecord("api", "api", "api-main-rawkodeacademy.grafbase.app")
 		.addCNameRecord("stripe", "billing", "hosted-checkout.stripecdn.com")
 		.addTextRecord(
 			"stripe-acme",
