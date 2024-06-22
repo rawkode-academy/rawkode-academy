@@ -1,6 +1,5 @@
 ---
-import LoginButton from "../components/auth/login-button.astro";
-import ProfileMenu from "../components/profile/menu.astro";
+// import LoginButton from "../components/auth/login-button.astro";
 import MenuItems from "../components/sidebar/items.vue";
 
 import {
@@ -113,7 +112,7 @@ const menuItemsOrgs = [
 						></path>
 					</svg>
 				</a>
-				<form action="#" method="GET" class="hidden md:block md:pl-2">
+				<!-- <form action="#" method="GET" class="hidden md:block md:pl-2">
 					<label for="topbar-search" class="sr-only">Search</label>
 					<div class="relative md:w-64 md:w-96">
 						<div
@@ -141,7 +140,7 @@ const menuItemsOrgs = [
 							placeholder="Search"
 						/>
 					</div>
-				</form>
+				</form> -->
 			</div>
 			<div class="flex items-center lg:order-2">
 				<!-- Notifications-->
@@ -149,7 +148,7 @@ const menuItemsOrgs = [
 				<!-- Apps -->
 
 				<!-- Profile -->
-				{Astro.locals.user ? <ProfileMenu /> : <LoginButton />}
+				<!-- {Astro.locals.user ? <ProfileMenu /> : <LoginButton />} -->
 			</div>
 		</div>
 	</nav>
