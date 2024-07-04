@@ -38,6 +38,10 @@ interface BumpEmailConfig {
 	domainKey: string;
 }
 
+interface ProtonMailConfig {
+	verificationCode: string;
+}
+
 export class ManagedDomain extends Construct {
 	private readonly registrar: Registrar;
 	private readonly cloudflareZone: Zone;
@@ -492,6 +496,55 @@ export class ManagedDomain extends Construct {
 				.join(" ")} -all`
 		);
 
+		return this;
+	}
+
+	enableProtonMail(config: ProtonMailConfig): ManagedDomain {
+		this.addTextRecord(
+			"verification",
+			"@",
+			`protonmail-verification=${config.verificationCode}`
+		);
+
+		this.addTextRecord("spf", "@", "v=spf1 include:_spf.protonmail.ch ~all");
+
+		this.addCNameRecord(
+			"dkim1",
+			"protonmail._domainkey",
+			"protonmail.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch."
+		);
+
+		this.addCNameRecord(
+			"dkim2",
+			"protonmail2._domainkey",
+			"protonmail2.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch."
+		);
+
+		this.addCNameRecord(
+			"dkim3",
+			"protonmail3._domainkey",
+			"protonmail3.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch."
+		);
+
+		new Record(this, "mx1", {
+			zoneId: this.cloudflareZone.id,
+			name: "@",
+			type: "MX",
+			ttl: 3600,
+			priority: 10,
+			value: "mail.protonmail.ch",
+			comment: "Managed by Terraform",
+		});
+
+		new Record(this, "mx2", {
+			zoneId: this.cloudflareZone.id,
+			name: "@",
+			type: "MX",
+			ttl: 3600,
+			priority: 20,
+			value: "mailsec.protonmail.ch",
+			comment: "Managed by Terraform",
+		});
 		return this;
 	}
 
