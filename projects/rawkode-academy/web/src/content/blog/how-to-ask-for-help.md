@@ -22,7 +22,7 @@ Separate your question from the log outputs, most systems will have a way to ent
 
 ### Example
 
-```text
+```plaintext
 # dmesg log with error
 [331337.438088] hub 4-0:1.0: 2 ports detected
 [331337.465300] ACPI: bus type thunderbolt registered

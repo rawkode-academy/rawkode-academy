@@ -11,7 +11,7 @@ const { title } = Astro.props;
 
 <style is:global>
 	main {
-		@apply flex flex-col justify-center items-center p-4;
+		@apply mx-auto pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased;
 
 		/* ml-64 for when screens are big enough to show sidebar
 		 * pt-16 to keep the content below the static navbar
@@ -38,12 +38,12 @@ const { title } = Astro.props;
 	}
 </style>
 
-<html lang="en">
+<!DOCTYPE html lang="en">
 	<DefaultHead title={title}>
 		<slot name="extra-head" slot="extra-head" />
 	</DefaultHead>
 
-	<body class="h-full bg-white dark:bg-black">
+	<body class="h-full w-full mx-auto  max-w-screen-xl bg-white dark:bg-black">
 		<slot name="layout">
 			<DefaultLayout>
 				<slot />
