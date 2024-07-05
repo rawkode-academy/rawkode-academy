@@ -1,0 +1,122 @@
+---
+interface Partner {
+	name: string;
+	url: string;
+	since: string;
+	level: "Malt" | "Blend" | "Dram" | "Nip";
+}
+
+type Partners = Partner[];
+
+const partners: Partners = [
+	{
+		name: "ngrok",
+		level: "Blend",
+		since: "2024",
+		url: "https://ngrok.com",
+	},
+	{
+		name: "ControlPlane",
+		level: "Dram",
+		since: "2024",
+		url: "https://controlplane.io",
+	},
+	{
+		name: "Guidepad",
+		level: "Dram",
+		since: "2024",
+		url: "https://guidepad.io",
+	},
+	{
+		name: "Microsoft",
+		level: "Nip",
+		since: "2024",
+		url: "https://microsoft.com",
+	},
+	{
+		name: "Fermyon",
+		level: "Nip",
+		since: "2024",
+		url: "https://fermyon.com",
+	},
+];
+---
+
+<section class="bg-white dark:bg-gray-900">
+	<div class="py-8 px-4 mx-auto sm:py-16 lg:px-6">
+		<div class="mb-8 lg:mb-16">
+			<h2
+				class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+			>
+				Our Partners
+			</h2>
+			<p class="text-gray-500 sm:text-xl dark:text-gray-400">
+				The Rawkode Academy couldn't exist without the support of our partners.
+				Visit their websites, contact them, and remember to let them know that
+				you found them right here.
+			</p>
+			<div class="mt-4">
+				<a
+					href="/organizations/lets-chat"
+					title=""
+					class="inline-flex items-center text-base font-medium text-primary-600 hover:underline dark:text-primary-500"
+				>
+					Become a Partner
+					<svg
+						aria-hidden="true"
+						class="w-5 h-5 ml-1.5"
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+							clip-rule="evenodd"></path>
+					</svg>
+				</a>
+			</div>
+		</div>
+
+		<div
+			class="grid grid-cols-2 mt-8 text-center gap-y-8 gap-x-6 sm:grid-cols-3 lg:grid-cols-4 sm:gap-8 lg:mt-16"
+		>
+			{
+				partners.map((partner) => (
+					<div>
+						<div>
+							<img
+								class="object-contain w-auto h-12 mx-auto"
+								src={`/partners/${partner.name.toLowerCase()}.svg`}
+								alt={`${partner.name} Logo`}
+							/>
+							<p class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 mt-2.5">
+								Partner since {partner.since}
+							</p>
+						</div>
+						<div class="mt-5">
+							<a
+								href={partner.url}
+								title=""
+								class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+								role="button"
+							>
+								<svg
+									aria-hidden="true"
+									class="w-5 h-5 mr-2 -ml-1"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+								>
+									<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+									<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+								</svg>
+								Visit website
+							</a>
+						</div>
+					</div>
+				))
+			}
+		</div>
+	</div>
+</section>
