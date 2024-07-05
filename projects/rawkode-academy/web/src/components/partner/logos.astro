@@ -3,6 +3,7 @@ interface Partner {
 	name: string;
 	url: string;
 	since: string;
+	logo: string;
 	level: "Malt" | "Blend" | "Dram" | "Nip";
 }
 
@@ -13,30 +14,35 @@ const partners: Partners = [
 		name: "ngrok",
 		level: "Blend",
 		since: "2024",
+		logo: "ngrok.svg",
 		url: "https://ngrok.com",
 	},
 	{
 		name: "ControlPlane",
 		level: "Dram",
 		since: "2024",
+		logo: "controlplane.svg",
 		url: "https://controlplane.io",
 	},
 	{
 		name: "Guidepad",
 		level: "Dram",
 		since: "2024",
+		logo: "guidepad.svg",
 		url: "https://guidepad.io",
 	},
 	{
-		name: "Microsoft",
+		name: "Microsoft Azure",
 		level: "Nip",
 		since: "2024",
-		url: "https://microsoft.com",
+		logo: "microsoft-azure.png",
+		url: "https://azure.com",
 	},
 	{
 		name: "Fermyon",
 		level: "Nip",
 		since: "2024",
+		logo: "fermyon.svg",
 		url: "https://fermyon.com",
 	},
 ];
@@ -86,8 +92,8 @@ const partners: Partners = [
 					<div>
 						<div>
 							<img
-								class="object-contain w-auto h-12 mx-auto"
-								src={`/partners/${partner.name.toLowerCase()}.svg`}
+								class="object-contain w-auto h-24 mx-auto"
+								src={`/partners/${partner.logo}`}
 								alt={`${partner.name} Logo`}
 							/>
 							<p class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 mt-2.5">
