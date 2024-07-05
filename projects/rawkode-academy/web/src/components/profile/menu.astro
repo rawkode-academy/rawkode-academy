@@ -1,15 +1,15 @@
 ---
-if (!Astro.locals.user) {
-	console.log("Does this bail on menu?");
-	return;
-}
+// if (!Astro.locals.user) {
+// 	console.log("Does this bail on menu?");
+// 	return;
+// }
 
-const name = Astro.locals.user.name;
-const email = Astro.locals.user.email;
-const avatarUrl = Astro.locals.user.avatarUrl;
+// const name = Astro.locals.user.name;
+// const email = Astro.locals.user.email;
+// const avatarUrl = Astro.locals.user.avatarUrl;
 ---
 
-<button
+<!-- <button
 	type="button"
 	class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
 	id="user-menu-button"
@@ -17,13 +17,9 @@ const avatarUrl = Astro.locals.user.avatarUrl;
 	data-dropdown-toggle="dropdown"
 >
 	<span class="sr-only">Open user menu</span>
-	<img
-		class="w-8 h-8 rounded-full"
-		src={avatarUrl}
-		alt="user photo"
-	/>
+	<img class="w-8 h-8 rounded-full" src={avatarUrl} alt="user photo" />
 </button>
-<!-- Dropdown menu -->
+<!-- Dropdown menu
 <div
 	class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
 	id="dropdown"
@@ -45,4 +41,4 @@ const avatarUrl = Astro.locals.user.avatarUrl;
 			>
 		</li>
 	</ul>
-</div>
+</div> -->

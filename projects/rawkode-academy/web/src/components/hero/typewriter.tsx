@@ -15,13 +15,8 @@ interface Props {
 	secondaryButton: ButtonProps;
 }
 
-// Fisher-Yates Sorting Algorithm
-const shuffle = (array: string[]) => {
-	for (let i = array.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[array[i], array[j]] = [array[j], array[i]];
-	}
-	return array;
+const shuffle = (array: string[]): string[] => {
+	return array.sort(() => Math.random() - 0.5);
 };
 
 const Typewriter = (props: Props) => {
@@ -34,7 +29,7 @@ const Typewriter = (props: Props) => {
 							className="bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent"
 							sequence={shuffle(props.rotatedPrefixes).reduce<
 								Array<string | number>
-							>((acc, prefix) => [...acc, prefix, 1250], [])}
+							>((acc, prefix: string) => [...acc, prefix, 1250], [])}
 							wrapper="span"
 							preRenderFirstString={true}
 							speed={16}

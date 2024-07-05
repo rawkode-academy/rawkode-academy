@@ -1,6 +1,7 @@
 ---
 import FeatureList from "../components/feature/list.vue";
 import HeroTypewriter from "../components/hero/typewriter.tsx";
+import PartnerLogos from "../components/partner/logos.astro";
 import Page from "../wrappers/page.astro";
 import HeroImage from "./hero.png";
 ---
@@ -11,7 +12,7 @@ import HeroImage from "./hero.png";
 		highlight="hard"
 		image={HeroImage}
 		primaryButton={{
-			text: "Search Videos",
+			text: "Search Content",
 			link: "https://www.youtube.com/@RawkodeAcademy/videos",
 			newWindow: true,
 		}}
@@ -69,4 +70,6 @@ import HeroImage from "./hero.png";
 			},
 		]}
 	/>
+
+	<PartnerLogos />
 </Page>
