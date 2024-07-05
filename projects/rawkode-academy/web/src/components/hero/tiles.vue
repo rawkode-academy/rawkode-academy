@@ -8,7 +8,7 @@ const props = defineProps({
 			<div class="mx-auto px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
 				<div class="mx-auto gap-x-14 lg:mx-0 lg:flex  lg:items-center">
 					<div class="relative w-full lg:shrink-0">
-					<h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">{{ props.title }}</h1>
+					<h1>{{ props.title }}</h1>
 						<p class="mt-6 text-lg leading-8 text-gray-600">Cupidatat minim id magna ipsum sint
 					dolor qui. Sunt sit in quis cupidatat mollit aute velit. Et labore commodo nulla aliqua proident mollit ullamco
 					exercitation tempor. Sint aliqua anim nulla sunt mollit id pariatur in voluptate cillum.</p>
