@@ -26,8 +26,6 @@ export default (scope: Construct): ManagedDomain => {
 			"_acme-challenge.billing",
 			"sJV8MAy9curK26zz05xdgnDL3X6uf-2IEdua78oHimw"
 		)
-		.addARecord("web", "@", "185.230.63.107")
-		.addCNameRecord("www", "www", "pointing.wixdns.net")
 		.addTextRecord(
 			"_atproto",
 			"_atproto",
