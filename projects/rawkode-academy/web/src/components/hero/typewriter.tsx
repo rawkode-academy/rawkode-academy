@@ -1,10 +1,18 @@
 import { TypeAnimation } from "react-type-animation";
 
+interface ButtonProps {
+	text: string;
+	link: string;
+	newWindow?: boolean;
+}
+
 interface Props {
 	rotatedPrefixes: string[];
 	suffix: string;
 	highlight: string;
 	image: ImageMetadata;
+	primaryButton: ButtonProps;
+	secondaryButton: ButtonProps;
 }
 
 // Fisher-Yates Sorting Algorithm
@@ -45,10 +53,11 @@ const Typewriter = (props: Props) => {
 						We're here to help.
 					</p>
 					<a
-						href="#"
+						href={props.primaryButton.link}
+						target={props.primaryButton.newWindow ? "_blank" : "_self"}
 						className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center rounded-lg text-black bg-gradient-to-br from-primary to-secondary hover:from-secondary hover:to-primary"
 					>
-						Free Membership (Coming Soon)
+						{props.primaryButton.text}
 						<svg
 							className="w-5 h-5 ml-2 -mr-1"
 							fill="currentColor"
@@ -64,10 +73,11 @@ const Typewriter = (props: Props) => {
 					</a>
 
 					<a
-						href="/about"
+						href={props.secondaryButton.link}
+						target={props.secondaryButton.newWindow ? "_blank" : "_self"}
 						className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
 					>
-						Learn More
+						{props.secondaryButton.text}
 					</a>
 				</div>
 				<div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
