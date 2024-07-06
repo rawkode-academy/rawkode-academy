@@ -1,8 +1,7 @@
 ---
 title: "Zed: Show & Tell"
 slug: zed-show-and-tell
-publishedAt: 2024-08-05
-updatedAt: 2024-08-05
+publishedAt: 2024-07-05
 isDraft: false
 authors:
   - icepuma

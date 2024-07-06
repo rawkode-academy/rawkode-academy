@@ -2,7 +2,9 @@
 import { getCollection } from "astro:content";
 import FeaturedArticle from "./article.astro";
 
-const latestBlogPosts = (await getCollection("blog")).slice(0, 3);
+const latestBlogPosts = (await getCollection("blog"))
+	.slice(0, 3)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 ---
 
 <section class="bg-white dark:bg-gray-900">
