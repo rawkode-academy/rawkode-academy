@@ -3,7 +3,6 @@ export default {
 	darkMode: "media",
 	content: [
 		"./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}",
-		"./node_modules/flowbite-vue/**/*.{js,jsx,ts,tsx}",
 		"./node_modules/flowbite/**/*.{js,jsx,ts,tsx}",
 	],
 	theme: {

@@ -29,7 +29,6 @@
 		"astro": "4.2.5",
 		"flowbite": "^2.2.0",
 		"flowbite-typography": "^1.0",
-		"flowbite-vue": "^0.1.1",
 		"graphql": "^16.8.1",
 		"luxon": "^3.4.4",
 		"react": "^18.0.0",
