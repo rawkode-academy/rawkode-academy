@@ -48,7 +48,7 @@ const { Content } = await article.render();
 								href="#"
 								rel="author"
 								class="text-xl font-bold text-gray-900 dark:text-white"
-								>Rawkode Academy
+								>{article.data.authors.join(", ")}
 							</a>
 							<p class="text-base text-gray-500 dark:text-gray-400">
 								Published at <time
