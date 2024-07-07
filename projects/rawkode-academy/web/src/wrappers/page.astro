@@ -38,14 +38,6 @@ const { title } = Astro.props;
 	}
 </style>
 
-<script>
-(() => {
-  (document.querySelectorAll('a')).forEach(link => {
-    link.hostname !== location.hostname && link.setAttribute('target', '_blank');
-  })
-})();
-</script>
-
 <!DOCTYPE html lang="en">
 	<DefaultHead title={title}>
 		<slot name="extra-head" slot="extra-head" />
