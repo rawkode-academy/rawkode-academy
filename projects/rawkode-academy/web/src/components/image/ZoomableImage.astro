@@ -1,0 +1,17 @@
+---
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
+
+interface Props {
+	image: ImageMetadata;
+	alt: string;
+}
+
+const { image, alt } = Astro.props;
+---
+
+<Zoom client:load>
+	<Image src={image} alt={alt} />
+</Zoom>

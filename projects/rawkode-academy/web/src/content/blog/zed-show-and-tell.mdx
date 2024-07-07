@@ -7,6 +7,8 @@ authors:
   - icepuma
 ---
 
+import ZoomableImage from "@components/image/ZoomableImage.astro";
+
 A common habit of developers is searching for new tools on a regular basis. Visual Studio Code is such a tool which helped me over the years write some awesome code. But I always wanted to try something new. So I stumbled upon Zed.
 
 ## So what is Zed?
@@ -25,11 +27,17 @@ I personally used `brew` to install Zed: `brew install zed`
 
 The first thing you see is an empty window. I typically use `⌘ + P` to open the file finder and navigate to my file of choice.
 
-![Zed - empty window](./images/zed-show-and-tell-01.png)
+<ZoomableImage
+	image={import("./images/zed-show-and-tell-01.png")}
+	alt="Zed - empty window"
+/>
 
 Here you see the file finder in action.
 
-![Zed - file finder](./images/zed-show-and-tell-02.png)
+<ZoomableImage
+	image={import("./images/zed-show-and-tell-02.png")}
+	alt="Zed - file finder"
+/>
 
 ## Working with Rust
 
@@ -37,15 +45,24 @@ Zed is "language aware" and detected that I opened a Rust file and applies the c
 The extension uses [rust-analyzer](https://github.com/rust-lang/rust-analyzer) for things like code completion, running tests and [tree-sitter-rust](https://github.com/tree-sitter/tree-sitter-rust) for syntax highlighting.
 It also added indicators for Rust tests, so that I can run them directly from the editor. Let's try it out :)
 
-![Zed - rust file](./images/zed-show-and-tell-03.png)
+<ZoomableImage
+	image={import("./images/zed-show-and-tell-03.png")}
+	alt="Zed - rust file"
+/>
 
 After clicking the "Run" button (the little "play" icon next to the test function), the test output is displayed in the built-in terminal at the bottom of the window.
 
-![Zed - rust test](./images/zed-show-and-tell-04.png)
+<ZoomableImage
+	image={import("./images/zed-show-and-tell-04.png")}
+	alt="Zed - rust test"
+/>
 
 Let's do some refactoring. I open the `editor: rename` option (via Command Palette) by pressing `⌘ + Shift + P`, change the name of the variable and see all changes in some kind of preview window.
 
-![Zed - refactoring](./images/zed-show-and-tell-05.png)
+<ZoomableImage
+	image={import("./images/zed-show-and-tell-05.png")}
+	alt="Zed - refactoring"
+/>
 
 ## Conclusion
 
