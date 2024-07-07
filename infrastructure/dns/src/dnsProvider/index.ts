@@ -30,7 +30,7 @@ interface GSuiteConfig {
 }
 
 interface Microsoft365Config {
-	txtVerification: string;
+	txtVerification?: string;
 	spfIncludes: string[];
 }
 
@@ -368,12 +368,19 @@ export class ManagedDomain extends Construct {
 			comment: "Managed by Terraform",
 		});
 
-		this.addTextRecord("microsoft-verification", "@", config.txtVerification)
-			.addTextRecord(
-				"microsoft-spf",
+		if (config.txtVerification) {
+			this.addTextRecord(
+				"microsoft-verification",
 				"@",
-				"v=spf1 include:spf.protection.outlook.com -all"
-			)
+				`MS=${config.txtVerification}`
+			);
+		}
+
+		this.addTextRecord(
+			"microsoft-spf",
+			"@",
+			"v=spf1 include:spf.protection.outlook.com -all"
+		)
 			.addCNameRecord(
 				"microsoft-discover",
 				"autodiscover",
