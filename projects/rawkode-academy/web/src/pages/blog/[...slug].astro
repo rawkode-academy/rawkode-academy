@@ -1,7 +1,7 @@
 ---
-import type { GetStaticPaths,GetStaticPathsResult } from "astro";
-import { getCollection,type CollectionEntry } from "astro:content";
-import Page from "../../wrappers/page.astro";
+import Page from "@wrappers/page.astro";
+import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { getCollection, type CollectionEntry } from "astro:content";
 
 type Props = {
 	article: CollectionEntry<"blog">;
