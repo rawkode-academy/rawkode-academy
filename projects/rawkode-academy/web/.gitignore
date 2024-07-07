@@ -8,3 +8,5 @@ node_modules
 # GraphQL Generated Client
 ./src/gql
 .DS_Store
+
+bun.lockb
