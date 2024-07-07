@@ -26,9 +26,13 @@ const { article } = Astro.props;
 		>
 			{article.data.title}
 		</h2>
-		<p class="mb-4 font-light text-gray-500 dark:text-gray-400">
-			Subtitles are a work in progress.
-		</p>
+		{
+			article.data.subtitle && (
+				<p class="mb-4 font-light text-gray-500 dark:text-gray-400 whitespace-pre-line">
+					{article.data.subtitle}
+				</p>
+			)
+		}
 		<div class="flex items-center space-x-4">
 			<img
 				class="w-10 h-10 rounded-full"
