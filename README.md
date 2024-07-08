@@ -24,6 +24,6 @@ When you open your pull request, we'll inform you how much we'd be willing to pa
 
 ## CDRs
 
-Community Decision Records take huge inspiration from Architecture Decision Records [ADR](https://github.com/joelparkerhenderson/architecture-decision-record). They're proposals to help the Academy grow and become an inclusive place for all people interested in Kubernetes / Cloud Native and all sorts of technologies.
+Community Decision Records take huge inspiration from Architecture Decision Records [ADR](https://github.com/joelparkerhenderson/architecture-decision-record). They're proposals to help the Academy grow and become an inclusive place for all people interested in future-facing technologies.
 
-Have a look at the [cdr](cdr) folder for the records.
+Have a look at the [cdrs](cdrs) folder for the records.
