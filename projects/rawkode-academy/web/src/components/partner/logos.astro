@@ -1,9 +1,16 @@
 ---
+import { Image } from "astro:assets";
+
+interface Logo {
+	name: string;
+	extension: "svg" | "png";
+}
+
 interface Partner {
 	name: string;
 	url: string;
 	since: string;
-	logo: string;
+	logo: Logo;
 	level: "Malt" | "Blend" | "Dram" | "Nip";
 }
 
@@ -14,35 +21,35 @@ const partners: Partners = [
 		name: "ngrok",
 		level: "Blend",
 		since: "2024",
-		logo: "ngrok.svg",
+		logo: { name: "ngrok", extension: "svg" },
 		url: "https://ngrok.com",
 	},
 	{
 		name: "ControlPlane",
 		level: "Dram",
 		since: "2024",
-		logo: "controlplane.svg",
+		logo: { name: "controlplane", extension: "svg" },
 		url: "https://controlplane.io",
 	},
 	{
 		name: "Guidepad",
 		level: "Dram",
 		since: "2024",
-		logo: "guidepad.svg",
+		logo: { name: "guidepad", extension: "svg" },
 		url: "https://guidepad.io",
 	},
 	{
 		name: "Microsoft Azure",
 		level: "Nip",
 		since: "2024",
-		logo: "microsoft-azure.png",
+		logo: { name: "microsoft-azure", extension: "png" },
 		url: "https://azure.com",
 	},
 	{
 		name: "Fermyon",
 		level: "Nip",
 		since: "2024",
-		logo: "fermyon.svg",
+		logo: { name: "fermyon", extension: "svg" },
 		url: "https://fermyon.com",
 	},
 ];
@@ -91,9 +98,22 @@ const partners: Partners = [
 				partners.map((partner) => (
 					<div>
 						<div>
-							<img
-								class="object-contain w-auto h-24 mx-auto"
-								src={`/partners/${partner.logo}`}
+							<Image
+								class="block dark:hidden object-contain w-auto h-24 mx-auto"
+								src={
+									import(
+										`./logos/${partner.logo.name}-light.${partner.logo.extension}`
+									)
+								}
+								alt={`${partner.name} Logo`}
+							/>
+							<Image
+								class="hidden dark:block object-contain w-auto h-24 mx-auto"
+								src={
+									import(
+										`./logos/${partner.logo.name}-dark.${partner.logo.extension}`
+									)
+								}
 								alt={`${partner.name} Logo`}
 							/>
 							<p class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 mt-2.5">
