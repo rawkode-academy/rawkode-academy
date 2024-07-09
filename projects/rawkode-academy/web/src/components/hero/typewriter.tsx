@@ -22,8 +22,8 @@ const shuffle = (array: string[]): string[] => {
 const Typewriter = (props: Props) => {
 	return (
 		<section className="bg-white dark:bg-black">
-			<div className="grid px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
-				<div className="mr-auto place-self-center lg:col-span-7">
+			<div className="grid px-2 py-8 mx-auto lg:gap-4 xl:gap-0 lg:py-16 lg:grid-cols-12">
+				<div className="mr-auto place-self-center lg:col-span-8">
 					<h1 className="mb-4 text-4xl font-semibold tracking-tight leading-none md:text-5xl xl:text-6xl text-black dark:text-white">
 						<TypeAnimation
 							className="bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent"
@@ -75,7 +75,7 @@ const Typewriter = (props: Props) => {
 						{props.secondaryButton.text}
 					</a>
 				</div>
-				<div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
+				<div className="hidden lg:mt-0 lg:col-span-4 lg:flex">
 					<img src={props.image.src} alt="Mix of Cloud Native Project Logos" />
 				</div>
 			</div>
