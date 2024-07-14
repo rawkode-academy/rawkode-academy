@@ -7,9 +7,8 @@ export default (scope: Construct): ManagedDomain => {
 		"rawkode.dev",
 		Registrar.Cloudflare
 	)
-		.enableMicrosoft365({
-			spfIncludes: [],
-			txtVerification: "ms41378544",
+		.enableProtonMail({
+			verificationCode: "0b2988d284e63f924714e3ae1bc5fae4cf9223ca",
 		})
 		.addTextRecord(
 			"google-site-verification",
