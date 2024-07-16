@@ -1,18 +1,18 @@
 ---
-// import LoginButton from "../components/auth/login-button.astro";
 import MenuItems from "@components/sidebar/items.vue";
+import LoginButton from "../components/auth/login-button.astro";
 
 import {
-// AcademicCapIcon,
-// CalendarDaysIcon,
-ChatBubbleLeftEllipsisIcon,
-HomeIcon,
-// FilmIcon,
-InformationCircleIcon,
-MegaphoneIcon,
-NewspaperIcon,
-// QuestionMarkCircleIcon,
-RocketLaunchIcon,
+	// AcademicCapIcon,
+	// CalendarDaysIcon,
+	ChatBubbleLeftEllipsisIcon,
+	HomeIcon,
+	// FilmIcon,
+	InformationCircleIcon,
+	MegaphoneIcon,
+	NewspaperIcon,
+	// QuestionMarkCircleIcon,
+	RocketLaunchIcon,
 } from "@heroicons/vue/24/outline";
 
 const menuItems = [
@@ -146,7 +146,7 @@ const menuItemsOrgs = [
 				<!-- Apps -->
 
 				<!-- Profile -->
-				<!-- {Astro.locals.user ? <ProfileMenu /> : <LoginButton />} -->
+				<LoginButton client:load />
 			</div>
 		</div>
 	</nav>
@@ -203,6 +203,6 @@ const menuItemsOrgs = [
 	</aside>
 
 	<main>
-			<slot />
+		<slot />
 	</main>
 </div>
