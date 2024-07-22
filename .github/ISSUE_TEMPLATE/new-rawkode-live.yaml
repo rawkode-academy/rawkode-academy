@@ -1,0 +1,28 @@
+name: Rawkode Live Episode
+description: Suggest a Project for an Episode of Rawkode Live.
+title: "[Rawkode Live]: "
+labels: ["content/rawkode-live", "status/proposed"]
+projects: ["RawkodeAcademy/11"]
+assignees:
+  - rawkode
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to propose an episode of Rawkode Live.
+  - type: input
+    id: project-name
+    attributes:
+      label: Project Name
+      description: What is this project called?
+      placeholder: Kubernetes
+    validations:
+      required: true
+  - type: input
+    id: project-repository
+    attributes:
+      label: Project Repository
+      description: Where can I find the source code?
+      placeholder: https://github.com/kubernetes/kubernetes
+    validations:
+      required: true
