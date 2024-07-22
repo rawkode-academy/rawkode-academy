@@ -1,6 +1,6 @@
 name: Rawkode Live Episode
 description: Suggest a Project for an Episode of Rawkode Live.
-title: "[Rawkode Live]: "
+title: "Enter Project Name Here"
 labels: ["content/rawkode-live", "status/proposed"]
 projects: ["RawkodeAcademy/11"]
 assignees:
@@ -10,14 +10,6 @@ body:
     attributes:
       value: |
         Thank you for taking the time to propose an episode of Rawkode Live.
-  - type: input
-    id: project-name
-    attributes:
-      label: Project Name
-      description: What is this project called?
-      placeholder: Kubernetes
-    validations:
-      required: true
   - type: input
     id: project-repository
     attributes:
