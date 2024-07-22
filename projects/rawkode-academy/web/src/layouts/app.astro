@@ -1,6 +1,6 @@
 ---
-// import LoginButton from "../components/auth/login-button.astro";
 import MenuItems from "@components/sidebar/items.vue";
+import LoginButton from "../components/auth/login-button.astro";
 
 import {
 // AcademicCapIcon,
@@ -146,7 +146,7 @@ const menuItemsOrgs = [
 				<!-- Apps -->
 
 				<!-- Profile -->
-				<!-- {Astro.locals.user ? <ProfileMenu /> : <LoginButton />} -->
+				<LoginButton server:defer />
 			</div>
 		</div>
 	</nav>
@@ -203,6 +203,6 @@ const menuItemsOrgs = [
 	</aside>
 
 	<main>
-			<slot />
+		<slot />
 	</main>
 </div>

@@ -13,6 +13,9 @@ export default defineConfig({
 	adapter: cloudflare({
 		mode: "advanced",
 	}),
+	experimental: {
+		serverIslands: true,
+	},
 	markdown: {
 		rehypePlugins: [
 			[
