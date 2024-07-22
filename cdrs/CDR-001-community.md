@@ -19,7 +19,7 @@ This CDR introduces 3 new terms to the vocabulary.
 
 #### Friction
 
-Frictions are issues opened on this repository and labelled appropriately. Anyone can open a friction when they feel that someone about the community can be improved.
+Frictions are issues opened on this repository and labelled appropriately. Anyone can open a friction when they feel that something about the community can be improved.
 
 #### CDR
 
