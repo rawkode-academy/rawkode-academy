@@ -1,0 +1,25 @@
+{
+  "name": "image-service",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "prebuild": "cp node_modules/@resvg/resvg-wasm/index_bg.wasm src/wasm/resvg.wasm && cp node_modules/yoga-wasm-web/dist/yoga.wasm src/wasm/yoga.wasm",
+    "prestart": "cp node_modules/@resvg/resvg-wasm/index_bg.wasm src/wasm/resvg.wasm && cp node_modules/yoga-wasm-web/dist/yoga.wasm src/wasm/yoga.wasm",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "0.8.2",
+    "@resvg/resvg-wasm": "2.6.2",
+    "astro": "4.11.5",
+    "satori": "0.10.14",
+    "satori-html": "0.3.2",
+    "typescript": "5.5.3",
+    "yoga-wasm-web": "0.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/cloudflare": "11.0.1"
+  }
+}
