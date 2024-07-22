@@ -39,7 +39,7 @@
           ...
         }:
         {
-           devenv.shells.default = {
+          devenv.shells.default = {
             devenv.root =
               let
                 devenvRootFileContent = builtins.readFile devenv-root.outPath;
@@ -53,13 +53,17 @@
             languages.typescript.enable = true;
 
             packages = with pkgs; [
-							biome
-							bun
-nodejs
-						];
+              biome
+              bun
+              nodejs
+            ];
 
             enterShell = ''
               bun install
+              __patchTarget="./node_modules/@cloudflare/workerd-linux-64/bin/workerd"
+              if [[ -f "$__patchTarget" ]]; then
+              ${pkgs.patchelf}/bin/patchelf --set-interpreter ${pkgs.glibc}/lib/ld-linux-x86-64.so.2 "$__patchTarget"
+              fi
             '';
 
             scripts.dev.exec = ''
