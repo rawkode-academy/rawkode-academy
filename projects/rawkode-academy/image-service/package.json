@@ -13,10 +13,11 @@
   "dependencies": {
     "@astrojs/check": "0.8.2",
     "@resvg/resvg-wasm": "2.6.2",
-    "astro": "4.11.5",
+    "astro": "4.12.2",
     "satori": "0.10.14",
     "satori-html": "0.3.2",
     "typescript": "5.5.3",
+    "utf64": "1.0.3",
     "yoga-wasm-web": "0.3.3"
   },
   "devDependencies": {
