@@ -8,6 +8,7 @@ import satori, { init } from "satori/wasm";
 import type { APIRoute } from "astro";
 import { loadGoogleFont } from "@/lib/fonts";
 import { DEFAULT_TEMPLATE, type Template } from "@/lib/template";
+import * as utf64 from "utf64";
 
 // Code is mostly taken from https://github.com/kvnang/workers-og
 
@@ -51,18 +52,49 @@ const loadTemplates = async () => {
 	}
 };
 
+interface Payload {
+	format: "svg" | "png";
+	text: string;
+	template: string;
+}
+
+const DEFAULT_PAYLOAD: Payload = {
+	format: "svg",
+	text: "Hello, World!",
+	template: "default",
+};
+
+// Use https://github.com/more-please/more-stuff/tree/main/utf64 to decode the string
+const getPayloadFromSearchParams = (searchParams: URLSearchParams): Payload => {
+	const payloadFromSearchParams = searchParams.get("payload");
+
+	if (payloadFromSearchParams !== null) {
+		const decodedPayload = utf64.decode(payloadFromSearchParams);
+
+		try {
+			const payload: Partial<Payload> = JSON.parse(decodedPayload);
+
+			return {
+				format: payload.format ?? "svg",
+				text: payload.text ?? "Hello, World!",
+				template: payload.template ?? "default",
+			};
+		} catch (error) {
+			return DEFAULT_PAYLOAD;
+		}
+	}
+
+	return DEFAULT_PAYLOAD;
+};
+
 export const GET: APIRoute = async ({ request }) => {
 	await Promise.all([initResvgWasm(), initYogaWasm(), loadTemplates()]);
 
 	const searchParams = new URLSearchParams(new URL(request.url).search);
+	const payload = getPayloadFromSearchParams(searchParams);
 
-	const format = searchParams.get("format") || "svg";
-	const title = searchParams.get("text") || "Hello, World!";
-	const templateName = searchParams.get("template") || "default";
-
-	const template = templates[templateName] ?? DEFAULT_TEMPLATE;
-
-	const content = template.render(title);
+	const template = templates[payload.template] ?? DEFAULT_TEMPLATE;
+	const content = template.render(payload.text);
 
 	const svg = await satori(content, {
 		width: 1200,
@@ -80,7 +112,7 @@ export const GET: APIRoute = async ({ request }) => {
 		],
 	});
 
-	if (format === "svg") {
+	if (payload.format === "svg") {
 		return new Response(svg, {
 			headers: {
 				"Content-Type": "image/svg+xml",
