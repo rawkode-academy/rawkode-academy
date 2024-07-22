@@ -19,12 +19,8 @@ const JWKS = createRemoteJWKSet(
 
 export const onRequest = defineMiddleware(async (context, next) => {
     const session = await getSessionFromCookie(context.cookies);
-    console.log("1");
-
-    console.debug(session);
 
     if (!("accessToken" in session)) {
-        console.log("No access token");
         return next();
     }
 
@@ -33,7 +29,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     // If the session is valid, move on to the next function
     if (hasValidSession) {
-        console.log("Session valid");
         context.locals.user = session.user;
         return next();
     }
@@ -63,23 +58,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
         context.locals.user = session.user;
         return next();
     } catch (e) {
-        console.debug(e);
-        console.log("Deleting Cookies");
-
         context.cookies.delete(cookieName);
         return context.redirect('/');
     }
 });
 
 const getSessionFromCookie = async (cookies: AstroCookies): Promise<MaybeSessionData> => {
-    console.log("Checking for cookie");
     const cookie = cookies.get(cookieName);
     if (!cookie) {
-        console.log("No cookie");
         return {} as NoSession;
     }
 
-    console.log("cookie dude");
     return unsealData<SessionData>(cookie.value, {
         password: import.meta.env.WORKOS_COOKIE_PASSWORD,
     });
