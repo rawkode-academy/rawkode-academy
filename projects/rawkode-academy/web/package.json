@@ -27,10 +27,12 @@
     "@trigger.dev/sdk": "^2.3.19",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "astro": "4.11.5",
+    "@workos-inc/node": "^7.13.0",
+    "astro": "^4.12.2",
     "flowbite": "^2.4.1",
     "flowbite-typography": "^1.0",
     "graphql": "^16.9.0",
+    "iron-session": "^8.0.2",
     "luxon": "^3.4.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -44,7 +46,7 @@
     "vue-writer": "^2.0.2"
   },
   "devDependencies": {
-		"@graphql-codegen/cli": "5.0.2",
+    "@graphql-codegen/cli": "5.0.2",
     "@types/luxon": "^3.4.2",
     "@graphql-codegen/introspection": "4.0.3",
     "@graphql-codegen/client-preset": "4.3.2",
