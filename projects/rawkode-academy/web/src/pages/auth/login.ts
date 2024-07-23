@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ locals, redirect }) => {
 
 	const authorizationUrl = workos.userManagement.getAuthorizationUrl({
 		provider: 'authkit',
-		redirectUri: 'http://localhost:4321/auth/callback',
+		redirectUri: locals.runtime.env.REDIRECT_URL,
 		clientId,
 	});
 

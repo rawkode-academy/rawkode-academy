@@ -5,3 +5,6 @@ compatibility_flags = [ "nodejs_compat" ]
 
 [env.production]
 compatibility_date = "2024-07-01"
+
+[env.production.vars]
+REDIRECT_URL = "https://rawkode.academy/auth/callback"
