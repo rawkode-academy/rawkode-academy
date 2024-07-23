@@ -28,10 +28,8 @@ const { Content } = await article.render();
 ---
 
 <Page title="Blog">
-	<div class="flex justify-between px-4 mx-auto max-w-screen-xl">
-		<article
-			class="mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert"
-		>
+	<div class="px-4">
+		<article class="max-w-screen-xl format prose lg:prose-xl dark:format-invert">
 			<h1>{article.data.title}</h1>
 
 			<header class="mb-4 lg:mb-6 not-format">
