@@ -4,24 +4,26 @@ import { sealData } from 'iron-session';
 
 export const prerender = false;
 
-const workos = new WorkOS(import.meta.env.WORKOS_API_KEY)
-
 export const GET: APIRoute = async ({
+	locals,
   request,
   redirect,
   cookies,
 }) => {
+	const env = locals.runtime.env;
+	const workos = new WorkOS(env.WORKOS_API_KEY)
+
   const code = String(
     new URL(request.url).searchParams.get('code')
   )
   const session =
     await workos.userManagement.authenticateWithCode({
       code,
-      clientId: import.meta.env.WORKOS_CLIENT_ID,
+      clientId: env.WORKOS_CLIENT_ID,
     })
 
   const encryptedSession = await sealData(session, {
-    password: import.meta.env.WORKOS_COOKIE_PASSWORD,
+    password: env.WORKOS_COOKIE_PASSWORD,
   })
 
   cookies.set('wos-session', encryptedSession, {
