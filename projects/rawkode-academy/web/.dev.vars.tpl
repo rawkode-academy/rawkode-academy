@@ -1,4 +1,4 @@
-REDIRECT_URL="https://localhost:4321/auth/callback"
+REDIRECT_URL="http://localhost:4321/auth/callback"
 
 WORKOS_CLIENT_ID="{{ op://sa.rawkode.academy/workos-staging/username }}"
 WORKOS_API_KEY="{{ op://sa.rawkode.academy/workos-staging/password }}"
