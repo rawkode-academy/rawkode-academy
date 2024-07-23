@@ -6,6 +6,7 @@ dist
 node_modules
 
 # Cloudflare
+.wrangler
 .dev.vars
 
 # GraphQL Generated Client
