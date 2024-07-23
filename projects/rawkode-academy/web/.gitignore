@@ -5,6 +5,9 @@ dist
 # NodeJS
 node_modules
 
+# Cloudflare
+.dev.vars
+
 # GraphQL Generated Client
 ./src/gql
 .DS_Store
