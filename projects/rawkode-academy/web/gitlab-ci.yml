@@ -6,16 +6,31 @@ cache:
     - ./node_modules/
 
 default:
-    before_script:
-        - echo experimental-features = nix-command flakes >> /etc/nix/nix.conf
-        - cd ./projects/rawkode-academy/web
+  before_script:
+    - echo experimental-features = nix-command flakes >> /etc/nix/nix.conf
+    - cd ./projects/rawkode-academy/web
 
-bun-install:
+web-bun-install:
   stage: setup
   script:
     - nix develop --impure . --command "bun" -- install
 
-astro-check:
+web-astro-check:
   stage: lint
   script:
     - nix develop --impure . --command "bun" -- x astro check
+
+web-astro-build:
+  stage: build
+  script:
+    - nix develop --impure . --command "bun" -- run build
+
+web-deploy:
+  stage: deploy
+  enviroment:
+    name: production
+    url: https://rawkode.academy
+  script:
+    - nix develop --impure . --command "bun" -- x wrangler pages deploy
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
