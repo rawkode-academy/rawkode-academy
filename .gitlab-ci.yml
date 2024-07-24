@@ -5,4 +5,7 @@ stages:
   - deploy
 
 include:
-  - local: '**/gitlab-ci.yml'
+  - local: ./projects/rawkode-academy/web/gitlab-ci.yml
+    rules:
+      - changes:
+        - projects/rawkode-academy/web/**/*

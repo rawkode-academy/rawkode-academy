@@ -1,7 +1,4 @@
 image: nixos/nix:2.21.4
-only:
-  changes:
-    - "./projects/rawkode-academy/web"
 
 cache:
   paths:
