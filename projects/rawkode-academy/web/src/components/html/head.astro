@@ -1,11 +1,13 @@
 ---
 import Posthog from "@components/analytics/posthog.astro";
+import Opengraph from "./opengraph.astro";
 
 interface Props {
 	title: string;
 }
 
 const { title } = Astro.props;
+
 ---
 
 <style is:global>
@@ -53,6 +55,8 @@ const { title } = Astro.props;
 	<meta name="theme-color" content="#5F5ED7" />
 
 	<title>{title} | Rawkode Academy</title>
+
+	<Opengraph title={title} />
 
 	<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/avenir" />
 	<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/orbitron" />

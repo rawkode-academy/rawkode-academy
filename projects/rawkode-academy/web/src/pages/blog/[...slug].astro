@@ -27,7 +27,7 @@ const { article } = Astro.props;
 const { Content } = await article.render();
 ---
 
-<Page title="Blog">
+<Page title={`${article.data.title} | Blog`}>
 	<div class="px-4">
 		<article class="max-w-screen-xl format prose lg:prose-xl dark:format-invert">
 			<h1>{article.data.title}</h1>
