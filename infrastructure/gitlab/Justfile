@@ -1,0 +1,20 @@
+@default:
+  just --choose
+
+# Clean up node_modules and generated providers
+clean:
+  rm -rf node_modules .gen
+
+# Get and Generate the Providers
+build-providers:
+  bun x cdktf provider get
+
+## CDKTF Commands
+# Run cdktf Plan
+plan stack="":
+  op run -- bun x cdktf plan {{ stack }}
+
+
+# Run cdktf Deploy
+deploy stack="":
+  op run -- bun x cdktf deploy {{ stack }}
