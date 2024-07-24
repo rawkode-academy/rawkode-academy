@@ -1,4 +1,7 @@
 image: nixos/nix:2.21.4
+only:
+  changes:
+    - "./projects/rawkode-academy/web"
 
 cache:
   paths:
@@ -8,6 +11,7 @@ cache:
 default:
     before_script:
         - echo experimental-features = nix-command flakes >> /etc/nix/nix.conf
+        - cd ./projects/rawkode-academy/web
 
 bun-install:
   stage: setup
