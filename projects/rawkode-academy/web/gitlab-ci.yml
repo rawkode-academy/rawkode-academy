@@ -27,7 +27,7 @@ web-astro-build:
 
 web-deploy:
   stage: deploy
-  enviroment:
+  environment:
     name: production
     url: https://rawkode.academy
   script:
