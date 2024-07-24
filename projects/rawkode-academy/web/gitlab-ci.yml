@@ -1,0 +1,20 @@
+image: nixos/nix:2.21.4
+
+cache:
+  paths:
+    - /nix
+    - ./node_modules/
+
+default:
+    before_script:
+        - echo experimental-features = nix-command flakes >> /etc/nix/nix.conf
+
+bun-install:
+  stage: setup
+  script:
+    - nix develop --impure . --command "bun" -- install
+
+astro-check:
+  stage: lint
+  script:
+    - nix develop --impure . --command "bun" -- x astro check
