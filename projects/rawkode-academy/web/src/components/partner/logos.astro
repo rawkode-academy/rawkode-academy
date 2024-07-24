@@ -1,9 +1,8 @@
 ---
-import { Image } from "astro:assets";
-
 interface Logo {
-	name: string;
-	extension: "svg" | "png";
+	image: typeof import("*?raw");
+	fillLight: string;
+	fillDark: string;
 }
 
 interface Partner {
@@ -21,40 +20,59 @@ const partners: Partners = [
 		name: "ngrok",
 		level: "Blend",
 		since: "2024",
-		logo: { name: "ngrok", extension: "svg" },
+		logo: {
+			image: await import(`./logos/ngrok.svg?raw`),
+			fillLight: "#10239E",
+			fillDark: "white",
+		},
 		url: "https://ngrok.com",
 	},
 	{
 		name: "ControlPlane",
 		level: "Dram",
 		since: "2024",
-		logo: { name: "controlplane", extension: "svg" },
+		logo: {
+			image: await import(`./logos/controlplane.svg?raw`),
+			fillLight: "black",
+			fillDark: "white",
+		},
 		url: "https://controlplane.io",
 	},
 	{
 		name: "Guidepad",
 		level: "Dram",
 		since: "2024",
-		logo: { name: "guidepad", extension: "svg" },
+		logo: {
+			image: await import(`./logos/guidepad.svg?raw`),
+			fillLight: "black",
+			fillDark: "white",
+		},
 		url: "https://guidepad.io",
 	},
 	{
 		name: "Microsoft Azure",
 		level: "Nip",
 		since: "2024",
-		logo: { name: "microsoft-azure", extension: "png" },
+		logo: {
+			image: await import(`./logos/microsoft.svg?raw`),
+			fillLight: "#706d6e",
+			fillDark: "#706d6e",
+		},
 		url: "https://azure.com",
 	},
 	{
 		name: "Fermyon",
 		level: "Nip",
 		since: "2024",
-		logo: { name: "fermyon", extension: "svg" },
-		url: "https://fermyon.com",
+		logo: {
+			image: await import(`./logos/fermyon.svg?raw`),
+			fillLight: "#0d203f",
+			fillDark: "#34E8BD",
+		},
+		url: "https://www.fermyon.com/?utm_source=rawkode&utm_medium=logo&utm_campaign=acad-sponsor",
 	},
 ];
 ---
-
 <section class="bg-white dark:bg-gray-900">
 	<div class="py-8 px-4 mx-auto sm:py-16 lg:px-6">
 		<div class="mb-8 lg:mb-16">
@@ -92,30 +110,18 @@ const partners: Partners = [
 		</div>
 
 		<div
-			class="grid grid-cols-2 mt-8 text-center gap-y-8 gap-x-6 sm:grid-cols-3 lg:grid-cols-4 sm:gap-8 lg:mt-16"
+			class="grid grid-cols-1 mt-8 text-center gap-y-16 gaps-x-16 lg:grid-cols-2 xl:grid-cols-3"
 		>
 			{
-				partners.map((partner) => (
+				partners.map(async (partner) => (
 					<div>
 						<div>
-							<Image
-								class="block dark:hidden object-contain w-auto h-24 mx-auto"
-								src={
-									import(
-										`./logos/${partner.logo.name}-light.${partner.logo.extension}`
-									)
-								}
-								alt={`${partner.name} Logo`}
-							/>
-							<Image
-								class="hidden dark:block object-contain w-auto h-24 mx-auto"
-								src={
-									import(
-										`./logos/${partner.logo.name}-dark.${partner.logo.extension}`
-									)
-								}
-								alt={`${partner.name} Logo`}
-							/>
+							<div class="flex justify-center w-auto max-w-64 object-contain h-24 mx-auto mb-4"
+							style=`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`
+							>
+								<Fragment set:html={partner.logo.image.default} />
+							</div>
+
 							<p class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 mt-2.5">
 								Partner since {partner.since}
 							</p>

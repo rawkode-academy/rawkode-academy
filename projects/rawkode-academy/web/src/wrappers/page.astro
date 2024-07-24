@@ -14,7 +14,7 @@ const { title } = Astro.props;
 		<slot name="extra-head" slot="extra-head" />
 	</DefaultHead>
 
-  <body class="h-full w-full mx-auto max-w-screen-3xl bg-white dark:bg-black">
+	<body class="h-full w-full mx-auto max-w-screen-3xl bg-white dark:bg-black">
 		<slot name="layout">
 			<DefaultLayout>
 				<slot />
@@ -23,26 +23,27 @@ const { title } = Astro.props;
 		<script>
 			import "flowbite";
 		</script>
-	</body>
+	</body><style is:global>
+		:root {
+			color-scheme: light dark;
+		}
+
+		h1,
+		h2,
+		h3 {
+			@apply mt-8 mb-4;
+		}
+
+		h1 {
+			@apply mb-4 text-4xl tracking-tight font-bold text-gray-900 dark:text-white;
+		}
+
+		h2 {
+			@apply text-2xl font-semibold text-gray-900 dark:text-white;
+		}
+
+		h3 {
+			@apply text-xl text-gray-900 dark:text-white;
+		}
+	</style>
 </html>
-
-<style is:global>
-	h1,
-	h2,
-	h3 {
-		@apply mt-8 mb-4;
-	}
-
-	h1 {
-		@apply mb-4 text-4xl tracking-tight font-bold text-gray-900 dark:text-white;
-	}
-
-	h2 {
-		@apply text-2xl font-semibold text-gray-900 dark:text-white;
-	}
-
-	h3 {
-		@apply text-xl text-gray-900 dark:text-white;
-	}
-</style>
-  
