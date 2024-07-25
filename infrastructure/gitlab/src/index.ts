@@ -1,16 +1,40 @@
+import { DataGitlabGroup } from "@generatedProviders/gitlab/data-gitlab-group";
+import { GroupLabel } from "@generatedProviders/gitlab/group-label";
+import { Project } from "@generatedProviders/gitlab/project";
+import { GitlabProvider } from "@generatedProviders/gitlab/provider";
+import { DataOnepasswordItem } from "@generatedProviders/onepassword/data-onepassword-item";
+import { DataOnepasswordVault } from "@generatedProviders/onepassword/data-onepassword-vault";
+import { OnepasswordProvider } from "@generatedProviders/onepassword/provider";
 import { App, HttpBackend, TerraformStack } from "cdktf";
 import { Construct } from "constructs";
-import { GitlabProvider } from "@generatedProviders/gitlab/provider";
-import { Project } from "@generatedProviders/gitlab/project";
-import { GroupLabel } from "@generatedProviders/gitlab/group-label";
-import { DataGitlabGroup } from "@generatedProviders/gitlab/data-gitlab-group";
 
 class GitLab extends TerraformStack {
 	constructor(scope: Construct, id: string) {
 		super(scope, id);
 
+		new OnepasswordProvider(this, "onepassword", {
+			account: "my.1password.eu",
+		});
+
+		// GitLab uses Personal Acces Tokens, so this secret comes
+		// from my personal vault; and as such only I can run this stack.
+		const vault = new DataOnepasswordVault(this, "rawkode-academy", {
+			name: "Private",
+		});
+
+		new DataOnepasswordItem(this, "item", {
+			vault: vault.name,
+			title: "GitLab",
+		});
+
+		// Currently no way to fetch section fields from
+		// this 1Password item.
+		// Pennding: https://github.com/1Password/terraform-provider-onepassword/issues/187
+		// When this is resolved, we can fetch the PAT form 1Password
+		// and even create the GitLab CI/CD variables
+
 		new GitlabProvider(this, "gitlab", {
-			token: process.env.GITLAB_ACCESS_TOKEN,
+			token: process.env.GITLAB_ACCESS_TOKEN || "",
 		});
 
 		const group = new DataGitlabGroup(this, "group", {
