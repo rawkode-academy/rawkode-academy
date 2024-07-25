@@ -18,7 +18,7 @@ export default defineConfig({
 			validateSecrets: true,
 			schema: {
 				REDIRECT_URL: envField.string({
-					context: "client",
+					context: "server",
 					access: "public",
 					optional: true,
 					default: "http://localhost:4321/auth/callback",
