@@ -3,7 +3,6 @@ image: nixos/nix:2.21.4
 cache:
   paths:
     - /nix
-    - ./node_modules/
 
 default:
   before_script:
@@ -24,9 +23,14 @@ web-astro-build:
   stage: build
   script:
     - nix develop --impure . --command "bun" -- run build
+  artifacts:
+    paths:
+      - ./projects/rawkode-academy/web/dist
 
 web-deploy:
   stage: deploy
+  dependencies:
+    - web-astro-build
   environment:
     name: production
     url: https://rawkode.academy
