@@ -4,8 +4,13 @@ stages:
   - build
   - deploy
 
+ensure-never-empty:
+  stage: setup
+  script:
+    - echo "Hello, World!"
+
 include:
   - local: projects/rawkode-academy/web/gitlab-ci.yml
     rules:
       - changes:
-        - projects/rawkode-academy/web/**/*
+          - projects/rawkode-academy/web/**/*
