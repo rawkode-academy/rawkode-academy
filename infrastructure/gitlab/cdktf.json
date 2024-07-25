@@ -4,6 +4,7 @@
   "app": "bun x ts-node src/index.ts",
   "sendCrashReports": "false",
   "terraformProviders": [
+		"1password/onepassword@~> 2.1",
     "gitlabhq/gitlab@~> 17.2"
   ],
   "terraformModules": [],
