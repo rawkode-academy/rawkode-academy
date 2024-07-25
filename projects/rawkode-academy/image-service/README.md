@@ -1,6 +1,6 @@
-# OpenGraph service
+# Image service
 
-Generate OpenGraph images with a given set of parameters.
+Generate images (`svg` & `png`) with a given set of parameters.
 
 ## Local development
 
