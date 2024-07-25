@@ -11,22 +11,22 @@ type NoSession = {};
 type MaybeSessionData = NoSession | SessionData;
 
 export const onRequest = defineMiddleware(async (context, next) => {
+	const { getSecret } = await import("astro:env/server");
+
 	// The runtime isn't available for pre-rendered pages and we
 	// only want this middleware to run for SSR.
 	if (!("runtime" in context.locals)) {
 		return next();
 	}
 
-	const env = context.locals.runtime.env;
-
-	const session = await getSessionFromCookie(env, context.cookies);
+	const session = await getSessionFromCookie(context.cookies);
 
 	if (!("accessToken" in session)) {
 		return next();
 	}
 
-	const clientId = env.WORKOS_CLIENT_ID;
-	const workos = new WorkOS(env.WORKOS_API_KEY)
+	const clientId = getSecret("WORKOS_CLIENT_ID") || "";
+	const workos = new WorkOS(getSecret("WORKOS_API_KEY"));
 	const JWKS = createRemoteJWKSet(
 		new URL(workos.userManagement.getJwksUrl(clientId)),
 	);
@@ -51,7 +51,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 				accessToken,
 				refreshToken,
 			},
-			{ password: env.WORKOS_COOKIE_PASSWORD || "" },
+			{ password: getSecret("WORKOS_COOKIE_PASSWORD") || "" },
 		);
 
 		context.cookies.set(cookieName, encryptedSession, {
@@ -69,13 +69,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
 	}
 });
 
-const getSessionFromCookie = async (env: Env, cookies: AstroCookies): Promise<MaybeSessionData> => {
+const getSessionFromCookie = async (cookies: AstroCookies): Promise<MaybeSessionData> => {
+	const { getSecret } = await import("astro:env/server");
+
+	const cookiePassword = getSecret("WORKOS_COOKIE_PASSWORD") || "";
+
 	const cookie = cookies.get(cookieName);
 	if (!cookie) {
 		return {} as NoSession;
 	}
 
 	return unsealData<SessionData>(cookie.value, {
-		password: env.WORKOS_COOKIE_PASSWORD,
+		password: cookiePassword,
 	});
 }
