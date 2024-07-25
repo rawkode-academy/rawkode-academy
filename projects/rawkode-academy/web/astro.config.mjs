@@ -20,12 +20,11 @@ export default defineConfig({
 				REDIRECT_URL: envField.string({
 					context: "server",
 					access: "public",
-					optional: true,
-					default: "http://localhost:4321/auth/callback",
+					optional: false,
 				}),
 				WORKOS_CLIENT_ID: envField.string({
 					context: "server",
-					access: "secret",
+					access: "public",
 					optional: false,
 				}),
 				WORKOS_API_KEY: envField.string({
