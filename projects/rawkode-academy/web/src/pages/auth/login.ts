@@ -6,8 +6,6 @@ export const prerender = false;
 export const GET: APIRoute = async ({ redirect }) => {
 	const { getSecret } = await import("astro:env/server");
 
-	console.log(getSecret("REDIRECT_URL"));
-
 	const workos = new WorkOS(getSecret("WORKOS_API_KEY"));
 	const clientId = getSecret("WORKOS_CLIENT_ID") || "";
 
