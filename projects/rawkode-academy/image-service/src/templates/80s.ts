@@ -5,7 +5,7 @@ export const template: Template = {
 	font: DEFAULT_FONT,
 
 	render(title) {
-		return html`<div
+		return html(`<div
 			style="width: 1200px; height: 630px; background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff); background-size: 400% 400%; display: flex; justify-content: center; align-items: center; font-family: Arial, sans-serif;"
 		>
 			<h1
@@ -13,6 +13,6 @@ export const template: Template = {
 			>
 				${title}
 			</h1>
-		</div>`;
+		</div>`);
 	},
 };

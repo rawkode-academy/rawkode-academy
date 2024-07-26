@@ -9,7 +9,7 @@ export const template: Template = {
 	},
 
 	render(title) {
-		return html`<div
+		return html(`<div
 			style="display: flex; flex-direction: column; height: 100%;"
 		>
 			<div
@@ -27,13 +27,13 @@ export const template: Template = {
 				</svg>
 			</div>
 
-			<div style="flex: 1; display: flex; align-items: center;">
+			<div style="flex: 1; display: flex; align-items: center; background-color: white;">
 				<p
 					style="font-family: Poppins; font-size: 32px; margin: 20px; text-overflow: ellipsis;"
 				>
 					${title}
 				</p>
 			</div>
-		</div>`;
+		</div>`);
 	},
 };

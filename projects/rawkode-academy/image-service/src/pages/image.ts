@@ -87,6 +87,11 @@ const getPayloadFromSearchParams = (searchParams: URLSearchParams): Payload => {
 	return DEFAULT_PAYLOAD;
 };
 
+// cache for one day
+// When changing to higher caching times, consider adding "immutable, no-transform"
+
+const CACHE_CONTROL = "public, max-age=86400";
+
 export const GET: APIRoute = async ({ request }) => {
 	await Promise.all([initResvgWasm(), initYogaWasm(), loadTemplates()]);
 
@@ -116,7 +121,7 @@ export const GET: APIRoute = async ({ request }) => {
 		return new Response(svg, {
 			headers: {
 				"Content-Type": "image/svg+xml",
-				"Cache-Control": "public, immutable, no-transform, max-age=31536000",
+				"Cache-Control": CACHE_CONTROL,
 			},
 			status: 200,
 		});
@@ -142,7 +147,7 @@ export const GET: APIRoute = async ({ request }) => {
 	return new Response(body, {
 		headers: {
 			"Content-Type": "image/png",
-			"Cache-Control": "public, immutable, no-transform, max-age=31536000",
+			"Cache-Control": CACHE_CONTROL,
 		},
 		status: 200,
 	});
