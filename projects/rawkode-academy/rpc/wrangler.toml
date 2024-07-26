@@ -1,8 +1,0 @@
-name = "rpc"
-main="src/index.ts"
-compatibility_date = "2023-12-01"
-compatibility_flags = ["nodejs_compat"]
-
-routes = [
-	{ pattern = "rpc.rawkode.academy", custom_domain = true }
-]
