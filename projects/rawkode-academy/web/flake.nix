@@ -67,7 +67,6 @@
             '';
 
             scripts.dev.exec = ''
-              op inject --force -i .dev.vars.tpl -o .dev.vars
               bun x astro dev
             '';
           };

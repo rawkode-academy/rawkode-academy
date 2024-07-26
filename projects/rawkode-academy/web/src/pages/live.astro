@@ -1,0 +1,45 @@
+---
+import Page from "@wrappers/page.astro";
+
+const videoId = "04fd9d3c9bd548bf083d69ddacbf5324";
+const posterUrl = encodeURIComponent(
+	"https://i3.ytimg.com/vi/h6AhLhkcOsw/maxresdefault.jpg"
+);
+---
+
+<Page title="Help">
+	<h1>Live</h1>
+
+	<p>Join us live for our next live stream!</p>
+
+	<h2>Developing & Building Open Source with Dagger | Kargo</h2>
+
+	<p>August 7th at 1700 BST / 0900 Pacific</p>
+	<br />
+	<p class="mb-2 prose">
+		This live stream series will demonstrate how open source projects can
+		leverage Dagger to enhance their build automation and development
+		environments. Dagger enables developers to define their pipelines and
+		environments using general-purpose programming languages, increasing
+		flexibility and maintainability compared to traditional configuration-based
+		tools.
+	</p>
+	<p class="mb-2 prose">
+		We will collaborate with various open source communities to implement Dagger
+		in real-world scenarios, showcasing best practices and addressing common
+		challenges. Each stream will focus on a specific aspect of Dagger, such as
+		building container images, orchestrating complex workflows, or managing
+		dependencies. By the end of the series, viewers will have a comprehensive
+		understanding of Dagger's capabilities and how to apply them to their own
+		projects.
+	</p>
+	<br />
+
+	<div style="position: relative; padding-top: 56.25%">
+		<iframe
+			src=`https://customer-qvhar784v2kmewih.cloudflarestream.com/${videoId}/iframe?poster=${posterUrl}`
+			style="border: none; position: absolute; top: 0; height: 100%; width: 100%"
+			allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+			allowfullscreen="true"></iframe>
+	</div>
+</Page>
