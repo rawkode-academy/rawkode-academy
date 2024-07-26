@@ -9,10 +9,14 @@ const { title } = Astro.props;
 const ogImagePayload = { text: title, format: "png" };
 const payload = utf64.encode(JSON.stringify(ogImagePayload));
 const ogImageUrl = `https://image.rawkode.academy/image?payload=${payload}`;
+const url = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content={title} />
-<meta property="og:description" content="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape." />
-<meta property="og:url" content={Astro.url} />
+<meta
+	property="og:description"
+	content="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape."
+/>
+<meta property="og:url" content={url} />
 <meta property="og:image" content={ogImageUrl} />

@@ -12,6 +12,7 @@ export default defineConfig({
 	adapter: cloudflare({
 		mode: "advanced",
 	}),
+	site: import.meta.env.DEV ? "http://localhost:4321" : "https://rawkode.academy",
 	experimental: {
 		serverIslands: true,
 		env: {
