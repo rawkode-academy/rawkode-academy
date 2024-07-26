@@ -17,7 +17,7 @@ To add a new template, just add a new file here: `<template-key>.ts`:
 
   	render(title) {
   		// FIXME: add a proper
-  		return html`<div>${title}</div>`;
+  		return html(`<div>${title}</div>`);
   	},
   };
   ```

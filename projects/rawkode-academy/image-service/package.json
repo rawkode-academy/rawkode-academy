@@ -8,7 +8,8 @@
     "start": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run"
   },
   "dependencies": {
     "@astrojs/check": "0.8.2",
@@ -21,6 +22,7 @@
     "yoga-wasm-web": "0.3.3"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "11.0.1"
+    "@astrojs/cloudflare": "11.0.1",
+    "vitest": "2.0.4"
   }
 }
