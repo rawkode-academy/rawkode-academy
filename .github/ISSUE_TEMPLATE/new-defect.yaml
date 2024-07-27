@@ -1,0 +1,43 @@
+name: New Defect
+description: Use this template to report a new defect.
+labels:
+  - type/defect
+assignees:
+  - rawkode
+  - icepuma
+body:
+  - type: checkboxes
+    id: existing-issues-check
+    attributes:
+      label: Check for existing issues
+      description: Please check the list of existing issues for duplicates; if a defect already exists, give it a `+1` (👍).
+      options:
+        - label: Completed
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the defect & provice steps to reproduce it
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: Where did you encounter this defect?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Browser
+      description: Which browser did you use?
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Microsoft Edge
