@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "format": "biome format --write src/",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "codegen": "graphql-codegen --config graphql-codegen.ts"
@@ -47,13 +48,17 @@
     "vue-writer": "^2.0.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.8.3",
     "@graphql-codegen/cli": "5.0.2",
-    "@types/luxon": "^3.4.2",
-    "@graphql-codegen/introspection": "4.0.3",
     "@graphql-codegen/client-preset": "4.3.2",
+    "@graphql-codegen/introspection": "4.0.3",
+    "@types/luxon": "^3.4.2",
     "wrangler": "^3.64.0"
   },
   "trigger.dev": {
     "endpointId": "rawkode-academy-Gpkz"
-  }
+  },
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }
