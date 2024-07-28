@@ -60,6 +60,9 @@
     "endpointId": "rawkode-academy-Gpkz"
   },
   "trustedDependencies": [
-    "@biomejs/biome"
+    "@biomejs/biome",
+    "esbuild",
+    "sharp",
+    "workerd"
   ]
 }
