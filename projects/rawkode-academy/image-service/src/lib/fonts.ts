@@ -56,7 +56,7 @@ export async function loadGoogleFont({
 	const body = await response.text();
 	// Get the font URL from the CSS text
 	const fontUrl = body.match(
-		/src: url\((.+)\) format\('(opentype|truetype)'\)/
+		/src: url\((.+)\) format\('(opentype|truetype)'\)/,
 	)?.[1];
 
 	if (!fontUrl) {

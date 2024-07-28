@@ -7,7 +7,11 @@ import initYoga from "yoga-wasm-web";
 import satori, { init } from "satori/wasm";
 import type { APIRoute } from "astro";
 import { loadGoogleFont } from "@/lib/fonts";
-import { DEFAULT_TEMPLATE, type Template } from "@/lib/template";
+import {
+	DEFAULT_HASHED_TEMPLATE,
+	type HashedTemplate,
+	type Template,
+} from "@/lib/template";
 import * as utf64 from "utf64";
 
 // Code is mostly taken from https://github.com/kvnang/workers-og
@@ -30,10 +34,10 @@ const initYogaWasm = async () => {
 
 const templateModules = import.meta.glob<{ template: Template }>(
 	"/src/templates/*.ts",
-	{ eager: true }
+	{ eager: true },
 );
 
-const templates: { [name: string]: Template } = {};
+const templates: { [name: string]: HashedTemplate } = {};
 
 const loadTemplates = async () => {
 	// only load templates once
@@ -45,7 +49,10 @@ const loadTemplates = async () => {
 				const name = match[1];
 
 				if (name && module.template) {
-					templates[name] = module.template;
+					templates[name] = {
+						hash: module.template.hash(),
+						template: module.template,
+					};
 				}
 			}
 		}
@@ -98,7 +105,8 @@ export const GET: APIRoute = async ({ request }) => {
 	const searchParams = new URLSearchParams(new URL(request.url).search);
 	const payload = getPayloadFromSearchParams(searchParams);
 
-	const template = templates[payload.template] ?? DEFAULT_TEMPLATE;
+	const hashedTemplate = templates[payload.template] ?? DEFAULT_HASHED_TEMPLATE;
+	const template = hashedTemplate.template;
 	const content = template.render(payload.text);
 
 	const svg = await satori(content, {
@@ -122,6 +130,7 @@ export const GET: APIRoute = async ({ request }) => {
 			headers: {
 				"Content-Type": "image/svg+xml",
 				"Cache-Control": CACHE_CONTROL,
+				ETag: hashedTemplate.hash,
 			},
 			status: 200,
 		});
@@ -148,6 +157,7 @@ export const GET: APIRoute = async ({ request }) => {
 		headers: {
 			"Content-Type": "image/png",
 			"Cache-Control": CACHE_CONTROL,
+			ETag: hashedTemplate.hash,
 		},
 		status: 200,
 	});

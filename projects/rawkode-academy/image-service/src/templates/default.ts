@@ -1,4 +1,4 @@
-import type { Template } from "@/lib/template";
+import { createHash, type Template } from "@/lib/template";
 import { html } from "satori-html";
 
 export const template: Template = {
@@ -6,6 +6,11 @@ export const template: Template = {
 		name: "Poppins",
 		weight: 400,
 		style: "normal",
+	},
+
+	hash() {
+		// we call the render method with a stable input to calculate the hash
+		return createHash(this.render("comtrya"));
 	},
 
 	render(title) {
