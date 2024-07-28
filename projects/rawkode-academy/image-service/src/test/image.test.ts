@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import * as utf64 from "utf64";
 
 const toArrayBuffer = async (
-	data: typeof import("*?raw")
+	data: typeof import("*?raw"),
 ): Promise<ArrayBuffer> => {
 	const encoder = new TextEncoder();
 	return encoder.encode(data.default).buffer;
@@ -14,7 +14,7 @@ const withoutParamsFixture = await import(
 ).then(toArrayBuffer);
 
 const withTextFixture = await import("./fixtures/with-text.svg?raw").then(
-	toArrayBuffer
+	toArrayBuffer,
 );
 
 const withAmpersandInTextFixture = await import(
@@ -30,13 +30,13 @@ describe("/image", () => {
 			expect(response.status).toEqual(200);
 
 			expect((await response.arrayBuffer()).byteLength).toEqual(
-				withoutParamsFixture.byteLength
+				withoutParamsFixture.byteLength,
 			);
 		});
 
 		test("should return 200, when calling with a text", async () => {
 			const payload = utf64.encode(
-				JSON.stringify({ text: "Henlo, dis is doggo!" })
+				JSON.stringify({ text: "Henlo, dis is doggo!" }),
 			);
 
 			const response = await GET({
@@ -46,13 +46,13 @@ describe("/image", () => {
 
 			expect(response.status).toEqual(200);
 			expect((await response.arrayBuffer()).byteLength).toEqual(
-				withTextFixture.byteLength
+				withTextFixture.byteLength,
 			);
 		});
 
 		test("should return 200 and render ampersand correctly", async () => {
 			const payload = utf64.encode(
-				JSON.stringify({ text: "Henlo, dis is doggo & catto!" })
+				JSON.stringify({ text: "Henlo, dis is doggo & catto!" }),
 			);
 
 			const response = await GET({
@@ -62,8 +62,29 @@ describe("/image", () => {
 
 			expect(response.status).toEqual(200);
 			expect((await response.arrayBuffer()).byteLength).toEqual(
-				withAmpersandInTextFixture.byteLength
+				withAmpersandInTextFixture.byteLength,
 			);
+		});
+
+		test("should return 200 and return an etag which should not change when called twice", async () => {
+			const defaultTemplate = await import("../templates/default");
+			const expectedHash = defaultTemplate.template.hash();
+
+			const firstResponse = await GET({
+				// @ts-ignore - not all properties are set for request
+				request: { url: "http://localhost:4321" },
+			});
+
+			expect(firstResponse.status).toEqual(200);
+			expect(firstResponse.headers.get("ETag")).toEqual(expectedHash);
+
+			const secondResponse = await GET({
+				// @ts-ignore - not all properties are set for request
+				request: { url: "http://localhost:4321" },
+			});
+
+			expect(secondResponse.status).toEqual(200);
+			expect(secondResponse.headers.get("ETag")).toEqual(expectedHash);
 		});
 	});
 });

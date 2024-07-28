@@ -7,14 +7,14 @@
     "prestart": "just copy-wasm",
     "start": "astro dev",
     "build": "astro check && astro build",
-    "preview": "astro preview",
-    "astro": "astro",
+    "format": "biome format --write src/",
     "test": "vitest run"
   },
   "dependencies": {
     "@astrojs/check": "0.8.2",
     "@resvg/resvg-wasm": "2.6.2",
     "astro": "4.12.2",
+    "js-sha256": "0.11.0",
     "satori": "0.10.14",
     "satori-html": "0.3.2",
     "typescript": "5.5.3",
@@ -23,6 +23,10 @@
   },
   "devDependencies": {
     "@astrojs/cloudflare": "11.0.1",
+    "@biomejs/biome": "1.8.3",
     "vitest": "2.0.4"
-  }
+  },
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }
