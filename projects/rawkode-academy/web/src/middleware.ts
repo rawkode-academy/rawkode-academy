@@ -1,8 +1,8 @@
 import { WorkOS, type AuthenticationResponse } from "@workos-inc/node";
 import type { AstroCookies } from "astro";
 import { defineMiddleware } from "astro:middleware";
-import { sealData, unsealData } from 'iron-session';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { sealData, unsealData } from "iron-session";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
 const cookieName = "wos-session";
 
@@ -55,21 +55,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
 		);
 
 		context.cookies.set(cookieName, encryptedSession, {
-			path: '/',
+			path: "/",
 			httpOnly: true,
 			secure: true,
-			sameSite: 'lax',
+			sameSite: "lax",
 		});
 
 		context.locals.user = session.user;
 		return next();
 	} catch (e) {
 		context.cookies.delete(cookieName);
-		return context.redirect('/');
+		return context.redirect("/");
 	}
 });
 
-const getSessionFromCookie = async (cookies: AstroCookies): Promise<MaybeSessionData> => {
+const getSessionFromCookie = async (
+	cookies: AstroCookies,
+): Promise<MaybeSessionData> => {
 	const { getSecret } = await import("astro:env/server");
 
 	const cookiePassword = getSecret("WORKOS_COOKIE_PASSWORD") || "";
@@ -82,4 +84,4 @@ const getSessionFromCookie = async (cookies: AstroCookies): Promise<MaybeSession
 	return unsealData<SessionData>(cookie.value, {
 		password: cookiePassword,
 	});
-}
+};
