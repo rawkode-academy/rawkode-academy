@@ -1,22 +1,21 @@
 ---
+import type { OpenGraphProps } from "@/types/opengraph";
 import * as utf64 from "utf64";
 
-interface Props {
-	title: string;
-}
+interface Props extends OpenGraphProps {}
 
-const { title } = Astro.props;
-const ogImagePayload = { text: title, format: "png" };
-const payload = utf64.encode(JSON.stringify(ogImagePayload));
-const ogImageUrl = `https://image.rawkode.academy/image?payload=${payload}`;
-const url = new URL(Astro.url.pathname, Astro.site);
+const { title, description, image } = Astro.props;
+
+const ogImagePayload = image ?? { text: title, format: "png" };
+const ogDescription =
+	description ??
+	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
+const ogImageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(JSON.stringify(ogImagePayload))}`;
+const ogUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content={title} />
-<meta
-	property="og:description"
-	content="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape."
-/>
-<meta property="og:url" content={url} />
+<meta property="og:description" content={ogDescription} />
+<meta property="og:url" content={ogUrl} />
 <meta property="og:image" content={ogImageUrl} />

@@ -1,12 +1,9 @@
 ---
 import Posthog from "@/components/analytics/posthog.astro";
 import Opengraph from "./opengraph.astro";
+import type { OpenGraphProps } from "@/types/opengraph";
 
-interface Props {
-	title: string;
-}
-
-const { title } = Astro.props;
+interface Props extends OpenGraphProps {}
 ---
 
 <style is:global>
@@ -54,9 +51,9 @@ const { title } = Astro.props;
 	<meta name="theme-color" content="#5F5ED7" />
 	<meta name="description" content="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape." />
 
-	<title>{title} | Rawkode Academy</title>
+	<title>{Astro.props.title} | Rawkode Academy</title>
 
-	<Opengraph title={title} />
+	<Opengraph {...Astro.props} />
 
 	<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/avenir" />
 	<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/orbitron" />
