@@ -3,8 +3,8 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "prebuild": "cp node_modules/@resvg/resvg-wasm/index_bg.wasm src/wasm/resvg.wasm && cp node_modules/yoga-wasm-web/dist/yoga.wasm src/wasm/yoga.wasm",
-    "prestart": "cp node_modules/@resvg/resvg-wasm/index_bg.wasm src/wasm/resvg.wasm && cp node_modules/yoga-wasm-web/dist/yoga.wasm src/wasm/yoga.wasm",
+    "prebuild": "just copy-wasm",
+    "prestart": "just copy-wasm",
     "start": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
