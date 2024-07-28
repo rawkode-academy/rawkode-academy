@@ -81,6 +81,8 @@ const { title } = Astro.props;
 
 	<slot name="extra-head" />
 
+	<link rel="sitemap" href="/sitemap-index.xml" />
+	
 	<script is:inline>
 		(function (d, t) {
 			var BASE_URL = "https://app.chatwoot.com";
