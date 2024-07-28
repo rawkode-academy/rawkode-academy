@@ -1,16 +1,13 @@
 ---
 import DefaultHead from "@/components/html/head.astro";
 import DefaultLayout from "@/layouts/app.astro";
+import type { OpenGraphProps } from "@/types/opengraph";
 
-interface Props {
-	title: string;
-}
-
-const { title } = Astro.props;
+interface Props extends OpenGraphProps {}
 ---
 
 <html lang="en">
-	<DefaultHead title={title}>
+	<DefaultHead {...Astro.props}>
 		<slot name="extra-head" slot="extra-head" />
 	</DefaultHead>
 
