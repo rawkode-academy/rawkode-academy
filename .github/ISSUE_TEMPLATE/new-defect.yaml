@@ -19,7 +19,7 @@ body:
     id: summary
     attributes:
       label: Summary
-      description: Describe the defect & provice steps to reproduce it
+      description: Describe the defect & provide steps to reproduce it
     validations:
       required: true
 
@@ -41,3 +41,21 @@ body:
         - Firefox
         - Safari
         - Microsoft Edge
+
+  - type: dropdown
+    id: assignee
+    attributes:
+      label: Do you want to help fix this bug? (If "Yes", we assign you the ticket)
+      multiple: false
+      options:
+        - "No"
+        - "Yes"
+      default: 0
+    validations:
+      required: false
+
+
+  - type: markdown
+    attributes:
+      value: |
+        You can also join our Discord [here](http://rawkode.chat).
