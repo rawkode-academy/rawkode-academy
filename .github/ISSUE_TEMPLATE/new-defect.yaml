@@ -1,4 +1,4 @@
-name: New Defect
+name: 🐛 New Defect
 description: Use this template to report a new defect.
 labels:
   - type/defect
