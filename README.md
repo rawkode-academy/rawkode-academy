@@ -1,4 +1,8 @@
-# RawkodeAcademy MonoRepo
+# RawkodeAcademy Mono Repository
+
+## Chat with Us
+
+[![](https://dcbadge.limes.pink/api/server/ErVgHCN)](https://discord.gg/RawkodeAcademy)
 
 ## CDRs
 
