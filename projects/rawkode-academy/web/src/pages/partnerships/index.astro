@@ -1,14 +1,36 @@
 ---
-import Cards3 from "@/components/feature/cards-3.vue";
-import Purple from "@/components/stats/purple.vue";
+import HeroCards3 from "@/components/hero/cards-3.vue";
+import Pricing from "@/components/partner/pricing/cards.vue";
+import Featured from "@/components/partner/pricing/featured.vue";
+import Stats from "@/components/stats/simple.vue";
 import Center from "@/components/title/center.astro";
 import Page from "@/wrappers/page.astro";
 ---
 
 <Page title="About">
 	<Center title="Rawkode Academy Partnerships" />
-	<Cards3
+	<HeroCards3
 		title="We can accelerate the growth of developers and your product."
+		highlightWords="growth developers product"
 	/>
-	<Purple />
+	<Stats
+		title="We make content developers love"
+		stats={[
+			{
+				label: "Technologies Covered",
+				value: "> 90",
+			},
+			{
+				label: "Hours of Content Produced",
+				value: "> 500",
+			},
+			{
+				label: "Views",
+				value: "> 1 Million",
+			},
+		]}
+	/>
+
+	<Pricing />
+	<Featured />
 </Page>
