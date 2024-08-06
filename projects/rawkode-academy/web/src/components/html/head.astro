@@ -1,7 +1,7 @@
 ---
 import Posthog from "@/components/analytics/posthog.astro";
-import Opengraph from "./opengraph.astro";
 import type { OpenGraphProps } from "@/types/opengraph";
+import Opengraph from "./opengraph.astro";
 
 interface Props extends OpenGraphProps {}
 ---
@@ -49,7 +49,10 @@ interface Props extends OpenGraphProps {}
 	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
 	<meta name="msapplication-TileColor" content="#da532c" />
 	<meta name="theme-color" content="#5F5ED7" />
-	<meta name="description" content="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape." />
+	<meta
+		name="description"
+		content="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape."
+	/>
 
 	<title>{Astro.props.title} | Rawkode Academy</title>
 
@@ -79,24 +82,6 @@ interface Props extends OpenGraphProps {}
 	<slot name="extra-head" />
 
 	<link rel="sitemap" href="/sitemap-index.xml" />
-	
-	<script is:inline>
-		(function (d, t) {
-			var BASE_URL = "https://app.chatwoot.com";
-			var g = d.createElement(t),
-				s = d.getElementsByTagName(t)[0];
-			g.src = BASE_URL + "/packs/js/sdk.js";
-			g.defer = true;
-			g.async = true;
-			s.parentNode.insertBefore(g, s);
-			g.onload = function () {
-				window.chatwootSDK.run({
-					websiteToken: "e9tsHkpvV7Tm4EVLvJXh2iAN",
-					baseUrl: BASE_URL,
-				});
-			};
-		})(document, "script");
-	</script>
 
 	<Posthog />
 </head>
