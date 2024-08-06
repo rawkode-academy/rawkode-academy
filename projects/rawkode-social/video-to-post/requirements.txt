@@ -1,3 +1,4 @@
+deepgram-captions
 deepgram-sdk
 ffmpy
 marimo

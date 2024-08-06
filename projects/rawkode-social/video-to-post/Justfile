@@ -1,0 +1,3 @@
+dev:
+	mkdir -p {downloads,transcripts}
+	op run -- marimo edit --no-token --port 2718 main.py
