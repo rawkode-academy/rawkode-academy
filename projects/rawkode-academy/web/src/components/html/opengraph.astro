@@ -10,7 +10,9 @@ const ogImagePayload = image ?? { text: title, format: "png" };
 const ogDescription =
 	description ??
 	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
-const ogImageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(JSON.stringify(ogImagePayload))}`;
+const ogImageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(
+	JSON.stringify(ogImagePayload),
+)}`;
 const ogUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
