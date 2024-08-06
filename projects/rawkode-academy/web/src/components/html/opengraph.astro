@@ -11,7 +11,7 @@ const ogDescription =
 	description ??
 	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
 const ogImageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(
-	JSON.stringify(ogImagePayload),
+	JSON.stringify(ogImagePayload)
 )}`;
 const ogUrl = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -21,3 +21,10 @@ const ogUrl = new URL(Astro.url.pathname, Astro.site);
 <meta property="og:description" content={ogDescription} />
 <meta property="og:url" content={ogUrl} />
 <meta property="og:image" content={ogImageUrl} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:domain" content={ogUrl.hostname} />
+<meta property="twitter:url" content={ogUrl} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={ogDescription} />
+<meta name="twitter:image" content={ogImageUrl} />
