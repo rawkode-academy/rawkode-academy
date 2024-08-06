@@ -3,9 +3,6 @@ import LoginButton from "@/components/auth/login-button.astro";
 import MenuItems from "@/components/sidebar/items.vue";
 
 import {
-	// AcademicCapIcon,
-	// CalendarDaysIcon,
-	ChatBubbleLeftEllipsisIcon,
 	FilmIcon,
 	HomeIcon,
 	InformationCircleIcon,
@@ -49,17 +46,20 @@ const menuItems = [
 	// { name: 'Help', href: '/help', icon: QuestionMarkCircleIcon, current: false },
 ];
 
+const menuItemsMaintainers = [
+	{
+		name: "Share Your Project",
+		href: "/maintainers/share-your-project",
+		icon: RocketLaunchIcon,
+		current: false,
+	},
+];
+
 const menuItemsOrgs = [
 	{
 		name: "Partnerships",
 		href: "/organizations/partnerships",
 		icon: RocketLaunchIcon,
-		current: false,
-	},
-	{
-		name: "Let's Chat",
-		href: "/organizations/lets-chat",
-		icon: ChatBubbleLeftEllipsisIcon,
 		current: false,
 	},
 ];
@@ -199,7 +199,15 @@ const menuItemsOrgs = [
 			</ul>
 			<ul class="pt-3 mt-3 space-y-2">
 				<li>
-					<div class="text-xs font-semibold leading-6 text-indigo-200">
+					<div class="text-xs font-semibold leading-6 text-primary">
+						For OSS Maintainers
+					</div>
+				</li>
+				<MenuItems menuItems={menuItemsMaintainers} />
+			</ul>
+			<ul class="pt-3 mt-3 space-y-2">
+				<li>
+					<div class="text-xs font-semibold leading-6 text-primary">
 						For Organizations
 					</div>
 				</li>

@@ -1,0 +1,35 @@
+---
+import CalCom from "@/components/calcom";
+import Page from "@/wrappers/page.astro";
+---
+
+<style>
+	h1,
+	h2,
+	h3 {
+		@apply mt-8 mb-4;
+	}
+
+	h1 {
+		@apply text-4xl tracking-tight font-bold text-gray-900 dark:text-white;
+	}
+</style>
+
+<Page title="Share Your Project">
+	<h1>Share Your Project</h1>
+	<p class="mb-4 dark:text-gray-400">
+		Want to join me on Rawkode Live to share your project with our audience?
+	</p>
+
+	<a class="text-primary" href="https://rawkode.link/live-prep"
+		>Read our live preperation document.</a
+	>
+
+	<h2>Book Your Slot</h2>
+	<p>
+		Grab any slot you like and we'll be in touch to cover everything you need
+		before we go live.
+	</p>
+
+	<CalCom client:only="react" link="share-your-project" />
+</Page>
