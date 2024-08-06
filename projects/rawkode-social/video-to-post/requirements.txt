@@ -1,0 +1,4 @@
+deepgram-sdk
+ffmpy
+marimo
+yt-dlp
