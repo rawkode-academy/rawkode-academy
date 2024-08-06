@@ -19,7 +19,7 @@ mark {
 <template>
 	<section class="overflow-hidden">
 		<div class="container px-4 mx-auto">
-			<h2 class="text-2xl md:text-4xl xl:text-6xl font-bold font-heading text-center tracking-px-n leading-none">
+			<h2 class="text-3xl md:text-4xl xl:text-6xl font-bold font-heading text-center tracking-px-n leading-none">
 				<WordHighlighter :split-by-space=true :query=highlightWords>{{ title }}
 				</WordHighlighter>
 			</h2>
