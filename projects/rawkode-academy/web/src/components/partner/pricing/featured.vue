@@ -32,8 +32,8 @@ const maltPricingPlan: PricingPlan = {
 						<ul role="list" class="space-y-4 dark:text-white">
 							<li v-for="feature in maltPricingPlan.features" class="flex space-x-2.5">
 								<!-- Icon -->
-								<svg class="flex-shrink-0 w-5 h-5 text-green-500 dark:text-green-400" fill="currentColor"
-									viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+								<svg class="flex-shrink-0 w-5 h-5 text-secondary" fill="currentColor" viewBox="0 0 20 20"
+									xmlns="http://www.w3.org/2000/svg">
 									<path fill-rule="evenodd"
 										d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 										clip-rule="evenodd"></path>
@@ -47,8 +47,8 @@ const maltPricingPlan: PricingPlan = {
 					<div class="self-center w-full">
 						<div class="text-5xl font-extrabold text-gray-900 dark:text-white">{{ maltPricingPlan.price }}</div>
 						<div class="mt-1 mb-4 text-gray-500 text-light dark:text-gray-400">USD / anually</div>
-						<a href="#"
-							class="flex justify-center text-white bg-primary hover:bg-secondary focus:ring-4 focus:ring-bue-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Let's
+						<a href="/organizations/lets-chat"
+							class="flex justify-center text-white bg-secondary hover:bg-primary focus:ring-4 focus:ring-bue-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Let's
 							Excel Together</a>
 					</div>
 				</div>
