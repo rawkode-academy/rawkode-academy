@@ -28,9 +28,8 @@ mark {
 					<div class="px-10 pt-11 text-center bg-gray-100 h-96 rounded-4xl">
 						<h3 class="mb-3 text-xl font-bold font-heading leading-normal">Authenticity</h3>
 						<p class="mb-10 text-gray-600 font-medium leading-relaxed">The Rawkode Academy instructors are Staff+
-							developers, so we don' t teach people Hello, World! We do deep dive content that helps other Staff+
-							developers
-							solve real world problems.</p>
+							developers, so we don't teach people Hello, World! We do deep dive content that helps other Staff+
+							developers solve real world problems.</p>
 						<img
 							class="mx-auto h-72 object-cover rounded-3xl shadow-3xl transform hover:translate-y-3 transition ease-in-out duration-1000"
 							src="https://static.shuffle.dev/uploads/files/87/8793fff1e1a8f34e2bae79583d28f545e3bc5f34/headshot.jpg"
@@ -41,7 +40,7 @@ mark {
 					<div class="px-10 pt-11 text-center bg-gray-100 h-96 rounded-4xl">
 						<h3 class="mb-3 text-xl font-bold font-heading leading-normal">Hands-On</h3>
 						<p class="mb-10 text-gray-600 font-medium leading-relaxed">All our tutorials are hands-on, showing people
-							step by step how to tackle the complexitiers of the Cloud Native development.</p>
+							step by step how to tackle the complexities of the Cloud Native development.</p>
 						<img
 							class="mx-auto h-72 object-cover rounded-3xl shadow-3xl transform hover:translate-y-3 transition ease-in-out duration-1000"
 							src="https://static.shuffle.dev/uploads/files/87/8793fff1e1a8f34e2bae79583d28f545e3bc5f34/Screenshot-from-2024-08-05-16-27-50.png"
