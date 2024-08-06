@@ -63,9 +63,9 @@ const pricingPlans: PricingPlan[] = [
 					<h3 class="mb-4 text-2xl font-semibold">{{ plan.title }}</h3>
 					<p class="min-h-32 font-light text-gray-500 sm:text-lg dark:text-gray-400">{{
 						plan.description }}</p>
-					<div class="flex justify-center items-baseline my-8">
-						<span class="mr-2 text-5xl font-extrabold">{{ plan.price }}</span>
-						<span class="text-gray-500 dark:text-gray-400">USD / annually</span>
+					<div class="grid justify-center my-8">
+						<div class="text-5xl font-extrabold">{{ plan.price }}</div>
+						<div class="text-gray-500 dark:text-gray-400">USD / annually</div>
 					</div>
 					<!-- List -->
 					<ul role="list" class="mb-8 space-y-4 text-left min-h-64">

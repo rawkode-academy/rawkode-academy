@@ -1,10 +1,11 @@
 ---
-import HeroCards3 from "@/components/hero/cards-3.vue";
+import FeatureListIcons from "@/components/feature/list-icons.vue";
 import Pricing from "@/components/partner/pricing/cards.vue";
 import Featured from "@/components/partner/pricing/featured.vue";
 import Stats from "@/components/stats/simple.vue";
 import Testimonial from "@/components/testimonial/single.astro";
 import Center from "@/components/title/center.astro";
+import H2Highlight from "@/components/title/h2-highlight.vue";
 import Page from "@/wrappers/page.astro";
 ---
 
@@ -20,25 +21,28 @@ import Page from "@/wrappers/page.astro";
 	description="We can accelerate the growth of developers and your product."
 >
 	<Center title="Rawkode Academy Partnerships" />
-	<HeroCards3
+	<H2Highlight
 		title="We can accelerate the growth of developers and your product."
 		highlightWords="growth developers product"
 	/>
+
+	<FeatureListIcons />
+
 	<hr class="mt-12" />
 	<Stats
 		title="We make content developers love"
 		stats={[
 			{
 				label: "Technologies Covered",
-				value: "> 90",
+				value: "90+",
 			},
 			{
 				label: "Hours of Content Produced",
-				value: "> 500",
+				value: "500+",
 			},
 			{
 				label: "Views",
-				value: "> 1 Million",
+				value: "1M+",
 			},
 		]}
 	/>
