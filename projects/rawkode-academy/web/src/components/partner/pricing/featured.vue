@@ -9,7 +9,7 @@ interface PricingPlan {
 const maltPricingPlan: PricingPlan = {
 	title: "Malt",
 	price: 8000,
-	description: "Only for organizations that want to make a huge impact",
+	description: "The finest of the whiskies, a malt is a single grain, single barrel, and single malt. Only the best for you.",
 	features: [
 		"Website Placement",
 		"Quarterly Live Stream",

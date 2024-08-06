@@ -10,7 +10,7 @@ const pricingPlans: PricingPlan[] = [
 	{
 		title: "Nip",
 		price: 1000,
-		description: "A nip if what we offer people from our hip flasks, which means a sip of whisky.",
+		description: "A nip is what we offer people from our hip flasks, which means a sip of whisky.",
 		features: [
 			"Website Placement",
 			"Quarterly Live Stream",
@@ -19,7 +19,7 @@ const pricingPlans: PricingPlan[] = [
 	{
 		title: "Dram",
 		price: 2000,
-		description: "A dram means you’ve got a drink to yourself! Usually 25 ml of Scotland’s finest whisky; depending on how much you spend.",
+		description: "A dram means a small pour of whisky, shot sized.",
 		features: [
 			"Website Placement",
 			"Quarterly Live Stream",
@@ -44,11 +44,19 @@ const pricingPlans: PricingPlan[] = [
 	<section class="bg-white dark:bg-gray-900">
 		<div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
 			<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Designed for business
-					teams like yours</h2>
-				<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">Here at Flowbite we focus on markets
-					where technology, innovation, and capital can unlock long-term value and drive economic growth.</p>
+				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Partnership Plans</h2>
+				<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">It doesn't matter if you're here to
+					support our mission or because you need help with go to market, product market fit, developer marketing, or
+					straight up content; we have plans for all use-cases.</p>
 			</div>
+
+			<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
+				<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">The Rawkode Academy is proudly brought
+					to
+					you from Glasgow, Scotland. As such, our plans reflect a little bit of our heritage and culture.</p>
+				<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">🏴󠁧󠁢󠁳󠁣󠁴󠁿 🥃</p>
+			</div>
+
 			<div class="space-y-8 lg:grid lg:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
 				<div v-for="plan in pricingPlans"
 					class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-800 dark:text-white">
