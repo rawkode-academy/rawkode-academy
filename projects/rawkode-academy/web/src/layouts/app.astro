@@ -1,6 +1,6 @@
 ---
-import MenuItems from "@/components/sidebar/items.vue";
 import LoginButton from "@/components/auth/login-button.astro";
+import MenuItems from "@/components/sidebar/items.vue";
 
 import {
 	// AcademicCapIcon,
@@ -9,14 +9,20 @@ import {
 	FilmIcon,
 	HomeIcon,
 	InformationCircleIcon,
-	MegaphoneIcon,
 	NewspaperIcon,
 	// QuestionMarkCircleIcon,
 	RocketLaunchIcon,
+	UsersIcon,
 } from "@heroicons/vue/24/outline";
 
 const menuItems = [
 	{ name: "Home", href: "/", icon: HomeIcon, current: true },
+	{
+		name: "Live",
+		href: "/live",
+		icon: FilmIcon,
+		current: false,
+	},
 	{ name: "Blog", href: "/blog", icon: NewspaperIcon, current: false },
 	// { name: 'Events', href: '/events', icon: CalendarDaysIcon, current: false },
 	// { name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
@@ -27,33 +33,26 @@ const menuItems = [
 	// 	icon: VideoCameraIcon,
 	// 	current: false,
 	// },
-	// { name: 'Community', href: '#', icon: UsersIcon, current: false },
+	{
+		name: "Community",
+		href: "https://rawkode.chat",
+		icon: UsersIcon,
+		current: false,
+		target: "_blank",
+	},
 	{
 		name: "About",
 		href: "/about",
 		icon: InformationCircleIcon,
 		current: false,
 	},
-	{
-		name: "Live",
-		href: "/live",
-		icon: FilmIcon,
-		current: false,
-	},
 	// { name: 'Help', href: '/help', icon: QuestionMarkCircleIcon, current: false },
 ];
 
 const menuItemsOrgs = [
-	// { name: 'Memberships', href: '#', icon: BuildingOfficeIcon, current: false },
 	{
-		name: "Sponsorships",
-		href: "/organizations/lets-chat",
-		icon: MegaphoneIcon,
-		current: false,
-	},
-	{
-		name: "Collaborations",
-		href: "/organizations/lets-chat",
+		name: "Partnerships",
+		href: "/organizations/partnerships",
 		icon: RocketLaunchIcon,
 		current: false,
 	},
