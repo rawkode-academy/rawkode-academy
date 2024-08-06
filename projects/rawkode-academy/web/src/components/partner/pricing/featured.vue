@@ -8,7 +8,7 @@ interface PricingPlan {
 
 const maltPricingPlan: PricingPlan = {
 	title: "Malt",
-	price: 96000,
+	price: 8000,
 	description: "Only for organizations that want to make a huge impact",
 	features: [
 		"Website Placement",
@@ -23,8 +23,7 @@ const maltPricingPlan: PricingPlan = {
 <template>
 	<section class="bg-white dark:bg-gray-900">
 		<div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-			<!-- Pricing Card -->
-			<div class="bg-white rounded-lg shadow lg:grid lg:grid-cols-3 dark:bg-gray-800">
+			<div class="border-4 border-secondary bg-white rounded-lg shadow lg:grid lg:grid-cols-3 dark:bg-gray-800">
 				<div class="col-span-2 p-6 lg:p-8">
 					<h2 class="mb-1 text-2xl font-bold text-gray-900 dark:text-white">{{ maltPricingPlan.title }}</h2>
 					<p class="text-lg font-light text-gray-500 dark:text-gray-400">{{ maltPricingPlan.description }}</p>
@@ -46,8 +45,8 @@ const maltPricingPlan: PricingPlan = {
 				</div>
 				<div class="flex p-6 text-center bg-gray-50 lg:p-8 dark:bg-gray-700">
 					<div class="self-center w-full">
-						<div class="text-5xl font-extrabold text-gray-900 dark:text-white">96000</div>
-						<div class="mt-1 mb-4 text-gray-500 text-light dark:text-gray-400">USD / year</div>
+						<div class="text-5xl font-extrabold text-gray-900 dark:text-white">{{ maltPricingPlan.price }}</div>
+						<div class="mt-1 mb-4 text-gray-500 text-light dark:text-gray-400">USD / month</div>
 						<a href="#"
 							class="flex justify-center text-white bg-primary hover:bg-secondary focus:ring-4 focus:ring-bue-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Let's
 							Excel Together</a>

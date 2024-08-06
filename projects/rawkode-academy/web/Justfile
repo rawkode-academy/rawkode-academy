@@ -12,6 +12,9 @@ build:
 	bun run astro check
 	bun run astro build
 
+deploy:
+	op run -- bun run wrangler pages deploy --branch main dist
+
 preview:
 	bun run astro preview
 

@@ -9,7 +9,7 @@ interface PricingPlan {
 const pricingPlans: PricingPlan[] = [
 	{
 		title: "Nip",
-		price: 12000,
+		price: 1000,
 		description: "A nip if what we offer people from our hip flasks, which means a sip of whisky.",
 		features: [
 			"Website Placement",
@@ -18,7 +18,7 @@ const pricingPlans: PricingPlan[] = [
 	},
 	{
 		title: "Dram",
-		price: 24000,
+		price: 2000,
 		description: "A dram means you’ve got a drink to yourself! Usually 25 ml of Scotland’s finest whisky; depending on how much you spend.",
 		features: [
 			"Website Placement",
@@ -28,7 +28,7 @@ const pricingPlans: PricingPlan[] = [
 	},
 	{
 		title: "Blend",
-		price: 48000,
+		price: 4000,
 		description: "There’s nothing wrong with a good ole’ blended whisky, as Johnnie Walker may have taught you.",
 		features: [
 			"Website Placement",
@@ -57,7 +57,7 @@ const pricingPlans: PricingPlan[] = [
 						plan.description }}</p>
 					<div class="flex justify-center items-baseline my-8">
 						<span class="mr-2 text-5xl font-extrabold">{{ plan.price }}</span>
-						<span class="text-gray-500 dark:text-gray-400">/year</span>
+						<span class="text-gray-500 dark:text-gray-400">USD / month</span>
 					</div>
 					<!-- List -->
 					<ul role="list" class="mb-8 space-y-4 text-left min-h-64">
@@ -74,7 +74,7 @@ const pricingPlans: PricingPlan[] = [
 					</ul>
 					<a href="/organizations/lets-chat"
 						class="text-white bg-primary hover:bg-secondary focus:ring-4 focus:secondary font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:secondary">Let's
-						Discuss</a>
+						Collaborate</a>
 				</div>
 			</div>
 
