@@ -46,6 +46,7 @@
     "typescript": "^5.5.3",
     "utf64": "1.0.3",
     "vue": "^3.4.31",
+    "vue-word-highlighter": "^1.2.4",
     "vue-writer": "^2.0.2"
   },
   "devDependencies": {
