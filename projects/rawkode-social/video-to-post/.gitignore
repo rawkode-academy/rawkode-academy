@@ -1,3 +1,13 @@
+# Project
 .devenv
+.ruff_cache
+__pycache__
 downloads
 transcripts
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
