@@ -1,0 +1,19 @@
+@default:
+	just --list
+
+dev:
+	bun run astro dev
+
+format:
+	nixfmt .
+	biome format --write src/
+
+build:
+	bun run astro check
+	bun run astro build
+
+preview:
+	bun run astro preview
+
+codegen:
+	bun run graphql-codegen --config graphql-codegen.ts

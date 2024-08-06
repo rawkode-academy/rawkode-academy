@@ -1,16 +1,19 @@
 # Astro
 .astro
 dist
-.direnv
-# NodeJS
-node_modules
 
 # Cloudflare
 .wrangler
 .dev.vars
 
+# Direnv
+.direnv
+
+# Devenv
+.devenv*
+
 # GraphQL Generated Client
 ./src/gql
-.DS_Store
 
-bun.lockb
+# NodeJS
+node_modules
