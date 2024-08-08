@@ -51,11 +51,13 @@ export default (scope: Construct): ManagedDomain => {
 			"clk2._domainkey",
 			"dkim2.yo4jsvea9l19.clerk.services"
 		)
-		.addCNameRecord(
-			"clerk-mail",
-			"clkmail",
-			"mail.yo4jsvea9l19.clerk.services"
-		);
+		.addCNameRecord("clerk-mail", "clkmail", "mail.yo4jsvea9l19.clerk.services")
+		.enableResend({
+			subdomain: "send",
+			domainKey:
+				"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCfK48hLXQQaOSlmyhwTQ18L7tCdVQ9RQc57MbYMmyfg9fDSZuIc1Gzygbhg/XYNtdAZc2Sas/WuRFNkcKhhzWOMfeCitP7jNSe3Fb+EjXQocDK24yP71ErgKXDy2DodlevYrMfV47usQQbRnBVIMxKJVFgLCtrmJ7e0h75vaotZQIDAQAB",
+			mxValue: "feedback-smtp.us-east-1.amazonses.com",
+		});
 
 	return managedDomain;
 };

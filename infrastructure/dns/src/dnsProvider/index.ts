@@ -42,6 +42,12 @@ interface ProtonMailConfig {
 	verificationCode: string;
 }
 
+interface ResendConfig {
+	subdomain: string;
+	mxValue: string;
+	domainKey: string;
+}
+
 export class ManagedDomain extends Construct {
 	private readonly registrar: Registrar;
 	private readonly cloudflareZone: Zone;
@@ -566,5 +572,23 @@ export class ManagedDomain extends Construct {
 		this.addARecord("shortio2", subdomain, "52.59.165.42");
 
 		return this;
+	}
+
+	enableResend(config: ResendConfig): ManagedDomain {
+		new Record(this, "resend-mx", {
+			zoneId: this.cloudflareZone.id,
+			name: config.subdomain,
+			type: "MX",
+			ttl: 3600,
+			priority: 10,
+			value: config.mxValue,
+			comment: "Managed by Terraform",
+		});
+
+		return this.addTextRecord(
+			"resend-spf",
+			config.subdomain,
+			"v=spf1 include:amazonses.com ~all"
+		).addTextRecord("resend-domain-key", "resend._domainkey", config.domainKey);
 	}
 }
