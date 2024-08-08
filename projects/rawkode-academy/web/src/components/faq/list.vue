@@ -66,9 +66,9 @@
 					<div id="accordion-flush-body-3" class="hidden" aria-labelledby="accordion-flush-heading-3">
 						<div class="py-5 border-b border-gray-200 dark:border-gray-700">
 							<p class="mb-2 text-gray-500 dark:text-gray-400">I don't know! Will 10,000 people view our content?
-								Definitely. Is that better than 2000 people swinging by your booth for free swag? Absolutely.</p>
+								Definitely. Is that better than 2,000 people swinging by your booth for free swag? Absolutely.</p>
 							<p class="mb-2 text-gray-500 dark:text-gray-400">As we add more functionality to the platform, you'll get
-								anonymised reports about the content and the viewership. If the viewers opt-in to communication from
+								anonymized reports about the content and the viewership. If the viewers opt-in to communication from
 								partners, you'll have the ability to connect with them too.</p>
 						</div>
 					</div>

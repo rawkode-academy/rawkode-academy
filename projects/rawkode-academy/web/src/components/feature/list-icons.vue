@@ -57,7 +57,7 @@ const offerings: Offering[] = [
 				</h2>
 				<p class="font-light text-gray-500 dark:text-gray-400 sm:text-xl">We only work with partners where we
 					truly
-					believe their mission can help enrich the lives of developers. Only when our message is authentic, we can
+					believe their mission can help enrich the lives of developers. Only when our message is authentic, can we
 					truly deliver on our promise to help you grow.</p>
 				<p class="mt-4 text-black dark:text-white sm:text-xl">We deliver on that promise with the following:
 				</p>
