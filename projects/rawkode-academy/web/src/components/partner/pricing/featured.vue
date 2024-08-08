@@ -1,14 +1,14 @@
 <script setup lang="ts">
 interface PricingPlan {
 	title: string;
-	price: number;
+	price: string;
 	description: string;
 	features: string[];
 }
 
 const maltPricingPlan: PricingPlan = {
 	title: "Malt",
-	price: 96,000,
+	price: "96,000",
 	description: "The finest of the whiskies, a malt is a single grain, single barrel, and single malt. Only the best for you.",
 	features: [
 		"Website Placement",
