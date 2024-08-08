@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
 import { getSecret } from "astro:env/server";
-import { WorkOS } from "@workos-inc/node";
+import { WorkOS, type UserCreatedEvent } from "@workos-inc/node";
 
 export const POST: APIRoute = async ({ request }) => {
-	const payload = await request.json();
+	const payload: UserCreatedEvent = await request.json();
 	const workos = new WorkOS(getSecret("WORKOS_API_KEY") || "");
 	const workOsSignature = request.headers.get("workos-signature") || "";
 	const webhookSecret = getSecret("WEBHOOK_SECRET_USER_REGISTERED") || "";
@@ -14,9 +14,9 @@ export const POST: APIRoute = async ({ request }) => {
 		secret: webhookSecret,
 	});
 
-	return new Response(
-		JSON.stringify({
-			name: "rawkode",
-		})
-	);
+	return new Response("{}", {
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
 };
