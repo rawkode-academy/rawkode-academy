@@ -9,7 +9,7 @@ interface PricingPlan {
 const pricingPlans: PricingPlan[] = [
 	{
 		title: "Nip",
-		price: 12000,
+		price: 12,000,
 		description: "A nip is what we offer people from our hip flasks, which means a sip of whisky.",
 		features: [
 			"Website Placement",
@@ -18,7 +18,7 @@ const pricingPlans: PricingPlan[] = [
 	},
 	{
 		title: "Dram",
-		price: 24000,
+		price: 24,000,
 		description: "A dram means a small pour of whisky, shot sized.",
 		features: [
 			"Website Placement",
@@ -28,7 +28,7 @@ const pricingPlans: PricingPlan[] = [
 	},
 	{
 		title: "Blend",
-		price: 48000,
+		price: 48,000,
 		description: "There’s nothing wrong with a good ole’ blended whisky, as Johnnie Walker may have taught you.",
 		features: [
 			"Website Placement",
