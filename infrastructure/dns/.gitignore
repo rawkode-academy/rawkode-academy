@@ -9,3 +9,12 @@ cdktf.log
 tsconfig.tsbuildinfo
 !jest.config.js
 !setup.js
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
