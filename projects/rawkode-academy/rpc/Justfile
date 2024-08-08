@@ -3,3 +3,7 @@ dev:
 
 test-webhooks:
 	hurl --test --glob "./tests/**/*.hurl"
+
+deploy:
+	op run -- bun run wrangler pages deploy
+	op run -- npx trigger.dev@beta deploy
