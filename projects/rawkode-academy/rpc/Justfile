@@ -4,6 +4,13 @@ dev:
 test-webhooks:
 	hurl --test --glob "./tests/**/*.hurl"
 
-deploy:
+deploy: deploy-astro deploy-trigger
+
+deploy-astro:
 	op run -- bun run wrangler pages deploy
+
+deploy-trigger:
 	op run -- npx trigger.dev@beta deploy
+
+deploy-restate:
+	bun run restate deployments register https://rawkode-academy-rpc.pages.dev/restate
