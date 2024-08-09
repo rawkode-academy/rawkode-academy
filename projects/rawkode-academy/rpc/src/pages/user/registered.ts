@@ -1,20 +1,25 @@
 import * as clients from "@restatedev/restate-sdk-clients";
 import { configure } from "@trigger.dev/sdk/v3";
-import { WorkOS, type UserCreatedEvent } from "@workos-inc/node";
+import {
+	WorkOS,
+	type AuthenticationEmailVerificationSucceededEventResponse,
+	type UserCreatedEventResponse,
+} from "@workos-inc/node";
 import type { APIRoute } from "astro";
 import { getSecret } from "astro:env/server";
 import { userRegistered as userRegisteredTrigger } from "../../trigger/user/registered.ts";
 import { RestateUserRegisteredWorkflow } from "../../restate/user/registered.ts";
 
-export const POST: APIRoute = async ({ request }) => {
-	const payload: UserCreatedEvent = await request.json();
-	const workos = new WorkOS(getSecret("WORKOS_API_KEY") || "");
-	const workOsSignature = request.headers.get("workos-signature") || "";
-	const webhookSecret = getSecret("WEBHOOK_SECRET_USER_REGISTERED") || "";
-	const triggerSecretKey = getSecret("TRIGGER_SECRET_KEY") || "";
+const workos = new WorkOS(getSecret("WORKOS_API_KEY") || "");
+const webhookSecret = getSecret("WEBHOOK_SECRET_USER_REGISTERED") || "";
+const triggerSecretKey = getSecret("TRIGGER_SECRET_KEY") || "";
 
-	await workos.webhooks.constructEvent({
-		payload: payload,
+export const POST: APIRoute = async ({ request }) => {
+	const payload = await request.json();
+	const workOsSignature = request.headers.get("workos-signature") || "";
+
+	const webhook = await workos.webhooks.constructEvent({
+		payload,
 		sigHeader: workOsSignature,
 		secret: webhookSecret,
 	});
@@ -26,6 +31,32 @@ export const POST: APIRoute = async ({ request }) => {
 		},
 	});
 
+	console.debug(webhook);
+
+	switch (webhook.event) {
+		case "user.created":
+			await userCreated(restate, payload as UserCreatedEventResponse);
+			break;
+
+		case "authentication.email_verification_succeeded":
+			await userEmailVerified(
+				restate,
+				payload as AuthenticationEmailVerificationSucceededEventResponse
+			);
+			break;
+	}
+
+	return new Response("{}", {
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+};
+
+const userCreated = async (
+	restate: clients.Ingress,
+	payload: UserCreatedEventResponse
+) => {
 	await restate
 		.workflowClient(RestateUserRegisteredWorkflow, payload.data.id)
 		.workflowSubmit(payload);
@@ -38,9 +69,20 @@ export const POST: APIRoute = async ({ request }) => {
 		idempotencyKey: payload.id,
 	});
 
-	return new Response("{}", {
-		headers: {
-			"Content-Type": "application/json",
-		},
-	});
+	return;
+};
+
+const userEmailVerified = async (
+	restate: clients.Ingress,
+	payload: AuthenticationEmailVerificationSucceededEventResponse
+) => {
+	if (!payload.data.user_id) {
+		console.debug(payload);
+		throw new Error("User ID is required");
+	}
+
+	await restate
+		.workflowClient(RestateUserRegisteredWorkflow, payload.data.user_id)
+		.verifiedEmail();
+	return;
 };
