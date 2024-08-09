@@ -17,7 +17,9 @@ export const RestateUserRegisteredWorkflow = workflow({
 					from: "Rawkode Academy <hello@rawkode.academy>",
 					to: [payload.data.email],
 					subject: "Welcome to the Rawkode Academy",
-					text: `Hi ${payload.data.firstName},\n\nWelcome to the Rawkode Academy!\n\nWe'll never send you marketing emails, but we will send you important updates about your account.\n\nIf you have any questions, please reply to this email.\n\nThanks,\n\nThe Rawkode Academy Team`,
+					text: `Hi ${
+						payload.data.firstName || "there!"
+					},\n\nWelcome to the Rawkode Academy!\n\nWe'll never send you marketing emails, but we will send you important updates about your account.\n\nIf you have any questions, please reply to this email.\n\nThanks,\n\nThe Rawkode Academy Team`,
 				});
 
 				if (error) {
