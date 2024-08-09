@@ -1,12 +1,9 @@
 import { workflow, type WorkflowContext } from "@restatedev/restate-sdk/fetch";
 import type { UserCreatedEvent } from "@workos-inc/node";
 import { Resend } from "resend";
+import type { Env } from "../../restateEnv.ts";
 
-interface Env {
-	RESEND_API_KEY: string;
-}
-
-export const userRegistered = workflow({
+export const RestateUserRegisteredWorkflow = workflow({
 	name: "user.registered",
 	handlers: {
 		run: async (ctx: WorkflowContext, payload: UserCreatedEvent) => {

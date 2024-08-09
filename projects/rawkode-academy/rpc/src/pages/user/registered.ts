@@ -4,7 +4,7 @@ import { WorkOS, type UserCreatedEvent } from "@workos-inc/node";
 import type { APIRoute } from "astro";
 import { getSecret } from "astro:env/server";
 import { userRegistered as userRegisteredTrigger } from "../../trigger/user/registered.ts";
-import type { userRegistered as userRegisteredRestate } from "../../restate/user/registered.ts";
+import { RestateUserRegisteredWorkflow } from "../../restate/user/registered.ts";
 
 export const POST: APIRoute = async ({ request }) => {
 	const payload: UserCreatedEvent = await request.json();
@@ -26,12 +26,10 @@ export const POST: APIRoute = async ({ request }) => {
 		},
 	});
 
-	await restate
-		.workflowClient<typeof userRegisteredRestate>(
-			{ name: "user.registered" },
-			payload.data.id
-		)
-		.workflowSubmit(payload);
+	const a = restate.workflowClient<typeof RestateUserRegisteredWorkflow>(
+		{ name: "user.registered" },
+		payload.data.id
+	);
 
 	configure({
 		secretKey: triggerSecretKey,
