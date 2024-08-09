@@ -13,4 +13,4 @@ deploy-trigger:
 	op run -- npx trigger.dev@beta deploy
 
 deploy-restate:
-	bun run restate deployments register https://rawkode-academy-rpc.pages.dev/restate
+	bun run restate deployments register https://rawkode-academy-rpc.pages.dev/restate --force
