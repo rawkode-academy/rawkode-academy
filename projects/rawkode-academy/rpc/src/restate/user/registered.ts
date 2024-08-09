@@ -8,7 +8,7 @@ export const RestateUserRegisteredWorkflow = workflow({
 	handlers: {
 		run: async (ctx: WorkflowContext, payload: UserCreatedEvent) => {
 			ctx.set("phase", "Send Welcome Email");
-			const [env] = ctx.request().extraArgs[0] as [Env];
+			const [env] = ctx.request().extraArgs as [Env];
 
 			const resend = new Resend(env.RESEND_API_KEY);
 

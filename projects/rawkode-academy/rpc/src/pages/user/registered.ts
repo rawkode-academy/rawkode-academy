@@ -26,10 +26,9 @@ export const POST: APIRoute = async ({ request }) => {
 		},
 	});
 
-	const a = restate.workflowClient<typeof RestateUserRegisteredWorkflow>(
-		{ name: "user.registered" },
-		payload.data.id
-	);
+	await restate
+		.workflowClient(RestateUserRegisteredWorkflow, payload.data.id)
+		.workflowSubmit(payload);
 
 	configure({
 		secretKey: triggerSecretKey,
