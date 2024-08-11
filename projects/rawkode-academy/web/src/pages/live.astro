@@ -1,9 +1,9 @@
 ---
 import Page from "@/wrappers/page.astro";
-
-const videoId = "04fd9d3c9bd548bf083d69ddacbf5324";
+const videoId = "8cd78ca6cb3556a88bc83eadb9375fde";
+const youTubeId = "hbdURAMgCF8";
 const posterUrl = encodeURIComponent(
-	"https://i3.ytimg.com/vi/h6AhLhkcOsw/maxresdefault.jpg",
+	`https://i3.ytimg.com/vi/${youTubeId}/maxresdefault.jpg`
 );
 ---
 
@@ -12,9 +12,9 @@ const posterUrl = encodeURIComponent(
 
 	<p>Join us live for our next live stream!</p>
 
-	<h2>Developing & Building Open Source with Dagger | Kargo</h2>
+	<h2>Developing & Building Open Source with Dagger | OpenUnison</h2>
 
-	<p>August 7th at 1700 BST / 0900 Pacific</p>
+	<p>August 14th at 1700 BST / 0900 Pacific</p>
 	<br />
 	<p class="mb-2 prose">
 		This live stream series will demonstrate how open source projects can
@@ -35,10 +35,9 @@ const posterUrl = encodeURIComponent(
 	</p>
 	<br />
 
-	<div style="position: relative; padding-top: 56.25%">
+	<div class="relative mx-auto max-w-fit px-">
 		<iframe
 			src=`https://customer-qvhar784v2kmewih.cloudflarestream.com/${videoId}/iframe?poster=${posterUrl}`
-			style="border: none; position: absolute; top: 0; height: 100%; width: 100%"
 			allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
 			allowfullscreen="true"></iframe>
 	</div>
