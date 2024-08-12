@@ -1,0 +1,14 @@
+{
+  "name": "rawkodeacademy",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@dmno/encrypted-vault-plugin": "^0.0.4",
+    "dmno": "^0.0.21"
+  }
+}

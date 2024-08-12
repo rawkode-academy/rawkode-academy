@@ -10,4 +10,3 @@ insert_final_newline = true
 
 [*.{yml,yaml}]
 indent_style = space
-
