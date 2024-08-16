@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 import { decodeJwt } from "jose";
 import { getSessionFromCookie } from "../../middleware";
 
-export const GET: APIRoute = async ({ cookies, locals, redirect }) => {
+export const GET: APIRoute = async ({ cookies, redirect }) => {
 	const { getSecret } = await import("astro:env/server");
 
 	const session = await getSessionFromCookie(cookies);
@@ -15,9 +15,6 @@ export const GET: APIRoute = async ({ cookies, locals, redirect }) => {
 		sameSite: "lax",
 	});
 
-	if (!("runtime" in locals)) {
-		return redirect("/");
-	}
 
 	if (!("accessToken" in session)) {
 		return redirect("/");
