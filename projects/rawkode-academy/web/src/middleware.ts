@@ -12,11 +12,14 @@ type NoSession = {};
 type MaybeSessionData = NoSession | SessionData;
 
 export const onRequest = defineMiddleware(async (context, next) => {
+	console.log(1);
 	const { WORKOS_API_KEY, WORKOS_CLIENT_ID, WORKOS_COOKIE_PASSWORD } = await import("astro:env/server");
 
+	console.log(2);
 	// The runtime isn't available for pre-rendered pages and we
 	// only want this middleware to run for SSR.
 	if (!("runtime" in context.locals)) {
+		console.debug("No runtime, skipping middleware");
 		return next();
 	}
 
@@ -24,8 +27,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 	// No access token, no auth; continue.
 	if (!("accessToken" in session)) {
+		console.debug(session);
+		console.debug("No access token, skipping middleware");
 		return next();
 	}
+
+	process.stdout.write("this bit");
 
 	const workos = new WorkOS(WORKOS_API_KEY);
 

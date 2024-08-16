@@ -12,6 +12,12 @@ build:
 	bun run astro check
 	bun run astro build
 
+test:
+	bun run vitest
+
+test-with-logs:
+	bun run vitest --reporter=basic --no-file-parallelism --disable-console-intercept
+
 deploy:
 	op run -- bun run wrangler pages deploy --branch main dist
 
