@@ -1,5 +1,5 @@
 ---
-import LoginButton from "@/components/auth/login-button.astro";
+import UserHeader from "@/components/auth/user-header.astro";
 import MenuItems from "@/components/sidebar/items.vue";
 
 import {
@@ -151,7 +151,7 @@ const menuItemsOrgs = [
 				<!-- Apps -->
 
 				<!-- Profile -->
-				<LoginButton server:defer />
+				<UserHeader server:defer />
 			</div>
 		</div>
 	</nav>
