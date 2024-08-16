@@ -57,7 +57,23 @@ export default (scope: Construct): ManagedDomain => {
 			domainKey:
 				"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCfK48hLXQQaOSlmyhwTQ18L7tCdVQ9RQc57MbYMmyfg9fDSZuIc1Gzygbhg/XYNtdAZc2Sas/WuRFNkcKhhzWOMfeCitP7jNSe3Fb+EjXQocDK24yP71ErgKXDy2DodlevYrMfV47usQQbRnBVIMxKJVFgLCtrmJ7e0h75vaotZQIDAQAB",
 			mxValue: "feedback-smtp.us-east-1.amazonses.com",
-		});
+		})
+		.addCNameRecord(
+			"workos-1",
+			"em4779.platform",
+			"u36670648.wl149.sendgrid.net"
+		)
+		.addCNameRecord(
+			"workos-2",
+			"wos._domainkey.platform",
+			"wos.domainkey.u36670648.wl149.sendgrid.net"
+		)
+		.addCNameRecord(
+			"workos-3",
+			"wos2._domainkey.platform",
+			"wos2.domainkey.u36670648.wl149.sendgrid.net"
+		)
+		.addCNameRecord("workos-auth", "auth", "cname.workos-dns.com");
 
 	return managedDomain;
 };
