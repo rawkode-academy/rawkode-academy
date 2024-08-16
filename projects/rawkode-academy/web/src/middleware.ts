@@ -12,7 +12,7 @@ type NoSession = {};
 type MaybeSessionData = NoSession | SessionData;
 
 export const onRequest = defineMiddleware(async (context, next) => {
-	const { getSecret } = await import("astro:env/server");
+	const { WORKOS_API_KEY, WORKOS_CLIENT_ID, WORKOS_COOKIE_PASSWORD } = await import("astro:env/server");
 
 	// The runtime isn't available for pre-rendered pages and we
 	// only want this middleware to run for SSR.
@@ -22,15 +22,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 	const session = await getSessionFromCookie(context.cookies);
 
+	// No access token, no auth; continue.
 	if (!("accessToken" in session)) {
 		return next();
 	}
 
-	const clientId = getSecret("WORKOS_CLIENT_ID") || "";
-	const workos = new WorkOS(getSecret("WORKOS_API_KEY"));
+	const workos = new WorkOS(WORKOS_API_KEY);
 
 	const JWKS = createRemoteJWKSet(
-		new URL(workos.userManagement.getJwksUrl(clientId)),
+		new URL(workos.userManagement.getJwksUrl(WORKOS_CLIENT_ID)),
 	);
 
 	try {
@@ -42,13 +42,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
 			return next();
 		}
 
-		context.cookies.delete(cookieName);
-		return next();
+		// Session isn't valid, so forward to logout
+		// and try to clean up the session.
+		return context.redirect("/auth/logout");
 	} catch (error) {
 		if (error instanceof JWTExpired) {
 			const { accessToken, refreshToken } =
 				await workos.userManagement.authenticateWithRefreshToken({
-					clientId,
+					clientId: WORKOS_CLIENT_ID,
 					refreshToken: session.refreshToken,
 				});
 
@@ -57,7 +58,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 					accessToken,
 					refreshToken,
 				},
-				{ password: getSecret("WORKOS_COOKIE_PASSWORD") || "" },
+				{ password: WORKOS_COOKIE_PASSWORD },
 			);
 
 			context.cookies.set(cookieName, encryptedSession, {
@@ -70,8 +71,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 			context.locals.user = session.user;
 			return next();
 		} else {
-			context.cookies.delete(cookieName);
-			return next();
+			return context.redirect("/auth/logout");
 		}
 	}
 });
