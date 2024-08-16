@@ -3,6 +3,7 @@ import type { AstroCookies } from "astro";
 import { defineMiddleware } from "astro:middleware";
 import { sealData, unsealData } from "iron-session";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { JWTExpired } from "jose/errors";
 
 const cookieName = "wos-session";
 
@@ -27,49 +28,55 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 	const clientId = getSecret("WORKOS_CLIENT_ID") || "";
 	const workos = new WorkOS(getSecret("WORKOS_API_KEY"));
+
 	const JWKS = createRemoteJWKSet(
 		new URL(workos.userManagement.getJwksUrl(clientId)),
 	);
 
-	const hasValidSession = await jwtVerify(session.accessToken, JWKS);
-
-	// If the session is valid, move on to the next function
-	if (hasValidSession) {
-		context.locals.user = session.user;
-		return next();
-	}
-
 	try {
-		const { accessToken, refreshToken } =
-			await workos.userManagement.authenticateWithRefreshToken({
-				clientId,
-				refreshToken: session.refreshToken,
+		const hasValidSession = await jwtVerify(session.accessToken, JWKS);
+
+		// If the session is valid, move on to the next function
+		if (hasValidSession) {
+			context.locals.user = session.user;
+			return next();
+		}
+
+		context.cookies.delete(cookieName);
+		return next();
+	} catch (error) {
+		if (error instanceof JWTExpired) {
+			const { accessToken, refreshToken } =
+				await workos.userManagement.authenticateWithRefreshToken({
+					clientId,
+					refreshToken: session.refreshToken,
+				});
+
+			const encryptedSession = await sealData(
+				{
+					accessToken,
+					refreshToken,
+				},
+				{ password: getSecret("WORKOS_COOKIE_PASSWORD") || "" },
+			);
+
+			context.cookies.set(cookieName, encryptedSession, {
+				path: "/",
+				httpOnly: true,
+				secure: true,
+				sameSite: "lax",
 			});
 
-		const encryptedSession = await sealData(
-			{
-				accessToken,
-				refreshToken,
-			},
-			{ password: getSecret("WORKOS_COOKIE_PASSWORD") || "" },
-		);
-
-		context.cookies.set(cookieName, encryptedSession, {
-			path: "/",
-			httpOnly: true,
-			secure: true,
-			sameSite: "lax",
-		});
-
-		context.locals.user = session.user;
-		return next();
-	} catch (e) {
-		context.cookies.delete(cookieName);
-		return context.redirect("/");
+			context.locals.user = session.user;
+			return next();
+		} else {
+			context.cookies.delete(cookieName);
+			return next();
+		}
 	}
 });
 
-const getSessionFromCookie = async (
+export const getSessionFromCookie = async (
 	cookies: AstroCookies,
 ): Promise<MaybeSessionData> => {
 	const { getSecret } = await import("astro:env/server");
