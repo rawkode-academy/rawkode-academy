@@ -27,7 +27,7 @@ export default defineConfig({
         }),
         WORKOS_CLIENT_ID: envField.string({
           context: "server",
-          access: "public",
+          access: "secret",
           optional: false
         }),
         WORKOS_API_KEY: envField.string({
