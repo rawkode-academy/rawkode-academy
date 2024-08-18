@@ -1,21 +1,13 @@
-import { WorkOS, type AuthenticationResponse } from "@workos-inc/node";
-import type { AstroCookies } from "astro";
+import { WorkOS } from "@workos-inc/node";
 import { defineMiddleware } from "astro:middleware";
-import { sealData, unsealData } from "iron-session";
+import { sealData } from "iron-session";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { JWTExpired } from "jose/errors";
+import { cookieName, getSessionFromCookie } from "../utils/sessionCookie";
 
-const cookieName = "wos-session";
-
-type SessionData = AuthenticationResponse;
-type NoSession = {};
-type MaybeSessionData = NoSession | SessionData;
-
-export const onRequest = defineMiddleware(async (context, next) => {
-	console.log(1);
+export const authMiddleware = defineMiddleware(async (context, next) => {
 	const { WORKOS_API_KEY, WORKOS_CLIENT_ID, WORKOS_COOKIE_PASSWORD } = await import("astro:env/server");
 
-	console.log(2);
 	// The runtime isn't available for pre-rendered pages and we
 	// only want this middleware to run for SSR.
 	if (!("runtime" in context.locals)) {
@@ -27,12 +19,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 	// No access token, no auth; continue.
 	if (!("accessToken" in session)) {
-		console.debug(session);
 		console.debug("No access token, skipping middleware");
 		return next();
 	}
-
-	process.stdout.write("this bit");
 
 	const workos = new WorkOS(WORKOS_API_KEY);
 
@@ -83,19 +72,3 @@ export const onRequest = defineMiddleware(async (context, next) => {
 	}
 });
 
-export const getSessionFromCookie = async (
-	cookies: AstroCookies,
-): Promise<MaybeSessionData> => {
-	const { getSecret } = await import("astro:env/server");
-
-	const cookiePassword = getSecret("WORKOS_COOKIE_PASSWORD") || "";
-
-	const cookie = cookies.get(cookieName);
-	if (!cookie) {
-		return {} as NoSession;
-	}
-
-	return unsealData<SessionData>(cookie.value, {
-		password: cookiePassword,
-	});
-};
