@@ -1,7 +1,7 @@
 import WorkOS from "@workos-inc/node";
 import type { APIRoute } from "astro";
 import { decodeJwt } from "jose";
-import { getSessionFromCookie } from "../../middleware";
+import { getSessionFromCookie } from "../../utils/sessionCookie";
 
 export const GET: APIRoute = async ({ cookies, redirect }) => {
 	const { getSecret } = await import("astro:env/server");
