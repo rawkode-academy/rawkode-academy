@@ -1,23 +1,12 @@
 import { jwtVerify } from "jose";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getSessionFromCookie } from "../utils/sessionCookie.ts";
+import { onRequest } from "./index.ts";
 
 vi.mock("jose");
-vi.mock(
-	"./middleware",
-	async (importOriginal) => {
-		const mod = await importOriginal<
-			typeof import("./middleware")
-		>();
+vi.mock("../utils/sessionCookie.ts");
 
-		return {
-			...mod,
-			getSessionFromCookie: vi.fn(),
-		};
-	},
-);
-
-
-describe("onRequest Middleware", () => {
+describe("Auth Middleware", () => {
 	let context: any;
 	let next: any;
 
@@ -36,29 +25,29 @@ describe("onRequest Middleware", () => {
 
 	afterEach(() => {
 		vi.restoreAllMocks();
+		vi.resetModules();
 	});
 
 	it("shouldn't use middleware for prerendered pages", async () => {
-		const { onRequest } = await import("./middleware");
-
 		await onRequest(context, next);
+
+		expect(getSessionFromCookie).not.toHaveBeenCalled();
 		expect(next).toHaveBeenCalledOnce();
 	});
 
 	it("should continue if there is no access token in session", async () => {
 		context.locals.runtime = true;
 
-		const { onRequest } = await import("./middleware");
+		vi.mocked(getSessionFromCookie).mockResolvedValue({});
 
 		await onRequest(context, next);
 
+		expect(getSessionFromCookie).toHaveBeenCalled();
 		expect(next).toHaveBeenCalledOnce();
 	});
 
 	it("should continue if JWT is valid", async () => {
 		context.locals.runtime = true;
-
-		const { getSessionFromCookie, onRequest } = await import("./middleware");
 
 		vi.mocked(getSessionFromCookie).mockResolvedValue({
 			accessToken: "access-token",
@@ -72,6 +61,8 @@ describe("onRequest Middleware", () => {
 
 		await onRequest(context, next);
 
+		expect(getSessionFromCookie).toHaveBeenCalled();
+		expect(jwtVerify).toHaveBeenCalled();
 		expect(next).toHaveBeenCalledOnce();
 		expect(context.locals.user).toEqual("user");
 	});
