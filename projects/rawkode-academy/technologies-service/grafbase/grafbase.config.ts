@@ -2,17 +2,25 @@ import { config, graph } from "@grafbase/sdk";
 
 const g = graph.Standalone({ subgraph: true });
 
+const technologyType = {
+	id: g.string(),
+	name: g.string(),
+	description: g.string(),
+	license: g.string(),
+	websiteUrl: g.string(),
+	documentationUrl: g.string(),
+	githubRepository: g.string(),
+};
+
 const technology = g
-	.type("Technology", {
-		id: g.string(),
-		name: g.string(),
-		description: g.string(),
-		license: g.string(),
-		websiteUrl: g.string(),
-		documentationUrl: g.string(),
-		githubRepository: g.string(),
-	})
+	.type("Technology", technologyType)
 	.key("id", { select: "technologyById(id: $id)" });
+
+g.mutation("createTechnology", {
+	resolver: "create",
+	returns: g.ref(technology),
+	args: technologyType,
+});
 
 g.query("technologies", {
 	resolver: "technologies",
@@ -32,7 +40,8 @@ export default config({
 	},
 	auth: {
 		rules: (rules) => {
-			rules.public();
+			rules.public().read();
+			rules.private().create().update().delete();
 		},
 	},
 });
