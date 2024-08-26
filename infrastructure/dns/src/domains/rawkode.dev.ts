@@ -7,9 +7,7 @@ export default (scope: Construct): ManagedDomain => {
 		"rawkode.dev",
 		Registrar.Cloudflare
 	)
-		.enableProtonMail({
-			verificationCode: "0b2988d284e63f924714e3ae1bc5fae4cf9223ca",
-		})
+		.enableFastmail()
 		.addTextRecord(
 			"google-site-verification",
 			"@",
