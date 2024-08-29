@@ -28,6 +28,7 @@ import rawkodeStudio from "./domains/rawkode.studio";
 import rawkodeWin from "./domains/rawkode.win";
 import rawkodeVip from "./domains/rawkode.vip";
 import rawkodeXyz from "./domains/rawkode.xyz";
+import rmrfEmail from "./domains/rmrf.email";
 
 class CoreDns extends TerraformStack {
 	constructor(scope: Construct, id: string) {
@@ -67,6 +68,7 @@ class CoreDns extends TerraformStack {
 		rawkodeWin(this);
 		rawkodeVip(this);
 		rawkodeXyz(this);
+		rmrfEmail(this);
 	}
 }
 
