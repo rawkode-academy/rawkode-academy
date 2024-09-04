@@ -1,7 +1,7 @@
 import {
 	dag,
+	Container,
 	Directory,
-	File,
 	object,
 	func,
 	CacheSharingMode,
@@ -17,7 +17,8 @@ class Bun {
 	 * Install JavaScript/Typescript dependencies using bun.
 	 */
 	@func()
-	async install(packageJson: File): Promise<Directory> {
+	async install(directory: Directory): Promise<Container> {
+		const packageJson = directory.file("package.json");
 		const workingDirectory = "/code";
 		const packageName = `${
 			JSON.parse(await packageJson.contents()).name as string
@@ -26,12 +27,11 @@ class Bun {
 		return dag
 			.container()
 			.from("node:21")
+			.withMountedDirectory(workingDirectory, directory)
 			.withWorkdir(workingDirectory)
 			.withMountedCache("/node_modules", dag.cacheVolume(packageName), {
 				sharing: CacheSharingMode.Shared,
 			})
-			.withMountedFile(`${workingDirectory}/package.json`, packageJson)
-			.withExec(["npm", "install"])
-			.directory(`${workingDirectory}/node_modules`);
+			.withExec(["npm", "install"]);
 	}
 }
