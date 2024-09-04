@@ -8,7 +8,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@dmno/encrypted-vault-plugin": "^0.0.4",
+		"@dmno/1password-plugin": "^0.0.4",
+		"@dmno/encrypted-vault-plugin": "^0.0.5",
     "dmno": "^0.0.21"
   }
 }
