@@ -1,0 +1,28 @@
+{
+  "name": "technology-service",
+  "sdk": "typescript",
+  "dependencies": [
+    {
+      "name": "NodeJS",
+      "source": "../../../daggerverse/nodejs"
+    },
+    {
+      "name": "OnePassword",
+      "source": "../../../daggerverse/onepassword"
+    },
+    {
+      "name": "RawkodeAcademy",
+      "source": "../../../dagger"
+    },
+    {
+      "name": "restate",
+      "source": "../../../daggerverse/restate"
+    },
+    {
+      "name": "sqld",
+      "source": "../../../daggerverse/sqld"
+    }
+  ],
+  "source": "dagger",
+  "engineVersion": "v0.13.0"
+}

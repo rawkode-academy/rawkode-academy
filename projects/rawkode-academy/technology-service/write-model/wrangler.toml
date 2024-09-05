@@ -1,0 +1,10 @@
+name = "technology-service-write-model"
+main = "./src/index.ts"
+compatibility_date = "2024-05-13"
+compatibility_flags = ["nodejs_compat"]
+
+[env.development]
+vars = { ENVIRONMENT = "development", TURSO_URL = "http://localhost:8081" }
+
+[env.production]
+vars = { ENVIRONMENT = "production" }

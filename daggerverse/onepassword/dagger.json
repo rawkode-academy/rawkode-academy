@@ -1,0 +1,6 @@
+{
+  "name": "OnePassword",
+  "sdk": "typescript",
+  "source": ".",
+  "engineVersion": "v0.13.0"
+}

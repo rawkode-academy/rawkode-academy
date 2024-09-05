@@ -1,0 +1,12 @@
+{
+  "name": "RawkodeAcademy",
+  "sdk": "typescript",
+  "dependencies": [
+    {
+      "name": "NodeJS",
+      "source": "daggerverse/nodejs"
+    }
+  ],
+  "source": "dagger",
+  "engineVersion": "v0.13.0"
+}

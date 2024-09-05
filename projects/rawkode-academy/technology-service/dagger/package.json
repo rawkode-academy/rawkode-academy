@@ -1,0 +1,12 @@
+{
+	"type": "module",
+	"dagger": {
+		"runtime": "bun"
+	},
+	"dependencies": {
+		"@dagger.io/dagger": "./sdk",
+		"@tursodatabase/api": "^1.8.1",
+		"cloudflare": "^3.5.0",
+		"typescript": "^5.5.4"
+	}
+}
