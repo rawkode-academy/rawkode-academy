@@ -1,0 +1,15 @@
+[install.cache]
+dir = "/code/node_modules/.bun/global-cache"
+
+[install]
+dev = true
+frozenLockfile = true
+optional = true
+peer = true
+production = false
+
+[run]
+# This defaults to bun --bun which removes node entirely
+bun = true
+# Hide redundant "running" message output
+silent = true

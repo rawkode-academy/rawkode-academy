@@ -8,15 +8,15 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@sindresorhus/slugify": "^2.2.1",
+    "@supabase/supabase-js": "^2.39.0",
     "@types/gapi": "^0.0.47",
     "@types/node": "^20.10.3",
     "fastq": "^1.15.0",
     "google-auth-library": "^9.4.1",
     "googleapis": "^129.0.0",
     "js-yaml": "^4.1.0",
-    "@supabase/supabase-js": "^2.39.0",
     "openai": "^4.20.1",
-    "@sindresorhus/slugify": "^2.2.1",
     "zod": "^3.22.4"
   }
 }

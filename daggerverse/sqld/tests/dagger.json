@@ -1,0 +1,13 @@
+{
+	"name": "tests",
+	"sdk": "typescript",
+	"runtime": "bun",
+	"dependencies": [
+		{
+			"name": "sqld",
+			"source": ".."
+		}
+	],
+	"source": ".",
+	"engineVersion": "v0.12.7"
+}
