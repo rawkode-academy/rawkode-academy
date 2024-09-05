@@ -35,9 +35,6 @@ g.query("technologyById", {
 
 export default config({
 	graph: g,
-	experimental: {
-		codegen: true,
-	},
 	auth: {
 		rules: (rules) => {
 			rules.public().read();

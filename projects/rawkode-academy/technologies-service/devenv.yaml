@@ -2,3 +2,5 @@
 inputs:
   nixpkgs:
     url: github:cachix/devenv-nixpkgs/rolling
+  grafbase:
+    url: github:grafbase/grafbase
