@@ -6,9 +6,12 @@ interface Secrets {
 }
 
 export const getSecrets = async (): Promise<Secrets> => {
-	if (process.env.INFISICAL_MACHINE_ID?.includes("op://")) {
+	if (
+		process.env.INFISICAL_MACHINE_ID === undefined ||
+		process.env.INFISICAL_MACHINE_ID?.includes("op://")
+	) {
 		return {
-			tursoUrl: "http://127.0.0.1:8080",
+			tursoUrl: "http://sqld:5000",
 			tursoToken: "",
 		};
 	}

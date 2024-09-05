@@ -13,6 +13,8 @@ const client = createClient({
 export const db = drizzle(client);
 
 const seed = async () => {
+	db.delete(technologiesTable).run();
+
 	await db
 		.insert(technologiesTable)
 		.values({
