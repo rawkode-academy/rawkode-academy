@@ -120,7 +120,7 @@ export class WriteModel {
 				.onePassword()
 				.getSecretByReference(
 					onePasswordToken,
-					"op://sa.rawkode.academy/turso/platform/password",
+					"op://sa.rawkode.academy/turso/platform-group/api-token",
 				);
 
 			const tursoTokenResponse = await fetch(
@@ -156,7 +156,7 @@ export class WriteModel {
 					body: JSON.stringify({
 						name: "TURSO_URL",
 						type: "secret_text",
-						text: "libsql://technology-service-rawkodeacademy.turso.io",
+						text: "libsql://technologies-rawkodeacademy.turso.io",
 					}),
 				},
 			);
@@ -200,7 +200,7 @@ export class WriteModel {
 				.onePassword()
 				.getSecretByReference(
 					onePasswordToken,
-					"op://sa.rawkode.academy/restate/password",
+					"op://sa.rawkode.academy/restate/api-token",
 				);
 
 			return await dag
