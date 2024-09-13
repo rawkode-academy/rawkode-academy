@@ -1,3 +1,6 @@
+# age / sops
+.env.local
+
 # Devenv
 .devenv*
 devenv.local.nix

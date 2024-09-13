@@ -1,0 +1,384 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "age": {
+        "pkg-path": "age"
+      },
+      "runme": {
+        "pkg-path": "runme"
+      },
+      "sops": {
+        "pkg-path": "sops"
+      }
+    },
+    "vars": {},
+    "hook": {},
+    "profile": {},
+    "options": {
+      "systems": [
+        "aarch64-darwin",
+        "aarch64-linux",
+        "x86_64-darwin",
+        "x86_64-linux"
+      ],
+      "allow": {
+        "licenses": []
+      },
+      "semver": {}
+    },
+    "services": {},
+    "build": {}
+  },
+  "packages": [
+    {
+      "attr_path": "age",
+      "broken": false,
+      "derivation": "/nix/store/05y01fh5j38q8ha1v4zgay9hlsjyb7mv-age-1.2.0.drv",
+      "description": "Modern encryption tool with small explicit keys",
+      "install_id": "age",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "age-1.2.0",
+      "pname": "age",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.2.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/31vajb04v7ii66jj6nvz65icddp1i60l-age-1.2.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "age",
+      "broken": false,
+      "derivation": "/nix/store/qszqgyqlcpng6ggdj4p5bxpwqg9f30qc-age-1.2.0.drv",
+      "description": "Modern encryption tool with small explicit keys",
+      "install_id": "age",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "age-1.2.0",
+      "pname": "age",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.2.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/c8ll79zcg647xmp2bzfbwkyw08agd4v0-age-1.2.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "age",
+      "broken": false,
+      "derivation": "/nix/store/j7xmj4m4a1q96lr8cdpslvan43d00ai9-age-1.2.0.drv",
+      "description": "Modern encryption tool with small explicit keys",
+      "install_id": "age",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "age-1.2.0",
+      "pname": "age",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.2.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/0svzfn9fvmz3yxn0p04k88ncd8wws7x9-age-1.2.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "age",
+      "broken": false,
+      "derivation": "/nix/store/sjgbfk24dhy088y3fb5xp31rni08bhr4-age-1.2.0.drv",
+      "description": "Modern encryption tool with small explicit keys",
+      "install_id": "age",
+      "license": "BSD-3-Clause",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "age-1.2.0",
+      "pname": "age",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.2.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/325xqnz1ag5nqyims11nisix7lxlssqa-age-1.2.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "runme",
+      "broken": false,
+      "derivation": "/nix/store/7794qpr8x1bhnc8qbr7imay2fyjshqbd-runme-3.0.2.drv",
+      "description": "Execute commands inside your runbooks, docs, and READMEs",
+      "install_id": "runme",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "runme-3.0.2",
+      "pname": "runme",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.0.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/xb802c65adh11p6h6nvyvwsfbl6sc7c3-runme-3.0.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "runme",
+      "broken": false,
+      "derivation": "/nix/store/gzsxkwbdiz3jw5z6vj0cdmjz6ay9q4gc-runme-3.0.2.drv",
+      "description": "Execute commands inside your runbooks, docs, and READMEs",
+      "install_id": "runme",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "runme-3.0.2",
+      "pname": "runme",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.0.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/74fhpxyka9k5i2k1yjmknr0f5kdmyrml-runme-3.0.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "runme",
+      "broken": false,
+      "derivation": "/nix/store/z12q1y4k2vk55b4pviw5z5zfazr3qnr9-runme-3.0.2.drv",
+      "description": "Execute commands inside your runbooks, docs, and READMEs",
+      "install_id": "runme",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "runme-3.0.2",
+      "pname": "runme",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.0.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/k2l2d72jyfvf4h6g06rq23gda34v978x-runme-3.0.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "runme",
+      "broken": false,
+      "derivation": "/nix/store/qbliwz987kfzy26jn89bjx1nhbxn92di-runme-3.0.2.drv",
+      "description": "Execute commands inside your runbooks, docs, and READMEs",
+      "install_id": "runme",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "runme-3.0.2",
+      "pname": "runme",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.0.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/1n4bzrjr8fl2kssgixbsslrlyjrhgajv-runme-3.0.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "sops",
+      "broken": false,
+      "derivation": "/nix/store/2hnp11vlb4lza56iydqcvsaimgphpbvn-sops-3.9.0.drv",
+      "description": "Simple and flexible tool for managing secrets",
+      "install_id": "sops",
+      "license": "MPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "sops-3.9.0",
+      "pname": "sops",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.9.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/cdzzn5rmjnr48yq0808jaz8n23pk3bv9-sops-3.9.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "sops",
+      "broken": false,
+      "derivation": "/nix/store/qhgsyd6i1lgpr26a5gznjslf7477g54x-sops-3.9.0.drv",
+      "description": "Simple and flexible tool for managing secrets",
+      "install_id": "sops",
+      "license": "MPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "sops-3.9.0",
+      "pname": "sops",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.9.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/5da8mgsqz0yxnawn4mii4qlpl5nw8iiw-sops-3.9.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "sops",
+      "broken": false,
+      "derivation": "/nix/store/prw0dzvnsn9a32x12asav6z8cw7gwyil-sops-3.9.0.drv",
+      "description": "Simple and flexible tool for managing secrets",
+      "install_id": "sops",
+      "license": "MPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "sops-3.9.0",
+      "pname": "sops",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.9.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/87bk5sl3x0ckq7rxhjnmjchfgbxyv4i4-sops-3.9.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "sops",
+      "broken": false,
+      "derivation": "/nix/store/484s6hg8q9flhzd2ni99xl17jnrnk8d9-sops-3.9.0.drv",
+      "description": "Simple and flexible tool for managing secrets",
+      "install_id": "sops",
+      "license": "MPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "name": "sops-3.9.0",
+      "pname": "sops",
+      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "rev_count": 679633,
+      "rev_date": "2024-09-10T15:58:18Z",
+      "scrape_date": "2024-09-12T03:12:46Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "3.9.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/b4lxdfgfk5lcj4cxyvypim13skk905r4-sops-3.9.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}

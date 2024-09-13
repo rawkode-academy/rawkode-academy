@@ -1,0 +1,9 @@
+version = 1
+
+[install]
+age.pkg-path = "age"
+sops.pkg-path = "sops"
+runme.pkg-path = "runme"
+
+[options]
+systems = ["aarch64-darwin", "aarch64-linux", "x86_64-darwin", "x86_64-linux"]
