@@ -1,15 +1,24 @@
-import type { Container, Directory, Secret } from "@dagger.io/dagger";
+import type { Directory, Secret } from "@dagger.io/dagger";
 import { dag, object, func } from "@dagger.io/dagger";
 
+/**
+ * SOPS: Simple And Flexible Tool For Managing Secrets
+ */
 @object()
 class Sops {
 	/**
-	 * SOPs
+	 * Get a list of secrets from an encrypted SOPs file
+	 *
+	 * @param privateKey 	The private key used for decrypting secrets
+	 * @param directory 	The directory containing the encrypted SOPs file
+	 * @param inputType 	The input format of your encrypted SOPs file
+	 * @returns 					A list of secrets
 	 */
 	@func()
 	async getSecrets(
 		privateKey: Secret,
 		directory: Directory,
+		inputType: string = "yaml",
 	): Promise<Secret[]> {
 		const output = await dag
 			.container()
@@ -22,6 +31,7 @@ class Sops {
 			.withExec([
 				"sops",
 				"exec-file",
+				`--input-type=${inputType}`,
 				"--output-type=json",
 				"/secrets",
 				"cat {}",
@@ -31,7 +41,7 @@ class Sops {
 	}
 }
 
-function convertJsonToSecrets(obj: Record<string, any>, prefix = ""): Secret[] {
+const convertJsonToSecrets = (obj: Record<string, any>, prefix = ""): Secret[] => {
 	const secrets: Secret[] = [];
 
 	for (const key in obj) {
