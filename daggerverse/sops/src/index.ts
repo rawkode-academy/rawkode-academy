@@ -1,9 +1,9 @@
-import type { Directory, Secret } from "@dagger.io/dagger";
-import { dag, object, func } from "@dagger.io/dagger";
-
 /**
  * SOPS: Simple And Flexible Tool For Managing Secrets
  */
+import type { Directory, Secret } from "@dagger.io/dagger";
+import { dag, object, func } from "@dagger.io/dagger";
+
 @object()
 class Sops {
 	/**
