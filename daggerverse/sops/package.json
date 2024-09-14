@@ -1,10 +1,12 @@
 {
+	"name": "@rawkodeacademy/daggerverse-sops",
+	"version": "1.0.0",
 	"type": "module",
 	"dagger": {
 		"runtime": "bun"
 	},
 	"dependencies": {
-		"typescript": "^5.5.4",
-		"@dagger.io/dagger": "./sdk"
+		"@dagger.io/dagger": "./sdk",
+		"typescript": "^5.5.4"
 	}
 }

@@ -6,6 +6,12 @@
       "age": {
         "pkg-path": "age"
       },
+      "biome": {
+        "pkg-path": "biome"
+      },
+      "bun": {
+        "pkg-path": "bun"
+      },
       "runme": {
         "pkg-path": "runme"
       },
@@ -39,13 +45,13 @@
       "description": "Modern encryption tool with small explicit keys",
       "install_id": "age",
       "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "age-1.2.0",
       "pname": "age",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -68,13 +74,13 @@
       "description": "Modern encryption tool with small explicit keys",
       "install_id": "age",
       "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "age-1.2.0",
       "pname": "age",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -97,13 +103,13 @@
       "description": "Modern encryption tool with small explicit keys",
       "install_id": "age",
       "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "age-1.2.0",
       "pname": "age",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -126,13 +132,13 @@
       "description": "Modern encryption tool with small explicit keys",
       "install_id": "age",
       "license": "BSD-3-Clause",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "age-1.2.0",
       "pname": "age",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -149,19 +155,251 @@
       "priority": 5
     },
     {
+      "attr_path": "biome",
+      "broken": false,
+      "derivation": "/nix/store/p128jg3pjaix88p0y70hdzz0sh46d692-biome-1.8.3.drv",
+      "description": "Toolchain of the web",
+      "install_id": "biome",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "name": "biome-1.8.3",
+      "pname": "biome",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/29sj1kjc5zn9wnypnw504py8mfk6vbix-biome-1.8.3"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "biome",
+      "broken": false,
+      "derivation": "/nix/store/lw4d22lsiyjnrvyznam429gc4pm5rrn8-biome-1.8.3.drv",
+      "description": "Toolchain of the web",
+      "install_id": "biome",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "name": "biome-1.8.3",
+      "pname": "biome",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/ndv5w6v3i6nvf7b0v3his0rgxinkn37h-biome-1.8.3"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "biome",
+      "broken": false,
+      "derivation": "/nix/store/qnbp884mf9f96n4361jwnrxxid863p28-biome-1.8.3.drv",
+      "description": "Toolchain of the web",
+      "install_id": "biome",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "name": "biome-1.8.3",
+      "pname": "biome",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/mbfw8m7g0x9vwzf14b14lbm2jmzal11l-biome-1.8.3"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "biome",
+      "broken": false,
+      "derivation": "/nix/store/f48a70ga530qrwq649zwgikp0r024jrz-biome-1.8.3.drv",
+      "description": "Toolchain of the web",
+      "install_id": "biome",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "name": "biome-1.8.3",
+      "pname": "biome",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/8phdfp7jh76flkdnv42zznk02y22a4n6-biome-1.8.3"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bun",
+      "broken": false,
+      "derivation": "/nix/store/9ka7cd8i282lsl6sm0s6wh9ijds5yf4j-bun-1.1.20.drv",
+      "description": "Incredibly fast JavaScript runtime, bundler, transpiler and package manager – all in one",
+      "install_id": "bun",
+      "license": "[ MIT, LGPL-2.1-only ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "name": "bun-1.1.20",
+      "pname": "bun",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.1.20",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/dmqhgf7h8snab4rqsviy04rj18i3g6nk-bun-1.1.20"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bun",
+      "broken": false,
+      "derivation": "/nix/store/vcix9g58554di6dk2g8vkji9yrc44h81-bun-1.1.20.drv",
+      "description": "Incredibly fast JavaScript runtime, bundler, transpiler and package manager – all in one",
+      "install_id": "bun",
+      "license": "[ MIT, LGPL-2.1-only ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "name": "bun-1.1.20",
+      "pname": "bun",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.1.20",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/d7c36wqc7dmjmgb2sfgvppiwm7d8php9-bun-1.1.20"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bun",
+      "broken": false,
+      "derivation": "/nix/store/wjgcb3r1rqmjn7apkq1j7qjgvchmaj6z-bun-1.1.20.drv",
+      "description": "Incredibly fast JavaScript runtime, bundler, transpiler and package manager – all in one",
+      "install_id": "bun",
+      "license": "[ MIT, LGPL-2.1-only ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "name": "bun-1.1.20",
+      "pname": "bun",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.1.20",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/zc1cwiahwsdm1pj7alclj53mz2bqxq00-bun-1.1.20"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bun",
+      "broken": false,
+      "derivation": "/nix/store/bygwjsrsnk58157pl7lcs53limvbfvak-bun-1.1.20.drv",
+      "description": "Incredibly fast JavaScript runtime, bundler, transpiler and package manager – all in one",
+      "install_id": "bun",
+      "license": "[ MIT, LGPL-2.1-only ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "name": "bun-1.1.20",
+      "pname": "bun",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.1.20",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/kyiz8i5594rwlvjb4p2yylv8m3m78xbg-bun-1.1.20"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
       "attr_path": "runme",
       "broken": false,
       "derivation": "/nix/store/7794qpr8x1bhnc8qbr7imay2fyjshqbd-runme-3.0.2.drv",
       "description": "Execute commands inside your runbooks, docs, and READMEs",
       "install_id": "runme",
       "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "runme-3.0.2",
       "pname": "runme",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -184,13 +422,13 @@
       "description": "Execute commands inside your runbooks, docs, and READMEs",
       "install_id": "runme",
       "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "runme-3.0.2",
       "pname": "runme",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -213,13 +451,13 @@
       "description": "Execute commands inside your runbooks, docs, and READMEs",
       "install_id": "runme",
       "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "runme-3.0.2",
       "pname": "runme",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -242,13 +480,13 @@
       "description": "Execute commands inside your runbooks, docs, and READMEs",
       "install_id": "runme",
       "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "runme-3.0.2",
       "pname": "runme",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -271,13 +509,13 @@
       "description": "Simple and flexible tool for managing secrets",
       "install_id": "sops",
       "license": "MPL-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "sops-3.9.0",
       "pname": "sops",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -300,13 +538,13 @@
       "description": "Simple and flexible tool for managing secrets",
       "install_id": "sops",
       "license": "MPL-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "sops-3.9.0",
       "pname": "sops",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -329,13 +567,13 @@
       "description": "Simple and flexible tool for managing secrets",
       "install_id": "sops",
       "license": "MPL-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "sops-3.9.0",
       "pname": "sops",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
@@ -358,13 +596,13 @@
       "description": "Simple and flexible tool for managing secrets",
       "install_id": "sops",
       "license": "MPL-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1355a0cbfeac61d785b7183c0caaec1f97361b43",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
       "name": "sops-3.9.0",
       "pname": "sops",
-      "rev": "1355a0cbfeac61d785b7183c0caaec1f97361b43",
-      "rev_count": 679633,
-      "rev_date": "2024-09-10T15:58:18Z",
-      "scrape_date": "2024-09-12T03:12:46Z",
+      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
+      "rev_count": 680062,
+      "rev_date": "2024-09-11T13:54:33Z",
+      "scrape_date": "2024-09-14T03:13:36Z",
       "stabilities": [
         "unstable"
       ],
