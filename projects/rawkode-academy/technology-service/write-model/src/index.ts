@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client";
-import { type Context, endpoint, service } from "@restatedev/restate-sdk/fetch";
+import { type Context, endpoint, service, TerminalError } from "@restatedev/restate-sdk/fetch";
 import slugify from "@sindresorhus/slugify";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 import type { z } from "zod";
 import { CreateTechnology } from "../../data-model/integrations/zod.ts";
@@ -34,16 +35,27 @@ const technologyService = service({
 				authToken: env.TURSO_TOKEN,
 			});
 
-			ctx.console.log(`Attempting to create technology with url ${env.TURSO_URL}`);
+			const id = slugify(technology.name, {
+				lowercase: true,
+			});
 
 			const db = drizzle(client);
+
+			ctx.console.log("Checking unique constraints are passing before writing to database");
+
+			const checks = await db.select().from(technologiesTable).where(eq(technologiesTable.id, id));
+
+			if (checks.length > 0) {
+				throw new TerminalError(`New technology, ${technology.name}, does not pass unique ID constraints. ID was generated as ${id}.`, { errorCode: 400 });
+			}
+
+			ctx.console.log(`Attempting to create technology with url ${env.TURSO_URL}`);
+
 			await db
 				.insert(technologiesTable)
 				.values({
 					...technology,
-					id: slugify(technology.name, {
-						lowercase: true,
-					}),
+					id,
 				})
 				.run();
 
