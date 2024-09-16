@@ -1,28 +1,32 @@
 {
-	"name": "technology-service",
-	"sdk": "typescript",
-	"source": "dagger",
-	"engineVersion": "v0.13.0",
-	"dependencies": [
-		{
-			"name": "RawkodeAcademy",
-			"source": "../../.."
-		},
-		{
-			"name": "NodeJS",
-			"source": "../../../daggerverse/nodejs"
-		},
-		{
-			"name": "OnePassword",
-			"source": "../../../daggerverse/onepassword"
-		},
-		{
-			"name": "restate",
-			"source": "../../../daggerverse/restate"
-		},
-		{
-			"name": "sqld",
-			"source": "../../../daggerverse/sqld"
-		}
-	]
+  "name": "technology-service",
+  "sdk": "typescript",
+  "dependencies": [
+    {
+      "name": "sops",
+      "source": "../../../daggerverse/sops"
+    },
+    {
+      "name": "NodeJS",
+      "source": "../../../daggerverse/nodejs"
+    },
+    {
+      "name": "OnePassword",
+      "source": "../../../daggerverse/onepassword"
+    },
+    {
+      "name": "RawkodeAcademy",
+      "source": "../../../."
+    },
+    {
+      "name": "restate",
+      "source": "../../../daggerverse/restate"
+    },
+    {
+      "name": "sqld",
+      "source": "../../../daggerverse/sqld"
+    }
+  ],
+  "source": "dagger",
+  "engineVersion": "v0.13.0"
 }

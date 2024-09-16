@@ -1,6 +1,6 @@
 {
-	"name": "Kubernetes",
-	"description": "I like Kubernetes",
+	"name": "Rust",
+	"description": "Rust Programming Language",
 	"license": "MIT",
-	"website": "https://kubernetes.io"
+	"website": "https://rustlang.com"
 }
