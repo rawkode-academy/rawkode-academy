@@ -1,9 +1,0 @@
-{
-	"[nix]": {
-		"editor.defaultFormatter": "jnoortheen.nix-ide",
-		"editor.formatOnPaste": true,
-		"editor.formatOnSave": true,
-		"editor.formatOnType": true,
-		"editor.formatOnSaveMode": "file"
-	}
-}
