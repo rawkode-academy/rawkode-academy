@@ -1,7 +1,8 @@
-import type { Directory, Secret } from "@dagger.io/dagger";
+import type { Container, Directory, Secret } from "@dagger.io/dagger";
 import { argument, func, object } from "@dagger.io/dagger";
 
 import { DataModel } from "./data-model";
+import { Simple } from "./simple";
 import { WriteModel } from "./write-model";
 
 @object()
@@ -25,6 +26,12 @@ class TechnologyService {
 		);
 		await writeModelResult.sync();
 	}
+
+	@func("funny")
+	async simple(
+		@argument({defaultPath: "."}) directory: Directory): Promise<Container> {
+		return new Simple().simple(directory);
+	};
 
 	dataModel(): DataModel {
 		return new DataModel();
