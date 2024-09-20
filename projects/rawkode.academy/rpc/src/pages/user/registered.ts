@@ -12,6 +12,8 @@ import { RestateUserRegisteredWorkflow } from "../../restate/user/registered.ts"
 
 const workos = new WorkOS(getSecret("WORKOS_API_KEY") || "");
 const webhookSecret = getSecret("WEBHOOK_SECRET_USER_REGISTERED") || "";
+
+const restateApiKey = getSecret("RESTATE_API_KEY");
 const triggerSecretKey = getSecret("TRIGGER_SECRET_KEY") || "";
 
 export const POST: APIRoute = async ({ request }) => {
@@ -27,30 +29,39 @@ export const POST: APIRoute = async ({ request }) => {
 	const restate = clients.connect({
 		url: getSecret("RESTATE_CLOUD_URL") || "",
 		headers: {
-			Authorization: `Bearer ${getSecret("RESTATE_API_KEY") || ""}`,
+			Authorization: `Bearer ${restateApiKey}`,
 		},
 	});
 
-	console.debug(webhook);
+	try {
+		switch (webhook.event) {
+			case "user.created":
+				await userCreated(restate, payload as UserCreatedEventResponse);
+				break;
 
-	switch (webhook.event) {
-		case "user.created":
-			await userCreated(restate, payload as UserCreatedEventResponse);
-			break;
+			case "authentication.email_verification_succeeded":
+				await userEmailVerified(
+					restate,
+					payload as AuthenticationEmailVerificationSucceededEventResponse
+				);
+				break;
+		}
 
-		case "authentication.email_verification_succeeded":
-			await userEmailVerified(
-				restate,
-				payload as AuthenticationEmailVerificationSucceededEventResponse
-			);
-			break;
+		return new Response("{}", {
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	} catch (error) {
+		console.error(error);
+
+		return new Response("{}", {
+			headers: {
+				"Content-Type": "application/json",
+			},
+			status: 500,
+		});
 	}
-
-	return new Response("{}", {
-		headers: {
-			"Content-Type": "application/json",
-		},
-	});
 };
 
 const userCreated = async (

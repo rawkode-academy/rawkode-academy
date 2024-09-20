@@ -6,15 +6,17 @@ import type { Env } from "../../restateEnv.ts";
 
 const handler = endpoint()
 	.bind(RestateUserRegisteredWorkflow)
-	// .withIdentityV1(env.getSecret("RESTATE_IDENTITY_KEY") || "")
+	.withIdentityV1(env.getSecret("RESTATE_IDENTITY_KEY") as string)
 	.handler();
 
 export const GET: APIRoute = async ({ request }) => {
 	const envPassthrough: Env = {
-		RESEND_API_KEY: env.RESEND_API_KEY,
-		TRIGGER_SECRET_KEY: env.TRIGGER_SECRET_KEY,
-		WEBHOOK_SECRET_USER_REGISTERED: env.WEBHOOK_SECRET_USER_REGISTERED,
-		WORKOS_API_KEY: env.WORKOS_API_KEY,
+		BASELIME_API_KEY: env.BASELIME_API_KEY as string,
+		RESEND_API_KEY: env.RESEND_API_KEY as string,
+		RESTATE_API_KEY: env.RESTATE_API_KEY as string,
+		TRIGGER_SECRET_KEY: env.TRIGGER_SECRET_KEY as string,
+		WEBHOOK_SECRET_USER_REGISTERED: env.WEBHOOK_SECRET_USER_REGISTERED as string,
+		WORKOS_API_KEY: env.WORKOS_API_KEY as string,
 	};
 
 	return handler.fetch(request, envPassthrough);
@@ -22,10 +24,12 @@ export const GET: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
 	const envPassthrough: Env = {
-		RESEND_API_KEY: env.RESEND_API_KEY,
-		TRIGGER_SECRET_KEY: env.TRIGGER_SECRET_KEY,
-		WEBHOOK_SECRET_USER_REGISTERED: env.WEBHOOK_SECRET_USER_REGISTERED,
-		WORKOS_API_KEY: env.WORKOS_API_KEY,
+		BASELIME_API_KEY: env.BASELIME_API_KEY as string,
+		RESEND_API_KEY: env.RESEND_API_KEY as string,
+		RESTATE_API_KEY: env.RESTATE_API_KEY as string,
+		TRIGGER_SECRET_KEY: env.TRIGGER_SECRET_KEY as string,
+		WEBHOOK_SECRET_USER_REGISTERED: env.WEBHOOK_SECRET_USER_REGISTERED as string,
+		WORKOS_API_KEY: env.WORKOS_API_KEY as string,
 	};
 
 	return handler.fetch(request, envPassthrough);
