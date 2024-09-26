@@ -1,21 +1,18 @@
 {
-	"name": "shows-service",
-	"peerDependencies": {
-		"typescript": "^5.0.0"
-	},
-	"dependencies": {
-		"@infisical/sdk": "^2.1.8",
-		"@libsql/client": "^0.4.3",
-		"@types/jsonwebtoken": "^9.0.6",
-		"drizzle-orm": "^0.29.3",
-		"drizzle-typebox": "^0.1.1",
-		"graphql": "^16.8.1",
-		"jsonwebtoken": "^9.0.2"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^1.5.3",
-		"@grafbase/sdk": "~0.17.0",
-		"@types/bun": "latest",
-		"drizzle-kit": "^0.20.14"
-	}
+  "name": "shows-service",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "@libsql/client": "^0.14.0",
+    "drizzle-graphql": "^0.8.5",
+    "drizzle-orm": "^0.33.0",
+    "graphql": "^16.9.0"
+  }
 }

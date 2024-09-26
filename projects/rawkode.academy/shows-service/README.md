@@ -2,8 +2,10 @@
 
 ## Local Development
 
-```shell
-direnv allow
-nix develop --impure
-devenv up
+### Database
+
+This dagger command will provision a libsql server and run the migrations.
+
+```shell '{"name": "dev"}'
+dagger call dev up
 ```
