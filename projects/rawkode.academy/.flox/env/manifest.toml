@@ -13,6 +13,7 @@ rover.pkg-path = "rover"
 bun.pkg-path = "bun"
 turso-cli.pkg-path = "turso-cli"
 sqld.pkg-path = "sqld"
+nodejs.pkg-path = "nodejs"
 # hello.pkg-path = "hello"
 # nodejs = { version = "^20.15.1", pkg-path = "nodejs" }
 

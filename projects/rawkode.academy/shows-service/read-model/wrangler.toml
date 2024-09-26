@@ -1,0 +1,15 @@
+name = "shows-service-read-model"
+
+compatibility_date = "2024-09-23"
+compatibility_flags = [ "nodejs_compat" ]
+
+workers_dev = true
+send_metrics = false
+
+main = "index.ts"
+
+[observability]
+enabled = true
+
+[env.production.vars]
+LIBSQL_URL = "libsql://shows-rawkodeacademy.turso.io"
