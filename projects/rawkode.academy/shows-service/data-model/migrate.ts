@@ -5,17 +5,17 @@ import { client } from "./client.ts";
 const db = drizzle(client);
 
 const main = async () => {
-	await migrate(db, {
-		migrationsFolder: "./migrations",
-	});
+  await migrate(db, {
+    migrationsFolder: "./migrations",
+  });
 };
 
 try {
-	await main();
+  await main();
 } catch (err) {
-	console.error("Error performing migration: ", err);
-	client.close();
-	process.exit(1);
+  console.error("Error performing migration: ", err);
+  client.close();
+  process.exit(1);
 }
 
 client.close();
