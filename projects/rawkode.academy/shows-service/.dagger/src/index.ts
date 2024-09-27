@@ -16,13 +16,14 @@ class ShowsService {
 		});
 
 		await dag
-			.nodeJs()
-			.withBun(source)
-			.withExec(["ls"])
-			// .withEnvVariable("LIBSQL_URL", "http://libsql:8080")
-			// .withEnvVariable("LIBSQL_TOKEN", "")
-			// .withServiceBinding("libsql", libsql)
-			// .withExec(["bun", "data-model/migrate.ts"])
+			.container()
+			.from("denoland/deno")
+			.withEnvVariable("LIBSQL_URL", "http://libsql:2000")
+			.withEnvVariable("LIBSQL_TOKEN", "")
+			.withServiceBinding("libsql", libsql)
+			.withMountedDirectory("/code", source)
+			.withWorkdir("/code/data-model")
+			.withExec(["deno", "run", "--allow-read=./migrations", "--allow-net=libsql:2000", "--allow-env=LIBSQL_URL,LIBSQL_TOKEN", "migrate.ts"])
 			.stdout();
 
 		return libsql;
