@@ -18,9 +18,15 @@ deno run --allow-env --allow-net read-model/index.ts
 
 ## Deploy
 
+### Read Model
+
 ```shell '{"name": "deploy"}'
 export LIBSQL_URL=""
 export LIBSQL_TOKEN=""
 
 deployctl deploy --org="Rawkode Academy" --project="plt-shows-r" --env=LIBSQL_URL=${LIBSQL_URL} --env=LIBSQL_TOKEN=${LIBSQL_TOKEN} --include=deno.json --include=data-model --include=./read-model --entrypoint=./read-model/index.ts
+
+deno run -A read-model/getSchema.ts | rover subgraph check rawkode-academy-production@current --name shows --schema -
+
+deno run -A read-model/getSchema.ts | rover subgraph publish rawkode-academy-production@current --routing-url https://plt-shows-r.deno.dev/ --name shows --schema -
 ```
