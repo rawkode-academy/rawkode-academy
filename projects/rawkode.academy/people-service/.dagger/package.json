@@ -1,0 +1,10 @@
+{
+	"type": "module",
+	"dagger": {
+		"runtime": "bun"
+	},
+	"dependencies": {
+		"@dagger.io/dagger": "./sdk",
+		"typescript": "^5.5.4"
+	}
+}
