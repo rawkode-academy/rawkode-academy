@@ -2,12 +2,28 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@std/assert@1": "jsr:@std/assert@1.0.6",
+      "jsr:@std/internal@^1.0.4": "jsr:@std/internal@1.0.4",
       "npm:@apollo/server@^4.11.0": "npm:@apollo/server@4.11.0_graphql@16.9.0",
-      "npm:@cloudflare/workers-types@4.20240925.0": "npm:@cloudflare/workers-types@4.20240925.0",
       "npm:@libsql/client@^0.14.0": "npm:@libsql/client@0.14.0",
-      "npm:drizzle-graphql@^0.8.5": "npm:drizzle-graphql@0.8.5_drizzle-orm@0.33.0__@cloudflare+workers-types@4.20240925.0__@libsql+client@0.14.0_graphql@16.9.0_@cloudflare+workers-types@4.20240925.0_@libsql+client@0.14.0",
-      "npm:drizzle-orm@^0.33.0": "npm:drizzle-orm@0.33.0_@cloudflare+workers-types@4.20240925.0_@libsql+client@0.14.0",
-      "npm:graphql@^16.9.0": "npm:graphql@16.9.0"
+      "npm:@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157": "npm:@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157",
+      "npm:@sindresorhus/slugify@^2.2.1": "npm:@sindresorhus/slugify@2.2.1",
+      "npm:drizzle-graphql@^0.8.5": "npm:drizzle-graphql@0.8.5_drizzle-orm@0.33.0__@libsql+client@0.14.0_graphql@16.9.0_@libsql+client@0.14.0",
+      "npm:drizzle-orm@^0.33.0": "npm:drizzle-orm@0.33.0_@libsql+client@0.14.0",
+      "npm:drizzle-zod@^0.5.1": "npm:drizzle-zod@0.5.1_drizzle-orm@0.33.0__@libsql+client@0.14.0_zod@3.23.8_@libsql+client@0.14.0",
+      "npm:graphql@^16.9.0": "npm:graphql@16.9.0",
+      "npm:zod@^3.23.8": "npm:zod@3.23.8"
+    },
+    "jsr": {
+      "@std/assert@1.0.6": {
+        "integrity": "1904c05806a25d94fe791d6d883b685c9e2dcd60e4f9fc30f4fc5cf010c72207",
+        "dependencies": [
+          "jsr:@std/internal@^1.0.4"
+        ]
+      },
+      "@std/internal@1.0.4": {
+        "integrity": "62e8e4911527e5e4f307741a795c0b0a9e6958d0b3790716ae71ce085f755422"
+      }
     },
     "npm": {
       "@apollo/cache-control-types@1.0.3_graphql@16.9.0": {
@@ -152,8 +168,8 @@
         "integrity": "sha512-YBDiuAX9i1lLc6GeTy1m7DGLFn/gMnvXqlalOIMjM7DeOgIacEjjfwPqb0M1CQ2v11HhR15d1NmxJoRCfrNqcA==",
         "dependencies": {}
       },
-      "@cloudflare/workers-types@4.20240925.0": {
-        "integrity": "sha512-KpqyRWvanEuXgBTKYFzRp4NsWOEcswxjsPRSre1zYQcODmc8PUrraVHQUmgvkJgv3FzB+vI9xm7J6oE4MmZHCA==",
+      "@bufbuild/protobuf@1.10.0": {
+        "integrity": "sha512-QDdVFLoN93Zjg36NoQPZfsVH9tZew7wKDKyV5qRdj8ntT4wQCOradQjRaTdwMhWUYsgKsvCINKKm87FdEk96Ag==",
         "dependencies": {}
       },
       "@graphql-tools/merge@8.4.2_graphql@16.9.0": {
@@ -298,6 +314,30 @@
       "@protobufjs/utf8@1.1.0": {
         "integrity": "sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==",
         "dependencies": {}
+      },
+      "@restatedev/restate-sdk-core@0.0.0-SNAPSHOT-20240926122157": {
+        "integrity": "sha512-uVi4QOTWAU7GfZxqMugQPv8QEtsSF2NP7Yyxzq+DLapKvcngNEMxo/yQyPcS4VjGKAJiXo9XmaK5RMXnR0KuTA==",
+        "dependencies": {}
+      },
+      "@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157": {
+        "integrity": "sha512-kpeyWaugqCL0Q7GAUhHXyGcN6je1nF4cn+e0FvaRygmQNAB1lOxNg6PRsvzDEI7RRwMjyFbIEiZbltpEy407ew==",
+        "dependencies": {
+          "@bufbuild/protobuf": "@bufbuild/protobuf@1.10.0",
+          "@restatedev/restate-sdk-core": "@restatedev/restate-sdk-core@0.0.0-SNAPSHOT-20240926122157"
+        }
+      },
+      "@sindresorhus/slugify@2.2.1": {
+        "integrity": "sha512-MkngSCRZ8JdSOCHRaYd+D01XhvU3Hjy6MGl06zhOk614hp9EOAp5gIkBeQg7wtmxpitU6eAL4kdiRMcJa2dlrw==",
+        "dependencies": {
+          "@sindresorhus/transliterate": "@sindresorhus/transliterate@1.6.0",
+          "escape-string-regexp": "escape-string-regexp@5.0.0"
+        }
+      },
+      "@sindresorhus/transliterate@1.6.0": {
+        "integrity": "sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ==",
+        "dependencies": {
+          "escape-string-regexp": "escape-string-regexp@5.0.0"
+        }
       },
       "@types/body-parser@1.19.5": {
         "integrity": "sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==",
@@ -505,19 +545,25 @@
         "integrity": "sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw==",
         "dependencies": {}
       },
-      "drizzle-graphql@0.8.5_drizzle-orm@0.33.0__@cloudflare+workers-types@4.20240925.0__@libsql+client@0.14.0_graphql@16.9.0_@cloudflare+workers-types@4.20240925.0_@libsql+client@0.14.0": {
+      "drizzle-graphql@0.8.5_drizzle-orm@0.33.0__@libsql+client@0.14.0_graphql@16.9.0_@libsql+client@0.14.0": {
         "integrity": "sha512-MAqBwmj/kSZWIUQdYCsYtoZWxxVRcXWkhsqt0b6fY1XC171WHBK/jZiVWepO04tDsdaDuTvzlufDHJqNl3VVWQ==",
         "dependencies": {
-          "drizzle-orm": "drizzle-orm@0.33.0_@cloudflare+workers-types@4.20240925.0_@libsql+client@0.14.0",
+          "drizzle-orm": "drizzle-orm@0.33.0_@libsql+client@0.14.0",
           "graphql": "graphql@16.9.0",
           "graphql-parse-resolve-info": "graphql-parse-resolve-info@4.13.0_graphql@16.9.0"
         }
       },
-      "drizzle-orm@0.33.0_@cloudflare+workers-types@4.20240925.0_@libsql+client@0.14.0": {
+      "drizzle-orm@0.33.0_@libsql+client@0.14.0": {
         "integrity": "sha512-SHy72R2Rdkz0LEq0PSG/IdvnT3nGiWuRk+2tXZQ90GVq/XQhpCzu/EFT3V2rox+w8MlkBQxifF8pCStNYnERfA==",
         "dependencies": {
-          "@cloudflare/workers-types": "@cloudflare/workers-types@4.20240925.0",
           "@libsql/client": "@libsql/client@0.14.0"
+        }
+      },
+      "drizzle-zod@0.5.1_drizzle-orm@0.33.0__@libsql+client@0.14.0_zod@3.23.8_@libsql+client@0.14.0": {
+        "integrity": "sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==",
+        "dependencies": {
+          "drizzle-orm": "drizzle-orm@0.33.0_@libsql+client@0.14.0",
+          "zod": "zod@3.23.8"
         }
       },
       "ee-first@1.1.1": {
@@ -544,6 +590,10 @@
       },
       "escape-html@1.0.3": {
         "integrity": "sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==",
+        "dependencies": {}
+      },
+      "escape-string-regexp@5.0.0": {
+        "integrity": "sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==",
         "dependencies": {}
       },
       "etag@1.8.1": {
@@ -984,6 +1034,10 @@
       "ws@8.18.0": {
         "integrity": "sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==",
         "dependencies": {}
+      },
+      "zod@3.23.8": {
+        "integrity": "sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==",
+        "dependencies": {}
       }
     }
   },
@@ -993,9 +1047,13 @@
       "jsr:@std/assert@1",
       "npm:@apollo/server@^4.11.0",
       "npm:@libsql/client@^0.14.0",
+      "npm:@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157",
+      "npm:@sindresorhus/slugify@^2.2.1",
       "npm:drizzle-graphql@^0.8.5",
       "npm:drizzle-orm@^0.33.0",
-      "npm:graphql@^16.9.0"
+      "npm:drizzle-zod@^0.5.1",
+      "npm:graphql@^16.9.0",
+      "npm:zod@^3.23.8"
     ]
   }
 }
