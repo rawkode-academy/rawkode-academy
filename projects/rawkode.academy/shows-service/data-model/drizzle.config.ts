@@ -8,7 +8,7 @@ export default ({
 	strict: true,
 	verbose: true,
 	dbCredentials: {
-		url: process.env.TURSO_URL as string,
-		authToken: process.env.TURSO_TOKEN as string,
+		url: Deno.env.get("LIBSQL_URL"),
+		authToken: Deno.env.get("LIBSQL_TOKEN"),
 	},
 } satisfies Config);

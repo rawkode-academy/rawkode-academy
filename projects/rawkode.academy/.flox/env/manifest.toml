@@ -14,6 +14,7 @@ bun.pkg-path = "bun"
 turso-cli.pkg-path = "turso-cli"
 sqld.pkg-path = "sqld"
 nodejs.pkg-path = "nodejs"
+deno.pkg-path = "deno"
 # hello.pkg-path = "hello"
 # nodejs = { version = "^20.15.1", pkg-path = "nodejs" }
 

@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/libsql";
 import { migrate } from "drizzle-orm/libsql/migrator";
-import { client } from "./client";
+import { client } from "./client.ts";
 
 const db = drizzle(client);
 

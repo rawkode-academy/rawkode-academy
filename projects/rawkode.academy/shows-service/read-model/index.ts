@@ -1,53 +1,45 @@
 import { ApolloServer } from "@apollo/server";
-import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
-import { startServerAndCreateCloudflareWorkersHandler } from "@as-integrations/cloudflare-workers";
+import { startStandaloneServer } from '@apollo/server/standalone';
+import { createClient } from "@libsql/client";
 import { buildSchema } from "drizzle-graphql";
 import { drizzle } from "drizzle-orm/libsql";
 import { GraphQLObjectType, GraphQLSchema } from "graphql";
-import * as dataSchema from "../data-model/schema";
-import { createClient } from "@libsql/client";
-import type { ExecutionContext, ExportedHandler } from "@cloudflare/workers-types";
+import * as dataSchema from "../data-model/schema.ts";
 
-interface Env {
-	LIBSQL_URL: string;
-	LIBSQL_TOKEN: string;
+if (!Deno.env.has("LIBSQL_URL")) {
+	Deno.env.set("LIBSQL_URL", "http://localhost:2000");
 }
 
-interface Context {
-	token: string;
+if (!Deno.env.has("LIBSQL_TOKEN")) {
+	Deno.env.set("LIBSQL_TOKEN", "");
 }
 
-export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		const client = createClient({
-			url: env.LIBSQL_URL as string,
-			authToken: env.LIBSQL_TOKEN as string,
-		});
+const client = createClient({
+	url: Deno.env.get("LIBSQL_URL"),
+	authToken: Deno.env.get("LIBSQL_TOKEN"),
+});
 
-		const db = drizzle(client, { schema: dataSchema });
+const db = drizzle(client, { schema: dataSchema });
 
-		const { entities } = buildSchema(db);
+const { entities } = buildSchema(db);
 
-		const schema = new GraphQLSchema({
-			query: new GraphQLObjectType({
-				name: "Query",
-				fields: {
-					show: entities.queries.showsTableSingle,
-					shows: entities.queries.showsTable,
-				},
-			}),
-		});
+const schema = new GraphQLSchema({
+	query: new GraphQLObjectType({
+		name: "Query",
+		fields: {
+			show: entities.queries.showsTableSingle,
+			shows: entities.queries.showsTable,
+		},
+	}),
+});
 
-		const server = new ApolloServer<Context>({
-			schema,
-			introspection: true,
-			plugins: [ApolloServerPluginLandingPageLocalDefault({ footer: false })],
-		});
+const server = new ApolloServer<Context>({
+	schema,
+	introspection: true,
+});
 
-		return startServerAndCreateCloudflareWorkersHandler<Env, Context>(server, {
-			context: async ({ env, request, ctx }) => {
-				return { token: "secret" };
-			},
-		})(request, env, ctx);
-	},
-} satisfies ExportedHandler<Env>;
+const { url } = await startStandaloneServer(server, {
+	listen: { port: 4000 },
+});
+
+console.log(`🚀  Server ready at: ${url}`);
