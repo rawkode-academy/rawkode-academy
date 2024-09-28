@@ -1,6 +1,5 @@
 {
   "imports": {
-    "@apollo/server": "npm:@apollo/server@^4.11.0",
     "@libsql/client": "npm:@libsql/client@^0.14.0",
     "@restatedev/restate-sdk": "npm:@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157",
     "@sindresorhus/slugify": "npm:@sindresorhus/slugify@^2.2.1",
@@ -9,6 +8,7 @@
     "drizzle-orm": "npm:drizzle-orm@^0.33.0",
     "drizzle-zod": "npm:drizzle-zod@^0.5.1",
     "graphql": "npm:graphql@^16.9.0",
+    "graphql-yoga": "npm:graphql-yoga@^5.7.0",
     "zod": "npm:zod@^3.23.8"
   },
   "compilerOptions": {
