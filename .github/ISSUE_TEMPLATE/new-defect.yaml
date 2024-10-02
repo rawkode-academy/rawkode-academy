@@ -1,7 +1,6 @@
 name: 🐛 New Defect
 description: Use this template to report a new defect.
-labels:
-  - type/defect
+type: Defect
 assignees:
   - rawkode
   - icepuma
