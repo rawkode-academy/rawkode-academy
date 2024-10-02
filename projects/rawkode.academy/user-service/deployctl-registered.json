@@ -1,0 +1,10 @@
+{
+	"deploy": {
+		"project": "plt-users-registered",
+		"include": [
+			"deno.jsonc",
+			"registered/main.ts"
+		],
+		"entrypoint": "registered/main.ts"
+	}
+}
