@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "@restatedev/restate-sdk": "npm:@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157",
+    "@workos-inc/node": "npm:@workos-inc/node@^7.27.3",
+    "resend": "npm:resend@^4.0.0"
+  }
+}
