@@ -16,8 +16,8 @@ class ShowsService {
 		});
 
 		await dag
-			.container()
-			.from("denoland/deno")
+			.deno()
+			.withCache(source)
 			.withEnvVariable("LIBSQL_URL", "http://libsql:2000")
 			.withEnvVariable("LIBSQL_TOKEN", "")
 			.withServiceBinding("libsql", libsql)

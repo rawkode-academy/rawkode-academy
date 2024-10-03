@@ -15,9 +15,9 @@ try {
 } catch (err) {
   console.error("Error performing migration: ", err);
   client.close();
-  process.exit(1);
+  Deno.exit(1);
 }
 
 client.close();
 console.log("Tables migrated!");
-process.exit(0);
+Deno.exit(0);

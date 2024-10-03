@@ -3,6 +3,10 @@
   "sdk": "typescript",
   "dependencies": [
     {
+      "name": "deno",
+      "source": "../../../daggerverse/deno"
+    },
+    {
       "name": "NodeJS",
       "source": "../../../daggerverse/nodejs"
     },

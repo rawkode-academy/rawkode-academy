@@ -1,0 +1,7 @@
+{
+	"imports": {
+		"constructs": "npm:constructs@^10",
+		"projen": "npm:projen@^0.88",
+		"smol-toml": "npm:smol-toml@^1"
+	}
+}

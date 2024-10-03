@@ -13,7 +13,7 @@ const seed = async () => {
     })
     .returning()
     .all();
-  process.exit(0);
+	Deno.exit(0);
 };
 
 await seed();

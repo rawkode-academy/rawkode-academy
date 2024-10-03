@@ -1,0 +1,6 @@
+{
+  "name": "deno",
+  "sdk": "typescript",
+  "source": ".",
+  "engineVersion": "v0.13.3"
+}
