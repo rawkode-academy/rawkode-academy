@@ -1,3 +1,7 @@
+---
+shell: bash
+---
+
 # People Service
 
 ## Local Development
@@ -13,7 +17,7 @@ dagger call dev up
 ### Read Model
 
 ```shell '{"name": "read-model"}'
-deno run --allow-env --allow-net read-model/index.ts
+deno run --allow-env --allow-read --allow-net read-model/main.ts
 ```
 
 ## Deploy
@@ -21,14 +25,13 @@ deno run --allow-env --allow-net read-model/index.ts
 ### Read Model
 
 ```shell '{"name": "deploy-read-model"}'
-export LIBSQL_URL=""
-export LIBSQL_TOKEN=""
+export LIBSQL_URL=Enter the libSQL URL
+export LIBSQL_TOKEN=Enter the libSQL Token
+export HIVE_TOKEN=Enter the Hive Token
 
-deployctl deploy --config=deployctl-read-model.json --org="Rawkode Academy" --env=LIBSQL_URL=${LIBSQL_URL} --env=LIBSQL_TOKEN=${LIBSQL_TOKEN}
+deno run --allow-all --no-config 'jsr:@deno/deployctl' deploy --config=deployctl-read-model.json --org="Rawkode Academy" --project plt-people-r --prod
 
-deno run -A read-model/getSchema.ts | rover subgraph check rawkode-academy-production@current --name people --schema -
-
-deno run -A read-model/getSchema.ts | rover subgraph publish rawkode-academy-production@current --routing-url https://plt-people-r.deno.dev/ --name people --schema -
+deno run -A --node-modules-dir npm:@graphql-hive/cli schema:publish  --url="https://plt-people-r.deno.dev/" --service=people ./read-model/schema.graphql
 ```
 
 ### Write Model

@@ -6,8 +6,14 @@
       "bun": {
         "pkg-path": "bun"
       },
+      "cargo": {
+        "pkg-path": "cargo"
+      },
       "deno": {
         "pkg-path": "deno"
+      },
+      "flyctl": {
+        "pkg-path": "flyctl"
       },
       "nodejs": {
         "pkg-path": "nodejs"
@@ -22,7 +28,6 @@
         "pkg-path": "turso-cli"
       }
     },
-    "vars": {},
     "hook": {},
     "profile": {},
     "options": {
@@ -36,9 +41,7 @@
         "licenses": []
       },
       "semver": {}
-    },
-    "services": {},
-    "build": {}
+    }
   },
   "packages": [
     {
@@ -56,6 +59,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -85,6 +89,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -114,6 +119,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -143,6 +149,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -152,6 +159,126 @@
       ],
       "outputs": {
         "out": "/nix/store/mqzlk40bnhx54by2m4lyyc02syippzad-bun-1.1.29"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cargo",
+      "broken": false,
+      "derivation": "/nix/store/a6j07nsrmnqhv0mm2bbnvnjcfkv3bxpz-cargo-1.80.1.drv",
+      "description": "Downloads your Rust project's dependencies and builds your project",
+      "install_id": "cargo",
+      "license": "[ MIT, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "name": "cargo-1.80.1",
+      "pname": "cargo",
+      "rev": "30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "rev_count": 684846,
+      "rev_date": "2024-09-23T20:13:18Z",
+      "scrape_date": "2024-09-27T03:18:01Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.80.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/idfq37bavykpfahg0q8cpawj90sckagq-cargo-1.80.1"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cargo",
+      "broken": false,
+      "derivation": "/nix/store/piqkpmwr5m4bn8p0d0j8q94y0bb7yfkw-cargo-1.80.1.drv",
+      "description": "Downloads your Rust project's dependencies and builds your project",
+      "install_id": "cargo",
+      "license": "[ MIT, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "name": "cargo-1.80.1",
+      "pname": "cargo",
+      "rev": "30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "rev_count": 684846,
+      "rev_date": "2024-09-23T20:13:18Z",
+      "scrape_date": "2024-09-27T03:18:01Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.80.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/hgycsvahrwxwkq56zj5by28pxwx9sfqh-cargo-1.80.1"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cargo",
+      "broken": false,
+      "derivation": "/nix/store/lw8a7gvkhkjfwfccpyy0p2i2kq1bq5qk-cargo-1.80.1.drv",
+      "description": "Downloads your Rust project's dependencies and builds your project",
+      "install_id": "cargo",
+      "license": "[ MIT, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "name": "cargo-1.80.1",
+      "pname": "cargo",
+      "rev": "30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "rev_count": 684846,
+      "rev_date": "2024-09-23T20:13:18Z",
+      "scrape_date": "2024-09-27T03:18:01Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.80.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/rc3niv9fvii3lc862h81qbqca89yagg9-cargo-1.80.1"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cargo",
+      "broken": false,
+      "derivation": "/nix/store/gjrrcbbsmjq4dp6gfrss50l6zm628qpw-cargo-1.80.1.drv",
+      "description": "Downloads your Rust project's dependencies and builds your project",
+      "install_id": "cargo",
+      "license": "[ MIT, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "name": "cargo-1.80.1",
+      "pname": "cargo",
+      "rev": "30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "rev_count": 684846,
+      "rev_date": "2024-09-23T20:13:18Z",
+      "scrape_date": "2024-09-27T03:18:01Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.80.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/c0r47wb8xm1dbsvppw6gh75jfjakal1y-cargo-1.80.1"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -172,6 +299,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -201,6 +329,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -230,6 +359,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -259,6 +389,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -268,6 +399,126 @@
       ],
       "outputs": {
         "out": "/nix/store/j1xsin03grmx9h1z3rwgdmpnwidpysjr-deno-1.46.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flyctl",
+      "broken": false,
+      "derivation": "/nix/store/4ilmdx1cyq93rcc7wwi461fvvj76anjh-flyctl-0.3.6.drv",
+      "description": "Command line tools for fly.io services",
+      "install_id": "flyctl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "name": "flyctl-0.3.6",
+      "pname": "flyctl",
+      "rev": "30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "rev_count": 684846,
+      "rev_date": "2024-09-23T20:13:18Z",
+      "scrape_date": "2024-09-27T03:18:01Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.6",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/1ys8xf2rq1il00sysh9721q8gda8fimy-flyctl-0.3.6"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flyctl",
+      "broken": false,
+      "derivation": "/nix/store/ghbyj92nm93gsg5lmgv967859cb9mk65-flyctl-0.3.6.drv",
+      "description": "Command line tools for fly.io services",
+      "install_id": "flyctl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "name": "flyctl-0.3.6",
+      "pname": "flyctl",
+      "rev": "30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "rev_count": 684846,
+      "rev_date": "2024-09-23T20:13:18Z",
+      "scrape_date": "2024-09-27T03:18:01Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.6",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/zfxdp4j23f04ppsmb7fg4k6pli4ci2wm-flyctl-0.3.6"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flyctl",
+      "broken": false,
+      "derivation": "/nix/store/410hxidz801cgmk2if8li4pxf0kjpyvj-flyctl-0.3.6.drv",
+      "description": "Command line tools for fly.io services",
+      "install_id": "flyctl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "name": "flyctl-0.3.6",
+      "pname": "flyctl",
+      "rev": "30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "rev_count": 684846,
+      "rev_date": "2024-09-23T20:13:18Z",
+      "scrape_date": "2024-09-27T03:18:01Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.6",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/nsabd58kiqdn9zwycavclvzil18i171p-flyctl-0.3.6"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flyctl",
+      "broken": false,
+      "derivation": "/nix/store/szi2gb30awg98x0ka72r46rj71qhwj1i-flyctl-0.3.6.drv",
+      "description": "Command line tools for fly.io services",
+      "install_id": "flyctl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "name": "flyctl-0.3.6",
+      "pname": "flyctl",
+      "rev": "30439d93eb8b19861ccbe3e581abf97bdc91b093",
+      "rev_count": 684846,
+      "rev_date": "2024-09-23T20:13:18Z",
+      "scrape_date": "2024-09-27T03:18:01Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.6",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/h4z0vl98a219y7az7rkm41hfcfyjm5zr-flyctl-0.3.6"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -288,6 +539,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -318,6 +570,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -348,6 +601,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -378,6 +632,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -408,6 +663,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -437,6 +693,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -466,6 +723,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -495,6 +753,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -524,6 +783,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -553,6 +813,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -582,6 +843,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -611,6 +873,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -640,6 +903,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -669,6 +933,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -698,6 +963,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -727,6 +993,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,

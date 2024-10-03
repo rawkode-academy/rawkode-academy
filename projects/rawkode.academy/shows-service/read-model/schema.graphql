@@ -1,0 +1,9 @@
+type Show @key(fields: "id") {
+  id: ID!
+	name: String!
+}
+
+type Query {
+  shows: [Show]
+  showById(id: ID!): Show
+}

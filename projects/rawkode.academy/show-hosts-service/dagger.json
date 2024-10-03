@@ -1,0 +1,20 @@
+{
+  "name": "show-hosts-service",
+  "sdk": "typescript",
+  "dependencies": [
+    {
+      "name": "deno",
+      "source": "../../../daggerverse/deno"
+    },
+    {
+      "name": "NodeJS",
+      "source": "../../../daggerverse/nodejs"
+    },
+    {
+      "name": "sqld",
+      "source": "../../../daggerverse/sqld"
+    }
+  ],
+  "source": ".dagger",
+  "engineVersion": "v0.13.3"
+}

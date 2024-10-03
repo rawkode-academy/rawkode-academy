@@ -1,8 +1,0 @@
-{
-	"name": "rawkode-academy-api",
-	"version": "1.0.0",
-	"devDependencies": {
-		"@grafbase/sdk": "~0.17.0"
-	},
-	"license": "MIT"
-}
