@@ -1,0 +1,9 @@
+extend type Person @key(fields: "id", resolvable: false) {
+  id: ID!
+	shows: [Show]
+}
+
+extend type Show @key(fields: "id", resolvable: false) {
+	id: ID!
+	people: [Person]
+}

@@ -1,11 +1,11 @@
 {
   "deploy": {
-    "project": "plt-shows-r",
     "include": [
       "data-model",
       "deno.jsonc",
-      "read-model/index.ts"
+      "read-model/main.ts",
+			"read-model/schema.graphql"
     ],
-    "entrypoint": "read-model/index.ts"
+    "entrypoint": "read-model/main.ts"
   }
 }
