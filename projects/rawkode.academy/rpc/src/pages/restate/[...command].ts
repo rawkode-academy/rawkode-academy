@@ -6,7 +6,7 @@ import type { Env } from "../../restateEnv.ts";
 
 const handler = endpoint()
 	.bind(RestateUserRegisteredWorkflow)
-	.withIdentityV1(env.getSecret("RESTATE_IDENTITY_KEY") as string)
+	// .withIdentityV1(env.getSecret("RESTATE_IDENTITY_KEY") as string)
 	.handler();
 
 export const GET: APIRoute = async ({ request }) => {
