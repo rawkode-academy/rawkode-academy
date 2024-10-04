@@ -25,11 +25,7 @@ deno run --allow-env --allow-read --allow-net read-model/main.ts
 ### Read Model
 
 ```shell '{"name": "deploy-read-model"}'
-export NAME="show-hosts"
-
-deno run --allow-all --no-config 'jsr:@deno/deployctl' deploy --config=deployctl-read-model.json --org="Rawkode Academy" --project plt-${NAME}-r --prod
-
-# deno run -A --node-modules-dir npm:@graphql-hive/cli schema:publish  --url="https://plt-${NAME}-r.deno.dev/" --service=${NAME} ./read-model/schema.graphql
+deno run --allow-all --no-config 'jsr:@deno/deployctl' deploy --config=deployctl-read-model.json --org="Rawkode Academy" --project plt-show-hosts-r --prod
 ```
 
 ### Write Model

@@ -25,13 +25,7 @@ deno run --allow-env --allow-read --allow-net read-model/main.ts
 ### Read Model
 
 ```shell '{"name": "deploy-read-model"}'
-export LIBSQL_URL=Enter the libSQL URL
-export LIBSQL_TOKEN=Enter the libSQL Token
-export HIVE_TOKEN=Enter the Hive Token
-
 deno run --allow-all --no-config 'jsr:@deno/deployctl' deploy --config=deployctl-read-model.json --org="Rawkode Academy" --project plt-people-r --prod
-
-deno run -A --node-modules-dir npm:@graphql-hive/cli schema:publish  --url="https://plt-people-r.deno.dev/" --service=people ./read-model/schema.graphql
 ```
 
 ### Write Model

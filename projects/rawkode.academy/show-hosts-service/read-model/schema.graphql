@@ -1,9 +1,8 @@
-extend type Person @key(fields: "id", resolvable: false) {
+type Person @key(fields: "id") {
   id: ID!
-	shows: [Show]
 }
 
-extend type Show @key(fields: "id", resolvable: false) {
+extend type Show @key(fields: "id") {
 	id: ID!
-	people: [Person]
+	hosts: [Person]
 }

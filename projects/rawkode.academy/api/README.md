@@ -1,3 +1,7 @@
+---
+shell: bash
+---
+
 # API
 
 ## Deploy

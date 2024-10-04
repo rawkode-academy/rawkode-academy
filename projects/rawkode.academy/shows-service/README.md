@@ -1,3 +1,7 @@
+---
+shell: bash
+---
+
 # Shows Service
 
 ## Local Development
@@ -21,14 +25,7 @@ deno run --allow-env --allow-net read-model/index.ts
 ### Read Model
 
 ```shell '{"name": "deploy-read-model"}'
-export LIBSQL_URL=Enter the libSQL URL
-export LIBSQL_TOKEN=Enter the libSQL Token
-export HIVE_TOKEN=Enter the Hive Token
-
 deno run --allow-all --no-config 'jsr:@deno/deployctl' deploy --config=deployctl-read-model.json --org="Rawkode Academy" --project plt-shows-r --prod
-
-deno run -A read-model/getSchema.ts | save schema.graphql
-deno run -A --node-modules-dir npm:@graphql-hive/cli schema:publish  --url="https://plt-shows-r.deno.dev/" --service=shows ./schema.graphql
 ```
 
 ### Write Model
