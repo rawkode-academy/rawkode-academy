@@ -19,6 +19,9 @@ describe("Auth Middleware", () => {
 				set: vi.fn(),
 			},
 			redirect: vi.fn(),
+			request: {
+				url: "https://example.com",
+			},
 		};
 		next = vi.fn();
 	});
@@ -56,7 +59,9 @@ describe("Auth Middleware", () => {
 		});
 
 		vi.mocked(jwtVerify).mockResolvedValue({
-			key: new Uint8Array(2), payload: {}, protectedHeader: { alg: "" },
+			key: new Uint8Array(2),
+			payload: {},
+			protectedHeader: { alg: "" },
 		});
 
 		await onRequest(context, next);
