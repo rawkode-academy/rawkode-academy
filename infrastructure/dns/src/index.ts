@@ -9,7 +9,6 @@ import alphabitsTv from "./domains/alphabits.tv";
 import canideployToday from "./domains/canideploy.today";
 import chappaaiDev from "./domains/chappaai.dev";
 import cloudnativecompassFm from "./domains/cloudnativecompass.fm";
-import comtryaDev from "./domains/comtrya.dev";
 import klusteredLive from "./domains/klustered.live";
 import rawkoDe from "./domains/rawko.de";
 import rawkodeAcademy from "./domains/rawkode.academy";
@@ -49,7 +48,6 @@ class CoreDns extends TerraformStack {
 		canideployToday(this);
 		chappaaiDev(this);
 		cloudnativecompassFm(this);
-		comtryaDev(this);
 		klusteredLive(this);
 		rawkoDe(this);
 		rawkodeAcademy(this);

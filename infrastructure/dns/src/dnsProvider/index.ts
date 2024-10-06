@@ -34,10 +34,6 @@ interface Microsoft365Config {
 	spfIncludes: string[];
 }
 
-interface BumpEmailConfig {
-	domainKey: string;
-}
-
 interface ProtonMailConfig {
 	verificationCode: string;
 }
@@ -103,7 +99,7 @@ export class ManagedDomain extends Construct {
 	addPageRule(
 		id: string,
 		target: string,
-		actions: PageRuleActions
+		actions: PageRuleActions,
 	): ManagedDomain {
 		if (this.registrar !== Registrar.Cloudflare) {
 			throw new Error("Page rules are only supported for Cloudflare domains");
@@ -122,7 +118,7 @@ export class ManagedDomain extends Construct {
 		id: string,
 		name: string,
 		value: string,
-		ttl = 300
+		ttl = 300,
 	): ManagedDomain {
 		new Record(this, id, {
 			zoneId: this.cloudflareZone.id,
@@ -140,7 +136,7 @@ export class ManagedDomain extends Construct {
 		id: string,
 		name: string,
 		value: string,
-		proxied?: boolean
+		proxied?: boolean,
 	): ManagedDomain {
 		new Record(this, id, {
 			zoneId: this.cloudflareZone.id,
@@ -178,7 +174,7 @@ export class ManagedDomain extends Construct {
 
 			case Email.Configured:
 				throw new Error(
-					"Attempting to discourage email, but email has already been enabled"
+					"Attempting to discourage email, but email has already been enabled",
 				);
 		}
 	}
@@ -207,21 +203,21 @@ export class ManagedDomain extends Construct {
 		this.addTextRecord(
 			"spf",
 			"@",
-			"v=spf1 include:spf.messagingengine.com ~all"
+			"v=spf1 include:spf.messagingengine.com ~all",
 		);
 
 		for (let i = 1; i <= 3; i++) {
 			this.addCNameRecord(
 				`dkim${i}`,
 				`fm${i}._domainkey`,
-				`fm${i}.${this.cloudflareZone.zone}.dkim.fmhosted.com`
+				`fm${i}.${this.cloudflareZone.zone}.dkim.fmhosted.com`,
 			);
 		}
 
 		this.addCNameRecord(
 			`dkim-mesmtp`,
 			`mesmtp._domainkey`,
-			`mesmtp.${this.cloudflareZone.zone}.dkim.fmhosted.com`
+			`mesmtp.${this.cloudflareZone.zone}.dkim.fmhosted.com`,
 		);
 
 		new Record(this, "srv-submission", {
@@ -378,48 +374,52 @@ export class ManagedDomain extends Construct {
 			this.addTextRecord(
 				"microsoft-verification",
 				"@",
-				`MS=${config.txtVerification}`
+				`MS=${config.txtVerification}`,
 			);
 		}
 
 		this.addTextRecord(
 			"microsoft-spf",
 			"@",
-			"v=spf1 include:spf.protection.outlook.com -all"
+			"v=spf1 include:spf.protection.outlook.com -all",
 		)
 			.addCNameRecord(
 				"microsoft-discover",
 				"autodiscover",
-				"autodiscover.outlook.com"
+				"autodiscover.outlook.com",
 			)
 			.addCNameRecord(
 				"microsoft-dkim-1",
 				"selector1._domainkey",
-				`selector1-${this.zoneString.replace(
-					".",
-					"-"
-				)}._domainkey.rawkodeacademy.onmicrosoft.com`
+				`selector1-${
+					this.zoneString.replace(
+						".",
+						"-",
+					)
+				}._domainkey.rawkodeacademy.onmicrosoft.com`,
 			)
 			.addCNameRecord(
 				"microsoft-dkim-2",
 				"selector2._domainkey",
-				`selector2-${this.zoneString.replace(
-					".",
-					"-"
-				)}._domainkey.rawkodeacademy.onmicrosoft.com`
+				`selector2-${
+					this.zoneString.replace(
+						".",
+						"-",
+					)
+				}._domainkey.rawkodeacademy.onmicrosoft.com`,
 			);
 
 		return this;
 	}
 
-	enableBumpEmail(config: BumpEmailConfig): ManagedDomain {
+	enableSimpleLogin(): ManagedDomain {
 		new Record(this, "mx1", {
 			zoneId: this.cloudflareZone.id,
 			name: "@",
 			type: "MX",
 			ttl: 3600,
 			priority: 10,
-			value: "mx.bump.email.",
+			value: "mx1.simplelogin.co.",
 			comment: "Managed by Terraform",
 		});
 
@@ -429,16 +429,34 @@ export class ManagedDomain extends Construct {
 			type: "MX",
 			ttl: 3600,
 			priority: 20,
-			value: "mx2.bump.email.",
+			value: "mx2.simplelogin.co.",
 			comment: "Managed by Terraform",
 		});
 
-		this.addTextRecord("spf", "@", "v=spf1 include:spf.bump.email ~all");
+		this.addTextRecord("spf", "@", "v=spf1 include:simplelogin.co ~all");
+
+		this.addCNameRecord(
+			"dkim1",
+			"dkim._domainkey",
+			"dkim._domainkey.simplelogin.co.",
+		);
+
+		this.addCNameRecord(
+			"dkim2",
+			"dkim02._domainkey",
+			"dkim03._domainkey.simplelogin.co.",
+		);
+
+		this.addCNameRecord(
+			"dkim3",
+			"dkim03._domainkey",
+			"dkim03._domainkey.simplelogin.co.",
+		);
 
 		this.addTextRecord(
-			"dkim",
-			"bump._domainkey",
-			`v=DKIM1; p=${config.domainKey}`
+			"dmarc",
+			"_dmarc",
+			"v=DMARC1; p=quarantine; pct=100; adkim=s; aspf=s",
 		);
 
 		return this;
@@ -498,15 +516,17 @@ export class ManagedDomain extends Construct {
 		this.addTextRecord(
 			"dkim",
 			"google._domainkey",
-			`v=DKIM1; k=rsa; p=${config.domainKey}`
+			`v=DKIM1; k=rsa; p=${config.domainKey}`,
 		);
 
 		this.addTextRecord(
 			"spf",
 			"@",
-			`v=spf1 include:_spf.google.com ${config.spfIncludes
-				.map((include) => `include:${include}`)
-				.join(" ")} -all`
+			`v=spf1 include:_spf.google.com ${
+				config.spfIncludes
+					.map((include) => `include:${include}`)
+					.join(" ")
+			} -all`,
 		);
 
 		return this;
@@ -516,7 +536,7 @@ export class ManagedDomain extends Construct {
 		this.addTextRecord(
 			"verification",
 			"@",
-			`protonmail-verification=${config.verificationCode}`
+			`protonmail-verification=${config.verificationCode}`,
 		);
 
 		this.addTextRecord("spf", "@", "v=spf1 include:_spf.protonmail.ch ~all");
@@ -524,19 +544,19 @@ export class ManagedDomain extends Construct {
 		this.addCNameRecord(
 			"dkim1",
 			"protonmail._domainkey",
-			"protonmail.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch."
+			"protonmail.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch.",
 		);
 
 		this.addCNameRecord(
 			"dkim2",
 			"protonmail2._domainkey",
-			"protonmail2.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch."
+			"protonmail2.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch.",
 		);
 
 		this.addCNameRecord(
 			"dkim3",
 			"protonmail3._domainkey",
-			"protonmail3.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch."
+			"protonmail3.domainkey.d6tnun6yjhyqafzeqma5dsgy6epijgw5tlj4tmg2czg6apyp7cowa.domains.proton.ch.",
 		);
 
 		new Record(this, "mx1", {
@@ -588,7 +608,7 @@ export class ManagedDomain extends Construct {
 		return this.addTextRecord(
 			"resend-spf",
 			config.subdomain,
-			"v=spf1 include:amazonses.com ~all"
+			"v=spf1 include:amazonses.com ~all",
 		).addTextRecord("resend-domain-key", "resend._domainkey", config.domainKey);
 	}
 }
