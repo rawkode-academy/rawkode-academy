@@ -19,7 +19,7 @@ export default (scope: Construct): ManagedDomain => {
 			"@",
 			"google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU"
 		)
-		.addCNameRecord("api", "api", "api-main-rawkodeacademy.grafbase.app")
+		.addCNameRecord("api", "api", "rawkode-academy-api.fly.dev")
 		.addCNameRecord("stripe", "billing", "hosted-checkout.stripecdn.com")
 		.addTextRecord(
 			"stripe-acme",

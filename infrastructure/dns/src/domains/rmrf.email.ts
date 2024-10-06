@@ -8,7 +8,5 @@ export default (scope: Construct): ManagedDomain => {
 		Registrar.Cloudflare
 	);
 
-	managedDomain.enableFastmail();
-
-	return managedDomain;
+	return managedDomain.enableSimpleLogin();
 };
