@@ -1,0 +1,381 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "google-cloud-sdk": {
+        "pkg-path": "google-cloud-sdk"
+      },
+      "opentofu": {
+        "pkg-path": "opentofu"
+      },
+      "terraform": {
+        "pkg-path": "terraform"
+      }
+    },
+    "hook": {},
+    "profile": {},
+    "options": {
+      "systems": [
+        "aarch64-darwin",
+        "aarch64-linux",
+        "x86_64-darwin",
+        "x86_64-linux"
+      ],
+      "allow": {
+        "licenses": []
+      },
+      "semver": {}
+    }
+  },
+  "packages": [
+    {
+      "attr_path": "google-cloud-sdk",
+      "broken": false,
+      "derivation": "/nix/store/69a434ragm2h20lwdzv0vwnifq8kv5cn-google-cloud-sdk-494.0.0.drv",
+      "description": "Tools for the google cloud platform",
+      "install_id": "google-cloud-sdk",
+      "license": "Unspecified free software license",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "google-cloud-sdk-494.0.0",
+      "pname": "google-cloud-sdk",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "494.0.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/vj189b7g7a47m410n7i5218i339zrv1r-google-cloud-sdk-494.0.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "google-cloud-sdk",
+      "broken": false,
+      "derivation": "/nix/store/cl71cmhd36427rb4w4fsfxs6cpq452cc-google-cloud-sdk-494.0.0.drv",
+      "description": "Tools for the google cloud platform",
+      "install_id": "google-cloud-sdk",
+      "license": "Unspecified free software license",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "google-cloud-sdk-494.0.0",
+      "pname": "google-cloud-sdk",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "494.0.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/fcy6s62xsbgnzdmg42wsd84a9066hf8r-google-cloud-sdk-494.0.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "google-cloud-sdk",
+      "broken": false,
+      "derivation": "/nix/store/q835xsb6c938z95fjvx3l7qhr79k30yq-google-cloud-sdk-494.0.0.drv",
+      "description": "Tools for the google cloud platform",
+      "install_id": "google-cloud-sdk",
+      "license": "Unspecified free software license",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "google-cloud-sdk-494.0.0",
+      "pname": "google-cloud-sdk",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "494.0.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/0k1wcz2h1pixyas5acpxpcvrlfr178m7-google-cloud-sdk-494.0.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "google-cloud-sdk",
+      "broken": false,
+      "derivation": "/nix/store/b5lsga8hj84cm4rxv0d7bxmfd1gngf7v-google-cloud-sdk-494.0.0.drv",
+      "description": "Tools for the google cloud platform",
+      "install_id": "google-cloud-sdk",
+      "license": "Unspecified free software license",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "google-cloud-sdk-494.0.0",
+      "pname": "google-cloud-sdk",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "494.0.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/h5xqqp2y3cp3nkf2jy2ysc1cyapzq7mf-google-cloud-sdk-494.0.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "opentofu",
+      "broken": false,
+      "derivation": "/nix/store/3f5wf56ly0vdnri9rgzw43zz71r1dafk-opentofu-1.8.3.drv",
+      "description": "Tool for building, changing, and versioning infrastructure",
+      "install_id": "opentofu",
+      "license": "MPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "opentofu-1.8.3",
+      "pname": "opentofu",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/i57rri31mwihmjs1k8bjf94hw0bipz7p-opentofu-1.8.3"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "opentofu",
+      "broken": false,
+      "derivation": "/nix/store/8mkzfv16ncxkp1r20fl5jxwhhk660q4b-opentofu-1.8.3.drv",
+      "description": "Tool for building, changing, and versioning infrastructure",
+      "install_id": "opentofu",
+      "license": "MPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "opentofu-1.8.3",
+      "pname": "opentofu",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/w5hv3dnfklghplqjmqgnzyjkry6q4yif-opentofu-1.8.3"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "opentofu",
+      "broken": false,
+      "derivation": "/nix/store/8kg9h8n37cqppqq1347yzs11qpr6id31-opentofu-1.8.3.drv",
+      "description": "Tool for building, changing, and versioning infrastructure",
+      "install_id": "opentofu",
+      "license": "MPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "opentofu-1.8.3",
+      "pname": "opentofu",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/amra0vlv2d5a17bvfzkfk9xygzf9ar1s-opentofu-1.8.3"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "opentofu",
+      "broken": false,
+      "derivation": "/nix/store/1g7rz9xh6j2kly3lzza72wk8c69ahn5g-opentofu-1.8.3.drv",
+      "description": "Tool for building, changing, and versioning infrastructure",
+      "install_id": "opentofu",
+      "license": "MPL-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "opentofu-1.8.3",
+      "pname": "opentofu",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.8.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/41439x934nckjmlk43jkfrj1a4hqvwdk-opentofu-1.8.3"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "terraform",
+      "broken": false,
+      "derivation": "/nix/store/cjzav01n02k30pbyx7xzhd03xm58jh8a-terraform-1.9.7.drv",
+      "description": "Tool for building, changing, and versioning infrastructure",
+      "install_id": "terraform",
+      "license": "BUSL-1.1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "terraform-1.9.7",
+      "pname": "terraform",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": true,
+      "version": "1.9.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/m9d0gmkxk6lc8a3qnv00q7fc5zad1vw3-terraform-1.9.7"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "terraform",
+      "broken": false,
+      "derivation": "/nix/store/f6zrrxppd4hhwv0mg4ji8yd1hhn6xhkm-terraform-1.9.7.drv",
+      "description": "Tool for building, changing, and versioning infrastructure",
+      "install_id": "terraform",
+      "license": "BUSL-1.1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "terraform-1.9.7",
+      "pname": "terraform",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": true,
+      "version": "1.9.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/5529g300sjnp7wmp7kyihd89g2n62kj3-terraform-1.9.7"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "terraform",
+      "broken": false,
+      "derivation": "/nix/store/095m2sl668992iszz9k9hwr10gzqzrs0-terraform-1.9.7.drv",
+      "description": "Tool for building, changing, and versioning infrastructure",
+      "install_id": "terraform",
+      "license": "BUSL-1.1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "terraform-1.9.7",
+      "pname": "terraform",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": true,
+      "version": "1.9.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/jak4q1dh4b88kqdy01f2g15cxibmzb0f-terraform-1.9.7"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "terraform",
+      "broken": false,
+      "derivation": "/nix/store/1cimn0iyznrplg6nvilxzyp9dlcabns8-terraform-1.9.7.drv",
+      "description": "Tool for building, changing, and versioning infrastructure",
+      "install_id": "terraform",
+      "license": "BUSL-1.1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=bc947f541ae55e999ffdb4013441347d83b00feb",
+      "name": "terraform-1.9.7",
+      "pname": "terraform",
+      "rev": "bc947f541ae55e999ffdb4013441347d83b00feb",
+      "rev_count": 688563,
+      "rev_date": "2024-10-04T05:06:13Z",
+      "scrape_date": "2024-10-06T03:50:36Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": true,
+      "version": "1.9.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/hk9vpmy4g58989l91zyasrdk8qmmqn3p-terraform-1.9.7"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+version = 1
+
+[install]
+opentofu.pkg-path = "opentofu"
+google-cloud-sdk.pkg-path = "google-cloud-sdk"
+
+[options]
+systems = ["aarch64-darwin", "aarch64-linux", "x86_64-darwin", "x86_64-linux"]
