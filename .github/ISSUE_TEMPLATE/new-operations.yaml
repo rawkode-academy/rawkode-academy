@@ -1,41 +1,41 @@
-name: 🏗️ New Operations Change
+name: 🏗️ Operations / Platform / Automations
 description: Use this template to suggest a change in the infrastructure or a new automation
-labels:
-  - type/operations
+type: Operations
 assignees:
   - rawkode
-  - icepuma
 body:
-  - type: checkboxes
-    id: existing-issues-check
+  - type: markdown
     attributes:
-      label: Check for existing issues
-      description: Please check the list of existing issues for duplicates; if a operations request already exists, give it a `+1` (👍).
-      options:
-        - label: Completed
-          required: true
+      value: |
+        **Want to discuss this issue first?**
+
+        Join the [Discord](https://rawkode.chat) and let's chat!
 
   - type: textarea
     id: description
     attributes:
       label: Description
-      description: Please describe your proposed change
+      description: What would you like to see?
+      value: |
+        # Request
+
+        What do you want to see change?
+
+        ## Why would this be beneficial?
+
+        Explain the value proposition
+
     validations:
       required: true
 
   - type: dropdown
     id: assignee
     attributes:
-      label: Do you want to help us with the change request? (If "Yes", we assign you the ticket)
+      label: Do you want us to assign this issue to you?
       multiple: false
+      default: 0
       options:
         - "No"
         - "Yes"
-      default: 0
     validations:
       required: false
-
-  - type: markdown
-    attributes:
-      value: |
-        You can also join our Discord [here](http://rawkode.chat).
