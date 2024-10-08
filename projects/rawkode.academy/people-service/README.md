@@ -22,10 +22,23 @@ deno run --allow-env --allow-read --allow-net read-model/main.ts
 
 ## Deploy
 
+### Data Model
+
+```shell {name=deploy-data-model}
+export LIBSQL_TOKEN="op://sa.rawkode.academy/turso/platform-group/api-token"
+export LIBSQL_URL="https://people-rawkodeacademy.turso.io"
+
+cd data-model
+op run -- deno run --allow-all migrate.ts
+```
+
+
 ### Read Model
 
 ```shell '{"name": "deploy-read-model"}'
 deno run --allow-all --no-config 'jsr:@deno/deployctl' deploy --config=deployctl-read-model.json --org="Rawkode Academy" --project plt-people-r --prod
+
+bunx wgc subgraph publish people --namespace production --schema ./read-model/schema.graphql --routing-url https://plt-people-r.deno.dev
 ```
 
 ### Write Model

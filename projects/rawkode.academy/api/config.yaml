@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/wundergraph/cosmo/main/router/pkg/config/config.schema.json
+version: "1"
+log_level: debug
+authentication:
+  providers:
+    - name: WorkOS
+      jwks:
+        url: "http://api.workos.com/sso/jwks/${WORKOS_CLIENT_ID}"
+
+headers:
+  all:
+    request:
+      - op: propagate
+        named: Authorization

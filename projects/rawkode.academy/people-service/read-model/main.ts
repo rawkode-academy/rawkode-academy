@@ -5,9 +5,9 @@ import { createClient } from "@libsql/client";
 import * as path from "@std/path";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
-import { parse } from "graphql";
+import { GraphQLError, parse } from "graphql";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import * as dataSchema from "../data-model/schema.ts";
-import type { Res } from "@apollo/server";
 
 if (!Deno.env.has("LIBSQL_URL")) {
 	Deno.env.set("LIBSQL_URL", "http://localhost:2000");
@@ -26,22 +26,40 @@ const db = drizzle(client, { schema: dataSchema });
 
 const resolvers = {
 	Person: {
-		__resolveReference({ id }: { id: string }) {
-			const person = db.query.peopleTable.findFirst({ where: eq(dataSchema.peopleTable.id, id) });
+		async __resolveReference({ id }: { id: string }) {
+			const person = await db.query.peopleTable.findFirst({ where: eq(dataSchema.peopleTable.id, id) }).execute();
 
 			if (!person) {
-				throw new Error(`Person with id ${id} not found`);
+				throw new GraphQLError('Person not found.', {
+					extensions: {
+						code: 'NOT_FOUND',
+						http: { status: 404 },
+					}
+				});
 			}
 
 			return person;
 		}
 	},
 	Query: {
-		people() {
-			return db.select().from(dataSchema.peopleTable);
+		async me(_parent: unknown, _args: unknown, context: Context) {
+			if (!context.sub) {
+				console.log("Unauthenticated, NO SUB ME.");
+				throw new GraphQLError('Unauthenticated Request', {
+					extensions: {
+						code: 'UNAUTHENTICATED',
+						http: { status: 401 },
+					}
+				});
+			}
+
+			return await db.query.peopleTable.findFirst({ where: eq(dataSchema.peopleTable.id, context.sub) }).execute();
 		},
-		personById(id: string) {
-			return db.select().from(dataSchema.peopleTable).where(eq(dataSchema.peopleTable.id, id)).limit(1);
+		async people() {
+			return await db.select().from(dataSchema.peopleTable).execute();
+		},
+		async personById(id: string) {
+			return await db.query.peopleTable.findFirst({ where: eq(dataSchema.peopleTable.id, id) }).execute();
 		}
 	}
 };
@@ -49,15 +67,50 @@ const resolvers = {
 const schema = buildSubgraphSchema({
 	typeDefs: parse(Deno.readTextFileSync(`${path.dirname(path.fromFileUrl(import.meta.url))}/schema.graphql`)),
 	resolvers,
-})
+});
 
-const server = new ApolloServer({
+const server = new ApolloServer<Context>({
 	schema,
 	introspection: true,
 });
 
+interface Context {
+	sub?: string;
+	authScope?: string;
+}
+
 const { url } = await startStandaloneServer(server, {
 	listen: { port: 8000 },
+	context: async ({ req }) => {
+		const JWKS = createRemoteJWKSet(new URL(`https://api.workos.com/sso/jwks/${Deno.env.get("WORKOS_CLIENT_ID") || ""}`))
+
+		if (!req.headers.authorization) {
+			console.log("Unauthenticated, but letting it slide.");
+			return {
+				sub: undefined,
+				authScope: undefined,
+			};
+		}
+
+		const accessToken = req.headers.authorization?.replace("Bearer ", "") || "";
+
+		const { payload } = await jwtVerify(accessToken, JWKS);
+
+		if (!payload.sub) {
+			console.log("Unauthenticated, NO SUB.");
+			throw new GraphQLError('Unauthenticated Request', {
+				extensions: {
+					code: 'UNAUTHENTICATED',
+					http: { status: 401 },
+				}
+			});
+		}
+
+		return {
+			sub: payload.sub,
+			authScope: "learner"
+		};
+	},
 });
 
 console.log(`Server running on: ${url}`);

@@ -1,10 +1,18 @@
-type Person  @key(fields: "id") {
+extend schema
+	@link(
+		url: "https://specs.apollo.dev/federation/v2.6"
+		import: ["@key", "@authenticated", "@requiresScopes"]
+	)
+
+type Person @key(fields: "id") {
 	id: ID!
 	forename: String!
 	surname: String!
+	email: String! @requiresScopes(scopes: [["system"]])
 }
 
-type Query {
-	personById(id: ID!): Person
-	people: [Person]
+type Query{
+	me: Person @authenticated
+	personById(id: ID!): Person @requiresScopes(scopes: [["system"]])
+	people: [Person] @requiresScopes(scopes: [["system"]])
 }
