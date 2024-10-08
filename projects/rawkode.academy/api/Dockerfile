@@ -1,6 +1,7 @@
-FROM ghcr.io/grafbase/gateway:latest
+FROM ghcr.io/wundergraph/cosmo/router:latest
 
-COPY gateway.toml /etc/gateway.toml
+ENV LISTEN_ADDR 0.0.0.0:3002
+EXPOSE 3002
 
-ENTRYPOINT ["/bin/grafbase-gateway"]
-CMD [ "--config", "/etc/gateway.toml"]
+ENV CONFIG_PATH /etc/config.yaml
+COPY config.yaml /etc/config.yaml
