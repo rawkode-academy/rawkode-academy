@@ -1,0 +1,6 @@
+{
+	"imports": {
+		"@std/assert": "jsr:@std/assert@1",
+		"madr": "npm:madr@^4.0.0"
+	}
+}
