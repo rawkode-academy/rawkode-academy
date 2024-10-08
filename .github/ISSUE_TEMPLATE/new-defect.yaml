@@ -1,60 +1,38 @@
 name: 🐛 New Defect
-description: Use this template to report a new defect.
+description: Is something broken? 😱
 type: Defect
 assignees:
   - rawkode
   - icepuma
 body:
-  - type: checkboxes
-    id: existing-issues-check
+  - type: markdown
     attributes:
-      label: Check for existing issues
-      description: Please check the list of existing issues for duplicates; if a defect already exists, give it a `+1` (👍).
-      options:
-        - label: Completed
-          required: true
+      value: |
+        **Want to discuss this issue first?**
+
+        Join the [Discord](https://rawkode.chat) and let's chat!
 
   - type: textarea
-    id: summary
+    id: description
     attributes:
-      label: Summary
-      description: Describe the defect & provide steps to reproduce it
+      label: Description
+      description: What would you like to see?
+      value: |
+        # Defect
+
+        What did you notice was not working correctly?
+
     validations:
       required: true
-
-  - type: input
-    id: url
-    attributes:
-      label: URL
-      description: Where did you encounter this defect?
-    validations:
-      required: true
-
-  - type: dropdown
-    id: browsers
-    attributes:
-      label: Browser
-      description: Which browser did you use?
-      options:
-        - Chrome
-        - Firefox
-        - Safari
-        - Microsoft Edge
 
   - type: dropdown
     id: assignee
     attributes:
-      label: Do you want to help fix this bug? (If "Yes", we assign you the ticket)
+      label: Do you want us to assign this issue to you?
       multiple: false
+      default: 0
       options:
         - "No"
         - "Yes"
-      default: 0
     validations:
       required: false
-
-
-  - type: markdown
-    attributes:
-      value: |
-        You can also join our Discord [here](http://rawkode.chat).
