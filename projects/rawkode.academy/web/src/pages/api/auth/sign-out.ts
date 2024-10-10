@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { ZITADEL_CLIENT_ID, ZITADEL_URL } from "astro:env/server";
 
 export const prerender = false;
 
@@ -10,5 +11,7 @@ export const GET: APIRoute = ({ cookies, redirect }) => {
 		sameSite: "strict",
 	});
 
-	return redirect(import.meta.env.SITE);
+	return redirect(
+		`${ZITADEL_URL}/oidc/v1/end_session?post_logout_redirect_uri=${import.meta.env.SITE}&client_id=${ZITADEL_CLIENT_ID}`,
+	);
 };
