@@ -7,4 +7,5 @@ compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2024-07-01"
 
 [env.production.vars]
-REDIRECT_URL = "https://rawkode.academy/auth/callback"
+ZITADEL_CLIENT_ID="288679506217135064"
+ZITADEL_URL="https://zitadel.rawkode.academy"

@@ -1,6 +1,5 @@
 import { Zitadel } from "@/lib/zitadel";
 import { defineMiddleware } from "astro:middleware";
-import { createRemoteJWKSet, jwtVerify } from "jose";
 
 export const authMiddleware = defineMiddleware(async (context, next) => {
 	// The runtime isn't available for pre-rendered pages and we
@@ -16,15 +15,15 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
 		return next();
 	}
 
-	const accessToken = await context.cookies.get("accessToken");
+	const accessToken = context.cookies.get("accessToken");
 	if (!accessToken) {
 		console.debug("No access token, skipping middleware");
 		return next();
 	}
 
-	const idTokenCookie = await context.cookies.get("idToken");
+	const idTokenCookie = context.cookies.get("idToken");
 	const idToken = idTokenCookie?.value;
-	const refreshTokenCookie = await context.cookies.get("refreshToken");
+	const refreshTokenCookie = context.cookies.get("refreshToken");
 	const refreshToken = refreshTokenCookie?.value;
 
 	const zitadel = new Zitadel();
