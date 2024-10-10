@@ -8,7 +8,11 @@ export default (scope: Construct): ManagedDomain => {
 		Registrar.Cloudflare,
 	);
 
-	managedDomain.discourageEmail();
+	managedDomain.discourageEmail().addARecord(
+		"strean",
+		"stream",
+		"147.28.184.31",
+	);
 
 	return managedDomain;
 };

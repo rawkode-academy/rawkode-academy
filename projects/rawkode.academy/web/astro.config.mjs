@@ -9,43 +9,33 @@ import rehypeExternalLinks from "rehype-external-links";
 
 // https://astro.build/config
 export default defineConfig({
-  output: "hybrid",
-  integrations: [tailwind(), vue(), react(), mdx(), sitemap()],
-  adapter: cloudflare({
-    mode: "advanced"
-  }),
-  site: import.meta.env.DEV ? "http://localhost:4321" : "https://rawkode.academy",
-  experimental: {
-    serverIslands: true,
-    env: {
-      validateSecrets: true,
-      schema: {
-        REDIRECT_URL: envField.string({
-          context: "server",
-          access: "public",
-          optional: false
-        }),
-        WORKOS_CLIENT_ID: envField.string({
-          context: "server",
-          access: "secret",
-          optional: false
-        }),
-        WORKOS_API_KEY: envField.string({
-          context: "server",
-          access: "secret",
-          optional: false
-        }),
-        WORKOS_COOKIE_PASSWORD: envField.string({
-          context: "server",
-          access: "secret",
-          optional: false
-        })
-      }
-    }
-  },
-  markdown: {
-    rehypePlugins: [[rehypeExternalLinks, {
-      target: "_blank"
-    }]]
-  }
+	output: "server",
+	integrations: [mdx(), react(), sitemap(), tailwind(), vue()],
+	adapter: cloudflare({
+		mode: "advanced",
+	}),
+	site: import.meta.env.DEV
+		? "http://localhost:4321"
+		: "https://rawkode.academy",
+	env: {
+		validateSecrets: true,
+		schema: {
+			ZITADEL_URL: envField.string({
+				context: "server",
+				access: "public",
+			}),
+			ZITADEL_CLIENT_ID: envField.string({
+				context: "server",
+				access: "public",
+			}),
+		},
+	},
+	security: {
+		checkOrigin: true,
+	},
+	markdown: {
+		rehypePlugins: [[rehypeExternalLinks, {
+			target: "_blank",
+		}]],
+	},
 });
