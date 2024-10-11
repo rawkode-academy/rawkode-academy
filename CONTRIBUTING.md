@@ -6,21 +6,10 @@ shell: bash
 
 Welcome! We love that you'd like to contribute to the Rawkode Academy.
 
-## Secrets
+## Chat with Us
 
-If you've provided your age key, you'll have likely been allocated access to the secrets you require to contribute.
+You can either open a [discussion](https://github.com/RawkodeAcademy/RawkodeAcademy/discussions), [issue](https://github.com/RawkodeAcademy/RawkodeAcademy/issues), or [join the Discord](https://rawkode.chat); we'd be happy to help you find something to build that contributes to making the Rawkode Academy the best palce to learn and practice Cloud Native development.
 
-You can test this by accessing the available-to-all Cloudflare Account ID.
+## Good First Issues
 
-First, you'll need to create `.env.local` in the root if this repository and provide your AGE private key. This file
-is ignored by Git, but mistakes do happen. You may wish to expose it via 1Password or A N Other password manager:
-
-```
-export SOPS_AGE_KEY_LOCAL="op://Employee/Age Key/password"
-```
-
-### Test Your Access
-
-```shell {"name": "Test SOPs Access"}
-sops exec-file sops.yaml 'cat {}'
-```
+We try to identify issues that don't require any understanding of the current system. You can find them [here](https://github.com/RawkodeAcademy/RawkodeAcademy/issues?q=is%3Aissue+state%3Aopen+label%3A%22Good+First+Issue%22).
