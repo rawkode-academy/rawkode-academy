@@ -82,7 +82,7 @@ interface Context {
 const { url } = await startStandaloneServer(server, {
 	listen: { port: 8000 },
 	context: async ({ req }) => {
-		const JWKS = createRemoteJWKSet(new URL(`https://api.workos.com/sso/jwks/${Deno.env.get("WORKOS_CLIENT_ID") || ""}`))
+		const JWKS = createRemoteJWKSet(new URL("https://zitadel.rawkode.academy/oauth/v2/keys"));
 
 		if (!req.headers.authorization) {
 			console.log("Unauthenticated, but letting it slide.");
