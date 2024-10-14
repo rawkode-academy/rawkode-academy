@@ -3,6 +3,8 @@ import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 
+export const prerender = true;
+
 type Props = {
 	article: CollectionEntry<"blog">;
 };

@@ -9,6 +9,9 @@ import rehypeExternalLinks from "rehype-external-links";
 
 // https://astro.build/config
 export default defineConfig({
+	legacy: {
+		collections: true,
+	},
 	output: "server",
 	integrations: [mdx(), react(), sitemap(), tailwind(), vue()],
 	adapter: cloudflare({
@@ -34,8 +37,13 @@ export default defineConfig({
 		checkOrigin: true,
 	},
 	markdown: {
-		rehypePlugins: [[rehypeExternalLinks, {
-			target: "_blank",
-		}]],
+		rehypePlugins: [
+			[
+				rehypeExternalLinks,
+				{
+					target: "_blank",
+				},
+			],
+		],
 	},
 });
