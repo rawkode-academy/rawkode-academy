@@ -5,8 +5,8 @@ export default (scope: Construct): ManagedDomain => {
 	const managedDomain = new ManagedDomain(
 		scope,
 		"rmrf.email",
-		Registrar.Cloudflare
+		Registrar.Cloudflare,
 	);
 
-	return managedDomain.enableSimpleLogin();
+	return managedDomain.enableFastmail();
 };
