@@ -20,6 +20,8 @@
     "@astrojs/tailwind": "^5.1.1",
     "@astrojs/vue": "5.0.0-beta.0",
     "@calcom/embed-react": "^1.5.1",
+    "@grafana/faro-web-sdk": "^1.11.0",
+    "@grafana/faro-web-tracing": "^1.11.0",
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.1.5",
     "@oslojs/jwt": "^0.2.0",

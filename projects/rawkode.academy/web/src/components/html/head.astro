@@ -2,6 +2,7 @@
 import Posthog from "@/components/analytics/posthog.astro";
 import type { OpenGraphProps } from "@/types/opengraph";
 import Opengraph from "./opengraph.astro";
+import Grafana from "./grafana.astro";
 
 interface Props extends OpenGraphProps {}
 ---
@@ -84,4 +85,5 @@ interface Props extends OpenGraphProps {}
 	<link rel="sitemap" href="/sitemap-index.xml" />
 
 	<Posthog />
+	<Grafana />
 </head>
