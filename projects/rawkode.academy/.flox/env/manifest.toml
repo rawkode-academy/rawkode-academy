@@ -9,6 +9,7 @@ sqld.pkg-path = "sqld"
 turso-cli.pkg-path = "turso-cli"
 flyctl.pkg-path = "flyctl"
 cargo.pkg-path = "cargo"
+wasmer.flake = "github:NixOS/nixpkgs/nixpkgs-unstable#wasmer"
 
 [options]
 systems = ["aarch64-darwin", "aarch64-linux", "x86_64-darwin", "x86_64-linux"]

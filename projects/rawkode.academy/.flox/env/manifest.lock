@@ -26,6 +26,9 @@
       },
       "turso-cli": {
         "pkg-path": "turso-cli"
+      },
+      "wasmer": {
+        "flake": "github:NixOS/nixpkgs/nixpkgs-unstable#wasmer"
       }
     },
     "hook": {},
@@ -59,6 +62,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -89,6 +93,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -119,6 +124,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -149,6 +155,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -179,6 +186,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -209,6 +217,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -239,6 +248,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -269,6 +279,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -299,6 +310,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -329,6 +341,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -359,6 +372,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -389,6 +403,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -419,6 +434,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -449,6 +465,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -479,6 +496,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -509,6 +527,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -539,6 +558,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -570,6 +590,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -601,6 +622,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -632,6 +654,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -663,6 +686,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -693,6 +717,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -723,6 +748,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -753,6 +779,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -783,6 +810,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -813,6 +841,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -843,6 +872,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -873,6 +903,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -903,6 +934,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -933,6 +965,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -963,6 +996,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -993,6 +1027,7 @@
       "rev_date": "2024-09-23T20:13:18Z",
       "scrape_date": "2024-09-27T03:18:01Z",
       "stabilities": [
+        "stable",
         "staging",
         "unstable"
       ],
@@ -1006,6 +1041,118 @@
       },
       "system": "x86_64-linux",
       "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "install_id": "wasmer",
+      "locked-url": "github:NixOS/nixpkgs/2d2a9ddbe3f2c00747398f3dc9b05f7f2ebb0f53",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.aarch64-darwin.wasmer",
+      "derivation": "/nix/store/ww2ccjy7k0ga5wxr3268qyi6asj8459m-wasmer-4.4.0.drv",
+      "outputs": {
+        "out": "/nix/store/c34k99syvyligafpwyfxas8arysly555-wasmer-4.4.0"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "aarch64-darwin",
+      "system": "aarch64-darwin",
+      "name": "wasmer-4.4.0",
+      "pname": "wasmer",
+      "version": "4.4.0",
+      "description": "Universal WebAssembly Runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "wasmer",
+      "locked-url": "github:NixOS/nixpkgs/2d2a9ddbe3f2c00747398f3dc9b05f7f2ebb0f53",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.aarch64-linux.wasmer",
+      "derivation": "/nix/store/67273cc9lng7wnycspj0qzk6ky39yaiv-wasmer-4.4.0.drv",
+      "outputs": {
+        "out": "/nix/store/51sy7gpaacn80270faq72wfck1cykchm-wasmer-4.4.0"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "aarch64-linux",
+      "system": "aarch64-linux",
+      "name": "wasmer-4.4.0",
+      "pname": "wasmer",
+      "version": "4.4.0",
+      "description": "Universal WebAssembly Runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "wasmer",
+      "locked-url": "github:NixOS/nixpkgs/2d2a9ddbe3f2c00747398f3dc9b05f7f2ebb0f53",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.x86_64-darwin.wasmer",
+      "derivation": "/nix/store/3v9b7gbhys3x0y5sdqrlxn1k2zvcyc5b-wasmer-4.4.0.drv",
+      "outputs": {
+        "out": "/nix/store/6zla5nqa1w7yw76dlg8ip82wbjxcrjbh-wasmer-4.4.0"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "x86_64-darwin",
+      "system": "x86_64-darwin",
+      "name": "wasmer-4.4.0",
+      "pname": "wasmer",
+      "version": "4.4.0",
+      "description": "Universal WebAssembly Runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "wasmer",
+      "locked-url": "github:NixOS/nixpkgs/2d2a9ddbe3f2c00747398f3dc9b05f7f2ebb0f53",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.x86_64-linux.wasmer",
+      "derivation": "/nix/store/l2yp3bcwz7r90777in6c5w6ydvw69dj6-wasmer-4.4.0.drv",
+      "outputs": {
+        "out": "/nix/store/6wk5q08imd2nxqxgczwr4nym8yf4zll9-wasmer-4.4.0"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "x86_64-linux",
+      "system": "x86_64-linux",
+      "name": "wasmer-4.4.0",
+      "pname": "wasmer",
+      "version": "4.4.0",
+      "description": "Universal WebAssembly Runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
       "priority": 5
     }
   ]
