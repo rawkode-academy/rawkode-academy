@@ -1,13 +1,17 @@
-import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
-import { buildSubgraphSchema } from "@apollo/subgraph";
+import {
+	createRemoteJwksSigningKeyProvider,
+	extractFromHeader,
+	useJWT,
+} from "@graphql-yoga/plugin-jwt";
 import { createClient } from "@libsql/client";
-import * as path from "@std/path";
-import { eq } from "drizzle-orm";
+import schemaBuilder from "@pothos/core";
+import directivesPlugin from "@pothos/plugin-directives";
+import drizzlePlugin from "@pothos/plugin-drizzle";
+import federationPlugin from "@pothos/plugin-federation";
 import { drizzle } from "drizzle-orm/libsql";
-import { GraphQLError, parse } from "graphql";
-import { createRemoteJWKSet, jwtVerify } from "jose";
+import { createYoga } from "graphql-yoga";
 import * as dataSchema from "../data-model/schema.ts";
+import { eq } from "drizzle-orm";
 
 if (!Deno.env.has("LIBSQL_URL")) {
 	Deno.env.set("LIBSQL_URL", "http://localhost:2000");
@@ -24,93 +28,89 @@ const client = createClient({
 
 const db = drizzle(client, { schema: dataSchema });
 
-const resolvers = {
-	Person: {
-		async __resolveReference({ id }: { id: string }) {
-			const person = await db.query.peopleTable.findFirst({ where: eq(dataSchema.peopleTable.id, id) }).execute();
-
-			if (!person) {
-				throw new GraphQLError('Person not found.', {
-					extensions: {
-						code: 'NOT_FOUND',
-						http: { status: 404 },
-					}
-				});
-			}
-
-			return person;
-		}
-	},
-	Query: {
-		async me(_parent: unknown, _args: unknown, context: Context) {
-			if (!context.sub) {
-				console.log("Unauthenticated, NO SUB ME.");
-				throw new GraphQLError('Unauthenticated Request', {
-					extensions: {
-						code: 'UNAUTHENTICATED',
-						http: { status: 401 },
-					}
-				});
-			}
-
-			return await db.query.peopleTable.findFirst({ where: eq(dataSchema.peopleTable.id, context.sub) }).execute();
-		},
-		async people() {
-			return await db.select().from(dataSchema.peopleTable).execute();
-		},
-		async personById(id: string) {
-			return await db.query.peopleTable.findFirst({ where: eq(dataSchema.peopleTable.id, id) }).execute();
-		}
-	}
-};
-
-const schema = buildSubgraphSchema({
-	typeDefs: parse(Deno.readTextFileSync(`${path.dirname(path.fromFileUrl(import.meta.url))}/schema.graphql`)),
-	resolvers,
-});
-
-const server = new ApolloServer<Context>({
-	schema,
-	introspection: true,
-});
-
+// TODO: This should be shared across all services
 interface Context {
-	sub?: string;
-	authScope?: string;
+	jwt: {
+		payload: {
+			sub: string;
+			given_name: string;
+			family_name: string;
+			picture: string;
+			email: string;
+		}
+	};
 }
 
-const { url } = await startStandaloneServer(server, {
-	listen: { port: 8000 },
-	context: async ({ req }) => {
-		const JWKS = createRemoteJWKSet(new URL("https://zitadel.rawkode.academy/oauth/v2/keys"));
+export interface PothosTypes {
+	Context: Context;
+	DrizzleSchema: typeof dataSchema;
+}
 
-		if (!req.headers.authorization) {
-			console.log("Unauthenticated, but letting it slide.");
-			return {
-				sub: undefined,
-				authScope: undefined,
-			};
-		}
-
-		const accessToken = req.headers.authorization?.replace("Bearer ", "") || "";
-
-		const { payload } = await jwtVerify(accessToken, JWKS);
-
-		if (!payload.sub) {
-			console.log("Unauthenticated, NO SUB.");
-			throw new GraphQLError('Unauthenticated Request', {
-				extensions: {
-					code: 'UNAUTHENTICATED',
-					http: { status: 401 },
-				}
-			});
-		}
-
-		return {
-			sub: payload.sub,
-			authScope: "learner"
-		};
+const builder = new schemaBuilder<PothosTypes>({
+	plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
+	drizzle: {
+		client: db,
 	},
 });
 
-console.log(`Server running on: ${url}`);
+const personRef = builder.drizzleObject("peopleTable", {
+	name: "person",
+	fields: (t) => ({
+		id: t.exposeString("id"),
+		forename: t.exposeString("forename"),
+		surname: t.exposeString("surname"),
+		email: t.exposeString("email", {
+			requiresScopes: [["system"]],
+		}),
+	}),
+});
+
+builder.asEntity(personRef, {
+	key: builder.selection<{ id: string }>("id"),
+	resolveReference: async (user) =>
+		await db.query.peopleTable.findFirst({
+			where: eq(dataSchema.peopleTable.id, user.id),
+		}).execute(),
+});
+
+builder.queryType({
+	fields: (t) => ({
+		me: t.field({
+			type: personRef,
+			resolve: async (_root, _args, ctx) => await db.query.peopleTable.findFirst({
+				where: eq(dataSchema.peopleTable.id, ctx.jwt.payload.sub),
+			}).execute(),
+		}),
+	}),
+});
+
+const yoga = createYoga({
+	schema: builder.toSubGraphSchema({
+		linkUrl: "https://specs.apollo.dev/federation/v2.6",
+		federationDirectives: ["@key", "@authenticated", "@requiresScopes"],
+	}),
+	plugins: [
+		useJWT({
+			singingKeyProviders: [
+				createRemoteJwksSigningKeyProvider({ jwksUri: "https://zitadel.rawkode.academy/oauth/v2/keys" }),
+			],
+			tokenLookupLocations: [
+				extractFromHeader({ name: "authorization", prefix: "Bearer" }),
+			],
+			// tokenVerification: {
+			//   audience: 'my-audience',
+			// },
+			extendContext: true,
+			reject: {
+				missingToken: false,
+				invalidToken: false,
+			},
+		}),
+	],
+});
+
+Deno.serve({
+	onListen: ({ hostname, port, transport }) => {
+		console.log(`Listening on ${transport}://${hostname}:${port}`);
+	},
+}, yoga.fetch);

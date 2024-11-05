@@ -1,10 +1,10 @@
 {
   "deploy": {
+		"project": "plt-people-r",
     "include": [
       "data-model",
       "deno.jsonc",
-      "read-model/main.ts",
-			"read-model/schema.graphql"
+      "read-model/main.ts"
     ],
     "entrypoint": "read-model/main.ts"
   }

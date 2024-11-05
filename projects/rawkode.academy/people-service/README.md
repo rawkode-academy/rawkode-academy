@@ -1,4 +1,6 @@
 ---
+runme:
+  version: v3
 shell: bash
 ---
 
@@ -10,13 +12,13 @@ shell: bash
 
 This dagger command will provision a libsql server and run the migrations.
 
-```shell '{"name": "dev"}'
+```shell {"name":"dev"}
 dagger call dev up
 ```
 
 ### Read Model
 
-```shell '{"name": "read-model"}'
+```shell {"name":"dev-read-model"}
 deno run --allow-env --allow-read --allow-net read-model/main.ts
 ```
 
@@ -24,7 +26,7 @@ deno run --allow-env --allow-read --allow-net read-model/main.ts
 
 ### Data Model
 
-```shell {name=deploy-data-model}
+```shell {"name":"deploy-data-model"}
 export LIBSQL_TOKEN="op://sa.rawkode.academy/turso/platform-group/api-token"
 export LIBSQL_URL="https://people-rawkodeacademy.turso.io"
 
@@ -32,18 +34,17 @@ cd data-model
 op run -- deno run --allow-all migrate.ts
 ```
 
-
 ### Read Model
 
-```shell '{"name": "deploy-read-model"}'
-deno run --allow-all --no-config 'jsr:@deno/deployctl' deploy --config=deployctl-read-model.json --org="Rawkode Academy" --project plt-people-r --prod
+```shell {"name":"deploy-read-model"}
+deno run --allow-all --no-config 'jsr:@deno/deployctl' deploy --config=deployctl-read-model.json --org="Rawkode Academy" --prod
 
 bunx wgc subgraph publish people --namespace production --schema ./read-model/schema.graphql --routing-url https://plt-people-r.deno.dev
 ```
 
 ### Write Model
 
-```shell '{"name": "deploy-write-model"}'
+```shell {"name":"deploy-write-model"}
 export LIBSQL_URL=""
 export LIBSQL_TOKEN=""
 export RESTATE_IDENTITY_KEY=""
