@@ -9,7 +9,7 @@ internal_port = 3002
 force_https = true
 auto_stop_machines = 'stop'
 auto_start_machines = true
-min_machines_running = 0
+min_machines_running = 3
 
 [[vm]]
 memory = '512mb'
