@@ -5,7 +5,7 @@ authentication:
   providers:
     - name: WorkOS
       jwks:
-        url: "http://api.workos.com/sso/jwks/${WORKOS_CLIENT_ID}"
+        url: "https://zitadel.rawkode.academy/oauth/v2/keys"
 
 headers:
   all:
