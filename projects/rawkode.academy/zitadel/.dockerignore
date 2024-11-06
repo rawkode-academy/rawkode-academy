@@ -1,0 +1,6 @@
+# flyctl launch added from .flox/.gitignore
+.flox/**/run
+.flox/**/cache
+.flox/**/lib
+.flox/**/log
+fly.toml
