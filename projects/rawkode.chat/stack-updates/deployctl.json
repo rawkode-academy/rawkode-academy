@@ -1,0 +1,10 @@
+{
+	"deploy": {
+		"project": "chat-stack-updates",
+		"entrypoint": "main.ts",
+		"include": [
+			"deno.jsonc",
+			"main.ts"
+		]
+	}
+}
