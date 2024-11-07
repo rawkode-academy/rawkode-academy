@@ -155,7 +155,7 @@ export class ManagedDomain extends Construct {
 			zoneId: this.cloudflareZone.id,
 			type: "TXT",
 			name,
-			value,
+			value: `"${value}"`,
 			comment: "Managed by Terraform",
 		});
 
