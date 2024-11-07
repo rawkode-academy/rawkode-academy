@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "dev": "deno run --watch main.ts"
+  },
+  "imports": {
+    "@mikaelporttila/rss": "jsr:@mikaelporttila/rss@^1.1.1",
+    "@std/assert": "jsr:@std/assert@1",
+    "@types/turndown": "npm:@types/turndown@^5.0.5",
+    "feedparser": "npm:feedparser@^2.2.10",
+    "turndown": "npm:turndown@^7.2.0",
+    "zulip-js": "npm:zulip-js@^2.1.0"
+  }
+}
