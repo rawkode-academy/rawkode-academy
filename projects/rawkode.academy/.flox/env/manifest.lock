@@ -1,0 +1,1091 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "bun": {
+        "pkg-path": "bun"
+      },
+      "cargo": {
+        "pkg-path": "cargo"
+      },
+      "deno": {
+        "flake": "github:NixOS/nixpkgs/nixpkgs-unstable#deno"
+      },
+      "flyctl": {
+        "pkg-path": "flyctl"
+      },
+      "nodejs": {
+        "pkg-path": "nodejs"
+      },
+      "rover": {
+        "pkg-path": "rover"
+      },
+      "sqld": {
+        "pkg-path": "sqld"
+      },
+      "turso-cli": {
+        "pkg-path": "turso-cli"
+      },
+      "wasmer": {
+        "flake": "github:NixOS/nixpkgs/nixpkgs-unstable#wasmer"
+      }
+    },
+    "hook": {},
+    "profile": {},
+    "options": {
+      "systems": [
+        "aarch64-darwin",
+        "aarch64-linux",
+        "x86_64-darwin",
+        "x86_64-linux"
+      ],
+      "allow": {
+        "licenses": []
+      },
+      "semver": {}
+    }
+  },
+  "packages": [
+    {
+      "attr_path": "bun",
+      "broken": false,
+      "derivation": "/nix/store/ak82da1immnc8cbwmq553pb0sh1q3djr-bun-1.1.31.drv",
+      "description": "Incredibly fast JavaScript runtime, bundler, transpiler and package manager – all in one",
+      "install_id": "bun",
+      "license": "[ MIT, LGPL-2.1-only ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "bun-1.1.31",
+      "pname": "bun",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.1.31",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/gmvlpnhc673pjwai7q0ydvikif8r1gg5-bun-1.1.31"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bun",
+      "broken": false,
+      "derivation": "/nix/store/zwq8p3si3f5lhz3gb2nd4dkc8lc2vkxa-bun-1.1.31.drv",
+      "description": "Incredibly fast JavaScript runtime, bundler, transpiler and package manager – all in one",
+      "install_id": "bun",
+      "license": "[ MIT, LGPL-2.1-only ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "bun-1.1.31",
+      "pname": "bun",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.1.31",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/4xbdp3yb549g0c50qjb2majdg3b484i1-bun-1.1.31"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bun",
+      "broken": false,
+      "derivation": "/nix/store/zw67yla9pcfv8yvnlkvgjsb8mi2nwav4-bun-1.1.31.drv",
+      "description": "Incredibly fast JavaScript runtime, bundler, transpiler and package manager – all in one",
+      "install_id": "bun",
+      "license": "[ MIT, LGPL-2.1-only ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "bun-1.1.31",
+      "pname": "bun",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.1.31",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/rvf4znnp3zy53f6wc8wkccrz3n59l552-bun-1.1.31"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "bun",
+      "broken": false,
+      "derivation": "/nix/store/q0kccm3zsag6cwfb9f9mq0x15z7i59jj-bun-1.1.31.drv",
+      "description": "Incredibly fast JavaScript runtime, bundler, transpiler and package manager – all in one",
+      "install_id": "bun",
+      "license": "[ MIT, LGPL-2.1-only ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "bun-1.1.31",
+      "pname": "bun",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.1.31",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/gimbmhysr6l7fbzk25alznv0mphiy97a-bun-1.1.31"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cargo",
+      "broken": false,
+      "derivation": "/nix/store/lfv17hv58rs8vp028ffvc0r2zp493f8w-cargo-1.82.0.drv",
+      "description": "Downloads your Rust project's dependencies and builds your project",
+      "install_id": "cargo",
+      "license": "[ MIT, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "cargo-1.82.0",
+      "pname": "cargo",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.82.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/5nqnfi6kz28md4bgr51ysdx98czc37dd-cargo-1.82.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cargo",
+      "broken": false,
+      "derivation": "/nix/store/ffsj9gj519ch8vs2wccvkgc2ji7szbjh-cargo-1.82.0.drv",
+      "description": "Downloads your Rust project's dependencies and builds your project",
+      "install_id": "cargo",
+      "license": "[ MIT, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "cargo-1.82.0",
+      "pname": "cargo",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.82.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/yz43sw6x1zdbddv063p7ybd2j2jn6bbl-cargo-1.82.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cargo",
+      "broken": false,
+      "derivation": "/nix/store/w0kdafk5r803rhs2fhvvdmfj6d71lczg-cargo-1.82.0.drv",
+      "description": "Downloads your Rust project's dependencies and builds your project",
+      "install_id": "cargo",
+      "license": "[ MIT, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "cargo-1.82.0",
+      "pname": "cargo",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.82.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/ihphbwmww3g33pjcm3b28zsbp0mvp9rf-cargo-1.82.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "cargo",
+      "broken": false,
+      "derivation": "/nix/store/9xicfb72cr9mf875qc3ym1cjni1zwfgx-cargo-1.82.0.drv",
+      "description": "Downloads your Rust project's dependencies and builds your project",
+      "install_id": "cargo",
+      "license": "[ MIT, Apache-2.0 ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "cargo-1.82.0",
+      "pname": "cargo",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.82.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/sgg3iawfk7jahlsmnlj643sb8xw52jdx-cargo-1.82.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flyctl",
+      "broken": false,
+      "derivation": "/nix/store/i42abl1fflivzy6sbvmlvvxqzr5vylck-flyctl-0.3.29.drv",
+      "description": "Command line tools for fly.io services",
+      "install_id": "flyctl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "flyctl-0.3.29",
+      "pname": "flyctl",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.29",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/ddl4yf4ny8b5c4vccqyiy5d7kvzas190-flyctl-0.3.29"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flyctl",
+      "broken": false,
+      "derivation": "/nix/store/08fh1cgmyigk5mnd8s7znq7gi20mv8gf-flyctl-0.3.29.drv",
+      "description": "Command line tools for fly.io services",
+      "install_id": "flyctl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "flyctl-0.3.29",
+      "pname": "flyctl",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.29",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/2hpxbzgqsvhgl10l6nyqx2pmkajsbzf5-flyctl-0.3.29"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flyctl",
+      "broken": false,
+      "derivation": "/nix/store/k7y1dsv6vzrxhmj6m69a231fdwfhrq38-flyctl-0.3.29.drv",
+      "description": "Command line tools for fly.io services",
+      "install_id": "flyctl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "flyctl-0.3.29",
+      "pname": "flyctl",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.29",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/s44l1f34b7ym6jaxyqiwdjnfh6wzyvjr-flyctl-0.3.29"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "flyctl",
+      "broken": false,
+      "derivation": "/nix/store/6c07hxg4vgr67svqyrlmgrwiymya14jf-flyctl-0.3.29.drv",
+      "description": "Command line tools for fly.io services",
+      "install_id": "flyctl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "flyctl-0.3.29",
+      "pname": "flyctl",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.3.29",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/z2lkyraakc644cbrxa0sfk9hm1j6nzrj-flyctl-0.3.29"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/yz8yjgl9xs9gbk4y2ar44lng9vxnk454-nodejs-20.18.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "nodejs-20.18.0",
+      "pname": "nodejs",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20.18.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "libv8": "/nix/store/0x38rb1l2fp5k1765pxw9jsxamcmq06n-nodejs-20.18.0-libv8",
+        "out": "/nix/store/n3yy2py144i01235yqq6ps3ah5dkynx2-nodejs-20.18.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/wb39s2j0p6bmynhvrrsbmayq1dal4pyn-nodejs-20.18.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "nodejs-20.18.0",
+      "pname": "nodejs",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20.18.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "libv8": "/nix/store/b64y4904jda3vi487yrvk2ls1rkg30xm-nodejs-20.18.0-libv8",
+        "out": "/nix/store/p4kpvfr95znlbh61nwlwcdfc7gkcyngl-nodejs-20.18.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/3gqhy6sig3vbb8i9xql7mya9732mgsk0-nodejs-20.18.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "nodejs-20.18.0",
+      "pname": "nodejs",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20.18.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "libv8": "/nix/store/sjs2syzk35xqm9jif9hp1rjd82irzkil-nodejs-20.18.0-libv8",
+        "out": "/nix/store/m1ymz3alwqc71yrmzl8sas2m8ksqhhsh-nodejs-20.18.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs",
+      "broken": false,
+      "derivation": "/nix/store/02a7604ac95ibdih8a1gakfzpcvkxh1x-nodejs-20.18.0.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "nodejs-20.18.0",
+      "pname": "nodejs",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "20.18.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "libv8": "/nix/store/30a0s87x6bjvcd2fjpvg5safq58z80as-nodejs-20.18.0-libv8",
+        "out": "/nix/store/jz54v1m0ldqivx5i45q8i05pz5clf842-nodejs-20.18.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "rover",
+      "broken": false,
+      "derivation": "/nix/store/j2r92bn5q9123za8irbamg2rn9ccj9b2-rover-0.24.0.drv",
+      "description": "CLI for interacting with ApolloGraphQL's developer tooling, including managing self-hosted and GraphOS graphs",
+      "install_id": "rover",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "rover-0.24.0",
+      "pname": "rover",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.24.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/kxpm7axldci7frasjpkv1jk1frvwqpv9-rover-0.24.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "rover",
+      "broken": false,
+      "derivation": "/nix/store/bgcgxc7b65yf5xk24jk9vwzjykn1hnyx-rover-0.24.0.drv",
+      "description": "CLI for interacting with ApolloGraphQL's developer tooling, including managing self-hosted and GraphOS graphs",
+      "install_id": "rover",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "rover-0.24.0",
+      "pname": "rover",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.24.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/4jnir5rvvbj81zlzdpyfsf1qkrvpz8za-rover-0.24.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "rover",
+      "broken": false,
+      "derivation": "/nix/store/mj3dn0rwijlh7sc907i1y056sfgfi37f-rover-0.24.0.drv",
+      "description": "CLI for interacting with ApolloGraphQL's developer tooling, including managing self-hosted and GraphOS graphs",
+      "install_id": "rover",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "rover-0.24.0",
+      "pname": "rover",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.24.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/q3jj047skr6g0acfarj17x49aby5hwhi-rover-0.24.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "rover",
+      "broken": false,
+      "derivation": "/nix/store/isvx1nx61cnyaa7pljwlv3nys2sib96i-rover-0.24.0.drv",
+      "description": "CLI for interacting with ApolloGraphQL's developer tooling, including managing self-hosted and GraphOS graphs",
+      "install_id": "rover",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "rover-0.24.0",
+      "pname": "rover",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.24.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/pxn67szkqyj2s00ymj89si9zgiggs76p-rover-0.24.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "sqld",
+      "broken": false,
+      "derivation": "/nix/store/7ywy186669wgbiqh79kgd8n79hpv3pnn-sqld-0.24.18.drv",
+      "description": "LibSQL with extended capabilities like HTTP protocol, replication, and more",
+      "install_id": "sqld",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "sqld-0.24.18",
+      "pname": "sqld",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.24.18",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/vch66an2xadsh0yffvg5miihlax2y6p8-sqld-0.24.18"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "sqld",
+      "broken": false,
+      "derivation": "/nix/store/lbxn7pxc2m7g49rkgwnj2g1xps33m0j3-sqld-0.24.18.drv",
+      "description": "LibSQL with extended capabilities like HTTP protocol, replication, and more",
+      "install_id": "sqld",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "sqld-0.24.18",
+      "pname": "sqld",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.24.18",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/c2wlxii4vld4k1wwv8na8r6954f25rav-sqld-0.24.18"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "sqld",
+      "broken": false,
+      "derivation": "/nix/store/6lsqx699l4ynknkw2kz4dj9zsns2zkf2-sqld-0.24.18.drv",
+      "description": "LibSQL with extended capabilities like HTTP protocol, replication, and more",
+      "install_id": "sqld",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "sqld-0.24.18",
+      "pname": "sqld",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.24.18",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/1xp7lwg8gaddg4qblcy8fiiyl2dxmkxx-sqld-0.24.18"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "sqld",
+      "broken": false,
+      "derivation": "/nix/store/9817rih6pbiv6mfjk9wp0x1zsvzh23d8-sqld-0.24.18.drv",
+      "description": "LibSQL with extended capabilities like HTTP protocol, replication, and more",
+      "install_id": "sqld",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "sqld-0.24.18",
+      "pname": "sqld",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.24.18",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/0yqnz5zncj4yb2cdfw1wa55xzxvljqgx-sqld-0.24.18"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "turso-cli",
+      "broken": false,
+      "derivation": "/nix/store/sdzr8ffvjvkjl4cbzg7c67mn19xsgn50-turso-cli-0.97.2.drv",
+      "description": "This is the command line interface (CLI) to Turso",
+      "install_id": "turso-cli",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "turso-cli-0.97.2",
+      "pname": "turso-cli",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.97.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/ma3sm93v23w18crlwhpbf8pzg9s7kf2a-turso-cli-0.97.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "turso-cli",
+      "broken": false,
+      "derivation": "/nix/store/wiv9ls9k6p21vkah2hg258nfc9gdy2g0-turso-cli-0.97.2.drv",
+      "description": "This is the command line interface (CLI) to Turso",
+      "install_id": "turso-cli",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "turso-cli-0.97.2",
+      "pname": "turso-cli",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.97.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/iip4l5k5l1vkh9n998fmh7b0yahsh7a4-turso-cli-0.97.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "turso-cli",
+      "broken": false,
+      "derivation": "/nix/store/v2xbgh489wdg7pjb2y84bia6iaspnllp-turso-cli-0.97.2.drv",
+      "description": "This is the command line interface (CLI) to Turso",
+      "install_id": "turso-cli",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "turso-cli-0.97.2",
+      "pname": "turso-cli",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.97.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/ygixa6n2cvg7564zd04n65gx8y79a2zb-turso-cli-0.97.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "turso-cli",
+      "broken": false,
+      "derivation": "/nix/store/pg7zf687cyrxwr65hcj1dflda76iiv8a-turso-cli-0.97.2.drv",
+      "description": "This is the command line interface (CLI) to Turso",
+      "install_id": "turso-cli",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "name": "turso-cli-0.97.2",
+      "pname": "turso-cli",
+      "rev": "7ffd9ae656aec493492b44d0ddfb28e79a1ea25d",
+      "rev_count": 702572,
+      "rev_date": "2024-11-02T07:13:23Z",
+      "scrape_date": "2024-11-04T04:02:54Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.97.2",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/j5f2419h0sgghl7p1jcr6h0ncmlvm8pk-turso-cli-0.97.2"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "install_id": "deno",
+      "locked-url": "github:NixOS/nixpkgs/a04d33c0c3f1a59a2c1cb0c6e34cd24500e5a1dc",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.aarch64-darwin.deno",
+      "derivation": "/nix/store/9phjhz3f8q3gxfb4sn07w08g8c05q0ms-deno-2.0.2.drv",
+      "outputs": {
+        "out": "/nix/store/kkrdfxw0d7a2zah7f1287v8kwz6mjrlg-deno-2.0.2"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "aarch64-darwin",
+      "system": "aarch64-darwin",
+      "name": "deno-2.0.2",
+      "pname": "deno",
+      "version": "2.0.2",
+      "description": "Secure runtime for JavaScript and TypeScript",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "deno",
+      "locked-url": "github:NixOS/nixpkgs/a04d33c0c3f1a59a2c1cb0c6e34cd24500e5a1dc",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.aarch64-linux.deno",
+      "derivation": "/nix/store/wys91wff9798p23dapxch53n7id0c3pn-deno-2.0.2.drv",
+      "outputs": {
+        "out": "/nix/store/l9gq9hamk448ssy0qmrgdx3xjdyhw3g4-deno-2.0.2"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "aarch64-linux",
+      "system": "aarch64-linux",
+      "name": "deno-2.0.2",
+      "pname": "deno",
+      "version": "2.0.2",
+      "description": "Secure runtime for JavaScript and TypeScript",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "deno",
+      "locked-url": "github:NixOS/nixpkgs/a04d33c0c3f1a59a2c1cb0c6e34cd24500e5a1dc",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.x86_64-darwin.deno",
+      "derivation": "/nix/store/j4l5fgvw439h8dwjcjyzyn9zy967c2fn-deno-2.0.2.drv",
+      "outputs": {
+        "out": "/nix/store/zxhdycr35sdg2gdyb3m72in97pk0cv34-deno-2.0.2"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "x86_64-darwin",
+      "system": "x86_64-darwin",
+      "name": "deno-2.0.2",
+      "pname": "deno",
+      "version": "2.0.2",
+      "description": "Secure runtime for JavaScript and TypeScript",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "deno",
+      "locked-url": "github:NixOS/nixpkgs/a04d33c0c3f1a59a2c1cb0c6e34cd24500e5a1dc",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.x86_64-linux.deno",
+      "derivation": "/nix/store/yq7p2lxkgx0md6dy8hbpvhg93hhid03a-deno-2.0.2.drv",
+      "outputs": {
+        "out": "/nix/store/8sr95hpklk6d044jarjhccc28vicjpv6-deno-2.0.2"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "x86_64-linux",
+      "system": "x86_64-linux",
+      "name": "deno-2.0.2",
+      "pname": "deno",
+      "version": "2.0.2",
+      "description": "Secure runtime for JavaScript and TypeScript",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "wasmer",
+      "locked-url": "github:NixOS/nixpkgs/a04d33c0c3f1a59a2c1cb0c6e34cd24500e5a1dc",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.aarch64-darwin.wasmer",
+      "derivation": "/nix/store/f4whbq8i4xnvyh4p9zwp6aw5xbdbfnrq-wasmer-5.0.0.drv",
+      "outputs": {
+        "out": "/nix/store/g3p9wn1kax4q4yq6mfd1yyrr67w98q42-wasmer-5.0.0"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "aarch64-darwin",
+      "system": "aarch64-darwin",
+      "name": "wasmer-5.0.0",
+      "pname": "wasmer",
+      "version": "5.0.0",
+      "description": "Universal WebAssembly Runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "wasmer",
+      "locked-url": "github:NixOS/nixpkgs/a04d33c0c3f1a59a2c1cb0c6e34cd24500e5a1dc",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.aarch64-linux.wasmer",
+      "derivation": "/nix/store/14sdpw4lcal5h1ws83sqz5rbd8742sfk-wasmer-5.0.0.drv",
+      "outputs": {
+        "out": "/nix/store/78n9qld6mhbch6lmy2kh00prvdjxfrsd-wasmer-5.0.0"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "aarch64-linux",
+      "system": "aarch64-linux",
+      "name": "wasmer-5.0.0",
+      "pname": "wasmer",
+      "version": "5.0.0",
+      "description": "Universal WebAssembly Runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "wasmer",
+      "locked-url": "github:NixOS/nixpkgs/a04d33c0c3f1a59a2c1cb0c6e34cd24500e5a1dc",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.x86_64-darwin.wasmer",
+      "derivation": "/nix/store/8s10va8jrf2csz7gpg2rsryl40l9kl7a-wasmer-5.0.0.drv",
+      "outputs": {
+        "out": "/nix/store/ia2zkgndv3bm5d1p5c3pcj86fd6w3qma-wasmer-5.0.0"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "x86_64-darwin",
+      "system": "x86_64-darwin",
+      "name": "wasmer-5.0.0",
+      "pname": "wasmer",
+      "version": "5.0.0",
+      "description": "Universal WebAssembly Runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    },
+    {
+      "install_id": "wasmer",
+      "locked-url": "github:NixOS/nixpkgs/a04d33c0c3f1a59a2c1cb0c6e34cd24500e5a1dc",
+      "flake-description": "A collection of packages for the Nix package manager",
+      "locked-flake-attr-path": "legacyPackages.x86_64-linux.wasmer",
+      "derivation": "/nix/store/wdgbmlq1cpq4vbxrkm7dg3bxwi2kmdxs-wasmer-5.0.0.drv",
+      "outputs": {
+        "out": "/nix/store/6aax1avmvrj3zgp5kknwzmfrvf2ak2a3-wasmer-5.0.0"
+      },
+      "output-names": [
+        "out"
+      ],
+      "outputs-to-install": [
+        "out"
+      ],
+      "package-system": "x86_64-linux",
+      "system": "x86_64-linux",
+      "name": "wasmer-5.0.0",
+      "pname": "wasmer",
+      "version": "5.0.0",
+      "description": "Universal WebAssembly Runtime",
+      "licenses": [
+        "MIT"
+      ],
+      "broken": false,
+      "unfree": false,
+      "priority": 5
+    }
+  ]
+}

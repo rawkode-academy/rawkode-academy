@@ -20,6 +20,7 @@ export default (scope: Construct): ManagedDomain => {
 			"google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU",
 		)
 		.addCNameRecord("api", "api", "rawkode-academy-api.fly.dev")
+		.addCNameRecord("zitadel", "zitadel", "rawkode-academy-ekhcdu.us1.zitadel.cloud")
 		.addCNameRecord("stripe", "billing", "hosted-checkout.stripecdn.com")
 		.addTextRecord(
 			"stripe-acme",
@@ -31,47 +32,7 @@ export default (scope: Construct): ManagedDomain => {
 			"_atproto",
 			"did=did:plc:qtpysarntxepux4to4dr4hgr",
 		)
-		.addCNameRecord(
-			"clerk-accounts-portal",
-			"accounts",
-			"accounts.clerk.services",
-		)
-		.addCNameRecord(
-			"clerk-frontend-api",
-			"clerk",
-			"frontend-api.clerk.services",
-		)
-		.addCNameRecord(
-			"clerk-dkim-1",
-			"clk._domainkey",
-			"dkim1.yo4jsvea9l19.clerk.services",
-		)
-		.addCNameRecord(
-			"clerk-dkim-2",
-			"clk2._domainkey",
-			"dkim2.yo4jsvea9l19.clerk.services",
-		)
-		.addCNameRecord(
-			"workos-1",
-			"em4779.platform",
-			"u36670648.wl149.sendgrid.net",
-		)
-		.addCNameRecord(
-			"workos-2",
-			"wos._domainkey.platform",
-			"wos.domainkey.u36670648.wl149.sendgrid.net",
-		)
-		.addCNameRecord(
-			"workos-3",
-			"wos2._domainkey.platform",
-			"wos2.domainkey.u36670648.wl149.sendgrid.net",
-		)
-		.addCNameRecord("auth", "auth", "cname.workos-dns.com")
-		.addCNameRecord(
-			"zitadel",
-			"zitadel",
-			"production-ds3f3w.eu1.zitadel.cloud",
-		).enableResend({
+		.enableResend({
 			subdomain: "send",
 			domainKey:
 				"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJKsVRi83GwLUtyJ3Z6UWrp1onOlmGzQxErb6Y0m06+JPigyFr1HpdfiX1afgQ+kICp83pSY2/1J8eqr0Q+u29pu3Lpmhrm72DOZ4VuSOkQQh7E31PIuJlM0FD+SzdLWf9cx5PMWJbpCpw1CdbmzezBhL2J4qKxNLCTypaGmrfzwIDAQAB",
