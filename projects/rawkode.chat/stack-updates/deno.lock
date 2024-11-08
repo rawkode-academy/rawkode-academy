@@ -4,7 +4,10 @@
     "jsr:@maxim-mazurok/sax-ts@1.2.13": "1.2.13",
     "jsr:@mikaelporttila/rss@^1.1.1": "1.1.1",
     "jsr:@std/assert@1": "1.0.7",
+    "jsr:@std/assert@^1.0.7": "1.0.7",
+    "jsr:@std/expect@*": "1.0.7",
     "jsr:@std/internal@^1.0.5": "1.0.5",
+    "jsr:@std/testing@*": "1.0.4",
     "npm:@types/turndown@^5.0.5": "5.0.5",
     "npm:feedparser@^2.2.10": "2.2.10",
     "npm:turndown@^7.2.0": "7.2.0",
@@ -26,8 +29,22 @@
         "jsr:@std/internal"
       ]
     },
+    "@std/expect@1.0.7": {
+      "integrity": "3904afa77cfe5c45dd2cd2c476e6fc5b6f57103d712890f0783d74c19d4b05a9",
+      "dependencies": [
+        "jsr:@std/assert@^1.0.7",
+        "jsr:@std/internal"
+      ]
+    },
     "@std/internal@1.0.5": {
       "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
+    },
+    "@std/testing@1.0.4": {
+      "integrity": "ca1368d720b183f572d40c469bb9faf09643ddd77b54f8b44d36ae6b94940576",
+      "dependencies": [
+        "jsr:@std/assert@^1.0.7",
+        "jsr:@std/internal"
+      ]
     }
   },
   "npm": {
@@ -206,6 +223,11 @@
         "isomorphic-form-data"
       ]
     }
+  },
+  "remote": {
+    "https://deno.land/std@0.100.0/fmt/colors.ts": "db22b314a2ae9430ae7460ce005e0a7130e23ae1c999157e3bb77cf55800f7e4",
+    "https://deno.land/std@0.100.0/testing/_diff.ts": "a214632660e819a099f3ce719770031a69ba165853f930b90b44d7317a05585b",
+    "https://deno.land/std@0.100.0/testing/asserts.ts": "c4e8b3d81a5d80d6a4b48692e298dbeccfa22a5291782d6faa05115eb61d337e"
   },
   "workspace": {
     "dependencies": [
