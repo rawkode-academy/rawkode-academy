@@ -14,9 +14,14 @@ Deno.cron("stack-updates", "0 * * * *", async () => {
 	const keyValueStore = await Deno.openKv();
 
 	const projectsToFollow = [
+		"denoland/deno",
+		"drizzle-team/drizzle-orm",
+		"hayes/pothos",
 		"restatedev/restate",
 		"withastro/astro",
+		"wundergraph/cosmo",
 		"zitadel/zitadel",
+		"zulip/zulip",
 	];
 
 	projectsToFollow.forEach(async (project) => {
