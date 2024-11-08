@@ -1,6 +1,7 @@
-import { parseFeed } from "@mikaelporttila/rss";
 import turndown from "turndown";
 import createZulipClient from "zulip-js";
+import { getValueAsDate, storeDate } from "./store.ts";
+import { fetchReleaseFeed } from "./feed.ts";
 
 const zulipConfig = {
 	username: Deno.env.get("ZULIP_USERNAME"),
@@ -9,7 +10,7 @@ const zulipConfig = {
 };
 
 // Hourly
-Deno.cron("stack-updates", "* * * * *", async () => {
+Deno.cron("stack-updates", "0 * * * *", async () => {
 	const keyValueStore = await Deno.openKv();
 
 	const projectsToFollow = [
@@ -19,45 +20,45 @@ Deno.cron("stack-updates", "* * * * *", async () => {
 	];
 
 	projectsToFollow.forEach(async (project) => {
-		const projectState = await keyValueStore.get<Date>(["state", project]);
+		const projectLastUpdated = await getValueAsDate(keyValueStore, project);
+		const projectReleaseFeed = await fetchReleaseFeed(project);
 
-		if (projectState.value === null) {
-			// Set state to 6 hours ago to avoid fetching all releases
-			keyValueStore.set(
-				["state", project],
-				new Date(Date.now() - 6 * 60 * 60 * 1000),
-			);
-
-			// We won't try to fetch this now, let's capture during next schedule
-			console.info(
-				`Project, ${project}, appears to be new. Scheduled for next fetch.`,
-			);
+		if (!projectReleaseFeed.updateDate) {
+			console.error(`We couldn't determine when the release feed for ${project} was last updated. Skipping.`);
 			return;
 		}
 
-		const response = await fetch(
-			`https://github.com/${project}/releases.atom`,
-		);
-		const xml = await response.text();
-		const feed = await parseFeed(xml);
-
-		if (projectState >= feed.updated) {
+		if (projectLastUpdated >= projectReleaseFeed.updateDate) {
+			console.info(`Release feed for ${project} hasn't been updated since our last fetch.  Skipping.`);
 			return;
 		}
 
-		keyValueStore.set(
-			["state", project],
-			feed.updated,
-		);
+		console.info(`Release feed for ${project} has been updated since our last fetch. Processing.`);
 
-		// Let's never spam more than 2 items
-		const latestEntries = feed.entries.slice(0, 2);
+		storeDate(keyValueStore, project, projectReleaseFeed.updateDate);
 
 		const zulip = await createZulipClient(zulipConfig);
 		const td = new turndown();
 
-		latestEntries.forEach(async (entry) => {
-			if (projectState >= entry.updated) {
+		// Let's never spam more than 2 items
+		projectReleaseFeed.entries.slice(0, 2).forEach(async (entry) => {
+			if (!entry.updated) {
+				console.error(`Release ${entry.title?.value} for ${project} doesn't have an updated date. Skipping.`);
+				return;
+			}
+
+			if (entry.updated <= projectLastUpdated) {
+				console.error(`Release ${entry.title?.value} for ${project} has already been handled. Skipping.`);
+				return;
+			}
+
+			if (!entry.title) {
+				console.error(`Release ${entry.id} for ${project} doesn't have a title. Skipping.`);
+				return;
+			}
+
+			if (!entry.content) {
+				console.error(`Release ${entry.title.value} for ${project} doesn't have any content. Skipping.`);
 				return;
 			}
 

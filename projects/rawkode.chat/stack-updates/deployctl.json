@@ -4,7 +4,9 @@
 		"entrypoint": "main.ts",
 		"include": [
 			"deno.jsonc",
-			"main.ts"
+			"main.ts",
+			"feed.ts",
+			"store.ts"
 		]
 	}
 }
