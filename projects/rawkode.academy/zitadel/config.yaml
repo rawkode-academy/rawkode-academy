@@ -1,0 +1,28 @@
+Log:
+  Level: info
+  Formatter:
+    Format: text
+
+Metrics:
+  Type: none
+Tracing:
+  Type: none
+Profiler:
+  Type: none
+Telemetry:
+  Enabled: false
+
+Port: 8080
+ExternalPort: 8080
+ExternalSecure: true
+ExternalDomain: zitadel.rawkode.academy
+TLS:
+  Enabled: false
+
+WebAuthNName: RawkodeAcademy
+Database:
+  postgres:
+    MaxOpenConns: 16
+    MaxIdleConns: 8
+    MaxConnLifetime: 4h
+    MaxConnIdleTime: 30m
