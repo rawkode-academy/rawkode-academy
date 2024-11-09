@@ -1,0 +1,10 @@
+{
+	"deploy": {
+		"project": "chat-standup-bot",
+		"entrypoint": "main.ts",
+		"include": [
+			"deno.jsonc",
+			"main.ts"
+		]
+	}
+}
