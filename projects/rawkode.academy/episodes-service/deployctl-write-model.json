@@ -1,0 +1,11 @@
+{
+	"deploy": {
+		"project": "plt-episodes-w",
+		"include": [
+			"data-model",
+			"deno.jsonc",
+			"write-model/main.ts"
+		],
+		"entrypoint": "write-model/main.ts"
+	}
+}
