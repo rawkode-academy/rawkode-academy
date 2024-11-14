@@ -9,11 +9,11 @@ const seed = async () => {
     .insert(peopleTable)
     .values({
       id: "1",
-			forename: "Jack",
-			surname: "O'Neill",
+      forename: "Jack",
+      surname: "O'Neill",
     })
     .returning()
-		.all();
+    .all();
 
   Deno.exit(0);
 };
