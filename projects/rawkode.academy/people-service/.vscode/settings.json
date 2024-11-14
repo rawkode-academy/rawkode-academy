@@ -1,6 +1,3 @@
 {
-	"deno.enable": true,
-	"deno.disablePaths": [
-		".dagger"
-	]
+  "deno.enable": true
 }

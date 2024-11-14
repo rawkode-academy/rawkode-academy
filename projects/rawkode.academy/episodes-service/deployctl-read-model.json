@@ -4,7 +4,8 @@
 		"include": [
 			"data-model",
 			"deno.jsonc",
-			"read-model/main.ts"
+			"read-model/main.ts",
+			"read-model/schema.ts"
 		],
 		"entrypoint": "read-model/main.ts"
 	}

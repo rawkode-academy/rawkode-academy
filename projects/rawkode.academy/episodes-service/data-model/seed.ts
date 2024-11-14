@@ -1,8 +1,5 @@
-import { drizzle } from 'drizzle-orm/libsql';
-import { client } from './client.ts';
+import { db } from './client.ts';
 import { episodesTable } from './schema.ts';
-
-const db = drizzle(client);
 
 const seed = async () => {
 	await db
@@ -16,7 +13,10 @@ const seed = async () => {
 		})
 		.returning()
 		.all();
+
+	db.$client.close();
 	Deno.exit(0);
 };
 
 await seed();
+db.$client.close();

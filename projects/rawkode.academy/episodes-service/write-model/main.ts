@@ -1,4 +1,3 @@
-import { createClient } from '@libsql/client';
 import {
 	type Context,
 	endpoint,
@@ -6,8 +5,8 @@ import {
 	TerminalError,
 } from '@restatedev/restate-sdk/fetch';
 import { and, eq } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/libsql';
 import { z } from 'zod';
+import { db } from '../data-model/client.ts';
 import { CreateEpisode } from '../data-model/integrations/zod.ts';
 import { episodesTable } from '../data-model/schema.ts';
 
@@ -28,13 +27,6 @@ const episodeService = service({
 					error: e,
 				};
 			}
-
-			const client = createClient({
-				url: Deno.env.get('LIBSQL_URL')!,
-				authToken: Deno.env.get('LIBSQL_TOKEN')!,
-			});
-
-			const db = drizzle(client);
 
 			ctx.console.log(
 				'Checking unique constraints are passing before writing to database',
@@ -64,8 +56,21 @@ const episodeService = service({
 	},
 });
 
+// We allow this to be empty because of how deno deploy works
+const restateIdentityKey = Deno.env.get('RESTATE_IDENTITY_KEY') || '';
+
+// and because of ^^ we set a fake key for the "first" deploy
+// YES, THIS SUCKS.
 const handler = endpoint().bind(episodeService).withIdentityV1(
-	Deno.env.get('RESTATE_IDENTITY_KEY')!,
+	restateIdentityKey ||
+		'publickeyv1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
 ).bidirectional().handler();
 
-Deno.serve({ port: 9080 }, handler.fetch);
+const port = Deno.env.get('PORT') || '9080';
+
+Deno.serve({
+	port: Number(port),
+	onListen: ({ hostname, port, transport }) => {
+		console.log(`Listening on ${transport}://${hostname}:${port}`);
+	},
+}, handler.fetch);
