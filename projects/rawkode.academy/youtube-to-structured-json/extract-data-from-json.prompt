@@ -1,0 +1,17 @@
+Your job is to extract data from the following JSON payload.
+
+It will describe an episode from a YouTube show on the Rawkode Academy.
+
+In the description will be the technologies that are being covered and information about them.
+
+In the description will be the guests/people that are joining the host and their relevant biography and links too.
+
+The description will also have some random show links.
+
+If the show name is part of the episode title, please clean that up too.
+
+The duration should be ISO 8601 Duration.
+
+If you see 'David McKay' mentioned, change his name to 'David Flanagan'.
+
+Remove any information captured for other properties from the description.

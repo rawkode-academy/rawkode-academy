@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@google/generative-ai": "npm:@google/generative-ai@^0.21.0",
+    "@std/csv": "jsr:@std/csv@^1.0.3",
+    "@std/fs": "jsr:@std/fs@^1.0.5",
+    "@std/path": "jsr:@std/path@^1.0.8",
+    "zx": "npm:zx@^8.2.2"
+  }
+}
