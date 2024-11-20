@@ -1,4 +1,8 @@
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import {
+	DynamicRetrievalMode,
+	GoogleGenerativeAI,
+	SchemaType,
+} from "@google/generative-ai";
 import { existsSync } from "@std/fs";
 
 const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
@@ -14,27 +18,38 @@ const episode = {
 		id: {
 			type: SchemaType.STRING,
 			description: "ID of the episode",
-			nullable: false,
 		},
 		show: {
 			type: SchemaType.STRING,
 			description: "Show of the episode",
-			nullable: false,
 		},
 		title: {
 			type: SchemaType.STRING,
 			description: "Title of the episode",
-			nullable: false,
+		},
+		firstWordTimestamp: {
+			type: SchemaType.STRING,
+			description: "When is the first word said?",
+		},
+		lastWordTimestamp: {
+			type: SchemaType.STRING,
+			description: "When is the last word said?",
+		},
+		practicalityScore: {
+			type: SchemaType.STRING,
+			description: "How useful / practical was this?",
+		},
+		enjoymentScore: {
+			type: SchemaType.STRING,
+			description: "How enjoyable was this?",
 		},
 		description: {
 			type: SchemaType.STRING,
 			description: "Description of the episode",
-			nullable: false,
 		},
 		duration: {
 			type: SchemaType.STRING,
 			description: "Duration of the episode",
-			nullable: false,
 		},
 		chapters: {
 			type: SchemaType.ARRAY,
@@ -45,12 +60,10 @@ const episode = {
 					title: {
 						type: SchemaType.STRING,
 						description: "Title of the chapter",
-						nullable: false,
 					},
 					start: {
 						type: SchemaType.STRING,
 						description: "Start time of the chapter",
-						nullable: false,
 					},
 				},
 			},
@@ -64,27 +77,22 @@ const episode = {
 					name: {
 						type: SchemaType.STRING,
 						description: "Name of the guest",
-						nullable: false,
 					},
 					biography: {
 						type: SchemaType.STRING,
 						description: "Biography of the guest",
-						nullable: true,
 					},
 					github: {
 						type: SchemaType.STRING,
 						description: "GitHub of the guest",
-						nullable: true,
 					},
 					website: {
 						type: SchemaType.STRING,
 						description: "Website of the guest",
-						nullable: true,
 					},
 					twitter: {
 						type: SchemaType.STRING,
 						description: "Twitter of the guest",
-						nullable: true,
 					},
 				},
 			},
@@ -98,27 +106,18 @@ const episode = {
 					name: {
 						type: SchemaType.STRING,
 						description: "Name of the technology",
-						nullable: false,
 					},
 					website: {
 						type: SchemaType.STRING,
 						description: "Website of the technology",
-						nullable: true,
 					},
 					github: {
 						type: SchemaType.STRING,
 						description: "Repository of the technology",
-						nullable: true,
-					},
-					twitter: {
-						type: SchemaType.STRING,
-						description: "Twitter of the technology",
-						nullable: true,
 					},
 					documentation: {
 						type: SchemaType.STRING,
 						description: "Documentation of the technology",
-						nullable: true,
 					},
 				},
 			},
@@ -132,7 +131,6 @@ const episode = {
 					url: {
 						type: SchemaType.STRING,
 						description: "URL of the link",
-						nullable: false,
 					},
 				},
 			},
@@ -143,7 +141,7 @@ const episode = {
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 
 const model = genAI.getGenerativeModel({
-	model: "gemini-1.5-pro-latest",
+	model: "gemini-1.5-flash-latest",
 	generationConfig: {
 		responseMimeType: "application/json",
 		responseSchema: episode,
@@ -151,27 +149,46 @@ const model = genAI.getGenerativeModel({
 });
 
 for (const file of Deno.readDirSync("./data-from-csv")) {
-	const json = JSON.parse(await Deno.readTextFile(`./data-from-csv/${file.name}`));
-
-	if (existsSync(`./data-from-gemini/${json['Video ID']}.json`)) {
-		console.log(`Skipping ${json['Video ID']} as it already exists...`);
+	if (!file.name.endsWith(".json")) {
 		continue;
 	}
 
-
-	console.log(`Generating content for ${json['Video ID']}...`);
-	const result = await model.generateContent(
-		[
-			Deno.readTextFileSync("./extract-data-from-json.prompt"),
-			Deno.readTextFileSync(`./data-from-csv/${file.name}`),
-		],
+	const json = JSON.parse(
+		await Deno.readTextFile(`./data-from-csv/${file.name}`),
 	);
 
+	if (existsSync(`./data-from-gemini/${json["Video ID"]}.json`)) {
+		console.log(`Skipping ${json["Video ID"]} as it already exists...`);
+		continue;
+	}
 
-	Deno.writeTextFileSync(
-		`./data-from-gemini/${json['Video ID']}.json`,
-		result.response.text(),
-	);
+	try {
+		console.log(`Generating content for ${json["Video ID"]}...`);
+		const result = await model.generateContent(
+			[
+				Deno.readTextFileSync("./extract-data-from-json.md"),
+				Deno.readTextFileSync(`./data-from-csv/${file.name}`),
+				Deno.readTextFileSync(`./data-from-csv/${json["Video ID"]}.en.vtt`),
+			],
+			{
+				// 3 minutes
+				timeout: 180000,
+			},
+		);
 
-	console.log(`Generated content for ${json['Video ID']}`);
+		Deno.writeTextFileSync(
+			`./data-from-gemini/${json["Video ID"]}.json`,
+			result.response.text(),
+		);
+	} catch (error) {
+		console.error(
+			`Failed to generate content for ${
+				json["Video ID"]
+			} within timeout of 3 minutes`,
+		);
+		console.error(error);
+		continue;
+	}
+
+	console.log(`Generated content for ${json["Video ID"]}`);
 }
