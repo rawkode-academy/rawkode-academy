@@ -9,9 +9,8 @@ version = 1
 # List packages you wish to install in your environment inside
 # the `[install]` section.
 [install]
-flyctl.pkg-path = "flyctl"
-fluxcd.pkg-path = "fluxcd"
 oras.pkg-path = "oras"
+fluxcd.pkg-path = "fluxcd"
 # hello.pkg-path = "hello"
 # nodejs = { version = "^20.15.1", pkg-path = "nodejs" }
 

@@ -1,0 +1,262 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "fluxcd": {
+        "pkg-path": "fluxcd"
+      },
+      "oras": {
+        "pkg-path": "oras"
+      }
+    },
+    "hook": {},
+    "profile": {},
+    "options": {
+      "systems": [
+        "aarch64-darwin",
+        "aarch64-linux",
+        "x86_64-darwin",
+        "x86_64-linux"
+      ],
+      "allow": {
+        "licenses": []
+      },
+      "semver": {}
+    }
+  },
+  "packages": [
+    {
+      "attr_path": "fluxcd",
+      "broken": false,
+      "derivation": "/nix/store/9drz8psx7xwxw5d1mwwhi5vak5n96mjd-fluxcd-2.4.0.drv",
+      "description": "Open and extensible continuous delivery solution for Kubernetes",
+      "install_id": "fluxcd",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "name": "fluxcd-2.4.0",
+      "pname": "fluxcd",
+      "rev": "5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "rev_count": 708622,
+      "rev_date": "2024-11-15T13:07:34Z",
+      "scrape_date": "2024-11-17T03:59:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.4.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/yhi5qzr3g60v3x88p5319hzcc5bx2fsc-fluxcd-2.4.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "fluxcd",
+      "broken": false,
+      "derivation": "/nix/store/d2ci8kjrqg5qy0pmjsjzfldnn5z998rv-fluxcd-2.4.0.drv",
+      "description": "Open and extensible continuous delivery solution for Kubernetes",
+      "install_id": "fluxcd",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "name": "fluxcd-2.4.0",
+      "pname": "fluxcd",
+      "rev": "5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "rev_count": 708622,
+      "rev_date": "2024-11-15T13:07:34Z",
+      "scrape_date": "2024-11-17T03:59:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.4.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/xwplpfpfwiyklx1l1q24ppa2xykc155l-fluxcd-2.4.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "fluxcd",
+      "broken": false,
+      "derivation": "/nix/store/mmj3sm3qhkq5g6hh12pm19gzxcanyazc-fluxcd-2.4.0.drv",
+      "description": "Open and extensible continuous delivery solution for Kubernetes",
+      "install_id": "fluxcd",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "name": "fluxcd-2.4.0",
+      "pname": "fluxcd",
+      "rev": "5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "rev_count": 708622,
+      "rev_date": "2024-11-15T13:07:34Z",
+      "scrape_date": "2024-11-17T03:59:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.4.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/y3ig2irlgwnk358h5clk9nf8af8px4hc-fluxcd-2.4.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "fluxcd",
+      "broken": false,
+      "derivation": "/nix/store/pamab425z3n9gdwxxd0sfzx6397mk187-fluxcd-2.4.0.drv",
+      "description": "Open and extensible continuous delivery solution for Kubernetes",
+      "install_id": "fluxcd",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "name": "fluxcd-2.4.0",
+      "pname": "fluxcd",
+      "rev": "5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "rev_count": 708622,
+      "rev_date": "2024-11-15T13:07:34Z",
+      "scrape_date": "2024-11-17T03:59:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.4.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/1f5dm7fxm0z51mxdjpab7yqlppqi9b8k-fluxcd-2.4.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "oras",
+      "broken": false,
+      "derivation": "/nix/store/wl37j1fl2rbzllqvdr15a2z9z0s0q1ck-oras-1.2.0.drv",
+      "description": "ORAS project provides a way to push and pull OCI Artifacts to and from OCI Registries",
+      "install_id": "oras",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "name": "oras-1.2.0",
+      "pname": "oras",
+      "rev": "5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "rev_count": 708622,
+      "rev_date": "2024-11-15T13:07:34Z",
+      "scrape_date": "2024-11-17T03:59:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.2.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/kgqfd6zfhxvzqhbw58dys9yjqvyq065n-oras-1.2.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "oras",
+      "broken": false,
+      "derivation": "/nix/store/5cas689x23shqa0mrbdvxkn9p8k2xd7w-oras-1.2.0.drv",
+      "description": "ORAS project provides a way to push and pull OCI Artifacts to and from OCI Registries",
+      "install_id": "oras",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "name": "oras-1.2.0",
+      "pname": "oras",
+      "rev": "5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "rev_count": 708622,
+      "rev_date": "2024-11-15T13:07:34Z",
+      "scrape_date": "2024-11-17T03:59:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.2.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/6z4nmpwz0agp09yfixzzrxyvsvcklr7k-oras-1.2.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "oras",
+      "broken": false,
+      "derivation": "/nix/store/3caw2lw3divbk9k7wkwb14b489xhzrr9-oras-1.2.0.drv",
+      "description": "ORAS project provides a way to push and pull OCI Artifacts to and from OCI Registries",
+      "install_id": "oras",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "name": "oras-1.2.0",
+      "pname": "oras",
+      "rev": "5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "rev_count": 708622,
+      "rev_date": "2024-11-15T13:07:34Z",
+      "scrape_date": "2024-11-17T03:59:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.2.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/swdl6plfljww999hl176hzpcml48ad7c-oras-1.2.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "oras",
+      "broken": false,
+      "derivation": "/nix/store/py7zjzpzyr58aj7mkrhcv7w97ilgxz0m-oras-1.2.0.drv",
+      "description": "ORAS project provides a way to push and pull OCI Artifacts to and from OCI Registries",
+      "install_id": "oras",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "name": "oras-1.2.0",
+      "pname": "oras",
+      "rev": "5e4fbfb6b3de1aa2872b76d49fafc942626e2add",
+      "rev_count": 708622,
+      "rev_date": "2024-11-15T13:07:34Z",
+      "scrape_date": "2024-11-17T03:59:12Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.2.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/8hc4h3pbczasxv54dy1v0mkyhr2161pc-oras-1.2.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}
