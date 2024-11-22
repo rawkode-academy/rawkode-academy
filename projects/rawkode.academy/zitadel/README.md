@@ -20,7 +20,7 @@ gcloud auth configure-docker ${REGION}-docker.pkg.dev
 
 tar -czf zitadel.tar.gz ./kubernetes
 
-oras push ${REGION}-docker.pkg.dev/${PROJECT}/rawkode-academy/zitadel:v1 zitadel.tar.gz
+oras push ${REGION}-docker.pkg.dev/${PROJECT}/rawkode-academy/zitadel:v1.0.9 zitadel.tar.gz
 ```
 
 
