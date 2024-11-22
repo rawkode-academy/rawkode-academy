@@ -1,0 +1,35 @@
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1beta1
+metadata:
+  name: zitadel
+  namespace: zitadel
+spec:
+  parentRefs:
+  - kind: Gateway
+    name: ngrok
+    namespace: ngrok
+  hostnames:
+  - "zitadel.rawkode.academy"
+  rules:
+  - backendRefs:
+    - name: zitadel
+      kind: Service
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zitadel
+spec:
+  ingressClassName: ngrok
+  rules:
+    - host: zitadel.rawkode.academy
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zitadel
+                port:
+                  number: 8080

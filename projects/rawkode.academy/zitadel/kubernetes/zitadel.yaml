@@ -1,0 +1,95 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: zitadel
+spec:
+  interval: 48h
+  url: https://charts.zitadel.com
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: zitadel
+spec:
+  interval: 72h
+  timeout: 5m
+  chart:
+    spec:
+      chart: zitadel
+      version: '8.6.*'
+      sourceRef:
+        kind: HelmRepository
+        name: zitadel
+      interval: 5m
+  releaseName: zitadel
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  test:
+    enable: true
+  driftDetection:
+    mode: enabled
+    ignore:
+    - paths: ["/spec/replicas"]
+      target:
+        kind: Deployment
+  values:
+    env:
+    - name: ZITADEL_DATABASE_POSTGRES_HOST
+      valueFrom:
+        secretKeyRef:
+          name: zitadel-app
+          key: host
+    - name: ZITADEL_DATABASE_POSTGRES_PORT
+      valueFrom:
+        secretKeyRef:
+          name: zitadel-app
+          key: port
+    - name: ZITADEL_DATABASE_POSTGRES_DATABASE
+      value: zitadel
+    - name: ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: zitadel-superuser
+          key: username
+    - name: ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: zitadel-superuser
+          key: password
+    - name: ZITADEL_DATABASE_POSTGRES_USER_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: zitadel-app
+          key: username
+    - name: ZITADEL_DATABASE_POSTGRES_USER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: zitadel-app
+          key: password
+    service:
+      protocol: http
+      appProtocol: kubernetes.io/h2c
+    zitadel:
+      masterkeySecretName: zitadel-masterkey
+      configmapConfig:
+        ExternalSecure: true
+        ExternalDomain: zitadel.rawkode.academy
+        TLS:
+          Enabled: false
+        Database:
+          Postgres:
+            MaxOpenConns: 20
+            MaxIdleConns: 10
+            MaxConnLifetime: 30m
+            MaxConnIdleTime: 5m
+            User:
+              SSL:
+                Mode: disable
+            Admin:
+              SSL:
+                Mode: disable
