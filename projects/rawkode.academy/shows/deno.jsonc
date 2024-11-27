@@ -4,6 +4,7 @@
 		"@apollo/server": "npm:@apollo/server@^4.11.0",
 		"@apollo/subgraph": "npm:@apollo/subgraph@^2.9.2",
 		"@fastly/js-compute": "npm:@fastly/js-compute@^3.27.2",
+		"@graphql-tools/utils": "npm:@graphql-tools/utils@^10.6.1",
 		"@graphql-yoga/plugin-jwt": "npm:@graphql-yoga/plugin-jwt@^3.4.1",
 		"@libsql/client": "npm:@libsql/client@^0.14.0",
 		"@pothos/core": "npm:@pothos/core@^4.3.0",

@@ -1,12 +1,13 @@
 {
   "imports": {
     "@apollo/subgraph": "npm:@apollo/subgraph@^2.9.3",
+		"@graphql-tools/utils": "npm:@graphql-tools/utils@^10.6.1",
     "@graphql-yoga/plugin-jwt": "npm:@graphql-yoga/plugin-jwt@^3.1.0",
     "@libsql/client": "npm:@libsql/client@^0.14.0",
     "@pothos/core": "npm:@pothos/core@^4.3.0",
     "@pothos/plugin-directives": "npm:@pothos/plugin-directives@^4.1.0",
-    "@pothos/plugin-drizzle": "npm:@pothos/plugin-drizzle@^0.4.7",
-    "@pothos/plugin-federation": "npm:@pothos/plugin-federation@^4.1.0",
+    "@pothos/plugin-drizzle": "npm:@pothos/plugin-drizzle@^0.5.2",
+    "@pothos/plugin-federation": "npm:@pothos/plugin-federation@^4.2.0",
     "@restatedev/restate-sdk": "npm:@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157",
     "@std/assert": "jsr:@std/assert@1",
     "@std/path": "jsr:@std/path@^1.0.6",
