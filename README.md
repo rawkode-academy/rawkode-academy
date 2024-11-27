@@ -2,7 +2,7 @@
 
 ## Chat with Us
 
-[![Join the Rawkode Academy Zulip](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://chat.rawkode.academy)
+[![Join the Rawkode Academy Zulip](https://img.shields.io/badge/Zulip-Join_the_Community-5f5ed7.svg?style=for-the-badge&logo=zulip)](https://chat.rawkode.academy)
 
 ## CDRs
 
