@@ -1,0 +1,43 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cloudnative-pg
+spec:
+  interval: 48h
+  url: https://cloudnative-pg.github.io/charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cloudnative-pg
+spec:
+  interval: 72h
+  timeout: 5m
+  chart:
+    spec:
+      chart: cloudnative-pg
+      version: '0.22.*'
+      sourceRef:
+        kind: HelmRepository
+        name: cloudnative-pg
+      interval: 5m
+  releaseName: cloudnative-pg
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  test:
+    enable: true
+  values:
+    replicaCount: 1
+    crds:
+      create: true
+    nodeSelector:
+      cloud.google.com/gke-spot: "true"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
