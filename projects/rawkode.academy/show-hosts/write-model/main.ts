@@ -1,4 +1,3 @@
-import { createClient } from "@libsql/client";
 import {
 	type Context,
 	endpoint,
@@ -6,8 +5,8 @@ import {
 	TerminalError,
 } from "@restatedev/restate-sdk/fetch";
 import { and, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
 import { z } from "zod";
+import { db } from '../data-model/client.ts';
 import { AddHostToShow } from "../data-model/integrations/zod.ts";
 import { showHostsTable } from "../data-model/schema.ts";
 
@@ -28,13 +27,6 @@ const showsService = service({
 					error: e,
 				};
 			}
-
-			const client = createClient({
-				url: Deno.env.get("LIBSQL_URL") || "",
-				authToken: Deno.env.get("LIBSQL_TOKEN") || "",
-			});
-
-			const db = drizzle(client);
 
 			ctx.console.log(
 				"Checking unique constraints are passing before writing to database",

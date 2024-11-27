@@ -5,12 +5,13 @@
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/path@^1.0.6": "1.0.8",
     "npm:@apollo/subgraph@^2.9.3": "2.9.3_graphql@16.9.0",
+    "npm:@graphql-tools/utils@^10.6.1": "10.6.1_graphql@16.9.0",
     "npm:@graphql-yoga/plugin-jwt@^3.1.0": "3.2.0_graphql@16.9.0_graphql-yoga@5.8.0__graphql@16.9.0",
     "npm:@libsql/client@0.14": "0.14.0",
     "npm:@pothos/core@^4.3.0": "4.3.0_graphql@16.9.0",
     "npm:@pothos/plugin-directives@^4.1.0": "4.1.0_graphql@16.9.0",
-    "npm:@pothos/plugin-drizzle@~0.4.7": "0.4.7_@pothos+core@4.3.0__graphql@16.9.0_graphql@16.9.0",
-    "npm:@pothos/plugin-federation@^4.1.0": "4.1.0_@apollo+subgraph@2.9.3__graphql@16.9.0_graphql@16.9.0",
+    "npm:@pothos/plugin-drizzle@~0.5.2": "0.5.2_@pothos+core@4.3.0__graphql@16.9.0_graphql@16.9.0",
+    "npm:@pothos/plugin-federation@^4.2.0": "4.2.0_@apollo+subgraph@2.9.3__graphql@16.9.0_graphql@16.9.0",
     "npm:@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157": "0.0.0-SNAPSHOT-20240926122157",
     "npm:drizzle-orm@0.33": "0.33.0_@libsql+client@0.14.0",
     "npm:drizzle-zod@~0.5.1": "0.5.1_drizzle-orm@0.33.0__@libsql+client@0.14.0_zod@3.23.8_@libsql+client@0.14.0",
@@ -77,7 +78,7 @@
     "@graphql-tools/executor@1.3.2_graphql@16.9.0": {
       "integrity": "sha512-U8nAR709IPNjwf0aLG6U9FlX0t7vA4cdWvL4RtMR/L/Ll4OHZ39OqUtq6moy+kLRRwLTqLif6iiUYrxnWpUGXw==",
       "dependencies": [
-        "@graphql-tools/utils",
+        "@graphql-tools/utils@10.5.5_graphql@16.9.0",
         "@graphql-typed-document-node/core",
         "@repeaterjs/repeater",
         "graphql",
@@ -88,7 +89,7 @@
     "@graphql-tools/merge@9.0.8_graphql@16.9.0": {
       "integrity": "sha512-RG9NEp4fi0MoFi0te4ahqTMYuavQnXlpEZxxMomdCa6CI5tfekcVm/rsLF5Zt8O4HY+esDt9+4dCL+aOKvG79w==",
       "dependencies": [
-        "@graphql-tools/utils",
+        "@graphql-tools/utils@10.5.5_graphql@16.9.0",
         "graphql",
         "tslib"
       ]
@@ -97,7 +98,7 @@
       "integrity": "sha512-Cz1o+rf9cd3uMgG+zI9HlM5mPlnHQUlk/UQRZyUlPDfT+944taLaokjvj7AI6GcOFVf4f2D11XthQp+0GY31jQ==",
       "dependencies": [
         "@graphql-tools/merge",
-        "@graphql-tools/utils",
+        "@graphql-tools/utils@10.5.5_graphql@16.9.0",
         "graphql",
         "tslib",
         "value-or-promise"
@@ -105,6 +106,16 @@
     },
     "@graphql-tools/utils@10.5.5_graphql@16.9.0": {
       "integrity": "sha512-LF/UDWmMT0mnobL2UZETwYghV7HYBzNaGj0SAkCYOMy/C3+6sQdbcTksnoFaKR9XIVD78jNXEGfivbB8Zd+cwA==",
+      "dependencies": [
+        "@graphql-typed-document-node/core",
+        "cross-inspect",
+        "dset",
+        "graphql",
+        "tslib"
+      ]
+    },
+    "@graphql-tools/utils@10.6.1_graphql@16.9.0": {
+      "integrity": "sha512-XHl0/DWkMf/8Dmw1F3RRoMPt6ZwU4J707YWcbPjS+49WZNoTVz6f+prQ4GuwZT8RqTPtrRawnGU93AV73ZLTfQ==",
       "dependencies": [
         "@graphql-typed-document-node/core",
         "cross-inspect",
@@ -226,15 +237,15 @@
         "graphql"
       ]
     },
-    "@pothos/plugin-drizzle@0.4.7_@pothos+core@4.3.0__graphql@16.9.0_graphql@16.9.0": {
-      "integrity": "sha512-X9Ja7xS/8paHiI1cID63xAUAAzdtRUcpzrx02/S1sEq/sb/1g7zyHjE5hds4BFixEfgCU1j9RTisaIEB7vlUJw==",
+    "@pothos/plugin-drizzle@0.5.2_@pothos+core@4.3.0__graphql@16.9.0_graphql@16.9.0": {
+      "integrity": "sha512-mSyNvGvsGNkkOaznnLEkNO0mkcpWGbxAuhVirg8fku9Pyp19lhiihQmukhjovQx0H7cOMiK6xNiIhX2vM07jYA==",
       "dependencies": [
         "@pothos/core",
         "graphql"
       ]
     },
-    "@pothos/plugin-federation@4.1.0_@apollo+subgraph@2.9.3__graphql@16.9.0_graphql@16.9.0": {
-      "integrity": "sha512-5PEY/BNA0Ttouhrc2s62GDiMpTRDviXv4L3YG5CtdT96X2DJb2jZroJT5rhNgH8ww001KbJ6lVle7eid1ySHKA==",
+    "@pothos/plugin-federation@4.2.0_@apollo+subgraph@2.9.3__graphql@16.9.0_graphql@16.9.0": {
+      "integrity": "sha512-e3mLRxtqvDYTkbKxiVjleWEvbHiilBoN2OoKpVpJIpIOSxo2kmwO3bQBqouaDedSaAZluBSPIH79zYQ9pMg84Q==",
       "dependencies": [
         "@apollo/subgraph",
         "graphql"
@@ -487,7 +498,7 @@
         "@envelop/core",
         "@graphql-tools/executor",
         "@graphql-tools/schema",
-        "@graphql-tools/utils",
+        "@graphql-tools/utils@10.5.5_graphql@16.9.0",
         "@graphql-yoga/logger",
         "@graphql-yoga/subscription",
         "@whatwg-node/fetch",
@@ -683,12 +694,13 @@
       "jsr:@std/assert@1",
       "jsr:@std/path@^1.0.6",
       "npm:@apollo/subgraph@^2.9.3",
+      "npm:@graphql-tools/utils@^10.6.1",
       "npm:@graphql-yoga/plugin-jwt@^3.1.0",
       "npm:@libsql/client@0.14",
       "npm:@pothos/core@^4.3.0",
       "npm:@pothos/plugin-directives@^4.1.0",
-      "npm:@pothos/plugin-drizzle@~0.4.7",
-      "npm:@pothos/plugin-federation@^4.1.0",
+      "npm:@pothos/plugin-drizzle@~0.5.2",
+      "npm:@pothos/plugin-federation@^4.2.0",
       "npm:@restatedev/restate-sdk@0.0.0-SNAPSHOT-20240926122157",
       "npm:drizzle-orm@0.33",
       "npm:drizzle-zod@~0.5.1",

@@ -1,13 +1,13 @@
-import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { lexicographicSortSchema } from "graphql";
-import { getSchema } from "./schema.ts";
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
+import { lexicographicSortSchema } from 'graphql';
+import { getSchema } from './schema.ts';
 
 const schemaAsString = printSchemaWithDirectives(
 	lexicographicSortSchema(getSchema()),
 	{
 		// This is needed to print the directives properly,
 		// no idea why.
-		pathToDirectivesInExtensions: [""],
+		pathToDirectivesInExtensions: [''],
 	},
 );
 

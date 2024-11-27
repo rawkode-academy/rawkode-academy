@@ -1,8 +1,0 @@
-type Person @key(fields: "id") {
-  id: ID!
-}
-
-extend type Show @key(fields: "id") {
-	id: ID!
-	hosts: [Person]
-}
