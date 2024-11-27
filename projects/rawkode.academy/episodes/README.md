@@ -60,6 +60,7 @@ gcloud run deploy episodes-read \
       --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest"
 
 deno run --allow-all read-model/publish.ts
+deno run npm:wgc subgraph publish episodes --namespace production --schema ./read-model/schema.gql --routing-url https://episodes-read-458678766461.europe-west2.run.app
 ```
 
 ### Write Model

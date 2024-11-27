@@ -3,6 +3,7 @@ import { getSchema } from './schema.ts';
 
 const yoga = createYoga({
 	schema: getSchema(),
+	graphqlEndpoint: '/',
 });
 
 const port = Deno.env.get('PORT') || '8000';

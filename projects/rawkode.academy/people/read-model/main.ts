@@ -7,7 +7,8 @@ import { createYoga } from "graphql-yoga";
 import { getSchema } from "./schema.ts";
 
 const yoga = createYoga({
-  schema: getSchema(),
+	schema: getSchema(),
+	graphqlEndpoint: "/",
   plugins: [
     useJWT({
       singingKeyProviders: [
