@@ -11,7 +11,6 @@ cargo.pkg-path = "cargo"
 wasmer.flake = "github:NixOS/nixpkgs/nixpkgs-unstable#wasmer"
 deno.flake = "github:NixOS/nixpkgs/nixpkgs-unstable#deno"
 scaleway-cli.pkg-path = "scaleway-cli"
-google-cloud-sdk.pkg-path = "google-cloud-sdk"
 oras.pkg-path = "oras"
 
 [options]
