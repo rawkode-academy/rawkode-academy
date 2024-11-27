@@ -15,4 +15,4 @@ if (!serviceName) {
 	throw new Error('SERVICE_NAME environment variable is required');
 }
 
-await $`bunx wgc subgraph publish ${serviceName} --namespace production --schema ./read-model/schema.gql --routing-url https://plt-${serviceName}-r.deno.dev`;
+await $`bunx wgc subgraph publish ${serviceName} --namespace production --schema ./read-model/schema.gql --routing-url https://episodes-read-458678766461.europe-west2.run.app`;
