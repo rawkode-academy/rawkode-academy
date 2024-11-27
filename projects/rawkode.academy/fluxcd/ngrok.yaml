@@ -24,4 +24,3 @@ spec:
         mode: Terminate
         certificateRefs:
           - name: ngrokcert
----

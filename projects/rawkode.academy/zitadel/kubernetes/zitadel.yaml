@@ -37,45 +37,63 @@ spec:
     - paths: ["/spec/replicas"]
       target:
         kind: Deployment
+  # https://github.com/zitadel/zitadel-charts/pull/276
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              version: v1
+              kind: Service
+              name: zitadel
+            patch: |
+              - op: replace
+                path: /spec/ports/0/appProtocol
+                value: kubernetes.io/h2c
   values:
+    replicaCount: 1
+    image:
+      tag: 'v2.64.1'
     env:
     - name: ZITADEL_DATABASE_POSTGRES_HOST
       valueFrom:
         secretKeyRef:
-          name: zitadel-app
+          name: postgresql-app
           key: host
     - name: ZITADEL_DATABASE_POSTGRES_PORT
       valueFrom:
         secretKeyRef:
-          name: zitadel-app
+          name: postgresql-app
           key: port
     - name: ZITADEL_DATABASE_POSTGRES_DATABASE
-      value: zitadel
+      value: app
     - name: ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME
       valueFrom:
         secretKeyRef:
-          name: zitadel-superuser
+          name: postgresql-superuser
           key: username
     - name: ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: zitadel-superuser
+          name: postgresql-superuser
           key: password
     - name: ZITADEL_DATABASE_POSTGRES_USER_USERNAME
       valueFrom:
         secretKeyRef:
-          name: zitadel-app
+          name: postgresql-app
           key: username
     - name: ZITADEL_DATABASE_POSTGRES_USER_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: zitadel-app
+          name: postgresql-app
           key: password
-    service:
-      protocol: http
-      appProtocol: kubernetes.io/h2c
+    nodeSelector:
+      cloud.google.com/gke-spot: "true"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
     zitadel:
-      masterkeySecretName: zitadel-masterkey
+      masterkeySecretName: masterkey
       configmapConfig:
         ExternalSecure: true
         ExternalDomain: zitadel.rawkode.academy
