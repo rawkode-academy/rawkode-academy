@@ -1,26 +1,33 @@
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
 metadata:
   name: ngrok
-  namespace: ngrok
+  namespace: flux-system
 spec:
-  controllerName: ngrok.com/gateway-controller
+  provider: gcp
+  interval: 5m0s
+  url: oci://europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/ngrok
+  ref:
+    semver: 'v1.0.*'
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
+apiVersion: v1
+kind: Namespace
 metadata:
   name: ngrok
-  namespace: ngrok
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: ngrok
+  namespace: flux-system
 spec:
-  gatewayClassName: ngrok
-  listeners:
-    - name: ngrok
-      allowedRoutes:
-        namespaces:
-          from: All
-      port: 443
-      protocol: HTTPS
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - name: ngrokcert
+  targetNamespace: ngrok
+  interval: 15m0s
+  path: ./
+  prune: true
+  retryInterval: 2m0s
+  sourceRef:
+    kind: OCIRepository
+    name: ngrok
+  timeout: 3m0s
+  wait: true
