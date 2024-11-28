@@ -1,0 +1,88 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cosmo
+spec:
+  type: oci
+  interval: 48h
+  url: oci://ghcr.io/wundergraph/cosmo/helm-charts
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: router
+data:
+  config.yaml: |
+    # yaml-language-server: $schema=https://raw.githubusercontent.com/wundergraph/cosmo/main/router/pkg/config/config.schema.json
+    version: "1"
+    log_level: debug
+    authentication:
+      providers:
+        - name: Zitadel
+          jwks:
+            url: "https://zitadel.rawkode.academy/oauth/v2/keys"
+
+    headers:
+      all:
+        request:
+          - op: propagate
+            named: Authorization
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: router
+spec:
+  interval: 72h
+  timeout: 5m
+  chart:
+    spec:
+      chart: router
+      version: '0.9.*'
+      sourceRef:
+        kind: HelmRepository
+        name: cosmo
+      interval: 5m
+  releaseName: router
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  test:
+    enable: true
+  driftDetection:
+    mode: enabled
+    ignore:
+    - paths: ["/spec/replicas"]
+      target:
+        kind: Deployment
+  values:
+    nodeSelector:
+      cloud.google.com/gke-spot: "true"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    existingConfigmap: router
+    existingSecret: router
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: router
+spec:
+  ingressClassName: ngrok
+  rules:
+    - host: api.rawkode.academy
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: router
+                port:
+                  number: 3002
