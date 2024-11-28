@@ -19,8 +19,6 @@ export default (scope: Construct): ManagedDomain => {
 			"@",
 			"google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU",
 		)
-		.addCNameRecord("api", "api", "rawkode-academy-api.fly.dev")
-		.addCNameRecord("zitadel", "zitadel", "rawkode-academy-ekhcdu.us1.zitadel.cloud")
 		.addCNameRecord("stripe", "billing", "hosted-checkout.stripecdn.com")
 		.addTextRecord(
 			"stripe-acme",
@@ -35,7 +33,7 @@ export default (scope: Construct): ManagedDomain => {
 		.enableResend({
 			subdomain: "send",
 			domainKey:
-				"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJKsVRi83GwLUtyJ3Z6UWrp1onOlmGzQxErb6Y0m06+JPigyFr1HpdfiX1afgQ+kICp83pSY2/1J8eqr0Q+u29pu3Lpmhrm72DOZ4VuSOkQQh7E31PIuJlM0FD+SzdLWf9cx5PMWJbpCpw1CdbmzezBhL2J4qKxNLCTypaGmrfzwIDAQAB",
+				"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJKsVRi83GwLUtyJ3Z6UWrp1onOlmGzQxErb6Y0m06+JPigyFr1HpdfiX1afgQ+kICp83pSY2/1J8eqr0Q+u29pu3Lpmhrm72DOZ4VuSOkQQh7E31PIuJlM0FD+SzdLWf9cx5PMWJbpCpw1CdbmzezBhL2J4qKxNLCTypaGmrfzwIDAQAB",
 			mxValue: "feedback-smtp.eu-west-1.amazonses.com",
 		});
 
