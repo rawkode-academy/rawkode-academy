@@ -73,4 +73,4 @@ const handler = endpoint().bind(showsService).withIdentityV1(
 	Deno.env.get("RESTATE_IDENTITY_KEY") || "",
 ).bidirectional().handler();
 
-Deno.serve({ port: 9080 }, handler.fetch);
+Deno.serve({ port: parseInt(Deno.env.get("PORT") || "9080", 10) }, handler.fetch);

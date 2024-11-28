@@ -15,7 +15,7 @@ Deno.env.set("USE_WEB_CRYPTO", "true");
 
 type T = z.infer<typeof AddHostToShow>;
 
-const showsService = service({
+const showHostsService = service({
 	name: "show-hosts",
 	handlers: {
 		add: async (ctx: Context, showHost: T) => {
@@ -56,8 +56,8 @@ const showsService = service({
 	},
 });
 
-const handler = endpoint().bind(showsService).withIdentityV1(
+const handler = endpoint().bind(showHostsService).withIdentityV1(
 	Deno.env.get("RESTATE_IDENTITY_KEY") || "",
 ).bidirectional().handler();
 
-Deno.serve({ port: 9080 }, handler.fetch);
+Deno.serve({ port: parseInt(Deno.env.get("PORT") || "9080", 10) }, handler.fetch);
