@@ -53,21 +53,8 @@ const peopleService = service({
   },
 });
 
-// We allow this to be empty because of how deno deploy works
-const restateIdentityKey = Deno.env.get("RESTATE_IDENTITY_KEY") || "";
-
-// and because of ^^ we set a fake key for the "first" deploy
-// YES, THIS SUCKS.
 const handler = endpoint().bind(peopleService).withIdentityV1(
-  restateIdentityKey ||
-    "publickeyv1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+	Deno.env.get("RESTATE_IDENTITY_KEY") || "",
 ).bidirectional().handler();
 
-const port = Deno.env.get("PORT") || "9080";
-
-Deno.serve({
-  port: Number(port),
-  onListen: ({ hostname, port, transport }) => {
-    console.log(`Listening on ${transport}://${hostname}:${port}`);
-  },
-}, handler.fetch);
+Deno.serve({ port: parseInt(Deno.env.get("PORT") || "9080", 10) }, handler.fetch);
