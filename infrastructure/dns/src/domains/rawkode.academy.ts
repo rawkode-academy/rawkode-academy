@@ -18,7 +18,8 @@ export default (scope: Construct): ManagedDomain => {
 			"google-site-verification",
 			"@",
 			"google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU",
-		)
+	)
+		.addCNameRecord("videos", "videos", "vz-a980a339-070.b-cdn.net")
 		.addCNameRecord("stripe", "billing", "hosted-checkout.stripecdn.com")
 		.addTextRecord(
 			"stripe-acme",
