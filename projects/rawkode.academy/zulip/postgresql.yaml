@@ -1,0 +1,31 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgresql
+spec:
+  imageName: europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/zulip-postgresql:16-zulip-001
+  enableSuperuserAccess: true
+  instances: 2
+  enablePDB: true
+  storage:
+    size: 1Gi
+  resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+  bootstrap:
+    initdb:
+      database: zulip
+      owner: zulip
+      dataChecksums: true
+      encoding: 'UTF-8'
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: postgresql
+spec:
+  schedule: "0 0 0 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: postgresql

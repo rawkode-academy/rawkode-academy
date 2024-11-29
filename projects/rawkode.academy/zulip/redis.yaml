@@ -1,0 +1,38 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: valkey
+spec:
+  interval: 48h
+  type: oci
+  url: oci://registry-1.docker.io/bitnamicharts/valkey
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: valkey
+spec:
+  interval: 72h
+  timeout: 5m
+  chart:
+    spec:
+      chart: valkey
+      version: '2.0.*'
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+      interval: 5m
+  releaseName: valkey
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  test:
+    enable: true
+  values:
+    architecture: standalone
+    auth:
+      enabled: true

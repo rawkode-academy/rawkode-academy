@@ -1,0 +1,206 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zulip
+  labels:
+    app.kubernetes.io/name: zulip
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zulip
+  serviceName: zulip
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: zulip
+    spec:
+      securityContext: {}
+      containers:
+        - name: zulip
+          securityContext: {}
+          image: "zulip/docker-zulip:9.3-0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: zulip-persistent-storage
+              mountPath: /data
+          env:
+            - name: LOADBALANCER_IPS
+              value: 0.0.0.0/0
+            - name: DB_HOST
+              value: "postgresql-rw"
+            - name: DB_HOST_PORT
+              value: "5432"
+            - name: SETTING_MEMCACHED_LOCATION
+              value: "memcached:11211"
+            - name: SETTING_RABBITMQ_HOST
+              value: "rabbitmq"
+            - name: SETTING_REDIS_HOST
+              value: "valkey-headless"
+            - name: DISABLE_HTTPS
+              value: "true"
+            - name: SETTING_EMAIL_HOST
+              value: "smtp.resend.com"
+            - name: SETTING_EMAIL_HOST_USER
+              value: "resend"
+            - name: SETTING_EMAIL_PORT
+              value: "587"
+            - name: SETTING_EMAIL_USE_SSL
+              value: "False"
+            - name: SSL_CERTIFICATE_GENERATION
+              value: "self-signed"
+            - name: SETTING_EMAIL_USE_TLS
+              value: "True"
+            - name: SETTING_EXTERNAL_HOST
+              value: "chat.rawkode.academy"
+            - name: SETTING_ZULIP_ADMINISTRATOR
+              value: "team@rawkode.academy"
+            - name: SETTING_ZULIP_SERVICE_PUSH_NOTIFICATIONS
+              value: "True"
+            - name: ZULIP_AUTH_BACKENDS
+              value: "GenericOpenIdConnectBackend"
+            - name: SECRETS_rabbitmq_password
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq
+                  key: rabbitmq-password
+            - name: SECRETS_postgres_password
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-app
+                  key: password
+            - name: SECRETS_memcached_password
+              valueFrom:
+                secretKeyRef:
+                  name: memcached
+                  key: memcached-password
+            - name: SECRETS_redis_password
+              valueFrom:
+                secretKeyRef:
+                  name: valkey
+                  key: valkey-password
+            - name: SECRETS_secret_key
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: secret-key
+            - name: SECRETS_email_password
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: email-password
+            - name: SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: zitadel-config
+            - name: SETTING_GIPHY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: giphy-api-key
+            - name: SECRETS_avatar_salt
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: avatar-salt
+            - name: SECRETS_shared_secret
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: shared-secret
+            - name: SECRETS_zulip_org_key
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: zulip-org-key
+            - name: SECRETS_zulip_org_id
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: zulip-org-id
+            - name: SECRETS_camo_key
+              valueFrom:
+                secretKeyRef:
+                  name: zulip
+                  key: camo-key
+          resources: {}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+              httpHeaders:
+              - name: Host
+                value: "chat.rawkode.academy"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+              httpHeaders:
+              - name: Host
+                value: "chat.rawkode.academy"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 30
+
+      volumes:
+        - name: zulip-persistent-storage
+          persistentVolumeClaim:
+            claimName: zulip-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zulip
+  labels:
+    app.kubernetes.io/name: zulip
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: zulip
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: zulip-data
+  labels:
+    app.kubernetes.io/name: zulip
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "10Gi"
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zulip
+spec:
+  ingressClassName: ngrok
+  rules:
+    - host: chat.rawkode.academy
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zulip
+                port:
+                  number: 80
