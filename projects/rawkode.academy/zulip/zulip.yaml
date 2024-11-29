@@ -64,6 +64,8 @@ spec:
               value: "self-signed"
             - name: SETTING_EMAIL_USE_TLS
               value: "True"
+            - name: SETTING_WEB_PUBLIC_STREAMS_ENABLED
+              value: "True"
             - name: SETTING_ZULIP_SERVICE_PUSH_NOTIFICATIONS
               value: "True"
             - name: ZULIP_AUTH_BACKENDS
