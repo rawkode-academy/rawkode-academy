@@ -20,7 +20,7 @@ const builder = new schemaBuilder<PothosTypes>({
 
 export const getSchema = (): GraphQLSchema => {
 	const showRef = builder.drizzleObject('showsTable', {
-		name: 'show',
+		name: 'Show',
 		fields: (t) => ({
 			id: t.exposeString('id'),
 			name: t.exposeString('name'),
@@ -50,7 +50,7 @@ export const getSchema = (): GraphQLSchema => {
 						where: eq(dataSchema.showsTable.id, args.id),
 					})).execute(),
 			}),
-			shows: t.drizzleField({
+			allShows: t.drizzleField({
 				type: [showRef],
 				resolve: (query, _root, _args, _ctx) =>
 					db.query.showsTable.findMany(query()).execute(),

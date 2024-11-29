@@ -29,7 +29,7 @@ export const getSchema = (): GraphQLSchema => {
 	});
 
 	const episodeRef = builder.drizzleObject('episodesTable', {
-		name: 'episode',
+		name: 'Episode',
 		fields: (t) => ({
 			code: t.exposeString('code'),
 			showId: t.exposeString('showId'),
@@ -55,7 +55,7 @@ export const getSchema = (): GraphQLSchema => {
 
 	builder.queryType({
 		fields: (t) => ({
-			episode: t.drizzleField({
+			episodeByShowCode: t.drizzleField({
 				type: episodeRef,
 				args: {
 					code: t.arg({
@@ -75,7 +75,7 @@ export const getSchema = (): GraphQLSchema => {
 						),
 					})).execute(),
 			}),
-			showEpisodes: t.drizzleField({
+			episodesForShow: t.drizzleField({
 				type: [episodeRef],
 				args: {
 					showId: t.arg({
