@@ -34,7 +34,7 @@ export default (scope: Construct): ManagedDomain => {
 		.addTextRecord(
 			"bimi",
 			"default._bimi",
-			`v=BIMI1; l=https://raw.githubusercontent.com/RawkodeAcademy/RawkodeAcademy/refs/heads/main/branding/icon-gradient-bimi.svg; a=;`,
+			`v=BIMI1; l=https://rawkode.academy/icon-gradient-bimi.svg; a=;`,
 		)
 		.enableResend({
 			subdomain: "send",
