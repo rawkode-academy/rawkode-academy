@@ -1,5 +1,7 @@
 {
   "imports": {
+		"@deepgram/captions": "npm:@deepgram/captions@^1.2.0",
+		"@deepgram/sdk": "npm:@deepgram/sdk@^3.9.0",
     "@google/generative-ai": "npm:@google/generative-ai@^0.21.0",
     "@std/csv": "jsr:@std/csv@^1.0.3",
     "@std/fs": "jsr:@std/fs@^1.0.5",
