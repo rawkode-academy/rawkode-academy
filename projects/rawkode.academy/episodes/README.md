@@ -34,7 +34,7 @@ deno lint
 
 ### Data Model
 
-```sh {"name":"dev-db"}
+```sh {"name":"migrate-production"}
 export LIBSQL_URL="https://${SERVICE_NAME}-${LIBSQL_BASE_URL}"
 export LIBSQL_TOKEN="op://sa.rawkode.academy/turso/platform-group/api-token"
 

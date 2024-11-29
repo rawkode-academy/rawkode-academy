@@ -19,14 +19,26 @@ const builder = new schemaBuilder<PothosTypes>({
 });
 
 export const getSchema = (): GraphQLSchema => {
+	const contentRef = builder.externalRef(
+		'Content',
+		builder.selection<{ id: string }>('id'),
+	).implement({
+		externalFields: (t) => ({
+			id: t.string(),
+		}),
+	});
+
 	const episodeRef = builder.drizzleObject('episodesTable', {
 		name: 'episode',
 		fields: (t) => ({
 			code: t.exposeString('code'),
 			showId: t.exposeString('showId'),
-			title: t.exposeString('title'),
-			subtitle: t.exposeString('subtitle'),
-			description: t.exposeString('description'),
+			content: t.field({
+				type: contentRef,
+				resolve: (episode) => ({
+					id: episode.contentId,
+				}),
+			}),
 		}),
 	});
 
@@ -81,6 +93,6 @@ export const getSchema = (): GraphQLSchema => {
 
 	return builder.toSubGraphSchema({
 		linkUrl: 'https://specs.apollo.dev/federation/v2.6',
-		federationDirectives: ['@key'],
+		federationDirectives: ['@extends', '@external', '@key'],
 	});
 };

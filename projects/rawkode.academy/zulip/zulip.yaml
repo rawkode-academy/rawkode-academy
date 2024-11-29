@@ -42,6 +42,16 @@ spec:
               value: "valkey-headless"
             - name: DISABLE_HTTPS
               value: "true"
+            - name: SETTING_EXTERNAL_HOST
+              value: "chat.rawkode.academy"
+            - name: SETTING_ZULIP_ADMINISTRATOR
+              value: "Rawkode Academy Zulip <team@rawkode.academy>"
+            - name: SETTING_DEFAULT_FROM_EMAIL
+              value: "Rawkode Academy Zulip2 <team@rawkode.academy>"
+            - name: SETTING_NOREPLY_EMAIL_ADDRESS
+              value: "Rawkode Academy Zulip3 <team@rawkode.academy>"
+            - name: SETTING_ADD_TOKENS_TO_NOREPLY_ADDRESS
+              value: "False"
             - name: SETTING_EMAIL_HOST
               value: "smtp.resend.com"
             - name: SETTING_EMAIL_HOST_USER
@@ -54,10 +64,6 @@ spec:
               value: "self-signed"
             - name: SETTING_EMAIL_USE_TLS
               value: "True"
-            - name: SETTING_EXTERNAL_HOST
-              value: "chat.rawkode.academy"
-            - name: SETTING_ZULIP_ADMINISTRATOR
-              value: "team@rawkode.academy"
             - name: SETTING_ZULIP_SERVICE_PUSH_NOTIFICATIONS
               value: "True"
             - name: ZULIP_AUTH_BACKENDS

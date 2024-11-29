@@ -1,45 +1,45 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "82e47ded-5592-45eb-9683-a1bfcc8cfc50",
+  "id": "c4a320b9-a1a6-4d0e-a66b-388a0c23971e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "episodes": {
-      "name": "episodes",
+    "content": {
+      "name": "content",
       "columns": {
-        "showId": {
-          "name": "showId",
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "code": {
-          "name": "code",
+        "subtitle": {
+          "name": "subtitle",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "contentId": {
-          "name": "contentId",
+        "status": {
+          "name": "status",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'draft'"
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "episodes_showId_code_pk": {
-          "columns": [
-            "showId",
-            "code"
-          ],
-          "name": "episodes_showId_code_pk"
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     }
