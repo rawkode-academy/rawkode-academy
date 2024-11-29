@@ -24,5 +24,5 @@ gcloud auth configure-docker ${REGION}-docker.pkg.dev
 
 tar -czf archive.tar.gz *.yaml
 
-oras push ${REGION}-docker.pkg.dev/${PROJECT}/rawkode-academy/zulip:v1.0.22 archive.tar.gz
+oras push ${REGION}-docker.pkg.dev/${PROJECT}/rawkode-academy/zulip:v1.0.23 archive.tar.gz
 ```
