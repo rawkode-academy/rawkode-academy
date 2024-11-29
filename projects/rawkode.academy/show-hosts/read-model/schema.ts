@@ -19,12 +19,12 @@ const builder = new schemaBuilder<PothosTypes>({
 });
 
 const personRef = builder.externalRef(
-	'person',
+	'Person',
 	builder.selection<{ id: string }>('id'),
 );
 
 const showRef = builder.externalRef(
-	'show',
+	'Show',
 	builder.selection<{ id: string }>('id'),
 ).implement({
 	externalFields: (t) => ({

@@ -38,7 +38,7 @@ export const getSchema = (): GraphQLSchema => {
 	});
 
 	const personRef = builder.drizzleObject("peopleTable", {
-		name: "person",
+		name: "Person",
 		fields: (t) => ({
 			id: t.exposeString("id"),
 			forename: t.exposeString("forename"),
