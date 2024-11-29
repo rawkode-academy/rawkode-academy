@@ -18,7 +18,7 @@ export default (scope: Construct): ManagedDomain => {
 			"google-site-verification",
 			"@",
 			"google-site-verification=dlh9jxVzubowYFoVO82naJOotuUwY8zNG2VYGWlDhsU",
-	)
+		)
 		.addCNameRecord("videos", "videos", "vz-a980a339-070.b-cdn.net")
 		.addCNameRecord("stripe", "billing", "hosted-checkout.stripecdn.com")
 		.addTextRecord(
@@ -30,6 +30,11 @@ export default (scope: Construct): ManagedDomain => {
 			"_atproto",
 			"_atproto",
 			"did=did:plc:qtpysarntxepux4to4dr4hgr",
+		)
+		.addTextRecord(
+			"bimi",
+			"default._bimi",
+			`v=BIMI1; l=https://raw.githubusercontent.com/RawkodeAcademy/RawkodeAcademy/refs/heads/main/branding/icon-gradient-bimi.svg; a=;`,
 		)
 		.enableResend({
 			subdomain: "send",
