@@ -122,7 +122,9 @@ const transcribeAudio = async (id: string): Promise<boolean> => {
 			punctuate: true,
 			summarize: true,
 			paragraphs: true,
-			keywords: Deno.readFileSync("./glossary.txt").toString().split("\n"),
+			keywords: Deno.readFileSync("./glossary.txt").toString().split(
+				"\n",
+			),
 		},
 	);
 
@@ -242,7 +244,7 @@ const deleteBunnyVideo = (id: string) => {
 			],
 		},
 	).outputSync();
-}
+};
 
 interface BunnyResponse {
 	guid: string;
@@ -319,6 +321,31 @@ const uploadToBunny = (id: string): boolean => {
 		deleteBunnyVideo(json.guid);
 		return false;
 	}
+
+	console.log(`Uploading captions for ${json.guid}...`);
+	// Captions as Base64
+	const captions = Deno.readFileSync(`./pipeline/${id}/audio.en.vtt`);
+	const base64Captions = btoa(new TextDecoder().decode(captions));
+
+	new Deno.Command(
+		"curl",
+		{
+			args: [
+				"--request",
+				"POST",
+				"--url",
+				`https://video.bunnycdn.com/library/345630/videos/${json.guid}/captions/en`,
+				"--header",
+				`AccessKey: ${bunnyApiKey}`,
+				"--header",
+				"accept: application/json",
+				"--header",
+				"content-type: application/json",
+				"--data",
+				`{"srclang":"en","captionsFile": "${base64Captions}"}`,
+			],
+		},
+	).outputSync();
 
 	console.log(`Uploading video for ${json.guid}...`);
 
