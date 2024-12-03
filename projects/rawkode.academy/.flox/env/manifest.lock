@@ -12,8 +12,14 @@
       "deno": {
         "flake": "github:NixOS/nixpkgs/nixpkgs-unstable#deno"
       },
+      "fluxcd": {
+        "pkg-path": "fluxcd"
+      },
       "flyctl": {
         "pkg-path": "flyctl"
+      },
+      "kubectl": {
+        "pkg-path": "kubectl"
       },
       "nodejs": {
         "pkg-path": "nodejs"
@@ -294,6 +300,126 @@
       "priority": 5
     },
     {
+      "attr_path": "fluxcd",
+      "broken": false,
+      "derivation": "/nix/store/6g25d3makjz27vybv3yvcy3181dcqls5-fluxcd-2.4.0.drv",
+      "description": "Open and extensible continuous delivery solution for Kubernetes",
+      "install_id": "fluxcd",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "fluxcd-2.4.0",
+      "pname": "fluxcd",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.4.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/w01ng017zzcr0l6g7yqbbzkgndya9vi9-fluxcd-2.4.0"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "fluxcd",
+      "broken": false,
+      "derivation": "/nix/store/cxyfidxbihwx0xj2lg74kdnrmdxfxfa0-fluxcd-2.4.0.drv",
+      "description": "Open and extensible continuous delivery solution for Kubernetes",
+      "install_id": "fluxcd",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "fluxcd-2.4.0",
+      "pname": "fluxcd",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.4.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/88cxfw9jzz7rxwvpf2c57cyvplpf7ymc-fluxcd-2.4.0"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "fluxcd",
+      "broken": false,
+      "derivation": "/nix/store/i7403cmlyigw0vw2glmij77h1hhnyan8-fluxcd-2.4.0.drv",
+      "description": "Open and extensible continuous delivery solution for Kubernetes",
+      "install_id": "fluxcd",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "fluxcd-2.4.0",
+      "pname": "fluxcd",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.4.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/45wsjs5ikkll4915fb7xfvqlxh2mwxi3-fluxcd-2.4.0"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "fluxcd",
+      "broken": false,
+      "derivation": "/nix/store/if8wkn8sr6h0wrh6dwr2yzs17b7rxhjl-fluxcd-2.4.0.drv",
+      "description": "Open and extensible continuous delivery solution for Kubernetes",
+      "install_id": "fluxcd",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "fluxcd-2.4.0",
+      "pname": "fluxcd",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.4.0",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/cpi0kcqnss9qrnyf4xm4v7g58x5zj7dr-fluxcd-2.4.0"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
       "attr_path": "flyctl",
       "broken": false,
       "derivation": "/nix/store/i42abl1fflivzy6sbvmlvvxqzr5vylck-flyctl-0.3.29.drv",
@@ -408,6 +534,138 @@
       ],
       "outputs": {
         "out": "/nix/store/z2lkyraakc644cbrxa0sfk9hm1j6nzrj-flyctl-0.3.29"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "kubectl",
+      "broken": false,
+      "derivation": "/nix/store/9lwvjfm716gi5i1bxzc634jjg9nl2jm9-kubectl-1.31.2.drv",
+      "description": "Kubernetes CLI",
+      "install_id": "kubectl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "kubectl-1.31.2",
+      "pname": "kubectl",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.31.2",
+      "outputs_to_install": [
+        "out",
+        "man"
+      ],
+      "outputs": {
+        "convert": "/nix/store/90nf3rw5h92bzafsf24s2ijfwfbbglvy-kubectl-1.31.2-convert",
+        "man": "/nix/store/k2dwhk2hdhdp7vbliij1jgrfm0rvj57c-kubectl-1.31.2-man",
+        "out": "/nix/store/hk0qrz3w3ivibz67fjah61gpq5dfpj7n-kubectl-1.31.2"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "kubectl",
+      "broken": false,
+      "derivation": "/nix/store/yky8d9n7y9jq173mclq52s5r9zi9j8kd-kubectl-1.31.2.drv",
+      "description": "Kubernetes CLI",
+      "install_id": "kubectl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "kubectl-1.31.2",
+      "pname": "kubectl",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.31.2",
+      "outputs_to_install": [
+        "out",
+        "man"
+      ],
+      "outputs": {
+        "convert": "/nix/store/kbkblm912v1lgrmqvg187kviwxfg3ywr-kubectl-1.31.2-convert",
+        "man": "/nix/store/6wc7cni53c0g9162z281qqmflfpp3vq7-kubectl-1.31.2-man",
+        "out": "/nix/store/z3mlcpb4gd4n1c7c2ly7fz2j65zkcv3n-kubectl-1.31.2"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "kubectl",
+      "broken": false,
+      "derivation": "/nix/store/fd429r396wqgaba9akr56s8rhrfs5a25-kubectl-1.31.2.drv",
+      "description": "Kubernetes CLI",
+      "install_id": "kubectl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "kubectl-1.31.2",
+      "pname": "kubectl",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.31.2",
+      "outputs_to_install": [
+        "out",
+        "man"
+      ],
+      "outputs": {
+        "convert": "/nix/store/g49s8ahgcsm2m5azd09ql7434mdzif33-kubectl-1.31.2-convert",
+        "man": "/nix/store/xija3wpdm6jmkmlfd0y6d49vgg3098lw-kubectl-1.31.2-man",
+        "out": "/nix/store/bgq5fk947zf52ys0izx4k4m7pwq77pri-kubectl-1.31.2"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "kubectl",
+      "broken": false,
+      "derivation": "/nix/store/ki3s8q6fbxg2ppwgc1xq4hh58hh4ska5-kubectl-1.31.2.drv",
+      "description": "Kubernetes CLI",
+      "install_id": "kubectl",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "kubectl-1.31.2",
+      "pname": "kubectl",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "1.31.2",
+      "outputs_to_install": [
+        "out",
+        "man"
+      ],
+      "outputs": {
+        "convert": "/nix/store/0yj1raiv1zddfarndmgrgmd7p27cbq6m-kubectl-1.31.2-convert",
+        "man": "/nix/store/zfm38523vg5frylms8klxsi8jyqh374i-kubectl-1.31.2-man",
+        "out": "/nix/store/nqkn7vjqgcnp834vg0dwff4rj30v9i65-kubectl-1.31.2"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
