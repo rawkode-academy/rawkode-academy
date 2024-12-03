@@ -60,6 +60,28 @@ spec:
               value: "587"
             - name: SETTING_EMAIL_USE_SSL
               value: "False"
+            - name: SETTING_LOCAL_UPLOADS_DIR
+              value: "None"
+            - name: SETTING_S3_ENDPOINT_URL
+              value: "https://0aeb879de8e3cdde5fb3d413025222ce.eu.r2.cloudflarestorage.com"
+            - name: SETTING_S3_AVATAR_PUBLIC_URL_PREFIX
+              value: https://pub-7a38fcb356f246139fdb7341b6a3d168.r2.dev
+            - name: SETTING_S3_REGION
+              value: "auto"
+            - name: SETTING_S3_AUTH_UPLOADS_BUCKET
+              value: "rawkode-academy-zulip-uploads"
+            - name: SETTING_S3_AVATAR_BUCKET
+              value: "rawkode-academy-zulip-avatars"
+            - name: SECRETS_s3_key
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-r2
+                  key: access-key-id
+            - name: SECRETS_s3_secret_key
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-r2
+                  key: secret-access-key
             - name: SSL_CERTIFICATE_GENERATION
               value: "self-signed"
             - name: SETTING_EMAIL_USE_TLS

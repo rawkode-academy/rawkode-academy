@@ -222,13 +222,10 @@ export class ManagedDomain extends Construct {
 
 		new Record(this, "srv-submission", {
 			zoneId: this.cloudflareZone.id,
-			name: "srv-submission",
+			name: "_submission_tcp",
 			type: "SRV",
 			ttl: 3600,
 			data: {
-				name: this.cloudflareZone.zone,
-				service: "_submission",
-				proto: "_tcp",
 				priority: 0,
 				weight: 1,
 				port: 587,
@@ -239,13 +236,10 @@ export class ManagedDomain extends Construct {
 
 		new Record(this, "srv-imap", {
 			zoneId: this.cloudflareZone.id,
-			name: "srv-imap",
+			name: "_imap_tcp",
 			type: "SRV",
 			ttl: 3600,
 			data: {
-				name: this.cloudflareZone.zone,
-				service: "_imap",
-				proto: "_tcp",
 				priority: 0,
 				weight: 0,
 				port: 0,
@@ -256,13 +250,10 @@ export class ManagedDomain extends Construct {
 
 		new Record(this, "srv-imaps", {
 			zoneId: this.cloudflareZone.id,
-			name: "srv-imaps",
+			name: "_imaps_tcp",
 			type: "SRV",
 			ttl: 3600,
 			data: {
-				name: this.cloudflareZone.zone,
-				service: "_imaps",
-				proto: "_tcp",
 				priority: 0,
 				weight: 1,
 				port: 993,
@@ -273,13 +264,10 @@ export class ManagedDomain extends Construct {
 
 		new Record(this, "srv-jmap", {
 			zoneId: this.cloudflareZone.id,
-			name: "srv-jmap",
+			name: "_jmap_tcp",
 			type: "SRV",
 			ttl: 3600,
 			data: {
-				name: this.cloudflareZone.zone,
-				service: "_jmap",
-				proto: "_tcp",
 				priority: 0,
 				weight: 1,
 				port: 443,
@@ -290,13 +278,10 @@ export class ManagedDomain extends Construct {
 
 		new Record(this, "srv-carddav", {
 			zoneId: this.cloudflareZone.id,
-			name: "srv-carddav",
+			name: "_carddav_tcp",
 			type: "SRV",
 			ttl: 3600,
 			data: {
-				name: this.cloudflareZone.zone,
-				service: "_carddav",
-				proto: "_tcp",
 				priority: 0,
 				weight: 0,
 				port: 0,
@@ -307,13 +292,10 @@ export class ManagedDomain extends Construct {
 
 		new Record(this, "srv-carddavs", {
 			zoneId: this.cloudflareZone.id,
-			name: "srv-carddavs",
+			name: "_carddavs_tcp",
 			type: "SRV",
 			ttl: 3600,
 			data: {
-				name: this.cloudflareZone.zone,
-				service: "_carddavs",
-				proto: "_tcp",
 				priority: 0,
 				weight: 1,
 				port: 443,
@@ -324,13 +306,10 @@ export class ManagedDomain extends Construct {
 
 		new Record(this, "srv-caldav", {
 			zoneId: this.cloudflareZone.id,
-			name: "srv-caldav",
+			name: "_caldav_tcp",
 			type: "SRV",
 			ttl: 3600,
 			data: {
-				name: this.cloudflareZone.zone,
-				service: "_caldav",
-				proto: "_tcp",
 				priority: 0,
 				weight: 0,
 				port: 0,
@@ -341,13 +320,10 @@ export class ManagedDomain extends Construct {
 
 		new Record(this, "srv-caldavs", {
 			zoneId: this.cloudflareZone.id,
-			name: "srv-caldavs",
+			name: "_caldavs_tcp",
 			type: "SRV",
 			ttl: 3600,
 			data: {
-				name: this.cloudflareZone.zone,
-				service: "_caldavs",
-				proto: "_tcp",
 				priority: 0,
 				weight: 1,
 				port: 443,
@@ -605,19 +581,14 @@ export class ManagedDomain extends Construct {
 			comment: "Managed by Terraform",
 		});
 
-		new Record(this, `resend-dkim`, {
-			zoneId: this.cloudflareZone.id,
-			name: "resend._domainkey",
-			type: "TXT",
-			ttl: 3600,
-			value: `p=${config.domainKey}`,
-			comment: "Managed by Terraform",
-		});
-
 		return this.addTextRecord(
 			"resend-spf",
 			config.subdomain,
 			"v=spf1 include:amazonses.com ~all",
-		).addTextRecord("resend-domain-key", "resend._domainkey", config.domainKey);
+		).addTextRecord(
+			"resend-domain-key",
+			"resend._domainkey",
+			`p=${config.domainKey}`,
+		);
 	}
 }
