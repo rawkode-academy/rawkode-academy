@@ -7,16 +7,10 @@ import vue from "@astrojs/vue";
 import { defineConfig, envField } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
 
-// https://astro.build/config
 export default defineConfig({
-	legacy: {
-		collections: true,
-	},
 	output: "server",
 	integrations: [mdx(), react(), sitemap(), tailwind(), vue()],
-	adapter: cloudflare({
-		mode: "advanced",
-	}),
+	adapter: cloudflare({}),
 	site: import.meta.env.DEV
 		? "http://localhost:4321"
 		: "https://rawkode.academy",
