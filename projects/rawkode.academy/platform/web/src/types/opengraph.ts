@@ -1,7 +1,7 @@
 import type { ImageServicePayload } from "./image-service";
 
 export interface OpenGraphProps {
-	title: string;
-	description?: string;
-	image?: ImageServicePayload;
+  title: string;
+  description?: string;
+  image?: ImageServicePayload;
 }

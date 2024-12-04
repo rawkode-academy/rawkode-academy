@@ -2,8 +2,8 @@
 import { getViteConfig } from "astro/config";
 
 export default getViteConfig({
-	test: {
-		include: ["src/**/*.{spec,test}.{ts,tsx}"],
-		mockReset: true,
-	},
+  test: {
+    include: ["src/**/*.{spec,test}.{ts,tsx}"],
+    mockReset: true,
+  },
 });
