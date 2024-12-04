@@ -9,18 +9,18 @@ type NoSession = {};
 type MaybeSessionData = NoSession | SessionData;
 
 export const getSessionFromCookie = async (
-	cookies: AstroCookies,
+  cookies: AstroCookies,
 ): Promise<MaybeSessionData> => {
-	const { getSecret } = await import("astro:env/server");
+  const { getSecret } = await import("astro:env/server");
 
-	const cookiePassword = getSecret("WORKOS_COOKIE_PASSWORD") || "";
+  const cookiePassword = getSecret("WORKOS_COOKIE_PASSWORD") || "";
 
-	const cookie = cookies.get(cookieName);
-	if (!cookie) {
-		return {} as NoSession;
-	}
+  const cookie = cookies.get(cookieName);
+  if (!cookie) {
+    return {} as NoSession;
+  }
 
-	return unsealData<SessionData>(cookie.value, {
-		password: cookiePassword,
-	});
+  return unsealData<SessionData>(cookie.value, {
+    password: cookiePassword,
+  });
 };

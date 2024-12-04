@@ -1,4 +1,4 @@
 export interface ImageServicePayload {
-	text: string;
-	format: "svg" | "png";
+  text: string;
+  format: "svg" | "png";
 }
