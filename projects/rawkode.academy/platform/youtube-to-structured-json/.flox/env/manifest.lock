@@ -3,6 +3,9 @@
   "manifest": {
     "version": 1,
     "install": {
+      "ffmpeg": {
+        "pkg-path": "ffmpeg"
+      },
       "yt-dlp": {
         "pkg-path": "yt-dlp"
       }
@@ -24,20 +27,169 @@
   },
   "packages": [
     {
+      "attr_path": "ffmpeg",
+      "broken": false,
+      "derivation": "/nix/store/k7a6l5x7cvndmy87rrm544xr6zx6z3mp-ffmpeg-7.1.drv",
+      "description": "Complete, cross-platform solution to record, convert and stream audio and video",
+      "install_id": "ffmpeg",
+      "license": "[ LGPL-2.1-or-later, GPL-2.0-or-later, LGPL-3.0-or-later, GPL-3.0-or-later ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "ffmpeg-7.1",
+      "pname": "ffmpeg",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "7.1",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/10vwqg6nkvvjz6cf00s7xr3pqpryyijm-ffmpeg-7.1-bin",
+        "data": "/nix/store/3i18mmxkyyaf9aswqg08sczkx886kix3-ffmpeg-7.1-data",
+        "dev": "/nix/store/f8fbl5xrcygs6y9b04gnhnyyzchkdhri-ffmpeg-7.1-dev",
+        "doc": "/nix/store/dndkgipgrlph33ggf1sx88r872qp42j1-ffmpeg-7.1-doc",
+        "lib": "/nix/store/fp7p8d9km3j6v8200lv0v3bz653x7jvr-ffmpeg-7.1-lib",
+        "man": "/nix/store/v05zflvqw1sjfr5lszfr4dqa5sy6z2ln-ffmpeg-7.1-man",
+        "out": "/nix/store/lmqpzfdyg8cza7p0l4d6483255293rbi-ffmpeg-7.1"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "ffmpeg",
+      "broken": false,
+      "derivation": "/nix/store/xiln9y62nw30k7rar3g2y0nz2zbcsf6v-ffmpeg-7.1.drv",
+      "description": "Complete, cross-platform solution to record, convert and stream audio and video",
+      "install_id": "ffmpeg",
+      "license": "[ LGPL-2.1-or-later, GPL-2.0-or-later, LGPL-3.0-or-later, GPL-3.0-or-later ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "ffmpeg-7.1",
+      "pname": "ffmpeg",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "7.1",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/kgpc3nfxasqchkcky0w0ncmiq8ahfwc6-ffmpeg-7.1-bin",
+        "data": "/nix/store/0440fga0325ij4dvih39d1avr5xzynv4-ffmpeg-7.1-data",
+        "dev": "/nix/store/wj8zvm31ac1jqsh3297hlwzdg8ifn5kh-ffmpeg-7.1-dev",
+        "doc": "/nix/store/3vb90br3515cbyzq6v2yf8p8845zbks7-ffmpeg-7.1-doc",
+        "lib": "/nix/store/nk23lc576yd7w5qkhbp64gq2l64kmz0k-ffmpeg-7.1-lib",
+        "man": "/nix/store/i9rprj5njjkhdr0bj7gidazyz9r9j70n-ffmpeg-7.1-man",
+        "out": "/nix/store/001qmwq3malq43iwqlsdf6vzg3scjs6k-ffmpeg-7.1"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "ffmpeg",
+      "broken": false,
+      "derivation": "/nix/store/2ssrijszy8ry1wb59mqw601rv312b0an-ffmpeg-7.1.drv",
+      "description": "Complete, cross-platform solution to record, convert and stream audio and video",
+      "install_id": "ffmpeg",
+      "license": "[ LGPL-2.1-or-later, GPL-2.0-or-later, LGPL-3.0-or-later, GPL-3.0-or-later ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "ffmpeg-7.1",
+      "pname": "ffmpeg",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "7.1",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/iz138ddcys34wskc7zhhwld86dpsxwyd-ffmpeg-7.1-bin",
+        "data": "/nix/store/s31p4xy870lbwgllv6nb7m3vvaz5kkd2-ffmpeg-7.1-data",
+        "dev": "/nix/store/gc75yam07hdi7adiq86nvjib661dffxr-ffmpeg-7.1-dev",
+        "doc": "/nix/store/bd2qwdsxyps3m0acmbygz2nh5vbhqq4h-ffmpeg-7.1-doc",
+        "lib": "/nix/store/ipkv3cnqpbycp2lz756vhxq3afczm85b-ffmpeg-7.1-lib",
+        "man": "/nix/store/4013vgdqsdmg7n6fvf2sy15kdmcwnlgr-ffmpeg-7.1-man",
+        "out": "/nix/store/q9pcwzglw3f7lip8zpw6lpaf12s9xadg-ffmpeg-7.1"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "ffmpeg",
+      "broken": false,
+      "derivation": "/nix/store/limpsbaqwar103619ziv4j8qig1p9qb4-ffmpeg-7.1.drv",
+      "description": "Complete, cross-platform solution to record, convert and stream audio and video",
+      "install_id": "ffmpeg",
+      "license": "[ LGPL-2.1-or-later, GPL-2.0-or-later, LGPL-3.0-or-later, GPL-3.0-or-later ]",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
+      "name": "ffmpeg-7.1",
+      "pname": "ffmpeg",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
+      "stabilities": [
+        "staging",
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "7.1",
+      "outputs_to_install": [
+        "bin",
+        "man"
+      ],
+      "outputs": {
+        "bin": "/nix/store/zcbf5d79fdqbg26y8q186x60pqlc4ij6-ffmpeg-7.1-bin",
+        "data": "/nix/store/kny0dw81bn17p5w68vydif4m2d4ibfxy-ffmpeg-7.1-data",
+        "dev": "/nix/store/h0j33vqdmai1jvzlb89ilnkf5vqzn0zn-ffmpeg-7.1-dev",
+        "doc": "/nix/store/xgbip7gg64nqz5jmbn4qmfr4r7gwx036-ffmpeg-7.1-doc",
+        "lib": "/nix/store/r6jmxl2xg3li517lqn4whvhzfb1nqfkh-ffmpeg-7.1-lib",
+        "man": "/nix/store/jqqx4gdmpra3kk6w9zih0ch3pdfyzyb5-ffmpeg-7.1-man",
+        "out": "/nix/store/m0ldka5y7sh4j01x1k99515rc7zpwcfc-ffmpeg-7.1"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
       "attr_path": "yt-dlp",
       "broken": false,
       "derivation": "/nix/store/dq2ip59jxphkh69dlrr39jki39pq2smv-yt-dlp-2024.11.4.drv",
       "description": "Command-line tool to download videos from YouTube.com and other sites (youtube-dl fork)",
       "install_id": "yt-dlp",
       "license": "Unlicense",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=76612b17c0ce71689921ca12d9ffdc9c23ce40b2",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
       "name": "yt-dlp-2024.11.4",
       "pname": "yt-dlp",
-      "rev": "76612b17c0ce71689921ca12d9ffdc9c23ce40b2",
-      "rev_count": 705705,
-      "rev_date": "2024-11-09T08:06:34Z",
-      "scrape_date": "2024-11-11T03:57:18Z",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -60,14 +212,15 @@
       "description": "Command-line tool to download videos from YouTube.com and other sites (youtube-dl fork)",
       "install_id": "yt-dlp",
       "license": "Unlicense",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=76612b17c0ce71689921ca12d9ffdc9c23ce40b2",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
       "name": "yt-dlp-2024.11.4",
       "pname": "yt-dlp",
-      "rev": "76612b17c0ce71689921ca12d9ffdc9c23ce40b2",
-      "rev_count": 705705,
-      "rev_date": "2024-11-09T08:06:34Z",
-      "scrape_date": "2024-11-11T03:57:18Z",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -90,14 +243,15 @@
       "description": "Command-line tool to download videos from YouTube.com and other sites (youtube-dl fork)",
       "install_id": "yt-dlp",
       "license": "Unlicense",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=76612b17c0ce71689921ca12d9ffdc9c23ce40b2",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
       "name": "yt-dlp-2024.11.4",
       "pname": "yt-dlp",
-      "rev": "76612b17c0ce71689921ca12d9ffdc9c23ce40b2",
-      "rev_count": 705705,
-      "rev_date": "2024-11-09T08:06:34Z",
-      "scrape_date": "2024-11-11T03:57:18Z",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -120,14 +274,15 @@
       "description": "Command-line tool to download videos from YouTube.com and other sites (youtube-dl fork)",
       "install_id": "yt-dlp",
       "license": "Unlicense",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=76612b17c0ce71689921ca12d9ffdc9c23ce40b2",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=dc460ec76cbff0e66e269457d7b728432263166c",
       "name": "yt-dlp-2024.11.4",
       "pname": "yt-dlp",
-      "rev": "76612b17c0ce71689921ca12d9ffdc9c23ce40b2",
-      "rev_count": 705705,
-      "rev_date": "2024-11-09T08:06:34Z",
-      "scrape_date": "2024-11-11T03:57:18Z",
+      "rev": "dc460ec76cbff0e66e269457d7b728432263166c",
+      "rev_count": 706477,
+      "rev_date": "2024-11-11T10:11:37Z",
+      "scrape_date": "2024-11-15T03:58:27Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,

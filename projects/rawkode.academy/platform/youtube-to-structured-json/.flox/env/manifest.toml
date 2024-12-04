@@ -10,6 +10,7 @@ version = 1
 # the `[install]` section.
 [install]
 yt-dlp.pkg-path = "yt-dlp"
+ffmpeg.pkg-path = "ffmpeg"
 # hello.pkg-path = "hello"
 # nodejs = { version = "^20.15.1", pkg-path = "nodejs" }
 
