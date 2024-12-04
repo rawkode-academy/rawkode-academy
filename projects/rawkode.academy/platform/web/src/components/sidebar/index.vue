@@ -32,7 +32,7 @@ const menuItems = [
 	// },
 	{
 		name: "Community",
-		href: "https://rawkode.chat",
+		href: "https://chat.rawkode.academy",
 		icon: UsersIcon,
 		current: false,
 		target: "_blank",
