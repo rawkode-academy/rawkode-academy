@@ -1,11 +1,17 @@
 {
   "imports": {
-		"@deepgram/captions": "npm:@deepgram/captions@^1.2.0",
-		"@deepgram/sdk": "npm:@deepgram/sdk@^3.9.0",
+    "@aws-sdk/client-s3": "npm:@aws-sdk/client-s3@^3.703.0",
+    "@deepgram/captions": "npm:@deepgram/captions@^1.2.0",
+    "@deepgram/sdk": "npm:@deepgram/sdk@^3.9.0",
+    "@google-cloud/speech": "npm:@google-cloud/speech@^6.7.0",
+    "@google-cloud/storage": "npm:@google-cloud/storage@^7.14.0",
     "@google/generative-ai": "npm:@google/generative-ai@^0.21.0",
+    "@paralleldrive/cuid2": "npm:@paralleldrive/cuid2@^2.2.2",
     "@std/csv": "jsr:@std/csv@^1.0.3",
     "@std/fs": "jsr:@std/fs@^1.0.5",
     "@std/path": "jsr:@std/path@^1.0.8",
+    "music-metadata": "npm:music-metadata@^10.6.2",
+    "webvtt-parser": "npm:webvtt-parser@^2.2.0",
     "zx": "npm:zx@^8.2.2"
   }
 }
