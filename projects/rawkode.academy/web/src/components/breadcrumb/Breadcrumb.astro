@@ -1,0 +1,36 @@
+---
+import End from "./End.astro";
+import First from "./First.astro";
+import Middle from "./Middle.astro";
+
+interface BreadcrumbElement {
+	title: string;
+	link: string;
+}
+
+type Props = {
+	elements: BreadcrumbElement[];
+};
+
+const { elements } = Astro.props;
+---
+
+<nav class="flex" aria-label="Breadcrumb">
+	<ol
+		class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse"
+	>
+		{
+			elements.map((element, index) => {
+				if (index === 0) {
+					return <First title={element.title} link={element.link} />;
+				}
+
+				if (index === elements.length - 1) {
+					return <End title={element.title} />;
+				}
+
+				return <Middle title={element.title} link={element.link} />;
+			})
+		}
+	</ol>
+</nav>

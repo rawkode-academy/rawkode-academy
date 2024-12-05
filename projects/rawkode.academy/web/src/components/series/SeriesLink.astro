@@ -1,0 +1,16 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+type Props = {
+	series: CollectionEntry<"series">;
+};
+
+const { series } = Astro.props;
+---
+
+<p class="text-xl font-semibold text-blue-600/100 dark:text-blue-500/100">
+	Part of the series: <a
+		class="underline hover:no-underline"
+		href={`/series/${series.id}`}>{series.data.title}</a
+	>
+</p>
