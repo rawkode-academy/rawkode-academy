@@ -1,14 +1,14 @@
-import { jwtVerify } from "jose";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getSessionFromCookie } from "../utils/sessionCookie.ts";
 import { onRequest } from "./index.ts";
+import { Zitadel } from "@/lib/zitadel/index.ts";
+import type { OidcStandardClaims } from "oidc-client-ts";
 
 vi.mock("jose");
-vi.mock("../utils/sessionCookie.ts");
 
 describe("Auth Middleware", () => {
   let context: any;
   let next: any;
+  let fetchUser: any;
 
   beforeEach(() => {
     context = {
@@ -24,6 +24,7 @@ describe("Auth Middleware", () => {
       },
     };
     next = vi.fn();
+    fetchUser = vi.spyOn(Zitadel.prototype, "fetchUser");
   });
 
   afterEach(() => {
@@ -34,41 +35,45 @@ describe("Auth Middleware", () => {
   it("shouldn't use middleware for prerendered pages", async () => {
     await onRequest(context, next);
 
-    expect(getSessionFromCookie).not.toHaveBeenCalled();
+    expect(fetchUser).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledOnce();
   });
 
   it("should continue if there is no access token in session", async () => {
     context.locals.runtime = true;
-
-    vi.mocked(getSessionFromCookie).mockResolvedValue({});
+    context.cookies.get.mockImplementationOnce(() => {
+      return undefined;
+    });
 
     await onRequest(context, next);
 
-    expect(getSessionFromCookie).toHaveBeenCalled();
+    expect(fetchUser).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledOnce();
   });
 
   it("should continue if JWT is valid", async () => {
     context.locals.runtime = true;
 
-    vi.mocked(getSessionFromCookie).mockResolvedValue({
-      accessToken: "access-token",
-      refreshToken: "refresh-token",
-      user: "user",
+    context.cookies.get.mockImplementationOnce(() => {
+      return {
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+        user: "user",
+      };
     });
 
-    vi.mocked(jwtVerify).mockResolvedValue({
-      key: new Uint8Array(2),
-      payload: {},
-      protectedHeader: { alg: "" },
+    const expectedUser: OidcStandardClaims = {
+      name: "user",
+    };
+
+    fetchUser.mockImplementationOnce(() => {
+      return expectedUser;
     });
 
     await onRequest(context, next);
 
-    expect(getSessionFromCookie).toHaveBeenCalled();
-    expect(jwtVerify).toHaveBeenCalled();
+    expect(fetchUser).toHaveBeenCalled();
     expect(next).toHaveBeenCalledOnce();
-    expect(context.locals.user).toEqual("user");
+    expect(context.locals.user).toEqual(expectedUser);
   });
 });

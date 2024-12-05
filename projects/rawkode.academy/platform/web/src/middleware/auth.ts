@@ -33,6 +33,7 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
     idToken,
     refreshToken,
   );
+
   if (!user) {
     // Couldn't get a user, let's log them out
     console.debug("No user, redirecting to sign-out");

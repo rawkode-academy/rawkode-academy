@@ -10,7 +10,8 @@ This is the website at https://rawkode.academy
 
 ## Local Development
 
-If you don't have https://direnv.net[direnv] installed, you'll need to source the `.envrc` file for the correct environment variables to be available.
+If you don't have https://direnv.net[direnv] installed, you'll need to source
+the `.envrc` file for the correct environment variables to be available.
 
 If you don't have access to the secrets, authentication won't work.
 
@@ -26,8 +27,8 @@ bun run dev
 
 ### Without Nix
 
-If you wanna get up and running, you just need to install [Deno](https://deno.com).
-
+If you wanna get up and running, you just need to install
+[Deno](https://deno.com).
 
 ```shell {"name": "install"}
 bun install
@@ -40,6 +41,7 @@ bun run dev
 ```
 
 ## Checks, Linting, & Formatting
+
 ```shell {"name": "check"}
 deno fmt .
 bun run astro check
