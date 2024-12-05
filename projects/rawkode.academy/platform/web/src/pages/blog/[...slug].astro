@@ -1,6 +1,7 @@
 ---
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { render } from "astro:content";
 import { getCollection, type CollectionEntry } from "astro:content";
 
 export const prerender = true;
@@ -16,7 +17,7 @@ export const getStaticPaths: GetStaticPaths =
 		return blogEntries.map((article) => {
 			return {
 				params: {
-					slug: article.slug,
+					slug: article.id,
 				},
 				props: {
 					article,
@@ -26,7 +27,7 @@ export const getStaticPaths: GetStaticPaths =
 	};
 
 const { article } = Astro.props;
-const { Content } = await article.render();
+const { Content } = await render(article);
 ---
 
 <Page title={`${article.data.title} | Blog`}>
