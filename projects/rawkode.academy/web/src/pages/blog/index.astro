@@ -1,6 +1,8 @@
 ---
-import Featured from "@/components/blog/featured/section.astro";
+import Featured from "@/components/blog/featured/Featured.astro";
 import Page from "@/wrappers/page.astro";
+
+export const prerender = true;
 ---
 
 <style>
@@ -10,12 +12,14 @@ import Page from "@/wrappers/page.astro";
 </style>
 
 <Page title="Blog">
-	<h1>Our Blog</h1>
+	<h1 class="text-5xl font-extrabold dark:text-white">Our Blog</h1>
+
 	<p class="text-gray-500 font-semibold sm:text-xl dark:text-gray-400">
 		We're a community of learners. We're always learning, and we're always
-		sharing what we're learning. Our blog is a place for us to share our thoughts, ideas, and
-		experiences.
+		sharing what we're learning. Our blog is a place for us to share our
+		thoughts, ideas, and experiences.
 	</p>
+
 	<p class="mt-8 font-light text-gray-500 dark:text-gray-400">
 		Want to share something you've recently learned? Awesome. Why not <a
 			target="_blank"
@@ -23,6 +27,6 @@ import Page from "@/wrappers/page.astro";
 			>submit a pull request</a
 		>?
 	</p>
+
 	<Featured />
-	<!-- <List /> -->
 </Page>
