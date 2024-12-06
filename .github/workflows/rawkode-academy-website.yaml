@@ -40,7 +40,7 @@ jobs:
           preCommands: |
             bun run build
       - name: comment-with-preview-url
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.review.state == 'approved'
         uses: thollander/actions-comment-pull-request@v3
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
