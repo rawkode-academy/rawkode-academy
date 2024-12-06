@@ -23,6 +23,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - shell: bash
+        working-directory: "projects/rawkode.academy/web"
+        run: source .env
       - name: deploy
         uses: cloudflare/wrangler-action@v3
         with:
@@ -33,7 +36,6 @@ jobs:
           command: pages deploy --project-name=rawkode-academy ./dist
           workingDirectory: "projects/rawkode.academy/web"
           preCommands: |
-            source .env
             bun run build
       - name: comment-with-preview-url
         if: github.event_name == 'pull_request'
