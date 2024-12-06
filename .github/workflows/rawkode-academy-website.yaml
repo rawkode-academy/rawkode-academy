@@ -1,0 +1,42 @@
+name: rawkode.academy/website/deploy
+
+on:
+  push:
+    paths:
+      - "projects/rawkode.academy/web/**"
+  schedule:
+    - cron: "12 4 * * *"
+
+permissions:
+   pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          packageManager: bun
+          command: pages deploy --project-name=rawkode-academy ./dist
+          workingDirectory: "projects/rawkode.academy/web"
+          preCommands: |
+            bun run build
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v3
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        with:
+          message: |
+            🚀 Your preview deployment can be viewed now:
+
+            $DEPLOYMENT_URL
