@@ -45,4 +45,4 @@ jobs:
           message: |
             🌐 Your preview deployment can be viewed now 🚀
 
-            ${{ steps.deploy.outputs.pages-deployment-url }}
+            ${{ steps.deploy.outputs.deployment-url }}
