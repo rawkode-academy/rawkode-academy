@@ -1,6 +1,7 @@
 name: rawkode.academy/website/deploy
 
 on:
+  workflow_dispatch: {}
   push:
     paths:
       - ".github/workflows/rawkode-academy-website.yaml"
