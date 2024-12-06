@@ -14,12 +14,12 @@ import {
 
 const menuItems = [
 	{ name: "Home", href: "/", icon: HomeIcon, current: true },
-	{
-		name: "Live",
-		href: "/live",
-		icon: FilmIcon,
-		current: false,
-	},
+	// {
+	// 	name: "Live",
+	// 	href: "/live",
+	// 	icon: FilmIcon,
+	// 	current: false,
+	// },
 	{ name: "Blog", href: "/blog", icon: NewspaperIcon, current: false },
 	// { name: 'Events', href: '/events', icon: CalendarDaysIcon, current: false },
 	// { name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
