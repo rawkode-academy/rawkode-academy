@@ -3,6 +3,7 @@ name: rawkode.academy/website/deploy
 on:
   push:
     paths:
+      - ".github/workflows/rawkode-academy-website.yaml"
       - "projects/rawkode.academy/web/**"
   schedule:
     - cron: "12 4 * * *"
