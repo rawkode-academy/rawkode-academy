@@ -11,6 +11,7 @@
   languages.typescript.enable = true;
 
   packages = with pkgs; [
+    bun
     nixfmt-rfc-style
   ];
 
