@@ -21,7 +21,7 @@ defineProps<{
 			id="userProfileButton" aria-expanded="false" data-dropdown-toggle="userProfileDropdown">
 			<span class="sr-only">Open user menu</span>
 			<img v-if="user.picture" class="w-8 h-8 rounded-full" :src="user.picture" alt="user photo" />
-			<Avatar v-else class="w-8 h-8 rounded-full" :name="user.name || ''" variant="pixel"/>
+			<Avatar v-else class="w-8 h-8 rounded-full" :name="user.name || ''" variant="pixel" />
 		</button>
 		<div
 			class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
@@ -32,14 +32,9 @@ defineProps<{
 			</div>
 			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
 				<li>
-					<a href="#"
-						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">My
-						Profile (Coming Soon)</a>
-				</li>
-				<li>
-					<a href="#"
-						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white">Account
-						Settings (Coming Soon)</a>
+					<a target="_blank" href="https://zitadel.rawkode.academy"
+						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">My
+						Profile</a>
 				</li>
 			</ul>
 			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
