@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize]
     paths:
-      - ".github/workflows/rawkode-academy-website.yaml"
+      - ".github/workflows/rawkode-academy-website-preview.yaml"
       - "projects/rawkode.academy/web/**"
 
 permissions:
@@ -45,4 +45,4 @@ jobs:
           message: |
             🌐 Your preview deployment can be viewed now 🚀
 
-            ${{ steps.deploy.outputs.pages-deployment-alias-url }}
+            ${{ steps.deploy.outputs.pages-deployment-url }}
