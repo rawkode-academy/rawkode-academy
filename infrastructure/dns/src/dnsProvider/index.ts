@@ -26,7 +26,7 @@ export enum Registrar {
 
 interface GSuiteConfig {
 	domainKey: string;
-	spfIncludes: string[];
+	spfIncludes?: string[];
 }
 
 interface Microsoft365Config {
@@ -500,8 +500,9 @@ export class ManagedDomain extends Construct {
 			"@",
 			`v=spf1 include:_spf.google.com ${
 				config.spfIncludes
-					.map((include) => `include:${include}`)
-					.join(" ")
+					? config.spfIncludes.map((include) => `include:${include}`)
+						.join(" ")
+					: ""
 			} -all`,
 		);
 
