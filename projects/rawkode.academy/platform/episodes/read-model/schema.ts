@@ -19,8 +19,8 @@ const builder = new schemaBuilder<PothosTypes>({
 });
 
 export const getSchema = (): GraphQLSchema => {
-	const contentRef = builder.externalRef(
-		'Content',
+	const videoRef = builder.externalRef(
+		'Video',
 		builder.selection<{ id: string }>('id'),
 	).implement({
 		externalFields: (t) => ({
@@ -34,9 +34,9 @@ export const getSchema = (): GraphQLSchema => {
 			code: t.exposeString('code'),
 			showId: t.exposeString('showId'),
 			content: t.field({
-				type: contentRef,
-				resolve: (episode) => ({
-					id: episode.contentId,
+				type: videoRef,
+				resolve: (video) => ({
+					id: video.contentId,
 				}),
 			}),
 		}),
