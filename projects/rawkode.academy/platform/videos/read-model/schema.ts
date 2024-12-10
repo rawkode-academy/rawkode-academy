@@ -19,8 +19,8 @@ const builder = new schemaBuilder<PothosTypes>({
 });
 
 export const getSchema = (): GraphQLSchema => {
-	const contentRef = builder.drizzleObject('contentTable', {
-		name: 'Content',
+	const videosRef = builder.drizzleObject('videosTable', {
+		name: 'Video',
 		fields: (t) => ({
 			id: t.exposeString('id'),
 			title: t.exposeString('title'),
@@ -29,18 +29,18 @@ export const getSchema = (): GraphQLSchema => {
 		}),
 	});
 
-	builder.asEntity(contentRef, {
+	builder.asEntity(videosRef, {
 		key: builder.selection<{ id: string }>('id'),
-		resolveReference: (content) =>
-			db.query.contentTable.findFirst({
-				where: eq(dataSchema.contentTable.id, content.id),
+		resolveReference: (video) =>
+			db.query.videosTable.findFirst({
+				where: eq(dataSchema.videosTable.id, video.id),
 			}).execute(),
 	});
 
 	builder.queryType({
 		fields: (t) => ({
-			contentByID: t.drizzleField({
-				type: contentRef,
+			videoByID: t.drizzleField({
+				type: videosRef,
 				args: {
 					id: t.arg({
 						type: 'String',
@@ -48,14 +48,14 @@ export const getSchema = (): GraphQLSchema => {
 					}),
 				},
 				resolve: (query, _root, args, _ctx) =>
-					db.query.contentTable.findFirst(query({
-						where: eq(dataSchema.contentTable.id, args.id),
+					db.query.videosTable.findFirst(query({
+						where: eq(dataSchema.videosTable.id, args.id),
 					})).execute(),
 			}),
-			allContent: t.drizzleField({
-				type: [contentRef],
+			allVideos: t.drizzleField({
+				type: [videosRef],
 				resolve: (query, _root, _args, _ctx) =>
-					db.query.contentTable.findMany(query({})).execute(),
+					db.query.videosTable.findMany(query({})).execute(),
 			}),
 		}),
 	});
