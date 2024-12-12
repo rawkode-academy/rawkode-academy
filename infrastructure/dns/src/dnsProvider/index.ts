@@ -31,7 +31,6 @@ interface GSuiteConfig {
 
 interface Microsoft365Config {
 	txtVerification?: string;
-	spfIncludes: string[];
 }
 
 interface ProtonMailConfig {
