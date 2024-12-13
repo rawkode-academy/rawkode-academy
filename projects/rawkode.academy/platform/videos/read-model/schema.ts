@@ -26,7 +26,11 @@ export const getSchema = (): GraphQLSchema => {
 			title: t.exposeString('title'),
 			subtitle: t.exposeString('subtitle'),
 			status: t.exposeString('status'),
-			thumbnail: t.string({
+			playlistUrl: t.string({
+				resolve: (video) =>
+					`https://videos.rawkode.academy/${video.id}/playlist.m3u8`,
+			}),
+			thumbnailUrl: t.string({
 				resolve: (video) =>
 					`https://videos.rawkode.academy/${video.id}/thumbnail.jpg`,
 			}),
