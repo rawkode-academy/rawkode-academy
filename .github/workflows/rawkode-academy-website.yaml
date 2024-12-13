@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - ".github/workflows/rawkode-academy-website.yaml"
-      - "projects/rawkode.academy/web/**"
+      - "projects/rawkode.academy/website/**"
   schedule:
     - cron: "12 4 * * *"
 
@@ -28,7 +28,7 @@ jobs:
         with:
           bun-version: latest
       - shell: bash
-        working-directory: "projects/rawkode.academy/web"
+        working-directory: "projects/rawkode.academy/website"
         run: source .env
       - name: deploy
         uses: cloudflare/wrangler-action@v3
@@ -38,6 +38,6 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           packageManager: bun
           command: pages deploy --project-name=rawkode-academy ./dist
-          workingDirectory: "projects/rawkode.academy/web"
+          workingDirectory: "projects/rawkode.academy/website"
           preCommands: |
             bun run build

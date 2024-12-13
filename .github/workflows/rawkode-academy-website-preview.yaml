@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
     paths:
       - ".github/workflows/rawkode-academy-website-preview.yaml"
-      - "projects/rawkode.academy/web/**"
+      - "projects/rawkode.academy/website/**"
 
 permissions:
    pull-requests: write
@@ -25,7 +25,7 @@ jobs:
         with:
           bun-version: latest
       - shell: bash
-        working-directory: "projects/rawkode.academy/web"
+        working-directory: "projects/rawkode.academy/website"
         run: source .env
       - id: deploy
         name: deploy
@@ -36,7 +36,7 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           packageManager: bun
           command: pages deploy --project-name=rawkode-academy ./dist
-          workingDirectory: "projects/rawkode.academy/web"
+          workingDirectory: "projects/rawkode.academy/website"
           preCommands: |
             bun run build
       - name: comment-with-preview-url
