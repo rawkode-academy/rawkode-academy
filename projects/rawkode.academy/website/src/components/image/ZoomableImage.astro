@@ -12,6 +12,6 @@ interface Props {
 const { image, alt } = Astro.props;
 ---
 
-<Zoom client:load>
+<Zoom client:only="react">
 	<Image src={image} alt={alt} />
 </Zoom>

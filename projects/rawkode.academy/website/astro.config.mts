@@ -16,11 +16,23 @@ export default defineConfig({
       themes: ["catppuccin-mocha", "catppuccin-latte"],
     }),
     mdx(),
-    react(),
+    react({ experimentalReactChildren: true }),
     sitemap(),
     tailwind(),
     vue(),
   ],
+  vite: {
+    resolve: {
+      // Use react-dom/server.edge instead of react-dom/server.browser for React 19.
+      // Without this, MessageChannel from node:worker_threads needs to be polyfilled.
+      // https://github.com/withastro/adapters/pull/436
+      alias: import.meta.env.PROD
+        ? {
+          "react-dom/server": "react-dom/server.edge",
+        }
+        : {},
+    },
+  },
   adapter: cloudflare({
     imageService: "cloudflare",
   }),
