@@ -4,18 +4,29 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
 import vue from "@astrojs/vue";
+import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
+import rehypeMermaid from "rehype-mermaid";
 
 export default defineConfig({
   output: "server",
-  integrations: [mdx(), react(), sitemap(), tailwind(), vue()],
+  integrations: [
+    expressiveCode({
+      themes: ["catppuccin-mocha", "catppuccin-latte"],
+    }),
+    mdx(),
+    react(),
+    sitemap(),
+    tailwind(),
+    vue(),
+  ],
   adapter: cloudflare({
     imageService: "cloudflare",
   }),
-  site: import.meta.env.DENO
-    ? "http://localhost:4321"
-    : "https://rawkode.academy",
+  site: import.meta.env.CF_PAGES_URL
+    ? import.meta.env.CF_PAGES_URL
+    : "http://localhost:4321",
   env: {
     validateSecrets: true,
     schema: {
@@ -34,6 +45,10 @@ export default defineConfig({
   },
   markdown: {
     rehypePlugins: [
+      [
+        rehypeMermaid,
+        { strategy: "img-svg" },
+      ],
       [
         rehypeExternalLinks,
         {
