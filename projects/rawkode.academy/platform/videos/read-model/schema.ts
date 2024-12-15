@@ -62,8 +62,22 @@ export const getSchema = (): GraphQLSchema => {
 			}),
 			allVideos: t.drizzleField({
 				type: [videosRef],
-				resolve: (query, _root, _args, _ctx) =>
-					db.query.videosTable.findMany(query({})).execute(),
+				args: {
+					limit: t.arg({
+						type: 'Int',
+						required: false,
+					}),
+					offset: t.arg({
+						type: 'Int',
+						required: false,
+					}),
+				},
+				resolve: (query, _root, args, _ctx) =>
+					db.query.videosTable.findMany(query({
+						limit: args.limit ?? 16,
+						offset: args.offset ?? 0,
+						orderBy: (video, { desc }) => desc(video.id),
+					})).execute(),
 			}),
 		}),
 	});
