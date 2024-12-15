@@ -26,7 +26,7 @@ export default defineConfig({
   }),
   site: import.meta.env.CF_PAGES_URL
     ? import.meta.env.CF_PAGES_URL
-    : "http://localhost:4321",
+    : "https://rawkode.academy",
   env: {
     validateSecrets: true,
     schema: {
