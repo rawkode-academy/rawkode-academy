@@ -6,27 +6,31 @@
     "prebuild": "just copy-wasm",
     "prestart": "just copy-wasm",
     "start": "astro dev",
-    "build": "astro check && astro build",
-    "format": "biome format --write src/",
+    "format": "deno fmt .",
+    "build": "deno fmt --check . && astro check && astro build",
     "test": "vitest run"
   },
   "dependencies": {
-    "@astrojs/check": "0.8.2",
+    "@astrojs/check": "0.9.4",
     "@resvg/resvg-wasm": "2.6.2",
-    "astro": "4.12.2",
+    "astro": "5.0.5",
     "js-sha256": "0.11.0",
-    "satori": "0.10.14",
+    "satori": "0.12.0",
     "satori-html": "0.3.2",
-    "typescript": "5.5.3",
+    "typescript": "5.7.2",
     "utf64": "1.0.3",
     "yoga-wasm-web": "0.3.3"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "11.0.1",
-    "@biomejs/biome": "1.8.3",
-    "vitest": "2.0.4"
+    "@astrojs/cloudflare": "12.1.0",
+    "@astrojs/ts-plugin": "1.10.4",
+    "deno": "2.1.4",
+    "vitest": "2.1.6"
   },
   "trustedDependencies": [
-    "@biomejs/biome"
+    "deno",
+    "esbuild",
+    "sharp",
+    "workerd"
   ]
 }
