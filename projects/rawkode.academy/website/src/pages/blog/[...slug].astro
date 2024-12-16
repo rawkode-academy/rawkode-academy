@@ -1,4 +1,5 @@
 ---
+import TableOfContents from "@/components/blog/TableOfContents.astro";
 import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -28,7 +29,7 @@ export const getStaticPaths: GetStaticPaths =
 	};
 
 const { article } = Astro.props;
-const { Content } = await render(article);
+const { Content, headings } = await render(article);
 const maybeSeries =
 	article.data.series && (await getEntry("series", article.data.series.id));
 ---
@@ -83,6 +84,8 @@ const maybeSeries =
 
 			{maybeSeries && <SeriesLink series={maybeSeries} />}
 		</header>
+
+		<TableOfContents headings={headings} />
 
 		<Content />
 	</article>

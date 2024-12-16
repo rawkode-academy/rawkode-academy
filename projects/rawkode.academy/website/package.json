@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "format": "biome format --write src/",
-    "build": "astro check && astro build",
+    "format": "deno fmt .",
+    "build": "deno fmt --check . && astro check && astro build",
     "preview": "astro preview",
     "codegen": "graphql-codegen --config graphql-codegen.ts",
     "postinstall": "playwright install chromium"
@@ -69,12 +69,14 @@
     "@graphql-codegen/client-preset": "4.5.1",
     "@graphql-codegen/introspection": "4.0.3",
     "@types/luxon": "3.4.2",
+    "deno": "2.1.4",
     "wrangler": "3.92.0"
   },
   "trigger.dev": {
     "endpointId": "rawkode-academy-Gpkz"
   },
   "trustedDependencies": [
+    "deno",
     "esbuild",
     "protobufjs",
     "sharp",
