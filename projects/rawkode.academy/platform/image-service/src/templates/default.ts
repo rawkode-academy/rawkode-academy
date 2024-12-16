@@ -2,19 +2,20 @@ import { createHash, type Template } from "@/lib/template";
 import { html } from "satori-html";
 
 export const template: Template = {
-	font: {
-		name: "Poppins",
-		weight: 400,
-		style: "normal",
-	},
+  font: {
+    name: "Poppins",
+    weight: 400,
+    style: "normal",
+  },
 
-	hash() {
-		// we call the render method with a stable input to calculate the hash
-		return createHash(this.render("comtrya"));
-	},
+  hash() {
+    // we call the render method with a stable input to calculate the hash
+    return createHash(this.render("comtrya"));
+  },
 
-	render(title) {
-		return html(`<div style="display: flex; flex-direction: column; height: 100%;">
+  render(title) {
+    return html(
+      `<div style="display: flex; flex-direction: column; height: 100%;">
 			<div
 				style="flex: 3; display: flex; align-items: center; justify-content: center; background: white; padding-left: 24rem; padding-right: 24rem;">
 				<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 559.671 143.20864">
@@ -32,6 +33,7 @@ export const template: Template = {
 					${title}
 				</p>
 			</div>
-		</div>`);
-	},
+		</div>`,
+    );
+  },
 };
