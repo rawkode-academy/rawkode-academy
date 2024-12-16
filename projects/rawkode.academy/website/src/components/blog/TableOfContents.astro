@@ -1,0 +1,23 @@
+---
+import type { MarkdownHeading } from "astro";
+
+type Props = {
+	headings: MarkdownHeading[];
+};
+
+const { headings } = Astro.props;
+
+// HINT: this is the best for the moment
+const levelTwoHeadings = headings.filter((heading) => heading.depth === 2)
+---
+
+<h2>Table of Contents</h2>
+<ul class="space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
+	{
+		levelTwoHeadings.map((heading) => (
+			<li>
+				<a href={`#${heading.slug}`}>{heading.text}</a>
+			</li>
+		))
+	}
+</ul>
