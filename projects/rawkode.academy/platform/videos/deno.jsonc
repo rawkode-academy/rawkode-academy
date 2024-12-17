@@ -22,7 +22,8 @@
 		"drizzle-kit": "npm:drizzle-kit@^0.28.1",
 		"drizzle-orm": "npm:drizzle-orm@^0.36.1",
 		"drizzle-zod": "npm:drizzle-zod@^0.5.1",
-		"graphql": "npm:graphql@^16.9.0",
+		"graphql": "npm:graphql@^16.10.0",
+		"graphql-scalars": "npm:graphql-scalars@^1.24.0",
 		"graphql-yoga": "npm:graphql-yoga@^5.10.3",
 		"zod": "npm:zod@^3.23.8",
 		"zx": "npm:zx@^8.2.2"

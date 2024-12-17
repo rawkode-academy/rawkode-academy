@@ -1,6 +1,6 @@
 import {
 	GetObjectCommand,
-	GetObjectCommandInput,
+	type GetObjectCommandInput,
 	ListObjectsV2Command,
 	S3Client,
 } from '@aws-sdk/client-s3';
@@ -78,6 +78,7 @@ interface Metadata {
 	title: string;
 	thumbnail: string;
 	description: string;
+	timestamp: number;
 	duration: number;
 	view_count: number;
 	like_count: number;
@@ -137,9 +138,15 @@ for (const directory of allDirectories.directories) {
 			title: cleanTitle,
 			subtitle: '',
 			status: 'published',
+			releasedAt: new Date(metadata.timestamp),
 		})
 		.onConflictDoUpdate({
 			target: videosTable.id,
-			set: { title: cleanTitle, subtitle: '', status: 'published' },
+			set: {
+				title: cleanTitle,
+				subtitle: '',
+				status: 'published',
+				releasedAt: new Date(metadata.timestamp),
+			},
 		});
 }
