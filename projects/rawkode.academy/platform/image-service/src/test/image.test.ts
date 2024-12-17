@@ -4,7 +4,7 @@ import * as utf64 from "utf64";
 
 const toArrayBuffer = async (
   data: typeof import("*?raw"),
-): Promise<ArrayBuffer> => {
+): Promise<ArrayBufferLike> => {
   const encoder = new TextEncoder();
   return encoder.encode(data.default).buffer;
 };
