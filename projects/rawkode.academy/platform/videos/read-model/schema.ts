@@ -4,11 +4,18 @@ import drizzlePlugin from '@pothos/plugin-drizzle';
 import federationPlugin from '@pothos/plugin-federation';
 import { eq } from 'drizzle-orm';
 import { type GraphQLSchema } from 'graphql';
+import { DateResolver } from 'graphql-scalars';
 import { db } from '../data-model/client.ts';
 import * as dataSchema from '../data-model/schema.ts';
 
 export interface PothosTypes {
 	DrizzleSchema: typeof dataSchema;
+	Scalars: {
+		Date: {
+			Input: Date;
+			Output: Date;
+		};
+	};
 }
 
 const builder = new schemaBuilder<PothosTypes>({
@@ -18,6 +25,8 @@ const builder = new schemaBuilder<PothosTypes>({
 	},
 });
 
+builder.addScalarType('Date', DateResolver);
+
 export const getSchema = (): GraphQLSchema => {
 	const videosRef = builder.drizzleObject('videosTable', {
 		name: 'Video',
@@ -25,7 +34,10 @@ export const getSchema = (): GraphQLSchema => {
 			id: t.exposeString('id'),
 			title: t.exposeString('title'),
 			subtitle: t.exposeString('subtitle'),
-			status: t.exposeString('status'),
+			releasedAt: t.field({
+				type: 'Date',
+				resolve: (video) => video.releasedAt,
+			}),
 			playlistUrl: t.string({
 				resolve: (video) =>
 					`https://videos.rawkode.academy/${video.id}/stream.m3u8`,
@@ -60,7 +72,7 @@ export const getSchema = (): GraphQLSchema => {
 						where: eq(dataSchema.videosTable.id, args.id),
 					})).execute(),
 			}),
-			allVideos: t.drizzleField({
+			getLatestVideos: t.drizzleField({
 				type: [videosRef],
 				args: {
 					limit: t.arg({
@@ -74,9 +86,9 @@ export const getSchema = (): GraphQLSchema => {
 				},
 				resolve: (query, _root, args, _ctx) =>
 					db.query.videosTable.findMany(query({
-						limit: args.limit ?? 16,
+						limit: args.limit ?? 15,
 						offset: args.offset ?? 0,
-						orderBy: (video, { desc }) => desc(video.id),
+						orderBy: (video, { desc }) => desc(video.releasedAt),
 					})).execute(),
 			}),
 		}),
