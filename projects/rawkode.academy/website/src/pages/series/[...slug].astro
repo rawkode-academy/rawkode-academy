@@ -2,6 +2,7 @@
 import SeriesArticles from "@/components/blog/series/SeriesArticles.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { getImage } from "astro:assets";
 import { getCollection, render, type CollectionEntry } from "astro:content";
 
 export const prerender = true;
@@ -9,6 +10,19 @@ export const prerender = true;
 type Props = {
 	series: CollectionEntry<"series">;
 };
+
+const computeImageUrl = async (
+	series: CollectionEntry<"series">
+): Promise<URL | undefined> => {
+	if (series.data.cover) {
+		const image = await getImage({ src: series.data.cover.image });
+
+		return new URL(image.src, Astro.site);
+	}
+
+	return undefined;
+};
+
 
 export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
@@ -28,9 +42,11 @@ export const getStaticPaths: GetStaticPaths =
 
 const { series } = Astro.props;
 const { Content } = await render(series);
+
+const imageUrl = await computeImageUrl(series);
 ---
 
-<Page title={`${series.data.title}`}>
+<Page title={`${series.data.title} | Series`} image={{image: imageUrl }}>
 	<h1 class="text-5xl font-extrabold dark:text-white">
 		{series.data.title}
 	</h1>

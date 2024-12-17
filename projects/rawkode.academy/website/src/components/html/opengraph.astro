@@ -6,7 +6,7 @@ interface Props extends OpenGraphProps {}
 
 const { title, description, image } = Astro.props;
 
-const ogImagePayload = image ?? { text: title, format: "png" };
+const ogImagePayload = image ? {...image, text: title, format: "png"} : { text: title, format: "png" };
 const ogDescription =
 	description ??
 	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
