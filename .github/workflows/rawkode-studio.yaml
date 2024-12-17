@@ -1,0 +1,43 @@
+name: rawkode.studio/deploy
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/rawkode-studio.yaml"
+      - "projects/rawkode.studio/**"
+  schedule:
+    - cron: "12 4 * * *"
+
+permissions:
+  pull-requests: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - shell: bash
+        working-directory: "projects/rawkode.studio"
+        run: source .env
+      - name: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          packageManager: bun
+          command: pages deploy --project-name=rawkode-studio ./dist
+          workingDirectory: "projects/rawkode.studio"
+          preCommands: |
+            bun run build
