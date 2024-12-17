@@ -2,7 +2,11 @@
 import TableOfContents from "@/components/blog/TableOfContents.astro";
 import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import type {
+	GetStaticPaths,
+	GetStaticPathsResult,
+} from "astro";
+import { getImage } from "astro:assets";
 import { getEntry } from "astro:content";
 import { getCollection, render, type CollectionEntry } from "astro:content";
 
@@ -10,6 +14,18 @@ export const prerender = true;
 
 type Props = {
 	article: CollectionEntry<"blog">;
+};
+
+const computeImageUrl = async (
+	article: CollectionEntry<"blog">
+): Promise<URL | undefined> => {
+	if (article.data.cover) {
+		const image = await getImage({ src: article.data.cover.image });
+
+		return new URL(image.src, Astro.site);
+	}
+
+	return undefined;
 };
 
 export const getStaticPaths: GetStaticPaths =
@@ -32,9 +48,11 @@ const { article } = Astro.props;
 const { Content, headings } = await render(article);
 const maybeSeries =
 	article.data.series && (await getEntry("series", article.data.series.id));
+
+const imageUrl = await computeImageUrl(article);
 ---
 
-<Page title={`${article.data.title} | Blog`}>
+<Page title={`${article.data.title} | Blog`} image={{ image: imageUrl }}>
 	<h1 class="text-5xl font-extrabold dark:text-white">
 		{article.data.title}
 	</h1>
