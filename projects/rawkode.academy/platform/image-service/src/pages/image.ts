@@ -12,7 +12,7 @@ import {
   type HashedTemplate,
   type Template,
 } from "@/lib/template";
-import * as utf64 from "utf64";
+import { getPayloadFromSearchParams } from "@/lib/payload";
 
 // Code is mostly taken from https://github.com/kvnang/workers-og
 
@@ -59,41 +59,6 @@ const loadTemplates = async () => {
   }
 };
 
-interface Payload {
-  format: "svg" | "png";
-  text: string;
-  template: string;
-}
-
-const DEFAULT_PAYLOAD: Payload = {
-  format: "svg",
-  text: "Hello, World!",
-  template: "default",
-};
-
-// Use https://github.com/more-please/more-stuff/tree/main/utf64 to decode the string
-const getPayloadFromSearchParams = (searchParams: URLSearchParams): Payload => {
-  const payloadFromSearchParams = searchParams.get("payload");
-
-  if (payloadFromSearchParams !== null) {
-    const decodedPayload = utf64.decode(payloadFromSearchParams);
-
-    try {
-      const payload: Partial<Payload> = JSON.parse(decodedPayload);
-
-      return {
-        format: payload.format ?? "svg",
-        text: payload.text ?? "Hello, World!",
-        template: payload.template ?? "default",
-      };
-    } catch (error) {
-      return DEFAULT_PAYLOAD;
-    }
-  }
-
-  return DEFAULT_PAYLOAD;
-};
-
 // cache for one day
 // When changing to higher caching times, consider adding "immutable, no-transform"
 
@@ -107,7 +72,7 @@ export const GET: APIRoute = async ({ request }) => {
 
   const hashedTemplate = templates[payload.template] ?? DEFAULT_HASHED_TEMPLATE;
   const template = hashedTemplate.template;
-  const content = template.render(payload.text);
+  const content = template.render(payload);
 
   const svg = await satori(content, {
     width: 1200,

@@ -1,6 +1,7 @@
 import type { FontStyle, FontWeight } from "satori";
 import { html } from "satori-html";
 import { sha256 } from "js-sha256";
+import { DEFAULT_PAYLOAD, type Payload } from "./payload";
 
 // redefine type from "satori-html", because it is not exported
 export interface VNode {
@@ -27,7 +28,7 @@ export const DEFAULT_FONT: Font = {
 export interface Template {
   font: Font;
   hash: () => string;
-  render: (title: string) => VNode;
+  render: (payload: Payload) => VNode;
 }
 
 export interface HashedTemplate {
@@ -50,11 +51,11 @@ export const DEFAULT_TEMPLATE: Template = {
 
   hash() {
     // we call the render method with a stable input to calculate the hash
-    return createHash(this.render("comtrya"));
+    return createHash(this.render(DEFAULT_PAYLOAD));
   },
 
-  render(title) {
-    return html`<div>${title}</div>`;
+  render(payload: Payload) {
+    return html`<div>${payload.text}</div>`;
   },
 };
 
