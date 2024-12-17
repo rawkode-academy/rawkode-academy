@@ -3,6 +3,7 @@
 	"imports": {
 		"@apollo/server": "npm:@apollo/server@^4.11.2",
 		"@apollo/subgraph": "npm:@apollo/subgraph@^2.9.3",
+		"@aws-sdk/client-s3": "npm:@aws-sdk/client-s3@^3.714.0",
 		"@fastly/js-compute": "npm:@fastly/js-compute@^3.28.0",
 		"@graphql-tools/utils": "npm:@graphql-tools/utils@^10.6.2",
 		"@graphql-yoga/plugin-jwt": "npm:@graphql-yoga/plugin-jwt@^3.4.4",
@@ -22,7 +23,7 @@
 		"drizzle-zod": "npm:drizzle-zod@^0.5.1",
 		"graphql": "npm:graphql@^16.9.0",
 		"graphql-yoga": "npm:graphql-yoga@^5.10.4",
-		"zod": "npm:zod@^3.24.1",
+		"zod": "npm:zod@^3.23.8",
 		"zx": "npm:zx@^8.2.4"
 	},
 	"compilerOptions": {
