@@ -1,0 +1,25 @@
+{
+  "name": "rawkode.studio",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "format": "deno fmt .",
+    "build": "deno fmt --check . && astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "astro": "5.0.9",
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "deno": "2.1.4"
+  },
+  "trustedDependencies": [
+    "deno",
+    "esbuild",
+    "sharp"
+  ]
+}
