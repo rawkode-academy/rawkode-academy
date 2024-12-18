@@ -1,15 +1,32 @@
+import { useSentry } from "@envelop/sentry";
 import {
   createRemoteJwksSigningKeyProvider,
   extractFromHeader,
   useJWT,
 } from "@graphql-yoga/plugin-jwt";
+import * as Sentry from "@sentry/deno";
+import "@sentry/tracing";
 import { createYoga } from "graphql-yoga";
 import { getSchema } from "./schema.ts";
 
+if (Deno.env.get("SENTRY_DSN")) {
+  Sentry.init({
+    dsn: Deno.env.get("SENTRY_DSN"),
+    environment: "production",
+    tracesSampleRate: 1.0,
+  });
+
+  console.debug("Sentry is enabled");
+}
+
 const yoga = createYoga({
-	schema: getSchema(),
-	graphqlEndpoint: "/",
+  schema: getSchema(),
+  graphqlEndpoint: "/",
   plugins: [
+    useSentry({
+      includeRawResult: false,
+      includeExecuteVariables: true,
+    }),
     useJWT({
       singingKeyProviders: [
         createRemoteJwksSigningKeyProvider({
