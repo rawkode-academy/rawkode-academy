@@ -64,7 +64,7 @@ videoRef.implement({
 					personId: dataSchema.castingCreditsTable.personId,
 				}).from(dataSchema.castingCreditsTable).where(
 					and(
-						eq(dataSchema.castingCreditsTable.contentId, video.id),
+						eq(dataSchema.castingCreditsTable.videoId, video.id),
 						eq(dataSchema.castingCreditsTable.role, args.role),
 					),
 				),

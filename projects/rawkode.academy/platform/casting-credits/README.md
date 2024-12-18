@@ -38,7 +38,7 @@ deno lint
 export LIBSQL_URL="https://${SERVICE_NAME}-${LIBSQL_BASE_URL}"
 export LIBSQL_TOKEN="op://sa.rawkode.academy/turso/platform-group/api-token"
 
-op run -- deno --allow-all data-model/migrate.ts
+(cd data-model && op run -- deno --allow-all migrate.ts)
 ```
 
 ### Read Model

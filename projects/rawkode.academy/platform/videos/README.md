@@ -40,11 +40,11 @@ deno lint
 
 ### Data Model
 
-```sh {"name": "migrate-production"}
+```sh {"name":"production-migrate"}
 export LIBSQL_URL="https://${SERVICE_NAME}-${LIBSQL_BASE_URL}"
 export LIBSQL_TOKEN="op://sa.rawkode.academy/turso/platform-group/api-token"
 
-op run -- deno --allow-all data-model/migrate.ts
+(cd data-model && op run -- deno --allow-all migrate.ts)
 ```
 
 ### Read Model
@@ -52,41 +52,19 @@ op run -- deno --allow-all data-model/migrate.ts
 ```sh {"name":"deploy-read-model"}
 epoch=$(date +%s)
 
-podman image build --target=read-model --tag europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/videos-read:${epoch} .
-podman image push europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/videos-read:${epoch}
+podman image build --target=read-model --tag europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch} .
+podman image push europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch}
 
-gcloud run deploy videos-read \
-      --image=europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/videos-read:${epoch} \
+gcloud run deploy ${SERVICE_NAME}-read \
+      --image=europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch} \
       --region=europe-west2 \
       --use-http2 \
       --allow-unauthenticated \
       --cpu="1" --memory="512Mi" \
       --cpu-boost \
-      --set-env-vars="SERVICE_NAME=videos,LIBSQL_BASE_URL=rawkodeacademy.turso.io" \
-      --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest"
+      --set-env-vars="SERVICE_NAME=${SERVICE_NAME},LIBSQL_BASE_URL=rawkodeacademy.turso.io" \
+      --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest,SENTRY_DSN=${SERVICE_NAME}-read-sentry-dsn:latest"
 
 deno run --allow-all read-model/publish.ts
-bunx wgc subgraph publish videos --namespace production --schema ./read-model/schema.gql --routing-url https://videos-read-458678766461.europe-west2.run.app
-```
-
-### Write Model
-
-```sh {"name":"deploy-write-model"}
-epoch=$(date +%s)
-
-podman image build --target=write-model --tag europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/videos-write:${epoch} .
-podman image push europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/videos-write:${epoch}
-
-gcloud run deploy videos-write \
-      --image=europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/videos-write:${epoch} \
-      --tag v${epoch} \
-      --region=europe-west2 \
-      --use-http2 \
-      --allow-unauthenticated \
-      --cpu="1" --memory="512Mi" \
-      --cpu-boost \
-      --set-env-vars="SERVICE_NAME=videos,LIBSQL_BASE_URL=rawkodeacademy.turso.io" \
-      --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest,RESTATE_IDENTITY_KEY=restate-identity-key:latest"
-
-deno run -A --no-config 'npm:@restatedev/restate' deployments register https://v${epoch}---videos-write-wlnfqm3bkq-nw.a.run.app
+bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql --routing-url https://${SERVICE_NAME}-read-458678766461.europe-west2.run.app
 ```

@@ -5,5 +5,5 @@ import { z } from 'zod';
 export const AddCastingCredit = createInsertSchema(castingCreditsTable, {
 	personId: z.string().min(1),
 	role: z.string().min(1),
-	contentId: z.string().min(1),
+	videoId: z.string().min(1),
 });

@@ -7,8 +7,9 @@ const seed = async () => {
 		.values({
 			title: 'Window of Opportunity',
 			subtitle: 'The team is stuck in a time loop.',
-			status: 'draft',
-			releasedAt: new Date(),
+			description: 'The team is stuck in a time loop.',
+			publishedAt: new Date(),
+			duration: 360,
 		})
 		.returning()
 		.all();
