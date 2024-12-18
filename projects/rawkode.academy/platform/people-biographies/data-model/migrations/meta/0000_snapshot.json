@@ -1,28 +1,21 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f6d13033-a2b4-4441-b9e8-3be39f8fa5a1",
+  "id": "a5072d46-554e-4720-885f-6075bcceeb93",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "people": {
-      "name": "people",
+    "people_biographies": {
+      "name": "people_biographies",
       "columns": {
-        "id": {
-          "name": "id",
+        "person_id": {
+          "name": "person_id",
           "type": "text",
           "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
-        "forename": {
-          "name": "forename",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "surname": {
-          "name": "surname",
+        "biography": {
+          "name": "biography",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

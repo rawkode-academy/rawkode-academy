@@ -43,9 +43,6 @@ export const getSchema = (): GraphQLSchema => {
 			id: t.exposeString("id"),
 			forename: t.exposeString("forename"),
 			surname: t.exposeString("surname"),
-			email: t.exposeString("email", {
-				requiresScopes: [["system"]],
-			}),
 		}),
 	});
 
