@@ -2,7 +2,7 @@ import schemaBuilder from '@pothos/core';
 import directivesPlugin from '@pothos/plugin-directives';
 import drizzlePlugin from '@pothos/plugin-drizzle';
 import federationPlugin from '@pothos/plugin-federation';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { type GraphQLSchema } from 'graphql';
 import { db } from '../data-model/client.ts';
 import * as dataSchema from '../data-model/schema.ts';
@@ -12,16 +12,23 @@ export interface PothosTypes {
 }
 
 const builder = new schemaBuilder<PothosTypes>({
-	plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
+	plugins: [
+		directivesPlugin,
+		drizzlePlugin,
+		federationPlugin,
+	],
 	drizzle: {
 		client: db,
 	},
 });
 
-const chapterRef = builder.drizzleObject('chaptersTable', {
-	name: 'Chapter',
+interface Chapter {
+	startTime: number;
+	title: string;
+}
+
+const chapterRef = builder.objectRef<Chapter>('Chapter').implement({
 	fields: (t) => ({
-		videoId: t.exposeString('videoId'),
 		startTime: t.exposeInt('startTime'),
 		title: t.exposeString('title'),
 	}),
@@ -38,7 +45,11 @@ builder.externalRef(
 		chapters: t.field({
 			type: [chapterRef],
 			resolve: (video) =>
-				db.select().from(dataSchema.chaptersTable).where(
+				db.select({
+					videoId: dataSchema.chaptersTable.videoId,
+					startTime: dataSchema.chaptersTable.startTime,
+					title: dataSchema.chaptersTable.title,
+				}).from(dataSchema.chaptersTable).where(
 					eq(dataSchema.chaptersTable.videoId, video.id),
 				).orderBy(asc(dataSchema.chaptersTable.startTime)),
 		}),

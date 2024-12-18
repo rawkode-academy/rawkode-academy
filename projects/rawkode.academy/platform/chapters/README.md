@@ -57,7 +57,7 @@ gcloud run deploy chapters-read \
       --cpu="1" --memory="512Mi" \
       --cpu-boost \
       --set-env-vars="SERVICE_NAME=chapters,LIBSQL_BASE_URL=rawkodeacademy.turso.io" \
-      --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest"
+      --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest,SENTRY_DSN=chapters-read-sentry-dsn:latest"
 
 deno run --allow-all read-model/publish.ts
 bunx wgc subgraph publish chapters --namespace production --schema ./read-model/schema.gql --routing-url https://chapters-read-458678766461.europe-west2.run.app
