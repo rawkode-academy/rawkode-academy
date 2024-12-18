@@ -1,20 +1,13 @@
 {
-	"version": "7",
-	"dialect": "sqlite",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "6",
-			"when": 1733856771916,
-			"tag": "0000_perfect_bloodstorm",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "6",
-			"when": 1734470828210,
-			"tag": "0001_little_sunspot",
-			"breakpoints": true
-		}
-	]
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1734560161845,
+      "tag": "0000_chilly_sentry",
+      "breakpoints": true
+    }
+  ]
 }

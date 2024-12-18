@@ -60,7 +60,7 @@ gcloud run deploy ${SERVICE_NAME}-read \
       --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest,SENTRY_DSN=${SERVICE_NAME}-read-sentry-dsn:latest"
 
 deno run --allow-all read-model/publish.ts
-bunx wgc subgraph publish chapters --namespace production --schema ./read-model/schema.gql --routing-url https://chapters-read-458678766461.europe-west2.run.app
+bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql --routing-url https://${SERVICE_NAME}-read-458678766461.europe-west2.run.app
 ```
 
 ### Write Model

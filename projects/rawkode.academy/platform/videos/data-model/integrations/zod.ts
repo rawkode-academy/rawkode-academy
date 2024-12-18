@@ -2,9 +2,10 @@ import { videosTable } from '../schema.ts';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-export const CreateVideos = createInsertSchema(videosTable, {
-	title: z.string().min(1),
-	subtitle: z.string().min(1),
-	status: z.enum(['draft', 'published']).default('draft'),
-	releasedAt: z.date(),
+export const CreateVideo = createInsertSchema(videosTable, {
+	title: z.string().nonempty(),
+	subtitle: z.string().nonempty(),
+	description: z.string().nonempty(),
+	duration: z.number().positive(),
+	publishedAt: z.date(),
 });

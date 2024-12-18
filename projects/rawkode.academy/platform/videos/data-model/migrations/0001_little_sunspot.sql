@@ -1,1 +1,0 @@
-ALTER TABLE `videos` ADD `releasedAt` integer NOT NULL;

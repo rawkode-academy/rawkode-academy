@@ -7,6 +7,7 @@ import {
 import { existsSync } from '@std/fs';
 import { db } from './data-model/client.ts';
 import { videosTable } from './data-model/schema.ts';
+import moment from 'moment';
 
 const cloudflareR2 = {
 	accountId: '0aeb879de8e3cdde5fb3d413025222ce',
@@ -137,16 +138,18 @@ for (const directory of allDirectories.directories) {
 			id: dirName,
 			title: cleanTitle,
 			subtitle: '',
-			status: 'published',
-			releasedAt: new Date(metadata.timestamp),
+			description: metadata.description,
+			duration: metadata.duration,
+			publishedAt: new Date(metadata.timestamp),
 		})
 		.onConflictDoUpdate({
 			target: videosTable.id,
 			set: {
 				title: cleanTitle,
 				subtitle: '',
-				status: 'published',
-				releasedAt: new Date(metadata.timestamp),
+				description: metadata.description,
+				duration: metadata.duration,
+				publishedAt: new Date(metadata.timestamp),
 			},
 		});
 }

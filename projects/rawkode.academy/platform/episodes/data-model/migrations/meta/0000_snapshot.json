@@ -1,12 +1,19 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "82e47ded-5592-45eb-9683-a1bfcc8cfc50",
+  "id": "4d78139d-a7ac-4efc-9a8b-1d6b332d523e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "episodes": {
       "name": "episodes",
       "columns": {
+        "videoId": {
+          "name": "videoId",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
         "showId": {
           "name": "showId",
           "type": "text",
@@ -20,26 +27,20 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "contentId": {
-          "name": "contentId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "episodes_showId_code_pk": {
+      "indexes": {
+        "showCode": {
+          "name": "showCode",
           "columns": [
             "showId",
             "code"
           ],
-          "name": "episodes_showId_code_pk"
+          "isUnique": true
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
     }

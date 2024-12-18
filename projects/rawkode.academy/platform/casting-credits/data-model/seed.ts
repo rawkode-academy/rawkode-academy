@@ -7,7 +7,7 @@ const seed = async () => {
 		.values({
 			personId: 'rawkode',
 			role: 'Host',
-			contentId: 'abc123',
+			videoId: 'abc123',
 		})
 		.returning()
 		.all();

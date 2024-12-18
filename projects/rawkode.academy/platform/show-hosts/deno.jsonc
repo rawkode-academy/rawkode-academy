@@ -3,6 +3,7 @@
 	"imports": {
 		"@apollo/server": "npm:@apollo/server@^4.11.0",
 		"@apollo/subgraph": "npm:@apollo/subgraph@^2.9.2",
+		"@envelop/sentry": "npm:@envelop/sentry@^12.0.0",
 		"@fastly/js-compute": "npm:@fastly/js-compute@^3.27.2",
 		"@graphql-tools/utils": "npm:@graphql-tools/utils@^10.6.1",
 		"@graphql-yoga/plugin-jwt": "npm:@graphql-yoga/plugin-jwt@^3.4.1",
@@ -12,6 +13,8 @@
 		"@pothos/plugin-drizzle": "npm:@pothos/plugin-drizzle@^0.5.1",
 		"@pothos/plugin-federation": "npm:@pothos/plugin-federation@^4.2.0",
 		"@restatedev/restate-sdk": "npm:@restatedev/restate-sdk@^1.4.0",
+		"@sentry/deno": "npm:@sentry/deno@^8.47.0",
+		"@sentry/tracing": "npm:@sentry/tracing@^7.114.0",
 		"@sindresorhus/slugify": "npm:@sindresorhus/slugify@^2.2.1",
 		"@std/assert": "jsr:@std/assert@1",
 		"@std/fs": "jsr:@std/fs@^1.0.5",

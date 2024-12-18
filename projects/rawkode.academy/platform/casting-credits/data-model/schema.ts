@@ -5,11 +5,11 @@ export const castingCreditsTable = sqliteTable(
 	{
 		personId: text('person_id').notNull(),
 		role: text('role').notNull(),
-		contentId: text('content_id').notNull(),
+		videoId: text('video_id').notNull(),
 	},
 	(table) => ({
 		primaryKey: primaryKey({
-			columns: [table.personId, table.role, table.contentId],
+			columns: [table.personId, table.role, table.videoId],
 		}),
 	}),
 );

@@ -2,7 +2,7 @@ import schemaBuilder from '@pothos/core';
 import directivesPlugin from '@pothos/plugin-directives';
 import drizzlePlugin from '@pothos/plugin-drizzle';
 import federationPlugin from '@pothos/plugin-federation';
-import { and, asc, eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import { type GraphQLSchema } from 'graphql';
 import { db } from '../data-model/client.ts';
 import * as dataSchema from '../data-model/schema.ts';
@@ -46,7 +46,7 @@ builder.externalRef(
 			type: [chapterRef],
 			resolve: (video) =>
 				db.select({
-					videoId: dataSchema.chaptersTable.videoId,
+					contentId: dataSchema.chaptersTable.videoId,
 					startTime: dataSchema.chaptersTable.startTime,
 					title: dataSchema.chaptersTable.title,
 				}).from(dataSchema.chaptersTable).where(
