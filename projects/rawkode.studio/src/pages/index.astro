@@ -1,5 +1,14 @@
 ---
+import Auth from "@/components/Auth.astro";
+import Layout from "@/layouts/Layout.astro";
 
+const { user } = Astro.locals;
 ---
 
-rawkode.studio
+<Layout title="rawkode.studio">
+	<h1 class="text-5xl font-extrabold dark:text-white">rawkode.studio</h1>
+
+	<Auth server:defer />
+
+	<p class="text-gray-500 dark:text-gray-400">{JSON.stringify(user)}</p>
+</Layout>
