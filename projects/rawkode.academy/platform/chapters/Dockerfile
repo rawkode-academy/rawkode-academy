@@ -2,7 +2,7 @@ FROM docker.io/denoland/deno:2.1.1 AS base
 
 WORKDIR /app
 
-COPY deno.jsonc deno.lock .
+COPY deno.jsonc deno.lock ./
 RUN deno install
 
 COPY ./data-model data-model
