@@ -34,13 +34,13 @@ defineProps<{ user: OidcStandardClaimsWithRoles | undefined }>();
 	>
 		<div class="py-3 px-4">
 			<span class="block text-sm font-semibold text-gray-900 dark:text-white">
-				Neil sims
+				{{ user.name }}
 			</span>
 
 			<span
 				class="block text-sm font-light text-gray-500 truncate dark:text-gray-400"
 			>
-				name@flowbite.com
+				{{ user.email }}
 			</span>
 		</div>
 
