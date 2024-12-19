@@ -66,9 +66,7 @@ export class Zitadel {
   }
 
   public async fetchUser(
-    _accessToken: string,
     idToken: string | undefined,
-    _refreshToken: string | undefined,
   ): Promise<OidcStandardClaimsWithRoles | undefined> {
     if (!idToken) {
       return undefined;

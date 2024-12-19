@@ -48,12 +48,9 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
   }
 
   const idToken = context.cookies.get("idToken")?.value;
-  const refreshToken = context.cookies.get("refreshToken")?.value;
 
   const user = await zitadel.fetchUser(
-    accessToken.value,
     idToken,
-    refreshToken,
   );
 
   if (!user) {
@@ -69,7 +66,8 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
 export const secureRoutesMiddleware = defineMiddleware(
   async (context, next) => {
     if (isAdminRoute(context.request)) {
-      const user = context.locals.user;
+      const idToken = context.cookies.get("idToken")?.value;
+      const user = await zitadel.fetchUser(idToken);
 
       if (!user) {
         return context.redirect("/");

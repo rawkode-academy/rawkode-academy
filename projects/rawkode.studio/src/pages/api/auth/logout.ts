@@ -11,13 +11,6 @@ export const GET: APIRoute = ({ cookies, redirect }) => {
     sameSite: "strict",
   });
 
-  cookies.delete("refreshToken", {
-    secure: import.meta.env.MODE === "production",
-    httpOnly: true,
-    path: "/",
-    sameSite: "strict",
-  });
-
   cookies.delete("accessToken", {
     secure: import.meta.env.MODE === "production",
     httpOnly: true,
