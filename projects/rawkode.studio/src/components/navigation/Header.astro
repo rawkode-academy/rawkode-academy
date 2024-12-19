@@ -1,0 +1,24 @@
+---
+import Logo from "./Logo.astro";
+import Menu from "./Menu.astro";
+import ProfileMenu from "./ProfileMenu.astro";
+
+// https://flowbite.com/blocks/marketing/header/#header-with-user-dropdown
+---
+
+<header>
+	<nav class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800">
+		<div
+			class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl"
+		>
+			<Logo />
+
+			<div class="flex items-center lg:order-2">
+				<!-- TODO: DarkModeToggle /-->
+				<ProfileMenu server:defer />
+			</div>
+
+			<Menu />
+		</div>
+	</nav>
+</header>

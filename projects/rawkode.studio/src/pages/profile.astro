@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+const { user } = Astro.locals;
+---
+
+<Layout title="rawkode.studio">
+	<h2 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+		Roles:
+	</h2>
+
+	<ul
+		class="max-w-md space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400"
+	>
+		{user?.roles.map((role) => <li>{role}</li>)}
+	</ul>
+</Layout>

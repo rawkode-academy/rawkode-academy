@@ -25,7 +25,7 @@ const precomputePathRegex = (patterns: Array<string | RegExp>) => {
   ) => (pattern instanceof RegExp ? pattern : pathToRegexp(pattern)));
 };
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isAdminRoute = createRouteMatcher(["/admin(.*)", "/profile(.*)"]);
 
 const zitadel = new Zitadel();
 
