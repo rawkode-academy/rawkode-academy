@@ -5,6 +5,8 @@ import cloudflare from "@astrojs/cloudflare";
 
 import tailwind from "@astrojs/tailwind";
 
+import vue from "@astrojs/vue";
+
 const site = (): string => {
   if (import.meta.env.CF_PAGES_URL) {
     return import.meta.env.CF_PAGES_URL;
@@ -39,5 +41,5 @@ export default defineConfig({
     checkOrigin: true,
   },
 
-  integrations: [tailwind()],
+  integrations: [tailwind(), vue()],
 });
