@@ -10,14 +10,10 @@ export const GET: APIRoute = ({ cookies, redirect }) => {
   const state = generateState();
   const codeVerifier = generateCodeVerifier();
 
-  console.log(`State Set: ${state}`);
-  console.log(`Code Verifier Set: ${codeVerifier}`);
-
-  const authorizationURL = zitadel.createAuthorizationURL(state, codeVerifier, [
-    "openid",
-    "profile",
-    "email",
-  ]);
+  const authorizationURL = zitadel.createAuthorizationURL(
+    state,
+    codeVerifier,
+  );
 
   cookies.set("state", state, {
     secure: false,

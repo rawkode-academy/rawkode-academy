@@ -4,6 +4,20 @@ import { ZITADEL_CLIENT_ID, ZITADEL_URL } from "astro:env/server";
 export const prerender = false;
 
 export const GET: APIRoute = ({ cookies, redirect }) => {
+  cookies.delete("idToken", {
+    secure: import.meta.env.MODE === "production",
+    httpOnly: true,
+    path: "/",
+    sameSite: "strict",
+  });
+
+  cookies.delete("refreshToken", {
+    secure: import.meta.env.MODE === "production",
+    httpOnly: true,
+    path: "/",
+    sameSite: "strict",
+  });
+
   cookies.delete("accessToken", {
     secure: import.meta.env.MODE === "production",
     httpOnly: true,

@@ -1,10 +1,10 @@
-import type { OidcStandardClaims } from "oidc-client-ts";
+import type { OidcStandardClaimsWithRoles } from "./lib/security";
 
 /// <reference types="astro/client" />
 declare global {
   namespace App {
     interface Locals {
-      user: OidcStandardClaims;
+      user?: OidcStandardClaimsWithRoles;
     }
   }
 }
