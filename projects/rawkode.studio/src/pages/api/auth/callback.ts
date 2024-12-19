@@ -39,9 +39,6 @@ export const GET: APIRoute = async (
     });
   }
 
-  console.log(cookieState.value);
-  console.log(cookieCodeVerifier.value);
-
   const zitadel = new Zitadel();
 
   let tokens = undefined;
@@ -51,7 +48,7 @@ export const GET: APIRoute = async (
       cookieCodeVerifier.value,
     );
   } catch (e) {
-    console.log(e);
+    console.error(e);
 
     return new Response(null, {
       status: 500,
