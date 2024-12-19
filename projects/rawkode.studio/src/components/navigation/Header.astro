@@ -1,7 +1,6 @@
 ---
 import Logo from "./Logo.astro";
-import Menu from "./Menu.astro";
-import ProfileMenu from "./ProfileMenu.astro";
+import MenuWithProfile from "./MenuWithProfile.astro";
 
 // https://flowbite.com/blocks/marketing/header/#header-with-user-dropdown
 ---
@@ -13,11 +12,7 @@ import ProfileMenu from "./ProfileMenu.astro";
 		>
 			<Logo />
 
-			<div class="flex items-center lg:order-2">
-				<ProfileMenu />
-			</div>
-
-			<Menu />
+			<MenuWithProfile server:defer />
 		</div>
 	</nav>
 </header>

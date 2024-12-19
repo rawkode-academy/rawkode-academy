@@ -1,13 +1,11 @@
 ---
-import type { OidcStandardClaimsWithRoles } from "@/lib/security";
+import type { OidcStandardClaimsWithRoles } from '@/lib/security'
 
 type Props = {
-	user: OidcStandardClaimsWithRoles | undefined;
-};
-
-const { user } = Astro.props;
+	user: OidcStandardClaimsWithRoles | undefined
+}
+const {user} = Astro.props;
 ---
-
 {
 	user ? (
 		<div>
