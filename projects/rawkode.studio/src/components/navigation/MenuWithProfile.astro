@@ -1,18 +1,12 @@
 ---
-import LoginLogoutButton from "@/components/navigation/LoginLogoutButton.astro";
-import Menu from "@/components/navigation/Menu.astro";
-import MenuOpenButton from "@/components/navigation/MenuOpenButton.astro";
-import ProfileButton from "@/components/navigation/ProfileButton.astro";
-import ProfileDropdown from "@/components/navigation/ProfileDropdown.astro";
+import Menu from "./Menu.astro";
+import Profile from "./profile/Profile.vue";
 
 const { user } = Astro.locals;
 ---
 
 <div class="flex items-center lg:order-2">
-	<ProfileButton user={user} />
-	<ProfileDropdown user={user} />
-	<LoginLogoutButton user={user} />
-	<MenuOpenButton />
+	<Profile client:only="vue" user={user} />
 </div>
 
 <Menu />
