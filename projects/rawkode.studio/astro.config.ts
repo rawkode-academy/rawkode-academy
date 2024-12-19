@@ -6,38 +6,38 @@ import cloudflare from "@astrojs/cloudflare";
 import tailwind from "@astrojs/tailwind";
 
 const site = (): string => {
-	if (import.meta.env.CF_PAGES_URL) {
-		return import.meta.env.CF_PAGES_URL;
-	}
+  if (import.meta.env.CF_PAGES_URL) {
+    return import.meta.env.CF_PAGES_URL;
+  }
 
-	if (import.meta.env.DEV) {
-		return "http://localhost:4321";
-	}
+  if (import.meta.env.DEV) {
+    return "http://localhost:4321";
+  }
 
-	return "https://rawkode.studio";
+  return "https://rawkode.studio";
 };
 
 // https://astro.build/config
 export default defineConfig({
-	output: "server",
-	adapter: cloudflare({}),
+  output: "server",
+  adapter: cloudflare({}),
 
-	site: site(),
+  site: site(),
 
-	env: {
-		validateSecrets: true,
-		schema: {
-			ZITADEL_URL: envField.string({ context: "server", access: "public" }),
-			ZITADEL_CLIENT_ID: envField.string({
-				context: "server",
-				access: "public",
-			}),
-		},
-	},
+  env: {
+    validateSecrets: true,
+    schema: {
+      ZITADEL_URL: envField.string({ context: "server", access: "public" }),
+      ZITADEL_CLIENT_ID: envField.string({
+        context: "server",
+        access: "public",
+      }),
+    },
+  },
 
-	security: {
-		checkOrigin: true,
-	},
+  security: {
+    checkOrigin: true,
+  },
 
-	integrations: [tailwind()],
+  integrations: [tailwind()],
 });
