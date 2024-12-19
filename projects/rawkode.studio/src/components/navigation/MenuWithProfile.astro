@@ -1,22 +1,18 @@
 ---
-import ProfileButton from "./ProfileButton.astro";
-import ProfileDropdown from "./ProfileDropdown.astro";
-import LoginLogoutButton from "./LoginLogoutButton.astro";
-import Menu from "./Menu.astro";
-import MenuOpenButton from "./MenuOpenButton.astro";
+import LoginLogoutButton from "@/components/navigation/LoginLogoutButton.astro";
+import Menu from "@/components/navigation/Menu.astro";
+import MenuOpenButton from "@/components/navigation/MenuOpenButton.astro";
+import ProfileButton from "@/components/navigation/ProfileButton.astro";
+import ProfileDropdown from "@/components/navigation/ProfileDropdown.astro";
 
 const { user } = Astro.locals;
 ---
 
 <div class="flex items-center lg:order-2">
-	<ProfileButton user={user} client:load />
-	<ProfileDropdown user={user} client:load />
-	<LoginLogoutButton user={user} client:load />
-	<MenuOpenButton client:load />
+	<ProfileButton user={user} />
+	<ProfileDropdown user={user} />
+	<LoginLogoutButton user={user} />
+	<MenuOpenButton />
 </div>
 
-<Menu client:load />
-
-<script>
-	import "flowbite";
-</script>
+<Menu />
