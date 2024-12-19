@@ -25,7 +25,8 @@ const precomputePathRegex = (patterns: Array<string | RegExp>) => {
   ) => (pattern instanceof RegExp ? pattern : pathToRegexp(pattern)));
 };
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)", "/profile(.*)"]);
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/profile(.*)"]);
 
 const zitadel = new Zitadel();
 
@@ -69,15 +70,20 @@ export const secureRoutesMiddleware = defineMiddleware(
       const idToken = context.cookies.get("idToken")?.value;
       const user = await zitadel.fetchUser(idToken);
 
-      if (!user) {
-        return context.redirect("/");
+      if (user?.roles.includes("director")) {
+        return next();
       }
 
-      if (user.roles.includes("director")) {
+      return context.redirect("/");
+    } else if (isProtectedRoute(context.request)) {
+      const idToken = context.cookies.get("idToken")?.value;
+      const user = await zitadel.fetchUser(idToken);
+
+      if (user) {
         return next();
-      } else {
-        return context.redirect("/");
       }
+
+      return context.redirect("/");
     }
 
     return next();
