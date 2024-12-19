@@ -20,7 +20,13 @@ const site = (): string => {
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    routes: {
+      extend: {
+        include: [{ pattern: "/server_islands/*" }],
+      },
+    },
+  }),
 
   site: site(),
 
