@@ -3,6 +3,8 @@ import type { APIRoute } from "astro";
 
 export const prerender = false;
 
+const zitadel = new Zitadel();
+
 export const GET: APIRoute = async (
   { cookies, redirect, request },
 ): Promise<Response> => {
@@ -22,8 +24,17 @@ export const GET: APIRoute = async (
   const cookieState = cookies.get("state");
   const cookieCodeVerifier = cookies.get("codeVerifier");
 
-  cookies.delete("state");
-  cookies.delete("codeVerifier");
+  cookies.delete("state", {
+    secure: false,
+    path: "/",
+    httpOnly: true,
+  });
+
+  cookies.delete("codeVerifier", {
+    secure: false,
+    path: "/",
+    httpOnly: true,
+  });
 
   if (!cookieState || !cookieCodeVerifier) {
     return new Response(null, {
@@ -39,9 +50,8 @@ export const GET: APIRoute = async (
     });
   }
 
-  const zitadel = new Zitadel();
-
   let tokens = undefined;
+
   try {
     tokens = await zitadel.validateAuthorizationCode(
       code,
@@ -71,15 +81,6 @@ export const GET: APIRoute = async (
     maxAge: tokens.accessTokenExpiresInSeconds(),
     sameSite: "strict",
   });
-
-  if (tokens.hasRefreshToken()) {
-    cookies.set("refreshToken", tokens.refreshToken(), {
-      secure: import.meta.env.MODE === "production",
-      httpOnly: true,
-      path: "/",
-      sameSite: "strict",
-    });
-  }
 
   return redirect("/");
 };
