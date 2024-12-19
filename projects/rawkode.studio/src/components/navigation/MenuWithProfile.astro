@@ -1,5 +1,6 @@
 ---
 import Menu from "./Menu.astro";
+import MenuOpenButton from "./MenuOpenButton.astro";
 import Profile from "./profile/Profile.vue";
 
 const { user } = Astro.locals;
@@ -7,6 +8,7 @@ const { user } = Astro.locals;
 
 <div class="flex items-center lg:order-2">
 	<Profile client:only="vue" user={user} />
+	<MenuOpenButton />
 </div>
 
 <Menu />
