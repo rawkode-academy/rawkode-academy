@@ -1,6 +1,6 @@
 import { Button } from "@/components/shadcn/button";
 import { GalleryVerticalEnd } from "lucide-react";
-import rawkodeStudio from "@/assets/rawkode.studio.png";
+import rawkodeStudio from "@/assets/rawkode.studio.webp";
 
 export default function LoginPage() {
   return (

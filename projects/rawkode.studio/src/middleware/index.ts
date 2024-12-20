@@ -17,7 +17,6 @@ const authMiddleware = defineMiddleware(async (context, next) => {
   const accessToken = context.cookies.get("accessToken");
 
   if (!accessToken) {
-    console.debug("No access token, skipping middleware");
     return next();
   }
 
@@ -28,7 +27,6 @@ const authMiddleware = defineMiddleware(async (context, next) => {
   );
 
   if (!user) {
-    console.debug("No user, redirecting to logout");
     return context.redirect("/api/auth/logout");
   }
 
