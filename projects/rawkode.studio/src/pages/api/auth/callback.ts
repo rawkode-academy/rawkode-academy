@@ -4,7 +4,7 @@ import type { APIRoute } from "astro";
 const zitadel = new Zitadel();
 
 export const GET: APIRoute = async (
-  { cookies, redirect, request },
+  { cookies, request },
 ): Promise<Response> => {
   const url = new URL(request.url);
   const searchParams = url.searchParams;
@@ -69,7 +69,7 @@ export const GET: APIRoute = async (
     httpOnly: true,
     path: "/",
     maxAge: tokens.accessTokenExpiresInSeconds(),
-    sameSite: "lax",
+    sameSite: "strict",
   });
 
   cookies.set("idToken", tokens.idToken(), {
@@ -77,8 +77,14 @@ export const GET: APIRoute = async (
     httpOnly: true,
     path: "/",
     maxAge: tokens.accessTokenExpiresInSeconds(),
-    sameSite: "lax",
+    sameSite: "strict",
   });
 
-  return redirect("/");
+  const redirectHtml =
+    `<html><head><meta http-equiv="refresh" content="0;URL='${import.meta.env.SITE}'"/></head><body><p>Moved to <a href="${import.meta.env.SITE}">/</a>.</p></body></html>`;
+
+  return new Response(redirectHtml, {
+    status: 200,
+    headers: { "Content-Type": "text/html" },
+  });
 };

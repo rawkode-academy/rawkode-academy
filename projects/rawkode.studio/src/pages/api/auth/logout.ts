@@ -6,14 +6,14 @@ export const GET: APIRoute = ({ cookies, redirect }) => {
     secure: import.meta.env.MODE === "production",
     httpOnly: true,
     path: "/",
-    sameSite: "lax",
+    sameSite: "strict",
   });
 
   cookies.delete("accessToken", {
     secure: import.meta.env.MODE === "production",
     httpOnly: true,
     path: "/",
-    sameSite: "lax",
+    sameSite: "strict",
   });
 
   const redirectUri = new URL("/login", import.meta.env.SITE);
