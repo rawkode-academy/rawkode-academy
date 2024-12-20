@@ -69,7 +69,7 @@ export const GET: APIRoute = async (
     httpOnly: true,
     path: "/",
     maxAge: tokens.accessTokenExpiresInSeconds(),
-    sameSite: import.meta.env.MODE === "production" ? "strict" : "lax",
+    sameSite: "lax",
   });
 
   cookies.set("idToken", tokens.idToken(), {
@@ -77,7 +77,7 @@ export const GET: APIRoute = async (
     httpOnly: true,
     path: "/",
     maxAge: tokens.accessTokenExpiresInSeconds(),
-    sameSite: import.meta.env.MODE === "production" ? "strict" : "lax",
+    sameSite: "lax",
   });
 
   return redirect("/");
