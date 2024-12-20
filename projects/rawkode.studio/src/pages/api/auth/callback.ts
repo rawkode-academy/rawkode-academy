@@ -1,8 +1,6 @@
 import { Zitadel } from "@/lib/zitadel";
 import type { APIRoute } from "astro";
 
-export const prerender = false;
-
 const zitadel = new Zitadel();
 
 export const GET: APIRoute = async (
@@ -71,7 +69,7 @@ export const GET: APIRoute = async (
     httpOnly: true,
     path: "/",
     maxAge: tokens.accessTokenExpiresInSeconds(),
-    sameSite: "strict",
+    sameSite: import.meta.env.MODE === "production" ? "strict" : "lax",
   });
 
   cookies.set("idToken", tokens.idToken(), {
@@ -79,7 +77,7 @@ export const GET: APIRoute = async (
     httpOnly: true,
     path: "/",
     maxAge: tokens.accessTokenExpiresInSeconds(),
-    sameSite: "strict",
+    sameSite: import.meta.env.MODE === "production" ? "strict" : "lax",
   });
 
   return redirect("/");

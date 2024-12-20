@@ -2,8 +2,6 @@ import { Zitadel } from "@/lib/zitadel";
 import { generateCodeVerifier, generateState } from "arctic";
 import type { APIRoute } from "astro";
 
-export const prerender = false;
-
 export const GET: APIRoute = ({ cookies, redirect }) => {
   const zitadel = new Zitadel();
 

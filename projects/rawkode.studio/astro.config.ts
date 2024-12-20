@@ -1,11 +1,8 @@
 // @ts-check
 import { defineConfig, envField } from "astro/config";
-
 import cloudflare from "@astrojs/cloudflare";
-
+import react from "@astrojs/react";
 import tailwind from "@astrojs/tailwind";
-
-import vue from "@astrojs/vue";
 
 const site = (): string => {
   if (import.meta.env.CF_PAGES_URL) {
@@ -41,5 +38,5 @@ export default defineConfig({
     checkOrigin: true,
   },
 
-  integrations: [tailwind(), vue()],
+  integrations: [tailwind({ applyBaseStyles: false }), react()],
 });
