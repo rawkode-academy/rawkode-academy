@@ -1,5 +1,5 @@
 ---
-import Navigation from "@/components/navigation/Navigation.astro";
+import "@/styles/globals.css";
 
 export interface Props {
 	title: string;
@@ -18,15 +18,7 @@ const { title } = Astro.props;
 		<title>{title}</title>
 	</head>
 
-	<body class="antialiased bg-gray-100 dark:bg-white">
-		<Navigation />
-
-		<main class="container p-4 mx-auto">
+	<body>
 			<slot />
-		</main>
 	</body>
 </html>
-
-<script>
-	import "flowbite";
-</script>

@@ -1,36 +1,9 @@
 import { Zitadel } from "@/lib/zitadel";
-import { pathToRegexp } from "@clerk/shared/pathToRegexp";
 import { defineMiddleware, sequence } from "astro:middleware";
-
-// HINT: https://github.com/clerk/javascript/blob/main/packages/astro/src/server/route-matcher.ts
-type WithPathPatternWildcard<T = string> = `${T & string}(.*)`;
-type Autocomplete<U extends T, T = string> = U | (T & Record<never, never>);
-type RouteMatcherRoutes = Autocomplete<WithPathPatternWildcard>;
-type RouteMatcherParam =
-  | Array<RegExp | RouteMatcherRoutes>
-  | RegExp
-  | RouteMatcherRoutes;
-
-const createRouteMatcher = (routes: RouteMatcherParam) => {
-  const routePatterns = [routes || ""].flat().filter(Boolean);
-  const matchers = precomputePathRegex(routePatterns);
-
-  return (request: Request) =>
-    matchers.some((matcher) => matcher.test(new URL(request.url).pathname));
-};
-
-const precomputePathRegex = (patterns: Array<string | RegExp>) => {
-  return patterns.map((
-    pattern,
-  ) => (pattern instanceof RegExp ? pattern : pathToRegexp(pattern)));
-};
-
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
-const isProtectedRoute = createRouteMatcher(["/profile(.*)"]);
 
 const zitadel = new Zitadel();
 
-export const authMiddleware = defineMiddleware(async (context, next) => {
+const authMiddleware = defineMiddleware(async (context, next) => {
   // The runtime isn't available for pre-rendered pages and we
   // only want this middleware to run for SSR.
   if (!("runtime" in context.locals)) {
@@ -64,30 +37,4 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
   return next();
 });
 
-export const secureRoutesMiddleware = defineMiddleware(
-  async (context, next) => {
-    if (isAdminRoute(context.request)) {
-      const idToken = context.cookies.get("idToken")?.value;
-      const user = await zitadel.fetchUser(idToken);
-
-      if (user?.roles.includes("director")) {
-        return next();
-      }
-
-      return context.redirect("/");
-    } else if (isProtectedRoute(context.request)) {
-      const idToken = context.cookies.get("idToken")?.value;
-      const user = await zitadel.fetchUser(idToken);
-
-      if (user) {
-        return next();
-      }
-
-      return context.redirect("/");
-    }
-
-    return next();
-  },
-);
-
-export const onRequest = sequence(secureRoutesMiddleware, authMiddleware);
+export const onRequest = sequence(authMiddleware);

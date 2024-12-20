@@ -1,0 +1,8 @@
+---
+import LoginPage from "@/app/login/login-page";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Login">
+	<LoginPage client:only="react" />
+</BaseLayout>
