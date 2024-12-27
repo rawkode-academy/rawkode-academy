@@ -16,7 +16,6 @@ const site = (): string => {
   return "https://rawkode.studio";
 };
 
-// https://astro.build/config
 export default defineConfig({
   output: "server",
   adapter: cloudflare(),
@@ -26,6 +25,12 @@ export default defineConfig({
   env: {
     validateSecrets: true,
     schema: {
+      LIVEKIT_URL: envField.string({ context: "server", access: "secret" }),
+      LIVEKIT_API_KEY: envField.string({ context: "server", access: "secret" }),
+      LIVEKIT_API_SECRET: envField.string({
+        context: "server",
+        access: "secret",
+      }),
       ZITADEL_URL: envField.string({ context: "server", access: "public" }),
       ZITADEL_CLIENT_ID: envField.string({
         context: "server",
@@ -38,9 +43,16 @@ export default defineConfig({
     checkOrigin: true,
   },
 
-  integrations: [tailwind({ applyBaseStyles: false }), react()],
+  integrations: [
+    tailwind({ applyBaseStyles: false }),
+    react({ experimentalReactChildren: true }),
+  ],
 
   vite: {
+    ssr: {
+      external: ["node:crypto"],
+    },
+
     resolve: {
       alias: import.meta.env.PROD
         ? {
