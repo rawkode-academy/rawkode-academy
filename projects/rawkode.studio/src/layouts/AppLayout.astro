@@ -1,5 +1,5 @@
 ---
-import Page from "@/app/page";
+import App from "@/components/app";
 import BaseLayout from "./BaseLayout.astro";
 import type { OidcStandardClaimsWithRoles } from "@/lib/security";
 
@@ -12,7 +12,7 @@ const { title, user } = Astro.props;
 ---
 
 <BaseLayout title={title}>
-	<Page user={user} client:only="react">
+	<App user={user} client:only="react">
 		<slot />
-	</Page>
+	</App>
 </BaseLayout>
