@@ -25,7 +25,7 @@ export default defineConfig({
   env: {
     // FIXME? to make it work, we need to have them at build time
     validateSecrets: false,
-    
+
     schema: {
       LIVEKIT_URL: envField.string({ context: "server", access: "secret" }),
       LIVEKIT_API_KEY: envField.string({ context: "server", access: "secret" }),
