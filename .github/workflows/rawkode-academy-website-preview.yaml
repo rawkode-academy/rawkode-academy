@@ -29,7 +29,8 @@ jobs:
         run: source .env
       - id: deploy
         name: deploy
-        uses: cloudflare/wrangler-action@v3
+        # https://github.com/cloudflare/wrangler-action/issues/347
+        uses: cloudflare/wrangler-action@v3.13.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
