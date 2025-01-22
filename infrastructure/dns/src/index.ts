@@ -6,7 +6,6 @@ import { Construct } from "constructs";
 import alphabitsFm from "./domains/alphabits.fm";
 import alphabitsShow from "./domains/alphabits.show";
 import alphabitsTv from "./domains/alphabits.tv";
-import canideployToday from "./domains/canideploy.today";
 import chappaaiDev from "./domains/chappaai.dev";
 import cloudnativecompassFm from "./domains/cloudnativecompass.fm";
 import klusteredLive from "./domains/klustered.live";
@@ -45,7 +44,6 @@ class CoreDns extends TerraformStack {
 		alphabitsFm(this);
 		alphabitsShow(this);
 		alphabitsTv(this);
-		canideployToday(this);
 		chappaaiDev(this);
 		cloudnativecompassFm(this);
 		klusteredLive(this);

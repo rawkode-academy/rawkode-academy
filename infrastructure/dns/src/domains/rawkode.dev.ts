@@ -7,7 +7,7 @@ export default (scope: Construct): ManagedDomain => {
 		"rawkode.dev",
 		Registrar.Cloudflare,
 	)
-		.enableMicrosoft365({})
+		.enableFastmail()
 		.addTextRecord(
 			"google-site-verification",
 			"@",
