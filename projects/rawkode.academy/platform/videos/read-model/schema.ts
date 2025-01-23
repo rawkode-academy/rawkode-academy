@@ -2,7 +2,7 @@ import schemaBuilder from '@pothos/core';
 import directivesPlugin from '@pothos/plugin-directives';
 import drizzlePlugin from '@pothos/plugin-drizzle';
 import federationPlugin from '@pothos/plugin-federation';
-import { eq, lte } from "drizzle-orm";
+import { eq, lte } from 'drizzle-orm';
 import { type GraphQLSchema } from 'graphql';
 import { DateResolver } from 'graphql-scalars';
 import { db } from '../data-model/client.ts';
@@ -38,8 +38,8 @@ const videoRef = builder.drizzleObject('videosTable', {
 			type: 'Date',
 			resolve: (video) => video.publishedAt,
 		}),
-		duration: t.exposeString('duration'),
-		playlistUrl: t.string({
+		duration: t.exposeInt('duration'),
+		streamUrl: t.string({
 			resolve: (video) =>
 				`https://videos.rawkode.academy/${video.id}/stream.m3u8`,
 		}),
