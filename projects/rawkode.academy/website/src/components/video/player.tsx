@@ -64,7 +64,8 @@ export default function VideoPlayer({
 
   return (
     <video
-      ref={videoRef}
+			ref={videoRef}
+			width="100%"
       controls
 			playsInline
 			poster={thumbnailUrl}
