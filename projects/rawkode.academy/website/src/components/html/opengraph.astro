@@ -4,27 +4,37 @@ import * as utf64 from "utf64";
 
 interface Props extends OpenGraphProps {}
 
-const { title, description, image } = Astro.props;
+const { title, description, image, useImageDirectly = false } = Astro.props;
+const openGraphUrl = new URL(Astro.url.pathname, Astro.site);
 
-const ogImagePayload = image ? {...image, text: title, format: "png"} : { text: title, format: "png" };
-const ogDescription =
+const openGraphDescription =
 	description ??
 	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
-const ogImageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(
-	JSON.stringify(ogImagePayload)
+
+// Dynamic OpenGraph Image Generation
+const openGraphImagePayload = image
+	? { ...image, text: title, format: "png" }
+	: { text: title, format: "png" };
+const openGraphImageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(
+	JSON.stringify(openGraphImagePayload)
 )}`;
-const ogUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content={title} />
-<meta property="og:description" content={ogDescription} />
-<meta property="og:url" content={ogUrl} />
-<meta property="og:image" content={ogImageUrl} />
+<meta property="og:description" content={openGraphDescription} />
+<meta property="og:url" content={openGraphUrl} />
+<meta
+	property="og:image"
+	content={useImageDirectly ? image?.image : openGraphImageUrl}
+/>
 
 <meta name="twitter:card" content="summary_large_image" />
-<meta property="twitter:domain" content={ogUrl.hostname} />
-<meta property="twitter:url" content={ogUrl} />
+<meta property="twitter:domain" content={openGraphUrl.hostname} />
+<meta property="twitter:url" content={openGraphUrl} />
 <meta name="twitter:title" content={title} />
-<meta name="twitter:description" content={ogDescription} />
-<meta name="twitter:image" content={ogImageUrl} />
+<meta name="twitter:description" content={openGraphDescription} />
+<meta
+	name="twitter:image"
+	content={useImageDirectly ? image?.image : openGraphImageUrl}
+/>
