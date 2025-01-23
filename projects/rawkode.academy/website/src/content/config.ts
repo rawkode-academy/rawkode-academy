@@ -1,5 +1,39 @@
 import { glob } from "astro/loaders";
 import { defineCollection, reference, z } from "astro:content";
+import { gql, GraphQLClient } from "graphql-request";
+
+const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
+
+// We'll get the latest 300, which should be all or almost all
+// Anything else can be fetched dynamically
+const graphQLQuery = gql`
+	query {
+		videos: getLatestVideos(limit: 300) {
+			id
+			title
+			subtitle
+			description
+			publishedAt
+			playlistUrl
+		}
+	}
+`;
+
+const videos = defineCollection({
+  loader: async () => {
+    const { videos }: any = await graphQLClient.request(graphQLQuery);
+
+    return videos;
+  },
+  schema: z.object({
+    id: z.string(),
+    title: z.string(),
+    subtitle: z.string().optional(),
+    description: z.string(),
+    playlistUrl: z.string(),
+    publishedAt: z.string(),
+  }),
+});
 
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections
 
@@ -39,7 +73,4 @@ const series = defineCollection({
     }),
 });
 
-export const collections = {
-  blog,
-  series,
-};
+export const collections = { blog, series, videos };

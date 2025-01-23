@@ -1,0 +1,45 @@
+---
+import type { GetStaticPaths } from "astro";
+import Page from "@/wrappers/page.astro";
+import VideoPlayer from "@/components/video/player";
+import { getCollection } from "astro:content";
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+	const videos = await getCollection("videos");
+
+	return videos.map((video) => ({
+		params: { id: video.id },
+		props: { video },
+	}));
+}) satisfies GetStaticPaths;
+
+const { video } = Astro.props;
+---
+
+<Page title="Watch">
+	<div class="flex dark:bg-black dark:text-white min-h-screen">
+		<div class="w-full lg:w-3/4 px-4 py-4">
+			<div class="mt-4">
+				<h1 class="text-xxl font-bold mb-2">{video.data.title}</h1>
+				<div class="flex items-center text-gray-500 text-sm mb-2">
+					<span class="mx-2">&bull;</span>
+					<span>{video.data.publishedAt}</span>
+				</div>
+			</div>
+
+			<div
+				class="relative w-full aspect-video rounded-lg overflow-hidden bg-black"
+			>
+				<VideoPlayer client:only="react" src={video.data.playlistUrl} />
+			</div>
+
+			<!-- Video Description -->
+			<div class="mt-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm">
+				<p class="prose">{video.data.description}</p>
+			</div>
+			<hr class="my-6" />
+		</div>
+	</div>
+</Page>
