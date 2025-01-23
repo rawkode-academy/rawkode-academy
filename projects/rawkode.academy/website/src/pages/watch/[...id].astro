@@ -18,7 +18,7 @@ export const getStaticPaths = (async () => {
 const { video } = Astro.props;
 ---
 
-<Page title="Watch">
+<Page title={video.data.title} description={video.data.description} useImageDirectly={true} image={{ image: new URL(video.data.thumbnailUrl) }}>
 	<div class="flex dark:bg-black dark:text-white min-h-screen">
 		<div class="w-full lg:w-3/4 px-4 py-4">
 			<div class="mt-4">
@@ -32,7 +32,7 @@ const { video } = Astro.props;
 			<div
 				class="relative w-full aspect-video rounded-lg overflow-hidden bg-black"
 			>
-				<VideoPlayer client:only="react" src={video.data.playlistUrl} />
+				<VideoPlayer client:only="react" src={video.data.playlistUrl} thumbnailUrl={video.data.thumbnailUrl} />
 			</div>
 
 			<!-- Video Description -->

@@ -15,6 +15,7 @@ const graphQLQuery = gql`
 			description
 			publishedAt
 			playlistUrl
+			thumbnailUrl
 		}
 	}
 `;
@@ -31,7 +32,8 @@ const videos = defineCollection({
     subtitle: z.string().optional(),
     description: z.string(),
     playlistUrl: z.string(),
-    publishedAt: z.string(),
+		publishedAt: z.string(),
+		thumbnailUrl: z.string(),
   }),
 });
 

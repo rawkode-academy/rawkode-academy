@@ -5,13 +5,15 @@ interface VideoPlayerProps {
   src: string;
   width?: number;
   height?: number;
-  autoPlay?: boolean;
+	autoPlay?: boolean;
+	thumbnailUrl: string;
   onError?: (error: Error) => void;
   onReady?: () => void;
 }
 
 export default function VideoPlayer({
-  src,
+	src,
+	thumbnailUrl,
   autoPlay = false,
   onError,
   onReady
@@ -64,7 +66,8 @@ export default function VideoPlayer({
     <video
       ref={videoRef}
       controls
-      playsInline
+			playsInline
+			poster={thumbnailUrl}
     />
   );
 }
