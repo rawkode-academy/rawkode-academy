@@ -140,7 +140,7 @@ for (const directory of allDirectories.directories) {
 			subtitle: '',
 			description: metadata.description,
 			duration: metadata.duration,
-			publishedAt: new Date(metadata.timestamp),
+			publishedAt: new Date(metadata.timestamp * 1000),
 		})
 		.onConflictDoUpdate({
 			target: videosTable.id,
@@ -149,7 +149,7 @@ for (const directory of allDirectories.directories) {
 				subtitle: '',
 				description: metadata.description,
 				duration: metadata.duration,
-				publishedAt: new Date(metadata.timestamp),
+				publishedAt: new Date(metadata.timestamp * 1000),
 			},
 		});
 }
