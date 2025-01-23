@@ -14,7 +14,7 @@ const graphQLQuery = gql`
 			subtitle
 			description
 			publishedAt
-			playlistUrl
+			streamUrl
 			thumbnailUrl
 		}
 	}
@@ -31,7 +31,7 @@ const videos = defineCollection({
     title: z.string(),
     subtitle: z.string().optional(),
     description: z.string(),
-    playlistUrl: z.string(),
+    streamUrl: z.string(),
 		publishedAt: z.string(),
 		thumbnailUrl: z.string(),
   }),

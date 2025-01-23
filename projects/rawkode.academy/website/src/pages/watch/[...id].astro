@@ -32,7 +32,7 @@ const { video } = Astro.props;
 			<div
 				class="relative w-full aspect-video rounded-lg overflow-hidden bg-black"
 			>
-				<VideoPlayer client:only="react" src={video.data.playlistUrl} thumbnailUrl={video.data.thumbnailUrl} />
+				<VideoPlayer client:only="react" src={video.data.streamUrl} thumbnailUrl={video.data.thumbnailUrl} />
 			</div>
 
 			<!-- Video Description -->
