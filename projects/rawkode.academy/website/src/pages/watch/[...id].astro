@@ -1,8 +1,9 @@
 ---
-import type { GetStaticPaths } from "astro";
 import Page from "@/wrappers/page.astro";
 import VideoPlayer from "@/components/video/player";
+import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
+import { Marked } from "marked";
 
 export const prerender = true;
 
@@ -16,9 +17,20 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { video } = Astro.props;
+
+// Setting breaks to true doesn't handle multiple sequentiaal \n's
+const marked = new Marked({ breaks: false, gfm: true });
+const renderedDescription = marked.parse(
+	video.data.description.replaceAll("\n", "</br>")
+);
 ---
 
-<Page title={video.data.title} description={video.data.description} useImageDirectly={true} image={{ image: new URL(video.data.thumbnailUrl) }}>
+<Page
+	title={video.data.title}
+	description={video.data.description}
+	useImageDirectly={true}
+	image={{ image: new URL(video.data.thumbnailUrl) }}
+>
 	<div class="flex dark:bg-black dark:text-white min-h-screen">
 		<div class="w-full lg:w-3/4 px-4 py-4">
 			<div class="mt-4">
@@ -32,12 +44,19 @@ const { video } = Astro.props;
 			<div
 				class="relative w-full aspect-video rounded-lg overflow-hidden bg-black"
 			>
-				<VideoPlayer client:only="react" src={video.data.streamUrl} thumbnailUrl={video.data.thumbnailUrl} />
+				<VideoPlayer
+					client:only="react"
+					src={video.data.streamUrl}
+					thumbnailUrl={video.data.thumbnailUrl}
+				/>
 			</div>
 
 			<!-- Video Description -->
 			<div class="mt-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm">
-				<p class="prose">{video.data.description}</p>
+				<p class="prose">
+					<p class="prose"><p set:html={renderedDescription} /></p>
+					<hr class="my-6" />
+				</p>
 			</div>
 			<hr class="my-6" />
 		</div>
