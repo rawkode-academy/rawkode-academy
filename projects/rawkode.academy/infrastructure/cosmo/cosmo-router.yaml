@@ -11,7 +11,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: router
+  name: router-config
 data:
   config.yaml: |
     # yaml-language-server: $schema=https://raw.githubusercontent.com/wundergraph/cosmo/main/router/pkg/config/config.schema.json
@@ -35,7 +35,7 @@ metadata:
   name: router
 spec:
   interval: 72h
-  timeout: 5m
+  timeout: 1m
   chart:
     spec:
       chart: router
@@ -66,7 +66,7 @@ spec:
       requests:
         cpu: 100m
         memory: 128Mi
-    existingConfigmap: router
+    existingConfigmap: router-config
     existingSecret: router
 ---
 apiVersion: networking.k8s.io/v1
