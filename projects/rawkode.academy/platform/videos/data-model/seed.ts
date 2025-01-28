@@ -7,6 +7,7 @@ const seed = async () => {
 		.values({
 			title: 'Window of Opportunity',
 			subtitle: 'The team is stuck in a time loop.',
+			slug: 'window-of-opportunity',
 			description: 'The team is stuck in a time loop.',
 			publishedAt: new Date(),
 			duration: 360,

@@ -33,6 +33,7 @@ const videoRef = builder.drizzleObject('videosTable', {
 		id: t.exposeString('id'),
 		title: t.exposeString('title'),
 		subtitle: t.exposeString('subtitle'),
+		slug: t.exposeString('slug'),
 		description: t.exposeString('description'),
 		publishedAt: t.field({
 			type: 'Date',

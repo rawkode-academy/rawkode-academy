@@ -7,7 +7,7 @@ import {
 import { existsSync } from '@std/fs';
 import { db } from './data-model/client.ts';
 import { videosTable } from './data-model/schema.ts';
-import moment from 'moment';
+import {slugifyWithCounter} from '@sindresorhus/slugify';
 
 const cloudflareR2 = {
 	accountId: '0aeb879de8e3cdde5fb3d413025222ce',
@@ -100,6 +100,8 @@ const getYouTubeMetadata = (metadataJson: string): Metadata => {
 
 const allDirectories = await listDirectories('rawkode-academy-videos');
 
+const slugify = slugifyWithCounter();
+
 for (const directory of allDirectories.directories) {
 	if (!directory) {
 		console.log(`Skipping directory: ${directory}`);
@@ -127,6 +129,10 @@ for (const directory of allDirectories.directories) {
 
 	const metadata = getYouTubeMetadata(`./transcode/${dirName}/metadata.json`);
 
+	if (metadata.availability === 'private') {
+		continue;
+	}
+
 	// Remove anything after "|" in title
 	const cleanTitle = metadata.title.split('|')[0].trim();
 
@@ -138,6 +144,9 @@ for (const directory of allDirectories.directories) {
 			id: dirName,
 			title: cleanTitle,
 			subtitle: '',
+			slug: slugify(cleanTitle, {
+				decamelize: false,
+			}),
 			description: metadata.description,
 			duration: metadata.duration,
 			publishedAt: new Date(metadata.timestamp * 1000),
@@ -147,6 +156,9 @@ for (const directory of allDirectories.directories) {
 			set: {
 				title: cleanTitle,
 				subtitle: '',
+				slug: slugify(cleanTitle, {
+					decamelize: false,
+				}),
 				description: metadata.description,
 				duration: metadata.duration,
 				publishedAt: new Date(metadata.timestamp * 1000),

@@ -1,7 +1,7 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "a230580e-0d12-459d-9726-61f236851bb2",
+	"id": "40ec84f7-e63d-4b74-83b2-f56879e23007",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"tables": {
 		"videos": {
@@ -23,6 +23,13 @@
 				},
 				"subtitle": {
 					"name": "subtitle",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"slug": {
+					"name": "slug",
 					"type": "text",
 					"primaryKey": false,
 					"notNull": true,
@@ -50,7 +57,15 @@
 					"autoincrement": false
 				}
 			},
-			"indexes": {},
+			"indexes": {
+				"videos_slug_unique": {
+					"name": "videos_slug_unique",
+					"columns": [
+						"slug"
+					],
+					"isUnique": true
+				}
+			},
 			"foreignKeys": {},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},

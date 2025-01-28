@@ -5,6 +5,7 @@ export const videosTable = sqliteTable('videos', {
 	id: text('id').primaryKey().$default(createId),
 	title: text('title').notNull(),
 	subtitle: text('subtitle').notNull(),
+	slug: text('slug').notNull().unique(),
 	description: text('description').notNull(),
 	duration: integer({ mode: 'number' }).notNull(),
 	publishedAt: integer({ mode: 'timestamp' }).notNull(),

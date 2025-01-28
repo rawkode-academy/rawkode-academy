@@ -11,7 +11,7 @@ export const getStaticPaths = (async () => {
 	const videos = await getCollection("videos");
 
 	return videos.map((video) => ({
-		params: { id: video.id },
+		params: { slug: video.data.slug },
 		props: { video },
 	}));
 }) satisfies GetStaticPaths;
