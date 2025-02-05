@@ -1,0 +1,88 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  query: string;
+  operation: string;
+  limit: number;
+}
+
+const { title, description, query, operation, limit } = Astro.props;
+
+interface Video {
+  title: string;
+  thumbnailUrl: string;
+  duration: number;
+  slug: string;
+  publishedAt: string;
+  streamUrl: string;
+}
+
+const response = await fetch("https://api.rawkode.academy/graphql", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    query,
+    variables: {
+      limit,
+    },
+  }),
+});
+
+const { data } = await response.json();
+const videos = (data[operation] ?? []) as Video[];
+
+function formatDuration(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  }
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+}
+
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+---
+
+<section class="py-12 bg-gray-50 even:bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">{title}</h2>
+      <p class="mt-4 text-lg text-gray-500">{description}</p>
+    </div>
+    <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+      {videos.map((video: Video) => (
+        <a href={`/watch/${video.slug}`} class="group">
+          <div class="relative aspect-video">
+            <img
+              src={video.thumbnailUrl}
+              alt={video.title}
+              class="w-full h-full object-cover rounded-lg shadow-md transition-transform group-hover:scale-105"
+            />
+            <div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
+              {formatDuration(video.duration)}
+            </div>
+          </div>
+          <div class="mt-4">
+            <h3 class="text-lg font-medium text-gray-900 group-hover:text-indigo-600 line-clamp-2">
+              {video.title}
+            </h3>
+            <p class="mt-1 text-sm text-gray-500">
+              {formatDate(video.publishedAt)}
+            </p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

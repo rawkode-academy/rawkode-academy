@@ -1,1 +1,51 @@
-Hi
+---
+import VideoFeed from "../components/video/video-feed.astro";
+import Layout from "../layouts/app.astro";
+
+const latestVideosQuery = `
+  query GetLatestVideos($limit: Int!) {
+    getLatestVideos(limit: $limit) {
+      title
+      thumbnailUrl
+      duration
+      slug
+      publishedAt
+      streamUrl
+    }
+  }
+`;
+
+// Placeholder for the random videos query - user will provide this
+const randomVideosQuery = `
+  query GetRandomVideos($limit: Int!) {
+    getRandomVideos(limit: $limit) {
+      title
+      thumbnailUrl
+      duration
+      slug
+      publishedAt
+      streamUrl
+    }
+  }
+`;
+---
+
+<Layout>
+  <div class="space-y-0">
+    <VideoFeed
+      title="Latest Videos"
+      description="Stay up to date with our newest content"
+      operation="getLatestVideos"
+      query={latestVideosQuery}
+      limit={12}
+    />
+
+    <VideoFeed
+      title="Random Videos"
+      description="Discover something new from our collection"
+      operation="getRandomVideos"
+      query={randomVideosQuery}
+      limit={12}
+    />
+  </div>
+</Layout>

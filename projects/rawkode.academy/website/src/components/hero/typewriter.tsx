@@ -50,7 +50,7 @@ const Typewriter = (props: Props) => {
           <a
             href={props.primaryButton.link}
             target={props.primaryButton.newWindow ? "_blank" : "_self"}
-            className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center rounded-lg text-black bg-gradient-to-br from-primary to-secondary hover:from-secondary hover:to-primary"
+            className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center rounded-lg text-white bg-gradient-to-br from-primary to-secondary hover:from-secondary hover:to-primary"
           >
             {props.primaryButton.text}
             <svg
