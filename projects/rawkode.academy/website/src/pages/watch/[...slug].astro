@@ -1,6 +1,7 @@
 ---
 import Page from "@/wrappers/page.astro";
 import VideoPlayer from "@/components/video/player";
+import VideoMetadata from "@/components/html/video-metadata.astro";
 import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 import { Marked } from "marked";
@@ -31,6 +32,15 @@ const renderedDescription = marked.parse(
 	useImageDirectly={true}
 	image={{ image: new URL(video.data.thumbnailUrl) }}
 >
+	<VideoMetadata
+		slot="extra-head"
+		title={video.data.title}
+		description={video.data.description}
+		thumbnailUrl={video.data.thumbnailUrl}
+		publishedAt={video.data.publishedAt}
+		duration={video.data.duration}
+		streamUrl={video.data.streamUrl}
+	/>
 	<div class="flex dark:bg-black dark:text-white min-h-screen">
 		<div class="w-full lg:w-3/4 px-4 py-4">
 			<div class="mt-4">

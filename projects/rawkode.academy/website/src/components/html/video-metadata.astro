@@ -1,0 +1,68 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  thumbnailUrl?: string;
+  publishedAt?: string;
+  duration?: string;
+  streamUrl?: string;
+  isVideoList?: boolean;
+}
+
+const {
+  title,
+  description,
+  thumbnailUrl,
+  publishedAt,
+  duration,
+  streamUrl,
+  isVideoList = false
+} = Astro.props;
+
+// Format duration from seconds to ISO 8601
+const formatDuration = (seconds: string) => {
+  if (!seconds) return undefined;
+  const sec = parseInt(seconds);
+  const hours = Math.floor(sec / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
+  const remainingSeconds = sec % 60;
+  return `PT${hours ? hours + 'H' : ''}${minutes ? minutes + 'M' : ''}${remainingSeconds}S`;
+};
+
+const formattedDuration = formatDuration(duration);
+
+// Generate structured data
+const structuredData = isVideoList ? {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": title,
+  "description": description,
+  "url": Astro.url.href
+} : {
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": title,
+  "description": description,
+  "thumbnailUrl": thumbnailUrl,
+  "uploadDate": publishedAt,
+  "duration": formattedDuration,
+  "contentUrl": streamUrl,
+  "url": Astro.url.href
+};
+---
+
+<!-- Video-specific meta tags -->
+<meta property="og:type" content={isVideoList ? "website" : "video.other"} />
+{!isVideoList && streamUrl && <meta property="og:video" content={streamUrl} />}
+{!isVideoList && streamUrl && <meta property="og:video:url" content={streamUrl} />}
+{!isVideoList && thumbnailUrl && <meta property="og:video:thumbnail" content={thumbnailUrl} />}
+{!isVideoList && duration && <meta property="og:video:duration" content={duration} />}
+
+<!-- Additional SEO meta tags -->
+<meta name="twitter:card" content={thumbnailUrl ? "summary_large_image" : "summary"} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{thumbnailUrl && <meta name="twitter:image" content={thumbnailUrl} />}
+
+<!-- Structured Data -->
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
