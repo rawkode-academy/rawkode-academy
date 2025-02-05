@@ -2,6 +2,7 @@
 import FeatureList from "@/components/feature/list.vue";
 import HeroTypewriter from "@/components/hero/typewriter.tsx";
 import PartnerLogos from "@/components/partner/logos.astro";
+import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
 import HeroImage from "./hero.png";
 ---
@@ -12,9 +13,8 @@ import HeroImage from "./hero.png";
 		highlight="hard"
 		image={HeroImage}
 		primaryButton={{
-			text: "Search Content",
-			link: "https://www.youtube.com/@RawkodeAcademy/videos",
-			newWindow: true,
+			text: "Checkout Our Videos",
+			link: "/videos",
 		}}
 		secondaryButton={{
 			text: "About Us",
@@ -32,6 +32,25 @@ import HeroImage from "./hero.png";
 			"Infrastructure as Code",
 		]}
 		suffix="may be complex, but it doesn't need to be hard."
+	/>
+
+	<VideoFeed
+		title="Latest Videos"
+		description="Stay up to date with our newest content"
+		operation="getLatestVideos"
+		query={`
+			query GetLatestVideos($limit: Int!) {
+				getLatestVideos(limit: $limit) {
+					title
+					thumbnailUrl
+					duration
+					slug
+					publishedAt
+					streamUrl
+				}
+			}
+		`}
+		limit={4}
 	/>
 
 	<FeatureList

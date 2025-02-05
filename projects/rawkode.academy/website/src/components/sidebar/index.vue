@@ -10,6 +10,7 @@ import {
 	// QuestionMarkCircleIcon,
 	RocketLaunchIcon,
 	UsersIcon,
+	VideoCameraIcon,
 } from "@heroicons/vue/24/outline";
 
 const menuItems = [
@@ -24,12 +25,12 @@ const menuItems = [
 	// { name: 'Events', href: '/events', icon: CalendarDaysIcon, current: false },
 	// { name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
 	// { name: 'Shows', href: '#', icon: FilmIcon, current: false },
-	// {
-	// 	name: "All Videos",
-	// 	href: "/videos",
-	// 	icon: VideoCameraIcon,
-	// 	current: false,
-	// },
+	{
+		name: "Videos",
+		href: "/videos",
+		icon: VideoCameraIcon,
+		current: false,
+	},
 	{
 		name: "Community",
 		href: "https://chat.rawkode.academy",
