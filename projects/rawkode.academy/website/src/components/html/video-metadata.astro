@@ -4,7 +4,7 @@ interface Props {
   description: string;
   thumbnailUrl?: string;
   publishedAt?: string;
-  duration?: string;
+  duration?: number;
   streamUrl?: string;
   isVideoList?: boolean;
 }
@@ -20,16 +20,18 @@ const {
 } = Astro.props;
 
 // Format duration from seconds to ISO 8601
-const formatDuration = (seconds: string) => {
-  if (!seconds) return undefined;
-  const sec = parseInt(seconds);
-  const hours = Math.floor(sec / 3600);
-  const minutes = Math.floor((sec % 3600) / 60);
-  const remainingSeconds = sec % 60;
-  return `PT${hours ? hours + 'H' : ''}${minutes ? minutes + 'M' : ''}${remainingSeconds}S`;
-};
+function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
 
-const formattedDuration = formatDuration(duration);
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  }
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+}
+
+const formattedDuration = formatDuration(duration ?? 0);
 
 // Generate structured data
 const structuredData = isVideoList ? {
@@ -56,7 +58,7 @@ const structuredData = isVideoList ? {
 {!isVideoList && streamUrl && <meta property="og:video" content={streamUrl} />}
 {!isVideoList && streamUrl && <meta property="og:video:url" content={streamUrl} />}
 {!isVideoList && thumbnailUrl && <meta property="og:video:thumbnail" content={thumbnailUrl} />}
-{!isVideoList && duration && <meta property="og:video:duration" content={duration} />}
+{!isVideoList && duration && <meta property="og:video:duration" content={formattedDuration} />}
 
 <!-- Additional SEO meta tags -->
 <meta name="twitter:card" content={thumbnailUrl ? "summary_large_image" : "summary"} />
@@ -65,4 +67,4 @@ const structuredData = isVideoList ? {
 {thumbnailUrl && <meta name="twitter:image" content={thumbnailUrl} />}
 
 <!-- Structured Data -->
-<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />

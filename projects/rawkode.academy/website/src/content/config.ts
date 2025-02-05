@@ -17,6 +17,7 @@ const graphQLQuery = gql`
 			publishedAt
 			streamUrl
 			thumbnailUrl
+			duration
 		}
 	}
 `;
@@ -36,6 +37,7 @@ const videos = defineCollection({
 		streamUrl: z.string(),
 		publishedAt: z.string(),
 		thumbnailUrl: z.string(),
+		duration: z.number(),
 	}),
 });
 
