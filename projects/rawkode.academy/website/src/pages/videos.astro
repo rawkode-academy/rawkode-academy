@@ -1,6 +1,7 @@
 ---
+import Page from "@/wrappers/page.astro";
 import VideoFeed from "../components/video/video-feed.astro";
-import Layout from "../layouts/app.astro";
+import VideoMetadata from "../components/html/video-metadata.astro";
 
 const latestVideosQuery = `
   query GetLatestVideos($limit: Int!) {
@@ -30,8 +31,14 @@ const randomVideosQuery = `
 `;
 ---
 
-<Layout>
-  <div class="space-y-0">
+<Page title="Videos">
+  <VideoMetadata
+    slot="extra-head"
+    title="Rawkode Academy Videos"
+    description="Explore our collection of educational videos about cloud native technologies, development practices, and more."
+    isVideoList={true}
+  />
+  <div class="bg-gray-50 dark:bg-gray-800">
     <VideoFeed
       title="Latest Videos"
       description="Stay up to date with our newest content"
@@ -39,7 +46,8 @@ const randomVideosQuery = `
       query={latestVideosQuery}
       limit={12}
     />
-
+  </div>
+  <div class="bg-white dark:bg-gray-900">
     <VideoFeed
       title="Random Videos"
       description="Discover something new from our collection"
@@ -48,4 +56,4 @@ const randomVideosQuery = `
       limit={12}
     />
   </div>
-</Layout>
+</Page>
