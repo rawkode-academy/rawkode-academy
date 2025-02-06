@@ -56,7 +56,7 @@ const renderedDescription = marked.parse(
 			>
 				<VideoPlayer
 					client:only="react"
-					src={video.data.streamUrl}
+					videoId={video.data.id}
 					thumbnailUrl={video.data.thumbnailUrl}
 				/>
 			</div>
