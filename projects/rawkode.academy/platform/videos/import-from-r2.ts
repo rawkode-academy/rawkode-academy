@@ -7,7 +7,7 @@ import {
 import { existsSync } from '@std/fs';
 import { db } from './data-model/client.ts';
 import { videosTable } from './data-model/schema.ts';
-import {slugifyWithCounter} from '@sindresorhus/slugify';
+import { slugifyWithCounter } from '@sindresorhus/slugify';
 
 const cloudflareR2 = {
 	accountId: '0aeb879de8e3cdde5fb3d413025222ce',
