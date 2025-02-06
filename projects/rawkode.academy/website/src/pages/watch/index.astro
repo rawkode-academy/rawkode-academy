@@ -1,7 +1,7 @@
 ---
 import Page from "@/wrappers/page.astro";
-import VideoFeed from "../components/video/video-feed.astro";
-import VideoMetadata from "../components/html/video-metadata.astro";
+import VideoFeed from "@/components/video/video-feed.astro";
+import VideoMetadata from "@/components/html/video-metadata.astro";
 
 const latestVideosQuery = `
   query GetLatestVideos($limit: Int!) {

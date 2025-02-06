@@ -26,8 +26,8 @@ const menuItems = [
 	// { name: 'Courses', href: '#', icon: AcademicCapIcon, current: false },
 	// { name: 'Shows', href: '#', icon: FilmIcon, current: false },
 	{
-		name: "Videos",
-		href: "/videos",
+		name: "Watch",
+		href: "/watch",
 		icon: VideoCameraIcon,
 		current: false,
 	},
