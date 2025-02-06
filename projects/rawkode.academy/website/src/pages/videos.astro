@@ -16,7 +16,6 @@ const latestVideosQuery = `
   }
 `;
 
-// Placeholder for the random videos query - user will provide this
 const randomVideosQuery = `
   query GetRandomVideos($limit: Int!) {
     getRandomVideos(limit: $limit) {
@@ -32,28 +31,97 @@ const randomVideosQuery = `
 ---
 
 <Page title="Videos">
-  <VideoMetadata
-    slot="extra-head"
-    title="Rawkode Academy Videos"
-    description="Explore our collection of educational videos about cloud native technologies, development practices, and more."
-    isVideoList={true}
-  />
-  <div class="bg-gray-50 dark:bg-gray-800">
-    <VideoFeed
-      title="Latest Videos"
-      description="Stay up to date with our newest content"
-      operation="getLatestVideos"
-      query={latestVideosQuery}
-      limit={12}
-    />
-  </div>
-  <div class="bg-white dark:bg-gray-900">
-    <VideoFeed
-      title="Random Videos"
-      description="Discover something new from our collection"
-      operation="getRandomVideos"
-      query={randomVideosQuery}
-      limit={12}
-    />
-  </div>
+	<VideoMetadata
+		slot="extra-head"
+		title="Rawkode Academy Videos"
+		description="Explore our collection of educational videos about cloud native technologies, development practices, and more."
+		isVideoList={true}
+	/>
+
+	<div class="flex flex-col gap-12 video-feeds">
+		<style>
+			:root {
+				--primary: #5f5ed7;
+				--secondary: #00ceff;
+			}
+
+			.video-feeds {
+				display: flex;
+				flex-direction: column;
+				gap: 3rem;
+			}
+
+			.video-feeds > :global(*:not(:last-child)) {
+				position: relative;
+				padding-bottom: 3rem;
+			}
+
+			@keyframes expandFromCenter {
+				0% {
+					transform: scaleX(0);
+					opacity: 0;
+				}
+				100% {
+					transform: scaleX(1);
+					opacity: 1;
+				}
+			}
+
+			@keyframes separatorScroll {
+				0% {
+					transform: scaleX(0);
+					opacity: 0;
+				}
+				25%,
+				75% {
+					transform: scaleX(1);
+					opacity: 1;
+				}
+				100% {
+					transform: scaleX(0);
+					opacity: 0;
+				}
+			}
+
+			.video-feeds > :global(*:not(:last-child))::after {
+				content: "";
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				height: 4px;
+				background: linear-gradient(
+					to right,
+					var(--primary),
+					var(--secondary),
+					var(--primary)
+				);
+				transform-origin: center;
+
+				/* Fallback animation */
+				animation: expandFromCenter 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+
+				/* Scroll-linked animation */
+				animation-timeline: view();
+				animation-name: separatorScroll;
+				animation-range: entry-crossing exit-crossing; /* More fluid range */
+				animation-timing-function: ease; /* Smooth easing */
+			}
+		</style>
+
+		<VideoFeed
+			title="Latest Videos"
+			description="Stay up to date with our newest content"
+			operation="getLatestVideos"
+			query={latestVideosQuery}
+			limit={12}
+		/>
+		<VideoFeed
+			title="Random Videos"
+			description="Discover something new from our collection"
+			operation="getRandomVideos"
+			query={randomVideosQuery}
+			limit={12}
+		/>
+	</div>
 </Page>
