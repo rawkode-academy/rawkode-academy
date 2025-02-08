@@ -4,11 +4,11 @@ import { gql, GraphQLClient } from "graphql-request";
 
 const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
 
-// We'll get the latest 300, which should be all or almost all
+// We'll get the latest 400, which should be all or almost all
 // Anything else can be fetched dynamically
 const graphQLQuery = gql`
 	query {
-		videos: getLatestVideos(limit: 300) {
+		videos: getLatestVideos(limit: 400) {
 			id
 			slug
 			title
