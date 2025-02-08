@@ -5,9 +5,10 @@ interface Props {
   query: string;
   operation: string;
   limit: number;
+  variables?: Record<string, any>;
 }
 
-const { title, description, query, operation, limit } = Astro.props;
+const { title, description, query, operation, limit, variables = {} } = Astro.props;
 
 interface Video {
   title: string;
@@ -27,6 +28,7 @@ const response = await fetch("https://api.rawkode.academy/graphql", {
     query,
     variables: {
       limit,
+      ...variables
     },
   }),
 });
