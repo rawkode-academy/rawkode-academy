@@ -2,7 +2,7 @@ import schemaBuilder from '@pothos/core';
 import directivesPlugin from '@pothos/plugin-directives';
 import drizzlePlugin from '@pothos/plugin-drizzle';
 import federationPlugin from '@pothos/plugin-federation';
-import { desc, eq, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, like, lte, or, sql } from 'drizzle-orm';
 import { type GraphQLSchema } from 'graphql';
 import { DateResolver } from 'graphql-scalars';
 import { db } from '../data-model/client.ts';
@@ -106,7 +106,32 @@ builder.queryType({
 				db.select()
 					.from(dataSchema.videosTable)
 					.orderBy(desc(sql`RANDOM()`))
-					.limit(args.limit ?? 15)
+					.limit(args.limit ?? 15),
+		}),
+		simpleSearch: t.field({
+			type: [videoRef],
+			args: {
+				term: t.arg({
+					type: 'String',
+					required: true,
+				}),
+				limit: t.arg({
+					type: 'Int',
+					required: false,
+				}),
+			},
+			resolve: (_root, args, _ctx) =>
+				db.query.videosTable.findMany({
+					limit: args.limit ?? 15,
+					where: and(
+						lte(dataSchema.videosTable.publishedAt, new Date()),
+						or(
+							like(dataSchema.videosTable.title, args.term),
+							like(dataSchema.videosTable.description, args.term),
+						),
+					),
+					orderBy: (video, { desc }) => desc(video.publishedAt),
+				}).execute(),
 		}),
 	}),
 });
