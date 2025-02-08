@@ -1,0 +1,32 @@
+---
+import Page from "@/wrappers/page.astro";
+import VideoFeed from "@/components/video/video-feed.astro";
+
+const searchQuery = Astro.url.searchParams.get("q") || "";
+
+const searchGraphQLQuery = `
+  query Search($term: String!) {
+    simpleSearch(term: $term) {
+      id
+      title
+      description
+      publishedAt
+      thumbnailUrl
+      duration
+      slug
+      streamUrl
+    }
+  }
+`;
+---
+
+<Page title=`${searchQuery} Search Results``>
+  <VideoFeed
+    title={`Search Results for "${searchQuery}"`}
+    description="Videos matching your search"
+    query={searchGraphQLQuery}
+    operation="simpleSearch"
+    limit={12}
+    variables={{ term: searchQuery }}
+  />
+</Page>

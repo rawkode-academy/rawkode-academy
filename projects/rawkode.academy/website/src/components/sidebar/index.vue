@@ -74,8 +74,8 @@ onMounted(() => {
 		class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-black dark:border-gray-700"
 		aria-label="Sidenav" id="drawer-navigation">
 		<div class="overflow-y-auto py-5 px-3 h-full">
-			<!--  Search for  mobile
-			<form action="#" method="GET" class="md:hidden mb-2">
+			<!-- Search for mobile -->
+			<form action="/search" method="GET" class="md:hidden mb-2">
 				<label for="sidebar-search" class="sr-only">Search</label>
 				<div class="relative">
 					<div
@@ -97,13 +97,13 @@ onMounted(() => {
 					</div>
 					<input
 						type="text"
-						name="search"
+						name="q"
 						id="sidebar-search"
 						class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-						placeholder="Search"
+						placeholder="Search videos..."
 					/>
 				</div>
-			</form> -->
+			</form>
 			<ul class="space-y-2">
 				<MenuItems :menuItems="menuItems" />
 			</ul>
