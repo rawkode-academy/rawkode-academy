@@ -1,4 +1,6 @@
 ---
+export const prerender = true;
+
 import Page from "@/wrappers/page.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
@@ -117,6 +119,7 @@ const randomVideosQuery = `
 			limit={12}
 		/>
 		<VideoFeed
+			server:defer
 			title="Random Videos"
 			description="Discover something new from our collection"
 			operation="getRandomVideos"
