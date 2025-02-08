@@ -3,15 +3,14 @@ import { initFlowbite } from 'flowbite';
 import { onMounted } from 'vue';
 import MenuItems from "./items.vue";
 import {
-	FilmIcon,
 	HomeIcon,
 	InformationCircleIcon,
 	NewspaperIcon,
 	// QuestionMarkCircleIcon,
 	RocketLaunchIcon,
-	UsersIcon,
 	VideoCameraIcon,
 } from "@heroicons/vue/24/outline";
+import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/20/solid';
 
 const menuItems = [
 	{ name: "Home", href: "/", icon: HomeIcon, current: true },
@@ -32,9 +31,9 @@ const menuItems = [
 		current: false,
 	},
 	{
-		name: "Community",
+		name: "Join the Zulip",
 		href: "https://chat.rawkode.academy",
-		icon: UsersIcon,
+		icon: ChatBubbleLeftEllipsisIcon,
 		current: false,
 		target: "_blank",
 	},
