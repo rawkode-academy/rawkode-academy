@@ -7,8 +7,9 @@ import Sidebar from "@/components/sidebar/index.vue";
 	<nav
 		class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-black dark:border-gray-700 fixed left-0 right-0 top-0 z-50"
 	>
-		<div class="flex flex-wrap items-center">
-			<div class="flex items-center w-64 shrink-0">
+		<div class="flex items-center justify-between">
+			<!-- Left section - Logo -->
+			<div class="flex items-center w-64">
 				<button
 					data-drawer-target="drawer-navigation"
 					data-drawer-toggle="drawer-navigation"
@@ -54,11 +55,16 @@ import Sidebar from "@/components/sidebar/index.vue";
 					</svg>
 				</a>
 			</div>
-			<form action="/search" method="GET" class="hidden md:block flex-1 px-4 max-w-[600px] mx-auto">
+			<!-- Center section - Search -->
+			<form
+				action="/search"
+				method="GET"
+				class="hidden md:flex flex-1 justify-center max-w-[500px] mx-8"
+			>
 				<label for="topbar-search" class="sr-only">Search</label>
 				<div class="relative w-full">
 					<div
-						class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none"
+						class="flex absolute inset-y-0 left-0 items-center pl-4 pointer-events-none"
 					>
 						<svg
 							class="w-4 h-4 text-gray-400"
@@ -78,12 +84,13 @@ import Sidebar from "@/components/sidebar/index.vue";
 						type="text"
 						name="q"
 						id="topbar-search"
-						class="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded focus:ring-1 focus:ring-primary focus:border-primary block w-full pl-9 pr-3 py-1.5 placeholder-gray-400 dark:placeholder-gray-500"
+						class="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-2 focus:ring-primary focus:border-primary block w-full pl-10 pr-4 py-2 placeholder-gray-400 dark:placeholder-gray-500"
 						placeholder="Search videos..."
 					/>
 				</div>
 			</form>
-			<div class="flex items-center w-64 justify-end shrink-0">
+			<!-- Right section - Profile -->
+			<div class="flex w-64 items-center justify-end">
 				<!-- Notifications-->
 
 				<!-- Apps -->
