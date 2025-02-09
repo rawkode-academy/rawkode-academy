@@ -16,13 +16,13 @@ const { article } = Astro.props;
 		{
 			article.data.cover ? (
 				<Image
-					class="mb-5 rounded-lg w-full"
+					class="mb-5 rounded-lg w-full h-48 object-cover"
 					src={article.data.cover.image}
 					alt={article.data.cover.alt}
 				/>
 			) : (
 				<img
-					class="mb-5 rounded-lg w-full"
+					class="mb-5 rounded-lg w-full h-48 object-cover"
 					src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
 					alt="office laptop working"
 				/>

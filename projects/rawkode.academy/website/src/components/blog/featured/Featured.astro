@@ -1,34 +1,15 @@
 ---
 import { getCollection } from "astro:content";
 import ArticleCard from "../ArticleCard.astro";
-import SeriesCard from "../SeriesCard.astro";
 
 const latestBlogPosts = (await getCollection("blog"))
 	.slice(0, 3)
 	.filter((article) => !article.data.isDraft)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
-
-// FIXME: Only fetch series that are younger than 30 days
-// FIXME: Only fetch series that contain blog posts
-const blogSeries = await getCollection("series");
 ---
 
 <section class="bg-white dark:bg-gray-900">
 	<div class="pb-8 mx-auto lg:pb-16">
-		{
-			blogSeries.length > 0 && (
-				<>
-					<h3 class="text-3xl font-bold dark:text-white">Series</h3>
-
-					<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 pt-4">
-						{blogSeries.map((series) => (
-							<SeriesCard series={series} />
-						))}
-					</div>
-				</>
-			)
-		}
-
 		<h3 class="text-3xl font-bold dark:text-white">Articles</h3>
 
 		<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 pt-4">
