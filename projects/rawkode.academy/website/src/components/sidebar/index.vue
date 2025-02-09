@@ -99,7 +99,7 @@ onMounted(() => {
 						type="text"
 						name="q"
 						id="sidebar-search"
-						class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+						class="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-1 focus:ring-primary focus:border-primary block w-full pl-10 p-2 placeholder-gray-400 dark:placeholder-gray-500"
 						placeholder="Search videos..."
 					/>
 				</div>

@@ -7,8 +7,8 @@ import Sidebar from "@/components/sidebar/index.vue";
 	<nav
 		class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-black dark:border-gray-700 fixed left-0 right-0 top-0 z-50"
 	>
-		<div class="flex flex-wrap justify-between items-center">
-			<div class="flex justify-normal items-center">
+		<div class="flex flex-wrap items-center">
+			<div class="flex items-center w-64 shrink-0">
 				<button
 					data-drawer-target="drawer-navigation"
 					data-drawer-toggle="drawer-navigation"
@@ -41,7 +41,7 @@ import Sidebar from "@/components/sidebar/index.vue";
 					</svg>
 					<span class="sr-only">Toggle sidebar</span>
 				</button>
-				<a href="/" aria-label="return to the home page" class="flex mr-4 w-32">
+				<a href="/" aria-label="return to the home page" class="flex w-32">
 					<svg
 						class="fill-black dark:fill-white h-8"
 						id="Layer_1"
@@ -53,37 +53,37 @@ import Sidebar from "@/components/sidebar/index.vue";
 						></path>
 					</svg>
 				</a>
-				<form action="/search" method="GET" class="hidden md:block md:pl-2">
-					<label for="topbar-search" class="sr-only">Search</label>
-					<div class="relative md:w-64 md:w-96">
-						<div
-							class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none"
-						>
-							<svg
-								class="w-5 h-5 text-gray-500 dark:text-gray-400"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									clip-rule="evenodd"
-									d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-								>
-								</path>
-							</svg>
-						</div>
-						<input
-							type="text"
-							name="q"
-							id="topbar-search"
-							class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-							placeholder="Search videos..."
-						/>
-					</div>
-				</form>
 			</div>
-			<div class="flex items-center lg:order-2">
+			<form action="/search" method="GET" class="hidden md:block flex-1 px-4 max-w-[600px] mx-auto">
+				<label for="topbar-search" class="sr-only">Search</label>
+				<div class="relative w-full">
+					<div
+						class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none"
+					>
+						<svg
+							class="w-4 h-4 text-gray-400"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								fill-rule="evenodd"
+								clip-rule="evenodd"
+								d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+							>
+							</path>
+						</svg>
+					</div>
+					<input
+						type="text"
+						name="q"
+						id="topbar-search"
+						class="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded focus:ring-1 focus:ring-primary focus:border-primary block w-full pl-9 pr-3 py-1.5 placeholder-gray-400 dark:placeholder-gray-500"
+						placeholder="Search videos..."
+					/>
+				</div>
+			</form>
+			<div class="flex items-center w-64 justify-end shrink-0">
 				<!-- Notifications-->
 
 				<!-- Apps -->
