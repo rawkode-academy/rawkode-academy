@@ -46,7 +46,7 @@ export default defineConfig({
   },
 
   integrations: [
-    react({ experimentalReactChildren: true }),
+    react(),
   ],
 
   vite: {
