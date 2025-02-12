@@ -2,7 +2,7 @@
 import { defineConfig, envField } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from "@tailwindcss/vite";
 
 const site = (): string => {
   if (import.meta.env.CF_PAGES_URL) {
@@ -46,21 +46,15 @@ export default defineConfig({
   },
 
   integrations: [
-    tailwind({ applyBaseStyles: false }),
     react({ experimentalReactChildren: true }),
   ],
 
   vite: {
+    plugins: [
+      tailwindcss()
+    ],
     ssr: {
       external: ["node:crypto"],
-    },
-
-    resolve: {
-      alias: import.meta.env.PROD
-        ? {
-          "react-dom/server": "react-dom/server.edge",
-        }
-        : undefined,
     },
   },
 });
