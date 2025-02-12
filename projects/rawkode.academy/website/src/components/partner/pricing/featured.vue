@@ -14,7 +14,6 @@ const maltPricingPlan: PricingPlan = {
 		"Website Placement",
 		"Quarterly Live Stream",
 		"80 Hours of Consulting or Content Creation",
-		"Pre-roll on all free, unsponsored, content",
 		"2 Hour Course on Your Product, technology, or pattern of choice"
 	],
 };
