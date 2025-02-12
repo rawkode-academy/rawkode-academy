@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* https://github.com/tailwindlabs/tailwindcss/issues/15794#issuecomment-2629603348 */
 @source "../components/";
 
 @custom-variant dark (&:is(.dark *));
