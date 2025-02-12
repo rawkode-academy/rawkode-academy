@@ -34,7 +34,6 @@ const pricingPlans: PricingPlan[] = [
 			"Website Placement",
 			"Quarterly Live Stream",
 			"64 Hours of Consulting or Content Creation",
-			"Mid-roll on all free, unsponsored, content",
 		],
 	}
 ]
