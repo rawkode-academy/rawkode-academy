@@ -1,4 +1,4 @@
-import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
+import { InfluxDBClient, Point } from "@influxdata/influxdb3-client-browser";
 import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
