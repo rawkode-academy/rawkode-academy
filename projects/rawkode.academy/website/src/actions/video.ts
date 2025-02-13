@@ -1,7 +1,7 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { InfluxDB, Point } from "@influxdata/influxdb-client";
-import { getSecret, INFLUXDB_BUCKET, INFLUXDB_ORG } from "astro:env/server";
+import { getSecret } from "astro:env/server";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
@@ -38,12 +38,15 @@ export const trackVideoEvent = defineAction({
 
 			const influxDBUrl = getSecret("INFLUXDB_URL");
 			const influxDBToken = getSecret("INFLUXDB_TOKEN");
+			const influxDBOrg = getSecret("INFLUXDB_ORG");
+			const influxDBBucket = getSecret("INFLUXDB_BUCKET");
 
 			console.log("InfluxDB URL:", influxDBUrl);
-			console.log("InfluxDB Org:", INFLUXDB_ORG);
+			console.log("InfluxDB Org:", influxDBOrg);
+			console.log("InfluxDB Bucket:", influxDBBucket);
 
 			// Not configured, that's OK
-			if (!influxDBUrl || !influxDBToken || !INFLUXDB_ORG) {
+			if (!influxDBUrl || !influxDBToken || !influxDBOrg || !influxDBBucket) {
 				console.log(`InfluxDB not configured, skipping event`);
 				return { success: true };
 			}
@@ -53,7 +56,7 @@ export const trackVideoEvent = defineAction({
 				token: influxDBToken,
 			});
 
-			const writeApi = influxDB.getWriteApi(INFLUXDB_ORG, INFLUXDB_BUCKET);
+			const writeApi = influxDB.getWriteApi(influxDBOrg, influxDBBucket);
 
 			let point = new Point("event")
 				.tag("action", event.action)
