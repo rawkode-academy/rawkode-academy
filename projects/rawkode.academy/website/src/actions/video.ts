@@ -1,7 +1,7 @@
+import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
 import { ActionError, defineAction } from "astro:actions";
-import { z } from "astro:schema";
-import { InfluxDB, Point } from "@influxdata/influxdb-client";
 import { getSecret } from "astro:env/server";
+import { z } from "astro:schema";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
@@ -47,34 +47,33 @@ export const trackVideoEvent = defineAction({
 				return { success: true };
 			}
 
-			const influxDB = new InfluxDB({
-				url: influxDBUrl,
+			const influxDB = new InfluxDBClient({
+				host: influxDBUrl,
 				token: influxDBToken,
+				database: influxDBBucket,
 			});
 
-			const writeApi = influxDB.getWriteApi(influxDBOrg, influxDBBucket);
-
-			let point = new Point("event")
-				.tag("action", event.action)
-				.tag("videoId", event.videoId)
-				.tag("viewerId", "anonymous");
+			let point = Point.measurement("event")
+				.setTag("action", event.action)
+				.setTag("videoId", event.videoId)
+				.setTag("viewerId", "anonymous");
 
 			switch (event.action) {
 				case "video_started":
 				case "video_paused":
 				case "video_seeked":
-					point = point.intField("seconds", event.seconds);
+					point.setField("seconds", event.seconds);
 					break;
 				case "video_progressed":
-					point = point.intField("percent", event.percent);
+					point.setField("percent", event.percent);
 					break;
 				case "video_completed":
 					break;
 			}
 
-			writeApi.writePoint(point);
+			await influxDB.write(point);
+			await influxDB.close();
 
-			await writeApi.flush();
 			return {
 				success: true as const,
 			};
