@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Hls from "hls.js";
+import { actions } from "astro:actions";
 
 interface VideoPlayerProps {
   videoId: string;
@@ -11,7 +12,7 @@ interface VideoPlayerProps {
   onReady?: () => void;
 }
 
-type VideoAnalyticsEvent =
+export type VideoAnalyticsEvent =
   | VideoStartedEvent
   | VideoPausedEvent
   | VideoSeekedEvent
@@ -47,31 +48,16 @@ interface VideoProgressedEvent {
   percent: number;
 }
 
-declare global {
-  interface Window {
-    faro?: {
-      api: {
-        pushEvent: (name: string, attributes: Record<string, unknown>) => void;
-      };
-    };
+async function trackVideoEvent(event: VideoAnalyticsEvent) {
+  try {
+    await actions.trackVideoEvent(event);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to track video event:", error.message);
+    } else {
+      console.error("Failed to track video event:", error);
+    }
   }
-}
-
-function trackVideoEvent(event: VideoAnalyticsEvent) {
-  if (!window.faro) {
-    console.warn("Faro not initialized, skipping video event tracking");
-    return;
-  }
-
-  const action = event.action;
-
-  window.faro.api.pushEvent(action, {
-    ...Object.fromEntries(
-      Object.entries(event).filter(([key, _]) => key !== "action").map((
-        [key, value],
-      ) => [key, String(value)]),
-    ),
-  });
 }
 
 export default function VideoPlayer({
