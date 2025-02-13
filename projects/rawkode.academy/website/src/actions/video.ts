@@ -41,10 +41,6 @@ export const trackVideoEvent = defineAction({
 			const influxDBOrg = getSecret("INFLUXDB_ORG");
 			const influxDBBucket = getSecret("INFLUXDB_BUCKET");
 
-			console.log("InfluxDB URL:", influxDBUrl);
-			console.log("InfluxDB Org:", influxDBOrg);
-			console.log("InfluxDB Bucket:", influxDBBucket);
-
 			// Not configured, that's OK
 			if (!influxDBUrl || !influxDBToken || !influxDBOrg || !influxDBBucket) {
 				console.log(`InfluxDB not configured, skipping event`);
@@ -78,11 +74,7 @@ export const trackVideoEvent = defineAction({
 
 			writeApi.writePoint(point);
 
-			console.log(point);
-
-			await writeApi.close();
-			console.log("DONE");
-
+			await writeApi.flush();
 			return {
 				success: true as const,
 			};
