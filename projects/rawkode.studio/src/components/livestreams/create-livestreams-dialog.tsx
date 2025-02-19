@@ -1,6 +1,7 @@
 import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -30,6 +31,12 @@ const formSchema = z.object({
   name: z.string()
     .min(1, { message: "Name must be at least 1 character." })
     .max(64, { message: "Name must be at most 64 characters." }),
+  maxParticipants: z.coerce.number()
+    .min(1, {
+      message: "Max participants must be at least 1.",
+    }).max(100, {
+      message: "Max participants must be at most 100.",
+    }),
 });
 
 export default function CreateLivestreamsDialog() {
@@ -39,12 +46,16 @@ export default function CreateLivestreamsDialog() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      maxParticipants: 10,
     },
   });
 
   const { mutate } = useMutation({
     mutationFn: (values: z.infer<typeof formSchema>) =>
-      actions.createRoom({ name: values.name }),
+      actions.createRoom({
+        name: values.name,
+        maxParticipants: values.maxParticipants,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["livestreams"] });
     },
@@ -75,6 +86,7 @@ export default function CreateLivestreamsDialog() {
                   onSuccess: () => {
                     setOpen(false);
                     form.reset();
+                    console.log(`Successfully created room: ${values.name}`);
                   },
                 })
               )}
@@ -91,6 +103,25 @@ export default function CreateLivestreamsDialog() {
                     <FormControl>
                       <Input
                         placeholder="Name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxParticipants"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Max participants
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Max participants"
                         {...field}
                       />
                     </FormControl>
