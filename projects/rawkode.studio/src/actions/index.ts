@@ -26,6 +26,7 @@ export const server = {
   createRoom: defineAction({
     input: z.object({
       name: z.string(),
+      maxParticipants: z.number(),
     }),
 
     handler: async (input, context) => {
@@ -33,7 +34,10 @@ export const server = {
         throw new ActionError({ code: "UNAUTHORIZED" });
       }
 
-      const room = await roomClientService.createRoom({ name: input.name });
+      const room = await roomClientService.createRoom({
+        name: input.name,
+        maxParticipants: input.maxParticipants,
+      });
 
       return {
         id: room.sid,
