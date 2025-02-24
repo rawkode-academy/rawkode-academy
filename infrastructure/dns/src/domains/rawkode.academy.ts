@@ -34,6 +34,14 @@ export default (scope: Construct): ManagedDomain => {
 			"default._bimi",
 			`v=BIMI1; l=https://rawkode.academy/icon-gradient-bimi.svg; a=;`,
 		)
+		.addCNameRecord("www", "www", "rawkode.academy")
+		.addCNameRecord("meet", "meet", "custom.savvycal.com")
+		.addTextRecord(
+			"savvycal",
+			"20250224144620pm._domainkey",
+			"k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCIAjV3SWToVrZLC0ZqlPE58BLitE11e7+GBBZbZNyRBjeZObIo+PX7UbllD2MTiAKWEfO2DCvZYW5eavJUP+xvHH+nnDywsgW184Z7+lA/Oand3P9IaSGP/YhZ2NzJgoOMqK+TbrdP9+gIDXhFzLhxVn6T9+AI4jnp9dYbod9DLQIDAQAB",
+		)
+		.addCNameRecord("savvycal-sender", "pm-bounces", "pm.mtasv.net")
 		.enableResend({
 			subdomain: "send",
 			domainKey:
