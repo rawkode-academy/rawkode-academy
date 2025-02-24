@@ -59,7 +59,6 @@ export class ManagedDomain extends Construct {
 			zone,
 			accountId: process.env.CLOUDFLARE_ACCOUNT_ID || "",
 			type: "full",
-			plan: "free",
 			lifecycle: {
 				preventDestroy: true,
 			},
