@@ -38,6 +38,7 @@
     "@types/marked": "^6.0.0",
     "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
+    "@vidstack/react": "^1.12.13",
     "@workos-inc/node": "7.36.0",
     "arctic": "3.0.0",
     "astro": "5.1.2",

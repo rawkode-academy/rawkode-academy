@@ -111,6 +111,12 @@ onMounted(() => {
     >
       <media-provider>
         <source :src="`https://videos.rawkode.academy/${videoId}/stream.m3u8`" type="application/x-mpegurl" />
+        <track
+          kind="chapters"
+          :src="`/api/chapters/${videoId}`"
+          label="Chapters"
+          default
+        />
         <media-poster
           class="vds-poster"
           :src="thumbnailUrl"
