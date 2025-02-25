@@ -8,6 +8,7 @@ import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeMermaid from "rehype-mermaid";
+import { vite as vidstack } from 'vidstack/plugins';
 
 export default defineConfig({
 	output: "server",
@@ -22,6 +23,16 @@ export default defineConfig({
 		vue(),
 	],
 	vite: {
+		plugins: [
+			vidstack({ include: /components\/video\// }),
+			vue({
+				template: {
+					compilerOptions: {
+						isCustomElement: (tag) => tag.startsWith("media-"),
+					},
+				},
+			}),
+		],
 		resolve: {
 			// Use react-dom/server.edge instead of react-dom/server.browser for React 19.
 			// Without this, MessageChannel from node:worker_threads needs to be polyfilled.

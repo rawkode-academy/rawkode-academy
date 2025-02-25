@@ -1,6 +1,6 @@
 ---
 import Page from "@/wrappers/page.astro";
-import VideoPlayer from "@/components/video/player";
+import VideoPlayer from "@/components/video/player.vue";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
@@ -8,16 +8,29 @@ import { Marked } from "marked";
 
 export const prerender = true;
 
+// Define the video data type explicitly
+interface VideoData {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  streamUrl: string;
+  publishedAt: string;
+  thumbnailUrl: string;
+  duration: number;
+}
+
 export const getStaticPaths = (async () => {
 	const videos = await getCollection("videos");
 
-	return videos.map((video) => ({
+	return videos.map((video: any) => ({
 		params: { slug: video.data.slug },
 		props: { video },
 	}));
 }) satisfies GetStaticPaths;
 
-const { video } = Astro.props;
+const { video } = Astro.props as { video: { data: VideoData } };
 
 // Setting breaks to true doesn't handle multiple sequentiaal \n's
 const marked = new Marked({ breaks: false, gfm: true });
@@ -55,7 +68,7 @@ const renderedDescription = marked.parse(
 				class="relative w-full aspect-video rounded-lg overflow-hidden bg-black"
 			>
 				<VideoPlayer
-					client:only="react"
+					client:only="vue"
 					videoId={video.data.id}
 					thumbnailUrl={video.data.thumbnailUrl}
 				/>
