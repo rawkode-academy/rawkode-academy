@@ -26,27 +26,27 @@
     {
       "attr_path": "runme",
       "broken": false,
-      "derivation": "/nix/store/7794qpr8x1bhnc8qbr7imay2fyjshqbd-runme-3.0.2.drv",
+      "derivation": "/nix/store/1q7nfrbq9clf7y8ks487d7c3r2zkcsrd-runme-3.8.3.drv",
       "description": "Execute commands inside your runbooks, docs, and READMEs",
       "install_id": "runme",
       "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
-      "name": "runme-3.0.2",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=0196c0175e9191c474c26ab5548db27ef5d34b05",
+      "name": "runme-3.8.3",
       "pname": "runme",
-      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
-      "rev_count": 680062,
-      "rev_date": "2024-09-11T13:54:33Z",
-      "scrape_date": "2024-09-14T03:13:36Z",
+      "rev": "0196c0175e9191c474c26ab5548db27ef5d34b05",
+      "rev_count": 758135,
+      "rev_date": "2025-02-24T03:24:50Z",
+      "scrape_date": "2025-02-25T02:25:54Z",
       "stabilities": [
         "unstable"
       ],
       "unfree": false,
-      "version": "3.0.2",
+      "version": "3.8.3",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/xb802c65adh11p6h6nvyvwsfbl6sc7c3-runme-3.0.2"
+        "out": "/nix/store/fkw1wzn3255y1mb42g0a3x6d2wpsv63k-runme-3.8.3"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -55,27 +55,27 @@
     {
       "attr_path": "runme",
       "broken": false,
-      "derivation": "/nix/store/gzsxkwbdiz3jw5z6vj0cdmjz6ay9q4gc-runme-3.0.2.drv",
+      "derivation": "/nix/store/gfalbda0cpxrg8l9397b3aq3hhz2c341-runme-3.8.3.drv",
       "description": "Execute commands inside your runbooks, docs, and READMEs",
       "install_id": "runme",
       "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
-      "name": "runme-3.0.2",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=0196c0175e9191c474c26ab5548db27ef5d34b05",
+      "name": "runme-3.8.3",
       "pname": "runme",
-      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
-      "rev_count": 680062,
-      "rev_date": "2024-09-11T13:54:33Z",
-      "scrape_date": "2024-09-14T03:13:36Z",
+      "rev": "0196c0175e9191c474c26ab5548db27ef5d34b05",
+      "rev_count": 758135,
+      "rev_date": "2025-02-24T03:24:50Z",
+      "scrape_date": "2025-02-25T02:25:54Z",
       "stabilities": [
         "unstable"
       ],
       "unfree": false,
-      "version": "3.0.2",
+      "version": "3.8.3",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/74fhpxyka9k5i2k1yjmknr0f5kdmyrml-runme-3.0.2"
+        "out": "/nix/store/pjbbs5bl6k3q79rq26r6cdyr2682xij2-runme-3.8.3"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -84,27 +84,27 @@
     {
       "attr_path": "runme",
       "broken": false,
-      "derivation": "/nix/store/z12q1y4k2vk55b4pviw5z5zfazr3qnr9-runme-3.0.2.drv",
+      "derivation": "/nix/store/k3cy2yv643gfrm8w2dalxzhahgqaid67-runme-3.8.3.drv",
       "description": "Execute commands inside your runbooks, docs, and READMEs",
       "install_id": "runme",
       "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
-      "name": "runme-3.0.2",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=0196c0175e9191c474c26ab5548db27ef5d34b05",
+      "name": "runme-3.8.3",
       "pname": "runme",
-      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
-      "rev_count": 680062,
-      "rev_date": "2024-09-11T13:54:33Z",
-      "scrape_date": "2024-09-14T03:13:36Z",
+      "rev": "0196c0175e9191c474c26ab5548db27ef5d34b05",
+      "rev_count": 758135,
+      "rev_date": "2025-02-24T03:24:50Z",
+      "scrape_date": "2025-02-25T02:25:54Z",
       "stabilities": [
         "unstable"
       ],
       "unfree": false,
-      "version": "3.0.2",
+      "version": "3.8.3",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/k2l2d72jyfvf4h6g06rq23gda34v978x-runme-3.0.2"
+        "out": "/nix/store/lhbg9n9ngm6wy2jc9k6wpwbh2kbvjgpk-runme-3.8.3"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -113,27 +113,27 @@
     {
       "attr_path": "runme",
       "broken": false,
-      "derivation": "/nix/store/qbliwz987kfzy26jn89bjx1nhbxn92di-runme-3.0.2.drv",
+      "derivation": "/nix/store/gn10q7ambv7ccqfnapv2009wsl1q60l0-runme-3.8.3.drv",
       "description": "Execute commands inside your runbooks, docs, and READMEs",
       "install_id": "runme",
       "license": "Apache-2.0",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=4f807e8940284ad7925ebd0a0993d2a1791acb2f",
-      "name": "runme-3.0.2",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=0196c0175e9191c474c26ab5548db27ef5d34b05",
+      "name": "runme-3.8.3",
       "pname": "runme",
-      "rev": "4f807e8940284ad7925ebd0a0993d2a1791acb2f",
-      "rev_count": 680062,
-      "rev_date": "2024-09-11T13:54:33Z",
-      "scrape_date": "2024-09-14T03:13:36Z",
+      "rev": "0196c0175e9191c474c26ab5548db27ef5d34b05",
+      "rev_count": 758135,
+      "rev_date": "2025-02-24T03:24:50Z",
+      "scrape_date": "2025-02-25T02:25:54Z",
       "stabilities": [
         "unstable"
       ],
       "unfree": false,
-      "version": "3.0.2",
+      "version": "3.8.3",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/1n4bzrjr8fl2kssgixbsslrlyjrhgajv-runme-3.0.2"
+        "out": "/nix/store/2kgwfvz90l5csn6gqkix3xinqvmgfmar-runme-3.8.3"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
