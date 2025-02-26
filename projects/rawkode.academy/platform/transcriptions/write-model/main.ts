@@ -39,7 +39,7 @@ const transcriptionService = service({
 					.transcribeUrl(
 						{
 							url:
-								`https://videos.rawkode.academy/${config.videoId}/youtube/audio.wav`,
+								`https://videos.rawkode.academy/${config.videoId}/youtube/video.mkv`,
 						},
 						{
 							model: 'nova-3',
