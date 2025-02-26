@@ -34,7 +34,17 @@ const transcriptionService = service({
 				},
 			});
 
-			const result = await ctx.run(async () => {
+			const myRunRetryPolicy = {
+				// 5 minutes
+				initialRetryIntervalMillis: 300000,
+				maxRetryIntervalMillis: 3000000,
+				retryIntervalFactor: 5,
+				maxRetryAttempts: 1024,
+				// 3 days
+				maxRetryDurationMillis: 259200000,
+			};
+
+			const result = await ctx.run("transcription", async () => {
 				const { result, error } = await deepgram.listen.prerecorded
 					.transcribeUrl(
 						{
@@ -49,14 +59,11 @@ const transcriptionService = service({
 					);
 
 				if (error) {
-					throw new TerminalError('Something went wrong.', {
-						errorCode: 500,
-						cause: error,
-					});
+					throw error;
 				}
 
 				return result;
-			});
+			}, myRunRetryPolicy);
 
 			const captions = webvtt(result);
 
