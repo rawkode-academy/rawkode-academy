@@ -18,25 +18,36 @@ const site = (): string => {
 
 export default defineConfig({
   output: "server",
-  adapter: cloudflare(),
+
+  adapter: cloudflare({
+    imageService: "cloudflare",
+  }),
 
   site: site(),
 
   env: {
-    // FIXME? to make it work, we need to have them at build time
     validateSecrets: false,
 
     schema: {
-      LIVEKIT_URL: envField.string({ context: "server", access: "secret" }),
-      LIVEKIT_API_KEY: envField.string({ context: "server", access: "secret" }),
+      ZITADEL_URL: envField.string({
+        context: "server",
+        access: "public",
+      }),
+      ZITADEL_CLIENT_ID: envField.string({
+        context: "server",
+        access: "public",
+      }),
+      LIVEKIT_URL: envField.string({
+        context: "server",
+        access: "secret",
+      }),
       LIVEKIT_API_SECRET: envField.string({
         context: "server",
         access: "secret",
       }),
-      ZITADEL_URL: envField.string({ context: "server", access: "public" }),
-      ZITADEL_CLIENT_ID: envField.string({
+      LIVEKIT_API_KEY: envField.string({
         context: "server",
-        access: "public",
+        access: "secret",
       }),
     },
   },
@@ -53,6 +64,7 @@ export default defineConfig({
     plugins: [
       tailwindcss(),
     ],
+
     ssr: {
       external: ["node:crypto"],
     },
