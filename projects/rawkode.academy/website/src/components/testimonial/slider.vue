@@ -30,33 +30,34 @@ defineProps<Props>();
     class="testimonial-carousel"
   >
     <Slide v-for="(testimonial, index) in testimonials" :key="index">
-      <div class="testimonial-slide">
-        <div class="testimonial-card">
+      <div class="py-8 px-4 md:py-8 md:px-4 text-gray-900 dark:text-gray-100">
+        <div class="relative max-w-3xl mx-auto p-8 md:p-10 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           <blockquote>
-            <p class="testimonial-text">
+            <p class="relative text-xl font-medium leading-relaxed text-gray-800 dark:text-gray-100 mb-6 text-center px-6 z-10">
               {{ testimonial.quote }}
             </p>
           </blockquote>
-          <div class="author-section">
-            <div class="author-image">
+          <div class="flex items-center justify-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex-shrink-0 mr-4">
               <img
                 :src="testimonial.author.image"
                 :alt="`${testimonial.author.name} profile picture`"
+                class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 dark:border-indigo-400 shadow-sm ring-2 ring-white dark:ring-gray-800"
               />
             </div>
-            <div class="author-info">
+            <div class="flex flex-col">
               <a
                 v-if="testimonial.author.link"
                 target="_blank"
                 :href="testimonial.author.link"
-                class="author-link"
+                class="no-underline transition-opacity hover:opacity-80"
               >
-                <div class="author-name">{{ testimonial.author.name }}</div>
-                <div class="author-title">{{ testimonial.author.title }}</div>
+                <div class="font-semibold text-gray-900 dark:text-white mb-1">{{ testimonial.author.name }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">{{ testimonial.author.title }}</div>
               </a>
               <div v-else>
-                <div class="author-name">{{ testimonial.author.name }}</div>
-                <div class="author-title">{{ testimonial.author.title }}</div>
+                <div class="font-semibold text-gray-900 dark:text-white mb-1">{{ testimonial.author.name }}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">{{ testimonial.author.title }}</div>
               </div>
             </div>
           </div>
@@ -72,141 +73,6 @@ defineProps<Props>();
 </template>
 
 <style>
-.testimonial-slide {
-  padding: 2rem 1rem;
-}
-
-.testimonial-card {
-  position: relative;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2.5rem 2rem 2rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-  border-radius: 1rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(229, 231, 235, 0.5);
-  overflow: hidden;
-}
-
-.dark .testimonial-card {
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-  border-color: rgba(55, 65, 81, 0.5);
-}
-
-.quote-icon {
-  position: absolute;
-  width: 4rem;
-  height: 4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.12;
-  z-index: 1;
-}
-
-.quote-icon-start {
-  top: 1.5rem;
-  left: 1.5rem;
-  transform: rotate(180deg);
-}
-
-.quote-icon-end {
-  bottom: 1.5rem;
-  right: 1.5rem;
-}
-
-.quote-icon svg {
-  width: 100%;
-  height: 100%;
-  color: #4f46e5;
-}
-
-.dark .quote-icon svg {
-  color: #6366f1;
-}
-
-.testimonial-text {
-  position: relative;
-  font-size: 1.25rem;
-  line-height: 1.75;
-  font-weight: 500;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
-  z-index: 10;
-  text-align: center;
-  padding: 0 1.5rem;
-}
-
-.dark .testimonial-text {
-  color: #f9fafb;
-}
-
-.author-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(229, 231, 235, 0.7);
-}
-
-.dark .author-section {
-  border-top-color: rgba(55, 65, 81, 0.7);
-}
-
-.author-image {
-  flex-shrink: 0;
-  margin-right: 1rem;
-}
-
-.author-image img {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 9999px;
-  object-fit: cover;
-  border: 2px solid #4f46e5;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
-}
-
-.dark .author-image img {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(31, 41, 55, 0.8);
-}
-
-.author-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.author-name {
-  font-weight: 600;
-  font-size: 1rem;
-  color: #111827;
-  margin-bottom: 0.25rem;
-}
-
-.dark .author-name {
-  color: #f9fafb;
-}
-
-.author-title {
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.dark .author-title {
-  color: #9ca3af;
-}
-
-.author-link {
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-.author-link:hover {
-  opacity: 0.8;
-}
-
 /* Customize carousel navigation */
 .carousel__prev,
 .carousel__next {
@@ -220,11 +86,22 @@ defineProps<Props>();
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
 }
 
+.dark .carousel__prev,
+.dark .carousel__next {
+  background-color: #6366f1 !important; /* indigo-500 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
 .carousel__prev:hover,
 .carousel__next:hover {
   background-color: #4338ca !important; /* indigo-700 */
   opacity: 1 !important;
   transform: scale(1.05) !important;
+}
+
+.dark .carousel__prev:hover,
+.dark .carousel__next:hover {
+  background-color: #818cf8 !important; /* indigo-400 */
 }
 
 .carousel__icon {
@@ -260,14 +137,6 @@ defineProps<Props>();
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .testimonial-card {
-    padding: 2rem 1.5rem 1.5rem;
-  }
-
-  .testimonial-text {
-    font-size: 1.125rem;
-  }
-
   .carousel__prev,
   .carousel__next {
     width: 2.5rem !important;
@@ -277,18 +146,9 @@ defineProps<Props>();
 }
 
 @media (max-width: 640px) {
-  .testimonial-slide {
-    padding: 1rem 0.5rem;
-  }
-
   .carousel__prev,
   .carousel__next {
     display: none !important;
-  }
-
-  .author-image img {
-    width: 2.5rem;
-    height: 2.5rem;
   }
 }
 </style>

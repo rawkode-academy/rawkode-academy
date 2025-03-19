@@ -20,13 +20,16 @@ interface Props {
 const { testimonials } = Astro.props;
 ---
 
-<section class="testimonial-section">
-  <div class="testimonial-container">
-    <div class="testimonial-header">
-      <h2 class="testimonial-title">
+<section class="relative py-16 md:py-16 overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white">
+  <!-- Gradient line at the top -->
+  <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-600 to-purple-500"></div>
+
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="max-w-3xl mx-auto mb-12 text-center">
+      <h2 class="text-4xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-white">
         Don't just take our word for it ...
       </h2>
-      <div class="testimonial-subtitle">
+      <div class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
         Here's what our partners have to say about working with us
       </div>
     </div>
@@ -34,76 +37,3 @@ const { testimonials } = Astro.props;
     <SliderClient testimonials={testimonials} client:load />
   </div>
 </section>
-
-<style>
-  .testimonial-section {
-    background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
-    padding: 4rem 0;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .testimonial-section::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(to right, #4f46e5, #8b5cf6);
-  }
-
-  .dark .testimonial-section {
-    background: linear-gradient(to bottom, #111827, #1f2937);
-  }
-
-  .testimonial-container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 1rem;
-  }
-
-  .testimonial-header {
-    max-width: 800px;
-    margin: 0 auto 3rem;
-    text-align: center;
-  }
-
-  .testimonial-title {
-    font-size: 2.25rem;
-    font-weight: 800;
-    line-height: 1.2;
-    color: #111827;
-    margin-bottom: 1rem;
-    letter-spacing: -0.025em;
-  }
-
-  .dark .testimonial-title {
-    color: #f9fafb;
-  }
-
-  .testimonial-subtitle {
-    font-size: 1.125rem;
-    color: #6b7280;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .dark .testimonial-subtitle {
-    color: #9ca3af;
-  }
-
-  @media (max-width: 768px) {
-    .testimonial-section {
-      padding: 3rem 0;
-    }
-
-    .testimonial-title {
-      font-size: 1.875rem;
-    }
-
-    .testimonial-subtitle {
-      font-size: 1rem;
-    }
-  }
-</style>
