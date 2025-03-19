@@ -22,9 +22,9 @@ const shuffle = (array: string[]): string[] => {
 const Typewriter = (props: Props) => {
   return (
     <section className="bg-white dark:bg-black">
-      <div className="grid px-2 py-8 mx-auto lg:gap-4 xl:gap-0 lg:py-16 lg:grid-cols-12">
-        <div className="mr-auto place-self-center lg:col-span-8">
-          <h1 className="mb-4 text-4xl font-semibold tracking-tight leading-none md:text-5xl xl:text-6xl text-black dark:text-white">
+      <div className="grid px-4 py-12 mx-auto lg:gap-8 xl:gap-0 lg:py-24 lg:grid-cols-12 max-w-7xl">
+        <div className="mr-auto place-self-center lg:col-span-7">
+          <h1 className="mb-6 text-4xl font-bold tracking-tight leading-none md:text-5xl xl:text-6xl text-black dark:text-white">
             <TypeAnimation
               className="bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent"
               sequence={shuffle(props.rotatedPrefixes).reduce<
@@ -38,14 +38,17 @@ const Typewriter = (props: Props) => {
               repeat={Number.POSITIVE_INFINITY}
             />
             <br />
-            {props.suffix}
+            <span className="relative">
+              {props.suffix}
+              <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 to-secondary/30"></span>
+            </span>
           </h1>
-          <p className="mb-6 font-light text-gray-600 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
+          <p className="mb-8 text-gray-600 lg:mb-10 md:text-lg lg:text-xl dark:text-gray-400 max-w-3xl">
             Navigating the Cloud Native landscape can be tough and just keeping
             your head above water is a challenge.
             <br />
             <br />
-            We're here to help.
+            <span className="font-medium text-black dark:text-white">We're here to help.</span>
           </p>
           <a
             href={props.primaryButton.link}

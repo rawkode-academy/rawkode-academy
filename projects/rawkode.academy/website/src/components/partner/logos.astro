@@ -97,42 +97,60 @@ const partners: Partners = [
 ---
 
 		<div
-			class="grid grid-cols-1 mt-8 text-center gap-y-16 gaps-x-16 lg:grid-cols-2 xl:grid-cols-3"
+			class="grid grid-cols-1 text-center gap-8 md:grid-cols-2 xl:grid-cols-3"
 		>
 			{
 				partners.map(async (partner) => (
-					<div>
-						<div>
-							<div class="flex justify-center w-auto max-w-64 object-contain h-24 mx-auto mb-4"
-							style=`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`
-							>
-								<Fragment set:html={partner.logo.image.default} />
-							</div>
-
-							<p class="text-base font-normal leading-tight text-gray-500 dark:text-gray-400 mt-2.5">
-								Partner since {partner.since}
-							</p>
-						</div>
-						<div class="mt-5">
-							<a
-								href={partner.url}
-								title={partner.name}
-								target="_blank"
-								class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-								role="button"
-							>
-								<svg
-									aria-hidden="true"
-									class="w-5 h-5 mr-2 -ml-1"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 20 20"
-									fill="currentColor"
+					<div class="group relative p-6 rounded-lg transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-800 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-primary/20 dark:hover:border-primary/20">
+						<div class="flex flex-col h-full">
+							<div class="flex-grow">
+								<div
+									class="flex justify-center items-center w-full h-24 mx-auto mb-4 transition-transform duration-300 group-hover:scale-105"
+									style=`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`
 								>
-									<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-									<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-								</svg>
-								Visit website
-							</a>
+									<div class="w-48 h-20 flex items-center justify-center">
+										<Fragment set:html={partner.logo.image.default} />
+									</div>
+								</div>
+
+								<div class="flex items-center justify-center gap-2 mt-3">
+									<span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+										partner.level === "Malt"
+											? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+											: partner.level === "Blend"
+											? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+											: partner.level === "Dram"
+											? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+											: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+									}`}>
+										{partner.level} Partner
+									</span>
+									<span class="text-sm text-gray-500 dark:text-gray-400">
+										Since {partner.since}
+									</span>
+								</div>
+							</div>
+							<div class="mt-5">
+								<a
+									href={partner.url}
+									title={`Visit ${partner.name} website`}
+									target="_blank"
+									class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-50 hover:text-primary focus:z-10 focus:ring-2 focus:ring-primary/30 dark:focus:ring-primary/30 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white transition-colors duration-200"
+									role="button"
+								>
+									<svg
+										aria-hidden="true"
+										class="w-4 h-4 mr-2"
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+									>
+										<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+										<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+									</svg>
+									Visit {partner.name}
+								</a>
+							</div>
 						</div>
 					</div>
 				))
