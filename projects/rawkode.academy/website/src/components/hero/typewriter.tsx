@@ -38,9 +38,23 @@ const Typewriter = (props: Props) => {
               repeat={Number.POSITIVE_INFINITY}
             />
             <br />
-            <span className="relative">
-              {props.suffix}
-              <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 to-secondary/30"></span>
+            <span>
+              {props.suffix.split(props.highlight).map((part, index, array) => {
+                // If this is the last part, just return it
+                if (index === array.length - 1) {
+                  return part;
+                }
+                // Otherwise, return this part followed by the highlighted word
+                return (
+                  <>
+                    {part}
+                    <span className="relative">
+                      {props.highlight}
+                      <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 to-secondary/30"></span>
+                    </span>
+                  </>
+                );
+              })}
             </span>
           </h1>
           <p className="mb-8 text-gray-600 lg:mb-10 md:text-lg lg:text-xl dark:text-gray-400 max-w-3xl">
