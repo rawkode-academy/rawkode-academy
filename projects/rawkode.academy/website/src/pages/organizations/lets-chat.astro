@@ -1,5 +1,4 @@
 ---
-import CalCom from "@/components/calcom";
 import Page from "@/wrappers/page.astro";
 ---
 
@@ -13,16 +12,165 @@ import Page from "@/wrappers/page.astro";
 	h1 {
 		@apply text-4xl tracking-tight font-bold text-gray-900 dark:text-white;
 	}
+
+	.benefits-list {
+		@apply mt-6 space-y-4;
+	}
+
+	.benefits-list li {
+		@apply flex items-start;
+	}
+
+	.benefits-list .icon {
+		@apply flex-shrink-0 w-5 h-5 text-primary mt-1 mr-3;
+	}
+
+	.benefits-list .text {
+		@apply text-gray-600 dark:text-gray-300;
+	}
+
+	#booking-page {
+		@apply w-full min-h-[600px] overflow-hidden;
+	}
 </style>
 
-<Page title="Let's Chat">
-	<h1>Let's Work Together</h1>
+<Page
+	title="Schedule a Partnership Consultation"
+	description="Discuss how Rawkode Academy can help accelerate your developer marketing strategy and product adoption."
+>
+	<div class="max-w-4xl mx-auto">
+		<h1 class="text-center mb-6">Schedule Your Partnership Consultation</h1>
 
-	<p class="mb-4 dark:text-gray-400">
-		Want to find out how a <a href="/organizations/partnerships"
-			>Rawkode Academy partnership</a
-		> can help your business, product, and developers? We'd love to chat.
-	</p>
+		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+			<p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
+				Ready to explore how a <a
+					href="/organizations/partnerships"
+					class="text-primary hover:underline">Rawkode Academy partnership</a
+				> can accelerate your developer marketing strategy and product adoption?
+				Schedule a consultation with our team to discuss your specific goals and
+				how we can help you achieve them.
+			</p>
 
-	<CalCom client:only="react" link="partner-discussion" />
+			<h2 class="text-2xl font-semibold text-gray-800 dark:text-white">
+				During our consultation, we'll discuss:
+			</h2>
+
+			<ul class="benefits-list">
+				<li>
+					<svg
+						class="icon"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text"
+						>Your product's unique value proposition and how to effectively
+						communicate it to developers</span
+					>
+				</li>
+				<li>
+					<svg
+						class="icon"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text"
+						>Your current developer marketing challenges and opportunities</span
+					>
+				</li>
+				<li>
+					<svg
+						class="icon"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text"
+						>Which partnership tier would best align with your business
+						objectives</span
+					>
+				</li>
+				<li>
+					<svg
+						class="icon"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text"
+						>Potential content strategies and formats to showcase your
+						technology</span
+					>
+				</li>
+				<li>
+					<svg
+						class="icon"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+							clip-rule="evenodd"></path>
+					</svg>
+					<span class="text"
+						>How we measure success and provide ongoing value throughout our
+						partnership</span
+					>
+				</li>
+			</ul>
+		</div>
+
+		<div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+			<h2
+				class="text-2xl font-semibold text-gray-800 dark:text-white text-center mb-6"
+			>
+				Select a Time That Works for You
+			</h2>
+
+			<div id="booking-page">
+				<!-- this is where we will inject the interface -->
+			</div>
+
+			<script is:inline>
+				window.SavvyCal =
+					window.SavvyCal ||
+					function () {
+						(SavvyCal.q = SavvyCal.q || []).push(arguments);
+					};
+			</script>
+			<script is:inline async src="https://embed.savvycal.com/v1/embed.js"
+			></script>
+			<script is:inline>
+				SavvyCal("init", { origin: "https://meet.rawkode.academy" });
+				SavvyCal("inline", {
+					link: "collaborate",
+					selector: "#booking-page",
+					theme: "os",
+				});
+			</script>
+		</div>
+	</div>
 </Page>
