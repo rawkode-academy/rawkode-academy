@@ -1,294 +1,292 @@
 ---
 import Page from "@/wrappers/page.astro";
+import Center from "@/components/title/center.astro";
+import H2Highlight from "@/components/title/h2-highlight.vue";
+import Stats from "@/components/stats/simple.vue";
 ---
 
+<style>
+	.section-divider {
+		@apply relative py-4 my-8;
+	}
+
+	.section-divider::before {
+		content: "";
+		@apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/3 h-0.5 bg-gradient-to-r from-primary to-secondary;
+	}
+</style>
+
 <Page title="About">
-	<h1 class="text-5xl font-extrabold dark:text-white">
-		About the Rawkode Academy
-	</h1>
+	<Center title="About the Rawkode Academy" />
 
-	<p class="mb-4 font-semibold dark:text-white">
-		The Rawkode Academy was founded in 2019 by David Flanagan, née McKay; a
-		developer and operator with over 20 years experience in the industry.
-	</p>
+	<div class="max-w-4xl mx-auto mb-12 text-center">
+		<p class="text-xl text-gray-600 dark:text-gray-300 mb-6">
+			The Rawkode Academy was founded in 2019 by David Flanagan, née McKay, a
+			developer and operator with over 20 years of experience in the industry.
+		</p>
 
-	<h2 class="text-4xl font-bold dark:text-white">Latest Numbers</h2>
+		<p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
+			Our mission is to provide high-quality educational content for developers
+			and operators, focusing on cloud-native technologies, Kubernetes, and
+			modern infrastructure solutions. Through live streams, tutorials, and
+			interactive content, we aim to make complex technologies accessible to
+			everyone.
+		</p>
 
-	<div
-		class="mb-4 space-y-4 md:grid md:grid-cols-3 md:gap-4 xl:gap-16 md:space-y-0 md:mb-8"
-	>
-		<div
-			class="flex justify-center items-center p-6 text-center bg-gray-100 rounded xl:p-12 dark:bg-gray-800"
+		<div class="section-divider"></div>
+
+		<Stats
+			title="Our Impact"
+			stats={[
+				{
+					label: "Views",
+					value: "1M+",
+				},
+				{
+					label: "Hours of Content",
+					value: "500+",
+				},
+				{
+					label: "Projects Covered",
+					value: "90+",
+				},
+			]}
+		/>
+		<p
+			class="text-sm font-light text-center text-gray-500 dark:text-gray-400 mb-8"
 		>
-			<div class="text-gray-900 dark:text-white">
-				<p class="mb-2 text-4xl font-extrabold md:text-5xl">1 Million</p>
-				<h4 class="mb-2 text-xl font-semibold">Views</h4>
-				<p class="font-light text-gray-500 dark:text-gray-400">
-					across all channels
+			<span class="font-medium text-primary-600 dark:text-primary-500">*</span> These
+			numbers are a rough estimate at the moment and we'll loop in real-time numbers
+			shortly.
+		</p>
+
+		<div class="section-divider"></div>
+
+		<H2Highlight title="Our Founder's Journey" highlightWords="Journey" />
+
+		<div class="max-w-4xl mx-auto">
+			<H2Highlight title="The Early Years" highlightWords="Early" />
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				Starting his career in 2003, David joined a small local development
+				company that specialized in ticketing systems for horse racing tracks
+				across the UK. Working at a smaller company allowed him to gain
+				experience across the entire product stack: custom kernel development
+				(C), backend servers (C & PHP), front-end point of sale terminals (C++
+				with QT3), and even mobile development (C#) on early Windows CE devices.
+			</p>
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				As part of a small team, David was also responsible for the
+				infrastructure that ran the company's products, leveraging his extensive
+				Linux knowledge from running Linux on the desktop since his first Coral
+				Linux install in 2000.
+			</p>
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				Working with diverse technologies early in his career, David developed a
+				passion for exploring and experimenting with new technologies to better
+				understand the problems they solved and the paradigms they introduced.
+				One of the first technologies to capture David's attention was Puppet in
+				2004. Puppet revolutionized the way the company managed their fleet of
+				servers, which were located at customer sites across the UK, eliminating
+				the need for emergency on-site visits to address server issues.
+			</p>
+
+			<div class="section-divider"></div>
+
+			<H2Highlight
+				title="Embracing Cloud-Native Technologies"
+				highlightWords="Cloud-Native"
+			/>
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				David was an early adopter of cloud, containers, and cloud-native
+				technologies. As the Director of Development for TeamRock (now
+				LouderSound), a rock and metal media organization, David was responsible
+				for the software, infrastructure, and website during a significant
+				scaling challenge: a massive traffic surge following the passing of
+				Lemmy Kilmister. Thanks to forward-thinking infrastructure decisions,
+				David and his team had already migrated from traditional virtual-machine
+				infrastructure to containerized workloads running on Amazon Web Services
+				in 2014, shortly after the public launch of Docker. This preparation
+				enabled the platform to handle the unexpected traffic spike
+				successfully.
+			</p>
+
+			<div class="section-divider"></div>
+
+			<H2Highlight
+				title="The Birth of Rawkode Academy"
+				highlightWords="Rawkode Academy"
+			/>
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				While David enjoyed writing software, scaling infrastructure, and
+				leading teams, he discovered that his true passion was helping others
+				learn and succeed in the field. He began presenting at local user groups
+				in 2016, gradually progressing to conferences, before transitioning to a
+				full-time Developer Advocacy position at InfluxData.
+			</p>
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				At InfluxData, David worked to simplify the adoption of InfluxDB and
+				Telegraf for Kubernetes operators as their preferred solution for metric
+				collection and storage. This effort extended beyond speaking engagements
+				at conferences and user groups about monitoring Kubernetes clusters; he
+				actively collaborated with engineering teams to improve deployment and
+				management capabilities on Kubernetes.
+			</p>
+
+			<div
+				class="p-4 mb-6 border-l-4 border-blue-500 bg-blue-50 dark:bg-gray-800 dark:border-blue-400"
+			>
+				<h4 class="text-lg font-medium text-blue-800 dark:text-blue-400">
+					Historical Note
+				</h4>
+				<p class="text-sm text-gray-700 dark:text-gray-300">
+					Before metrics-server, Kubernetes collected monitoring information
+					through a program called Heapster, which was built on top of InfluxDB
+					1.
 				</p>
 			</div>
-		</div>
-		<div
-			class="flex justify-center items-center p-6 text-center bg-gray-100 rounded xl:p-12 dark:bg-gray-800"
-		>
-			<div class="text-gray-900 dark:text-white">
-				<p class="mb-2 text-4xl font-extrabold md:text-5xl">500</p>
-				<h4 class="mb-2 text-xl font-semibold">Hours</h4>
-				<p class="font-light text-gray-500 dark:text-gray-400">of content</p>
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				It was during this time that the Rawkode Academy released its first
+				video: "Last Week in Kubernetes."
+			</p>
+
+			<div class="mb-6 flex justify-center">
+				<div class="video-container">
+					<iframe
+						width="560"
+						height="315"
+						src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
+						title="YouTube video player"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+						allowfullscreen
+						class="shadow-lg rounded-lg"></iframe>
+					<p class="text-sm text-center mt-2 text-gray-500 dark:text-gray-400">
+						The first Rawkode Academy video on YouTube
+					</p>
+				</div>
 			</div>
-		</div>
-		<div
-			class="flex justify-center items-center p-6 text-center bg-gray-100 rounded xl:p-12 dark:bg-gray-800"
-		>
-			<div class="text-gray-900 dark:text-white">
-				<p class="mb-2 text-4xl font-extrabold md:text-5xl">90+</p>
-				<h4 class="mb-2 text-xl font-semibold">Projects Covered</h4>
-				<p class="font-light text-gray-500 dark:text-gray-400">
-					from the CNCF Landscape
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				After InfluxData, David joined Equinix Metal where he continued to
+				develop and expand the Rawkode Academy. His focus was helping developers
+				and operators learn to run and use Kubernetes and other Cloud Native
+				technologies on bare metal infrastructure, addressing the unique
+				challenges not present when running on cloud providers.
+			</p>
+
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				Throughout his work with Kubernetes, David was inspired by TGIK, a
+				weekly live stream hosted by Joe Beda, one of Kubernetes' creators. On
+				TGIK, Joe explored new Cloud Native technologies by working through
+				documentation and examples, often with help from project maintainers and
+				contributors in the chat. This inspired David to create his own format,
+				inviting maintainers and contributors directly onto live streams where
+				they could not only assist with technical issues but also discuss their
+				projects' history, purpose, and context.
+			</p>
+
+			<div
+				class="p-4 mb-6 border-l-4 border-blue-500 bg-blue-50 dark:bg-gray-800 dark:border-blue-400"
+			>
+				<h4 class="text-lg font-medium text-blue-800 dark:text-blue-400">
+					Evolution of the Format
+				</h4>
+				<p class="text-sm text-gray-700 dark:text-gray-300">
+					Before being called "Rawkode Live," the stream was named "RTFM,"
+					reflecting its premise of guiding people through open source projects
+					using official documentation and examples.
 				</p>
 			</div>
-		</div>
-	</div>
-	<p class="text-sm font-light text-center text-gray-500 dark:text-gray-400">
-		<span class="font-medium text-primary-600 dark:text-primary-500">*</span> These
-		numbers are a rough estimate at the moment and we'll loop in real-time numbers
-		shortly.
-	</p>
 
-	<h2 class="text-4xl font-bold dark:text-white">The History Lesson</h2>
+			<div class="section-divider"></div>
 
-	<h3 class="text-3xl font-bold dark:text-white">The Early Years</h3>
+			<H2Highlight
+				title="Klustered: An Innovative Learning Format"
+				highlightWords="Innovative"
+			/>
 
-	<p class="mb-4 dark:text-white">
-		Starting his career, back in 2003, David joined a small local development
-		company that specialised in ticketing systems for horse racing tracks across
-		the UK. His favourite thing about working at a smaller shop was the ability
-		to work across the entire product stack; including custom kernel development
-		(C), backend servers (C & PHP), front-end point of sale terminals (C++ with
-		QT3), and even mobile development (C#) ... which wasn't like mobile
-		development today; have you ever tried a Windows CE 4 device? 😅
-	</p>
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				In 2021, David launched a bold new educational format called Klustered.
+				The premise was simple but challenging: experts would attempt to
+				troubleshoot deliberately broken Kubernetes clusters in real-time. This
+				innovative approach to learning through problem-solving quickly became
+				one of Rawkode Academy's most popular series, with David hosting the
+				first episode alongside guest Walid Shaari.
+			</p>
 
-	<p class="mb-4 dark:text-white">
-		Given that this was a small team, David was also responsible for the
-		infrastructure that ran the company's products; primarily due to his
-		extensive Linux knowledge having ran Linux on the desktop since his first
-		Coral Linux install in 2000. Is it the year of the Linux desktop yet? 🤔
-	</p>
+			<div class="mb-6 flex justify-center">
+				<div class="video-container">
+					<iframe
+						width="560"
+						height="315"
+						src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
+						title="YouTube video player"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+						allowfullscreen
+						class="shadow-lg rounded-lg"></iframe>
+					<p class="text-sm text-center mt-2 text-gray-500 dark:text-gray-400">
+						The first episode of Klustered
+					</p>
+				</div>
+			</div>
 
-	<p class="mb-4 dark:text-white">
-		Working with all these technologies from early on in his career, David
-		became a bit of a technology magpie; continually exploring and experimenting
-		with new technologies to better understand the problems they solved and the
-		paradigms they brought. One of the first technologies to capture David's
-		attention was Puppet, back in 2004. Puppet revolutionised the way the
-		company managed their fleet of servers, which were all located at their
-		customer sites across the UK. No more 3 hour drives at 4am in the morning to
-		fix a server that had crashed due to a power outage. 🙌
-	</p>
+			<div class="section-divider"></div>
 
-	<h3 class="text-3xl font-bold dark:text-white">First Real Scaling Challenge</h3>
+			<H2Highlight title="Rawkode Academy Today" highlightWords="Today" />
 
-	<p class="mb-4 dark:text-white">
-		David was an early adopter of cloud, containers, and cloud-native
-		technologies. During his time as the Director of Development for a rock and
-		metal media organization called TeamRock (now LouderSound), David was
-		responsible for the software, infrastructure, and website during its biggest
-		test: the unfortunate death of Lemmy Kilmister. Fortunately, due to his
-		desire to experiment and play with new technologies, David and his team had
-		already migrated their slow to provision virtual-machine centric
-		infrastructure to containerised workloads running on Amazon Web Services the
-		year prior, 2014, not long after the public launch of Docker.
-	</p>
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				Today, Rawkode Academy continues to evolve as a premier educational
+				platform for cloud-native technologies. We offer a diverse range of
+				content including live streams with project maintainers, technical
+				tutorials, problem-solving sessions, and in-depth explorations of
+				emerging technologies in the cloud-native ecosystem.
+			</p>
 
-	<h3 class="text-3xl font-bold dark:text-white">The Educator</h3>
+			<p class="mb-4 text-gray-600 dark:text-gray-300">
+				Our content is designed for developers and operators at all skill
+				levels, from those just beginning their journey with containers and
+				Kubernetes to experienced professionals looking to deepen their
+				expertise or explore new tools and approaches.
+			</p>
 
-	<p class="mb-4 dark:text-white">
-		As much as David enjoys writing software, scaling infrastructure, and
-		leading teams; he quickly realised that his passion was helping others learn
-		and be successful. David started presenting at local user groups in 2016,
-		slowly working up to conferences, before eventually moving into a full-time
-		Developer Advocacy position at InfluxData.
-	</p>
-
-	<p class="mb-4 dark:text-white">
-		During his time at Influx, David was a driving force to help make it easier
-		for people operating Kubernetes to adopt InfluxDB and Telegraf as their
-		stack of choice for metric collection and storage. This didn't just involve
-		being at conferences and user-groups speaking about monitoring and observing
-		Kubernetes clusters, but actively working with engineering to ensure the
-		project was easier to deploy and manage on top of Kubernetes.
-	</p>
-
-	<div
-		id="alert-additional-content-1"
-		class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
-		role="alert"
-	>
-		<div class="flex items-center">
-			<svg
-				class="flex-shrink-0 w-4 h-4 me-2"
-				aria-hidden="true"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="currentColor"
-				viewBox="0 0 20 20"
+			<div
+				class="mt-8 mb-8 bg-gradient-to-r from-primary to-secondary p-6 rounded-lg shadow-lg"
 			>
-				<path
-					d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
-				></path>
-			</svg>
-			<span class="sr-only">Fun Fact</span>
-			<h4 class="text-lg font-medium">Fun Fact</h4>
-		</div>
-		<div class="mt-2 mb-4 text-sm">
-			Before metrics-server, Kubernetes collected monitoring information into a
-			program called Heapster. Heapster was built on top of InfluxDB 1.
-		</div>
-	</div>
-
-	<p class="mb-4 dark:text-white">
-		It was during this time that the Rawkode Academy released it's first video
-		... "Last Week in Kubernetes".
-	</p>
-
-	<div class="mb-4 flex justify-center">
-		<iframe
-			width="560"
-			height="315"
-			src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
-			title="YouTube video player"
-			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-			allowfullscreen></iframe>
-	</div>
-
-	<p class="mb-4 dark:text-white">
-		Let's not forget the first live-stream too ... 😅
-	</p>
-	<div class="mb-4 flex justify-center">
-		<iframe
-			width="560"
-			height="315"
-			src="https://www.youtube-nocookie.com/embed/yGfUunEIBjU?si=oFL_lykTdxH1qmYM"
-			title="YouTube video player"
-			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-			allowfullscreen></iframe>
-	</div>
-
-	<div
-		id="alert-additional-content-1"
-		class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
-		role="alert"
-	>
-		<div class="flex items-center">
-			<svg
-				class="flex-shrink-0 w-4 h-4 me-2"
-				aria-hidden="true"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="currentColor"
-				viewBox="0 0 20 20"
-			>
-				<path
-					d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
-				></path>
-			</svg>
-			<span class="sr-only">Fun Fact</span>
-			<h4 class="text-lg font-medium">Fun Fact</h4>
-		</div>
-		<div class="mt-2 mb-4 text-sm">
-			This wasn't actually the first stream, it's just the first one on YouTube
-			and that we've got a recording of. There was maybe 3 or 4 streams before
-			this one, but they were lost on Twitch.
-		</div>
-	</div>
-
-	<p class="mb-4 font-medium dark:text-white">
-		After moving on from InfluxData, David joined Equinix Metal where he
-		continued to work-on and grow the Rawkode Academy by helping developers and
-		operators learn how to run and use Kubernetes, and other Cloud Native
-		technologies, on bare metal; which comes with a whole host of challenges
-		that are not present when running on a cloud provider.
-	</p>
-
-	<p class="mb-4 font-medium dark:text-white">
-		Throughout his time working with Kubernetes, David was a fan and keen
-		watcher of TGIK, a weekly live stream hosted by Joe Beda, one of the
-		creators of Kubernetes. On TGIK, Joe live streamed himself exploring new
-		Cloud Native technologies, by working through the documentation and
-		examples. Often, he'd rely on the maintainers and contributors to those
-		projects being active in the chat to help him out when he got stuck. This is
-		when David decided that he wanted to carry on TGIK in his own way, by
-		inviting the maintainers and contributors of said projects on a live-stream
-		with him, where they could not only help him when there were issues, but
-		also talk about the project and the problems it solves while sharing its
-		history, flavour, and context.
-	</p>
-
-	<div
-		id="alert-additional-content-1"
-		class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
-		role="alert"
-	>
-		<div class="flex items-center">
-			<svg
-				class="flex-shrink-0 w-4 h-4 me-2"
-				aria-hidden="true"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="currentColor"
-				viewBox="0 0 20 20"
-			>
-				<path
-					d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
-				></path>
-			</svg>
-			<span class="sr-only">Fun Fact</span>
-			<h4 class="text-lg font-medium">Fun Fact</h4>
-		</div>
-		<div class="mt-2 mb-4 text-sm">
-			Before the live-stream was called "Rawkode Live", the name "RTFM" was
-			used; as the premise of the streams was to guide people through open
-			source projects by using the documentation and examples.
-		</div>
-	</div>
-
-	<p class="mb-4 font-medium dark:text-white">
-		Fast-forward to 2021, and David had the worst idea of his career; but
-		through hubris and in the name of edutainment, David hosted the first
-		episode of Klustered, along with his guest, Walid Shaari.
-	</p>
-
-	<div class="mb-4 flex justify-center">
-		<iframe
-			width="560"
-			height="315"
-			src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
-			title="YouTube video player"
-			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-			allowfullscreen></iframe>
-	</div>
-
-	<div
-		id="alert-additional-content-1"
-		class="p-4 mb-4 text-blue-800 border border-blue-300 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 dark:border-blue-800"
-		role="alert"
-	>
-		<div class="flex items-center">
-			<svg
-				class="flex-shrink-0 w-4 h-4 me-2"
-				aria-hidden="true"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="currentColor"
-				viewBox="0 0 20 20"
-			>
-				<path
-					d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
-				></path>
-			</svg>
-			<span class="sr-only">Fun Fact</span>
-			<h4 class="text-lg font-medium">Fun Fact</h4>
-		</div>
-		<div class="mt-2 mb-4 text-sm">
-			The original name for Klustered was "Klusterfucked", but this was changed
-			prior to the first episode.
+				<h3 class="text-xl font-bold text-white mb-4">Join Our Community</h3>
+				<p class="text-white mb-4">
+					Whether you're looking to learn new skills, stay updated on the latest
+					cloud-native technologies, or connect with like-minded professionals,
+					Rawkode Academy has something for you.
+				</p>
+				<div class="flex flex-wrap justify-center mt-4 gap-4">
+					<a
+						href="/watch"
+						class="bg-white text-primary font-bold py-2 px-6 rounded-full hover:bg-gray-100 transition duration-300"
+					>
+						Watch Our Content
+					</a>
+					<a
+						href="/blog"
+						class="bg-transparent text-white font-bold py-2 px-6 rounded-full border border-white hover:bg-white hover:text-primary transition duration-300"
+					>
+						Read Our Blog
+					</a>
+					<a
+						href="https://chat.rawkode.academy"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="bg-blue-600 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-700 transition duration-300"
+					>
+						Join Our Zulip Chat
+					</a>
+				</div>
+			</div>
 		</div>
 	</div>
 </Page>
