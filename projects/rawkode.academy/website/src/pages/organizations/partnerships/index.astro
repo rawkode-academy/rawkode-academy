@@ -1,7 +1,7 @@
 ---
 import FAQ from "@/components/faq/list.vue";
 import FeatureListIcons from "@/components/feature/list-icons.vue";
-import PartnerLogos from "@/components/partner/logos-solo.astro";
+import PartnerLogos from "@/components/partner/logos.astro";
 import Pricing from "@/components/partner/pricing/cards.vue";
 import Featured from "@/components/partner/pricing/featured.vue";
 import VsConference from "@/components/partner/vs-conference.astro";
@@ -53,7 +53,19 @@ import Page from "@/wrappers/page.astro";
 
 	<hr />
 
-	<PartnerLogos />
+	<section class="bg-white dark:bg-gray-900">
+		<div class="py-8 px-4 mx-auto sm:py-16 lg:px-6">
+			<div class="mb-8 lg:mb-16">
+				<h2
+					class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+				>
+					Our Partners
+				</h2>
+			</div>
+			<PartnerLogos />
+		</div>
+	</section>
+
 	<VsConference />
 
 	<hr />
