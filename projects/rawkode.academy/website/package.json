@@ -16,6 +16,7 @@
     "@astrojs/cloudflare": "12.1.0",
     "@astrojs/mdx": "4.0.3",
     "@astrojs/node": "9.0.0",
+    "@astrojs/partytown": "^2.1.4",
     "@astrojs/react": "4.1.2",
     "@astrojs/sitemap": "3.2.1",
     "@astrojs/tailwind": "5.1.4",
