@@ -6,7 +6,7 @@ import Pricing from "@/components/partner/pricing/cards.vue";
 import Featured from "@/components/partner/pricing/featured.vue";
 import VsConference from "@/components/partner/vs-conference.astro";
 import Stats from "@/components/stats/simple.vue";
-import Testimonial from "@/components/testimonial/single.astro";
+import TestimonialSlider from "@/components/testimonial/slider.astro";
 import Center from "@/components/title/center.astro";
 import H2Highlight from "@/components/title/h2-highlight.vue";
 import Page from "@/wrappers/page.astro";
@@ -49,15 +49,40 @@ import Page from "@/wrappers/page.astro";
 			},
 		]}
 	/>
-	<Testimonial />
+	<TestimonialSlider
+		testimonials={[
+			{
+				quote:
+					"Working with David and Rawkode Academy has been incredibly valuable for our early-stage journey at Guidepad. His deep expertise in the cloud native landscape has helped us refine our product positioning, create compelling demo videos, and confidently navigate the market. The guidance and insights we receive from David consistently elevate our product and strategy, making this partnership truly invaluable. We look forward to continuing this partnership as we evolve and grow in the market.",
+				author: {
+					name: "Reggie Wilkerson",
+					title: "Co-Founder & CEO at Guidepad",
+					image:
+						"https://media.licdn.com/dms/image/v2/C4E03AQFOPPjnnDM3sQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1667932645366?e=1747872000&v=beta&t=fLl3GgbVrGLilgNi6_uut8XYQp-8YU28VRq5P0D3iOU",
+					link: "https://guidepad.io",
+				},
+			},
+			{
+				quote:
+					"Rawkode Academy has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services.",
+				author: {
+					name: "Mikkel Mørk Hegnhøj",
+					title: "Head of DevRel at Fermyon",
+					image:
+						"https://www.fermyon.com/static/image/profile/mikkel-hegnhoj.jpg",
+					link: "https://fermyon.com",
+				},
+			},
+		]}
+	/>
 
 	<hr />
 
 	<section class="bg-white dark:bg-gray-900">
-		<div class="py-8 px-4 mx-auto sm:py-16 lg:px-6">
-			<div class="mb-8 lg:mb-16">
+		<div class="px-4 mx-auto max-w-screen-xl lg:px-6 xl:px-0">
+			<div class="mx-auto max-w-screen-md text-center">
 				<h2
-					class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+					class="text-3xl tracking-tight font-extrabold text-gray-900 md:text-4xl dark:text-white"
 				>
 					Our Partners
 				</h2>
@@ -65,39 +90,39 @@ import Page from "@/wrappers/page.astro";
 			<PartnerLogos />
 		</div>
 	</section>
+</Page>
 
-	<VsConference />
+<VsConference />
 
-	<hr />
+<hr />
 
-	<div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-		<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-			<h2
-				class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
-			>
-				Partnership Plans
-			</h2>
-			<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
-				It doesn't matter if you're here to support our mission or because you
-				need help with go to market, product market fit, developer marketing, or
-				straight up content; we have plans for all use-cases.
-			</p>
-		</div>
-
-		<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-			<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
-				The Rawkode Academy is proudly brought to you from Glasgow, Scotland. As
-				such, our plans reflect a little bit of our heritage and culture.
-			</p>
-			<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
-				🏴󠁧󠁢󠁳󠁣󠁴󠁿 🥃
-			</p>
-		</div>
-
-		<Featured />
-		<Pricing />
+<div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+	<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
+		<h2
+			class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+		>
+			Partnership Plans
+		</h2>
+		<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
+			It doesn't matter if you're here to support our mission or because you
+			need help with go to market, product market fit, developer marketing, or
+			straight up content; we have plans for all use-cases.
+		</p>
 	</div>
 
-	<hr />
-	<FAQ />
-</Page>
+	<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
+		<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
+			The Rawkode Academy is proudly brought to you from Glasgow, Scotland. As
+			such, our plans reflect a little bit of our heritage and culture.
+		</p>
+		<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
+			🏴󠁧󠁢󠁳󠁣󠁴󠁿 🥃
+		</p>
+	</div>
+
+	<Featured />
+	<Pricing />
+</div>
+
+<hr />
+<FAQ />
