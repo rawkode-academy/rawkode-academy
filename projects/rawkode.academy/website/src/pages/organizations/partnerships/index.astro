@@ -13,27 +13,40 @@ import Page from "@/wrappers/page.astro";
 ---
 
 <style>
-	hr {
-		@apply bg-gradient-to-r from-primary to-secondary;
-		@apply h-2 md:mx-32;
+	.section-divider {
+		@apply relative py-12 my-8;
+	}
+
+	.section-divider::before {
+		content: "";
+		@apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/3 h-0.5 bg-gradient-to-r from-primary to-secondary;
 	}
 </style>
 
 <Page
-	title="Let's Partner Together"
-	description="We can accelerate the growth of developers and your product."
+	title="Strategic Developer Partnerships"
+	description="Accelerate developer adoption and product growth through strategic content partnerships with Rawkode Academy."
 >
 	<Center title="Rawkode Academy Partnerships" />
 	<H2Highlight
-		title="We can accelerate the growth of developers and your product."
-		highlightWords="growth developers product"
+		title="Accelerate developer adoption and product growth through authentic technical content."
+		highlightWords="developer adoption product growth authentic"
 	/>
+
+	<div class="max-w-4xl mx-auto mb-12 text-center">
+		<p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
+			At Rawkode Academy, we bridge the gap between innovative technologies and the developers who implement them. Our partnerships are designed to showcase your product's unique value through expert-led content that resonates with technical audiences.
+		</p>
+		<p class="text-lg text-gray-600 dark:text-gray-300">
+			Whether you're launching a new developer tool, expanding your cloud platform, or seeking to increase adoption of your open source project, our strategic approach to developer marketing delivers measurable results.
+		</p>
+	</div>
 
 	<FeatureListIcons />
 
-	<hr class="mt-12" />
+	<div class="section-divider"></div>
 	<Stats
-		title="We make content developers love"
+		title="Proven Developer Engagement"
 		stats={[
 			{
 				label: "Technologies Covered",
@@ -44,7 +57,7 @@ import Page from "@/wrappers/page.astro";
 				value: "500+",
 			},
 			{
-				label: "Views",
+				label: "Developer Views",
 				value: "1M+",
 			},
 		]}
@@ -76,53 +89,80 @@ import Page from "@/wrappers/page.astro";
 		]}
 	/>
 
-	<hr />
+	<div class="section-divider"></div>
 
-	<section class="bg-white dark:bg-gray-900">
-		<div class="px-4 mx-auto max-w-screen-xl lg:px-6 xl:px-0">
-			<div class="mx-auto max-w-screen-md text-center">
+	<section class="bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-black py-16">
+		<div class="py-8 px-4 mx-auto sm:py-16 lg:px-6 max-w-7xl">
+			<div class="mb-12 lg:mb-16 text-center">
 				<h2
-					class="text-3xl tracking-tight font-extrabold text-gray-900 md:text-4xl dark:text-white"
+					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
 				>
-					Our Partners
+					Our <span class="text-primary">Trusted</span> Partners
 				</h2>
+				<p class="text-gray-600 sm:text-xl dark:text-gray-400 max-w-3xl mx-auto">
+					Join these innovative companies who trust Rawkode Academy to connect their technologies with developers worldwide.
+				</p>
 			</div>
-			<PartnerLogos />
+
+			<div class="relative">
+				<div class="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-xl"></div>
+				<div class="relative bg-white/50 dark:bg-gray-800/50 p-8 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+					<PartnerLogos />
+				</div>
+			</div>
 		</div>
 	</section>
+
+	<VsConference />
+
+	<div class="section-divider"></div>
+
+	<div class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+		<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
+			<h2
+				class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+			>
+				Partnership Tiers
+			</h2>
+			<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
+				Whether you're looking to increase brand awareness, educate developers about your technology, or develop a comprehensive go-to-market strategy, we offer flexible partnership options to meet your specific goals.
+			</p>
+		</div>
+
+		<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
+			<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
+				The Rawkode Academy is proudly brought to you from Glasgow, Scotland. Our partnership tiers are named after traditional Scottish whisky measurements, reflecting our heritage of quality, craftsmanship, and attention to detail.
+			</p>
+			<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
+				🏴󠁧󠁢󠁳󠁣󠁴󠁿 🥃
+			</p>
+		</div>
+
+		<Featured />
+		<Pricing />
+	</div>
+
+	<div class="section-divider"></div>
+
+	<section class="bg-white dark:bg-gray-900 py-12">
+		<div class="px-4 mx-auto max-w-screen-xl lg:px-6">
+			<div class="mx-auto max-w-screen-md text-center mb-8">
+				<h2 class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+					Ready to Accelerate Your Developer Strategy?
+				</h2>
+				<p class="mb-8 text-lg text-gray-600 dark:text-gray-300">
+					Schedule a consultation to discuss how we can create a customized partnership that aligns with your business objectives and connects your technology with our developer community.
+				</p>
+				<a href="/organizations/lets-chat" class="inline-flex items-center px-5 py-3 text-base font-medium text-white bg-primary hover:bg-secondary rounded-lg transition-colors duration-300">
+					Schedule Your Consultation
+					<svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<div class="section-divider"></div>
+	<FAQ />
 </Page>
-
-<VsConference />
-
-<hr />
-
-<div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-	<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-		<h2
-			class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
-		>
-			Partnership Plans
-		</h2>
-		<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
-			It doesn't matter if you're here to support our mission or because you
-			need help with go to market, product market fit, developer marketing, or
-			straight up content; we have plans for all use-cases.
-		</p>
-	</div>
-
-	<div class="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-		<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
-			The Rawkode Academy is proudly brought to you from Glasgow, Scotland. As
-			such, our plans reflect a little bit of our heritage and culture.
-		</p>
-		<p class="mb-5 font-light text-gray-500 sm:text-xl dark:text-gray-400">
-			🏴󠁧󠁢󠁳󠁣󠁴󠁿 🥃
-		</p>
-	</div>
-
-	<Featured />
-	<Pricing />
-</div>
-
-<hr />
-<FAQ />

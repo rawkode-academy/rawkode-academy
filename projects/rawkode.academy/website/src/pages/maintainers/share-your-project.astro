@@ -1,5 +1,4 @@
 ---
-import CalCom from "@/components/calcom";
 import Page from "@/wrappers/page.astro";
 ---
 
@@ -24,5 +23,24 @@ import Page from "@/wrappers/page.astro";
 		before we go live.
 	</p>
 
-	<CalCom client:only="react" link="share-your-project" />
+	<div id="booking-page">
+		<!-- this is where we will inject the interface -->
+	</div>
+
+	<script is:inline>
+		window.SavvyCal =
+			window.SavvyCal ||
+			function () {
+				(SavvyCal.q = SavvyCal.q || []).push(arguments);
+			};
+	</script>
+	<script is:inline async src="https://embed.savvycal.com/v1/embed.js"></script>
+	<script is:inline>
+		SavvyCal("init", { origin: "https://meet.rawkode.academy" });
+		SavvyCal("inline", {
+			link: "share-your-project",
+			selector: "#booking-page",
+			theme: "os",
+		});
+	</script>
 </Page>
