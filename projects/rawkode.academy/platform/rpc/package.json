@@ -19,7 +19,7 @@
     "@trigger.dev/sdk": "3.0.0-beta.52",
     "@workos-inc/node": "^7.21.0",
     "astro": "^4.13.2",
-    "resend": "^3.5.0"
+    "resend": "^4.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240806.0"
