@@ -13,6 +13,9 @@
   packages = with pkgs; [
     bun
     nixfmt-rfc-style
+		playwright
+		playwright-test
+		puppeteer-cli
   ];
 
   enterShell = ''

@@ -9,6 +9,7 @@ import {
 	// QuestionMarkCircleIcon,
 	RocketLaunchIcon,
 	VideoCameraIcon,
+	CalendarIcon,
 } from "@heroicons/vue/24/outline";
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/20/solid';
 
@@ -28,6 +29,12 @@ const menuItems = [
 		name: "Watch",
 		href: "/watch",
 		icon: VideoCameraIcon,
+		current: false,
+	},
+	{
+		name: "Community Day",
+		href: "/community-day",
+		icon: CalendarIcon,
 		current: false,
 	},
 	{
