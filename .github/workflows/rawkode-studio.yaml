@@ -23,8 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     name: deploy
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
         with:
           bun-version: latest
       - shell: bash
@@ -32,7 +32,7 @@ jobs:
         run: source .env
       - name: deploy
         # https://github.com/cloudflare/wrangler-action/issues/347
-        uses: cloudflare/wrangler-action@v3.13.0
+        uses: cloudflare/wrangler-action@6d58852c35a27e6034745c5d0bc373d739014f7f # v3.13.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
