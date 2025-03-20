@@ -75,8 +75,8 @@
 		"vue3-carousel": "^0.15.0"
 	},
 	"devDependencies": {
-		"@graphql-codegen/cli": "5.0.3",
-		"@graphql-codegen/client-preset": "4.5.1",
+		"@graphql-codegen/cli": "5.0.5",
+		"@graphql-codegen/client-preset": "4.7.0",
 		"@graphql-codegen/introspection": "4.0.3",
 		"@types/luxon": "3.4.2",
 		"wrangler": "3.99.0"
