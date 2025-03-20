@@ -1,7 +1,7 @@
 import { Domain } from "../types";
 
 const redirects: Domain = {
-	defaultRedirect: "https://discord.gg/ErVgHCN",
+	defaultRedirect: "https://chat.rawkode.academy",
 	redirects: {},
 };
 

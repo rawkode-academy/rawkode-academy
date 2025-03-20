@@ -2,4 +2,4 @@ secrets:
 	op run --no-masking -- printenv INFLUXDB_TOKEN | op run -- pnpm exec wrangler secret put INFLUXDB_TOKEN
 
 deploy:
-	op run -- pnpm exec wrangler deploy
+	op run -- wrangler deploy
