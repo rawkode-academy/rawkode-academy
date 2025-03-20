@@ -1,0 +1,414 @@
+---
+import Page from "@/wrappers/page.astro";
+import H2Highlight from "@/components/title/h2-highlight.vue";
+import { actions } from "astro:actions";
+
+const result = Astro.getActionResult(actions.signupForCommunityDay);
+
+export const prerender = false;
+---
+
+<Page
+	title="Rawkode Academy Community Day"
+	description="Join us for a one-day conference celebrating the Rawkode Academy community. Sign up to be notified when registration opens!"
+>
+	<style>
+		/* Animation keyframes */
+		@keyframes fadeIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+		}
+
+		@keyframes slideUp {
+			from { transform: translateY(20px); opacity: 0; }
+			to { transform: translateY(0); opacity: 1; }
+		}
+
+		@keyframes slideInRight {
+			from { transform: translateX(20px); opacity: 0; }
+			to { transform: translateX(0); opacity: 1; }
+		}
+
+		@keyframes pulse {
+			0% { transform: scale(1); }
+			50% { transform: scale(1.05); }
+			100% { transform: scale(1); }
+		}
+
+		@keyframes float {
+			0% { transform: translateY(0px); }
+			50% { transform: translateY(-10px); }
+			100% { transform: translateY(0px); }
+		}
+
+		@keyframes gradientFlow {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
+
+		/* Animation classes */
+		.animate-fadeIn {
+			animation: fadeIn 0.8s ease-in-out forwards;
+		}
+
+		.animate-slideUp {
+			animation: slideUp 0.8s ease-out forwards;
+		}
+
+		.animate-slideInRight {
+			animation: slideInRight 0.8s ease-out forwards;
+		}
+
+		.animate-pulse {
+			animation: pulse 2s ease-in-out infinite;
+		}
+
+		.animate-float {
+			animation: float 6s ease-in-out infinite;
+		}
+
+		.animate-delay-100 {
+			animation-delay: 100ms;
+		}
+
+		.animate-delay-200 {
+			animation-delay: 200ms;
+		}
+
+		.animate-delay-300 {
+			animation-delay: 300ms;
+		}
+
+		.animate-delay-400 {
+			animation-delay: 400ms;
+		}
+
+		.animate-delay-500 {
+			animation-delay: 500ms;
+		}
+
+		.animate-delay-600 {
+			animation-delay: 600ms;
+		}
+
+		.animate-delay-700 {
+			animation-delay: 700ms;
+		}
+
+		.animate-delay-800 {
+			animation-delay: 800ms;
+		}
+
+		.animate-delay-900 {
+			animation-delay: 900ms;
+		}
+
+		.animate-delay-1000 {
+			animation-delay: 1000ms;
+		}
+
+		.gradient-animation {
+			background-size: 200% 200%;
+			animation: gradientFlow 15s ease infinite;
+		}
+	</style>
+
+	<!-- Hero Section with Background Pattern -->
+	<div class="relative isolate px-6 lg:px-8 py-16">
+		<!-- Background pattern -->
+		<div class="absolute inset-0 -z-10 overflow-hidden">
+			<div class="absolute inset-0 bg-[radial-gradient(#5F5ED720_1px,transparent_1px)] dark:bg-[radial-gradient(#5F5ED715_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] bg-[size:20px_20px]"></div>
+		</div>
+
+		<div class="mx-auto max-w-4xl">
+			<div class="text-center animate-fadeIn">
+				<h1 class="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text mb-6 gradient-animation pb-1">Community Day</h1>
+				<p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4 max-w-2xl mx-auto animate-slideUp animate-delay-200">
+					A premier one-day conference celebrating the Rawkode Academy community and
+					cutting-edge cloud-native technologies.
+				</p>
+				<p class="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto animate-slideUp animate-delay-300">
+					Join us for an unforgettable day of knowledge sharing, networking, and collaboration with the brightest minds in the cloud-native ecosystem.
+				</p>
+			</div>
+
+			<div class="relative mt-8 mb-16 animate-slideUp animate-delay-400">
+				<div class="absolute inset-0 bg-gradient-to-r from-primary to-secondary blur-xl opacity-20 rounded-xl gradient-animation"></div>
+				<div class="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-8 rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50">
+					<h2 class="text-2xl font-bold text-gray-800 dark:text-white flex justify-center items-center mb-4">
+						<span class="bg-gradient-to-r from-primary to-secondary p-3 rounded-full mr-3 animate-pulse">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+								<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+								<line x1="16" y1="2" x2="16" y2="6"></line>
+								<line x1="8" y1="2" x2="8" y2="6"></line>
+								<line x1="3" y1="10" x2="21" y2="10"></line>
+							</svg>
+						</span>
+						Event Details
+					</h2>
+
+					<p class="text-center text-gray-700 dark:text-gray-300 mb-6">
+						The Rawkode Academy Community Day brings together developers, operators, and enthusiasts for a day packed with insights, hands-on learning, and meaningful connections.
+					</p>
+
+					<div class="grid md:grid-cols-2 gap-6">
+						<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-700 transform transition-all duration-300 hover:scale-[1.05] hover:shadow-xl animate-slideInRight animate-delay-600">
+							<h3 class="font-bold text-gray-800 dark:text-white text-lg flex items-center mb-3">
+								<span class="text-primary mr-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+								</span>
+								Date Coming Soon
+							</h3>
+							<p class="text-gray-600 dark:text-gray-300">
+								We're finalizing the details for our first-ever Community Day. This exclusive event will feature expert-led sessions, interactive workshops, and unique networking opportunities. Sign up below to be the first to know when registration opens!
+							</p>
+						</div>
+
+						<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-700 transform transition-all duration-300 hover:scale-[1.05] hover:shadow-xl animate-slideInRight animate-delay-700">
+							<h3 class="font-bold text-gray-800 dark:text-white text-lg flex items-center mb-3">
+								<span class="text-primary mr-2">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+									</svg>
+								</span>
+								European Location
+							</h3>
+							<p class="text-gray-600 dark:text-gray-300">
+								The event will be held in Europe. The exact city will be announced soon, but we're planning for a central European location with excellent transportation links, premium venues, and accommodation options to ensure an exceptional experience for all attendees.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="mt-16 mb-16">
+				<div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 animate-fadeIn animate-delay-700">
+					<h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 text-center">Why Attend Community Day?</h2>
+
+					<div class="grid md:grid-cols-3 gap-6 mt-6">
+						<div class="flex flex-col items-center text-center">
+							<div class="p-3 rounded-full bg-primary/10 dark:bg-primary/20 text-primary mb-3">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+								</svg>
+							</div>
+							<h3 class="font-semibold text-gray-800 dark:text-white mb-2">Cutting-Edge Content</h3>
+							<p class="text-gray-600 dark:text-gray-300 text-sm">Gain insights into the latest cloud-native technologies and practices from industry leaders and innovators.</p>
+						</div>
+
+						<div class="flex flex-col items-center text-center">
+							<div class="p-3 rounded-full bg-secondary/10 dark:bg-secondary/20 text-secondary mb-3">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+								</svg>
+							</div>
+							<h3 class="font-semibold text-gray-800 dark:text-white mb-2">Valuable Connections</h3>
+							<p class="text-gray-600 dark:text-gray-300 text-sm">Network with like-minded professionals, potential collaborators, and community members who share your passion.</p>
+						</div>
+
+						<div class="flex flex-col items-center text-center">
+							<div class="p-3 rounded-full bg-tertiary/10 dark:bg-tertiary/20 text-tertiary mb-3">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+								</svg>
+							</div>
+							<h3 class="font-semibold text-gray-800 dark:text-white mb-2">Practical Skills</h3>
+							<p class="text-gray-600 dark:text-gray-300 text-sm">Take home actionable knowledge and techniques that you can immediately apply to your projects and workflows.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="mt-12 mb-16 text-center animate-slideUp animate-delay-800">
+				<a
+					href="https://chat.rawkode.academy"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="inline-flex items-center px-6 py-3 text-base font-medium text-center text-white bg-gradient-to-r from-primary to-secondary rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50 animate-pulse gradient-animation"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+					</svg>
+					Join the conversation on Zulip
+					<svg
+						aria-hidden="true"
+						class="w-5 h-5 ml-2"
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+							clip-rule="evenodd"></path>
+					</svg>
+				</a>
+			</div>
+
+			<div class="max-w-xl mx-auto animate-slideUp animate-delay-900">
+				<H2Highlight title="Stay Updated" highlightWords="Updated" />
+
+				<div class="relative">
+					<div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 blur-xl opacity-30 rounded-xl gradient-animation"></div>
+					<div
+						class="relative bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm"
+					>
+						{result && result.data ? (
+							<div class="text-center py-8 animate-fadeIn">
+								<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-6 animate-float">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+									</svg>
+								</div>
+								<h3 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text mb-3 gradient-animation">Thank You!</h3>
+								<p class="text-lg text-gray-700 dark:text-gray-300 mb-6 animate-slideUp animate-delay-200">
+									We've added your email to our notification list. We'll let you know as soon as we have more details about the Community Day!
+								</p>
+								<div class="mt-6 inline-block bg-gray-100 dark:bg-gray-700 px-5 py-3 rounded-xl shadow-sm animate-slideUp animate-delay-400">
+									<p class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+										</svg>
+										<span class="font-medium">Pro tip:</span> Join our Zulip chat to stay connected with the community in the meantime.
+									</p>
+								</div>
+							</div>
+						) : (
+							<>
+								{result && result.error && (
+									<div class="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300 animate-fadeIn">
+										<p class="font-medium">Error: {result.error.message}</p>
+									</div>
+								)}
+
+								<form
+									method="POST"
+									action={actions.signupForCommunityDay}
+									class="space-y-6 animate-fadeIn"
+								>
+									<div>
+										<label
+											for="email"
+											class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+											>Email address</label
+										>
+										<div class="relative">
+											<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+												<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+												</svg>
+											</div>
+											<input
+												type="email"
+												id="email"
+												name="email"
+												required
+												placeholder="your@email.com"
+												class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-300 hover:shadow-md"
+											/>
+										</div>
+									</div>
+
+									<button
+										type="submit"
+										class="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center hover:scale-[1.02] gradient-animation"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+										</svg>
+										<span>Sign Up for Updates</span>
+									</button>
+								</form>
+							</>
+						)}
+					</div>
+				</div>
+			</div>
+
+			<div class="mt-20 space-y-8 animate-fadeIn animate-delay-1000">
+				<H2Highlight title="What to Expect" highlightWords="Expect" />
+				<p class="text-center text-gray-700 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+					Our carefully curated program ensures a perfect balance of learning, networking, and inspiration. Here's what you can look forward to at Community Day:
+				</p>
+
+				<div class="grid md:grid-cols-2 gap-8">
+					<div
+						class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 transform transition-all duration-300 hover:scale-[1.05] hover:shadow-xl group animate-slideInRight animate-delay-300"
+					>
+						<div class="flex items-center mb-4">
+							<div class="p-3 rounded-full bg-primary/10 dark:bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-semibold ml-4 text-gray-800 dark:text-white">Expert Speakers</h3>
+						</div>
+						<p class="text-gray-600 dark:text-gray-300 ml-14">
+							Learn directly from industry experts and project maintainers in the
+							cloud-native ecosystem. Gain exclusive insights into emerging technologies, best practices, and real-world case studies.
+						</p>
+					</div>
+
+					<div
+						class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 transform transition-all duration-300 hover:scale-[1.05] hover:shadow-xl group animate-slideInRight animate-delay-400"
+					>
+						<div class="flex items-center mb-4">
+							<div class="p-3 rounded-full bg-secondary/10 dark:bg-secondary/20 text-secondary group-hover:bg-secondary group-hover:text-white transition-all duration-300">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-semibold ml-4 text-gray-800 dark:text-white">Hands-on Workshops</h3>
+						</div>
+						<p class="text-gray-600 dark:text-gray-300 ml-14">
+							Get practical, hands-on experience with guided workshops on the latest
+							technologies. These interactive sessions will help you develop new skills and deepen your understanding of key concepts.
+						</p>
+					</div>
+
+					<div
+						class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 transform transition-all duration-300 hover:scale-[1.05] hover:shadow-xl group animate-slideInRight animate-delay-500"
+					>
+						<div class="flex items-center mb-4">
+							<div class="p-3 rounded-full bg-tertiary/10 dark:bg-tertiary/20 text-tertiary group-hover:bg-tertiary group-hover:text-white transition-all duration-300">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-semibold ml-4 text-gray-800 dark:text-white">Networking</h3>
+						</div>
+						<p class="text-gray-600 dark:text-gray-300 ml-14">
+							Connect with like-minded professionals and build your community. Our structured networking sessions and social events create the perfect environment for meaningful conversations and collaboration opportunities.
+						</p>
+					</div>
+
+					<div
+						class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 transform transition-all duration-300 hover:scale-[1.05] hover:shadow-xl group animate-slideInRight animate-delay-600"
+					>
+						<div class="flex items-center mb-4">
+							<div class="p-3 rounded-full bg-quaternary/10 dark:bg-quaternary/20 text-quaternary group-hover:bg-quaternary group-hover:text-white transition-all duration-300">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-semibold ml-4 text-gray-800 dark:text-white">Project Showcases</h3>
+						</div>
+						<p class="text-gray-600 dark:text-gray-300 ml-14">
+							Discover exciting new projects in the cloud-native space. Get a first look at innovative tools and technologies that are shaping the future of cloud computing and infrastructure.
+						</p>
+					</div>
+				</div>
+
+				<div class="mt-12 text-center">
+					<p class="text-lg text-gray-700 dark:text-gray-300 font-medium animate-pulse">
+						<span class="bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">Limited spots available!</span> Sign up now to secure your place at this exclusive event.
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</Page>

@@ -1,7 +1,16 @@
 import { InfluxDBClient, Point } from "@influxdata/influxdb3-client-browser";
 import { ActionError, defineAction } from "astro:actions";
-import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
+
+// Import getSecret conditionally to avoid client-side errors
+let getSecret: (key: string) => string | undefined;
+try {
+  const envServer = await import("astro:env/server");
+  getSecret = envServer.getSecret;
+} catch (error) {
+  // Fallback for client-side or when module is not available
+  getSecret = () => undefined;
+}
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
