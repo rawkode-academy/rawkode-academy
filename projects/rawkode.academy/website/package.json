@@ -19,7 +19,7 @@
 		"@astrojs/partytown": "^2.1.4",
 		"@astrojs/react": "4.1.2",
 		"@astrojs/sitemap": "3.2.1",
-		"@astrojs/tailwind": "5.1.4",
+		"@astrojs/tailwind": "6.0.0",
 		"@astrojs/ts-plugin": "1.10.4",
 		"@astrojs/vue": "5.0.4",
 		"@grafana/faro-web-sdk": "^1.13.1",
