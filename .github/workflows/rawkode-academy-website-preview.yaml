@@ -1,8 +1,6 @@
 name: rawkode.academy/website/preview
 
 on:
-  pull_request_review:
-    types: [submitted]
   pull_request:
     types: [opened, synchronize]
     paths:
@@ -14,11 +12,6 @@ permissions:
 
 jobs:
   deploy:
-    if: |
-      github.event.review.state == 'approved' ||
-      github.event.pull_request.author_association == 'OWNER' ||
-      github.event.pull_request.author_association == 'MEMBER' ||
-      github.event.pull_request.author_association == 'COLLABORATOR'
     runs-on: ubuntu-latest
     name: deploy
     steps:
