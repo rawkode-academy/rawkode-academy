@@ -25,7 +25,7 @@
     "@astrojs/cloudflare": "12.1.0",
     "@astrojs/ts-plugin": "1.10.4",
     "deno": "2.1.4",
-    "vitest": "2.1.6"
+    "vitest": "2.1.9"
   },
   "trustedDependencies": [
     "deno",
