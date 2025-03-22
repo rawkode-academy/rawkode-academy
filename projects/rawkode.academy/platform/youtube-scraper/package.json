@@ -11,7 +11,7 @@
     "@sindresorhus/slugify": "^2.2.1",
     "@supabase/supabase-js": "^2.39.0",
     "@types/gapi": "^0.0.47",
-    "@types/node": "^20.10.3",
+    "@types/node": "^22.0.0",
     "fastq": "^1.15.0",
     "google-auth-library": "^9.4.1",
     "googleapis": "^129.0.0",
