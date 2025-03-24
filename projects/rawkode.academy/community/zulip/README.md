@@ -4,6 +4,12 @@ shell: bash
 
 # Zulip
 
+## Why Not Helm?
+
+Zulip do provide a [Helm chart](https://github.com/zulip/docker-zulip/blob/main/kubernetes/chart/zulip), however; the dependencies cannot be disabled and I don't want to YOLO a Postgres onto my cluster without CloudNative PG.
+
+So this is our generated version from that chart.
+
 ## Custom PostgreSQL Image
 
 ```shell {"name": "publish-postgresql"}
@@ -24,5 +30,5 @@ gcloud auth configure-docker ${REGION}-docker.pkg.dev
 
 tar -czf archive.tar.gz *.yaml
 
-oras push ${REGION}-docker.pkg.dev/${PROJECT}/rawkode-academy/zulip:v1.0.33 archive.tar.gz
+oras push ${REGION}-docker.pkg.dev/${PROJECT}/rawkode-academy/zulip:v1.0.34 archive.tar.gz
 ```
