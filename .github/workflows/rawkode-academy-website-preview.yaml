@@ -16,12 +16,18 @@ jobs:
     name: deploy
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
+      - uses: cachix/install-nix-action@v26
+      - uses: cachix/cachix-action@v14
         with:
-          bun-version: latest
+          name: devenv
+      - name: Install devenv.sh
+        run: nix profile install nixpkgs#devenv
       - shell: bash
         working-directory: "projects/rawkode.academy/website"
         run: source .env
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
+        with:
+          bun-version: latest
       - id: deploy
         name: deploy
         # https://github.com/cloudflare/wrangler-action/issues/347
@@ -34,7 +40,7 @@ jobs:
           command: pages deploy --project-name=rawkode-academy ./dist
           workingDirectory: "projects/rawkode.academy/website"
           preCommands: |
-            bun run build
+            devenv shell bun run build
       - name: comment-with-preview-url
         uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3
         with:
