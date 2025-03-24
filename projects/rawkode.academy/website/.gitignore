@@ -17,3 +17,6 @@ dist
 
 # NodeJS
 node_modules
+
+# generated d2 diagrams
+public/d2/
