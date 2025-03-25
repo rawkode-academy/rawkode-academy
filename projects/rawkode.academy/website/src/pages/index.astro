@@ -25,6 +25,7 @@ const organizationSchema = {
 <Page title="Home">
 	<Fragment slot="extra-head">
 		<script
+			is:inline
 			type="application/ld+json"
 			set:html={JSON.stringify(organizationSchema)}
 		></script>
