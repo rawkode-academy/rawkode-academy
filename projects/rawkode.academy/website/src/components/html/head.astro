@@ -50,10 +50,13 @@ interface Props extends OpenGraphProps {}
 	<meta name="theme-color" content="#5F5ED7" />
 	<meta
 		name="description"
-		content="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape."
+		content={Astro.props.description || "The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape."}
 	/>
 
 	<title>{Astro.props.title} | Rawkode Academy</title>
+	
+	<!-- Canonical URL -->
+	<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
 
 	<Opengraph {...Astro.props} />
 

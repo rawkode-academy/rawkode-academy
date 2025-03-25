@@ -26,7 +26,12 @@ export default defineConfig({
 		}),
 		mdx(),
 		react({ experimentalReactChildren: true }),
-		sitemap(),
+		sitemap({
+			filter: (page) => !page.includes('api/'),
+			changefreq: 'weekly',
+			lastmod: new Date(),
+			priority: 0.7,
+		}),
 		tailwind(),
 		vue(),
 		partytown(),

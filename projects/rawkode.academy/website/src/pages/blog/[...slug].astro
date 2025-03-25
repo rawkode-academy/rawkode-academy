@@ -50,7 +50,15 @@ const maybeSeries =
 const imageUrl = await computeImageUrl(article);
 ---
 
-<Page title={`${article.data.title} | Blog`} image={{ image: imageUrl }}>
+<Page 
+	title={`${article.data.title} | Blog`} 
+	description={article.data.subtitle}
+	image={{ image: imageUrl }}
+	isArticle={true}
+	publishedAt={article.data.publishedAt}
+	updatedAt={article.data.updatedAt}
+	authors={article.data.authors}
+>
 	<h1 class="text-5xl font-extrabold dark:text-white">
 		{article.data.title}
 	</h1>
