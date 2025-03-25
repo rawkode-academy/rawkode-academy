@@ -39,7 +39,11 @@ function formatVttTime(seconds: number): string {
   const secs = Math.floor(seconds % 60);
   const milliseconds = Math.floor((seconds % 1) * 1000);
 
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+  return `${hours.toString().padStart(2, "0")}:${
+    minutes.toString().padStart(2, "0")
+  }:${secs.toString().padStart(2, "0")}.${
+    milliseconds.toString().padStart(3, "0")
+  }`;
 }
 
 // Generate VTT content from chapters
@@ -83,7 +87,9 @@ export const GET: APIRoute = async ({ params }): Promise<Response> => {
     }
 
     // Fetch video chapters from GraphQL API
-    const data = await graphQLClient.request<VideoData>(getVideoChaptersQuery, { id: videoId });
+    const data = await graphQLClient.request<VideoData>(getVideoChaptersQuery, {
+      id: videoId,
+    });
 
     if (!data.videoByID) {
       return new Response("Video not found", { status: 404 });
@@ -99,8 +105,8 @@ export const GET: APIRoute = async ({ params }): Promise<Response> => {
       headers: {
         "Content-Type": "text/vtt",
         "Content-Disposition": `attachment; filename="${videoId}-chapters.vtt"`,
-        "Cache-Control": "public, max-age=3600"
-      }
+        "Cache-Control": "public, max-age=3600",
+      },
     });
   } catch (error) {
     console.error("Error generating chapters VTT:", error);

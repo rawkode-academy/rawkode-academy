@@ -50,7 +50,8 @@ const Typewriter = (props: Props) => {
                     {part}
                     <span className="relative">
                       {props.highlight}
-                      <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 to-secondary/30"></span>
+                      <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 to-secondary/30">
+                      </span>
                     </span>
                   </>
                 );
@@ -62,7 +63,9 @@ const Typewriter = (props: Props) => {
             your head above water is a challenge.
             <br />
             <br />
-            <span className="font-medium text-black dark:text-white">We're here to help.</span>
+            <span className="font-medium text-black dark:text-white">
+              We're here to help.
+            </span>
           </p>
           <a
             href={props.primaryButton.link}
