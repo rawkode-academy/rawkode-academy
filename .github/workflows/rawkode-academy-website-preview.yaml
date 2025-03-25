@@ -11,9 +11,9 @@ permissions:
    pull-requests: write
 
 jobs:
-  deploy:
+  preview:
     runs-on: ubuntu-latest
-    name: deploy
+    name: preview
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: cachix/install-nix-action@v26
@@ -28,8 +28,8 @@ jobs:
       - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
         with:
           bun-version: latest
-      - id: deploy
-        name: deploy
+      - id: preview
+        name: preview
         # https://github.com/cloudflare/wrangler-action/issues/347
         uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
         with:
@@ -47,4 +47,4 @@ jobs:
           message: |
             🌐 Your preview deployment can be viewed now 🚀
 
-            ${{ steps.deploy.outputs.deployment-url }}
+            ${{ steps.preview.outputs.deployment-url }}
