@@ -8,7 +8,9 @@
     "format": "deno fmt .",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "codegen": "graphql-codegen --config graphql-codegen.ts"
+    "codegen": "graphql-codegen --config graphql-codegen.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -77,6 +79,8 @@
     "@types/marked": "^6.0.0",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
+    "happy-dom": "^13.10.1",
+    "node-html-parser": "^7.0.1",
     "wrangler": "^4.4.0"
   },
   "trigger.dev": {

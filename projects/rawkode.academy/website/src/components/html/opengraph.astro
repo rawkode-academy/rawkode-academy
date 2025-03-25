@@ -6,7 +6,6 @@ interface Props extends OpenGraphProps {
   isArticle?: boolean;
   publishedAt?: Date;
   updatedAt?: Date;
-  authors?: string[];
 }
 
 const {
@@ -16,8 +15,7 @@ const {
   useImageDirectly = false,
   isArticle = false,
   publishedAt,
-  updatedAt,
-  authors = []
+  updatedAt
 } = Astro.props;
 
 const openGraphUrl = new URL(Astro.url.pathname, Astro.site);
@@ -71,7 +69,7 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
 />
 
 <!-- JSON-LD structured data for breadcrumbs -->
-<script type="application/ld+json">
+<script is:inline type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",

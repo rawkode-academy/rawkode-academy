@@ -10,5 +10,10 @@ export default getViteConfig({
   test: {
     include: ["src/**/*.{spec,test}.{ts,tsx}"],
     mockReset: true,
+    environment: "happy-dom",
+    globals: true,
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+    },
   },
 } as any);

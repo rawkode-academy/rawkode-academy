@@ -1,4 +1,5 @@
 import type { ImageServicePayload } from "./image-service";
+import type { CollectionEntry } from "astro:content";
 
 export interface OpenGraphProps {
   title: string;
@@ -8,5 +9,5 @@ export interface OpenGraphProps {
   isArticle?: boolean;
   publishedAt?: Date;
   updatedAt?: Date;
-  authors?: string[];
+  authors?: CollectionEntry<"people">[];
 }
