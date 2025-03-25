@@ -1,8 +1,5 @@
 ---
-import type { OpenGraphProps } from "@/types/opengraph";
 import * as utf64 from "utf64";
-
-type Props = OpenGraphProps;
 
 const {
   title,
@@ -64,34 +61,27 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
 	content={useImageDirectly ? image?.image : openGraphImageUrl}
 />
 
-<!-- JSON-LD structured data for breadcrumbs -->
-<script is:inline type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Home",
-      "item": "https://rawkode.academy"
+<script is:inline type="application/ld+json" set:html={
+  JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": shouldShowArticleMeta ? "Article" : "WebPage",
+    "headline": title,
+    "description": openGraphDescription,
+    "image": useImageDirectly ? image?.image : openGraphImageUrl,
+    "url": openGraphUrl.toString(),
+    "datePublished": publishedAt ? publishedAt.toISOString() : undefined,
+    "dateModified": updatedAt ? updatedAt.toISOString() : undefined,
+    "publisher": {
+      "@type": "Organization",
+      "name": "Rawkode Academy",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://rawkode.academy/android-chrome-512x512.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": openGraphUrl.toString()
     }
-    {Astro.url.pathname !== "/" &&
-      `,{
-        "@type": "ListItem",
-        "position": 2,
-        "name": "${Astro.url.pathname.split('/')[1].charAt(0).toUpperCase() + Astro.url.pathname.split('/')[1].slice(1)}",
-        "item": "https://rawkode.academy${Astro.url.pathname.split('/').slice(0, 2).join('/')}"
-      }`
-    }
-    {Astro.url.pathname.split('/').length > 2 && Astro.url.pathname !== "/" &&
-      `,{
-        "@type": "ListItem",
-        "position": 3,
-        "name": "${title}",
-        "item": "https://rawkode.academy${Astro.url.pathname}"
-      }`
-    }
-  ]
-}
-</script>
+  })
+} />
