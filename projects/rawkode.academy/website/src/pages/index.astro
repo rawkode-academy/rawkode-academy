@@ -4,9 +4,31 @@ import HeroImage from "./hero.png";
 import HeroTypewriter from "@/components/hero/typewriter.tsx";
 import FeatureList from "@/components/feature/list.vue";
 import PartnerLogos from "@/components/partner/logos.astro";
+
+// Organization structured data for SEO
+const organizationSchema = {
+	"@context": "https://schema.org",
+	"@type": "Organization",
+	name: "Rawkode Academy",
+	url: "https://rawkode.academy",
+	logo: "https://rawkode.academy/android-chrome-512x512.png",
+	description:
+		"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.",
+	sameAs: [
+		"https://github.com/RawkodeAcademy",
+		"https://bsky.app/profile/rawkode.academy",
+		"https://www.linkedin.com/company/rawkodeacademy/",
+	],
+};
 ---
 
 <Page title="Home">
+	<Fragment slot="extra-head">
+		<script
+			type="application/ld+json"
+			set:html={JSON.stringify(organizationSchema)}
+		></script>
+	</Fragment>
 	<HeroTypewriter
 		client:only="react"
 		highlight="hard"
