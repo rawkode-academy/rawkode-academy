@@ -2,11 +2,7 @@
 import type { OpenGraphProps } from "@/types/opengraph";
 import * as utf64 from "utf64";
 
-interface Props extends OpenGraphProps {
-  isArticle?: boolean;
-  publishedAt?: Date;
-  updatedAt?: Date;
-}
+type Props = OpenGraphProps;
 
 const {
   title,
