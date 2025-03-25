@@ -9,15 +9,15 @@ interface Props extends OpenGraphProps {
   authors?: string[];
 }
 
-const { 
-  title, 
-  description, 
-  image, 
-  useImageDirectly = false, 
+const {
+  title,
+  description,
+  image,
+  useImageDirectly = false,
   isArticle = false,
   publishedAt,
   updatedAt,
-  authors = [] 
+  authors = []
 } = Astro.props;
 
 const openGraphUrl = new URL(Astro.url.pathname, Astro.site);
@@ -56,12 +56,6 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
 {shouldShowArticleMeta && updatedAt && (
   <meta property="article:modified_time" content={updatedAt.toISOString()} />
 )}
-{shouldShowArticleMeta && authors.length > 0 && (
-  <meta property="article:author" content={`https://rawkode.academy/authors/${authors[0].toLowerCase().replace(/\s+/g, '-')}`} />
-)}
-{shouldShowArticleMeta && (
-  <meta property="article:section" content="Cloud Native" />
-)}
 {shouldShowArticleMeta && (
   <meta property="article:publisher" content="https://rawkode.academy" />
 )}
@@ -88,7 +82,7 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
       "name": "Home",
       "item": "https://rawkode.academy"
     }
-    {Astro.url.pathname !== "/" && 
+    {Astro.url.pathname !== "/" &&
       `,{
         "@type": "ListItem",
         "position": 2,
@@ -96,7 +90,7 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
         "item": "https://rawkode.academy${Astro.url.pathname.split('/').slice(0, 2).join('/')}"
       }`
     }
-    {Astro.url.pathname.split('/').length > 2 && Astro.url.pathname !== "/" && 
+    {Astro.url.pathname.split('/').length > 2 && Astro.url.pathname !== "/" &&
       `,{
         "@type": "ListItem",
         "position": 3,
