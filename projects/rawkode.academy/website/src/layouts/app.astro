@@ -3,7 +3,7 @@ import UserHeader from "@/components/auth/user-header.astro";
 import Sidebar from "@/components/sidebar/index.vue";
 ---
 
-<div class="antialiased bg-gray-50 dark:bg-gray-900">
+<div class="antialiased">
 	<nav
 		class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-black dark:border-gray-700 fixed left-0 right-0 top-0 z-50"
 	>
@@ -104,23 +104,20 @@ import Sidebar from "@/components/sidebar/index.vue";
 	<Sidebar client:only="vue" />
 
 	<div class="flex overflow-hidden">
-		<div class="hidden"></div>
-		<div class="bg-gray-50 dark:bg-gray-900 w-full md:ml-64">
-			<main class="h-auto pt-20 px-4 md:px-8">
-				<div class="bg-primary text-white text-center py-2 px-4">
-					<p class="text-sm">
-						🚧 This platform open-source and is in early development. We welcome <a
-							href="https://github.com/RawkodeAcademy/RawkodeAcademy/issues"
-							class="underline hover:text-blue-200">feature requests</a
-						> and <a
-							href="https://github.com/RawkodeAcademy/RawkodeAcademy"
-							class="underline hover:text-blue-200">pull requests</a
-						>! 🚀
-					</p>
-				</div>
+		<main class="w-full md:ml-64 h-auto pt-20 px-4 md:px-8 overflow-x-hidden">
+			<div class="bg-primary text-white text-center py-2 px-4">
+				<p class="text-sm">
+					🚧 This platform open-source and is in early development. We welcome <a
+						href="https://github.com/RawkodeAcademy/RawkodeAcademy/issues"
+						class="underline hover:text-blue-200">feature requests</a
+					> and <a
+						href="https://github.com/RawkodeAcademy/RawkodeAcademy"
+						class="underline hover:text-blue-200">pull requests</a
+					>! 🚀
+				</p>
+			</div>
 
-				<slot />
-			</main>
-		</div>
+			<slot />
+		</main>
 	</div>
 </div>

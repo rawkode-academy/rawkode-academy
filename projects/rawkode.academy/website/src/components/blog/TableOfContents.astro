@@ -3,21 +3,686 @@ import type { MarkdownHeading } from "astro";
 
 type Props = {
 	headings: MarkdownHeading[];
+	class?: string;
 };
 
-const { headings } = Astro.props;
+const { headings, class: className = "" } = Astro.props;
 
-// HINT: this is the best for the moment
-const levelTwoHeadings = headings.filter((heading) => heading.depth === 2)
+// Define types for our TOC structure
+type TocHeading = MarkdownHeading & { subheadings: MarkdownHeading[] };
+
+// Filter headings to only include h2 and h3
+const filteredHeadings = headings.filter(
+	(heading) => heading.depth === 2 || heading.depth === 3
+);
+
+// Group headings by their hierarchy using reduce
+const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
+	(acc, heading) => {
+		if (heading.depth === 2) {
+			// Create a new h2 heading with empty subheadings
+			const h2Heading: TocHeading = { ...heading, subheadings: [] };
+			acc.push(h2Heading);
+		} else if (heading.depth === 3 && acc.length > 0) {
+			// Add h3 to the last h2's subheadings
+			const lastH2 = acc[acc.length - 1];
+			if (lastH2) {
+				lastH2.subheadings.push(heading);
+			}
+		}
+		return acc;
+	},
+	[]
+);
 ---
 
-<h2>Table of Contents</h2>
-<ul class="space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
-	{
-		levelTwoHeadings.map((heading) => (
-			<li>
-				<a href={`#${heading.slug}`}>{heading.text}</a>
-			</li>
-		))
+<!-- Toggle button - positioned independently -->
+<button
+	id="toc-mobile-toggle"
+	class="md:hidden fixed top-24 right-0 bg-white/95 dark:bg-gray-800/95 text-gray-600 dark:text-gray-300 p-2 rounded-l-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 border-r-0 z-50"
+>
+	<svg
+		id="toc-icon-open"
+		xmlns="http://www.w3.org/2000/svg"
+		class="h-6 w-6"
+		fill="none"
+		viewBox="0 0 24 24"
+		stroke="currentColor"
+	>
+		<path
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			stroke-width="2"
+			d="M4 6h16M4 12h16M4 18h7"></path>
+	</svg>
+	<svg
+		id="toc-icon-close"
+		xmlns="http://www.w3.org/2000/svg"
+		class="h-6 w-6 hidden"
+		fill="none"
+		viewBox="0 0 24 24"
+		stroke="currentColor"
+	>
+		<path
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			stroke-width="2"
+			d="M6 18L18 6M6 6l12 12"></path>
+	</svg>
+</button>
+
+<!-- TOC Container - Vertically centered when minimized, expands on hover -->
+<div
+	id="toc-container"
+	class={`toc-container bg-white/95 dark:bg-gray-800/95 border-l border-gray-200 dark:border-gray-700 max-h-[50vh] overflow-y-auto rounded-lg backdrop-blur-sm shadow-lg dark:shadow-xl transition-all duration-300 ease-in-out opacity-50 ${className}`}
+>
+	<div class="p-2 md:p-4">
+		<div class="mb-3 flex items-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-6 w-6 md:mr-2 text-primary flex-shrink-0"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M4 6h16M4 12h16M4 18h7"></path>
+			</svg>
+			<h2
+				class="text-lg font-semibold whitespace-nowrap overflow-hidden toc-title"
+			>
+				Table of Contents
+			</h2>
+		</div>
+		<ul class="space-y-2 text-gray-600 dark:text-gray-300 relative list-none">
+			{
+				tocHeadings.map((heading) => (
+					<li class="list-none">
+						<div class="toc-item" data-heading-slug={heading.slug}>
+							<a
+								href={`#${heading.slug}`}
+								class="flex items-center hover:text-primary transition-colors duration-200 py-1 border-l-2 border-transparent pl-2 relative"
+							>
+								<div class="toc-dot absolute w-3 h-3 rounded-full bg-primary" />
+								<div class="toc-content ml-4 flex items-center">
+									<span class="text-sm md:text-base break-words">
+										{heading.text}
+									</span>
+								</div>
+							</a>
+						</div>
+
+						{heading.subheadings.length > 0 && (
+							<ul class="ml-4 mt-1 space-y-1 list-none">
+								{heading.subheadings.map((subheading) => (
+									<li
+										class="toc-subitem list-none"
+										data-heading-slug={subheading.slug}
+									>
+										<a
+											href={`#${subheading.slug}`}
+											class="flex items-center hover:text-primary transition-colors duration-200 py-1 border-l-0 pl-2 text-sm relative"
+										>
+											<div class="toc-dot absolute w-2 h-2 rounded-full bg-primary/90" />
+											<div class="toc-content ml-4 flex items-center">
+												<span class="text-xs md:text-sm break-words">
+													{subheading.text}
+												</span>
+											</div>
+										</a>
+									</li>
+								))}
+							</ul>
+						)}
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</div>
+
+<style>
+	/* Define primary color RGB values */
+	:root {
+		--color-primary-rgb: 95, 94, 215; /* RGB values for #5F5ED7 */
 	}
-</ul>
+
+	/* Remove underlines from TOC links */
+	#toc-container a {
+		text-decoration: none;
+	}
+
+	/* Pulsing animation for touch devices to indicate interactivity */
+	@keyframes pulse {
+		0% {
+			transform: scale(1);
+			opacity: 0.7;
+		}
+		50% {
+			transform: scale(1.2);
+			opacity: 1;
+		}
+		100% {
+			transform: scale(1);
+			opacity: 0.7;
+		}
+	}
+
+	/* Collapsed/expanded state styling */
+	.toc-content,
+	.toc-title {
+		opacity: 0;
+		width: 0;
+		transition:
+			opacity 0.3s ease,
+			width 0.3s ease;
+	}
+
+	/* For non-touch devices (hover) */
+	#toc-container:hover {
+		opacity: 1;
+	}
+
+	#toc-container:hover .toc-content,
+	#toc-container:hover .toc-title {
+		opacity: 1;
+		width: auto;
+	}
+
+	/* Ensure all dots are visible in minimized state */
+	#toc-container .toc-dot {
+		opacity: 1;
+		left: -1rem; /* Original position */
+		background-color: #5f5ed7; /* Primary color */
+		box-shadow: 0 0 6px rgba(95, 94, 215, 0.9);
+		z-index: 20;
+		position: absolute; /* Ensure absolute positioning */
+	}
+
+	/* For touch devices (click/tap) */
+	#toc-container.touch-device.expanded {
+		width: 16rem !important;
+		opacity: 1;
+	}
+
+	#toc-container.touch-device.expanded .toc-content,
+	#toc-container.touch-device.expanded .toc-title {
+		opacity: 1;
+		width: auto;
+	}
+
+	#toc-container.touch-device .toc-dot {
+		animation: pulse 2s infinite ease-in-out;
+	}
+
+	#toc-container.touch-device.expanded .toc-dot {
+		animation: none;
+		transform: scale(1.5);
+		opacity: 1;
+	}
+
+	.toc-dot {
+		transition: all 0.3s ease;
+	}
+
+	#toc-container:hover .toc-dot {
+		transform: scale(1.2);
+	}
+
+	/* Mobile-specific styles */
+	@media (max-width: 768px) {
+		#toc-container {
+			transform: translateX(100%);
+			width: calc(
+				100% - 2rem
+			) !important; /* Match content width minus padding */
+			max-width: calc(100vw - 2rem); /* Ensure it doesn't exceed viewport */
+			border-radius: 8px 0 0 8px;
+			z-index: 50;
+			opacity: 0;
+			pointer-events: none;
+			right: 0;
+		}
+
+		#toc-container.mobile-visible {
+			transform: translateX(0);
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		#toc-container .toc-content,
+		#toc-container .toc-title {
+			opacity: 1;
+			width: auto;
+		}
+
+		/* Override parent hover behavior on mobile */
+		#toc-container:hover {
+			width: calc(100% - 2rem) !important;
+		}
+
+		/* Hide dots container on mobile */
+		.toc-dots-container {
+			display: none !important;
+		}
+	}
+
+	/* Medium screens */
+	@media (min-width: 769px) and (max-width: 1023px) {
+		#toc-container {
+			width: 2rem !important; /* Collapsed width */
+			max-width: 2rem;
+			transition: all 0.3s ease;
+			position: fixed;
+			right: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			z-index: 40;
+			overflow-x: hidden;
+			padding-right: 0.5rem;
+		}
+
+		#toc-container.mobile-visible,
+		#toc-container:hover {
+			width: min(
+				16rem,
+				calc(100% - 2rem)
+			) !important; /* Smaller width for medium screens */
+			max-width: min(16rem, calc(100% - 2rem));
+			right: 1rem;
+			transform: translateY(-50%);
+		}
+	}
+
+	/* Large screens and up */
+	@media (min-width: 1024px) {
+		#toc-container {
+			width: 2rem !important; /* Collapsed width */
+			max-width: 2rem;
+			transition: all 0.3s ease;
+			position: fixed;
+			right: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			z-index: 40;
+			overflow-x: hidden;
+			padding-right: 0.5rem;
+		}
+
+		#toc-container.mobile-visible,
+		#toc-container:hover {
+			width: min(
+				24rem,
+				calc(100% - 2rem)
+			) !important; /* Responsive width that doesn't exceed content */
+			max-width: min(24rem, calc(100% - 2rem));
+			right: 1rem;
+			transform: translateY(-50%);
+		}
+	}
+</style>
+
+<script>
+	// Helper function to get DOM elements with null checks
+	const getElement = (id: string): HTMLElement | null =>
+		document.getElementById(id);
+
+	// Helper function to toggle icon visibility
+	const toggleIcons = (
+		iconOpen: HTMLElement | null,
+		iconClose: HTMLElement | null,
+		showClose = false
+	): void => {
+		if (!iconOpen || !iconClose) return;
+
+		iconOpen.classList.toggle("hidden", showClose);
+		iconClose.classList.toggle("hidden", !showClose);
+	};
+
+	// Setup touch device behavior
+	const setupTouchDevice = (tocContainer: HTMLElement): void => {
+		if (!tocContainer) return;
+
+		const isTouchDevice =
+			"ontouchstart" in window || navigator.maxTouchPoints > 0;
+		if (!isTouchDevice) return;
+
+		// Add a class to identify touch devices
+		tocContainer.classList.add("touch-device");
+
+		// Add click event to toggle expanded state
+		tocContainer.addEventListener("click", (e: MouseEvent) => {
+			const target = e.target as HTMLElement;
+			// Only toggle if clicking on the container itself or a dot, not on links
+			if (
+				target === tocContainer ||
+				(target && target.classList.contains("toc-dot"))
+			) {
+				tocContainer.classList.toggle("expanded");
+				// Prevent the click from triggering links
+				e.preventDefault();
+			}
+		});
+	};
+
+	// Setup mobile toggle button
+	const setupMobileToggle = (
+		tocContainer: HTMLElement,
+		mobileToggle: HTMLElement,
+		iconOpen: HTMLElement,
+		iconClose: HTMLElement
+	): void => {
+		if (!tocContainer || !mobileToggle || !iconOpen || !iconClose) return;
+
+		// Toggle button functionality
+		mobileToggle.addEventListener("click", (e: MouseEvent) => {
+			const isVisible = tocContainer.classList.toggle("mobile-visible");
+			toggleIcons(iconOpen, iconClose, isVisible);
+			e.stopPropagation();
+		});
+
+		// Close TOC when clicking outside
+		document.addEventListener("click", (e: MouseEvent) => {
+			const target = e.target as HTMLElement;
+			if (
+				tocContainer.classList.contains("mobile-visible") &&
+				!tocContainer.contains(target) &&
+				target !== mobileToggle
+			) {
+				tocContainer.classList.remove("mobile-visible");
+				toggleIcons(iconOpen, iconClose, false);
+			}
+		});
+	};
+
+	// Handle window resize
+	const setupResizeHandler = (
+		tocContainer: HTMLElement,
+		iconOpen: HTMLElement,
+		iconClose: HTMLElement
+	): void => {
+		if (!tocContainer || !iconOpen || !iconClose) return;
+
+		window.addEventListener("resize", () => {
+			// Check if it's a mobile device now
+			const isMobile = window.innerWidth < 768;
+
+			// If we're on desktop and TOC is in mobile visible state, reset it
+			if (!isMobile && tocContainer.classList.contains("mobile-visible")) {
+				tocContainer.classList.remove("mobile-visible");
+				toggleIcons(iconOpen, iconClose, false);
+			}
+		});
+	};
+
+	// Create a separate container for dots in minimized state
+	const createDotsContainer = (
+		tocContainer: HTMLElement
+	): HTMLElement | null => {
+		if (!tocContainer) return null;
+
+		// Create a container for the dots
+		const dotsContainer = document.createElement("div");
+		dotsContainer.id = "toc-dots-container";
+		dotsContainer.className = "toc-dots-container";
+		dotsContainer.style.position = "absolute";
+		dotsContainer.style.top = "50%";
+		dotsContainer.style.left = "50%";
+		dotsContainer.style.transform = "translate(-50%, -50%)";
+		dotsContainer.style.display = "flex";
+		dotsContainer.style.flexDirection = "column";
+		dotsContainer.style.alignItems = "center";
+		dotsContainer.style.justifyContent = "center";
+		dotsContainer.style.height = "80%"; // Use most of the container height
+		dotsContainer.style.zIndex = "30";
+
+		// Hide on mobile
+		if (window.innerWidth <= 768) {
+			dotsContainer.style.display = "none";
+		}
+
+		// Get only h2 TOC items (toc-item class)
+		const tocItems = tocContainer.querySelectorAll(".toc-item");
+		const itemCount = tocItems.length;
+
+		// Create a dot for each h2 TOC item
+		tocItems.forEach((item, index) => {
+			const dot = document.createElement("div");
+			const slug = item.getAttribute("data-heading-slug");
+			dot.className = "toc-dot-clone";
+			dot.setAttribute("data-heading-slug", slug || "");
+			dot.style.width = "6px";
+			dot.style.height = "6px";
+			dot.style.borderRadius = "50%";
+			dot.style.backgroundColor = "#5f5ed7";
+			dot.style.opacity = "0.7";
+			dot.style.marginBottom = index < itemCount - 1 ? "1.5rem" : "0";
+			dot.style.transition =
+				"transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease";
+			dot.style.cursor = "pointer";
+
+			// Add click event to navigate to the corresponding heading
+			dot.addEventListener("click", (e) => {
+				if (slug) {
+					window.location.hash = slug;
+				}
+				// Stop propagation to prevent interfering with mobile toggle
+				e.stopPropagation();
+			});
+
+			// Add hover effect
+			dot.addEventListener("mouseenter", () => {
+				dot.style.opacity = "1";
+				dot.style.transform = "scale(1.5)";
+			});
+
+			dot.addEventListener("mouseleave", () => {
+				// Only reset if not the active dot
+				if (!dot.classList.contains("active-dot")) {
+					dot.style.opacity = "0.7";
+					dot.style.transform = "scale(1)";
+				}
+			});
+
+			dotsContainer.appendChild(dot);
+		});
+
+		tocContainer.appendChild(dotsContainer);
+
+		// Show/hide dots container based on hover (desktop only)
+		tocContainer.addEventListener("mouseenter", () => {
+			if (window.innerWidth > 768) {
+				dotsContainer.style.display = "none";
+			}
+		});
+
+		tocContainer.addEventListener("mouseleave", () => {
+			if (window.innerWidth > 768) {
+				dotsContainer.style.display = "flex";
+			}
+		});
+
+		// Update dots visibility on window resize
+		window.addEventListener("resize", () => {
+			if (window.innerWidth <= 768) {
+				dotsContainer.style.display = "none";
+			} else if (!tocContainer.matches(":hover")) {
+				dotsContainer.style.display = "flex";
+			}
+		});
+
+		return dotsContainer;
+	};
+
+	// Main setup function for TOC
+	const setupTOC = (): void => {
+		const tocContainer = getElement("toc-container");
+		const mobileToggle = getElement("toc-mobile-toggle");
+		const iconOpen = getElement("toc-icon-open");
+		const iconClose = getElement("toc-icon-close");
+
+		if (!tocContainer || !mobileToggle || !iconOpen || !iconClose) return;
+
+		setupTouchDevice(tocContainer);
+		setupMobileToggle(tocContainer, mobileToggle, iconOpen, iconClose);
+		setupResizeHandler(tocContainer, iconOpen, iconClose);
+
+		// Only create dots container on desktop
+		if (window.innerWidth > 768) {
+			createDotsContainer(tocContainer);
+		}
+	};
+
+	// Reset all TOC items to inactive state
+	const resetTocItems = (tocItems: NodeListOf<Element>): void => {
+		tocItems.forEach((item) => {
+			const link = item.querySelector("a");
+			if (link) {
+				link.classList.remove("text-primary", "font-medium", "border-primary");
+				if (item.classList.contains("toc-item")) {
+					link.classList.add("border-transparent");
+				}
+			}
+		});
+	};
+
+	// Find current heading based on scroll position
+	const findCurrentHeadingIndex = (
+		headings: HTMLElement[],
+		scrollPosition: number
+	): number => {
+		let currentHeadingIndex = -1;
+
+		for (let i = 0; i < headings.length; i++) {
+			const heading = headings[i] as HTMLElement;
+			if (heading.offsetTop > scrollPosition) {
+				break;
+			}
+			currentHeadingIndex = i;
+		}
+
+		return currentHeadingIndex;
+	};
+
+	// No highlight line or trail functions needed
+
+	// Activate the current TOC item
+	const activateTocItem = (currentTocItem: HTMLElement): void => {
+		if (!currentTocItem) return;
+
+		const link = currentTocItem.querySelector("a");
+		if (link) {
+			link.classList.add("text-primary", "font-medium");
+			if (currentTocItem.classList.contains("toc-item")) {
+				link.classList.add("border-primary");
+				link.classList.remove("border-transparent");
+			}
+		}
+	};
+
+	// Find TOC item corresponding to a heading
+	const findTocItem = (headingId: string): HTMLElement | null => {
+		// First try to find it as a main item
+		let tocItem = document.querySelector(
+			`.toc-item[data-heading-slug="${headingId}"]`
+		) as HTMLElement;
+
+		// If not found, try as a subitem
+		if (!tocItem) {
+			tocItem = document.querySelector(
+				`.toc-subitem[data-heading-slug="${headingId}"]`
+			) as HTMLElement;
+		}
+
+		return tocItem;
+	};
+
+	// Function to highlight the current heading in the TOC
+	const updateTOC = (): void => {
+		const headings = Array.from(
+			document.querySelectorAll("h2[id], h3[id]")
+		) as HTMLElement[];
+		const tocItems = document.querySelectorAll(".toc-item, .toc-subitem");
+		const dotsContainer = document.getElementById("toc-dots-container");
+
+		if (headings.length === 0 || tocItems.length === 0) return;
+
+		// Get the current scroll position with a small offset
+		const scrollPosition = window.scrollY + 150;
+
+		// Find the current heading
+		const currentHeadingIndex = findCurrentHeadingIndex(
+			headings,
+			scrollPosition
+		);
+
+		// Reset all TOC items
+		resetTocItems(tocItems);
+
+		// Reset all dot clones
+		if (dotsContainer) {
+			const dotClones = dotsContainer.querySelectorAll(".toc-dot-clone");
+			dotClones.forEach((dot) => {
+				dot.classList.remove("active-dot");
+				(dot as HTMLElement).style.opacity = "0.7";
+				(dot as HTMLElement).style.transform = "scale(1)";
+				(dot as HTMLElement).style.backgroundColor = "#5f5ed7";
+			});
+		}
+
+		// Handle active heading if found
+		if (currentHeadingIndex >= 0) {
+			const currentHeading = headings[currentHeadingIndex];
+			if (currentHeading && currentHeading.id) {
+				const currentTocItem = findTocItem(currentHeading.id);
+
+				if (currentTocItem) {
+					activateTocItem(currentTocItem);
+
+					// Also highlight the corresponding dot in the dots container
+					if (dotsContainer) {
+						// Find the closest h2 heading if current is h3
+						let h2Slug = currentHeading.id;
+						if (currentHeading.tagName === "H3") {
+							// Find the parent h2 by traversing up the DOM
+							let h2 = currentHeading.previousElementSibling;
+							while (h2 && h2.tagName !== "H2") {
+								h2 = h2.previousElementSibling;
+							}
+							if (h2 && h2.id) {
+								h2Slug = h2.id;
+							}
+						}
+
+						// Find and highlight the dot
+						const activeDot = dotsContainer.querySelector(
+							`.toc-dot-clone[data-heading-slug="${h2Slug}"]`
+						) as HTMLElement;
+
+						if (activeDot) {
+							activeDot.classList.add("active-dot");
+							activeDot.style.opacity = "1";
+							activeDot.style.transform = "scale(1.5)";
+							activeDot.style.backgroundColor = "#7f7ef2"; // Slightly lighter for better visibility
+						}
+					}
+				}
+			}
+		}
+	};
+
+	// Initialize everything when the DOM is ready
+	document.addEventListener("DOMContentLoaded", () => {
+		setupTOC();
+		updateTOC(); // Initial TOC update
+	});
+
+	// Update TOC on scroll
+	window.addEventListener("scroll", updateTOC, { passive: true });
+
+	// Update on window resize
+	window.addEventListener("resize", updateTOC, { passive: true });
+</script>

@@ -3,7 +3,6 @@ import { getCollection } from "astro:content";
 import ArticleCard from "../ArticleCard.astro";
 
 const latestBlogPosts = (await getCollection("blog"))
-	.slice(0, 3)
 	.filter((article) => !article.data.isDraft)
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 ---
