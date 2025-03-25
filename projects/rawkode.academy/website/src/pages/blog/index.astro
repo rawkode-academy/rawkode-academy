@@ -1,32 +1,59 @@
 ---
-import Featured from "@/components/blog/featured/Featured.astro";
 import Page from "@/wrappers/page.astro";
+import Featured from "@/components/blog/featured/Featured.astro";
 
 export const prerender = true;
 ---
 
-<style>
-	a {
-		@apply text-primary;
-	}
-</style>
-
 <Page title="Blog">
-	<h1 class="text-5xl font-extrabold dark:text-white">Our Blog</h1>
+	<style>
+		a {
+			@apply text-primary;
+		}
 
-	<p class="text-gray-500 font-semibold sm:text-xl dark:text-gray-400">
-		We're a community of learners. We're always learning, and we're always
-		sharing what we're learning. Our blog is a place for us to share our
-		thoughts, ideas, and experiences.
-	</p>
+		.hero-gradient {
+			background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+		}
 
-	<p class="mt-8 font-light text-gray-500 dark:text-gray-400">
-		Want to share something you've recently learned? Awesome. Why not <a
-			target="_blank"
-			href="https://github.com/RawkodeAcademy/RawkodeAcademy"
-			>submit a pull request</a
-		>?
-	</p>
+		.card-hover {
+			transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+		}
+
+		.card-hover:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		}
+
+		.animate-float {
+			animation: float 6s ease-in-out infinite;
+		}
+
+		@keyframes float {
+			0% {
+				transform: translateY(0px);
+			}
+			50% {
+				transform: translateY(-20px);
+			}
+			100% {
+				transform: translateY(0px);
+			}
+		}
+	</style>
+
+	<div class="mt-8 hero-gradient rounded-3xl p-8 mb-12 relative overflow-hidden">
+		<div class="absolute top-0 right-0 w-1/2 h-full opacity-10">
+			<svg class="w-full h-full animate-float" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+				<path fill="#FFFFFF" d="M40.8,-62.2C52.9,-56.3,62.2,-43.9,68.1,-29.8C74,-15.6,76.5,0.4,73.2,15.1C69.9,29.8,60.8,43.2,48.6,53.4C36.4,63.6,21.2,70.5,4.4,74.1C-12.4,77.7,-30.9,77.9,-45.9,70.1C-60.9,62.3,-72.3,46.4,-77.2,28.7C-82.1,11,-80.5,-8.5,-73.3,-24.8C-66.2,-41.1,-53.6,-54.1,-39.5,-59.5C-25.5,-64.9,-10,-62.6,3.4,-67.7C16.8,-72.8,28.7,-68.1,40.8,-62.2Z" transform="translate(100 100)" />
+			</svg>
+		</div>
+		<div class="relative z-10">
+			<h1 class="text-6xl font-extrabold text-white mb-4"><span class="bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200">Blog</span></h1>
+			<p class="text-xl font-semibold text-purple-100 max-w-2xl">
+				Our blog explores a diverse array of subjects including cloud native technologies, distributed systems, and event-driven architectures.
+			</p>
+		</div>
+	</div>
 
 	<Featured />
 </Page>
