@@ -53,11 +53,15 @@ const imageUrl = await computeImageUrl(article);
 <Page 
 	title={`${article.data.title} | Blog`} 
 	description={article.data.subtitle}
-	image={{ image: imageUrl }}
+	image={imageUrl ? { 
+		image: imageUrl, 
+		text: article.data.title, 
+		format: "png" as const 
+	} : undefined}
 	isArticle={true}
 	publishedAt={article.data.publishedAt}
 	updatedAt={article.data.updatedAt}
-	authors={article.data.authors}
+	authors={authors}
 >
 	<h1 class="text-5xl font-extrabold dark:text-white">
 		{article.data.title}
