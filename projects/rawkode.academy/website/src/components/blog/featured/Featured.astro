@@ -1,16 +1,17 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntries, type CollectionEntry } from "astro:content";
 import ArticleCard from "../ArticleCard.astro";
 import { Image } from "astro:assets";
 
 const allBlogPosts = (await getCollection("blog"))
-	.filter((article) => !article.data.isDraft)
-	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+	.filter((article: CollectionEntry<"blog">) => !article.data.isDraft)
+	.sort((a: CollectionEntry<"blog">, b: CollectionEntry<"blog">) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
 // Get the latest article
 const latestArticle = allBlogPosts[0];
+const latestArticleAuthors = latestArticle ? await getEntries(latestArticle.data.authors) : [];
 
-// Get the rest of the articles
+// Get other articles
 const otherArticles = allBlogPosts.slice(1);
 ---
 
@@ -25,7 +26,7 @@ const otherArticles = allBlogPosts.slice(1);
 					<div class="h-px flex-grow bg-gradient-to-r from-purple-500 to-transparent ml-4"></div>
 				</div>
 				<a href={`/blog/${latestArticle.id}`} class="block transform transition-all duration-300 hover:scale-[1.01] hover:-translate-y-1">
-					<article class="p-0 bg-white rounded-xl overflow-hidden shadow-xl dark:bg-gray-800 dark:border-gray-700 border border-gray-100 dark:border-gray-700">
+					<article class="p-0 bg-white rounded-xl overflow-hidden shadow-xl dark:bg-gray-800 dark:border-gray-700 border border-gray-100">
 						<div class="flex flex-col lg:flex-row">
 							<div class="lg:w-1/2 relative">
 								{latestArticle.data.cover ? (
@@ -67,16 +68,29 @@ const otherArticles = allBlogPosts.slice(1);
 								<div class="mt-auto pt-6 border-t border-gray-100 dark:border-gray-700">
 									<div class="flex items-center justify-between">
 										<div class="flex items-center space-x-3">
-											<div class="relative">
-												<img
-													class="w-12 h-12 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white"
-													src="https://pbs.twimg.com/profile_images/1618711146260832262/P7jcoO32_400x400.jpg"
-													alt={`Profile picture of ${latestArticle.data.authors[0]}`}
-												/>
-												<span class="absolute bottom-0 right-0 h-3 w-3 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"></span>
+											<div class="flex -space-x-3">
+												{latestArticleAuthors.slice(0, 3).map((author, index) => (
+													<div class="relative" style={`z-index: ${10 - index}`}>
+														<img
+															class="w-12 h-12 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white"
+															src={`https://github.com/${author.data.handle}.png`}
+															alt={`Profile picture of ${author.data.name}`}
+														/>
+														{index === 0 && (
+															<span class="absolute bottom-0 right-0 h-3 w-3 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"></span>
+														)}
+													</div>
+												))}
+												{latestArticleAuthors.length > 3 && (
+													<div class="relative" style="z-index: 0;">
+														<div class="w-12 h-12 rounded-full bg-purple-100 border-2 border-purple-500 p-0.5 bg-white flex items-center justify-center text-sm text-purple-800 font-medium">
+															+{latestArticleAuthors.length - 3}
+														</div>
+													</div>
+												)}
 											</div>
 											<div class="font-medium dark:text-white">
-												<div class="text-sm">{latestArticle.data.authors.join(", ")}</div>
+												<div class="text-sm">{latestArticleAuthors.map((author: CollectionEntry<"people">) => author.data.name).join(", ")}</div>
 											</div>
 										</div>
 										<div class="flex items-center space-x-2">
@@ -108,7 +122,7 @@ const otherArticles = allBlogPosts.slice(1);
 				<div class="h-px flex-grow bg-gradient-to-r from-purple-500 to-transparent ml-4"></div>
 			</div>
 			<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-				{otherArticles.map((article) => (
+				{otherArticles.map((article: CollectionEntry<"blog">) => (
 					<div class="transform transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 h-full">
 						<ArticleCard article={article} />
 					</div>

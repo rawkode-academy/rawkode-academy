@@ -1,5 +1,6 @@
 import { glob } from "astro/loaders";
 import { defineCollection, reference, z } from "astro:content";
+
 import { gql, GraphQLClient } from "graphql-request";
 
 const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
@@ -43,6 +44,17 @@ const videos = defineCollection({
 
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections
 
+const people = defineCollection({
+		loader: glob({
+		pattern: ["**\/*.json"],
+		base: "./content/people",
+	}),
+	schema: z.object({
+		name: z.string(),
+		handle: z.string(),
+	}),
+});
+
 const blog = defineCollection({
 	loader: glob({
 		pattern: ["**\/*.mdx", "**\/*.md"],
@@ -60,7 +72,7 @@ const blog = defineCollection({
 			publishedAt: z.coerce.date(),
 			updatedAt: z.coerce.date().optional(),
 			isDraft: z.boolean().default(true),
-			authors: z.array(z.string()).default(["Rawkode Academy"]),
+			authors: z.array(reference('people')).default(['rawkode']),
 		}),
 });
 
@@ -79,4 +91,4 @@ const series = defineCollection({
 		}),
 });
 
-export const collections = { blog, series, videos };
+export const collections = { blog, series, videos, people };
