@@ -9,10 +9,16 @@ import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
-import { vite as vidstack } from "vidstack/plugins";
+import { vite as vidstackPlugin } from "vidstack/plugins";
+
+// Type assertion to work around type incompatibility
+const vidstack = vidstackPlugin as any;
 
 export default defineConfig({
 	output: "server",
+	adapter: cloudflare({
+		imageService: "cloudflare",
+	}),
 	integrations: [
 		d2(),
 		expressiveCode({
@@ -47,9 +53,6 @@ export default defineConfig({
 				: {},
 		},
 	},
-	adapter: cloudflare({
-		imageService: "cloudflare",
-	}),
 	site: import.meta.env.CF_PAGES_URL
 		? import.meta.env.CF_PAGES_URL
 		: "https://rawkode.academy",

@@ -5,9 +5,10 @@ import { getViteConfig } from "astro/config";
 process.env.ZITADEL_URL = "some-zitadel-url";
 process.env.ZITADEL_CLIENT_ID = "some-client-id";
 
+// Use type assertion to work around the UserConfig type issue
 export default getViteConfig({
   test: {
     include: ["src/**/*.{spec,test}.{ts,tsx}"],
     mockReset: true,
   },
-});
+} as any);
