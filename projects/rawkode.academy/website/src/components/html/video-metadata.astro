@@ -25,10 +25,17 @@ function formatDuration(seconds: number): string {
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = Math.floor(seconds % 60);
 
+  let result = "PT";
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+    result += `${hours}H`;
   }
-  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  if (minutes > 0) {
+    result += `${minutes}M`;
+  }
+  if (remainingSeconds > 0 || (hours === 0 && minutes === 0)) {
+    result += `${remainingSeconds}S`;
+  }
+  return result;
 }
 
 const formattedDuration = formatDuration(duration ?? 0);
