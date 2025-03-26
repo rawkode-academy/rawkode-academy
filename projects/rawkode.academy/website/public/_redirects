@@ -1,0 +1,3 @@
+/blog/our-federated-graphql-api /read/federated-graphql-microservices 301
+/blog/our-federated-graphql-api/ /read/federated-graphql-microservices 301
+/blog/* /read/:splat 301

@@ -55,10 +55,10 @@ const people = defineCollection({
   }),
 });
 
-const blog = defineCollection({
+const articles = defineCollection({
   loader: glob({
     pattern: ["**\/*.mdx", "**\/*.md"],
-    base: "./content/blog",
+    base: "./content/articles",
   }),
   schema: ({ image }) =>
     z.object({
@@ -91,4 +91,4 @@ const series = defineCollection({
     }),
 });
 
-export const collections = { blog, series, videos, people };
+export const collections = { articles, series, videos, people };

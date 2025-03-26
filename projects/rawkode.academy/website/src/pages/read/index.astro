@@ -2,22 +2,22 @@
 import { getCollection, getEntries } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { Image } from "astro:assets";
-import ArticleCard from "@/components/blog/ArticleCard.astro";
+import ArticleCard from "@/components/articles/ArticleCard.astro";
 
 export const prerender = true;
 
 // Get all blog posts and sort by date
-const allBlogPosts = (await getCollection("blog"))
+const allArticles = (await getCollection("articles"))
   .filter((article) => !article.data.isDraft)
   .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
 // Get featured posts (latest 3)
-const featuredPosts = allBlogPosts.slice(0, 3);
+const featuredPosts = allArticles.slice(0, 3);
 const latestPost = featuredPosts[0];
 const latestPostAuthors = latestPost ? await getEntries(latestPost.data.authors) : [];
 
 // Get remaining posts
-const remainingPosts = allBlogPosts.slice(3);
+const remainingPosts = allArticles.slice(3);
 
 // Function to format dates
 function formatDate(date: Date): string {
@@ -29,7 +29,7 @@ function formatDate(date: Date): string {
 }
 ---
 
-<Page title="Blog">
+<Page title="Articles">
   <style>
     /* Core styles */
     .primary-gradient {
@@ -183,7 +183,7 @@ function formatDate(date: Date): string {
 
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold">
             <span class="text-gray-900 dark:text-white">The </span>
-            <span class="text-gradient">Tech Blog</span>
+            <span class="text-gradient">Articles</span>
           </h1>
 
           <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl">
@@ -209,7 +209,7 @@ function formatDate(date: Date): string {
                 <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
                 <div class="w-3 h-3 bg-green-500 rounded-full"></div>
               </div>
-              <div class="flex-1 text-center text-xs text-gray-500 dark:text-gray-400 font-semibold">blog.rawkode.academy</div>
+              <div class="flex-1 text-center text-xs text-gray-500 dark:text-gray-400 font-semibold">rawkode.academy/articles</div>
             </div>
             <div class="terminal-body bg-gray-50 dark:bg-gray-900">
               <div class="terminal-prompt text-gray-800 dark:text-gray-200">ls -la /articles</div>
@@ -228,7 +228,7 @@ function formatDate(date: Date): string {
               </div>
               <div class="terminal-prompt text-gray-800 dark:text-gray-200 mt-2">open /latest-article.md</div>
               <div class="terminal-output text-gray-700 dark:text-gray-300">
-                <a href={latestPost ? `/blog/${latestPost.id}` : '#'} class="text-xs inline-flex items-center text-primary hover:underline">
+                <a href={latestPost ? `/read/${latestPost.id}` : '#'} class="text-xs inline-flex items-center text-primary hover:underline">
                   Opening article...
                   <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -258,7 +258,7 @@ function formatDate(date: Date): string {
           <!-- Main Featured Article -->
           {latestPost && (
             <div class="featured-main relative article-card rounded-xl overflow-hidden shadow-lg h-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <a href={`/blog/${latestPost.id}`} class="block relative h-full">
+              <a href={`/read/${latestPost.id}`} class="block relative h-full">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
 
                 {latestPost.data.cover ? (
@@ -321,7 +321,7 @@ function formatDate(date: Date): string {
           <!-- Secondary Featured Articles -->
           {featuredPosts.slice(1).map(post => (
             <div class="article-card rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <a href={`/blog/${post.id}`} class="block h-full flex flex-col">
+              <a href={`/read/${post.id}`} class="block h-full flex flex-col">
                 <div class="relative h-48">
                   <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
 

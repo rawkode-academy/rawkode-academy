@@ -3,16 +3,16 @@ import { getCollection, getEntries, type CollectionEntry } from "astro:content";
 import ArticleCard from "../ArticleCard.astro";
 import { Image } from "astro:assets";
 
-const allBlogPosts = (await getCollection("blog"))
-	.filter((article: CollectionEntry<"blog">) => !article.data.isDraft)
-	.sort((a: CollectionEntry<"blog">, b: CollectionEntry<"blog">) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+const allArticles = (await getCollection("articles"))
+	.filter((article: CollectionEntry<"articles">) => !article.data.isDraft)
+	.sort((a: CollectionEntry<"articles">, b: CollectionEntry<"articles">) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
 // Get the latest article
-const latestArticle = allBlogPosts[0];
+const latestArticle = allArticles[0];
 const latestArticleAuthors = latestArticle ? await getEntries(latestArticle.data.authors) : [];
 
 // Get other articles
-const otherArticles = allBlogPosts.slice(1);
+const otherArticles = allArticles.slice(1);
 ---
 
 <section class="bg-white dark:bg-gray-900">
@@ -25,7 +25,7 @@ const otherArticles = allBlogPosts.slice(1);
 					<h3 class="text-3xl font-bold dark:text-white">Latest Article</h3>
 					<div class="h-px flex-grow bg-gradient-to-r from-purple-500 to-transparent ml-4"></div>
 				</div>
-				<a href={`/blog/${latestArticle.id}`} class="block transform transition-all duration-300 hover:scale-[1.01] hover:-translate-y-1">
+				<a href={`/read/${latestArticle.id}`} class="block transform transition-all duration-300 hover:scale-[1.01] hover:-translate-y-1">
 					<article class="p-0 bg-white rounded-xl overflow-hidden shadow-xl dark:bg-gray-800 dark:border-gray-700 border border-gray-100">
 						<div class="flex flex-col lg:flex-row">
 							<div class="lg:w-1/2 relative">
@@ -122,7 +122,7 @@ const otherArticles = allBlogPosts.slice(1);
 				<div class="h-px flex-grow bg-gradient-to-r from-purple-500 to-transparent ml-4"></div>
 			</div>
 			<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-				{otherArticles.map((article: CollectionEntry<"blog">) => (
+				{otherArticles.map((article: CollectionEntry<"articles">) => (
 					<div class="transform transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 h-full">
 						<ArticleCard article={article} />
 					</div>

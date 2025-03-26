@@ -54,7 +54,7 @@ const offerings: Offering[] = [
 		tagline: "Build developer competency and confidence with your technology",
 		features: [
 			{
-				name: "Blogging",
+				name: "Writing",
 				description: "In-depth technical articles and tutorials"
 			},
 			{
@@ -117,15 +117,20 @@ const offerings: Offering[] = [
 	<section class="bg-white dark:bg-gray-900">
 		<div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
 			<div class="max-w-screen-md mb-8 lg:mb-16">
-				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Partner With Industry Experts</h2>
-				<p class="font-light text-gray-500 dark:text-gray-400 sm:text-xl">We carefully select partners whose technologies genuinely enhance developers' work and lives. Our authentic approach ensures we can effectively advocate for your solutions and help you reach your growth objectives.</p>
-				<p class="mt-4 text-black dark:text-white sm:text-xl font-medium">Our three-pillar approach to developer engagement:</p>
+				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Partner With Industry
+					Experts</h2>
+				<p class="font-light text-gray-500 dark:text-gray-400 sm:text-xl">We carefully select partners whose
+					technologies genuinely enhance developers' work and lives. Our authentic approach ensures we can effectively
+					advocate for your solutions and help you reach your growth objectives.</p>
+				<p class="mt-4 text-black dark:text-white sm:text-xl font-medium">Our three-pillar approach to developer
+					engagement:</p>
 			</div>
 			<div class="space-y-12 md:grid md:grid-cols-1 lg:grid-cols-3 md:gap-8 xl:gap-12 md:space-y-0">
-				<div v-for="offer in offerings" 
+				<div v-for="offer in offerings"
 					class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300">
 					<div class="flex items-center mb-4">
-						<div :class="`flex justify-center items-center mr-4 w-12 h-12 bg-${offer.color} rounded-full dark:bg-${offer.color} lg:h-14 lg:w-14`">
+						<div
+							:class="`flex justify-center items-center mr-4 w-12 h-12 bg-${offer.color} rounded-full dark:bg-${offer.color} lg:h-14 lg:w-14`">
 							<svg class="w-6 h-6 text-white lg:w-7 lg:h-7" fill="currentColor" viewBox="0 0 20 20"
 								xmlns="http://www.w3.org/2000/svg">
 								<path fill-rule="evenodd"
@@ -138,9 +143,9 @@ const offerings: Offering[] = [
 							<p :class="`text-${offer.color} font-medium`">{{ offer.description }}</p>
 						</div>
 					</div>
-					
+
 					<p class="mb-6 text-gray-700 dark:text-gray-300">{{ offer.tagline }}</p>
-					
+
 					<ul role="list" class="space-y-5">
 						<li v-for="feature in offer.features" class="relative pl-8">
 							<svg :class="`absolute left-0 top-1 w-5 h-5 text-${offer.color}`" fill="currentColor" viewBox="0 0 20 20"
