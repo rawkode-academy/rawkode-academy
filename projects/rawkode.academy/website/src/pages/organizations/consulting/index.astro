@@ -10,16 +10,16 @@ import Page from "@/wrappers/page.astro";
 	.section-separator {
 		@apply py-16 md:py-20;
 	}
-	
+
 	.section-highlight {
 		@apply bg-gray-50 dark:bg-gray-900 relative overflow-hidden;
 	}
-	
+
 	.section-highlight::before {
 		content: "";
 		@apply absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary;
 	}
-	
+
 	.section-highlight::after {
 		content: "";
 		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 blur-2xl;
@@ -40,7 +40,7 @@ import Page from "@/wrappers/page.astro";
 		<p class="text-xl text-gray-700 dark:text-gray-200 mb-8 leading-relaxed">
 			Rawkode Academy offers specialized technical consulting services focused on cloud infrastructure, Kubernetes, platform engineering, and cloud engineering. We help you implement Infrastructure as Code with Terraform and Pulumi, optimize Kubernetes environments, establish GitOps workflows, implement SRE practices, and build comprehensive observability solutions.
 		</p>
-		
+
 		<div class="grid md:grid-cols-3 gap-6 text-left mt-12">
 			<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
 				<div class="flex items-center mb-4">
@@ -55,7 +55,7 @@ import Page from "@/wrappers/page.astro";
 					Deep experience with Kubernetes, Terraform, Pulumi, and GitOps workflows to help you build robust, scalable infrastructure and delivery pipelines.
 				</p>
 			</div>
-			
+
 			<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
 				<div class="flex items-center mb-4">
 					<div class="bg-secondary/10 p-3 rounded-full mr-4">
@@ -69,7 +69,7 @@ import Page from "@/wrappers/page.astro";
 					Implement GitOps practices and continuous delivery pipelines using tools like Flux and ArgoCD to enable declarative, git-based infrastructure and application deployments.
 				</p>
 			</div>
-			
+
 			<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
 				<div class="flex items-center mb-4">
 					<div class="bg-tertiary/10 p-3 rounded-full mr-4">
@@ -251,7 +251,7 @@ import Page from "@/wrappers/page.astro";
 					Flexible consulting arrangements designed to meet your specific needs and timeline
 				</p>
 			</div>
-			
+
 			<div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
 				<!-- Engagement Model 1 -->
 				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300">
@@ -262,12 +262,12 @@ import Page from "@/wrappers/page.astro";
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
 						Comprehensive analysis of your current technology stack, architecture, and development workflows with actionable recommendations.
 					</p>
-					
+
 					<div class="mt-6 mb-4">
 						<span class="text-2xl font-bold text-gray-900 dark:text-white">$10,000</span>
 						<span class="text-gray-500 dark:text-gray-400"> fixed price</span>
 					</div>
-					
+
 					<ul class="space-y-2 mb-6">
 						<li class="flex items-start">
 							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -294,18 +294,18 @@ import Page from "@/wrappers/page.astro";
 							<span class="text-gray-700 dark:text-gray-300">Executive presentation</span>
 						</li>
 					</ul>
-					
+
 					<a href="/organizations/lets-chat" class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-lg transition-colors duration-300">
 						Book Assessment
 					</a>
 				</div>
-				
+
 				<!-- Engagement Model 2 -->
 				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border-2 border-secondary dark:border-secondary shadow-md hover:shadow-xl transition-all duration-300 relative">
 					<div class="absolute top-0 right-0 px-3 py-1 bg-secondary text-white text-xs font-semibold rounded-bl-lg rounded-tr-lg">
 						Popular Choice
 					</div>
-					
+
 					<div class="flex justify-between items-start mb-4">
 						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Implementation Sprint</h3>
 						<span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-secondary/10 text-secondary rounded-full">2-4 weeks</span>
@@ -313,12 +313,12 @@ import Page from "@/wrappers/page.astro";
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
 						Hands-on implementation of specific technical initiatives with your team, delivering immediate improvement to your systems.
 					</p>
-					
+
 					<div class="mt-6 mb-4">
 						<span class="text-2xl font-bold text-gray-900 dark:text-white">$25,000</span>
 						<span class="text-gray-500 dark:text-gray-400"> fixed price</span>
 					</div>
-					
+
 					<ul class="space-y-2 mb-6">
 						<li class="flex items-start">
 							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -351,12 +351,12 @@ import Page from "@/wrappers/page.astro";
 							<span class="text-gray-700 dark:text-gray-300">2 weeks of follow-up support</span>
 						</li>
 					</ul>
-					
+
 					<a href="/organizations/lets-chat" class="block w-full text-center py-2 px-4 bg-secondary hover:bg-primary text-white rounded-lg transition-colors duration-300">
 						Book Sprint
 					</a>
 				</div>
-				
+
 				<!-- Engagement Model 3 -->
 				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300">
 					<div class="flex justify-between items-start mb-4">
@@ -366,12 +366,12 @@ import Page from "@/wrappers/page.astro";
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
 						Embed our expertise within your team on a recurring basis to provide ongoing guidance, implementation, and support.
 					</p>
-					
+
 					<div class="mt-6 mb-4">
 						<span class="text-2xl font-bold text-gray-900 dark:text-white">$2,400</span>
 						<span class="text-gray-500 dark:text-gray-400"> per day</span>
 					</div>
-					
+
 					<ul class="space-y-2 mb-6">
 						<li class="flex items-start">
 							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -398,7 +398,7 @@ import Page from "@/wrappers/page.astro";
 							<span class="text-gray-700 dark:text-gray-300">Volume discounts available</span>
 						</li>
 					</ul>
-					
+
 					<a href="/organizations/lets-chat" class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-lg transition-colors duration-300">
 						Discuss Options
 					</a>
@@ -417,7 +417,7 @@ import Page from "@/wrappers/page.astro";
 					A collaborative process designed to deliver practical solutions and lasting capabilities
 				</p>
 			</div>
-			
+
 			<div class="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
 				<!-- Step 1 -->
 				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
@@ -427,7 +427,7 @@ import Page from "@/wrappers/page.astro";
 						We start by understanding your specific challenges, technical environment, and team capabilities.
 					</p>
 				</div>
-				
+
 				<!-- Step 2 -->
 				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
 					<div class="absolute -top-4 -left-4 w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center font-bold text-lg">2</div>
@@ -436,7 +436,7 @@ import Page from "@/wrappers/page.astro";
 						Together we define clear objectives, determine success metrics, and create an actionable implementation plan.
 					</p>
 				</div>
-				
+
 				<!-- Step 3 -->
 				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
 					<div class="absolute -top-4 -left-4 w-10 h-10 bg-tertiary text-white rounded-full flex items-center justify-center font-bold text-lg">3</div>
@@ -445,7 +445,7 @@ import Page from "@/wrappers/page.astro";
 						Our experts work alongside your team to implement solutions, sharing knowledge throughout the process.
 					</p>
 				</div>
-				
+
 				<!-- Step 4 -->
 				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
 					<div class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg">4</div>
@@ -468,33 +468,8 @@ import Page from "@/wrappers/page.astro";
 					Hear directly from the companies we've helped
 				</p>
 			</div>
-			
-			<TestimonialSlider
-				testimonials={[
-					{
-						quote:
-							"Working with David and Rawkode Academy has been incredibly valuable for our early-stage journey at Guidepad. His deep expertise in the cloud native landscape has helped us refine our product positioning, create compelling demo videos, and confidently navigate the market. The guidance and insights we receive from David consistently elevate our product and strategy, making this partnership truly invaluable. We look forward to continuing this partnership as we evolve and grow in the market.",
-						author: {
-							name: "Reggie Wilkerson",
-							title: "Co-Founder & CEO at Guidepad",
-							image:
-								"https://media.licdn.com/dms/image/v2/C4E03AQFOPPjnnDM3sQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1667932645366?e=1747872000&v=beta&t=fLl3GgbVrGLilgNi6_uut8XYQp-8YU28VRq5P0D3iOU",
-							link: "https://guidepad.io",
-						},
-					},
-					{
-						quote:
-							"Rawkode Academy has done an amazing job helping developers be introduced to the world of server-side WebAssembly, promoting Spin project and Fermyon Cloud. We've heard from many developers, that the Advent of Spin challenges, created by Rawkode, was the perfect opportunity to get hands-on, and we've seen notable results in developers joining our community and using our services.",
-						author: {
-							name: "Mikkel Mørk Hegnhøj",
-							title: "Head of DevRel at Fermyon",
-							image:
-								"https://www.fermyon.com/static/image/profile/mikkel-hegnhoj.jpg",
-							link: "https://fermyon.com",
-						},
-					},
-				]}
-			/>
+
+	<TestimonialSlider type="consulting" />
 		</section>
 
 	<section class="bg-white dark:bg-gray-800 section-separator">
@@ -528,7 +503,7 @@ import Page from "@/wrappers/page.astro";
 			</div>
 		</div>
 	</section>
-	
+
 	<section class="bg-white dark:bg-gray-800 section-separator">
 	<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
 		<div class="mx-auto max-w-screen-md text-center mb-8">

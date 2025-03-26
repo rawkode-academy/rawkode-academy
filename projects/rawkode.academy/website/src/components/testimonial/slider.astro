@@ -1,23 +1,43 @@
 ---
+import { getCollection } from 'astro:content';
 import SliderClient from './slider.vue';
 
-interface Author {
-  name: string;
-  title: string;
-  image: string;
-  link?: string;
-}
-
-interface Testimonial {
-  quote: string;
-  author: Author;
-}
-
 interface Props {
-  testimonials: Testimonial[];
+  type?: 'maintainer' | 'partner' | 'consulting' | 'viewer';
+  limit?: number;
 }
 
-const { testimonials } = Astro.props;
+const { type, limit = 10 } = Astro.props;
+
+// Get testimonials from the collection
+const allTestimonials = await getCollection('testimonials');
+
+// Define the testimonial type
+interface TestimonialEntry {
+  data: {
+    quote: string;
+    author: {
+      name: string;
+      title: string;
+      image: string;
+      link?: string;
+    };
+    type: 'maintainer' | 'partner' | 'consulting' | 'viewer';
+  };
+}
+
+// Filter by type if specified
+const filteredTestimonials = type
+  ? allTestimonials.filter((testimonial: TestimonialEntry) => testimonial.data.type === type)
+  : allTestimonials;
+
+// Limit the number of testimonials if specified
+const testimonials = filteredTestimonials
+  .slice(0, limit)
+  .map((testimonial: TestimonialEntry) => ({
+    quote: testimonial.data.quote,
+    author: testimonial.data.author
+  }));
 ---
 
 <section class="relative py-16 md:py-16 overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white">
