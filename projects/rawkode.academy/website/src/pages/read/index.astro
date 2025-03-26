@@ -223,7 +223,7 @@ function formatDate(date: Date): string {
               <div class="terminal-prompt text-gray-800 dark:text-gray-200 mt-2">cat /latest-article.md</div>
               <div class="terminal-output text-gray-700 dark:text-gray-300">
                 <div class="font-semibold text-sm md:text-base text-primary dark:text-primary"># {latestPost?.data.title}</div>
-                <div class="text-xs md:text-sm mt-1 text-gray-600 dark:text-gray-400">{latestPost?.data.subtitle}</div>
+                <div class="text-xs md:text-sm mt-1 text-gray-600 dark:text-gray-400">{latestPost?.data.openGraph.subtitle}</div>
                 <div class="text-xs mt-2 text-gray-500 dark:text-gray-500">Published: {latestPost ? formatDate(latestPost.data.publishedAt) : ''}</div>
               </div>
               <div class="terminal-prompt text-gray-800 dark:text-gray-200 mt-2">open /latest-article.md</div>
@@ -282,9 +282,9 @@ function formatDate(date: Date): string {
                     {latestPost.data.title}
                   </h3>
 
-                  {latestPost.data.subtitle && (
+                  {latestPost.data.openGraph.subtitle && (
                     <p class="text-gray-200 mb-4 line-clamp-2">
-                      {latestPost.data.subtitle}
+                      {latestPost.data.openGraph.subtitle}
                     </p>
                   )}
 
@@ -347,9 +347,9 @@ function formatDate(date: Date): string {
                     {post.data.title}
                   </h3>
 
-                  {post.data.subtitle && (
+                  {post.data.openGraph.subtitle && (
                     <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                      {post.data.subtitle}
+                      {post.data.openGraph.subtitle}
                     </p>
                   )}
 

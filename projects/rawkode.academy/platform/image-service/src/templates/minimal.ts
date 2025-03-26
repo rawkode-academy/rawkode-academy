@@ -29,7 +29,7 @@ export const template: Template = {
           <!-- Main content -->
           <div style="display: flex; flex-direction: column;">
             <h1 style="font-size: 64px; font-weight: 700; color: #111827; margin: 0 0 32px 0; line-height: 1.1; max-width: 800px;">
-              ${payload.text}
+              ${payload.title}
             </h1>
             <div style="width: 80px; height: 6px; background: linear-gradient(90deg, #5f5ed7, #00ceff); margin-bottom: 32px;"></div>
             <p style="font-size: 24px; color: #4b5563; margin: 0; max-width: 600px; line-height: 1.5;">

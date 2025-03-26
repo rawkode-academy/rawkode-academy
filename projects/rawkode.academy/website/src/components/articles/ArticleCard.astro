@@ -46,9 +46,9 @@ const authors = await getEntries(article.data.authors);
 				{article.data.title}
 			</h2>
 			{
-				article.data.subtitle && (
+				article.data.openGraph.subtitle && (
 					<p class="mb-4 font-light text-gray-500 dark:text-gray-400 line-clamp-3">
-						{article.data.subtitle}
+						{article.data.openGraph.subtitle}
 					</p>
 				)
 			}

@@ -60,9 +60,9 @@ const otherArticles = allArticles.slice(1);
 								<h2 class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
 									{latestArticle.data.title}
 								</h2>
-								{latestArticle.data.subtitle && (
+								{latestArticle.data.openGraph.subtitle && (
 									<p class="mb-6 text-lg font-light text-gray-500 dark:text-gray-400 whitespace-pre-line line-clamp-3">
-										{latestArticle.data.subtitle}
+										{latestArticle.data.openGraph.subtitle}
 									</p>
 								)}
 								<div class="mt-auto pt-6 border-t border-gray-100 dark:border-gray-700">

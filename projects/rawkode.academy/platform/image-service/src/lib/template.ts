@@ -20,7 +20,7 @@ export interface Font {
 }
 
 export const DEFAULT_FONT: Font = {
-  name: "Open Sans",
+  name: "Quicksand",
   weight: 400,
   style: "normal",
 };
@@ -55,7 +55,7 @@ export const DEFAULT_TEMPLATE: Template = {
   },
 
   render(payload: Payload) {
-    return html`<div>${payload.text}</div>`;
+    return html`<div>${payload.title}</div>`;
   },
 };
 

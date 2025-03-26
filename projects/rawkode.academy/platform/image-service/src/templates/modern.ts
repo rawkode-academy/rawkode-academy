@@ -33,7 +33,7 @@ export const template: Template = {
           <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-right: ${payload.image ? '40px' : '0'};">
             <div style="display: flex; flex-direction: column; width: 100%;">
               <h1 style="font-size: 48px; font-weight: 700; color: #1a202c; margin: 0 0 24px 0; line-height: 1.2; display: flex;">
-                ${payload.text}
+                ${payload.title}
               </h1>
               <p style="font-size: 24px; color: #4a5568; margin: 0; opacity: 0.9; display: flex;">
                 Learn, build, and share with the Rawkode Academy community

@@ -2,3 +2,4 @@
 # These will be generated and committed by the GitHub Action
 /preview-images/
 /template-previews.json
+/.astro

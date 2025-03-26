@@ -38,7 +38,7 @@ export const template: Template = {
             <!-- Text content -->
             <div style="display: flex; flex-direction: column; width: 100%;">
               <h1 style="font-size: ${payload.image ? '52px' : '64px'}; font-weight: 700; color: white; margin: 0 0 32px 0; line-height: 1.2; max-width: ${payload.image ? '500px' : '800px'};">
-                ${payload.text}
+                ${payload.title}
               </h1>
 
               <div style="display: flex; padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; font-size: 16px; margin-bottom: 40px;">
