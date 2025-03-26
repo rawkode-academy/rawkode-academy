@@ -1,5 +1,5 @@
 ---
-import TableOfContents from "@/components/blog/TableOfContents.astro";
+import TableOfContents from "@/components/articles/TableOfContents.astro";
 import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -10,11 +10,11 @@ import { getCollection, getEntries, render, type CollectionEntry } from "astro:c
 export const prerender = true;
 
 type Props = {
-	article: CollectionEntry<"blog">;
+	article: CollectionEntry<"articles">;
 };
 
 const computeImageUrl = async (
-	article: CollectionEntry<"blog">
+	article: CollectionEntry<"articles">
 ): Promise<URL | undefined> => {
 	if (article.data.cover) {
 		const image = await getImage({ src: article.data.cover.image });
@@ -27,9 +27,9 @@ const computeImageUrl = async (
 
 export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
-		const blogEntries = await getCollection("blog");
+		const articles = await getCollection("articles");
 
-		return blogEntries.map((article: CollectionEntry<"blog">) => {
+		return articles.map((article: CollectionEntry<"articles">) => {
 			return {
 				params: {
 					slug: article.id,
@@ -50,13 +50,13 @@ const maybeSeries =
 const imageUrl = await computeImageUrl(article);
 ---
 
-<Page 
-	title={`${article.data.title} | Blog`} 
+<Page
+	title={`${article.data.title} | Articles`}
 	description={article.data.subtitle}
-	image={imageUrl ? { 
-		image: imageUrl, 
-		text: article.data.title, 
-		format: "png" as const 
+	image={imageUrl ? {
+		image: imageUrl,
+		text: article.data.title,
+		format: "png" as const
 	} : undefined}
 	isArticle={true}
 	publishedAt={article.data.publishedAt}

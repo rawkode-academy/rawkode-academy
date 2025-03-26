@@ -31,12 +31,12 @@ const baseMenuItems = [
 	// 	href: "/live",
 	// 	icon: FilmIcon,
 	// },
-	{ name: "Blog", href: "/blog", icon: NewspaperIcon },
+	{ name: "Articles", href: "/read", icon: NewspaperIcon },
 	// { name: 'Events', href: '/events', icon: CalendarDaysIcon },
 	// { name: 'Courses', href: '#', icon: AcademicCapIcon },
 	// { name: 'Shows', href: '#', icon: FilmIcon },
 	{
-		name: "Watch",
+		name: "Videos",
 		href: "/watch",
 		icon: VideoCameraIcon,
 	},
@@ -115,7 +115,7 @@ function isCurrentPath(itemPath: string) {
 	}
 
 	// For other pages, check if the current path starts with the item path
-	// This handles nested routes (e.g. /blog/some-post should highlight the Blog item)
+	// This handles nested routes (e.g. /read/some-post should highlight the article)
 	return itemPath !== "/" && currentPath.value.startsWith(itemPath);
 }
 </script>

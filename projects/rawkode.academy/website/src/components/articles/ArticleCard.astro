@@ -3,14 +3,14 @@ import { Image } from "astro:assets";
 import { getEntries, type CollectionEntry } from "astro:content";
 
 type Props = {
-	article: CollectionEntry<"blog">;
+	article: CollectionEntry<"articles">;
 };
 
 const { article } = Astro.props;
 const authors = await getEntries(article.data.authors);
 ---
 
-<a href={`/blog/${article.id}`} class="h-full">
+<a href={`/read/${article.id}`} class="h-full">
 	<article
 		class="p-0 bg-white rounded-xl overflow-hidden shadow-lg dark:bg-gray-800 dark:border-gray-700 h-full flex flex-col transition-all duration-300 border border-gray-100 dark:border-gray-700"
 	>
