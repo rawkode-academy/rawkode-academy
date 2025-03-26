@@ -1,46 +1,345 @@
 ---
+import Title from "@/components/title/center.astro";
 import Page from "@/wrappers/page.astro";
+import TestimonialSlider from "@/components/testimonial/slider.astro";
+import StatsSimple from "@/components/stats/simple.vue";
+
+// Define props for the layout
+export const title = "Share Your Project on Rawkode Live";
+export const description = "Showcase your open-source project to a passionate community of developers and tech enthusiasts on Rawkode Live.";
+
+// Specify the layout for this page using the path string
+export const layout = "@/wrappers/page.astro";
+
+// Testimonials are now loaded from the content collection
+
+// Stats data
+const statsData = {
+  title: "Join Our Growing Community",
+  stats: [
+    {
+      value: "100+",
+      label: "Projects Featured"
+    },
+    {
+      value: "1M+",
+      label: "Views"
+    },
+    {
+      value: "100%",
+      label: "Enjoyed the Experience!"
+    }
+  ]
+};
+
+// Process steps
+const processSteps = [
+  {
+    title: "Apply",
+    description: "Submit your project through our booking system. We'll review it to ensure it's a good fit for our audience."
+  },
+  {
+    title: "Prepare",
+    description: "Once approved, we'll send you preparation guidelines to help you showcase your project effectively."
+  },
+  {
+    title: "Present",
+    description: "Join David for a live session where we'll demo your project, discuss its features, and engage with the audience."
+  },
+  {
+    title: "Connect",
+    description: "After the stream, we'll share the recording and help you connect with interested developers from our community."
+  }
+];
+
+// FAQ items
+const faqItems = [
+  {
+    question: "What types of projects are suitable for Rawkode Live?",
+    answer: "We welcome a wide range of open-source projects, particularly those related to cloud-native technologies, developer tools, infrastructure, and automation. The key criteria are that your project solves a real problem for developers and has an open-source component."
+  },
+  {
+    question: "Do I need to be the project creator to present?",
+    answer: "Not necessarily. While project creators often make great presenters, we also welcome core contributors or maintainers who are deeply familiar with the project and can speak authoritatively about its design, implementation, and roadmap."
+  },
+  {
+    question: "How technical should my presentation be?",
+    answer: "Our audience consists primarily of developers and technical professionals, so we encourage in-depth technical discussions. However, the best presentations balance technical details with clear explanations of the problem being solved and the project's value proposition."
+  },
+  {
+    question: "Is there a cost to participate?",
+    answer: "No, featuring your open-source project on Rawkode Live is completely free. We're passionate about supporting the open-source community and helping great projects gain visibility."
+  },
+  {
+    question: "What's the format of the session?",
+    answer: "Sessions typically run 60-90 minutes and include an introduction to you and your project, a demonstration or walkthrough, and audience Q&A. The format is conversational and flexible, allowing us to focus on the most interesting aspects of your project."
+  }
+];
 ---
 
 <Page
-	title="Share Your Project"
-	description="Want to join me on Rawkode Live to share your project with our audience?"
+	title="Share Your Project on Rawkode Live"
+	description="Showcase your open-source project to a passionate community of developers and tech enthusiasts on Rawkode Live."
 >
-	<h1 class="text-5xl font-extrabold dark:text-white">Share Your Project</h1>
-
-	<p class="mb-4 dark:text-gray-400">
-		Want to join me on Rawkode Live to share your project with our audience?
-	</p>
-
-	<a class="text-primary" href="https://rawkode.link/live-prep"
-		>Read our live preparation document.</a
-	>
-
-	<h2 class="text-4xl font-bold dark:text-white">Book Your Slot</h2>
-
-	<p>
-		Grab any slot you like and we'll be in touch to cover everything you need
-		before we go live.
-	</p>
-
-	<div id="booking-page">
-		<!-- this is where we will inject the interface -->
+	<!-- Hero Section -->
+	<div class="relative isolate px-6 pt-14 lg:px-8">
+		<div class="mx-auto max-w-4xl py-12 sm:py-16 lg:py-20">
+			<div class="hidden sm:mb-8 sm:flex sm:justify-center">
+				<div
+					class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 dark:text-gray-400 ring-1 ring-gray-900/10 dark:ring-gray-700 hover:ring-gray-900/20 dark:hover:ring-gray-600"
+				>
+					Join over 100 projects that have been featured on Rawkode Live. <a
+						href="#booking"
+						class="font-semibold text-indigo-600 dark:text-indigo-400"
+						><span class="absolute inset-0" aria-hidden="true"></span>Book your slot <span
+							aria-hidden="true">&rarr;</span
+						></a
+					>
+				</div>
+			</div>
+			<div class="text-center">
+				<h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+					Showcase Your Open Source Project
+				</h1>
+				<p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
+					Get your project in front of thousands of developers, receive valuable feedback, and connect with potential contributors through a live, interactive session with David (Rawkode).
+				</p>
+				<div class="mt-10 flex items-center justify-center gap-x-6">
+					<a
+						href="#booking"
+						class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+						>Book Your Slot</a
+					>
+					<a href="#process" class="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-300"
+						>Learn how it works <span aria-hidden="true">→</span></a
+					>
+				</div>
+			</div>
+		</div>
+		<div
+			class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+			aria-hidden="true"
+		>
+			<div
+				class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+				style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
+			>
+			</div>
+		</div>
 	</div>
 
+	<!-- Stats Section -->
+	<div class="py-8">
+		<StatsSimple title={statsData.title} stats={statsData.stats} client:load />
+	</div>
+
+	<!-- Why Share Section -->
+	<section class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+		<Title title="Why Share Your Project?" />
+
+		<div class="grid gap-8 lg:grid-cols-2 mt-8">
+			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+				<div class="flex items-center mb-4">
+					<div class="p-2 mr-4 bg-indigo-100 dark:bg-indigo-900 rounded-full">
+						<svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+							<path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					<h3 class="text-xl font-bold dark:text-white">Gain Visibility</h3>
+				</div>
+				<p class="text-gray-600 dark:text-gray-300">
+					Introduce your project to a dedicated audience of developers, potential contributors, and early adopters. Get valuable exposure for your hard work and reach developers who are actively looking for new tools and technologies.
+				</p>
+			</div>
+			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+				<div class="flex items-center mb-4">
+					<div class="p-2 mr-4 bg-purple-100 dark:bg-purple-900 rounded-full">
+						<svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					<h3 class="text-xl font-bold dark:text-white">Get Feedback</h3>
+				</div>
+				<p class="text-gray-600 dark:text-gray-300">
+					Engage in a live Q&A session with an audience that understands technical challenges. Receive constructive feedback, answer questions, and spark discussions that can help shape your project's future and identify blind spots.
+				</p>
+			</div>
+			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+				<div class="flex items-center mb-4">
+					<div class="p-2 mr-4 bg-blue-100 dark:bg-blue-900 rounded-full">
+						<svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
+						</svg>
+					</div>
+					<h3 class="text-xl font-bold dark:text-white">Connect with the Community</h3>
+				</div>
+				<p class="text-gray-600 dark:text-gray-300">
+					Become part of the Rawkode community. Connect with like-minded individuals, find collaborators, and build relationships with other maintainers and developers who share your passion for open source and innovation.
+				</p>
+			</div>
+			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+				<div class="flex items-center mb-4">
+					<div class="p-2 mr-4 bg-green-100 dark:bg-green-900 rounded-full">
+						<svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					<h3 class="text-xl font-bold dark:text-white">It's Fun!</h3>
+				</div>
+				<p class="text-gray-600 dark:text-gray-300">
+					Join David (Rawkode) for a relaxed, informal chat about your project. We keep it fun, engaging, and focused on celebrating your work. No corporate speak or marketing pitches—just authentic conversations about cool technology.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- Process Section -->
+	<section id="process" class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+		<Title title="How It Works" />
+
+		<div class="max-w-3xl mx-auto mt-8">
+			<ol class="relative border-l border-gray-200 dark:border-gray-700">
+				{processSteps.map((step, index) => (
+					<li class="mb-10 ml-6">
+						<span class="absolute flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800 dark:bg-indigo-900">
+							<span class="text-indigo-800 dark:text-indigo-300 font-bold">{index + 1}</span>
+						</span>
+						<h3 class="flex items-center mb-1 text-lg font-semibold text-gray-900 dark:text-white">
+							{step.title}
+						</h3>
+						<p class="mb-4 text-base font-normal text-gray-600 dark:text-gray-300">{step.description}</p>
+					</li>
+				))}
+			</ol>
+		</div>
+	</section>
+
+	<!-- What to Expect Section -->
+	<section class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+		<Title title="What to Expect" />
+		<div class="text-center max-w-3xl mx-auto">
+			<p class="mb-6 text-gray-600 dark:text-gray-300 lg:text-lg">
+				Our sessions are typically 60-90 minutes long and follow this format:
+			</p>
+
+			<div class="grid gap-8 sm:grid-cols-3 mt-8 text-left">
+				<div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+					<div class="flex items-center justify-center w-10 h-10 mb-4 bg-indigo-100 dark:bg-indigo-900 rounded-full mx-auto">
+						<span class="text-indigo-800 dark:text-indigo-300 font-bold">1</span>
+					</div>
+					<h3 class="mb-2 text-xl font-bold text-center dark:text-white">Introduction</h3>
+					<p class="text-gray-600 dark:text-gray-300">
+						We'll start with introductions and background on you and your project. What problem does it solve? What inspired you to create it?
+					</p>
+				</div>
+
+				<div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+					<div class="flex items-center justify-center w-10 h-10 mb-4 bg-indigo-100 dark:bg-indigo-900 rounded-full mx-auto">
+						<span class="text-indigo-800 dark:text-indigo-300 font-bold">2</span>
+					</div>
+					<h3 class="mb-2 text-xl font-bold text-center dark:text-white">Demo & Walkthrough</h3>
+					<p class="text-gray-600 dark:text-gray-300">
+						Show your project in action with a live demonstration. Walk through key features, architecture decisions, and what makes your approach unique.
+					</p>
+				</div>
+
+				<div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+					<div class="flex items-center justify-center w-10 h-10 mb-4 bg-indigo-100 dark:bg-indigo-900 rounded-full mx-auto">
+						<span class="text-indigo-800 dark:text-indigo-300 font-bold">3</span>
+					</div>
+					<h3 class="mb-2 text-xl font-bold text-center dark:text-white">Q&A & Discussion</h3>
+					<p class="text-gray-600 dark:text-gray-300">
+						Engage with the audience through live Q&A. Discuss challenges, future plans, and how others can contribute to your project.
+					</p>
+				</div>
+			</div>
+
+			<p class="mt-8 text-gray-600 dark:text-gray-300 lg:text-lg">
+				To help you prepare and ensure everything runs smoothly, please read our <a class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium" href="https://rawkode.link/live-prep">live preparation document</a>.
+			</p>
+		</div>
+	</section>
+
+	<!-- Testimonials Section -->
+	<TestimonialSlider type="maintainer" />
+
+	<!-- FAQ Section -->
+	<section class="bg-white dark:bg-gray-900 py-12">
+		<div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+			<h2 class="mb-8 text-3xl lg:text-4xl tracking-tight font-extrabold text-center text-gray-900 dark:text-white">
+				Frequently Asked Questions
+			</h2>
+			<div class="mx-auto max-w-screen-md">
+				<div id="accordion-flush" data-accordion="collapse"
+					data-active-classes="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+					data-inactive-classes="text-gray-500 dark:text-gray-400">
+
+					{faqItems.map((item, index) => (
+						<>
+							<h2 id={`accordion-flush-heading-${index + 1}`}>
+								<button type="button"
+									class="flex justify-between items-center py-5 w-full font-medium text-left text-gray-900 bg-white border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+									data-accordion-target={`#accordion-flush-body-${index + 1}`}
+									aria-expanded={index === 0 ? "true" : "false"}
+									aria-controls={`accordion-flush-body-${index + 1}`}>
+									<span>{item.question}</span>
+									<svg data-accordion-icon="" class={`w-6 h-6 ${index === 0 ? 'rotate-180' : ''} shrink-0`} fill="currentColor" viewBox="0 0 20 20"
+										xmlns="http://www.w3.org/2000/svg">
+										<path fill-rule="evenodd"
+											d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+											clip-rule="evenodd"></path>
+									</svg>
+								</button>
+							</h2>
+							<div id={`accordion-flush-body-${index + 1}`} class={index === 0 ? '' : 'hidden'} aria-labelledby={`accordion-flush-heading-${index + 1}`}>
+								<div class="py-5 border-b border-gray-200 dark:border-gray-700">
+									<p class="mb-2 text-gray-600 dark:text-gray-300">{item.answer}</p>
+								</div>
+							</div>
+						</>
+					))}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Booking Section -->
+	<section id="booking" class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+		<Title title="Ready to Share?" />
+		<div class="text-center max-w-3xl mx-auto">
+			<p class="mb-8 text-gray-600 dark:text-gray-300 lg:text-lg">
+				Awesome! Find a time that works for you using the calendar below. Select any available slot, and we'll follow up with all the details you need before the show.
+			</p>
+		</div>
+
+		<div id="booking-page" class="mt-8 rounded-lg shadow-lg overflow-hidden max-w-4xl mx-auto">
+			<!-- SavvyCal embed will go here -->
+		</div>
+	</section>
+
 	<script is:inline>
+		// Ensure SavvyCal object exists
 		window.SavvyCal =
 			window.SavvyCal ||
 			function () {
 				(SavvyCal.q = SavvyCal.q || []).push(arguments);
 			};
-	</script>
-	<script is:inline async src="https://embed.savvycal.com/v1/embed.js"></script>
-	<script is:inline>
-		SavvyCal("init", { origin: "https://meet.rawkode.academy" });
-		SavvyCal("inline", {
-			link: "share-your-project",
-			selector: "#booking-page",
-			theme: "os",
-		});
+
+		// Load SavvyCal embed script
+		const script = document.createElement('script');
+		script.async = true;
+		script.src = 'https://embed.savvycal.com/v1/embed.js';
+		document.head.appendChild(script);
+
+		// Initialize SavvyCal once the script is loaded
+		script.onload = () => {
+			SavvyCal("init", { origin: "https://meet.rawkode.academy" });
+			SavvyCal("inline", {
+				link: "share-your-project",
+				selector: "#booking-page",
+				theme: "os", // Use OS theme preference (light/dark)
+			});
+		};
 	</script>
 </Page>

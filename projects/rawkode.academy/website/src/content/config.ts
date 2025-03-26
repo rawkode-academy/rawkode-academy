@@ -91,4 +91,21 @@ const series = defineCollection({
     }),
 });
 
-export const collections = { articles, series, videos, people };
+const testimonials = defineCollection({
+  loader: glob({
+    pattern: ["**/*.yaml", "**/*.yml"],
+    base: "./content/testimonials",
+  }),
+  schema: z.object({
+    quote: z.string(),
+    author: z.object({
+      name: z.string(),
+      title: z.string(),
+      image: z.string(),
+      link: z.string().optional(),
+    }),
+    type: z.enum(["maintainer", "partner", "consulting", "viewer"]),
+  }),
+});
+
+export const collections = { articles, series, videos, people, testimonials };
