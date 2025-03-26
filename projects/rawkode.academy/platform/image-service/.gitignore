@@ -1,13 +1,4 @@
-dist/
-.astro/
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-.env
-.env.production
-.DS_Store
-.idea/
-.vscode
-bun.lockb
+# Template preview files (local development only)
+# These will be generated and committed by the GitHub Action
+/preview-images/
+/template-previews.json
