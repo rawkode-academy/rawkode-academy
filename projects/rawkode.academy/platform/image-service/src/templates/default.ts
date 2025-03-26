@@ -34,7 +34,7 @@ export const template: Template = {
             <div style="display: flex; flex-direction: column; width: 100%;">
               <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #5f5ed7, #00ceff); margin-bottom: 24px;"></div>
               <h1 style="font-size: 56px; font-weight: 700; color: #1e293b; margin: 0 0 24px 0; line-height: 1.2;">
-                ${payload.text}
+                ${payload.title}
               </h1>
               <p style="font-size: 20px; color: #64748b; margin: 0; line-height: 1.5;">
                 Welcome to Rawkode Academy - Learn, build, and share with our community

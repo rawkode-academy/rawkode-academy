@@ -51,8 +51,9 @@ const imageUrl = await computeImageUrl(article);
 ---
 
 <Page
-	title={`${article.data.title} | Articles`}
-	description={article.data.subtitle}
+	title={`${article.data.openGraph.title}`}
+	subtitle={article.data.openGraph.subtitle}
+	description={article.data.description}
 	image={imageUrl ? {
 		image: imageUrl,
 		text: article.data.title,

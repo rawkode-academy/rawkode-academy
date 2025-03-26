@@ -62,13 +62,17 @@ const articles = defineCollection({
   }),
   schema: ({ image }) =>
     z.object({
-      title: z.string(),
+			title: z.string(),
+			description: z.string(),
+			openGraph: z.object({
+				title: z.string(),
+				subtitle: z.string(),
+			}),
       cover: z.object({
         image: image(),
         alt: z.string(),
       }).optional(),
       series: reference("series").optional(),
-      subtitle: z.string().optional(),
       publishedAt: z.coerce.date(),
       updatedAt: z.coerce.date().optional(),
       isDraft: z.boolean().default(true),

@@ -39,7 +39,7 @@ export const template: Template = {
 
           <div style="display: flex; flex-direction: column; flex: 1; justify-content: center;">
             <h1 style="font-size: 64px; font-weight: 700; color: white; margin: 0 0 24px 0; line-height: 1.2; max-width: 800px;">
-              ${payload.text}
+              ${payload.title}
             </h1>
             <p style="font-size: 24px; color: rgba(255, 255, 255, 0.8); margin: 0; line-height: 1.5;">
               Rawkode Academy

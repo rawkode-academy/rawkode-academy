@@ -15,7 +15,7 @@ export const template: Template = {
 			<h1
 				style="font-family: ; font-size: 4em; color: #ffffff; text-shadow: 3px 3px 0 #ff00ff, 6px 6px 0 #00ffff; text-transform: uppercase; letter-spacing: 2px; text-align: center; padding: 20px;"
 			>
-				${payload.text}
+				${payload.title}
 			</h1>
 		</div>`);
   },

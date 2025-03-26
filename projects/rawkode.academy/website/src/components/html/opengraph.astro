@@ -2,13 +2,14 @@
 import * as utf64 from "utf64";
 
 const {
-  title,
-  description,
-  image,
-  useImageDirectly = false,
-  isArticle = false,
-  publishedAt,
-  updatedAt
+	title,
+	subtitle,
+	description,
+	image,
+	useImageDirectly = false,
+	isArticle = false,
+	publishedAt,
+	updatedAt,
 } = Astro.props;
 
 const openGraphUrl = new URL(Astro.url.pathname, Astro.site);
@@ -17,12 +18,14 @@ const openGraphDescription =
 	description ??
 	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
 
-// Dynamic OpenGraph Image Generation
-const openGraphImagePayload = image
-	? { ...image, text: title, format: "png" }
-	: { text: title, format: "png" };
 const openGraphImageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(
-	JSON.stringify(openGraphImagePayload)
+	JSON.stringify({
+		...image,
+		title,
+		subtitle,
+		format: "png",
+		template: "gradient",
+	})
 )}`;
 
 // Determine if we should show article specific meta tags
@@ -31,7 +34,10 @@ const isBlogOrSeriesPath = isPath("/blog/") || isPath("/series/");
 const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
 ---
 
-<meta property="og:type" content={shouldShowArticleMeta ? "article" : "website"} />
+<meta
+	property="og:type"
+	content={shouldShowArticleMeta ? "article" : "website"}
+/>
 <meta property="og:title" content={title} />
 <meta property="og:description" content={openGraphDescription} />
 <meta property="og:url" content={openGraphUrl} />
@@ -41,15 +47,24 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
 />
 
 <!-- Article specific Open Graph meta tags -->
-{shouldShowArticleMeta && publishedAt && (
-  <meta property="article:published_time" content={publishedAt.toISOString()} />
-)}
-{shouldShowArticleMeta && updatedAt && (
-  <meta property="article:modified_time" content={updatedAt.toISOString()} />
-)}
-{shouldShowArticleMeta && (
-  <meta property="article:publisher" content="https://rawkode.academy" />
-)}
+{
+	shouldShowArticleMeta && publishedAt && (
+		<meta
+			property="article:published_time"
+			content={publishedAt.toISOString()}
+		/>
+	)
+}
+{
+	shouldShowArticleMeta && updatedAt && (
+		<meta property="article:modified_time" content={updatedAt.toISOString()} />
+	)
+}
+{
+	shouldShowArticleMeta && (
+		<meta property="article:publisher" content="https://rawkode.academy" />
+	)
+}
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta property="twitter:domain" content={openGraphUrl.hostname} />
@@ -61,27 +76,29 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
 	content={useImageDirectly ? image?.image : openGraphImageUrl}
 />
 
-<script is:inline type="application/ld+json" set:html={
-  JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": shouldShowArticleMeta ? "Article" : "WebPage",
-    "headline": title,
-    "description": openGraphDescription,
-    "image": useImageDirectly ? image?.image : openGraphImageUrl,
-    "url": openGraphUrl.toString(),
-    "datePublished": publishedAt ? publishedAt.toISOString() : undefined,
-    "dateModified": updatedAt ? updatedAt.toISOString() : undefined,
-    "publisher": {
-      "@type": "Organization",
-      "name": "Rawkode Academy",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://rawkode.academy/android-chrome-512x512.png"
-      }
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": openGraphUrl.toString()
-    }
-  })
-} />
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify({
+		"@context": "https://schema.org",
+		"@type": shouldShowArticleMeta ? "Article" : "WebPage",
+		headline: title,
+		description: openGraphDescription,
+		image: useImageDirectly ? image?.image : openGraphImageUrl,
+		url: openGraphUrl.toString(),
+		datePublished: publishedAt ? publishedAt.toISOString() : undefined,
+		dateModified: updatedAt ? updatedAt.toISOString() : undefined,
+		publisher: {
+			"@type": "Organization",
+			name: "Rawkode Academy",
+			logo: {
+				"@type": "ImageObject",
+				url: "https://rawkode.academy/android-chrome-512x512.png",
+			},
+		},
+		mainEntityOfPage: {
+			"@type": "WebPage",
+			"@id": openGraphUrl.toString(),
+		},
+	})}
+></script>

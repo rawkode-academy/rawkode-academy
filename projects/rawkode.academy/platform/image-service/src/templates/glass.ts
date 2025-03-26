@@ -42,26 +42,18 @@ export const template: Template = {
             <!-- Glass card effect -->
             <div style="display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 60px;">
               <h1 style="font-size: 64px; font-weight: 700; color: white; margin: 0 0 32px 0; line-height: 1.2; display: flex;">
-                ${payload.text}
+                ${payload.title}
               </h1>
               <p style="font-size: 24px; color: rgba(255, 255, 255, 0.7); margin: 0; line-height: 1.5; display: flex;">
-                Explore cutting-edge content from Rawkode Academy
+                ${payload.subtitle}
               </p>
-
-              <!-- Badge -->
-              <div style="display: flex; align-items: center; background: rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 20px; margin-top: 40px; align-self: flex-start;">
-                <div style="width: 8px; height: 8px; border-radius: 50%; background: #38BDF8; margin-right: 8px; display: flex;"></div>
-                <div style="font-size: 14px; color: rgba(255, 255, 255, 0.9); display: flex;">
-                  Glass Template
-                </div>
-              </div>
             </div>
           </div>
 
           <!-- Footer -->
           <div style="display: flex; justify-content: flex-end; margin-top: 40px;">
             <div style="font-size: 16px; color: rgba(255, 255, 255, 0.5); display: flex;">
-              rawkode.academy
+              Rawkode Academy
             </div>
           </div>
         </div>
