@@ -2,20 +2,12 @@
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
 import 'vue3-carousel/dist/carousel.css';
 
-interface Author {
-  name: string;
-  title: string;
-  image: string;
-  link?: string;
-}
-
-interface Testimonial {
-  quote: string;
-  author: Author;
-}
-
+// Use a more permissive type definition by using a Record type
 interface Props {
-  testimonials: Testimonial[];
+  testimonials: {
+    quote: string;
+    author: Record<string, any>;
+  }[];
 }
 
 defineProps<Props>();
