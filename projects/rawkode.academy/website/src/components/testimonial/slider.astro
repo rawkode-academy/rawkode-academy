@@ -60,7 +60,7 @@ const testimonials = filteredTestimonials.slice(0, limit).map((testimonial) => {
 		<h2
 			class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
 		>
-			What Our <span class="text-primary">{getAudience(type)}</span> Say
+			What {type == "maintainer" ? "Project" : "Our"} <span class="text-primary">{getAudience(type)}</span> Say
 		</h2>
 		<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
 			{blurb}
