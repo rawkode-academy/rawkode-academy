@@ -14,54 +14,44 @@ defineProps<Props>();
 </script>
 
 <template>
-  <Carousel
-    :autoplay="5000"
-    :wrap-around="true"
-    :items-to-show="1"
-    :pause-autoplay-on-hover="true"
-    class="testimonial-carousel"
-  >
-    <Slide v-for="(testimonial, index) in testimonials" :key="index">
-      <div class="py-8 px-4 md:py-8 md:px-4 text-gray-900 dark:text-gray-100">
-        <div class="relative max-w-3xl mx-auto p-8 md:p-10 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <blockquote>
-            <p class="relative text-xl font-medium leading-relaxed text-gray-800 dark:text-gray-100 mb-6 text-center px-6 z-10">
-              {{ testimonial.quote }}
-            </p>
-          </blockquote>
-          <div class="flex items-center justify-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <div class="flex-shrink-0 mr-4">
-              <img
-                :src="testimonial.author.image"
-                :alt="`${testimonial.author.name} profile picture`"
-                class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 dark:border-indigo-400 shadow-sm ring-2 ring-white dark:ring-gray-800"
-              />
-            </div>
-            <div class="flex flex-col">
-              <a
-                v-if="testimonial.author.link"
-                target="_blank"
-                :href="testimonial.author.link"
-                class="no-underline transition-opacity hover:opacity-80"
-              >
-                <div class="font-semibold text-gray-900 dark:text-white mb-1">{{ testimonial.author.name }}</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">{{ testimonial.author.title }}</div>
-              </a>
-              <div v-else>
-                <div class="font-semibold text-gray-900 dark:text-white mb-1">{{ testimonial.author.name }}</div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">{{ testimonial.author.title }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Slide>
+	<Carousel :autoplay="5000" :wrap-around="true" :items-to-show="1" :pause-autoplay-on-hover="true"
+		class="testimonial-carousel">
+		<Slide v-for="(testimonial, index) in testimonials" :key="index">
+			<div class="py-4 px-4 md:py-4 md:px-4 text-gray-900 dark:text-gray-100">
+				<div
+					class="relative max-w-3xl mx-auto p-8 md:p-10 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+					<blockquote>
+						<p
+							class="relative text-xl font-medium leading-relaxed text-gray-800 dark:text-gray-100 mb-6 text-center px-6 z-10">
+							{{ testimonial.quote }}
+						</p>
+					</blockquote>
+					<div class="flex items-center justify-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+						<div class="flex-shrink-0 mr-4">
+							<img :src="testimonial.author.image" :alt="`${testimonial.author.name} profile picture`"
+								class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 dark:border-indigo-400 shadow-sm ring-2 ring-white dark:ring-gray-800" />
+						</div>
+						<div class="flex flex-col">
+							<a v-if="testimonial.author.link" target="_blank" :href="testimonial.author.link"
+								class="no-underline transition-opacity hover:opacity-80">
+								<div class="font-semibold text-gray-900 dark:text-white mb-1">{{ testimonial.author.name }}</div>
+								<div class="text-sm text-gray-500 dark:text-gray-400">{{ testimonial.author.title }}</div>
+							</a>
+							<div v-else>
+								<div class="font-semibold text-gray-900 dark:text-white mb-1">{{ testimonial.author.name }}</div>
+								<div class="text-sm text-gray-500 dark:text-gray-400">{{ testimonial.author.title }}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</Slide>
 
-    <template #addons>
-      <Navigation />
-      <Pagination />
-    </template>
-  </Carousel>
+		<template #addons>
+			<Navigation />
+			<Pagination />
+		</template>
+	</Carousel>
 </template>
 
 <style>
