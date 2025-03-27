@@ -1,53 +1,70 @@
 ---
-import { getCollection } from 'astro:content';
-import SliderClient from './slider.vue';
+import { getCollection } from "astro:content";
+import SliderClient from "./slider.vue";
 
 interface Props {
-  type?: 'maintainer' | 'partner' | 'consulting' | 'viewer';
-  limit?: number;
+	type?: "maintainer" | "partner" | "consulting" | "viewer";
+	blurb: string;
+	limit?: number;
 }
 
-const { type, limit = 10 } = Astro.props;
+const getAudience = (type: string | undefined) => {
+	switch (type) {
+		case "maintainer":
+			return "Maintainers";
+		case "partner":
+			return "Partners";
+		case "consulting":
+			return "Clients";
+		case "viewer":
+			return "Viewers";
+		default:
+			return "Viewers";
+	}
+};
+
+const { type, blurb, limit = 10 } = Astro.props;
 
 // Get testimonials from the collection
-const allTestimonials = await getCollection('testimonials');
+const allTestimonials = await getCollection("testimonials");
 
 // Filter by type if specified
 const filteredTestimonials = type
-  ? allTestimonials.filter((testimonial) => testimonial.data.type === type)
-  : allTestimonials;
+	? allTestimonials.filter((testimonial) => testimonial.data.type === type)
+	: allTestimonials;
 
 // Limit the number of testimonials if specified and manually create objects with correct property order
-const testimonials = filteredTestimonials
-  .slice(0, limit)
-  .map((testimonial) => {
-    const { name, title, image, link } = testimonial.data.author;
-    return {
-      quote: testimonial.data.quote,
-      author: { 
-        name, 
-        title, 
-        image,
-        link
-      }
-    };
-  });
+const testimonials = filteredTestimonials.slice(0, limit).map((testimonial) => {
+	const { name, title, image, link } = testimonial.data.author;
+	return {
+		quote: testimonial.data.quote,
+		author: {
+			name,
+			title,
+			image,
+			link,
+		},
+	};
+});
 ---
 
-<section class="relative py-16 md:py-16 overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white">
-  <!-- Gradient line at the top -->
-  <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-600 to-purple-500"></div>
-
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="max-w-3xl mx-auto mb-12 text-center">
-      <h2 class="text-4xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-white">
-        Don't just take our word for it ...
-      </h2>
-      <div class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-        Here's what our partners have to say about working with us
-      </div>
-    </div>
-
-    <SliderClient testimonials={testimonials} client:load />
-  </div>
+<section
+	class="relative py-16 md:py-16 overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white"
+>
+	<!-- Gradient line at the top -->
+	<div
+		class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-600 to-purple-500"
+	>
+	</div>
+	<div class="text-center">
+		<h2
+			class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
+		>
+			What Our <span class="text-primary">{getAudience(type)}</span> Say
+		</h2>
+		<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+			{blurb}
+		</p>
+	</div>
+	<SliderClient testimonials={testimonials} client:load />
 </section>

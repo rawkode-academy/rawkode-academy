@@ -38,49 +38,98 @@ import Page from "@/wrappers/page.astro";
 
 	<div class="max-w-5xl mx-auto mb-16 text-center">
 		<p class="text-xl text-gray-700 dark:text-gray-200 mb-8 leading-relaxed">
-			Rawkode Academy offers specialized technical consulting services focused on cloud infrastructure, Kubernetes, platform engineering, and cloud engineering. We help you implement Infrastructure as Code with Terraform and Pulumi, optimize Kubernetes environments, establish GitOps workflows, implement SRE practices, and build comprehensive observability solutions.
+			Rawkode Academy offers specialized technical consulting services focused
+			on cloud infrastructure, Kubernetes, platform engineering, and cloud
+			engineering. We help you implement Infrastructure as Code with Terraform
+			and Pulumi, optimize Kubernetes environments, establish GitOps workflows,
+			implement SRE practices, and build comprehensive observability solutions.
 		</p>
 
 		<div class="grid md:grid-cols-3 gap-6 text-left mt-12">
-			<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+			<div
+				class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
+			>
 				<div class="flex items-center mb-4">
 					<div class="bg-primary/10 p-3 rounded-full mr-4">
-						<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+						<svg
+							class="w-6 h-6 text-primary"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+							></path>
 						</svg>
 					</div>
 					<h3 class="text-lg font-bold">Cloud Native Expertise</h3>
 				</div>
 				<p class="text-gray-600 dark:text-gray-300">
-					Deep experience with Kubernetes, Terraform, Pulumi, and GitOps workflows to help you build robust, scalable infrastructure and delivery pipelines.
+					Deep experience with Kubernetes, Terraform, Pulumi, and GitOps
+					workflows to help you build robust, scalable infrastructure and
+					delivery pipelines.
 				</p>
 			</div>
 
-			<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+			<div
+				class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
+			>
 				<div class="flex items-center mb-4">
 					<div class="bg-secondary/10 p-3 rounded-full mr-4">
-						<svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+						<svg
+							class="w-6 h-6 text-secondary"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+							></path>
 						</svg>
 					</div>
 					<h3 class="text-lg font-bold">GitOps & Continuous Delivery</h3>
 				</div>
 				<p class="text-gray-600 dark:text-gray-300">
-					Implement GitOps practices and continuous delivery pipelines using tools like Flux and ArgoCD to enable declarative, git-based infrastructure and application deployments.
+					Implement GitOps practices and continuous delivery pipelines using
+					tools like Flux and ArgoCD to enable declarative, git-based
+					infrastructure and application deployments.
 				</p>
 			</div>
 
-			<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+			<div
+				class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
+			>
 				<div class="flex items-center mb-4">
 					<div class="bg-tertiary/10 p-3 rounded-full mr-4">
-						<svg class="w-6 h-6 text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+						<svg
+							class="w-6 h-6 text-tertiary"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+							></path>
 						</svg>
 					</div>
 					<h3 class="text-lg font-bold">Reliability & Observability</h3>
 				</div>
 				<p class="text-gray-600 dark:text-gray-300">
-					Establish SRE practices and comprehensive observability solutions that improve system reliability, incident response, and operational visibility.
+					Establish SRE practices and comprehensive observability solutions that
+					improve system reliability, incident response, and operational
+					visibility.
 				</p>
 			</div>
 		</div>
@@ -89,7 +138,9 @@ import Page from "@/wrappers/page.astro";
 	<section class="bg-white dark:bg-gray-800 py-16">
 		<div class="container mx-auto px-4">
 			<div class="max-w-screen-md mx-auto mb-12 text-center">
-				<h2 class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
+				<h2
+					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
+				>
 					Our Consulting Services
 				</h2>
 				<p class="text-lg text-gray-600 dark:text-gray-300">
@@ -99,141 +150,324 @@ import Page from "@/wrappers/page.astro";
 
 			<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
 				<!-- Service 1 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
+				>
 					<div class="flex items-center mb-4">
 						<div class="bg-primary/10 flex-shrink-0 p-3 rounded-full mr-4">
-							<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+							<svg
+								class="w-6 h-6 text-primary"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
 							</svg>
 						</div>
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Developer Experience Optimization</h3>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">
+							Developer Experience Optimization
+						</h3>
 					</div>
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
-						Improve your development workflows, tooling, and environments to boost developer productivity and satisfaction.
+						Improve your development workflows, tooling, and environments to
+						boost developer productivity and satisfaction.
 					</p>
 					<ul class="space-y-2 mb-4">
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-primary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">CI/CD pipeline optimization</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>CI/CD pipeline optimization</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-primary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Development environment setup</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Development environment setup</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-primary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Docker and containerization strategies</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Docker and containerization strategies</span
+							>
 						</li>
 					</ul>
 				</div>
 
 				<!-- Service 2 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
+				>
 					<div class="flex items-center mb-4">
 						<div class="bg-secondary/10 flex-shrink-0 p-3 rounded-full mr-4">
-							<svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+							<svg
+								class="w-6 h-6 text-secondary"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
+								></path>
 							</svg>
 						</div>
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Cloud Native Architecture</h3>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">
+							Cloud Native Architecture
+						</h3>
 					</div>
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
-						Design, implement, and optimize cloud-native architectures that leverage Kubernetes and modern infrastructure patterns.
+						Design, implement, and optimize cloud-native architectures that
+						leverage Kubernetes and modern infrastructure patterns.
 					</p>
 					<ul class="space-y-2 mb-4">
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-secondary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-secondary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Kubernetes deployment strategies</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Kubernetes deployment strategies</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-secondary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-secondary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Microservices architecture design</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Microservices architecture design</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-secondary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-secondary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Service mesh implementation</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Service mesh implementation</span
+							>
 						</li>
 					</ul>
 				</div>
 
 				<!-- Service 3 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
+				>
 					<div class="flex items-center mb-4">
 						<div class="bg-tertiary/10 flex-shrink-0 p-3 rounded-full mr-4">
-							<svg class="w-6 h-6 text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+							<svg
+								class="w-6 h-6 text-tertiary"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+								></path>
 							</svg>
 						</div>
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Platform Engineering</h3>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">
+							Platform Engineering
+						</h3>
 					</div>
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
-						Build internal developer platforms that streamline operations and empower engineering teams to focus on value delivery.
+						Build internal developer platforms that streamline operations and
+						empower engineering teams to focus on value delivery.
 					</p>
 					<ul class="space-y-2 mb-4">
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-tertiary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Self-service infrastructure portals</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Self-service infrastructure portals</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-tertiary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">GitOps and Infrastructure as Code</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>GitOps and Infrastructure as Code</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-tertiary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Developer tooling standardization</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Developer tooling standardization</span
+							>
 						</li>
 					</ul>
 				</div>
 
 				<!-- Service 4 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
+				>
 					<div class="flex items-center mb-4">
 						<div class="bg-primary/10 flex-shrink-0 p-3 rounded-full mr-4">
-							<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+							<svg
+								class="w-6 h-6 text-primary"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+								></path>
 							</svg>
 						</div>
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Technical Team Development</h3>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">
+							Technical Team Development
+						</h3>
 					</div>
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
-						Upskill your engineering teams with targeted workshops, pair programming, and knowledge transfer sessions.
+						Upskill your engineering teams with targeted workshops, pair
+						programming, and knowledge transfer sessions.
 					</p>
 					<ul class="space-y-2 mb-4">
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-primary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Custom technical workshops</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Custom technical workshops</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-primary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Mentoring and technical guidance</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Mentoring and technical guidance</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-primary mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-primary mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Technology architecture reviews</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Technology architecture reviews</span
+							>
 						</li>
 					</ul>
 				</div>
@@ -244,162 +478,337 @@ import Page from "@/wrappers/page.astro";
 	<section class="section-highlight section-separator">
 		<div class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
 			<div class="text-center mb-10">
-				<h2 class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
+				<h2
+					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
+				>
 					Engagement Models
 				</h2>
 				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-					Flexible consulting arrangements designed to meet your specific needs and timeline
+					Flexible consulting arrangements designed to meet your specific needs
+					and timeline
 				</p>
 			</div>
 
 			<div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
 				<!-- Engagement Model 1 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300">
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300"
+				>
 					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Technology Assessment</h3>
-						<span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-primary/10 text-primary rounded-full">1-2 weeks</span>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">
+							Technology Assessment
+						</h3>
+						<span
+							class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-primary/10 text-primary rounded-full"
+							>1-2 weeks</span
+						>
 					</div>
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
-						Comprehensive analysis of your current technology stack, architecture, and development workflows with actionable recommendations.
+						Comprehensive analysis of your current technology stack,
+						architecture, and development workflows with actionable
+						recommendations.
 					</p>
 
 					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-gray-900 dark:text-white">$10,000</span>
+						<span class="text-2xl font-bold text-gray-900 dark:text-white"
+							>$10,000</span
+						>
 						<span class="text-gray-500 dark:text-gray-400"> fixed price</span>
 					</div>
 
 					<ul class="space-y-2 mb-6">
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Deep-dive technical discovery</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Deep-dive technical discovery</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Prioritized recommendations</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Prioritized recommendations</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Detailed documentation</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Detailed documentation</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Executive presentation</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Executive presentation</span
+							>
 						</li>
 					</ul>
 
-					<a href="/organizations/lets-chat" class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-lg transition-colors duration-300">
+					<a
+						href="/organizations/lets-chat"
+						class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-lg transition-colors duration-300"
+					>
 						Book Assessment
 					</a>
 				</div>
 
 				<!-- Engagement Model 2 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border-2 border-secondary dark:border-secondary shadow-md hover:shadow-xl transition-all duration-300 relative">
-					<div class="absolute top-0 right-0 px-3 py-1 bg-secondary text-white text-xs font-semibold rounded-bl-lg rounded-tr-lg">
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border-2 border-secondary dark:border-secondary shadow-md hover:shadow-xl transition-all duration-300 relative"
+				>
+					<div
+						class="absolute top-0 right-0 px-3 py-1 bg-secondary text-white text-xs font-semibold rounded-bl-lg rounded-tr-lg"
+					>
 						Popular Choice
 					</div>
 
 					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Implementation Sprint</h3>
-						<span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-secondary/10 text-secondary rounded-full">2-4 weeks</span>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">
+							Implementation Sprint
+						</h3>
+						<span
+							class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-secondary/10 text-secondary rounded-full"
+							>2-4 weeks</span
+						>
 					</div>
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
-						Hands-on implementation of specific technical initiatives with your team, delivering immediate improvement to your systems.
+						Hands-on implementation of specific technical initiatives with your
+						team, delivering immediate improvement to your systems.
 					</p>
 
 					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-gray-900 dark:text-white">$25,000</span>
+						<span class="text-2xl font-bold text-gray-900 dark:text-white"
+							>$25,000</span
+						>
 						<span class="text-gray-500 dark:text-gray-400"> fixed price</span>
 					</div>
 
 					<ul class="space-y-2 mb-6">
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Focused technical project</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Focused technical project</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Direct hands-on coding</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Direct hands-on coding</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Knowledge transfer sessions</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Knowledge transfer sessions</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Complete documentation</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Complete documentation</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">2 weeks of follow-up support</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>2 weeks of follow-up support</span
+							>
 						</li>
 					</ul>
 
-					<a href="/organizations/lets-chat" class="block w-full text-center py-2 px-4 bg-secondary hover:bg-primary text-white rounded-lg transition-colors duration-300">
+					<a
+						href="/organizations/lets-chat"
+						class="block w-full text-center py-2 px-4 bg-secondary hover:bg-primary text-white rounded-lg transition-colors duration-300"
+					>
 						Book Sprint
 					</a>
 				</div>
 
 				<!-- Engagement Model 3 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300">
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300"
+				>
 					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white">Staff Augmentation</h3>
-						<span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-tertiary/10 text-tertiary rounded-full">Flexible</span>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">
+							Staff Augmentation
+						</h3>
+						<span
+							class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-tertiary/10 text-tertiary rounded-full"
+							>Flexible</span
+						>
 					</div>
 					<p class="mb-4 text-gray-600 dark:text-gray-300">
-						Embed our expertise within your team on a recurring basis to provide ongoing guidance, implementation, and support.
+						Embed our expertise within your team on a recurring basis to provide
+						ongoing guidance, implementation, and support.
 					</p>
 
 					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-gray-900 dark:text-white">$2,400</span>
+						<span class="text-2xl font-bold text-gray-900 dark:text-white"
+							>$2,400</span
+						>
 						<span class="text-gray-500 dark:text-gray-400"> per day</span>
 					</div>
 
 					<ul class="space-y-2 mb-6">
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Minimum 5-day commitment</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Minimum 5-day commitment</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Flexible scheduling</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Flexible scheduling</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Direct collaboration with your team</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Direct collaboration with your team</span
+							>
 						</li>
 						<li class="flex items-start">
-							<svg class="w-5 h-5 text-green-500 mt-0.5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-								<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							<svg
+								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300">Volume discounts available</span>
+							<span class="text-gray-700 dark:text-gray-300"
+								>Volume discounts available</span
+							>
 						</li>
 					</ul>
 
-					<a href="/organizations/lets-chat" class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-lg transition-colors duration-300">
+					<a
+						href="/organizations/lets-chat"
+						class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-lg transition-colors duration-300"
+					>
 						Discuss Options
 					</a>
 				</div>
@@ -410,76 +819,108 @@ import Page from "@/wrappers/page.astro";
 	<section class="bg-white dark:bg-gray-800 section-separator">
 		<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
 			<div class="text-center mb-10">
-				<h2 class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
+				<h2
+					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
+				>
 					Our Approach
 				</h2>
 				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-					A collaborative process designed to deliver practical solutions and lasting capabilities
+					A collaborative process designed to deliver practical solutions and
+					lasting capabilities
 				</p>
 			</div>
 
 			<div class="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
 				<!-- Step 1 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
-					<div class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg">1</div>
-					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">Discovery</h3>
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
+				>
+					<div
+						class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg"
+					>
+						1
+					</div>
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">
+						Discovery
+					</h3>
 					<p class="text-gray-600 dark:text-gray-300">
-						We start by understanding your specific challenges, technical environment, and team capabilities.
+						We start by understanding your specific challenges, technical
+						environment, and team capabilities.
 					</p>
 				</div>
 
 				<!-- Step 2 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
-					<div class="absolute -top-4 -left-4 w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center font-bold text-lg">2</div>
-					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">Planning</h3>
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
+				>
+					<div
+						class="absolute -top-4 -left-4 w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center font-bold text-lg"
+					>
+						2
+					</div>
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">
+						Planning
+					</h3>
 					<p class="text-gray-600 dark:text-gray-300">
-						Together we define clear objectives, determine success metrics, and create an actionable implementation plan.
+						Together we define clear objectives, determine success metrics, and
+						create an actionable implementation plan.
 					</p>
 				</div>
 
 				<!-- Step 3 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
-					<div class="absolute -top-4 -left-4 w-10 h-10 bg-tertiary text-white rounded-full flex items-center justify-center font-bold text-lg">3</div>
-					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">Execution</h3>
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
+				>
+					<div
+						class="absolute -top-4 -left-4 w-10 h-10 bg-tertiary text-white rounded-full flex items-center justify-center font-bold text-lg"
+					>
+						3
+					</div>
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">
+						Execution
+					</h3>
 					<p class="text-gray-600 dark:text-gray-300">
-						Our experts work alongside your team to implement solutions, sharing knowledge throughout the process.
+						Our experts work alongside your team to implement solutions, sharing
+						knowledge throughout the process.
 					</p>
 				</div>
 
 				<!-- Step 4 -->
-				<div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
-					<div class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg">4</div>
-					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">Transition</h3>
+				<div
+					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
+				>
+					<div
+						class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg"
+					>
+						4
+					</div>
+					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">
+						Transition
+					</h3>
 					<p class="text-gray-600 dark:text-gray-300">
-						We ensure your team is fully equipped to maintain and extend the implemented solutions with comprehensive documentation.
+						We ensure your team is fully equipped to maintain and extend the
+						implemented solutions with comprehensive documentation.
 					</p>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-			<div class="text-center mb-10">
-				<h2 class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
-					What Our Clients Say
-				</h2>
-				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10">
-					Hear directly from the companies we've helped
-				</p>
-			</div>
-
-	<TestimonialSlider type="consulting" />
-		</section>
+	<!-- <TestimonialSlider type="consulting" blurb="Hear directly from the companies we've helped" /> -->
 
 	<section class="bg-white dark:bg-gray-800 section-separator">
 		<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
 			<div class="mx-auto max-w-screen-md text-center mb-8">
-				<h2 class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+				<h2
+					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
+				>
 					Ready to Start?
 				</h2>
-				<p class="mb-10 text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-					Schedule a no-obligation consultation to discuss your technical challenges and explore how we can help
+				<p
+					class="mb-10 text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
+				>
+					Schedule a no-obligation consultation to discuss your technical
+					challenges and explore how we can help
 				</p>
 				<div class="flex flex-col sm:flex-row justify-center gap-4">
 					<a
@@ -505,16 +946,18 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="bg-white dark:bg-gray-800 section-separator">
-	<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
-		<div class="mx-auto max-w-screen-md text-center mb-8">
-			<h2 class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 dark:text-white">
-				Frequently Asked Questions
-			</h2>
-			<p class="text-lg text-gray-600 dark:text-gray-300">
-				Learn more about our consulting services
-			</p>
+		<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
+			<div class="mx-auto max-w-screen-md text-center mb-8">
+				<h2
+					class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+				>
+					Frequently Asked Questions
+				</h2>
+				<p class="text-lg text-gray-600 dark:text-gray-300">
+					Learn more about our consulting services
+				</p>
+			</div>
+			<FAQ />
 		</div>
-		<FAQ />
-	</div>
-</section>
+	</section>
 </Page>

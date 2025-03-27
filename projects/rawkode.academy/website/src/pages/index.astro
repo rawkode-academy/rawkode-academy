@@ -4,6 +4,7 @@ import HeroImage from "./_hero.png";
 import HeroTypewriter from "@/components/hero/typewriter.tsx";
 import FeatureList from "@/components/feature/list.vue";
 import PartnerLogos from "@/components/partner/logos.astro";
+import TestimonialSlider from "@/components/testimonial/slider.astro"; // Adjust the path as needed
 
 // Organization structured data for SEO
 const organizationSchema = {
@@ -98,6 +99,12 @@ const organizationSchema = {
 			},
 		]}
 	/>
+
+	<section class="section-highlight section-separator">
+		<div class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+			<TestimonialSlider type="viewer" blurb="We're proud of the content we produce, but don't take our word for it. Here's what our viewers have to say about the Rawkode Academy." />
+		</div>
+	</section>
 
 	<section
 		class="bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-black py-16"
