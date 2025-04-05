@@ -123,6 +123,7 @@ if (user && roomExists) {
         box-shadow: 0 0 40px rgba(0, 0, 0, 0.1), 0 0 60px var(--card-glow, transparent);
         overflow: hidden;
         color: var(--text-primary);
+        pointer-events: auto; /* Ensure card content is interactive */
       }
 
       .card-wrapper h1,
@@ -188,7 +189,7 @@ if (user && roomExists) {
     />
 
     <!-- Invitation UI Container -->
-    <div id="invitation-container" class="relative min-h-screen flex flex-col">
+    <div id="invitation-container" class="relative min-h-screen flex flex-col" style="pointer-events: none;">
       <!-- Content -->
       <div class="flex-1 flex items-center justify-center px-4 py-12 z-10 content-container">
         <div class="w-full max-w-md card-wrapper">
@@ -213,5 +214,59 @@ if (user && roomExists) {
 
     <!-- Join handler component -->
     <JoinHandler roomName={roomName} user={user} roomExists={roomExists} />
+
+    <!-- Travel Indicator UI -->
+    <div
+      id="travel-indicator"
+      class="fixed bottom-5 right-5 bg-gray-900/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-700/50 text-xs text-gray-300 space-y-1 transition-opacity duration-500 ease-out opacity-0 pointer-events-none"
+      style="z-index: 100;"
+      data-visible="false"
+    >
+      <!-- Blinking Heading -->
+      <h4 id="travel-indicator-heading" class="text-center font-semibold text-amber-400 text-sm mb-1 font-mono">
+        Gate Activity Detected
+      </h4>
+
+      <!-- Slot 1 -->
+      <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
+        <div class="flex justify-between items-center">
+          <span class="travel-start-name font-mono text-blue-300/90"></span>
+          <span class="mx-2 text-gray-500">&rarr;</span>
+          <span class="travel-end-name font-mono text-blue-300/90"></span>
+        </div>
+        <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
+           <div class="travel-indicator-line"></div>
+           <div class="travel-indicator-dot"></div>
+        </div>
+      </div>
+
+      <!-- Slot 2 -->
+      <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
+        <div class="flex justify-between items-center">
+          <span class="travel-start-name font-mono text-blue-300/90"></span>
+          <span class="mx-2 text-gray-500">&rarr;</span>
+          <span class="travel-end-name font-mono text-blue-300/90"></span>
+        </div>
+        <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
+           <div class="travel-indicator-line"></div>
+           <div class="travel-indicator-dot"></div>
+        </div>
+      </div>
+
+      <!-- Slot 3 -->
+      <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
+        <div class="flex justify-between items-center">
+          <span class="travel-start-name font-mono text-blue-300/90"></span>
+          <span class="mx-2 text-gray-500">&rarr;</span>
+          <span class="travel-end-name font-mono text-blue-300/90"></span>
+        </div>
+        <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
+           <div class="travel-indicator-line"></div>
+           <div class="travel-indicator-dot"></div>
+        </div>
+      </div>
+
+    </div>
+
   </body>
 </html>
