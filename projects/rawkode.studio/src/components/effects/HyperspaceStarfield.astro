@@ -29,6 +29,7 @@
     border-radius: 50%;
     box-shadow: 0 0 1px rgba(255, 255, 255, 0.6);
     transform: translate(-50%, -50%); /* Center the star on its coordinates */
+    cursor: pointer; /* Add hover indicator */
   }
 
   /* Larger stars */
@@ -103,6 +104,8 @@
     height: 0.8px !important;
     transition: all 0.4s ease;
     box-shadow: 0 0 3px rgba(255, 255, 255, 0.1);
+    pointer-events: auto; /* Explicitly ensure lines are interactive */
+    /* cursor: pointer; /* Removed hover indicator */
   }
 
   /* Constellation group */
@@ -112,28 +115,38 @@
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    pointer-events: none; /* Group itself is not interactive */
+    z-index: 10; /* Keep explicit z-index */
   }
 
-  /* Interact area for each group */
-  .constellation-interact {
+  /* Constellation Name Label */
+  .constellation-label {
     position: absolute;
-    background-color: transparent;
-    cursor: pointer;
-    z-index: 10;
-    pointer-events: auto;
+    color: rgba(150, 210, 255, 0.9); /* Light blue, slightly brighter */
+    font-size: 12px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Cleaner font */
+    text-shadow: 0 0 5px rgba(100, 180, 255, 0.8);
+    transform: translate(-50%, -50%); /* Center on coordinates */
+    z-index: 15;
+    pointer-events: none;
+    opacity: 1; /* Always visible */
+    /* transition: opacity 0.4s ease; Removed */
+    white-space: nowrap;
   }
 
-  /* Hover effects for constellations */
-  .constellation-interact:hover + .constellation-group .constellation-line {
-    background-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-    height: 1.2px !important;
-  }
-
-  .constellation-interact:hover + .constellation-group .star {
-    background-color: #fff;
-    box-shadow: 0 0 10px #fff, 0 0 20px rgba(255, 255, 255, 0.8);
+  /* Individual Star Name Label (similar to constellation) */
+  .star-label {
+    position: absolute;
+    color: rgba(120, 210, 255, 0.85); /* Match energy burst label color */
+    font-size: 10px; /* Smaller font */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-shadow: 0 0 4px rgba(0, 100, 200, 0.9); /* Match energy burst label shadow */
+    transform: translate(-50%, -150%); /* Position above star */
+    z-index: 14; /* Below constellation labels */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
   }
 
   /* Path line styling - for energy travel paths */
@@ -163,6 +176,75 @@
     from { background-position-x: 0; }
     to { background-position-x: 24px; }
   }
+
+  /* Travel Indicator Specific Styles */
+  .travel-indicator-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    transform: translateY(-50%);
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.4),
+      rgba(255, 255, 255, 0.4) 3px, /* Shorter dashes */
+      transparent 3px,
+      transparent 6px
+    );
+    animation: dashMove 0.8s linear infinite; /* Reuse main animation */
+    animation-direction: normal; /* Always move left to right */
+  }
+
+  .travel-indicator-dot {
+    position: absolute;
+    top: 50%;
+    left: 0; /* Start at left */
+    width: 4px;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    box-shadow:
+      0 0 4px 1px rgba(120, 220, 255, 0.9), /* Slightly smaller shadow */
+      0 0 8px 2px rgba(50, 180, 255, 0.6);
+    transform: translate(0, -50%);
+    animation-name: travelIndicatorMove;
+    animation-timing-function: linear; /* Use linear for simplicity */
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes travelIndicatorMove {
+    from { left: 0%; transform: translate(0, -50%); }
+    to   { left: 100%; transform: translate(-100%, -50%); } /* End fully inside */
+  }
+
+  /* Style for the Travel Indicator Heading */
+  #travel-indicator-heading {
+    animation: slowBlink 2.5s infinite ease-in-out;
+  }
+
+  /* Styles for Travel Indicator visibility */
+  #travel-indicator.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .travel-slot {
+     opacity: 0;
+     transition: opacity 0.4s ease-out;
+     pointer-events: none;
+  }
+
+  .travel-slot.active {
+      opacity: 1;
+      pointer-events: auto;
+  }
+
+  /* Slow Blinking Animation */
+  @keyframes slowBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
 </style>
 
 <!-- Space background with stars -->
@@ -175,6 +257,13 @@
     // Get starfield container
     const starField = document.getElementById('hyperspace');
     if (!starField) return;
+
+    // --- Single Label for Star Hovers ---
+    let starHoverLabel = document.createElement('div');
+    starHoverLabel.id = 'star-hover-label';
+    starHoverLabel.className = 'star-label';
+    starField.appendChild(starHoverLabel);
+    // --- End Single Label Setup ---
 
     // Configuration
     const gridCellSize = 25; // Smaller cell size (was 40px)
@@ -192,8 +281,10 @@
     let energyIntervals = [];
     let allStars = []; // Track all stars for random selection
 
-    // Flag to track if an energy dot is currently traveling
-    let isEnergyDotTraveling = false;
+    // Flag to track if an energy dot is currently traveling - REPLACED
+    // let isEnergyDotTraveling = false;
+    let activeEnergyBurstsCount = 0; // Counter for parallel bursts
+    const maxParallelBursts = 3; // Limit
 
     // Track which stars are part of constellations
     const constellationStars = new Set();
@@ -421,13 +512,8 @@
         const constellationGroup = document.createElement('div');
         constellationGroup.className = 'constellation-group';
 
-        // Create interactive area for this constellation
-        const interactArea = document.createElement('div');
-        interactArea.className = 'constellation-interact';
-
-        // Track these elements for cleanup
+        // Track elements for cleanup
         allConstellationElements.push(constellationGroup);
-        allConstellationElements.push(interactArea);
 
         // Start with the first star
         const firstStar = startingCell.star;
@@ -436,8 +522,8 @@
         const constellationPath = [firstStar];
         constellationStars.add(firstStar.id);
 
-        // Keep track of all connections in this constellation
-        const connections = [];
+        // Keep track of connections *within* this constellation
+        const currentConstellationLines = [];
 
         // Track all possible directions for each star in the constellation
         const possibleConnections = new Map();
@@ -460,174 +546,244 @@
           let lowestEntropyConnections = [];
 
           // For each star in our constellation that has possible connections
-          for (const [starId, connections] of possibleConnections.entries()) {
-            if (connections.length === 0) {
-              // No valid connections, remove from possibilities
+          for (const [starId, potentialConnections] of possibleConnections.entries()) {
+            if (potentialConnections.length === 0) {
               possibleConnections.delete(starId);
               continue;
             }
 
-            // Calculate entropy based on number of valid connections
-            // and distance to other stars in constellation
-            for (const connection of connections) {
+            const currentStar = starsById[starId]; // This is 'B'
+            // Removed previousStar logic as angle constraints are gone
+
+            const validConnectionsForStar = [];
+
+            // Calculate entropy for all potential connections
+            for (const connection of potentialConnections) {
+              const nextStar = connection.star; // This is 'C'
+
+              // Calculate base entropy
               connection.entropy = calculateEntropy(
-                starsById[starId],
-                connection.star,
+                currentStar, // B
+                nextStar,    // C
                 constellationPath,
-                allLineSegments
+                [...allLineSegments, ...currentConstellationLines] // Check entropy against all lines
               );
+
+              // Apply bonus if extending the most recent segment
+              const isExtendingLastSegment = constellationPath.length > 0 && currentStar.id === constellationPath[constellationPath.length - 1].id;
+              if (isExtendingLastSegment) {
+                const extensionBonus = 5.0; // Encourages extending the line
+                connection.entropy = Math.max(0, connection.entropy - extensionBonus);
+              }
+
+              validConnectionsForStar.push(connection);
             }
 
-            // Find connection with lowest entropy
-            const minEntropyConn = connections.reduce(
+            // Find connection with lowest entropy for this specific currentStar ('B')
+            const minEntropyConn = validConnectionsForStar.reduce(
               (min, conn) => conn.entropy < min.entropy ? conn : min,
               { entropy: Infinity }
             );
 
-            // If this is the lowest entropy we've seen so far
+            // Check if we actually found a connection (entropy might be Infinity if no stars nearby)
+            if (minEntropyConn.entropy === Infinity) {
+                possibleConnections.delete(starId);
+                continue;
+            }
+
             if (minEntropyConn.entropy < lowestEntropy) {
               lowestEntropy = minEntropyConn.entropy;
-              lowestEntropyStar = starsById[starId];
-              lowestEntropyConnections = connections;
+              lowestEntropyStar = currentStar; // The 'B' star
+              lowestEntropyConnections = validConnectionsForStar; // Store all potential connections for B
             }
           }
 
-          // If we found a valid next star to connect
+          // If we found a valid lowest entropy star to connect from
           if (lowestEntropyStar && lowestEntropyConnections.length > 0) {
-            // Sort connections by entropy and pick the lowest
+            // Sort the potential connections for the chosen star by entropy
             lowestEntropyConnections.sort((a, b) => a.entropy - b.entropy);
 
-            // Choose the lowest entropy connection with a slight randomization
-            const connectionIndex = Math.random() > 0.8
-              ? Math.floor(Math.random() * Math.min(3, lowestEntropyConnections.length))
-              : 0;
+            let connectionMade = false;
+            // Iterate through sorted connections, pick the first non-intersecting one
+            for (const connection of lowestEntropyConnections) {
+                const nextStar = connection.star;
 
-            const nextStar = lowestEntropyConnections[connectionIndex].star;
+                // Define the potential line segment
+                const potentialLine = {
+                  x1: lowestEntropyStar.x, y1: lowestEntropyStar.y,
+                  x2: nextStar.x, y2: nextStar.y
+                };
 
-            // Check if adding this star would create any intersecting lines
-            const potentialConnection = {
-              from: lowestEntropyStar,
-              to: nextStar
-            };
+                let wouldIntersect = false;
+                const minStarClearance = 1.5; // Minimum distance line must keep from other stars
 
-            // Check for intersections with existing lines
-            let wouldIntersect = false;
+                // --- New Check: Line proximity to other stars ---
+                for (const starId of constellationStars) {
+                    // Skip endpoints of the potential line
+                    if (starId === lowestEntropyStar.id || starId === nextStar.id) continue;
 
-            // Check against this constellation's connections
-            for (const existingConn of connections) {
-              if (linesIntersect(
-                existingConn.from.x, existingConn.from.y,
-                existingConn.to.x, existingConn.to.y,
-                potentialConnection.from.x, potentialConnection.from.y,
-                potentialConnection.to.x, potentialConnection.to.y
-              )) {
-                wouldIntersect = true;
-                break;
-              }
-            }
+                    const otherStar = starsById[starId];
+                    if (!otherStar) continue; // Should not happen, but safeguard
 
-            // Check against ALL previously drawn connections from other constellations
-            if (!wouldIntersect) {
-              for (const existingSegment of allLineSegments) {
-                if (linesIntersect(
-                  existingSegment.x1, existingSegment.y1,
-                  existingSegment.x2, existingSegment.y2,
-                  potentialConnection.from.x, potentialConnection.from.y,
-                  potentialConnection.to.x, potentialConnection.to.y
-                )) {
-                  wouldIntersect = true;
-                  break;
+                    const distToStar = linePointDistance(
+                        potentialLine.x1, potentialLine.y1,
+                        potentialLine.x2, potentialLine.y2,
+                        otherStar.x, otherStar.y
+                    );
+
+                    if (distToStar < minStarClearance) {
+                        wouldIntersect = true;
+                        break; // No need to check other stars or lines
+                    }
                 }
-              }
-            }
+                // --- End new check ---
 
-            // If no intersection, add the connection
-            if (!wouldIntersect) {
-              // Add the connection
-              connections.push(potentialConnection);
+                // If proximity check passed, proceed to line intersection checks
+                if (!wouldIntersect) {
+                  // Add the star to our constellation path
+                  constellationPath.push(nextStar);
+                  constellationStars.add(nextStar.id);
 
-              // Add the star to our constellation
-              constellationPath.push(nextStar);
-              constellationStars.add(nextStar.id);
+                  // Add the new line segment to *this* constellation's list
+                  currentConstellationLines.push(potentialLine);
 
-              // Find new possible connections from this star
-              const newConnections = findNearbyStars(
-                grid,
-                nextStar.gridX,
-                nextStar.gridY,
-                maxConnectionDistance
-              )
-              .filter(star => !constellationStars.has(star.id))
-              .map(star => ({
-                star: star,
-                entropy: 0
-              }));
+                  // Find new possible connections from this newly added star
+                  const newConnections = findNearbyStars(
+                    grid,
+                    nextStar.gridX,
+                    nextStar.gridY,
+                    maxConnectionDistance
+                  )
+                  .filter(star => !constellationStars.has(star.id))
+                  .map(star => ({
+                    star: star,
+                    entropy: 0 // Entropy will be calculated in the next main loop iteration
+                  }));
 
-              // Add new possibilities
-              possibleConnections.set(nextStar.id, newConnections);
+                  // Add new possibilities for the newly added star
+                  possibleConnections.set(nextStar.id, newConnections);
 
-              // Remove the connected star from all other stars' possibilities
-              for (const [id, starConnections] of possibleConnections.entries()) {
-                if (id !== nextStar.id) {
-                  possibleConnections.set(
-                    id,
-                    starConnections.filter(conn => conn.star.id !== nextStar.id)
-                  );
+                  // Remove the newly connected star from all other stars' possibilities
+                  for (const [id, starConnections] of possibleConnections.entries()) {
+                    if (id !== nextStar.id) {
+                      possibleConnections.set(
+                        id,
+                        starConnections.filter(conn => conn.star.id !== nextStar.id)
+                      );
+                    }
+                  }
+
+                  connectionMade = true;
+                  break; // Exit the loop once a valid connection is made
                 }
-              }
-            } else {
-              // Remove this connection as it would cause an intersection
-              possibleConnections.set(
-                lowestEntropyStar.id,
-                lowestEntropyConnections.filter(conn => conn.star.id !== nextStar.id)
-              );
+                // If it did intersect (either star proximity or line crossing), the loop continues
             }
+
+            // If no connection was made (all options intersected or list was empty), remove the star from future consideration
+            if (!connectionMade) {
+                 possibleConnections.delete(lowestEntropyStar.id);
+            }
+
           } else {
-            // No valid connections left, exit the loop
+            // No valid connections left from any star, exit the main WFC loop
             break;
           }
         }
 
         // Only create constellation if we have enough stars
         if (constellationPath.length >= minStarsPerConstellation) {
-          // Render the connection lines
-          for (const connection of connections) {
-            const line = createConnectingLine(connection.from, connection.to, constellationGroup, viewportWidth, viewportHeight);
+
+          // Move stars belonging to this constellation into the group
+          /* TEMP: Disable moving stars to test event bubbling
+          for (const star of constellationPath) {
+            if (star.element && star.element.parentNode) {
+               constellationGroup.appendChild(star.element);
+            }
+          }
+          */
+
+          // Render the connection lines into constellationGroup
+          for (const connectionLine of currentConstellationLines) {
+            const lineElement = createConnectingLine(
+              { x: connectionLine.x1, y: connectionLine.y1 },
+              { x: connectionLine.x2, y: connectionLine.y2 },
+              constellationGroup,
+              viewportWidth,
+              viewportHeight
+            );
 
             // Track line element for cleanup
-            if (line) {
-              allConstellationElements.push(line);
+            if (lineElement) {
+              allConstellationElements.push(lineElement);
             }
 
             // Add this connection to the global list to check against future constellations
-            allLineSegments.push({
-              x1: connection.from.x,
-              y1: connection.from.y,
-              x2: connection.to.x,
-              y2: connection.to.y
-            });
+            allLineSegments.push(connectionLine);
           }
 
           // Calculate bounding box for this constellation
           const bounds = getGroupBounds(constellationPath);
 
-          // Size the interact area
-          interactArea.style.left = `${bounds.minX - 5}%`;
-          interactArea.style.top = `${bounds.minY - 5}%`;
-          interactArea.style.width = `${bounds.maxX - bounds.minX + 10}%`;
-          interactArea.style.height = `${bounds.maxY - bounds.minY + 10}%`;
+          // Configure and Add Constellation Label
+          const constellationName = generateConstellationName();
+          const label = document.createElement('div'); // Create label here now
+          label.className = 'constellation-label';
+          label.textContent = constellationName;
+          const labelX = bounds.minX + (bounds.maxX - bounds.minX) / 2;
+          const labelY = bounds.minY - 3;
+          label.style.left = `${Math.max(2, Math.min(98, labelX))}%`;
+          label.style.top = `${Math.max(2, Math.min(98, labelY))}%`;
+
+          // Track label for cleanup and add to DOM
+          allConstellationElements.push(label);
+          starField.appendChild(label);
 
           // Add to used areas to prevent overlap
           usedAreas.push(bounds);
 
-          // Add to document
-          fragment.appendChild(interactArea);
+          // Add constellation group to document fragment
           fragment.appendChild(constellationGroup);
         }
       }
 
       // Add all elements to the DOM at once
       starField.appendChild(fragment);
+
+      // --- Attach Event Delegation for Individual Star Hovers (AFTER initial setup) ---
+      let starHoverTimeout = null; // Ensure this is accessible
+
+      starField.addEventListener('mouseover', (event) => {
+          if (event.target.classList.contains('star')) {
+              const starElement = event.target;
+              const starId = starElement.id;
+              // console.log("Hovered star ID:", starId); // DEBUG
+
+              // No exception: Apply to all stars
+              const starData = starsById[starId];
+              // console.log("Found starData:", starData); // DEBUG
+
+              if (starData && starData.name) { // Also check if name exists
+                  // console.log("Setting label:", starData.name, starElement.style.left, starElement.style.top); // DEBUG
+                  clearTimeout(starHoverTimeout);
+                  starHoverLabel.textContent = starData.name;
+                  starHoverLabel.style.left = starElement.style.left;
+                  starHoverLabel.style.top = starElement.style.top;
+                  starHoverLabel.style.opacity = '1';
+              } else {
+                  // console.warn("Star data or name missing for ID:", starId); // DEBUG
+              }
+          }
+      });
+
+      starField.addEventListener('mouseout', (event) => {
+          if (event.target.classList.contains('star')) {
+              // No exception: Hide label when leaving any star
+              starHoverTimeout = setTimeout(() => {
+                  starHoverLabel.style.opacity = '0';
+              }, 50); // Short delay to prevent flicker
+          }
+      });
+      // --- End Individual Star Hover Logic ---
 
       // Start single global energy burst animation
       startGlobalEnergyAnimation(viewportWidth, viewportHeight);
@@ -646,8 +802,8 @@
 
         // Set timeout with random delay
         const timeout = setTimeout(() => {
-          // Only create a new burst if we have enough stars AND no other dot is traveling
-          if (allStars.length >= 10 && !isEnergyDotTraveling) {
+          // Only create a new burst if we have enough stars AND below parallel limit
+          if (allStars.length >= 10 && activeEnergyBurstsCount < maxParallelBursts) {
             // Define a safe margin from the edges (8% of viewport)
             const safeMargin = 8;
 
@@ -661,20 +817,25 @@
 
             // Make sure we have enough visible stars
             if (visibleStars.length >= 2) {
-              // Pick random start and end stars from visible stars
+              // Pick random start star from visible stars
               const startIndex = Math.floor(Math.random() * visibleStars.length);
-              let endIndex;
-
-              // Make sure end star is different from start star
-              do {
-                endIndex = Math.floor(Math.random() * visibleStars.length);
-              } while (endIndex === startIndex);
-
               const startStar = visibleStars[startIndex];
-              const endStar = visibleStars[endIndex];
+              const startStarClassName = startStar.element.className;
 
-              // Create energy burst between these two random stars
-              createEnergyBurst(startStar, endStar, viewportWidth, viewportHeight);
+              // Filter for potential end stars of the same size, excluding the start star
+              const potentialEndStars = visibleStars.filter(star =>
+                star.id !== startStar.id && star.element.className === startStarClassName
+              );
+
+              // Only proceed if we found at least one matching star
+              if (potentialEndStars.length > 0) {
+                // Pick a random end star from the filtered list
+                const endIndex = Math.floor(Math.random() * potentialEndStars.length);
+                const endStar = potentialEndStars[endIndex];
+
+                // Create energy burst between these two stars of the same size
+                createEnergyBurst(startStar, endStar, viewportWidth, viewportHeight);
+              }
             }
           }
 
@@ -701,6 +862,15 @@
       // Start with distance as base entropy
       let entropy = distance;
 
+      // --- Add penalty for connections that are too short ---
+      const minPreferredDistance = 3.5; // Minimum preferred distance (relative to grid units)
+      const shortDistancePenaltyFactor = 10;
+      if (distance < minPreferredDistance) {
+        // Add penalty that increases as distance gets shorter
+        entropy += Math.pow(minPreferredDistance - distance, 2) * shortDistancePenaltyFactor;
+      }
+      // --- End short distance penalty ---
+
       // Adjust entropy based on proximity to other stars in constellation
       // Prefer stars that are close to multiple existing stars
       let proximityBonus = 0;
@@ -721,15 +891,24 @@
       entropy -= proximityBonus;
 
       // Add penalty for each near-miss with existing lines (prefer cleaner arrangements)
+      const nearMissThreshold = 2.5; // Slightly larger threshold (was 2)
+      const nearMissPenaltyFactor = 8; // Significantly increased penalty factor (was 3)
+
       for (const line of existingLines) {
+        // Don't penalize proximity to lines connected to the fromStar
+        if ((line.x1 === fromStar.x && line.y1 === fromStar.y) || (line.x2 === fromStar.x && line.y2 === fromStar.y)) {
+          continue;
+        }
+
         const nearMiss = linePointDistance(
           line.x1, line.y1, line.x2, line.y2,
           toStar.x, toStar.y
         );
 
-        // If very close to an existing line, increase entropy
-        if (nearMiss < 2) {
-          entropy += (2 - nearMiss) * 3;
+        // If very close to an existing line, increase entropy significantly
+        if (nearMiss < nearMissThreshold) {
+          // Penalty increases exponentially as distance decreases
+          entropy += Math.pow(nearMissThreshold - nearMiss, 2) * nearMissPenaltyFactor;
         }
       }
 
@@ -788,36 +967,6 @@
       }
 
       return results;
-    }
-
-    // Helper function to check if two line segments intersect
-    function linesIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
-      // Check if the lines share an endpoint
-      if ((x1 === x3 && y1 === y3) ||
-          (x1 === x4 && y1 === y4) ||
-          (x2 === x3 && y2 === y3) ||
-          (x2 === x4 && y2 === y4)) {
-        return false;  // Don't count shared endpoints as intersections
-      }
-
-      // Calculate directions
-      const d1x = x2 - x1;
-      const d1y = y2 - y1;
-      const d2x = x4 - x3;
-      const d2y = y4 - y3;
-
-      // Calculate the determinant
-      const det = d1x * d2y - d1y * d2x;
-
-      // If determinant is zero, lines are parallel
-      if (Math.abs(det) < 0.001) return false;
-
-      // Calculate relative positions
-      const s = (d1x * (y3 - y1) - d1y * (x3 - x1)) / det;
-      const t = (d2x * (y1 - y3) - d2y * (x1 - x3)) / -det;
-
-      // Check if intersection point is within both line segments
-      return s >= 0 && s <= 1 && t >= 0 && t <= 1;
     }
 
     // Helper function to find a valid starting cell for a constellation
@@ -957,7 +1106,7 @@
       line.style.boxShadow = '0 0 3px rgba(255, 255, 255, 0.1)'; // Add subtle glow
       line.style.transformOrigin = '0 0'; // Very important for correct rotation
       line.style.transform = `rotate(${angle}deg)`;
-      line.style.zIndex = '-1';
+      line.style.zIndex = '5'; // Ensure lines are behind label/interact
 
       container.appendChild(line);
       return line;
@@ -1058,10 +1207,30 @@
       return `${prefix}${firstDigit}${middleLetter}${secondDigit}-${suffix}`;
     }
 
+    // Generate pseudo-scientific constellation names
+    function generateConstellationName() {
+      const greekLetters = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega'];
+      const latinGenitives = ['Lyrae', 'Cygni', 'Orionis', 'Majoris', 'Minoris', 'Andromedae', 'Aquilae', 'Aurigae', 'Bootis', 'Cancri', 'Centauri', 'Capricorni', 'Draconis', 'Geminorum', 'Herculis', 'Leonis', 'Pegasi', 'Persei', 'Piscium', 'Sagittarii', 'Scorpii', 'Tauri', 'Ursae', 'Virginis'];
+
+      const letter = greekLetters[Math.floor(Math.random() * greekLetters.length)];
+      const genitive = latinGenitives[Math.floor(Math.random() * latinGenitives.length)];
+
+      return `${letter} ${genitive}`;
+    }
+
     // Helper function to create an energy burst between two stars
     function createEnergyBurst(star1, star2, viewportWidth, viewportHeight) {
-      // Set the flag to indicate a dot is now traveling
-      isEnergyDotTraveling = true;
+      // Increment active burst counter
+      activeEnergyBurstsCount++;
+
+      // Find an available travel indicator slot (Lookup moved inside)
+      const travelIndicator = document.getElementById('travel-indicator');
+      const availableSlot = travelIndicator?.querySelector('.travel-slot:not(.active)'); // Find first inactive slot
+
+      // Log moved down slightly to ensure travelIndicator is looked up first
+      // console.log('Attempting burst. Available slot:', availableSlot);
+
+      let currentSlot = null; // Keep track of the slot used by this burst
 
       // Get start and end positions
       const startX = star1.x;
@@ -1096,11 +1265,8 @@
       pathLine.style.transformOrigin = '0 0';
       pathLine.style.transform = `rotate(${angle}deg)`;
 
-      // Determine animation direction based on angle
-      if (angle > 90 || angle < -90) {
-        // Reverse the animation direction for paths going leftward
-        pathLine.style.animationDirection = 'reverse';
-      }
+      // Dashes should always move along the line from start to end
+      pathLine.style.animationDirection = 'normal';
 
       document.getElementById('hyperspace').appendChild(pathLine);
 
@@ -1152,9 +1318,38 @@
       energyDot.style.top = `${startY}%`;
 
       // Scale duration based on distance for consistent speed
-      // Base speed: 15% of screen width per second
-      const baseSpeed = 6; // percent per second (doubled from 3 to make dot move faster)
+      const baseSpeed = 6;
       const duration = Math.max(1000, (distancePercent / baseSpeed) * 1000);
+
+      // Update and Show Travel Indicator Slot
+      if (travelIndicator && availableSlot) { // Check both exist
+        currentSlot = availableSlot; // Assign this slot to the current burst
+        currentSlot.classList.add('active'); // Mark slot as active (triggers CSS transition)
+        currentSlot.style.display = 'block'; // Ensure display is block
+        travelIndicator.classList.add('visible'); // Make parent visible (triggers CSS transition)
+        travelIndicator.dataset.visible = 'true'; // Update data attribute
+
+        const travelStartName = currentSlot.querySelector('.travel-start-name');
+        const travelEndName = currentSlot.querySelector('.travel-end-name');
+        const travelDot = currentSlot.querySelector('.travel-indicator-dot');
+
+        if (travelStartName && travelEndName && travelDot) {
+           travelStartName.textContent = star1.name;
+           travelEndName.textContent = star2.name;
+
+           // Apply duration to dot animation
+           travelDot.style.animationDuration = `${duration}ms`;
+           // Reset animation
+           travelDot.classList.remove('travel-indicator-dot');
+           void travelDot.offsetWidth; // Trigger reflow
+           travelDot.classList.add('travel-indicator-dot');
+        } else {
+           // console.warn('Elements missing within travel indicator slot');
+        }
+      } else {
+        // Updated warning message
+        // console.warn('Could not find #travel-indicator or no available slot.', {travelIndicator, availableSlot}); // DEBUG
+      }
 
       // Animate dot movement
       const startTime = performance.now();
@@ -1245,8 +1440,26 @@
               if (flashIndex > -1) allEnergyBursts.splice(flashIndex, 1);
             }
 
-            // Reset the traveling flag so a new dot can be created
-            isEnergyDotTraveling = false;
+            // Decrement active burst counter
+            activeEnergyBurstsCount--;
+
+            // Hide the specific Travel Indicator Slot used by this burst
+            // console.log('Burst ended. Cleaning up slot:', currentSlot); // DEBUG
+            if (currentSlot) {
+                currentSlot.classList.remove('active'); // Mark slot as inactive (triggers CSS transition)
+                currentSlot.style.display = 'none'; // Ensure display is none
+
+                // Check if any other slots are active, if not, hide the main container
+                const anyActiveSlots = travelIndicator?.querySelector('.travel-slot.active');
+                if (!anyActiveSlots) {
+                    // console.log('No active slots remain, hiding main indicator.'); // DEBUG
+                    if(travelIndicator) {
+                         travelIndicator.classList.remove('visible'); // Hide parent (triggers CSS transition)
+                         travelIndicator.dataset.visible = 'false'; // Update data attribute
+                    }
+                }
+            }
+
           }, 350);
         }
       }
