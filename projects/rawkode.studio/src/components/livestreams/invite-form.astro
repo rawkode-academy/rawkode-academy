@@ -1,0 +1,65 @@
+---
+import { Link, Video } from "lucide-react";
+import RoomJoinForm from "./room-join-form";
+
+interface Props {
+  roomName: string;
+  roomExists: boolean;
+  user: any;
+  token: string | null;
+}
+
+const { roomName, roomExists, user, token } = Astro.props;
+---
+
+<div id="join-ui" class="mt-6">
+  {!roomExists && (
+    <div class="p-4 rounded-lg flex items-center gap-3 error-container">
+      <div class="shrink-0 size-10 rounded-full flex items-center justify-center error-icon-container">
+        <Link className="size-5" />
+      </div>
+      <div>
+        <p class="font-medium error-title">Room Not Available</p>
+        <p class="text-sm error-message">
+          This livestream may have ended or doesn't exist.
+        </p>
+      </div>
+    </div>
+  )}
+
+  {roomExists && !user && <RoomJoinForm roomName={roomName} skipRoomCheck={true} client:load />}
+
+  {roomExists && user && !token && (
+    <div class="p-4 border border-amber-300 bg-amber-50 text-amber-700 rounded-lg flex items-center gap-3">
+      <div class="shrink-0 size-10 rounded-full bg-amber-100 flex items-center justify-center">
+        <Link className="size-5" />
+      </div>
+      <div>
+        <p class="font-medium">Connection Failed</p>
+        <p class="text-sm text-amber-600">Please refresh or try again.</p>
+      </div>
+    </div>
+  )}
+
+  {roomExists && user && token && (
+    <div id="joining-message" class="p-4 border border-green-300 bg-green-50 text-green-700 rounded-lg flex items-center gap-3">
+      <div class="shrink-0 size-10 rounded-full bg-green-100 flex items-center justify-center">
+        <Video className="size-5" />
+      </div>
+      <div>
+        <p class="font-medium">Joining Stream</p>
+        <p class="text-sm text-green-600">
+          Connecting as {user.preferred_username || user.name}...
+        </p>
+      </div>
+    </div>
+  )}
+
+  <!-- Join button container will be inserted here for directors -->
+  <div id="join-container"></div>
+</div>
+
+<!-- Footer with additional info -->
+<p class="mt-6 text-center text-xs text-muted">
+  Powered by RawkodeStudio &copy; {new Date().getFullYear()}
+</p>

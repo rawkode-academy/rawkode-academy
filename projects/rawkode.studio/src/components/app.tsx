@@ -1,7 +1,7 @@
 import type { OidcStandardClaimsWithRoles } from "@/lib/security";
 import { StrictMode } from "react";
 import SidebarLayout from "./sidebar/sidebar-layout";
-import IndexPage from "./index/index-page";
+import HomePage from "./index/index-page";
 import ActiveLivestreamPage from "./livestreams/active-livestreams-page";
 import ProfilePage from "./profile/profile-page";
 import { BrowserRouter, Route, Routes } from "react-router";
@@ -20,8 +20,8 @@ export default function App({ user }: Props) {
             <Route
               index
               element={
-                <SidebarLayout user={user} title="Index">
-                  <IndexPage />
+                <SidebarLayout user={user} title="Home">
+                  <HomePage />
                 </SidebarLayout>
               }
             />
