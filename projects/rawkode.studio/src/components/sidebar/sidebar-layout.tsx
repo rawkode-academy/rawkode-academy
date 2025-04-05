@@ -21,23 +21,79 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/shadcn/sidebar";
 import type { OidcStandardClaimsWithRoles } from "@/lib/security";
 import { queryClient } from "@/store";
 import { QueryClientProvider } from "@tanstack/react-query";
-import {
-  Camera,
-  ChevronUp,
-  Home,
-  LogOut,
-  User,
-  User2,
-  Video,
-} from "lucide-react";
+import { Camera, Home, LogOut, MoreVertical, User, Video } from "lucide-react";
 import { Link } from "react-router";
-import CreateLivestreamsDialog from "../livestreams/create-livestreams-dialog";
 import LivestreamCounter from "./livestream-counter";
 import { ModeToggle } from "../common/ModeToggle";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn/avatar";
+
+interface UserNavigationProps {
+  user: OidcStandardClaimsWithRoles;
+}
+
+function UserNavigation({ user }: UserNavigationProps) {
+  const { isMobile } = useSidebar();
+
+  const getInitials = (name: string | undefined) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <SidebarMenuButton
+          size="lg"
+          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+        >
+          <Avatar className="size-8 mr-2">
+            <AvatarImage src={user.picture} alt={user.name || "User"} />
+            <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+          </Avatar>
+          <div className="grid flex-1 text-left text-sm leading-tight">
+            <span>{user.preferred_username || user.name}</span>
+            <span className="text-xs text-muted-foreground">{user.email}</span>
+          </div>
+          <MoreVertical className="ml-auto size-4" />
+        </SidebarMenuButton>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+        side={isMobile ? "bottom" : "right"}
+        align="end"
+        sideOffset={4}
+      >
+        <DropdownMenuItem asChild>
+          <Link to="/profile">
+            <User />
+            Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a href="/api/auth/logout">
+            <LogOut />
+            Logout
+          </a>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 interface Props {
   title: string;
@@ -49,7 +105,7 @@ export default function SidebarLayout({ user, title, children }: Props) {
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider>
-        <Sidebar collapsible="icon">
+        <Sidebar collapsible="icon" variant="inset">
           <SidebarHeader>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -91,7 +147,6 @@ export default function SidebarLayout({ user, title, children }: Props) {
               <SidebarGroupLabel>
                 Live Streams
               </SidebarGroupLabel>
-              <CreateLivestreamsDialog />
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
@@ -112,33 +167,7 @@ export default function SidebarLayout({ user, title, children }: Props) {
           <SidebarFooter>
             <SidebarMenu>
               <SidebarMenuItem>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton>
-                      <User2 />
-                      {user.name}
-                      <ChevronUp className="ml-auto" />
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent
-                    side="top"
-                    className="w-[--radix-popper-anchor-width]"
-                  >
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile">
-                        <User />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a href="/api/auth/logout">
-                        <LogOut />
-                        Logout
-                      </a>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <UserNavigation user={user} />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>

@@ -1,73 +1,233 @@
-import { Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../shadcn/alert-dialog";
-import { Button, buttonVariants } from "../shadcn/button";
-import { useMutation } from "@tanstack/react-query";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/shadcn/dialog";
+import { Button } from "@/components/shadcn/button";
+import { Trash, X } from "lucide-react";
 import { actions } from "astro:actions";
-import { queryClient } from "@/store";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Spinner } from "../common/Spinner";
+import { useRef } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../shadcn/tooltip";
+import { motion } from "motion/react";
 
 interface Props {
   name: string;
 }
 
 export default function DeleteLivestreamDialog({ name }: Props) {
-  const [open, setOpen] = useState(false);
+  // Dialog state
+  const [isOpen, setIsOpen] = useState(false);
 
-  const { mutate } = useMutation({
-    mutationFn: (name: string) => actions.deleteRoom({ name }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["livestreams"] });
+  // Deletion state
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  // Reference to current room being deleted
+  const roomToDeleteRef = useRef<string | null>(null);
+
+  // Query client for cache invalidation
+  const queryClient = useQueryClient();
+
+  // Verification query with built-in polling
+  const verificationQuery = useQuery({
+    queryKey: ["roomDeletionVerification", roomToDeleteRef.current],
+    queryFn: async () => {
+      // Get fresh list of rooms directly from API
+      const { data: rooms, error } = await actions.listRooms();
+
+      if (error) throw error;
+      if (!rooms) throw new Error("No data received");
+
+      // Check if the room still exists
+      const stillExists = rooms.some((room) =>
+        room.name === roomToDeleteRef.current
+      );
+
+      // If room still exists, throw error to trigger retry
+      if (stillExists) {
+        throw new Error("Room still exists");
+      }
+
+      // Return true if room is gone (success)
+      return true;
     },
+    enabled: isDeleting && roomToDeleteRef.current !== null,
+    refetchInterval: 1500,
+    refetchOnWindowFocus: false,
+    staleTime: 0,
+    retry: 20,
+    retryDelay: 1500,
   });
 
+  // Handle successful verification
+  useEffect(() => {
+    if (verificationQuery.isSuccess && isDeleting) {
+      queryClient.invalidateQueries({ queryKey: ["livestreams"] });
+      setIsDeleting(false);
+      setIsOpen(false);
+      roomToDeleteRef.current = null;
+    }
+  }, [verificationQuery.isSuccess, isDeleting, queryClient]);
+
+  // Handle max retries reached
+  useEffect(() => {
+    if (verificationQuery.failureCount >= 20 && isDeleting) {
+      setIsDeleting(false);
+      setIsError(true);
+      roomToDeleteRef.current = null;
+    }
+  }, [verificationQuery.failureCount, isDeleting]);
+
+  // Delete the room
+  const deleteRoom = async () => {
+    try {
+      // Start deleting
+      setIsDeleting(true);
+      setIsError(false);
+      roomToDeleteRef.current = name;
+
+      // Call API to delete room
+      await actions.deleteRoom({ name });
+
+      // API call success, verification will happen automatically
+      // through the enabled query
+    } catch (error) {
+      setIsDeleting(false);
+      setIsError(true);
+      roomToDeleteRef.current = null;
+    }
+  };
+
+  // Reset all state
+  const handleClose = () => {
+    if (!isDeleting) {
+      setIsOpen(false);
+      setIsError(false);
+      roomToDeleteRef.current = null;
+    }
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger>
-        <Tooltip>
-          <TooltipTrigger>
-            <Button size="icon" variant="outline">
-              <Trash2 />
+    <>
+      {/* Trigger Button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => setIsOpen(true)}
+            >
+              <Trash />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            Delete Live Stream "{name}"
-          </TooltipContent>
-        </Tooltip>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Live Stream "{name}"?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className={buttonVariants({ variant: "destructive" })}
-            onClick={() => {
-              mutate(name, {
-                onSuccess: () => {
-                  setOpen(false);
-                },
-              });
-            }}
+          </motion.div>
+        </TooltipTrigger>
+        <TooltipContent>
+          Delete Live Stream "{name}"
+        </TooltipContent>
+      </Tooltip>
+
+      {/* Delete Dialog */}
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          // Only allow closing if not deleting
+          if (!open && isDeleting) return;
+          setIsOpen(open);
+          if (!open) handleClose();
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          {isDeleting && (
+            <motion.div
+              className="absolute inset-x-0 top-0 h-1 bg-destructive z-50 origin-left"
+              initial={{ scaleX: 0 }}
+              animate={{
+                scaleX: verificationQuery.fetchStatus === "fetching"
+                  ? 0.85
+                  : 0.4,
+                transition: { duration: 2, ease: "easeOut" },
+              }}
+            />
+          )}
+
+          {/* Custom close button that's disabled during deletion */}
+          <DialogClose
+            className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+            disabled={isDeleting}
           >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
+
+          <DialogHeader>
+            <DialogTitle>Delete Live Stream "{name}"?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          {isDeleting && (
+            <div className="w-full flex items-center p-4 pl-6 my-4 rounded-md bg-secondary">
+              <motion.div
+                initial={{ rotate: 0 }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <Spinner size="medium" />
+              </motion.div>
+              <span className="ml-3 text-sm text-muted-foreground">
+                {verificationQuery.fetchStatus === "fetching"
+                  ? "Waiting for LiveKit..."
+                  : "Deleting room..."}
+              </span>
+            </div>
+          )}
+
+          {!isDeleting && isError && (
+            <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm mb-4">
+              Failed to delete room. It may still exist.
+            </div>
+          )}
+
+          <div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <div>
+                <Button
+                  variant={isError ? "outline" : "destructive"}
+                  onClick={deleteRoom}
+                  disabled={isDeleting}
+                  className={isDeleting ? "opacity-50" : ""}
+                >
+                  {isDeleting
+                    ? (
+                      <div className="flex items-center gap-2">
+                        Deleting...
+                      </div>
+                    )
+                    : (
+                      "Delete"
+                    )}
+                </Button>
+              </div>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

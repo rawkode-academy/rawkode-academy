@@ -1,0 +1,78 @@
+---
+interface Props {
+  roomName: string;
+  user: any;
+  roomExists: boolean;
+}
+
+const { roomName, user, roomExists } = Astro.props;
+---
+
+<script is:inline define:vars={{ roomName, user, roomExists }}>
+  // Function to check if user has director role
+  function isDirector() {
+    if (!user || !user.roles) return false;
+    return Array.isArray(user.roles) && user.roles.includes('director');
+  }
+
+  // Function to show join button for directors
+  function showJoinButton() {
+    // Don't show the button if the room doesn't exist
+    if (!roomExists) return;
+
+    const joinUI = document.getElementById('join-ui');
+    const joinContainer = document.getElementById('join-container');
+    const joiningMessage = document.getElementById('joining-message');
+
+    if (!joinUI || !joinContainer) return;
+
+    // Hide any existing "Joining Stream" message
+    if (joiningMessage) {
+      joiningMessage.style.display = 'none';
+    }
+
+    // Clear any existing content
+    joinContainer.innerHTML = '';
+
+    // Create join button container
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "p-4 border border-primary/30 bg-primary/10 text-primary rounded-lg flex flex-col items-center gap-3";
+
+    // Add message
+    const message = document.createElement("p");
+    message.className = "font-medium text-center";
+    message.textContent = "Join this livestream as a director";
+    buttonContainer.appendChild(message);
+
+    // Create join button
+    const joinButton = document.createElement("button");
+    joinButton.className = "mt-2 px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 flex items-center gap-2 transition-colors";
+    joinButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 10H4V3"/><path d="M20 14v7h-7"/><path d="M14 15a7 7 0 0 0-9.8-10"/><path d="M10 9a7 7 0 0 0 9.8 10"/></svg> Join Stream`;
+
+    joinButton.addEventListener("click", () => {
+      // Trigger joining through a custom event
+      document.dispatchEvent(new CustomEvent('initiate-join', {
+        detail: { roomName }
+      }));
+    });
+
+    buttonContainer.appendChild(joinButton);
+    joinContainer.appendChild(buttonContainer);
+  }
+
+  // Add event listener for the custom event to show join button
+  document.addEventListener('show-join-button', () => {
+    // Only show join button if room exists
+    if (roomExists) {
+      showJoinButton();
+    }
+  });
+
+  // When page loads, check if user is a director and show join button if needed
+  document.addEventListener('DOMContentLoaded', () => {
+    // If user is a director and room exists, show the join button
+    if (isDirector() && roomExists) {
+      showJoinButton();
+    }
+  });
+</script>
