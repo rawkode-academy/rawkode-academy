@@ -2,9 +2,10 @@
 import { actions } from "astro:actions";
 import '@/styles/global.css';
 import { roomClientService } from "@/lib/livekit";
-import HyperspaceStarfield from '@/components/effects/HyperspaceStarfield.astro';
+import Starfield from '@/components/effects/Starfield.astro';
 import InviteForm from '@/components/livestreams/invite-form.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import TravelIndicator from "../../components/effects/TravelIndicator.astro";
 
 // Get the roomName from the URL parameter
 const { roomName } = Astro.params;
@@ -56,13 +57,13 @@ if (user && roomExists) {
 
 <BaseLayout title={`Join ${roomName} - Live Stream`}>
   <!-- Space background with stars -->
-  <HyperspaceStarfield />
+  <Starfield seed={roomName} />
 
   <!-- Invitation UI Container -->
-  <div id="invitation-container" class="relative min-h-screen flex flex-col">
+  <div id="invitation-container" class="relative min-h-screen flex flex-col pointer-events-none">
     <!-- Content -->
     <div class="flex-1 flex items-center justify-center px-4 py-12 z-10">
-      <div class="w-full max-w-md backdrop-blur-md rounded-lg p-6 border border-border/50 bg-background/80 shadow-lg">
+      <div class="w-full max-w-md backdrop-blur-md rounded-lg p-6 border border-border/50 bg-background/80 shadow-lg pointer-events-auto">
         <!-- Header with room name -->
         <div class="mb-4">
           <h1 class="text-2xl font-bold text-center">{roomName}</h1>
@@ -99,55 +100,5 @@ if (user && roomExists) {
     }
   </script>
 
-  <!-- Travel Indicator UI -->
-  <div
-    id="travel-indicator"
-    class="fixed bottom-5 right-5 bg-gray-900/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-700/50 text-xs text-gray-300 space-y-1 transition-opacity duration-500 ease-out opacity-0 pointer-events-none"
-    style="z-index: 100;"
-    data-visible="false"
-  >
-    <!-- Blinking Heading -->
-    <h4 id="travel-indicator-heading" class="text-center font-semibold text-amber-400 text-sm mb-1 font-mono">
-      Gate Activity Detected
-    </h4>
-
-    <!-- Slot 1 -->
-    <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
-      <div class="flex justify-between items-center">
-        <span class="travel-start-name font-mono text-blue-300/90"></span>
-        <span class="mx-2 text-gray-500">&rarr;</span>
-        <span class="travel-end-name font-mono text-blue-300/90"></span>
-      </div>
-      <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
-         <div class="travel-indicator-line"></div>
-         <div class="travel-indicator-dot"></div>
-      </div>
-    </div>
-
-    <!-- Slot 2 -->
-    <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
-      <div class="flex justify-between items-center">
-        <span class="travel-start-name font-mono text-blue-300/90"></span>
-        <span class="mx-2 text-gray-500">&rarr;</span>
-        <span class="travel-end-name font-mono text-blue-300/90"></span>
-      </div>
-      <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
-         <div class="travel-indicator-line"></div>
-         <div class="travel-indicator-dot"></div>
-      </div>
-    </div>
-
-    <!-- Slot 3 -->
-    <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
-      <div class="flex justify-between items-center">
-        <span class="travel-start-name font-mono text-blue-300/90"></span>
-        <span class="mx-2 text-gray-500">&rarr;</span>
-        <span class="travel-end-name font-mono text-blue-300/90"></span>
-      </div>
-      <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
-         <div class="travel-indicator-line"></div>
-         <div class="travel-indicator-dot"></div>
-      </div>
-    </div>
-  </div>
+  <TravelIndicator />
 </BaseLayout>
