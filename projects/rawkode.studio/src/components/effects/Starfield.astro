@@ -1,0 +1,1033 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  seed?: string; // Optional seed for deterministic generation
+}
+
+const { seed = 'default-seed', ...rest } = Astro.props;
+---
+
+<style is:inline>
+  /* Starfield wrapper */
+  .starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #121212; /* Dark background for stars */
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: auto; /* Ensure the starfield can receive events */
+  }
+
+  /* Instant background visibility */
+  body {
+    background: #121212;
+  }
+
+  /* Star styles */
+  .star {
+    position: absolute;
+    width: 1.5px;
+    height: 1.5px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 1px rgba(255, 255, 255, 0.6);
+    transform: translate(-50%, -50%); /* Center the star on its coordinates */
+    cursor: pointer; /* Add hover indicator */
+    z-index: 5; /* Ensure stars are above the background */
+    pointer-events: auto; /* Explicitly enable pointer events */
+  }
+
+  /* Star hover effect */
+  .star:hover {
+    transform: translate(-50%, -50%) scale(1.5);
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.9);
+    transition: all 0.2s ease;
+  }
+
+  /* Larger stars */
+  .star-tiny {
+    width: 1px;
+    height: 1px;
+    box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+  }
+
+  .star-small {
+    width: 2px;
+    height: 2px;
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.7);
+  }
+
+  .star-medium {
+    width: 3px;
+    height: 3px;
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+  }
+
+  .star-large {
+    width: 4px;
+    height: 4px;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+  }
+
+  .star-xlarge {
+    width: 5px;
+    height: 5px;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 1);
+  }
+
+  /* Energy line styling */
+  .energy-line {
+    position: absolute;
+    width: 20px;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 1px;
+    box-shadow:
+      0 0 4px 1px rgba(120, 220, 255, 0.8),
+      0 0 8px 2px rgba(50, 180, 255, 0.5),
+      0 0 12px 4px rgba(30, 120, 255, 0.3);
+    z-index: 10;
+    pointer-events: none;
+    transform-origin: center left;
+  }
+
+  /* Energy dot styling */
+  .energy-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    box-shadow:
+      0 0 6px 2px rgba(120, 220, 255, 0.9),
+      0 0 12px 4px rgba(50, 180, 255, 0.6),
+      0 0 18px 6px rgba(30, 120, 255, 0.3);
+    z-index: 10;
+    pointer-events: none;
+    transform: translate(-50%, -50%); /* Center the dot on its coordinates */
+  }
+
+  /* Updated constellation line styling */
+  .constellation-line {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.25);
+    transform-origin: 0 0;
+    z-index: 5;
+    height: 0.8px !important;
+    transition: all 0.4s ease;
+    box-shadow: 0 0 3px rgba(255, 255, 255, 0.1);
+    pointer-events: auto; /* Explicitly ensure lines are interactive */
+    /* cursor: pointer; /* Removed hover indicator */
+  }
+
+  /* Constellation group */
+  .constellation-group {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Group itself is not interactive */
+    z-index: 10; /* Keep explicit z-index */
+  }
+
+  /* Constellation Name Label */
+  .constellation-label {
+    position: absolute;
+    color: rgba(150, 210, 255, 0.9); /* Light blue, slightly brighter */
+    font-size: 12px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Cleaner font */
+    text-shadow: 0 0 5px rgba(100, 180, 255, 0.8);
+    transform: translate(-50%, -50%); /* Center on coordinates */
+    z-index: 15;
+    pointer-events: none;
+    opacity: 1; /* Always visible */
+    /* transition: opacity 0.4s ease; Removed */
+    white-space: nowrap;
+  }
+
+  /* Individual Star Name Label (similar to constellation) */
+  .star-label {
+    position: absolute;
+    color: rgba(120, 210, 255, 0.85); /* Match energy burst label color */
+    font-size: 10px; /* Smaller font */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-shadow: 0 0 4px rgba(0, 100, 200, 0.9); /* Match energy burst label shadow */
+    transform: translate(-50%, -150%); /* Position above star */
+    z-index: 15; /* Make sure it's above stars and constellation lines */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+  }
+
+  /* Path line styling - for energy travel paths */
+  .path-line {
+    position: absolute;
+    transform-origin: 0 0;
+    z-index: 4;
+    height: 1px !important;
+    transition: opacity 0.3s ease;
+    overflow: hidden;
+
+    /* Create dashed lines with a background pattern */
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0.5) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+
+    /* Explicitly animate the background position */
+    animation: dashMove 0.8s linear infinite;
+  }
+
+  /* Animation for moving dashed line */
+  @keyframes dashMove {
+    from { background-position-x: 0; }
+    to { background-position-x: 24px; }
+  }
+
+  /* Travel Indicator Specific Styles - Moved to TravelIndicator.astro component */
+</style>
+
+<!-- Space background with stars -->
+<div class="starfield" id="starfield" {...rest}>
+  <!-- Stars will be generated by script -->
+</div>
+
+<script is:inline define:vars={{ initialSeed: seed }}>
+  (function() {
+    // Get starfield container
+    const starField = document.getElementById('starfield');
+    if (!starField) return;
+
+    // --- Seeded PRNG (Mulberry32) ---
+    function mulberry32(a) {
+      return function() {
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      }
+    }
+
+    // Function to create a numeric hash from a string seed
+    function cyrb53(str, seed = 0) {
+        let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+        for (let i = 0, ch; i < str.length; i++) {
+            ch = str.charCodeAt(i);
+            h1 = Math.imul(h1 ^ ch, 2654435761);
+            h2 = Math.imul(h2 ^ ch, 1597334677);
+        }
+        h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+        h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+        return 4294967296 * (2097151 & h2) + (h1>>>0);
+    };
+
+    // Initialize the random number generator with the seed
+    const numericSeed = cyrb53(initialSeed);
+    let random = mulberry32(numericSeed);
+    console.log(`Starfield initialized with seed: "${initialSeed}" (Numeric: ${numericSeed})`);
+    // --- End Seeded PRNG Setup ---
+
+    // --- Single Label for Star Hovers ---
+    let starHoverLabel = document.createElement('div');
+    starHoverLabel.id = 'star-hover-label';
+    starHoverLabel.className = 'star-label';
+    starField.appendChild(starHoverLabel);
+    // --- End Single Label Setup ---
+
+    // Configuration
+    const gridCellSize = 25;
+    const starCount = 1200;
+    const constellationCount = 10;
+    const maxStarsPerConstellation = 7;
+    const minStarsPerConstellation = 4;
+    const maxConnectionDistance = 5;
+    const gridDensityFactor = 0.3;
+
+    // Track elements to clean up on resize
+    let allStarElements = [];
+    let allConstellationElements = [];
+    let allEnergyBursts = [];
+    let energyIntervals = [];
+    let allStars = [];
+
+    let activeEnergyBurstsCount = 0;
+    const maxParallelBursts = 1;
+
+    // Track which stars are part of constellations
+    const constellationStars = new Set();
+
+    // Keep track of constellation areas to prevent overlap
+    const usedAreas = [];
+
+    // Keep track of used constellation sections
+    let usedSections = new Set();
+
+    // Initialize the starfield
+    generateStarfield();
+
+    // Add window resize handler with debounce
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        // Clear existing starfield
+        clearStarfield();
+
+        // Reset constellation tracking
+        constellationStars.clear();
+        usedAreas.length = 0;
+        usedSections.clear();
+
+        // Stop all energy burst animations
+        energyIntervals.forEach(interval => clearInterval(interval));
+        energyIntervals = [];
+
+        // Re-initialize RNG for consistency after resize
+        random = mulberry32(numericSeed);
+
+        // Regenerate with new dimensions
+        generateStarfield();
+      }, 250);
+    });
+
+    // Function to clear the existing starfield
+    function clearStarfield() {
+      // Remove stars, constellations, energy bursts
+      allStarElements.forEach(el => el?.parentNode?.removeChild(el));
+      allConstellationElements.forEach(el => el?.parentNode?.removeChild(el));
+      allEnergyBursts.forEach(el => el?.parentNode?.removeChild(el));
+
+      // Reset tracking arrays
+      allStarElements = [];
+      allConstellationElements = [];
+      allEnergyBursts = [];
+    }
+
+    // Main function to generate the starfield
+    function generateStarfield() {
+      // Get current viewport dimensions
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Create a document fragment for better performance
+      const fragment = document.createDocumentFragment();
+
+      // Reset all stars array
+      allStars = [];
+
+      // Calculate grid dimensions based on current viewport
+      const gridRows = Math.ceil(viewportHeight / gridCellSize);
+      const gridCols = Math.ceil(viewportWidth / gridCellSize);
+
+      // Create grid representation
+      const grid = new Array(gridRows);
+      for (let y = 0; y < gridRows; y++) {
+        grid[y] = new Array(gridCols).fill(null);
+      }
+
+      // Track all stars by ID for easier lookup
+      const starsById = {};
+
+      // First, ensure grid has enough stars placed for constellations, but with more randomness
+      let gridStarsPlaced = 0;
+      const desiredGridStars = Math.floor(gridRows * gridCols * gridDensityFactor);
+
+      // Place stars directly on grid with some variation
+      while (gridStarsPlaced < desiredGridStars) {
+        // Choose a random grid cell using seeded random
+        const gridY = Math.floor(random() * gridRows);
+        const gridX = Math.floor(random() * gridCols);
+
+        // Skip if cell already has a star
+        if (grid[gridY][gridX]) continue;
+
+        // Add more randomness to grid positioning using seeded random
+        const randomOffset = 0.6; // Larger offset for more scattered look
+        const xPercent = ((gridX + random() * randomOffset - randomOffset/2) / gridCols) * 100;
+        const yPercent = ((gridY + random() * randomOffset - randomOffset/2) / gridRows) * 100;
+
+        // Constrain to viewport
+        const safeXPercent = Math.max(0.5, Math.min(99.5, xPercent));
+        const safeYPercent = Math.max(0.5, Math.min(99.5, yPercent));
+
+        // Always make these stars bigger (potential constellation candidates)
+        const star = createStar(safeXPercent, safeYPercent, true);
+
+        // Store grid coordinates
+        star.gridX = gridX;
+        star.gridY = gridY;
+
+        // Add to lookup and grid
+        starsById[star.id] = star;
+        grid[gridY][gridX] = star;
+
+        // Add to all stars array for random selection
+        allStars.push(star);
+
+        // Track the element for cleanup
+        allStarElements.push(star.element);
+
+        // Add to fragment
+        fragment.appendChild(star.element);
+        gridStarsPlaced++;
+      }
+
+      // Create clusters of stars in some areas for a more realistic look
+      const numClusters = Math.floor(random() * 10) + 5; // 5-15 clusters
+      for (let c = 0; c < numClusters; c++) {
+        const clusterX = random() * 100;
+        const clusterY = random() * 100;
+        const clusterSize = Math.floor(random() * 30) + 15; // 15-45 stars per cluster
+        const clusterRadius = random() * 12 + 5; // 5-17% radius
+
+        for (let i = 0; i < clusterSize; i++) {
+          // Create stars in a Gaussian-like distribution around the cluster center using seeded random
+          const angle = random() * Math.PI * 2;
+          const distance = random() * clusterRadius * (random() + 0.5); // More stars toward center
+
+          const starX = clusterX + Math.cos(angle) * distance;
+          const starY = clusterY + Math.sin(angle) * distance;
+
+          // Skip if outside viewport
+          if (starX < 0 || starX > 100 || starY < 0 || starY > 100) continue;
+
+          // These are smaller background stars (not for constellations)
+          const star = createStar(starX, starY, false);
+
+          // Map to nearest grid cell
+          const gridX = Math.floor((starX / 100) * gridCols);
+          const gridY = Math.floor((starY / 100) * gridRows);
+
+          // Store grid coordinates
+          if (gridX >= 0 && gridX < gridCols && gridY >= 0 && gridY < gridRows) {
+            star.gridX = gridX;
+            star.gridY = gridY;
+          }
+
+          // Add to lookup
+          starsById[star.id] = star;
+
+          // Add to all stars array for random selection
+          allStars.push(star);
+
+          // Track the element for cleanup
+          allStarElements.push(star.element);
+
+          // Add to fragment
+          fragment.appendChild(star.element);
+        }
+      }
+
+      // Fill remaining space with randomly scattered stars
+      const remainingStars = starCount - gridStarsPlaced - (numClusters * 30); // Approx calculation
+      for (let i = 0; i < remainingStars; i++) {
+        // Regular stars with random positioning using seeded random
+        const xPercent = random() * 100;
+        const yPercent = random() * 100;
+
+        // These stars can be any size using seeded random
+        const isBig = random() > 0.9; // Reduced probability of big stars
+        const star = createStar(xPercent, yPercent, isBig);
+
+        // Map to nearest grid cell
+        const gridX = Math.floor((xPercent / 100) * gridCols);
+        const gridY = Math.floor((yPercent / 100) * gridRows);
+
+        // Store grid coordinates if in bounds
+        if (gridX >= 0 && gridX < gridCols && gridY >= 0 && gridY < gridRows) {
+          star.gridX = gridX;
+          star.gridY = gridY;
+
+          // Only add to grid if it's a big star and the cell is empty
+          if (isBig && !grid[gridY][gridX]) {
+            grid[gridY][gridX] = star;
+          }
+        }
+
+        // Add to lookup
+        starsById[star.id] = star;
+
+        // Add to all stars array for random selection
+        allStars.push(star);
+
+        // Track the element for cleanup
+        allStarElements.push(star.element);
+
+        // Add to fragment
+        fragment.appendChild(star.element);
+      }
+
+      // Keep track of ALL line segments across ALL constellations
+      const allLineSegments = [];
+
+      // Wave function collapse implementation for constellations
+      for (let c = 0; c < constellationCount; c++) {
+        // Find a valid starting point on the grid using seeded random
+        let startingCell = findValidStartingCell(grid);
+        if (!startingCell) continue;
+
+        // Create a group container for this constellation
+        const constellationGroup = document.createElement('div');
+        constellationGroup.className = 'constellation-group';
+
+        // Track elements for cleanup
+        allConstellationElements.push(constellationGroup);
+
+        // Start with the first star
+        const firstStar = startingCell.star;
+
+        // Initialize the constellation path with the first star
+        const constellationPath = [firstStar];
+        constellationStars.add(firstStar.id);
+
+        // Keep track of connections *within* this constellation
+        const currentConstellationLines = [];
+
+        // Track all possible directions for each star in the constellation
+        const possibleConnections = new Map();
+
+        // Initialize the wave function for the first star
+        possibleConnections.set(firstStar.id, findNearbyStars(grid, firstStar.gridX, firstStar.gridY, maxConnectionDistance)
+          .filter(star => !constellationStars.has(star.id))
+          .map(star => ({ star: star, entropy: 0 }))
+        );
+
+        // Continue until we reach the desired size or have no more valid options
+        while (constellationPath.length < maxStarsPerConstellation && possibleConnections.size > 0) {
+          // Find star with lowest entropy (fewest valid connections) to collapse next
+          let lowestEntropyStar = null;
+          let lowestEntropy = Infinity;
+          let lowestEntropyConnections = [];
+
+          // For each star in our constellation that has possible connections
+          for (const [starId, potentialConnections] of possibleConnections.entries()) {
+            if (potentialConnections.length === 0) {
+              possibleConnections.delete(starId);
+              continue;
+            }
+
+            const currentStar = starsById[starId]; // 'B'
+            const validConnectionsForStar = [];
+
+            // Calculate entropy for all potential connections
+            for (const connection of potentialConnections) {
+              const nextStar = connection.star; // 'C'
+
+              connection.entropy = calculateEntropy(
+                currentStar, nextStar, constellationPath,
+                [...allLineSegments, ...currentConstellationLines]
+              );
+
+              const isExtendingLastSegment = constellationPath.length > 0 && currentStar.id === constellationPath[constellationPath.length - 1].id;
+              if (isExtendingLastSegment) {
+                connection.entropy = Math.max(0, connection.entropy - 5.0);
+              }
+              validConnectionsForStar.push(connection);
+            }
+
+            const minEntropyConn = validConnectionsForStar.reduce(
+              (min, conn) => conn.entropy < min.entropy ? conn : min,
+              { entropy: Infinity }
+            );
+
+            if (minEntropyConn.entropy === Infinity) {
+                possibleConnections.delete(starId);
+                continue;
+            }
+
+            if (minEntropyConn.entropy < lowestEntropy) {
+              lowestEntropy = minEntropyConn.entropy;
+              lowestEntropyStar = currentStar; // 'B'
+              lowestEntropyConnections = validConnectionsForStar;
+            }
+          }
+
+          // If we found a valid lowest entropy star to connect from
+          if (lowestEntropyStar && lowestEntropyConnections.length > 0) {
+            lowestEntropyConnections.sort((a, b) => a.entropy - b.entropy);
+
+            let connectionMade = false;
+            for (const connection of lowestEntropyConnections) {
+                const nextStar = connection.star;
+                const potentialLine = { x1: lowestEntropyStar.x, y1: lowestEntropyStar.y, x2: nextStar.x, y2: nextStar.y };
+                let wouldIntersect = false;
+                const minStarClearance = 1.5;
+
+                for (const starId of constellationStars) {
+                    if (starId === lowestEntropyStar.id || starId === nextStar.id) continue;
+                    const otherStar = starsById[starId];
+                    if (!otherStar) continue;
+                    const distToStar = linePointDistance(potentialLine.x1, potentialLine.y1, potentialLine.x2, potentialLine.y2, otherStar.x, otherStar.y);
+                    if (distToStar < minStarClearance) {
+                        wouldIntersect = true;
+                        break;
+                    }
+                }
+
+                if (!wouldIntersect) {
+                  constellationPath.push(nextStar);
+                  constellationStars.add(nextStar.id);
+                  currentConstellationLines.push(potentialLine);
+                  const newConnections = findNearbyStars(grid, nextStar.gridX, nextStar.gridY, maxConnectionDistance)
+                    .filter(star => !constellationStars.has(star.id))
+                    .map(star => ({ star: star, entropy: 0 }));
+                  possibleConnections.set(nextStar.id, newConnections);
+                  for (const [id, starConnections] of possibleConnections.entries()) {
+                    if (id !== nextStar.id) {
+                      possibleConnections.set(id, starConnections.filter(conn => conn.star.id !== nextStar.id));
+                    }
+                  }
+                  connectionMade = true;
+                  break;
+                }
+            }
+            if (!connectionMade) {
+                 possibleConnections.delete(lowestEntropyStar.id);
+            }
+          } else {
+            break;
+          }
+        }
+
+        // Only create constellation if we have enough stars
+        if (constellationPath.length >= minStarsPerConstellation) {
+          // Render connection lines
+          for (const connectionLine of currentConstellationLines) {
+            const lineElement = createConnectingLine(
+              { x: connectionLine.x1, y: connectionLine.y1 },
+              { x: connectionLine.x2, y: connectionLine.y2 },
+              constellationGroup, viewportWidth, viewportHeight
+            );
+            if (lineElement) allConstellationElements.push(lineElement);
+            allLineSegments.push(connectionLine);
+          }
+
+          const bounds = getGroupBounds(constellationPath);
+          const constellationName = generateConstellationName();
+          const label = document.createElement('div');
+          label.className = 'constellation-label';
+          label.textContent = constellationName;
+          const labelX = bounds.minX + (bounds.maxX - bounds.minX) / 2;
+          const labelY = bounds.minY - 3;
+          label.style.left = `${Math.max(2, Math.min(98, labelX))}%`;
+          label.style.top = `${Math.max(2, Math.min(98, labelY))}%`;
+          allConstellationElements.push(label);
+          starField.appendChild(label);
+          usedAreas.push(bounds);
+          fragment.appendChild(constellationGroup);
+        }
+      }
+
+      // Add all elements to the DOM at once
+      starField.appendChild(fragment);
+
+      // Event Delegation setup (remains the same)
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('Starfield DOM loaded, setting up event handlers');
+        setupStarHoverEvents();
+      });
+      function setupStarHoverEvents() {
+        starField.addEventListener('mouseover', handleStarMouseOver, true);
+        starField.addEventListener('mouseout', handleStarMouseOut, true);
+        console.log('Star hover events attached to starfield');
+      }
+      function handleStarMouseOver(event) {
+        if (event.target.classList.contains('star')) {
+          const starElement = event.target;
+          const starId = starElement.id;
+          console.log("Star hover detected:", starId);
+          for (const star of allStars) {
+            if (star.id === starId && star.name) {
+              starHoverLabel.textContent = star.name;
+              starHoverLabel.style.left = starElement.style.left;
+              starHoverLabel.style.top = starElement.style.top;
+              starHoverLabel.style.opacity = '1';
+              break;
+            }
+          }
+        }
+      }
+      function handleStarMouseOut(event) {
+        if (event.target.classList.contains('star')) {
+          setTimeout(() => { starHoverLabel.style.opacity = '0'; }, 50);
+        }
+      }
+
+      // Start energy burst animation
+      startGlobalEnergyAnimation(viewportWidth, viewportHeight);
+    }
+
+    // Start a single global animation with one particle at a time using seeded random
+    function startGlobalEnergyAnimation(viewportWidth, viewportHeight) {
+      energyIntervals.forEach(interval => clearInterval(interval));
+      energyIntervals = [];
+
+      function scheduleNextBurst() {
+        const randomDelay = 1000 + Math.floor(random() * 9000);
+        const timeout = setTimeout(() => {
+          if (allStars.length >= 10 && activeEnergyBurstsCount < maxParallelBursts) {
+            const safeMargin = 8;
+            const visibleStars = allStars.filter(star =>
+              star.x >= safeMargin && star.x <= (100 - safeMargin) &&
+              star.y >= safeMargin && star.y <= (100 - safeMargin)
+            );
+
+            if (visibleStars.length >= 2) {
+              const startIndex = Math.floor(random() * visibleStars.length);
+              const startStar = visibleStars[startIndex];
+              const startStarClassName = startStar.element.className;
+              const potentialEndStars = visibleStars.filter(star =>
+                star.id !== startStar.id && star.element.className === startStarClassName
+              );
+
+              if (potentialEndStars.length > 0) {
+                const endIndex = Math.floor(random() * potentialEndStars.length);
+                const endStar = potentialEndStars[endIndex];
+                createEnergyBurst(startStar, endStar, viewportWidth, viewportHeight);
+              }
+            }
+          }
+          scheduleNextBurst();
+        }, randomDelay);
+        energyIntervals.push(timeout);
+      }
+      scheduleNextBurst();
+    }
+
+    // Calculate entropy using seeded random
+    function calculateEntropy(fromStar, toStar, existingPath, existingLines) {
+      const dx = toStar.x - fromStar.x;
+      const dy = toStar.y - fromStar.y;
+      const distance = Math.sqrt(dx*dx + dy*dy);
+      let entropy = distance;
+
+      const minPreferredDistance = 3.5;
+      const shortDistancePenaltyFactor = 10;
+      if (distance < minPreferredDistance) {
+        entropy += Math.pow(minPreferredDistance - distance, 2) * shortDistancePenaltyFactor;
+      }
+
+      let proximityBonus = 0;
+      for (const star of existingPath) {
+        if (star.id === fromStar.id) continue;
+        const dxOther = toStar.x - star.x;
+        const dyOther = toStar.y - star.y;
+        const distOther = Math.sqrt(dxOther*dxOther + dyOther*dyOther);
+        if (distOther < maxConnectionDistance * 1.5) {
+          proximityBonus += (maxConnectionDistance * 1.5 - distOther) / 2;
+        }
+      }
+      entropy -= proximityBonus;
+
+      const nearMissThreshold = 2.5;
+      const nearMissPenaltyFactor = 8;
+      for (const line of existingLines) {
+        if ((line.x1 === fromStar.x && line.y1 === fromStar.y) || (line.x2 === fromStar.x && line.y2 === fromStar.y)) continue;
+        const nearMiss = linePointDistance(line.x1, line.y1, line.x2, line.y2, toStar.x, toStar.y);
+        if (nearMiss < nearMissThreshold) {
+          entropy += Math.pow(nearMissThreshold - nearMiss, 2) * nearMissPenaltyFactor;
+        }
+      }
+
+      entropy += random() * 2; // Use seeded random for randomness adjustment
+
+      return entropy;
+    }
+
+    // linePointDistance remains the same (no randomness)
+    function linePointDistance(x1, y1, x2, y2, px, py) {
+      const lengthSq = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+      if (lengthSq === 0) return Math.sqrt((px - x1) * (px - x1) + (py - y1) * (py - y1));
+      const t = Math.max(0, Math.min(1, ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / lengthSq));
+      const projX = x1 + t * (x2 - x1);
+      const projY = y1 + t * (y2 - y1);
+      return Math.sqrt((px - projX) * (px - projX) + (py - projY) * (py - projY));
+    }
+
+    // findNearbyStars remains the same (no randomness)
+    function findNearbyStars(grid, centerX, centerY, maxDistance) {
+      const results = [];
+      const gridRows = grid.length;
+      const gridCols = grid[0].length;
+      for (let dy = -maxDistance; dy <= maxDistance; dy++) {
+        for (let dx = -maxDistance; dx <= maxDistance; dx++) {
+          const x = centerX + dx;
+          const y = centerY + dy;
+          if (x < 0 || x >= gridCols || y < 0 || y >= gridRows || !grid[y][x]) continue;
+          const distSquared = dx*dx + dy*dy;
+          if (distSquared > maxDistance*maxDistance) continue;
+          results.push(grid[y][x]);
+        }
+      }
+      return results;
+    }
+
+    // findValidStartingCell uses seeded random
+    function findValidStartingCell(grid) {
+      const gridRows = grid.length;
+      const gridCols = grid[0].length;
+      const sectionsX = 3, sectionsY = 3;
+      const sectionWidth = gridCols / sectionsX;
+      const sectionHeight = gridRows / sectionsY;
+      let sectionX, sectionY, attempts = 0;
+
+      do {
+        if (usedSections.size >= sectionsX * sectionsY || attempts > 20) {
+          usedSections.clear(); // Reset if full or stuck
+        }
+        sectionX = Math.floor(random() * sectionsX);
+        sectionY = Math.floor(random() * sectionsY);
+        attempts++;
+      } while (usedSections.has(`${sectionX},${sectionY}`) && attempts < 20);
+
+      usedSections.add(`${sectionX},${sectionY}`);
+
+      const minX = Math.floor(sectionX * sectionWidth);
+      const maxX = Math.floor((sectionX + 1) * sectionWidth);
+      const minY = Math.floor(sectionY * sectionHeight);
+      const maxY = Math.floor((sectionY + 1) * sectionHeight);
+
+      for (let attempt = 0; attempt < 100; attempt++) {
+        const y = minY + Math.floor(random() * (maxY - minY));
+        const x = minX + Math.floor(random() * (maxX - minX));
+        if (y < 0 || y >= gridRows || x < 0 || x >= gridCols) continue; // Bounds check
+        if (grid[y] && grid[y][x] && !constellationStars.has(grid[y][x].id)) {
+          let isValid = true;
+          const cellX = (x / gridCols) * 100;
+          const cellY = (y / gridRows) * 100;
+          for (const area of usedAreas) {
+            if (!(cellX + 5 < area.minX || cellX - 5 > area.maxX || cellY + 5 < area.minY || cellY - 5 > area.maxY)) {
+              isValid = false; break;
+            }
+          }
+          if (isValid) return { x, y, star: grid[y][x] };
+        }
+      }
+
+      // Fallback using seeded random
+      for (let attempt = 0; attempt < 100; attempt++) {
+        const y = Math.floor(random() * gridRows);
+        const x = Math.floor(random() * gridCols);
+        if (grid[y] && grid[y][x] && !constellationStars.has(grid[y][x].id)) {
+          let isValid = true;
+          const cellX = (x / gridCols) * 100;
+          const cellY = (y / gridRows) * 100;
+          for (const area of usedAreas) {
+             if (!(cellX + 5 < area.minX || cellX - 5 > area.maxX || cellY + 5 < area.minY || cellY - 5 > area.maxY)) {
+              isValid = false; break;
+            }
+          }
+          if (isValid) return { x, y, star: grid[y][x] };
+        }
+      }
+
+      // Last resort (unlikely with seeded RNG but keep as fallback)
+      if (usedAreas.length < 3) {
+        for (let y = 0; y < gridRows; y++) {
+          for (let x = 0; x < gridCols; x++) {
+            if (grid[y][x] && !constellationStars.has(grid[y][x].id)) {
+              return { x, y, star: grid[y][x] };
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    // createConnectingLine remains the same (no randomness)
+    function createConnectingLine(star1, star2, container, viewportWidth, viewportHeight) {
+      const line = document.createElement('div');
+      const star1XPx = (star1.x / 100) * viewportWidth;
+      const star1YPx = (star1.y / 100) * viewportHeight;
+      const star2XPx = (star2.x / 100) * viewportWidth;
+      const star2YPx = (star2.y / 100) * viewportHeight;
+      const dxPx = star2XPx - star1XPx;
+      const dyPx = star2YPx - star1YPx;
+      const distancePx = Math.sqrt(dxPx * dxPx + dyPx * dyPx);
+      const angle = Math.atan2(dyPx, dxPx) * 180 / Math.PI;
+      const distancePercent = (distancePx / viewportWidth) * 100;
+      line.className = 'constellation-line';
+      line.style.position = 'absolute';
+      line.style.left = `${star1.x}%`;
+      line.style.top = `${star1.y}%`;
+      line.style.width = `${distancePercent}%`;
+      line.style.height = '0.8px';
+      line.style.backgroundColor = 'rgba(255, 255, 255, 0.25)';
+      line.style.boxShadow = '0 0 3px rgba(255, 255, 255, 0.1)';
+      line.style.transformOrigin = '0 0';
+      line.style.transform = `rotate(${angle}deg)`;
+      line.style.zIndex = '5';
+      container.appendChild(line);
+      return line;
+    }
+
+    // getGroupBounds remains the same (no randomness)
+    function getGroupBounds(stars) {
+      let minX = 100, minY = 100, maxX = 0, maxY = 0;
+      stars.forEach(star => {
+        minX = Math.min(minX, star.x);
+        minY = Math.min(minY, star.y);
+        maxX = Math.max(maxX, star.x);
+        maxY = Math.max(maxY, star.y);
+      });
+      return { minX, minY, maxX, maxY };
+    }
+
+    // createStar uses seeded random
+    function createStar(x, y, isBig) {
+      const star = document.createElement('div');
+      const starId = `star-${random().toString(36).substring(2, 9)}`;
+      star.id = starId;
+      const stargateName = generateStargateName();
+      const offsetX = (random() * 0.8 - 0.4);
+      const offsetY = (random() * 0.8 - 0.4);
+      star.style.left = `${x + offsetX}%`;
+      star.style.top = `${y + offsetY}%`;
+      const sizeRandom = random();
+
+      if (isBig && sizeRandom > 0.9) star.className = 'star star-xlarge';
+      else if (isBig && sizeRandom > 0.7) star.className = 'star star-large';
+      else if (isBig || sizeRandom > 0.85) star.className = 'star star-medium';
+      else if (sizeRandom > 0.6) star.className = 'star star-small';
+      else if (sizeRandom > 0.3) star.className = 'star';
+      else star.className = 'star star-tiny';
+
+      let baseBrightness;
+      if (star.className.includes('star-xlarge')) baseBrightness = 0.9;
+      else if (star.className.includes('star-large')) baseBrightness = 0.8;
+      else if (star.className.includes('star-medium')) baseBrightness = 0.7;
+      else if (star.className.includes('star-small')) baseBrightness = 0.6;
+      else if (star.className.includes('star-tiny')) baseBrightness = 0.4;
+      else baseBrightness = 0.5;
+
+      const randomBrightness = random() * 0.3;
+      star.style.opacity = (baseBrightness + randomBrightness).toFixed(2);
+
+      if (random() > 0.7) {
+        const hue = Math.floor(random() * 60);
+        star.style.backgroundColor = `hsl(${hue}, 100%, ${90 + Math.floor(random() * 10)}%)`;
+      }
+
+      return {
+        element: star, id: starId, x: x + offsetX, y: y + offsetY, name: stargateName
+      };
+    }
+
+    // generateStargateName uses seeded random
+    function generateStargateName() {
+      const prefix = random() > 0.7 ? 'M' : 'P';
+      const firstDigit = Math.floor(random() * 9) + 1;
+      const middleLetter = String.fromCharCode(65 + Math.floor(random() * 26));
+      const secondDigit = Math.floor(random() * 9);
+      const suffix = Math.floor(random() * 900) + 100;
+      return `${prefix}${firstDigit}${middleLetter}${secondDigit}-${suffix}`;
+    }
+
+    // generateConstellationName uses seeded random
+    function generateConstellationName() {
+      const greekLetters = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi', 'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi', 'Omega'];
+      const latinGenitives = ['Lyrae', 'Cygni', 'Orionis', 'Majoris', 'Minoris', 'Andromedae', 'Aquilae', 'Aurigae', 'Bootis', 'Cancri', 'Centauri', 'Capricorni', 'Draconis', 'Geminorum', 'Herculis', 'Leonis', 'Pegasi', 'Persei', 'Piscium', 'Sagittarii', 'Scorpii', 'Tauri', 'Ursae', 'Virginis'];
+      const letter = greekLetters[Math.floor(random() * greekLetters.length)];
+      const genitive = latinGenitives[Math.floor(random() * latinGenitives.length)];
+      return `${letter} ${genitive}`;
+    }
+
+    // createEnergyBurst remains the same (animation is time-based, not random)
+    function createEnergyBurst(star1, star2, viewportWidth, viewportHeight) {
+      activeEnergyBurstsCount++;
+      const travelIndicator = document.getElementById('travel-indicator');
+      const availableSlot = travelIndicator?.querySelector('.travel-slot:not(.active)');
+      let currentSlot = null;
+      const startX = star1.x, startY = star1.y, endX = star2.x, endY = star2.y;
+      const star1XPx = (startX / 100) * viewportWidth, star1YPx = (startY / 100) * viewportHeight;
+      const star2XPx = (endX / 100) * viewportWidth, star2YPx = (endY / 100) * viewportHeight;
+      const dxPx = star2XPx - star1XPx, dyPx = star2YPx - star1YPx;
+      const distancePx = Math.sqrt(dxPx * dxPx + dyPx * dyPx);
+      const angle = Math.atan2(dyPx, dxPx) * 180 / Math.PI;
+      const distancePercent = (distancePx / viewportWidth) * 100;
+
+      const pathLine = document.createElement('div');
+      pathLine.className = 'path-line';
+      pathLine.style.position = 'absolute'; pathLine.style.left = `${startX}%`; pathLine.style.top = `${startY}%`;
+      pathLine.style.width = `${distancePercent}%`; pathLine.style.transformOrigin = '0 0'; pathLine.style.transform = `rotate(${angle}deg)`;
+      pathLine.style.animationDirection = 'normal';
+      starField.appendChild(pathLine); allEnergyBursts.push(pathLine);
+
+      const energyDot = document.createElement('div');
+      energyDot.className = 'energy-dot'; starField.appendChild(energyDot); allEnergyBursts.push(energyDot);
+
+      const sourceLabel = document.createElement('div');
+      sourceLabel.style.cssText = `position: absolute; left: ${startX}%; top: ${startY}%; color: rgba(120, 210, 255, 0.85); font-size: 11px; font-family: monospace; text-shadow: 0 0 4px rgba(0, 100, 200, 0.9); transform: translate(-50%, -50%) translate(0, -15px); z-index: 12; pointer-events: none;`;
+      sourceLabel.textContent = star1.name; starField.appendChild(sourceLabel); allEnergyBursts.push(sourceLabel);
+
+      const destLabel = document.createElement('div');
+      destLabel.style.cssText = `position: absolute; left: ${endX}%; top: ${endY}%; color: rgba(120, 210, 255, 0.85); font-size: 11px; font-family: monospace; text-shadow: 0 0 4px rgba(0, 100, 200, 0.9); transform: translate(-50%, -50%) translate(0, -15px); z-index: 12; pointer-events: none;`;
+      destLabel.textContent = star2.name; starField.appendChild(destLabel); allEnergyBursts.push(destLabel);
+
+      energyDot.style.left = `${startX}%`; energyDot.style.top = `${startY}%`;
+      const baseSpeed = 6; const duration = Math.max(1000, (distancePercent / baseSpeed) * 1000);
+
+      if (travelIndicator && availableSlot) {
+        currentSlot = availableSlot; currentSlot.classList.add('active'); currentSlot.style.display = 'block';
+        travelIndicator.classList.add('visible'); travelIndicator.dataset.visible = 'true';
+        const travelStartName = currentSlot.querySelector('.travel-start-name');
+        const travelEndName = currentSlot.querySelector('.travel-end-name');
+        const travelDot = currentSlot.querySelector('.travel-indicator-dot');
+        if (travelStartName && travelEndName && travelDot) {
+           travelStartName.textContent = star1.name; travelEndName.textContent = star2.name;
+           travelDot.style.animationDuration = `${duration}ms`;
+           travelDot.classList.remove('travel-indicator-dot'); void travelDot.offsetWidth; travelDot.classList.add('travel-indicator-dot');
+        }
+      }
+
+      const startTime = performance.now();
+      function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+        const currentX = startX + (endX - startX) * easeOutQuad;
+        const currentY = startY + (endY - startY) * easeOutQuad;
+        energyDot.style.left = `${currentX}%`; energyDot.style.top = `${currentY}%`;
+
+        if (progress < 1) { requestAnimationFrame(animate); }
+        else {
+          const flash = document.createElement('div');
+          flash.style.cssText = `position: absolute; left: ${endX}%; top: ${endY}%; width: 8px; height: 8px; background-color: rgba(255, 255, 255, 0.9); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px 5px rgba(100, 200, 255, 0.8); opacity: 1; transition: all 0.3s ease-out; z-index: 12;`;
+          starField.appendChild(flash); allEnergyBursts.push(flash);
+          setTimeout(() => { flash.style.opacity = '0'; flash.style.width = '12px'; flash.style.height = '12px'; flash.style.boxShadow = '0 0 15px 8px rgba(100, 200, 255, 0)'; }, 50);
+
+          pathLine.style.opacity = '0'; sourceLabel.style.opacity = '0'; destLabel.style.opacity = '0';
+
+          setTimeout(() => {
+            [energyDot, pathLine, sourceLabel, destLabel, flash].forEach(el => {
+              if (el && el.parentNode) el.parentNode.removeChild(el);
+              const index = allEnergyBursts.indexOf(el);
+              if (index > -1) allEnergyBursts.splice(index, 1);
+            });
+            activeEnergyBurstsCount--;
+            if (currentSlot) {
+              currentSlot.classList.remove('active'); currentSlot.style.display = 'none';
+              const anyActiveSlots = travelIndicator?.querySelector('.travel-slot.active');
+              if (!anyActiveSlots && travelIndicator) {
+                travelIndicator.classList.remove('visible'); travelIndicator.dataset.visible = 'false';
+              }
+            }
+          }, 350);
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+  })();
+</script>
+
+</script>
