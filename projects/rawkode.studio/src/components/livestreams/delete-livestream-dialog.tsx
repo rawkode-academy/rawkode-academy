@@ -119,7 +119,7 @@ export default function DeleteLivestreamDialog({ name }: Props) {
       {/* Trigger Button */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <div>
             <Button
               size="icon"
               variant="outline"
@@ -127,7 +127,7 @@ export default function DeleteLivestreamDialog({ name }: Props) {
             >
               <Trash />
             </Button>
-          </motion.div>
+          </div>
         </TooltipTrigger>
         <TooltipContent>
           Delete Live Stream "{name}"

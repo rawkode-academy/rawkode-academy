@@ -144,7 +144,7 @@ export default function HomePage() {
 
   const handleJoinAsDirector = () => {
     if (!roomName) return;
-    window.open(`/invite/${roomName}`, "_blank");
+    window.open(`/watch/${roomName}`, "_blank");
   };
 
   const openCustomStreamDialog = () => {
@@ -168,45 +168,24 @@ export default function HomePage() {
       )}
 
       {/* Hero section */}
-      <motion.div
-        className="text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="text-center">
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
           Live Streaming
         </h1>
         <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
           Quickly create and manage live streams for your audience.
         </p>
-      </motion.div>
+      </div>
 
       {/* CTA buttons */}
-      <motion.div
-        className="mt-10 flex flex-col gap-y-4 sm:flex-row sm:gap-x-6 sm:gap-y-0 justify-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
+      <div className="mt-10 flex flex-col gap-y-4 sm:flex-row sm:gap-x-6 sm:gap-y-0 justify-center">
         <Button
           onClick={createRoom}
           disabled={isCreating}
           className="gap-2 overflow-hidden relative"
           size="lg"
         >
-          <motion.div
-            className="flex items-center gap-2"
-            initial={{ scale: 1 }}
-            animate={isCreating
-              ? {
-                scale: [1, 1.03, 1],
-                transition: { repeat: Infinity, duration: 1.5 },
-              }
-              : { scale: 1 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
+          <div className="flex items-center gap-2">
             {isCreating
               ? (
                 <motion.div
@@ -219,7 +198,7 @@ export default function HomePage() {
               )
               : <Rocket className="h-5 w-5" />}
             Start Instant Stream
-          </motion.div>
+          </div>
         </Button>
         <Button
           variant="outline"
@@ -227,26 +206,17 @@ export default function HomePage() {
           className="gap-2"
           onClick={openCustomStreamDialog}
         >
-          <motion.div
-            className="flex items-center gap-2"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
+          <div className="flex items-center gap-2">
             <Video className="h-5 w-5" />
             Create Custom Stream
-          </motion.div>
+          </div>
         </Button>
-      </motion.div>
+      </div>
 
       {createError && (
-        <motion.div
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mt-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm max-w-xl mx-auto"
-        >
+        <div className="mt-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm max-w-xl mx-auto">
           {createError}
-        </motion.div>
+        </div>
       )}
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>

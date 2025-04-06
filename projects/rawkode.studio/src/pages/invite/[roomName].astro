@@ -4,9 +4,7 @@ import '@/styles/global.css';
 import { roomClientService } from "@/lib/livekit";
 import HyperspaceStarfield from '@/components/effects/HyperspaceStarfield.astro';
 import InviteForm from '@/components/livestreams/invite-form.astro';
-import JoinHandler from '@/components/livestreams/join-handler.astro';
-import RoomManager from '@/components/livestreams/room-manager.astro';
-import { LIVEKIT_URL } from "astro:env/server";
+import BaseLayout from '@/layouts/BaseLayout.astro';
 
 // Get the roomName from the URL parameter
 const { roomName } = Astro.params;
@@ -23,20 +21,20 @@ try {
   roomExists = rooms.some(room => room.name === roomName);
 } catch (error) {
   console.error("Error checking if room exists:", error);
-  // Continue anyway, as we might still be able to generate a token
+  // Continue anyway, to show the "room not available" message
 }
 
 // Check if user is authenticated
 const user = Astro.locals.user;
 
-// If user is authenticated, generate token directly
+// Generate a token if the user is authenticated
 let token = null;
 if (user && roomExists) {
   try {
-    // Use Astro.callAction() instead of directly calling the action
+    // Generate token
     const response = await Astro.callAction(actions.generateTokenFromInvite, {
       roomName,
-      participantName: user.preferred_username || user.name || undefined,
+      participantName: user?.preferred_username || user?.name || undefined,
     });
 
     // Check if the response contains a data property (the token string)
@@ -47,226 +45,109 @@ if (user && roomExists) {
       token = response;
     }
 
-    // Log for debugging
-    console.log("Generated token for authenticated user", { hasToken: !!token });
+    console.log("Generated token for user on invite page", { hasToken: !!token });
   } catch (error) {
-    console.error("Error generating token for authenticated user:", error);
-    // Continue to show the join form if token generation fails
+    console.error("Error generating token on invite page:", error);
   }
 }
 
-// No formatting applied to the room name
-// The original roomName will be used directly
+// No token generation needed here - it will happen on the watch page
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Join {roomName} - Live Stream</title>
-    <style is:inline>
-      /* Content styles */
-      .content-container {
-        position: relative;
-        z-index: 10;
-      }
+<BaseLayout title={`Join ${roomName} - Live Stream`}>
+  <!-- Space background with stars -->
+  <HyperspaceStarfield />
 
-      /* CSS variable color conversion helpers */
-      :root {
-        --card-rgb: 255, 255, 255; /* Default fallback */
-        --text-primary: rgba(0, 0, 0, 0.9);
-        --text-secondary: rgba(0, 0, 0, 0.7);
-        --text-muted: rgba(0, 0, 0, 0.5);
-        --error-bg: rgba(255, 0, 0, 0.05);
-        --error-border: rgba(220, 38, 38, 0.2);
-        --error-text: rgba(185, 28, 28, 1);
-        --error-text-secondary: rgba(185, 28, 28, 0.8);
-        --error-icon-bg: rgba(252, 165, 165, 0.2);
-      }
-
-      @media (prefers-color-scheme: light) {
-        :root {
-          --card-rgb: 255, 255, 255;
-          --text-primary: rgba(0, 0, 0, 0.9);
-          --text-secondary: rgba(0, 0, 0, 0.7);
-          --text-muted: rgba(0, 0, 0, 0.5);
-          --error-bg: rgba(255, 0, 0, 0.05);
-          --error-border: rgba(220, 38, 38, 0.2);
-          --error-text: rgba(185, 28, 28, 1);
-          --error-text-secondary: rgba(185, 28, 28, 0.8);
-          --error-icon-bg: rgba(252, 165, 165, 0.2);
-        }
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --card-rgb: 22, 25, 37;
-          --card-border: rgba(75, 85, 120, 0.5);
-          --card-glow: rgba(80, 140, 220, 0.08);
-          --text-primary: rgba(255, 255, 255, 0.95);
-          --text-secondary: rgba(255, 255, 255, 0.8);
-          --text-muted: rgba(255, 255, 255, 0.6);
-          --error-bg: rgba(255, 50, 50, 0.15);
-          --error-border: rgba(255, 100, 100, 0.4);
-          --error-text: rgba(255, 120, 120, 1);
-          --error-text-secondary: rgba(255, 150, 150, 0.9);
-          --error-icon-bg: rgba(255, 80, 80, 0.2);
-        }
-      }
-
-      .card-wrapper {
-        backdrop-filter: blur(12px);
-        border-radius: var(--radius);
-        padding: 1.5rem;
-        background-color: rgba(var(--card-rgb), 0.85); /* Add transparency to card */
-        border: 1px solid var(--border, var(--card-border, rgba(0, 0, 0, 0.1)));
-        box-shadow: 0 0 40px rgba(0, 0, 0, 0.1), 0 0 60px var(--card-glow, transparent);
-        overflow: hidden;
-        color: var(--text-primary);
-        pointer-events: auto; /* Ensure card content is interactive */
-      }
-
-      .card-wrapper h1,
-      .card-wrapper h2,
-      .card-wrapper h3 {
-        color: var(--text-primary);
-      }
-
-      .card-wrapper p,
-      .card-wrapper .text-muted-foreground {
-        color: var(--text-secondary);
-      }
-
-      .card-wrapper .text-xs {
-        color: var(--text-muted);
-      }
-
-      /* Error styles */
-      .card-wrapper .error-container {
-        border-color: var(--error-border);
-        background-color: var(--error-bg);
-      }
-
-      .card-wrapper .error-icon-container {
-        background-color: var(--error-icon-bg);
-      }
-
-      .card-wrapper .error-title {
-        color: var(--error-text);
-      }
-
-      .card-wrapper .error-message {
-        color: var(--error-text-secondary);
-      }
-
-      /* Full-screen livestream container */
-      .livestream-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 20;
-        display: none;
-      }
-
-      .livestream-container.active {
-        display: block;
-      }
-    </style>
-  </head>
-  <body class="bg-background text-foreground">
-    <!-- Space background with stars -->
-    <HyperspaceStarfield />
-
-    <!-- LiveKit Room Container -->
-    <RoomManager
-      serverUrl={LIVEKIT_URL}
-      roomName={roomName}
-      token={token}
-      user={user}
-      roomExists={roomExists}
-    />
-
-    <!-- Invitation UI Container -->
-    <div id="invitation-container" class="relative min-h-screen flex flex-col" style="pointer-events: none;">
-      <!-- Content -->
-      <div class="flex-1 flex items-center justify-center px-4 py-12 z-10 content-container">
-        <div class="w-full max-w-md card-wrapper">
-          <!-- Header with room name -->
-          <div class="mb-4">
-            <h1 class="text-2xl font-bold text-center">{roomName}</h1>
-            <p class="mt-2 text-center text-muted-foreground">
-              You've been invited to join this live stream
-            </p>
-          </div>
-
-          <!-- Join form and status -->
-          <InviteForm
-            roomName={roomName}
-            roomExists={roomExists}
-            user={user}
-            token={token}
-          />
-                </div>
-                </div>
-              </div>
-
-    <!-- Join handler component -->
-    <JoinHandler roomName={roomName} user={user} roomExists={roomExists} />
-
-    <!-- Travel Indicator UI -->
-    <div
-      id="travel-indicator"
-      class="fixed bottom-5 right-5 bg-gray-900/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-700/50 text-xs text-gray-300 space-y-1 transition-opacity duration-500 ease-out opacity-0 pointer-events-none"
-      style="z-index: 100;"
-      data-visible="false"
-    >
-      <!-- Blinking Heading -->
-      <h4 id="travel-indicator-heading" class="text-center font-semibold text-amber-400 text-sm mb-1 font-mono">
-        Gate Activity Detected
-      </h4>
-
-      <!-- Slot 1 -->
-      <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
-        <div class="flex justify-between items-center">
-          <span class="travel-start-name font-mono text-blue-300/90"></span>
-          <span class="mx-2 text-gray-500">&rarr;</span>
-          <span class="travel-end-name font-mono text-blue-300/90"></span>
+  <!-- Invitation UI Container -->
+  <div id="invitation-container" class="relative min-h-screen flex flex-col">
+    <!-- Content -->
+    <div class="flex-1 flex items-center justify-center px-4 py-12 z-10">
+      <div class="w-full max-w-md backdrop-blur-md rounded-lg p-6 border border-border/50 bg-background/80 shadow-lg">
+        <!-- Header with room name -->
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold text-center">{roomName}</h1>
+          <p class="mt-2 text-center text-muted-foreground">
+            You've been invited to join this live stream
+          </p>
         </div>
-        <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
-           <div class="travel-indicator-line"></div>
-           <div class="travel-indicator-dot"></div>
-        </div>
+
+        <!-- Join form and status -->
+        <InviteForm
+          roomName={roomName}
+          roomExists={roomExists}
+          user={user}
+          token={token}
+        />
+
+        <!-- Footer with additional info -->
+        <p class="mt-6 text-center text-xs text-muted-foreground">
+          Powered by RawkodeStudio &copy; {new Date().getFullYear()}
+        </p>
       </div>
+    </div>
+  </div>
 
-      <!-- Slot 2 -->
-      <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
-        <div class="flex justify-between items-center">
-          <span class="travel-start-name font-mono text-blue-300/90"></span>
-          <span class="mx-2 text-gray-500">&rarr;</span>
-          <span class="travel-end-name font-mono text-blue-300/90"></span>
-        </div>
-        <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
-           <div class="travel-indicator-line"></div>
-           <div class="travel-indicator-dot"></div>
-        </div>
+  <script is:inline define:vars={{ roomName }}>
+    // Clear any tokens for this room if they exist
+    // This ensures we don't have stale tokens when coming back to the invite page
+    const storedRoomName = sessionStorage.getItem("livekit-room");
+
+    if (storedRoomName === roomName) {
+      console.log("Clearing existing tokens for room:", roomName);
+      sessionStorage.removeItem("livekit-token");
+      sessionStorage.removeItem("livekit-room");
+    }
+  </script>
+
+  <!-- Travel Indicator UI -->
+  <div
+    id="travel-indicator"
+    class="fixed bottom-5 right-5 bg-gray-900/80 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-700/50 text-xs text-gray-300 space-y-1 transition-opacity duration-500 ease-out opacity-0 pointer-events-none"
+    style="z-index: 100;"
+    data-visible="false"
+  >
+    <!-- Blinking Heading -->
+    <h4 id="travel-indicator-heading" class="text-center font-semibold text-amber-400 text-sm mb-1 font-mono">
+      Gate Activity Detected
+    </h4>
+
+    <!-- Slot 1 -->
+    <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
+      <div class="flex justify-between items-center">
+        <span class="travel-start-name font-mono text-blue-300/90"></span>
+        <span class="mx-2 text-gray-500">&rarr;</span>
+        <span class="travel-end-name font-mono text-blue-300/90"></span>
       </div>
-
-      <!-- Slot 3 -->
-      <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
-        <div class="flex justify-between items-center">
-          <span class="travel-start-name font-mono text-blue-300/90"></span>
-          <span class="mx-2 text-gray-500">&rarr;</span>
-          <span class="travel-end-name font-mono text-blue-300/90"></span>
-        </div>
-        <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
-           <div class="travel-indicator-line"></div>
-           <div class="travel-indicator-dot"></div>
-        </div>
+      <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
+         <div class="travel-indicator-line"></div>
+         <div class="travel-indicator-dot"></div>
       </div>
-
     </div>
 
-  </body>
-</html>
+    <!-- Slot 2 -->
+    <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
+      <div class="flex justify-between items-center">
+        <span class="travel-start-name font-mono text-blue-300/90"></span>
+        <span class="mx-2 text-gray-500">&rarr;</span>
+        <span class="travel-end-name font-mono text-blue-300/90"></span>
+      </div>
+      <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
+         <div class="travel-indicator-line"></div>
+         <div class="travel-indicator-dot"></div>
+      </div>
+    </div>
+
+    <!-- Slot 3 -->
+    <div class="travel-slot border-t border-gray-700/30 pt-1 mt-1" style="display: none;">
+      <div class="flex justify-between items-center">
+        <span class="travel-start-name font-mono text-blue-300/90"></span>
+        <span class="mx-2 text-gray-500">&rarr;</span>
+        <span class="travel-end-name font-mono text-blue-300/90"></span>
+      </div>
+      <div class="travel-visual relative w-40 h-2 bg-black/30 rounded-full overflow-hidden mx-auto">
+         <div class="travel-indicator-line"></div>
+         <div class="travel-indicator-dot"></div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
