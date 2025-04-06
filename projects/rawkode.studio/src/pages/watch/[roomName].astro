@@ -1,0 +1,166 @@
+---
+import { actions } from "astro:actions";
+import '@/styles/global.css';
+import { roomClientService } from "@/lib/livekit";
+import { LIVEKIT_URL } from "astro:env/server";
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import LivekitRoom from '@/components/livestreams/livekit-room';
+
+// Get the roomName from the URL parameter
+const { roomName } = Astro.params;
+
+// Redirect if no room name is provided
+if (!roomName) {
+  return Astro.redirect("/");
+}
+
+// Check if the room actually exists
+let roomExists = false;
+try {
+  const rooms = await roomClientService.listRooms();
+  roomExists = rooms.some(room => room.name === roomName);
+} catch (error) {
+  console.error("Error checking if room exists:", error);
+}
+
+// If room doesn't exist, redirect to home
+if (!roomExists) {
+  return Astro.redirect("/?error=room-not-found");
+}
+
+// Check if user is authenticated
+const user = Astro.locals.user;
+
+// If no user, we'll check for sessionStorage token client-side
+if (!user) {
+  console.log("No authenticated user - will check for guest token client-side");
+}
+
+// Only generate a server-side token if user is authenticated
+// For guests, we'll rely on the token from sessionStorage
+let token = null;
+let tokenError = null;
+
+if (user) {
+  try {
+    const response = await Astro.callAction(actions.generateTokenFromInvite, {
+      roomName,
+      participantName: user?.preferred_username || user?.name,
+    });
+
+    if (response && response.data && typeof response.data === 'string') {
+      token = response.data;
+    } else if (typeof response === 'string') {
+      token = response;
+    }
+
+    console.log("Generated token for authenticated user", { hasToken: !!token, tokenLength: token?.length });
+  } catch (error) {
+    console.error("Error generating token for user:", error);
+    tokenError = "Failed to generate access token. Please try again.";
+  }
+} else {
+  console.log("Skipping server-side token generation for guest - will use sessionStorage");
+}
+
+// Default display name for authenticated users
+const displayName = user?.preferred_username || user?.name || 'Guest';
+---
+
+<BaseLayout title={`Watch: ${roomName} - Live Stream`}>
+  <div id="connection-error" class="fixed inset-0 flex items-center justify-center z-50 p-4 bg-background/95 hidden">
+    <div class="max-w-md w-full">
+      <div class="mb-4 p-4 border border-destructive bg-destructive/10 text-destructive rounded-md">
+        <h3 class="font-semibold">Connection Error</h3>
+        <p class="text-sm" id="error-message">Failed to generate access token. Please try again.</p>
+      </div>
+      <button
+        class="w-full py-2 px-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
+        onclick={`window.location.href = '/invite/${roomName}'`}
+      >
+        Return to Invite Page
+      </button>
+    </div>
+  </div>
+
+  <div id="connecting" class="fixed inset-0 flex flex-col items-center justify-center z-50 p-4 bg-background/95">
+    <div class="animate-spin size-12 border-4 border-primary border-t-transparent rounded-full"></div>
+    <p class="mt-4 text-muted-foreground">Connecting to stream...</p>
+  </div>
+
+  {/* LiveKit Room - Initially hidden until we confirm we have a token */}
+  <div id="room-container" class="hidden">
+    <LivekitRoom
+      serverUrl={LIVEKIT_URL}
+      client:only="react"
+      onLeaveRoom={(roomName: string) => {
+        // User manually closed the room - handle redirection
+        console.log("User left room:", roomName);
+        // Redirect to the invite page
+        window.location.href = `/invite/${roomName}`;
+      }}
+    />
+  </div>
+
+  <script is:inline define:vars={{ roomName, serverToken: token, serverTokenError: tokenError, displayName, hasUser: !!user }}>
+    // Get token from sessionStorage
+    let token = sessionStorage.getItem("livekit-token");
+    const storedRoomName = sessionStorage.getItem("livekit-room");
+    const storedDisplayName = sessionStorage.getItem("display-name");
+
+    // Debug what we found
+    console.log("Page load token status:", {
+      hasStoredToken: !!token,
+      storedRoom: storedRoomName,
+      currentRoom: roomName,
+      hasServerToken: !!serverToken,
+      hasUser: hasUser,
+      storedDisplayName
+    });
+
+    // Validate the stored room name matches the current room
+    if (storedRoomName !== roomName) {
+      // Room name mismatch - clear any existing tokens
+      console.warn("Room name mismatch:", { storedRoom: storedRoomName, currentRoom: roomName });
+      token = null;
+      sessionStorage.removeItem("livekit-token");
+      sessionStorage.removeItem("livekit-room");
+    }
+
+    // For authenticated users, we can use the server token if needed
+    // For guests, we MUST have a token in sessionStorage
+    if (!token) {
+      if (hasUser && serverToken) {
+        token = serverToken;
+        sessionStorage.setItem("livekit-token", token);
+        sessionStorage.setItem("livekit-room", roomName);
+        console.log("Using server-generated token for authenticated user");
+      } else {
+        // No token in sessionStorage and no fallback token - must go back to invite page
+        console.error("No valid token found, redirecting to invite page");
+        window.location.href = `/invite/${roomName}`;
+        throw new Error("No valid token - redirecting to invite page");
+      }
+    }
+
+    // Always use stored display name if available
+    if (storedDisplayName) {
+      console.log("Using stored display name:", storedDisplayName);
+    }
+
+    // If we have no token at all, redirect to invite page
+    if (!token || serverTokenError) {
+      console.error("No valid token found, redirecting to invite page");
+      window.location.href = `/invite/${roomName}`;
+    } else {
+      // We have a valid token, show the room
+      document.getElementById("connecting").classList.add("hidden");
+      document.getElementById("room-container").classList.remove("hidden");
+
+      // Trigger refresh event to make sure LivekitRoom component loads the tokens
+      setTimeout(() => {
+        document.dispatchEvent(new CustomEvent('livekit-refresh-tokens'));
+      }, 100);
+    }
+  </script>
+</BaseLayout>

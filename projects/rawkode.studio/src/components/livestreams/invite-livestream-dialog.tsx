@@ -14,7 +14,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { motion } from "motion/react";
 
 interface Props {
   roomName: string;
@@ -40,7 +39,7 @@ export default function InviteLivestreamDialog({ roomName }: Props) {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <div>
             <Button
               size="icon"
               variant="outline"
@@ -48,7 +47,7 @@ export default function InviteLivestreamDialog({ roomName }: Props) {
             >
               <Link2 />
             </Button>
-          </motion.div>
+          </div>
         </TooltipTrigger>
         <TooltipContent>
           Invite to Live Stream "{roomName}"

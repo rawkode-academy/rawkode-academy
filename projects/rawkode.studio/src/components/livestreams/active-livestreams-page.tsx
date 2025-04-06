@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/shadcn/dialog";
 import { Input } from "@/components/shadcn/input";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 
 type Room = {
   id: string;
@@ -199,7 +199,7 @@ export default function ActiveLivestreamPage() {
 
   const handleJoinAsDirector = () => {
     if (!roomName) return;
-    window.open(`/invite/${roomName}`, "_blank");
+    window.open(`/watch/${roomName}`, "_blank");
   };
 
   const openCustomStreamDialog = () => {
@@ -248,18 +248,7 @@ export default function ActiveLivestreamPage() {
             disabled={isCreating}
             className="gap-2 overflow-hidden relative"
           >
-            <motion.div
-              className="flex items-center gap-2"
-              initial={{ scale: 1 }}
-              animate={isCreating
-                ? {
-                  scale: [1, 1.03, 1],
-                  transition: { repeat: Infinity, duration: 1.5 },
-                }
-                : { scale: 1 }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
+            <div className="flex items-center gap-2">
               {isCreating
                 ? (
                   <motion.div
@@ -276,52 +265,34 @@ export default function ActiveLivestreamPage() {
                 )
                 : <Rocket className="h-4 w-4" />}
               Instant Stream
-            </motion.div>
+            </div>
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="gap-2"
             onClick={openCustomStreamDialog}
           >
-            <motion.div
-              className="flex items-center gap-2"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
+            <div className="flex items-center gap-2">
               <Video className="h-4 w-4" />
               Custom Stream
-            </motion.div>
+            </div>
           </Button>
         </div>
       </div>
 
       {createError && (
-        <motion.div
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm"
-        >
+        <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md text-sm">
           {createError}
-        </motion.div>
+        </div>
       )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
+      <div className="mt-8">
         <DataTable columns={columns} data={data} />
-      </motion.div>
+      </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+          <div>
             <DialogHeader>
               <DialogTitle>Room Created Successfully!</DialogTitle>
               <DialogDescription>
@@ -346,31 +317,24 @@ export default function ActiveLivestreamPage() {
               </div>
 
               {copied && (
-                <motion.p
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-2 text-sm text-green-500"
-                >
+                <p className="mt-2 text-sm text-green-500">
                   Copied to clipboard!
-                </motion.p>
+                </p>
               )}
 
               <div className="mt-6 flex justify-end gap-2">
                 <Button onClick={() => setShowDialog(false)} variant="outline">
                   Close
                 </Button>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <div>
                   <Button onClick={handleJoinAsDirector} className="gap-2">
                     <ExternalLink className="h-4 w-4" />
                     Join Now
                   </Button>
-                </motion.div>
+                </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </DialogContent>
       </Dialog>
 

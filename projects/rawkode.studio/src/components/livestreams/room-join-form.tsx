@@ -31,16 +31,15 @@ export default function RoomJoinForm(
     const checkRoomExists = async () => {
       try {
         setIsCheckingRoom(true);
-        const response = await actions.listRooms();
+        const response = await actions.checkRoomExists({
+          roomName,
+        });
 
         if (response.error) {
-          console.error("Error checking rooms:", response.error);
+          console.error("Error checking room:", response.error);
           setRoomExists(true); // Assume it exists if we can't check
-        } else if (Array.isArray(response.data)) {
-          const exists = response.data.some((room: any) =>
-            room.name === roomName
-          );
-          setRoomExists(exists);
+        } else if (response.data && typeof response.data.exists === "boolean") {
+          setRoomExists(response.data.exists);
         }
       } catch (err) {
         console.error("Failed to check if room exists:", err);
@@ -58,18 +57,22 @@ export default function RoomJoinForm(
     setIsLoading(true);
     setError(null);
 
+    // Clear the voluntary leave flag immediately - this ensures rejoining works first try
+    sessionStorage.removeItem("user-left-voluntarily");
+
     // Skip room existence check if skipRoomCheck is true
     if (!skipRoomCheck) {
       try {
         // Double check if room still exists
-        const roomsResponse = await actions.listRooms();
+        const roomResponse = await actions.checkRoomExists({
+          roomName,
+        });
 
-        if (!roomsResponse.error && Array.isArray(roomsResponse.data)) {
-          const roomStillExists = roomsResponse.data.some((room: any) =>
-            room.name === roomName
-          );
-
-          if (!roomStillExists) {
+        if (
+          !roomResponse.error && roomResponse.data &&
+          typeof roomResponse.data.exists === "boolean"
+        ) {
+          if (!roomResponse.data.exists) {
             throw new Error(
               "This livestream has ended or is no longer available",
             );
@@ -97,10 +100,13 @@ export default function RoomJoinForm(
         sessionStorage.setItem("livekit-token", response.data);
         sessionStorage.setItem("livekit-room", roomName);
 
-        console.log("Token generated and stored in sessionStorage");
+        // Store the display name in sessionStorage
+        if (name.trim()) {
+          sessionStorage.setItem("display-name", name.trim());
+          console.log("Guest name stored in sessionStorage:", name.trim());
+        }
 
-        // Notify the LivekitRoom component to refresh its tokens
-        document.dispatchEvent(new CustomEvent("livekit-refresh-tokens"));
+        console.log("Token generated and stored in sessionStorage");
 
         // Hide this component and show success message
         const formContainer = document.querySelector("form")?.closest(
@@ -128,14 +134,11 @@ export default function RoomJoinForm(
           formContainer.appendChild(successMessage);
         }
 
-        // Trigger the join event directly - this will cause the room-manager component to handle the join
+        // Wait a moment to show the success message, then redirect to watch page
         setTimeout(() => {
-          document.dispatchEvent(
-            new CustomEvent("initiate-join", {
-              detail: { roomName },
-            }),
-          );
-        }, 500);
+          // Redirect to the watch page without parameters - tokens are already in sessionStorage
+          window.location.href = `/watch/${roomName}`;
+        }, 1000);
       } else {
         throw new Error("Invalid token returned from server");
       }

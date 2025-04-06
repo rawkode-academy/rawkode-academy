@@ -27,6 +27,28 @@ export const server = {
     },
   }),
 
+  // Public action to check if a room exists
+  checkRoomExists: defineAction({
+    input: z.object({
+      roomName: z.string(),
+    }),
+
+    handler: async (input) => {
+      try {
+        const rooms = await roomClientService.listRooms();
+        const roomExists = rooms.some((room) => room.name === input.roomName);
+
+        return { exists: roomExists };
+      } catch (error) {
+        console.error("Error checking if room exists:", error);
+        throw new ActionError({
+          code: "BAD_REQUEST",
+          message: "Failed to check if room exists",
+        });
+      }
+    },
+  }),
+
   createRoom: defineAction({
     input: z.object({
       name: z.string(),
@@ -75,9 +97,16 @@ export const server = {
     handler: async (input, context) => {
       try {
         // Check if the room exists before generating a token
-        // This works for both authenticated and unauthenticated users
-        const rooms = await roomClientService.listRooms();
-        const roomExists = rooms.some((room) => room.name === input.roomName);
+        let roomExists = false;
+        try {
+          const rooms = await roomClientService.listRooms();
+          roomExists = rooms.some((room) => room.name === input.roomName);
+        } catch (roomCheckError) {
+          console.warn("Error checking room existence:", roomCheckError);
+          // Assume room exists if we can't check due to permissions
+          // This is safer than blocking token generation completely
+          roomExists = true;
+        }
 
         if (!roomExists) {
           throw new ActionError({
@@ -86,9 +115,23 @@ export const server = {
           });
         }
 
-        // Generate a random identity if none is provided
+        // Check if there's a user session (logged in) or this is a guest
+        const loggedInUser = context?.locals?.user;
+        const isGuest = !loggedInUser;
+        const userDisplayName = loggedInUser?.preferred_username ||
+          loggedInUser?.name;
+
+        // Generate identity using provided participant name first, then user info, then random
+        // The participantName is highest priority - when client explicitly provides a name, use it
         const identity = input.participantName?.trim() ||
+          userDisplayName ||
           `guest-${Math.floor(Math.random() * 10000)}`;
+
+        console.log("Generating token for", isGuest ? "guest" : "user", {
+          identity,
+          fromParticipantName: !!input.participantName?.trim(),
+          fromUserDisplay: !!userDisplayName,
+        });
 
         // Create the token
         const at = new AccessToken(
@@ -98,8 +141,7 @@ export const server = {
         );
 
         // Check if user has the director role
-        const isDirector = context?.locals?.user?.roles?.includes("director") ||
-          false;
+        const isDirector = loggedInUser?.roles?.includes("director") || false;
 
         // Add the grant - use room name, not room ID
         at.addGrant({
@@ -107,9 +149,9 @@ export const server = {
           room: input.roomName,
           // Only directors can publish audio/video
           canPublish: isDirector,
-          // Allow chat for non-directors
-          canPublishData: !isDirector,
-          // Directors can subscribe to everything
+          // Allow chat for all users
+          canPublishData: true,
+          // Allow everyone to subscribe to everything
           canSubscribe: true,
         });
 
