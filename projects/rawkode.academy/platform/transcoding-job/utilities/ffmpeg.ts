@@ -1,5 +1,6 @@
 import { basename, extname, join } from "@std/path";
 import ffmpeg from "fluent-ffmpeg";
+import { outputDir } from "../globals.ts";
 
 type Resolution = [width: number, height: number];
 
@@ -61,7 +62,7 @@ export const generateMasterPlaylist = (transcodeResults: TranscodeResult[]) => {
         result.bitrate * 1000
       },RESOLUTION=${result.width}x${result.height}`,
     );
-    playlist.push(result.m3u8Path);
+    playlist.push(result.m3u8Path.substring(outputDir.length + 1));
   }
   return playlist.join("\n");
 };
@@ -73,8 +74,7 @@ export const transcode = async ( // Make the outer function async
   const inputPathname = decodeURI(inputUrl.pathname);
   const inputExtension = extname(inputPathname);
   const inputFilenameBase = basename(inputPathname, inputExtension);
-  const baseOutputDir = "transcoded";
-  const resolutionOutputDir = join(baseOutputDir, `${preset.resolution}p`);
+  const resolutionOutputDir = join(outputDir, `${preset.resolution}p`);
   const m3u8Filename = `stream.m3u8`;
   const m3u8Path = join(resolutionOutputDir, m3u8Filename);
   const segmentPathPattern = join(

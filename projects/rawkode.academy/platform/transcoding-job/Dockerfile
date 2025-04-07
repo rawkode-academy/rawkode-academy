@@ -2,7 +2,7 @@ FROM docker.io/denoland/deno:2.2.8 AS base
 
 WORKDIR /app
 
-RUN apt update && apt install --yes ffmpeg
+RUN apt update && apt install --yes ffmpeg rclone
 
 COPY deno.jsonc deno.lock ./
 RUN deno install
