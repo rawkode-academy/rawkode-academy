@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "@aws-sdk/client-s3": "npm:@aws-sdk/client-s3@^3.782.0",
+    "@std/assert": "jsr:@std/assert@1",
+    "@std/fs": "jsr:@std/fs@^1.0.15",
+    "@std/path": "jsr:@std/path@^1.0.8",
+    "@types/fluent-ffmpeg": "npm:@types/fluent-ffmpeg@^2.1.27",
+    "fluent-ffmpeg": "npm:fluent-ffmpeg@^2.1.3"
+  }
+}
