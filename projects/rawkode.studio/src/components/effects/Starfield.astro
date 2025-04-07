@@ -138,10 +138,18 @@ const { seed = 'default-seed', ...rest } = Astro.props;
   /* Constellation Name Label */
   .constellation-label {
     position: absolute;
-    color: rgba(150, 210, 255, 0.9); /* Light blue, slightly brighter */
+    color: rgba(170, 220, 255, 0.95); /* Slightly brighter blue */
     font-size: 12px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Cleaner font */
-    text-shadow: 0 0 5px rgba(100, 180, 255, 0.8);
+    /* Multi-layered shadow for better contrast */
+    text-shadow:
+      /* Original blue glow */
+      0 0 7px rgba(100, 180, 255, 0.9),
+      /* Subtle dark outline */
+      1px 1px 1px rgba(0, 0, 0, 0.7),
+      -1px -1px 1px rgba(0, 0, 0, 0.7),
+      1px -1px 1px rgba(0, 0, 0, 0.7),
+      -1px 1px 1px rgba(0, 0, 0, 0.7);
     transform: translate(-50%, -50%); /* Center on coordinates */
     z-index: 15;
     pointer-events: none;
@@ -194,6 +202,72 @@ const { seed = 'default-seed', ...rest } = Astro.props;
   }
 
   /* Travel Indicator Specific Styles - Moved to TravelIndicator.astro component */
+
+  /* Comet styles */
+  .comet {
+    position: absolute;
+    /* Base styles - will be overridden by size classes */
+    background-color: rgba(200, 220, 255, 0.85);
+    border-radius: 50%;
+    z-index: 20;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Medium size (current default) */
+  .comet.comet-medium {
+      width: 3px;
+      height: 3px;
+      box-shadow:
+        0 0 5px 2px rgba(150, 200, 255, 0.6),
+        0 0 10px 4px rgba(100, 180, 255, 0.3),
+        0 0 15px 6px rgba(50, 150, 255, 0.15);
+  }
+
+  /* Small size */
+  .comet.comet-small {
+      width: 2px;
+      height: 2px;
+      box-shadow:
+        0 0 3px 1px rgba(150, 200, 255, 0.55),
+        0 0 7px 2px rgba(100, 180, 255, 0.25),
+        0 0 11px 4px rgba(50, 150, 255, 0.1);
+  }
+
+  /* Tiny size */
+  .comet.comet-tiny {
+      width: 1px;
+      height: 1px;
+      box-shadow:
+        0 0 2px 1px rgba(150, 200, 255, 0.5),
+        0 0 4px 1px rgba(100, 180, 255, 0.2),
+        0 0 7px 2px rgba(50, 150, 255, 0.08);
+  }
+
+  .comet-tail-particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: rgba(180, 210, 255, 0.6); /* Fainter blue */
+    border-radius: 50%;
+    box-shadow: 0 0 3px 1px rgba(150, 200, 255, 0.4);
+    z-index: 19; /* Below comet head but above most other things */
+    pointer-events: none;
+    opacity: 0; /* Start invisible */
+    transition: opacity 0.5s ease-out; /* Fade in/out */
+  }
+
+  /* --- Blinking Animation --- */
+  @keyframes blinkAnimation {
+    0%, 100% { opacity: var(--star-base-opacity, 0.8); } /* Use CSS variable for max */
+    50% { opacity: 0.2; } /* Minimum opacity */
+  }
+
+  .blinking-star {
+    animation: blinkAnimation 7s infinite alternate ease-in-out; /* 7-second cycle */
+    /* animation-delay is set inline via JS for randomness */
+  }
+  /* --- End Blinking Animation --- */
 </style>
 
 <!-- Space background with stars -->
@@ -250,7 +324,13 @@ const { seed = 'default-seed', ...rest } = Astro.props;
     const maxStarsPerConstellation = 7;
     const minStarsPerConstellation = 4;
     const maxConnectionDistance = 5;
+    const constellationBorderMargin = 10; // Minimum % distance from viewport edge
     const gridDensityFactor = 0.3;
+    const cometSpeed = 0.01; // Percentage of screen width per second
+    const cometInterval = 3000; // Milliseconds between *potential* new comet spawns
+    const maxComets = 5; // Maximum number of simultaneous comets
+    const tailParticleLife = 1200; // Reduced lifetime for shorter tail
+    const particlesPerSecond = 60; // Reduced density
 
     // Track elements to clean up on resize
     let allStarElements = [];
@@ -258,6 +338,14 @@ const { seed = 'default-seed', ...rest } = Astro.props;
     let allEnergyBursts = [];
     let energyIntervals = [];
     let allStars = [];
+
+    // --- Comet State (Modified for Multiple Comets) ---
+    let activeComets = []; // Array to hold active comet objects
+    let cometParticles = []; // Keep single array for particles, they manage their own lifecycle
+    let cometSpawnTimeout = null; // Timeout for scheduling next spawn check
+    let animationFrameId = null; // Single animation frame ID for the main loop
+    let nextCometId = 0; // Simple ID generator for comets
+    // --- End Comet State ---
 
     let activeEnergyBurstsCount = 0;
     const maxParallelBursts = 1;
@@ -270,6 +358,8 @@ const { seed = 'default-seed', ...rest } = Astro.props;
 
     // Keep track of used constellation sections
     let usedSections = new Set();
+    // Keep track of placed label approximate centers to avoid overlap
+    let placedLabelCenters = [];
 
     // Initialize the starfield
     generateStarfield();
@@ -286,6 +376,7 @@ const { seed = 'default-seed', ...rest } = Astro.props;
         constellationStars.clear();
         usedAreas.length = 0;
         usedSections.clear();
+        placedLabelCenters = []; // Reset label positions
 
         // Stop all energy burst animations
         energyIntervals.forEach(interval => clearInterval(interval));
@@ -310,6 +401,43 @@ const { seed = 'default-seed', ...rest } = Astro.props;
       allStarElements = [];
       allConstellationElements = [];
       allEnergyBursts = [];
+
+      // Clear active comet
+      // clearComet(); <-- Replace with clearAllComets
+      clearAllComets();
+    }
+
+    // Function to clear all active comets and their particles
+    function clearAllComets() {
+      // Stop spawning new comets
+      if (cometSpawnTimeout) {
+        clearTimeout(cometSpawnTimeout);
+        cometSpawnTimeout = null;
+      }
+      // Stop the main animation loop
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+
+      // Remove comet head elements from DOM
+      activeComets.forEach(comet => {
+        if (comet.element && comet.element.parentNode) {
+          comet.element.parentNode.removeChild(comet.element);
+        }
+      });
+      activeComets = []; // Clear the active comets array
+
+      // Remove all existing particle elements from DOM
+      // (Their individual timeouts will eventually clear them from the array, but remove from DOM now)
+      cometParticles.forEach(p => {
+        if (p.element && p.element.parentNode) {
+          p.element.parentNode.removeChild(p.element);
+        }
+      });
+      // We don't clear cometParticles array here, particles manage their own removal via timeout
+      // However, on a full reset/resize, it's okay if they vanish instantly.
+      cometParticles = [];
     }
 
     // Main function to generate the starfield
@@ -515,21 +643,32 @@ const { seed = 'default-seed', ...rest } = Astro.props;
               continue;
             }
 
-            const currentStar = starsById[starId]; // 'B'
+            const currentStar = starsById[starId];
             const validConnectionsForStar = [];
 
             // Calculate entropy for all potential connections
             for (const connection of potentialConnections) {
-              const nextStar = connection.star; // 'C'
+              const nextStar = connection.star;
 
-              connection.entropy = calculateEntropy(
-                currentStar, nextStar, constellationPath,
-                [...allLineSegments, ...currentConstellationLines]
-              );
+              // --- Check Border Margin for nextStar ---
+              const nextXPercent = nextStar.x;
+              const nextYPercent = nextStar.y;
+              if (nextXPercent < constellationBorderMargin || nextXPercent > (100 - constellationBorderMargin) ||
+                  nextYPercent < constellationBorderMargin || nextYPercent > (100 - constellationBorderMargin))
+              {
+                  connection.entropy = Infinity; // Disqualify if too close to border
+                  // console.log(`Star ${nextStar.id} disqualified: Too close to border.`);
+              } else {
+                  // --- End Border Check ---
+                  connection.entropy = calculateEntropy(
+                    currentStar, nextStar, constellationPath,
+                    [...allLineSegments, ...currentConstellationLines]
+                  );
 
-              const isExtendingLastSegment = constellationPath.length > 0 && currentStar.id === constellationPath[constellationPath.length - 1].id;
-              if (isExtendingLastSegment) {
-                connection.entropy = Math.max(0, connection.entropy - 5.0);
+                  const isExtendingLastSegment = constellationPath.length > 0 && currentStar.id === constellationPath[constellationPath.length - 1].id;
+                  if (isExtendingLastSegment) {
+                    connection.entropy = Math.max(0, connection.entropy - 5.0); // Slightly prefer extending
+                  }
               }
               validConnectionsForStar.push(connection);
             }
@@ -562,6 +701,22 @@ const { seed = 'default-seed', ...rest } = Astro.props;
                 let wouldIntersect = false;
                 const minStarClearance = 1.5;
 
+                // --- Final Intersection Check ---
+                const p1 = { x: potentialLine.x1, y: potentialLine.y1 };
+                const q1 = { x: potentialLine.x2, y: potentialLine.y2 };
+                for (const existingLine of currentConstellationLines) {
+                    const p2 = { x: existingLine.x1, y: existingLine.y1 };
+                    const q2 = { x: existingLine.x2, y: existingLine.y2 };
+                    if (lineSegmentsIntersect(p1, q1, p2, q2)) {
+                        wouldIntersect = true;
+                        // console.log(`Final check failed: ${lowestEntropyStar.id}->${nextStar.id} would intersect existing line.`);
+                        break;
+                    }
+                }
+                if (wouldIntersect) continue; // Try the next best connection if this one intersects
+                // --- End Final Intersection Check ---
+
+                // Check for near-miss with other stars (existing check)
                 for (const starId of constellationStars) {
                     if (starId === lowestEntropyStar.id || starId === nextStar.id) continue;
                     const otherStar = starsById[starId];
@@ -578,7 +733,20 @@ const { seed = 'default-seed', ...rest } = Astro.props;
                   constellationStars.add(nextStar.id);
                   currentConstellationLines.push(potentialLine);
                   const newConnections = findNearbyStars(grid, nextStar.gridX, nextStar.gridY, maxConnectionDistance)
-                    .filter(star => !constellationStars.has(star.id))
+                    .filter(star => {
+                        if (constellationStars.has(star.id)) return false;
+                        // --- Check Border Margin for newly found connections ---
+                        const starXPercent = star.x;
+                        const starYPercent = star.y;
+                        if (starXPercent < constellationBorderMargin || starXPercent > (100 - constellationBorderMargin) ||
+                            starYPercent < constellationBorderMargin || starYPercent > (100 - constellationBorderMargin))
+                        {
+                            // console.log(`Potential connection ${star.id} disqualified: Too close to border.`);
+                            return false; // Filter out stars too close to border
+                        }
+                        // --- End Border Check ---
+                        return true;
+                    })
                     .map(star => ({ star: star, entropy: 0 }));
                   possibleConnections.set(nextStar.id, newConnections);
                   for (const [id, starConnections] of possibleConnections.entries()) {
@@ -611,18 +779,45 @@ const { seed = 'default-seed', ...rest } = Astro.props;
             allLineSegments.push(connectionLine);
           }
 
-          const bounds = getGroupBounds(constellationPath);
+          // --- Calculate Centroid for Label ---
+          let totalX = 0, totalY = 0;
+          constellationPath.forEach(star => {
+            totalX += star.x;
+            totalY += star.y;
+          });
+          const centroidX = totalX / constellationPath.length;
+          const centroidY = totalY / constellationPath.length;
+          // --- End Centroid Calculation ---
+
+          // --- Check Label Collision & Place Label ---
+          // const minLabelDistance = 10; // Minimum % distance between label centers
+          // let canPlaceLabel = true;
+          // for (const existingLabelCenter of placedLabelCenters) {
+          //     const dx = centroidX - existingLabelCenter.x;
+          //     const dy = centroidY - existingLabelCenter.y;
+          //     const distSq = dx * dx + dy * dy;
+          //     if (distSq < minLabelDistance * minLabelDistance) {
+          //         canPlaceLabel = false;
+          //         // console.log(`Skipping label for constellation centered near (${centroidX.toFixed(1)}, ${centroidY.toFixed(1)}) due to collision.`);
+          //         break;
+          //     }
+          // }
+
+          // if (canPlaceLabel) { // REMOVED Condition - Always place label now
           const constellationName = generateConstellationName();
           const label = document.createElement('div');
           label.className = 'constellation-label';
           label.textContent = constellationName;
-          const labelX = bounds.minX + (bounds.maxX - bounds.minX) / 2;
-          const labelY = bounds.minY - 3;
-          label.style.left = `${Math.max(2, Math.min(98, labelX))}%`;
-          label.style.top = `${Math.max(2, Math.min(98, labelY))}%`;
+          // Position at centroid, ensuring it stays within reasonable bounds
+          label.style.left = `${Math.max(5, Math.min(95, centroidX))}%`; // Keep slightly away from absolute edge
+          label.style.top = `${Math.max(5, Math.min(95, centroidY))}%`;
           allConstellationElements.push(label);
           starField.appendChild(label);
-          usedAreas.push(bounds);
+          placedLabelCenters.push({ x: centroidX, y: centroidY }); // Still track position for potential future use
+          // } // else: label wasn't placed due to potential collision // REMOVED
+          // --- End Label Placement Logic ---
+
+          usedAreas.push(getGroupBounds(constellationPath)); // Still use bounds for area tracking
           fragment.appendChild(constellationGroup);
         }
       }
@@ -664,6 +859,252 @@ const { seed = 'default-seed', ...rest } = Astro.props;
 
       // Start energy burst animation
       startGlobalEnergyAnimation(viewportWidth, viewportHeight);
+
+      // Start the comet spawning loop
+      scheduleCometSpawn(viewportWidth, viewportHeight); // Start the spawning loop
+    }
+
+    // Schedules the next check to see if a new comet can be spawned
+    function scheduleCometSpawn(viewportWidth, viewportHeight) {
+        // Clear previous timeout just in case this is called unexpectedly
+        if (cometSpawnTimeout) clearTimeout(cometSpawnTimeout);
+
+        // Calculate delay for the next spawn check
+        const delay = cometInterval + Math.random() * 1000; // Base interval + some variance
+
+        // console.log(`Scheduling next comet spawn check in ${delay.toFixed(0)}ms. Active: ${activeComets.length}`);
+
+        cometSpawnTimeout = setTimeout(() => {
+            // Only spawn if we are below the limit
+            if (activeComets.length < maxComets) {
+              // console.log("Spawn check passed, creating comet.");
+              createComet(viewportWidth, viewportHeight);
+            } else {
+              // console.log("Spawn check failed, max comets reached.");
+            }
+            // Always schedule the *next* check after this one finishes
+            scheduleCometSpawn(viewportWidth, viewportHeight);
+        }, delay);
+    }
+
+    // Create and animate a comet - Now adds to array and starts main loop if needed
+    function createComet(viewportWidth, viewportHeight) {
+      // console.log("Attempting to create comet...");
+
+      const maxSpawnAttempts = 10;
+      const minSeparationDistance = 20; // Minimum % distance from other comets
+      let foundSeparatedPath = false;
+
+      let startXPercent, startYPercent, endXPercent, endYPercent, angle, distance, normalizedDx, normalizedDy, durationMs, cometSizeClass, particleSizeFactor;
+
+      for (let attempt = 0; attempt < maxSpawnAttempts; attempt++) {
+          // --- Generate Potential Path & Size ---
+          const sizeRoll = Math.random();
+          cometSizeClass = 'comet-medium'; // Default (current size)
+          particleSizeFactor = 1.0;
+          if (sizeRoll < 0.4) { cometSizeClass = 'comet-small'; particleSizeFactor = 0.6; }
+          else if (sizeRoll < 0.7) { cometSizeClass = 'comet-tiny'; particleSizeFactor = 0.3; }
+
+          const startSide = Math.floor(Math.random() * 4);
+          const endSide = (startSide + 1 + Math.floor(Math.random() * 2)) % 4;
+          const margin = 5;
+
+          switch (startSide) {
+            case 0: startXPercent = Math.random() * 100; startYPercent = -margin; break;
+            case 1: startXPercent = 100 + margin; startYPercent = Math.random() * 100; break;
+            case 2: startXPercent = Math.random() * 100; startYPercent = 100 + margin; break;
+            case 3: startXPercent = -margin; startYPercent = Math.random() * 100; break;
+          }
+          switch (endSide) {
+            case 0: endXPercent = Math.random() * 100; endYPercent = -margin; break;
+            case 1: endXPercent = 100 + margin; endYPercent = Math.random() * 100; break;
+            case 2: endXPercent = Math.random() * 100; endYPercent = 100 + margin; break;
+            case 3: endXPercent = -margin; endYPercent = Math.random() * 100; break;
+          }
+
+          // --- Check Separation ---
+          let isTooClose = false;
+          const currentTimeForCheck = performance.now(); // Use consistent time for checking all active comets
+
+          for (const existingComet of activeComets) {
+              // Calculate current position of the existing comet
+              const elapsed = currentTimeForCheck - existingComet.startTime;
+              const progress = Math.min(elapsed / existingComet.duration, 1);
+              const existingX = existingComet.startX + (existingComet.endX - existingComet.startX) * progress;
+              const existingY = existingComet.startY + (existingComet.endY - existingComet.startY) * progress;
+
+              // Calculate distance between new start and existing current position
+              const dx = startXPercent - existingX;
+              const dy = startYPercent - existingY;
+              const distSq = dx * dx + dy * dy; // Use squared distance to avoid sqrt
+
+              if (distSq < minSeparationDistance * minSeparationDistance) {
+                  isTooClose = true;
+                  // console.log(`Spawn attempt ${attempt + 1} failed: Too close to comet ${existingComet.id}`);
+                  break; // No need to check other comets
+              }
+          }
+
+          if (!isTooClose) {
+              // console.log(`Spawn attempt ${attempt + 1} successful.`);
+              foundSeparatedPath = true;
+              // Calculate final path details now that we've accepted it
+              const dxFinal = endXPercent - startXPercent;
+              const dyFinal = endYPercent - startYPercent;
+              distance = Math.sqrt(dxFinal * dxFinal + dyFinal * dyFinal);
+              angle = Math.atan2(dyFinal, dxFinal);
+              normalizedDx = dxFinal / distance;
+              normalizedDy = dyFinal / distance;
+              durationMs = (distance / cometSpeed) * 10;
+              break; // Exit the attempt loop
+          }
+      } // End spawn attempt loop
+
+      // If no suitable path found after attempts, skip spawning this time
+      if (!foundSeparatedPath) {
+          // console.log("Could not find separated path after max attempts, skipping spawn.");
+          return;
+      }
+
+      // --- Create Comet Element and Object (using the found path/size) ---
+      const cometElement = document.createElement('div');
+      cometElement.className = `comet ${cometSizeClass}`;
+      cometElement.style.left = `${startXPercent}%`;
+      cometElement.style.top = `${startYPercent}%`;
+      starField.appendChild(cometElement);
+
+      const newComet = {
+        id: nextCometId++,
+        element: cometElement,
+        sizeFactor: particleSizeFactor,
+        startX: startXPercent,
+        startY: startYPercent,
+        endX: endXPercent,
+        endY: endYPercent,
+        angle: angle, // Use calculated angle
+        dx: normalizedDx, // Use calculated normalized vectors
+        dy: normalizedDy,
+        startTime: performance.now(),
+        duration: durationMs, // Use calculated duration
+        lastParticleSpawnTime: performance.now()
+      };
+
+      // Add to active comets
+      activeComets.push(newComet);
+      console.log(`Comet ${newComet.id} created (${cometSizeClass}). Active: ${activeComets.length}`);
+
+      // Start the main animation loop if it's not already running
+      if (!animationFrameId) {
+        console.log("Starting main animation loop.");
+        animationFrameId = requestAnimationFrame(() => animateComets(viewportWidth, viewportHeight));
+      }
+    }
+
+    // Animation loop for ALL active comets
+    function animateComets(viewportWidth, viewportHeight) {
+      const currentTime = performance.now();
+      const cometsToRemove = [];
+
+      // 1. Update positions and generate particles for active comets
+      activeComets.forEach(comet => {
+        const elapsed = currentTime - comet.startTime;
+        const progress = Math.min(elapsed / comet.duration, 1);
+
+        // Update position
+        const currentX = comet.startX + (comet.endX - comet.startX) * progress;
+        const currentY = comet.startY + (comet.endY - comet.startY) * progress;
+        comet.element.style.left = `${currentX}%`;
+        comet.element.style.top = `${currentY}%`;
+
+        // Tail Particle Generation (per comet)
+        const timeSinceLastParticle = currentTime - comet.lastParticleSpawnTime;
+        const effectiveParticlesPerSecond = particlesPerSecond * (0.5 + comet.sizeFactor * 0.5);
+        const particlesToSpawn = Math.floor(timeSinceLastParticle / (1000 / effectiveParticlesPerSecond));
+
+        if (particlesToSpawn > 0) {
+            for (let i = 0; i < particlesToSpawn; i++) {
+                const spawnProgress = Math.min((elapsed - (particlesToSpawn - 1 - i) * (1000 / effectiveParticlesPerSecond)) / comet.duration, 1);
+                if (spawnProgress < 0) continue; // Avoid spawning particles before comet start
+
+                const particleX = comet.startX + (comet.endX - comet.startX) * spawnProgress;
+                const particleY = comet.startY + (comet.endY - comet.startY) * spawnProgress;
+
+                const maxOffset = 0.1 + spawnProgress * 0.4;
+                const perpendicularAngle = comet.angle + Math.PI / 2;
+                const randomOffsetMagnitude = (Math.random() - 0.5) * maxOffset;
+                const offsetX = Math.cos(perpendicularAngle) * randomOffsetMagnitude;
+                const offsetY = Math.sin(perpendicularAngle) * randomOffsetMagnitude;
+
+                const particle = document.createElement('div');
+                particle.className = 'comet-tail-particle';
+
+                const baseParticleSize = 0.5 + Math.random() * 1.0;
+                const particleSize = Math.max(0.3, baseParticleSize * comet.sizeFactor);
+                particle.style.width = `${particleSize}px`;
+                particle.style.height = `${particleSize}px`;
+
+                particle.style.left = `${particleX + offsetX}%`;
+                particle.style.top = `${particleY + offsetY}%`;
+
+                const initialOpacity = 0.3 + Math.random() * 0.5;
+                particle.style.opacity = initialOpacity.toFixed(2);
+
+                starField.appendChild(particle);
+
+                const particleData = {
+                    element: particle,
+                    creationTime: currentTime,
+                    spawnProgress: spawnProgress
+                };
+                cometParticles.push(particleData);
+
+                const lifetimeMultiplier = 1 - particleData.spawnProgress;
+                const dynamicLifetime = Math.max(200, tailParticleLife * lifetimeMultiplier * (0.8 + comet.sizeFactor * 0.2));
+
+                setTimeout(() => {
+                    if (!particle || !particle.parentNode) return; // Check if particle still exists
+                    particle.style.opacity = '0';
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                        // Remove from array - slightly safer to filter than splice inside timeout?
+                        // const index = cometParticles.indexOf(particleData);
+                        // if (index > -1) {
+                        //     cometParticles.splice(index, 1);
+                        // }
+                    }, 500);
+                }, dynamicLifetime);
+            }
+            comet.lastParticleSpawnTime = currentTime;
+        }
+
+        // Check if comet is finished
+        if (progress >= 1) {
+          // console.log(`Comet ${comet.id} finished flight.`);
+          cometsToRemove.push(comet.id);
+          if (comet.element && comet.element.parentNode) {
+            comet.element.parentNode.removeChild(comet.element);
+          }
+        }
+      }); // End forEach activeComet
+
+      // 2. Clean up finished comets from the active list
+      if (cometsToRemove.length > 0) {
+        activeComets = activeComets.filter(c => !cometsToRemove.includes(c.id));
+        // console.log(`Removed ${cometsToRemove.length} comets. Active: ${activeComets.length}`);
+      }
+
+      // 3. Clean up faded/removed particles from the tracking array
+      cometParticles = cometParticles.filter(p => p.element && p.element.parentNode);
+
+      // 4. Continue animation loop ONLY if there are active comets
+      if (activeComets.length > 0) {
+        animationFrameId = requestAnimationFrame(() => animateComets(viewportWidth, viewportHeight));
+      } else {
+        // console.log("No active comets, stopping animation loop.");
+        animationFrameId = null; // Stop the loop
+      }
     }
 
     // Start a single global animation with one particle at a time using seeded random
@@ -710,6 +1151,21 @@ const { seed = 'default-seed', ...rest } = Astro.props;
       const distance = Math.sqrt(dx*dx + dy*dy);
       let entropy = distance;
 
+      // --- Intersection Penalty ---
+      const intersectionPenalty = 1000; // High penalty for crossing lines
+      const p1 = { x: fromStar.x, y: fromStar.y };
+      const q1 = { x: toStar.x, y: toStar.y };
+      for (const existingLine of existingLines) {
+          const p2 = { x: existingLine.x1, y: existingLine.y1 };
+          const q2 = { x: existingLine.x2, y: existingLine.y2 };
+          if (lineSegmentsIntersect(p1, q1, p2, q2)) {
+              entropy += intersectionPenalty;
+              // console.log(`Intersection penalty added for ${fromStar.id}->${toStar.id} crossing line.`);
+              break; // One intersection is enough to penalize heavily
+          }
+      }
+      // --- End Intersection Penalty ---
+
       const minPreferredDistance = 3.5;
       const shortDistancePenaltyFactor = 10;
       if (distance < minPreferredDistance) {
@@ -752,6 +1208,59 @@ const { seed = 'default-seed', ...rest } = Astro.props;
       const projY = y1 + t * (y2 - y1);
       return Math.sqrt((px - projX) * (px - projX) + (py - projY) * (py - projY));
     }
+
+    // --- Geometry Helpers for Line Intersection ---
+    // Helper to find orientation of ordered triplet (p, q, r).
+    // Returns 0 --> p, q and r are collinear
+    // Returns 1 --> Clockwise
+    // Returns 2 --> Counterclockwise
+    function orientation(p, q, r) {
+        const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+        if (Math.abs(val) < 0.00001) return 0; // Collinear (using epsilon)
+        return (val > 0) ? 1 : 2; // Clockwise or Counterclockwise
+    }
+
+    // Given three collinear points p, q, r, the function checks if
+    // point q lies on line segment 'pr'
+    function onSegment(p, q, r) {
+        return (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
+                q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y));
+    }
+
+    // Main function to check if line segment 'p1q1' and 'p2q2' intersect.
+    function lineSegmentsIntersect(p1, q1, p2, q2) {
+        // Exclude checks where segments share an endpoint immediately
+        if ((p1.x === p2.x && p1.y === p2.y) || (p1.x === q2.x && p1.y === q2.y) ||
+            (q1.x === p2.x && q1.y === p2.y) || (q1.x === q2.x && q1.y === q2.y)) {
+            return false;
+        }
+
+        // Find the four orientations needed for general and special cases
+        const o1 = orientation(p1, q1, p2);
+        const o2 = orientation(p1, q1, q2);
+        const o3 = orientation(p2, q2, p1);
+        const o4 = orientation(p2, q2, q1);
+
+        // General case
+        if (o1 !== 0 && o2 !== 0 && o3 !== 0 && o4 !== 0) { // Ensure none are collinear first for general case
+             if (o1 !== o2 && o3 !== o4) {
+                return true;
+             }
+        }
+
+        // Special Cases for collinearity
+        // p1, q1 and p2 are collinear and p2 lies on segment p1q1
+        if (o1 === 0 && onSegment(p1, p2, q1)) return true;
+        // p1, q1 and q2 are collinear and q2 lies on segment p1q1
+        if (o2 === 0 && onSegment(p1, q2, q1)) return true;
+        // p2, q2 and p1 are collinear and p1 lies on segment p2q2
+        if (o3 === 0 && onSegment(p2, p1, q2)) return true;
+        // p2, q2 and q1 are collinear and q1 lies on segment p2q2
+        if (o4 === 0 && onSegment(p2, q1, q2)) return true;
+
+        return false; // Doesn't intersect
+    }
+    // --- End Geometry Helpers ---
 
     // findNearbyStars remains the same (no randomness)
     function findNearbyStars(grid, centerX, centerY, maxDistance) {
@@ -800,12 +1309,25 @@ const { seed = 'default-seed', ...rest } = Astro.props;
         const y = minY + Math.floor(random() * (maxY - minY));
         const x = minX + Math.floor(random() * (maxX - minX));
         if (y < 0 || y >= gridRows || x < 0 || x >= gridCols) continue; // Bounds check
+
+        const cellXPercent = (x / gridCols) * 100;
+        const cellYPercent = (y / gridRows) * 100;
+
+        // --- Check Border Margin ---
+        if (cellXPercent < constellationBorderMargin || cellXPercent > (100 - constellationBorderMargin) ||
+            cellYPercent < constellationBorderMargin || cellYPercent > (100 - constellationBorderMargin))
+        {
+            continue; // Too close to border
+        }
+        // --- End Border Check ---
+
         if (grid[y] && grid[y][x] && !constellationStars.has(grid[y][x].id)) {
           let isValid = true;
-          const cellX = (x / gridCols) * 100;
-          const cellY = (y / gridRows) * 100;
+          // const cellX = (x / gridCols) * 100; // Already calculated
+          // const cellY = (y / gridRows) * 100;
           for (const area of usedAreas) {
-            if (!(cellX + 5 < area.minX || cellX - 5 > area.maxX || cellY + 5 < area.minY || cellY - 5 > area.maxY)) {
+            // Check overlap with existing constellation areas (existing check)
+            if (!(cellXPercent + 5 < area.minX || cellXPercent - 5 > area.maxX || cellYPercent + 5 < area.minY || cellYPercent - 5 > area.maxY)) {
               isValid = false; break;
             }
           }
@@ -817,12 +1339,24 @@ const { seed = 'default-seed', ...rest } = Astro.props;
       for (let attempt = 0; attempt < 100; attempt++) {
         const y = Math.floor(random() * gridRows);
         const x = Math.floor(random() * gridCols);
+
+        const cellXPercent = (x / gridCols) * 100;
+        const cellYPercent = (y / gridRows) * 100;
+
+        // --- Check Border Margin (Fallback) ---
+        if (cellXPercent < constellationBorderMargin || cellXPercent > (100 - constellationBorderMargin) ||
+            cellYPercent < constellationBorderMargin || cellYPercent > (100 - constellationBorderMargin))
+        {
+            continue; // Too close to border
+        }
+        // --- End Border Check ---
+
         if (grid[y] && grid[y][x] && !constellationStars.has(grid[y][x].id)) {
           let isValid = true;
-          const cellX = (x / gridCols) * 100;
-          const cellY = (y / gridRows) * 100;
+          // const cellX = (x / gridCols) * 100; // Already calculated
+          // const cellY = (y / gridRows) * 100;
           for (const area of usedAreas) {
-             if (!(cellX + 5 < area.minX || cellX - 5 > area.maxX || cellY + 5 < area.minY || cellY - 5 > area.maxY)) {
+             if (!(cellXPercent + 5 < area.minX || cellXPercent - 5 > area.maxX || cellYPercent + 5 < area.minY || cellYPercent - 5 > area.maxY)) {
               isValid = false; break;
             }
           }
@@ -910,7 +1444,22 @@ const { seed = 'default-seed', ...rest } = Astro.props;
       else baseBrightness = 0.5;
 
       const randomBrightness = random() * 0.3;
-      star.style.opacity = (baseBrightness + randomBrightness).toFixed(2);
+      const finalOpacity = (baseBrightness + randomBrightness).toFixed(2);
+
+      // --- Apply Blinking Randomly (now seeded) ---
+      const blinkChance = 0.15; // 15% chance to blink
+      if (random() < blinkChance) { // Use SEEDED random() for blinking decision
+          star.classList.add('blinking-star');
+          // Set the base opacity for the animation via CSS variable
+          star.style.setProperty('--star-base-opacity', finalOpacity);
+          // Set random delay so blinks aren't synchronized
+          const delay = random() * 7; // Use SEEDED random() for delay (up to animation duration 7s)
+          star.style.animationDelay = `-${delay.toFixed(2)}s`;
+      } else {
+          // If not blinking, just set the static opacity
+          star.style.opacity = finalOpacity;
+      }
+      // --- End Apply Blinking ---
 
       if (random() > 0.7) {
         const hue = Math.floor(random() * 60);
