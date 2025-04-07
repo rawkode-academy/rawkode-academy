@@ -1,7 +1,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import {
   downloadUrl,
-  generatePlaylist,
+  generateMasterPlaylist,
   transcodeAll,
 } from "./utilities/mod.ts";
 import { uploadDirectoryToS3, uploadToS3 } from "./utilities/s3.ts";
@@ -44,7 +44,7 @@ await uploadToS3(
 
 const results = await transcodeAll(new URL(`${input}.mkv`, import.meta.url));
 
-const playlist = await generatePlaylist(results);
+const playlist = await generateMasterPlaylist(results);
 Deno.writeTextFile(
   `./transcoded/stream.m3u8`,
   playlist,
