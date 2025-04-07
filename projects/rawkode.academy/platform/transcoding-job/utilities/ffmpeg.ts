@@ -47,7 +47,7 @@ export const getResolution = (localFile: string): Promise<Resolution> => {
   });
 };
 
-export const generatePlaylist = (transcodeResults: TranscodeResult[]) => {
+export const generateMasterPlaylist = (transcodeResults: TranscodeResult[]) => {
   const playlist = [
     `#EXTM3U`,
     `#EXT-X-VERSION:3`,
@@ -61,7 +61,7 @@ export const generatePlaylist = (transcodeResults: TranscodeResult[]) => {
         result.bitrate * 1000
       },RESOLUTION=${result.width}x${result.height}`,
     );
-    playlist.push(result.m3u8Filename);
+    playlist.push(result.m3u8Path);
   }
   return playlist.join("\n");
 };
