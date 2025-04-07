@@ -1,8 +1,12 @@
 ---
 import LoginPage from "@/components/login/login-page";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import rawkodeStudio from "@/assets/rawkode.studio.webp";
+import { Image } from "astro:assets";
 ---
 
 <BaseLayout title="Login">
-	<LoginPage client:only="react" />
+	<LoginPage client:only="react">
+		<Image src={rawkodeStudio} alt="rawkode studio with a camera and penguins" />
+	</LoginPage>
 </BaseLayout>
