@@ -38,7 +38,7 @@
     "@trigger.dev/sdk": "^3.3.7",
     "@vidstack/react": "^1.12.13",
     "arctic": "^3.5.0",
-    "astro": "^5.5.4",
+    "astro": "^5.6.1",
     "astro-d2": "^0.7.0",
     "astro-expressive-code": "^0.40.2",
     "flowbite": "^3.1.2",
