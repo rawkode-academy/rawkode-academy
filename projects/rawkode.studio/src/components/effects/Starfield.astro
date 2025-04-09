@@ -199,11 +199,6 @@ const { seed = 'default-seed', ...rest } = Astro.props;
     to { background-position-x: 24px; }
   }
 
-  /* Animations pause class for pausing all animations when the tab is hidden */
-  .animations-paused * {
-    animation-play-state: paused !important;
-  }
-
   /* Travel Indicator Specific Styles - Moved to TravelIndicator.astro component */
 
   /* Comet styles */
@@ -487,14 +482,19 @@ const { seed = 'default-seed', ...rest } = Astro.props;
         // Store pause start time for energy bursts
         activeEnergyBursts.forEach(burst => {
           burst.pauseStartTime = pauseStartTime;
+
+          // Pause travel indicator animation if exists
+          if (burst.travelSlot) {
+            const travelDot = burst.travelSlot.querySelector('.travel-indicator-dot');
+            if (travelDot) {
+              travelDot.style.animationPlayState = 'paused';
+            }
+          }
         });
 
         // Stop any pending comet spawns by setting the time far in the future
         nextCometSpawnTime = Number.MAX_SAFE_INTEGER;
         nextEnergyBurstTime = Number.MAX_SAFE_INTEGER;
-
-        // Pause all animations in the document by adding a class to the body
-        document.body.classList.add('animations-paused');
       }
     }
 
@@ -539,6 +539,14 @@ const { seed = 'default-seed', ...rest } = Astro.props;
             pauseDuration = resumeTime - burst.pauseStartTime;
             burst.startTime += pauseDuration;
             delete burst.pauseStartTime;
+
+            // Resume travel indicator animation if exists
+            if (burst.travelSlot) {
+              const travelDot = burst.travelSlot.querySelector('.travel-indicator-dot');
+              if (travelDot) {
+                travelDot.style.animationPlayState = 'running';
+              }
+            }
           }
         });
 
@@ -549,9 +557,6 @@ const { seed = 'default-seed', ...rest } = Astro.props;
         // Schedule next events
         nextCometSpawnTime = resumeTime + 1000 + Math.random() * 2000;
         nextEnergyBurstTime = resumeTime + 2000 + Math.floor(random() * 5000);
-
-        // Resume all animations by removing the pause class
-        document.body.classList.remove('animations-paused');
 
         // Reset pause flag AFTER all setup is complete
         isPaused = false;
@@ -589,13 +594,13 @@ const { seed = 'default-seed', ...rest } = Astro.props;
       // Process updates with fixed time step
       while (accumulator >= FRAME_TIME && !isPaused) {
         // Update game state with fixed delta
-        updateGameState();
+        updateGameState(FRAME_TIME);
         accumulator -= FRAME_TIME;
       }
 
       // Render the current state (can be interpolated for smoother visuals)
       if (!isPaused) {
-        renderGameState();
+        renderGameState(accumulator / FRAME_TIME);
       }
 
       // Schedule next frame only if we're not paused
@@ -616,7 +621,7 @@ const { seed = 'default-seed', ...rest } = Astro.props;
       const currentTime = performance.now();
       if (currentTime >= nextCometSpawnTime && !isPaused) {
         if (activeComets.length < maxComets) {
-          createComet();
+          createComet(window.innerWidth, window.innerHeight);
         }
         // Schedule next spawn check with some randomness
         nextCometSpawnTime = currentTime + cometInterval + Math.random() * 1000;
@@ -629,8 +634,8 @@ const { seed = 'default-seed', ...rest } = Astro.props;
       if (currentTime >= nextEnergyBurstTime && activeEnergyBurstsCount < maxParallelBursts && !isPaused) {
         // Try to create a new energy burst
         tryCreateEnergyBurst();
-        // Schedule next energy burst with randomness
-        nextEnergyBurstTime = currentTime + 1000 + Math.floor(random() * 9000);
+        // Schedule next energy burst with longer minimum delay (4-12 seconds)
+        nextEnergyBurstTime = currentTime + 4000 + Math.floor(random() * 8000);
       }
 
       // 5. Update time-based effects that would have used timeouts
@@ -746,9 +751,9 @@ const { seed = 'default-seed', ...rest } = Astro.props;
           const cometIndex = activeComets.findIndex(c => c.id === id);
           if (cometIndex >= 0) {
             const comet = activeComets[cometIndex];
-            if (comet.element && comet.element.parentNode) {
-              comet.element.parentNode.removeChild(comet.element);
-            }
+        if (comet.element && comet.element.parentNode) {
+          comet.element.parentNode.removeChild(comet.element);
+        }
             activeComets.splice(cometIndex, 1);
           }
         }
@@ -862,6 +867,13 @@ const { seed = 'default-seed', ...rest } = Astro.props;
               // When this effect is processed, decrease the active burst count
               activeEnergyBurstsCount--;
 
+              // Add a minimum cooldown before another burst can start
+              const currentNextBurstTime = nextEnergyBurstTime;
+              const minimumNextTime = currentTime + 3000; // At least 3 seconds after a burst ends
+              if (currentNextBurstTime < minimumNextTime) {
+                nextEnergyBurstTime = minimumNextTime;
+              }
+
               // Update travel indicator UI
               if (burst.travelSlot) {
                 burst.travelSlot.classList.remove('active');
@@ -905,6 +917,9 @@ const { seed = 'default-seed', ...rest } = Astro.props;
 
     // Try to create an energy burst between two random stars
     function tryCreateEnergyBurst() {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
       if (allStars.length >= 10 && activeEnergyBurstsCount < maxParallelBursts) {
         const safeMargin = 8;
         const visibleStars = allStars.filter(star =>
@@ -923,7 +938,7 @@ const { seed = 'default-seed', ...rest } = Astro.props;
           if (potentialEndStars.length > 0) {
             const endIndex = Math.floor(random() * potentialEndStars.length);
             const endStar = potentialEndStars[endIndex];
-            createEnergyBurst(startStar, endStar);
+            createEnergyBurst(startStar, endStar, viewportWidth, viewportHeight);
             return true;
           }
         }
@@ -1789,69 +1804,50 @@ const { seed = 'default-seed', ...rest } = Astro.props;
     }
 
     // Create energy burst - Modified for the new game loop
-    function createEnergyBurst(star1, star2) {
+    function createEnergyBurst(star1, star2, viewportWidth, viewportHeight) {
       activeEnergyBurstsCount++;
       const travelIndicator = document.getElementById('travel-indicator');
       const availableSlot = travelIndicator?.querySelector('.travel-slot:not(.active)');
       let currentSlot = null;
       const startX = star1.x, startY = star1.y, endX = star2.x, endY = star2.y;
-
-      // Calculate angle and distance in percent
-      const dx = endX - startX;
-      const dy = endY - startY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      const star1XPx = (startX / 100) * viewportWidth, star1YPx = (startY / 100) * viewportHeight;
+      const star2XPx = (endX / 100) * viewportWidth, star2YPx = (endY / 100) * viewportHeight;
+      const dxPx = star2XPx - star1XPx, dyPx = star2YPx - star1YPx;
+      const distancePx = Math.sqrt(dxPx * dxPx + dyPx * dyPx);
+      const angle = Math.atan2(dyPx, dxPx) * 180 / Math.PI;
+      const distancePercent = (distancePx / viewportWidth) * 100;
 
       const pathLine = document.createElement('div');
       pathLine.className = 'path-line';
-      pathLine.style.position = 'absolute';
-      pathLine.style.left = `${startX}%`;
-      pathLine.style.top = `${startY}%`;
-      pathLine.style.width = `${distance}%`;
-      pathLine.style.transformOrigin = '0 0';
-      pathLine.style.transform = `rotate(${angle}deg)`;
+      pathLine.style.position = 'absolute'; pathLine.style.left = `${startX}%`; pathLine.style.top = `${startY}%`;
+      pathLine.style.width = `${distancePercent}%`; pathLine.style.transformOrigin = '0 0'; pathLine.style.transform = `rotate(${angle}deg)`;
       pathLine.style.animationDirection = 'normal';
-      starField.appendChild(pathLine);
-      allEnergyBursts.push(pathLine);
+      starField.appendChild(pathLine); allEnergyBursts.push(pathLine);
 
       const energyDot = document.createElement('div');
-      energyDot.className = 'energy-dot';
-      starField.appendChild(energyDot);
-      allEnergyBursts.push(energyDot);
+      energyDot.className = 'energy-dot'; starField.appendChild(energyDot); allEnergyBursts.push(energyDot);
 
       const sourceLabel = document.createElement('div');
       sourceLabel.style.cssText = `position: absolute; left: ${startX}%; top: ${startY}%; color: rgba(120, 210, 255, 0.85); font-size: 11px; font-family: monospace; text-shadow: 0 0 4px rgba(0, 100, 200, 0.9); transform: translate(-50%, -50%) translate(0, -15px); z-index: 12; pointer-events: none;`;
-      sourceLabel.textContent = star1.name;
-      starField.appendChild(sourceLabel);
-      allEnergyBursts.push(sourceLabel);
+      sourceLabel.textContent = star1.name; starField.appendChild(sourceLabel); allEnergyBursts.push(sourceLabel);
 
       const destLabel = document.createElement('div');
       destLabel.style.cssText = `position: absolute; left: ${endX}%; top: ${endY}%; color: rgba(120, 210, 255, 0.85); font-size: 11px; font-family: monospace; text-shadow: 0 0 4px rgba(0, 100, 200, 0.9); transform: translate(-50%, -50%) translate(0, -15px); z-index: 12; pointer-events: none;`;
-      destLabel.textContent = star2.name;
-      starField.appendChild(destLabel);
-      allEnergyBursts.push(destLabel);
+      destLabel.textContent = star2.name; starField.appendChild(destLabel); allEnergyBursts.push(destLabel);
 
-      energyDot.style.left = `${startX}%`;
-      energyDot.style.top = `${startY}%`;
-      const baseSpeed = 6;
-      const duration = Math.max(1000, (distance / baseSpeed) * 1000);
+      energyDot.style.left = `${startX}%`; energyDot.style.top = `${startY}%`;
+      const baseSpeed = 6; const duration = Math.max(1000, (distancePercent / baseSpeed) * 1000);
 
       if (travelIndicator && availableSlot) {
-        currentSlot = availableSlot;
-        currentSlot.classList.add('active');
-        currentSlot.style.display = 'block';
-        travelIndicator.classList.add('visible');
-        travelIndicator.dataset.visible = 'true';
+        currentSlot = availableSlot; currentSlot.classList.add('active'); currentSlot.style.display = 'block';
+        travelIndicator.classList.add('visible'); travelIndicator.dataset.visible = 'true';
         const travelStartName = currentSlot.querySelector('.travel-start-name');
         const travelEndName = currentSlot.querySelector('.travel-end-name');
         const travelDot = currentSlot.querySelector('.travel-indicator-dot');
         if (travelStartName && travelEndName && travelDot) {
-           travelStartName.textContent = star1.name;
-           travelEndName.textContent = star2.name;
+           travelStartName.textContent = star1.name; travelEndName.textContent = star2.name;
            travelDot.style.animationDuration = `${duration}ms`;
-           travelDot.classList.remove('travel-indicator-dot');
-           void travelDot.offsetWidth;
-           travelDot.classList.add('travel-indicator-dot');
+           travelDot.classList.remove('travel-indicator-dot'); void travelDot.offsetWidth; travelDot.classList.add('travel-indicator-dot');
         }
       }
 
