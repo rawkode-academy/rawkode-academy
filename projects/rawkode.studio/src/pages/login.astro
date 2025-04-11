@@ -1,17 +1,18 @@
 ---
 import LoginPage from "@/components/login/login-page";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import rawkodeStudio from "@/assets/rawkode.studio.webp";
-import { Picture } from "astro:assets";
+import backgroundVideo from "@/assets/background.mp4";
 ---
 
 <BaseLayout title="Login">
 	<LoginPage client:only="react">
-		<Picture
-			src={rawkodeStudio}
-			format="webp"
-			alt="rawkode studio with a camera and penguins"
+		<video
+			src={backgroundVideo}
+			autoplay
+			loop
+			muted
+			playsinline
 			class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-		/>
+		></video>
 	</LoginPage>
 </BaseLayout>
