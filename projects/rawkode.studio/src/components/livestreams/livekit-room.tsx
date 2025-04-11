@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
+import { Button } from "@/components/shadcn/button";
+import { Separator } from "@/components/shadcn/separator";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { cn } from "@/lib/utils";
 import {
-  FocusLayout,
-  GridLayout,
   LayoutContextProvider,
   LiveKitRoom,
   ParticipantTile,
@@ -12,13 +14,8 @@ import {
   useRoomContext,
   useTracks,
 } from "@livekit/components-react";
-import { Track } from "livekit-client";
 import "@livekit/components-styles";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/shadcn/button";
-import { Separator } from "@/components/shadcn/separator";
-import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
-import { Skeleton } from "@/components/shadcn/skeleton";
+import { Track } from "livekit-client";
 import {
   LogOut,
   MessageSquare,
@@ -32,6 +29,7 @@ import {
   Wifi,
   WifiOff,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 // Define props interface
 export interface LivekitRoomProps {
@@ -400,15 +398,6 @@ function VideoGrid() {
     );
   }
 
-  // If someone is screen sharing, use FocusLayout to focus on that
-  if (screenShareTrack) {
-    return (
-      <div className="w-full h-full bg-black">
-        <FocusLayout trackRef={screenShareTrack} />
-      </div>
-    );
-  }
-
   // Filter to only get tracks from participants who have their camera enabled
   const cameraTrackReferences = tracks.filter((track) => {
     // Only include Camera tracks
@@ -418,15 +407,77 @@ function VideoGrid() {
     return track.participant.isCameraEnabled === true;
   });
 
+  // If someone is screen sharing, use a custom layout with screen share and floating participant tiles
+  if (screenShareTrack) {
+    return (
+      <div className="w-full h-full bg-black relative">
+        {/* Main screen share takes full screen */}
+        <div className="absolute inset-0 w-full h-full">
+          <ParticipantTile
+            trackRef={screenShareTrack}
+            disableSpeakingIndicator={true}
+            className="w-full h-full"
+          />
+        </div>
+
+        {/* Floating participant videos in a vertical column on the right */}
+        <div className="absolute top-4 right-4 w-48 max-h-[90%] overflow-y-auto space-y-2 z-10">
+          {cameraTrackReferences.map((track) => (
+            <div
+              key={track.publication?.trackSid}
+              className="w-full aspect-video rounded-lg overflow-hidden shadow-lg border border-white/10"
+            >
+              <ParticipantTile
+                trackRef={track}
+                disableSpeakingIndicator={false}
+                className="w-full h-full"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Default 3-column grid when no screen sharing
   return (
-    <div className="w-full h-full bg-black">
-      <GridLayout
-        tracks={cameraTrackReferences}
-        className="w-full h-full"
-        style={{ aspectRatio: 16 / 9 }}
+    <div className="w-full h-full bg-black p-4">
+      <div
+        className={`grid gap-4 w-full h-full ${
+          cameraTrackReferences.length === 1
+            ? "grid-cols-1"
+            : cameraTrackReferences.length === 2
+            ? "grid-cols-2"
+            : cameraTrackReferences.length === 3
+            ? "grid-cols-3"
+            : cameraTrackReferences.length === 4
+            ? "grid-cols-2 grid-rows-2"
+            : cameraTrackReferences.length <= 6
+            ? "grid-cols-3 grid-rows-2"
+            : cameraTrackReferences.length <= 9
+            ? "grid-cols-3 grid-rows-3"
+            : cameraTrackReferences.length <= 12
+            ? "grid-cols-4 grid-rows-3"
+            : "grid-cols-4 grid-rows-4"
+        }`}
       >
-        <ParticipantTile disableSpeakingIndicator={false} />
-      </GridLayout>
+        {cameraTrackReferences.map((track) => (
+          <div
+            key={track.publication?.trackSid}
+            className={`rounded-lg overflow-hidden shadow-md ${
+              cameraTrackReferences.length === 1
+                ? "w-full h-full"
+                : "aspect-video"
+            }`}
+          >
+            <ParticipantTile
+              trackRef={track}
+              disableSpeakingIndicator={false}
+              className="w-full h-full"
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
