@@ -41,39 +41,11 @@ interface Props extends OpenGraphProps {}
 		}
 	</style>
 
-	<script>
-		(function () {
-			var webSdkScript = document.createElement("script");
-			webSdkScript.src =
-				"https://unpkg.com/@grafana/faro-web-sdk@^1.0.0/dist/bundle/faro-web-sdk.iife.js";
-
-			webSdkScript.onload = () => {
-				(window as any).GrafanaFaroWebSdk.initializeFaro({
-					url: "https://faro-collector-prod-gb-south-0.grafana.net/collect/614f7fa11ef6e2c96da968373bc2df04",
-					app: {
-						name: "rawkode.academy",
-					},
-				});
-
-				var webTracingScript = document.createElement("script");
-				webTracingScript.src =
-					"https://unpkg.com/@grafana/faro-web-tracing@^1.0.0/dist/bundle/faro-web-tracing.iife.js";
-
-				webTracingScript.onload = () => {
-					(window as any).GrafanaFaroWebSdk.faro.instrumentations.add(
-						new (window as any).GrafanaFaroWebTracing.TracingInstrumentation()
-					);
-				};
-				document.head.appendChild(webTracingScript);
-			};
-
-			document.head.appendChild(webSdkScript);
-		})();
-	</script>
-
 	<script
+		defer
 		is:inline
 		type="text/partytown"
-		src="https://cloud.umami.is/script.js"
-		data-website-id="91803d91-ac5a-4223-9603-f2c2dc3a2e66"></script>
+		src="https://api.pirsch.io/pa.js"
+		id="pianjs"
+		data-code="igGf5I0rdoVFo6JawhQe2mEcOkhvCfDh"></script>
 </html>
