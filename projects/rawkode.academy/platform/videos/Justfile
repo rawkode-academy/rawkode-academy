@@ -1,8 +1,6 @@
 deploy-read-model:
 	#!/usr/bin/env bash
-	cd read-model
-	bunx wrangler deploy --var SERVICE_NAME=${SERVICE_NAME} --var LIBSQL_BASE_URL=${LIBSQL_BASE_URL}
-	cd ..
+	bunx wrangler -c ./read-model/wrangler.jsonc deploy --var SERVICE_NAME:${SERVICE_NAME} --var LIBSQL_BASE_URL:${LIBSQL_BASE_URL}
 
 	bun run read-model/publish.ts
 	bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql

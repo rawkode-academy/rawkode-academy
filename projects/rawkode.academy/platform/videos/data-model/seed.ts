@@ -1,5 +1,7 @@
-import { db } from "./client";
+import { getDatabase } from "./client";
 import { videosTable } from "./schema";
+
+const db = getDatabase();
 
 const seed = async () => {
 	await db
