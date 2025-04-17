@@ -1,6 +1,6 @@
-import { videosTable } from '../schema.ts';
-import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { videosTable } from "../schema.ts";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const CreateVideo = createInsertSchema(videosTable, {
 	title: z.string().nonempty(),

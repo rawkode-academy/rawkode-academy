@@ -1,4 +1,4 @@
-name = "casting-credits-read-model"
+name = "videos-read-model"
 main = "./main.ts"
 
 workers_dev = false
@@ -11,11 +11,10 @@ secrets_store_secrets = [
   { binding = "LIBSQL_TOKEN", store_id= "492e5e40b9d64ebeac7e7a77db91ff6e", secret_name = "LIBSQL_TOKEN_PLATFORM" }
 ]
 
-
-tail_consumers = [{service = "casting-credits-read-model-tail-sentry"}, {service = "casting-credits-read-model-tail-baselime"}]
+# tail_consumers = [{service = "videos-read-model-tail-sentry"}, {service = "casting-credits-read-model-tail-baselime"}]
 
 routes = [
-  { pattern = "casting-credits.api.rawkode.academy", custom_domain = true }
+  { pattern = "videos.api.rawkode.academy", custom_domain = true }
 ]
 
 [observability.logs]

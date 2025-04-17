@@ -3,20 +3,20 @@ import {
 	type GetObjectCommandInput,
 	ListObjectsV2Command,
 	S3Client,
-} from '@aws-sdk/client-s3';
-import { existsSync } from '@std/fs';
-import { db } from './data-model/client.ts';
-import { videosTable } from './data-model/schema.ts';
-import { slugifyWithCounter } from '@sindresorhus/slugify';
+} from "@aws-sdk/client-s3";
+import { slugifyWithCounter } from "@sindresorhus/slugify";
+import { existsSync, promises as fsPromises } from "node:fs";
+import { db } from "./data-model/client.ts";
+import { videosTable } from "./data-model/schema.ts";
 
 const cloudflareR2 = {
-	accountId: '0aeb879de8e3cdde5fb3d413025222ce',
-	accessKey: Deno.env.get('CLOUDFLARE_R2_ACCESS_KEY')!,
-	secretKey: Deno.env.get('CLOUDFLARE_R2_SECRET_KEY')!,
+	accountId: "0aeb879de8e3cdde5fb3d413025222ce",
+	accessKey: Bun.env.CLOUDFLARE_R2_ACCESS_KEY || "",
+	secretKey: Bun.env.CLOUDFLARE_R2_SECRET_KEY || "",
 };
 
 const s3 = new S3Client({
-	region: 'auto',
+	region: "auto",
 	endpoint: `https://${cloudflareR2.accountId}.eu.r2.cloudflarestorage.com`,
 	credentials: {
 		accessKeyId: cloudflareR2.accessKey,
@@ -33,7 +33,7 @@ const downloadFromR2 = async (remote: string, local: string) => {
 	console.log(`R2 Downloading ${remote} to ${local}...`);
 
 	const command: GetObjectCommandInput = {
-		Bucket: 'rawkode-academy-videos',
+		Bucket: "rawkode-academy-videos",
 		Key: remote,
 	};
 
@@ -41,13 +41,11 @@ const downloadFromR2 = async (remote: string, local: string) => {
 		const s3Command = new GetObjectCommand(command);
 		const response = await s3.send(s3Command);
 		if (!response.Body) {
-			throw new Error('No body in response.');
+			throw new Error("No body in response.");
 		}
 
-		Deno.writeFileSync(
-			local,
-			await response.Body.transformToByteArray(),
-		);
+		const buffer = Buffer.from(await response.Body.transformToByteArray());
+		await Bun.write(local, buffer);
 
 		console.log(`File ${remote} downloaded to ${local}.`);
 	} catch (error) {
@@ -55,10 +53,10 @@ const downloadFromR2 = async (remote: string, local: string) => {
 	}
 };
 
-const listDirectories = async (bucketName: string, prefix: string = '') => {
+const listDirectories = async (bucketName: string, prefix = "") => {
 	const command = new ListObjectsV2Command({
 		Bucket: bucketName,
-		Delimiter: '/',
+		Delimiter: "/",
 		Prefix: prefix,
 	});
 
@@ -69,7 +67,7 @@ const listDirectories = async (bucketName: string, prefix: string = '') => {
 			files: response.Contents?.map((c) => c.Key) || [],
 		};
 	} catch (error) {
-		console.error('Error listing S3 directories:', error);
+		console.error("Error listing S3 directories:", error);
 		throw error;
 	}
 };
@@ -83,22 +81,23 @@ interface Metadata {
 	duration: number;
 	view_count: number;
 	like_count: number;
-	live_status: 'was_live' | 'none';
-	chapters: [{
-		start_time: number;
-		title: string;
-		end_time: number;
-	}];
-	availability: 'public' | 'private';
+	live_status: "was_live" | "none";
+	chapters: [
+		{
+			start_time: number;
+			title: string;
+			end_time: number;
+		},
+	];
+	availability: "public" | "private";
 }
 
-const getYouTubeMetadata = (metadataJson: string): Metadata => {
-	return JSON.parse(
-		Deno.readTextFileSync(metadataJson),
-	) satisfies Metadata;
+const getYouTubeMetadata = async (metadataJson: string): Promise<Metadata> => {
+	const fileContent = await Bun.file(metadataJson).text();
+	return JSON.parse(fileContent) as Metadata;
 };
 
-const allDirectories = await listDirectories('rawkode-academy-videos');
+const allDirectories = await listDirectories("rawkode-academy-videos");
 
 const slugify = slugifyWithCounter();
 
@@ -108,7 +107,7 @@ for (const directory of allDirectories.directories) {
 		continue;
 	}
 
-	if (directory === 'rawkode-academy-videos/') {
+	if (directory === "rawkode-academy-videos/") {
 		console.log(`Skipping root directory: ${directory}`);
 		continue;
 	}
@@ -118,7 +117,7 @@ for (const directory of allDirectories.directories) {
 	const dirName = directory.substring(0, directory.length - 1);
 
 	if (!existsSync(`transcode/${dirName}`)) {
-		Deno.mkdirSync(`transcode/${dirName}`, { recursive: true });
+		await fsPromises.mkdir(`transcode/${dirName}`, { recursive: true });
 	}
 
 	// Download Metadata
@@ -127,14 +126,18 @@ for (const directory of allDirectories.directories) {
 		`./transcode/${dirName}/metadata.json`,
 	);
 
-	const metadata = getYouTubeMetadata(`./transcode/${dirName}/metadata.json`);
+	const metadata = await getYouTubeMetadata(
+		`./transcode/${dirName}/metadata.json`,
+	);
 
-	if (metadata.availability === 'private') {
+	if (metadata.availability === "private") {
 		continue;
 	}
 
 	// Remove anything after "|" in title
-	const cleanTitle = metadata.title.split('|')[0].trim();
+	const cleanTitle: string = metadata.title
+		? metadata.title.split("|")[0] || metadata.title
+		: metadata.title;
 
 	console.log(`Upserting ${dirName} - ${cleanTitle}`);
 
@@ -143,7 +146,7 @@ for (const directory of allDirectories.directories) {
 		.values({
 			id: dirName,
 			title: cleanTitle,
-			subtitle: '',
+			subtitle: "",
 			slug: slugify(cleanTitle, {
 				decamelize: false,
 			}),
@@ -155,7 +158,7 @@ for (const directory of allDirectories.directories) {
 			target: videosTable.id,
 			set: {
 				title: cleanTitle,
-				subtitle: '',
+				subtitle: "",
 				slug: slugify(cleanTitle, {
 					decamelize: false,
 				}),

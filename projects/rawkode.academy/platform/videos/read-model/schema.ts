@@ -1,12 +1,12 @@
-import schemaBuilder from '@pothos/core';
-import directivesPlugin from '@pothos/plugin-directives';
-import drizzlePlugin from '@pothos/plugin-drizzle';
-import federationPlugin from '@pothos/plugin-federation';
-import { and, desc, eq, like, lte, or, sql } from 'drizzle-orm';
-import { type GraphQLSchema } from 'graphql';
-import { DateResolver } from 'graphql-scalars';
-import { db } from '../data-model/client.ts';
-import * as dataSchema from '../data-model/schema.ts';
+import schemaBuilder from "@pothos/core";
+import directivesPlugin from "@pothos/plugin-directives";
+import drizzlePlugin from "@pothos/plugin-drizzle";
+import federationPlugin from "@pothos/plugin-federation";
+import { and, desc, eq, like, lte, or, sql } from "drizzle-orm";
+import type { GraphQLSchema } from "graphql";
+import { DateResolver } from "graphql-scalars";
+import { db } from "../data-model/client.ts";
+import * as dataSchema from "../data-model/schema.ts";
 
 export interface PothosTypes {
 	DrizzleSchema: typeof dataSchema;
@@ -25,21 +25,21 @@ const builder = new schemaBuilder<PothosTypes>({
 	},
 });
 
-builder.addScalarType('Date', DateResolver);
+builder.addScalarType("Date", DateResolver);
 
-const videoRef = builder.drizzleObject('videosTable', {
-	name: 'Video',
+const videoRef = builder.drizzleObject("videosTable", {
+	name: "Video",
 	fields: (t) => ({
-		id: t.exposeString('id'),
-		title: t.exposeString('title'),
-		subtitle: t.exposeString('subtitle'),
-		slug: t.exposeString('slug'),
-		description: t.exposeString('description'),
+		id: t.exposeString("id"),
+		title: t.exposeString("title"),
+		subtitle: t.exposeString("subtitle"),
+		slug: t.exposeString("slug"),
+		description: t.exposeString("description"),
 		publishedAt: t.field({
-			type: 'Date',
+			type: "Date",
 			resolve: (video) => video.publishedAt,
 		}),
-		duration: t.exposeInt('duration'),
+		duration: t.exposeInt("duration"),
 		streamUrl: t.string({
 			resolve: (video) =>
 				`https://videos.rawkode.academy/${video.id}/stream.m3u8`,
@@ -52,11 +52,13 @@ const videoRef = builder.drizzleObject('videosTable', {
 });
 
 builder.asEntity(videoRef, {
-	key: builder.selection<{ id: string }>('id'),
+	key: builder.selection<{ id: string }>("id"),
 	resolveReference: (video) =>
-		db.query.videosTable.findFirst({
-			where: eq(dataSchema.videosTable.id, video.id),
-		}).execute(),
+		db.query.videosTable
+			.findFirst({
+				where: eq(dataSchema.videosTable.id, video.id),
+			})
+			.execute(),
 });
 
 builder.queryType({
@@ -65,45 +67,50 @@ builder.queryType({
 			type: videoRef,
 			args: {
 				id: t.arg({
-					type: 'String',
+					type: "String",
 					required: true,
 				}),
 			},
 			resolve: (_root, args, _ctx) =>
-				db.query.videosTable.findFirst({
-					where: eq(dataSchema.videosTable.id, args.id),
-				}).execute(),
+				db.query.videosTable
+					.findFirst({
+						where: eq(dataSchema.videosTable.id, args.id),
+					})
+					.execute(),
 		}),
 		getLatestVideos: t.field({
 			type: [videoRef],
 			args: {
 				limit: t.arg({
-					type: 'Int',
+					type: "Int",
 					required: false,
 				}),
 				offset: t.arg({
-					type: 'Int',
+					type: "Int",
 					required: false,
 				}),
 			},
 			resolve: (_root, args, _ctx) =>
-				db.query.videosTable.findMany({
-					limit: args.limit ?? 15,
-					offset: args.offset ?? 0,
-					where: lte(dataSchema.videosTable.publishedAt, new Date()),
-					orderBy: (video, { desc }) => desc(video.publishedAt),
-				}).execute(),
+				db.query.videosTable
+					.findMany({
+						limit: args.limit ?? 15,
+						offset: args.offset ?? 0,
+						where: lte(dataSchema.videosTable.publishedAt, new Date()),
+						orderBy: (video, { desc }) => desc(video.publishedAt),
+					})
+					.execute(),
 		}),
 		getRandomVideos: t.field({
 			type: [videoRef],
 			args: {
 				limit: t.arg({
-					type: 'Int',
+					type: "Int",
 					required: false,
 				}),
 			},
 			resolve: (_root, args, _ctx) =>
-				db.select()
+				db
+					.select()
 					.from(dataSchema.videosTable)
 					.orderBy(desc(sql`RANDOM()`))
 					.limit(args.limit ?? 15),
@@ -112,32 +119,34 @@ builder.queryType({
 			type: [videoRef],
 			args: {
 				term: t.arg({
-					type: 'String',
+					type: "String",
 					required: true,
 				}),
 				limit: t.arg({
-					type: 'Int',
+					type: "Int",
 					required: false,
 				}),
 			},
 			resolve: (_root, args, _ctx) =>
-				db.query.videosTable.findMany({
-					limit: args.limit ?? 15,
-					where: and(
-						lte(dataSchema.videosTable.publishedAt, new Date()),
-						or(
-							like(dataSchema.videosTable.title, args.term),
-							like(dataSchema.videosTable.description, args.term),
+				db.query.videosTable
+					.findMany({
+						limit: args.limit ?? 15,
+						where: and(
+							lte(dataSchema.videosTable.publishedAt, new Date()),
+							or(
+								like(dataSchema.videosTable.title, args.term),
+								like(dataSchema.videosTable.description, args.term),
+							),
 						),
-					),
-					orderBy: (video, { desc }) => desc(video.publishedAt),
-				}).execute(),
+						orderBy: (video, { desc }) => desc(video.publishedAt),
+					})
+					.execute(),
 		}),
 	}),
 });
 
 export const getSchema = (): GraphQLSchema =>
 	builder.toSubGraphSchema({
-		linkUrl: 'https://specs.apollo.dev/federation/v2.6',
-		federationDirectives: ['@extends', '@external', '@key'],
+		linkUrl: "https://specs.apollo.dev/federation/v2.6",
+		federationDirectives: ["@extends", "@external", "@key"],
 	});
