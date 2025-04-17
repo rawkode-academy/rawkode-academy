@@ -44,21 +44,8 @@ export LIBSQL_TOKEN="op://sa.rawkode.academy/turso/platform-group/api-token"
 ### Read Model
 
 ```sh {"name":"deploy-read-model"}
-epoch=$(date +%s)
+(cd read-model && bunx wrangler deploy --var SERVICE_NAME=${SERVICE_NAME} --var LIBSQL_BASE_URL=${LIBSQL_BASE_URL})
 
-podman image build --target=read-model --tag europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch} .
-podman image push europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch}
-
-gcloud run deploy ${SERVICE_NAME}-read \
-      --image=europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch} \
-      --region=europe-west2 \
-      --use-http2 \
-      --allow-unauthenticated \
-      --cpu="1" --memory="512Mi" \
-      --cpu-boost \
-      --set-env-vars="SERVICE_NAME=${SERVICE_NAME},LIBSQL_BASE_URL=rawkodeacademy.turso.io" \
-      --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest,SENTRY_DSN=${SERVICE_NAME}-read-sentry-dsn:latest"
-
-deno run --allow-all read-model/publish.ts
-bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql --routing-url https://${SERVICE_NAME}-read-458678766461.europe-west2.run.app
+bun run read-model/publish.ts
+bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql --routing-url https://${SERVICE_NAME}.api.rawkode.academy
 ```

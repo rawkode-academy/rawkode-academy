@@ -1,17 +1,17 @@
-import { db } from './client.ts';
-import { castingCreditsTable } from './schema.ts';
+import { db } from "./client";
+import { castingCreditsTable } from "./schema";
 
 const seed = async () => {
 	await db
 		.insert(castingCreditsTable)
 		.values({
-			personId: 'rawkode',
-			role: 'Host',
-			videoId: 'abc123',
+			personId: "rawkode",
+			role: "Host",
+			videoId: "abc123",
 		})
 		.returning()
 		.all();
-	Deno.exit(0);
+	process.exit(0);
 };
 
 await seed();
