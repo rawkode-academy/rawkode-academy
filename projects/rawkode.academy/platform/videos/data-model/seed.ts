@@ -1,14 +1,14 @@
-import { db } from './client.ts';
-import { videosTable } from './schema.ts';
+import { db } from "./client";
+import { videosTable } from "./schema";
 
 const seed = async () => {
 	await db
 		.insert(videosTable)
 		.values({
-			title: 'Window of Opportunity',
-			subtitle: 'The team is stuck in a time loop.',
-			slug: 'window-of-opportunity',
-			description: 'The team is stuck in a time loop.',
+			title: "Window of Opportunity",
+			subtitle: "The team is stuck in a time loop.",
+			slug: "window-of-opportunity",
+			description: "The team is stuck in a time loop.",
 			publishedAt: new Date(),
 			duration: 360,
 		})
@@ -16,7 +16,7 @@ const seed = async () => {
 		.all();
 
 	db.$client.close();
-	Deno.exit(0);
+	process.exit(0);
 };
 
 await seed();

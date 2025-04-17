@@ -60,9 +60,7 @@
 			"indexes": {
 				"videos_slug_unique": {
 					"name": "videos_slug_unique",
-					"columns": [
-						"slug"
-					],
+					"columns": ["slug"],
 					"isUnique": true
 				}
 			},
