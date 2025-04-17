@@ -1,18 +1,18 @@
 import { migrate } from "drizzle-orm/libsql/migrator";
-import { db } from "./client.ts";
+import { db } from "./client";
 
 const main = async () => {
-  await migrate(db, {
-    migrationsFolder: `${import.meta.dirname}/migrations`,
-  });
+	await migrate(db, {
+		migrationsFolder: `${import.meta.dirname}/migrations`,
+	});
 };
 
 try {
-  await main();
+	await main();
 } catch (err) {
-  console.error("Error performing migration: ", err);
-  Deno.exit(1);
+	console.error("Error performing migration: ", err);
+	process.exit(1);
 }
 
 console.log("Tables migrated!");
-Deno.exit(0);
+process.exit(0);
