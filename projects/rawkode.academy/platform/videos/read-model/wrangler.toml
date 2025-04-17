@@ -1,7 +1,7 @@
 name = "videos-read-model"
 main = "./main.ts"
 
-workers_dev = false
+workers_dev = true
 logpush = false
 
 compatibility_flags = [ "nodejs_compat" ]
@@ -12,10 +12,6 @@ secrets_store_secrets = [
 ]
 
 # tail_consumers = [{service = "videos-read-model-tail-sentry"}, {service = "casting-credits-read-model-tail-baselime"}]
-
-routes = [
-  { pattern = "videos.api.rawkode.academy", custom_domain = true }
-]
 
 [observability.logs]
 enabled = true

@@ -5,4 +5,5 @@ deploy-read-model:
 	cd ..
 
 	bun run read-model/publish.ts
-	bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql --routing-url https://${SERVICE_NAME}.api.rawkode.academy
+	bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql
+	bunx wgc subgraph update ${SERVICE_NAME} --namespace production --routing-url https://${SERVICE_NAME}-read-model.rawkodeacademy.workers.dev
