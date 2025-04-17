@@ -1,0 +1,38 @@
+{
+	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+	"name": "videos-read-model",
+	"main": "./main.ts",
+
+	"compatibility_date": "2025-04-05",
+	"compatibility_flags": [
+		"nodejs_compat",
+	],
+
+	"keep_vars": false,
+	"minify": true,
+
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1
+		}
+	},
+
+	// Not available via nodejs_compat_populate_process_env
+	// "secrets_store_secrets": [
+	// 	{
+	// 		"binding": "LIBSQL_TOKEN",
+	// 		"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+	// 		"secret_name": "LIBSQL_TOKEN_PLATFORM"
+	// 	}
+	// ],
+
+	"placement": {
+		"mode": "smart"
+	},
+
+	"workers_dev": true
+}
