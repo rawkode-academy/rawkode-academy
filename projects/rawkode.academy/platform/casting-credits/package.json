@@ -1,0 +1,33 @@
+{
+	"name": "casting-credits",
+	"type": "module",
+	"private": true,
+	"dependencies": {
+		"@apollo/subgraph": "^2.9.3",
+		"@envelop/sentry": "^12.0.0",
+		"@graphql-tools/utils": "^10.6.4",
+		"@graphql-yoga/plugin-jwt": "^3.4.6",
+		"@libsql/client": "^0.14.0",
+		"@pothos/core": "^4.3.0",
+		"@pothos/plugin-directives": "^4.2.0",
+		"@pothos/plugin-drizzle": "^0.5.1",
+		"@pothos/plugin-federation": "^4.2.0",
+		"@sentry/node": "^9.13.0",
+		"@sentry/tracing": "^7.114.0",
+		"@sindresorhus/slugify": "^2.2.1",
+		"drizzle-graphql": "^0.8.5",
+		"drizzle-kit": "^0.30.0",
+		"drizzle-orm": "^0.36.1",
+		"drizzle-zod": "^0.5.1",
+		"graphql": "^16.10.0",
+		"graphql-yoga": "^5.10.6",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
+}

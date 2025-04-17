@@ -1,17 +1,19 @@
-import { printSchemaWithDirectives } from '@graphql-tools/utils';
-import { lexicographicSortSchema } from 'graphql';
-import { getSchema } from './schema.ts';
+import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { lexicographicSortSchema } from "graphql";
+import { writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { getSchema } from "./schema";
 
 const schemaAsString = printSchemaWithDirectives(
 	lexicographicSortSchema(getSchema()),
 	{
 		// This is needed to print the directives properly,
 		// no idea why.
-		pathToDirectivesInExtensions: [''],
+		pathToDirectivesInExtensions: [""],
 	},
 );
 
-Deno.writeFileSync(
-	`${import.meta.dirname}/schema.gql`,
-	new TextEncoder().encode(schemaAsString),
-);
+const __dirname = dirname(import.meta.path);
+const outputPath = join(__dirname, "schema.gql");
+
+writeFileSync(outputPath, schemaAsString);
