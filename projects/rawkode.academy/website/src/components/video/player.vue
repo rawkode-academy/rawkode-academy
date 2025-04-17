@@ -106,9 +106,9 @@ onMounted(() => {
 	<div class="w-full aspect-video">
 		<media-player ref="player" :autoplay="!!autoPlay" class="w-full h-full">
 			<media-provider>
-				<source :src="`https://videos.rawkode.academy/${videoId}/stream.m3u8`" type="application/x-mpegurl" />
-				<Track :src="`https://videos.rawkode.academy/${videoId}/captions/en.vtt`" kind="subtitles" label="English"
-					lang="en-US" default />
+				<source :src="`https://content.rawkode.academy/videos/${videoId}/stream.m3u8`" type="application/x-mpegurl" />
+				<Track :src="`https://content.rawkode.academy/videos/${videoId}/captions/en.vtt`" kind="subtitles"
+					label="English" lang="en-US" default />
 				<track kind="chapters" :src="`/api/chapters/${videoId}`" label="Chapters" default />
 				<media-poster class="vds-poster" :src="thumbnailUrl" :alt="`Thumbnail for ${videoId}`"></media-poster>
 			</media-provider>
