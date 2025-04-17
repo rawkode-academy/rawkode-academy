@@ -17,17 +17,14 @@ turso dev --port 2000
 ### Read Model
 
 ```sh {"name":"read-model"}
-# Restricting ENV not working right now:
-# https://github.com/denoland/deno/pull/26758
-# when we can, add --allow-env=$DENO_ALLOWED_ENV
-deno run --allow-env --allow-write=./read-model/schema.gql --allow-net read-model/main.ts
+bun run read-model/main.ts
 ```
 
 ### Checks, Formatting, & Linting
 
 ```sh {"name":"check"}
-deno fmt --check
-deno lint
+bun run biome lint --write .
+bun run biome format --write .
 ```
 
 ## Deploy
@@ -38,7 +35,7 @@ deno lint
 export LIBSQL_URL="https://${SERVICE_NAME}-${LIBSQL_BASE_URL}"
 export LIBSQL_TOKEN="op://sa.rawkode.academy/turso/platform-group/api-token"
 
-op run -- deno --allow-all data-model/migrate.ts
+op run -- bun run data-model/migrate.ts
 ```
 
 ### Read Model
