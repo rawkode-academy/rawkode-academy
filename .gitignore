@@ -14,3 +14,7 @@ dist
 
 # Rust
 target
+
+# moon
+.moon/cache
+.moon/docker

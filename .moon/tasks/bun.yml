@@ -1,0 +1,19 @@
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+tasks:
+  format:
+    command: 'bun run biome format .'
+    options:
+      runInCI: true
+  lint:
+    command: 'bun run biome lint .'
+    options:
+      runInCI: true
+  dev:
+    command: 'bun run dev'
+    options:
+      runInCI: false
+  test:
+    command: 'bun test'
+    options:
+      runInCI: true

@@ -4,9 +4,7 @@
 	"main": "./main.ts",
 
 	"compatibility_date": "2025-04-05",
-	"compatibility_flags": [
-		"nodejs_compat",
-	],
+	"compatibility_flags": ["nodejs_compat"],
 
 	"keep_vars": false,
 	"minify": true,
