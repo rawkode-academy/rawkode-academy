@@ -1,0 +1,20 @@
+id: 'rawkode.academy/platform/videos'
+
+project:
+  name: 'videos'
+  description: Videos Service
+  maintainers: ['rawkode']
+
+tags:
+  - 'platform-data-model'
+  - 'platform-read-model'
+
+type: 'application'
+stack: 'backend'
+language: 'typescript'
+toolchain:
+  default: 'bun'
+
+env:
+  SERVICE_NAME: videos
+  LIBSQL_BASE_URL: 'rawkodeacademy.turso.io'

@@ -1,0 +1,8 @@
+$schema: './cache/schemas/workspace.json'
+
+projects:
+  - '**/moon.yml'
+
+vcs:
+  manager: 'git'
+  defaultBranch: 'main'
