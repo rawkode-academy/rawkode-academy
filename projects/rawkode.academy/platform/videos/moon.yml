@@ -17,4 +17,3 @@ toolchain:
 
 env:
   SERVICE_NAME: videos
-  LIBSQL_BASE_URL: 'rawkodeacademy.turso.io'

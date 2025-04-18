@@ -1,19 +1,21 @@
 $schema: 'https://moonrepo.dev/schemas/tasks.json'
 
+fileGroups:
+  sources:
+    - '**/*.ts'
+    - '**/*.js'
+    - '**/*.json'
+
 tasks:
   format:
     command: 'bun run biome format .'
+    inputs:
+      - '@group(sources)'
     options:
       runInCI: true
   lint:
     command: 'bun run biome lint .'
-    options:
-      runInCI: true
-  dev:
-    command: 'bun run dev'
-    options:
-      runInCI: false
-  test:
-    command: 'bun test'
+    inputs:
+      - '@group(sources)'
     options:
       runInCI: true
