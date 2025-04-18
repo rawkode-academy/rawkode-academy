@@ -2,6 +2,11 @@ $schema: 'https://moonrepo.dev/schemas/tasks.json'
 
 tasks:
   deploy:
+    deps:
+      - lint
+      - format
+    env:
+      LIBSQL_BASE_URL: rawkodeacademy.turso.io
     script: |
       bunx wrangler -c ./read-model/wrangler.jsonc deploy --var SERVICE_NAME:${SERVICE_NAME} --var LIBSQL_BASE_URL:${LIBSQL_BASE_URL}
 
