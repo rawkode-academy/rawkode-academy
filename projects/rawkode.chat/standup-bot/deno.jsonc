@@ -1,6 +1,0 @@
-{
-  "imports": {
-    "@std/assert": "jsr:@std/assert@1",
-    "zulip-js": "npm:zulip-js@^2.1.0"
-  }
-}

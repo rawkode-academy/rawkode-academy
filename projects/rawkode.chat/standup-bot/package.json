@@ -1,0 +1,10 @@
+{
+	"name": "standup-bot",
+	"private": true,
+	"dependencies": {
+		"zulip-js": "^2.1.0"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
+}

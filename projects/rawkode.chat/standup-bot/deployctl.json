@@ -1,9 +1,9 @@
 {
 	"deploy": {
-		"project": "chat-standup-bot",
+		"project": "rka-chat-standup-bot",
 		"entrypoint": "main.ts",
 		"include": [
-			"deno.jsonc",
+			"package.json",
 			"main.ts"
 		]
 	}
