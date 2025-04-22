@@ -1,0 +1,19 @@
+id: "rawkode.academy/platform/video-guests"
+
+project:
+  name: "video-guests"
+  description: Video Guests Service
+  maintainers: ["rawkode"]
+
+tags:
+  - "platform-data-model"
+  - "platform-read-model"
+
+type: "application"
+stack: "backend"
+language: "typescript"
+toolchain:
+  default: "deno"
+
+env:
+  SERVICE_NAME: video-guests

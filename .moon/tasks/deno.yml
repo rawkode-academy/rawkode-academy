@@ -8,21 +8,22 @@ fileGroups:
 
 tasks:
   install:
-    command: 'bun install'
+    command: 'deno install'
     inputs:
-      - bun.lockb
+      - deno.lock
       - package.json
     options:
       runInCI: true
 
   format:
-    command: 'bun run biome format .'
+    command: 'deno fmt --check .'
     inputs:
       - '@group(sources)'
     options:
       runInCI: true
+
   lint:
-    command: 'bun run biome lint .'
+    command: 'deno lint .'
     inputs:
       - '@group(sources)'
     options:
