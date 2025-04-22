@@ -1,0 +1,19 @@
+id: "rawkode.academy/platform/technologies"
+
+project:
+  name: "technologies"
+  description: Technologies Service
+  maintainers: ["rawkode"]
+
+tags:
+  - "platform-data-model"
+  - "platform-read-model"
+
+type: "application"
+stack: "backend"
+language: "typescript"
+toolchain:
+  default: "deno"
+
+env:
+  SERVICE_NAME: technologies
