@@ -1,7 +1,16 @@
 $schema: 'https://moonrepo.dev/schemas/tasks.json'
 
 tasks:
-  format:
-    command: 'bun run biome format .'
-    options:
-      runInCI: true
+  migrations-generate:
+    command: 'deno run -A npm:drizzle-kit generate'
+    inputs:
+      - ./data-model/schema.ts
+
+  migrations-push:
+    command: 'op run -- deno run -A ./data-model/migrate.ts'
+    env:
+      LIBSQL_BASE_URL: rawkodeacademy.turso.io
+      LIBSQL_URL: "https://${SERVICE_NAME}-${LIBSQL_BASE_URL}"
+      LIBSQL_TOKEN: "op://sa.rawkode.academy/turso/platform-group/api-token"
+    inputs:
+      - ./data-model/migrations/*.sql
