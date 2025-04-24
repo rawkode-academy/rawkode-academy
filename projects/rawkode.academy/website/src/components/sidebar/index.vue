@@ -12,6 +12,7 @@ import {
 	CalendarIcon,
 	WrenchScrewdriverIcon,
 	AcademicCapIcon,
+	CubeIcon,
 } from "@heroicons/vue/24/outline";
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/20/solid';
 
@@ -39,6 +40,11 @@ const baseMenuItems = [
 		name: "Videos",
 		href: "/watch",
 		icon: VideoCameraIcon,
+	},
+	{
+		name: "Technologies",
+		href: "/technology",
+		icon: CubeIcon,
 	},
 	{
 		name: "Community Day",

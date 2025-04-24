@@ -1,0 +1,296 @@
+---
+export const prerender = true;
+
+import Page from "@/wrappers/page.astro";
+import { request } from "graphql-request";
+import type { GetStaticPaths } from "astro";
+
+// Define the Technology data type explicitly
+export interface Technology {
+	id: string;
+	name: string;
+	description: string;
+	documentation?: string;
+	website?: string;
+	logo?: string;
+}
+
+interface GetTechnologiesResponse {
+	getTechnologies: Technology[];
+}
+
+// Fetch all technologies to generate static paths
+export const getStaticPaths = (async () => {
+	// const endpoint = import.meta.env.PUBLIC_GRAPHQL_ENDPOINT; // Use hardcoded endpoint
+	const endpoint = "https://api.rawkode.academy/graphql";
+	const data = await request<GetTechnologiesResponse>(
+		endpoint,
+		`query GetTechnologies($limit: Int) {
+		getTechnologies(limit: $limit) {
+			id
+			name
+			description
+
+			website
+			documentation
+
+			logo
+		}
+	}`,
+		{ limit: 700 }
+	);
+
+	return data.getTechnologies.map((tech) => ({
+		params: { id: tech.id },
+		props: { technology: tech },
+	}));
+}) satisfies GetStaticPaths;
+
+const { technology } = Astro.props as { technology: Technology };
+
+const placeholderLogo = "/tech-logos/rawkode-academy.svg"; // Define a placeholder
+---
+
+<Page title={technology.name} description={technology.description}>
+	<div class="flex flex-col gap-12 dark:bg-black dark:text-white min-h-screen">
+		<style>
+			:root {
+				--primary: #5f5ed7;
+				--secondary: #00ceff;
+			}
+
+			.tech-header {
+				background: linear-gradient(
+					to bottom right,
+					rgba(95, 94, 215, 0.1),
+					rgba(0, 206, 255, 0.1)
+				);
+				border-bottom: 1px solid rgba(95, 94, 215, 0.2);
+			}
+
+			.tech-logo {
+				@apply w-32 h-32 object-contain rounded-lg overflow-hidden;
+				background: white;
+				padding: 0.5rem;
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+				transition: transform 0.3s ease;
+			}
+
+			.tech-logo:hover {
+				transform: scale(1.05);
+			}
+
+			.link-button {
+				@apply inline-flex items-center px-4 py-2 rounded-lg text-white font-medium transition-all duration-300;
+				background: linear-gradient(to right, var(--primary), var(--secondary));
+				box-shadow: 0 4px 10px rgba(95, 94, 215, 0.3);
+			}
+
+			.link-button:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 6px 15px rgba(95, 94, 215, 0.4);
+			}
+
+			.link-button svg {
+				@apply w-5 h-5 mr-2;
+			}
+
+			.content-section {
+				@apply bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8;
+			}
+
+			.section-title {
+				@apply text-2xl font-bold mb-4 text-gray-900 dark:text-white;
+				position: relative;
+				padding-left: 1rem;
+			}
+
+			.section-title::before {
+				content: "";
+				position: absolute;
+				left: 0;
+				top: 0.25rem;
+				bottom: 0.25rem;
+				width: 4px;
+				background: linear-gradient(
+					to bottom,
+					var(--primary),
+					var(--secondary)
+				);
+				border-radius: 2px;
+			}
+
+			.empty-state {
+				@apply flex flex-col items-center justify-center p-8 rounded-lg;
+				background: rgba(95, 94, 215, 0.03);
+				border: 2px dashed rgba(95, 94, 215, 0.1);
+			}
+
+			.empty-state svg {
+				@apply w-16 h-16 mb-4 text-gray-400;
+			}
+
+			.content-card {
+				@apply bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300;
+				border: 1px solid rgba(95, 94, 215, 0.1);
+			}
+
+			.content-card:hover {
+				transform: translateY(-5px);
+				box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+			}
+
+			.content-card img {
+				@apply w-full h-40 object-cover;
+			}
+
+			.content-card .content {
+				@apply p-4;
+			}
+
+			.content-card h3 {
+				@apply text-lg font-semibold mb-2 text-gray-900 dark:text-white;
+			}
+
+			.content-card p {
+				@apply text-gray-600 dark:text-gray-300 text-sm;
+			}
+		</style>
+
+		<!-- Technology Header -->
+		<section class="tech-header w-full px-4 py-8">
+			<div class="max-w-7xl mx-auto">
+				<div
+					class="flex flex-col md:flex-row items-center md:items-start gap-8"
+				>
+					<img
+						src={technology.logo ? technology.logo : placeholderLogo}
+						alt={`${technology.name} Logo`}
+						class="tech-logo"
+						onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
+					/>
+					<div class="flex-1">
+						<h1
+							class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white"
+						>
+							{technology.name}
+						</h1>
+						<p class="text-lg text-gray-700 dark:text-gray-300 mb-6 max-w-3xl">
+							{technology.description}
+						</p>
+						<div class="flex flex-wrap gap-4">
+							{
+								technology.website && (
+									<a
+										href={technology.website}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="link-button"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="1.5"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
+											/>
+										</svg>
+										Official Website
+									</a>
+								)
+							}
+							{
+								technology.documentation && (
+									<a
+										href={technology.documentation}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="link-button"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="1.5"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+											/>
+										</svg>
+										Documentation
+									</a>
+								)
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Content Sections -->
+		<div class="w-full px-4 pb-12">
+			<div class="max-w-7xl mx-auto">
+				<!-- Videos Section -->
+				<section class="content-section">
+					<h2 class="section-title">Related Videos</h2>
+					<div class="mt-6">
+						<div class="empty-state">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="1.5"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0118 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 016 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M19.125 12h1.5m0 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h1.5M7.125 14.25v1.5m0-1.5c0-.621.504-1.125 1.125-1.125M7.125 14.25c0-.621-.504-1.125-1.125-1.125M15 14.25v1.5m0-1.5c0-.621.504-1.125 1.125-1.125M15 14.25c0-.621-.504-1.125-1.125-1.125m-7.5 0h7.5"
+								></path>
+							</svg>
+							<p class="text-gray-500 dark:text-gray-400 text-center">
+								No videos found for {technology.name}. Check back soon for
+								upcoming content!
+							</p>
+						</div>
+					</div>
+				</section>
+
+				<!-- Articles Section -->
+				<section class="content-section">
+					<h2 class="section-title">Related Articles</h2>
+					<div class="mt-6">
+						<div class="empty-state">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke-width="1.5"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z"
+								></path>
+							</svg>
+							<p class="text-gray-500 dark:text-gray-400 text-center">
+								No articles found for {technology.name}. Stay tuned for upcoming
+								tutorials and guides!
+							</p>
+						</div>
+					</div>
+				</section>
+
+			</div>
+		</div>
+	</div>
+</Page>

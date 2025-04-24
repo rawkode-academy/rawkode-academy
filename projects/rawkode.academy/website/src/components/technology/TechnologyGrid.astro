@@ -1,0 +1,41 @@
+---
+// Define the Technology interface directly
+interface Technology {
+  id: string;
+  slug?: string;
+  name: string;
+  description: string;
+  logo?: string;
+}
+
+interface Props {
+  technologies: Technology[];
+}
+
+const { technologies } = Astro.props;
+const placeholderLogo = "/tech-logos/rawkode-academy.svg";
+---
+
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+  {technologies.map((tech) => {
+    const logoUrl = tech.logo ?? placeholderLogo;
+    return (
+      <a
+        href={`/technology/${tech.id}`}
+        class="flex flex-col items-center p-4 bg-gray-100 dark:bg-gray-800 rounded-lg hover:shadow-lg transition-shadow duration-200"
+      >
+        <div class="bg-white rounded-md p-2 mb-3">
+          <img
+            src={logoUrl}
+            alt={`${tech.name} Logo`}
+            class="w-20 h-20 object-contain"
+            onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
+          />
+        </div>
+        <h3 class="text-md font-semibold text-center text-gray-800 dark:text-gray-200">
+          {tech.name}
+        </h3>
+      </a>
+    );
+  })}
+</div>
