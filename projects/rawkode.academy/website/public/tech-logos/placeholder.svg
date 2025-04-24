@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+	<defs>
+		<linearGradient id="techGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" stop-color="#5f5ed7" />
+			<stop offset="100%" stop-color="#00ceff" />
+		</linearGradient>
+	</defs>
+	<rect width="200" height="200" fill="#f8f9fa" rx="20" ry="20" />
+	<circle cx="100" cy="80" r="40" fill="url(#techGradient)" />
+	<rect x="60" y="130" width="80" height="10" rx="5" ry="5" fill="url(#techGradient)" />
+	<rect x="70" y="150" width="60" height="10" rx="5" ry="5" fill="url(#techGradient)" />
+	<path d="M100,40 L115,65 H85 Z" fill="url(#techGradient)" />
+	<path d="M70,80 A30,30 0 0,1 130,80" fill="none" stroke="white" stroke-width="6" />
+</svg>
