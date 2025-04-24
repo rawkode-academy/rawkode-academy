@@ -69,22 +69,22 @@ export default defineConfig({
         context: "server",
         access: "public",
       }),
-      INFLUX_HOST: envField.string({
+      INFLUXDB_URL: envField.string({
         context: "server",
         access: "secret",
         optional: true,
       }),
-      INFLUX_TOKEN: envField.string({
+      INFLUXDB_TOKEN: envField.string({
         context: "server",
         access: "secret",
         optional: true,
       }),
-      INFLUX_ORG: envField.string({
+      INFLUXDB_ORG: envField.string({
         context: "server",
         access: "public",
         optional: true,
       }),
-      INFLUX_BUCKET: envField.string({
+      INFLUXDB_BUCKET: envField.string({
         context: "server",
         access: "public",
         default: "video-events",
