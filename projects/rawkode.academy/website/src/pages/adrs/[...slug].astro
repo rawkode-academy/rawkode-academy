@@ -1,0 +1,188 @@
+---
+import { getCollection, getEntries, render } from "astro:content";
+import Page from "@/wrappers/page.astro";
+import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import type { CollectionEntry } from "astro:content";
+
+export const prerender = true;
+
+type Props = {
+  adr: CollectionEntry<"adrs">;
+};
+
+export const getStaticPaths: GetStaticPaths = async (): Promise<GetStaticPathsResult> => {
+  const adrs = await getCollection("adrs");
+
+  return adrs.map((adr) => {
+    return {
+      params: {
+        slug: adr.id,
+      },
+      props: {
+        adr,
+      },
+    };
+  });
+};
+
+const { adr } = Astro.props;
+const { Content } = await render(adr);
+
+let authors: CollectionEntry<"people">[] = [];
+try {
+  authors = await getEntries(adr.data.authors);
+} catch (error) {
+  console.error(`Error fetching authors for ADR ${adr.id}:`, error);
+}
+
+const formatDate = (date: Date): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+};
+
+// Extract the ADR number from the ID using a regex to ensure it's 4 digits
+const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
+---
+
+<Page title={`ADR-${adrNumber}: ${adr.data.title}`} description={`Architecture Decision Record: ${adr.data.title}`}>
+  <h1 class="text-5xl font-extrabold dark:text-white">
+    <span class="text-purple-600 dark:text-purple-400">ADR-{adrNumber}:</span> {adr.data.title}
+  </h1>
+
+  <div class="relative max-w-full overflow-x-hidden">
+    <article class="format prose dark:format-invert w-full max-w-full">
+      <header class="mb-8 lg:mb-10 not-format">
+        <!-- Metadata card with glass morphism effect -->
+        <div
+          class="relative backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg"
+        >
+          <div class="flex flex-col gap-4">
+            <!-- Author section -->
+            {authors.length > 0 && (
+              <div class="flex flex-col">
+                <div class="flex flex-wrap gap-2 mb-2">
+                  <div class="flex -space-x-4">
+                    {authors.filter(author => author && author.data).slice(0, 4).map((author, index) => (
+                      <div class="relative" style={`z-index: ${10 - index}`}>
+                        <img
+                          class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-purple-500 bg-white"
+                          src={`https://github.com/${author.data.handle}.png`}
+                          alt={`Profile picture of ${author.data.name}`}
+                        />
+                        {index === 0 && (
+                          <span class="absolute bottom-0 right-0 h-4 w-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"></span>
+                        )}
+                      </div>
+                    ))}
+                    {authors.filter(author => author && author.data).length > 4 && (
+                      <div class="relative z-0">
+                        <div class="w-16 h-16 rounded-full bg-purple-100 border-2 border-purple-500 bg-white flex items-center justify-center text-sm text-purple-800 font-medium">
+                          +{authors.filter(author => author && author.data).length - 4}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-2">
+                  {authors.filter(author => author && author.data).map((author) => (
+                    <div class="inline-flex items-center bg-purple-50 dark:bg-gray-700 rounded-full px-3 py-1">
+                      <a
+                        href={`https://github.com/${author.data.handle}`}
+                        target="_blank"
+                        rel="author noopener noreferrer"
+                        class="text-sm font-medium text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-purple-100 transition-colors"
+                      >
+                        {author.data.name}
+                      </a>
+                      <span class="mx-1 text-purple-400 dark:text-purple-500">•</span>
+                      <span class="text-xs text-purple-500 dark:text-purple-400">@{author.data.handle}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {authors.length > 0 && <div class="w-full h-px bg-gray-200 dark:bg-gray-700 my-2"></div>}
+
+            <!-- Status section -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div class="mt-2 md:mt-0">
+                {adr.data.adoptedAt ? (
+                  <div class="flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5 text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span class="ml-2 text-sm font-medium text-green-700 dark:text-green-400">
+                      Adopted on {formatDate(adr.data.adoptedAt)}
+                    </span>
+                  </div>
+                ) : (
+                  <div class="flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5 text-yellow-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                    <span class="ml-2 text-sm font-medium text-yellow-700 dark:text-yellow-400">
+                      Proposed on {formatDate(adr.data.createdAt)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <!-- Date information -->
+            <div class="flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-purple-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                ></path>
+              </svg>
+              <span class="ml-2 text-sm text-gray-600 dark:text-gray-300">
+                Created: <time datetime={adr.data.createdAt.toString()}>
+                  {formatDate(adr.data.createdAt)}
+                </time>
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="prose dark:prose-invert max-w-none">
+        <Content />
+      </div>
+    </article>
+  </div>
+</Page>

@@ -13,6 +13,7 @@ import {
 	WrenchScrewdriverIcon,
 	AcademicCapIcon,
 	CubeIcon,
+	DocumentTextIcon,
 } from "@heroicons/vue/24/outline";
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/20/solid';
 
@@ -65,6 +66,14 @@ const baseMenuItems = [
 	// { name: 'Help', href: '/help', icon: QuestionMarkCircleIcon },
 ];
 
+const baseMenuItemsContributors = [
+	{
+		name: "ADRs",
+		href: "/adrs",
+		icon: DocumentTextIcon,
+	},
+];
+
 const baseMenuItemsMaintainers = [
 	{
 		name: "Share Your Project",
@@ -108,6 +117,13 @@ const menuItemsMaintainers = computed(() => {
 
 const menuItemsOrgs = computed(() => {
 	return baseMenuItemsOrgs.map(item => ({
+		...item,
+		current: isCurrentPath(item.href)
+	}));
+});
+
+const menuItemsContributors = computed(() => {
+	return baseMenuItemsContributors.map(item => ({
 		...item,
 		current: isCurrentPath(item.href)
 	}));
@@ -169,6 +185,15 @@ function isCurrentPath(itemPath: string) {
 				</div>
 				<ul class="space-y-1.5">
 					<MenuItems :menuItems="menuItemsOrgs" />
+				</ul>
+			</div>
+			<div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
+				<div
+					class="text-xs font-semibold leading-6 px-2 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+					For Contributors
+				</div>
+				<ul class="space-y-1.5">
+					<MenuItems :menuItems="menuItemsContributors" />
 				</ul>
 			</div>
 		</div>
