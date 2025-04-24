@@ -1,0 +1,130 @@
+---
+import { getCollection, getEntries } from "astro:content";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = true;
+
+// Get all ADRs and sort alphanumerically by ID
+const allAdrs = await getCollection("adrs");
+allAdrs.sort((a, b) => {
+  // Extract the numeric ID from the slug (e.g., "0001-name" -> 1)
+  const adrNumberA = a.id.match(/^(\d{4})-/)?.[1] || "0000";
+  const adrNumberB = b.id.match(/^(\d{4})-/)?.[1] || "0000";
+  return parseInt(adrNumberA) - parseInt(adrNumberB);
+});
+
+// Get authors for each ADR
+const adrAuthors = await Promise.all(
+  allAdrs.map(async (adr) => {
+    try {
+      return {
+        id: adr.id,
+        authors: await getEntries(adr.data.authors)
+      };
+    } catch (error) {
+      console.error(`Error fetching authors for ADR ${adr.id}:`, error);
+      return {
+        id: adr.id,
+        authors: []
+      };
+    }
+  })
+);
+
+const formatDate = (date: Date): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+};
+
+// Function to extract ADR number from ID
+const getAdrNumber = (id: string): string => {
+  return id.match(/^(\d{4})-/)?.[1] || "0000";
+};
+---
+
+<Page title="Architecture Decision Records" subtitle="Documentation of architecture decisions">
+  <div class="max-w-screen-xl mx-auto">
+    <h1 class="text-5xl font-extrabold mb-6 text-gray-900 dark:text-white">
+      Architecture Decision Records
+    </h1>
+
+    <p class="mb-10 text-lg text-gray-700 dark:text-gray-300">
+      This page lists all architecture decisions made in this project. ADRs are a lightweight method to document architectural decisions including their context and consequences.
+    </p>
+
+    <div class="grid gap-6 lg:gap-8">
+      {allAdrs.map((adr) => {
+        const authorData = adrAuthors.find(a => a.id === adr.id);
+        const authors = authorData?.authors || [];
+        const adrNumber = getAdrNumber(adr.id);
+
+        return (
+          <a href={`/adrs/${adr.id}`} class="block">
+            <div class="transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl rounded-xl overflow-hidden backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 shadow-md">
+              <div class="p-6">
+                <div class="flex items-center gap-4 mb-4">
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white my-auto">
+                    <span class="text-purple-600 dark:text-purple-400">ADR-{adrNumber}:</span> {adr.data.title}
+                  </h2>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4 mt-2">
+                  <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {formatDate(adr.data.createdAt)}
+                  </div>
+
+                  {adr.data.adoptedAt ? (
+                    <div class="flex items-center">
+                      <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Adopted
+                      </span>
+                    </div>
+                  ) : (
+                    <div class="flex items-center">
+                      <span class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        Proposed
+                      </span>
+                    </div>
+                  )}
+
+                  {authors.length > 0 && (
+                    <div class="flex items-center">
+                      <div class="flex -space-x-3 mr-2">
+                        {authors.filter(author => author && author.data).slice(0, 3).map((author, index) => (
+                          <div class="relative" style={`z-index: ${10 - index}`}>
+                            <img
+                              class="w-8 h-8 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white"
+                              src={`https://github.com/${author.data.handle}.png`}
+                              alt={`Profile picture of ${author.data.name}`}
+                              title={author.data.name}
+                            />
+                          </div>
+                        ))}
+                        {authors.filter(author => author && author.data).length > 3 && (
+                          <div class="relative z-0">
+                            <div class="w-8 h-8 rounded-full bg-purple-100 border-2 border-purple-500 p-0.5 bg-white flex items-center justify-center text-xs text-purple-800 font-medium">
+                              +{authors.filter(author => author && author.data).length - 3}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <span class="text-sm text-gray-600 dark:text-gray-400">
+                        {authors.filter(author => author && author.data).map(author => author.data.name).join(", ")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</Page>

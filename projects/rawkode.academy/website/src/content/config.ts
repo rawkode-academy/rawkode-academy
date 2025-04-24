@@ -131,6 +131,20 @@ const series = defineCollection({
     }),
 });
 
+const adrs = defineCollection({
+  loader: glob({
+    pattern: ["**\/*.md"],
+    base: "./content/adrs",
+  }),
+  schema: () =>
+    z.object({
+			title: z.string(),
+			createdAt: z.coerce.date(),
+			adoptedAt: z.coerce.date().optional(),
+			authors: z.array(reference("people")).default(["rawkode"]),
+    }),
+});
+
 const testimonials = defineCollection({
   loader: glob({
     pattern: ["**/*.yaml", "**/*.yml"],
@@ -148,4 +162,11 @@ const testimonials = defineCollection({
   }),
 });
 
-export const collections = { articles, series, videos, people, testimonials };
+export const collections = {
+  adrs,
+  articles,
+  series,
+  videos,
+  people,
+  testimonials,
+};
