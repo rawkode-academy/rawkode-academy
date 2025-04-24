@@ -53,6 +53,11 @@ const baseMenuItems = [
 		icon: CalendarIcon,
 	},
 	{
+		name: "ADRs",
+		href: "/adrs",
+		icon: DocumentTextIcon,
+	},
+	{
 		name: "Zulip Chat",
 		href: "https://chat.rawkode.academy",
 		icon: ChatBubbleLeftEllipsisIcon,
@@ -108,6 +113,13 @@ const menuItems = computed(() => {
 	}));
 });
 
+const menuItemsContributors = computed(() => {
+	return baseMenuItemsContributors.map(item => ({
+		...item,
+		current: isCurrentPath(item.href)
+	}));
+});
+
 const menuItemsMaintainers = computed(() => {
 	return baseMenuItemsMaintainers.map(item => ({
 		...item,
@@ -117,13 +129,6 @@ const menuItemsMaintainers = computed(() => {
 
 const menuItemsOrgs = computed(() => {
 	return baseMenuItemsOrgs.map(item => ({
-		...item,
-		current: isCurrentPath(item.href)
-	}));
-});
-
-const menuItemsContributors = computed(() => {
-	return baseMenuItemsContributors.map(item => ({
 		...item,
 		current: isCurrentPath(item.href)
 	}));
@@ -172,6 +177,15 @@ function isCurrentPath(itemPath: string) {
 			<div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
 				<div
 					class="text-xs font-semibold leading-6 px-2 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+					For Contributors
+				</div>
+				<ul class="space-y-1.5">
+					<MenuItems :menuItems="menuItemsContributors" />
+				</ul>
+			</div>
+			<div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
+				<div
+					class="text-xs font-semibold leading-6 px-2 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
 					For OSS Maintainers
 				</div>
 				<ul class="space-y-1.5">
@@ -187,15 +201,7 @@ function isCurrentPath(itemPath: string) {
 					<MenuItems :menuItems="menuItemsOrgs" />
 				</ul>
 			</div>
-			<div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
-				<div
-					class="text-xs font-semibold leading-6 px-2 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-					For Contributors
-				</div>
-				<ul class="space-y-1.5">
-					<MenuItems :menuItems="menuItemsContributors" />
-				</ul>
-			</div>
 		</div>
 	</aside>
 </template>
+
