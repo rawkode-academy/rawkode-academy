@@ -1,4 +1,4 @@
-import { InfluxDBClient, Point } from "@influxdata/influxdb3-client-browser";
+import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
