@@ -71,10 +71,10 @@ export const trackVideoEvent = defineAction({
         case "video_started":
         case "video_paused":
         case "video_seeked":
-          point.setField("seconds", event.seconds);
+          point.setField("seconds", event.seconds, "integer");
           break;
         case "video_progressed":
-          point.setField("percent", event.percent);
+          point.setField("percent", event.percent, "float");
           break;
         case "video_completed":
           break;
