@@ -11,10 +11,7 @@ export const signupForCommunityDay = defineAction({
   input: SignupSchema,
   accept: "form",
   handler: async (data, _ctx) => {
-    console.log("HERE I AM");
     const { email } = data;
-
-    console.log("email", email);
 
     const resendApiKey = getSecret("RESEND_API_KEY") ||
       process.env.RESEND_API_KEY;
@@ -32,14 +29,11 @@ export const signupForCommunityDay = defineAction({
     try {
       const resend = new Resend(resendApiKey);
 
-      console.log("SENDING");
-
       const r = await resend.contacts.create({
         email: email,
         unsubscribed: false,
         audience_id: audienceId,
       });
-      console.debug(r);
     } catch (resendError) {
       console.error("Error adding contact to Resend:", resendError);
       throw new ActionError({
