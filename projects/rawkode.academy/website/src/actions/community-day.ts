@@ -29,7 +29,7 @@ export const signupForCommunityDay = defineAction({
     try {
       const resend = new Resend(resendApiKey);
 
-      const r = await resend.contacts.create({
+      await resend.contacts.create({
         email: email,
         unsubscribed: false,
         audience_id: audienceId,
