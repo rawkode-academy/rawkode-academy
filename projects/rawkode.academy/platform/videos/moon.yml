@@ -13,7 +13,7 @@ type: "application"
 stack: "backend"
 language: "typescript"
 toolchain:
-  default: "bun"
+  default: "deno"
 
 env:
   SERVICE_NAME: videos

@@ -19,6 +19,12 @@ const graphQLQuery = gql`
 			streamUrl
 			thumbnailUrl
 			duration
+
+			technologies {
+				id
+				name
+				logo
+			}
 		}
 	}
 `;
@@ -38,7 +44,14 @@ const videos = defineCollection({
     streamUrl: z.string(),
     publishedAt: z.string(),
     thumbnailUrl: z.string(),
-    duration: z.number(),
+		duration: z.number(),
+		technologies: z.array(
+			z.object({
+				id: z.string(),
+				name: z.string(),
+				logo: z.string(),
+			})
+		),
   }),
 });
 

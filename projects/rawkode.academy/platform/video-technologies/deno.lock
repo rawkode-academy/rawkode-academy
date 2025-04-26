@@ -5,9 +5,9 @@
     "npm:@apollo/subgraph@^2.9.2": "2.10.1_graphql@16.10.0",
     "npm:@graphql-tools/utils@^10.6.1": "10.8.6_graphql@16.10.0",
     "npm:@libsql/client@0.14": "0.14.0",
-    "npm:@pothos/core@^4.3.0": "4.6.0_graphql@16.10.0",
-    "npm:@pothos/plugin-directives@^4.1.0": "4.2.0_graphql@16.10.0",
-    "npm:@pothos/plugin-drizzle@~0.5.1": "0.5.3_@pothos+core@4.6.0__graphql@16.10.0_graphql@16.10.0",
+    "npm:@pothos/core@^4.6.0": "4.6.0_graphql@16.10.0",
+    "npm:@pothos/plugin-directives@^4.2.0": "4.2.0_graphql@16.10.0",
+    "npm:@pothos/plugin-drizzle@~0.8.1": "0.8.1_@pothos+core@4.6.0__graphql@16.10.0_graphql@16.10.0",
     "npm:@pothos/plugin-federation@^4.2.0": "4.3.2_@apollo+subgraph@2.10.1__graphql@16.10.0_graphql@16.10.0",
     "npm:@restatedev/restate-sdk@^1.4.0": "1.5.3",
     "npm:@sindresorhus/slugify@^2.2.1": "2.2.1",
@@ -664,8 +664,8 @@
         "graphql"
       ]
     },
-    "@pothos/plugin-drizzle@0.5.3_@pothos+core@4.6.0__graphql@16.10.0_graphql@16.10.0": {
-      "integrity": "sha512-FMau7qKa35WqMe8rWYNmSRUI/BG0dGMafZP25LgXe6Kh4wx5TuSDUg1piTs/ODyLDe/hLtuNx2DJ1WaWYZJ6CA==",
+    "@pothos/plugin-drizzle@0.8.1_@pothos+core@4.6.0__graphql@16.10.0_graphql@16.10.0": {
+      "integrity": "sha512-ul4eTS3KdeMCmrdvn0syLjbxXxpi5P6P0uNIDLF7Z/nP3J5lLW6Yul/BKpgr3fdzBoSmh1vmoBacRiGnssc3ZA==",
       "dependencies": [
         "@pothos/core",
         "graphql"
@@ -1852,9 +1852,9 @@
         "npm:@apollo/subgraph@^2.9.2",
         "npm:@graphql-tools/utils@^10.6.1",
         "npm:@libsql/client@0.14",
-        "npm:@pothos/core@^4.3.0",
-        "npm:@pothos/plugin-directives@^4.1.0",
-        "npm:@pothos/plugin-drizzle@~0.5.1",
+        "npm:@pothos/core@^4.6.0",
+        "npm:@pothos/plugin-directives@^4.2.0",
+        "npm:@pothos/plugin-drizzle@~0.8.1",
         "npm:@pothos/plugin-federation@^4.2.0",
         "npm:@restatedev/restate-sdk@^1.4.0",
         "npm:@sindresorhus/slugify@^2.2.1",

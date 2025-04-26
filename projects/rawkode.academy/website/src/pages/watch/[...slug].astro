@@ -10,24 +10,35 @@ export const prerender = true;
 
 // Define the video data type explicitly
 interface VideoData {
-  id: string;
-  slug: string;
-  title: string;
-  subtitle?: string;
-  description: string;
-  streamUrl: string;
-  publishedAt: string;
-  thumbnailUrl: string;
-  duration: number;
+	id: string;
+	slug: string;
+	title: string;
+	subtitle?: string;
+	description: string;
+	streamUrl: string;
+	publishedAt: string;
+	thumbnailUrl: string;
+	duration: number;
+	technologies: TechnologyData[];
+}
+interface TechnologyData {
+	id: string;
+	name: string;
+	logo: string;
 }
 
 export const getStaticPaths = (async () => {
-	const videos = await getCollection("videos");
+	try {
+		const videos = await getCollection("videos");
 
-	return videos.map((video: any) => ({
-		params: { slug: video.data.slug },
-		props: { video },
-	}));
+		return videos.map((video: any) => ({
+			params: { slug: video.data.slug },
+			props: { video },
+		}));
+	} catch (error) {
+		console.error("Error fetching videos:", error);
+		return [];
+	}
 }) satisfies GetStaticPaths;
 
 const { video } = Astro.props as { video: { data: VideoData } };
@@ -74,6 +85,29 @@ const renderedDescription = marked.parse(
 				/>
 			</div>
 
+			{/* Technologies Section */}
+			{video.data.technologies && video.data.technologies.length > 0 && (
+				<div class="mt-4">
+					<h3 class="font-semibold text-gray-900 dark:text-white mb-2">Technologies</h3>
+					<div class="flex flex-wrap gap-2">
+						{video.data.technologies.map((technology) => (
+							<a
+								Astro.key={technology.name}
+								href={`/technology/${technology.id}`}
+								class="inline-flex items-center rounded-md bg-indigo-50 px-2.5 py-0.5 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-700"
+							>
+								<img
+									src={technology.logo}
+									alt={technology.name}
+									class="h-4 w-4 mr-1 rounded-full"
+								/>
+								{technology.name}
+							</a>
+						))}
+					</div>
+				</div>
+			)}
+
 			<!-- Video Description -->
 			<div class="mt-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm">
 				<p class="prose">
@@ -81,6 +115,7 @@ const renderedDescription = marked.parse(
 					<hr class="my-6" />
 				</p>
 			</div>
+
 			<hr class="my-6" />
 		</div>
 	</div>
