@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
-import * as dataSchema from "../data-model/schema";
+import * as dataSchema from "../data-model/schema.ts";
+import process from "node:process";
 
 export const getDatabase = () => {
 	const serviceName = process.env.SERVICE_NAME;
