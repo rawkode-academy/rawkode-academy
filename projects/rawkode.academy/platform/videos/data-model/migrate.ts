@@ -1,5 +1,5 @@
 import { migrate } from "drizzle-orm/libsql/migrator";
-import { getDatabase } from "./client";
+import { getDatabase } from "./client.ts";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
