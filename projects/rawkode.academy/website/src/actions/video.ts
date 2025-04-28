@@ -1,40 +1,31 @@
 import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-
-// Import getSecret conditionally to avoid client-side errors
-let getSecret: (key: string) => string | undefined;
-try {
-  const envServer = await import("astro:env/server");
-  getSecret = envServer.getSecret;
-} catch (error) {
-  // Fallback for client-side or when module is not available
-  getSecret = () => undefined;
-}
+import { getSecret }  from "astro:env/server";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("played"),
-    videoId: z.string(),
+    video: z.string(),
     seconds: z.number(),
   }),
   z.object({
     action: z.literal("paused"),
-    videoId: z.string(),
+    video: z.string(),
     seconds: z.number(),
   }),
   z.object({
     action: z.literal("seeked"),
-    videoId: z.string(),
+    video: z.string(),
     seconds: z.number(),
   }),
   z.object({
     action: z.literal("completed"),
-    videoId: z.string(),
+    video: z.string(),
   }),
   z.object({
     action: z.literal("progressed"),
-    videoId: z.string(),
+    video: z.string(),
     percent: z.number(),
   }),
 ]);
@@ -64,7 +55,7 @@ export const trackVideoEvent = defineAction({
 
       let point = Point.measurement("video")
         .setTag("action", event.action)
-        .setTag("video", event.videoId)
+        .setTag("video", event.video)
         .setTag("viewer", ctx.locals.user?.sub ?? "anonymous");
 
       switch (event.action) {
