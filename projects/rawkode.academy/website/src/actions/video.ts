@@ -14,26 +14,26 @@ try {
 
 const VideoEventSchema = z.discriminatedUnion("action", [
   z.object({
-    action: z.literal("video_started"),
+    action: z.literal("played"),
     videoId: z.string(),
     seconds: z.number(),
   }),
   z.object({
-    action: z.literal("video_paused"),
+    action: z.literal("paused"),
     videoId: z.string(),
     seconds: z.number(),
   }),
   z.object({
-    action: z.literal("video_seeked"),
+    action: z.literal("seeked"),
     videoId: z.string(),
     seconds: z.number(),
   }),
   z.object({
-    action: z.literal("video_completed"),
+    action: z.literal("completed"),
     videoId: z.string(),
   }),
   z.object({
-    action: z.literal("video_progressed"),
+    action: z.literal("progressed"),
     videoId: z.string(),
     percent: z.number(),
   }),
@@ -45,10 +45,10 @@ export const trackVideoEvent = defineAction({
     try {
       console.log("Video event received:", event);
 
-      const influxDBUrl = getSecret("INFLUXDB_URL");
-      const influxDBToken = getSecret("INFLUXDB_TOKEN");
-      const influxDBOrg = getSecret("INFLUXDB_ORG");
-      const influxDBBucket = getSecret("INFLUXDB_BUCKET");
+      const influxDBUrl = getSecret("INFLUX_HOST");
+      const influxDBToken = getSecret("INFLUX_TOKEN");
+      const influxDBOrg = getSecret("INFLUX_ORG");
+      const influxDBBucket = getSecret("INFLUX_BUCKET");
 
       // Not configured, that's OK
       if (!influxDBUrl || !influxDBToken || !influxDBOrg || !influxDBBucket) {
@@ -62,21 +62,21 @@ export const trackVideoEvent = defineAction({
         database: influxDBBucket,
       });
 
-      let point = Point.measurement("event")
+      let point = Point.measurement("video")
         .setTag("action", event.action)
-        .setTag("videoId", event.videoId)
-        .setTag("viewerId", "anonymous");
+        .setTag("video", event.videoId)
+        .setTag("viewer", "anonymous");
 
       switch (event.action) {
-        case "video_started":
-        case "video_paused":
-        case "video_seeked":
+        case "played":
+        case "paused":
+        case "seeked":
           point.setField("seconds", event.seconds, "integer");
           break;
-        case "video_progressed":
+        case "progressed":
           point.setField("percent", event.percent, "float");
           break;
-        case "video_completed":
+        case "completed":
           break;
       }
 
