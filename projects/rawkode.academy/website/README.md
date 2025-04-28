@@ -67,3 +67,22 @@ bun run vitest \
 ```shell {"name": "deploy"}
 op run -- bun run wrangler pages deploy --branch main dist
 ```
+
+## InfluxDB 3
+
+```shell
+op run -- influx bucket create \
+  --schema-type explicit \
+  --retention 0 \
+  --name analytics
+
+op run -- influx bucket-schema update \
+  --bucket analytics \
+  --name website \
+  --columns-file ./integrations/influxdb/analytics/website.json
+
+op run -- influx bucket-schema update \
+  --bucket analytics \
+  --name video \
+  --columns-file ./integrations/influxdb/analytics/video.json
+```
