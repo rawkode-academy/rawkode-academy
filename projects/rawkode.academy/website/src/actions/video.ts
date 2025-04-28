@@ -41,7 +41,7 @@ const VideoEventSchema = z.discriminatedUnion("action", [
 
 export const trackVideoEvent = defineAction({
   input: VideoEventSchema,
-  handler: async (event, _ctx) => {
+  handler: async (event, ctx) => {
     try {
       console.log("Video event received:", event);
 
@@ -65,7 +65,7 @@ export const trackVideoEvent = defineAction({
       let point = Point.measurement("video")
         .setTag("action", event.action)
         .setTag("video", event.videoId)
-        .setTag("viewer", "anonymous");
+        .setTag("viewer", ctx.locals.user?.sub ?? "anonymous");
 
       switch (event.action) {
         case "played":
@@ -74,7 +74,7 @@ export const trackVideoEvent = defineAction({
           point.setField("seconds", event.seconds, "integer");
           break;
         case "progressed":
-          point.setField("percent", event.percent, "float");
+          point.setField("percent", event.percent, "integer");
           break;
         case "completed":
           break;

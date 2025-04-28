@@ -11,7 +11,7 @@ try {
 	getSecret = () => undefined;
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
 	try {
 		// Parse the request body
 		const event = await request.json();
@@ -43,7 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
 		const point = Point.measurement("website")
 			.setTag("action", event.action)
 			.setTag("path", event.path)
-			.setTag("viewer", "anonymous")
+			.setTag("viewer", locals.user?.sub ?? "anonymous")
 			.setTag("browser", event.browser)
 			.setTag("os", event.os);
 
