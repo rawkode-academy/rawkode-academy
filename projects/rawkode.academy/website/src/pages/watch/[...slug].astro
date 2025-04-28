@@ -80,33 +80,37 @@ const renderedDescription = marked.parse(
 			>
 				<VideoPlayer
 					client:only="vue"
-					videoId={video.data.id}
+					video={video.data.id}
 					thumbnailUrl={video.data.thumbnailUrl}
 				/>
 			</div>
 
 			{/* Technologies Section */}
-			{video.data.technologies && video.data.technologies.length > 0 && (
-				<div class="mt-4">
-					<h3 class="font-semibold text-gray-900 dark:text-white mb-2">Technologies</h3>
-					<div class="flex flex-wrap gap-2">
-						{video.data.technologies.map((technology) => (
-							<a
-								Astro.key={technology.name}
-								href={`/technology/${technology.id}`}
-								class="inline-flex items-center rounded-md bg-indigo-50 px-2.5 py-0.5 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-700"
-							>
-								<img
-									src={technology.logo}
-									alt={technology.name}
-									class="h-4 w-4 mr-1 rounded-full"
-								/>
-								{technology.name}
-							</a>
-						))}
+			{
+				video.data.technologies && video.data.technologies.length > 0 && (
+					<div class="mt-4">
+						<h3 class="font-semibold text-gray-900 dark:text-white mb-2">
+							Technologies
+						</h3>
+						<div class="flex flex-wrap gap-2">
+							{video.data.technologies.map((technology) => (
+								<a
+									Astro.key={technology.name}
+									href={`/technology/${technology.id}`}
+									class="inline-flex items-center rounded-md bg-indigo-50 px-2.5 py-0.5 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-700"
+								>
+									<img
+										src={technology.logo}
+										alt={technology.name}
+										class="h-4 w-4 mr-1 rounded-full"
+									/>
+									{technology.name}
+								</a>
+							))}
+						</div>
 					</div>
-				</div>
-			)}
+				)
+			}
 
 			<!-- Video Description -->
 			<div class="mt-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm">

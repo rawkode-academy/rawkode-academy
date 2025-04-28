@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 import { actions } from 'astro:actions';
 
 const props = defineProps<{
-	videoId: string;
+	video: string;
 	thumbnailUrl: string;
 	autoPlay?: boolean;
 }>();
@@ -13,11 +13,11 @@ const player = ref<HTMLElement | null>(null);
 const progressMilestones = ref<Set<number>>(new Set());
 
 type VideoAnalyticsEvent =
-	| { action: 'video_started'; videoId: string; seconds: number }
-	| { action: 'video_paused'; videoId: string; seconds: number }
-	| { action: 'video_seeked'; videoId: string; seconds: number }
-	| { action: 'video_completed'; videoId: string }
-	| { action: 'video_progressed'; videoId: string; percent: number };
+	| { action: 'played'; video: string; seconds: number }
+	| { action: 'paused'; video: string; seconds: number }
+	| { action: 'seeked'; video: string; seconds: number }
+	| { action: 'completed'; video: string }
+	| { action: 'progressed'; video: string; percent: number };
 
 async function trackVideoEvent(event: VideoAnalyticsEvent) {
 	try {
@@ -40,8 +40,8 @@ onMounted(() => {
 		if (!mediaEl) return;
 
 		const event: VideoAnalyticsEvent = {
-			action: 'video_started',
-			videoId: props.videoId,
+			action: 'played',
+			video: props.video,
 			seconds: mediaEl.currentTime || 0,
 		};
 		trackVideoEvent(event);
@@ -52,8 +52,8 @@ onMounted(() => {
 		if (!mediaEl) return;
 
 		const event: VideoAnalyticsEvent = {
-			action: 'video_paused',
-			videoId: props.videoId,
+			action: 'paused',
+			video: props.video,
 			seconds: mediaEl.currentTime || 0,
 		};
 		trackVideoEvent(event);
@@ -64,8 +64,8 @@ onMounted(() => {
 		if (!mediaEl) return;
 
 		const event: VideoAnalyticsEvent = {
-			action: 'video_seeked',
-			videoId: props.videoId,
+			action: 'seeked',
+			video: props.video,
 			seconds: mediaEl.currentTime || 0,
 		};
 		trackVideoEvent(event);
@@ -73,8 +73,8 @@ onMounted(() => {
 
 	player.value.addEventListener('ended', () => {
 		const event: VideoAnalyticsEvent = {
-			action: 'video_completed',
-			videoId: props.videoId,
+			action: 'completed',
+			video: props.video,
 		};
 		trackVideoEvent(event);
 	});
@@ -85,14 +85,13 @@ onMounted(() => {
 
 		const progress = Math.floor((mediaEl.currentTime / mediaEl.duration) * 100);
 
-		// Check for specific milestones (5%, 10%, 25%, 50%, 75%, 95%)
 		const milestones = [5, 10, 25, 50, 75, 95];
 		for (const milestone of milestones) {
 			if (progress >= milestone && !progressMilestones.value.has(milestone)) {
 				progressMilestones.value.add(milestone);
 				const event: VideoAnalyticsEvent = {
-					action: 'video_progressed',
-					videoId: props.videoId,
+					action: 'progressed',
+					video: props.video,
 					percent: milestone,
 				};
 				trackVideoEvent(event);
@@ -106,11 +105,11 @@ onMounted(() => {
 	<div class="w-full aspect-video">
 		<media-player ref="player" :autoplay="!!autoPlay" class="w-full h-full">
 			<media-provider>
-				<source :src="`https://content.rawkode.academy/videos/${videoId}/stream.m3u8`" type="application/x-mpegurl" />
-				<Track :src="`https://content.rawkode.academy/videos/${videoId}/captions/en.vtt`" kind="subtitles"
-					label="English" lang="en-US" default />
-				<track kind="chapters" :src="`/api/chapters/${videoId}`" label="Chapters" default />
-				<media-poster class="vds-poster" :src="thumbnailUrl" :alt="`Thumbnail for ${videoId}`"></media-poster>
+				<source :src="`https://content.rawkode.academy/videos/${video}/stream.m3u8`" type="application/x-mpegurl" />
+				<Track :src="`https://content.rawkode.academy/videos/${video}/captions/en.vtt`" kind="subtitles" label="English"
+					lang="en-US" default />
+				<track kind="chapters" :src="`/api/chapters/${video}`" label="Chapters" default />
+				<media-poster class="vds-poster" :src="thumbnailUrl" :alt="`Thumbnail for ${video}`"></media-poster>
 			</media-provider>
 			<media-video-layout></media-video-layout>
 		</media-player>
