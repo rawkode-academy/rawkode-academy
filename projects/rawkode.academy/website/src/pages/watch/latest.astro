@@ -1,0 +1,41 @@
+---
+export const prerender = true;
+
+import Page from "@/wrappers/page.astro";
+import VideoFeed from "@/components/video/video-feed.astro";
+import VideoMetadata from "@/components/html/video-metadata.astro";
+
+const query = `
+  query GetLatestVideos($limit: Int!) {
+    getLatestVideos(limit: $limit) {
+      title
+      thumbnailUrl
+      duration
+      slug
+      publishedAt
+      streamUrl
+    }
+  }
+`;
+
+const limit = 10000;
+const variables = { limit };
+---
+
+<Page title="All Videos">
+  <VideoMetadata
+    slot="extra-head"
+    title="Rawkode Academy Videos"
+    description="Browse our full collection of videos."
+    isVideoList={true}
+  />
+
+  <VideoFeed
+    title="All Videos"
+    description="Explore every video we've published"
+    operation="getLatestVideos"
+    query={query}
+    limit={limit}
+    variables={variables}
+  />
+</Page>
