@@ -1,0 +1,19 @@
+id: "rawkode.academy/platform/transcriptions"
+
+project:
+  name: "transcriptions"
+  description: Transcriptions Service
+  maintainers: ["rawkode"]
+
+tags:
+  - "platform-data-model"
+  - "platform-write-model"
+
+type: "application"
+stack: "backend"
+language: "typescript"
+toolchain:
+  default: "deno"
+
+env:
+  SERVICE_NAME: transcriptions

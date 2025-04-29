@@ -1,0 +1,17 @@
+{
+  "name": "rawkode-academy-transcriptions",
+  "version": "1.0.0",
+  "description": "Transcription service for Rawkode Academy",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.750.0",
+    "@deepgram/sdk": "^3.12.1",
+    "@restatedev/restate-sdk": "^1.5.3",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240605.0",
+    "typescript": "^5.0.0"
+  }
+}
