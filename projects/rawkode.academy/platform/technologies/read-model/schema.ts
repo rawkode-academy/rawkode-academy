@@ -67,7 +67,7 @@ export const getSchema = (): GraphQLSchema => {
             .findMany({
               limit: args.limit ?? 15,
               offset: args.offset ?? 0,
-              orderBy: (technology, { asc }) => asc(technology.name),
+              orderBy: (technology, { asc }) => asc(technology.id),
             })
             .execute(),
       }),
