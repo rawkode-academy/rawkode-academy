@@ -1,24 +1,25 @@
-import { getDatabase } from "./client";
-import { videosTable } from "./schema";
+import process from "node:process";
+import { getDatabase } from "./client.ts";
+import { videosTable } from "./schema.ts";
 
 const db = getDatabase();
 
 const seed = async () => {
-	await db
-		.insert(videosTable)
-		.values({
-			title: "Window of Opportunity",
-			subtitle: "The team is stuck in a time loop.",
-			slug: "window-of-opportunity",
-			description: "The team is stuck in a time loop.",
-			publishedAt: new Date(),
-			duration: 360,
-		})
-		.returning()
-		.all();
+  await db
+    .insert(videosTable)
+    .values({
+      title: "Window of Opportunity",
+      subtitle: "The team is stuck in a time loop.",
+      slug: "window-of-opportunity",
+      description: "The team is stuck in a time loop.",
+      publishedAt: new Date(),
+      duration: 360,
+    })
+    .returning()
+    .all();
 
-	db.$client.close();
-	process.exit(0);
+  db.$client.close();
+  process.exit(0);
 };
 
 await seed();

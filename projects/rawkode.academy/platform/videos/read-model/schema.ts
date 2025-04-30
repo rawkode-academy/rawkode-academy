@@ -9,156 +9,156 @@ import { getDatabase } from "../data-model/client.ts";
 import * as dataSchema from "../data-model/schema.ts";
 
 export interface PothosTypes {
-	DrizzleSchema: typeof dataSchema;
-	Scalars: {
-		Date: {
-			Input: Date;
-			Output: Date;
-		};
-	};
+  DrizzleSchema: typeof dataSchema;
+  Scalars: {
+    Date: {
+      Input: Date;
+      Output: Date;
+    };
+  };
 }
 
 const buildSchema = () => {
-	const db = getDatabase();
+  const db = getDatabase();
 
-	const builder = new schemaBuilder<PothosTypes>({
-		plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
-		drizzle: {
-			client: db,
-		},
-	});
+  const builder = new schemaBuilder<PothosTypes>({
+    plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
+    drizzle: {
+      client: db,
+    },
+  });
 
-	builder.addScalarType("Date", DateResolver);
+  builder.addScalarType("Date", DateResolver);
 
-	const videoRef = builder.drizzleObject("videosTable", {
-		name: "Video",
-		fields: (t) => ({
-			id: t.exposeString("id"),
-			title: t.exposeString("title"),
-			subtitle: t.exposeString("subtitle"),
-			slug: t.exposeString("slug"),
-			description: t.exposeString("description"),
-			publishedAt: t.field({
-				type: "Date",
-				resolve: (video) => video.publishedAt,
-			}),
-			duration: t.exposeInt("duration"),
-			streamUrl: t.string({
-				resolve: (video) =>
-					`https://videos.rawkode.academy/${video.id}/stream.m3u8`,
-			}),
-			thumbnailUrl: t.string({
-				resolve: (video) =>
-					`https://videos.rawkode.academy/${video.id}/thumbnail.jpg`,
-			}),
-		}),
-	});
+  const videoRef = builder.drizzleObject("videosTable", {
+    name: "Video",
+    fields: (t) => ({
+      id: t.exposeString("id"),
+      title: t.exposeString("title"),
+      subtitle: t.exposeString("subtitle"),
+      slug: t.exposeString("slug"),
+      description: t.exposeString("description"),
+      publishedAt: t.field({
+        type: "Date",
+        resolve: (video) => video.publishedAt,
+      }),
+      duration: t.exposeInt("duration"),
+      streamUrl: t.string({
+        resolve: (video) =>
+          `https://videos.rawkode.academy/${video.id}/stream.m3u8`,
+      }),
+      thumbnailUrl: t.string({
+        resolve: (video) =>
+          `https://videos.rawkode.academy/${video.id}/thumbnail.jpg`,
+      }),
+    }),
+  });
 
-	builder.asEntity(videoRef, {
-		key: builder.selection<{ id: string }>("id"),
-		resolveReference: (video) =>
-			db.query.videosTable
-				.findFirst({
-					where: eq(dataSchema.videosTable.id, video.id),
-				})
-				.execute(),
-	});
+  builder.asEntity(videoRef, {
+    key: builder.selection<{ id: string }>("id"),
+    resolveReference: (video) =>
+      db.query.videosTable
+        .findFirst({
+          where: eq(dataSchema.videosTable.id, video.id),
+        })
+        .execute(),
+  });
 
-	builder.queryType({
-		fields: (t) => ({
-			videoByID: t.field({
-				type: videoRef,
-				args: {
-					id: t.arg({
-						type: "String",
-						required: true,
-					}),
-				},
-				resolve: (_root, args, _ctx) =>
-					db.query.videosTable
-						.findFirst({
-							where: eq(dataSchema.videosTable.id, args.id),
-						})
-						.execute(),
-			}),
-			getLatestVideos: t.field({
-				type: [videoRef],
-				args: {
-					limit: t.arg({
-						type: "Int",
-						required: false,
-					}),
-					offset: t.arg({
-						type: "Int",
-						required: false,
-					}),
-				},
-				resolve: (_root, args, _ctx) =>
-					db.query.videosTable
-						.findMany({
-							limit: args.limit ?? 15,
-							offset: args.offset ?? 0,
-							where: lte(dataSchema.videosTable.publishedAt, new Date()),
-							orderBy: (video, { desc }) => desc(video.publishedAt),
-						})
-						.execute(),
-			}),
-			getRandomVideos: t.field({
-				type: [videoRef],
-				args: {
-					limit: t.arg({
-						type: "Int",
-						required: false,
-					}),
-				},
-				resolve: (_root, args, _ctx) =>
-					db
-						.select()
-						.from(dataSchema.videosTable)
-						.orderBy(desc(sql`RANDOM()`))
-						.limit(args.limit ?? 15),
-			}),
-			simpleSearch: t.field({
-				type: [videoRef],
-				args: {
-					term: t.arg({
-						type: "String",
-						required: true,
-					}),
-					limit: t.arg({
-						type: "Int",
-						required: false,
-					}),
-				},
-				resolve: (_root, args, _ctx) => {
-					const term = `%${args.term}%`;
+  builder.queryType({
+    fields: (t) => ({
+      videoByID: t.field({
+        type: videoRef,
+        args: {
+          id: t.arg({
+            type: "String",
+            required: true,
+          }),
+        },
+        resolve: (_root, args, _ctx) =>
+          db.query.videosTable
+            .findFirst({
+              where: eq(dataSchema.videosTable.id, args.id),
+            })
+            .execute(),
+      }),
+      getLatestVideos: t.field({
+        type: [videoRef],
+        args: {
+          limit: t.arg({
+            type: "Int",
+            required: false,
+          }),
+          offset: t.arg({
+            type: "Int",
+            required: false,
+          }),
+        },
+        resolve: (_root, args, _ctx) =>
+          db.query.videosTable
+            .findMany({
+              limit: args.limit ?? 15,
+              offset: args.offset ?? 0,
+              where: lte(dataSchema.videosTable.publishedAt, new Date()),
+              orderBy: (video, { desc }) => desc(video.publishedAt),
+            })
+            .execute(),
+      }),
+      getRandomVideos: t.field({
+        type: [videoRef],
+        args: {
+          limit: t.arg({
+            type: "Int",
+            required: false,
+          }),
+        },
+        resolve: (_root, args, _ctx) =>
+          db
+            .select()
+            .from(dataSchema.videosTable)
+            .orderBy(desc(sql`RANDOM()`))
+            .limit(args.limit ?? 15),
+      }),
+      simpleSearch: t.field({
+        type: [videoRef],
+        args: {
+          term: t.arg({
+            type: "String",
+            required: true,
+          }),
+          limit: t.arg({
+            type: "Int",
+            required: false,
+          }),
+        },
+        resolve: (_root, args, _ctx) => {
+          const term = `%${args.term}%`;
 
-					return db.query.videosTable
-						.findMany({
-							limit: args.limit ?? 15,
-							where: and(
-								lte(dataSchema.videosTable.publishedAt, new Date()),
-								or(
-									like(dataSchema.videosTable.title, term),
-									like(dataSchema.videosTable.description, term),
-								),
-							),
-							orderBy: (video, { desc }) => desc(video.publishedAt),
-						})
-						.execute()
-					},
-			}),
-		}),
-	});
+          return db.query.videosTable
+            .findMany({
+              limit: args.limit ?? 15,
+              where: and(
+                lte(dataSchema.videosTable.publishedAt, new Date()),
+                or(
+                  like(dataSchema.videosTable.title, term),
+                  like(dataSchema.videosTable.description, term),
+                ),
+              ),
+              orderBy: (video, { desc }) => desc(video.publishedAt),
+            })
+            .execute();
+        },
+      }),
+    }),
+  });
 
-	return builder;
+  return builder;
 };
 
 export const getSchema = (): GraphQLSchema => {
-	const builder = buildSchema();
+  const builder = buildSchema();
 
-	return builder.toSubGraphSchema({
-		linkUrl: "https://specs.apollo.dev/federation/v2.6",
-		federationDirectives: ["@extends", "@external", "@key"],
-	});
+  return builder.toSubGraphSchema({
+    linkUrl: "https://specs.apollo.dev/federation/v2.6",
+    federationDirectives: ["@extends", "@external", "@key"],
+  });
 };
