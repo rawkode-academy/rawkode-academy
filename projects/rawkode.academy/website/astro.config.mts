@@ -15,7 +15,7 @@ import { vite as vidstackPlugin } from "vidstack/plugins";
 const vidstack = vidstackPlugin as any;
 
 export default defineConfig({
-	output: "static",
+	output: "server",
 	adapter: cloudflare({
 		imageService: "cloudflare",
 	}),
