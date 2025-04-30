@@ -52,11 +52,11 @@ export class Zitadel {
     return tokens;
   }
 
-  public async fetchUser(
+  public fetchUser(
     _accessToken: string,
     idToken: string | undefined,
     _refreshToken: string | undefined,
-  ): Promise<OidcStandardClaims | undefined> {
+  ): OidcStandardClaims | undefined {
     if (!idToken) {
       return undefined;
     }

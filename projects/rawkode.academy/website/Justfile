@@ -2,27 +2,26 @@
 	just --list
 
 dev:
-	bun run astro dev
+	deno run dev
 
 format:
 	nixfmt .
-	bun run format
+	deno fmt .
 
 build:
-	bun run astro check
-	bun run astro build
+	deno run --allow-all npm:astro check
+	deno run --allow-all npm:astro build
 
 test:
-	bun run vitest
+	deno run test
 
 test-with-logs:
-	bun run vitest --reporter=basic --no-file-parallelism --disable-console-intercept
+	deno run --allow-all npm:vitest --reporter=default --no-file-parallelism --disable-console-intercept
 
 deploy:
-	op run -- bun run wrangler pages deploy --branch main dist
+	op run -- bunx wrangler pages deploy --branch main dist
 
 preview:
-	bun run astro preview
+	deno run --allow-all npm:astro preview
 
-codegen:
 	bun run graphql-codegen --config graphql-codegen.ts

@@ -31,10 +31,10 @@ const Typewriter = (props: Props) => {
                 Array<string | number>
               >((acc, prefix: string) => [...acc, prefix, 1250], [])}
               wrapper="span"
-              preRenderFirstString={true}
+              preRenderFirstString
               speed={16}
               deletionSpeed={32}
-              cursor={true}
+              cursor
               repeat={Number.POSITIVE_INFINITY}
             />
             <br />

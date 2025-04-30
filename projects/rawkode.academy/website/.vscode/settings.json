@@ -1,3 +1,6 @@
 {
-  "html.customData": ["./node_modules/vidstack/vscode.html-data.json"]
+  "html.customData": [
+    "./node_modules/vidstack/vscode.html-data.json"
+  ],
+  "deno.enable": true
 }

@@ -1,7 +1,7 @@
-import { Zitadel } from "@/lib/zitadel";
+import { Zitadel } from "@/lib/zitadel/index.ts";
 import { defineMiddleware } from "astro:middleware";
 
-export const authMiddleware = defineMiddleware(async (context, next) => {
+export const authMiddleware = defineMiddleware((context, next) => {
   // The runtime isn't available for pre-rendered pages and we
   // only want this middleware to run for SSR.
   if (!("runtime" in context.locals)) {
@@ -28,7 +28,7 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
 
   const zitadel = new Zitadel();
 
-  const user = await zitadel.fetchUser(
+  const user = zitadel.fetchUser(
     accessToken.value,
     idToken,
     refreshToken,

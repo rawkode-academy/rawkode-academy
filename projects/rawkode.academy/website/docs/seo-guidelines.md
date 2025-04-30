@@ -1,10 +1,12 @@
 # SEO Guidelines and Testing
 
-This document outlines the SEO requirements and testing approach for the Rawkode Academy website to ensure consistent and effective search engine optimization.
+This document outlines the SEO requirements and testing approach for the Rawkode
+Academy website to ensure consistent and effective search engine optimization.
 
 ## Required SEO Components
 
-All pages on the Rawkode Academy website must include the following SEO components:
+All pages on the Rawkode Academy website must include the following SEO
+components:
 
 ### Basic Meta Tags
 
@@ -108,7 +110,8 @@ All pages must include appropriate structured data based on page type:
 
 ## Testing
 
-The SEO requirements are validated using comprehensive tests that ensure all necessary meta tags and structured data are present and properly formatted. 
+The SEO requirements are validated using comprehensive tests that ensure all
+necessary meta tags and structured data are present and properly formatted.
 
 The test suite examines:
 
@@ -125,9 +128,12 @@ bun test src/components/html/seo.test.ts
 
 ## Implementation Notes
 
-- The `head.astro` component includes basic meta tags and imports the OpenGraph component
-- The `opengraph.astro` component handles OpenGraph, Twitter Card, and breadcrumb structured data
-- The `video-metadata.astro` component adds video-specific meta tags and structured data
+- The `head.astro` component includes basic meta tags and imports the OpenGraph
+  component
+- The `opengraph.astro` component handles OpenGraph, Twitter Card, and
+  breadcrumb structured data
+- The `video-metadata.astro` component adds video-specific meta tags and
+  structured data
 - For dynamic image generation, we use the image service with encoded payloads
 
 ## Best Practices
