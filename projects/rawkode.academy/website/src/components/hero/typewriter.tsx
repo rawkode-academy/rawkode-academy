@@ -97,7 +97,11 @@ const Typewriter = (props: Props) => {
           </a>
         </div>
         <div className="hidden lg:mt-0 lg:col-span-4 lg:flex">
-          <img src={props.image.src} alt="Mix of Cloud Native Project Logos" />
+          <img
+            src={props.image.src}
+            alt="Mix of Cloud Native Project Logos"
+            className="object-contain w-full h-auto"
+          />
         </div>
       </div>
     </section>
