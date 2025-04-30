@@ -1,5 +1,7 @@
 /// <reference types="vitest" />
 import { getViteConfig } from "astro/config";
+import process from "node:process";
+import type { ViteUserConfig } from "vitest/config";
 
 // HINT: setting the vars via "test.env" inside the "getViteConfig" object does not work :/
 process.env.ZITADEL_URL = "some-zitadel-url";
@@ -13,7 +15,7 @@ export default getViteConfig({
     environment: "happy-dom",
     globals: true,
     coverage: {
-      reporter: ['text', 'json', 'html'],
+      reporter: ["text", "json", "html"],
     },
   },
-} as any);
+} as ViteUserConfig);

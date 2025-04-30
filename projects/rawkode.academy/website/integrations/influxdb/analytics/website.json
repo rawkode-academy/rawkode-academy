@@ -4,14 +4,14 @@
   { "name": "action", "type": "tag" },
   { "name": "path", "type": "tag" },
 
-	{ "name": "viewer", "type": "tag" },
+  { "name": "viewer", "type": "tag" },
   { "name": "time_on_page", "type": "field", "dataType": "integer" },
 
   { "name": "referrer", "type": "tag" },
   { "name": "browser", "type": "tag" },
   { "name": "os", "type": "tag" },
 
-	{ "name": "country", "type": "tag" },
+  { "name": "country", "type": "tag" },
 
   { "name": "utm_source", "type": "tag" },
   { "name": "utm_medium", "type": "tag" },

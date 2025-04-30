@@ -2,6 +2,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
 import { Resend } from "resend";
+import process from "node:process";
 
 const SignupSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -32,7 +33,7 @@ export const signupForCommunityDay = defineAction({
       await resend.contacts.create({
         email: email,
         unsubscribed: false,
-        audience_id: audienceId,
+        audienceId: audienceId,
       });
     } catch (resendError) {
       console.error("Error adding contact to Resend:", resendError);

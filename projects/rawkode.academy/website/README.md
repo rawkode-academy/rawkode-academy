@@ -22,7 +22,7 @@ We're still considering how to best support this for everyone.
 We use [Flox](https://flox.dev) and their hierarchical activations.
 
 ```shell
-bun run dev
+deno run dev
 ```
 
 ### Without Nix
@@ -31,32 +31,33 @@ If you wanna get up and running, you just need to install
 [Deno](https://deno.com).
 
 ```shell {"name": "install"}
-bun install
+deno install
 ```
 
 ...finally, run the local dev server
 
 ```shell {"name": "dev"}
-bun run dev
+deno run dev
 ```
 
 ## Checks, Linting, & Formatting
 
 ```shell {"name": "check"}
 deno fmt .
-bun run astro check
+deno lint .
+deno run --allow-all npm:astro check
 ```
 
 ## Testing
 
 ```shell {"name": "test"}
-bun run vitest
+deno run test
 ```
 
 We also provide a useful logging / debugging configuration for tests:
 
 ```shell {"name": "test-debug"}
-bun run vitest \
+bun run test \
 	--reporter=basic \
 	--no-file-parallelism \
 	--disable-console-intercept
@@ -65,7 +66,7 @@ bun run vitest \
 ## Deploy
 
 ```shell {"name": "deploy"}
-op run -- bun run wrangler pages deploy --branch main dist
+op run -- bunx wrangler pages deploy --branch main dist
 ```
 
 ## InfluxDB 3

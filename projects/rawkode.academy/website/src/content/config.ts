@@ -29,9 +29,32 @@ const graphQLQuery = gql`
 	}
 `;
 
+interface Video {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  publishedAt: string;
+  streamUrl: string;
+  thumbnailUrl: string;
+  duration: number;
+  technologies: Array<{
+    id: string;
+    name: string;
+    logo: string;
+  }>;
+}
+
+interface GraphQLResponse {
+  videos: Video[];
+}
+
 const videos = defineCollection({
   loader: async () => {
-    const { videos }: any = await graphQLClient.request(graphQLQuery);
+    const { videos }: GraphQLResponse = await graphQLClient.request(
+      graphQLQuery,
+    );
 
     return videos;
   },
@@ -44,14 +67,14 @@ const videos = defineCollection({
     streamUrl: z.string(),
     publishedAt: z.string(),
     thumbnailUrl: z.string(),
-		duration: z.number(),
-		technologies: z.array(
-			z.object({
-				id: z.string(),
-				name: z.string(),
-				logo: z.string(),
-			})
-		),
+    duration: z.number(),
+    technologies: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        logo: z.string(),
+      }),
+    ),
   }),
 });
 
@@ -75,12 +98,12 @@ const articles = defineCollection({
   }),
   schema: ({ image }) =>
     z.object({
-			title: z.string(),
-			description: z.string(),
-			openGraph: z.object({
-				title: z.string(),
-				subtitle: z.string(),
-			}),
+      title: z.string(),
+      description: z.string(),
+      openGraph: z.object({
+        title: z.string(),
+        subtitle: z.string(),
+      }),
       cover: z.object({
         image: image(),
         alt: z.string(),

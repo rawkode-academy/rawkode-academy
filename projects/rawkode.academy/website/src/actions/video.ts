@@ -1,7 +1,7 @@
 import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { getSecret }  from "astro:env/server";
+import { getSecret } from "astro:env/server";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
   z.object({
@@ -53,7 +53,7 @@ export const trackVideoEvent = defineAction({
         database: influxDBBucket,
       });
 
-      let point = Point.measurement("video")
+      const point = Point.measurement("video")
         .setTag("action", event.action)
         .setTag("video", event.video)
         .setTag("viewer", ctx.locals.user?.sub ?? "anonymous");
