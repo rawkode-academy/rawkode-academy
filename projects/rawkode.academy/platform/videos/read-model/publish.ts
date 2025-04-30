@@ -6,10 +6,10 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const schemaAsString = printSchemaWithDirectives(
-	lexicographicSortSchema(getSchema()),
-	{
-		pathToDirectivesInExtensions: [""],
-	},
+  lexicographicSortSchema(getSchema()),
+  {
+    pathToDirectivesInExtensions: [""],
+  },
 );
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
