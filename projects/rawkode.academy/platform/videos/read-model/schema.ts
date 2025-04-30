@@ -130,20 +130,23 @@ const buildSchema = () => {
 						required: false,
 					}),
 				},
-				resolve: (_root, args, _ctx) =>
-					db.query.videosTable
+				resolve: (_root, args, _ctx) => {
+					const term = `%${args.term}%`;
+
+					return db.query.videosTable
 						.findMany({
 							limit: args.limit ?? 15,
 							where: and(
 								lte(dataSchema.videosTable.publishedAt, new Date()),
 								or(
-									like(dataSchema.videosTable.title, args.term),
-									like(dataSchema.videosTable.description, args.term),
+									like(dataSchema.videosTable.title, term),
+									like(dataSchema.videosTable.description, term),
 								),
 							),
 							orderBy: (video, { desc }) => desc(video.publishedAt),
 						})
-						.execute(),
+						.execute()
+					},
 			}),
 		}),
 	});
