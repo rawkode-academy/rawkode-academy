@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "alwaysStrict": true,
-    "charset": "utf8",
     "declaration": true,
     "experimentalDecorators": true,
     "inlineSourceMap": true,
@@ -26,7 +25,8 @@
     "baseUrl": ".gen",
     "paths": {
       "@generatedProviders/*": ["providers/*"]
-    }
+    },
+    "ignoreDeprecations": "5.0"
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"]

@@ -20,4 +20,4 @@ deploy stack="":
   op run -- bun x cdktf deploy {{ stack }}
 
 deletelock:
-  curl -XDELETE -d '{"ID": ""}' -u 'rawkodeacademy:PASSWORD' https://terraform-state-backend.rawkode-academy.workers.dev/states/core-infrastructure-dns/lock
+  curl -XDELETE -d '{"ID": ""}' -u 'rawkodeacademy:PASSWORD' https://terraform-state-backend.rawkodeacademy.workers.dev/states/core-infrastructure-dns/lock
