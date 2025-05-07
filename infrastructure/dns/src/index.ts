@@ -71,7 +71,7 @@ class CoreDns extends TerraformStack {
 const app = new App();
 const stack = new CoreDns(app, "dns");
 
-const baseUrl = "https://terraform-state-backend.rawkode-academy.workers.dev";
+const baseUrl = "https://terraform-state-backend.rawkodeacademy.workers.dev";
 
 new HttpBackend(stack, {
 	address: `${baseUrl}/states/core-infrastructure-dns`,

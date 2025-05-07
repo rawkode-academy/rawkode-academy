@@ -1,4 +1,4 @@
-# RawkodeAcademy Mono Repository
+# Rawkode Academy Mono Repository
 
 ## Chat with Us
 
