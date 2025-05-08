@@ -1,10 +1,10 @@
-import { roomClientService } from "@/lib/livekit";
+import { roomClientService, tokenVerifier } from "@/lib/livekit";
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { AccessToken } from "livekit-server-sdk";
 import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
 import { database } from "@/lib/database";
-import { roomsTable } from "@/schema";
+import { chatMessagesTable, roomsTable } from "@/schema";
 import { desc, isNotNull } from "drizzle-orm";
 
 export type LiveStream = {
@@ -22,6 +22,29 @@ export type PastLiveStream = {
 };
 
 export const server = {
+  addChatMessage: defineAction({
+    input: z.object({
+      roomId: z.string(),
+      token: z.string(),
+      message: z.string(),
+      participantName: z.string(),
+    }),
+
+    handler: async (input) => {
+      try {
+        await tokenVerifier.verify(input.token);
+      } catch (error) {
+        throw new ActionError({ code: "UNAUTHORIZED" });
+      }
+
+      await database.insert(chatMessagesTable).values({
+        roomId: input.roomId,
+        message: input.message,
+        participantName: input.participantName,
+      });
+    },
+  }),
+
   listRooms: defineAction({
     handler: async (_input, context) => {
       if (!context.locals.user) {

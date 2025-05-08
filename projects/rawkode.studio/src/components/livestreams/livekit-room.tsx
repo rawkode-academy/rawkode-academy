@@ -309,7 +309,7 @@ export default function LivekitRoomWrapper({
                     <Separator />
                     <div className="flex-1 grid grid-rows-2 gap-4 min-h-0">
                       <ParticipantsList />
-                      <ChatWithLiveKit />
+                      <ChatWithLiveKit token={token} />
                     </div>
                   </>
                 )
@@ -705,10 +705,16 @@ function ParticipantsList() {
 }
 
 // Chat Section Component using LiveKit's useChat hook
-function ChatWithLiveKit() {
+interface ChatWithLiveKitProps {
+  token: string | null;
+}
+
+function ChatWithLiveKit({ token }: ChatWithLiveKitProps) {
   const { chatMessages, send } = useChat();
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const room = useRoomContext();
+  const localParticipant = useLocalParticipant();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -716,6 +722,47 @@ function ChatWithLiveKit() {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatMessages]);
+
+  const handleSendMessage = async () => {
+    if (messageText.trim() && send) {
+      const currentMessage = messageText;
+      setMessageText(""); // Clear input immediately
+
+      try {
+        // Send LiveKit message
+        await send(currentMessage);
+
+        const roomId = await room.getSid();
+
+        console.log(roomId);
+
+        const participantName = localParticipant.localParticipant.identity;
+        // Call the API endpoint
+        if (token && roomId && participantName) {
+          await fetch("/api/livestream/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              roomId: roomId,
+              message: currentMessage,
+              token: token,
+              participantName: participantName,
+            }),
+          });
+        } else {
+          console.error(
+            "Token or Room ID or Participant Name is missing, cannot send chat to API",
+          );
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
+        // Optionally, restore messageText if send failed
+        // setMessageText(currentMessage);
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -761,21 +808,15 @@ function ChatWithLiveKit() {
           value={messageText}
           onChange={(e) => setMessageText(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && messageText.trim()) {
-              send(messageText);
-              setMessageText("");
+            if (e.key === "Enter") {
+              handleSendMessage();
             }
           }}
         />
         <Button
           size="sm"
           className="h-9 flex-shrink-0"
-          onClick={() => {
-            if (messageText.trim()) {
-              send(messageText);
-              setMessageText("");
-            }
-          }}
+          onClick={handleSendMessage}
         >
           Send
         </Button>
