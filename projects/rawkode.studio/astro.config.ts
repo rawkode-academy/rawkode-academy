@@ -21,6 +21,9 @@ export default defineConfig({
 
   adapter: cloudflare({
     imageService: "cloudflare",
+    platformProxy: {
+      enabled: true,
+    },
   }),
 
   site: site(),
@@ -56,9 +59,7 @@ export default defineConfig({
     checkOrigin: true,
   },
 
-  integrations: [
-    react(),
-  ],
+  integrations: [react()],
 
   vite: {
     plugins: [
