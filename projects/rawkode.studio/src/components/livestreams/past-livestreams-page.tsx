@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { type ColumnDef } from "@tanstack/react-table";
 import { actions } from "astro:actions";
+import { Link } from "react-router";
+import { Button } from "../shadcn/button";
 import { DataTable } from "../common/DataTable";
 import { ErrorMessage } from "../common/ErrorMessage";
 import { Spinner } from "../common/Spinner";
@@ -28,7 +30,15 @@ const columns: ColumnDef<PastLiveStream>[] = [
     accessorKey: "participantsJoined",
     cell: ({ row }) => row.original.participantsJoined ?? 0,
   },
-  // Add more columns if needed, e.g., duration
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => (
+      <Button asChild variant="outline" size="sm">
+        <Link to={`/livestreams/past/${row.original.id}`}>View Details</Link>
+      </Button>
+    ),
+  },
 ];
 
 export default function PastLivestreamsPage() {
