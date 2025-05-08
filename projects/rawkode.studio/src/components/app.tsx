@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import SidebarLayout from "./sidebar/sidebar-layout";
 import HomePage from "./index/index-page";
 import ActiveLivestreamPage from "./livestreams/active-livestreams-page";
+import PastLivestreamsPage from "./livestreams/past-livestreams-page";
 import ProfilePage from "./profile/profile-page";
 import { BrowserRouter, Route, Routes } from "react-router";
 
@@ -39,6 +40,14 @@ export default function App({ user }: Props) {
                 element={
                   <SidebarLayout user={user} title="Active Livestreams">
                     <ActiveLivestreamPage />
+                  </SidebarLayout>
+                }
+              />
+              <Route
+                path="past"
+                element={
+                  <SidebarLayout user={user} title="Past Livestreams">
+                    <PastLivestreamsPage />
                   </SidebarLayout>
                 }
               />
