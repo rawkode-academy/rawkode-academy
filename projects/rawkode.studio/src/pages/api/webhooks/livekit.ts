@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
   const room = event.room;
 
   if (!room) {
-    return new Response("Room  not found", { status: 404 });
+    return new Response("Room not found", { status: 404 });
   }
 
   switch (event.event) {
@@ -46,7 +46,7 @@ export const POST: APIRoute = async ({ request }) => {
       await database.insert(participantsTable).values({
         roomId: room.sid,
         name: participant.identity,
-      });
+      }).onConflictDoNothing();
       break;
     default:
       break;

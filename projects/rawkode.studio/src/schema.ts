@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const roomsTable = sqliteTable("rooms", {
   id: text("id").primaryKey(),
@@ -18,7 +18,9 @@ export const participantsTable = sqliteTable("participants", {
   joinedAt: integer("joined_at", { mode: "timestamp" }).notNull().$defaultFn(
     () => new Date(),
   ),
-});
+}, (table) => [
+  unique().on(table.roomId, table.name),
+]);
 
 export const chatMessagesTable = sqliteTable("chat_messages", {
   id: integer("id").primaryKey({ autoIncrement: true }),
