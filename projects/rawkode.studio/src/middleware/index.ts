@@ -3,6 +3,12 @@ import { defineMiddleware, sequence } from "astro:middleware";
 
 const zitadel = new Zitadel();
 
+// URLs that should be bypassed from authentication
+const bypassUrls = [
+  "/api/webhooks/livekit",
+  "/api/auth/logout",
+];
+
 const authMiddleware = defineMiddleware(async (context, next) => {
   // The runtime isn't available for pre-rendered pages and we
   // only want this middleware to run for SSR.
@@ -10,7 +16,7 @@ const authMiddleware = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  if (context.request.url.endsWith("/api/auth/logout")) {
+  if (bypassUrls.includes(context.request.url)) {
     return next();
   }
 
