@@ -21,9 +21,6 @@ export default defineConfig({
 
   adapter: cloudflare({
     imageService: "cloudflare",
-    platformProxy: {
-      enabled: true,
-    },
   }),
 
   site: site(),
@@ -49,6 +46,14 @@ export default defineConfig({
         access: "secret",
       }),
       LIVEKIT_API_KEY: envField.string({
+        context: "server",
+        access: "secret",
+      }),
+      TURSO_URL: envField.string({
+        context: "server",
+        access: "secret",
+      }),
+      TURSO_AUTH_TOKEN: envField.string({
         context: "server",
         access: "secret",
       }),

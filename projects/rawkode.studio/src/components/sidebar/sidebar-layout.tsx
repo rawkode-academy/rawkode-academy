@@ -26,7 +26,15 @@ import {
 import type { OidcStandardClaimsWithRoles } from "@/lib/security";
 import { queryClient } from "@/store";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Camera, Home, LogOut, MoreVertical, User, Video } from "lucide-react";
+import {
+  Camera,
+  History,
+  Home,
+  LogOut,
+  MoreVertical,
+  User,
+  Video,
+} from "lucide-react";
 import { Link } from "react-router";
 import LivestreamCounter from "./livestream-counter";
 import { ModeToggle } from "../common/ModeToggle";
@@ -159,6 +167,14 @@ export default function SidebarLayout({ user, title, children }: Props) {
                     <SidebarMenuBadge>
                       <LivestreamCounter />
                     </SidebarMenuBadge>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link to="/livestreams/past">
+                        <History />
+                        <span>Past Streams</span>
+                      </Link>
+                    </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>

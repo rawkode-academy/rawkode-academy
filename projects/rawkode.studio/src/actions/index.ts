@@ -3,11 +3,22 @@ import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { AccessToken } from "livekit-server-sdk";
 import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
+import { database } from "@/lib/database";
+import { roomsTable } from "@/schema";
+import { desc, isNotNull } from "drizzle-orm";
 
 export type LiveStream = {
   id: string;
   name: string;
   numParticipants: number;
+};
+
+export type PastLiveStream = {
+  id: string;
+  name: string;
+  startedAt: Date | null;
+  finishedAt: Date;
+  participantsJoined: number | null;
 };
 
 export const server = {
@@ -24,6 +35,50 @@ export const server = {
         name: room.name,
         numParticipants: room.numParticipants || 0,
       }));
+    },
+  }),
+
+  listPastRooms: defineAction({
+    handler: async (_input, context) => {
+      if (!context.locals) {
+        console.error(
+          "Error: context.locals is undefined in listPastRooms action.",
+        );
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server configuration error.",
+        });
+      }
+      try {
+        const pastRoomsData = await database
+          .select({
+            id: roomsTable.id,
+            name: roomsTable.name,
+            startedAt: roomsTable.startedAt,
+            finishedAt: roomsTable.finishedAt,
+            participantsJoined: roomsTable.participantsJoined,
+          })
+          .from(roomsTable)
+          .where(isNotNull(roomsTable.finishedAt))
+          .orderBy(desc(roomsTable.finishedAt));
+
+        return pastRoomsData
+          .filter((
+            room: { finishedAt: Date | null | undefined },
+          ): room is { finishedAt: Date } & typeof room =>
+            room.finishedAt != null
+          )
+          .map((room) => ({
+            ...room,
+            participantsJoined: room.participantsJoined ?? 0,
+          })) as PastLiveStream[];
+      } catch (error) {
+        console.error("Error fetching past rooms:", error);
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch past livestreams.",
+        });
+      }
     },
   }),
 
