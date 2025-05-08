@@ -1,4 +1,8 @@
-import { RoomServiceClient, WebhookReceiver } from "livekit-server-sdk";
+import {
+  RoomServiceClient,
+  TokenVerifier,
+  WebhookReceiver,
+} from "livekit-server-sdk";
 import {
   LIVEKIT_API_KEY,
   LIVEKIT_API_SECRET,
@@ -12,6 +16,11 @@ export const roomClientService = new RoomServiceClient(
 );
 
 export const webhookReceiver = new WebhookReceiver(
+  LIVEKIT_API_KEY,
+  LIVEKIT_API_SECRET,
+);
+
+export const tokenVerifier = new TokenVerifier(
   LIVEKIT_API_KEY,
   LIVEKIT_API_SECRET,
 );

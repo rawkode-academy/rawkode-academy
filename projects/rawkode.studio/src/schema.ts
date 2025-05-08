@@ -10,3 +10,13 @@ export const roomsTable = sqliteTable("rooms", {
   participantsLeft: integer("participants_left").default(0),
   finishedAt: integer("finished_at", { mode: "timestamp" }),
 });
+
+export const chatMessagesTable = sqliteTable("chat_messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  roomId: text("room_id").references(() => roomsTable.id),
+  participantName: text("participant_name").notNull(),
+  message: text("message").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(
+    () => new Date(),
+  ),
+});
