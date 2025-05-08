@@ -15,10 +15,9 @@ export const POST: APIRoute = async ({ request }) => {
   const event = await webhookReceiver.receive(body, authorization);
 
   const room = event.room;
-  const participant = event.participant;
 
-  if (!room || !participant) {
-    return new Response("Room or participant not found", { status: 404 });
+  if (!room) {
+    return new Response("Room  not found", { status: 404 });
   }
 
   switch (event.event) {
@@ -37,6 +36,12 @@ export const POST: APIRoute = async ({ request }) => {
       await database.update(roomsTable).set({
         participantsJoined: sql`${roomsTable.participantsJoined} + 1`,
       }).where(eq(roomsTable.id, room.sid));
+
+      const participant = event.participant;
+
+      if (!participant) {
+        return new Response("Participant not found", { status: 404 });
+      }
 
       await database.insert(participantsTable).values({
         roomId: room.sid,
