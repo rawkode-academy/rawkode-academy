@@ -4,8 +4,8 @@ import { z } from "astro:schema";
 import { AccessToken } from "livekit-server-sdk";
 import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
 import { database } from "@/lib/database";
-import { chatMessagesTable, roomsTable } from "@/schema";
-import { desc, isNotNull } from "drizzle-orm";
+import { chatMessagesTable, participantsTable, roomsTable } from "@/schema";
+import { desc, eq, isNotNull } from "drizzle-orm";
 
 export type LiveStream = {
   id: string;
@@ -19,6 +19,23 @@ export type PastLiveStream = {
   startedAt: Date | null;
   finishedAt: Date;
   participantsJoined: number | null;
+};
+
+// New ChatMessage type
+export type ChatMessage = {
+  id: number;
+  roomId: string;
+  participantName: string;
+  message: string;
+  createdAt: Date;
+};
+
+// New Participant type
+export type Participant = {
+  id: number;
+  roomId: string;
+  name: string;
+  joinedAt: Date;
 };
 
 export const server = {
@@ -42,6 +59,68 @@ export const server = {
         message: input.message,
         participantName: input.participantName,
       });
+    },
+  }),
+
+  // New action to get past room chat messages
+  getPastRoomChatMessages: defineAction({
+    input: z.object({
+      roomId: z.string(),
+    }),
+    handler: async (input, context) => {
+      if (!context.locals.user) {
+        throw new ActionError({ code: "UNAUTHORIZED" });
+      }
+
+      try {
+        const messages = await database
+          .select({
+            id: chatMessagesTable.id,
+            roomId: chatMessagesTable.roomId,
+            participantName: chatMessagesTable.participantName,
+            message: chatMessagesTable.message,
+            createdAt: chatMessagesTable.createdAt,
+          })
+          .from(chatMessagesTable)
+          .where(eq(chatMessagesTable.roomId, input.roomId))
+          .orderBy(chatMessagesTable.createdAt); // Order by creation time
+
+        return messages as ChatMessage[];
+      } catch (error) {
+        console.error("Error fetching chat messages:", error);
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch chat messages.",
+        });
+      }
+    },
+  }),
+
+  // New action to get room participants
+  getRoomParticipants: defineAction({
+    input: z.object({
+      roomId: z.string(),
+    }),
+    handler: async (input, context) => {
+      if (!context.locals.user) {
+        throw new ActionError({ code: "UNAUTHORIZED" });
+      }
+
+      try {
+        const participants = await database
+          .select()
+          .from(participantsTable)
+          .where(eq(participantsTable.roomId, input.roomId))
+          .orderBy(participantsTable.joinedAt);
+
+        return participants as Participant[];
+      } catch (error) {
+        console.error("Error fetching room participants:", error);
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch room participants.",
+        });
+      }
     },
   }),
 

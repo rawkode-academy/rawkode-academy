@@ -1,6 +1,6 @@
 import { database } from "@/lib/database";
 import { webhookReceiver } from "@/lib/livekit";
-import { roomsTable } from "@/schema";
+import { participantsTable, roomsTable } from "@/schema";
 import type { APIRoute } from "astro";
 import { eq, sql } from "drizzle-orm";
 
@@ -15,9 +15,10 @@ export const POST: APIRoute = async ({ request }) => {
   const event = await webhookReceiver.receive(body, authorization);
 
   const room = event.room;
+  const participant = event.participant;
 
-  if (!room) {
-    return new Response("Room not found", { status: 404 });
+  if (!room || !participant) {
+    return new Response("Room or participant not found", { status: 404 });
   }
 
   switch (event.event) {
@@ -36,11 +37,11 @@ export const POST: APIRoute = async ({ request }) => {
       await database.update(roomsTable).set({
         participantsJoined: sql`${roomsTable.participantsJoined} + 1`,
       }).where(eq(roomsTable.id, room.sid));
-      break;
-    case "participant_left":
-      await database.update(roomsTable).set({
-        participantsLeft: sql`${roomsTable.participantsLeft} + 1`,
-      }).where(eq(roomsTable.id, room.sid));
+
+      await database.insert(participantsTable).values({
+        roomId: room.sid,
+        name: participant.identity,
+      });
       break;
     default:
       break;

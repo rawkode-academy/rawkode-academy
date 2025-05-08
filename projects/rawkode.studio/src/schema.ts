@@ -11,6 +11,15 @@ export const roomsTable = sqliteTable("rooms", {
   finishedAt: integer("finished_at", { mode: "timestamp" }),
 });
 
+export const participantsTable = sqliteTable("participants", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  roomId: text("room_id").references(() => roomsTable.id),
+  name: text("name").notNull(),
+  joinedAt: integer("joined_at", { mode: "timestamp" }).notNull().$defaultFn(
+    () => new Date(),
+  ),
+});
+
 export const chatMessagesTable = sqliteTable("chat_messages", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   roomId: text("room_id").references(() => roomsTable.id),
