@@ -1,27 +1,19 @@
-name: rawkode.academy/website/deploy
+name: rawkode.academy/website/preview
 
 on:
-  workflow_dispatch: {}
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [opened, synchronize]
     paths:
-      - ".github/workflows/rawkode-academy-website.yaml"
+      - ".github/workflows/rawkode-academy-website-preview.yaml"
       - "projects/rawkode.academy/website/**"
-  schedule:
-    - cron: "12 4 * * *"
 
 permissions:
    pull-requests: write
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  deploy:
+  preview:
     runs-on: ubuntu-latest
-    name: deploy
+    name: preview
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: cachix/install-nix-action@v26
@@ -30,15 +22,17 @@ jobs:
           name: devenv
       - name: Install devenv.sh
         run: nix profile install nixpkgs#devenv
-      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
-        with:
-          bun-version: latest
       - shell: bash
         working-directory: "projects/rawkode.academy/website"
         run: source .env
-      - name: deploy
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
+        with:
+          bun-version: latest
+      - id: preview
+        name: preview
         # https://github.com/cloudflare/wrangler-action/issues/347
-        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
+        # https://github.com/cloudflare/wrangler-action/issues/329
+        uses: cloudflare/wrangler-action@v3.12.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -48,3 +42,10 @@ jobs:
           workingDirectory: "projects/rawkode.academy/website"
           preCommands: |
             devenv shell bun run build
+      - name: comment-with-preview-url
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3
+        with:
+          message: |
+            🌐 Your preview deployment can be viewed now 🚀
+
+            ${{ steps.preview.outputs.deployment-url }}
