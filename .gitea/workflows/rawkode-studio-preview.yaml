@@ -25,7 +25,8 @@ jobs:
       - id: deploy
         name: deploy
         # https://github.com/cloudflare/wrangler-action/issues/347
-        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
+        # https://github.com/cloudflare/wrangler-action/issues/329
+        uses: cloudflare/wrangler-action@v3.12.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
