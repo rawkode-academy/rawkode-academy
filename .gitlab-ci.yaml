@@ -1,0 +1,42 @@
+.docker:
+  image: docker:latest
+  services:
+    - docker:${DOCKER_VERSION}-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: '1'
+    DOCKER_TLS_CERTDIR: '/certs'
+    DOCKER_CERT_PATH: '/certs/client'
+    DOCKER_DRIVER: overlay2
+    DOCKER_VERSION: '27.2.0'
+    DAGGER_CLOUD_TOKEN: $DAGGER_CLOUD_TOKEN
+.dagger:
+  extends: [.docker]
+  before_script:
+    - apk add curl git
+    - curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
+
+stages:
+  - deploy
+
+website-deploy-production:
+  extends: [.dagger]
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - projects/rawkode.academy/website/**/*
+  script:
+    - cd projects/rawkode.academy/website
+    - dagger call deploy --git-head=main --cloudflare-api-token $CLOUDFLARE_API_TOKEN
+
+website-deploy-merge-request:
+  extends: [.dagger]
+  stage: deploy
+  rules:
+    - if: '$CI_MERGE_REQUEST_ID'
+      changes:
+        - projects/rawkode.academy/website/**/*
+  script:
+    - cd projects/rawkode.academy/website
+    - dagger call deploy --git-head $(git rev-parse --abbrev-ref HEAD) --cloudflare-api-token $CLOUDFLARE_API_TOKEN

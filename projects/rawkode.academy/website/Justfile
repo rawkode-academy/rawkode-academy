@@ -19,7 +19,8 @@ test-with-logs:
 	deno run --allow-all npm:vitest --reporter=default --no-file-parallelism --disable-console-intercept
 
 deploy:
-	op run -- bunx wrangler pages deploy --branch main dist
+	#!/usr/bin/env bash
+	dagger call deploy --git-head $(git rev-parse --abbrev-ref HEAD) --cloudflare-api-token op://sa.rawkode.academy/cloudflare/password
 
 preview:
 	deno run --allow-all npm:astro preview

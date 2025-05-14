@@ -1,5 +1,0 @@
-bun:
-  version: "1.2.10"
-
-deno:
-  version: "2.2.11"

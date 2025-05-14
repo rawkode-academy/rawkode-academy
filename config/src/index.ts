@@ -1,10 +1,22 @@
-import { func, object } from "@dagger.io/dagger"
-import { CloudflareConfig } from "./cloudflare";
+import { func, object } from "@dagger.io/dagger";
 
 @object()
-class Config {
+export class Config {
+	/** Cloudflare account ID. */
 	@func()
-	cloudflare(): CloudflareConfig {
-		return new CloudflareConfig();
+	cloudflareAccountId(): string {
+		return "0aeb879de8e3cdde5fb3d413025222ce";
+	}
+
+	/** Terraform backend URL. */
+	@func()
+	terraformBackendUrl(): string {
+		return "https://terraform-state-backend.rawkode-academy.workers.dev";
+	}
+
+	/** Terraform backend bucket name. */
+	@func()
+	terraformBackendBucketName(): string {
+		return "rawkode-cloud-tfstate";
 	}
 }

@@ -53,11 +53,6 @@ const baseMenuItems = [
 		icon: CalendarIcon,
 	},
 	{
-		name: "ADRs",
-		href: "/adrs",
-		icon: DocumentTextIcon,
-	},
-	{
 		name: "Zulip Chat",
 		href: "https://chat.rawkode.academy",
 		icon: ChatBubbleLeftEllipsisIcon,
