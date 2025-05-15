@@ -20,8 +20,7 @@ export default (scope: Construct): ManagedDomain => {
 			"_atproto",
 			"_atproto",
 			"did=did:plc:35bdlgus7hihmup66o265nuy",
-		)
-		.addARecord("gitlab", "@", "51.159.221.54");
+		);
 
 	return managedDomain;
 };

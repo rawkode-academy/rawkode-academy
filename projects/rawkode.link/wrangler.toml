@@ -1,16 +1,16 @@
 name = "rawkode-link"
 main = "src/index.ts"
-compatibility_date = "2023-08-01"
+compatibility_date = "2025-05-01"
 
 workers_dev = false
-
-usage_model = "unbound"
 
 routes = [
   { pattern = "rawkode.chat", custom_domain = true },
   { pattern = "rawkode.chat/*", zone_name = "rawkode.chat" },
   { pattern = "rawkode.community", custom_domain = true },
   { pattern = "rawkode.community/*", zone_name = "rawkode.community" },
+  { pattern = "rawkode.dev", custom_domain = true },
+  { pattern = "rawkode.dev/*", zone_name = "rawkode.dev" },
   { pattern = "rawkode.link", custom_domain = true },
   { pattern = "rawkode.link/*", zone_name = "rawkode.link" },
   { pattern = "rawkode.live", custom_domain = true },
