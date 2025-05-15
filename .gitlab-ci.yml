@@ -19,7 +19,16 @@
     - curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
 
 stages:
+  - bootstrap
   - deploy
+
+bootstrap:
+  stage: bootstrap
+  image: alpine:latest
+  script:
+    - echo "Welcome to CICD"
+    - echo "This pipeline ensures that MRs can be merged when they have no pipeline."
+    - echo "Fun, right?"
 
 website-deploy-production:
   extends: [.dagger]
