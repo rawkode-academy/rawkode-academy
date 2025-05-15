@@ -71,15 +71,16 @@ class CoreDns extends TerraformStack {
 const app = new App();
 const stack = new CoreDns(app, "dns");
 
-const baseUrl = "https://terraform-state-backend.rawkodeacademy.workers.dev";
+const address = "https://code.rawkode.academy/api/v4/projects/1/terraform/state/infrastructure-dns";
 
 new HttpBackend(stack, {
-	address: `${baseUrl}/states/core-infrastructure-dns`,
+	address,
+	username: "terraform",
+	retryWaitMin: 5,
+	lockAddress: `${address}/lock`,
 	lockMethod: "PUT",
+	unlockAddress: `${address}/lock`,
 	unlockMethod: "DELETE",
-	lockAddress: `${baseUrl}/states/core-infrastructure-dns/lock`,
-	unlockAddress: `${baseUrl}/states/core-infrastructure-dns/lock`,
-	username: "rawkodeacademy",
 });
 
 app.synth();
