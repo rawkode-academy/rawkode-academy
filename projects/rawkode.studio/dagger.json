@@ -1,5 +1,5 @@
 {
-  "name": "website",
+  "name": "studio",
   "engineVersion": "v0.18.8",
   "sdk": {
     "source": "typescript"
@@ -7,7 +7,7 @@
   "dependencies": [
     {
       "name": "bun",
-      "source": "../../../dagger/bun"
+      "source": "../../dagger/bun"
     }
   ],
   "source": ".dagger"

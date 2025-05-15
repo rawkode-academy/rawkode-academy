@@ -1,6 +1,6 @@
 {
   "name": "config",
-  "engineVersion": "v0.18.7",
+  "engineVersion": "v0.18.8",
   "sdk": {
     "source": "typescript"
   }

@@ -1,0 +1,21 @@
+{
+  "name": "cloudflare",
+  "engineVersion": "v0.18.8",
+  "sdk": {
+    "source": "typescript"
+  },
+  "dependencies": [
+    {
+      "name": "config",
+      "source": "../../config"
+    },
+    {
+      "name": "bun",
+      "source": "../bun"
+    },
+    {
+      "name": "gitlab",
+      "source": "../gitlab"
+    }
+  ]
+}

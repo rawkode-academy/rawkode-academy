@@ -6,7 +6,7 @@ shell: bash
 
 # Rawkode Academy Website
 
-This is the website at https://rawkode.academy
+This is the website at https://rawkode.academy.
 
 ## Local Development
 
