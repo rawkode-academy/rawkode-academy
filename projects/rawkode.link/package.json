@@ -1,5 +1,5 @@
 {
-	"name": "@rawkodeacademy/rawkode.link",
+	"name": "rawkode.link",
 	"private": true,
 	"scripts": {
 		"deploy": "wrangler deploy",

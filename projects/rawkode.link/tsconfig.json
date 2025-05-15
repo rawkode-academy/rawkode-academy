@@ -1,28 +1,22 @@
 {
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "ES2021"
-    ],
-    "module": "ES2022",
-    "moduleResolution": "node",
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "outDir": "dist",
-    "pretty": true,
-    "sourceMap": true,
-    "strict": true,
-    "noEmit": true,
-    "target": "ES2021",
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
-    "types": [
-      "@cloudflare/workers-types"
-    ]
-  },
-  "include": [
-    "src/index.ts"
-  ]
+	"compilerOptions": {
+		"experimentalDecorators": true,
+		"forceConsistentCasingInFileNames": true,
+		"lib": ["ES2021"],
+		"module": "ES2022",
+		"moduleResolution": "node",
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"outDir": "dist",
+		"pretty": true,
+		"sourceMap": true,
+		"strict": true,
+		"noEmit": true,
+		"target": "ES2021",
+		"isolatedModules": true,
+		"skipLibCheck": true,
+		"allowSyntheticDefaultImports": true,
+		"types": ["@cloudflare/workers-types"]
+	},
+	"include": ["src/index.ts"]
 }
