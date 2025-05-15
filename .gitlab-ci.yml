@@ -111,3 +111,34 @@ studio-deploy-merge-request:
           env:CICD_COMMENT_TOKEN \
           --merge-request-id=$CI_MERGE_REQUEST_ID
       .
+
+infrastructure-dns-merge-request:
+  stage: deploy
+  rules:
+    - if: "$CI_MERGE_REQUEST_ID"
+      changes:
+        - infrastructure/dns/**/*
+  id_tokens:
+    GCP_ID_TOKEN:
+      aud: code.rawkode.academy
+  secrets:
+    CLOUDFLARE_TOKEN:
+      gcp_secret_manager:
+        name: projects/458678766461/secrets/clouflare-dns-edit
+      token: $GCP_ID_TOKEN
+    DNSIMPLE_TOKEN:
+      gcp_secret_manager:
+        name: projects/458678766461/secrets/dnsimple-all-access
+      token: $GCP_ID_TOKEN
+  script:
+    - cd infrastructure/dns
+    - |
+      dagger <<.
+        container |
+          from "oven/bun" |
+          with-exec "bun install" |
+          with-exec "bun x cdktf provider get" |
+          with-secret-variable CLOUDFLARE_TOKEN env:CLOUDFLARE_TOKEN |
+          with-secret-variable DNSIMPLE_TOKEN env:DNSIMPLE_TOKEN |
+          with-exec "bun x cdktf plan"
+      .
