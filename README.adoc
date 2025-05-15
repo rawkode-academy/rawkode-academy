@@ -1,0 +1,13 @@
+= Rawkode Academy Mono Repository
+
+image:https://code.rawkode.academy/RawkodeAcademy/RawkodeAcademy/badges/main/pipeline.svg[link="https://code.rawkode.academy/RawkodeAcademy/RawkodeAcademy/-/commits/main",title="pipeline status"]
+
+== Chat with Us
+
+link:https://chat.rawkode.academy[image:https://img.shields.io/badge/Zulip-Join_the_Community-5f5ed7.svg?style=for-the-badge&logo=zulip[Join the Rawkode Academy Zulip]]
+
+== CDRs
+
+Community Decision Records take huge inspiration from link:https://github.com/joelparkerhenderson/architecture-decision-record[Architecture Decision Records ]. They're proposals to help the Academy grow and become an inclusive place for all people interested in future-facing technologies.
+
+Have a look at the link:./cdrs[cdrs] folder for the records.
