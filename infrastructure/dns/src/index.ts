@@ -78,7 +78,7 @@ new HttpBackend(stack, {
 	address,
 	retryWaitMin: 5,
 	lockAddress: `${address}/lock`,
-	lockMethod: "PUT",
+	lockMethod: "POST",
 	unlockAddress: `${address}/lock`,
 	unlockMethod: "DELETE",
 });
