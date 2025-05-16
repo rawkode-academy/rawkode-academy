@@ -57,7 +57,7 @@ export class ManagedDomain extends Construct {
 
 		this.cloudflareZone = new Zone(this, "zone", {
 			zone,
-			accountId: process.env.CLOUDFLARE_ACCOUNT_ID || "",
+			accountId: "0aeb879de8e3cdde5fb3d413025222ce",
 			type: "full",
 			lifecycle: {
 				preventDestroy: true,
