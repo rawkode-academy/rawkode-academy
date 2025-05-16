@@ -136,10 +136,14 @@ infrastructure-dns-merge-request:
     - |
       dagger <<.
         container |
-          from "oven/bun" |
-          with-exec "bun install" |
-          with-exec "bun x cdktf provider get" |
+          from "docker.io/hashicorp/jsii-terraform" |
+          with-mounted-directory /code . |
+          with-workdir /code |
+          with-exec -- npm install |
+          with-exec -- npx cdktf provider get |
+          with-env-variable TF_HTTP_USERNAME gitlab-ci-token |
           with-secret-variable CLOUDFLARE_TOKEN env:CLOUDFLARE_TOKEN |
+          with-secret-variable TF_HTTP_PASSWORD env:CI_JOB_TOKEN |
           with-secret-variable DNSIMPLE_TOKEN env:DNSIMPLE_TOKEN |
-          with-exec -- bun x cdktf plan
+          with-exec -- npx cdktf plan
       .
