@@ -1,7 +1,7 @@
 {
   "projectId": "78822cba-f36f-481e-9d39-199e9d81602b",
   "language": "typescript",
-  "app": "bun x ts-node src/index.ts",
+  "app": "npx ts-node src/index.ts",
   "sendCrashReports": "false",
   "terraformProviders": [
     "cloudflare/cloudflare@~> 3.32",
