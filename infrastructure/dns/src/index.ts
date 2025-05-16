@@ -32,9 +32,7 @@ class CoreDns extends TerraformStack {
 	constructor(scope: Construct, id: string) {
 		super(scope, id);
 
-		new CloudflareProvider(this, "cloudflare", {
-			accountId: "0aeb879de8e3cdde5fb3d413025222ce",
-		});
+		new CloudflareProvider(this, "cloudflare");
 
 		new DnsimpleProvider(this, "dnsimple", {
 			account: "126046",
