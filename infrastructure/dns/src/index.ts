@@ -33,11 +33,12 @@ class CoreDns extends TerraformStack {
 		super(scope, id);
 
 		new CloudflareProvider(this, "cloudflare", {
-			apiToken: process.env.CLOUDFLARE_API_TOKEN,
+			accountId: "0aeb879de8e3cdde5fb3d413025222ce",
+			apiToken: process.env.CLOUDFLARE_TOKEN,
 		});
 
 		new DnsimpleProvider(this, "dnsimple", {
-			account: process.env.DNSIMPLE_ACCOUNT || "",
+			account: "126046",
 			token: process.env.DNSIMPLE_TOKEN || "",
 		});
 
@@ -75,7 +76,6 @@ const address = "https://code.rawkode.academy/api/v4/projects/1/terraform/state/
 
 new HttpBackend(stack, {
 	address,
-	username: "terraform",
 	retryWaitMin: 5,
 	lockAddress: `${address}/lock`,
 	lockMethod: "PUT",

@@ -133,6 +133,7 @@ infrastructure-dns-merge-request:
       token: $GCP_ID_TOKEN
   script:
     - cd infrastructure/dns
+    - printenv
     - |
       dagger <<.
         container |
@@ -142,8 +143,8 @@ infrastructure-dns-merge-request:
           with-exec -- npm install |
           with-exec -- npx cdktf provider get |
           with-env-variable TF_HTTP_USERNAME gitlab-ci-token |
-          with-secret-variable CLOUDFLARE_TOKEN env:CLOUDFLARE_TOKEN |
           with-secret-variable TF_HTTP_PASSWORD env:CI_JOB_TOKEN |
+          with-secret-variable CLOUDFLARE_TOKEN env:CLOUDFLARE_TOKEN |
           with-secret-variable DNSIMPLE_TOKEN env:DNSIMPLE_TOKEN |
           with-exec -- npx cdktf plan
       .
