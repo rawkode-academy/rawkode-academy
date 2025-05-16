@@ -27,10 +27,6 @@ const maltPricingPlan: PricingPlan = {
 			description: "Extensive dedicated time for strategic consulting, product positioning, and premium content development"
 		},
 		{
-			text: "Exclusive 2-Hour Course",
-			description: "Custom-developed educational course on your product, technology, or pattern of choice, professionally produced and promoted to our audience"
-		},
-		{
 			text: "Executive Advisory Sessions",
 			description: "Direct access to our team for strategic guidance and industry insights"
 		},
