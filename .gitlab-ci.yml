@@ -113,6 +113,7 @@ studio-deploy-merge-request:
       .
 
 infrastructure-dns-merge-request:
+  extends: [.dagger]
   stage: deploy
   rules:
     - if: "$CI_MERGE_REQUEST_ID"
@@ -140,5 +141,5 @@ infrastructure-dns-merge-request:
           with-exec "bun x cdktf provider get" |
           with-secret-variable CLOUDFLARE_TOKEN env:CLOUDFLARE_TOKEN |
           with-secret-variable DNSIMPLE_TOKEN env:DNSIMPLE_TOKEN |
-          with-exec "bun x cdktf plan"
+          with-exec -- bun x cdktf plan
       .
