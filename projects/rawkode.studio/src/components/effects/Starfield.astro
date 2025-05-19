@@ -1,11 +1,11 @@
 ---
-import type { HTMLAttributes } from 'astro/types';
+import type { HTMLAttributes } from "astro/types";
 
-interface Props extends HTMLAttributes<'div'> {
-  seed?: string; // Optional seed for deterministic generation
+interface Props extends HTMLAttributes<"div"> {
+	seed?: string; // Optional seed for deterministic generation
 }
 
-const { seed = 'default-seed', ...rest } = Astro.props;
+const { seed = "default-seed", ...rest } = Astro.props;
 ---
 
 <style is:inline>
