@@ -1,139 +1,134 @@
-import { Link, useParams } from "react-router";
-import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
 import { actions } from "astro:actions";
 import type { ChatMessage, Participant } from "@/actions"; // Import ChatMessage and Participant types
-import { Spinner } from "../common/Spinner"; // Import Spinner
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { Link, useParams } from "react-router";
 import { ErrorMessage } from "../common/ErrorMessage"; // Import ErrorMessage
+import { Spinner } from "../common/Spinner"; // Import Spinner
 
 export default function PastLivestreamDetailsPage() {
-  const { roomId } = useParams<{ roomId: string }>();
+	const { roomId } = useParams<{ roomId: string }>();
 
-  const {
-    isPending: chatPending,
-    isError: chatError,
-    data: chatMessages,
-    error: chatFetchError,
-  } = useQuery({
-    queryKey: ["pastLivestreamChatMessages", roomId],
-    queryFn: async () => {
-      if (!roomId) return [];
-      const { data, error } = await actions.getPastRoomChatMessages({ roomId });
-      if (error) throw error;
-      return data as ChatMessage[];
-    },
-    enabled: !!roomId,
-  });
+	const {
+		isPending: chatPending,
+		isError: chatError,
+		data: chatMessages,
+		error: chatFetchError,
+	} = useQuery({
+		queryKey: ["pastLivestreamChatMessages", roomId],
+		queryFn: async () => {
+			if (!roomId) return [];
+			const { data, error } = await actions.getPastRoomChatMessages({ roomId });
+			if (error) throw error;
+			return data as ChatMessage[];
+		},
+		enabled: !!roomId,
+	});
 
-  const {
-    isPending: participantsPending,
-    isError: participantsError,
-    data: participants,
-    error: participantsFetchError,
-  } = useQuery({
-    queryKey: ["roomParticipants", roomId],
-    queryFn: async () => {
-      if (!roomId) return [];
-      const { data, error } = await actions.getRoomParticipants({ roomId });
-      if (error) throw error;
-      return data as Participant[];
-    },
-    enabled: !!roomId,
-  });
+	const {
+		isPending: participantsPending,
+		isError: participantsError,
+		data: participants,
+		error: participantsFetchError,
+	} = useQuery({
+		queryKey: ["roomParticipants", roomId],
+		queryFn: async () => {
+			if (!roomId) return [];
+			const { data, error } = await actions.getRoomParticipants({ roomId });
+			if (error) throw error;
+			return data as Participant[];
+		},
+		enabled: !!roomId,
+	});
 
-  const isPending = chatPending || participantsPending;
-  const isError = chatError || participantsError;
-  const errorToDisplay = chatFetchError || participantsFetchError;
+	const isPending = chatPending || participantsPending;
+	const isError = chatError || participantsError;
+	const errorToDisplay = chatFetchError || participantsFetchError;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="p-6"
-    >
-      <div className="mb-4">
-        <Link
-          to="/livestreams/past"
-          className="text-sm text-blue-500 hover:text-blue-400 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          &larr; Back to Past Livestreams
-        </Link>
-      </div>
-      <h1 className="text-2xl font-semibold mb-6 text-neutral-800 dark:text-neutral-200">
-        Chat History for Livestream: {roomId}
-      </h1>
+	return (
+		<motion.div
+			initial={{ opacity: 0, y: 20 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ duration: 0.5 }}
+			className="p-6"
+		>
+			<div className="mb-4">
+				<Link
+					to="/livestreams/past"
+					className="text-sm text-blue-500 hover:text-blue-400 dark:text-blue-400 dark:hover:text-blue-300"
+				>
+					&larr; Back to Past Livestreams
+				</Link>
+			</div>
+			<h1 className="text-2xl font-semibold mb-6 text-neutral-800 dark:text-neutral-200">
+				Chat History for Livestream: {roomId}
+			</h1>
 
-      {isPending && (
-        <div className="flex items-center justify-center h-64">
-          <Spinner className="size-10 text-blue-500" />
-        </div>
-      )}
+			{isPending && (
+				<div className="flex items-center justify-center h-64">
+					<Spinner className="size-10 text-blue-500" />
+				</div>
+			)}
 
-      {isError && errorToDisplay && <ErrorMessage error={errorToDisplay} />}
+			{isError && errorToDisplay && <ErrorMessage error={errorToDisplay} />}
 
-      {!isPending && !isError && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-3 bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg max-h-[70vh] overflow-y-auto">
-            {chatMessages && chatMessages.length > 0
-              ? (
-                chatMessages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className="flex flex-col p-3 bg-white dark:bg-neutral-700 rounded-md"
-                  >
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-semibold text-sm text-neutral-600 dark:text-neutral-300">
-                        {msg.participantName}
-                      </span>
-                      <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                        {new Date(msg.createdAt).toLocaleString()}
-                      </span>
-                    </div>
-                    <p className="text-neutral-700 dark:text-neutral-200 text-sm">
-                      {msg.message}
-                    </p>
-                  </div>
-                ))
-              )
-              : (
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  No chat messages found for this livestream.
-                </p>
-              )}
-          </div>
+			{!isPending && !isError && (
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+					<div className="md:col-span-2 space-y-3 bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg max-h-[70vh] overflow-y-auto">
+						{chatMessages && chatMessages.length > 0 ? (
+							chatMessages.map((msg) => (
+								<div
+									key={msg.id}
+									className="flex flex-col p-3 bg-white dark:bg-neutral-700 rounded-md"
+								>
+									<div className="flex justify-between items-center mb-1">
+										<span className="font-semibold text-sm text-neutral-600 dark:text-neutral-300">
+											{msg.participantName}
+										</span>
+										<span className="text-xs text-neutral-500 dark:text-neutral-400">
+											{new Date(msg.createdAt).toLocaleString()}
+										</span>
+									</div>
+									<p className="text-neutral-700 dark:text-neutral-200 text-sm">
+										{msg.message}
+									</p>
+								</div>
+							))
+						) : (
+							<p className="text-neutral-500 dark:text-neutral-400">
+								No chat messages found for this livestream.
+							</p>
+						)}
+					</div>
 
-          {participants && participants.length > 0
-            ? (
-              <div className="md:col-span-1 bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg max-h-[70vh] overflow-y-auto">
-                <h2 className="text-lg font-semibold mb-3 text-neutral-700 dark:text-neutral-300">
-                  Participants ({participants.length})
-                </h2>
-                <ul className="space-y-2">
-                  {participants.map((participant) => (
-                    <li
-                      key={participant.id} // Assuming participant has an id
-                      className="p-2 bg-white dark:bg-neutral-700 rounded text-sm text-neutral-600 dark:text-neutral-300"
-                    >
-                      {participant.name}
-                      <span className="block text-xs text-neutral-400 dark:text-neutral-500">
-                        Joined:{" "}
-                        {new Date(participant.joinedAt).toLocaleString()}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-            : (
-              <div className="md:col-span-1 bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg">
-                <p className="text-neutral-500 dark:text-neutral-400">
-                  No participants found for this livestream.
-                </p>
-              </div>
-            )}
-        </div>
-      )}
-    </motion.div>
-  );
+					{participants && participants.length > 0 ? (
+						<div className="md:col-span-1 bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg max-h-[70vh] overflow-y-auto">
+							<h2 className="text-lg font-semibold mb-3 text-neutral-700 dark:text-neutral-300">
+								Participants ({participants.length})
+							</h2>
+							<ul className="space-y-2">
+								{participants.map((participant) => (
+									<li
+										key={participant.id} // Assuming participant has an id
+										className="p-2 bg-white dark:bg-neutral-700 rounded text-sm text-neutral-600 dark:text-neutral-300"
+									>
+										{participant.name}
+										<span className="block text-xs text-neutral-400 dark:text-neutral-500">
+											Joined: {new Date(participant.joinedAt).toLocaleString()}
+										</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					) : (
+						<div className="md:col-span-1 bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg">
+							<p className="text-neutral-500 dark:text-neutral-400">
+								No participants found for this livestream.
+							</p>
+						</div>
+					)}
+				</div>
+			)}
+		</motion.div>
+	);
 }

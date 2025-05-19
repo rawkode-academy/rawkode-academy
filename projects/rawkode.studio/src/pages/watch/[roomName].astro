@@ -1,31 +1,31 @@
 ---
 import { actions } from "astro:actions";
-import '@/styles/global.css';
-import { roomClientService } from "@/lib/livekit";
+import "@/styles/global.css";
 import { LIVEKIT_URL } from "astro:env/server";
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import LivekitRoom from '@/components/livestreams/livekit-room';
+import LivekitRoom from "@/components/livestreams/livekit-room";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { roomClientService } from "@/lib/livekit";
 
 // Get the roomName from the URL parameter
 const { roomName } = Astro.params;
 
 // Redirect if no room name is provided
 if (!roomName) {
-  return Astro.redirect("/");
+	return Astro.redirect("/");
 }
 
 // Check if the room actually exists
 let roomExists = false;
 try {
-  const rooms = await roomClientService.listRooms();
-  roomExists = rooms.some(room => room.name === roomName);
+	const rooms = await roomClientService.listRooms();
+	roomExists = rooms.some((room) => room.name === roomName);
 } catch (error) {
-  console.error("Error checking if room exists:", error);
+	console.error("Error checking if room exists:", error);
 }
 
 // If room doesn't exist, redirect to home
 if (!roomExists) {
-  return Astro.redirect("/?error=room-not-found");
+	return Astro.redirect("/?error=room-not-found");
 }
 
 // Check if user is authenticated
@@ -33,7 +33,7 @@ const user = Astro.locals.user;
 
 // If no user, we'll check for sessionStorage token client-side
 if (!user) {
-  console.log("No authenticated user - will check for guest token client-side");
+	console.log("No authenticated user - will check for guest token client-side");
 }
 
 // Only generate a server-side token if user is authenticated
@@ -42,29 +42,34 @@ let token = null;
 let tokenError = null;
 
 if (user) {
-  try {
-    const response = await Astro.callAction(actions.generateTokenFromInvite, {
-      roomName,
-      participantName: user?.preferred_username || user?.name,
-    });
+	try {
+		const response = await Astro.callAction(actions.generateTokenFromInvite, {
+			roomName,
+			participantName: user?.preferred_username || user?.name,
+		});
 
-    if (response && response.data && typeof response.data === 'string') {
-      token = response.data;
-    } else if (typeof response === 'string') {
-      token = response;
-    }
+		if (response?.data && typeof response.data === "string") {
+			token = response.data;
+		} else if (typeof response === "string") {
+			token = response;
+		}
 
-    console.log("Generated token for authenticated user", { hasToken: !!token, tokenLength: token?.length });
-  } catch (error) {
-    console.error("Error generating token for user:", error);
-    tokenError = "Failed to generate access token. Please try again.";
-  }
+		console.log("Generated token for authenticated user", {
+			hasToken: !!token,
+			tokenLength: token?.length,
+		});
+	} catch (error) {
+		console.error("Error generating token for user:", error);
+		tokenError = "Failed to generate access token. Please try again.";
+	}
 } else {
-  console.log("Skipping server-side token generation for guest - will use sessionStorage");
+	console.log(
+		"Skipping server-side token generation for guest - will use sessionStorage",
+	);
 }
 
 // Default display name for authenticated users
-const displayName = user?.preferred_username || user?.name || 'Guest';
+const displayName = user?.preferred_username || user?.name || "Guest";
 ---
 
 <BaseLayout title={`Watch: ${roomName} - Live Stream`}>
