@@ -1,0 +1,26 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "standup-bot",
+	"main": "src/main.ts",
+	"compatibility_date": "2025-05-05",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+			"head_sampling_rate": 1,
+			"invocation_logs": true
+		}
+	},
+	"triggers": {
+		"crons": [
+			"0 3 * * Mon-Fri"
+		],
+	},
+	"vars": {
+		"ZULIP_USERNAME": "rocko-bot@chat.rawkode.academy",
+		"ZULIP_REALM": "https://chat.rawkode.academy",
+	},
+}

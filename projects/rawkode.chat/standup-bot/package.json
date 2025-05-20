@@ -1,10 +1,17 @@
 {
-	"name": "standup-bot",
-	"private": true,
-	"dependencies": {
-		"zulip-js": "^2.1.0"
-	},
-	"peerDependencies": {
-		"typescript": "^5"
-	}
+  "name": "standup-bot",
+  "private": true,
+  "dependencies": {
+    "zulip-js": "^2.1.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250520.0",
+    "@types/bun": "^1.2.13",
+    "@types/isomorphic-fetch": "^0.0.39",
+    "@types/isomorphic-form-data": "^2.0.4",
+    "wrangler": "^4.16.0"
+  }
 }
