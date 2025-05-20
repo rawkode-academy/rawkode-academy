@@ -333,9 +333,18 @@ const { seed = "default-seed", ...rest } = Astro.props;
     };
 
     // Initialize the random number generator with the seed
-    const numericSeed = cyrb53(initialSeed);
+    let numericSeed;
+
+    if (initialSeed && initialSeed !== "null" && initialSeed !== "undefined") {
+      numericSeed = cyrb53(initialSeed);
+    } else {
+      // Fallback to a new random seed if none is provided or it's invalid
+      initialSeed = Math.random().toString(36).substring(2, 15);
+      numericSeed = cyrb53(initialSeed);
+    }
+
     let random = mulberry32(numericSeed);
-    console.log(`Starfield initialized with seed: "${initialSeed}" (Numeric: ${numericSeed})`);
+
     // --- End Seeded PRNG Setup ---
 
     // --- Single Label for Star Hovers ---
@@ -455,7 +464,7 @@ const { seed = "default-seed", ...rest } = Astro.props;
     // Pause the game loop without stopping it completely
     function pauseGameLoop() {
       if (!isPaused) {
-        console.log('Starfield game loop paused - tab inactive');
+
 
         // Store current time for pause duration calculation
         const pauseStartTime = performance.now();
@@ -501,7 +510,7 @@ const { seed = "default-seed", ...rest } = Astro.props;
     // Resume the game loop
     function resumeGameLoop() {
       if (isPaused) {
-        console.log('Starfield game loop resumed - tab active');
+
 
         // Current time for resuming
         const resumeTime = performance.now();
@@ -572,7 +581,7 @@ const { seed = "default-seed", ...rest } = Astro.props;
     function gameLoop(timestamp) {
       // If we're paused, don't process anything
       if (isPaused) {
-        console.log("Game loop running while paused - this shouldn't happen");
+
         return;
       }
 
@@ -582,7 +591,7 @@ const { seed = "default-seed", ...rest } = Astro.props;
 
       // Protect against very large time steps (e.g., after tab was inactive)
       if (deltaTime > 1000) {
-        console.log(`Large delta time detected: ${deltaTime}ms - capping to 1000ms`);
+
         deltaTime = 1000; // Cap at 1 second
       }
 
@@ -1660,19 +1669,19 @@ const { seed = "default-seed", ...rest } = Astro.props;
 
       // Event Delegation setup (remains the same)
       document.addEventListener('DOMContentLoaded', function() {
-        console.log('Starfield DOM loaded, setting up event handlers');
+
         setupStarHoverEvents();
       });
       function setupStarHoverEvents() {
         starField.addEventListener('mouseover', handleStarMouseOver, true);
         starField.addEventListener('mouseout', handleStarMouseOut, true);
-        console.log('Star hover events attached to starfield');
+
       }
       function handleStarMouseOver(event) {
         if (event.target.classList.contains('star')) {
           const starElement = event.target;
           const starId = starElement.id;
-          console.log("Star hover detected:", starId);
+
           for (const star of allStars) {
             if (star.id === starId && star.name) {
               starHoverLabel.textContent = star.name;
@@ -1800,7 +1809,7 @@ const { seed = "default-seed", ...rest } = Astro.props;
 
       // Add to active comets
       activeComets.push(newComet);
-      console.log(`Comet ${newComet.id} created (${cometSizeClass}). Active: ${activeComets.length}`);
+
     }
 
     // Create energy burst - Modified for the new game loop

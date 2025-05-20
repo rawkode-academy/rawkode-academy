@@ -105,10 +105,7 @@ export default function RoomJoinForm({
 				// Store the display name in sessionStorage
 				if (name.trim()) {
 					sessionStorage.setItem("display-name", name.trim());
-					console.log("Guest name stored in sessionStorage:", name.trim());
 				}
-
-				console.log("Token generated and stored in sessionStorage");
 
 				// Hide this component and show success message
 				const formContainer = document

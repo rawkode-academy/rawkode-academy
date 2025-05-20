@@ -87,7 +87,6 @@ export const server = {
 
 				return messages as ChatMessage[];
 			} catch (error) {
-				console.error("Error fetching chat messages:", error);
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Failed to fetch chat messages.",
@@ -115,7 +114,6 @@ export const server = {
 
 				return participants as Participant[];
 			} catch (error) {
-				console.error("Error fetching room participants:", error);
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Failed to fetch room participants.",
@@ -143,9 +141,6 @@ export const server = {
 	listPastRooms: defineAction({
 		handler: async (_input, context) => {
 			if (!context.locals) {
-				console.error(
-					"Error: context.locals is undefined in listPastRooms action.",
-				);
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Server configuration error.",
@@ -175,7 +170,6 @@ export const server = {
 						participantsJoined: room.participantsJoined ?? 0,
 					})) as PastLiveStream[];
 			} catch (error) {
-				console.error("Error fetching past rooms:", error);
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Failed to fetch past livestreams.",
@@ -197,7 +191,6 @@ export const server = {
 
 				return { exists: roomExists };
 			} catch (error) {
-				console.error("Error checking if room exists:", error);
 				throw new ActionError({
 					code: "BAD_REQUEST",
 					message: "Failed to check if room exists",
@@ -259,7 +252,6 @@ export const server = {
 					const rooms = await roomClientService.listRooms();
 					roomExists = rooms.some((room) => room.name === input.roomName);
 				} catch (roomCheckError) {
-					console.warn("Error checking room existence:", roomCheckError);
 					// Assume room exists if we can't check due to permissions
 					// This is safer than blocking token generation completely
 					roomExists = true;
@@ -274,7 +266,6 @@ export const server = {
 
 				// Check if there's a user session (logged in) or this is a guest
 				const loggedInUser = context?.locals?.user;
-				const isGuest = !loggedInUser;
 				const userDisplayName =
 					loggedInUser?.preferred_username || loggedInUser?.name;
 
@@ -284,12 +275,6 @@ export const server = {
 					input.participantName?.trim() ||
 					userDisplayName ||
 					`guest-${Math.floor(Math.random() * 10000)}`;
-
-				console.log("Generating token for", isGuest ? "guest" : "user", {
-					identity,
-					fromParticipantName: !!input.participantName?.trim(),
-					fromUserDisplay: !!userDisplayName,
-				});
 
 				// Create the token
 				const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
@@ -318,7 +303,7 @@ export const server = {
 				return token;
 			} catch (error) {
 				// Return a simple string error message
-				console.error("Failed to generate token:", error);
+
 				throw new ActionError({
 					code: error instanceof ActionError ? error.code : "BAD_REQUEST",
 					message:

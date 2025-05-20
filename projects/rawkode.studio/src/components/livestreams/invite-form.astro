@@ -8,7 +8,7 @@ interface Props {
 	roomName: string;
 	roomExists: boolean;
 	user: OidcStandardClaimsWithRoles | undefined;
-	token: string | null;
+	token: string | undefined;
 }
 
 const { roomName, roomExists, user, token } = Astro.props;
@@ -66,8 +66,6 @@ const { roomName, roomExists, user, token } = Astro.props;
           // Store token in sessionStorage
           sessionStorage.setItem("livekit-token", "${token}");
           sessionStorage.setItem("livekit-room", "${roomName}");
-
-          console.log("Stored token and redirecting to watch page");
 
           // Navigate to watch page
           window.location.href = "/watch/${roomName}";
