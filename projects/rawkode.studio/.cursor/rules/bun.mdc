@@ -1,7 +1,7 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
-* after implementing things, use `bun deno fmt . && bun run build` to check for broken things
+* after implementing things, use `bun astro:format` to check for broken things
 * use `bun add` to add new libraries

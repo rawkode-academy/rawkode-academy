@@ -29,26 +29,13 @@ try {
 const user = Astro.locals.user;
 
 // Generate a token if the user is authenticated
-let token = null;
+let token: string | undefined = undefined;
 if (user && roomExists) {
 	try {
 		// Generate token
-		const response = await Astro.callAction(actions.generateTokenFromInvite, {
-			roomName,
-			participantName: user?.preferred_username || user?.name || undefined,
-		});
-
-		// Check if the response contains a data property (the token string)
-		if (response?.data && typeof response.data === "string") {
-			token = response.data;
-		} else if (typeof response === "string") {
-			// Sometimes the action returns the token directly
-			token = response;
-		}
-
-		console.log("Generated token for user on invite page", {
-			hasToken: !!token,
-		});
+		token = await actions
+			.generateTokenFromInvite({ roomName })
+			.then((result) => result.data);
 	} catch (error) {
 		console.error("Error generating token on invite page:", error);
 	}
@@ -96,10 +83,19 @@ if (user && roomExists) {
     const storedRoomName = sessionStorage.getItem("livekit-room");
 
     if (storedRoomName === roomName) {
-      console.log("Clearing existing tokens for room:", roomName);
       sessionStorage.removeItem("livekit-token");
       sessionStorage.removeItem("livekit-room");
     }
+
+    // Store token in sessionStorage
+    sessionStorage.setItem("livekit-token", token);
+    sessionStorage.setItem("livekit-room", roomName);
+
+    // For debugging and to ensure the values are set correctly
+    // This can be removed in production or when no longer needed
+
+    // Navigate to watch page
+    window.location.href = `/watch/${roomName}`;
   </script>
 
   <TravelIndicator />
