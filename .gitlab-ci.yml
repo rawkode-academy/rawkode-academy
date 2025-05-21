@@ -33,6 +33,9 @@ bootstrap:
 website-deploy-production:
   extends: [.dagger]
   stage: deploy
+  environment:
+    name: rawkode-academy-production
+    url: https://rawkode.academy
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
@@ -74,6 +77,9 @@ website-deploy-merge-request:
 studio-deploy-production:
   extends: [.dagger]
   stage: deploy
+  environment:
+    name: rawkode-studio-production
+    url: https://rawkode.studio
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
