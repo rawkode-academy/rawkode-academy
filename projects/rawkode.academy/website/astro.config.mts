@@ -10,6 +10,7 @@ import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
+import faroUploader from "@grafana/faro-rollup-plugin";
 
 export default defineConfig({
   output: "server",
@@ -43,6 +44,14 @@ export default defineConfig({
           },
         },
       }),
+      faroUploader({
+        appName: "rawkode.academy",
+        endpoint: "https://faro-api-prod-gb-south-0.grafana.net/faro/api/v1",
+        appId: "27",
+        stackId: "711132",
+        apiKey: process.env.GRAFANA_SOURCE_MAPS || "",
+        gzipContents: true,
+      }),
     ],
     resolve: {
       // Use react-dom/server.edge instead of react-dom/server.browser for React 19.
@@ -50,8 +59,8 @@ export default defineConfig({
       // https://github.com/withastro/adapters/pull/436
       alias: import.meta.env.PROD
         ? {
-          "react-dom/server": "react-dom/server.edge",
-        }
+            "react-dom/server": "react-dom/server.edge",
+          }
         : {},
     },
   },
