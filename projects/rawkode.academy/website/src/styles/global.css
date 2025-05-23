@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@plugin "flowbite/plugin";
+@plugin "flowbite-typography";
+@source "../node_modules/flowbite";
+
+@theme {
+    --color-primary: #5f5ed7;
+    --color-secondary: #00ceff;
+    --color-tertiary: #04b59c;
+    --color-quaternary: #85ff95;
+    --color-black: #111827;
+    --font-display: "Quicksand", sans-serif;
+    --font-body: "Poppins", sans-serif;
+    --font-mono: "Monaspace", monospace;
+}

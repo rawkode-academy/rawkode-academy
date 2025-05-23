@@ -115,8 +115,8 @@ const offerings: Offering[] = [
 </script>
 <template>
 	<section class="bg-white dark:bg-gray-900">
-		<div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
-			<div class="max-w-screen-md mb-8 lg:mb-16">
+		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
+			<div class="max-w-(--breakpoint-md) mb-8 lg:mb-16">
 				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Partner With Industry
 					Experts</h2>
 				<p class="font-light text-gray-500 dark:text-gray-400 sm:text-xl">We carefully select partners whose

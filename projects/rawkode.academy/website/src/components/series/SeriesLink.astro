@@ -8,7 +8,7 @@ type Props = {
 const { series } = Astro.props;
 ---
 
-<p class="text-xl font-semibold text-blue-600/100 dark:text-blue-500/100">
+<p class="text-xl font-semibold text-blue-600 dark:text-blue-500">
 	Part of the series: <a
 		class="underline hover:no-underline"
 		href={`/series/${series.id}`}>{series.data.title}</a

@@ -3,6 +3,8 @@ import Page from "@/wrappers/page.astro";
 ---
 
 <style>
+	@reference "@/styles/global.css";
+
 	h1,
 	h2,
 	h3 {
@@ -22,7 +24,7 @@ import Page from "@/wrappers/page.astro";
 	}
 
 	.benefits-list .icon {
-		@apply flex-shrink-0 w-5 h-5 text-primary mt-1 mr-3;
+		@apply shrink-0 w-5 h-5 text-primary mt-1 mr-3;
 	}
 
 	.benefits-list .text {

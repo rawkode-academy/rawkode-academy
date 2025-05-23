@@ -3,7 +3,6 @@ import mdx from "@astrojs/mdx";
 import partytown from "@astrojs/partytown";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
-import tailwind from "@astrojs/tailwind";
 import vue from "@astrojs/vue";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
@@ -11,6 +10,7 @@ import { defineConfig, envField } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import faroUploader from "@grafana/faro-rollup-plugin";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   output: "server",
@@ -30,7 +30,6 @@ export default defineConfig({
       lastmod: new Date(),
       priority: 0.7,
     }),
-    tailwind(),
     vue(),
     partytown(),
   ],
@@ -52,6 +51,7 @@ export default defineConfig({
         apiKey: process.env.GRAFANA_SOURCE_MAPS || "",
         gzipContents: true,
       }),
+      tailwindcss(),
     ],
     resolve: {
       // Use react-dom/server.edge instead of react-dom/server.browser for React 19.

@@ -24,7 +24,7 @@ let styles = {
 switch (variant) {
 	case "tip":
 		styles.container =
-			"bg-gradient-to-r from-green-50 to-green-100 text-green-800 dark:from-green-950/80 dark:to-green-900/80 dark:text-green-100";
+			"bg-linear-to-r from-green-50 to-green-100 text-green-800 dark:from-green-950/80 dark:to-green-900/80 dark:text-green-100";
 		styles.icon = "text-green-600 dark:text-green-400";
 		styles.gradient = "from-green-500 to-green-400";
 		styles.border = "border-green-500";
@@ -33,7 +33,7 @@ switch (variant) {
 		break;
 	case "caution":
 		styles.container =
-			"bg-gradient-to-r from-orange-50 to-orange-100 text-orange-800 dark:from-orange-950/80 dark:to-orange-900/80 dark:text-orange-100";
+			"bg-linear-to-r from-orange-50 to-orange-100 text-orange-800 dark:from-orange-950/80 dark:to-orange-900/80 dark:text-orange-100";
 		styles.icon = "text-orange-600 dark:text-orange-400";
 		styles.gradient = "from-yellow-500 to-orange-400";
 		styles.border = "border-yellow-500";
@@ -42,7 +42,7 @@ switch (variant) {
 		break;
 	case "danger":
 		styles.container =
-			"bg-gradient-to-r from-red-50 to-red-100 text-red-800 dark:from-red-950/80 dark:to-red-900/80 dark:text-red-100";
+			"bg-linear-to-r from-red-50 to-red-100 text-red-800 dark:from-red-950/80 dark:to-red-900/80 dark:text-red-100";
 		styles.icon = "text-red-600 dark:text-red-400";
 		styles.gradient = "from-red-500 to-red-400";
 		styles.border = "border-red-500";
@@ -51,7 +51,7 @@ switch (variant) {
 		break;
 	case "info":
 		styles.container =
-			"bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 dark:from-blue-950/80 dark:to-blue-900/80 dark:text-blue-100";
+			"bg-linear-to-r from-blue-50 to-blue-100 text-blue-800 dark:from-blue-950/80 dark:to-blue-900/80 dark:text-blue-100";
 		styles.icon = "text-blue-600 dark:text-blue-400";
 		styles.gradient = "from-blue-500 to-blue-400";
 		styles.border = "border-blue-500";
@@ -66,7 +66,7 @@ switch (variant) {
 >
 	<!-- Modern accent line with glow effect -->
 	<div
-		class={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${styles.gradient} shadow-[0_0_8px_rgba(var(--accent-glow),0.6)]`}
+		class={`absolute left-0 top-0 bottom-0 w-1.5 bg-linear-to-b ${styles.gradient} shadow-[0_0_8px_rgba(var(--accent-glow),0.6)]`}
 	>
 	</div>
 
@@ -74,7 +74,7 @@ switch (variant) {
 	<div class="px-4 relative z-10">
 		<div class="flex items-center gap-2">
 			<div
-				class={`rounded-full bg-gradient-to-br ${styles.gradient} p-1.5 flex items-center justify-center shadow-sm transform transition-transform duration-200 hover:scale-105`}
+				class={`rounded-full bg-linear-to-br ${styles.gradient} p-1.5 flex items-center justify-center shadow-sm transform transition-transform duration-200 hover:scale-105`}
 			>
 				{
 					variant === "tip" && (
@@ -124,6 +124,8 @@ switch (variant) {
 </div>
 
 <style>
+	@reference "@/styles/global.css";
+
 	/* Define accent glow variables for each variant */
 	.aside:global(.border-green-500) {
 		--accent-glow: 34, 197, 94; /* green-500 */

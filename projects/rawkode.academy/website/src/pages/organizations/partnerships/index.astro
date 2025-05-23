@@ -13,6 +13,8 @@ import Page from "@/wrappers/page.astro";
 ---
 
 <style>
+	@reference "@/styles/global.css";
+
 	.section-separator {
 		@apply py-16 md:py-20;
 	}
@@ -23,12 +25,12 @@ import Page from "@/wrappers/page.astro";
 
 	.section-highlight::before {
 		content: "";
-		@apply absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary;
+		@apply absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-secondary;
 	}
 
 	.section-highlight::after {
 		content: "";
-		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 blur-2xl;
+		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-linear-to-r from-primary/10 to-secondary/10 blur-2xl;
 	}
 </style>
 
@@ -140,7 +142,7 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
 			<div class="text-center mb-10">
 				<h2
 					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
@@ -178,7 +180,7 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section
-		class="section-highlight section-separator bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-black"
+		class="section-highlight section-separator bg-linear-to-b from-white to-gray-50 dark:from-gray-900 dark:to-black"
 	>
 		<div class="py-2 px-4 mx-auto lg:px-6 max-w-7xl">
 			<div class="mb-12 lg:mb-16 text-center">
@@ -197,7 +199,7 @@ import Page from "@/wrappers/page.astro";
 
 			<div class="relative">
 				<div
-					class="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-xl"
+					class="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-secondary/5 rounded-xl"
 				>
 				</div>
 				<div
@@ -216,8 +218,8 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-			<div class="mx-auto max-w-screen-md text-center mb-12">
+		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
+			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-12">
 				<h2
 					class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
 				>
@@ -231,7 +233,7 @@ import Page from "@/wrappers/page.astro";
 				</p>
 			</div>
 
-			<div class="mx-auto max-w-screen-md text-center mb-10">
+			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-10">
 				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
 					The Rawkode Academy is proudly brought to you from Glasgow, Scotland.
 					Our partnership tiers are named after traditional Scottish whisky
@@ -249,8 +251,8 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 mx-auto max-w-screen-xl lg:px-6">
-			<div class="mx-auto max-w-screen-md text-center">
+		<div class="px-4 mx-auto max-w-(--breakpoint-xl) lg:px-6">
+			<div class="mx-auto max-w-(--breakpoint-md) text-center">
 				<div class="inline-block p-2 mb-6 bg-primary/10 rounded-full">
 					<svg
 						class="w-8 h-8 text-primary"
@@ -306,8 +308,8 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
-			<div class="mx-auto max-w-screen-md text-center mb-8">
+		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
+			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
 				<h2
 					class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 dark:text-white"
 				>

@@ -15,7 +15,7 @@ const authors = await getEntries(article.data.authors);
 		class="p-0 bg-white rounded-xl overflow-hidden shadow-lg dark:bg-gray-800 dark:border-gray-700 h-full flex flex-col transition-all duration-300 border border-gray-100 dark:border-gray-700"
 	>
 		<div class="relative">
-			<div class="absolute inset-0 bg-gradient-to-tr from-purple-600/30 to-indigo-600/30 mix-blend-multiply z-10"></div>
+			<div class="absolute inset-0 bg-linear-to-tr from-purple-600/30 to-indigo-600/30 mix-blend-multiply z-10"></div>
 			{
 				article.data.cover ? (
 					<Image
@@ -39,7 +39,7 @@ const authors = await getEntries(article.data.authors);
 				</span>
 			</div>
 		</div>
-		<div class="p-6 flex flex-col flex-grow">
+		<div class="p-6 flex flex-col grow">
 			<h2
 				class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2"
 			>

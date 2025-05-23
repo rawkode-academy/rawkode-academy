@@ -23,7 +23,7 @@ const otherArticles = allArticles.slice(1);
 				<div class="flex items-center mb-8">
 					<div class="w-2 h-8 bg-purple-600 rounded-full mr-3"></div>
 					<h3 class="text-3xl font-bold dark:text-white">Latest Article</h3>
-					<div class="h-px flex-grow bg-gradient-to-r from-purple-500 to-transparent ml-4"></div>
+					<div class="h-px grow bg-linear-to-r from-purple-500 to-transparent ml-4"></div>
 				</div>
 				<a href={`/read/${latestArticle.id}`} class="block transform transition-all duration-300 hover:scale-[1.01] hover:-translate-y-1">
 					<article class="p-0 bg-white rounded-xl overflow-hidden shadow-xl dark:bg-gray-800 dark:border-gray-700 border border-gray-100">
@@ -31,7 +31,7 @@ const otherArticles = allArticles.slice(1);
 							<div class="lg:w-1/2 relative">
 								{latestArticle.data.cover ? (
 									<div class="relative">
-										<div class="absolute inset-0 bg-gradient-to-tr from-purple-600/40 to-indigo-600/40 mix-blend-multiply z-10"></div>
+										<div class="absolute inset-0 bg-linear-to-tr from-purple-600/40 to-indigo-600/40 mix-blend-multiply z-10"></div>
 										<Image
 											class="w-full h-64 lg:h-full object-cover"
 											src={latestArticle.data.cover.image}
@@ -40,7 +40,7 @@ const otherArticles = allArticles.slice(1);
 									</div>
 								) : (
 									<div class="relative">
-										<div class="absolute inset-0 bg-gradient-to-tr from-purple-600/40 to-indigo-600/40 mix-blend-multiply z-10"></div>
+										<div class="absolute inset-0 bg-linear-to-tr from-purple-600/40 to-indigo-600/40 mix-blend-multiply z-10"></div>
 										<img
 											class="w-full h-64 lg:h-full object-cover"
 											src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
@@ -119,7 +119,7 @@ const otherArticles = allArticles.slice(1);
 			<div class="flex items-center mb-8">
 				<div class="w-2 h-8 bg-purple-600 rounded-full mr-3"></div>
 				<h3 class="text-3xl font-bold dark:text-white">More Articles</h3>
-				<div class="h-px flex-grow bg-gradient-to-r from-purple-500 to-transparent ml-4"></div>
+				<div class="h-px grow bg-linear-to-r from-purple-500 to-transparent ml-4"></div>
 			</div>
 			<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
 				{otherArticles.map((article: CollectionEntry<"articles">) => (

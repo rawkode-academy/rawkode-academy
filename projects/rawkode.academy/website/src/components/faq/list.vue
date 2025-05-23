@@ -1,10 +1,10 @@
 <template>
 	<section class="bg-white dark:bg-gray-900">
-		<div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6 ">
+		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6 ">
 			<h2
 				class="mb-6 lg:mb-8 text-3xl lg:text-4xl tracking-tight font-extrabold text-center text-gray-900 dark:text-white">
 				Partnership FAQ</h2>
-			<div class="mx-auto max-w-screen-md">
+			<div class="mx-auto max-w-(--breakpoint-md)">
 				<div id="accordion-flush" data-accordion="collapse"
 					data-active-classes="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
 					data-inactive-classes="text-gray-500 dark:text-gray-400">

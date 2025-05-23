@@ -19,7 +19,7 @@ defineProps<Props>();
 		<Slide v-for="(testimonial, index) in testimonials" :key="index">
 			<div class="py-4 px-4 md:py-4 md:px-4 text-gray-900 dark:text-gray-100">
 				<div
-					class="relative max-w-3xl mx-auto p-8 md:p-10 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+					class="relative max-w-3xl mx-auto p-8 md:p-10 rounded-2xl bg-linear-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
 					<blockquote>
 						<p
 							class="relative text-xl font-medium leading-relaxed text-gray-800 dark:text-gray-100 mb-6 text-center px-6 z-10">
@@ -27,7 +27,7 @@ defineProps<Props>();
 						</p>
 					</blockquote>
 					<div class="flex items-center justify-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-						<div class="flex-shrink-0 mr-4">
+						<div class="shrink-0 mr-4">
 							<img :src="testimonial.author.image" :alt="`${testimonial.author.name} profile picture`"
 								class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 dark:border-indigo-400 shadow-sm ring-2 ring-white dark:ring-gray-800" />
 						</div>

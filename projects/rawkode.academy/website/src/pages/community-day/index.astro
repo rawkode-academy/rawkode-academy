@@ -118,12 +118,12 @@ export const prerender = false;
 	<div class="relative isolate px-6 lg:px-8 py-16">
 		<!-- Background pattern -->
 		<div class="absolute inset-0 -z-10 overflow-hidden">
-			<div class="absolute inset-0 bg-[radial-gradient(#5F5ED720_1px,transparent_1px)] dark:bg-[radial-gradient(#5F5ED715_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] bg-[size:20px_20px]"></div>
+			<div class="absolute inset-0 bg-[radial-gradient(#5F5ED720_1px,transparent_1px)] dark:bg-[radial-gradient(#5F5ED715_1px,transparent_1px)] mask-[radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[20px_20px]"></div>
 		</div>
 
 		<div class="mx-auto max-w-4xl">
 			<div class="text-center animate-fadeIn">
-				<h1 class="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text mb-6 gradient-animation pb-1">Community Day</h1>
+				<h1 class="text-4xl md:text-5xl font-bold tracking-tight bg-linear-to-r from-primary to-secondary inline-block text-transparent bg-clip-text mb-6 gradient-animation pb-1">Community Day</h1>
 				<p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4 max-w-2xl mx-auto animate-slideUp animate-delay-200">
 					A premier one-day conference celebrating the Rawkode Academy community and
 					cutting-edge cloud-native technologies.
@@ -134,10 +134,10 @@ export const prerender = false;
 			</div>
 
 			<div class="relative mt-8 mb-16 animate-slideUp animate-delay-400">
-				<div class="absolute inset-0 bg-gradient-to-r from-primary to-secondary blur-xl opacity-20 rounded-xl gradient-animation"></div>
+				<div class="absolute inset-0 bg-linear-to-r from-primary to-secondary blur-xl opacity-20 rounded-xl gradient-animation"></div>
 				<div class="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-8 rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50">
 					<h2 class="text-2xl font-bold text-gray-800 dark:text-white flex justify-center items-center mb-4">
-						<span class="bg-gradient-to-r from-primary to-secondary p-3 rounded-full mr-3 animate-pulse">
+						<span class="bg-linear-to-r from-primary to-secondary p-3 rounded-full mr-3 animate-pulse">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
 								<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
 								<line x1="16" y1="2" x2="16" y2="6"></line>
@@ -228,7 +228,7 @@ export const prerender = false;
 					href="https://chat.rawkode.academy"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="inline-flex items-center px-6 py-3 text-base font-medium text-center text-white bg-gradient-to-r from-primary to-secondary rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50 animate-pulse gradient-animation"
+					class="inline-flex items-center px-6 py-3 text-base font-medium text-center text-white bg-linear-to-r from-primary to-secondary rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50 animate-pulse gradient-animation"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
@@ -253,7 +253,7 @@ export const prerender = false;
 				<H2Highlight title="Stay Updated" highlightWords="Updated" />
 
 				<div class="relative">
-					<div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 blur-xl opacity-30 rounded-xl gradient-animation"></div>
+					<div class="absolute inset-0 bg-linear-to-r from-primary/20 to-secondary/20 blur-xl opacity-30 rounded-xl gradient-animation"></div>
 					<div
 						class="relative bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm"
 					>
@@ -264,7 +264,7 @@ export const prerender = false;
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 									</svg>
 								</div>
-								<h3 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text mb-3 gradient-animation">Thank You!</h3>
+								<h3 class="text-2xl font-bold bg-linear-to-r from-primary to-secondary inline-block text-transparent bg-clip-text mb-3 gradient-animation">Thank You!</h3>
 								<p class="text-lg text-gray-700 dark:text-gray-300 mb-6 animate-slideUp animate-delay-200">
 									We've added your email to our notification list. We'll let you know as soon as we have more details about the Community Day!
 								</p>
@@ -315,7 +315,7 @@ export const prerender = false;
 
 									<button
 										type="submit"
-										class="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center hover:scale-[1.02] gradient-animation"
+										class="w-full bg-linear-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center hover:scale-[1.02] gradient-animation"
 									>
 										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -405,7 +405,7 @@ export const prerender = false;
 
 				<div class="mt-12 text-center">
 					<p class="text-lg text-gray-700 dark:text-gray-300 font-medium animate-pulse">
-						<span class="bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">Limited spots available!</span> Sign up now to secure your place at this exclusive event.
+						<span class="bg-linear-to-r from-primary to-secondary text-transparent bg-clip-text">Limited spots available!</span> Sign up now to secure your place at this exclusive event.
 					</p>
 				</div>
 			</div>

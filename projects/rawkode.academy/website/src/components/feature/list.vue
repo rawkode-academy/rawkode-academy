@@ -23,7 +23,7 @@ defineProps<Props>();
 			</div>
 			<div class="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:space-y-0">
 				<div v-for="item in segments" class="p-6 rounded-lg transition-all duration-300 hover:shadow-md dark:hover:shadow-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
-					<div class="flex justify-center items-center mb-4 w-12 h-12 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20">
+					<div class="flex justify-center items-center mb-4 w-12 h-12 rounded-full bg-linear-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20">
 						<span class="text-3xl">{{ item.emoji || "😼" }}</span>
 					</div>
 					<h3 class="mb-3 text-xl font-bold dark:text-white">{{ item.title }}</h3>
