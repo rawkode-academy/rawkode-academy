@@ -31,13 +31,15 @@ function formatDate(date: Date): string {
 
 <Page title="Articles">
   <style>
+    @reference "@/styles/global.css";
+
     /* Core styles */
     .primary-gradient {
-      @apply bg-gradient-to-r from-primary to-secondary;
+      @apply bg-linear-to-r from-primary to-secondary;
     }
 
     .text-gradient {
-      @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+      @apply bg-clip-text text-transparent bg-linear-to-r from-primary to-secondary;
     }
 
     .article-card {
@@ -142,7 +144,7 @@ function formatDate(date: Date): string {
 
   <!-- Hero Section with Interactive Terminal -->
   <section class="relative py-16 overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-gray-50 to-secondary/5 dark:from-primary/10 dark:via-gray-900 dark:to-secondary/10 animate-gradient"></div>
+    <div class="absolute inset-0 bg-linear-to-br from-primary/5 via-gray-50 to-secondary/5 dark:from-primary/10 dark:via-gray-900 dark:to-secondary/10 animate-gradient"></div>
 
     <!-- Particle effect container (purely decorative) -->
     <div class="absolute inset-0 opacity-30 pointer-events-none">
@@ -249,9 +251,9 @@ function formatDate(date: Date): string {
       <!-- Featured Articles -->
       <div class="mb-16">
         <div class="flex items-center mb-8">
-          <div class="h-10 w-1 bg-gradient-to-b from-primary to-secondary rounded-full mr-3"></div>
+          <div class="h-10 w-1 bg-linear-to-b from-primary to-secondary rounded-full mr-3"></div>
           <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Featured Articles</h2>
-          <div class="ml-4 h-px flex-grow bg-gradient-to-r from-primary/30 to-transparent"></div>
+          <div class="ml-4 h-px grow bg-linear-to-r from-primary/30 to-transparent"></div>
         </div>
 
         <div class="featured-grid">
@@ -259,7 +261,7 @@ function formatDate(date: Date): string {
           {latestPost && (
             <div class="featured-main relative article-card rounded-xl overflow-hidden shadow-lg h-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               <a href={`/read/${latestPost.id}`} class="block relative h-full">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+                <div class="absolute inset-0 bg-linear-to-t from-black/80 to-transparent z-10"></div>
 
                 {latestPost.data.cover ? (
                   <Image
@@ -268,7 +270,7 @@ function formatDate(date: Date): string {
                     class="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
-                  <div class="absolute inset-0 bg-gradient-to-br from-primary/40 to-secondary/40"></div>
+                  <div class="absolute inset-0 bg-linear-to-br from-primary/40 to-secondary/40"></div>
                 )}
 
                 <div class="absolute top-4 left-4 z-20">
@@ -323,7 +325,7 @@ function formatDate(date: Date): string {
             <div class="article-card rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               <a href={`/read/${post.id}`} class="block h-full flex flex-col">
                 <div class="relative h-48">
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
+                  <div class="absolute inset-0 bg-linear-to-t from-black/30 to-transparent z-10"></div>
 
                   {post.data.cover ? (
                     <Image
@@ -332,7 +334,7 @@ function formatDate(date: Date): string {
                       class="w-full h-full object-cover"
                     />
                   ) : (
-                    <div class="w-full h-full bg-gradient-to-br from-primary/30 to-secondary/30"></div>
+                    <div class="w-full h-full bg-linear-to-br from-primary/30 to-secondary/30"></div>
                   )}
 
                   <div class="absolute top-3 left-3 z-20">
@@ -342,7 +344,7 @@ function formatDate(date: Date): string {
                   </div>
                 </div>
 
-                <div class="p-5 flex-grow flex flex-col">
+                <div class="p-5 grow flex flex-col">
                   <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
                     {post.data.title}
                   </h3>
@@ -377,9 +379,9 @@ function formatDate(date: Date): string {
       <!-- All Articles -->
       <div>
         <div class="flex items-center mb-8">
-          <div class="h-10 w-1 bg-gradient-to-b from-primary to-secondary rounded-full mr-3"></div>
+          <div class="h-10 w-1 bg-linear-to-b from-primary to-secondary rounded-full mr-3"></div>
           <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">All Articles</h2>
-          <div class="ml-4 h-px flex-grow bg-gradient-to-r from-primary/30 to-transparent"></div>
+          <div class="ml-4 h-px grow bg-linear-to-r from-primary/30 to-transparent"></div>
         </div>
 
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

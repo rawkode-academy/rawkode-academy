@@ -26,7 +26,7 @@ const Typewriter = (props: Props) => {
         <div className="mr-auto place-self-center lg:col-span-7">
           <h1 className="mb-6 text-4xl font-bold tracking-tight leading-none md:text-5xl xl:text-6xl text-black dark:text-white">
             <TypeAnimation
-              className="bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent"
+              className="bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent"
               sequence={shuffle(props.rotatedPrefixes).reduce<
                 Array<string | number>
               >((acc, prefix: string) => [...acc, prefix, 1250], [])}
@@ -50,7 +50,7 @@ const Typewriter = (props: Props) => {
                     {part}
                     <span className="relative">
                       {props.highlight}
-                      <span className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 to-secondary/30">
+                      <span className="absolute bottom-0 left-0 w-full h-1 bg-linear-to-r from-primary/30 to-secondary/30">
                       </span>
                     </span>
                   </>
@@ -70,7 +70,7 @@ const Typewriter = (props: Props) => {
           <a
             href={props.primaryButton.link}
             target={props.primaryButton.newWindow ? "_blank" : "_self"}
-            className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center rounded-lg text-white bg-gradient-to-br from-primary to-secondary hover:from-secondary hover:to-primary"
+            className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center rounded-lg text-white bg-linear-to-br from-primary to-secondary hover:from-secondary hover:to-primary"
           >
             {props.primaryButton.text}
             <svg

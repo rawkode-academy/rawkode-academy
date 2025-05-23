@@ -10,9 +10,11 @@ interface Props {
 defineProps<Props>();
 </script>
 
-<style lang="postcss" module>
+<style>
+@reference "@/styles/global.css";
+
 mark {
-	@apply bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent;
+	@apply bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent;
 }
 </style>
 

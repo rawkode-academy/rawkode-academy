@@ -35,7 +35,7 @@ const props = defineProps<{
 			<!-- Left border indicator for active item -->
 			<div 
 				v-if="item.current" 
-				class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-secondary">
+				class="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-primary to-secondary">
 			</div>
 			
 			<component :is="item.icon"

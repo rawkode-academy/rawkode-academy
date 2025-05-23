@@ -6,6 +6,8 @@ import Page from "@/wrappers/page.astro";
 ---
 
 <style>
+	@reference "@/styles/global.css";
+
 	.section-separator {
 		@apply py-16 md:py-20;
 	}
@@ -16,12 +18,12 @@ import Page from "@/wrappers/page.astro";
 
 	.section-highlight::before {
 		content: "";
-		@apply absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary;
+		@apply absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-secondary;
 	}
 
 	.section-highlight::after {
 		content: "";
-		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 blur-2xl;
+		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-linear-to-r from-primary/10 to-secondary/10 blur-2xl;
 	}
 </style>
 
@@ -137,7 +139,7 @@ import Page from "@/wrappers/page.astro";
 
 	<section class="bg-white dark:bg-gray-800 py-16">
 		<div class="container mx-auto px-4">
-			<div class="max-w-screen-md mx-auto mb-12 text-center">
+			<div class="max-w-(--breakpoint-md) mx-auto mb-12 text-center">
 				<h2
 					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
 				>
@@ -154,7 +156,7 @@ import Page from "@/wrappers/page.astro";
 					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
 				>
 					<div class="flex items-center mb-4">
-						<div class="bg-primary/10 flex-shrink-0 p-3 rounded-full mr-4">
+						<div class="bg-primary/10 shrink-0 p-3 rounded-full mr-4">
 							<svg
 								class="w-6 h-6 text-primary"
 								fill="none"
@@ -252,7 +254,7 @@ import Page from "@/wrappers/page.astro";
 					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
 				>
 					<div class="flex items-center mb-4">
-						<div class="bg-secondary/10 flex-shrink-0 p-3 rounded-full mr-4">
+						<div class="bg-secondary/10 shrink-0 p-3 rounded-full mr-4">
 							<svg
 								class="w-6 h-6 text-secondary"
 								fill="none"
@@ -350,7 +352,7 @@ import Page from "@/wrappers/page.astro";
 					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
 				>
 					<div class="flex items-center mb-4">
-						<div class="bg-tertiary/10 flex-shrink-0 p-3 rounded-full mr-4">
+						<div class="bg-tertiary/10 shrink-0 p-3 rounded-full mr-4">
 							<svg
 								class="w-6 h-6 text-tertiary"
 								fill="none"
@@ -448,7 +450,7 @@ import Page from "@/wrappers/page.astro";
 					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
 				>
 					<div class="flex items-center mb-4">
-						<div class="bg-primary/10 flex-shrink-0 p-3 rounded-full mr-4">
+						<div class="bg-primary/10 shrink-0 p-3 rounded-full mr-4">
 							<svg
 								class="w-6 h-6 text-primary"
 								fill="none"
@@ -546,7 +548,7 @@ import Page from "@/wrappers/page.astro";
 					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
 				>
 					<div class="flex items-center mb-4">
-						<div class="bg-secondary/10 flex-shrink-0 p-3 rounded-full mr-4">
+						<div class="bg-secondary/10 shrink-0 p-3 rounded-full mr-4">
 							<svg
 								class="w-6 h-6 text-secondary"
 								fill="none"
@@ -643,7 +645,7 @@ import Page from "@/wrappers/page.astro";
 					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
 				>
 					<div class="flex items-center mb-4">
-						<div class="bg-tertiary/10 flex-shrink-0 p-3 rounded-full mr-4">
+						<div class="bg-tertiary/10 shrink-0 p-3 rounded-full mr-4">
 							<svg
 								class="w-6 h-6 text-tertiary"
 								fill="none"
@@ -739,7 +741,7 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
 			<div class="text-center mb-10">
 				<h2
 					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
@@ -1113,7 +1115,7 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
+		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
 			<div class="text-center mb-10">
 				<h2
 					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
@@ -1203,8 +1205,8 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
-			<div class="mx-auto max-w-screen-md text-center mb-8">
+		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
+			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
 				<h2
 					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
 				>
@@ -1240,8 +1242,8 @@ import Page from "@/wrappers/page.astro";
 	</section>
 
 	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-screen-xl lg:py-16">
-			<div class="mx-auto max-w-screen-md text-center mb-8">
+		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
+			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
 				<h2
 					class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 dark:text-white"
 				>
