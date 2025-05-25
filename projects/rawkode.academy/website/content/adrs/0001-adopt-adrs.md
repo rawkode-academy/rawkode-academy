@@ -1,6 +1,6 @@
 ---
 title: Adopt Architecture Decision Records (ADRs)
-createdAt: 2025-04-25
+adoptedAt: 2025-04-25
 authors: ["icepuma", "rawkode"]
 ---
 

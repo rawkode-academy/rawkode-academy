@@ -1,6 +1,6 @@
 ---
 title: Adopt Bun + Biome for JS/TS Services
-createdAt: 2025-05-09
+adoptedAt: 2025-05-09
 authors: [ "rawkode" ]
 ---
 
