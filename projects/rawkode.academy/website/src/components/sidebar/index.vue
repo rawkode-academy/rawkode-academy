@@ -14,6 +14,7 @@ import {
 	AcademicCapIcon,
 	CubeIcon,
 	DocumentTextIcon,
+	ClockIcon,
 } from "@heroicons/vue/24/outline";
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/20/solid';
 
@@ -64,6 +65,11 @@ const baseMenuItems = [
 		name: "About",
 		href: "/about",
 		icon: InformationCircleIcon,
+	},
+	{
+		name: "Changelog",
+		href: "/changelog",
+		icon: ClockIcon,
 	},
 	// { name: 'Help', href: '/help', icon: QuestionMarkCircleIcon },
 ];
@@ -184,4 +190,3 @@ function isCurrentPath(itemPath: string) {
 		</div>
 	</aside>
 </template>
-

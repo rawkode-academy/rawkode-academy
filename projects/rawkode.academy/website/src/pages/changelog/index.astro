@@ -1,0 +1,123 @@
+---
+import { fetchChangelogEntries } from "../../lib/gitlab";
+import PageWrapper from "../../wrappers/page.astro";
+import { marked } from "marked";
+
+// Configure marked for better GitLab-style rendering
+marked.setOptions({
+	breaks: true,
+	gfm: true,
+	pedantic: false,
+});
+
+const changelog = await fetchChangelogEntries();
+
+const processedChangelog = changelog.map((entry) => {
+	const renderedDescription = marked(entry.description);
+
+	return {
+		...entry,
+		renderedDescription: String(renderedDescription),
+	};
+});
+
+const typeColors = {
+	feature: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+	fix: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+	chore: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+	docs: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+	breaking:
+		"bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+};
+---
+
+<PageWrapper
+	title="Changelog"
+	description="Stay up to date with the latest changes and improvements to Rawkode Academy."
+>
+	<div class="max-w-4xl mx-auto px-4 py-8">
+		<div class="mb-8">
+			<h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+				Changelog
+			</h1>
+			<p class="text-lg text-gray-600 dark:text-gray-300">
+				Stay up to date with the latest changes and improvements to Rawkode
+				Academy.
+			</p>
+		</div>
+
+		{
+			processedChangelog.length === 0 ? (
+				<div class="text-center py-12">
+					<p class="text-gray-500 dark:text-gray-400">
+						No changelog entries found. Changelog entries are automatically
+						generated from GitLab merge requests with the "Changelog" label.
+					</p>
+				</div>
+			) : (
+				<div class="space-y-8">
+					{processedChangelog.map((entry) => (
+						<article class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+							<div class="flex items-start justify-between mb-4">
+								<div class="flex-1">
+									<div class="flex items-center gap-3 mb-2">
+										<span
+											class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeColors[entry.type as keyof typeof typeColors] || typeColors.chore}`}
+										>
+											{entry.type}
+										</span>
+										<span class="text-sm text-gray-500 dark:text-gray-400">
+											MR !{entry.id}
+										</span>
+									</div>
+									<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+										<a
+											href={entry.url}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="hover:text-blue-600 dark:hover:text-blue-400"
+										>
+											{entry.title}
+										</a>
+									</h2>
+									<div
+										class="text-gray-600 dark:text-gray-300 mb-3 prose prose-sm dark:prose-invert max-w-none [&>p]:mb-4 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>li]:mb-1"
+										set:html={entry.renderedDescription}
+									/>
+								</div>
+							</div>
+
+							<div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+								<div class="flex items-center gap-4">
+									<time datetime={entry.date.toISOString()}>
+										{entry.date.toLocaleDateString("en-US", {
+											year: "numeric",
+											month: "long",
+											day: "numeric",
+										})}
+									</time>
+									<div class="flex items-center gap-2">
+										<img
+											src={entry.author.avatar_url}
+											alt={entry.author.name}
+											class="w-5 h-5 rounded-full"
+										/>
+										<span>by {entry.author.name}</span>
+									</div>
+								</div>
+								<a
+									href={entry.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-blue-600 dark:text-blue-400 hover:underline"
+								>
+									View merge request
+								</a>
+							</div>
+						</article>
+					))}
+				</div>
+			)
+		}
+	</div>
+</PageWrapper>
