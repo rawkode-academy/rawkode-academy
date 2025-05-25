@@ -105,18 +105,39 @@ import Sidebar from "@/components/sidebar/index.vue";
 
 	<div class="flex overflow-hidden">
 		<main class="w-full md:ml-64 h-auto pt-20 px-4 md:px-8 overflow-x-hidden">
-			<div class="bg-primary text-white text-center py-2 px-4">
-				<p class="text-sm">
-					🚧 This platform is open-source and in early development. We welcome <a
-						href="https://github.com/RawkodeAcademy/RawkodeAcademy/issues"
-						class="underline hover:text-blue-200">feature requests</a
-					> and <a
-						href="https://github.com/RawkodeAcademy/RawkodeAcademy"
-						class="underline hover:text-blue-200">pull requests</a
-					>! 🚀
-				</p>
-			</div>
+			<div class="relative overflow-hidden bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white">
+				<div class="absolute inset-0 bg-gradient-to-r from-purple-600/90 via-blue-600/80 to-indigo-700/90 animate-pulse pointer-events-none"></div>
+				<div class="relative flex items-center justify-center py-2 px-4 z-10">
+					<div class="flex items-center space-x-4">
+						<div class="flex items-center space-x-2">
+							<svg class="w-5 h-5 text-yellow-300 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+								<path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+							</svg>
+							<span class="font-semibold text-yellow-300">OPEN SOURCE</span>
+						</div>
+						<div class="flex items-center space-x-3">
+							<span class="text-sm font-medium">Platform in early development</span>
+							<div class="flex space-x-2">
+								<a target="_blank" href="https://code.rawkode.academy/RawkodeAcademy/RawkodeAcademy/-/issues/new"
+									 class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200 hover:scale-105">
+											Create an Issue
+								</a>
+								<a target="_blank"  href="https://code.rawkode.academy/RawkodeAcademy/RawkodeAcademy"
+									 class="bg-yellow-400/90 hover:bg-yellow-400 text-purple-900 text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200 hover:scale-105">
+									Contribute
+								</a>
+							</div>
+						</div>
 
+					</div>
+				</div>
+				<div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+					<div class="absolute top-2 left-4 w-2 h-2 bg-white rounded-full animate-ping"></div>
+					<div class="absolute top-4 right-8 w-1 h-1 bg-yellow-300 rounded-full animate-ping" style="animation-delay: 0.5s;"></div>
+					<div class="absolute bottom-2 left-1/4 w-1.5 h-1.5 bg-purple-300 rounded-full animate-ping" style="animation-delay: 1s;"></div>
+					<div class="absolute bottom-3 right-1/3 w-1 h-1 bg-blue-300 rounded-full animate-ping" style="animation-delay: 1.5s;"></div>
+				</div>
+			</div>
 			<slot />
 		</main>
 	</div>
