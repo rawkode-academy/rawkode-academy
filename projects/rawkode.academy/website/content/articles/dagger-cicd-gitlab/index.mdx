@@ -1,0 +1,417 @@
+---
+title: Building Production-Ready Deployments with Containerized Builds and Automatic Preview Environments
+description: How we built a robust deployment pipeline using Dagger for containerized builds, GitLab CI for orchestration, and Cloudflare Pages for instant preview environments
+slug: dagger-gitlab-cloudflare-deployment
+openGraph:
+  title: "Production-Ready Deployments with Dagger, GitLab CI, and Cloudflare Pages"
+  subtitle: "Containerized builds, automatic previews, and zero-config deployments"
+cover:
+  image: "./cover.png"
+  alt: "Dagger Logo, with Cloudflare and GitLab Logos"
+publishedAt: 2025-05-29
+isDraft: false
+authors:
+  - rawkode
+---
+
+At Rawkode Academy, we've built a modern deployment pipeline that combines the power of Dagger for containerized builds, GitLab CI for orchestration, and Cloudflare Workers for hosting. This setup gives us fast, reliable deployments with automatic preview environments for every merge request.
+
+## Why This Stack?
+
+At the Rawkode Academy, one of our values is "Future Facing". We strive to use the best tools available to ensure our projects are maintainable, scalable, and developer-friendly. Our latest deployment pipeline is a testament to this value, combining Dagger, GitLab CI, and Cloudflare Workers to create a robust and efficient workflow.
+
+### Dagger
+
+**Dagger** leverages BuildKit's powerful caching mechanisms while providing an "as code" approach to CI/CD pipelines. Instead of writing YAML configurations, we can define our build and deployment logic using TypeScript and Dagger Shell, making pipelines more maintainable, testable, and reusable across different environments.
+
+While we use Dagger for CICD, it also can work as a local development tool, a task runner, and pretty much anything else you can think of. In due course, it will replace many tools:
+
+- Make / Just
+- Docker Compose
+- Tilt / DevSpace / Skaffold
+
+The Dagger team ship new features and improvements at an incredible pace, and the community is growing rapidly. It's a great time to get involved!
+
+### GitLab
+
+**GitLab CI** offers robust pipeline orchestration with excellent integration features. It allows us to automate the entire deployment process, from code changes to production deployment. GitLab CI's powerful rules and triggers help us manage complex workflows efficiently.
+
+We love what GitHub are doing these days, but the Rawkode Academy team had an urge to host our own forge and integrate it into our entire SDLC and platform itself; and GitLab was a great choice. We explored Gitea and Forgejo too, both fantastic options, but GitLab's complete feature set, including security scanning, code quality checks, and built-in CI/CD, made it the best fit for our needs.
+
+### Cloudflare Workers
+
+**Cloudflare Workers** delivers fast, global content delivery with generous free tiers. It provides a reliable and scalable hosting solution that ensures our content is accessible worldwide with minimal latency. It's widely supported by modern web frameworks and integrates seamlessly with our CI/CD pipeline.
+
+## Architecture Overview
+
+Our deployment pipeline follows this flow:
+
+1. **Code Changes**: Developers create merge requests in GitLab, triggering the CI pipeline. Nothing terribly exciting here.
+2. **Build Stage**: GitLab CI uses Dagger to build the website, leveraging Bun.
+3. **Deploy Stage**: Custom Dagger module deploys to Cloudflare Workers
+4. **Preview/Production**: Automatic deployment to preview URLs or production
+
+## Notes
+
+Ideally, the GitLab CI configuration would be a single job that calls `dagger ci`. However, there's a few challenges at the moment that we need to give time to mature:
+
+Dagger caching is not that great yet, we're hoping they release a managed service for this soon.
+
+The lack of caching means a `dagger ci` call would likely run everything, even though only a small portion of our repository has changed.
+
+## Dagger Configuration
+
+### Website Build Module
+
+Our website build is handled by a Dagger module that ensures consistent builds across environments.
+
+We currently duplicate this module across multiple projects, but this won't be required soon as Dagger has a working prototype of [Inline Modules](https://github.com/dagger/dagger/pull/10453) which will hopefully land soon.
+
+```typescript title=".dagger/src/index.ts"
+import {
+	argument,
+	dag,
+	Directory,
+	func,
+	object,
+} from "@dagger.io/dagger";
+
+@object()
+export class Website {
+	/**
+	 * Build the website and get the output directory.
+	 */
+	@func()
+	async build(
+		@argument({ defaultPath: ".", ignore: ["node_modules"] }) source: Directory,
+	): Promise<Directory> {
+		return dag.bun()
+			.withCache()
+			.install(source)
+			.withMountedFile(
+				"/usr/local/bin/d2",
+				dag.container()
+					.from("terrastruct/d2")
+					.file("/usr/local/bin/d2"),
+			)
+			.withExec([
+				"bun",
+				"run",
+				"build",
+			]).directory("dist");
+	}
+}
+```
+
+This module:
+- Uses Bun for fast package management and builds
+- Includes D2 for diagram generation in our content
+- Leverages Dagger's caching for faster subsequent builds
+- Returns a directory containing the built static assets
+
+### Cloudflare Deployment Module
+
+We've created a reusable Dagger module for Cloudflare Workers deployments.
+
+This module can be used across all projects, it lives at the root of our monorepo.
+
+It can be added to projects with:
+
+```Shell
+dagger install ../../dagger/cloudflare
+```
+
+We provide two functions in this module: `deploy` for production deployments and `preview` for merge request previews. Both functions use the Cloudflare Wrangler CLI to handle deployments.
+
+```typescript title="/dagger/cloudflare/src/index.ts"
+import {
+	dag,
+	Directory,
+	File,
+	func,
+	object,
+	Secret,
+} from "@dagger.io/dagger";
+
+@object()
+export class Cloudflare {
+	/**
+	 * Deploy a website to Cloudflare Workers.
+	 */
+	@func()
+	async deploy(
+		dist: Directory,
+		wranglerConfig: File,
+		cloudflareApiToken: Secret,
+	): Promise<string> {
+		const cloudflareAccountId = await dag.config().cloudflareAccountId();
+
+		const wranglerFilename = await wranglerConfig.name();
+
+		const deploymentResult = await dag.container()
+			.from("node:22")
+			.withWorkdir("/deploy")
+			// Only doing this to cache the wrangler installation
+			.withExec([
+				"npx",
+				"wrangler",
+				"--version",
+			])
+			.withMountedDirectory("/deploy/dist", dist)
+			.withMountedFile(
+				`/deploy/${wranglerFilename}`,
+				wranglerConfig,
+			)
+			.withEnvVariable("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
+			.withSecretVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
+			.withExec([
+				"npx",
+				"wrangler",
+				"deploy",
+			]);
+
+		if (await deploymentResult.exitCode() !== 0) {
+			throw new Error(
+				"Deployment failed. Error: " + await deploymentResult.stdout() +
+				await deploymentResult.stderr(),
+			);
+		}
+
+		return deploymentResult.stdout();
+	}
+
+	/**
+	 * Deploy a preview website to Cloudflare Workers.
+	 */
+	@func()
+	async preview(
+		dist: Directory,
+		wranglerConfig: File,
+		cloudflareApiToken: Secret,
+		gitlabApiToken: Secret,
+		mergeRequestId: string,
+	): Promise<string> {
+		const cloudflareAccountId = await dag.config().cloudflareAccountId();
+
+		const wranglerFilename = await wranglerConfig.name();
+
+		const deploymentResult = await dag.container()
+			.from("node:22")
+			.withWorkdir("/deploy")
+			// Only doing this to cache the wrangler installation
+			.withExec([
+				"npx",
+				"wrangler",
+				"--version",
+			])
+			.withMountedDirectory("/deploy/dist", dist)
+			.withMountedFile(
+				`/deploy/${wranglerFilename}`,
+				wranglerConfig,
+			)
+			.withEnvVariable("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
+			.withSecretVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
+			.withExec([
+				"npx",
+				"wrangler",
+				"versions",
+				"upload",
+			]);
+
+		if (await deploymentResult.exitCode() !== 0) {
+			throw new Error(
+				"Deployment failed. Error: " + await deploymentResult.stdout() +
+				await deploymentResult.stderr(),
+			);
+		}
+
+		const allOutput = await deploymentResult.stdout();
+
+		return dag.gitlab().postMergeRequestComment(
+			gitlabApiToken,
+			mergeRequestId,
+			allOutput,
+		).stdout();
+	}
+}
+```
+
+Key features of this module:
+- **Branch-based deployments**: Supports both production and preview deployments based on the context (merge request or main branch).
+- **Wrangler integration**: Leverages Cloudflare's official CLI tool, `wrangler`, for robust deployments.
+  - We use `wrangler deploy` for production deployments.
+  - For preview deployments, we use `wrangler versions upload`, which allows us to deploy a version of the site without affecting the production environment.
+- **Automatic MR comments**: For preview deployments, it posts the deployment URL as a comment on the merge request, making it easy for reviewers to access the preview environment.
+
+### The Config Module Pattern
+
+You might have noticed the line `dag.config().cloudflareAccountId()` in our deployment module. This demonstrates a powerful pattern in Dagger for managing configuration across multiple modules.
+
+The `dag.config()` pattern allows us to:
+1. **Centralize configuration**: Store all environment-specific values in one place
+2. **Avoid hardcoding**: Keep sensitive or environment-specific data out of our modules
+3. **Enable reusability**: Share the same modules across different environments
+
+Here's how we implement our config module:
+
+```typescript title="/dagger/config/src/index.ts"
+import { func, object } from "@dagger.io/dagger";
+
+@object()
+export class Config {
+  /**
+   * Get the Cloudflare account ID for deployments
+   */
+  @func()
+  cloudflareAccountId(): string {
+    // In production, this could read from environment variables
+    // or fetch from a secret management system
+    return "your-cloudflare-account-id";
+  }
+
+  /**
+   * Get the GitLab project ID for API calls
+   */
+  @func()
+  gitlabProjectId(): string {
+    return "your-gitlab-project-id";
+  }
+}
+```
+
+This config module is installed in our repository root and can be accessed by any other module via `dag.config()`. This pattern is particularly useful when:
+- Managing different environments (dev, staging, production)
+- Sharing configuration across multiple deployment modules
+- Keeping sensitive data separate from your module logic
+
+To use this pattern in your own projects:
+1. Create a config module at your repository root
+2. Install it: `dagger install ./dagger/config`
+3. Access it from any module: `await dag.config().yourConfigMethod()`
+
+## GitLab CI Pipeline
+
+Our GitLab CI configuration orchestrates the entire deployment process.
+
+Firstly, we configure some base jobs that will be used by all other jobs. This includes setting up Docker-in-Docker for building images and installing Dagger.
+
+```yaml title=".dagger/.gitlab-ci.yml"
+.docker:
+  image: docker:latest
+  services:
+    - name: docker:${DOCKER_VERSION}-dind
+      command: ["--registry-mirror", "https://mirror.gcr.io"]
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_DRIVER: overlay2
+    DOCKER_VERSION: "27.2.0"
+    DOCKER_TLS_VERIFY: "1"
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_CERT_PATH: "/certs/client"
+  before_script:
+    - until docker info > /dev/null 2>&1; do sleep 1; done
+
+.dagger:
+  extends: [.docker]
+  before_script:
+    - apk add ca-certificates curl git
+    - curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
+```
+
+Next, we define the deploy and preview jobs for each project. These are orchestrated with Dagger Shell, which is a really nice way to interact with Dagger without having to build custom modules.
+
+
+```yaml title=".dagger/.gitlab-ci.yml"
+website-deploy-production:
+  extends: [.dagger]
+  stage: deploy
+  environment:
+    name: rawkode-academy-production
+    url: https://rawkode.academy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - projects/rawkode.academy/website/**/*
+  script:
+    - cd projects/rawkode.academy/website
+    - |
+      dagger <<.
+        . | build | export dist
+
+        ../../../dagger/cloudflare | deploy \
+          ./dist \
+          wrangler.jsonc \
+          env:CLOUDFLARE_WORKERS_TOKEN
+      .
+
+website-deploy-merge-request:
+  extends: [.dagger]
+  stage: deploy
+  rules:
+    - if: "$CI_MERGE_REQUEST_ID"
+      changes:
+        - projects/rawkode.academy/website/**/*
+  script:
+    - cd projects/rawkode.academy/website
+    - |
+      dagger <<.
+        . | build | export dist
+
+        ../../../dagger/cloudflare | preview \
+          ./dist \
+          wrangler.jsonc \
+          env:CLOUDFLARE_WORKERS_TOKEN \
+          env:CICD_COMMENT_TOKEN \
+          $CI_MERGE_REQUEST_ID
+      .
+```
+
+Dagger Shell has full access to modules and their dependencies, enabling us to build and deploy our website with a single command. The `build` function compiles the website which can be exported and stored within a variable; while the `deploy` and `preview` functions handle the deployment to Cloudflare Workers and take our export/variable as input.
+
+## Local Development
+
+Developers can run the exact same build process locally:
+
+```bash
+# Build the website locally
+# (Assuming you are in the 'projects/rawkode.academy/website' directory)
+dagger . build
+
+# Deploy to a preview environment (requires tokens)
+# This command also assumes you are in the 'projects/rawkode.academy/website' directory.
+# It uses 'dagger call' to invoke the 'deploy' function in the shared Cloudflare Dagger module.
+# The path '../../../dagger/cloudflare' points to this module relative to the current directory.
+dagger call -m ../../../dagger/cloudflare deploy \
+  --dist ./dist \
+  --wrangler-config wrangler.jsonc \
+  --cloudflare-api-token env:CLOUDFLARE_PAGES_TOKEN
+```
+
+## Security Considerations
+
+- **Secret Management**: All sensitive tokens are managed through GitLab CI variables. This ensures that secrets are not hardcoded in the codebase, reducing the risk of accidental exposure. We use GitLab's built-in secret management to securely store and access tokens, API keys, and other sensitive information.
+
+- **Branch Protection**: Production deployments only happen from the main branch. This practice ensures that only thoroughly reviewed and tested code reaches production. We enforce branch protection rules to prevent direct pushes to the main branch, requiring all changes to go through a merge request process.
+
+- **Access Control**: Cloudflare API tokens are scoped to specific resources. This principle of least privilege ensures that each token has the minimum permissions necessary to perform its function, reducing the potential impact of a compromised token. We regularly review and rotate tokens to maintain security.
+
+- **Environment Isolation**: We use separate environments for development, staging, and production. This isolation helps prevent accidental changes to production systems and allows for thorough testing before deployment.
+
+- **Regular Audits**: We conduct regular security audits of our CI/CD pipeline and infrastructure. This includes reviewing access controls, secret management practices, and deployment processes to identify and address potential vulnerabilities.
+
+## Performance Optimizations
+
+1. **Docker Layer Caching**: The pipeline uses Docker-in-Docker with proper caching
+2. **Dagger Caching**: Build dependencies are cached between runs
+3. **Change Detection**: Deployments only trigger when relevant files change
+4. **Parallel Execution**: Multiple projects can deploy simultaneously
+
+## Conclusion
+
+This Dagger + GitLab + Cloudflare Workers setup provides us with a robust, fast, and developer-friendly deployment pipeline. The combination of containerized builds, automatic preview environments, and integrated notifications creates an excellent developer experience while maintaining production reliability.
+
+The modular approach with Dagger also means we can easily extend this pipeline to support additional deployment targets or build processes as our needs evolve. This flexibility ensures that our deployment pipeline can grow and adapt with our projects, making it a future-proof solution.
+
+If you're looking to modernize your deployment pipeline, this stack offers a great balance of simplicity, power, and developer experience. By adopting this setup, you can achieve faster, more reliable deployments, reduce manual overhead, and focus on what truly matters—building great software.
+
+We're excited about the possibilities this pipeline opens up and look forward to seeing how it can help other teams achieve similar results. The future of CI/CD is here, and it's more powerful and developer-friendly than ever before.

@@ -101,12 +101,14 @@ export class Cloudflare {
 
 		const allOutput = await deploymentResult.stdout();
 
+		// Extract the preview URL from the output
+		const urlMatch = allOutput.match(/https:\/\/[^\s]+\.workers\.dev/);
+		const previewUrl = urlMatch ? urlMatch[0] : "Preview URL not found";
+
 		return dag.gitlab().postMergeRequestComment(
 			gitlabApiToken,
 			mergeRequestId,
-			allOutput,
+			`Version Preview URL: ${previewUrl}`,
 		).stdout();
-
-		return allOutput;
 	}
 }
