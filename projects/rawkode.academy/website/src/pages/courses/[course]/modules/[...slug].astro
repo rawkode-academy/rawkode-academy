@@ -1,0 +1,236 @@
+---
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import Page from "@/wrappers/page.astro";
+import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { getImage } from "astro:assets";
+import { getCollection, getEntries, render, type CollectionEntry } from "astro:content";
+
+export const prerender = true;
+
+type Props = {
+	module: CollectionEntry<"courseModules">;
+	course: CollectionEntry<"courses">;
+};
+
+const computeImageUrl = async (
+	module: CollectionEntry<"courseModules">
+): Promise<URL | undefined> => {
+	if (module.data.cover) {
+		const image = await getImage({ src: module.data.cover.image });
+
+		return new URL(image.src, Astro.site);
+	}
+
+	return undefined;
+};
+
+export const getStaticPaths: GetStaticPaths =
+	async (): Promise<GetStaticPathsResult> => {
+		const courseModules = await getCollection("courseModules");
+		const courses = await getCollection("courses");
+
+		// Only generate pages for published modules
+		const publishedModules = courseModules.filter(module => !module.data.isDraft);
+
+		return publishedModules.map((module: CollectionEntry<"courseModules">) => {
+			const course = courses.find(c => c.id === module.data.course.id);
+
+			return {
+				params: {
+					course: module.data.course.id,
+					slug: module.id,
+				},
+				props: {
+					module,
+					course,
+				},
+			};
+		});
+	};
+
+const { module, course } = Astro.props;
+
+// Prevent viewing draft modules
+if (module.data.isDraft) {
+	return Astro.redirect("/404");
+}
+
+const { Content } = await render(module);
+const authors = await getEntries(module.data.authors);
+
+const imageUrl = await computeImageUrl(module);
+
+const breadcrumbElements = [
+	{ title: "Home", link: "/" },
+	{ title: "Courses", link: "/courses" },
+	{ title: course.data.title, link: `/courses/${course.id}` },
+	{ title: module.data.title, link: `/courses/${course.id}/modules/${module.id}` },
+];
+
+// Get all course modules for navigation
+const allCourseModules = (await getCollection("courseModules"))
+	.filter((m) => m.data.course.id === course.id)
+	.filter((m) => !m.data.isDraft)
+	.sort((a, b) => a.data.order - b.data.order);
+
+const currentIndex = allCourseModules.findIndex(m => m.id === module.id);
+const previousModule = currentIndex > 0 ? allCourseModules[currentIndex - 1] : null;
+const nextModule = currentIndex < allCourseModules.length - 1 ? allCourseModules[currentIndex + 1] : null;
+---
+
+<Page
+	title={`${module.data.title} | ${course.data.title}`}
+	description={module.data.description}
+	image={imageUrl ? {
+		image: imageUrl,
+		text: module.data.title,
+		format: "png" as const
+	} : undefined}
+	publishedAt={module.data.publishedAt}
+	updatedAt={module.data.updatedAt}
+	authors={authors}
+>
+	<div class="bg-white dark:bg-gray-900">
+		<!-- Breadcrumb Section -->
+		<div class="py-4 px-4 mx-auto max-w-screen-xl border-b border-gray-100 dark:border-gray-800">
+			<Breadcrumb elements={breadcrumbElements} />
+		</div>
+
+		<!-- Module Header -->
+		<div class="bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+			<div class="py-16 px-4 mx-auto max-w-screen-xl">
+				<div class="max-w-5xl mx-auto">
+					<!-- Module Meta -->
+					<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+						<div class="flex flex-wrap items-center gap-4">
+							<span class="text-sm text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 px-4 py-2 rounded-full">
+								{module.data.section && `${module.data.section} • `}Module {module.data.order}
+							</span>
+							{module.data.videoUrl && (
+								<span class="text-sm text-primary bg-primary/10 px-4 py-2 rounded-full flex items-center">
+									<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+										<path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" fill-rule="evenodd"></path>
+									</svg>
+									Video Available
+								</span>
+							)}
+							<span class="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full">
+								Published {new Intl.DateTimeFormat('en-US', {
+									year: 'numeric',
+									month: 'long',
+									day: 'numeric'
+								}).format(module.data.publishedAt)}
+							</span>
+						</div>
+
+						<!-- Author -->
+						<div class="flex items-center gap-3">
+							<span class="text-sm text-gray-500 dark:text-gray-400">Author:</span>
+							<div class="flex items-center gap-3">
+								{authors.map((author) => (
+									<div class="flex items-center gap-2">
+										<img
+											class="w-8 h-8 rounded-full object-cover border-2 border-purple-200 dark:border-purple-700"
+											src={`https://github.com/${author.data.handle}.png`}
+											alt={`Profile picture of ${author.data.name}`}
+										/>
+										<div class="text-sm">
+											<div class="font-medium text-gray-900 dark:text-white">{author.data.name}</div>
+											<div class="text-xs text-gray-500 dark:text-gray-400">@{author.data.handle}</div>
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					</div>
+
+					<!-- Title and Description -->
+					<div>
+						<h1 class="text-4xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
+							{module.data.title}
+						</h1>
+
+						<p class="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-4xl">
+							{module.data.description}
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Main Content -->
+		<div class="py-8 px-4 mx-auto max-w-screen-xl">
+
+			<!-- Video Section -->
+			{module.data.videoUrl && (
+				<div class="mb-8">
+					<div class="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+						<div class="text-center">
+							<svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+								<path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" fill-rule="evenodd"></path>
+							</svg>
+							<p class="text-gray-500 dark:text-gray-400">Video content would be embedded here</p>
+							<a href={module.data.videoUrl} target="_blank" class="text-primary hover:text-primary/80 text-sm">
+								Watch on external platform →
+							</a>
+						</div>
+					</div>
+				</div>
+			)}
+
+			<!-- Module Content -->
+			<article class="format prose lg:prose-xl dark:format-invert max-w-none mb-16">
+				<Content />
+			</article>
+
+			<!-- Navigation -->
+			<div class="flex items-center justify-between pt-8 border-t border-gray-200 dark:border-gray-700">
+				<div class="flex-1">
+					{previousModule && (
+						<a
+							href={`/courses/${course.id}/modules/${previousModule.id}`}
+							class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+						>
+							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+							</svg>
+							<div class="text-left">
+								<div class="text-xs text-gray-500 dark:text-gray-400">Previous</div>
+								<div>{previousModule.data.title}</div>
+							</div>
+						</a>
+					)}
+				</div>
+
+				<div class="flex-1 text-center">
+					<a
+						href={`/courses/${course.id}`}
+						class="inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
+					>
+						<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0l-4-4m4 4l-4 4"></path>
+						</svg>
+						Back to Course
+					</a>
+				</div>
+
+				<div class="flex-1 text-right">
+					{nextModule && (
+						<a
+							href={`/courses/${course.id}/modules/${nextModule.id}`}
+							class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+						>
+							<div class="text-right">
+								<div class="text-xs text-gray-500 dark:text-gray-400">Next</div>
+								<div>{nextModule.data.title}</div>
+							</div>
+							<svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+							</svg>
+						</a>
+					)}
+				</div>
+			</div>
+		</div>
+	</div>
+</Page>

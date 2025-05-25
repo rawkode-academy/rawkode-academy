@@ -1,0 +1,177 @@
+---
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import Page from "@/wrappers/page.astro";
+import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { getImage } from "astro:assets";
+import { getCollection, getEntries, render, type CollectionEntry } from "astro:content";
+import CourseModules from "@/components/courses/CourseModules.astro";
+
+export const prerender = true;
+
+type Props = {
+	course: CollectionEntry<"courses">;
+};
+
+const computeImageUrl = async (
+	course: CollectionEntry<"courses">
+): Promise<URL | undefined> => {
+	if (course.data.cover) {
+		const image = await getImage({ src: course.data.cover.image });
+
+		return new URL(image.src, Astro.site);
+	}
+
+	return undefined;
+};
+
+export const getStaticPaths: GetStaticPaths =
+	async (): Promise<GetStaticPathsResult> => {
+		const courses = await getCollection("courses");
+
+		return courses.map((course: CollectionEntry<"courses">) => {
+			return {
+				params: {
+					slug: course.id,
+				},
+				props: {
+					course,
+				},
+			};
+		});
+	};
+
+const { course } = Astro.props;
+const { Content } = await render(course);
+const authors = await getEntries(course.data.authors);
+
+// Get course modules for statistics
+const allCourseModules = (await getCollection("courseModules"))
+	.filter((module) => module.data.course.id === course.id)
+	.sort((a, b) => a.data.order - b.data.order);
+
+const totalModules = allCourseModules.length;
+
+const imageUrl = await computeImageUrl(course);
+
+// Get difficulty badge color
+function getDifficultyColor(difficulty: string) {
+	switch (difficulty) {
+		case "beginner":
+			return "bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900";
+		case "intermediate":
+			return "bg-yellow-100 text-yellow-800 dark:bg-yellow-200 dark:text-yellow-900";
+		case "advanced":
+			return "bg-red-100 text-red-800 dark:bg-red-200 dark:text-red-900";
+		default:
+			return "bg-gray-100 text-gray-800 dark:bg-gray-200 dark:text-gray-900";
+	}
+}
+
+const breadcrumbElements = [
+	{ title: "Home", link: "/" },
+	{ title: "Courses", link: "/courses" },
+	{ title: course.data.title, link: `/courses/${course.id}` },
+];
+---
+
+<Page
+	title={`${course.data.title} | Course`}
+	description={course.data.description}
+	image={imageUrl ? {
+		image: imageUrl,
+		text: course.data.title,
+		format: "png" as const
+	} : undefined}
+	publishedAt={course.data.publishedAt}
+	updatedAt={course.data.updatedAt}
+	authors={authors}
+>
+		<div class="bg-white dark:bg-gray-900">
+		<!-- Breadcrumb Section -->
+		<div class="py-4 px-4 mx-auto max-w-screen-xl border-b border-gray-100 dark:border-gray-800">
+			<Breadcrumb elements={breadcrumbElements} />
+		</div>
+
+		<!-- Course Header -->
+		<div class="bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+			<div class="py-16 px-4 mx-auto max-w-screen-xl">
+								<div class="max-w-5xl mx-auto">
+					<!-- Course Meta -->
+										<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+						<div class="flex flex-wrap items-center gap-4">
+							<span class={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${getDifficultyColor(course.data.difficulty)}`}>
+								{course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}{totalModules > 0 && ` • ${totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}`}
+							</span>
+
+							<span class="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full">
+								Published {new Intl.DateTimeFormat('en-US', {
+									year: 'numeric',
+									month: 'long',
+									day: 'numeric'
+								}).format(course.data.publishedAt)}
+							</span>
+						</div>
+
+						<!-- Instructor -->
+						<div class="flex items-center gap-3">
+							<span class="text-sm text-gray-500 dark:text-gray-400">Instructor:</span>
+							<div class="flex items-center gap-3">
+								{authors.map((author) => (
+									<div class="flex items-center gap-2">
+										<img
+											class="w-8 h-8 rounded-full object-cover border-2 border-purple-200 dark:border-purple-700"
+											src={`https://github.com/${author.data.handle}.png`}
+											alt={`Profile picture of ${author.data.name}`}
+										/>
+										<div class="text-sm">
+											<div class="font-medium text-gray-900 dark:text-white">{author.data.name}</div>
+											<div class="text-xs text-gray-500 dark:text-gray-400">@{author.data.handle}</div>
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					</div>
+
+					<!-- Title and Description -->
+					<div>
+						<h1 class="text-4xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
+							{course.data.title}
+						</h1>
+
+						<p class="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-4xl">
+							{course.data.description}
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Main Content -->
+		<div class="py-8 px-4 mx-auto max-w-screen-xl">
+			<!-- Course Content -->
+			<article class="format prose lg:prose-xl dark:format-invert max-w-none mb-16">
+				<Content />
+			</article>
+
+			<!-- Course Modules -->
+			<div class="mb-16">
+				<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Course Content</h2>
+				<CourseModules course={course} />
+			</div>
+
+			<!-- Back to Courses -->
+			<div class="pt-8 border-t border-gray-200 dark:border-gray-700">
+				<a
+					href="/courses"
+					class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+				>
+					<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+					</svg>
+					Back to all courses
+				</a>
+			</div>
+		</div>
+	</div>
+</Page>

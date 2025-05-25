@@ -37,8 +37,8 @@ const baseMenuItems = [
 	// 	icon: FilmIcon,
 	// },
 	{ name: "Articles", href: "/read", icon: NewspaperIcon },
+	{ name: "Courses", href: "/courses", icon: AcademicCapIcon },
 	// { name: 'Events', href: '/events', icon: CalendarDaysIcon },
-	// { name: 'Courses', href: '#', icon: AcademicCapIcon },
 	// { name: 'Shows', href: '#', icon: FilmIcon },
 	{
 		name: "Videos",
