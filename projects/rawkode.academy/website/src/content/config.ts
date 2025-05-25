@@ -161,6 +161,50 @@ const testimonials = defineCollection({
   }),
 });
 
+const courses = defineCollection({
+  loader: glob({
+    pattern: ["**/*.mdx", "**/*.md"],
+    base: "./content/courses",
+  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      cover: z.object({
+        image: image(),
+        alt: z.string(),
+      }).optional(),
+      publishedAt: z.coerce.date(),
+      updatedAt: z.coerce.date().optional(),
+      authors: z.array(reference("people")).default(["rawkode"]),
+      difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+    }),
+});
+
+const courseModules = defineCollection({
+  loader: glob({
+    pattern: ["**/*.mdx", "**/*.md"],
+    base: "./content/course-modules",
+  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      course: reference("courses"),
+      section: z.string().optional(), // For grouping modules into sections
+      order: z.number(), // For sorting modules within a course
+      cover: z.object({
+        image: image(),
+        alt: z.string(),
+      }).optional(),
+      publishedAt: z.coerce.date(),
+      updatedAt: z.coerce.date().optional(),
+      isDraft: z.boolean().default(true),
+      authors: z.array(reference("people")).default(["rawkode"]),
+      videoUrl: z.string().optional(),
+    }),
+});
+
 export const collections = {
   adrs,
   articles,
@@ -168,4 +212,6 @@ export const collections = {
   videos,
   people,
   testimonials,
+  courses,
+  courseModules,
 };

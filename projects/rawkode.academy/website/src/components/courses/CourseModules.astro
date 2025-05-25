@@ -1,0 +1,123 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
+
+type Props = {
+	course: CollectionEntry<"courses">;
+};
+
+const { course } = Astro.props;
+
+// Get all course modules for this course (including drafts)
+const courseModules = (await getCollection("courseModules"))
+	.filter((module) => module.data.course.id === course.id)
+	.sort((a, b) => a.data.order - b.data.order);
+
+// Group course modules by section
+const groupedModules = courseModules.reduce((acc, module) => {
+	const section = module.data.section || "Course Content";
+	if (!acc[section]) {
+		acc[section] = [];
+	}
+	acc[section].push(module);
+	return acc;
+}, {} as Record<string, typeof courseModules>);
+
+// Calculate total modules
+const totalModules = courseModules.length;
+---
+
+{
+	totalModules === 0 ? (
+		<div class="text-gray-500 dark:text-gray-400 text-center py-8">
+			<svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+			</svg>
+			<p class="text-sm">No course modules available yet.</p>
+			<p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Check back soon for content updates!</p>
+		</div>
+	) : (
+				<div class="space-y-8">
+
+			{Object.entries(groupedModules).map(([sectionName, modules]) => (
+				<div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+					<!-- Section Header -->
+					<div class="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+						<div class="flex items-center justify-between">
+							<div class="text-lg font-semibold text-gray-900 dark:text-white">{sectionName}</div>
+							<div class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-700 px-2 py-1 rounded">
+								{modules.length === 1 ? `${modules.length} module` : `${modules.length} modules`}
+							</div>
+						</div>
+					</div>
+
+					<!-- Section Modules -->
+					<div class="divide-y divide-gray-200 dark:divide-gray-700">
+						{modules.map((module) => {
+							const isDraft = module.data.isDraft;
+							const Element = isDraft ? 'div' : 'a';
+							const elementProps = isDraft
+								? { class: "block p-6 bg-white dark:bg-gray-800 cursor-not-allowed" }
+								: {
+									href: `/courses/${course.id}/modules/${module.id}`,
+									class: "block p-6 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 group"
+								};
+
+							return (
+								<Element {...elementProps}>
+									<div class="flex items-center gap-4">
+										<div class="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center text-sm font-medium">
+											{module.data.order}
+										</div>
+										<div class="flex-1 min-w-0">
+																						<h4 class={`text-base font-medium line-clamp-2 mb-1 ${
+												isDraft
+													? "text-gray-900 dark:text-white"
+													: "text-gray-900 dark:text-white group-hover:text-primary transition-colors"
+											}`}>
+												{module.data.title}
+											</h4>
+											<p class={`text-sm mt-1 line-clamp-2 ${
+												isDraft
+													? "text-gray-500 dark:text-gray-400"
+													: "text-gray-500 dark:text-gray-400"
+											}`}>
+												{module.data.description}
+											</p>
+											{!isDraft && module.data.videoUrl && (
+												<div class="mt-3">
+													<span class="text-xs text-primary bg-primary/10 px-2 py-1 rounded-full flex items-center w-fit">
+														<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+															<path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" fill-rule="evenodd"></path>
+														</svg>
+														Video
+													</span>
+												</div>
+											)}
+										</div>
+										<div class="flex-shrink-0">
+											{isDraft ? (
+												<span class="text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded-full flex items-center">
+													<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+														<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+													</svg>
+													Coming Soon
+												</span>
+											) : (
+												<svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+												</svg>
+											)}
+										</div>
+									</div>
+								</Element>
+							);
+						})}
+					</div>
+				</div>
+			))}
+		</div>
+	)
+}
+
+

@@ -1,0 +1,54 @@
+---
+import { getCollection } from "astro:content";
+import Page from "@/wrappers/page.astro";
+import CourseCard from "@/components/courses/CourseCard.astro";
+
+export const prerender = true;
+
+// Get all courses and sort by published date
+const allCourses = (await getCollection("courses"))
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+---
+
+<Page title="Courses" description="Explore our comprehensive courses on cloud-native technologies, DevOps, and modern software development.">
+  <div class="bg-white dark:bg-gray-900">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+      <!-- Header Section -->
+      <div class="mx-auto max-w-screen-md text-center lg:mb-16 mb-8">
+        <h1 class="mb-4 text-3xl lg:text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
+          Courses
+        </h1>
+        <p class="font-light text-gray-500 lg:mb-8 sm:text-xl dark:text-gray-400">
+          Master cloud-native technologies with our comprehensive, hands-on courses. From beginner to advanced,
+          we've got you covered with practical skills you can apply immediately.
+        </p>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6 border-l-4 border-blue-500">
+                    <p class="text-base text-gray-700 dark:text-gray-200">
+            All courses are <strong class="text-green-600 dark:text-green-400">completely free</strong> to access! If you'd like to download source code and additional resources, please
+            <a href="/api/auth/sign-in" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium underline">create an account</a> — it only takes a moment.
+          </p>
+        </div>
+      </div>
+
+      <!-- Courses Grid -->
+      {allCourses.length === 0 ? (
+        <div class="text-center py-16">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            No courses available yet
+          </h2>
+          <p class="text-gray-500 dark:text-gray-400">
+            We're working hard to bring you amazing courses. Check back soon!
+          </p>
+        </div>
+      ) : (
+        <div class="grid gap-8 lg:grid-cols-2">
+          {allCourses.map((course) => (
+            <CourseCard course={course} />
+          ))}
+        </div>
+      )}
+
+
+    </div>
+  </div>
+</Page>

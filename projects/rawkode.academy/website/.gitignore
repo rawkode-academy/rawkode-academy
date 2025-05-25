@@ -20,3 +20,4 @@ node_modules
 
 # generated d2 diagrams
 public/d2/
+.cursor
