@@ -25,6 +25,8 @@ onMounted(() => {
 	initFlowbite();
 });
 
+
+
 // Create menu items array without the current property
 const baseMenuItems = [
 	{ name: "Home", href: "/", icon: HomeIcon },
@@ -148,24 +150,7 @@ function isCurrentPath(itemPath: string) {
 		border-r border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-100/10 dark:shadow-black/20" aria-label="Sidenav"
 		id="drawer-navigation">
 		<div class="overflow-y-auto py-5 px-4 h-full">
-			<!-- Search for mobile -->
-			<form action="/search" method="GET" class="md:hidden mb-4 relative">
-				<label for="sidebar-search" class="sr-only">Search</label>
-				<div class="relative">
-					<div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
-						<svg class="w-5 h-5 text-primary/70 dark:text-primary/70" fill="currentColor" viewBox="0 0 20 20"
-							xmlns="http://www.w3.org/2000/svg">
-							<path fill-rule="evenodd" clip-rule="evenodd"
-								d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z">
-							</path>
-						</svg>
-					</div>
-					<input type="text" name="q" id="sidebar-search" class="bg-white/80 dark:bg-black/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg
-						focus:ring-2 focus:ring-primary/50 focus:border-primary/70
-						block w-full pl-10 p-2.5 placeholder-gray-400 dark:placeholder-gray-500
-						transition-all duration-200 ease-in-out" placeholder="Search videos..." />
-				</div>
-			</form>
+
 			<ul class="space-y-1.5">
 				<MenuItems :menuItems="menuItems" />
 			</ul>
