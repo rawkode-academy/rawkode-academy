@@ -139,8 +139,7 @@ const adrs = defineCollection({
   schema: () =>
     z.object({
 			title: z.string(),
-			createdAt: z.coerce.date(),
-			adoptedAt: z.coerce.date().optional(),
+			adoptedAt: z.coerce.date(),
 			authors: z.array(reference("people")).default(["rawkode"]),
     }),
 });
