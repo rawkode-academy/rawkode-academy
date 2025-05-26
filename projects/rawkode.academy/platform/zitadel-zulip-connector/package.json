@@ -1,0 +1,24 @@
+{
+	"name": "zitadel-zulip-connector",
+	"module": "src/main.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "wrangler dev",
+		"test": "bun test",
+		"test:watch": "bun test --watch",
+		"test:coverage": "bun test --coverage"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "4.20250525.0",
+		"@types/bun": "latest",
+		"wrangler": "4.16.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"hono": "4.7.10",
+		"zod": "^3.25.28"
+	}
+}
