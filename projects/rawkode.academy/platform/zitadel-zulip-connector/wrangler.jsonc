@@ -1,0 +1,15 @@
+{
+	"name": "zitadel-zulip-connector",
+	"main": "src/main.ts",
+	"compatibility_date": "2025-05-05",
+	"vars": {
+		"ZITADEL_DOMAIN": "zitadel.rawkode.academy",
+		"ZULIP_SITE": "https://chat.rawkode.academy"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "USER_MAPPINGS",
+			"id": "582378020f874b558deb6270a4c63fa8"
+		}
+	]
+}
