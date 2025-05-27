@@ -49,8 +49,7 @@ website-deploy-production:
         ../../../dagger/cloudflare | deploy \
           ./dist \
           wrangler.jsonc \
-          env:CLOUDFLARE_WORKERS_TOKEN \
-          env:CICD_COMMENT_TOKEN
+          env:CLOUDFLARE_WORKERS_TOKEN
       .
 
 website-deploy-merge-request:
@@ -66,12 +65,12 @@ website-deploy-merge-request:
       dagger <<.
         . | build | export dist
 
-        ../../../dagger/cloudflare | deploy \
+        ../../../dagger/cloudflare | preview \
           ./dist \
           wrangler.jsonc \
           env:CLOUDFLARE_WORKERS_TOKEN \
           env:CICD_COMMENT_TOKEN \
-          --merge-request-id=$CI_MERGE_REQUEST_ID
+          $CI_MERGE_REQUEST_ID
       .
 
 studio-deploy-production:
@@ -110,12 +109,12 @@ studio-deploy-merge-request:
       dagger <<.
         . | build | export dist
 
-        ../../dagger/cloudflare | deploy \
+        ../../dagger/cloudflare | preview \
           ./dist \
           wrangler.jsonc \
           env:CLOUDFLARE_WORKERS_TOKEN \
           env:CICD_COMMENT_TOKEN \
-          --merge-request-id=$CI_MERGE_REQUEST_ID
+          $CI_MERGE_REQUEST_ID
       .
 
 infrastructure-dns-merge-request:
