@@ -45,7 +45,6 @@ export class Cloudflare {
         "wrangler",
         "deploy",
         `--env=${mergeRequestId ? "preview" : "produdction"}`,
-        "/deploy/dist",
       ]);
 
     if (await deploymentResult.exitCode() !== 0) {
