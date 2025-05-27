@@ -74,6 +74,7 @@
     "vue3-carousel": "^0.15.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@graphql-codegen/cli": "^5.0.6",
     "@graphql-codegen/client-preset": "^4.8.1",
     "@graphql-codegen/introspection": "^4.0.3",
