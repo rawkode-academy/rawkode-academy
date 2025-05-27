@@ -1,6 +1,4 @@
 import { sequence } from "astro:middleware";
 import { authMiddleware } from "./auth";
 
-export const onRequest = sequence(
-  authMiddleware,
-);
+export const onRequest = sequence(authMiddleware);

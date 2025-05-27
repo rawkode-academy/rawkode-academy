@@ -6,7 +6,8 @@ import StatsSimple from "@/components/stats/simple.vue";
 
 // Define props for the layout
 export const title = "Share Your Project on Rawkode Live";
-export const description = "Showcase your open-source project to a passionate community of developers and tech enthusiasts on Rawkode Live.";
+export const description =
+	"Showcase your open-source project to a passionate community of developers and tech enthusiasts on Rawkode Live.";
 
 // Specify the layout for this page using the path string
 export const layout = "@/wrappers/page.astro";
@@ -15,65 +16,74 @@ export const layout = "@/wrappers/page.astro";
 
 // Stats data
 const statsData = {
-  title: "Join Our Growing Community",
-  stats: [
-    {
-      value: "100+",
-      label: "Projects Featured"
-    },
-    {
-      value: "1M+",
-      label: "Views"
-    },
-    {
-      value: "100%",
-      label: "Enjoyed the Experience!"
-    }
-  ]
+	title: "Join Our Growing Community",
+	stats: [
+		{
+			value: "100+",
+			label: "Projects Featured",
+		},
+		{
+			value: "1M+",
+			label: "Views",
+		},
+		{
+			value: "100%",
+			label: "Enjoyed the Experience!",
+		},
+	],
 };
 
 // Process steps
 const processSteps = [
-  {
-    title: "Apply",
-    description: "Submit your project through our booking system. We'll review it to ensure it's a good fit for our audience."
-  },
-  {
-    title: "Prepare",
-    description: "Once approved, we'll send you preparation guidelines to help you showcase your project effectively."
-  },
-  {
-    title: "Present",
-    description: "Join David for a live session where we'll demo your project, discuss its features, and engage with the audience."
-  },
-  {
-    title: "Connect",
-    description: "After the stream, we'll share the recording and help you connect with interested developers from our community."
-  }
+	{
+		title: "Apply",
+		description:
+			"Submit your project through our booking system. We'll review it to ensure it's a good fit for our audience.",
+	},
+	{
+		title: "Prepare",
+		description:
+			"Once approved, we'll send you preparation guidelines to help you showcase your project effectively.",
+	},
+	{
+		title: "Present",
+		description:
+			"Join David for a live session where we'll demo your project, discuss its features, and engage with the audience.",
+	},
+	{
+		title: "Connect",
+		description:
+			"After the stream, we'll share the recording and help you connect with interested developers from our community.",
+	},
 ];
 
 // FAQ items
 const faqItems = [
-  {
-    question: "What types of projects are suitable for Rawkode Live?",
-    answer: "We welcome a wide range of open-source projects, particularly those related to cloud-native technologies, developer tools, infrastructure, and automation. The key criteria are that your project solves a real problem for developers and has an open-source component."
-  },
-  {
-    question: "Do I need to be the project creator to present?",
-    answer: "Not necessarily. While project creators often make great presenters, we also welcome core contributors or maintainers who are deeply familiar with the project and can speak authoritatively about its design, implementation, and roadmap."
-  },
-  {
-    question: "How technical should my presentation be?",
-    answer: "Our audience consists primarily of developers and technical professionals, so we encourage in-depth technical discussions. However, the best presentations balance technical details with clear explanations of the problem being solved and the project's value proposition."
-  },
-  {
-    question: "Is there a cost to participate?",
-    answer: "No, featuring your open-source project on Rawkode Live is completely free. We're passionate about supporting the open-source community and helping great projects gain visibility."
-  },
-  {
-    question: "What's the format of the session?",
-    answer: "Sessions typically run 60-90 minutes and include an introduction to you and your project, a demonstration or walkthrough, and audience Q&A. The format is conversational and flexible, allowing us to focus on the most interesting aspects of your project."
-  }
+	{
+		question: "What types of projects are suitable for Rawkode Live?",
+		answer:
+			"We welcome a wide range of open-source projects, particularly those related to cloud-native technologies, developer tools, infrastructure, and automation. The key criteria are that your project solves a real problem for developers and has an open-source component.",
+	},
+	{
+		question: "Do I need to be the project creator to present?",
+		answer:
+			"Not necessarily. While project creators often make great presenters, we also welcome core contributors or maintainers who are deeply familiar with the project and can speak authoritatively about its design, implementation, and roadmap.",
+	},
+	{
+		question: "How technical should my presentation be?",
+		answer:
+			"Our audience consists primarily of developers and technical professionals, so we encourage in-depth technical discussions. However, the best presentations balance technical details with clear explanations of the problem being solved and the project's value proposition.",
+	},
+	{
+		question: "Is there a cost to participate?",
+		answer:
+			"No, featuring your open-source project on Rawkode Live is completely free. We're passionate about supporting the open-source community and helping great projects gain visibility.",
+	},
+	{
+		question: "What's the format of the session?",
+		answer:
+			"Sessions typically run 60-90 minutes and include an introduction to you and your project, a demonstration or walkthrough, and audience Q&A. The format is conversational and flexible, allowing us to focus on the most interesting aspects of your project.",
+	},
 ];
 ---
 

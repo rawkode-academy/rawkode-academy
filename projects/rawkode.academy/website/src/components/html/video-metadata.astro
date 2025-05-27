@@ -1,63 +1,65 @@
 ---
 interface Props {
-  title: string;
-  description: string;
-  thumbnailUrl?: string;
-  publishedAt?: string;
-  duration?: number;
-  streamUrl?: string;
-  isVideoList?: boolean;
+	title: string;
+	description: string;
+	thumbnailUrl?: string;
+	publishedAt?: string;
+	duration?: number;
+	streamUrl?: string;
+	isVideoList?: boolean;
 }
 
 const {
-  title,
-  description,
-  thumbnailUrl,
-  publishedAt,
-  duration,
-  streamUrl,
-  isVideoList = false
+	title,
+	description,
+	thumbnailUrl,
+	publishedAt,
+	duration,
+	streamUrl,
+	isVideoList = false,
 } = Astro.props;
 
 // Format duration from seconds to ISO 8601
 function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const remainingSeconds = Math.floor(seconds % 60);
 
-  let result = "PT";
-  if (hours > 0) {
-    result += `${hours}H`;
-  }
-  if (minutes > 0) {
-    result += `${minutes}M`;
-  }
-  if (remainingSeconds > 0 || (hours === 0 && minutes === 0)) {
-    result += `${remainingSeconds}S`;
-  }
-  return result;
+	let result = "PT";
+	if (hours > 0) {
+		result += `${hours}H`;
+	}
+	if (minutes > 0) {
+		result += `${minutes}M`;
+	}
+	if (remainingSeconds > 0 || (hours === 0 && minutes === 0)) {
+		result += `${remainingSeconds}S`;
+	}
+	return result;
 }
 
 const formattedDuration = formatDuration(duration ?? 0);
 
 // Generate structured data
-const structuredData = isVideoList ? {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  "name": title,
-  "description": description,
-  "url": Astro.url.href
-} : {
-  "@context": "https://schema.org",
-  "@type": "VideoObject",
-  "name": title,
-  "description": description,
-  "thumbnailUrl": thumbnailUrl,
-  "uploadDate": publishedAt,
-  "duration": formattedDuration,
-  "contentUrl": streamUrl,
-  "url": Astro.url.href
-};
+const structuredData = isVideoList
+	? {
+			"@context": "https://schema.org",
+			"@type": "ItemList",
+			name: title,
+			description: description,
+			url: Astro.url.href,
+		}
+	: {
+			"@context": "https://schema.org",
+			"@type": "VideoObject",
+			name: title,
+			description: description,
+			thumbnailUrl: thumbnailUrl,
+			uploadDate: publishedAt,
+			duration: formattedDuration,
+			contentUrl: streamUrl,
+			url: Astro.url.href,
+		};
 ---
 
 <!-- Video-specific meta tags -->

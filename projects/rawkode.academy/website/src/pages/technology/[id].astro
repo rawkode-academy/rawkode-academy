@@ -49,7 +49,7 @@ export const getStaticPaths = (async () => {
       }
 		}
 	}`,
-		{ limit: 700 }
+		{ limit: 700 },
 	);
 
 	return data.getTechnologies.map((tech) => ({

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { initFlowbite } from 'flowbite';
-import { onMounted, ref, computed } from 'vue';
+import { initFlowbite } from "flowbite";
+import { onMounted, ref, computed } from "vue";
 import MenuItems from "./items.vue";
 import {
 	HomeIcon,
@@ -16,7 +16,7 @@ import {
 	DocumentTextIcon,
 	ClockIcon,
 } from "@heroicons/vue/24/outline";
-import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/20/solid';
+import { ChatBubbleLeftEllipsisIcon } from "@heroicons/vue/20/solid";
 
 // Get the current path from the window location
 const currentPath = ref("");
@@ -25,8 +25,6 @@ onMounted(() => {
 	currentPath.value = window.location.pathname;
 	initFlowbite();
 });
-
-
 
 // Create menu items array without the current property
 const baseMenuItems = [
@@ -110,30 +108,30 @@ const baseMenuItemsOrgs = [
 
 // Compute the menu items with the current property based on the current path
 const menuItems = computed(() => {
-	return baseMenuItems.map(item => ({
+	return baseMenuItems.map((item) => ({
 		...item,
-		current: isCurrentPath(item.href)
+		current: isCurrentPath(item.href),
 	}));
 });
 
 const menuItemsContributors = computed(() => {
-	return baseMenuItemsContributors.map(item => ({
+	return baseMenuItemsContributors.map((item) => ({
 		...item,
-		current: isCurrentPath(item.href)
+		current: isCurrentPath(item.href),
 	}));
 });
 
 const menuItemsMaintainers = computed(() => {
-	return baseMenuItemsMaintainers.map(item => ({
+	return baseMenuItemsMaintainers.map((item) => ({
 		...item,
-		current: isCurrentPath(item.href)
+		current: isCurrentPath(item.href),
 	}));
 });
 
 const menuItemsOrgs = computed(() => {
-	return baseMenuItemsOrgs.map(item => ({
+	return baseMenuItemsOrgs.map((item) => ({
 		...item,
-		current: isCurrentPath(item.href)
+		current: isCurrentPath(item.href),
 	}));
 });
 

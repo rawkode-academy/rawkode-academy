@@ -86,91 +86,94 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from "vue";
 
 interface Comment {
-  id: number
-  author: string
-  email: string
-  content: string
-  timestamp: string
-  avatar_url?: string
+	id: number;
+	author: string;
+	email: string;
+	content: string;
+	timestamp: string;
+	avatar_url?: string;
 }
 
 interface Props {
-  videoId: string
+	videoId: string;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
-const comments = ref<Comment[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
-const zulipTopicUrl = ref<string | null>(null)
+const comments = ref<Comment[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
+const zulipTopicUrl = ref<string | null>(null);
 
 const fetchComments = async () => {
-  try {
-    loading.value = true
-    error.value = null
+	try {
+		loading.value = true;
+		error.value = null;
 
-    const response = await fetch(`/api/comments/${props.videoId}`)
+		const response = await fetch(`/api/comments/${props.videoId}`);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch comments: ${response.statusText}`)
-    }
+		if (!response.ok) {
+			throw new Error(`Failed to fetch comments: ${response.statusText}`);
+		}
 
-    const data = await response.json()
+		const data = await response.json();
 
-    if (data.error) {
-      throw new Error(data.error)
-    }
+		if (data.error) {
+			throw new Error(data.error);
+		}
 
-    comments.value = data.comments || []
+		comments.value = data.comments || [];
 
-    // Get Zulip topic URL from API response if available
-    zulipTopicUrl.value = data.zulipTopicUrl || null
-
-  } catch (err) {
-    console.error('Error fetching comments:', err)
-    error.value = err instanceof Error ? err.message : 'Failed to load comments'
-  } finally {
-    loading.value = false
-  }
-}
+		// Get Zulip topic URL from API response if available
+		zulipTopicUrl.value = data.zulipTopicUrl || null;
+	} catch (err) {
+		console.error("Error fetching comments:", err);
+		error.value =
+			err instanceof Error ? err.message : "Failed to load comments";
+	} finally {
+		loading.value = false;
+	}
+};
 
 const formatDate = (timestamp: string): string => {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+	const date = new Date(timestamp);
+	const now = new Date();
+	const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
 
-  if (diffInHours < 1) {
-    const diffInMinutes = Math.floor(diffInHours * 60)
-    return diffInMinutes <= 1 ? 'just now' : `${diffInMinutes} minutes ago`
-  }
-  if (diffInHours < 24) {
-    const hours = Math.floor(diffInHours)
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`
-  }
-  if (diffInHours < 24 * 7) {
-    const days = Math.floor(diffInHours / 24)
-    return `${days} day${days === 1 ? '' : 's'} ago`
-  }
-  return date.toLocaleDateString()
-}
+	if (diffInHours < 1) {
+		const diffInMinutes = Math.floor(diffInHours * 60);
+		return diffInMinutes <= 1 ? "just now" : `${diffInMinutes} minutes ago`;
+	}
+	if (diffInHours < 24) {
+		const hours = Math.floor(diffInHours);
+		return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+	}
+	if (diffInHours < 24 * 7) {
+		const days = Math.floor(diffInHours / 24);
+		return `${days} day${days === 1 ? "" : "s"} ago`;
+	}
+	return date.toLocaleDateString();
+};
 
 const formatContent = (content: string): string => {
-  // Basic Zulip markdown to HTML conversion
-  // This is a simplified version - you might want to use a proper markdown parser
-  return content
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/`(.*?)`/g, '<code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">$1</code>')
-    .replace(/\n/g, '<br>')
-}
+	// Basic Zulip markdown to HTML conversion
+	// This is a simplified version - you might want to use a proper markdown parser
+	return content
+		.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+		.replace(/\*(.*?)\*/g, "<em>$1</em>")
+		.replace(
+			/`(.*?)`/g,
+			'<code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">$1</code>',
+		)
+		.replace(/\n/g, "<br>");
+};
 
 onMounted(() => {
-  fetchComments()
-})
+	fetchComments();
+});
 </script>
 
 <style scoped>

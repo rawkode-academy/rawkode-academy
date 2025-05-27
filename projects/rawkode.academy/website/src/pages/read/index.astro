@@ -8,24 +8,26 @@ export const prerender = true;
 
 // Get all blog posts and sort by date
 const allArticles = (await getCollection("articles"))
-  .filter((article) => !article.data.isDraft)
-  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+	.filter((article) => !article.data.isDraft)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
 // Get featured posts (latest 3)
 const featuredPosts = allArticles.slice(0, 3);
 const latestPost = featuredPosts[0];
-const latestPostAuthors = latestPost ? await getEntries(latestPost.data.authors) : [];
+const latestPostAuthors = latestPost
+	? await getEntries(latestPost.data.authors)
+	: [];
 
 // Get remaining posts
 const remainingPosts = allArticles.slice(3);
 
 // Function to format dates
 function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  }).format(date);
+	return new Intl.DateTimeFormat("en-US", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	}).format(date);
 }
 ---
 

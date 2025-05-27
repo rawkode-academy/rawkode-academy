@@ -6,8 +6,9 @@ import CourseCard from "@/components/courses/CourseCard.astro";
 export const prerender = true;
 
 // Get all courses and sort by published date
-const allCourses = (await getCollection("courses"))
-  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+const allCourses = (await getCollection("courses")).sort(
+	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
 ---
 
 <Page title="Courses" description="Explore our comprehensive courses on cloud-native technologies, DevOps, and modern software development.">

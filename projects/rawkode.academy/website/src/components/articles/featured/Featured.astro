@@ -5,11 +5,16 @@ import { Image } from "astro:assets";
 
 const allArticles = (await getCollection("articles"))
 	.filter((article: CollectionEntry<"articles">) => !article.data.isDraft)
-	.sort((a: CollectionEntry<"articles">, b: CollectionEntry<"articles">) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+	.sort(
+		(a: CollectionEntry<"articles">, b: CollectionEntry<"articles">) =>
+			b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+	);
 
 // Get the latest article
 const latestArticle = allArticles[0];
-const latestArticleAuthors = latestArticle ? await getEntries(latestArticle.data.authors) : [];
+const latestArticleAuthors = latestArticle
+	? await getEntries(latestArticle.data.authors)
+	: [];
 
 // Get other articles
 const otherArticles = allArticles.slice(1);

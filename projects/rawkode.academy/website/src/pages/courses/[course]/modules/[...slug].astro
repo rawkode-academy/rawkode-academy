@@ -3,7 +3,12 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { getImage } from "astro:assets";
-import { getCollection, getEntries, render, type CollectionEntry } from "astro:content";
+import {
+	getCollection,
+	getEntries,
+	render,
+	type CollectionEntry,
+} from "astro:content";
 
 export const prerender = true;
 
@@ -13,7 +18,7 @@ type Props = {
 };
 
 const computeImageUrl = async (
-	module: CollectionEntry<"courseModules">
+	module: CollectionEntry<"courseModules">,
 ): Promise<URL | undefined> => {
 	if (module.data.cover) {
 		const image = await getImage({ src: module.data.cover.image });
@@ -30,10 +35,12 @@ export const getStaticPaths: GetStaticPaths =
 		const courses = await getCollection("courses");
 
 		// Only generate pages for published modules
-		const publishedModules = courseModules.filter(module => !module.data.isDraft);
+		const publishedModules = courseModules.filter(
+			(module) => !module.data.isDraft,
+		);
 
 		return publishedModules.map((module: CollectionEntry<"courseModules">) => {
-			const course = courses.find(c => c.id === module.data.course.id);
+			const course = courses.find((c) => c.id === module.data.course.id);
 
 			return {
 				params: {
@@ -64,7 +71,10 @@ const breadcrumbElements = [
 	{ title: "Home", link: "/" },
 	{ title: "Courses", link: "/courses" },
 	{ title: course.data.title, link: `/courses/${course.id}` },
-	{ title: module.data.title, link: `/courses/${course.id}/modules/${module.id}` },
+	{
+		title: module.data.title,
+		link: `/courses/${course.id}/modules/${module.id}`,
+	},
 ];
 
 // Get all course modules for navigation
@@ -73,9 +83,13 @@ const allCourseModules = (await getCollection("courseModules"))
 	.filter((m) => !m.data.isDraft)
 	.sort((a, b) => a.data.order - b.data.order);
 
-const currentIndex = allCourseModules.findIndex(m => m.id === module.id);
-const previousModule = currentIndex > 0 ? allCourseModules[currentIndex - 1] : null;
-const nextModule = currentIndex < allCourseModules.length - 1 ? allCourseModules[currentIndex + 1] : null;
+const currentIndex = allCourseModules.findIndex((m) => m.id === module.id);
+const previousModule =
+	currentIndex > 0 ? allCourseModules[currentIndex - 1] : null;
+const nextModule =
+	currentIndex < allCourseModules.length - 1
+		? allCourseModules[currentIndex + 1]
+		: null;
 ---
 
 <Page
