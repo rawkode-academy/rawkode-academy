@@ -11,11 +11,17 @@
 	"observability": {
 		"enabled": true
 	},
+	"routes": [
+		{
+			"pattern": "rawkode.academy",
+			"custom_domain": true
+		}
+	],
 	"vars": {
 		"INFLUX_HOST": "https://eu-central-1-1.aws.cloud2.influxdata.com",
 		"INFLUX_ORG": "Rawkode Academy",
 		"INFLUX_BUCKET": "analytics",
-		"ZITADEL_CLIENT_ID": "288679506217135064",
+		"ZITADEL_CLIENT_ID": "293097955970320066",
 		"ZITADEL_URL": "https://zitadel.rawkode.academy"
 	}
 }

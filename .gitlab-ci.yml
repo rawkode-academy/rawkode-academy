@@ -1,7 +1,8 @@
 .docker:
   image: docker:latest
   services:
-    - docker:${DOCKER_VERSION}-dind
+    - name: docker:${DOCKER_VERSION}-dind
+      command: ["--registry-mirror", "https://mirror.gcr.io"]
   variables:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_DRIVER: overlay2

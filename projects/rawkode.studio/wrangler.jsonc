@@ -8,6 +8,12 @@
 		"binding": "ASSETS",
 		"directory": "./dist"
 	},
+	"routes": [
+		{
+			"pattern": "rawkode.studio",
+			"custom_domain": true
+		}
+	],
 	"observability": {
 		"enabled": true
 	}
