@@ -11,15 +11,16 @@
 	"observability": {
 		"enabled": true
 	},
+	"vars": {
+		"INFLUX_HOST": "https://eu-central-1-1.aws.cloud2.influxdata.com",
+		"INFLUX_ORG": "Rawkode Academy",
+		"INFLUX_BUCKET": "analytics",
+		"ZITADEL_CLIENT_ID": "288679506217135064",
+		"ZITADEL_URL": "https://zitadel.rawkode.academy"
+	},
 	"env": {
-		"production": {
-			"vars": {
-				"INFLUX_HOST": "https://eu-central-1-1.aws.cloud2.influxdata.com",
-				"INFLUX_ORG": "Rawkode Academy",
-				"INFLUX_BUCKET": "analytics",
-				"ZITADEL_CLIENT_ID": "288679506217135064",
-				"ZITADEL_URL": "https://zitadel.rawkode.academy"
-			}
+		"preview": {
+			"workers_dev": true
 		}
 	}
 }
