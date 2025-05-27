@@ -10,10 +10,5 @@
 	},
 	"observability": {
 		"enabled": true
-	},
-	"env": {
-		"preview": {
-			"workers_dev": true
-		}
 	}
 }
