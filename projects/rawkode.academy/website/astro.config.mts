@@ -106,17 +106,20 @@ export default defineConfig({
 			INFLUXDB_BUCKET: envField.string({
 				context: "server",
 				access: "public",
+				optional: false,
 				default: "video-events",
 			}),
 			ZULIP_URL: envField.string({
 				context: "server",
 				access: "public",
+				optional: false,
 				default: "https://chat.rawkode.academy",
 			}),
 			ZULIP_EMAIL: envField.string({
 				context: "server",
 				access: "public",
 				default: "rocko-bot@chat.rawkode.academy",
+				optional: false,
 			}),
 			ZULIP_API_KEY: envField.string({
 				context: "server",

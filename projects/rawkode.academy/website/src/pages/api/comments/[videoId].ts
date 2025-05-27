@@ -1,5 +1,5 @@
 import { getCollection } from "astro:content";
-import { getSecret } from "astro:env/server";
+import { getSecret, ZULIP_URL, ZULIP_EMAIL } from "astro:env/server";
 import type { APIRoute } from "astro";
 
 interface ZulipMessage {
@@ -32,8 +32,6 @@ export const GET: APIRoute = async ({ params }) => {
 		}
 
 		const zulipStreamId = 14;
-		const zulipUrl = getSecret("ZULIP_URL");
-		const zulipEmail = getSecret("ZULIP_EMAIL");
 		const zulipApiKey = getSecret("ZULIP_API_KEY");
 
 		const videos = await getCollection("videos");
@@ -50,7 +48,7 @@ export const GET: APIRoute = async ({ params }) => {
 
 		const topicName = video.data.title;
 
-		const messagesUrl = new URL(`${zulipUrl}/api/v1/messages`);
+		const messagesUrl = new URL(`${ZULIP_URL}/api/v1/messages`);
 		messagesUrl.searchParams.set("anchor", "newest");
 		messagesUrl.searchParams.set("num_before", "100");
 		messagesUrl.searchParams.set("num_after", "0");
@@ -62,7 +60,7 @@ export const GET: APIRoute = async ({ params }) => {
 			]),
 		);
 
-		const auth = Buffer.from(`${zulipEmail}:${zulipApiKey}`).toString("base64");
+		const auth = Buffer.from(`${ZULIP_EMAIL}:${zulipApiKey}`).toString("base64");
 		const response = await fetch(messagesUrl.toString(), {
 			headers: {
 				Authorization: `Basic ${auth}`,
@@ -101,11 +99,7 @@ export const GET: APIRoute = async ({ params }) => {
 				new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
 		);
 
-		// Generate Zulip topic URL for frontend
-		const zulipTopicUrl =
-			zulipUrl && zulipStreamId
-				? `${zulipUrl}/#narrow/stream/${zulipStreamId}/topic/${encodeURIComponent(topicName)}`
-				: null;
+		const zulipTopicUrl = `${ZULIP_URL}/#narrow/stream/${zulipStreamId}/topic/${encodeURIComponent(topicName)}`;
 
 		return new Response(
 			JSON.stringify({
