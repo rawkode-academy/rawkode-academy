@@ -1,6 +1,7 @@
 ---
 import Page from "@/wrappers/page.astro";
 import VideoPlayer from "@/components/video/player.vue";
+import VideoComments from "@/components/video/comments.vue";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
@@ -31,7 +32,7 @@ export const getStaticPaths = (async () => {
 	try {
 		const videos = await getCollection("videos");
 
-		return videos.map((video: any) => ({
+		return videos.map((video) => ({
 			params: { slug: video.data.slug },
 			props: { video },
 		}));
@@ -46,7 +47,7 @@ const { video } = Astro.props as { video: { data: VideoData } };
 // Setting breaks to true doesn't handle multiple sequentiaal \n's
 const marked = new Marked({ breaks: false, gfm: true });
 const renderedDescription = marked.parse(
-	video.data.description.replaceAll("\n", "</br>")
+	video.data.description.replaceAll("\n", "</br>"),
 );
 ---
 
@@ -119,6 +120,9 @@ const renderedDescription = marked.parse(
 					<hr class="my-6" />
 				</p>
 			</div>
+
+			<!-- Comments Section -->
+			<VideoComments client:only="vue" videoId={video.data.id} />
 
 			<hr class="my-6" />
 		</div>
