@@ -93,8 +93,7 @@ studio-deploy-production:
         ../../dagger/cloudflare | deploy \
           ./dist \
           wrangler.jsonc \
-          env:CLOUDFLARE_WORKERS_TOKEN \
-          env:CICD_COMMENT_TOKEN
+          env:CLOUDFLARE_WORKERS_TOKEN
       .
 
 studio-deploy-merge-request:
