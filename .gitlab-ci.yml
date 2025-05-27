@@ -92,8 +92,8 @@ studio-deploy-production:
 
         ../../dagger/cloudflare | deploy \
           ./dist \
-          wrangler.toml \
-          env:CLOUDFLARE_PAGES_TOKEN \
+          wrangler.jsonc \
+          env:CLOUDFLARE_WORKERS_TOKEN \
           env:CICD_COMMENT_TOKEN
       .
 
@@ -112,8 +112,8 @@ studio-deploy-merge-request:
 
         ../../dagger/cloudflare | deploy \
           ./dist \
-          wrangler.toml \
-          env:CLOUDFLARE_PAGES_TOKEN \
+          wrangler.jsonc \
+          env:CLOUDFLARE_WORKERS_TOKEN \
           env:CICD_COMMENT_TOKEN \
           --merge-request-id=$CI_MERGE_REQUEST_ID
       .
