@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: zitadel
-      version: '8.6.*'
+      version: '8.13.*'
       sourceRef:
         kind: HelmRepository
         name: zitadel
@@ -37,22 +37,10 @@ spec:
     - paths: ["/spec/replicas"]
       target:
         kind: Deployment
-  # https://github.com/zitadel/zitadel-charts/pull/276
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              version: v1
-              kind: Service
-              name: zitadel
-            patch: |
-              - op: replace
-                path: /spec/ports/0/appProtocol
-                value: kubernetes.io/h2c
   values:
     replicaCount: 1
     image:
-      tag: 'v2.64.1'
+      tag: 'v3.2.1'
     env:
     - name: ZITADEL_DATABASE_POSTGRES_HOST
       valueFrom:

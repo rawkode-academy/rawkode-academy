@@ -5,7 +5,7 @@ export const prerender = false;
 
 export const GET: APIRoute = ({ cookies, redirect }) => {
 	cookies.delete("accessToken", {
-		secure: import.meta.env.MODE === "production",
+		secure: import.meta.env.PROD === true,
 		httpOnly: true,
 		path: "/",
 		sameSite: "strict",

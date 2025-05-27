@@ -44,9 +44,7 @@ export class Zitadel {
 		searchParams.set("client_id", this.clientId);
 
 		const request = createOAuth2Request(this.tokenEndpoint, searchParams);
-		const tokens = await sendTokenRequest(request);
-
-		return tokens;
+		return await sendTokenRequest(request);
 	}
 
 	public fetchUser(
@@ -63,7 +61,7 @@ export class Zitadel {
 		} catch (e) {
 			console.error(e);
 		}
-		// Eventually add refresh logic
-		return;
+
+		return undefined;
 	}
 }

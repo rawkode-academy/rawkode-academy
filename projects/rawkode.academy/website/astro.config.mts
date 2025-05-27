@@ -13,7 +13,7 @@ import faroUploader from "@grafana/faro-rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
 
 const getSiteUrl = () => {
-	if (import.meta.env.MODE === "development") {
+	if (import.meta.env.DEV === true) {
 		return "http://localhost:4321";
 	}
 
