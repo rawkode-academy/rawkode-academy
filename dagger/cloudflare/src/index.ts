@@ -15,12 +15,14 @@ export class Cloudflare {
   @func()
   async deploy(
 		dist: Directory,
-		wranglerToml: File,
+		wranglerConfig: File,
     cloudflareApiToken: Secret,
     gitlabApiToken: Secret,
     mergeRequestId?: string,
   ): Promise<string> {
-    const cloudflareAccountId = await dag.config().cloudflareAccountId();
+		const cloudflareAccountId = await dag.config().cloudflareAccountId();
+
+		const wranglerFilename = await wranglerConfig.name();
 
     const deploymentResult = await dag.container()
       .from("node:22")
@@ -33,15 +35,14 @@ export class Cloudflare {
       ])
       .withMountedDirectory("/deploy/dist", dist)
       .withMountedFile(
-        "/deploy/wrangler.toml",
-        wranglerToml,
+        `/deploy/${wranglerFilename}`,
+        wranglerConfig,
       )
       .withEnvVariable("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
       .withSecretVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
       .withExec([
         "npx",
         "wrangler",
-        "pages",
         "deploy",
         `--branch=${mergeRequestId ? `mr${mergeRequestId}` : "main"}`,
         "/deploy/dist",
