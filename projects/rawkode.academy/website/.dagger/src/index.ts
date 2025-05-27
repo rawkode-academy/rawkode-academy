@@ -1,10 +1,4 @@
-import {
-	argument,
-	dag,
-	Directory,
-	func,
-	object,
-} from "@dagger.io/dagger";
+import { argument, dag, type Directory, func, object } from "@dagger.io/dagger";
 
 @object()
 export class Website {
@@ -15,19 +9,15 @@ export class Website {
 	async build(
 		@argument({ defaultPath: ".", ignore: ["node_modules"] }) source: Directory,
 	): Promise<Directory> {
-		return dag.bun()
+		return dag
+			.bun()
 			.withCache()
 			.install(source)
 			.withMountedFile(
 				"/usr/local/bin/d2",
-				dag.container()
-					.from("terrastruct/d2")
-					.file("/usr/local/bin/d2"),
+				dag.container().from("terrastruct/d2").file("/usr/local/bin/d2"),
 			)
-			.withExec([
-				"bun",
-				"run",
-				"build",
-			]).directory("dist");
+			.withExec(["bun", "run", "build"])
+			.directory("dist");
 	}
 }

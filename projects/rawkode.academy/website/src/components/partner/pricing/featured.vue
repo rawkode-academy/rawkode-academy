@@ -15,24 +15,28 @@ interface PricingPlan {
 const maltPricingPlan: PricingPlan = {
 	title: "Malt",
 	price: "96,000",
-	description: "Premier Partnership - Our highest tier of collaboration, featuring comprehensive support and maximum visibility.",
+	description:
+		"Premier Partnership - Our highest tier of collaboration, featuring comprehensive support and maximum visibility.",
 	ctaText: "Become a Premier Partner",
 	features: [
 		{
 			text: "Everything in Blend",
-			description: "All features from the Blend partnership tier"
+			description: "All features from the Blend partnership tier",
 		},
 		{
 			text: "80 Hours of Consulting or Content Creation",
-			description: "Extensive dedicated time for strategic consulting, product positioning, and premium content development"
+			description:
+				"Extensive dedicated time for strategic consulting, product positioning, and premium content development",
 		},
 		{
 			text: "Executive Advisory Sessions",
-			description: "Direct access to our team for strategic guidance and industry insights"
+			description:
+				"Direct access to our team for strategic guidance and industry insights",
 		},
 		{
 			text: "Co-Marketing Opportunities",
-			description: "Joint marketing initiatives including co-branded content, webinars, and promotional campaigns"
+			description:
+				"Joint marketing initiatives including co-branded content, webinars, and promotional campaigns",
 		},
 	],
 };

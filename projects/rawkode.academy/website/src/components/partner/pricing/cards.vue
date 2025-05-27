@@ -17,69 +17,80 @@ const pricingPlans: PricingPlan[] = [
 	{
 		title: "Nip",
 		price: "12,000",
-		description: "Essential visibility and quarterly engagement with our developer community.",
+		description:
+			"Essential visibility and quarterly engagement with our developer community.",
 		ctaText: "Get Started",
 		features: [
 			{
 				text: "Featured Partner Placement",
-				description: "Your brand prominently displayed on our homepage and partners page with company description and industry classification"
+				description:
+					"Your brand prominently displayed on our homepage and partners page with company description and industry classification",
 			},
 			{
 				text: "Quarterly Live Stream",
-				description: "Collaborative live coding sessions or product demonstrations to showcase your technology"
+				description:
+					"Collaborative live coding sessions or product demonstrations to showcase your technology",
 			},
 			{
 				text: "Social Media Promotion",
-				description: "Mentions across our social channels highlighting your partnership"
+				description:
+					"Mentions across our social channels highlighting your partnership",
 			},
 		],
 	},
 	{
 		title: "Dram",
 		price: "24,000",
-		description: "Targeted developer outreach with customized content creation to showcase your technology.",
+		description:
+			"Targeted developer outreach with customized content creation to showcase your technology.",
 		ctaText: "Grow Together",
 		popular: true,
 		features: [
 			{
 				text: "Everything in Nip",
-				description: "All features from the Nip partnership tier"
+				description: "All features from the Nip partnership tier",
 			},
 			{
 				text: "32 Hours of Consulting or Content",
-				description: "Dedicated time for strategic consulting or creating tailored content that highlights your product"
+				description:
+					"Dedicated time for strategic consulting or creating tailored content that highlights your product",
 			},
 			{
 				text: "Quarterly Strategy Sessions",
-				description: "Regular meetings to align content and engagement with your business goals"
+				description:
+					"Regular meetings to align content and engagement with your business goals",
 			},
 		],
 	},
 	{
 		title: "Blend",
 		price: "48,000",
-		description: "Extensive collaboration with significant developer engagement opportunities and strategic guidance.",
+		description:
+			"Extensive collaboration with significant developer engagement opportunities and strategic guidance.",
 		ctaText: "Accelerate Growth",
 		features: [
 			{
 				text: "Everything in Dram",
-				description: "All features from the Dram partnership tier"
+				description: "All features from the Dram partnership tier",
 			},
 			{
 				text: "64 Hours of Consulting or Content",
-				description: "Expanded dedicated time for strategic consulting or creating premium content"
+				description:
+					"Expanded dedicated time for strategic consulting or creating premium content",
 			},
 			{
 				text: "Go-to-Market Strategy Support",
-				description: "Expert guidance on positioning your product for developer adoption"
+				description:
+					"Expert guidance on positioning your product for developer adoption",
 			},
 			{
 				text: "Priority Content Calendar Placement",
-				description: "Preferred scheduling for your content and promotional activities"
-			}
+				description:
+					"Preferred scheduling for your content and promotional activities",
+			},
 		],
-	}
-]
+	},
+];
 </script>
 
 <template>

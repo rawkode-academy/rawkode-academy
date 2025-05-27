@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { initFlowbite } from 'flowbite';
-import type { OidcStandardClaims } from 'oidc-client-ts';
-import { onMounted } from 'vue';
+import { initFlowbite } from "flowbite";
+import type { OidcStandardClaims } from "oidc-client-ts";
+import { onMounted } from "vue";
 import Avatar from "vue-boring-avatars";
 
 onMounted(() => {
 	initFlowbite();
-})
+});
 
 defineProps<{
 	user: OidcStandardClaims;
 }>();
-
 </script>
 
 <template>

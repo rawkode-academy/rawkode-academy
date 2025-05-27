@@ -26,7 +26,7 @@ const endpoint = "https://api.rawkode.academy/graphql";
 const data = await request<GetTechnologiesResponse>(
 	endpoint,
 	getTechnologiesQuery,
-	{ limit: 200 } // Fetch up to 200 technologies
+	{ limit: 200 }, // Fetch up to 200 technologies
 );
 
 const technologies = data.getTechnologies;

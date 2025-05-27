@@ -14,14 +14,17 @@ const courseModules = (await getCollection("courseModules"))
 	.sort((a, b) => a.data.order - b.data.order);
 
 // Group course modules by section
-const groupedModules = courseModules.reduce((acc, module) => {
-	const section = module.data.section || "Course Content";
-	if (!acc[section]) {
-		acc[section] = [];
-	}
-	acc[section].push(module);
-	return acc;
-}, {} as Record<string, typeof courseModules>);
+const groupedModules = courseModules.reduce(
+	(acc, module) => {
+		const section = module.data.section || "Course Content";
+		if (!acc[section]) {
+			acc[section] = [];
+		}
+		acc[section].push(module);
+		return acc;
+	},
+	{} as Record<string, typeof courseModules>,
+);
 
 // Calculate total modules
 const totalModules = courseModules.length;

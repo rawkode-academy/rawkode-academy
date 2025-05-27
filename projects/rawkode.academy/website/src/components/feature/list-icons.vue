@@ -19,33 +19,33 @@ const offerings: Offering[] = [
 		features: [
 			{
 				name: "Conference & User Group Speaking",
-				description: "Expert representation at industry events"
+				description: "Expert representation at industry events",
 			},
 			{
 				name: "Podcast Interviews",
-				description: "Storytelling that highlights your product vision"
+				description: "Storytelling that highlights your product vision",
 			},
 			{
 				name: "Product Reviews",
-				description: "Authentic evaluations from a developer perspective"
+				description: "Authentic evaluations from a developer perspective",
 			},
 			{
 				name: "Release Highlights",
-				description: "Showcase new features and improvements"
+				description: "Showcase new features and improvements",
 			},
 			{
 				name: "Short-Form Content",
-				description: "Engaging technical demonstrations"
+				description: "Engaging technical demonstrations",
 			},
 			{
 				name: "Social Media Campaigns",
-				description: "Targeted outreach to developer communities"
+				description: "Targeted outreach to developer communities",
 			},
 			{
 				name: "Thought Leadership",
-				description: "Position your brand as an industry innovator"
-			}
-		]
+				description: "Position your brand as an industry innovator",
+			},
+		],
 	},
 	{
 		title: "Developer Education",
@@ -55,33 +55,33 @@ const offerings: Offering[] = [
 		features: [
 			{
 				name: "Writing",
-				description: "In-depth technical articles and tutorials"
+				description: "In-depth technical articles and tutorials",
 			},
 			{
 				name: "Hackathons",
-				description: "Hands-on challenges that showcase your platform"
+				description: "Hands-on challenges that showcase your platform",
 			},
 			{
 				name: "Live Coding",
-				description: "Real-time implementation and problem-solving"
+				description: "Real-time implementation and problem-solving",
 			},
 			{
 				name: "Long-Form Content",
-				description: "Comprehensive guides and case studies"
+				description: "Comprehensive guides and case studies",
 			},
 			{
 				name: "Online Courses",
-				description: "Structured learning paths for your technology"
+				description: "Structured learning paths for your technology",
 			},
 			{
 				name: "Webinars",
-				description: "Interactive demonstrations and Q&A sessions"
+				description: "Interactive demonstrations and Q&A sessions",
 			},
 			{
 				name: "Workshops",
-				description: "Guided implementation with expert instruction"
-			}
-		]
+				description: "Guided implementation with expert instruction",
+			},
+		],
 	},
 	{
 		title: "Developer Experience",
@@ -91,26 +91,26 @@ const offerings: Offering[] = [
 		features: [
 			{
 				name: "Documentation Review",
-				description: "Enhance clarity and completeness of technical guides"
+				description: "Enhance clarity and completeness of technical guides",
 			},
 			{
 				name: "Go-To-Market Strategy",
-				description: "Developer-focused launch and adoption planning"
+				description: "Developer-focused launch and adoption planning",
 			},
 			{
 				name: "Product-Market Fit Analysis",
-				description: "Identify opportunities to better serve developer needs"
+				description: "Identify opportunities to better serve developer needs",
 			},
 			{
 				name: "Roadmap Consultation",
-				description: "Strategic guidance on feature prioritization"
+				description: "Strategic guidance on feature prioritization",
 			},
 			{
 				name: "User Experience Testing",
-				description: "Real-world feedback from developer perspective"
-			}
-		]
-	}
+				description: "Real-world feedback from developer perspective",
+			},
+		],
+	},
 ];
 </script>
 <template>

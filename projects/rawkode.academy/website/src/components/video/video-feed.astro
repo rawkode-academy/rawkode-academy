@@ -1,58 +1,65 @@
 ---
 interface Props {
-  title: string;
-  description: string;
-  query: string;
-  operation: string;
-  limit: number;
-  variables?: Record<string, any>;
+	title: string;
+	description: string;
+	query: string;
+	operation: string;
+	limit: number;
+	variables?: Record<string, any>;
 }
 
-const { title, description, query, operation, limit, variables = {} } = Astro.props;
+const {
+	title,
+	description,
+	query,
+	operation,
+	limit,
+	variables = {},
+} = Astro.props;
 
 interface Video {
-  title: string;
-  thumbnailUrl: string;
-  duration: number;
-  slug: string;
-  publishedAt: string;
-  streamUrl: string;
+	title: string;
+	thumbnailUrl: string;
+	duration: number;
+	slug: string;
+	publishedAt: string;
+	streamUrl: string;
 }
 
 const response = await fetch("https://api.rawkode.academy/graphql", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    query,
-    variables: {
-      limit,
-      ...variables
-    },
-  }),
+	method: "POST",
+	headers: {
+		"Content-Type": "application/json",
+	},
+	body: JSON.stringify({
+		query,
+		variables: {
+			limit,
+			...variables,
+		},
+	}),
 });
 
 const { data } = await response.json();
 const videos = (data[operation] ?? []) as Video[];
 
 function formatDuration(seconds: number) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const remainingSeconds = Math.floor(seconds % 60);
 
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
-  }
-  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+	if (hours > 0) {
+		return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+	}
+	return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+	return new Date(dateString).toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
 }
 ---
 

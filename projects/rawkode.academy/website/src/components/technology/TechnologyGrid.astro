@@ -1,15 +1,15 @@
 ---
 // Define the Technology interface directly
 interface Technology {
-  id: string;
-  slug?: string;
-  name: string;
-  description: string;
-  logo?: string;
+	id: string;
+	slug?: string;
+	name: string;
+	description: string;
+	logo?: string;
 }
 
 interface Props {
-  technologies: Technology[];
+	technologies: Technology[];
 }
 
 const { technologies } = Astro.props;

@@ -2,9 +2,7 @@
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy",
 	"compatibility_date": "2025-05-05",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
+	"compatibility_flags": ["nodejs_compat"],
 	"main": "./dist/_worker.js/index.js",
 	"assets": {
 		"binding": "ASSETS",
@@ -21,7 +19,7 @@
 				"INFLUX_BUCKET": "analytics",
 				"ZITADEL_CLIENT_ID": "288679506217135064",
 				"ZITADEL_URL": "https://zitadel.rawkode.academy"
-			},
+			}
 		}
 	}
 }

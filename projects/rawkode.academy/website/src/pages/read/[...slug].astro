@@ -5,7 +5,12 @@ import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { getImage } from "astro:assets";
 import { getEntry } from "astro:content";
-import { getCollection, getEntries, render, type CollectionEntry } from "astro:content";
+import {
+	getCollection,
+	getEntries,
+	render,
+	type CollectionEntry,
+} from "astro:content";
 
 export const prerender = true;
 
@@ -14,7 +19,7 @@ type Props = {
 };
 
 const computeImageUrl = async (
-	article: CollectionEntry<"articles">
+	article: CollectionEntry<"articles">,
 ): Promise<URL | undefined> => {
 	if (article.data.cover) {
 		const image = await getImage({ src: article.data.cover.image });

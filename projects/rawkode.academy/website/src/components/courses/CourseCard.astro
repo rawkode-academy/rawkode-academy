@@ -10,8 +10,9 @@ const { course } = Astro.props;
 const authors = await getEntries(course.data.authors);
 
 // Get course modules count (including drafts)
-const courseModules = (await getCollection("courseModules"))
-	.filter((module) => module.data.course.id === course.id);
+const courseModules = (await getCollection("courseModules")).filter(
+	(module) => module.data.course.id === course.id,
+);
 
 const totalModules = courseModules.length;
 
