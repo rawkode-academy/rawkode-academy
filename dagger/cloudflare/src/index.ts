@@ -44,7 +44,7 @@ export class Cloudflare {
         "npx",
         "wrangler",
         "deploy",
-        `--branch=${mergeRequestId ? `mr${mergeRequestId}` : "main"}`,
+        `--env=${mergeRequestId ? "preview" : "produdction"}`,
         "/deploy/dist",
       ]);
 
