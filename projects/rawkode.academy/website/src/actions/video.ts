@@ -1,7 +1,12 @@
 import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { getSecret } from "astro:env/server";
+import {
+	getSecret,
+	INFLUXDB_HOST,
+	INFLUXDB_ORG,
+	INFLUXDB_BUCKET,
+} from "astro:env/server";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
@@ -36,21 +41,23 @@ export const trackVideoEvent = defineAction({
 		try {
 			console.log("Video event received:", event);
 
-			const influxDBUrl = getSecret("INFLUX_HOST");
-			const influxDBToken = getSecret("INFLUX_TOKEN");
-			const influxDBOrg = getSecret("INFLUX_ORG");
-			const influxDBBucket = getSecret("INFLUX_BUCKET");
+			const influxDBToken = getSecret("INFLUXDB_TOKEN");
 
 			// Not configured, that's OK
-			if (!influxDBUrl || !influxDBToken || !influxDBOrg || !influxDBBucket) {
+			if (
+				!INFLUXDB_HOST ||
+				!INFLUXDB_ORG ||
+				!INFLUXDB_BUCKET ||
+				!influxDBToken
+			) {
 				console.log(`InfluxDB not configured, skipping event`);
 				return { success: true };
 			}
 
 			const influxDB = new InfluxDBClient({
-				host: influxDBUrl,
+				host: INFLUXDB_HOST,
+				database: INFLUXDB_BUCKET,
 				token: influxDBToken,
-				database: influxDBBucket,
 			});
 
 			const point = Point.measurement("video")
