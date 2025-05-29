@@ -60,7 +60,9 @@ export const GET: APIRoute = async ({ params }) => {
 			]),
 		);
 
-		const auth = Buffer.from(`${ZULIP_EMAIL}:${zulipApiKey}`).toString("base64");
+		const auth = Buffer.from(`${ZULIP_EMAIL}:${zulipApiKey}`).toString(
+			"base64",
+		);
 		const response = await fetch(messagesUrl.toString(), {
 			headers: {
 				Authorization: `Basic ${auth}`,

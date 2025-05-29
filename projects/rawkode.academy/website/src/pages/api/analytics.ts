@@ -1,15 +1,11 @@
 import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
 import type { APIRoute } from "astro";
-
-// Import getSecret conditionally to avoid client-side errors
-let getSecret: (key: string) => string | undefined;
-try {
-	const envServer = await import("astro:env/server");
-	getSecret = envServer.getSecret;
-} catch (_error) {
-	// Fallback for client-side or when module is not available
-	getSecret = () => undefined;
-}
+import {
+	getSecret,
+	INFLUXDB_HOST,
+	INFLUXDB_ORG,
+	INFLUXDB_BUCKET,
+} from "astro:env/server";
 
 interface AnalyticsEvent {
 	action: string;
@@ -27,19 +23,18 @@ interface AnalyticsEvent {
 
 export const POST: APIRoute = async ({ request, locals }) => {
 	try {
-		// Parse the request body
 		const event = (await request.json()) as AnalyticsEvent;
 
-		console.log("Web analytics event received:", event);
-
-		const influxDBUrl = getSecret("INFLUX_HOST");
-		const influxDBToken = getSecret("INFLUX_TOKEN");
-		const influxDBOrg = getSecret("INFLUX_ORG");
-		const influxDBBucket = getSecret("INFLUX_BUCKET");
+		const influxDBToken = getSecret("INFLUXDB_TOKEN");
 
 		// Not configured, that's OK
-		if (!influxDBUrl || !influxDBToken || !influxDBOrg || !influxDBBucket) {
+		if (!INFLUXDB_HOST || !INFLUXDB_ORG || !INFLUXDB_BUCKET || !influxDBToken) {
 			console.log(`InfluxDB not configured, skipping analytics`);
+			console.log(`Host is ${INFLUXDB_HOST}`);
+			console.log(`Org is ${INFLUXDB_ORG}`);
+			console.log(`Bucket is ${INFLUXDB_BUCKET}`);
+			console.log(`Token is ${influxDBToken}`);
+
 			return new Response(JSON.stringify({ success: true }), {
 				status: 200,
 				headers: {
@@ -49,9 +44,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		}
 
 		const influxDB = new InfluxDBClient({
-			host: influxDBUrl,
+			host: INFLUXDB_HOST,
+			database: INFLUXDB_BUCKET,
 			token: influxDBToken,
-			database: influxDBBucket,
 		});
 
 		const point = Point.measurement("website")
@@ -76,9 +71,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 		switch (event.action) {
 			case "page.view":
+				point.setField("value", 0, "integer");
 				if (event.referrer) {
 					point.setTag("referrer", event.referrer);
-					point.setField("value", 0, "integer");
 				}
 				break;
 			case "page.exit":
