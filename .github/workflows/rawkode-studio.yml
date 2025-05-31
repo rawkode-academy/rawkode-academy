@@ -1,0 +1,80 @@
+name: rawkode.studio/website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/rawkode-studio.yml"
+      - "projects/rawkode.studio/**"
+  pull_request:
+    paths:
+      - ".github/workflows/rawkode-studio.yml"
+      - "projects/rawkode.studio/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dagger
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
+
+      - name: Build Studio
+        working-directory: projects/rawkode.studio
+        run: |
+          dagger <<.
+            . | build | export dist
+          .
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: "rawkode-academy-production"
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: Get secrets from GCP Secret Manager
+        id: secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |
+            CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
+
+      - name: Deploy to Production
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: projects/rawkode.studio
+        env:
+          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+        run: |
+          dagger <<.
+            ../../dagger/cloudflare | deploy \
+              ./dist \
+              wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN
+          .
+
+      - name: Deploy Preview
+        id: preview
+        if: github.event_name == 'pull_request'
+        working-directory: projects/rawkode.studio
+        env:
+          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dagger <<.
+            ../../dagger/cloudflare | preview \
+              ./dist \
+              wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN \
+              env:GITHUB_TOKEN \
+              ${{ github.repository }} \
+              ${{ github.event.pull_request.number }}
+          .

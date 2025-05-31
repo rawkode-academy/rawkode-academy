@@ -1,13 +1,61 @@
-= Rawkode Academy Mono Repository
+= 🎓 Rawkode Academy
 
-image:https://code.rawkode.academy/RawkodeAcademy/RawkodeAcademy/badges/main/pipeline.svg[link="https://code.rawkode.academy/RawkodeAcademy/RawkodeAcademy/-/commits/main",title="pipeline status"]
+Welcome to the Rawkode Academy GitHub organization! We're dedicated to providing high-quality educational content for developers, focusing on cloud-native technologies, DevOps practices, and modern software development.
 
-== Chat with Us
+== 🚀 What We Do
+
+Rawkode Academy creates educational content that helps developers level up their skills through:
+
+* *Live Coding Sessions* - Real-world problem solving and exploration
+* *Courses* - Structured learning paths for various technologies
+* *Open Source Projects* - Learn by contributing to real projects
+* *Community Learning* - Collaborative environment for knowledge sharing
+
+== 📚 This Repository
+
+This is our main repository, monorepository, containing our platform, infrastructure, and course materials
+
+== 🌟 Get Involved
+
+=== Join Our Community
 
 link:https://chat.rawkode.academy[image:https://img.shields.io/badge/Zulip-Join_the_Community-5f5ed7.svg?style=for-the-badge&logo=zulip[Join the Rawkode Academy Zulip]]
+
+[.text-center]
+image::https://raw.githubusercontent.com/RawkodeAcademy/RawkodeAcademy/main/branding/icon-gradient.svg[Rawkode Academy Logo,100,align="center"]
+
+[.text-center]
+*Learn. Build. Share.*
 
 == CDRs
 
 Community Decision Records take huge inspiration from link:https://github.com/joelparkerhenderson/architecture-decision-record[Architecture Decision Records ]. They're proposals to help the Academy grow and become an inclusive place for all people interested in future-facing technologies.
 
 Have a look at the link:./cdrs[cdrs] folder for the records.
+
+=== Contributing
+
+We welcome contributions! Whether it's:
+
+* 🐛 Reporting bugs
+* 💡 Suggesting new features
+* 📝 Improving documentation
+* 🔧 Submitting pull requests
+
+Please read our link:https://github.com/RawkodeAcademy/RawkodeAcademy/blob/main/CONTRIBUTING.md[Contributing Guidelines] and link:https://github.com/RawkodeAcademy/RawkodeAcademy/blob/main/CODE_OF_CONDUCT.md[Code of Conduct] before contributing.
+
+== 🛠️ Technology Stack
+
+We use modern tools and technologies including:
+
+* *Dagger* for CI/CD pipelines
+* *Cloudflare Workers* for edge computing
+* *TypeScript* & *Deno* for our applications
+* *Kubernetes* for container orchestration
+* *Terraform CDK* for infrastructure as code
+
+== 📬 Contact
+
+* 🌐 Website: link:https://rawkode.academy[rawkode.academy]
+* 🐦 BlueSky: link:https://bsky.app/profile/rawkode.academy[@rawkode.academy]
+* 📧 Email: hello@rawkode.academy
