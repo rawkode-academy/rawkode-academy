@@ -14,8 +14,8 @@
       "source": "../bun"
     },
     {
-      "name": "gitlab",
-      "source": "../gitlab"
+      "name": "github",
+      "source": "../github"
     }
   ]
 }

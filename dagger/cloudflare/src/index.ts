@@ -1,11 +1,4 @@
-import {
-	dag,
-	Directory,
-	File,
-	func,
-	object,
-	Secret,
-} from "@dagger.io/dagger";
+import { dag, Directory, File, func, object, Secret } from "@dagger.io/dagger";
 
 @object()
 export class Cloudflare {
@@ -22,32 +15,23 @@ export class Cloudflare {
 
 		const wranglerFilename = await wranglerConfig.name();
 
-		const deploymentResult = await dag.container()
+		const deploymentResult = await dag
+			.container()
 			.from("node:22")
 			.withWorkdir("/deploy")
 			// Only doing this to cache the wrangler installation
-			.withExec([
-				"npx",
-				"wrangler",
-				"--version",
-			])
+			.withExec(["npx", "wrangler", "--version"])
 			.withMountedDirectory("/deploy/dist", dist)
-			.withMountedFile(
-				`/deploy/${wranglerFilename}`,
-				wranglerConfig,
-			)
+			.withMountedFile(`/deploy/${wranglerFilename}`, wranglerConfig)
 			.withEnvVariable("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
 			.withSecretVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
-			.withExec([
-				"npx",
-				"wrangler",
-				"deploy",
-			]);
+			.withExec(["npx", "wrangler", "deploy"]);
 
-		if (await deploymentResult.exitCode() !== 0) {
+		if ((await deploymentResult.exitCode()) !== 0) {
 			throw new Error(
-				"Deployment failed. Error: " + await deploymentResult.stdout() +
-				await deploymentResult.stderr(),
+				"Deployment failed. Error: " +
+					(await deploymentResult.stdout()) +
+					(await deploymentResult.stderr()),
 			);
 		}
 
@@ -62,40 +46,31 @@ export class Cloudflare {
 		dist: Directory,
 		wranglerConfig: File,
 		cloudflareApiToken: Secret,
-		gitlabApiToken: Secret,
-		mergeRequestId: string,
+		githubApiToken: Secret,
+		repository: string,
+		pullRequestNumber: string,
 	): Promise<string> {
 		const cloudflareAccountId = await dag.config().cloudflareAccountId();
 
 		const wranglerFilename = await wranglerConfig.name();
 
-		const deploymentResult = await dag.container()
+		const deploymentResult = await dag
+			.container()
 			.from("node:22")
 			.withWorkdir("/deploy")
 			// Only doing this to cache the wrangler installation
-			.withExec([
-				"npx",
-				"wrangler",
-				"--version",
-			])
+			.withExec(["npx", "wrangler", "--version"])
 			.withMountedDirectory("/deploy/dist", dist)
-			.withMountedFile(
-				`/deploy/${wranglerFilename}`,
-				wranglerConfig,
-			)
+			.withMountedFile(`/deploy/${wranglerFilename}`, wranglerConfig)
 			.withEnvVariable("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
 			.withSecretVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
-			.withExec([
-				"npx",
-				"wrangler",
-				"versions",
-				"upload",
-			]);
+			.withExec(["npx", "wrangler", "versions", "upload"]);
 
-		if (await deploymentResult.exitCode() !== 0) {
+		if ((await deploymentResult.exitCode()) !== 0) {
 			throw new Error(
-				"Deployment failed. Error: " + await deploymentResult.stdout() +
-				await deploymentResult.stderr(),
+				"Deployment failed. Error: " +
+					(await deploymentResult.stdout()) +
+					(await deploymentResult.stderr()),
 			);
 		}
 
@@ -105,10 +80,16 @@ export class Cloudflare {
 		const urlMatch = allOutput.match(/https:\/\/[^\s]+\.workers\.dev/);
 		const previewUrl = urlMatch ? urlMatch[0] : "Preview URL not found";
 
-		return dag.gitlab().postMergeRequestComment(
-			gitlabApiToken,
-			mergeRequestId,
-			`Version Preview URL: ${previewUrl}`,
-		).stdout();
+		await dag
+			.github()
+			.postPullRequestComment(
+				githubApiToken,
+				repository,
+				pullRequestNumber,
+				`Version Preview URL: ${previewUrl}`,
+			)
+			.exitCode();
+
+		return allOutput;
 	}
 }
