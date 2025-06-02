@@ -1,0 +1,362 @@
+---
+title: "Getting Started with Kyverno 1.14's New ValidatingPolicy: Why CEL Changes Everything"
+description: "Kyverno 1.14 (released April 25, 2025) introduces dedicated ValidatingPolicy and ImageValidatingPolicy types that leverage CEL (Common Expression Language) - the same validation language Kubernetes now uses natively, creating a unified policy experience across your entire stack."
+openGraph:
+  title: "Kyverno 1.14 ValidatingPolicy with CEL"
+  subtitle: "Platform Engineering Policy-as-Code Revolution"
+slug: kyverno-cel-validating-policy
+cover:
+  image: "./cover.png"
+  alt: "Kyverno CEL ValidatingPolicy visualization"
+publishedAt: 2025-07-02
+isDraft: false
+authors:
+  - rawkode
+---
+
+Kyverno 1.14 (released April 25, 2025) introduces dedicated ValidatingPolicy and ImageValidatingPolicy types that leverage CEL (Common Expression Language) - the same validation language Kubernetes now uses natively, creating a unified policy experience across your entire stack.
+
+For platform engineers and security teams implementing policy-as-code in Kubernetes, this convergence represents a fundamental shift toward standardization and performance. Let's explore why this matters and how to get started.
+
+## The CEL Convergence
+
+Kubernetes' adoption of CEL for native validation creates an unprecedented opportunity for policy engines like Kyverno to standardize on the same language. This convergence delivers three critical benefits:
+
+**One expression language** to learn across Kubernetes and Kyverno means your team invests in skills that transfer between CRD validation rules, ValidatingAdmissionPolicies, and now Kyverno policies.
+
+**Better performance** - CEL expressions are parsed once and compiled to bytecode, providing significant speed improvements over traditional validation methods.
+
+**Reusable validation logic** between native Kubernetes and Kyverno policies eliminates the need to maintain separate validation implementations.
+
+Kubernetes now uses CEL in multiple contexts:
+- CRD validation rules (beta in 1.25, GA in 1.29)
+- ValidatingAdmissionPolicies (beta in 1.28, GA in 1.30)
+- Future features like ResourceQuota expressions and RBAC conditions
+
+This means mastering CEL for Kyverno directly translates to expertise across the entire Kubernetes ecosystem.
+
+## Your First ValidatingPolicy
+
+Let's start with a practical example that demonstrates the power and simplicity of Kyverno's new ValidatingPolicy with CEL:
+
+```yaml
+apiVersion: policies.kyverno.io/v1alpha1
+kind: ValidatingPolicy
+metadata:
+  name: require-pod-resources
+spec:
+  rules:
+    - name: check-resource-limits
+      match:
+        any:
+        - resources:
+            kinds:
+            - Pod
+      validate:
+        cel:
+          expressions:
+          - expression: |
+              object.spec.containers.all(container, 
+                has(container.resources.limits) && 
+                has(container.resources.limits.memory) && 
+                has(container.resources.limits.cpu)
+              )
+            message: "All containers must have CPU and memory limits defined"
+          - expression: |
+              object.spec.containers.all(container,
+                container.resources.limits.memory.matches('^[0-9]+(Mi|Gi)$') &&
+                size(container.resources.limits.memory) <= size('8Gi')
+              )
+            message: "Memory limits must not exceed 8Gi"
+```
+
+This policy enforces two critical requirements:
+1. All containers must have CPU and memory limits defined
+2. Memory limits cannot exceed 8Gi
+
+The CEL expressions use familiar functional programming patterns like `all()` to iterate over collections, making the logic both readable and powerful.
+
+## Why This Matters: The Kubernetes CEL Native Story
+
+Understanding how CEL fits into the broader Kubernetes ecosystem helps appreciate why this standardization matters. Consider how the same validation logic can now work across different contexts.
+
+**CRD Validation Example:**
+```yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: applications.platform.io
+spec:
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            replicas:
+              type: integer
+              x-kubernetes-validations:
+              - rule: "self <= 10"
+                message: "replicas cannot exceed 10"
+```
+
+**ValidatingAdmissionPolicy Example:**
+```yaml
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: replica-limit
+spec:
+  matchConstraints:
+    resourceRules:
+    - operations: ["CREATE", "UPDATE"]
+      apiGroups: ["apps"]
+      apiVersions: ["v1"]
+      resources: ["deployments"]
+  validations:
+  - expression: "object.spec.replicas <= 10"
+    message: "replicas cannot exceed 10"
+```
+
+**Kyverno ValidatingPolicy Example:**
+```yaml
+apiVersion: policies.kyverno.io/v1alpha1
+kind: ValidatingPolicy
+metadata:
+  name: replica-limit
+spec:
+  rules:
+    - name: check-replicas
+      match:
+        any:
+        - resources:
+            kinds:
+            - Deployment
+      validate:
+        cel:
+          expressions:
+          - expression: "object.spec.replicas <= 10"
+            message: "replicas cannot exceed 10"
+```
+
+Notice how the core CEL expression `object.spec.replicas <= 10` remains identical across all three contexts. This consistency dramatically reduces the learning curve and enables teams to reuse validation logic.
+
+## Advanced Pattern: Cross-Resource Validation
+
+CEL's power becomes evident when handling complex validation scenarios that require external data or cross-resource relationships:
+
+```yaml
+apiVersion: policies.kyverno.io/v1alpha1
+kind: ValidatingPolicy
+metadata:
+  name: namespace-resource-quotas
+spec:
+  rules:
+    - name: enforce-team-quotas
+      match:
+        any:
+        - resources:
+            kinds:
+            - Deployment
+            - StatefulSet
+      validate:
+        cel:
+          paramKind:
+            apiVersion: v1
+            kind: ConfigMap
+          paramRef:
+            name: team-configs
+            namespace: platform
+          expressions:
+          - expression: |
+              has(object.metadata.labels.team) && 
+              object.metadata.labels.team in params.data &&
+              object.spec.replicas <= int(params.data[object.metadata.labels.team])
+            message: "Replica count exceeds team quota defined in platform/team-configs"
+          - expression: |
+              has(object.metadata.labels.environment) &&
+              object.metadata.labels.environment in ['dev', 'staging', 'prod']
+            message: "Must specify valid environment label: dev, staging, or prod"
+```
+
+This policy demonstrates advanced CEL patterns:
+- **External parameter references** using `paramKind` and `paramRef`
+- **Data validation** against external ConfigMap values
+- **Multi-expression validation** with distinct error messages
+- **Complex boolean logic** combining multiple conditions
+
+The referenced ConfigMap might look like:
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: team-configs
+  namespace: platform
+data:
+  frontend: "5"
+  backend: "10"
+  data: "3"
+```
+
+## ImageValidatingPolicy in Action
+
+Kyverno 1.14 also introduces ImageValidatingPolicy for specialized image security validation:
+
+```yaml
+apiVersion: policies.kyverno.io/v1alpha1
+kind: ImageValidatingPolicy
+metadata:
+  name: secure-supply-chain
+spec:
+  rules:
+    - name: verify-signatures-and-provenance
+      match:
+        any:
+        - resources:
+            kinds:
+            - Pod
+      imageVerify:
+        - imageReferences:
+          - "*"
+          attestors:
+          - count: 1
+            entries:
+            - keys:
+                publicKeys: |-
+                  -----BEGIN PUBLIC KEY-----
+                  ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                  -----END PUBLIC KEY-----
+          validate:
+            cel:
+              expressions:
+              - expression: |
+                  attestations.all(att, 
+                    att.predicateType == "https://slsa.dev/provenance/v0.2" &&
+                    att.predicate.buildType == "https://tekton.dev/chains/v2"
+                  )
+                message: "Images must be built using Tekton with SLSA provenance"
+              - expression: |
+                  attestations.exists(att,
+                    att.predicateType == "https://spdx.dev/Document" &&
+                    att.predicate.packages.all(pkg, 
+                      !pkg.versionInfo.contains("SNAPSHOT") &&
+                      !pkg.versionInfo.contains("alpha")
+                    )
+                  )
+                message: "Images cannot contain snapshot or alpha dependencies"
+```
+
+This policy combines signature verification with CEL-based attestation validation, ensuring:
+- Images are signed with the specified public key
+- Build provenance follows SLSA standards
+- Dependencies meet stability requirements
+
+## Migration Guide: From ClusterPolicy to ValidatingPolicy
+
+Migrating existing ClusterPolicy resources to the new ValidatingPolicy type often simplifies your policy definitions. Here's a before/after comparison:
+
+**Before (ClusterPolicy):**
+```yaml
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-labels
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: check-team-label
+      match:
+        any:
+        - resources:
+            kinds:
+            - Deployment
+      validate:
+        message: "Deployments must have a team label"
+        pattern:
+          metadata:
+            labels:
+              team: "?*"
+    - name: check-environment-label
+      match:
+        any:
+        - resources:
+            kinds:
+            - Deployment
+      validate:
+        message: "Environment label must be dev, staging, or prod"
+        anyPattern:
+        - metadata:
+            labels:
+              environment: "dev"
+        - metadata:
+            labels:
+              environment: "staging"
+        - metadata:
+            labels:
+              environment: "prod"
+```
+
+**After (ValidatingPolicy):**
+```yaml
+apiVersion: policies.kyverno.io/v1alpha1
+kind: ValidatingPolicy
+metadata:
+  name: require-labels
+spec:
+  rules:
+    - name: validate-labels
+      match:
+        any:
+        - resources:
+            kinds:
+            - Deployment
+      validate:
+        cel:
+          expressions:
+          - expression: "has(object.metadata.labels.team) && object.metadata.labels.team != ''"
+            message: "Deployments must have a team label"
+          - expression: "has(object.metadata.labels.environment) && object.metadata.labels.environment in ['dev', 'staging', 'prod']"
+            message: "Environment label must be dev, staging, or prod"
+```
+
+**Migration Benefits:**
+- **Reduced complexity**: Single rule instead of multiple rules
+- **Better performance**: CEL compilation vs pattern matching
+- **Clearer logic**: Explicit boolean expressions vs pattern inference
+- **Enhanced readability**: Self-documenting validation conditions
+
+## Performance Implications
+
+CEL's compilation model provides significant performance advantages over traditional validation approaches. Kyverno maintainers report substantial improvements in policy evaluation speed, though specific benchmarks vary by workload:
+
+**ClusterPolicy Pattern Matching:**
+- Parse YAML patterns at runtime
+- Recursive object traversal for each validation
+- Variable performance depending on pattern complexity
+
+**ValidatingPolicy CEL:**
+- Compile expressions once at policy load
+- Direct object field access via compiled bytecode
+- Faster execution for complex validation logic
+
+**Real-world Impact:**
+- Measurably faster policy evaluation
+- Reduced CPU usage during peak admission loads
+- Better cluster responsiveness under policy-heavy workloads
+
+For clusters with hundreds of policies and high pod creation rates, these performance improvements directly translate to reduced latency and improved user experience.
+
+## Getting Started Checklist
+
+Ready to adopt Kyverno 1.14's ValidatingPolicy? Follow this implementation path:
+
+1. **Upgrade Kyverno** to version 1.14 or later
+2. **Start with simple policies** using basic CEL expressions
+3. **Gradually migrate** existing ClusterPolicy resources
+4. **Leverage external parameters** for dynamic validation
+5. **Implement ImageValidatingPolicy** for supply chain security
+6. **Monitor performance** improvements in your cluster
+
+The convergence of CEL across Kubernetes and Kyverno represents more than just a technical upgrade - it's a fundamental shift toward a unified policy ecosystem. By adopting these new ValidatingPolicy types, you're investing in skills and patterns that will serve your platform engineering efforts across the entire Kubernetes landscape.
+
+Start experimenting with CEL today, and experience the power of unified validation logic across your cloud native stack.
