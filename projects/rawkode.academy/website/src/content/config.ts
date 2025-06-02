@@ -8,25 +8,25 @@ const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
 // We'll get the latest 400, which should be all or almost all
 // Anything else can be fetched dynamically
 const graphQLQuery = gql`
-	query {
-		videos: getLatestVideos(limit: 400) {
-			id
-			slug
-			title
-			subtitle
-			description
-			publishedAt
-			streamUrl
-			thumbnailUrl
-			duration
+  query {
+    videos: getLatestVideos(limit: 400) {
+      id
+      slug
+      title
+      subtitle
+      description
+      publishedAt
+      streamUrl
+      thumbnailUrl
+      duration
 
-			technologies {
-				id
-				name
-				logo
-			}
-		}
-	}
+      technologies {
+        id
+        name
+        logo
+      }
+    }
+  }
 `;
 
 interface Video {
@@ -212,6 +212,20 @@ const courseModules = defineCollection({
 		}),
 });
 
+const changelog = defineCollection({
+	loader: glob({
+		pattern: ["**/*.md", "**/*.mdx"],
+		base: "./content/changelog",
+	}),
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		type: z.enum(["feature", "fix", "chore", "docs", "breaking"]),
+		date: z.coerce.date(),
+		author: z.string(),
+	}),
+});
+
 export const collections = {
 	adrs,
 	articles,
@@ -221,4 +235,5 @@ export const collections = {
 	testimonials,
 	courses,
 	courseModules,
+	changelog,
 };
