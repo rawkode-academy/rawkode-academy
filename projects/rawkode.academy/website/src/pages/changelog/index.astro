@@ -1,5 +1,5 @@
 ---
-import { fetchChangelogEntries } from "../../lib/gitlab";
+import { getCollection } from "astro:content";
 import PageWrapper from "../../wrappers/page.astro";
 import { marked } from "marked";
 
@@ -10,16 +10,49 @@ marked.setOptions({
 	pedantic: false,
 });
 
-const changelog = await fetchChangelogEntries();
+// Get all changelog entries from the content collection
+const changelogEntries = await getCollection("changelog");
 
-const processedChangelog = changelog.map((entry) => {
-	const renderedDescription = marked(entry.description);
-
+// Helper function to fetch GitHub user data
+async function fetchGitHubUser(username: string) {
+	try {
+		const response = await fetch(`https://api.github.com/users/${username}`);
+		if (response.ok) {
+			const data = await response.json();
+			return {
+				name: data.name || username,
+				avatar_url: data.avatar_url,
+			};
+		}
+	} catch (error) {
+		console.error(`Failed to fetch GitHub user data for ${username}:`, error);
+	}
+	// Fallback values
 	return {
-		...entry,
-		renderedDescription: String(renderedDescription),
+		name: username,
+		avatar_url: `https://github.com/${username}.png`,
 	};
+}
+
+// Sort by date (newest first)
+const sortedChangelog = changelogEntries.sort((a, b) => {
+	return b.data.date.getTime() - a.data.date.getTime();
 });
+
+// Process entries to render markdown and fetch author data
+const processedChangelog = await Promise.all(
+	sortedChangelog.map(async (entry) => {
+		const renderedContent = marked(entry.body || "");
+		const authorData = await fetchGitHubUser(entry.data.author);
+
+		return {
+			...entry.data,
+			id: entry.id,
+			renderedContent: String(renderedContent),
+			author: authorData,
+		};
+	}),
+);
 
 const typeColors = {
 	feature: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
@@ -50,8 +83,7 @@ const typeColors = {
 			processedChangelog.length === 0 ? (
 				<div class="text-center py-12">
 					<p class="text-gray-500 dark:text-gray-400">
-						No changelog entries found. Changelog entries are automatically
-						generated from GitLab merge requests with the "Changelog" label.
+						No changelog entries found.
 					</p>
 				</div>
 			) : (
@@ -66,23 +98,13 @@ const typeColors = {
 										>
 											{entry.type}
 										</span>
-										<span class="text-sm text-gray-500 dark:text-gray-400">
-											MR !{entry.id}
-										</span>
 									</div>
 									<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-										<a
-											href={entry.url}
-											target="_blank"
-											rel="noopener noreferrer"
-											class="hover:text-blue-600 dark:hover:text-blue-400"
-										>
-											{entry.title}
-										</a>
+										{entry.title}
 									</h2>
 									<div
 										class="text-gray-600 dark:text-gray-300 mb-3 prose prose-sm dark:prose-invert max-w-none [&>p]:mb-4 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>li]:mb-1"
-										set:html={entry.renderedDescription}
+										set:html={entry.renderedContent}
 									/>
 								</div>
 							</div>
@@ -105,14 +127,6 @@ const typeColors = {
 										<span>by {entry.author.name}</span>
 									</div>
 								</div>
-								<a
-									href={entry.url}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="text-blue-600 dark:text-blue-400 hover:underline"
-								>
-									View merge request
-								</a>
 							</div>
 						</article>
 					))}

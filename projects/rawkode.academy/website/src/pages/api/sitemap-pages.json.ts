@@ -159,14 +159,38 @@ function createNavigationItem(
 export const GET: APIRoute = async ({ site }) => {
 	try {
 		const baseUrl = site?.toString() || "https://rawkode.academy";
-		const sitemapUrl = `${baseUrl}/sitemap-0.xml`;
+		let xmlContent: string;
 
-		const response = await fetch(sitemapUrl);
-		if (!response.ok) {
-			throw new Error(`Failed to fetch sitemap: ${response.status}`);
+		// In development, try to read from the dist directory
+		if (import.meta.env.DEV) {
+			try {
+				const fs = await import("node:fs/promises");
+				const path = await import("node:path");
+				const distPath = path.join(process.cwd(), "dist", "sitemap-0.xml");
+				xmlContent = await fs.readFile(distPath, "utf-8");
+			} catch (fileError) {
+				// If file doesn't exist in dist, return empty navigation
+				console.warn(
+					"Sitemap not found in dist directory, returning empty navigation",
+				);
+				return new Response(JSON.stringify([]), {
+					status: 200,
+					headers: {
+						"Content-Type": "application/json",
+						"Cache-Control": "no-cache",
+					},
+				});
+			}
+		} else {
+			// In production, fetch from the URL
+			const sitemapUrl = `${baseUrl}/sitemap-0.xml`;
+			const response = await fetch(sitemapUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch sitemap: ${response.status}`);
+			}
+			xmlContent = await response.text();
 		}
 
-		const xmlContent = await response.text();
 		const urls = parseXmlToUrls(xmlContent);
 
 		const navigationItems: NavigationItem[] = urls
@@ -191,7 +215,9 @@ export const GET: APIRoute = async ({ site }) => {
 			status: 200,
 			headers: {
 				"Content-Type": "application/json",
-				"Cache-Control": "public, max-age=3600", // Cache for 1 hour
+				"Cache-Control": import.meta.env.DEV
+					? "no-cache"
+					: "public, max-age=3600", // No cache in dev, 1 hour in prod
 			},
 		});
 	} catch (error) {
