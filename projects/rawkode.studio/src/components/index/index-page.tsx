@@ -1,4 +1,7 @@
 import { actions } from "astro:actions";
+import { Spinner } from "@/components/common/Spinner";
+import CreateLivestreamsDialog from "@/components/livestreams/active/create-livestreams-dialog";
+import type { CreateLivestreamsDialogRef } from "@/components/livestreams/active/create-livestreams-dialog";
 import { Button } from "@/components/shadcn/button";
 import {
 	Dialog,
@@ -13,9 +16,6 @@ import { Copy, ExternalLink, Rocket, Video } from "lucide-react";
 import { motion } from "motion/react";
 import * as randomWords from "random-words";
 import { useEffect, useRef, useState } from "react";
-import { Spinner } from "../common/Spinner";
-import CreateLivestreamsDialog from "../livestreams/create-livestreams-dialog";
-import type { CreateLivestreamsDialogRef } from "../livestreams/create-livestreams-dialog";
 
 function generateInviteLink(roomName: string) {
 	return `${window.location.origin}/invite/${roomName}`;

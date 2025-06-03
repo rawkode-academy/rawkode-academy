@@ -1,1 +1,0 @@
-ALTER TABLE `chat_messages` ADD `participant_name` text NOT NULL;

@@ -1,14 +1,76 @@
 {
 	"version": "6",
 	"dialect": "sqlite",
-	"id": "56f3f95d-20f5-4c67-a9f6-4205cf896a1e",
+	"id": "9894a697-b431-4cd3-89b9-10431519e102",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"tables": {
-		"rooms": {
-			"name": "rooms",
+		"chat_messages": {
+			"name": "chat_messages",
 			"columns": {
 				"id": {
 					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": true
+				},
+				"room_sid": {
+					"name": "room_sid",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"participant_identity": {
+					"name": "participant_identity",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"participant_name": {
+					"name": "participant_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"message": {
+					"name": "message",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"chat_messages_room_sid_livestreams_sid_fk": {
+					"name": "chat_messages_room_sid_livestreams_sid_fk",
+					"tableFrom": "chat_messages",
+					"tableTo": "livestreams",
+					"columnsFrom": ["room_sid"],
+					"columnsTo": ["sid"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"livestreams": {
+			"name": "livestreams",
+			"columns": {
+				"sid": {
+					"name": "sid",
 					"type": "text",
 					"primaryKey": true,
 					"notNull": true,
@@ -21,39 +83,98 @@
 					"notNull": true,
 					"autoincrement": false
 				},
-				"started_at": {
-					"name": "started_at",
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false,
+					"default": "'created'"
+				},
+				"created_at": {
+					"name": "created_at",
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": true,
 					"autoincrement": false
 				},
-				"participants_joined": {
-					"name": "participants_joined",
+				"started_at": {
+					"name": "started_at",
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": false,
-					"autoincrement": false,
-					"default": 0
+					"autoincrement": false
 				},
-				"participants_left": {
-					"name": "participants_left",
-					"type": "integer",
-					"primaryKey": false,
-					"notNull": false,
-					"autoincrement": false,
-					"default": 0
-				},
-				"finished_at": {
-					"name": "finished_at",
+				"ended_at": {
+					"name": "ended_at",
 					"type": "integer",
 					"primaryKey": false,
 					"notNull": false,
 					"autoincrement": false
 				}
 			},
-			"indexes": {},
+			"indexes": {
+				"livestreams_name_unique": {
+					"name": "livestreams_name_unique",
+					"columns": ["name"],
+					"isUnique": true
+				}
+			},
 			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"checkConstraints": {}
+		},
+		"participants": {
+			"name": "participants",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"autoincrement": true
+				},
+				"room_sid": {
+					"name": "room_sid",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"identity": {
+					"name": "identity",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"autoincrement": false
+				}
+			},
+			"indexes": {
+				"participants_room_sid_identity_unique": {
+					"name": "participants_room_sid_identity_unique",
+					"columns": ["room_sid", "identity"],
+					"isUnique": true
+				}
+			},
+			"foreignKeys": {
+				"participants_room_sid_livestreams_sid_fk": {
+					"name": "participants_room_sid_livestreams_sid_fk",
+					"tableFrom": "participants",
+					"tableTo": "livestreams",
+					"columnsFrom": ["room_sid"],
+					"columnsTo": ["sid"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"checkConstraints": {}

@@ -8,77 +8,62 @@ import {
 	RoomAudioRenderer,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
+import { Chat } from "@/components/livestreams/room/Chat";
+import { ConnectionIndicator } from "@/components/livestreams/room/ConnectionIndicator";
+import { ControlsSection } from "@/components/livestreams/room/ControlsSection";
+import { ParticipantsList } from "@/components/livestreams/room/ParticipantsList";
+import { PermissionHandler } from "@/components/livestreams/room/PermissionHandler";
+import { VideoGrid } from "@/components/livestreams/room/VideoGrid";
+import { useLivestreamToken } from "@/hooks/use-livestream-token";
 import { useEffect, useState } from "react";
-import { Chat } from "./room/Chat";
-import { ConnectionIndicator } from "./room/ConnectionIndicator";
-import { ParticipantsList } from "./room/ParticipantsList";
-import { RoomControls } from "./room/RoomControls";
-import { VideoGrid } from "./room/VideoGrid";
 
 // Define props interface
 export interface LivekitRoomProps {
 	serverUrl: string;
+	roomName: string;
+	participantName?: string;
 	onLeaveRoom?: (roomName: string) => void;
 	className?: string;
 }
 
 export default function LivekitRoomWrapper({
 	serverUrl,
+	roomName,
+	participantName: propParticipantName,
 	onLeaveRoom,
 	className,
 }: LivekitRoomProps) {
-	const [token, setToken] = useState<string | null>(null);
-	const [roomName, setRoomName] = useState<string | null>(null);
+	// Get participant name from props or sessionStorage - initialize immediately
+	const getInitialParticipantName = () => {
+		if (propParticipantName) return propParticipantName;
+		if (typeof window !== "undefined") {
+			return sessionStorage.getItem("participant-name") || undefined;
+		}
+		return undefined;
+	};
+
+	const [participantName] = useState<string | undefined>(
+		getInitialParticipantName,
+	);
+
+	const {
+		token,
+		isLoading,
+		error: tokenError,
+	} = useLivestreamToken({
+		roomName,
+		participantName,
+	});
 	const [error, setError] = useState<string | null>(null);
 	const [connectionStatus, setConnectionStatus] =
 		useState<string>("connecting");
 
-	// Get tokens from sessionStorage
+	// Set error from token hook
 	useEffect(() => {
-		const refreshFromSessionStorage = () => {
-			try {
-				const fetchedToken = sessionStorage.getItem("livekit-token");
-				const fetchedRoom = sessionStorage.getItem("livekit-room");
-
-				if (fetchedToken && fetchedRoom) {
-					setToken(fetchedToken);
-					setRoomName(fetchedRoom);
-				}
-			} catch (err) {
-				setError("Failed to load session data");
-			}
-		};
-
-		refreshFromSessionStorage();
-
-		// Set up an interval to check for token updates
-		const intervalId = setInterval(refreshFromSessionStorage, 1000);
-
-		return () => clearInterval(intervalId);
-	}, []);
-
-	// Listen for refresh tokens event
-	useEffect(() => {
-		const refreshTokens = () => {
-			try {
-				const fetchedToken = sessionStorage.getItem("livekit-token");
-				const fetchedRoom = sessionStorage.getItem("livekit-room");
-
-				if (fetchedToken && fetchedRoom) {
-					setToken(fetchedToken);
-					setRoomName(fetchedRoom);
-				}
-			} catch (err) {
-				setError("Failed to update session data");
-			}
-		};
-
-		document.addEventListener("livekit-refresh-tokens", refreshTokens);
-
-		return () => {
-			document.removeEventListener("livekit-refresh-tokens", refreshTokens);
-		};
-	}, []);
+		if (tokenError) {
+			setError(tokenError.message);
+		}
+	}, [tokenError]);
 
 	// Listen for leave room event
 	useEffect(() => {
@@ -115,9 +100,6 @@ export default function LivekitRoomWrapper({
 	// Handle room leave/disconnect with fallback if callback is not provided
 	const handleLeaveRoom = (name: string) => {
 		try {
-			// Clear tokens
-			sessionStorage.removeItem("livekit-token");
-			sessionStorage.removeItem("livekit-room");
 			setConnectionStatus("disconnected");
 
 			// Call the callback if it exists and is a function
@@ -160,7 +142,19 @@ export default function LivekitRoomWrapper({
 		);
 	}
 
-	if (!token || !roomName) {
+	// Show loading state while fetching token
+	if (isLoading) {
+		return (
+			<div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-background/95">
+				<div className="flex flex-col items-center gap-4">
+					<div className="animate-spin size-12 border-4 border-primary border-t-transparent rounded-full" />
+					<p className="text-muted-foreground">Connecting to stream...</p>
+				</div>
+			</div>
+		);
+	}
+
+	if (!token) {
 		return null;
 	}
 
@@ -177,7 +171,6 @@ export default function LivekitRoomWrapper({
 			}}
 			onConnected={() => {
 				setConnectionStatus("connected");
-				document.dispatchEvent(new CustomEvent("livekit-refresh-tokens"));
 			}}
 			onError={(err) => {
 				setConnectionStatus("error");
@@ -229,10 +222,9 @@ export default function LivekitRoomWrapper({
 						<div className="flex-1 overflow-y-auto p-3 space-y-4 flex flex-col">
 							{connectionStatus === "connected" ? (
 								<>
-									<RoomControls />
-									<Separator />
+									<ControlsSection token={token} />
 									<div className="flex-1 grid grid-rows-2 gap-4 min-h-0">
-										<ParticipantsList />
+										<ParticipantsList token={token} />
 										<Chat token={token} />
 									</div>
 								</>
@@ -280,6 +272,7 @@ export default function LivekitRoomWrapper({
 					</div>
 				</div>
 				<RoomAudioRenderer />
+				<PermissionHandler />
 			</LayoutContextProvider>
 		</LiveKitRoom>
 	);

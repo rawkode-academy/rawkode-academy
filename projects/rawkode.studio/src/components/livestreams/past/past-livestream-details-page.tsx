@@ -1,10 +1,10 @@
 import { actions } from "astro:actions";
 import type { ChatMessage, Participant } from "@/actions"; // Import ChatMessage and Participant types
+import { ErrorMessage } from "@/components/common/ErrorMessage"; // Import ErrorMessage
+import { Spinner } from "@/components/common/Spinner"; // Import Spinner
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link, useParams } from "react-router";
-import { ErrorMessage } from "../common/ErrorMessage"; // Import ErrorMessage
-import { Spinner } from "../common/Spinner"; // Import Spinner
 
 export default function PastLivestreamDetailsPage() {
 	const { roomId } = useParams<{ roomId: string }>();
@@ -113,9 +113,6 @@ export default function PastLivestreamDetailsPage() {
 										className="p-2 bg-white dark:bg-neutral-700 rounded text-sm text-neutral-600 dark:text-neutral-300"
 									>
 										{participant.name}
-										<span className="block text-xs text-neutral-400 dark:text-neutral-500">
-											Joined: {new Date(participant.joinedAt).toLocaleString()}
-										</span>
 									</li>
 								))}
 							</ul>

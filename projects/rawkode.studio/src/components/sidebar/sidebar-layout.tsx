@@ -1,4 +1,5 @@
 import { version } from "@/../package.json";
+import { ModeToggle } from "@/components/common/ModeToggle";
 import {
 	Avatar,
 	AvatarFallback,
@@ -28,6 +29,7 @@ import {
 	SidebarTrigger,
 	useSidebar,
 } from "@/components/shadcn/sidebar";
+import LivestreamCounter from "@/components/sidebar/livestream-counter";
 import type { OidcStandardClaimsWithRoles } from "@/lib/security";
 import { queryClient } from "@/store";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -41,8 +43,6 @@ import {
 	Video,
 } from "lucide-react";
 import { Link } from "react-router";
-import { ModeToggle } from "../common/ModeToggle";
-import LivestreamCounter from "./livestream-counter";
 
 interface UserNavigationProps {
 	user: OidcStandardClaimsWithRoles;

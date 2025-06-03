@@ -1,13 +1,13 @@
-import { Moon, Sun } from "lucide-react";
-import * as React from "react";
-import { useEffect } from "react";
-import { Button } from "../shadcn/button";
+import { Button } from "@/components/shadcn/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "../shadcn/dropdown-menu";
+} from "@/components/shadcn/dropdown-menu";
+import { Moon, Sun } from "lucide-react";
+import * as React from "react";
+import { useEffect } from "react";
 
 export function ModeToggle() {
 	const [theme, setThemeState] = React.useState<

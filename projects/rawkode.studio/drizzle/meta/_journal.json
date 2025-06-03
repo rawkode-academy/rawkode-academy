@@ -5,36 +5,8 @@
 		{
 			"idx": 0,
 			"version": "6",
-			"when": 1746721230778,
-			"tag": "0000_youthful_prism",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "6",
-			"when": 1746724700472,
-			"tag": "0001_flat_sally_floyd",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "6",
-			"when": 1746725650860,
-			"tag": "0002_strange_lord_hawal",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "6",
-			"when": 1746727980552,
-			"tag": "0003_great_thing",
-			"breakpoints": true
-		},
-		{
-			"idx": 4,
-			"version": "6",
-			"when": 1746735582711,
-			"tag": "0004_sturdy_toxin",
+			"when": 1748988359290,
+			"tag": "0000_overconfident_sasquatch",
 			"breakpoints": true
 		}
 	]

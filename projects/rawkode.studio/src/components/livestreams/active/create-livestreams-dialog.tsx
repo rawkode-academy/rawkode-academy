@@ -1,5 +1,6 @@
 import { actions } from "astro:actions";
 import { z } from "astro:schema";
+import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/shadcn/button";
 import {
 	Dialog,
@@ -29,7 +30,6 @@ import * as randomWords from "random-words";
 import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Spinner } from "../common/Spinner";
 
 const formSchema = z.object({
 	name: z

@@ -1,13 +1,13 @@
 import { actions } from "astro:actions";
 import type { PastLiveStream } from "@/actions"; // Import the new type
+import { DataTable } from "@/components/common/DataTable";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { Spinner } from "@/components/common/Spinner";
+import { Button } from "@/components/shadcn/button";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { motion } from "framer-motion";
 import { Link } from "react-router";
-import { DataTable } from "../common/DataTable";
-import { ErrorMessage } from "../common/ErrorMessage";
-import { Spinner } from "../common/Spinner";
-import { Button } from "../shadcn/button";
 
 // Define columns for the DataTable
 const columns: ColumnDef<PastLiveStream>[] = [

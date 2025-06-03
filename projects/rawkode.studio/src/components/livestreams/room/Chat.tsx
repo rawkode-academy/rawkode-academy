@@ -1,10 +1,17 @@
 import { Button } from "@/components/shadcn/button";
 import {
-	useChat,
-	useLocalParticipant,
-	useRoomContext,
-} from "@livekit/components-react";
-import { MessageSquare } from "lucide-react";
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/shadcn/popover";
+import {
+	EmojiPicker,
+	EmojiPickerContent,
+	EmojiPickerFooter,
+	EmojiPickerSearch,
+} from "@/components/ui/emoji-picker";
+import { useChat, useRoomContext } from "@livekit/components-react";
+import { MessageSquare, Smile } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 // Chat Section Component using LiveKit's useChat hook
@@ -15,9 +22,10 @@ interface ChatProps {
 export function Chat({ token }: ChatProps) {
 	const { chatMessages, send } = useChat();
 	const [messageText, setMessageText] = useState("");
+	const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 	const room = useRoomContext();
-	const localParticipant = useLocalParticipant();
 
 	// Auto-scroll to bottom when new messages arrive
 	useEffect(() => {
@@ -28,33 +36,31 @@ export function Chat({ token }: ChatProps) {
 
 	const handleSendMessage = async () => {
 		if (messageText.trim() && send) {
-			const currentMessage = messageText;
+			const processedMessage = messageText.trim();
 			setMessageText(""); // Clear input immediately
 
 			try {
 				// Send LiveKit message
-				await send(currentMessage);
+				await send(processedMessage);
 
-				const roomId = await room.getSid();
+				const roomSid = await room.getSid();
 
-				const participantName = localParticipant.localParticipant.identity;
 				// Call the API endpoint
-				if (token && roomId && participantName) {
+				if (token && roomSid) {
 					await fetch("/api/livestream/chat", {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
+							Authorization: `Bearer ${token}`,
 						},
 						body: JSON.stringify({
-							roomId: roomId,
-							message: currentMessage,
-							token: token,
-							participantName: participantName,
+							roomSid: roomSid,
+							message: processedMessage,
 						}),
 					});
 				} else {
 					console.error(
-						"Token or Room ID or Participant Name is missing, cannot send chat to API",
+						"Token or Room SID is missing, cannot send chat to API",
 					);
 				}
 			} catch (error) {
@@ -62,6 +68,25 @@ export function Chat({ token }: ChatProps) {
 				// setMessageText(currentMessage);
 			}
 		}
+	};
+
+	const handleEmojiSelect = (emoji: string) => {
+		// Insert emoji at cursor position or at the end
+		if (inputRef.current) {
+			const start = inputRef.current.selectionStart || messageText.length;
+			const end = inputRef.current.selectionEnd || messageText.length;
+			const newText =
+				messageText.slice(0, start) + emoji + messageText.slice(end);
+			setMessageText(newText);
+
+			// Focus back on input and set cursor position after emoji
+			setTimeout(() => {
+				inputRef.current?.focus();
+				const newCursorPos = start + emoji.length;
+				inputRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+			}, 0);
+		}
+		setEmojiPickerOpen(false);
 	};
 
 	return (
@@ -97,18 +122,46 @@ export function Chat({ token }: ChatProps) {
 			</div>
 
 			<div className="flex gap-2 flex-shrink-0 mt-auto">
-				<input
-					type="text"
-					className="flex-1 h-9 px-3 py-2 text-sm bg-sidebar-accent/30 border border-sidebar-border/30 rounded-md"
-					placeholder="Send a message..."
-					value={messageText}
-					onChange={(e) => setMessageText(e.target.value)}
-					onKeyDown={(e) => {
-						if (e.key === "Enter") {
-							handleSendMessage();
-						}
-					}}
-				/>
+				<div className="flex-1 relative flex gap-1">
+					<input
+						ref={inputRef}
+						type="text"
+						className="flex-1 h-9 px-3 py-2 text-sm bg-sidebar-accent/30 border border-sidebar-border/30 rounded-md"
+						placeholder="Send a message..."
+						value={messageText}
+						onChange={(e) => setMessageText(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === "Enter") {
+								handleSendMessage();
+							}
+						}}
+					/>
+					<Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+						<PopoverTrigger asChild>
+							<Button
+								size="sm"
+								variant="ghost"
+								className="h-9 w-9 p-0"
+								title="Add emoji"
+							>
+								<Smile className="h-4 w-4" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent
+							className="p-0 w-[320px] overflow-hidden"
+							align="end"
+						>
+							<EmojiPicker
+								className="h-[350px] w-full"
+								onEmojiSelect={(emoji) => handleEmojiSelect(emoji.emoji)}
+							>
+								<EmojiPickerSearch placeholder="Search emoji..." />
+								<EmojiPickerContent className="h-[250px]" />
+								<EmojiPickerFooter />
+							</EmojiPicker>
+						</PopoverContent>
+					</Popover>
+				</div>
 				<Button
 					size="sm"
 					className="h-9 flex-shrink-0"
