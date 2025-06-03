@@ -1,4 +1,11 @@
 import { actions } from "astro:actions";
+import { DataTable } from "@/components/common/DataTable";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { Spinner } from "@/components/common/Spinner";
+import CreateLivestreamsDialog from "@/components/livestreams/active/create-livestreams-dialog";
+import type { CreateLivestreamsDialogRef } from "@/components/livestreams/active/create-livestreams-dialog";
+import DeleteLivestreamDialog from "@/components/livestreams/active/delete-livestream-dialog";
+import InviteLivestreamDialog from "@/components/livestreams/active/invite-livestream-dialog";
 import { Button } from "@/components/shadcn/button";
 import {
 	Dialog,
@@ -14,13 +21,6 @@ import { motion } from "framer-motion";
 import { Copy, ExternalLink, Rocket, Video } from "lucide-react";
 import * as randomWords from "random-words";
 import { useEffect, useRef, useState } from "react";
-import { DataTable } from "../common/DataTable";
-import { ErrorMessage } from "../common/ErrorMessage";
-import { Spinner } from "../common/Spinner";
-import CreateLivestreamsDialog from "./create-livestreams-dialog";
-import type { CreateLivestreamsDialogRef } from "./create-livestreams-dialog";
-import DeleteLivestreamDialog from "./delete-livestream-dialog";
-import InviteLivestreamDialog from "./invite-livestream-dialog";
 
 type Room = {
 	id: string;

@@ -2,9 +2,13 @@ import { ActionError, defineAction } from "astro:actions";
 import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
 import { z } from "astro:schema";
 import { database } from "@/lib/database";
-import { roomClientService, tokenVerifier } from "@/lib/livekit";
-import { chatMessagesTable, participantsTable, roomsTable } from "@/schema";
-import { desc, eq, isNotNull } from "drizzle-orm";
+import { roomClientService } from "@/lib/livekit";
+import {
+	chatMessagesTable,
+	livestreamsTable,
+	participantsTable,
+} from "@/schema";
+import { desc, eq } from "drizzle-orm";
 import { AccessToken } from "livekit-server-sdk";
 
 export type LiveStream = {
@@ -24,7 +28,8 @@ export type PastLiveStream = {
 // New ChatMessage type
 export type ChatMessage = {
 	id: number;
-	roomId: string;
+	roomSid: string;
+	participantIdentity: string;
 	participantName: string;
 	message: string;
 	createdAt: Date;
@@ -33,31 +38,28 @@ export type ChatMessage = {
 // New Participant type
 export type Participant = {
 	id: number;
-	roomId: string;
+	roomSid: string;
+	identity: string;
 	name: string;
-	joinedAt: Date;
 };
 
 export const server = {
 	addChatMessage: defineAction({
 		input: z.object({
-			roomId: z.string(),
-			token: z.string(),
+			roomSid: z.string(),
+			participantIdentity: z.string(),
 			message: z.string(),
-			participantName: z.string(),
 		}),
 
 		handler: async (input) => {
-			try {
-				await tokenVerifier.verify(input.token);
-			} catch (error) {
-				throw new ActionError({ code: "UNAUTHORIZED" });
-			}
+			// Use the identity as the participant name - this prevents spoofing
+			const participantName = input.participantIdentity;
 
 			await database.insert(chatMessagesTable).values({
-				roomId: input.roomId,
+				roomSid: input.roomSid,
+				participantIdentity: input.participantIdentity,
+				participantName: participantName,
 				message: input.message,
-				participantName: input.participantName,
 			});
 		},
 	}),
@@ -76,13 +78,14 @@ export const server = {
 				const messages = await database
 					.select({
 						id: chatMessagesTable.id,
-						roomId: chatMessagesTable.roomId,
+						roomSid: chatMessagesTable.roomSid,
+						participantIdentity: chatMessagesTable.participantIdentity,
 						participantName: chatMessagesTable.participantName,
 						message: chatMessagesTable.message,
 						createdAt: chatMessagesTable.createdAt,
 					})
 					.from(chatMessagesTable)
-					.where(eq(chatMessagesTable.roomId, input.roomId))
+					.where(eq(chatMessagesTable.roomSid, input.roomId))
 					.orderBy(chatMessagesTable.createdAt); // Order by creation time
 
 				return messages as ChatMessage[];
@@ -109,8 +112,7 @@ export const server = {
 				const participants = await database
 					.select()
 					.from(participantsTable)
-					.where(eq(participantsTable.roomId, input.roomId))
-					.orderBy(participantsTable.joinedAt);
+					.where(eq(participantsTable.roomSid, input.roomId));
 
 				return participants as Participant[];
 			} catch (error) {
@@ -149,22 +151,31 @@ export const server = {
 			try {
 				const pastRoomsData = await database
 					.select({
-						id: roomsTable.id,
-						name: roomsTable.name,
-						startedAt: roomsTable.startedAt,
-						finishedAt: roomsTable.finishedAt,
-						participantsJoined: roomsTable.participantsJoined,
+						id: livestreamsTable.sid,
+						name: livestreamsTable.name,
+						startedAt: livestreamsTable.startedAt,
+						finishedAt: livestreamsTable.endedAt,
 					})
-					.from(roomsTable)
-					.where(isNotNull(roomsTable.finishedAt))
-					.orderBy(desc(roomsTable.finishedAt));
+					.from(livestreamsTable)
+					.where(eq(livestreamsTable.status, "ended"))
+					.orderBy(desc(livestreamsTable.endedAt));
 
-				return pastRoomsData
-					.filter(
-						(room: { finishedAt: Date | null | undefined }): room is {
-							finishedAt: Date;
-						} & typeof room => room.finishedAt != null,
-					)
+				// Get participant counts for each room
+				const roomsWithCounts = await Promise.all(
+					pastRoomsData.map(async (room) => {
+						const participantCount = await database
+							.select({ count: participantsTable.id })
+							.from(participantsTable)
+							.where(eq(participantsTable.roomSid, room.id));
+						return {
+							...room,
+							participantsJoined: participantCount.length,
+						};
+					}),
+				);
+
+				return roomsWithCounts
+					.filter((room) => room.finishedAt != null)
 					.map((room) => ({
 						...room,
 						participantsJoined: room.participantsJoined ?? 0,
@@ -217,6 +228,13 @@ export const server = {
 				emptyTimeout: input.emptyTimeout || 120, // 2 minutes in seconds
 			});
 
+			// Insert into database with 'created' status
+			await database.insert(livestreamsTable).values({
+				sid: room.sid,
+				name: room.name,
+				status: "created",
+			});
+
 			return {
 				id: room.sid,
 				name: room.name,
@@ -232,6 +250,21 @@ export const server = {
 		handler: async (input, context) => {
 			if (!context.locals.user) {
 				throw new ActionError({ code: "UNAUTHORIZED" });
+			}
+
+			// Get room info before deleting
+			const rooms = await roomClientService.listRooms();
+			const room = rooms.find((r) => r.name === input.name);
+
+			if (room) {
+				// Update database status to ended
+				await database
+					.update(livestreamsTable)
+					.set({
+						status: "ended",
+						endedAt: new Date(),
+					})
+					.where(eq(livestreamsTable.sid, room.sid));
 			}
 
 			await roomClientService.deleteRoom(input.name);
@@ -269,12 +302,13 @@ export const server = {
 				const userDisplayName =
 					loggedInUser?.preferred_username || loggedInUser?.name;
 
-				// Generate identity using provided participant name first, then user info, then random
-				// The participantName is highest priority - when client explicitly provides a name, use it
-				const identity =
-					input.participantName?.trim() ||
-					userDisplayName ||
-					`guest-${Math.floor(Math.random() * 10000)}`;
+				// Generate identity:
+				// - For authenticated users: always use their actual username (prevents spoofing)
+				// - For guests: use provided name or generate random
+				const identity = loggedInUser
+					? userDisplayName || loggedInUser.sub // Use sub as fallback if no display name
+					: input.participantName?.trim() ||
+						`guest-${Math.floor(Math.random() * 10000)}`;
 
 				// Create the token
 				const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {

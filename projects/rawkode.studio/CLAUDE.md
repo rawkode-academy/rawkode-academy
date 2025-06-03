@@ -42,6 +42,9 @@ bunx npm-check-updates --interactive
 ### Key Directories
 - `src/actions/` - Server-side operations (room management, chat, auth)
 - `src/components/livestreams/` - Video streaming UI components
+  - `active/` - Active livestream management components
+  - `past/` - Past livestream viewing components
+  - `room/` - Shared room components (video grid, chat, controls)
 - `src/pages/api/` - API endpoints (auth callbacks, webhooks)
 - `src/lib/` - Core utilities (database client, LiveKit client, auth helpers)
 - `drizzle/` - Database migrations and schema snapshots
@@ -63,12 +66,18 @@ The application is deployed to Cloudflare Pages/Workers. Configuration is in `wr
 
 ## Development Guidelines
 
-1. **Component Organization**: Place new UI components in appropriate subdirectories under `src/components/`. Use shadcn components from `src/components/shadcn/` as building blocks.
+1. **Import Conventions**: Always use absolute imports with the `@/` alias instead of relative imports. For example:
+   - ✅ `import { Button } from "@/components/shadcn/button"`
+   - ❌ `import { Button } from "../shadcn/button"`
+   - ✅ `import { Chat } from "@/components/livestreams/room/Chat"`
+   - ❌ `import { Chat } from "./Chat"`
 
-2. **Server Actions**: Use Astro Actions in `src/actions/` for server-side operations. These are type-safe and handle authentication automatically.
+2. **Component Organization**: Place new UI components in appropriate subdirectories under `src/components/`. Use shadcn components from `src/components/shadcn/` as building blocks.
 
-3. **Database Changes**: Modify `src/schema.ts` and run migrations. The dev server automatically applies migrations on startup.
+3. **Server Actions**: Use Astro Actions in `src/actions/` for server-side operations. These are type-safe and handle authentication automatically.
 
-4. **Authentication**: Use the `security.ts` utilities for authentication checks. The `director` role is required for administrative actions.
+4. **Database Changes**: Modify `src/schema.ts` and run migrations. The dev server automatically applies migrations on startup.
 
-5. **Real-time Features**: LiveKit handles video/audio streaming. Chat uses server-sent events through Astro Actions.
+5. **Authentication**: Use the `security.ts` utilities for authentication checks. The `director` role is required for administrative actions.
+
+6. **Real-time Features**: LiveKit handles video/audio streaming. Chat uses server-sent events through Astro Actions.

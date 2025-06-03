@@ -1,12 +1,12 @@
+import HomePage from "@/components/index/index-page";
+import ActiveLivestreamPage from "@/components/livestreams/active/active-livestreams-page";
+import PastLivestreamDetailsPage from "@/components/livestreams/past/past-livestream-details-page";
+import PastLivestreamsPage from "@/components/livestreams/past/past-livestreams-page";
+import ProfilePage from "@/components/profile/profile-page";
+import SidebarLayout from "@/components/sidebar/sidebar-layout";
 import type { OidcStandardClaimsWithRoles } from "@/lib/security";
 import { StrictMode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
-import HomePage from "./index/index-page";
-import ActiveLivestreamPage from "./livestreams/active-livestreams-page";
-import PastLivestreamDetailsPage from "./livestreams/past-livestream-details-page";
-import PastLivestreamsPage from "./livestreams/past-livestreams-page";
-import ProfilePage from "./profile/profile-page";
-import SidebarLayout from "./sidebar/sidebar-layout";
 
 interface Props {
 	user: OidcStandardClaimsWithRoles;

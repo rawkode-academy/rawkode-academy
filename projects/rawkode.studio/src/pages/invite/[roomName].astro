@@ -1,8 +1,7 @@
 ---
-import { actions } from "astro:actions";
 import "@/styles/global.css";
 import Starfield from "@/components/effects/Starfield.astro";
-import InviteForm from "@/components/livestreams/invite-form.astro";
+import InviteRoomForm from "@/components/livestreams/active/invite-room-form";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { roomClientService } from "@/lib/livekit";
 import TravelIndicator from "../../components/effects/TravelIndicator.astro";
@@ -28,20 +27,8 @@ try {
 // Check if user is authenticated
 const user = Astro.locals.user;
 
-// Generate a token if the user is authenticated
-let token: string | undefined = undefined;
-if (user && roomExists) {
-	try {
-		// Generate token
-		token = await actions
-			.generateTokenFromInvite({ roomName })
-			.then((result) => result.data);
-	} catch (error) {
-		console.error("Error generating token on invite page:", error);
-	}
-}
-
-// No token generation needed here - it will happen on the watch page
+// Don't auto-redirect directors - let them choose to join
+// They may have just left the room intentionally
 ---
 
 <BaseLayout title={`Join ${roomName} - Live Stream`}>
@@ -62,11 +49,12 @@ if (user && roomExists) {
         </div>
 
         <!-- Join form and status -->
-        <InviteForm
+        <InviteRoomForm
           roomName={roomName}
           roomExists={roomExists}
-          user={user}
-          token={token}
+          isDirector={!!user}
+          directorName={user?.preferred_username || user?.name}
+          client:load
         />
 
         <!-- Footer with additional info -->
@@ -77,26 +65,6 @@ if (user && roomExists) {
     </div>
   </div>
 
-  <script is:inline define:vars={{ roomName }}>
-    // Clear any tokens for this room if they exist
-    // This ensures we don't have stale tokens when coming back to the invite page
-    const storedRoomName = sessionStorage.getItem("livekit-room");
-
-    if (storedRoomName === roomName) {
-      sessionStorage.removeItem("livekit-token");
-      sessionStorage.removeItem("livekit-room");
-    }
-
-    // Store token in sessionStorage
-    sessionStorage.setItem("livekit-token", token);
-    sessionStorage.setItem("livekit-room", roomName);
-
-    // For debugging and to ensure the values are set correctly
-    // This can be removed in production or when no longer needed
-
-    // Navigate to watch page
-    window.location.href = `/watch/${roomName}`;
-  </script>
 
   <TravelIndicator />
 </BaseLayout>

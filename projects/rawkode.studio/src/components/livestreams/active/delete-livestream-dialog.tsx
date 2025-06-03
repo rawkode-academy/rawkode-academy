@@ -1,4 +1,5 @@
 import { actions } from "astro:actions";
+import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/shadcn/button";
 import {
 	Dialog,
@@ -9,13 +10,16 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/shadcn/dialog";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/shadcn/tooltip";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
-import { Spinner } from "../common/Spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../shadcn/tooltip";
 
 interface Props {
 	name: string;

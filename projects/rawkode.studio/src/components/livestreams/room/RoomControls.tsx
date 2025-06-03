@@ -1,5 +1,8 @@
+import { BackstageToggle } from "@/components/livestreams/room/BackstageToggle";
+import { RaiseHandButton } from "@/components/livestreams/room/RaiseHandButton";
 import { Button } from "@/components/shadcn/button";
-import { useLocalParticipant, useRoomContext } from "@livekit/components-react";
+import { useLocalParticipant } from "@livekit/components-react";
+import { ParticipantEvent } from "livekit-client";
 import {
 	LogOut,
 	Mic,
@@ -10,10 +13,13 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+interface RoomControlsProps {
+	token: string | null;
+}
+
 // Room Controls Component
-export function RoomControls() {
+export function RoomControls({ token }: RoomControlsProps) {
 	const { localParticipant } = useLocalParticipant();
-	const room = useRoomContext();
 	const [permissionsLoaded, setPermissionsLoaded] = useState(false);
 
 	// Default permissions to true initially to show controls while loading
@@ -23,12 +29,13 @@ export function RoomControls() {
 		canPublishData: true,
 	});
 
-	// Separate effect to handle permissions loading
+	// Update permissions when they change
 	useEffect(() => {
-		const checkPermissions = () => {
-			if (!room || !room.localParticipant) return;
+		if (!localParticipant) return;
 
-			const perms = room.localParticipant.permissions;
+		const updatePermissions = () => {
+			const perms = localParticipant.permissions;
+			console.log("RoomControls: Updating permissions", perms);
 			setPermissions({
 				canPublish: !!perms?.canPublish,
 				canPublishData: !!perms?.canPublishData,
@@ -36,26 +43,27 @@ export function RoomControls() {
 			setPermissionsLoaded(true);
 		};
 
-		// Check permissions immediately
-		checkPermissions();
+		// Initial update
+		updatePermissions();
 
-		// And also when connection state changes
-		if (room) {
-			room.on("connectionStateChanged", checkPermissions);
+		// Listen for permission changes
+		const handlePermissionsChanged = () => {
+			console.log("RoomControls: Permission change event received");
+			updatePermissions();
+		};
 
-			return () => {
-				room.off("connectionStateChanged", checkPermissions);
-			};
-		}
-	}, [room]);
+		localParticipant.on(
+			ParticipantEvent.ParticipantPermissionsChanged,
+			handlePermissionsChanged,
+		);
 
-	// Count available buttons to determine layout
-	const availableButtons = [
-		permissions.canPublish, // Audio and video require canPublish
-		permissions.canPublish,
-		permissions.canPublish && permissions.canPublishData, // Screen sharing requires both
-		true, // Leave button is always shown
-	].filter(Boolean).length;
+		return () => {
+			localParticipant.off(
+				ParticipantEvent.ParticipantPermissionsChanged,
+				handlePermissionsChanged,
+			);
+		};
+	}, [localParticipant]);
 
 	const toggleMicrophone = async () => {
 		if (!localParticipant) return;
@@ -91,80 +99,106 @@ export function RoomControls() {
 	};
 
 	return (
-		<div className="mb-4">
+		<div>
 			<h4 className="text-sm font-medium mb-3">Controls</h4>
-			<div
-				className={`grid ${
-					availableButtons === 1 ? "grid-cols-1" : "grid-cols-2"
-				} gap-2`}
-			>
+
+			{/* For viewers - show raise hand above leave button */}
+			{!permissions.canPublish && (
+				<div className="space-y-2">
+					<RaiseHandButton className="h-10 w-full" token={token} />
+					<Button
+						size="sm"
+						variant="destructive"
+						className="flex items-center justify-center h-10 rounded-lg w-full"
+						onClick={() =>
+							document.dispatchEvent(new Event("livekit-leave-room"))
+						}
+					>
+						<LogOut className="h-4 w-4 mr-2" />
+						Leave
+					</Button>
+				</div>
+			)}
+
+			<div className="grid grid-cols-2 gap-2">
+				{/* For speakers - show all controls */}
 				{permissions.canPublish && (
-					<Button
-						size="sm"
-						variant={
-							localParticipant?.isMicrophoneEnabled ? "default" : "secondary"
-						}
-						className="flex items-center justify-center h-10 rounded-lg border border-sidebar-border/30 w-full"
-						onClick={toggleMicrophone}
-						disabled={!permissionsLoaded}
-					>
-						{localParticipant?.isMicrophoneEnabled ? (
-							<Mic className="h-4 w-4 mr-2" />
-						) : (
-							<MicOff className="h-4 w-4 mr-2" />
+					<>
+						<Button
+							size="sm"
+							variant={
+								localParticipant?.isMicrophoneEnabled ? "default" : "secondary"
+							}
+							className="flex items-center justify-center h-10 rounded-lg border border-sidebar-border/30 w-full"
+							onClick={toggleMicrophone}
+							disabled={!permissionsLoaded}
+						>
+							{localParticipant?.isMicrophoneEnabled ? (
+								<Mic className="h-4 w-4 mr-2" />
+							) : (
+								<MicOff className="h-4 w-4 mr-2" />
+							)}
+							{localParticipant?.isMicrophoneEnabled ? "Mute" : "Unmute"}
+						</Button>
+
+						<Button
+							size="sm"
+							variant={
+								localParticipant?.isCameraEnabled ? "default" : "secondary"
+							}
+							className="flex items-center justify-center h-10 rounded-lg border border-sidebar-border/30 w-full"
+							onClick={toggleCamera}
+							disabled={!permissionsLoaded}
+						>
+							{localParticipant?.isCameraEnabled ? (
+								<Video className="h-4 w-4 mr-2" />
+							) : (
+								<VideoOff className="h-4 w-4 mr-2" />
+							)}
+							{localParticipant?.isCameraEnabled ? "Stop Video" : "Start Video"}
+						</Button>
+
+						{permissions.canPublishData && (
+							<Button
+								size="sm"
+								variant={
+									localParticipant?.isScreenShareEnabled
+										? "default"
+										: "secondary"
+								}
+								className="flex items-center justify-center h-10 rounded-lg border border-sidebar-border/30 w-full"
+								onClick={toggleScreenShare}
+								disabled={!permissionsLoaded}
+							>
+								<ScreenShare className="h-4 w-4 mr-2" />
+								{localParticipant?.isScreenShareEnabled
+									? "Stop Sharing"
+									: "Share Screen"}
+							</Button>
 						)}
-						{localParticipant?.isMicrophoneEnabled ? "Mute" : "Unmute"}
-					</Button>
-				)}
 
-				{permissions.canPublish && (
-					<Button
-						size="sm"
-						variant={
-							localParticipant?.isCameraEnabled ? "default" : "secondary"
-						}
-						className="flex items-center justify-center h-10 rounded-lg border border-sidebar-border/30 w-full"
-						onClick={toggleCamera}
-						disabled={!permissionsLoaded}
-					>
-						{localParticipant?.isCameraEnabled ? (
-							<Video className="h-4 w-4 mr-2" />
-						) : (
-							<VideoOff className="h-4 w-4 mr-2" />
-						)}
-						{localParticipant?.isCameraEnabled ? "Stop Video" : "Start Video"}
-					</Button>
+						<Button
+							size="sm"
+							variant="destructive"
+							className="flex items-center justify-center h-10 rounded-lg w-full"
+							onClick={() =>
+								document.dispatchEvent(new Event("livekit-leave-room"))
+							}
+						>
+							<LogOut className="h-4 w-4 mr-2" />
+							Leave
+						</Button>
+					</>
 				)}
-
-				{permissions.canPublish && permissions.canPublishData && (
-					<Button
-						size="sm"
-						variant={
-							localParticipant?.isScreenShareEnabled ? "default" : "secondary"
-						}
-						className="flex items-center justify-center h-10 rounded-lg border border-sidebar-border/30 w-full"
-						onClick={toggleScreenShare}
-						disabled={!permissionsLoaded}
-					>
-						<ScreenShare className="h-4 w-4 mr-2" />
-						{localParticipant?.isScreenShareEnabled
-							? "Stop Sharing"
-							: "Share Screen"}
-					</Button>
-				)}
-
-				<Button
-					size="sm"
-					variant="destructive"
-					className="flex items-center justify-center h-10 rounded-lg w-full"
-					onClick={() =>
-						document.dispatchEvent(new Event("livekit-leave-room"))
-					}
-				>
-					<LogOut className="h-4 w-4 mr-2" />
-					Leave
-				</Button>
 			</div>
+
+			{/* Show additional controls below the grid */}
+			{permissions.canPublish &&
+				localParticipant?.attributes?.role === "director" && (
+					<div className="mt-2">
+						<BackstageToggle />
+					</div>
+				)}
 		</div>
 	);
 }

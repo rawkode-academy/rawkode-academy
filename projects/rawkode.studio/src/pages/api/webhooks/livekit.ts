@@ -1,8 +1,8 @@
 import { database } from "@/lib/database";
 import { webhookReceiver } from "@/lib/livekit";
-import { participantsTable, roomsTable } from "@/schema";
+import { livestreamsTable, participantsTable } from "@/schema";
 import type { APIRoute } from "astro";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const POST: APIRoute = async ({ request }) => {
 	const body = await request.text();
@@ -22,42 +22,46 @@ export const POST: APIRoute = async ({ request }) => {
 
 	switch (event.event) {
 		case "room_started":
-			await database.insert(roomsTable).values({
-				id: room.sid,
-				name: room.name,
-			});
-			break;
-		case "room_finished":
+			// Update status from 'created' to 'running' when first participant joins
 			await database
-				.update(roomsTable)
+				.update(livestreamsTable)
 				.set({
-					finishedAt: new Date(),
+					status: "running",
+					startedAt: new Date(),
 				})
-				.where(eq(roomsTable.id, room.sid));
+				.where(eq(livestreamsTable.sid, room.sid));
 			break;
-		case "participant_joined": {
-			await database
-				.update(roomsTable)
-				.set({
-					participantsJoined: sql`${roomsTable.participantsJoined} + 1`,
-				})
-				.where(eq(roomsTable.id, room.sid));
 
+		case "room_finished":
+			// Update status to 'ended' when room finishes
+			await database
+				.update(livestreamsTable)
+				.set({
+					status: "ended",
+					endedAt: new Date(),
+				})
+				.where(eq(livestreamsTable.sid, room.sid));
+			break;
+
+		case "participant_joined": {
 			const participant = event.participant;
 
 			if (!participant) {
 				return new Response("Participant not found", { status: 404 });
 			}
 
+			// Upsert participant
 			await database
 				.insert(participantsTable)
 				.values({
-					roomId: room.sid,
-					name: participant.identity,
+					roomSid: room.sid,
+					identity: participant.identity,
+					name: participant.name || participant.identity,
 				})
 				.onConflictDoNothing();
 			break;
 		}
+
 		default:
 			break;
 	}
