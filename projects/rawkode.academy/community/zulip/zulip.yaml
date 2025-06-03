@@ -90,6 +90,8 @@ spec:
               value: "True"
             - name: SETTING_ZULIP_SERVICE_PUSH_NOTIFICATIONS
               value: "True"
+            - name: SETTING_USING_PGROONGA
+              value: "True"
             - name: ZULIP_AUTH_BACKENDS
               value: "GenericOpenIdConnectBackend"
             - name: SECRETS_rabbitmq_password
