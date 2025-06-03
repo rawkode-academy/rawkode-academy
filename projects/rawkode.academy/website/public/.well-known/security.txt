@@ -1,0 +1,13 @@
+Contact: mailto:team@rawkode.academy
+Expires: 2026-06-03T09:00:00.000Z
+Preferred-Languages: en
+Encryption: age1fpdd46j6jflyn734h7pnjlk5mnf0j4htqfx9p2sn6qqc09nm39wq5uu3ce
+Policy: https://github.com/RawkodeAcademy/RawkodeAcademy/blob/main/SECURITY.md
+Canonical: https://rawkode.academy/.well-known/security.txt
+
+# Security Policy
+
+If you have found any issues that might have security implications,
+please send a report privately to team@rawkode.academy.
+
+Please do not report security reports publicly.
