@@ -1,5 +1,6 @@
 ---
 import TableOfContents from "@/components/articles/TableOfContents.astro";
+import Updates from "@/components/articles/Updates.astro";
 import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -244,6 +245,8 @@ const imageUrl = await computeImageUrl(article);
 					}
 				</div>
 			</header>
+
+			<Updates updates={article.data.updates} />
 
 			<Content />
 		</article>
