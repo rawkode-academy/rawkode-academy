@@ -1,6 +1,10 @@
 import { Button } from "@/components/shadcn/button";
 import { cn } from "@/lib/utils";
-import { useLocalParticipant, useRoomContext } from "@livekit/components-react";
+import {
+	useLocalParticipant,
+	useParticipantAttribute,
+	useRoomContext,
+} from "@livekit/components-react";
 import { Hand } from "lucide-react";
 import { useState } from "react";
 
@@ -14,8 +18,11 @@ export function RaiseHandButton({ className, token }: RaiseHandButtonProps) {
 	const room = useRoomContext();
 	const [isUpdating, setIsUpdating] = useState(false);
 
-	// Read hand raised state from participant attributes
-	const handRaised = localParticipant?.attributes?.raisedHand === "true";
+	// Use the useParticipantAttribute hook to automatically track attribute changes
+	const handRaisedAttribute = useParticipantAttribute("raisedHand", {
+		participant: localParticipant,
+	});
+	const handRaised = handRaisedAttribute === "true";
 
 	const toggleHand = async () => {
 		if (!localParticipant || !room || isUpdating) return;

@@ -57,29 +57,24 @@ export function RaisedHandsList({ token }: RaisedHandsListProps) {
 		if (!room?.name) return;
 
 		try {
-			// Update participant's attribute to lower their hand
-			const participant = participants.find(
-				(p) => p.identity === participantIdentity,
-			);
-			if (participant) {
-				// For now, we'll use the API to ensure it's done server-side
-				const response = await fetch("/api/livestream/participant", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						...(token && { Authorization: `Bearer ${token}` }),
-					},
-					credentials: "include",
-					body: JSON.stringify({
-						roomName: room.name,
-						action: "lower_hand",
-					}),
-				});
+			// Directors can lower other participants' hands
+			const response = await fetch("/api/livestream/participant", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					...(token && { Authorization: `Bearer ${token}` }),
+				},
+				credentials: "include",
+				body: JSON.stringify({
+					roomName: room.name,
+					participantIdentity,
+					action: "lower_hand",
+				}),
+			});
 
-				if (!response.ok) {
-					const error = await response.json();
-					console.error("Failed to lower hand:", error);
-				}
+			if (!response.ok) {
+				const error = await response.json();
+				console.error("Failed to lower participant hand:", error);
 			}
 		} catch (error) {
 			console.error("Failed to reject hand raise:", error);
