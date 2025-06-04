@@ -56,6 +56,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
 			canPublish: isDirector,
 			canPublishData: true,
 			canSubscribe: true,
+			canUpdateOwnMetadata: true, // Allow participants to receive attribute updates
 		});
 
 		at.ttl = "1h";

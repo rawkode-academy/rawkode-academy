@@ -1,5 +1,4 @@
 import { ActionError, defineAction } from "astro:actions";
-import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
 import { z } from "astro:schema";
 import { database } from "@/lib/database";
 import { roomClientService } from "@/lib/livekit";
@@ -9,7 +8,6 @@ import {
 	participantsTable,
 } from "@/schema";
 import { desc, eq } from "drizzle-orm";
-import { AccessToken } from "livekit-server-sdk";
 
 export type LiveStream = {
 	id: string;
@@ -268,84 +266,6 @@ export const server = {
 			}
 
 			await roomClientService.deleteRoom(input.name);
-		},
-	}),
-
-	generateTokenFromInvite: defineAction({
-		input: z.object({
-			roomName: z.string(),
-			participantName: z.string().optional(),
-		}),
-
-		handler: async (input, context) => {
-			try {
-				// Check if the room exists before generating a token
-				let roomExists = false;
-				try {
-					const rooms = await roomClientService.listRooms();
-					roomExists = rooms.some((room) => room.name === input.roomName);
-				} catch (roomCheckError) {
-					// Assume room exists if we can't check due to permissions
-					// This is safer than blocking token generation completely
-					roomExists = true;
-				}
-
-				if (!roomExists) {
-					throw new ActionError({
-						code: "NOT_FOUND",
-						message: "Room does not exist",
-					});
-				}
-
-				// Check if there's a user session (logged in) or this is a guest
-				const loggedInUser = context?.locals?.user;
-				const userDisplayName =
-					loggedInUser?.preferred_username || loggedInUser?.name;
-
-				// Generate identity:
-				// - For authenticated users: always use their actual username (prevents spoofing)
-				// - For guests: use provided name or generate random
-				const identity = loggedInUser
-					? userDisplayName || loggedInUser.sub // Use sub as fallback if no display name
-					: input.participantName?.trim() ||
-						`guest-${Math.floor(Math.random() * 10000)}`;
-
-				// Create the token
-				const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
-					identity,
-				});
-
-				// Check if user has the director role
-				const isDirector = loggedInUser?.roles?.includes("director") || false;
-
-				// Add the grant - use room name, not room ID
-				at.addGrant({
-					roomJoin: true,
-					room: input.roomName,
-					// Only directors can publish audio/video
-					canPublish: isDirector,
-					// Allow chat for all users
-					canPublishData: true,
-					// Allow everyone to subscribe to everything
-					canSubscribe: true,
-				});
-
-				// Convert to string JWT
-				const token = at.toJwt();
-
-				// Return only a string value for simplicity
-				return token;
-			} catch (error) {
-				// Return a simple string error message
-
-				throw new ActionError({
-					code: error instanceof ActionError ? error.code : "BAD_REQUEST",
-					message:
-						error instanceof ActionError
-							? error.message
-							: "Token generation failed",
-				});
-			}
 		},
 	}),
 };

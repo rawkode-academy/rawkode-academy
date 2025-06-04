@@ -85,9 +85,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			},
 
 			lower_hand: async () => {
-				await roomClientService.updateParticipant(roomName, auth.identity, {
+				// Allow directors to lower other participants' hands
+				const targetId =
+					isDirector && participantIdentity
+						? participantIdentity
+						: auth.identity;
+				const targetParticipant =
+					targetId === auth.identity
+						? participant
+						: await roomClientService.getParticipant(roomName, targetId);
+
+				await roomClientService.updateParticipant(roomName, targetId, {
 					attributes: {
-						...participant?.attributes,
+						...targetParticipant?.attributes,
 						raisedHand: "false",
 					},
 				});
