@@ -9,6 +9,9 @@ cover:
   image: "./cover.png"
   alt: "Kyverno CEL ValidatingPolicy visualization"
 publishedAt: 2025-07-02
+updates:
+  - date: 2025-07-04
+    reason: "Claude article review changed policies for the worst. This has been corrected"
 isDraft: false
 authors:
   - rawkode
@@ -45,29 +48,26 @@ kind: ValidatingPolicy
 metadata:
   name: require-pod-resources
 spec:
-  rules:
-    - name: check-resource-limits
-      match:
-        any:
-        - resources:
-            kinds:
-            - Pod
-      validate:
-        cel:
-          expressions:
-          - expression: |
-              object.spec.containers.all(container, 
-                has(container.resources.limits) && 
-                has(container.resources.limits.memory) && 
-                has(container.resources.limits.cpu)
-              )
-            message: "All containers must have CPU and memory limits defined"
-          - expression: |
-              object.spec.containers.all(container,
-                container.resources.limits.memory.matches('^[0-9]+(Mi|Gi)$') &&
-                size(container.resources.limits.memory) <= size('8Gi')
-              )
-            message: "Memory limits must not exceed 8Gi"
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: [v1]
+      operations:  [CREATE, UPDATE]
+      resources:   [pods]
+  validations:
+  - expression: |
+      object.spec.containers.all(container,
+        has(container.resources.limits) &&
+        has(container.resources.limits.memory) &&
+        has(container.resources.limits.cpu)
+      )
+    message: "All containers must have CPU and memory limits defined"
+  - expression: |
+      object.spec.containers.all(container,
+        container.resources.limits.memory.matches('^[0-9]+(Mi|Gi)$') &&
+        size(container.resources.limits.memory) <= size('8Gi')
+      )
+    message: "Memory limits must not exceed 8Gi"
 ```
 
 This policy enforces two critical requirements:
@@ -99,10 +99,10 @@ spec:
                 message: "replicas cannot exceed 10"
 ```
 
-**ValidatingAdmissionPolicy Example:**
+**Kyverno ValidatingPolicy Example:**
 ```yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
-kind: ValidatingAdmissionPolicy
+apiVersion: policies.kyverno.io/v1alpha1
+kind: ValidatingPolicy
 metadata:
   name: replica-limit
 spec:
@@ -117,27 +117,6 @@ spec:
     message: "replicas cannot exceed 10"
 ```
 
-**Kyverno ValidatingPolicy Example:**
-```yaml
-apiVersion: policies.kyverno.io/v1alpha1
-kind: ValidatingPolicy
-metadata:
-  name: replica-limit
-spec:
-  rules:
-    - name: check-replicas
-      match:
-        any:
-        - resources:
-            kinds:
-            - Deployment
-      validate:
-        cel:
-          expressions:
-          - expression: "object.spec.replicas <= 10"
-            message: "replicas cannot exceed 10"
-```
-
 Notice how the core CEL expression `object.spec.replicas <= 10` remains identical across all three contexts. This consistency dramatically reduces the learning curve and enables teams to reuse validation logic.
 
 ## Advanced Pattern: Cross-Resource Validation
@@ -150,32 +129,26 @@ kind: ValidatingPolicy
 metadata:
   name: namespace-resource-quotas
 spec:
-  rules:
-    - name: enforce-team-quotas
-      match:
-        any:
-        - resources:
-            kinds:
-            - Deployment
-            - StatefulSet
-      validate:
-        cel:
-          paramKind:
-            apiVersion: v1
-            kind: ConfigMap
-          paramRef:
-            name: team-configs
-            namespace: platform
-          expressions:
-          - expression: |
-              has(object.metadata.labels.team) && 
-              object.metadata.labels.team in params.data &&
-              object.spec.replicas <= int(params.data[object.metadata.labels.team])
-            message: "Replica count exceeds team quota defined in platform/team-configs"
-          - expression: |
-              has(object.metadata.labels.environment) &&
-              object.metadata.labels.environment in ['dev', 'staging', 'prod']
-            message: "Must specify valid environment label: dev, staging, or prod"
+  matchConstraints:
+    resourceRules:
+    - operations: ["CREATE", "UPDATE"]
+      apiGroups: ["apps"]
+      apiVersions: ["v1"]
+      resources: ["deployments", "statefulsets"]
+  variables:
+  - name: configs
+    expression: >
+      resource.Get("v1", "configmaps", "platform", "team-configs")
+  validations:
+      - expression: |
+          has(object.metadata.labels.team) &&
+          object.metadata.labels.team in variables.configs.data &&
+          object.spec.replicas <= int(variables.configs.data[object.metadata.labels.team])
+        message: "Replica count exceeds team quota defined in platform/team-configs"
+      - expression: |
+          has(object.metadata.labels.environment) &&
+          object.metadata.labels.environment in ['dev', 'staging', 'prod']
+        message: "Must specify valid environment label: dev, staging, or prod"
 ```
 
 This policy demonstrates advanced CEL patterns:
@@ -202,47 +175,53 @@ data:
 Kyverno 1.14 also introduces ImageValidatingPolicy for specialized image security validation:
 
 ```yaml
+# https://github.com/kyverno/policies/blob/main/other/verify-image-ivpol/verify-image-ivpol.yaml
 apiVersion: policies.kyverno.io/v1alpha1
 kind: ImageValidatingPolicy
 metadata:
-  name: secure-supply-chain
+  name: verify-image-ivpol
+  annotations:
+    policies.kyverno.io/title: Verify Image
+    policies.kyverno.io/category: Software Supply Chain Security, EKS Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.14.0
+    policies.kyverno.io/description: >-
+      Using the Cosign project, OCI images may be signed to ensure supply chain
+      security is maintained. Those signatures can be verified before pulling into
+      a cluster. This policy checks the signature of an image repo called
+      ghcr.io/kyverno/test-verify-image to ensure it has been signed by verifying
+      its signature against the provided public key. This policy serves as an illustration for
+      how to configure a similar rule and will require replacing with your image(s) and keys.
 spec:
-  rules:
-    - name: verify-signatures-and-provenance
-      match:
-        any:
-        - resources:
-            kinds:
-            - Pod
-      imageVerify:
-        - imageReferences:
-          - "*"
-          attestors:
-          - count: 1
-            entries:
-            - keys:
-                publicKeys: |-
-                  -----BEGIN PUBLIC KEY-----
-                  ABCDEFGHIJKLMNOPQRSTUVWXYZ
-                  -----END PUBLIC KEY-----
-          validate:
-            cel:
-              expressions:
-              - expression: |
-                  attestations.all(att, 
-                    att.predicateType == "https://slsa.dev/provenance/v0.2" &&
-                    att.predicate.buildType == "https://tekton.dev/chains/v2"
-                  )
-                message: "Images must be built using Tekton with SLSA provenance"
-              - expression: |
-                  attestations.exists(att,
-                    att.predicateType == "https://spdx.dev/Document" &&
-                    att.predicate.packages.all(pkg, 
-                      !pkg.versionInfo.contains("SNAPSHOT") &&
-                      !pkg.versionInfo.contains("alpha")
-                    )
-                  )
-                message: "Images cannot contain snapshot or alpha dependencies"
+  webhookConfiguration:
+    timeoutSeconds: 30
+  evaluation:
+   background:
+    enabled: false
+  validationActions: [Deny]
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  matchImageReferences:
+        - glob : "docker.io/mohdcode/kyverno*"
+  attestors:
+  - name: cosign
+    cosign:
+     key:
+      data: |
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE6QsNef3SKYhJVYSVj+ZfbPwJd0pv
+                DLYNHXITZkhIzfE+apcxDjCCkDPcJ3A3zvhPATYOIsCxYPch7Q2JdJLsDQ==
+                -----END PUBLIC KEY-----
+  validations:
+    - expression: >-
+       images.containers.map(image, verifyImageSignatures(image, [attestors.cosign])).all(e ,e > 0)
+      message: >-
+       failed the verification
 ```
 
 This policy combines signature verification with CEL-based attestation validation, ensuring:
@@ -261,39 +240,26 @@ kind: ClusterPolicy
 metadata:
   name: require-labels
 spec:
-  validationFailureAction: enforce
-  background: true
   rules:
-    - name: check-team-label
-      match:
-        any:
-        - resources:
-            kinds:
-            - Deployment
-      validate:
-        message: "Deployments must have a team label"
-        pattern:
-          metadata:
-            labels:
-              team: "?*"
-    - name: check-environment-label
-      match:
-        any:
-        - resources:
-            kinds:
-            - Deployment
-      validate:
-        message: "Environment label must be dev, staging, or prod"
-        anyPattern:
-        - metadata:
-            labels:
-              environment: "dev"
-        - metadata:
-            labels:
-              environment: "staging"
-        - metadata:
-            labels:
-              environment: "prod"
+  - name: require-labels
+    match:
+      any:
+      - resources:
+          kinds:
+          - Deployment
+    validate:
+      failureAction: Enforce
+      message: "Environment label must be dev, staging, or prod"
+      anyPattern:
+      - metadata:
+          labels:
+            environment: "dev" # Changed label key to 'environment' to match message
+      - metadata:
+          labels:
+            environment: "staging"
+      - metadata:
+          labels:
+            environment: "prod"
 ```
 
 **After (ValidatingPolicy):**
@@ -303,20 +269,17 @@ kind: ValidatingPolicy
 metadata:
   name: require-labels
 spec:
-  rules:
-    - name: validate-labels
-      match:
-        any:
-        - resources:
-            kinds:
-            - Deployment
-      validate:
-        cel:
-          expressions:
-          - expression: "has(object.metadata.labels.team) && object.metadata.labels.team != ''"
-            message: "Deployments must have a team label"
-          - expression: "has(object.metadata.labels.environment) && object.metadata.labels.environment in ['dev', 'staging', 'prod']"
-            message: "Environment label must be dev, staging, or prod"
+  matchConstraints:
+    resourceRules:
+    - operations: ["CREATE", "UPDATE"]
+      apiGroups: ["apps"]
+      apiVersions: ["v1"]
+      resources: ["deployments"]
+  validations:
+    - expression: "has(object.metadata.labels.team) && object.metadata.labels.team != ''"
+      message: "Deployments must have a team label"
+    - expression: "has(object.metadata.labels.environment) && object.metadata.labels.environment in ['dev', 'staging', 'prod']"
+      message: "Environment label must be dev, staging, or prod"
 ```
 
 **Migration Benefits:**

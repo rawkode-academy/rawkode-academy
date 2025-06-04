@@ -112,6 +112,14 @@ const articles = defineCollection({
 			series: reference("series").optional(),
 			publishedAt: z.coerce.date(),
 			updatedAt: z.coerce.date().optional(),
+			updates: z
+				.array(
+					z.object({
+						date: z.coerce.date(),
+						reason: z.string(),
+					}),
+				)
+				.optional(),
 			isDraft: z.boolean().default(true),
 			authors: z.array(reference("people")).default(["rawkode"]),
 		}),
