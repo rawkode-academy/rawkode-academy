@@ -227,11 +227,14 @@ export const server = {
 			});
 
 			// Insert into database with 'created' status
-			await database.insert(livestreamsTable).values({
-				sid: room.sid,
-				name: room.name,
-				status: "created",
-			});
+			await database
+				.insert(livestreamsTable)
+				.values({
+					sid: room.sid,
+					name: room.name,
+					status: "created",
+				})
+				.onConflictDoNothing();
 
 			return {
 				id: room.sid,
