@@ -2,7 +2,6 @@ import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
 import { roomClientService } from "@/lib/livekit";
 import type { APIRoute } from "astro";
 import { AccessToken } from "livekit-server-sdk";
-import * as randomWords from "random-words";
 
 const jsonResponse = (data: unknown, status = 200) =>
 	new Response(JSON.stringify(data), {
@@ -13,8 +12,12 @@ const jsonResponse = (data: unknown, status = 200) =>
 const errorResponse = (error: string, status = 400) =>
 	jsonResponse({ error }, status);
 
-const generateGuestName = () =>
-	(randomWords.generate({ exactly: 3 }) as string[]).join("-");
+const generateGuestName = () => {
+	const randomNumbers = Array.from({ length: 5 }, () =>
+		Math.floor(Math.random() * 10),
+	).join("");
+	return `guest-${randomNumbers}`;
+};
 
 export const GET: APIRoute = async ({ request, locals }) => {
 	try {
@@ -46,7 +49,6 @@ export const GET: APIRoute = async ({ request, locals }) => {
 			identity,
 			attributes: {
 				role: isDirector ? "director" : "viewer",
-				joinedAt: new Date().toISOString(),
 			},
 		});
 
@@ -61,6 +63,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
 		at.ttl = "1h";
 		const token = await at.toJwt();
+
+		console.log(token);
 
 		return jsonResponse({ token });
 	} catch (error) {

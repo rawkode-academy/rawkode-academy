@@ -13,7 +13,9 @@ const authMiddleware = defineMiddleware(async (context, next) => {
 		return next();
 	}
 
-	if (bypassUrls.includes(context.request.url)) {
+	const url = new URL(context.request.url);
+
+	if (bypassUrls.includes(url.pathname)) {
 		return next();
 	}
 
