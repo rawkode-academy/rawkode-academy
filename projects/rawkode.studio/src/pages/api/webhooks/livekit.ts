@@ -37,6 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
 						status: "running",
 						startedAt: new Date(),
 					},
+					where: eq(livestreamsTable.status, "created"),
 				});
 			break;
 
