@@ -22,14 +22,22 @@ export const POST: APIRoute = async ({ request }) => {
 
 	switch (event.event) {
 		case "room_started":
-			// Update status from 'created' to 'running' when first participant joins
+			// Upsert room to handle race condition with backend room creation
 			await database
-				.update(livestreamsTable)
-				.set({
+				.insert(livestreamsTable)
+				.values({
+					sid: room.sid,
+					name: room.name,
 					status: "running",
 					startedAt: new Date(),
 				})
-				.where(eq(livestreamsTable.sid, room.sid));
+				.onConflictDoUpdate({
+					target: livestreamsTable.sid,
+					set: {
+						status: "running",
+						startedAt: new Date(),
+					},
+				});
 			break;
 
 		case "room_finished":
