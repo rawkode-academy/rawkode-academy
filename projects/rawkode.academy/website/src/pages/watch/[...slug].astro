@@ -44,11 +44,23 @@ export const getStaticPaths = (async () => {
 
 const { video } = Astro.props as { video: { data: VideoData } };
 
-// Setting breaks to true doesn't handle multiple sequentiaal \n's
-const marked = new Marked({ breaks: false, gfm: true });
-const renderedDescription = marked.parse(
-	video.data.description.replaceAll("\n", "</br>"),
-);
+// Configure Marked to handle single newlines as breaks
+const marked = new Marked({ 
+	breaks: true, 
+	gfm: true
+});
+// No longer need to replaceAll \n
+const renderedDescriptionHtml = marked.parse(video.data.description);
+
+// Format date to readable format
+const formatDate = (dateString: string) => {
+	const date = new Date(dateString);
+	return date.toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric'
+	});
+};
 ---
 
 <Page
@@ -66,65 +78,320 @@ const renderedDescription = marked.parse(
 		duration={video.data.duration}
 		streamUrl={video.data.streamUrl}
 	/>
-	<div class="flex dark:bg-black dark:text-white min-h-screen">
-		<div class="w-full lg:w-3/4 px-4 py-4">
-			<div class="mt-4">
-				<h1 class="text-xxl font-bold mb-2">{video.data.title}</h1>
-				<div class="flex items-center text-gray-500 text-sm mb-2">
-					<span class="mx-2">&bull;</span>
-					<span>{video.data.publishedAt}</span>
+	<div class="min-h-screen bg-gray-50 dark:bg-gray-950">
+		<div class="container mx-auto px-4 py-6 lg:py-8 max-w-screen-2xl">
+			{/* Hero Section with Title */}
+			<div class="mb-8">
+				<h1 class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">{video.data.title}</h1>
+				<div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+					<time datetime={video.data.publishedAt} class="flex items-center gap-2">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+						</svg>
+						{formatDate(video.data.publishedAt)}
+					</time>
+					<span class="text-gray-400 dark:text-gray-600">•</span>
+					<span>{Math.floor(video.data.duration / 60)} min watch</span>
 				</div>
 			</div>
 
-			<div
-				class="relative w-full aspect-video rounded-lg overflow-hidden bg-black"
-			>
-				<VideoPlayer
-					client:only="vue"
-					video={video.data.id}
-					thumbnailUrl={video.data.thumbnailUrl}
-				/>
-			</div>
-
-			{/* Technologies Section */}
-			{
-				video.data.technologies && video.data.technologies.length > 0 && (
-					<div class="mt-4">
-						<h3 class="font-semibold text-gray-900 dark:text-white mb-2">
-							Technologies
-						</h3>
-						<div class="flex flex-wrap gap-2">
-							{video.data.technologies.map((technology) => (
-								<a
-									Astro.key={technology.name}
-									href={`/technology/${technology.id}`}
-									class="inline-flex items-center rounded-md bg-indigo-50 px-2.5 py-0.5 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 dark:hover:bg-indigo-700"
-								>
-									<img
-										src={technology.logo}
-										alt={technology.name}
-										class="h-4 w-4 mr-1 rounded-full"
-									/>
-									{technology.name}
-								</a>
-							))}
+			{/* Main Content - Single Column */}
+			<div class="max-w-4xl mx-auto">
+				{/* Video Player */}
+				<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl">
+					<VideoPlayer
+						client:only="vue"
+						video={video.data.id}
+						thumbnailUrl={video.data.thumbnailUrl}
+					/>
+				</div>
+				
+				{/* Video Controls & Social Features */}
+				<div class="mt-4 bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800">
+					<div class="flex flex-wrap items-center justify-between gap-4">
+						{/* Reaction Buttons */}
+						<div class="flex items-center gap-1 sm:gap-2">
+							<button aria-label="Like this video (124 likes)" class="coming-soon-btn group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+								<span aria-hidden="true" class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">👍</span>
+								<span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">124</span>
+							</button>
+							<button aria-label="Rocket reaction (89 reactions)" class="coming-soon-btn group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+								<span aria-hidden="true" class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">🚀</span>
+								<span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">89</span>
+							</button>
+							<button aria-label="Insightful reaction (45 reactions)" class="coming-soon-btn group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+								<span aria-hidden="true" class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">💡</span>
+								<span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">45</span>
+							</button>
+						</div>
+						
+						{/* Share Options */}
+						<div class="flex items-center gap-2">
+							<button aria-label="Share this video" class="coming-soon-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+								<svg aria-hidden="true" class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.632 4.684C18.114 16.938 18 16.482 18 16c0-.482.114-.938.316-1.342m0 2.684a3 3 0 110-2.684M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+								</svg>
+								<span class="text-xs sm:text-sm font-medium">Share</span>
+							</button>
+							<button aria-label="Save this video for later" class="coming-soon-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+								<svg aria-hidden="true" class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+								</svg>
+								<span class="text-xs sm:text-sm font-medium">Save</span>
+							</button>
 						</div>
 					</div>
-				)
-			}
+				</div>
+				
+				{/* Coming Soon Banner */}
+				<div id="coming-soon-banner" class="hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 ease-in-out">
+					<div class="flex items-center gap-3">
+						<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+						<span class="text-sm font-medium">This feature is coming in a few days!</span>
+					</div>
+				</div>
 
-			<!-- Video Description -->
-			<div class="mt-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm">
-				<p class="prose">
-					<p class="prose"><p set:html={renderedDescription} /></p>
-					<hr class="my-6" />
-				</p>
+				{/* Tabbed Content: Description & Transcript */}
+				<div class="mt-6 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800" data-tabs-container>
+					{/* Tab Navigation */}
+					<div class="border-b border-gray-200 dark:border-gray-800">
+						<nav class="flex -mb-px overflow-x-auto" role="tablist">
+							<button 
+								id="tab-description"
+								data-tab="description"
+								class="tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 font-medium text-sm whitespace-nowrap"
+								role="tab"
+								aria-selected="true"
+								aria-controls="panel-description"
+							>
+								Description
+							</button>
+							<button 
+								id="tab-transcript"
+								data-tab="transcript"
+								class="tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 font-medium text-sm whitespace-nowrap"
+								role="tab"
+								aria-selected="false"
+								aria-controls="panel-transcript"
+							>
+								Transcript
+							</button>
+							<button 
+								id="tab-resources"
+								data-tab="resources"
+								class="tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 font-medium text-sm whitespace-nowrap"
+								role="tab"
+								aria-selected="false"
+								aria-controls="panel-resources"
+							>
+								Resources
+							</button>
+						</nav>
+					</div>
+					
+					{/* Tab Content */}
+					<div class="p-6">
+						{/* Description Panel */}
+						<div id="panel-description" data-panel="description" class="tab-panel" role="tabpanel" aria-labelledby="tab-description">
+							<div
+								class="prose prose-lg dark:prose-invert max-w-none"
+								set:html={renderedDescriptionHtml}
+							/>
+						</div>
+						
+						{/* Transcript Panel */}
+						<div id="panel-transcript" data-panel="transcript" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-transcript">
+							<div class="prose prose-lg dark:prose-invert max-w-none">
+								<p class="text-gray-600 dark:text-gray-400">
+									Transcript feature coming soon. This will display the full transcript of the video with timestamps.
+								</p>
+							</div>
+						</div>
+						
+						{/* Resources Panel */}
+						<div id="panel-resources" data-panel="resources" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-resources">
+							<div class="prose prose-lg dark:prose-invert max-w-none">
+								<p class="text-gray-600 dark:text-gray-400">
+									Resources related to this video will be displayed here, including links, downloads, and additional materials.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				{/* Technologies Section */}
+				{
+					video.data.technologies && video.data.technologies.length > 0 && (
+						<div class="mt-6">
+							<h3 class="text-base font-medium text-gray-700 dark:text-gray-300 mb-3">Technologies used in this video</h3>
+							<div class="flex flex-wrap gap-2">
+								{video.data.technologies.map((technology) => (
+									<a
+										Astro.key={technology.name}
+										href={`/technology/${technology.id}`}
+										class="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 group"
+									>
+										<div class="w-6 h-6 relative overflow-hidden rounded">
+											<img
+												src={technology.logo}
+												alt={technology.name}
+												class="w-full h-full object-contain"
+											/>
+										</div>
+										<span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
+											{technology.name}
+										</span>
+										<svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+										</svg>
+									</a>
+								))}
+							</div>
+						</div>
+					)
+				}
+				
+				{/* Comments Section */}
+				<div class="mt-6">
+					<VideoComments client:only="vue" videoId={video.data.id} />
+				</div>
 			</div>
-
-			<!-- Comments Section -->
-			<VideoComments client:only="vue" videoId={video.data.id} />
-
-			<hr class="my-6" />
+			</div>
 		</div>
 	</div>
 </Page>
+
+<style>
+	/* Professional typography for prose content */
+	.prose {
+		line-height: 1.75;
+		color: rgb(55 65 81);
+	}
+	
+	.dark .prose {
+		color: rgb(209 213 219);
+	}
+	
+	.prose :global(p) {
+		margin-bottom: 1.5rem;
+	}
+	
+	/* Clean, professional link styles */
+	.prose :global(a) {
+		color: rgb(59 130 246);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		text-decoration-thickness: 1px;
+		transition: all 0.2s ease;
+	}
+
+	.prose :global(a:hover) {
+		color: rgb(37 99 235);
+		text-decoration-thickness: 2px;
+	}
+
+	.dark .prose :global(a) {
+		color: rgb(96 165 250);
+	}
+
+	.dark .prose :global(a:hover) {
+		color: rgb(147 197 253);
+	}
+	
+	/* Tab styles for future interactivity */
+	.tab-active {
+		border-bottom-color: rgb(59 130 246);
+		color: rgb(59 130 246);
+	}
+	
+	/* Smooth transitions for interactive elements */
+	button, a {
+		transition-property: all;
+		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+		transition-duration: 150ms;
+	}
+	
+	/* Hide scrollbar on tab navigation */
+	nav::-webkit-scrollbar {
+		display: none;
+	}
+	
+	nav {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+</style>
+
+<script>
+	// Tab switching functionality
+	document.addEventListener('DOMContentLoaded', () => {
+		const tabButtons = document.querySelectorAll('.tab-button');
+		const tabPanels = document.querySelectorAll('.tab-panel');
+		
+		tabButtons.forEach(button => {
+			button.addEventListener('click', () => {
+				const targetTab = button.getAttribute('data-tab');
+				
+				// Update button states and ARIA attributes
+				tabButtons.forEach(btn => {
+					btn.classList.remove('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+					btn.classList.add('border-transparent', 'text-gray-600', 'dark:text-gray-400');
+					btn.setAttribute('aria-selected', 'false');
+				});
+				
+				button.classList.remove('border-transparent', 'text-gray-600', 'dark:text-gray-400');
+				button.classList.add('border-blue-500', 'text-blue-600', 'dark:text-blue-400');
+				button.setAttribute('aria-selected', 'true');
+				
+				// Update panel visibility
+				tabPanels.forEach(panel => {
+					if (panel.getAttribute('data-panel') === targetTab) {
+						panel.classList.remove('hidden');
+					} else {
+						panel.classList.add('hidden');
+					}
+				});
+			});
+		});
+		
+		// Coming soon banner functionality
+		const comingSoonButtons = document.querySelectorAll('.coming-soon-btn');
+		const banner = document.getElementById('coming-soon-banner');
+		let bannerTimeout: ReturnType<typeof setTimeout> | undefined;
+		
+		comingSoonButtons.forEach(button => {
+			button.addEventListener('click', (e) => {
+				e.preventDefault();
+				
+				if (!banner) return;
+				
+				// Clear any existing timeout
+				if (bannerTimeout) {
+					clearTimeout(bannerTimeout);
+				}
+				
+				// Show banner with animation
+				banner.classList.remove('hidden');
+				banner.classList.add('opacity-0', 'translate-y-2');
+				
+				// Force reflow for animation
+				banner.offsetHeight;
+				
+				// Animate in
+				banner.classList.remove('opacity-0', 'translate-y-2');
+				
+				// Hide after 3 seconds
+				bannerTimeout = setTimeout(() => {
+					if (!banner) return;
+					banner.classList.add('opacity-0', 'translate-y-2');
+					setTimeout(() => {
+						if (!banner) return;
+						banner.classList.add('hidden');
+					}, 300);
+				}, 3000);
+			});
+		});
+	});
+</script>
