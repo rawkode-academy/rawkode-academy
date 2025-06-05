@@ -65,6 +65,7 @@ mkdir -p platform/<service-name>/{data-model,read-model,write-model}
     "@pothos/plugin-drizzle": "^0.8.1",
     "@pothos/plugin-federation": "^4.3.2",
     "@sindresorhus/slugify": "^2.2.1",
+    "cloudflare:workers": "^0.5.0",
     "drizzle-kit": "^0.30.6",
     "drizzle-orm": "^0.38.4",
     "drizzle-zod": "^0.6.1",
@@ -309,61 +310,217 @@ Cloudflare Worker configuration:
 
 ### 5. Write Model (Optional)
 
-For services that need write operations, use Restate for durable execution:
+For services that need write operations, use Cloudflare Workflows for durable execution:
 
-#### write-model/main.ts
+#### write-model/workflow.ts
 ```typescript
 import {
-  type Context,
-  endpoint,
-  service,
-  TerminalError,
-} from "@restatedev/restate-sdk/fetch";
+  WorkflowEntrypoint,
+  WorkflowStep,
+  WorkflowEvent,
+} from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
 import { CreateExample } from "../data-model/integrations/zod.ts";
 import { exampleTable } from "../data-model/schema.ts";
 
-// Note: Write models with D1 require a different approach
-// Consider using Cloudflare Workers directly or Durable Objects
-// for write operations with D1
-
-type T = z.infer<typeof CreateExample>;
-
 export interface Env {
   DB: D1Database;
 }
 
+type CreateExampleParams = z.infer<typeof CreateExample>;
+
+export class ExampleWriteWorkflow extends WorkflowEntrypoint<
+  Env,
+  CreateExampleParams
+> {
+  async run(event: WorkflowEvent<CreateExampleParams>, step: WorkflowStep) {
+    const db = drizzle(this.env.DB);
+
+    // Step 1: Validate input
+    const validatedData = await step.do(
+      "validate input",
+      async () => {
+        try {
+          return CreateExample.parse(event.payload);
+        } catch (error) {
+          throw new Error(`Validation failed: ${error.message}`);
+        }
+      }
+    );
+
+    // Step 2: Insert into database with retry logic
+    const result = await step.do(
+      "insert into database",
+      {
+        retries: {
+          limit: 3,
+          delay: "1 second",
+          backoff: "exponential",
+        },
+        timeout: "30 seconds",
+      },
+      async () => {
+        try {
+          const inserted = await db
+            .insert(exampleTable)
+            .values(validatedData)
+            .returning()
+            .get();
+          
+          return inserted;
+        } catch (error) {
+          throw new Error(`Database insert failed: ${error.message}`);
+        }
+      }
+    );
+
+    // Step 3: Post-processing (optional)
+    await step.do(
+      "post-processing",
+      async () => {
+        // Perform any additional tasks like sending notifications,
+        // updating caches, or triggering other workflows
+        console.log(`Successfully created example with ID: ${result.id}`);
+      }
+    );
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+}
+```
+
+#### write-model/main.ts
+```typescript
+import type { ExampleWriteWorkflow } from "./workflow.ts";
+
+export interface Env {
+  DB: D1Database;
+  EXAMPLE_WORKFLOW: Workflow<typeof ExampleWriteWorkflow>;
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    const db = drizzle(env.DB);
+    // Parse request URL
+    const url = new URL(request.url);
     
-    // Handle write operations
-    if (request.method === "POST") {
-      const data = await request.json();
+    // Handle workflow execution
+    if (url.pathname === "/create" && request.method === "POST") {
+      try {
+        const data = await request.json();
+        
+        // Create a new workflow instance
+        const instance = await env.EXAMPLE_WORKFLOW.create({
+          id: crypto.randomUUID(),
+          params: data,
+        });
+        
+        // Return workflow instance details
+        return new Response(
+          JSON.stringify({
+            success: true,
+            workflowId: instance.id,
+            status: await instance.status(),
+          }),
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      } catch (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+    
+    // Handle workflow status check
+    if (url.pathname.startsWith("/status/") && request.method === "GET") {
+      const workflowId = url.pathname.split("/")[2];
       
       try {
-        CreateExample.parse(data);
+        const instance = await env.EXAMPLE_WORKFLOW.get(workflowId);
+        const status = await instance.status();
         
-        await db
-          .insert(exampleTable)
-          .values(data)
-          .run();
-          
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { "Content-Type": "application/json" },
-        });
-      } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            workflowId,
+            status,
+          }),
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      } catch (error) {
+        return new Response(
+          JSON.stringify({ error: "Workflow not found" }),
+          {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
       }
     }
     
     return new Response("Method not allowed", { status: 405 });
   },
 };
+```
+
+#### write-model/wrangler.jsonc
+```jsonc
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "<service-name>-write-model",
+  "main": "./main.ts",
+
+  "compatibility_date": "2025-04-05",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "keep_vars": false,
+  "minify": true,
+
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 1
+    }
+  },
+
+  "placement": {
+    "mode": "smart"
+  },
+
+  "workers_dev": true,
+  
+  // D1 Database binding
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "<service-name>-db",
+      "database_id": "<your-database-id>"
+    }
+  ],
+  
+  // Workflow binding
+  "workflows": [
+    {
+      "name": "example-workflow",
+      "binding": "EXAMPLE_WORKFLOW",
+      "class_name": "ExampleWriteWorkflow",
+      "script_name": "./workflow.ts"
+    }
+  ]
+}
 ```
 
 ## Federation Best Practices

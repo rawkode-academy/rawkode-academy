@@ -1,8 +1,35 @@
 const GRAPHQL_ENDPOINT = "https://api.rawkode.academy/graphql";
-const LIMIT = 5;
+const LIMIT = 100;
 
-async function fetchVideos(offset: number): Promise<any[]> {
-  const query = `
+interface Technology {
+	id: string;
+	terms: {
+		term: string;
+	}[];
+}
+
+interface Video {
+	id: string;
+	title: string;
+	technologies: Technology[];
+}
+
+interface GraphQLResponse {
+	data?: {
+		getLatestVideos: Video[];
+	};
+	errors?: Array<{
+		message: string;
+		locations?: Array<{
+			line: number;
+			column: number;
+		}>;
+		path?: string[];
+	}>;
+}
+
+async function fetchVideos(offset: number): Promise<Video[]> {
+	const query = `
     query GetLatestVideos($limit: Int!, $offset: Int!) {
       getLatestVideos(limit: $limit, offset: $offset) {
         id
@@ -17,125 +44,135 @@ async function fetchVideos(offset: number): Promise<any[]> {
     }
   `;
 
-  const variables = {
-    limit: LIMIT,
-    offset: offset,
-  };
+	const variables = {
+		limit: LIMIT,
+		offset: offset,
+	};
 
-  console.log(`Fetching videos with offset: ${offset}`);
+	console.log(`Fetching videos with offset: ${offset}`);
 
-  try {
-    const response = await fetch(GRAPHQL_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify({ query, variables }),
-    });
+	try {
+		const response = await fetch(GRAPHQL_ENDPOINT, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+			body: JSON.stringify({ query, variables }),
+		});
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 
-    const result = await response.json();
+		const result = (await response.json()) as GraphQLResponse;
 
-    if (result.errors) {
-        console.error("GraphQL Errors:", result.errors);
-        return []; // Treat GraphQL errors as potentially stopping condition or handle differently
-    }
+		if (result.errors) {
+			console.error("GraphQL Errors:", result.errors);
+			return []; // Treat GraphQL errors as potentially stopping condition or handle differently
+		}
 
-    const videos = result?.data?.getLatestVideos;
-    if (!videos || !Array.isArray(videos)) {
-        console.error("Unexpected response structure:", result);
-        return []; // Stop if the structure is not as expected
-    }
+		const videos = result?.data?.getLatestVideos;
+		if (!videos || !Array.isArray(videos)) {
+			console.error("Unexpected response structure:", result);
+			return []; // Stop if the structure is not as expected
+		}
 
-    console.log(`Fetched ${videos.length} videos.`);
-    return videos;
-
-  } catch (error) {
-    console.error("Error fetching videos:", error);
-    // Decide if you want to retry or stop on fetch errors
-    // For now, we stop the process on error
-    return [];
-  }
+		console.log(`Fetched ${videos.length} videos.`);
+		return videos;
+	} catch (error) {
+		console.error("Error fetching videos:", error);
+		// Decide if you want to retry or stop on fetch errors
+		// For now, we stop the process on error
+		return [];
+	}
 }
 
-const RESTATE_TRANSCRIPTION_BASE_ENDPOINT = "https://201j3n9npdrybn7f2z8tmnj8rds.env.us.restate.cloud:8080/transcription/transcribeVideoById";
+const CLOUDFLARE_TRANSCRIPTION_ENDPOINT =
+	"https://transcriptions.rawkodeacademy.workers.dev";
 
-async function triggerTranscription(videoId: string, apiKey: string, delay: string): Promise<void> {
-    const endpointUrl = `${RESTATE_TRANSCRIPTION_BASE_ENDPOINT}/send?delay=${delay}`;
-    console.log(`Scheduling transcription for video ID: ${videoId} with delay ${delay} to ${endpointUrl}`);
-    try {
-        const response = await fetch(endpointUrl, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ videoId: videoId, language: "en" }),
-        });
+async function triggerTranscription(videoId: string): Promise<void> {
+	console.log(`Triggering transcription for video ID: ${videoId}`);
+	try {
+		const response = await fetch(CLOUDFLARE_TRANSCRIPTION_ENDPOINT, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${process.env.HTTP_TRANSCRIPTION_TOKEN}`,
+			},
+			body: JSON.stringify({ videoId: videoId, language: "en" }),
+		});
 
-        if (!response.ok) {
-            const errorBody = await response.text();
-            console.error(`Error scheduling transcription for ${videoId}: ${response.status} - ${errorBody}`);
-        } else {
-            console.log(`Successfully scheduled transcription for video ID: ${videoId} with delay ${delay}`);
-            // Optionally process the response body if needed
-            // const result = await response.json();
-        }
-    } catch (error) {
-        console.error(`Network or other error scheduling transcription for ${videoId}:`, error);
-    }
+		if (!response.ok) {
+			const errorBody = await response.text();
+			console.error(
+				`Error triggering transcription for ${videoId}: ${response.status} - ${errorBody}`,
+			);
+		} else {
+			const result = (await response.json()) as { workflowId: string };
+			console.log(
+				`Successfully triggered transcription for video ID: ${videoId}, workflow ID: ${result.workflowId}`,
+			);
+		}
+	} catch (error) {
+		console.error(
+			`Network or other error triggering transcription for ${videoId}:`,
+			error,
+		);
+	}
 }
-
 
 async function main() {
-  const restateApiKey = Deno.env.get("RESTATE_API_KEY");
-  if (!restateApiKey) {
-    console.error("Error: RESTATE_API_KEY environment variable is not set.");
-    Deno.exit(1);
-  }
+	let offset = 0;
+	let keepFetching = true;
+	let totalProcessed = 0;
 
-  let offset = 0;
-  let keepFetching = true;
+	while (keepFetching) {
+		const videos = await fetchVideos(offset);
 
-  while (keepFetching) {
-    const videos = await fetchVideos(offset);
+		if (videos.length === 0) {
+			console.log("No more videos found. Stopping.");
+			keepFetching = false;
+		} else {
+			// Trigger transcription for each video
+			console.log(`Processing ${videos.length} videos for transcription...`);
 
-    if (videos.length === 0) {
-      console.log("No more videos found. Stopping.");
-      keepFetching = false;
-    } else {
-      // Calculate delay for this batch
-      let delay: string;
-      if (offset === 0) {
-        delay = "PT10S"; // 10 seconds for the first batch
-      } else {
-        const delayMinutes = (offset / LIMIT) * 10;
-        delay = `PT${delayMinutes}M`; // PT10M, PT20M, etc.
-      }
+			// Process videos with a small delay between each to avoid overwhelming the endpoint
+			for (let i = 0; i < videos.length; i++) {
+				const video = videos[i];
+				if (video?.id) {
+					await triggerTranscription(video.id);
+					totalProcessed++;
 
-      // Schedule transcription for each video with the calculated delay
-      console.log(`Processing ${videos.length} videos for transcription scheduling with delay ${delay}...`);
-      for (const video of videos) {
-        if (video && video.id) {
-            // No await here, let the requests fire off without waiting for each one
-            triggerTranscription(video.id, restateApiKey, delay);
-        } else {
-            console.warn("Found video without ID in batch, skipping transcription scheduling:", video);
-        }
-      }
+					// Add a small delay between requests (1 second)
+					if (i < videos.length - 1) {
+						await new Promise((resolve) => setTimeout(resolve, 1000));
+					}
+				} else {
+					console.warn(
+						"Found video without ID in batch, skipping transcription:",
+						video,
+					);
+				}
+			}
 
-      // Prepare for the next fetch immediately (no sleep)
-      offset += LIMIT;
-      console.log(`Preparing for next fetch (offset: ${offset}).`);
-      // Removed sleep call
-    }
-  }
+			// Prepare for the next fetch
+			offset += LIMIT;
+			console.log(
+				`Processed ${totalProcessed} videos so far. Preparing for next fetch (offset: ${offset}).`,
+			);
 
-  console.log("Finished fetching all videos.");
+			// Add a delay between batches (5 seconds)
+			if (keepFetching) {
+				console.log("Waiting 5 seconds before next batch...");
+				await new Promise((resolve) => setTimeout(resolve, 5000));
+			}
+		}
+	}
+
+	console.log(
+		`Finished processing all videos. Total processed: ${totalProcessed}`,
+	);
 }
 
 main();

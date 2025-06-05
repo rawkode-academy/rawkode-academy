@@ -1,0 +1,50 @@
+{
+	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+	"name": "transcriptions",
+	"main": "src/main.ts",
+	"workers_dev": true,
+	"compatibility_date": "2025-05-05",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"keep_vars": false,
+	"minify": true,
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1,
+		},
+	},
+	"r2_buckets": [
+		{
+			"binding": "TRANSCRIPTIONS_BUCKET",
+			"bucket_name": "rawkode-academy-content",
+		},
+	],
+	"ai": {
+		"binding": "AI",
+	},
+	"workflows": [
+		{
+			"name": "transcribe",
+			"binding": "TRANSCRIPTION_WORKFLOW",
+			"class_name": "TranscribeWorkflow",
+			"script_name": "src/workflow.ts",
+		},
+	],
+	"secrets_store_secrets": [
+		{
+			"binding": "HTTP_TRANSCRIPTION_TOKEN",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "HTTP_TRANSCRIPTION_TOKEN",
+		},
+		{
+			"binding": "DEEPGRAM_API_TOKEN",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "DEEPGRAM_API_TOKEN",
+		},
+	],
+}
