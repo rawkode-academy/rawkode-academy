@@ -29,6 +29,27 @@ await downloadUrl(
 
 const results = await transcodeAll(new URL(`file://${Deno.cwd()}/${outputDir}/${input}.mkv`));
 
+// Extract audio from the original video
+const audioExtractionCmd = new Deno.Command("ffmpeg", {
+	args: [
+		"-i",
+		`${outputDir}/${input}.mkv`,
+		"-vn", // No video
+		"-acodec",
+		"copy", // Copy audio without re-encoding
+		"-y", // Overwrite output file
+		`${outputDir}/${input}.mp3`,
+	],
+});
+
+const audioResult = await audioExtractionCmd.output();
+if (!audioResult.success) {
+	console.error("Failed to extract audio from original video");
+	console.error(new TextDecoder().decode(audioResult.stderr));
+} else {
+	console.log(`Audio extracted successfully: ${input}.mp3`);
+}
+
 const playlist = await generateMasterPlaylist(results);
 Deno.writeTextFile(
   `./${outputDir}/stream.m3u8`,
