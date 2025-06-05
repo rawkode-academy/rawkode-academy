@@ -27,35 +27,74 @@ interface GetTechnologiesResponse {
 
 // Fetch all technologies to generate static paths
 export const getStaticPaths = (async () => {
-	// const endpoint = import.meta.env.PUBLIC_GRAPHQL_ENDPOINT; // Use hardcoded endpoint
 	const endpoint = "https://api.rawkode.academy/graphql";
-	const data = await request<GetTechnologiesResponse>(
-		endpoint,
-		`query GetTechnologies($limit: Int) {
-		getTechnologies(limit: $limit) {
-			id
-			name
-			description
+	
+	try {
+		console.log("Fetching technologies from GraphQL API...");
+		
+		// First, try to get a smaller batch to see if the API is working
+		const testData = await request<GetTechnologiesResponse>(
+			endpoint,
+			`query GetTechnologies($limit: Int) {
+			getTechnologies(limit: $limit) {
+				id
+				name
+				description
 
-			website
-			documentation
+				website
+				documentation
 
-			logo
-      videos {
-        id
-        title
-				slug
-        thumbnailUrl
-      }
+				logo
+	      videos {
+	        id
+	        title
+					slug
+	        thumbnailUrl
+	      }
+			}
+		}`,
+			{ limit: 10 },
+		);
+		
+		console.log(`Test query successful, fetched ${testData.getTechnologies.length} technologies`);
+		
+		// Now try the full query
+		const data = await request<GetTechnologiesResponse>(
+			endpoint,
+			`query GetTechnologies($limit: Int) {
+			getTechnologies(limit: $limit) {
+				id
+				name
+				description
+
+				website
+				documentation
+
+				logo
+	      videos {
+	        id
+	        title
+					slug
+	        thumbnailUrl
+	      }
+			}
+		}`,
+			{ limit: 700 },
+		);
+
+		console.log(`Successfully fetched ${data.getTechnologies.length} technologies`);
+		
+		return data.getTechnologies.map((tech) => ({
+			params: { id: tech.id },
+			props: { technology: tech },
+		}));
+	} catch (error) {
+		console.error("Failed to fetch technologies:", error);
+		if (error && typeof error === 'object' && 'response' in error) {
+			console.error("GraphQL Response:", JSON.stringify((error as any).response, null, 2));
 		}
-	}`,
-		{ limit: 700 },
-	);
-
-	return data.getTechnologies.map((tech) => ({
-		params: { id: tech.id },
-		props: { technology: tech },
-	}));
+		throw error; // Re-throw to fail the build with proper error message
+	}
 }) satisfies GetStaticPaths;
 
 const { technology } = Astro.props as { technology: Technology };
