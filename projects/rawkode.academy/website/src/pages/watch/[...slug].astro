@@ -254,9 +254,16 @@ const formatDate = (dateString: string) => {
 						{/* Transcript Panel */}
 						<div id="panel-transcript" data-panel="transcript" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-transcript">
 							<div class="prose prose-lg dark:prose-invert max-w-none">
-								<p class="text-gray-600 dark:text-gray-400">
-									Transcript feature coming soon. This will display the full transcript of the video with timestamps.
-								</p>
+								<div id="transcript-loading" class="hidden text-center py-8" aria-live="polite">
+									<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+									<p class="text-gray-600 dark:text-gray-400">Loading transcript...</p>
+								</div>
+								<div id="transcript-error" class="hidden text-center py-8">
+									<p class="text-red-600 dark:text-red-400">Failed to load transcript. Please try again later.</p>
+								</div>
+								<div id="transcript-content" class="hidden space-y-3" aria-live="polite">
+									<!-- Transcript content will be loaded here -->
+								</div>
 							</div>
 						</div>
 						
@@ -444,4 +451,143 @@ const formatDate = (dateString: string) => {
 			});
 		});
 	});
+</script>
+
+<script define:vars={{videoId: video.data.id, videoSlug: video.data.slug}}>
+	// Transcript functionality
+	let transcriptLoaded = false;
+	
+	
+	// Function to parse WebVTT format
+	function parseWebVTT(vttText) {
+		const lines = vttText.split('\n');
+		const cues = [];
+		let currentCue = null;
+		
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i].trim();
+			
+			// Skip empty lines and WEBVTT header
+			if (!line || line === 'WEBVTT') continue;
+			
+			// Check if line contains timestamp (format: 00:00:00.000 --> 00:00:00.000)
+			const timestampMatch = line.match(/^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})/);
+			
+			if (timestampMatch) {
+				// If we have a previous cue, add it to the array
+				if (currentCue && currentCue.text.trim()) {
+					cues.push(currentCue);
+				}
+				
+				// Start a new cue
+				currentCue = {
+					start: timestampMatch[1],
+					end: timestampMatch[2],
+					text: ''
+				};
+			} else if (currentCue && line && !line.startsWith('NOTE')) {
+				// Add text to current cue (skip NOTE lines)
+				if (currentCue.text) {
+					currentCue.text += ' ';
+				}
+				currentCue.text += line;
+			}
+		}
+		
+		// Add the last cue
+		if (currentCue && currentCue.text.trim()) {
+			cues.push(currentCue);
+		}
+		
+		return cues;
+	}
+	
+	// Function to load and display transcript
+	async function loadTranscript() {
+		if (transcriptLoaded) return;
+		
+		const loadingEl = document.getElementById('transcript-loading');
+		const errorEl = document.getElementById('transcript-error');
+		const contentEl = document.getElementById('transcript-content');
+		
+		if (!contentEl) {
+			console.error('Transcript content element not found');
+			return;
+		}
+		
+		try {
+			loadingEl?.classList.remove('hidden');
+			errorEl?.classList.add('hidden');
+			contentEl?.classList.add('hidden');
+			
+			console.log('Loading transcript for video ID:', videoId, 'slug:', videoSlug);
+			
+			// Use the videoId directly as provided in the example URL pattern
+			const transcriptUrl = `https://content.rawkode.academy/videos/${videoId}/captions/en.vtt`;
+			console.log('Fetching transcript from:', transcriptUrl);
+			
+			const response = await fetch(transcriptUrl);
+			console.log('Transcript fetch response:', response.status, response.statusText);
+			
+			if (!response.ok) {
+				throw new Error(`Failed to fetch transcript: ${response.status} ${response.statusText} from ${transcriptUrl}`);
+			}
+			
+			const vttText = await response.text();
+			const cues = parseWebVTT(vttText);
+			
+			if (cues.length === 0) {
+				throw new Error('No transcript content found');
+			}
+			
+			// Create transcript content safely to prevent XSS
+			contentEl.innerHTML = ''; // Clear existing content
+			cues.forEach((cue, index) => {
+				const entryButton = document.createElement('button');
+				entryButton.className = 'transcript-entry group hover:bg-gray-50 dark:hover:bg-gray-800 p-3 rounded-lg transition-colors w-full text-left';
+				entryButton.setAttribute('aria-label', `Jump to ${cue.start}`);
+				entryButton.setAttribute('tabindex', '0');
+				
+				const startDiv = document.createElement('div');
+				startDiv.className = 'text-sm text-blue-600 dark:text-blue-400 font-mono mb-1';
+				startDiv.textContent = cue.start;
+				
+				const textDiv = document.createElement('div');
+				textDiv.className = 'text-gray-900 dark:text-gray-100 leading-relaxed';
+				textDiv.textContent = cue.text;
+				
+				entryButton.appendChild(startDiv);
+				entryButton.appendChild(textDiv);
+				contentEl.appendChild(entryButton);
+			});
+			
+			loadingEl?.classList.add('hidden');
+			contentEl.classList.remove('hidden');
+			
+			transcriptLoaded = true;
+		} catch (error) {
+			console.error('Failed to load transcript:', error);
+			loadingEl?.classList.add('hidden');
+			errorEl?.classList.remove('hidden');
+			
+			// Show more specific error messages for debugging in dev
+			if (errorEl) {
+				const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('workers.dev');
+				if (isDev && error instanceof Error) {
+					const errorP = errorEl.querySelector('p');
+					if (errorP) {
+						errorP.textContent = `Failed to load transcript: ${error.message}`;
+					}
+				}
+			}
+		}
+	}
+	
+	// Load transcript when transcript tab is clicked
+	const transcriptTab = document.querySelector('[data-tab="transcript"]');
+	if (transcriptTab) {
+		transcriptTab.addEventListener('click', () => {
+			loadTranscript();
+		});
+	}
 </script>
