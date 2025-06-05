@@ -35,6 +35,13 @@ jobs:
             . | build | export dist
           .
 
+      - name: Build Storybook
+        working-directory: projects/rawkode.academy/website
+        run: |
+          dagger <<.
+            . | buildStorybook | export storybook-static
+          .
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -61,6 +68,19 @@ jobs:
               env:CLOUDFLARE_WORKERS_TOKEN
           .
 
+      - name: Deploy Storybook Production
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: projects/rawkode.academy/website
+        env:
+          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+        run: |
+          dagger <<.
+            ../../../dagger/cloudflare | deploy \
+              ./storybook-static \
+              wrangler.design.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN
+          .
+
       - name: Deploy Preview
         id: preview
         if: github.event_name == 'pull_request'
@@ -73,6 +93,24 @@ jobs:
             ../../../dagger/cloudflare | preview \
               ./dist \
               wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN \
+              env:GITHUB_TOKEN \
+              ${{ github.repository }} \
+              ${{ github.event.pull_request.number }}
+          .
+
+      - name: Deploy Storybook Preview
+        id: storybook-preview
+        if: github.event_name == 'pull_request'
+        working-directory: projects/rawkode.academy/website
+        env:
+          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dagger <<.
+            ../../../dagger/cloudflare | preview \
+              ./storybook-static \
+              wrangler.design.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN \
               env:GITHUB_TOKEN \
               ${{ github.repository }} \
