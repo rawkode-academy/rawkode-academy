@@ -1,6 +1,6 @@
-# YouTube to R2 Uploader
+# YouTube to R2 Migration Tools
 
-Downloads YouTube videos, extracts audio, and uploads everything to Cloudflare R2 with CUID-based organization.
+This directory contains tools for migrating YouTube videos to Cloudflare R2 storage and managing the uploaded content.
 
 ## Features
 
@@ -135,3 +135,33 @@ The script generates a SQL INSERT statement for the `videos` table with:
 - `description`: Full video description
 - `duration`: Video length in seconds
 - `publishedAt`: Unix timestamp of the upload date
+
+## Scripts
+
+### youtube_to_r2.py
+Downloads YouTube videos, extracts audio, and uploads to Cloudflare R2 buckets.
+
+### migrate_thumbnails.py
+Migrates thumbnails from rawkode-academy-videos bucket to rawkode-academy-content bucket.
+
+Usage:
+```bash
+# Dry run to see what would be migrated
+./migrate_thumbnails.py --dry-run
+
+# Perform actual migration
+./migrate_thumbnails.py
+
+# Show migration status
+./migrate_thumbnails.py --show-state
+
+# Reset migration state
+./migrate_thumbnails.py --reset-state
+```
+
+The script:
+- Lists all thumbnails in the videos bucket (format: `{video_id}/thumbnail.jpg`)
+- Copies them to the content bucket (format: `videos/{video_id}/thumbnail.jpg`)
+- Tracks progress in a state file to allow resuming
+- Skips thumbnails that already exist in the destination
+- Provides detailed logging and migration summary
