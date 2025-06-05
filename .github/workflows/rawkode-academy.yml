@@ -75,7 +75,7 @@ jobs:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
         run: |
           dagger <<.
-            ../../../dagger/cloudflare | deploy \
+            ../../../dagger/cloudflare | deployAssets \
               ./storybook-static \
               wrangler.design.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN
@@ -108,7 +108,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           dagger <<.
-            ../../../dagger/cloudflare | preview \
+            ../../../dagger/cloudflare | previewAssets \
               ./storybook-static \
               wrangler.design.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN \
