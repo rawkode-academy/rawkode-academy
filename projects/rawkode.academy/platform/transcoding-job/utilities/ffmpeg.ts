@@ -1,5 +1,5 @@
 import { basename, extname, join } from "@std/path";
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg, { type FfprobeData, type FfprobeStream } from "fluent-ffmpeg";
 import { outputDir } from "../globals.ts";
 
 type Resolution = [width: number, height: number];
@@ -28,13 +28,13 @@ type TranscodeResult = {
 
 export const getResolution = (localFile: string): Promise<Resolution> => {
   return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(localFile, (err, metadata) => {
+    ffmpeg.ffprobe(localFile, (err: Error | null, metadata: FfprobeData) => {
       if (err) {
         return reject(err);
       }
 
       const video_stream = metadata.streams.find(
-        (stream) => stream.codec_type === "video",
+        (stream: FfprobeStream) => stream.codec_type === "video",
       );
 
       if (!video_stream || !video_stream.width || !video_stream.height) {
@@ -50,8 +50,8 @@ export const getResolution = (localFile: string): Promise<Resolution> => {
 
 export const generateMasterPlaylist = (transcodeResults: TranscodeResult[]) => {
   const playlist = [
-    `#EXTM3U`,
-    `#EXT-X-VERSION:3`,
+    "#EXTM3U",
+    "#EXT-X-VERSION:3",
   ];
   for (const result of transcodeResults) {
     console.log(
@@ -75,7 +75,7 @@ export const transcode = async ( // Make the outer function async
   const inputExtension = extname(inputPathname);
   const inputFilenameBase = basename(inputPathname, inputExtension);
   const resolutionOutputDir = join(outputDir, `${preset.resolution}p`);
-  const m3u8Filename = `stream.m3u8`;
+  const m3u8Filename = "stream.m3u8";
   const m3u8Path = join(resolutionOutputDir, m3u8Filename);
   const segmentPathPattern = join(
     resolutionOutputDir,
@@ -135,14 +135,13 @@ export const transcode = async ( // Make the outer function async
         segmentPathPattern,
       ])
       .output(m3u8Path)
-      .on("start", (cmdline) => {
+      .on("start", (cmdline: string) => {
         console.log(`FFmpeg (${preset.resolution}p) started.`);
         console.log(cmdline);
       })
-      .on("codecData", function (data) {
+      .on("codecData", (data: { audio: string; video: string }) => {
         console.log(
-          "Input is " + data.audio + " audio " +
-            "with " + data.video + " video",
+          `Input is ${data.audio} audio with ${data.video} video`,
         );
       })
       .on("end", () => { // Remove async from here
@@ -177,7 +176,7 @@ export const transcode = async ( // Make the outer function async
             );
           });
       })
-      .on("error", (err, stderr) => {
+      .on("error", (err: Error, stderr: string) => {
         // Ensure err is treated as Error type for message access
         const errMsg = err instanceof Error ? err.message : String(err);
         console.error(`FFmpeg (${preset.resolution}p) error:`, errMsg);
@@ -220,7 +219,7 @@ export const transcodeAll = async (
 
   console.log(
     `Suitable presets for ${originalHeight}p input: ${
-      suitablePresets.map((p) => p.resolution + "p").join(", ")
+      suitablePresets.map((p) => `${p.resolution}p`).join(", ")
     }`,
   );
 
