@@ -20,4 +20,19 @@ export class Website {
       .withExec(["bun", "run", "build"])
       .directory("dist");
   }
+
+  /**
+   * Build Storybook and get the output directory.
+   */
+  @func()
+  async buildStorybook(
+    @argument({ defaultPath: ".", ignore: ["node_modules"] }) source: Directory,
+  ): Promise<Directory> {
+    return dag
+      .bun()
+      .withCache()
+      .install(source)
+      .withExec(["bun", "run", "build-storybook"])
+      .directory("storybook-static");
+  }
 }
