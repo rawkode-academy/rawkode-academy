@@ -26,3 +26,13 @@ preview:
 	deno run --allow-all npm:astro preview
 
 	bun run graphql-codegen --config graphql-codegen.ts
+
+# Invalidate the videos-latest cache tag on Cloudflare
+invalidate-videos-cache:
+	#!/usr/bin/env bash
+	set -xe
+	curl -s -XPOST \
+		"https://api.cloudflare.com/client/v4/zones/789be9a4588576db675cc2053ea3a89d/purge_cache" \
+		-H "Authorization: Bearer $CLOUDFLARE_CACHE_BUSTER_TOKEN" \
+		-H "Content-Type: application/json" \
+		-d '{"tags": ["videos-latest"]}'

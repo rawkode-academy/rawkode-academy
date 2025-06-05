@@ -3,54 +3,44 @@ import Page from "@/wrappers/page.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import VideoComments from "@/components/video/comments.vue";
 import VideoMetadata from "@/components/html/video-metadata.astro";
-import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 import { Marked } from "marked";
 
-export const prerender = true;
+export const prerender = false;
 
-// Define the video data type explicitly
-interface VideoData {
-	id: string;
-	slug: string;
-	title: string;
-	subtitle?: string;
-	description: string;
-	streamUrl: string;
-	publishedAt: string;
-	thumbnailUrl: string;
-	duration: number;
-	technologies: TechnologyData[];
-}
-interface TechnologyData {
-	id: string;
-	name: string;
-	logo: string;
+// Get the slug from URL params
+const { slug } = Astro.params;
+
+// Fetch video data dynamically for SSR
+const videos = await getCollection("videos");
+const video = videos.find(v => v.data.slug === slug);
+
+// Handle 404 case
+if (!video) {
+	return Astro.redirect("/404");
 }
 
-export const getStaticPaths = (async () => {
-	try {
-		const videos = await getCollection("videos");
+// Set cache headers for ISR
+// Individual video pages can cache longer since they change less frequently
+// Client cache: 10 minutes, Edge cache: 2 hours, Serve stale for 48 hours
+Astro.response.headers.set('Cache-Control', 'public, max-age=600, s-maxage=7200, stale-while-revalidate=172800');
+Astro.response.headers.set('CDN-Cache-Control', 'public, max-age=7200');
 
-		return videos.map((video) => ({
-			params: { slug: video.data.slug },
-			props: { video },
-		}));
-	} catch (error) {
-		console.error("Error fetching videos:", error);
-		return [];
-	}
-}) satisfies GetStaticPaths;
+// Add cache tags for targeted invalidation
+// Use video-specific tag to purge individual videos
+Astro.response.headers.set('Cache-Tag', `video-${video.data.slug}, videos-page, video-detail`);
 
-const { video } = Astro.props as { video: { data: VideoData } };
+// Add build timestamp for debugging
+Astro.response.headers.set('X-Build-Time', new Date().toISOString());
 
 // Configure Marked to handle single newlines as breaks
 const marked = new Marked({ 
 	breaks: true, 
 	gfm: true
 });
-// No longer need to replaceAll \n
-const renderedDescriptionHtml = marked.parse(video.data.description);
+// Convert literal \n escape sequences to actual newlines before processing
+const processedDescription = video.data.description.replace(/\\n/g, '\n');
+const renderedDescriptionHtml = marked.parse(processedDescription);
 
 // Format date to readable format
 const formatDate = (dateString: string) => {

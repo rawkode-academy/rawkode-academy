@@ -1,0 +1,22 @@
+# Cloudflare R2 Configuration - VIDEOS Bucket
+export VIDEOS_ENDPOINT="https://YOUR_ACCOUNT_ID.eu.r2.cloudflarestorage.com"
+export VIDEOS_ACCESS_KEY="your-videos-access-key"
+export VIDEOS_SECRET_KEY="your-videos-secret-key"
+export VIDEOS_BUCKET="your-videos-bucket-name"
+
+# Cloudflare R2 Configuration - CONTENT Bucket
+export CONTENT_ENDPOINT="https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com"
+export CONTENT_ACCESS_KEY="your-content-access-key"
+export CONTENT_SECRET_KEY="your-content-secret-key"
+export CONTENT_BUCKET="your-content-bucket-name"
+
+# Google Cloud Configuration
+# These have defaults but can be overridden
+export GCP_PROJECT="rawkode-academy-production"
+export GCP_LOCATION="europe-west2"
+export GCP_JOB_NAME="transcoding-job"
+
+# Google Cloud Authentication
+# Set this to the path of your service account key file
+# Or use gcloud auth application-default login
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service-account-key.json"
