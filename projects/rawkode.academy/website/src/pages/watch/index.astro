@@ -1,9 +1,20 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import Page from "@/wrappers/page.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
+
+// Set cache headers for ISR
+// Client cache: 5 minutes, Edge cache: 1 hour, Serve stale content for 24 hours during revalidation
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+Astro.response.headers.set('CDN-Cache-Control', 'public, max-age=3600');
+
+// Add cache tags for targeted invalidation
+Astro.response.headers.set('Cache-Tag', 'videos-page, videos-list, videos-latest');
+
+// Add build timestamp for debugging
+Astro.response.headers.set('X-Build-Time', new Date().toISOString());
 
 const latestVideosQuery = `
   query GetLatestVideos($limit: Int!) {
