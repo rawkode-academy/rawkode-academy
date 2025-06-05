@@ -2,6 +2,7 @@
 import UserHeader from "@/components/auth/user-header.astro";
 import Sidebar from "@/components/sidebar/index.vue";
 import CommandPaletteWrapper from "@/components/command-palette/wrapper.tsx";
+import Footer from "@/components/footer/Footer.astro";
 ---
 
 <div class="antialiased">
@@ -116,8 +117,9 @@ import CommandPaletteWrapper from "@/components/command-palette/wrapper.tsx";
 
 	<Sidebar client:only="vue" />
 
-	<div class="flex overflow-hidden">
-		<main class="w-full md:ml-64 h-auto pt-20 px-4 md:px-8 overflow-x-hidden">
+	<div class="flex flex-col min-h-screen">
+		<div class="flex overflow-hidden flex-1">
+			<main class="w-full md:ml-64 h-auto pt-20 px-4 md:px-8 overflow-x-hidden">
 			<div
 				class="relative overflow-hidden bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white"
 			>
@@ -226,8 +228,12 @@ import CommandPaletteWrapper from "@/components/command-palette/wrapper.tsx";
 					</div>
 				</div>
 			</div>
-			<slot />
-		</main>
+				<slot />
+			</main>
+		</div>
+		<div class="md:ml-64">
+			<Footer />
+		</div>
 	</div>
 
 	<CommandPaletteWrapper client:only="react" />
