@@ -23,11 +23,11 @@ const input = Deno.env.get("VIDEO_ID");
 
 // Download original video from Cloudflare R2
 await downloadUrl(
-	`https://videos.rawkode.academy/${input}/original.mkv`,
+	`https://content.rawkode.academy/videos/${input}/original.mkv`,
 	`${outputDir}/${input}.mkv`,
 );
 
-const results = await transcodeAll(new URL(`${input}.mkv`, import.meta.url));
+const results = await transcodeAll(new URL(`file://${Deno.cwd()}/${outputDir}/${input}.mkv`));
 
 const playlist = await generateMasterPlaylist(results);
 Deno.writeTextFile(
