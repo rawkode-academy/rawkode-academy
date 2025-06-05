@@ -5,15 +5,75 @@ import VideoComments from "@/components/video/comments.vue";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import { getCollection } from "astro:content";
 import { Marked } from "marked";
+import { gql, GraphQLClient } from "graphql-request";
 
 export const prerender = false;
 
 // Get the slug from URL params
 const { slug } = Astro.params;
 
-// Fetch video data dynamically for SSR
+// First, try to get video from the collection (build-time data)
 const videos = await getCollection("videos");
-const video = videos.find(v => v.data.slug === slug);
+let video: typeof videos[0] | undefined = videos.find(v => v.data.slug === slug);
+
+// If not found in collection, fetch from API directly
+if (!video) {
+	const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
+	
+	const query = gql`
+		query GetVideoBySlug($slug: String!) {
+			video: getVideoBySlug(slug: $slug) {
+				id
+				slug
+				title
+				subtitle
+				description
+				publishedAt
+				streamUrl
+				thumbnailUrl
+				duration
+				technologies {
+					id
+					name
+					logo
+				}
+			}
+		}
+	`;
+	
+	interface VideoResponse {
+		video: {
+			id: string;
+			slug: string;
+			title: string;
+			subtitle?: string;
+			description: string;
+			publishedAt: string;
+			streamUrl: string;
+			thumbnailUrl: string;
+			duration: number;
+			technologies: Array<{
+				id: string;
+				name: string;
+				logo: string;
+			}>;
+		};
+	}
+	
+	try {
+		const response = await graphQLClient.request<VideoResponse>(query, { slug });
+		if (response.video) {
+			// Transform to match the collection format
+			video = {
+				id: response.video.slug,
+				collection: 'videos' as const,
+				data: response.video
+			};
+		}
+	} catch (error) {
+		console.error('Failed to fetch video from API:', error);
+	}
+}
 
 // Handle 404 case
 if (!video) {
