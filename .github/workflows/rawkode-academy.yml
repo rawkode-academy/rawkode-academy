@@ -11,6 +11,7 @@ on:
     paths:
       - ".github/workflows/rawkode-academy.yml"
       - "projects/rawkode.academy/website/**"
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -56,7 +57,7 @@ jobs:
             CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
 
       - name: Deploy Production
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         working-directory: projects/rawkode.academy/website
         env:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
@@ -69,7 +70,7 @@ jobs:
           .
 
       - name: Deploy Storybook Production
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         working-directory: projects/rawkode.academy/website
         env:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
