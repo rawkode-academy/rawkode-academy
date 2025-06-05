@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
 import { Command } from "cmdk";
-import { getCategoryIcon, GitHubIcon, GitLabIcon } from "./icons";
+import { useEffect, useRef, useState } from "react";
+import { GitHubIcon, GitLabIcon, getCategoryIcon } from "./icons";
 import "./styles.css";
 
 interface NavigationItem {
@@ -123,8 +123,15 @@ export default function CommandPalette({
 	};
 
 	const getItemIcon = (item: NavigationItem) => {
-		if (item.href.includes("github.com")) return GitHubIcon;
-		if (item.href.includes("gitlab.com")) return GitLabIcon;
+		try {
+			const url = new URL(item.href, window.location.origin);
+			if (url.hostname === "github.com" || url.hostname === "www.github.com")
+				return GitHubIcon;
+			if (url.hostname === "gitlab.com" || url.hostname === "www.gitlab.com")
+				return GitLabIcon;
+		} catch {
+			// Invalid URL or relative path, fall through to default
+		}
 		return getCategoryIcon(item.category);
 	};
 
@@ -228,7 +235,9 @@ export default function CommandPalette({
 										return (
 											<Command.Item
 												key={item.id}
-												value={`${item.title} ${item.description || ""} ${(item.keywords || []).join(" ")}`}
+												value={`${item.title} ${item.description || ""} ${(
+													item.keywords || []
+												).join(" ")}`}
 												onSelect={() => handleSelect(item.href)}
 												className="command-palette-item"
 											>

@@ -1,0 +1,38 @@
+# Justfile for transcoding-job
+
+# Variables
+registry := "europe-west2-docker.pkg.dev"
+project := "rawkode-academy-production"
+repository := "rawkode-academy"
+image_name := "platform/transcoding-job"
+image_url := registry + "/" + project + "/" + repository + "/" + image_name
+
+# Default recipe
+default:
+    @just --list
+
+# Build the Docker image
+build tag="latest":
+    docker build -t {{image_url}}:{{tag}} .
+
+# Push the Docker image
+push tag="latest":
+    docker push {{image_url}}:{{tag}}
+
+# Build and push in one command
+deploy tag="latest":
+    @just build {{tag}}
+    @just push {{tag}}
+
+# Configure Docker to use gcloud for authentication
+auth:
+    gcloud auth configure-docker {{registry}}
+
+# Show the image URL
+url tag="latest":
+    @echo "{{image_url}}:{{tag}}"
+
+# Clean up local images
+clean:
+    docker rmi {{image_url}} || true
+    docker system prune -f

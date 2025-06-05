@@ -1,0 +1,41 @@
+---
+import { Image } from "astro:assets";
+
+interface Props {
+  content: any;
+}
+
+const { content: Content } = Astro.props;
+
+// Override components to be RSS-safe
+const components = {
+  // Replace ZoomableImage with standard Image component
+  ZoomableImage: ({ image, alt }: any) => {
+    if (!image) return null;
+    return <Image src={image} alt={alt || ""} loading="lazy" />;
+  },
+  
+  // Replace Aside with a simple div
+  Aside: ({ variant = "info", children }: any) => {
+    const styles: Record<string, string> = {
+      tip: "background-color: #f0f9ff; border-left: 4px solid #3b82f6;",
+      caution: "background-color: #fffbeb; border-left: 4px solid #f59e0b;",
+      danger: "background-color: #fef2f2; border-left: 4px solid #ef4444;",
+      info: "background-color: #f0f9ff; border-left: 4px solid #3b82f6;",
+    };
+    
+    const style = `${styles[variant] || styles.info} padding: 1rem; margin: 1rem 0; border-radius: 0.375rem;`;
+    
+    return (
+      <div style={style}>
+        <strong style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; letter-spacing: 0.05em;">
+          {variant.toUpperCase()}
+        </strong>
+        {children}
+      </div>
+    );
+  },
+};
+---
+
+<Content components={components} />

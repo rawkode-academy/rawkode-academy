@@ -1,11 +1,11 @@
 [
-	{ "name": "time", "type": "timestamp" },
+  { "name": "time", "type": "timestamp" },
 
-	{ "name": "action", "type": "tag" },
-	{ "name": "video", "type": "tag" },
+  { "name": "action", "type": "tag" },
+  { "name": "video", "type": "tag" },
 
-	{ "name": "viewer", "type": "tag" },
+  { "name": "viewer", "type": "tag" },
 
-	{ "name": "seconds", "type": "field", "dataType": "integer" },
-	{ "name": "percent", "type": "field", "dataType": "integer" }
+  { "name": "seconds", "type": "field", "dataType": "integer" },
+  { "name": "percent", "type": "field", "dataType": "integer" }
 ]

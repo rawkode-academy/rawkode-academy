@@ -26,3 +26,11 @@ When making code changes, always run the appropriate linting and type checking c
 ## Project Structure
 
 This is a monorepo containing multiple projects and services. Each project may have its own specific conventions documented in nested CLAUDE.md files. Always check for project-specific CLAUDE.md files when working in subdirectories.
+
+## Package Manager
+
+This project uses Bun as the package manager. When working with dependencies:
+- Use `bun install` to install dependencies
+- Use `bun add <package>` to add new dependencies
+- Use `bun run <script>` to run scripts from package.json
+- For the rawkode.academy/website project specifically, all commands should use Bun
