@@ -152,16 +152,7 @@ nav {
   scrollbar-width: none;
 }
 
-/* Professional typography for prose content */
-.prose {
-  line-height: 1.75;
-  color: rgb(55 65 81);
-}
-
-.dark .prose {
-  color: rgb(209 213 219);
-}
-
+/* Additional spacing for prose paragraphs */
 .prose :deep(p) {
   margin-bottom: 1.5rem;
 }
