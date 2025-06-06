@@ -1,1 +1,14 @@
 * @rawkode
+
+#################################### Generated content - do not edit! ####################################
+# This block has been generated with codeowners-generator (for more information https://github.com/gagoar/codeowners-generator)
+# Don't worry, the content outside this block will be kept.
+
+# Rule extracted from infrastructure/github/CODEOWNERS
+/infrastructure/github/**/* @rawkode
+# Rule extracted from projects/rawkode.studio/CODEOWNERS
+/projects/rawkode.studio/**/* @icepuma
+# Rule extracted from projects/rawkode.academy/website/content/adrs/CODEOWNERS
+/projects/rawkode.academy/website/content/adrs/**/* @maintainer
+
+#################################### Generated content - do not edit! ####################################

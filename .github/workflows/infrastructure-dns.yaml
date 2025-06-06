@@ -4,7 +4,7 @@ name: "Infrastructure / DNS"
 on:
   pull_request:
     paths:
-      - ".github/workflows/infrastructure-dns.yml"
+      - ".github/workflows/infrastructure-dns.yaml"
       - "infrastructure/dns/**"
 
 jobs:
