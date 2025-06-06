@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - ".github/workflows/rawkode-studio.yml"
+      - ".github/workflows/rawkode-studio.yaml"
       - "projects/rawkode.studio/**"
   pull_request:
     paths:
-      - ".github/workflows/rawkode-studio.yml"
+      - ".github/workflows/rawkode-studio.yaml"
       - "projects/rawkode.studio/**"
 
 jobs:

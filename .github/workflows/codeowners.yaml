@@ -1,0 +1,17 @@
+name: Lint CODEOWNERS
+permissions:
+  contents: read
+
+on:
+  pull_request:
+
+jobs:
+  codeowners:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: check codeowners
+        uses: gagoar/codeowners-generator@master
+        with:
+          use-maintainers: false
+          check: true
