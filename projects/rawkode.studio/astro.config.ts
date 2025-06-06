@@ -57,6 +57,22 @@ export default defineConfig({
 				context: "server",
 				access: "secret",
 			}),
+			S3_ENDPOINT: envField.string({
+				context: "server",
+				access: "secret",
+			}),
+			S3_ACCESS_KEY: envField.string({
+				context: "server",
+				access: "secret",
+			}),
+			S3_SECRET_KEY: envField.string({
+				context: "server",
+				access: "secret",
+			}),
+			S3_BUCKET_NAME: envField.string({
+				context: "server",
+				access: "secret",
+			}),
 		},
 	},
 

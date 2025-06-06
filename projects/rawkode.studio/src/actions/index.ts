@@ -1,4 +1,10 @@
 import { ActionError, defineAction } from "astro:actions";
+import {
+	S3_ACCESS_KEY,
+	S3_BUCKET_NAME,
+	S3_ENDPOINT,
+	S3_SECRET_KEY,
+} from "astro:env/server";
 import { z } from "astro:schema";
 import { database } from "@/lib/database";
 import { roomClientService } from "@/lib/livekit";
@@ -8,6 +14,134 @@ import {
 	participantsTable,
 } from "@/schema";
 import { desc, eq } from "drizzle-orm";
+import {
+	AutoParticipantEgress,
+	AutoTrackEgress,
+	type CreateOptions,
+	EncodedFileOutput,
+	EncodingOptions,
+	RoomCompositeEgressRequest,
+	RoomEgress,
+	SegmentedFileOutput,
+	VideoCodec,
+} from "livekit-server-sdk";
+
+const DEFAULT_ENCODING = {
+	WIDTH: 1920,
+	HEIGHT: 1080,
+	VIDEO_CODEC: "VP8" as const,
+	VIDEO_BITRATE: 14_000,
+	FRAMERATE: 60,
+};
+
+const ROOM_DEFAULTS = {
+	EMPTY_TIMEOUT: 2 * 60, // 2 minutes in seconds
+	LAYOUT: "speaker-light" as const,
+};
+
+const CODEC_MAP: Record<string, VideoCodec> = {
+	VP8: VideoCodec.VP8,
+	H264: VideoCodec.H264_BASELINE,
+};
+
+function createS3Config() {
+	return {
+		endpoint: S3_ENDPOINT,
+		accessKey: S3_ACCESS_KEY,
+		secret: S3_SECRET_KEY,
+		bucket: S3_BUCKET_NAME,
+	};
+}
+
+function createFilePaths() {
+	return {
+		participantVideo:
+			"livekit-recordings/{room_name}/participant_{publisher_identity}.mp4",
+		participantSegmentPrefix:
+			"livekit-recordings/{room_name}/participant_{publisher_identity}",
+		participantPlaylist: "participant_{publisher_identity}.m3u8",
+		track:
+			"livekit-recordings/{room_name}/track_{publisher_identity}-{track_source}-{track_type}",
+		roomVideo: "livekit-recordings/{room_name}/room_{room_name}.mp4",
+		roomSegmentPrefix: "livekit-recordings/{room_name}/room_{room_name}",
+		roomPlaylist: "room_{room_name}.m3u8",
+	};
+}
+
+function createEncodingOptions(input: {
+	videoWidth?: number;
+	videoHeight?: number;
+	videoCodec?: string;
+	videoBitrate?: number;
+	framerate?: number;
+}) {
+	return new EncodingOptions({
+		width: input.videoWidth || DEFAULT_ENCODING.WIDTH,
+		height: input.videoHeight || DEFAULT_ENCODING.HEIGHT,
+		videoCodec:
+			CODEC_MAP[input.videoCodec || DEFAULT_ENCODING.VIDEO_CODEC] ||
+			VideoCodec.VP8,
+		videoBitrate: input.videoBitrate || DEFAULT_ENCODING.VIDEO_BITRATE,
+		framerate: input.framerate || DEFAULT_ENCODING.FRAMERATE,
+	});
+}
+
+function createRoomEgress(roomName: string, encodingOptions: EncodingOptions) {
+	const s3Config = createS3Config();
+	const filePaths = createFilePaths();
+
+	return new RoomEgress({
+		// Individual participant recordings
+		participant: new AutoParticipantEgress({
+			options: {
+				case: "advanced",
+				value: encodingOptions,
+			},
+			fileOutputs: [
+				new EncodedFileOutput({
+					filepath: filePaths.participantVideo,
+					output: { case: "s3", value: s3Config },
+				}),
+			],
+			segmentOutputs: [
+				new SegmentedFileOutput({
+					filenamePrefix: filePaths.participantSegmentPrefix,
+					playlistName: filePaths.participantPlaylist,
+					output: { case: "s3", value: s3Config },
+				}),
+			],
+		}),
+
+		// Individual track recordings
+		tracks: new AutoTrackEgress({
+			filepath: filePaths.track,
+			output: { case: "s3", value: s3Config },
+		}),
+
+		// Composite room recording
+		room: new RoomCompositeEgressRequest({
+			roomName: roomName,
+			layout: ROOM_DEFAULTS.LAYOUT,
+			options: {
+				case: "advanced",
+				value: encodingOptions,
+			},
+			fileOutputs: [
+				new EncodedFileOutput({
+					filepath: filePaths.roomVideo,
+					output: { case: "s3", value: s3Config },
+				}),
+			],
+			segmentOutputs: [
+				new SegmentedFileOutput({
+					filenamePrefix: filePaths.roomSegmentPrefix,
+					playlistName: filePaths.roomPlaylist,
+					output: { case: "s3", value: s3Config },
+				}),
+			],
+		}),
+	});
+}
 
 export type LiveStream = {
 	id: string;
@@ -23,7 +157,6 @@ export type PastLiveStream = {
 	participantsJoined: number | null;
 };
 
-// New ChatMessage type
 export type ChatMessage = {
 	id: number;
 	roomSid: string;
@@ -33,7 +166,6 @@ export type ChatMessage = {
 	createdAt: Date;
 };
 
-// New Participant type
 export type Participant = {
 	id: number;
 	roomSid: string;
@@ -62,7 +194,6 @@ export const server = {
 		},
 	}),
 
-	// New action to get past room chat messages
 	getPastRoomChatMessages: defineAction({
 		input: z.object({
 			roomId: z.string(),
@@ -96,7 +227,6 @@ export const server = {
 		},
 	}),
 
-	// New action to get room participants
 	getRoomParticipants: defineAction({
 		input: z.object({
 			roomId: z.string(),
@@ -187,32 +317,17 @@ export const server = {
 		},
 	}),
 
-	// Public action to check if a room exists
-	checkRoomExists: defineAction({
-		input: z.object({
-			roomName: z.string(),
-		}),
-
-		handler: async (input) => {
-			try {
-				const rooms = await roomClientService.listRooms();
-				const roomExists = rooms.some((room) => room.name === input.roomName);
-
-				return { exists: roomExists };
-			} catch (error) {
-				throw new ActionError({
-					code: "BAD_REQUEST",
-					message: "Failed to check if room exists",
-				});
-			}
-		},
-	}),
-
 	createRoom: defineAction({
 		input: z.object({
 			name: z.string(),
 			maxParticipants: z.number(),
 			emptyTimeout: z.number().optional(),
+			enableAutoEgress: z.boolean().optional(),
+			videoWidth: z.number().optional(),
+			videoHeight: z.number().optional(),
+			videoCodec: z.string().optional(),
+			videoBitrate: z.number().optional(),
+			framerate: z.number().optional(),
 		}),
 
 		handler: async (input, context) => {
@@ -220,11 +335,21 @@ export const server = {
 				throw new ActionError({ code: "UNAUTHORIZED" });
 			}
 
-			const room = await roomClientService.createRoom({
+			const createRoomOptions: CreateOptions = {
 				name: input.name,
 				maxParticipants: input.maxParticipants,
-				emptyTimeout: input.emptyTimeout || 120, // 2 minutes in seconds
-			});
+				emptyTimeout: input.emptyTimeout || ROOM_DEFAULTS.EMPTY_TIMEOUT,
+			};
+
+			if (input.enableAutoEgress) {
+				const encodingOptions = createEncodingOptions(input);
+				createRoomOptions.egress = createRoomEgress(
+					input.name,
+					encodingOptions,
+				);
+			}
+
+			const room = await roomClientService.createRoom(createRoomOptions);
 
 			// Insert into database with 'created' status
 			await database

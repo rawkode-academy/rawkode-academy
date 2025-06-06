@@ -81,3 +81,78 @@ The application is deployed to Cloudflare Pages/Workers. Configuration is in `wr
 5. **Authentication**: Use the `security.ts` utilities for authentication checks. The `director` role is required for administrative actions.
 
 6. **Real-time Features**: LiveKit handles video/audio streaming. Chat uses server-sent events through Astro Actions.
+
+## LiveKit Documentation Reference
+
+The following LiveKit documentation is available at https://docs.livekit.io/llms.txt:
+
+# LiveKit Docs
+
+> LiveKit is an open source platform for developers building realtime media applications. It makes it easy to integrate audio, video, text, data, and AI models while offering scalable realtime infrastructure built on top of WebRTC.
+
+## Overview
+
+LiveKit contains these primary components:
+
+- [Open source WebRTC SFU](https://github.com/livekit/livekit), with a hosted global mesh version available as [LiveKit Cloud](https://cloud.livekit.io)
+- [Open source AI Agents Framework](https://github.com/livekit/agents) for building realtime and Voice AI agents in Python (Node.js beta also [available](https://github.com/livekit/agents-js))
+- [Realtime SDKs](https://docs.livekit.io/home/client/connect.md) to make it easy to add realitme audio, video, and data to your apps (available for Web, iOS, Android, Flutter, React Native, Unity, Python, Node.js, Rust, and more))
+- [Telephony integration](https://docs.livekit.io/sip.md) built on SIP for integrating telephony into LiveKit rooms
+
+For greater detail, see [Intro to LiveKit](https://docs.livekit.io/home/get-started/intro-to-livekit.md).
+
+### Key Documentation Sections
+
+#### Home - Core Platform
+- Get Started: Authentication, Rooms/participants/tracks
+- CLI: Templates and bootstrapping
+- LiveKit SDKs: Realtime media, text & data, state synchronization
+- Server APIs: Token generation, room/participant management, webhooks
+- Recording & Composition: Egress service for recording/livestreaming
+- Stream Ingest: Bringing non-WebRTC sources into rooms
+- Cloud: Architecture, billing, analytics
+- Self-hosting: Deployment options including Kubernetes
+
+#### Agents - AI Framework
+- Getting Started: Voice AI quickstart, telephony integration
+- Building Voice Agents: Workflows, audio/vision, tools, turn detection
+- Integrations: Partner support for OpenAI, Google, Azure, AWS, Groq, and more
+- Deployment: Production deployment and recording/transcripts
+
+#### Telephony - SIP Integration
+- Getting Started: SIP trunk setup
+- Provider Guides: Twilio, Telnyx, Plivo
+- Features: DTMF, cold transfer, HD voice
+- API Reference: SIP participant management
+
+### Integration Partners
+
+**LLM Providers:**
+- OpenAI (including Realtime API)
+- Google Gemini (including Live API) 
+- Azure OpenAI
+- Anthropic Claude
+- Amazon Bedrock
+- Cerebras, DeepSeek, Fireworks, Groq, Letta, Ollama, Perplexity, Together AI, xAI
+
+**Speech-to-Text (STT):**
+- AssemblyAI, Amazon Transcribe, Azure AI Speech, Clova, Deepgram, fal, Gladia, Google Cloud, Groq, OpenAI, Speechmatics
+
+**Text-to-Speech (TTS):**
+- Amazon Polly, Azure AI Speech, Cartesia, Deepgram, ElevenLabs, Google Cloud, Groq, Hume, Neuphonic, OpenAI, PlayHT, Resemble AI, Rime, Speechify
+
+**Virtual Avatars:**
+- Beyond Presence, bitHuman, Tavus
+
+### Example Applications
+
+- Voice assistants (Swift, Next.js, Flutter, React Native, Android)
+- Medical office triage agent
+- Personal shopping assistant
+- Restaurant ordering agent
+- LivePaint - realtime drawing game with AI judge
+- Push-to-talk multi-participant conversations
+- Background audio for thinking states
+- Multi-language switching agents
+
+For the complete documentation, visit the individual pages at https://docs.livekit.io/
