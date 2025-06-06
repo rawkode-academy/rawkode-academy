@@ -1,5 +1,4 @@
 import { actions } from "astro:actions";
-import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/shadcn/button";
 import {
 	Dialog,
@@ -172,27 +171,6 @@ export default function DeleteLivestreamDialog({ name }: Props) {
 						<DialogTitle>Delete Live Stream "{name}"?</DialogTitle>
 						<DialogDescription>This action cannot be undone.</DialogDescription>
 					</DialogHeader>
-
-					{isDeleting && (
-						<div className="w-full flex items-center p-4 pl-6 my-4 rounded-md bg-secondary">
-							<motion.div
-								initial={{ rotate: 0 }}
-								animate={{ rotate: 360 }}
-								transition={{
-									duration: 1,
-									repeat: Number.POSITIVE_INFINITY,
-									ease: "linear",
-								}}
-							>
-								<Spinner size="medium" />
-							</motion.div>
-							<span className="ml-3 text-sm text-muted-foreground">
-								{verificationQuery.fetchStatus === "fetching"
-									? "Waiting for LiveKit..."
-									: "Deleting room..."}
-							</span>
-						</div>
-					)}
 
 					{!isDeleting && isError && (
 						<div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm mb-4">

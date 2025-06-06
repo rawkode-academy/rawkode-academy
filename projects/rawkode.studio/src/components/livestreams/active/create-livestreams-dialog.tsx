@@ -1,7 +1,7 @@
 import { actions } from "astro:actions";
 import { z } from "astro:schema";
-import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/shadcn/button";
+import { Checkbox } from "@/components/shadcn/checkbox";
 import {
 	Dialog,
 	DialogClose,
@@ -14,12 +14,20 @@ import {
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/shadcn/select";
 import { SidebarGroupAction } from "@/components/shadcn/sidebar";
 import { queryClient } from "@/store";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +52,15 @@ const formSchema = z.object({
 		.max(100, {
 			message: "Max participants must be at most 100.",
 		}),
+	enableAutoEgress: z.boolean(),
+	videoWidth: z.coerce.number().optional(),
+	videoHeight: z.coerce.number().optional(),
+	videoCodec: z.enum(["VP8", "H264"]).optional(),
+	videoBitrate: z.coerce.number().optional(),
+	framerate: z.enum(["30", "60"]).optional(),
 });
+
+type FormData = z.infer<typeof formSchema>;
 
 // Define the interface for the ref
 interface CreateLivestreamsDialogRef {
@@ -75,15 +91,22 @@ const CreateLivestreamsDialog = React.forwardRef<
 		setOpen,
 	}));
 
-	const form = useForm<z.infer<typeof formSchema>>({
+	const form = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: "",
 			maxParticipants: 10,
+			enableAutoEgress: false,
+			videoWidth: 1920,
+			videoHeight: 1080,
+			videoCodec: "VP8",
+			videoBitrate: 14000,
+			framerate: "60",
 		},
 	});
 
 	const watchedName = form.watch("name");
+	const watchedEnableAutoEgress = form.watch("enableAutoEgress");
 
 	// Query to get existing rooms
 	const { data: rooms } = useQuery({
@@ -170,19 +193,37 @@ const CreateLivestreamsDialog = React.forwardRef<
 
 	// Mutation for creating a room
 	const { mutate } = useMutation({
-		mutationFn: (values: z.infer<typeof formSchema>) => {
+		mutationFn: (values: FormData) => {
 			// Create the parameters object
 			const params: {
 				name: string;
 				maxParticipants: number;
 				emptyTimeout?: number;
+				enableAutoEgress?: boolean;
+				videoWidth?: number;
+				videoHeight?: number;
+				videoCodec?: string;
+				videoBitrate?: number;
+				framerate?: number;
 			} = {
 				name: values.name,
 				maxParticipants: values.maxParticipants,
+				enableAutoEgress: values.enableAutoEgress,
 			};
 
 			// Add emptyTimeout (will be ignored if not supported by the action)
 			params.emptyTimeout = 120; // 2 minutes timeout
+
+			// Add video settings if auto egress is enabled
+			if (values.enableAutoEgress) {
+				params.videoWidth = values.videoWidth;
+				params.videoHeight = values.videoHeight;
+				params.videoCodec = values.videoCodec;
+				params.videoBitrate = values.videoBitrate;
+				params.framerate = values.framerate
+					? Number.parseInt(values.framerate)
+					: undefined;
+			}
 
 			return actions.createRoom(params);
 		},
@@ -200,7 +241,7 @@ const CreateLivestreamsDialog = React.forwardRef<
 		},
 	});
 
-	const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
+	const handleFormSubmit = (values: FormData) => {
 		if (nameExists) {
 			return; // Prevent submission if name exists
 		}
@@ -236,7 +277,7 @@ const CreateLivestreamsDialog = React.forwardRef<
 					</SidebarGroupAction>
 				</DialogTrigger>
 			)}
-			<DialogContent className="sm:max-w-lg">
+			<DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
 				{isCreating && (
 					<motion.div
 						className="absolute inset-x-0 top-0 h-1 bg-primary z-50 origin-left"
@@ -260,113 +301,230 @@ const CreateLivestreamsDialog = React.forwardRef<
 					<DialogDescription>
 						Enter details for your new live stream room.
 					</DialogDescription>
-					<Form {...form}>
-						<form
-							onSubmit={form.handleSubmit(handleFormSubmit)}
-							className="space-y-8"
-						>
-							<FormField
-								control={form.control}
-								name="name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Name</FormLabel>
-										<div className="flex gap-2">
+				</DialogHeader>
+				<Form {...form}>
+					<form
+						onSubmit={form.handleSubmit(handleFormSubmit)}
+						className="space-y-4"
+					>
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+							<div className="space-y-4">
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Name</FormLabel>
+											<div className="flex gap-2">
+												<FormControl>
+													<Input
+														placeholder="Name"
+														disabled={isCreating}
+														{...field}
+													/>
+												</FormControl>
+												<div>
+													<Button
+														type="button"
+														variant="outline"
+														size="icon"
+														onClick={() => {
+															// Generate 4 random words and join them with dashes
+															const words = randomWords.generate({
+																exactly: 4,
+															}) as string[];
+															const roomName = words.join("-");
+															// Update the form field
+															form.setValue("name", roomName);
+														}}
+														disabled={isCreating}
+														title="Generate random room name"
+													>
+														<Dice5 className="h-4 w-4" />
+													</Button>
+												</div>
+											</div>
+											{nameExists && (
+												<p className="text-sm text-destructive">
+													A room with this name already exists.
+												</p>
+											)}
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="maxParticipants"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Max participants</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Name"
+													type="number"
+													placeholder="Max participants"
 													disabled={isCreating}
 													{...field}
 												/>
 											</FormControl>
-											<div>
-												<Button
-													type="button"
-													variant="outline"
-													size="icon"
-													onClick={() => {
-														// Generate 4 random words and join them with dashes
-														const words = randomWords.generate({
-															exactly: 4,
-														}) as string[];
-														const roomName = words.join("-");
-														// Update the form field
-														form.setValue("name", roomName);
-													}}
-													disabled={isCreating}
-													title="Generate random room name"
-												>
-													<Dice5 className="h-4 w-4" />
-												</Button>
-											</div>
-										</div>
-										{nameExists && (
-											<p className="text-sm text-destructive">
-												A room with this name already exists.
-											</p>
-										)}
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="maxParticipants"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Max participants</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												placeholder="Max participants"
-												disabled={isCreating}
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							{error && !isCreating && (
-								<div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
-									{error}
-								</div>
-							)}
-
-							{isCreating && (
-								<div className="w-full flex items-center p-4 pl-6 my-4 rounded-md bg-secondary">
-									<motion.div
-										initial={{ rotate: 0 }}
-										animate={{ rotate: 360 }}
-										transition={{
-											duration: 1,
-											repeat: Number.POSITIVE_INFINITY,
-											ease: "linear",
-										}}
-									>
-										<Spinner size="medium" />
-									</motion.div>
-									<span className="ml-3 text-sm text-muted-foreground">
-										{creationStatus === "creating"
-											? "Creating room..."
-											: "Waiting for LiveKit..."}
-									</span>
-								</div>
-							)}
-
-							<div>
-								<Button
-									type="submit"
-									disabled={isCreating || nameExists}
-									className={isCreating ? "opacity-50" : ""}
-								>
-									Create
-								</Button>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							</div>
-						</form>
-					</Form>
-				</DialogHeader>
+
+							<div className="space-y-4 lg:border-l lg:pl-6">
+								<FormField
+									control={form.control}
+									name="enableAutoEgress"
+									render={({ field }) => (
+										<FormItem className="flex flex-row items-center space-x-3 space-y-0">
+											<FormControl>
+												<Checkbox
+													checked={field.value}
+													onCheckedChange={field.onChange}
+													disabled={isCreating}
+												/>
+											</FormControl>
+											<div className="flex-1">
+												<FormLabel className="text-sm font-normal">
+													Enable auto-recording
+												</FormLabel>
+												<FormDescription className="text-xs">
+													Automatically record all tracks and composite view
+												</FormDescription>
+											</div>
+										</FormItem>
+									)}
+								/>
+								<div className="grid grid-cols-2 gap-2">
+									<FormField
+										control={form.control}
+										name="videoWidth"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-sm">Width</FormLabel>
+												<FormControl>
+													<Input
+														type="number"
+														placeholder="1920"
+														disabled={isCreating || !watchedEnableAutoEgress}
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="videoHeight"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-sm">Height</FormLabel>
+												<FormControl>
+													<Input
+														type="number"
+														placeholder="1080"
+														disabled={isCreating || !watchedEnableAutoEgress}
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+								<div className="grid grid-cols-2 gap-2">
+									<FormField
+										control={form.control}
+										name="videoCodec"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-sm">Video Codec</FormLabel>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+													disabled={isCreating || !watchedEnableAutoEgress}
+												>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select a codec" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="VP8">VP8</SelectItem>
+														<SelectItem value="H264">H264 Baseline</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="framerate"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="text-sm">Framerate</FormLabel>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+													disabled={isCreating || !watchedEnableAutoEgress}
+												>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select framerate" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="30">30 fps</SelectItem>
+														<SelectItem value="60">60 fps</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+								<FormField
+									control={form.control}
+									name="videoBitrate"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className="text-sm">Bitrate (kbps)</FormLabel>
+											<FormControl>
+												<Input
+													type="number"
+													placeholder="14000"
+													disabled={isCreating || !watchedEnableAutoEgress}
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+						</div>
+
+						{error && !isCreating && (
+							<div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+								{error}
+							</div>
+						)}
+
+						<div>
+							<Button
+								type="submit"
+								disabled={isCreating || nameExists}
+								className={isCreating ? "opacity-50" : ""}
+							>
+								Create
+							</Button>
+						</div>
+					</form>
+				</Form>
 			</DialogContent>
 		</Dialog>
 	);
