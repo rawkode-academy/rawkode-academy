@@ -90,7 +90,7 @@ export default defineConfig({
 		plugins: [tailwindcss()],
 
 		ssr: {
-			external: ["node:crypto"],
+			external: ["node:crypto", "node:fs/promises", "node:path", "node:url"],
 		},
 
 		resolve: {
@@ -99,6 +99,60 @@ export default defineConfig({
 						"react-dom/server": "react-dom/server.edge",
 					}
 				: undefined,
+		},
+
+		build: {
+			rollupOptions: {
+				output: {
+					manualChunks: (id) => {
+						// Split LiveKit SDK into its own chunk
+						if (id.includes("livekit-client")) {
+							return "livekit";
+						}
+
+						// Split React and React DOM into vendor chunk
+						if (
+							id.includes("node_modules/react/") ||
+							id.includes("node_modules/react-dom/")
+						) {
+							return "react-vendor";
+						}
+
+						// Split other large dependencies
+						if (id.includes("@radix-ui") || id.includes("@floating-ui")) {
+							return "ui-vendor";
+						}
+
+						// Split form libraries
+						if (
+							id.includes("react-hook-form") ||
+							id.includes("@hookform") ||
+							id.includes("zod")
+						) {
+							return "forms";
+						}
+
+						// Split Astro actions runtime
+						if (id.includes("_astro_actions")) {
+							return "astro-actions";
+						}
+
+						// Split date/time libraries
+						if (id.includes("date-fns") || id.includes("@formatjs")) {
+							return "datetime";
+						}
+
+						// Split other utilities
+						if (
+							id.includes("clsx") ||
+							id.includes("class-variance-authority") ||
+							id.includes("tailwind-merge")
+						) {
+							return "utils";
+						}
+					},
+				},
+			},
 		},
 	},
 });

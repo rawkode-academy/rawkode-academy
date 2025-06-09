@@ -1,7 +1,7 @@
-import { toast } from "@/components/shadcn/sonner";
 import { useLocalParticipant } from "@livekit/components-react";
 import { ParticipantEvent } from "livekit-client";
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 export function PermissionHandler() {
 	const { localParticipant } = useLocalParticipant();

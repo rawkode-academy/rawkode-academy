@@ -146,47 +146,51 @@ export default function SidebarLayout({ user, title, children }: Props) {
 								</SidebarMenu>
 							</SidebarGroupContent>
 						</SidebarGroup>
-						<SidebarGroup>
-							<SidebarGroupLabel>Live Streams</SidebarGroupLabel>
-							<SidebarGroupContent>
-								<SidebarMenu>
-									<SidebarMenuItem>
-										<SidebarMenuButton asChild>
-											<Link to="/livestreams/active">
-												<Video />
-												<span>Active Streams</span>
-											</Link>
-										</SidebarMenuButton>
-										<SidebarMenuBadge>
-											<LivestreamCounter />
-										</SidebarMenuBadge>
-									</SidebarMenuItem>
-									<SidebarMenuItem>
-										<SidebarMenuButton asChild>
-											<Link to="/livestreams/past">
-												<History />
-												<span>Past Streams</span>
-											</Link>
-										</SidebarMenuButton>
-									</SidebarMenuItem>
-								</SidebarMenu>
-							</SidebarGroupContent>
-						</SidebarGroup>
-						<SidebarGroup>
-							<SidebarGroupLabel>Help & Resources</SidebarGroupLabel>
-							<SidebarGroupContent>
-								<SidebarMenu>
-									<SidebarMenuItem>
-										<SidebarMenuButton asChild>
-											<Link to="/documentation">
-												<Book />
-												<span>Studio Guide</span>
-											</Link>
-										</SidebarMenuButton>
-									</SidebarMenuItem>
-								</SidebarMenu>
-							</SidebarGroupContent>
-						</SidebarGroup>
+						{user.roles?.includes("director") && (
+							<>
+								<SidebarGroup>
+									<SidebarGroupLabel>Live Streams</SidebarGroupLabel>
+									<SidebarGroupContent>
+										<SidebarMenu>
+											<SidebarMenuItem>
+												<SidebarMenuButton asChild>
+													<Link to="/livestreams/active">
+														<Video />
+														<span>Active Streams</span>
+													</Link>
+												</SidebarMenuButton>
+												<SidebarMenuBadge>
+													<LivestreamCounter />
+												</SidebarMenuBadge>
+											</SidebarMenuItem>
+											<SidebarMenuItem>
+												<SidebarMenuButton asChild>
+													<Link to="/livestreams/past">
+														<History />
+														<span>Past Streams</span>
+													</Link>
+												</SidebarMenuButton>
+											</SidebarMenuItem>
+										</SidebarMenu>
+									</SidebarGroupContent>
+								</SidebarGroup>
+								<SidebarGroup>
+									<SidebarGroupLabel>Help & Resources</SidebarGroupLabel>
+									<SidebarGroupContent>
+										<SidebarMenu>
+											<SidebarMenuItem>
+												<SidebarMenuButton asChild>
+													<Link to="/documentation">
+														<Book />
+														<span>Studio Guide</span>
+													</Link>
+												</SidebarMenuButton>
+											</SidebarMenuItem>
+										</SidebarMenu>
+									</SidebarGroupContent>
+								</SidebarGroup>
+							</>
+						)}
 					</SidebarContent>
 					<SidebarFooter>
 						<SidebarMenu>
