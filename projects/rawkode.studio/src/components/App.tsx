@@ -1,3 +1,4 @@
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 import SidebarLayout from "@/components/layout/SidebarLayout";
 import DocumentationPage from "@/components/pages/DocumentationPage";
 import HomePage from "@/components/pages/HomePage";
@@ -24,7 +25,7 @@ export default function App({ user }: Props) {
 							index
 							element={
 								<SidebarLayout user={user} title="Home">
-									<HomePage />
+									<HomePage user={user} />
 								</SidebarLayout>
 							}
 						/>
@@ -39,34 +40,42 @@ export default function App({ user }: Props) {
 						<Route
 							path="documentation"
 							element={
-								<SidebarLayout user={user} title="Studio Guide">
-									<DocumentationPage />
-								</SidebarLayout>
+								<ProtectedRoute user={user}>
+									<SidebarLayout user={user} title="Studio Guide">
+										<DocumentationPage />
+									</SidebarLayout>
+								</ProtectedRoute>
 							}
 						/>
 						<Route path="livestreams">
 							<Route
 								path="active"
 								element={
-									<SidebarLayout user={user} title="Active Livestreams">
-										<ActiveLivestreamPage />
-									</SidebarLayout>
+									<ProtectedRoute user={user}>
+										<SidebarLayout user={user} title="Active Livestreams">
+											<ActiveLivestreamPage />
+										</SidebarLayout>
+									</ProtectedRoute>
 								}
 							/>
 							<Route
 								path="past"
 								element={
-									<SidebarLayout user={user} title="Past Livestreams">
-										<PastLivestreamsPage />
-									</SidebarLayout>
+									<ProtectedRoute user={user}>
+										<SidebarLayout user={user} title="Past Livestreams">
+											<PastLivestreamsPage />
+										</SidebarLayout>
+									</ProtectedRoute>
 								}
 							/>
 							<Route
 								path="past/:roomId"
 								element={
-									<SidebarLayout user={user} title="Livestream Details">
-										<PastLivestreamDetailsPage />
-									</SidebarLayout>
+									<ProtectedRoute user={user}>
+										<SidebarLayout user={user} title="Livestream Details">
+											<PastLivestreamDetailsPage />
+										</SidebarLayout>
+									</ProtectedRoute>
 								}
 							/>
 						</Route>
