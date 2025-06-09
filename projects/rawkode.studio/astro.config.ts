@@ -17,6 +17,10 @@ const site = (): string => {
 };
 
 export default defineConfig({
+	devToolbar: {
+		enabled: false,
+	},
+
 	output: "server",
 
 	adapter: cloudflare({

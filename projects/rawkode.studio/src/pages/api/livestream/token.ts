@@ -1,4 +1,9 @@
 import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
+import {
+	LayoutType,
+	parseRoomMetadata,
+	stringifyRoomMetadata,
+} from "@/components/livestreams/room/layouts/permissions";
 import { roomClientService } from "@/lib/livekit";
 import type { APIRoute } from "astro";
 import { AccessToken } from "livekit-server-sdk";
@@ -30,8 +35,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
 		}
 
 		// Verify room exists
-		const rooms = await roomClientService.listRooms();
-		if (!rooms.find((room) => room.name === roomName)) {
+		const rooms = await roomClientService.listRooms([roomName]);
+		const room = rooms[0];
+		if (!room) {
 			return errorResponse("Room does not exist", 404);
 		}
 
@@ -40,25 +46,66 @@ export const GET: APIRoute = async ({ request, locals }) => {
 		const isAuthenticated = !!user;
 		const isDirector = user?.roles?.includes("director") || false;
 
+		// Determine the role: director > participant > viewer
+		// Directors have full privileges
+		// Authenticated users get participant role
+		// Unauthenticated users are viewers
+		let role = "viewer"; // Default role for unauthenticated users
+		if (isDirector) {
+			role = "director";
+		} else if (isAuthenticated) {
+			role = "participant";
+		}
+
 		const identity = isAuthenticated
 			? user.preferred_username || user.name || user.sub
 			: participantName?.trim() || generateGuestName();
+
+		// If this is a director, check if they should be set as presenter
+		if (isDirector) {
+			const currentMetadata = parseRoomMetadata(room.metadata);
+
+			// If no presenter is set, make this director the presenter
+			if (!currentMetadata?.presenter) {
+				try {
+					const metadata = {
+						activeLayout: currentMetadata?.activeLayout || LayoutType.GRID,
+						presenter: identity,
+					};
+
+					await roomClientService.updateRoomMetadata(
+						roomName,
+						stringifyRoomMetadata(metadata),
+					);
+
+					console.log(`Set ${identity} as presenter for room ${roomName}`);
+				} catch (error) {
+					console.error("Failed to set presenter:", error);
+					// Continue anyway - token generation shouldn't fail due to this
+				}
+			}
+		}
 
 		// Create LiveKit access token
 		const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
 			identity,
 			attributes: {
-				role: isDirector ? "director" : "viewer",
+				role: role,
 			},
 		});
+
+		// Set permissions based on role
+		// Directors can publish by default, others need to be promoted
+		const canPublish = role === "director";
+		// Directors and participants can send chat messages
+		const canPublishData = role === "director" || role === "participant";
 
 		at.addGrant({
 			roomJoin: true,
 			room: roomName,
-			canPublish: isDirector,
-			canPublishData: true,
+			canPublish: canPublish,
+			canPublishData: canPublishData,
 			canSubscribe: true,
-			canUpdateOwnMetadata: true, // Allow participants to receive attribute updates
 		});
 
 		at.ttl = "1h";

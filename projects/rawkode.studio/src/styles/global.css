@@ -4,6 +4,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer utilities {
+	/* Ensure tooltip triggers work with disabled buttons */
+	span:has(> button:disabled) {
+		pointer-events: auto !important;
+	}
+}
+
 :root {
 	--radius: 0rem;
 	--background: oklch(1 0 0);
@@ -142,4 +149,77 @@
 	body {
 		@apply bg-background text-foreground;
 	}
+}
+
+@layer utilities {
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	.animate-fade-in {
+		animation: fade-in 0.3s ease-out;
+	}
+}
+
+/* Custom scrollbar styles */
+@layer components {
+	/* Webkit browsers */
+	.custom-scrollbar::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		background-color: oklch(var(--muted-foreground) / 30%);
+		border-radius: 4px;
+		border: 2px solid transparent;
+		background-clip: padding-box;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		background-color: oklch(var(--muted-foreground) / 50%);
+	}
+
+	/* Firefox */
+	.custom-scrollbar {
+		scrollbar-width: thin;
+		scrollbar-color: oklch(var(--muted-foreground) / 30%) transparent;
+	}
+
+	.custom-scrollbar:hover {
+		scrollbar-color: oklch(var(--muted-foreground) / 50%) transparent;
+	}
+}
+
+/* Hide LiveKit participant indicators globally */
+.lk-participant-tile .lk-participant-metadata {
+	display: none !important;
+}
+
+.lk-participant-tile .lk-connection-quality {
+	display: none !important;
+}
+
+.lk-participant-tile button {
+	display: none !important;
+}
+
+.lk-participant-tile .lk-focus-toggle {
+	display: none !important;
+}
+
+/* Remove rounded corners from participant tiles */
+.lk-participant-tile {
+	border-radius: 0 !important;
 }

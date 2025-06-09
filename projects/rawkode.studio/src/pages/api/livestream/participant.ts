@@ -2,11 +2,16 @@ import { roomClientService } from "@/lib/livekit";
 import { extractLiveKitAuth } from "@/lib/security";
 import type { APIRoute } from "astro";
 import type { ParticipantInfo } from "livekit-server-sdk";
+import { DataPacket_Kind } from "livekit-server-sdk";
 
-type Action = "raise_hand" | "lower_hand" | "promote" | "demote";
+type Action =
+	| "raise_hand_request"
+	| "raise_hand_response"
+	| "promote"
+	| "demote";
 
-const SELF_ACTIONS = ["raise_hand", "lower_hand"] as const;
-const DIRECTOR_ACTIONS = ["promote", "demote"] as const;
+const PARTICIPANT_ACTIONS = ["raise_hand_request"] as const;
+const DIRECTOR_ACTIONS = ["promote", "demote", "raise_hand_response"] as const;
 
 const jsonResponse = (data: unknown, status = 200) =>
 	new Response(JSON.stringify(data), {
@@ -51,7 +56,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		}
 
 		// Determine target identity
-		const targetIdentity = SELF_ACTIONS.includes(action)
+		const targetIdentity = PARTICIPANT_ACTIONS.includes(action)
 			? auth.identity
 			: participantIdentity;
 
@@ -69,38 +74,70 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 		// Handle actions
 		const handlers: Record<Action, () => Promise<Response>> = {
-			raise_hand: async () => {
+			raise_hand_request: async () => {
 				const { raised } = body;
 				if (raised === undefined) {
 					return errorResponse("Raised state is required");
 				}
 
-				await roomClientService.updateParticipant(roomName, auth.identity, {
-					attributes: {
-						...participant?.attributes,
-						raisedHand: raised.toString(),
-					},
+				// Check if the participant's role allows them to raise hand
+				const participantRole = participant?.attributes?.role || "viewer";
+				if (participantRole === "viewer") {
+					return errorResponse("Viewers cannot raise their hand", 403);
+				}
+
+				// Send data message to directors about the raise hand request
+				const message = JSON.stringify({
+					type: "raise_hand_request",
+					identity: auth.identity,
+					name: participant?.name || auth.identity,
+					raised,
+					timestamp: Date.now(),
 				});
+
+				try {
+					await roomClientService.sendData(
+						roomName,
+						new TextEncoder().encode(message),
+						DataPacket_Kind.RELIABLE,
+						{},
+					);
+				} catch (error) {
+					console.error("Failed to send raise hand data message:", error);
+					return errorResponse("Failed to send raise hand request", 500);
+				}
+
 				return jsonResponse({ success: true });
 			},
 
-			lower_hand: async () => {
-				// Allow directors to lower other participants' hands
-				const targetId =
-					isDirector && participantIdentity
-						? participantIdentity
-						: auth.identity;
-				const targetParticipant =
-					targetId === auth.identity
-						? participant
-						: await roomClientService.getParticipant(roomName, targetId);
+			raise_hand_response: async () => {
+				// Directors respond to raise hand requests
+				const { targetIdentity: target, approved } = body;
+				if (!target || approved === undefined) {
+					return errorResponse(
+						"Target identity and approved state are required",
+					);
+				}
 
-				await roomClientService.updateParticipant(roomName, targetId, {
-					attributes: {
-						...targetParticipant?.attributes,
-						raisedHand: "false",
-					},
+				const message = JSON.stringify({
+					type: "raise_hand_response",
+					targetIdentity: target,
+					approved,
+					timestamp: Date.now(),
 				});
+
+				try {
+					await roomClientService.sendData(
+						roomName,
+						new TextEncoder().encode(message),
+						DataPacket_Kind.RELIABLE,
+						{},
+					);
+				} catch (error) {
+					console.error("Failed to send raise hand response:", error);
+					return errorResponse("Failed to send raise hand response", 500);
+				}
+
 				return jsonResponse({ success: true });
 			},
 
@@ -113,15 +150,33 @@ export const POST: APIRoute = async ({ request, locals }) => {
 							canPublish: true,
 							canSubscribe: true,
 							canPublishData: true,
-							canUpdateMetadata: true,
 						},
 						attributes: {
 							...participant?.attributes,
-							raisedHand: "false",
-							promotedAt: new Date().toISOString(),
+							role: "participant",
 						},
 					},
 				);
+
+				// Send data message to clear any raised hand state
+				const message = JSON.stringify({
+					type: "raise_hand_response",
+					targetIdentity: participantIdentity,
+					approved: true,
+					timestamp: Date.now(),
+				});
+
+				try {
+					await roomClientService.sendData(
+						roomName,
+						new TextEncoder().encode(message),
+						DataPacket_Kind.RELIABLE,
+						{},
+					);
+				} catch (error) {
+					console.error("Failed to send promotion notification:", error);
+				}
+
 				return jsonResponse({ success: true });
 			},
 
@@ -134,15 +189,45 @@ export const POST: APIRoute = async ({ request, locals }) => {
 							canPublish: false,
 							canSubscribe: true,
 							canPublishData: true,
-							canUpdateMetadata: true,
 						},
 						attributes: {
 							...participant?.attributes,
-							raisedHand: "false",
-							demotedAt: new Date().toISOString(),
+							role: "participant",
 						},
 					},
 				);
+
+				// Update room metadata to set the demoter as the presenter
+				const rooms = await roomClientService.listRooms([roomName]);
+				const room = rooms[0];
+				if (room) {
+					const metadata = room.metadata ? JSON.parse(room.metadata) : {};
+					metadata.presenter = auth.identity;
+					await roomClientService.updateRoomMetadata(
+						roomName,
+						JSON.stringify(metadata),
+					);
+				}
+
+				// Send data message to clear any raised hand state
+				const message = JSON.stringify({
+					type: "raise_hand_response",
+					targetIdentity: participantIdentity,
+					approved: false,
+					timestamp: Date.now(),
+				});
+
+				try {
+					await roomClientService.sendData(
+						roomName,
+						new TextEncoder().encode(message),
+						DataPacket_Kind.RELIABLE,
+						{},
+					);
+				} catch (error) {
+					console.error("Failed to send demotion notification:", error);
+				}
+
 				return jsonResponse({ success: true });
 			},
 		};

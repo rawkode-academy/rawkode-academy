@@ -11,14 +11,14 @@ export const GET: APIRoute = ({ cookies, redirect }) => {
 	const authorizationURL = zitadel.createAuthorizationURL(state, codeVerifier);
 
 	cookies.set("state", state, {
-		secure: false,
+		secure: import.meta.env.MODE === "production",
 		path: "/",
 		httpOnly: true,
 		maxAge: 60 * 10,
 	});
 
 	cookies.set("codeVerifier", codeVerifier, {
-		secure: false,
+		secure: import.meta.env.MODE === "production",
 		path: "/",
 		httpOnly: true,
 		maxAge: 60 * 10,

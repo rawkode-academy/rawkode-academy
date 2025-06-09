@@ -82,6 +82,8 @@ The application is deployed to Cloudflare Pages/Workers. Configuration is in `wr
 
 6. **Real-time Features**: LiveKit handles video/audio streaming. Chat uses server-sent events through Astro Actions.
 
+7. **Error Handling and Linting**: Always fix linting and TypeScript errors properly. Never use ignore comments (like `biome-ignore` or `eslint-disable`). Fix the underlying issue instead of suppressing warnings.
+
 ## LiveKit Documentation Reference
 
 The following LiveKit documentation is available at https://docs.livekit.io/llms.txt:
