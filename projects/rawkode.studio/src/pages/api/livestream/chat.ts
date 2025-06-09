@@ -2,7 +2,14 @@ import { actions } from "astro:actions";
 import { extractLiveKitAuth } from "@/lib/security";
 import type { APIRoute } from "astro";
 
-export const POST: APIRoute = async ({ request, callAction }) => {
+export const POST: APIRoute = async ({ request, callAction, locals }) => {
+	// Check if user is authenticated
+	if (!locals.user) {
+		return new Response("Authentication required", {
+			status: 401,
+		});
+	}
+
 	// Extract auth from LiveKit token
 	const auth = await extractLiveKitAuth(request);
 	if (!auth) {
@@ -21,7 +28,7 @@ export const POST: APIRoute = async ({ request, callAction }) => {
 		});
 	}
 
-	const result = await callAction(actions.addChatMessage, {
+	const result = await callAction(actions.chat.addChatMessage, {
 		roomSid,
 		message,
 		participantIdentity: auth.identity,

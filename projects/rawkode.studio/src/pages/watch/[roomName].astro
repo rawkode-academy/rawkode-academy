@@ -1,7 +1,7 @@
 ---
 import "@/styles/global.css";
 import { LIVEKIT_URL } from "astro:env/server";
-import LivekitRoom from "@/components/livestreams/room/livekit-room";
+import { RoomWrapper } from "@/components/livestreams/room/RoomWrapper";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { roomClientService } from "@/lib/livekit";
 
@@ -22,28 +22,21 @@ try {
 	console.error("Error checking if room exists:", error);
 }
 
-// If room doesn't exist, redirect to home
-if (!roomExists) {
-	return Astro.redirect("/?error=room-not-found");
-}
-
-// Check if user is authenticated
+// Check if user is authenticated and has director role
 const user = Astro.locals.user;
-
-// For guests, we need to ensure they came from the invite page
-// For authenticated users, we can use their user info
+const isDirector = user?.roles?.includes("director") || false;
+const username = user?.preferred_username || user?.name;
+const isAuthenticated = !!user;
 ---
 
-<BaseLayout title={`Watch: ${roomName} - Live Stream`}>
-  <LivekitRoom
+<BaseLayout title={`${roomName} - Live Stream`}>
+  <RoomWrapper
     serverUrl={LIVEKIT_URL}
     roomName={roomName}
-    participantName={user?.preferred_username || user?.name}
+    roomExists={roomExists}
+    isDirector={isDirector}
+    username={username}
+    isAuthenticated={isAuthenticated}
     client:only="react"
-    onLeaveRoom={(roomName: string) => {
-      // Redirect to the invite page
-      window.location.href = `/invite/${roomName}`;
-    }}
   />
-
 </BaseLayout>

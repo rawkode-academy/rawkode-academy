@@ -80,7 +80,10 @@ export class Zitadel {
 				};
 			}
 
-			return undefined;
+			return {
+				...decodedIdToken,
+				roles: [],
+			};
 		} catch (e) {
 			console.error(e);
 		}

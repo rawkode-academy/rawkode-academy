@@ -24,13 +24,13 @@ export const GET: APIRoute = async ({
 	const cookieCodeVerifier = cookies.get("codeVerifier");
 
 	cookies.delete("state", {
-		secure: false,
+		secure: import.meta.env.MODE === "production",
 		path: "/",
 		httpOnly: true,
 	});
 
 	cookies.delete("codeVerifier", {
-		secure: false,
+		secure: import.meta.env.MODE === "production",
 		path: "/",
 		httpOnly: true,
 	});
@@ -66,7 +66,7 @@ export const GET: APIRoute = async ({
 	}
 
 	cookies.set("accessToken", tokens.accessToken(), {
-		secure: import.meta.env.PROD === true,
+		secure: import.meta.env.MODE === "production",
 		httpOnly: true,
 		path: "/",
 		maxAge: tokens.accessTokenExpiresInSeconds(),
