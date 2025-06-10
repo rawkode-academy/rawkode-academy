@@ -1,0 +1,19 @@
+set dotenv-load
+
+default:
+    @just --list
+
+dev:
+    npm run dev
+
+deploy:
+    npm run deploy
+
+publish-schema:
+    npm run publish-schema
+
+generate-migrations:
+    npm run generate-migrations
+
+migrate:
+    npm run migrate

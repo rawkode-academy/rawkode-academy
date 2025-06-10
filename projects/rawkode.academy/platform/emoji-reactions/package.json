@@ -1,0 +1,28 @@
+{
+  "name": "emoji-reactions",
+  "version": "1.0.0",
+  "description": "Service to store emoji reactions to content by learners",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev read-model/main.ts",
+    "deploy": "wrangler deploy read-model/main.ts",
+    "publish-schema": "deno run -A read-model/publish.ts",
+    "generate-migrations": "drizzle-kit generate:sqlite --schema=./data-model/schema.ts --out=./data-model/migrations",
+    "migrate": "deno run -A data-model/migrate.ts"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.4.0-pre.7",
+    "@pothos/core": "^3.41.0",
+    "@pothos/plugin-directives": "^3.9.2",
+    "@pothos/plugin-drizzle": "^0.4.2",
+    "@pothos/plugin-federation": "^3.14.0",
+    "drizzle-orm": "^0.29.1",
+    "graphql": "^16.8.1",
+    "graphql-scalars": "^1.22.4",
+    "graphql-yoga": "^5.0.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.20.6",
+    "wrangler": "^3.22.1"
+  }
+}
