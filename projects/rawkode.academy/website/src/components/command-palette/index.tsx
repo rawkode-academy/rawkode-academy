@@ -1,6 +1,6 @@
 import { Command } from "cmdk";
 import { useEffect, useRef, useState } from "react";
-import { GitHubIcon, GitLabIcon, getCategoryIcon } from "./icons";
+import { getCategoryIcon, GitHubIcon } from "./icons";
 import "./styles.css";
 
 interface NavigationItem {
@@ -12,30 +12,6 @@ interface NavigationItem {
 	keywords?: string[];
 }
 
-// External links that aren't in the sitemap
-const externalNavigationItems: NavigationItem[] = [
-	{
-		id: "github",
-		title: "GitHub",
-		href: "https://github.com/rawkode",
-		category: "External",
-		description: "Visit our GitHub",
-	},
-	{
-		id: "gitlab-issues",
-		title: "Report Issue",
-		href: "https://gitlab.com/rawkode/rawkode-academy/-/issues",
-		category: "External",
-		description: "Report a bug or request a feature",
-	},
-	{
-		id: "gitlab-repo",
-		title: "Source Code",
-		href: "https://gitlab.com/rawkode/rawkode-academy",
-		category: "External",
-		description: "View the source code",
-	},
-];
 
 interface CommandPaletteProps {
 	isOpen: boolean;
@@ -47,27 +23,18 @@ export default function CommandPalette({
 	onClose,
 }: CommandPaletteProps) {
 	const [search, setSearch] = useState("");
-	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>(
-		externalNavigationItems,
-	);
+	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const customFilter = (value: string, search: string) => {
-		const searchLower = search.toLowerCase();
+		if (!search.trim()) return 1; // Show all items when search is empty
+
+		const searchTerms = search.toLowerCase().split(/\s+/).filter(Boolean);
 		const valueLower = value.toLowerCase();
 
-		// Exact match gets highest priority
-		if (valueLower === searchLower) return 1;
-
-		// Starts with search term gets high priority
-		if (valueLower.startsWith(searchLower)) return 0.9;
-
-		// Contains search term gets medium priority
-		if (valueLower.includes(searchLower)) return 0.7;
-
-		// No match
-		return 0;
+		// Check if all search terms are found in the value
+		return searchTerms.every((term) => valueLower.includes(term)) ? 1 : 0;
 	};
 
 	useEffect(() => {
@@ -76,11 +43,10 @@ export default function CommandPalette({
 				const response = await fetch("/api/sitemap-pages.json");
 				if (response.ok) {
 					const sitemapItems = await response.json();
-					setNavigationItems([...sitemapItems, ...externalNavigationItems]);
+					setNavigationItems(sitemapItems);
 				}
 			} catch (error) {
 				console.error("Failed to fetch navigation items:", error);
-				// Keep external items as fallback
 			} finally {
 				setIsLoading(false);
 			}
@@ -125,10 +91,9 @@ export default function CommandPalette({
 	const getItemIcon = (item: NavigationItem) => {
 		try {
 			const url = new URL(item.href, window.location.origin);
-			if (url.hostname === "github.com" || url.hostname === "www.github.com")
+			if (url.hostname === "github.com" || url.hostname === "www.github.com") {
 				return GitHubIcon;
-			if (url.hostname === "gitlab.com" || url.hostname === "www.gitlab.com")
-				return GitLabIcon;
+			}
 		} catch {
 			// Invalid URL or relative path, fall through to default
 		}
