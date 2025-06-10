@@ -1,11 +1,5 @@
 import type { APIRoute } from "astro";
-
-interface SitemapUrl {
-  loc: string;
-  lastmod?: string;
-  changefreq?: string;
-  priority?: string;
-}
+import { getCollection } from "astro:content";
 
 interface NavigationItem {
   id: string;
@@ -16,198 +10,112 @@ interface NavigationItem {
   keywords?: string[];
 }
 
-function parseXmlToUrls(xmlContent: string): SitemapUrl[] {
-  const urls: SitemapUrl[] = [];
-  const urlMatches = xmlContent.match(/<url>.*?<\/url>/gs);
+// External links that aren't in the sitemap
+const externalNavigationItems: NavigationItem[] = [
+  {
+    id: "github",
+    title: "GitHub",
+    href: "https://github.com/RawkodeAcademy/RawkodeAcademy",
+    category: "External",
+    description: "Visit our GitHub",
+  },
+  {
+    id: "github-issues",
+    title: "Report Issue",
+    href: "https://github.com/RawkodeAcademy/RawkodeAcademy/issues",
+    category: "External",
+    description: "Report a bug or request a feature",
+  },
+];
 
-  if (!urlMatches) return urls;
+async function generateNavigationItems(): Promise<NavigationItem[]> {
+  const navigationItems: NavigationItem[] = [];
 
-  urlMatches.forEach((urlBlock) => {
-    const locMatch = urlBlock.match(/<loc>(.*?)<\/loc>/);
-    const lastmodMatch = urlBlock.match(/<lastmod>(.*?)<\/lastmod>/);
-    const changefreqMatch = urlBlock.match(/<changefreq>(.*?)<\/changefreq>/);
-    const priorityMatch = urlBlock.match(/<priority>(.*?)<\/priority>/);
+  // Add static pages
+  const staticPages = [
+    { href: "/", title: "Home", category: "Pages", description: "Rawkode Academy Homepage" },
+    { href: "/about", title: "About", category: "About", description: "About Rawkode Academy" },
+    { href: "/watch", title: "All Videos", category: "Videos", description: "Browse all videos" },
+    { href: "/read", title: "All Articles", category: "Articles", description: "Browse all articles" },
+    { href: "/series", title: "All Series", category: "Series", description: "Browse video series" },
+    { href: "/technology", title: "All Technologies", category: "Technology", description: "Browse technologies" },
+    { href: "/courses", title: "Courses", category: "Learning", description: "Browse available courses" },
+    { href: "/changelog", title: "Changelog", category: "Updates", description: "Recent updates and changes" },
+    { href: "/community-day", title: "Community Day", category: "Community", description: "Community events and meetups" },
+    { href: "/search", title: "Search", category: "Tools", description: "Search the site" },
+    { href: "/feeds", title: "RSS Feeds", category: "Tools", description: "Subscribe to RSS feeds" },
+    { href: "/organizations/consulting", title: "Consulting", category: "Organizations", description: "Consulting services" },
+    { href: "/organizations/training", title: "Training", category: "Organizations", description: "Training services" },
+    { href: "/organizations/partnerships", title: "Partnerships", category: "Organizations", description: "Partner with us" },
+    { href: "/maintainers/share-your-project", title: "Share Your Project", category: "Community", description: "Share your open source project" },
+  ];
 
-    if (locMatch && locMatch[1]) {
-      const url: SitemapUrl = {
-        loc: locMatch[1],
-      };
-
-      if (lastmodMatch?.[1]) url.lastmod = lastmodMatch[1];
-      if (changefreqMatch?.[1]) url.changefreq = changefreqMatch[1];
-      if (priorityMatch?.[1]) url.priority = priorityMatch[1];
-
-      urls.push(url);
-    }
+  staticPages.forEach((page) => {
+    navigationItems.push({
+      id: page.href,
+      title: page.title,
+      description: page.description,
+      href: page.href,
+      category: page.category,
+      keywords: [page.title.toLowerCase(), page.category.toLowerCase()],
+    });
   });
 
-  return urls;
-}
-
-function createNavigationItem(
-  url: SitemapUrl,
-  baseUrl: string,
-): NavigationItem {
-  const path = url.loc.replace(baseUrl, "");
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const segments = normalizedPath.split("/").filter(Boolean);
-
-  // Generate title from URL path
-  let title = segments[segments.length - 1] || "Home";
-  if (title) {
-    title = title.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-  }
-
-  // Determine category based on path structure
-  let category = "Pages";
-  if (segments.length > 0) {
-    const firstSegment = segments[0];
-    switch (firstSegment) {
-      case "watch":
-        category = "Videos";
-        if (segments.length === 1) title = "All Videos";
-        break;
-      case "read":
-        category = "Articles";
-        if (segments.length === 1) title = "All Articles";
-        break;
-      case "technology":
-        category = "Technology";
-        if (segments.length === 1) title = "All Technologies";
-        break;
-      case "series":
-        category = "Series";
-        if (segments.length === 1) title = "All Series";
-        break;
-      case "organizations":
-        category = "Organizations";
-        break;
-      case "adrs":
-        category = "Documentation";
-        if (segments.length === 1) title = "Architecture Decisions";
-        break;
-      case "community-day":
-        category = "Community";
-        title = "Community Day";
-        break;
-      case "maintainers":
-        category = "Community";
-        break;
-      case "about":
-        category = "About";
-        break;
-      case "search":
-        category = "Tools";
-        break;
-      default:
-        category = "Pages";
-    }
-  }
-
-  // Generate description based on category and title
-  let description = "";
-  switch (category) {
-    case "Videos":
-      description = segments.length > 1
-        ? "Watch this video"
-        : "Browse all videos";
-      break;
-    case "Articles":
-      description = segments.length > 1
-        ? "Read this article"
-        : "Browse all articles";
-      break;
-    case "Technology":
-      description = segments.length > 1
-        ? `Learn about ${title}`
-        : "Browse technologies";
-      break;
-    case "Series":
-      description = segments.length > 1
-        ? `Watch ${title} series`
-        : "Browse video series";
-      break;
-    case "Organizations":
-      description = segments.length > 1
-        ? `Learn about ${title}`
-        : "Partner organizations";
-      break;
-    case "Documentation":
-      description = "Technical documentation";
-      break;
-    case "Community":
-      description = "Community information";
-      break;
-    case "About":
-      description = "About Rawkode Academy";
-      break;
-    case "Tools":
-      description = "Search and discovery tools";
-      break;
-    default:
-      description = `Navigate to ${title}`;
-  }
-
-  // Create keywords for better search
-  const keywords = [...segments, title.toLowerCase(), category.toLowerCase()];
-
-  return {
-    id: normalizedPath || "home",
-    title,
-    description,
-    href: normalizedPath || "/",
-    category,
-    keywords,
-  };
-}
-
-export const GET: APIRoute = async ({ site }) => {
   try {
-    const baseUrl = site?.toString() || "https://rawkode.academy";
-    let xmlContent: string;
+    // Add articles
+    const articles = await getCollection("articles");
+    articles.forEach((article) => {
+      navigationItems.push({
+        id: `/read/${article.id}`,
+        title: article.data.title,
+        description: article.data.description || "Read this article",
+        href: `/read/${article.id}`,
+        category: "Articles",
+        keywords: [article.data.title.toLowerCase(), "article", "read"],
+      });
+    });
 
-    // In development, try to read from the dist directory
-    if (import.meta.env.DEV) {
-      try {
-        const fs = await import("node:fs/promises");
-        const path = await import("node:path");
-        const distPath = path.join(process.cwd(), "dist", "sitemap-0.xml");
-        xmlContent = await fs.readFile(distPath, "utf-8");
-      } catch (fileError) {
-        // If file doesn't exist in dist, return empty navigation
-        console.warn(
-          "Sitemap not found in dist directory, returning empty navigation",
-        );
-        return new Response(JSON.stringify([]), {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache",
-          },
-        });
-      }
-    } else {
-      // In production, fetch from the URL
-      const sitemapUrl = `${baseUrl}/sitemap-0.xml`;
-      const response = await fetch(sitemapUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch sitemap: ${response.status}`);
-      }
-      xmlContent = await response.text();
-    }
+    // Add series
+    const series = await getCollection("series");
+    series.forEach((s) => {
+      navigationItems.push({
+        id: `/series/${s.id}`,
+        title: s.data.title,
+        description: "Watch this series",
+        href: `/series/${s.id}`,
+        category: "Series",
+        keywords: [s.data.title.toLowerCase(), "series", "watch"],
+      });
+    });
 
-    const urls = parseXmlToUrls(xmlContent);
+    // Add courses
+    const courses = await getCollection("courses");
+    courses.forEach((course) => {
+      navigationItems.push({
+        id: `/courses/${course.id}`,
+        title: course.data.title,
+        description: course.data.description || "Learn this course",
+        href: `/courses/${course.id}`,
+        category: "Learning",
+        keywords: [course.data.title.toLowerCase(), "course", "learn"],
+      });
+    });
+  } catch (error) {
+    console.error("Error loading collections:", error);
+  }
 
-    const navigationItems: NavigationItem[] = urls
-      .map((url) => createNavigationItem(url, baseUrl))
-      .filter((item) => {
-        // Filter out API routes and other unwanted paths
-        return (
-          !item.href.includes("/api/") &&
-          !item.href.includes("robots.txt") &&
-          !item.href.includes("sitemap")
-        );
-      })
+  return navigationItems;
+}
+
+// Prerender this endpoint at build time
+export const prerender = true;
+
+export const GET: APIRoute = async () => {
+  try {
+    const navigationItems = await generateNavigationItems();
+    
+    // Add external navigation items
+    const allItems = [...navigationItems, ...externalNavigationItems]
       .sort((a, b) => {
         // Sort by category first, then by title
         if (a.category !== b.category) {
@@ -216,13 +124,11 @@ export const GET: APIRoute = async ({ site }) => {
         return a.title.localeCompare(b.title);
       });
 
-    return new Response(JSON.stringify(navigationItems), {
+    return new Response(JSON.stringify(allItems), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": import.meta.env.DEV
-          ? "no-cache"
-          : "public, max-age=3600", // No cache in dev, 1 hour in prod
+        "Cache-Control": "public, max-age=3600", // Cache for 1 hour
       },
     });
   } catch (error) {

@@ -11,6 +11,7 @@ import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import faroUploader from "@grafana/faro-rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
+import { fetchVideosFromGraphQL } from "./src/lib/fetch-videos";
 
 const getSiteUrl = () => {
   if (import.meta.env.DEV === true) {
@@ -37,10 +38,17 @@ export default defineConfig({
     mdx(),
     react({ experimentalReactChildren: true }),
     sitemap({
-      filter: (page) => !page.includes("api/"),
+      filter: (page) => 
+        !page.includes("api/") && 
+        !page.includes("sitemap-"),
       changefreq: "weekly",
       lastmod: new Date(),
       priority: 0.7,
+      customPages: await (async () => {
+        const siteUrl = getSiteUrl();
+        const videos = await fetchVideosFromGraphQL();
+        return videos.map(video => `${siteUrl}/watch/${video.slug}/`);
+      })(),
     }),
     vue(),
     partytown(),
