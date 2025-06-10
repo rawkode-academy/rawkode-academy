@@ -1,0 +1,12 @@
+{
+	"name": "emoji-reactions",
+	"main": "main.ts",
+	"compatibility_date": "2023-12-01",
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "emoji-reactions",
+			"database_id": "emoji-reactions"
+		}
+	]
+}
