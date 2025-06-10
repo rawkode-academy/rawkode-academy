@@ -86,4 +86,9 @@ op run -- influx bucket-schema update \
   --bucket analytics \
   --name video \
   --columns-file ./integrations/influxdb/analytics/video.json
+
+op run -- influx bucket-schema update \
+  --bucket analytics \
+  --name share \
+  --columns-file ./integrations/influxdb/analytics/share.json
 ```

@@ -3,6 +3,7 @@ import Page from "@/wrappers/page.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import VideoReactions from "@/components/video/reactions.vue";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
+// ShareButton is now internal to VideoReactions
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import { getCollection } from "astro:content";
 import { Marked } from "marked";
@@ -20,7 +21,7 @@ let video: typeof videos[0] | undefined = videos.find(v => v.data.slug === slug)
 // If not found in collection, fetch from API directly
 if (!video) {
 	const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
-	
+
 	const query = gql`
 		query GetVideoBySlug($slug: String!) {
 			video: getVideoBySlug(slug: $slug) {
@@ -41,7 +42,7 @@ if (!video) {
 			}
 		}
 	`;
-	
+
 	interface VideoResponse {
 		video: {
 			id: string;
@@ -60,7 +61,7 @@ if (!video) {
 			}>;
 		};
 	}
-	
+
 	try {
 		const response = await graphQLClient.request<VideoResponse>(query, { slug });
 		if (response.video) {
@@ -95,8 +96,8 @@ Astro.response.headers.set('Cache-Tag', `video-${video.data.slug}, videos-page, 
 Astro.response.headers.set('X-Build-Time', new Date().toISOString());
 
 // Configure Marked to handle single newlines as breaks
-const marked = new Marked({ 
-	breaks: true, 
+const marked = new Marked({
+	breaks: true,
 	gfm: true
 });
 // Convert literal \n escape sequences to actual newlines before processing
@@ -156,10 +157,16 @@ const formatDate = (dateString: string) => {
 						thumbnailUrl={video.data.thumbnailUrl}
 					/>
 				</div>
-				
+
 				{/* Video Controls & Social Features */}
 				<div class="mt-4">
-					<VideoReactions client:load videoId={video.data.id} />
+					<VideoReactions
+						client:load
+						videoId={video.data.id}
+						videoTitle={video.data.title}
+						videoSlug={video.data.slug}
+					/>
+					{/* ShareButton will be managed internally by VideoReactions */}
 				</div>
 
 				{/* Tabbed Content: Description & Transcript */}
@@ -170,7 +177,7 @@ const formatDate = (dateString: string) => {
 						videoId={video.data.id}
 					/>
 				</div>
-				
+
 				{/* Technologies Section */}
 				{
 					video.data.technologies && video.data.technologies.length > 0 && (
@@ -202,7 +209,7 @@ const formatDate = (dateString: string) => {
 						</div>
 					)
 				}
-				
+
 			</div>
 			</div>
 		</div>
@@ -215,15 +222,15 @@ const formatDate = (dateString: string) => {
 		line-height: 1.75;
 		color: rgb(55 65 81);
 	}
-	
+
 	.dark .prose {
 		color: rgb(209 213 219);
 	}
-	
+
 	.prose :global(p) {
 		margin-bottom: 1.5rem;
 	}
-	
+
 	/* Clean, professional link styles */
 	.prose :global(a) {
 		color: rgb(59 130 246);
