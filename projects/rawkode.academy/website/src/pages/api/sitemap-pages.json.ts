@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
+import { request } from "graphql-request";
 
 interface NavigationItem {
   id: string;
@@ -8,6 +9,28 @@ interface NavigationItem {
   href: string;
   category: string;
   keywords?: string[];
+}
+
+interface Technology {
+  id: string;
+  name: string;
+  description: string;
+  logo?: string;
+}
+
+interface GetTechnologiesResponse {
+  getTechnologies: Technology[];
+}
+
+interface Video {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+}
+
+interface GetVideosResponse {
+  getLatestVideos: Video[];
 }
 
 // External links that aren't in the sitemap
@@ -28,7 +51,7 @@ const externalNavigationItems: NavigationItem[] = [
   },
 ];
 
-async function generateNavigationItems(): Promise<NavigationItem[]> {
+async function generateNavigationItems(includeArticles: boolean = false): Promise<NavigationItem[]> {
   const navigationItems: NavigationItem[] = [];
 
   // Add static pages
@@ -62,18 +85,20 @@ async function generateNavigationItems(): Promise<NavigationItem[]> {
   });
 
   try {
-    // Add articles
-    const articles = await getCollection("articles");
-    articles.forEach((article) => {
-      navigationItems.push({
-        id: `/read/${article.id}`,
-        title: article.data.title,
-        description: article.data.description || "Read this article",
-        href: `/read/${article.id}`,
-        category: "Articles",
-        keywords: [article.data.title.toLowerCase(), "article", "read"],
+    // Add articles only if requested
+    if (includeArticles) {
+      const articles = await getCollection("articles");
+      articles.forEach((article) => {
+        navigationItems.push({
+          id: `/read/${article.id}`,
+          title: article.data.title,
+          description: article.data.description || "Read this article",
+          href: `/read/${article.id}`,
+          category: "Articles",
+          keywords: [article.data.title.toLowerCase(), "article", "read"],
+        });
       });
-    });
+    }
 
     // Add series
     const series = await getCollection("series");
@@ -100,8 +125,66 @@ async function generateNavigationItems(): Promise<NavigationItem[]> {
         keywords: [course.data.title.toLowerCase(), "course", "learn"],
       });
     });
+    
+    // Add technologies
+    const getTechnologiesQuery = /* GraphQL */ `
+      query GetTechnologies($limit: Int) {
+        getTechnologies(limit: $limit) {
+          id
+          name
+          description
+        }
+      }
+    `;
+    
+    const endpoint = "https://api.rawkode.academy/graphql";
+    const techData = await request<GetTechnologiesResponse>(
+      endpoint,
+      getTechnologiesQuery,
+      { limit: 100 } // Fetch up to 100 technologies for command palette
+    );
+    
+    techData.getTechnologies.forEach((tech) => {
+      navigationItems.push({
+        id: `/technology/${tech.id}`,
+        title: tech.name,
+        description: tech.description || "Explore this technology",
+        href: `/technology/${tech.id}`,
+        category: "Technology",
+        keywords: [tech.name.toLowerCase(), "technology", "tech"],
+      });
+    });
+    
+    // Add videos
+    const getVideosQuery = /* GraphQL */ `
+      query GetVideos($limit: Int) {
+        getLatestVideos(limit: $limit) {
+          id
+          slug
+          title
+          description
+        }
+      }
+    `;
+    
+    const videoData = await request<GetVideosResponse>(
+      endpoint,
+      getVideosQuery,
+      { limit: 50 } // Fetch up to 50 videos for command palette
+    );
+    
+    videoData.getLatestVideos.forEach((video) => {
+      navigationItems.push({
+        id: `/watch/${video.slug}`,
+        title: video.title,
+        description: video.description || "Watch this video",
+        href: `/watch/${video.slug}`,
+        category: "Videos",
+        keywords: [video.title.toLowerCase(), "video", "watch"],
+      });
+    });
   } catch (error) {
-    console.error("Error loading collections:", error);
+    console.error("Error loading collections or technologies:", error);
   }
 
   return navigationItems;
@@ -110,9 +193,11 @@ async function generateNavigationItems(): Promise<NavigationItem[]> {
 // Prerender this endpoint at build time
 export const prerender = true;
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ url }) => {
   try {
-    const navigationItems = await generateNavigationItems();
+    // Check if we should include articles (for dynamic fetching)
+    const includeArticles = url.searchParams.get('includeArticles') === 'true';
+    const navigationItems = await generateNavigationItems(includeArticles);
     
     // Add external navigation items
     const allItems = [...navigationItems, ...externalNavigationItems]

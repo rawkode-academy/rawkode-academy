@@ -24,11 +24,8 @@ export default function CommandPalette({
 }: CommandPaletteProps) {
 	const [search, setSearch] = useState("");
 	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
-	const [articleItems, setArticleItems] = useState<NavigationItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
-	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 	const customFilter = (value: string, search: string) => {
 		if (!search.trim()) return 1; // Show all items when search is empty
@@ -46,9 +43,7 @@ export default function CommandPalette({
 				const response = await fetch("/api/sitemap-pages.json");
 				if (response.ok) {
 					const sitemapItems = await response.json();
-					// Filter out articles initially
-					const filteredItems = sitemapItems.filter((item: NavigationItem) => item.category !== "Articles");
-					setNavigationItems(filteredItems);
+					setNavigationItems(sitemapItems);
 				}
 			} catch (error) {
 				console.error("Failed to fetch navigation items:", error);
@@ -59,39 +54,6 @@ export default function CommandPalette({
 
 		fetchNavigationItems();
 	}, []);
-
-	// Search for articles when user types
-	useEffect(() => {
-		if (searchTimeoutRef.current) {
-			clearTimeout(searchTimeoutRef.current);
-		}
-
-		if (search.length >= 2) {
-			setIsSearchingArticles(true);
-			searchTimeoutRef.current = setTimeout(async () => {
-				try {
-					const response = await fetch(`/api/search-articles.json?q=${encodeURIComponent(search)}`);
-					if (response.ok) {
-						const articles = await response.json();
-						setArticleItems(articles);
-					}
-				} catch (error) {
-					console.error("Failed to search articles:", error);
-				} finally {
-					setIsSearchingArticles(false);
-				}
-			}, 300); // Debounce search
-		} else {
-			setArticleItems([]);
-			setIsSearchingArticles(false);
-		}
-
-		return () => {
-			if (searchTimeoutRef.current) {
-				clearTimeout(searchTimeoutRef.current);
-			}
-		};
-	}, [search]);
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -140,10 +102,7 @@ export default function CommandPalette({
 
 	if (!isOpen) return null;
 
-	// Combine navigation items and article items
-	const allItems = [...navigationItems, ...articleItems];
-
-	const groupedItems = allItems.reduce(
+	const groupedItems = navigationItems.reduce(
 		(acc, item) => {
 			if (!acc[item.category]) {
 				acc[item.category] = [];
@@ -220,7 +179,7 @@ export default function CommandPalette({
 
 					<Command.List className="command-palette-list">
 						<Command.Empty className="command-palette-empty">
-							{isLoading ? "Loading..." : isSearchingArticles ? "Searching articles..." : `No results found for "${search}"`}
+							{isLoading ? "Loading..." : `No results found for "${search}"`}
 						</Command.Empty>
 
 						{Object.entries(groupedItems).map(([category, items]) => {
@@ -241,7 +200,9 @@ export default function CommandPalette({
 										return (
 											<Command.Item
 												key={item.id}
-									value={`${item.title} ${item.description || ""}`}
+												value={`${item.title} ${item.description || ""} ${(
+													item.keywords || []
+												).join(" ")}`}
 												onSelect={() => handleSelect(item.href)}
 												className="command-palette-item"
 											>
@@ -250,6 +211,11 @@ export default function CommandPalette({
 													<div className="command-palette-item-title">
 														{item.title}
 													</div>
+													{item.description && (
+														<div className="command-palette-item-description">
+															{item.description}
+														</div>
+													)}
 												</div>
 												{item.href.startsWith("http") && (
 													<svg
