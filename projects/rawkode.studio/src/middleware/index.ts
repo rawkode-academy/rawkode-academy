@@ -7,35 +7,35 @@ const zitadel = new Zitadel();
 const bypassUrls = ["/api/webhooks/livekit", "/api/auth/logout"];
 
 const authMiddleware = defineMiddleware(async (context, next) => {
-	// The runtime isn't available for pre-rendered pages and we
-	// only want this middleware to run for SSR.
-	if (!("runtime" in context.locals)) {
-		return next();
-	}
+  // The runtime isn't available for pre-rendered pages and we
+  // only want this middleware to run for SSR.
+  if (!("runtime" in context.locals)) {
+    return next();
+  }
 
-	const url = new URL(context.request.url);
+  const url = new URL(context.request.url);
 
-	if (bypassUrls.includes(url.pathname)) {
-		return next();
-	}
+  if (bypassUrls.includes(url.pathname)) {
+    return next();
+  }
 
-	const accessToken = context.cookies.get("accessToken");
+  const accessToken = context.cookies.get("accessToken");
 
-	if (!accessToken) {
-		return next();
-	}
+  if (!accessToken) {
+    return next();
+  }
 
-	const idToken = context.cookies.get("idToken")?.value;
+  const idToken = context.cookies.get("idToken")?.value;
 
-	const user = await zitadel.fetchUser(idToken);
+  const user = await zitadel.fetchUser(idToken);
 
-	if (!user) {
-		return context.redirect("/api/auth/logout");
-	}
+  if (!user) {
+    return context.redirect("/api/auth/logout");
+  }
 
-	context.locals.user = user;
+  context.locals.user = user;
 
-	return next();
+  return next();
 });
 
 export const onRequest = sequence(authMiddleware);

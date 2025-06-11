@@ -5,12 +5,12 @@ export const roles = ["guest", "director", "contributor"] as const;
 export type Roles = (typeof roles)[number];
 
 export interface OidcStandardClaimsWithRoles extends OidcStandardClaims {
-	roles: Roles[];
+  roles: Roles[];
 }
 
 export interface LiveKitAuth {
-	token: string;
-	identity: string;
+  token: string;
+  identity: string;
 }
 
 /**
@@ -19,22 +19,22 @@ export interface LiveKitAuth {
  * @returns The token and participant identity, or null if invalid/missing
  */
 export async function extractLiveKitAuth(
-	request: Request,
+  request: Request,
 ): Promise<LiveKitAuth | null> {
-	const authHeader = request.headers.get("Authorization");
-	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-		return null;
-	}
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
 
-	const token = authHeader.substring(7);
-	try {
-		const decoded = await tokenVerifier.verify(token);
-		const identity = decoded.sub;
-		if (!identity) {
-			return null;
-		}
-		return { token, identity };
-	} catch (error) {
-		return null;
-	}
+  const token = authHeader.substring(7);
+  try {
+    const decoded = await tokenVerifier.verify(token);
+    const identity = decoded.sub;
+    if (!identity) {
+      return null;
+    }
+    return { token, identity };
+  } catch (error) {
+    return null;
+  }
 }

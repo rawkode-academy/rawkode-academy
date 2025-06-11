@@ -4,71 +4,71 @@ import { extractLiveKitAuth } from "@/lib/security";
 import type { APIRoute } from "astro";
 
 const jsonResponse = (data: unknown, status = 200) =>
-	new Response(JSON.stringify(data), {
-		status,
-		headers: { "Content-Type": "application/json" },
-	});
+  new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 
 const errorResponse = (error: string, status = 400) =>
-	jsonResponse({ error }, status);
+  jsonResponse({ error }, status);
 
 export const POST: APIRoute = async ({ request }) => {
-	try {
-		// Extract auth from LiveKit token
-		const auth = await extractLiveKitAuth(request);
-		if (!auth) {
-			return errorResponse(
-				"Authorization header with Bearer token is required",
-				401,
-			);
-		}
+  try {
+    // Extract auth from LiveKit token
+    const auth = await extractLiveKitAuth(request);
+    if (!auth) {
+      return errorResponse(
+        "Authorization header with Bearer token is required",
+        401,
+      );
+    }
 
-		const body = await request.json();
-		const { roomName, metadata } = body;
+    const body = await request.json();
+    const { roomName, metadata } = body;
 
-		// Validate required fields
-		if (!roomName || !metadata) {
-			return errorResponse("Room name and metadata are required");
-		}
+    // Validate required fields
+    if (!roomName || !metadata) {
+      return errorResponse("Room name and metadata are required");
+    }
 
-		// Get room info to check if it exists
-		const rooms = await roomClientService.listRooms([roomName]);
-		const room = rooms[0];
+    // Get room info to check if it exists
+    const rooms = await roomClientService.listRooms([roomName]);
+    const room = rooms[0];
 
-		if (!room) {
-			return errorResponse("Room not found", 404);
-		}
+    if (!room) {
+      return errorResponse("Room not found", 404);
+    }
 
-		// Check if user has permission to change layouts
-		// Get participant info
-		const participant = await roomClientService.getParticipant(
-			roomName,
-			auth.identity,
-		);
+    // Check if user has permission to change layouts
+    // Get participant info
+    const participant = await roomClientService.getParticipant(
+      roomName,
+      auth.identity,
+    );
 
-		if (!participant) {
-			return errorResponse("Participant not found in room", 404);
-		}
+    if (!participant) {
+      return errorResponse("Participant not found in room", 404);
+    }
 
-		// Check if user is a director or presenter
-		const participantRole = participant.attributes?.role || "viewer";
-		const isDirector = participantRole === "director";
-		const roomMetadata = parseRoomMetadata(room.metadata);
-		const isPresenter = auth.identity === roomMetadata?.presenter;
+    // Check if user is a director or presenter
+    const participantRole = participant.attributes?.role || "viewer";
+    const isDirector = participantRole === "director";
+    const roomMetadata = parseRoomMetadata(room.metadata);
+    const isPresenter = auth.identity === roomMetadata?.presenter;
 
-		if (!isDirector && !isPresenter) {
-			return errorResponse(
-				"Only directors and presenters can change layouts",
-				403,
-			);
-		}
+    if (!isDirector && !isPresenter) {
+      return errorResponse(
+        "Only directors and presenters can change layouts",
+        403,
+      );
+    }
 
-		// Update room metadata
-		await roomClientService.updateRoomMetadata(roomName, metadata);
+    // Update room metadata
+    await roomClientService.updateRoomMetadata(roomName, metadata);
 
-		return jsonResponse({ success: true });
-	} catch (error) {
-		console.error("Error updating room layout:", error);
-		return errorResponse("Failed to update room layout", 500);
-	}
+    return jsonResponse({ success: true });
+  } catch (error) {
+    console.error("Error updating room layout:", error);
+    return errorResponse("Failed to update room layout", 500);
+  }
 };

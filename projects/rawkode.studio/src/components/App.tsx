@@ -11,77 +11,77 @@ import { StrictMode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 
 interface Props {
-	user: OidcStandardClaimsWithRoles;
-	children: React.ReactNode;
+  user: OidcStandardClaimsWithRoles;
+  children: React.ReactNode;
 }
 
 export default function App({ user }: Props) {
-	return (
-		<StrictMode>
-			<BrowserRouter>
-				<Routes>
-					<Route path="/">
-						<Route
-							index
-							element={
-								<SidebarLayout user={user} title="Home">
-									<HomePage user={user} />
-								</SidebarLayout>
-							}
-						/>
-						<Route
-							path="profile"
-							element={
-								<SidebarLayout user={user} title="Profile">
-									<ProfilePage user={user} />
-								</SidebarLayout>
-							}
-						/>
-						<Route
-							path="documentation"
-							element={
-								<ProtectedRoute user={user}>
-									<SidebarLayout user={user} title="Studio Guide">
-										<DocumentationPage />
-									</SidebarLayout>
-								</ProtectedRoute>
-							}
-						/>
-						<Route path="livestreams">
-							<Route
-								path="active"
-								element={
-									<ProtectedRoute user={user}>
-										<SidebarLayout user={user} title="Active Livestreams">
-											<ActiveLivestreamPage />
-										</SidebarLayout>
-									</ProtectedRoute>
-								}
-							/>
-							<Route
-								path="past"
-								element={
-									<ProtectedRoute user={user}>
-										<SidebarLayout user={user} title="Past Livestreams">
-											<PastLivestreamsPage />
-										</SidebarLayout>
-									</ProtectedRoute>
-								}
-							/>
-							<Route
-								path="past/:roomId"
-								element={
-									<ProtectedRoute user={user}>
-										<SidebarLayout user={user} title="Livestream Details">
-											<PastLivestreamDetailsPage />
-										</SidebarLayout>
-									</ProtectedRoute>
-								}
-							/>
-						</Route>
-					</Route>
-				</Routes>
-			</BrowserRouter>
-		</StrictMode>
-	);
+  return (
+    <StrictMode>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/">
+            <Route
+              index
+              element={
+                <SidebarLayout user={user} title="Home">
+                  <HomePage user={user} />
+                </SidebarLayout>
+              }
+            />
+            <Route
+              path="profile"
+              element={
+                <SidebarLayout user={user} title="Profile">
+                  <ProfilePage user={user} />
+                </SidebarLayout>
+              }
+            />
+            <Route
+              path="documentation"
+              element={
+                <ProtectedRoute user={user}>
+                  <SidebarLayout user={user} title="Studio Guide">
+                    <DocumentationPage />
+                  </SidebarLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="livestreams">
+              <Route
+                path="active"
+                element={
+                  <ProtectedRoute user={user}>
+                    <SidebarLayout user={user} title="Active Livestreams">
+                      <ActiveLivestreamPage />
+                    </SidebarLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="past"
+                element={
+                  <ProtectedRoute user={user}>
+                    <SidebarLayout user={user} title="Past Livestreams">
+                      <PastLivestreamsPage />
+                    </SidebarLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="past/:roomId"
+                element={
+                  <ProtectedRoute user={user}>
+                    <SidebarLayout user={user} title="Livestream Details">
+                      <PastLivestreamDetailsPage />
+                    </SidebarLayout>
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </StrictMode>
+  );
 }

@@ -1,13 +1,13 @@
 {
-	"version": "7",
-	"dialect": "sqlite",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "6",
-			"when": 1748988359290,
-			"tag": "0000_overconfident_sasquatch",
-			"breakpoints": true
-		}
-	]
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1749642807156,
+      "tag": "0000_same_shockwave",
+      "breakpoints": true
+    }
+  ]
 }
