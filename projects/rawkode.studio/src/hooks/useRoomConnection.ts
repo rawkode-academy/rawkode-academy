@@ -43,15 +43,11 @@ export function useRoomConnection({
   // Handle connection state changes
   const handleConnected = useCallback(() => {
     setConnectionState(ConnectionState.Connected);
-    toast.success("Connected to stream");
   }, []);
 
   const handleDisconnected = useCallback(
-    (reason?: DisconnectReason) => {
+    (_reason?: DisconnectReason) => {
       setConnectionState(ConnectionState.Disconnected);
-      if (reason) {
-        toast.error(`Disconnected: ${reason}`);
-      }
       handleLeaveRoom(roomName);
     },
     [roomName, handleLeaveRoom],
@@ -64,7 +60,6 @@ export function useRoomConnection({
 
   const handleReconnected = useCallback(() => {
     setConnectionState(ConnectionState.Connected);
-    toast.success("Reconnected to stream");
   }, []);
 
   const handleError = useCallback(

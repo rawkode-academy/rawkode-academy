@@ -11,6 +11,7 @@ export interface OidcStandardClaimsWithRoles extends OidcStandardClaims {
 export interface LiveKitAuth {
   token: string;
   identity: string;
+  room?: string;
 }
 
 /**
@@ -33,7 +34,11 @@ export async function extractLiveKitAuth(
     if (!identity) {
       return null;
     }
-    return { token, identity };
+    return {
+      token,
+      identity,
+      room: decoded.video?.room,
+    };
   } catch (error) {
     return null;
   }
