@@ -8,6 +8,17 @@ export interface OidcStandardClaimsWithRoles extends OidcStandardClaims {
   roles: Roles[];
 }
 
+/**
+ * Checks if a user has the director role
+ * @param user The user claims object
+ * @returns true if the user has the director role
+ */
+export function hasDirectorRole(
+  user: OidcStandardClaimsWithRoles | undefined,
+): boolean {
+  return user?.roles?.includes("director") ?? false;
+}
+
 export interface LiveKitAuth {
   token: string;
   identity: string;

@@ -1,5 +1,6 @@
 import { ParticipantTile } from "@livekit/components-react";
 import { EmptyState } from "./EmptyState";
+import { ParticipantNameplate } from "./ParticipantNameplate";
 import type { LayoutProps } from "./types";
 
 export function PictureInPictureLayout({
@@ -38,6 +39,7 @@ export function PictureInPictureLayout({
               disableSpeakingIndicator={true}
               className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
             />
+            {!isScreenShare && <ParticipantNameplate trackRef={mainTrack} />}
           </div>
         )}
       </div>
@@ -51,6 +53,7 @@ export function PictureInPictureLayout({
               disableSpeakingIndicator={true}
               className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
             />
+            <ParticipantNameplate trackRef={pipTrack} size="small" />
           </div>
         </div>
       )}

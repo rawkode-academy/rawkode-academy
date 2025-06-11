@@ -1,8 +1,8 @@
 import { ZITADEL_CLIENT_ID, ZITADEL_URL } from "astro:env/server";
-import { decodeJWT } from "@oslojs/jwt";
 import type { OAuth2Tokens } from "arctic";
 import { createS256CodeChallenge } from "arctic/dist/oauth2";
 import { createOAuth2Request, sendTokenRequest } from "arctic/dist/request";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { OidcStandardClaimsWithRoles, Roles } from "./security";
 
 type ZitadelRoles = { [role: string]: { [aud: string]: string } };
@@ -11,7 +11,10 @@ export class Zitadel {
   private readonly baseUrl = ZITADEL_URL;
   private readonly clientId = ZITADEL_CLIENT_ID;
 
-  public readonly jwksUrl = `${this.baseUrl}/oauth/v2/keys`;
+  // JWKS endpoint for verifying JWT signatures
+  private readonly jwksUrl = `${this.baseUrl}/oauth/v2/keys`;
+  // Create a remote JWK set for token verification
+  private readonly jwks = createRemoteJWKSet(new URL(this.jwksUrl));
 
   private readonly authorizationEndpoint = `${this.baseUrl}/oauth/v2/authorize`;
   private readonly redirectUri = `${import.meta.env.SITE}/api/auth/callback`;
@@ -67,28 +70,34 @@ export class Zitadel {
     }
 
     try {
-      const decodedIdToken = decodeJWT(idToken);
+      // Verify the JWT signature using the JWKS
+      const { payload } = await jwtVerify(idToken, this.jwks, {
+        // Verify the issuer matches our Zitadel instance
+        issuer: this.baseUrl,
+        // Verify the audience includes our client ID
+        audience: this.clientId,
+      });
 
-      if ("urn:zitadel:iam:org:project:roles" in decodedIdToken) {
-        const roles = decodedIdToken[
+      // Extract roles from the verified payload
+      if ("urn:zitadel:iam:org:project:roles" in payload) {
+        const roles = payload[
           "urn:zitadel:iam:org:project:roles"
         ] as ZitadelRoles;
 
         return {
-          ...decodedIdToken,
+          ...payload,
           roles: Object.keys(roles).map((role) => role as Roles),
-        };
+        } as OidcStandardClaimsWithRoles;
       }
 
       return {
-        ...decodedIdToken,
+        ...payload,
         roles: [],
-      };
+      } as OidcStandardClaimsWithRoles;
     } catch (e) {
-      console.error(e);
+      console.error("JWT verification failed:", e);
+      // Return undefined for invalid tokens instead of throwing
+      return undefined;
     }
-
-    // TODO: Eventually add refresh logic
-    return undefined;
   }
 }
