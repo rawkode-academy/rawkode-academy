@@ -1,14 +1,41 @@
 import { actions } from "astro:actions";
 import type { ChatMessage } from "@/actions/chat";
 import type { Participant } from "@/actions/participants";
-import { ErrorMessage } from "@/components/common/ErrorMessage"; // Import ErrorMessage
-import { Spinner } from "@/components/common/Spinner"; // Import Spinner
+import type { PastLiveStream } from "@/actions/rooms";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
+import { Spinner } from "@/components/common/Spinner";
+import { Badge } from "@/components/shadcn/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
+import { calculateDuration } from "@/lib/duration";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Link, useParams } from "react-router";
 
 export default function PastLivestreamDetailsPage() {
   const { roomId } = useParams<{ roomId: string }>();
+
+  const {
+    isPending: roomDetailsPending,
+    isError: roomDetailsError,
+    data: roomDetails,
+    error: roomDetailsFetchError,
+  } = useQuery({
+    queryKey: ["pastLivestreamDetails", roomId],
+    queryFn: async () => {
+      if (!roomId) return null;
+      const { data, error } = await actions.rooms.listPastRooms();
+      if (error) throw error;
+      return (
+        (data as PastLiveStream[]).find((room) => room.id === roomId) || null
+      );
+    },
+    enabled: !!roomId,
+  });
 
   const {
     isPending: chatPending,
@@ -46,9 +73,10 @@ export default function PastLivestreamDetailsPage() {
     enabled: !!roomId,
   });
 
-  const isPending = chatPending || participantsPending;
-  const isError = chatError || participantsError;
-  const errorToDisplay = chatFetchError || participantsFetchError;
+  const isPending = roomDetailsPending || chatPending || participantsPending;
+  const isError = roomDetailsError || chatError || participantsError;
+  const errorToDisplay =
+    roomDetailsFetchError || chatFetchError || participantsFetchError;
 
   return (
     <motion.div
@@ -65,9 +93,62 @@ export default function PastLivestreamDetailsPage() {
           &larr; Back to Past Livestreams
         </Link>
       </div>
-      <h1 className="text-2xl font-semibold mb-6 text-neutral-800 dark:text-neutral-200">
-        Chat History for Livestream: {roomId}
-      </h1>
+      {roomDetails && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl">
+              {roomDetails.displayName}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">LiveKit SID</p>
+                <p className="font-mono text-sm truncate">
+                  {roomDetails.livekitSid}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Room ID</p>
+                <p className="font-mono text-sm">{roomDetails.id}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Status</p>
+                <Badge variant="secondary">Ended</Badge>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Started At</p>
+                <p className="text-sm">
+                  {roomDetails.startedAt
+                    ? new Date(roomDetails.startedAt).toLocaleString()
+                    : "-"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Finished At</p>
+                <p className="text-sm">
+                  {roomDetails.finishedAt
+                    ? new Date(roomDetails.finishedAt).toLocaleString()
+                    : "-"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Duration</p>
+                <p className="text-sm">
+                  {calculateDuration(
+                    roomDetails.startedAt,
+                    roomDetails.finishedAt,
+                  )}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <h2 className="text-xl font-semibold mb-4 text-neutral-800 dark:text-neutral-200">
+        Chat History
+      </h2>
 
       {isPending && (
         <div className="flex items-center justify-center h-64">
