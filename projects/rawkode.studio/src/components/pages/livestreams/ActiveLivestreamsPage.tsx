@@ -1,4 +1,5 @@
 import { actions } from "astro:actions";
+import type { LiveStream } from "@/actions/rooms";
 import { DataTable } from "@/components/common/DataTable";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Spinner } from "@/components/common/Spinner";
@@ -22,20 +23,17 @@ import { motion } from "framer-motion";
 import { Copy, ExternalLink, Rocket, Video } from "lucide-react";
 import { useRef } from "react";
 
-type Room = {
-  id: string;
-  livekitSid: string;
-  displayName: string;
-  numParticipants: number;
-};
-
-const columns: ColumnDef<Room>[] = [
+const columns: ColumnDef<LiveStream>[] = [
+  {
+    header: "LiveKit SID",
+    accessorFn: (row) => row.livekitSid,
+  },
   {
     header: "Room ID",
     accessorFn: (row) => row.id,
   },
   {
-    header: "Name",
+    header: "Display Name",
     accessorFn: (row) => row.displayName,
   },
   {

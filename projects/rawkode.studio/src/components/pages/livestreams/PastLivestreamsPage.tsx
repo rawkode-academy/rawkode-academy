@@ -4,6 +4,7 @@ import { DataTable } from "@/components/common/DataTable";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/shadcn/button";
+import { calculateDuration } from "@/lib/duration";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { motion } from "framer-motion";
@@ -12,8 +13,16 @@ import { Link } from "react-router";
 // Define columns for the DataTable
 const columns: ColumnDef<PastLiveStream>[] = [
   {
-    header: "Name",
-    accessorKey: "name",
+    header: "LiveKit SID",
+    accessorFn: (row) => row.livekitSid,
+  },
+  {
+    header: "Room ID",
+    accessorFn: (row) => row.id,
+  },
+  {
+    header: "Display Name",
+    accessorFn: (row) => row.displayName,
   },
   {
     header: "Started At",
@@ -24,6 +33,10 @@ const columns: ColumnDef<PastLiveStream>[] = [
     header: "Finished At",
     accessorFn: (row) =>
       row.finishedAt ? new Date(row.finishedAt).toLocaleString() : "N/A",
+  },
+  {
+    header: "Duration",
+    accessorFn: (row) => calculateDuration(row.startedAt, row.finishedAt),
   },
   {
     header: "Participants Joined",
