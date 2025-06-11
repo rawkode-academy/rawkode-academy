@@ -1,3 +1,4 @@
+import { ModeToggle } from "@/components/common/ModeToggle";
 import { Alert, AlertDescription } from "@/components/shadcn/alert";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -346,6 +347,15 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
           <div className="space-y-6">
+            {/* Appearance Settings */}
+            <div className="space-y-3">
+              <h3 className="font-medium">Appearance</h3>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="theme-toggle">Theme</Label>
+                <ModeToggle />
+              </div>
+            </div>
+
             {/* Camera Selection */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">

@@ -1,3 +1,4 @@
+import { ModeToggle } from "@/components/common/ModeToggle";
 import { ModernBackground } from "@/components/common/ModernBackground";
 import { Alert, AlertDescription } from "@/components/shadcn/alert";
 import { Button } from "@/components/shadcn/button";
@@ -24,6 +25,7 @@ import {
   AlertCircle,
   Camera,
   CameraOff,
+  LogIn,
   Mic,
   MicOff,
   User,
@@ -474,6 +476,14 @@ export function PrejoinScreen({
     return (
       <div className="relative min-h-screen flex items-center justify-center p-4">
         <ModernBackground />
+
+        {/* Theme toggle in top right corner of screen */}
+        <div className="absolute top-2 right-2 z-10">
+          <div className="bg-background/80 backdrop-blur-sm border border-foreground/20 rounded-md">
+            <ModeToggle />
+          </div>
+        </div>
+
         <Card className="w-full max-w-sm backdrop-blur-md bg-background/80 border-border/50">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
@@ -504,6 +514,13 @@ export function PrejoinScreen({
     <div className="relative min-h-screen flex items-center justify-center p-4">
       <ModernBackground />
 
+      {/* Theme toggle in top right corner of screen */}
+      <div className="absolute top-2 right-2 z-10">
+        <div className="bg-background/80 backdrop-blur-sm border border-foreground/20 rounded-md">
+          <ModeToggle />
+        </div>
+      </div>
+
       <Card className="w-full max-w-md backdrop-blur-md bg-background/80 border-border/50">
         <CardHeader className="text-center pb-4">
           <div className="flex items-center justify-center gap-2 mb-1">
@@ -523,34 +540,76 @@ export function PrejoinScreen({
           <CardContent className="flex flex-col gap-4 pt-0 pb-4">
             {/* User name display */}
             {!isDirector && isAuthenticated && providedUsername && (
-              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50 text-sm">
-                <User className="size-4" />
-                <span>
-                  Joining as: <strong>{providedUsername}</strong>
-                </span>
-              </div>
+              <>
+                <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50 text-sm">
+                  <User className="size-4" />
+                  <span>
+                    Joining as: <strong>{providedUsername}</strong>
+                  </span>
+                </div>
+
+                {/* Submit button for authenticated users */}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Joining..." : "Join Livestream"}
+                </Button>
+              </>
             )}
 
             {/* Guest name input */}
             {!isDirector && !isAuthenticated && (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="username">Display Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your name (optional)"
-                    className="pl-10"
-                    disabled={isLoading}
-                    autoFocus
-                  />
+              <>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="username">Display Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Enter your name (optional)"
+                      className="pl-10"
+                      disabled={isLoading}
+                      autoFocus
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Leave blank for a random guest name
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Leave blank for a random guest name
-                </p>
-              </div>
+
+                {/* Submit button for guests */}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Joining..." : "Join Livestream"}
+                </Button>
+
+                {/* Login option for guests */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or
+                    </span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    // Store the current room URL to redirect back after login
+                    const returnUrl =
+                      window.location.pathname + window.location.search;
+                    sessionStorage.setItem("login-return-url", returnUrl);
+                    window.location.href = `/api/auth/login?returnTo=${encodeURIComponent(returnUrl)}`;
+                  }}
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Sign in for better experience
+                </Button>
+              </>
             )}
 
             {/* Director info */}
@@ -758,6 +817,11 @@ export function PrejoinScreen({
                     </>
                   )}
                 </div>
+
+                {/* Submit button for directors */}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Joining..." : "Join Livestream"}
+                </Button>
               </div>
             )}
 
@@ -768,11 +832,6 @@ export function PrejoinScreen({
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
-            {/* Submit button */}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Joining..." : "Join Livestream"}
-            </Button>
 
             {/* Terms text */}
             <p className="text-xs text-center text-muted-foreground">
