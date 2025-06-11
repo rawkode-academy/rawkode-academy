@@ -10,16 +10,31 @@ const { roomName } = Astro.params;
 
 // Redirect if no room name is provided
 if (!roomName) {
-	return Astro.redirect("/");
+  return Astro.redirect("/");
 }
 
-// Check if the room actually exists
+// Check if the room actually exists and get display name
 let roomExists = false;
+let displayName = roomName; // Default to room ID
+
 try {
-	const rooms = await roomClientService.listRooms();
-	roomExists = rooms.some((room) => room.name === roomName);
+  const rooms = await roomClientService.listRooms();
+  const room = rooms.find((r) => r.name === roomName);
+
+  if (room) {
+    roomExists = true;
+    // Parse metadata to get display name
+    if (room.metadata) {
+      try {
+        const metadata = JSON.parse(room.metadata);
+        displayName = metadata.displayName || roomName;
+      } catch (e) {
+        // If metadata parsing fails, use room name as fallback
+      }
+    }
+  }
 } catch (error) {
-	console.error("Error checking if room exists:", error);
+  console.error("Error checking if room exists:", error);
 }
 
 // Check if user is authenticated and has director role
@@ -29,10 +44,11 @@ const username = user?.preferred_username || user?.name;
 const isAuthenticated = !!user;
 ---
 
-<BaseLayout title={`${roomName} - Live Stream`}>
+<BaseLayout title={`${displayName} - Live Stream`}>
   <RoomWrapper
     serverUrl={LIVEKIT_URL}
     roomName={roomName}
+    roomDisplayName={displayName}
     roomExists={roomExists}
     isDirector={isDirector}
     username={username}
