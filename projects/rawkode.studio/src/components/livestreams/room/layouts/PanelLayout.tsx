@@ -1,5 +1,6 @@
 import { ParticipantTile } from "@livekit/components-react";
 import { EmptyState } from "./EmptyState";
+import { ParticipantNameplate } from "./ParticipantNameplate";
 import type { LayoutProps } from "./types";
 
 export function PanelLayout({
@@ -42,6 +43,7 @@ export function PanelLayout({
                       disableSpeakingIndicator={true}
                       className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
                     />
+                    <ParticipantNameplate trackRef={track} size="small" />
                   </div>
                 </div>
               ))}
@@ -88,6 +90,10 @@ export function PanelLayout({
                 trackRef={track}
                 disableSpeakingIndicator={true}
                 className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
+              />
+              <ParticipantNameplate
+                trackRef={track}
+                size={participantCount > 4 ? "small" : "default"}
               />
             </div>
           </div>

@@ -45,6 +45,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.44.2",
     "frimousse": "^0.2.0",
+    "jose": "^6.0.11",
     "livekit-client": "2.13.3",
     "livekit-server-sdk": "2.13.0",
     "lucide-react": "^0.513.0",

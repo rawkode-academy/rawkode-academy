@@ -24,11 +24,10 @@ const generateGuestName = () => {
   return `guest-${randomNumbers}`;
 };
 
-export const GET: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const url = new URL(request.url);
-    const roomName = url.searchParams.get("roomName");
-    const participantName = url.searchParams.get("participantName");
+    const body = await request.json();
+    const { roomName, participantName } = body;
 
     if (!roomName) {
       return errorResponse("Room name is required");
@@ -108,10 +107,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
       canSubscribe: true,
     });
 
-    at.ttl = "1h";
+    at.ttl = "15m"; // 15 minutes
     const token = await at.toJwt();
-
-    console.log(token);
 
     return jsonResponse({ token });
   } catch (error) {
@@ -120,4 +117,4 @@ export const GET: APIRoute = async ({ request, locals }) => {
   }
 };
 
-export const POST: APIRoute = GET;
+// Only POST method allowed to prevent CSRF attacks

@@ -15,6 +15,7 @@ import {
   getResolutionDimensions,
   recordingSettingsSchema,
 } from "@/lib/recordingConfig";
+import { hasDirectorRole } from "@/lib/security";
 import { livestreamsTable, participantsTable } from "@/schema";
 import { desc, eq } from "drizzle-orm";
 import {
@@ -334,6 +335,14 @@ export const rooms = {
         throw new ActionError({ code: "UNAUTHORIZED" });
       }
 
+      // Check if user has director role
+      if (!hasDirectorRole(context.locals.user)) {
+        throw new ActionError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions",
+        });
+      }
+
       // Check if the provided ID already exists
       const existing = await database
         .select({ id: livestreamsTable.id })
@@ -406,6 +415,14 @@ export const rooms = {
     handler: async (input, context) => {
       if (!context.locals.user) {
         throw new ActionError({ code: "UNAUTHORIZED" });
+      }
+
+      // Check if user has director role
+      if (!hasDirectorRole(context.locals.user)) {
+        throw new ActionError({
+          code: "FORBIDDEN",
+          message: "Insufficient permissions",
+        });
       }
 
       // Get room info from database

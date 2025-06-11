@@ -1,3 +1,5 @@
+import { createHmac } from "node:crypto";
+import { AUTH_STATE_SECRET } from "astro:env/server";
 import { Zitadel } from "@/lib/zitadel";
 import type { APIRoute } from "astro";
 
@@ -16,18 +18,12 @@ export const GET: APIRoute = async ({
   if (!code || !state) {
     return new Response(null, {
       status: 401,
-      statusText: "Unable to authenticate user. PKCE flow not completed",
+      statusText: "Authentication failed",
     });
   }
 
-  const cookieState = cookies.get("state");
+  // Only need to retrieve the code verifier - state is self-contained
   const cookieCodeVerifier = cookies.get("codeVerifier");
-
-  cookies.delete("state", {
-    secure: import.meta.env.MODE === "production",
-    path: "/",
-    httpOnly: true,
-  });
 
   cookies.delete("codeVerifier", {
     secure: import.meta.env.MODE === "production",
@@ -35,17 +31,62 @@ export const GET: APIRoute = async ({
     httpOnly: true,
   });
 
-  if (!cookieState || !cookieCodeVerifier) {
+  if (!cookieCodeVerifier) {
     return new Response(null, {
       status: 401,
-      statusText: "Unable to authenticate user. PKCE flow not started",
+      statusText: "Authentication failed",
     });
   }
 
-  if (cookieState.value !== state) {
+  // Decode and validate the state
+  let returnTo = "/";
+  try {
+    // Decode the state from base64url
+    const decodedState = JSON.parse(
+      Buffer.from(state, "base64url").toString("utf-8"),
+    );
+
+    // Extract signature and state data
+    const { signature, ...stateData } = decodedState;
+
+    if (!signature) {
+      return new Response(null, {
+        status: 401,
+        statusText: "Authentication failed",
+      });
+    }
+
+    // Verify HMAC signature
+    const expectedSignature = createHmac("sha256", AUTH_STATE_SECRET)
+      .update(JSON.stringify(stateData))
+      .digest("base64url");
+
+    if (signature !== expectedSignature) {
+      return new Response(null, {
+        status: 401,
+        statusText: "Authentication failed",
+      });
+    }
+
+    // Check timestamp to ensure state isn't too old
+    const stateAge = Date.now() - stateData.timestamp;
+    if (stateAge > 10 * 60 * 1000) {
+      // 10 minutes
+      return new Response(null, {
+        status: 401,
+        statusText: "Authentication failed",
+      });
+    }
+
+    // Extract returnTo from the verified state
+    if (stateData.returnTo) {
+      returnTo = stateData.returnTo;
+    }
+  } catch (e) {
+    console.error("State validation failed:", e);
     return new Response(null, {
       status: 401,
-      statusText: "Unable to authenticate user. State mismatch",
+      statusText: "Authentication failed",
     });
   }
 
@@ -61,7 +102,7 @@ export const GET: APIRoute = async ({
 
     return new Response(null, {
       status: 500,
-      statusText: "Unable to create authentication URL",
+      statusText: "Authentication service error",
     });
   }
 
@@ -81,7 +122,25 @@ export const GET: APIRoute = async ({
     sameSite: "strict",
   });
 
-  const redirectHtml = `<html><head><meta http-equiv="refresh" content="0;URL='${import.meta.env.SITE}'"/></head><body><p>Moved to <a href="${import.meta.env.SITE}">/</a>.</p></body></html>`;
+  // Determine the redirect URL - use returnTo from state if available and valid
+  let redirectUrl = import.meta.env.SITE;
+
+  if (returnTo && returnTo !== "/") {
+    // Validate that the returnTo URL is safe (same origin)
+    try {
+      const returnToUrl = new URL(returnTo, import.meta.env.SITE);
+      const siteUrl = new URL(import.meta.env.SITE);
+
+      // Only allow redirects to the same origin
+      if (returnToUrl.origin === siteUrl.origin) {
+        redirectUrl = returnToUrl.toString();
+      }
+    } catch {
+      // If URL parsing fails, use default redirect
+    }
+  }
+
+  const redirectHtml = `<html><head><meta http-equiv="refresh" content="0;URL='${redirectUrl}'"/></head><body><p>Moved to <a href="${redirectUrl}">${redirectUrl}</a>.</p></body></html>`;
 
   return new Response(redirectHtml, {
     status: 200,

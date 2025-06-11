@@ -1,5 +1,6 @@
 import { ParticipantTile } from "@livekit/components-react";
 import { EmptyState } from "./EmptyState";
+import { ParticipantNameplate } from "./ParticipantNameplate";
 import type { LayoutProps } from "./types";
 
 export function GridLayout({ cameraTrackReferences }: LayoutProps) {
@@ -47,6 +48,10 @@ export function GridLayout({ cameraTrackReferences }: LayoutProps) {
                 trackRef={track}
                 disableSpeakingIndicator={true}
                 className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
+              />
+              <ParticipantNameplate
+                trackRef={track}
+                size={participantCount > 4 ? "small" : "default"}
               />
             </div>
           </div>

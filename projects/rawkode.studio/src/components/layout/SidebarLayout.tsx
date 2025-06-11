@@ -1,5 +1,4 @@
 import { ModeToggle } from "@/components/common/ModeToggle";
-import LivestreamCounter from "@/components/layout/LivestreamCounter";
 import {
   Avatar,
   AvatarFallback,
@@ -22,7 +21,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
@@ -159,9 +157,6 @@ export default function SidebarLayout({ user, title, children }: Props) {
                             <span>Active Streams</span>
                           </Link>
                         </SidebarMenuButton>
-                        <SidebarMenuBadge>
-                          <LivestreamCounter />
-                        </SidebarMenuBadge>
                       </SidebarMenuItem>
                       <SidebarMenuItem>
                         <SidebarMenuButton asChild>

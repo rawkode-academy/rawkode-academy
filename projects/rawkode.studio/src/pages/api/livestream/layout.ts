@@ -17,10 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Extract auth from LiveKit token
     const auth = await extractLiveKitAuth(request);
     if (!auth) {
-      return errorResponse(
-        "Authorization header with Bearer token is required",
-        401,
-      );
+      return errorResponse("Unauthorized", 401);
     }
 
     const body = await request.json();
@@ -33,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Verify the participant has access to this room
     if (auth.room !== roomName) {
-      return errorResponse("Unauthorized access to room", 403);
+      return errorResponse("Forbidden", 403);
     }
 
     // Get room info to check if it exists
@@ -62,10 +59,7 @@ export const POST: APIRoute = async ({ request }) => {
     const isPresenter = auth.identity === roomMetadata?.presenter;
 
     if (!isDirector && !isPresenter) {
-      return errorResponse(
-        "Only directors and presenters can change layouts",
-        403,
-      );
+      return errorResponse("Forbidden", 403);
     }
 
     // Update room metadata

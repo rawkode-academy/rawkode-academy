@@ -1,5 +1,9 @@
-import { ParticipantTile } from "@livekit/components-react";
+import {
+  ParticipantTile,
+  type TrackReferenceOrPlaceholder,
+} from "@livekit/components-react";
 import { EmptyState } from "./EmptyState";
+import { ParticipantNameplate } from "./ParticipantNameplate";
 import type { LayoutProps } from "./types";
 
 export function SideBySideLayout({
@@ -18,6 +22,10 @@ export function SideBySideLayout({
     ? [screenShareTrack, presenterCameraTracks[0]].filter(Boolean)
     : presenterCameraTracks.slice(0, 2);
 
+  // Track which items are screenshares
+  const isScreenShare = (track: TrackReferenceOrPlaceholder) =>
+    track === screenShareTrack;
+
   if (tracks.length === 0) {
     return <EmptyState />;
   }
@@ -33,6 +41,9 @@ export function SideBySideLayout({
               disableSpeakingIndicator={true}
               className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
             />
+            {!isScreenShare(tracks[0]) && (
+              <ParticipantNameplate trackRef={tracks[0]} />
+            )}
           </div>
         </div>
       </div>
@@ -50,11 +61,16 @@ export function SideBySideLayout({
           >
             <div className="absolute inset-0 overflow-hidden shadow-lg ring-1 ring-gray-300/20 hover:ring-gray-400/30 dark:ring-white/5 dark:hover:ring-white/10 bg-gray-900">
               {track && (
-                <ParticipantTile
-                  trackRef={track}
-                  disableSpeakingIndicator={true}
-                  className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
-                />
+                <>
+                  <ParticipantTile
+                    trackRef={track}
+                    disableSpeakingIndicator={true}
+                    className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
+                  />
+                  {!isScreenShare(track) && (
+                    <ParticipantNameplate trackRef={track} />
+                  )}
+                </>
               )}
             </div>
           </div>

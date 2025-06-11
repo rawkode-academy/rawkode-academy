@@ -27,10 +27,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Extract auth from LiveKit token
     const auth = await extractLiveKitAuth(request);
     if (!auth) {
-      return errorResponse(
-        "Authorization header with Bearer token is required",
-        401,
-      );
+      return errorResponse("Unauthorized", 401);
     }
 
     const body = await request.json();
@@ -43,21 +40,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Verify the participant has access to this room
     if (auth.room !== roomName) {
-      return errorResponse("Unauthorized access to room", 403);
+      return errorResponse("Forbidden", 403);
     }
 
     // Check if participantIdentity is required for this action
     if (DIRECTOR_ACTIONS.includes(action) && !participantIdentity) {
-      return errorResponse("Participant identity is required for this action");
+      return errorResponse("Invalid request");
     }
 
     // Check director authorization for protected actions
     const isDirector = locals.user?.roles?.includes("director") || false;
     if (DIRECTOR_ACTIONS.includes(action) && !isDirector) {
-      return errorResponse(
-        `Unauthorized - only directors can ${action.replace("_", " ")} participants`,
-        403,
-      );
+      return errorResponse("Forbidden", 403);
     }
 
     // Determine target identity
@@ -88,7 +82,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         // Check if the participant's role allows them to raise hand
         const participantRole = participant?.attributes?.role || "viewer";
         if (participantRole === "viewer") {
-          return errorResponse("Viewers cannot raise their hand", 403);
+          return errorResponse("Forbidden", 403);
         }
 
         // Send data message to directors about the raise hand request

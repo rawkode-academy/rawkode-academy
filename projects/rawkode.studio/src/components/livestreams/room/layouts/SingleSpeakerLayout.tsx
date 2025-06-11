@@ -1,5 +1,6 @@
 import { ParticipantTile } from "@livekit/components-react";
 import { EmptyState } from "./EmptyState";
+import { ParticipantNameplate } from "./ParticipantNameplate";
 import type { LayoutProps } from "./types";
 
 export function SingleSpeakerLayout({
@@ -32,6 +33,7 @@ export function SingleSpeakerLayout({
           disableSpeakingIndicator={true}
           className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
         />
+        {!isScreenShare && <ParticipantNameplate trackRef={primaryTrack} />}
       </div>
     </div>
   );

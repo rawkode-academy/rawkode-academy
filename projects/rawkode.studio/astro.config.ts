@@ -77,6 +77,10 @@ export default defineConfig({
         context: "server",
         access: "secret",
       }),
+      AUTH_STATE_SECRET: envField.string({
+        context: "server",
+        access: "secret",
+      }),
     },
   },
 

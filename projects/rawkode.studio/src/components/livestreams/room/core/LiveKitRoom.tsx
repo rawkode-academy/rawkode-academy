@@ -110,11 +110,10 @@ export default function LiveKitRoom({
           <Button
             className="w-full mt-4"
             onClick={() => {
-              setError(null);
-              window.location.reload();
+              window.location.href = "/";
             }}
           >
-            Try Again
+            Go to Homepage
           </Button>
         </div>
       </div>
@@ -132,7 +131,13 @@ export default function LiveKitRoom({
             Failed to get access token for the room.
           </AlertDescription>
           <div className="mt-4">
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+            <Button
+              onClick={() => {
+                window.location.href = "/";
+              }}
+            >
+              Go to Homepage
+            </Button>
           </div>
         </Alert>
       </div>

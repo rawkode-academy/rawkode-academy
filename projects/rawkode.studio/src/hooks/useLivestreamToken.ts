@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface UseTokenOptions {
   roomName?: string;
@@ -19,6 +19,31 @@ export function useLivestreamToken({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Function to refresh the token
+  const refreshToken = useCallback(async (currentToken: string) => {
+    try {
+      const response = await fetch("/api/livestream/refresh-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: currentToken }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to refresh token");
+      }
+
+      setToken(data.token);
+      setError(null);
+    } catch (err) {
+      console.error("Error refreshing token:", err);
+      setError(err instanceof Error ? err : new Error("Token refresh failed"));
+    }
+  }, []);
+
   useEffect(() => {
     if (!roomName) {
       setIsLoading(false);
@@ -30,12 +55,16 @@ export function useLivestreamToken({
         setIsLoading(true);
         setError(null);
 
-        const params = new URLSearchParams({
-          roomName,
-          ...(participantName && { participantName }),
+        const response = await fetch("/api/livestream/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            roomName,
+            ...(participantName && { participantName }),
+          }),
         });
-
-        const response = await fetch(`/api/livestream/token?${params}`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -53,6 +82,23 @@ export function useLivestreamToken({
 
     fetchToken();
   }, [roomName, participantName]);
+
+  // Set up polling for token refresh
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    // Refresh token every minute
+    const interval = setInterval(() => {
+      refreshToken(token);
+    }, 60 * 1000); // 1 minute
+
+    // Cleanup interval on unmount or when token changes
+    return () => {
+      clearInterval(interval);
+    };
+  }, [token, refreshToken]);
 
   return { token, isLoading, error };
 }

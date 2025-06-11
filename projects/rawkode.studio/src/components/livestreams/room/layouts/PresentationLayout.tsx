@@ -1,5 +1,6 @@
 import { ParticipantTile } from "@livekit/components-react";
 import { EmptyState } from "./EmptyState";
+import { ParticipantNameplate } from "./ParticipantNameplate";
 import type { LayoutProps } from "./types";
 
 export function PresentationLayout({
@@ -25,6 +26,7 @@ export function PresentationLayout({
                 disableSpeakingIndicator={true}
                 className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
               />
+              <ParticipantNameplate trackRef={cameraTrackReferences[0]} />
             </div>
           </div>
         </div>
@@ -47,6 +49,7 @@ export function PresentationLayout({
                     disableSpeakingIndicator={true}
                     className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
                   />
+                  <ParticipantNameplate trackRef={track} />
                 </div>
               </div>
             ))}
@@ -67,6 +70,9 @@ export function PresentationLayout({
             disableSpeakingIndicator={true}
             className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
           />
+          {!screenShareTrack && (
+            <ParticipantNameplate trackRef={cameraTrackReferences[0]} />
+          )}
         </div>
       </div>
 
@@ -84,6 +90,7 @@ export function PresentationLayout({
                   disableSpeakingIndicator={true}
                   className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
                 />
+                <ParticipantNameplate trackRef={track} size="small" />
               </div>
             </div>
           ))}
