@@ -1,0 +1,38 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "random-video-social-post",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-06-10",
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+	},
+	"workflows": [
+		{
+			"name": "random-video-social-post",
+			"binding": "RandomVideoSocialPost",
+			"class_name": "RandomVideoSocialPost",
+		},
+	],
+	"triggers": {
+		"crons": [
+			"0 02 * * *",
+			"0 10 * * *",
+			"0 18 * * *",
+		],
+	},
+	"vars": {
+		"BLUESKY_HANDLE": "rawkode.academy",
+		"LINKEDIN_USER_ID": "",
+	},
+	"ai": {
+		"binding": "AI",
+	},
+	"secrets_store_secrets": [
+		{
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"binding": "BLUESKY_APP_PASSWORD",
+			"secret_name": "BLUESKY_APP_PASSWORD",
+		}
+	]
+}

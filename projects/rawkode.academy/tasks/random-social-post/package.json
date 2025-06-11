@@ -1,0 +1,19 @@
+{
+	"name": "random-social-post",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"start": "wrangler dev",
+		"dev": "wrangler dev",
+		"cf-typegen": "wrangler types"
+	},
+	"devDependencies": {
+		"typescript": "^5.8.3",
+		"wrangler": "^4.19.1"
+	},
+	"dependencies": {
+		"@atproto/api": "^0.15.14",
+		"zod": "^3.25.61"
+	}
+}
