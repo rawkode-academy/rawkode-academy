@@ -1,0 +1,3 @@
+Generate a short and punchy, social media post for BlueSky about the following video.
+
+Remember, BlueSky limit posts to 300 characters.
