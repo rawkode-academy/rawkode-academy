@@ -19,9 +19,12 @@ export const GET: APIRoute = async ({ request, url, callAction }) => {
     });
   }
 
-  // Note: We already have the participant's identity from the token
-  // The token itself proves they have access to the room since it was
-  // generated specifically for this room
+  // Verify the participant has access to this room
+  if (auth.room !== roomName) {
+    return new Response("Unauthorized access to room", {
+      status: 403,
+    });
+  }
 
   try {
     const result = await callAction(actions.chat.getPastRoomChatMessages, {
@@ -67,6 +70,13 @@ export const POST: APIRoute = async ({ request, callAction, locals }) => {
   if (!roomName || !message) {
     return new Response("Room name and message are required", {
       status: 400,
+    });
+  }
+
+  // Verify the participant has access to this room
+  if (auth.room !== roomName) {
+    return new Response("Unauthorized access to room", {
+      status: 403,
     });
   }
 
