@@ -26,8 +26,15 @@ import { useLivestreamToken } from "@/hooks/useLivestreamToken";
 import { useParticipantInfo } from "@/hooks/useParticipantInfo";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
 import { ConnectionState, RoomEvent, VideoPresets } from "livekit-client";
-import { AlertCircle, Loader2 } from "lucide-react";
-import { useContext, useEffect } from "react";
+import {
+  AlertCircle,
+  Loader2,
+  Menu,
+  MessageSquare,
+  Users,
+  X,
+} from "lucide-react";
+import { useContext, useEffect, useState } from "react";
 
 // Props interface
 export interface LiveKitRoomProps {
@@ -221,76 +228,200 @@ function RoomContent({
   token,
   connectionState,
 }: RoomContentProps) {
+  const [activeTab, setActiveTab] = useState<"participants" | "chat">("chat");
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    };
+    if (mobileMenuOpen) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [mobileMenuOpen]);
+
+  // Sidebar content component
+  const SidebarContent = () => (
+    <>
+      {/* Header */}
+      <div className="p-3 border-b border-sidebar-border bg-sidebar">
+        <div className="flex items-center justify-center gap-2">
+          <span className="font-bold text-sidebar-foreground">
+            {roomDisplayName}
+          </span>
+          <ConnectionIndicator
+            status={
+              connectionState === ConnectionState.Connected
+                ? "connected"
+                : connectionState === ConnectionState.Reconnecting
+                  ? "reconnecting"
+                  : connectionState === ConnectionState.Connecting
+                    ? "connecting"
+                    : "disconnected"
+            }
+          />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-hidden p-3 flex flex-col bg-sidebar text-sidebar-foreground">
+        {connectionState === ConnectionState.Connected ? (
+          <div className="flex flex-col h-full">
+            <ControlsSection token={token} />
+            <Separator className="my-3" />
+
+            {/* Mobile tabs for participants/chat */}
+            <div className="xl:hidden flex gap-2 mb-3">
+              <Button
+                variant={activeTab === "participants" ? "default" : "outline"}
+                size="sm"
+                className="flex-1"
+                onClick={() => setActiveTab("participants")}
+              >
+                <Users className="w-4 h-4 mr-1" />
+                Participants
+              </Button>
+              <Button
+                variant={activeTab === "chat" ? "default" : "outline"}
+                size="sm"
+                className="flex-1"
+                onClick={() => {
+                  setActiveTab("chat");
+                  setUnreadMessages(0);
+                }}
+              >
+                <MessageSquare className="w-4 h-4 mr-1" />
+                Chat
+                {unreadMessages > 0 && activeTab !== "chat" && (
+                  <span className="ml-1 bg-red-500 text-white rounded-full px-1 text-xs">
+                    {unreadMessages}
+                  </span>
+                )}
+              </Button>
+            </div>
+
+            {/* Desktop: Show both sections */}
+            <div className="hidden xl:flex xl:flex-col flex-1 min-h-0">
+              {/* Participants Section */}
+              <div className="flex-1 overflow-hidden">
+                <ScrollArea className="h-full">
+                  <div className="px-2">
+                    <ParticipantsList token={token} />
+                  </div>
+                </ScrollArea>
+              </div>
+
+              <Separator className="my-2" />
+
+              {/* Chat Section */}
+              <div className="flex-1 min-h-0">
+                <Chat token={token} />
+              </div>
+            </div>
+
+            {/* Mobile: Show active tab */}
+            <div className="xl:hidden flex-1 min-h-0">
+              {activeTab === "participants" ? (
+                <ScrollArea className="h-full">
+                  <div className="px-2">
+                    <ParticipantsList token={token} />
+                  </div>
+                </ScrollArea>
+              ) : (
+                <Chat
+                  token={token}
+                  onNewMessage={() => {
+                    if (activeTab !== "chat") {
+                      setUnreadMessages((prev) => prev + 1);
+                    }
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <Loader2 className="size-8 animate-spin mx-auto mb-2" />
+              <p>Connecting to room...</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div className="fixed inset-0 flex">
       {/* Main video grid area */}
-      <div className="flex-1 h-full overflow-hidden">
+      <div className="flex-1 h-full overflow-hidden relative bg-gray-100 dark:bg-background">
         <VideoGrid />
-      </div>
 
-      {/* Right sidebar */}
-      <div
-        className={cn(
-          "w-80 h-full bg-sidebar/90 backdrop-blur-md border-l border-sidebar-border/50 flex flex-col overflow-hidden",
-          connectionState !== ConnectionState.Connected &&
-            "pointer-events-none opacity-90",
-        )}
-      >
-        {/* Header */}
-        <div className="p-3 border-b border-sidebar-border/50">
-          <div className="flex items-center justify-center gap-2">
-            <span className="font-bold text-sidebar-foreground">
-              {roomDisplayName}
-            </span>
-            <ConnectionIndicator
-              status={
-                connectionState === ConnectionState.Connected
-                  ? "connected"
-                  : connectionState === ConnectionState.Reconnecting
-                    ? "reconnecting"
-                    : connectionState === ConnectionState.Connecting
-                      ? "connecting"
-                      : "disconnected"
-              }
-            />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-hidden p-3 flex flex-col">
-          {connectionState === ConnectionState.Connected ? (
-            <div className="flex flex-col h-full">
-              <ControlsSection token={token} />
-              <Separator className="my-3" />
-
-              {/* Container for participants and chat */}
-              <div className="flex-1 flex flex-col min-h-0">
-                {/* Participants Section */}
-                <div className="flex-1 overflow-hidden">
-                  <ScrollArea className="h-full">
-                    <div className="px-2">
-                      <ParticipantsList token={token} />
-                    </div>
-                  </ScrollArea>
-                </div>
-
-                <Separator className="my-2" />
-
-                {/* Chat Section */}
-                <div className="flex-1 min-h-0">
-                  <Chat token={token} />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <Loader2 className="size-8 animate-spin mx-auto mb-2" />
-                <p>Connecting to room...</p>
-              </div>
-            </div>
+        {/* Mobile menu button - shown on sm and md breakpoints */}
+        <div className="xl:hidden absolute top-2 right-2 z-10">
+          {!mobileMenuOpen && (
+            <Button
+              size="icon"
+              variant="outline"
+              className="bg-background/80 backdrop-blur-sm border-foreground/20"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-5 w-5 text-foreground" />
+              {unreadMessages > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  {unreadMessages}
+                </span>
+              )}
+            </Button>
           )}
         </div>
+
+        {/* Custom Mobile Sidebar - shown on sm, md, and lg breakpoints */}
+        {mobileMenuOpen && (
+          <div className="xl:hidden">
+            {/* Backdrop */}
+            <button
+              type="button"
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close sidebar"
+            />
+
+            {/* Sidebar Panel */}
+            <div className="fixed inset-y-0 right-0 w-full sm:w-96 z-50 transform transition-transform duration-300 ease-in-out">
+              <div className="h-full bg-sidebar border-l border-sidebar-border flex flex-col overflow-hidden">
+                {/* Close button */}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="absolute top-2 right-2 z-10 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close</span>
+                </Button>
+
+                <SidebarContent />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop sidebar - only shown on xl breakpoint and above */}
+      <div
+        className={cn(
+          "hidden xl:flex w-80 h-full bg-sidebar border-l border-sidebar-border flex-col overflow-hidden",
+          connectionState !== ConnectionState.Connected &&
+            "pointer-events-none opacity-50",
+        )}
+      >
+        <SidebarContent />
       </div>
     </div>
   );

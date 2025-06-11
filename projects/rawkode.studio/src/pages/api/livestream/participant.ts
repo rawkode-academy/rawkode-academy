@@ -41,6 +41,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return errorResponse("Room name and action are required");
     }
 
+    // Verify the participant has access to this room
+    if (auth.room !== roomName) {
+      return errorResponse("Unauthorized access to room", 403);
+    }
+
     // Check if participantIdentity is required for this action
     if (DIRECTOR_ACTIONS.includes(action) && !participantIdentity) {
       return errorResponse("Participant identity is required for this action");

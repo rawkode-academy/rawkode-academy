@@ -31,6 +31,11 @@ export const POST: APIRoute = async ({ request }) => {
       return errorResponse("Room name and metadata are required");
     }
 
+    // Verify the participant has access to this room
+    if (auth.room !== roomName) {
+      return errorResponse("Unauthorized access to room", 403);
+    }
+
     // Get room info to check if it exists
     const rooms = await roomClientService.listRooms([roomName]);
     const room = rooms[0];

@@ -1,155 +1,95 @@
 import { ParticipantTile } from "@livekit/components-react";
-import { useEffect, useRef, useState } from "react";
+import { EmptyState } from "./EmptyState";
 import type { LayoutProps } from "./types";
 
 export function PanelLayout({
   cameraTrackReferences,
   screenShareTrack,
 }: LayoutProps) {
-  const panelists = cameraTrackReferences.slice(0, 3);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [mainTileDimensions, setMainTileDimensions] = useState({
-    width: 640,
-    height: 360,
-  });
-  const [panelTileDimensions, setPanelTileDimensions] = useState({
-    width: 256,
-    height: 144,
-  });
+  const participantCount = cameraTrackReferences.length;
 
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (!containerRef.current) return;
+  if (participantCount === 0 && !screenShareTrack) {
+    return <EmptyState />;
+  }
 
-      const { clientWidth, clientHeight } = containerRef.current;
-      const padding = 32;
-      const gap = 16;
-
-      if (screenShareTrack) {
-        // Calculate panel height (fixed at 180px)
-        const panelHeight = 180;
-        const availableMainHeight =
-          clientHeight - padding * 2 - panelHeight - gap;
-        const availableMainWidth = clientWidth - padding * 2;
-
-        // 16:9 aspect ratio for main content
-        const aspectRatio = 16 / 9;
-        const mainWidthByHeight = availableMainHeight * aspectRatio;
-        const mainHeightByWidth = availableMainWidth / aspectRatio;
-
-        if (mainWidthByHeight <= availableMainWidth) {
-          // Height-constrained
-          setMainTileDimensions({
-            width: mainWidthByHeight,
-            height: availableMainHeight,
-          });
-        } else {
-          // Width-constrained
-          setMainTileDimensions({
-            width: availableMainWidth,
-            height: mainHeightByWidth,
-          });
-        }
-
-        // Calculate panel tile dimensions
-        const panelTileWidth = Math.min(
-          320,
-          (clientWidth - padding * 2 - gap * 2) / 3,
-        );
-        setPanelTileDimensions({
-          width: panelTileWidth,
-          height: panelTileWidth / aspectRatio,
-        });
-      } else {
-        // Without screen share, just calculate panel dimensions
-        const panelTileWidth = Math.min(
-          320,
-          (clientWidth - padding * 2 - gap * 2) / 3,
-        );
-        setPanelTileDimensions({
-          width: panelTileWidth,
-          height: panelTileWidth / (16 / 9),
-        });
-      }
-    };
-
-    updateDimensions();
-
-    const resizeObserver = new ResizeObserver(updateDimensions);
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [screenShareTrack]);
-
+  // With screen share - like PictureInPictureLayout but with bottom participants
   if (screenShareTrack) {
     return (
-      <div
-        ref={containerRef}
-        className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center gap-4 p-8"
-      >
-        {/* Screen share centered with proper aspect ratio */}
-        <div
-          className="relative overflow-hidden rounded-lg shadow-2xl ring-1 ring-white/10 bg-gray-900"
-          style={{
-            width: `${mainTileDimensions.width}px`,
-            height: `${mainTileDimensions.height}px`,
-          }}
-        >
-          <ParticipantTile
-            trackRef={screenShareTrack}
-            disableSpeakingIndicator={true}
-            className="w-full h-full"
-          />
+      <div className="w-full h-full bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-gray-900 dark:via-gray-950 dark:to-black relative p-2">
+        {/* Main screen share */}
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="relative overflow-hidden shadow-lg ring-1 ring-gray-300/20 hover:ring-gray-400/30 dark:ring-white/5 dark:hover:ring-white/10 bg-gray-900 w-full h-full">
+            <ParticipantTile
+              trackRef={screenShareTrack}
+              disableSpeakingIndicator={true}
+              className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
+            />
+          </div>
         </div>
 
-        {/* Panelists strip at bottom */}
-        <div className="flex gap-4">
-          {panelists.map((track) => (
-            <div
-              key={track.publication?.trackSid}
-              className="relative overflow-hidden rounded-lg shadow-2xl ring-1 ring-white/10 hover:ring-white/20 bg-gray-900"
-              style={{
-                width: `${panelTileDimensions.width}px`,
-                height: `${panelTileDimensions.height}px`,
-              }}
-            >
-              <ParticipantTile
-                trackRef={track}
-                disableSpeakingIndicator={true}
-                className="w-full h-full"
-              />
+        {/* Participants overlay at bottom, full width */}
+        {participantCount > 0 && (
+          <div className="absolute bottom-2 left-0 right-0 p-2">
+            <div className="flex gap-2 justify-center">
+              {cameraTrackReferences.slice(0, 4).map((track) => (
+                <div
+                  key={track.publication?.trackSid}
+                  className="w-1/4 min-w-[200px] max-w-[350px] aspect-video"
+                >
+                  <div className="relative overflow-hidden shadow-xl ring-1 ring-gray-300/30 hover:ring-gray-400/40 dark:ring-white/10 dark:hover:ring-white/20 bg-gray-900 w-full h-full">
+                    <ParticipantTile
+                      trackRef={track}
+                      disableSpeakingIndicator={true}
+                      className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     );
   }
 
-  // Without screen share, show horizontal strip at bottom
+  // Without screen share - like GridLayout
+  const getGridClass = () => {
+    if (participantCount === 1) {
+      return "grid-cols-1";
+    }
+    if (participantCount === 2) {
+      return "grid-cols-1 md:grid-cols-2";
+    }
+    if (participantCount <= 4) {
+      return "grid-cols-1 sm:grid-cols-2";
+    }
+    if (participantCount <= 6) {
+      return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+    }
+    if (participantCount <= 9) {
+      return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3";
+    }
+    if (participantCount <= 12) {
+      return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4";
+    }
+    return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5";
+  };
+
   return (
-    <div
-      ref={containerRef}
-      className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col justify-end items-center p-8"
-    >
-      <div className="flex gap-4">
-        {panelists.map((track) => (
+    <div className="w-full h-full bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-gray-900 dark:via-gray-950 dark:to-black p-2">
+      <div className={`grid ${getGridClass()} gap-2 w-full h-full`}>
+        {cameraTrackReferences.map((track) => (
           <div
             key={track.publication?.trackSid}
-            className="relative overflow-hidden rounded-lg shadow-2xl ring-1 ring-white/10 hover:ring-white/20 bg-gray-900"
-            style={{
-              width: `${panelTileDimensions.width}px`,
-              height: `${panelTileDimensions.height}px`,
-            }}
+            className="relative w-full aspect-video"
           >
-            <ParticipantTile
-              trackRef={track}
-              disableSpeakingIndicator={true}
-              className="w-full h-full"
-            />
+            <div className="absolute inset-0 overflow-hidden shadow-lg ring-1 ring-gray-300/20 hover:ring-gray-400/30 dark:ring-white/5 dark:hover:ring-white/10 bg-gray-900">
+              <ParticipantTile
+                trackRef={track}
+                disableSpeakingIndicator={true}
+                className="absolute inset-0 w-full h-full [&_.lk-participant-tile]:rounded-none"
+              />
+            </div>
           </div>
         ))}
       </div>

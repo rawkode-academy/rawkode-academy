@@ -3,7 +3,10 @@ import "@/styles/global.css";
 import { LIVEKIT_URL } from "astro:env/server";
 import { RoomWrapper } from "@/components/livestreams/room/RoomWrapper";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { database } from "@/lib/database";
 import { roomClientService } from "@/lib/livekit";
+import { livestreamsTable } from "@/schema";
+import { eq } from "drizzle-orm";
 
 // Get the roomName from the URL parameter
 const { roomName } = Astro.params;
@@ -18,20 +21,25 @@ let roomExists = false;
 let displayName = roomName; // Default to room ID
 
 try {
+  // Always get the display name from the database
+  const dbRoom = await database
+    .select({
+      displayName: livestreamsTable.displayName,
+    })
+    .from(livestreamsTable)
+    .where(eq(livestreamsTable.id, roomName))
+    .limit(1);
+
+  if (dbRoom.length > 0 && dbRoom[0].displayName) {
+    displayName = dbRoom[0].displayName;
+  }
+
+  // Check if room exists in LiveKit
   const rooms = await roomClientService.listRooms();
   const room = rooms.find((r) => r.name === roomName);
 
   if (room) {
     roomExists = true;
-    // Parse metadata to get display name
-    if (room.metadata) {
-      try {
-        const metadata = JSON.parse(room.metadata);
-        displayName = metadata.displayName || roomName;
-      } catch (e) {
-        // If metadata parsing fails, use room name as fallback
-      }
-    }
   }
 } catch (error) {
   console.error("Error checking if room exists:", error);

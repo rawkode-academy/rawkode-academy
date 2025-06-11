@@ -194,7 +194,7 @@ export type PastLiveStream = {
   displayName: string;
   startedAt: Date | null;
   finishedAt: Date;
-  participantsJoined: number | null;
+  participantsCount: number | null;
 };
 
 export const rooms = {
@@ -228,6 +228,44 @@ export const rooms = {
     },
   }),
 
+  listRunningRooms: defineAction({
+    handler: async (_input, context) => {
+      if (!context.locals.user) {
+        throw new ActionError({ code: "UNAUTHORIZED" });
+      }
+
+      // Get running rooms from database
+      const runningRooms = await database
+        .select({
+          id: livestreamsTable.id,
+          displayName: livestreamsTable.displayName,
+          startedAt: livestreamsTable.startedAt,
+        })
+        .from(livestreamsTable)
+        .where(eq(livestreamsTable.status, "running"))
+        .orderBy(desc(livestreamsTable.startedAt));
+
+      // Get participant counts for each room
+      const roomsWithCounts = await Promise.all(
+        runningRooms.map(async (room) => {
+          const participants = await database
+            .select()
+            .from(participantsTable)
+            .where(eq(participantsTable.roomId, room.id));
+
+          return {
+            id: room.id,
+            displayName: room.displayName,
+            participantCount: participants.length,
+            startedAt: room.startedAt,
+          };
+        }),
+      );
+
+      return roomsWithCounts;
+    },
+  }),
+
   listPastRooms: defineAction({
     handler: async (_input, context) => {
       if (!context.locals) {
@@ -252,13 +290,13 @@ export const rooms = {
         // Get participant counts for each room
         const roomsWithCounts = await Promise.all(
           pastRoomsData.map(async (room) => {
-            const participantCount = await database
-              .select({ count: participantsTable.id })
+            const participants = await database
+              .select()
               .from(participantsTable)
               .where(eq(participantsTable.roomId, room.id));
             return {
               ...room,
-              participantsJoined: participantCount.length,
+              participantsCount: participants.length,
             };
           }),
         );
@@ -267,7 +305,7 @@ export const rooms = {
           .filter((room) => room.finishedAt != null)
           .map((room) => ({
             ...room,
-            participantsJoined: room.participantsJoined ?? 0,
+            participantsCount: room.participantsCount ?? 0,
           })) as PastLiveStream[];
       } catch (error) {
         throw new ActionError({

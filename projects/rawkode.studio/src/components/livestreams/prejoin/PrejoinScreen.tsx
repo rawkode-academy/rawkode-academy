@@ -32,7 +32,6 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface PrejoinScreenProps {
-  roomName: string;
   roomDisplayName: string;
   roomExists: boolean;
   isDirector: boolean;
@@ -42,7 +41,6 @@ interface PrejoinScreenProps {
 }
 
 export function PrejoinScreen({
-  roomName: _roomName,
   roomDisplayName,
   roomExists,
   isDirector,

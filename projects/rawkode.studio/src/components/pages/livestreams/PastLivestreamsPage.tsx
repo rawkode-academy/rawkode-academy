@@ -39,9 +39,8 @@ const columns: ColumnDef<PastLiveStream>[] = [
     accessorFn: (row) => calculateDuration(row.startedAt, row.finishedAt),
   },
   {
-    header: "Participants Joined",
-    accessorKey: "participantsJoined",
-    cell: ({ row }) => row.original.participantsJoined ?? 0,
+    header: "Participants",
+    accessorFn: (row) => row.participantsCount ?? 0,
   },
   {
     id: "actions",

@@ -1,7 +1,16 @@
+import { actions } from "astro:actions";
 import { Spinner } from "@/components/common/Spinner";
 import CreateLivestreamsDialog from "@/components/livestreams/dialogs/CreateLivestreamDialog";
 import type { CreateLivestreamsDialogRef } from "@/components/livestreams/dialogs/CreateLivestreamDialog";
+import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +20,9 @@ import {
 } from "@/components/shadcn/dialog";
 import { Input } from "@/components/shadcn/input";
 import { useRoomCreation } from "@/hooks/useRoomCreation";
-import { Copy, ExternalLink, Rocket, Video } from "lucide-react";
+import { Clock, Copy, ExternalLink, Rocket, Users, Video } from "lucide-react";
 import { motion } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function generateInviteLink(roomName: string) {
   return `${window.location.origin}/watch/${roomName}`;
@@ -22,6 +31,13 @@ function generateInviteLink(roomName: string) {
 interface Props {
   user?: { roles?: string[] };
 }
+
+type RunningLivestream = {
+  id: string;
+  displayName: string;
+  participantCount: number;
+  startedAt: Date | null;
+};
 
 export default function HomePage({ user }: Props) {
   const {
@@ -37,6 +53,31 @@ export default function HomePage({ user }: Props) {
   } = useRoomCreation();
 
   const createDialogRef = useRef<CreateLivestreamsDialogRef>(null);
+  const [runningLivestreams, setRunningLivestreams] = useState<
+    RunningLivestream[]
+  >([]);
+  const [isLoadingLivestreams, setIsLoadingLivestreams] = useState(false);
+
+  // Fetch running livestreams for all non-director users
+  useEffect(() => {
+    if (!user?.roles?.includes("director")) {
+      fetchRunningLivestreams();
+    }
+  }, [user]);
+
+  const fetchRunningLivestreams = async () => {
+    setIsLoadingLivestreams(true);
+    try {
+      const result = await actions.rooms.listRunningRooms();
+      if (result.data) {
+        setRunningLivestreams(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch running livestreams:", error);
+    } finally {
+      setIsLoadingLivestreams(false);
+    }
+  };
 
   const handleJoinAsDirector = () => {
     if (!roomName) return;
@@ -47,6 +88,11 @@ export default function HomePage({ user }: Props) {
     if (createDialogRef.current) {
       createDialogRef.current.setOpen(true);
     }
+  };
+
+  const formatStartTime = (startedAt: Date | null) => {
+    if (!startedAt) return "N/A";
+    return new Date(startedAt).toLocaleString();
   };
 
   return (
@@ -120,23 +166,74 @@ export default function HomePage({ user }: Props) {
       )}
 
       {/* Viewer content - show when not a director */}
-      {!user?.roles?.includes("director") && (
-        <div className="mt-10 max-w-2xl mx-auto">
-          <div className="rounded-lg border bg-card p-8 text-center">
-            <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-semibold mb-2">
-              Live Streams Coming Soon
-            </h2>
-            <p className="text-muted-foreground mb-4">
-              We're working on bringing you a list of upcoming and active
-              livestreams. Check back soon or ask your host for a direct link to
-              join a stream.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              In the meantime, if you have a link to a livestream, you can join
-              it directly.
-            </p>
-          </div>
+      {!user?.roles?.includes("director") && user && (
+        <div className="mt-10 max-w-4xl mx-auto">
+          {isLoadingLivestreams ? (
+            <div className="flex justify-center py-8">
+              <Spinner className="h-8 w-8" />
+            </div>
+          ) : runningLivestreams.length > 0 ? (
+            <div>
+              <h2 className="text-2xl font-semibold mb-6 text-center">
+                Active Livestreams
+              </h2>
+              <div className="grid gap-4 md:grid-cols-2">
+                {runningLivestreams.map((livestream) => (
+                  <Card key={livestream.id} className="overflow-hidden">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg">
+                            {livestream.displayName}
+                          </CardTitle>
+                          <CardDescription className="mt-1">
+                            <div className="flex items-center gap-4 text-sm">
+                              <span className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                {livestream.participantCount}{" "}
+                                {livestream.participantCount === 1
+                                  ? "participant"
+                                  : "participants"}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                Started: {formatStartTime(livestream.startedAt)}
+                              </span>
+                            </div>
+                          </CardDescription>
+                        </div>
+                        <Badge variant="default" className="bg-green-500">
+                          Live
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        className="w-full"
+                        onClick={() =>
+                          window.open(`/watch/${livestream.id}`, "_blank")
+                        }
+                      >
+                        <Video className="h-4 w-4 mr-2" />
+                        Join Livestream
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg border bg-card p-8 text-center">
+              <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h2 className="text-xl font-semibold mb-2">
+                No Active Livestreams
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                There are no livestreams running at the moment. Check back later
+                or ask your host for a direct link to join a stream.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

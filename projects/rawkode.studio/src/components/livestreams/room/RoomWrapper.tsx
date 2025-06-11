@@ -30,9 +30,9 @@ export function RoomWrapper({
   // Check if user has already completed prejoin
   useEffect(() => {
     const prejoinCompleted = sessionStorage.getItem("prejoin-completed");
-    const lastRoom = sessionStorage.getItem("last-room-name");
+    const lastRoom = sessionStorage.getItem("last-room-display-name");
 
-    if (prejoinCompleted === "true" && roomName === lastRoom) {
+    if (prejoinCompleted === "true" && roomDisplayName === lastRoom) {
       // User already went through prejoin, skip it
       const savedName = sessionStorage.getItem("participant-name");
       if (savedName) {
@@ -49,9 +49,9 @@ export function RoomWrapper({
       sessionStorage.removeItem("prejoin-video-device");
     }
 
-    // Store current room name
-    sessionStorage.setItem("last-room-name", roomName);
-  }, [roomName]);
+    // Store current room display name
+    sessionStorage.setItem("last-room-display-name", roomDisplayName);
+  }, [roomDisplayName]);
 
   const handleJoin = (choices: LocalUserChoices) => {
     // Store prejoin choices in session storage
@@ -92,7 +92,6 @@ export function RoomWrapper({
   if (showPrejoin) {
     return (
       <PrejoinScreen
-        roomName={roomName}
         roomDisplayName={roomDisplayName}
         roomExists={roomExists}
         isDirector={isDirector}
