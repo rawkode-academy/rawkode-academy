@@ -38,11 +38,7 @@ export const chat = {
     input: z.object({
       roomId: z.string(),
     }),
-    handler: async (input, context) => {
-      if (!context.locals.user) {
-        throw new ActionError({ code: "UNAUTHORIZED" });
-      }
-
+    handler: async (input) => {
       try {
         const messages = await database
           .select({
