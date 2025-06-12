@@ -84,6 +84,7 @@ export const POST: APIRoute = async ({ request, callAction, locals }) => {
     roomId: roomName, // roomName is our custom ID
     message,
     participantIdentity: auth.identity,
+    participantName: auth.displayName || auth.identity, // Use displayName from token if available
   });
 
   if (result.error) {

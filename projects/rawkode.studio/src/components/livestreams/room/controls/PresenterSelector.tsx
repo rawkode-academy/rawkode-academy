@@ -89,7 +89,10 @@ export function PresenterSelector() {
         const participant = participants.find(
           (p) => p.identity === participantIdentity,
         );
-        const name = participant?.name || participant?.identity || "Unknown";
+        const name =
+          participant?.attributes?.displayName ||
+          participant?.identity ||
+          "Unknown";
         toast.success(`${name} is now the presenter`);
       } catch (error) {
         console.error("Failed to update presenter:", error);
@@ -147,7 +150,7 @@ export function PresenterSelector() {
             <>
               <div className="px-2 py-1.5 text-sm text-muted-foreground">
                 Current:{" "}
-                {currentPresenterParticipant.name ||
+                {currentPresenterParticipant.attributes?.displayName ||
                   currentPresenterParticipant.identity}
               </div>
               <DropdownMenuSeparator />
@@ -180,7 +183,8 @@ export function PresenterSelector() {
                         isCurrentPresenter ? "text-primary" : ""
                       }`}
                     >
-                      {participant.name || participant.identity}
+                      {participant.attributes?.displayName ||
+                        participant.identity}
                       {isYou && " (You)"}
                     </div>
                     <div className="text-xs text-muted-foreground">

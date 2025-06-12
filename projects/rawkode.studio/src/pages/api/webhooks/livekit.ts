@@ -57,7 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
         .values({
           roomId: room.name, // room.name is our custom ID
           identity: participant.identity,
-          name: participant.name || participant.identity,
+          name: participant.attributes?.displayName || participant.identity,
         })
         .onConflictDoNothing();
       break;

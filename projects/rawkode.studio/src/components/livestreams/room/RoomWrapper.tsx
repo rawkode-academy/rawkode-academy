@@ -23,9 +23,7 @@ export function RoomWrapper({
   isAuthenticated,
 }: RoomWrapperProps) {
   const [showPrejoin, setShowPrejoin] = useState(true);
-  const [participantName, setParticipantName] = useState<string | undefined>(
-    username,
-  );
+  const [displayName, setDisplayName] = useState<string | undefined>(username);
 
   // Check if user has already completed prejoin
   useEffect(() => {
@@ -34,15 +32,11 @@ export function RoomWrapper({
 
     if (prejoinCompleted === "true" && roomDisplayName === lastRoom) {
       // User already went through prejoin, skip it
-      const savedName = sessionStorage.getItem("participant-name");
-      if (savedName) {
-        setParticipantName(savedName);
-      }
+      // Display name is now handled through LiveKit participant attributes
       setShowPrejoin(false);
     } else {
       // Clear old prejoin data if switching rooms
       sessionStorage.removeItem("prejoin-completed");
-      sessionStorage.removeItem("participant-name");
       sessionStorage.removeItem("prejoin-audio-enabled");
       sessionStorage.removeItem("prejoin-video-enabled");
       sessionStorage.removeItem("prejoin-audio-device");
@@ -56,7 +50,7 @@ export function RoomWrapper({
   const handleJoin = (choices: LocalUserChoices) => {
     // Store prejoin choices in session storage
     sessionStorage.setItem("prejoin-completed", "true");
-    sessionStorage.setItem("participant-name", choices.username);
+    // Display name is passed to LiveKit token, no need to store separately
     sessionStorage.setItem(
       "prejoin-audio-enabled",
       choices.audioEnabled.toString(),
@@ -74,14 +68,13 @@ export function RoomWrapper({
     }
 
     // Update state to show room
-    setParticipantName(choices.username);
+    setDisplayName(choices.username);
     setShowPrejoin(false);
   };
 
   const handleLeaveRoom = () => {
     // Clear prejoin flag and reload to show prejoin again
     sessionStorage.removeItem("prejoin-completed");
-    sessionStorage.removeItem("participant-name");
     sessionStorage.removeItem("prejoin-audio-enabled");
     sessionStorage.removeItem("prejoin-video-enabled");
     sessionStorage.removeItem("prejoin-audio-device");
@@ -107,7 +100,7 @@ export function RoomWrapper({
       serverUrl={serverUrl}
       roomName={roomName}
       roomDisplayName={roomDisplayName}
-      participantName={participantName}
+      displayName={displayName}
       onLeaveRoom={handleLeaveRoom}
     />
   );

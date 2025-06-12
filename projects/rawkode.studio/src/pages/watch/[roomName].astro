@@ -48,7 +48,7 @@ try {
 // Check if user is authenticated and has director role
 const user = Astro.locals.user;
 const isDirector = user?.roles?.includes("director") || false;
-const username = user?.preferred_username || user?.name;
+const username = user?.name;
 const isAuthenticated = !!user;
 ---
 

@@ -18,17 +18,15 @@ export const chat = {
     input: z.object({
       roomId: z.string(),
       participantIdentity: z.string(),
+      participantName: z.string(),
       message: z.string(),
     }),
 
     handler: async (input) => {
-      // Use the identity as the participant name - this prevents spoofing
-      const participantName = input.participantIdentity;
-
       await database.insert(chatMessagesTable).values({
         roomId: input.roomId,
         participantIdentity: input.participantIdentity,
-        participantName: participantName,
+        participantName: input.participantName,
         message: input.message,
       });
     },

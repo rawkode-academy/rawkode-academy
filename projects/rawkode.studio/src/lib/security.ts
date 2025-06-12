@@ -6,6 +6,7 @@ export type Roles = (typeof roles)[number];
 
 export interface OidcStandardClaimsWithRoles extends OidcStandardClaims {
   roles: Roles[];
+  name?: string;
 }
 
 /**
@@ -23,6 +24,7 @@ export interface LiveKitAuth {
   token: string;
   identity: string;
   room?: string;
+  displayName?: string;
 }
 
 /**
@@ -45,10 +47,13 @@ export async function extractLiveKitAuth(
     if (!identity) {
       return null;
     }
+    // Extract displayName from attributes if available
+    const displayName = decoded.attributes?.displayName;
     return {
       token,
       identity,
       room: decoded.video?.room,
+      displayName,
     };
   } catch (error) {
     return null;
