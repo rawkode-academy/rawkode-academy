@@ -41,7 +41,7 @@ export interface LiveKitRoomProps {
   serverUrl: string;
   roomName: string;
   roomDisplayName: string;
-  participantName?: string;
+  displayName?: string;
   onLeaveRoom?: (roomName: string) => void;
   className?: string;
 }
@@ -50,13 +50,12 @@ export default function LiveKitRoom({
   serverUrl,
   roomName,
   roomDisplayName,
-  participantName: propParticipantName,
+  displayName,
   onLeaveRoom,
   className,
 }: LiveKitRoomProps) {
   // Custom hooks
-  const { participantName, initialMediaSettings } =
-    useParticipantInfo(propParticipantName);
+  const { initialMediaSettings } = useParticipantInfo();
   const {
     connectionState,
     error,
@@ -73,7 +72,7 @@ export default function LiveKitRoom({
     error: tokenError,
   } = useLivestreamToken({
     roomName,
-    participantName,
+    displayName,
   });
 
   // Handle token error

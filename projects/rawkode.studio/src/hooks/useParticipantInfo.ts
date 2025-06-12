@@ -7,16 +7,7 @@ interface MediaSettings {
   videoDeviceId?: string;
 }
 
-export function useParticipantInfo(propParticipantName?: string) {
-  // Get participant name from props or sessionStorage
-  const getInitialParticipantName = () => {
-    if (propParticipantName) return propParticipantName;
-    if (typeof window !== "undefined") {
-      return sessionStorage.getItem("participant-name") || undefined;
-    }
-    return undefined;
-  };
-
+export function useParticipantInfo() {
   // Get initial media settings from prejoin preferences
   const getInitialMediaSettings = (): MediaSettings => {
     if (typeof window !== "undefined") {
@@ -39,15 +30,11 @@ export function useParticipantInfo(propParticipantName?: string) {
     };
   };
 
-  const [participantName] = useState<string | undefined>(
-    getInitialParticipantName,
-  );
   const [initialMediaSettings] = useState<MediaSettings>(
     getInitialMediaSettings,
   );
 
   return {
-    participantName,
     initialMediaSettings,
   };
 }

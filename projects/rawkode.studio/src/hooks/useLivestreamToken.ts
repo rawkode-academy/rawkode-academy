@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 interface UseTokenOptions {
   roomName?: string;
-  participantName?: string;
+  displayName?: string;
 }
 
 interface TokenResult {
@@ -13,7 +13,7 @@ interface TokenResult {
 
 export function useLivestreamToken({
   roomName,
-  participantName,
+  displayName,
 }: UseTokenOptions): TokenResult {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +62,7 @@ export function useLivestreamToken({
           },
           body: JSON.stringify({
             roomName,
-            ...(participantName && { participantName }),
+            ...(displayName && { displayName }),
           }),
         });
         const data = await response.json();
@@ -81,7 +81,7 @@ export function useLivestreamToken({
     };
 
     fetchToken();
-  }, [roomName, participantName]);
+  }, [roomName, displayName]);
 
   // Set up polling for token refresh
   useEffect(() => {

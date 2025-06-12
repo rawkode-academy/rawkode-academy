@@ -10,7 +10,9 @@ export function ParticipantNameplate({
   size = "default",
 }: ParticipantNameplateProps) {
   const name =
-    trackRef.participant?.name || trackRef.participant?.identity || "Unknown";
+    trackRef.participant?.attributes?.displayName ||
+    trackRef.participant?.identity ||
+    "Unknown";
 
   const isSmall = size === "small";
 

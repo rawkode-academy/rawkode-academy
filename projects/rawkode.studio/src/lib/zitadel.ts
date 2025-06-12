@@ -77,6 +77,7 @@ export class Zitadel {
         // Verify the audience includes our client ID
         audience: this.clientId,
       });
+      console.log(JSON.stringify(payload));
 
       // Extract roles from the verified payload
       if ("urn:zitadel:iam:org:project:roles" in payload) {
@@ -87,12 +88,14 @@ export class Zitadel {
         return {
           ...payload,
           roles: Object.keys(roles).map((role) => role as Roles),
+          name: payload.name as string | undefined,
         } as OidcStandardClaimsWithRoles;
       }
 
       return {
         ...payload,
         roles: [],
+        name: payload.name as string | undefined,
       } as OidcStandardClaimsWithRoles;
     } catch (e) {
       console.error("JWT verification failed:", e);

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/shadcn/select";
 import { Separator } from "@/components/shadcn/separator";
+import { generateGuestName } from "@/lib/guest";
 import { cn } from "@/lib/utils";
 import type { LocalUserChoices } from "@livekit/components-core";
 import {
@@ -52,6 +53,7 @@ export function PrejoinScreen({
 }: PrejoinScreenProps) {
   // State
   const [username, setUsername] = useState(providedUsername || "");
+  const [guestNamePlaceholder] = useState(() => generateGuestName());
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [audioDeviceId, setAudioDeviceId] = useState<string>("");
@@ -423,6 +425,16 @@ export function PrejoinScreen({
     setIsLoading(true);
     setError(null);
 
+    // Validate display name
+    const finalUsername =
+      username.trim() ||
+      (!isAuthenticated ? guestNamePlaceholder : providedUsername || "");
+    if (!finalUsername) {
+      setError("Please enter a display name");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Stop preview stream before joining
       if (previewStream) {
@@ -458,7 +470,7 @@ export function PrejoinScreen({
       }
 
       const choices: LocalUserChoices = {
-        username: isAuthenticated ? providedUsername || "" : username.trim(),
+        username: finalUsername,
         audioEnabled,
         videoEnabled,
         audioDeviceId,
@@ -538,25 +550,8 @@ export function PrejoinScreen({
 
         <form onSubmit={handleSubmit} className="flex flex-col">
           <CardContent className="flex flex-col gap-4 pt-0 pb-4">
-            {/* User name display */}
-            {!isDirector && isAuthenticated && providedUsername && (
-              <>
-                <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50 text-sm">
-                  <User className="size-4" />
-                  <span>
-                    Joining as: <strong>{providedUsername}</strong>
-                  </span>
-                </div>
-
-                {/* Submit button for authenticated users */}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Joining..." : "Join Livestream"}
-                </Button>
-              </>
-            )}
-
-            {/* Guest name input */}
-            {!isDirector && !isAuthenticated && (
+            {/* Name input for all non-director users */}
+            {!isDirector && (
               <>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="username">Display Name</Label>
@@ -566,23 +561,33 @@ export function PrejoinScreen({
                       id="username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Enter your name (optional)"
+                      placeholder={
+                        isAuthenticated
+                          ? providedUsername || "Enter your display name"
+                          : guestNamePlaceholder
+                      }
                       className="pl-10"
                       disabled={isLoading}
                       autoFocus
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Leave blank for a random guest name
+                    {isAuthenticated
+                      ? "Choose how your name appears to others"
+                      : "Leave blank to use the suggested guest name"}
                   </p>
                 </div>
 
-                {/* Submit button for guests */}
+                {/* Submit button for all non-director users */}
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Joining..." : "Join Livestream"}
                 </Button>
+              </>
+            )}
 
-                {/* Login option for guests */}
+            {/* Login option for guests only */}
+            {!isDirector && !isAuthenticated && (
+              <>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t" />
@@ -612,13 +617,25 @@ export function PrejoinScreen({
               </>
             )}
 
-            {/* Director info */}
-            {isDirector && providedUsername && (
-              <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-primary/10 text-sm">
-                <User className="size-4" />
-                <span>
-                  Joining as director: <strong>{providedUsername}</strong>
-                </span>
+            {/* Director name input */}
+            {isDirector && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="username">Display Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder={providedUsername || "Enter your display name"}
+                    className="pl-10"
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Choose how your name appears to others
+                </p>
               </div>
             )}
 

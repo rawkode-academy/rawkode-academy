@@ -4,6 +4,7 @@ import {
   parseRoomMetadata,
   stringifyRoomMetadata,
 } from "@/components/livestreams/room/layouts/permissions";
+import { generateGuestName } from "@/lib/guest";
 import { roomClientService } from "@/lib/livekit";
 import type { APIRoute } from "astro";
 import { AccessToken } from "livekit-server-sdk";
@@ -17,20 +18,17 @@ const jsonResponse = (data: unknown, status = 200) =>
 const errorResponse = (error: string, status = 400) =>
   jsonResponse({ error }, status);
 
-const generateGuestName = () => {
-  const randomNumbers = Array.from({ length: 5 }, () =>
-    Math.floor(Math.random() * 10),
-  ).join("");
-  return `guest-${randomNumbers}`;
-};
-
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = await request.json();
-    const { roomName, participantName } = body;
+    const { roomName, displayName } = body;
 
     if (!roomName) {
       return errorResponse("Room name is required");
+    }
+
+    if (!displayName?.trim()) {
+      return errorResponse("Display name is required");
     }
 
     // Verify room exists
@@ -56,9 +54,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       role = "participant";
     }
 
+    // Identity: use preferred_username for authenticated users, generate guest ID for others
     const identity = isAuthenticated
-      ? user.preferred_username || user.name || user.sub
-      : participantName?.trim() || generateGuestName();
+      ? user.preferred_username
+      : generateGuestName();
 
     // If this is a director, check if they should be set as presenter
     if (isDirector) {
@@ -90,6 +89,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       identity,
       attributes: {
         role: role,
+        displayName: displayName.trim(),
       },
     });
 
