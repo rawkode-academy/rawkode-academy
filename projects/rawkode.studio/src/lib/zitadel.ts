@@ -77,7 +77,6 @@ export class Zitadel {
         // Verify the audience includes our client ID
         audience: this.clientId,
       });
-      console.log(JSON.stringify(payload));
 
       // Extract roles from the verified payload
       if ("urn:zitadel:iam:org:project:roles" in payload) {

@@ -384,8 +384,6 @@ export const rooms = {
         });
       }
 
-      console.log(JSON.stringify(createRoomOptions));
-
       const room = await roomClientService.createRoom(createRoomOptions);
 
       // Insert into database with 'created' status
