@@ -120,10 +120,105 @@ const technologies = data.getTechnologies;
 				transform: translateY(-5px);
 			}
 
-			.tech-card img {
-				@apply w-full h-32 object-contain p-4;
-				background: white; /* Light background for logos regardless of mode */
+			.tech-card .logo-container {
+				@apply relative w-full h-32 p-4 rounded-t-lg overflow-hidden;
+				/* Checkered background pattern for contrast with any logo color */
+				background:
+					linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
+					linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
+					linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
+					linear-gradient(-45deg, transparent 75%, #e5e7eb 75%);
+				background-size: 20px 20px;
+				background-position:
+					0 0,
+					0 10px,
+					10px -10px,
+					-10px 0px;
+				background-color: #f3f4f6;
 				border-bottom: 1px solid rgba(95, 94, 215, 0.1);
+				position: relative;
+			}
+
+			.tech-card .logo-container::before {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background: radial-gradient(
+					circle at center,
+					rgba(95, 94, 215, 0.03) 0%,
+					transparent 70%
+				);
+				z-index: 1;
+			}
+
+			/* Create a duplicate layer for contrast */
+			.tech-card .logo-container::after {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background: linear-gradient(
+					135deg,
+					rgba(0, 0, 0, 0.03) 0%,
+					rgba(0, 0, 0, 0.06) 100%
+				);
+				z-index: 2;
+				mix-blend-mode: multiply;
+			}
+
+			.dark .tech-card .logo-container {
+				background:
+					linear-gradient(45deg, #374151 25%, transparent 25%),
+					linear-gradient(-45deg, #374151 25%, transparent 25%),
+					linear-gradient(45deg, transparent 75%, #374151 75%),
+					linear-gradient(-45deg, transparent 75%, #374151 75%);
+				background-size: 20px 20px;
+				background-position:
+					0 0,
+					0 10px,
+					10px -10px,
+					-10px 0px;
+				background-color: #4b5563;
+			}
+
+			.dark .tech-card .logo-container::after {
+				background: linear-gradient(
+					135deg,
+					rgba(255, 255, 255, 0.03) 0%,
+					rgba(255, 255, 255, 0.06) 100%
+				);
+				mix-blend-mode: screen;
+			}
+
+			.tech-card img {
+				@apply w-full h-full object-contain relative;
+				z-index: 10;
+				/* Multiple filters for better visibility */
+				filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5))
+					drop-shadow(0 0 1px rgba(255, 255, 255, 0.5))
+					drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) contrast(1.1);
+				mix-blend-mode: normal;
+				transition: all 0.3s ease;
+			}
+
+			.dark .tech-card img {
+				filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5))
+					drop-shadow(0 0 1px rgba(0, 0, 0, 0.5))
+					drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) contrast(1.1)
+					brightness(1.1);
+			}
+
+			.tech-card:hover img {
+				transform: scale(1.05);
+				filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))
+					drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+					drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15)) contrast(1.2);
+			}
+
+			.dark .tech-card:hover img {
+				filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
+					drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))
+					drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) contrast(1.2)
+					brightness(1.15);
 			}
 
 			.tech-card .content {
@@ -170,11 +265,13 @@ const technologies = data.getTechnologies;
 					{
 						technologies.map((tech) => (
 							<a href={`/technology/${tech.id}`} class="tech-card">
-								<img
-									src={tech.logo ? tech.logo : "/tech-logos/placeholder.svg"}
-									alt={`${tech.name} Logo`}
-									onerror={`this.onerror=null; this.src='/tech-logos/placeholder.svg';`}
-								/>
+								<div class="logo-container">
+									<img
+										src={tech.logo ? tech.logo : "/apple-touch-icon.png"}
+										alt={`${tech.name} Logo`}
+										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
+									/>
+								</div>
 								<div class="content">
 									<h3>{tech.name}</h3>
 									<p>{tech.description}</p>

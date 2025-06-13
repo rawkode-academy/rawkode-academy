@@ -24,7 +24,7 @@ export const Default: Story = {
     suffix: 'with Rawkode Academy',
     highlight: 'Rawkode Academy',
     image: {
-      src: '/tech-logos/placeholder.svg',
+      src: '/apple-touch-icon.png',
       width: 400,
       height: 400,
       format: 'svg',
