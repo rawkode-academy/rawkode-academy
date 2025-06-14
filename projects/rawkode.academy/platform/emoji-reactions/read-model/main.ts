@@ -1,11 +1,17 @@
 import { createYoga } from 'graphql-yoga';
 import { getSchema } from './schema';
 
-const yoga = createYoga({
-	schema: getSchema(),
-	graphqlEndpoint: '/',
-});
+export interface Env {
+	DB: D1Database;
+}
 
 export default {
-	fetch: yoga.fetch,
+	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		const yoga = createYoga({
+			schema: getSchema(env),
+			graphqlEndpoint: '/',
+		});
+
+		return yoga.fetch(request, env, ctx);
+	},
 };
