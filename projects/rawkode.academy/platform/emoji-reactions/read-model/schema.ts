@@ -38,6 +38,36 @@ const emojiReactionRef = builder.objectRef<{
 	}),
 });
 
+// Helper function to get emoji reactions for any content
+const getEmojiReactionsForContent = async (contentId: string) => {
+	const result = await db
+		.select({
+			emoji: dataSchema.emojiReactionsTable.emoji,
+			count: count(),
+		})
+		.from(dataSchema.emojiReactionsTable)
+		.where(eq(dataSchema.emojiReactionsTable.contentId, contentId))
+		.groupBy(dataSchema.emojiReactionsTable.emoji);
+
+	return result;
+};
+
+// Helper function to check if user has reacted
+const hasUserReacted = async (contentId: string, personId: string, emoji: string) => {
+	const result = await db
+		.select({ count: count() })
+		.from(dataSchema.emojiReactionsTable)
+		.where(
+			and(
+				eq(dataSchema.emojiReactionsTable.contentId, contentId),
+				eq(dataSchema.emojiReactionsTable.personId, personId),
+				eq(dataSchema.emojiReactionsTable.emoji, emoji),
+			),
+		);
+
+	return (result[0]?.count || 0) > 0;
+};
+
 // Extend Video type to include emoji reactions
 builder.externalRef(
 	'Video',
@@ -49,18 +79,7 @@ builder.externalRef(
 	fields: (t) => ({
 		emojiReactions: t.field({
 			type: [emojiReactionRef],
-			resolve: async (video) => {
-				const result = await db
-					.select({
-						emoji: dataSchema.videoEmojiReactionsTable.emoji,
-						count: count(),
-					})
-					.from(dataSchema.videoEmojiReactionsTable)
-					.where(eq(dataSchema.videoEmojiReactionsTable.videoId, video.id))
-					.groupBy(dataSchema.videoEmojiReactionsTable.emoji);
-
-				return result;
-			},
+			resolve: async (video) => getEmojiReactionsForContent(video.id),
 		}),
 		hasReacted: t.field({
 			type: 'Boolean',
@@ -74,20 +93,7 @@ builder.externalRef(
 					required: true,
 				}),
 			},
-			resolve: async (video, args) => {
-				const result = await db
-					.select({ count: count() })
-					.from(dataSchema.videoEmojiReactionsTable)
-					.where(
-						and(
-							eq(dataSchema.videoEmojiReactionsTable.videoId, video.id),
-							eq(dataSchema.videoEmojiReactionsTable.personId, args.personId),
-							eq(dataSchema.videoEmojiReactionsTable.emoji, args.emoji),
-						),
-					);
-
-				return (result[0]?.count || 0) > 0;
-			},
+			resolve: async (video, args) => hasUserReacted(video.id, args.personId, args.emoji),
 		}),
 	}),
 });
@@ -103,18 +109,7 @@ builder.externalRef(
 	fields: (t) => ({
 		emojiReactions: t.field({
 			type: [emojiReactionRef],
-			resolve: async (episode) => {
-				const result = await db
-					.select({
-						emoji: dataSchema.episodeEmojiReactionsTable.emoji,
-						count: count(),
-					})
-					.from(dataSchema.episodeEmojiReactionsTable)
-					.where(eq(dataSchema.episodeEmojiReactionsTable.episodeId, episode.id))
-					.groupBy(dataSchema.episodeEmojiReactionsTable.emoji);
-
-				return result;
-			},
+			resolve: async (episode) => getEmojiReactionsForContent(episode.id),
 		}),
 		hasReacted: t.field({
 			type: 'Boolean',
@@ -128,20 +123,7 @@ builder.externalRef(
 					required: true,
 				}),
 			},
-			resolve: async (episode, args) => {
-				const result = await db
-					.select({ count: count() })
-					.from(dataSchema.episodeEmojiReactionsTable)
-					.where(
-						and(
-							eq(dataSchema.episodeEmojiReactionsTable.episodeId, episode.id),
-							eq(dataSchema.episodeEmojiReactionsTable.personId, args.personId),
-							eq(dataSchema.episodeEmojiReactionsTable.emoji, args.emoji),
-						),
-					);
-
-				return (result[0]?.count || 0) > 0;
-			},
+			resolve: async (episode, args) => hasUserReacted(episode.id, args.personId, args.emoji),
 		}),
 	}),
 });
@@ -149,10 +131,10 @@ builder.externalRef(
 // Define mutation type for adding and removing reactions
 builder.mutationType({
 	fields: (t) => ({
-		addVideoEmojiReaction: t.field({
+		addEmojiReaction: t.field({
 			type: 'Boolean',
 			args: {
-				videoId: t.arg({
+				contentId: t.arg({
 					type: 'String',
 					required: true,
 				}),
@@ -164,27 +146,32 @@ builder.mutationType({
 					type: 'String',
 					required: true,
 				}),
+				timestampPosition: t.arg({
+					type: 'Int',
+					required: false,
+				}),
 			},
 			resolve: async (_root, args) => {
 				try {
-					await db.insert(dataSchema.videoEmojiReactionsTable).values({
-						videoId: args.videoId,
+					await db.insert(dataSchema.emojiReactionsTable).values({
+						contentId: args.contentId,
 						personId: args.personId,
 						emoji: args.emoji,
 						reactedAt: new Date(),
+						timestampPosition: args.timestampPosition,
 					}).onConflictDoNothing();
 					
 					return true;
 				} catch (error) {
-					console.error('Error adding video emoji reaction:', error);
+					console.error('Error adding emoji reaction:', error);
 					return false;
 				}
 			},
 		}),
-		removeVideoEmojiReaction: t.field({
+		removeEmojiReaction: t.field({
 			type: 'Boolean',
 			args: {
-				videoId: t.arg({
+				contentId: t.arg({
 					type: 'String',
 					required: true,
 				}),
@@ -199,84 +186,18 @@ builder.mutationType({
 			},
 			resolve: async (_root, args) => {
 				try {
-					await db.delete(dataSchema.videoEmojiReactionsTable)
+					await db.delete(dataSchema.emojiReactionsTable)
 						.where(
 							and(
-								eq(dataSchema.videoEmojiReactionsTable.videoId, args.videoId),
-								eq(dataSchema.videoEmojiReactionsTable.personId, args.personId),
-								eq(dataSchema.videoEmojiReactionsTable.emoji, args.emoji),
+								eq(dataSchema.emojiReactionsTable.contentId, args.contentId),
+								eq(dataSchema.emojiReactionsTable.personId, args.personId),
+								eq(dataSchema.emojiReactionsTable.emoji, args.emoji),
 							),
 						);
 					
 					return true;
 				} catch (error) {
-					console.error('Error removing video emoji reaction:', error);
-					return false;
-				}
-			},
-		}),
-		addEpisodeEmojiReaction: t.field({
-			type: 'Boolean',
-			args: {
-				episodeId: t.arg({
-					type: 'String',
-					required: true,
-				}),
-				personId: t.arg({
-					type: 'String',
-					required: true,
-				}),
-				emoji: t.arg({
-					type: 'String',
-					required: true,
-				}),
-			},
-			resolve: async (_root, args) => {
-				try {
-					await db.insert(dataSchema.episodeEmojiReactionsTable).values({
-						episodeId: args.episodeId,
-						personId: args.personId,
-						emoji: args.emoji,
-						reactedAt: new Date(),
-					}).onConflictDoNothing();
-					
-					return true;
-				} catch (error) {
-					console.error('Error adding episode emoji reaction:', error);
-					return false;
-				}
-			},
-		}),
-		removeEpisodeEmojiReaction: t.field({
-			type: 'Boolean',
-			args: {
-				episodeId: t.arg({
-					type: 'String',
-					required: true,
-				}),
-				personId: t.arg({
-					type: 'String',
-					required: true,
-				}),
-				emoji: t.arg({
-					type: 'String',
-					required: true,
-				}),
-			},
-			resolve: async (_root, args) => {
-				try {
-					await db.delete(dataSchema.episodeEmojiReactionsTable)
-						.where(
-							and(
-								eq(dataSchema.episodeEmojiReactionsTable.episodeId, args.episodeId),
-								eq(dataSchema.episodeEmojiReactionsTable.personId, args.personId),
-								eq(dataSchema.episodeEmojiReactionsTable.emoji, args.emoji),
-							),
-						);
-					
-					return true;
-				} catch (error) {
-					console.error('Error removing episode emoji reaction:', error);
+					console.error('Error removing emoji reaction:', error);
 					return false;
 				}
 			},
@@ -287,7 +208,7 @@ builder.mutationType({
 // Query type for getting top reactions
 builder.queryType({
 	fields: (t) => ({
-		getTopVideoEmojiReactions: t.field({
+		getTopEmojiReactions: t.field({
 			type: [emojiReactionRef],
 			args: {
 				limit: t.arg({
@@ -298,38 +219,26 @@ builder.queryType({
 			resolve: async (_root, args) => {
 				const result = await db
 					.select({
-						emoji: dataSchema.videoEmojiReactionsTable.emoji,
+						emoji: dataSchema.emojiReactionsTable.emoji,
 						count: count(),
 					})
-					.from(dataSchema.videoEmojiReactionsTable)
-					.groupBy(dataSchema.videoEmojiReactionsTable.emoji)
+					.from(dataSchema.emojiReactionsTable)
+					.groupBy(dataSchema.emojiReactionsTable.emoji)
 					.orderBy(sql`count(*) DESC`)
 					.limit(args.limit ?? 10);
 
 				return result;
 			},
 		}),
-		getTopEpisodeEmojiReactions: t.field({
+		getEmojiReactionsForContent: t.field({
 			type: [emojiReactionRef],
 			args: {
-				limit: t.arg({
-					type: 'Int',
-					required: false,
+				contentId: t.arg({
+					type: 'String',
+					required: true,
 				}),
 			},
-			resolve: async (_root, args) => {
-				const result = await db
-					.select({
-						emoji: dataSchema.episodeEmojiReactionsTable.emoji,
-						count: count(),
-					})
-					.from(dataSchema.episodeEmojiReactionsTable)
-					.groupBy(dataSchema.episodeEmojiReactionsTable.emoji)
-					.orderBy(sql`count(*) DESC`)
-					.limit(args.limit ?? 10);
-
-				return result;
-			},
+			resolve: async (_root, args) => getEmojiReactionsForContent(args.contentId),
 		}),
 	}),
 });
