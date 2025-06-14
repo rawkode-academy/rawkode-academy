@@ -5,32 +5,18 @@ import {
 	text,
 } from 'drizzle-orm/sqlite-core';
 
-export const videoEmojiReactionsTable = sqliteTable(
-	'video_emoji_reactions',
+export const emojiReactionsTable = sqliteTable(
+	'emoji_reactions',
 	{
-		videoId: text('video_id').notNull(),
+		contentId: text('content_id').notNull(),
 		personId: text('person_id').notNull(),
 		emoji: text('emoji').notNull(),
-		reactedAt: integer('reacted_at', { mode: 'timestamp' }).notNull(),
+		reactedAt: integer('reacted_at', { mode: 'timestamp' }),
+		timestampPosition: integer('timestamp_position'),
 	},
 	(table) => ({
 		primaryKey: primaryKey({
-			columns: [table.videoId, table.personId, table.emoji],
-		}),
-	}),
-);
-
-export const episodeEmojiReactionsTable = sqliteTable(
-	'episode_emoji_reactions',
-	{
-		episodeId: text('episode_id').notNull(),
-		personId: text('person_id').notNull(),
-		emoji: text('emoji').notNull(),
-		reactedAt: integer('reacted_at', { mode: 'timestamp' }).notNull(),
-	},
-	(table) => ({
-		primaryKey: primaryKey({
-			columns: [table.episodeId, table.personId, table.emoji],
+			columns: [table.contentId, table.personId, table.emoji],
 		}),
 	}),
 );
