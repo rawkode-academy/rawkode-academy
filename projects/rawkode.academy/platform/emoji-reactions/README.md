@@ -13,11 +13,11 @@ This service allows learners to add emoji reactions to content on the Rawkode Ac
 ## Data Model
 
 The service stores emoji reactions with the following fields:
-- `contentId`: ID of the content being reacted to
-- `contentType`: Type of content (video, episode, etc.)
+- `contentId`: ID of the content being reacted to (generic, works with any content type)
 - `personId`: ID of the person adding the reaction
 - `emoji`: The emoji used for the reaction
 - `reactedAt`: Timestamp when the reaction was added
+- `contentTimestamp`: Optional position within video/audio content (in seconds)
 
 ## GraphQL Schema
 
@@ -31,7 +31,8 @@ It also provides mutations:
 - `removeEmojiReaction`: Remove an existing emoji reaction
 
 And queries:
-- `getTopEmojiReactions`: Get the most popular emoji reactions for a content type
+- `getTopEmojiReactions`: Get the most popular emoji reactions across all content
+- `getEmojiReactionsForContent`: Get emoji reactions for specific content
 
 ## Development
 

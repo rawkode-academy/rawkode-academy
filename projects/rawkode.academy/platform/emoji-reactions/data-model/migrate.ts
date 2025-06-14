@@ -1,10 +1,11 @@
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { db } from "./client";
 
 const main = async () => {
 	await migrate(db, {
-		migrationsFolder: `${dirname(import.meta.path)}/migrations`,
+		migrationsFolder: `${dirname(fileURLToPath(import.meta.url))}/migrations`,
 	});
 };
 
