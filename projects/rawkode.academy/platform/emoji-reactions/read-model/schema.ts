@@ -146,7 +146,7 @@ builder.mutationType({
 					type: 'String',
 					required: true,
 				}),
-				timestampPosition: t.arg({
+				contentTimestamp: t.arg({
 					type: 'Int',
 					required: false,
 				}),
@@ -158,7 +158,7 @@ builder.mutationType({
 						personId: args.personId,
 						emoji: args.emoji,
 						reactedAt: new Date(),
-						timestampPosition: args.timestampPosition,
+						contentTimestamp: args.contentTimestamp,
 					}).onConflictDoNothing();
 					
 					return true;
