@@ -12,7 +12,7 @@ export const emojiReactionsTable = sqliteTable(
 		personId: text('person_id').notNull(),
 		emoji: text('emoji').notNull(),
 		reactedAt: integer('reacted_at', { mode: 'timestamp' }),
-		timestampPosition: integer('timestamp_position'),
+		contentTimestamp: integer('content_timestamp'),
 	},
 	(table) => ({
 		primaryKey: primaryKey({
