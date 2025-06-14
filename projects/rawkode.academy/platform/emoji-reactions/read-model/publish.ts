@@ -9,6 +9,6 @@ const worker = await unstable_dev('main.ts', {
 const schema = getSchema();
 const sdl = printSchema(schema);
 
-console.log(sdl);
+writeFileSync('schema.gql', sdl);
 
 await worker.stop();
