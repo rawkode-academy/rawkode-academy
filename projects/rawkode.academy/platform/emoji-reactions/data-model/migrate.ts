@@ -1,17 +1,19 @@
-import { createClient } from '@libsql/client/web';
-import { drizzle } from 'drizzle-orm/libsql';
-import { migrate } from 'drizzle-orm/libsql/migrator';
+import { migrate } from "drizzle-orm/libsql/migrator";
+import { dirname } from "node:path";
+import { db } from "./client";
 
-const client = createClient({
-	url: 'file:emoji-reactions.db',
-});
+const main = async () => {
+	await migrate(db, {
+		migrationsFolder: `${dirname(import.meta.path)}/migrations`,
+	});
+};
 
-const db = drizzle(client);
+try {
+	await main();
+} catch (err) {
+	console.error("Error performing migration: ", err);
+	process.exit(1);
+}
 
-await migrate(db, {
-	migrationsFolder: './migrations',
-});
-
-console.log('Migrations complete');
-
-await client.close();
+console.log("Tables migrated!");
+process.exit(0);

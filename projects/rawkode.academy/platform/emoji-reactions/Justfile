@@ -1,19 +1,7 @@
-set dotenv-load
+deploy-read-model:
+	#!/usr/bin/env bash
+	bunx wrangler -c ./read-model/wrangler.jsonc deploy --var SERVICE_NAME:${SERVICE_NAME} --var LIBSQL_BASE_URL:${LIBSQL_BASE_URL}
 
-default:
-    @just --list
-
-dev:
-    npm run dev
-
-deploy:
-    npm run deploy
-
-publish-schema:
-    npm run publish-schema
-
-generate-migrations:
-    npm run generate-migrations
-
-migrate:
-    npm run migrate
+	bun run read-model/publish.ts
+	bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql
+	bunx wgc subgraph update ${SERVICE_NAME} --namespace production --routing-url https://${SERVICE_NAME}-read-model.rawkodeacademy.workers.dev
