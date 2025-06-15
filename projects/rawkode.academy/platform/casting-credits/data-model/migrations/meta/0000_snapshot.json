@@ -1,54 +1,58 @@
 {
-	"version": "6",
-	"dialect": "sqlite",
-	"id": "ad59de35-4ea4-4562-a0b2-c70fda218274",
-	"prevId": "00000000-0000-0000-0000-000000000000",
-	"tables": {
-		"casting-credits": {
-			"name": "casting-credits",
-			"columns": {
-				"person_id": {
-					"name": "person_id",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false
-				},
-				"role": {
-					"name": "role",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false
-				},
-				"video_id": {
-					"name": "video_id",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true,
-					"autoincrement": false
-				}
-			},
-			"indexes": {},
-			"foreignKeys": {},
-			"compositePrimaryKeys": {
-				"casting-credits_person_id_role_video_id_pk": {
-					"columns": ["person_id", "role", "video_id"],
-					"name": "casting-credits_person_id_role_video_id_pk"
-				}
-			},
-			"uniqueConstraints": {},
-			"checkConstraints": {}
-		}
-	},
-	"views": {},
-	"enums": {},
-	"_meta": {
-		"schemas": {},
-		"tables": {},
-		"columns": {}
-	},
-	"internal": {
-		"indexes": {}
-	}
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "d0b4fbd2-d55c-4720-b2f0-62faf8a02e04",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "casting_credits": {
+      "name": "casting_credits",
+      "columns": {
+        "person_id": {
+          "name": "person_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "video_id": {
+          "name": "video_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "casting_credits_person_id_role_video_id_pk": {
+          "columns": [
+            "person_id",
+            "role",
+            "video_id"
+          ],
+          "name": "casting_credits_person_id_role_video_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
 }

@@ -1,16 +1,11 @@
 {
 	"$schema": "https://unpkg.com/wrangler/config-schema.json",
-	"name": "casting-credits-read-model",
-	"main": "./main.ts",
-
+	"name": "platform-casting-credits-read-model",
+	"main": "main.ts",
 	"compatibility_date": "2025-04-05",
-	"compatibility_flags": [
-		"nodejs_compat",
-	],
-
+	"compatibility_flags": ["nodejs_compat"],
 	"keep_vars": false,
 	"minify": true,
-
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,
@@ -21,18 +16,17 @@
 		}
 	},
 
-	// Not available via nodejs_compat_populate_process_env
-	// "secrets_store_secrets": [
-	// 	{
-	// 		"binding": "LIBSQL_TOKEN",
-	// 		"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
-	// 		"secret_name": "LIBSQL_TOKEN_PLATFORM"
-	// 	}
-	// ],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "platform-casting-credits",
+			"database_id": "15730bdf-5b13-40dd-b072-0d15ee0a570a",
+			"migrations_dir": "../data-model/migrations"
+		}
+	],
 
 	"placement": {
 		"mode": "smart"
 	},
-
 	"workers_dev": true
 }

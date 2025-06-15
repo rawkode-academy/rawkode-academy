@@ -1,7 +1,7 @@
 import { primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const castingCreditsTable = sqliteTable(
-	"casting-credits",
+	"casting_credits",
 	{
 		personId: text("person_id").notNull(),
 		role: text("role").notNull(),
