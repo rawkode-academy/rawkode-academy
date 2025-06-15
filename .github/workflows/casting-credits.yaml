@@ -70,23 +70,23 @@ jobs:
           SERVICE_NAME: platform-casting-credits
         run: |
           dagger <<.
+            codebase=$(../../../../dagger/bun | install --directory .)
+            
             ../../../../dagger/cloudflare | deploy \
-              ./ \
+              $codebase \
               ./read-model/wrangler.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN
-          .
-          dagger <<.
+              
             ../../../../dagger/cloudflare | applyMigrations \
-              ./ \
+              $codebase \
               ./read-model/wrangler.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN \
               platform-casting-credits
-          .
-          dagger <<.
+
             ../../../../dagger/wundergraph | generateAndPublishSubgraph \
               ${SERVICE_NAME} \
               production \
-              . \
+              $codebase \
               ./read-model/publish.ts \
               https://${SERVICE_NAME}-read-model.rawkode-academy.workers.dev \
               env:COSMO_API_KEY
