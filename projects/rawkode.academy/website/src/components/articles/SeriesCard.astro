@@ -18,12 +18,14 @@ const { series } = Astro.props;
 					class="w-full h-52 object-cover"
 					src={series.data.cover.image}
 					alt={series.data.cover.alt}
+					loading="lazy"
 				/>
 			) : (
 				<img
 					class="w-full h-52 object-cover"
 					src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
-					alt="office laptop working"
+					alt="Default placeholder image for series without custom cover"
+					loading="lazy"
 				/>
 			)
 		}

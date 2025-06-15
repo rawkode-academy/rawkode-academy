@@ -9,6 +9,7 @@ import {
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Badge from "@/components/common/Badge.vue";
 import CourseModules from "@/components/courses/CourseModules.astro";
+import CourseJsonLd from "@/components/html/course-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
@@ -94,6 +95,22 @@ const breadcrumbElements = [
 	updatedAt={course.data.updatedAt}
 	authors={authors}
 >
+	{imageUrl ? (
+		<CourseJsonLd
+			slot="extra-head"
+			course={course}
+			modules={allCourseModules}
+			authors={authors}
+			imageUrl={imageUrl}
+		/>
+	) : (
+		<CourseJsonLd
+			slot="extra-head"
+			course={course}
+			modules={allCourseModules}
+			authors={authors}
+		/>
+	)}
 		<div class="bg-white dark:bg-gray-900">
 		<!-- Breadcrumb Section -->
 		<div class="py-4 px-4 mx-auto max-w-screen-xl border-b border-gray-100 dark:border-gray-800">

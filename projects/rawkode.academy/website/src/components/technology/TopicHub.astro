@@ -1,0 +1,85 @@
+---
+import { getCollection } from "astro:content";
+import ArticleCard from "@/components/articles/ArticleCard.astro";
+import SectionHeader from "@/components/common/SectionHeader.vue";
+
+export interface Props {
+	technologyId: string;
+	technologyName: string;
+	videos: Array<{
+		id: string;
+		title: string;
+		thumbnailUrl: string;
+		slug: string;
+	}>;
+}
+
+const { technologyId, technologyName, videos = [] } = Astro.props;
+
+// Get all articles that mention this technology
+const allArticles = await getCollection("articles", ({ data }) => {
+	return !data.isDraft && data.technologies?.includes(technologyId);
+});
+
+// Sort articles by date
+const articles = allArticles.sort(
+	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+---
+
+<div class="space-y-12">
+  <!-- Articles Section -->
+  {articles.length > 0 && (
+    <section>
+      <SectionHeader 
+        title={`Articles about ${technologyName}`}
+        showSeparator={false}
+        class="mb-6"
+      />
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {articles.map((article) => (
+          <ArticleCard article={article} />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Videos Section -->
+  {videos.length > 0 && (
+    <section>
+      <SectionHeader 
+        title={`Videos about ${technologyName}`}
+        showSeparator={false}
+        class="mb-6"
+      />
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {videos.map((video) => (
+          <a
+            href={`/watch/${video.slug}`}
+            class="group relative block overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 aspect-video"
+          >
+            <img
+              src={video.thumbnailUrl}
+              alt={video.title}
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div class="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+              <h3 class="font-semibold line-clamp-2">{video.title}</h3>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Empty State -->
+  {articles.length === 0 && videos.length === 0 && (
+    <div class="text-center py-12">
+      <p class="text-gray-500 dark:text-gray-400">
+        No content found for {technologyName} yet. Check back soon!
+      </p>
+    </div>
+  )}
+</div>

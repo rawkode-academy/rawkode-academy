@@ -1,7 +1,9 @@
 ---
 import { getCollection } from "astro:content";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 // ShareButton is now internal to VideoReactions
 import VideoMetadata from "@/components/html/video-metadata.astro";
+import RelatedVideos from "@/components/video/RelatedVideos.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import VideoReactions from "@/components/video/reactions.vue";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
@@ -125,6 +127,12 @@ const formatDate = (dateString: string) => {
 		day: "numeric",
 	});
 };
+
+const breadcrumbElements = [
+	{ title: "Home", link: "/" },
+	{ title: "Videos", link: "/watch" },
+	{ title: video.data.title, link: `/watch/${video.data.slug}` },
+];
 ---
 
 <Page
@@ -144,6 +152,11 @@ const formatDate = (dateString: string) => {
 	/>
 	<div class="min-h-screen bg-gray-50 dark:bg-gray-950">
 		<div class="container mx-auto px-4 py-6 lg:py-8 max-w-screen-2xl">
+			{/* Breadcrumb */}
+			<div class="mb-6">
+				<Breadcrumb elements={breadcrumbElements} />
+			</div>
+			
 			{/* Hero Section with Title */}
 			<div class="mb-8">
 				<h1 class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">{video.data.title}</h1>
@@ -173,7 +186,7 @@ const formatDate = (dateString: string) => {
 				{/* Video Controls & Social Features */}
 				<div class="mt-4">
 					<VideoReactions
-						client:load
+						client:idle
 						videoId={video.data.id}
 						videoTitle={video.data.title}
 						videoSlug={video.data.slug}
@@ -184,7 +197,7 @@ const formatDate = (dateString: string) => {
 				{/* Tabbed Content: Description & Transcript */}
 				<div class="mt-6">
 					<VideoContentTabs
-						client:load
+						client:idle
 						descriptionHtml={renderedDescriptionHtml}
 						videoId={video.data.id}
 					/>
@@ -223,6 +236,9 @@ const formatDate = (dateString: string) => {
 				}
 
 			</div>
+			
+			{/* Related Videos */}
+			<RelatedVideos currentVideo={video} limit={4} />
 			</div>
 		</div>
 	</div>

@@ -3,6 +3,7 @@ import Button from "@/components/common/Button.vue";
 import PageHero from "@/components/common/PageHero.vue";
 import FAQ from "@/components/faq/list.vue";
 import FeatureListIcons from "@/components/feature/list-icons.vue";
+import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import PartnerLogos from "@/components/partner/logos.astro";
 import Pricing from "@/components/partner/pricing/cards.vue";
 import Featured from "@/components/partner/pricing/featured.vue";
@@ -10,6 +11,34 @@ import VsConference from "@/components/partner/vs-conference.astro";
 import Stats from "@/components/stats/simple.vue";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
 import Page from "@/wrappers/page.astro";
+
+const partnershipFAQs = [
+	{
+		question: "What is the minimum partnership duration?",
+		answer:
+			"Our partnerships are structured as annual engagements to ensure we can deliver meaningful results. Developer marketing and education require a strategic, long-term approach to build awareness, trust, and adoption. Our experience shows that sustained engagement over time yields significantly better outcomes than short-term campaigns.",
+	},
+	{
+		question: "What are the payment terms for partnerships?",
+		answer:
+			"For Nip and Dram partnerships, we typically require annual payment upfront. For Blend and Malt partnerships, we offer flexible payment options including quarterly or semi-annual installments. We're happy to discuss payment structures that align with your budgeting cycles during our consultation.",
+	},
+	{
+		question: "How do you measure partnership success?",
+		answer:
+			"We provide comprehensive analytics and reporting tailored to your specific goals. Metrics typically include content engagement (views, watch time, interactions), developer sentiment, community growth, and when possible, product adoption indicators. All partnerships include regular performance reviews to ensure we're delivering value and to refine our approach as needed. For partners at the Blend and Malt tiers, we also provide deeper insights into developer behavior and preferences, helping you refine your product and go-to-market strategy.",
+	},
+	{
+		question: "How do you qualify potential partners?",
+		answer:
+			"We partner with companies that offer genuine value to developers and align with our mission of advancing developer education. We evaluate potential partners based on their technology's innovation, market relevance, and potential impact on the developer community. We're selective in our partnerships to ensure we can authentically advocate for your products.",
+	},
+	{
+		question: "I have additional questions about partnerships",
+		answer:
+			"We'd be happy to discuss your specific needs and answer any questions you may have. Schedule a consultation with our partnership team to explore how we can work together to achieve your developer marketing and education goals.",
+	},
+];
 ---
 
 <style>
@@ -38,6 +67,7 @@ import Page from "@/wrappers/page.astro";
 	title="Strategic Technology Partnerships | Rawkode Academy"
 	description="Partner with Rawkode Academy to accelerate developer adoption, improve product experience, and drive growth through expert technical content and strategic guidance."
 >
+	<FAQJsonLD questions={partnershipFAQs} slot="head" />
 	<!-- Hero Section -->
 	<PageHero
 		title="Strategic Technology Partnerships"

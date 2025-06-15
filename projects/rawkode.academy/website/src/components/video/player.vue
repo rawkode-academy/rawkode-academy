@@ -9,7 +9,6 @@ const props = defineProps<{
 	autoPlay?: boolean;
 }>();
 
-const player = ref<HTMLElement | null>(null);
 const progressMilestones = ref<Set<number>>(new Set());
 
 type VideoAnalyticsEvent =
@@ -32,11 +31,13 @@ async function trackVideoEvent(event: VideoAnalyticsEvent) {
 }
 
 onMounted(() => {
-	if (!player.value) return;
+	// Get the media player element
+	const playerEl = document.querySelector("media-player");
+	if (!playerEl) return;
 
 	// Handle media events
-	player.value.addEventListener("play", () => {
-		const mediaEl = player.value?.querySelector("video");
+	playerEl.addEventListener("play", () => {
+		const mediaEl = playerEl.querySelector("video");
 		if (!mediaEl) return;
 
 		const event: VideoAnalyticsEvent = {
@@ -47,8 +48,8 @@ onMounted(() => {
 		trackVideoEvent(event);
 	});
 
-	player.value.addEventListener("pause", () => {
-		const mediaEl = player.value?.querySelector("video");
+	playerEl.addEventListener("pause", () => {
+		const mediaEl = playerEl.querySelector("video");
 		if (!mediaEl) return;
 
 		const event: VideoAnalyticsEvent = {
@@ -59,8 +60,8 @@ onMounted(() => {
 		trackVideoEvent(event);
 	});
 
-	player.value.addEventListener("seeked", () => {
-		const mediaEl = player.value?.querySelector("video");
+	playerEl.addEventListener("seeked", () => {
+		const mediaEl = playerEl.querySelector("video");
 		if (!mediaEl) return;
 
 		const event: VideoAnalyticsEvent = {
@@ -71,7 +72,7 @@ onMounted(() => {
 		trackVideoEvent(event);
 	});
 
-	player.value.addEventListener("ended", () => {
+	playerEl.addEventListener("ended", () => {
 		const event: VideoAnalyticsEvent = {
 			action: "completed",
 			video: props.video,
@@ -79,8 +80,8 @@ onMounted(() => {
 		trackVideoEvent(event);
 	});
 
-	player.value.addEventListener("timeupdate", () => {
-		const mediaEl = player.value?.querySelector("video");
+	playerEl.addEventListener("timeupdate", () => {
+		const mediaEl = playerEl.querySelector("video");
 		if (!mediaEl || !mediaEl.duration) return;
 
 		const progress = Math.floor((mediaEl.currentTime / mediaEl.duration) * 100);
@@ -103,11 +104,14 @@ onMounted(() => {
 
 <template>
 	<div class="w-full aspect-video">
-		<media-player ref="player" :autoplay="!!autoPlay" class="w-full h-full">
+		<media-player 
+			:autoplay="!!autoPlay" 
+			class="w-full h-full"
+			playsinline
+		>
 			<media-provider>
 				<source :src="`https://content.rawkode.academy/videos/${video}/stream.m3u8`" type="application/x-mpegurl" />
-				<Track :src="`https://content.rawkode.academy/videos/${video}/captions/en.vtt`" kind="subtitles" label="English"
-					lang="en-US" default />
+				<track :src="`https://content.rawkode.academy/videos/${video}/captions/en.vtt`" kind="subtitles" label="English" lang="en-US" default />
 				<track kind="chapters" :src="`/api/chapters/${video}`" label="Chapters" default />
 				<media-poster class="vds-poster" :src="thumbnailUrl" :alt="`Thumbnail for ${video}`"></media-poster>
 			</media-provider>
@@ -115,3 +119,27 @@ onMounted(() => {
 		</media-player>
 	</div>
 </template>
+
+<style scoped>
+/* Prevent automatic fullscreen on iOS */
+:deep(video) {
+	-webkit-playsinline: true;
+	playsinline: true;
+}
+
+/* Ensure video stays in its container on mobile */
+:deep(media-player) {
+	position: relative !important;
+}
+
+/* Override any fullscreen styles on mobile */
+@media (max-width: 768px) {
+	:deep(video::-webkit-media-controls-fullscreen-button) {
+		display: inline-block !important;
+	}
+	
+	:deep(.vds-fullscreen) {
+		position: relative !important;
+	}
+}
+</style>

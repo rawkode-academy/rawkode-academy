@@ -1,0 +1,89 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+	course: CollectionEntry<"courses">;
+	modules: CollectionEntry<"courseModules">[];
+	authors: CollectionEntry<"people">[];
+	imageUrl?: URL;
+}
+
+const { course, modules, authors, imageUrl } = Astro.props;
+
+// Calculate total duration (estimated based on module count)
+const estimatedDurationPerModule = 30; // minutes
+const totalDurationMinutes = modules.length * estimatedDurationPerModule;
+const totalDurationISO = `PT${Math.floor(totalDurationMinutes / 60)}H${totalDurationMinutes % 60}M`;
+
+// Map difficulty to skill level
+const getSkillLevel = (difficulty: string) => {
+	switch (difficulty) {
+		case "beginner":
+			return "Beginner";
+		case "intermediate":
+			return "Intermediate";
+		case "advanced":
+			return "Advanced";
+		default:
+			return "Intermediate";
+	}
+};
+
+// Create hasCourseInstance for each module
+const courseInstances = modules.map((module) => ({
+	"@type": "CourseInstance",
+	name: module.data.title,
+	description: module.data.description,
+	courseMode: "online",
+	courseWorkload: "PT30M", // Estimated 30 minutes per module
+}));
+
+// Create structured data for the course
+const courseJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "Course",
+	name: course.data.title,
+	description: course.data.description,
+	provider: {
+		"@type": "Organization",
+		name: "Rawkode Academy",
+		sameAs: "https://rawkode.academy",
+		logo: {
+			"@type": "ImageObject",
+			url: "https://rawkode.academy/android-chrome-512x512.png",
+		},
+	},
+	educationalCredentialAwarded: "Certificate of Completion",
+	coursePrerequisites: [],
+	hasCourseInstance: courseInstances,
+	numberOfCredits: modules.length,
+	timeRequired: totalDurationISO,
+	skillLevel: getSkillLevel(course.data.difficulty),
+	inLanguage: "en-US",
+	availableLanguage: ["en-US"],
+	datePublished: course.data.publishedAt.toISOString(),
+	dateModified:
+		course.data.updatedAt?.toISOString() ||
+		course.data.publishedAt.toISOString(),
+	image:
+		imageUrl?.toString() ||
+		"https://rawkode.academy/android-chrome-512x512.png",
+	creator: authors.map((author) => ({
+		"@type": "Person",
+		name: author.data.name,
+		url: `https://github.com/${author.data.handle}`,
+	})),
+	teaches: modules.map((module) => module.data.title).join(", "),
+	educationalLevel: getSkillLevel(course.data.difficulty),
+	learningResourceType: "Online Course",
+	interactivityType: "active",
+	isAccessibleForFree: true,
+	url: new URL(`/courses/${course.id}`, Astro.site).href,
+};
+---
+
+<script
+	type="application/ld+json"
+	set:html={JSON.stringify(courseJsonLd)}
+	is:inline
+></script>

@@ -1,0 +1,27 @@
+---
+export interface FAQItem {
+	question: string;
+	answer: string;
+}
+
+export interface Props {
+	questions: FAQItem[];
+}
+
+const { questions } = Astro.props;
+
+const faqJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "FAQPage",
+	mainEntity: questions.map((item) => ({
+		"@type": "Question",
+		name: item.question,
+		acceptedAnswer: {
+			"@type": "Answer",
+			text: item.answer,
+		},
+	})),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} is:inline />

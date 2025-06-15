@@ -14,6 +14,7 @@ interface Props {
 	};
 	authors: Author[];
 	publishedAt: Date;
+	readingTimeText?: string;
 }
 
 defineProps<Props>();
@@ -31,12 +32,14 @@ defineProps<Props>();
           class="w-full h-52 object-cover"
           :src="cover.image"
           :alt="cover.alt"
+          loading="lazy"
         />
         <img
           v-else
           class="w-full h-52 object-cover"
           src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
-          alt="office laptop working"
+          alt="Default placeholder image for article without custom cover"
+          loading="lazy"
         />
         <div class="absolute top-3 left-3 z-20">
           <span
@@ -69,6 +72,7 @@ defineProps<Props>();
                     class="w-10 h-10 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white"
                     :src="`https://github.com/${author.handle}.png`"
                     :alt="`Profile picture of ${author.name}`"
+                    loading="lazy"
                   />
                   <span 
                     v-if="index === 0" 
@@ -85,11 +89,17 @@ defineProps<Props>();
                 <div class="text-sm">{{ authors.map(a => a.name).join(", ") }}</div>
               </div>
             </div>
-            <div class="flex items-center space-x-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <div class="text-xs font-normal text-gray-500 dark:text-gray-400">
+            <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+              <div v-if="readingTimeText" class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {{ readingTimeText }}
+              </div>
+              <div class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
                 {{ new Intl.DateTimeFormat('en-US', {
                   year: 'numeric',
                   month: 'short',

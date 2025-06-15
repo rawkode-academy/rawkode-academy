@@ -58,7 +58,38 @@ const structuredData = isVideoList
 			uploadDate: publishedAt,
 			duration: formattedDuration,
 			contentUrl: streamUrl,
+			embedUrl: streamUrl, // Required for Google Video Search
 			url: Astro.url.href,
+			// Additional required/recommended properties for Google Video Search
+			publisher: {
+				"@type": "Organization",
+				name: "Rawkode Academy",
+				logo: {
+					"@type": "ImageObject",
+					url: "https://rawkode.academy/android-chrome-512x512.png",
+					width: 512,
+					height: 512,
+				},
+			},
+			creator: {
+				"@type": "Person",
+				name: "David McKay",
+				url: "https://rawkode.academy",
+			},
+			interactionStatistic: {
+				"@type": "InteractionCounter",
+				interactionType: { "@type": "WatchAction" },
+				userInteractionCount: 0, // This would ideally come from your analytics
+			},
+			expires: null, // Videos don't expire
+			hasPart: [], // Could add chapters here if available
+			isAccessibleForFree: true,
+			isLiveBroadcast: false,
+			isFamilyFriendly: true,
+			inLanguage: "en-US",
+			// Video quality information
+			videoFrameSize: "1920x1080",
+			videoQuality: "HD",
 		};
 ---
 

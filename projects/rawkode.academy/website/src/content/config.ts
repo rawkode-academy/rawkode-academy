@@ -122,6 +122,7 @@ const articles = defineCollection({
 				.optional(),
 			isDraft: z.boolean().default(true),
 			authors: z.array(reference("people")).default(["rawkode"]),
+			technologies: z.array(z.string()).optional(),
 		}),
 });
 

@@ -11,6 +11,7 @@
           class="w-10 h-10 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white"
           :src="`https://github.com/${author.data.handle}.png`"
           :alt="`Profile picture of ${author.data.name}`"
+          loading="lazy"
         />
         <span
           v-if="showActiveIndicator && index === 0"
@@ -34,8 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import type { CollectionEntry } from "astro:content";
+import { computed } from "vue";
 
 interface Props {
 	authors: CollectionEntry<"people">[];

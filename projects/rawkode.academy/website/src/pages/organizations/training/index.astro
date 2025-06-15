@@ -5,7 +5,36 @@ import FeatureCard from "@/components/common/FeatureCard.vue";
 import GridLayout from "@/components/common/GridLayout.vue";
 import PageHero from "@/components/common/PageHero.vue";
 import FAQ from "@/components/faq/training-list.vue";
+import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import Page from "@/wrappers/page.astro";
+
+const trainingFAQs = [
+	{
+		question: "How many people can attend a training session?",
+		answer:
+			"For on-site workshops, we can accommodate up to 20 participants per instructor. For virtual live training, we recommend a maximum of 15 participants to ensure adequate interaction and support. For larger teams, we can arrange multiple sessions or provide additional instructors for an additional fee.",
+	},
+	{
+		question: "Do you provide training materials to participants?",
+		answer:
+			"Yes, all participants receive comprehensive digital training materials including slides, lab instructions, sample code, and additional resources for further learning. For virtual sessions, we also provide recordings of the training sessions that remain accessible for 30 days after the program concludes.",
+	},
+	{
+		question: "How far in advance should we book training?",
+		answer:
+			"We recommend booking at least 4-6 weeks in advance to ensure availability of our instructors and allow adequate time for customization. For on-site training that requires travel arrangements or custom program development, 8-12 weeks of lead time is ideal. However, we do try to accommodate urgent requests when possible.",
+	},
+	{
+		question: "What prerequisites should participants have?",
+		answer:
+			"Prerequisites vary by training program. For most technical training, participants should have basic command-line skills and familiarity with fundamental concepts like containerization or CI/CD. However, we tailor the difficulty level to match your team's experience. During our pre-training assessment, we'll identify any specific knowledge gaps and can recommend pre-training resources if necessary.",
+	},
+	{
+		question: "I have additional questions about training programs",
+		answer:
+			"We'd be happy to discuss your specific training needs and answer any questions you may have. Schedule a consultation with our team to explore how we can help upskill your technical team.",
+	},
+];
 ---
 
 <style>
@@ -34,6 +63,7 @@ import Page from "@/wrappers/page.astro";
 	title="Technical Training Programs | Rawkode Academy"
 	description="Hands-on technical training programs for cloud native technologies, developer experience, and platform engineering to upskill your engineering teams."
 >
+	<FAQJsonLD questions={trainingFAQs} slot="head" />
 	<!-- Hero Section -->
 	<PageHero
 		title="Professional Technical Training"

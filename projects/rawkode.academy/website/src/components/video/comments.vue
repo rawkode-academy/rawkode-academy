@@ -41,6 +41,7 @@
               :src="comment.avatar_url"
               :alt="comment.author"
               class="h-8 w-8 rounded-full"
+              loading="lazy"
             />
             <div
               v-else
