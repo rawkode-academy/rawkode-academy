@@ -10,10 +10,10 @@ import {
 
 @object()
 export class Bun {
-	private container: Container;
+	private _container: Container;
 
 	constructor(version: string = "1-debian") {
-		this.container = dag
+		this._container = dag
 			.container()
 			.from(`oven/bun:${version}`)
 			.withWorkdir("/code");
@@ -22,7 +22,7 @@ export class Bun {
 
 	@func()
 	async withCache(): Promise<Bun> {
-		this.container = this.container.withMountedCache(
+		this._container = this._container.withMountedCache(
 			"/home/bun/.bun",
 			dag.cacheVolume("bun-cache"),
 			{
@@ -34,13 +34,18 @@ export class Bun {
 	}
 
 	@func()
+	container(): Container {
+		return this._container;
+	}
+
+	@func()
 	async install(
 		@argument({ ignore: [".git", "node_modules"] }) directory: Directory,
 	): Promise<Container> {
 		const nodeModules = dag.cacheVolume("node-modules");
 
 		return this
-			.container
+			._container
 			.withMountedFile("/code/bun.lock", directory.file("bun.lock"))
 			.withMountedFile("/code/package.json", directory.file("package.json"))
 			.withMountedCache(

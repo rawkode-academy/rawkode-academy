@@ -63,7 +63,7 @@ jobs:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
         run: |
           dagger <<.
-            ../../../dagger/cloudflare | deploy \
+            ../../../dagger/cloudflare | deploy-dist \
               ./dist \
               wrangler.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN

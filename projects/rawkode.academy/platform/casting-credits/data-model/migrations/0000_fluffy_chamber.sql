@@ -1,4 +1,4 @@
-CREATE TABLE `casting-credits` (
+CREATE TABLE `casting_credits` (
 	`person_id` text NOT NULL,
 	`role` text NOT NULL,
 	`video_id` text NOT NULL,

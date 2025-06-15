@@ -3,10 +3,76 @@ import { dag, Directory, File, func, object, Secret } from "@dagger.io/dagger";
 @object()
 export class Cloudflare {
 	/**
-	 * Deploy a website with worker script to Cloudflare Workers.
+	 * Deploy a backend service with worker script to Cloudflare Workers.
 	 */
 	@func()
 	async deploy(
+		source: Directory,
+		wranglerPath: string,
+		cloudflareApiToken: Secret,
+	): Promise<string> {
+		const cloudflareAccountId = await dag.config().cloudflareAccountId();
+
+		const deploymentResult = await dag
+			.container()
+			.from("node:22")
+			// Only doing this to cache the wrangler installation
+			.withExec(["npx", "wrangler", "--version"])
+			.withWorkdir("/deploy")
+			.withMountedDirectory("/deploy", source)
+			.withEnvVariable("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
+			.withSecretVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
+			.withExec(["npx", "wrangler", "deploy", "--config", wranglerPath]);
+
+		if ((await deploymentResult.exitCode()) !== 0) {
+			throw new Error(
+				"Deployment failed. Error: " +
+					(await deploymentResult.stdout()) +
+					(await deploymentResult.stderr()),
+			);
+		}
+
+		return deploymentResult.stdout();
+	}
+
+	/**
+	 * Apply migrations to a backend service with worker script to Cloudflare Workers.
+	 */
+	@func()
+	async applyMigrations(
+		source: Directory,
+		wranglerPath: string,
+		cloudflareApiToken: Secret,
+	): Promise<string> {
+		const cloudflareAccountId = await dag.config().cloudflareAccountId();
+
+		const deploymentResult = await dag
+			.container()
+			.from("node:22")
+			// Only doing this to cache the wrangler installation
+			.withExec(["npx", "wrangler", "--version"])
+			.withWorkdir("/deploy")
+			.withMountedDirectory("/deploy", source)
+			.withEnvVariable("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
+			.withSecretVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
+			.withExec(["npx", "wrangler", "--config", wranglerPath, "d1", "migrations", "apply", "--remote", "DB"]);
+
+		if ((await deploymentResult.exitCode()) !== 0) {
+			throw new Error(
+				"Deployment failed. Error: " +
+					(await deploymentResult.stdout()) +
+					(await deploymentResult.stderr()),
+			);
+		}
+
+		return deploymentResult.stdout();
+	}
+
+	/**
+	 * Deploy a website with worker script to Cloudflare Workers.
+	 */
+	@func()
+	async deployDist(
 		dist: Directory,
 		wranglerConfig: File,
 		cloudflareApiToken: Secret,
@@ -22,6 +88,7 @@ export class Cloudflare {
 			// Only doing this to cache the wrangler installation
 			.withExec(["npx", "wrangler", "--version"])
 			.withMountedDirectory("/deploy/dist", dist)
+			.withExec(["ls"])
 			.withMountedFile(`/deploy/${wranglerFilename}`, wranglerConfig)
 			.withEnvVariable("CLOUDFLARE_ACCOUNT_ID", cloudflareAccountId)
 			.withSecretVariable("CLOUDFLARE_API_TOKEN", cloudflareApiToken)
