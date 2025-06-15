@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { initFlowbite } from "flowbite";
-import { onMounted, ref, computed } from "vue";
-import MenuItems from "./items.vue";
+import { ChatBubbleLeftEllipsisIcon } from "@heroicons/vue/20/solid";
 import {
+	AcademicCapIcon,
+	CalendarIcon,
+	ChevronDownIcon,
+	ChevronRightIcon,
+	ClockIcon,
+	CubeIcon,
+	DocumentTextIcon,
 	InformationCircleIcon,
 	NewspaperIcon,
 	RocketLaunchIcon,
 	VideoCameraIcon,
-	CalendarIcon,
 	WrenchScrewdriverIcon,
-	AcademicCapIcon,
-	CubeIcon,
-	DocumentTextIcon,
-	ClockIcon,
-	ChevronDownIcon,
-	ChevronRightIcon,
 } from "@heroicons/vue/24/outline";
-import { ChatBubbleLeftEllipsisIcon } from "@heroicons/vue/20/solid";
+import { initFlowbite } from "flowbite";
+import { computed, onMounted, ref } from "vue";
+import MenuItems from "./items.vue";
 
 // Get the current path from the window location
 const currentPath = ref("");
@@ -29,9 +29,12 @@ const sectionsExpanded = ref({
 onMounted(() => {
 	currentPath.value = window.location.pathname;
 	initFlowbite();
-	
+
 	// Auto-expand sections if they contain the current page
-	if (currentPath.value.startsWith('/community-day') || currentPath.value.includes('chat.rawkode')) {
+	if (
+		currentPath.value.startsWith("/community-day") ||
+		currentPath.value.includes("chat.rawkode")
+	) {
 		sectionsExpanded.value.community = true;
 	}
 });
@@ -52,7 +55,12 @@ const baseMenuItemsMain = [
 // Community items
 const baseMenuItemsCommunity = [
 	{ name: "Community Day", href: "/community-day", icon: CalendarIcon },
-	{ name: "Zulip Chat", href: "https://chat.rawkode.academy", icon: ChatBubbleLeftEllipsisIcon, target: "_blank" },
+	{
+		name: "Zulip Chat",
+		href: "https://chat.rawkode.academy",
+		icon: ChatBubbleLeftEllipsisIcon,
+		target: "_blank",
+	},
 ];
 
 // Footer items - always visible at bottom

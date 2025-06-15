@@ -102,42 +102,42 @@
 </template>
 
 <script>
-import VideoTranscript from "./transcript.vue";
 import VideoComments from "./comments.vue";
+import VideoTranscript from "./transcript.vue";
 
 export default {
-  name: "VideoContentTabs",
-  components: {
-    VideoTranscript,
-    VideoComments,
-  },
-  props: {
-    descriptionHtml: {
-      type: String,
-      required: true,
-      default: "",
-    },
-    videoId: {
-      type: String,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      activeTab: "description",
-      tabs: [
-        { id: "description", label: "Description" },
-        { id: "comments", label: "Comments" },
-        { id: "resources", label: "Resources" },
-        { id: "transcript", label: "Transcript" },
-      ],
-    };
-  },
-  methods: {
-    setActiveTab(tabId) {
-      this.activeTab = tabId;
-    },
-  },
+	name: "VideoContentTabs",
+	components: {
+		VideoTranscript,
+		VideoComments,
+	},
+	props: {
+		descriptionHtml: {
+			type: String,
+			required: true,
+			default: "",
+		},
+		videoId: {
+			type: String,
+			required: true,
+		},
+	},
+	data() {
+		return {
+			activeTab: "description",
+			tabs: [
+				{ id: "description", label: "Description" },
+				{ id: "comments", label: "Comments" },
+				{ id: "resources", label: "Resources" },
+				{ id: "transcript", label: "Transcript" },
+			],
+		};
+	},
+	methods: {
+		setActiveTab(tabId) {
+			this.activeTab = tabId;
+		},
+	},
 };
 </script>
 

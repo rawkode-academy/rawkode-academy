@@ -1,11 +1,11 @@
 [
-  { "name": "time", "type": "timestamp" },
+	{ "name": "time", "type": "timestamp" },
 
-  { "name": "action", "type": "tag" },
-  { "name": "platform", "type": "tag" },
-  { "name": "content_type", "type": "tag" },
-  { "name": "content_id", "type": "tag" },
-  { "name": "viewer", "type": "tag" },
+	{ "name": "action", "type": "tag" },
+	{ "name": "platform", "type": "tag" },
+	{ "name": "content_type", "type": "tag" },
+	{ "name": "content_id", "type": "tag" },
+	{ "name": "viewer", "type": "tag" },
 
-  { "name": "success", "type": "field", "dataType": "boolean" }
+	{ "name": "success", "type": "field", "dataType": "boolean" }
 ]

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Carousel, Slide, Pagination, Navigation } from "vue3-carousel";
+import { Carousel, Navigation, Pagination, Slide } from "vue3-carousel";
 import "vue3-carousel/dist/carousel.css";
 
 // Use a more permissive type definition by using a Record type

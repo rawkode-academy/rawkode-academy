@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import ShareButton from './ShareButton.vue';
+import ShareButton from "./ShareButton.vue";
 
 export default {
 	components: {
@@ -106,9 +106,9 @@ export default {
 			bannerTimeout: null,
 			showShareOptions: false, // New state for toggling ShareButton
 			reactions: [
-				{ emoji: '👍', label: 'Like this video', count: 124 },
-				{ emoji: '🚀', label: 'Rocket reaction', count: 89 },
-				{ emoji: '💡', label: 'Insightful reaction', count: 45 },
+				{ emoji: "👍", label: "Like this video", count: 124 },
+				{ emoji: "🚀", label: "Rocket reaction", count: 89 },
+				{ emoji: "💡", label: "Insightful reaction", count: 45 },
 			],
 		};
 	},
@@ -127,23 +127,23 @@ export default {
 		showComingSoonBanner() {
 			// Clear any existing timeout
 			if (this.bannerTimeout) {
-        clearTimeout(this.bannerTimeout);
-      }
+				clearTimeout(this.bannerTimeout);
+			}
 
-      // Show banner
-      this.showBanner = true;
+			// Show banner
+			this.showBanner = true;
 
-      // Hide after 3 seconds
-      this.bannerTimeout = setTimeout(() => {
-        this.showBanner = false;
-      }, 3000);
-    },
-  },
-  beforeUnmount() {
-    if (this.bannerTimeout) {
-      clearTimeout(this.bannerTimeout);
-    }
-  },
+			// Hide after 3 seconds
+			this.bannerTimeout = setTimeout(() => {
+				this.showBanner = false;
+			}, 3000);
+		},
+	},
+	beforeUnmount() {
+		if (this.bannerTimeout) {
+			clearTimeout(this.bannerTimeout);
+		}
+	},
 };
 </script>
 

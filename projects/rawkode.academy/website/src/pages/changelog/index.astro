@@ -1,7 +1,9 @@
 ---
 import { getCollection } from "astro:content";
-import PageWrapper from "../../wrappers/page.astro";
+import Button from "@/components/common/Button.vue";
+import PageHero from "@/components/common/PageHero.vue";
 import { marked } from "marked";
+import PageWrapper from "../../wrappers/page.astro";
 
 // Configure marked for better GitLab-style rendering
 marked.setOptions({
@@ -68,16 +70,24 @@ const typeColors = {
 	title="Changelog"
 	description="Stay up to date with the latest changes and improvements to Rawkode Academy."
 >
-	<div class="max-w-4xl mx-auto px-4 py-8">
-		<div class="mb-8">
-			<h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-				Changelog
-			</h1>
-			<p class="text-lg text-gray-600 dark:text-gray-300">
-				Stay up to date with the latest changes and improvements to Rawkode
-				Academy.
-			</p>
-		</div>
+	<!-- Hero Section -->
+	<PageHero
+		title="Changelog"
+		subtitle="Stay up to date with the latest updates, features, and improvements to Rawkode Academy."
+		badge="What's New"
+		stats={[
+			{ label: `${changelogEntries.length} Updates` },
+			{ label: 'Weekly Releases' },
+			{ label: 'Open Source' }
+		]}
+	>
+		<Fragment slot="actions">
+			<Button href="#latest" variant="primary" size="lg">View Latest</Button>
+			<Button href="https://github.com/RawkodeAcademy" variant="ghost" size="lg">GitHub</Button>
+		</Fragment>
+	</PageHero>
+
+	<div id="latest" class="max-w-4xl mx-auto px-4 py-8">
 
 		{
 			processedChangelog.length === 0 ? (

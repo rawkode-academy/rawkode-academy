@@ -1,9 +1,12 @@
 ---
 export const prerender = true;
 
+import Button from "@/components/common/Button.vue";
+import PageHero from "@/components/common/PageHero.vue";
+import SectionHeader from "@/components/common/SectionHeader.vue";
+import type { Technology } from "@/pages/technology/[id].astro";
 import Page from "@/wrappers/page.astro";
 import { request } from "graphql-request";
-import type { Technology } from "@/pages/technology/[id].astro";
 
 interface GetTechnologiesResponse {
 	getTechnologies: Technology[];
@@ -235,30 +238,26 @@ const technologies = data.getTechnologies;
 		</style>
 
 		<!-- Hero Section -->
-		<section class="w-full">
-			<div
-				class="bg-linear-to-br from-primary to-secondary text-white py-12 px-4 rounded-lg shadow-lg"
-			>
-				<div class="max-w-4xl mx-auto">
-					<h1 class="text-4xl md:text-5xl font-bold mb-4 text-center">
-						Explore the World of Technologies
-					</h1>
-					<p class="text-lg md:text-xl text-center">
-						Discover the latest technologies and expand your knowledge with
-						Rawkode Academy.
-					</p>
-				</div>
-			</div>
-		</section>
+		<PageHero
+			title="Explore the World of Technologies"
+			subtitle="Discover the latest technologies and expand your knowledge with Rawkode Academy."
+			badge="Technology Hub"
+			stats={[
+				{ label: `${technologies.length} Technologies` },
+				{ label: 'Expert Guides' },
+				{ label: 'Best Practices' }
+			]}
+		>
+			<Fragment slot="actions">
+				<Button href="#technologies" variant="primary" size="lg">Browse Technologies</Button>
+				<Button href="/courses" variant="secondary" size="lg">View Courses</Button>
+			</Fragment>
+		</PageHero>
 
 		<!-- Technologies Section -->
 		<section class="w-full px-4">
 			<div class="max-w-7xl mx-auto">
-				<h2
-					class="text-2xl md:text-3xl font-bold mb-6 text-gray-900 dark:text-white"
-				>
-					Technologies
-				</h2>
+				<SectionHeader title="Technologies" showSeparator={false} class="mb-6" />
 				<div
 					class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
 				>

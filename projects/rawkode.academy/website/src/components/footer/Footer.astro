@@ -1,63 +1,84 @@
 ---
-import {
-    NewspaperIcon,
-    VideoCameraIcon,
-    AcademicCapIcon,
-    CubeIcon,
-    RocketLaunchIcon,
-    WrenchScrewdriverIcon,
-    CalendarIcon,
-    InformationCircleIcon,
-    ClockIcon,
-    DocumentTextIcon,
-    ShareIcon,
-} from "@heroicons/vue/24/outline";
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/vue/20/solid";
+import {
+	AcademicCapIcon,
+	CalendarIcon,
+	ClockIcon,
+	CubeIcon,
+	DocumentTextIcon,
+	InformationCircleIcon,
+	NewspaperIcon,
+	RocketLaunchIcon,
+	ShareIcon,
+	VideoCameraIcon,
+	WrenchScrewdriverIcon,
+} from "@heroicons/vue/24/outline";
 
 const currentYear = new Date().getFullYear();
 
 // Define all sections of links
 const learningSections = {
-    title: "Learning",
-    links: [
-        { name: "Articles", href: "/read", icon: NewspaperIcon },
-        { name: "Videos", href: "/watch", icon: VideoCameraIcon },
-        { name: "Courses", href: "/courses", icon: AcademicCapIcon },
-        { name: "Technologies", href: "/technology", icon: CubeIcon },
-    ]
+	title: "Learning",
+	links: [
+		{ name: "Articles", href: "/read", icon: NewspaperIcon },
+		{ name: "Videos", href: "/watch", icon: VideoCameraIcon },
+		{ name: "Courses", href: "/courses", icon: AcademicCapIcon },
+		{ name: "Technologies", href: "/technology", icon: CubeIcon },
+	],
 };
 
 const organizationSection = {
-    title: "For Organizations",
-    links: [
-        { name: "Partnerships", href: "/organizations/partnerships", icon: RocketLaunchIcon },
-        { name: "Consulting", href: "/organizations/consulting", icon: WrenchScrewdriverIcon },
-        { name: "Training", href: "/organizations/training", icon: AcademicCapIcon },
-    ]
+	title: "For Organizations",
+	links: [
+		{
+			name: "Partnerships",
+			href: "/organizations/partnerships",
+			icon: RocketLaunchIcon,
+		},
+		{
+			name: "Consulting",
+			href: "/organizations/consulting",
+			icon: WrenchScrewdriverIcon,
+		},
+		{
+			name: "Training",
+			href: "/organizations/training",
+			icon: AcademicCapIcon,
+		},
+	],
 };
 
 const communitySection = {
-    title: "Community",
-    links: [
-        { name: "Community Day", href: "/community-day", icon: CalendarIcon },
-        { name: "Zulip Chat", href: "https://chat.rawkode.academy", icon: ChatBubbleLeftEllipsisIcon, external: true },
-    ]
+	title: "Community",
+	links: [
+		{ name: "Community Day", href: "/community-day", icon: CalendarIcon },
+		{
+			name: "Zulip Chat",
+			href: "https://chat.rawkode.academy",
+			icon: ChatBubbleLeftEllipsisIcon,
+			external: true,
+		},
+	],
 };
 
 const contributorsSection = {
-    title: "Contributors",
-    links: [
-        { name: "ADRs", href: "/adrs", icon: DocumentTextIcon },
-        { name: "Share Your Project", href: "/maintainers/share-your-project", icon: ShareIcon },
-    ]
+	title: "Contributors",
+	links: [
+		{ name: "ADRs", href: "/adrs", icon: DocumentTextIcon },
+		{
+			name: "Share Your Project",
+			href: "/maintainers/share-your-project",
+			icon: ShareIcon,
+		},
+	],
 };
 
 const aboutSection = {
-    title: "About",
-    links: [
-        { name: "About Us", href: "/about", icon: InformationCircleIcon },
-        { name: "Changelog", href: "/changelog", icon: ClockIcon },
-    ]
+	title: "About",
+	links: [
+		{ name: "About Us", href: "/about", icon: InformationCircleIcon },
+		{ name: "Changelog", href: "/changelog", icon: ClockIcon },
+	],
 };
 ---
 

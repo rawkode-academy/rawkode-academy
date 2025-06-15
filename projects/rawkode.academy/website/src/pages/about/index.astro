@@ -1,8 +1,9 @@
 ---
-import Page from "@/wrappers/page.astro";
-import Center from "@/components/title/center.astro";
-import H2Highlight from "@/components/title/h2-highlight.vue";
+import Button from "@/components/common/Button.vue";
+import PageHero from "@/components/common/PageHero.vue";
 import Stats from "@/components/stats/simple.vue";
+import H2Highlight from "@/components/title/h2-highlight.vue";
+import Page from "@/wrappers/page.astro";
 ---
 
 <style>
@@ -19,9 +20,18 @@ import Stats from "@/components/stats/simple.vue";
 </style>
 
 <Page title="About">
-	<Center title="About the Rawkode Academy" />
+	<!-- Hero Section -->
+	<PageHero
+		title="About the Rawkode Academy"
+		subtitle="Empowering developers with cloud native knowledge since 2019"
+		badge="Our Story"
+	>
+		<Fragment slot="actions">
+			<Button href="#mission" variant="primary" size="lg">Our Mission</Button>
+		</Fragment>
+	</PageHero>
 
-	<div class="max-w-4xl mx-auto mb-12 text-center">
+	<div id="mission" class="max-w-4xl mx-auto mb-12 text-center">
 		<p class="text-xl text-gray-600 dark:text-gray-300 mb-6">
 			The Rawkode Academy was founded in 2019 by David Flanagan, née McKay, a
 			developer and operator with over 20 years of experience in the industry.

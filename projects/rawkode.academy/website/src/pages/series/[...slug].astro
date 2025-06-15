@@ -1,9 +1,9 @@
 ---
+import { getImage } from "astro:assets";
+import { type CollectionEntry, getCollection, render } from "astro:content";
 import SeriesArticles from "@/components/articles/series/SeriesArticles.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
-import { getImage } from "astro:assets";
-import { getCollection, render, type CollectionEntry } from "astro:content";
 
 export const prerender = true;
 

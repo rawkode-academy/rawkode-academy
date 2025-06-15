@@ -1,5 +1,5 @@
-import CommandPalette from "./index";
 import { useCommandPalette } from "@/hooks/useCommandPalette";
+import CommandPalette from "./index";
 
 export default function CommandPaletteWrapper() {
 	const { isOpen, close } = useCommandPalette();

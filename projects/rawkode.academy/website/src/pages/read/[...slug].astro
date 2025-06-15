@@ -1,17 +1,17 @@
 ---
+import { getImage } from "astro:assets";
+import { getEntry } from "astro:content";
+import {
+	type CollectionEntry,
+	getCollection,
+	getEntries,
+	render,
+} from "astro:content";
 import TableOfContents from "@/components/articles/TableOfContents.astro";
 import Updates from "@/components/articles/Updates.astro";
 import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
-import { getImage } from "astro:assets";
-import { getEntry } from "astro:content";
-import {
-	getCollection,
-	getEntries,
-	render,
-	type CollectionEntry,
-} from "astro:content";
 
 export const prerender = true;
 

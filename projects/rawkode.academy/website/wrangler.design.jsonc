@@ -2,9 +2,7 @@
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "design",
 	"compatibility_date": "2025-05-05",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
+	"compatibility_flags": ["nodejs_compat"],
 	"routes": [
 		{
 			"pattern": "design.rawkode.academy",
