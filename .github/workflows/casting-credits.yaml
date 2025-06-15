@@ -73,13 +73,13 @@ jobs:
             ../../../../dagger/cloudflare | deploy \
               ./ \
               ./read-model/wrangler.jsonc \
-              env:CLOUDFLARE_API_TOKEN
+              env:CLOUDFLARE_WORKERS_TOKEN
           .
           dagger <<.
             ../../../../dagger/cloudflare | applyMigrations \
               ./ \
               ./read-model/wrangler.jsonc \
-              env:CLOUDFLARE_API_TOKEN \
+              env:CLOUDFLARE_WORKERS_TOKEN \
               platform-casting-credits
           .
           dagger <<.
