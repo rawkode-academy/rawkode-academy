@@ -1,15 +1,16 @@
 ---
-import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
-import Page from "@/wrappers/page.astro";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { getImage } from "astro:assets";
 import {
+	type CollectionEntry,
 	getCollection,
 	getEntries,
 	render,
-	type CollectionEntry,
 } from "astro:content";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import Badge from "@/components/common/Badge.vue";
 import CourseModules from "@/components/courses/CourseModules.astro";
+import Page from "@/wrappers/page.astro";
+import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
 export const prerender = true;
 
@@ -58,17 +59,19 @@ const totalModules = allCourseModules.length;
 
 const imageUrl = await computeImageUrl(course);
 
-// Get difficulty badge color
-function getDifficultyColor(difficulty: string) {
+// Get difficulty badge variant
+function getDifficultyVariant(
+	difficulty: string,
+): "success" | "warning" | "danger" | "default" {
 	switch (difficulty) {
 		case "beginner":
-			return "bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900";
+			return "success";
 		case "intermediate":
-			return "bg-yellow-100 text-yellow-800 dark:bg-yellow-200 dark:text-yellow-900";
+			return "warning";
 		case "advanced":
-			return "bg-red-100 text-red-800 dark:bg-red-200 dark:text-red-900";
+			return "danger";
 		default:
-			return "bg-gray-100 text-gray-800 dark:bg-gray-200 dark:text-gray-900";
+			return "default";
 	}
 }
 
@@ -104,17 +107,21 @@ const breadcrumbElements = [
 					<!-- Course Meta -->
 										<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
 						<div class="flex flex-wrap items-center gap-4">
-							<span class={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${getDifficultyColor(course.data.difficulty)}`}>
+							<Badge
+								variant={getDifficultyVariant(course.data.difficulty)}
+								size="md"
+								class="shadow-sm"
+							>
 								{course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}{totalModules > 0 && ` • ${totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}`}
-							</span>
+							</Badge>
 
-							<span class="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full">
+							<Badge variant="default" size="md">
 								Published {new Intl.DateTimeFormat('en-US', {
 									year: 'numeric',
 									month: 'long',
 									day: 'numeric'
 								}).format(course.data.publishedAt)}
-							</span>
+							</Badge>
 						</div>
 
 						<!-- Instructor -->

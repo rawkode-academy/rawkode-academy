@@ -16,7 +16,7 @@ const components = {
   },
   
   // Replace Aside with a simple div
-  Aside: ({ variant = "info", children }: any) => {
+  Aside: ({ variant = "info" }: any) => {
     const styles: Record<string, string> = {
       tip: "background-color: #f0f9ff; border-left: 4px solid #3b82f6;",
       caution: "background-color: #fffbeb; border-left: 4px solid #f59e0b;",
@@ -30,8 +30,7 @@ const components = {
       <div style={style}>
         <strong style="display: block; margin-bottom: 0.5rem; font-size: 0.875rem; letter-spacing: 0.05em;">
           {variant.toUpperCase()}
-        </strong>
-        {children}
+        </strong>children
       </div>
     );
   },

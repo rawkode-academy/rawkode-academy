@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import "vidstack/bundle";
-import { onMounted, ref } from "vue";
 import { actions } from "astro:actions";
+import { onMounted, ref } from "vue";
 
 const props = defineProps<{
 	video: string;

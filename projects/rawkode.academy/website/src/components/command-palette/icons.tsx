@@ -259,7 +259,6 @@ export function getCategoryIcon(
 			return ToolsIcon;
 		case "external":
 			return ExternalIcon;
-		case "pages":
 		default:
 			return PagesIcon;
 	}

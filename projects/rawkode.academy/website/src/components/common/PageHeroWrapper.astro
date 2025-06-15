@@ -1,0 +1,29 @@
+---
+import PageHeroVue from "./PageHero.vue";
+import type { Component } from "vue";
+
+interface Stat {
+	icon?: Component;
+	label: string;
+}
+
+export interface Props {
+	title: string;
+	subtitle?: string;
+	badge?: string;
+	stats?: Stat[];
+}
+
+const { title, subtitle, badge, stats } = Astro.props;
+---
+
+{/* @ts-expect-error - Vue component with slots */}
+<PageHeroVue client:load title={title} subtitle={subtitle} badge={badge} stats={stats}>
+  <Fragment slot="breadcrumb">
+    <slot name="breadcrumb" />
+  </Fragment>
+  <Fragment slot="actions">
+    <slot name="actions" />
+  </Fragment>
+  <slot />
+</PageHeroVue>

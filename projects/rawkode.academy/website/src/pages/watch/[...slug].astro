@@ -1,13 +1,13 @@
 ---
-import Page from "@/wrappers/page.astro";
+import { getCollection } from "astro:content";
+// ShareButton is now internal to VideoReactions
+import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import VideoReactions from "@/components/video/reactions.vue";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
-// ShareButton is now internal to VideoReactions
-import VideoMetadata from "@/components/html/video-metadata.astro";
-import { getCollection } from "astro:content";
+import Page from "@/wrappers/page.astro";
+import { GraphQLClient, gql } from "graphql-request";
 import { Marked } from "marked";
-import { gql, GraphQLClient } from "graphql-request";
 
 export const prerender = false;
 
@@ -16,11 +16,15 @@ const { slug } = Astro.params;
 
 // First, try to get video from the collection (build-time data)
 const videos = await getCollection("videos");
-let video: typeof videos[0] | undefined = videos.find(v => v.data.slug === slug);
+let video: (typeof videos)[0] | undefined = videos.find(
+	(v) => v.data.slug === slug,
+);
 
 // If not found in collection, fetch from API directly
 if (!video) {
-	const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
+	const graphQLClient = new GraphQLClient(
+		"https://api.rawkode.academy/graphql",
+	);
 
 	const query = gql`
 		query GetVideoBySlug($slug: String!) {
@@ -63,17 +67,19 @@ if (!video) {
 	}
 
 	try {
-		const response = await graphQLClient.request<VideoResponse>(query, { slug });
+		const response = await graphQLClient.request<VideoResponse>(query, {
+			slug,
+		});
 		if (response.video) {
 			// Transform to match the collection format
 			video = {
 				id: response.video.slug,
-				collection: 'videos' as const,
-				data: response.video
+				collection: "videos" as const,
+				data: response.video,
 			};
 		}
 	} catch (error) {
-		console.error('Failed to fetch video from API:', error);
+		console.error("Failed to fetch video from API:", error);
 	}
 }
 
@@ -85,32 +91,38 @@ if (!video) {
 // Set cache headers for ISR
 // Individual video pages can cache longer since they change less frequently
 // Client cache: 10 minutes, Edge cache: 2 hours, Serve stale for 48 hours
-Astro.response.headers.set('Cache-Control', 'public, max-age=600, s-maxage=7200, stale-while-revalidate=172800');
-Astro.response.headers.set('CDN-Cache-Control', 'public, max-age=7200');
+Astro.response.headers.set(
+	"Cache-Control",
+	"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
+);
+Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
 
 // Add cache tags for targeted invalidation
 // Use video-specific tag to purge individual videos
-Astro.response.headers.set('Cache-Tag', `video-${video.data.slug}, videos-page, video-detail`);
+Astro.response.headers.set(
+	"Cache-Tag",
+	`video-${video.data.slug}, videos-page, video-detail`,
+);
 
 // Add build timestamp for debugging
-Astro.response.headers.set('X-Build-Time', new Date().toISOString());
+Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
 // Configure Marked to handle single newlines as breaks
 const marked = new Marked({
 	breaks: true,
-	gfm: true
+	gfm: true,
 });
 // Convert literal \n escape sequences to actual newlines before processing
-const processedDescription = video.data.description.replace(/\\n/g, '\n');
+const processedDescription = video.data.description.replace(/\\n/g, "\n");
 const renderedDescriptionHtml = marked.parse(processedDescription);
 
 // Format date to readable format
 const formatDate = (dateString: string) => {
 	const date = new Date(dateString);
-	return date.toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric'
+	return date.toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
 	});
 };
 ---

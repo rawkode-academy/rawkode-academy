@@ -66,211 +66,216 @@
 
 <script>
 export default {
-  props: {
-    videoId: {
-      type: String,
-      required: true,
-    },
-    isActive: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      loading: false,
-      error: false,
-      errorMessage: 'Failed to load transcript. Please try again later.',
-      transcriptLoaded: false,
-      cues: [],
-      paragraphs: [],
-      searchQuery: '',
-      matchCount: 0,
-    };
-  },
-  computed: {
-    searchResultsText() {
-      if (this.searchQuery.length < 2) return '';
-      return this.matchCount > 0
-        ? `${this.matchCount} match${this.matchCount !== 1 ? 'es' : ''} found`
-        : 'No matches found';
-    },
-  },
-  watch: {
-    searchQuery(newQuery) {
-      this.performSearch(newQuery);
-    },
-  },
-  methods: {
-    async loadTranscript() {
-      if (this.transcriptLoaded) return;
+	props: {
+		videoId: {
+			type: String,
+			required: true,
+		},
+		isActive: {
+			type: Boolean,
+			default: false,
+		},
+	},
+	data() {
+		return {
+			loading: false,
+			error: false,
+			errorMessage: "Failed to load transcript. Please try again later.",
+			transcriptLoaded: false,
+			cues: [],
+			paragraphs: [],
+			searchQuery: "",
+			matchCount: 0,
+		};
+	},
+	computed: {
+		searchResultsText() {
+			if (this.searchQuery.length < 2) return "";
+			return this.matchCount > 0
+				? `${this.matchCount} match${this.matchCount !== 1 ? "es" : ""} found`
+				: "No matches found";
+		},
+	},
+	methods: {
+		async loadTranscript() {
+			if (this.transcriptLoaded) return;
 
-      this.loading = true;
-      this.error = false;
+			this.loading = true;
+			this.error = false;
 
-      try {
-        const transcriptUrl = `https://content.rawkode.academy/videos/${this.videoId}/captions/en.vtt`;
-        const response = await fetch(transcriptUrl);
+			try {
+				const transcriptUrl = `https://content.rawkode.academy/videos/${this.videoId}/captions/en.vtt`;
+				const response = await fetch(transcriptUrl);
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch transcript: ${response.status} ${response.statusText}`);
-        }
+				if (!response.ok) {
+					throw new Error(
+						`Failed to fetch transcript: ${response.status} ${response.statusText}`,
+					);
+				}
 
-        const vttText = await response.text();
-        this.cues = this.parseWebVTT(vttText);
+				const vttText = await response.text();
+				this.cues = this.parseWebVTT(vttText);
 
-        if (this.cues.length === 0) {
-          throw new Error('No transcript content found');
-        }
+				if (this.cues.length === 0) {
+					throw new Error("No transcript content found");
+				}
 
-        // Group cues into paragraphs
-        this.paragraphs = this.groupIntoParagraphs(this.cues);
-        this.transcriptLoaded = true;
-      } catch (error) {
-        console.error('Failed to load transcript:', error);
-        this.error = true;
-        if (error instanceof Error) {
-          this.errorMessage = `Failed to load transcript: ${error.message}`;
-        }
-      } finally {
-        this.loading = false;
-      }
-    },
+				// Group cues into paragraphs
+				this.paragraphs = this.groupIntoParagraphs(this.cues);
+				this.transcriptLoaded = true;
+			} catch (error) {
+				console.error("Failed to load transcript:", error);
+				this.error = true;
+				if (error instanceof Error) {
+					this.errorMessage = `Failed to load transcript: ${error.message}`;
+				}
+			} finally {
+				this.loading = false;
+			}
+		},
 
-    parseWebVTT(vttText) {
-      const lines = vttText.split('\n');
-      const cues = [];
-      let currentCue = null;
+		parseWebVTT(vttText) {
+			const lines = vttText.split("\n");
+			const cues = [];
+			let currentCue = null;
 
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
+			for (let i = 0; i < lines.length; i++) {
+				const line = lines[i].trim();
 
-        // Skip empty lines and WEBVTT header
-        if (!line || line === 'WEBVTT') continue;
+				// Skip empty lines and WEBVTT header
+				if (!line || line === "WEBVTT") continue;
 
-        // Check if line contains timestamp
-        const timestampMatch = line.match(
-          /^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})/
-        );
+				// Check if line contains timestamp
+				const timestampMatch = line.match(
+					/^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})/,
+				);
 
-        if (timestampMatch) {
-          // If we have a previous cue, add it to the array
-          if (currentCue && currentCue.text.trim()) {
-            cues.push(currentCue);
-          }
+				if (timestampMatch) {
+					// If we have a previous cue, add it to the array
+					if (currentCue?.text.trim()) {
+						cues.push(currentCue);
+					}
 
-          // Start a new cue
-          currentCue = {
-            start: timestampMatch[1],
-            end: timestampMatch[2],
-            text: '',
-          };
-        } else if (currentCue && line && !line.startsWith('NOTE')) {
-          // Add text to current cue (skip NOTE lines)
-          if (currentCue.text) {
-            currentCue.text += ' ';
-          }
-          currentCue.text += line;
-        }
-      }
+					// Start a new cue
+					currentCue = {
+						start: timestampMatch[1],
+						end: timestampMatch[2],
+						text: "",
+					};
+				} else if (currentCue && line && !line.startsWith("NOTE")) {
+					// Add text to current cue (skip NOTE lines)
+					if (currentCue.text) {
+						currentCue.text += " ";
+					}
+					currentCue.text += line;
+				}
+			}
 
-      // Add the last cue
-      if (currentCue && currentCue.text.trim()) {
-        cues.push(currentCue);
-      }
+			// Add the last cue
+			if (currentCue?.text.trim()) {
+				cues.push(currentCue);
+			}
 
-      return cues;
-    },
+			return cues;
+		},
 
-    groupIntoParagraphs(cues) {
-      const paragraphs = [];
-      let currentParagraph = [];
-      let wordCount = 0;
+		groupIntoParagraphs(cues) {
+			const paragraphs = [];
+			let currentParagraph = [];
+			let wordCount = 0;
 
-      cues.forEach((cue, index) => {
-        currentParagraph.push(cue);
-        wordCount += cue.text.split(' ').length;
+			cues.forEach((cue, index) => {
+				currentParagraph.push(cue);
+				wordCount += cue.text.split(" ").length;
 
-        // Create new paragraph every ~100 words or at natural breaks
-        if (wordCount > 100 || index === cues.length - 1) {
-          paragraphs.push(currentParagraph);
-          currentParagraph = [];
-          wordCount = 0;
-        }
-      });
+				// Create new paragraph every ~100 words or at natural breaks
+				if (wordCount > 100 || index === cues.length - 1) {
+					paragraphs.push(currentParagraph);
+					currentParagraph = [];
+					wordCount = 0;
+				}
+			});
 
-      return paragraphs;
-    },
+			return paragraphs;
+		},
 
-    highlightText(text) {
-      if (!this.searchQuery || this.searchQuery.length < 2) {
-        return this.escapeHtml(text);
-      }
+		highlightText(text) {
+			if (!this.searchQuery || this.searchQuery.length < 2) {
+				return this.escapeHtml(text);
+			}
 
-      const query = this.searchQuery.toLowerCase();
-      const lowerText = text.toLowerCase();
+			const query = this.searchQuery.toLowerCase();
+			const lowerText = text.toLowerCase();
 
-      if (!lowerText.includes(query)) {
-        return this.escapeHtml(text);
-      }
+			if (!lowerText.includes(query)) {
+				return this.escapeHtml(text);
+			}
 
-      // Escape HTML first, then apply highlighting
-      const escapedText = this.escapeHtml(text);
-      const regex = new RegExp(`(${this.escapeRegExp(this.searchQuery)})`, 'gi');
-      return escapedText.replace(regex, '<span class="transcript-highlight">$1</span>');
-    },
+			// Escape HTML first, then apply highlighting
+			const escapedText = this.escapeHtml(text);
+			const regex = new RegExp(
+				`(${this.escapeRegExp(this.searchQuery)})`,
+				"gi",
+			);
+			return escapedText.replace(
+				regex,
+				'<span class="transcript-highlight">$1</span>',
+			);
+		},
 
-    escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    },
+		escapeHtml(text) {
+			const div = document.createElement("div");
+			div.textContent = text;
+			return div.innerHTML;
+		},
 
-    escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    },
+		escapeRegExp(string) {
+			return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		},
 
-    performSearch(query) {
-      if (!query || query.length < 2) {
-        this.matchCount = 0;
-        return;
-      }
+		performSearch(query) {
+			if (!query || query.length < 2) {
+				this.matchCount = 0;
+				return;
+			}
 
-      this.matchCount = 0;
-      const lowerQuery = query.toLowerCase();
-      let firstMatch = null;
+			this.matchCount = 0;
+			const lowerQuery = query.toLowerCase();
+			let firstMatch = null;
 
-      // Count matches
-      this.cues.forEach((cue) => {
-        if (cue.text.toLowerCase().includes(lowerQuery)) {
-          this.matchCount++;
-          if (!firstMatch) {
-            firstMatch = cue;
-          }
-        }
-      });
+			// Count matches
+			this.cues.forEach((cue) => {
+				if (cue.text.toLowerCase().includes(lowerQuery)) {
+					this.matchCount++;
+					if (!firstMatch) {
+						firstMatch = cue;
+					}
+				}
+			});
 
-      // Scroll to first match
-      if (firstMatch && this.$el) {
-        this.$nextTick(() => {
-          const element = this.$el.querySelector(`[data-start="${firstMatch.start}"]`);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        });
-      }
-    },
-  },
-  watch: {
-    isActive: {
-      handler(newVal) {
-        if (newVal && !this.transcriptLoaded && !this.loading) {
-          this.loadTranscript();
-        }
-      },
-      immediate: true,
-    },
-  },
+			// Scroll to first match
+			if (firstMatch && this.$el) {
+				this.$nextTick(() => {
+					const element = this.$el.querySelector(
+						`[data-start="${firstMatch.start}"]`,
+					);
+					if (element) {
+						element.scrollIntoView({ behavior: "smooth", block: "center" });
+					}
+				});
+			}
+		},
+	},
+	watch: {
+		isActive: {
+			handler(newVal) {
+				if (newVal && !this.transcriptLoaded && !this.loading) {
+					this.loadTranscript();
+				}
+			},
+			immediate: true,
+		},
+	},
 };
 </script>
 

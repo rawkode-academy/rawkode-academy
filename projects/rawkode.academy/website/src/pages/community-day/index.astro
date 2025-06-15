@@ -1,7 +1,9 @@
 ---
-import Page from "@/wrappers/page.astro";
-import H2Highlight from "@/components/title/h2-highlight.vue";
 import { actions } from "astro:actions";
+import Button from "@/components/common/Button.vue";
+import PageHero from "@/components/common/PageHero.vue";
+import H2Highlight from "@/components/title/h2-highlight.vue";
+import Page from "@/wrappers/page.astro";
 
 const result = Astro.getActionResult(actions.signupForCommunityDay);
 
@@ -114,26 +116,27 @@ export const prerender = false;
 		}
 	</style>
 
-	<!-- Hero Section with Background Pattern -->
+	<!-- Hero Section -->
+	<PageHero
+		title="Community Day"
+		subtitle="A premier one-day conference celebrating the Rawkode Academy community and cutting-edge cloud-native technologies."
+		badge="Coming Soon"
+		stats={[
+			{ label: 'European Location' },
+			{ label: 'Expert Speakers' },
+			{ label: 'Hands-on Workshops' }
+		]}
+	>
+		<Fragment slot="actions">
+			<Button href="#register" variant="primary" size="lg">Get Notified</Button>
+			<Button href="#event-details" variant="ghost" size="lg">Learn More</Button>
+		</Fragment>
+	</PageHero>
+
 	<div class="relative isolate px-6 lg:px-8 py-16">
-		<!-- Background pattern -->
-		<div class="absolute inset-0 -z-10 overflow-hidden">
-			<div class="absolute inset-0 bg-[radial-gradient(#5F5ED720_1px,transparent_1px)] dark:bg-[radial-gradient(#5F5ED715_1px,transparent_1px)] mask-[radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] bg-size-[20px_20px]"></div>
-		</div>
-
 		<div class="mx-auto max-w-4xl">
-			<div class="text-center animate-fadeIn">
-				<h1 class="text-4xl md:text-5xl font-bold tracking-tight bg-linear-to-r from-primary to-secondary inline-block text-transparent bg-clip-text mb-6 gradient-animation pb-1">Community Day</h1>
-				<p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4 max-w-2xl mx-auto animate-slideUp animate-delay-200">
-					A premier one-day conference celebrating the Rawkode Academy community and
-					cutting-edge cloud-native technologies.
-				</p>
-				<p class="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto animate-slideUp animate-delay-300">
-					Join us for an unforgettable day of knowledge sharing, networking, and collaboration with the brightest minds in the cloud-native ecosystem.
-				</p>
-			</div>
 
-			<div class="relative mt-8 mb-16 animate-slideUp animate-delay-400">
+			<div id="event-details" class="relative mt-8 mb-16 animate-slideUp animate-delay-400">
 				<div class="absolute inset-0 bg-linear-to-r from-primary to-secondary blur-xl opacity-20 rounded-xl gradient-animation"></div>
 				<div class="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-8 rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50">
 					<h2 class="text-2xl font-bold text-gray-800 dark:text-white flex justify-center items-center mb-4">
@@ -249,7 +252,7 @@ export const prerender = false;
 				</a>
 			</div>
 
-			<div class="max-w-xl mx-auto animate-slideUp animate-delay-900">
+			<div id="register" class="max-w-xl mx-auto animate-slideUp animate-delay-900">
 				<H2Highlight title="Stay Updated" highlightWords="Updated" />
 
 				<div class="relative">

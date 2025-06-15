@@ -1,27 +1,27 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "rawkode-academy",
-  "compatibility_date": "2025-05-05",
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "./dist/_worker.js/index.js",
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./dist"
-  },
-  "observability": {
-    "enabled": true
-  },
-  "routes": [
-    {
-      "pattern": "rawkode.academy",
-      "custom_domain": true
-    }
-  ],
-  "vars": {
-    "INFLUXDB_HOST": "https://eu-central-1-1.aws.cloud2.influxdata.com",
-    "INFLUXDB_ORG": "Rawkode Academy",
-    "INFLUXDB_BUCKET": "analytics",
-    "ZITADEL_CLIENT_ID": "293097955970320066",
-    "ZITADEL_URL": "https://zitadel.rawkode.academy"
-  }
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "rawkode-academy",
+	"compatibility_date": "2025-05-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "./dist/_worker.js/index.js",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"routes": [
+		{
+			"pattern": "rawkode.academy",
+			"custom_domain": true
+		}
+	],
+	"vars": {
+		"INFLUXDB_HOST": "https://eu-central-1-1.aws.cloud2.influxdata.com",
+		"INFLUXDB_ORG": "Rawkode Academy",
+		"INFLUXDB_BUCKET": "analytics",
+		"ZITADEL_CLIENT_ID": "293097955970320066",
+		"ZITADEL_URL": "https://zitadel.rawkode.academy"
+	}
 }

@@ -20,71 +20,80 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCopy, faShare } from '@fortawesome/free-solid-svg-icons';
-import { faLinkedin, faReddit, faBluesky } from '@fortawesome/free-brands-svg-icons';
 import { actions } from "astro:actions";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+	faBluesky,
+	faLinkedin,
+	faReddit,
+} from "@fortawesome/free-brands-svg-icons";
+import { faCopy, faShare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { computed, ref } from "vue";
 
 library.add(faCopy, faShare, faLinkedin, faReddit, faBluesky);
 
 const props = defineProps<{
 	videoId: string;
-  videoTitle: string;
-  videoSlug: string;
+	videoTitle: string;
+	videoSlug: string;
 }>();
 
-const copyButtonText = ref('Copy Link');
+const copyButtonText = ref("Copy Link");
 
-const shareUrl = computed(() => `https://rawkode.academy/watch/${props.videoSlug}`);
+const shareUrl = computed(
+	() => `https://rawkode.academy/watch/${props.videoSlug}`,
+);
 
 const linkedinShareUrl = computed(() => {
-  const url = encodeURIComponent(shareUrl.value);
-  return `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+	const url = encodeURIComponent(shareUrl.value);
+	return `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
 });
 
-async function trackShare(platform: "clipboard" | "bluesky" | "linkedin" | "reddit", action: "share" = "share") {
-  try {
-    await actions.trackShareEvent({
-      action,
-      platform,
-      content_type: "video",
+async function trackShare(
+	platform: "clipboard" | "bluesky" | "linkedin" | "reddit",
+	action: "share" = "share",
+) {
+	try {
+		await actions.trackShareEvent({
+			action,
+			platform,
+			content_type: "video",
 			content_id: props.videoId,
-      success: true,
-    });
-  } catch (error) {
-    console.error(`Failed to track ${platform} share:`, error);
-  }
+			success: true,
+		});
+	} catch (error) {
+		console.error(`Failed to track ${platform} share:`, error);
+	}
 }
 
 const copyLink = async () => {
-  try {
-    await navigator.clipboard.writeText(shareUrl.value);
-    copyButtonText.value = 'Link Copied!';
-    await trackShare('clipboard', 'share');
-    setTimeout(() => {
-      copyButtonText.value = 'Copy Link';
-    }, 2000);
-  } catch (err) {
-    console.error('Failed to copy: ', err);
-    copyButtonText.value = 'Failed to copy';
-     setTimeout(() => {
-      copyButtonText.value = 'Copy Link';
-    }, 2000);
-  }
+	try {
+		await navigator.clipboard.writeText(shareUrl.value);
+		copyButtonText.value = "Link Copied!";
+		await trackShare("clipboard", "share");
+		setTimeout(() => {
+			copyButtonText.value = "Copy Link";
+		}, 2000);
+	} catch (err) {
+		console.error("Failed to copy: ", err);
+		copyButtonText.value = "Failed to copy";
+		setTimeout(() => {
+			copyButtonText.value = "Copy Link";
+		}, 2000);
+	}
 };
 
 const blueskyShareUrl = computed(() => {
-  const url = encodeURIComponent(shareUrl.value);
-  const text = encodeURIComponent(props.videoTitle);
-  return `https://bsky.app/intent/compose?text=${text}%20${url}`;
+	const url = encodeURIComponent(shareUrl.value);
+	const text = encodeURIComponent(props.videoTitle);
+	return `https://bsky.app/intent/compose?text=${text}%20${url}`;
 });
 
 const redditShareUrl = computed(() => {
-  const url = encodeURIComponent(shareUrl.value);
-  const text = encodeURIComponent(props.videoTitle);
-  return `https://www.reddit.com/submit?url=${url}&title=${text}`;
+	const url = encodeURIComponent(shareUrl.value);
+	const text = encodeURIComponent(props.videoTitle);
+	return `https://www.reddit.com/submit?url=${url}&title=${text}`;
 });
 </script>
 

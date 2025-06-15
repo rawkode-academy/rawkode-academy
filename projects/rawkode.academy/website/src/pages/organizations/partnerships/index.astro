@@ -1,4 +1,6 @@
 ---
+import Button from "@/components/common/Button.vue";
+import PageHero from "@/components/common/PageHero.vue";
 import FAQ from "@/components/faq/list.vue";
 import FeatureListIcons from "@/components/feature/list-icons.vue";
 import PartnerLogos from "@/components/partner/logos.astro";
@@ -7,8 +9,6 @@ import Featured from "@/components/partner/pricing/featured.vue";
 import VsConference from "@/components/partner/vs-conference.astro";
 import Stats from "@/components/stats/simple.vue";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
-import Center from "@/components/title/center.astro";
-import H2Highlight from "@/components/title/h2-highlight.vue";
 import Page from "@/wrappers/page.astro";
 ---
 
@@ -38,13 +38,24 @@ import Page from "@/wrappers/page.astro";
 	title="Strategic Technology Partnerships | Rawkode Academy"
 	description="Partner with Rawkode Academy to accelerate developer adoption, improve product experience, and drive growth through expert technical content and strategic guidance."
 >
-	<Center title="Strategic Technology Partnerships" />
-	<H2Highlight
-		title="Accelerate developer adoption and product growth through authentic technical content and strategic guidance."
-		highlightWords="accelerate developer adoption growth authentic strategic"
-	/>
+	<!-- Hero Section -->
+	<PageHero
+		title="Strategic Technology Partnerships"
+		subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance."
+		badge="Partner With Us"
+		stats={[
+			{ label: '100K+ Developers' },
+			{ label: 'Global Reach' },
+			{ label: 'Proven Results' }
+		]}
+	>
+		<Fragment slot="actions">
+			<Button href="#benefits" variant="primary" size="lg">Explore Benefits</Button>
+			<Button href="/organizations/lets-chat" variant="secondary" size="lg">Become a Partner</Button>
+		</Fragment>
+	</PageHero>
 
-	<div class="max-w-5xl mx-auto mb-16 text-center">
+	<div class="max-w-5xl mx-auto mb-16 text-center pt-16">
 		<p class="text-xl text-gray-700 dark:text-gray-200 mb-8 leading-relaxed">
 			At Rawkode Academy, we connect cutting-edge technologies with the
 			developers who bring them to life. Our expertise bridges the critical gap
@@ -137,7 +148,7 @@ import Page from "@/wrappers/page.astro";
 		</div>
 	</div>
 
-	<section class="bg-white dark:bg-gray-800 py-16">
+	<section id="benefits" class="bg-white dark:bg-gray-800 py-16">
 		<FeatureListIcons />
 	</section>
 

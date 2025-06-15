@@ -1,8 +1,8 @@
 ---
 import { getCollection, getEntries, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
-import type { CollectionEntry } from "astro:content";
 
 export const prerender = true;
 

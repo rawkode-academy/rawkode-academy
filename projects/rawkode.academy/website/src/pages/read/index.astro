@@ -1,8 +1,11 @@
 ---
-import { getCollection, getEntries } from "astro:content";
-import Page from "@/wrappers/page.astro";
 import { Image } from "astro:assets";
+import { getCollection, getEntries } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
+import Button from "@/components/common/Button.vue";
+import PageHero from "@/components/common/PageHero.vue";
+import SectionHeader from "@/components/common/SectionHeader.vue";
+import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
@@ -144,107 +147,26 @@ function formatDate(date: Date): string {
     }
   </style>
 
-  <!-- Hero Section with Interactive Terminal -->
-  <section class="relative py-16 overflow-hidden">
-    <div class="absolute inset-0 bg-linear-to-br from-primary/5 via-gray-50 to-secondary/5 dark:from-primary/10 dark:via-gray-900 dark:to-secondary/10 animate-gradient"></div>
-
-    <!-- Particle effect container (purely decorative) -->
-    <div class="absolute inset-0 opacity-30 pointer-events-none">
-      {Array.from({ length: 20 }).map(() => {
-        const top = Math.random() * 100;
-        const left = Math.random() * 100;
-        const size = Math.random() * 10 + 2;
-        const opacity = Math.random() * 0.5 + 0.1;
-        const duration = Math.random() * 10 + 5;
-
-        return (
-          <div
-            class="particle"
-            style={`
-              top: ${top}%;
-              left: ${left}%;
-              width: ${size}px;
-              height: ${size}px;
-              opacity: ${opacity};
-              animation: float ${duration}s linear infinite;
-            `}
-          ></div>
-        );
-      })}
-    </div>
-
-    <div class="container relative mx-auto px-4 md:px-6 z-10">
-      <div class="flex flex-col lg:flex-row items-center gap-8">
-        <!-- Hero Text -->
-        <div class="lg:w-1/2 space-y-6">
-          <div class="inline-block">
-            <div class="flex items-center mb-2 space-x-2">
-              <span class="px-2 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-white">RAWKODE ACADEMY</span>
-              <span class="h-px w-10 bg-primary/50"></span>
-              <span class="text-sm text-gray-500 dark:text-gray-400">Cloud Native Knowledge</span>
-            </div>
-          </div>
-
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold">
-            <span class="text-gray-900 dark:text-white">The </span>
-            <span class="text-gradient">Articles</span>
-          </h1>
-
-          <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl">
-            Deep dive into cloud native technologies, Kubernetes, observability, and more. Written by practitioners for practitioners.
-          </p>
-
-          <div class="pt-2">
-            <a href="#main-content" class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white rounded-lg bg-primary hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg">
-              Explore Articles
-              <svg class="w-4 h-4 ml-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-              </svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- Terminal-inspired Feature -->
-        <div class="lg:w-1/2 w-full">
-          <div class="terminal shadow-2xl max-w-xl mx-auto">
-            <div class="terminal-header">
-              <div class="flex space-x-2">
-                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-              </div>
-              <div class="flex-1 text-center text-xs text-gray-500 dark:text-gray-400 font-semibold">rawkode.academy/articles</div>
-            </div>
-            <div class="terminal-body bg-gray-50 dark:bg-gray-900">
-              <div class="terminal-prompt text-gray-800 dark:text-gray-200">ls -la /articles</div>
-              <div class="terminal-output text-gray-700 dark:text-gray-300">
-                <div class="grid grid-cols-3 text-xs md:text-sm gap-1">
-                  <span class="text-blue-500 dark:text-blue-400">kubernetes/</span>
-                  <span class="text-blue-500 dark:text-blue-400">observability/</span>
-                  <span class="text-blue-500 dark:text-blue-400">platform-eng/</span>
-                </div>
-              </div>
-              <div class="terminal-prompt text-gray-800 dark:text-gray-200 mt-2">cat /latest-article.md</div>
-              <div class="terminal-output text-gray-700 dark:text-gray-300">
-                <div class="font-semibold text-sm md:text-base text-primary dark:text-primary"># {latestPost?.data.title}</div>
-                <div class="text-xs md:text-sm mt-1 text-gray-600 dark:text-gray-400">{latestPost?.data.openGraph.subtitle}</div>
-                <div class="text-xs mt-2 text-gray-500 dark:text-gray-500">Published: {latestPost ? formatDate(latestPost.data.publishedAt) : ''}</div>
-              </div>
-              <div class="terminal-prompt text-gray-800 dark:text-gray-200 mt-2">open /latest-article.md</div>
-              <div class="terminal-output text-gray-700 dark:text-gray-300">
-                <a href={latestPost ? `/read/${latestPost.id}` : '#'} class="text-xs inline-flex items-center text-primary hover:underline">
-                  Opening article...
-                  <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- Hero Section -->
+  <PageHero
+    title="Articles"
+    subtitle="Deep dive into cloud native technologies, Kubernetes, observability, and more. Written by practitioners for practitioners."
+    badge="Cloud Native Knowledge"
+    stats={[
+      { label: `${allArticles.length} Articles` },
+      { label: 'Updated Weekly' },
+      { label: 'Community Driven' }
+    ]}
+  >
+    <Fragment slot="actions">
+      <Button href="#main-content" variant="primary" size="lg">
+        Explore Articles
+        <svg slot="icon-right" class="w-4 h-4 ml-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+        </svg>
+      </Button>
+    </Fragment>
+  </PageHero>
 
   <!-- Main Content -->
   <section id="main-content" class="py-16 bg-white dark:bg-gray-900">
@@ -252,11 +174,7 @@ function formatDate(date: Date): string {
 
       <!-- Featured Articles -->
       <div class="mb-16">
-        <div class="flex items-center mb-8">
-          <div class="h-10 w-1 bg-linear-to-b from-primary to-secondary rounded-full mr-3"></div>
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Featured Articles</h2>
-          <div class="ml-4 h-px grow bg-linear-to-r from-primary/30 to-transparent"></div>
-        </div>
+        <SectionHeader title="Featured Articles" />
 
         <div class="featured-grid">
           <!-- Main Featured Article -->
@@ -380,11 +298,7 @@ function formatDate(date: Date): string {
 
       <!-- All Articles -->
       <div>
-        <div class="flex items-center mb-8">
-          <div class="h-10 w-1 bg-linear-to-b from-primary to-secondary rounded-full mr-3"></div>
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">All Articles</h2>
-          <div class="ml-4 h-px grow bg-linear-to-r from-primary/30 to-transparent"></div>
-        </div>
+        <SectionHeader title="All Articles" />
 
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {remainingPosts.map(article => (

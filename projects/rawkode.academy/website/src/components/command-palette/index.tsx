@@ -1,6 +1,6 @@
 import { Command } from "cmdk";
 import { useEffect, useRef, useState } from "react";
-import { getCategoryIcon, GitHubIcon } from "./icons";
+import { GitHubIcon, getCategoryIcon } from "./icons";
 import "./styles.css";
 
 interface NavigationItem {
@@ -11,7 +11,6 @@ interface NavigationItem {
 	category: string;
 	keywords?: string[];
 }
-
 
 interface CommandPaletteProps {
 	isOpen: boolean;
@@ -47,7 +46,9 @@ export default function CommandPalette({
 				if (response.ok) {
 					const sitemapItems = await response.json();
 					// Filter out articles initially
-					const filteredItems = sitemapItems.filter((item: NavigationItem) => item.category !== "Articles");
+					const filteredItems = sitemapItems.filter(
+						(item: NavigationItem) => item.category !== "Articles",
+					);
 					setNavigationItems(filteredItems);
 				}
 			} catch (error) {
@@ -70,7 +71,9 @@ export default function CommandPalette({
 			setIsSearchingArticles(true);
 			searchTimeoutRef.current = setTimeout(async () => {
 				try {
-					const response = await fetch(`/api/search-articles.json?q=${encodeURIComponent(search)}`);
+					const response = await fetch(
+						`/api/search-articles.json?q=${encodeURIComponent(search)}`,
+					);
 					if (response.ok) {
 						const articles = await response.json();
 						setArticleItems(articles);
@@ -148,7 +151,7 @@ export default function CommandPalette({
 			if (!acc[item.category]) {
 				acc[item.category] = [];
 			}
-			acc[item.category]!.push(item);
+			acc[item.category]?.push(item);
 			return acc;
 		},
 		{} as Record<string, NavigationItem[]>,
@@ -220,7 +223,11 @@ export default function CommandPalette({
 
 					<Command.List className="command-palette-list">
 						<Command.Empty className="command-palette-empty">
-							{isLoading ? "Loading..." : isSearchingArticles ? "Searching articles..." : `No results found for "${search}"`}
+							{isLoading
+								? "Loading..."
+								: isSearchingArticles
+									? "Searching articles..."
+									: `No results found for "${search}"`}
 						</Command.Empty>
 
 						{Object.entries(groupedItems).map(([category, items]) => {
@@ -241,7 +248,7 @@ export default function CommandPalette({
 										return (
 											<Command.Item
 												key={item.id}
-									value={`${item.title} ${item.description || ""}`}
+												value={`${item.title} ${item.description || ""}`}
 												onSelect={() => handleSelect(item.href)}
 												className="command-palette-item"
 											>
