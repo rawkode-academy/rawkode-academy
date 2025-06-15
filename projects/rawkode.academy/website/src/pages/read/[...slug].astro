@@ -7,11 +7,14 @@ import {
 	getEntries,
 	render,
 } from "astro:content";
+import RelatedArticles from "@/components/articles/RelatedArticles.astro";
 import TableOfContents from "@/components/articles/TableOfContents.astro";
 import Updates from "@/components/articles/Updates.astro";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { calculateReadingTime } from "@/utils/reading-time";
 
 export const prerender = true;
 
@@ -54,6 +57,13 @@ const maybeSeries =
 	article.data.series && (await getEntry("series", article.data.series.id));
 
 const imageUrl = await computeImageUrl(article);
+const readingTime = calculateReadingTime(article.body || '');
+
+const breadcrumbElements = [
+	{ title: "Home", link: "/" },
+	{ title: "Articles", link: "/read" },
+	{ title: article.data.title, link: `/read/${article.id}` },
+];
 ---
 
 <Page
@@ -70,6 +80,11 @@ const imageUrl = await computeImageUrl(article);
 	updatedAt={article.data.updatedAt}
 	authors={authors}
 >
+	<!-- Breadcrumb Section -->
+	<div class="mb-6">
+		<Breadcrumb elements={breadcrumbElements} />
+	</div>
+	
 	<h1 class="text-5xl font-extrabold dark:text-white">
 		{article.data.title}
 	</h1>
@@ -229,7 +244,7 @@ const imageUrl = await computeImageUrl(article);
 										d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 								</svg>
 								<span class="ml-2 text-sm text-gray-600 dark:text-gray-300">
-									{Math.ceil((article.body?.length || 0) / 1000) || 1} min read
+									{readingTime.text}
 								</span>
 							</div>
 						</div>
@@ -249,6 +264,9 @@ const imageUrl = await computeImageUrl(article);
 			<Updates updates={article.data.updates} />
 
 			<Content />
+			
+			<!-- Related Articles -->
+			<RelatedArticles currentArticle={article} limit={3} />
 		</article>
 	</div>
 </Page>

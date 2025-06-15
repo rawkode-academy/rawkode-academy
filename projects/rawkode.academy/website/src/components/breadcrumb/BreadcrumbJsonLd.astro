@@ -1,0 +1,32 @@
+---
+interface BreadcrumbElement {
+	title: string;
+	link: string;
+}
+
+type Props = {
+	elements: BreadcrumbElement[];
+};
+
+const { elements } = Astro.props;
+
+// Convert breadcrumb elements to JSON-LD format
+const breadcrumbJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "BreadcrumbList",
+	itemListElement: elements.map((element, index) => ({
+		"@type": "ListItem",
+		position: index + 1,
+		name: element.title,
+		item: element.link.startsWith("http")
+			? element.link
+			: new URL(element.link, Astro.site).href,
+	})),
+};
+---
+
+<script
+	type="application/ld+json"
+	set:html={JSON.stringify(breadcrumbJsonLd)}
+	is:inline
+></script>

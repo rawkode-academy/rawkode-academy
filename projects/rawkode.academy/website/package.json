@@ -6,11 +6,13 @@
 		"dev": "astro dev",
 		"start": "astro dev",
 		"format": "deno fmt .",
-		"build": "astro check && astro build",
+		"build": "bun run validate:seo && astro check && astro build",
 		"preview": "astro preview",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"test": "vitest run",
 		"test:watch": "vitest",
+		"test:seo": "vitest run src/tests/seo.test.ts",
+		"validate:seo": "bun scripts/validate-seo.ts",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build"
 	},
@@ -112,9 +114,11 @@
 		"@types/sanitize-html": "^2.16.0",
 		"@vitejs/plugin-react": "^4.5.1",
 		"@vitejs/plugin-vue": "^5.2.4",
+		"gray-matter": "^4.0.3",
 		"happy-dom": "^17.4.7",
 		"node-html-parser": "^7.0.1",
 		"storybook": "^8.6.14",
+		"tsx": "^4.20.3",
 		"wrangler": "^4.16.1"
 	},
 	"trigger.dev": {

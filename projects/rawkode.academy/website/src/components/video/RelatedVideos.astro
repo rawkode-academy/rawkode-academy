@@ -1,0 +1,144 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+
+interface Props {
+	currentVideo: CollectionEntry<"videos">;
+	limit?: number;
+}
+
+const { currentVideo, limit = 4 } = Astro.props;
+
+// Get all videos
+const allVideos = await getCollection("videos");
+
+// Find related videos based on:
+// 1. Same technologies
+// 2. Recent videos (excluding current)
+const relatedVideos: CollectionEntry<"videos">[] = [];
+
+// First, add videos with overlapping technologies
+if (
+	currentVideo.data.technologies &&
+	currentVideo.data.technologies.length > 0
+) {
+	const currentTechIds = currentVideo.data.technologies.map((tech) => tech.id);
+
+	const techVideos = allVideos.filter((video) => {
+		if (video.id === currentVideo.id) return false;
+
+		const videoTechIds = video.data.technologies?.map((tech) => tech.id) || [];
+		return videoTechIds.some((techId) => currentTechIds.includes(techId));
+	});
+
+	// Sort by number of matching technologies
+	techVideos.sort((a, b) => {
+		const aTechIds = a.data.technologies?.map((tech) => tech.id) || [];
+		const bTechIds = b.data.technologies?.map((tech) => tech.id) || [];
+
+		const aMatches = aTechIds.filter((id) =>
+			currentTechIds.includes(id),
+		).length;
+		const bMatches = bTechIds.filter((id) =>
+			currentTechIds.includes(id),
+		).length;
+
+		return bMatches - aMatches;
+	});
+
+	relatedVideos.push(...techVideos);
+}
+
+// Then, add recent videos if we need more
+if (relatedVideos.length < limit) {
+	const recentVideos = allVideos
+		.filter(
+			(video) =>
+				video.id !== currentVideo.id &&
+				!relatedVideos.find((r) => r.id === video.id),
+		)
+		.sort(
+			(a, b) =>
+				new Date(b.data.publishedAt).getTime() -
+				new Date(a.data.publishedAt).getTime(),
+		)
+		.slice(0, limit - relatedVideos.length);
+
+	relatedVideos.push(...recentVideos);
+}
+
+// Limit to requested number
+const finalRelatedVideos = relatedVideos.slice(0, limit);
+
+// Format duration
+const formatDuration = (seconds: number) => {
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const secs = seconds % 60;
+
+	if (hours > 0) {
+		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
+			.toString()
+			.padStart(2, "0")}`;
+	}
+	return `${minutes}:${secs.toString().padStart(2, "0")}`;
+};
+---
+
+{finalRelatedVideos.length > 0 && (
+	<section class="mt-12 pt-12 border-t border-gray-200 dark:border-gray-700">
+		<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+			Related Videos
+		</h2>
+		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+			{finalRelatedVideos.map((video) => (
+				<a
+					href={`/watch/${video.data.slug}`}
+					class="group block bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+				>
+					<!-- Thumbnail -->
+					<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
+						<img
+							src={video.data.thumbnailUrl}
+							alt={video.data.title}
+							class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+							loading="lazy"
+						/>
+						<!-- Duration badge -->
+						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+							{formatDuration(video.data.duration)}
+						</div>
+					</div>
+					
+					<!-- Content -->
+					<div class="p-4">
+						<h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary transition-colors">
+							{video.data.title}
+						</h3>
+						
+						{video.data.subtitle && (
+							<p class="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+								{video.data.subtitle}
+							</p>
+						)}
+						
+						<!-- Technologies -->
+						{video.data.technologies && video.data.technologies.length > 0 && (
+							<div class="mt-3 flex flex-wrap gap-1">
+								{video.data.technologies.slice(0, 3).map((tech) => (
+									<span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
+										{tech.name}
+									</span>
+								))}
+								{video.data.technologies.length > 3 && (
+									<span class="text-xs text-gray-500 dark:text-gray-400 px-1">
+										+{video.data.technologies.length - 3}
+									</span>
+								)}
+							</div>
+						)}
+					</div>
+				</a>
+			))}
+		</div>
+	</section>
+)}

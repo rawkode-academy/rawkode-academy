@@ -2,6 +2,8 @@
 import type { OpenGraphProps } from "@/types/opengraph";
 import PostHog from "../posthog/index.astro";
 import Opengraph from "./opengraph.astro";
+import SearchActionJsonLd from "./search-action-jsonld.astro";
+import OrganizationJsonLd from "./organization-jsonld.astro";
 
 interface Props extends OpenGraphProps {}
 ---
@@ -16,6 +18,39 @@ interface Props extends OpenGraphProps {}
 			url("/fonts/monaspaceneon.woff") format("woff2-variations");
 		font-weight: 200 900;
 		font-stretch: 75% 125%;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: "Poppins";
+		src: url("/fonts/poppins-regular.woff") format("woff");
+		font-weight: 400;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: "Poppins";
+		src: url("/fonts/poppins-semibold.woff") format("woff");
+		font-weight: 600;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: "Quicksand";
+		src: url("/fonts/quicksand-regular.woff") format("woff");
+		font-weight: 400;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	@font-face {
+		font-family: "Quicksand";
+		src: url("/fonts/quicksand-bold.woff") format("woff");
+		font-weight: 700;
+		font-style: normal;
+		font-display: swap;
 	}
 
 	h1,
@@ -63,25 +98,29 @@ interface Props extends OpenGraphProps {}
 	<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
 
 	<Opengraph {...Astro.props} />
+	<SearchActionJsonLd />
+	<OrganizationJsonLd />
 
-	<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/avenir" />
-	<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/orbitron" />
-	<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/poppins" />
-	<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/quicksand" />
-
+	<!-- Preload critical fonts -->
 	<link
 		rel="preload"
-		href="/fonts/monasans.woff2"
+		href="/fonts/poppins-regular.woff"
 		as="font"
-		type="font/woff2"
+		type="font/woff"
 		crossorigin
 	/>
-
+	<link
+		rel="preload"
+		href="/fonts/quicksand-bold.woff"
+		as="font"
+		type="font/woff"
+		crossorigin
+	/>
 	<link
 		rel="preload"
 		href="/fonts/monaspaceneon.woff"
 		as="font"
-		type="font/woff2"
+		type="font/woff"
 		crossorigin
 	/>
 

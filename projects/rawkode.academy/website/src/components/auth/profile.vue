@@ -19,7 +19,7 @@ defineProps<{
 			class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
 			id="userProfileButton" aria-expanded="false" data-dropdown-toggle="userProfileDropdown">
 			<span class="sr-only">Open user menu</span>
-			<img v-if="user.picture" class="w-8 h-8 rounded-full" :src="user.picture" alt="user photo" />
+			<img v-if="user.picture" class="w-8 h-8 rounded-full" :src="user.picture" :alt="`Profile picture for ${user.name || 'user'}`" loading="lazy" />
 			<Avatar v-else class="w-8 h-8 rounded-full" :name="user.name || ''" variant="pixel" />
 		</button>
 		<div

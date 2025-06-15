@@ -1,0 +1,66 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import ArticleCard from "./ArticleCard.astro";
+
+interface Props {
+	currentArticle: CollectionEntry<"articles">;
+	limit?: number;
+}
+
+const { currentArticle, limit = 3 } = Astro.props;
+
+// Get all published articles
+const allArticles = await getCollection(
+	"articles",
+	({ data }) => !data.isDraft,
+);
+
+// Find related articles based on:
+// 1. Same series (if applicable)
+// 2. Recent articles (excluding current)
+const relatedArticles: CollectionEntry<"articles">[] = [];
+
+// First, add articles from the same series
+if (currentArticle.data.series) {
+	const seriesArticles = allArticles.filter(
+		(article) =>
+			article.data.series?.id === currentArticle.data.series?.id &&
+			article.id !== currentArticle.id,
+	);
+	relatedArticles.push(...seriesArticles);
+}
+
+// Then, add recent articles if we need more
+if (relatedArticles.length < limit) {
+	const recentArticles = allArticles
+		.filter(
+			(article) =>
+				article.id !== currentArticle.id &&
+				!relatedArticles.find((r) => r.id === article.id),
+		)
+		.sort(
+			(a, b) =>
+				new Date(b.data.publishedAt).getTime() -
+				new Date(a.data.publishedAt).getTime(),
+		)
+		.slice(0, limit - relatedArticles.length);
+
+	relatedArticles.push(...recentArticles);
+}
+
+// Limit to requested number
+const finalRelatedArticles = relatedArticles.slice(0, limit);
+---
+
+{finalRelatedArticles.length > 0 && (
+	<section class="mt-16 pt-16 border-t border-gray-200 dark:border-gray-700">
+		<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+			Related Articles
+		</h2>
+		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+			{finalRelatedArticles.map((article) => (
+				<ArticleCard article={article} />
+			))}
+		</div>
+	</section>
+)}

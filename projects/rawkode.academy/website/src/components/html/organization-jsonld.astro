@@ -1,0 +1,96 @@
+---
+interface Props {
+	showInAllPages?: boolean;
+}
+
+const { showInAllPages = false } = Astro.props;
+
+// Only show on homepage or if explicitly requested
+const shouldShow = Astro.url.pathname === "/" || showInAllPages;
+
+if (!shouldShow) return;
+
+const organizationSchema = {
+	"@context": "https://schema.org",
+	"@type": "Organization",
+	"@id": "https://rawkode.academy/#organization",
+	name: "Rawkode Academy",
+	url: "https://rawkode.academy",
+	logo: {
+		"@type": "ImageObject",
+		url: "https://rawkode.academy/android-chrome-512x512.png",
+		width: 512,
+		height: 512,
+	},
+	description:
+		"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for developers to keep up with the Cloud Native landscape.",
+	sameAs: [
+		"https://github.com/RawkodeAcademy",
+		"https://www.youtube.com/@RawkodeAcademy",
+		"https://twitter.com/RawkodeAcademy",
+		"https://www.linkedin.com/company/rawkode-academy",
+	],
+	contactPoint: {
+		"@type": "ContactPoint",
+		contactType: "customer support",
+		email: "support@rawkode.academy",
+		url: "https://rawkode.academy/organizations/lets-chat",
+	},
+	founder: {
+		"@type": "Person",
+		name: "David Flanagan",
+		url: "https://github.com/rawkode",
+		sameAs: [
+			"https://twitter.com/rawkode",
+			"https://www.linkedin.com/in/rawkode",
+		],
+	},
+	foundingDate: "2021",
+	areaServed: {
+		"@type": "Place",
+		name: "Global",
+	},
+	knowsAbout: [
+		"Cloud Native",
+		"Kubernetes",
+		"DevOps",
+		"Platform Engineering",
+		"Infrastructure as Code",
+		"GitOps",
+		"Observability",
+		"Site Reliability Engineering",
+	],
+	offers: [
+		{
+			"@type": "Offer",
+			itemOffered: {
+				"@type": "Service",
+				name: "Technical Training",
+				description: "Hands-on technical training for cloud native technologies",
+			},
+		},
+		{
+			"@type": "Offer",
+			itemOffered: {
+				"@type": "Service",
+				name: "Technical Consulting",
+				description: "Expert consulting for developer experience and cloud infrastructure",
+			},
+		},
+		{
+			"@type": "Offer",
+			itemOffered: {
+				"@type": "Course",
+				name: "Online Courses",
+				description: "Self-paced online courses for cloud native technologies",
+			},
+		},
+	],
+};
+---
+
+<script
+	type="application/ld+json"
+	set:html={JSON.stringify(organizationSchema)}
+	is:inline
+></script>

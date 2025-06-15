@@ -5,7 +5,37 @@ import FeatureCard from "@/components/common/FeatureCard.vue";
 import GridLayout from "@/components/common/GridLayout.vue";
 import PageHero from "@/components/common/PageHero.vue";
 import FAQ from "@/components/faq/consulting-list.vue";
+import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import Page from "@/wrappers/page.astro";
+
+const consultingFAQs = [
+	{
+		question: "What technologies and platforms do you specialize in?",
+		answer:
+			"We specialize in cloud native infrastructure and software development technologies, with particular expertise in: Infrastructure as Code using Terraform and Pulumi, Kubernetes for both developers and operators, Site Reliability Engineering (SRE) practices, Observability with modern monitoring stacks, Platform Engineering and internal developer platforms, GitOps workflows and continuous delivery, and Software development in Rust and Go with DDD, BDD, and TDD practices.",
+	},
+	{
+		question: "Do you offer remote consulting services?",
+		answer:
+			"Yes, we provide fully remote consulting services to clients worldwide. We use collaborative tools and structured processes that have proven effective for distributed teams. For certain engagements, we can also arrange for on-site work if required, though this may involve additional travel expenses.",
+	},
+	{
+		question:
+			"Can you help with migrating our infrastructure to Infrastructure as Code?",
+		answer:
+			"Absolutely! We specialize in helping organizations migrate their existing infrastructure to Infrastructure as Code using Terraform or Pulumi. Our process involves a careful assessment of your current environment, creating a migration strategy, implementing the IaC solution with proper testing, and training your team on best practices. We handle everything from basic VM deployments to complex multi-cloud architectures.",
+	},
+	{
+		question: "How quickly can you start a consulting engagement?",
+		answer:
+			"Our typical lead time is 2-4 weeks from contract signing to project kickoff, depending on the scope of work and our current commitments. For urgent needs, we may be able to accommodate faster timelines – please discuss your timeframe during our initial consultation. We maintain a limited number of active engagements to ensure high-quality delivery for all clients.",
+	},
+	{
+		question: "I have additional questions about consulting services",
+		answer:
+			"We'd be happy to discuss your specific technical challenges and answer any questions you may have. Schedule a consultation with our team to explore how we can help with your infrastructure, platform engineering, or software development needs.",
+	},
+];
 ---
 
 <style>
@@ -34,6 +64,7 @@ import Page from "@/wrappers/page.astro";
 	title="Technical Consulting Services | Rawkode Academy"
 	description="Expert technical consulting for developer experience, cloud native technologies, and software architecture to accelerate your technical initiatives and upskill your teams."
 >
+	<FAQJsonLD questions={consultingFAQs} slot="head" />
 	<!-- Hero Section -->
 	<PageHero
 		title="Expert Technical Consulting"

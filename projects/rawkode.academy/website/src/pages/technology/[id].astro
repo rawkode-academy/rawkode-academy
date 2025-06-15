@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 
+import TopicHub from "@/components/technology/TopicHub.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths } from "astro";
 import { request } from "graphql-request";
@@ -298,7 +299,15 @@ const placeholderLogo = "/apple-touch-icon.png"; // Define a placeholder
 		<!-- Content Sections -->
 		<div class="w-full px-4 pb-12">
 			<div class="max-w-7xl mx-auto">
-				<!-- Videos Section -->
+				<TopicHub 
+					technologyId={technology.id}
+					technologyName={technology.name}
+					videos={technology.videos || []}
+				/>
+			</div>
+		</div>
+	</div>
+</Page>
 				<section class="content-section">
 					<h2 class="section-title">Related Videos</h2>
 					<div class="mt-6">

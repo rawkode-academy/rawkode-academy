@@ -4,6 +4,7 @@ import { type CollectionEntry, getEntries } from "astro:content";
 import AuthorAvatarGroup from "../common/AuthorAvatarGroup.vue";
 import BaseCard from "../common/BaseCard.vue";
 import FormattedDate from "../common/FormattedDate.vue";
+import { calculateReadingTime } from "@/utils/reading-time";
 
 type Props = {
 	article: CollectionEntry<"articles">;
@@ -11,6 +12,7 @@ type Props = {
 
 const { article } = Astro.props;
 const authors = await getEntries(article.data.authors);
+const readingTime = calculateReadingTime(article.body || '');
 ---
 
 <BaseCard href={`/read/${article.id}`}>
@@ -22,12 +24,14 @@ const authors = await getEntries(article.data.authors);
 					class="w-full h-52 object-cover"
 					src={article.data.cover.image}
 					alt={article.data.cover.alt}
+					loading="lazy"
 				/>
 			) : (
 				<img
 					class="w-full h-52 object-cover"
 					src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
-					alt="office laptop working"
+					alt="Default placeholder image for article without custom cover"
+					loading="lazy"
 				/>
 			)
 		}
@@ -50,7 +54,15 @@ const authors = await getEntries(article.data.authors);
 	<Fragment slot="footer">
 		<div class="flex items-center justify-between">
 			<AuthorAvatarGroup authors={authors} />
-			<FormattedDate date={article.data.publishedAt} showIcon={true} />
+			<div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+				<span class="flex items-center gap-1">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					{readingTime.text}
+				</span>
+				<FormattedDate date={article.data.publishedAt} showIcon={true} />
+			</div>
 		</div>
 	</Fragment>
 </BaseCard>

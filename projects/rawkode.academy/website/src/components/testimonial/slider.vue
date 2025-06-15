@@ -29,7 +29,7 @@ defineProps<Props>();
 					<div class="flex items-center justify-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
 						<div class="shrink-0 mr-4">
 							<img :src="testimonial.author.image" :alt="`${testimonial.author.name} profile picture`"
-								class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 dark:border-indigo-400 shadow-sm ring-2 ring-white dark:ring-gray-800" />
+								class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 dark:border-indigo-400 shadow-sm ring-2 ring-white dark:ring-gray-800" loading="lazy" />
 						</div>
 						<div class="flex flex-col">
 							<a v-if="testimonial.author.link" target="_blank" :href="testimonial.author.link"

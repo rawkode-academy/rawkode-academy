@@ -1,4 +1,5 @@
 ---
+import BreadcrumbJsonLd from "./BreadcrumbJsonLd.astro";
 import End from "./End.astro";
 import First from "./First.astro";
 import Middle from "./Middle.astro";
@@ -15,6 +16,7 @@ type Props = {
 const { elements } = Astro.props;
 ---
 
+<BreadcrumbJsonLd elements={elements} />
 <nav class="flex" aria-label="Breadcrumb">
 	<ol
 		class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse"
