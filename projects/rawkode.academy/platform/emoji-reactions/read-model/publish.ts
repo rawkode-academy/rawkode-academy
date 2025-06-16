@@ -1,9 +1,10 @@
-import { unstable_dev } from 'wrangler';
-import { getSchema } from './schema';
-import { printSchema } from 'graphql';
-import { writeFileSync } from 'node:fs';
+import { unstable_dev } from "wrangler";
+import { getSchema } from "./schema";
+import { lexicographicSortSchema } from "graphql";
+import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { writeFileSync } from "node:fs";
 
-const worker = await unstable_dev('main.ts', {
+const worker = await unstable_dev("main.ts", {
 	experimental: { disableExperimentalWarning: true },
 });
 
@@ -13,8 +14,11 @@ const mockEnv = {
 };
 
 const schema = getSchema(mockEnv);
-const sdl = printSchema(schema);
+const sdl = printSchemaWithDirectives(lexicographicSortSchema(schema), {
+	// This is needed to print the directives properly
+	pathToDirectivesInExtensions: [""],
+});
 
-writeFileSync('schema.gql', sdl);
+writeFileSync("schema.gql", sdl);
 
 await worker.stop();

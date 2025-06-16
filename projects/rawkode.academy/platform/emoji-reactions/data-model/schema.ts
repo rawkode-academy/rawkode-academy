@@ -3,20 +3,20 @@ import {
 	primaryKey,
 	sqliteTable,
 	text,
-} from 'drizzle-orm/sqlite-core';
+} from "drizzle-orm/sqlite-core";
 
 export const emojiReactionsTable = sqliteTable(
-	'emoji_reactions',
+	"emoji_reactions",
 	{
-		contentId: text('content_id').notNull(),
-		personId: text('person_id').notNull(),
-		emoji: text('emoji').notNull(),
-		reactedAt: integer('reacted_at', { mode: 'timestamp' }),
-		contentTimestamp: integer('content_timestamp'),
+		contentId: text("content_id").notNull(),
+		personId: text("person_id").notNull(),
+		emoji: text("emoji").notNull(),
+		reactedAt: integer("reacted_at", { mode: "timestamp" }),
+		contentTimestamp: integer("content_timestamp").notNull().default(0),
 	},
 	(table) => ({
 		primaryKey: primaryKey({
-			columns: [table.contentId, table.personId, table.emoji],
+			columns: [table.contentId, table.personId, table.emoji, table.contentTimestamp],
 		}),
 	}),
 );

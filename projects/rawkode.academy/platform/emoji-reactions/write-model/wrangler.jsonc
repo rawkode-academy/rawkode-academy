@@ -1,0 +1,16 @@
+{
+	"$schema": "../node_modules/wrangler/config-schema.json",
+	"name": "platform-emoji-reactions-write-model",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-06-10",
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1
+	},
+	"workflows": [
+		{
+			"name": "reactToContent",
+			"class_name": "ReactToContentWorkflow"
+		}
+	]
+}

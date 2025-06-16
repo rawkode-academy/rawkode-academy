@@ -1,31 +1,41 @@
 {
-  "name": "emoji-reactions",
-  "private": true,
-  "dependencies": {
-    "@apollo/subgraph": "^2.10.2",
-    "@graphql-tools/utils": "^10.8.6",
-    "@paralleldrive/cuid2": "^2.2.2",
-    "@pothos/core": "^4.6.0",
-    "@pothos/plugin-directives": "^4.2.0",
-    "@pothos/plugin-drizzle": "^0.8.1",
-    "@pothos/plugin-federation": "^4.3.2",
-    "@sindresorhus/slugify": "^2.2.1",
-    "drizzle-kit": "^0.30.6",
-    "drizzle-orm": "^0.38.4",
-    "drizzle-zod": "^0.6.1",
-    "graphql": "^16.10.0",
-    "graphql-scalars": "^1.24.2",
-    "graphql-yoga": "^5.13.4",
-    "zod": "^3.24.3"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@cloudflare/workers-types": "^4.20250426.0",
-    "@types/bun": "latest",
-    "@types/node": "^22.15.2",
-    "wrangler": "^4.13.2"
-  },
-  "peerDependencies": {
-    "typescript": "^5.8.3"
-  }
+	"name": "emoji-reactions",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"test": "bun test",
+		"test:watch": "bun test --watch"
+	},
+	"dependencies": {
+		"@apollo/subgraph": "^2.11.0",
+		"@envelop/sentry": "^12.0.0",
+		"@graphql-tools/utils": "^10.8.6",
+		"@paralleldrive/cuid2": "^2.2.2",
+		"@pothos/core": "^4.6.2",
+		"@pothos/plugin-directives": "^4.2.1",
+		"@pothos/plugin-drizzle": "^0.5.3",
+		"@pothos/plugin-federation": "^4.3.3",
+		"@sentry/node": "^9.29.0",
+		"@sentry/tracing": "^7.120.3",
+		"@sindresorhus/slugify": "^2.2.1",
+		"drizzle-graphql": "^0.8.5",
+		"drizzle-kit": "^0.30.6",
+		"drizzle-orm": "^0.36.4",
+		"drizzle-zod": "^0.5.1",
+		"graphql": "^16.11.0",
+		"graphql-scalars": "^1.24.2",
+		"graphql-yoga": "^5.13.5",
+		"typescript": "^5.8.3",
+		"zod": "^3.25.64"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@cloudflare/workers-types": "^4.20250614.0",
+		"@types/bun": "latest",
+		"miniflare": "^4.20250604.1",
+		"wrangler": "^4.13.2"
+	},
+	"peerDependencies": {
+		"typescript": "^5.8.3"
+	}
 }
