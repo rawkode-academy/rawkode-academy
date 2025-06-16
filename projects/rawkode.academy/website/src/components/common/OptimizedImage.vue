@@ -100,7 +100,9 @@ function handleError() {
 	hasError.value = true;
 	if (props.fallbackSrc) {
 		props.src = props.fallbackSrc; // Update the image source to the fallback
-		console.error(`Failed to load image: ${props.src}. Using fallback: ${props.fallbackSrc}`);
+		console.error(
+			`Failed to load image: ${props.src}. Using fallback: ${props.fallbackSrc}`,
+		);
 	} else {
 		console.error(`Failed to load image: ${props.src}. No fallback provided.`);
 	}
