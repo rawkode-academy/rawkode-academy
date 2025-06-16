@@ -1,11 +1,11 @@
 <template>
   <div class="comments-section mt-8">
     <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-      Comments ({{ comments.length }})
+      Comments {{ !loading ? `(${comments.length})` : '' }}
     </h3>
 
-    <div v-if="loading" class="flex justify-center py-8">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    <div v-if="loading" class="space-y-2">
+      <SkeletonComment v-for="i in 3" :key="i" :lines="2" />
     </div>
 
     <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
@@ -88,6 +88,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import SkeletonComment from "@/components/common/SkeletonComment.vue";
 
 interface Comment {
 	id: number;

@@ -29,10 +29,7 @@
     </div>
 
     <!-- Loading state -->
-    <div v-if="loading" class="text-center py-8" aria-live="polite">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p class="text-gray-600 dark:text-gray-400">Loading transcript...</p>
-    </div>
+    <SkeletonTranscript v-if="loading" />
 
     <!-- Error state -->
     <div v-if="error" class="text-center py-8">
@@ -65,7 +62,12 @@
 </template>
 
 <script>
+import SkeletonTranscript from "@/components/common/SkeletonTranscript.vue";
+
 export default {
+	components: {
+		SkeletonTranscript,
+	},
 	props: {
 		videoId: {
 			type: String,

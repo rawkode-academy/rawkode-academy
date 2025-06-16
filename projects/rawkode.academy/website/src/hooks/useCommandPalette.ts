@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
 
-export function useCommandPalette() {
+interface CommandPaletteHook {
+	isOpen: boolean;
+	open: () => void;
+	close: () => void;
+	toggle: () => void;
+}
+
+export function useCommandPalette(): CommandPaletteHook {
 	const [isOpen, setIsOpen] = useState(false);
 
-	const open = () => setIsOpen(true);
-	const close = () => setIsOpen(false);
-	const toggle = () => setIsOpen((prev) => !prev);
+	const open = (): void => setIsOpen(true);
+	const close = (): void => setIsOpen(false);
+	const toggle = (): void => setIsOpen((prev) => !prev);
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
