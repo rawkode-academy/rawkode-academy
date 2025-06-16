@@ -29,14 +29,14 @@ defineProps<{
 				<span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ user.name }}</span>
 				<span class="block text-sm text-gray-900 truncate dark:text-white">{{ user.email }}</span>
 			</div>
-			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="userProfileButton">
 				<li>
 					<a target="_blank" href="https://zitadel.rawkode.academy"
 						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">My
 						Profile</a>
 				</li>
 			</ul>
-			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="userProfileButton">
 				<li>
 					<a href="/api/auth/sign-out"
 						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign
