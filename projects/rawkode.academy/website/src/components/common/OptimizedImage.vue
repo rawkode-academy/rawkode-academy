@@ -99,8 +99,10 @@ function generateImageUrl(src: string, width: number): string {
 function handleError() {
 	hasError.value = true;
 	if (props.fallbackSrc) {
-		// You could emit an event or update the src to use fallback
-		console.error(`Failed to load image: ${props.src}`);
+		props.src = props.fallbackSrc; // Update the image source to the fallback
+		console.error(`Failed to load image: ${props.src}. Using fallback: ${props.fallbackSrc}`);
+	} else {
+		console.error(`Failed to load image: ${props.src}. No fallback provided.`);
 	}
 }
 </script>
