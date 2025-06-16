@@ -1,4 +1,11 @@
-import { dag, Directory, File, func, object, Secret } from "@dagger.io/dagger";
+import {
+	dag,
+	type Directory,
+	type File,
+	func,
+	object,
+	type Secret,
+} from "@dagger.io/dagger";
 
 @object()
 export class Cloudflare {
@@ -26,9 +33,7 @@ export class Cloudflare {
 
 		if ((await deploymentResult.exitCode()) !== 0) {
 			throw new Error(
-				"Deployment failed. Error: " +
-					(await deploymentResult.stdout()) +
-					(await deploymentResult.stderr()),
+				`Deployment failed. Error: ${await deploymentResult.stdout()}${await deploymentResult.stderr()}`,
 			);
 		}
 
@@ -59,9 +64,7 @@ export class Cloudflare {
 
 		if ((await deploymentResult.exitCode()) !== 0) {
 			throw new Error(
-				"Deployment failed. Error: " +
-					(await deploymentResult.stdout()) +
-					(await deploymentResult.stderr()),
+				`Deployment failed. Error: ${await deploymentResult.stdout()}${await deploymentResult.stderr()}`,
 			);
 		}
 
@@ -96,9 +99,7 @@ export class Cloudflare {
 
 		if ((await deploymentResult.exitCode()) !== 0) {
 			throw new Error(
-				"Deployment failed. Error: " +
-					(await deploymentResult.stdout()) +
-					(await deploymentResult.stderr()),
+				`Deployment failed. Error: ${await deploymentResult.stdout()}${await deploymentResult.stderr()}`,
 			);
 		}
 
@@ -132,9 +133,7 @@ export class Cloudflare {
 
 		if ((await deploymentResult.exitCode()) !== 0) {
 			throw new Error(
-				"Deployment failed. Error: " +
-					(await deploymentResult.stdout()) +
-					(await deploymentResult.stderr()),
+				`Deployment failed. Error: ${await deploymentResult.stdout()}${await deploymentResult.stderr()}`,
 			);
 		}
 
@@ -178,9 +177,7 @@ export class Cloudflare {
 
 		if ((await deploymentResult.exitCode()) !== 0) {
 			throw new Error(
-				"Deployment failed. Error: " +
-					(await deploymentResult.stdout()) +
-					(await deploymentResult.stderr()),
+				`Deployment failed. Error: ${await deploymentResult.stdout()}${await deploymentResult.stderr()}`,
 			);
 		}
 
@@ -253,9 +250,7 @@ export class Cloudflare {
 
 		if ((await deploymentResult.exitCode()) !== 0) {
 			throw new Error(
-				"Deployment failed. Error: " +
-					(await deploymentResult.stdout()) +
-					(await deploymentResult.stderr()),
+				`Deployment failed. Error: ${await deploymentResult.stdout()}${await deploymentResult.stderr()}`,
 			);
 		}
 
