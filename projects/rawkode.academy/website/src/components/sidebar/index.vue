@@ -14,12 +14,14 @@ import {
 	VideoCameraIcon,
 	WrenchScrewdriverIcon,
 } from "@heroicons/vue/24/outline";
-import { initFlowbite } from "flowbite";
 import { computed, onMounted, ref } from "vue";
 import MenuItems from "./items.vue";
 
 // Get the current path from the window location
 const currentPath = ref("");
+
+// Sidebar open state for mobile
+const sidebarOpen = ref(false);
 
 // Collapsible section states
 const sectionsExpanded = ref({
@@ -28,7 +30,6 @@ const sectionsExpanded = ref({
 
 onMounted(() => {
 	currentPath.value = window.location.pathname;
-	initFlowbite();
 
 	// Auto-expand sections if they contain the current page
 	if (
@@ -37,6 +38,11 @@ onMounted(() => {
 	) {
 		sectionsExpanded.value.community = true;
 	}
+
+	// Listen for toggle events from navbar
+	window.addEventListener("toggle-sidebar", () => {
+		sidebarOpen.value = !sidebarOpen.value;
+	});
 });
 
 // Toggle section expansion
@@ -130,10 +136,14 @@ function isCurrentPath(itemPath: string) {
 </script>
 
 <template>
-	<aside class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full md:translate-x-0
-		bg-linear-to-br from-white to-gray-50 dark:from-black dark:to-gray-900
-		border-r border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-100/10 dark:shadow-black/20" aria-label="Sidenav"
-		id="drawer-navigation">
+	<aside 
+		:class="[
+			'fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform',
+			sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
+			'bg-linear-to-br from-white to-gray-50 dark:from-black dark:to-gray-900',
+			'border-r border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-100/10 dark:shadow-black/20'
+		]"
+		aria-label="Sidenav">
 		<div class="overflow-y-auto py-5 px-4 h-full flex flex-col">
 
 			<!-- Main navigation - always visible -->
