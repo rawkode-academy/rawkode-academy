@@ -1,0 +1,56 @@
+---
+export interface Props {
+	lightSrc: ImageMetadata;
+	darkSrc: ImageMetadata;
+	alt: string;
+	class?: string;
+	loading?: "eager" | "lazy";
+}
+
+import { Image } from "astro:assets";
+
+const {
+	lightSrc,
+	darkSrc,
+	alt,
+	class: className = "",
+	loading = "lazy",
+} = Astro.props;
+---
+
+<div class={`theme-aware-image ${className}`}>
+	<Image
+		src={lightSrc}
+		alt={alt}
+		class="theme-light-only"
+		loading={loading}
+	/>
+	<Image
+		src={darkSrc}
+		alt={alt}
+		class="theme-dark-only"
+		loading={loading}
+	/>
+</div>
+
+<style>
+	.theme-aware-image {
+		position: relative;
+		width: 100%;
+		height: auto;
+	}
+
+	:global(.dark) .theme-light-only {
+		display: none;
+	}
+
+	:global(:not(.dark)) .theme-dark-only {
+		display: none;
+	}
+
+	.theme-light-only,
+	.theme-dark-only {
+		width: 100%;
+		height: auto;
+	}
+</style>

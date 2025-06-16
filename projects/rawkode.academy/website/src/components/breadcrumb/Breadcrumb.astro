@@ -17,9 +17,9 @@ const { elements } = Astro.props;
 ---
 
 <BreadcrumbJsonLd elements={elements} />
-<nav class="flex" aria-label="Breadcrumb">
+<nav class="flex py-3" aria-label="Breadcrumb">
 	<ol
-		class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse"
+		class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse bg-gray-50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-gray-200 dark:border-gray-700"
 	>
 		{
 			elements.map((element, index) => {
