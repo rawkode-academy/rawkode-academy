@@ -538,7 +538,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 				link.classList.remove("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-800");
 				const dot = link.querySelector(".toc-dot") as HTMLElement;
 				if (dot) {
-					dot.style.opacity = "0";
+					dot.classList.add("hidden-opacity");
 				}
 			}
 		});
