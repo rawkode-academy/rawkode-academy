@@ -53,6 +53,18 @@ export default defineConfig({
 			config: {
 				forward: ["dataLayer.push", "gtag", "posthog", "GrafanaFaroWebSdk"],
 				lib: "/_partytown/",
+				// Prevent service worker registration attempts from Partytown
+				mainWindowAccessors: ["navigator.serviceWorker"],
+				resolveUrl: (url) => {
+					// Allow all URLs except service worker registrations
+					if (
+						url.pathname.includes("sw.js") ||
+						url.pathname.includes("service-worker")
+					) {
+						return null;
+					}
+					return url;
+				},
 			},
 		}),
 	],
