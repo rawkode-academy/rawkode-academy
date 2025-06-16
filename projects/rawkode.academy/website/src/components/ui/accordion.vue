@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 
 interface AccordionItem {
 	id: string;
 	question: string;
-	answer: string;
+	answer?: string;
 }
 
 interface Props {
@@ -14,19 +14,17 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const openItems = ref<Set<string>>(
-	new Set(props.defaultOpenId ? [props.defaultOpenId] : []),
+// Use reactive state instead of Set for better reactivity
+const openItems = reactive<Record<string, boolean>>(
+	props.defaultOpenId ? { [props.defaultOpenId]: true } : {}
 );
 
 const toggleItem = (id: string) => {
-	if (openItems.value.has(id)) {
-		openItems.value.delete(id);
-	} else {
-		openItems.value.add(id);
-	}
+	console.log('Toggling item:', id, 'Current state:', openItems[id]);
+	openItems[id] = !openItems[id];
 };
 
-const isOpen = (id: string) => openItems.value.has(id);
+const isOpen = (id: string) => !!openItems[id];
 </script>
 
 <template>
@@ -69,10 +67,15 @@ const isOpen = (id: string) => openItems.value.has(id);
 					v-show="isOpen(item.id)"
 					:id="`accordion-body-${item.id}`"
 					:aria-labelledby="`accordion-heading-${item.id}`"
+					role="region"
 					class="overflow-hidden"
 				>
 					<div class="py-5 border-b border-gray-200 dark:border-gray-700">
-						<div v-html="item.answer" class="text-gray-600 dark:text-gray-300"></div>
+						<div class="text-gray-600 dark:text-gray-300">
+							<slot :name="`answer-${item.id}`">
+								{{ item.answer }}
+							</slot>
+						</div>
 					</div>
 				</div>
 			</Transition>
