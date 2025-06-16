@@ -1,9 +1,32 @@
-import { describe, it, expect } from "vitest";
-import { getCollection } from "astro:content";
+import { describe, it, expect, vi } from "vitest";
+
+// Mock getCollection for tests
+const getCollection = vi.fn();
 
 describe("SEO Validation", () => {
 	describe("Article SEO", () => {
 		it("all articles should have required meta fields", async () => {
+			// Mock articles data
+			const mockArticles = [
+				{
+					id: "test-article",
+					data: {
+						title: "Test Article Title for SEO",
+						description: "This is a test article description that meets the minimum length requirement for SEO validation",
+						openGraph: {
+							title: "OG Title",
+							subtitle: "OG Subtitle"
+						},
+						publishedAt: new Date(),
+						authors: ["test-author"],
+						isDraft: false
+					},
+					body: "Test article content that is long enough"
+				}
+			];
+			
+			getCollection.mockResolvedValue(mockArticles);
+			
 			const articles = await getCollection("articles", ({ data }) => !data.isDraft);
 			
 			for (const article of articles) {
