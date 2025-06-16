@@ -8,6 +8,8 @@ import FAQ from "@/components/faq/consulting-list.vue";
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 
+export const prerender = true;
+
 const consultingFAQs = [
 	{
 		question: "What technologies and platforms do you specialize in?",
