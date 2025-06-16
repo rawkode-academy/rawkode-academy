@@ -26,11 +26,9 @@ const {
 	decoding = "async",
 	class: className,
 	sizes,
-	widths = [320, 640, 768, 1024, 1280, 1536],
 	formats = ["avif", "webp"],
 	quality = 80,
 	fetchpriority = "auto",
-	placeholder = "blur",
 } = Astro.props;
 
 // Check if the image is external
@@ -65,15 +63,13 @@ const aspectRatio = width && height ? width / height : undefined;
 			height={height || 1080}
 			loading={loading}
 			decoding={decoding}
-			class={className}
-			widths={widths}
+			{...(className ? { class: className } : {})}
 			sizes={
 				sizes ||
 				"(max-width: 640px) 100vw, (max-width: 768px) 90vw, (max-width: 1024px) 80vw, 1280px"
 			}
-			format={formats}
+			{...(formats[0] ? { format: formats[0] } : {})}
 			quality={quality}
-			densities={[1, 2]}
 		/>
 	)
 }

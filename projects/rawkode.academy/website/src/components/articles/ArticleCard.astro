@@ -12,7 +12,7 @@ type Props = {
 
 const { article } = Astro.props;
 const authors = await getEntries(article.data.authors);
-const readingTime = calculateReadingTime(article.body || '');
+const readingTime = calculateReadingTime(article.body || "");
 ---
 
 <BaseCard href={`/read/${article.id}`}>

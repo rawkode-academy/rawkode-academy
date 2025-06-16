@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactElement } from "react";
 import { type Component, createApp, h } from "vue";
 
 interface VueInReactProps {
@@ -6,7 +6,10 @@ interface VueInReactProps {
 	props?: Record<string, unknown>;
 }
 
-export const VueInReact = ({ component, props = {} }: VueInReactProps): JSX.Element => {
+export const VueInReact = ({
+	component,
+	props = {},
+}: VueInReactProps): ReactElement => {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {

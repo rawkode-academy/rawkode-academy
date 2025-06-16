@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi, expect } from "vitest";
 
 // Mock Astro imports
 vi.mock("astro:content", () => ({

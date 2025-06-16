@@ -1,4 +1,4 @@
-import React, { Component, type ReactNode, type ErrorInfo } from "react";
+import { Component, type ReactNode, type ErrorInfo } from "react";
 
 interface Props {
 	children: ReactNode;
@@ -20,9 +20,9 @@ export default class ErrorBoundary extends Component<Props, State> {
 		return { hasError: true, error };
 	}
 
-	componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+	override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
 		console.error("ErrorBoundary caught an error:", error, errorInfo);
-		
+
 		// Log to monitoring service if available
 		if (typeof window !== "undefined" && window.GrafanaFaroWebSdk?.faro) {
 			window.GrafanaFaroWebSdk.faro.api.pushError(error, {
@@ -37,7 +37,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 		this.setState({ hasError: false, error: null });
 	};
 
-	render(): ReactNode {
+	override render(): ReactNode {
 		if (this.state.hasError && this.state.error) {
 			if (this.props.fallback) {
 				return this.props.fallback(this.state.error, this.resetError);
@@ -53,6 +53,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 							{this.state.error.message || "An unexpected error occurred"}
 						</p>
 						<button
+							type="button"
 							onClick={this.resetError}
 							className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
 						>

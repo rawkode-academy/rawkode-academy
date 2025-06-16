@@ -18,7 +18,7 @@ interface UseAsyncDataReturn<T> {
 
 export function useAsyncData<T>(
 	fetcher: () => Promise<T>,
-	options: UseAsyncDataOptions = {}
+	options: UseAsyncDataOptions = {},
 ): UseAsyncDataReturn<T> {
 	const {
 		immediate = true,
@@ -30,7 +30,7 @@ export function useAsyncData<T>(
 	const data = ref<T | null>(null);
 	const loading = ref(false);
 	const error = ref<string | null>(null);
-	
+
 	let retryCount = 0;
 	let abortController: AbortController | null = null;
 
@@ -46,12 +46,12 @@ export function useAsyncData<T>(
 
 		try {
 			const result = await fetcher();
-			
+
 			// Check if request was aborted
 			if (abortController.signal.aborted) {
 				return;
 			}
-			
+
 			data.value = result;
 			retryCount = 0; // Reset retry count on success
 		} catch (err) {
@@ -59,20 +59,20 @@ export function useAsyncData<T>(
 			if (err instanceof Error && err.name === "AbortError") {
 				return;
 			}
-			
+
 			const errorMessage = getErrorMessage(err);
 			error.value = errorMessage;
-			
-			logError(err, { 
+
+			logError(err, {
 				component: "useAsyncData",
 				retryCount,
 				maxRetries,
 			});
-			
+
 			if (onError) {
 				onError(err);
 			}
-			
+
 			// Auto-retry if configured
 			if (retryCount < maxRetries) {
 				retryCount++;
@@ -106,7 +106,7 @@ export function useAsyncData<T>(
 	});
 
 	return {
-		data,
+		data: data as Ref<T | null>,
 		loading,
 		error,
 		execute,
