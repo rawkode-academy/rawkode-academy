@@ -1,5 +1,6 @@
 import { Command } from "cmdk";
 import { useEffect, useRef, useState } from "react";
+import { SkeletonList } from "@/components/common/SkeletonList";
 import { GitHubIcon, getCategoryIcon } from "./icons";
 import "./styles.css";
 
@@ -20,7 +21,7 @@ interface CommandPaletteProps {
 export default function CommandPalette({
 	isOpen,
 	onClose,
-}: CommandPaletteProps) {
+}: CommandPaletteProps): JSX.Element | null {
 	const [search, setSearch] = useState("");
 	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
 	const [articleItems, setArticleItems] = useState<NavigationItem[]>([]);
@@ -29,7 +30,7 @@ export default function CommandPalette({
 	const inputRef = useRef<HTMLInputElement>(null);
 	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-	const customFilter = (value: string, search: string) => {
+	const customFilter = (value: string, search: string): number => {
 		if (!search.trim()) return 1; // Show all items when search is empty
 
 		const searchTerms = search.toLowerCase().split(/\s+/).filter(Boolean);
@@ -222,12 +223,32 @@ export default function CommandPalette({
 					</div>
 
 					<Command.List className="command-palette-list">
+						{isLoading && (
+							<div className="command-palette-loading">
+								<SkeletonList
+									items={5}
+									showIcon={true}
+									iconSize="1.5rem"
+									showSubtitle={false}
+									className="command-palette-skeleton"
+								/>
+							</div>
+						)}
+
+						{isSearchingArticles && !isLoading && search.length >= 2 && (
+							<div className="command-palette-searching">
+								<SkeletonList
+									items={3}
+									showIcon={true}
+									iconSize="1.5rem"
+									showSubtitle={true}
+									className="command-palette-skeleton"
+								/>
+							</div>
+						)}
+
 						<Command.Empty className="command-palette-empty">
-							{isLoading
-								? "Loading..."
-								: isSearchingArticles
-									? "Searching articles..."
-									: `No results found for "${search}"`}
+							{!isLoading && !isSearchingArticles && `No results found for "${search}"`}
 						</Command.Empty>
 
 						{Object.entries(groupedItems).map(([category, items]) => {

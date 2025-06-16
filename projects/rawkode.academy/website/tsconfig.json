@@ -1,7 +1,7 @@
 {
 	"extends": "astro/tsconfigs/strictest",
 	"include": [".astro/types.d.ts", "**/*"],
-	"exclude": ["dist"],
+	"exclude": ["dist", "node_modules"],
 
 	"compilerOptions": {
 		"plugins": [
@@ -15,6 +15,16 @@
 		"types": ["vidstack/vue"],
 		"paths": {
 			"@/*": ["src/*"]
-		}
+		},
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true
 	}
 }
