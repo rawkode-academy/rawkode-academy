@@ -8,6 +8,8 @@ import FAQ from "@/components/faq/training-list.vue";
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 
+export const prerender = true;
+
 const trainingFAQs = [
 	{
 		question: "How many people can attend a training session?",
