@@ -1,17 +1,25 @@
-import { getSchema } from "./schema";
-import { lexicographicSortSchema } from "graphql";
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { lexicographicSortSchema } from "graphql";
 import { writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { getSchema } from "./schema";
 
-// Mock D1 database for schema generation only
-const mockEnv = {
+// Create a mock environment for schema generation
+const mockEnv: Env = {
 	DB: {} as D1Database,
 };
 
-const schema = getSchema(mockEnv);
-const sdl = printSchemaWithDirectives(lexicographicSortSchema(schema), {
-	// This is needed to print the directives properly
-	pathToDirectivesInExtensions: [""],
-});
+const schemaAsString = printSchemaWithDirectives(
+	lexicographicSortSchema(getSchema(mockEnv)),
+	{
+		// This is needed to print the directives properly,
+		// no idea why.
+		pathToDirectivesInExtensions: [""],
+	},
+);
 
-writeFileSync("schema.gql", sdl);
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const outputPath = join(__dirname, "schema.gql");
+
+writeFileSync(outputPath, schemaAsString);
