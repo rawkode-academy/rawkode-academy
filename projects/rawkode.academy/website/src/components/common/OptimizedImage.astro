@@ -1,0 +1,79 @@
+---
+import { Image } from "astro:assets";
+
+export interface Props {
+	src: string;
+	alt: string;
+	width?: number;
+	height?: number;
+	loading?: "lazy" | "eager";
+	decoding?: "async" | "auto" | "sync";
+	class?: string;
+	sizes?: string;
+	widths?: number[];
+	formats?: Array<"avif" | "webp" | "png" | "jpg">;
+	quality?: number;
+	fetchpriority?: "high" | "low" | "auto";
+	placeholder?: "blur" | "dominantColor" | "none";
+}
+
+const {
+	src,
+	alt,
+	width,
+	height,
+	loading = "lazy",
+	decoding = "async",
+	class: className,
+	sizes,
+	widths = [320, 640, 768, 1024, 1280, 1536],
+	formats = ["avif", "webp"],
+	quality = 80,
+	fetchpriority = "auto",
+	placeholder = "blur",
+} = Astro.props;
+
+// Check if the image is external
+const isExternal = src.startsWith("http://") || src.startsWith("https://");
+
+// Generate dimensions for layout stability
+const aspectRatio = width && height ? width / height : undefined;
+---
+
+{
+	isExternal ? (
+		<img
+			src={src}
+			alt={alt}
+			width={width}
+			height={height}
+			loading={loading}
+			decoding={decoding}
+			fetchpriority={fetchpriority}
+			class={className}
+			style={
+				aspectRatio
+					? `aspect-ratio: ${aspectRatio}; width: 100%; height: auto;`
+					: undefined
+			}
+		/>
+	) : (
+		<Image
+			src={src}
+			alt={alt}
+			width={width || 1920}
+			height={height || 1080}
+			loading={loading}
+			decoding={decoding}
+			class={className}
+			widths={widths}
+			sizes={
+				sizes ||
+				"(max-width: 640px) 100vw, (max-width: 768px) 90vw, (max-width: 1024px) 80vw, 1280px"
+			}
+			format={formats}
+			quality={quality}
+			densities={[1, 2]}
+		/>
+	)
+}
