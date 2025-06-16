@@ -8,9 +8,12 @@
       <SkeletonComment v-for="i in 3" :key="i" :lines="2" />
     </div>
 
-    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
-      <p class="text-red-700 dark:text-red-300">{{ error }}</p>
-    </div>
+    <ErrorState 
+      v-else-if="error"
+      :message="error"
+      :on-retry="fetchComments"
+      retry-text="Retry loading comments"
+    />
 
     <div v-else-if="comments.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
       <p>No comments yet. Be the first to comment on Zulip!</p>
@@ -89,6 +92,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import SkeletonComment from "@/components/common/SkeletonComment.vue";
+import ErrorState from "@/components/common/ErrorState.vue";
+import { handleApiResponse, getErrorMessage } from "@/utils/error-handler";
 
 interface Comment {
 	id: number;
@@ -116,25 +121,20 @@ const fetchComments = async () => {
 		error.value = null;
 
 		const response = await fetch(`/api/comments/${props.videoId}`);
-
-		if (!response.ok) {
-			throw new Error(`Failed to fetch comments: ${response.statusText}`);
-		}
-
-		const data = await response.json();
+		const data = await handleApiResponse<{
+			comments?: Comment[];
+			zulipTopicUrl?: string;
+			error?: string;
+		}>(response);
 
 		if (data.error) {
 			throw new Error(data.error);
 		}
 
 		comments.value = data.comments || [];
-
-		// Get Zulip topic URL from API response if available
 		zulipTopicUrl.value = data.zulipTopicUrl || null;
 	} catch (err) {
-		console.error("Error fetching comments:", err);
-		error.value =
-			err instanceof Error ? err.message : "Failed to load comments";
+		error.value = getErrorMessage(err);
 	} finally {
 		loading.value = false;
 	}
