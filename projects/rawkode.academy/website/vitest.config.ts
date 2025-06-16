@@ -16,6 +16,15 @@ export default getViteConfig({
 		globals: true,
 		coverage: {
 			reporter: ["text", "json", "html"],
+			exclude: [
+				"node_modules/**",
+				"dist/**",
+				"**/*.d.ts",
+				"**/*.config.*",
+				"**/*.spec.ts",
+				"**/*.test.ts",
+			],
 		},
+		setupFiles: ["./src/tests/setup.ts"],
 	},
 } as ViteUserConfig);
