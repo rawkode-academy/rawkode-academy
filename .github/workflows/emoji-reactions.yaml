@@ -67,7 +67,7 @@ jobs:
         env:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
           COSMO_API_KEY: ${{ steps.secrets.outputs.COSMO_API_KEY }}
-          SERVICE_NAME: platform-emoji-reactions
+          SERVICE_NAME: emoji-reactions
         run: |
           dagger <<'.'
             codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
