@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 import { glob } from "glob";
 import { readFile } from "node:fs/promises";
-// @ts-expect-error gray-matter is a dev dependency
 import matter from "gray-matter";
 
 interface ValidationError {

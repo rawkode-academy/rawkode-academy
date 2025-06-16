@@ -10,7 +10,7 @@ interface SkeletonListProps {
 	className?: string;
 }
 
-export const SkeletonList: React.FC<SkeletonListProps> = ({
+export function SkeletonList({
 	items = 5,
 	showIcon = true,
 	iconSize = "2rem",
@@ -75,4 +75,4 @@ export const SkeletonList: React.FC<SkeletonListProps> = ({
 			))}
 		</div>
 	);
-};
+}
