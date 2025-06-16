@@ -11,9 +11,12 @@ import {
 export class CastingCredits {
 		async install(
 			@argument({ defaultPath: "." }) directory: Directory,
+			devDependencies = false,
 		): Promise<Container> {
 			const bun = dag.bun();
-			return await bun.withCache().install(directory);
+			return await bun.withCache().install(directory, {
+				devDependencies,
+			});
 		}
 
 		/**
@@ -23,7 +26,10 @@ export class CastingCredits {
 		async test(
 			@argument({ defaultPath: "." }) directory: Directory,
 		): Promise<Container> {
-			const app = await this.install(directory);
+			const app = (await this.install(directory, true)).withExec([
+				"bun",
+				"test",
+			]);
 			return app.withExec(["bun", "test"]);
 		}
 
@@ -34,7 +40,7 @@ export class CastingCredits {
 		async testCoverage(
 			@argument({ defaultPath: "." }) directory: Directory,
 		): Promise<Container> {
-			const app = await this.install(directory);
+			const app = await this.install(directory, true);
 			return app.withExec(["bun", "test", "--coverage"]);
 		}
 	}

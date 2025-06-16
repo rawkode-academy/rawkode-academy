@@ -41,6 +41,7 @@ export class Bun {
 	@func()
 	async install(
 		@argument({ ignore: [".git", "node_modules"] }) directory: Directory,
+		devDependencies = false,
 	): Promise<Container> {
 		const nodeModules = dag.cacheVolume("node-modules");
 
@@ -48,15 +49,7 @@ export class Bun {
 			._container
 			.withMountedFile("/code/bun.lock", directory.file("bun.lock"))
 			.withMountedFile("/code/package.json", directory.file("package.json"))
-			.withMountedCache(
-				"/code/node_modules",
-				nodeModules,
-				{
-					sharing: CacheSharingMode.Private,
-					owner: "bun",
-				},
-			)
-			.withExec(["bun", "install", "--frozen-lockfile"])
+			.withExec(["bun", "install", "--frozen-lockfile", devDependencies ? "--dev" : ""])
 			.withMountedDirectory("/code", directory).withMountedCache(
 				"/code/node_modules",
 				nodeModules,
@@ -65,5 +58,28 @@ export class Bun {
 					owner: "bun",
 				},
 			);
+	}
+
+	/**
+	 * This is a temporary workaround.
+	 * The problem is that the mountedCache above  means when we call
+	 * install | directory /code
+	 * we only get our code and node_modules doesn't travel with it.
+	 * Our existing functions aren't setup to work around this yet.
+	 * So here we are.
+	 *
+	 * @param directory
+	 * @returns
+	 */
+	@func()
+	async installNoCache(
+		@argument({ ignore: [".git", "node_modules"] }) directory: Directory,
+	): Promise<Container> {
+		const nodeModules = dag.cacheVolume("node-modules");
+
+		return this
+			._container
+			.withMountedDirectory("/code", directory)
+			.withExec(["bun", "install", "--frozen-lockfile"]);
 	}
 }

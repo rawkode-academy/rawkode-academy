@@ -30,7 +30,7 @@ jobs:
       - name: Run Tests
         working-directory: projects/rawkode.academy/platform/casting-credits
         run: |
-          dagger -m . call test --directory=.
+          dagger call test
 
   deploy:
     runs-on: ubuntu-latest
@@ -69,19 +69,18 @@ jobs:
           COSMO_API_KEY: ${{ steps.secrets.outputs.COSMO_API_KEY }}
           SERVICE_NAME: platform-casting-credits
         run: |
-          dagger <<.
-            codebase=$(../../../../dagger/bun | install --directory .)
-            
+          dagger <<'.'
+            codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
+
             ../../../../dagger/cloudflare | deploy \
               $codebase \
               ./read-model/wrangler.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN
-              
+
             ../../../../dagger/cloudflare | applyMigrations \
               $codebase \
               ./read-model/wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN \
-              platform-casting-credits
+              env:CLOUDFLARE_WORKERS_TOKEN
 
             ../../../../dagger/wundergraph | generateAndPublishSubgraph \
               ${SERVICE_NAME} \
