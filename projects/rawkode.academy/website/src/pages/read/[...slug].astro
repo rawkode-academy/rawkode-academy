@@ -57,7 +57,7 @@ const maybeSeries =
 	article.data.series && (await getEntry("series", article.data.series.id));
 
 const imageUrl = await computeImageUrl(article);
-const readingTime = calculateReadingTime(article.body || '');
+const readingTime = calculateReadingTime(article.body || "");
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },

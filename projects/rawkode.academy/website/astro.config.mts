@@ -29,7 +29,6 @@ export default defineConfig({
 	output: "server",
 	adapter: cloudflare({
 		imageService: "cloudflare",
-		mode: "directory",
 	}),
 	integrations: [
 		d2(),

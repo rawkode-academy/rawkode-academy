@@ -2,7 +2,8 @@
 
 export const APP_NAME = "Rawkode Academy";
 export const APP_URL = "https://rawkode.academy";
-export const APP_DESCRIPTION = "The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for developers.";
+export const APP_DESCRIPTION =
+	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for developers.";
 
 export const API_ENDPOINTS = {
 	VIDEOS: "/api/videos",

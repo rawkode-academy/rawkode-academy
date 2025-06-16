@@ -1,5 +1,5 @@
 import { Command } from "cmdk";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { SkeletonList } from "@/components/common/SkeletonList";
 import { GitHubIcon, getCategoryIcon } from "./icons";
 import "./styles.css";
@@ -21,7 +21,7 @@ interface CommandPaletteProps {
 export default function CommandPalette({
 	isOpen,
 	onClose,
-}: CommandPaletteProps): JSX.Element | null {
+}: CommandPaletteProps): ReactElement | null {
 	const [search, setSearch] = useState("");
 	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
 	const [articleItems, setArticleItems] = useState<NavigationItem[]>([]);
@@ -248,7 +248,9 @@ export default function CommandPalette({
 						)}
 
 						<Command.Empty className="command-palette-empty">
-							{!isLoading && !isSearchingArticles && `No results found for "${search}"`}
+							{!isLoading &&
+								!isSearchingArticles &&
+								`No results found for "${search}"`}
 						</Command.Empty>
 
 						{Object.entries(groupedItems).map(([category, items]) => {

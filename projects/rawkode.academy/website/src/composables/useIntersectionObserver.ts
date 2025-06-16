@@ -12,7 +12,7 @@ interface UseIntersectionObserverReturn {
 export function useIntersectionObserver(
 	target: Ref<Element | null>,
 	callback?: (entries: IntersectionObserverEntry[]) => void,
-	options: UseIntersectionObserverOptions = {}
+	options: UseIntersectionObserverOptions = {},
 ): UseIntersectionObserverReturn {
 	const { immediate = true, ...observerOptions } = options;
 	const isIntersecting = ref(false);
@@ -32,7 +32,7 @@ export function useIntersectionObserver(
 
 		observer = new IntersectionObserver((entries) => {
 			isIntersecting.value = entries.some((entry) => entry.isIntersecting);
-			
+
 			if (callback) {
 				callback(entries);
 			}

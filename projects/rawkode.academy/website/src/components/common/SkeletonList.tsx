@@ -1,6 +1,4 @@
-import React from "react";
-
-interface SkeletonListProps {
+export interface SkeletonListProps {
 	items?: number;
 	showIcon?: boolean;
 	iconSize?: string;
@@ -18,15 +16,10 @@ export function SkeletonList({
 	showSubtitle = true,
 	showAction = false,
 	className = "",
-}) => {
+}: SkeletonListProps) {
 	const getTitleWidth = (index: number): string => {
 		const widths = ["70%", "85%", "60%", "75%", "65%"];
 		return widths[index % widths.length] || "70%";
-	};
-
-	const getSubtitleWidth = (index: number): string => {
-		const widths = ["50%", "40%", "55%", "45%", "60%"];
-		return widths[index % widths.length] || "50%";
 	};
 
 	return (
@@ -57,7 +50,7 @@ export function SkeletonList({
 						{showSubtitle && (
 							<div
 								className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-3"
-								style={{ width: getSubtitleWidth(index) }}
+								style={{ width: "50%" }}
 							/>
 						)}
 					</div>

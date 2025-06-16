@@ -6,7 +6,6 @@ export interface Article extends BaseEntity {
 	description: string;
 	content: string;
 	publishedAt: Date;
-	updatedAt?: Date;
 	authors: Author[];
 	technologies?: Technology[];
 	tags?: string[];
