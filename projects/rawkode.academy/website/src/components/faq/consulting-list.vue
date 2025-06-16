@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Accordion from "../ui/accordion.vue";
+import FaqAccordion from "./accordion-wrapper.vue";
 
 const faqItems = [
 	{
@@ -48,7 +48,7 @@ const faqItems = [
 	<section class="bg-white dark:bg-gray-900">
 		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
 			<div class="mx-auto max-w-(--breakpoint-md)">
-				<Accordion :items="faqItems" default-open-id="1" />
+				<FaqAccordion :items="faqItems" default-open-id="1" />
 			</div>
 		</div>
 	</section>
