@@ -53,16 +53,16 @@ describe("GraphQL Federation Features", () => {
 			const sdl = result.data._service.sdl;
 
 			// Check for federation directives
-			expect(sdl).toContain('@extends');
-			expect(sdl).toContain('@external');
+			expect(sdl).toContain("@extends");
+			expect(sdl).toContain("@external");
 
 			// Check for proper type extensions
-			expect(sdl).toContain('type Video');
-			expect(sdl).toContain('@extends');
-			expect(sdl).toContain('type Person');
+			expect(sdl).toContain("type Video");
+			expect(sdl).toContain("@extends");
+			expect(sdl).toContain("type Person");
 
 			// Check for our custom fields
-			expect(sdl).toContain('creditsForRole(role: String!): [CastingCredit!]');
+			expect(sdl).toContain("creditsForRole(role: String!): [CastingCredit!]");
 		});
 	});
 
@@ -209,14 +209,14 @@ describe("GraphQL Federation Features", () => {
 			const db = drizzle(env.DB);
 			const videoIds = Array.from({ length: 10 }, (_, i) => `video${i + 10}`);
 			await db.insert(schema.castingCreditsTable).values(
-				videoIds.map(videoId => ({
+				videoIds.map((videoId) => ({
 					personId: "person1",
 					role: "host",
 					videoId,
-				}))
+				})),
 			);
 
-			const representations = videoIds.map(id => ({
+			const representations = videoIds.map((id) => ({
 				__typename: "Video",
 				id,
 			}));
@@ -239,17 +239,20 @@ describe("GraphQL Federation Features", () => {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					query,
-					variables: { representations }
+					variables: { representations },
 				}),
 			});
 
 			const result = await response.json();
 			expect(result.errors).toBeUndefined();
 			expect(result.data._entities).toHaveLength(10);
-			expect(result.data._entities.every((e: any) =>
-				e.creditsForRole.length === 1 &&
-				e.creditsForRole[0].person.id === "person1"
-			)).toBe(true);
+			expect(
+				result.data._entities.every(
+					(e: any) =>
+						e.creditsForRole.length === 1 &&
+						e.creditsForRole[0].person.id === "person1",
+				),
+			).toBe(true);
 		});
 	});
 
@@ -341,11 +344,14 @@ describe("GraphQL Federation Features", () => {
 			// D1 has a limit on SQL variables, batch the inserts
 			const batchSize = 30;
 			for (let i = 0; i < 100; i += batchSize) {
-				const credits = Array.from({ length: Math.min(batchSize, 100 - i) }, (_, j) => ({
-					personId: `person${i + j + 100}`,
-					role: "extra",
-					videoId: "video1",
-				}));
+				const credits = Array.from(
+					{ length: Math.min(batchSize, 100 - i) },
+					(_, j) => ({
+						personId: `person${i + j + 100}`,
+						role: "extra",
+						videoId: "video1",
+					}),
+				);
 				await db.insert(schema.castingCreditsTable).values(credits);
 			}
 

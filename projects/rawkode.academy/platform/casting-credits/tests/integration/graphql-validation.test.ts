@@ -13,9 +13,9 @@ describe("GraphQL Input Validation and Error Handling", () => {
 		const db = drizzle(env.DB);
 		await db.delete(schema.castingCreditsTable);
 
-		await db.insert(schema.castingCreditsTable).values([
-			{ personId: "person1", role: "host", videoId: "video1" },
-		]);
+		await db
+			.insert(schema.castingCreditsTable)
+			.values([{ personId: "person1", role: "host", videoId: "video1" }]);
 
 		yoga = createYoga({
 			schema: getSchema(env),
@@ -89,9 +89,9 @@ describe("GraphQL Input Validation and Error Handling", () => {
 			const response = await yoga.fetch("http://localhost", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					query,
-					variables: { role: longRole }
+					variables: { role: longRole },
 				}),
 			});
 
@@ -103,7 +103,7 @@ describe("GraphQL Input Validation and Error Handling", () => {
 		it("should handle special characters in role", async () => {
 			const db = drizzle(env.DB);
 			const specialRole = "host & producer (main)";
-			
+
 			await db.insert(schema.castingCreditsTable).values({
 				personId: "person2",
 				role: specialRole,
@@ -125,16 +125,18 @@ describe("GraphQL Input Validation and Error Handling", () => {
 			const response = await yoga.fetch("http://localhost", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					query,
-					variables: { role: specialRole }
+					variables: { role: specialRole },
 				}),
 			});
 
 			const result = await response.json();
 			expect(result.errors).toBeUndefined();
 			expect(result.data._entities[0].creditsForRole).toHaveLength(1);
-			expect(result.data._entities[0].creditsForRole[0].person.id).toBe("person2");
+			expect(result.data._entities[0].creditsForRole[0].person.id).toBe(
+				"person2",
+			);
 		});
 	});
 
@@ -154,8 +156,8 @@ describe("GraphQL Input Validation and Error Handling", () => {
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ 
-					query: "{ __typename }"
+				body: JSON.stringify({
+					query: "{ __typename }",
 				}),
 			});
 
@@ -296,9 +298,9 @@ describe("GraphQL Input Validation and Error Handling", () => {
 			const response = await yoga.fetch("http://localhost", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					query,
-					variables: { role: null }
+					variables: { role: null },
 				}),
 			});
 
@@ -323,9 +325,9 @@ describe("GraphQL Input Validation and Error Handling", () => {
 			const response = await yoga.fetch("http://localhost", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					query,
-					variables: {}
+					variables: {},
 				}),
 			});
 
@@ -349,12 +351,12 @@ describe("GraphQL Input Validation and Error Handling", () => {
 			const response = await yoga.fetch("http://localhost", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					query,
-					variables: { 
+					variables: {
 						unusedVar: "value",
-						anotherUnused: 123 
-					}
+						anotherUnused: 123,
+					},
 				}),
 			});
 
