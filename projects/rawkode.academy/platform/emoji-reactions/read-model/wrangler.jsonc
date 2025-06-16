@@ -3,6 +3,9 @@
 	"name": "emoji-reactions-read-model",
 	"main": "./main.ts",
 	"compatibility_date": "2025-04-05",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
 	"keep_vars": false,
 	"minify": true,
 	"placement": {
@@ -12,8 +15,8 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "emoji-reactions-db",
-			"database_id": "your-database-id"
+			"database_name": "platform-emoji-reactions",
+			"database_id": "86e45a3f-6d07-48d7-9bbb-4edfacfbe1ca"
 		}
 	]
 }
