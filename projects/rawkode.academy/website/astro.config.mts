@@ -50,7 +50,12 @@ export default defineConfig({
 			})(),
 		}),
 		vue(),
-		partytown(),
+		partytown({
+			config: {
+				forward: ["dataLayer.push", "gtag", "posthog", "GrafanaFaroWebSdk"],
+				lib: "/_partytown/",
+			},
+		}),
 	],
 	vite: {
 		plugins: [
