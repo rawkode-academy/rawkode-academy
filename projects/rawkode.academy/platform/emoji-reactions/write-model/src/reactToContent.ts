@@ -17,7 +17,7 @@ export class ReactToContentWorkflow extends WorkflowEntrypoint<Env, Params> {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
 		await step.do('persistReactionToD1', async () => {
 			const { contentId, personId, emoji, contentTimestamp } = event.payload;
-			const db = drizzle(env.DB);
+			const db = drizzle(this.env.DB);
 
 			await db
 				.insert(emojiReactionsTable)
