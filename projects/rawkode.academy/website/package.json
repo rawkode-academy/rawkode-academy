@@ -79,7 +79,8 @@
 		"vidstack": "^1.12.13-next",
 		"vitest": "^3.1.4",
 		"vue": "^3.5.14",
-		"vue-boring-avatars": "^1.4.0"
+		"vue-boring-avatars": "^1.4.0",
+		"vue-word-highlighter": "^1.2.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
