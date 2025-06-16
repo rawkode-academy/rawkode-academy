@@ -1,12 +1,12 @@
-import schemaBuilder from '@pothos/core';
-import directivesPlugin from '@pothos/plugin-directives';
-import drizzlePlugin from '@pothos/plugin-drizzle';
-import federationPlugin from '@pothos/plugin-federation';
-import { and, count, eq, sql } from 'drizzle-orm';
-import { type GraphQLSchema } from 'graphql';
-import { DateResolver } from 'graphql-scalars';
-import { getDatabase } from '../data-model/client';
-import * as dataSchema from '../data-model/schema';
+import schemaBuilder from "@pothos/core";
+import directivesPlugin from "@pothos/plugin-directives";
+import drizzlePlugin from "@pothos/plugin-drizzle";
+import federationPlugin from "@pothos/plugin-federation";
+import { and, count, eq, sql } from "drizzle-orm";
+import type { GraphQLSchema } from "graphql";
+import { DateResolver } from "graphql-scalars";
+import { getDatabase } from "../data-model/client";
+import * as dataSchema from "../data-model/schema";
 
 export interface PothosTypes {
 	DrizzleSchema: typeof dataSchema;
@@ -20,7 +20,7 @@ export interface PothosTypes {
 
 const createBuilder = (env: { DB: D1Database }) => {
 	const db = getDatabase(env);
-	
+
 	const builder = new schemaBuilder<PothosTypes>({
 		plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
 		drizzle: {
@@ -28,18 +28,20 @@ const createBuilder = (env: { DB: D1Database }) => {
 		},
 	});
 
-	builder.addScalarType('Date', DateResolver);
+	builder.addScalarType("Date", DateResolver);
 
 	// Define the EmojiReaction type
-	const emojiReactionRef = builder.objectRef<{
-		emoji: string;
-		count: number;
-	}>('EmojiReaction').implement({
-		fields: (t) => ({
-			emoji: t.exposeString('emoji'),
-			count: t.exposeInt('count'),
-		}),
-	});
+	const emojiReactionRef = builder
+		.objectRef<{
+			emoji: string;
+			count: number;
+		}>("EmojiReaction")
+		.implement({
+			fields: (t) => ({
+				emoji: t.exposeString("emoji"),
+				count: t.exposeInt("count"),
+			}),
+		});
 
 	// Helper function to get emoji reactions for any content
 	const getEmojiReactionsForContent = async (contentId: string) => {
@@ -56,7 +58,11 @@ const createBuilder = (env: { DB: D1Database }) => {
 	};
 
 	// Helper function to check if user has reacted
-	const hasUserReacted = async (contentId: string, personId: string, emoji: string) => {
+	const hasUserReacted = async (
+		contentId: string,
+		personId: string,
+		emoji: string,
+	) => {
 		const result = await db
 			.select({ count: count() })
 			.from(dataSchema.emojiReactionsTable)
@@ -72,141 +78,64 @@ const createBuilder = (env: { DB: D1Database }) => {
 	};
 
 	// Extend Video type to include emoji reactions
-	builder.externalRef(
-		'Video',
-		builder.selection<{ id: string }>('id'),
-	).implement({
-		externalFields: (t) => ({
-			id: t.string(),
-		}),
-		fields: (t) => ({
-			emojiReactions: t.field({
-				type: [emojiReactionRef],
-				resolve: async (video) => getEmojiReactionsForContent(video.id),
+	builder
+		.externalRef("Video", builder.selection<{ id: string }>("id"))
+		.implement({
+			externalFields: (t) => ({
+				id: t.string(),
 			}),
-			hasReacted: t.field({
-				type: 'Boolean',
-				args: {
-					personId: t.arg({
-						type: 'String',
-						required: true,
-					}),
-					emoji: t.arg({
-						type: 'String',
-						required: true,
-					}),
-				},
-				resolve: async (video, args) => hasUserReacted(video.id, args.personId, args.emoji),
+			fields: (t) => ({
+				emojiReactions: t.field({
+					type: [emojiReactionRef],
+					resolve: async (video) => getEmojiReactionsForContent(video.id),
+				}),
+				hasReacted: t.field({
+					type: "Boolean",
+					args: {
+						personId: t.arg({
+							type: "String",
+							required: true,
+						}),
+						emoji: t.arg({
+							type: "String",
+							required: true,
+						}),
+					},
+					resolve: async (video, args) =>
+						hasUserReacted(video.id, args.personId, args.emoji),
+				}),
 			}),
-		}),
-	});
+		});
 
 	// Extend Episode type to include emoji reactions
-	builder.externalRef(
-		'Episode',
-		builder.selection<{ id: string }>('id'),
-	).implement({
-		externalFields: (t) => ({
-			id: t.string(),
-		}),
-		fields: (t) => ({
-			emojiReactions: t.field({
-				type: [emojiReactionRef],
-				resolve: async (episode) => getEmojiReactionsForContent(episode.id),
+	builder
+		.externalRef("Episode", builder.selection<{ id: string }>("id"))
+		.implement({
+			externalFields: (t) => ({
+				id: t.string(),
 			}),
-			hasReacted: t.field({
-				type: 'Boolean',
-				args: {
-					personId: t.arg({
-						type: 'String',
-						required: true,
-					}),
-					emoji: t.arg({
-						type: 'String',
-						required: true,
-					}),
-				},
-				resolve: async (episode, args) => hasUserReacted(episode.id, args.personId, args.emoji),
+			fields: (t) => ({
+				emojiReactions: t.field({
+					type: [emojiReactionRef],
+					resolve: async (episode) => getEmojiReactionsForContent(episode.id),
+				}),
+				hasReacted: t.field({
+					type: "Boolean",
+					args: {
+						personId: t.arg({
+							type: "String",
+							required: true,
+						}),
+						emoji: t.arg({
+							type: "String",
+							required: true,
+						}),
+					},
+					resolve: async (episode, args) =>
+						hasUserReacted(episode.id, args.personId, args.emoji),
+				}),
 			}),
-		}),
-	});
-
-	// Define mutation type for adding and removing reactions
-	builder.mutationType({
-		fields: (t) => ({
-			addEmojiReaction: t.field({
-				type: 'Boolean',
-				args: {
-					contentId: t.arg({
-						type: 'String',
-						required: true,
-					}),
-					personId: t.arg({
-						type: 'String',
-						required: true,
-					}),
-					emoji: t.arg({
-						type: 'String',
-						required: true,
-					}),
-					contentTimestamp: t.arg({
-						type: 'Int',
-						required: false,
-					}),
-				},
-				resolve: async (_root, args) => {
-					try {
-						await db.insert(dataSchema.emojiReactionsTable).values({
-							contentId: args.contentId,
-							personId: args.personId,
-							emoji: args.emoji,
-							reactedAt: new Date(),
-							contentTimestamp: args.contentTimestamp,
-						}).onConflictDoNothing();
-						
-						return true;
-					} catch (error) {
-						console.error('Error adding emoji reaction:', error);
-						return false;
-					}
-				},
-			}),
-			removeEmojiReaction: t.field({
-				type: 'Boolean',
-				args: {
-					contentId: t.arg({
-						type: 'String',
-						required: true,
-					}),
-					personId: t.arg({
-						type: 'String',
-						required: true,
-					}),
-					emoji: t.arg({
-						type: 'String',
-						required: true,
-					}),
-				},
-				resolve: async (_root, args) => {
-					try {
-						await db.delete(dataSchema.emojiReactionsTable)
-							.where(
-								and(
-									eq(dataSchema.emojiReactionsTable.contentId, args.contentId),
-									eq(dataSchema.emojiReactionsTable.personId, args.personId),
-									eq(dataSchema.emojiReactionsTable.emoji, args.emoji),
-								),
-							);
-						
-						return true;
-					} catch (error) {
-						console.error('Error removing emoji reaction:', error);
-						return false;
-					}
-				},
-			}),
-		}),
-	});
+		});
 
 	// Query type for getting top reactions
 	builder.queryType({
@@ -215,7 +144,7 @@ const createBuilder = (env: { DB: D1Database }) => {
 				type: [emojiReactionRef],
 				args: {
 					limit: t.arg({
-						type: 'Int',
+						type: "Int",
 						required: false,
 					}),
 				},
@@ -237,11 +166,12 @@ const createBuilder = (env: { DB: D1Database }) => {
 				type: [emojiReactionRef],
 				args: {
 					contentId: t.arg({
-						type: 'String',
+						type: "String",
 						required: true,
 					}),
 				},
-				resolve: async (_root, args) => getEmojiReactionsForContent(args.contentId),
+				resolve: async (_root, args) =>
+					getEmojiReactionsForContent(args.contentId),
 			}),
 		}),
 	});
@@ -252,7 +182,7 @@ const createBuilder = (env: { DB: D1Database }) => {
 export const getSchema = (env: { DB: D1Database }): GraphQLSchema => {
 	const builder = createBuilder(env);
 	return builder.toSubGraphSchema({
-		linkUrl: 'https://specs.apollo.dev/federation/v2.6',
-		federationDirectives: ['@extends', '@external', '@key'],
+		linkUrl: "https://specs.apollo.dev/federation/v2.6",
+		federationDirectives: ["@extends", "@external", "@key"],
 	});
 };

@@ -1,3 +1,39 @@
 node_modules
 .env
 *.db
+
+# Wrangler generated files
+worker-configuration.d.ts
+
+# Wrangler state
+.wrangler/
+
+# Environment variables
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

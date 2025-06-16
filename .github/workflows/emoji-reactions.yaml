@@ -1,16 +1,16 @@
-name: rawkode.academy/platform/casting-credits
+name: rawkode.academy/platform/emoji-reactions
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/casting-credits.yaml"
-      - "projects/rawkode.academy/platform/casting-credits/**"
+      - ".github/workflows/emoji-reactions.yaml"
+      - "projects/rawkode.academy/platform/emoji-reactions/**"
   pull_request:
     paths:
-      - ".github/workflows/casting-credits.yaml"
-      - "projects/rawkode.academy/platform/casting-credits/**"
+      - ".github/workflows/emoji-reactions.yaml"
+      - "projects/rawkode.academy/platform/emoji-reactions/**"
 
 jobs:
   test:
@@ -28,7 +28,7 @@ jobs:
           curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
 
       - name: Run Tests
-        working-directory: projects/rawkode.academy/platform/casting-credits
+        working-directory: projects/rawkode.academy/platform/emoji-reactions
         run: |
           dagger call test
 
@@ -63,11 +63,11 @@ jobs:
             COSMO_API_KEY:projects/458678766461/secrets/cosmo-api-key
 
       - name: Deploy and Register Subgraph
-        working-directory: projects/rawkode.academy/platform/casting-credits
+        working-directory: projects/rawkode.academy/platform/emoji-reactions
         env:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
           COSMO_API_KEY: ${{ steps.secrets.outputs.COSMO_API_KEY }}
-          SERVICE_NAME: platform-casting-credits
+          SERVICE_NAME: platform-emoji-reactions
         run: |
           dagger <<'.'
             codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
@@ -89,4 +89,9 @@ jobs:
               ./read-model/publish.ts \
               https://${SERVICE_NAME}-read-model.rawkode-academy.workers.dev \
               env:COSMO_API_KEY
+
+            ../../../../dagger/cloudflare | deploy \
+              $codebase \
+              ./write-model/wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN
           .
