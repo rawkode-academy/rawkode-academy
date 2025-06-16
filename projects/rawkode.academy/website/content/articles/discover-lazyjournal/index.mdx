@@ -1,9 +1,9 @@
 ---
-title: "Lazyjournal: A Comprehensive Log Viewer for Cloud Native Environments"
-description: "Lazyjournal is a terminal user interface log viewer that aggregates logs from various sources, providing a unified interface for developers and system administrators."
+title: "Lazyjournal: A Log Viewer for Cloud Native Environments"
+description: "Lazyjournal is a TUI log viewer that aggregates logs from various sources, providing a unified interface for developers and system administrators."
 slug: lazyjournal-log-viewer
 openGraph:
-  title: "Lazyjournal: A Comprehensive Log Viewer for Cloud Native Environments"
+  title: "Lazyjournal: A Log Viewer for Cloud Native Environments"
   subtitle: "Centralized log access for developers and system administrators"
 cover:
   image: "./cover.png"
@@ -14,16 +14,15 @@ authors:
   - rawkode
 ---
 
-import ThemeAwareImage from '@/components/common/ThemeAwareImage.vue';
+import ThemeAwareImage from '@/components/common/ThemeAwareImage.astro';
 import screenshotLight from './screenshot-light-mode.png';
 import screenshotDark from './screenshot-dark-mode.png';
 
 Lazyjournal is a **terminal user interface (TUI) log viewer** that provides centralized access to logs from journald, auditd, file systems, Docker containers, Podman, and Kubernetes pods. Created by Alex Kup (Lifailon), this Go-based tool offers a modern alternative to traditional log viewing methods with advanced filtering, real-time streaming, and syntax coloring capabilities.
 
 <ThemeAwareImage
-  client:load
-  lightSrc={screenshotLight.src}
-  darkSrc={screenshotDark.src}
+  lightSrc={screenshotLight}
+  darkSrc={screenshotDark}
   alt="Lazyjournal interface showing log filtering and navigation"
   class="my-8 rounded-lg shadow-lg"
 />

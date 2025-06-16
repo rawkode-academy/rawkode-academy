@@ -40,12 +40,22 @@ const {
 		height: auto;
 	}
 
-	:global(.dark) .theme-light-only {
+	/* Display light image by default and hide dark image */
+	.theme-light-only {
+		display: block;
+	}
+	.theme-dark-only {
 		display: none;
 	}
 
-	:global(:not(.dark)) .theme-dark-only {
-		display: none;
+	/* When user prefers dark mode, show dark image and hide light image */
+	@media (prefers-color-scheme: dark) {
+		.theme-light-only {
+			display: none;
+		}
+		.theme-dark-only {
+			display: block;
+		}
 	}
 
 	.theme-light-only,

@@ -84,7 +84,7 @@ const breadcrumbElements = [
 	<div class="mb-6">
 		<Breadcrumb elements={breadcrumbElements} />
 	</div>
-	
+
 	<h1 class="text-3xl md:text-4xl font-extrabold dark:text-white mb-6">
 		{article.data.title}
 	</h1>
@@ -111,7 +111,7 @@ const breadcrumbElements = [
 									<img
 										class="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-900 shadow-sm"
 										src={`https://github.com/${author.data.handle}.png`}
-										alt={`${author.data.name}`}
+										alt={`Profile picture of ${author.data.name}`}
 										style={`z-index: ${3 - index}`}
 									/>
 								))}
@@ -135,8 +135,8 @@ const breadcrumbElements = [
 											{author.data.name}
 										</a>
 										{index < authors.length - 1 && (
-											index === authors.length - 2 ? 
-											<span class="text-gray-400 dark:text-gray-600">&</span> : 
+											index === authors.length - 2 ?
+											<span class="text-gray-400 dark:text-gray-600">&</span> :
 											<span class="text-gray-400 dark:text-gray-600">,</span>
 										)}
 									</>
@@ -249,7 +249,7 @@ const breadcrumbElements = [
 			<Updates updates={article.data.updates} />
 
 			<Content />
-			
+
 			<!-- Related Articles -->
 			<RelatedArticles currentArticle={article} limit={3} />
 		</article>
