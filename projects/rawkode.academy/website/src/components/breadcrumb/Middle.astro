@@ -10,22 +10,22 @@ const { title, link } = Astro.props;
 <li>
 	<div class="flex items-center">
 		<svg
-			class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1"
+			class="rtl:rotate-180 w-3 h-3 text-gray-400 dark:text-gray-500 mx-2"
 			aria-hidden="true"
 			xmlns="http://www.w3.org/2000/svg"
 			fill="none"
-			viewBox="0 0 6 10"
+			viewBox="0 0 8 14"
 		>
 			<path
 				stroke="currentColor"
 				stroke-linecap="round"
 				stroke-linejoin="round"
 				stroke-width="2"
-				d="m1 9 4-4-4-4"></path>
+				d="m1 13 5.7-5.326a.909.909 0 0 0 0-1.348L1 1"></path>
 		</svg>
 		<a
 			href={link}
-			class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
+			class="text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary transition-colors duration-200"
 			>{title}</a
 		>
 	</div>
