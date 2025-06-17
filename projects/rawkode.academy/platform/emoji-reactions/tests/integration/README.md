@@ -24,7 +24,7 @@ Tests for the GraphQL API with a real database:
 ### GraphQL Federation Tests (`graphql-federation.test.ts`)
 
 Tests for federation-specific functionality:
-- Entity resolution for Video and Episode types
+- Entity resolution for Video
 - Field extensions
 - Federation directives
 

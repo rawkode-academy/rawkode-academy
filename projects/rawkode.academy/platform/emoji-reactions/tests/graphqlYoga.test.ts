@@ -56,7 +56,6 @@ describe("GraphQL Yoga Integration", () => {
 		const typeNames = result.data.__schema.types.map((t: any) => t.name);
 		expect(typeNames).toContain("EmojiReaction");
 		expect(typeNames).toContain("Video");
-		expect(typeNames).toContain("Episode");
 		expect(typeNames).toContain("Query");
 	});
 

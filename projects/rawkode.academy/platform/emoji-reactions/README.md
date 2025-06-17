@@ -4,7 +4,7 @@ This service allows learners to add emoji reactions to content on the Rawkode Ac
 
 ## Features
 
-- Add emoji reactions to videos, episodes, and other content types
+- Add emoji reactions to videos
 - Remove emoji reactions
 - Query for emoji reactions on content
 - Check if a user has reacted with a specific emoji
@@ -21,7 +21,7 @@ The service stores emoji reactions with the following fields:
 
 ## GraphQL Schema
 
-The service extends the existing Video and Episode types to include:
+The service extends the existing Video type to include:
 
 - `emojiReactions`: List of emoji reactions with counts
 - `hasReacted`: Boolean indicating if a user has reacted with a specific emoji

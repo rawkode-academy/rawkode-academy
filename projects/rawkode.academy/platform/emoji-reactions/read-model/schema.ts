@@ -107,36 +107,6 @@ const createBuilder = (env: { DB: D1Database }) => {
 			}),
 		});
 
-	// Extend Episode type to include emoji reactions
-	builder
-		.externalRef("Episode", builder.selection<{ id: string }>("id"))
-		.implement({
-			externalFields: (t) => ({
-				id: t.string(),
-			}),
-			fields: (t) => ({
-				emojiReactions: t.field({
-					type: [emojiReactionRef],
-					resolve: async (episode) => getEmojiReactionsForContent(episode.id),
-				}),
-				hasReacted: t.field({
-					type: "Boolean",
-					args: {
-						personId: t.arg({
-							type: "String",
-							required: true,
-						}),
-						emoji: t.arg({
-							type: "String",
-							required: true,
-						}),
-					},
-					resolve: async (episode, args) =>
-						hasUserReacted(episode.id, args.personId, args.emoji),
-				}),
-			}),
-		});
-
 	// Query type for getting top reactions
 	builder.queryType({
 		fields: (t) => ({
