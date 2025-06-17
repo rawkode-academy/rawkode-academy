@@ -1,7 +1,10 @@
 import { actions } from "astro:actions";
+import { Clock, Copy, ExternalLink, Rocket, Users, Video } from "lucide-react";
+import { motion } from "motion/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Spinner } from "@/components/common/Spinner";
-import CreateLivestreamsDialog from "@/components/livestreams/dialogs/CreateLivestreamDialog";
 import type { CreateLivestreamsDialogRef } from "@/components/livestreams/dialogs/CreateLivestreamDialog";
+import CreateLivestreamsDialog from "@/components/livestreams/dialogs/CreateLivestreamDialog";
 import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -20,9 +23,6 @@ import {
 } from "@/components/shadcn/dialog";
 import { Input } from "@/components/shadcn/input";
 import { useRoomCreation } from "@/hooks/useRoomCreation";
-import { Clock, Copy, ExternalLink, Rocket, Users, Video } from "lucide-react";
-import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
 
 function generateInviteLink(roomName: string) {
   return `${window.location.origin}/watch/${roomName}`;
@@ -58,14 +58,7 @@ export default function HomePage({ user }: Props) {
   >([]);
   const [isLoadingLivestreams, setIsLoadingLivestreams] = useState(false);
 
-  // Fetch running livestreams for all non-director users
-  useEffect(() => {
-    if (!user?.roles?.includes("director")) {
-      fetchRunningLivestreams();
-    }
-  }, [user]);
-
-  const fetchRunningLivestreams = async () => {
+  const fetchRunningLivestreams = useCallback(async () => {
     setIsLoadingLivestreams(true);
     try {
       const result = await actions.rooms.listRunningRooms();
@@ -77,7 +70,14 @@ export default function HomePage({ user }: Props) {
     } finally {
       setIsLoadingLivestreams(false);
     }
-  };
+  }, []);
+
+  // Fetch running livestreams for all non-director users
+  useEffect(() => {
+    if (!user?.roles?.includes("director")) {
+      fetchRunningLivestreams();
+    }
+  }, [user, fetchRunningLivestreams]);
 
   const handleJoinAsDirector = () => {
     if (!roomName) return;

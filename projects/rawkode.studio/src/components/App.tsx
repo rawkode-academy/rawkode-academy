@@ -1,14 +1,14 @@
+import { StrictMode } from "react";
+import { BrowserRouter, Route, Routes } from "react-router";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import SidebarLayout from "@/components/layout/SidebarLayout";
 import DocumentationPage from "@/components/pages/DocumentationPage";
 import HomePage from "@/components/pages/HomePage";
-import ProfilePage from "@/components/pages/ProfilePage";
 import ActiveLivestreamPage from "@/components/pages/livestreams/ActiveLivestreamsPage";
 import PastLivestreamDetailsPage from "@/components/pages/livestreams/PastLivestreamDetailsPage";
 import PastLivestreamsPage from "@/components/pages/livestreams/PastLivestreamsPage";
+import ProfilePage from "@/components/pages/ProfilePage";
 import type { OidcStandardClaimsWithRoles } from "@/lib/security";
-import { StrictMode } from "react";
-import { BrowserRouter, Route, Routes } from "react-router";
 
 interface Props {
   user: OidcStandardClaimsWithRoles;

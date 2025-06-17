@@ -1,3 +1,6 @@
+import { useLocalParticipant, useRoomContext } from "@livekit/components-react";
+import { Hand } from "lucide-react";
+import { useContext, useState } from "react";
 import { useRoomPermissions } from "@/components/livestreams/room/hooks/useRoomPermissions";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -6,9 +9,6 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { cn } from "@/lib/utils";
-import { useLocalParticipant, useRoomContext } from "@livekit/components-react";
-import { Hand } from "lucide-react";
-import { useContext, useState } from "react";
 import { RaiseHandContext } from "./RaiseHandContext";
 
 interface RaiseHandButtonProps {

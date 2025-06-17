@@ -1,8 +1,8 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { eq } from "drizzle-orm";
 import { database } from "@/lib/database";
 import { participantsTable } from "@/schema";
-import { eq } from "drizzle-orm";
 
 export type Participant = {
   id: number;
@@ -28,7 +28,7 @@ export const participants = {
           .where(eq(participantsTable.roomId, input.roomId));
 
         return participants as Participant[];
-      } catch (error) {
+      } catch (_error) {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch room participants.",

@@ -1,8 +1,8 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { eq } from "drizzle-orm";
 import { database } from "@/lib/database";
 import { chatMessagesTable } from "@/schema";
-import { eq } from "drizzle-orm";
 
 export type ChatMessage = {
   id: number;
@@ -52,7 +52,7 @@ export const chat = {
           .orderBy(chatMessagesTable.createdAt); // Order by creation time
 
         return messages as ChatMessage[];
-      } catch (error) {
+      } catch (_error) {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch chat messages.",

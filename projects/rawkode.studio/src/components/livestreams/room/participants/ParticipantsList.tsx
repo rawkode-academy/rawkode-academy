@@ -1,12 +1,3 @@
-import { useRoomPermissions } from "@/components/livestreams/room/hooks/useRoomPermissions";
-import { parseRoomMetadata } from "@/components/livestreams/room/layouts/permissions";
-import { Button } from "@/components/shadcn/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/shadcn/dropdown-menu";
 import {
   useLocalParticipant,
   useParticipants,
@@ -25,6 +16,15 @@ import {
   VideoOff,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useRoomPermissions } from "@/components/livestreams/room/hooks/useRoomPermissions";
+import { parseRoomMetadata } from "@/components/livestreams/room/layouts/permissions";
+import { Button } from "@/components/shadcn/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/dropdown-menu";
 
 interface ParticipantsListProps {
   token: string | null;

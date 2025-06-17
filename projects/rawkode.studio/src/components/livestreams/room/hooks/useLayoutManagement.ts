@@ -1,6 +1,6 @@
-import { LayoutType } from "@/components/livestreams/room/layouts/permissions";
 import { useParticipants } from "@livekit/components-react";
 import { useCallback, useState } from "react";
+import { LayoutType } from "@/components/livestreams/room/layouts/permissions";
 
 export function useLayoutManagement() {
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>(

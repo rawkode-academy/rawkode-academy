@@ -1,5 +1,12 @@
 import { actions } from "astro:actions";
 import { z } from "astro:schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Dice5, Plus, X } from "lucide-react";
+import { motion } from "motion/react";
+import * as randomWords from "random-words";
+import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/shadcn/button";
 import { Checkbox } from "@/components/shadcn/checkbox";
@@ -46,14 +53,6 @@ import {
   type RecordingSettings,
 } from "@/lib/recordingConfig";
 import { queryClient } from "@/store";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Dice5, Plus, X } from "lucide-react";
-import { motion } from "motion/react";
-import * as randomWords from "random-words";
-import { useEffect, useImperativeHandle, useRef, useState } from "react";
-import React from "react";
-import { useForm } from "react-hook-form";
 
 // Simple schema - we only validate what we need on the client
 const formSchema = z.object({

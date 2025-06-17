@@ -1,11 +1,24 @@
+import { useLocalParticipant, useRoomInfo } from "@livekit/components-react";
+import {
+  Grid3x3,
+  LayoutGrid,
+  MessageSquare,
+  PictureInPicture,
+  Presentation,
+  User,
+  Users,
+  Users2,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useLayout } from "@/components/livestreams/room/core/LayoutContext";
 import {
+  getUserRole,
   LAYOUT_CONFIGS,
   type LayoutType,
+  parseRoomMetadata,
   ROLE_PERMISSIONS,
   type RoomLayoutMetadata,
-  getUserRole,
-  parseRoomMetadata,
   stringifyRoomMetadata,
 } from "@/components/livestreams/room/layouts/permissions";
 import { Button } from "@/components/shadcn/button";
@@ -23,19 +36,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { useLocalParticipant, useRoomInfo } from "@livekit/components-react";
-import {
-  Grid3x3,
-  LayoutGrid,
-  MessageSquare,
-  PictureInPicture,
-  Presentation,
-  User,
-  Users,
-  Users2,
-} from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 
 const LAYOUT_ICONS: Record<
   string,

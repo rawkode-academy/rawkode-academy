@@ -1,12 +1,12 @@
+import { useLocalParticipant } from "@livekit/components-react";
+import { Eye, EyeOff } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/shadcn/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { useLocalParticipant } from "@livekit/components-react";
-import { Eye, EyeOff } from "lucide-react";
-import { useEffect, useState } from "react";
 
 export function BackstageToggle() {
   const { localParticipant } = useLocalParticipant();

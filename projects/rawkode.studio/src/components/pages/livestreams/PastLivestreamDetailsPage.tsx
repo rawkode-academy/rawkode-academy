@@ -1,4 +1,7 @@
 import { actions } from "astro:actions";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { Link, useParams } from "react-router";
 import type { ChatMessage } from "@/actions/chat";
 import type { Participant } from "@/actions/participants";
 import type { PastLiveStream } from "@/actions/rooms";
@@ -12,9 +15,6 @@ import {
   CardTitle,
 } from "@/components/shadcn/card";
 import { calculateDuration } from "@/lib/duration";
-import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { Link, useParams } from "react-router";
 
 export default function PastLivestreamDetailsPage() {
   const { roomId } = useParams<{ roomId: string }>();

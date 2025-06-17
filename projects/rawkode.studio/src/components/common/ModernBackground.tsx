@@ -1,4 +1,5 @@
 import type React from "react";
+import { useId } from "react";
 
 interface ModernBackgroundProps {
   className?: string;
@@ -7,6 +8,7 @@ interface ModernBackgroundProps {
 export const ModernBackground: React.FC<ModernBackgroundProps> = ({
   className = "",
 }) => {
+  const patternId = useId();
   return (
     <div className={`fixed inset-0 ${className}`}>
       {/* Base gradient background */}
@@ -27,7 +29,7 @@ export const ModernBackground: React.FC<ModernBackgroundProps> = ({
       >
         <defs>
           <pattern
-            id="animated-mesh"
+            id={patternId}
             x="0"
             y="0"
             width="100"
@@ -85,7 +87,7 @@ export const ModernBackground: React.FC<ModernBackgroundProps> = ({
             />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#animated-mesh)" />
+        <rect width="100%" height="100%" fill={`url(#${patternId})`} />
       </svg>
 
       {/* CSS animations */}

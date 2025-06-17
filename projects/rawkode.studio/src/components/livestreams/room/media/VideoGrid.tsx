@@ -1,3 +1,13 @@
+import {
+  useLocalParticipant,
+  useParticipants,
+  useRoomInfo,
+  useTracks,
+} from "@livekit/components-react";
+import { Track } from "livekit-client";
+import { Users } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { useLayout } from "@/components/livestreams/room/core/LayoutContext";
 import {
   GridLayout,
@@ -9,20 +19,10 @@ import {
   SingleSpeakerLayout,
 } from "@/components/livestreams/room/layouts";
 import {
-  LayoutType,
   getDefaultLayout,
+  LayoutType,
   parseRoomMetadata,
 } from "@/components/livestreams/room/layouts/permissions";
-import {
-  useLocalParticipant,
-  useParticipants,
-  useRoomInfo,
-  useTracks,
-} from "@livekit/components-react";
-import { Track } from "livekit-client";
-import { Users } from "lucide-react";
-import { useEffect } from "react";
-import { toast } from "sonner";
 
 // Video Grid Component
 export function VideoGrid() {

@@ -1,5 +1,17 @@
-import { ModeToggle } from "@/components/common/ModeToggle";
+import type { LocalUserChoices } from "@livekit/components-core";
+import {
+  AlertCircle,
+  Camera,
+  CameraOff,
+  LogIn,
+  Mic,
+  MicOff,
+  User,
+  Video,
+} from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ModernBackground } from "@/components/common/ModernBackground";
+import { ModeToggle } from "@/components/common/ModeToggle";
 import { Alert, AlertDescription } from "@/components/shadcn/alert";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -21,18 +33,6 @@ import {
 import { Separator } from "@/components/shadcn/separator";
 import { generateGuestName } from "@/lib/guest";
 import { cn } from "@/lib/utils";
-import type { LocalUserChoices } from "@livekit/components-core";
-import {
-  AlertCircle,
-  Camera,
-  CameraOff,
-  LogIn,
-  Mic,
-  MicOff,
-  User,
-  Video,
-} from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 interface PrejoinScreenProps {
   roomDisplayName: string;
@@ -57,6 +57,8 @@ export function PrejoinScreen({
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [audioDeviceId, setAudioDeviceId] = useState<string>("");
+  const usernameInputId1 = useId();
+  const usernameInputId2 = useId();
   const [videoDeviceId, setVideoDeviceId] = useState<string>("");
   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
@@ -478,7 +480,7 @@ export function PrejoinScreen({
       };
 
       onJoin(choices);
-    } catch (err) {
+    } catch (_err) {
       setError("Failed to join the stream. Please try again.");
       setIsLoading(false);
     }
@@ -554,11 +556,11 @@ export function PrejoinScreen({
             {!isDirector && (
               <>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="username">Display Name</Label>
+                  <Label htmlFor={usernameInputId1}>Display Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                     <Input
-                      id="username"
+                      id={usernameInputId1}
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder={
@@ -620,11 +622,11 @@ export function PrejoinScreen({
             {/* Director name input */}
             {isDirector && (
               <div className="flex flex-col gap-2">
-                <Label htmlFor="username">Display Name</Label>
+                <Label htmlFor={usernameInputId2}>Display Name</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                   <Input
-                    id="username"
+                    id={usernameInputId2}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder={providedUsername || "Enter your display name"}

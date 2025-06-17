@@ -1,4 +1,6 @@
 import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
+import type { APIRoute } from "astro";
+import { AccessToken } from "livekit-server-sdk";
 import {
   LayoutType,
   parseRoomMetadata,
@@ -6,8 +8,6 @@ import {
 } from "@/components/livestreams/room/layouts/permissions";
 import { generateGuestName } from "@/lib/guest";
 import { roomClientService } from "@/lib/livekit";
-import type { APIRoute } from "astro";
-import { AccessToken } from "livekit-server-sdk";
 
 const jsonResponse = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -77,8 +77,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
           );
 
           console.log(`Set ${identity} as presenter for room ${roomName}`);
-        } catch (error) {
-          console.error("Failed to set presenter:", error);
+        } catch (_error) {
+          console.error("Failed to set presenter:", _error);
           // Continue anyway - token generation shouldn't fail due to this
         }
       }
@@ -111,8 +111,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const token = await at.toJwt();
 
     return jsonResponse({ token });
-  } catch (error) {
-    console.error("Error generating token:", error);
+  } catch (_error) {
+    console.error("Error generating token:", _error);
     return errorResponse("Failed to generate token", 500);
   }
 };

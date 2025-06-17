@@ -1,11 +1,11 @@
-import { LayoutType } from "@/components/livestreams/room/layouts/permissions";
 import {
-  type ReactNode,
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useState,
 } from "react";
+import { LayoutType } from "@/components/livestreams/room/layouts/permissions";
 
 interface LayoutContextValue {
   currentLayout: LayoutType;
