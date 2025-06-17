@@ -1,15 +1,7 @@
-import jwt from "@tsndr/cloudflare-worker-jwt";
 export * from "./reactToContent";
 
 interface Env {
 	reactToContent: Workflow;
-}
-
-interface TokenPayload {
-	sub: string;
-	iss: string;
-	exp: number;
-	[key: string]: any;
 }
 
 export default {
@@ -72,38 +64,31 @@ export default {
 			// Extract token from Bearer header
 			const token = authHeader.substring(7);
 
-			// Verify the JWT token
+			// Validate the token using the userinfo endpoint
+			// This works for both JWT access tokens and opaque tokens
 			try {
-				// First, decode without verification to check the issuer
-				const decoded = jwt.decode<TokenPayload>(token);
-				if (!decoded || !decoded.payload) {
+				const userinfoResponse = await fetch(
+					"https://zitadel.rawkode.academy/oidc/v1/userinfo",
+					{
+						method: "GET",
+						headers: {
+							"Authorization": `Bearer ${token}`,
+						},
+					},
+				);
+
+				if (!userinfoResponse.ok) {
+					console.error("Token validation failed:", userinfoResponse.status);
 					return Response.json(
-						{ error: "Invalid token format" },
+						{ error: "Invalid or expired token" },
 						{ status: 401, headers: corsHeaders },
 					);
 				}
 
-				// Check issuer
-				if (decoded.payload.iss !== "https://zitadel.rawkode.academy") {
-					return Response.json(
-						{ error: "Invalid token issuer" },
-						{ status: 401, headers: corsHeaders },
-					);
-				}
-
-				// For OIDC tokens with RSA signatures, we need to fetch the public key from JWKS
-				// Since the cloudflare-worker-jwt library doesn't support JWKS directly,
-				// we'll perform basic validation for now
-				const now = Math.floor(Date.now() / 1000);
-				if (decoded.payload.exp && decoded.payload.exp < now) {
-					return Response.json(
-						{ error: "Token expired" },
-						{ status: 401, headers: corsHeaders },
-					);
-				}
-
-				// Verify that the personId in the request matches the token subject
-				if (body.personId !== decoded.payload.sub) {
+				const userinfo = await userinfoResponse.json();
+				
+				// Verify that the personId in the request matches the user's subject
+				if (body.personId !== userinfo.sub) {
 					return Response.json(
 						{ error: "PersonId does not match authenticated user" },
 						{ status: 403, headers: corsHeaders },
@@ -112,7 +97,7 @@ export default {
 			} catch (error) {
 				console.error("Token verification failed:", error);
 				return Response.json(
-					{ error: "Invalid token" },
+					{ error: "Token validation failed" },
 					{ status: 401, headers: corsHeaders },
 				);
 			}
