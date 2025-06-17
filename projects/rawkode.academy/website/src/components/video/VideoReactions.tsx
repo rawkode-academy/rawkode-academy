@@ -26,8 +26,12 @@ export default function VideoReactions({ videoId }: VideoReactionsProps) {
 	const [showBanner, setShowBanner] = useState(false);
 	const [bannerMessage, setBannerMessage] = useState("");
 	const [, setUserReactions] = useState<Set<string>>(new Set());
+	const [pendingReactions, setPendingReactions] = useState<Map<string, number>>(
+		new Map(),
+	);
 	const pickerRef = useRef<HTMLDivElement>(null);
 	const bannerTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+	const fetchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
 	// Check authentication status
 	useEffect(() => {
@@ -49,6 +53,18 @@ export default function VideoReactions({ videoId }: VideoReactionsProps) {
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, []);
+
+	// Cleanup timeouts on unmount
+	useEffect(() => {
+		return () => {
+			if (bannerTimeoutRef.current) {
+				clearTimeout(bannerTimeoutRef.current);
+			}
+			if (fetchTimeoutRef.current) {
+				clearTimeout(fetchTimeoutRef.current);
+			}
 		};
 	}, []);
 
@@ -170,6 +186,18 @@ export default function VideoReactions({ videoId }: VideoReactionsProps) {
 		if (loading) return;
 		setLoading(true);
 
+		// Optimistically update the count immediately
+		setPendingReactions((prev) => {
+			const newMap = new Map(prev);
+			newMap.set(emoji, (newMap.get(emoji) || 0) + 1);
+			return newMap;
+		});
+
+		// Update reactions display with pending count
+		setReactions((prev) =>
+			prev.map((r) => (r.emoji === emoji ? { ...r, count: r.count + 1 } : r)),
+		);
+
 		try {
 			const { error } = await actions.addReaction({
 				contentId: videoId,
@@ -179,21 +207,60 @@ export default function VideoReactions({ videoId }: VideoReactionsProps) {
 			if (error) {
 				console.error("Failed to add reaction:", error);
 				showBannerMessage("Failed to add reaction. Please try again.");
-			} else {
-				// Optimistically update the count
+
+				// Revert optimistic update on error
+				setPendingReactions((prev) => {
+					const newMap = new Map(prev);
+					const current = newMap.get(emoji) || 0;
+					if (current > 1) {
+						newMap.set(emoji, current - 1);
+					} else {
+						newMap.delete(emoji);
+					}
+					return newMap;
+				});
+
 				setReactions((prev) =>
 					prev.map((r) =>
-						r.emoji === emoji ? { ...r, count: r.count + 1 } : r,
+						r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
 					),
 				);
+			} else {
 				setUserReactions((prev) => new Set(prev).add(emoji));
 
+				// Clear any existing fetch timeout
+				if (fetchTimeoutRef.current) {
+					clearTimeout(fetchTimeoutRef.current);
+				}
+
 				// Refresh reactions from server after a short delay
-				setTimeout(() => fetchReactions(), 1000);
+				fetchTimeoutRef.current = setTimeout(() => {
+					fetchReactions();
+					// Clear pending reactions after fetch
+					setPendingReactions(new Map());
+				}, 1500);
 			}
 		} catch (error) {
 			console.error("Failed to add reaction:", error);
 			showBannerMessage("Failed to add reaction. Please try again.");
+
+			// Revert optimistic update on error
+			setPendingReactions((prev) => {
+				const newMap = new Map(prev);
+				const current = newMap.get(emoji) || 0;
+				if (current > 1) {
+					newMap.set(emoji, current - 1);
+				} else {
+					newMap.delete(emoji);
+				}
+				return newMap;
+			});
+
+			setReactions((prev) =>
+				prev.map((r) =>
+					r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1) } : r,
+				),
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -245,27 +312,41 @@ export default function VideoReactions({ videoId }: VideoReactionsProps) {
 			<div className="flex flex-wrap items-center justify-between gap-4">
 				{/* Reaction Buttons */}
 				<div className="flex items-center gap-1 sm:gap-2">
-					{topReactions.map((reaction) => (
-						<button
-							type="button"
-							key={reaction.emoji}
-							aria-label={`${reaction.label} (${reaction.count} ${
-								reaction.count === 1 ? "reaction" : "reactions"
-							})`}
-							className="group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-							onClick={() => handleReaction(reaction.emoji)}
-						>
-							<span
-								aria-hidden="true"
-								className="text-xl sm:text-2xl group-hover:scale-110 transition-transform"
+					{topReactions.map((reaction) => {
+						const hasPending = pendingReactions.has(reaction.emoji);
+						return (
+							<button
+								type="button"
+								key={reaction.emoji}
+								aria-label={`${reaction.label} (${reaction.count} ${
+									reaction.count === 1 ? "reaction" : "reactions"
+								})`}
+								className={`group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all ${
+									hasPending
+										? "ring-2 ring-blue-500 ring-opacity-50 animate-pulse"
+										: ""
+								}`}
+								onClick={() => handleReaction(reaction.emoji)}
+								disabled={loading && hasPending}
 							>
-								{reaction.emoji}
-							</span>
-							<span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-								{reaction.count}
-							</span>
-						</button>
-					))}
+								<span
+									aria-hidden="true"
+									className="text-xl sm:text-2xl group-hover:scale-110 transition-transform"
+								>
+									{reaction.emoji}
+								</span>
+								<span
+									className={`text-xs sm:text-sm font-medium ${
+										hasPending
+											? "text-blue-600 dark:text-blue-400"
+											: "text-gray-700 dark:text-gray-300"
+									}`}
+								>
+									{reaction.count}
+								</span>
+							</button>
+						);
+					})}
 
 					{/* Emoji Picker Button */}
 					<div className="relative" ref={pickerRef}>
