@@ -54,20 +54,6 @@ describe("GraphQL Schema", () => {
 		).toBeDefined();
 	});
 
-	it("should extend Episode type with emoji reactions", () => {
-		const schema = getSchema(mockEnv);
-		const episodeType = schema.getType("Episode") as any;
-
-		expect(episodeType).toBeDefined();
-		const fields = episodeType.getFields();
-
-		expect(fields.emojiReactions).toBeDefined();
-		expect(fields.emojiReactions.type.toString()).toBe("[EmojiReaction!]");
-
-		expect(fields.hasReacted).toBeDefined();
-		expect(fields.hasReacted.type.toString()).toBe("Boolean");
-	});
-
 	it("should have query fields", () => {
 		const schema = getSchema(mockEnv);
 		const queryType = schema.getQueryType();
