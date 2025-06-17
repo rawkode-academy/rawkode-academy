@@ -16,11 +16,11 @@ const props = defineProps<Props>();
 
 // Use reactive state instead of Set for better reactivity
 const openItems = reactive<Record<string, boolean>>(
-	props.defaultOpenId ? { [props.defaultOpenId]: true } : {}
+	props.defaultOpenId ? { [props.defaultOpenId]: true } : {},
 );
 
 const toggleItem = (id: string) => {
-	console.log('Toggling item:', id, 'Current state:', openItems[id]);
+	console.log("Toggling item:", id, "Current state:", openItems[id]);
 	openItems[id] = !openItems[id];
 };
 

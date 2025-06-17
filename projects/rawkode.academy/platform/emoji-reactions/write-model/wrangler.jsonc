@@ -18,6 +18,7 @@
 	"workflows": [
 		{
 			"name": "reactToContent",
+			"binding": "reactToContent",
 			"class_name": "ReactToContentWorkflow"
 		}
 	]
