@@ -86,7 +86,7 @@ export default {
 				}
 
 				const userinfo = await userinfoResponse.json();
-				
+
 				// Verify that the personId in the request matches the user's subject
 				if (body.personId !== userinfo.sub) {
 					return Response.json(
@@ -112,14 +112,13 @@ export default {
 				},
 			});
 
-			// Wait for the workflow to complete
-			const result = await instance.result();
-
+			// Return the workflow instance details
+			// Workflows run asynchronously, so we return immediately
 			return Response.json(
 				{
 					success: true,
 					workflowId: instance.id,
-					result,
+					status: "started",
 				},
 				{ headers: corsHeaders },
 			);
