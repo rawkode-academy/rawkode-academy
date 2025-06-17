@@ -4,6 +4,7 @@
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "astro dev",
+		"dev:wrangler": "wrangler dev",
 		"start": "astro dev",
 		"format": "deno fmt .",
 		"build": "bun run validate:seo && astro check && astro build",
