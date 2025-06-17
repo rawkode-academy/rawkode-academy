@@ -17,9 +17,7 @@ interface VideoReactionsProps {
 
 const DEFAULT_BUTTON_EMOJIS = ["👍", "❤️", "🚀", "🔥"];
 
-export default function VideoReactions({
-	videoId,
-}: VideoReactionsProps) {
+export default function VideoReactions({ videoId }: VideoReactionsProps) {
 	const [reactions, setReactions] = useState<Reaction[]>([]);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -94,7 +92,13 @@ export default function VideoReactions({
 				throw new Error(`GraphQL request failed: ${response.status}`);
 			}
 
-			const data = await response.json() as { data?: { _entities?: Array<{ emojiReactions?: Array<{ emoji: string; count: number }> }> } };
+			const data = (await response.json()) as {
+				data?: {
+					_entities?: Array<{
+						emojiReactions?: Array<{ emoji: string; count: number }>;
+					}>;
+				};
+			};
 			const videoEntity = data.data?._entities?.[0];
 
 			if (videoEntity?.emojiReactions) {
@@ -284,7 +288,9 @@ export default function VideoReactions({
 							<div className="absolute z-50 mt-2 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 right-0">
 								<Picker
 									data={data}
-									onEmojiSelect={(emoji: { native: string }) => handleEmojiSelect(emoji.native)}
+									onEmojiSelect={(emoji: { native: string }) =>
+										handleEmojiSelect(emoji.native)
+									}
 									theme="auto"
 									previewPosition="none"
 									skinTonePosition="none"
