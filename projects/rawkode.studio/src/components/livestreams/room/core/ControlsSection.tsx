@@ -1,10 +1,10 @@
+import { useRoomContext } from "@livekit/components-react";
+import { useContext } from "react";
 import { RaiseHandContext } from "@/components/livestreams/room/controls/RaiseHandContext";
 import { RoomControls } from "@/components/livestreams/room/controls/RoomControls";
 import { useRoomPermissions } from "@/components/livestreams/room/hooks/useRoomPermissions";
 import { RaisedHandsList } from "@/components/livestreams/room/participants/RaisedHandsList";
 import { Separator } from "@/components/shadcn/separator";
-import { useRoomContext } from "@livekit/components-react";
-import { useContext } from "react";
 
 interface ControlsSectionProps {
   token: string | null;

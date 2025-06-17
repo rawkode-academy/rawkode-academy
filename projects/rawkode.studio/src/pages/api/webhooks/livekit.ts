@@ -1,9 +1,9 @@
-import { database } from "@/lib/database";
-import { webhookReceiver } from "@/lib/livekit";
-import { livestreamsTable, participantsTable } from "@/schema";
 import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
 import type { Room } from "livekit-server-sdk";
+import { database } from "@/lib/database";
+import { webhookReceiver } from "@/lib/livekit";
+import { livestreamsTable, participantsTable } from "@/schema";
 
 export const POST: APIRoute = async ({ request }) => {
   const body = await request.text();

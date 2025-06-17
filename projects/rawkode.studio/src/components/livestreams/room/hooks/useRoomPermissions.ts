@@ -1,10 +1,10 @@
-import {
-  ROLE_PERMISSIONS,
-  getUserRole,
-  parseRoomMetadata,
-} from "@/components/livestreams/room/layouts/permissions";
 import { useLocalParticipant, useRoomInfo } from "@livekit/components-react";
 import { useMemo } from "react";
+import {
+  getUserRole,
+  parseRoomMetadata,
+  ROLE_PERMISSIONS,
+} from "@/components/livestreams/room/layouts/permissions";
 
 export interface RoomPermissions {
   isDirector: boolean;

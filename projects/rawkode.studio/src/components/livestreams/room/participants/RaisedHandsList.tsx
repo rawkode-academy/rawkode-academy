@@ -1,5 +1,3 @@
-import { RaiseHandContext } from "@/components/livestreams/room/controls/RaiseHandContext";
-import { Button } from "@/components/shadcn/button";
 import {
   useRemoteParticipants,
   useRoomContext,
@@ -7,6 +5,8 @@ import {
 import type { RemoteParticipant } from "livekit-client";
 import { Check, X } from "lucide-react";
 import { useContext, useState } from "react";
+import { RaiseHandContext } from "@/components/livestreams/room/controls/RaiseHandContext";
+import { Button } from "@/components/shadcn/button";
 
 interface RaisedHandsListProps {
   onPromote: (participantIdentity: string) => Promise<void>;

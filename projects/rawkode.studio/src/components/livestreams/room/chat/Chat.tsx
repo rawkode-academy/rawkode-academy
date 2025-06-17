@@ -1,3 +1,6 @@
+import { useChat, useRoomContext } from "@livekit/components-react";
+import { MessageSquare, Send, Smile } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/actions/chat";
 import { useRoomPermissions } from "@/components/livestreams/room/hooks/useRoomPermissions";
 import { Button } from "@/components/shadcn/button";
@@ -12,9 +15,6 @@ import {
   EmojiPickerFooter,
   EmojiPickerSearch,
 } from "@/components/ui/EmojiPicker";
-import { useChat, useRoomContext } from "@livekit/components-react";
-import { MessageSquare, Send, Smile } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 // Chat Section Component using LiveKit's useChat hook
 interface ChatProps {

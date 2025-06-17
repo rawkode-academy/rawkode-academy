@@ -1,4 +1,12 @@
 import { actions } from "astro:actions";
+import {
+  useLocalParticipant,
+  useParticipants,
+  useRoomInfo,
+} from "@livekit/components-react";
+import { Presentation, User } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useRoomPermissions } from "@/components/livestreams/room/hooks/useRoomPermissions";
 import {
   LayoutType,
@@ -20,14 +28,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import {
-  useLocalParticipant,
-  useParticipants,
-  useRoomInfo,
-} from "@livekit/components-react";
-import { Presentation, User } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export function PresenterSelector() {
   const { localParticipant } = useLocalParticipant();

@@ -1,5 +1,5 @@
-import { Button } from "@/components/shadcn/button";
 import { GalleryVerticalEnd } from "lucide-react";
+import { Button } from "@/components/shadcn/button";
 
 export default function LoginPage({ children }: { children: React.ReactNode }) {
   return (

@@ -1,27 +1,4 @@
 import {
-  type ControlPermissions,
-  LAYOUT_CONFIGS,
-  LAYOUT_PERMISSIONS,
-  LayoutType,
-  ROLE_PERMISSIONS,
-  getDefaultLayout,
-  getPermissionReason,
-} from "@/components/livestreams/room/layouts/permissions";
-import { Alert, AlertDescription } from "@/components/shadcn/alert";
-import { Badge } from "@/components/shadcn/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/shadcn/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/shadcn/tabs";
-import {
   AlertTriangle,
   Ban,
   Camera,
@@ -44,6 +21,29 @@ import {
   Users2,
   Video,
 } from "lucide-react";
+import {
+  type ControlPermissions,
+  getDefaultLayout,
+  getPermissionReason,
+  LAYOUT_CONFIGS,
+  LAYOUT_PERMISSIONS,
+  LayoutType,
+  ROLE_PERMISSIONS,
+} from "@/components/livestreams/room/layouts/permissions";
+import { Alert, AlertDescription } from "@/components/shadcn/alert";
+import { Badge } from "@/components/shadcn/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn/tabs";
 
 // Helper function to get icon component
 function getLayoutIcon(iconName: string) {

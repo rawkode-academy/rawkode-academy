@@ -1,12 +1,12 @@
 ---
 import "@/styles/global.css";
 import { LIVEKIT_URL } from "astro:env/server";
+import { eq } from "drizzle-orm";
 import { RoomWrapper } from "@/components/livestreams/room/RoomWrapper";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { database } from "@/lib/database";
 import { roomClientService } from "@/lib/livekit";
 import { livestreamsTable } from "@/schema";
-import { eq } from "drizzle-orm";
 
 // Get the roomName from the URL parameter
 const { roomName } = Astro.params;
@@ -47,9 +47,9 @@ try {
 
 // Check if user is authenticated and has director role
 const user = Astro.locals.user;
-const isDirector = user?.roles?.includes("director") || false;
-const username = user?.name;
-const isAuthenticated = !!user;
+const _isDirector = user?.roles?.includes("director") || false;
+const _username = user?.name;
+const _isAuthenticated = !!user;
 ---
 
 <BaseLayout title={`${displayName} - Live Stream`}>
@@ -58,9 +58,9 @@ const isAuthenticated = !!user;
     roomName={roomName}
     roomDisplayName={displayName}
     roomExists={roomExists}
-    isDirector={isDirector}
-    username={username}
-    isAuthenticated={isAuthenticated}
+    isDirector={_isDirector}
+    username={_username}
+    isAuthenticated={_isAuthenticated}
     client:only="react"
   />
 </BaseLayout>

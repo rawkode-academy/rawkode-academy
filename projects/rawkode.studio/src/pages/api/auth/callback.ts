@@ -1,7 +1,8 @@
-import { createHmac } from "node:crypto";
 import { AUTH_STATE_SECRET } from "astro:env/server";
-import { Zitadel } from "@/lib/zitadel";
+import { createHmac } from "node:crypto";
+import type { OAuth2Tokens } from "arctic";
 import type { APIRoute } from "astro";
+import { Zitadel } from "@/lib/zitadel";
 
 const zitadel = new Zitadel();
 
@@ -90,7 +91,7 @@ export const GET: APIRoute = async ({
     });
   }
 
-  let tokens = undefined;
+  let tokens: OAuth2Tokens;
 
   try {
     tokens = await zitadel.validateAuthorizationCode(

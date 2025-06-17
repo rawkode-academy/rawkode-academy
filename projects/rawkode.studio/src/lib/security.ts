@@ -1,5 +1,5 @@
-import { tokenVerifier } from "@/lib/livekit";
 import type { OidcStandardClaims } from "oidc-client-ts";
+import { tokenVerifier } from "@/lib/livekit";
 
 export const roles = ["guest", "director", "contributor"] as const;
 export type Roles = (typeof roles)[number];
@@ -55,7 +55,7 @@ export async function extractLiveKitAuth(
       room: decoded.video?.room,
       displayName,
     };
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

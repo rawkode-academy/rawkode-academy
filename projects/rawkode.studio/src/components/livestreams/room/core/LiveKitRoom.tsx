@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   LayoutContextProvider,
   LiveKitRoom as LiveKitRoomComponent,
@@ -6,10 +5,23 @@ import {
   useLocalParticipant,
   useRoomContext,
 } from "@livekit/components-react";
+import { cn } from "@/lib/utils";
 import "@livekit/components-styles";
+import { ConnectionState, RoomEvent, VideoPresets } from "livekit-client";
+import {
+  AlertCircle,
+  Loader2,
+  Menu,
+  MessageSquare,
+  Users,
+  X,
+} from "lucide-react";
+import { useContext, useEffect, useState } from "react";
 import { Chat } from "@/components/livestreams/room/chat/Chat";
-import { RaiseHandProvider } from "@/components/livestreams/room/controls/RaiseHandContext";
-import { RaiseHandContext } from "@/components/livestreams/room/controls/RaiseHandContext";
+import {
+  RaiseHandContext,
+  RaiseHandProvider,
+} from "@/components/livestreams/room/controls/RaiseHandContext";
 import { ControlsSection } from "@/components/livestreams/room/core/ControlsSection";
 import { LayoutProvider } from "@/components/livestreams/room/core/LayoutContext";
 import { PermissionHandler } from "@/components/livestreams/room/core/PermissionHandler";
@@ -25,16 +37,6 @@ import { Separator } from "@/components/shadcn/separator";
 import { useLivestreamToken } from "@/hooks/useLivestreamToken";
 import { useParticipantInfo } from "@/hooks/useParticipantInfo";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
-import { ConnectionState, RoomEvent, VideoPresets } from "livekit-client";
-import {
-  AlertCircle,
-  Loader2,
-  Menu,
-  MessageSquare,
-  Users,
-  X,
-} from "lucide-react";
-import { useContext, useEffect, useState } from "react";
 
 // Props interface
 export interface LiveKitRoomProps {
@@ -220,6 +222,129 @@ export default function LiveKitRoom({
   );
 }
 
+// Sidebar content component - extracted to avoid nested component definition
+interface SidebarContentProps {
+  roomDisplayName: string;
+  token: string;
+  connectionState: ConnectionState;
+  activeTab: "participants" | "chat";
+  setActiveTab: React.Dispatch<React.SetStateAction<"participants" | "chat">>;
+  unreadMessages: number;
+  setUnreadMessages: React.Dispatch<React.SetStateAction<number>>;
+}
+
+const SidebarContentComponent: React.FC<SidebarContentProps> = ({
+  roomDisplayName,
+  token,
+  connectionState,
+  activeTab,
+  setActiveTab,
+  unreadMessages,
+  setUnreadMessages,
+}) => (
+  <>
+    {/* Header */}
+    <div className="p-3 border-b border-sidebar-border bg-sidebar">
+      <div className="flex items-center justify-center gap-2">
+        <span className="font-bold text-sidebar-foreground">
+          {roomDisplayName}
+        </span>
+        <ConnectionIndicator
+          status={
+            connectionState === ConnectionState.Connected
+              ? "connected"
+              : connectionState === ConnectionState.Reconnecting
+                ? "reconnecting"
+                : connectionState === ConnectionState.Connecting
+                  ? "connecting"
+                  : "disconnected"
+          }
+        />
+      </div>
+    </div>
+
+    {/* Content */}
+    <div className="flex-1 overflow-hidden p-3 flex flex-col bg-sidebar text-sidebar-foreground">
+      {connectionState === ConnectionState.Connected ? (
+        <div className="flex flex-col h-full">
+          <ControlsSection token={token} />
+          <Separator className="my-3" />
+
+          {/* Mobile tabs for participants/chat */}
+          <div className="xl:hidden flex gap-2 mb-3">
+            <Button
+              variant={activeTab === "participants" ? "default" : "outline"}
+              size="sm"
+              className="flex-1"
+              onClick={() => {
+                setActiveTab("participants");
+                setUnreadMessages(0);
+              }}
+            >
+              <Users className="size-4 mr-1" />
+              Participants
+            </Button>
+            <Button
+              variant={activeTab === "chat" ? "default" : "outline"}
+              size="sm"
+              className="flex-1 relative"
+              onClick={() => {
+                setActiveTab("chat");
+                setUnreadMessages(0);
+              }}
+            >
+              <MessageSquare className="size-4 mr-1" />
+              Chat
+              {unreadMessages > 0 && activeTab !== "chat" && (
+                <span className="absolute -top-1 -right-1 size-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">
+                  {unreadMessages > 9 ? "9+" : unreadMessages}
+                </span>
+              )}
+            </Button>
+          </div>
+
+          {/* Desktop: Participants always visible, mobile: conditional */}
+          <div className="hidden xl:block mb-3">
+            <ScrollArea className="h-[200px] pr-3">
+              <ParticipantsList token={token} />
+            </ScrollArea>
+          </div>
+
+          {/* Desktop: Chat always visible, mobile: conditional */}
+          <div className="flex-1 hidden xl:flex">
+            <Chat token={token} />
+          </div>
+
+          {/* Mobile: Show active tab content */}
+          <div className="flex-1 xl:hidden overflow-hidden">
+            {activeTab === "participants" ? (
+              <ScrollArea className="h-full pr-3">
+                <ParticipantsList token={token} />
+              </ScrollArea>
+            ) : (
+              <Chat
+                token={token}
+                onNewMessage={() => {
+                  if (activeTab !== "chat") {
+                    setUnreadMessages((prev) => prev + 1);
+                  }
+                }}
+              />
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center text-muted-foreground">
+            <Loader2 className="size-8 animate-spin mx-auto mb-2" />
+            <p>Connecting to room...</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </>
+);
+
 // Room content component
 interface RoomContentProps {
   roomDisplayName: string;
@@ -248,117 +373,6 @@ function RoomContent({
       return () => document.removeEventListener("keydown", handleEscape);
     }
   }, [mobileMenuOpen]);
-
-  // Sidebar content component
-  const SidebarContent = () => (
-    <>
-      {/* Header */}
-      <div className="p-3 border-b border-sidebar-border bg-sidebar">
-        <div className="flex items-center justify-center gap-2">
-          <span className="font-bold text-sidebar-foreground">
-            {roomDisplayName}
-          </span>
-          <ConnectionIndicator
-            status={
-              connectionState === ConnectionState.Connected
-                ? "connected"
-                : connectionState === ConnectionState.Reconnecting
-                  ? "reconnecting"
-                  : connectionState === ConnectionState.Connecting
-                    ? "connecting"
-                    : "disconnected"
-            }
-          />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-hidden p-3 flex flex-col bg-sidebar text-sidebar-foreground">
-        {connectionState === ConnectionState.Connected ? (
-          <div className="flex flex-col h-full">
-            <ControlsSection token={token} />
-            <Separator className="my-3" />
-
-            {/* Mobile tabs for participants/chat */}
-            <div className="xl:hidden flex gap-2 mb-3">
-              <Button
-                variant={activeTab === "participants" ? "default" : "outline"}
-                size="sm"
-                className="flex-1"
-                onClick={() => setActiveTab("participants")}
-              >
-                <Users className="w-4 h-4 mr-1" />
-                Participants
-              </Button>
-              <Button
-                variant={activeTab === "chat" ? "default" : "outline"}
-                size="sm"
-                className="flex-1"
-                onClick={() => {
-                  setActiveTab("chat");
-                  setUnreadMessages(0);
-                }}
-              >
-                <MessageSquare className="w-4 h-4 mr-1" />
-                Chat
-                {unreadMessages > 0 && activeTab !== "chat" && (
-                  <span className="ml-1 bg-red-500 text-white rounded-full px-1 text-xs">
-                    {unreadMessages}
-                  </span>
-                )}
-              </Button>
-            </div>
-
-            {/* Desktop: Show both sections */}
-            <div className="hidden xl:flex xl:flex-col flex-1 min-h-0">
-              {/* Participants Section */}
-              <div className="flex-1 overflow-hidden">
-                <ScrollArea className="h-full">
-                  <div className="px-2">
-                    <ParticipantsList token={token} />
-                  </div>
-                </ScrollArea>
-              </div>
-
-              <Separator className="my-2" />
-
-              {/* Chat Section */}
-              <div className="flex-1 min-h-0">
-                <Chat token={token} />
-              </div>
-            </div>
-
-            {/* Mobile: Show active tab */}
-            <div className="xl:hidden flex-1 min-h-0">
-              {activeTab === "participants" ? (
-                <ScrollArea className="h-full">
-                  <div className="px-2">
-                    <ParticipantsList token={token} />
-                  </div>
-                </ScrollArea>
-              ) : (
-                <Chat
-                  token={token}
-                  onNewMessage={() => {
-                    if (activeTab !== "chat") {
-                      setUnreadMessages((prev) => prev + 1);
-                    }
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center text-muted-foreground">
-              <Loader2 className="size-8 animate-spin mx-auto mb-2" />
-              <p>Connecting to room...</p>
-            </div>
-          </div>
-        )}
-      </div>
-    </>
-  );
 
   return (
     <div className="fixed inset-0 flex">
@@ -410,7 +424,15 @@ function RoomContent({
                   <span className="sr-only">Close</span>
                 </Button>
 
-                <SidebarContent />
+                <SidebarContentComponent
+                  roomDisplayName={roomDisplayName}
+                  token={token}
+                  connectionState={connectionState}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  unreadMessages={unreadMessages}
+                  setUnreadMessages={setUnreadMessages}
+                />
               </div>
             </div>
           </div>
@@ -425,7 +447,15 @@ function RoomContent({
             "pointer-events-none opacity-50",
         )}
       >
-        <SidebarContent />
+        <SidebarContentComponent
+          roomDisplayName={roomDisplayName}
+          token={token}
+          connectionState={connectionState}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          unreadMessages={unreadMessages}
+          setUnreadMessages={setUnreadMessages}
+        />
       </div>
     </div>
   );

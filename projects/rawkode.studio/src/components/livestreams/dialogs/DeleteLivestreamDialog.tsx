@@ -1,4 +1,8 @@
 import { actions } from "astro:actions";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Trash, X } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -15,11 +19,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash, X } from "lucide-react";
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { useRef } from "react";
 
 interface Props {
   id: string;
@@ -103,7 +102,7 @@ export default function DeleteLivestreamDialog({ id, displayName }: Props) {
 
       // API call success, verification will happen automatically
       // through the enabled query
-    } catch (error) {
+    } catch (_error) {
       setIsDeleting(false);
       setIsError(true);
       roomToDeleteRef.current = null;

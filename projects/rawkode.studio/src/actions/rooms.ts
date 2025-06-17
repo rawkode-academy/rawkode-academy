@@ -6,17 +6,6 @@ import {
   S3_SECRET_KEY,
 } from "astro:env/server";
 import { z } from "astro:schema";
-import { database } from "@/lib/database";
-import { roomClientService } from "@/lib/livekit";
-import {
-  type FramerateKey,
-  type ResolutionKey,
-  getFramerateValue,
-  getResolutionDimensions,
-  recordingSettingsSchema,
-} from "@/lib/recordingConfig";
-import { hasDirectorRole } from "@/lib/security";
-import { livestreamsTable, participantsTable } from "@/schema";
 import { desc, eq } from "drizzle-orm";
 import {
   AutoParticipantEgress,
@@ -29,6 +18,17 @@ import {
   SegmentedFileOutput,
   VideoCodec,
 } from "livekit-server-sdk";
+import { database } from "@/lib/database";
+import { roomClientService } from "@/lib/livekit";
+import {
+  type FramerateKey,
+  getFramerateValue,
+  getResolutionDimensions,
+  type ResolutionKey,
+  recordingSettingsSchema,
+} from "@/lib/recordingConfig";
+import { hasDirectorRole } from "@/lib/security";
+import { livestreamsTable, participantsTable } from "@/schema";
 
 const ROOM_DEFAULTS = {
   EMPTY_TIMEOUT: 2 * 60, // 2 minutes in seconds
@@ -214,7 +214,7 @@ export const rooms = {
           try {
             const metadata = JSON.parse(room.metadata);
             displayName = metadata.displayName || room.name;
-          } catch (e) {
+          } catch (_e) {
             // If metadata parsing fails, use room name as fallback
           }
         }
@@ -308,7 +308,7 @@ export const rooms = {
             ...room,
             participantsCount: room.participantsCount ?? 0,
           })) as PastLiveStream[];
-      } catch (error) {
+      } catch (_error) {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch past livestreams.",
@@ -483,9 +483,9 @@ export const rooms = {
         );
 
         return { success: true };
-      } catch (error) {
-        if (error instanceof ActionError) {
-          throw error;
+      } catch (_error) {
+        if (_error instanceof ActionError) {
+          throw _error;
         }
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",

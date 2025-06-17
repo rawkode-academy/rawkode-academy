@@ -1,3 +1,13 @@
+// Removed LiveKit imports - using native WebRTC instead
+import {
+  AlertCircle,
+  Camera,
+  CameraOff,
+  Mic,
+  Monitor,
+  Settings,
+} from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ModeToggle } from "@/components/common/ModeToggle";
 import { Alert, AlertDescription } from "@/components/shadcn/alert";
 import { Button } from "@/components/shadcn/button";
@@ -22,16 +32,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-// Removed LiveKit imports - using native WebRTC instead
-import {
-  AlertCircle,
-  Camera,
-  CameraOff,
-  Mic,
-  Monitor,
-  Settings,
-} from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 interface SettingsDialogProps {
   className?: string;
@@ -57,6 +57,8 @@ const DEFAULT_SETTINGS: StreamingSettings = {
 
 export function SettingsDialog({ className }: SettingsDialogProps) {
   const [open, setOpen] = useState(false);
+  const cameraSelectId = useId();
+  const micSelectId = useId();
   const [devices, setDevices] = useState<{
     audioInputs: MediaDeviceInfo[];
     videoInputs: MediaDeviceInfo[];
@@ -434,7 +436,7 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
                     value={selectedDevices.videoInput || "no-device"}
                     onValueChange={handleVideoDeviceChange}
                   >
-                    <SelectTrigger id="camera-select" className="w-full">
+                    <SelectTrigger id={cameraSelectId} className="w-full">
                       <SelectValue placeholder="Select a camera" />
                     </SelectTrigger>
                     <SelectContent>
@@ -462,7 +464,7 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Mic className="h-4 w-4" />
-                <Label htmlFor="mic-select">Microphone</Label>
+                <Label htmlFor={micSelectId}>Microphone</Label>
               </div>
               {permissions.microphone === "denied" ? (
                 <Alert variant="destructive">
@@ -490,7 +492,7 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
                     }))
                   }
                 >
-                  <SelectTrigger id="mic-select" className="w-full">
+                  <SelectTrigger id={micSelectId} className="w-full">
                     <SelectValue placeholder="Select a microphone" />
                   </SelectTrigger>
                   <SelectContent>

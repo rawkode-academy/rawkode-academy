@@ -1,21 +1,3 @@
-import { SettingsDialog } from "@/components/livestreams/dialogs/SettingsDialog";
-import { BackstageToggle } from "@/components/livestreams/room/controls/BackstageToggle";
-import { LayoutSelector } from "@/components/livestreams/room/controls/LayoutSelector";
-import { PresenterSelector } from "@/components/livestreams/room/controls/PresenterSelector";
-import { RaiseHandButton } from "@/components/livestreams/room/controls/RaiseHandButton";
-import { useMediaPermissions } from "@/components/livestreams/room/hooks/useMediaPermissions";
-import {
-  ROLE_PERMISSIONS,
-  getUserRole,
-  parseRoomMetadata,
-} from "@/components/livestreams/room/layouts/permissions";
-import { Button } from "@/components/shadcn/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/shadcn/tooltip";
 import { useLocalParticipant, useRoomInfo } from "@livekit/components-react";
 import { VideoPresets } from "livekit-client";
 import {
@@ -28,6 +10,24 @@ import {
   VideoOff,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { SettingsDialog } from "@/components/livestreams/dialogs/SettingsDialog";
+import { BackstageToggle } from "@/components/livestreams/room/controls/BackstageToggle";
+import { LayoutSelector } from "@/components/livestreams/room/controls/LayoutSelector";
+import { PresenterSelector } from "@/components/livestreams/room/controls/PresenterSelector";
+import { RaiseHandButton } from "@/components/livestreams/room/controls/RaiseHandButton";
+import { useMediaPermissions } from "@/components/livestreams/room/hooks/useMediaPermissions";
+import {
+  getUserRole,
+  parseRoomMetadata,
+  ROLE_PERMISSIONS,
+} from "@/components/livestreams/room/layouts/permissions";
+import { Button } from "@/components/shadcn/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
 
 interface RoomControlsProps {
   token: string | null;

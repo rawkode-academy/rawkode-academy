@@ -1,7 +1,7 @@
 import { LIVEKIT_API_KEY, LIVEKIT_API_SECRET } from "astro:env/server";
-import { roomClientService, tokenVerifier } from "@/lib/livekit";
 import type { APIRoute } from "astro";
 import { AccessToken } from "livekit-server-sdk";
+import { roomClientService, tokenVerifier } from "@/lib/livekit";
 
 const jsonResponse = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {

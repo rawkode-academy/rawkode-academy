@@ -1,7 +1,7 @@
-import { PrejoinScreen } from "@/components/livestreams/prejoin/PrejoinScreen";
-import LiveKitRoom from "@/components/livestreams/room/core/LiveKitRoom";
 import type { LocalUserChoices } from "@livekit/components-core";
 import { useState } from "react";
+import { PrejoinScreen } from "@/components/livestreams/prejoin/PrejoinScreen";
+import LiveKitRoom from "@/components/livestreams/room/core/LiveKitRoom";
 
 interface RoomWrapperProps {
   serverUrl: string;

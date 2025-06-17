@@ -1,3 +1,5 @@
+import { Copy, Link2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/shadcn/button";
 import {
   Dialog,
@@ -12,8 +14,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { Copy, Link2 } from "lucide-react";
-import { useState } from "react";
 
 interface Props {
   roomId: string;
