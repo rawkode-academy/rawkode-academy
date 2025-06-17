@@ -9,7 +9,7 @@ const ReactionSchema = z.object({
 
 // Use the deployed URL in production, localhost in development
 const EMOJI_SERVICE_URL = import.meta.env.PROD
-	? "https://platform-emoji-reactions-write-model.rawkode-academy.workers.dev"
+	? "https://platform-emoji-reactions-write-model.rawkodeacademy.workers.dev"
 	: "http://localhost:8787"; // Local wrangler dev port
 
 export const addReaction = defineAction({
@@ -50,14 +50,14 @@ export const addReaction = defineAction({
 			});
 
 			if (!response.ok) {
-				const error = await response.json();
+				const errorData = await response.json() as { error?: string };
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
-					message: error.error || "Failed to add reaction",
+					message: errorData.error || "Failed to add reaction",
 				});
 			}
 
-			const result = await response.json();
+			const result = await response.json() as Record<string, unknown>;
 
 			return {
 				success: true,
@@ -79,7 +79,7 @@ export const addReaction = defineAction({
 
 export const removeReaction = defineAction({
 	input: ReactionSchema,
-	handler: async ({ contentId, emoji, contentTimestamp }, ctx) => {
+	handler: async () => {
 		// For now, just return success - removal can be implemented later
 		// when the write model supports it
 		return {

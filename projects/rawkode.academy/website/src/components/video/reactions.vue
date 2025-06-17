@@ -4,6 +4,35 @@
 .connected {
 	@apply border-blue-500 dark:border-blue-400;
 }
+
+/* Emoji Mart styling overrides for dark mode */
+.emoji-mart {
+	@apply !bg-white dark:!bg-gray-800 !border-gray-300 dark:!border-gray-600;
+}
+
+.emoji-mart-category-label span {
+	@apply !text-gray-700 dark:!text-gray-300;
+}
+
+.emoji-mart-search input {
+	@apply !bg-gray-50 dark:!bg-gray-700 !text-gray-900 dark:!text-gray-100 !border-gray-300 dark:!border-gray-600;
+}
+
+.emoji-mart-search-icon {
+	@apply !text-gray-500 dark:!text-gray-400;
+}
+
+.emoji-mart-bar {
+	@apply !border-gray-300 dark:!border-gray-600;
+}
+
+.emoji-mart-anchors i {
+	@apply !text-gray-600 dark:!text-gray-400;
+}
+
+.emoji-mart-anchor-selected .emoji-mart-anchor-bar {
+	@apply !bg-blue-500;
+}
 </style>
 
 <template>
@@ -47,60 +76,19 @@
 						leave-from-class="transform opacity-100 scale-100"
 						leave-to-class="transform opacity-0 scale-95">
 						<div v-if="showEmojiPicker" 
-							class="absolute z-50 mt-2 w-64 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5">
-							<div class="p-3">
-								<input
-									v-model="emojiSearch"
-									type="text"
-									placeholder="Search or paste emoji..."
-									class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-									@input="handleEmojiInput"
-									@keydown.enter="submitCustomEmoji"
-								/>
-								
-								<!-- Common Emojis Grid -->
-								<div v-if="!emojiSearch" class="mt-3">
-									<div v-if="otherReactions.length > 0" class="mb-4">
-										<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Other reactions:</p>
-										<div class="grid grid-cols-6 gap-1">
-											<button
-												v-for="reaction in otherReactions"
-												:key="reaction.emoji"
-												class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-xl relative"
-												@click="selectEmoji(reaction.emoji)">
-												{{ reaction.emoji }}
-												<span v-if="reaction.count > 0" class="absolute -top-1 -right-1 text-[10px] bg-gray-600 text-white rounded-full w-4 h-4 flex items-center justify-center">
-													{{ reaction.count }}
-												</span>
-											</button>
-										</div>
-									</div>
-									<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Popular reactions:</p>
-									<div class="grid grid-cols-6 gap-1">
-										<button
-											v-for="emoji in commonEmojis"
-											:key="emoji"
-											class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-xl"
-											@click="selectEmoji(emoji)">
-											{{ emoji }}
-										</button>
-									</div>
-								</div>
-								
-								<!-- Search Results / Custom Emoji -->
-								<div v-else class="mt-3">
-									<button
-										v-if="isValidEmoji(emojiSearch)"
-										class="w-full p-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors flex items-center justify-center gap-2"
-										@click="submitCustomEmoji">
-										<span class="text-2xl">{{ emojiSearch }}</span>
-										<span class="text-sm text-gray-600 dark:text-gray-400">Click to react</span>
-									</button>
-									<p v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
-										Type or paste an emoji
-									</p>
-								</div>
-							</div>
+							class="absolute z-50 mt-2 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5"
+							:class="{ 'right-0': true }">
+							<Picker
+								:data="emojiIndex"
+								set="native"
+								:native="true"
+								:show-preview="false"
+								:show-skin-tones="false"
+								:emoji-size="24"
+								:per-line="8"
+								:i18n="i18n"
+								@select="onEmojiSelect"
+							/>
 						</div>
 					</transition>
 				</div>
@@ -167,6 +155,7 @@ import ShareButton from "./ShareButton.vue";
 export default {
 	components: {
 		ShareButton,
+		Picker,
 	},
 	props: {
 		videoId: {
@@ -195,44 +184,32 @@ export default {
 			defaultEmojis: ["👍", "🚀", "💡", "❤️", "🔥", "👏"],
 			loading: false,
 			showEmojiPicker: false,
-			emojiSearch: "",
+			emojiIndex: emojiIndex,
+			i18n: {
+				search: "Search",
+				clear: "Clear",
+				notfound: "No Emoji Found",
+				skintext: "Choose your default skin tone",
+				categories: {
+					search: "Search Results",
+					recent: "Frequently Used",
+					people: "Smileys & People",
+					nature: "Animals & Nature",
+					foods: "Food & Drink",
+					activity: "Activity",
+					places: "Travel & Places",
+					objects: "Objects",
+					symbols: "Symbols",
+					flags: "Flags",
+					custom: "Custom",
+				},
+			},
 			commonEmojis: [
-				"😀",
-				"😍",
-				"🤣",
-				"😊",
-				"😎",
-				"🤔",
-				"👏",
-				"🎉",
-				"💯",
-				"✨",
-				"🙌",
-				"💪",
-				"🚀",
-				"💡",
-				"🔥",
-				"⭐",
-				"🌟",
-				"🎯",
-				"❤️",
-				"💜",
-				"💙",
-				"💚",
-				"🧡",
-				"💛",
-				"😮",
-				"😲",
-				"🤯",
-				"🤩",
-				"🥳",
-				"🤗",
-				"👍",
-				"👎",
-				"👌",
-				"✌️",
-				"🤝",
-				"🙏",
+				"😀", "😍", "🤣", "😊", "😎", "🤔", "👏", "🎉",
+				"💯", "✨", "🙌", "💪", "🚀", "💡", "🔥", "⭐",
+				"🌟", "🎯", "❤️", "💜", "💙", "💚", "🧡", "💛",
+				"😮", "😲", "🤯", "🤩", "🥳", "🤗", "👍", "👎",
+				"👌", "✌️", "🤝", "🙏", "😢", "😭", "😡", "🥰",
 			],
 		};
 	},
@@ -258,10 +235,13 @@ export default {
 		},
 	},
 	async mounted() {
+		console.log("VideoReactions mounted with videoId:", this.videoId);
 		// Check if user is authenticated
 		await this.checkAuth();
+		console.log("Auth check complete, isAuthenticated:", this.isAuthenticated);
 		// Fetch reactions for this video
 		await this.fetchReactions();
+		console.log("Reactions fetched:", this.reactions);
 		// Add click outside listener
 		document.addEventListener("click", this.handleClickOutside);
 	},
@@ -319,16 +299,16 @@ export default {
 					const reactionMap = new Map();
 
 					// Initialize with all default emojis (not just button ones)
-					this.defaultEmojis.forEach((emoji) => {
+					for (const emoji of this.defaultEmojis) {
 						reactionMap.set(emoji, {
 							emoji,
 							label: this.getEmojiLabel(emoji),
 							count: 0,
 						});
-					});
+					}
 
 					// Update counts from API
-					videoEntity.emojiReactions.forEach((reaction) => {
+					for (const reaction of videoEntity.emojiReactions) {
 						if (reactionMap.has(reaction.emoji)) {
 							reactionMap.get(reaction.emoji).count = reaction.count;
 						} else {
@@ -339,7 +319,7 @@ export default {
 								count: reaction.count,
 							});
 						}
-					});
+					}
 
 					// Convert to array and sort by count
 					this.reactions = Array.from(reactionMap.values()).sort(
@@ -365,9 +345,12 @@ export default {
 				"🔥": "Fire reaction",
 				"👏": "Applause reaction",
 			};
-			return labels[emoji] || "React with " + emoji;
+			return labels[emoji] || `React with ${emoji}`;
 		},
 		async handleReaction(reaction) {
+			console.log("handleReaction called with:", reaction);
+			console.log("isAuthenticated:", this.isAuthenticated);
+			
 			if (!this.isAuthenticated) {
 				// Redirect to sign in
 				window.location.href = "/api/auth/sign-in";
@@ -434,30 +417,16 @@ export default {
 			if (this.showEmojiPicker) {
 				// Close share options if open
 				this.showShareOptions = false;
-				// Reset search when opening
-				this.emojiSearch = "";
 			}
 		},
-		isValidEmoji(str) {
-			// Check if the string is a valid emoji
-			const emojiRegex = /\p{Emoji}/u;
-			return emojiRegex.test(str) && str.length <= 4; // Most emojis are 1-2 characters, some with modifiers can be up to 4
-		},
-		handleEmojiInput() {
-			// Trim the input to handle paste of multiple characters
-			if (this.emojiSearch.length > 4) {
-				this.emojiSearch = this.emojiSearch.slice(0, 4);
-			}
+		onEmojiSelect(emoji) {
+			// emoji.native contains the emoji character
+			this.addCustomReaction(emoji.native);
+			this.showEmojiPicker = false;
 		},
 		selectEmoji(emoji) {
 			this.addCustomReaction(emoji);
 			this.showEmojiPicker = false;
-			this.emojiSearch = "";
-		},
-		submitCustomEmoji() {
-			if (this.isValidEmoji(this.emojiSearch)) {
-				this.selectEmoji(this.emojiSearch);
-			}
 		},
 		async addCustomReaction(emoji) {
 			// Check if this emoji already exists in reactions

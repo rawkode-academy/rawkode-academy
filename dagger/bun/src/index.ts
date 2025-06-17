@@ -41,7 +41,6 @@ export class Bun {
 	@func()
 	async install(
 		@argument({ ignore: [".git", "node_modules"] }) directory: Directory,
-		devDependencies = false,
 	): Promise<Container> {
 		const nodeModules = dag.cacheVolume("node-modules");
 
@@ -49,7 +48,7 @@ export class Bun {
 			._container
 			.withMountedFile("/code/bun.lock", directory.file("bun.lock"))
 			.withMountedFile("/code/package.json", directory.file("package.json"))
-			.withExec(["bun", "install", "--frozen-lockfile", devDependencies ? "--dev" : ""])
+			.withExec(["bun", "install", "--frozen-lockfile"])
 			.withMountedDirectory("/code", directory).withMountedCache(
 				"/code/node_modules",
 				nodeModules,

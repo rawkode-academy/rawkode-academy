@@ -45,10 +45,10 @@ export default function CommandPalette({
 			try {
 				const response = await fetch("/api/sitemap-pages.json");
 				if (response.ok) {
-					const sitemapItems = await response.json();
+					const sitemapItems: NavigationItem[] = await response.json();
 					// Filter out articles initially
 					const filteredItems = sitemapItems.filter(
-						(item: NavigationItem) => item.category !== "Articles",
+						(item) => item.category !== "Articles",
 					);
 					setNavigationItems(filteredItems);
 				}
@@ -76,7 +76,7 @@ export default function CommandPalette({
 						`/api/search-articles.json?q=${encodeURIComponent(search)}`,
 					);
 					if (response.ok) {
-						const articles = await response.json();
+						const articles: NavigationItem[] = await response.json();
 						setArticleItems(articles);
 					}
 				} catch (error) {

@@ -33,7 +33,12 @@ export async function handleApiResponse<T>(response: Response): Promise<T> {
 		let errorDetails: unknown;
 
 		try {
-			const errorData = await response.json();
+			const errorData: {
+				error?: string;
+				message?: string;
+				code?: string;
+				details?: unknown;
+			} = await response.json();
 			if (errorData.error) {
 				errorMessage = errorData.error;
 			} else if (errorData.message) {
