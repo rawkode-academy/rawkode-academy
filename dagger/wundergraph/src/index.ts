@@ -42,9 +42,7 @@ export class Wundergraph {
 
 		if ((await publishResult.exitCode()) !== 0) {
 			throw new Error(
-				"Subgraph publish failed. Error: " +
-					(await publishResult.stdout()) +
-					(await publishResult.stderr()),
+				`Subgraph publish failed. Error: ${await publishResult.stdout()}${await publishResult.stderr()}`,
 			);
 		}
 
