@@ -60,7 +60,7 @@
 			</div>
 		</transition>
 
-		<!-- Coming Soon Banner -->
+		<!-- Banner Messages -->
 		<transition name="banner" enter-active-class="transition-all duration-300 ease-in-out"
 			enter-from-class="opacity-0 translate-y-2" enter-to-class="opacity-100 translate-y-0"
 			leave-active-class="transition-all duration-300 ease-in-out" leave-from-class="opacity-100 translate-y-0"
@@ -72,7 +72,7 @@
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
 							d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 					</svg>
-					<span class="text-sm font-medium">This feature is coming in a few days!</span>
+					<span class="text-sm font-medium">{{ bannerMessage }}</span>
 				</div>
 			</div>
 		</transition>
@@ -80,6 +80,7 @@
 </template>
 
 <script>
+import { actions } from "astro:actions";
 import ShareButton from "./ShareButton.vue";
 
 export default {
@@ -104,18 +105,146 @@ export default {
 		return {
 			showBanner: false,
 			bannerTimeout: null,
-			showShareOptions: false, // New state for toggling ShareButton
-			reactions: [
-				{ emoji: "👍", label: "Like this video", count: 124 },
-				{ emoji: "🚀", label: "Rocket reaction", count: 89 },
-				{ emoji: "💡", label: "Insightful reaction", count: 45 },
-			],
+			bannerMessage: "",
+			showShareOptions: false,
+			reactions: [],
+			userReactions: new Set(), // Track which emojis the current user has reacted with
+			isAuthenticated: false,
+			defaultEmojis: ["👍", "🚀", "💡", "❤️", "🔥", "👏"],
+			loading: false,
 		};
 	},
+	async mounted() {
+		// Check if user is authenticated
+		await this.checkAuth();
+		// Fetch reactions for this video
+		await this.fetchReactions();
+	},
 	methods: {
-		handleReaction(reaction) {
-			this.showComingSoonBanner();
-			// TODO: Implement reaction logic when backend is ready
+		async checkAuth() {
+			try {
+				const response = await fetch("/api/auth/me");
+				this.isAuthenticated = response.ok;
+			} catch (error) {
+				console.error("Failed to check auth status:", error);
+			}
+		},
+		async fetchReactions() {
+			try {
+				const query = `
+					query GetVideoReactions($videoId: String!) {
+						_entities(representations: [{ __typename: "Video", id: $videoId }]) {
+							... on Video {
+								id
+								emojiReactions {
+									emoji
+									count
+								}
+							}
+						}
+					}
+				`;
+
+				const response = await fetch("https://api.rawkode.academy/graphql", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						query,
+						variables: { videoId: this.videoId },
+					}),
+				});
+
+				const data = await response.json();
+				const videoEntity = data.data?._entities?.[0];
+
+				if (videoEntity?.emojiReactions) {
+					// Create reaction objects from the GraphQL response
+					const reactionMap = new Map();
+
+					// Initialize with default emojis
+					this.defaultEmojis.forEach((emoji) => {
+						reactionMap.set(emoji, {
+							emoji,
+							label: this.getEmojiLabel(emoji),
+							count: 0,
+						});
+					});
+
+					// Update counts from API
+					videoEntity.emojiReactions.forEach((reaction) => {
+						if (reactionMap.has(reaction.emoji)) {
+							reactionMap.get(reaction.emoji).count = reaction.count;
+						} else {
+							// Add non-default emojis that have reactions
+							reactionMap.set(reaction.emoji, {
+								emoji: reaction.emoji,
+								label: this.getEmojiLabel(reaction.emoji),
+								count: reaction.count,
+							});
+						}
+					});
+
+					// Convert to array and sort by count
+					this.reactions = Array.from(reactionMap.values()).sort(
+						(a, b) => b.count - a.count,
+					);
+				}
+			} catch (error) {
+				console.error("Failed to fetch reactions:", error);
+				// Fall back to default emojis with 0 counts
+				this.reactions = this.defaultEmojis.map((emoji) => ({
+					emoji,
+					label: this.getEmojiLabel(emoji),
+					count: 0,
+				}));
+			}
+		},
+		getEmojiLabel(emoji) {
+			const labels = {
+				"👍": "Like this video",
+				"🚀": "Rocket reaction",
+				"💡": "Insightful reaction",
+				"❤️": "Love this video",
+				"🔥": "Fire reaction",
+				"👏": "Applause reaction",
+			};
+			return labels[emoji] || "React with " + emoji;
+		},
+		async handleReaction(reaction) {
+			if (!this.isAuthenticated) {
+				// Redirect to sign in
+				window.location.href = "/api/auth/sign-in";
+				return;
+			}
+
+			if (this.loading) return;
+			this.loading = true;
+
+			try {
+				const { data, error } = await actions.addReaction({
+					contentId: this.videoId,
+					emoji: reaction.emoji,
+				});
+
+				if (error) {
+					console.error("Failed to add reaction:", error);
+					this.showErrorBanner("Failed to add reaction. Please try again.");
+				} else {
+					// Optimistically update the count
+					reaction.count++;
+					this.userReactions.add(reaction.emoji);
+
+					// Refresh reactions from server after a short delay
+					setTimeout(() => this.fetchReactions(), 1000);
+				}
+			} catch (error) {
+				console.error("Failed to add reaction:", error);
+				this.showErrorBanner("Failed to add reaction. Please try again.");
+			} finally {
+				this.loading = false;
+			}
 		},
 		handleShare() {
 			this.showShareOptions = !this.showShareOptions;
@@ -125,12 +254,19 @@ export default {
 			// TODO: Implement save functionality
 		},
 		showComingSoonBanner() {
+			this.showBannerMessage("This feature is coming in a few days!");
+		},
+		showErrorBanner(message) {
+			this.showBannerMessage(message);
+		},
+		showBannerMessage(message) {
 			// Clear any existing timeout
 			if (this.bannerTimeout) {
 				clearTimeout(this.bannerTimeout);
 			}
 
-			// Show banner
+			// Update banner message
+			this.bannerMessage = message;
 			this.showBanner = true;
 
 			// Hide after 3 seconds
