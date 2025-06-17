@@ -26,7 +26,10 @@ export async function fetchVideosFromGraphQL(): Promise<Video[]> {
 			throw new Error(`GraphQL request failed: ${response.status}`);
 		}
 
-		const data = await response.json();
+		const data: {
+			data?: { getLatestVideos?: Video[] };
+			errors?: any;
+		} = await response.json();
 
 		if (data.errors) {
 			console.error("GraphQL errors:", data.errors);

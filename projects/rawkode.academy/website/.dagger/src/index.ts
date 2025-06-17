@@ -11,7 +11,6 @@ export class Website {
 	): Promise<Directory> {
 		return dag
 			.bun()
-			.withCache()
 			.install(source)
 			.withMountedFile(
 				"/usr/local/bin/d2",

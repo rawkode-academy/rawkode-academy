@@ -20,3 +20,7 @@ bun run biome lint
 ```
 
 These commands ensure consistent code formatting and catch potential issues. All code must pass both formatting and linting checks before being committed.
+
+## Build
+
+If a `build` script is available via `bun run build`; this must also be validated before committing any code changes.

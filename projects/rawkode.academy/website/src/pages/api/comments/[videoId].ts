@@ -82,7 +82,7 @@ export const GET: APIRoute = async ({ params }) => {
 			});
 		}
 
-		const data = await response.json();
+		const data: { messages?: ZulipMessage[] } = await response.json();
 		const messages: ZulipMessage[] = data.messages || [];
 
 		// Transform Zulip messages to comments format
