@@ -15,8 +15,17 @@ interface TokenPayload {
 export default {
 	async fetch(req: Request, env: Env): Promise<Response> {
 		// Handle CORS for browser requests
+		const origin = req.headers.get("Origin");
+		const allowedOrigins = [
+			"https://rawkode.academy",
+			"http://localhost:4321",
+			"http://localhost:8787",
+		];
+
 		const corsHeaders = {
-			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Origin": allowedOrigins.includes(origin || "")
+				? origin!
+				: "https://rawkode.academy",
 			"Access-Control-Allow-Methods": "POST, OPTIONS",
 			"Access-Control-Allow-Headers": "Content-Type, Authorization",
 		};

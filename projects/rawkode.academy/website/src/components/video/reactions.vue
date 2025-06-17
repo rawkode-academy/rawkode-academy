@@ -12,7 +12,7 @@
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<!-- Reaction Buttons -->
 			<div class="flex items-center gap-1 sm:gap-2">
-				<button v-for="reaction in reactions" :key="reaction.emoji"
+				<button v-for="reaction in topReactions" :key="reaction.emoji"
 					:aria-label="`${reaction.label} (${reaction.count} ${reaction.count === 1 ? 'reaction' : 'reactions'})`"
 					class="group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
 					@click="handleReaction(reaction)">
@@ -23,6 +23,87 @@
 						{{ reaction.count }}
 					</span>
 				</button>
+				
+				<!-- Emoji Picker Button -->
+				<div class="relative">
+					<button
+						aria-label="Add custom emoji reaction"
+						class="group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border-2 border-dashed border-gray-300 dark:border-gray-600"
+						@click="toggleEmojiPicker">
+						<span aria-hidden="true" class="text-xl sm:text-2xl">
+							➕
+						</span>
+						<span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+							Add
+						</span>
+					</button>
+					
+					<!-- Emoji Picker Dropdown -->
+					<transition
+						enter-active-class="transition ease-out duration-200"
+						enter-from-class="transform opacity-0 scale-95"
+						enter-to-class="transform opacity-100 scale-100"
+						leave-active-class="transition ease-in duration-150"
+						leave-from-class="transform opacity-100 scale-100"
+						leave-to-class="transform opacity-0 scale-95">
+						<div v-if="showEmojiPicker" 
+							class="absolute z-50 mt-2 w-64 rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5">
+							<div class="p-3">
+								<input
+									v-model="emojiSearch"
+									type="text"
+									placeholder="Search or paste emoji..."
+									class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+									@input="handleEmojiInput"
+									@keydown.enter="submitCustomEmoji"
+								/>
+								
+								<!-- Common Emojis Grid -->
+								<div v-if="!emojiSearch" class="mt-3">
+									<div v-if="otherReactions.length > 0" class="mb-4">
+										<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Other reactions:</p>
+										<div class="grid grid-cols-6 gap-1">
+											<button
+												v-for="reaction in otherReactions"
+												:key="reaction.emoji"
+												class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-xl relative"
+												@click="selectEmoji(reaction.emoji)">
+												{{ reaction.emoji }}
+												<span v-if="reaction.count > 0" class="absolute -top-1 -right-1 text-[10px] bg-gray-600 text-white rounded-full w-4 h-4 flex items-center justify-center">
+													{{ reaction.count }}
+												</span>
+											</button>
+										</div>
+									</div>
+									<p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Popular reactions:</p>
+									<div class="grid grid-cols-6 gap-1">
+										<button
+											v-for="emoji in commonEmojis"
+											:key="emoji"
+											class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-xl"
+											@click="selectEmoji(emoji)">
+											{{ emoji }}
+										</button>
+									</div>
+								</div>
+								
+								<!-- Search Results / Custom Emoji -->
+								<div v-else class="mt-3">
+									<button
+										v-if="isValidEmoji(emojiSearch)"
+										class="w-full p-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors flex items-center justify-center gap-2"
+										@click="submitCustomEmoji">
+										<span class="text-2xl">{{ emojiSearch }}</span>
+										<span class="text-sm text-gray-600 dark:text-gray-400">Click to react</span>
+									</button>
+									<p v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+										Type or paste an emoji
+									</p>
+								</div>
+							</div>
+						</div>
+					</transition>
+				</div>
 			</div>
 
 			<!-- Share and Save Options -->
@@ -112,13 +193,71 @@ export default {
 			isAuthenticated: false,
 			defaultEmojis: ["👍", "🚀", "💡", "❤️", "🔥", "👏"],
 			loading: false,
+			showEmojiPicker: false,
+			emojiSearch: "",
+			commonEmojis: [
+				"😀",
+				"😍",
+				"🤣",
+				"😊",
+				"😎",
+				"🤔",
+				"👏",
+				"🎉",
+				"💯",
+				"✨",
+				"🙌",
+				"💪",
+				"🚀",
+				"💡",
+				"🔥",
+				"⭐",
+				"🌟",
+				"🎯",
+				"❤️",
+				"💜",
+				"💙",
+				"💚",
+				"🧡",
+				"💛",
+				"😮",
+				"😲",
+				"🤯",
+				"🤩",
+				"🥳",
+				"🤗",
+				"👍",
+				"👎",
+				"👌",
+				"✌️",
+				"🤝",
+				"🙏",
+			],
 		};
+	},
+	computed: {
+		topReactions() {
+			// Return top 4 reactions by count
+			return this.reactions.slice(0, 4);
+		},
+		otherReactions() {
+			// Return reactions not in the top 4 that have counts > 0
+			return this.reactions.slice(4).filter((r) => r.count > 0);
+		},
 	},
 	async mounted() {
 		// Check if user is authenticated
 		await this.checkAuth();
 		// Fetch reactions for this video
 		await this.fetchReactions();
+		// Add click outside listener
+		document.addEventListener("click", this.handleClickOutside);
+	},
+	beforeUnmount() {
+		if (this.bannerTimeout) {
+			clearTimeout(this.bannerTimeout);
+		}
+		document.removeEventListener("click", this.handleClickOutside);
 	},
 	methods: {
 		async checkAuth() {
@@ -155,6 +294,10 @@ export default {
 						variables: { videoId: this.videoId },
 					}),
 				});
+
+				if (!response.ok) {
+					throw new Error(`GraphQL request failed: ${response.status}`);
+				}
 
 				const data = await response.json();
 				const videoEntity = data.data?._entities?.[0];
@@ -274,12 +417,65 @@ export default {
 				this.showBanner = false;
 			}, 3000);
 		},
-	},
-	beforeUnmount() {
-		if (this.bannerTimeout) {
-			clearTimeout(this.bannerTimeout);
-		}
+		toggleEmojiPicker() {
+			this.showEmojiPicker = !this.showEmojiPicker;
+			if (this.showEmojiPicker) {
+				// Close share options if open
+				this.showShareOptions = false;
+				// Reset search when opening
+				this.emojiSearch = "";
+			}
+		},
+		isValidEmoji(str) {
+			// Check if the string is a valid emoji
+			const emojiRegex = /\p{Emoji}/u;
+			return emojiRegex.test(str) && str.length <= 4; // Most emojis are 1-2 characters, some with modifiers can be up to 4
+		},
+		handleEmojiInput() {
+			// Trim the input to handle paste of multiple characters
+			if (this.emojiSearch.length > 4) {
+				this.emojiSearch = this.emojiSearch.slice(0, 4);
+			}
+		},
+		selectEmoji(emoji) {
+			this.addCustomReaction(emoji);
+			this.showEmojiPicker = false;
+			this.emojiSearch = "";
+		},
+		submitCustomEmoji() {
+			if (this.isValidEmoji(this.emojiSearch)) {
+				this.selectEmoji(this.emojiSearch);
+			}
+		},
+		async addCustomReaction(emoji) {
+			// Check if this emoji already exists in reactions
+			let reaction = this.reactions.find((r) => r.emoji === emoji);
+
+			if (!reaction) {
+				// Add new reaction to the list
+				reaction = {
+					emoji,
+					label: this.getEmojiLabel(emoji),
+					count: 0,
+				};
+				this.reactions.push(reaction);
+			}
+
+			// Use the existing handleReaction method
+			await this.handleReaction(reaction);
+		},
+		handleClickOutside(event) {
+			const emojiPicker = this.$el.querySelector(
+				'.relative:has([aria-label="Add custom emoji reaction"])',
+			);
+			if (
+				emojiPicker &&
+				!emojiPicker.contains(event.target) &&
+				this.showEmojiPicker
+			) {
+				this.showEmojiPicker = false;
+			}
+		},
 	},
 };
 </script>
-
