@@ -18,7 +18,6 @@ export const GET: APIRoute = async ({ locals }) => {
 			user: {
 				sub: user.sub,
 				name: user.name,
-				email: user.email,
 			},
 		}),
 		{
