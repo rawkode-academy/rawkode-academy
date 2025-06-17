@@ -303,22 +303,27 @@ const SidebarContentComponent: React.FC<SidebarContentProps> = ({
             </Button>
           </div>
 
-          {/* Desktop: Participants always visible, mobile: conditional */}
-          <div className="hidden xl:block mb-3">
-            <ScrollArea className="h-[200px] pr-3">
-              <ParticipantsList token={token} />
-            </ScrollArea>
-          </div>
+          {/* Desktop: Split view for participants and chat */}
+          <div className="hidden xl:flex flex-col flex-1 gap-3">
+            {/* Participants section - 50% height */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <ScrollArea className="h-full">
+                <ParticipantsList token={token} />
+              </ScrollArea>
+            </div>
 
-          {/* Desktop: Chat always visible, mobile: conditional */}
-          <div className="flex-1 hidden xl:flex">
-            <Chat token={token} />
+            <Separator />
+
+            {/* Chat section - 50% height */}
+            <div className="flex-1 flex min-h-0">
+              <Chat token={token} />
+            </div>
           </div>
 
           {/* Mobile: Show active tab content */}
           <div className="flex-1 xl:hidden overflow-hidden">
             {activeTab === "participants" ? (
-              <ScrollArea className="h-full pr-3">
+              <ScrollArea className="h-full">
                 <ParticipantsList token={token} />
               </ScrollArea>
             ) : (
