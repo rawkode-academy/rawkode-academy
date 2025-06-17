@@ -1,6 +1,6 @@
 {
 	"$schema": "https://unpkg.com/wrangler/config-schema.json",
-	"name": "emoji-reactions-read-model",
+	"name": "platform-emoji-reactions-read-model",
 	"main": "./main.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": [
