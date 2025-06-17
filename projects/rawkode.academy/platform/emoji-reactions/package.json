@@ -18,6 +18,7 @@
 		"@sentry/node": "^9.29.0",
 		"@sentry/tracing": "^7.120.3",
 		"@sindresorhus/slugify": "^2.2.1",
+		"@tsndr/cloudflare-worker-jwt": "^3.2.0",
 		"drizzle-graphql": "^0.8.5",
 		"drizzle-kit": "^0.30.6",
 		"drizzle-orm": "^0.36.4",

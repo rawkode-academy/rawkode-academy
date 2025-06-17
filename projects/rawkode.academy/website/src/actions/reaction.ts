@@ -25,11 +25,21 @@ export const addReaction = defineAction({
 				});
 			}
 
+			// Get the access token from cookies
+			const accessToken = ctx.cookies.get("accessToken");
+			if (!accessToken) {
+				throw new ActionError({
+					code: "UNAUTHORIZED",
+					message: "Missing access token",
+				});
+			}
+
 			// Call the emoji reactions service via HTTP
 			const response = await fetch(EMOJI_SERVICE_URL, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
+					Authorization: `Bearer ${accessToken.value}`, // Pass the JWT token
 				},
 				body: JSON.stringify({
 					contentId,

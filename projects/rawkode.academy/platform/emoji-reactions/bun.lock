@@ -15,6 +15,7 @@
         "@sentry/node": "^9.29.0",
         "@sentry/tracing": "^7.120.3",
         "@sindresorhus/slugify": "^2.2.1",
+        "@tsndr/cloudflare-worker-jwt": "^3.2.0",
         "drizzle-graphql": "^0.8.5",
         "drizzle-kit": "^0.30.6",
         "drizzle-orm": "^0.36.4",
@@ -307,6 +308,8 @@
     "@sindresorhus/slugify": ["@sindresorhus/slugify@2.2.1", "", { "dependencies": { "@sindresorhus/transliterate": "^1.0.0", "escape-string-regexp": "^5.0.0" } }, "sha512-MkngSCRZ8JdSOCHRaYd+D01XhvU3Hjy6MGl06zhOk614hp9EOAp5gIkBeQg7wtmxpitU6eAL4kdiRMcJa2dlrw=="],
 
     "@sindresorhus/transliterate": ["@sindresorhus/transliterate@1.6.0", "", { "dependencies": { "escape-string-regexp": "^5.0.0" } }, "sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ=="],
+
+    "@tsndr/cloudflare-worker-jwt": ["@tsndr/cloudflare-worker-jwt@3.2.0", "", {}, "sha512-y45452JzKxFDfCUHNGrdgIcrJTkYa6xtrKtCQTjKj+hjzw8dOHF9R0uGuU8WxvCCMi4sMzZ1KREnZTsTy7DsiQ=="],
 
     "@types/bun": ["@types/bun@1.2.16", "", { "dependencies": { "bun-types": "1.2.16" } }, "sha512-1aCZJ/6nSiViw339RsaNhkNoEloLaPzZhxMOYEa7OzRzO41IGg5n/7I43/ZIAW/c+Q6cT12Vf7fOZOoVIzb5BQ=="],
 
