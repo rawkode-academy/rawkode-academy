@@ -191,6 +191,7 @@ export default {
 			reactions: [],
 			userReactions: new Set(), // Track which emojis the current user has reacted with
 			isAuthenticated: false,
+			defaultButtonEmojis: ["👍", "❤️", "🚀", "🔥"], // Always show these 4 as buttons
 			defaultEmojis: ["👍", "🚀", "💡", "❤️", "🔥", "👏"],
 			loading: false,
 			showEmojiPicker: false,
@@ -237,12 +238,23 @@ export default {
 	},
 	computed: {
 		topReactions() {
-			// Return top 4 reactions by count
-			return this.reactions.slice(0, 4);
+			// Always show the 4 default button emojis
+			return this.defaultButtonEmojis.map((emoji) => {
+				const existing = this.reactions.find((r) => r.emoji === emoji);
+				return (
+					existing || {
+						emoji,
+						label: this.getEmojiLabel(emoji),
+						count: 0,
+					}
+				);
+			});
 		},
 		otherReactions() {
-			// Return reactions not in the top 4 that have counts > 0
-			return this.reactions.slice(4).filter((r) => r.count > 0);
+			// Return reactions that aren't in the default buttons but have counts > 0
+			return this.reactions.filter(
+				(r) => !this.defaultButtonEmojis.includes(r.emoji) && r.count > 0,
+			);
 		},
 	},
 	async mounted() {
@@ -306,7 +318,7 @@ export default {
 					// Create reaction objects from the GraphQL response
 					const reactionMap = new Map();
 
-					// Initialize with default emojis
+					// Initialize with all default emojis (not just button ones)
 					this.defaultEmojis.forEach((emoji) => {
 						reactionMap.set(emoji, {
 							emoji,
