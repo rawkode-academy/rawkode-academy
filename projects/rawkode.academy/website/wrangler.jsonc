@@ -17,6 +17,12 @@
 			"custom_domain": true
 		}
 	],
+	"services": [
+		{
+			"binding": "EMOJI_REACTIONS",
+			"service": "platform-emoji-reactions-write-model"
+		}
+	],
 	"vars": {
 		"INFLUXDB_HOST": "https://eu-central-1-1.aws.cloud2.influxdata.com",
 		"INFLUXDB_ORG": "Rawkode Academy",
