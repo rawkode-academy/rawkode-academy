@@ -280,10 +280,10 @@ export function Chat({ token, onNewMessage }: ChatProps) {
   })();
 
   return (
-    <div className="flex flex-col h-full min-h-0 p-2">
+    <div className="flex flex-col h-full min-h-0">
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto pr-2 mb-3 min-h-0 custom-scrollbar"
+        className="flex-1 overflow-y-auto px-2 mb-3 min-h-0 custom-scrollbar"
       >
         <div>
           {isLoadingHistory ? (
