@@ -31,7 +31,7 @@ export const addReaction = defineAction({
 
 			// Access the runtime environment through locals
 			const runtime = ctx.locals.runtime;
-			if (!runtime || !runtime.env || !runtime.env.EMOJI_REACTIONS) {
+			if (!runtime || !runtime.EMOJI_REACTIONS) {
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Emoji reactions service not configured",
@@ -39,7 +39,7 @@ export const addReaction = defineAction({
 			}
 
 			// Call the emoji reactions service via service binding
-			const response = await runtime.env.EMOJI_REACTIONS.fetch(
+			const response = await runtime.EMOJI_REACTIONS.fetch(
 				new Request("https://emoji-reactions.internal/", {
 					method: "POST",
 					headers: {
