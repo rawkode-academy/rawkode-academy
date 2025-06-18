@@ -5,7 +5,11 @@ interface Video {
 
 export async function fetchVideosFromGraphQL(): Promise<Video[]> {
 	try {
-		const response = await fetch("https://api.rawkode.academy/graphql", {
+		// This function is called during build time in astro.config.mts,
+		// so we can't use astro:env/server here
+		const graphqlEndpoint =
+			process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/graphql";
+		const response = await fetch(graphqlEndpoint, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

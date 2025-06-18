@@ -2,8 +2,9 @@ import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
 
 import { GraphQLClient, gql } from "graphql-request";
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
 
-const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
+const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);
 
 // We'll get the latest 400, which should be all or almost all
 // Anything else can be fetched dynamically

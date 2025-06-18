@@ -5,6 +5,7 @@ import TopicHub from "@/components/technology/TopicHub.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths } from "astro";
 import { request } from "graphql-request";
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
 
 // Define the Technology data type explicitly
 export interface Technology {
@@ -28,7 +29,7 @@ interface GetTechnologiesResponse {
 
 // Fetch all technologies to generate static paths
 export const getStaticPaths = (async () => {
-	const endpoint = "https://api.rawkode.academy/graphql";
+	const endpoint = GRAPHQL_ENDPOINT;
 
 	try {
 		console.log("Fetching technologies from GraphQL API...");

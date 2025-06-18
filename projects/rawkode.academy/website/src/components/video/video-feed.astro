@@ -1,4 +1,6 @@
 ---
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
+
 interface Props {
 	title: string;
 	description: string;
@@ -26,7 +28,7 @@ interface Video {
 	streamUrl: string;
 }
 
-const response = await fetch("https://api.rawkode.academy/graphql", {
+const response = await fetch(GRAPHQL_ENDPOINT, {
 	method: "POST",
 	headers: {
 		"Content-Type": "application/json",
