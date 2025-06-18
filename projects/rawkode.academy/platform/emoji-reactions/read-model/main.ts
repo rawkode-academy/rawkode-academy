@@ -1,3 +1,4 @@
+import type { D1Database, ExecutionContext } from "@cloudflare/workers-types";
 import { createYoga } from "graphql-yoga";
 import { getSchema } from "./schema";
 
@@ -5,7 +6,6 @@ export interface Env {
 	DB: D1Database;
 }
 
-// force:redeploy
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const yoga = createYoga({

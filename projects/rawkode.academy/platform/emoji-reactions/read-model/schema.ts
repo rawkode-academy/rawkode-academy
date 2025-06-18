@@ -1,22 +1,16 @@
+import type { D1Database } from "@cloudflare/workers-types";
 import schemaBuilder from "@pothos/core";
 import directivesPlugin from "@pothos/plugin-directives";
 import drizzlePlugin from "@pothos/plugin-drizzle";
 import federationPlugin from "@pothos/plugin-federation";
 import { and, count, eq, sql } from "drizzle-orm";
 import type { GraphQLSchema } from "graphql";
-import { DateResolver } from "graphql-scalars";
 import { getDatabase } from "../data-model/client";
 import * as dataSchema from "../data-model/schema";
 
 export interface PothosTypes {
-	DrizzleSchema: typeof dataSchema;
-	Scalars: {
-		Date: {
-			Input: Date;
-			Output: Date;
-		};
-	};
-}
+		DrizzleSchema: typeof dataSchema;
+	}
 
 const createBuilder = (env: { DB: D1Database }) => {
 	const db = getDatabase(env);
@@ -28,9 +22,6 @@ const createBuilder = (env: { DB: D1Database }) => {
 		},
 	});
 
-	builder.addScalarType("Date", DateResolver);
-
-	// Define the EmojiReaction type
 	const emojiReactionRef = builder
 		.objectRef<{
 			emoji: string;
