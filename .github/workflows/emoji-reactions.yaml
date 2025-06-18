@@ -87,7 +87,7 @@ jobs:
               production \
               $codebase \
               ./read-model/publish.ts \
-              https://${SERVICE_NAME}-read-model.rawkode-academy.workers.dev \
+              https://${SERVICE_NAME}-read-model.rawkodeacademy.workers.dev \
               env:COSMO_API_KEY
 
             ../../../../dagger/cloudflare | deploy \
