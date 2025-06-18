@@ -2,15 +2,15 @@ import { defineMiddleware } from "astro:middleware";
 import { Zitadel } from "@/lib/zitadel/index.ts";
 
 export const authMiddleware = defineMiddleware((context, next) => {
-	// The runtime isn't available for pre-rendered pages and we
-	// only want this middleware to run for SSR.
-	if (!("runtime" in context.locals)) {
-		console.debug("No runtime, skipping middleware");
+	if (context.isPrerendered) {
+		// The runtime isn't available for pre-rendered pages and we
+		// only want this middleware to run for SSR.
+		console.debug("Prerendered: skipping auth middleware");
 		return next();
 	}
 
-	// Don't run on sign-out page 😂
 	if (context.request.url.endsWith("/api/auth/sign-out")) {
+		// Don't run on sign-out page 😂
 		console.debug("Sign-out page, skipping auth middleware");
 		return next();
 	}
