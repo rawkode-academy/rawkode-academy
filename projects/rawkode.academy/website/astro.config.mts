@@ -98,6 +98,16 @@ export default defineConfig({
 					}
 				: {},
 		},
+		ssr: {
+			external: [
+				"node:process",
+				"node:fs/promises",
+				"node:path",
+				"node:url",
+				"node:crypto",
+				"node:worker_threads",
+			],
+		},
 	},
 	site: getSiteUrl(),
 	env: {

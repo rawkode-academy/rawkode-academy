@@ -65,7 +65,11 @@ try {
 const isAuthenticated = Astro.cookies.has("accessToken");
 ---
 
-<div class="video-reactions" data-video-id={videoId} data-authenticated={isAuthenticated}>
+<div
+	class="video-reactions"
+	data-video-id={videoId}
+	data-authenticated={isAuthenticated}
+>
 	<div class="reactions-container">
 		{
 			DEFAULT_REACTIONS.map((reaction) => (
@@ -79,7 +83,9 @@ const isAuthenticated = Astro.cookies.has("accessToken");
 				</button>
 			))
 		}
-		<button class="reaction-btn add-emoji" aria-label="Add custom emoji">+</button>
+		<button class="reaction-btn add-emoji" aria-label="Add custom emoji"
+			>+</button
+		>
 	</div>
 
 	<div class="emoji-picker" hidden>
@@ -143,16 +149,29 @@ const isAuthenticated = Astro.cookies.has("accessToken");
 	const container = document.querySelector(".video-reactions") as HTMLElement;
 	const videoId = container?.dataset.videoId || "";
 	const emojiPicker = container?.querySelector(".emoji-picker") as HTMLElement;
-	const addEmojiBtn = container?.querySelector(".add-emoji") as HTMLButtonElement;
+	const addEmojiBtn = container?.querySelector(
+		".add-emoji",
+	) as HTMLButtonElement;
 
 	// Handle reactions
 	async function handleReaction(emoji: string) {
-
-		const button = container?.querySelector(`[data-emoji="${emoji}"]`) as HTMLButtonElement;
+		const button = container?.querySelector(
+			`[data-emoji="${emoji}"]`,
+		) as HTMLButtonElement;
 		if (!button) return;
 
 		const countEl = button.querySelector(".count") as HTMLElement;
 		const currentCount = parseInt(countEl.textContent || "0");
+
+		// Get current video timestamp
+		let contentTimestamp = 0;
+		const mediaPlayer = document.querySelector("media-player");
+		if (mediaPlayer) {
+			const video = mediaPlayer.querySelector("video");
+			if (video && video.currentTime) {
+				contentTimestamp = Math.floor(video.currentTime);
+			}
+		}
 
 		// Optimistic update
 		countEl.textContent = String(currentCount + 1);
@@ -162,15 +181,16 @@ const isAuthenticated = Astro.cookies.has("accessToken");
 			const { error } = await actions.addReaction({
 				contentId: videoId,
 				emoji,
+				contentTimestamp,
 			});
 
 			if (error) {
 				// Revert on error
 				countEl.textContent = String(currentCount);
 				button.classList.remove("active");
-				
+
 				// Handle authentication errors
-				if (error.code === 'UNAUTHORIZED') {
+				if (error.code === "UNAUTHORIZED") {
 					window.location.href = "/api/auth/sign-in";
 				}
 			}
