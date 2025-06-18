@@ -7,6 +7,7 @@ import SectionHeader from "@/components/common/SectionHeader.vue";
 import type { Technology } from "@/pages/technology/[id].astro";
 import Page from "@/wrappers/page.astro";
 import { request } from "graphql-request";
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
 
 interface GetTechnologiesResponse {
 	getTechnologies: Technology[];
@@ -25,7 +26,7 @@ const getTechnologiesQuery = /* GraphQL */ `
 `;
 
 // const endpoint = import.meta.env.PUBLIC_GRAPHQL_ENDPOINT; // Use hardcoded endpoint
-const endpoint = "https://api.rawkode.academy/graphql";
+const endpoint = GRAPHQL_ENDPOINT;
 const data = await request<GetTechnologiesResponse>(
 	endpoint,
 	getTechnologiesQuery,

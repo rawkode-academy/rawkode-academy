@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
 	COMMENTS: "/api/comments",
 	SEARCH: "/api/search",
 	ANALYTICS: "/api/analytics",
+	GRAPHQL: "https://api.rawkode.academy/graphql",
 } as const;
 
 export const BREAKPOINTS = {

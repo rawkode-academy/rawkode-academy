@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { GraphQLClient, gql } from "graphql-request";
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
 
 // Define types for the GraphQL response
 interface Chapter {
@@ -17,7 +18,7 @@ interface VideoData {
 export const prerender = false;
 
 // GraphQL client setup
-const graphQLClient = new GraphQLClient("https://api.rawkode.academy/graphql");
+const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);
 
 // GraphQL query to fetch video chapters
 const getVideoChaptersQuery = gql`

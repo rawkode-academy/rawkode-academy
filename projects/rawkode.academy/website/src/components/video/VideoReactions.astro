@@ -1,0 +1,213 @@
+---
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
+
+interface Props {
+	videoId: string;
+}
+
+const { videoId } = Astro.props;
+
+const DEFAULT_REACTIONS = [
+	{ emoji: "👍", label: "Like" },
+	{ emoji: "👏", label: "Applause" },
+	{ emoji: "🚀", label: "Rocket" },
+	{ emoji: "💡", label: "Insightful" },
+];
+
+const EXTRA_EMOJIS = [
+	"😊",
+	"😍",
+	"🤔",
+	"😎",
+	"🙌",
+	"💯",
+	"🎉",
+	"💪",
+	"🤯",
+	"🤩",
+	"😂",
+	"🤝",
+	"👀",
+	"🧠",
+];
+
+// Fetch current reaction counts
+let reactionCounts: Record<string, number> = {};
+try {
+	const response = await fetch(GRAPHQL_ENDPOINT, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			query: `query($videoId: String!) {
+				videoByID(id: $videoId) {
+					emojiReactions { emoji count }
+				}
+			}`,
+			variables: { videoId },
+		}),
+	});
+
+	if (response.ok) {
+		const result = (await response.json()) as {
+			data?: {
+				videoByID?: {
+					emojiReactions?: Array<{ emoji: string; count: number }>;
+				};
+			};
+		};
+		result.data?.videoByID?.emojiReactions?.forEach(({ emoji, count }) => {
+			reactionCounts[emoji] = count;
+		});
+	}
+} catch (error) {
+	console.error("Failed to fetch reactions:", error);
+}
+const isAuthenticated = Astro.cookies.has("accessToken");
+---
+
+<div class="video-reactions" data-video-id={videoId} data-authenticated={isAuthenticated}>
+	<div class="reactions-container">
+		{
+			DEFAULT_REACTIONS.map((reaction) => (
+				<button
+					class="reaction-btn"
+					data-emoji={reaction.emoji}
+					aria-label={`${reaction.label} reaction`}
+				>
+					<span class="emoji">{reaction.emoji}</span>
+					<span class="count">{reactionCounts[reaction.emoji] || 0}</span>
+				</button>
+			))
+		}
+		<button class="reaction-btn add-emoji" aria-label="Add custom emoji">+</button>
+	</div>
+
+	<div class="emoji-picker" hidden>
+		{
+			EXTRA_EMOJIS.map((emoji) => (
+				<button class="emoji-option" data-emoji={emoji}>
+					{emoji}
+				</button>
+			))
+		}
+	</div>
+</div>
+
+<style>
+	@reference "@/styles/global.css";
+
+	.video-reactions {
+		@apply bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800;
+	}
+
+	.reactions-container {
+		@apply flex items-center gap-2 flex-wrap;
+	}
+
+	.reaction-btn {
+		@apply flex items-center gap-2 px-3 py-2 rounded-lg transition-all;
+		@apply hover:bg-gray-100 dark:hover:bg-gray-800;
+		@apply focus:outline-none focus:ring-2 focus:ring-blue-500;
+	}
+
+	.reaction-btn.active {
+		@apply ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20;
+	}
+
+	.emoji {
+		@apply text-xl;
+	}
+
+	.count {
+		@apply text-sm font-medium text-gray-700 dark:text-gray-300;
+	}
+
+	.add-emoji {
+		@apply border-2 border-dashed border-gray-300 dark:border-gray-600;
+	}
+
+	.emoji-picker {
+		@apply mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg;
+		@apply grid grid-cols-8 gap-1;
+	}
+
+	.emoji-option {
+		@apply p-2 text-2xl rounded hover:bg-gray-200 dark:hover:bg-gray-700;
+		@apply transition-colors cursor-pointer;
+	}
+</style>
+
+<script>
+	import { actions } from "astro:actions";
+
+	const container = document.querySelector(".video-reactions") as HTMLElement;
+	const videoId = container?.dataset.videoId || "";
+	const emojiPicker = container?.querySelector(".emoji-picker") as HTMLElement;
+	const addEmojiBtn = container?.querySelector(".add-emoji") as HTMLButtonElement;
+
+	// Handle reactions
+	async function handleReaction(emoji: string) {
+
+		const button = container?.querySelector(`[data-emoji="${emoji}"]`) as HTMLButtonElement;
+		if (!button) return;
+
+		const countEl = button.querySelector(".count") as HTMLElement;
+		const currentCount = parseInt(countEl.textContent || "0");
+
+		// Optimistic update
+		countEl.textContent = String(currentCount + 1);
+		button.classList.add("active");
+
+		try {
+			const { error } = await actions.addReaction({
+				contentId: videoId,
+				emoji,
+			});
+
+			if (error) {
+				// Revert on error
+				countEl.textContent = String(currentCount);
+				button.classList.remove("active");
+				
+				// Handle authentication errors
+				if (error.code === 'UNAUTHORIZED') {
+					window.location.href = "/api/auth/sign-in";
+				}
+			}
+		} catch {
+			// Revert on error
+			countEl.textContent = String(currentCount);
+			button.classList.remove("active");
+		}
+	}
+
+	// Set up reaction buttons
+	container?.querySelectorAll(".reaction-btn[data-emoji]").forEach((btn) => {
+		btn.addEventListener("click", (e) => {
+			const emoji = (e.currentTarget as HTMLElement).dataset.emoji;
+			if (emoji) handleReaction(emoji);
+		});
+	});
+
+	// Set up emoji picker
+	addEmojiBtn?.addEventListener("click", () => {
+		emojiPicker.hidden = !emojiPicker.hidden;
+	});
+
+	emojiPicker?.querySelectorAll(".emoji-option").forEach((btn) => {
+		btn.addEventListener("click", (e) => {
+			const emoji = (e.currentTarget as HTMLElement).dataset.emoji;
+			if (emoji) {
+				handleReaction(emoji);
+				emojiPicker.hidden = true;
+			}
+		});
+	});
+
+	// Close emoji picker on outside click
+	document.addEventListener("click", (e) => {
+		if (!container?.contains(e.target as Node)) {
+			emojiPicker.hidden = true;
+		}
+	});
+</script>

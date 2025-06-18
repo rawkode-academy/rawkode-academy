@@ -5,10 +5,9 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import RelatedVideos from "@/components/video/RelatedVideos.astro";
 import VideoPlayer from "@/components/video/player.vue";
-import VideoReactions from "@/components/video/VideoReactions.tsx";
+import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import Page from "@/wrappers/page.astro";
-import { GraphQLClient, gql } from "graphql-request";
 import { Marked } from "marked";
 
 export const prerender = false;
@@ -21,69 +20,6 @@ const videos = await getCollection("videos");
 let video: (typeof videos)[0] | undefined = videos.find(
 	(v) => v.data.slug === slug,
 );
-
-// If not found in collection, fetch from API directly
-if (!video) {
-	const graphQLClient = new GraphQLClient(
-		"https://api.rawkode.academy/graphql",
-	);
-
-	const query = gql`
-		query GetVideoBySlug($slug: String!) {
-			video: getVideoBySlug(slug: $slug) {
-				id
-				slug
-				title
-				subtitle
-				description
-				publishedAt
-				streamUrl
-				thumbnailUrl
-				duration
-				technologies {
-					id
-					name
-					logo
-				}
-			}
-		}
-	`;
-
-	interface VideoResponse {
-		video: {
-			id: string;
-			slug: string;
-			title: string;
-			subtitle?: string;
-			description: string;
-			publishedAt: string;
-			streamUrl: string;
-			thumbnailUrl: string;
-			duration: number;
-			technologies: Array<{
-				id: string;
-				name: string;
-				logo: string;
-			}>;
-		};
-	}
-
-	try {
-		const response = await graphQLClient.request<VideoResponse>(query, {
-			slug,
-		});
-		if (response.video) {
-			// Transform to match the collection format
-			video = {
-				id: response.video.slug,
-				collection: "videos" as const,
-				data: response.video,
-			};
-		}
-	} catch (error) {
-		console.error("Failed to fetch video from API:", error);
-	}
-}
 
 // Handle 404 case
 if (!video) {
@@ -186,10 +122,8 @@ const breadcrumbElements = [
 				{/* Video Controls & Social Features */}
 				<div class="mt-4">
 					<VideoReactions
-						client:idle
+						server:defer
 						videoId={video.data.id}
-						videoTitle={video.data.title}
-						videoSlug={video.data.slug}
 					/>
 					{/* ShareButton will be managed internally by VideoReactions */}
 				</div>

@@ -148,6 +148,12 @@ export default defineConfig({
 				access: "secret",
 				optional: true,
 			}),
+			GRAPHQL_ENDPOINT: envField.string({
+				context: "server",
+				access: "public",
+				default:
+					process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/graphql",
+			}),
 		},
 	},
 	security: {

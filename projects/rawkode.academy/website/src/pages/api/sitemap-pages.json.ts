@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
 import { request } from "graphql-request";
 
 interface NavigationItem {
@@ -214,7 +215,7 @@ async function generateNavigationItems(
       }
     `;
 
-		const endpoint = "https://api.rawkode.academy/graphql";
+		const endpoint = GRAPHQL_ENDPOINT;
 		const techData = await request<GetTechnologiesResponse>(
 			endpoint,
 			getTechnologiesQuery,
