@@ -1,12 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
-import {
-	INFLUXDB_BUCKET,
-	INFLUXDB_HOST,
-	INFLUXDB_ORG,
-	getSecret,
-} from "astro:env/server";
 import { z } from "astro:schema";
-import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
+import { Analytics, getSessionId, type AnalyticsEnv } from "../lib/analytics";
 
 const ShareEventSchema = z.object({
 	action: z.enum(["share"]),
@@ -22,38 +16,26 @@ export const trackShareEvent = defineAction({
 		try {
 			console.log("Share event received:", event);
 
-			const influxDBToken = getSecret("INFLUXDB_TOKEN");
+			// Get session ID from request or generate new one
+			const sessionId = ctx.request
+				? getSessionId(ctx.request)
+				: crypto.randomUUID();
 
-			// Not configured, that's OK
-			if (
-				!INFLUXDB_HOST ||
-				!INFLUXDB_ORG ||
-				!INFLUXDB_BUCKET ||
-				!influxDBToken
-			) {
-				console.log("InfluxDB not configured, skipping event");
-				return { success: true };
-			}
+			// Initialize analytics
+			const analytics = new Analytics(
+				ctx.locals.runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+				sessionId,
+				ctx.locals.user?.sub,
+			);
 
-			const influxDB = new InfluxDBClient({
-				host: INFLUXDB_HOST,
-				database: INFLUXDB_BUCKET,
-				token: influxDBToken,
-			});
-
-			const point = Point.measurement("share")
-				.setTag("action", event.action)
-				.setTag("platform", event.platform)
-				.setTag("content_type", event.content_type)
-				.setTag("content_id", event.content_id)
-				.setTag("viewer", ctx.locals.user?.sub ?? "anonymous")
-				.setField("success", event.success);
-
-			await influxDB.write(point);
-			await influxDB.close();
+			// Track share event with new pipeline
+			const success = await analytics.trackShare(
+				`${event.content_type}/${event.content_id}`,
+				event.platform,
+			);
 
 			return {
-				success: true as const,
+				success,
 			};
 		} catch (error) {
 			throw new ActionError({

@@ -1,0 +1,35 @@
+
+[package]
+name = "compaction-worker"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Cloudflare Worker
+worker = "0.3.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Parquet
+arrow-array = "52.0.0"
+arrow-schema = "52.0.0"
+parquet = { version = "52.0.0", default-features = false, features = ["arrow", "async"] }
+
+# Async
+futures = "0.3.30"
+tokio = { version = "1", features = ["rt", "macros"] }
+wasm-bindgen = "0.2.92"
+wasm-bindgen-futures = "0.4.42"
+
+# Other
+chrono = { version = "0.4", features = ["serde"] }
+console_error_panic_hook = "0.1.7"
+log = "0.4.22"
+regex = "1.10"
+uuid = { version = "1.6", features = ["v4", "wasm-bindgen"] }
+getrandom = { version = "0.2", features = ["js"] }

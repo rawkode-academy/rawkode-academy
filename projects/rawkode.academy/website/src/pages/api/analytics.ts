@@ -1,11 +1,10 @@
-import {
-	INFLUXDB_BUCKET,
-	INFLUXDB_HOST,
-	INFLUXDB_ORG,
-	getSecret,
-} from "astro:env/server";
-import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
 import type { APIRoute } from "astro";
+import {
+	Analytics,
+	getSessionId,
+	createAnalyticsHeaders,
+	type AnalyticsEnv,
+} from "../../lib/analytics";
 
 interface AnalyticsEvent {
 	action: string;
@@ -24,73 +23,57 @@ interface AnalyticsEvent {
 export const POST: APIRoute = async ({ request, locals }) => {
 	try {
 		const event = (await request.json()) as AnalyticsEvent;
+		const sessionId = getSessionId(request);
 
-		const influxDBToken = getSecret("INFLUXDB_TOKEN");
+		// Initialize analytics with session and user info
+		const analytics = new Analytics(
+			locals.runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+			sessionId,
+			locals.user?.sub,
+		);
 
-		// Not configured, that's OK
-		if (!INFLUXDB_HOST || !INFLUXDB_ORG || !INFLUXDB_BUCKET || !influxDBToken) {
-			console.log("InfluxDB not configured, skipping analytics");
-			console.log(`Host is ${INFLUXDB_HOST}`);
-			console.log(`Org is ${INFLUXDB_ORG}`);
-			console.log(`Bucket is ${INFLUXDB_BUCKET}`);
-			console.log(`Token is ${influxDBToken}`);
+		// Build UTM parameters object
+		const utmParams: Record<string, string> = {};
+		if (event.utm_source) utmParams.utm_source = event.utm_source;
+		if (event.utm_medium) utmParams.utm_medium = event.utm_medium;
+		if (event.utm_campaign) utmParams.utm_campaign = event.utm_campaign;
+		if (event.utm_term) utmParams.utm_term = event.utm_term;
+		if (event.utm_content) utmParams.utm_content = event.utm_content;
 
-			return new Response(JSON.stringify({ success: true }), {
-				status: 200,
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-		}
-
-		const influxDB = new InfluxDBClient({
-			host: INFLUXDB_HOST,
-			database: INFLUXDB_BUCKET,
-			token: influxDBToken,
-		});
-
-		const point = Point.measurement("website")
-			.setTag("action", event.action)
-			.setTag("path", event.path)
-			.setTag("viewer", locals.user?.sub ?? "anonymous")
-			.setTag("browser", event.browser)
-			.setTag("os", event.os);
-
-		// Add CF-IPCountry header if available
-		const country = request.headers.get("CF-IPCountry");
-		if (country) {
-			point.setTag("country", country);
-		}
-
-		// Add UTM parameters if they exist
-		if (event.utm_source) point.setTag("utm_source", event.utm_source);
-		if (event.utm_medium) point.setTag("utm_medium", event.utm_medium);
-		if (event.utm_campaign) point.setTag("utm_campaign", event.utm_campaign);
-		if (event.utm_term) point.setTag("utm_term", event.utm_term);
-		if (event.utm_content) point.setTag("utm_content", event.utm_content);
+		let success = false;
 
 		switch (event.action) {
 			case "page.view":
-				point.setField("value", 0, "integer");
-				if (event.referrer) {
-					point.setTag("referrer", event.referrer);
-				}
+				success = await analytics.trackPageView(
+					event.path,
+					event.path, // Using path as title for now
+					event.referrer,
+					utmParams,
+				);
 				break;
 			case "page.exit":
-				point.setField("time_on_page", event.time_on_page, "integer");
+				success = await analytics.trackPageExit(
+					event.path,
+					event.time_on_page || 0,
+				);
 				break;
+			default:
+				// Track as custom event
+				success = await analytics.trackCustomEvent(event.action, {
+					path: event.path,
+					browser: event.browser,
+					os: event.os,
+					referrer: event.referrer,
+					...utmParams,
+				});
 		}
 
-		console.log("Writing point to InfluxDB:", point);
+		const responseHeaders = createAnalyticsHeaders(sessionId);
+		responseHeaders.set("Content-Type", "application/json");
 
-		await influxDB.write(point);
-		await influxDB.close();
-
-		return new Response(JSON.stringify({ success: true }), {
-			status: 200,
-			headers: {
-				"Content-Type": "application/json",
-			},
+		return new Response(JSON.stringify({ success }), {
+			status: success ? 200 : 500,
+			headers: responseHeaders,
 		});
 	} catch (error) {
 		console.error("Failed to process analytics event:", error);

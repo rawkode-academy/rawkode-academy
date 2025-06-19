@@ -1,5 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { Analytics, getSessionId, type AnalyticsEnv } from "../lib/analytics";
 
 const ReactionSchema = z.object({
 	contentId: z.string(),
@@ -73,6 +74,17 @@ export const addReaction = defineAction({
 
 			const result = (await response.json()) as Record<string, unknown>;
 
+			// Track the reaction event
+			const sessionId = ctx.request
+				? getSessionId(ctx.request)
+				: crypto.randomUUID();
+			const analytics = new Analytics(
+				runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+				sessionId,
+				user.sub,
+			);
+			await analytics.trackReaction(contentId, emoji, "add");
+
 			return {
 				success: true,
 				...result,
@@ -93,7 +105,21 @@ export const addReaction = defineAction({
 
 export const removeReaction = defineAction({
 	input: ReactionSchema,
-	handler: async () => {
+	handler: async ({ contentId, emoji }, ctx) => {
+		// Track the reaction removal event
+		const user = ctx.locals.user;
+		if (user) {
+			const sessionId = ctx.request
+				? getSessionId(ctx.request)
+				: crypto.randomUUID();
+			const analytics = new Analytics(
+				ctx.locals.runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+				sessionId,
+				user.sub,
+			);
+			await analytics.trackReaction(contentId, emoji, "remove");
+		}
+
 		// For now, just return success - removal can be implemented later
 		// when the write model supports it
 		return {

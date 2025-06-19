@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: stg_cloudevents_raw
+    description: |
+      Generic staging model for all CloudEvents stored in Parquet format.
+      This is a base model that projects can use to build their specific models.
+    columns:
+      - name: id
+        description: CloudEvent unique identifier
+        tests:
+          - not_null
+          - unique
+      - name: specversion
+        description: CloudEvents specification version
+      - name: type
+        description: Event type (e.g., tools.rawkode.analytics.pageview)
+      - name: source
+        description: Event source identifier
+      - name: time
+        description: Event timestamp
+      - name: sessionid
+        description: Session identifier (analytics extension)
+      - name: environment
+        description: Environment (production/development)

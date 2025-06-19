@@ -1,0 +1,30 @@
+{
+	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "analytics-compaction-worker",
+	"main": "build/worker/shim.mjs",
+
+  "compatibility_date": "2024-01-01",
+
+  "build": {
+    "command": "cargo install -q worker-build && worker-build --release"
+  },
+
+  // Environment variables
+  "vars": {
+    "COMPACTION_THRESHOLD_MB": "10",  // Files smaller than this are candidates
+    "COMPACTION_TARGET_MB": "100"     // Target size for merged files
+  },
+
+  // R2 bucket bindings
+  "r2_buckets": [
+    {
+      "binding": "ANALYTICS_SOURCE",
+      "bucket_name": "analytics-source"
+    }
+  ],
+
+  // Scheduled trigger - daily at 2 AM UTC
+  "triggers": {
+    "crons": ["0 2 * * *"]
+  }
+}

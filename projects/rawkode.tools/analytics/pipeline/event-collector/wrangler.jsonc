@@ -1,0 +1,62 @@
+{
+	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+	"name": "analytics-event-collector",
+	"main": "build/worker/shim.mjs",
+	"compatibility_date": "2024-09-23",
+	"compatibility_flags": [
+		"nodejs_compat",
+	],
+	"build": {
+		"command": "cargo install -q worker-build && worker-build --release"
+	},
+	// This worker is only accessible via service bindings
+	// No public routes are exposed
+	"workers_dev": false,
+	"preview_urls": false,
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"head_sampling_rate": 1,
+		}
+	},
+	"vars": {
+		"BUFFER_SIZE": "1000",
+		"BUFFER_TIMEOUT_MS": "60000"
+	},
+	"r2_buckets": [
+		{
+			"binding": "ANALYTICS_SOURCE",
+			"bucket_name": "analytics-source"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "EVENT_BUFFER_DO",
+				"class_name": "EventBufferDurableObject"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": [
+				"EventBufferDurableObject"
+			]
+		}
+	],
+	"analytics_engine_datasets": [
+		{
+			"binding": "ANALYTICS_ENGINE",
+			"dataset": "analytics-events",
+		}
+	],
+	// Scheduled trigger for flushing buffers
+	"triggers": {
+		"crons": [
+			"*/5 * * * *"
+		] // Every 5 minutes
+	}
+}

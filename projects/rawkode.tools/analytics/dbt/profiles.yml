@@ -1,0 +1,27 @@
+rawkode_analytics:
+  outputs:
+    dev:
+      type: duckdb
+      path: './target/dev.duckdb'
+      extensions:
+        - httpfs
+        - parquet
+      settings:
+        s3_region: 'auto'
+        s3_endpoint: 'https://<account-id>.r2.cloudflarestorage.com'
+        s3_access_key_id: '{{ env_var("R2_ACCESS_KEY_ID") }}'
+        s3_secret_access_key: '{{ env_var("R2_SECRET_ACCESS_KEY") }}'
+    
+    prod:
+      type: duckdb
+      path: ':memory:'
+      extensions:
+        - httpfs
+        - parquet
+      settings:
+        s3_region: 'auto'
+        s3_endpoint: 'https://<account-id>.r2.cloudflarestorage.com'
+        s3_access_key_id: '{{ env_var("R2_ACCESS_KEY_ID") }}'
+        s3_secret_access_key: '{{ env_var("R2_SECRET_ACCESS_KEY") }}'
+        
+  target: dev

@@ -21,6 +21,10 @@
 		{
 			"binding": "EMOJI_REACTIONS",
 			"service": "platform-emoji-reactions-write-model"
+		},
+		{
+			"binding": "ANALYTICS",
+			"service": "analytics-event-collector"
 		}
 	],
 	"vars": {
