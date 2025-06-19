@@ -1,0 +1,30 @@
+[package]
+name = "analytics-event-collector"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+console_error_panic_hook = []
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+bytes = "1"
+chrono = { version = "0.4", features = ["serde"] }
+cloudevents-sdk = { version = "0.7", default-features = false }
+getrandom = { version = "0.2", features = ["js"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", default-features = false }
+uuid = { version = "1", features = ["v4", "serde", "js"] }
+worker = "0.3"
+
+# Parquet dependencies
+arrow-array = "52.0.0"
+arrow-schema = "52.0.0"
+parquet = { version = "52.0.0", default-features = false, features = ["arrow", "async"] }
+
+[profile.release]
+opt-level = "s"
+lto = true

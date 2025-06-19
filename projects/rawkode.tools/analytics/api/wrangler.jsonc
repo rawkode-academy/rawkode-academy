@@ -1,0 +1,41 @@
+{
+	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "analytics-api",
+  "main": "api/index.ts",
+
+  "compatibility_date": "2024-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Environment variables
+  "vars": {
+    "DUCKDB_WASM_URL": "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@latest/dist/"
+  },
+
+  // R2 bucket bindings
+  "r2_buckets": [
+    {
+      "binding": "ANALYTICS_SOURCE",
+      "bucket_name": "analytics-source"
+    },
+    {
+      "binding": "ANALYTICS_PROCESSED",
+      "bucket_name": "analytics-processed"
+    },
+    {
+      "binding": "ANALYTICS_CATALOG",
+      "bucket_name": "analytics-catalog"
+    }
+  ],
+
+  // Analytics Engine binding
+  "analytics_engine_datasets": [
+    {
+      "binding": "ANALYTICS_ENGINE"
+    }
+  ]
+
+  // Add R2 credentials as secrets
+  // wrangler secret put R2_ACCESS_KEY_ID
+  // wrangler secret put R2_SECRET_ACCESS_KEY
+  // wrangler secret put R2_ENDPOINT
+}

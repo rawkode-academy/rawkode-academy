@@ -1,0 +1,83 @@
+api_url := "https://5820a033-analytics-event-collector.rawkodeacademy.workers.dev"
+api_token := "ukw9pt1u1f7nvbvarxmcq794"
+compactor_url := "https://analytics-compaction-worker.rawkodeacademy.workers.dev"
+
+# Deploy compaction worker
+deploy-compactor:
+    cd pipeline/compaction-worker && wrangler deploy
+
+default:
+  just --list
+
+# Test health endpoint
+test-health:
+    curl -i {{api_url}}/health
+
+# Test sending a single CloudEvent
+test-single-event:
+    #!/usr/bin/env bash
+    curl -i -X POST {{api_url}}/events \
+        -H "Authorization: Bearer {{api_token}}" \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"specversion\": \"1.0\",
+            \"type\": \"com.example.test\",
+            \"source\": \"justfile-test\",
+            \"id\": \"test-event-$(date +%s)\",
+            \"time\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
+            \"data\": {
+                \"message\": \"Test event from Justfile\",
+                \"timestamp\": \"$(date +%s)\"
+            }
+        }"
+
+# Test sending batch events
+test-batch-events:
+    #!/usr/bin/env bash
+    curl -i -X POST {{api_url}}/events/batch \
+        -H "Authorization: Bearer {{api_token}}" \
+        -H "Content-Type: application/json" \
+        -d "{
+            \"events\": [
+                {
+                    \"specversion\": \"1.0\",
+                    \"type\": \"com.example.batch.test\",
+                    \"source\": \"justfile-batch-test\",
+                    \"id\": \"batch-event-1-$(date +%s)\",
+                    \"time\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
+                    \"data\": {
+                        \"message\": \"Batch event 1\",
+                        \"index\": 1
+                    }
+                },
+                {
+                    \"specversion\": \"1.0\",
+                    \"type\": \"com.example.batch.test\",
+                    \"source\": \"justfile-batch-test\",
+                    \"id\": \"batch-event-2-$(date +%s)\",
+                    \"time\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
+                    \"data\": {
+                        \"message\": \"Batch event 2\",
+                        \"index\": 2
+                    }
+                }
+            ]
+        }"
+
+# Test unauthorized request (should fail)
+test-unauthorized:
+    curl -i -X POST {{api_url}}/events \
+        -H "Content-Type: application/json" \
+        -d '{"specversion": "1.0", "type": "com.example.test", "source": "unauthorized-test", "id": "test-event-unauthorized"}'
+
+# Run all tests
+test-all: test-health test-unauthorized test-single-event test-batch-events
+    @echo "All tests completed"
+
+# Run event-collector locally with wrangler
+dev:
+    cd pipeline/event-collector && wrangler dev
+
+# Deploy event-collector
+deploy:
+    cd pipeline/event-collector && wrangler deploy

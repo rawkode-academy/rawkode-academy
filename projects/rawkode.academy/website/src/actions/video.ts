@@ -1,12 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
-import {
-	INFLUXDB_BUCKET,
-	INFLUXDB_HOST,
-	INFLUXDB_ORG,
-	getSecret,
-} from "astro:env/server";
 import { z } from "astro:schema";
-import { InfluxDBClient, Point } from "@influxdata/influxdb3-client";
+import { Analytics, getSessionId, type AnalyticsEnv } from "../lib/analytics";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
@@ -41,48 +35,53 @@ export const trackVideoEvent = defineAction({
 		try {
 			console.log("Video event received:", event);
 
-			const influxDBToken = getSecret("INFLUXDB_TOKEN");
+			// Get session ID from request or generate new one
+			const sessionId = ctx.request
+				? getSessionId(ctx.request)
+				: crypto.randomUUID();
 
-			// Not configured, that's OK
-			if (
-				!INFLUXDB_HOST ||
-				!INFLUXDB_ORG ||
-				!INFLUXDB_BUCKET ||
-				!influxDBToken
-			) {
-				console.log("InfluxDB not configured, skipping event");
-				return { success: true };
-			}
+			// Initialize analytics
+			const analytics = new Analytics(
+				ctx.locals.runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+				sessionId,
+				ctx.locals.user?.sub,
+			);
 
-			const influxDB = new InfluxDBClient({
-				host: INFLUXDB_HOST,
-				database: INFLUXDB_BUCKET,
-				token: influxDBToken,
-			});
-
-			const point = Point.measurement("video")
-				.setTag("action", event.action)
-				.setTag("video", event.video)
-				.setTag("viewer", ctx.locals.user?.sub ?? "anonymous");
+			// Map the action to the appropriate analytics method
+			let success = false;
+			const extra: Record<string, unknown> = {};
 
 			switch (event.action) {
 				case "played":
 				case "paused":
 				case "seeked":
-					point.setField("seconds", event.seconds, "integer");
+					success = await analytics.trackVideoEvent(
+						event.video,
+						event.action === "played"
+							? "play"
+							: event.action === "paused"
+								? "pause"
+								: "seek",
+						event.seconds,
+					);
 					break;
 				case "progressed":
-					point.setField("percent", event.percent, "integer");
+					extra.percent = event.percent;
+					success = await analytics.trackVideoEvent(
+						event.video,
+						"progress",
+						undefined,
+						undefined,
+						extra,
+					);
 					break;
 				case "completed":
+					success = await analytics.trackVideoEvent(event.video, "complete");
 					break;
 			}
 
-			await influxDB.write(point);
-			await influxDB.close();
-
 			return {
-				success: true as const,
+				success,
 			};
 		} catch (error) {
 			throw new ActionError({

@@ -9,6 +9,7 @@ declare namespace Cloudflare {
 		ZITADEL_CLIENT_ID: "293097955970320066";
 		ZITADEL_URL: "https://zitadel.rawkode.academy";
 		EMOJI_REACTIONS: Fetcher /* platform-emoji-reactions-write-model */;
+		ANALYTICS: Fetcher /* analytics-event-collector */;
 		ASSETS: Fetcher;
 	}
 }
