@@ -239,8 +239,9 @@ interface VideoEvent extends BaseEvent {
    wrangler secret put R2_SECRET_ACCESS_KEY --config wrangler-api.toml
    wrangler secret put R2_ENDPOINT --config wrangler-api.toml
 
-   # For the event collector
-   wrangler secret put ANALYTICS_API_KEY --config wrangler.toml
+   # For the event collector (only needed for external HTTP API access)
+   # Note: The website uses service bindings which don't require an API key
+   wrangler secret put ANALYTICS_API_KEY --config pipeline/event-collector/wrangler.jsonc
    ```
 
 4. Deploy workers:
@@ -269,13 +270,36 @@ interface VideoEvent extends BaseEvent {
 ## Integration Guide
 
 ### Sending Events
+
+#### Via Service Binding (Recommended for internal services)
+When your Worker has a service binding to the analytics service, no API key is required:
+
 ```typescript
-// From any Worker or application
+// In your Worker with ANALYTICS service binding
+await env.ANALYTICS.fetch('https://internal/events', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    event_type: 'page_view',
+    timestamp: new Date().toISOString(),
+    page_url: 'https://rawkode.academy/',
+    // ... other fields
+  })
+});
+```
+
+#### Via HTTP API (For external applications)
+When calling from external applications or Workers without service bindings, use the API key:
+
+```typescript
+// From external application or Worker without service binding
 await fetch('https://analytics.rawkode.tools/events', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'X-API-Key': env.ANALYTICS_API_KEY
+    'X-API-Key': env.ANALYTICS_API_KEY  // Required for HTTP API access
   },
   body: JSON.stringify({
     events: [{

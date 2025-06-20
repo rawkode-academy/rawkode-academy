@@ -5,6 +5,8 @@ const MAX_EVENT_SIZE: usize = 1024 * 1024; // 1MB per event
 const MAX_BATCH_SIZE: usize = 100; // Max 100 events per batch
 const MAX_STRING_LENGTH: usize = 1024; // Max length for string fields
 const MAX_DATA_DEPTH: usize = 5; // Max depth for nested JSON data
+const MAX_EVENT_TYPE_LENGTH: usize = 255; // Max length for event type
+const MAX_DATA_STRING_LENGTH: usize = MAX_STRING_LENGTH * 10; // Max length for strings in data
 
 #[derive(Debug)]
 pub enum ValidationError {
@@ -98,7 +100,7 @@ pub fn validate_event(event: &Event) -> Result<(), ValidationError> {
 /// Check if event type is valid (alphanumeric with dots, hyphens, underscores)
 fn is_valid_event_type(event_type: &str) -> bool {
     !event_type.is_empty() 
-        && event_type.len() <= 255
+        && event_type.len() <= MAX_EVENT_TYPE_LENGTH
         && event_type.chars().all(|c| c.is_alphanumeric() || c == '.' || c == '-' || c == '_')
 }
 
@@ -123,7 +125,7 @@ fn validate_json_depth(value: &Value, current_depth: usize) -> Result<(), Valida
             }
         }
         Value::String(s) => {
-            if s.len() > MAX_STRING_LENGTH * 10 { // Allow longer strings in data
+            if s.len() > MAX_DATA_STRING_LENGTH { // Allow longer strings in data
                 return Err(ValidationError::StringTooLong("data_string".to_string(), s.len()));
             }
         }
