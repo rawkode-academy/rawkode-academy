@@ -1,0 +1,28 @@
+name = "analytics-health-checker"
+main = "build/worker/shim.mjs"
+compatibility_date = "2024-01-01"
+
+[build]
+command = "cargo install -q worker-build && worker-build --release"
+
+[env.production]
+vars = { LOG_LEVEL = "INFO" }
+
+[[env.production.services]]
+binding = "EVENT_COLLECTOR"
+service = "analytics-event-collector"
+
+[env.production.analytics_engine_datasets]
+[[env.production.analytics_engine_datasets]]
+binding = "HEALTH_METRICS"
+
+[[env.production.triggers.crons]]
+# Run health checks every 5 minutes
+crons = ["*/5 * * * *"]
+
+# Alert configuration
+[vars]
+ALERT_WEBHOOK_URL = "" # To be configured
+ALERT_EMAIL = "" # To be configured
+CHECK_TIMEOUT_MS = "30000"
+SYNTHETIC_EVENT_TYPE = "analytics.synthetic.health_check"

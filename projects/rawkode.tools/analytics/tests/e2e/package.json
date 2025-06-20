@@ -1,0 +1,19 @@
+{
+  "name": "analytics-e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:local": "EVENT_COLLECTOR_URL=http://localhost:8787 API_URL=http://localhost:4000/graphql vitest run",
+    "test:preview": "EVENT_COLLECTOR_URL=https://analytics-event-collector.preview.workers.dev API_URL=https://analytics-api.preview.workers.dev/graphql vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "graphql": "^16.8.1",
+    "graphql-request": "^7.2.0",
+    "uuid": "^9.0.1",
+    "vitest": "^1.2.1"
+  }
+}
