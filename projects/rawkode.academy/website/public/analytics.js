@@ -73,6 +73,7 @@
 		const data = {
 			action: "page.view",
 			path: globalThis.location.pathname,
+			title: document.title || globalThis.location.pathname, // Include page title
 			referrer: document.referrer || "",
 		};
 

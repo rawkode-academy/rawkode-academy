@@ -3,12 +3,12 @@ import {
 	Analytics,
 	getSessionId,
 	createAnalyticsHeaders,
-	type AnalyticsEnv,
 } from "../../lib/analytics";
 
 interface AnalyticsEvent {
 	action: string;
 	path: string;
+	title?: string; // Page title from document.title
 	browser: string;
 	os: string;
 	referrer?: string;
@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 		// Initialize analytics with session and user info
 		const analytics = new Analytics(
-			locals.runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+			locals.runtime.env,
 			sessionId,
 			locals.user?.sub,
 		);
@@ -46,7 +46,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			case "page.view":
 				success = await analytics.trackPageView(
 					event.path,
-					event.path, // Using path as title for now
+					event.title || event.path, // Use actual title if provided, fallback to path
 					event.referrer,
 					utmParams,
 				);
