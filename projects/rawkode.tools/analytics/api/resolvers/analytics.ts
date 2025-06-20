@@ -18,8 +18,10 @@ export const analyticsResolver = {
     try {
       await client.initialize();
 
-      // Build the query
-      const groupByClause = args.groupBy?.length ? args.groupBy.join(', ') : 'event_type';
+      // Validate and sanitize inputs
+      const validColumns = ['event_type', 'source', 'subject', 'time'];
+      const groupByColumns = args.groupBy?.filter(col => validColumns.includes(col)) || [];
+      const groupByClause = groupByColumns.length ? groupByColumns.join(', ') : 'event_type';
 
       let query = `
         SELECT
@@ -30,12 +32,20 @@ export const analyticsResolver = {
       `;
 
       if (args.eventType) {
-        query += ` AND type = '${args.eventType}'`;
+        // Escape single quotes and validate eventType
+        const escapedEventType = args.eventType.replace(/'/g, "''");
+        query += ` AND type = '${escapedEventType}'`;
       }
 
       if (args.timeRange) {
-        query += ` AND time >= '${args.timeRange.start}'::TIMESTAMP`;
-        query += ` AND time <= '${args.timeRange.end}'::TIMESTAMP`;
+        // Validate ISO timestamps
+        const startDate = new Date(args.timeRange.start);
+        const endDate = new Date(args.timeRange.end);
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          throw new Error('Invalid time range provided');
+        }
+        query += ` AND time >= '${startDate.toISOString()}'::TIMESTAMP`;
+        query += ` AND time <= '${endDate.toISOString()}'::TIMESTAMP`;
       }
 
       query += ` GROUP BY ${groupByClause} ORDER BY count DESC`;
@@ -68,12 +78,33 @@ export const analyticsResolver = {
     try {
       await client.initialize();
 
-      // Safety check - only allow SELECT queries
-      if (!args.query.trim().toUpperCase().startsWith('SELECT')) {
+      // Normalize and validate query
+      const normalizedQuery = args.query.trim();
+      const upperQuery = normalizedQuery.toUpperCase();
+
+      // Safety checks
+      if (!upperQuery.startsWith('SELECT')) {
         throw new Error('Only SELECT queries are allowed');
       }
 
-      const results = await client.query(args.query);
+      // Additional security checks
+      const forbiddenKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'CREATE', 'ALTER', 'TRUNCATE', 'EXEC', 'EXECUTE'];
+      for (const keyword of forbiddenKeywords) {
+        if (upperQuery.includes(keyword)) {
+          throw new Error(`Query contains forbidden keyword: ${keyword}`);
+        }
+      }
+
+      // Check for suspicious patterns that might indicate SQL injection attempts
+      const suspiciousPatterns = [/;\s*SELECT/i, /UNION\s+SELECT/i, /--/];
+      for (const pattern of suspiciousPatterns) {
+        if (pattern.test(normalizedQuery)) {
+          throw new Error('Query contains suspicious patterns');
+        }
+      }
+
+      // Limit query execution time (this would need to be implemented in DuckDBClient)
+      const results = await client.query(normalizedQuery);
       return JSON.stringify(results, null, 2);
     } finally {
       await client.close();

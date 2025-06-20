@@ -138,10 +138,15 @@ impl DurableObject for EventBufferDurableObject {
                         return Response::error("Failed to flush events", 500);
                     }
                 } else {
-                    // Set alarm for periodic flush (5 minutes)
-                    let alarm_time = Date::now().as_millis() as i64 + 300_000; // 5 minutes
+                    // Set alarm for periodic flush
+                    let timeout_ms = self.env.var("BUFFER_TIMEOUT_MS")
+                        .ok()
+                        .and_then(|v| v.to_string().parse::<i64>().ok())
+                        .unwrap_or(60_000); // Default to 1 minute
+                    
+                    let alarm_time = Date::now().as_millis() as i64 + timeout_ms;
                     self.state.storage().set_alarm(alarm_time).await?;
-                    log_info(&format!("Set alarm for flush in 5 minutes. Current buffer size: {}", self.buffered_events.len()));
+                    log_info(&format!("Set alarm for flush in {}ms. Current buffer size: {}", timeout_ms, self.buffered_events.len()));
                 }
 
                 Response::ok("Events buffered")
@@ -153,6 +158,31 @@ impl DurableObject for EventBufferDurableObject {
                     "buffered_count": self.buffered_events.len(),
                 });
                 Response::ok(status.to_string())
+            }
+            Method::Delete => {
+                // Manual flush endpoint
+                log_info(&format!("Manual flush requested for event type: {:?}", self.event_type));
+                
+                if self.buffered_events.is_empty() {
+                    return Response::ok(serde_json::json!({
+                        "status": "no_events",
+                        "message": "No events to flush"
+                    }).to_string());
+                }
+                
+                let event_count = self.buffered_events.len();
+                match self.flush().await {
+                    Ok(_) => {
+                        Response::ok(serde_json::json!({
+                            "status": "flushed",
+                            "message": format!("Successfully flushed {} events", event_count)
+                        }).to_string())
+                    }
+                    Err(e) => {
+                        log_error(&format!("Manual flush failed: {}", e));
+                        Response::error(format!("Flush failed: {}", e), 500)
+                    }
+                }
             }
             _ => Response::error("Method not allowed", 405),
         }

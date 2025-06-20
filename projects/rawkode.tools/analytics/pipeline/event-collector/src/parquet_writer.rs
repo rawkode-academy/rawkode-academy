@@ -23,7 +23,16 @@ impl ParquetWriter {
             return Ok(());
         }
 
-        let bucket = self.env.bucket("ANALYTICS_SOURCE")?;
+        let bucket = match self.env.bucket("ANALYTICS_SOURCE") {
+            Ok(b) => {
+                log_info("Successfully got ANALYTICS_SOURCE bucket");
+                b
+            }
+            Err(e) => {
+                log_error(&format!("Failed to get ANALYTICS_SOURCE bucket: {}", e));
+                return Err(e);
+            }
+        };
         
         let now = Utc::now();
         let partition_path = self.get_partition_path(event_type, &now);
@@ -33,16 +42,22 @@ impl ParquetWriter {
         log_info(&format!("Preparing to write {} events to R2 at: {}", events.len(), key));
 
         // Convert events to JSON strings
+        log_info(&format!("Converting {} events to JSON strings", events.len()));
         let json_strings: Vec<String> = events
             .iter()
             .map(|event| serde_json::to_string(event).map_err(|e| Error::RustError(format!("JSON serialize error: {}", e))))
             .collect::<std::result::Result<Vec<String>, _>>()?;
+        
+        log_info(&format!("Successfully converted {} events to JSON", json_strings.len()));
 
         // Create Arrow array and schema
+        log_info("Creating Arrow array and schema");
         let array: ArrayRef = Arc::new(StringArray::from(json_strings));
         let schema = Arc::new(Schema::new(vec![Field::new("raw_event", DataType::Utf8, false)]));
         let batch = arrow_array::RecordBatch::try_new(schema.clone(), vec![array])
             .map_err(|e| Error::RustError(format!("RecordBatch error: {}", e)))?;
+        
+        log_info("Successfully created Arrow RecordBatch");
 
         // Write to Parquet format
         let mut parquet_buffer = Vec::new();

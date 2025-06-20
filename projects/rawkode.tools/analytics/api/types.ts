@@ -7,6 +7,9 @@ export interface Env {
   R2_ENDPOINT?: string;
   R2_ACCESS_KEY_ID?: string;
   R2_SECRET_ACCESS_KEY?: string;
+  ANALYTICS_API_KEY?: string;
+  NODE_ENV?: string;
+  ALLOWED_ORIGINS?: string;
 }
 
 export interface Context {
