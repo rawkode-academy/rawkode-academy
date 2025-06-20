@@ -27,7 +27,8 @@
 	"r2_buckets": [
 		{
 			"binding": "ANALYTICS_SOURCE",
-			"bucket_name": "analytics-source"
+			"bucket_name": "analytics-source",
+			"preview_bucket_name": "analytics-source"
 		}
 	],
 	"durable_objects": {
