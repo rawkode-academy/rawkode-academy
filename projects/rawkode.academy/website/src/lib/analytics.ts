@@ -17,6 +17,7 @@ interface CloudEvent {
 
 export interface AnalyticsEnv {
 	ANALYTICS?: Fetcher;
+	CF_PAGES_BRANCH?: string;
 }
 
 // Service binding URL constants
@@ -26,7 +27,7 @@ const ANALYTICS_SERVICE_URLS = {
 } as const;
 
 export class Analytics {
-	private env: AnalyticsEnv & { CF_PAGES_BRANCH?: string };
+	private env: AnalyticsEnv;
 	private sessionId: string;
 	private userId: string | undefined;
 	private source = "https://rawkode.academy";
@@ -34,7 +35,7 @@ export class Analytics {
 	private environment: string;
 
 	constructor(
-		env: AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+		env: AnalyticsEnv,
 		sessionId: string,
 		userId: string | undefined,
 	) {
