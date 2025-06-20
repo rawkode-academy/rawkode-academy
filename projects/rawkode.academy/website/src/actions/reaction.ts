@@ -79,7 +79,7 @@ export const addReaction = defineAction({
 				? getSessionId(ctx.request)
 				: "anonymous";
 			const analytics = new Analytics(
-				runtime.env,
+				ctx.locals.runtime.env,
 				sessionId,
 				user.sub,
 			);

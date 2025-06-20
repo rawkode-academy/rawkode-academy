@@ -73,7 +73,7 @@ export class Analytics {
 		subject?: string | undefined,
 	): Promise<boolean> {
 		if (!this.env.ANALYTICS) {
-			console.warn("Analytics service binding not configured");
+			console.warn(`Analytics service binding not configured. Event type '${type}' will not be sent.`);
 			return false;
 		}
 
@@ -87,6 +87,12 @@ export class Analytics {
 					body: JSON.stringify(event),
 				},
 			);
+			
+			if (!response.ok) {
+				const errorText = await response.text();
+				console.error(`Analytics service error for event type '${type}': ${response.status} ${response.statusText}`, errorText);
+			}
+			
 			return response.ok;
 		} catch (error) {
 			console.error("Failed to send analytics event:", error);
@@ -102,7 +108,7 @@ export class Analytics {
 		}>,
 	): Promise<boolean> {
 		if (!this.env.ANALYTICS) {
-			console.warn("Analytics service binding not configured");
+			console.warn(`Analytics service binding not configured. Batch of ${events.length} events will not be sent.`);
 			return false;
 		}
 
@@ -119,6 +125,12 @@ export class Analytics {
 					body: JSON.stringify({ events: cloudEvents }),
 				},
 			);
+			
+			if (!response.ok) {
+				const errorText = await response.text();
+				console.error(`Analytics service error for batch of ${events.length} events: ${response.status} ${response.statusText}`, errorText);
+			}
+			
 			return response.ok;
 		} catch (error) {
 			console.error("Failed to send batch analytics events:", error);
