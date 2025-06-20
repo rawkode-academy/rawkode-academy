@@ -129,10 +129,15 @@ impl DurableObject for EventBufferDurableObject {
                 self.buffered_events.extend(events);
                 
                 // Check if we should flush
-                let should_flush = self.buffered_events.len() >= 1000; // Flush at 1000 events
+                let buffer_size_threshold = self.env.var("BUFFER_SIZE")
+                    .ok()
+                    .and_then(|v| v.to_string().parse::<usize>().ok())
+                    .unwrap_or(1000); // Default to 1000 if not set
+                
+                let should_flush = self.buffered_events.len() >= buffer_size_threshold;
                 
                 if should_flush {
-                    log_info(&format!("Buffer size ({}) reached threshold, flushing", self.buffered_events.len()));
+                    log_info(&format!("Buffer size ({}) reached threshold ({}), flushing", self.buffered_events.len(), buffer_size_threshold));
                     if let Err(e) = self.flush().await {
                         log_error(&format!("Failed to flush events: {}", e));
                         return Response::error("Failed to flush events", 500);
