@@ -97,8 +97,9 @@ impl DurableObject for EventBufferDurableObject {
         
         log_info(&format!("DO received request: {} {}", req.method(), path));
 
-        // Extract event type from path
-        let event_type = path.trim_start_matches('/').trim_end_matches('/').to_string();
+        // Extract event type from path (remove leading slash and any trailing path components)
+        let path_parts: Vec<&str> = path.trim_start_matches('/').split('/').collect();
+        let event_type = path_parts.first().unwrap_or(&"").to_string();
         
         if event_type.is_empty() {
             log_error("No event type provided in path");

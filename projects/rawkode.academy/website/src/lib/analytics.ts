@@ -54,7 +54,7 @@ export class Analytics {
 		return {
 			id: crypto.randomUUID(),
 			specversion: "1.0",
-			type: `com.rawkode.${type}`,
+			type: type, // Use the type directly without prefix
 			source: this.source,
 			time: new Date().toISOString(),
 			datacontenttype: "application/json",
@@ -144,7 +144,7 @@ export class Analytics {
 		referrer?: string,
 		utmParams?: Record<string, string>,
 	): Promise<boolean> {
-		return this.sendEvent("pageview", {
+		return this.sendEvent("analytics.web.pageview", {
 			page_url: url,
 			page_title: title,
 			referrer,
@@ -153,7 +153,7 @@ export class Analytics {
 	}
 
 	async trackPageExit(url: string, timeOnPage: number): Promise<boolean> {
-		return this.sendEvent("page_exit", {
+		return this.sendEvent("analytics.web.page_exit", {
 			page_url: url,
 			time_on_page: timeOnPage,
 		});
@@ -167,7 +167,7 @@ export class Analytics {
 		extra?: Record<string, unknown>,
 	): Promise<boolean> {
 		return this.sendEvent(
-			"video",
+			"analytics.video.event",
 			{
 				video_id: videoId,
 				action,
@@ -180,7 +180,7 @@ export class Analytics {
 	}
 
 	async trackShare(url: string, channel: string): Promise<boolean> {
-		return this.sendEvent("share", {
+		return this.sendEvent("analytics.social.share", {
 			url,
 			channel,
 		});
@@ -192,7 +192,7 @@ export class Analytics {
 		action: "add" | "remove",
 	): Promise<boolean> {
 		return this.sendEvent(
-			"reaction",
+			"analytics.engagement.reaction",
 			{
 				video_id: videoId,
 				reaction,
