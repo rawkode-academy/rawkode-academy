@@ -128,6 +128,10 @@ async fn find_compaction_candidates(
 ) -> Result<Vec<CompactionCandidate>> {
     let mut candidates: HashMap<String, CompactionCandidate> = HashMap::new();
     let mut cursor: Option<String> = None;
+    
+    // Compile regex once outside the loop
+    let partition_regex = Regex::new(r"^(events/[^/]+/year=\d+/month=\d+/day=\d+/hour=\d+)/")
+        .map_err(|e| Error::RustError(format!("Failed to compile regex: {}", e)))?;
 
     loop {
         let mut list_options = bucket.list()
@@ -144,8 +148,7 @@ async fn find_compaction_candidates(
             let key = object.key();
             
             // Extract partition path
-            let regex = Regex::new(r"^(events/[^/]+/year=\d+/month=\d+/day=\d+/hour=\d+)/").unwrap();
-            if let Some(captures) = regex.captures(&key) {
+            if let Some(captures) = partition_regex.captures(&key) {
                 let partition_path = captures.get(1).unwrap().as_str().to_string();
                 
                 // Only consider files smaller than threshold for compaction

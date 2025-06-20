@@ -15,8 +15,6 @@ pub enum ValidationError {
     InvalidSubject(String),
     DataTooDeep(usize),
     StringTooLong(String, usize),
-    InvalidTimeFormat(String),
-    MissingRequiredField(String),
 }
 
 impl std::fmt::Display for ValidationError {
@@ -42,12 +40,6 @@ impl std::fmt::Display for ValidationError {
             }
             ValidationError::StringTooLong(field, len) => {
                 write!(f, "Field '{}' length {} exceeds maximum of {}", field, len, MAX_STRING_LENGTH)
-            }
-            ValidationError::InvalidTimeFormat(time) => {
-                write!(f, "Invalid time format '{}': must be RFC3339", time)
-            }
-            ValidationError::MissingRequiredField(field) => {
-                write!(f, "Missing required field '{}'", field)
             }
         }
     }

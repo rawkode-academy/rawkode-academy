@@ -208,7 +208,7 @@ export function getSessionId(request: Request): string {
 
 export function createAnalyticsHeaders(sessionId: string): Headers {
 	const headers = new Headers();
-	headers.set(
+	headers.append(
 		"Set-Cookie",
 		`analytics_session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1800`,
 	);
