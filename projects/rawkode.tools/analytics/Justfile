@@ -81,3 +81,52 @@ dev:
 # Deploy event-collector
 deploy:
     cd pipeline/event-collector && wrangler deploy
+
+# Deploy all services
+deploy-all: deploy deploy-compactor
+    cd monitoring/health-checker && wrangler deploy
+    cd api && wrangler deploy
+    cd pipeline/catalog-worker && wrangler deploy
+    @echo "All services deployed"
+
+# Run TypeScript unit tests
+test-ts:
+    bunx vitest run --exclude="**/integration/**" --exclude="**/e2e/**"
+
+# Run TypeScript integration tests
+test-integration:
+    bunx vitest run tests/integration
+
+# Run E2E tests
+test-e2e:
+    bunx vitest run tests/e2e
+
+# Run Rust tests for a specific worker
+test-rust worker:
+    cd pipeline/{{worker}} && cargo test
+
+# Run all Rust tests
+test-rust-all:
+    cd pipeline/event-collector && cargo test
+    cd pipeline/compaction-worker && cargo test
+    cd pipeline/catalog-worker && cargo test
+
+# Run all tests
+test-complete: test-ts test-rust-all
+    @echo "All unit tests completed"
+
+# Run health check monitoring
+test-monitoring:
+    cd monitoring/health-checker && wrangler dev
+
+# Lint TypeScript code
+lint:
+    bunx eslint . --ext .ts,.tsx
+
+# Type check TypeScript code
+typecheck:
+    bunx tsc --noEmit
+
+# Format code
+format:
+    bunx prettier --write .
