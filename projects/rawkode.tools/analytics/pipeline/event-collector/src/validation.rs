@@ -1,4 +1,4 @@
-use cloudevents::Event;
+use cloudevents::{Event, AttributesReader};
 use serde_json::Value;
 
 const MAX_EVENT_SIZE: usize = 1024 * 1024; // 1MB per event
@@ -89,8 +89,20 @@ pub fn validate_event(event: &Event) -> Result<(), ValidationError> {
 
     // Validate data depth if present
     if let Some(data) = event.data() {
-        if let Ok(json_value) = serde_json::from_slice::<Value>(data.as_bytes()) {
-            validate_json_depth(&json_value, 0)?;
+        match data {
+            cloudevents::Data::Binary(bytes) => {
+                if let Ok(json_value) = serde_json::from_slice::<Value>(bytes) {
+                    validate_json_depth(&json_value, 0)?;
+                }
+            }
+            cloudevents::Data::String(s) => {
+                if let Ok(json_value) = serde_json::from_str::<Value>(s) {
+                    validate_json_depth(&json_value, 0)?;
+                }
+            }
+            cloudevents::Data::Json(value) => {
+                validate_json_depth(value, 0)?;
+            }
         }
     }
 

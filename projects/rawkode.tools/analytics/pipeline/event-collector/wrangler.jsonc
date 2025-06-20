@@ -9,10 +9,9 @@
 	"build": {
 		"command": "cargo install -q worker-build && worker-build --release"
 	},
-	// This worker is only accessible via service bindings
-	// No public routes are exposed
-	"workers_dev": false,
-	"preview_urls": false,
+	// Enable workers dev URL for debugging
+	"workers_dev": true,
+	"preview_urls": true,
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,

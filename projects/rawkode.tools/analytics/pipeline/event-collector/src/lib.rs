@@ -73,12 +73,12 @@ pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         })
         // Debug endpoints (should be removed in production)
         .get_async("/debug/status/:event_type", |_req, ctx| async move {
-            let event_type = ctx.param("event_type").unwrap_or_default();
-            debug_get_status(event_type, ctx).await
+            let event_type = ctx.param("event_type").map(|s| s.to_string()).unwrap_or_else(|| "".to_string());
+            debug_get_status(&event_type, ctx).await
         })
         .post_async("/debug/flush/:event_type", |_req, ctx| async move {
-            let event_type = ctx.param("event_type").unwrap_or_default();
-            debug_flush_buffer(event_type, ctx).await
+            let event_type = ctx.param("event_type").map(|s| s.to_string()).unwrap_or_else(|| "".to_string());
+            debug_flush_buffer(&event_type, ctx).await
         })
         .get_async("/debug/test-r2", |_req, ctx| async move {
             debug_test_r2(ctx).await
@@ -91,17 +91,15 @@ async fn handle_cloudevents(mut req: Request, ctx: RouteContext<()>) -> Result<R
     utils::log_info("Processing single CloudEvent request");
     
     // Check Content-Length header for payload size
-    if let Some(content_length) = req.headers().get("content-length") {
-        if let Ok(length_str) = content_length {
-            if let Ok(length) = length_str.parse::<usize>() {
-                const MAX_PAYLOAD_SIZE: usize = 10 * 1024 * 1024; // 10MB max for entire request
-                if length > MAX_PAYLOAD_SIZE {
-                    utils::log_error(&format!("Request payload too large: {} bytes", length));
-                    return Ok(Response::from_json(&ErrorResponse {
-                        error: "Payload too large".to_string(),
-                        details: Some(format!("Maximum payload size is {} bytes", MAX_PAYLOAD_SIZE)),
-                    })?.with_status(413)); // 413 Payload Too Large
-                }
+    if let Ok(Some(content_length)) = req.headers().get("content-length") {
+        if let Ok(length) = content_length.parse::<usize>() {
+            const MAX_PAYLOAD_SIZE: usize = 10 * 1024 * 1024; // 10MB max for entire request
+            if length > MAX_PAYLOAD_SIZE {
+                utils::log_error(&format!("Request payload too large: {} bytes", length));
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "Payload too large".to_string(),
+                    details: Some(format!("Maximum payload size is {} bytes", MAX_PAYLOAD_SIZE)),
+                })?.with_status(413)); // 413 Payload Too Large
             }
         }
     }
@@ -171,17 +169,15 @@ async fn handle_batch_events(mut req: Request, ctx: RouteContext<()>) -> Result<
     utils::log_info("Processing batch CloudEvents request");
     
     // Check Content-Length header for payload size
-    if let Some(content_length) = req.headers().get("content-length") {
-        if let Ok(length_str) = content_length {
-            if let Ok(length) = length_str.parse::<usize>() {
-                const MAX_PAYLOAD_SIZE: usize = 10 * 1024 * 1024; // 10MB max for entire request
-                if length > MAX_PAYLOAD_SIZE {
-                    utils::log_error(&format!("Batch request payload too large: {} bytes", length));
-                    return Ok(Response::from_json(&ErrorResponse {
-                        error: "Payload too large".to_string(),
-                        details: Some(format!("Maximum payload size is {} bytes", MAX_PAYLOAD_SIZE)),
-                    })?.with_status(413)); // 413 Payload Too Large
-                }
+    if let Ok(Some(content_length)) = req.headers().get("content-length") {
+        if let Ok(length) = content_length.parse::<usize>() {
+            const MAX_PAYLOAD_SIZE: usize = 10 * 1024 * 1024; // 10MB max for entire request
+            if length > MAX_PAYLOAD_SIZE {
+                utils::log_error(&format!("Batch request payload too large: {} bytes", length));
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "Payload too large".to_string(),
+                    details: Some(format!("Maximum payload size is {} bytes", MAX_PAYLOAD_SIZE)),
+                })?.with_status(413)); // 413 Payload Too Large
             }
         }
     }
@@ -328,7 +324,7 @@ async fn debug_get_status(event_type: &str, ctx: RouteContext<()>) -> Result<Res
     let stub = buffer_do.id_from_name(event_type)?.get_stub()?;
     
     let mut response = stub.fetch_with_request(
-        Request::new(&format!("http://do/{}/", event_type))?
+        Request::new(&format!("http://do/{}/", event_type), Method::Get)?
     ).await?;
     
     let status = response.text().await?;
@@ -372,7 +368,7 @@ async fn debug_test_r2(ctx: RouteContext<()>) -> Result<Response> {
     let test_key = format!("_test/connection-test-{}.txt", Date::now().as_millis());
     let test_content = "R2 connection test successful";
     
-    match bucket.put(&test_key, test_content).execute().await {
+    match bucket.put(&test_key, test_content.as_bytes().to_vec()).execute().await {
         Ok(_) => {
             utils::log_info(&format!("Successfully wrote test file: {}", test_key));
             
