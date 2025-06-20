@@ -83,6 +83,9 @@ pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .get_async("/debug/test-r2", |_req, ctx| async move {
             debug_test_r2(ctx).await
         })
+        .get_async("/debug/list-r2", |_req, ctx| async move {
+            debug_list_r2(ctx).await
+        })
         .run(req, env)
         .await
 }
@@ -372,29 +375,87 @@ async fn debug_test_r2(ctx: RouteContext<()>) -> Result<Response> {
         Ok(_) => {
             utils::log_info(&format!("Successfully wrote test file: {}", test_key));
             
+            // Try to read back the file we just wrote
+            let read_result = bucket.get(&test_key).execute().await;
+            let read_info = match read_result {
+                Ok(Some(object)) => {
+                    match object.body() {
+                        Some(body) => {
+                            let text = body.text().await.unwrap_or_else(|_| "Failed to read body".to_string());
+                            format!("Read back: {}", text)
+                        }
+                        None => "Object has no body!".to_string(),
+                    }
+                }
+                Ok(None) => "File not found after write!".to_string(),
+                Err(e) => format!("Read error: {}", e),
+            };
+            
             // Try to list files in the bucket
             let list_result = bucket.list().execute().await;
             let list_info = match list_result {
                 Ok(list) => {
-                    format!("Bucket has {} objects", list.objects().len())
+                    let objects = list.objects();
+                    let keys: Vec<String> = objects.iter().map(|o| o.key().to_string()).collect();
+                    format!("Bucket has {} objects: {:?}", objects.len(), keys)
                 }
                 Err(e) => {
                     format!("Failed to list bucket: {}", e)
                 }
             };
             
-            // Clean up test file
-            let _ = bucket.delete(&test_key).await;
+            // Don't delete - let's see if it persists
+            // let _ = bucket.delete(&test_key).await;
             
             Response::ok(serde_json::json!({
                 "status": "success",
                 "test_file": test_key,
+                "write_result": "success",
+                "read_result": read_info,
                 "bucket_info": list_info
             }).to_string())
         }
         Err(e) => {
             utils::log_error(&format!("Failed to write test file: {}", e));
             Response::error(format!("R2 write failed: {}", e), 500)
+        }
+    }
+}
+
+async fn debug_list_r2(ctx: RouteContext<()>) -> Result<Response> {
+    utils::log_info("Listing R2 bucket contents");
+    
+    let bucket = match ctx.env.bucket("ANALYTICS_SOURCE") {
+        Ok(b) => b,
+        Err(e) => {
+            return Ok(Response::error(format!("Failed to get bucket: {}", e), 500)?);
+        }
+    };
+    
+    // List all objects in the bucket
+    let list_result = bucket.list().execute().await;
+    match list_result {
+        Ok(list) => {
+            let objects = list.objects();
+            let mut object_info = Vec::new();
+            
+            for obj in objects {
+                object_info.push(serde_json::json!({
+                    "key": obj.key(),
+                    "size": obj.size(),
+                    "uploaded": obj.uploaded().as_millis(),
+                }));
+            }
+            
+            Response::ok(serde_json::json!({
+                "status": "success",
+                "count": object_info.len(),
+                "objects": object_info
+            }).to_string())
+        }
+        Err(e) => {
+            utils::log_error(&format!("Failed to list bucket: {}", e));
+            Response::error(format!("R2 list failed: {}", e), 500)
         }
     }
 }
