@@ -19,6 +19,12 @@ export interface AnalyticsEnv {
 	ANALYTICS?: Fetcher;
 }
 
+// Service binding URL constants
+const ANALYTICS_SERVICE_URLS = {
+	SINGLE_EVENT: "https://internal/events",
+	BATCH_EVENTS: "https://internal/events/batch",
+} as const;
+
 export class Analytics {
 	private env: AnalyticsEnv & { CF_PAGES_BRANCH?: string };
 	private sessionId: string;
@@ -73,7 +79,7 @@ export class Analytics {
 		try {
 			const event = this.createCloudEvent(type, data, subject);
 			const response = await this.env.ANALYTICS.fetch(
-				"https://internal/events",
+				ANALYTICS_SERVICE_URLS.SINGLE_EVENT,
 				{
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -105,7 +111,7 @@ export class Analytics {
 			);
 
 			const response = await this.env.ANALYTICS.fetch(
-				"https://internal/events/batch",
+				ANALYTICS_SERVICE_URLS.BATCH_EVENTS,
 				{
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -196,7 +202,7 @@ export function getSessionId(request: Request): string {
 	const cookies = request.headers.get("cookie") || "";
 	const sessionMatch = cookies.match(/analytics_session=([^;]+)/);
 
-	return sessionMatch?.[1] ?? crypto.randomUUID();
+	return sessionMatch?.[1] ?? "anonymous";
 }
 
 export function createAnalyticsHeaders(sessionId: string): Headers {
