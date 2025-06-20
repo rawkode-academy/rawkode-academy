@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { Analytics, getSessionId, type AnalyticsEnv } from "../lib/analytics";
+import { Analytics, getSessionId } from "../lib/analytics";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
@@ -35,14 +35,14 @@ export const trackVideoEvent = defineAction({
 		try {
 			console.log("Video event received:", event);
 
-			// Get session ID from request or generate new one
+			// Get session ID from request or use anonymous
 			const sessionId = ctx.request
 				? getSessionId(ctx.request)
-				: crypto.randomUUID();
+				: "anonymous";
 
 			// Initialize analytics
 			const analytics = new Analytics(
-				ctx.locals.runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+				ctx.locals.runtime.env,
 				sessionId,
 				ctx.locals.user?.sub,
 			);

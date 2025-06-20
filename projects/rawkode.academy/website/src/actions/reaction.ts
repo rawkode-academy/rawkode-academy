@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { Analytics, getSessionId, type AnalyticsEnv } from "../lib/analytics";
+import { Analytics, getSessionId } from "../lib/analytics";
 
 const ReactionSchema = z.object({
 	contentId: z.string(),
@@ -77,9 +77,9 @@ export const addReaction = defineAction({
 			// Track the reaction event
 			const sessionId = ctx.request
 				? getSessionId(ctx.request)
-				: crypto.randomUUID();
+				: "anonymous";
 			const analytics = new Analytics(
-				runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+				runtime.env,
 				sessionId,
 				user.sub,
 			);
@@ -111,9 +111,9 @@ export const removeReaction = defineAction({
 		if (user) {
 			const sessionId = ctx.request
 				? getSessionId(ctx.request)
-				: crypto.randomUUID();
+				: "anonymous";
 			const analytics = new Analytics(
-				ctx.locals.runtime.env as AnalyticsEnv & { CF_PAGES_BRANCH?: string },
+				ctx.locals.runtime.env,
 				sessionId,
 				user.sub,
 			);

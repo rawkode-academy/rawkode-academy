@@ -11,9 +11,7 @@ declare global {
 		interface Locals extends Runtime {
 			user: OidcStandardClaims;
 			runtime: {
-				env: Env & AnalyticsEnv & {
-					CF_PAGES_BRANCH?: string;
-				};
+				env: Env & AnalyticsEnv;
 			};
 		}
 	}
