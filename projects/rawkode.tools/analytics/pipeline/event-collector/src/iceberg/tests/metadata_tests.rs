@@ -569,6 +569,123 @@ fn validate_metadata_invariants(metadata: &TableMetadata) -> bool {
 #[derive(Debug, Clone)]
 enum MetadataOperation {
     AddSnapshot(Snapshot),
-    AddSchema(Schema),
+    AddSchema(serde_json::Value),
     UpdateProperty(String, String),
+}
+
+#[test]
+fn should_handle_partition_evolution() {
+    // Given
+    let mut metadata = create_test_table_metadata();
+    
+    // When - Add new partition spec
+    let new_spec = PartitionSpec {
+        spec_id: 1,
+        fields: vec![
+            PartitionField {
+                source_id: 2,
+                field_id: 1000,
+                name: "year".to_string(),
+                transform: "year".to_string(),
+            },
+            PartitionField {
+                source_id: 2,
+                field_id: 1001,
+                name: "month".to_string(),
+                transform: "month".to_string(),
+            },
+            PartitionField {
+                source_id: 2,
+                field_id: 1002,
+                name: "day".to_string(),
+                transform: "day".to_string(),
+            },
+        ],
+    };
+    
+    metadata.partition_specs.push(new_spec);
+    metadata.default_spec_id = 1;
+    metadata.last_partition_id = 1002;
+    
+    // Then
+    assert_eq!(metadata.partition_specs.len(), 2);
+    assert_eq!(metadata.partition_specs[1].fields.len(), 3);
+    assert_eq!(metadata.default_spec_id, 1);
+    assert!(validate_metadata_invariants(&metadata));
+}
+
+#[test]
+fn should_reject_invalid_metadata_json() {
+    // Given
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    let env = create_test_env();
+    
+    runtime.block_on(async {
+        // Test various invalid JSON scenarios
+        let test_cases = vec![
+            // Missing required fields
+            r#"{"format_version": 2}"#,
+            // Invalid format version
+            r#"{"format_version": 999, "table_uuid": "test", "location": "s3://test"}"#,
+            // Invalid schema structure
+            r#"{"format_version": 2, "table_uuid": "test", "location": "s3://test", "schemas": "not-an-array"}"#,
+            // Empty table UUID
+            r#"{"format_version": 2, "table_uuid": "", "location": "s3://test"}"#,
+        ];
+        
+        for json in test_cases {
+            let result = serde_json::from_str::<TableMetadata>(json);
+            assert!(result.is_err(), "Should have failed to parse: {}", json);
+        }
+    });
+}
+
+#[test]
+fn should_handle_large_snapshot_histories() {
+    // Given - Table with many snapshots
+    let mut metadata = create_test_table_metadata();
+    let snapshot_count = 1000;
+    
+    // When - Add many snapshots
+    for i in 0..snapshot_count {
+        let parent_id = if i == 0 { None } else { Some(i - 1) };
+        let snapshot = create_test_snapshot(i, parent_id);
+        metadata.snapshots.push(snapshot);
+        metadata.snapshot_log.push(SnapshotLogEntry {
+            timestamp_ms: Date::now().as_millis() as i64 + i,
+            snapshot_id: i,
+        });
+    }
+    metadata.current_snapshot_id = Some(snapshot_count - 1);
+    
+    // Then
+    assert_eq!(metadata.snapshots.len(), snapshot_count as usize);
+    assert_eq!(metadata.snapshot_log.len(), snapshot_count as usize);
+    assert!(validate_metadata_invariants(&metadata));
+    
+    // Verify we can traverse the entire lineage
+    let mut current_id = metadata.current_snapshot_id;
+    let mut lineage_length = 0;
+    while let Some(id) = current_id {
+        lineage_length += 1;
+        let snapshot = metadata.snapshots.iter().find(|s| s.snapshot_id == id).unwrap();
+        current_id = snapshot.parent_snapshot_id;
+    }
+    assert_eq!(lineage_length, snapshot_count);
+}
+
+#[test]
+fn should_handle_metadata_file_errors() {
+    // Given
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    let env = create_test_env();
+    let iceberg_metadata = IcebergMetadata::new(&env, "s3://bucket/error-test".to_string());
+    
+    runtime.block_on(async {
+        // When - Try to read non-existent metadata
+        let result = iceberg_metadata.read_current_metadata().await;
+        
+        // Then - Should handle gracefully
+        assert!(result.is_err());
+    });
 }
