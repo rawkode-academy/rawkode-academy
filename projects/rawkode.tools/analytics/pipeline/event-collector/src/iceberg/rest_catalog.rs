@@ -1,5 +1,5 @@
 use crate::errors::CollectorError;
-use crate::iceberg::metadata::{IcebergMetadata, Snapshot, TableMetadata};
+use crate::iceberg::metadata::{Snapshot, TableMetadata};
 use crate::iceberg::manifest::DataFile;
 use crate::utils::{log_error, log_info};
 use serde::{Deserialize, Serialize};
@@ -608,13 +608,13 @@ pub trait CatalogOperations: Send + Sync {
     fn create_table<'a>(
         &'a self,
         table_name: &'a str,
-        metadata: IcebergMetadata,
+        metadata: TableMetadata,
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<()>> + 'a>>;
     
     fn load_table<'a>(
         &'a self,
         table_name: &'a str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Option<IcebergMetadata>>> + 'a>>;
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Option<TableMetadata>>> + 'a>>;
     
     fn commit_snapshot<'a>(
         &'a self,
@@ -648,7 +648,7 @@ impl CatalogOperations for RestCatalogAdapter {
     fn create_table<'a>(
         &'a self,
         table_name: &'a str,
-        metadata: IcebergMetadata,
+        _metadata: TableMetadata,
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<()>> + 'a>> {
         Box::pin(async move {
             // Convert IcebergMetadata to REST API format
@@ -670,13 +670,11 @@ impl CatalogOperations for RestCatalogAdapter {
     fn load_table<'a>(
         &'a self,
         table_name: &'a str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Option<IcebergMetadata>>> + 'a>> {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Option<TableMetadata>>> + 'a>> {
         Box::pin(async move {
             match self.catalog.load_table(table_name).await? {
                 Some(table_metadata) => {
-                    // Convert TableMetadata to IcebergMetadata
-                    // This would need proper conversion logic
-                    Ok(None)
+                    Ok(Some(table_metadata))
                 }
                 None => Ok(None),
             }
@@ -725,7 +723,7 @@ impl CatalogOperations for super::catalog::IcebergCatalog {
     fn create_table<'a>(
         &'a self,
         table_name: &'a str,
-        metadata: IcebergMetadata,
+        metadata: TableMetadata,
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<()>> + 'a>> {
         Box::pin(self.create_table(table_name, metadata))
     }
@@ -733,7 +731,7 @@ impl CatalogOperations for super::catalog::IcebergCatalog {
     fn load_table<'a>(
         &'a self,
         table_name: &'a str,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Option<IcebergMetadata>>> + 'a>> {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Option<TableMetadata>>> + 'a>> {
         Box::pin(self.load_table(table_name))
     }
     

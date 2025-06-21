@@ -9,6 +9,22 @@ use crate::utils::{log_error, log_info};
 /// Iceberg table metadata version
 const ICEBERG_FORMAT_VERSION: i32 = 2;
 
+/// Schema definition for Iceberg tables
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Schema {
+    pub schema_id: i32,
+    pub fields: Vec<Field>,
+}
+
+/// Field definition in a schema
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Field {
+    pub id: i32,
+    pub name: String,
+    pub field_type: String,
+    pub required: bool,
+}
+
 /// Iceberg FileFormat enum
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -179,6 +195,15 @@ pub struct IcebergMetadata {
     table_location: String,
 }
 
+impl Clone for IcebergMetadata {
+    fn clone(&self) -> Self {
+        Self {
+            env: self.env.clone(),
+            table_location: self.table_location.clone(),
+        }
+    }
+}
+
 impl IcebergMetadata {
     pub fn new(env: &Env, table_location: String) -> Self {
         Self {
@@ -190,7 +215,7 @@ impl IcebergMetadata {
     /// Initialize a new Iceberg table
     pub async fn create_table(
         &self,
-        table_name: &str,
+        _table_name: &str,
         schema: serde_json::Value,
         partition_spec: Vec<PartitionField>,
         properties: HashMap<String, String>,

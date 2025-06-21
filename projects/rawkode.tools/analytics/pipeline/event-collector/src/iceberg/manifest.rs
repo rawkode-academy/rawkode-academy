@@ -110,6 +110,7 @@ impl ManifestFile {
 
     /// Add a delete file to the manifest
     pub fn add_delete(&mut self, delete_file: DataFile) {
+        let record_count = delete_file.record_count;
         self.entries.push(ManifestEntry {
             status: ManifestEntryStatus::Added,
             snapshot_id: None,
@@ -117,7 +118,7 @@ impl ManifestFile {
             data_file: delete_file,
         });
         self.deleted_files_count += 1;
-        self.deleted_rows_count += delete_file.record_count;
+        self.deleted_rows_count += record_count;
     }
 
     /// Get the total record count

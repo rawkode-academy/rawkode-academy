@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use worker::*;
 
 use super::metadata::{DataFile, IcebergMetadata, ManifestEntry, ManifestEntryStatus};
-use super::schema::IcebergTableProperties;
 
 const MIN_FILES_FOR_COMPACTION: usize = 10;
 const TARGET_FILE_SIZE_BYTES: i64 = 128 * 1024 * 1024; // 128MB
@@ -158,7 +157,7 @@ impl IcebergCompactor {
         ));
 
         // Write compacted file
-        let writer = super::writer::IcebergWriter::new(&self.env, self.table_location.clone());
+        let writer = super::writer::IcebergWriter::new(self.env.clone(), super::writer::WriteConfig::default());
         let partition_values = plan.source_files[0].partition.clone();
         
         let compacted_file = writer
@@ -239,7 +238,7 @@ impl IcebergCompactor {
     /// Read events from a Parquet file
     async fn read_parquet_events(
         &self,
-        bucket: &Bucket,
+        _bucket: &Bucket,
         file_path: &str,
     ) -> Result<Vec<cloudevents::Event>> {
         // In a real implementation, this would:
@@ -295,7 +294,7 @@ pub struct CompactionResult {
 pub async fn scheduled(event: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
     log_info(&format!(
         "Compaction scheduled event at {}",
-        event.schedule_time()
+        event.schedule()
     ));
 
     let table_location = env
