@@ -4,11 +4,13 @@ use worker::*;
 
 mod buffer;
 mod errors;
+mod iceberg;
 mod parquet_writer;
 mod utils;
 mod validation;
 
 use buffer::EventBuffer;
+use iceberg::IcebergEventBuffer;
 use validation::{validate_batch, validate_event};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -147,30 +149,69 @@ async fn handle_cloudevents(mut req: Request, ctx: RouteContext<()>) -> Result<R
         .map(|event| enrich_event_with_cf_data(event, cf_data.cloned()))
         .collect();
 
-    // Buffer events for batch writing to R2
-    let buffer = EventBuffer::new(&ctx.env);
-    match buffer.add_events(enriched_events.clone()).await {
-        Ok(_) => {
-            utils::log_info(&format!(
-                "Successfully buffered {} events",
-                enriched_events.len()
-            ));
-        }
-        Err(e) => {
-            utils::log_error(&format!("Failed to buffer events: {}", e));
-            // Check if it's a partial failure
-            if let errors::CollectorError::TooManyFailures { count } = &e {
-                return Ok(Response::from_json(&ErrorResponse {
-                    error: "All event types failed to buffer".to_string(),
-                    details: Some(format!("{} failures occurred", count)),
-                })?
-                .with_status(503)); // Service Unavailable
+    // Check if Iceberg mode is enabled
+    let use_iceberg = ctx.env.var("USE_ICEBERG")
+        .ok()
+        .map(|v| v.to_string() == "true")
+        .unwrap_or(false);
+
+    // Buffer events for batch writing
+    if use_iceberg {
+        let table_location = ctx.env.var("ICEBERG_TABLE_LOCATION")
+            .ok()
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "analytics/events".to_string());
+        let iceberg_buffer = IcebergEventBuffer::new(&ctx.env, table_location);
+        match iceberg_buffer.add_events(enriched_events.clone()).await {
+            Ok(_) => {
+                utils::log_info(&format!(
+                    "Successfully buffered {} events to Iceberg",
+                    enriched_events.len()
+                ));
             }
-            return Ok(Response::from_json(&ErrorResponse {
-                error: "Failed to buffer events".to_string(),
-                details: Some(e.to_string()),
-            })?
-            .with_status(500));
+            Err(e) => {
+                utils::log_error(&format!("Failed to buffer events to Iceberg: {}", e));
+                // Check if it's a partial failure
+                if let errors::CollectorError::TooManyFailures { count } = &e {
+                    return Ok(Response::from_json(&ErrorResponse {
+                        error: "All event types failed to buffer".to_string(),
+                        details: Some(format!("{} failures occurred", count)),
+                    })?
+                    .with_status(503)); // Service Unavailable
+                }
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "Failed to buffer events".to_string(),
+                    details: Some(e.to_string()),
+                })?
+                .with_status(500));
+            }
+        }
+    } else {
+        // Use standard buffer
+        let buffer = EventBuffer::new(&ctx.env);
+        match buffer.add_events(enriched_events.clone()).await {
+            Ok(_) => {
+                utils::log_info(&format!(
+                    "Successfully buffered {} events",
+                    enriched_events.len()
+                ));
+            }
+            Err(e) => {
+                utils::log_error(&format!("Failed to buffer events: {}", e));
+                // Check if it's a partial failure
+                if let errors::CollectorError::TooManyFailures { count } = &e {
+                    return Ok(Response::from_json(&ErrorResponse {
+                        error: "All event types failed to buffer".to_string(),
+                        details: Some(format!("{} failures occurred", count)),
+                    })?
+                    .with_status(503)); // Service Unavailable
+                }
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "Failed to buffer events".to_string(),
+                    details: Some(e.to_string()),
+                })?
+                .with_status(500));
+            }
         }
     }
 
@@ -283,30 +324,69 @@ async fn handle_batch_events(mut req: Request, ctx: RouteContext<()>) -> Result<
         utils::log_info(&format!("Successfully parsed all {} events", events.len()));
     }
 
+    // Check if Iceberg mode is enabled
+    let use_iceberg = ctx.env.var("USE_ICEBERG")
+        .ok()
+        .map(|v| v.to_string() == "true")
+        .unwrap_or(false);
+
     // Buffer events
-    let buffer = EventBuffer::new(&ctx.env);
-    match buffer.add_events(events.clone()).await {
-        Ok(_) => {
-            utils::log_info(&format!(
-                "Successfully buffered {} events from batch",
-                events.len()
-            ));
-        }
-        Err(e) => {
-            utils::log_error(&format!("Failed to buffer batch events: {}", e));
-            // Check if it's a partial failure
-            if let errors::CollectorError::TooManyFailures { count } = &e {
-                return Ok(Response::from_json(&ErrorResponse {
-                    error: "All event types failed to buffer".to_string(),
-                    details: Some(format!("{} failures occurred", count)),
-                })?
-                .with_status(503)); // Service Unavailable
+    if use_iceberg {
+        let table_location = ctx.env.var("ICEBERG_TABLE_LOCATION")
+            .ok()
+            .map(|v| v.to_string())
+            .unwrap_or_else(|| "analytics/events".to_string());
+        let iceberg_buffer = IcebergEventBuffer::new(&ctx.env, table_location);
+        match iceberg_buffer.add_events(events.clone()).await {
+            Ok(_) => {
+                utils::log_info(&format!(
+                    "Successfully buffered {} events from batch to Iceberg",
+                    events.len()
+                ));
             }
-            return Ok(Response::from_json(&ErrorResponse {
-                error: "Failed to buffer events".to_string(),
-                details: Some(e.to_string()),
-            })?
-            .with_status(500));
+            Err(e) => {
+                utils::log_error(&format!("Failed to buffer batch events to Iceberg: {}", e));
+                // Check if it's a partial failure
+                if let errors::CollectorError::TooManyFailures { count } = &e {
+                    return Ok(Response::from_json(&ErrorResponse {
+                        error: "All event types failed to buffer".to_string(),
+                        details: Some(format!("{} failures occurred", count)),
+                    })?
+                    .with_status(503)); // Service Unavailable
+                }
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "Failed to buffer events".to_string(),
+                    details: Some(e.to_string()),
+                })?
+                .with_status(500));
+            }
+        }
+    } else {
+        // Use standard buffer
+        let buffer = EventBuffer::new(&ctx.env);
+        match buffer.add_events(events.clone()).await {
+            Ok(_) => {
+                utils::log_info(&format!(
+                    "Successfully buffered {} events from batch",
+                    events.len()
+                ));
+            }
+            Err(e) => {
+                utils::log_error(&format!("Failed to buffer batch events: {}", e));
+                // Check if it's a partial failure
+                if let errors::CollectorError::TooManyFailures { count } = &e {
+                    return Ok(Response::from_json(&ErrorResponse {
+                        error: "All event types failed to buffer".to_string(),
+                        details: Some(format!("{} failures occurred", count)),
+                    })?
+                    .with_status(503)); // Service Unavailable
+                }
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "Failed to buffer events".to_string(),
+                    details: Some(e.to_string()),
+                })?
+                .with_status(500));
+            }
         }
     }
 
@@ -529,5 +609,6 @@ async fn debug_list_r2(ctx: RouteContext<()>) -> Result<Response> {
     }
 }
 
-// Export the Durable Object
+// Export the Durable Objects
 pub use buffer::EventBufferDurableObject;
+pub use iceberg::IcebergBufferDurableObject;
