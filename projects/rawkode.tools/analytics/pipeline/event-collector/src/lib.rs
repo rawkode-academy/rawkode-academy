@@ -1,14 +1,15 @@
-use worker::*;
-use serde::{Deserialize, Serialize};
 use cloudevents::{Event, EventBuilder, EventBuilderV10};
+use serde::{Deserialize, Serialize};
+use worker::*;
 
-mod utils;
-mod parquet_writer;
 mod buffer;
+mod errors;
+mod parquet_writer;
+mod utils;
 mod validation;
 
 use buffer::EventBuffer;
-use validation::{validate_event, validate_batch};
+use validation::{validate_batch, validate_event};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct BatchEventsRequest {
@@ -37,22 +38,6 @@ fn log_request(req: &Request) {
     ));
 }
 
-#[event(scheduled)]
-pub async fn scheduled(_event: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
-    utils::log_info("Scheduled event triggered: Relying on Durable Object alarms for flushing.");
-
-    // With Durable Objects, each object instance manages its own buffer and flushing via alarms.
-    // A central scheduled flush is less critical. If you needed to force a flush on all
-    // active objects, you would need a mechanism to track them (e.g., registering them in KV).
-    // For this implementation, we'll rely on the DO alarms.
-    // The `flush_all` method is a placeholder to demonstrate where you would
-    // trigger a flush of all DOs if needed.
-    let buffer = EventBuffer::new(&env);
-    if let Err(e) = buffer.flush_all().await {
-        utils::log_error(&format!("Error during scheduled flush_all call: {}", e));
-    }
-}
-
 #[event(fetch)]
 pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     utils::set_panic_hook();
@@ -73,11 +58,17 @@ pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         })
         // Debug endpoints (should be removed in production)
         .get_async("/debug/status/:event_type", |_req, ctx| async move {
-            let event_type = ctx.param("event_type").map(|s| s.to_string()).unwrap_or_else(|| "".to_string());
+            let event_type = ctx
+                .param("event_type")
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| "".to_string());
             debug_get_status(&event_type, ctx).await
         })
         .post_async("/debug/flush/:event_type", |_req, ctx| async move {
-            let event_type = ctx.param("event_type").map(|s| s.to_string()).unwrap_or_else(|| "".to_string());
+            let event_type = ctx
+                .param("event_type")
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| "".to_string());
             debug_flush_buffer(&event_type, ctx).await
         })
         .get_async("/debug/test-r2", |_req, ctx| async move {
@@ -92,7 +83,7 @@ pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
 
 async fn handle_cloudevents(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     utils::log_info("Processing single CloudEvent request");
-    
+
     // Check Content-Length header for payload size
     if let Ok(Some(content_length)) = req.headers().get("content-length") {
         if let Ok(length) = content_length.parse::<usize>() {
@@ -101,26 +92,34 @@ async fn handle_cloudevents(mut req: Request, ctx: RouteContext<()>) -> Result<R
                 utils::log_error(&format!("Request payload too large: {} bytes", length));
                 return Ok(Response::from_json(&ErrorResponse {
                     error: "Payload too large".to_string(),
-                    details: Some(format!("Maximum payload size is {} bytes", MAX_PAYLOAD_SIZE)),
-                })?.with_status(413)); // 413 Payload Too Large
+                    details: Some(format!(
+                        "Maximum payload size is {} bytes",
+                        MAX_PAYLOAD_SIZE
+                    )),
+                })?
+                .with_status(413)); // 413 Payload Too Large
             }
         }
     }
-    
+
     let body = req.text().await?;
 
     // Parse CloudEvents from HTTP request
     let events = match parse_cloudevents_http(&req, &body) {
         Ok(events) => {
-            utils::log_info(&format!("Parsed {} CloudEvent(s) from request", events.len()));
+            utils::log_info(&format!(
+                "Parsed {} CloudEvent(s) from request",
+                events.len()
+            ));
             events
-        },
+        }
         Err(e) => {
             utils::log_error(&format!("Failed to parse CloudEvent: {}", e));
             return Ok(Response::from_json(&ErrorResponse {
                 error: "Invalid CloudEvent data".to_string(),
                 details: Some(e.to_string()),
-            })?.with_status(400));
+            })?
+            .with_status(400));
         }
     };
 
@@ -134,7 +133,8 @@ async fn handle_cloudevents(mut req: Request, ctx: RouteContext<()>) -> Result<R
                 return Ok(Response::from_json(&ErrorResponse {
                     error: "Event validation failed".to_string(),
                     details: Some(e.to_string()),
-                })?.with_status(400));
+                })?
+                .with_status(400));
             }
         }
     }
@@ -151,14 +151,26 @@ async fn handle_cloudevents(mut req: Request, ctx: RouteContext<()>) -> Result<R
     let buffer = EventBuffer::new(&ctx.env);
     match buffer.add_events(enriched_events.clone()).await {
         Ok(_) => {
-            utils::log_info(&format!("Successfully buffered {} events", enriched_events.len()));
-        },
+            utils::log_info(&format!(
+                "Successfully buffered {} events",
+                enriched_events.len()
+            ));
+        }
         Err(e) => {
             utils::log_error(&format!("Failed to buffer events: {}", e));
+            // Check if it's a partial failure
+            if let errors::CollectorError::TooManyFailures { count } = &e {
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "All event types failed to buffer".to_string(),
+                    details: Some(format!("{} failures occurred", count)),
+                })?
+                .with_status(503)); // Service Unavailable
+            }
             return Ok(Response::from_json(&ErrorResponse {
                 error: "Failed to buffer events".to_string(),
                 details: Some(e.to_string()),
-            })?.with_status(500));
+            })?
+            .with_status(500));
         }
     }
 
@@ -170,31 +182,42 @@ async fn handle_cloudevents(mut req: Request, ctx: RouteContext<()>) -> Result<R
 
 async fn handle_batch_events(mut req: Request, ctx: RouteContext<()>) -> Result<Response> {
     utils::log_info("Processing batch CloudEvents request");
-    
+
     // Check Content-Length header for payload size
     if let Ok(Some(content_length)) = req.headers().get("content-length") {
         if let Ok(length) = content_length.parse::<usize>() {
             const MAX_PAYLOAD_SIZE: usize = 10 * 1024 * 1024; // 10MB max for entire request
             if length > MAX_PAYLOAD_SIZE {
-                utils::log_error(&format!("Batch request payload too large: {} bytes", length));
+                utils::log_error(&format!(
+                    "Batch request payload too large: {} bytes",
+                    length
+                ));
                 return Ok(Response::from_json(&ErrorResponse {
                     error: "Payload too large".to_string(),
-                    details: Some(format!("Maximum payload size is {} bytes", MAX_PAYLOAD_SIZE)),
-                })?.with_status(413)); // 413 Payload Too Large
+                    details: Some(format!(
+                        "Maximum payload size is {} bytes",
+                        MAX_PAYLOAD_SIZE
+                    )),
+                })?
+                .with_status(413)); // 413 Payload Too Large
             }
         }
     }
     let batch: BatchEventsRequest = match req.json::<BatchEventsRequest>().await {
         Ok(batch) => {
-            utils::log_info(&format!("Received batch with {} events", batch.events.len()));
+            utils::log_info(&format!(
+                "Received batch with {} events",
+                batch.events.len()
+            ));
             batch
-        },
+        }
         Err(e) => {
             utils::log_error(&format!("Failed to parse batch request: {}", e));
             return Ok(Response::from_json(&ErrorResponse {
                 error: "Invalid batch format".to_string(),
                 details: Some(e.to_string()),
-            })?.with_status(400));
+            })?
+            .with_status(400));
         }
     };
 
@@ -204,29 +227,34 @@ async fn handle_batch_events(mut req: Request, ctx: RouteContext<()>) -> Result<
         return Ok(Response::from_json(&ErrorResponse {
             error: "Batch validation failed".to_string(),
             details: Some(e.to_string()),
-        })?.with_status(400));
+        })?
+        .with_status(400));
     }
 
     let cf_data = req.cf();
     let mut events = Vec::new();
     let mut parse_errors = 0;
-    
+
     for (index, event_data) in batch.events.iter().enumerate() {
         match serde_json::from_value::<Event>(event_data.clone()) {
             Ok(event) => {
                 // Validate event before enriching
                 if let Err(e) = validate_event(&event) {
                     parse_errors += 1;
-                    utils::log_error(&format!("Event validation failed at index {}: {}", index, e));
+                    utils::log_error(&format!(
+                        "Event validation failed at index {}: {}",
+                        index, e
+                    ));
                     if parse_errors > 5 {
                         return Ok(Response::from_json(&ErrorResponse {
                             error: "Too many invalid events in batch".to_string(),
                             details: Some(format!("{} events failed validation", parse_errors)),
-                        })?.with_status(400));
+                        })?
+                        .with_status(400));
                     }
                     continue;
                 }
-                
+
                 let enriched_event = enrich_event_with_cf_data(event, cf_data.cloned());
                 events.push(enriched_event);
             }
@@ -237,14 +265,20 @@ async fn handle_batch_events(mut req: Request, ctx: RouteContext<()>) -> Result<
                     return Ok(Response::from_json(&ErrorResponse {
                         error: "Too many invalid events in batch".to_string(),
                         details: Some(format!("{} events failed to parse", parse_errors)),
-                    })?.with_status(400));
+                    })?
+                    .with_status(400));
                 }
             }
         }
     }
-    
+
     if parse_errors > 0 {
-        utils::log_info(&format!("Parsed {}/{} events successfully ({} failures)", events.len(), batch.events.len(), parse_errors));
+        utils::log_info(&format!(
+            "Parsed {}/{} events successfully ({} failures)",
+            events.len(),
+            batch.events.len(),
+            parse_errors
+        ));
     } else {
         utils::log_info(&format!("Successfully parsed all {} events", events.len()));
     }
@@ -253,14 +287,26 @@ async fn handle_batch_events(mut req: Request, ctx: RouteContext<()>) -> Result<
     let buffer = EventBuffer::new(&ctx.env);
     match buffer.add_events(events.clone()).await {
         Ok(_) => {
-            utils::log_info(&format!("Successfully buffered {} events from batch", events.len()));
-        },
+            utils::log_info(&format!(
+                "Successfully buffered {} events from batch",
+                events.len()
+            ));
+        }
         Err(e) => {
             utils::log_error(&format!("Failed to buffer batch events: {}", e));
+            // Check if it's a partial failure
+            if let errors::CollectorError::TooManyFailures { count } = &e {
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "All event types failed to buffer".to_string(),
+                    details: Some(format!("{} failures occurred", count)),
+                })?
+                .with_status(503)); // Service Unavailable
+            }
             return Ok(Response::from_json(&ErrorResponse {
                 error: "Failed to buffer events".to_string(),
                 details: Some(e.to_string()),
-            })?.with_status(500));
+            })?
+            .with_status(500));
         }
     }
 
@@ -317,80 +363,94 @@ fn enrich_event_with_cf_data(event: Event, cf: Option<Cf>) -> Event {
 
 // Debug functions
 async fn debug_get_status(event_type: &str, ctx: RouteContext<()>) -> Result<Response> {
-    utils::log_info(&format!("Debug status check for event type: {}", event_type));
-    
+    utils::log_info(&format!(
+        "Debug status check for event type: {}",
+        event_type
+    ));
+
     if event_type.is_empty() {
         return Ok(Response::error("Event type required", 400)?);
     }
-    
+
     let buffer_do = ctx.env.durable_object("EVENT_BUFFER_DO")?;
     let stub = buffer_do.id_from_name(event_type)?.get_stub()?;
-    
-    let mut response = stub.fetch_with_request(
-        Request::new(&format!("http://do/{}/", event_type), Method::Get)?
-    ).await?;
-    
+
+    let mut response = stub
+        .fetch_with_request(Request::new(
+            &format!("http://do/{}/", event_type),
+            Method::Get,
+        )?)
+        .await?;
+
     let status = response.text().await?;
     Response::ok(status)
 }
 
 async fn debug_flush_buffer(event_type: &str, ctx: RouteContext<()>) -> Result<Response> {
     utils::log_info(&format!("Debug flush for event type: {}", event_type));
-    
+
     if event_type.is_empty() {
         return Ok(Response::error("Event type required", 400)?);
     }
-    
+
     let buffer_do = ctx.env.durable_object("EVENT_BUFFER_DO")?;
     let stub = buffer_do.id_from_name(event_type)?.get_stub()?;
-    
+
     // Send a DELETE request to trigger flush
-    let mut response = stub.fetch_with_request(
-        Request::new_with_init(
+    let mut response = stub
+        .fetch_with_request(Request::new_with_init(
             &format!("http://do/{}/flush", event_type),
             RequestInit::new().with_method(Method::Delete),
-        )?
-    ).await?;
-    
+        )?)
+        .await?;
+
     let result = response.text().await?;
     Response::ok(result)
 }
 
 async fn debug_test_r2(ctx: RouteContext<()>) -> Result<Response> {
     utils::log_info("Testing R2 bucket connection");
-    
+
     // Try to access the bucket
     let bucket = match ctx.env.bucket("ANALYTICS_SOURCE") {
         Ok(b) => b,
         Err(e) => {
-            return Ok(Response::error(format!("Failed to get bucket: {}", e), 500)?);
+            return Ok(Response::error(
+                format!("Failed to get bucket: {}", e),
+                500,
+            )?);
         }
     };
-    
+
     // Try to write a test file
     let test_key = format!("_test/connection-test-{}.txt", Date::now().as_millis());
     let test_content = "R2 connection test successful";
-    
-    match bucket.put(&test_key, test_content.as_bytes().to_vec()).execute().await {
+
+    match bucket
+        .put(&test_key, test_content.as_bytes().to_vec())
+        .execute()
+        .await
+    {
         Ok(_) => {
             utils::log_info(&format!("Successfully wrote test file: {}", test_key));
-            
+
             // Try to read back the file we just wrote
             let read_result = bucket.get(&test_key).execute().await;
             let read_info = match read_result {
-                Ok(Some(object)) => {
-                    match object.body() {
-                        Some(body) => {
-                            let text = body.text().await.unwrap_or_else(|_| "Failed to read body".to_string());
-                            format!("Read back: {}", text)
-                        }
-                        None => "Object has no body!".to_string(),
+                Ok(Some(object)) => match object.body() {
+                    Some(body) => {
+                        let text = body
+                            .text()
+                            .await
+                            .unwrap_or_else(|_| "Failed to read body".to_string());
+                        format!("Read back: {}", text)
                     }
-                }
+                    None => "Object has no body!".to_string(),
+                },
                 Ok(None) => "File not found after write!".to_string(),
                 Err(e) => format!("Read error: {}", e),
             };
-            
+
             // Try to list files in the bucket
             let list_result = bucket.list().execute().await;
             let list_info = match list_result {
@@ -403,17 +463,20 @@ async fn debug_test_r2(ctx: RouteContext<()>) -> Result<Response> {
                     format!("Failed to list bucket: {}", e)
                 }
             };
-            
+
             // Don't delete - let's see if it persists
             // let _ = bucket.delete(&test_key).await;
-            
-            Response::ok(serde_json::json!({
-                "status": "success",
-                "test_file": test_key,
-                "write_result": "success",
-                "read_result": read_info,
-                "bucket_info": list_info
-            }).to_string())
+
+            Response::ok(
+                serde_json::json!({
+                    "status": "success",
+                    "test_file": test_key,
+                    "write_result": "success",
+                    "read_result": read_info,
+                    "bucket_info": list_info
+                })
+                .to_string(),
+            )
         }
         Err(e) => {
             utils::log_error(&format!("Failed to write test file: {}", e));
@@ -424,21 +487,24 @@ async fn debug_test_r2(ctx: RouteContext<()>) -> Result<Response> {
 
 async fn debug_list_r2(ctx: RouteContext<()>) -> Result<Response> {
     utils::log_info("Listing R2 bucket contents");
-    
+
     let bucket = match ctx.env.bucket("ANALYTICS_SOURCE") {
         Ok(b) => b,
         Err(e) => {
-            return Ok(Response::error(format!("Failed to get bucket: {}", e), 500)?);
+            return Ok(Response::error(
+                format!("Failed to get bucket: {}", e),
+                500,
+            )?);
         }
     };
-    
+
     // List all objects in the bucket
     let list_result = bucket.list().execute().await;
     match list_result {
         Ok(list) => {
             let objects = list.objects();
             let mut object_info = Vec::new();
-            
+
             for obj in objects {
                 object_info.push(serde_json::json!({
                     "key": obj.key(),
@@ -446,12 +512,15 @@ async fn debug_list_r2(ctx: RouteContext<()>) -> Result<Response> {
                     "uploaded": obj.uploaded().as_millis(),
                 }));
             }
-            
-            Response::ok(serde_json::json!({
-                "status": "success",
-                "count": object_info.len(),
-                "objects": object_info
-            }).to_string())
+
+            Response::ok(
+                serde_json::json!({
+                    "status": "success",
+                    "count": object_info.len(),
+                    "objects": object_info
+                })
+                .to_string(),
+            )
         }
         Err(e) => {
             utils::log_error(&format!("Failed to list bucket: {}", e));
