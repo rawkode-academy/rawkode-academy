@@ -1,4 +1,4 @@
-use cloudevents::{Event, AttributesReader};
+use cloudevents::{AttributesReader, Event};
 use serde_json::Value;
 
 const MAX_EVENT_SIZE: usize = 1024 * 1024; // 1MB per event
@@ -23,10 +23,18 @@ impl std::fmt::Display for ValidationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ValidationError::EventTooLarge(size) => {
-                write!(f, "Event size {} exceeds maximum of {} bytes", size, MAX_EVENT_SIZE)
+                write!(
+                    f,
+                    "Event size {} exceeds maximum of {} bytes",
+                    size, MAX_EVENT_SIZE
+                )
             }
             ValidationError::BatchTooLarge(size) => {
-                write!(f, "Batch size {} exceeds maximum of {} events", size, MAX_BATCH_SIZE)
+                write!(
+                    f,
+                    "Batch size {} exceeds maximum of {} events",
+                    size, MAX_BATCH_SIZE
+                )
             }
             ValidationError::InvalidEventType(t) => {
                 write!(f, "Invalid event type '{}': must be alphanumeric with dots, hyphens, or underscores", t)
@@ -35,13 +43,25 @@ impl std::fmt::Display for ValidationError {
                 write!(f, "Invalid source '{}': must be a valid URI", s)
             }
             ValidationError::InvalidSubject(s) => {
-                write!(f, "Invalid subject '{}': subject too long or contains invalid characters", s)
+                write!(
+                    f,
+                    "Invalid subject '{}': subject too long or contains invalid characters",
+                    s
+                )
             }
             ValidationError::DataTooDeep(depth) => {
-                write!(f, "Event data nesting depth {} exceeds maximum of {}", depth, MAX_DATA_DEPTH)
+                write!(
+                    f,
+                    "Event data nesting depth {} exceeds maximum of {}",
+                    depth, MAX_DATA_DEPTH
+                )
             }
             ValidationError::StringTooLong(field, len) => {
-                write!(f, "Field '{}' length {} exceeds maximum of {}", field, len, MAX_STRING_LENGTH)
+                write!(
+                    f,
+                    "Field '{}' length {} exceeds maximum of {}",
+                    field, len, MAX_STRING_LENGTH
+                )
             }
         }
     }
@@ -60,10 +80,8 @@ pub fn validate_batch(events: &[Value]) -> Result<(), ValidationError> {
 /// Validate a CloudEvent
 pub fn validate_event(event: &Event) -> Result<(), ValidationError> {
     // Check event size
-    let event_size = serde_json::to_string(event)
-        .map(|s| s.len())
-        .unwrap_or(0);
-    
+    let event_size = serde_json::to_string(event).map(|s| s.len()).unwrap_or(0);
+
     if event_size > MAX_EVENT_SIZE {
         return Err(ValidationError::EventTooLarge(event_size));
     }
@@ -111,9 +129,11 @@ pub fn validate_event(event: &Event) -> Result<(), ValidationError> {
 
 /// Check if event type is valid (alphanumeric with dots, hyphens, underscores)
 fn is_valid_event_type(event_type: &str) -> bool {
-    !event_type.is_empty() 
+    !event_type.is_empty()
         && event_type.len() <= MAX_EVENT_TYPE_LENGTH
-        && event_type.chars().all(|c| c.is_alphanumeric() || c == '.' || c == '-' || c == '_')
+        && event_type
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '.' || c == '-' || c == '_')
 }
 
 /// Validate JSON depth to prevent deeply nested objects
@@ -137,8 +157,12 @@ fn validate_json_depth(value: &Value, current_depth: usize) -> Result<(), Valida
             }
         }
         Value::String(s) => {
-            if s.len() > MAX_DATA_STRING_LENGTH { // Allow longer strings in data
-                return Err(ValidationError::StringTooLong("data_string".to_string(), s.len()));
+            if s.len() > MAX_DATA_STRING_LENGTH {
+                // Allow longer strings in data
+                return Err(ValidationError::StringTooLong(
+                    "data_string".to_string(),
+                    s.len(),
+                ));
             }
         }
         _ => {}

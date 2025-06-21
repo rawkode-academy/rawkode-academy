@@ -21,8 +21,8 @@
 		}
 	},
 	"vars": {
-		"BUFFER_SIZE": "1000",
-		"BUFFER_TIMEOUT_MS": "60000"
+		"BUFFER_SIZE": "5",
+		"BUFFER_TIMEOUT_MS": "30000"
 	},
 	"r2_buckets": [
 		{
@@ -52,11 +52,5 @@
 			"binding": "ANALYTICS_ENGINE",
 			"dataset": "analytics-events",
 		}
-	],
-	// Scheduled trigger for flushing buffers
-	"triggers": {
-		"crons": [
-			"*/5 * * * *"
-		] // Every 5 minutes
-	}
+	]
 }
