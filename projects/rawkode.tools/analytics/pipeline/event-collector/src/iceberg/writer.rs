@@ -1,12 +1,12 @@
 use crate::errors::CollectorError;
 use crate::iceberg::schema::IcebergEventSchema;
+use crate::iceberg::metadata::{DataFile, FileFormat};
 use crate::utils::{log_error, log_info};
-use arrow_array::{ArrayRef, Int32Array, StringArray, TimestampMicrosecondArray};
-use arrow_schema::{DataType, Field, Schema};
+use arrow_array::{ArrayRef, TimestampMicrosecondArray, builder::{StringBuilder, Int32Builder}};
 use chrono::{DateTime, Datelike, Timelike, Utc};
 use cloudevents::{AttributesReader, Event};
 use parquet::arrow::ArrowWriter;
-use parquet::file::properties::{WriterProperties, WriterPropertiesBuilder};
+use parquet::file::properties::WriterProperties;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
@@ -67,37 +67,6 @@ pub struct WriteCheckpoint {
     pub timestamp: DateTime<Utc>,
 }
 
-/// Iceberg data file metadata
-#[derive(Debug, Clone)]
-pub struct DataFile {
-    pub path: String,
-    pub file_format: FileFormat,
-    pub record_count: i64,
-    pub file_size_bytes: i64,
-    pub column_sizes: std::collections::HashMap<String, i64>,
-    pub value_counts: std::collections::HashMap<String, i64>,
-    pub null_value_counts: std::collections::HashMap<String, i64>,
-    pub lower_bounds: std::collections::HashMap<String, Vec<u8>>,
-    pub upper_bounds: std::collections::HashMap<String, Vec<u8>>,
-    pub key_metadata: Option<Vec<u8>>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum FileFormat {
-    Parquet,
-    Avro,
-    Orc,
-}
-
-impl std::fmt::Display for FileFormat {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            FileFormat::Parquet => write!(f, "parquet"),
-            FileFormat::Avro => write!(f, "avro"),
-            FileFormat::Orc => write!(f, "orc"),
-        }
-    }
-}
 
 /// Iceberg writer for CloudEvents
 pub struct IcebergWriter {
@@ -140,17 +109,58 @@ impl IcebergWriter {
             duration
         ));
 
+        // Convert column statistics to use i32 keys instead of String
+        let mut column_sizes_i32 = HashMap::new();
+        let mut value_counts_i32 = HashMap::new();
+        let mut null_value_counts_i32 = HashMap::new();
+        let mut lower_bounds_i32 = HashMap::new();
+        let mut upper_bounds_i32 = HashMap::new();
+        
+        // For now, just use dummy field IDs (1-based)
+        let mut field_id = 1i32;
+        for (_, size) in stats.column_sizes.iter() {
+            column_sizes_i32.insert(field_id, *size);
+            field_id += 1;
+        }
+        
+        field_id = 1;
+        for (_, count) in stats.value_counts.iter() {
+            value_counts_i32.insert(field_id, *count);
+            field_id += 1;
+        }
+        
+        field_id = 1;
+        for (_, count) in stats.null_value_counts.iter() {
+            null_value_counts_i32.insert(field_id, *count);
+            field_id += 1;
+        }
+        
+        field_id = 1;
+        for (_, bounds) in stats.lower_bounds.iter() {
+            lower_bounds_i32.insert(field_id, bounds.clone());
+            field_id += 1;
+        }
+        
+        field_id = 1;
+        for (_, bounds) in stats.upper_bounds.iter() {
+            upper_bounds_i32.insert(field_id, bounds.clone());
+            field_id += 1;
+        }
+        
         Ok(DataFile {
-            path: file_path,
+            file_path,
             file_format: FileFormat::Parquet,
+            partition: partition_values,
             record_count: events.len() as i64,
-            file_size_bytes: parquet_data.len() as i64,
-            column_sizes: stats.column_sizes,
-            value_counts: stats.value_counts,
-            null_value_counts: stats.null_value_counts,
-            lower_bounds: stats.lower_bounds,
-            upper_bounds: stats.upper_bounds,
+            file_size_in_bytes: parquet_data.len() as i64,
+            column_sizes: column_sizes_i32,
+            value_counts: value_counts_i32,
+            null_value_counts: null_value_counts_i32,
+            lower_bounds: lower_bounds_i32,
+            upper_bounds: upper_bounds_i32,
             key_metadata: None,
+            split_offsets: None,
+            sort_order_id: None,
         })
     }
 
@@ -185,7 +195,22 @@ impl IcebergWriter {
         }
         
         // All events written
-        match self.write_data_file(events).await {
+        // Extract partition values from the first event (assuming all events in batch have same partition)
+        let partition_values = if !events.is_empty() {
+            let first_event = &events[0];
+            let event_time = first_event.time().cloned().unwrap_or_else(|| Utc::now());
+            let mut values = HashMap::new();
+            values.insert("type".to_string(), first_event.ty().to_string());
+            values.insert("year".to_string(), event_time.year().to_string());
+            values.insert("month".to_string(), format!("{:02}", event_time.month()));
+            values.insert("day".to_string(), format!("{:02}", event_time.day()));
+            values.insert("hour".to_string(), format!("{:02}", event_time.hour()));
+            values
+        } else {
+            HashMap::new()
+        };
+        
+        match self.write_data_file(events, partition_values).await {
             Ok(data_file) => WriteResult::Complete {
                 data_file,
                 duration: start_time.elapsed(),
@@ -205,37 +230,37 @@ impl IcebergWriter {
     /// Convert events to Parquet format with proper CloudEvents schema
     fn events_to_parquet(&self, events: &[Event]) -> Result<(Vec<u8>, ParquetStats)> {
         // Create Arrow arrays for each field
-        let mut id_builder = arrow_array::StringBuilder::new();
-        let mut source_builder = arrow_array::StringBuilder::new();
-        let mut type_builder = arrow_array::StringBuilder::new();
-        let mut specversion_builder = arrow_array::StringBuilder::new();
+        let mut id_builder = StringBuilder::new();
+        let mut source_builder = StringBuilder::new();
+        let mut type_builder = StringBuilder::new();
+        let mut specversion_builder = StringBuilder::new();
         let mut time_builder = TimestampMicrosecondArray::builder(events.len());
-        let mut datacontenttype_builder = arrow_array::StringBuilder::new();
-        let mut dataschema_builder = arrow_array::StringBuilder::new();
-        let mut subject_builder = arrow_array::StringBuilder::new();
-        let mut data_builder = arrow_array::StringBuilder::new();
-        let mut extensions_builder = arrow_array::StringBuilder::new();
+        let mut datacontenttype_builder = StringBuilder::new();
+        let mut dataschema_builder = StringBuilder::new();
+        let mut subject_builder = StringBuilder::new();
+        let mut data_builder = StringBuilder::new();
+        let mut extensions_builder = StringBuilder::new();
         
         // Cloudflare fields
-        let mut cf_colo_builder = arrow_array::StringBuilder::new();
-        let mut cf_country_builder = arrow_array::StringBuilder::new();
-        let mut cf_city_builder = arrow_array::StringBuilder::new();
-        let mut cf_continent_builder = arrow_array::StringBuilder::new();
-        let mut cf_postal_code_builder = arrow_array::StringBuilder::new();
-        let mut cf_region_builder = arrow_array::StringBuilder::new();
-        let mut cf_timezone_builder = arrow_array::StringBuilder::new();
-        let mut cf_http_protocol_builder = arrow_array::StringBuilder::new();
-        let mut cf_tls_version_builder = arrow_array::StringBuilder::new();
-        let mut cf_tls_cipher_builder = arrow_array::StringBuilder::new();
+        let mut cf_colo_builder = StringBuilder::new();
+        let mut cf_country_builder = StringBuilder::new();
+        let mut cf_city_builder = StringBuilder::new();
+        let mut cf_continent_builder = StringBuilder::new();
+        let mut cf_postal_code_builder = StringBuilder::new();
+        let mut cf_region_builder = StringBuilder::new();
+        let mut cf_timezone_builder = StringBuilder::new();
+        let mut cf_http_protocol_builder = StringBuilder::new();
+        let mut cf_tls_version_builder = StringBuilder::new();
+        let mut cf_tls_cipher_builder = StringBuilder::new();
         
         // Partition fields
-        let mut year_builder = arrow_array::Int32Builder::new();
-        let mut month_builder = arrow_array::Int32Builder::new();
-        let mut day_builder = arrow_array::Int32Builder::new();
-        let mut hour_builder = arrow_array::Int32Builder::new();
+        let mut year_builder = Int32Builder::new();
+        let mut month_builder = Int32Builder::new();
+        let mut day_builder = Int32Builder::new();
+        let mut hour_builder = Int32Builder::new();
         
         // Raw event for compatibility
-        let mut raw_event_builder = arrow_array::StringBuilder::new();
+        let mut raw_event_builder = StringBuilder::new();
         
         // Process each event
         for event in events {
@@ -243,7 +268,7 @@ impl IcebergWriter {
             id_builder.append_value(event.id());
             source_builder.append_value(event.source().as_str());
             type_builder.append_value(event.ty());
-            specversion_builder.append_value(event.specversion());
+            specversion_builder.append_value(format!("{:?}", event.specversion()));
             
             // Time handling
             match event.time() {
@@ -455,10 +480,15 @@ impl IcebergWriter {
             .map(|s| s.replace('.', "_").to_lowercase())
             .unwrap_or_else(|| "unknown".to_string());
         
-        let year = partition_values.get("year").unwrap_or(&"0000".to_string());
-        let month = partition_values.get("month").unwrap_or(&"00".to_string());
-        let day = partition_values.get("day").unwrap_or(&"00".to_string());
-        let hour = partition_values.get("hour").unwrap_or(&"00".to_string());
+        let default_year = "0000".to_string();
+        let default_month = "00".to_string();
+        let default_day = "00".to_string();
+        let default_hour = "00".to_string();
+        
+        let year = partition_values.get("year").unwrap_or(&default_year);
+        let month = partition_values.get("month").unwrap_or(&default_month);
+        let day = partition_values.get("day").unwrap_or(&default_day);
+        let hour = partition_values.get("hour").unwrap_or(&default_hour);
         
         let timestamp = Date::now().as_millis();
         let file_id = uuid::Uuid::new_v4();
@@ -510,29 +540,3 @@ struct ParquetStats {
     upper_bounds: std::collections::HashMap<String, Vec<u8>>,
 }
 
-impl DataFile {
-    /// Get the record count
-    pub fn record_count(&self) -> i64 {
-        self.record_count
-    }
-
-    /// Get the file size in bytes
-    pub fn file_size_bytes(&self) -> i64 {
-        self.file_size_bytes
-    }
-
-    /// Get the file format
-    pub fn file_format(&self) -> FileFormat {
-        self.file_format
-    }
-
-    /// Get column sizes
-    pub fn column_sizes(&self) -> &std::collections::HashMap<String, i64> {
-        &self.column_sizes
-    }
-
-    /// Get the file path
-    pub fn path(&self) -> &str {
-        &self.path
-    }
-}

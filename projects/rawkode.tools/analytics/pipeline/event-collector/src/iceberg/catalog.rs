@@ -1,8 +1,7 @@
-use crate::errors::CollectorError;
-use crate::iceberg::metadata::{IcebergMetadata, Snapshot};
+use crate::iceberg::metadata::{TableMetadata, Snapshot};
 use crate::iceberg::manifest::DataFile;
 use worker::*;
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
 /// Errors that can occur in catalog operations
 #[derive(Debug, Clone)]
@@ -53,7 +52,7 @@ impl IcebergCatalog {
     pub async fn create_table(
         &self,
         table_name: &str,
-        metadata: IcebergMetadata,
+        metadata: TableMetadata,
     ) -> Result<()> {
         let bucket = self.env.bucket("ANALYTICS_SOURCE")?;
         
@@ -80,7 +79,7 @@ impl IcebergCatalog {
     }
 
     /// Load table metadata
-    pub async fn load_table(&self, table_name: &str) -> Result<Option<IcebergMetadata>> {
+    pub async fn load_table(&self, table_name: &str) -> Result<Option<TableMetadata>> {
         let bucket = self.env.bucket("ANALYTICS_SOURCE")?;
         let metadata_path = self.current_metadata_path(table_name).await?;
         
@@ -111,10 +110,12 @@ impl IcebergCatalog {
             .ok_or_else(|| Error::RustError(CatalogError::TableNotFound.to_string()))?;
 
         // Add snapshot
-        metadata.add_snapshot(snapshot);
+        metadata.snapshots.push(snapshot.clone());
+        metadata.current_snapshot_id = Some(snapshot.snapshot_id);
+        metadata.last_updated_ms = Date::now().as_millis() as i64;
 
         // Write new metadata version
-        let new_version = format!("v{}", metadata.last_sequence_number);
+        let new_version = format!("v{}", metadata.snapshots.len() + 1);
         let metadata_path = self.metadata_path(table_name, &new_version);
         
         let metadata_json = serde_json::to_string(&metadata)

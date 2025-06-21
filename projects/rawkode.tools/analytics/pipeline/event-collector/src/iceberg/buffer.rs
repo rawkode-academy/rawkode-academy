@@ -6,9 +6,9 @@ use std::collections::HashMap;
 use worker::*;
 
 use super::metadata::{IcebergMetadata, PartitionField};
-use super::rest_catalog::{CatalogFactory, CatalogOperations};
+use super::rest_catalog::CatalogFactory;
 use super::schema::{IcebergEventSchema, IcebergTableProperties};
-use super::writer::IcebergWriter;
+use super::writer::{IcebergWriter, WriteConfig};
 
 const DEFAULT_BUFFER_SIZE: usize = 2000; // Larger batches for Iceberg
 const DEFAULT_TIMEOUT_MS: i64 = 30_000; // 30 seconds
@@ -445,7 +445,7 @@ impl IcebergBufferDurableObject {
 
         // Initialize Iceberg components
         let table_location = self.get_table_location();
-        let iceberg_writer = IcebergWriter::new(&self.env, table_location.clone());
+        let iceberg_writer = IcebergWriter::new(self.env.clone(), WriteConfig::default());
         let iceberg_metadata = IcebergMetadata::new(&self.env, table_location.clone());
 
         // Ensure table exists
