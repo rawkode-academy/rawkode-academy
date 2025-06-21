@@ -1,4 +1,7 @@
 #[cfg(test)]
+mod catalog_tests;
+
+#[cfg(test)]
 mod metadata_tests;
 
 #[cfg(test)]
