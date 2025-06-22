@@ -17,14 +17,12 @@ const ESTIMATED_EVENT_SIZE: usize = 2048; // Average event size in bytes
 /// Iceberg-aware event buffer that writes to Iceberg tables
 pub struct IcebergEventBuffer {
     env: Env,
-    table_location: String,
 }
 
 impl IcebergEventBuffer {
-    pub fn new(env: &Env, table_location: String) -> Self {
+    pub fn new(env: &Env, _table_location: String) -> Self {
         Self {
             env: env.clone(),
-            table_location,
         }
     }
 

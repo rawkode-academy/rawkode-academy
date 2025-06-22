@@ -43,7 +43,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		let success = false;
 
 		switch (event.action) {
-			case "page.view":
+			case "pageview":
+			case "page.view": // Support both for backward compatibility
 				success = await analytics.trackPageView(
 					event.path,
 					event.title || event.path, // Use actual title if provided, fallback to path

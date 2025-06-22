@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// Errors that can occur in catalog operations
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub enum CatalogError {
     TableNotFound,
     TableAlreadyExists,
@@ -34,11 +35,13 @@ impl std::fmt::Display for CatalogError {
 impl std::error::Error for CatalogError {}
 
 /// Iceberg catalog implementation for R2
+#[allow(dead_code)]
 pub struct IcebergCatalog {
     env: Env,
     catalog_namespace: String,
 }
 
+#[allow(dead_code)]
 impl IcebergCatalog {
     /// Create a new catalog instance
     pub fn new(env: Env, namespace: String) -> Self {

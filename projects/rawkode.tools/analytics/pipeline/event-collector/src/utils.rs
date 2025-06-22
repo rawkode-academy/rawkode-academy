@@ -1,4 +1,5 @@
-use worker::*;
+#[cfg(target_arch = "wasm32")]
+use worker::{console_error, console_log};
 
 pub fn set_panic_hook() {
     // When the `console_error_panic_hook` feature is enabled, we can call the

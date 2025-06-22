@@ -166,11 +166,13 @@ export class Analytics {
 		duration?: number,
 		extra?: Record<string, unknown>,
 	): Promise<boolean> {
+		// Use specific event types for better partitioning and querying
+		const eventType = `analytics.video.${action}`;
+		
 		return this.sendEvent(
-			"analytics.video.event",
+			eventType,
 			{
 				video_id: videoId,
-				action,
 				position,
 				duration,
 				...extra,
