@@ -14,9 +14,6 @@ Disallow: /admin/
 Disallow: /private/
 Disallow: /_server-islands/
 
-# Crawl delay for all bots
-Crawl-delay: 10
-
 # Sitemap locations
 Sitemap: ${sitemapURL.href}
 Sitemap: ${videoSitemapURL.href}

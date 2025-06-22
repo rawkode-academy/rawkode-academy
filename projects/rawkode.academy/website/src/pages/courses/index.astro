@@ -12,9 +12,12 @@ export const prerender = true;
 const allCourses = (await getCollection("courses")).sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
+
+const pageTitle = "Cloud Native Courses | Rawkode Academy";
+const pageDescription = "Explore our comprehensive courses on cloud-native technologies, DevOps, and modern software development.";
 ---
 
-<Page title="Courses" description="Explore our comprehensive courses on cloud-native technologies, DevOps, and modern software development.">
+<Page title={pageTitle} description={pageDescription}>
   <!-- Hero Section -->
   <PageHero
     title="Professional Cloud Native Courses"
