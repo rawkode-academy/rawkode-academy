@@ -181,11 +181,22 @@ impl IcebergEventBuffer {
                             error_text
                         ));
                     } else {
-                        let _ = response.text().await;
-                        log_info(&format!(
-                            "[{}] Successfully sent events to partition '{}'",
-                            request_id, partition_key
-                        ));
+                        // Consume response body to ensure connection completes
+                        match response.text().await {
+                            Ok(_) => {
+                                log_info(&format!(
+                                    "[{}] Successfully sent events to partition '{}'",
+                                    request_id, partition_key
+                                ));
+                            }
+                            Err(e) => {
+                                log_error(&format!(
+                                    "[{}] Failed to read response body for partition '{}': {}",
+                                    request_id, partition_key, e
+                                ));
+                                failures += 1;
+                            }
+                        }
                     }
                 }
                 Err(e) => {
@@ -240,12 +251,26 @@ impl IcebergEventBuffer {
             )));
         }
         
-        let _ = response.text().await;
-        log_info(&format!(
-            "[{}] Successfully sent chunk to partition '{}'",
-            request_id, partition_key
-        ));
-        Ok(())
+        // Consume response body to ensure connection completes
+        match response.text().await {
+            Ok(_) => {
+                log_info(&format!(
+                    "[{}] Successfully sent chunk to partition '{}'",
+                    request_id, partition_key
+                ));
+                Ok(())
+            }
+            Err(e) => {
+                log_error(&format!(
+                    "[{}] Failed to read chunk response body for partition '{}': {}",
+                    request_id, partition_key, e
+                ));
+                Err(Error::RustError(format!(
+                    "Failed to read response body: {}",
+                    e
+                )))
+            }
+        }
     }
 
     /// Partition events by type and hour
@@ -329,16 +354,52 @@ impl DurableObject for IcebergBufferDurableObject {
     }
 
     async fn alarm(&mut self) -> Result<Response> {
-        log_info("Iceberg buffer alarm triggered");
+        let partition_key = self
+            .state
+            .storage()
+            .get::<String>("partition_key")
+            .await
+            .ok()
+            .unwrap_or_else(|| "unknown".to_string());
+        
+        log_info(&format!(
+            "Iceberg buffer alarm triggered for partition '{}'",
+            partition_key
+        ));
+        
+        // Get buffer count before flush
+        let buffer_count = self.get_buffer_count().await.unwrap_or(0);
+        log_info(&format!(
+            "Buffer contains {} events to flush",
+            buffer_count
+        ));
+        
+        if buffer_count == 0 {
+            log_info("No events to flush, alarm completed");
+            return Response::ok("Alarm processed - no events to flush");
+        }
         
         match self.flush_to_iceberg().await {
             Ok(files_written) => {
+                log_info(&format!(
+                    "Alarm flush successful - wrote {} files for {} events",
+                    files_written, buffer_count
+                ));
                 Response::ok(format!("Alarm processed - wrote {} files", files_written))
             }
             Err(e) => {
                 log_error(&format!("Failed to flush during alarm: {}", e));
                 // Retry later
-                let _ = self.state.storage().set_alarm(DEFAULT_TIMEOUT_MS).await;
+                match self.state.storage().set_alarm(DEFAULT_TIMEOUT_MS).await {
+                    Ok(_) => log_info(&format!(
+                        "Retry alarm set for {} ms",
+                        DEFAULT_TIMEOUT_MS
+                    )),
+                    Err(alarm_err) => log_error(&format!(
+                        "Failed to set retry alarm: {}",
+                        alarm_err
+                    )),
+                }
                 Err(e)
             }
         }
@@ -453,7 +514,16 @@ impl IcebergBufferDurableObject {
         } else {
             // Set alarm for future flush
             match self.set_flush_alarm().await {
-                Ok(_) => {}
+                Ok(_) => {
+                    log_info(&format!(
+                        "Alarm set for flush in {} ms",
+                        self.env
+                            .var("ICEBERG_BUFFER_TIMEOUT_MS")
+                            .ok()
+                            .and_then(|v| v.to_string().parse::<i64>().ok())
+                            .unwrap_or(DEFAULT_TIMEOUT_MS)
+                    ));
+                }
                 Err(e) => log_error(&format!("Failed to set alarm: {}", e)),
             }
             Response::ok(format!(
@@ -730,6 +800,20 @@ impl IcebergBufferDurableObject {
             .and_then(|v| v.to_string().parse::<i64>().ok())
             .unwrap_or(DEFAULT_TIMEOUT_MS);
 
-        self.state.storage().set_alarm(timeout_ms).await
+        log_info(&format!(
+            "Setting alarm with timeout: {} ms (parsed from env var or using default)",
+            timeout_ms
+        ));
+
+        match self.state.storage().set_alarm(timeout_ms).await {
+            Ok(_) => {
+                log_info(&format!("Alarm successfully set for {} ms from now", timeout_ms));
+                Ok(())
+            }
+            Err(e) => {
+                log_error(&format!("Failed to set alarm: {}", e));
+                Err(e)
+            }
+        }
     }
 }
