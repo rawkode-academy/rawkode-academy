@@ -6,13 +6,13 @@ use std::collections::HashMap;
 use worker::*;
 
 use super::metadata::{IcebergMetadata, PartitionField};
-use super::rest_catalog::CatalogFactory;
 use super::schema::{IcebergEventSchema, IcebergTableProperties};
 use super::writer::{IcebergWriter, WriteConfig};
 
-const DEFAULT_BUFFER_SIZE: usize = 2000; // Larger batches for Iceberg
+const DEFAULT_BUFFER_SIZE: usize = 1000; // Balanced for memory efficiency
 const DEFAULT_TIMEOUT_MS: i64 = 30_000; // 30 seconds
-const MAX_BUFFER_SIZE: usize = 5000; // Reduced for Worker memory
+const MAX_BUFFER_SIZE: usize = 2000; // Conservative limit for Worker memory
+const ESTIMATED_EVENT_SIZE: usize = 2048; // Average event size in bytes
 
 /// Iceberg-aware event buffer that writes to Iceberg tables
 pub struct IcebergEventBuffer {
@@ -30,11 +30,22 @@ impl IcebergEventBuffer {
 
     pub async fn add_events(&self, events: Vec<Event>) -> CollectorResult<()> {
         let request_id = uuid::Uuid::new_v4().to_string();
+        let event_count = events.len();
+        let estimated_memory = event_count * ESTIMATED_EVENT_SIZE;
+        
         log_info(&format!(
-            "[{}] Adding {} events to Iceberg buffer",
+            "[{}] Adding {} events to Iceberg buffer (~{} KB)",
             request_id,
-            events.len()
+            event_count,
+            estimated_memory / 1024
         ));
+        
+        // Check memory constraints before processing
+        if estimated_memory > 10 * 1024 * 1024 { // 10MB limit for incoming batch
+            return Err(CollectorError::ValidationError(
+                format!("Event batch too large: {} events (~{} MB)", event_count, estimated_memory / 1024 / 1024)
+            ));
+        }
 
         // Group events by partition
         let partitioned_events = self.partition_events(events);
@@ -93,6 +104,31 @@ impl IcebergEventBuffer {
                 }
             };
 
+            // Check partition size before sending
+            let partition_memory = events.len() * ESTIMATED_EVENT_SIZE;
+            if partition_memory > 5 * 1024 * 1024 { // 5MB limit per partition
+                log_error(&format!(
+                    "[{}] Partition '{}' too large: {} events (~{} MB)",
+                    request_id, partition_key, events.len(), partition_memory / 1024 / 1024
+                ));
+                // Split large partitions into smaller chunks
+                for chunk in events.chunks(500) {
+                    let chunk_payload = PartitionedEventPayload {
+                        events: chunk.to_vec(),
+                        partition_key: partition_key.clone(),
+                        event_type: event_type.clone(),
+                        hour_key: hour_key.clone(),
+                    };
+                    
+                    // Send chunk to DO
+                    if let Err(e) = self.send_chunk_to_do(&request_id, &stub, &partition_key, &chunk_payload).await {
+                        failures += 1;
+                        log_error(&format!("[{}] Failed to send chunk: {}", request_id, e));
+                    }
+                }
+                continue;
+            }
+            
             // Serialize events with partition info
             let payload = PartitionedEventPayload {
                 events,
@@ -173,6 +209,47 @@ impl IcebergEventBuffer {
         }
     }
 
+    /// Send a chunk of events to a durable object
+    async fn send_chunk_to_do(
+        &self,
+        request_id: &str,
+        stub: &Fetcher,
+        partition_key: &str,
+        payload: &PartitionedEventPayload,
+    ) -> Result<()> {
+        let body = serde_json::to_string(payload)
+            .map_err(|e| Error::RustError(format!("Failed to serialize payload: {}", e)))?;
+            
+        let request = Request::new_with_init(
+            &format!("http://do/{}/", partition_key),
+            RequestInit::new()
+                .with_method(Method::Post)
+                .with_body(Some(body.into())),
+        )?;
+        
+        let mut response = stub.fetch_with_request(request).await?;
+        
+        if response.status_code() >= 400 {
+            let error_text = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unable to read response".to_string());
+            return Err(Error::RustError(format!(
+                "DO returned {} for partition '{}': {}",
+                response.status_code(),
+                partition_key,
+                error_text
+            )));
+        }
+        
+        let _ = response.text().await;
+        log_info(&format!(
+            "[{}] Successfully sent chunk to partition '{}'",
+            request_id, partition_key
+        ));
+        Ok(())
+    }
+
     /// Partition events by type and hour
     fn partition_events(&self, events: Vec<Event>) -> HashMap<(String, String), Vec<Event>> {
         let mut partitioned = HashMap::new();
@@ -214,6 +291,11 @@ struct PartitionedEventPayload {
 }
 
 /// Durable Object for buffering events by partition
+/// 
+/// Memory-efficient design:
+/// - Limits buffer size to prevent OOM in Workers
+/// - Estimates memory usage and flushes proactively
+/// - Chunks large payloads to avoid request size limits
 #[durable_object]
 pub struct IcebergBufferDurableObject {
     state: State,
@@ -302,12 +384,35 @@ impl IcebergBufferDurableObject {
         let initial_count = buffered_events.len();
         buffered_events.extend(payload.events);
 
-        // Check buffer limits
-        if buffered_events.len() > MAX_BUFFER_SIZE {
+        // Check buffer limits with memory estimation
+        let new_buffer_size = buffered_events.len();
+        let estimated_buffer_memory = new_buffer_size * ESTIMATED_EVENT_SIZE;
+        
+        if new_buffer_size > MAX_BUFFER_SIZE {
             return Response::error(
-                format!("Buffer would exceed maximum size of {}", MAX_BUFFER_SIZE),
+                format!("Buffer would exceed maximum size of {} events", MAX_BUFFER_SIZE),
                 507,
             );
+        }
+        
+        if estimated_buffer_memory > 20 * 1024 * 1024 { // 20MB hard limit
+            log_error(&format!(
+                "Buffer memory limit exceeded: {} events (~{} MB)",
+                new_buffer_size,
+                estimated_buffer_memory / 1024 / 1024
+            ));
+            // Force flush before accepting more events
+            match self.flush_to_iceberg().await {
+                Ok(_) => {},
+                Err(e) => {
+                    return Response::error(
+                        format!("Buffer full and flush failed: {}", e),
+                        507,
+                    );
+                }
+            }
+            // Re-add the new events after flush
+            buffered_events = payload.events;
         }
 
         // Save updated buffer

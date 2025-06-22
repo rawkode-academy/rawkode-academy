@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use chrono::{DateTime, Utc};
 
 /// Manifest file containing a list of data files
 #[derive(Debug, Clone, Serialize, Deserialize)]
