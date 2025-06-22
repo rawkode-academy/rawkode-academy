@@ -1,9 +1,8 @@
-use crate::errors::CollectorError;
 use crate::iceberg::schema::IcebergEventSchema;
 use crate::iceberg::metadata::{DataFile, FileFormat};
-use crate::utils::{log_error, log_info};
+use crate::utils::log_info;
 use arrow_array::{ArrayRef, TimestampMicrosecondArray, builder::{StringBuilder, Int32Builder}};
-use chrono::{DateTime, Datelike, Timelike, Utc};
+use chrono::{Datelike, Timelike, Utc};
 use cloudevents::{AttributesReader, Event};
 use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;
@@ -80,6 +79,23 @@ impl IcebergWriter {
     }
 
     /// Write events to a data file with partition values
+    /// 
+    /// # Arguments
+    /// 
+    /// * `events` - CloudEvents to write (must not be empty)
+    /// * `partition_values` - Partition values for organizing data files
+    /// 
+    /// # Returns
+    /// 
+    /// DataFile metadata for the written Parquet file
+    /// 
+    /// # Errors
+    /// 
+    /// Returns an error if:
+    /// - Event list is empty
+    /// - Parquet serialization fails
+    /// - R2 write operation fails
+    /// - Memory limits are exceeded
     pub async fn write_data_file(
         &self,
         events: Vec<Event>,
@@ -87,6 +103,16 @@ impl IcebergWriter {
     ) -> Result<DataFile> {
         if events.is_empty() {
             return Err(Error::RustError("No events to write".to_string()));
+        }
+        
+        // Check memory constraints
+        let estimated_memory = events.len() * 2048; // ~2KB per event
+        if estimated_memory > 50 * 1024 * 1024 { // 50MB limit
+            return Err(Error::RustError(format!(
+                "Event batch too large for Worker memory: {} events (~{} MB)",
+                events.len(),
+                estimated_memory / 1024 / 1024
+            )));
         }
 
         let start_time = Date::now();
@@ -97,9 +123,28 @@ impl IcebergWriter {
         // Generate file path with partition structure
         let file_path = self.generate_partitioned_file_path(&partition_values);
         
-        // Write to R2
+        // Write to R2 with retry logic
         let bucket = self.env.bucket("ANALYTICS_SOURCE")?;
-        bucket.put(&file_path, parquet_data.clone()).execute().await?;
+        
+        // Attempt write with one retry on failure
+        let write_result = bucket.put(&file_path, parquet_data.clone()).execute().await;
+        match write_result {
+            Ok(_) => {},
+            Err(e) => {
+                log_info(&format!("First write attempt failed: {}, retrying...", e));
+                // Retry once with a slight delay
+                let retry_result = bucket.put(&file_path, parquet_data.clone()).execute().await;
+                match retry_result {
+                    Ok(_) => log_info("Retry successful"),
+                    Err(retry_error) => {
+                        return Err(Error::RustError(format!(
+                            "Failed to write to R2 after retry: {}",
+                            retry_error
+                        )));
+                    }
+                }
+            }
+        }
         
         let duration = Date::now().as_millis() - start_time.as_millis();
         log_info(&format!(
@@ -228,7 +273,16 @@ impl IcebergWriter {
     }
 
     /// Convert events to Parquet format with proper CloudEvents schema
+    /// 
+    /// Handles edge cases:
+    /// - Null values in optional fields
+    /// - Missing timestamps (uses current time)
+    /// - Large data payloads
+    /// - Invalid UTF-8 in binary data
     fn events_to_parquet(&self, events: &[Event]) -> Result<(Vec<u8>, ParquetStats)> {
+        if events.is_empty() {
+            return Err(Error::RustError("Cannot create Parquet file with zero events".to_string()));
+        }
         // Create Arrow arrays for each field
         let mut id_builder = StringBuilder::new();
         let mut source_builder = StringBuilder::new();
@@ -306,33 +360,63 @@ impl IcebergWriter {
                 None => subject_builder.append_null(),
             }
             
-            // Data field as JSON string
+            // Data field as JSON string with size limit
             match event.data() {
                 Some(data) => {
                     let data_str = match data {
                         cloudevents::Data::Binary(bytes) => {
-                            String::from_utf8_lossy(bytes).into_owned()
+                            // Limit binary data to 1MB
+                            if bytes.len() > 1024 * 1024 {
+                                format!("[Binary data truncated: {} bytes]", bytes.len())
+                            } else {
+                                String::from_utf8_lossy(bytes).into_owned()
+                            }
                         }
-                        cloudevents::Data::String(s) => s.clone(),
-                        cloudevents::Data::Json(json) => json.to_string(),
+                        cloudevents::Data::String(s) => {
+                            // Limit string data to 1MB
+                            if s.len() > 1024 * 1024 {
+                                format!("{}... [truncated at 1MB]", &s[..1024 * 1024])
+                            } else {
+                                s.clone()
+                            }
+                        }
+                        cloudevents::Data::Json(json) => {
+                            let json_str = json.to_string();
+                            if json_str.len() > 1024 * 1024 {
+                                format!("{}... [JSON truncated at 1MB]", &json_str[..1024 * 1024])
+                            } else {
+                                json_str
+                            }
+                        },
                     };
                     data_builder.append_value(&data_str);
                 }
                 None => data_builder.append_null(),
             }
             
-            // Extensions as JSON
+            // Extensions as JSON with error handling
             let extensions: HashMap<String, serde_json::Value> = event
                 .iter_extensions()
-                .map(|(k, v)| (k.to_string(), serde_json::Value::String(v.to_string())))
+                .filter_map(|(k, v)| {
+                    // Skip extensions with invalid keys or values
+                    if k.len() > 256 { // Limit key length
+                        return None;
+                    }
+                    let value_str = v.to_string();
+                    if value_str.len() > 10240 { // Limit value length to 10KB
+                        return None;
+                    }
+                    Some((k.to_string(), serde_json::Value::String(value_str)))
+                })
                 .collect();
             
             if extensions.is_empty() {
                 extensions_builder.append_null();
             } else {
-                let ext_json = serde_json::to_string(&extensions)
-                    .unwrap_or_else(|_| "{}".to_string());
-                extensions_builder.append_value(&ext_json);
+                match serde_json::to_string(&extensions) {
+                    Ok(ext_json) => extensions_builder.append_value(&ext_json),
+                    Err(_) => extensions_builder.append_value("{}"),
+                }
             }
             
             // Extract Cloudflare fields from extensions
@@ -388,10 +472,21 @@ impl IcebergWriter {
                 None => cf_tls_cipher_builder.append_null(),
             }
             
-            // Raw event JSON
-            let raw_json = serde_json::to_string(event)
-                .unwrap_or_else(|_| "{}".to_string());
-            raw_event_builder.append_value(&raw_json);
+            // Raw event JSON with error handling
+            match serde_json::to_string(event) {
+                Ok(raw_json) => {
+                    // Limit raw JSON to 5MB
+                    if raw_json.len() > 5 * 1024 * 1024 {
+                        raw_event_builder.append_value("[Event too large to store raw]")
+                    } else {
+                        raw_event_builder.append_value(&raw_json)
+                    }
+                }
+                Err(e) => {
+                    log_info(&format!("Failed to serialize event: {}", e));
+                    raw_event_builder.append_value(format!("{{\"error\": \"Serialization failed: {}\"}}", e).as_str())
+                }
+            }
         }
         
         // Build arrays

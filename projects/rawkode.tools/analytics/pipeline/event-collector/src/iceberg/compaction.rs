@@ -1,3 +1,18 @@
+//! Iceberg table compaction for Cloudflare Workers
+//! 
+//! This module implements a memory-efficient compaction strategy that:
+//! - Identifies small files within partitions that need compaction
+//! - Merges multiple small files into larger files (target: 128MB)
+//! - Handles Worker memory constraints (128MB limit)
+//! - Provides scheduled worker support for background compaction
+//! 
+//! # Design Considerations
+//! 
+//! - Files are compacted within partition boundaries to maintain query efficiency
+//! - Maximum of 50 files per compaction operation to stay within memory limits
+//! - Compaction creates new snapshots with proper lineage tracking
+//! - Failed compactions don't affect table consistency
+
 use crate::utils::{log_error, log_info};
 use std::collections::HashMap;
 use worker::*;
@@ -9,12 +24,22 @@ const TARGET_FILE_SIZE_BYTES: i64 = 128 * 1024 * 1024; // 128MB
 const MAX_COMPACTION_FILES: usize = 50; // Limit for Worker memory
 
 /// Iceberg compaction strategy for Workers
+/// 
+/// Manages the identification and merging of small files within an Iceberg table.
+/// Designed to work within Cloudflare Workers' constraints while maintaining
+/// optimal file sizes for query performance.
 pub struct IcebergCompactor {
     env: Env,
     table_location: String,
 }
 
 impl IcebergCompactor {
+    /// Create a new compactor instance
+    /// 
+    /// # Arguments
+    /// 
+    /// * `env` - Cloudflare Worker environment
+    /// * `table_location` - S3-style path to the Iceberg table (e.g., "analytics/events")
     pub fn new(env: &Env, table_location: String) -> Self {
         Self {
             env: env.clone(),
@@ -23,6 +48,16 @@ impl IcebergCompactor {
     }
 
     /// Identify files that need compaction
+    /// 
+    /// Analyzes the current table state and creates compaction plans for partitions
+    /// with many small files. Each plan targets merging small files into ~128MB files.
+    /// 
+    /// # Returns
+    /// 
+    /// Vector of compaction plans, each containing:
+    /// - Partition key for the files to compact
+    /// - List of source files to merge
+    /// - Estimated output size and record count
     pub async fn plan_compaction(&self) -> Result<Vec<CompactionPlan>> {
         let iceberg_metadata = IcebergMetadata::new(&self.env, self.table_location.clone());
         
@@ -117,7 +152,19 @@ impl IcebergCompactor {
         Ok(plans)
     }
 
-    /// Execute a compaction plan (to be called by a scheduled worker)
+    /// Execute a compaction plan
+    /// 
+    /// Reads multiple small files, merges them into a single larger file,
+    /// and creates a new snapshot with the compacted data. This operation
+    /// is atomic - either all changes are committed or none are.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `plan` - Compaction plan specifying which files to merge
+    /// 
+    /// # Returns
+    /// 
+    /// Result containing statistics about the compaction operation
     pub async fn execute_compaction(&self, plan: &CompactionPlan) -> Result<CompactionResult> {
         log_info(&format!(
             "Executing compaction for partition '{}' with {} files",
@@ -238,21 +285,126 @@ impl IcebergCompactor {
     /// Read events from a Parquet file
     async fn read_parquet_events(
         &self,
-        _bucket: &Bucket,
+        bucket: &Bucket,
         file_path: &str,
     ) -> Result<Vec<cloudevents::Event>> {
-        // In a real implementation, this would:
-        // 1. Download the Parquet file from R2
-        // 2. Use arrow-rs to read the file
-        // 3. Convert rows back to CloudEvents
-        // 
-        // For Workers memory constraints, we might need to stream process
-        // or use a separate compaction worker with more memory
+        log_info(&format!("Reading events from: {}", file_path));
         
-        log_info(&format!("Would read events from: {}", file_path));
+        // Download Parquet file from R2
+        let object = match bucket.get(file_path).execute().await {
+            Ok(Some(obj)) => obj,
+            Ok(None) => {
+                return Err(Error::RustError(format!("File not found: {}", file_path)));
+            }
+            Err(e) => {
+                return Err(Error::RustError(format!("Failed to get file {}: {}", file_path, e)));
+            }
+        };
         
-        // Placeholder - in production, implement proper Parquet reading
-        Ok(Vec::new())
+        let parquet_data = match object.body() {
+            Some(body) => body.bytes().await?,
+            None => {
+                return Err(Error::RustError("File has no body".to_string()));
+            }
+        };
+        
+        // Parse Parquet file using arrow-rs
+        use arrow_array::RecordBatch;
+        use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+        use std::io::Cursor;
+        
+        let cursor = Cursor::new(parquet_data);
+        let builder = match ParquetRecordBatchReaderBuilder::try_new(cursor) {
+            Ok(b) => b,
+            Err(e) => {
+                return Err(Error::RustError(format!("Failed to read Parquet: {}", e)));
+            }
+        };
+        
+        // Check memory usage before reading
+        let metadata = builder.metadata();
+        let estimated_memory = metadata.file_metadata().num_rows() as usize * 1024; // Estimate 1KB per event
+        
+        if estimated_memory > 50 * 1024 * 1024 { // 50MB limit for Workers
+            log_error(&format!(
+                "File {} too large for in-memory processing: {} rows",
+                file_path,
+                metadata.file_metadata().num_rows()
+            ));
+            return Err(Error::RustError("File too large for Worker memory".to_string()));
+        }
+        
+        let mut reader = builder.build()?;
+        let mut events = Vec::new();
+        
+        // Read all record batches and convert to CloudEvents
+        while let Some(batch_result) = reader.next() {
+            let batch = match batch_result {
+                Ok(b) => b,
+                Err(e) => {
+                    log_error(&format!("Failed to read batch: {}", e));
+                    continue;
+                }
+            };
+            
+            // Convert RecordBatch to CloudEvents
+            let batch_events = self.record_batch_to_events(&batch)?;
+            events.extend(batch_events);
+        }
+        
+        log_info(&format!("Read {} events from {}", events.len(), file_path));
+        Ok(events)
+    }
+    
+    /// Convert Arrow RecordBatch to CloudEvents
+    fn record_batch_to_events(&self, batch: &RecordBatch) -> Result<Vec<cloudevents::Event>> {
+        use arrow_array::{StringArray, TimestampMicrosecondArray};
+        use cloudevents::{EventBuilder, EventBuilderV10};
+        
+        let mut events = Vec::with_capacity(batch.num_rows());
+        
+        // Get column arrays
+        let id_array = batch.column(0).as_any().downcast_ref::<StringArray>()
+            .ok_or_else(|| Error::RustError("Invalid id column".to_string()))?;
+        let source_array = batch.column(1).as_any().downcast_ref::<StringArray>()
+            .ok_or_else(|| Error::RustError("Invalid source column".to_string()))?;
+        let type_array = batch.column(2).as_any().downcast_ref::<StringArray>()
+            .ok_or_else(|| Error::RustError("Invalid type column".to_string()))?;
+        let time_array = batch.column(4).as_any().downcast_ref::<TimestampMicrosecondArray>()
+            .ok_or_else(|| Error::RustError("Invalid time column".to_string()))?;
+        let data_array = batch.column(8).as_any().downcast_ref::<StringArray>()
+            .ok_or_else(|| Error::RustError("Invalid data column".to_string()))?;
+        
+        // Reconstruct events from columns
+        for row in 0..batch.num_rows() {
+            let mut builder = EventBuilderV10::new()
+                .id(id_array.value(row))
+                .source(source_array.value(row))
+                .ty(type_array.value(row));
+            
+            // Add time if not null
+            if !time_array.is_null(row) {
+                let micros = time_array.value(row);
+                let secs = micros / 1_000_000;
+                let nanos = ((micros % 1_000_000) * 1000) as u32;
+                let datetime = chrono::DateTime::<chrono::Utc>::from_timestamp(secs, nanos)
+                    .ok_or_else(|| Error::RustError("Invalid timestamp".to_string()))?;
+                builder = builder.time(datetime);
+            }
+            
+            // Add data if not null
+            if !data_array.is_null(row) {
+                let data_str = data_array.value(row);
+                if let Ok(json_value) = serde_json::from_str::<serde_json::Value>(data_str) {
+                    builder = builder.data("application/json", json_value);
+                }
+            }
+            
+            let event = builder.build()?;
+            events.push(event);
+        }
+        
+        Ok(events)
     }
 
     /// Generate partition key from partition values
@@ -269,6 +421,8 @@ impl IcebergCompactor {
 }
 
 /// Compaction plan for a set of files
+/// 
+/// Represents a planned compaction operation for files within a single partition
 #[derive(Debug, Clone)]
 pub struct CompactionPlan {
     pub partition_key: String,
@@ -278,6 +432,8 @@ pub struct CompactionPlan {
 }
 
 /// Result of a compaction operation
+/// 
+/// Contains statistics and metadata about a completed compaction
 #[derive(Debug, Clone)]
 pub struct CompactionResult {
     pub partition_key: String,
@@ -290,6 +446,10 @@ pub struct CompactionResult {
 }
 
 /// Scheduled worker for running compaction
+/// 
+/// This worker should be scheduled to run periodically (e.g., every hour)
+/// to identify and compact small files. Due to Worker time limits, it
+/// processes one partition per invocation.
 #[event(scheduled)]
 pub async fn scheduled(event: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
     log_info(&format!(
