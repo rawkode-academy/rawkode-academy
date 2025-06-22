@@ -101,8 +101,9 @@ export class QueryBuilder {
   }
 
   private isValidIdentifier(identifier: string): boolean {
-    // Only allow alphanumeric, underscore, and dot (for table.column)
-    return /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)?$/.test(identifier);
+    // Allow alphanumeric, underscore, dot (for table.column), parentheses, asterisk, and space
+    // for expressions like 'COUNT(*) as count'
+    return /^[a-zA-Z0-9_\.\(\)\*\s]+$/.test(identifier) && identifier.trim().length > 0;
   }
 
   private isValidTablePath(path: string): boolean {

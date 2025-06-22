@@ -1,29 +1,52 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DuckDBClient } from './duckdb-client';
+import type { Env } from '../types';
 
 // Mock the modules
 vi.mock('@duckdb/duckdb-wasm', () => ({
-  createWorker: vi.fn().mockResolvedValue({
-    terminate: vi.fn(),
+  getJsDelivrBundles: vi.fn().mockReturnValue([
+    {
+      mainModule: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/duckdb.wasm',
+      mainWorker: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/duckdb-browser.worker.js',
+      pthreadWorker: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/pthread.worker.js',
+    },
+  ]),
+  selectBundle: vi.fn().mockResolvedValue({
+    mainModule: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/duckdb.wasm',
+    mainWorker: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/duckdb-browser.worker.js',
+    pthreadWorker: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/pthread.worker.js',
   }),
-  initializeDuckDB: vi.fn().mockResolvedValue({
+  ConsoleLogger: vi.fn().mockImplementation(() => ({})),
+  AsyncDuckDB: vi.fn().mockImplementation(() => ({
+    instantiate: vi.fn(),
     connect: vi.fn().mockResolvedValue({
       query: vi.fn(),
       close: vi.fn(),
     }),
     terminate: vi.fn(),
-  }),
-  ConsoleLogger: vi.fn().mockImplementation(() => ({})),
-  LogLevel: {
-    WARNING: 1,
-  },
+  })),
 }));
+
+// Mock Worker
+global.Worker = vi.fn().mockImplementation(() => ({})) as any;
+global.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
 
 describe('DuckDBClient', () => {
   let client: DuckDBClient;
+  let mockEnv: Env;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    mockEnv = {
+      ANALYTICS_SOURCE: {} as any,
+      ANALYTICS_PROCESSED: {} as any,
+      ANALYTICS_CATALOG: {} as any,
+      ANALYTICS_ENGINE: {} as any,
+      R2_ENDPOINT: 'https://test.r2.cloudflarestorage.com',
+      R2_ACCESS_KEY_ID: 'test-access-key',
+      R2_SECRET_ACCESS_KEY: 'test-secret-key',
+    };
   });
 
   afterEach(async () => {
@@ -34,77 +57,150 @@ describe('DuckDBClient', () => {
 
   describe('Initialization', () => {
     it('should create a client instance', () => {
-      client = new DuckDBClient();
+      client = new DuckDBClient(mockEnv);
       expect(client).toBeInstanceOf(DuckDBClient);
     });
 
-    it('should initialize on first query', async () => {
-      client = new DuckDBClient();
-      const mockQuery = vi.fn().mockResolvedValue({
-        toArray: () => Promise.resolve([{ count: 1 }]),
-      });
+    it('should initialize DuckDB on first use', async () => {
+      client = new DuckDBClient(mockEnv);
       
-      // Mock the connection
-      const mockConnection = { query: mockQuery, close: vi.fn() };
-      vi.mocked(await client['getConnection']).mockResolvedValue(mockConnection as any);
+      const mockResult = {
+        toArray: vi.fn().mockReturnValue([{ toJSON: () => ({ count: 1 }) }]),
+      };
+      
+      const mockConnection = {
+        query: vi.fn().mockResolvedValue(mockResult),
+        close: vi.fn(),
+      };
+      
+      const { AsyncDuckDB } = await import('@duckdb/duckdb-wasm');
+      const mockAsyncDuckDB = vi.mocked(AsyncDuckDB).mock.results[0].value;
+      mockAsyncDuckDB.connect = vi.fn().mockResolvedValue(mockConnection);
+      
+      await client.initialize();
+      
+      expect(AsyncDuckDB).toHaveBeenCalled();
+      expect(mockAsyncDuckDB.instantiate).toHaveBeenCalled();
+      expect(mockAsyncDuckDB.connect).toHaveBeenCalled();
+    });
 
-      await client.query('SELECT 1 as count');
-      expect(mockQuery).toHaveBeenCalledWith('SELECT 1 as count');
+    it('should configure S3 settings during initialization', async () => {
+      client = new DuckDBClient(mockEnv);
+      
+      const mockConnection = {
+        query: vi.fn().mockResolvedValue({ toArray: () => [] }),
+        close: vi.fn(),
+      };
+      
+      const { AsyncDuckDB } = await import('@duckdb/duckdb-wasm');
+      const mockAsyncDuckDB = vi.mocked(AsyncDuckDB).mock.results[0].value;
+      mockAsyncDuckDB.connect = vi.fn().mockResolvedValue(mockConnection);
+      
+      await client.initialize();
+      
+      // Check S3 configuration queries
+      const queries = mockConnection.query.mock.calls.map(call => call[0]);
+      expect(queries).toContain('INSTALL httpfs;');
+      expect(queries).toContain('LOAD httpfs;');
+      expect(queries.some(q => q.includes('SET s3_region='))).toBe(true);
+      expect(queries.some(q => q.includes('SET s3_endpoint='))).toBe(true);
+      expect(queries.some(q => q.includes('SET s3_access_key_id='))).toBe(true);
     });
   });
 
   describe('Query Execution', () => {
     it('should execute a simple query', async () => {
-      client = new DuckDBClient();
-      const mockResults = [{ value: 42 }];
+      client = new DuckDBClient(mockEnv);
       
-      const mockQuery = vi.fn().mockResolvedValue({
-        toArray: () => Promise.resolve(mockResults),
-      });
-
-      // Override the query method for testing
-      client.query = vi.fn().mockResolvedValue(mockResults);
-
+      const mockResults = [{ toJSON: () => ({ value: 42 }) }];
+      const mockResult = {
+        toArray: vi.fn().mockReturnValue(mockResults),
+      };
+      
+      const mockConnection = {
+        query: vi.fn().mockResolvedValue(mockResult),
+        close: vi.fn(),
+      };
+      
+      const { AsyncDuckDB } = await import('@duckdb/duckdb-wasm');
+      const mockAsyncDuckDB = vi.mocked(AsyncDuckDB).mock.results[0].value;
+      mockAsyncDuckDB.connect = vi.fn().mockResolvedValue(mockConnection);
+      
+      await client.initialize();
       const results = await client.query('SELECT 42 as value');
-      expect(results).toEqual(mockResults);
+      
+      expect(results).toEqual([{ value: 42 }]);
     });
 
     it('should handle query errors', async () => {
-      client = new DuckDBClient();
-      const errorMessage = 'Invalid SQL syntax';
+      client = new DuckDBClient(mockEnv);
       
-      client.query = vi.fn().mockRejectedValue(new Error(errorMessage));
-
-      await expect(client.query('INVALID SQL')).rejects.toThrow(errorMessage);
+      const mockConnection = {
+        query: vi.fn().mockRejectedValue(new Error('Invalid SQL syntax')),
+        close: vi.fn(),
+      };
+      
+      const { AsyncDuckDB } = await import('@duckdb/duckdb-wasm');
+      const mockAsyncDuckDB = vi.mocked(AsyncDuckDB).mock.results[0].value;
+      mockAsyncDuckDB.connect = vi.fn().mockResolvedValue(mockConnection);
+      
+      await client.initialize();
+      
+      await expect(client.query('INVALID SQL')).rejects.toThrow('Query failed: Error: Invalid SQL syntax');
     });
 
     it('should handle empty results', async () => {
-      client = new DuckDBClient();
-      client.query = vi.fn().mockResolvedValue([]);
-
+      client = new DuckDBClient(mockEnv);
+      
+      const mockResult = {
+        toArray: vi.fn().mockReturnValue([]),
+      };
+      
+      const mockConnection = {
+        query: vi.fn().mockResolvedValue(mockResult),
+        close: vi.fn(),
+      };
+      
+      const { AsyncDuckDB } = await import('@duckdb/duckdb-wasm');
+      const mockAsyncDuckDB = vi.mocked(AsyncDuckDB).mock.results[0].value;
+      mockAsyncDuckDB.connect = vi.fn().mockResolvedValue(mockConnection);
+      
+      await client.initialize();
       const results = await client.query('SELECT * FROM non_existent_table');
+      
       expect(results).toEqual([]);
+    });
+
+    it('should throw error if not initialized', async () => {
+      client = new DuckDBClient(mockEnv);
+      
+      await expect(client.query('SELECT 1')).rejects.toThrow('DuckDB connection not initialized');
     });
   });
 
   describe('Connection Management', () => {
     it('should close connection properly', async () => {
-      client = new DuckDBClient();
-      const mockClose = vi.fn();
+      client = new DuckDBClient(mockEnv);
       
-      // Mock the internal connection
-      client['connection'] = { close: mockClose } as any;
-      client['db'] = { terminate: vi.fn() } as any;
-      client['worker'] = { terminate: vi.fn() } as any;
-
+      const mockConnection = {
+        query: vi.fn().mockResolvedValue({ toArray: () => [] }),
+        close: vi.fn(),
+      };
+      
+      const { AsyncDuckDB } = await import('@duckdb/duckdb-wasm');
+      const mockAsyncDuckDB = vi.mocked(AsyncDuckDB).mock.results[0].value;
+      mockAsyncDuckDB.connect = vi.fn().mockResolvedValue(mockConnection);
+      mockAsyncDuckDB.terminate = vi.fn();
+      
+      await client.initialize();
       await client.close();
       
-      expect(mockClose).toHaveBeenCalled();
-      expect(client['connection']).toBeNull();
+      expect(mockConnection.close).toHaveBeenCalled();
+      expect(mockAsyncDuckDB.terminate).toHaveBeenCalled();
     });
 
     it('should handle multiple close calls gracefully', async () => {
-      client = new DuckDBClient();
+      client = new DuckDBClient(mockEnv);
       
       await client.close();
       // Second close should not throw
@@ -112,48 +208,51 @@ describe('DuckDBClient', () => {
     });
   });
 
-  describe('S3 Configuration', () => {
-    it('should configure S3 settings during initialization', async () => {
-      client = new DuckDBClient();
-      const mockQuery = vi.fn().mockResolvedValue({ toArray: () => Promise.resolve([]) });
-      
-      client.query = mockQuery;
-
-      // Trigger initialization
-      await client.query('SELECT 1');
-
-      // Check if S3 configuration queries were made
-      const calls = mockQuery.mock.calls.flat();
-      const hasS3Config = calls.some(call => 
-        call.includes('s3_endpoint') || 
-        call.includes('s3_url_style') ||
-        call.includes('s3_region')
-      );
-
-      // Since we're mocking, we won't see the actual S3 config calls
-      // This is more of a placeholder for when we have better mocking
-      expect(mockQuery).toHaveBeenCalled();
-    });
-  });
-
   describe('Error Handling', () => {
-    it('should handle initialization errors', async () => {
-      client = new DuckDBClient();
-      const initError = new Error('Failed to initialize DuckDB');
+    it('should log and rethrow query errors', async () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       
-      // Mock initialization failure
-      client['initialize'] = vi.fn().mockRejectedValue(initError);
-
-      await expect(client.query('SELECT 1')).rejects.toThrow('Failed to initialize DuckDB');
+      client = new DuckDBClient(mockEnv);
+      
+      const queryError = new Error('Query execution failed');
+      const mockConnection = {
+        query: vi.fn().mockRejectedValue(queryError),
+        close: vi.fn(),
+      };
+      
+      const { AsyncDuckDB } = await import('@duckdb/duckdb-wasm');
+      const mockAsyncDuckDB = vi.mocked(AsyncDuckDB).mock.results[0].value;
+      mockAsyncDuckDB.connect = vi.fn().mockResolvedValue(mockConnection);
+      
+      await client.initialize();
+      
+      await expect(client.query('SELECT 1')).rejects.toThrow('Query failed: Error: Query execution failed');
+      expect(consoleErrorSpy).toHaveBeenCalledWith('DuckDB query error:', queryError);
+      
+      consoleErrorSpy.mockRestore();
     });
 
-    it('should handle connection errors', async () => {
-      client = new DuckDBClient();
-      const connectionError = new Error('Connection lost');
+    it('should handle result conversion errors', async () => {
+      client = new DuckDBClient(mockEnv);
       
-      client['getConnection'] = vi.fn().mockRejectedValue(connectionError);
-
-      await expect(client.query('SELECT 1')).rejects.toThrow('Connection lost');
+      const mockResult = {
+        toArray: vi.fn().mockImplementation(() => {
+          throw new Error('Conversion failed');
+        }),
+      };
+      
+      const mockConnection = {
+        query: vi.fn().mockResolvedValue(mockResult),
+        close: vi.fn(),
+      };
+      
+      const { AsyncDuckDB } = await import('@duckdb/duckdb-wasm');
+      const mockAsyncDuckDB = vi.mocked(AsyncDuckDB).mock.results[0].value;
+      mockAsyncDuckDB.connect = vi.fn().mockResolvedValue(mockConnection);
+      
+      await client.initialize();
+      
+      await expect(client.query('SELECT 1')).rejects.toThrow('Query failed: Error: Conversion failed');
     });
   });
 });

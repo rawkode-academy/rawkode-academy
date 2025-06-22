@@ -1,5 +1,5 @@
 // Test setup file for Vitest
-import { beforeAll, afterAll, afterEach } from 'vitest';
+import { beforeAll, afterAll, afterEach, vi } from 'vitest';
 
 // Mock environment variables for tests
 process.env.NODE_ENV = 'test';
@@ -23,6 +23,15 @@ afterAll(() => {
 
 // Mock fetch for tests (if needed)
 global.fetch = vi.fn();
+
+// Mock Worker for DuckDB tests
+global.Worker = vi.fn().mockImplementation(() => ({
+  postMessage: vi.fn(),
+  terminate: vi.fn(),
+})) as any;
+
+// Mock URL.createObjectURL
+global.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
 
 // Mock console methods to reduce noise in tests
 const originalConsole = {
