@@ -1,10 +1,9 @@
-use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 use worker::*;
 
-use crate::utils::{log_error, log_info};
+use crate::utils::log_info;
 
 /// Iceberg table metadata version
 const ICEBERG_FORMAT_VERSION: i32 = 2;

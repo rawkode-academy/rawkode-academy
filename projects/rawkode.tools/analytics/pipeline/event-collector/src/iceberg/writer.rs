@@ -2,7 +2,7 @@ use crate::iceberg::schema::IcebergEventSchema;
 use crate::iceberg::metadata::{DataFile, FileFormat};
 use crate::utils::log_info;
 use arrow_array::{ArrayRef, TimestampMicrosecondArray, builder::{StringBuilder, Int32Builder}};
-use chrono::{Datelike, Timelike, Utc};
+use chrono::{DateTime, Datelike, Timelike, Utc};
 use cloudevents::{AttributesReader, Event};
 use parquet::arrow::ArrowWriter;
 use parquet::file::properties::WriterProperties;

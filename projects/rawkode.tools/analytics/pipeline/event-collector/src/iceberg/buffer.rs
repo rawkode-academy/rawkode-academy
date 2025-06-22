@@ -213,7 +213,7 @@ impl IcebergEventBuffer {
     async fn send_chunk_to_do(
         &self,
         request_id: &str,
-        stub: &Fetcher,
+        stub: &Stub,
         partition_key: &str,
         payload: &PartitionedEventPayload,
     ) -> Result<()> {
@@ -382,13 +382,13 @@ impl IcebergBufferDurableObject {
         };
 
         let initial_count = buffered_events.len();
-        buffered_events.extend(payload.events);
-
-        // Check buffer limits with memory estimation
-        let new_buffer_size = buffered_events.len();
-        let estimated_buffer_memory = new_buffer_size * ESTIMATED_EVENT_SIZE;
+        let new_events_count = payload.events.len();
         
-        if new_buffer_size > MAX_BUFFER_SIZE {
+        // Check if we would exceed buffer limits before adding
+        let potential_buffer_size = initial_count + new_events_count;
+        let estimated_buffer_memory = potential_buffer_size * ESTIMATED_EVENT_SIZE;
+        
+        if potential_buffer_size > MAX_BUFFER_SIZE {
             return Response::error(
                 format!("Buffer would exceed maximum size of {} events", MAX_BUFFER_SIZE),
                 507,
@@ -398,7 +398,7 @@ impl IcebergBufferDurableObject {
         if estimated_buffer_memory > 20 * 1024 * 1024 { // 20MB hard limit
             log_error(&format!(
                 "Buffer memory limit exceeded: {} events (~{} MB)",
-                new_buffer_size,
+                potential_buffer_size,
                 estimated_buffer_memory / 1024 / 1024
             ));
             // Force flush before accepting more events
@@ -411,8 +411,11 @@ impl IcebergBufferDurableObject {
                     );
                 }
             }
-            // Re-add the new events after flush
+            // After flush, start with just the new events
             buffered_events = payload.events;
+        } else {
+            // Normal case: add events to existing buffer
+            buffered_events.extend(payload.events);
         }
 
         // Save updated buffer
