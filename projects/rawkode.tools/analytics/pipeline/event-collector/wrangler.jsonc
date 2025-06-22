@@ -62,6 +62,12 @@
 			"new_classes": [
 				"IcebergBufferDurableObject"
 			]
+		},
+		{
+			"tag": "v3",
+			"deleted_classes": [
+				"EventBufferDurableObject"
+			]
 		}
 	],
 	"analytics_engine_datasets": [
