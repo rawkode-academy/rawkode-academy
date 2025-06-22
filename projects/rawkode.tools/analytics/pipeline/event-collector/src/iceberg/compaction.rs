@@ -435,6 +435,7 @@ impl IcebergCompactor {
 /// 
 /// Represents a planned compaction operation for files within a single partition
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct CompactionPlan {
     pub partition_key: String,
     pub source_files: Vec<DataFile>,
@@ -446,6 +447,7 @@ pub struct CompactionPlan {
 /// 
 /// Contains statistics and metadata about a completed compaction
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct CompactionResult {
     pub partition_key: String,
     pub source_files_count: usize,

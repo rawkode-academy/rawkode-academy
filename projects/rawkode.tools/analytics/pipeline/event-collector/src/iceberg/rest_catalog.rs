@@ -7,6 +7,7 @@ use worker::*;
 
 /// REST API catalog client for R2 Data Catalog
 /// This provides an alternative to direct R2 access when using a catalog service
+#[allow(dead_code)]
 pub struct RestCatalog {
     env: Env,
     catalog_endpoint: String,
@@ -80,6 +81,7 @@ pub enum TableUpdate {
     SetProperties { properties: HashMap<String, String> },
 }
 
+#[allow(dead_code)]
 impl RestCatalog {
     /// Create a new REST catalog client
     pub fn new(env: Env, endpoint: String, namespace: String) -> Self {
@@ -565,6 +567,7 @@ impl RestCatalog {
 /// Factory to create appropriate catalog based on configuration
 pub struct CatalogFactory;
 
+#[allow(dead_code)]
 impl CatalogFactory {
     /// Create a catalog instance based on environment configuration
     pub fn create_catalog(env: &Env) -> Box<dyn CatalogOperations> {
@@ -603,6 +606,7 @@ impl CatalogFactory {
 }
 
 /// Trait for catalog operations to allow swapping implementations
+#[allow(dead_code)]
 pub trait CatalogOperations: Send + Sync {
     fn create_table<'a>(
         &'a self,
@@ -633,10 +637,12 @@ pub trait CatalogOperations: Send + Sync {
 }
 
 /// Adapter to make REST catalog implement CatalogOperations
+#[allow(dead_code)]
 struct RestCatalogAdapter {
     catalog: RestCatalog,
 }
 
+#[allow(dead_code)]
 impl RestCatalogAdapter {
     fn new(catalog: RestCatalog) -> Self {
         Self { catalog }

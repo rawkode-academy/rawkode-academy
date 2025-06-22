@@ -75,6 +75,7 @@ pub enum FileFormat {
     Parquet,
 }
 
+#[allow(dead_code)]
 impl ManifestFile {
     /// Create a new manifest file from data files
     pub fn create(data_files: Vec<DataFile>) -> Self {
@@ -159,6 +160,7 @@ impl ManifestFile {
     }
 }
 
+#[allow(dead_code)]
 impl DataFile {
     /// Create a new data file
     pub fn new(

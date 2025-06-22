@@ -14,10 +14,13 @@ use worker::*;
 /// Configuration for Iceberg writer
 #[derive(Debug, Clone)]
 pub struct WriteConfig {
+    #[allow(dead_code)]
     pub target_file_size: u64,
     pub row_group_size: usize,
     pub compression: CompressionType,
+    #[allow(dead_code)]
     pub write_timeout: Duration,
+    #[allow(dead_code)]
     pub enable_bloom_filter: bool,
     pub enable_statistics: bool,
 }
@@ -36,6 +39,7 @@ impl Default for WriteConfig {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub enum CompressionType {
     None,
     Snappy,
@@ -46,6 +50,7 @@ pub enum CompressionType {
 
 /// Result of a write operation
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum WriteResult {
     Complete {
         data_file: DataFile,
@@ -60,6 +65,7 @@ pub enum WriteResult {
 
 /// Checkpoint for resuming partial writes
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct WriteCheckpoint {
     pub written_count: usize,
     pub partial_file: Option<String>,
@@ -210,6 +216,7 @@ impl IcebergWriter {
     }
 
     /// Write events with checkpoint support for large batches
+    #[allow(dead_code)]
     pub async fn write_with_checkpoint(
         &self,
         events: Vec<Event>,

@@ -71,7 +71,7 @@
 	// Track page view
 	const trackPageView = () => {
 		const data = {
-			action: "page.view",
+			action: "pageview", // Changed to match server-side convention
 			path: globalThis.location.pathname,
 			title: document.title || globalThis.location.pathname, // Include page title
 			referrer: document.referrer || "",
