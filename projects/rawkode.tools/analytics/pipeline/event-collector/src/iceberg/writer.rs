@@ -495,7 +495,7 @@ impl IcebergWriter {
             Arc::new(source_builder.finish()),
             Arc::new(type_builder.finish()),
             Arc::new(specversion_builder.finish()),
-            Arc::new(time_builder.finish()),
+            Arc::new(time_builder.finish().with_timezone("UTC")),
             Arc::new(datacontenttype_builder.finish()),
             Arc::new(dataschema_builder.finish()),
             Arc::new(subject_builder.finish()),

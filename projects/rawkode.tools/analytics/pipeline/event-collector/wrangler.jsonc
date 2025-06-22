@@ -24,7 +24,7 @@
 		"BUFFER_SIZE": "5",
 		"BUFFER_TIMEOUT_MS": "30000",
 		// Iceberg configuration
-		"USE_ICEBERG": "false", // Set to "true" to enable Iceberg format
+		"USE_ICEBERG": "true", // Set to "true" to enable Iceberg format
 		"ICEBERG_TABLE_LOCATION": "analytics/events",
 		"ICEBERG_BUFFER_SIZE": "2000",
 		"ICEBERG_BUFFER_TIMEOUT_MS": "30000",
