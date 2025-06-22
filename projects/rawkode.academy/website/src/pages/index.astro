@@ -21,9 +21,12 @@ const organizationSchema = {
 		"https://www.linkedin.com/company/rawkodeacademy/",
 	],
 };
+
+const pageTitle = "Cloud Native & Kubernetes Education | Rawkode Academy";
+const pageDescription = "Master Cloud Native technologies and Kubernetes with Rawkode Academy's expert-led courses, articles, and live streams. Stay ahead in the fast-evolving tech landscape.";
 ---
 
-<Page title="Rawkode Academy">
+<Page title={pageTitle} description={pageDescription}>
 	<Fragment slot="extra-head">
 		<script
 			is:inline
@@ -59,7 +62,7 @@ const organizationSchema = {
 
 	<FeatureList
 		title="Our Learning Path & Values"
-		description="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape."
+		description="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native and Kubernetes landscape."
 		segments={[
 			{
 				title: "Authenticity",

@@ -32,9 +32,12 @@ function formatDate(date: Date): string {
 		day: "numeric",
 	}).format(date);
 }
+
+const pageTitle = "Cloud Native & Kubernetes Articles | Rawkode Academy";
+const pageDescription = "Deep dive into cloud native technologies, Kubernetes, observability, and more. Articles written by practitioners for practitioners at Rawkode Academy.";
 ---
 
-<Page title="Articles">
+<Page title={pageTitle} description={pageDescription}>
   <style>
     @reference "@/styles/global.css";
 
