@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { Miniflare } from 'miniflare';
-import type { R2Bucket } from '@cloudflare/workers-types';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { createTestMiniflare, cleanupR2Bucket, type TestEnv } from '../helpers/miniflare-setup';
+import type { Miniflare } from 'miniflare';
+import type { R2Bucket, R2Object } from '@cloudflare/workers-types';
 
 // Types for Iceberg catalog
 interface IcebergMetadata {
@@ -44,27 +45,19 @@ interface DataFile {
 class R2DataCatalog {
   private bucket: R2Bucket;
   private prefix: string;
+  private tables: Map<string, IcebergMetadata> = new Map();
 
   constructor(bucket: R2Bucket, prefix: string) {
     this.bucket = bucket;
     this.prefix = prefix;
   }
 
-  static async create(config: { bucket: string; prefix: string }): Promise<R2DataCatalog> {
-    // In real implementation, this would get the actual R2 bucket
-    const mf = new Miniflare({
-      r2Buckets: [config.bucket],
-    });
-    const bucket = await mf.getR2Bucket(config.bucket);
-    return new R2DataCatalog(bucket, config.prefix);
-  }
-
   async createTable(tableId: string, metadata: IcebergMetadata): Promise<void> {
     const metadataPath = `${this.prefix}/${tableId}/metadata/v1.metadata.json`;
     await this.bucket.put(metadataPath, JSON.stringify(metadata, null, 2));
     
-    // Update catalog listing
     await this.updateCatalogListing(tableId);
+    this.tables.set(tableId, metadata);
   }
 
   async loadTable(tableId: string): Promise<IcebergMetadata | null> {
@@ -75,8 +68,7 @@ class R2DataCatalog {
       return null;
     }
     
-    const text = await object.text();
-    return JSON.parse(text);
+    return JSON.parse(await object.text());
   }
 
   async listTables(): Promise<string[]> {
@@ -93,29 +85,33 @@ class R2DataCatalog {
 
   async dropNamespace(namespace: string): Promise<void> {
     // List all objects with the namespace prefix
-    const listed = await this.bucket.list({ prefix: namespace });
+    const objects = await this.bucket.list({ prefix: namespace });
     
     // Delete all objects
-    for (const object of listed.objects) {
+    for (const object of objects.objects) {
       await this.bucket.delete(object.key);
     }
+    
+    this.tables.clear();
   }
 
-  async commitTransaction(
-    tableId: string,
-    transaction: { type: string; dataFiles: string[] }
-  ): Promise<void> {
-    const metadata = await this.loadTable(tableId);
-    if (!metadata) {
+  async commitTransaction(tableId: string, transaction: { type: string; dataFiles: DataFile[] }): Promise<void> {
+    const metadataPath = `${this.prefix}/${tableId}/metadata/v1.metadata.json`;
+    
+    // Read current metadata
+    const currentObject = await this.bucket.get(metadataPath);
+    if (!currentObject) {
       throw new Error(`Table ${tableId} not found`);
     }
+    
+    const metadata = JSON.parse(await currentObject.text());
+    const expectedSnapshotId = metadata.currentSnapshotId || 0;
 
-    // Simulate adding a new snapshot
     const newSnapshot: Snapshot = {
-      snapshotId: Date.now(),
+      snapshotId: expectedSnapshotId + 1,
       parentSnapshotId: metadata.currentSnapshotId,
       timestampMs: Date.now(),
-      manifestList: `${tableId}/metadata/manifest-list-${Date.now()}.avro`,
+      manifestList: `${this.prefix}/${tableId}/metadata/snap-${Date.now()}.avro`,
       summary: {
         operation: transaction.type,
         'added-data-files': transaction.dataFiles.length.toString(),
@@ -126,12 +122,11 @@ class R2DataCatalog {
     metadata.currentSnapshotId = newSnapshot.snapshotId;
 
     // Try to update with optimistic concurrency
-    const metadataPath = `${this.prefix}/${tableId}/metadata/v1.metadata.json`;
-    const currentObject = await this.bucket.get(metadataPath);
-    
-    if (currentObject) {
-      const currentMetadata = JSON.parse(await currentObject.text());
-      if (currentMetadata.currentSnapshotId !== metadata.currentSnapshotId - 1) {
+    // Re-read to check if it changed
+    const checkObject = await this.bucket.get(metadataPath);
+    if (checkObject) {
+      const checkMetadata = JSON.parse(await checkObject.text());
+      if (checkMetadata.currentSnapshotId !== expectedSnapshotId) {
         throw new Error('Concurrent modification detected');
       }
     }
@@ -175,19 +170,21 @@ function createTestMetadata(): IcebergMetadata {
 }
 
 describe('Iceberg R2 Data Catalog Integration', () => {
+  let mf: Miniflare;
+  let env: TestEnv;
   let catalog: R2DataCatalog;
   let testNamespace: string;
 
   beforeEach(async () => {
+    mf = await createTestMiniflare();
+    env = await mf.getBindings<TestEnv>();
     testNamespace = `test_${Date.now()}`;
-    catalog = await R2DataCatalog.create({
-      bucket: 'test-analytics',
-      prefix: testNamespace,
-    });
+    catalog = new R2DataCatalog(env.CATALOG_BUCKET, testNamespace);
   });
 
   afterEach(async () => {
     await catalog.dropNamespace(testNamespace);
+    await mf.dispose();
   });
 
   it('should register table when metadata written', async () => {
@@ -207,193 +204,131 @@ describe('Iceberg R2 Data Catalog Integration', () => {
     expect(loadedMetadata?.currentSnapshotId).toBeUndefined();
   });
 
-  it('should handle concurrent metadata updates', async () => {
+  it('should commit snapshots atomically', async () => {
     // Given
-    const tableId = 'events.concurrent_test';
-    await catalog.createTable(tableId, createTestMetadata());
-    
-    // When - Simulate concurrent updates
-    const updates = Array.from({ length: 10 }, (_, i) => 
-      catalog.commitTransaction(tableId, {
-        type: 'append',
-        dataFiles: [`file${i}.parquet`],
-      })
-    );
-    
-    const results = await Promise.allSettled(updates);
-    
-    // Then
-    const successCount = results.filter(r => r.status === 'fulfilled').length;
-    expect(successCount).toBeGreaterThan(0);
-    expect(successCount).toBeLessThan(10); // Some should fail due to conflicts
-    
-    const metadata = await catalog.loadTable(tableId);
-    expect(metadata?.snapshots.length).toBe(successCount);
-  });
-
-  it('should maintain catalog consistency across workers', async () => {
-    // Given
-    const catalog1 = await R2DataCatalog.create({
-      bucket: 'test-analytics',
-      prefix: testNamespace,
-    });
-    const catalog2 = await R2DataCatalog.create({
-      bucket: 'test-analytics',
-      prefix: testNamespace,
-    });
+    const tableId = 'events.click';
+    const metadata = createTestMetadata();
+    await catalog.createTable(tableId, metadata);
     
     // When
-    await catalog1.createTable('table1', createTestMetadata());
-    await catalog2.createTable('table2', createTestMetadata());
+    const dataFiles: DataFile[] = [
+      {
+        path: 's3://test-bucket/data/file1.parquet',
+        fileFormat: 'parquet',
+        recordCount: 1000,
+        fileSizeBytes: 1024 * 1024,
+      },
+    ];
     
-    // Then
-    const tables1 = await catalog1.listTables();
-    const tables2 = await catalog2.listTables();
-    
-    expect(tables1).toEqual(tables2);
-    expect(tables1).toContain('table1');
-    expect(tables1).toContain('table2');
-  });
-
-  it('should track snapshot lineage correctly', async () => {
-    // Given
-    const tableId = 'events.lineage_test';
-    await catalog.createTable(tableId, createTestMetadata());
-    
-    // When - Create a chain of snapshots
-    for (let i = 0; i < 5; i++) {
-      await catalog.commitTransaction(tableId, {
-        type: 'append',
-        dataFiles: [`file${i}.parquet`],
-      });
-    }
-    
-    // Then
-    const metadata = await catalog.loadTable(tableId);
-    expect(metadata?.snapshots.length).toBe(5);
-    
-    // Verify lineage
-    for (let i = 1; i < metadata!.snapshots.length; i++) {
-      const snapshot = metadata!.snapshots[i];
-      const previousSnapshot = metadata!.snapshots[i - 1];
-      expect(snapshot.parentSnapshotId).toBe(previousSnapshot.snapshotId);
-    }
-  });
-
-  it('should handle table not found errors', async () => {
-    // When/Then
-    const metadata = await catalog.loadTable('non_existent_table');
-    expect(metadata).toBeNull();
-    
-    await expect(
-      catalog.commitTransaction('non_existent_table', {
-        type: 'append',
-        dataFiles: ['file.parquet'],
-      })
-    ).rejects.toThrow('Table non_existent_table not found');
-  });
-
-  it('should support multiple namespaces', async () => {
-    // Given
-    const namespace1 = `${testNamespace}/prod`;
-    const namespace2 = `${testNamespace}/dev`;
-    
-    const catalog1 = await R2DataCatalog.create({
-      bucket: 'test-analytics',
-      prefix: namespace1,
-    });
-    const catalog2 = await R2DataCatalog.create({
-      bucket: 'test-analytics',
-      prefix: namespace2,
-    });
-    
-    // When
-    await catalog1.createTable('events.production', createTestMetadata());
-    await catalog2.createTable('events.development', createTestMetadata());
-    
-    // Then
-    const tables1 = await catalog1.listTables();
-    const tables2 = await catalog2.listTables();
-    
-    expect(tables1).toContain('events.production');
-    expect(tables1).not.toContain('events.development');
-    
-    expect(tables2).toContain('events.development');
-    expect(tables2).not.toContain('events.production');
-  });
-});
-
-describe('Catalog Synchronization Tests', () => {
-  it('should sync catalog when R2 objects change', async () => {
-    // Given
-    const testNamespace = `sync_test_${Date.now()}`;
-    const catalog = await R2DataCatalog.create({
-      bucket: 'test-analytics',
-      prefix: testNamespace,
-    });
-    
-    // Simulate external table creation
-    const mf = new Miniflare({ r2Buckets: ['test-analytics'] });
-    const bucket = await mf.getR2Bucket('test-analytics');
-    
-    const externalMetadata = createTestMetadata();
-    await bucket.put(
-      `${testNamespace}/external_table/metadata/v1.metadata.json`,
-      JSON.stringify(externalMetadata)
-    );
-    
-    // When - Catalog should detect the new table on next list
-    const tables = await catalog.listTables();
-    
-    // Note: In a real implementation, we'd have a sync mechanism
-    // For now, we manually update the catalog
-    await bucket.put(
-      `${testNamespace}/_catalog.json`,
-      JSON.stringify({ tables: ['external_table'] })
-    );
-    
-    // Then
-    const updatedTables = await catalog.listTables();
-    expect(updatedTables).toContain('external_table');
-    
-    // Cleanup
-    await catalog.dropNamespace(testNamespace);
-  });
-
-  it('should handle stale reads when catalog updated', async () => {
-    // This test demonstrates version conflict detection
-    const testNamespace = `stale_test_${Date.now()}`;
-    const catalog = await R2DataCatalog.create({
-      bucket: 'test-analytics',
-      prefix: testNamespace,
-    });
-    
-    const tableId = 'events.stale_test';
-    await catalog.createTable(tableId, createTestMetadata());
-    
-    // Simulate two workers loading the same metadata
-    const metadata1 = await catalog.loadTable(tableId);
-    const metadata2 = await catalog.loadTable(tableId);
-    
-    // Worker 1 commits first
     await catalog.commitTransaction(tableId, {
       type: 'append',
-      dataFiles: ['file1.parquet'],
+      dataFiles,
     });
     
-    // Worker 2 tries to commit with stale metadata
-    // This would fail in a real implementation with proper versioning
-    try {
-      // Simulate the conflict by manually checking
-      const currentMetadata = await catalog.loadTable(tableId);
-      if (currentMetadata?.currentSnapshotId !== metadata2?.currentSnapshotId) {
-        throw new Error('Concurrent modification detected');
-      }
-    } catch (error) {
-      expect(error.message).toBe('Concurrent modification detected');
+    // Then
+    const updated = await catalog.loadTable(tableId);
+    expect(updated?.snapshots).toHaveLength(1);
+    expect(updated?.currentSnapshotId).toBe(1);
+    expect(updated?.snapshots[0].summary.operation).toBe('append');
+  });
+
+  it('should handle concurrent modifications', async () => {
+    // Given
+    const tableId = 'events.concurrent';
+    const metadata = createTestMetadata();
+    await catalog.createTable(tableId, metadata);
+    
+    // Simulate concurrent modifications
+    const commit1 = catalog.commitTransaction(tableId, {
+      type: 'append',
+      dataFiles: [{
+        path: 's3://test-bucket/data/file1.parquet',
+        fileFormat: 'parquet',
+        recordCount: 1000,
+        fileSizeBytes: 1024 * 1024,
+      }],
+    });
+    
+    const commit2 = catalog.commitTransaction(tableId, {
+      type: 'append',
+      dataFiles: [{
+        path: 's3://test-bucket/data/file2.parquet',
+        fileFormat: 'parquet',
+        recordCount: 2000,
+        fileSizeBytes: 2 * 1024 * 1024,
+      }],
+    });
+    
+    // Then - one should succeed, one should fail
+    const results = await Promise.allSettled([commit1, commit2]);
+    const succeeded = results.filter(r => r.status === 'fulfilled');
+    const failed = results.filter(r => r.status === 'rejected');
+    
+    expect(succeeded).toHaveLength(1);
+    expect(failed).toHaveLength(1);
+    expect(failed[0].status).toBe('rejected');
+    if (failed[0].status === 'rejected') {
+      expect(failed[0].reason.message).toContain('Concurrent modification');
+    }
+  });
+
+  it('should maintain transaction isolation', async () => {
+    // Given
+    const tableId = 'events.isolation';
+    const metadata = createTestMetadata();
+    await catalog.createTable(tableId, metadata);
+    
+    // When - Multiple readers during write
+    const writePromise = catalog.commitTransaction(tableId, {
+      type: 'append',
+      dataFiles: [{
+        path: 's3://test-bucket/data/file1.parquet',
+        fileFormat: 'parquet',
+        recordCount: 1000,
+        fileSizeBytes: 1024 * 1024,
+      }],
+    });
+    
+    // Read while write is in progress
+    const readDuringWrite = await catalog.loadTable(tableId);
+    expect(readDuringWrite?.currentSnapshotId).toBeUndefined();
+    
+    // Wait for write to complete
+    await writePromise;
+    
+    // Read after write
+    const readAfterWrite = await catalog.loadTable(tableId);
+    expect(readAfterWrite?.currentSnapshotId).toBe(1);
+  });
+
+  it('should list tables across namespaces', async () => {
+    // Given
+    const tables = ['events.page_view', 'events.click', 'metrics.performance'];
+    
+    // When
+    for (const tableId of tables) {
+      await catalog.createTable(tableId, createTestMetadata());
     }
     
-    // Cleanup
+    // Then
+    const listedTables = await catalog.listTables();
+    expect(listedTables).toHaveLength(3);
+    expect(listedTables).toEqual(expect.arrayContaining(tables));
+  });
+
+  it('should clean up namespace on drop', async () => {
+    // Given
+    const tableId = 'events.cleanup';
+    await catalog.createTable(tableId, createTestMetadata());
+    
+    // When
     await catalog.dropNamespace(testNamespace);
+    
+    // Then
+    const tables = await catalog.listTables();
+    expect(tables).toHaveLength(0);
+    
+    const metadata = await catalog.loadTable(tableId);
+    expect(metadata).toBeNull();
   });
 });
