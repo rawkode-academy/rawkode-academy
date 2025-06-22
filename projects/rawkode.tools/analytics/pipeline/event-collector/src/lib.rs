@@ -1,5 +1,7 @@
 use cloudevents::{Event, EventBuilder, EventBuilderV10};
+use flate2::read::GzDecoder;
 use serde::{Deserialize, Serialize};
+use std::io::Read;
 use worker::*;
 
 mod buffer;
@@ -244,21 +246,61 @@ async fn handle_batch_events(mut req: Request, ctx: RouteContext<()>) -> Result<
             }
         }
     }
-    let batch: BatchEventsRequest = match req.json::<BatchEventsRequest>().await {
-        Ok(batch) => {
-            utils::log_info(&format!(
-                "Received batch with {} events",
-                batch.events.len()
-            ));
-            batch
+
+    // Check if the request is compressed
+    let is_compressed = req.headers()
+        .get("content-encoding")
+        .ok()
+        .flatten()
+        .map(|ce| ce.to_lowercase() == "gzip")
+        .unwrap_or(false);
+
+    let batch: BatchEventsRequest = if is_compressed {
+        utils::log_info("Decompressing gzipped batch request");
+        // Get the raw bytes
+        let compressed_bytes = req.bytes().await?;
+        
+        // Decompress
+        let mut decoder = GzDecoder::new(&compressed_bytes[..]);
+        let mut decompressed = String::new();
+        decoder.read_to_string(&mut decompressed)
+            .map_err(|e| Error::BadEncoding(format!("Failed to decompress: {}", e)))?;
+        
+        // Parse JSON
+        match serde_json::from_str::<BatchEventsRequest>(&decompressed) {
+            Ok(batch) => {
+                utils::log_info(&format!(
+                    "Decompressed and parsed batch with {} events",
+                    batch.events.len()
+                ));
+                batch
+            }
+            Err(e) => {
+                utils::log_error(&format!("Failed to parse decompressed batch: {}", e));
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "Invalid batch format".to_string(),
+                    details: Some(e.to_string()),
+                })?
+                .with_status(400));
+            }
         }
-        Err(e) => {
-            utils::log_error(&format!("Failed to parse batch request: {}", e));
-            return Ok(Response::from_json(&ErrorResponse {
-                error: "Invalid batch format".to_string(),
-                details: Some(e.to_string()),
-            })?
-            .with_status(400));
+    } else {
+        match req.json::<BatchEventsRequest>().await {
+            Ok(batch) => {
+                utils::log_info(&format!(
+                    "Received batch with {} events",
+                    batch.events.len()
+                ));
+                batch
+            }
+            Err(e) => {
+                utils::log_error(&format!("Failed to parse batch request: {}", e));
+                return Ok(Response::from_json(&ErrorResponse {
+                    error: "Invalid batch format".to_string(),
+                    details: Some(e.to_string()),
+                })?
+                .with_status(400));
+            }
         }
     };
 

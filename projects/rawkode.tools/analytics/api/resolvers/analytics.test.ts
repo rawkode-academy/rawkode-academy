@@ -1,26 +1,57 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { analyticsResolvers } from './analytics';
+import { analyticsResolver } from './analytics';
 import { DuckDBClient } from '../utils/duckdb-client';
+import { QueryBuilder } from '../utils/query-builder';
 
 // Mock DuckDBClient
-const mockQuery = vi.fn();
-const mockDuckDB = {
-  query: mockQuery,
-} as unknown as DuckDBClient;
+vi.mock('../utils/duckdb-client', () => ({
+  DuckDBClient: vi.fn().mockImplementation(() => ({
+    initialize: vi.fn(),
+    query: vi.fn(),
+    close: vi.fn(),
+  })),
+}));
 
-// Mock context
-const mockContext = {
-  duckdb: mockDuckDB,
-  env: {
-    ANALYTICS_SOURCE_BUCKET: 'test-analytics-bucket',
-    CATALOG_BUCKET: 'test-catalog-bucket',
-    DB: {} as any,
-  },
-};
+// Mock QueryBuilder
+vi.mock('../utils/query-builder', () => ({
+  QueryBuilder: vi.fn().mockImplementation(() => {
+    const builder = {
+      select: vi.fn().mockReturnThis(),
+      from: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      groupBy: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      build: vi.fn().mockReturnValue('SELECT * FROM events'),
+    };
+    return builder;
+  }),
+  addTimeRangeConditions: vi.fn(),
+}));
 
 describe('Analytics Resolvers', () => {
+  let mockClient: any;
+  let mockContext: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    mockClient = {
+      initialize: vi.fn(),
+      query: vi.fn(),
+      close: vi.fn(),
+    };
+    
+    vi.mocked(DuckDBClient).mockImplementation(() => mockClient);
+    
+    mockContext = {
+      env: {
+        ANALYTICS_SOURCE: {} as any,
+        ANALYTICS_PROCESSED: {} as any,
+        ANALYTICS_CATALOG: {} as any,
+        ANALYTICS_ENGINE: {} as any,
+        NODE_ENV: 'test',
+      },
+    };
   });
 
   describe('eventCounts', () => {
@@ -29,7 +60,7 @@ describe('Analytics Resolvers', () => {
         { event_type: 'page_view', count: 100 },
         { event_type: 'click', count: 50 },
       ];
-      mockQuery.mockResolvedValue(mockResults);
+      mockClient.query.mockResolvedValue(mockResults);
 
       const args = {
         timeRange: {
@@ -38,46 +69,37 @@ describe('Analytics Resolvers', () => {
         },
       };
 
-      const result = await analyticsResolvers.Query.eventCounts(
-        {},
-        args,
-        mockContext
-      );
+      const result = await analyticsResolver.eventCounts({}, args, mockContext);
 
-      expect(mockQuery).toHaveBeenCalledTimes(1);
-      expect(mockQuery.mock.calls[0][0]).toContain('SELECT event_type, COUNT(*) as count');
-      expect(mockQuery.mock.calls[0][0]).toContain('GROUP BY event_type');
-      expect(mockQuery.mock.calls[0][0]).toContain('ORDER BY count DESC');
+      expect(mockClient.initialize).toHaveBeenCalled();
+      expect(mockClient.query).toHaveBeenCalled();
+      expect(mockClient.close).toHaveBeenCalled();
       
       expect(result).toEqual([
-        { eventType: 'page_view', count: 100 },
-        { eventType: 'click', count: 50 },
+        { dimensions: JSON.stringify({ event_type: 'page_view' }), count: 100 },
+        { dimensions: JSON.stringify({ event_type: 'click' }), count: 50 },
       ]);
     });
 
-    it('should apply filters when provided', async () => {
-      mockQuery.mockResolvedValue([]);
+    it('should apply event type filter when provided', async () => {
+      mockClient.query.mockResolvedValue([]);
 
       const args = {
+        eventType: 'page_view',
         timeRange: {
           start: '2024-01-01T00:00:00Z',
           end: '2024-01-31T23:59:59Z',
         },
-        filter: {
-          eventTypes: ['page_view', 'click'],
-          source: 'web',
-        },
       };
 
-      await analyticsResolvers.Query.eventCounts({}, args, mockContext);
+      await analyticsResolver.eventCounts({}, args, mockContext);
 
-      const query = mockQuery.mock.calls[0][0];
-      expect(query).toContain("event_type IN ('page_view', 'click')");
-      expect(query).toContain("source = 'web'");
+      const queryBuilder = vi.mocked(QueryBuilder).mock.results[0].value;
+      expect(queryBuilder.where).toHaveBeenCalledWith('type', '=', 'page_view');
     });
 
     it('should handle empty results', async () => {
-      mockQuery.mockResolvedValue([]);
+      mockClient.query.mockResolvedValue([]);
 
       const args = {
         timeRange: {
@@ -86,17 +108,13 @@ describe('Analytics Resolvers', () => {
         },
       };
 
-      const result = await analyticsResolvers.Query.eventCounts(
-        {},
-        args,
-        mockContext
-      );
+      const result = await analyticsResolver.eventCounts({}, args, mockContext);
 
       expect(result).toEqual([]);
     });
 
     it('should handle query errors', async () => {
-      mockQuery.mockRejectedValue(new Error('Query failed'));
+      mockClient.query.mockRejectedValue(new Error('Query failed'));
 
       const args = {
         timeRange: {
@@ -106,230 +124,160 @@ describe('Analytics Resolvers', () => {
       };
 
       await expect(
-        analyticsResolvers.Query.eventCounts({}, args, mockContext)
+        analyticsResolver.eventCounts({}, args, mockContext)
       ).rejects.toThrow('Query failed');
+      
+      // Ensure close is still called on error
+      expect(mockClient.close).toHaveBeenCalled();
     });
-  });
 
-  describe('eventDetails', () => {
-    it('should return event details with pagination', async () => {
+    it('should group by specified columns', async () => {
       const mockResults = [
-        {
-          event_id: '123',
-          event_type: 'page_view',
-          time: '2024-01-15T10:30:00Z',
-          source: 'web',
-          data: '{"page": "/home"}',
-        },
+        { event_type: 'page_view', source: 'web', count: 100 },
+        { event_type: 'click', source: 'mobile', count: 50 },
       ];
-      mockQuery.mockResolvedValue(mockResults);
+      mockClient.query.mockResolvedValue(mockResults);
 
       const args = {
-        timeRange: {
-          start: '2024-01-01T00:00:00Z',
-          end: '2024-01-31T23:59:59Z',
-        },
-        limit: 10,
-        offset: 0,
+        groupBy: ['event_type', 'source'],
       };
 
-      const result = await analyticsResolvers.Query.eventDetails(
-        {},
-        args,
-        mockContext
-      );
+      const result = await analyticsResolver.eventCounts({}, args, mockContext);
 
-      expect(mockQuery).toHaveBeenCalledTimes(1);
-      expect(mockQuery.mock.calls[0][0]).toContain('SELECT *');
-      expect(mockQuery.mock.calls[0][0]).toContain('ORDER BY time DESC');
-      expect(mockQuery.mock.calls[0][0]).toContain('LIMIT 10');
-      expect(mockQuery.mock.calls[0][0]).toContain('OFFSET 0');
-
+      const queryBuilder = vi.mocked(QueryBuilder).mock.results[0].value;
+      expect(queryBuilder.select).toHaveBeenCalledWith('event_type', 'source', 'COUNT(*) as count');
+      expect(queryBuilder.groupBy).toHaveBeenCalledWith('event_type', 'source');
+      
       expect(result).toEqual([
-        {
-          eventId: '123',
-          eventType: 'page_view',
-          time: '2024-01-15T10:30:00Z',
-          source: 'web',
-          data: { page: '/home' },
-        },
+        { dimensions: JSON.stringify({ event_type: 'page_view', source: 'web' }), count: 100 },
+        { dimensions: JSON.stringify({ event_type: 'click', source: 'mobile' }), count: 50 },
       ]);
     });
 
-    it('should use default pagination values', async () => {
-      mockQuery.mockResolvedValue([]);
+    it('should filter out invalid columns from groupBy', async () => {
+      mockClient.query.mockResolvedValue([]);
 
       const args = {
-        timeRange: {
-          start: '2024-01-01T00:00:00Z',
-          end: '2024-01-31T23:59:59Z',
-        },
+        groupBy: ['event_type', 'invalid_column', 'source'],
       };
 
-      await analyticsResolvers.Query.eventDetails({}, args, mockContext);
+      await analyticsResolver.eventCounts({}, args, mockContext);
 
-      const query = mockQuery.mock.calls[0][0];
-      expect(query).toContain('LIMIT 100');
-      expect(query).toContain('OFFSET 0');
-    });
-
-    it('should parse JSON data field', async () => {
-      const mockResults = [
-        {
-          event_id: '123',
-          event_type: 'click',
-          time: '2024-01-15T10:30:00Z',
-          source: 'web',
-          data: '{"button": "submit", "form": "login"}',
-        },
-      ];
-      mockQuery.mockResolvedValue(mockResults);
-
-      const args = {
-        timeRange: {
-          start: '2024-01-01T00:00:00Z',
-          end: '2024-01-31T23:59:59Z',
-        },
-      };
-
-      const result = await analyticsResolvers.Query.eventDetails(
-        {},
-        args,
-        mockContext
-      );
-
-      expect(result[0].data).toEqual({
-        button: 'submit',
-        form: 'login',
-      });
-    });
-
-    it('should handle invalid JSON in data field', async () => {
-      const mockResults = [
-        {
-          event_id: '123',
-          event_type: 'error',
-          time: '2024-01-15T10:30:00Z',
-          source: 'web',
-          data: 'invalid json',
-        },
-      ];
-      mockQuery.mockResolvedValue(mockResults);
-
-      const args = {
-        timeRange: {
-          start: '2024-01-01T00:00:00Z',
-          end: '2024-01-31T23:59:59Z',
-        },
-      };
-
-      const result = await analyticsResolvers.Query.eventDetails(
-        {},
-        args,
-        mockContext
-      );
-
-      expect(result[0].data).toBe('invalid json');
+      const queryBuilder = vi.mocked(QueryBuilder).mock.results[0].value;
+      expect(queryBuilder.select).toHaveBeenCalledWith('event_type', 'source', 'COUNT(*) as count');
+      expect(queryBuilder.groupBy).toHaveBeenCalledWith('event_type', 'source');
     });
   });
 
-  describe('eventTimeSeries', () => {
-    it('should return time series data with hourly granularity', async () => {
-      const mockResults = [
-        { time_bucket: '2024-01-15T10:00:00Z', count: 25 },
-        { time_bucket: '2024-01-15T11:00:00Z', count: 30 },
-      ];
-      mockQuery.mockResolvedValue(mockResults);
+  describe('rawQuery', () => {
+    it('should execute SELECT queries in non-production', async () => {
+      const mockResults = [{ id: 1, name: 'test' }];
+      mockClient.query.mockResolvedValue(mockResults);
 
       const args = {
-        timeRange: {
-          start: '2024-01-15T00:00:00Z',
-          end: '2024-01-15T23:59:59Z',
-        },
-        granularity: 'HOUR',
+        query: "SELECT * FROM read_parquet('s3://analytics-source/events/2024/*.parquet')",
       };
 
-      const result = await analyticsResolvers.Query.eventTimeSeries(
-        {},
-        args,
-        mockContext
-      );
+      const result = await analyticsResolver.rawQuery({}, args, mockContext);
 
-      expect(mockQuery).toHaveBeenCalledTimes(1);
-      expect(mockQuery.mock.calls[0][0]).toContain('date_trunc');
-      expect(mockQuery.mock.calls[0][0]).toContain("'hour'");
+      expect(mockClient.initialize).toHaveBeenCalled();
+      expect(mockClient.query).toHaveBeenCalledWith(args.query);
+      expect(mockClient.close).toHaveBeenCalled();
       
-      expect(result).toEqual({
-        labels: ['2024-01-15T10:00:00Z', '2024-01-15T11:00:00Z'],
-        datasets: [
-          {
-            label: 'Events',
-            data: [25, 30],
-          },
-        ],
-      });
+      expect(result).toBe(JSON.stringify(mockResults, null, 2));
     });
 
-    it('should handle different granularities', async () => {
-      mockQuery.mockResolvedValue([]);
+    it('should reject queries in production environment', async () => {
+      mockContext.env.NODE_ENV = 'production';
 
-      const testCases = [
-        { granularity: 'DAY', expected: "'day'" },
-        { granularity: 'WEEK', expected: "'week'" },
-        { granularity: 'MONTH', expected: "'month'" },
+      const args = {
+        query: 'SELECT * FROM events',
+      };
+
+      await expect(
+        analyticsResolver.rawQuery({}, args, mockContext)
+      ).rejects.toThrow('Raw queries are disabled in production for security reasons');
+    });
+
+    it('should reject non-SELECT queries', async () => {
+      const args = {
+        query: 'UPDATE events SET status = "deleted"',
+      };
+
+      await expect(
+        analyticsResolver.rawQuery({}, args, mockContext)
+      ).rejects.toThrow('Only SELECT queries are allowed');
+    });
+
+    it('should reject queries with forbidden keywords', async () => {
+      const forbiddenQueries = [
+        'SELECT * FROM events; DROP TABLE events',
+        'SELECT * FROM events WHERE id = 1 OR DELETE FROM events',
+        'SELECT * FROM events; INSERT INTO events VALUES (1, 2, 3)',
+        'SELECT * FROM events UNION SELECT * FROM users',
       ];
 
-      for (const testCase of testCases) {
-        vi.clearAllMocks();
-        
-        const args = {
-          timeRange: {
-            start: '2024-01-01T00:00:00Z',
-            end: '2024-12-31T23:59:59Z',
-          },
-          granularity: testCase.granularity as any,
-        };
-
-        await analyticsResolvers.Query.eventTimeSeries({}, args, mockContext);
-
-        const query = mockQuery.mock.calls[0][0];
-        expect(query).toContain(testCase.expected);
+      for (const query of forbiddenQueries) {
+        await expect(
+          analyticsResolver.rawQuery({}, { query }, mockContext)
+        ).rejects.toThrow();
       }
     });
 
-    it('should filter by event type when provided', async () => {
-      mockQuery.mockResolvedValue([]);
+    it('should reject queries with suspicious patterns', async () => {
+      const suspiciousQueries = [
+        'SELECT * FROM events WHERE id = 1 OR 1=1 OR id = 2',
+        'SELECT * FROM events -- DROP TABLE',
+        'SELECT * FROM events /* comment */ DROP TABLE',
+        'SELECT SLEEP(10)',
+        'SELECT * FROM events WHERE name = CHAR(65,66,67)',
+        'SELECT * FROM events WHERE id = 0x1234',
+      ];
 
-      const args = {
-        timeRange: {
-          start: '2024-01-01T00:00:00Z',
-          end: '2024-01-31T23:59:59Z',
-        },
-        filter: {
-          eventTypes: ['page_view'],
-        },
-      };
-
-      await analyticsResolvers.Query.eventTimeSeries({}, args, mockContext);
-
-      const query = mockQuery.mock.calls[0][0];
-      expect(query).toContain("event_type IN ('page_view')");
+      for (const query of suspiciousQueries) {
+        await expect(
+          analyticsResolver.rawQuery({}, { query }, mockContext)
+        ).rejects.toThrow('Query contains suspicious patterns');
+      }
     });
 
-    it('should default to HOUR granularity', async () => {
-      mockQuery.mockResolvedValue([]);
-
+    it('should reject queries not reading from allowed tables', async () => {
       const args = {
-        timeRange: {
-          start: '2024-01-01T00:00:00Z',
-          end: '2024-01-31T23:59:59Z',
-        },
+        query: 'SELECT * FROM secret_table',
       };
 
-      await analyticsResolvers.Query.eventTimeSeries({}, args, mockContext);
+      await expect(
+        analyticsResolver.rawQuery({}, args, mockContext)
+      ).rejects.toThrow('Query must read from allowed analytics tables only');
+    });
 
-      const query = mockQuery.mock.calls[0][0];
-      expect(query).toContain("'hour'");
+    it('should allow queries reading from analytics tables', async () => {
+      mockClient.query.mockResolvedValue([]);
+
+      const validQueries = [
+        "SELECT * FROM read_parquet('s3://analytics-source/events/2024/*.parquet')",
+        "SELECT * FROM read_parquet('s3://analytics-processed/aggregated/daily/*.parquet')",
+      ];
+
+      for (const query of validQueries) {
+        await expect(
+          analyticsResolver.rawQuery({}, { query }, mockContext)
+        ).resolves.toBe('[]');
+      }
+    });
+
+    it('should close client even on error', async () => {
+      mockClient.query.mockRejectedValue(new Error('Query failed'));
+
+      const args = {
+        query: "SELECT * FROM read_parquet('s3://analytics-source/events/*.parquet')",
+      };
+
+      await expect(
+        analyticsResolver.rawQuery({}, args, mockContext)
+      ).rejects.toThrow('Query failed');
+      
+      expect(mockClient.close).toHaveBeenCalled();
     });
   });
 });

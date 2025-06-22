@@ -1,0 +1,63 @@
+{
+  "name": "@rawkode-tools/analytics-sdk",
+  "version": "1.0.0",
+  "description": "Frontend event collection SDK with batching, offline support, and compression",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "cloudevents": "^10.0.0",
+    "idb": "^8.0.2",
+    "pako": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pako": "^2.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "@vitest/coverage-v8": "^2.1.9",
+    "eslint": "^9.29.0",
+    "fake-indexeddb": "^6.0.0",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.5.3",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "analytics",
+    "event-tracking",
+    "cloudevents",
+    "sdk",
+    "frontend",
+    "batching",
+    "offline-support"
+  ],
+  "author": "Rawkode Academy",
+  "license": "MIT"
+}

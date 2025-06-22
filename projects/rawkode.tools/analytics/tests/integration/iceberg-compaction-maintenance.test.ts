@@ -182,10 +182,14 @@ class SnapshotManager {
 
     // Ensure minimum snapshots are kept
     if (policy.minSnapshotsToKeep) {
-      const toKeep = snapshots.length - eligibleForRemoval.length;
-      if (toKeep < policy.minSnapshotsToKeep) {
-        const keepCount = policy.minSnapshotsToKeep - toKeep;
-        eligibleForRemoval = eligibleForRemoval.slice(keepCount);
+      const totalSnapshots = snapshots.length;
+      const willRemain = totalSnapshots - eligibleForRemoval.length;
+      
+      if (willRemain < policy.minSnapshotsToKeep) {
+        // Need to keep some that would otherwise be removed
+        const needToKeep = policy.minSnapshotsToKeep - willRemain;
+        // Remove from the end (keep the newest of the eligible)
+        eligibleForRemoval = eligibleForRemoval.slice(0, eligibleForRemoval.length - needToKeep);
       }
     }
 
@@ -323,15 +327,17 @@ describe('Compactor Integration Tests', () => {
 describe('Maintenance Operations', () => {
   it('should expire old snapshots based on retention policy', async () => {
     // Given
+    const now = Date.now();
+    const dayInMs = 24 * 60 * 60 * 1000;
     const snapshots: Snapshot[] = Array.from({ length: 10 }, (_, i) => ({
       snapshotId: i,
-      timestampMs: Date.now() - (i * 24 * 60 * 60 * 1000), // i days ago
+      timestampMs: now - (i * dayInMs), // i days ago
       parentSnapshotId: i > 0 ? i - 1 : undefined,
       manifestList: `manifest-${i}.avro`,
     }));
     
     const policy: RetentionPolicy = {
-      maxSnapshotAgeMs: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxSnapshotAgeMs: 7 * dayInMs, // 7 days
       minSnapshotsToKeep: 2,
     };
     
@@ -341,8 +347,8 @@ describe('Maintenance Operations', () => {
     const expired = await manager.expireSnapshots(snapshots, policy);
     
     // Then
-    expect(expired.length).toBe(3); // Snapshots 7, 8, 9 (older than 7 days)
-    expect(expired.every(s => s.snapshotId >= 7)).toBe(true);
+    expect(expired.length).toBe(2); // Snapshots 8, 9 (older than 7 days, not including exactly 7 days)
+    expect(expired.every(s => s.snapshotId >= 8)).toBe(true);
   });
 
   it('should respect minimum snapshots to keep', async () => {

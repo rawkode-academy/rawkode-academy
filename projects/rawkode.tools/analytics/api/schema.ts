@@ -4,13 +4,14 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLInputObjectType,
   GraphQLSchema,
   GraphQLString,
 } from 'graphql';
 import { analyticsResolver } from './resolvers/analytics';
 import { catalogResolver } from './resolvers/catalog';
 
-const TimeRangeInput = new GraphQLObjectType({
+const TimeRangeInput = new GraphQLInputObjectType({
   name: 'TimeRangeInput',
   fields: {
     start: { type: new GraphQLNonNull(GraphQLString) },
