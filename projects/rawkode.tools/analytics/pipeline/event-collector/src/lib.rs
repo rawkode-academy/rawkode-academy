@@ -263,8 +263,10 @@ async fn handle_batch_events(mut req: Request, ctx: RouteContext<()>) -> Result<
         // Decompress
         let mut decoder = GzDecoder::new(&compressed_bytes[..]);
         let mut decompressed = String::new();
-        decoder.read_to_string(&mut decompressed)
-            .map_err(|e| Error::BadEncoding(format!("Failed to decompress: {}", e)))?;
+        match decoder.read_to_string(&mut decompressed) {
+            Ok(_) => {},
+            Err(e) => return Err(worker::Error::RustError(format!("Failed to decompress: {}", e))),
+        }
         
         // Parse JSON
         match serde_json::from_str::<BatchEventsRequest>(&decompressed) {

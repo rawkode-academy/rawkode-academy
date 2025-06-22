@@ -14,6 +14,7 @@
 //! - Failed compactions don't affect table consistency
 
 use crate::utils::{log_error, log_info};
+use arrow_array::{Array, RecordBatch};
 use std::collections::HashMap;
 use worker::*;
 
@@ -309,12 +310,11 @@ impl IcebergCompactor {
         };
         
         // Parse Parquet file using arrow-rs
-        use arrow_array::RecordBatch;
         use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
-        use std::io::Cursor;
+        use bytes::Bytes;
         
-        let cursor = Cursor::new(parquet_data);
-        let builder = match ParquetRecordBatchReaderBuilder::try_new(cursor) {
+        let parquet_bytes = Bytes::from(parquet_data);
+        let builder = match ParquetRecordBatchReaderBuilder::try_new(parquet_bytes) {
             Ok(b) => b,
             Err(e) => {
                 return Err(Error::RustError(format!("Failed to read Parquet: {}", e)));
@@ -334,7 +334,12 @@ impl IcebergCompactor {
             return Err(Error::RustError("File too large for Worker memory".to_string()));
         }
         
-        let mut reader = builder.build()?;
+        let mut reader = match builder.build() {
+            Ok(r) => r,
+            Err(e) => {
+                return Err(Error::RustError(format!("Failed to build Parquet reader: {}", e)));
+            }
+        };
         let mut events = Vec::new();
         
         // Read all record batches and convert to CloudEvents
@@ -400,7 +405,13 @@ impl IcebergCompactor {
                 }
             }
             
-            let event = builder.build()?;
+            let event = match builder.build() {
+                Ok(e) => e,
+                Err(e) => {
+                    log_error(&format!("Failed to build event at row {}: {}", row, e));
+                    continue;
+                }
+            };
             events.push(event);
         }
         

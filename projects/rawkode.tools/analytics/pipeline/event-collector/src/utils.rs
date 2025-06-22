@@ -12,9 +12,17 @@ pub fn set_panic_hook() {
 }
 
 pub fn log_error(msg: &str) {
+    #[cfg(target_arch = "wasm32")]
     console_error!("{}", msg);
+    
+    #[cfg(not(target_arch = "wasm32"))]
+    eprintln!("{}", msg);
 }
 
 pub fn log_info(msg: &str) {
+    #[cfg(target_arch = "wasm32")]
     console_log!("{}", msg);
+    
+    #[cfg(not(target_arch = "wasm32"))]
+    println!("{}", msg);
 }

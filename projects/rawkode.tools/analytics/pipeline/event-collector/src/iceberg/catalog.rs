@@ -103,7 +103,7 @@ impl IcebergCatalog {
         &self,
         table_name: &str,
         snapshot: Snapshot,
-        data_files: Vec<DataFile>,
+        _data_files: Vec<DataFile>,
     ) -> Result<()> {
         // Load current metadata
         let mut metadata = self.load_table(table_name).await?

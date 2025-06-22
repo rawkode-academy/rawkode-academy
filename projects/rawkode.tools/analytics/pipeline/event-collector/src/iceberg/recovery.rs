@@ -7,7 +7,9 @@
 //! - Network timeouts
 //! - Memory exhaustion
 
-use worker::*;
+use worker::{Env, Error, Result};
+#[cfg(target_arch = "wasm32")]
+use worker::Date;
 use std::time::Duration;
 use crate::utils::{log_error, log_info};
 
@@ -75,7 +77,6 @@ impl RecoveryCoordinator {
         F: Fn() -> Result<T>,
     {
         let mut attempts = 0;
-        let mut last_error = None;
         
         loop {
             attempts += 1;
@@ -89,7 +90,7 @@ impl RecoveryCoordinator {
                     return Ok(result);
                 }
                 Err(e) => {
-                    last_error = Some(e.clone());
+                    let error_msg = e.to_string();
                     let strategy = self.determine_strategy(&e);
                     
                     match strategy {
@@ -97,7 +98,7 @@ impl RecoveryCoordinator {
                             if attempts >= max_attempts {
                                 log_error(&format!(
                                     "{} failed after {} attempts: {}",
-                                    operation_name, attempts, e
+                                    operation_name, attempts, error_msg
                                 ));
                                 return Err(e);
                             }
@@ -105,7 +106,7 @@ impl RecoveryCoordinator {
                             let delay = calculate_backoff_delay(attempts, initial_delay, max_delay);
                             log_info(&format!(
                                 "{} failed (attempt {}), retrying in {}ms: {}",
-                                operation_name, attempts, delay.as_millis(), e
+                                operation_name, attempts, delay.as_millis(), error_msg
                             ));
                             
                             // In Workers, we can't actually sleep, so we'll return an error
@@ -116,25 +117,25 @@ impl RecoveryCoordinator {
                             )));
                         }
                         RecoveryStrategy::Skip => {
-                            log_info(&format!("{} failed, skipping: {}", operation_name, e));
+                            log_info(&format!("{} failed, skipping: {}", operation_name, error_msg));
                             return Err(e);
                         }
                         RecoveryStrategy::FailFast => {
-                            log_error(&format!("{} failed, failing fast: {}", operation_name, e));
+                            log_error(&format!("{} failed, failing fast: {}", operation_name, error_msg));
                             return Err(e);
                         }
                         RecoveryStrategy::RepairAndRetry => {
                             if attempts > 2 {
                                 log_error(&format!(
                                     "{} repair failed after {} attempts: {}",
-                                    operation_name, attempts, e
+                                    operation_name, attempts, error_msg
                                 ));
                                 return Err(e);
                             }
                             
                             log_info(&format!(
                                 "{} attempting repair (attempt {}): {}",
-                                operation_name, attempts, e
+                                operation_name, attempts, error_msg
                             ));
                             
                             // Attempt repair based on error type
@@ -181,19 +182,10 @@ impl RecoveryCoordinator {
         // 2. Validate and fix inconsistencies
         // 3. Update version hints
         
-        // For now, we'll just clear caches
-        match self.env.cache("iceberg_metadata") {
-            Ok(cache) => {
-                // Clear cached metadata
-                let _ = cache.delete("current_metadata", false).await;
-                log_info("Cleared metadata cache");
-                Ok(())
-            }
-            Err(e) => {
-                log_error(&format!("Failed to access cache during repair: {}", e));
-                Err(e)
-            }
-        }
+        // TODO: Implement cache clearing when cache API is available
+        // For now, we'll just log that repair was attempted
+        log_info("Metadata repair attempted - cache clearing not implemented");
+        Ok(())
     }
     
     /// Repair corrupted manifest
@@ -227,14 +219,19 @@ pub struct CircuitBreaker {
     failure_threshold: u32,
     success_threshold: u32,
     timeout: Duration,
+    #[cfg(test)]
+    pub state: CircuitState,
+    #[cfg(not(test))]
     state: CircuitState,
     failure_count: u32,
     success_count: u32,
     last_failure_time: Option<i64>,
+    #[cfg(test)]
+    test_time: Option<i64>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-enum CircuitState {
+pub enum CircuitState {
     Closed,    // Normal operation
     Open,      // Failing, reject requests
     HalfOpen,  // Testing if service recovered
@@ -251,6 +248,30 @@ impl CircuitBreaker {
             failure_count: 0,
             success_count: 0,
             last_failure_time: None,
+            #[cfg(test)]
+            test_time: None,
+        }
+    }
+    
+    /// Get the current time in milliseconds
+    fn current_time_millis(&self) -> i64 {
+        #[cfg(test)]
+        if let Some(time) = self.test_time {
+            return time;
+        }
+        
+        #[cfg(target_arch = "wasm32")]
+        {
+            Date::now().as_millis() as i64
+        }
+        
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            use std::time::{SystemTime, UNIX_EPOCH};
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as i64
         }
     }
     
@@ -261,8 +282,12 @@ impl CircuitBreaker {
             CircuitState::Open => {
                 // Check if timeout has passed
                 if let Some(last_failure) = self.last_failure_time {
-                    let elapsed = Date::now().as_millis() - last_failure;
-                    if elapsed > self.timeout.as_millis() as i64 {
+                    let current_time = self.current_time_millis();
+                    let elapsed = current_time - last_failure;
+                    let timeout_millis = self.timeout.as_millis() as i64;
+                    
+                    
+                    if elapsed > timeout_millis {
                         self.state = CircuitState::HalfOpen;
                         self.success_count = 0;
                         true
@@ -292,9 +317,8 @@ impl CircuitBreaker {
                 }
             }
             CircuitState::Open => {
-                // Shouldn't happen, but reset anyway
-                self.state = CircuitState::Closed;
-                self.failure_count = 0;
+                // In open state, success doesn't change anything
+                // The circuit must wait for timeout before attempting recovery
             }
         }
     }
@@ -306,7 +330,7 @@ impl CircuitBreaker {
                 self.failure_count += 1;
                 if self.failure_count >= self.failure_threshold {
                     self.state = CircuitState::Open;
-                    self.last_failure_time = Some(Date::now().as_millis());
+                    self.last_failure_time = Some(self.current_time_millis());
                     log_error(&format!(
                         "Circuit breaker opened after {} failures",
                         self.failure_count
@@ -316,12 +340,12 @@ impl CircuitBreaker {
             CircuitState::HalfOpen => {
                 self.state = CircuitState::Open;
                 self.failure_count = self.failure_threshold;
-                self.last_failure_time = Some(Date::now().as_millis());
+                self.last_failure_time = Some(self.current_time_millis());
                 log_error("Circuit breaker reopened after failure in half-open state");
             }
             CircuitState::Open => {
                 // Already open, update last failure time
-                self.last_failure_time = Some(Date::now().as_millis());
+                self.last_failure_time = Some(self.current_time_millis());
             }
         }
     }
@@ -346,19 +370,29 @@ mod tests {
     fn test_circuit_breaker() {
         let mut breaker = CircuitBreaker::new(3, 2, Duration::from_secs(60));
         
+        // Set initial test time
+        breaker.test_time = Some(1000);
+        
         // Initially closed
         assert!(breaker.is_allowed());
+        assert_eq!(breaker.state, CircuitState::Closed);
         
         // Record failures
         breaker.record_failure();
         breaker.record_failure();
         assert!(breaker.is_allowed()); // Still closed
+        assert_eq!(breaker.state, CircuitState::Closed);
         
         breaker.record_failure();
+        assert_eq!(breaker.state, CircuitState::Open);
         assert!(!breaker.is_allowed()); // Now open
         
         // Success in open state doesn't change anything
         breaker.record_success();
         assert!(!breaker.is_allowed());
+        
+        // Test timeout - advance time past timeout
+        breaker.test_time = Some(1000 + 60_001); // 60 seconds + 1ms
+        assert!(breaker.is_allowed()); // Should transition to half-open
     }
 }

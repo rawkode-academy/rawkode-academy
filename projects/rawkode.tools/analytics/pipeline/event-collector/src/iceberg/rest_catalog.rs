@@ -1,4 +1,3 @@
-use crate::errors::CollectorError;
 use crate::iceberg::metadata::{Snapshot, TableMetadata};
 use crate::iceberg::manifest::DataFile;
 use crate::utils::{log_error, log_info};

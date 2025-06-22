@@ -13,6 +13,7 @@ pub enum CollectorError {
     TooManyFailures {
         count: u32,
     },
+    ValidationError(String),
 }
 
 impl fmt::Display for CollectorError {
@@ -23,6 +24,7 @@ impl fmt::Display for CollectorError {
                 write!(f, "Cannot access Durable Object '{}': {}", name, source)
             }
             Self::TooManyFailures { count } => write!(f, "Too many failures: {}", count),
+            Self::ValidationError(msg) => write!(f, "Validation error: {}", msg),
         }
     }
 }
@@ -37,6 +39,7 @@ pub fn log_error_with_context(error: &CollectorError, request_id: &str) {
         CollectorError::InvalidEvent { .. } => "event_validation_error",
         CollectorError::DurableObjectAccess { .. } => "do_access_error",
         CollectorError::TooManyFailures { .. } => "circuit_breaker_error",
+        CollectorError::ValidationError(_) => "validation_error",
     };
 
     log_error(&format!(
