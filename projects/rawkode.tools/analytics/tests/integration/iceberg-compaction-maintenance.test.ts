@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { sleep, assertEventually } from '../helpers/test-utilities';
 
 interface DataFile {
   path: string;
@@ -133,9 +134,7 @@ class Compactor {
       bytesCompacted += group.totalSize;
       
       // Simulate I/O delay
-      await new Promise(resolve => 
-        setTimeout(resolve, Math.min(100, group.totalSize / 1024 / 1024))
-      );
+      await sleep(Math.min(100, group.totalSize / 1024 / 1024));
     }
 
     return {
@@ -159,7 +158,7 @@ class OrphanFileCleaner {
   async removeOrphanFiles(orphanFiles: string[]): Promise<number> {
     // Simulate file removal
     for (const file of orphanFiles) {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await sleep(10);
     }
     return orphanFiles.length;
   }
@@ -170,37 +169,52 @@ class SnapshotManager {
     snapshots: Snapshot[],
     policy: RetentionPolicy
   ): Promise<Snapshot[]> {
+    if (snapshots.length === 0) return [];
+    
     const now = Date.now();
-    let eligibleForRemoval = [...snapshots];
-
-    // Apply age-based retention
-    if (policy.maxSnapshotAgeMs) {
-      eligibleForRemoval = eligibleForRemoval.filter(
-        s => now - s.timestampMs > policy.maxSnapshotAgeMs!
-      );
+    
+    // Sort snapshots by timestamp (newest first)
+    const sortedSnapshots = [...snapshots].sort((a, b) => b.timestampMs - a.timestampMs);
+    
+    // Start by considering all snapshots for removal
+    const toRemove = new Set<number>(snapshots.map(s => s.snapshotId));
+    
+    // Apply retention rules to determine what to keep
+    
+    // 1. Always keep minimum number of snapshots (newest ones)
+    const minToKeep = policy.minSnapshotsToKeep || 0;
+    if (minToKeep > 0) {
+      sortedSnapshots.slice(0, minToKeep).forEach(s => {
+        toRemove.delete(s.snapshotId);
+      });
     }
-
-    // Ensure minimum snapshots are kept
-    if (policy.minSnapshotsToKeep) {
-      const totalSnapshots = snapshots.length;
-      const willRemain = totalSnapshots - eligibleForRemoval.length;
-      
-      if (willRemain < policy.minSnapshotsToKeep) {
-        // Need to keep some that would otherwise be removed
-        const needToKeep = policy.minSnapshotsToKeep - willRemain;
-        // Remove from the end (keep the newest of the eligible)
-        eligibleForRemoval = eligibleForRemoval.slice(0, eligibleForRemoval.length - needToKeep);
+    
+    // 2. Keep snapshots within age limit
+    if (policy.maxSnapshotAgeMs !== undefined) {
+      sortedSnapshots.forEach(s => {
+        if (now - s.timestampMs <= policy.maxSnapshotAgeMs!) {
+          toRemove.delete(s.snapshotId);
+        }
+      });
+    }
+    
+    // 3. Enforce maximum snapshots limit
+    if (policy.maxSnapshotsToKeep !== undefined) {
+      // If no other policies applied, or if we're keeping more than max
+      const currentlyKeeping = snapshots.length - toRemove.size;
+      if (currentlyKeeping > policy.maxSnapshotsToKeep || 
+          (!policy.minSnapshotsToKeep && policy.maxSnapshotAgeMs === undefined)) {
+        // Clear and rebuild based on max limit
+        toRemove.clear();
+        snapshots.forEach(s => toRemove.add(s.snapshotId));
+        sortedSnapshots.slice(0, policy.maxSnapshotsToKeep).forEach(s => {
+          toRemove.delete(s.snapshotId);
+        });
       }
     }
-
-    // Apply maximum snapshot limit
-    if (policy.maxSnapshotsToKeep && snapshots.length > policy.maxSnapshotsToKeep) {
-      const excess = snapshots.length - policy.maxSnapshotsToKeep;
-      const oldestFirst = [...snapshots].sort((a, b) => a.timestampMs - b.timestampMs);
-      eligibleForRemoval = oldestFirst.slice(0, excess);
-    }
-
-    return eligibleForRemoval;
+    
+    // Return snapshots that should be removed
+    return snapshots.filter(s => toRemove.has(s.snapshotId));
   }
 }
 
@@ -347,20 +361,25 @@ describe('Maintenance Operations', () => {
     const expired = await manager.expireSnapshots(snapshots, policy);
     
     // Then
-    expect(expired.length).toBe(2); // Snapshots 8, 9 (older than 7 days, not including exactly 7 days)
-    expect(expired.every(s => s.snapshotId >= 8)).toBe(true);
+    // Snapshots: 0 (0 days), 1 (1 day), ..., 7 (7 days), 8 (8 days), 9 (9 days)
+    // Keep: snapshots 0-7 (within 7 days, <= 7 days)
+    // Remove: snapshots 8, 9 (older than 7 days)
+    expect(expired.length).toBe(2);
+    expect(expired.map(s => s.snapshotId).sort()).toEqual([8, 9]);
   });
 
   it('should respect minimum snapshots to keep', async () => {
     // Given
+    const now = Date.now();
+    const dayInMs = 24 * 60 * 60 * 1000;
     const snapshots: Snapshot[] = Array.from({ length: 3 }, (_, i) => ({
       snapshotId: i,
-      timestampMs: Date.now() - (30 * 24 * 60 * 60 * 1000), // 30 days ago
+      timestampMs: now - (30 * dayInMs) - (i * dayInMs), // 30, 31, 32 days ago
       manifestList: `manifest-${i}.avro`,
     }));
     
     const policy: RetentionPolicy = {
-      maxSnapshotAgeMs: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxSnapshotAgeMs: 7 * dayInMs, // 7 days
       minSnapshotsToKeep: 2,
     };
     
@@ -370,14 +389,19 @@ describe('Maintenance Operations', () => {
     const expired = await manager.expireSnapshots(snapshots, policy);
     
     // Then
-    expect(expired.length).toBe(1); // Keep at least 2 snapshots
+    // All 3 snapshots are older than 7 days
+    // But we must keep at least 2 (the newest ones: 0 and 1)
+    // So only remove snapshot 2
+    expect(expired.length).toBe(1);
+    expect(expired[0].snapshotId).toBe(2);
   });
 
   it('should enforce maximum snapshot limit', async () => {
     // Given
+    const now = Date.now();
     const snapshots: Snapshot[] = Array.from({ length: 100 }, (_, i) => ({
       snapshotId: i,
-      timestampMs: Date.now() - (i * 60 * 60 * 1000), // i hours ago
+      timestampMs: now - (i * 60 * 60 * 1000), // i hours ago
       manifestList: `manifest-${i}.avro`,
     }));
     
@@ -392,7 +416,8 @@ describe('Maintenance Operations', () => {
     
     // Then
     expect(expired.length).toBe(50);
-    expect(expired.every(s => s.snapshotId >= 50)).toBe(true); // Remove oldest
+    // Should keep the 50 newest (0-49) and remove the 50 oldest (50-99)
+    expect(expired.every(s => s.snapshotId >= 50)).toBe(true);
   });
 
   it('should clean orphaned files after failed writes', async () => {
@@ -458,7 +483,7 @@ describe('Performance Impact Tests', () => {
     
     const simulateRead = async () => {
       activeReaders.count++;
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await sleep(50);
       activeReaders.count--;
     };
     
@@ -468,11 +493,11 @@ describe('Performance Impact Tests', () => {
       
       if (readerSnapshot > 5) {
         // Delay compaction if too many readers
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await sleep(100);
       }
       
       // Simulate compaction work
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await sleep(200);
     };
     
     // When - Concurrent reads and compaction
@@ -498,7 +523,7 @@ describe('Performance Impact Tests', () => {
       const results = await Promise.all(
         operations.map(async (op) => {
           operationLog.push(`Processing ${op}`);
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await sleep(10);
           return `${op} completed`;
         })
       );
