@@ -50,3 +50,6 @@ pub const MAX_BATCH_SIZE: usize = 5000; // Maximum events per batch
 
 // Re-export commonly used types
 pub use buffer::{IcebergBufferDurableObject, IcebergEventBuffer};
+
+#[cfg(test)]
+mod tests;
