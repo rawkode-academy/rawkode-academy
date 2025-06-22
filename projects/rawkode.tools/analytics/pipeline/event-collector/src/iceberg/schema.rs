@@ -45,14 +45,15 @@ impl IcebergEventSchema {
     pub fn create_event_schema() -> ArrowSchema {
         ArrowSchema::new(vec![
             ArrowField::new("id", ArrowDataType::Utf8, false),
-            ArrowField::new("type", ArrowDataType::Utf8, false),
             ArrowField::new("source", ArrowDataType::Utf8, false),
+            ArrowField::new("type", ArrowDataType::Utf8, false),
             ArrowField::new("specversion", ArrowDataType::Utf8, false),
-            ArrowField::new("subject", ArrowDataType::Utf8, true),
             ArrowField::new("time", ArrowDataType::Timestamp(arrow_schema::TimeUnit::Microsecond, Some("UTC".into())), true),
             ArrowField::new("datacontenttype", ArrowDataType::Utf8, true),
             ArrowField::new("dataschema", ArrowDataType::Utf8, true),
+            ArrowField::new("subject", ArrowDataType::Utf8, true),
             ArrowField::new("data", ArrowDataType::Utf8, true),
+            ArrowField::new("extensions", ArrowDataType::Utf8, true),
             ArrowField::new("cf_colo", ArrowDataType::Utf8, true),
             ArrowField::new("cf_country", ArrowDataType::Utf8, true),
             ArrowField::new("cf_city", ArrowDataType::Utf8, true),
@@ -68,6 +69,7 @@ impl IcebergEventSchema {
             ArrowField::new("month", ArrowDataType::Int32, false),
             ArrowField::new("day", ArrowDataType::Int32, false),
             ArrowField::new("hour", ArrowDataType::Int32, false),
+            ArrowField::new("raw_event", ArrowDataType::Utf8, true),
         ])
     }
 }

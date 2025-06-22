@@ -2,6 +2,7 @@ use crate::iceberg::writer::*;
 use cloudevents::{Event, EventBuilder, EventBuilderV10};
 use chrono::Utc;
 use worker::*;
+use std::collections::HashMap;
 
 #[cfg(test)]
 use proptest::prelude::*;
@@ -18,9 +19,15 @@ async fn should_write_data_file_when_events_buffered() {
     let config = WriteConfig::default();
     let writer = IcebergWriter::new(create_test_env(), config);
     let events = generate_test_events(100);
+    let mut partition_values = HashMap::new();
+    partition_values.insert("type".to_string(), "test.event".to_string());
+    partition_values.insert("year".to_string(), "2024".to_string());
+    partition_values.insert("month".to_string(), "06".to_string());
+    partition_values.insert("day".to_string(), "22".to_string());
+    partition_values.insert("hour".to_string(), "12".to_string());
     
     // When
-    let result = writer.write_data_file(events.clone()).await;
+    let result = writer.write_data_file(events.clone(), partition_values).await;
     
     // Then
     assert!(result.is_ok());
@@ -37,9 +44,10 @@ async fn should_handle_empty_events_vector() {
     let config = WriteConfig::default();
     let writer = IcebergWriter::new(create_test_env(), config);
     let events = vec![];
+    let partition_values = HashMap::new();
     
     // When
-    let result = writer.write_data_file(events).await;
+    let result = writer.write_data_file(events, partition_values).await;
     
     // Then
     assert!(result.is_err());
