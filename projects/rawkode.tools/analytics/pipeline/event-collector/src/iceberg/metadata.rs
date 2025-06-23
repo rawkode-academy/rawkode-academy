@@ -124,24 +124,32 @@ pub struct TableMetadata {
     pub format_version: i32,
     pub table_uuid: String,
     pub location: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_sequence_number: Option<i64>, // R2 Data Catalog specific
     pub last_updated_ms: i64,
     pub last_column_id: i32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub schema: Option<serde_json::Value>, // R2 Data Catalog doesn't return this
     pub schemas: Vec<serde_json::Value>,
     pub current_schema_id: i32,
-    pub partition_spec: Vec<PartitionField>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub partition_spec: Option<Vec<PartitionField>>, // R2 Data Catalog doesn't return this
     pub partition_specs: Vec<PartitionSpec>,
     pub default_spec_id: i32,
     pub last_partition_id: i32,
     pub properties: HashMap<String, String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub current_snapshot_id: Option<i64>,
+    #[serde(default)]
     pub snapshots: Vec<Snapshot>,
+    #[serde(default)]
     pub snapshot_log: Vec<SnapshotLogEntry>,
+    #[serde(default)]
     pub metadata_log: Vec<MetadataLogEntry>,
     pub sort_orders: Vec<SortOrder>,
     pub default_sort_order_id: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub refs: Option<serde_json::Value>, // R2 Data Catalog specific
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -229,12 +237,13 @@ impl IcebergMetadata {
             format_version: ICEBERG_FORMAT_VERSION,
             table_uuid: table_uuid.clone(),
             location: self.table_location.clone(),
+            last_sequence_number: Some(0),
             last_updated_ms: timestamp_ms,
             last_column_id: 25, // Based on our schema
             schema: Some(schema.clone()),
             schemas: vec![schema],
             current_schema_id: 0,
-            partition_spec: partition_spec.clone(),
+            partition_spec: Some(partition_spec.clone()),
             partition_specs: vec![PartitionSpec {
                 spec_id: 0,
                 fields: partition_spec,
@@ -258,6 +267,7 @@ impl IcebergMetadata {
                 ],
             }],
             default_sort_order_id: 0,
+            refs: None,
         };
 
         // Write initial metadata
