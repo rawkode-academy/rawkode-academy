@@ -55,10 +55,13 @@ pub struct PartitionField {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct LoadTableResponse {
     pub metadata_location: String,
     pub metadata: TableMetadata,
     pub config: HashMap<String, String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub storage_credentials: Option<Vec<serde_json::Value>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
