@@ -28,7 +28,7 @@
 		"ICEBERG_BUFFER_TIMEOUT_MS": "30000",
 		// R2 Data Catalog configuration
 		"CLOUDFLARE_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
-		"ICEBERG_NAMESPACE": "analytics", // Catalog namespace for tables
+		"ICEBERG_NAMESPACE": "default", // Catalog namespace for tables (R2 Data Catalog uses "default")
 		"COMPACTION_THRESHOLD": "50", // Number of files before triggering compaction
 		"TARGET_FILE_SIZE_MB": "128" // Target file size for compacted files in MB
 	},

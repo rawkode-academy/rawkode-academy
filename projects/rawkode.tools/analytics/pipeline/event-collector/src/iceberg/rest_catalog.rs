@@ -319,15 +319,7 @@ impl RestCatalog {
 
     /// Load table metadata via REST API
     pub async fn load_table(&self, table_name: &str) -> Result<Option<TableMetadata>> {
-        // First, try to list namespaces to verify connectivity
-        match self.list_namespaces().await {
-            Ok(namespaces) => {
-                log_info(&format!("Available namespaces: {:?}", namespaces));
-            }
-            Err(e) => {
-                log_error(&format!("Failed to list namespaces: {}", e));
-            }
-        }
+        // Skip namespace listing for now - R2 Data Catalog might not support it
         
         let url = format!(
             "{}/v1/namespaces/{}/tables/{}",
