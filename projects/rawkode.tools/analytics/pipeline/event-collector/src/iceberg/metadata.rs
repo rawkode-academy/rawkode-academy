@@ -126,7 +126,8 @@ pub struct TableMetadata {
     pub location: String,
     pub last_updated_ms: i64,
     pub last_column_id: i32,
-    pub schema: serde_json::Value, // Simplified for now
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub schema: Option<serde_json::Value>, // R2 Data Catalog doesn't return this
     pub schemas: Vec<serde_json::Value>,
     pub current_schema_id: i32,
     pub partition_spec: Vec<PartitionField>,
@@ -230,7 +231,7 @@ impl IcebergMetadata {
             location: self.table_location.clone(),
             last_updated_ms: timestamp_ms,
             last_column_id: 25, // Based on our schema
-            schema: schema.clone(),
+            schema: Some(schema.clone()),
             schemas: vec![schema],
             current_schema_id: 0,
             partition_spec: partition_spec.clone(),
