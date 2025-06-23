@@ -348,7 +348,14 @@ impl DurableObject for IcebergBufferDurableObject {
         match method {
             Method::Post => self.handle_post(req).await,
             Method::Get => self.handle_get().await,
-            Method::Delete => self.handle_flush().await,
+            Method::Delete => {
+                // Special endpoint to clear stuck state
+                if path.ends_with("/reset-table-creation") {
+                    self.handle_reset_table_creation().await
+                } else {
+                    self.handle_flush().await
+                }
+            },
             _ => Response::error("Method not allowed", 405),
         }
     }
@@ -557,6 +564,16 @@ impl IcebergBufferDurableObject {
         let buffer_count = self.get_buffer_count().await.unwrap_or(0);
 
         let table_location = self.get_table_location();
+        
+        // Check table creation status
+        let table_exists = self.state.storage().get::<bool>("table_exists").await.ok();
+        let creation_timestamp = self.state.storage().get::<i64>("table_creation_in_progress").await.ok();
+        let creation_status = if let Some(ts) = creation_timestamp {
+            let elapsed = Date::now().as_millis() as i64 - ts;
+            format!("in_progress ({}s ago)", elapsed / 1000)
+        } else {
+            "not_started".to_string()
+        };
 
         let status = serde_json::json!({
             "partition_key": partition_key,
@@ -564,6 +581,8 @@ impl IcebergBufferDurableObject {
             "max_buffer_size": MAX_BUFFER_SIZE,
             "buffer_threshold": self.get_buffer_threshold(),
             "table_location": table_location,
+            "table_exists": table_exists,
+            "table_creation_status": creation_status,
         });
 
         Response::ok(status.to_string())
@@ -729,10 +748,19 @@ impl IcebergBufferDurableObject {
                 // Check if creation is already in progress
                 let creation_key = "table_creation_in_progress";
                 if let Ok(timestamp) = self.state.storage().get::<i64>(creation_key).await {
+                    let elapsed = Date::now().as_millis() as i64 - timestamp;
                     // If creation was started more than 5 minutes ago, retry
-                    if (Date::now().as_millis() as i64 - timestamp) < 300_000 {
-                        log_info("Table creation already in progress");
+                    if elapsed < 300_000 {
+                        log_info(&format!(
+                            "Table creation already in progress (started {} seconds ago)",
+                            elapsed / 1000
+                        ));
                         return Err(Error::RustError("Table creation in progress".to_string()));
+                    } else {
+                        log_info(&format!(
+                            "Previous table creation timed out after {} seconds, retrying",
+                            elapsed / 1000
+                        ));
                     }
                 }
 
@@ -879,5 +907,26 @@ impl IcebergBufferDurableObject {
                 Err(e)
             }
         }
+    }
+
+    async fn handle_reset_table_creation(&mut self) -> Result<Response> {
+        log_info("Resetting table creation state");
+        
+        // Clear the table creation in progress flag
+        match self.state.storage().delete("table_creation_in_progress").await {
+            Ok(_) => log_info("Cleared table_creation_in_progress flag"),
+            Err(e) => log_error(&format!("Failed to clear table_creation_in_progress: {}", e)),
+        }
+        
+        // Also clear the table exists flag to force re-check
+        match self.state.storage().delete("table_exists").await {
+            Ok(_) => log_info("Cleared table_exists flag"),
+            Err(e) => log_error(&format!("Failed to clear table_exists: {}", e)),
+        }
+        
+        Response::ok(serde_json::json!({
+            "status": "reset_complete",
+            "message": "Table creation state has been reset"
+        }).to_string())
     }
 }
