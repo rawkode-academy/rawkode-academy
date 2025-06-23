@@ -6,6 +6,7 @@ use worker::*;
 use crate::utils::log_info;
 
 /// Iceberg table metadata version
+#[allow(dead_code)]
 const ICEBERG_FORMAT_VERSION: i32 = 2;
 
 /// Schema definition for Iceberg tables
@@ -212,6 +213,7 @@ impl IcebergMetadata {
     }
 
     /// Initialize a new Iceberg table
+    #[allow(dead_code)]
     pub async fn create_table(
         &self,
         _table_name: &str,

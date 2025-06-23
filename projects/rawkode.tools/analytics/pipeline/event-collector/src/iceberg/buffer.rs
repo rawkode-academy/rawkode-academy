@@ -5,7 +5,7 @@ use cloudevents::{AttributesReader, Event};
 use std::collections::HashMap;
 use worker::*;
 
-use super::metadata::{IcebergMetadata, PartitionField};
+use super::rest_catalog::RestCatalog;
 use super::schema::{IcebergEventSchema, IcebergTableProperties};
 use super::writer::{IcebergWriter, WriteConfig};
 
@@ -30,14 +30,14 @@ impl IcebergEventBuffer {
         let request_id = uuid::Uuid::new_v4().to_string();
         let event_count = events.len();
         let estimated_memory = event_count * ESTIMATED_EVENT_SIZE;
-        
+
         log_info(&format!(
             "[{}] Adding {} events to Iceberg buffer (~{} KB)",
             request_id,
             event_count,
             estimated_memory / 1024
         ));
-        
+
         // Check memory constraints before processing
         if estimated_memory > 10 * 1024 * 1024 { // 10MB limit for incoming batch
             return Err(CollectorError::ValidationError(
@@ -47,7 +47,7 @@ impl IcebergEventBuffer {
 
         // Group events by partition
         let partitioned_events = self.partition_events(events);
-        
+
         log_info(&format!(
             "[{}] Partitioned events into {} groups",
             request_id,
@@ -117,7 +117,7 @@ impl IcebergEventBuffer {
                         event_type: event_type.clone(),
                         hour_key: hour_key.clone(),
                     };
-                    
+
                     // Send chunk to DO
                     if let Err(e) = self.send_chunk_to_do(&request_id, &stub, &partition_key, &chunk_payload).await {
                         failures += 1;
@@ -126,7 +126,7 @@ impl IcebergEventBuffer {
                 }
                 continue;
             }
-            
+
             // Serialize events with partition info
             let payload = PartitionedEventPayload {
                 events,
@@ -228,16 +228,16 @@ impl IcebergEventBuffer {
     ) -> Result<()> {
         let body = serde_json::to_string(payload)
             .map_err(|e| Error::RustError(format!("Failed to serialize payload: {}", e)))?;
-            
+
         let request = Request::new_with_init(
             &format!("http://do/{}/", partition_key),
             RequestInit::new()
                 .with_method(Method::Post)
                 .with_body(Some(body.into())),
         )?;
-        
+
         let mut response = stub.fetch_with_request(request).await?;
-        
+
         if response.status_code() >= 400 {
             let error_text = response
                 .text()
@@ -250,7 +250,7 @@ impl IcebergEventBuffer {
                 error_text
             )));
         }
-        
+
         // Consume response body to ensure connection completes
         match response.text().await {
             Ok(_) => {
@@ -279,13 +279,13 @@ impl IcebergEventBuffer {
 
         for event in events {
             let event_type = event.ty().to_string();
-            
+
             // Get event time or use current time
             let event_time = event
                 .time()
                 .cloned()
                 .unwrap_or_else(|| Utc::now());
-            
+
             // Create hour-based partition key
             let hour_key = format!(
                 "{:04}-{:02}-{:02}-{:02}",
@@ -314,7 +314,7 @@ struct PartitionedEventPayload {
 }
 
 /// Durable Object for buffering events by partition
-/// 
+///
 /// Memory-efficient design:
 /// - Limits buffer size to prevent OOM in Workers
 /// - Estimates memory usage and flushes proactively
@@ -361,24 +361,24 @@ impl DurableObject for IcebergBufferDurableObject {
             .await
             .ok()
             .unwrap_or_else(|| "unknown".to_string());
-        
+
         log_info(&format!(
             "Iceberg buffer alarm triggered for partition '{}'",
             partition_key
         ));
-        
+
         // Get buffer count before flush
         let buffer_count = self.get_buffer_count().await.unwrap_or(0);
         log_info(&format!(
             "Buffer contains {} events to flush",
             buffer_count
         ));
-        
+
         if buffer_count == 0 {
             log_info("No events to flush, alarm completed");
             return Response::ok("Alarm processed - no events to flush");
         }
-        
+
         match self.flush_to_iceberg().await {
             Ok(files_written) => {
                 log_info(&format!(
@@ -388,12 +388,25 @@ impl DurableObject for IcebergBufferDurableObject {
                 Response::ok(format!("Alarm processed - wrote {} files", files_written))
             }
             Err(e) => {
-                log_error(&format!("Failed to flush during alarm: {}", e));
-                // Retry later
-                match self.state.storage().set_alarm(DEFAULT_TIMEOUT_MS).await {
+                let error_msg = e.to_string();
+                log_error(&format!("Failed to flush during alarm: {}", error_msg));
+                
+                // Different retry strategies based on error type
+                let retry_delay = if error_msg.contains("Table creation in progress") {
+                    // Table creation in progress, wait longer
+                    300_000 // 5 minutes
+                } else if error_msg.contains("CLOUDFLARE_ACCOUNT_ID") {
+                    // Configuration error, don't retry frequently
+                    600_000 // 10 minutes
+                } else {
+                    // Normal retry
+                    DEFAULT_TIMEOUT_MS
+                };
+                
+                match self.state.storage().set_alarm(retry_delay).await {
                     Ok(_) => log_info(&format!(
                         "Retry alarm set for {} ms",
-                        DEFAULT_TIMEOUT_MS
+                        retry_delay
                     )),
                     Err(alarm_err) => log_error(&format!(
                         "Failed to set retry alarm: {}",
@@ -442,18 +455,18 @@ impl IcebergBufferDurableObject {
 
         let initial_count = buffered_events.len();
         let new_events_count = payload.events.len();
-        
+
         // Check if we would exceed buffer limits before adding
         let potential_buffer_size = initial_count + new_events_count;
         let estimated_buffer_memory = potential_buffer_size * ESTIMATED_EVENT_SIZE;
-        
+
         if potential_buffer_size > MAX_BUFFER_SIZE {
             return Response::error(
                 format!("Buffer would exceed maximum size of {} events", MAX_BUFFER_SIZE),
                 507,
             );
         }
-        
+
         if estimated_buffer_memory > 20 * 1024 * 1024 { // 20MB hard limit
             log_error(&format!(
                 "Buffer memory limit exceeded: {} events (~{} MB)",
@@ -542,7 +555,7 @@ impl IcebergBufferDurableObject {
             .await
             .ok();
         let buffer_count = self.get_buffer_count().await.unwrap_or(0);
-        
+
         let table_location = self.get_table_location();
 
         let status = serde_json::json!({
@@ -619,14 +632,32 @@ impl IcebergBufferDurableObject {
             partition_key
         ));
 
-        // Initialize Iceberg components
-        let table_location = self.get_table_location();
+        // Initialize components
+        let table_name = "analytics_events";
         let iceberg_writer = IcebergWriter::new(self.env.clone(), WriteConfig::default());
-        let iceberg_metadata = IcebergMetadata::new(&self.env, table_location.clone());
+        
+        // Create REST catalog client
+        let account_id = match self.env.var("CLOUDFLARE_ACCOUNT_ID") {
+            Ok(id) => id.to_string(),
+            Err(_) => {
+                log_error("CLOUDFLARE_ACCOUNT_ID not configured");
+                return Err(worker::Error::RustError("Missing CLOUDFLARE_ACCOUNT_ID".to_string()));
+            }
+        };
+        
+        let catalog_endpoint = format!(
+            "https://catalog.cloudflarestorage.com/{}/analytics-source",
+            account_id
+        );
+        let rest_catalog = RestCatalog::new(
+            self.env.clone(),
+            catalog_endpoint,
+            "analytics".to_string()
+        );
 
         // Ensure table exists
-        let table_metadata = match self.ensure_table_exists(&iceberg_metadata).await {
-            Ok(metadata) => metadata,
+        let _table_exists = match self.ensure_table_exists_rest(&rest_catalog, table_name).await {
+            Ok(exists) => exists,
             Err(e) => {
                 log_error(&format!("Failed to ensure table exists: {}", e));
                 return Err(e);
@@ -648,24 +679,14 @@ impl IcebergBufferDurableObject {
             }
         };
 
-        // Create new snapshot
-        match iceberg_metadata
-            .create_snapshot(&table_metadata, vec![data_file], "append")
-            .await
-        {
-            Ok(new_metadata) => {
-                // Update version hint
-                let version = format!("v{}", new_metadata.snapshots.len() + 1);
-                match iceberg_metadata.update_version_hint(&version).await {
-                    Ok(_) => log_info(&format!("Updated version hint to {}", version)),
-                    Err(e) => log_error(&format!("Failed to update version hint: {}", e)),
-                }
-            }
-            Err(e) => {
-                log_error(&format!("Failed to create snapshot: {}", e));
-                return Err(e);
-            }
-        }
+        // With R2 Data Catalog, data files are automatically registered
+        // when written to the proper location with correct naming convention
+        log_info(&format!(
+            "Data file written successfully: {} ({} bytes, {} records)",
+            data_file.file_path,
+            data_file.file_size_in_bytes,
+            data_file.record_count
+        ));
 
         // Clear buffer
         match self
@@ -683,23 +704,47 @@ impl IcebergBufferDurableObject {
         Ok(1) // Number of files written
     }
 
-    async fn ensure_table_exists(
+    async fn ensure_table_exists_rest(
         &self,
-        iceberg_metadata: &IcebergMetadata,
-    ) -> Result<super::metadata::TableMetadata> {
-        // Try to read existing metadata
-        match iceberg_metadata.read_current_metadata().await {
-            Ok(metadata) => Ok(metadata),
-            Err(_) => {
+        rest_catalog: &RestCatalog,
+        table_name: &str,
+    ) -> Result<bool> {
+        // Check if we already verified table exists in this DO
+        if let Ok(true) = self.state.storage().get::<bool>("table_exists").await {
+            return Ok(true);
+        }
+
+        // Try to load existing table
+        match rest_catalog.load_table(table_name).await {
+            Ok(Some(_metadata)) => {
+                log_info(&format!("Table {} already exists", table_name));
+                // Cache that table exists
+                let _ = self.state.storage().put("table_exists", true).await;
+                Ok(true)
+            }
+            Ok(None) => {
                 // Table doesn't exist, create it
-                log_info("Creating new Iceberg table for analytics events");
-                
+                log_info(&format!("Creating new Iceberg table: {}", table_name));
+
+                // Check if creation is already in progress
+                let creation_key = "table_creation_in_progress";
+                if let Ok(timestamp) = self.state.storage().get::<i64>(creation_key).await {
+                    // If creation was started more than 5 minutes ago, retry
+                    if (Date::now().as_millis() as i64 - timestamp) < 300_000 {
+                        log_info("Table creation already in progress");
+                        return Err(Error::RustError("Table creation in progress".to_string()));
+                    }
+                }
+
+                // Mark creation as in progress
+                let _ = self.state.storage().put(creation_key, Date::now().as_millis() as i64).await;
+
                 let schema = IcebergEventSchema::create_event_schema();
                 let schema_json = serde_json::json!({
                     "type": "struct",
-                    "fields": schema.fields().iter().map(|f| {
+                    "fields": schema.fields().iter().enumerate().map(|(i, f)| {
                         serde_json::json!({
-                            "id": f.name(),
+                            "id": i + 1,
                             "name": f.name(),
                             "required": !f.is_nullable(),
                             "type": format!("{:?}", f.data_type()).to_lowercase()
@@ -708,31 +753,31 @@ impl IcebergBufferDurableObject {
                 });
 
                 let partition_spec = vec![
-                    PartitionField {
+                    super::rest_catalog::PartitionField {
                         source_id: 2, // type field
                         field_id: 1000,
                         name: "type".to_string(),
                         transform: "identity".to_string(),
                     },
-                    PartitionField {
+                    super::rest_catalog::PartitionField {
                         source_id: 20, // year field
                         field_id: 1001,
                         name: "year".to_string(),
                         transform: "identity".to_string(),
                     },
-                    PartitionField {
+                    super::rest_catalog::PartitionField {
                         source_id: 21, // month field
                         field_id: 1002,
                         name: "month".to_string(),
                         transform: "identity".to_string(),
                     },
-                    PartitionField {
+                    super::rest_catalog::PartitionField {
                         source_id: 22, // day field
                         field_id: 1003,
                         name: "day".to_string(),
                         transform: "identity".to_string(),
                     },
-                    PartitionField {
+                    super::rest_catalog::PartitionField {
                         source_id: 23, // hour field
                         field_id: 1004,
                         name: "hour".to_string(),
@@ -742,24 +787,43 @@ impl IcebergBufferDurableObject {
 
                 let properties = IcebergTableProperties::default_properties();
 
-                iceberg_metadata
-                    .create_table("analytics_events", schema_json, partition_spec, properties)
+                match rest_catalog
+                    .create_table(table_name, schema_json, partition_spec, properties)
                     .await
+                {
+                    Ok(_metadata) => {
+                        log_info("Successfully created Iceberg table");
+                        // Cache that table exists
+                        let _ = self.state.storage().put("table_exists", true).await;
+                        // Clear creation flag
+                        let _ = self.state.storage().delete(creation_key).await;
+                        Ok(true)
+                    }
+                    Err(e) => {
+                        log_error(&format!("Failed to create Iceberg table: {}", e));
+                        // Don't clear creation flag on error
+                        Err(e)
+                    }
+                }
+            }
+            Err(e) => {
+                log_error(&format!("Failed to load table metadata: {}", e));
+                Err(e)
             }
         }
     }
 
     fn extract_partition_values(&self, event: &Event) -> HashMap<String, String> {
         let mut values = HashMap::new();
-        
+
         values.insert("type".to_string(), event.ty().to_string());
-        
+
         let event_time = event.time().cloned().unwrap_or_else(|| Utc::now());
         values.insert("year".to_string(), event_time.year().to_string());
         values.insert("month".to_string(), format!("{:02}", event_time.month()));
         values.insert("day".to_string(), format!("{:02}", event_time.day()));
         values.insert("hour".to_string(), format!("{:02}", event_time.hour()));
-        
+
         values
     }
 

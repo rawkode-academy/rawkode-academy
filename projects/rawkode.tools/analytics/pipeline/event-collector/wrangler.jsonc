@@ -26,11 +26,8 @@
 		"ICEBERG_TABLE_LOCATION": "analytics/events",
 		"ICEBERG_BUFFER_SIZE": "2000",
 		"ICEBERG_BUFFER_TIMEOUT_MS": "30000",
-		// R2 Data Catalog REST API endpoint (optional)
-		// If set to a valid HTTP(S) URL, will use REST API for catalog operations
-		// Otherwise, will use direct R2 access for catalog metadata
-		"R2_CATALOG_ENDPOINT": "https://your-r2-bucket.r2.cloudflarestorage.com",
-		"R2_CATALOG_AUTH_TOKEN": "", // Optional: Bearer token for REST API authentication
+		// R2 Data Catalog configuration
+		"CLOUDFLARE_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
 		"ICEBERG_NAMESPACE": "analytics", // Catalog namespace for tables
 		"COMPACTION_THRESHOLD": "50", // Number of files before triggering compaction
 		"TARGET_FILE_SIZE_MB": "128" // Target file size for compacted files in MB

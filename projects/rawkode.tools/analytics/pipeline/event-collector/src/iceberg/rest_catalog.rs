@@ -7,7 +7,6 @@ use worker::*;
 
 /// REST API catalog client for R2 Data Catalog
 /// This provides an alternative to direct R2 access when using a catalog service
-#[allow(dead_code)]
 pub struct RestCatalog {
     env: Env,
     catalog_endpoint: String,
@@ -81,7 +80,6 @@ pub enum TableUpdate {
     SetProperties { properties: HashMap<String, String> },
 }
 
-#[allow(dead_code)]
 impl RestCatalog {
     /// Create a new REST catalog client
     pub fn new(env: Env, endpoint: String, namespace: String) -> Self {
@@ -109,7 +107,7 @@ impl RestCatalog {
 
         let request_body = CreateTableRequest {
             name: table_name.to_string(),
-            location: format!("s3://{}/{}/{}", self.get_bucket_name(), self.namespace, table_name),
+            location: format!("r2://analytics-source/{}/{}", self.namespace, table_name),
             schema,
             partition_spec,
             properties,
@@ -133,7 +131,7 @@ impl RestCatalog {
         }
 
         // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_CATALOG_AUTH_TOKEN") {
+        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
             match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
                 Ok(_) => {},
                 Err(e) => {
@@ -219,7 +217,7 @@ impl RestCatalog {
         }
 
         // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_CATALOG_AUTH_TOKEN") {
+        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
             match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
                 Ok(_) => {},
                 Err(e) => {
@@ -335,7 +333,7 @@ impl RestCatalog {
         }
 
         // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_CATALOG_AUTH_TOKEN") {
+        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
             match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
                 Ok(_) => {},
                 Err(e) => {
@@ -421,7 +419,7 @@ impl RestCatalog {
         }
 
         // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_CATALOG_AUTH_TOKEN") {
+        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
             match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
                 Ok(_) => {},
                 Err(e) => {
@@ -505,7 +503,7 @@ impl RestCatalog {
         let mut headers = Headers::new();
         
         // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_CATALOG_AUTH_TOKEN") {
+        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
             match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
                 Ok(_) => {},
                 Err(e) => {
@@ -555,13 +553,6 @@ impl RestCatalog {
     }
 
     /// Helper to get bucket name from environment
-    fn get_bucket_name(&self) -> String {
-        self.env
-            .var("ANALYTICS_BUCKET_NAME")
-            .ok()
-            .map(|v| v.to_string())
-            .unwrap_or_else(|| "analytics-source".to_string())
-    }
 }
 
 /// Factory to create appropriate catalog based on configuration
