@@ -768,14 +768,22 @@ impl IcebergBufferDurableObject {
                 let _ = self.state.storage().put(creation_key, Date::now().as_millis() as i64).await;
 
                 let schema = IcebergEventSchema::create_event_schema();
+                // Convert Arrow data types to Iceberg type format
                 let schema_json = serde_json::json!({
                     "type": "struct",
                     "fields": schema.fields().iter().enumerate().map(|(i, f)| {
+                        let iceberg_type = match f.data_type() {
+                            arrow_schema::DataType::Utf8 => "string",
+                            arrow_schema::DataType::Int32 => "int",
+                            arrow_schema::DataType::Int64 => "long",
+                            arrow_schema::DataType::Timestamp(_, _) => "timestamp",
+                            _ => "string" // Default to string for unknown types
+                        };
                         serde_json::json!({
                             "id": i + 1,
                             "name": f.name(),
                             "required": !f.is_nullable(),
-                            "type": format!("{:?}", f.data_type()).to_lowercase()
+                            "type": iceberg_type
                         })
                     }).collect::<Vec<_>>()
                 });

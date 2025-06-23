@@ -90,6 +90,65 @@ impl RestCatalog {
         }
     }
 
+    /// Create namespace if it doesn't exist
+    pub async fn ensure_namespace(&self) -> Result<()> {
+        let url = format!("{}/v1/namespaces/{}", self.catalog_endpoint, self.namespace);
+        
+        log_info(&format!("Checking namespace {} exists", self.namespace));
+        
+        let mut headers = Headers::new();
+        headers.set("Accept", "application/json")?;
+        
+        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
+            headers.set("Authorization", &format!("Bearer {}", auth_token.to_string()))?;
+        }
+        
+        let request = Request::new_with_init(
+            &url,
+            RequestInit::new()
+                .with_method(Method::Get)
+                .with_headers(headers.clone()),
+        )?;
+        
+        let mut response = Fetch::Request(request).send().await?;
+        
+        if response.status_code() == 404 {
+            // Namespace doesn't exist, create it
+            log_info(&format!("Creating namespace {}", self.namespace));
+            
+            let create_body = serde_json::json!({
+                "namespace": [self.namespace.as_str()],
+                "properties": {}
+            });
+            
+            let create_url = format!("{}/v1/namespaces", self.catalog_endpoint);
+            headers.set("Content-Type", "application/json")?;
+            
+            let create_request = Request::new_with_init(
+                &create_url,
+                RequestInit::new()
+                    .with_method(Method::Post)
+                    .with_headers(headers)
+                    .with_body(Some(serde_json::to_string(&create_body)?.into())),
+            )?;
+            
+            let mut create_response = Fetch::Request(create_request).send().await?;
+            
+            if create_response.status_code() >= 400 {
+                let error_body = create_response.text().await.unwrap_or_default();
+                return Err(Error::RustError(format!(
+                    "Failed to create namespace: {} - {}",
+                    create_response.status_code(),
+                    error_body
+                )));
+            }
+            
+            log_info(&format!("Successfully created namespace {}", self.namespace));
+        }
+        
+        Ok(())
+    }
+
     /// Create a new table via REST API
     pub async fn create_table(
         &self,
@@ -98,6 +157,9 @@ impl RestCatalog {
         partition_spec: Vec<PartitionField>,
         properties: HashMap<String, String>,
     ) -> Result<TableMetadata> {
+        // Ensure namespace exists first
+        self.ensure_namespace().await?;
+        
         let url = format!(
             "{}/v1/namespaces/{}/tables",
             self.catalog_endpoint, self.namespace
@@ -170,8 +232,9 @@ impl RestCatalog {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             let error_msg = format!(
-                "REST API returned error {}: {}",
+                "REST API returned error {} for URL {}: {}",
                 response.status_code(),
+                url,
                 error_body
             );
             log_error(&error_msg);
@@ -259,8 +322,9 @@ impl RestCatalog {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             let error_msg = format!(
-                "REST API returned error {}: {}",
+                "REST API returned error {} for URL {}: {}",
                 response.status_code(),
+                url,
                 error_body
             );
             log_error(&error_msg);
@@ -372,8 +436,9 @@ impl RestCatalog {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             let error_msg = format!(
-                "REST API returned error {}: {}",
+                "REST API returned error {} for URL {}: {}",
                 response.status_code(),
+                url,
                 error_body
             );
             log_error(&error_msg);
@@ -457,8 +522,9 @@ impl RestCatalog {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             let error_msg = format!(
-                "REST API returned error {}: {}",
+                "REST API returned error {} for URL {}: {}",
                 response.status_code(),
+                url,
                 error_body
             );
             log_error(&error_msg);
@@ -541,8 +607,9 @@ impl RestCatalog {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             let error_msg = format!(
-                "REST API returned error {}: {}",
+                "REST API returned error {} for URL {}: {}",
                 response.status_code(),
+                url,
                 error_body
             );
             log_error(&error_msg);
