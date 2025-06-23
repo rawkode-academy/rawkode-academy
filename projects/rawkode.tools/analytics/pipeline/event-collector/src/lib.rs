@@ -78,6 +78,13 @@ pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .get_async("/debug/list-r2", |_req, ctx| async move {
             debug_list_r2(ctx).await
         })
+        // Durable Object management endpoints
+        .get_async("/do/:partition/*path", |req, ctx| async move {
+            handle_do_request(req, ctx, Method::Get).await
+        })
+        .delete_async("/do/:partition/*path", |req, ctx| async move {
+            handle_do_request(req, ctx, Method::Delete).await
+        })
         .run(req, env)
         .await
 }
@@ -576,6 +583,68 @@ async fn debug_list_r2(ctx: RouteContext<()>) -> Result<Response> {
         Err(e) => {
             utils::log_error(&format!("Failed to list bucket: {}", e));
             Response::error(format!("R2 list failed: {}", e), 500)
+        }
+    }
+}
+
+// Handler for Durable Object management
+async fn handle_do_request(
+    _req: Request,
+    ctx: RouteContext<()>,
+    method: Method,
+) -> Result<Response> {
+    let partition = match ctx.param("partition") {
+        Some(p) => p,
+        None => return Response::error("Missing partition parameter", 400),
+    };
+    
+    let path = ctx.param("path").map_or("", |v| v.as_str());
+    
+    utils::log_info(&format!("DO request: partition='{}', path='{}'", partition, path));
+    
+    // Get the DO binding
+    let buffer_do = match ctx.env.durable_object("ICEBERG_BUFFER_DO") {
+        Ok(binding) => binding,
+        Err(e) => {
+            utils::log_error(&format!("Failed to get DO binding: {}", e));
+            return Response::error("Failed to access Durable Object", 500);
+        }
+    };
+    
+    // Get DO stub for this partition
+    let stub = match buffer_do.id_from_name(partition) {
+        Ok(id) => match id.get_stub() {
+            Ok(stub) => stub,
+            Err(e) => {
+                utils::log_error(&format!("Failed to get DO stub: {}", e));
+                return Response::error("Failed to get Durable Object stub", 500);
+            }
+        },
+        Err(e) => {
+            utils::log_error(&format!("Failed to get DO ID: {}", e));
+            return Response::error("Failed to get Durable Object ID", 500);
+        }
+    };
+    
+    // Build request to forward to DO
+    let url = format!("http://do/{}/{}", partition, path);
+    let request = match Request::new_with_init(
+        &url,
+        RequestInit::new().with_method(method),
+    ) {
+        Ok(req) => req,
+        Err(e) => {
+            utils::log_error(&format!("Failed to build request: {}", e));
+            return Response::error("Failed to build request", 500);
+        }
+    };
+    
+    // Forward request to DO
+    match stub.fetch_with_request(request).await {
+        Ok(response) => Ok(response),
+        Err(e) => {
+            utils::log_error(&format!("DO request failed: {}", e));
+            Response::error("Durable Object request failed", 500)
         }
     }
 }

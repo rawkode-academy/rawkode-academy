@@ -110,14 +110,14 @@ impl RestCatalog {
                 .with_headers(headers.clone()),
         )?;
         
-        let mut response = Fetch::Request(request).send().await?;
+        let response = Fetch::Request(request).send().await?;
         
         if response.status_code() == 404 {
             // Namespace doesn't exist, create it
             log_info(&format!("Creating namespace {}", self.namespace));
             
             let create_body = serde_json::json!({
-                "namespace": [self.namespace.as_str()],
+                "namespace": self.namespace,
                 "properties": {}
             });
             
@@ -157,8 +157,8 @@ impl RestCatalog {
         partition_spec: Vec<PartitionField>,
         properties: HashMap<String, String>,
     ) -> Result<TableMetadata> {
-        // Ensure namespace exists first
-        self.ensure_namespace().await?;
+        // Skip namespace creation for R2 Data Catalog - namespaces might be implicit
+        // self.ensure_namespace().await?;
         
         let url = format!(
             "{}/v1/namespaces/{}/tables",
@@ -618,8 +618,6 @@ impl RestCatalog {
 
         Ok(())
     }
-
-    /// Helper to get bucket name from environment
 }
 
 /// Factory to create appropriate catalog based on configuration
