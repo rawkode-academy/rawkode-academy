@@ -17,9 +17,10 @@ flate2 = "1.0"
 getrandom = { version = "0.2", features = ["js"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", default-features = false }
+tokio = { version = "1", features = ["sync", "macros", "io-util", "rt", "time"]}
 uuid = { version = "1", features = ["v4", "serde", "js"] }
 worker = "0.3"
+urlencoding = "2.1"
 
 # Parquet dependencies
 arrow-array = "52.0.0"

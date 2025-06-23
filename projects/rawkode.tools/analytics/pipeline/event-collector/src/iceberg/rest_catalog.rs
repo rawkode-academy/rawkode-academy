@@ -8,9 +8,12 @@ use worker::*;
 /// REST API catalog client for R2 Data Catalog
 /// This provides an alternative to direct R2 access when using a catalog service
 pub struct RestCatalog {
-    env: Env,
     catalog_endpoint: String,
+    warehouse: String,
     namespace: String,
+    credential: Option<String>,
+    headers: HashMap<String, String>,
+    prefix: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -28,15 +31,24 @@ pub struct TableIdentifier {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateTableRequest {
     pub name: String,
-    pub location: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
     pub schema: serde_json::Value,
-    pub partition_spec: Vec<PartitionField>,
+    #[serde(rename = "partition-spec", skip_serializing_if = "Option::is_none")]
+    pub partition_spec: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub properties: HashMap<String, String>,
+    #[serde(rename = "stage-create", skip_serializing_if = "Option::is_none")]
+    pub stage_create: Option<bool>,
+    #[serde(rename = "sort-order", skip_serializing_if = "Option::is_none")]
+    pub sort_order: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PartitionField {
+    #[serde(rename = "source-id")]
     pub source_id: i32,
+    #[serde(rename = "field-id")]
     pub field_id: i32,
     pub name: String,
     pub transform: String,
@@ -80,70 +92,109 @@ pub enum TableUpdate {
     SetProperties { properties: HashMap<String, String> },
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ConfigResponse {
+    overrides: HashMap<String, String>,
+    defaults: HashMap<String, String>,
+}
+
 impl RestCatalog {
     /// Create a new REST catalog client
-    pub fn new(env: Env, endpoint: String, namespace: String) -> Self {
+    pub fn new(env: &Env, endpoint: String, warehouse: String, namespace: String) -> Self {
+        // Try to get the credential at initialization
+        let credential = match env.secret("R2_DATA_CATALOG_API_TOKEN") {
+            Ok(token) => {
+                let token_str = token.to_string();
+                log_info(&format!("REST catalog initialized with credential (length: {})", token_str.len()));
+                Some(token_str)
+            },
+            Err(e) => {
+                log_error(&format!("Failed to retrieve R2_DATA_CATALOG_API_TOKEN secret during initialization: {:?}", e));
+                None
+            }
+        };
+        
+        // Initialize headers according to RESTCatalog spec
+        let mut headers = HashMap::new();
+        
+        // Signal that we support vended-credentials for access delegation
+        headers.insert(
+            "X-Iceberg-Access-Delegation".to_string(),
+            "vended-credentials".to_string()
+        );
+        
         Self {
-            env,
             catalog_endpoint: endpoint,
+            warehouse,
             namespace,
+            credential,
+            headers,
+            prefix: None,
         }
     }
 
-    /// Create namespace if it doesn't exist
-    pub async fn ensure_namespace(&self) -> Result<()> {
-        let url = format!("{}/v1/namespaces/{}", self.catalog_endpoint, self.namespace);
+    /// Get catalog config and extract prefix
+    pub async fn get_config(&mut self) -> Result<()> {
+        let url = format!("{}/v1/config?warehouse={}", 
+            self.catalog_endpoint.trim_end_matches('/'), 
+            urlencoding::encode(&self.warehouse)
+        );
         
-        log_info(&format!("Checking namespace {} exists", self.namespace));
+        log_info(&format!("Getting catalog config from: {}", url));
         
         let mut headers = Headers::new();
         headers.set("Accept", "application/json")?;
-        
-        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
-            headers.set("Authorization", &format!("Bearer {}", auth_token.to_string()))?;
-        }
+        self.add_headers(&mut headers)?;
         
         let request = Request::new_with_init(
             &url,
             RequestInit::new()
                 .with_method(Method::Get)
-                .with_headers(headers.clone()),
+                .with_headers(headers),
         )?;
         
-        let response = Fetch::Request(request).send().await?;
+        let mut response = Fetch::Request(request).send().await?;
         
-        if response.status_code() == 404 {
-            // Namespace doesn't exist, create it
-            log_info(&format!("Creating namespace {}", self.namespace));
-            
-            let create_body = serde_json::json!({
-                "namespace": [self.namespace.as_str()],
-                "properties": {}
-            });
-            
-            let create_url = format!("{}/v1/namespaces", self.catalog_endpoint);
-            headers.set("Content-Type", "application/json")?;
-            
-            let create_request = Request::new_with_init(
-                &create_url,
-                RequestInit::new()
-                    .with_method(Method::Post)
-                    .with_headers(headers)
-                    .with_body(Some(serde_json::to_string(&create_body)?.into())),
-            )?;
-            
-            let mut create_response = Fetch::Request(create_request).send().await?;
-            
-            if create_response.status_code() >= 400 {
-                let error_body = create_response.text().await.unwrap_or_default();
-                return Err(Error::RustError(format!(
-                    "Failed to create namespace: {} - {}",
-                    create_response.status_code(),
-                    error_body
-                )));
-            }
-            
-            log_info(&format!("Successfully created namespace {}", self.namespace));
+        if response.status_code() >= 400 {
+            let error_body = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+            return Err(Error::RustError(format!(
+                "Failed to get catalog config: {} - {}",
+                response.status_code(),
+                error_body
+            )));
+        }
+        
+        let body = response.text().await?;
+        let config: ConfigResponse = serde_json::from_str(&body)
+            .map_err(|e| Error::RustError(format!("Failed to parse config response: {}", e)))?;
+        
+        // Extract prefix from overrides
+        if let Some(prefix) = config.overrides.get("prefix") {
+            log_info(&format!("Got catalog prefix: {}", prefix));
+            self.prefix = Some(prefix.clone());
+        }
+        
+        Ok(())
+    }
+    
+    /// Get the prefix (must have called get_config first)
+    fn get_prefix(&self) -> Result<String> {
+        self.prefix.clone().ok_or_else(|| {
+            Error::RustError("No prefix found in catalog config - call get_config() first".to_string())
+        })
+    }
+
+    /// Helper method to add required headers for REST catalog requests
+    fn add_headers(&self, headers: &mut Headers) -> Result<()> {
+        // Add all configured headers
+        for (key, value) in &self.headers {
+            headers.set(key, value)?;
+        }
+        
+        // Based on DuckDB's implementation, use Bearer token authentication
+        if let Some(ref credential) = self.credential {
+            log_info(&format!("Setting Authorization header with credential (length: {})", credential.len()));
+            headers.set("Authorization", &format!("Bearer {}", credential))?;
         }
         
         Ok(())
@@ -154,32 +205,38 @@ impl RestCatalog {
         &self,
         table_name: &str,
         schema: serde_json::Value,
-        partition_spec: Vec<PartitionField>,
+        partition_spec: serde_json::Value,
         properties: HashMap<String, String>,
     ) -> Result<TableMetadata> {
-        // Try to ensure namespace exists
-        if let Err(e) = self.ensure_namespace().await {
-            log_error(&format!("Warning: Could not ensure namespace exists: {}", e));
-            // Continue anyway - namespace might already exist or be implicit
-        }
+        // Skip namespace check for R2 Data Catalog - namespace should already exist
+        // R2 Data Catalog might not allow namespace operations via REST API
+        log_info("Skipping namespace check - assuming 'default' namespace exists");
         
-        let url = format!(
-            "{}/v1/namespaces/{}/tables",
-            self.catalog_endpoint, self.namespace
-        );
+        // Get prefix from config (must have been fetched already)
+        let prefix = self.get_prefix()?;
+        
+        // Remove trailing slash from endpoint if present
+        let endpoint = self.catalog_endpoint.trim_end_matches('/');
+        // Build URL with prefix as DuckDB does
+        let url = format!("{}/v1/{}/namespaces/{}/tables", endpoint, prefix, self.namespace);
 
         log_info(&format!("Creating table {} via REST API at {}", table_name, url));
 
         let request_body = CreateTableRequest {
             name: table_name.to_string(),
-            location: format!("r2://analytics-source/{}/{}", self.namespace, table_name),
+            location: None,  // Let R2 Data Catalog determine the location
             schema,
-            partition_spec,
+            partition_spec: if partition_spec.is_null() { None } else { Some(partition_spec) },
             properties,
+            stage_create: None,
+            sort_order: None,
         };
 
         let body_json = match serde_json::to_string(&request_body) {
-            Ok(json) => json,
+            Ok(json) => {
+                log_info(&format!("Create table request body: {}", json));
+                json
+            },
             Err(e) => {
                 let error_msg = format!("Failed to serialize create table request: {}", e);
                 log_error(&error_msg);
@@ -195,14 +252,9 @@ impl RestCatalog {
             }
         }
 
-        // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
-            match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
-                Ok(_) => {},
-                Err(e) => {
-                    log_error(&format!("Failed to set authorization header: {}", e));
-                }
-            }
+        // Add required headers
+        if let Err(e) = self.add_headers(&mut headers) {
+            log_error(&format!("Failed to add headers: {}", e));
         }
 
         let request = match Request::new_with_init(
@@ -266,6 +318,7 @@ impl RestCatalog {
     }
 
     /// List namespaces to verify catalog access
+    #[allow(dead_code)]
     pub async fn list_namespaces(&self) -> Result<Vec<String>> {
         let url = format!("{}/v1/namespaces", self.catalog_endpoint);
         
@@ -274,9 +327,7 @@ impl RestCatalog {
         let mut headers = Headers::new();
         headers.set("Accept", "application/json")?;
         
-        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
-            headers.set("Authorization", &format!("Bearer {}", auth_token.to_string()))?;
-        }
+        self.add_headers(&mut headers)?;
         
         let request = Request::new_with_init(
             &url,
@@ -321,12 +372,11 @@ impl RestCatalog {
     pub async fn load_table(&self, table_name: &str) -> Result<Option<TableMetadata>> {
         // Skip namespace listing for now - R2 Data Catalog might not support it
         
-        let url = format!(
-            "{}/v1/namespaces/{}/tables/{}",
-            self.catalog_endpoint, self.namespace, table_name
-        );
+        let prefix = self.get_prefix()?;
+        let endpoint = self.catalog_endpoint.trim_end_matches('/');
+        let url = format!("{}/v1/{}/namespaces/{}/tables/{}", endpoint, prefix, self.namespace, table_name);
 
-        log_info(&format!("Loading table {} via REST API", table_name));
+        log_info(&format!("Loading table {} via REST API at URL: {}", table_name, url));
 
         let mut headers = Headers::new();
         match headers.set("Accept", "application/json") {
@@ -336,14 +386,9 @@ impl RestCatalog {
             }
         }
 
-        // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
-            match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
-                Ok(_) => {},
-                Err(e) => {
-                    log_error(&format!("Failed to set authorization header: {}", e));
-                }
-            }
+        // Add required headers
+        if let Err(e) = self.add_headers(&mut headers) {
+            log_error(&format!("Failed to add headers: {}", e));
         }
 
         let request = match Request::new_with_init(
@@ -416,10 +461,7 @@ impl RestCatalog {
         requirements: Vec<TableRequirement>,
         updates: Vec<TableUpdate>,
     ) -> Result<TableMetadata> {
-        let url = format!(
-            "{}/v1/namespaces/{}/tables/{}",
-            self.catalog_endpoint, self.namespace, table_name
-        );
+        let url = format!("{}/v1/namespaces/{}/tables/{}", self.catalog_endpoint, self.namespace, table_name);
 
         log_info(&format!(
             "Committing {} updates to table {} via REST API",
@@ -453,14 +495,9 @@ impl RestCatalog {
             }
         }
 
-        // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
-            match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
-                Ok(_) => {},
-                Err(e) => {
-                    log_error(&format!("Failed to set authorization header: {}", e));
-                }
-            }
+        // Add required headers
+        if let Err(e) = self.add_headers(&mut headers) {
+            log_error(&format!("Failed to add headers: {}", e));
         }
 
         let request = match Request::new_with_init(
@@ -525,10 +562,10 @@ impl RestCatalog {
 
     /// List all tables in the namespace
     pub async fn list_tables(&self) -> Result<Vec<TableIdentifier>> {
-        let url = format!(
-            "{}/v1/namespaces/{}/tables",
-            self.catalog_endpoint, self.namespace
-        );
+        // Remove trailing slash from endpoint if present
+        let endpoint = self.catalog_endpoint.trim_end_matches('/');
+        // When endpoint includes the warehouse path, don't add it again
+        let url = format!("{}/v1/namespaces/{}/tables", endpoint, self.namespace);
 
         log_info("Listing tables via REST API");
 
@@ -540,14 +577,9 @@ impl RestCatalog {
             }
         }
 
-        // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
-            match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
-                Ok(_) => {},
-                Err(e) => {
-                    log_error(&format!("Failed to set authorization header: {}", e));
-                }
-            }
+        // Add required headers
+        if let Err(e) = self.add_headers(&mut headers) {
+            log_error(&format!("Failed to add headers: {}", e));
         }
 
         let request = match Request::new_with_init(
@@ -616,23 +648,16 @@ impl RestCatalog {
 
     /// Drop a table via REST API
     pub async fn drop_table(&self, table_name: &str, purge: bool) -> Result<()> {
-        let url = format!(
-            "{}/v1/namespaces/{}/tables/{}?purgeRequested={}",
-            self.catalog_endpoint, self.namespace, table_name, purge
-        );
+        let base_url = format!("{}/v1/namespaces/{}/tables/{}", self.catalog_endpoint, self.namespace, table_name);
+        let url = format!("{}?purgeRequested={}", base_url, purge);
 
         log_info(&format!("Dropping table {} via REST API", table_name));
 
         let mut headers = Headers::new();
         
-        // Add authorization if configured
-        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
-            match headers.set("Authorization", &format!("Bearer {}", auth_token.to_string())) {
-                Ok(_) => {},
-                Err(e) => {
-                    log_error(&format!("Failed to set authorization header: {}", e));
-                }
-            }
+        // Add required headers
+        if let Err(e) = self.add_headers(&mut headers) {
+            log_error(&format!("Failed to add headers: {}", e));
         }
 
         let request = match Request::new_with_init(
@@ -700,8 +725,14 @@ impl CatalogFactory {
                     endpoint_str, namespace
                 ));
                 
+                let warehouse = env
+                    .var("ICEBERG_WAREHOUSE")
+                    .ok()
+                    .map(|v| v.to_string())
+                    .unwrap_or_else(|| "analytics-source".to_string());
+                
                 return Box::new(RestCatalogAdapter::new(
-                    RestCatalog::new(env.clone(), endpoint_str, namespace)
+                    RestCatalog::new(env, endpoint_str, warehouse, namespace)
                 ));
             }
         }
@@ -765,23 +796,13 @@ impl RestCatalogAdapter {
 impl CatalogOperations for RestCatalogAdapter {
     fn create_table<'a>(
         &'a self,
-        table_name: &'a str,
+        _table_name: &'a str,
         _metadata: TableMetadata,
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<()>> + 'a>> {
         Box::pin(async move {
-            // Convert IcebergMetadata to REST API format
-            let schema = serde_json::json!({
-                "type": "struct",
-                "fields": [] // Would need to extract from metadata
-            });
-            
-            let partition_spec = vec![]; // Would need to extract from metadata
-            let properties = HashMap::new(); // Would need to extract from metadata
-            
-            self.catalog
-                .create_table(table_name, schema, partition_spec, properties)
-                .await?;
-            Ok(())
+            // REST catalog operations require config fetching, but we can't mutate self here
+            // This is a limitation of the current trait design
+            Err(Error::RustError("REST catalog table creation requires mutable access".to_string()))
         })
     }
     

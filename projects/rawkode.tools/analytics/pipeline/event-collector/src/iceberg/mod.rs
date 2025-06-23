@@ -35,6 +35,7 @@ pub mod catalog;
 pub mod compaction;
 pub mod manifest;
 pub mod metadata;
+pub mod official_catalog;
 pub mod recovery;
 pub mod rest_catalog;
 pub mod schema;

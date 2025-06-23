@@ -5,8 +5,7 @@ use cloudevents::{AttributesReader, Event};
 use std::collections::HashMap;
 use worker::*;
 
-use super::rest_catalog::RestCatalog;
-use super::schema::{IcebergEventSchema, IcebergTableProperties};
+use super::official_catalog::OfficialCatalog;
 use super::writer::{IcebergWriter, WriteConfig};
 
 const DEFAULT_BUFFER_SIZE: usize = 1000; // Balanced for memory efficiency
@@ -621,6 +620,68 @@ impl IcebergBufferDurableObject {
         }
     }
 
+    async fn ensure_table_exists_official(&self, table_name: &str) -> Result<bool> {
+        // Check if we already verified table exists in this DO
+        if let Ok(true) = self.state.storage().get::<bool>("table_exists").await {
+            return Ok(true);
+        }
+
+        // Create official catalog
+        let catalog = match OfficialCatalog::new(&self.env).await {
+            Ok(cat) => cat,
+            Err(e) => {
+                log_error(&format!("Failed to create official catalog: {}", e));
+                return Err(e);
+            }
+        };
+
+        // Check if table exists
+        match catalog.table_exists("default", table_name).await {
+            Ok(true) => {
+                log_info(&format!("Table {} already exists", table_name));
+                let _ = self.state.storage().put("table_exists", true).await;
+                Ok(true)
+            }
+            Ok(false) => {
+                log_info(&format!("Table {} does not exist, creating...", table_name));
+                
+                // Check if creation is already in progress
+                let creation_key = "table_creation_in_progress";
+                if let Ok(timestamp) = self.state.storage().get::<i64>(creation_key).await {
+                    let elapsed = Date::now().as_millis() as i64 - timestamp;
+                    if elapsed < 300_000 { // 5 minutes
+                        log_info(&format!(
+                            "Table creation already in progress (started {} seconds ago)",
+                            elapsed / 1000
+                        ));
+                        return Err(Error::RustError("Table creation in progress".to_string()));
+                    }
+                }
+
+                // Mark creation as in progress
+                let _ = self.state.storage().put(creation_key, Date::now().as_millis() as i64).await;
+
+                // Create the table
+                match catalog.create_analytics_table("default").await {
+                    Ok(()) => {
+                        log_info("Successfully created analytics_events table");
+                        let _ = self.state.storage().put("table_exists", true).await;
+                        let _ = self.state.storage().delete(creation_key).await;
+                        Ok(true)
+                    }
+                    Err(e) => {
+                        log_error(&format!("Failed to create table: {}", e));
+                        Err(e)
+                    }
+                }
+            }
+            Err(e) => {
+                log_error(&format!("Failed to check table existence: {}", e));
+                Err(e)
+            }
+        }
+    }
+
     async fn flush_to_iceberg(&mut self) -> Result<usize> {
         // Load events
         let buffered_events = match self
@@ -655,27 +716,8 @@ impl IcebergBufferDurableObject {
         let table_name = "analytics_events";
         let iceberg_writer = IcebergWriter::new(self.env.clone(), WriteConfig::default());
         
-        // Create REST catalog client
-        let account_id = match self.env.var("CLOUDFLARE_ACCOUNT_ID") {
-            Ok(id) => id.to_string(),
-            Err(_) => {
-                log_error("CLOUDFLARE_ACCOUNT_ID not configured");
-                return Err(worker::Error::RustError("Missing CLOUDFLARE_ACCOUNT_ID".to_string()));
-            }
-        };
-        
-        let catalog_endpoint = format!(
-            "https://catalog.cloudflarestorage.com/{}/analytics-source",
-            account_id
-        );
-        let rest_catalog = RestCatalog::new(
-            self.env.clone(),
-            catalog_endpoint,
-            "default".to_string()  // Use "default" namespace as shown in the tutorial
-        );
-
-        // Ensure table exists
-        let _table_exists = match self.ensure_table_exists_rest(&rest_catalog, table_name).await {
+        // Ensure table exists using the official catalog
+        let _table_exists = match self.ensure_table_exists_official(table_name).await {
             Ok(exists) => exists,
             Err(e) => {
                 log_error(&format!("Failed to ensure table exists: {}", e));
@@ -723,108 +765,6 @@ impl IcebergBufferDurableObject {
         Ok(1) // Number of files written
     }
 
-    async fn ensure_table_exists_rest(
-        &self,
-        rest_catalog: &RestCatalog,
-        table_name: &str,
-    ) -> Result<bool> {
-        // Check if we already verified table exists in this DO
-        if let Ok(true) = self.state.storage().get::<bool>("table_exists").await {
-            return Ok(true);
-        }
-
-        // Try to load existing table
-        match rest_catalog.load_table(table_name).await {
-            Ok(Some(_metadata)) => {
-                log_info(&format!("Table {} already exists", table_name));
-                // Cache that table exists
-                let _ = self.state.storage().put("table_exists", true).await;
-                Ok(true)
-            }
-            Ok(None) => {
-                // Table doesn't exist, create it
-                log_info(&format!("Creating new Iceberg table: {}", table_name));
-
-                // Check if creation is already in progress
-                let creation_key = "table_creation_in_progress";
-                if let Ok(timestamp) = self.state.storage().get::<i64>(creation_key).await {
-                    let elapsed = Date::now().as_millis() as i64 - timestamp;
-                    // If creation was started more than 5 minutes ago, retry
-                    if elapsed < 300_000 {
-                        log_info(&format!(
-                            "Table creation already in progress (started {} seconds ago)",
-                            elapsed / 1000
-                        ));
-                        return Err(Error::RustError("Table creation in progress".to_string()));
-                    } else {
-                        log_info(&format!(
-                            "Previous table creation timed out after {} seconds, retrying",
-                            elapsed / 1000
-                        ));
-                    }
-                }
-
-                // Mark creation as in progress
-                let _ = self.state.storage().put(creation_key, Date::now().as_millis() as i64).await;
-
-                let schema = IcebergEventSchema::create_event_schema();
-                // Convert Arrow data types to Iceberg type format
-                let schema_json = serde_json::json!({
-                    "type": "struct",
-                    "fields": schema.fields().iter().enumerate().map(|(i, f)| {
-                        let iceberg_type = match f.data_type() {
-                            arrow_schema::DataType::Utf8 => "string",
-                            arrow_schema::DataType::Int32 => "int",
-                            arrow_schema::DataType::Int64 => "long",
-                            arrow_schema::DataType::Timestamp(_, _) => "timestamp",
-                            _ => "string" // Default to string for unknown types
-                        };
-                        serde_json::json!({
-                            "id": i + 1,
-                            "name": f.name(),
-                            "required": !f.is_nullable(),
-                            "type": iceberg_type
-                        })
-                    }).collect::<Vec<_>>()
-                });
-
-                // Simplified partition spec - just partition by type
-                let partition_spec = vec![
-                    super::rest_catalog::PartitionField {
-                        source_id: 2, // type field
-                        field_id: 1000,
-                        name: "type".to_string(),
-                        transform: "identity".to_string(),
-                    },
-                ];
-
-                let properties = IcebergTableProperties::default_properties();
-
-                match rest_catalog
-                    .create_table(table_name, schema_json, partition_spec, properties)
-                    .await
-                {
-                    Ok(_metadata) => {
-                        log_info("Successfully created Iceberg table");
-                        // Cache that table exists
-                        let _ = self.state.storage().put("table_exists", true).await;
-                        // Clear creation flag
-                        let _ = self.state.storage().delete(creation_key).await;
-                        Ok(true)
-                    }
-                    Err(e) => {
-                        log_error(&format!("Failed to create Iceberg table: {}", e));
-                        // Don't clear creation flag on error
-                        Err(e)
-                    }
-                }
-            }
-            Err(e) => {
-                log_error(&format!("Failed to load table metadata: {}", e));
-                Err(e)
-            }
-        }
-    }
 
     fn extract_partition_values(&self, event: &Event) -> HashMap<String, String> {
         let mut values = HashMap::new();

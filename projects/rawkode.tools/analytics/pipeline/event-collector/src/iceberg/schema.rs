@@ -35,7 +35,6 @@ pub struct StructField {
 }
 
 use arrow_schema::{DataType as ArrowDataType, Field as ArrowField, Schema as ArrowSchema};
-use std::collections::HashMap;
 
 /// Schema representing CloudEvents for Iceberg tables
 pub struct IcebergEventSchema;
@@ -74,21 +73,3 @@ impl IcebergEventSchema {
     }
 }
 
-/// Default properties for Iceberg tables
-pub struct IcebergTableProperties;
-
-impl IcebergTableProperties {
-    pub fn default_properties() -> HashMap<String, String> {
-        let mut props = HashMap::new();
-        props.insert("format-version".to_string(), "2".to_string());
-        props.insert("write.format.default".to_string(), "parquet".to_string());
-        props.insert("write.metadata.compression-codec".to_string(), "gzip".to_string());
-        props.insert("write.parquet.compression-codec".to_string(), "snappy".to_string());
-        props.insert("write.parquet.page-size-bytes".to_string(), "1048576".to_string());
-        props.insert("write.parquet.dict-size-bytes".to_string(), "2097152".to_string());
-        props.insert("write.parquet.row-group-size-bytes".to_string(), "134217728".to_string());
-        props.insert("commit.retry.num-retries".to_string(), "4".to_string());
-        props.insert("commit.retry.min-wait-ms".to_string(), "100".to_string());
-        props
-    }
-}
