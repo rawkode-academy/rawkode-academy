@@ -117,7 +117,7 @@ impl RestCatalog {
             log_info(&format!("Creating namespace {}", self.namespace));
             
             let create_body = serde_json::json!({
-                "namespace": self.namespace,
+                "namespace": [self.namespace.as_str()],
                 "properties": {}
             });
             
@@ -157,8 +157,11 @@ impl RestCatalog {
         partition_spec: Vec<PartitionField>,
         properties: HashMap<String, String>,
     ) -> Result<TableMetadata> {
-        // Skip namespace creation for R2 Data Catalog - namespaces might be implicit
-        // self.ensure_namespace().await?;
+        // Try to ensure namespace exists
+        if let Err(e) = self.ensure_namespace().await {
+            log_error(&format!("Warning: Could not ensure namespace exists: {}", e));
+            // Continue anyway - namespace might already exist or be implicit
+        }
         
         let url = format!(
             "{}/v1/namespaces/{}/tables",
@@ -262,8 +265,70 @@ impl RestCatalog {
         Ok(load_response.metadata)
     }
 
+    /// List namespaces to verify catalog access
+    pub async fn list_namespaces(&self) -> Result<Vec<String>> {
+        let url = format!("{}/v1/namespaces", self.catalog_endpoint);
+        
+        log_info("Listing namespaces via REST API");
+        
+        let mut headers = Headers::new();
+        headers.set("Accept", "application/json")?;
+        
+        if let Ok(auth_token) = self.env.var("R2_DATA_CATALOG_API_TOKEN") {
+            headers.set("Authorization", &format!("Bearer {}", auth_token.to_string()))?;
+        }
+        
+        let request = Request::new_with_init(
+            &url,
+            RequestInit::new()
+                .with_method(Method::Get)
+                .with_headers(headers),
+        )?;
+        
+        let mut response = Fetch::Request(request).send().await?;
+        
+        if response.status_code() >= 400 {
+            let error_body = response.text().await.unwrap_or_default();
+            return Err(Error::RustError(format!(
+                "Failed to list namespaces: {} - {}",
+                response.status_code(),
+                error_body
+            )));
+        }
+        
+        let body = response.text().await?;
+        log_info(&format!("Namespaces response: {}", body));
+        
+        // Parse response - expecting {"namespaces": [{"namespace": ["name1"]}, ...]}
+        let parsed: serde_json::Value = serde_json::from_str(&body)?;
+        let namespaces = parsed["namespaces"]
+            .as_array()
+            .ok_or_else(|| Error::RustError("Invalid namespaces response".to_string()))?
+            .iter()
+            .filter_map(|ns| {
+                ns["namespace"]
+                    .as_array()
+                    .and_then(|arr| arr.first())
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string())
+            })
+            .collect();
+        
+        Ok(namespaces)
+    }
+
     /// Load table metadata via REST API
     pub async fn load_table(&self, table_name: &str) -> Result<Option<TableMetadata>> {
+        // First, try to list namespaces to verify connectivity
+        match self.list_namespaces().await {
+            Ok(namespaces) => {
+                log_info(&format!("Available namespaces: {:?}", namespaces));
+            }
+            Err(e) => {
+                log_error(&format!("Failed to list namespaces: {}", e));
+            }
+        }
+        
         let url = format!(
             "{}/v1/namespaces/{}/tables/{}",
             self.catalog_endpoint, self.namespace, table_name
