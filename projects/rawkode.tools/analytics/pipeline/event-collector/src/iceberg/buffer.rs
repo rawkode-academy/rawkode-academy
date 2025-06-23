@@ -671,7 +671,7 @@ impl IcebergBufferDurableObject {
         let rest_catalog = RestCatalog::new(
             self.env.clone(),
             catalog_endpoint,
-            "analytics".to_string()
+            "default".to_string()  // Use "default" namespace as shown in the tutorial
         );
 
         // Ensure table exists
@@ -788,35 +788,12 @@ impl IcebergBufferDurableObject {
                     }).collect::<Vec<_>>()
                 });
 
+                // Simplified partition spec - just partition by type
                 let partition_spec = vec![
                     super::rest_catalog::PartitionField {
                         source_id: 2, // type field
                         field_id: 1000,
                         name: "type".to_string(),
-                        transform: "identity".to_string(),
-                    },
-                    super::rest_catalog::PartitionField {
-                        source_id: 20, // year field
-                        field_id: 1001,
-                        name: "year".to_string(),
-                        transform: "identity".to_string(),
-                    },
-                    super::rest_catalog::PartitionField {
-                        source_id: 21, // month field
-                        field_id: 1002,
-                        name: "month".to_string(),
-                        transform: "identity".to_string(),
-                    },
-                    super::rest_catalog::PartitionField {
-                        source_id: 22, // day field
-                        field_id: 1003,
-                        name: "day".to_string(),
-                        transform: "identity".to_string(),
-                    },
-                    super::rest_catalog::PartitionField {
-                        source_id: 23, // hour field
-                        field_id: 1004,
-                        name: "hour".to_string(),
                         transform: "identity".to_string(),
                     },
                 ];
