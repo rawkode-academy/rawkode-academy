@@ -36,9 +36,7 @@ export const trackVideoEvent = defineAction({
 			console.log("Video event received:", event);
 
 			// Get session ID from request or use anonymous
-			const sessionId = ctx.request
-				? getSessionId(ctx.request)
-				: "anonymous";
+			const sessionId = ctx.request ? getSessionId(ctx.request) : "anonymous";
 
 			// Initialize analytics
 			const analytics = new Analytics(

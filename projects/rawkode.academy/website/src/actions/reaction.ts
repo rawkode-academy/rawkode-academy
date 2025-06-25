@@ -75,9 +75,7 @@ export const addReaction = defineAction({
 			const result = (await response.json()) as Record<string, unknown>;
 
 			// Track the reaction event
-			const sessionId = ctx.request
-				? getSessionId(ctx.request)
-				: "anonymous";
+			const sessionId = ctx.request ? getSessionId(ctx.request) : "anonymous";
 			const analytics = new Analytics(
 				ctx.locals.runtime.env,
 				sessionId,
@@ -109,9 +107,7 @@ export const removeReaction = defineAction({
 		// Track the reaction removal event
 		const user = ctx.locals.user;
 		if (user) {
-			const sessionId = ctx.request
-				? getSessionId(ctx.request)
-				: "anonymous";
+			const sessionId = ctx.request ? getSessionId(ctx.request) : "anonymous";
 			const analytics = new Analytics(
 				ctx.locals.runtime.env,
 				sessionId,
