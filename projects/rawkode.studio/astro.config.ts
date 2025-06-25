@@ -109,9 +109,12 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            // Split LiveKit SDK into its own chunk
+            // Split LiveKit SDK and its components into separate chunks
             if (id.includes("livekit-client")) {
-              return "livekit";
+              return "livekit-core";
+            }
+            if (id.includes("@livekit/components-react")) {
+              return "livekit-components";
             }
 
             // Split React and React DOM into vendor chunk
@@ -122,7 +125,7 @@ export default defineConfig({
               return "react-vendor";
             }
 
-            // Split other large dependencies
+            // Split UI component libraries
             if (id.includes("@radix-ui") || id.includes("@floating-ui")) {
               return "ui-vendor";
             }
@@ -146,7 +149,7 @@ export default defineConfig({
               return "datetime";
             }
 
-            // Split other utilities
+            // Split utility libraries
             if (
               id.includes("clsx") ||
               id.includes("class-variance-authority") ||
@@ -154,9 +157,36 @@ export default defineConfig({
             ) {
               return "utils";
             }
+
+            // Split shadcn components
+            if (id.includes("/components/shadcn/")) {
+              return "shadcn-ui";
+            }
+
+            // Split recording templates
+            if (id.includes("/components/recording-templates/")) {
+              return "recording-templates";
+            }
+
+            // Split livestream room components
+            if (id.includes("/components/livestreams/room/")) {
+              return "livestream-room";
+            }
+
+            // Split other livestream components
+            if (id.includes("/components/livestreams/")) {
+              return "livestream-ui";
+            }
+
+            // Split page components
+            if (id.includes("/components/pages/")) {
+              return "pages";
+            }
           },
         },
       },
+      // Increase chunk size warning limit for known large dependencies
+      chunkSizeWarningLimit: 600,
     },
   },
 });
