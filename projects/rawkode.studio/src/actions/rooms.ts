@@ -20,7 +20,6 @@ import {
 } from "livekit-server-sdk";
 import { hasDirectorRole } from "@/lib/auth";
 import { database } from "@/lib/database";
-import { getLiveKitLayoutString } from "@/lib/layout";
 import { egressClient, roomClientService } from "@/lib/livekit";
 import {
   type FramerateKey,
@@ -157,15 +156,16 @@ function createRoomEgress(
       });
     };
 
-    const layoutString = getLiveKitLayoutString(
-      options.layout || ROOM_DEFAULTS.LAYOUT,
-      import.meta.env.SITE,
-    );
-    console.log("Creating room egress with layout:", layoutString);
+    const layout = options.layout || ROOM_DEFAULTS.LAYOUT;
+    const customBaseUrl = `${import.meta.env.SITE.endsWith("/") ? import.meta.env.SITE.slice(0, -1) : import.meta.env.SITE}/recording-templates`;
+
+    console.log("Creating room egress with layout:", layout);
+    console.log("Using custom base URL:", customBaseUrl);
 
     egressConfig.room = new RoomCompositeEgressRequest({
       roomName: roomName,
-      layout: layoutString,
+      layout: layout,
+      customBaseUrl: customBaseUrl,
       options: {
         case: "advanced",
         value: createCompositeEncodingOptions(),
@@ -566,16 +566,12 @@ export const rooms = {
         const updatePromises = roomCompositeEgresses.map(async (egress) => {
           if (!egress.egressId) return;
 
-          const layoutString = getLiveKitLayoutString(
-            input.layout,
-            import.meta.env.SITE,
-          );
           console.log(
             `Updating egress ${egress.egressId} with layout:`,
-            layoutString,
+            input.layout,
           );
 
-          await egressClient.updateLayout(egress.egressId, layoutString);
+          await egressClient.updateLayout(egress.egressId, input.layout);
         });
 
         await Promise.all(updatePromises);
