@@ -88,9 +88,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
       identity,
       name: displayName.trim(),
-      attributes: {
-        role: role,
-      },
+      metadata: JSON.stringify({ role }),
     });
 
     // Set permissions based on role

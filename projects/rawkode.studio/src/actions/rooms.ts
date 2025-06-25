@@ -572,27 +572,28 @@ export const rooms = {
         await Promise.all(updatePromises);
 
         // Also update the room metadata to keep it in sync
+        let metadata: Record<string, any> = {};
+
         if (room?.metadata) {
           try {
-            const metadata = JSON.parse(room.metadata);
-            metadata.layout = input.layout;
-
-            await roomClientService.updateRoomMetadata(
-              input.roomId,
-              JSON.stringify(metadata),
-            );
+            metadata = JSON.parse(room.metadata);
           } catch (error) {
             console.warn(
               `Failed to parse metadata for room ${input.roomId}:`,
               error,
             );
-            // If metadata parsing fails, just update with new layout
-            await roomClientService.updateRoomMetadata(
-              input.roomId,
-              JSON.stringify({ layout: input.layout }),
-            );
+            // Start with empty object if parsing fails
+            metadata = {};
           }
         }
+
+        // Update the layout while preserving all other metadata fields
+        metadata.layout = input.layout;
+
+        await roomClientService.updateRoomMetadata(
+          input.roomId,
+          JSON.stringify(metadata),
+        );
 
         return { success: true };
       } catch (error) {

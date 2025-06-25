@@ -3,6 +3,10 @@ import type { ParticipantInfo } from "livekit-server-sdk";
 import { DataPacket_Kind } from "livekit-server-sdk";
 import { extractLiveKitAuth } from "@/lib/auth";
 import { roomClientService } from "@/lib/livekit";
+import {
+  getParticipantRole,
+  parseParticipantMetadata,
+} from "@/lib/participant";
 
 type Action =
   | "raise_hand_request"
@@ -80,7 +84,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         }
 
         // Check if the participant's role allows them to raise hand
-        const participantRole = participant?.attributes?.role || "viewer";
+        const participantRole = getParticipantRole(participant);
         if (participantRole === "viewer") {
           return errorResponse("Forbidden", 403);
         }
@@ -141,6 +145,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       },
 
       promote: async () => {
+        // Parse existing metadata
+        const existingMetadata = parseParticipantMetadata(participant);
+        const updatedMetadata = {
+          ...existingMetadata,
+          role: "participant" as const,
+        };
+
         await roomClientService.updateParticipant(
           roomName,
           participantIdentity,
@@ -150,9 +161,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
               canSubscribe: true,
               canPublishData: true,
             },
+            metadata: JSON.stringify(updatedMetadata),
             attributes: {
               ...participant?.attributes,
-              role: "participant",
+              role: "participant", // Keep for backwards compatibility
             },
           },
         );
@@ -180,6 +192,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       },
 
       demote: async () => {
+        // Parse existing metadata
+        const existingMetadata = parseParticipantMetadata(participant);
+        const updatedMetadata = {
+          ...existingMetadata,
+          role: "participant" as const,
+        };
+
         await roomClientService.updateParticipant(
           roomName,
           participantIdentity,
@@ -189,9 +208,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
               canSubscribe: true,
               canPublishData: true,
             },
+            metadata: JSON.stringify(updatedMetadata),
             attributes: {
               ...participant?.attributes,
-              role: "participant",
+              role: "participant", // Keep for backwards compatibility
             },
           },
         );

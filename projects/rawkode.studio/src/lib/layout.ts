@@ -10,7 +10,6 @@ export interface LayoutDefinition {
   label: string;
   description: string;
   component: ComponentType<LayoutProps>;
-  recordingTemplatePath: string;
   supportsScreenShare: boolean;
   maxParticipants?: number;
   minParticipants?: number;
@@ -40,25 +39,6 @@ class LayoutRegistry {
       label: layout.label,
       description: layout.description,
     }));
-  }
-
-  getRecordingTemplatePath(layoutId: string): string | undefined {
-    return this.layouts.get(layoutId)?.recordingTemplatePath;
-  }
-
-  getRecordingTemplateUrl(
-    layoutId: string,
-    baseUrl: string,
-  ): string | undefined {
-    const path = this.getRecordingTemplatePath(layoutId);
-    if (!path) return undefined;
-
-    // Ensure baseUrl doesn't end with a slash
-    const cleanBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-    // Ensure path starts with a slash
-    const cleanPath = path.startsWith("/") ? path : `/${path}`;
-
-    return `${cleanBaseUrl}${cleanPath}`;
   }
 }
 

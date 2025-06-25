@@ -2,14 +2,15 @@ import { useLocalParticipant } from "@livekit/components-react";
 import { ParticipantEvent } from "livekit-client";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { getParticipantRole } from "@/lib/participant";
 
 export function PermissionHandler() {
   const { localParticipant } = useLocalParticipant();
   const previousCanPublish = useRef<boolean | null>(null);
   const hasShownInitialToast = useRef(false);
 
-  // Check if user is a director from attributes
-  const participantRole = localParticipant?.attributes?.role || "viewer";
+  // Check if user is a director from metadata
+  const participantRole = getParticipantRole(localParticipant);
   const isDirector = participantRole === "director";
 
   useEffect(() => {
@@ -32,8 +33,8 @@ export function PermissionHandler() {
       const wasAbleToPublish = previousCanPublish.current || false;
       const attributes = localParticipant.attributes || {};
 
-      // Re-check director status from attributes
-      const currentRole = localParticipant?.attributes?.role || "viewer";
+      // Re-check director status from metadata
+      const currentRole = getParticipantRole(localParticipant);
       const currentIsDirector = currentRole === "director";
 
       console.log("Permission change detected:", {
@@ -82,15 +83,15 @@ export function PermissionHandler() {
       handlePermissionsChanged,
     );
 
-    // Also listen for attribute changes (which might include permission metadata)
-    const handleAttributesChanged = () => {
-      // Trigger permission check when attributes change
+    // Also listen for metadata changes (which might include role changes)
+    const handleMetadataChanged = () => {
+      // Trigger permission check when metadata changes
       handlePermissionsChanged();
     };
 
     localParticipant.on(
-      ParticipantEvent.AttributesChanged,
-      handleAttributesChanged,
+      ParticipantEvent.ParticipantMetadataChanged,
+      handleMetadataChanged,
     );
 
     return () => {
@@ -99,8 +100,8 @@ export function PermissionHandler() {
         handlePermissionsChanged,
       );
       localParticipant.off(
-        ParticipantEvent.AttributesChanged,
-        handleAttributesChanged,
+        ParticipantEvent.ParticipantMetadataChanged,
+        handleMetadataChanged,
       );
     };
   }, [localParticipant, isDirector]);
