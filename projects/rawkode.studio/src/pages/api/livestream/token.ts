@@ -6,8 +6,8 @@ import {
   parseRoomMetadata,
   stringifyRoomMetadata,
 } from "@/components/livestreams/room/layouts/permissions";
+import { generateGuestName } from "@/lib/guest";
 import { roomClientService } from "@/lib/livekit";
-import { generateGuestName } from "@/lib/utils";
 
 const jsonResponse = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -77,8 +77,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
           );
 
           console.log(`Set ${identity} as presenter for room ${roomName}`);
-        } catch (error) {
-          console.error("Failed to set presenter:", error);
+        } catch (_error) {
+          console.error("Failed to set presenter:", _error);
           // Continue anyway - token generation shouldn't fail due to this
         }
       }
@@ -87,8 +87,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Create LiveKit access token
     const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
       identity,
-      name: displayName.trim(),
-      metadata: JSON.stringify({ role }),
+      attributes: {
+        role: role,
+        displayName: displayName.trim(),
+      },
     });
 
     // Set permissions based on role
@@ -109,8 +111,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const token = await at.toJwt();
 
     return jsonResponse({ token });
-  } catch (error) {
-    console.error("Error generating token:", error);
+  } catch (_error) {
+    console.error("Error generating token:", _error);
     return errorResponse("Failed to generate token", 500);
   }
 };

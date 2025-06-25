@@ -1,9 +1,6 @@
 import { z } from "astro:schema";
 
-// ============================================
-// Recording Configuration Constants
-// ============================================
-
+// Shared recording configuration types and schemas
 export const RESOLUTIONS = {
   "720": { width: 1280, height: 720, label: "720p" },
   "1080": { width: 1920, height: 1080, label: "1080p" },
@@ -25,17 +22,10 @@ export const BITRATES = {
   "15000": { value: 15000, label: "15 Mbps" },
 } as const;
 
-// ============================================
-// Type Definitions
-// ============================================
-
+// Type definitions
 export type ResolutionKey = keyof typeof RESOLUTIONS;
 export type FramerateKey = keyof typeof FRAMERATES;
 export type BitrateKey = keyof typeof BITRATES;
-
-// ============================================
-// Schemas
-// ============================================
 
 // Zod schema for recording settings
 export const recordingSettingsSchema = z.object({
@@ -46,20 +36,12 @@ export const recordingSettingsSchema = z.object({
 
 export type RecordingSettings = z.infer<typeof recordingSettingsSchema>;
 
-// ============================================
-// Defaults
-// ============================================
-
 // Default recording settings
 export const DEFAULT_RECORDING_SETTINGS: RecordingSettings = {
   resolution: "1080",
   framerate: "60",
   videoBitrate: 6000,
 };
-
-// ============================================
-// Helper Functions
-// ============================================
 
 // Helper to get resolution dimensions
 export function getResolutionDimensions(resolution: ResolutionKey) {

@@ -1,4 +1,3 @@
-import { actions } from "astro:actions";
 import { useLocalParticipant, useRoomInfo } from "@livekit/components-react";
 import {
   Grid3x3,
@@ -22,10 +21,6 @@ import {
   type RoomLayoutMetadata,
   stringifyRoomMetadata,
 } from "@/components/livestreams/room/layouts/permissions";
-import { layoutRegistry } from "@/lib/layout";
-import { getParticipantRole } from "@/lib/participant";
-// Import layouts to ensure they're registered
-import "@/components/livestreams/room/layouts";
 import { Button } from "@/components/shadcn/button";
 import {
   DropdownMenu,
@@ -66,7 +61,7 @@ export function LayoutSelector({ token }: LayoutSelectorProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Check if user has permission to change layouts using the permission system
-  const participantRole = getParticipantRole(localParticipant);
+  const participantRole = localParticipant?.attributes?.role || "viewer";
   const isDirector = participantRole === "director";
   // Check if the local participant is the presenter by comparing with room metadata
   const roomPresenter = parseRoomMetadata(roomInfo?.metadata)?.presenter;
@@ -123,19 +118,6 @@ export function LayoutSelector({ token }: LayoutSelectorProps) {
         }
 
         toast.success(`Layout changed to ${LAYOUT_CONFIGS[newLayout].name}`);
-
-        // Also update the egress layout if recording is active
-        if (roomInfo?.name) {
-          try {
-            await actions.rooms.updateRoomEgressLayout({
-              roomId: roomInfo.name,
-              layout: newLayout,
-            });
-          } catch (egressError) {
-            // Don't fail the whole operation if egress update fails
-            console.warn("Failed to update egress layout:", egressError);
-          }
-        }
       } catch (error) {
         console.error("Failed to update layout:", error);
         toast.error(
@@ -148,11 +130,11 @@ export function LayoutSelector({ token }: LayoutSelectorProps) {
     [canChangeLayout, currentLayout, roomInfo?.name, roomInfo?.metadata, token],
   );
 
-  // Get layouts from the registry
-  const availableLayouts = layoutRegistry.getAll();
+  // Show all layouts regardless of conditions
+  const availableLayouts = Object.values(LAYOUT_CONFIGS);
 
   const currentConfig = LAYOUT_CONFIGS[currentLayout];
-  const IconComponent = LAYOUT_ICONS[currentConfig?.icon] || LayoutGrid;
+  const IconComponent = LAYOUT_ICONS[currentConfig.icon] || LayoutGrid;
 
   return (
     <TooltipProvider>
@@ -184,17 +166,13 @@ export function LayoutSelector({ token }: LayoutSelectorProps) {
           <DropdownMenuSeparator />
 
           {availableLayouts.map((layout) => {
-            // Get icon from LAYOUT_CONFIGS if available, otherwise use LayoutGrid
-            const layoutConfig = LAYOUT_CONFIGS[layout.id as LayoutType];
-            const LayoutIcon = layoutConfig
-              ? LAYOUT_ICONS[layoutConfig.icon] || LayoutGrid
-              : LayoutGrid;
+            const LayoutIcon = LAYOUT_ICONS[layout.icon] || LayoutGrid;
             const isActive = layout.id === currentLayout;
 
             return (
               <DropdownMenuItem
                 key={layout.id}
-                onClick={() => handleLayoutChange(layout.id as LayoutType)}
+                onClick={() => handleLayoutChange(layout.id)}
                 disabled={isActive || isUpdating}
                 className="cursor-pointer"
               >
@@ -208,7 +186,7 @@ export function LayoutSelector({ token }: LayoutSelectorProps) {
                     <div
                       className={`font-medium ${isActive ? "text-primary" : ""}`}
                     >
-                      {layout.label}
+                      {layout.name}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {layout.description}

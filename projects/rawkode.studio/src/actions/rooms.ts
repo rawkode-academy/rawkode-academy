@@ -18,22 +18,21 @@ import {
   SegmentedFileOutput,
   VideoCodec,
 } from "livekit-server-sdk";
-import { hasDirectorRole } from "@/lib/auth";
 import { database } from "@/lib/database";
-import { getLiveKitLayoutString } from "@/lib/layout";
-import { egressClient, roomClientService } from "@/lib/livekit";
+import { roomClientService } from "@/lib/livekit";
 import {
   type FramerateKey,
   getFramerateValue,
   getResolutionDimensions,
   type ResolutionKey,
   recordingSettingsSchema,
-} from "@/lib/recording";
+} from "@/lib/recordingConfig";
+import { hasDirectorRole } from "@/lib/security";
 import { livestreamsTable, participantsTable } from "@/schema";
 
 const ROOM_DEFAULTS = {
   EMPTY_TIMEOUT: 2 * 60, // 2 minutes in seconds
-  LAYOUT: "grid" as const,
+  LAYOUT: "speaker-light" as const,
 };
 
 function createS3Config() {
@@ -159,10 +158,7 @@ function createRoomEgress(
 
     egressConfig.room = new RoomCompositeEgressRequest({
       roomName: roomName,
-      layout: getLiveKitLayoutString(
-        options.layout || ROOM_DEFAULTS.LAYOUT,
-        import.meta.env.SITE,
-      ),
+      layout: options.layout || ROOM_DEFAULTS.LAYOUT,
       options: {
         case: "advanced",
         value: createCompositeEncodingOptions(),
@@ -218,11 +214,7 @@ export const rooms = {
           try {
             const metadata = JSON.parse(room.metadata);
             displayName = metadata.displayName || room.name;
-          } catch (error) {
-            console.warn(
-              `Failed to parse metadata for room ${room.name}:`,
-              error,
-            );
+          } catch (_e) {
             // If metadata parsing fails, use room name as fallback
           }
         }
@@ -316,8 +308,7 @@ export const rooms = {
             ...room,
             participantsCount: room.participantsCount ?? 0,
           })) as PastLiveStream[];
-      } catch (error) {
-        console.error("Failed to fetch past livestreams:", error);
+      } catch (_error) {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch past livestreams.",
@@ -332,7 +323,7 @@ export const rooms = {
       roomId: z.string(), // Required room ID from client
       maxParticipants: z.number(),
       emptyTimeout: z.number().optional(),
-      layout: z.string().optional().default("grid"),
+      layout: z.string().optional().default("speaker-light"),
       // Recording settings - presence of object means recording is enabled
       participantRecording: recordingSettingsSchema.optional(),
       trackRecording: z.boolean().optional(),
@@ -492,117 +483,13 @@ export const rooms = {
         );
 
         return { success: true };
-      } catch (error) {
-        console.error("Failed to update room layout:", error);
-        if (error instanceof ActionError) {
-          throw error;
+      } catch (_error) {
+        if (_error instanceof ActionError) {
+          throw _error;
         }
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update room layout",
-        });
-      }
-    },
-  }),
-
-  updateRoomEgressLayout: defineAction({
-    input: z.object({
-      roomId: z.string(),
-      layout: z.string(),
-    }),
-
-    handler: async (input, context) => {
-      if (!context.locals.user) {
-        throw new ActionError({ code: "UNAUTHORIZED" });
-      }
-
-      try {
-        // Get room info to check metadata and presenter
-        const rooms = await roomClientService.listRooms([input.roomId]);
-        const room = rooms[0];
-
-        if (!room) {
-          throw new ActionError({
-            code: "NOT_FOUND",
-            message: "Room not found",
-          });
-        }
-
-        // Check if user is director or presenter
-        const isDirector = hasDirectorRole(context.locals.user);
-        const roomMetadata = room.metadata ? JSON.parse(room.metadata) : {};
-        const isPresenter =
-          context.locals.user.preferred_username === roomMetadata.presenter;
-
-        if (!isDirector && !isPresenter) {
-          throw new ActionError({
-            code: "FORBIDDEN",
-            message:
-              "Only directors and the current presenter can update the recording layout",
-          });
-        }
-        // List active egresses for the room
-        const egresses = await egressClient.listEgress({
-          roomName: input.roomId,
-          active: true,
-        });
-
-        // Find room composite egresses
-        const roomCompositeEgresses = egresses.filter(
-          (egress) => egress.request?.case === "roomComposite",
-        );
-
-        if (roomCompositeEgresses.length === 0) {
-          throw new ActionError({
-            code: "NOT_FOUND",
-            message: "No active composite recording found for this room",
-          });
-        }
-
-        // Update each composite egress with the new layout
-        const updatePromises = roomCompositeEgresses.map(async (egress) => {
-          if (!egress.egressId) return;
-
-          await egressClient.updateLayout(
-            egress.egressId,
-            getLiveKitLayoutString(input.layout, import.meta.env.SITE),
-          );
-        });
-
-        await Promise.all(updatePromises);
-
-        // Also update the room metadata to keep it in sync
-        let metadata: Record<string, any> = {};
-
-        if (room?.metadata) {
-          try {
-            metadata = JSON.parse(room.metadata);
-          } catch (error) {
-            console.warn(
-              `Failed to parse metadata for room ${input.roomId}:`,
-              error,
-            );
-            // Start with empty object if parsing fails
-            metadata = {};
-          }
-        }
-
-        // Update the layout while preserving all other metadata fields
-        metadata.layout = input.layout;
-
-        await roomClientService.updateRoomMetadata(
-          input.roomId,
-          JSON.stringify(metadata),
-        );
-
-        return { success: true };
-      } catch (error) {
-        if (error instanceof ActionError) {
-          throw error;
-        }
-        throw new ActionError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update egress layout",
         });
       }
     },

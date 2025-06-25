@@ -265,7 +265,10 @@ export function Chat({ token, onNewMessage }: ChatProps) {
         allMessages.push({
           id: msg.id,
           message: msg.message,
-          participantName: msg.from?.name || msg.from?.identity || "Anonymous",
+          participantName:
+            msg.from?.attributes?.displayName ||
+            msg.from?.identity ||
+            "Anonymous",
           participantIdentity: msg.from?.identity || "anonymous",
           timestamp: msg.timestamp || Date.now(),
         });

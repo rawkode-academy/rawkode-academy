@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/card";
-import { calculateDuration } from "@/lib/utils";
+import { calculateDuration } from "@/lib/duration";
 
 export default function PastLivestreamDetailsPage() {
   const { roomId } = useParams<{ roomId: string }>();

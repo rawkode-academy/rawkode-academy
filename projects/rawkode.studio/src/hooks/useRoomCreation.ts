@@ -2,7 +2,7 @@ import { actions } from "astro:actions";
 import { useQuery } from "@tanstack/react-query";
 import * as randomWords from "random-words";
 import { useEffect, useRef, useState } from "react";
-import { generateRoomId } from "@/lib/utils";
+import { generateRoomId } from "@/lib/generateRoomId";
 
 export type CreationStatus = "idle" | "creating" | "verifying" | "complete";
 

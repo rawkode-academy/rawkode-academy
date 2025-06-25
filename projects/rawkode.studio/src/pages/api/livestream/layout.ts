@@ -1,8 +1,7 @@
 import type { APIRoute } from "astro";
 import { parseRoomMetadata } from "@/components/livestreams/room/layouts/permissions";
-import { extractLiveKitAuth } from "@/lib/auth";
 import { roomClientService } from "@/lib/livekit";
-import { getParticipantRole } from "@/lib/participant";
+import { extractLiveKitAuth } from "@/lib/security";
 
 const jsonResponse = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -54,7 +53,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Check if user is a director or presenter
-    const participantRole = getParticipantRole(participant);
+    const participantRole = participant.attributes?.role || "viewer";
     const isDirector = participantRole === "director";
     const roomMetadata = parseRoomMetadata(room.metadata);
     const isPresenter = auth.identity === roomMetadata?.presenter;
