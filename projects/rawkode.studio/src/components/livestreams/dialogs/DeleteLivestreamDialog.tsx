@@ -102,7 +102,8 @@ export default function DeleteLivestreamDialog({ id, displayName }: Props) {
 
       // API call success, verification will happen automatically
       // through the enabled query
-    } catch (_error) {
+    } catch (error) {
+      console.error("Failed to delete livestream:", error);
       setIsDeleting(false);
       setIsError(true);
       roomToDeleteRef.current = null;

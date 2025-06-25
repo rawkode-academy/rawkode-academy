@@ -68,10 +68,26 @@ export const POST: APIRoute = async ({ request }) => {
       canPublishData = verified.video?.canPublishData || false;
     }
 
-    // Create new token with current permissions
+    // Query current participant attributes (role might have changed)
+    let currentAttributes = verified.attributes || {};
+
+    try {
+      const participants = await roomClientService.listParticipants(room);
+      const currentParticipant = participants.find(
+        (p) => p.identity === identity,
+      );
+
+      if (currentParticipant?.attributes) {
+        currentAttributes = currentParticipant.attributes;
+      }
+    } catch (error) {
+      console.error("Failed to query participant attributes:", error);
+    }
+
+    // Create new token with current permissions and attributes
     const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
       identity: identity,
-      attributes: verified.attributes || {},
+      attributes: currentAttributes,
     });
 
     // Set grants based on current participant state

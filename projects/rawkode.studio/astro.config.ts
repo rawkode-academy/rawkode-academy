@@ -109,9 +109,25 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            // Split LiveKit SDK into its own chunk
+            // Split LiveKit SDK into smaller chunks
             if (id.includes("livekit-client")) {
-              return "livekit";
+              // Split WebRTC related code
+              if (id.includes("webrtc") || id.includes("rtc")) {
+                return "livekit-webrtc";
+              }
+              // Split room/participant management
+              if (id.includes("room") || id.includes("participant")) {
+                return "livekit-room";
+              }
+              // Split track/media handling
+              if (id.includes("track") || id.includes("media")) {
+                return "livekit-media";
+              }
+              // Everything else from livekit-client
+              return "livekit-core";
+            }
+            if (id.includes("@livekit/components-react")) {
+              return "livekit-components";
             }
 
             // Split React and React DOM into vendor chunk
@@ -122,7 +138,7 @@ export default defineConfig({
               return "react-vendor";
             }
 
-            // Split other large dependencies
+            // Split UI component libraries
             if (id.includes("@radix-ui") || id.includes("@floating-ui")) {
               return "ui-vendor";
             }
@@ -141,12 +157,9 @@ export default defineConfig({
               return "astro-actions";
             }
 
-            // Split date/time libraries
-            if (id.includes("date-fns") || id.includes("@formatjs")) {
-              return "datetime";
-            }
+            // Note: date-fns is included in utils chunk due to small usage
 
-            // Split other utilities
+            // Split utility libraries
             if (
               id.includes("clsx") ||
               id.includes("class-variance-authority") ||
@@ -154,9 +167,36 @@ export default defineConfig({
             ) {
               return "utils";
             }
+
+            // Split shadcn components
+            if (id.includes("/components/shadcn/")) {
+              return "shadcn-ui";
+            }
+
+            // Split recording templates
+            if (id.includes("/components/recording-templates/")) {
+              return "recording-templates";
+            }
+
+            // Split livestream room components
+            if (id.includes("/components/livestreams/room/")) {
+              return "livestream-room";
+            }
+
+            // Split other livestream components
+            if (id.includes("/components/livestreams/")) {
+              return "livestream-ui";
+            }
+
+            // Split page components
+            if (id.includes("/components/pages/")) {
+              return "pages";
+            }
           },
         },
       },
+      // Increase chunk size warning limit for known large dependencies
+      chunkSizeWarningLimit: 850, // LiveKit SDK is large but necessary
     },
   },
 });

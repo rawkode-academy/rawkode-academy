@@ -1,5 +1,5 @@
 import { Navigate } from "react-router";
-import type { OidcStandardClaimsWithRoles } from "@/lib/security";
+import type { OidcStandardClaimsWithRoles } from "@/lib/auth";
 
 interface Props {
   user: OidcStandardClaimsWithRoles;
