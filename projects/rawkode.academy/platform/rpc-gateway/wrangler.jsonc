@@ -1,0 +1,56 @@
+{
+	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+	"name": "platform-rpc-gateway",
+	"main": "main.ts",
+	"compatibility_date": "2025-04-05",
+	"keep_vars": false,
+	"minify": true,
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1
+		}
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": true,
+	// Service bindings to write models
+	"services": [
+		{
+			"binding": "CASTING_CREDITS",
+			"service": "platform-casting-credits-write-model"
+		}
+		// {
+		// 	"binding": "TECHNOLOGIES_WRITE",
+		// 	"service": "technologies-write-model"
+		// }
+		// Add more service bindings as write models are deployed:
+		// {
+		//   "binding": "PEOPLE_WRITE",
+		//   "service": "platform-people-write-model"
+		// },
+		// {
+		//   "binding": "SHOWS_WRITE",
+		//   "service": "platform-shows-write-model"
+		// },
+		// {
+		//   "binding": "SHOW_HOSTS_WRITE",
+		//   "service": "platform-show-hosts-write-model"
+		// }
+	],
+	"secrets_store_secrets": [
+		{
+			"binding": "PLATFORM_RPC_TOKEN",
+			"secret_name": "PLATFORM_RPC_TOKEN",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e"
+		}
+	],
+	// Zitadel PAT authentication configuration
+	"vars": {
+		"ZITADEL_INTROSPECTION_URL": "https://zitadel.rawkode.academy/oauth/v2/introspect"
+	}
+}
