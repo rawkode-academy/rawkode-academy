@@ -144,10 +144,7 @@ export default defineConfig({
               return "astro-actions";
             }
 
-            // Split date/time libraries
-            if (id.includes("date-fns") || id.includes("@formatjs")) {
-              return "datetime";
-            }
+            // Note: date-fns is included in utils chunk due to small usage
 
             // Split utility libraries
             if (
