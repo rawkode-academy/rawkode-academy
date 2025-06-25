@@ -41,20 +41,20 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
+      - name: git-clone
         uses: actions/checkout@v4
 
-      - name: Install Dagger
+      - name: dagger-install
         run: |
           curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
 
-      - name: Authenticate to Google Cloud
+      - name: gcloud-authenticate
         uses: google-github-actions/auth@v2
         with:
           project_id: "rawkode-academy-production"
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
 
-      - name: Get secrets from GCP Secret Manager
+      - name: secrets-get
         id: secrets
         uses: google-github-actions/get-secretmanager-secrets@v2
         with:
@@ -62,7 +62,7 @@ jobs:
             CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
             COSMO_API_KEY:projects/458678766461/secrets/cosmo-api-key
 
-      - name: Deploy and Register Subgraph
+      - name: deploy-read-model
         working-directory: projects/rawkode.academy/platform/casting-credits
         env:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
@@ -90,3 +90,17 @@ jobs:
               https://${SERVICE_NAME}-read-model.rawkode-academy.workers.dev \
               env:COSMO_API_KEY
           .
+      - name: deploy-write-model
+        working-directory: projects/rawkode.academy/platform/casting-credits
+        env:
+          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          SERVICE_NAME: platform-casting-credits
+        run: |
+          dagger <<'.'
+            codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
+
+            ../../../../dagger/cloudflare | deploy \
+              $codebase \
+              ./write-model/wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN
+s

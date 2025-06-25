@@ -1,6 +1,7 @@
 .wrangler
-node_modules
-/sdk
-/**/node_modules/**
-/**/.pnpm-store/**
 /.env
+/**/.pnpm-store/**
+/**/node_modules/**
+/sdk
+node_modules
+worker-configuration.d.ts
