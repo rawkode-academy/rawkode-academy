@@ -1,6 +1,6 @@
 import { actions } from "astro:actions";
 import type { APIRoute } from "astro";
-import { extractLiveKitAuth } from "@/lib/security";
+import { extractLiveKitAuth } from "@/lib/auth";
 
 export const GET: APIRoute = async ({ request, url, callAction }) => {
   // Extract auth from LiveKit token

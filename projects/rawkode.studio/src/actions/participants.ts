@@ -28,7 +28,8 @@ export const participants = {
           .where(eq(participantsTable.roomId, input.roomId));
 
         return participants as Participant[];
-      } catch (_error) {
+      } catch (error) {
+        console.error("Failed to fetch room participants:", error);
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch room participants.",

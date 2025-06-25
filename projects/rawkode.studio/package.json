@@ -18,6 +18,7 @@
     "@livekit/components-core": "^0.12.7",
     "@livekit/components-react": "2.9.9",
     "@livekit/components-styles": "1.1.6",
+    "@livekit/egress-sdk": "^0.2.1",
     "@oslojs/jwt": "0.3.0",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",

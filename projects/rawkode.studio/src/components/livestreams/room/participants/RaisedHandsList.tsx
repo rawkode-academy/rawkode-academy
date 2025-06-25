@@ -91,7 +91,7 @@ export function RaisedHandsList({ onPromote, token }: RaisedHandsListProps) {
               className="flex items-center gap-2 p-2 bg-orange-500/10 dark:bg-orange-500/10 border border-orange-500/30 dark:border-orange-500/20 rounded-xl"
             >
               <span className="flex-1 text-sm font-medium text-foreground truncate">
-                {participant.attributes?.displayName || participant.identity}
+                {participant.name || participant.identity}
               </span>
 
               <div className="flex items-center gap-1">

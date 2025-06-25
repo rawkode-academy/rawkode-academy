@@ -13,6 +13,7 @@
         "@livekit/components-core": "^0.12.7",
         "@livekit/components-react": "2.9.9",
         "@livekit/components-styles": "1.1.6",
+        "@livekit/egress-sdk": "^0.2.1",
         "@oslojs/jwt": "0.3.0",
         "@radix-ui/react-alert-dialog": "^1.1.14",
         "@radix-ui/react-avatar": "^1.1.10",
@@ -378,6 +379,8 @@
     "@livekit/components-react": ["@livekit/components-react@2.9.9", "", { "dependencies": { "@livekit/components-core": "0.12.7", "clsx": "2.1.1", "usehooks-ts": "3.1.1" }, "peerDependencies": { "@livekit/krisp-noise-filter": "^0.2.12", "livekit-client": "^2.13.1", "react": ">=18", "react-dom": ">=18", "tslib": "^2.6.2" }, "optionalPeers": ["@livekit/krisp-noise-filter"] }, "sha512-ZxiHSCNVxNG8XZdJkpJ7+ga/Wl6WRDkZocJGd+eh8F1JRjjqrBL9IesOPzOK0INX9lAaVCe9VqL41B+B5PVdrg=="],
 
     "@livekit/components-styles": ["@livekit/components-styles@1.1.6", "", {}, "sha512-V6zfuREC2ksW8z6T6WSbEvdLB5ICVikGz1GtLr59UcxHDyAsKDbuDHAyl3bF3xBqPKYmY3GWF3Qk39rnScyOtA=="],
+
+    "@livekit/egress-sdk": ["@livekit/egress-sdk@0.2.1", "", { "peerDependencies": { "livekit-client": "^1.15.13 || ^2.7.5" } }, "sha512-pmg5K2zXv3YDj/dxLG1OLvzbTKHEp0hmPbLa9a2tsy08jFIg6tRp+bwRaFH0HM1XLMDn2Ng0c/fY3FW87IYkwQ=="],
 
     "@livekit/mutex": ["@livekit/mutex@1.1.1", "", {}, "sha512-EsshAucklmpuUAfkABPxJNhzj9v2sG7JuzFDL4ML1oJQSV14sqrpTYnsaOudMAw9yOaW53NU3QQTlUQoRs4czw=="],
 
