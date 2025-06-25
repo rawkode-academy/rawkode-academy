@@ -33,7 +33,7 @@ export function parseParticipantMetadata(
 }
 
 /**
- * Get the role of a participant, with fallback to attributes for backwards compatibility
+ * Get the role of a participant from metadata
  * @param participant The participant object
  * @returns The participant's role
  */
@@ -41,23 +41,13 @@ export function getParticipantRole(
   participant:
     | Participant
     | ParticipantInfo
-    | { metadata?: string; attributes?: Record<string, string> }
+    | { metadata?: string }
     | undefined,
 ): "director" | "participant" | "viewer" {
-  // First try to get role from metadata
+  // Get role from metadata
   const metadata = parseParticipantMetadata(participant);
   if (metadata.role) {
     return metadata.role;
-  }
-
-  // Fallback to attributes for backwards compatibility
-  const attributeRole = participant?.attributes?.role;
-  if (
-    attributeRole === "director" ||
-    attributeRole === "participant" ||
-    attributeRole === "viewer"
-  ) {
-    return attributeRole;
   }
 
   // Default to viewer

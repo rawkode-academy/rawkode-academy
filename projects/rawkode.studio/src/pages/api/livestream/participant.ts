@@ -162,10 +162,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
               canPublishData: true,
             },
             metadata: JSON.stringify(updatedMetadata),
-            attributes: {
-              ...participant?.attributes,
-              role: "participant", // Keep for backwards compatibility
-            },
           },
         );
 
@@ -209,10 +205,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
               canPublishData: true,
             },
             metadata: JSON.stringify(updatedMetadata),
-            attributes: {
-              ...participant?.attributes,
-              role: "participant", // Keep for backwards compatibility
-            },
           },
         );
 
