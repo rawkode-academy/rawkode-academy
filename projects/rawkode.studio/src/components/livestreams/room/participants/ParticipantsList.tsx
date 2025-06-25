@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import { getParticipantRole } from "@/lib/participant";
 
 interface ParticipantsListProps {
   token: string | null;
@@ -133,7 +134,7 @@ export function ParticipantsList({ token }: ParticipantsListProps) {
   const renderParticipant = (participant: (typeof participants)[0]) => {
     const isLocal = participant === localParticipant;
     const isSpeaker = participant.permissions?.canPublish;
-    const participantRole = participant.attributes?.role || "viewer";
+    const participantRole = getParticipantRole(participant);
     const isDirector = participantRole === "director";
     const isLoading = loadingParticipant === participant.identity;
     const isPresenter = participant.identity === currentPresenter;
@@ -150,7 +151,7 @@ export function ParticipantsList({ token }: ParticipantsListProps) {
       >
         <div className="flex-1 min-w-0 flex items-center gap-2">
           <p className="text-sm font-medium text-foreground truncate">
-            {participant.attributes?.displayName || participant.identity}
+            {participant.name || participant.identity}
           </p>
 
           <div className="flex items-center gap-2 ml-auto">

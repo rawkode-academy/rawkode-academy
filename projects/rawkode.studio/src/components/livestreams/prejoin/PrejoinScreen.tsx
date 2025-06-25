@@ -31,8 +31,7 @@ import {
   SelectValue,
 } from "@/components/shadcn/select";
 import { Separator } from "@/components/shadcn/separator";
-import { generateGuestName } from "@/lib/guest";
-import { cn } from "@/lib/utils";
+import { cn, generateGuestName } from "@/lib/utils";
 
 interface PrejoinScreenProps {
   roomDisplayName: string;
@@ -480,7 +479,8 @@ export function PrejoinScreen({
       };
 
       onJoin(choices);
-    } catch (_err) {
+    } catch (error) {
+      console.error("Failed to join stream:", error);
       setError("Failed to join the stream. Please try again.");
       setIsLoading(false);
     }

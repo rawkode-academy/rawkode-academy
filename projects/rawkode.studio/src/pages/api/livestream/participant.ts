@@ -1,8 +1,9 @@
 import type { APIRoute } from "astro";
 import type { ParticipantInfo } from "livekit-server-sdk";
 import { DataPacket_Kind } from "livekit-server-sdk";
+import { extractLiveKitAuth } from "@/lib/auth";
 import { roomClientService } from "@/lib/livekit";
-import { extractLiveKitAuth } from "@/lib/security";
+import { getParticipantRole } from "@/lib/participant";
 
 type Action =
   | "raise_hand_request"
@@ -80,7 +81,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         }
 
         // Check if the participant's role allows them to raise hand
-        const participantRole = participant?.attributes?.role || "viewer";
+        const participantRole = getParticipantRole(participant);
         if (participantRole === "viewer") {
           return errorResponse("Forbidden", 403);
         }
@@ -141,6 +142,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       },
 
       promote: async () => {
+        // Update role in attributes
         await roomClientService.updateParticipant(
           roomName,
           participantIdentity,
@@ -180,6 +182,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       },
 
       demote: async () => {
+        // Update role in attributes (keep as participant, just remove publish permissions)
         await roomClientService.updateParticipant(
           roomName,
           participantIdentity,

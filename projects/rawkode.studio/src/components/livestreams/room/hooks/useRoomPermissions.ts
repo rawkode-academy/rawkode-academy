@@ -5,6 +5,7 @@ import {
   parseRoomMetadata,
   ROLE_PERMISSIONS,
 } from "@/components/livestreams/room/layouts/permissions";
+import { getParticipantRole } from "@/lib/participant";
 
 export interface RoomPermissions {
   isDirector: boolean;
@@ -25,9 +26,7 @@ export function useRoomPermissions(): RoomPermissions {
   const roomInfo = useRoomInfo();
 
   return useMemo(() => {
-    const participantRole = localParticipant?.attributes?.role as
-      | string
-      | undefined;
+    const participantRole = getParticipantRole(localParticipant);
     const isDirector = participantRole === "director";
 
     // Check if the local participant is the presenter by comparing with room metadata
@@ -51,9 +50,5 @@ export function useRoomPermissions(): RoomPermissions {
       canRaiseHand: permissions.canRaiseHand,
       canSendChatMessages: permissions.canSendChatMessages,
     };
-  }, [
-    localParticipant?.attributes?.role,
-    localParticipant?.identity,
-    roomInfo?.metadata,
-  ]);
+  }, [localParticipant, localParticipant?.identity, roomInfo?.metadata]);
 }
