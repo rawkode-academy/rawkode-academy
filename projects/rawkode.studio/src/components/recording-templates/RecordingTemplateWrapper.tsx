@@ -224,18 +224,17 @@ function RoomContent({ layout, error }: RoomContentProps) {
 
 export function RecordingTemplateWrapper() {
   const [error, setError] = useState<Error>();
+  const [layout, setLayout] = useState(EgressHelper.getLayout() || "grid");
 
   // Get parameters from URL using the official SDK
   const url = EgressHelper.getLiveKitURL();
   const token = EgressHelper.getAccessToken();
-  const layout = EgressHelper.getLayout() || "grid";
 
   // Listen for layout changes
   useEffect(() => {
     EgressHelper.onLayoutChanged((newLayout: string) => {
       console.log(`Layout changed to: ${newLayout}`);
-      // In this implementation, we handle layout changes through re-renders
-      // The layout is fetched fresh from EgressHelper on each render
+      setLayout(newLayout);
     });
   }, []);
 
