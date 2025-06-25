@@ -157,12 +157,15 @@ function createRoomEgress(
       });
     };
 
+    const layoutString = getLiveKitLayoutString(
+      options.layout || ROOM_DEFAULTS.LAYOUT,
+      import.meta.env.SITE,
+    );
+    console.log("Creating room egress with layout:", layoutString);
+
     egressConfig.room = new RoomCompositeEgressRequest({
       roomName: roomName,
-      layout: getLiveKitLayoutString(
-        options.layout || ROOM_DEFAULTS.LAYOUT,
-        import.meta.env.SITE,
-      ),
+      layout: layoutString,
       options: {
         case: "advanced",
         value: createCompositeEncodingOptions(),
@@ -563,10 +566,16 @@ export const rooms = {
         const updatePromises = roomCompositeEgresses.map(async (egress) => {
           if (!egress.egressId) return;
 
-          await egressClient.updateLayout(
-            egress.egressId,
-            getLiveKitLayoutString(input.layout, import.meta.env.SITE),
+          const layoutString = getLiveKitLayoutString(
+            input.layout,
+            import.meta.env.SITE,
           );
+          console.log(
+            `Updating egress ${egress.egressId} with layout:`,
+            layoutString,
+          );
+
+          await egressClient.updateLayout(egress.egressId, layoutString);
         });
 
         await Promise.all(updatePromises);
