@@ -1,4 +1,0 @@
-name = "rawkode-academy-rpc"
-pages_build_output_dir = "dist"
-compatibility_date = "2024-07-01"
-compatibility_flags = [ "nodejs_compat" ]
