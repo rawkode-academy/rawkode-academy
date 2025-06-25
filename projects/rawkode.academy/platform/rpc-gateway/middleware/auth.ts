@@ -16,6 +16,17 @@ interface IntrospectionResponse {
 	"urn:zitadel:iam:user:id"?: string;
 	"urn:zitadel:iam:user:resourceowner:id"?: string;
 	"urn:zitadel:iam:user:resourceowner:name"?: string;
+	// Project-specific roles might be included
+	"urn:zitadel:iam:org:project:293097880707663554:roles"?: {
+		[role: string]: {
+			[orgId: string]: string;
+		};
+	};
+	"urn:zitadel:iam:org:project:roles"?: {
+		[role: string]: {
+			[orgId: string]: string;
+		};
+	};
 	[key: string]: unknown;
 }
 
@@ -58,24 +69,37 @@ export async function auth(c: Context<{ Bindings: Env }>, next: Next) {
 	}
 
 	try {
-		// Introspect the PAT with Zitadel
+		// Check if client credentials are configured
+		if (!c.env.PLATFORM_RPC_CLIENT_ID || !c.env.PLATFORM_RPC_CLIENT_SECRET) {
+			throw new Error("Missing Zitadel client credentials for introspection");
+		}
+
+		// Create Basic Auth header for introspection
+		const credentials = `${c.env.PLATFORM_RPC_CLIENT_ID}:${c.env.PLATFORM_RPC_CLIENT_SECRET}`;
+		const basicAuth = btoa(credentials);
+
+		// Introspect the PAT with Zitadel using Basic Auth
 		const response = await fetch(introspectionEndpoint, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/x-www-form-urlencoded",
 				Accept: "application/json",
+				Authorization: `Basic ${basicAuth}`,
 			},
 			body: new URLSearchParams({
 				token,
 				token_type_hint: "access_token",
+				scope: "openid profile urn:zitadel:iam:org:projects:roles",
 			}),
 		});
 
 		if (!response.ok) {
+			const errorText = await response.text();
 			console.error(
 				"Token introspection failed:",
 				response.status,
 				response.statusText,
+				errorText,
 			);
 			return c.json(
 				{
@@ -102,6 +126,29 @@ export async function auth(c: Context<{ Bindings: Env }>, next: Next) {
 					},
 				},
 				401,
+			);
+		}
+
+		// Check for platform-rpc role
+		const projectRoles = introspection["urn:zitadel:iam:org:project:293097880707663554:roles"] ||
+			introspection["urn:zitadel:iam:org:project:roles"];
+		
+		const hasPlatformRpcRole = projectRoles && Object.keys(projectRoles).includes("platform-rpc");
+
+		if (!hasPlatformRpcRole) {
+			console.warn(
+				`User ${introspection.username || introspection.sub} attempted access without platform-rpc role`,
+				{ projectRoles },
+			);
+			return c.json(
+				{
+					success: false,
+					error: {
+						code: "FORBIDDEN",
+						message: "Missing required platform-rpc role",
+					},
+				},
+				403,
 			);
 		}
 

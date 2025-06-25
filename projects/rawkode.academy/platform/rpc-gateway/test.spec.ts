@@ -16,12 +16,15 @@ async function request(
 			fetch: async () => new Response("mock", { status: 200 }),
 		},
 		PLATFORM_RPC_TOKEN: "test-token",
+		PLATFORM_RPC_CLIENT_ID: "test-client-id",
+		PLATFORM_RPC_CLIENT_SECRET: "test-client-secret",
+		ZITADEL_INTROSPECTION_URL: "https://zitadel.rawkode.academy/oauth/v2/introspect",
 		...env,
 	};
 
 	// Mock successful token introspection by default
-	if (mockIntrospection && options?.headers?.["Authorization"]) {
-		(global.fetch as any).mockResolvedValueOnce(
+	if (mockIntrospection && options?.headers?.Authorization) {
+		(global.fetch as vi.Mock).mockResolvedValueOnce(
 			new Response(
 				JSON.stringify({
 					active: true,
@@ -29,6 +32,11 @@ async function request(
 					username: "testuser",
 					"urn:zitadel:iam:org:id": "test-org-id",
 					client_id: "test-client-id",
+					"urn:zitadel:iam:org:project:293097880707663554:roles": {
+						"platform-rpc": {
+							"test-org-id": "test-org-name"
+						}
+					}
 				}),
 				{ status: 200 },
 			),
@@ -140,7 +148,7 @@ describe("RPC Gateway", () => {
 
 		it("should return unauthorized when token is inactive", async () => {
 			// Mock inactive token response
-			(global.fetch as any).mockResolvedValueOnce(
+			(global.fetch as vi.Mock).mockResolvedValueOnce(
 				new Response(
 					JSON.stringify({
 						active: false,
@@ -173,6 +181,46 @@ describe("RPC Gateway", () => {
 			expect(data.error.message).toBe("Token is inactive or expired");
 		});
 
+		it("should return forbidden when user lacks platform-rpc role", async () => {
+			// Mock token without platform-rpc role
+			(global.fetch as vi.Mock).mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						active: true,
+						sub: "test-user-id",
+						username: "testuser",
+						"urn:zitadel:iam:org:id": "test-org-id",
+						client_id: "test-client-id",
+						// No roles
+					}),
+					{ status: 200 },
+				),
+			);
+
+			const res = await request(
+				"/rpc",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": "Bearer no-role-token",
+					},
+					body: JSON.stringify({
+						service: "casting-credits",
+						params: {},
+					}),
+				},
+				{},
+				false, // Don't use default mock
+			);
+
+			expect(res.status).toBe(403);
+			const data = await res.json();
+			expect(data.success).toBe(false);
+			expect(data.error.code).toBe("FORBIDDEN");
+			expect(data.error.message).toBe("Missing required platform-rpc role");
+		});
+
 		it("should forward token claims as headers to downstream service", async () => {
 			let capturedRequest: Request | null = null;
 
@@ -203,10 +251,10 @@ describe("RPC Gateway", () => {
 
 			expect(res.status).toBe(200);
 			expect(capturedRequest).not.toBeNull();
-			expect(capturedRequest!.headers.get("X-User-Id")).toBe("test-user-id");
-			expect(capturedRequest!.headers.get("X-Username")).toBe("testuser");
-			expect(capturedRequest!.headers.get("X-Org-Id")).toBe("test-org-id");
-			expect(capturedRequest!.headers.get("X-Client-Id")).toBe("test-client-id");
+			expect(capturedRequest?.headers.get("X-User-Id")).toBe("test-user-id");
+			expect(capturedRequest?.headers.get("X-Username")).toBe("testuser");
+			expect(capturedRequest?.headers.get("X-Org-Id")).toBe("test-org-id");
+			expect(capturedRequest?.headers.get("X-Client-Id")).toBe("test-client-id");
 		});
 	});
 });
