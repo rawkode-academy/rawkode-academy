@@ -67,7 +67,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       if (!currentMetadata?.presenter) {
         try {
           const metadata = {
-            activeLayout: currentMetadata?.activeLayout || LayoutType.GRID,
+            ...currentMetadata,
+            layout: currentMetadata?.layout || LayoutType.GRID,
             presenter: identity,
           };
 

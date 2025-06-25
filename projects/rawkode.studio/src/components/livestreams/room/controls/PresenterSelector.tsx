@@ -70,7 +70,7 @@ export function PresenterSelector() {
 
       try {
         const existingMetadata = parseRoomMetadata(roomInfo.metadata) || {
-          activeLayout: LayoutType.GRID,
+          layout: LayoutType.GRID,
         };
 
         const metadata = {

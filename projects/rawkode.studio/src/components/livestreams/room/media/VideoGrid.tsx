@@ -80,8 +80,8 @@ export function VideoGrid() {
   // Update layout based on room metadata
   useEffect(() => {
     const metadata = parseRoomMetadata(roomInfo?.metadata);
-    if (metadata?.activeLayout) {
-      setCurrentLayout(metadata.activeLayout);
+    if (metadata?.layout) {
+      setCurrentLayout(metadata.layout as LayoutType);
     } else {
       // Use default layout based on room state
       setCurrentLayout(

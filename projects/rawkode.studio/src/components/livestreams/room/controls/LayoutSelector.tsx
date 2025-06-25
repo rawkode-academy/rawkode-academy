@@ -79,8 +79,8 @@ export function LayoutSelector({ token }: LayoutSelectorProps) {
     if (!roomInfo?.metadata) return;
 
     const metadata = parseRoomMetadata(roomInfo.metadata);
-    if (metadata?.activeLayout && metadata.activeLayout !== currentLayout) {
-      setCurrentLayout(metadata.activeLayout);
+    if (metadata?.layout && metadata.layout !== currentLayout) {
+      setCurrentLayout(metadata.layout as LayoutType);
     }
   }, [roomInfo?.metadata, currentLayout, setCurrentLayout]);
 
@@ -96,11 +96,11 @@ export function LayoutSelector({ token }: LayoutSelectorProps) {
       setIsUpdating(true);
 
       try {
-        // Preserve existing metadata like presenter
+        // Preserve existing metadata like presenter and displayName
         const existingMetadata = parseRoomMetadata(roomInfo?.metadata) || {};
         const metadata: RoomLayoutMetadata = {
           ...existingMetadata,
-          activeLayout: newLayout,
+          layout: newLayout,
         };
 
         // Update room metadata via API endpoint with LiveKit token auth

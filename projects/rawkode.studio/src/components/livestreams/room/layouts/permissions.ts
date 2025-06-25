@@ -61,8 +61,10 @@ export const LAYOUT_CONFIGS: Record<LayoutType, LayoutConfig> = {
 };
 
 export interface RoomLayoutMetadata {
-  activeLayout: LayoutType;
+  layout?: string; // Layout type
   presenter?: string; // Identity of the current presenter
+  displayName?: string; // Display name of the room
+  [key: string]: unknown; // Allow other fields to be preserved
 }
 
 export function parseRoomMetadata(
@@ -72,12 +74,15 @@ export function parseRoomMetadata(
 
   try {
     const parsed = JSON.parse(metadata);
-    if (
-      parsed.activeLayout &&
-      Object.values(LayoutType).includes(parsed.activeLayout)
-    ) {
-      return parsed as RoomLayoutMetadata;
-    }
+
+    // Ensure layout field exists with a valid value
+    return {
+      ...parsed,
+      layout:
+        parsed.layout && Object.values(LayoutType).includes(parsed.layout)
+          ? parsed.layout
+          : LayoutType.GRID,
+    };
   } catch (e) {
     console.error("Failed to parse room metadata:", e);
   }
