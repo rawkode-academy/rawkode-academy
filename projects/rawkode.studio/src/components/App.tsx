@@ -8,7 +8,7 @@ import ActiveLivestreamPage from "@/components/pages/livestreams/ActiveLivestrea
 import PastLivestreamDetailsPage from "@/components/pages/livestreams/PastLivestreamDetailsPage";
 import PastLivestreamsPage from "@/components/pages/livestreams/PastLivestreamsPage";
 import ProfilePage from "@/components/pages/ProfilePage";
-import type { OidcStandardClaimsWithRoles } from "@/lib/security";
+import type { OidcStandardClaimsWithRoles } from "@/lib/auth";
 
 interface Props {
   user: OidcStandardClaimsWithRoles;

@@ -52,7 +52,8 @@ export const chat = {
           .orderBy(chatMessagesTable.createdAt); // Order by creation time
 
         return messages as ChatMessage[];
-      } catch (_error) {
+      } catch (error) {
+        console.error("Failed to fetch chat messages:", error);
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch chat messages.",

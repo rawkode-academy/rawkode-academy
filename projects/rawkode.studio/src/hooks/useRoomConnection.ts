@@ -30,7 +30,8 @@ export function useRoomConnection({
             window.location.href = `/watch/${name}`;
           }
         }
-      } catch (_err) {
+      } catch (error) {
+        console.error("Error leaving room:", error);
         // Still try to redirect even if there was an error
         if (name) {
           window.location.href = `/watch/${name}`;

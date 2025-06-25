@@ -44,14 +44,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { generateRoomId } from "@/lib/generateRoomId";
+import { layoutRegistry } from "@/lib/layout";
 import {
   BITRATES,
   DEFAULT_RECORDING_SETTINGS,
   FRAMERATES,
   RESOLUTIONS,
   type RecordingSettings,
-} from "@/lib/recordingConfig";
+} from "@/lib/recording";
+import { generateRoomId } from "@/lib/utils";
 import { queryClient } from "@/store";
 
 // Simple schema - we only validate what we need on the client
@@ -68,7 +69,7 @@ const formSchema = z.object({
     .max(100, {
       message: "Max participants must be at most 100.",
     }),
-  layout: z.string().default("speaker-light"),
+  layout: z.string().default("grid"),
   // Recording checkboxes
   enableTrackRecording: z.boolean().default(false),
   enableParticipantRecording: z.boolean().default(false),
@@ -80,26 +81,8 @@ const formSchema = z.object({
   compositeRecording: z.any().optional(),
 });
 
-// LiveKit layout options with descriptions
-const LAYOUT_OPTIONS = [
-  {
-    value: "speaker-light",
-    label: "Speaker",
-    description:
-      "Active speaker is prominently displayed with other participants shown smaller.",
-  },
-  {
-    value: "grid-light",
-    label: "Grid",
-    description:
-      "All participants are displayed in an equal-sized grid layout.",
-  },
-  {
-    value: "single-speaker",
-    label: "Single Speaker",
-    description: "Only the active speaker is shown, perfect for presentations.",
-  },
-] as const;
+// Import layouts to ensure they're registered
+import "@/components/livestreams/room/layouts";
 
 // Define the interface for the ref
 interface CreateLivestreamsDialogRef {
@@ -125,6 +108,9 @@ export default React.forwardRef<
   const [generatedRoomId, setGeneratedRoomId] = useState<string>("");
   const createdRoomIdRef = useRef<string | null>(null);
 
+  // Get layout options from the registry
+  const layoutOptions = layoutRegistry.getSelectOptions();
+
   // Store user's recording settings to preserve them when toggling
   const [participantRecordingSettings, setParticipantRecordingSettings] =
     useState(DEFAULT_RECORDING_SETTINGS);
@@ -142,7 +128,7 @@ export default React.forwardRef<
     defaultValues: {
       displayName: "",
       maxParticipants: 10,
-      layout: "speaker-light",
+      layout: "grid",
       // Recording checkboxes
       enableParticipantRecording: false,
       enableTrackRecording: false,
@@ -493,7 +479,7 @@ export default React.forwardRef<
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {LAYOUT_OPTIONS.map((option) => (
+                            {layoutOptions.map((option) => (
                               <SelectItem
                                 key={option.value}
                                 value={option.value}
@@ -504,7 +490,7 @@ export default React.forwardRef<
                           </SelectContent>
                         </Select>
                         <FormDescription>
-                          {LAYOUT_OPTIONS.find(
+                          {layoutOptions.find(
                             (opt) => opt.value === field.value,
                           )?.description ||
                             "Choose how participants will appear in composite recordings."}

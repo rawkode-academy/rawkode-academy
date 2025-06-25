@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { parseRoomMetadata } from "@/components/livestreams/room/layouts/permissions";
+import { extractLiveKitAuth } from "@/lib/auth";
 import { roomClientService } from "@/lib/livekit";
-import { extractLiveKitAuth } from "@/lib/security";
 
 const jsonResponse = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {

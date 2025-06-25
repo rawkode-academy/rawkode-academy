@@ -2,7 +2,7 @@ import { AUTH_STATE_SECRET } from "astro:env/server";
 import { createHmac, randomBytes } from "node:crypto";
 import { generateCodeVerifier } from "arctic";
 import type { APIRoute } from "astro";
-import { Zitadel } from "@/lib/zitadel";
+import { Zitadel } from "@/lib/auth";
 
 export const GET: APIRoute = ({ cookies, redirect, url }) => {
   const zitadel = new Zitadel();

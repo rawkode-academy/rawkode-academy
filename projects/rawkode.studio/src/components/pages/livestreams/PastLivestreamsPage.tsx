@@ -8,7 +8,7 @@ import { DataTable } from "@/components/common/DataTable";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/shadcn/button";
-import { calculateDuration } from "@/lib/duration";
+import { calculateDuration } from "@/lib/utils";
 
 // Define columns for the DataTable
 const columns: ColumnDef<PastLiveStream>[] = [

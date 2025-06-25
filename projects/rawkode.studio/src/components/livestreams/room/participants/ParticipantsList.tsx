@@ -150,7 +150,7 @@ export function ParticipantsList({ token }: ParticipantsListProps) {
       >
         <div className="flex-1 min-w-0 flex items-center gap-2">
           <p className="text-sm font-medium text-foreground truncate">
-            {participant.attributes?.displayName || participant.identity}
+            {participant.name || participant.identity}
           </p>
 
           <div className="flex items-center gap-2 ml-auto">
