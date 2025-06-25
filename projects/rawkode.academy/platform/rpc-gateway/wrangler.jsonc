@@ -47,10 +47,16 @@
 			"binding": "PLATFORM_RPC_TOKEN",
 			"secret_name": "PLATFORM_RPC_TOKEN",
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e"
+		},
+		{
+			"binding": "PLATFORM_RPC_CLIENT_SECRET",
+			"secret_name": "PLATFORM_RPC_CLIENT_SECRET",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e"
 		}
 	],
 	// Zitadel PAT authentication configuration
 	"vars": {
-		"ZITADEL_INTROSPECTION_URL": "https://zitadel.rawkode.academy/oauth/v2/introspect"
+		"ZITADEL_INTROSPECTION_URL": "https://zitadel.rawkode.academy/oauth/v2/introspect",
+		"PLATFORM_RPC_CLIENT_ID": "326146569185329443"
 	}
 }
