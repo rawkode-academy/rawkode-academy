@@ -28,6 +28,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
+import { getParticipantRole } from "@/lib/participant";
 
 export function PresenterSelector() {
   const { localParticipant } = useLocalParticipant();
@@ -184,7 +185,7 @@ export function PresenterSelector() {
                       {isYou && " (You)"}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {participant.attributes?.role || "Participant"}
+                      {getParticipantRole(participant) || "Participant"}
                     </div>
                   </div>
                   {isCurrentPresenter && (

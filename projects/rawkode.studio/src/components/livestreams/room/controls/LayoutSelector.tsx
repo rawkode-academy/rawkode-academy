@@ -23,6 +23,7 @@ import {
   stringifyRoomMetadata,
 } from "@/components/livestreams/room/layouts/permissions";
 import { layoutRegistry } from "@/lib/layout";
+import { getParticipantRole } from "@/lib/participant";
 // Import layouts to ensure they're registered
 import "@/components/livestreams/room/layouts";
 import { Button } from "@/components/shadcn/button";
@@ -65,7 +66,7 @@ export function LayoutSelector({ token }: LayoutSelectorProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Check if user has permission to change layouts using the permission system
-  const participantRole = localParticipant?.attributes?.role || "viewer";
+  const participantRole = getParticipantRole(localParticipant);
   const isDirector = participantRole === "director";
   // Check if the local participant is the presenter by comparing with room metadata
   const roomPresenter = parseRoomMetadata(roomInfo?.metadata)?.presenter;

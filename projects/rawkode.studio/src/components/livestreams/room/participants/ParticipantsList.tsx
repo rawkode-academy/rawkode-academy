@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import { getParticipantRole } from "@/lib/participant";
 
 interface ParticipantsListProps {
   token: string | null;
@@ -133,7 +134,7 @@ export function ParticipantsList({ token }: ParticipantsListProps) {
   const renderParticipant = (participant: (typeof participants)[0]) => {
     const isLocal = participant === localParticipant;
     const isSpeaker = participant.permissions?.canPublish;
-    const participantRole = participant.attributes?.role || "viewer";
+    const participantRole = getParticipantRole(participant);
     const isDirector = participantRole === "director";
     const isLoading = loadingParticipant === participant.identity;
     const isPresenter = participant.identity === currentPresenter;

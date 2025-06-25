@@ -66,8 +66,8 @@ export async function extractLiveKitAuth(
     if (!identity) {
       return null;
     }
-    // Extract displayName from attributes if available
-    const displayName = decoded.attributes?.displayName;
+    // Extract displayName from the name field
+    const displayName = decoded.name;
     return {
       token,
       identity,
