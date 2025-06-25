@@ -39,7 +39,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/shadcn/sidebar";
-import type { OidcStandardClaimsWithRoles } from "@/lib/auth";
+import type { OidcStandardClaimsWithRoles } from "@/lib/security";
 import { queryClient } from "@/store";
 
 interface UserNavigationProps {

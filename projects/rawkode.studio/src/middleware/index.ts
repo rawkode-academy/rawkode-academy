@@ -1,5 +1,5 @@
 import { defineMiddleware, sequence } from "astro:middleware";
-import { Zitadel } from "@/lib/auth";
+import { Zitadel } from "@/lib/zitadel";
 
 const zitadel = new Zitadel();
 

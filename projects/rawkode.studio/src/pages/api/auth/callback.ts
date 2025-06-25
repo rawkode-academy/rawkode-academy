@@ -2,7 +2,7 @@ import { AUTH_STATE_SECRET } from "astro:env/server";
 import { createHmac } from "node:crypto";
 import type { OAuth2Tokens } from "arctic";
 import type { APIRoute } from "astro";
-import { Zitadel } from "@/lib/auth";
+import { Zitadel } from "@/lib/zitadel";
 
 const zitadel = new Zitadel();
 

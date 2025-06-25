@@ -11,7 +11,6 @@ import {
   parseRoomMetadata,
   ROLE_PERMISSIONS,
 } from "@/components/livestreams/room/layouts/permissions";
-import { getParticipantRole } from "@/lib/participant";
 
 export interface MediaButtonState {
   enabled: boolean;
@@ -98,7 +97,9 @@ export function useMediaPermissions(): UseMediaPermissionsResult {
     const presenter = metadata?.presenter;
 
     // Determine user role
-    const participantRole = getParticipantRole(localParticipant);
+    const participantRole = localParticipant?.attributes?.role as
+      | string
+      | undefined;
     const isDirector = participantRole === "director";
     const isPresenter = localParticipant?.identity === presenter;
 
@@ -106,7 +107,11 @@ export function useMediaPermissions(): UseMediaPermissionsResult {
       ? "director"
       : isPresenter
         ? "presenter"
-        : participantRole;
+        : participantRole === "viewer"
+          ? "viewer"
+          : participantRole === "participant"
+            ? "participant"
+            : "viewer";
 
     // Determine effective role for media permissions
     // If user is a presenter, always use presenter permissions for media
@@ -195,6 +200,7 @@ export function useMediaPermissions(): UseMediaPermissionsResult {
     localParticipant?.isMicrophoneEnabled,
     localParticipant?.isCameraEnabled,
     localParticipant?.isScreenShareEnabled,
+    localParticipant?.attributes?.role,
     localParticipant?.identity,
   ]);
 

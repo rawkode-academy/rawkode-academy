@@ -3,7 +3,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import type { OidcStandardClaimsWithRoles } from "@/lib/auth";
+import type { OidcStandardClaimsWithRoles } from "@/lib/security";
 import { cn } from "@/lib/utils";
 
 export interface Props {
