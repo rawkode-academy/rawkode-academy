@@ -103,4 +103,3 @@ jobs:
               $codebase \
               ./write-model/wrangler.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN
-s
