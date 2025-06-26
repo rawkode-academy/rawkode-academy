@@ -1,35 +1,17 @@
-import { useSentry } from '@envelop/sentry';
-import * as Sentry from '@sentry/deno';
-import '@sentry/tracing';
-import { createYoga } from 'graphql-yoga';
-import { getSchema } from './schema.ts';
+import { createYoga } from "graphql-yoga";
+import { getSchema } from "./schema";
 
-if (Deno.env.get('SENTRY_DSN')) {
-	Sentry.init({
-		dsn: Deno.env.get('SENTRY_DSN'),
-		environment: 'production',
-		tracesSampleRate: 1.0,
-	});
-
-	console.debug('Sentry is enabled');
+export interface Env {
+	DB: D1Database;
 }
 
-const yoga = createYoga({
-	schema: getSchema(),
-	plugins: [
-		useSentry({
-			includeRawResult: false,
-			includeExecuteVariables: true,
-		}),
-	],
-	graphqlEndpoint: '/',
-});
+export default {
+	fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		const yoga = createYoga({
+			schema: getSchema(env),
+			graphqlEndpoint: "/",
+		});
 
-const port = Deno.env.get('PORT') || '8000';
-
-Deno.serve({
-	port: Number(port),
-	onListen: ({ hostname, port, transport }) => {
-		console.log(`Listening on ${transport}://${hostname}:${port}`);
+		return yoga.fetch(request, env, ctx);
 	},
-}, yoga.fetch);
+};
