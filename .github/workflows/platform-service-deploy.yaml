@@ -42,7 +42,7 @@ jobs:
       - name: Run Tests
         working-directory: ${{ inputs.service-path }}
         run: |
-          bun add projen constructs
+          (cd ../../generators/projen-platform-service && bun install && bun run types)
           bun run .projenrc.ts
 
           ../../../../dagger/bun | install-no-cache . | with-exec bun test
@@ -88,7 +88,7 @@ jobs:
           COSMO_API_KEY: ${{ steps.secrets.outputs.COSMO_API_KEY }}
           SERVICE_NAME: platform-${{ inputs.service-name }}
         run: |
-          bun add projen constructs
+          (cd ../../generators/projen-platform-service && bun install && bun run types)
           bun run .projenrc.ts
 
           dagger <<'.'
