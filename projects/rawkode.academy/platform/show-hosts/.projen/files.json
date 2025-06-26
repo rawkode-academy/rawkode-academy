@@ -6,7 +6,6 @@
     ".projen/files.json",
     ".projen/tasks.json",
     "biome.json",
-    "dagger.json",
     "drizzle.config.ts",
     "package.json",
     "read-model/main.ts",
