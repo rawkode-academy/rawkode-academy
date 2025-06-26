@@ -1,21 +1,40 @@
 import { Component, JsonFile, type Project } from "projen";
 
-export interface DaggerConfigOptions {
+type DaggerSdk = "typescript";
+
+interface DaggerDependency {
+	name: string;
+	source: string;
+}
+
+interface Options {
 	name?: string;
 	engineVersion?: string;
-	sdk?: string;
+	source?: string;
+	sdk?: {
+		source: DaggerSdk;
+	};
+	dependencies?: DaggerDependency[];
 }
 
 export class Dagger extends Component {
-	constructor(project: Project, options: DaggerConfigOptions = {}) {
+	constructor(project: Project, options: Options = {}) {
 		super(project);
 
-		new JsonFile(project, "dagger.json", {
-			obj: {
-				name: options.name || project.name,
-				engineVersion: options.engineVersion || "v0.8.11",
-				...(options.sdk && { sdk: options.sdk }),
+		const defaults: Required<Options> = {
+			name: project.name,
+			engineVersion: "v0.8.11",
+			source: ".dagger",
+			sdk: {
+				source: "typescript",
 			},
+			dependencies: [],
+		};
+
+		const config = { ...defaults, ...options };
+
+		new JsonFile(project, "dagger.json", {
+			obj: config,
 		});
 	}
 }

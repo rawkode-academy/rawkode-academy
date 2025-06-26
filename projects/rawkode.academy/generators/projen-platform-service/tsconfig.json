@@ -1,8 +1,9 @@
 {
 	"compilerOptions": {
-		"target": "ES2020",
-		"module": "commonjs",
-		"lib": ["ES2020"],
+		"target": "ES2022",
+		"module": "ES2022",
+		"lib": ["ES2022"],
+		"moduleResolution": "bundler",
 		"declaration": true,
 		"outDir": "./lib",
 		"rootDir": "./src",
@@ -10,7 +11,11 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"allowImportingTsExtensions": true,
+		"noEmit": false,
+		"emitDeclarationOnly": false
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "lib"]

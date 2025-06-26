@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "platform-{{SERVICE_NAME}}-read-model",
+	"name": "platform-{{ serviceName }}-read-model",
 	"main": "./main.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
@@ -22,8 +22,8 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "platform-{{SERVICE_NAME}}",
-			"database_id": "{{DATABASE_ID}}"
+			"database_name": "platform-{{ serviceName }}",
+			"database_id": "{{ databaseId }}"
 		}
 	]
 }

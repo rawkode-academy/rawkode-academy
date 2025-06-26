@@ -2,6 +2,7 @@
 	"name": "projen-platform-service",
 	"version": "0.1.0",
 	"description": "Projen template for Rawkode Academy platform services",
+	"type": "module",
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
 	"scripts": {
