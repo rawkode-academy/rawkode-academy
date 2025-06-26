@@ -1,0 +1,43 @@
+{
+	"name": "projen-platform-service",
+	"version": "0.1.0",
+	"description": "Projen template for Rawkode Academy platform services",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"scripts": {
+		"types": "bun run quicktype -s schema -l ts  ./node_modules/@biomejs/biome/configuration_schema.json -o src/biome/types.ts"
+	},
+	"keywords": [
+		"projen",
+		"graphql",
+		"cloudflare",
+		"microservices"
+	],
+	"author": "Rawkode Academy",
+	"license": "MIT",
+	"peerDependencies": {
+		"projen": "^0.80.0"
+	},
+	"dependencies": {
+		"@biomejs/biome": "2.0.5",
+		"@biomejs/js-api": "1.0.0",
+		"@schemastore/tsconfig": "0.0.11",
+		"@types/bun": "1.2.17",
+		"@types/typescript": "2.0.0",
+		"json-schema-to-typescript": "15.0.4",
+		"liquidjs": "^10.19.0",
+		"projen": "^0.80.0",
+		"quicktype": "23.2.6"
+	},
+	"devDependencies": {
+		"@types/jest": "^29.5.12",
+		"@types/node": "^20.11.24",
+		"jest": "^29.7.0",
+		"ts-jest": "^29.1.2",
+		"typescript": "^5.3.3"
+	},
+	"files": [
+		"lib",
+		"templates"
+	]
+}
