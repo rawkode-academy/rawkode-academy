@@ -1,5 +1,5 @@
 {
-	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "platform-rpc-gateway",
 	"main": "main.ts",
 	"compatibility_date": "2025-04-05",
@@ -17,30 +17,22 @@
 	"placement": {
 		"mode": "smart"
 	},
-	"workers_dev": true,
-	// Service bindings to write models
+	"workers_dev": false,
+	"routes": [
+		{
+			"pattern": "rpc.rawkode.academy",
+			"custom_domain": true
+		}
+	],
 	"services": [
 		{
 			"binding": "CASTING_CREDITS",
 			"service": "platform-casting-credits-write-model"
+		},
+		{
+			"binding": "SHOWS",
+			"service": "platform-shows-write-model"
 		}
-		// {
-		// 	"binding": "TECHNOLOGIES_WRITE",
-		// 	"service": "technologies-write-model"
-		// }
-		// Add more service bindings as write models are deployed:
-		// {
-		//   "binding": "PEOPLE_WRITE",
-		//   "service": "platform-people-write-model"
-		// },
-		// {
-		//   "binding": "SHOWS_WRITE",
-		//   "service": "platform-shows-write-model"
-		// },
-		// {
-		//   "binding": "SHOW_HOSTS_WRITE",
-		//   "service": "platform-show-hosts-write-model"
-		// }
 	],
 	"secrets_store_secrets": [
 		{

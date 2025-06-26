@@ -16,6 +16,8 @@ const __dirname = path.dirname(__filename);
 
 export class PlatformService extends Project {
 	private readonly options: Required<PlatformServiceOptions>;
+	private readonly dependencies: Record<string, string>;
+	private readonly devDependencies: Record<string, string>;
 
 	constructor(options: PlatformServiceOptions) {
 		super({
@@ -33,27 +35,8 @@ export class PlatformService extends Project {
 			...options,
 		};
 
-		this.createReadme();
-		this.createPackageJson();
-		this.createConfigFiles();
-
-		new DataModel(this);
-
-		new ReadModel(this, {
-			serviceName: this.options.serviceName,
-			databaseId: this.options.databaseId,
-		});
-
-		if (this.options.includeWriteModel) {
-			new WriteModel(this, {
-				databaseId: this.options.databaseId,
-				workflows: [],
-			});
-		}
-	}
-
-	private createPackageJson() {
-		const deps = {
+		// Initialize dependencies
+		this.dependencies = {
 			"@apollo/subgraph": "^2.10.2",
 			"@graphql-tools/utils": "^10.8.6",
 			"@paralleldrive/cuid2": "^2.2.2",
@@ -72,7 +55,7 @@ export class PlatformService extends Project {
 			...this.options.additionalDependencies,
 		};
 
-		const devDeps = {
+		this.devDependencies = {
 			"@biomejs/biome": "^1.9.4",
 			"@cloudflare/workers-types": "^4.20250426.0",
 			"@types/bun": "latest",
@@ -82,13 +65,82 @@ export class PlatformService extends Project {
 			...this.options.additionalDevDependencies,
 		};
 
+		new DataModel(this);
+
+		new ReadModel(this, {
+			serviceName: this.options.serviceName,
+			databaseId: this.options.databaseId,
+		});
+
+		if (this.options.includeWriteModel) {
+			new WriteModel(this, {
+				databaseId: this.options.databaseId,
+				workflows: [],
+			});
+		}
+
+		this.createReadme();
+		this.createPackageJson();
+		this.createConfigFiles();
+	}
+
+	/**
+	 * Register additional dependencies
+	 */
+	public addDependency(name: string, version: string): void {
+		this.dependencies[name] = version;
+	}
+
+	/**
+	 * Register multiple dependencies at once
+	 */
+	public addDependencies(deps: Record<string, string>): void {
+		Object.assign(this.dependencies, deps);
+	}
+
+	/**
+	 * Register additional dev dependencies
+	 */
+	public addDevDependency(name: string, version: string): void {
+		this.devDependencies[name] = version;
+	}
+
+	/**
+	 * Register multiple dev dependencies at once
+	 */
+	public addDevDependencies(deps: Record<string, string>): void {
+		Object.assign(this.devDependencies, deps);
+	}
+
+	private createPackageJson() {
+		// Sort dependencies alphabetically
+		const sortedDeps = Object.keys(this.dependencies)
+			.sort()
+			.reduce(
+				(acc, key) => {
+					acc[key] = this.dependencies[key];
+					return acc;
+				},
+				{} as Record<string, string>,
+			);
+
+		const sortedDevDeps = Object.keys(this.devDependencies)
+			.sort()
+			.reduce(
+				(acc, key) => {
+					acc[key] = this.devDependencies[key];
+					return acc;
+				},
+				{} as Record<string, string>,
+			);
+
 		new JsonFile(this, "package.json", {
 			obj: {
 				name: this.options.serviceName,
 				private: true,
 				type: "module",
-				dependencies: deps,
-				devDependencies: devDeps,
+				dependencies: sortedDeps,
+				devDependencies: sortedDevDeps,
 			},
 		});
 	}

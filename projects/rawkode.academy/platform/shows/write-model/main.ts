@@ -1,76 +1,55 @@
-import { createClient } from "@libsql/client";
-import {
-	type Context,
-	endpoint,
-	service,
-	TerminalError,
-} from "@restatedev/restate-sdk/fetch";
+import type { D1Database } from "@cloudflare/workers-types";
+import { drizzle } from "drizzle-orm/d1";
 import slugify from "@sindresorhus/slugify";
-import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
-import { z } from "zod";
-import { CreateShow } from "../data-model/integrations/zod.ts";
-import { showsTable } from "../data-model/schema.ts";
+import { Hono } from "hono";
+import { createShow } from "../data-model/integrations/zod.ts";
+import * as schema from "../data-model/schema.ts";
 
-// This avoids using polyfilled node APIs
-Deno.env.set("USE_WEB_CRYPTO", "true");
+type Bindings = {
+	DB: D1Database;
+};
 
-type T = z.infer<typeof CreateShow>;
+const app = new Hono<{ Bindings: Bindings }>();
 
-const showsService = service({
-	name: "show",
-	handlers: {
-		create: async (ctx: Context, show: T) => {
-			try {
-				CreateShow.parse(show);
-			} catch (e) {
-				return {
-					message: "Failed to create show.",
-					error: e,
-				};
-			}
+app.post("/", async (c) => {
+	const db = drizzle(c.env.DB, { schema });
 
-			const client = createClient({
-				url: Deno.env.get("LIBSQL_URL") || "",
-				authToken: Deno.env.get("LIBSQL_TOKEN") || "",
-			});
+	const newShow = createShow.safeParse(await c.req.json());
 
-			const id = slugify(show.name, {
-				lowercase: true,
-			});
+	if (newShow.success === false) {
+		return c.json({ error: newShow.error.flatten() }, { status: 400 });
+	}
 
-			const db = drizzle(client);
+	const { name } = newShow.data;
 
-			ctx.console.log(
-				"Checking unique constraints are passing before writing to database",
-			);
+	try {
+		const result = await db
+			.insert(schema.showsTable)
+			.values({
+				id: slugify(name, {
+					lowercase: true,
+					separator: "-",
+				}),
+				name,
+			})
+			.returning()
+			.get();
 
-			const checks = await db.select().from(showsTable).where(
-				eq(showsTable.id, id),
-			);
-
-			if (checks.length > 0) {
-				throw new TerminalError(
-					`New show, ${show.name}, does not pass unique ID constraints. ID was generated as ${id}.`,
-					{ errorCode: 400 },
-				);
-			}
-
-			await db
-				.insert(showsTable)
-				.values({
-					...show,
-					id,
-				})
-				.run();
-
-			return "Job done";
-		},
-	},
+		return c.json(
+			{
+				success: true,
+				message: "Show created successfully",
+				data: result,
+			},
+			{ status: 201 },
+		);
+	} catch (error) {
+		console.error("Error creating show:", error);
+		return c.json(
+			{ error: "Failed to create show" },
+			{ status: 500 },
+		);
+	}
 });
 
-const handler = endpoint().bind(showsService).withIdentityV1(
-	Deno.env.get("RESTATE_IDENTITY_KEY") || "",
-).bidirectional().handler();
-
-Deno.serve({ port: parseInt(Deno.env.get("PORT") || "9080", 10) }, handler.fetch);
+export default app;

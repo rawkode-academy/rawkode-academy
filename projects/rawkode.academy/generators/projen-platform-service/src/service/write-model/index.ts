@@ -2,6 +2,7 @@ import { Liquid } from "liquidjs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Component, type Project, TextFile } from "projen";
+import type { PlatformService } from "../../project";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,11 +20,11 @@ interface Options {
 }
 
 export class WriteModel extends Component {
-	public readonly project: Project;
+	public readonly project: PlatformService;
 	private options: Options;
 	private liquid: Liquid;
 
-	constructor(project: Project, options: Options) {
+	constructor(project: PlatformService, options: Options) {
 		super(project);
 
 		this.project = project;
@@ -33,8 +34,10 @@ export class WriteModel extends Component {
 			root: path.join(__dirname, "../../../templates/write-model"),
 		});
 
-		// Create files during construction
 		this.createWranglerConfig();
+
+		console.log("adding dep");
+		this.project.addDependency("hono", "^4.8.3");
 	}
 
 	private createWranglerConfig() {
