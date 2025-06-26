@@ -74,8 +74,11 @@ export async function auth(c: Context<{ Bindings: Env }>, next: Next) {
 			throw new Error("Missing Zitadel client credentials for introspection");
 		}
 
+		// Get the secret value - need to await the promise
+		const clientSecret = await c.env.PLATFORM_RPC_CLIENT_SECRET.get();
+
 		// Create Basic Auth header for introspection
-		const credentials = `${c.env.PLATFORM_RPC_CLIENT_ID}:${c.env.PLATFORM_RPC_CLIENT_SECRET.get()}`;
+		const credentials = `${c.env.PLATFORM_RPC_CLIENT_ID}:${clientSecret}`;
 		const basicAuth = btoa(credentials);
 
 		// Introspect the PAT with Zitadel using Basic Auth

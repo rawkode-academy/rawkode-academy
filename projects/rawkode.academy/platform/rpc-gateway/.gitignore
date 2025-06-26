@@ -1,6 +1,7 @@
 # Wrangler
 .wrangler/
 .dev.vars
+worker-configuration.d.ts
 
 # Node modules
 node_modules/
