@@ -1,18 +1,18 @@
-name: rawkode.academy/platform/casting-credits
+name: rawkode.academy/platform/emoji-reactions
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/casting-credits.yaml"
+      - ".github/workflows/platform-emoji-reactions.yaml"
       - ".github/workflows/platform-service-deploy.yaml"
-      - "projects/rawkode.academy/platform/casting-credits/**"
+      - "projects/rawkode.academy/platform/emoji-reactions/**"
   pull_request:
     paths:
-      - ".github/workflows/casting-credits.yaml"
+      - ".github/workflows/platform-emoji-reactions.yaml"
       - ".github/workflows/platform-service-deploy.yaml"
-      - "projects/rawkode.academy/platform/casting-credits/**"
+      - "projects/rawkode.academy/platform/emoji-reactions/**"
 
 jobs:
   deploy:
@@ -22,8 +22,8 @@ jobs:
       pull-requests: write
       id-token: write
     with:
-      service-name: casting-credits
-      service-path: projects/rawkode.academy/platform/casting-credits
+      service-name: emoji-reactions
+      service-path: projects/rawkode.academy/platform/emoji-reactions
       has-write-model: true
     secrets:
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
