@@ -24,6 +24,6 @@ jobs:
     with:
       service-name: chapters
       service-path: projects/rawkode.academy/platform/chapters
-      has-write-model: true
+      has-write-model: false
     secrets:
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
