@@ -1,8 +1,10 @@
-import { Component, Project, TextFile, JsonFile } from "projen";
-import * as path from "path";
-import * as fs from "fs";
-import { PlatformServiceOptions } from "../../options";
 import { Liquid } from "liquidjs";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
+import { Component, type Project, TextFile } from "projen";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export interface WorkflowDefinition {
 	name: string;
@@ -11,84 +13,35 @@ export interface WorkflowDefinition {
 	scriptName: string;
 }
 
-export interface WriteModelConstructOptions {
-	serviceName: string;
-	tableName: string;
-	graphqlTypeName: string;
+interface Options {
 	databaseId: string;
 	workflows: WorkflowDefinition[];
 }
 
-export class WriteModelConstruct extends Component {
+export class WriteModel extends Component {
+	public readonly project: Project;
+	private options: Options;
 	private liquid: Liquid;
 
-	constructor(project: Project, options: WriteModelConstructOptions) {
+	constructor(project: Project, options: Options) {
 		super(project);
+
+		this.project = project;
+		this.options = options;
 
 		this.liquid = new Liquid({
 			root: path.join(__dirname, "../../../templates/write-model"),
 		});
 
-		project.addTask("synth:write-model", {
-			exec: "echo 'Synthesizing write-model templates'",
-		});
-
-		this.synthesize(options);
+		// Create files during construction
+		this.createWranglerConfig();
 	}
 
-	private synthesize(options: WriteModelConstructOptions) {
-		Promise.all([
-			this.createWorkflow(options),
-			this.createMain(options),
-			this.createWorkerConfiguration(),
-			this.createWranglerConfig(options),
-		]).catch((error) => {
-			throw new Error(`Failed to synthesize write-model templates: ${error}`);
-		});
-	}
-
-	private async createWorkflow(options: WriteModelConstructOptions) {
-		const content = await this.liquid.renderFile("workflow.ts", {
-			graphqlTypeName: options.graphqlTypeName,
-			tableName: options.tableName,
-		});
-
-		new TextFile(this.project, "write-model/workflow.ts", {
-			lines: content.split("\n"),
-		});
-	}
-
-	private async createMain(options: WriteModelConstructOptions) {
-		// For backward compatibility, use the first workflow if it exists
-		const defaultWorkflowBinding = options.workflows.length > 0 
-			? options.workflows[0].binding 
-			: options.serviceName.toUpperCase().replace(/-/g, "_") + "_WORKFLOW";
-
-		const content = await this.liquid.renderFile("main.ts", {
-			graphqlTypeName: options.graphqlTypeName,
-			workflowBinding: defaultWorkflowBinding,
-			serviceName: options.serviceName,
-			workflows: options.workflows,
-		});
-
-		new TextFile(this.project, "write-model/main.ts", {
-			lines: content.split("\n"),
-		});
-	}
-
-	private async createWorkerConfiguration() {
-		const content = await this.liquid.renderFile("worker-configuration.d.ts", {});
-
-		new TextFile(this.project, "write-model/worker-configuration.d.ts", {
-			lines: content.split("\n"),
-		});
-	}
-
-	private async createWranglerConfig(options: WriteModelConstructOptions) {
-		const content = await this.liquid.renderFile("wrangler.jsonc", {
-			serviceName: options.serviceName,
-			databaseId: options.databaseId,
-			workflows: options.workflows,
+	private createWranglerConfig() {
+		const content = this.liquid.renderFileSync("wrangler.jsonc", {
+			serviceName: this.project.name,
+			databaseId: this.options.databaseId,
+			workflows: this.options.workflows,
 		});
 
 		new TextFile(this.project, "write-model/wrangler.jsonc", {

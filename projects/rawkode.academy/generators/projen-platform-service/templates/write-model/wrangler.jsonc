@@ -1,6 +1,6 @@
 {
 	"$schema": "https://unpkg.com/wrangler/config-schema.json",
-	"name": "{{ serviceName }}-write-model",
+	"name": "platform-{{ serviceName }}-write-model",
 	"main": "./main.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
@@ -22,7 +22,7 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "{{ serviceName }}-db",
+			"database_name": "{{ serviceName }}",
 			"database_id": "{{ databaseId }}"
 		}
 	],

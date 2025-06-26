@@ -1,86 +1,133 @@
----
-runme:
-  version: v3
-shell: bash
----
-
 # Shows Service
 
-## Local Development
 
-### Database
 
-```sh {"background":"true","name":"dev-db"}
-turso dev --port 2000
+## Overview
+
+This is a GraphQL microservice that provides shows functionality for the Rawkode Academy platform. It uses:
+
+- **GraphQL Federation**: Apollo Federation v2 for schema composition
+- **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
+- **Runtime**: Cloudflare Workers
+- **Language**: TypeScript with strict mode
+
+## Service Structure
+
+```
+shows/
+├── data-model/          # Database schema and migrations
+├── read-model/          # GraphQL read API
+├── write-model/         # Write operations via Cloudflare Workflows
+└── package.json
 ```
 
-### Read Model
+## Development
 
-```sh {"name":"read-model"}
-# Restricting ENV not working right now:
-# https://github.com/denoland/deno/pull/26758
-# when we can, add --allow-env=$DENO_ALLOWED_ENV
-deno run --allow-env --allow-write=./read-model/schema.gql --allow-net read-model/main.ts
+### Prerequisites
+
+- Bun runtime
+- Cloudflare account with D1 access
+- Wrangler CLI
+
+### Setup
+
+1. Install dependencies:
+   ```bash
+   bun install
+   ```
+
+2. Create D1 database (if not already created):
+   ```bash
+   bun run wrangler d1 create shows-db
+   ```
+
+3. Update `wrangler.jsonc` files with your database ID
+
+4. Run migrations:
+   ```bash
+   bun run wrangler d1 migrations apply shows-db
+   ```
+
+### Local Development
+
+```bash
+# Start the read model locally
+cd read-model && bun run wrangler dev --local --persist-to=.wrangler
+
+# Start the write model locally (in another terminal)
+cd write-model && bun run wrangler dev --local --persist-to=.wrangler
 ```
 
-### Checks, Formatting, & Linting
+### Schema Changes
 
-```sh {"name":"check"}
-deno fmt --check
-deno lint
+1. Modify `data-model/schema.ts`
+2. Generate migration:
+   ```bash
+   bun run drizzle-kit generate
+   ```
+3. Apply migration:
+   ```bash
+   bun run wrangler d1 migrations apply shows-db
+   ```
+4. Update GraphQL schema in `read-model/schema.ts`
+5. Publish schema:
+   ```bash
+   bun run publish:schema
+   ```
+
+## Deployment
+
+Deploy to Cloudflare Workers:
+
+```bash
+# Deploy read model
+bun run deploy:read
+
+# Deploy write model
+bun run deploy:write
 ```
 
-## Deploy
+## GraphQL Schema
 
-### Data Model
+The service exposes the following GraphQL types:
 
-```sh {"name":"dev-db"}
-export LIBSQL_URL="https://${SERVICE_NAME}-${LIBSQL_BASE_URL}"
-export LIBSQL_TOKEN="op://sa.rawkode.academy/turso/platform-group/api-token"
+- ``: Main entity type
 
-op run -- deno --allow-all data-model/migrate.ts
+### Example Queries
+
+```graphql
+query GetById {
+  showsById(id: "...") {
+    id
+    createdAt
+    updatedAt
+  }
+}
 ```
 
-### Read Model
+### Example Mutations
 
-```sh {"name":"deploy-read-model"}
-epoch=$(date +%s)
-
-podman image build --target=read-model --tag europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch} .
-podman image push europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch}
-
-gcloud run deploy ${SERVICE_NAME}-read \
-      --image=europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-read:${epoch} \
-      --region=europe-west2 \
-      --use-http2 \
-      --allow-unauthenticated \
-      --cpu="1" --memory="512Mi" \
-      --cpu-boost \
-      --set-env-vars="SERVICE_NAME=${SERVICE_NAME},LIBSQL_BASE_URL=rawkodeacademy.turso.io" \
-      --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest,SENTRY_DSN=${SERVICE_NAME}-read-sentry-dsn:latest"
-
-deno run --allow-all read-model/publish.ts
-bunx wgc subgraph publish ${SERVICE_NAME} --namespace production --schema ./read-model/schema.gql --routing-url https://${SERVICE_NAME}-read-458678766461.europe-west2.run.app
+```graphql
+mutation Create {
+  create(input: {
+    # Add your input fields here
+  }) {
+    id
+    createdAt
+  }
+}
 ```
 
-### Write Model
+## Testing
 
-```sh {"name":"deploy-write-model"}
-epoch=$(date +%s)
+Tests have not been configured for this service.
 
-podman image build --target=write-model --tag europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-write:${epoch} .
-podman image push europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-write:${epoch}
+## Environment Variables
 
-gcloud run deploy ${SERVICE_NAME}-write \
-      --image=europe-west2-docker.pkg.dev/rawkode-academy-production/rawkode-academy/${SERVICE_NAME}-write:${epoch} \
-      --tag v${epoch} \
-      --region=europe-west2 \
-      --use-http2 \
-      --allow-unauthenticated \
-      --cpu="1" --memory="512Mi" \
-      --cpu-boost \
-      --set-env-vars="SERVICE_NAME=${SERVICE_NAME},LIBSQL_BASE_URL=rawkodeacademy.turso.io" \
-      --set-secrets="LIBSQL_TOKEN=turso-platform-token-rw:latest,RESTATE_IDENTITY_KEY=restate-identity-key:latest"
+- `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare account ID
+- `CLOUDFLARE_DATABASE_ID`: The D1 database ID
+- `CLOUDFLARE_D1_TOKEN`: Authentication token for D1
 
-deno run -A --no-config 'npm:@restatedev/restate' deployments register https://v${epoch}---${SERVICE_NAME}-write-wlnfqm3bkq-nw.a.run.app
-```
+## Monitoring
+
+Service metrics and logs are available in the Cloudflare dashboard under Workers & Pages.
