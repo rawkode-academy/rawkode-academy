@@ -23,7 +23,8 @@
 		{
 			"binding": "DB",
 			"database_name": "platform-{{ serviceName }}",
-			"database_id": "{{ databaseId }}"
+			"database_id": "{{ databaseId }}",
+			"migrations": "../data-model/migrations"
 		}
 	]
 }
