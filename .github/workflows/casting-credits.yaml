@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest,dagger=0.18.11
     permissions:
       contents: read
       pull-requests: write
@@ -33,7 +33,7 @@ jobs:
           dagger call test
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest,dagger=0.18.11
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
