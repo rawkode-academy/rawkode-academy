@@ -1,15 +1,14 @@
 import { describe, it, expect, beforeEach } from "bun:test";
 import { createYoga } from "graphql-yoga";
-import { getSchema } from "../../read-model/schema";
-import { getDatabase } from "../../data-model/client";
-import { emojiReactionsTable } from "../../data-model/schema";
+import { getSchema } from "../../read-model/schema.ts";
+import { emojiReactionsTable } from "../../data-model/schema.ts";
+import { drizzle } from "drizzle-orm/d1";
 
 describe("GraphQL API Integration Tests", () => {
 	let yoga: ReturnType<typeof createYoga>;
-	let db: ReturnType<typeof getDatabase>;
+	const db = drizzle(globalThis.env.DB);
 
 	beforeEach(async () => {
-		db = getDatabase(globalThis.env);
 		await db.delete(emojiReactionsTable).execute();
 
 		const schema = getSchema(globalThis.env);
