@@ -1,0 +1,25 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/health
+  body: none
+  auth: none
+}
+
+docs {
+  Check if the RPC Gateway service is healthy. This endpoint does not require authentication.
+
+  ## Expected Response
+
+  ```json
+  {
+    "status": "healthy",
+    "service": "rpc-gateway",
+    "timestamp": "2024-01-20T10:30:00.000Z"
+  }
+  ```
+}
