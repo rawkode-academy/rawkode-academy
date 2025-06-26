@@ -1,3 +1,4 @@
 .wrangler
 node_modules
 transcode
+worker-configuration.d.ts
