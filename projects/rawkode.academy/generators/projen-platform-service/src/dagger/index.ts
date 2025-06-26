@@ -23,7 +23,7 @@ export class Dagger extends Component {
 
 		const defaults: Required<Options> = {
 			name: project.name,
-			engineVersion: "v0.8.11",
+			engineVersion: "v0.18.10",
 			source: ".dagger",
 			sdk: {
 				source: "typescript",
