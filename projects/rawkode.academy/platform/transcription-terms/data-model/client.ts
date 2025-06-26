@@ -1,18 +1,6 @@
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
-import process from "node:process";
-import * as dataSchema from "../data-model/schema.ts";
+import { drizzle } from "drizzle-orm/d1";
+import * as dataSchema from "../data-model/schema";
 
-const serviceName = process.env.SERVICE_NAME;
-const libSqlUrl = process.env.LIBSQL_URL;
-const libSqlBaseUrl = process.env.LIBSQL_BASE_URL;
-const authToken = process.env.LIBSQL_TOKEN;
-
-const url = libSqlUrl || `https://${serviceName}-${libSqlBaseUrl}`;
-
-const client = createClient({
-  url,
-  authToken,
-});
-
-export const db = drizzle(client, { schema: dataSchema });
+export const getDatabase = (env: { DB: D1Database }) => {
+	return drizzle(env.DB, { schema: dataSchema });
+};

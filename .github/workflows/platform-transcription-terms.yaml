@@ -1,0 +1,29 @@
+name: rawkode.academy/platform/transcription-terms
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/platform-transcription-terms.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/platform/transcription-terms/**"
+  pull_request:
+    paths:
+      - ".github/workflows/platform-transcription-terms.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/platform/transcription-terms/**"
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/platform-service-deploy.yaml
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    with:
+      service-name: transcription-terms
+      service-path: projects/rawkode.academy/platform/transcription-terms
+      has-write-model: false
+    secrets:
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
