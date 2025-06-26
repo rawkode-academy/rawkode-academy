@@ -1,13 +1,12 @@
 import { describe, it, expect, beforeEach } from "bun:test";
-import { getDatabase } from "../../data-model/client";
+import { drizzle } from "drizzle-orm/d1";
 import { emojiReactionsTable } from "../../data-model/schema";
 import { eq, and, count } from "drizzle-orm";
 
 describe("Database Integration Tests", () => {
-	let db: ReturnType<typeof getDatabase>;
+	const db = drizzle(globalThis.env.DB);
 
 	beforeEach(async () => {
-		db = getDatabase(globalThis.env);
 		// Clean up the database before each test
 		await db.delete(emojiReactionsTable).execute();
 	});
