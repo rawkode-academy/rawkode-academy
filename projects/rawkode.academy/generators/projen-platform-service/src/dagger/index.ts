@@ -28,7 +28,10 @@ export class Dagger extends Component {
 			sdk: {
 				source: "typescript",
 			},
-			dependencies: [],
+			dependencies: [{
+				"name": "bun",
+				"source": "../../../../dagger/bun"
+			}],
 		};
 
 		const config = { ...defaults, ...options };
