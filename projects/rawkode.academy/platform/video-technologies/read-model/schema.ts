@@ -2,26 +2,30 @@ import schemaBuilder from "@pothos/core";
 import directivesPlugin from "@pothos/plugin-directives";
 import drizzlePlugin from "@pothos/plugin-drizzle";
 import federationPlugin from "@pothos/plugin-federation";
+import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
 import { type GraphQLSchema } from "graphql";
-import { db } from "../data-model/client.ts";
 import * as dataSchema from "../data-model/schema.ts";
 
 export interface PothosTypes {
   DrizzleSchema: typeof dataSchema;
 }
 
-const builder = new schemaBuilder<PothosTypes>({
-  plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
-  drizzle: {
-    client: db,
-  },
-});
+export const getSchema = (env: Env): GraphQLSchema => {
+  const db = drizzle(env.DB, { schema: dataSchema });
 
-const videoRef = builder.externalRef(
-  "Video",
-  builder.selection<{ id: string }>("id"),
-).implement({
+  const builder = new schemaBuilder<PothosTypes>({
+    plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
+    drizzle: {
+      client: db,
+      schema: dataSchema,
+    },
+  });
+
+  const videoRef = builder.externalRef(
+    "Video",
+    builder.selection<{ id: string }>("id"),
+  ).implement({
   externalFields: (t) => ({
     id: t.string(),
   }),
@@ -36,12 +40,12 @@ const videoRef = builder.externalRef(
         ),
     }),
   }),
-});
+  });
 
-const technologyRef = builder.externalRef(
-  "Technology",
-  builder.selection<{ id: string }>("id"),
-).implement({
+  const technologyRef = builder.externalRef(
+    "Technology",
+    builder.selection<{ id: string }>("id"),
+  ).implement({
   externalFields: (t) => ({
     id: t.string(),
   }),
@@ -55,10 +59,9 @@ const technologyRef = builder.externalRef(
           eq(dataSchema.videoTechnologiesTable.technologyId, technology.id),
         ),
     }),
-  }),
-});
+    }),
+  });
 
-export const getSchema = (): GraphQLSchema => {
   return builder.toSubGraphSchema({
     linkUrl: "https://specs.apollo.dev/federation/v2.6",
     federationDirectives: ["@extends", "@external", "@key"],
