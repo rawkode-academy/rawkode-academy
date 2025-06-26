@@ -27,4 +27,4 @@ jobs:
       has-write-model: true
     secrets:
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      GCP_PROJECT_ID
+
