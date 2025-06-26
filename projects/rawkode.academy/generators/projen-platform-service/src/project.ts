@@ -150,10 +150,6 @@ export class PlatformService extends Project {
 
 		new Biome(this);
 
-		new Dagger(this, {
-			name: this.options.serviceName,
-		});
-
 		new Bun(this);
 	}
 

@@ -35,11 +35,15 @@ jobs:
         run: |
           curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Run Tests
         working-directory: ${{ inputs.service-path }}
         run: |
           bunx --bun projen
-          dagger call test
+          ../../../../dagger/bun | install-no-cache . | with-exec bun test
 
   deploy:
     runs-on: depot-ubuntu-latest,dagger=0.18.11
