@@ -1,0 +1,29 @@
+name: rawkode.academy/platform/people-biographies
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/platform-people-biographies.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/platform/people-biographies/**"
+  pull_request:
+    paths:
+      - ".github/workflows/platform-people-biographies.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/platform/people-biographies/**"
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/platform-service-deploy.yaml
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    with:
+      service-name: people-biographies
+      service-path: projects/rawkode.academy/platform/people-biographies
+      has-write-model: true
+    secrets:
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
