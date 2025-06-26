@@ -44,11 +44,6 @@
 	],
 	"secrets_store_secrets": [
 		{
-			"binding": "PLATFORM_RPC_TOKEN",
-			"secret_name": "PLATFORM_RPC_TOKEN",
-			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e"
-		},
-		{
 			"binding": "PLATFORM_RPC_CLIENT_SECRET",
 			"secret_name": "PLATFORM_RPC_CLIENT_SECRET",
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e"
