@@ -1,0 +1,29 @@
+name: rawkode.academy/platform/technologies
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/platform-technologies.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/platform/technologies/**"
+  pull_request:
+    paths:
+      - ".github/workflows/platform-technologies.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/platform/technologies/**"
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/platform-service-deploy.yaml
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    with:
+      service-name: technologies
+      service-path: projects/rawkode.academy/platform/technologies
+      has-write-model: false
+    secrets:
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
