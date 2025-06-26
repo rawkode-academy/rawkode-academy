@@ -45,7 +45,9 @@ jobs:
           (cd ../../generators/projen-platform-service && bun install && bun run types)
           bun run .projenrc.ts
 
-          ../../../../dagger/bun | install-no-cache . | with-exec bun test
+          dagger <<'.'
+            ../../../../dagger/bun | install-no-cache . | with-exec bun test
+          .
 
   deploy:
     runs-on: depot-ubuntu-latest,dagger=0.18.11
