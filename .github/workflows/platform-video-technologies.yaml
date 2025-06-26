@@ -24,6 +24,6 @@ jobs:
     with:
       service-name: video-technologies
       service-path: projects/rawkode.academy/platform/video-technologies
-      has-write-model: true
+      has-write-model: false
     secrets:
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
