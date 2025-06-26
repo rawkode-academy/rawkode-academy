@@ -1,0 +1,29 @@
+name: rawkode.academy/platform/people
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/platform-people.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/platform/people/**"
+  pull_request:
+    paths:
+      - ".github/workflows/platform-people.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/platform/people/**"
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/platform-service-deploy.yaml
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    with:
+      service-name: people
+      service-path: projects/rawkode.academy/platform/people
+      has-write-model: true
+    secrets:
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
