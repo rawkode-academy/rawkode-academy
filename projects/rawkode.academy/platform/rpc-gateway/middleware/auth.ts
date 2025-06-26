@@ -75,7 +75,7 @@ export async function auth(c: Context<{ Bindings: Env }>, next: Next) {
 		}
 
 		// Create Basic Auth header for introspection
-		const credentials = `${c.env.PLATFORM_RPC_CLIENT_ID}:${c.env.PLATFORM_RPC_CLIENT_SECRET}`;
+		const credentials = `${c.env.PLATFORM_RPC_CLIENT_ID}:${c.env.PLATFORM_RPC_CLIENT_SECRET.get()}`;
 		const basicAuth = btoa(credentials);
 
 		// Introspect the PAT with Zitadel using Basic Auth
@@ -132,7 +132,7 @@ export async function auth(c: Context<{ Bindings: Env }>, next: Next) {
 		// Check for platform-rpc role
 		const projectRoles = introspection["urn:zitadel:iam:org:project:293097880707663554:roles"] ||
 			introspection["urn:zitadel:iam:org:project:roles"];
-		
+
 		const hasPlatformRpcRole = projectRoles && Object.keys(projectRoles).includes("platform-rpc");
 
 		if (!hasPlatformRpcRole) {
