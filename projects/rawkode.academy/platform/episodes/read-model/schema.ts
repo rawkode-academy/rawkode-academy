@@ -2,33 +2,37 @@ import schemaBuilder from '@pothos/core';
 import directivesPlugin from '@pothos/plugin-directives';
 import drizzlePlugin from '@pothos/plugin-drizzle';
 import federationPlugin from '@pothos/plugin-federation';
+import { drizzle } from 'drizzle-orm/d1';
 import { and, eq } from 'drizzle-orm';
 import { type GraphQLSchema } from 'graphql';
-import { db } from '../data-model/client.ts';
 import * as dataSchema from '../data-model/schema.ts';
 
 export interface PothosTypes {
 	DrizzleSchema: typeof dataSchema;
 }
 
-const builder = new schemaBuilder<PothosTypes>({
-	plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
-	drizzle: {
-		client: db,
-	},
-});
+export const getSchema = (env: Env): GraphQLSchema => {
+	const db = drizzle(env.DB, { schema: dataSchema });
 
-const showRef = builder.externalRef(
-	'Show',
-	builder.selection<{ id: string }>('id'),
-);
+	const builder = new schemaBuilder<PothosTypes>({
+		plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
+		drizzle: {
+			client: db,
+			schema: dataSchema,
+		},
+	});
 
-const videoRef = builder.externalRef(
-	'Video',
-	builder.selection<{ id: string }>('id'),
-);
+	const showRef = builder.externalRef(
+		'Show',
+		builder.selection<{ id: string }>('id'),
+	);
 
-const episodeRef = builder.drizzleObject('episodesTable', {
+	const videoRef = builder.externalRef(
+		'Video',
+		builder.selection<{ id: string }>('id'),
+	);
+
+	const episodeRef = builder.drizzleObject('episodesTable', {
 	name: 'Episode',
 	fields: (t) => ({
 		id: t.exposeString('videoId'),
@@ -70,17 +74,17 @@ const episodeRef = builder.drizzleObject('episodesTable', {
 			},
 		}),
 	}),
-});
+	});
 
-builder.asEntity(episodeRef, {
+	builder.asEntity(episodeRef, {
 	key: builder.selection<{ id: string }>('id'),
 	resolveReference: async (episode) =>
 		await db.query.episodesTable.findFirst({
 			where: eq(dataSchema.episodesTable.videoId, episode.id),
 		}).execute(),
-});
+	});
 
-showRef.implement({
+	showRef.implement({
 	externalFields: (t) => ({
 		id: t.string(),
 	}),
@@ -93,9 +97,9 @@ showRef.implement({
 				}),
 		}),
 	}),
-});
+	});
 
-videoRef.implement({
+	videoRef.implement({
 	externalFields: (t) => ({
 		id: t.string(),
 	}),
@@ -108,10 +112,9 @@ videoRef.implement({
 					where: eq(dataSchema.episodesTable.videoId, video.id),
 				}),
 		}),
-	}),
-});
+		}),
+	});
 
-export const getSchema = (): GraphQLSchema => {
 	builder.queryType({
 		fields: (t) => ({
 			episodeByVideoId: t.field({

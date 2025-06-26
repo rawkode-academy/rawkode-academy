@@ -2,10 +2,10 @@ import schemaBuilder from "@pothos/core";
 import directivesPlugin from "@pothos/plugin-directives";
 import drizzlePlugin from "@pothos/plugin-drizzle";
 import federationPlugin from "@pothos/plugin-federation";
+import { drizzle } from "drizzle-orm/d1";
 import { and, desc, eq, like, lte, or, sql } from "drizzle-orm";
 import type { GraphQLSchema } from "graphql";
 import { DateResolver } from "graphql-scalars";
-import { getDatabase } from "../data-model/client.ts";
 import * as dataSchema from "../data-model/schema.ts";
 
 export interface PothosTypes {
@@ -18,13 +18,14 @@ export interface PothosTypes {
   };
 }
 
-const buildSchema = () => {
-  const db = getDatabase();
+export const getSchema = (env: Env): GraphQLSchema => {
+  const db = drizzle(env.DB, { schema: dataSchema });
 
   const builder = new schemaBuilder<PothosTypes>({
     plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
     drizzle: {
       client: db,
+      schema: dataSchema,
     },
   });
 
@@ -150,12 +151,6 @@ const buildSchema = () => {
       }),
     }),
   });
-
-  return builder;
-};
-
-export const getSchema = (): GraphQLSchema => {
-  const builder = buildSchema();
 
   return builder.toSubGraphSchema({
     linkUrl: "https://specs.apollo.dev/federation/v2.6",
