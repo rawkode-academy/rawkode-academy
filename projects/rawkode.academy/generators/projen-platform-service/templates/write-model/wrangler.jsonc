@@ -1,0 +1,37 @@
+{
+	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+	"name": "{{ serviceName }}-write-model",
+	"main": "./main.ts",
+	"compatibility_date": "2025-04-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"keep_vars": false,
+	"minify": true,
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1
+		}
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "{{ serviceName }}-db",
+			"database_id": "{{ databaseId }}"
+		}
+	],
+	"workflows": [{% for workflow in workflows %}
+		{
+			"name": "{{ workflow.name }}",
+			"binding": "{{ workflow.binding }}",
+			"class_name": "{{ workflow.className }}",
+			"script_name": "{{ workflow.scriptName }}"
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]
+}
