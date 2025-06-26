@@ -1,0 +1,14 @@
+{
+	"name": "chapters",
+	"engineVersion": "v0.18.10",
+	"sdk": {
+		"source": "typescript"
+	},
+	"dependencies": [
+		{
+			"name": "bun",
+			"source": "../../../../dagger/bun"
+		}
+	],
+	"source": ".dagger"
+}

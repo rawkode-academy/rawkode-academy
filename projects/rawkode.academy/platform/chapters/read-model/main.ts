@@ -1,5 +1,5 @@
-import { createYoga } from 'graphql-yoga';
-import { type Env, getSchema } from "./schema.ts";
+import { createYoga } from "graphql-yoga";
+import { getSchema, type Env } from "./schema";
 
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext) {
