@@ -1,0 +1,116 @@
+name: Reusable Platform Service Deployment
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        description: 'Name of the platform service (e.g., casting-credits, emoji-reactions)'
+        required: true
+        type: string
+      service-path:
+        description: 'Path to the service directory from repo root'
+        required: true
+        type: string
+      has-write-model:
+        description: 'Whether the service has a write-model to deploy'
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      GCP_WORKLOAD_IDENTITY_PROVIDER:
+        required: true
+
+jobs:
+  test:
+    runs-on: depot-ubuntu-latest,dagger=0.18.11
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dagger
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
+
+      - name: Run Tests
+        working-directory: ${{ inputs.service-path }}
+        run: |
+          dagger call test
+
+  deploy:
+    runs-on: depot-ubuntu-latest,dagger=0.18.11
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dagger
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: "rawkode-academy-production"
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: Get secrets from GCP Secret Manager
+        id: secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |
+            CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
+            COSMO_API_KEY:projects/458678766461/secrets/cosmo-api-key
+
+      - name: Deploy Read Model and Register Subgraph
+        working-directory: ${{ inputs.service-path }}
+        env:
+          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          COSMO_API_KEY: ${{ steps.secrets.outputs.COSMO_API_KEY }}
+          SERVICE_NAME: platform-${{ inputs.service-name }}
+        run: |
+          dagger <<'.'
+            codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
+
+            ../../../../dagger/cloudflare | deploy \
+              $codebase \
+              ./read-model/wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN
+
+            ../../../../dagger/cloudflare | applyMigrations \
+              $codebase \
+              ./read-model/wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN
+
+            ../../../../dagger/wundergraph | generateAndPublishSubgraph \
+              ${SERVICE_NAME} \
+              production \
+              $codebase \
+              ./read-model/publish.ts \
+              https://${SERVICE_NAME}-read-model.rawkode-academy.workers.dev \
+              env:COSMO_API_KEY
+          .
+
+      - name: Deploy Write Model
+        if: inputs.has-write-model
+        working-directory: ${{ inputs.service-path }}
+        env:
+          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          SERVICE_NAME: platform-${{ inputs.service-name }}
+        run: |
+          dagger <<'.'
+            codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
+
+            ../../../../dagger/cloudflare | deploy \
+              $codebase \
+              ./write-model/wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN
+          .

@@ -6,92 +6,20 @@ on:
       - main
     paths:
       - ".github/workflows/emoji-reactions.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
       - "projects/rawkode.academy/platform/emoji-reactions/**"
   pull_request:
     paths:
       - ".github/workflows/emoji-reactions.yaml"
+      - ".github/workflows/platform-service-deploy.yaml"
       - "projects/rawkode.academy/platform/emoji-reactions/**"
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Dagger
-        run: |
-          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
-
-      - name: Run Tests
-        working-directory: projects/rawkode.academy/platform/emoji-reactions
-        run: |
-          dagger call test
-
   deploy:
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Dagger
-        run: |
-          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: "rawkode-academy-production"
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-
-      - name: Get secrets from GCP Secret Manager
-        id: secrets
-        uses: google-github-actions/get-secretmanager-secrets@v2
-        with:
-          secrets: |
-            CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
-            COSMO_API_KEY:projects/458678766461/secrets/cosmo-api-key
-
-      - name: Deploy and Register Subgraph
-        working-directory: projects/rawkode.academy/platform/emoji-reactions
-        env:
-          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
-          COSMO_API_KEY: ${{ steps.secrets.outputs.COSMO_API_KEY }}
-          SERVICE_NAME: platform-emoji-reactions
-        run: |
-          dagger <<'.'
-            codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
-
-            ../../../../dagger/cloudflare | deploy \
-              $codebase \
-              ./read-model/wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN
-
-            ../../../../dagger/cloudflare | applyMigrations \
-              $codebase \
-              ./read-model/wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN
-
-            ../../../../dagger/wundergraph | generateAndPublishSubgraph \
-              ${SERVICE_NAME} \
-              production \
-              $codebase \
-              ./read-model/publish.ts \
-              https://${SERVICE_NAME}-read-model.rawkodeacademy.workers.dev \
-              env:COSMO_API_KEY
-
-            ../../../../dagger/cloudflare | deploy \
-              $codebase \
-              ./write-model/wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN
-          .
+    uses: ./.github/workflows/platform-service-deploy.yaml
+    with:
+      service-name: emoji-reactions
+      service-path: projects/rawkode.academy/platform/emoji-reactions
+      has-write-model: true
+    secrets:
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
