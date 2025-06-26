@@ -4,8 +4,8 @@ import directivesPlugin from "@pothos/plugin-directives";
 import drizzlePlugin from "@pothos/plugin-drizzle";
 import federationPlugin from "@pothos/plugin-federation";
 import { and, count, eq, sql } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/d1";
 import type { GraphQLSchema } from "graphql";
-import { getDatabase } from "../data-model/client";
 import * as dataSchema from "../data-model/schema";
 
 export interface PothosTypes {
@@ -13,7 +13,7 @@ export interface PothosTypes {
 	}
 
 const createBuilder = (env: { DB: D1Database }) => {
-	const db = getDatabase(env);
+	const db = drizzle(env.DB);
 
 	const builder = new schemaBuilder<PothosTypes>({
 		plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
