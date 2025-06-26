@@ -70,6 +70,10 @@ jobs:
             CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
             COSMO_API_KEY:projects/458678766461/secrets/cosmo-api-key
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Deploy Read Model and Register Subgraph
         working-directory: ${{ inputs.service-path }}
         env:
@@ -77,6 +81,7 @@ jobs:
           COSMO_API_KEY: ${{ steps.secrets.outputs.COSMO_API_KEY }}
           SERVICE_NAME: platform-${{ inputs.service-name }}
         run: |
+          bunx --bun projen
           dagger <<'.'
             codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
 
