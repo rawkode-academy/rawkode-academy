@@ -1,6 +1,6 @@
 import { WorkflowEntrypoint, WorkflowStep, type WorkflowEvent } from 'cloudflare:workers';
 import { drizzle } from 'drizzle-orm/d1';
-import {  emojiReactionsTable } from "../../data-model/schema";
+import { emojiReactionsTable } from "../data-model/schema";
 
 type Env = {
 	DB: D1Database;
