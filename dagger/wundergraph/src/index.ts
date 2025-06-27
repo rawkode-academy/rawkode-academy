@@ -56,7 +56,6 @@ export class Wundergraph {
 		serviceName: string,
 		namespace: string,
 		serviceDirectory: Directory,
-		publishScript: string,
 		routingUrl: string,
 		cosmoApiKey: Secret,
 	): Promise<string> {
@@ -66,7 +65,7 @@ export class Wundergraph {
 			.container()
 			.withMountedDirectory("/code", serviceDirectory)
 			.withWorkdir("/code")
-			.withExec(["bun", "run", publishScript]);
+			.withExec(["bun", "run", "read-model/publish.ts"]);
 
 		// Get the generated schema file
 		const schemaFile = generatedSchema.file("./read-model/schema.gql");
