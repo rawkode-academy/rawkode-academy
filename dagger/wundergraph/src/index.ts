@@ -21,13 +21,13 @@ export class Wundergraph {
 		cosmoApiKey: Secret,
 	): Promise<string> {
 		const publishResult = await dag
+			.bun()
 			.container()
-			.from("node:22-alpine")
 			.withWorkdir("/publish")
 			.withMountedFile("/publish/schema.gql", schemaFile)
 			.withSecretVariable("COSMO_API_KEY", cosmoApiKey)
 			.withExec([
-				"npx",
+				"bunx",
 				"wgc",
 				"subgraph",
 				"publish",
