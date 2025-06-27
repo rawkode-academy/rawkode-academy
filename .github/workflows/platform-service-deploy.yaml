@@ -25,6 +25,8 @@ jobs:
     runs-on: depot-ubuntu-latest,dagger=0.18.11
     permissions:
       contents: read
+      # We use this to comment on the PR
+      # with preview URLs
       pull-requests: write
 
     steps:
