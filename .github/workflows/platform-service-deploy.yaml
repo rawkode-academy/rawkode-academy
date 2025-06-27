@@ -31,10 +31,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Dagger
-        run: |
-          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
-
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -60,10 +56,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install Dagger
-        run: |
-          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
