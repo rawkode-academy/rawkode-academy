@@ -65,12 +65,11 @@ export class Wundergraph {
 			.container()
 			.withMountedDirectory("/code", serviceDirectory)
 			.withWorkdir("/code")
-			.withExec(["bun", "run", "read-model/publish.ts"]);
+			.withExec(["bun", "run", "read-model/publish.ts"])
+			.withExec(["cat", "read-model/schema.gql"]);
 
-		// Get the generated schema file
-		const schemaFile = generatedSchema.file("./read-model/schema.gql");
+		const schemaFile = generatedSchema.file("read-model/schema.gql");
 
-		// Publish the subgraph
 		return this.publishSubgraph(
 			serviceName,
 			namespace,
