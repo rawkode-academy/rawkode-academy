@@ -82,6 +82,16 @@ export const getSchema = (env: Env): GraphQLSchema => {
             })
             .execute(),
       }),
+      getAllVideos: t.field({
+        type: [videoRef],
+        resolve: (_root, _args, _ctx) =>
+          db.query.videosTable
+            .findMany({
+              where: lte(dataSchema.videosTable.publishedAt, new Date()),
+              orderBy: (video, { desc }) => desc(video.publishedAt),
+            })
+            .execute(),
+      }),
       getLatestVideos: t.field({
         type: [videoRef],
         args: {
