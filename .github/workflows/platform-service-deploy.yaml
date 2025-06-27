@@ -1,4 +1,4 @@
-# Forcing a Redeploy, Increment Here: 6
+# Forcing a Redeploy, Increment Here: 7
 name: Reusable Platform Service Deployment
 
 on:
@@ -106,8 +106,10 @@ jobs:
               production \
               $codebase \
               https://platform-${SERVICE_NAME}-read-model.rawkode-academy.workers.dev \
-              env:COSMO_API_KEY
+              env:COSMO_API_KEY | export schema.gql
           .
+
+          bunx wgc subgraph publish ${SERVICE_NAME} --schema schema.gql --routing-url https://platform-${{ inputs.service-name }}-read-model.rawkode-academy.workers.dev --namespace production
 
       - name: Deploy Write Model
         if: inputs.has-write-model
