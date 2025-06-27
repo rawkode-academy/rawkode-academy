@@ -1,6 +1,5 @@
 import {
 	type Directory,
-	type File,
 	dag,
 	func,
 	object,
@@ -10,22 +9,26 @@ import {
 @object()
 export class Wundergraph {
 	/**
-	 * Publish a GraphQL subgraph to WunderGraph Cosmo.
+	 * Generate GraphQL schema and publish subgraph to WunderGraph Cosmo.
 	 */
 	@func()
-	async publishSubgraph(
+	async generateAndPublishSubgraph(
 		serviceName: string,
 		namespace: string,
-		schemaFile: File,
+		serviceDirectory: Directory,
 		routingUrl: string,
 		cosmoApiKey: Secret,
 	): Promise<string> {
-		const publishResult = await dag
+		// Generate schema using bun
+		const result = await dag
 			.bun()
 			.container()
-			.withSecretVariable("COSMO_API_KEY", cosmoApiKey)
+			.withMountedDirectory("/code", serviceDirectory)
 			.withWorkdir("/code")
-			.withMountedFile("/code/read-model/schema.gql", schemaFile)
+			.withExec(["echo", "debug counter 1"])
+			.withExec(["bun", "run", "read-model/publish.ts"])
+			.withExec(["cat", "read-model/schema.gql"])
+			.withSecretVariable("COSMO_API_KEY", cosmoApiKey)
 			.withExec([
 				"bunx",
 				"wgc",
@@ -39,43 +42,12 @@ export class Wundergraph {
 				"--routing-url",
 				routingUrl,
 			]);
-
-		if ((await publishResult.exitCode()) !== 0) {
+		if ((await result.exitCode()) !== 0) {
 			throw new Error(
-				`Subgraph publish failed. Error: ${await publishResult.stdout()}${await publishResult.stderr()}`,
+				`Subgraph publish failed. Error: ${await result.stdout()}${await result.stderr()}`,
 			);
 		}
 
-		return publishResult.stdout();
-	}
-
-	/**
-	 * Generate GraphQL schema and publish subgraph to WunderGraph Cosmo.
-	 */
-	@func()
-	async generateAndPublishSubgraph(
-		serviceName: string,
-		namespace: string,
-		serviceDirectory: Directory,
-		routingUrl: string,
-		cosmoApiKey: Secret,
-	): Promise<string> {
-		// Generate schema using bun
-		const generatedSchema = await dag
-			.bun()
-			.container()
-			.withMountedDirectory("/code", serviceDirectory)
-			.withWorkdir("/code")
-			.withExec(["bun", "run", "read-model/publish.ts"]);
-
-		const schemaFile = generatedSchema.file("read-model/schema.gql");
-
-		return this.publishSubgraph(
-			serviceName,
-			namespace,
-			schemaFile,
-			routingUrl,
-			cosmoApiKey,
-		);
+		return result.stdout();
 	}
 }
