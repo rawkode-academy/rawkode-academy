@@ -110,6 +110,7 @@ jobs:
           .
 
           bunx wgc subgraph publish ${SERVICE_NAME} --schema schema.gql --routing-url https://platform-${{ inputs.service-name }}-read-model.rawkodeacademy.workers.dev --namespace production
+          bunx wgc subgraph update ${SERVICE_NAME} --routing-url https://platform-${{ inputs.service-name }}-read-model.rawkodeacademy.workers.dev --namespace production
 
       - name: Deploy Write Model
         if: inputs.has-write-model
