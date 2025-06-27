@@ -1,6 +1,7 @@
 import {
 	type Directory,
 	dag,
+	type File,
 	func,
 	object,
 	type Secret,
@@ -18,36 +19,27 @@ export class Wundergraph {
 		serviceDirectory: Directory,
 		routingUrl: string,
 		cosmoApiKey: Secret,
-	): Promise<string> {
-		// Generate schema using bun
-		const result = await dag
+	): Promise<File> {
+		return await dag
 			.bun()
 			.container()
 			.withMountedDirectory("/code", serviceDirectory)
 			.withWorkdir("/code")
-			.withExec(["echo", "debug counter 1"])
-			.withExec(["bun", "run", "read-model/publish.ts"])
-			.withExec(["cat", "read-model/schema.gql"])
 			.withSecretVariable("COSMO_API_KEY", cosmoApiKey)
-			.withExec([
-				"bunx",
-				"wgc",
-				"subgraph",
-				"publish",
-				serviceName,
-				"--namespace",
-				namespace,
-				"--schema",
-				"read-model/schema.gql",
-				"--routing-url",
-				routingUrl,
-			]);
-		if ((await result.exitCode()) !== 0) {
-			throw new Error(
-				`Subgraph publish failed. Error: ${await result.stdout()}${await result.stderr()}`,
-			);
-		}
-
-		return result.stdout();
+			.withExec(["bun", "run", "read-model/publish.ts"])
+			// .withExec([
+			// 	"bunx",
+			// 	"wgc",
+			// 	"subgraph",
+			// 	"publish",
+			// 	serviceName,
+			// 	"--namespace",
+			// 	namespace,
+			// 	"--schema",
+			// 	"read-model/schema.gql",
+			// 	"--routing-url",
+			// 	routingUrl,
+			// ])
+			.file("read-model/schema.gql");
 	}
 }
