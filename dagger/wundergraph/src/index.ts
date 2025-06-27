@@ -1,7 +1,7 @@
 import {
-	dag,
 	type Directory,
 	type File,
+	dag,
 	func,
 	object,
 	type Secret,
@@ -23,9 +23,8 @@ export class Wundergraph {
 		const publishResult = await dag
 			.bun()
 			.container()
-			.withWorkdir("/publish")
-			.withMountedFile("/publish/schema.gql", schemaFile)
 			.withSecretVariable("COSMO_API_KEY", cosmoApiKey)
+			.withMountedFile("/code/read-model/schema.gql", schemaFile)
 			.withExec([
 				"bunx",
 				"wgc",
@@ -35,7 +34,7 @@ export class Wundergraph {
 				"--namespace",
 				namespace,
 				"--schema",
-				"/publish/schema.gql",
+				"./read-model/schema.gql",
 				"--routing-url",
 				routingUrl,
 			]);

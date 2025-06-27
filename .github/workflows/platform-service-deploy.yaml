@@ -105,7 +105,6 @@ jobs:
               ${SERVICE_NAME} \
               production \
               $codebase \
-              ./read-model/publish.ts \
               https://platform-${SERVICE_NAME}-read-model.rawkode-academy.workers.dev \
               env:COSMO_API_KEY
           .
