@@ -24,6 +24,7 @@ export class Wundergraph {
 			.bun()
 			.container()
 			.withSecretVariable("COSMO_API_KEY", cosmoApiKey)
+			.withWorkdir("/code")
 			.withMountedFile("/code/read-model/schema.gql", schemaFile)
 			.withExec([
 				"bunx",
@@ -34,7 +35,7 @@ export class Wundergraph {
 				"--namespace",
 				namespace,
 				"--schema",
-				"./read-model/schema.gql",
+				"read-model/schema.gql",
 				"--routing-url",
 				routingUrl,
 			]);
@@ -65,8 +66,7 @@ export class Wundergraph {
 			.container()
 			.withMountedDirectory("/code", serviceDirectory)
 			.withWorkdir("/code")
-			.withExec(["bun", "run", "read-model/publish.ts"])
-			.withExec(["cat", "read-model/schema.gql"]);
+			.withExec(["bun", "run", "read-model/publish.ts"]);
 
 		const schemaFile = generatedSchema.file("read-model/schema.gql");
 
