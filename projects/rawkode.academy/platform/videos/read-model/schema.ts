@@ -19,7 +19,16 @@ export interface PothosTypes {
 }
 
 export const getSchema = (env: Env): GraphQLSchema => {
-  const db = drizzle(env.DB, { schema: dataSchema });
+  const db = drizzle(env.DB, { 
+    schema: dataSchema,
+    logger: {
+      logQuery: (query, params) => {
+        console.log('SQL Query:', query);
+        console.log('Parameters count:', params.length);
+        console.log('Parameters:', params);
+      }
+    }
+  });
 
   const builder = new schemaBuilder<PothosTypes>({
     plugins: [directivesPlugin, drizzlePlugin, federationPlugin],
@@ -31,8 +40,9 @@ export const getSchema = (env: Env): GraphQLSchema => {
 
   builder.addScalarType("Date", DateResolver);
 
-  const videoRef = builder.drizzleObject("videosTable", {
-    name: "Video",
+  const videoRef = builder.objectRef<typeof dataSchema.videosTable.$inferSelect>("Video");
+  
+  builder.objectType(videoRef, {
     fields: (t) => ({
       id: t.exposeString("id"),
       title: t.exposeString("title"),
@@ -57,12 +67,14 @@ export const getSchema = (env: Env): GraphQLSchema => {
 
   builder.asEntity(videoRef, {
     key: builder.selection<{ id: string }>("id"),
-    resolveReference: (video) =>
-      db.query.videosTable
-        .findFirst({
-          where: eq(dataSchema.videosTable.id, video.id),
-        })
-        .execute(),
+    resolveReference: async (video) => {
+      const result = await db
+        .select()
+        .from(dataSchema.videosTable)
+        .where(eq(dataSchema.videosTable.id, video.id))
+        .get();
+      return result;
+    },
   });
 
   builder.queryType({
@@ -84,13 +96,14 @@ export const getSchema = (env: Env): GraphQLSchema => {
       }),
       getAllVideos: t.field({
         type: [videoRef],
-        resolve: (_root, _args, _ctx) =>
-          db.query.videosTable
-            .findMany({
-              where: lte(dataSchema.videosTable.publishedAt, new Date()),
-              orderBy: (video, { desc }) => desc(video.publishedAt),
-            })
-            .execute(),
+        resolve: (_root, _args, _ctx) => {
+          const now = new Date();
+          return db
+            .select()
+            .from(dataSchema.videosTable)
+            .where(lte(dataSchema.videosTable.publishedAt, now))
+            .orderBy(desc(dataSchema.videosTable.publishedAt));
+        },
       }),
       getLatestVideos: t.field({
         type: [videoRef],
@@ -104,15 +117,16 @@ export const getSchema = (env: Env): GraphQLSchema => {
             required: false,
           }),
         },
-        resolve: (_root, args, _ctx) =>
-          db.query.videosTable
-            .findMany({
-              limit: args.limit ?? 15,
-              offset: args.offset ?? 0,
-              where: lte(dataSchema.videosTable.publishedAt, new Date()),
-              orderBy: (video, { desc }) => desc(video.publishedAt),
-            })
-            .execute(),
+        resolve: (_root, args, _ctx) => {
+          const now = new Date();
+          return db
+            .select()
+            .from(dataSchema.videosTable)
+            .where(lte(dataSchema.videosTable.publishedAt, now))
+            .orderBy(desc(dataSchema.videosTable.publishedAt))
+            .limit(args.limit ?? 15)
+            .offset(args.offset ?? 0);
+        },
       }),
       getRandomVideos: t.field({
         type: [videoRef],
@@ -143,12 +157,13 @@ export const getSchema = (env: Env): GraphQLSchema => {
         },
         resolve: (_root, args, _ctx) => {
           const term = `%${args.term}%`;
+          const now = new Date();
 
           return db.query.videosTable
             .findMany({
               limit: args.limit ?? 15,
               where: and(
-                lte(dataSchema.videosTable.publishedAt, new Date()),
+                lte(dataSchema.videosTable.publishedAt, now),
                 or(
                   like(dataSchema.videosTable.title, term),
                   like(dataSchema.videosTable.description, term),
