@@ -1,37 +1,29 @@
 ---
-import { Image } from "astro:assets";
 import { getCollection, getEntries } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
-import Button from "@/components/common/Button.vue";
-import PageHero from "@/components/common/PageHero.vue";
+import FeaturedContent from "@/components/common/FeaturedContent.astro";
 import SectionHeader from "@/components/common/SectionHeader.vue";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-// Get all blog posts and sort by date
-const allArticles = (await getCollection("articles"))
-	.filter((article) => !article.data.isDraft)
-	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+const allArticles = await getCollection("articles");
 
-// Get featured posts (latest 3)
+// Sort articles by publication date
+allArticles.sort(
+	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
+
+// Featured posts are the first 3
 const featuredPosts = allArticles.slice(0, 3);
 const latestPost = featuredPosts[0];
+
 const latestPostAuthors = latestPost
 	? await getEntries(latestPost.data.authors)
 	: [];
 
-// Get remaining posts
-const remainingPosts = allArticles.slice(3);
-
-// Function to format dates
-function formatDate(date: Date): string {
-	return new Intl.DateTimeFormat("en-US", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	}).format(date);
-}
+// Get remaining posts (skip the first one since it's featured)
+const remainingPosts = allArticles.slice(1);
 
 const pageTitle = "Cloud Native & Kubernetes Articles | Rawkode Academy";
 const pageDescription =
@@ -114,25 +106,6 @@ const pageDescription =
       @apply bg-primary text-white;
     }
 
-    /* Grid layout */
-    .featured-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    @media (min-width: 768px) {
-      .featured-grid {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto;
-      }
-
-      .featured-main {
-        grid-column: 1 / 2;
-        grid-row: 1 / 3;
-      }
-    }
-
     /* Scrolling animation */
     .scroll-prompt {
       animation: bounce 2s infinite;
@@ -151,155 +124,24 @@ const pageDescription =
     }
   </style>
 
-  <!-- Hero Section -->
-  <PageHero
-    title="Articles"
-    subtitle="Deep dive into cloud native technologies, Kubernetes, observability, and more. Written by practitioners for practitioners."
-    badge="Cloud Native Knowledge"
-    stats={[
-      { label: `${allArticles.length} Articles` },
-      { label: 'Updated Weekly' },
-      { label: 'Community Driven' }
-    ]}
-  >
-    <Fragment slot="actions">
-      <Button href="#main-content" variant="primary" size="lg">
-        Explore Articles
-        <svg slot="icon-right" class="w-4 h-4 ml-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-        </svg>
-      </Button>
-    </Fragment>
-  </PageHero>
+  <!-- Featured Content Section -->
+  {latestPost && (
+    <FeaturedContent
+      type="article"
+      title={latestPost.data.title}
+      description={latestPost.data.openGraph.subtitle}
+      thumbnailUrl={typeof latestPost.data.cover?.image === 'string' ? latestPost.data.cover.image : latestPost.data.cover?.image?.src || "https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"}
+      thumbnailAlt={latestPost.data.cover?.alt || "Article cover image"}
+      author={latestPostAuthors.map(author => author.data.name).join(", ")}
+      date={latestPost.data.publishedAt.toISOString()}
+      href={`/read/${latestPost.id}`}
+      ctaText="Read Article"
+    />
+  )}
 
   <!-- Main Content -->
-  <section id="main-content" class="py-16 bg-white dark:bg-gray-900">
+  <section class="py-16 bg-gray-50 dark:bg-gray-900">
     <div class="container mx-auto px-4 md:px-6">
-
-      <!-- Featured Articles -->
-      <div class="mb-16">
-        <SectionHeader title="Featured Articles" />
-
-        <div class="featured-grid">
-          <!-- Main Featured Article -->
-          {latestPost && (
-            <div class="featured-main relative article-card rounded-xl overflow-hidden shadow-lg h-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <a href={`/read/${latestPost.id}`} class="block relative h-full">
-                <div class="absolute inset-0 bg-linear-to-t from-black/80 to-transparent z-10"></div>
-
-                {latestPost.data.cover ? (
-                  <Image
-                    src={latestPost.data.cover.image}
-                    alt={latestPost.data.cover.alt}
-                    class="absolute inset-0 w-full h-full object-cover"
-                  />
-                ) : (
-                  <div class="absolute inset-0 bg-linear-to-br from-primary/40 to-secondary/40"></div>
-                )}
-
-                <div class="absolute top-4 left-4 z-20">
-                  <span class="px-3 py-1 text-xs font-semibold rounded-full bg-primary text-white shadow-lg">
-                    Latest Article
-                  </span>
-                </div>
-
-                <div class="relative z-20 flex flex-col h-full justify-end p-6">
-                  <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">
-                    {latestPost.data.title}
-                  </h3>
-
-                  {latestPost.data.openGraph.subtitle && (
-                    <p class="text-gray-200 mb-4 line-clamp-2">
-                      {latestPost.data.openGraph.subtitle}
-                    </p>
-                  )}
-
-                  <div class="flex items-center justify-between mt-4">
-                    <div class="flex items-center">
-                      <div class="flex -space-x-2">
-                        {latestPostAuthors.slice(0, 3).map(author => (
-                          <div class="relative">
-                            <img
-                              class="w-8 h-8 rounded-full object-cover border-2 border-white"
-                              src={`https://github.com/${author.data.handle}.png`}
-                              alt={`Profile picture of ${author.data.name}`}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      <span class="ml-2 text-sm text-white">
-                        By {latestPostAuthors.map(author => author.data.name).join(", ")}
-                      </span>
-                    </div>
-
-                    <div class="flex items-center text-gray-300 text-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      {formatDate(latestPost.data.publishedAt)}
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          )}
-
-          <!-- Secondary Featured Articles -->
-          {featuredPosts.slice(1).map(post => (
-            <div class="article-card rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <a href={`/read/${post.id}`} class="block h-full flex flex-col">
-                <div class="relative h-48">
-                  <div class="absolute inset-0 bg-linear-to-t from-black/30 to-transparent z-10"></div>
-
-                  {post.data.cover ? (
-                    <Image
-                      src={post.data.cover.image}
-                      alt={post.data.cover.alt}
-                      class="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div class="w-full h-full bg-linear-to-br from-primary/30 to-secondary/30"></div>
-                  )}
-
-                  <div class="absolute top-3 left-3 z-20">
-                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-primary/90 text-white shadow-md">
-                      Featured
-                    </span>
-                  </div>
-                </div>
-
-                <div class="p-5 grow flex flex-col">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                    {post.data.title}
-                  </h3>
-
-                  {post.data.openGraph.subtitle && (
-                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
-                      {post.data.openGraph.subtitle}
-                    </p>
-                  )}
-
-                  <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
-                      <div class="text-sm text-gray-600 dark:text-gray-400">
-                        <span class="text-primary font-medium">Read Article</span>
-                      </div>
-
-                      <div class="flex items-center text-gray-500 dark:text-gray-400 text-xs">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {formatDate(post.data.publishedAt)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <!-- All Articles -->
       <div>
         <SectionHeader title="All Articles" />
@@ -312,7 +154,6 @@ const pageDescription =
           ))}
         </div>
       </div>
-
     </div>
   </section>
 </Page>
