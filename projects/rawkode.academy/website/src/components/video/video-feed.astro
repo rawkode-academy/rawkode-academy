@@ -1,13 +1,23 @@
 ---
 import { GRAPHQL_ENDPOINT } from "astro:env/server";
 
+interface Video {
+	title: string;
+	thumbnailUrl: string;
+	duration: number;
+	slug: string;
+	publishedAt: string;
+	streamUrl?: string;
+}
+
 interface Props {
 	title: string;
 	description: string;
-	query: string;
-	operation: string;
-	limit: number;
+	query?: string;
+	operation?: string;
+	limit?: number;
 	variables?: Record<string, any>;
+	videos?: Video[];
 }
 
 const {
@@ -17,33 +27,33 @@ const {
 	operation,
 	limit,
 	variables = {},
+	videos: passedVideos,
 } = Astro.props;
 
-interface Video {
-	title: string;
-	thumbnailUrl: string;
-	duration: number;
-	slug: string;
-	publishedAt: string;
-	streamUrl: string;
-}
+let videos: Video[];
 
-const response = await fetch(GRAPHQL_ENDPOINT, {
-	method: "POST",
-	headers: {
-		"Content-Type": "application/json",
-	},
-	body: JSON.stringify({
-		query,
-		variables: {
-			limit,
-			...variables,
+if (passedVideos) {
+	videos = passedVideos;
+} else if (query && operation && limit) {
+	const response = await fetch(GRAPHQL_ENDPOINT, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
 		},
-	}),
-});
+		body: JSON.stringify({
+			query,
+			variables: {
+				limit,
+				...variables,
+			},
+		}),
+	});
 
-const { data }: { data: Record<string, Video[]> } = await response.json();
-const videos = (data[operation] ?? []) as Video[];
+	const { data }: { data: Record<string, Video[]> } = await response.json();
+	videos = data ? ((data[operation] ?? []) as Video[]) : [];
+} else {
+	videos = [];
+}
 
 function formatDuration(seconds: number) {
 	const hours = Math.floor(seconds / 3600);
