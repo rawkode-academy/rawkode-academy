@@ -22,8 +22,9 @@ export const getSchema = (env: Env): GraphQLSchema => {
     },
   });
 
-  const technologyRef = builder.drizzleObject("technologiesTable", {
-    name: "Technology",
+  const technologyRef = builder.objectRef<typeof dataSchema.technologiesTable.$inferSelect>("Technology");
+
+  builder.objectType(technologyRef, {
     fields: (t) => ({
       id: t.exposeString("id"),
       name: t.exposeString("name"),
@@ -39,12 +40,14 @@ export const getSchema = (env: Env): GraphQLSchema => {
 
   builder.asEntity(technologyRef, {
     key: builder.selection<{ id: string }>("id"),
-    resolveReference: async (technology) =>
-      await db.query.technologiesTable
-        .findFirst({
-          where: eq(dataSchema.technologiesTable.id, technology.id),
-        })
-        .execute(),
+    resolveReference: async (technology) => {
+      const result = await db
+        .select()
+        .from(dataSchema.technologiesTable)
+        .where(eq(dataSchema.technologiesTable.id, technology.id))
+        .get();
+      return result;
+    },
   });
 
   builder.queryType({
