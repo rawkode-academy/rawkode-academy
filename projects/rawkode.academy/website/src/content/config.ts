@@ -218,7 +218,6 @@ const courseModules = defineCollection({
 			updatedAt: z.coerce.date().optional(),
 			isDraft: z.boolean().default(true),
 			authors: z.array(reference("people")).default(["rawkode"]),
-			videoUrl: z.string().optional(),
 		}),
 });
 
