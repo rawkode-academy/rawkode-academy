@@ -1,4 +1,4 @@
-// Removed LiveKit imports - using native WebRTC instead
+import { useLocalParticipant, useRoomContext } from "@livekit/components-react";
 import {
   AlertCircle,
   Camera,
@@ -56,6 +56,8 @@ const DEFAULT_SETTINGS: StreamingSettings = {
 };
 
 export function SettingsDialog({ className }: SettingsDialogProps) {
+  const { localParticipant } = useLocalParticipant();
+  const room = useRoomContext();
   const [open, setOpen] = useState(false);
   const cameraSelectId = useId();
   const micSelectId = useId();
@@ -112,7 +114,7 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
       // Create new preview stream using native WebRTC API
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          deviceId: selectedDevices.videoInput,
+          deviceId: { exact: selectedDevices.videoInput },
           width: { ideal: 640 },
           height: { ideal: 480 },
         },
@@ -289,6 +291,14 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
 
   const handleApplySettings = async () => {
     try {
+      // Store the current device IDs before updating
+      const previousAudioDevice = sessionStorage.getItem(
+        "prejoin-audio-device",
+      );
+      const previousVideoDevice = sessionStorage.getItem(
+        "prejoin-video-device",
+      );
+
       // Persist device selections to sessionStorage (only if valid devices)
       if (
         selectedDevices.audioInput &&
@@ -314,6 +324,56 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
         "streaming-settings",
         JSON.stringify(streamingSettings),
       );
+
+      // Re-publish camera if it's active and device changed
+      if (
+        localParticipant?.isCameraEnabled &&
+        previousVideoDevice !== selectedDevices.videoInput &&
+        selectedDevices.videoInput !== "no-device" &&
+        room
+      ) {
+        console.log("[DEBUG] Switching camera device:", {
+          previousDevice: previousVideoDevice,
+          newDevice: selectedDevices.videoInput,
+          timestamp: new Date().toISOString(),
+        });
+
+        try {
+          // Use LiveKit's switchActiveDevice for seamless switching
+          await room.switchActiveDevice(
+            "videoinput",
+            selectedDevices.videoInput,
+          );
+          console.log("[DEBUG] Camera device switched successfully");
+        } catch (error) {
+          console.error("[ERROR] Failed to switch camera device:", error);
+        }
+      }
+
+      // Re-publish microphone if it's active and device changed
+      if (
+        localParticipant?.isMicrophoneEnabled &&
+        previousAudioDevice !== selectedDevices.audioInput &&
+        selectedDevices.audioInput !== "no-device" &&
+        room
+      ) {
+        console.log("[DEBUG] Switching microphone device:", {
+          previousDevice: previousAudioDevice,
+          newDevice: selectedDevices.audioInput,
+          timestamp: new Date().toISOString(),
+        });
+
+        try {
+          // Use LiveKit's switchActiveDevice for seamless switching
+          await room.switchActiveDevice(
+            "audioinput",
+            selectedDevices.audioInput,
+          );
+          console.log("[DEBUG] Microphone device switched successfully");
+        } catch (error) {
+          console.error("[ERROR] Failed to switch microphone device:", error);
+        }
+      }
 
       setOpen(false);
     } catch (error) {
