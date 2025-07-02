@@ -1,4 +1,5 @@
 import { useLocalParticipant, useRoomContext } from "@livekit/components-react";
+import { Track } from "livekit-client";
 import {
   AlertCircle,
   Camera,
@@ -189,7 +190,29 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
         );
         setDevices({ audioInputs, videoInputs });
 
-        // Try to get stored device preferences from sessionStorage
+        // Get currently active devices from the room if available
+        let activeVideoDeviceId = null;
+        let activeAudioDeviceId = null;
+
+        if (room) {
+          // Get active video device from published tracks
+          const videoTrack = localParticipant?.getTrackPublication(
+            Track.Source.Camera,
+          )?.track;
+          if (videoTrack) {
+            activeVideoDeviceId = await videoTrack.getDeviceId();
+          }
+
+          // Get active audio device from published tracks
+          const audioTrack = localParticipant?.getTrackPublication(
+            Track.Source.Microphone,
+          )?.track;
+          if (audioTrack) {
+            activeAudioDeviceId = await audioTrack.getDeviceId();
+          }
+        }
+
+        // Try to get stored device preferences from sessionStorage as fallback
         const storedAudioDevice = sessionStorage.getItem(
           "prejoin-audio-device",
         );
@@ -211,15 +234,17 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
             ? storedVideoDevice
             : null;
 
-        // Use stored device or fallback to first available
+        // Priority: active device > stored device > first available
         setSelectedDevices(() => ({
           audioInput:
+            activeAudioDeviceId ||
             validStoredAudioDevice ||
             (audioInputs[0]?.deviceId && audioInputs[0].deviceId !== ""
               ? audioInputs[0].deviceId
               : null) ||
             "no-device",
           videoInput:
+            activeVideoDeviceId ||
             validStoredVideoDevice ||
             (videoInputs[0]?.deviceId && videoInputs[0].deviceId !== ""
               ? videoInputs[0].deviceId
@@ -236,7 +261,7 @@ export function SettingsDialog({ className }: SettingsDialogProps) {
     if (open) {
       getDevices();
     }
-  }, [open, checkPermissions]);
+  }, [open, checkPermissions, room, localParticipant]);
 
   // Cleanup preview stream when dialog closes
   useEffect(() => {
