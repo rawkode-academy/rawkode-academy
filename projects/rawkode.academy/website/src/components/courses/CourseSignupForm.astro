@@ -1,5 +1,4 @@
 ---
-import { actions } from "astro:actions";
 import H2Highlight from "@/components/title/h2-highlight.vue";
 
 export const partial = true;
@@ -15,13 +14,13 @@ type Props = {
 };
 
 const { courseId, signupConfig } = Astro.props;
-const result = Astro.getActionResult(actions.signupForCourseUpdates);
 const user = Astro.locals?.user;
 
 const { audienceId, sponsor, allowSponsorContact } = signupConfig;
 
 // Check if user is already subscribed
 let isAlreadySubscribed = false;
+
 if (user?.email) {
 	try {
 		const { getSecret } = await import("astro:env/server");
@@ -39,7 +38,6 @@ if (user?.email) {
 				isAlreadySubscribed = contact.data !== null;
 			} catch (error) {
 				// Contact not found or other error - they're not subscribed
-				// Contact not found or other error - they're not subscribed
 			}
 		}
 	} catch (error) {
@@ -51,6 +49,9 @@ if (user?.email) {
 const disclaimer = sponsor
 	? "By signing up, you agree to receive course updates and notifications."
 	: null;
+
+// Generate unique ID for this form instance
+const formId = `course-signup-${courseId.replace(/[^a-zA-Z0-9]/g, '-')}`;
 ---
 
 <div class="mt-16 max-w-2xl mx-auto">
@@ -58,6 +59,7 @@ const disclaimer = sponsor
 
 	<div
 		class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50"
+		id={formId}
 	>
 		{
 			isAlreadySubscribed ? (
@@ -85,31 +87,6 @@ const disclaimer = sponsor
 						You're already receiving updates for this course. We'll notify you as soon as new content is available.
 					</p>
 				</div>
-			) : result && result.data ? (
-				<div class="text-center py-8">
-					<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-6">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-8 w-8 text-green-600 dark:text-green-400"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M5 13l4 4L19 7"
-							/>
-						</svg>
-					</div>
-					<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-						Thank You!
-					</h3>
-					<p class="text-lg text-gray-700 dark:text-gray-300 mb-6">
-						{result.data.message}
-					</p>
-				</div>
 			) : (
 				<>
 					<p class="text-gray-700 dark:text-gray-300 mb-6 text-center">
@@ -117,15 +94,12 @@ const disclaimer = sponsor
 						this course.
 					</p>
 
-					{result && result.error && (
-						<div class="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300">
-							<p class="font-medium">Error: {result.error.message}</p>
-						</div>
-					)}
+					<div id={`${formId}-error`} class="hidden mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300">
+						<p class="font-medium">Error: <span id={`${formId}-error-message`}></span></p>
+					</div>
 
 					<form
-						method="POST"
-						action={actions.signupForCourseUpdates}
+						id={`${formId}-form`}
 						class="space-y-4"
 					>
 						<input type="hidden" name="audienceId" value={audienceId} />
@@ -135,14 +109,14 @@ const disclaimer = sponsor
 						{!user && (
 							<div>
 								<label
-									for="email"
+									for={`${formId}-email`}
 									class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 								>
 									Email address
 								</label>
 								<input
 									type="email"
-									id="email"
+									id={`${formId}-email`}
 									name="email"
 									required
 									placeholder="your@email.com"
@@ -161,13 +135,13 @@ const disclaimer = sponsor
 							<div class="flex items-start">
 								<input
 									type="checkbox"
-									id="sponsor-contact"
+									id={`${formId}-sponsor-contact`}
 									name="allowSponsorContact"
 									value="true"
 									class="mt-1 h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
 								/>
 								<label
-									for="sponsor-contact"
+									for={`${formId}-sponsor-contact`}
 									class="ml-2 text-sm text-gray-700 dark:text-gray-300"
 								>
 									I agree to allow{" "} {sponsor} to contact me with relevant offers and product updates.
@@ -196,8 +170,85 @@ const disclaimer = sponsor
 							{user ? "Register for Updates" : "Sign Up for Updates"}
 						</button>
 					</form>
+
+					<div id={`${formId}-success`} class="hidden text-center py-8">
+						<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-6">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-8 w-8 text-green-600 dark:text-green-400"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						</div>
+						<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+							Thank You!
+						</h3>
+						<p class="text-lg text-gray-700 dark:text-gray-300 mb-6" id={`${formId}-success-message`}>
+							Thank you for signing up! We'll notify you when new course content is available.
+						</p>
+					</div>
 				</>
 			)
 		}
 	</div>
 </div>
+
+<script define:vars={{ formId }}>
+	document.addEventListener('DOMContentLoaded', () => {
+		const form = document.getElementById(`${formId}-form`);
+		const errorDiv = document.getElementById(`${formId}-error`);
+		const errorMessage = document.getElementById(`${formId}-error-message`);
+		const successDiv = document.getElementById(`${formId}-success`);
+		const successMessage = document.getElementById(`${formId}-success-message`);
+
+		if (form) {
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				
+				// Reset error state
+				if (errorDiv) errorDiv.classList.add('hidden');
+				
+				try {
+					const formData = new FormData(form);
+					const response = await fetch('/api/course-signup', {
+						method: 'POST',
+						body: formData
+					});
+					
+					const data = await response.json();
+					
+					if (response.ok) {
+						// Hide form and show success message
+						form.style.display = 'none';
+						if (successDiv) {
+							successDiv.classList.remove('hidden');
+							if (successMessage && data.message) {
+								successMessage.textContent = data.message;
+							}
+						}
+					} else {
+						// Show error message
+						if (errorDiv && errorMessage) {
+							errorDiv.classList.remove('hidden');
+							errorMessage.textContent = data.error || 'An error occurred';
+						}
+					}
+				} catch (error) {
+					// Show error message
+					if (errorDiv && errorMessage) {
+						errorDiv.classList.remove('hidden');
+						errorMessage.textContent = 'An error occurred while processing your request';
+					}
+				}
+			});
+		}
+	});
+</script>
