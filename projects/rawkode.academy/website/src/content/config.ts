@@ -193,6 +193,13 @@ const courses = defineCollection({
 			updatedAt: z.coerce.date().optional(),
 			authors: z.array(reference("people")).default(["rawkode"]),
 			difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+			signupConfig: z
+				.object({
+					audienceId: z.string(),
+					sponsor: z.string().optional(),
+					allowSponsorContact: z.boolean().default(false),
+				})
+				.optional(),
 		}),
 });
 
