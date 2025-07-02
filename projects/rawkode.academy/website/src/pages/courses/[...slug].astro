@@ -9,6 +9,7 @@ import {
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Badge from "@/components/common/Badge.vue";
 import CourseModules from "@/components/courses/CourseModules.astro";
+import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -190,6 +191,16 @@ const breadcrumbElements = [
 				<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Course Content</h2>
 				<CourseModules course={course} />
 			</div>
+
+			<!-- Sign up for updates -->
+			{course.data.signupConfig && (
+				<CourseSignupForm 
+					courseId={course.id}
+					courseTitle={course.data.title}
+					signupConfig={course.data.signupConfig}
+					server:defer 
+				/>
+			)}
 
 			<!-- Back to Courses -->
 			<div class="pt-8 border-t border-gray-200 dark:border-gray-700">
