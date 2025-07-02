@@ -1,6 +1,5 @@
 ---
 import { actions } from "astro:actions";
-import type { CollectionEntry } from "astro:content";
 import H2Highlight from "@/components/title/h2-highlight.vue";
 
 export const partial = true;
@@ -10,12 +9,12 @@ type Props = {
 	courseTitle: string;
 	signupConfig: {
 		audienceId: string;
-		sponsor?: string;
-		allowSponsorContact?: boolean;
+		sponsor?: string | undefined;
+		allowSponsorContact: boolean;
 	};
 };
 
-const { courseId, courseTitle, signupConfig } = Astro.props;
+const { courseId, signupConfig } = Astro.props;
 const result = Astro.getActionResult(actions.signupForCourseUpdates);
 const user = Astro.locals?.user;
 
@@ -37,7 +36,7 @@ if (user?.email) {
 					email: user.email,
 					audienceId: audienceId,
 				});
-				isAlreadySubscribed = contact && !contact.unsubscribed;
+				isAlreadySubscribed = contact.data !== null;
 			} catch (error) {
 				// Contact not found or other error - they're not subscribed
 				// Contact not found or other error - they're not subscribed
