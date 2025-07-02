@@ -14,13 +14,10 @@ export const signupForCourseUpdates = defineAction({
 	input: SignupSchema,
 	accept: "form",
 	handler: async (data, ctx) => {
-		console.log("signupForCourseUpdates action called with data:", data);
-
-		const { audienceId, allowSponsorContact } = data;
+		const { audienceId } = data;
 
 		// Get email from either the form or the authenticated user
 		const email = data.email || ctx.locals?.user?.email;
-		console.log("Email resolved to:", email);
 
 		if (!email) {
 			throw new ActionError({
@@ -33,8 +30,6 @@ export const signupForCourseUpdates = defineAction({
 			getSecret("RESEND_API_KEY") || process.env.RESEND_API_KEY;
 
 		if (!resendApiKey) {
-			console.error("RESEND_API_KEY not configured");
-
 			throw new ActionError({
 				code: "INTERNAL_SERVER_ERROR",
 				message: "An error occurred while processing your request",
@@ -43,33 +38,33 @@ export const signupForCourseUpdates = defineAction({
 
 		try {
 			const resend = new Resend(resendApiKey);
-			console.log(
-				"Resend client created, attempting to add contact to audience:",
-				audienceId,
-			);
 
 			// Check if contact already exists in the audience
 			try {
-				const existingContacts = await resend.audiences.get(audienceId);
-				// Note: This might need adjustment based on Resend API response structure
-				// You may need to use resend.contacts.list() with filtering
-			} catch (checkError) {
-				// Continue with creation if check fails
+				// Check if contact already exists
+				const contact = await resend.contacts.get({
+					email: email,
+					audienceId: audienceId,
+				});
+				if (contact.data) {
+					throw new ActionError({
+						code: "BAD_REQUEST",
+						message: "You're already subscribed to updates for this course!",
+					});
+				}
+			} catch (checkError: any) {
+				// If error is not about already being subscribed, continue with creation
+				if (checkError.code === "BAD_REQUEST") {
+					throw checkError;
+				}
+				// Continue with creation if contact doesn't exist
 			}
 
 			// Add contact to the course-specific audience
-			console.log("Creating contact with data:", {
-				email,
-				audienceId,
-				allowSponsorContact,
-			});
 			const response = await resend.contacts.create({
 				email: email,
 				unsubscribed: false,
 				audienceId: audienceId,
-				data: {
-					allowSponsorContact: allowSponsorContact ? "true" : "false",
-				},
 			});
 
 			// Check if the contact was already in the audience
@@ -81,8 +76,6 @@ export const signupForCourseUpdates = defineAction({
 				};
 			}
 		} catch (resendError: any) {
-			console.error("Error adding contact to Resend:", resendError);
-
 			// Check if it's a duplicate error
 			if (
 				resendError.message &&
