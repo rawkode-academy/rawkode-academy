@@ -90,54 +90,61 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { actions } from 'astro:actions';
-import H2Highlight from '@/components/title/h2-highlight.vue';
+import { ref } from "vue";
+import { actions } from "astro:actions";
+import H2Highlight from "@/components/title/h2-highlight.vue";
 
 interface Props {
-  courseId: string;
-  courseTitle: string;
-  audienceId: string;
-  sponsor?: string | undefined;
-  allowSponsorContact: boolean;
-  userEmail?: string | undefined;
-  isAlreadySubscribed?: boolean | undefined;
+	courseId: string;
+	courseTitle: string;
+	audienceId: string;
+	sponsor?: string | undefined;
+	sponsorAudienceId?: string | undefined;
+	allowSponsorContact: boolean;
+	userEmail?: string | undefined;
+	isAlreadySubscribed?: boolean | undefined;
 }
 
 const props = defineProps<Props>();
 
-const email = ref(props.userEmail || '');
+const email = ref(props.userEmail || "");
 const sponsorContact = ref(false);
 const submitting = ref(false);
 const submitted = ref(false);
-const error = ref('');
-const successMessage = ref('');
+const error = ref("");
+const successMessage = ref("");
 
-const disclaimer = props.sponsor ? 'By signing up, you agree to receive course updates and notifications.' : null;
+const disclaimer = props.sponsor
+	? "By signing up, you agree to receive course updates and notifications."
+	: null;
 
 async function submitForm() {
-  error.value = '';
-  submitting.value = true;
+	error.value = "";
+	submitting.value = true;
 
-  try {
-    // Create FormData object since the action expects FormData
-    const formData = new FormData();
-    formData.append('audienceId', props.audienceId);
-    formData.append('email', email.value || props.userEmail || '');
-    formData.append('allowSponsorContact', sponsorContact.value.toString());
+	try {
+		// Create FormData object since the action expects FormData
+		const formData = new FormData();
+		formData.append("audienceId", props.audienceId);
+		formData.append("email", email.value || props.userEmail || "");
+		formData.append("allowSponsorContact", sponsorContact.value.toString());
+		if (props.sponsorAudienceId) {
+			formData.append("sponsorAudienceId", props.sponsorAudienceId);
+		}
 
-    const result = await actions.signupForCourseUpdates(formData);
+		const result = await actions.signupForCourseUpdates(formData);
 
-    if (result.error) {
-      error.value = result.error.message || 'An error occurred';
-    } else if (result.data) {
-      submitted.value = true;
-      successMessage.value = result.data.message;
-    }
-  } catch (err: any) {
-    error.value = err.message || 'An error occurred while processing your request';
-  } finally {
-    submitting.value = false;
-  }
+		if (result.error) {
+			error.value = result.error.message || "An error occurred";
+		} else if (result.data) {
+			submitted.value = true;
+			successMessage.value = result.data.message;
+		}
+	} catch (err: any) {
+		error.value =
+			err.message || "An error occurred while processing your request";
+	} finally {
+		submitting.value = false;
+	}
 }
 </script>

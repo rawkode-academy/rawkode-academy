@@ -9,6 +9,7 @@ type Props = {
 	signupConfig: {
 		audienceId: string;
 		sponsor?: string | undefined;
+		sponsorAudienceId?: string | undefined;
 		allowSponsorContact: boolean;
 	};
 };
@@ -16,7 +17,8 @@ type Props = {
 const { courseId, courseTitle, signupConfig } = Astro.props;
 const user = Astro.locals?.user;
 
-const { audienceId, sponsor, allowSponsorContact } = signupConfig;
+const { audienceId, sponsor, sponsorAudienceId, allowSponsorContact } =
+	signupConfig;
 
 // Check if user is already subscribed
 let isAlreadySubscribed = false;
@@ -51,6 +53,7 @@ if (user?.email) {
 	courseTitle={courseTitle}
 	audienceId={audienceId}
 	sponsor={sponsor}
+	sponsorAudienceId={sponsorAudienceId}
 	allowSponsorContact={allowSponsorContact}
 	userEmail={user?.email}
 	isAlreadySubscribed={isAlreadySubscribed}

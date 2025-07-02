@@ -29,6 +29,7 @@ export default defineConfig({
 	output: "server",
 	adapter: cloudflare({
 		imageService: "cloudflare",
+		sessionKVBindingName: "SESSION",
 	}),
 	integrations: [
 		d2(),
