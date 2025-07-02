@@ -120,11 +120,13 @@ async function submitForm() {
   submitting.value = true;
 
   try {
-    const result = await actions.signupForCourseUpdates({
-      audienceId: props.audienceId,
-      email: email.value || props.userEmail || '',
-      allowSponsorContact: sponsorContact.value
-    });
+    // Create FormData object since the action expects FormData
+    const formData = new FormData();
+    formData.append('audienceId', props.audienceId);
+    formData.append('email', email.value || props.userEmail || '');
+    formData.append('allowSponsorContact', sponsorContact.value.toString());
+
+    const result = await actions.signupForCourseUpdates(formData);
 
     if (result.error) {
       error.value = result.error.message || 'An error occurred';
