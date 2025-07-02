@@ -84,6 +84,13 @@ export const signupForCourseUpdates = defineAction({
 				}
 			}
 
+			// Store in session that this email has signed up for this course
+			if (ctx.session) {
+				const signedUpCourses = (await ctx.session.get("signedUpCourses")) || {};
+				signedUpCourses[audienceId] = email;
+				ctx.session.set("signedUpCourses", signedUpCourses);
+			}
+
 			// Check if the contact was already in the audience
 			if (response.data && response.data.id) {
 				return {

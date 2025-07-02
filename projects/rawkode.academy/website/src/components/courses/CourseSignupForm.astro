@@ -23,7 +23,18 @@ const { audienceId, sponsor, sponsorAudienceId, allowSponsorContact } =
 // Check if user is already subscribed
 let isAlreadySubscribed = false;
 
-if (user?.email) {
+// Check session for anonymous users who have already signed up
+let sessionEmail: string | undefined;
+if (Astro.session) {
+	const signedUpCourses = (await Astro.session.get("signedUpCourses")) || {};
+	sessionEmail = signedUpCourses[audienceId];
+}
+
+if (sessionEmail && !user) {
+	// Anonymous user who already signed up in this session
+	isAlreadySubscribed = true;
+} else if (user?.email) {
+	// Check if authenticated user is already subscribed
 	try {
 		const { getSecret } = await import("astro:env/server");
 		const { Resend } = await import("resend");
