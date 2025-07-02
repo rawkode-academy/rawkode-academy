@@ -7,6 +7,7 @@ import { Resend } from "resend";
 const SignupSchema = z.object({
 	email: z.string().email("Please enter a valid email address").optional(),
 	audienceId: z.string().min(1, "Audience ID is required"),
+	sponsorAudienceId: z.string().optional(),
 	allowSponsorContact: z.boolean().optional().default(false),
 });
 
@@ -14,7 +15,7 @@ export const signupForCourseUpdates = defineAction({
 	input: SignupSchema,
 	accept: "form",
 	handler: async (data, ctx) => {
-		const { audienceId } = data;
+		const { audienceId, sponsorAudienceId, allowSponsorContact } = data;
 
 		// Get email from either the form or the authenticated user
 		const email = data.email || ctx.locals?.user?.email;
@@ -66,6 +67,22 @@ export const signupForCourseUpdates = defineAction({
 				unsubscribed: false,
 				audienceId: audienceId,
 			});
+
+			// If user opted in to sponsor contact and sponsor audience ID is provided, add to sponsor audience too
+			if (allowSponsorContact && sponsorAudienceId) {
+				try {
+					await resend.contacts.create({
+						email: email,
+						unsubscribed: false,
+						audienceId: sponsorAudienceId,
+					});
+				} catch (sponsorError: any) {
+					// Contact might already exist in sponsor audience, that's OK
+					if (!sponsorError.message?.includes("already exists")) {
+						console.error("Failed to add to sponsor audience:", sponsorError);
+					}
+				}
+			}
 
 			// Check if the contact was already in the audience
 			if (response.data && response.data.id) {

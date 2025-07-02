@@ -197,6 +197,7 @@ const courses = defineCollection({
 				.object({
 					audienceId: z.string(),
 					sponsor: z.string().optional(),
+					sponsorAudienceId: z.string().optional(),
 					allowSponsorContact: z.boolean().default(false),
 				})
 				.optional(),
