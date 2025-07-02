@@ -146,79 +146,77 @@ export default function LiveKitRoom({
   }
 
   return (
-    <>
-      <LiveKitRoomComponent
-        token={token}
-        serverUrl={serverUrl}
-        connect={true}
-        video={initialMediaSettings.video}
-        audio={initialMediaSettings.audio}
-        options={{
-          videoCaptureDefaults: {
-            deviceId: initialMediaSettings.videoDeviceId,
-            resolution: VideoPresets.h1080.resolution,
+    <LiveKitRoomComponent
+      token={token}
+      serverUrl={serverUrl}
+      connect={true}
+      video={initialMediaSettings.video}
+      audio={initialMediaSettings.audio}
+      options={{
+        videoCaptureDefaults: {
+          deviceId: initialMediaSettings.videoDeviceId,
+          resolution: VideoPresets.h1080.resolution,
+        },
+        audioCaptureDefaults: {
+          deviceId: initialMediaSettings.audioDeviceId,
+        },
+        adaptiveStream: true,
+        dynacast: true,
+        publishDefaults: {
+          videoCodec: "vp9", // Use VP9 codec for better quality at lower bitrates
+          videoEncoding: {
+            maxBitrate: 10_000_000, // 10 Mbps for 1080p video
+            maxFramerate: 60,
           },
-          audioCaptureDefaults: {
-            deviceId: initialMediaSettings.audioDeviceId,
+          screenShareEncoding: {
+            maxBitrate: 10_000_000, // 10 Mbps default for screen share
+            maxFramerate: 60,
           },
-          adaptiveStream: true,
-          dynacast: true,
-          publishDefaults: {
-            videoCodec: "vp9", // Use VP9 codec for better quality at lower bitrates
-            videoEncoding: {
-              maxBitrate: 10_000_000, // 10 Mbps for 1080p video
-              maxFramerate: 60,
-            },
-            screenShareEncoding: {
-              maxBitrate: 10_000_000, // 10 Mbps default for screen share
-              maxFramerate: 60,
-            },
-            simulcast: false, // Disable simulcast for single high-quality stream
+          simulcast: false, // Disable simulcast for single high-quality stream
+        },
+      }}
+      onConnected={() => {
+        console.log(
+          "[DEBUG] LiveKit Room connected with publishing defaults:",
+          {
+            videoEnabled: initialMediaSettings.video,
+            audioEnabled: initialMediaSettings.audio,
+            videoDeviceId: initialMediaSettings.videoDeviceId || "default",
+            audioDeviceId: initialMediaSettings.audioDeviceId || "default",
+            videoResolution: "1920x1080",
+            videoCodec: "vp9",
+            videoMaxBitrate: 10_000_000,
+            videoMaxFramerate: 60,
+            screenShareMaxBitrate: 10_000_000,
+            screenShareMaxFramerate: 60,
+            adaptiveStream: true,
+            dynacast: true,
+            simulcast: false,
+            timestamp: new Date().toISOString(),
           },
-        }}
-        onConnected={() => {
-          console.log(
-            "[DEBUG] LiveKit Room connected with publishing defaults:",
-            {
-              videoEnabled: initialMediaSettings.video,
-              audioEnabled: initialMediaSettings.audio,
-              videoDeviceId: initialMediaSettings.videoDeviceId || "default",
-              audioDeviceId: initialMediaSettings.audioDeviceId || "default",
-              videoResolution: "1920x1080",
-              videoCodec: "vp9",
-              videoMaxBitrate: 10_000_000,
-              videoMaxFramerate: 60,
-              screenShareMaxBitrate: 10_000_000,
-              screenShareMaxFramerate: 60,
-              adaptiveStream: true,
-              dynacast: true,
-              simulcast: false,
-              timestamp: new Date().toISOString(),
-            },
-          );
-          handleConnected();
-        }}
-        onDisconnected={handleDisconnected}
-        onError={handleError}
-        className={cn("relative fixed inset-0 bg-background z-20", className)}
-        data-lk-theme="default"
-      >
-        <RaiseHandProvider>
-          <LayoutContextProvider>
-            <LayoutProvider>
-              <DataMessageHandler />
-              <RoomContent
-                roomDisplayName={roomDisplayName}
-                token={token}
-                connectionState={connectionState}
-              />
-              <RoomAudioRenderer />
-              <PermissionHandler />
-            </LayoutProvider>
-          </LayoutContextProvider>
-        </RaiseHandProvider>
-      </LiveKitRoomComponent>
-    </>
+        );
+        handleConnected();
+      }}
+      onDisconnected={handleDisconnected}
+      onError={handleError}
+      className={cn("relative fixed inset-0 bg-background z-20", className)}
+      data-lk-theme="default"
+    >
+      <RaiseHandProvider>
+        <LayoutContextProvider>
+          <LayoutProvider>
+            <DataMessageHandler />
+            <RoomContent
+              roomDisplayName={roomDisplayName}
+              token={token}
+              connectionState={connectionState}
+            />
+            <RoomAudioRenderer />
+            <PermissionHandler />
+          </LayoutProvider>
+        </LayoutContextProvider>
+      </RaiseHandProvider>
+    </LiveKitRoomComponent>
   );
 }
 

@@ -462,13 +462,17 @@ export function PrejoinScreen({
         audioContextRef.current.close();
       }
 
-      // Persist device selections to sessionStorage (only if valid devices)
+      // Persist device selections and enabled states to sessionStorage
       if (audioDeviceId && audioDeviceId !== "") {
         sessionStorage.setItem("prejoin-audio-device", audioDeviceId);
       }
       if (videoDeviceId && videoDeviceId !== "") {
         sessionStorage.setItem("prejoin-video-device", videoDeviceId);
       }
+
+      // Store enabled states (these were missing!)
+      sessionStorage.setItem("prejoin-audio-enabled", audioEnabled.toString());
+      sessionStorage.setItem("prejoin-video-enabled", videoEnabled.toString());
 
       const choices: LocalUserChoices = {
         username: finalUsername,
@@ -606,10 +610,8 @@ export function PrejoinScreen({
                   variant="outline"
                   className="w-full"
                   onClick={() => {
-                    // Store the current room URL to redirect back after login
                     const returnUrl =
                       window.location.pathname + window.location.search;
-                    sessionStorage.setItem("login-return-url", returnUrl);
                     window.location.href = `/api/auth/login?returnTo=${encodeURIComponent(returnUrl)}`;
                   }}
                 >
