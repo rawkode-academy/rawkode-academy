@@ -132,6 +132,7 @@ const breadcrumbElements = [
 								{course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}{totalModules > 0 && ` • ${totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}`}
 							</Badge>
 
+
 							<Badge variant="default" size="md">
 								Published {new Intl.DateTimeFormat('en-US', {
 									year: 'numeric',
@@ -178,6 +179,7 @@ const breadcrumbElements = [
 
 		<!-- Main Content -->
 		<div class="py-8 px-4 mx-auto max-w-screen-xl">
+
 			<!-- Course Content -->
 			<article class="format prose lg:prose-xl dark:format-invert max-w-none mb-16">
 				<Content />
