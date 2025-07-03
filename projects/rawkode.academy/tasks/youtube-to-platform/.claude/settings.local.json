@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(devenv:*)",
+      "Bash(direnv allow:*)"
+    ],
+    "deny": []
+  }
+}
