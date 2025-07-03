@@ -19,7 +19,7 @@ export interface PothosTypes {
 }
 
 export const getSchema = (env: Env): GraphQLSchema => {
-  const db = drizzle(env.DB, { 
+  const db = drizzle(env.DB, {
     schema: dataSchema,
     logger: {
       logQuery: (query, params) => {
@@ -41,7 +41,7 @@ export const getSchema = (env: Env): GraphQLSchema => {
   builder.addScalarType("Date", DateResolver);
 
   const videoRef = builder.objectRef<typeof dataSchema.videosTable.$inferSelect>("Video");
-  
+
   builder.objectType(videoRef, {
     fields: (t) => ({
       id: t.exposeString("id"),
@@ -56,11 +56,11 @@ export const getSchema = (env: Env): GraphQLSchema => {
       duration: t.exposeInt("duration"),
       streamUrl: t.string({
         resolve: (video) =>
-          `https://videos.rawkode.academy/${video.id}/stream.m3u8`,
+          `https://content.rawkode.academy/videos/${video.id}/stream.m3u8`,
       }),
       thumbnailUrl: t.string({
         resolve: (video) =>
-          `https://videos.rawkode.academy/${video.id}/thumbnail.jpg`,
+          `https://content.rawkode.academy/videos/${video.id}/thumbnail.jpg`,
       }),
     }),
   });
