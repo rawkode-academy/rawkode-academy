@@ -309,21 +309,42 @@ class DescriptDownloader:
             raise
 
     def copy_thumbnail(self, thumbnail_path, output_dir):
-        """Copy the provided thumbnail to the working directory."""
+        """Copy the provided thumbnail to the working directory, converting to JPEG if needed."""
         try:
             if not os.path.exists(thumbnail_path):
                 raise FileNotFoundError(f"Thumbnail file not found: {thumbnail_path}")
             
             output_path = os.path.join(output_dir, 'thumbnail.jpg')
-            logger.info(f"Copying thumbnail from {thumbnail_path}")
+            logger.info(f"Processing thumbnail from {thumbnail_path}")
             
-            shutil.copy2(thumbnail_path, output_path)
+            # Check if conversion is needed
+            if thumbnail_path.lower().endswith('.png'):
+                logger.info("Converting PNG thumbnail to JPEG")
+                # Use ffmpeg to convert PNG to JPEG
+                cmd = [
+                    'ffmpeg',
+                    '-i', thumbnail_path,
+                    '-vf', 'format=yuv420p',  # Ensure compatibility
+                    '-q:v', '2',  # High quality JPEG (1-31, lower is better)
+                    '-y',  # Overwrite output
+                    output_path
+                ]
+                
+                result = subprocess.run(cmd, capture_output=True, text=True)
+                if result.returncode != 0:
+                    logger.error(f"FFmpeg error: {result.stderr}")
+                    raise Exception(f"Thumbnail conversion failed: {result.stderr}")
+                
+                logger.info(f"Thumbnail converted to JPEG: {output_path}")
+            else:
+                # Already JPEG or other format, just copy
+                shutil.copy2(thumbnail_path, output_path)
+                logger.info(f"Thumbnail copied to: {output_path}")
             
-            logger.info(f"Thumbnail copied to: {output_path}")
             return output_path
             
         except Exception as e:
-            logger.error(f"Error copying thumbnail: {str(e)}")
+            logger.error(f"Error processing thumbnail: {str(e)}")
             raise
 
     def upload_to_r2(self, local_path, bucket, r2_key, content_type='application/octet-stream', use_videos_client=False):
