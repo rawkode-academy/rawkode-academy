@@ -176,7 +176,7 @@ const testimonials = defineCollection({
 
 const courses = defineCollection({
 	loader: glob({
-		pattern: ["**/*.mdx", "**/*.md"],
+		pattern: ["*.mdx", "*.md"],
 		base: "./content/courses",
 	}),
 	schema: ({ image }) =>
@@ -206,8 +206,8 @@ const courses = defineCollection({
 
 const courseModules = defineCollection({
 	loader: glob({
-		pattern: ["**/*.mdx", "**/*.md"],
-		base: "./content/course-modules",
+		pattern: ["*/*.mdx", "*/*.md"],
+		base: "./content/courses",
 	}),
 	schema: ({ image }) =>
 		z.object({
