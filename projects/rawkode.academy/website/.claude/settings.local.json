@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(rg:*)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

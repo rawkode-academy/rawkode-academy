@@ -1,6 +1,6 @@
 <template>
   <div class="mt-16 max-w-2xl mx-auto">
-    <H2Highlight title="Stay Updated" :highlightWords="['Updated']" />
+    <H2Highlight title="Stay Updated" highlightWords="Updated" />
 
     <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50">
       <!-- Already Subscribed -->
