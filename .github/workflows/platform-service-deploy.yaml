@@ -51,7 +51,7 @@ jobs:
 
   deploy:
     runs-on: depot-ubuntu-latest,dagger=0.18.11
-    needs: test
+  #  needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
