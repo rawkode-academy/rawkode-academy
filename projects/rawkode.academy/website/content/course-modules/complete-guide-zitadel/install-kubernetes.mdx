@@ -1,0 +1,93 @@
+---
+course: "complete-guide-zitadel"
+section: "Installation"
+
+title: "Installing Zitadel on Kubernetes with Helm"
+description: "This comprehensive hands-on tutorial demonstrates how to deploy Zitadel, the modern identity and access management platform, to a Kubernetes cluster using the official Helm charts. Starting with essential prerequisites including a running Kubernetes cluster (kind, minikube, or cloud-based) and the ability to execute kubectl and Helm commands, you'll learn the complete deployment process from start to finish."
+
+order: 4
+publishedAt: 2025-07-10
+isDraft: false
+authors:
+  - rawkode
+---
+
+import VideoPlayer from "@/components/video/player.vue";
+
+# Installing Zitadel on Kubernetes with Helm
+
+## Overview
+
+This comprehensive hands-on tutorial demonstrates how to deploy Zitadel, the modern identity and access management platform, to a Kubernetes cluster using the official Helm charts. Starting with essential prerequisites including a running Kubernetes cluster (kind, minikube, or cloud-based) and the ability to execute kubectl and Helm commands, you'll learn the complete deployment process from start to finish.
+
+## What You'll Learn
+
+### Prerequisites and Setup
+- Setting up a Kubernetes cluster (kind, minikube, or cloud-based)
+- Installing and configuring kubectl and Helm
+- Exploring the official `zitadel/zitadel-charts` repository
+- Understanding deployment examples and configuration options
+
+### Database Configuration
+- **PostgreSQL Best Practices**: Learn why providing your own PostgreSQL instance is recommended over Helm dependencies
+- **CloudNativePG Setup**: Practical demonstration of setting up a simple but effective PostgreSQL cluster
+- **Database Credentials**: Configuring admin and user database credentials securely
+- **Secret Management**: Using environment variables for sensitive configuration data
+
+### Core Installation Process
+- Adding the Zitadel Helm repository
+- Configuring the deployment values file
+- Setting up critical security configurations including master key management
+- Executing the Helm installation with real terminal commands
+- Troubleshooting common deployment issues
+
+### Accessing and Validating the Deployment
+- Configuring external domain settings for local development
+- Setting up port forwarding to access the Zitadel console
+- Initial admin login and password configuration
+- Validating the deployment with kubectl commands
+
+## Advanced Production Configurations
+
+### Security and Secrets Management
+- **Referenced Secrets**: Enhanced security through Kubernetes secret integration
+- **Master Key Configuration**: Secure generation and storage of encryption keys
+- **Non-root Execution**: Security contexts for safer container operations
+
+### High Availability and Scaling
+- **Multi-replica Setup**: Configuring high availability with multiple Zitadel instances
+- **Pod Disruption Budgets**: Ensuring zero-downtime during updates and maintenance
+- **Resource Management**: CPU, memory, and storage configuration for production workloads
+
+### Production Infrastructure
+- **Ingress Configuration**: Setting up external access through ingress controllers
+- **TLS and DNS**: Proper domain and certificate management
+- **Monitoring Integration**: Metrics collection for Prometheus and service monitors
+- **Additional Manifests**: Deploying complementary services like secrets, service mesh config, or OpenTelemetry collectors
+
+## Day-Two Operations
+- Monitoring and observability setup
+- Update and upgrade strategies
+- Backup and disaster recovery considerations
+- Performance tuning and optimization
+
+## Outcome
+
+By the end of this tutorial, you'll have a **fully functional, production-ready Zitadel deployment** running securely on Kubernetes, complete with:
+
+- ✅ Secure PostgreSQL integration
+- ✅ Proper secret management
+- ✅ High availability configuration
+- ✅ Monitoring and metrics collection
+- ✅ Production-grade security settings
+- ✅ External access configuration
+
+This foundation prepares you for the next phase: setting up your first Zitadel project and configuring authentication flows.
+
+<div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl my-8">
+  <VideoPlayer
+    client:only="vue"
+    video="b7bcg1fl06z4q9529ryalcj2"
+    thumbnailUrl="https://content.rawkode.academy/videos/b7bcg1fl06z4q9529ryalcj2/thumbnail.jpg"
+  />
+</div>
