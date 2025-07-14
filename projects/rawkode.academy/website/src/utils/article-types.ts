@@ -57,5 +57,8 @@ export const typeBadgeConfig = {
 } as const satisfies Record<string, TypeBadgeConfig>;
 
 export function getTypeBadgeConfig(type: string): TypeBadgeConfig {
-	return typeBadgeConfig[type as keyof typeof typeBadgeConfig] || typeBadgeConfig.tutorial;
+	return (
+		typeBadgeConfig[type as keyof typeof typeBadgeConfig] ||
+		typeBadgeConfig.tutorial
+	);
 }

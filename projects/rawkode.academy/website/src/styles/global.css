@@ -48,11 +48,11 @@
 	}
 
 	.prose ul {
-		@apply list-disc list-inside mb-6 space-y-2 ml-4;
+		@apply list-disc list-outside mb-6 space-y-2 ml-8;
 	}
 
 	.prose ol {
-		@apply list-decimal list-inside mb-6 space-y-2 ml-4;
+		@apply list-decimal list-outside mb-6 space-y-2 ml-8;
 	}
 
 	.prose li {

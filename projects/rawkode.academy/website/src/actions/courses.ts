@@ -86,7 +86,8 @@ export const signupForCourseUpdates = defineAction({
 
 			// Store in session that this email has signed up for this course
 			if (ctx.session) {
-				const signedUpCourses = (await ctx.session.get("signedUpCourses")) || {};
+				const signedUpCourses =
+					(await ctx.session.get("signedUpCourses")) || {};
 				signedUpCourses[audienceId] = email;
 				ctx.session.set("signedUpCourses", signedUpCourses);
 			}
