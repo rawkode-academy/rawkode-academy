@@ -3,7 +3,9 @@
     "allow": [
       "Bash(rg:*)",
       "Bash(bun run:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "WebFetch(domain:www.kubernetes.dev)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }

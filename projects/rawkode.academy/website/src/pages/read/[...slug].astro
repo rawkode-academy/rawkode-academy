@@ -15,6 +15,7 @@ import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { calculateReadingTime } from "@/utils/reading-time";
+import { getTypeBadgeConfig } from "@/utils/article-types";
 
 export const prerender = true;
 
@@ -64,6 +65,9 @@ const breadcrumbElements = [
 	{ title: "Articles", link: "/read" },
 	{ title: article.data.title, link: `/read/${article.id}` },
 ];
+
+const articleType = article.data.type || "tutorial";
+const badgeConfig = getTypeBadgeConfig(articleType);
 ---
 
 <Page
@@ -83,6 +87,16 @@ const breadcrumbElements = [
 	<!-- Breadcrumb Section -->
 	<div class="mb-6">
 		<Breadcrumb elements={breadcrumbElements} />
+	</div>
+
+	<!-- Article Type Badge -->
+	<div class="mb-4">
+		<span class={`${badgeConfig.bg} ${badgeConfig.text} text-sm font-semibold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5`}>
+			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={badgeConfig.icon} />
+			</svg>
+			{badgeConfig.label}
+		</span>
 	</div>
 
 	<h1 class="text-3xl md:text-4xl font-extrabold dark:text-white mb-6">

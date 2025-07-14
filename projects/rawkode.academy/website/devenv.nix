@@ -12,6 +12,7 @@
   languages.typescript.enable = true;
 
   packages = with pkgs; [
+    biome
     bun
     d2
     influxdb2
