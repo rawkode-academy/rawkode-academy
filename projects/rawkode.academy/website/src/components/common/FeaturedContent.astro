@@ -15,7 +15,15 @@ interface Props {
 	readTime?: string | undefined;
 	href: string;
 	ctaText: string;
-	articleType?: "tutorial" | "architecture" | "tools" | "practices" | "features" | "news" | "case-study" | "editorial";
+	articleType?:
+		| "tutorial"
+		| "architecture"
+		| "tools"
+		| "practices"
+		| "features"
+		| "news"
+		| "case-study"
+		| "editorial";
 }
 
 const {

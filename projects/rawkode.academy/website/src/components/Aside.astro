@@ -16,108 +16,99 @@ const { variant } = Astro.props as Props;
 const styles = {
 	container: "",
 	icon: "",
-	gradient: "",
+	iconBg: "",
 	border: "",
-	links: "",
+	glow: "",
 };
 
 switch (variant) {
 	case "tip":
 		styles.container =
-			"bg-linear-to-r from-green-50 to-green-100 text-green-800 dark:from-green-950/80 dark:to-green-900/80 dark:text-green-100";
-		styles.icon = "text-green-600 dark:text-green-400";
-		styles.gradient = "from-green-500 to-green-400";
-		styles.border = "border-green-500";
-		styles.links =
-			"text-green-700 underline decoration-green-500 decoration-2 underline-offset-2 font-medium hover:text-green-900 hover:decoration-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 dark:text-green-300 dark:decoration-green-400 dark:hover:text-green-200 dark:hover:decoration-green-300";
+			"bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 text-green-900 dark:text-green-100";
+		styles.icon = "text-green-700 dark:text-green-300";
+		styles.iconBg = "bg-green-100 dark:bg-green-900/50";
+		styles.border = "border-green-200 dark:border-green-800";
+		styles.glow = "shadow-green-100 dark:shadow-green-900/20";
 		break;
 	case "caution":
 		styles.container =
-			"bg-linear-to-r from-orange-50 to-orange-100 text-orange-800 dark:from-orange-950/80 dark:to-orange-900/80 dark:text-orange-100";
-		styles.icon = "text-orange-600 dark:text-orange-400";
-		styles.gradient = "from-yellow-500 to-orange-400";
-		styles.border = "border-yellow-500";
-		styles.links =
-			"text-orange-700 underline decoration-orange-500 decoration-2 underline-offset-2 font-medium hover:text-orange-900 hover:decoration-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:text-orange-300 dark:decoration-orange-400 dark:hover:text-orange-200 dark:hover:decoration-orange-300";
+			"bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-950/40 text-amber-900 dark:text-amber-100";
+		styles.icon = "text-amber-700 dark:text-amber-300";
+		styles.iconBg = "bg-amber-100 dark:bg-amber-900/50";
+		styles.border = "border-amber-200 dark:border-amber-800";
+		styles.glow = "shadow-amber-100 dark:shadow-amber-900/20";
 		break;
 	case "danger":
 		styles.container =
-			"bg-linear-to-r from-red-50 to-red-100 text-red-800 dark:from-red-950/80 dark:to-red-900/80 dark:text-red-100";
-		styles.icon = "text-red-600 dark:text-red-400";
-		styles.gradient = "from-red-500 to-red-400";
-		styles.border = "border-red-500";
-		styles.links =
-			"text-red-700 underline decoration-red-500 decoration-2 underline-offset-2 font-medium hover:text-red-900 hover:decoration-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-red-300 dark:decoration-red-400 dark:hover:text-red-200 dark:hover:decoration-red-300";
+			"bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/40 text-red-900 dark:text-red-100";
+		styles.icon = "text-red-700 dark:text-red-300";
+		styles.iconBg = "bg-red-100 dark:bg-red-900/50";
+		styles.border = "border-red-200 dark:border-red-800";
+		styles.glow = "shadow-red-100 dark:shadow-red-900/20";
 		break;
 	case "info":
 		styles.container =
-			"bg-linear-to-r from-blue-50 to-blue-100 text-blue-800 dark:from-blue-950/80 dark:to-blue-900/80 dark:text-blue-100";
-		styles.icon = "text-blue-600 dark:text-blue-400";
-		styles.gradient = "from-blue-500 to-blue-400";
-		styles.border = "border-blue-500";
-		styles.links =
-			"text-blue-700 underline decoration-blue-500 decoration-2 underline-offset-2 font-medium hover:text-blue-900 hover:decoration-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-blue-300 dark:decoration-blue-400 dark:hover:text-blue-200 dark:hover:decoration-blue-300";
+			"bg-gradient-to-r from-blue-50 to-sky-50 dark:from-blue-950/40 dark:to-sky-950/40 text-blue-900 dark:text-blue-100";
+		styles.icon = "text-blue-700 dark:text-blue-300";
+		styles.iconBg = "bg-blue-100 dark:bg-blue-900/50";
+		styles.border = "border-blue-200 dark:border-blue-800";
+		styles.glow = "shadow-blue-100 dark:shadow-blue-900/20";
 		break;
 }
 ---
 
 <div
-	class={`aside my-2 rounded-lg backdrop-blur-sm shadow-md border-r border-b ${styles.border} prose-p:my-0 ${styles.container} relative overflow-hidden transition-all duration-200 hover:shadow-lg`}
+	class={`aside my-3 rounded-lg border ${styles.border} ${styles.container} px-4 py-3 relative overflow-hidden transition-all duration-200 hover:shadow-md group ${styles.glow}`}
 >
-	<!-- Modern accent line with glow effect -->
-	<div
-		class={`absolute left-0 top-0 bottom-0 w-1.5 bg-linear-to-b ${styles.gradient} shadow-[0_0_8px_rgba(var(--accent-glow),0.6)]`}
-	>
-	</div>
-
-	<!-- Content container with balanced padding -->
-	<div class="px-4 relative z-10">
-		<div class="flex items-center gap-2">
-			<div
-				class={`rounded-full bg-linear-to-br ${styles.gradient} p-1.5 flex items-center justify-center shadow-sm transform transition-transform duration-200 hover:scale-105`}
-			>
-				{
-					variant === "tip" && (
-						<LightBulbIcon
-							class="h-4 w-4 text-white"
-							aria-hidden="true"
-							client:only="vue"
-						/>
-					)
-				}
-				{
-					variant === "caution" && (
-						<ExclamationTriangleIcon
-							class="h-4 w-4 text-white"
-							aria-hidden="true"
-							client:only="vue"
-						/>
-					)
-				}
-				{
-					variant === "danger" && (
-						<FireIcon
-							class="h-4 w-4 text-white"
-							aria-hidden="true"
-							client:only="vue"
-						/>
-					)
-				}
-				{
-					variant === "info" && (
-						<InformationCircleIcon
-							class="h-4 w-4 text-white"
-							aria-hidden="true"
-							client:only="vue"
-						/>
-					)
-				}
-			</div>
-			<p class="text-xs font-bold tracking-wider letter-spacing-wide">
-				{variant.toUpperCase()}
-			</p>
+	<!-- Subtle accent line -->
+	<div class={`absolute left-0 top-0 bottom-0 w-0.5 ${styles.iconBg} opacity-60 group-hover:opacity-100 transition-opacity duration-200`}></div>
+	
+	<!-- Content with inline icon -->
+	<div class="flex items-start gap-3">
+		<div class={`${styles.iconBg} ${styles.icon} p-1.5 rounded-md flex-shrink-0 transition-transform duration-200 group-hover:scale-105`}>
+			{
+				variant === "tip" && (
+					<LightBulbIcon
+						class="h-4 w-4"
+						aria-hidden="true"
+						client:only="vue"
+					/>
+				)
+			}
+			{
+				variant === "caution" && (
+					<ExclamationTriangleIcon
+						class="h-4 w-4"
+						aria-hidden="true"
+						client:only="vue"
+					/>
+				)
+			}
+			{
+				variant === "danger" && (
+					<FireIcon
+						class="h-4 w-4"
+						aria-hidden="true"
+						client:only="vue"
+					/>
+				)
+			}
+			{
+				variant === "info" && (
+					<InformationCircleIcon
+						class="h-4 w-4"
+						aria-hidden="true"
+						client:only="vue"
+					/>
+				)
+			}
 		</div>
-		<div class="px-0.5">
+		<div class="flex-1 min-w-0 prose-p:my-0 -mt-0.5">
+			<div class="flex items-center gap-2 mb-1">
+				<span class="text-[10px] font-semibold tracking-wider opacity-60 uppercase">
+					{variant}
+				</span>
+			</div>
 			<slot />
 		</div>
 	</div>
@@ -126,68 +117,46 @@ switch (variant) {
 <style>
 	@reference "@/styles/global.css";
 
-	/* Define accent glow variables for each variant */
-	.aside:global(.border-green-500) {
-		--accent-glow: 34, 197, 94; /* green-500 */
+	/* Ensure proper prose spacing */
+	.aside :global(p) {
+		@apply leading-relaxed;
 	}
 
-	.aside:global(.border-yellow-500) {
-		--accent-glow: 234, 179, 8; /* yellow-500 */
+	.aside :global(p:not(:first-child)) {
+		@apply mt-2;
 	}
 
-	.aside:global(.border-red-500) {
-		--accent-glow: 239, 68, 68; /* red-500 */
-	}
-
-	.aside:global(.border-blue-500) {
-		--accent-glow: 59, 130, 246; /* blue-500 */
-	}
-
-	/* Add letter spacing for the variant label */
-	.letter-spacing-wide {
-		letter-spacing: 0.05em;
-	}
-
-	/* Ensure links inherit the appropriate styling based on variant */
+	/* Refined link styling */
 	.aside :global(a) {
-		@apply transition-all duration-200;
+		@apply font-medium underline decoration-1 underline-offset-2 transition-all duration-200;
 	}
 
-	/* Apply variant-specific link styling */
-	.aside:global(.border-green-500) :global(a) {
-		@apply text-green-700 underline decoration-green-500 decoration-2 underline-offset-2 font-medium;
-		@apply hover:text-green-900 hover:decoration-green-700;
-		@apply focus:outline-none focus:ring-2 focus:ring-green-500;
-		@apply dark:text-green-300 dark:decoration-green-400 dark:hover:text-green-200 dark:hover:decoration-green-300;
+	.aside.border-green-200 :global(a) {
+		@apply text-green-700 decoration-green-500/50 hover:text-green-800 hover:decoration-green-600;
+		@apply dark:text-green-300 dark:decoration-green-400/50 dark:hover:text-green-200 dark:hover:decoration-green-300;
 	}
 
-	.aside:global(.border-yellow-500) :global(a) {
-		@apply text-orange-700 underline decoration-orange-500 decoration-2 underline-offset-2 font-medium;
-		@apply hover:text-orange-900 hover:decoration-orange-700;
-		@apply focus:outline-none focus:ring-2 focus:ring-orange-500;
-		@apply dark:text-orange-300 dark:decoration-orange-400 dark:hover:text-orange-200 dark:hover:decoration-orange-300;
+	.aside.border-amber-200 :global(a) {
+		@apply text-amber-700 decoration-amber-500/50 hover:text-amber-800 hover:decoration-amber-600;
+		@apply dark:text-amber-300 dark:decoration-amber-400/50 dark:hover:text-amber-200 dark:hover:decoration-amber-300;
 	}
 
-	.aside:global(.border-red-500) :global(a) {
-		@apply text-red-700 underline decoration-red-500 decoration-2 underline-offset-2 font-medium;
-		@apply hover:text-red-900 hover:decoration-red-700;
-		@apply focus:outline-none focus:ring-2 focus:ring-red-500;
-		@apply dark:text-red-300 dark:decoration-red-400 dark:hover:text-red-200 dark:hover:decoration-red-300;
+	.aside.border-red-200 :global(a) {
+		@apply text-red-700 decoration-red-500/50 hover:text-red-800 hover:decoration-red-600;
+		@apply dark:text-red-300 dark:decoration-red-400/50 dark:hover:text-red-200 dark:hover:decoration-red-300;
 	}
 
-	.aside:global(.border-blue-500) :global(a) {
-		@apply text-blue-700 underline decoration-blue-500 decoration-2 underline-offset-2 font-medium;
-		@apply hover:text-blue-900 hover:decoration-blue-700;
-		@apply focus:outline-none focus:ring-2 focus:ring-blue-500;
-		@apply dark:text-blue-300 dark:decoration-blue-400 dark:hover:text-blue-200 dark:hover:decoration-blue-300;
+	.aside.border-blue-200 :global(a) {
+		@apply text-blue-700 decoration-blue-500/50 hover:text-blue-800 hover:decoration-blue-600;
+		@apply dark:text-blue-300 dark:decoration-blue-400/50 dark:hover:text-blue-200 dark:hover:decoration-blue-300;
 	}
 
-	/* Add subtle animation for content */
+	/* Subtle shadow on hover */
 	.aside {
-		@apply transform transition-transform duration-300;
+		box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
 	}
 
 	.aside:hover {
-		@apply -translate-y-0.5;
+		box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 	}
 </style>

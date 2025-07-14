@@ -1,12 +1,12 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(rg:*)",
-      "Bash(bun run:*)",
-      "Bash(mv:*)",
-      "WebFetch(domain:www.kubernetes.dev)",
-      "Bash(mkdir:*)"
-    ],
-    "deny": []
-  }
+	"permissions": {
+		"allow": [
+			"Bash(rg:*)",
+			"Bash(bun run:*)",
+			"Bash(mv:*)",
+			"WebFetch(domain:www.kubernetes.dev)",
+			"Bash(mkdir:*)"
+		],
+		"deny": []
+	}
 }

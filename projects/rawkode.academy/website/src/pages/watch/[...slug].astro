@@ -26,7 +26,7 @@ let video: (typeof videos)[0] | undefined = videos.find(
 // If not found in collection, try fetching from GraphQL
 if (!video) {
 	const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);
-	
+
 	const query = gql`
 		query GetVideoBySlug($slug: String!) {
 			getVideoBySlug(slug: $slug) {
@@ -47,7 +47,7 @@ if (!video) {
 			}
 		}
 	`;
-	
+
 	try {
 		const response = await graphQLClient.request<{
 			getVideoBySlug: {
@@ -67,14 +67,14 @@ if (!video) {
 				}>;
 			} | null;
 		}>(query, { slug });
-		
+
 		if (response.getVideoBySlug) {
 			// Transform the GraphQL response to match the collection format
 			video = {
 				id: response.getVideoBySlug.slug,
 				collection: "videos",
 				data: response.getVideoBySlug,
-			} as typeof videos[0];
+			} as (typeof videos)[0];
 		}
 	} catch (error) {
 		console.error("Error fetching video from GraphQL:", error);
