@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import Button from "./Button.vue";
+import { getTypeBadgeConfig } from "@/utils/article-types";
 
 interface Props {
 	type: "article" | "video";
@@ -14,6 +15,7 @@ interface Props {
 	readTime?: string | undefined;
 	href: string;
 	ctaText: string;
+	articleType?: "tutorial" | "architecture" | "tools" | "practices" | "features" | "news" | "case-study" | "editorial";
 }
 
 const {
@@ -28,7 +30,10 @@ const {
 	readTime,
 	href,
 	ctaText,
+	articleType,
 } = Astro.props;
+
+const badgeConfig = articleType && getTypeBadgeConfig(articleType);
 
 function formatDate(dateString: string): string {
 	return new Date(dateString).toLocaleDateString("en-US", {
@@ -123,6 +128,15 @@ const truncatedDescription = truncateDescription(
             {formattedDuration && (
               <div class="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm font-medium">
                 {formattedDuration}
+              </div>
+            )}
+            
+            {/* Article type badge */}
+            {type === "article" && badgeConfig && (
+              <div class="absolute top-4 left-4">
+                <span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-md`}>
+                  {badgeConfig.label}
+                </span>
               </div>
             )}
           </div>

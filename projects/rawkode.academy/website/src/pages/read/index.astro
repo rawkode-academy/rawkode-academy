@@ -136,6 +136,7 @@ const pageDescription =
       date={latestPost.data.publishedAt.toISOString()}
       href={`/read/${latestPost.id}`}
       ctaText="Read Article"
+      articleType={latestPost.data.type}
     />
   )}
 

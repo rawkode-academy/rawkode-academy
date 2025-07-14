@@ -100,6 +100,16 @@ const articles = defineCollection({
 		z.object({
 			title: z.string(),
 			description: z.string(),
+			type: z.enum([
+				"tutorial",      // Step-by-step implementation guides
+				"architecture",  // System design and patterns
+				"tools",        // Tool reviews and introductions
+				"practices",    // Best practices and advice
+				"features",     // Deep dives into specific features
+				"news",         // News and announcements
+				"case-study",   // Real-world implementations
+				"editorial",    // Opinion pieces and editorials
+			]).default("tutorial"),
 			openGraph: z.object({
 				title: z.string(),
 				subtitle: z.string(),
@@ -124,6 +134,7 @@ const articles = defineCollection({
 			isDraft: z.boolean().default(true),
 			authors: z.array(reference("people")).default(["rawkode"]),
 			technologies: z.array(z.string()).optional(),
+			tags: z.array(z.string()).optional(),
 		}),
 });
 

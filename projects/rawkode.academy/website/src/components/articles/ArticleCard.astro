@@ -5,6 +5,7 @@ import AuthorAvatarGroup from "../common/AuthorAvatarGroup.vue";
 import BaseCard from "../common/BaseCard.vue";
 import FormattedDate from "../common/FormattedDate.vue";
 import { calculateReadingTime } from "@/utils/reading-time";
+import { getTypeBadgeConfig } from "@/utils/article-types";
 
 type Props = {
 	article: CollectionEntry<"articles">;
@@ -13,6 +14,9 @@ type Props = {
 const { article } = Astro.props;
 const authors = await getEntries(article.data.authors);
 const readingTime = calculateReadingTime(article.body || "");
+
+const articleType = article.data.type || "tutorial";
+const badgeConfig = getTypeBadgeConfig(articleType);
 ---
 
 <BaseCard href={`/read/${article.id}`}>
@@ -37,8 +41,8 @@ const readingTime = calculateReadingTime(article.body || "");
 		}
 	</Fragment>
 	<Fragment slot="badge">
-		<span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-1 rounded-full dark:bg-purple-200 dark:text-purple-900 backdrop-blur-sm shadow-md">
-			Article
+		<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-md`}>
+			{badgeConfig.label}
 		</span>
 	</Fragment>
 	<Fragment slot="content">
