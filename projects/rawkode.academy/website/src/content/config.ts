@@ -53,10 +53,16 @@ interface GraphQLResponse {
 
 const videos = defineCollection({
 	loader: async () => {
-		const { videos }: GraphQLResponse =
-			await graphQLClient.request(graphQLQuery);
+		try {
+			const { videos }: GraphQLResponse =
+				await graphQLClient.request(graphQLQuery);
 
-		return videos;
+			return videos;
+		} catch (error) {
+			console.warn("Failed to fetch videos from GraphQL API:", error);
+			// Return empty array when GraphQL API is not accessible (e.g., during CI builds)
+			return [];
+		}
 	},
 	schema: z.object({
 		id: z.string(),

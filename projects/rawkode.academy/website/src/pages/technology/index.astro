@@ -27,13 +27,19 @@ const getTechnologiesQuery = /* GraphQL */ `
 
 // const endpoint = import.meta.env.PUBLIC_GRAPHQL_ENDPOINT; // Use hardcoded endpoint
 const endpoint = GRAPHQL_ENDPOINT;
-const data = await request<GetTechnologiesResponse>(
-	endpoint,
-	getTechnologiesQuery,
-	{ limit: 200 }, // Fetch up to 200 technologies
-);
 
-const technologies = data.getTechnologies;
+let technologies: Technology[] = [];
+try {
+	const data = await request<GetTechnologiesResponse>(
+		endpoint,
+		getTechnologiesQuery,
+		{ limit: 200 }, // Fetch up to 200 technologies
+	);
+	technologies = data.getTechnologies;
+} catch (error) {
+	console.error("Failed to fetch technologies for index page:", error);
+	// Leave technologies as empty array when API is not accessible
+}
 ---
 
 <Page
