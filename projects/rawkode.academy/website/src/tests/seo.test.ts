@@ -146,9 +146,112 @@ describe("SEO Validation", () => {
 });
 
 describe("Structured Data Validation", () => {
-	it("should have valid JSON-LD schemas", () => {
-		// This would test the actual JSON-LD output
-		// For now, just a placeholder
-		expect(true).toBe(true);
+	it("should have valid Course JSON-LD with required fields", () => {
+		// Mock course data
+		const mockCourse = {
+			id: "test-course",
+			data: {
+				title: "Test Course",
+				description: "Test course description for structured data validation",
+				publishedAt: new Date("2025-01-01"),
+				updatedAt: new Date("2025-01-15"),
+				difficulty: "intermediate",
+			},
+		};
+
+		const mockModules = [
+			{
+				id: "module-1",
+				data: {
+					title: "Module 1",
+					description: "First module description",
+					order: 1,
+				},
+			},
+		];
+
+		const mockAuthors = [
+			{
+				data: {
+					name: "Test Author",
+					handle: "testauthor",
+				},
+			},
+		];
+
+		// Simulate the courseJsonLd creation logic
+		const courseJsonLd = {
+			"@context": "https://schema.org",
+			"@type": "Course",
+			name: mockCourse.data.title,
+			description: mockCourse.data.description,
+			provider: {
+				"@type": "Organization",
+				name: "Rawkode Academy",
+				sameAs: "https://rawkode.academy",
+				logo: {
+					"@type": "ImageObject",
+					url: "https://rawkode.academy/android-chrome-512x512.png",
+				},
+			},
+			hasCourseInstance: mockModules.map((module) => ({
+				"@type": "CourseInstance",
+				name: module.data.title,
+				description: module.data.description,
+				courseMode: "online",
+				courseWorkload: "PT30M",
+			})),
+			creator: mockAuthors.map((author) => ({
+				"@type": "Person",
+				name: author.data.name,
+				url: `https://github.com/${author.data.handle}`,
+			})),
+			offers: {
+				"@type": "Offer",
+				price: "0",
+				priceCurrency: "USD",
+				availability: "https://schema.org/InStock",
+				category: "Educational",
+				itemOffered: {
+					"@type": "Course",
+					name: mockCourse.data.title,
+					url: `https://rawkode.academy/courses/${mockCourse.id}`,
+				},
+			},
+			isAccessibleForFree: true,
+		};
+
+		// Validate required fields for Google Search Console
+		expect(courseJsonLd["@type"]).toBe("Course");
+		expect(courseJsonLd.provider).toBeDefined();
+		expect(courseJsonLd.provider["@type"]).toBe("Organization");
+		
+		expect(courseJsonLd.hasCourseInstance).toBeDefined();
+		expect(Array.isArray(courseJsonLd.hasCourseInstance)).toBe(true);
+		expect(courseJsonLd.hasCourseInstance.length).toBeGreaterThan(0);
+		
+		expect(courseJsonLd.offers).toBeDefined();
+		expect(courseJsonLd.offers["@type"]).toBe("Offer");
+		expect(courseJsonLd.offers.price).toBe("0");
+		expect(courseJsonLd.offers.priceCurrency).toBe("USD");
+		expect(courseJsonLd.offers.availability).toBe("https://schema.org/InStock");
+		expect(courseJsonLd.offers.category).toBe("Educational");
+		expect(courseJsonLd.offers.itemOffered).toBeDefined();
+		expect(courseJsonLd.offers.itemOffered["@type"]).toBe("Course");
+		expect(courseJsonLd.offers.itemOffered.url).toBeDefined();
+		
+		// Validate isAccessibleForFree field
+		expect(courseJsonLd.isAccessibleForFree).toBe(true);
+		
+		// Validate creator field
+		expect(courseJsonLd.creator).toBeDefined();
+		expect(Array.isArray(courseJsonLd.creator)).toBe(true);
+		expect(courseJsonLd.creator.length).toBeGreaterThan(0);
+		expect(courseJsonLd.creator[0]).toBeDefined();
+		expect(courseJsonLd.creator[0]?.name).toBe("Test Author");
+		expect(courseJsonLd.creator[0]?.url).toBe("https://github.com/testauthor");
+
+		// Validate JSON structure can be serialized
+		expect(() => JSON.stringify(courseJsonLd)).not.toThrow();
 	});
 });

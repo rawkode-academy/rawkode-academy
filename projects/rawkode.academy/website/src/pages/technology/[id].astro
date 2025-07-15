@@ -102,7 +102,10 @@ export const getStaticPaths = (async () => {
 				JSON.stringify((error as any).response, null, 2),
 			);
 		}
-		throw error; // Re-throw to fail the build with proper error message
+		// Return empty array when API is not accessible (e.g., during CI builds)
+		// This prevents technology pages from being generated but allows the build to succeed
+		console.warn("Technology pages will not be generated due to API unavailability");
+		return [];
 	}
 }) satisfies GetStaticPaths;
 

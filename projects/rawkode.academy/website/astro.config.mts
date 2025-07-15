@@ -13,6 +13,16 @@ import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import { fetchVideosFromGraphQL } from "./src/lib/fetch-videos";
 
+// Check if D2 is available (used for diagram rendering)
+let d2Available = false;
+try {
+	const { execSync } = await import("child_process");
+	execSync("d2 --version", { stdio: "ignore" });
+	d2Available = true;
+} catch {
+	console.warn("D2 not available, skipping diagram support");
+}
+
 const getSiteUrl = () => {
 	if (import.meta.env.DEV === true) {
 		return "http://localhost:4321";
@@ -32,7 +42,7 @@ export default defineConfig({
 		sessionKVBindingName: "SESSION",
 	}),
 	integrations: [
-		d2(),
+		...(d2Available ? [d2()] : []),
 		expressiveCode({
 			themes: ["catppuccin-mocha", "catppuccin-latte"],
 		}),
@@ -44,9 +54,14 @@ export default defineConfig({
 			lastmod: new Date(),
 			priority: 0.7,
 			customPages: await (async () => {
-				const siteUrl = getSiteUrl();
-				const videos = await fetchVideosFromGraphQL();
-				return videos.map((video) => `${siteUrl}/watch/${video.slug}/`);
+				try {
+					const siteUrl = getSiteUrl();
+					const videos = await fetchVideosFromGraphQL();
+					return videos.map((video) => `${siteUrl}/watch/${video.slug}/`);
+				} catch (error) {
+					console.warn("Skipping video pages in sitemap due to API unavailability:", error);
+					return [];
+				}
 			})(),
 		}),
 		vue(),

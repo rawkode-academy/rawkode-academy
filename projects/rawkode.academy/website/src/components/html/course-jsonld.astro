@@ -79,6 +79,18 @@ const courseJsonLd = {
 	interactivityType: "active",
 	isAccessibleForFree: true,
 	url: new URL(`/courses/${course.id}`, Astro.site).href,
+	offers: {
+		"@type": "Offer",
+		price: "0",
+		priceCurrency: "USD",
+		availability: "https://schema.org/InStock",
+		category: "Educational",
+		itemOffered: {
+			"@type": "Course",
+			name: course.data.title,
+			url: new URL(`/courses/${course.id}`, Astro.site).href,
+		},
+	},
 };
 ---
 
