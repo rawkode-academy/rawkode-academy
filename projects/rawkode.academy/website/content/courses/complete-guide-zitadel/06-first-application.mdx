@@ -1,0 +1,84 @@
+---
+course: "complete-guide-zitadel"
+section: "Getting Started"
+
+title: "Your First Application"
+slug: "first-application"
+description: "Learn how to configure your first application in the Zitadel console, hook it up to a sample application, and inspect the JWT claims. We'll cover the PKCE flow, token introspection, and adding user roles."
+
+order: 6
+publishedAt: 2025-07-16
+isDraft: false
+authors:
+  - rawkode
+---
+
+import VideoPlayer from "@/components/video/player.vue";
+
+Hello, welcome back. So far we've covered how to install and get Zitadel ready. I think it's about time we take a look at how to actually make it work and integrate with your applications. So in this video we are gonna take a look at the Zitadel console, configure our first application, and get it hooked up to the point where we can log in and visualize the claims of our JWT token.
+
+Let's have some fun.
+
+<div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl my-8">
+  <VideoPlayer
+    client:only="vue"
+    video="g4uh2a6tw6koxe1d2ywrftyr"
+    thumbnailUrl="https://content.rawkode.academy/videos/g4uh2a6tw6koxe1d2ywrftyr/thumbnail.jpg"
+  />
+</div>
+
+## Creating Your First Application
+
+The first thing we're gonna do is click **Create an application**. This guides us through creating our first project. I'll call this `Rawkode Academy`.
+
+Now you can select that you have some sort of front end framework. I'll click **React**. This is just telling us we're going to use the PKCE flow. I'll cover more about that in just a moment, but this is the recommended, preferred, most secure way to handle OIDC within your application.
+
+We then need to provide a redirect URL that is allowed to go through our flow. Because we're working on a local application today, we can leave this as a default `localhost:3000/callback`, although we will have to modify that shortly.
+
+Click **Create**, and now we have our first project and application configured. A project can house one or more applications, meaning you can use the same project across mobile, web, server, CLIs, et cetera.
+
+In order to make this work with our application, we'll need to go to **URLs** where we can get the discovery endpoint. We copy this, and this endpoint contains everything that you need to configure any OIDC application.
+
+## Understanding PKCE
+
+PKCE (Proof Key for Code Exchange) is a security extension for OAuth 2.0 that prevents authorization code interception attacks. It's essential for public clients, like single-page applications and mobile applications that can't securely store client secrets.
+
+Here is how PKCE works:
+1. Your application generates a cryptographically random **code verifier**.
+2. It then creates a **code challenge** by applying a SHA256 hash to this verifier and Base64 URL encoding the result.
+3. When initiating the authorization request, your app sends a code challenge and challenge method to the authorization server.
+4. The user authenticates and grants permission. The authorization server returns an authorization code to your redirect URL.
+5. Your application can then exchange this code for tokens, but crucially, it must include the original **code verifier**.
+6. The authorization server verifies that the code verifier matches the challenge it received earlier.
+
+If you're working on a web application, you would typically have to provide a client ID and a client secret. For front-end applications, the PKCE flow is just a lot easier as you don't have to worry about passing that secret material.
+
+## Integrating with a Sample App
+
+Let's run `bun run dev` and refresh our application. The code for this will be available in a resources section below.
+
+Let's click **Login** and our application asks for our OIDC well-known configuration URL and our OAuth client ID. We can get the client ID from the application configuration page.
+
+After pasting them in, you might see an error about the redirect URI. This is a common issue. Because I've put together a very simple single-page application, we just need to modify our redirect URL to only be `localhost:3000`.
+
+After correcting that, we can log in and we are presented with our token introspection page.
+
+## Token Introspection and Roles
+
+The first thing we have is our access token, and the second thing we have is our ID token. The ID token can be decoded to give us claims. We can see here that we have the issuer, the subject, the audience, an expiration, and the client ID.
+
+At the moment, there are no user roles. Let's add some.
+
+From the console, I have added two roles to this project, grouped into `C-Suite` and `Forge`. You can add roles as you wish. I can then go to **Authorizations** and assign these roles to my user for the project.
+
+If we go back to our web application and log in again, we get a new token. The decoded claims are bigger, and we can now see the roles assigned to our user.
+
+## Required Configuration
+
+For this to work, we do have to configure a few things within the project and the organization.
+
+In our React application's **Token Settings**, you'll see that we have **User Roles** and **User Info inside ID Token** enabled. This makes it easy to debug and print that information to the UI. If you don't have this, your application can just as easily contact the user info endpoint to get this information once it has the authentication token.
+
+Also, within the organization's **Login Settings**, we need to make sure that **User Registration** is allowed. This is disabled by default, so you will have to turn this on when you create your new Zitadel instance.
+
+In subsequent videos, we're gonna take a look at turning on SSO and OAuth authentication, allowing our users to sign in with their own accounts rather than Zitadel provisioned users. We will also take a look at the simple email and password user registration flow soon, too.

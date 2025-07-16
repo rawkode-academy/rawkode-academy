@@ -1,0 +1,52 @@
+---
+course: "complete-guide-zitadel"
+section: "Getting Started"
+
+order: 5
+title: "Zitadel Cloud"
+slug: "zitadel-cloud"
+description: "Learn how to get started with Zitadel Cloud, the managed service for Zitadel. In less than five minutes, you can have a fully functional Zitadel instance without managing any infrastructure. This is perfect for prototyping, side projects, or evaluating Zitadel quickly."
+
+publishedAt: 2025-07-16
+isDraft: false
+authors:
+  - rawkode
+---
+
+import VideoPlayer from "@/components/video/player.vue";
+
+So far, we've covered setting up Zitadel with Docker Compose and Kubernetes, but what if you don't want to manage any infrastructure at all? What if you just want to get started with Zitadel in the next five minutes without thinking about Postgres, or health checks, Helm charts? Well, you're in luck. That is where Zitadel Cloud comes in.
+
+Using a managed service means you can focus entirely on building your application. Instead of managing infrastructure, you get all the power of Zitadel without any of the operational overhead.
+
+So when you're prototyping, building a side project or just want to evaluate Zitadel quickly. Zitadel Cloud is the fastest way to get running, so let's head over to zitadel.com and get started.
+
+<div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl my-8">
+  <VideoPlayer
+    client:only="vue"
+    video="wcktaod7wsyzhg7rm0z3p1s3"
+    thumbnailUrl="https://content.rawkode.academy/videos/wcktaod7wsyzhg7rm0z3p1s3/thumbnail.jpg"
+  />
+</div>
+
+## Generous Free Tier
+
+There is a generous, free tier. There are no restrictions on any of the features. They are all available including 2FA, Passkeys, machine to machine, et cetera. You can have unlimited users with a caveat that only 100 daily active users are allowed on the free tier, which is gonna get you from prototype to production without spending a dime.
+
+This even supports your B2B use cases where you can have unlimited organizations within your setup. You are restricted to three identity providers, but realistically, you're only gonna want one or two. GitHub and Google, right? And there is no support, but that's why I'm here.
+
+So if you do run into any challenges, join the Rawkode Academy Zulip and I'll do my best to help you out.
+
+## When to use Zitadel Cloud vs Self-Hosting
+
+The main advantage here is that Zitadel handles all the infrastructure management updates, scaling and monitoring. For you. You get enterprise grade reliability without needing to build that expertise in house. So when should you use Zitadel Cloud versus self hosting?
+
+Well use cloud when you want to:
+- Focus on building your application and not managing infrastructure
+- Prototyping or building a proof of concept
+- Prefer predictable monthly pricing over infrastructure costs
+- Want automatic updates with that enterprise grade reliability
+
+Of course, you can also self-host, as we've covered in previous videos, when you want complete control over your deployment environment.
+
+That's it. We now have a fully functional Zitadel instance, we running on Zitadel Cloud. It took us less than five minutes. No Docker, no Kubernetes. Not even a terminal. In the next video, we'll set up our first project and start to show you how to build your entire identity and authentication pipeline around Zitadel. The choice is yours, pick, what makes sense? Get your Zitadel deployed. And now it's time to start building something great.
