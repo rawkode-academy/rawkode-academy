@@ -14,9 +14,10 @@ export interface S3Credentials {
 }
 
 /**
- * Syncs a local directory to an S3 bucket using rclone with dynamic configuration.
+ * Copies a local directory to an S3 bucket using rclone with dynamic configuration.
+ * Unlike sync, this will not delete files in the destination that don't exist in the source.
  *
- * @param localPath The path to the local directory to sync.
+ * @param localPath The path to the local directory to copy.
  * @param s3Config S3 credentials and bucket information.
  * @throws {Error} If the rclone command fails or config creation fails.
  */
@@ -33,7 +34,7 @@ export async function syncDirectoryToS3(
     s3Config.pathPrefix ? `/${s3Config.pathPrefix.replace(/^\/+/, '')}` : "" // Ensure single slash prefix if exists
   }`;
 
-  console.info(`Syncing directory '${localPath}' to S3 destination '${s3Destination}'...`);
+  console.info(`Copying directory '${localPath}' to S3 destination '${s3Destination}'...`);
 
   // Generate rclone config content
   const rcloneConfigContent = `
@@ -59,7 +60,7 @@ acl = public-read
 
     const command = new Deno.Command("rclone", {
       args: [
-        "sync",
+        "copy",
         localPath,
         s3Destination,
         "--config",
@@ -101,14 +102,14 @@ acl = public-read
 
     if (!status.success) {
       throw new Error(
-        `rclone sync failed with code ${status.code}. Stderr: ${stderrOutput}`,
+        `rclone copy failed with code ${status.code}. Stderr: ${stderrOutput}`,
       );
     }
 
-    console.info(`Successfully synced directory '${localPath}' to S3 bucket '${s3Config.bucketName}'.`);
+    console.info(`Successfully copied directory '${localPath}' to S3 bucket '${s3Config.bucketName}'.`);
 
   } catch (error) {
-    console.error("Error during rclone sync:", error);
+    console.error("Error during rclone copy:", error);
     throw error; // Re-throw the error after logging
   } finally {
     // Clean up the temporary config directory and file

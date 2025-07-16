@@ -24,21 +24,22 @@ const input = Deno.env.get("VIDEO_ID");
 // Download original video from Cloudflare R2
 await downloadUrl(
 	`https://content.rawkode.academy/videos/${input}/original.mkv`,
-	`${outputDir}/${input}.mkv`,
+	`${outputDir}/original.mkv`,
 );
 
-const results = await transcodeAll(new URL(`file://${Deno.cwd()}/${outputDir}/${input}.mkv`));
+const results = await transcodeAll(new URL(`file://${Deno.cwd()}/${outputDir}/original.mkv`));
 
 // Extract audio from the original video
 const audioExtractionCmd = new Deno.Command("ffmpeg", {
 	args: [
 		"-i",
-		`${outputDir}/${input}.mkv`,
+		`${outputDir}/original.mkv`,
 		"-vn", // No video
-		"-acodec",
-		"copy", // Copy audio without re-encoding
+		"-c:a",
+		"libmp3lame", // Re-encode to MP3
+		"-b:a", "192k", // Set audio bitrate
 		"-y", // Overwrite output file
-		`${outputDir}/${input}.mp3`,
+		`${outputDir}/original.mp3`,
 	],
 });
 
@@ -47,7 +48,7 @@ if (!audioResult.success) {
 	console.error("Failed to extract audio from original video");
 	console.error(new TextDecoder().decode(audioResult.stderr));
 } else {
-	console.log(`Audio extracted successfully: ${input}.mp3`);
+	console.log(`Audio extracted successfully: original.mp3`);
 }
 
 const playlist = await generateMasterPlaylist(results);
