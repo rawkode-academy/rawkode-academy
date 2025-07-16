@@ -1,53 +1,27 @@
 ---
 import MinimalLayout from '@/layouts/minimal.astro';
 import WebContainerEmbed from '@/components/courses/WebContainerEmbed.vue';
-import { loadWebContainerFiles } from '@/utils/webcontainer-loader';
-import { join, relative, isAbsolute } from 'node:path';
+// @ts-expect-error Virtual module provided by Vite plugin
+import { loadDemoFiles } from 'virtual:webcontainer-demos';
 
 // Get parameters from URL
 const url = new URL(Astro.request.url);
 const courseId = url.searchParams.get('course');
-const resourceId = url.searchParams.get('resource');
+const demoId = url.searchParams.get('demo') || url.searchParams.get('resource'); // Support both param names
 
 let title = 'WebContainer Demo';
 let files = {};
 let startCommand = 'npm run dev';
 let error = null;
 
-if (!courseId || !resourceId) {
-  error = 'Missing course or resource parameter';
+if (!courseId || !demoId) {
+  error = 'Missing course or demo parameter';
 } else {
   try {
-    // For now, we'll hardcode the mapping of resource IDs to their locations
-    // In the future, this could be stored in content collection metadata
-    const resourceMap: Record<string, { path: string; title: string; startCommand?: string }> = {
-      'oauth-pkce-demo': {
-        path: './examples/oauth-pkce-app',
-        title: 'OAuth PKCE Interactive Demo',
-        startCommand: 'node server.js'
-      }
-    };
-
-    const resourceInfo = resourceMap[resourceId];
-    if (!resourceInfo) {
-      error = `Unknown resource: ${resourceId}`;
-    } else {
-      title = resourceInfo.title;
-      startCommand = resourceInfo.startCommand || startCommand;
-      
-      // Validate the resource path to prevent path traversal
-      const basePath = join(process.cwd(), 'content', 'courses');
-      const coursePath = join(basePath, courseId);
-      const importPath = join(coursePath, resourceInfo.path);
-      const relativePath = relative(basePath, importPath);
-      
-      // Security check: ensure the path stays within the courses directory
-      if (relativePath.startsWith('../') || relativePath.includes('..\\') || isAbsolute(relativePath)) {
-        error = 'Invalid resource path';
-      } else {
-        files = await loadWebContainerFiles(importPath);
-      }
-    }
+    const demo = loadDemoFiles(courseId, demoId);
+    files = demo.files;
+    title = demo.config.title || title;
+    startCommand = demo.config.startCommand || startCommand;
   } catch (e) {
     console.error('Error loading WebContainer files:', e);
     error = `Failed to load demo files: ${e instanceof Error ? e.message : String(e)}`;

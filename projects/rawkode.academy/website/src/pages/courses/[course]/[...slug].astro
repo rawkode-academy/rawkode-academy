@@ -68,9 +68,7 @@ if (module.data.isDraft) {
 const { Content } = await render(module);
 const authors = await getEntries(module.data.authors);
 
-// Process resources to load WebContainer files
-import { loadWebContainerFiles } from '@/utils/webcontainer-loader';
-import { join } from 'node:path';
+// Process resources for display
 
 // Define the Resource type to match ResourceList component expectations
 type Resource = {
@@ -116,23 +114,20 @@ const allResources = [
 const processedResources: Resource[] = await Promise.all(
 	allResources.map(async (resource): Promise<Resource> => {
 		if (resource.type === 'embed' && resource.embedConfig?.container === 'webcontainer' && resource.embedConfig.import?.localDir) {
-			// Use the course reference ID from the module data
+			// For WebContainer embeds with local files, we'll use a special src URL
+			// that points to our embed page with the correct parameters
 			const courseName = module.data.course.id;
-			const importPath = join(process.cwd(), 'content', 'courses', courseName, resource.embedConfig.import.localDir.replace('./', ''));
+			const demoId = resource.embedConfig.import.localDir.split('/').pop() || 'demo';
 			
-			try {
-				const importedFiles = await loadWebContainerFiles(importPath);
-				return createResource({
-					...resource,
-					embedConfig: {
-						...resource.embedConfig,
-						files: { ...importedFiles, ...(resource.embedConfig.files || {}) }
-					}
-				});
-			} catch (error) {
-				console.error(`Failed to load files for ${resource.title}:`, error);
-				return createResource(resource);
-			}
+			return createResource({
+				...resource,
+				embedConfig: {
+					...resource.embedConfig,
+					src: `/embed/webcontainer?course=${courseName}&demo=${demoId}`,
+					// Remove the import config as it's not needed for the embed
+					import: undefined
+				}
+			});
 		}
 		return createResource(resource);
 	})

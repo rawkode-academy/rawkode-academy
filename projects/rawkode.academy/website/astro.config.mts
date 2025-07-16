@@ -12,6 +12,7 @@ import { defineConfig, envField } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import { fetchVideosFromGraphQL } from "./src/lib/fetch-videos";
+import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
 
 // Check if D2 is available (used for diagram rendering)
 let d2Available = false;
@@ -86,6 +87,7 @@ export default defineConfig({
 	],
 	vite: {
 		plugins: [
+			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
 			vue({
 				template: {
