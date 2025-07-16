@@ -1,0 +1,105 @@
+---
+import MinimalLayout from '@/layouts/minimal.astro';
+import WebContainerEmbed from '@/components/courses/WebContainerEmbed.vue';
+import { loadWebContainerFiles } from '@/utils/webcontainer-loader';
+import { join, relative, isAbsolute } from 'node:path';
+
+// Get parameters from URL
+const url = new URL(Astro.request.url);
+const courseId = url.searchParams.get('course');
+const resourceId = url.searchParams.get('resource');
+
+let title = 'WebContainer Demo';
+let files = {};
+let startCommand = 'npm run dev';
+let error = null;
+
+if (!courseId || !resourceId) {
+  error = 'Missing course or resource parameter';
+} else {
+  try {
+    // For now, we'll hardcode the mapping of resource IDs to their locations
+    // In the future, this could be stored in content collection metadata
+    const resourceMap: Record<string, { path: string; title: string; startCommand?: string }> = {
+      'oauth-pkce-demo': {
+        path: './examples/oauth-pkce-app',
+        title: 'OAuth PKCE Interactive Demo',
+        startCommand: 'node server.js'
+      }
+    };
+
+    const resourceInfo = resourceMap[resourceId];
+    if (!resourceInfo) {
+      error = `Unknown resource: ${resourceId}`;
+    } else {
+      title = resourceInfo.title;
+      startCommand = resourceInfo.startCommand || startCommand;
+      
+      // Validate the resource path to prevent path traversal
+      const basePath = join(process.cwd(), 'content', 'courses');
+      const coursePath = join(basePath, courseId);
+      const importPath = join(coursePath, resourceInfo.path);
+      const relativePath = relative(basePath, importPath);
+      
+      // Security check: ensure the path stays within the courses directory
+      if (relativePath.startsWith('../') || relativePath.includes('..\\') || isAbsolute(relativePath)) {
+        error = 'Invalid resource path';
+      } else {
+        files = await loadWebContainerFiles(importPath);
+      }
+    }
+  } catch (e) {
+    console.error('Error loading WebContainer files:', e);
+    error = `Failed to load demo files: ${e instanceof Error ? e.message : String(e)}`;
+  }
+}
+
+// This page needs server-side rendering
+export const prerender = false;
+---
+
+<MinimalLayout title={title}>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #app {
+      width: 100vw;
+      height: 100vh;
+    }
+    .error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #ef4444;
+      font-size: 1.25rem;
+      text-align: center;
+      padding: 2rem;
+    }
+    .error a {
+      color: #60a5fa;
+      text-decoration: underline;
+    }
+  </style>
+  
+  {error ? (
+    <div class="error">
+      <div>
+        <p>{error}</p>
+        <p><a href="javascript:history.back()">Go back</a></p>
+      </div>
+    </div>
+  ) : (
+    <div id="app">
+      <WebContainerEmbed
+        client:only="vue"
+        title={title}
+        files={files}
+        startCommand={startCommand}
+      />
+    </div>
+  )}
+</MinimalLayout>
