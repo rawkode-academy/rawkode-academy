@@ -1,0 +1,130 @@
+---
+
+export interface Props {
+  resources: Array<{
+    title: string;
+    description?: string;
+    type: "url" | "file" | "embed";
+    url?: string;
+    filePath?: string;
+    embedConfig?: {
+      container: "stackblitz" | "codesandbox" | "codepen" | "iframe";
+      src: string;
+      height?: string;
+      width?: string;
+    };
+    category: "slides" | "code" | "documentation" | "demos" | "other";
+  }>;
+}
+
+const { resources } = Astro.props;
+
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case "slides":
+      return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+      </svg>`;
+    case "code":
+      return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+      </svg>`;
+    case "documentation":
+      return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>`;
+    case "demos":
+      return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>`;
+    default:
+      return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>`;
+  }
+};
+
+const getResourceHref = (resource: Props["resources"][0]) => {
+  if (resource.type === "url") {
+    return resource.url;
+  } else if (resource.type === "file" && resource.filePath) {
+    return `/resources/${resource.filePath}`;
+  }
+  return "#";
+};
+
+const groupedResources = resources.reduce((acc, resource) => {
+  const category = resource.category;
+  if (category in acc) {
+    acc[category].push(resource);
+  }
+  return acc;
+}, {
+  slides: [],
+  code: [],
+  documentation: [],
+  demos: [],
+  other: []
+} as Record<"slides" | "code" | "documentation" | "demos" | "other", Props["resources"]>);
+
+const categoryLabels = {
+  slides: "Slides",
+  code: "Code Examples",
+  documentation: "Documentation",
+  demos: "Interactive Demos",
+  other: "Other Resources"
+};
+---
+
+{resources && resources.length > 0 && (
+  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-8">
+    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Course Resources</h3>
+    
+    <div class="space-y-6">
+      {Object.entries(groupedResources).map(([category, categoryResources]) => (
+        <div>
+          <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            {categoryLabels[category as keyof typeof categoryLabels]}
+          </h4>
+          
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {categoryResources.map((resource) => (
+              <a
+                href={getResourceHref(resource)}
+                target={resource.type === "url" ? "_blank" : undefined}
+                rel={resource.type === "url" ? "noopener noreferrer" : undefined}
+                class="flex items-start gap-3 p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow group"
+              >
+                <div class="flex-shrink-0 text-primary group-hover:text-primary/80 transition-colors">
+                  <Fragment set:html={getCategoryIcon(category)} />
+                </div>
+                
+                <div class="flex-1 min-w-0">
+                  <h5 class="font-medium text-gray-900 dark:text-white truncate">
+                    {resource.title}
+                  </h5>
+                  {resource.description && (
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                      {resource.description}
+                    </p>
+                  )}
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-gray-400 dark:text-gray-500">
+                      {resource.type === "url" ? "External Link" : "Download"}
+                    </span>
+                    {resource.type === "url" && (
+                      <svg class="w-3 h-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}

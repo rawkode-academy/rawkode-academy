@@ -8,6 +8,8 @@ import {
 } from "astro:content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
+import ResourceList from "@/components/courses/ResourceList.vue";
+import VideoPlayer from "@/components/video/player.vue";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
@@ -66,6 +68,76 @@ if (module.data.isDraft) {
 const { Content } = await render(module);
 const authors = await getEntries(module.data.authors);
 
+// Process resources to load WebContainer files
+import { loadWebContainerFiles } from '@/utils/webcontainer-loader';
+import { join } from 'node:path';
+
+// Define the Resource type to match ResourceList component expectations
+type Resource = {
+  title: string;
+  description?: string;
+  type: "url" | "file" | "embed";
+  url?: string;
+  filePath?: string;
+  embedConfig?: {
+    container: "stackblitz" | "codesandbox" | "codepen" | "iframe" | "webcontainer";
+    src: string;
+    height?: string;
+    width?: string;
+    startCommand?: string;
+    files?: Record<string, string>;
+  };
+  category: "slides" | "code" | "documentation" | "demos" | "other";
+};
+
+// Helper function to ensure proper resource shape
+function createResource(resource: any): Resource {
+  const result: Resource = {
+    title: resource.title,
+    type: resource.type,
+    category: resource.category || "other"
+  };
+  
+  // Only add optional properties if they exist
+  if (resource.description) result.description = resource.description;
+  if (resource.url) result.url = resource.url;
+  if (resource.filePath) result.filePath = resource.filePath;
+  if (resource.embedConfig) result.embedConfig = resource.embedConfig;
+  
+  return result;
+}
+
+// Process both course and module resources
+const allResources = [
+	...(course.data.resources || []),
+	...(module.data.resources || [])
+];
+
+const processedResources: Resource[] = await Promise.all(
+	allResources.map(async (resource): Promise<Resource> => {
+		if (resource.type === 'embed' && resource.embedConfig?.container === 'webcontainer' && resource.embedConfig.import?.localDir) {
+			// Use the course reference ID from the module data
+			const courseName = module.data.course.id;
+			const importPath = join(process.cwd(), 'content', 'courses', courseName, resource.embedConfig.import.localDir.replace('./', ''));
+			
+			try {
+				const importedFiles = await loadWebContainerFiles(importPath);
+				return createResource({
+					...resource,
+					embedConfig: {
+						...resource.embedConfig,
+						files: { ...importedFiles, ...(resource.embedConfig.files || {}) }
+					}
+				});
+			} catch (error) {
+				console.error(`Failed to load files for ${resource.title}:`, error);
+				return createResource(resource);
+			}
+		}
+		return createResource(resource);
+	})
+);
+
 const imageUrl = await computeImageUrl(module);
 
 const breadcrumbElements = [
@@ -119,7 +191,7 @@ const nextModule =
 		<div
 			class="bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
 		>
-			<div class="py-16 px-4 mx-auto max-w-screen-xl">
+			<div class="py-8 px-4 mx-auto max-w-screen-xl">
 				<div class="max-w-5xl mx-auto">
 					<!-- Module Meta -->
 					<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -191,14 +263,51 @@ const nextModule =
 			</div>
 		</div>
 
-		<!-- Main Content -->
+		<!-- Video Section -->
+		{module.data.video && (
+			<div class="py-12 px-4 mx-auto max-w-screen-xl">
+				<div class="max-w-5xl mx-auto">
+					<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl">
+						<VideoPlayer
+							client:only="vue"
+							video={module.data.video.id}
+							thumbnailUrl={module.data.video.thumbnailUrl || `https://content.rawkode.academy/videos/${module.data.video.id}/thumbnail.jpg`}
+						/>
+					</div>
+				</div>
+			</div>
+		)}
+
+		<!-- Main Content and Resources -->
 		<div class="py-8 px-4 mx-auto max-w-screen-xl">
-			<!-- Module Content -->
-			<article
-				class="format prose lg:prose-xl dark:format-invert max-w-none mb-16"
-			>
-				<Content />
-			</article>
+			<div class="max-w-7xl mx-auto">
+				{processedResources && processedResources.length > 0 ? (
+					<!-- Layout with sidebar for resources -->
+					<div class="lg:grid lg:grid-cols-12 lg:gap-8">
+						<!-- Main Content -->
+						<div class="lg:col-span-8">
+							<article
+								class="format prose lg:prose-xl dark:format-invert max-w-none mb-16"
+							>
+								<Content />
+							</article>
+						</div>
+
+						<!-- Resources Sidebar -->
+						<aside class="lg:col-span-4">
+							<div class="sticky top-24">
+								<ResourceList resources={processedResources} client:load />
+							</div>
+						</aside>
+					</div>
+				) : (
+					<!-- Full width content when no resources -->
+					<article
+						class="format prose lg:prose-xl dark:format-invert max-w-none mb-16 mx-auto"
+					>
+						<Content />
+					</article>
+				)}
 
 			<!-- Sign up for updates -->
 			{course.data.signupConfig && (

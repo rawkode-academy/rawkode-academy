@@ -86,6 +86,27 @@ const videos = defineCollection({
 
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections
 
+// Shared resource schema for courses and course modules
+const resourceSchema = z.object({
+	title: z.string(),
+	description: z.string().optional(),
+	type: z.enum(["url", "file", "embed"]),
+	url: z.string().url().optional(),
+	filePath: z.string().optional(),
+	embedConfig: z.object({
+		container: z.enum(["stackblitz", "codesandbox", "codepen", "iframe", "webcontainer"]),
+		src: z.string(),
+		height: z.string().default("600px"),
+		width: z.string().default("100%"),
+		files: z.record(z.string()).optional(), // For WebContainer file system
+		import: z.object({
+			localDir: z.string(), // Path relative to the content file
+		}).optional(),
+		startCommand: z.string().optional(), // Command to run in WebContainer
+	}).optional(),
+	category: z.enum(["slides", "code", "documentation", "demos", "other"]).default("other"),
+});
+
 const people = defineCollection({
 	loader: glob({
 		pattern: ["**/*.json"],
@@ -212,6 +233,7 @@ const courses = defineCollection({
 			updatedAt: z.coerce.date().optional(),
 			authors: z.array(reference("people")).default(["rawkode"]),
 			difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+			resources: z.array(resourceSchema).optional(),
 			signupConfig: z
 				.object({
 					audienceId: z.string(),
@@ -235,6 +257,12 @@ const courseModules = defineCollection({
 			course: reference("courses"),
 			section: z.string().optional(), // For grouping modules into sections
 			order: z.number(), // For sorting modules within a course
+			video: z
+				.object({
+					id: z.string(),
+					thumbnailUrl: z.string().optional(),
+				})
+				.optional(),
 			cover: z
 				.object({
 					image: image(),
@@ -245,6 +273,7 @@ const courseModules = defineCollection({
 			updatedAt: z.coerce.date().optional(),
 			isDraft: z.boolean().default(true),
 			authors: z.array(reference("people")).default(["rawkode"]),
+			resources: z.array(resourceSchema).optional(),
 		}),
 });
 

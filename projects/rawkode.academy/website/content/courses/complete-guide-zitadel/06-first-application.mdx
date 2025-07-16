@@ -11,21 +11,26 @@ publishedAt: 2025-07-16
 isDraft: false
 authors:
   - rawkode
+video:
+  id: "g4uh2a6tw6koxe1d2ywrftyr"
+  thumbnailUrl: "https://content.rawkode.academy/videos/g4uh2a6tw6koxe1d2ywrftyr/thumbnail.jpg"
+resources:
+  - title: "OAuth PKCE Demo Application"
+    description: "Interactive OAuth PKCE flow demonstration - Enter your Zitadel instance URL and client ID to test authentication"
+    type: "embed"
+    embedConfig:
+      container: "webcontainer"
+      src: "oauth-pkce-demo"
+      height: "800px"
+      startCommand: "node server.js"
+      import:
+        localDir: "./examples/oauth-pkce-app"
+    category: "demos"
 ---
-
-import VideoPlayer from "@/components/video/player.vue";
 
 Hello, welcome back. So far we've covered how to install and get Zitadel ready. I think it's about time we take a look at how to actually make it work and integrate with your applications. So in this video we are gonna take a look at the Zitadel console, configure our first application, and get it hooked up to the point where we can log in and visualize the claims of our JWT token.
 
 Let's have some fun.
-
-<div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl my-8">
-  <VideoPlayer
-    client:only="vue"
-    video="g4uh2a6tw6koxe1d2ywrftyr"
-    thumbnailUrl="https://content.rawkode.academy/videos/g4uh2a6tw6koxe1d2ywrftyr/thumbnail.jpg"
-  />
-</div>
 
 ## Creating Your First Application
 

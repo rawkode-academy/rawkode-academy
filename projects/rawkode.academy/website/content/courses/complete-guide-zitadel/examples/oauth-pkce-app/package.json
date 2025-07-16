@@ -1,0 +1,8 @@
+{
+  "name": "oauth-pkce-app",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  }
+}

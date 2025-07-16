@@ -36,6 +36,7 @@
         "@trigger.dev/resend": "^3.0.0",
         "@trigger.dev/sdk": "^3.3.17",
         "@vidstack/react": "^1.12.13",
+        "@webcontainer/api": "^1.6.1",
         "arctic": "^3.7.0",
         "astro": "5.8.0",
         "astro-d2": "^0.8.0",
@@ -1073,6 +1074,8 @@
     "@vue/shared": ["@vue/shared@3.5.16", "", {}, "sha512-c/0fWy3Jw6Z8L9FmTyYfkpM5zklnqqa9+a6dz3DvONRKW2NEbh46BP0FHuLFSWi2TnQEtp91Z6zOWNrU6QiyPg=="],
 
     "@vue/test-utils": ["@vue/test-utils@2.4.6", "", { "dependencies": { "js-beautify": "^1.14.9", "vue-component-type-helpers": "^2.0.0" } }, "sha512-FMxEjOpYNYiFe0GkaHsnJPXFHxQ6m4t8vI/ElPGpMWxZKpmRvQ33OIrvRXemy6yha03RxhOlQuy+gZMC3CQSow=="],
+
+    "@webcontainer/api": ["@webcontainer/api@1.6.1", "", {}, "sha512-2RS2KiIw32BY1Icf6M1DvqSmcon9XICZCDgS29QJb2NmF12ZY2V5Ia+949hMKB3Wno+P/Y8W+sPP59PZeXSELg=="],
 
     "@whatwg-node/disposablestack": ["@whatwg-node/disposablestack@0.0.6", "", { "dependencies": { "@whatwg-node/promise-helpers": "^1.0.0", "tslib": "^2.6.3" } }, "sha512-LOtTn+JgJvX8WfBVJtF08TGrdjuFzGJc4mkP8EdDI8ADbvO7kiexYep1o8dwnt0okb0jYclCDXF13xU7Ge4zSw=="],
 
