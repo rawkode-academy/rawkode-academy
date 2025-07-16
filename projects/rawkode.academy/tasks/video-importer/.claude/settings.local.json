@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(devenv:*)",
-      "Bash(direnv allow:*)"
+      "Bash(direnv allow:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
