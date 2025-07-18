@@ -72,65 +72,75 @@ const authors = await getEntries(module.data.authors);
 
 // Define the Resource type to match ResourceList component expectations
 type Resource = {
-  title: string;
-  description?: string;
-  type: "url" | "file" | "embed";
-  url?: string;
-  filePath?: string;
-  embedConfig?: {
-    container: "stackblitz" | "codesandbox" | "codepen" | "iframe" | "webcontainer";
-    src: string;
-    height?: string;
-    width?: string;
-    startCommand?: string;
-    files?: Record<string, string>;
-  };
-  category: "slides" | "code" | "documentation" | "demos" | "other";
+	title: string;
+	description?: string;
+	type: "url" | "file" | "embed";
+	url?: string;
+	filePath?: string;
+	embedConfig?: {
+		container:
+			| "stackblitz"
+			| "codesandbox"
+			| "codepen"
+			| "iframe"
+			| "webcontainer";
+		src: string;
+		height?: string;
+		width?: string;
+		startCommand?: string;
+		files?: Record<string, string>;
+	};
+	category: "slides" | "code" | "documentation" | "demos" | "other";
 };
 
 // Helper function to ensure proper resource shape
 function createResource(resource: any): Resource {
-  const result: Resource = {
-    title: resource.title,
-    type: resource.type,
-    category: resource.category || "other"
-  };
-  
-  // Only add optional properties if they exist
-  if (resource.description) result.description = resource.description;
-  if (resource.url) result.url = resource.url;
-  if (resource.filePath) result.filePath = resource.filePath;
-  if (resource.embedConfig) result.embedConfig = resource.embedConfig;
-  
-  return result;
+	const result: Resource = {
+		title: resource.title,
+		type: resource.type,
+		category: resource.category || "other",
+	};
+
+	// Only add optional properties if they exist
+	if (resource.description) result.description = resource.description;
+	if (resource.url) result.url = resource.url;
+	if (resource.filePath) result.filePath = resource.filePath;
+	if (resource.embedConfig) result.embedConfig = resource.embedConfig;
+
+	return result;
 }
 
 // Process both course and module resources
 const allResources = [
 	...(course.data.resources || []),
-	...(module.data.resources || [])
+	...(module.data.resources || []),
 ];
 
 const processedResources: Resource[] = await Promise.all(
 	allResources.map(async (resource): Promise<Resource> => {
-		if (resource.type === 'embed' && resource.embedConfig?.container === 'webcontainer' && resource.embedConfig.import?.localDir) {
+		if (
+			resource.type === "embed" &&
+			resource.embedConfig?.container === "webcontainer" &&
+			resource.embedConfig.import?.localDir
+		) {
 			// For WebContainer embeds with local files, we'll use a special src URL
 			// that points to our embed page with the correct parameters
 			const courseName = module.data.course.id;
-			const demoId = resource.embedConfig.import.localDir.split('/').pop() || 'demo';
-			
+			const demoId =
+				resource.embedConfig.import.localDir.split("/").pop() || "demo";
+
 			return createResource({
 				...resource,
 				embedConfig: {
 					...resource.embedConfig,
 					src: `/embed/webcontainer?course=${courseName}&demo=${demoId}`,
 					// Remove the import config as it's not needed for the embed
-					import: undefined
-				}
+					import: undefined,
+				},
 			});
 		}
 		return createResource(resource);
-	})
+	}),
 );
 
 const imageUrl = await computeImageUrl(module);

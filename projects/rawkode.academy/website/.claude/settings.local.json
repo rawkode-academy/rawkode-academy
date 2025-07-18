@@ -1,21 +1,21 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(rg:*)",
-      "Bash(bun run:*)",
-      "Bash(mv:*)",
-      "WebFetch(domain:www.kubernetes.dev)",
-      "Bash(mkdir:*)",
-      "Bash(ls:*)",
-      "WebFetch(domain:localhost)",
-      "mcp__container-use__environment_create",
-      "mcp__container-use__environment_config",
-      "mcp__container-use__environment_file_list",
-      "mcp__container-use__environment_run_cmd",
-      "mcp__container-use__environment_file_write",
-      "mcp__container-use__environment_file_read",
-      "Bash(container-use diff:*)"
-    ],
-    "deny": []
-  }
+	"permissions": {
+		"allow": [
+			"Bash(rg:*)",
+			"Bash(bun run:*)",
+			"Bash(mv:*)",
+			"WebFetch(domain:www.kubernetes.dev)",
+			"Bash(mkdir:*)",
+			"Bash(ls:*)",
+			"WebFetch(domain:localhost)",
+			"mcp__container-use__environment_create",
+			"mcp__container-use__environment_config",
+			"mcp__container-use__environment_file_list",
+			"mcp__container-use__environment_run_cmd",
+			"mcp__container-use__environment_file_write",
+			"mcp__container-use__environment_file_read",
+			"Bash(container-use diff:*)"
+		],
+		"deny": []
+	}
 }

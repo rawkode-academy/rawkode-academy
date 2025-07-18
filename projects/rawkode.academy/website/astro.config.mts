@@ -60,7 +60,10 @@ export default defineConfig({
 					const videos = await fetchVideosFromGraphQL();
 					return videos.map((video) => `${siteUrl}/watch/${video.slug}/`);
 				} catch (error) {
-					console.warn("Skipping video pages in sitemap due to API unavailability:", error);
+					console.warn(
+						"Skipping video pages in sitemap due to API unavailability:",
+						error,
+					);
 					return [];
 				}
 			})(),
