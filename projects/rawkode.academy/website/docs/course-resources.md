@@ -31,7 +31,7 @@ resources:
 - **url** (optional): Required for `type: "url"`, the external URL
 - **filePath** (optional): Required for `type: "file"`, relative path from `/public/resources/`
 - **embedConfig** (optional): Required for `type: "embed"`, configuration for embedded applications
-  - **container**: One of `"stackblitz"`, `"codesandbox"`, `"codepen"`, or `"iframe"`
+  - **container**: Either `"webcontainer"` for interactive Node.js environments or `"iframe"` for generic embeds
   - **src**: The source URL or project ID
   - **height** (optional): Height of the embed (default: "600px")
   - **width** (optional): Width of the embed (default: "100%")
@@ -46,45 +46,7 @@ For file resources:
 
 ## Embedded Application Resources
 
-For embedded applications, you can use popular web containers:
-
-### StackBlitz Example
-```yaml
-resources:
-  - title: "Astro Starter Template"
-    description: "Interactive Astro starter project"
-    type: "embed"
-    embedConfig:
-      container: "stackblitz"
-      src: "github/withastro/astro/tree/latest/examples/minimal"
-      height: "700px"
-    category: "code"
-```
-
-### CodeSandbox Example
-```yaml
-resources:
-  - title: "React Tutorial"
-    description: "Interactive React coding environment"
-    type: "embed"
-    embedConfig:
-      container: "codesandbox"
-      src: "new-react"
-      height: "600px"
-    category: "code"
-```
-
-### CodePen Example
-```yaml
-resources:
-  - title: "CSS Animation Demo"
-    description: "Interactive CSS animation example"
-    type: "embed"
-    embedConfig:
-      container: "codepen"
-      src: "https://codepen.io/pen/abcdef"
-    category: "code"
-```
+For embedded applications, you can use:
 
 ### Generic iframe Example
 ```yaml
@@ -192,9 +154,12 @@ resources:
     description: "Interactive Zitadel configuration demo"
     type: "embed"
     embedConfig:
-      container: "stackblitz"
+      container: "webcontainer"
       src: "zitadel-demo"
       height: "700px"
+      startCommand: "npm run dev"
+      import:
+        localDir: "./examples/zitadel-demo"
     category: "code"
 ---
 ```

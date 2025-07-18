@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 import Button from "@/components/common/Button.vue";
 import PageHero from "@/components/common/PageHero.vue";
 import { marked } from "marked";
@@ -45,7 +45,10 @@ const sortedChangelog = changelogEntries.sort((a, b) => {
 const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
 		const renderedContent = marked(entry.body || "");
-		const authorData = await fetchGitHubUser(entry.data.author);
+		const authorEntry = await getEntry(entry.data.author);
+		const authorData = await fetchGitHubUser(
+			authorEntry?.data.handle || "unknown",
+		);
 
 		return {
 			...entry.data,

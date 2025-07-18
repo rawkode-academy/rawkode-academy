@@ -1,8 +1,16 @@
 {
   "name": "oauth-pkce-app",
+  "module": "index.ts",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js"
+    "dev": "bun run --watch server.ts",
+    "start": "bun run server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }

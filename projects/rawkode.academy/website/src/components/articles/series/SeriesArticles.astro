@@ -11,7 +11,7 @@ const { series } = Astro.props;
 
 const articles = (await getCollection("articles"))
 	.filter((article) => article.data.series?.id === series.id)
-	.filter((article) => !article.data.isDraft)
+	.filter((article) => !article.data.draft)
 	.sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
 ---
 

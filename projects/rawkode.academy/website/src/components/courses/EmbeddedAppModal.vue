@@ -8,25 +8,24 @@
     >
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
         @click.self="close"
-        style="isolation: isolate;"
       >
         <div
           class="relative w-full max-w-6xl bg-white dark:bg-gray-900 rounded-lg shadow-2xl"
           @click.stop
         >
           <!-- Header -->
-          <div class="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-base font-medium text-gray-900 dark:text-white">
+          <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ resource.title }}
             </h3>
             <button
               @click="close"
-              class="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
               aria-label="Close"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -41,39 +40,9 @@
               </div>
             </div>
 
-            <!-- StackBlitz -->
-            <iframe
-              v-if="resource.embedConfig.container === 'stackblitz'"
-              :src="getStackBlitzUrl()"
-              :style="{ width: '100%', height: '100%' }"
-              frameborder="0"
-              @load="loading = false"
-            ></iframe>
-
-            <!-- CodeSandbox -->
-            <iframe
-              v-else-if="resource.embedConfig.container === 'codesandbox'"
-              :src="getCodeSandboxUrl()"
-              :style="{ width: '100%', height: '100%' }"
-              sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
-              frameborder="0"
-              @load="loading = false"
-            ></iframe>
-
-            <!-- CodePen -->
-            <iframe
-              v-else-if="resource.embedConfig.container === 'codepen'"
-              :src="getCodePenUrl()"
-              :style="{ width: '100%', height: '100%' }"
-              frameborder="0"
-              scrolling="no"
-              allowfullscreen
-              @load="loading = false"
-            ></iframe>
-
             <!-- WebContainer -->
             <WebContainerEmbed
-              v-else-if="resource.embedConfig.container === 'webcontainer'"
+              v-if="resource.embedConfig.container === 'webcontainer'"
               :title="resource.title"
               :files="resource.embedConfig.files || {}"
               :start-command="resource.embedConfig.startCommand"
@@ -92,7 +61,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+          <div class="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <p v-if="resource.description" class="text-sm text-gray-600 dark:text-gray-400">
               {{ resource.description }}
             </p>
@@ -126,12 +95,7 @@ interface EmbedResource {
 	description?: string;
 	type: "embed";
 	embedConfig: {
-		container:
-			| "stackblitz"
-			| "codesandbox"
-			| "codepen"
-			| "iframe"
-			| "webcontainer";
+		container: "webcontainer" | "iframe";
 		src: string;
 		height?: string;
 		width?: string;
@@ -167,71 +131,9 @@ const close = () => {
 	isOpen.value = false;
 };
 
-const getStackBlitzUrl = () => {
-	const src = props.resource.embedConfig.src;
-	try {
-		const url = new URL(src);
-		if (url.hostname !== "stackblitz.com") {
-			throw new Error("Invalid hostname");
-		}
-		return src.replace("/edit/", "/embed/");
-	} catch {
-		// If not a valid URL or wrong hostname, treat as project ID
-		return `https://stackblitz.com/embed/${src}?embed=1`;
-	}
-};
-
-const getCodeSandboxUrl = () => {
-	const src = props.resource.embedConfig.src;
-	try {
-		const url = new URL(src);
-		if (url.hostname !== "codesandbox.io") {
-			throw new Error("Invalid hostname");
-		}
-		return src.replace("/s/", "/embed/");
-	} catch {
-		// If not a valid URL or wrong hostname, treat as sandbox ID
-		return `https://codesandbox.io/embed/${src}`;
-	}
-};
-
-const getCodePenUrl = () => {
-	const src = props.resource.embedConfig.src;
-	try {
-		const url = new URL(src);
-		if (url.hostname !== "codepen.io") {
-			throw new Error("Invalid hostname");
-		}
-		return src.replace("/pen/", "/embed/");
-	} catch {
-		// If not a valid URL, return as-is (CodePen doesn't have a predictable embed pattern)
-		return src;
-	}
-};
-
 const getExternalUrl = () => {
 	const config = props.resource.embedConfig;
 	switch (config.container) {
-		case "stackblitz":
-			try {
-				const url = new URL(config.src);
-				return url.hostname === "stackblitz.com"
-					? config.src
-					: `https://stackblitz.com/edit/${config.src}`;
-			} catch {
-				return `https://stackblitz.com/edit/${config.src}`;
-			}
-		case "codesandbox":
-			try {
-				const url = new URL(config.src);
-				return url.hostname === "codesandbox.io"
-					? config.src
-					: `https://codesandbox.io/s/${config.src}`;
-			} catch {
-				return `https://codesandbox.io/s/${config.src}`;
-			}
-		case "codepen":
-			return config.src;
 		case "webcontainer":
 			return "#"; // WebContainers don't have external URLs
 		default:

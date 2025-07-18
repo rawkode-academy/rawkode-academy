@@ -16,7 +16,7 @@ interface FeedItem {
 
 export async function GET(context: APIContext) {
 	const [articles, videos] = await Promise.all([
-		getCollection("articles", ({ data }) => !data.isDraft),
+		getCollection("articles", ({ data }) => !data.draft),
 		getCollection("videos"),
 	]);
 

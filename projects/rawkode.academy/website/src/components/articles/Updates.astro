@@ -1,7 +1,7 @@
 ---
 interface Update {
 	date: Date;
-	reason: string;
+	description: string;
 }
 
 interface Props {
@@ -41,7 +41,7 @@ const formatDate = (date: Date) => {
 					<span class="font-medium text-gray-700 dark:text-gray-300">Updated:</span>
 					{updates.map((update, index) => (
 						<span class="ml-1">
-							{formatDate(update.date)} - {update.reason}
+							{formatDate(update.date)} - {update.description}
 							{index < updates.length - 1 && <span class="text-gray-400 dark:text-gray-600"> • </span>}
 						</span>
 					))}

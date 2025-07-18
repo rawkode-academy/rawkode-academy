@@ -71,8 +71,8 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 ---
 
 <Page
-	title={`${article.data.openGraph.title}`}
-	subtitle={article.data.openGraph.subtitle}
+	title={`${article.data.openGraph?.title || article.data.title}`}
+	subtitle={article.data.openGraph?.subtitle}
 	description={article.data.description}
 	image={imageUrl ? {
 		image: imageUrl,

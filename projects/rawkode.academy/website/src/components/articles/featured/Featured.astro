@@ -5,7 +5,7 @@ import SectionHeader from "@/components/common/SectionHeader.vue";
 import ArticleCard from "../ArticleCard.astro";
 
 const allArticles = (await getCollection("articles"))
-	.filter((article: CollectionEntry<"articles">) => !article.data.isDraft)
+	.filter((article: CollectionEntry<"articles">) => !article.data.draft)
 	.sort(
 		(a: CollectionEntry<"articles">, b: CollectionEntry<"articles">) =>
 			b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
@@ -62,9 +62,9 @@ const otherArticles = allArticles.slice(1);
 								<h2 class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
 									{latestArticle.data.title}
 								</h2>
-								{latestArticle.data.openGraph.subtitle && (
+								{latestArticle.data.openGraph?.subtitle && (
 									<p class="mb-6 text-lg font-light text-gray-500 dark:text-gray-400 whitespace-pre-line line-clamp-3">
-										{latestArticle.data.openGraph.subtitle}
+										{latestArticle.data.openGraph?.subtitle}
 									</p>
 								)}
 								<div class="mt-auto pt-6 border-t border-gray-100 dark:border-gray-700">
