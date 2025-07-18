@@ -225,11 +225,11 @@ describe("Structured Data Validation", () => {
 		expect(courseJsonLd["@type"]).toBe("Course");
 		expect(courseJsonLd.provider).toBeDefined();
 		expect(courseJsonLd.provider["@type"]).toBe("Organization");
-		
+
 		expect(courseJsonLd.hasCourseInstance).toBeDefined();
 		expect(Array.isArray(courseJsonLd.hasCourseInstance)).toBe(true);
 		expect(courseJsonLd.hasCourseInstance.length).toBeGreaterThan(0);
-		
+
 		expect(courseJsonLd.offers).toBeDefined();
 		expect(courseJsonLd.offers["@type"]).toBe("Offer");
 		expect(courseJsonLd.offers.price).toBe("0");
@@ -239,10 +239,10 @@ describe("Structured Data Validation", () => {
 		expect(courseJsonLd.offers.itemOffered).toBeDefined();
 		expect(courseJsonLd.offers.itemOffered["@type"]).toBe("Course");
 		expect(courseJsonLd.offers.itemOffered.url).toBeDefined();
-		
+
 		// Validate isAccessibleForFree field
 		expect(courseJsonLd.isAccessibleForFree).toBe(true);
-		
+
 		// Validate creator field
 		expect(courseJsonLd.creator).toBeDefined();
 		expect(Array.isArray(courseJsonLd.creator)).toBe(true);

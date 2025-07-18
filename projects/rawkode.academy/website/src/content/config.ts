@@ -93,18 +93,30 @@ const resourceSchema = z.object({
 	type: z.enum(["url", "file", "embed"]),
 	url: z.string().url().optional(),
 	filePath: z.string().optional(),
-	embedConfig: z.object({
-		container: z.enum(["stackblitz", "codesandbox", "codepen", "iframe", "webcontainer"]),
-		src: z.string(),
-		height: z.string().default("600px"),
-		width: z.string().default("100%"),
-		files: z.record(z.string()).optional(), // For WebContainer file system
-		import: z.object({
-			localDir: z.string(), // Path relative to the content file
-		}).optional(),
-		startCommand: z.string().optional(), // Command to run in WebContainer
-	}).optional(),
-	category: z.enum(["slides", "code", "documentation", "demos", "other"]).default("other"),
+	embedConfig: z
+		.object({
+			container: z.enum([
+				"stackblitz",
+				"codesandbox",
+				"codepen",
+				"iframe",
+				"webcontainer",
+			]),
+			src: z.string(),
+			height: z.string().default("600px"),
+			width: z.string().default("100%"),
+			files: z.record(z.string()).optional(), // For WebContainer file system
+			import: z
+				.object({
+					localDir: z.string(), // Path relative to the content file
+				})
+				.optional(),
+			startCommand: z.string().optional(), // Command to run in WebContainer
+		})
+		.optional(),
+	category: z
+		.enum(["slides", "code", "documentation", "demos", "other"])
+		.default("other"),
 });
 
 const people = defineCollection({

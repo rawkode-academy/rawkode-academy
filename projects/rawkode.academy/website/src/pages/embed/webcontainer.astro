@@ -1,31 +1,31 @@
 ---
-import MinimalLayout from '@/layouts/minimal.astro';
-import WebContainerEmbed from '@/components/courses/WebContainerEmbed.vue';
+import MinimalLayout from "@/layouts/minimal.astro";
+import WebContainerEmbed from "@/components/courses/WebContainerEmbed.vue";
 // @ts-expect-error Virtual module provided by Vite plugin
-import { loadDemoFiles } from 'virtual:webcontainer-demos';
+import { loadDemoFiles } from "virtual:webcontainer-demos";
 
 // Get parameters from URL
 const url = new URL(Astro.request.url);
-const courseId = url.searchParams.get('course');
-const demoId = url.searchParams.get('demo') || url.searchParams.get('resource'); // Support both param names
+const courseId = url.searchParams.get("course");
+const demoId = url.searchParams.get("demo") || url.searchParams.get("resource"); // Support both param names
 
-let title = 'WebContainer Demo';
+let title = "WebContainer Demo";
 let files = {};
-let startCommand = 'npm run dev';
+let startCommand = "npm run dev";
 let error = null;
 
 if (!courseId || !demoId) {
-  error = 'Missing course or demo parameter';
+	error = "Missing course or demo parameter";
 } else {
-  try {
-    const demo = loadDemoFiles(courseId, demoId);
-    files = demo.files;
-    title = demo.config.title || title;
-    startCommand = demo.config.startCommand || startCommand;
-  } catch (e) {
-    console.error('Error loading WebContainer files:', e);
-    error = `Failed to load demo files: ${e instanceof Error ? e.message : String(e)}`;
-  }
+	try {
+		const demo = loadDemoFiles(courseId, demoId);
+		files = demo.files;
+		title = demo.config.title || title;
+		startCommand = demo.config.startCommand || startCommand;
+	} catch (e) {
+		console.error("Error loading WebContainer files:", e);
+		error = `Failed to load demo files: ${e instanceof Error ? e.message : String(e)}`;
+	}
 }
 
 // This page needs server-side rendering
