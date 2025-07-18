@@ -1,0 +1,77 @@
+---
+import CourseSignupFormCompactVue from "./CourseSignupFormCompact.vue";
+
+export const partial = true;
+
+type Props = {
+	courseId: string;
+	courseTitle: string;
+	signupConfig: {
+		audienceId: string;
+		sponsor?: string | undefined;
+		sponsorAudienceId?: string | undefined;
+		allowSponsorContact: boolean;
+	};
+	userEmail?: string | undefined;
+	isAlreadySubscribed: boolean;
+};
+
+const {
+	courseId,
+	courseTitle,
+	signupConfig,
+	userEmail,
+	isAlreadySubscribed: propsIsAlreadySubscribed,
+} = Astro.props;
+const user = Astro.locals?.user;
+
+const { audienceId, sponsor, sponsorAudienceId, allowSponsorContact } =
+	signupConfig;
+
+// Check if user is already subscribed
+let isAlreadySubscribed = propsIsAlreadySubscribed;
+
+// Check session for anonymous users who have already signed up
+let sessionEmail: string | undefined;
+if (Astro.session) {
+	const signedUpCourses = (await Astro.session.get("signedUpCourses")) || {};
+	sessionEmail = signedUpCourses[audienceId];
+}
+
+if (sessionEmail && !user) {
+	// Anonymous user who already signed up in this session
+	isAlreadySubscribed = true;
+} else if (user?.email) {
+	// Check if authenticated user is already subscribed
+	try {
+		const { getSecret } = await import("astro:env/server");
+		const { Resend } = await import("resend");
+		const resendApiKey =
+			getSecret("RESEND_API_KEY") || process.env.RESEND_API_KEY;
+
+		if (resendApiKey) {
+			const resend = new Resend(resendApiKey);
+			try {
+				const contact = await resend.contacts.get({
+					email: user.email,
+					audienceId: audienceId,
+				});
+				isAlreadySubscribed = contact.data !== null;
+			} catch (error) {
+				// Contact not found or other error - they're not subscribed
+			}
+		}
+	} catch (error) {
+		// Error checking subscription status
+	}
+}
+---
+
+<CourseSignupFormCompactVue
+	courseId={courseId}
+	courseTitle={courseTitle}
+	signupConfig={{ audienceId, allowSponsorContact, ...(sponsor && { sponsor }), ...(sponsorAudienceId && { sponsorAudienceId }) }}
+	userEmail={userEmail || user?.email}
+	isAlreadySubscribed={isAlreadySubscribed}
+	client:load
+/>

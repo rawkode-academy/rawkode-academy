@@ -8,7 +8,7 @@ description: "Learn how to configure your first application in the Zitadel conso
 
 order: 6
 publishedAt: 2025-07-16
-isDraft: false
+draft: false
 authors:
   - rawkode
 video:
@@ -22,10 +22,10 @@ resources:
       container: "webcontainer"
       src: "oauth-pkce-demo"
       height: "800px"
-      startCommand: "node server.js"
+      startCommand: "bun run dev"
       import:
         localDir: "./examples/oauth-pkce-app"
-    category: "demos"
+    category: "code"
 ---
 
 Hello, welcome back. So far we've covered how to install and get Zitadel ready. I think it's about time we take a look at how to actually make it work and integrate with your applications. So in this video we are gonna take a look at the Zitadel console, configure our first application, and get it hooked up to the point where we can log in and visualize the claims of our JWT token.

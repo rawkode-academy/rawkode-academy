@@ -57,8 +57,17 @@ export const typeBadgeConfig = {
 } as const satisfies Record<string, TypeBadgeConfig>;
 
 export function getTypeBadgeConfig(type: string): TypeBadgeConfig {
+	// Map new schema types to existing visual types
+	const typeMapping: Record<string, string> = {
+		article: "tutorial",
+		guide: "practices",
+		tutorial: "tutorial",
+		news: "news",
+	};
+
+	const mappedType = typeMapping[type] || type;
 	return (
-		typeBadgeConfig[type as keyof typeof typeBadgeConfig] ||
+		typeBadgeConfig[mappedType as keyof typeof typeBadgeConfig] ||
 		typeBadgeConfig.tutorial
 	);
 }

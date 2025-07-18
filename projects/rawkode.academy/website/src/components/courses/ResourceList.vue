@@ -85,23 +85,25 @@ import EmbeddedAppModal from "./EmbeddedAppModal.vue";
 
 interface Resource {
 	title: string;
-	description?: string;
+	description?: string | undefined;
 	type: "url" | "file" | "embed";
-	url?: string;
-	filePath?: string;
-	embedConfig?: {
-		container:
-			| "stackblitz"
-			| "codesandbox"
-			| "codepen"
-			| "iframe"
-			| "webcontainer";
-		src: string;
-		height?: string;
-		width?: string;
-		startCommand?: string;
-		files?: Record<string, string>;
-	};
+	url?: string | undefined;
+	filePath?: string | undefined;
+	embedConfig?:
+		| {
+				container: "webcontainer" | "iframe";
+				src: string;
+				height: string;
+				width: string;
+				startCommand?: string | undefined;
+				files?: Record<string, string> | undefined;
+				import?:
+					| {
+							localDir: string;
+					  }
+					| undefined;
+		  }
+		| undefined;
 	category: "slides" | "code" | "documentation" | "demos" | "other";
 }
 
@@ -244,7 +246,7 @@ const openEmbedModal = (resource: Resource) => {
 			"width=1200,height=800,toolbar=no,menubar=no,location=no,status=no,noopener,noreferrer",
 		);
 	} else {
-		// Keep modal for other embed types (StackBlitz, CodeSandbox, etc.)
+		// Keep modal for other embed types
 		selectedEmbed.value = resource;
 		isEmbedModalOpen.value = true;
 	}

@@ -5,14 +5,23 @@ export interface Props {
 		title: string;
 		description?: string;
 		type: "url" | "file" | "embed";
-		url?: string;
-		filePath?: string;
-		embedConfig?: {
-			container: "stackblitz" | "codesandbox" | "codepen" | "iframe";
-			src: string;
-			height?: string;
-			width?: string;
-		};
+		url?: string | undefined;
+		filePath?: string | undefined;
+		embedConfig?:
+			| {
+					container: "webcontainer" | "iframe";
+					src: string;
+					height: string;
+					width: string;
+					files?: Record<string, string> | undefined;
+					import?:
+						| {
+								localDir: string;
+						  }
+						| undefined;
+					startCommand?: string | undefined;
+			  }
+			| undefined;
 		category: "slides" | "code" | "documentation" | "demos" | "other";
 	}>;
 }
@@ -56,22 +65,13 @@ const getResourceHref = (resource: Props["resources"][0]) => {
 
 const groupedResources = resources.reduce(
 	(acc, resource) => {
-		const category = resource.category;
-		if (category in acc) {
-			acc[category].push(resource);
+		if (!acc[resource.category]) {
+			acc[resource.category] = [];
 		}
+		acc[resource.category]!.push(resource);
 		return acc;
 	},
-	{
-		slides: [],
-		code: [],
-		documentation: [],
-		demos: [],
-		other: [],
-	} as Record<
-		"slides" | "code" | "documentation" | "demos" | "other",
-		Props["resources"]
-	>,
+	{} as Record<string, Props["resources"]>,
 );
 
 const categoryLabels = {

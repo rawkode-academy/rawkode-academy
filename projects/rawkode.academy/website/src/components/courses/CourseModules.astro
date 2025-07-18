@@ -27,8 +27,26 @@ const groupedModules = courseModules.reduce(
 	{} as Record<string, typeof courseModules>,
 );
 
-// Calculate total modules
+// Calculate total modules and total duration
 const totalModules = courseModules.length;
+const totalDuration = courseModules.reduce(
+	(acc, module) => acc + (module.data.duration || 0),
+	0,
+);
+
+// Format duration in hours and minutes
+function formatDuration(minutes: number): string {
+	if (minutes === 0) return "";
+	const hours = Math.floor(minutes / 60);
+	const mins = minutes % 60;
+	if (hours > 0 && mins > 0) {
+		return `${hours}h ${mins}m`;
+	} else if (hours > 0) {
+		return `${hours}h`;
+	} else {
+		return `${mins}m`;
+	}
+}
 ---
 
 {
@@ -41,77 +59,111 @@ const totalModules = courseModules.length;
 			<p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Check back soon for content updates!</p>
 		</div>
 	) : (
-				<div class="space-y-8">
-
-			{Object.entries(groupedModules).map(([sectionName, modules]) => (
-				<div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-					<!-- Section Header -->
-					<div class="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-						<div class="flex items-center justify-between">
-							<div class="text-lg font-semibold text-gray-900 dark:text-white">{sectionName}</div>
-							<Badge variant="default" size="sm">
-								{modules.length === 1 ? `${modules.length} module` : `${modules.length} modules`}
-							</Badge>
+		<div class="space-y-8">
+			{/* Course Overview Stats */}
+			{totalDuration > 0 && (
+				<div class="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+					<div class="flex flex-wrap items-center justify-between gap-4">
+						<div class="flex items-center gap-6">
+							<div>
+								<div class="text-2xl font-bold text-gray-900 dark:text-white">{totalModules}</div>
+								<div class="text-sm text-gray-600 dark:text-gray-400">Total Modules</div>
+							</div>
+							<div>
+								<div class="text-2xl font-bold text-gray-900 dark:text-white">{formatDuration(totalDuration)}</div>
+								<div class="text-sm text-gray-600 dark:text-gray-400">Total Duration</div>
+							</div>
 						</div>
 					</div>
-
-					<!-- Section Modules -->
-					<div class="divide-y divide-gray-200 dark:divide-gray-700">
-						{modules.map((module) => {
-							const isDraft = module.data.isDraft;
-							const Element = isDraft ? 'div' : 'a';
-							const elementProps = isDraft
-								? { class: "block p-6 bg-white dark:bg-gray-800 cursor-not-allowed" }
-								: {
-									href: `/courses/${course.id}/${module.id}`,
-									class: "block p-6 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 group"
-								};
-
-							return (
-								<Element {...elementProps}>
-									<div class="flex items-center gap-4">
-										<div class="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center text-sm font-medium">
-											{module.data.order}
-										</div>
-										<div class="flex-1 min-w-0">
-																						<h4 class={`text-base font-medium line-clamp-2 mb-1 ${
-												isDraft
-													? "text-gray-900 dark:text-white"
-													: "text-gray-900 dark:text-white group-hover:text-primary transition-colors"
-											}`}>
-												{module.data.title}
-											</h4>
-											<p class={`text-sm mt-1 line-clamp-2 ${
-												isDraft
-													? "text-gray-500 dark:text-gray-400"
-													: "text-gray-500 dark:text-gray-400"
-											}`}>
-												{module.data.description}
-											</p>
-										</div>
-										<div class="flex-shrink-0">
-											{isDraft ? (
-												<Badge variant="warning" size="sm" class="flex items-center">
-													<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-														<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-													</svg>
-													Coming Soon
-												</Badge>
-											) : (
-												<svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-												</svg>
-											)}
-										</div>
-									</div>
-								</Element>
-							);
-						})}
-					</div>
 				</div>
-			))}
+			)}
+
+			{Object.entries(groupedModules).map(([sectionName, modules]) => {
+				const sectionDuration = modules.reduce((acc, module) => acc + (module.data.duration || 0), 0);
+				
+				return (
+					<div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+						{/* Section Header */}
+						<div class="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+							<div class="flex items-center justify-between">
+								<div class="text-lg font-semibold text-gray-900 dark:text-white">{sectionName}</div>
+								<div class="flex items-center gap-3">
+									{sectionDuration > 0 && (
+										<span class="text-sm text-gray-600 dark:text-gray-400">
+											{formatDuration(sectionDuration)}
+										</span>
+									)}
+									<Badge variant="default" size="sm">
+										{modules.length === 1 ? `${modules.length} module` : `${modules.length} modules`}
+									</Badge>
+								</div>
+							</div>
+						</div>
+
+						{/* Section Modules */}
+						<div class="divide-y divide-gray-200 dark:divide-gray-700">
+							{modules.map((module) => {
+								const isDraft = module.data.draft;
+								const Element = isDraft ? 'div' : 'a';
+								const elementProps = isDraft
+									? { class: "block p-6 bg-white dark:bg-gray-800 cursor-not-allowed" }
+									: {
+										href: `/courses/${course.id}/${module.id}`,
+										class: "block p-6 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 group"
+									};
+
+								return (
+									<Element {...elementProps}>
+										<div class="flex items-center gap-4">
+											<div class="flex-shrink-0 w-10 h-10 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center text-sm font-medium">
+												{module.data.order}
+											</div>
+											<div class="flex-1 min-w-0">
+												<h4 class={`text-base font-medium line-clamp-2 mb-1 ${
+													isDraft
+														? "text-gray-900 dark:text-white"
+														: "text-gray-900 dark:text-white group-hover:text-primary transition-colors"
+												}`}>
+													{module.data.title}
+												</h4>
+												<p class={`text-sm mt-1 line-clamp-2 ${
+													isDraft
+														? "text-gray-500 dark:text-gray-400"
+														: "text-gray-500 dark:text-gray-400"
+												}`}>
+													{module.data.description}
+												</p>
+											</div>
+											<div class="flex-shrink-0 flex items-center gap-3">
+												{module.data.duration && module.data.duration > 0 && (
+													<span class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+														<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+														</svg>
+														{formatDuration(module.data.duration)}
+													</span>
+												)}
+												{isDraft ? (
+													<Badge variant="warning" size="sm" class="flex items-center">
+														<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+															<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+														</svg>
+														Coming Soon
+													</Badge>
+												) : (
+													<svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+													</svg>
+												)}
+											</div>
+										</div>
+									</Element>
+								);
+							})}
+						</div>
+					</div>
+				);
+			})}
 		</div>
 	)
 }
-
-

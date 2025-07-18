@@ -1,8 +1,9 @@
 <template>
-  <div class="h-screen flex flex-col bg-gray-900 text-gray-100">
+  <div class="h-full flex flex-col bg-gray-900 text-gray-100">
     <!-- Header -->
-    <div class="flex items-center justify-between p-2 bg-gray-800 border-b border-gray-700">
+    <div class="flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
       <div class="flex items-center gap-4">
+        <h3 class="text-lg font-semibold">{{ title }}</h3>
         <div v-if="status === 'booting'" class="flex items-center gap-2 text-sm text-gray-400">
           <div class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
           <span>Starting container...</span>
@@ -312,10 +313,11 @@ const initWebContainer = async () => {
 		await mountFiles();
 		writeTerminal("Files mounted successfully!", "success");
 
-		// Skip npm install since we don't have any dependencies
-		// The app is self-contained with no external packages
+		// Only install if package.json exists
+		if (props.files["package.json"]) {
+			await installDependencies();
+		}
 
-		writeTerminal("Starting development server...", "info");
 		await startDevServer();
 	} catch (error) {
 		status.value = "error";
@@ -333,9 +335,13 @@ onMounted(async () => {
 	await initWebContainer();
 });
 
-onUnmounted(() => {
+onUnmounted(async () => {
 	if (webcontainerInstance.value) {
-		webcontainerInstance.value.teardown();
+		try {
+			await webcontainerInstance.value.teardown();
+		} catch (error) {
+			writeTerminal(`Error during teardown: ${error}`, "error");
+		}
 	}
 });
 

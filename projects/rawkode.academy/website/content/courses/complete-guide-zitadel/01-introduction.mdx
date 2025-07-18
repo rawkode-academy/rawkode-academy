@@ -7,12 +7,39 @@ course: "complete-guide-zitadel"
 section: "Getting Started"
 order: 1
 publishedAt: 2025-07-02
-isDraft: false
+draft: false
 authors:
   - rawkode
 video:
   id: "hgg3yhgkk4jn9l7ryjw9ebs8"
   thumbnailUrl: "https://content.rawkode.academy/videos/hgg3yhgkk4jn9l7ryjw9ebs8/thumbnail.jpg"
+resources:
+  - title: "Zitadel Documentation"
+    description: "Official Zitadel documentation"
+    type: "url"
+    url: "https://zitadel.com/docs"
+    category: "documentation"
+  - title: "Zitadel GitHub Repository"
+    description: "Source code and examples"
+    type: "url"
+    url: "https://github.com/zitadel/zitadel"
+    category: "code"
+  - title: "Authentication Basics"
+    description: "Understanding OAuth2 and OpenID Connect"
+    type: "url"
+    url: "https://oauth.net/2/"
+    category: "documentation"
+  - title: "OAuth PKCE Interactive Demo"
+    description: "Try the OAuth PKCE flow right in your browser - Enter your Zitadel instance URL and client ID to test authentication"
+    type: "embed"
+    embedConfig:
+      container: "webcontainer"
+      src: "oauth-pkce-intro"
+      height: "800px"
+      startCommand: "bun run dev"
+      import:
+        localDir: "../complete-guide-zitadel/examples/oauth-pkce-app"
+    category: "code"
 ---
 
 ## Welcome to the Complete Guide to Zitadel

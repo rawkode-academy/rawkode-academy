@@ -6,10 +6,9 @@ import {
 	getEntries,
 	render,
 } from "astro:content";
-import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
-import Badge from "@/components/common/Badge.vue";
 import CourseModules from "@/components/courses/CourseModules.astro";
-import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
+import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
+import CourseDetailHero from "@/components/courses/CourseDetailHero.vue";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -49,62 +48,58 @@ export const getStaticPaths: GetStaticPaths =
 	};
 
 const { course } = Astro.props;
+
 const { Content } = await render(course);
 const authors = await getEntries(course.data.authors);
 
-// Get course modules for statistics
+// Get all modules for this course
 const allCourseModules = (await getCollection("courseModules"))
 	.filter((module) => module.data.course.id === course.id)
+	.filter((module) => !module.data.draft)
 	.sort((a, b) => a.data.order - b.data.order);
 
 const totalModules = allCourseModules.length;
+const totalDuration = allCourseModules.reduce(
+	(acc, module) => acc + (module.data.duration || 0),
+	0,
+);
+
+// Format duration
+function formatDuration(minutes: number): string {
+	if (minutes === 0) return "Self-paced";
+	const hours = Math.floor(minutes / 60);
+	const mins = minutes % 60;
+	if (hours === 0) return `${mins}m`;
+	if (mins === 0) return `${hours}h`;
+	return `${hours}h ${mins}m`;
+}
+
+// Utility function to get difficulty variant
 
 const imageUrl = await computeImageUrl(course);
 
-// Get difficulty badge variant
-function getDifficultyVariant(
-	difficulty: string,
-): "success" | "warning" | "danger" | "default" {
-	switch (difficulty) {
-		case "beginner":
-			return "success";
-		case "intermediate":
-			return "warning";
-		case "advanced":
-			return "danger";
-		default:
-			return "default";
-	}
-}
-
-const breadcrumbElements = [
-	{ title: "Home", link: "/" },
-	{ title: "Courses", link: "/courses" },
-	{ title: course.data.title, link: `/courses/${course.id}` },
-];
+// Format authors for the hero component
+const formattedAuthors = authors.map((author) => ({
+	name: author.data.name,
+	handle: author.data.handle,
+}));
 ---
 
 <Page
-	title={`${course.data.title} | Course`}
+	title={course.data.title}
 	description={course.data.description}
-	image={imageUrl ? {
-		image: imageUrl,
-		text: course.data.title,
-		format: "png" as const
-	} : undefined}
+	image={imageUrl
+		? {
+				image: imageUrl,
+				text: course.data.title,
+				format: "png" as const,
+			}
+		: undefined}
 	publishedAt={course.data.publishedAt}
 	updatedAt={course.data.updatedAt}
 	authors={authors}
 >
-	{imageUrl ? (
-		<CourseJsonLd
-			slot="extra-head"
-			course={course}
-			modules={allCourseModules}
-			authors={authors}
-			imageUrl={imageUrl}
-		/>
-	) : (
+	{imageUrl && (
 		<CourseJsonLd
 			slot="extra-head"
 			course={course}
@@ -112,108 +107,79 @@ const breadcrumbElements = [
 			authors={authors}
 		/>
 	)}
-		<div class="bg-white dark:bg-gray-900">
-		<!-- Breadcrumb Section -->
-		<div class="py-4 px-4 mx-auto max-w-screen-xl border-b border-gray-100 dark:border-gray-800">
-			<Breadcrumb elements={breadcrumbElements} />
-		</div>
-
-		<!-- Course Header -->
-		<div class="bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-			<div class="py-8 px-4 mx-auto max-w-screen-xl">
-								<div class="max-w-5xl mx-auto">
-					<!-- Course Meta -->
-										<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-						<div class="flex flex-wrap items-center gap-4">
-							<Badge
-								variant={getDifficultyVariant(course.data.difficulty)}
-								size="md"
-								class="shadow-sm"
-							>
-								{course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}{totalModules > 0 && ` • ${totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}`}
-							</Badge>
-
-
-							<Badge variant="default" size="md">
-								Published {new Intl.DateTimeFormat('en-US', {
-									year: 'numeric',
-									month: 'long',
-									day: 'numeric'
-								}).format(course.data.publishedAt)}
-							</Badge>
-						</div>
-
-						<!-- Instructor -->
-						<div class="flex items-center gap-3">
-							<span class="text-sm text-gray-500 dark:text-gray-400">Instructor:</span>
-							<div class="flex items-center gap-3">
-								{authors.map((author) => (
-									<div class="flex items-center gap-2">
-										<img
-											class="w-8 h-8 rounded-full object-cover border-2 border-purple-200 dark:border-purple-700"
-											src={`https://github.com/${author.data.handle}.png`}
-											alt={`Profile picture of ${author.data.name}`}
-										/>
-										<div class="text-sm">
-											<div class="font-medium text-gray-900 dark:text-white">{author.data.name}</div>
-											<div class="text-xs text-gray-500 dark:text-gray-400">@{author.data.handle}</div>
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</div>
-
-					<!-- Title and Description -->
-					<div>
-						<h1 class="text-4xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 leading-tight">
-							{course.data.title}
-						</h1>
-
-						<p class="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-4xl">
-							{course.data.description}
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Main Content -->
-		<div class="py-8 px-4 mx-auto max-w-screen-xl">
-
-			<!-- Course Content -->
-			<article class="format prose lg:prose-xl dark:format-invert max-w-none mb-16">
-				<Content />
-			</article>
-
-			<!-- Course Modules -->
-			<div class="mb-16">
-				<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Course Content</h2>
-				<CourseModules course={course} />
-			</div>
-
-			<!-- Sign up for updates -->
+	
+	<!-- Hero Section with Signup Form -->
+	<CourseDetailHero
+		title={course.data.title}
+		description={course.data.description}
+		moduleCount={totalModules}
+		totalDuration={formatDuration(totalDuration)}
+		difficulty={course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
+		authors={formattedAuthors}
+		client:load
+	>
+		<Fragment slot="signup-form">
 			{course.data.signupConfig && (
-				<CourseSignupForm 
+				<CourseSignupFormCompact 
 					courseId={course.id}
 					courseTitle={course.data.title}
 					signupConfig={course.data.signupConfig}
+					isAlreadySubscribed={false}
 					server:defer 
 				/>
 			)}
+		</Fragment>
+	</CourseDetailHero>
 
-			<!-- Back to Courses -->
-			<div class="pt-8 border-t border-gray-200 dark:border-gray-700">
-				<a
-					href="/courses"
-					class="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-				>
-					<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-					</svg>
-					Back to all courses
-				</a>
+	<div class="bg-gray-900">
+		<!-- Main Content -->
+		<div class="py-16 px-4 mx-auto max-w-screen-xl">
+			<!-- Course Overview Content -->
+			{Content && (
+				<div class="mb-16">
+					<h2 class="text-3xl font-bold text-white mb-8">Course Overview</h2>
+					<article class="prose prose-lg dark:prose-invert max-w-none">
+						<Content />
+					</article>
+				</div>
+			)}
+
+			<!-- Course Modules -->
+			<div id="course-content" class="mb-16 scroll-mt-20">
+				<h2 class="text-3xl font-bold text-white mb-8">Course Content</h2>
+				<CourseModules course={course} />
 			</div>
+
+			<!-- Resources -->
+			{course.data.resources && course.data.resources.length > 0 && (
+				<div class="mb-16">
+					<h2 class="text-3xl font-bold text-white mb-8">Course Resources</h2>
+					<div class="bg-gray-800 rounded-lg p-6">
+						{course.data.resources.map((resource) => (
+							<div class="flex items-start gap-4 mb-4 last:mb-0">
+								<div class="flex-1">
+									<h3 class="font-semibold text-white">{resource.title}</h3>
+									{resource.description && (
+										<p class="text-gray-400 text-sm mt-1">{resource.description}</p>
+									)}
+								</div>
+								{resource.type === "url" && resource.url && (
+									<a
+										href={resource.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="text-blue-400 hover:text-blue-300 transition-colors"
+									>
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+										</svg>
+									</a>
+								)}
+							</div>
+						))}
+					</div>
+				</div>
+			)}
 		</div>
 	</div>
 </Page>

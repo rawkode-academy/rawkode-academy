@@ -49,9 +49,9 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 		<h2 class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2">
 			{article.data.title}
 		</h2>
-		{article.data.openGraph.subtitle && (
+		{article.data.openGraph?.subtitle && (
 			<p class="mb-4 font-light text-gray-500 dark:text-gray-400 line-clamp-3">
-				{article.data.openGraph.subtitle}
+				{article.data.openGraph?.subtitle}
 			</p>
 		)}
 	</Fragment>
