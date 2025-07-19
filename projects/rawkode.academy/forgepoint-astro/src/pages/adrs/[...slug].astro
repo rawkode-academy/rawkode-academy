@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/BaseLayout.astro";
+import AppLayout from "../../components/AppLayout.astro";
 
 export async function getStaticPaths() {
 	const adrs = await getCollection("adrs");
@@ -16,11 +16,11 @@ const { Content } = await adr.render();
 const adrs = await getCollection("adrs");
 
 const statusColors = {
-	proposed: "bg-blue-100 text-blue-800",
-	accepted: "bg-green-100 text-green-800",
-	completed: "bg-purple-100 text-purple-800",
-	deprecated: "bg-gray-100 text-gray-800",
-	superseded: "bg-orange-100 text-orange-800",
+	proposed: "status-proposed",
+	accepted: "status-accepted",
+	completed: "status-completed",
+	deprecated: "status-deprecated",
+	superseded: "status-superseded",
 };
 
 const formatDate = (date: Date) => {
@@ -40,31 +40,303 @@ const supersedingAdr = adr.data.supersededBy
 	: null;
 ---
 
-<Layout title={adr.data.title}>
-	<main class="container mx-auto px-4 py-8 max-w-4xl">
-		<nav class="mb-8">
-			<a href="/adrs" class="text-blue-600 hover:underline">← Back to ADRs</a>
+<AppLayout title={`${adr.data.title} - ForgePoint`}>
+	<style>
+		.adr-detail {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+
+		.breadcrumb {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			color: #8b8b8d;
+			margin-bottom: 32px;
+		}
+
+		.breadcrumb a {
+			color: #8b8b8d;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.breadcrumb a:hover {
+			color: #e1e1e3;
+		}
+
+		.breadcrumb-separator {
+			color: #4b4b4d;
+		}
+
+		.adr-header {
+			margin-bottom: 32px;
+		}
+
+		.header-row {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+
+		.adr-title {
+			font-size: 32px;
+			font-weight: 600;
+			color: #fff;
+			line-height: 1.2;
+		}
+
+		.header-meta {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			flex-shrink: 0;
+		}
+
+		.status-badge {
+			padding: 6px 16px;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.status-proposed {
+			background-color: rgba(59, 130, 246, 0.2);
+			color: #3b82f6;
+		}
+
+		.status-accepted {
+			background-color: rgba(34, 197, 94, 0.2);
+			color: #22c55e;
+		}
+
+		.status-completed {
+			background-color: rgba(168, 85, 247, 0.2);
+			color: #a855f7;
+		}
+
+		.status-deprecated {
+			background-color: rgba(107, 114, 128, 0.2);
+			color: #6b7280;
+		}
+
+		.status-superseded {
+			background-color: rgba(251, 146, 60, 0.2);
+			color: #fb923c;
+		}
+
+		.date-label {
+			font-size: 13px;
+			color: #6b6b6d;
+		}
+
+		.superseded-notice {
+			background-color: rgba(251, 146, 60, 0.1);
+			border: 1px solid rgba(251, 146, 60, 0.3);
+			border-radius: 8px;
+			padding: 16px;
+			margin-bottom: 24px;
+		}
+
+		.superseded-text {
+			color: #fb923c;
+			font-size: 14px;
+			line-height: 1.6;
+		}
+
+		.superseded-link {
+			color: #fb923c;
+			text-decoration: none;
+			font-weight: 500;
+			transition: color 0.1s ease;
+		}
+
+		.superseded-link:hover {
+			color: #fed7aa;
+			text-decoration: underline;
+		}
+
+		.section {
+			margin-bottom: 40px;
+		}
+
+		.section-title {
+			font-size: 20px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 16px;
+		}
+
+		.content-box {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 24px;
+		}
+
+		.content-text {
+			font-size: 15px;
+			color: #e1e1e3;
+			line-height: 1.6;
+		}
+
+		.context-box {
+			border-color: #2a2a2d;
+		}
+
+		.decision-box {
+			border-color: #1e3a8a;
+			background-color: rgba(59, 130, 246, 0.05);
+		}
+
+		.consequences-box {
+			border-color: #166534;
+			background-color: rgba(34, 197, 94, 0.05);
+		}
+
+		.related-list {
+			display: grid;
+			gap: 12px;
+		}
+
+		.related-card {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 16px;
+			transition: all 0.2s ease;
+			cursor: pointer;
+		}
+
+		.related-card:hover {
+			background-color: #131316;
+			border-color: #2a2a2d;
+			transform: translateY(-2px);
+		}
+
+		.related-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 8px;
+		}
+
+		.related-link {
+			color: #e1e1e3;
+			text-decoration: none;
+			font-size: 15px;
+			font-weight: 500;
+			transition: color 0.1s ease;
+		}
+
+		.related-link:hover {
+			color: #5e6ad2;
+		}
+
+		.related-context {
+			font-size: 13px;
+			color: #8b8b8d;
+			line-height: 1.5;
+		}
+
+		.prose {
+			color: #e1e1e3;
+		}
+
+		.prose h1,
+		.prose h2,
+		.prose h3,
+		.prose h4,
+		.prose h5,
+		.prose h6 {
+			color: #fff;
+			font-weight: 600;
+			margin-top: 32px;
+			margin-bottom: 16px;
+		}
+
+		.prose p {
+			line-height: 1.7;
+			margin-bottom: 16px;
+		}
+
+		.prose ul,
+		.prose ol {
+			margin-bottom: 16px;
+			padding-left: 24px;
+		}
+
+		.prose li {
+			margin-bottom: 8px;
+		}
+
+		.prose code {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 4px;
+			padding: 2px 6px;
+			font-size: 14px;
+			color: #e1e1e3;
+		}
+
+		.prose pre {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 16px;
+			overflow-x: auto;
+			margin-bottom: 16px;
+		}
+
+		.prose pre code {
+			background: none;
+			border: none;
+			padding: 0;
+		}
+
+		.prose a {
+			color: #5e6ad2;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.prose a:hover {
+			color: #7b87e3;
+			text-decoration: underline;
+		}
+	</style>
+
+	<div class="adr-detail animate-fade-in">
+		<nav class="breadcrumb">
+			<a href="/adrs">ADRs</a>
+			<span class="breadcrumb-separator">/</span>
+			<span>{adr.data.title}</span>
 		</nav>
 		
 		<article>
-			<header class="mb-8">
-				<div class="flex items-start justify-between mb-4">
-					<h1 class="text-4xl font-bold">{adr.data.title}</h1>
-					<div class="flex items-center gap-2">
-						<span class={`px-3 py-1 rounded text-sm font-medium ${statusColors[adr.data.status]}`}>
-							{adr.data.status.toUpperCase()}
+			<header class="adr-header">
+				<div class="header-row">
+					<h1 class="adr-title">{adr.data.title}</h1>
+					<div class="header-meta">
+						<span class={`status-badge ${statusColors[adr.data.status]}`}>
+							{adr.data.status}
 						</span>
-						<span class="text-sm text-gray-500">
+						<span class="date-label">
 							{formatDate(adr.data.date)}
 						</span>
 					</div>
 				</div>
 				
 				{adr.data.supersededBy && supersedingAdr && (
-					<div class="bg-orange-50 border border-orange-200 p-4 rounded-lg mb-6">
-						<p class="text-orange-800">
-							<span class="font-semibold">Note:</span> This ADR has been superseded by{' '}
-							<a href={`/adrs/${supersedingAdr.slug}`} class="text-orange-600 hover:underline">
+					<div class="superseded-notice">
+						<p class="superseded-text">
+							<strong>Note:</strong> This ADR has been superseded by{' '}
+							<a href={`/adrs/${supersedingAdr.slug}`} class="superseded-link">
 								{supersedingAdr.data.title}
 							</a>
 						</p>
@@ -72,54 +344,52 @@ const supersedingAdr = adr.data.supersededBy
 				)}
 			</header>
 			
-			<section class="mb-8">
-				<h2 class="text-2xl font-semibold mb-4">Context</h2>
-				<div class="bg-gray-50 p-6 rounded-lg">
-					<p class="text-gray-800">{adr.data.context}</p>
+			<section class="section">
+				<h2 class="section-title">Context</h2>
+				<div class="content-box context-box">
+					<p class="content-text">{adr.data.context}</p>
 				</div>
 			</section>
 			
-			<section class="mb-8">
-				<h2 class="text-2xl font-semibold mb-4">Decision</h2>
-				<div class="bg-blue-50 p-6 rounded-lg">
-					<p class="text-gray-800">{adr.data.decision}</p>
+			<section class="section">
+				<h2 class="section-title">Decision</h2>
+				<div class="content-box decision-box">
+					<p class="content-text">{adr.data.decision}</p>
 				</div>
 			</section>
 			
-			<section class="mb-8">
-				<h2 class="text-2xl font-semibold mb-4">Consequences</h2>
-				<div class="bg-green-50 p-6 rounded-lg">
-					<p class="text-gray-800">{adr.data.consequences}</p>
+			<section class="section">
+				<h2 class="section-title">Consequences</h2>
+				<div class="content-box consequences-box">
+					<p class="content-text">{adr.data.consequences}</p>
 				</div>
 			</section>
 			
 			{relatedAdrs.length > 0 && (
-				<section class="mb-8">
-					<h2 class="text-2xl font-semibold mb-4">Related Decisions</h2>
-					<div class="space-y-3">
+				<section class="section">
+					<h2 class="section-title">Related Decisions</h2>
+					<div class="related-list">
 						{relatedAdrs.map((related) => (
-							<div class="border border-gray-200 rounded-lg p-4 hover:shadow transition-shadow">
-								<div class="flex items-center justify-between">
-									<h3 class="font-medium">
-										<a href={`/adrs/${related.slug}`} class="hover:text-blue-600 transition-colors">
-											{related.data.title}
-										</a>
-									</h3>
-									<span class={`px-2 py-1 rounded text-xs font-medium ${statusColors[related.data.status]}`}>
-										{related.data.status}
-									</span>
+							<a href={`/adrs/${related.slug}`} class="related-link">
+								<div class="related-card">
+									<div class="related-header">
+										<h3 class="related-link">{related.data.title}</h3>
+										<span class={`status-badge ${statusColors[related.data.status]}`}>
+											{related.data.status}
+										</span>
+									</div>
+									<p class="related-context">{related.data.context.substring(0, 150)}...</p>
 								</div>
-								<p class="text-sm text-gray-600 mt-1">{related.data.context.substring(0, 150)}...</p>
-							</div>
+							</a>
 						))}
 					</div>
 				</section>
 			)}
 			
-			<section class="prose prose-lg max-w-none">
-				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+			<section class="section prose">
+				<h2 class="section-title">Additional Details</h2>
 				<Content />
 			</section>
 		</article>
-	</main>
-</Layout>
+	</div>
+</AppLayout>
