@@ -1,8 +1,9 @@
 ---
 import "../styles/global.css";
+import { CommandPaletteWrapper } from "./CommandPaletteWrapper";
 
 export interface Props {
-  title: string;
+	title: string;
 }
 
 const { title } = Astro.props;
@@ -44,6 +45,7 @@ const { title } = Astro.props;
         display: flex;
         flex-direction: column;
         transition: transform 0.2s ease;
+        animation: slideInFromLeft 0.3s ease-out;
       }
 
       .sidebar-header {
@@ -229,6 +231,7 @@ const { title } = Astro.props;
         max-width: 1200px;
         margin: 0 auto;
         padding: 32px;
+        animation: fadeIn 0.4s ease-out;
       }
 
       /* Scrollbar styles */
@@ -346,7 +349,7 @@ const { title } = Astro.props;
               <circle cx="11" cy="11" r="8"></circle>
               <path d="m21 21-4.35-4.35"></path>
             </svg>
-            <input type="text" class="search-input" placeholder="Search or press ⌘K" />
+            <input type="text" class="search-input" placeholder="Search or press ⌘K" readonly style="cursor: pointer;" />
           </div>
           <div class="header-actions">
             <button class="header-button" title="Create new (⌘N)">
@@ -379,6 +382,9 @@ const { title } = Astro.props;
       </div>
     </div>
 
+    <!-- Command Palette React Component -->
+    <CommandPaletteWrapper client:load />
+
     <script>
       // Highlight active nav item
       const currentPath = window.location.pathname;
@@ -390,12 +396,28 @@ const { title } = Astro.props;
         }
       });
 
+      // Command palette state
+      let isCommandPaletteOpen = false;
+
+      // Function to toggle command palette
+      const toggleCommandPalette = () => {
+        isCommandPaletteOpen = !isCommandPaletteOpen;
+        const event = new CustomEvent('toggle-command-palette', { detail: isCommandPaletteOpen });
+        window.dispatchEvent(event);
+      };
+
+      // Search input click handler
+      document.querySelector('.search-input')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleCommandPalette();
+      });
+
       // Keyboard navigation
       document.addEventListener('keydown', (e) => {
         // Command palette
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
           e.preventDefault();
-          document.querySelector('.search-input')?.focus();
+          toggleCommandPalette();
         }
 
         // Quick navigation

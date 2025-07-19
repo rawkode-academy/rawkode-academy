@@ -1,65 +1,262 @@
 ---
+import AppLayout from "../../components/AppLayout.astro";
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/BaseLayout.astro";
 
 const prds = await getCollection("prds");
 
 const statusColors = {
-	proposed: "bg-blue-100 text-blue-800",
-	accepted: "bg-green-100 text-green-800",
-	completed: "bg-purple-100 text-purple-800",
-	deprecated: "bg-gray-100 text-gray-800",
+	proposed: "status-proposed",
+	accepted: "status-accepted",
+	completed: "status-completed",
+	deprecated: "status-deprecated",
+};
+
+const statusIcons = {
+	proposed: "○",
+	accepted: "◐",
+	completed: "●",
+	deprecated: "◌",
 };
 ---
 
-<Layout title="Product Requirement Documents">
-	<main class="container mx-auto px-4 py-8">
-		<h1 class="text-4xl font-bold mb-8">Product Requirement Documents (PRDs)</h1>
+<AppLayout title="PRDs - ForgePoint">
+	<style>
+		.prds-list {
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+
+		.page-header {
+			margin-bottom: 32px;
+		}
+
+		.page-title {
+			font-size: 24px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 8px;
+		}
+
+		.page-subtitle {
+			font-size: 14px;
+			color: #8b8b8d;
+		}
+
+		.prds-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+			gap: 16px;
+		}
+
+		.prd-card {
+			display: block;
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 24px;
+			text-decoration: none;
+			transition: all 0.1s ease;
+		}
+
+		.prd-card:hover {
+			background-color: #1a1a1d;
+			border-color: #2a2a2d;
+			transform: translateY(-2px);
+		}
+
+		.prd-header {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			margin-bottom: 16px;
+		}
+
+		.prd-title {
+			font-size: 18px;
+			font-weight: 600;
+			color: #e1e1e3;
+			margin-right: 12px;
+		}
+
+		.status-badge {
+			display: flex;
+			align-items: center;
+			gap: 4px;
+			padding: 2px 10px;
+			border-radius: 12px;
+			font-size: 11px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			flex-shrink: 0;
+		}
+
+		.status-icon {
+			font-size: 10px;
+		}
+
+		.status-proposed {
+			background-color: rgba(59, 130, 246, 0.2);
+			color: #3b82f6;
+		}
+
+		.status-accepted {
+			background-color: rgba(34, 197, 94, 0.2);
+			color: #22c55e;
+		}
+
+		.status-completed {
+			background-color: rgba(168, 85, 247, 0.2);
+			color: #a855f7;
+		}
+
+		.status-deprecated {
+			background-color: rgba(107, 114, 128, 0.2);
+			color: #6b7280;
+		}
+
+		.prd-description {
+			font-size: 13px;
+			color: #8b8b8d;
+			line-height: 1.6;
+			margin-bottom: 16px;
+		}
+
+		.prd-sections {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			margin-bottom: 16px;
+		}
+
+		.section-box {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 6px;
+			padding: 12px;
+		}
+
+		.section-label {
+			font-size: 11px;
+			font-weight: 600;
+			color: #5e6ad2;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-bottom: 6px;
+		}
+
+		.section-text {
+			font-size: 13px;
+			color: #e1e1e3;
+			line-height: 1.5;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+		}
+
+		.prd-meta {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 12px;
+			color: #6b6b6d;
+		}
+
+		.meta-item {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.meta-label {
+			font-weight: 500;
+		}
+
+		.empty-state {
+			text-align: center;
+			padding: 48px;
+			color: #6b6b6d;
+		}
+
+		.empty-state-icon {
+			width: 48px;
+			height: 48px;
+			margin: 0 auto 16px;
+			opacity: 0.5;
+		}
+
+		.empty-state-text {
+			font-size: 14px;
+			margin-bottom: 8px;
+		}
+
+		@media (max-width: 640px) {
+			.prds-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+
+	<div class="prds-list">
+		<div class="page-header">
+			<h1 class="page-title">Product Requirement Documents</h1>
+			<p class="page-subtitle">Detailed specifications for product features and enhancements</p>
+		</div>
 		
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		<div class="prds-grid">
 			{prds.map((prd) => (
-				<article class="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-					<div class="flex items-start justify-between mb-4">
-						<h2 class="text-2xl font-semibold">
-							<a href={`/prds/${prd.slug}`} class="hover:text-blue-600 transition-colors">
-								{prd.data.title}
-							</a>
-						</h2>
-						<span class={`px-2 py-1 rounded text-xs font-medium ${statusColors[prd.data.status]}`}>
-							{prd.data.status.toUpperCase()}
+				<a href={`/prds/${prd.slug}`} class="prd-card">
+					<div class="prd-header">
+						<h2 class="prd-title">{prd.data.title}</h2>
+						<span class={`status-badge ${statusColors[prd.data.status]}`}>
+							<span class="status-icon">{statusIcons[prd.data.status]}</span>
+							{prd.data.status}
 						</span>
 					</div>
 					
-					<p class="text-gray-600 mb-4">{prd.data.description}</p>
+					<p class="prd-description">{prd.data.description}</p>
 					
-					<div class="space-y-3 mb-4">
-						<div class="bg-gray-50 p-3 rounded">
-							<h3 class="text-sm font-semibold text-gray-700 mb-1">Problem</h3>
-							<p class="text-sm text-gray-600 line-clamp-2">{prd.data.problem}</p>
+					<div class="prd-sections">
+						<div class="section-box">
+							<div class="section-label">Problem</div>
+							<p class="section-text">{prd.data.problem}</p>
 						</div>
 						
-						<div class="bg-gray-50 p-3 rounded">
-							<h3 class="text-sm font-semibold text-gray-700 mb-1">Solution</h3>
-							<p class="text-sm text-gray-600 line-clamp-2">{prd.data.solution}</p>
+						<div class="section-box">
+							<div class="section-label">Solution</div>
+							<p class="section-text">{prd.data.solution}</p>
 						</div>
 					</div>
 					
-					<div class="flex items-center justify-between text-sm text-gray-500">
-						<span>
-							<span class="font-medium">Owner:</span> {prd.data.owner}
-						</span>
+					<div class="prd-meta">
+						<div class="meta-item">
+							<span class="meta-label">Owner:</span>
+							<span>{prd.data.owner}</span>
+						</div>
 						{prd.data.requirements && (
-							<span>
-								<span class="font-medium">Requirements:</span> {prd.data.requirements.length}
-							</span>
+							<div class="meta-item">
+								<span class="meta-label">Requirements:</span>
+								<span>{prd.data.requirements.length}</span>
+							</div>
 						)}
 					</div>
-				</article>
+				</a>
 			))}
 		</div>
 		
 		{prds.length === 0 && (
-			<p class="text-gray-500 text-center py-8">No PRDs have been created yet.</p>
+			<div class="empty-state">
+				<svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+					<polyline points="14 2 14 8 20 8"></polyline>
+					<line x1="16" y1="13" x2="8" y2="13"></line>
+					<line x1="16" y1="17" x2="8" y2="17"></line>
+					<polyline points="10 9 9 9 8 9"></polyline>
+				</svg>
+				<p class="empty-state-text">No PRDs yet</p>
+			</div>
 		)}
-	</main>
-</Layout>
+	</div>
+</AppLayout>
