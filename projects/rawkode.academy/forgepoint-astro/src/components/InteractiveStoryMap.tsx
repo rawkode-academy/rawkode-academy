@@ -976,62 +976,48 @@ export default function InteractiveStoryMap({
 	features,
 }: Props) {
 	return (
-		<div className="w-full h-screen border rounded-lg overflow-hidden bg-gray-900">
-			{/* Toolbar */}
-			<div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800">
-				<h2 className="text-xl font-semibold text-white">
-					Interactive Story Map
-				</h2>
-				<div className="flex gap-4 items-center">
-					<div className="text-sm text-gray-300 bg-gray-700 px-3 py-1 rounded">
-						💡 Shift + Click: Create story | Double-click: Edit | Drag: Link to
-						feature
+		<div className="w-full h-full bg-[#0a0a0a] relative">
+			{/* Floating Help */}
+			<div className="absolute top-4 left-4 z-10 bg-[#1a1a1d] border border-[#2a2a2d] rounded-lg p-3 max-w-sm">
+				<div className="text-xs text-gray-400 space-y-1">
+					<div><kbd className="bg-[#2a2a2d] px-1.5 py-0.5 rounded text-gray-300">Shift + Click</kbd> Create story</div>
+					<div><kbd className="bg-[#2a2a2d] px-1.5 py-0.5 rounded text-gray-300">Double-click</kbd> Edit item</div>
+					<div><kbd className="bg-[#2a2a2d] px-1.5 py-0.5 rounded text-gray-300">Drag</kbd> Link story to feature</div>
+				</div>
+			</div>
+
+			{/* Priority Legend */}
+			<div className="absolute bottom-4 left-4 z-10 bg-[#1a1a1d] border border-[#2a2a2d] rounded-lg p-3">
+				<div className="flex gap-3 text-xs">
+					<div className="flex items-center gap-1.5">
+						<div className="w-3 h-3 bg-red-600 rounded" />
+						<span className="text-gray-300">Must</span>
 					</div>
-					<div className="text-sm text-gray-300">
-						✏️ Full drawing tools • 🎨 Professional whiteboard • 🔗 Infinite
-						canvas
+					<div className="flex items-center gap-1.5">
+						<div className="w-3 h-3 bg-yellow-600 rounded" />
+						<span className="text-gray-300">Should</span>
+					</div>
+					<div className="flex items-center gap-1.5">
+						<div className="w-3 h-3 bg-blue-600 rounded" />
+						<span className="text-gray-300">Could</span>
+					</div>
+					<div className="flex items-center gap-1.5">
+						<div className="w-3 h-3 bg-gray-600 rounded" />
+						<span className="text-gray-300">Won't</span>
 					</div>
 				</div>
 			</div>
 
 			{/* Tldraw Canvas */}
-			<div className="h-[calc(100vh-140px)]">
-				<Tldraw shareZone={<div />} forceDarkMode={true} className="dark">
-					<StoryMapContent
-						personas={personas}
-						activities={activities}
-						stories={stories}
-						actions={actions}
-						features={features}
-					/>
-				</Tldraw>
-			</div>
-
-			{/* Legend */}
-			<div className="p-4 border-t border-gray-700 bg-gray-800">
-				<div className="flex flex-wrap gap-4 text-sm">
-					<div className="flex items-center gap-2">
-						<div className="w-4 h-4 bg-red-500 border border-red-400 rounded" />
-						<span className="text-white">MUST have</span>
-					</div>
-					<div className="flex items-center gap-2">
-						<div className="w-4 h-4 bg-yellow-500 border border-yellow-400 rounded" />
-						<span className="text-white">SHOULD have</span>
-					</div>
-					<div className="flex items-center gap-2">
-						<div className="w-4 h-4 bg-blue-500 border border-blue-400 rounded" />
-						<span className="text-white">COULD have</span>
-					</div>
-					<div className="flex items-center gap-2">
-						<div className="w-4 h-4 bg-gray-500 border border-gray-400 rounded" />
-						<span className="text-white">WON'T have</span>
-					</div>
-					<span className="ml-8 text-gray-300">
-						💡 Professional whiteboard with full drawing tools, shapes, and
-						collaboration features
-					</span>
-				</div>
-			</div>
+			<Tldraw shareZone={<div />} forceDarkMode={true} className="dark">
+				<StoryMapContent
+					personas={personas}
+					activities={activities}
+					stories={stories}
+					actions={actions}
+					features={features}
+				/>
+			</Tldraw>
 		</div>
 	);
 }
