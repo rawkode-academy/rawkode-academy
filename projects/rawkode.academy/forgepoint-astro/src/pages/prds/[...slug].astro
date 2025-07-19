@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/BaseLayout.astro";
+import AppLayout from "../../components/AppLayout.astro";
 
 export async function getStaticPaths() {
 	const prds = await getCollection("prds");
@@ -14,10 +14,10 @@ const { prd } = Astro.props;
 const { Content } = await prd.render();
 
 const statusColors = {
-	proposed: "bg-blue-100 text-blue-800",
-	accepted: "bg-green-100 text-green-800",
-	completed: "bg-purple-100 text-purple-800",
-	deprecated: "bg-gray-100 text-gray-800",
+	proposed: "status-proposed",
+	accepted: "status-accepted",
+	completed: "status-completed",
+	deprecated: "status-deprecated",
 };
 
 const formatDate = (date: Date | undefined) => {
@@ -30,92 +30,372 @@ const formatDate = (date: Date | undefined) => {
 };
 ---
 
-<Layout title={prd.data.title}>
-	<main class="container mx-auto px-4 py-8 max-w-4xl">
-		<nav class="mb-8">
-			<a href="/prds" class="text-blue-600 hover:underline">← Back to PRDs</a>
+<AppLayout title={`${prd.data.title} - ForgePoint`}>
+	<style>
+		.prd-detail {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+
+		.breadcrumb {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			color: #8b8b8d;
+			margin-bottom: 32px;
+		}
+
+		.breadcrumb a {
+			color: #8b8b8d;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.breadcrumb a:hover {
+			color: #e1e1e3;
+		}
+
+		.breadcrumb-separator {
+			color: #4b4b4d;
+		}
+
+		.prd-header {
+			margin-bottom: 32px;
+		}
+
+		.header-row {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+
+		.prd-title {
+			font-size: 32px;
+			font-weight: 600;
+			color: #fff;
+			line-height: 1.2;
+		}
+
+		.status-badge {
+			padding: 6px 16px;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.status-proposed {
+			background-color: rgba(59, 130, 246, 0.2);
+			color: #3b82f6;
+		}
+
+		.status-accepted {
+			background-color: rgba(34, 197, 94, 0.2);
+			color: #22c55e;
+		}
+
+		.status-completed {
+			background-color: rgba(168, 85, 247, 0.2);
+			color: #a855f7;
+		}
+
+		.status-deprecated {
+			background-color: rgba(107, 114, 128, 0.2);
+			color: #6b7280;
+		}
+
+		.prd-description {
+			font-size: 16px;
+			color: #8b8b8d;
+			line-height: 1.6;
+			margin-bottom: 24px;
+		}
+
+		.metadata-row {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+		}
+
+		.metadata-item {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 6px;
+			padding: 6px 16px;
+			font-size: 13px;
+			color: #e1e1e3;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.metadata-label {
+			color: #6b6b6d;
+			font-weight: 500;
+		}
+
+		.section {
+			margin-bottom: 40px;
+		}
+
+		.section-title {
+			font-size: 20px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 16px;
+		}
+
+		.stakeholders-list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+
+		.stakeholder-badge {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 6px;
+			padding: 4px 12px;
+			font-size: 13px;
+			color: #e1e1e3;
+		}
+
+		.content-box {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 24px;
+		}
+
+		.problem-box {
+			border-color: #dc2626;
+			background-color: rgba(239, 68, 68, 0.05);
+		}
+
+		.solution-box {
+			border-color: #16a34a;
+			background-color: rgba(34, 197, 94, 0.05);
+		}
+
+		.content-text {
+			font-size: 15px;
+			color: #e1e1e3;
+			line-height: 1.6;
+		}
+
+		.requirements-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.requirement-item {
+			position: relative;
+			padding-left: 24px;
+			margin-bottom: 12px;
+			font-size: 14px;
+			color: #e1e1e3;
+			line-height: 1.6;
+		}
+
+		.requirement-item:last-child {
+			margin-bottom: 0;
+		}
+
+		.requirement-item::before {
+			content: "•";
+			position: absolute;
+			left: 8px;
+			color: #5e6ad2;
+			font-weight: bold;
+		}
+
+		.metrics-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+			gap: 16px;
+		}
+
+		.metric-card {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 20px;
+		}
+
+		.metric-name {
+			font-size: 15px;
+			font-weight: 500;
+			color: #e1e1e3;
+			margin-bottom: 8px;
+		}
+
+		.metric-target {
+			font-size: 14px;
+			color: #8b8b8d;
+		}
+
+		.prose {
+			color: #e1e1e3;
+		}
+
+		.prose h1,
+		.prose h2,
+		.prose h3,
+		.prose h4,
+		.prose h5,
+		.prose h6 {
+			color: #fff;
+			font-weight: 600;
+			margin-top: 32px;
+			margin-bottom: 16px;
+		}
+
+		.prose p {
+			line-height: 1.7;
+			margin-bottom: 16px;
+		}
+
+		.prose ul,
+		.prose ol {
+			margin-bottom: 16px;
+			padding-left: 24px;
+		}
+
+		.prose li {
+			margin-bottom: 8px;
+		}
+
+		.prose code {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 4px;
+			padding: 2px 6px;
+			font-size: 14px;
+			color: #e1e1e3;
+		}
+
+		.prose pre {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 16px;
+			overflow-x: auto;
+			margin-bottom: 16px;
+		}
+
+		.prose pre code {
+			background: none;
+			border: none;
+			padding: 0;
+		}
+
+		.prose a {
+			color: #5e6ad2;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.prose a:hover {
+			color: #7b87e3;
+			text-decoration: underline;
+		}
+	</style>
+
+	<div class="prd-detail animate-fade-in">
+		<nav class="breadcrumb">
+			<a href="/prds">PRDs</a>
+			<span class="breadcrumb-separator">/</span>
+			<span>{prd.data.title}</span>
 		</nav>
 		
 		<article>
-			<header class="mb-8">
-				<div class="flex items-start justify-between mb-4">
-					<h1 class="text-4xl font-bold">{prd.data.title}</h1>
-					<span class={`px-3 py-1 rounded text-sm font-medium ${statusColors[prd.data.status]}`}>
-						{prd.data.status.toUpperCase()}
+			<header class="prd-header">
+				<div class="header-row">
+					<h1 class="prd-title">{prd.data.title}</h1>
+					<span class={`status-badge ${statusColors[prd.data.status]}`}>
+						{prd.data.status}
 					</span>
 				</div>
 				
-				<p class="text-xl text-gray-600 mb-6">{prd.data.description}</p>
+				<p class="prd-description">{prd.data.description}</p>
 				
-				<div class="flex flex-wrap gap-4 text-sm">
-					<div class="bg-gray-100 px-3 py-1 rounded">
-						<span class="font-medium">Owner:</span> {prd.data.owner}
+				<div class="metadata-row">
+					<div class="metadata-item">
+						<span class="metadata-label">Owner:</span>
+						<span>{prd.data.owner}</span>
 					</div>
-					{prd.data.createdAt && (
-						<div class="bg-gray-100 px-3 py-1 rounded">
-							<span class="font-medium">Created:</span> {formatDate(prd.data.createdAt)}
+					{formatDate(prd.data.createdAt) && (
+						<div class="metadata-item">
+							<span class="metadata-label">Created:</span>
+							<span>{formatDate(prd.data.createdAt)}</span>
 						</div>
 					)}
-					{prd.data.updatedAt && (
-						<div class="bg-gray-100 px-3 py-1 rounded">
-							<span class="font-medium">Updated:</span> {formatDate(prd.data.updatedAt)}
+					{formatDate(prd.data.updatedAt) && (
+						<div class="metadata-item">
+							<span class="metadata-label">Updated:</span>
+							<span>{formatDate(prd.data.updatedAt)}</span>
 						</div>
 					)}
 				</div>
 			</header>
 			
 			{prd.data.stakeholders && prd.data.stakeholders.length > 0 && (
-				<section class="mb-8">
-					<h2 class="text-2xl font-semibold mb-4">Stakeholders</h2>
-					<div class="flex flex-wrap gap-2">
+				<section class="section">
+					<h2 class="section-title">Stakeholders</h2>
+					<div class="stakeholders-list">
 						{prd.data.stakeholders.map((stakeholder) => (
-							<span class="bg-gray-100 px-3 py-1 rounded text-sm">{stakeholder}</span>
+							<span class="stakeholder-badge">{stakeholder}</span>
 						))}
 					</div>
 				</section>
 			)}
 			
-			<section class="mb-8">
-				<h2 class="text-2xl font-semibold mb-4">Problem Statement</h2>
-				<div class="bg-red-50 p-6 rounded-lg">
-					<p class="text-gray-800">{prd.data.problem}</p>
+			<section class="section">
+				<h2 class="section-title">Problem Statement</h2>
+				<div class="content-box problem-box">
+					<p class="content-text">{prd.data.problem}</p>
 				</div>
 			</section>
 			
-			<section class="mb-8">
-				<h2 class="text-2xl font-semibold mb-4">Proposed Solution</h2>
-				<div class="bg-green-50 p-6 rounded-lg">
-					<p class="text-gray-800">{prd.data.solution}</p>
+			<section class="section">
+				<h2 class="section-title">Proposed Solution</h2>
+				<div class="content-box solution-box">
+					<p class="content-text">{prd.data.solution}</p>
 				</div>
 			</section>
 			
-			<section class="mb-8">
-				<h2 class="text-2xl font-semibold mb-4">Requirements</h2>
-				<ul class="list-disc list-inside space-y-2">
+			<section class="section">
+				<h2 class="section-title">Requirements</h2>
+				<ul class="requirements-list">
 					{prd.data.requirements.map((requirement) => (
-						<li class="text-gray-700">{requirement}</li>
+						<li class="requirement-item">{requirement}</li>
 					))}
 				</ul>
 			</section>
 			
 			{prd.data.metrics && prd.data.metrics.length > 0 && (
-				<section class="mb-8">
-					<h2 class="text-2xl font-semibold mb-4">Success Metrics</h2>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<section class="section">
+					<h2 class="section-title">Success Metrics</h2>
+					<div class="metrics-grid">
 						{prd.data.metrics.map((metric) => (
-							<div class="bg-gray-50 p-4 rounded-lg">
-								<h3 class="font-medium text-gray-900">{metric.name}</h3>
-								<p class="text-sm text-gray-600">Target: {metric.target}</p>
+							<div class="metric-card">
+								<h3 class="metric-name">{metric.name}</h3>
+								<p class="metric-target">Target: {metric.target}</p>
 							</div>
 						))}
 					</div>
 				</section>
 			)}
 			
-			<section class="prose prose-lg max-w-none">
-				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+			<section class="section prose">
+				<h2 class="section-title">Additional Details</h2>
 				<Content />
 			</section>
 		</article>
-	</main>
-</Layout>
+	</div>
+</AppLayout>

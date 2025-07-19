@@ -247,7 +247,7 @@ export default function InteractiveStoryMap({
 			console.log("Editor not ready yet");
 			return;
 		}
-		
+
 		console.log("Editor ready, creating shapes");
 
 		// Clear all existing shapes to rebuild the canvas
@@ -555,9 +555,9 @@ export default function InteractiveStoryMap({
 			</div>
 
 			{/* Tldraw Canvas */}
-			<Tldraw 
-				shareZone={<div />} 
-				forceDarkMode={true} 
+			<Tldraw
+				shareZone={<div />}
+				forceDarkMode={true}
 				className="dark"
 				onMount={(editor) => {
 					console.log("Tldraw mounted, setting editor");

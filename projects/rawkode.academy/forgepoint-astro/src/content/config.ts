@@ -1,4 +1,4 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z, reference } from "astro:content";
 
 const personas = defineCollection({
 	type: "content",
@@ -22,7 +22,7 @@ const activities = defineCollection({
 		description: z.string(),
 		order: z.number().int().min(1),
 		outcome: z.string(),
-		personas: z.array(z.string()),
+		personas: z.array(reference("personas")),
 		metrics: z
 			.array(
 				z.object({
@@ -39,18 +39,18 @@ const stories = defineCollection({
 	schema: z.object({
 		title: z.string(),
 		description: z.string(),
-		asA: z.string(),
+		personaId: reference("personas"),
 		iWant: z.string(),
 		soThat: z.string(),
 		acceptanceCriteria: z.array(z.string()),
 		priority: z.enum(["must", "should", "could", "wont"]),
 		size: z.enum(["XS", "S", "M", "L", "XL"]).optional(),
-		activityId: z.string(),
-		featureId: z.string().optional(),
+		activityId: reference("activities"),
+		featureId: reference("features").optional(),
 		dependencies: z
 			.array(
 				z.object({
-					id: z.string(),
+					id: reference("stories"),
 					type: z.enum(["blocks", "requires", "relates-to"]),
 					duration: z.string().optional(),
 				}),
@@ -82,7 +82,7 @@ const features = defineCollection({
 		dependencies: z
 			.array(
 				z.object({
-					id: z.string(),
+					id: reference("features"),
 					type: z.enum(["blocks", "requires", "relates-to"]),
 					duration: z.string().optional(),
 				}),
@@ -130,8 +130,8 @@ const adrs = defineCollection({
 		decision: z.string(),
 		consequences: z.string(),
 		date: z.date(),
-		supersededBy: z.string().optional(),
-		relatedDecisions: z.array(z.string()).optional(),
+		supersededBy: reference("adrs").optional(),
+		relatedDecisions: z.array(reference("adrs")).optional(),
 	}),
 });
 
@@ -140,11 +140,11 @@ const actions = defineCollection({
 	schema: z.object({
 		title: z.string(),
 		description: z.string(),
-		persona: z.string(),
-		activityId: z.string(),
+		personaId: reference("personas"),
+		activityId: reference("activities"),
 		type: z.enum(["click", "input", "navigate", "view", "interact"]),
 		outcome: z.string(),
-		storyId: z.string().optional(),
+		storyId: reference("stories").optional(),
 		sequence: z.number().int().min(1).optional(),
 		preconditions: z.array(z.string()).optional(),
 		postconditions: z.array(z.string()).optional(),

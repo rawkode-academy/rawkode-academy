@@ -11,19 +11,19 @@ const features = await getCollection("features");
 
 // Debug logging
 console.log("Collections loaded:", {
-  personas: personas.length,
-  activities: activities.length,
-  stories: stories.length,
-  actions: actions.length,
-  features: features.length,
+	personas: personas.length,
+	activities: activities.length,
+	stories: stories.length,
+	actions: actions.length,
+	features: features.length,
 });
 
 // Add id field if missing
-const activitiesWithId = activities.map(a => ({ ...a, id: a.slug }));
-const personasWithId = personas.map(p => ({ ...p, id: p.slug }));
-const storiesWithId = stories.map(s => ({ ...s, id: s.slug }));
-const actionsWithId = actions.map(a => ({ ...a, id: a.slug }));
-const featuresWithId = features.map(f => ({ ...f, id: f.slug }));
+const activitiesWithId = activities.map((a) => ({ ...a, id: a.slug }));
+const personasWithId = personas.map((p) => ({ ...p, id: p.slug }));
+const storiesWithId = stories.map((s) => ({ ...s, id: s.slug }));
+const actionsWithId = actions.map((a) => ({ ...a, id: a.slug }));
+const featuresWithId = features.map((f) => ({ ...f, id: f.slug }));
 ---
 
 <AppLayout title="Story Map - ForgePoint">

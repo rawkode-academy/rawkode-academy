@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/BaseLayout.astro";
+import AppLayout from "../../components/AppLayout.astro";
 
 export async function getStaticPaths() {
 	const features = await getCollection("features");
@@ -17,61 +17,377 @@ const stories = await getCollection("stories");
 const relatedStories = stories.filter((s) => s.data.featureId === feature.slug);
 
 const priorityColors = {
-	must: "bg-red-100 text-red-800",
-	should: "bg-yellow-100 text-yellow-800",
-	could: "bg-green-100 text-green-800",
-	wont: "bg-gray-100 text-gray-800",
+	must: "priority-must",
+	should: "priority-should",
+	could: "priority-could",
+	wont: "priority-wont",
 };
 
-const sizeLabels = {
-	XS: "bg-blue-100 text-blue-800",
-	S: "bg-blue-200 text-blue-900",
-	M: "bg-blue-300 text-blue-900",
-	L: "bg-blue-400 text-blue-900",
-	XL: "bg-blue-500 text-white",
+const sizeStyles = {
+	XS: "size-xs",
+	S: "size-s",
+	M: "size-m",
+	L: "size-l",
+	XL: "size-xl",
 };
 ---
 
-<Layout title={feature.data.title}>
-	<main class="container mx-auto px-4 py-8 max-w-4xl">
-		<nav class="mb-8">
-			<a href="/features" class="text-blue-600 hover:underline">← Back to Features</a>
+<AppLayout title={`${feature.data.title} - ForgePoint`}>
+	<style>
+		.feature-detail {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+
+		.breadcrumb {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			color: #8b8b8d;
+			margin-bottom: 32px;
+		}
+
+		.breadcrumb a {
+			color: #8b8b8d;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.breadcrumb a:hover {
+			color: #e1e1e3;
+		}
+
+		.breadcrumb-separator {
+			color: #4b4b4d;
+		}
+
+		.feature-header {
+			margin-bottom: 32px;
+		}
+
+		.header-row {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+
+		.feature-title {
+			font-size: 32px;
+			font-weight: 600;
+			color: #fff;
+			line-height: 1.2;
+		}
+
+		.feature-badges {
+			display: flex;
+			gap: 8px;
+			flex-shrink: 0;
+		}
+
+		.priority-badge {
+			padding: 6px 16px;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.priority-must {
+			background-color: rgba(239, 68, 68, 0.2);
+			color: #ef4444;
+		}
+
+		.priority-should {
+			background-color: rgba(245, 158, 11, 0.2);
+			color: #f59e0b;
+		}
+
+		.priority-could {
+			background-color: rgba(59, 130, 246, 0.2);
+			color: #3b82f6;
+		}
+
+		.priority-wont {
+			background-color: rgba(107, 114, 128, 0.2);
+			color: #6b7280;
+		}
+
+		.size-badge {
+			padding: 6px 16px;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 600;
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			color: #a8a8a9;
+		}
+
+		.size-xs { color: #60a5fa; border-color: #60a5fa; }
+		.size-s { color: #3b82f6; border-color: #3b82f6; }
+		.size-m { color: #2563eb; border-color: #2563eb; }
+		.size-l { color: #1d4ed8; border-color: #1d4ed8; }
+		.size-xl { color: #1e40af; border-color: #1e40af; }
+
+		.feature-description {
+			font-size: 16px;
+			color: #8b8b8d;
+			line-height: 1.6;
+			margin-bottom: 24px;
+		}
+
+		.enhancement-box {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 24px;
+		}
+
+		.enhancement-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: #5e6ad2;
+			margin-bottom: 8px;
+		}
+
+		.enhancement-text {
+			font-size: 15px;
+			color: #e1e1e3;
+			line-height: 1.6;
+		}
+
+		.section {
+			margin-bottom: 40px;
+		}
+
+		.section-title {
+			font-size: 20px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 16px;
+		}
+
+		.dependencies-list {
+			display: grid;
+			gap: 12px;
+		}
+
+		.dependency-item {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			padding: 16px;
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 6px;
+		}
+
+		.dependency-type {
+			font-size: 14px;
+			font-weight: 600;
+			color: #5e6ad2;
+			text-transform: capitalize;
+			min-width: 100px;
+		}
+
+		.dependency-id {
+			flex: 1;
+			font-size: 14px;
+			color: #e1e1e3;
+		}
+
+		.dependency-duration {
+			font-size: 12px;
+			color: #6b6b6d;
+		}
+
+		.stories-list {
+			display: grid;
+			gap: 16px;
+		}
+
+		.story-card {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 20px;
+			transition: all 0.2s ease;
+		}
+
+		.story-card:hover {
+			background-color: #131316;
+			border-color: #2a2a2d;
+		}
+
+		.story-header {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 12px;
+		}
+
+		.story-link {
+			color: #e1e1e3;
+			text-decoration: none;
+			font-size: 16px;
+			font-weight: 500;
+			transition: color 0.1s ease;
+		}
+
+		.story-link:hover {
+			color: #5e6ad2;
+		}
+
+		.story-badges {
+			display: flex;
+			gap: 6px;
+			flex-shrink: 0;
+		}
+
+		.story-priority {
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-size: 11px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.story-size {
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-size: 11px;
+			font-weight: 600;
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			color: #a8a8a9;
+		}
+
+		.story-description {
+			font-size: 14px;
+			color: #8b8b8d;
+			margin-bottom: 8px;
+			line-height: 1.5;
+		}
+
+		.story-format {
+			font-size: 12px;
+			color: #6b6b6d;
+			line-height: 1.4;
+		}
+
+		.prose {
+			color: #e1e1e3;
+		}
+
+		.prose h1,
+		.prose h2,
+		.prose h3,
+		.prose h4,
+		.prose h5,
+		.prose h6 {
+			color: #fff;
+			font-weight: 600;
+			margin-top: 32px;
+			margin-bottom: 16px;
+		}
+
+		.prose p {
+			line-height: 1.7;
+			margin-bottom: 16px;
+		}
+
+		.prose ul,
+		.prose ol {
+			margin-bottom: 16px;
+			padding-left: 24px;
+		}
+
+		.prose li {
+			margin-bottom: 8px;
+		}
+
+		.prose code {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 4px;
+			padding: 2px 6px;
+			font-size: 14px;
+			color: #e1e1e3;
+		}
+
+		.prose pre {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 16px;
+			overflow-x: auto;
+			margin-bottom: 16px;
+		}
+
+		.prose pre code {
+			background: none;
+			border: none;
+			padding: 0;
+		}
+
+		.prose a {
+			color: #5e6ad2;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.prose a:hover {
+			color: #7b87e3;
+			text-decoration: underline;
+		}
+	</style>
+
+	<div class="feature-detail animate-fade-in">
+		<nav class="breadcrumb">
+			<a href="/features">Features</a>
+			<span class="breadcrumb-separator">/</span>
+			<span>{feature.data.title}</span>
 		</nav>
 		
 		<article>
-			<header class="mb-8">
-				<div class="flex items-start justify-between mb-4">
-					<h1 class="text-4xl font-bold">{feature.data.title}</h1>
-					<div class="flex gap-2">
-						<span class={`px-3 py-1 rounded text-sm font-medium ${priorityColors[feature.data.priority]}`}>
-							{feature.data.priority.toUpperCase()}
+			<header class="feature-header">
+				<div class="header-row">
+					<h1 class="feature-title">{feature.data.title}</h1>
+					<div class="feature-badges">
+						<span class={`priority-badge ${priorityColors[feature.data.priority]}`}>
+							{feature.data.priority}
 						</span>
 						{feature.data.size && (
-							<span class={`px-3 py-1 rounded text-sm font-medium ${sizeLabels[feature.data.size]}`}>
+							<span class={`size-badge ${sizeStyles[feature.data.size]}`}>
 								{feature.data.size}
 							</span>
 						)}
 					</div>
 				</div>
 				
-				<p class="text-xl text-gray-600 mb-6">{feature.data.description}</p>
+				<p class="feature-description">{feature.data.description}</p>
 				
-				<div class="bg-gray-50 p-6 rounded-lg">
-					<h2 class="text-lg font-semibold mb-2">Enhancement</h2>
-					<p class="text-gray-700">{feature.data.enhancement}</p>
+				<div class="enhancement-box">
+					<h2 class="enhancement-title">Enhancement</h2>
+					<p class="enhancement-text">{feature.data.enhancement}</p>
 				</div>
 			</header>
 			
 			{feature.data.dependencies && feature.data.dependencies.length > 0 && (
-				<section class="mb-8">
-					<h2 class="text-2xl font-semibold mb-4">Dependencies</h2>
-					<div class="space-y-2">
+				<section class="section">
+					<h2 class="section-title">Dependencies</h2>
+					<div class="dependencies-list">
 						{feature.data.dependencies.map((dep) => (
-							<div class="flex items-center gap-4 p-3 bg-gray-50 rounded">
-								<span class="font-medium capitalize">{dep.type.replace('-', ' ')}</span>
-								<span class="text-gray-600">{dep.id}</span>
+							<div class="dependency-item">
+								<span class="dependency-type">{dep.type.replace('-', ' ')}</span>
+								<span class="dependency-id">{dep.id}</span>
 								{dep.duration && (
-									<span class="text-sm text-gray-500">Duration: {dep.duration}</span>
+									<span class="dependency-duration">Duration: {dep.duration}</span>
 								)}
 							</div>
 						))}
@@ -80,30 +396,28 @@ const sizeLabels = {
 			)}
 			
 			{relatedStories.length > 0 && (
-				<section class="mb-8">
-					<h2 class="text-2xl font-semibold mb-4">Related Stories</h2>
-					<div class="space-y-4">
+				<section class="section">
+					<h2 class="section-title">Related Stories</h2>
+					<div class="stories-list">
 						{relatedStories.map((story) => (
-							<div class="border border-gray-200 rounded-lg p-4 hover:shadow transition-shadow">
-								<div class="flex items-start justify-between mb-2">
-									<h3 class="font-medium">
-										<a href={`/stories/${story.slug}`} class="hover:text-blue-600 transition-colors">
-											{story.data.title}
-										</a>
-									</h3>
-									<div class="flex gap-2">
-										<span class={`px-2 py-1 rounded text-xs font-medium ${priorityColors[story.data.priority]}`}>
-											{story.data.priority.toUpperCase()}
+							<div class="story-card">
+								<div class="story-header">
+									<a href={`/stories/${story.slug}`} class="story-link">
+										{story.data.title}
+									</a>
+									<div class="story-badges">
+										<span class={`story-priority ${priorityColors[story.data.priority]}`}>
+											{story.data.priority}
 										</span>
 										{story.data.size && (
-											<span class={`px-2 py-1 rounded text-xs font-medium ${sizeLabels[story.data.size]}`}>
+											<span class={`story-size ${sizeStyles[story.data.size]}`}>
 												{story.data.size}
 											</span>
 										)}
 									</div>
 								</div>
-								<p class="text-sm text-gray-600">{story.data.description}</p>
-								<div class="mt-2 text-xs text-gray-500">
+								<p class="story-description">{story.data.description}</p>
+								<div class="story-format">
 									As a {story.data.asA}, I want {story.data.iWant}
 								</div>
 							</div>
@@ -112,10 +426,10 @@ const sizeLabels = {
 				</section>
 			)}
 			
-			<section class="prose prose-lg max-w-none">
-				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+			<section class="section prose">
+				<h2 class="section-title">Additional Details</h2>
 				<Content />
 			</section>
 		</article>
-	</main>
-</Layout>
+	</div>
+</AppLayout>
