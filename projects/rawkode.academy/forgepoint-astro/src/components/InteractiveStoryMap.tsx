@@ -409,6 +409,52 @@ export default function InteractiveStoryMap({
 			});
 		});
 
+		// Create arrows from stories to features
+		stories.forEach((story) => {
+			if (story.data.featureId) {
+				const storyId = story.slug || story.id;
+				const featureId = story.data.featureId;
+				const feature = features.find(f => (f.slug || f.id) === featureId);
+				
+				if (feature) {
+					const activityId = story.data.activityId;
+					const activityIndex = sortedActivities.findIndex(a => (a.slug || a.id) === activityId);
+					
+					if (activityIndex !== -1) {
+						const storyX = 100 + activityIndex * 360;
+						const featureX = 100 + sortedActivities.length * 360 + 100;
+						const featureIndex = features.findIndex(f => (f.slug || f.id) === featureId);
+						const featureY = 150 + featureIndex * 180;
+						
+						// Find the story shape to get its Y position
+						const storyShape = shapes.find(s => s.id === createShapeId(`story-${storyId}`));
+						if (storyShape) {
+							shapes.push({
+								id: createShapeId(`arrow-story-${storyId}-feature-${featureId}`),
+								type: "arrow" as const,
+								x: storyX + 280,
+								y: storyShape.y + 50,
+								props: {
+									start: {
+										x: 0,
+										y: 0,
+									},
+									end: {
+										x: featureX - (storyX + 280),
+										y: featureY + 80 - (storyShape.y + 50),
+									},
+									color: "green" as const,
+									dash: "solid" as const,
+									size: "m" as const,
+									arrowheadEnd: "arrow" as const,
+								},
+							});
+						}
+					}
+				}
+			}
+		});
+
 		if (shapes.length > 0) {
 			console.log(`Creating ${shapes.length} shapes`);
 			editor.createShapes(shapes);
