@@ -695,6 +695,8 @@ export default function InteractiveStoryMap({
 				onMount={(editor) => {
 					console.log("Tldraw mounted, setting editor");
 					setEditor(editor);
+					// Set initial viewport
+					editor.setCamera({ x: 0, y: 0, z: 1 });
 				}}
 			/>
 		</div>
