@@ -18,12 +18,40 @@ console.log("Collections loaded:", {
 	features: features.length,
 });
 
-// Add id field if missing
-const activitiesWithId = activities.map((a) => ({ ...a, id: a.slug }));
+// Process collections to match the format expected by the React component
 const personasWithId = personas.map((p) => ({ ...p, id: p.slug }));
-const storiesWithId = stories.map((s) => ({ ...s, id: s.slug }));
-const actionsWithId = actions.map((a) => ({ ...a, id: a.slug }));
 const featuresWithId = features.map((f) => ({ ...f, id: f.slug }));
+
+const activitiesWithId = activities.map((activity) => ({
+	...activity,
+	id: activity.slug,
+	data: {
+		...activity.data,
+		personas: activity.data.personas.map((p) => p.slug || p.id),
+	},
+}));
+
+const storiesWithId = stories.map((story) => ({
+	...story,
+	id: story.slug,
+	data: {
+		...story.data,
+		personaId: story.data.personaId.slug,
+		activityId: story.data.activityId.slug,
+		featureId: story.data.featureId?.slug,
+	},
+}));
+
+const actionsWithId = actions.map((action) => ({
+	...action,
+	id: action.slug,
+	data: {
+		...action.data,
+		personaId: action.data.personaId.slug,
+		activityId: action.data.activityId.slug,
+		storyId: action.data.storyId?.slug,
+	},
+}));
 ---
 
 <AppLayout title="Story Map - ForgePoint">
