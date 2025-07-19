@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Tldraw, createShapeId, Editor, toRichText } from "tldraw";
+import { Tldraw, createShapeId, toRichText, type Editor } from "tldraw";
 import "tldraw/tldraw.css";
+import StoryCreationModal from "./StoryCreationModal";
 
 interface Activity {
 	id: string;
@@ -81,7 +82,7 @@ const priorityColors = {
 } as const;
 
 // Create shapes for personas at the top
-const createPersonaShapes = (personas: Persona[], editor: Editor) => {
+const createPersonaShapes = (personas: Persona[]) => {
 	const shapes = personas.map((persona, index) => {
 		const colors = ["violet", "blue", "green", "orange", "red"];
 		const personaId = persona.slug || persona.id;
@@ -227,6 +228,8 @@ export default function InteractiveStoryMap({
 	features = [],
 }: Props) {
 	const [editor, setEditor] = useState<Editor | null>(null);
+	const [showStoryModal, setShowStoryModal] = useState(false);
+	const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
 
 	// Debug logging
 	console.log("InteractiveStoryMap props:", {
@@ -339,7 +342,7 @@ export default function InteractiveStoryMap({
 			console.log("Creating shapes for activities:", sortedActivities.length);
 
 			// Create persona shapes
-			shapes.push(...createPersonaShapes(personas, editor));
+			shapes.push(...createPersonaShapes(personas));
 
 			// Create activity shapes
 			sortedActivities.forEach((activity, index) => {
@@ -602,49 +605,10 @@ export default function InteractiveStoryMap({
 			if (clickedActivity && point.y > 600) {
 				// Check if holding shift key for creation mode
 				if (e.shiftKey) {
-					const title = prompt("Enter story title:");
-					if (!title) return;
-
-					const description = prompt("Enter story description:") || "";
-					const personaId = prompt("As a (persona):") || "learner";
-					const iWant = prompt("I want to:") || "";
-					const soThat = prompt("So that:") || "";
-
 					// Check if we're in development mode
 					if (window.location.hostname === "localhost") {
-						try {
-							const activityId = clickedActivity.slug || clickedActivity.id;
-							const response = await fetch("/api/stories", {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({
-									title,
-									description,
-									personaId,
-									iWant,
-									soThat,
-									acceptanceCriteria: [],
-									priority: "should",
-									activityId: activityId,
-								}),
-							});
-
-							if (response.ok) {
-								const result = await response.json();
-								alert(`Story created: ${result.filename}`);
-								// Reload to show new story
-								window.location.reload();
-							} else {
-								const error = await response.json();
-								alert(`Error creating story: ${error.error}`);
-							}
-						} catch (err) {
-							alert(
-								`Error: ${err instanceof Error ? err.message : String(err)}`,
-							);
-						}
+						setSelectedActivity(clickedActivity);
+						setShowStoryModal(true);
 					} else {
 						alert(
 							"Story creation is only available in development mode. In production, stories should be created via Git.",
@@ -662,6 +626,30 @@ export default function InteractiveStoryMap({
 			editor.off("pointer:up", handleCanvasClick);
 		};
 	}, [editor, sortedActivities]);
+
+	const handleStorySubmit = async (data: any) => {
+		try {
+			const response = await fetch("/api/stories", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				// Show success and reload
+				setShowStoryModal(false);
+				window.location.reload();
+			} else {
+				const error = await response.json();
+				alert(`Error creating story: ${error.error}`);
+			}
+		} catch (err) {
+			alert(`Error: ${err instanceof Error ? err.message : String(err)}`);
+		}
+	};
 
 	return (
 		<div className="w-full h-full bg-[#0a0a0a] relative">
@@ -723,6 +711,19 @@ export default function InteractiveStoryMap({
 					editor.setCamera({ x: 0, y: 0, z: 1 });
 				}}
 			/>
+
+			{/* Story Creation Modal */}
+			{selectedActivity && (
+				<StoryCreationModal
+					isOpen={showStoryModal}
+					onClose={() => setShowStoryModal(false)}
+					onSubmit={handleStorySubmit}
+					activityId={selectedActivity.slug || selectedActivity.id}
+					activityTitle={selectedActivity.data.title}
+					personas={personas}
+					features={features}
+				/>
+			)}
 		</div>
 	);
 }
