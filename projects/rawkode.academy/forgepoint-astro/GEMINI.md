@@ -8,6 +8,8 @@ ALWAYS ASK: How can we elevate this? How can we improve? It's not done, not ever
 
 NEVER SIMPLIFY TO AVOID HARD PROBLEMS.
 
+ALWAYS REVIEW THE LATEST CODE CHANGES BEFORE MAKING YOUR REPLY.
+
 
 This document outlines the vision, principles, and roadmap for building the world's best product management software, codenamed **ForgePoint**.
 

@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import AppLayout from "../components/AppLayout.astro";
 import InteractiveStoryMap from "../components/InteractiveStoryMap.tsx";
 import { getCollection } from "astro:content";
 
@@ -10,13 +10,15 @@ const actions = await getCollection("actions");
 const features = await getCollection("features");
 ---
 
-<BaseLayout title="Interactive Story Map - ForgePoint">
-  <InteractiveStoryMap 
-    personas={personas}
-    activities={activities} 
-    stories={stories}
-    actions={actions}
-    features={features}
-    client:load
-  />
-</BaseLayout>
+<AppLayout title="Story Map - ForgePoint">
+  <div style="height: calc(100vh - 48px); width: 100%; overflow: hidden;">
+    <InteractiveStoryMap 
+      personas={personas}
+      activities={activities} 
+      stories={stories}
+      actions={actions}
+      features={features}
+      client:load
+    />
+  </div>
+</AppLayout>
