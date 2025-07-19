@@ -34,6 +34,7 @@ interface Story {
 		soThat: string;
 		priority: "must" | "should" | "could" | "wont";
 		activityId: string;
+		featureId?: string;
 	};
 }
 
