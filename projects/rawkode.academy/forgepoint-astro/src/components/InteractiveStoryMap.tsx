@@ -316,17 +316,27 @@ export default function InteractiveStoryMap({
 			return;
 		}
 
-		console.log("Editor ready, creating shapes");
+		console.log("Editor ready, scheduling shape creation...");
 
-		// Clear all existing shapes to rebuild the canvas
-		const allShapes = [...editor.getCurrentPageShapeIds()];
-		if (allShapes.length > 0) {
-			editor.deleteShapes(allShapes);
-		}
+		// Add delay to ensure tldraw canvas is fully initialized
+		const timeoutId = setTimeout(() => {
+			console.log("Creating shapes after delay...");
+			
+			// Double-check editor is still valid
+			if (!editor || editor.isDisposed) {
+				console.log("Editor was disposed during timeout");
+				return;
+			}
 
-		// Create all shapes
-		const shapes: any[] = [];
-		console.log("Creating shapes for activities:", sortedActivities.length);
+			// Clear all existing shapes to rebuild the canvas
+			const allShapes = [...editor.getCurrentPageShapeIds()];
+			if (allShapes.length > 0) {
+				editor.deleteShapes(allShapes);
+			}
+
+			// Create all shapes
+			const shapes: any[] = [];
+			console.log("Creating shapes for activities:", sortedActivities.length);
 
 		// Create persona shapes
 		shapes.push(...createPersonaShapes(personas, editor));
@@ -523,16 +533,22 @@ export default function InteractiveStoryMap({
 			}
 		});
 
-		if (shapes.length > 0) {
-			console.log(`Creating ${shapes.length} shapes`);
-			console.log("First few shapes:", shapes.slice(0, 3).map(s => ({ id: s.id, x: s.x, y: s.y, type: s.type })));
-			editor.createShapes(shapes);
-			// Center the view on the content
-			setTimeout(() => {
-				editor.zoomToFit();
-				console.log("Camera bounds after zoom:", editor.getViewportScreenBounds());
-			}, 100);
-		}
+			if (shapes.length > 0) {
+				console.log(`Creating ${shapes.length} shapes`);
+				console.log("First few shapes:", shapes.slice(0, 3).map(s => ({ id: s.id, x: s.x, y: s.y, type: s.type })));
+				editor.createShapes(shapes);
+				// Center the view on the content
+				setTimeout(() => {
+					editor.zoomToFit();
+					console.log("Camera bounds after zoom:", editor.getViewportScreenBounds());
+				}, 100);
+			}
+		}, 300); // 300ms delay to ensure canvas is ready
+		
+		// Cleanup
+		return () => {
+			clearTimeout(timeoutId);
+		};
 	}, [editor, sortedActivities, personas, stories, actions, features]);
 
 	// Add click handler for creating new stories
