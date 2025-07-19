@@ -7,17 +7,22 @@ const activities = await getCollection("activities");
 const features = await getCollection("features");
 
 // Group stories by activity
-const storiesByActivity = stories.reduce((acc, story) => {
-  const activityId = story.data.activityId;
-  if (!acc[activityId]) {
-    acc[activityId] = [];
-  }
-  acc[activityId].push(story);
-  return acc;
-}, {} as Record<string, typeof stories>);
+const storiesByActivity = stories.reduce(
+	(acc, story) => {
+		const activityId = story.data.activityId;
+		if (!acc[activityId]) {
+			acc[activityId] = [];
+		}
+		acc[activityId].push(story);
+		return acc;
+	},
+	{} as Record<string, typeof stories>,
+);
 
 // Sort activities by order
-const sortedActivities = [...activities].sort((a, b) => a.data.order - b.data.order);
+const sortedActivities = [...activities].sort(
+	(a, b) => a.data.order - b.data.order,
+);
 ---
 
 <AppLayout title="Stories - ForgePoint">
@@ -277,6 +282,7 @@ const sortedActivities = [...activities].sort((a, b) => a.data.order - b.data.or
       </div>
     </div>
 
+    <div class="stagger-children">
     {sortedActivities.map((activity) => {
       const activityStories = storiesByActivity[activity.id] || [];
       if (activityStories.length === 0) return null;
@@ -326,6 +332,7 @@ const sortedActivities = [...activities].sort((a, b) => a.data.order - b.data.or
         </div>
       );
     })}
+    </div>
 
     {stories.length === 0 && (
       <div class="empty-state">

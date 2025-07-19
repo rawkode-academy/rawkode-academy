@@ -22,7 +22,9 @@ const defaultCommands: CommandItem[] = [
 		description: "View the interactive story map",
 		category: "Navigation",
 		shortcut: "⌘1",
-		action: () => (window.location.href = "/story-map"),
+		action: () => {
+			window.location.href = "/story-map";
+		},
 	},
 	{
 		id: "nav-stories",
@@ -30,7 +32,9 @@ const defaultCommands: CommandItem[] = [
 		description: "View all user stories",
 		category: "Navigation",
 		shortcut: "⌘2",
-		action: () => (window.location.href = "/stories"),
+		action: () => {
+			window.location.href = "/stories";
+		},
 	},
 	{
 		id: "nav-features",
@@ -38,7 +42,9 @@ const defaultCommands: CommandItem[] = [
 		description: "View all features",
 		category: "Navigation",
 		shortcut: "⌘3",
-		action: () => (window.location.href = "/features"),
+		action: () => {
+			window.location.href = "/features";
+		},
 	},
 	{
 		id: "nav-activities",
@@ -46,7 +52,9 @@ const defaultCommands: CommandItem[] = [
 		description: "View all activities",
 		category: "Navigation",
 		shortcut: "⌘4",
-		action: () => (window.location.href = "/activities"),
+		action: () => {
+			window.location.href = "/activities";
+		},
 	},
 	{
 		id: "nav-personas",
@@ -54,7 +62,9 @@ const defaultCommands: CommandItem[] = [
 		description: "View all personas",
 		category: "Navigation",
 		shortcut: "⌘5",
-		action: () => (window.location.href = "/personas"),
+		action: () => {
+			window.location.href = "/personas";
+		},
 	},
 	{
 		id: "create-story",
@@ -102,20 +112,23 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 		const searchLower = search.toLowerCase();
 		return (
 			command.title.toLowerCase().includes(searchLower) ||
-			(command.description && command.description.toLowerCase().includes(searchLower)) ||
-			(command.category && command.category.toLowerCase().includes(searchLower))
+			command.description?.toLowerCase().includes(searchLower) ||
+			command.category?.toLowerCase().includes(searchLower)
 		);
 	});
 
 	// Group commands by category
-	const groupedCommands = filteredCommands.reduce((acc, command) => {
-		const category = command.category || "Other";
-		if (!acc[category]) {
-			acc[category] = [];
-		}
-		acc[category].push(command);
-		return acc;
-	}, {} as Record<string, CommandItem[]>);
+	const groupedCommands = filteredCommands.reduce(
+		(acc, command) => {
+			const category = command.category || "Other";
+			if (!acc[category]) {
+				acc[category] = [];
+			}
+			acc[category].push(command);
+			return acc;
+		},
+		{} as Record<string, CommandItem[]>,
+	);
 
 	// Reset selection when search changes
 	useEffect(() => {
@@ -148,7 +161,10 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 				break;
 			case "ArrowUp":
 				e.preventDefault();
-				setSelectedIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+				setSelectedIndex(
+					(prev) =>
+						(prev - 1 + filteredCommands.length) % filteredCommands.length,
+				);
 				break;
 			case "Enter":
 				e.preventDefault();
@@ -192,7 +208,9 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 								return (
 									<button
 										key={command.id}
-										ref={(el) => (itemRefs.current[index] = el)}
+										ref={(el) => {
+											itemRefs.current[index] = el;
+										}}
 										className={`command-item ${isSelected ? "selected" : ""}`}
 										onClick={() => {
 											command.action();
@@ -203,11 +221,15 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 										<div className="command-item-content">
 											<div className="command-item-title">{command.title}</div>
 											{command.description && (
-												<div className="command-item-description">{command.description}</div>
+												<div className="command-item-description">
+													{command.description}
+												</div>
 											)}
 										</div>
 										{command.shortcut && (
-											<div className="command-item-shortcut">{command.shortcut}</div>
+											<div className="command-item-shortcut">
+												{command.shortcut}
+											</div>
 										)}
 									</button>
 								);

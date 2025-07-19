@@ -1,6 +1,6 @@
 ---
+import AppLayout from "../../components/AppLayout.astro";
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/BaseLayout.astro";
 
 const activities = await getCollection("activities");
 const stories = await getCollection("stories");
@@ -14,57 +14,247 @@ const activityStories = activities
 	.sort((a, b) => a.data.order - b.data.order);
 ---
 
-<Layout title="Activities">
-	<main class="container mx-auto px-4 py-8">
-		<h1 class="text-4xl font-bold mb-8">Activities</h1>
+<AppLayout title="Activities - ForgePoint">
+	<style>
+		.activities-list {
+			max-width: 1000px;
+			margin: 0 auto;
+		}
+
+		.page-header {
+			margin-bottom: 32px;
+		}
+
+		.page-title {
+			font-size: 24px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 8px;
+		}
+
+		.page-subtitle {
+			font-size: 14px;
+			color: #8b8b8d;
+		}
+
+		.activity-item {
+			display: block;
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 24px;
+			margin-bottom: 16px;
+			text-decoration: none;
+			transition: all 0.1s ease;
+		}
+
+		.activity-item:hover {
+			background-color: #1a1a1d;
+			border-color: #2a2a2d;
+			transform: translateY(-2px);
+		}
+
+		.activity-header {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+
+		.activity-order {
+			width: 48px;
+			height: 48px;
+			background-color: #1a1a1d;
+			border: 2px solid #2a2a2d;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 20px;
+			font-weight: 700;
+			color: #5e6ad2;
+		}
+
+		.activity-title {
+			flex: 1;
+			font-size: 18px;
+			font-weight: 600;
+			color: #e1e1e3;
+		}
+
+		.story-count {
+			font-size: 12px;
+			color: #6b6b6d;
+			background-color: #1a1a1d;
+			padding: 4px 12px;
+			border-radius: 12px;
+		}
+
+		.activity-description {
+			font-size: 14px;
+			color: #8b8b8d;
+			line-height: 1.6;
+			margin-bottom: 16px;
+		}
+
+		.outcome-box {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 6px;
+			padding: 16px;
+			margin-bottom: 16px;
+		}
+
+		.outcome-label {
+			font-size: 12px;
+			font-weight: 600;
+			color: #5e6ad2;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-bottom: 8px;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.outcome-text {
+			font-size: 14px;
+			color: #e1e1e3;
+			line-height: 1.5;
+		}
+
+		.activity-metadata {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px;
+			font-size: 13px;
+		}
+
+		.metadata-item {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.metadata-label {
+			color: #6b6b6d;
+			font-weight: 500;
+		}
+
+		.metadata-value {
+			color: #a8a8a9;
+		}
+
+		.persona-pill {
+			display: inline-block;
+			padding: 2px 8px;
+			background-color: #5e6ad2;
+			color: #fff;
+			border-radius: 12px;
+			font-size: 11px;
+			font-weight: 500;
+			margin-right: 4px;
+		}
+
+		.metric-item {
+			display: inline-block;
+			padding: 2px 8px;
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			color: #a8a8a9;
+			border-radius: 4px;
+			font-size: 11px;
+			margin-right: 4px;
+		}
+
+		.empty-state {
+			text-align: center;
+			padding: 48px;
+			color: #6b6b6d;
+		}
+
+		.empty-state-icon {
+			width: 48px;
+			height: 48px;
+			margin: 0 auto 16px;
+			opacity: 0.5;
+		}
+
+		.empty-state-text {
+			font-size: 14px;
+			margin-bottom: 8px;
+		}
+	</style>
+
+	<div class="activities-list">
+		<div class="page-header">
+			<h1 class="page-title">Activities</h1>
+			<p class="page-subtitle">User journey activities in your product experience</p>
+		</div>
 		
-		<div class="space-y-6">
-			{activityStories.map((activity) => (
-				<article class="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-					<div class="flex items-start justify-between mb-4">
-						<div class="flex items-center gap-4">
-							<span class="text-3xl font-bold text-gray-300">{activity.data.order}</span>
-							<h2 class="text-2xl font-semibold">
-								<a href={`/activities/${activity.slug}`} class="hover:text-blue-600 transition-colors">
-									{activity.data.title}
-								</a>
-							</h2>
-						</div>
-						<span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
-							{activity.storyCount} {activity.storyCount === 1 ? 'story' : 'stories'}
-						</span>
+		{activityStories.map((activity) => (
+			<a href={`/activities/${activity.slug}`} class="activity-item">
+				<div class="activity-header">
+					<div class="activity-order">{activity.data.order}</div>
+					<h2 class="activity-title">{activity.data.title}</h2>
+					<span class="story-count">
+						{activity.storyCount} {activity.storyCount === 1 ? 'story' : 'stories'}
+					</span>
+				</div>
+				
+				<p class="activity-description">{activity.data.description}</p>
+				
+				<div class="outcome-box">
+					<div class="outcome-label">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<circle cx="12" cy="12" r="10"></circle>
+							<line x1="12" y1="2" x2="12" y2="6"></line>
+							<line x1="12" y1="18" x2="12" y2="22"></line>
+							<line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+							<line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+							<line x1="2" y1="12" x2="6" y2="12"></line>
+							<line x1="18" y1="12" x2="22" y2="12"></line>
+							<line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+							<line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+						</svg>
+						Expected Outcome
 					</div>
-					
-					<p class="text-gray-600 mb-4 ml-12">{activity.data.description}</p>
-					
-					<div class="bg-gray-50 p-4 rounded mb-4 ml-12">
-						<h3 class="text-sm font-semibold text-gray-700 mb-2">Expected Outcome</h3>
-						<p class="text-sm text-gray-600">{activity.data.outcome}</p>
-					</div>
-					
+					<p class="outcome-text">{activity.data.outcome}</p>
+				</div>
+				
+				<div class="activity-metadata">
 					{activity.data.personas && activity.data.personas.length > 0 && (
-						<div class="ml-12">
-							<span class="text-sm font-medium text-gray-700">Personas: </span>
-							<span class="text-sm text-gray-600">
-								{activity.data.personas.join(', ')}
+						<div class="metadata-item">
+							<span class="metadata-label">Personas:</span>
+							<span class="metadata-value">
+								{activity.data.personas.map(persona => (
+									<span class="persona-pill">{persona}</span>
+								))}
 							</span>
 						</div>
 					)}
 					
 					{activity.data.metrics && activity.data.metrics.length > 0 && (
-						<div class="ml-12 mt-2">
-							<span class="text-sm font-medium text-gray-700">Metrics: </span>
-							<span class="text-sm text-gray-600">
-								{activity.data.metrics.map(m => `${m.name} (${m.target})`).join(', ')}
+						<div class="metadata-item">
+							<span class="metadata-label">Metrics:</span>
+							<span class="metadata-value">
+								{activity.data.metrics.map(m => (
+									<span class="metric-item">{m.name} ({m.target})</span>
+								))}
 							</span>
 						</div>
 					)}
-				</article>
-			))}
-		</div>
+				</div>
+			</a>
+		))}
 		
 		{activities.length === 0 && (
-			<p class="text-gray-500 text-center py-8">No activities have been created yet.</p>
+			<div class="empty-state">
+				<svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+				</svg>
+				<p class="empty-state-text">No activities yet</p>
+			</div>
 		)}
-	</main>
-</Layout>
+	</div>
+</AppLayout>

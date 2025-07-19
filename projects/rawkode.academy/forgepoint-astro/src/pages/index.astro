@@ -9,18 +9,21 @@ const features = await getCollection("features");
 const prds = await getCollection("prds");
 
 // Calculate story statistics
-const storiesByPriority = stories.reduce((acc, story) => {
-  acc[story.data.priority] = (acc[story.data.priority] || 0) + 1;
-  return acc;
-}, {} as Record<string, number>);
+const storiesByPriority = stories.reduce(
+	(acc, story) => {
+		acc[story.data.priority] = (acc[story.data.priority] || 0) + 1;
+		return acc;
+	},
+	{} as Record<string, number>,
+);
 
-const linkedStories = stories.filter(s => s.data.featureId).length;
+const linkedStories = stories.filter((s) => s.data.featureId).length;
 const unlinkedStories = stories.length - linkedStories;
 
 // Recent activity (last 5 stories)
 const recentStories = [...stories]
-  .sort((a, b) => b.id.localeCompare(a.id))
-  .slice(0, 5);
+	.sort((a, b) => b.id.localeCompare(a.id))
+	.slice(0, 5);
 ---
 
 <AppLayout title="Dashboard - ForgePoint">
