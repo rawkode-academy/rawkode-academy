@@ -13,7 +13,7 @@ export async function getStaticPaths() {
 interface UpdateStoryRequest {
 	title?: string;
 	description?: string;
-	asA?: string;
+	personaId?: string;
 	iWant?: string;
 	soThat?: string;
 	acceptanceCriteria?: string[];
@@ -60,8 +60,11 @@ function updateFrontmatter(
 					updates.description !== undefined
 				) {
 					return `description: ${JSON.stringify(updates.description)}`;
-				} else if (trimmedKey === "asA" && updates.asA !== undefined) {
-					return `asA: ${JSON.stringify(updates.asA)}`;
+				} else if (
+					trimmedKey === "personaId" &&
+					updates.personaId !== undefined
+				) {
+					return `personaId: ${JSON.stringify(updates.personaId)}`;
 				} else if (trimmedKey === "iWant" && updates.iWant !== undefined) {
 					return `iWant: ${JSON.stringify(updates.iWant)}`;
 				} else if (trimmedKey === "soThat" && updates.soThat !== undefined) {
