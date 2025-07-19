@@ -29,7 +29,7 @@ interface Story {
 	data: {
 		title: string;
 		description: string;
-		asA: string;
+		personaId: string;
 		iWant: string;
 		soThat: string;
 		priority: "must" | "should" | "could" | "wont";
@@ -43,7 +43,7 @@ interface Action {
 	data: {
 		title: string;
 		description: string;
-		persona: string;
+		personaId: string;
 		activityId: string;
 		type: "click" | "input" | "navigate" | "view" | "interact";
 		outcome: string;
@@ -120,7 +120,7 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 				data: {
 					title: "Search",
 					description: "Enter search terms",
-					persona: activity.data.personas[0],
+					personaId: activity.data.personas[0],
 					activityId: activityId,
 					type: "input",
 					outcome: "Find relevant content",
@@ -133,7 +133,7 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 				data: {
 					title: "Browse",
 					description: "Scroll through results",
-					persona: activity.data.personas[0],
+					personaId: activity.data.personas[0],
 					activityId: activityId,
 					type: "view",
 					outcome: "View available options",
@@ -146,7 +146,7 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 				data: {
 					title: "Select",
 					description: "Click on item",
-					persona: activity.data.personas[0],
+					personaId: activity.data.personas[0],
 					activityId: activityId,
 					type: "click",
 					outcome: "Access detailed view",
@@ -162,7 +162,7 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 				data: {
 					title: "Comment",
 					description: "Add feedback",
-					persona: activity.data.personas[0],
+					personaId: activity.data.personas[0],
 					activityId: activityId,
 					type: "input",
 					outcome: "Share thoughts",
@@ -175,7 +175,7 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 				data: {
 					title: "Share",
 					description: "Distribute content",
-					persona: activity.data.personas[0],
+					personaId: activity.data.personas[0],
 					activityId: activityId,
 					type: "interact",
 					outcome: "Spread knowledge",
@@ -192,7 +192,7 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 				data: {
 					title: "Navigate",
 					description: "Go to section",
-					persona: activity.data.personas[0],
+					personaId: activity.data.personas[0],
 					activityId: activityId,
 					type: "navigate",
 					outcome: "Reach destination",
@@ -205,7 +205,7 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 				data: {
 					title: "Interact",
 					description: "Engage with feature",
-					persona: activity.data.personas[0],
+					personaId: activity.data.personas[0],
 					activityId: activityId,
 					type: "interact",
 					outcome: "Complete task",
@@ -367,7 +367,7 @@ export default function InteractiveStoryMap({
 						geo: "rectangle" as const,
 						color: priorityColors[story.data.priority],
 						fill: "semi" as const,
-						text: `${story.data.title}\n\nAs a ${story.data.asA}\nI want ${story.data.iWant}\nSo that ${story.data.soThat}`,
+						text: `${story.data.title}\n\nAs a ${story.data.personaId}\nI want ${story.data.iWant}\nSo that ${story.data.soThat}`,
 						font: "sans" as const,
 						size: "s" as const,
 						align: "start" as const,
@@ -449,7 +449,7 @@ export default function InteractiveStoryMap({
 					if (!title) return;
 
 					const description = prompt("Enter story description:") || "";
-					const asA = prompt("As a (persona):") || "user";
+					const personaId = prompt("As a (persona):") || "learner";
 					const iWant = prompt("I want to:") || "";
 					const soThat = prompt("So that:") || "";
 
@@ -465,7 +465,7 @@ export default function InteractiveStoryMap({
 								body: JSON.stringify({
 									title,
 									description,
-									asA,
+									personaId,
 									iWant,
 									soThat,
 									acceptanceCriteria: [],

@@ -7,7 +7,7 @@ import { join } from "node:path";
 interface CreateStoryRequest {
 	title: string;
 	description: string;
-	asA: string;
+	personaId: string;
 	iWant: string;
 	soThat: string;
 	acceptanceCriteria: string[];
@@ -29,7 +29,7 @@ function generateMarkdownContent(data: CreateStoryRequest): string {
 	const frontmatter = {
 		title: data.title,
 		description: data.description,
-		asA: data.asA,
+		personaId: data.personaId,
 		iWant: data.iWant,
 		soThat: data.soThat,
 		acceptanceCriteria: data.acceptanceCriteria,
@@ -79,7 +79,7 @@ export const POST: APIRoute = async ({ request }) => {
 		const requiredFields = [
 			"title",
 			"description",
-			"asA",
+			"personaId",
 			"iWant",
 			"soThat",
 			"acceptanceCriteria",
