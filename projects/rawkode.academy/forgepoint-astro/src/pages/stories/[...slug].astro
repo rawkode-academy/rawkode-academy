@@ -1,6 +1,6 @@
 ---
+import AppLayout from "../../components/AppLayout.astro";
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/BaseLayout.astro";
 
 export async function getStaticPaths() {
 	const stories = await getCollection("stories");
@@ -22,66 +22,451 @@ const feature = story.data.featureId
 	: null;
 
 const priorityColors = {
-	must: "bg-red-100 text-red-800",
-	should: "bg-yellow-100 text-yellow-800",
-	could: "bg-green-100 text-green-800",
-	wont: "bg-gray-100 text-gray-800",
+	must: "priority-must",
+	should: "priority-should",
+	could: "priority-could",
+	wont: "priority-wont",
 };
 
-const sizeLabels = {
-	XS: "bg-blue-100 text-blue-800",
-	S: "bg-blue-200 text-blue-900",
-	M: "bg-blue-300 text-blue-900",
-	L: "bg-blue-400 text-blue-900",
-	XL: "bg-blue-500 text-white",
+const sizeStyles = {
+	XS: "size-xs",
+	S: "size-s",
+	M: "size-m",
+	L: "size-l",
+	XL: "size-xl",
 };
 ---
 
-<Layout title={story.data.title}>
-	<main class="container mx-auto px-4 py-8 max-w-4xl">
-		<nav class="mb-8">
-			<a href="/stories" class="text-blue-600 hover:underline">← Back to Stories</a>
+<AppLayout title={`${story.data.title} - ForgePoint`}>
+	<style>
+		.story-detail {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+
+		.breadcrumb {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			color: #8b8b8d;
+			margin-bottom: 32px;
+		}
+
+		.breadcrumb a {
+			color: #8b8b8d;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.breadcrumb a:hover {
+			color: #e1e1e3;
+		}
+
+		.breadcrumb-separator {
+			color: #4b4b4d;
+		}
+
+		.story-header {
+			margin-bottom: 32px;
+		}
+
+		.story-title-row {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 16px;
+			margin-bottom: 16px;
+		}
+
+		.story-title {
+			font-size: 32px;
+			font-weight: 600;
+			color: #fff;
+			line-height: 1.2;
+		}
+
+		.story-badges {
+			display: flex;
+			gap: 8px;
+			flex-shrink: 0;
+		}
+
+		.priority-badge {
+			padding: 4px 12px;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.priority-must {
+			background-color: rgba(239, 68, 68, 0.2);
+			color: #ef4444;
+		}
+
+		.priority-should {
+			background-color: rgba(245, 158, 11, 0.2);
+			color: #f59e0b;
+		}
+
+		.priority-could {
+			background-color: rgba(59, 130, 246, 0.2);
+			color: #3b82f6;
+		}
+
+		.priority-wont {
+			background-color: rgba(107, 114, 128, 0.2);
+			color: #6b7280;
+		}
+
+		.size-badge {
+			padding: 4px 12px;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 600;
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			color: #a8a8a9;
+		}
+
+		.story-description {
+			font-size: 16px;
+			color: #8b8b8d;
+			line-height: 1.6;
+			margin-bottom: 24px;
+		}
+
+		.story-format {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 24px;
+			margin-bottom: 24px;
+		}
+
+		.story-format p {
+			font-size: 16px;
+			line-height: 1.8;
+			color: #e1e1e3;
+			margin: 0;
+		}
+
+		.story-format-label {
+			font-weight: 600;
+			color: #5e6ad2;
+		}
+
+		.story-metadata {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px;
+			margin-bottom: 32px;
+		}
+
+		.metadata-item {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 16px;
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 6px;
+			font-size: 13px;
+		}
+
+		.metadata-label {
+			color: #6b6b6d;
+			font-weight: 500;
+		}
+
+		.metadata-link {
+			color: #5e6ad2;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.metadata-link:hover {
+			color: #7b87e3;
+		}
+
+		.section {
+			margin-bottom: 40px;
+		}
+
+		.section-title {
+			font-size: 20px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 16px;
+		}
+
+		.criteria-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.criteria-item {
+			display: flex;
+			align-items: flex-start;
+			gap: 12px;
+			padding: 12px 0;
+			border-bottom: 1px solid #1f1f23;
+		}
+
+		.criteria-item:last-child {
+			border-bottom: none;
+		}
+
+		.criteria-check {
+			width: 20px;
+			height: 20px;
+			background-color: #1a1a1d;
+			border: 2px solid #2a2a2d;
+			border-radius: 4px;
+			flex-shrink: 0;
+			margin-top: 2px;
+		}
+
+		.criteria-text {
+			flex: 1;
+			font-size: 14px;
+			color: #e1e1e3;
+			line-height: 1.6;
+		}
+
+		.dependencies-grid {
+			display: grid;
+			gap: 12px;
+		}
+
+		.dependency-item {
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			padding: 16px;
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 6px;
+		}
+
+		.dependency-type {
+			font-size: 13px;
+			font-weight: 600;
+			color: #5e6ad2;
+			text-transform: capitalize;
+			min-width: 100px;
+		}
+
+		.dependency-id {
+			flex: 1;
+			font-size: 14px;
+			color: #e1e1e3;
+		}
+
+		.dependency-duration {
+			font-size: 12px;
+			color: #6b6b6d;
+		}
+
+		.attachments-grid {
+			display: grid;
+			gap: 16px;
+		}
+
+		.attachment-card {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 20px;
+		}
+
+		.attachment-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 16px;
+		}
+
+		.attachment-title {
+			font-size: 16px;
+			font-weight: 500;
+			color: #e1e1e3;
+		}
+
+		.attachment-type {
+			font-size: 12px;
+			color: #6b6b6d;
+			text-transform: capitalize;
+		}
+
+		.bdd-scenario {
+			display: grid;
+			gap: 12px;
+		}
+
+		.bdd-section {
+			display: grid;
+			gap: 8px;
+		}
+
+		.bdd-label {
+			font-size: 13px;
+			font-weight: 600;
+			color: #5e6ad2;
+		}
+
+		.bdd-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+			padding-left: 16px;
+		}
+
+		.bdd-item {
+			position: relative;
+			font-size: 13px;
+			color: #e1e1e3;
+			padding: 4px 0;
+			padding-left: 16px;
+		}
+
+		.bdd-item::before {
+			content: "•";
+			position: absolute;
+			left: 0;
+			color: #5e6ad2;
+		}
+
+		.attachment-link {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+			font-size: 13px;
+			color: #5e6ad2;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.attachment-link:hover {
+			color: #7b87e3;
+		}
+
+		.prose {
+			color: #e1e1e3;
+		}
+
+		.prose h1,
+		.prose h2,
+		.prose h3,
+		.prose h4,
+		.prose h5,
+		.prose h6 {
+			color: #fff;
+			font-weight: 600;
+			margin-top: 32px;
+			margin-bottom: 16px;
+		}
+
+		.prose p {
+			line-height: 1.7;
+			margin-bottom: 16px;
+		}
+
+		.prose ul,
+		.prose ol {
+			margin-bottom: 16px;
+			padding-left: 24px;
+		}
+
+		.prose li {
+			margin-bottom: 8px;
+		}
+
+		.prose code {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 4px;
+			padding: 2px 6px;
+			font-size: 14px;
+			color: #e1e1e3;
+		}
+
+		.prose pre {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 16px;
+			overflow-x: auto;
+			margin-bottom: 16px;
+		}
+
+		.prose pre code {
+			background: none;
+			border: none;
+			padding: 0;
+		}
+
+		.prose a {
+			color: #5e6ad2;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.prose a:hover {
+			color: #7b87e3;
+			text-decoration: underline;
+		}
+	</style>
+
+	<div class="story-detail animate-fade-in">
+		<nav class="breadcrumb">
+			<a href="/stories">Stories</a>
+			<span class="breadcrumb-separator">/</span>
+			<span>{story.data.title}</span>
 		</nav>
 		
 		<article>
-			<header class="mb-8">
-				<div class="flex items-start justify-between mb-4">
-					<h1 class="text-4xl font-bold">{story.data.title}</h1>
-					<div class="flex gap-2">
-						<span class={`px-3 py-1 rounded text-sm font-medium ${priorityColors[story.data.priority]}`}>
-							{story.data.priority.toUpperCase()}
+			<header class="story-header">
+				<div class="story-title-row">
+					<h1 class="story-title">{story.data.title}</h1>
+					<div class="story-badges">
+						<span class={`priority-badge ${priorityColors[story.data.priority]}`}>
+							{story.data.priority}
 						</span>
 						{story.data.size && (
-							<span class={`px-3 py-1 rounded text-sm font-medium ${sizeLabels[story.data.size]}`}>
+							<span class={`size-badge ${sizeStyles[story.data.size]}`}>
 								{story.data.size}
 							</span>
 						)}
 					</div>
 				</div>
 				
-				<p class="text-xl text-gray-600 mb-6">{story.data.description}</p>
+				<p class="story-description">{story.data.description}</p>
 				
-				<div class="bg-gray-50 p-6 rounded-lg mb-6">
-					<p class="text-lg">
-						<span class="font-semibold">As a</span> {story.data.asA},<br/>
-						<span class="font-semibold">I want</span> {story.data.iWant},<br/>
-						<span class="font-semibold">So that</span> {story.data.soThat}
+				<div class="story-format">
+					<p>
+						<span class="story-format-label">As a</span> {story.data.asA},<br/>
+						<span class="story-format-label">I want</span> {story.data.iWant},<br/>
+						<span class="story-format-label">So that</span> {story.data.soThat}
 					</p>
 				</div>
 				
-				<div class="flex flex-wrap gap-4 text-sm">
+				<div class="story-metadata">
 					{activity && (
-						<div class="bg-gray-100 px-3 py-1 rounded">
-							<span class="font-medium">Activity:</span>
-							<a href={`/activities/${activity.slug}`} class="text-blue-600 hover:underline ml-1">
+						<div class="metadata-item">
+							<span class="metadata-label">Activity:</span>
+							<a href={`/activities/${activity.slug}`} class="metadata-link">
 								{activity.data.title}
 							</a>
 						</div>
 					)}
 					{feature && (
-						<div class="bg-gray-100 px-3 py-1 rounded">
-							<span class="font-medium">Feature:</span>
-							<a href={`/features/${feature.slug}`} class="text-blue-600 hover:underline ml-1">
+						<div class="metadata-item">
+							<span class="metadata-label">Feature:</span>
+							<a href={`/features/${feature.slug}`} class="metadata-link">
 								{feature.data.title}
 							</a>
 						</div>
@@ -89,25 +474,28 @@ const sizeLabels = {
 				</div>
 			</header>
 			
-			<section class="mb-8">
-				<h2 class="text-2xl font-semibold mb-4">Acceptance Criteria</h2>
-				<ul class="list-disc list-inside space-y-2">
+			<section class="section">
+				<h2 class="section-title">Acceptance Criteria</h2>
+				<ul class="criteria-list">
 					{story.data.acceptanceCriteria.map((criterion) => (
-						<li class="text-gray-700">{criterion}</li>
+						<li class="criteria-item">
+							<div class="criteria-check"></div>
+							<span class="criteria-text">{criterion}</span>
+						</li>
 					))}
 				</ul>
 			</section>
 			
 			{story.data.dependencies && story.data.dependencies.length > 0 && (
-				<section class="mb-8">
-					<h2 class="text-2xl font-semibold mb-4">Dependencies</h2>
-					<div class="space-y-2">
+				<section class="section">
+					<h2 class="section-title">Dependencies</h2>
+					<div class="dependencies-grid">
 						{story.data.dependencies.map((dep) => (
-							<div class="flex items-center gap-4 p-3 bg-gray-50 rounded">
-								<span class="font-medium capitalize">{dep.type.replace('-', ' ')}</span>
-								<span class="text-gray-600">{dep.id}</span>
+							<div class="dependency-item">
+								<span class="dependency-type">{dep.type.replace('-', ' ')}</span>
+								<span class="dependency-id">{dep.id}</span>
 								{dep.duration && (
-									<span class="text-sm text-gray-500">Duration: {dep.duration}</span>
+									<span class="dependency-duration">{dep.duration}</span>
 								)}
 							</div>
 						))}
@@ -116,39 +504,45 @@ const sizeLabels = {
 			)}
 			
 			{story.data.attachments && story.data.attachments.length > 0 && (
-				<section class="mb-8">
-					<h2 class="text-2xl font-semibold mb-4">Attachments</h2>
-					<div class="space-y-4">
+				<section class="section">
+					<h2 class="section-title">Attachments</h2>
+					<div class="attachments-grid">
 						{story.data.attachments.map((attachment) => (
-							<div class="border border-gray-200 rounded-lg p-4">
-								<div class="flex items-center justify-between mb-2">
-									<h3 class="font-medium">{attachment.title || attachment.type}</h3>
-									<span class="text-sm text-gray-500 capitalize">{attachment.type.replace('-', ' ')}</span>
+							<div class="attachment-card">
+								<div class="attachment-header">
+									<h3 class="attachment-title">{attachment.title || attachment.type}</h3>
+									<span class="attachment-type">{attachment.type.replace('-', ' ')}</span>
 								</div>
 								
 								{attachment.type === 'bdd-scenario' && (
-									<div class="space-y-2 text-sm">
+									<div class="bdd-scenario">
 										{attachment.given && (
-											<div>
-												<span class="font-medium">Given:</span>
-												<ul class="list-disc list-inside ml-4">
-													{attachment.given.map((item) => <li>{item}</li>)}
+											<div class="bdd-section">
+												<div class="bdd-label">Given:</div>
+												<ul class="bdd-list">
+													{attachment.given.map((item) => (
+														<li class="bdd-item">{item}</li>
+													))}
 												</ul>
 											</div>
 										)}
 										{attachment.when && (
-											<div>
-												<span class="font-medium">When:</span>
-												<ul class="list-disc list-inside ml-4">
-													{attachment.when.map((item) => <li>{item}</li>)}
+											<div class="bdd-section">
+												<div class="bdd-label">When:</div>
+												<ul class="bdd-list">
+													{attachment.when.map((item) => (
+														<li class="bdd-item">{item}</li>
+													))}
 												</ul>
 											</div>
 										)}
 										{attachment.then_ && (
-											<div>
-												<span class="font-medium">Then:</span>
-												<ul class="list-disc list-inside ml-4">
-													{attachment.then_.map((item) => <li>{item}</li>)}
+											<div class="bdd-section">
+												<div class="bdd-label">Then:</div>
+												<ul class="bdd-list">
+													{attachment.then_.map((item) => (
+														<li class="bdd-item">{item}</li>
+													))}
 												</ul>
 											</div>
 										)}
@@ -156,8 +550,13 @@ const sizeLabels = {
 								)}
 								
 								{attachment.url && (
-									<a href={attachment.url} class="text-blue-600 hover:underline text-sm">
-										View attachment →
+									<a href={attachment.url} class="attachment-link">
+										View attachment
+										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+											<polyline points="15 3 21 3 21 9"></polyline>
+											<line x1="10" y1="14" x2="21" y2="3"></line>
+										</svg>
 									</a>
 								)}
 							</div>
@@ -166,10 +565,10 @@ const sizeLabels = {
 				</section>
 			)}
 			
-			<section class="prose prose-lg max-w-none">
-				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+			<section class="section prose">
+				<h2 class="section-title">Additional Details</h2>
 				<Content />
 			</section>
 		</article>
-	</main>
-</Layout>
+	</div>
+</AppLayout>

@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import Layout from "../../layouts/BaseLayout.astro";
+import AppLayout from "../../components/AppLayout.astro";
 
 export async function getStaticPaths() {
 	const personas = await getCollection("personas");
@@ -14,60 +14,280 @@ const { persona } = Astro.props;
 const { Content } = await persona.render();
 ---
 
-<Layout title={persona.data.title}>
-	<main class="container mx-auto px-4 py-8 max-w-4xl">
-		<nav class="mb-8">
-			<a href="/personas" class="text-blue-600 hover:underline">← Back to Personas</a>
+<AppLayout title={`${persona.data.title} - ForgePoint`}>
+	<style>
+		.persona-detail {
+			max-width: 800px;
+			margin: 0 auto;
+		}
+
+		.breadcrumb {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			color: #8b8b8d;
+			margin-bottom: 32px;
+		}
+
+		.breadcrumb a {
+			color: #8b8b8d;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.breadcrumb a:hover {
+			color: #e1e1e3;
+		}
+
+		.breadcrumb-separator {
+			color: #4b4b4d;
+		}
+
+		.persona-header {
+			margin-bottom: 32px;
+		}
+
+		.persona-title {
+			font-size: 32px;
+			font-weight: 600;
+			color: #fff;
+			line-height: 1.2;
+			margin-bottom: 16px;
+		}
+
+		.persona-description {
+			font-size: 16px;
+			color: #8b8b8d;
+			line-height: 1.6;
+			margin-bottom: 24px;
+		}
+
+		.persona-tags {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+		}
+
+		.persona-tag {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 6px;
+			padding: 6px 16px;
+			font-size: 13px;
+			color: #e1e1e3;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+
+		.tag-label {
+			color: #6b6b6d;
+			font-weight: 500;
+		}
+
+		.section {
+			margin-bottom: 40px;
+		}
+
+		.section-title {
+			font-size: 20px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 16px;
+		}
+
+		.context-box {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 24px;
+			font-size: 15px;
+			color: #e1e1e3;
+			line-height: 1.6;
+		}
+
+		.goals-pain-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 32px;
+		}
+
+		@media (max-width: 768px) {
+			.goals-pain-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		.list-container {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 24px;
+		}
+
+		.list-title {
+			font-size: 18px;
+			font-weight: 600;
+			color: #fff;
+			margin-bottom: 16px;
+		}
+
+		.custom-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.list-item {
+			position: relative;
+			padding-left: 24px;
+			margin-bottom: 12px;
+			font-size: 14px;
+			color: #e1e1e3;
+			line-height: 1.6;
+		}
+
+		.list-item:last-child {
+			margin-bottom: 0;
+		}
+
+		.list-item::before {
+			content: "•";
+			position: absolute;
+			left: 8px;
+			color: #5e6ad2;
+			font-weight: bold;
+		}
+
+		.prose {
+			color: #e1e1e3;
+		}
+
+		.prose h1,
+		.prose h2,
+		.prose h3,
+		.prose h4,
+		.prose h5,
+		.prose h6 {
+			color: #fff;
+			font-weight: 600;
+			margin-top: 32px;
+			margin-bottom: 16px;
+		}
+
+		.prose p {
+			line-height: 1.7;
+			margin-bottom: 16px;
+		}
+
+		.prose ul,
+		.prose ol {
+			margin-bottom: 16px;
+			padding-left: 24px;
+		}
+
+		.prose li {
+			margin-bottom: 8px;
+		}
+
+		.prose code {
+			background-color: #1a1a1d;
+			border: 1px solid #2a2a2d;
+			border-radius: 4px;
+			padding: 2px 6px;
+			font-size: 14px;
+			color: #e1e1e3;
+		}
+
+		.prose pre {
+			background-color: #0e0e10;
+			border: 1px solid #1f1f23;
+			border-radius: 8px;
+			padding: 16px;
+			overflow-x: auto;
+			margin-bottom: 16px;
+		}
+
+		.prose pre code {
+			background: none;
+			border: none;
+			padding: 0;
+		}
+
+		.prose a {
+			color: #5e6ad2;
+			text-decoration: none;
+			transition: color 0.1s ease;
+		}
+
+		.prose a:hover {
+			color: #7b87e3;
+			text-decoration: underline;
+		}
+	</style>
+
+	<div class="persona-detail animate-fade-in">
+		<nav class="breadcrumb">
+			<a href="/personas">Personas</a>
+			<span class="breadcrumb-separator">/</span>
+			<span>{persona.data.title}</span>
 		</nav>
 		
 		<article>
-			<header class="mb-8">
-				<h1 class="text-4xl font-bold mb-4">{persona.data.title}</h1>
-				<p class="text-xl text-gray-600 mb-4">{persona.data.description}</p>
+			<header class="persona-header">
+				<h1 class="persona-title">{persona.data.title}</h1>
+				<p class="persona-description">{persona.data.description}</p>
 				
-				<div class="flex flex-wrap gap-4 text-sm">
+				<div class="persona-tags">
 					{persona.data.role && (
-						<div class="bg-gray-100 px-3 py-1 rounded">
-							<span class="font-medium">Role:</span> {persona.data.role}
+						<div class="persona-tag">
+							<span class="tag-label">Role:</span>
+							<span>{persona.data.role}</span>
 						</div>
 					)}
 					{persona.data.experience && (
-						<div class="bg-gray-100 px-3 py-1 rounded">
-							<span class="font-medium">Experience:</span> {persona.data.experience}
+						<div class="persona-tag">
+							<span class="tag-label">Experience:</span>
+							<span>{persona.data.experience}</span>
 						</div>
 					)}
 				</div>
 			</header>
 			
-			<section class="mb-8">
-				<h2 class="text-2xl font-semibold mb-4">Context</h2>
-				<p class="text-gray-700">{persona.data.context}</p>
+			<section class="section">
+				<h2 class="section-title">Context</h2>
+				<div class="context-box">
+					{persona.data.context}
+				</div>
 			</section>
 			
-			<div class="grid md:grid-cols-2 gap-8 mb-8">
-				<section>
-					<h2 class="text-2xl font-semibold mb-4">Goals</h2>
-					<ul class="list-disc list-inside space-y-2">
-						{persona.data.goals.map((goal) => (
-							<li class="text-gray-700">{goal}</li>
-						))}
-					</ul>
-				</section>
-				
-				<section>
-					<h2 class="text-2xl font-semibold mb-4">Pain Points</h2>
-					<ul class="list-disc list-inside space-y-2">
-						{persona.data.painPoints.map((painPoint) => (
-							<li class="text-gray-700">{painPoint}</li>
-						))}
-					</ul>
-				</section>
-			</div>
+			<section class="section">
+				<div class="goals-pain-grid">
+					<div class="list-container">
+						<h3 class="list-title">Goals</h3>
+						<ul class="custom-list">
+							{persona.data.goals.map((goal) => (
+								<li class="list-item">{goal}</li>
+							))}
+						</ul>
+					</div>
+					
+					<div class="list-container">
+						<h3 class="list-title">Pain Points</h3>
+						<ul class="custom-list">
+							{persona.data.painPoints.map((painPoint) => (
+								<li class="list-item">{painPoint}</li>
+							))}
+						</ul>
+					</div>
+				</div>
+			</section>
 			
-			<section class="prose prose-lg max-w-none">
-				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+			<section class="section prose">
+				<h2 class="section-title">Additional Details</h2>
 				<Content />
 			</section>
 		</article>
-	</main>
-</Layout>
+	</div>
+</AppLayout>

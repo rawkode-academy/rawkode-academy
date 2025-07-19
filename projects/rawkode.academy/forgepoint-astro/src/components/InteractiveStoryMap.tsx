@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import { Tldraw, createShapeId, useEditor } from "tldraw";
+import React, { useEffect, useState } from "react";
+import { Tldraw, createShapeId, Editor } from "tldraw";
 import "tldraw/tldraw.css";
 
 interface Activity {
 	id: string;
+	slug?: string;
 	data: {
 		title: string;
 		description: string;
@@ -15,6 +16,7 @@ interface Activity {
 
 interface Persona {
 	id: string;
+	slug?: string;
 	data: {
 		title: string;
 		description: string;
@@ -23,6 +25,7 @@ interface Persona {
 
 interface Story {
 	id: string;
+	slug?: string;
 	data: {
 		title: string;
 		description: string;
@@ -51,6 +54,7 @@ interface Action {
 
 interface Feature {
 	id: string;
+	slug?: string;
 	data: {
 		title: string;
 		description: string;
@@ -76,11 +80,12 @@ const priorityColors = {
 } as const;
 
 // Create shapes for personas at the top
-const createPersonaShapes = (personas: Persona[], editor: any) => {
+const createPersonaShapes = (personas: Persona[], editor: Editor) => {
 	const shapes = personas.map((persona, index) => {
 		const colors = ["violet", "blue", "green", "orange", "red"];
+		const personaId = persona.slug || persona.id;
 		return {
-			id: createShapeId(`persona-${persona.id}`),
+			id: createShapeId(`persona-${personaId}`),
 			type: "geo" as const,
 			x: 100 + index * 120,
 			y: 50,
@@ -104,73 +109,74 @@ const createPersonaShapes = (personas: Persona[], editor: any) => {
 // Generate sample actions for each activity
 const generateActionsForActivity = (activity: Activity): Action[] => {
 	const actions: Action[] = [];
+	const activityId = activity.slug || activity.id;
 
 	// Generate actions based on activity type
-	if (activity.id.includes("discover")) {
+	if (activityId.includes("discover")) {
 		actions.push(
 			{
-				id: `${activity.id}-action-1`,
-				slug: `${activity.id}-action-1`,
+				id: `${activityId}-action-1`,
+				slug: `${activityId}-action-1`,
 				data: {
 					title: "Search",
 					description: "Enter search terms",
 					persona: activity.data.personas[0],
-					activityId: activity.id,
+					activityId: activityId,
 					type: "input",
 					outcome: "Find relevant content",
 					sequence: 1,
 				},
 			},
 			{
-				id: `${activity.id}-action-2`,
-				slug: `${activity.id}-action-2`,
+				id: `${activityId}-action-2`,
+				slug: `${activityId}-action-2`,
 				data: {
 					title: "Browse",
 					description: "Scroll through results",
 					persona: activity.data.personas[0],
-					activityId: activity.id,
+					activityId: activityId,
 					type: "view",
 					outcome: "View available options",
 					sequence: 2,
 				},
 			},
 			{
-				id: `${activity.id}-action-3`,
-				slug: `${activity.id}-action-3`,
+				id: `${activityId}-action-3`,
+				slug: `${activityId}-action-3`,
 				data: {
 					title: "Select",
 					description: "Click on item",
 					persona: activity.data.personas[0],
-					activityId: activity.id,
+					activityId: activityId,
 					type: "click",
 					outcome: "Access detailed view",
 					sequence: 3,
 				},
 			},
 		);
-	} else if (activity.id.includes("interact")) {
+	} else if (activityId.includes("interact")) {
 		actions.push(
 			{
-				id: `${activity.id}-action-1`,
-				slug: `${activity.id}-action-1`,
+				id: `${activityId}-action-1`,
+				slug: `${activityId}-action-1`,
 				data: {
 					title: "Comment",
 					description: "Add feedback",
 					persona: activity.data.personas[0],
-					activityId: activity.id,
+					activityId: activityId,
 					type: "input",
 					outcome: "Share thoughts",
 					sequence: 1,
 				},
 			},
 			{
-				id: `${activity.id}-action-2`,
-				slug: `${activity.id}-action-2`,
+				id: `${activityId}-action-2`,
+				slug: `${activityId}-action-2`,
 				data: {
 					title: "Share",
 					description: "Distribute content",
 					persona: activity.data.personas[0],
-					activityId: activity.id,
+					activityId: activityId,
 					type: "interact",
 					outcome: "Spread knowledge",
 					sequence: 2,
@@ -181,26 +187,26 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 		// Default actions
 		actions.push(
 			{
-				id: `${activity.id}-action-1`,
-				slug: `${activity.id}-action-1`,
+				id: `${activityId}-action-1`,
+				slug: `${activityId}-action-1`,
 				data: {
 					title: "Navigate",
 					description: "Go to section",
 					persona: activity.data.personas[0],
-					activityId: activity.id,
+					activityId: activityId,
 					type: "navigate",
 					outcome: "Reach destination",
 					sequence: 1,
 				},
 			},
 			{
-				id: `${activity.id}-action-2`,
-				slug: `${activity.id}-action-2`,
+				id: `${activityId}-action-2`,
+				slug: `${activityId}-action-2`,
 				data: {
 					title: "Interact",
 					description: "Engage with feature",
 					persona: activity.data.personas[0],
-					activityId: activity.id,
+					activityId: activityId,
 					type: "interact",
 					outcome: "Complete task",
 					sequence: 2,
@@ -212,23 +218,37 @@ const generateActionsForActivity = (activity: Activity): Action[] => {
 	return actions;
 };
 
-function StoryMapContent({
+export default function InteractiveStoryMap({
 	personas,
 	activities,
 	stories,
 	actions = [],
 	features = [],
 }: Props) {
-	const editor = useEditor();
+	const [editor, setEditor] = useState<Editor | null>(null);
+
+	// Debug logging
+	console.log("InteractiveStoryMap props:", {
+		personas: personas.length,
+		activities: activities.length,
+		stories: stories.length,
+		actions: actions.length,
+		features: features.length,
+	});
 
 	// Sort activities by order
 	const sortedActivities = [...activities].sort(
 		(a, b) => a.data.order - b.data.order,
 	);
 
-	// Create tldraw shapes for arrows
+	// Create shapes when editor is ready
 	useEffect(() => {
-		if (!editor) return;
+		if (!editor) {
+			console.log("Editor not ready yet");
+			return;
+		}
+		
+		console.log("Editor ready, creating shapes");
 
 		// Clear all existing shapes to rebuild the canvas
 		const allShapes = [...editor.getCurrentPageShapeIds()];
@@ -237,128 +257,98 @@ function StoryMapContent({
 		}
 
 		// Create all shapes
-		setTimeout(() => {
-			const shapes = [];
+		const shapes: any[] = [];
+		console.log("Creating shapes for activities:", sortedActivities.length);
 
-			// Create persona shapes
-			shapes.push(...createPersonaShapes(personas, editor));
+		// Create persona shapes
+		shapes.push(...createPersonaShapes(personas, editor));
 
-			// Create activity shapes
-			sortedActivities.forEach((activity, index) => {
-				const x = 100 + index * 360;
-				const y = 150;
+		// Create activity shapes
+		sortedActivities.forEach((activity, index) => {
+			const x = 100 + index * 360;
+			const y = 150;
+			const activityId = activity.slug || activity.id;
 
-				// Activity card shape
+			// Activity card shape
+			shapes.push({
+				id: createShapeId(`activity-${activityId}`),
+				type: "geo" as const,
+				x,
+				y,
+				props: {
+					w: 320,
+					h: 200,
+					geo: "rectangle" as const,
+					color: "blue" as const,
+					fill: "solid" as const,
+					text: `${activity.data.title}\n\n${activity.data.description}\n\nOutcome: ${activity.data.outcome}`,
+					font: "sans" as const,
+					size: "s" as const,
+					align: "start" as const,
+					verticalAlign: "start" as const,
+				},
+			});
+
+			// Create action shapes
+			const activityActions =
+				actions.length > 0
+					? actions.filter((a) => a.data.activityId === activityId)
+					: generateActionsForActivity(activity);
+
+			activityActions.forEach((action, actionIndex) => {
+				const actionX = x + (actionIndex % 2) * 170;
+				const actionY = 380 + Math.floor(actionIndex / 2) * 80;
+
 				shapes.push({
-					id: createShapeId(`activity-${activity.id}`),
+					id: createShapeId(`action-${action.id}`),
 					type: "geo" as const,
-					x,
-					y,
+					x: actionX,
+					y: actionY,
 					props: {
-						w: 320,
-						h: 200,
+						w: 160,
+						h: 70,
 						geo: "rectangle" as const,
-						color: "blue" as const,
-						fill: "solid" as const,
-						text: `${activity.data.title}\n\n${activity.data.description}\n\nOutcome: ${activity.data.outcome}`,
+						color: "violet" as const,
+						fill: "pattern" as const,
+						text: `${action.data.title}\n${action.data.description}`,
 						font: "sans" as const,
 						size: "s" as const,
-						align: "start" as const,
-						verticalAlign: "start" as const,
+						align: "middle" as const,
+						verticalAlign: "middle" as const,
 					},
 				});
 
-				// Create action shapes
-				const activityActions =
-					actions.length > 0
-						? actions.filter((a) => a.data.activityId === activity.id)
-						: generateActionsForActivity(activity);
-
-				activityActions.forEach((action, actionIndex) => {
-					const actionX = x + (actionIndex % 2) * 170;
-					const actionY = 380 + Math.floor(actionIndex / 2) * 80;
-
-					shapes.push({
-						id: createShapeId(`action-${action.id}`),
-						type: "geo" as const,
-						x: actionX,
-						y: actionY,
-						props: {
-							w: 160,
-							h: 70,
-							geo: "rectangle" as const,
-							color: "violet" as const,
-							fill: "pattern" as const,
-							text: `${action.data.title}\n${action.data.description}`,
-							font: "sans" as const,
-							size: "s" as const,
-							align: "middle" as const,
-							verticalAlign: "middle" as const,
+				// Create arrow from activity to action
+				shapes.push({
+					id: createShapeId(`arrow-${activityId}-${action.id}`),
+					type: "arrow" as const,
+					x: x + 160,
+					y: y + 200,
+					props: {
+						start: {
+							x: 0,
+							y: 0,
 						},
-					});
-
-					// Create arrow from activity to action
-					shapes.push({
-						id: createShapeId(`arrow-${activity.id}-${action.id}`),
-						type: "arrow" as const,
-						x: x + 160,
-						y: y + 200,
-						props: {
-							start: {
-								x: 0,
-								y: 0,
-							},
-							end: {
-								x: actionX + 80 - (x + 160),
-								y: actionY - (y + 200),
-							},
-							color: "grey" as const,
-							dash: "dashed" as const,
-							size: "s" as const,
+						end: {
+							x: actionX + 80 - (x + 160),
+							y: actionY - (y + 200),
 						},
-					});
-				});
-
-				// Create story shapes
-				const activityStories = stories.filter(
-					(story) => story.data.activityId === activity.id,
-				);
-				const actionsHeight = Math.ceil(activityActions.length / 2) * 80;
-
-				activityStories.forEach((story, storyIndex) => {
-					const storyY = 380 + actionsHeight + 40 + storyIndex * 120;
-					const priorityColors = {
-						must: "red" as const,
-						should: "yellow" as const,
-						could: "blue" as const,
-						wont: "grey" as const,
-					};
-
-					shapes.push({
-						id: createShapeId(`story-${story.id}`),
-						type: "geo" as const,
-						x,
-						y: storyY,
-						props: {
-							w: 280,
-							h: 100,
-							geo: "rectangle" as const,
-							color: priorityColors[story.data.priority],
-							fill: "semi" as const,
-							text: `${story.data.title}\n\nAs a ${story.data.asA}\nI want ${story.data.iWant}\nSo that ${story.data.soThat}`,
-							font: "sans" as const,
-							size: "s" as const,
-							align: "start" as const,
-							verticalAlign: "start" as const,
-						},
-					});
+						color: "grey" as const,
+						dash: "dashed" as const,
+						size: "s" as const,
+					},
 				});
 			});
 
-			// Create feature shapes
-			features.forEach((feature, index) => {
-				const x = 100 + sortedActivities.length * 360 + 100;
-				const y = 150 + index * 180;
+			// Create story shapes
+			const activityStories = stories.filter(
+				(story) => story.data.activityId === activityId,
+			);
+			const actionsHeight = Math.ceil(activityActions.length / 2) * 80;
+
+			activityStories.forEach((story, storyIndex) => {
+				const storyY = 380 + actionsHeight + 40 + storyIndex * 120;
+				const storyId = story.slug || story.id;
 				const priorityColors = {
 					must: "red" as const,
 					should: "yellow" as const,
@@ -367,17 +357,17 @@ function StoryMapContent({
 				};
 
 				shapes.push({
-					id: createShapeId(`feature-${feature.id}`),
+					id: createShapeId(`story-${storyId}`),
 					type: "geo" as const,
 					x,
-					y,
+					y: storyY,
 					props: {
-						w: 320,
-						h: 160,
+						w: 280,
+						h: 100,
 						geo: "rectangle" as const,
-						color: priorityColors[feature.data.priority],
-						fill: "solid" as const,
-						text: `FEATURE: ${feature.data.title}\n\n${feature.data.description}\n\nEnhancement: ${feature.data.enhancement}`,
+						color: priorityColors[story.data.priority],
+						fill: "semi" as const,
+						text: `${story.data.title}\n\nAs a ${story.data.asA}\nI want ${story.data.iWant}\nSo that ${story.data.soThat}`,
 						font: "sans" as const,
 						size: "s" as const,
 						align: "start" as const,
@@ -385,11 +375,47 @@ function StoryMapContent({
 					},
 				});
 			});
+		});
 
-			if (shapes.length > 0) {
-				editor.createShapes(shapes);
-			}
-		}, 100);
+		// Create feature shapes
+		features.forEach((feature, index) => {
+			const x = 100 + sortedActivities.length * 360 + 100;
+			const y = 150 + index * 180;
+			const featureId = feature.slug || feature.id;
+			const priorityColors = {
+				must: "red" as const,
+				should: "yellow" as const,
+				could: "blue" as const,
+				wont: "grey" as const,
+			};
+
+			shapes.push({
+				id: createShapeId(`feature-${featureId}`),
+				type: "geo" as const,
+				x,
+				y,
+				props: {
+					w: 320,
+					h: 160,
+					geo: "rectangle" as const,
+					color: priorityColors[feature.data.priority],
+					fill: "solid" as const,
+					text: `FEATURE: ${feature.data.title}\n\n${feature.data.description}\n\nEnhancement: ${feature.data.enhancement}`,
+					font: "sans" as const,
+					size: "s" as const,
+					align: "start" as const,
+					verticalAlign: "start" as const,
+				},
+			});
+		});
+
+		if (shapes.length > 0) {
+			console.log(`Creating ${shapes.length} shapes`);
+			editor.createShapes(shapes);
+			// Center the view on the content
+			editor.zoomToFit();
+			editor.centerOnPoint({ x: 600, y: 400 });
+		}
 	}, [editor, sortedActivities, personas, stories, actions, features]);
 
 	// Add click handler for creating new stories
@@ -430,6 +456,7 @@ function StoryMapContent({
 					// Check if we're in development mode
 					if (window.location.hostname === "localhost") {
 						try {
+							const activityId = clickedActivity.slug || clickedActivity.id;
 							const response = await fetch("/api/stories", {
 								method: "POST",
 								headers: {
@@ -443,7 +470,7 @@ function StoryMapContent({
 									soThat,
 									acceptanceCriteria: [],
 									priority: "should",
-									activityId: clickedActivity.id,
+									activityId: activityId,
 								}),
 							});
 
@@ -479,16 +506,6 @@ function StoryMapContent({
 		};
 	}, [editor, sortedActivities]);
 
-	return null; // All rendering is now handled in useEffect
-}
-
-export default function InteractiveStoryMap({
-	personas,
-	activities,
-	stories,
-	actions,
-	features,
-}: Props) {
 	return (
 		<div className="w-full h-full bg-[#0a0a0a] relative">
 			{/* Floating Help */}
@@ -538,15 +555,15 @@ export default function InteractiveStoryMap({
 			</div>
 
 			{/* Tldraw Canvas */}
-			<Tldraw shareZone={<div />} forceDarkMode={true} className="dark">
-				<StoryMapContent
-					personas={personas}
-					activities={activities}
-					stories={stories}
-					actions={actions}
-					features={features}
-				/>
-			</Tldraw>
+			<Tldraw 
+				shareZone={<div />} 
+				forceDarkMode={true} 
+				className="dark"
+				onMount={(editor) => {
+					console.log("Tldraw mounted, setting editor");
+					setEditor(editor);
+				}}
+			/>
 		</div>
 	);
 }
