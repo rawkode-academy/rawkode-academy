@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Tldraw, createShapeId, Editor } from "tldraw";
 import "tldraw/tldraw.css";
 
@@ -237,10 +237,77 @@ export default function InteractiveStoryMap({
 		features: features.length,
 	});
 
-	// Sort activities by order
-	const sortedActivities = [...activities].sort(
-		(a, b) => a.data.order - b.data.order,
+	// Memoize sorted activities
+	const sortedActivities = useMemo(
+		() => [...activities].sort((a, b) => a.data.order - b.data.order),
+		[activities]
 	);
+
+	// Create lookup maps for efficient access
+	const personasMap = useMemo(() => {
+		const map = new Map<string, Persona>();
+		personas.forEach((persona) => {
+			const key = persona.slug || persona.id;
+			map.set(key, persona);
+			map.set(persona.id, persona);
+		});
+		return map;
+	}, [personas]);
+
+	const activitiesMap = useMemo(() => {
+		const map = new Map<string, Activity>();
+		activities.forEach((activity) => {
+			const key = activity.slug || activity.id;
+			map.set(key, activity);
+			map.set(activity.id, activity);
+		});
+		return map;
+	}, [activities]);
+
+	const storiesMap = useMemo(() => {
+		const map = new Map<string, Story>();
+		const byActivityMap = new Map<string, Story[]>();
+		
+		stories.forEach((story) => {
+			const key = story.slug || story.id;
+			map.set(key, story);
+			map.set(story.id, story);
+			
+			// Also group by activity for efficient lookup
+			const activityStories = byActivityMap.get(story.data.activityId) || [];
+			activityStories.push(story);
+			byActivityMap.set(story.data.activityId, activityStories);
+		});
+		
+		return { map, byActivity: byActivityMap };
+	}, [stories]);
+
+	const featuresMap = useMemo(() => {
+		const map = new Map<string, Feature>();
+		features.forEach((feature) => {
+			const key = feature.slug || feature.id;
+			map.set(key, feature);
+			map.set(feature.id, feature);
+		});
+		return map;
+	}, [features]);
+
+	const actionsMap = useMemo(() => {
+		const map = new Map<string, Action>();
+		const byActivityMap = new Map<string, Action[]>();
+		
+		actions.forEach((action) => {
+			map.set(action.id, action);
+			if (action.slug) map.set(action.slug, action);
+			
+			// Group by activity for efficient lookup
+			const activityActions = byActivityMap.get(action.data.activityId) || [];
+			activityActions.push(action);
+			byActivityMap.set(action.data.activityId, activityActions);
+		});
+		
+		return { map, byActivity: byActivityMap };
+	}, [actions]);
 
 	// Create shapes when editor is ready
 	useEffect(() => {
@@ -458,10 +525,13 @@ export default function InteractiveStoryMap({
 
 		if (shapes.length > 0) {
 			console.log(`Creating ${shapes.length} shapes`);
+			console.log("First few shapes:", shapes.slice(0, 3).map(s => ({ id: s.id, x: s.x, y: s.y, type: s.type })));
 			editor.createShapes(shapes);
 			// Center the view on the content
-			editor.zoomToFit();
-			editor.centerOnPoint({ x: 600, y: 400 });
+			setTimeout(() => {
+				editor.zoomToFit();
+				console.log("Camera bounds after zoom:", editor.getViewportScreenBounds());
+			}, 100);
 		}
 	}, [editor, sortedActivities, personas, stories, actions, features]);
 
