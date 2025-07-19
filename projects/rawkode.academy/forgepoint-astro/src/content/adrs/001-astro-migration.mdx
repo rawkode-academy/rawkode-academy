@@ -1,0 +1,137 @@
+---
+title: "Migration from CUE to Astro-based Product Management Platform"
+status: "accepted"
+context: "The existing ForgePoint system uses CUE for data modeling but lacks a user-friendly interface for product management tasks"
+decision: "Migrate to Astro with content collections and MDX for a web-based product management platform"
+consequences: "Improved accessibility and usability while maintaining structured data benefits"
+date: 2025-01-18
+---
+
+# ADR-001: Migration from CUE to Astro-based Product Management Platform
+
+## Status
+**Accepted** - 2025-01-18
+
+## Context
+
+The current ForgePoint system uses CUE (Configure Unify Execute) for data modeling and validation of product management artifacts including:
+- User personas
+- User activities and journey mapping
+- User stories and features
+- Product requirements documents (PRDs)
+- Architecture decision records (ADRs)
+
+While CUE provides excellent data validation and type safety, the current implementation has several limitations:
+
+### Current Challenges
+1. **Accessibility**: Requires technical expertise to read and write CUE files
+2. **Visualization**: No built-in way to visualize user story maps or relationships
+3. **Collaboration**: Non-technical stakeholders cannot easily contribute or review content
+4. **Workflow Integration**: Difficult to integrate with standard product management workflows
+5. **Tooling**: Limited ecosystem compared to web-based alternatives
+
+### Requirements for New System
+- Maintain structured data and validation benefits
+- Provide accessible web interface for all stakeholders
+- Support rich content authoring with MDX
+- Enable visualization of user story maps and relationships
+- Integrate with modern development workflows
+- Support collaborative editing and review processes
+
+## Decision
+
+We will migrate the ForgePoint system to an **Astro-based web application** with the following architecture:
+
+### Technology Stack
+- **Astro**: Static site generator with content collections
+- **TypeScript**: Type safety and developer experience
+- **Zod**: Runtime validation for content schemas
+- **MDX**: Rich content authoring with embedded components
+- **Vue.js + Radix Vue**: Interactive UI components
+- **Tailwind CSS**: Utility-first styling
+
+### Content Architecture
+- **Content Collections**: Replace CUE packages with Astro content collections
+- **Frontmatter Validation**: Use Zod schemas for type safety and validation
+- **MDX Content**: Enable rich documentation within each artifact
+- **File-based**: Maintain Git-friendly, version-controlled content
+
+### Key Features
+1. **User Story Map Visualization**: Interactive story mapping interface
+2. **Content Management**: Web forms for creating and editing artifacts
+3. **Relationship Tracking**: Automatic linking between personas, activities, and stories
+4. **Export Capabilities**: Generate reports and documentation
+5. **Search and Filtering**: Find content across all artifact types
+
+## Alternatives Considered
+
+### Option 1: Keep CUE with Web Frontend
+**Pros**: Maintains existing data structure and validation
+**Cons**: Adds complexity, requires CUE expertise for content authors
+
+### Option 2: Pure Database Solution (PostgreSQL + Admin Interface)
+**Pros**: Traditional data management, familiar to many teams
+**Cons**: Less version control friendly, harder to backup/restore, requires database infrastructure
+
+### Option 3: Notion/Airtable Integration
+**Pros**: No development required, familiar interfaces
+**Cons**: Vendor lock-in, limited customization, export/backup challenges
+
+### Option 4: Custom React/Next.js Application
+**Pros**: Maximum flexibility and customization
+**Cons**: Higher development overhead, complex content management
+
+## Consequences
+
+### Positive Consequences
+- **Improved Accessibility**: Web interface accessible to all stakeholders
+- **Better Visualization**: Built-in story mapping and relationship visualization
+- **Enhanced Collaboration**: Web-based editing and review workflows
+- **Familiar Tools**: Standard web technologies for easier maintenance
+- **Git Integration**: Maintains version control and backup benefits
+- **Performance**: Static generation provides fast loading times
+- **Extensibility**: Easy to add new features and integrations
+
+### Negative Consequences
+- **Migration Effort**: Requires conversion of existing CUE files to MDX format
+- **Loss of CUE Benefits**: No longer get CUE's advanced constraint validation
+- **Complexity**: Web application is more complex than pure data files
+- **Maintenance Overhead**: Requires ongoing web application maintenance
+
+### Mitigation Strategies
+1. **Gradual Migration**: Convert content incrementally while maintaining CUE as source of truth initially
+2. **Schema Validation**: Use Zod to maintain data quality and type safety
+3. **Documentation**: Comprehensive documentation for content authors and developers
+4. **Backup Strategy**: Regular exports and Git-based versioning
+5. **Testing**: Comprehensive testing for content validation and user workflows
+
+## Implementation Plan
+
+### Phase 1: Foundation (Completed)
+- [x] Project setup with Astro, TypeScript, and content collections
+- [x] Define content schemas with Zod validation
+- [x] Create base layouts and page templates
+- [x] Convert core personas and activities to MDX format
+
+### Phase 2: Core Features
+- [ ] Build user story map visualization component
+- [ ] Implement content creation and editing workflows
+- [ ] Add search and filtering capabilities
+- [ ] Create export and reporting features
+
+### Phase 3: Advanced Features
+- [ ] Real-time collaboration features
+- [ ] Integration with external tools (Jira, GitHub, etc.)
+- [ ] Advanced analytics and metrics tracking
+- [ ] Mobile-responsive optimization
+
+## Monitoring and Review
+
+This decision will be reviewed after **3 months** of implementation with the following success criteria:
+- Stakeholder adoption rate > 80%
+- Content creation efficiency improvement > 50%
+- User story map usage in planning sessions
+- Reduced time for product management tasks
+- Positive feedback from non-technical stakeholders
+
+If the new system doesn't meet these criteria, we will consider reverting to CUE or implementing one of the alternative approaches.

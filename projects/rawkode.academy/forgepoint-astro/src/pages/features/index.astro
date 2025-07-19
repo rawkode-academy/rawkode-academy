@@ -1,0 +1,81 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+const features = await getCollection("features");
+const stories = await getCollection("stories");
+
+const getRelatedStoriesCount = (featureSlug: string) => {
+	return stories.filter((s) => s.data.featureId === featureSlug).length;
+};
+
+const priorityColors = {
+	must: "bg-red-100 text-red-800",
+	should: "bg-yellow-100 text-yellow-800",
+	could: "bg-green-100 text-green-800",
+	wont: "bg-gray-100 text-gray-800",
+};
+
+const sizeLabels = {
+	XS: "bg-blue-100 text-blue-800",
+	S: "bg-blue-200 text-blue-900",
+	M: "bg-blue-300 text-blue-900",
+	L: "bg-blue-400 text-blue-900",
+	XL: "bg-blue-500 text-white",
+};
+---
+
+<Layout title="Features">
+	<main class="container mx-auto px-4 py-8">
+		<h1 class="text-4xl font-bold mb-8">Features</h1>
+		
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			{features.map((feature) => {
+				const storyCount = getRelatedStoriesCount(feature.slug);
+				return (
+					<article class="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+						<div class="flex items-start justify-between mb-4">
+							<h2 class="text-2xl font-semibold">
+								<a href={`/features/${feature.slug}`} class="hover:text-blue-600 transition-colors">
+									{feature.data.title}
+								</a>
+							</h2>
+							<div class="flex gap-2">
+								<span class={`px-2 py-1 rounded text-xs font-medium ${priorityColors[feature.data.priority]}`}>
+									{feature.data.priority.toUpperCase()}
+								</span>
+								{feature.data.size && (
+									<span class={`px-2 py-1 rounded text-xs font-medium ${sizeLabels[feature.data.size]}`}>
+										{feature.data.size}
+									</span>
+								)}
+							</div>
+						</div>
+						
+						<p class="text-gray-600 mb-4">{feature.data.description}</p>
+						
+						<div class="bg-gray-50 p-4 rounded mb-4">
+							<h3 class="text-sm font-semibold text-gray-700 mb-2">Enhancement</h3>
+							<p class="text-sm text-gray-600">{feature.data.enhancement}</p>
+						</div>
+						
+						<div class="flex items-center justify-between text-sm text-gray-500">
+							<span>
+								<span class="font-medium">Stories:</span> {storyCount}
+							</span>
+							{feature.data.dependencies && feature.data.dependencies.length > 0 && (
+								<span>
+									<span class="font-medium">Dependencies:</span> {feature.data.dependencies.length}
+								</span>
+							)}
+						</div>
+					</article>
+				);
+			})}
+		</div>
+		
+		{features.length === 0 && (
+			<p class="text-gray-500 text-center py-8">No features have been created yet.</p>
+		)}
+	</main>
+</Layout>

@@ -1,0 +1,121 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+	const prds = await getCollection("prds");
+	return prds.map((prd) => ({
+		params: { slug: prd.slug },
+		props: { prd },
+	}));
+}
+
+const { prd } = Astro.props;
+const { Content } = await prd.render();
+
+const statusColors = {
+	proposed: "bg-blue-100 text-blue-800",
+	accepted: "bg-green-100 text-green-800",
+	completed: "bg-purple-100 text-purple-800",
+	deprecated: "bg-gray-100 text-gray-800",
+};
+
+const formatDate = (date: Date | undefined) => {
+	if (!date) return null;
+	return new Date(date).toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+};
+---
+
+<Layout title={prd.data.title}>
+	<main class="container mx-auto px-4 py-8 max-w-4xl">
+		<nav class="mb-8">
+			<a href="/prds" class="text-blue-600 hover:underline">← Back to PRDs</a>
+		</nav>
+		
+		<article>
+			<header class="mb-8">
+				<div class="flex items-start justify-between mb-4">
+					<h1 class="text-4xl font-bold">{prd.data.title}</h1>
+					<span class={`px-3 py-1 rounded text-sm font-medium ${statusColors[prd.data.status]}`}>
+						{prd.data.status.toUpperCase()}
+					</span>
+				</div>
+				
+				<p class="text-xl text-gray-600 mb-6">{prd.data.description}</p>
+				
+				<div class="flex flex-wrap gap-4 text-sm">
+					<div class="bg-gray-100 px-3 py-1 rounded">
+						<span class="font-medium">Owner:</span> {prd.data.owner}
+					</div>
+					{prd.data.createdAt && (
+						<div class="bg-gray-100 px-3 py-1 rounded">
+							<span class="font-medium">Created:</span> {formatDate(prd.data.createdAt)}
+						</div>
+					)}
+					{prd.data.updatedAt && (
+						<div class="bg-gray-100 px-3 py-1 rounded">
+							<span class="font-medium">Updated:</span> {formatDate(prd.data.updatedAt)}
+						</div>
+					)}
+				</div>
+			</header>
+			
+			{prd.data.stakeholders && prd.data.stakeholders.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Stakeholders</h2>
+					<div class="flex flex-wrap gap-2">
+						{prd.data.stakeholders.map((stakeholder) => (
+							<span class="bg-gray-100 px-3 py-1 rounded text-sm">{stakeholder}</span>
+						))}
+					</div>
+				</section>
+			)}
+			
+			<section class="mb-8">
+				<h2 class="text-2xl font-semibold mb-4">Problem Statement</h2>
+				<div class="bg-red-50 p-6 rounded-lg">
+					<p class="text-gray-800">{prd.data.problem}</p>
+				</div>
+			</section>
+			
+			<section class="mb-8">
+				<h2 class="text-2xl font-semibold mb-4">Proposed Solution</h2>
+				<div class="bg-green-50 p-6 rounded-lg">
+					<p class="text-gray-800">{prd.data.solution}</p>
+				</div>
+			</section>
+			
+			<section class="mb-8">
+				<h2 class="text-2xl font-semibold mb-4">Requirements</h2>
+				<ul class="list-disc list-inside space-y-2">
+					{prd.data.requirements.map((requirement) => (
+						<li class="text-gray-700">{requirement}</li>
+					))}
+				</ul>
+			</section>
+			
+			{prd.data.metrics && prd.data.metrics.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Success Metrics</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						{prd.data.metrics.map((metric) => (
+							<div class="bg-gray-50 p-4 rounded-lg">
+								<h3 class="font-medium text-gray-900">{metric.name}</h3>
+								<p class="text-sm text-gray-600">Target: {metric.target}</p>
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			<section class="prose prose-lg max-w-none">
+				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+				<Content />
+			</section>
+		</article>
+	</main>
+</Layout>

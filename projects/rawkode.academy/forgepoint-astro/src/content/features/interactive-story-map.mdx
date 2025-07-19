@@ -1,0 +1,55 @@
+---
+title: Interactive Story Map
+description: Visual, interactive story mapping tool for planning and tracking features across activities and personas
+enhancement: Implement a visual story map that allows product teams to organize stories by activities and personas, providing a holistic view of the product development roadmap
+priority: must
+size: XL
+dependencies:
+  - id: story-map-view
+    type: blocks
+    duration: 2 weeks
+  - id: drag-drop-stories
+    type: blocks
+    duration: 1 week
+  - id: filtering-personas
+    type: requires
+    duration: 3 days
+---
+
+## Overview
+
+The Interactive Story Map is ForgePoint's killer feature that transforms how product teams visualize and plan their work. It provides a two-dimensional view where:
+
+- **Horizontal axis**: Activities (user journey steps)
+- **Vertical axis**: Stories prioritized within each activity
+- **Color coding**: Different personas or story states
+
+## Key Capabilities
+
+### 1. Visual Organization
+- Drag-and-drop interface for organizing stories
+- Automatic layout adjustments
+- Zoom in/out for different levels of detail
+
+### 2. Filtering and Views
+- Filter by persona to see specific user journeys
+- Filter by priority (MoSCoW)
+- Toggle between planning and execution views
+
+### 3. Real-time Collaboration
+- Multiple team members can view and edit simultaneously
+- Comments and discussions on individual stories
+- Change tracking and history
+
+## Technical Implementation
+
+The story map will be built using:
+- Vue.js for the interactive components
+- CSS Grid for the flexible layout
+- Astro's content collections for data management
+
+## Success Metrics
+
+- Time to create initial story map: < 5 minutes
+- Stories organized per minute: > 10
+- Team adoption rate: > 80% within first month

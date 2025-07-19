@@ -1,0 +1,175 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+	const stories = await getCollection("stories");
+	return stories.map((story) => ({
+		params: { slug: story.slug },
+		props: { story },
+	}));
+}
+
+const { story } = Astro.props;
+const { Content } = await story.render();
+
+const activities = await getCollection("activities");
+const features = await getCollection("features");
+
+const activity = activities.find((a) => a.slug === story.data.activityId);
+const feature = story.data.featureId
+	? features.find((f) => f.slug === story.data.featureId)
+	: null;
+
+const priorityColors = {
+	must: "bg-red-100 text-red-800",
+	should: "bg-yellow-100 text-yellow-800",
+	could: "bg-green-100 text-green-800",
+	wont: "bg-gray-100 text-gray-800",
+};
+
+const sizeLabels = {
+	XS: "bg-blue-100 text-blue-800",
+	S: "bg-blue-200 text-blue-900",
+	M: "bg-blue-300 text-blue-900",
+	L: "bg-blue-400 text-blue-900",
+	XL: "bg-blue-500 text-white",
+};
+---
+
+<Layout title={story.data.title}>
+	<main class="container mx-auto px-4 py-8 max-w-4xl">
+		<nav class="mb-8">
+			<a href="/stories" class="text-blue-600 hover:underline">← Back to Stories</a>
+		</nav>
+		
+		<article>
+			<header class="mb-8">
+				<div class="flex items-start justify-between mb-4">
+					<h1 class="text-4xl font-bold">{story.data.title}</h1>
+					<div class="flex gap-2">
+						<span class={`px-3 py-1 rounded text-sm font-medium ${priorityColors[story.data.priority]}`}>
+							{story.data.priority.toUpperCase()}
+						</span>
+						{story.data.size && (
+							<span class={`px-3 py-1 rounded text-sm font-medium ${sizeLabels[story.data.size]}`}>
+								{story.data.size}
+							</span>
+						)}
+					</div>
+				</div>
+				
+				<p class="text-xl text-gray-600 mb-6">{story.data.description}</p>
+				
+				<div class="bg-gray-50 p-6 rounded-lg mb-6">
+					<p class="text-lg">
+						<span class="font-semibold">As a</span> {story.data.asA},<br/>
+						<span class="font-semibold">I want</span> {story.data.iWant},<br/>
+						<span class="font-semibold">So that</span> {story.data.soThat}
+					</p>
+				</div>
+				
+				<div class="flex flex-wrap gap-4 text-sm">
+					{activity && (
+						<div class="bg-gray-100 px-3 py-1 rounded">
+							<span class="font-medium">Activity:</span>
+							<a href={`/activities/${activity.slug}`} class="text-blue-600 hover:underline ml-1">
+								{activity.data.title}
+							</a>
+						</div>
+					)}
+					{feature && (
+						<div class="bg-gray-100 px-3 py-1 rounded">
+							<span class="font-medium">Feature:</span>
+							<a href={`/features/${feature.slug}`} class="text-blue-600 hover:underline ml-1">
+								{feature.data.title}
+							</a>
+						</div>
+					)}
+				</div>
+			</header>
+			
+			<section class="mb-8">
+				<h2 class="text-2xl font-semibold mb-4">Acceptance Criteria</h2>
+				<ul class="list-disc list-inside space-y-2">
+					{story.data.acceptanceCriteria.map((criterion) => (
+						<li class="text-gray-700">{criterion}</li>
+					))}
+				</ul>
+			</section>
+			
+			{story.data.dependencies && story.data.dependencies.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Dependencies</h2>
+					<div class="space-y-2">
+						{story.data.dependencies.map((dep) => (
+							<div class="flex items-center gap-4 p-3 bg-gray-50 rounded">
+								<span class="font-medium capitalize">{dep.type.replace('-', ' ')}</span>
+								<span class="text-gray-600">{dep.id}</span>
+								{dep.duration && (
+									<span class="text-sm text-gray-500">Duration: {dep.duration}</span>
+								)}
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			{story.data.attachments && story.data.attachments.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Attachments</h2>
+					<div class="space-y-4">
+						{story.data.attachments.map((attachment) => (
+							<div class="border border-gray-200 rounded-lg p-4">
+								<div class="flex items-center justify-between mb-2">
+									<h3 class="font-medium">{attachment.title || attachment.type}</h3>
+									<span class="text-sm text-gray-500 capitalize">{attachment.type.replace('-', ' ')}</span>
+								</div>
+								
+								{attachment.type === 'bdd-scenario' && (
+									<div class="space-y-2 text-sm">
+										{attachment.given && (
+											<div>
+												<span class="font-medium">Given:</span>
+												<ul class="list-disc list-inside ml-4">
+													{attachment.given.map((item) => <li>{item}</li>)}
+												</ul>
+											</div>
+										)}
+										{attachment.when && (
+											<div>
+												<span class="font-medium">When:</span>
+												<ul class="list-disc list-inside ml-4">
+													{attachment.when.map((item) => <li>{item}</li>)}
+												</ul>
+											</div>
+										)}
+										{attachment.then_ && (
+											<div>
+												<span class="font-medium">Then:</span>
+												<ul class="list-disc list-inside ml-4">
+													{attachment.then_.map((item) => <li>{item}</li>)}
+												</ul>
+											</div>
+										)}
+									</div>
+								)}
+								
+								{attachment.url && (
+									<a href={attachment.url} class="text-blue-600 hover:underline text-sm">
+										View attachment →
+									</a>
+								)}
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			<section class="prose prose-lg max-w-none">
+				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+				<Content />
+			</section>
+		</article>
+	</main>
+</Layout>

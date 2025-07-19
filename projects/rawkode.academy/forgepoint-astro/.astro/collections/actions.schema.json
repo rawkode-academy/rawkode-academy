@@ -1,0 +1,67 @@
+{
+  "$ref": "#/definitions/actions",
+  "definitions": {
+    "actions": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "persona": {
+          "type": "string"
+        },
+        "activityId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "click",
+            "input",
+            "navigate",
+            "view",
+            "interact"
+          ]
+        },
+        "outcome": {
+          "type": "string"
+        },
+        "storyId": {
+          "type": "string"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postconditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "persona",
+        "activityId",
+        "type",
+        "outcome"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

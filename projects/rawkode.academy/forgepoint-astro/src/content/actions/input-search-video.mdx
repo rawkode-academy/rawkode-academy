@@ -1,0 +1,43 @@
+---
+title: Input Search Query
+description: Enter keywords to search for educational videos
+persona: learner
+activityId: search-for-video
+type: input
+outcome: Search results displayed with relevant videos
+sequence: 1
+preconditions:
+  - User is on search page
+  - Search input is focused
+postconditions:
+  - Search query is submitted
+  - Loading state shown
+  - Results displayed or "no results" message
+---
+
+## Search Input Behavior
+
+The search input provides intelligent assistance for learners:
+
+### Features
+
+1. **Auto-suggestions**
+   - Popular search terms
+   - Recent searches
+   - Topic categories
+
+2. **Search Modifiers**
+   - Filter by difficulty level
+   - Duration constraints
+   - Language preferences
+
+3. **Instant Results**
+   - Debounced API calls (300ms)
+   - Skeleton loading states
+   - Progressive enhancement
+
+### Accessibility
+
+- Clear label and placeholder text
+- Keyboard navigation for suggestions
+- Screen reader announcements for result count
