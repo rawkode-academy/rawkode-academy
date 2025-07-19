@@ -1,0 +1,51 @@
+---
+title: Zoom to Activity
+description: Double-click an activity to zoom and center the view on it
+persona: contributor
+activityId: plan-features
+type: interact
+outcome: Canvas smoothly animates to center and zoom on the selected activity
+storyId: view-story-map
+sequence: 4
+preconditions:
+  - Story map is loaded
+  - Activity cards are visible
+postconditions:
+  - Selected activity is centered in viewport
+  - Zoom level adjusted to show activity details
+  - Navigation breadcrumb updated
+---
+
+## Zoom Behavior
+
+The zoom-to-activity feature provides quick navigation across large story maps:
+
+### Implementation Details
+
+1. **Trigger Methods**
+   - Double-click on activity card
+   - Keyboard shortcut: G then activity number
+   - Activity dropdown selection
+
+2. **Animation Properties**
+   - Duration: 500ms ease-in-out
+   - Zoom level: Calculated to fit activity + stories
+   - Padding: 100px around content
+
+3. **Edge Cases**
+   - Prevent zoom beyond max/min limits
+   - Handle empty activities gracefully
+   - Maintain aspect ratio
+
+### Code Example
+
+```typescript
+const zoomToActivity = (activityId: string) => {
+  const bounds = getActivityBounds(activityId);
+  editor.zoomToBounds(bounds, {
+    duration: 500,
+    padding: 100,
+    animation: { easing: 'ease-in-out' }
+  });
+};
+```

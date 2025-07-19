@@ -1,0 +1,73 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+	const personas = await getCollection("personas");
+	return personas.map((persona) => ({
+		params: { slug: persona.slug },
+		props: { persona },
+	}));
+}
+
+const { persona } = Astro.props;
+const { Content } = await persona.render();
+---
+
+<Layout title={persona.data.title}>
+	<main class="container mx-auto px-4 py-8 max-w-4xl">
+		<nav class="mb-8">
+			<a href="/personas" class="text-blue-600 hover:underline">← Back to Personas</a>
+		</nav>
+		
+		<article>
+			<header class="mb-8">
+				<h1 class="text-4xl font-bold mb-4">{persona.data.title}</h1>
+				<p class="text-xl text-gray-600 mb-4">{persona.data.description}</p>
+				
+				<div class="flex flex-wrap gap-4 text-sm">
+					{persona.data.role && (
+						<div class="bg-gray-100 px-3 py-1 rounded">
+							<span class="font-medium">Role:</span> {persona.data.role}
+						</div>
+					)}
+					{persona.data.experience && (
+						<div class="bg-gray-100 px-3 py-1 rounded">
+							<span class="font-medium">Experience:</span> {persona.data.experience}
+						</div>
+					)}
+				</div>
+			</header>
+			
+			<section class="mb-8">
+				<h2 class="text-2xl font-semibold mb-4">Context</h2>
+				<p class="text-gray-700">{persona.data.context}</p>
+			</section>
+			
+			<div class="grid md:grid-cols-2 gap-8 mb-8">
+				<section>
+					<h2 class="text-2xl font-semibold mb-4">Goals</h2>
+					<ul class="list-disc list-inside space-y-2">
+						{persona.data.goals.map((goal) => (
+							<li class="text-gray-700">{goal}</li>
+						))}
+					</ul>
+				</section>
+				
+				<section>
+					<h2 class="text-2xl font-semibold mb-4">Pain Points</h2>
+					<ul class="list-disc list-inside space-y-2">
+						{persona.data.painPoints.map((painPoint) => (
+							<li class="text-gray-700">{painPoint}</li>
+						))}
+					</ul>
+				</section>
+			</div>
+			
+			<section class="prose prose-lg max-w-none">
+				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+				<Content />
+			</section>
+		</article>
+	</main>
+</Layout>

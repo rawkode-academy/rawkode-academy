@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import InteractiveStoryMap from "../components/InteractiveStoryMap.tsx";
+import { getCollection } from "astro:content";
+
+const personas = await getCollection("personas");
+const activities = await getCollection("activities");
+const stories = await getCollection("stories");
+const actions = await getCollection("actions");
+const features = await getCollection("features");
+---
+
+<BaseLayout title="Interactive Story Map - ForgePoint">
+  <InteractiveStoryMap 
+    personas={personas}
+    activities={activities} 
+    stories={stories}
+    actions={actions}
+    features={features}
+    client:load
+  />
+</BaseLayout>

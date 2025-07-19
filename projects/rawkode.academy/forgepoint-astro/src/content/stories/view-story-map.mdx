@@ -1,0 +1,49 @@
+---
+title: View Interactive Story Map
+description: As a product team member, I need to view our stories organized in a visual map format
+asA: Product Manager
+iWant: to view all stories organized by activities and personas in a visual map
+soThat: I can understand the overall product roadmap and identify gaps or overlaps
+acceptanceCriteria:
+  - Stories are displayed in a grid with activities as columns
+  - Stories within each activity are vertically ordered by priority
+  - Each story card shows title, size, and persona color coding
+  - The map loads within 2 seconds for up to 100 stories
+  - I can see which stories are linked to which features
+priority: must
+size: L
+activityId: plan-features
+featureId: interactive-story-map
+attachments:
+  - type: bdd-scenario
+    title: Viewing story map with multiple activities
+    given:
+      - I have 5 activities defined
+      - Each activity has between 3-10 stories
+      - Stories have different priorities and personas assigned
+    when:
+      - I navigate to the story map view
+    then_:
+      - I see all activities as column headers
+      - Stories are displayed as cards within their activity columns
+      - Higher priority stories appear at the top of each column
+      - Each story card is color-coded by persona
+---
+
+## User Story Details
+
+The story map view is the foundation of ForgePoint's visual planning capabilities. It transforms the traditional backlog list into a two-dimensional map that provides context and relationships between stories.
+
+### Key Features
+
+1. **Activity-based Organization**: Stories are grouped by the user activities they support
+2. **Visual Priority**: Vertical positioning indicates priority within each activity
+3. **Persona Integration**: Color coding helps identify which user types benefit from each story
+4. **Feature Connections**: Visual indicators show which stories belong to larger features
+
+### Technical Considerations
+
+- Use Vue.js for reactive updates when stories change
+- Implement virtual scrolling for performance with large story counts
+- Cache rendered story cards to improve interaction speed
+- Provide keyboard navigation for accessibility

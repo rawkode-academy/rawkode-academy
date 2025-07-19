@@ -1,0 +1,76 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+const adrs = await getCollection("adrs");
+
+const sortedAdrs = adrs.sort((a, b) => {
+	return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+});
+
+const statusColors = {
+	proposed: "bg-blue-100 text-blue-800",
+	accepted: "bg-green-100 text-green-800",
+	completed: "bg-purple-100 text-purple-800",
+	deprecated: "bg-gray-100 text-gray-800",
+	superseded: "bg-orange-100 text-orange-800",
+};
+
+const formatDate = (date: Date) => {
+	return new Date(date).toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+};
+---
+
+<Layout title="Architecture Decision Records">
+	<main class="container mx-auto px-4 py-8">
+		<h1 class="text-4xl font-bold mb-8">Architecture Decision Records (ADRs)</h1>
+		
+		<div class="space-y-6">
+			{sortedAdrs.map((adr) => (
+				<article class="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+					<div class="flex items-start justify-between mb-4">
+						<h2 class="text-2xl font-semibold">
+							<a href={`/adrs/${adr.slug}`} class="hover:text-blue-600 transition-colors">
+								{adr.data.title}
+							</a>
+						</h2>
+						<div class="flex items-center gap-2">
+							<span class={`px-2 py-1 rounded text-xs font-medium ${statusColors[adr.data.status]}`}>
+								{adr.data.status.toUpperCase()}
+							</span>
+							<span class="text-sm text-gray-500">
+								{formatDate(adr.data.date)}
+							</span>
+						</div>
+					</div>
+					
+					<div class="space-y-3 mb-4">
+						<div class="bg-gray-50 p-3 rounded">
+							<h3 class="text-sm font-semibold text-gray-700 mb-1">Context</h3>
+							<p class="text-sm text-gray-600 line-clamp-2">{adr.data.context}</p>
+						</div>
+						
+						<div class="bg-gray-50 p-3 rounded">
+							<h3 class="text-sm font-semibold text-gray-700 mb-1">Decision</h3>
+							<p class="text-sm text-gray-600 line-clamp-2">{adr.data.decision}</p>
+						</div>
+					</div>
+					
+					{adr.data.supersededBy && (
+						<div class="text-sm text-orange-600 bg-orange-50 px-3 py-1 rounded inline-block">
+							Superseded by: {adr.data.supersededBy}
+						</div>
+					)}
+				</article>
+			))}
+		</div>
+		
+		{adrs.length === 0 && (
+			<p class="text-gray-500 text-center py-8">No ADRs have been created yet.</p>
+		)}
+	</main>
+</Layout>

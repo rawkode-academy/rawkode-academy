@@ -1,0 +1,49 @@
+---
+title: Filter by Persona
+description: Apply persona filter to show only relevant stories on the map
+persona: contributor
+activityId: plan-features
+type: interact
+outcome: Story map displays filtered view showing only stories for selected persona
+storyId: view-story-map
+sequence: 3
+preconditions:
+  - Story map is loaded
+  - Multiple personas exist
+  - Stories are assigned to personas
+postconditions:
+  - Only stories matching selected persona are visible
+  - Filter state is indicated in UI
+  - Clear filter option is available
+---
+
+## Interaction Flow
+
+The persona filtering feature enables focused planning sessions:
+
+1. **Filter Selection**
+   - Click on persona pill or use dropdown
+   - Multi-select for comparing personas
+   - Keyboard shortcut: P then persona number
+
+2. **Visual Changes**
+   - Non-matching stories fade or hide
+   - Matching stories highlight
+   - Activity columns adjust width
+
+3. **Persistence**
+   - Filter state saved to URL params
+   - Restored on page reload
+   - Shareable filtered views
+
+### Performance Optimization
+
+```typescript
+// Efficient filtering with memoization
+const filteredStories = useMemo(() => {
+  if (!selectedPersonas.length) return stories;
+  return stories.filter(story => 
+    selectedPersonas.includes(story.data.asA)
+  );
+}, [stories, selectedPersonas]);
+```

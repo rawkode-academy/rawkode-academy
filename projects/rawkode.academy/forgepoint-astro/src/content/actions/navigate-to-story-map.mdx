@@ -1,0 +1,32 @@
+---
+title: Navigate to Story Map
+description: Product manager navigates to the interactive story map view
+persona: contributor
+activityId: plan-features
+type: navigate
+outcome: Story map interface is loaded with all current stories displayed
+storyId: view-story-map
+sequence: 1
+preconditions:
+  - User is logged in
+  - User has product management permissions
+postconditions:
+  - Story map is visible
+  - Stories are organized by activities
+  - Persona filters are available
+---
+
+## Action Details
+
+This navigation action initiates the story mapping experience. The navigation should:
+
+- Be accessible from the main navigation menu
+- Include keyboard shortcut (Cmd/Ctrl + M)
+- Show loading state while fetching data
+- Preserve user's last view preferences
+
+### Performance Considerations
+
+- Lazy load the tldraw library
+- Cache story positions between sessions
+- Use virtual rendering for large story counts

@@ -1,0 +1,91 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const personas = await getCollection("personas");
+const activities = await getCollection("activities");
+const stories = await getCollection("stories");
+const prds = await getCollection("prds");
+const adrs = await getCollection("adrs");
+---
+
+<BaseLayout title="ForgePoint - Product Management Dashboard">
+  <div class="container py-8">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold tracking-tight text-white">ForgePoint</h1>
+      <p class="text-xl text-gray-400 mt-2">
+        Product management for cloud native teams
+      </p>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+        <h3 class="text-lg font-semibold mb-2 text-white">Story Maps</h3>
+        <p class="text-sm text-gray-400 mb-4">
+          Visualize your user journey with different approaches
+        </p>
+        <div class="flex flex-col gap-2">
+          <a href="/story-map" class="inline-flex items-center justify-center rounded-md bg-gray-600 px-3 py-2 text-sm font-medium text-white hover:bg-gray-700">
+            📊 Static View
+          </a>
+          <a href="/interactive-story-map" class="inline-flex items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700">
+            ✨ Vue Whiteboard
+          </a>
+          <a href="/tldraw-story-map" class="inline-flex items-center justify-center rounded-md bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-700">
+            🎨 Tldraw Canvas
+          </a>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+        <h3 class="text-lg font-semibold mb-2 text-white">Personas</h3>
+        <p class="text-sm text-gray-400 mb-4">
+          {personas.length} personas defined
+        </p>
+        <a href="/personas" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          View Personas
+        </a>
+      </div>
+
+      <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+        <h3 class="text-lg font-semibold mb-2 text-white">Activities</h3>
+        <p class="text-sm text-gray-400 mb-4">
+          {activities.length} user activities mapped
+        </p>
+        <a href="/activities" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          View Activities
+        </a>
+      </div>
+
+      <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+        <h3 class="text-lg font-semibold mb-2 text-white">User Stories</h3>
+        <p class="text-sm text-gray-400 mb-4">
+          {stories.length} stories documented
+        </p>
+        <a href="/stories" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          View Stories
+        </a>
+      </div>
+
+      <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+        <h3 class="text-lg font-semibold mb-2 text-white">PRDs</h3>
+        <p class="text-sm text-gray-400 mb-4">
+          {prds.length} product requirement documents
+        </p>
+        <a href="/prds" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          View PRDs
+        </a>
+      </div>
+
+      <div class="rounded-lg border border-gray-700 bg-gray-800 p-6">
+        <h3 class="text-lg font-semibold mb-2 text-white">ADRs</h3>
+        <p class="text-sm text-gray-400 mb-4">
+          {adrs.length} architecture decision records
+        </p>
+        <a href="/adrs" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          View ADRs
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

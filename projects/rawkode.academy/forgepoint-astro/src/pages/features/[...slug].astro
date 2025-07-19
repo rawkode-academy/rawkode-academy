@@ -1,0 +1,121 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+	const features = await getCollection("features");
+	return features.map((feature) => ({
+		params: { slug: feature.slug },
+		props: { feature },
+	}));
+}
+
+const { feature } = Astro.props;
+const { Content } = await feature.render();
+
+const stories = await getCollection("stories");
+const relatedStories = stories.filter((s) => s.data.featureId === feature.slug);
+
+const priorityColors = {
+	must: "bg-red-100 text-red-800",
+	should: "bg-yellow-100 text-yellow-800",
+	could: "bg-green-100 text-green-800",
+	wont: "bg-gray-100 text-gray-800",
+};
+
+const sizeLabels = {
+	XS: "bg-blue-100 text-blue-800",
+	S: "bg-blue-200 text-blue-900",
+	M: "bg-blue-300 text-blue-900",
+	L: "bg-blue-400 text-blue-900",
+	XL: "bg-blue-500 text-white",
+};
+---
+
+<Layout title={feature.data.title}>
+	<main class="container mx-auto px-4 py-8 max-w-4xl">
+		<nav class="mb-8">
+			<a href="/features" class="text-blue-600 hover:underline">← Back to Features</a>
+		</nav>
+		
+		<article>
+			<header class="mb-8">
+				<div class="flex items-start justify-between mb-4">
+					<h1 class="text-4xl font-bold">{feature.data.title}</h1>
+					<div class="flex gap-2">
+						<span class={`px-3 py-1 rounded text-sm font-medium ${priorityColors[feature.data.priority]}`}>
+							{feature.data.priority.toUpperCase()}
+						</span>
+						{feature.data.size && (
+							<span class={`px-3 py-1 rounded text-sm font-medium ${sizeLabels[feature.data.size]}`}>
+								{feature.data.size}
+							</span>
+						)}
+					</div>
+				</div>
+				
+				<p class="text-xl text-gray-600 mb-6">{feature.data.description}</p>
+				
+				<div class="bg-gray-50 p-6 rounded-lg">
+					<h2 class="text-lg font-semibold mb-2">Enhancement</h2>
+					<p class="text-gray-700">{feature.data.enhancement}</p>
+				</div>
+			</header>
+			
+			{feature.data.dependencies && feature.data.dependencies.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Dependencies</h2>
+					<div class="space-y-2">
+						{feature.data.dependencies.map((dep) => (
+							<div class="flex items-center gap-4 p-3 bg-gray-50 rounded">
+								<span class="font-medium capitalize">{dep.type.replace('-', ' ')}</span>
+								<span class="text-gray-600">{dep.id}</span>
+								{dep.duration && (
+									<span class="text-sm text-gray-500">Duration: {dep.duration}</span>
+								)}
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			{relatedStories.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Related Stories</h2>
+					<div class="space-y-4">
+						{relatedStories.map((story) => (
+							<div class="border border-gray-200 rounded-lg p-4 hover:shadow transition-shadow">
+								<div class="flex items-start justify-between mb-2">
+									<h3 class="font-medium">
+										<a href={`/stories/${story.slug}`} class="hover:text-blue-600 transition-colors">
+											{story.data.title}
+										</a>
+									</h3>
+									<div class="flex gap-2">
+										<span class={`px-2 py-1 rounded text-xs font-medium ${priorityColors[story.data.priority]}`}>
+											{story.data.priority.toUpperCase()}
+										</span>
+										{story.data.size && (
+											<span class={`px-2 py-1 rounded text-xs font-medium ${sizeLabels[story.data.size]}`}>
+												{story.data.size}
+											</span>
+										)}
+									</div>
+								</div>
+								<p class="text-sm text-gray-600">{story.data.description}</p>
+								<div class="mt-2 text-xs text-gray-500">
+									As a {story.data.asA}, I want {story.data.iWant}
+								</div>
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			<section class="prose prose-lg max-w-none">
+				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+				<Content />
+			</section>
+		</article>
+	</main>
+</Layout>

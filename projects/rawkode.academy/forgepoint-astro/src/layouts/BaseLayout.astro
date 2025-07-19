@@ -1,0 +1,67 @@
+---
+import "../styles/global.css";
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const {
+	title,
+	description = "ForgePoint - Product Management for Cloud Native Teams",
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-gray-900 text-white font-sans antialiased">
+    <div class="relative flex min-h-screen flex-col">
+      <header class="sticky top-0 z-50 w-full border-b border-gray-700 bg-gray-800/95 backdrop-blur supports-[backdrop-filter]:bg-gray-800/60">
+        <div class="container flex h-14 items-center">
+          <div class="mr-4 hidden md:flex">
+            <a class="mr-6 flex items-center space-x-2" href="/">
+              <span class="hidden font-bold sm:inline-block text-white">ForgePoint</span>
+            </a>
+            <nav class="flex items-center space-x-6 text-sm font-medium">
+              <a href="/story-map" class="transition-colors hover:text-white text-gray-300">
+                Story Map 🎨
+              </a>
+              <a href="/personas" class="transition-colors hover:text-white text-gray-300">
+                Personas
+              </a>
+              <a href="/activities" class="transition-colors hover:text-white text-gray-300">
+                Activities
+              </a>
+              <a href="/stories" class="transition-colors hover:text-white text-gray-300">
+                Stories
+              </a>
+              <a href="/prds" class="transition-colors hover:text-white text-gray-300">
+                PRDs
+              </a>
+              <a href="/adrs" class="transition-colors hover:text-white text-gray-300">
+                ADRs
+              </a>
+            </nav>
+          </div>
+        </div>
+      </header>
+      <main class="flex-1">
+        <slot />
+      </main>
+      <footer class="border-t border-gray-700 py-6 md:py-0">
+        <div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+          <p class="text-center text-sm leading-loose text-gray-400 md:text-left">
+            Built with Astro and Radix Vue. Open source product management for cloud native teams.
+          </p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

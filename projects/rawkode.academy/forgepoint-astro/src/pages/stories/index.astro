@@ -1,0 +1,90 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+const stories = await getCollection("stories");
+const activities = await getCollection("activities");
+
+const getActivityTitle = (activityId: string) => {
+	const activity = activities.find((a) => a.slug === activityId);
+	return activity?.data.title || activityId;
+};
+
+const priorityColors = {
+	must: "bg-red-100 text-red-800",
+	should: "bg-yellow-100 text-yellow-800",
+	could: "bg-green-100 text-green-800",
+	wont: "bg-gray-100 text-gray-800",
+};
+
+const sizeLabels = {
+	XS: "bg-blue-100 text-blue-800",
+	S: "bg-blue-200 text-blue-900",
+	M: "bg-blue-300 text-blue-900",
+	L: "bg-blue-400 text-blue-900",
+	XL: "bg-blue-500 text-white",
+};
+---
+
+<Layout title="User Stories">
+	<main class="container mx-auto px-4 py-8">
+		<h1 class="text-4xl font-bold mb-8">User Stories</h1>
+		
+		<div class="space-y-6">
+			{stories.map((story) => (
+				<article class="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+					<div class="flex items-start justify-between mb-4">
+						<h2 class="text-2xl font-semibold">
+							<a href={`/stories/${story.slug}`} class="hover:text-blue-600 transition-colors">
+								{story.data.title}
+							</a>
+						</h2>
+						<div class="flex gap-2">
+							<span class={`px-2 py-1 rounded text-xs font-medium ${priorityColors[story.data.priority]}`}>
+								{story.data.priority.toUpperCase()}
+							</span>
+							{story.data.size && (
+								<span class={`px-2 py-1 rounded text-xs font-medium ${sizeLabels[story.data.size]}`}>
+									{story.data.size}
+								</span>
+							)}
+						</div>
+					</div>
+					
+					<p class="text-gray-600 mb-4">{story.data.description}</p>
+					
+					<div class="bg-gray-50 p-4 rounded mb-4">
+						<p class="text-sm">
+							<span class="font-medium">As a</span> {story.data.asA},<br/>
+							<span class="font-medium">I want</span> {story.data.iWant},<br/>
+							<span class="font-medium">So that</span> {story.data.soThat}
+						</p>
+					</div>
+					
+					<div class="flex items-center gap-4 text-sm text-gray-500">
+						<span>
+							<span class="font-medium">Activity:</span> {getActivityTitle(story.data.activityId)}
+						</span>
+						{story.data.featureId && (
+							<span>
+								<span class="font-medium">Feature:</span> 
+								<a href={`/features/${story.data.featureId}`} class="text-blue-600 hover:underline">
+									{story.data.featureId}
+								</a>
+							</span>
+						)}
+						{story.data.acceptanceCriteria && (
+							<span>
+								<span class="font-medium">Criteria:</span> {story.data.acceptanceCriteria.length} items
+							</span>
+						)}
+					</div>
+				</article>
+			))}
+		</div>
+		
+		{stories.length === 0 && (
+			<p class="text-gray-500 text-center py-8">No stories have been created yet.</p>
+		)}
+	</main>
+</Layout>

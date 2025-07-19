@@ -1,0 +1,123 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+	const activities = await getCollection("activities");
+	return activities.map((activity) => ({
+		params: { slug: activity.slug },
+		props: { activity },
+	}));
+}
+
+const { activity } = Astro.props;
+const { Content } = await activity.render();
+
+const stories = await getCollection("stories");
+const personas = await getCollection("personas");
+
+const relatedStories = stories.filter(
+	(s) => s.data.activityId === activity.slug,
+);
+const relatedPersonas = activity.data.personas
+	? personas.filter((p) => activity.data.personas.includes(p.slug))
+	: [];
+
+const priorityColors = {
+	must: "bg-red-100 text-red-800",
+	should: "bg-yellow-100 text-yellow-800",
+	could: "bg-green-100 text-green-800",
+	wont: "bg-gray-100 text-gray-800",
+};
+---
+
+<Layout title={activity.data.title}>
+	<main class="container mx-auto px-4 py-8 max-w-4xl">
+		<nav class="mb-8">
+			<a href="/activities" class="text-blue-600 hover:underline">← Back to Activities</a>
+		</nav>
+		
+		<article>
+			<header class="mb-8">
+				<div class="flex items-center gap-4 mb-4">
+					<span class="text-5xl font-bold text-gray-300">{activity.data.order}</span>
+					<h1 class="text-4xl font-bold">{activity.data.title}</h1>
+				</div>
+				
+				<p class="text-xl text-gray-600 mb-6">{activity.data.description}</p>
+				
+				<div class="bg-gray-50 p-6 rounded-lg">
+					<h2 class="text-lg font-semibold mb-2">Expected Outcome</h2>
+					<p class="text-gray-700">{activity.data.outcome}</p>
+				</div>
+			</header>
+			
+			{activity.data.metrics && activity.data.metrics.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Success Metrics</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						{activity.data.metrics.map((metric) => (
+							<div class="bg-gray-50 p-4 rounded-lg">
+								<h3 class="font-medium text-gray-900">{metric.name}</h3>
+								<p class="text-sm text-gray-600">Target: {metric.target}</p>
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			{relatedPersonas.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Related Personas</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						{relatedPersonas.map((persona) => (
+							<div class="border border-gray-200 rounded-lg p-4 hover:shadow transition-shadow">
+								<h3 class="font-medium mb-2">
+									<a href={`/personas/${persona.slug}`} class="hover:text-blue-600 transition-colors">
+										{persona.data.title}
+									</a>
+								</h3>
+								<p class="text-sm text-gray-600">{persona.data.description}</p>
+								{persona.data.role && (
+									<p class="text-xs text-gray-500 mt-2">Role: {persona.data.role}</p>
+								)}
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			{relatedStories.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">User Stories</h2>
+					<div class="space-y-4">
+						{relatedStories.map((story) => (
+							<div class="border border-gray-200 rounded-lg p-4 hover:shadow transition-shadow">
+								<div class="flex items-start justify-between mb-2">
+									<h3 class="font-medium">
+										<a href={`/stories/${story.slug}`} class="hover:text-blue-600 transition-colors">
+											{story.data.title}
+										</a>
+									</h3>
+									<span class={`px-2 py-1 rounded text-xs font-medium ${priorityColors[story.data.priority]}`}>
+										{story.data.priority.toUpperCase()}
+									</span>
+								</div>
+								<p class="text-sm text-gray-600 mb-2">{story.data.description}</p>
+								<div class="bg-gray-50 p-3 rounded text-sm">
+									<span class="font-medium">As a</span> {story.data.asA},
+									<span class="font-medium">I want</span> {story.data.iWant}
+								</div>
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			<section class="prose prose-lg max-w-none">
+				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+				<Content />
+			</section>
+		</article>
+	</main>
+</Layout>

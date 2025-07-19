@@ -1,0 +1,36 @@
+---
+title: Click Join Community Button
+description: User clicks the prominent "Join Community" button on the homepage
+persona: learner
+activityId: discover-community
+type: click
+outcome: User is taken to the community signup page
+storyId: discover-community-welcome
+sequence: 1
+preconditions:
+  - User is on the homepage
+  - User is not logged in
+postconditions:
+  - User is on the community signup page
+  - Join form is visible
+---
+
+## Action Details
+
+This action represents the critical first step in the community onboarding flow. The "Join Community" button should be:
+
+- Prominently displayed on the homepage
+- Visually distinct with contrasting colors
+- Include hover states for better interactivity
+- Accessible via keyboard navigation
+
+### Technical Implementation
+
+```javascript
+// Example tracking code
+analytics.track('community_join_clicked', {
+  source: 'homepage',
+  position: 'hero_section',
+  user_type: 'guest'
+});
+```

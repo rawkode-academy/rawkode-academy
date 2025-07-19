@@ -1,0 +1,125 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+	const adrs = await getCollection("adrs");
+	return adrs.map((adr) => ({
+		params: { slug: adr.slug },
+		props: { adr },
+	}));
+}
+
+const { adr } = Astro.props;
+const { Content } = await adr.render();
+
+const adrs = await getCollection("adrs");
+
+const statusColors = {
+	proposed: "bg-blue-100 text-blue-800",
+	accepted: "bg-green-100 text-green-800",
+	completed: "bg-purple-100 text-purple-800",
+	deprecated: "bg-gray-100 text-gray-800",
+	superseded: "bg-orange-100 text-orange-800",
+};
+
+const formatDate = (date: Date) => {
+	return new Date(date).toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+};
+
+const relatedAdrs = adr.data.relatedDecisions
+	? adrs.filter((a) => adr.data.relatedDecisions?.includes(a.slug))
+	: [];
+
+const supersedingAdr = adr.data.supersededBy
+	? adrs.find((a) => a.slug === adr.data.supersededBy)
+	: null;
+---
+
+<Layout title={adr.data.title}>
+	<main class="container mx-auto px-4 py-8 max-w-4xl">
+		<nav class="mb-8">
+			<a href="/adrs" class="text-blue-600 hover:underline">← Back to ADRs</a>
+		</nav>
+		
+		<article>
+			<header class="mb-8">
+				<div class="flex items-start justify-between mb-4">
+					<h1 class="text-4xl font-bold">{adr.data.title}</h1>
+					<div class="flex items-center gap-2">
+						<span class={`px-3 py-1 rounded text-sm font-medium ${statusColors[adr.data.status]}`}>
+							{adr.data.status.toUpperCase()}
+						</span>
+						<span class="text-sm text-gray-500">
+							{formatDate(adr.data.date)}
+						</span>
+					</div>
+				</div>
+				
+				{adr.data.supersededBy && supersedingAdr && (
+					<div class="bg-orange-50 border border-orange-200 p-4 rounded-lg mb-6">
+						<p class="text-orange-800">
+							<span class="font-semibold">Note:</span> This ADR has been superseded by{' '}
+							<a href={`/adrs/${supersedingAdr.slug}`} class="text-orange-600 hover:underline">
+								{supersedingAdr.data.title}
+							</a>
+						</p>
+					</div>
+				)}
+			</header>
+			
+			<section class="mb-8">
+				<h2 class="text-2xl font-semibold mb-4">Context</h2>
+				<div class="bg-gray-50 p-6 rounded-lg">
+					<p class="text-gray-800">{adr.data.context}</p>
+				</div>
+			</section>
+			
+			<section class="mb-8">
+				<h2 class="text-2xl font-semibold mb-4">Decision</h2>
+				<div class="bg-blue-50 p-6 rounded-lg">
+					<p class="text-gray-800">{adr.data.decision}</p>
+				</div>
+			</section>
+			
+			<section class="mb-8">
+				<h2 class="text-2xl font-semibold mb-4">Consequences</h2>
+				<div class="bg-green-50 p-6 rounded-lg">
+					<p class="text-gray-800">{adr.data.consequences}</p>
+				</div>
+			</section>
+			
+			{relatedAdrs.length > 0 && (
+				<section class="mb-8">
+					<h2 class="text-2xl font-semibold mb-4">Related Decisions</h2>
+					<div class="space-y-3">
+						{relatedAdrs.map((related) => (
+							<div class="border border-gray-200 rounded-lg p-4 hover:shadow transition-shadow">
+								<div class="flex items-center justify-between">
+									<h3 class="font-medium">
+										<a href={`/adrs/${related.slug}`} class="hover:text-blue-600 transition-colors">
+											{related.data.title}
+										</a>
+									</h3>
+									<span class={`px-2 py-1 rounded text-xs font-medium ${statusColors[related.data.status]}`}>
+										{related.data.status}
+									</span>
+								</div>
+								<p class="text-sm text-gray-600 mt-1">{related.data.context.substring(0, 150)}...</p>
+							</div>
+						))}
+					</div>
+				</section>
+			)}
+			
+			<section class="prose prose-lg max-w-none">
+				<h2 class="text-2xl font-semibold mb-4">Additional Details</h2>
+				<Content />
+			</section>
+		</article>
+	</main>
+</Layout>

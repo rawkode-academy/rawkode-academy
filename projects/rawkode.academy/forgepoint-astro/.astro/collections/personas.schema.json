@@ -1,0 +1,55 @@
+{
+  "$ref": "#/definitions/personas",
+  "definitions": {
+    "personas": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "painPoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "context": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "experience": {
+          "type": "string",
+          "enum": [
+            "beginner",
+            "intermediate",
+            "expert",
+            "varied"
+          ]
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "goals",
+        "painPoints",
+        "context"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

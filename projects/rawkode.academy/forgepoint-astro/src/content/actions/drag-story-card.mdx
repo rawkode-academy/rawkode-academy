@@ -1,0 +1,43 @@
+---
+title: Drag Story Card
+description: User drags a story card to reorder priority within an activity
+persona: contributor
+activityId: plan-features
+type: interact
+outcome: Story is repositioned and priority is automatically updated
+storyId: view-story-map
+sequence: 2
+preconditions:
+  - Story map is loaded
+  - User has edit permissions
+  - Story card is visible
+postconditions:
+  - Story position is updated
+  - Priority field reflects new position
+  - Change is persisted to Git
+---
+
+## Interaction Details
+
+The drag-and-drop interaction for story cards enables intuitive priority management:
+
+### Visual Feedback
+- Card lifts slightly on hover
+- Ghost image follows cursor during drag
+- Drop zones highlight when hovering
+- Smooth animation on drop
+
+### Business Rules
+- Stories can only be moved within their activity column
+- Moving up increases priority (must > should > could)
+- Moving down decreases priority
+- Related stories maintain their relationships
+
+### Git Integration
+```yaml
+# Commit message format
+chore(forgepoint): reorder story priority in [activity-name]
+
+- Moved "[story-title]" from position X to Y
+- Updated priority from [old] to [new]
+```
