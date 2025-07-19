@@ -230,6 +230,8 @@ export default function InteractiveStoryMap({
 	const [editor, setEditor] = useState<Editor | null>(null);
 	const [showStoryModal, setShowStoryModal] = useState(false);
 	const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+	const [isDragging, setIsDragging] = useState(false);
+	const [draggedStoryId, setDraggedStoryId] = useState<string | null>(null);
 
 	// Debug logging
 	console.log("InteractiveStoryMap props:", {
@@ -627,6 +629,103 @@ export default function InteractiveStoryMap({
 		};
 	}, [editor, sortedActivities]);
 
+	// Add drag-to-connect handler for story-to-feature connections
+	useEffect(() => {
+		if (!editor) return;
+
+		const handleDragStart = () => {
+			// Get selected shapes
+			const selectedShapes = editor.getSelectedShapes();
+			
+			// Check if we're dragging a story shape
+			const storyShape = selectedShapes.find(shape => 
+				shape.id.toString().startsWith('shape:story-')
+			);
+
+			if (storyShape) {
+				const storyId = storyShape.id.toString().replace('shape:story-', '');
+				setIsDragging(true);
+				setDraggedStoryId(storyId);
+			}
+		};
+
+		const handleDragEnd = async () => {
+			if (!isDragging || !draggedStoryId) {
+				setIsDragging(false);
+				setDraggedStoryId(null);
+				return;
+			}
+
+			// Get selected shapes
+			const selectedShapes = editor.getSelectedShapes();
+			const storyShape = selectedShapes.find(shape => 
+				shape.id.toString().startsWith('shape:story-')
+			);
+
+			if (!storyShape) {
+				setIsDragging(false);
+				setDraggedStoryId(null);
+				return;
+			}
+
+			// Find all shapes at the current position
+			const point = editor.inputs.currentPagePoint;
+			const shapesAtPoint = editor.getShapeAtPoint(point);
+			
+			// Check if we're over a feature shape
+			const featureShape = shapesAtPoint?.id.toString().startsWith('shape:feature-') ? shapesAtPoint : null;
+			
+			if (featureShape) {
+				const featureId = featureShape.id.toString().replace('shape:feature-', '');
+				const story = stories.find(s => (s.slug || s.id) === draggedStoryId);
+				
+				if (story && window.location.hostname === "localhost") {
+					// Show connecting message
+					const confirmConnect = confirm(
+						`Connect story "${story.data.title}" to feature "${features.find(f => (f.slug || f.id) === featureId)?.data.title}"?`
+					);
+					
+					if (confirmConnect) {
+						try {
+							// Update the story via API
+							const response = await fetch(`/api/stories/${story.slug || story.id}`, {
+								method: 'PATCH',
+								headers: {
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify({
+									featureId: featureId
+								}),
+							});
+
+							if (response.ok) {
+								// Reload to show the new connection
+								window.location.reload();
+							} else {
+								const error = await response.json();
+								alert(`Error connecting story to feature: ${error.error || 'Unknown error'}`);
+							}
+						} catch (err) {
+							alert(`Error: ${err instanceof Error ? err.message : String(err)}`);
+						}
+					}
+				}
+			}
+			
+			setIsDragging(false);
+			setDraggedStoryId(null);
+		};
+
+		// Listen for drag events
+		editor.on('pointer:down', handleDragStart);
+		editor.on('pointer:up', handleDragEnd);
+
+		return () => {
+			editor.off('pointer:down', handleDragStart);
+			editor.off('pointer:up', handleDragEnd);
+		};
+	}, [editor, stories, features, isDragging, draggedStoryId]);
+
 	const handleStorySubmit = async (data: any) => {
 		try {
 			const response = await fetch("/api/stories", {
@@ -676,6 +775,15 @@ export default function InteractiveStoryMap({
 					</div>
 				</div>
 			</div>
+
+			{/* Drag feedback */}
+			{isDragging && draggedStoryId && (
+				<div className="absolute top-4 right-4 z-10 bg-green-900/90 border border-green-700 rounded-lg p-3">
+					<div className="text-sm text-green-300">
+						Drag story to a feature to connect them
+					</div>
+				</div>
+			)}
 
 			{/* Priority Legend */}
 			<div className="absolute bottom-4 left-4 z-10 bg-[#1a1a1d] border border-[#2a2a2d] rounded-lg p-3">
