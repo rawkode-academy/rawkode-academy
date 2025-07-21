@@ -15,7 +15,7 @@ export class Studio {
       .withExec([
         "bun",
         "run",
-        "astro:build",
+        "build",
       ]).directory("dist");
   }
 }

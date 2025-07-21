@@ -1,9 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-* don't hallucinate things. check the codebase first
-* check documentations online if you don't know a framework
-* if unsure, ask the user
-* if you add things for debugging, remove it afterwards

@@ -1,6 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-* always check implementations for potential leaks and implement best practices

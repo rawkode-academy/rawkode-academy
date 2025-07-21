@@ -1,7 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-* consultate https://docs.livekit.io/reference/components/react/ before doing any livekit react based changes
-* consultate https://docs.livekit.io/reference/server/server-apis/ before doing any livekit server changes 
