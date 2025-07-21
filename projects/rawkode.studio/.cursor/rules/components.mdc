@@ -1,6 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-* use tailwind and shadcn first, before hallucinating new components

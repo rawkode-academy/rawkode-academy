@@ -1,6 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-* always use the 'browser-mcp' MCP to verify 
