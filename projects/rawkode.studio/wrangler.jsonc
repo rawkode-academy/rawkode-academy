@@ -1,23 +1,23 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "rawkode-studio",
-  "compatibility_date": "2025-05-05",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "nodejs_compat_populate_process_env"
-  ],
-  "main": "./dist/_worker.js/index.js",
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "./dist"
-  },
-  "routes": [
-    {
-      "pattern": "rawkode.studio",
-      "custom_domain": true
-    }
-  ],
-  "observability": {
-    "enabled": true
-  }
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "rawkode-studio",
+	"compatibility_date": "2025-05-05",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"nodejs_compat_populate_process_env"
+	],
+	"main": "./dist/_worker.js/index.js",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist"
+	},
+	"routes": [
+		{
+			"pattern": "rawkode.studio",
+			"custom_domain": true
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
 }
