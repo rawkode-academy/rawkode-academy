@@ -1,5 +1,6 @@
 ---
 import "@/styles/global.css";
+import { Font } from "astro:assets";
 
 export interface Props {
 	title?: string;
@@ -18,6 +19,11 @@ const { title = "Rawkode Studio", description = "Welcome to Rawkode Studio" } = 
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<meta name="description" content={description} />
+		
+		<!-- Fonts -->
+		<Font cssVariable="--font-quicksand" preload />
+		<Font cssVariable="--font-poppins" />
+		
 		<script is:inline>
 			// Prevent FOUC (Flash of Unstyled Content)
 			const theme = localStorage.getItem('theme') || 'system';
