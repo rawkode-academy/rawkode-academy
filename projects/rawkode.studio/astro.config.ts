@@ -69,6 +69,14 @@ export default defineConfig({
 				context: "server",
 				access: "secret",
 			}),
+			REALTIMEKIT_ORGANIZATION_ID: envField.string({
+				context: "server",
+				access: "secret",
+			}),
+			REALTIMEKIT_API_KEY: envField.string({
+				context: "server",
+				access: "secret",
+			}),
 		},
 	},
 });

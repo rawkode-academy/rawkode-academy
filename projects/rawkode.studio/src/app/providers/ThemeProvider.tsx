@@ -1,61 +1,118 @@
 import type React from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
+type ResolvedTheme = "light" | "dark";
 
 interface ThemeContextType {
 	theme: Theme;
 	setTheme: (theme: Theme) => void;
+	resolvedTheme: ResolvedTheme | undefined;
+	systemTheme: ResolvedTheme | undefined;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const STORAGE_KEY = "theme";
+const MEDIA = "(prefers-color-scheme: dark)";
+
+// Get the system theme preference
+const getSystemTheme = (): ResolvedTheme => {
+	if (typeof window !== "undefined" && window.matchMedia(MEDIA).matches) {
+		return "dark";
+	}
+	return "light";
+};
+
+// Get the theme from storage or default to system
+const getTheme = (): Theme => {
+	if (typeof window === "undefined") return "system";
+
+	try {
+		const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+		return stored || "system";
+	} catch {
+		return "system";
+	}
+};
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-	const [theme, setTheme] = useState<Theme>("system");
+	const [theme, setThemeState] = useState<Theme>(getTheme);
+	const [systemTheme, setSystemTheme] = useState<ResolvedTheme | undefined>();
+	const [mounted, setMounted] = useState(false);
 
-	useEffect(() => {
-		const root = window.document.documentElement;
-		const savedTheme = localStorage.getItem("theme") as Theme | null;
+	// Calculate resolved theme
+	const resolvedTheme = useMemo<ResolvedTheme | undefined>(() => {
+		if (!mounted) return undefined;
 
-		if (savedTheme) {
-			setTheme(savedTheme);
+		if (theme === "system") {
+			return systemTheme;
 		}
 
-		const applyTheme = (theme: Theme) => {
-			if (
-				theme === "dark" ||
-				(theme === "system" &&
-					window.matchMedia("(prefers-color-scheme: dark)").matches)
-			) {
-				root.classList.add("dark");
-			} else {
-				root.classList.remove("dark");
-			}
-		};
+		return theme as ResolvedTheme;
+	}, [theme, systemTheme, mounted]);
 
-		applyTheme(theme);
+	// Apply theme to DOM
+	useEffect(() => {
+		const root = window.document.documentElement;
 
-		// Listen for system theme changes
-		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+		if (resolvedTheme) {
+			root.classList.remove("light", "dark");
+			root.classList.add(resolvedTheme);
+			root.style.colorScheme = resolvedTheme;
+		}
+	}, [resolvedTheme]);
+
+	// Handle system theme changes
+	useEffect(() => {
+		setMounted(true);
+		setSystemTheme(getSystemTheme());
+
+		const mediaQuery = window.matchMedia(MEDIA);
+
 		const handleChange = () => {
-			if (theme === "system") {
-				applyTheme("system");
-			}
+			setSystemTheme(getSystemTheme());
 		};
 
-		mediaQuery.addEventListener("change", handleChange);
-		return () => mediaQuery.removeEventListener("change", handleChange);
-	}, [theme]);
+		// Modern browsers
+		if (mediaQuery.addEventListener) {
+			mediaQuery.addEventListener("change", handleChange);
+		} else {
+			// Fallback for older browsers
+			mediaQuery.addListener(handleChange);
+		}
 
-	const handleSetTheme = (newTheme: Theme) => {
-		setTheme(newTheme);
-		localStorage.setItem("theme", newTheme);
+		return () => {
+			if (mediaQuery.removeEventListener) {
+				mediaQuery.removeEventListener("change", handleChange);
+			} else {
+				mediaQuery.removeListener(handleChange);
+			}
+		};
+	}, []);
+
+	const setTheme = (newTheme: Theme) => {
+		setThemeState(newTheme);
+
+		try {
+			localStorage.setItem(STORAGE_KEY, newTheme);
+		} catch {
+			// Ignore errors (e.g., in private mode)
+		}
 	};
 
+	const value = useMemo(
+		() => ({
+			theme,
+			setTheme,
+			resolvedTheme,
+			systemTheme,
+		}),
+		[theme, resolvedTheme, systemTheme],
+	);
+
 	return (
-		<ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
-			{children}
-		</ThemeContext.Provider>
+		<ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 	);
 }
 

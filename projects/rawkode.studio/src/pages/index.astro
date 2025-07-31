@@ -1,22 +1,12 @@
 ---
-import "@/styles/global.css";
+import BaseLayout from "@/layouts/BaseLayout.astro";
 import { App } from "@/app/App";
 
 const user = Astro.locals.user || null;
 ---
 
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Rawkode Studio</title>
-	</head>
-	<body>
-		<div id="root">
-			<App client:only="react" initialUser={user} />
-		</div>
-	</body>
-</html>
+<BaseLayout>
+	<div id="root">
+		<App client:only="react" initialUser={user} />
+	</div>
+</BaseLayout>

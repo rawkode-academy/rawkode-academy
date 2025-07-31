@@ -1,0 +1,35 @@
+---
+import "@/styles/global.css";
+
+export interface Props {
+	title?: string;
+	description?: string;
+}
+
+const { title = "Rawkode Studio", description = "Welcome to Rawkode Studio" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<script is:inline>
+			// Prevent FOUC (Flash of Unstyled Content)
+			const theme = localStorage.getItem('theme') || 'system';
+			const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			const resolvedTheme = theme === 'system' ? systemTheme : theme;
+			
+			document.documentElement.classList.add(resolvedTheme);
+			document.documentElement.style.colorScheme = resolvedTheme;
+		</script>
+		<slot name="head" />
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
