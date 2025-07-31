@@ -3,7 +3,7 @@
 import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig, envField } from "astro/config";
+import { defineConfig, envField, fontProviders } from "astro/config";
 
 const site = (): string => {
 	if (import.meta.env.CF_PAGES_URL) {
@@ -78,5 +78,24 @@ export default defineConfig({
 				access: "secret",
 			}),
 		},
+	},
+
+	experimental: {
+		fonts: [
+			{
+				provider: fontProviders.google(),
+				name: "Quicksand",
+				cssVariable: "--font-quicksand",
+				weights: ["400", "500", "600", "700"],
+				styles: ["normal"],
+			},
+			{
+				provider: fontProviders.google(),
+				name: "Poppins",
+				cssVariable: "--font-poppins",
+				weights: ["300", "400", "500", "600", "700"],
+				styles: ["normal"],
+			},
+		],
 	},
 });

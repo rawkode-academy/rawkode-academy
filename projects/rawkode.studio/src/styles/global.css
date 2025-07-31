@@ -1,25 +1,50 @@
 @import "tailwindcss";
 
+@theme {
+	/* Brand Colors from rawkode.academy */
+	--color-primary: #5f5ed7;
+	--color-secondary: #00ceff;
+	--color-tertiary: #04b59c;
+	--color-quaternary: #85ff95;
+	--color-black: #111827;
+
+	/* Typography */
+	--font-display: var(--font-quicksand), sans-serif;
+	--font-body: var(--font-poppins), sans-serif;
+	--font-mono: "Monaspace", monospace;
+}
+
 :root {
+	/* Light mode colors */
 	--color-background: hsl(0 0% 100%);
-	--color-foreground: hsl(224 71.4% 4.1%);
+	--color-foreground: #111827;
 	--color-card: hsl(0 0% 100%);
-	--color-card-foreground: hsl(224 71.4% 4.1%);
+	--color-card-foreground: #111827;
 	--color-popover: hsl(0 0% 100%);
-	--color-popover-foreground: hsl(224 71.4% 4.1%);
-	--color-primary: hsl(220.9 39.3% 11%);
-	--color-primary-foreground: hsl(210 20% 98%);
-	--color-secondary: hsl(220 14.3% 95.9%);
-	--color-secondary-foreground: hsl(220.9 39.3% 11%);
+	--color-popover-foreground: #111827;
+	--color-primary: #5f5ed7;
+	--color-primary-foreground: hsl(0 0% 100%);
+	--color-secondary: #00ceff;
+	--color-secondary-foreground: #111827;
+	--color-tertiary: #04b59c;
+	--color-tertiary-foreground: hsl(0 0% 100%);
+	--color-quaternary: #85ff95;
+	--color-quaternary-foreground: #111827;
 	--color-muted: hsl(220 14.3% 95.9%);
 	--color-muted-foreground: hsl(220 8.9% 46.1%);
 	--color-accent: hsl(220 14.3% 95.9%);
-	--color-accent-foreground: hsl(220.9 39.3% 11%);
+	--color-accent-foreground: #111827;
 	--color-destructive: hsl(0 84.2% 60.2%);
-	--color-destructive-foreground: hsl(210 20% 98%);
+	--color-destructive-foreground: hsl(0 0% 100%);
 	--color-border: hsl(220 13% 91%);
 	--color-input: hsl(220 13% 91%);
-	--color-ring: hsl(224 71.4% 4.1%);
+	--color-ring: #5f5ed7;
+
+	/* Semantic colors */
+	--color-success: #10b981;
+	--color-warning: #f59e0b;
+	--color-error: #ef4444;
+	--color-info: #3b82f6;
 
 	--radius-radius: 0.5rem;
 }
@@ -33,25 +58,30 @@ html.dark {
 }
 
 .dark {
-	--color-background: hsl(224 71.4% 4.1%);
+	/* Dark mode colors - maintaining brand colors */
+	--color-background: #111827;
 	--color-foreground: hsl(210 20% 98%);
-	--color-card: hsl(224 71.4% 4.1%);
+	--color-card: hsl(217.2 32.6% 17.5%);
 	--color-card-foreground: hsl(210 20% 98%);
-	--color-popover: hsl(224 71.4% 4.1%);
+	--color-popover: hsl(217.2 32.6% 17.5%);
 	--color-popover-foreground: hsl(210 20% 98%);
-	--color-primary: hsl(210 20% 98%);
-	--color-primary-foreground: hsl(220.9 39.3% 11%);
-	--color-secondary: hsl(215 27.9% 16.9%);
-	--color-secondary-foreground: hsl(210 20% 98%);
-	--color-muted: hsl(215 27.9% 16.9%);
-	--color-muted-foreground: hsl(217.9 10.6% 64.9%);
-	--color-accent: hsl(215 27.9% 16.9%);
+	--color-primary: #5f5ed7;
+	--color-primary-foreground: hsl(0 0% 100%);
+	--color-secondary: #00ceff;
+	--color-secondary-foreground: #111827;
+	--color-tertiary: #04b59c;
+	--color-tertiary-foreground: hsl(0 0% 100%);
+	--color-quaternary: #85ff95;
+	--color-quaternary-foreground: #111827;
+	--color-muted: hsl(217.2 32.6% 17.5%);
+	--color-muted-foreground: hsl(215 20.2% 65.1%);
+	--color-accent: hsl(217.2 32.6% 17.5%);
 	--color-accent-foreground: hsl(210 20% 98%);
 	--color-destructive: hsl(0 62.8% 30.6%);
 	--color-destructive-foreground: hsl(210 20% 98%);
-	--color-border: hsl(215 27.9% 16.9%);
-	--color-input: hsl(215 27.9% 16.9%);
-	--color-ring: hsl(216 12.2% 83.9%);
+	--color-border: hsl(217.2 32.6% 17.5%);
+	--color-input: hsl(217.2 32.6% 17.5%);
+	--color-ring: #5f5ed7;
 }
 
 * {
@@ -61,4 +91,60 @@ html.dark {
 body {
 	background-color: var(--color-background);
 	color: var(--color-foreground);
+	font-family: var(--font-body);
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--font-display);
+	font-weight: 700;
+}
+
+code,
+pre {
+	font-family: var(--font-mono);
+}
+
+/* Custom utility classes */
+.font-display {
+	font-family: var(--font-display);
+}
+
+.font-body {
+	font-family: var(--font-body);
+}
+
+.font-mono {
+	font-family: var(--font-mono);
+}
+
+/* Gradient utilities */
+.bg-gradient-primary {
+	background: linear-gradient(
+		135deg,
+		var(--color-primary) 0%,
+		var(--color-secondary) 100%
+	);
+}
+
+.bg-gradient-secondary {
+	background: linear-gradient(
+		135deg,
+		var(--color-secondary) 0%,
+		var(--color-tertiary) 100%
+	);
+}
+
+.bg-gradient-brand {
+	background: linear-gradient(
+		135deg,
+		var(--color-primary) 0%,
+		var(--color-secondary) 50%,
+		var(--color-tertiary) 100%
+	);
 }
