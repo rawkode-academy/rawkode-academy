@@ -1,4 +1,4 @@
-import type { OidcStandardClaimsWithRoles } from "@/lib/auth";
+import type { OidcStandardClaimsWithRoles } from "@/lib/auth/auth";
 
 declare global {
 	namespace App {

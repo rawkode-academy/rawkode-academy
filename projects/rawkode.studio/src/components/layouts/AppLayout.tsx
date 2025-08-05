@@ -1,4 +1,6 @@
+import type { ReactNode } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { ThemeToggle } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -8,8 +10,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ThemeToggle } from "@/components/ui";
-import type { ReactNode } from "react";
 
 interface AppLayoutProps {
 	children: ReactNode;
@@ -68,7 +68,9 @@ export function AppLayout({ children }: AppLayoutProps) {
 							) : (
 								<Button
 									variant="default"
-									onClick={() => (window.location.href = "/api/auth/login")}
+									onClick={() => {
+										window.location.href = "/api/auth/login";
+									}}
 								>
 									Sign in
 								</Button>
