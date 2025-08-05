@@ -3,19 +3,16 @@ import type { OAuth2Tokens } from "arctic";
 import { createS256CodeChallenge } from "arctic/dist/oauth2";
 import { createOAuth2Request, sendTokenRequest } from "arctic/dist/request";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import type { OidcStandardClaims } from "oidc-client-ts";
 
-// ============================================
-// Types and Interfaces
-// ============================================
+// Re-export types from auth-types for server-side usage
+export {
+	hasDirectorRole,
+	type OidcStandardClaimsWithRoles,
+	type Roles,
+	roles,
+} from "./auth-types";
 
-export const roles = ["guest", "director", "contributor"] as const;
-export type Roles = (typeof roles)[number];
-
-export interface OidcStandardClaimsWithRoles extends OidcStandardClaims {
-	roles: Roles[];
-	name?: string;
-}
+import type { OidcStandardClaimsWithRoles, Roles } from "./auth-types";
 
 export interface LiveKitAuth {
 	token: string;
@@ -25,21 +22,6 @@ export interface LiveKitAuth {
 }
 
 type ZitadelRoles = { [role: string]: { [aud: string]: string } };
-
-// ============================================
-// Role Checking Utilities
-// ============================================
-
-/**
- * Checks if a user has the director role
- * @param user The user claims object
- * @returns true if the user has the director role
- */
-export function hasDirectorRole(
-	user: OidcStandardClaimsWithRoles | undefined,
-): boolean {
-	return user?.roles?.includes("director") ?? false;
-}
 
 // ============================================
 // Zitadel OIDC Client

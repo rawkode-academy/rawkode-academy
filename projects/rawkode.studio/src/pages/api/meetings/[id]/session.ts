@@ -1,0 +1,64 @@
+import type { APIRoute } from "astro";
+import { RealtimeKitClient } from "@/lib/realtime-kit/client";
+
+export const GET: APIRoute = async ({ locals, params }) => {
+	// Check if user is authenticated
+	if (!locals.user) {
+		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+			status: 401,
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	}
+
+	const meetingId = params.id;
+
+	if (!meetingId) {
+		return new Response(JSON.stringify({ error: "Meeting ID required" }), {
+			status: 400,
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	}
+
+	try {
+		// Create RealtimeKit client
+		const client = new RealtimeKitClient();
+
+		// Fetch active session
+		const session = await client.getActiveSession(meetingId);
+
+		return new Response(JSON.stringify(session), {
+			status: 200,
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	} catch (error: any) {
+		// 404 means no active session, which is fine
+		if (error?.code === 404) {
+			return new Response(JSON.stringify({ active: false }), {
+				status: 200,
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+		}
+
+		console.error("Failed to fetch session:", error);
+		return new Response(
+			JSON.stringify({
+				error: "Failed to fetch session",
+				message: error instanceof Error ? error.message : "Unknown error",
+			}),
+			{
+				status: 500,
+				headers: {
+					"Content-Type": "application/json",
+				},
+			},
+		);
+	}
+};

@@ -1,3 +1,4 @@
+import { useTheme } from "@/app/providers/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -5,7 +6,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/app/providers/ThemeProvider";
 
 export function ThemeToggle() {
 	const { theme, setTheme, resolvedTheme } = useTheme();
@@ -28,6 +28,7 @@ export function ThemeToggle() {
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>System theme</title>
 							<rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
 							<line x1="8" y1="21" x2="16" y2="21" />
 							<line x1="12" y1="17" x2="12" y2="21" />
@@ -43,6 +44,7 @@ export function ThemeToggle() {
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>Light theme</title>
 							<circle cx="12" cy="12" r="5" />
 							<line x1="12" y1="1" x2="12" y2="3" />
 							<line x1="12" y1="21" x2="12" y2="23" />
@@ -64,6 +66,7 @@ export function ThemeToggle() {
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>Dark theme</title>
 							<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
 						</svg>
 					)}
@@ -82,6 +85,7 @@ export function ThemeToggle() {
 						strokeLinecap="round"
 						strokeLinejoin="round"
 					>
+						<title>Light mode</title>
 						<circle cx="12" cy="12" r="5" />
 						<line x1="12" y1="1" x2="12" y2="3" />
 						<line x1="12" y1="21" x2="12" y2="23" />
@@ -104,6 +108,7 @@ export function ThemeToggle() {
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>Selected</title>
 							<polyline points="20 6 9 17 4 12" />
 						</svg>
 					)}
@@ -119,6 +124,7 @@ export function ThemeToggle() {
 						strokeLinecap="round"
 						strokeLinejoin="round"
 					>
+						<title>Dark mode</title>
 						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
 					</svg>
 					Dark
@@ -133,6 +139,7 @@ export function ThemeToggle() {
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>Selected</title>
 							<polyline points="20 6 9 17 4 12" />
 						</svg>
 					)}
@@ -148,6 +155,7 @@ export function ThemeToggle() {
 						strokeLinecap="round"
 						strokeLinejoin="round"
 					>
+						<title>System mode</title>
 						<rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
 						<line x1="8" y1="21" x2="16" y2="21" />
 						<line x1="12" y1="17" x2="12" y2="21" />
@@ -164,6 +172,7 @@ export function ThemeToggle() {
 							strokeLinecap="round"
 							strokeLinejoin="round"
 						>
+							<title>Selected</title>
 							<polyline points="20 6 9 17 4 12" />
 						</svg>
 					)}

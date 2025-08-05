@@ -1,0 +1,10 @@
+---
+import { App } from "@/components/app/App";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const user = Astro.locals.user ?? null;
+---
+
+<BaseLayout title="Rawkode Studio App">
+	<App user={user} client:only="react" />
+</BaseLayout>

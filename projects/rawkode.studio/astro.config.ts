@@ -77,6 +77,36 @@ export default defineConfig({
 				context: "server",
 				access: "secret",
 			}),
+			REALTIMEKIT_API_URL: envField.string({
+				context: "server",
+				access: "public",
+				optional: true,
+				default: "https://rtk.realtime.cloudflare.com/v2",
+			}),
+			REALTIMEKIT_STREAM_URL: envField.string({
+				context: "client",
+				access: "public",
+				optional: true,
+				default: "rtmps://live.cloudflare.com:443/live/",
+			}),
+			REALTIMEKIT_ENABLE_RECORDING: envField.boolean({
+				context: "client",
+				access: "public",
+				optional: true,
+				default: true,
+			}),
+			REALTIMEKIT_ENABLE_LIVESTREAM: envField.boolean({
+				context: "client",
+				access: "public",
+				optional: true,
+				default: true,
+			}),
+			REALTIMEKIT_ENABLE_ANALYTICS: envField.boolean({
+				context: "client",
+				access: "public",
+				optional: true,
+				default: true,
+			}),
 		},
 	},
 

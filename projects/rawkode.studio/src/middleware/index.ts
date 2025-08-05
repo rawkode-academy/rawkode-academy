@@ -1,5 +1,5 @@
 import { defineMiddleware, sequence } from "astro:middleware";
-import { Zitadel } from "@/lib/auth";
+import { Zitadel } from "@/lib/auth/auth";
 
 // URLs that should be bypassed from authentication
 const bypassUrls = ["/api/auth/logout"];
@@ -25,7 +25,7 @@ const authMiddleware = defineMiddleware(async (context, next) => {
 
 	const idToken = context.cookies.get("idToken")?.value;
 
-	const zitadel = new Zitadel(url.origin);
+	const zitadel = new Zitadel();
 	const user = await zitadel.fetchUser(idToken);
 
 	if (!user) {
