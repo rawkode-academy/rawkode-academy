@@ -8,6 +8,7 @@ import {
 	render,
 } from "astro:content";
 import RelatedArticles from "@/components/articles/RelatedArticles.astro";
+import Resources from "@/components/articles/Resources.astro";
 import TableOfContents from "@/components/articles/TableOfContents.astro";
 import Updates from "@/components/articles/Updates.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
@@ -79,6 +80,7 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 		text: article.data.title,
 		format: "png" as const
 	} : undefined}
+	useImageDirectly={true}
 	isArticle={true}
 	publishedAt={article.data.publishedAt}
 	updatedAt={article.data.updatedAt}
@@ -263,6 +265,9 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 			<Updates updates={article.data.updates} />
 
 			<Content />
+
+			<!-- Resources -->
+			<Resources resources={article.data.resources} />
 
 			<!-- Related Articles -->
 			<RelatedArticles currentArticle={article} limit={3} />
