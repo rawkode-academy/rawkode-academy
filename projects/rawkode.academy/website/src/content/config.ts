@@ -88,6 +88,7 @@ const videos = defineCollection({
 
 // Shared resource schema for courses and course modules
 const resourceSchema = z.object({
+	id: z.string().optional(),
 	title: z.string(),
 	description: z.string().optional(),
 	type: z.enum(["url", "file", "embed"]),
@@ -126,7 +127,7 @@ const people = defineCollection({
 
 const articles = defineCollection({
 	loader: glob({
-		pattern: ["**/*.mdx"],
+		pattern: ["**/*.{md,mdx}"],
 		base: "./content/articles",
 	}),
 	schema: ({ image }) =>
@@ -166,6 +167,7 @@ const articles = defineCollection({
 					}),
 				)
 				.optional(),
+			resources: z.array(resourceSchema).optional(),
 		}),
 });
 
