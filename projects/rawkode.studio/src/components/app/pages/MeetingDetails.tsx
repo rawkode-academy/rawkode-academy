@@ -6,12 +6,18 @@ import {
 	Calendar,
 	Circle,
 	Clock,
+	Download,
+	FileText,
 	Globe,
+	Headphones,
 	MessageSquare,
+	Mic,
+	MicOff,
 	Monitor,
 	PauseCircle,
 	PlayCircle,
 	Radio,
+	Shield,
 	Users,
 	Video,
 	Wifi,
@@ -51,8 +57,7 @@ export function MeetingDetails() {
 			}
 			return response.json();
 		},
-		enabled: !!id && meeting?.status === "ACTIVE",
-		refetchInterval: 5000, // Refresh every 5 seconds
+		enabled: !!id,
 	});
 
 	const { data: livestream } = useQuery({
@@ -64,8 +69,46 @@ export function MeetingDetails() {
 			}
 			return response.json();
 		},
-		enabled: !!id && meeting?.status === "ACTIVE",
-		refetchInterval: 5000, // Refresh every 5 seconds
+		enabled: !!id,
+	});
+
+	const { data: participants } = useQuery({
+		queryKey: ["meeting", id, "participants"],
+		queryFn: async () => {
+			const response = await fetch(`/api/meetings/${id}/participants`);
+			if (!response.ok) {
+				throw new Error("Failed to fetch participants");
+			}
+			return response.json();
+		},
+		enabled: !!id,
+	});
+
+	const { data: recordings } = useQuery({
+		queryKey: ["meeting", id, "recordings"],
+		queryFn: async () => {
+			const response = await fetch(`/api/meetings/${id}/recordings`);
+			if (!response.ok) {
+				throw new Error("Failed to fetch recordings");
+			}
+			return response.json();
+		},
+		enabled: !!id,
+	});
+
+	const { data: sessionSummary } = useQuery({
+		queryKey: ["session", session?.id, "summary"],
+		queryFn: async () => {
+			if (!session?.id) {
+				throw new Error("Session ID is required");
+			}
+			const response = await fetch(`/api/sessions/${session.id}/summary`);
+			if (!response.ok) {
+				throw new Error("Failed to fetch summary");
+			}
+			return response.json();
+		},
+		enabled: !!session?.id,
 	});
 
 	if (isLoading) {
@@ -203,7 +246,7 @@ export function MeetingDetails() {
 				</Card>
 
 				{/* Active Session Card */}
-				{session && session.id && (
+				{session?.id && (
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
@@ -246,8 +289,91 @@ export function MeetingDetails() {
 					</Card>
 				)}
 
+				{/* Participants Card */}
+				{participants?.data && participants.data.length > 0 && (
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<Users className="h-5 w-5" />
+								Participants ({participants.data.length})
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-3">
+								{participants.data
+									.slice(0, 5)
+									.map(
+										(participant: {
+											id: string;
+											name?: string;
+											picture?: string;
+											preset_name?: string;
+											audio_enabled?: boolean;
+											video_enabled?: boolean;
+										}) => (
+											<div
+												key={participant.id}
+												className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+											>
+												<div className="flex items-center gap-3">
+													{participant.picture ? (
+														<img
+															src={participant.picture}
+															alt={participant.name}
+															className="h-8 w-8 rounded-full"
+														/>
+													) : (
+														<div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+															<Users className="h-4 w-4" />
+														</div>
+													)}
+													<div>
+														<p className="text-sm font-medium">
+															{participant.name}
+														</p>
+														{participant.preset_name && (
+															<p className="text-xs text-muted-foreground">
+																<Shield className="inline h-3 w-3 mr-1" />
+																{participant.preset_name}
+															</p>
+														)}
+													</div>
+												</div>
+												<div className="flex items-center gap-2">
+													{participant.audio_enabled !== undefined && (
+														<div>
+															{participant.audio_enabled ? (
+																<Mic className="h-4 w-4 text-green-500" />
+															) : (
+																<MicOff className="h-4 w-4 text-red-500" />
+															)}
+														</div>
+													)}
+													{participant.video_enabled !== undefined && (
+														<div>
+															{participant.video_enabled ? (
+																<Video className="h-4 w-4 text-green-500" />
+															) : (
+																<Video className="h-4 w-4 text-gray-400" />
+															)}
+														</div>
+													)}
+												</div>
+											</div>
+										),
+									)}
+								{participants.data.length > 5 && (
+									<div className="text-center text-sm text-muted-foreground pt-2">
+										and {participants.data.length - 5} more...
+									</div>
+								)}
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
 				{/* Recordings Card */}
-				{session?.recordings && session.recordings.length > 0 && (
+				{(recordings?.data?.length > 0 || session?.recordings?.length > 0) && (
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
@@ -257,52 +383,98 @@ export function MeetingDetails() {
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-3">
-								{session.recordings.map((recording: any) => (
-									<div
-										key={recording.id}
-										className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-									>
-										<div className="flex items-center gap-3">
-											{recording.status === "RECORDING" ? (
-												<PlayCircle className="h-4 w-4 text-red-500 animate-pulse" />
-											) : recording.status === "PAUSED" ? (
-												<PauseCircle className="h-4 w-4 text-yellow-500" />
-											) : (
-												<Circle className="h-4 w-4 text-gray-500" />
-											)}
-											<div>
-												<p className="text-sm font-medium">
-													Recording {recording.id.slice(0, 8)}
-												</p>
-												{recording.recording_duration && (
-													<p className="text-xs text-muted-foreground">
-														<Clock className="inline h-3 w-3 mr-1" />
-														{Math.floor(recording.recording_duration / 60)}m{" "}
-														{recording.recording_duration % 60}s
-													</p>
+								{(recordings?.data || session?.recordings || []).map(
+									(recording: {
+										id: string;
+										status: string;
+										recording_duration?: number;
+										file_size?: number;
+										download_url?: string;
+										audio_download_url?: string;
+									}) => (
+										<div
+											key={recording.id}
+											className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+										>
+											<div className="flex items-center gap-3">
+												{recording.status === "RECORDING" ? (
+													<PlayCircle className="h-4 w-4 text-red-500 animate-pulse" />
+												) : recording.status === "PAUSED" ? (
+													<PauseCircle className="h-4 w-4 text-yellow-500" />
+												) : (
+													<Circle className="h-4 w-4 text-gray-500" />
 												)}
+												<div>
+													<p className="text-sm font-medium">
+														Recording {recording.id.slice(0, 8)}
+													</p>
+													<div className="flex items-center gap-3 text-xs text-muted-foreground">
+														{recording.recording_duration && (
+															<span>
+																<Clock className="inline h-3 w-3 mr-1" />
+																{Math.floor(recording.recording_duration / 60)}m{" "}
+																{recording.recording_duration % 60}s
+															</span>
+														)}
+														{recording.file_size && (
+															<span>
+																{(recording.file_size / 1024 / 1024).toFixed(1)}{" "}
+																MB
+															</span>
+														)}
+													</div>
+												</div>
+											</div>
+											<div className="flex items-center gap-2">
+												{recording.download_url &&
+													recording.status === "UPLOADED" && (
+														<Button
+															size="sm"
+															variant="outline"
+															onClick={() =>
+																window.open(recording.download_url, "_blank")
+															}
+														>
+															<Download className="h-3 w-3" />
+														</Button>
+													)}
+												{recording.audio_download_url && (
+													<Button
+														size="sm"
+														variant="outline"
+														onClick={() =>
+															window.open(
+																recording.audio_download_url,
+																"_blank",
+															)
+														}
+														title="Download Audio Only"
+													>
+														<Headphones className="h-3 w-3" />
+													</Button>
+												)}
+												<Badge
+													variant={
+														recording.status === "RECORDING"
+															? "destructive"
+															: recording.status === "PAUSED"
+																? "secondary"
+																: "outline"
+													}
+												>
+													{recording.status}
+												</Badge>
 											</div>
 										</div>
-										<Badge
-											variant={
-												recording.status === "RECORDING"
-													? "destructive"
-													: recording.status === "PAUSED"
-														? "secondary"
-														: "outline"
-											}
-										>
-											{recording.status}
-										</Badge>
-									</div>
-								))}
+									),
+								)}
 							</div>
 						</CardContent>
 					</Card>
 				)}
 
 				{/* Livestream Card */}
-				{livestream && livestream.id && (
+				{livestream?.id && (
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
@@ -358,6 +530,77 @@ export function MeetingDetails() {
 									</div>
 								)}
 							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Session Summary Card */}
+				{sessionSummary?.summary && (
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<Brain className="h-5 w-5" />
+								Meeting Summary
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="prose prose-sm max-w-none">
+								<p className="text-sm text-muted-foreground whitespace-pre-wrap">
+									{sessionSummary.summary}
+								</p>
+								{sessionSummary.action_items &&
+									sessionSummary.action_items.length > 0 && (
+										<div className="mt-4">
+											<h4 className="text-sm font-semibold mb-2">
+												Action Items:
+											</h4>
+											<ul className="list-disc list-inside space-y-1">
+												{sessionSummary.action_items.map((item: string) => (
+													<li key={item} className="text-sm">
+														{item}
+													</li>
+												))}
+											</ul>
+										</div>
+									)}
+							</div>
+							{(sessionSummary.chat_available ||
+								sessionSummary.transcript_available) && (
+								<div className="flex gap-2 mt-4">
+									{sessionSummary.chat_available && (
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() =>
+												session?.id &&
+												window.open(
+													`/api/sessions/${session.id}/chat`,
+													"_blank",
+												)
+											}
+										>
+											<MessageSquare className="mr-1 h-3 w-3" />
+											Download Chat
+										</Button>
+									)}
+									{sessionSummary.transcript_available && (
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() =>
+												session?.id &&
+												window.open(
+													`/api/sessions/${session.id}/transcript`,
+													"_blank",
+												)
+											}
+										>
+											<FileText className="mr-1 h-3 w-3" />
+											Download Transcript
+										</Button>
+									)}
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				)}

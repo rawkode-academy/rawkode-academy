@@ -710,6 +710,208 @@ export class RealtimeKitClient {
 		const query = queryParams.toString();
 		return this.request(`/livestreams${query ? `?${query}` : ""}`);
 	}
+
+	/**
+	 * Get participants for a meeting
+	 */
+	async getParticipants(
+		meetingId: string,
+		params?: {
+			page_no?: number;
+			per_page?: number;
+		},
+	): Promise<{
+		data: Array<{
+			id: string;
+			name?: string;
+			picture?: string;
+			custom_participant_id: string;
+			preset_name: string;
+			created_at: string;
+			updated_at: string;
+			audio_enabled?: boolean;
+			video_enabled?: boolean;
+		}>;
+		paging?: {
+			total_count: number;
+			start_offset: number;
+			end_offset: number;
+		};
+	}> {
+		const queryParams = new URLSearchParams();
+		if (params?.page_no)
+			queryParams.append("page_no", params.page_no.toString());
+		if (params?.per_page)
+			queryParams.append("per_page", params.per_page.toString());
+
+		const query = queryParams.toString();
+		const url = `/meetings/${meetingId}/participants${query ? `?${query}` : ""}`;
+
+		// The API returns { success: true, data: [...], paging: {...} }
+		// But our request method only returns the data part
+		// We need to get the full response for pagination info
+		const response = await fetch(`${this.baseUrl}${url}`, {
+			headers: {
+				Authorization: this.getAuthHeader(),
+				"Content-Type": "application/json",
+			},
+		});
+
+		if (!response.ok) {
+			throw new RealtimeKitError(
+				response.status,
+				`Failed to fetch participants: ${response.statusText}`,
+			);
+		}
+
+		const result = await response.json();
+
+		if (!result.success) {
+			throw new RealtimeKitError(
+				result.error?.code || 500,
+				result.error?.message || "Failed to fetch participants",
+			);
+		}
+
+		// Return the data array and paging info
+		return {
+			data: result.data || [],
+			paging: result.paging,
+		};
+	}
+
+	/**
+	 * Get recordings for a meeting
+	 */
+	async getRecordings(params?: {
+		meeting_id?: string;
+		page_no?: number;
+		per_page?: number;
+		status?:
+			| "INVOKED"
+			| "RECORDING"
+			| "UPLOADING"
+			| "UPLOADED"
+			| "ERRORED"
+			| "PAUSED";
+	}): Promise<{
+		data: Array<Recording>;
+		paging?: {
+			total_count: number;
+			start_offset: number;
+			end_offset: number;
+		};
+	}> {
+		const queryParams = new URLSearchParams();
+		if (params?.meeting_id) queryParams.append("meeting_id", params.meeting_id);
+		if (params?.page_no)
+			queryParams.append("page_no", params.page_no.toString());
+		if (params?.per_page)
+			queryParams.append("per_page", params.per_page.toString());
+		if (params?.status) queryParams.append("status", params.status);
+
+		const query = queryParams.toString();
+		const url = `/recordings${query ? `?${query}` : ""}`;
+
+		// The API returns { success: true, data: [...], paging: {...} }
+		// We need to get the full response for pagination info
+		const response = await fetch(`${this.baseUrl}${url}`, {
+			headers: {
+				Authorization: this.getAuthHeader(),
+				"Content-Type": "application/json",
+			},
+		});
+
+		if (!response.ok) {
+			throw new RealtimeKitError(
+				response.status,
+				`Failed to fetch recordings: ${response.statusText}`,
+			);
+		}
+
+		const result = await response.json();
+
+		if (!result.success) {
+			throw new RealtimeKitError(
+				result.error?.code || 500,
+				result.error?.message || "Failed to fetch recordings",
+			);
+		}
+
+		// Return the data array and paging info
+		return {
+			data: result.data || [],
+			paging: result.paging,
+		};
+	}
+
+	/**
+	 * Get session summary
+	 */
+	async getSessionSummary(sessionId: string): Promise<{
+		sessionId: string;
+		summaryDownloadUrl: string;
+		summaryDownloadUrlExpiry: string;
+	}> {
+		const response = await this.request<{
+			success: boolean;
+			data: {
+				sessionId: string;
+				summaryDownloadUrl: string;
+				summaryDownloadUrlExpiry: string;
+			};
+		}>(`/sessions/${sessionId}/summary`);
+		return response.data;
+	}
+
+	/**
+	 * Generate session summary
+	 */
+	async generateSessionSummary(sessionId: string): Promise<{
+		message: string;
+		status: string;
+	}> {
+		return this.request(`/sessions/${sessionId}/summary`, {
+			method: "POST",
+			body: JSON.stringify({}),
+		});
+	}
+
+	/**
+	 * Get session chat download URL
+	 */
+	async getSessionChat(sessionId: string): Promise<{
+		chat_download_url: string;
+		chat_download_url_expiry: string;
+	}> {
+		const response = await this.request<{
+			success: boolean;
+			data: {
+				chat_download_url: string;
+				chat_download_url_expiry: string;
+			};
+		}>(`/sessions/${sessionId}/chat`);
+		return response.data;
+	}
+
+	/**
+	 * Get session transcript download URL
+	 */
+	async getSessionTranscript(sessionId: string): Promise<{
+		sessionId: string;
+		transcript_download_url: string;
+		transcript_download_url_expiry: string;
+	}> {
+		const response = await this.request<{
+			success: boolean;
+			data: {
+				sessionId: string;
+				transcript_download_url: string;
+				transcript_download_url_expiry: string;
+			};
+		}>(`/sessions/${sessionId}/transcript`);
+		return response.data;
+	}
 }
 
 // Export a default instance for convenience

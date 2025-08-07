@@ -36,9 +36,9 @@ export const GET: APIRoute = async ({ locals, params }) => {
 				"Content-Type": "application/json",
 			},
 		});
-	} catch (error: any) {
+	} catch (error) {
 		// 404 means no active livestream, which is fine
-		if (error?.code === 404) {
+		if ((error as { code?: number })?.code === 404) {
 			return new Response(JSON.stringify({ active: false }), {
 				status: 200,
 				headers: {
