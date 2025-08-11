@@ -6,7 +6,182 @@ course: "complete-guide-zitadel"
 section: "Authentication"
 order: 9
 publishedAt: 2025-07-30
-draft: true
+draft: false
 authors:
   - rawkode
+video:
+  id: "pxdgreblk59hxyny139a7i8i"
+  thumbnailUrl: "https://content.rawkode.academy/videos/pxdgreblk59hxyny139a7i8i/thumbnail.jpg"
+resources:
+  - title: "Zitadel Authentication Methods"
+    description: "Official documentation on authentication methods"
+    type: "url"
+    url: "https://zitadel.com/docs/guides/authentication"
+    category: "documentation"
+  - title: "WebAuthn & Passkeys Guide"
+    description: "Understanding passwordless authentication"
+    type: "url"
+    url: "https://webauthn.guide/"
+    category: "documentation"
+  - title: "FIDO Alliance"
+    description: "Standards for passwordless authentication"
+    type: "url"
+    url: "https://fidoalliance.org/"
+    category: "documentation"
 ---
+
+import Aside from "@/components/Aside.astro";
+
+## Multiple Authentication Methods in Zitadel
+
+In this video, we're going to take a look at something very simple, but also important: allowing people to register and login to your application using Zitadel with multiple methods. We'll cover username and password authentication, Passkeys, and explore the other options available in the Zitadel console.
+
+## Getting Started with Identity Providers
+
+When you first open your Zitadel Cloud console, you'll find the default settings for your instance. If you click on **Identity Providers**, you'll see that there are no third-party setups initially - no Google, GitHub, or other providers configured yet.
+
+For third-party providers like GitHub, you can click on them to get the configuration details where you'll need to add your client ID and secret. This setup is especially important when running your own Zitadel instance, as it's often crucial to piggyback onto existing authentication providers. We'll be covering social login providers in detail in the next video.
+
+## Configuring Password Authentication
+
+Let's start with the basics: how can we allow people to log in with their username and password? And even better, can we enable passwordless Passkey-based login?
+
+Good news: by default, passwordless login is enabled and supports:
+- Fingerprint authentication
+- Security keys
+- Face ID
+- Other biometric methods
+
+<Aside variant="warning">
+**Important:** Username and password authentication is NOT enabled by default in new Zitadel instances. You'll need to manually enable this in your settings.
+</Aside>
+
+### Enabling Username and Password Login
+
+To enable traditional password-based authentication:
+
+1. Navigate to your instance's default settings
+2. Find the **Login Behavior and Security** section
+3. Enable **Username and Password** authentication
+4. Check that **User Registration** is allowed
+5. Click **Save**
+
+You'll also find configuration options for:
+- Password complexity requirements
+- Password lifetime policies
+- Secret rotation settings
+- Login and registration restrictions
+
+## Understanding Organization vs Instance Settings
+
+One crucial point that often trips up new users: Zitadel has a hierarchy of settings.
+
+<Aside variant="info">
+There are **default instance-wide settings** that apply to all organizations when they have nothing set themselves or when they inherit from the instance. Each organization can also be configured independently with its own settings.
+</Aside>
+
+For example, if you disable user registration at the instance level but it's still enabled at the organization level, users can still register. Always check both levels when configuring authentication:
+
+1. **Instance Settings**: Default settings for your entire Zitadel instance
+2. **Organization Settings**: Can override instance defaults for specific organizations
+
+## User Registration Flow
+
+With registration enabled, here's the typical user flow:
+
+1. User navigates to the login page
+2. Clicks **Register** to create a new account
+3. Fills in the registration form:
+   - Name
+   - Email address
+   - Password (if password authentication is enabled)
+4. Confirms email address via verification code
+5. Optionally sets up second factor authentication
+6. Gains access to their user profile
+
+The entire process is handled by Zitadel's built-in UI - you don't need to build any custom forms initially.
+
+## Adding Passwordless Authentication
+
+Once a user has registered, they can add passwordless authentication methods:
+
+### Setting Up a Passkey
+
+1. Navigate to **Password and Security** in the user profile
+2. Click **Add Method**
+3. Choose **Use my own device**
+4. Give the Passkey a descriptive name
+5. Follow your browser/device prompts to create the Passkey
+6. The Passkey can be stored in:
+   - Your device's secure enclave
+   - Password managers like 1Password or Bitwarden
+   - Hardware security keys
+
+After setting up a Passkey, users can log in without entering a password - they'll just need to authenticate with their biometric or security key.
+
+## Multi-Factor Authentication (MFA)
+
+Zitadel supports multiple second factors for enhanced security:
+
+### TOTP (Time-based One-Time Passwords)
+Users can scan a QR code with authenticator apps like:
+- Google Authenticator
+- Microsoft Authenticator
+- 1Password
+- Authy
+
+### FIDO2/WebAuthn Keys
+Hardware security keys provide the strongest second factor:
+- YubiKey
+- Google Titan
+- Any FIDO2-compliant key
+
+## Login V2 and Custom Authentication UI
+
+While Zitadel provides a complete authentication UI out of the box, you might want something more integrated with your application. That's where Login V2 comes in.
+
+<Aside variant="tip">
+Login V2 hooks into the Zitadel Session API, allowing you to build custom authentication flows while still leveraging Zitadel's security features.
+</Aside>
+
+To enable Login V2:
+1. Go to **Default Settings**
+2. Navigate to **Features**
+3. Scroll down to find **Login V2**
+4. Enable the feature
+
+You can then either:
+- Fork Zitadel's TypeScript reference implementation
+- Build your own implementation using the Session API directly
+
+We'll cover Login V2 in detail in an upcoming video, as there's a lot to explore with custom authentication flows.
+
+## Best Practices
+
+### For Development
+- Start with username/password for simplicity
+- Enable all authentication methods to test integration
+- Use Zitadel's default UI to prototype quickly
+
+### For Production
+- Enable Passkeys for better user experience
+- Require MFA for sensitive applications
+- Consider disabling password authentication entirely for maximum security
+- Implement proper password policies if passwords are required
+- Use organization-specific settings for multi-tenant applications
+
+## What's Next?
+
+In the next video, we'll take a look at configuring third-party OAuth providers like GitHub and Google for social login. This allows users to authenticate with accounts they already have, reducing friction in the registration process.
+
+After that, we'll dive deep into Login V2 and building custom authentication experiences that seamlessly integrate with your application's design.
+
+## Summary
+
+Zitadel provides flexible authentication options out of the box:
+- Traditional username and password
+- Modern passwordless authentication with Passkeys
+- Multi-factor authentication with TOTP and hardware keys
+- Customizable registration and login flows
+
+The key is understanding the settings hierarchy (instance vs organization) and choosing the right authentication methods for your use case. Start simple with the defaults, then customize as your requirements evolve.
