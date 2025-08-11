@@ -6,7 +6,282 @@ course: "complete-guide-zitadel"
 section: "Authentication"
 order: 10
 publishedAt: 2025-07-10
-draft: true
+draft: false
 authors:
   - rawkode
+video:
+  id: "aaaag9oumw7ybfepfziq6e2b"
+  thumbnailUrl: "https://content.rawkode.academy/videos/aaaag9oumw7ybfepfziq6e2b/thumbnail.jpg"
+resources:
+  - title: "GitHub OAuth Apps Documentation"
+    description: "Official guide for creating OAuth applications on GitHub"
+    type: "url"
+    url: "https://docs.github.com/en/developers/apps/building-oauth-apps"
+    category: "documentation"
+  - title: "Zitadel Identity Providers Guide"
+    description: "Configure external identity providers in Zitadel"
+    type: "url"
+    url: "https://zitadel.com/docs/guides/identity-providers"
+    category: "documentation"
+  - title: "OAuth 2.0 Scopes"
+    description: "Understanding OAuth scopes and permissions"
+    type: "url"
+    url: "https://oauth.net/2/scope/"
+    category: "documentation"
+  - title: "Zitadel Actions Documentation"
+    description: "Learn about Zitadel Actions for customizing authentication flows"
+    type: "url"
+    url: "https://zitadel.com/docs/guides/actions"
+    category: "documentation"
 ---
+
+import Aside from "@/components/Aside.astro";
+
+## Connecting Zitadel with External OAuth Providers
+
+Welcome back to the Complete Guide to Zitadel. In this video, we'll explore how to connect your Zitadel instance to external OAuth providers, allowing users to log in using their existing accounts from services like GitHub, Google, Microsoft, and more.
+
+While this tutorial uses GitHub as the example, the principles apply to any OpenID Connect provider - whether that's Google, Microsoft, Okta, Auth0, or any other service that supports OAuth 2.0.
+
+## Understanding Identity Provider Configuration
+
+Zitadel offers two levels for configuring identity providers:
+
+1. **Instance Level (Default Settings)**: Providers configured here are inherited by all organizations
+2. **Organization Level**: Each organization can have its own identity provider configuration
+
+<Aside variant="info">
+For multi-tenant B2B applications, you'll typically configure providers at the organization level to give each tenant control over their authentication methods.
+</Aside>
+
+## Setting Up GitHub OAuth
+
+### Step 1: Create a GitHub OAuth Application
+
+First, we need to create an OAuth application in GitHub:
+
+1. Navigate to your GitHub Developer Settings
+2. Click **New OAuth App**
+3. Fill in the application details:
+   - **Application Name**: Your app name (e.g., "Zitadel Demo")
+   - **Homepage URL**: Your application URL
+   - **Authorization callback URL**: Copy this from Zitadel's setup screen
+4. Click **Register application**
+5. Note your **Client ID**
+6. Generate a new **Client Secret** (save this securely - you'll only see it once!)
+
+### Step 2: Configure GitHub in Zitadel
+
+In the Zitadel console:
+
+1. Navigate to **Organizations** → **Your Organization** → **Login and Access**
+2. Click **Identity Providers** → **Add Provider** → **GitHub**
+3. Enter your GitHub OAuth app credentials:
+   - **Client ID**: From GitHub
+   - **Client Secret**: From GitHub
+   - **Scopes**: Configure based on your needs
+4. Configure the provider settings
+
+## Understanding OAuth Scopes
+
+When configuring GitHub (or any OAuth provider), you need to specify which scopes your application requires. For GitHub:
+
+- `read:user` - Read access to user profile data
+- `user:email` - Access to user email addresses
+
+<Aside variant="tip">
+Always request the minimum scopes necessary for your application. This follows the principle of least privilege and builds user trust.
+</Aside>
+
+For other providers, common scopes include:
+- **Google**: `openid`, `profile`, `email`
+- **Microsoft**: `openid`, `profile`, `email`, `offline_access`
+- **Auth0**: `openid`, `profile`, `email`
+
+## Provider Configuration Options
+
+### Display Name
+This is what users will see on the login button (e.g., "GitHub Demo" or "Sign in with GitHub")
+
+### Account Creation
+- **Automatic creation**: Enable to automatically create Zitadel accounts for new users
+- **Account update**: Update user information from the provider on each login
+- **Account linking**: Merge accounts with matching email addresses
+
+<Aside variant="warning">
+Be careful with account linking by email. Only enable this if you trust the email verification process of your identity providers.
+</Aside>
+
+## The GitHub Name Challenge
+
+GitHub presents a unique challenge: it doesn't provide separate first and last name fields in its user profile. Instead, it returns a single `name` field. Since Zitadel requires both first and last names for account creation, we need to handle this.
+
+### Solution: Zitadel Actions
+
+Zitadel Actions allow you to customize the authentication flow. Here's how to automatically split the GitHub name:
+
+```javascript
+function updateGitHubUser(ctx, api) {
+  // Check if this is a GitHub login
+  if (ctx.v1.externalIdp?.id !== 'YOUR_GITHUB_IDP_ID') {
+    return;
+  }
+
+  // Get the full name from GitHub
+  const fullName = ctx.v1.externalIdp?.rawInfo?.name || '';
+  
+  // Split the name intelligently
+  const parts = fullName.trim().split(' ');
+  
+  if (parts.length === 0) {
+    return;
+  }
+  
+  // Set first name and last name
+  if (parts.length === 1) {
+    api.v1.user.setFirstName(parts[0]);
+    api.v1.user.setLastName(''); // Or use a placeholder
+  } else {
+    api.v1.user.setFirstName(parts[0]);
+    api.v1.user.setLastName(parts.slice(1).join(' '));
+  }
+}
+```
+
+### Implementing the Action
+
+1. Go to **Actions** in the Zitadel console
+2. Click **New Action**
+3. Name it (e.g., "Update GitHub User")
+4. Paste the action code
+5. Replace `YOUR_GITHUB_IDP_ID` with your actual GitHub IDP ID (found in the URL)
+6. Save the action
+7. Add a trigger for **Post Authentication**
+
+## Testing the Integration
+
+Once configured:
+
+1. Log out of Zitadel
+2. Go to the login page
+3. You'll see your new provider button (e.g., "Sign in with GitHub")
+4. Click it to authenticate
+5. Authorize the application in GitHub
+6. You'll be redirected back to Zitadel and logged in
+
+### First-Time Login Flow
+
+For new users:
+1. They authenticate with the external provider
+2. If account creation is automatic, Zitadel creates their account
+3. If the action is configured, it processes user data
+4. The user is logged in to your application
+
+### Returning User Flow
+
+1. Click the provider button
+2. If still authenticated with the provider, immediate redirect
+3. Otherwise, authenticate with the provider
+4. Return to your application
+
+## Configuring Other Popular Providers
+
+### Google
+
+1. Create a project in Google Cloud Console
+2. Enable Google+ API
+3. Create OAuth 2.0 credentials
+4. Add authorized redirect URI from Zitadel
+5. Configure in Zitadel with scopes: `openid profile email`
+
+### Microsoft (Azure AD)
+
+1. Register an application in Azure Portal
+2. Add a redirect URI (Web platform)
+3. Create a client secret
+4. Configure in Zitadel with tenant information
+5. Use scopes: `openid profile email offline_access`
+
+### Auth0
+
+1. Create an application in Auth0 Dashboard
+2. Set callback URL from Zitadel
+3. Note domain, client ID, and secret
+4. Configure in Zitadel with your Auth0 domain
+
+## Multiple Identity Providers
+
+You can configure multiple identity providers simultaneously:
+
+- Users can choose their preferred login method
+- Accounts can be linked if emails match (when configured)
+- Different organizations can have different provider sets
+- Providers can be enabled/disabled without data loss
+
+## Actions v2 Preview
+
+<Aside variant="info">
+Zitadel is developing Actions v2, which provides more sophisticated event handling and function capabilities. We'll cover this in detail in a future video.
+</Aside>
+
+## Security Considerations
+
+### Client Secret Management
+- Store secrets securely
+- Rotate secrets regularly
+- Never commit secrets to version control
+- Use environment variables or secret management tools
+
+### Scope Management
+- Request minimal necessary scopes
+- Review scope requirements regularly
+- Document why each scope is needed
+- Consider user privacy implications
+
+### Account Linking
+- Only link accounts with verified emails
+- Consider the trust level of each provider
+- Implement additional verification for sensitive operations
+- Log account linking events for audit trails
+
+## Troubleshooting Common Issues
+
+### "External user not found"
+This occurs when:
+- Automatic account creation is disabled
+- The action fails to set required fields
+- There's a mismatch in expected user data
+
+### Redirect URI Mismatch
+- Ensure the callback URL in your provider matches exactly
+- Check for trailing slashes
+- Verify HTTP vs HTTPS
+- Confirm the correct Zitadel instance URL
+
+### Missing User Information
+- Check the requested scopes
+- Verify the provider returns expected fields
+- Use actions to transform or supplement data
+- Review provider-specific documentation
+
+## Best Practices
+
+1. **Start Simple**: Begin with one provider and expand
+2. **Test Thoroughly**: Test new user registration and returning user flows
+3. **Document Configuration**: Keep records of client IDs, scopes, and settings
+4. **Monitor Usage**: Track which providers users prefer
+5. **Plan for Failures**: Have fallback authentication methods
+6. **Regular Audits**: Review provider configurations and permissions
+
+## Summary
+
+Connecting external OAuth providers to Zitadel is straightforward:
+
+1. Create an OAuth application with your provider
+2. Configure the provider in Zitadel with credentials and scopes
+3. Handle any provider-specific quirks with Actions
+4. Test the complete authentication flow
+
+With just a few clicks, you can offer users authentication through GitHub, Google, Microsoft, LinkedIn, Stack Overflow, and dozens of other providers. This reduces friction in the registration process and lets users leverage their existing accounts.
+
+In the next video, we'll explore more advanced authentication patterns and dive deeper into Zitadel Actions for customizing your authentication flows.
