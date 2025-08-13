@@ -45,7 +45,6 @@ class ProcessingState:
         'audio_uploaded_content',
         'subtitles_uploaded_content',
         'thumbnail_uploaded_content',
-        'thumbnail_uploaded_videos',
         'cloud_run_triggered',
         'completed'
     ]
@@ -124,19 +123,38 @@ class ProcessingState:
         if self.state_file.exists():
             self.state_file.unlink()
             logger.info(f"Cleaned up state file for {self.descript_id}")
+    
+    def reset_for_update(self):
+        """Reset specific steps for update mode while preserving CUID."""
+        steps_to_reset = [
+            'video_downloaded',
+            'audio_extracted', 
+            'video_uploaded_content',
+            'audio_uploaded_content',
+            'subtitles_uploaded_content',
+            'thumbnail_uploaded_content',
+            'cloud_run_triggered'
+        ]
+        
+        # Remove completed steps that need to be redone
+        self.state['completed_steps'] = [
+            step for step in self.state['completed_steps'] 
+            if step not in steps_to_reset
+        ]
+        
+        # Clear related artifacts
+        artifacts_to_clear = ['video_path', 'audio_path', 'cloud_run_operation']
+        for artifact in artifacts_to_clear:
+            if artifact in self.state['artifacts']:
+                del self.state['artifacts'][artifact]
+        
+        self.save()
+        logger.info(f"Reset state for update mode. Keeping CUID: {self.state['cuid']}")
 
 
 class DescriptDownloader:
     def __init__(self):
-        # Initialize R2 clients for both buckets
-        self.videos_client = boto3.client(
-            's3',
-            endpoint_url=os.environ.get('VIDEOS_ENDPOINT'),
-            aws_access_key_id=os.environ.get('VIDEOS_ACCESS_KEY'),
-            aws_secret_access_key=os.environ.get('VIDEOS_SECRET_KEY'),
-            region_name='auto'
-        )
-        
+        # Initialize R2 client for content bucket
         self.content_client = boto3.client(
             's3',
             endpoint_url=os.environ.get('CONTENT_ENDPOINT'),
@@ -145,14 +163,20 @@ class DescriptDownloader:
             region_name='auto'
         )
         
-        self.videos_bucket = os.environ.get('VIDEOS_BUCKET')
         self.content_bucket = os.environ.get('CONTENT_BUCKET')
+        if not self.content_bucket:
+            raise ValueError("CONTENT_BUCKET environment variable is not set")
         
         # Initialize Google Cloud Run Jobs client
         self.jobs_client = run_v2.JobsClient()
         self.gcp_project = os.environ.get('GCP_PROJECT', 'rawkode-academy-production')
         self.gcp_location = os.environ.get('GCP_LOCATION', 'europe-west2')
         self.gcp_job_name = os.environ.get('GCP_JOB_NAME', 'transcoding-job')
+        
+        # Cloudflare API credentials for cache purging
+        self.cf_api_token = os.environ.get('CLOUDFLARE_API_TOKEN')
+        self.cf_zone_id = os.environ.get('CLOUDFLARE_ZONE_ID')
+        self.content_domain = 'content.rawkode.academy'
 
     def extract_descript_id(self, url_or_id):
         """Extract Descript ID from share URL or use ID directly."""
@@ -347,16 +371,13 @@ class DescriptDownloader:
             logger.error(f"Error processing thumbnail: {str(e)}")
             raise
 
-    def upload_to_r2(self, local_path, bucket, r2_key, content_type='application/octet-stream', use_videos_client=False):
+    def upload_to_r2(self, local_path, bucket, r2_key, content_type='application/octet-stream'):
         """Upload file to Cloudflare R2."""
         try:
             logger.info(f"Uploading to R2 bucket '{bucket}': {r2_key}")
-            
-            # Choose the appropriate client
-            client = self.videos_client if use_videos_client else self.content_client
 
             with open(local_path, 'rb') as file:
-                client.upload_fileobj(
+                self.content_client.upload_fileobj(
                     file,
                     bucket,
                     r2_key,
@@ -375,6 +396,45 @@ class DescriptDownloader:
         except Exception as e:
             logger.error(f"Error uploading to R2: {str(e)}")
             raise
+
+    def purge_cache_by_prefix(self, cuid):
+        """Purge Cloudflare cache for all files under /videos/{cuid}/* prefix."""
+        if not self.cf_api_token or not self.cf_zone_id:
+            logger.warning("Cloudflare API credentials not configured, skipping cache purge")
+            return False
+        
+        try:
+            logger.info(f"Purging cache for prefix: /videos/{cuid}/*")
+            
+            # Cloudflare API endpoint for cache purge
+            url = f"https://api.cloudflare.com/client/v4/zones/{self.cf_zone_id}/purge_cache"
+            
+            headers = {
+                'Authorization': f'Bearer {self.cf_api_token}',
+                'Content-Type': 'application/json'
+            }
+            
+            # Use prefix purging to clear all transcoded files
+            data = {
+                'prefixes': [
+                    f"https://{self.content_domain}/videos/{cuid}/"
+                ]
+            }
+            
+            response = requests.post(url, headers=headers, json=data)
+            response_data = response.json()
+            
+            if response.status_code == 200 and response_data.get('success'):
+                logger.info(f"Successfully purged cache for /videos/{cuid}/*")
+                return True
+            else:
+                error_msg = response_data.get('errors', [{'message': 'Unknown error'}])[0].get('message', 'Unknown error')
+                logger.error(f"Failed to purge cache: {error_msg}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error purging cache: {str(e)}")
+            return False
 
     def trigger_cloud_run_job(self, video_cuid):
         """Trigger Google Cloud Run job with VIDEO_ID environment variable."""
@@ -503,7 +563,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
         return sql
 
-    def process_descript_url(self, descript_url_or_id, thumbnail_path, state, local_video_path=None):
+    def process_descript_url(self, descript_url_or_id, thumbnail_path, state, local_video_path=None, update_mode=False):
         """Process a single Descript URL or ID."""
         # Generate or retrieve CUID
         if state.state['cuid']:
@@ -527,7 +587,12 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
                 # Step 2: Download or use local video
                 video_path = None
-                if not state.is_step_completed('video_downloaded'):
+                # In update mode, always re-download from Descript (ignore local video)
+                if update_mode and local_video_path:
+                    logger.info("Update mode: Ignoring local video, will download from Descript")
+                    local_video_path = None
+                
+                if not state.is_step_completed('video_downloaded') or update_mode:
                     if local_video_path:
                         # Use local video file
                         logger.info(f"Using local video file: {local_video_path}")
@@ -579,7 +644,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
                 # Step 3: Extract audio
                 audio_path = None
-                if not state.is_step_completed('audio_extracted'):
+                if not state.is_step_completed('audio_extracted') or update_mode:
                     audio_path = self.extract_audio(video_path, temp_dir)
                     state.set_artifact('audio_path', audio_path)
                     state.mark_step_completed('audio_extracted')
@@ -593,7 +658,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
                 # Step 4: Download subtitles (VTT)
                 subtitles_path = None
-                if not state.is_step_completed('subtitles_downloaded'):
+                if not state.is_step_completed('subtitles_downloaded') or update_mode:
                     if 'subtitles_url' in metadata:
                         subtitles_path = os.path.join(temp_dir, 'subtitles.vtt')
                         self.download_file(metadata['subtitles_url'], subtitles_path, "subtitles")
@@ -629,15 +694,14 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                 else:
                     logger.info("Skipping thumbnail copy (already completed)")
                     # Re-copy thumbnail if needed for upload
-                    if (not state.is_step_completed('thumbnail_uploaded_content') or 
-                        not state.is_step_completed('thumbnail_uploaded_videos')):
+                    if not state.is_step_completed('thumbnail_uploaded_content'):
                         thumb_path = self.copy_thumbnail(thumbnail_path, temp_dir)
                     else:
                         thumb_path = os.path.join(temp_dir, 'thumbnail.jpg')
 
                 # Upload to R2 buckets
                 # Content bucket uploads
-                if not state.is_step_completed('video_uploaded_content'):
+                if not state.is_step_completed('video_uploaded_content') or update_mode:
                     self.upload_to_r2(
                         video_path or state.get_artifact('video_path') or os.path.join(temp_dir, 'video.mkv'),
                         self.content_bucket,
@@ -646,7 +710,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                     )
                     state.mark_step_completed('video_uploaded_content')
 
-                if not state.is_step_completed('audio_uploaded_content'):
+                if not state.is_step_completed('audio_uploaded_content') or update_mode:
                     self.upload_to_r2(
                         audio_path or state.get_artifact('audio_path') or os.path.join(temp_dir, 'audio.mp3'),
                         self.content_bucket,
@@ -655,7 +719,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                     )
                     state.mark_step_completed('audio_uploaded_content')
 
-                if not state.is_step_completed('subtitles_uploaded_content') and subtitles_path:
+                if (not state.is_step_completed('subtitles_uploaded_content') or update_mode) and subtitles_path:
                     self.upload_to_r2(
                         subtitles_path or state.get_artifact('subtitles_path') or os.path.join(temp_dir, 'subtitles.vtt'),
                         self.content_bucket,
@@ -664,7 +728,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                     )
                     state.mark_step_completed('subtitles_uploaded_content')
 
-                if not state.is_step_completed('thumbnail_uploaded_content'):
+                if not state.is_step_completed('thumbnail_uploaded_content') or update_mode:
                     self.upload_to_r2(
                         thumb_path or state.get_artifact('thumbnail_path') or os.path.join(temp_dir, 'thumbnail.jpg'),
                         self.content_bucket,
@@ -673,22 +737,22 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                     )
                     state.mark_step_completed('thumbnail_uploaded_content')
 
-                # Videos bucket upload
-                if not state.is_step_completed('thumbnail_uploaded_videos'):
-                    self.upload_to_r2(
-                        thumb_path or state.get_artifact('thumbnail_path') or os.path.join(temp_dir, 'thumbnail.jpg'),
-                        self.videos_bucket,
-                        f"{cuid}/thumbnail.jpg",
-                        'image/jpeg',
-                        use_videos_client=True
-                    )
-                    state.mark_step_completed('thumbnail_uploaded_videos')
-
                 # Trigger Cloud Run job
-                if not state.is_step_completed('cloud_run_triggered'):
+                if not state.is_step_completed('cloud_run_triggered') or update_mode:
                     operation_name = self.trigger_cloud_run_job(cuid)
                     state.set_artifact('cloud_run_operation', operation_name)
+                    state.set_artifact('cloud_run_triggered_at', datetime.now().isoformat())
                     state.mark_step_completed('cloud_run_triggered')
+                    if update_mode:
+                        logger.info("Update mode: Retriggered Cloud Run encoding job")
+                        logger.info("Note: CDN cache purging should be done AFTER transcoding completes")
+                        logger.info(f"To purge cache after transcoding, run:")
+                        logger.info(f"  curl -X POST 'https://api.cloudflare.com/client/v4/zones/{self.cf_zone_id}/purge_cache' \\")
+                        logger.info(f"    -H 'Authorization: Bearer YOUR_TOKEN' \\")
+                        logger.info(f"    -H 'Content-Type: application/json' \\")
+                        logger.info(f"    -d '{{\"prefixes\": [\"https://{self.content_domain}/videos/{cuid}/\"]}}'")
+                        logger.info("")
+                        logger.info("Or wait for the --purge-cache flag (coming soon)")
 
                 # Generate SQL
                 sql = self.generate_sql_insert(cuid, metadata, transcript_data)
@@ -714,22 +778,41 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
 def main():
     parser = argparse.ArgumentParser(description='Download Descript videos and upload to R2')
-    parser.add_argument('descript', help='Descript share URL or ID (e.g., OsxdwbYAhvG)')
-    parser.add_argument('thumbnail', help='Path to thumbnail image file')
+    parser.add_argument('descript', help='Descript share URL or ID (e.g., OsxdwbYAhvG)', nargs='?')
+    parser.add_argument('thumbnail', help='Path to thumbnail image file', nargs='?')
     parser.add_argument('--local-video', help='Path to local video file (skip download)', 
                         default=None)
     parser.add_argument('--state-dir', help='Directory to store processing state', 
                         default=None)
+    parser.add_argument('--update', action='store_true',
+                        help='Update mode: Re-download from Descript and re-encode existing video')
+    parser.add_argument('--purge-cache', help='Purge CDN cache for a video by CUID (use after transcoding completes)',
+                        metavar='CUID')
     
     args = parser.parse_args()
 
-    # Validate thumbnail exists
-    if not os.path.exists(args.thumbnail):
-        logger.error(f"Thumbnail file not found: {args.thumbnail}")
-        sys.exit(1)
-
     try:
         downloader = DescriptDownloader()
+        
+        # Handle cache purging mode
+        if args.purge_cache:
+            cuid = args.purge_cache
+            logger.info(f"Purging CDN cache for video: {cuid}")
+            if downloader.purge_cache_by_prefix(cuid):
+                logger.info("Cache purged successfully!")
+            else:
+                logger.error("Failed to purge cache")
+                sys.exit(1)
+            sys.exit(0)
+        
+        # Regular processing mode requires descript and thumbnail
+        if not args.descript or not args.thumbnail:
+            parser.error("descript and thumbnail arguments are required unless using --purge-cache")
+        
+        # Validate thumbnail exists
+        if not os.path.exists(args.thumbnail):
+            logger.error(f"Thumbnail file not found: {args.thumbnail}")
+            sys.exit(1)
         
         # Extract Descript ID from URL or use directly
         descript_id = downloader.extract_descript_id(args.descript)
@@ -738,8 +821,16 @@ def main():
         # Initialize state
         state = ProcessingState(descript_id, args.state_dir)
         
+        # Handle update mode
+        if args.update:
+            if not state.state['cuid']:
+                logger.error("Update mode requires existing state file with CUID. Process video normally first.")
+                sys.exit(1)
+            logger.info(f"Update mode: Will re-process video with CUID {state.state['cuid']}")
+            state.reset_for_update()
+        
         # Process the video
-        downloader.process_descript_url(args.descript, args.thumbnail, state, args.local_video)
+        downloader.process_descript_url(args.descript, args.thumbnail, state, args.local_video, update_mode=args.update)
         
     except KeyboardInterrupt:
         logger.info("\nProcess interrupted by user")

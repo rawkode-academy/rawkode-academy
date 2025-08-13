@@ -141,6 +141,37 @@ The script generates a SQL INSERT statement for the `videos` table with:
 ### youtube_to_r2.py
 Downloads YouTube videos, extracts audio, and uploads to Cloudflare R2 buckets.
 
+### descript_to_r2.py
+Downloads Descript videos, extracts audio, subtitles, and uploads to Cloudflare R2 buckets.
+
+Usage:
+```bash
+# Process a new Descript video
+python descript_to_r2.py <descript_id> <thumbnail_path>
+
+# Process with a local video file (skip Descript download)
+python descript_to_r2.py <descript_id> <thumbnail_path> --local-video <video_path>
+
+# Update an existing video after edits on Descript
+python descript_to_r2.py <descript_id> <thumbnail_path> --update
+```
+
+#### Update Mode
+When you've made edits to a video on Descript and need to re-process it:
+
+```bash
+python descript_to_r2.py <descript_id> <thumbnail_path> --update
+```
+
+The `--update` flag will:
+- Keep the existing CUID (preserving the video ID in your system)
+- Re-download the updated video from Descript
+- Re-extract audio and process subtitles
+- Re-upload all files to R2 (replacing existing files)
+- Retrigger the Cloud Run encoding job
+
+**Note:** Update mode requires an existing state file with a CUID. You must process the video normally first before using update mode.
+
 ### migrate_thumbnails.py
 Migrates thumbnails from rawkode-academy-videos bucket to rawkode-academy-content bucket.
 
