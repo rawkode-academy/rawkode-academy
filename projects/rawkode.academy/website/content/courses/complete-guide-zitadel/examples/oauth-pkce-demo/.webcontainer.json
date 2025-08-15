@@ -1,0 +1,5 @@
+{
+  "title": "OAuth PKCE Interactive Demo",
+  "description": "Interactive demonstration of OAuth 2.0 Authorization Code Flow with PKCE",
+  "startCommand": "node server.js"
+}
