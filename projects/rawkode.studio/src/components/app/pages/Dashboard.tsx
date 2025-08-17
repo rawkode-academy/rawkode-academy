@@ -8,8 +8,9 @@ import {
 	type SortingState,
 	useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { ShareMeetingDialog } from "@/components/app/components/ShareMeetingDialog";
 import { useAuth } from "@/components/app/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,8 @@ import type { Meeting, PreferredRegion } from "@/lib/realtime-kit/client";
 function CreateMeetingDialog() {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
+	const titleId = useId();
+	const regionId = useId();
 	const [open, setOpen] = useState(false);
 	const [formData, setFormData] = useState({
 		title: "",
@@ -132,13 +135,13 @@ function CreateMeetingDialog() {
 					<div className="grid gap-4 py-4">
 						<div className="grid gap-2">
 							<label
-								htmlFor="title"
+								htmlFor={titleId}
 								className="text-sm font-medium text-gray-700 dark:text-gray-300"
 							>
 								Meeting Title
 							</label>
 							<input
-								id="title"
+								id={titleId}
 								type="text"
 								value={formData.title}
 								onChange={(e) =>
@@ -152,13 +155,13 @@ function CreateMeetingDialog() {
 
 						<div className="grid gap-2">
 							<label
-								htmlFor="region"
+								htmlFor={regionId}
 								className="text-sm font-medium text-gray-700 dark:text-gray-300"
 							>
 								Preferred Region
 							</label>
 							<select
-								id="region"
+								id={regionId}
 								value={formData.preferred_region}
 								onChange={(e) =>
 									setFormData({
@@ -612,96 +615,6 @@ export function Dashboard() {
 				sortingFn: "datetime",
 			},
 			{
-				id: "features",
-				header: "Features",
-				cell: ({ row }) => (
-					<div className="flex gap-1.5 flex-wrap">
-						{row.original.record_on_start && (
-							<span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 rounded">
-								<svg
-									aria-hidden="true"
-									className="mr-1 h-3 w-3"
-									fill="currentColor"
-									viewBox="0 0 20 20"
-								>
-									<circle cx="10" cy="10" r="8" />
-								</svg>
-								Recording
-							</span>
-						)}
-						{row.original.live_stream_on_start && (
-							<span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 rounded">
-								<svg
-									aria-hidden="true"
-									className="mr-1 h-3 w-3"
-									fill="currentColor"
-									viewBox="0 0 20 20"
-								>
-									<path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-									<path
-										fillRule="evenodd"
-										d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-										clipRule="evenodd"
-									/>
-								</svg>
-								Streaming
-							</span>
-						)}
-						{row.original.persist_chat && (
-							<span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded">
-								<svg
-									aria-hidden="true"
-									className="mr-1 h-3 w-3"
-									fill="currentColor"
-									viewBox="0 0 20 20"
-								>
-									<path
-										fillRule="evenodd"
-										d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
-										clipRule="evenodd"
-									/>
-								</svg>
-								Chat
-							</span>
-						)}
-						{row.original.summarize_on_end && (
-							<span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 rounded">
-								<svg
-									aria-hidden="true"
-									className="mr-1 h-3 w-3"
-									fill="currentColor"
-									viewBox="0 0 20 20"
-								>
-									<path
-										fillRule="evenodd"
-										d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-										clipRule="evenodd"
-									/>
-								</svg>
-								AI Summary
-							</span>
-						)}
-						{row.original.ai_config?.transcription && (
-							<span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400 rounded">
-								<svg
-									aria-hidden="true"
-									className="mr-1 h-3 w-3"
-									fill="currentColor"
-									viewBox="0 0 20 20"
-								>
-									<path
-										fillRule="evenodd"
-										d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
-										clipRule="evenodd"
-									/>
-								</svg>
-								Transcription
-							</span>
-						)}
-					</div>
-				),
-			},
-			{
 				id: "actions",
 				header: "Actions",
 				cell: ({ row }) => {
@@ -716,17 +629,11 @@ export function Dashboard() {
 							>
 								View
 							</Button>
-							<Button
-								variant={isActive ? "default" : "outline"}
-								size="sm"
-								onClick={() => {
-									window.location.href = `/meeting/${row.original.id}`;
-								}}
-								disabled={!isActive}
-								title={!isActive ? "Meeting is not active" : "Join meeting"}
-							>
-								Join
-							</Button>
+							<ShareMeetingDialog meeting={row.original}>
+								<Button variant="outline" size="sm" title="Share meeting link">
+									Share
+								</Button>
+							</ShareMeetingDialog>
 							<StopMeetingButton
 								meetingId={row.original.id}
 								meetingTitle={row.original.title || "Untitled Meeting"}

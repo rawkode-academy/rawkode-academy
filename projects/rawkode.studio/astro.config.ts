@@ -43,14 +43,6 @@ export default defineConfig({
 		ssr: {
 			external: ["node:crypto", "node:fs/promises", "node:path", "node:url"],
 		},
-
-		resolve: {
-			alias: import.meta.env.PROD
-				? {
-						"react-dom/server": "react-dom/server.edge",
-					}
-				: undefined,
-		},
 	},
 
 	env: {

@@ -21,24 +21,39 @@ This is a monorepo containing multiple projects for the Rawkode Academy ecosyste
 ### Core Technologies
 - **Runtime**: Bun (preferred) - Fast all-in-one JavaScript runtime
 - **Language**: TypeScript (strict mode enabled)
-- **Formatter/Linter**: Biome (v2.1.3+) - Fast, unified toolchain
+- **Formatter/Linter**: Biome (v2.2.0+) - Fast, unified toolchain
 - **Package Manager**: Bun
 
 ### Frontend Stack
 - **Frameworks**: 
-  - Astro (SSR/SSG) - Main web framework
-  - React 19+ - Interactive components
-  - Vue 3 - Alternative components
+  - Astro 5+ (SSR) - Main web framework with server-side rendering
+  - React 19+ - Interactive components with latest features
+  - React Router v7 - Client-side routing
 - **Styling**: 
-  - Tailwind CSS v4 - Utility-first CSS
+  - Tailwind CSS v4 - Utility-first CSS with CSS variables
   - CSS Variables for design tokens
 - **UI Components**: 
   - Radix UI - Accessible component primitives
   - shadcn/ui patterns - Composable component architecture
   - class-variance-authority (CVA) - Variant management
+  - Lucide React - Icon library
+- **State Management**:
+  - TanStack Query v5 - Server state management
+  - React Context - Application state
+- **Real-time Features**:
+  - Cloudflare RealTimeKit - WebRTC platform for video meetings
+  - WebSockets - Real-time communication
 
 ### Backend Stack
-- **Platform**: Cloudflare Workers/Pages
+- **Platform**: Cloudflare Workers/Pages with server-side rendering
+- **Authentication**: 
+  - Zitadel - Identity provider (OIDC/OAuth2)
+  - Arctic - OAuth client library
+  - OIDC Client TS - OpenID Connect client
+  - Jose - JWT handling
+- **Real-time Platform**: 
+  - Cloudflare RealTimeKit - Video meeting infrastructure
+  - WebRTC - Peer-to-peer communication
 - **Database**: 
   - Cloudflare D1 (SQLite) - Primary database
   - Turso/LibSQL - Being phased out
@@ -151,6 +166,388 @@ For AI-assisted commits, append:
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+
+## Authentication & Authorization
+
+This application uses Zitadel as the identity provider with OIDC (OpenID Connect) for authentication.
+
+### Authentication Flow
+
+#### PKCE OAuth2 Flow
+```typescript
+// Authentication setup with PKCE
+import { Arctic } from "arctic";
+
+const zitadel = new Arctic({
+	clientId: ZITADEL_CLIENT_ID,
+	authorizeEndpoint: `${ZITADEL_URL}/oauth/v2/authorize`,
+	tokenEndpoint: `${ZITADEL_URL}/oauth/v2/token`,
+});
+
+// Generate PKCE challenge
+const { codeVerifier, codeChallenge } = await zitadel.generatePKCE();
+```
+
+#### JWT Token Handling
+```typescript
+import { jwtVerify, SignJWT } from "jose";
+
+// Verify JWT tokens
+const { payload } = await jwtVerify(
+	token,
+	new TextEncoder().encode(SECRET),
+	{ issuer: ZITADEL_URL }
+);
+
+// Create session tokens
+const sessionToken = await new SignJWT({ sub: userId })
+	.setProtectedHeader({ alg: "HS256" })
+	.setIssuedAt()
+	.setExpirationTime("24h")
+	.sign(new TextEncoder().encode(SECRET));
+```
+
+### Authentication Context
+
+```typescript
+// AuthContext.tsx pattern
+interface AuthContextType {
+	user: User | null;
+	isAuthenticated: boolean;
+	login: () => void;
+	logout: () => void;
+	isLoading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function useAuth() {
+	const context = useContext(AuthContext);
+	if (!context) {
+		throw new Error("useAuth must be used within AuthProvider");
+	}
+	return context;
+}
+```
+
+### Route Protection
+
+```typescript
+// RouteGuard component pattern
+interface RouteGuardProps {
+	children: React.ReactNode;
+	requireAuth?: boolean;
+	redirectTo?: string;
+}
+
+export function RouteGuard({ 
+	children, 
+	requireAuth = true, 
+	redirectTo = "/login" 
+}: RouteGuardProps) {
+	const { isAuthenticated, isLoading } = useAuth();
+
+	if (isLoading) return <LoadingSpinner />;
+	
+	if (requireAuth && !isAuthenticated) {
+		return <Navigate to={redirectTo} replace />;
+	}
+
+	return <>{children}</>;
+}
+```
+
+### API Route Protection
+
+```typescript
+// Middleware pattern for API routes
+export async function onRequest(
+	context: APIContext,
+	next: MiddlewareNext
+): Promise<Response> {
+	const token = context.request.headers.get("authorization")?.replace("Bearer ", "");
+	
+	if (!token) {
+		return new Response("Unauthorized", { status: 401 });
+	}
+
+	try {
+		const { payload } = await jwtVerify(
+			token,
+			new TextEncoder().encode(AUTH_SECRET)
+		);
+		
+		context.locals.user = payload;
+		return next();
+	} catch {
+		return new Response("Invalid token", { status: 401 });
+	}
+}
+```
+
+### Security Best Practices
+
+- **PKCE Flow**: Always use PKCE for OAuth2 flows
+- **Secure Cookies**: Use `httpOnly`, `secure`, `sameSite` attributes
+- **Token Validation**: Verify JWT signatures and claims
+- **CORS**: Configure proper origin checking in Astro config
+- **State Parameters**: Use cryptographically secure state for OAuth
+
+## RealTimeKit Integration
+
+Cloudflare RealTimeKit provides the WebRTC infrastructure for video meetings, recording, and livestreaming.
+
+### Environment Configuration
+
+```typescript
+// Environment variables for RealTimeKit
+REALTIMEKIT_ORGANIZATION_ID=your-org-id
+REALTIMEKIT_API_KEY=your-api-key
+REALTIMEKIT_API_URL=https://rtk.realtime.cloudflare.com/v2
+REALTIMEKIT_STREAM_URL=rtmps://live.cloudflare.com:443/live/
+REALTIMEKIT_ENABLE_RECORDING=true
+REALTIMEKIT_ENABLE_LIVESTREAM=true
+REALTIMEKIT_ENABLE_ANALYTICS=true
+```
+
+### Meeting Management
+
+#### Creating Meetings
+```typescript
+// API route: /api/meetings.ts
+import { createMeeting } from "@/lib/realtime-kit";
+
+export async function POST({ request }: APIContext) {
+	const { title, description, scheduledAt } = await request.json();
+	
+	try {
+		const meeting = await createMeeting({
+			title,
+			description,
+			scheduledAt,
+			settings: {
+				recording: {
+					enabled: REALTIMEKIT_ENABLE_RECORDING,
+					autoStart: true,
+				},
+				livestream: {
+					enabled: REALTIMEKIT_ENABLE_LIVESTREAM,
+				},
+			},
+		});
+		
+		return Response.json(meeting);
+	} catch (error) {
+		return new Response("Failed to create meeting", { status: 500 });
+	}
+}
+```
+
+#### Session Management
+```typescript
+// Creating a session for a meeting
+export async function createSession(meetingId: string) {
+	return await fetch(`${REALTIMEKIT_API_URL}/meetings/${meetingId}/sessions`, {
+		method: "POST",
+		headers: {
+			"Authorization": `Bearer ${REALTIMEKIT_API_KEY}`,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			participantLimits: {
+				maxParticipants: 50,
+				maxScreenShares: 3,
+			},
+		}),
+	});
+}
+```
+
+### React Components
+
+#### Meeting Provider Pattern
+```typescript
+import { RealTimeKitProvider } from "@cloudflare/realtimekit-react";
+
+interface MeetingProviderProps {
+	children: React.ReactNode;
+	meetingId: string;
+	sessionToken: string;
+}
+
+export function MeetingProvider({ 
+	children, 
+	meetingId, 
+	sessionToken 
+}: MeetingProviderProps) {
+	return (
+		<RealTimeKitProvider
+			organizationId={REALTIMEKIT_ORGANIZATION_ID}
+			apiKey={sessionToken}
+			meetingId={meetingId}
+			options={{
+				audio: { enabled: true },
+				video: { enabled: true },
+				screen: { enabled: true },
+			}}
+		>
+			{children}
+		</RealTimeKitProvider>
+	);
+}
+```
+
+#### Video Meeting Component
+```typescript
+import { 
+	useLocalParticipant, 
+	useRemoteParticipants,
+	useDevices,
+	useRoom
+} from "@cloudflare/realtimekit-react";
+
+export function VideoMeeting() {
+	const localParticipant = useLocalParticipant();
+	const remoteParticipants = useRemoteParticipants();
+	const { cameras, microphones, speakers } = useDevices();
+	const { isConnected, connectionState } = useRoom();
+
+	return (
+		<div className="meeting-container">
+			{/* Local participant video */}
+			<div className="local-video">
+				{localParticipant?.videoTrack && (
+					<video
+						ref={localParticipant.videoTrack.attach()}
+						autoPlay
+						muted
+						playsInline
+					/>
+				)}
+			</div>
+
+			{/* Remote participants grid */}
+			<div className="participants-grid">
+				{remoteParticipants.map((participant) => (
+					<ParticipantVideo 
+						key={participant.id} 
+						participant={participant} 
+					/>
+				))}
+			</div>
+
+			{/* Meeting controls */}
+			<MeetingControls />
+		</div>
+	);
+}
+```
+
+### Recording & Livestreaming
+
+#### Starting Recording
+```typescript
+export async function startRecording(sessionId: string) {
+	return await fetch(`${REALTIMEKIT_API_URL}/sessions/${sessionId}/recording`, {
+		method: "POST",
+		headers: {
+			"Authorization": `Bearer ${REALTIMEKIT_API_KEY}`,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			format: "mp4",
+			quality: "1080p",
+			layout: "grid",
+		}),
+	});
+}
+```
+
+#### Livestream Configuration
+```typescript
+export async function startLivestream(sessionId: string, streamKey: string) {
+	return await fetch(`${REALTIMEKIT_API_URL}/sessions/${sessionId}/livestream`, {
+		method: "POST",
+		headers: {
+			"Authorization": `Bearer ${REALTIMEKIT_API_KEY}`,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			rtmpUrl: `${REALTIMEKIT_STREAM_URL}${streamKey}`,
+			layout: "speaker",
+			resolution: "1920x1080",
+		}),
+	});
+}
+```
+
+### Custom Hooks
+
+#### useMeetings Hook
+```typescript
+import { useQuery, useMutation } from "@tanstack/react-query";
+
+export function useMeetings() {
+	const { data: meetings, isLoading } = useQuery({
+		queryKey: ["meetings"],
+		queryFn: async () => {
+			const response = await fetch("/api/meetings");
+			return response.json();
+		},
+	});
+
+	const createMeeting = useMutation({
+		mutationFn: async (meetingData: CreateMeetingRequest) => {
+			const response = await fetch("/api/meetings", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(meetingData),
+			});
+			return response.json();
+		},
+	});
+
+	return {
+		meetings,
+		isLoading,
+		createMeeting: createMeeting.mutate,
+		isCreating: createMeeting.isPending,
+	};
+}
+```
+
+### Error Handling
+
+```typescript
+// RealTimeKit error handling
+interface RTKError {
+	code: string;
+	message: string;
+	details?: Record<string, any>;
+}
+
+export function handleRTKError(error: RTKError) {
+	switch (error.code) {
+		case "PARTICIPANT_LIMIT_EXCEEDED":
+			return "Meeting is full. Please try again later.";
+		case "INVALID_SESSION":
+			return "Session has expired. Please rejoin.";
+		case "NETWORK_ERROR":
+			return "Connection lost. Attempting to reconnect...";
+		default:
+			return "An unexpected error occurred.";
+	}
+}
+```
+
+### Best Practices
+
+- **Token Management**: Use short-lived session tokens for security
+- **Graceful Degradation**: Handle network failures and reconnection
+- **Permission Handling**: Request camera/microphone permissions early
+- **Performance**: Implement virtual scrolling for large participant lists
+- **Accessibility**: Add ARIA labels and keyboard navigation
+- **Mobile Support**: Test on mobile devices and handle orientation changes
 
 ## TypeScript Guidelines
 

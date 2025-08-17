@@ -111,6 +111,18 @@ export function MeetingDetails() {
 		enabled: !!session?.id,
 	});
 
+	const { data: chatMessages } = useQuery({
+		queryKey: ["meeting", id, "chat"],
+		queryFn: async () => {
+			const response = await fetch(`/api/meetings/${id}/chat`);
+			if (!response.ok) {
+				throw new Error("Failed to fetch chat messages");
+			}
+			return response.json();
+		},
+		enabled: !!id && meeting?.persist_chat,
+	});
+
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center min-h-[400px]">
@@ -225,9 +237,16 @@ export function MeetingDetails() {
 									<MessageSquare className="h-4 w-4 text-muted-foreground" />
 									<span className="text-sm">Persist Chat</span>
 								</div>
-								<Badge variant={meeting.persist_chat ? "default" : "outline"}>
-									{meeting.persist_chat ? "Enabled" : "Disabled"}
-								</Badge>
+								<div className="flex items-center gap-2">
+									<Badge variant={meeting.persist_chat ? "default" : "outline"}>
+										{meeting.persist_chat ? "Enabled" : "Disabled"}
+									</Badge>
+									{meeting.persist_chat && (
+										<span className="text-xs text-muted-foreground">
+											(Available after session ends)
+										</span>
+									)}
+								</div>
 							</div>
 
 							<div className="flex items-center justify-between">
@@ -605,6 +624,106 @@ export function MeetingDetails() {
 					</Card>
 				)}
 
+				{/* Persisted Chat Messages Card */}
+				{meeting.persist_chat &&
+					chatMessages?.messages &&
+					chatMessages.messages.length > 0 && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<MessageSquare className="h-5 w-5" />
+									Chat History ({chatMessages.messages.length} messages)
+								</CardTitle>
+								{chatMessages.sessionsCount > 1 && (
+									<p className="text-sm text-muted-foreground">
+										From {chatMessages.sessionsCount} sessions
+									</p>
+								)}
+							</CardHeader>
+							<CardContent>
+								<div className="space-y-3 max-h-96 overflow-y-auto">
+									{chatMessages.messages.map(
+										(
+											message: {
+												timestamp: string;
+												participantName: string;
+												message: string;
+												sessionId: string;
+												sessionStarted: string;
+											},
+											index: number,
+										) => (
+											<div
+												key={`${message.sessionId}-${index}`}
+												className="flex gap-3 p-3 bg-muted/30 rounded-lg"
+											>
+												<div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+													<span className="text-xs font-semibold">
+														{message.participantName.charAt(0).toUpperCase()}
+													</span>
+												</div>
+												<div className="flex-1 min-w-0">
+													<div className="flex items-center gap-2 mb-1">
+														<span className="text-sm font-medium">
+															{message.participantName}
+														</span>
+														<span className="text-xs text-muted-foreground">
+															{new Date(message.timestamp).toLocaleString()}
+														</span>
+													</div>
+													<p className="text-sm text-muted-foreground break-words">
+														{message.message}
+													</p>
+												</div>
+											</div>
+										),
+									)}
+								</div>
+								<div className="flex justify-between items-center mt-4 pt-4 border-t">
+									<span className="text-xs text-muted-foreground">
+										Chat messages are persisted for one week
+									</span>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() =>
+											window.open(`/api/meetings/${id}/chat`, "_blank")
+										}
+									>
+										<Download className="mr-1 h-3 w-3" />
+										Export Chat
+									</Button>
+								</div>
+							</CardContent>
+						</Card>
+					)}
+
+				{/* Show message when chat persistence is enabled but no messages */}
+				{meeting.persist_chat &&
+					(!chatMessages?.messages || chatMessages.messages.length === 0) && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<MessageSquare className="h-5 w-5" />
+									Chat History
+								</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div className="text-center py-8 text-muted-foreground">
+									<MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+									<p className="text-sm">No chat history available yet</p>
+									<p className="text-xs mt-1">
+										Chat messages from completed meeting sessions will appear
+										here
+									</p>
+									<p className="text-xs mt-1 text-blue-600">
+										💡 Chat is only available after a meeting session ends
+									</p>
+								</div>
+							</CardContent>
+						</Card>
+					)}
+
 				<Card>
 					<CardHeader>
 						<CardTitle>Meeting ID</CardTitle>
@@ -615,18 +734,6 @@ export function MeetingDetails() {
 						</code>
 					</CardContent>
 				</Card>
-
-				<div className="flex gap-4">
-					{meeting.status === "ACTIVE" && (
-						<Button
-							onClick={() => navigate(`/meeting/${meeting.id}`)}
-							className="flex-1"
-						>
-							<Users className="mr-2 h-4 w-4" />
-							Join Meeting
-						</Button>
-					)}
-				</div>
 			</div>
 		</div>
 	);
