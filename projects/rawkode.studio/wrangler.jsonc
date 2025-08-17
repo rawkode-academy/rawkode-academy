@@ -1,7 +1,7 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-studio",
-	"compatibility_date": "2025-05-05",
+	"compatibility_date": "2025-08-17",
 	"compatibility_flags": [
 		"nodejs_compat",
 		"nodejs_compat_populate_process_env"
