@@ -8,15 +8,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function ThemeToggle() {
-	const { theme, setTheme, resolvedTheme } = useTheme();
+	const { theme, setTheme, actualTheme } = useTheme();
 
 	// Don't render until mounted to avoid hydration mismatch
-	if (!resolvedTheme) return null;
+	if (!actualTheme) return null;
 
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="ghost" size="icon" className="relative">
+				<Button variant="outline" size="icon" className="relative">
 					{theme === "system" ? (
 						<svg
 							className="h-[1.2rem] w-[1.2rem]"

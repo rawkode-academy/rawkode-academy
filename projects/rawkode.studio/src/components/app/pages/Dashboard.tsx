@@ -630,7 +630,14 @@ export function Dashboard() {
 								View
 							</Button>
 							<ShareMeetingDialog meeting={row.original}>
-								<Button variant="outline" size="sm" title="Share meeting link">
+								<Button
+									variant="outline"
+									size="sm"
+									disabled={!isActive}
+									title={
+										!isActive ? "Meeting is not active" : "Share meeting link"
+									}
+								>
 									Share
 								</Button>
 							</ShareMeetingDialog>

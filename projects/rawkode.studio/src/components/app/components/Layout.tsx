@@ -1,5 +1,6 @@
 import { Link, Outlet } from "react-router";
 import { useAuth } from "@/components/app/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function Layout() {
 	const { user, login, logout } = useAuth();
@@ -40,6 +41,7 @@ export function Layout() {
 						</div>
 
 						<div className="flex items-center space-x-4">
+							<ThemeToggle />
 							{user ? (
 								<>
 									<span className="text-sm text-muted-foreground">
