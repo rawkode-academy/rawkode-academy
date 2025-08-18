@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Route, Routes } from "react-router";
+import { ThemeProvider } from "@/app/providers/ThemeProvider";
 import { Layout } from "@/components/app/components/Layout";
 import {
 	AccessLevel,
@@ -32,66 +33,68 @@ const queryClient = new QueryClient({
 export function App({ user }: AppProps) {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<BrowserRouter>
-				<AuthProvider user={user}>
-					<Routes>
-						{/* Public Routes */}
-						<Route path="/" element={<Layout />}>
-							<Route index element={<Home />} />
+			<ThemeProvider>
+				<BrowserRouter>
+					<AuthProvider user={user}>
+						<Routes>
+							{/* Public Routes */}
+							<Route path="/" element={<Layout />}>
+								<Route index element={<Home />} />
 
-							{/* Guest-accessible meeting join */}
+								{/* Guest-accessible meeting join */}
+								<Route
+									path="join/:meetingId"
+									element={
+										<RouteGuard accessLevel={AccessLevel.PUBLIC}>
+											<MeetingJoin />
+										</RouteGuard>
+									}
+								/>
+							</Route>
+
+							{/* Protected Routes */}
+							<Route path="/" element={<Layout />}>
+								<Route
+									path="dashboard"
+									element={
+										<RouteGuard accessLevel={AccessLevel.AUTHENTICATED}>
+											<Dashboard />
+										</RouteGuard>
+									}
+								/>
+
+								<Route
+									path="meeting/:id"
+									element={
+										<RouteGuard accessLevel={AccessLevel.AUTHENTICATED}>
+											<MeetingDetails />
+										</RouteGuard>
+									}
+								/>
+
+								<Route
+									path="profile"
+									element={
+										<RouteGuard accessLevel={AccessLevel.AUTHENTICATED}>
+											<Profile />
+										</RouteGuard>
+									}
+								/>
+							</Route>
+
+							{/* Meeting Room - validates token, allows guests */}
 							<Route
-								path="join/:meetingId"
+								path="room/:id"
 								element={
 									<RouteGuard accessLevel={AccessLevel.PUBLIC}>
-										<MeetingJoin />
+										<MeetingRoom />
 									</RouteGuard>
 								}
 							/>
-						</Route>
-
-						{/* Protected Routes */}
-						<Route path="/" element={<Layout />}>
-							<Route
-								path="dashboard"
-								element={
-									<RouteGuard accessLevel={AccessLevel.AUTHENTICATED}>
-										<Dashboard />
-									</RouteGuard>
-								}
-							/>
-
-							<Route
-								path="meeting/:id"
-								element={
-									<RouteGuard accessLevel={AccessLevel.AUTHENTICATED}>
-										<MeetingDetails />
-									</RouteGuard>
-								}
-							/>
-
-							<Route
-								path="profile"
-								element={
-									<RouteGuard accessLevel={AccessLevel.AUTHENTICATED}>
-										<Profile />
-									</RouteGuard>
-								}
-							/>
-						</Route>
-
-						{/* Meeting Room - validates token, allows guests */}
-						<Route
-							path="room/:id"
-							element={
-								<RouteGuard accessLevel={AccessLevel.PUBLIC}>
-									<MeetingRoom />
-								</RouteGuard>
-							}
-						/>
-					</Routes>
-				</AuthProvider>
-			</BrowserRouter>
+						</Routes>
+					</AuthProvider>
+				</BrowserRouter>
+			</ThemeProvider>
 			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
 	);
