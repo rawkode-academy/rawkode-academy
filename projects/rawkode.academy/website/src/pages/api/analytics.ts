@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
 import {
 	Analytics,
-	getSessionId,
 	createAnalyticsHeaders,
+	getSessionId,
 } from "../../lib/analytics";
 
 interface AnalyticsEvent {

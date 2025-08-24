@@ -1,7 +1,7 @@
 import { Command } from "cmdk";
-import { useEffect, useRef, useState, type ReactElement } from "react";
+import { type ReactElement, useEffect, useRef, useState } from "react";
 import { SkeletonList } from "@/components/common/SkeletonList";
-import { GitHubIcon, getCategoryIcon } from "./icons";
+import { getCategoryIcon, GitHubIcon } from "./icons";
 import "./styles.css";
 
 interface NavigationItem {

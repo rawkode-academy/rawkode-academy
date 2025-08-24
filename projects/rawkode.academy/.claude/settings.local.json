@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(bun astro add:*)",
-      "Bash(bun add:*)"
+      "Bash(bun add:*)",
+      "Bash(bun run:*)",
+      "WebSearch"
     ],
     "deny": []
   }

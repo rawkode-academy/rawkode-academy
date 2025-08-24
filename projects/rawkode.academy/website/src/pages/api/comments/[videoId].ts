@@ -1,5 +1,5 @@
 import { getCollection } from "astro:content";
-import { ZULIP_EMAIL, ZULIP_URL, getSecret } from "astro:env/server";
+import { getSecret, ZULIP_EMAIL, ZULIP_URL } from "astro:env/server";
 import type { APIRoute } from "astro";
 
 interface ZulipMessage {

@@ -1,47 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OAuth PKCE Login</title>
     <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div id="login-section" class="card">
-            <h1>OAuth PKCE Authentication</h1>
-            <p>Click the button below to login using OAuth with PKCE flow</p>
-            <button id="login-btn" class="btn-primary">Login</button>
+      <div id="login-section" class="card">
+        <h1>OAuth PKCE Authentication</h1>
+        <p>Click the button below to login using OAuth with PKCE flow</p>
+        <button id="login-btn" class="btn-primary">Login</button>
+      </div>
+
+      <div id="token-section" class="hidden">
+        <div class="card">
+          <h2>Authentication Successful!</h2>
+          <div class="token-display">
+            <h3>Access Token</h3>
+            <pre id="access-token"></pre>
+          </div>
+
+          <div class="token-display">
+            <h3>ID Token</h3>
+            <pre id="id-token"></pre>
+          </div>
+
+          <div class="token-display">
+            <h3>Decoded Token Claims</h3>
+            <pre id="token-claims"></pre>
+          </div>
+
+          <div class="token-display">
+            <h3>User Roles</h3>
+            <pre id="user-roles"></pre>
+          </div>
+
+          <button id="logout-btn" class="btn-secondary">Logout</button>
         </div>
-        
-        <div id="token-section" class="hidden">
-            <div class="card">
-                <h2>Authentication Successful!</h2>
-                <div class="token-display">
-                    <h3>Access Token</h3>
-                    <pre id="access-token"></pre>
-                </div>
-                
-                <div class="token-display">
-                    <h3>ID Token</h3>
-                    <pre id="id-token"></pre>
-                </div>
-                
-                <div class="token-display">
-                    <h3>Decoded Token Claims</h3>
-                    <pre id="token-claims"></pre>
-                </div>
-                
-                <div class="token-display">
-                    <h3>User Roles</h3>
-                    <pre id="user-roles"></pre>
-                </div>
-                
-                <button id="logout-btn" class="btn-secondary">Logout</button>
-            </div>
-        </div>
+      </div>
     </div>
-    
+
     <script src="/app.js"></script>
-</body>
+  </body>
 </html>

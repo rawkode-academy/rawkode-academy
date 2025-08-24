@@ -4,7 +4,8 @@ This document explains how to add resource attachments to course modules.
 
 ## Adding Resources to a Course Module
 
-In your course module frontmatter (e.g., `content/courses/your-course/01-introduction.mdx`), add a `resources` array:
+In your course module frontmatter (e.g.,
+`content/courses/your-course/01-introduction.mdx`), add a `resources` array:
 
 ```yaml
 ---
@@ -27,19 +28,25 @@ resources:
 
 - **title** (required): Display name of the resource
 - **description** (optional): Brief description of the resource
-- **type** (required): One of `"url"` for external links, `"file"` for downloadable files, or `"embed"` for interactive demos
+- **type** (required): One of `"url"` for external links, `"file"` for
+  downloadable files, or `"embed"` for interactive demos
 - **url** (optional): Required for `type: "url"`, the external URL
-- **filePath** (optional): Required for `type: "file"`, relative path from `/public/resources/`
-- **embedConfig** (optional): Required for `type: "embed"`, configuration for embedded applications
-  - **container**: Either `"webcontainer"` for interactive Node.js environments or `"iframe"` for generic embeds
+- **filePath** (optional): Required for `type: "file"`, relative path from
+  `/public/resources/`
+- **embedConfig** (optional): Required for `type: "embed"`, configuration for
+  embedded applications
+  - **container**: Either `"webcontainer"` for interactive Node.js environments
+    or `"iframe"` for generic embeds
   - **src**: The source URL or project ID
   - **height** (optional): Height of the embed (default: "600px")
   - **width** (optional): Width of the embed (default: "100%")
-- **category** (required): One of `"slides"`, `"code"`, `"documentation"`, or `"other"`
+- **category** (required): One of `"slides"`, `"code"`, `"documentation"`, or
+  `"other"`
 
 ## File Resources
 
 For file resources:
+
 1. Place your files in `/public/resources/courses/your-course/`
 2. Reference them with `filePath: "courses/your-course/filename.pdf"`
 3. Files will be served from `/resources/courses/your-course/filename.pdf`
@@ -49,6 +56,7 @@ For file resources:
 For embedded applications, you can use:
 
 ### Generic iframe Example
+
 ```yaml
 resources:
   - title: "Custom Web App"
@@ -63,9 +71,11 @@ resources:
 
 ### WebContainer Example (Full Node.js Environment)
 
-WebContainers provide a full Node.js environment running in the browser. You can either:
+WebContainers provide a full Node.js environment running in the browser. You can
+either:
 
 1. **Import from local directory** (recommended for larger projects):
+
 ```yaml
 resources:
   - title: "OAuth PKCE Demo"
@@ -77,13 +87,14 @@ resources:
       height: "800px"
       startCommand: "bun run dev"
       import:
-        localDir: "./examples/oauth-pkce-app"  # Path relative to the module file
+        localDir: "./examples/oauth-pkce-app" # Path relative to the module file
     category: "code"
 ```
 
 Place your app files in `content/courses/your-course/examples/oauth-pkce-app/`.
 
 2. **Inline files** (for simple examples):
+
 ```yaml
 resources:
   - title: "Simple Node.js Demo"
@@ -105,12 +116,12 @@ resources:
           }
         "server.js": |
           import { createServer } from 'http';
-          
+
           const server = createServer((req, res) => {
             res.writeHead(200, { 'Content-Type': 'text/html' });
             res.end('<h1>Hello from WebContainer!</h1>');
           });
-          
+
           server.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
           });
@@ -119,7 +130,8 @@ resources:
 
 ## Complete Example
 
-Here's a complete example for a Zitadel course module with various resource types:
+Here's a complete example for a Zitadel course module with various resource
+types:
 
 ```yaml
 ---

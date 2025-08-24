@@ -38,11 +38,13 @@ src/
 ## State Management
 
 ### Local State
+
 - Use Vue's `ref` and `reactive` for component state
 - Use React's `useState` for React components
 - Keep state as close to where it's used as possible
 
 ### Shared State
+
 - Use props/events for parent-child communication
 - Use provide/inject for deeply nested components
 - Consider a state management solution for complex state
@@ -50,6 +52,7 @@ src/
 ## Data Fetching
 
 ### Best Practices
+
 1. Use the `useAsyncData` composable for consistent error handling
 2. Implement proper loading states with skeleton screens
 3. Handle errors gracefully with `ErrorState` component
@@ -57,23 +60,26 @@ src/
 5. Cancel requests when components unmount
 
 ### API Integration
+
 ```typescript
 // Use the error handler utility
-import { handleApiResponse } from '@/utils/error-handler';
+import { handleApiResponse } from "@/utils/error-handler";
 
-const response = await fetch('/api/endpoint');
+const response = await fetch("/api/endpoint");
 const data = await handleApiResponse(response);
 ```
 
 ## TypeScript Guidelines
 
 ### Type Safety
+
 1. **No `any` types**: Use `unknown` if type is truly unknown
 2. **Explicit return types**: Always declare function return types
 3. **Interface over Type**: Prefer interfaces for object shapes
 4. **Strict mode**: Keep TypeScript in strict mode
 
 ### Type Organization
+
 - Common types in `src/types/common.ts`
 - Feature-specific types in their own files
 - Import types using `import type` when possible
@@ -81,17 +87,20 @@ const data = await handleApiResponse(response);
 ## Performance Optimization
 
 ### Image Optimization
+
 - Use `OptimizedImage` component for all images
 - Provide width/height to prevent layout shift
 - Use appropriate formats (AVIF, WebP fallbacks)
 - Implement lazy loading for below-fold images
 
 ### Code Splitting
+
 - Use `client:visible` for components below fold
 - Use `client:idle` for non-critical components
 - Dynamic imports for heavy dependencies
 
 ### Caching Strategy
+
 - Static pages use `export const prerender = true`
 - API responses include appropriate cache headers
 - Use resource hints for external domains
@@ -99,11 +108,13 @@ const data = await handleApiResponse(response);
 ## Error Handling
 
 ### Component Level
+
 - Wrap React components with `ErrorBoundary`
 - Use `ErrorState` component for error UI
 - Log errors to monitoring service
 
 ### API Level
+
 - Use `ApiResponseError` for typed errors
 - Implement retry logic for transient failures
 - Show user-friendly error messages
@@ -111,16 +122,19 @@ const data = await handleApiResponse(response);
 ## Testing Strategy
 
 ### Unit Tests
+
 - Test utility functions and composables
 - Test component props and events
 - Mock external dependencies
 
 ### Integration Tests
+
 - Test API endpoints
 - Test component interactions
 - Test error scenarios
 
 ### Accessibility Tests
+
 - Ensure proper ARIA labels
 - Test keyboard navigation
 - Verify screen reader compatibility

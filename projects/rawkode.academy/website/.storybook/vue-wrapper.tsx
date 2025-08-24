@@ -4,7 +4,10 @@ import { createApp } from "vue";
 export function VueWrapper({
 	component,
 	props = {},
-}: { component: any; props?: any }) {
+}: {
+	component: any;
+	props?: any;
+}) {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {

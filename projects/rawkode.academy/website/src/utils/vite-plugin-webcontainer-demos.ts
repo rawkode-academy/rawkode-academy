@@ -1,5 +1,5 @@
 import type { Plugin } from "vite";
-import { readdir, readFile, access } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 
 const VIRTUAL_MODULE_ID = "virtual:webcontainer-demos";
@@ -112,7 +112,9 @@ export function webcontainerDemosPlugin(): Plugin {
 					`const demo${index} = import.meta.glob('${globPattern}', { as: 'raw', eager: true });`,
 				);
 				demoMap.push(
-					`'${key}': { files: demo${index}, config: ${JSON.stringify(demo.config)}, path: '${demo.path}' }`,
+					`'${key}': { files: demo${index}, config: ${JSON.stringify(
+						demo.config,
+					)}, path: '${demo.path}' }`,
 				);
 			});
 

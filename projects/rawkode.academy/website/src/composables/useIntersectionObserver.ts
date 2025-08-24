@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted, type Ref } from "vue";
+import { onMounted, onUnmounted, type Ref, ref } from "vue";
 
 interface UseIntersectionObserverOptions extends IntersectionObserverInit {
 	immediate?: boolean;
