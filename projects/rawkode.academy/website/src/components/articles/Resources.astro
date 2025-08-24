@@ -1,7 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
-type Resource = NonNullable<CollectionEntry<"articles">["data"]["resources"]>[number];
+type Resource = NonNullable<
+	CollectionEntry<"articles">["data"]["resources"]
+>[number];
 
 interface Props {
 	resources?: Resource[] | undefined;
@@ -26,7 +28,7 @@ const getCategoryIcon = (category: string) => {
 
 const groupResourcesByCategory = (resources: Resource[]) => {
 	const grouped: Record<string, Resource[]> = {};
-	resources.forEach(resource => {
+	resources.forEach((resource) => {
 		const category = resource.category || "other";
 		if (!grouped[category]) {
 			grouped[category] = [];
@@ -38,11 +40,16 @@ const groupResourcesByCategory = (resources: Resource[]) => {
 
 const getCategoryLabel = (category: string) => {
 	switch (category) {
-		case "documentation": return "Documentation";
-		case "code": return "Code";
-		case "slides": return "Slides";
-		case "demos": return "Demos";
-		default: return "Additional Resources";
+		case "documentation":
+			return "Documentation";
+		case "code":
+			return "Code";
+		case "slides":
+			return "Slides";
+		case "demos":
+			return "Demos";
+		default:
+			return "Additional Resources";
 	}
 };
 ---

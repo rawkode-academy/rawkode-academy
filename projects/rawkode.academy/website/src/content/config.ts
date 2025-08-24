@@ -1,7 +1,7 @@
 import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
 
-import { GraphQLClient, gql } from "graphql-request";
+import { gql, GraphQLClient } from "graphql-request";
 import { GRAPHQL_ENDPOINT } from "astro:env/server";
 
 const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);

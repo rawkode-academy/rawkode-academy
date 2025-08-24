@@ -14,7 +14,11 @@ const ColorSwatch = ({
 	color,
 	name,
 	value,
-}: { color: string; name: string; value: string }) => (
+}: {
+	color: string;
+	name: string;
+	value: string;
+}) => (
 	<div className="flex flex-col items-center">
 		<div
 			className="w-24 h-24 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-2"
@@ -29,7 +33,11 @@ const TextSample = ({
 	font,
 	name,
 	className,
-}: { font: string; name: string; className: string }) => (
+}: {
+	font: string;
+	name: string;
+	className: string;
+}) => (
 	<div className="space-y-2">
 		<h3 className="text-lg font-semibold text-gray-900 dark:text-white">
 			{name}
