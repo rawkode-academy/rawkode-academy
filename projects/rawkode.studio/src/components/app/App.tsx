@@ -57,7 +57,7 @@ export function App({ user }: AppProps) {
 								<Route
 									path="dashboard"
 									element={
-										<RouteGuard accessLevel={AccessLevel.AUTHENTICATED}>
+										<RouteGuard accessLevel={AccessLevel.DIRECTOR}>
 											<Dashboard />
 										</RouteGuard>
 									}
@@ -66,7 +66,7 @@ export function App({ user }: AppProps) {
 								<Route
 									path="meeting/:id"
 									element={
-										<RouteGuard accessLevel={AccessLevel.AUTHENTICATED}>
+										<RouteGuard accessLevel={AccessLevel.DIRECTOR}>
 											<MeetingDetails />
 										</RouteGuard>
 									}

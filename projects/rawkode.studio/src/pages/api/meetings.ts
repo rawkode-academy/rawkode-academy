@@ -3,16 +3,13 @@ import {
 	type CreateMeetingOptions,
 	RealtimeKitClient,
 } from "@/lib/realtime-kit/client";
+import { requireDirectorRole } from "@/lib/auth/auth-utils";
 
 export const GET: APIRoute = async ({ locals, url }) => {
-	// Check if user is authenticated
-	if (!locals.user) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
-			status: 401,
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
+	// Check if user has director role
+	const authError = requireDirectorRole(locals);
+	if (authError) {
+		return authError;
 	}
 
 	try {
@@ -58,14 +55,10 @@ export const GET: APIRoute = async ({ locals, url }) => {
 };
 
 export const POST: APIRoute = async ({ locals, request }) => {
-	// Check if user is authenticated
-	if (!locals.user) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
-			status: 401,
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
+	// Check if user has director role
+	const authError = requireDirectorRole(locals);
+	if (authError) {
+		return authError;
 	}
 
 	try {
