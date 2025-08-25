@@ -3,12 +3,11 @@ import {
 	Activity,
 	ArrowLeft,
 	Brain,
-	Calendar,
 	Circle,
 	Clock,
+	Copy,
 	Download,
 	FileText,
-	Globe,
 	Headphones,
 	MessageSquare,
 	Mic,
@@ -26,6 +25,7 @@ import { useNavigate, useParams } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { Meeting } from "@/lib/realtime-kit/client";
 
 export function MeetingDetails() {
@@ -162,103 +162,145 @@ export function MeetingDetails() {
 
 			<div className="space-y-6">
 				<Card>
-					<CardHeader>
-						<div className="flex items-start justify-between">
-							<div>
-								<CardTitle className="text-2xl">
-									{meeting.title || `Meeting ${meeting.id.slice(0, 8)}`}
-								</CardTitle>
-								<div className="flex items-center gap-2 mt-2">
-									<Badge
-										variant={
-											meeting.status === "ACTIVE" ? "default" : "secondary"
-										}
+					<CardHeader className="space-y-6 pb-6">
+						{/* Title with Status on same row */}
+						<div className="flex items-start justify-between gap-4">
+							<h1 className="text-2xl font-bold tracking-tight">
+								{meeting.title || `Meeting ${meeting.id.slice(0, 8)}`}
+							</h1>
+
+							<div className="flex items-center gap-2">
+								<span
+									className={cn(
+										"inline-flex items-center text-sm font-medium px-2 py-1 rounded-full",
+										meeting.status === "ACTIVE"
+											? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
+											: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+									)}
+								>
+									<Circle
+										className={cn(
+											"mr-1.5 h-2 w-2 fill-current",
+											meeting.status === "ACTIVE" && "animate-pulse",
+										)}
+									/>
+									{meeting.status || "Inactive"}
+								</span>
+
+								{meeting.preferred_region && (
+									<span className="text-sm text-muted-foreground px-2 py-1 bg-muted rounded-full">
+										{meeting.preferred_region}
+									</span>
+								)}
+							</div>
+						</div>
+
+						{/* Metadata - Full width flexbox */}
+						<div className="flex justify-between items-start pt-4">
+							<div className="flex-1">
+								<p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+									Meeting ID
+								</p>
+								<div className="flex items-center gap-2">
+									<code className="text-sm font-mono truncate">
+										{meeting.id}
+									</code>
+									<button
+										type="button"
+										onClick={() => navigator.clipboard.writeText(meeting.id)}
+										className="text-muted-foreground hover:text-foreground transition-colors"
+										title="Copy Meeting ID"
 									>
-										{meeting.status || "INACTIVE"}
-									</Badge>
-									{meeting.preferred_region && (
-										<Badge variant="outline">
-											<Globe className="mr-1 h-3 w-3" />
-											{meeting.preferred_region}
-										</Badge>
-									)}
+										<Copy className="h-3.5 w-3.5" />
+									</button>
 								</div>
+							</div>
+
+							<div className="flex-1 text-center">
+								<p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+									Created
+								</p>
+								<p className="text-sm">
+									{new Date(meeting.created_at).toLocaleDateString("en-US", {
+										month: "short",
+										day: "numeric",
+										year: "numeric",
+									})}
+								</p>
+							</div>
+
+							<div className="flex-1 text-right">
+								<p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+									Last Updated
+								</p>
+								<p className="text-sm">
+									{meeting.updated_at
+										? new Date(meeting.updated_at).toLocaleDateString("en-US", {
+												month: "short",
+												day: "numeric",
+												year: "numeric",
+											})
+										: "—"}
+								</p>
 							</div>
 						</div>
 					</CardHeader>
-					<CardContent>
-						<div className="grid gap-4">
-							<div className="flex items-center gap-2 text-sm text-muted-foreground">
-								<Calendar className="h-4 w-4" />
-								Created: {new Date(meeting.created_at).toLocaleString()}
-							</div>
-							{meeting.updated_at && (
-								<div className="flex items-center gap-2 text-sm text-muted-foreground">
-									<Calendar className="h-4 w-4" />
-									Updated: {new Date(meeting.updated_at).toLocaleString()}
-								</div>
-							)}
-						</div>
-					</CardContent>
-				</Card>
 
-				<Card>
-					<CardHeader>
-						<CardTitle>Meeting Configuration</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="grid gap-4">
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<Video className="h-4 w-4 text-muted-foreground" />
-									<span className="text-sm">Record on Start</span>
-								</div>
-								<Badge
-									variant={meeting.record_on_start ? "default" : "outline"}
-								>
-									{meeting.record_on_start ? "Enabled" : "Disabled"}
-								</Badge>
-							</div>
+					{/* Configuration Section - Pills stretched horizontally */}
+					<CardContent className="border-t">
+						<div className="py-4">
+							<h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-4">
+								Meeting Configuration
+							</h3>
 
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<Radio className="h-4 w-4 text-muted-foreground" />
-									<span className="text-sm">Live Stream on Start</span>
-								</div>
-								<Badge
-									variant={meeting.live_stream_on_start ? "default" : "outline"}
-								>
-									{meeting.live_stream_on_start ? "Enabled" : "Disabled"}
-								</Badge>
-							</div>
-
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<MessageSquare className="h-4 w-4 text-muted-foreground" />
-									<span className="text-sm">Persist Chat</span>
-								</div>
-								<div className="flex items-center gap-2">
-									<Badge variant={meeting.persist_chat ? "default" : "outline"}>
-										{meeting.persist_chat ? "Enabled" : "Disabled"}
-									</Badge>
-									{meeting.persist_chat && (
-										<span className="text-xs text-muted-foreground">
-											(Available after session ends)
-										</span>
+							<div className="grid grid-cols-4 gap-2">
+								<div
+									className={cn(
+										"flex items-center justify-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium transition-colors",
+										meeting.record_on_start
+											? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
+											: "bg-muted/50 text-muted-foreground",
 									)}
-								</div>
-							</div>
-
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<Brain className="h-4 w-4 text-muted-foreground" />
-									<span className="text-sm">Summarize on End</span>
-								</div>
-								<Badge
-									variant={meeting.summarize_on_end ? "default" : "outline"}
 								>
-									{meeting.summarize_on_end ? "Enabled" : "Disabled"}
-								</Badge>
+									<Video className="h-3 w-3" />
+									Recording
+								</div>
+
+								<div
+									className={cn(
+										"flex items-center justify-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium transition-colors",
+										meeting.live_stream_on_start
+											? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
+											: "bg-muted/50 text-muted-foreground",
+									)}
+								>
+									<Radio className="h-3 w-3" />
+									Streaming
+								</div>
+
+								<div
+									className={cn(
+										"flex items-center justify-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium transition-colors",
+										meeting.persist_chat
+											? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
+											: "bg-muted/50 text-muted-foreground",
+									)}
+								>
+									<MessageSquare className="h-3 w-3" />
+									Chat
+								</div>
+
+								<div
+									className={cn(
+										"flex items-center justify-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium transition-colors",
+										meeting.summarize_on_end
+											? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
+											: "bg-muted/50 text-muted-foreground",
+									)}
+								>
+									<Brain className="h-3 w-3" />
+									AI Summary
+								</div>
 							</div>
 						</div>
 					</CardContent>
@@ -723,17 +765,6 @@ export function MeetingDetails() {
 							</CardContent>
 						</Card>
 					)}
-
-				<Card>
-					<CardHeader>
-						<CardTitle>Meeting ID</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<code className="text-sm bg-muted px-2 py-1 rounded">
-							{meeting.id}
-						</code>
-					</CardContent>
-				</Card>
 			</div>
 		</div>
 	);

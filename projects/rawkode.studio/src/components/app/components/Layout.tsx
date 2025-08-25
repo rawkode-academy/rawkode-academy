@@ -1,9 +1,11 @@
 import { Link, Outlet } from "react-router";
 import { useAuth } from "@/components/app/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { hasDirectorRole } from "@/lib/auth/auth-types";
 
 export function Layout() {
 	const { user, login, logout } = useAuth();
+	const isDirector = user ? hasDirectorRole(user) : false;
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -23,12 +25,14 @@ export function Layout() {
 								</Link>
 								{user && (
 									<>
-										<Link
-											to="/dashboard"
-											className="text-sm font-medium hover:text-primary transition-colors"
-										>
-											Dashboard
-										</Link>
+										{isDirector && (
+											<Link
+												to="/dashboard"
+												className="text-sm font-medium hover:text-primary transition-colors"
+											>
+												Dashboard
+											</Link>
+										)}
 										<Link
 											to="/profile"
 											className="text-sm font-medium hover:text-primary transition-colors"
