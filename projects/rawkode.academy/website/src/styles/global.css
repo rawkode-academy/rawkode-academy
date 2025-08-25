@@ -6,9 +6,12 @@
 	--color-tertiary: #04b59c;
 	--color-quaternary: #85ff95;
 	--color-black: #111827;
-	--font-display: "Quicksand", sans-serif;
-	--font-body: "Poppins", sans-serif;
-	--font-mono: "Monaspace", monospace;
+}
+
+@theme {
+	--font-display: var(--font-quicksand), sans-serif;
+	--font-body: var(--font-poppins), sans-serif;
+	--font-mono: var(--font-monaspace-neon), monospace;
 }
 
 @layer base {

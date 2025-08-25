@@ -1,4 +1,5 @@
 ---
+import { Font } from "astro:assets";
 import type { OpenGraphProps } from "@/types/opengraph";
 import PostHog from "../posthog/index.astro";
 import Opengraph from "./opengraph.astro";
@@ -11,47 +12,7 @@ interface Props extends OpenGraphProps {}
 <style is:global>
 	@reference "@/styles/global.css";
 
-	@font-face {
-		font-family: "Monaspace";
-		src:
-			url("/fonts/monaspaceneon.woff") format("woff2 supports variations"),
-			url("/fonts/monaspaceneon.woff") format("woff2-variations");
-		font-weight: 200 900;
-		font-stretch: 75% 125%;
-		font-display: swap;
-	}
 
-	@font-face {
-		font-family: "Poppins";
-		src: url("/fonts/poppins-regular.woff") format("woff");
-		font-weight: 400;
-		font-style: normal;
-		font-display: swap;
-	}
-
-	@font-face {
-		font-family: "Poppins";
-		src: url("/fonts/poppins-semibold.woff") format("woff");
-		font-weight: 600;
-		font-style: normal;
-		font-display: swap;
-	}
-
-	@font-face {
-		font-family: "Quicksand";
-		src: url("/fonts/quicksand-regular.woff") format("woff");
-		font-weight: 400;
-		font-style: normal;
-		font-display: swap;
-	}
-
-	@font-face {
-		font-family: "Quicksand";
-		src: url("/fonts/quicksand-bold.woff") format("woff");
-		font-weight: 700;
-		font-style: normal;
-		font-display: swap;
-	}
 
 	h1,
 	h2,
@@ -63,7 +24,7 @@ interface Props extends OpenGraphProps {}
 	}
 
 	body {
-		@apply font-body;
+		font-family: var(--font-body);
 	}
 
 	pre,
@@ -76,6 +37,9 @@ interface Props extends OpenGraphProps {}
 </style>
 
 <head>
+	<Font cssVariable="--font-quicksand" preload />
+	<Font cssVariable="--font-poppins" />
+	<Font cssVariable="--font-monaspace-neon" />
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -111,27 +75,6 @@ interface Props extends OpenGraphProps {}
 	<link rel="dns-prefetch" href="https://eu-central-1-1.aws.cloud2.influxdata.com" />
 
 	<!-- Preload critical fonts -->
-	<link
-		rel="preload"
-		href="/fonts/poppins-regular.woff"
-		as="font"
-		type="font/woff"
-		crossorigin
-	/>
-	<link
-		rel="preload"
-		href="/fonts/quicksand-bold.woff"
-		as="font"
-		type="font/woff"
-		crossorigin
-	/>
-	<link
-		rel="preload"
-		href="/fonts/monaspaceneon.woff"
-		as="font"
-		type="font/woff"
-		crossorigin
-	/>
 
 	<slot name="extra-head" />
 

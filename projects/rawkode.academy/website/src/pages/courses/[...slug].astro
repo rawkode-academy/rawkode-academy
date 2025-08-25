@@ -116,7 +116,6 @@ const formattedAuthors = authors.map((author) => ({
 		totalDuration={formatDuration(totalDuration)}
 		difficulty={course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
 		authors={formattedAuthors}
-		client:load
 	>
 		<Fragment slot="signup-form">
 			{course.data.signupConfig && (

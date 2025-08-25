@@ -42,17 +42,17 @@ const Typewriter = (props: Props) => {
 							{props.suffix.split(props.highlight).map((part, index, array) => {
 								// If this is the last part, just return it
 								if (index === array.length - 1) {
-									return part;
+									return <span key={index}>{part}</span>;
 								}
 								// Otherwise, return this part followed by the highlighted word
 								return (
-									<>
+									<span key={index}>
 										{part}
 										<span className="relative">
 											{props.highlight}
 											<span className="absolute bottom-0 left-0 w-full h-1 bg-linear-to-r from-primary/30 to-secondary/30" />
 										</span>
-									</>
+									</span>
 								);
 							})}
 						</span>

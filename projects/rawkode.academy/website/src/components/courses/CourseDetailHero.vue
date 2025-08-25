@@ -98,9 +98,10 @@
               <img 
                 v-for="author in authors"
                 :key="author.handle"
-                :src="`https://github.com/${author.handle}.png`" 
+                :src="`https://avatars.githubusercontent.com/${author.handle}`" 
                 :alt="author.name"
                 class="w-10 h-10 rounded-full ring-2 ring-gray-700"
+                loading="lazy"
               />
               <div class="min-w-0">
                 <p class="text-xs text-gray-400">Taught by</p>
