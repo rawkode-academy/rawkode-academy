@@ -70,7 +70,7 @@ defineProps<Props>();
                 >
                   <img
                     class="w-10 h-10 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white"
-                    :src="`https://github.com/${author.handle}.png`"
+                    :src="`https://avatars.githubusercontent.com/${author.handle}`"
                     :alt="`Profile picture of ${author.name}`"
                     loading="lazy"
                   />
