@@ -25,7 +25,8 @@
 			"Bash(find:*)",
 			"Bash(cp:*)",
 			"WebFetch(domain:github.com)",
-			"WebFetch(domain:opensource.microsoft.com)"
+			"WebFetch(domain:opensource.microsoft.com)",
+			"WebFetch(domain:docs.astro.build)"
 		],
 		"deny": []
 	}

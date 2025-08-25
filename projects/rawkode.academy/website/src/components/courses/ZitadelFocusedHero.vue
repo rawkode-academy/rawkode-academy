@@ -127,7 +127,7 @@
               <p class="text-gray-400 text-sm mb-2">Taught by</p>
               <div class="flex items-center gap-3">
                 <img 
-                  src="https://github.com/rawkode.png" 
+                  src="https://avatars.githubusercontent.com/rawkode" 
                   alt="David Flanagan"
                   class="w-12 h-12 rounded-full"
                 />

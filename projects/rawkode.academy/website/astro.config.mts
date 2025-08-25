@@ -8,7 +8,7 @@ import faroUploader from "@grafana/faro-rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
-import { defineConfig, envField } from "astro/config";
+import { defineConfig, envField, fontProviders } from "astro/config";
 import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import { fetchVideosFromGraphQL } from "./src/lib/fetch-videos";
@@ -198,6 +198,31 @@ export default defineConfig({
 					target: "_blank",
 				},
 			],
+		],
+	},
+	experimental: {
+		fonts: [
+			{
+				provider: fontProviders.google(),
+				name: "Quicksand",
+				cssVariable: "--font-quicksand",
+				weights: ["400", "700"],
+				styles: ["normal"],
+			},
+			{
+				provider: fontProviders.google(),
+				name: "Poppins",
+				cssVariable: "--font-poppins",
+				weights: ["400", "600"],
+				styles: ["normal"],
+			},
+			{
+				provider: fontProviders.fontsource(),
+				name: "Monaspace Neon",
+				cssVariable: "--font-monaspace-neon",
+				weights: ["400"],
+				styles: ["normal"],
+			},
 		],
 	},
 });
