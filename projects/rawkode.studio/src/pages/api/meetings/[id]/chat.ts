@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
-import { RealtimeKitClient } from "@/lib/realtime-kit/client";
 import { requireDirectorRole } from "@/lib/auth/auth-utils";
+import { RealtimeKitClient } from "@/lib/realtime-kit/client";
 
 interface ChatMessage {
 	timestamp: string;

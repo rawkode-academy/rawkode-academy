@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
+import { requireDirectorRole } from "@/lib/auth/auth-utils";
 import {
 	type CreateMeetingOptions,
 	RealtimeKitClient,
 } from "@/lib/realtime-kit/client";
-import { requireDirectorRole } from "@/lib/auth/auth-utils";
 
 export const GET: APIRoute = async ({ locals, url }) => {
 	// Check if user has director role
