@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { requireDirectorRole } from "@/lib/auth/auth-utils";
 import {
 	checkRateLimit,
 	createAuditLog,
@@ -8,7 +9,6 @@ import {
 	validateMeetingAccess,
 } from "@/lib/auth/security";
 import { getRealtimeKitClient } from "@/lib/realtime-kit";
-import { requireDirectorRole } from "@/lib/auth/auth-utils";
 
 export const GET: APIRoute = async ({ locals, params }) => {
 	// Check if user has director role for viewing participants

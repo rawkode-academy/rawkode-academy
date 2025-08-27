@@ -4,8 +4,8 @@ import {
 	REALTIMEKIT_ORGANIZATION_ID,
 } from "astro:env/server";
 import type { APIRoute } from "astro";
-import { RealtimeKitClient } from "@/lib/realtime-kit/client";
 import { requireDirectorRole } from "@/lib/auth/auth-utils";
+import { RealtimeKitClient } from "@/lib/realtime-kit/client";
 
 export const POST: APIRoute = async ({ locals, params }) => {
 	// Check if user has director role

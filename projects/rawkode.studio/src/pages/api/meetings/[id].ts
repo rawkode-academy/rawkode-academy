@@ -1,12 +1,15 @@
 import type { APIRoute } from "astro";
 import { RealtimeKitClient } from "@/lib/realtime-kit/client";
-import { requireDirectorRole } from "@/lib/auth/auth-utils";
 
 export const GET: APIRoute = async ({ locals, params }) => {
-	// Check if user has director role
-	const authError = requireDirectorRole(locals);
-	if (authError) {
-		return authError;
+	// Check if user is logged in
+	if (!locals.user) {
+		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+			status: 401,
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
 	}
 
 	const meetingId = params.id;
