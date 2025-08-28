@@ -53,11 +53,15 @@ import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
 const componentVariants = cva(
-	"base-styles",
+	"bg-background text-foreground border-border",
 	{
 		variants: {
-			variant: { default: "...", secondary: "..." },
-			size: { default: "...", sm: "..." },
+			variant: { 
+				default: "bg-primary text-primary-foreground", 
+				secondary: "bg-secondary text-secondary-foreground",
+				outline: "border-2 bg-transparent hover:bg-accent hover:text-accent-foreground"
+			},
+			size: { default: "px-4 py-2", sm: "px-3 py-1.5", lg: "px-6 py-3" },
 		},
 		defaultVariants: { variant: "default", size: "default" },
 	},
@@ -70,7 +74,7 @@ interface ComponentProps
 const Component = React.forwardRef<HTMLDivElement, ComponentProps>(
 	({ className, variant, size, ...props }, ref) => (
 		<div
-			className={cn(componentVariants({ variant, size, className }))}
+			className={cn(componentVariants({ variant, size }), className)}
 			ref={ref}
 			{...props}
 		/>
@@ -81,10 +85,26 @@ Component.displayName = "Component";
 export { Component };
 ```
 
-### Fixing Theme/Background Issues
-- **Dialog backgrounds**: Use explicit colors like `bg-white dark:bg-gray-900` instead of CSS variables
-- **Dropdown menus**: Same pattern - explicit solid backgrounds
-- **Theme provider**: App uses `<ThemeProvider>` from `@/app/providers/ThemeProvider` (already implemented in `src/components/app/App.tsx`)
+### Theme System Architecture
+The app uses a CSS variable-based theming system with Tailwind CSS v4:
+
+- **Theme Definition**: Colors are defined in the `@theme` directive in `src/styles/global.css`
+- **Runtime Switching**: CSS variables in `:root` and `.dark` selectors handle light/dark mode
+- **Semantic Utilities**: Use semantic color classes like `bg-background`, `text-foreground`, `bg-primary`
+- **Theme Provider**: `<ThemeProvider>` from `@/app/providers/ThemeProvider` manages theme state (light/dark/system)
+
+```typescript
+// ✅ Preferred - Use semantic color utilities (maps to CSS variables)
+"bg-background text-foreground border-border"
+"bg-primary text-primary-foreground"
+"bg-card text-card-foreground"
+
+// ✅ For solid overlays/dialogs that need explicit backgrounds
+"bg-white dark:bg-gray-900"
+
+// ✅ For translucent backgrounds
+"bg-primary/10 border-primary/20"
+```
 
 ### Adding Authentication
 - Use existing `AuthContext` in `src/components/app/contexts/AuthContext.tsx`
@@ -159,41 +179,101 @@ export class RealtimeKitClient {
 
 ## 🎨 Styling Guidelines
 
-### CSS Variables (Global Theme)
-```css
-/* Light mode */
---color-background: hsl(0 0% 100%);
---color-foreground: #111827;
---color-primary: #5f5ed7;
---color-secondary: #00ceff;
+### Theme System with CSS Variables
+The project uses Tailwind CSS v4's `@theme` directive combined with CSS custom properties:
 
-/* Dark mode */
---color-background: #111827;
---color-foreground: hsl(210 20% 98%);
+```css
+/* Token Definition (global.css) */
+@theme {
+	/* Brand Colors */
+	--color-primary: #5f5ed7;
+	--color-secondary: #00ceff;
+	--color-tertiary: #04b59c;
+	--color-quaternary: #85ff95;
+}
+
+/* Runtime Theme Switching */
+:root {
+	/* Light mode semantic colors */
+	--color-background: hsl(0 0% 100%);
+	--color-foreground: #111827;
+	--color-card: hsl(0 0% 100%);
+	--color-muted: hsl(220 14.3% 95.9%);
+}
+
+.dark {
+	/* Dark mode semantic colors */
+	--color-background: #111827;
+	--color-foreground: hsl(210 20% 98%);
+	--color-card: hsl(217.2 32.6% 17.5%);
+	--color-muted: hsl(217.2 32.6% 17.5%);
+}
+```
+
+### Using Theme Colors in Components
+```typescript
+// ✅ Semantic utilities (automatically use CSS variables)
+className="bg-background text-foreground border-border"
+className="bg-primary text-primary-foreground"
+className="bg-card border-border p-4"
+
+// ✅ Opacity modifiers work with semantic colors
+className="bg-primary/10 border-primary/20"
+
+// ✅ Hover states with semantic colors
+className="hover:bg-accent hover:text-accent-foreground"
+```
+
+### Using the Theme System
+```typescript
+// Import the theme hook
+import { useTheme } from "@/app/providers/ThemeProvider";
+
+// In your component
+const { theme, setTheme, actualTheme } = useTheme();
+
+// Theme values: "light" | "dark" | "system" 
+// actualTheme values: "light" | "dark" (resolved from system if needed)
+
+// Toggle theme
+<Button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+	{actualTheme === "dark" ? "🌞" : "🌙"}
+</Button>
 ```
 
 ### Tailwind Class Order
 ```typescript
 // Layout → Spacing → Typography → Colors → Effects
-"flex items-center justify-between px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors"
+"flex items-center justify-between px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors"
 ```
 
 ## 🚨 Troubleshooting
 
 ### Transparent Backgrounds
 **Problem**: Components appear transparent
-**Solution**: Replace CSS variables with explicit colors
+**Solution**: Use semantic background utilities or explicit colors for overlays
 ```typescript
-// ❌ Don't use
-bg-[--color-background]
+// ✅ Preferred - Use semantic utilities (maps to CSS variables automatically)
+"bg-background"  // Uses var(--color-background)
+"bg-card"        // Uses var(--color-card)
 
-// ✅ Use instead
-bg-white dark:bg-gray-900
+// ✅ For modal overlays/dialogs that need solid backgrounds
+"bg-white dark:bg-gray-900"
+
+// ❌ Avoid arbitrary value syntax for theme colors
+"bg-[var(--color-background)]"  // Unnecessary and verbose
 ```
 
 ### Theme Issues
 **Problem**: Theme toggle not working
-**Solution**: Ensure ThemeProvider wraps the app and use `actualTheme` not `resolvedTheme`
+**Solution**: Ensure ThemeProvider wraps the app and use `actualTheme` from the hook
+```typescript
+// ✅ Correct usage
+import { useTheme } from "@/app/providers/ThemeProvider";
+
+const { theme, setTheme, actualTheme } = useTheme();
+// Use actualTheme for conditional logic, theme for display
+```
 
 ### Button Disabled States
 **Problem**: Buttons should be disabled based on conditions

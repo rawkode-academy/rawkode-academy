@@ -1,5 +1,5 @@
-import { AlertCircle, ArrowLeft, LogIn } from "lucide-react";
-import { useCallback, useEffect, useId, useState } from "react";
+import { AlertCircle, LogIn } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
 	MeetingProvider,
@@ -8,19 +8,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	createAuditLog,
 	generateParticipantId,
 	logSecurityEvent,
+	logSessionEvent,
 	sanitizeInput,
 } from "@/lib/auth/security";
+import { storeMeetingSession } from "@/lib/meeting-session";
 
 function MeetingJoinContent() {
 	const { meetingId } = useParams<{ meetingId: string }>();
 	const navigate = useNavigate();
-	const nameId = useId();
 	const {
 		meeting,
 		isLoading,
@@ -32,14 +31,7 @@ function MeetingJoinContent() {
 		accessReason,
 	} = useMeeting();
 
-	const [participantName, setParticipantName] = useState(
-		user?.name || user?.email || "",
-	);
 	const [isJoining, setIsJoining] = useState(false);
-
-	const handleBackToDashboard = () => {
-		navigate("/dashboard");
-	};
 
 	const handleLogin = () => {
 		window.location.href = `/api/auth/login?returnTo=${encodeURIComponent(window.location.pathname)}`;
@@ -50,11 +42,8 @@ function MeetingJoinContent() {
 			return;
 		}
 
-		// Use participant name from user or form input
-		const finalName = user?.name || user?.email || participantName.trim();
-		if (!finalName) {
-			return; // Don't auto-join if no name available
-		}
+		// Use participant name from user or default to Guest
+		const finalName = user?.name || user?.email || "Guest";
 
 		const sanitizedName = sanitizeInput(finalName);
 		if (!sanitizedName) {
@@ -105,10 +94,43 @@ function MeetingJoinContent() {
 				}),
 			);
 
-			// Redirect to the meeting room with setup screen enabled
-			navigate(
-				`/room/${meetingId}?token=${participantData.token}&name=${encodeURIComponent(sanitizedName)}&preset=${preset}`,
-			);
+			// Store sensitive data in secure session storage
+			try {
+				const sessionId = await storeMeetingSession(meetingId, {
+					token: participantData.token,
+					participantName: sanitizedName,
+					preset,
+				});
+
+				// Log successful session creation
+				logSessionEvent("session_created", meetingId, user?.sub, {
+					sessionId,
+					preset,
+					participantName: sanitizedName,
+				});
+
+				// Navigate with clean URL (no sensitive data)
+				navigate(`/room/${meetingId}`);
+			} catch (sessionError) {
+				console.warn(
+					"Failed to store session data, falling back to URL params:",
+					sessionError,
+				);
+
+				// Log session creation failure
+				logSessionEvent("session_invalid", meetingId, user?.sub, {
+					error:
+						sessionError instanceof Error
+							? sessionError.message
+							: "Unknown session error",
+					fallbackToUrl: true,
+				});
+
+				// Fallback to URL params if sessionStorage fails
+				navigate(
+					`/room/${meetingId}?token=${participantData.token}&name=${encodeURIComponent(sanitizedName)}&preset=${preset}`,
+				);
+			}
 		} catch (error) {
 			console.error("Failed to join meeting:", error);
 
@@ -130,38 +152,29 @@ function MeetingJoinContent() {
 			alert(error instanceof Error ? error.message : "Failed to join meeting");
 			setIsJoining(false);
 		}
-	}, [
-		meetingId,
-		isJoining,
-		canJoin,
-		user,
-		participantName,
-		preset,
-		roleDisplayName,
-		navigate,
-	]);
+	}, [meetingId, isJoining, canJoin, user, preset, roleDisplayName, navigate]);
 
-	// Auto-start join process for authenticated users or when name is available
+	// Auto-start join process only for authenticated users with existing names
 	useEffect(() => {
 		if (
 			meeting &&
 			canJoin &&
 			meeting.status === "ACTIVE" &&
 			!isJoining &&
-			(user?.name || (!user && participantName.trim()))
+			user?.name
 		) {
-			// Start join process automatically
+			// Start join process automatically only for authenticated users
 			handleJoinMeeting();
 		}
-	}, [meeting, canJoin, user, participantName, isJoining, handleJoinMeeting]);
+	}, [meeting, canJoin, user, isJoining, handleJoinMeeting]);
 
 	// Loading state
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gray-900 flex items-center justify-center">
+			<div className="flex items-center justify-center py-20">
 				<div className="text-center">
 					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4" />
-					<p className="text-white">Loading meeting...</p>
+					<p className="text-foreground">Loading meeting...</p>
 				</div>
 			</div>
 		);
@@ -170,12 +183,14 @@ function MeetingJoinContent() {
 	// Joining state
 	if (isJoining) {
 		return (
-			<div className="min-h-screen bg-gray-900 flex items-center justify-center">
+			<div className="flex items-center justify-center py-20">
 				<div className="text-center">
 					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4" />
-					<p className="text-white text-lg">Preparing to join meeting...</p>
-					<p className="text-gray-400 text-sm mt-2">
-						Setting up your session as {user?.name || participantName}
+					<p className="text-foreground text-lg">
+						Preparing to join meeting...
+					</p>
+					<p className="text-muted-foreground text-sm mt-2">
+						Setting up your session as {user?.name || user?.email || "Guest"}
 					</p>
 				</div>
 			</div>
@@ -185,34 +200,21 @@ function MeetingJoinContent() {
 	// Error state
 	if (error) {
 		return (
-			<div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-				<Card className="bg-gray-800 border-gray-700 max-w-md w-full">
+			<div className="flex items-center justify-center py-20 px-4">
+				<Card className="max-w-md w-full">
 					<CardHeader>
-						<CardTitle className="text-white flex items-center">
+						<CardTitle className="flex items-center">
 							<AlertCircle className="h-5 w-5 mr-2 text-red-500" />
 							Meeting Error
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-gray-300 mb-4">
+						<p className="text-muted-foreground mb-4">
 							{error?.message || "Failed to load meeting"}
 						</p>
-						<div className="flex space-x-3">
-							<Button
-								variant="outline"
-								onClick={handleBackToDashboard}
-								className="flex-1"
-							>
-								<ArrowLeft className="h-4 w-4 mr-2" />
-								Dashboard
-							</Button>
-							<Button
-								onClick={() => window.location.reload()}
-								className="flex-1"
-							>
-								Retry
-							</Button>
-						</div>
+						<Button onClick={() => window.location.reload()} className="w-full">
+							Retry
+						</Button>
 					</CardContent>
 				</Card>
 			</div>
@@ -222,18 +224,17 @@ function MeetingJoinContent() {
 	// No meeting found
 	if (!meeting) {
 		return (
-			<div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-				<Card className="bg-gray-800 border-gray-700 max-w-md w-full">
+			<div className="flex items-center justify-center py-20 px-4">
+				<Card className="max-w-md w-full">
 					<CardHeader>
-						<CardTitle className="text-white">Meeting Not Found</CardTitle>
+						<CardTitle>Meeting Not Found</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-gray-300 mb-4">
+						<p className="text-muted-foreground mb-4">
 							The meeting you're looking for doesn't exist or has been deleted.
 						</p>
-						<Button onClick={handleBackToDashboard} className="w-full">
-							<ArrowLeft className="h-4 w-4 mr-2" />
-							Back to Dashboard
+						<Button onClick={() => window.location.reload()} className="w-full">
+							Retry
 						</Button>
 					</CardContent>
 				</Card>
@@ -244,160 +245,105 @@ function MeetingJoinContent() {
 	// Access denied (only for inactive meetings now)
 	if (!canJoin) {
 		return (
-			<div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-				<Card className="bg-gray-800 border-gray-700 max-w-md w-full">
+			<div className="flex items-center justify-center py-20 px-4">
+				<Card className="max-w-md w-full">
 					<CardHeader>
-						<CardTitle className="text-white">Meeting Unavailable</CardTitle>
+						<CardTitle>Meeting Unavailable</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-gray-300 mb-4">
+						<p className="text-muted-foreground mb-4">
 							{accessReason || "This meeting is not currently available."}
 						</p>
-						<div className="space-y-3">
-							<Button
-								variant="outline"
-								onClick={handleBackToDashboard}
-								className="w-full"
-							>
-								<ArrowLeft className="h-4 w-4 mr-2" />
-								Back to Dashboard
-							</Button>
-							<Button
-								onClick={() => window.location.reload()}
-								className="w-full"
-							>
-								Refresh
-							</Button>
-						</div>
+						<Button onClick={() => window.location.reload()} className="w-full">
+							Refresh
+						</Button>
 					</CardContent>
 				</Card>
 			</div>
 		);
 	}
 
-	// For guests who need to enter their name
-	if (!user && !participantName.trim()) {
-		return (
-			<div className="min-h-screen bg-gray-900">
-				{/* Header */}
-				<div className="bg-gray-800 border-b border-gray-700 p-4">
-					<div className="max-w-4xl mx-auto flex items-center justify-between">
-						<div className="flex items-center space-x-4">
-							<Button
-								variant="ghost"
-								onClick={handleBackToDashboard}
-								className="text-white hover:bg-gray-700"
-							>
-								<ArrowLeft className="h-4 w-4 mr-2" />
-								Back
-							</Button>
-							<div>
-								<h1 className="text-white font-semibold">{meeting.title}</h1>
-								<div className="flex items-center space-x-4 text-sm text-gray-400">
-									<span>Livestream Meeting</span>
-									<Badge
-										variant={
-											meeting.status === "ACTIVE" ? "default" : "secondary"
-										}
-									>
-										{meeting.status}
-									</Badge>
-								</div>
+	// Guest user UI - show login and join options
+	return (
+		<div>
+			{/* Header */}
+			<div className="bg-card border-b border-border p-4">
+				<div className="max-w-4xl mx-auto flex items-center justify-between">
+					<div className="flex items-center space-x-4">
+						<div>
+							<h1 className="text-foreground font-semibold">{meeting.title}</h1>
+							<div className="flex items-center space-x-4 text-sm text-muted-foreground">
+								<span>Livestream Meeting</span>
+								<Badge
+									variant={
+										meeting.status === "ACTIVE" ? "success" : "secondary"
+									}
+								>
+									{meeting.status}
+								</Badge>
 							</div>
-						</div>
-						<div className="flex items-center space-x-2">
-							<Badge
-								variant="outline"
-								className="text-blue-400 border-blue-400"
-							>
-								{roleDisplayName}
-							</Badge>
 						</div>
 					</div>
-				</div>
-
-				{/* Name Input Form */}
-				<div className="max-w-2xl mx-auto p-6">
-					<Card className="bg-gray-800 border-gray-700">
-						<CardHeader>
-							<CardTitle className="text-white">Join Meeting</CardTitle>
-							<p className="text-gray-400">
-								Enter your name to join as a {roleDisplayName}.
-							</p>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							{/* Login option */}
-							<div className="bg-blue-900/20 border border-blue-700 rounded-lg p-3">
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-blue-200 text-sm">
-											Want host controls? Login to get director privileges.
-										</p>
-									</div>
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={handleLogin}
-										className="ml-4 shrink-0"
-									>
-										<LogIn className="h-4 w-4 mr-2" />
-										Login
-									</Button>
-								</div>
-							</div>
-
-							{/* Name Input */}
-							<div className="space-y-2">
-								<Label htmlFor={nameId} className="text-white">
-									Display Name
-								</Label>
-								<Input
-									id={nameId}
-									type="text"
-									value={participantName}
-									onChange={(e) => setParticipantName(e.target.value)}
-									placeholder="Enter your name"
-									className="bg-gray-700 border-gray-600 text-white"
-									required
-									maxLength={100}
-									autoFocus
-									onKeyDown={(e) => {
-										if (e.key === "Enter" && participantName.trim()) {
-											handleJoinMeeting();
-										}
-									}}
-								/>
-								<p className="text-xs text-gray-400">
-									Press Enter or click Join to continue
-								</p>
-							</div>
-
-							{/* Join Button */}
-							<Button
-								onClick={handleJoinMeeting}
-								disabled={!participantName.trim() || isJoining}
-								className="w-full"
-								size="lg"
-							>
-								Join Meeting
-							</Button>
-						</CardContent>
-					</Card>
+					<div className="flex items-center space-x-2">
+						<Badge variant="outline" className="text-primary border-primary">
+							{roleDisplayName}
+						</Badge>
+					</div>
 				</div>
 			</div>
-		);
-	}
 
-	// If we get here, join should happen automatically
-	// This is a fallback just in case
-	return (
-		<div className="min-h-screen bg-gray-900 flex items-center justify-center">
-			<div className="text-center">
-				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4" />
-				<p className="text-white text-lg">Preparing to join meeting...</p>
-				<p className="text-gray-400 text-sm mt-2">
-					Please wait while we set up your session
-				</p>
+			{/* Join Options */}
+			<div className="max-w-2xl mx-auto p-6">
+				<Card>
+					<CardHeader>
+						<CardTitle>Join Meeting</CardTitle>
+						<p className="text-muted-foreground">
+							Choose how you'd like to join as a {roleDisplayName}.
+						</p>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						{/* Login option */}
+						<div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+							<div className="flex items-center justify-between">
+								<div>
+									<h3 className="text-primary font-medium">
+										Login for Full Features
+									</h3>
+									<p className="text-primary/80 text-sm mt-1">
+										Access host controls and personalized settings
+									</p>
+								</div>
+								<Button
+									variant="outline"
+									onClick={handleLogin}
+									className="ml-4 shrink-0"
+								>
+									<LogIn className="h-4 w-4 mr-2" />
+									Login
+								</Button>
+							</div>
+						</div>
+
+						{/* Quick join option */}
+						<div className="bg-muted/50 border border-border rounded-lg p-4">
+							<div className="flex items-center justify-between">
+								<div>
+									<h3 className="text-foreground font-medium">Join as Guest</h3>
+									<p className="text-muted-foreground text-sm mt-1">
+										Quick access with limited features
+									</p>
+								</div>
+								<Button
+									onClick={handleJoinMeeting}
+									disabled={isJoining}
+									className="ml-4 shrink-0"
+								>
+									Join Now
+								</Button>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
 			</div>
 		</div>
 	);
@@ -408,8 +354,8 @@ export function MeetingJoin() {
 
 	if (!meetingId) {
 		return (
-			<div className="min-h-screen bg-gray-900 flex items-center justify-center">
-				<p className="text-white">Invalid meeting ID</p>
+			<div className="flex items-center justify-center py-20">
+				<p className="text-foreground">Invalid meeting ID</p>
 			</div>
 		);
 	}

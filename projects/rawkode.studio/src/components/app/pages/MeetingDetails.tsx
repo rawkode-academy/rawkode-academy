@@ -319,7 +319,7 @@ export function MeetingDetails() {
 							<div className="space-y-4">
 								<div className="flex items-center justify-between">
 									<span className="text-sm text-muted-foreground">Status</span>
-									<Badge variant="default" className="bg-green-500">
+									<Badge variant="default" className="bg-green-500 text-white">
 										<Circle className="mr-1 h-2 w-2 fill-current animate-pulse" />
 										Live
 									</Badge>

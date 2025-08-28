@@ -136,7 +136,7 @@ function CreateMeetingDialog() {
 						<div className="grid gap-2">
 							<label
 								htmlFor={titleId}
-								className="text-sm font-medium text-gray-700 dark:text-gray-300"
+								className="text-sm font-medium text-foreground"
 							>
 								Meeting Title
 							</label>
@@ -147,7 +147,7 @@ function CreateMeetingDialog() {
 								onChange={(e) =>
 									setFormData({ ...formData, title: e.target.value })
 								}
-								className="flex h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+								className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 								placeholder="Enter meeting title"
 								autoFocus
 							/>
@@ -156,7 +156,7 @@ function CreateMeetingDialog() {
 						<div className="grid gap-2">
 							<label
 								htmlFor={regionId}
-								className="text-sm font-medium text-gray-700 dark:text-gray-300"
+								className="text-sm font-medium text-foreground"
 							>
 								Preferred Region
 							</label>
@@ -169,7 +169,7 @@ function CreateMeetingDialog() {
 										preferred_region: e.target.value as PreferredRegion | "",
 									})
 								}
-								className="flex h-9 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+								className="flex h-9 w-full rounded-md border border-input bg-background text-foreground px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 							>
 								<option value="">Auto-select</option>
 								<option value="us-east-1">US East</option>
@@ -180,13 +180,13 @@ function CreateMeetingDialog() {
 						</div>
 
 						<div className="space-y-3">
-							<div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+							<div className="text-sm font-medium text-foreground">
 								Meeting Options
 							</div>
 
 							{/* Show warning if user tries to enable both */}
 							{(formData.record_on_start || formData.live_stream_on_start) && (
-								<div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
+								<div className="text-xs text-yellow-800 bg-yellow-50 dark:text-yellow-200 dark:bg-yellow-950/50 p-2 rounded">
 									Note: Recording and livestreaming cannot be enabled
 									simultaneously at meeting start
 								</div>
@@ -207,10 +207,10 @@ function CreateMeetingDialog() {
 													: formData.live_stream_on_start,
 											})
 										}
-										className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+										className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
 									/>
 									<span
-										className={`text-sm ${formData.live_stream_on_start ? "text-gray-400 line-through" : "text-gray-600 dark:text-gray-400"}`}
+										className={`text-sm ${formData.live_stream_on_start ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
 									>
 										Start recording automatically
 									</span>
@@ -230,10 +230,10 @@ function CreateMeetingDialog() {
 													: formData.record_on_start,
 											})
 										}
-										className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+										className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
 									/>
 									<span
-										className={`text-sm ${formData.record_on_start ? "text-gray-400 line-through" : "text-gray-600 dark:text-gray-400"}`}
+										className={`text-sm ${formData.record_on_start ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
 									>
 										Start livestream automatically
 									</span>
@@ -249,9 +249,9 @@ function CreateMeetingDialog() {
 												persist_chat: e.target.checked,
 											})
 										}
-										className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+										className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
 									/>
-									<span className="text-sm text-gray-600 dark:text-gray-400">
+									<span className="text-sm text-muted-foreground">
 										Save chat history
 									</span>
 								</label>
@@ -266,9 +266,9 @@ function CreateMeetingDialog() {
 												summarize_on_end: e.target.checked,
 											})
 										}
-										className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+										className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
 									/>
-									<span className="text-sm text-gray-600 dark:text-gray-400">
+									<span className="text-sm text-muted-foreground">
 										Generate AI summary when meeting ends
 									</span>
 								</label>
@@ -373,17 +373,17 @@ function StopMeetingButton({
 					<DialogTitle className="text-xl">Stop Meeting</DialogTitle>
 					<DialogDescription className="pt-2">
 						Are you sure you want to stop{" "}
-						<span className="font-semibold text-gray-900 dark:text-gray-100">
+						<span className="font-semibold text-foreground">
 							"{meetingTitle}"
 						</span>
 						?
 					</DialogDescription>
 				</DialogHeader>
 				<div className="my-4 space-y-3">
-					<p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+					<p className="text-sm font-medium text-foreground">
 						This action will:
 					</p>
-					<ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+					<ul className="space-y-2 text-sm text-muted-foreground">
 						<li className="flex items-start gap-3">
 							<svg
 								className="mt-0.5 h-5 w-5 text-red-500 flex-shrink-0"
@@ -401,7 +401,7 @@ function StopMeetingButton({
 							</svg>
 							<span>
 								Set the meeting status to{" "}
-								<strong className="font-semibold text-gray-700 dark:text-gray-300">
+								<strong className="font-semibold text-foreground">
 									INACTIVE
 								</strong>
 							</span>
@@ -528,14 +528,14 @@ export function Dashboard() {
 								className={`h-2 w-2 rounded-full mr-2 ${
 									status === "ACTIVE"
 										? "bg-green-500 animate-pulse"
-										: "bg-gray-400"
+										: "bg-muted"
 								}`}
 							/>
 							<span
 								className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-md ${
 									status === "ACTIVE"
-										? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-										: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
+										? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-400"
+										: "bg-muted text-muted-foreground"
 								}`}
 							>
 								{status}
@@ -740,11 +740,11 @@ export function Dashboard() {
 							</div>
 						</div>
 					) : !data || data.data.length === 0 ? (
-						<div className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 p-12">
+						<div className="rounded-lg border-2 border-dashed border-border p-12">
 							<div className="text-center">
 								<svg
 									aria-hidden="true"
-									className="mx-auto h-12 w-12 text-gray-400"
+									className="mx-auto h-12 w-12 text-muted-foreground"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
