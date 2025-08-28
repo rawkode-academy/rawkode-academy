@@ -46,20 +46,20 @@ export function ShareMeetingDialog({
 					</Button>
 				)}
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-md bg-gray-800 border-gray-700">
+			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle className="text-white">Share Meeting</DialogTitle>
-					<DialogDescription className="text-gray-400">
+					<DialogTitle>Share Meeting</DialogTitle>
+					<DialogDescription>
 						Anyone with this link can join the meeting.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="space-y-4">
 					{/* Meeting Info */}
 					<div className="text-center">
-						<h3 className="text-white font-semibold text-lg">
+						<h3 className="text-gray-900 dark:text-white font-semibold text-lg">
 							{meeting.title}
 						</h3>
-						<div className="flex items-center justify-center space-x-4 text-sm text-gray-400 mt-2">
+						<div className="flex items-center justify-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mt-2">
 							<div className="flex items-center space-x-1">
 								<Users className="h-4 w-4" />
 								<span>Livestream Meeting</span>
@@ -77,17 +77,19 @@ export function ShareMeetingDialog({
 
 					{/* Share URL */}
 					<div className="space-y-3">
-						<Label className="text-white">Meeting Link</Label>
+						<Label className="text-gray-900 dark:text-white">
+							Meeting Link
+						</Label>
 						<div className="flex space-x-2">
 							<Input
 								value={meetingUrl}
 								readOnly
-								className="bg-gray-700 border-gray-600 text-white"
+								className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
 							/>
 							<Button
 								onClick={handleCopyUrl}
 								variant="outline"
-								size="sm"
+								size="icon-lg"
 								className="shrink-0"
 							>
 								{copiedUrl ? (
@@ -97,7 +99,7 @@ export function ShareMeetingDialog({
 								)}
 							</Button>
 						</div>
-						<p className="text-xs text-gray-400">
+						<p className="text-xs text-gray-600 dark:text-gray-400">
 							Share this link with anyone you want to join the meeting
 						</p>
 					</div>
@@ -109,7 +111,7 @@ export function ShareMeetingDialog({
 						</Button>
 						<Button
 							onClick={handleCopyUrl}
-							className="bg-blue-600 hover:bg-blue-700"
+							className="bg-blue-600 hover:bg-blue-700 text-white"
 						>
 							{copiedUrl ? (
 								<>

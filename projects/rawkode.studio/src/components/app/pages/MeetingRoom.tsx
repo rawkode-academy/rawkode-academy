@@ -1,10 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { VideoMeeting } from "@/components/app/components/VideoMeeting";
 import { useAuth } from "@/components/app/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { logSessionEvent, validateSessionData } from "@/lib/auth/security";
+import {
+	clearMeetingSession,
+	getMeetingSession,
+	type MeetingSessionData,
+} from "@/lib/meeting-session";
 import type { Meeting } from "@/lib/realtime-kit/client";
 
 export function MeetingRoom() {
@@ -13,11 +20,69 @@ export function MeetingRoom() {
 	const navigate = useNavigate();
 	const { user } = useAuth();
 
-	// Get token and participant info from URL params
-	const token = searchParams.get("token");
+	// State for session data
+	const [sessionData, setSessionData] = useState<MeetingSessionData | null>(
+		null,
+	);
+	const [isLoadingSession, setIsLoadingSession] = useState(true);
+
+	// Load meeting session data
+	useEffect(() => {
+		if (!id) {
+			setIsLoadingSession(false);
+			return;
+		}
+
+		getMeetingSession(id)
+			.then((data) => {
+				if (data) {
+					// Validate session data
+					const validation = validateSessionData(data, id, user?.sub);
+					if (validation.isValid) {
+						setSessionData(data);
+						logSessionEvent("session_accessed", id, user?.sub, {
+							sessionId: data.sessionId,
+						});
+					} else {
+						console.warn("Invalid session data:", validation.reason);
+						logSessionEvent("session_invalid", id, user?.sub, {
+							reason: validation.reason,
+						});
+						// Clear invalid session data
+						clearMeetingSession(id);
+					}
+				}
+				setIsLoadingSession(false);
+			})
+			.catch((error) => {
+				console.warn("Failed to load session data:", error);
+				logSessionEvent("session_invalid", id, user?.sub, {
+					error: error instanceof Error ? error.message : "Session load error",
+				});
+				setIsLoadingSession(false);
+			});
+	}, [id, user]);
+
+	// Clean up session data when component unmounts or meeting is accessed
+	useEffect(() => {
+		return () => {
+			if (id && sessionData) {
+				clearMeetingSession(id);
+			}
+		};
+	}, [id, sessionData]);
+
+	// Get token and participant info from session storage or URL params (fallback)
+	const token = sessionData?.token || searchParams.get("token");
 	const participantName =
-		searchParams.get("name") || user?.name || user?.email || "Anonymous";
-	const preset = searchParams.get("preset") || "livestream_viewer";
+		sessionData?.participantName ||
+		searchParams.get("name") ||
+		user?.name ||
+		user?.email ||
+		"Anonymous";
+	const preset = (sessionData?.preset ||
+		searchParams.get("preset") ||
+		"livestream_viewer") as "livestream_viewer" | "livestream_host";
 
 	// Fetch meeting details
 	const {
@@ -41,6 +106,18 @@ export function MeetingRoom() {
 		enabled: !!id,
 	});
 
+	// Clear session data once we have successfully loaded meeting and token
+	useEffect(() => {
+		if (meeting && token && sessionData) {
+			// Clear session data after successful use to prevent token reuse
+			setTimeout(() => {
+				if (id) {
+					clearMeetingSession(id);
+				}
+			}, 1000); // Small delay to ensure meeting initialization starts
+		}
+	}, [meeting, token, sessionData, id]);
+
 	const handleLeaveMeeting = () => {
 		// Redirect to prejoin screen for the same meeting
 		navigate(`/join/${id}`);
@@ -56,12 +133,14 @@ export function MeetingRoom() {
 	}
 
 	// Loading state
-	if (isMeetingLoading) {
+	if (isMeetingLoading || isLoadingSession) {
 		return (
 			<div className="min-h-screen bg-gray-900 flex items-center justify-center">
 				<div className="text-center">
 					<Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
-					<p className="text-white">Loading meeting...</p>
+					<p className="text-white">
+						{isLoadingSession ? "Loading session..." : "Loading meeting..."}
+					</p>
 				</div>
 			</div>
 		);
@@ -175,7 +254,7 @@ export function MeetingRoom() {
 			meetingId={meeting.id}
 			authToken={token}
 			participantName={participantName}
-			preset={preset as "livestream_viewer" | "livestream_host"}
+			preset={preset}
 			showSetupScreen={true}
 			onLeave={handleLeaveMeeting}
 		/>

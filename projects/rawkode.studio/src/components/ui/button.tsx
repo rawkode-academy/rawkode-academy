@@ -9,20 +9,20 @@ const buttonVariants = cva(
 		variants: {
 			variant: {
 				default:
-					"bg-blue-600 text-white shadow hover:bg-blue-700 focus-visible:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600",
+					"bg-primary text-primary-foreground shadow hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring",
 				destructive:
-					"bg-red-600 text-white shadow-sm hover:bg-red-700 focus-visible:ring-red-600 dark:bg-red-900 dark:hover:bg-red-800",
+					"bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 focus-visible:ring-2 focus-visible:ring-ring",
 				outline:
-					"border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-gray-400",
+					"border border-input bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring",
 				secondary:
-					"bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 focus-visible:ring-gray-400",
+					"bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 focus-visible:ring-2 focus-visible:ring-ring",
 				ghost:
-					"hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 focus-visible:ring-gray-400",
-				link: "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline focus-visible:ring-blue-500",
+					"hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring",
+				link: "text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring",
 				gradient:
-					"bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-[1.02] focus-visible:ring-blue-500",
+					"bg-gradient-to-r from-primary to-purple-600 text-primary-foreground shadow-md hover:shadow-lg hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-ring",
 				"gradient-secondary":
-					"bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md hover:shadow-lg hover:scale-[1.02] focus-visible:ring-purple-500",
+					"bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md hover:shadow-lg hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-ring",
 			},
 			size: {
 				default: "h-9 px-4 py-2",

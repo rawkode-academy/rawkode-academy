@@ -26,7 +26,7 @@ const { title = "Rawkode Studio", description = "Welcome to Rawkode Studio" } = 
 		
 		<script is:inline>
 			// Prevent FOUC (Flash of Unstyled Content)
-			const theme = localStorage.getItem('theme') || 'system';
+			const theme = localStorage.getItem('rawkode-studio-theme') || 'system';
 			const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 			const resolvedTheme = theme === 'system' ? systemTheme : theme;
 			

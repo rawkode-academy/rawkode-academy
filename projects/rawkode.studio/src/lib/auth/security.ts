@@ -226,6 +226,82 @@ export function sanitizeInput(input: string): string {
 }
 
 /**
+ * Validate meeting session data for security
+ */
+export function validateSessionData(
+	sessionData: unknown,
+	_meetingId?: string,
+	_userId?: string,
+): { isValid: boolean; reason?: string } {
+	// Check required fields
+	if (!sessionData || typeof sessionData !== "object") {
+		return { isValid: false, reason: "Invalid session data format" };
+	}
+
+	const { token, participantName, preset, timestamp, sessionId } = sessionData;
+
+	// Validate token
+	if (!token || typeof token !== "string" || token.length < 10) {
+		return { isValid: false, reason: "Invalid or missing token" };
+	}
+
+	// Validate participant name
+	if (!participantName || typeof participantName !== "string") {
+		return { isValid: false, reason: "Invalid participant name" };
+	}
+
+	// Validate preset
+	if (!preset || !["livestream_viewer", "livestream_host"].includes(preset)) {
+		return { isValid: false, reason: "Invalid preset" };
+	}
+
+	// Validate timestamp (not too old)
+	if (!timestamp || typeof timestamp !== "number") {
+		return { isValid: false, reason: "Invalid timestamp" };
+	}
+
+	const age = Date.now() - timestamp;
+	if (age > 15 * 60 * 1000) {
+		// 15 minutes
+		return { isValid: false, reason: "Session expired" };
+	}
+
+	// Validate session ID format
+	if (!sessionId || typeof sessionId !== "string" || !sessionId.includes("-")) {
+		return { isValid: false, reason: "Invalid session ID" };
+	}
+
+	return { isValid: true };
+}
+
+/**
+ * Log session security events
+ */
+export function logSessionEvent(
+	action:
+		| "session_created"
+		| "session_accessed"
+		| "session_expired"
+		| "session_invalid",
+	meetingId: string,
+	userId?: string,
+	metadata?: Record<string, unknown>,
+): void {
+	const event = createAuditLog({
+		userId: userId || "anonymous",
+		action: `meeting_${action}`,
+		resource: meetingId,
+		success: action === "session_created" || action === "session_accessed",
+		metadata: {
+			...metadata,
+			sessionTimestamp: Date.now(),
+		},
+	});
+
+	logSecurityEvent(event);
+}
+
+/**
  * Rate limiting for API endpoints (simple in-memory implementation)
  */
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
