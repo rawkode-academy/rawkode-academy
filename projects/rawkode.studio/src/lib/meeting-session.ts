@@ -8,6 +8,7 @@ export interface MeetingSessionData {
 	participantName: string;
 	preset: "livestream_viewer" | "livestream_host";
 	sessionId: string;
+	timestamp: number;
 }
 
 const STORAGE_KEY_PREFIX = "rws_meeting_";
@@ -53,6 +54,7 @@ export function storeMeetingSession(
 		participantName: data.participantName,
 		preset: data.preset,
 		sessionId: generateSessionId(),
+		timestamp: Date.now(),
 	};
 
 	try {

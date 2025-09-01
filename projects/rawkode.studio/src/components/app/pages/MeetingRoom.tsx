@@ -33,34 +33,32 @@ export function MeetingRoom() {
 			return;
 		}
 
-		getMeetingSession(id)
-			.then((data) => {
-				if (data) {
-					// Validate session data
-					const validation = validateSessionData(data, id, user?.sub);
-					if (validation.isValid) {
-						setSessionData(data);
-						logSessionEvent("session_accessed", id, user?.sub, {
-							sessionId: data.sessionId,
-						});
-					} else {
-						console.warn("Invalid session data:", validation.reason);
-						logSessionEvent("session_invalid", id, user?.sub, {
-							reason: validation.reason,
-						});
-						// Clear invalid session data
-						clearMeetingSession(id);
-					}
+		try {
+			const data = getMeetingSession(id);
+			if (data) {
+				// Validate session data
+				const validation = validateSessionData(data, id, user?.sub);
+				if (validation.isValid) {
+					setSessionData(data);
+					logSessionEvent("session_accessed", id, user?.sub, {
+						sessionId: data.sessionId,
+					});
+				} else {
+					console.warn("Invalid session data:", validation.reason);
+					logSessionEvent("session_invalid", id, user?.sub, {
+						reason: validation.reason,
+					});
+					// Clear invalid session data
+					clearMeetingSession(id);
 				}
-				setIsLoadingSession(false);
-			})
-			.catch((error) => {
-				console.warn("Failed to load session data:", error);
-				logSessionEvent("session_invalid", id, user?.sub, {
-					error: error instanceof Error ? error.message : "Session load error",
-				});
-				setIsLoadingSession(false);
+			}
+		} catch (error) {
+			console.warn("Failed to load session data:", error);
+			logSessionEvent("session_invalid", id, user?.sub, {
+				error: error instanceof Error ? error.message : "Session load error",
 			});
+		}
+		setIsLoadingSession(false);
 	}, [id, user]);
 
 	// Clean up session data when component unmounts or meeting is accessed
