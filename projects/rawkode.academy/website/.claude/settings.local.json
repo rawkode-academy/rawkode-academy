@@ -1,4 +1,5 @@
 {
+<<<<<<< Updated upstream
 	"permissions": {
 		"allow": [
 			"Bash(rg:*)",
@@ -31,3 +32,69 @@
 		"deny": []
 	}
 }
+||||||| Stash base
+  "permissions": {
+    "allow": [
+      "Bash(rg:*)",
+      "Bash(bun run:*)",
+      "Bash(mv:*)",
+      "WebFetch(domain:www.kubernetes.dev)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:localhost)",
+      "mcp__container-use__environment_create",
+      "mcp__container-use__environment_config",
+      "mcp__container-use__environment_file_list",
+      "mcp__container-use__environment_run_cmd",
+      "mcp__container-use__environment_file_write",
+      "mcp__container-use__environment_file_read",
+      "Bash(container-use diff:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr reviews:*)",
+      "Bash(gh api:*)",
+      "Bash(git rebase:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(bun:*)",
+      "Bash(find:*)",
+      "Bash(cp:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:opensource.microsoft.com)"
+    ],
+    "deny": []
+  }
+}
+=======
+  "permissions": {
+    "allow": [
+      "Bash(rg:*)",
+      "Bash(bun run:*)",
+      "Bash(mv:*)",
+      "WebFetch(domain:www.kubernetes.dev)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:localhost)",
+      "mcp__container-use__environment_create",
+      "mcp__container-use__environment_config",
+      "mcp__container-use__environment_file_list",
+      "mcp__container-use__environment_run_cmd",
+      "mcp__container-use__environment_file_write",
+      "mcp__container-use__environment_file_read",
+      "Bash(container-use diff:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr reviews:*)",
+      "Bash(gh api:*)",
+      "Bash(git rebase:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(bun:*)",
+      "Bash(find:*)",
+      "Bash(cp:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:opensource.microsoft.com)"
+    ],
+    "deny": [],
+    "defaultMode": "acceptEdits"
+  }
+}
+>>>>>>> Stashed changes
