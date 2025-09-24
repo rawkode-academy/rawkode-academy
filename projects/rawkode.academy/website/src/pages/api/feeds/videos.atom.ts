@@ -1,12 +1,8 @@
-import { getLiveCollection } from "astro:content";
+import { getCollection } from "astro:content";
 import type { APIContext } from "astro";
 
 export async function GET(context: APIContext) {
-	const { entries: videos = [], error } = await getLiveCollection("videos");
-
-	if (error) {
-		console.error("Failed to load videos for Atom feed:", error);
-	}
+	const videos = await getCollection("videos");
 
 	// Sort by publishedAt desc
 	const sortedVideos = videos.sort(
@@ -64,16 +60,10 @@ ${sortedVideos
 	.join("\n")}
 </feed>`;
 
-	const response = new Response(atomFeed, {
+	return new Response(atomFeed, {
 		headers: {
 			"Content-Type": "application/atom+xml; charset=utf-8",
+			"Cache-Control": "max-age=3600",
 		},
 	});
-
-	response.headers.set(
-		"Cache-Control",
-		"public, max-age=600, s-maxage=1800, stale-while-revalidate=86400",
-	);
-
-	return response;
 }

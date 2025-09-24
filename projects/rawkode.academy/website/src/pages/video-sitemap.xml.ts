@@ -1,4 +1,4 @@
-import { getLiveCollection } from "astro:content";
+import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 
 // Format duration from seconds to ISO 8601
@@ -41,13 +41,7 @@ function escapeXml(unsafe: string): string {
 }
 
 export const GET: APIRoute = async ({ site }) => {
-	const { entries = [], error } = await getLiveCollection("videos");
-
-	if (error) {
-		console.error("Failed to load videos for sitemap:", error);
-	}
-
-	const videos = entries ?? [];
+	const videos = await getCollection("videos");
 
 	// Sort videos by publishedAt date (newest first)
 	const sortedVideos = videos.sort((a, b) => {
@@ -97,18 +91,13 @@ ${sortedVideos
 	.join("\n")}
 </urlset>`;
 
-	const response = new Response(sitemap.trim(), {
+	return new Response(sitemap.trim(), {
 		headers: {
 			"Content-Type": "application/xml; charset=utf-8",
+			"Cache-Control": "public, max-age=3600", // Cache for 1 hour
 		},
 	});
-
-	response.headers.set(
-		"Cache-Control",
-		"public, max-age=600, s-maxage=1800, stale-while-revalidate=86400",
-	);
-
-	return response;
 };
 
-export const prerender = false;
+// Prerender at build time
+export const prerender = true;
