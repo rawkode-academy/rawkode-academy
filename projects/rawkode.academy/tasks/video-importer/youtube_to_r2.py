@@ -188,140 +188,34 @@ class YouTubeToR2:
         # Cloud Run Jobs client
         self.jobs_client = run_v2.JobsClient()
 
-    def download_video(self, youtube_id, output_dir, max_retries=3):
-        """Download YouTube video in highest quality with retry logic."""
+    def download_video(self, youtube_id, output_dir):
+        """Download YouTube video in highest quality."""
         url = f"https://www.youtube.com/watch?v={youtube_id}"
 
         ydl_opts = {
-            'format': 'bestvideo+bestaudio/best',  # Let yt-dlp choose best format and merge to mkv
+            'format': 'bestvideo[ext=mkv]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
             'outtmpl': os.path.join(output_dir, '%(id)s.%(ext)s'),
-            'merge_output_format': 'mkv',  # Use mkv as expected by Cloud Run job
+            'merge_output_format': 'mkv',
             'quiet': False,
             'no_warnings': False,
-            'verbose': True,  # Enable verbose mode for debugging
             'logger': logger,
-            'progress_hooks': [self._download_hook],  # Add progress hook
-            'retries': 10,  # Number of retries for network errors
-            'fragment_retries': 10,  # Retry failed fragments
-            'skip_unavailable_fragments': False,  # Don't skip fragments
-            'http_chunk_size': 10485760,  # 10MB chunks
-            'continuedl': True,  # Continue partial downloads
-            # Add headers to bypass 403 errors
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-us,en;q=0.5',
-                'Sec-Fetch-Mode': 'navigate',
-            },
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['android', 'web'],  # Use Android client which often works better
-                    'player_skip': ['webpage', 'configs'],  # Skip some checks that might trigger 403
-                }
-            },
-            'nocheckcertificate': True,  # Skip certificate verification if needed
-            'prefer_insecure': True,  # Use HTTP if HTTPS fails
         }
 
-        for attempt in range(max_retries):
-            try:
-                logger.info(f"Download attempt {attempt + 1} of {max_retries}")
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                logger.info(f"Downloading video: {youtube_id}")
+                info = ydl.extract_info(url, download=True)
 
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    logger.info(f"Downloading video: {youtube_id}")
-                    logger.info(f"URL: {url}")
-                    logger.info(f"Output directory: {output_dir}")
+                # Get the actual filename
+                filename = ydl.prepare_filename(info)
+                if not filename.endswith('.mkv'):
+                    filename = filename.rsplit('.', 1)[0] + '.mkv'
 
-                    # First extract info without downloading to check availability
-                    logger.info("Extracting video info...")
-                    info = ydl.extract_info(url, download=False)
-                    logger.info(f"Video title: {info.get('title', 'Unknown')}")
-                    logger.info(f"Video duration: {info.get('duration', 0)} seconds")
-                    logger.info(f"Available formats: {len(info.get('formats', []))}")
+                return filename, info
 
-                    # Now download
-                    logger.info("Starting actual download...")
-                    info = ydl.extract_info(url, download=True)
-
-                    # Get the actual filename
-                    filename = ydl.prepare_filename(info)
-                    base_filename = filename.rsplit('.', 1)[0]
-
-                    # Check what file was actually created (mkv if merged, mp4 if single stream)
-                    if os.path.exists(base_filename + '.mkv'):
-                        filename = base_filename + '.mkv'
-                    elif os.path.exists(base_filename + '.mp4'):
-                        filename = base_filename + '.mp4'
-                    elif os.path.exists(filename):
-                        # Use the prepared filename as-is
-                        pass
-                    else:
-                        raise Exception(f"No output file found matching pattern: {base_filename}.*")
-
-                    # Verify file exists and has content
-                    if os.path.exists(filename):
-                        file_size = os.path.getsize(filename)
-                        logger.info(f"Downloaded file: {filename} (size: {file_size} bytes)")
-                        if file_size == 0:
-                            raise Exception("Downloaded file is empty")
-                    else:
-                        raise Exception(f"Downloaded file not found: {filename}")
-
-                    # Convert to mkv if we got mp4 (Cloud Run expects mkv)
-                    if filename.endswith('.mp4'):
-                        mkv_filename = base_filename + '.mkv'
-                        logger.info(f"Converting MP4 to MKV for Cloud Run compatibility...")
-
-                        cmd = [
-                            'ffmpeg',
-                            '-i', filename,
-                            '-c', 'copy',  # Copy streams without re-encoding
-                            '-y',  # Overwrite output
-                            mkv_filename
-                        ]
-
-                        result = subprocess.run(cmd, capture_output=True, text=True)
-                        if result.returncode != 0:
-                            logger.error(f"FFmpeg conversion error: {result.stderr}")
-                            raise Exception(f"Failed to convert MP4 to MKV: {result.stderr}")
-
-                        logger.info(f"Successfully converted to MKV: {mkv_filename}")
-
-                        # Remove the original mp4 to save space
-                        os.remove(filename)
-                        filename = mkv_filename
-
-                    return filename, info
-
-            except Exception as e:
-                logger.error(f"Error on attempt {attempt + 1}: {str(e)}")
-
-                if attempt < max_retries - 1:
-                    wait_time = (attempt + 1) * 5  # Exponential backoff
-                    logger.info(f"Waiting {wait_time} seconds before retry...")
-                    time.sleep(wait_time)
-
-                    # Clean up any partial downloads
-                    for file in os.listdir(output_dir):
-                        if file.startswith(youtube_id) and file.endswith('.part'):
-                            partial_file = os.path.join(output_dir, file)
-                            logger.info(f"Removing partial file: {partial_file}")
-                            os.remove(partial_file)
-                else:
-                    logger.error(f"Failed after {max_retries} attempts")
-                    import traceback
-                    logger.error(f"Traceback: {traceback.format_exc()}")
-                    raise
-
-    def _download_hook(self, d):
-        """Hook to monitor download progress."""
-        if d['status'] == 'downloading':
-            percent = d.get('_percent_str', 'N/A')
-            speed = d.get('_speed_str', 'N/A')
-            logger.debug(f"Downloading: {percent} at {speed}")
-        elif d['status'] == 'finished':
-            logger.info(f"Download finished: {d.get('filename', 'unknown')}")
+        except Exception as e:
+            logger.error(f"Error downloading video: {str(e)}")
+            raise
 
     def extract_audio(self, video_path, output_dir):
         """Extract audio from video as MP3."""
@@ -568,7 +462,6 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
                 # Upload video to CONTENT bucket
                 if not state.is_step_completed('video_uploaded_content'):
-                    # Video should always be mkv at this point (converted if necessary)
                     self.upload_to_r2(
                         video_path,
                         self.content_bucket,
@@ -642,7 +535,6 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                 state.mark_step_completed('completed')
 
                 logger.info(f"Successfully processed video {youtube_id}")
-
                 return {
                     'youtube_id': youtube_id,
                     'cuid': video_cuid,

@@ -1,13 +1,9 @@
-import { getLiveCollection } from "astro:content";
+import { getCollection } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 
 export async function GET(context: APIContext) {
-	const { entries: videos = [], error } = await getLiveCollection("videos");
-
-	if (error) {
-		console.error("Failed to load videos for RSS feed:", error);
-	}
+	const videos = await getCollection("videos");
 
 	// Sort by publishedAt desc
 	const sortedVideos = videos.sort(

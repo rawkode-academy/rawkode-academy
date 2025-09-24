@@ -1,4 +1,4 @@
-import { getCollection, getEntries, getLiveCollection } from "astro:content";
+import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
 import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
 
@@ -17,16 +17,10 @@ interface AtomEntry {
 }
 
 export async function GET(context: APIContext) {
-	const [articles, videosResult] = await Promise.all([
+	const [articles, videos] = await Promise.all([
 		getCollection("articles", ({ data }) => !data.draft),
-		getLiveCollection("videos"),
+		getCollection("videos"),
 	]);
-
-	if (videosResult.error) {
-		console.error("Failed to load videos for combined Atom feed:", videosResult.error);
-	}
-
-	const videos = videosResult.entries ?? [];
 
 	const site = context.site?.toString() || "https://rawkode.academy";
 	const feedUrl = `${site}/api/feeds/all.atom`;
@@ -132,16 +126,10 @@ ${entries
 	.join("\n")}
 </feed>`;
 
-	const response = new Response(atomFeed, {
+	return new Response(atomFeed, {
 		headers: {
 			"Content-Type": "application/atom+xml; charset=utf-8",
+			"Cache-Control": "max-age=3600",
 		},
 	});
-
-	response.headers.set(
-		"Cache-Control",
-		"public, max-age=600, s-maxage=1800, stale-while-revalidate=86400",
-	);
-
-	return response;
 }
