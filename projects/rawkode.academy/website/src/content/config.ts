@@ -1,89 +1,6 @@
 import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
 
-import { gql, GraphQLClient } from "graphql-request";
-import { GRAPHQL_ENDPOINT } from "astro:env/server";
-
-const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);
-
-// We'll get the latest 400, which should be all or almost all
-// Anything else can be fetched dynamically
-const graphQLQuery = gql`
-  query {
-    videos: getLatestVideos(limit: 400) {
-      id
-      slug
-      title
-      subtitle
-      description
-      publishedAt
-      streamUrl
-      thumbnailUrl
-      duration
-
-      technologies {
-        id
-        name
-        logo
-      }
-    }
-  }
-`;
-
-interface Video {
-	id: string;
-	slug: string;
-	title: string;
-	subtitle?: string;
-	description: string;
-	publishedAt: string;
-	streamUrl: string;
-	thumbnailUrl: string;
-	duration: number;
-	technologies: Array<{
-		id: string;
-		name: string;
-		logo: string;
-	}>;
-}
-
-interface GraphQLResponse {
-	videos: Video[];
-}
-
-const videos = defineCollection({
-	loader: async () => {
-		try {
-			const { videos }: GraphQLResponse =
-				await graphQLClient.request(graphQLQuery);
-
-			return videos;
-		} catch (error) {
-			console.warn("Failed to fetch videos from GraphQL API:", error);
-			// Return empty array when GraphQL API is not accessible (e.g., during CI builds)
-			return [];
-		}
-	},
-	schema: z.object({
-		id: z.string(),
-		slug: z.string(),
-		title: z.string(),
-		subtitle: z.string().optional(),
-		description: z.string(),
-		streamUrl: z.string(),
-		publishedAt: z.string(),
-		thumbnailUrl: z.string(),
-		duration: z.number(),
-		technologies: z.array(
-			z.object({
-				id: z.string(),
-				name: z.string(),
-				logo: z.string(),
-			}),
-		),
-	}),
-});
-
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections
 
 // Shared resource schema for courses and course modules
@@ -327,7 +244,6 @@ const changelog = defineCollection({
 });
 
 export const collections = {
-	videos,
 	people,
 	articles,
 	technologies,

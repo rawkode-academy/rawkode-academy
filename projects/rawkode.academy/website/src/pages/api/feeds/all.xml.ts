@@ -1,4 +1,4 @@
-import { getCollection, getEntries } from "astro:content";
+import { getCollection, getEntries, getLiveCollection } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
@@ -15,10 +15,16 @@ interface FeedItem {
 }
 
 export async function GET(context: APIContext) {
-	const [articles, videos] = await Promise.all([
+	const [articles, videosResult] = await Promise.all([
 		getCollection("articles", ({ data }) => !data.draft),
-		getCollection("videos"),
+		getLiveCollection("videos"),
 	]);
+
+	if (videosResult.error) {
+		console.error("Failed to load videos for combined RSS feed:", videosResult.error);
+	}
+
+	const videos = videosResult.entries ?? [];
 
 	// Render all articles in parallel for better performance
 	const renderedContent = await renderAndSanitizeArticles(articles);

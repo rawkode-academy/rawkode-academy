@@ -1,4 +1,4 @@
-import { getCollection } from "astro:content";
+import { getLiveEntry } from "astro:content";
 import { getSecret, ZULIP_EMAIL, ZULIP_URL } from "astro:env/server";
 import type { APIRoute } from "astro";
 
@@ -34,11 +34,12 @@ export const GET: APIRoute = async ({ params }) => {
 		const zulipStreamId = 14;
 		const zulipApiKey = getSecret("ZULIP_API_KEY");
 
-		const videos = await getCollection("videos");
-		const video = videos.find((v) => v.data.id === videoId);
+		const { entry: video, error } = await getLiveEntry("videos", videoId);
 
-		// This really should never happen, but let's keep the
-		// compiler happy.
+		if (error) {
+			console.error("Failed to load video for comments:", error);
+		}
+
 		if (!video) {
 			return new Response(JSON.stringify({ comments: [] }), {
 				status: 200,
