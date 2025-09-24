@@ -201,6 +201,7 @@ export default defineConfig({
 		],
 	},
 	experimental: {
+		liveContentCollections: true,
 		fonts: [
 			{
 				provider: fontProviders.google(),

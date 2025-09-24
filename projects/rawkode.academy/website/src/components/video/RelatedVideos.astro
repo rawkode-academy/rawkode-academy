@@ -1,20 +1,46 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import type { LiveDataEntry } from "astro";
+import { getLiveCollection } from "astro:content";
+
+interface VideoData {
+    id: string;
+    slug: string;
+    title: string;
+    // Align with live collection schema (nullable + optional -> includes undefined)
+    subtitle?: string | null | undefined;
+    description: string;
+    publishedAt: string;
+    thumbnailUrl: string;
+    duration: number;
+    streamUrl: string;
+    // Live schema requires technologies array
+    technologies: Array<{
+        id: string;
+        name: string;
+        logo: string;
+    }>;
+}
 
 interface Props {
-	currentVideo: CollectionEntry<"videos">;
+	currentVideo: LiveDataEntry<VideoData>;
 	limit?: number;
 }
 
 const { currentVideo, limit = 4 } = Astro.props;
 
 // Get all videos
-const allVideos = await getCollection("videos");
+const { entries: fetchedVideos = [], error } = await getLiveCollection("videos");
+
+if (error) {
+	console.error("Failed to load related videos:", error);
+}
+
+const allVideos = fetchedVideos ?? [];
 
 // Find related videos based on:
 // 1. Same technologies
 // 2. Recent videos (excluding current)
-const relatedVideos: CollectionEntry<"videos">[] = [];
+const relatedVideos: LiveDataEntry<VideoData>[] = [];
 
 // First, add videos with overlapping technologies
 if (
