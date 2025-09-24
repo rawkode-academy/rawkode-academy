@@ -2,6 +2,8 @@ import { getCollection } from "astro:content";
 import { getSecret, ZULIP_EMAIL, ZULIP_URL } from "astro:env/server";
 import type { APIRoute } from "astro";
 
+export const prerender = false;
+
 interface ZulipMessage {
 	id: number;
 	sender_full_name: string;

@@ -37,7 +37,7 @@ const getSiteUrl = () => {
 };
 
 export default defineConfig({
-	output: "server",
+	output: "static",
 	adapter: cloudflare({
 		imageService: "cloudflare",
 		sessionKVBindingName: "SESSION",
