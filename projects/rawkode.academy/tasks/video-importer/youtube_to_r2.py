@@ -188,34 +188,299 @@ class YouTubeToR2:
         # Cloud Run Jobs client
         self.jobs_client = run_v2.JobsClient()
 
-    def download_video(self, youtube_id, output_dir):
-        """Download YouTube video in highest quality."""
+    def fetch_metadata_only(self, youtube_id):
+        """Fetch YouTube video metadata without downloading the video."""
         url = f"https://www.youtube.com/watch?v={youtube_id}"
 
         ydl_opts = {
-            'format': 'bestvideo[ext=mkv]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
-            'outtmpl': os.path.join(output_dir, '%(id)s.%(ext)s'),
-            'merge_output_format': 'mkv',
             'quiet': False,
             'no_warnings': False,
             'logger': logger,
+            # Add headers to bypass potential restrictions
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-us,en;q=0.5',
+                'Sec-Fetch-Mode': 'navigate',
+            },
         }
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                logger.info(f"Downloading video: {youtube_id}")
-                info = ydl.extract_info(url, download=True)
-
-                # Get the actual filename
-                filename = ydl.prepare_filename(info)
-                if not filename.endswith('.mkv'):
-                    filename = filename.rsplit('.', 1)[0] + '.mkv'
-
-                return filename, info
-
+                logger.info(f"Fetching metadata for YouTube video: {youtube_id}")
+                info = ydl.extract_info(url, download=False)
+                logger.info(f"Video title: {info.get('title', 'Unknown')}")
+                logger.info(f"Video duration: {info.get('duration', 0)} seconds")
+                return info
         except Exception as e:
-            logger.error(f"Error downloading video: {str(e)}")
+            logger.error(f"Error fetching metadata: {str(e)}")
             raise
+
+    def download_video(self, youtube_id, output_dir, max_retries=3):
+        """Download YouTube video in highest quality with retry logic."""
+        url = f"https://www.youtube.com/watch?v={youtube_id}"
+
+        # Check for cookies file
+        cookies_file = os.path.expanduser('~/.youtube_cookies.txt')
+
+        # Check for PO token (for mobile web client)
+        po_token = os.environ.get('YOUTUBE_PO_TOKEN')
+
+        ydl_opts = {
+            # More flexible format selection to handle various scenarios
+            'format': None,  # Let yt-dlp auto-select the best available
+            'outtmpl': os.path.join(output_dir, '%(id)s.%(ext)s'),
+            'merge_output_format': 'mkv',  # Merge to MKV to ensure compatibility
+            'quiet': False,
+            'no_warnings': False,
+            'verbose': True,  # Enable verbose mode for debugging
+            'logger': logger,
+            'progress_hooks': [self._download_hook],  # Add progress hook
+            'retries': 10,  # Number of retries for network errors
+            'fragment_retries': 10,  # Retry failed fragments
+            'skip_unavailable_fragments': False,  # Don't skip fragments
+            'http_chunk_size': 10485760,  # 10MB chunks
+            'continuedl': True,  # Continue partial downloads
+            # Add headers to bypass 403 errors
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-us,en;q=0.5',
+                'Sec-Fetch-Mode': 'navigate',
+            },
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['tv_embedded', 'tv', 'web'],  # TV embedded works best currently
+                    'player_skip': [],  # Don't skip any player configs
+                }
+            },
+            'nocheckcertificate': True,  # Skip certificate verification if needed
+            'prefer_insecure': True,  # Use HTTP if HTTPS fails
+        }
+
+        # Add PO token if provided for mobile web client
+        if po_token:
+            ydl_opts['extractor_args']['youtube']['po_token'] = f'mweb.gvs+{po_token}'
+            logger.info("Using PO token for mobile web client")
+
+        # Add cookies if file exists
+        if os.path.exists(cookies_file):
+            ydl_opts['cookiefile'] = cookies_file
+            logger.info(f"Using cookies from {cookies_file}")
+        else:
+            logger.info("No cookies file found. To bypass YouTube restrictions:")
+            logger.info("  1. Export cookies to ~/.youtube_cookies.txt")
+            logger.info("  2. OR set YOUTUBE_PO_TOKEN environment variable (see https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide)")
+
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"Download attempt {attempt + 1} of {max_retries}")
+
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    logger.info(f"Downloading video: {youtube_id}")
+                    logger.info(f"URL: {url}")
+                    logger.info(f"Output directory: {output_dir}")
+
+                    # First extract info without downloading to check availability
+                    logger.info("Extracting video info...")
+                    info = ydl.extract_info(url, download=False)
+                    logger.info(f"Video title: {info.get('title', 'Unknown')}")
+                    logger.info(f"Video duration: {info.get('duration', 0)} seconds")
+
+                    # Log available video formats with resolution
+                    formats = info.get('formats', [])
+                    logger.info(f"Available formats: {len(formats)}")
+
+                    # Find and log the best video formats
+                    video_formats = [f for f in formats if f.get('vcodec') != 'none' and f.get('height')]
+                    video_formats.sort(key=lambda x: (x.get('height', 0), x.get('fps', 0)), reverse=True)
+
+                    if video_formats:
+                        logger.info("Top video formats available:")
+                        for fmt in video_formats[:5]:  # Show top 5
+                            height = fmt.get('height', 'N/A')
+                            fps = fmt.get('fps', 'N/A')
+                            vcodec = fmt.get('vcodec', 'N/A')
+                            format_id = fmt.get('format_id', 'N/A')
+                            ext = fmt.get('ext', 'N/A')
+                            logger.info(f"  Format {format_id}: {height}p @ {fps}fps, codec={vcodec}, ext={ext}")
+
+                    # Log what yt-dlp will actually download
+                    logger.info(f"Selected format: {info.get('format', 'Unknown')}")
+                    logger.info(f"Selected resolution: {info.get('height', 'Unknown')}p")
+
+                    # Now download
+                    logger.info("Starting actual download...")
+                    info = ydl.extract_info(url, download=True)
+
+                    # Detect the actual downloaded file
+                    detected_file, file_ext = self.detect_video_file(youtube_id, output_dir)
+
+                    if not detected_file:
+                        # Fallback to yt-dlp's prepared filename
+                        filename = ydl.prepare_filename(info)
+                        if not os.path.exists(filename):
+                            raise Exception(f"No video file found for {youtube_id}")
+                    else:
+                        filename = detected_file
+                        logger.info(f"Detected video file: {filename} (format: {file_ext})")
+
+                    # Verify file exists and has content
+                    if os.path.exists(filename):
+                        file_size = os.path.getsize(filename)
+                        logger.info(f"Downloaded file: {filename} (size: {file_size} bytes)")
+                        if file_size == 0:
+                            raise Exception("Downloaded file is empty")
+                    else:
+                        raise Exception(f"Downloaded file not found: {filename}")
+
+                    # Convert to mkv for Cloud Run compatibility (handles any format)
+                    filename = self.ensure_mkv_format(filename, output_dir)
+
+                    return filename, info
+
+            except Exception as e:
+                logger.error(f"Error on attempt {attempt + 1}: {str(e)}")
+
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 5  # Exponential backoff
+                    logger.info(f"Waiting {wait_time} seconds before retry...")
+                    time.sleep(wait_time)
+
+                    # Clean up any partial downloads
+                    for file in os.listdir(output_dir):
+                        if file.startswith(youtube_id) and file.endswith('.part'):
+                            partial_file = os.path.join(output_dir, file)
+                            logger.info(f"Removing partial file: {partial_file}")
+                            os.remove(partial_file)
+                else:
+                    logger.error(f"Failed after {max_retries} attempts")
+                    import traceback
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    raise
+
+    def _download_hook(self, d):
+        """Hook to monitor download progress."""
+        if d['status'] == 'downloading':
+            percent = d.get('_percent_str', 'N/A')
+            speed = d.get('_speed_str', 'N/A')
+            logger.debug(f"Downloading: {percent} at {speed}")
+        elif d['status'] == 'finished':
+            logger.info(f"Download finished: {d.get('filename', 'unknown')}")
+
+    def detect_video_file(self, youtube_id, output_dir):
+        """Detect the actual video file downloaded by yt-dlp.
+
+        Returns:
+            tuple: (filepath, extension) or (None, None) if not found
+        """
+        # Common video extensions in order of likelihood
+        video_extensions = ['.mp4', '.webm', '.mkv', '.mov', '.avi', '.flv', '.m4v', '.3gp', '.wmv']
+
+        # First, try exact ID match with known extensions
+        for ext in video_extensions:
+            filepath = os.path.join(output_dir, f"{youtube_id}{ext}")
+            if os.path.exists(filepath):
+                file_size = os.path.getsize(filepath)
+                if file_size > 0:
+                    logger.info(f"Found video file: {filepath} (size: {file_size} bytes)")
+                    return filepath, ext
+
+        # Fallback: search for any file starting with youtube_id
+        # This handles cases where yt-dlp adds format codes or other suffixes
+        for file in os.listdir(output_dir):
+            if file.startswith(youtube_id) and not file.endswith('.part'):
+                filepath = os.path.join(output_dir, file)
+                if os.path.isfile(filepath):
+                    file_size = os.path.getsize(filepath)
+                    if file_size > 0:
+                        _, ext = os.path.splitext(file)
+                        logger.info(f"Found video file via pattern match: {filepath} (size: {file_size} bytes)")
+                        return filepath, ext
+
+        logger.warning(f"No video file found for {youtube_id} in {output_dir}")
+        return None, None
+
+    def ensure_mkv_format(self, video_path, output_dir):
+        """Ensure video is in MKV format, converting if necessary.
+
+        Args:
+            video_path: Path to the input video file
+            output_dir: Directory for output file
+
+        Returns:
+            str: Path to MKV file (either original if already MKV, or converted)
+        """
+        # If already MKV, return as-is
+        if video_path.endswith('.mkv'):
+            logger.info("Video is already in MKV format")
+            return video_path
+
+        # Determine output path
+        base_name = os.path.splitext(os.path.basename(video_path))[0]
+        mkv_path = os.path.join(output_dir, f"{base_name}.mkv")
+
+        source_format = os.path.splitext(video_path)[1].lstrip('.')
+        logger.info(f"Converting {source_format.upper()} to MKV for Cloud Run compatibility...")
+
+        # Try advanced conversion with all stream mapping first
+        cmd = [
+            'ffmpeg',
+            '-i', video_path,
+            '-c:v', 'copy',       # Copy video codec
+            '-c:a', 'copy',       # Copy audio codec
+            '-c:s', 'copy',       # Copy subtitle streams if present
+            '-map', '0',          # Map all streams from input
+            '-movflags', 'faststart',  # Optimize for streaming
+            '-y',                 # Overwrite output
+            mkv_path
+        ]
+
+        logger.debug(f"Running ffmpeg command: {' '.join(cmd)}")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        # If advanced conversion fails, try simpler approach
+        if result.returncode != 0:
+            logger.warning(f"Advanced conversion failed: {result.stderr[:500]}")
+            logger.info("Trying simplified conversion...")
+
+            cmd_simple = [
+                'ffmpeg',
+                '-i', video_path,
+                '-c', 'copy',     # Copy all streams without re-encoding
+                '-y',             # Overwrite output
+                mkv_path
+            ]
+
+            result = subprocess.run(cmd_simple, capture_output=True, text=True)
+
+            if result.returncode != 0:
+                logger.error(f"Simple conversion also failed: {result.stderr}")
+                raise Exception(f"Failed to convert {source_format} to MKV: {result.stderr}")
+
+        # Verify the output file exists and has content
+        if os.path.exists(mkv_path):
+            output_size = os.path.getsize(mkv_path)
+            input_size = os.path.getsize(video_path)
+
+            if output_size == 0:
+                raise Exception(f"Converted MKV file is empty")
+
+            logger.info(f"Successfully converted to MKV: {mkv_path}")
+            logger.info(f"Size change: {input_size} bytes -> {output_size} bytes")
+
+            # Remove the original file to save space
+            try:
+                os.remove(video_path)
+                logger.info(f"Removed original {source_format} file")
+            except Exception as e:
+                logger.warning(f"Could not remove original file: {e}")
+
+            return mkv_path
+        else:
+            raise Exception(f"MKV output file was not created")
 
     def extract_audio(self, video_path, output_dir):
         """Extract audio from video as MP3."""
@@ -401,7 +666,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
         return sql
 
-    def process_video(self, youtube_id, resume=True, skip_cloud_run=False, force_cloud_run=False):
+    def process_video(self, youtube_id, resume=True, skip_cloud_run=False, force_cloud_run=False, local_video_path=None):
         """Download video, extract audio, and upload all assets."""
         # Initialize state management
         state = ProcessingState(youtube_id)
@@ -421,18 +686,46 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
         with tempfile.TemporaryDirectory() as temp_dir:
             try:
-                # Download video
+                # Handle video acquisition (download from YouTube or use local file)
                 if not state.is_step_completed('video_downloaded'):
-                    video_path, video_info = self.download_video(youtube_id, temp_dir)
-                    state.set_artifact('video_path', video_path)
-                    state.set_video_info(video_info)  # This now extracts only serializable data
-                    state.mark_step_completed('video_downloaded')
+                    if local_video_path:
+                        # Use local video file
+                        logger.info(f"Using local video file: {local_video_path}")
+                        if not os.path.exists(local_video_path):
+                            raise FileNotFoundError(f"Local video file not found: {local_video_path}")
+
+                        # Fetch metadata from YouTube
+                        video_info = self.fetch_metadata_only(youtube_id)
+
+                        # Copy local file to temp directory and ensure MKV format
+                        import shutil
+                        temp_video_path = os.path.join(temp_dir, os.path.basename(local_video_path))
+                        shutil.copy2(local_video_path, temp_video_path)
+                        video_path = self.ensure_mkv_format(temp_video_path, temp_dir)
+
+                        state.set_artifact('video_path', video_path)
+                        state.set_video_info(video_info)
+                        state.mark_step_completed('video_downloaded')
+                        logger.info(f"Successfully prepared local video: {video_path}")
+                    else:
+                        # Download from YouTube
+                        video_path, video_info = self.download_video(youtube_id, temp_dir)
+                        state.set_artifact('video_path', video_path)
+                        state.set_video_info(video_info)  # This now extracts only serializable data
+                        state.mark_step_completed('video_downloaded')
                 else:
                     logger.info("Skipping video download - already completed")
                     video_info = state.get_video_info()
-                    # Re-download to temp dir for processing if needed
+                    # Re-download or re-copy to temp dir for processing if needed
                     if not state.is_step_completed('audio_extracted') or not state.is_step_completed('video_uploaded_content'):
-                        video_path, _ = self.download_video(youtube_id, temp_dir)
+                        if local_video_path:
+                            # Re-copy local file
+                            import shutil
+                            temp_video_path = os.path.join(temp_dir, os.path.basename(local_video_path))
+                            shutil.copy2(local_video_path, temp_video_path)
+                            video_path = self.ensure_mkv_format(temp_video_path, temp_dir)
+                        else:
+                            video_path, _ = self.download_video(youtube_id, temp_dir)
 
                 # Extract audio
                 if not state.is_step_completed('audio_extracted'):
@@ -462,6 +755,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
                 # Upload video to CONTENT bucket
                 if not state.is_step_completed('video_uploaded_content'):
+                    # Video should always be mkv at this point (converted if necessary)
                     self.upload_to_r2(
                         video_path,
                         self.content_bucket,
@@ -535,6 +829,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                 state.mark_step_completed('completed')
 
                 logger.info(f"Successfully processed video {youtube_id}")
+
                 return {
                     'youtube_id': youtube_id,
                     'cuid': video_cuid,
@@ -567,6 +862,7 @@ def main():
     parser.add_argument('--show-state', action='store_true', help='Show current state and exit')
     parser.add_argument('--skip-cloud-run', action='store_true', help='Skip Cloud Run job trigger even if not completed')
     parser.add_argument('--force-cloud-run', action='store_true', help='Force Cloud Run job trigger even if already completed')
+    parser.add_argument('--local-video', help='Path to local video file (skip YouTube download, fetch metadata only)')
 
     # Handle the special case where YouTube ID starts with hyphen
     args, remaining = parser.parse_known_args()
@@ -667,10 +963,11 @@ def main():
         )
 
         result = processor.process_video(
-            args.youtube_id, 
+            args.youtube_id,
             resume=not args.no_resume,
             skip_cloud_run=args.skip_cloud_run,
-            force_cloud_run=args.force_cloud_run
+            force_cloud_run=args.force_cloud_run,
+            local_video_path=args.local_video
         )
 
         print(f"\nSuccess!")
