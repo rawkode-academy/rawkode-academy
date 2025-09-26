@@ -23,13 +23,20 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { useMeetings } from "@/lib/hooks/useMeetings";
-import type { Meeting, PreferredRegion } from "@/lib/realtime-kit/client";
+import type {
+	CreateMeetingOptions,
+	Meeting,
+	PreferredRegion,
+} from "@/lib/realtime-kit/client";
 
 function CreateMeetingDialog() {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 	const titleId = useId();
 	const regionId = useId();
+	const meetingTypeId = useId();
+	const recordingQualityId = useId();
+	const maxDurationId = useId();
 	const [open, setOpen] = useState(false);
 	const [formData, setFormData] = useState({
 		title: "",
@@ -38,6 +45,15 @@ function CreateMeetingDialog() {
 		live_stream_on_start: false,
 		persist_chat: false,
 		summarize_on_end: false,
+		// New recording quality options
+		recording_quality: "1080p" as "4k" | "1080p" | "720p" | "audio_only",
+		meeting_type: "general" as
+			| "podcast"
+			| "livestream"
+			| "interview"
+			| "general",
+		enable_transcription: true,
+		max_duration_hours: 2,
 	});
 
 	const createMeetingMutation = useMutation({
@@ -56,6 +72,82 @@ function CreateMeetingDialog() {
 				requestBody.preferred_region = formData.preferred_region;
 			}
 
+			// Add high-quality recording configuration if recording is enabled
+			if (formData.record_on_start) {
+				// Use specialized meeting creation for podcasts/livestreams
+				if (formData.meeting_type === "podcast") {
+					const response = await fetch("/api/meetings/podcast", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							title: formData.title || "Podcast Recording",
+							quality: formData.recording_quality,
+							duration_hours: formData.max_duration_hours,
+							auto_start_recording: formData.record_on_start,
+							enable_transcription: formData.enable_transcription,
+							enable_summary: formData.summarize_on_end,
+						}),
+					});
+
+					if (!response.ok) {
+						const error = await response.json();
+						throw new Error(error.error || "Failed to create podcast meeting");
+					}
+
+					return response.json();
+				} else if (formData.meeting_type === "livestream") {
+					const response = await fetch("/api/meetings/livestream", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							title: formData.title || "Livestream Recording",
+							quality: formData.recording_quality,
+							duration_hours: formData.max_duration_hours,
+							auto_start_recording: formData.record_on_start,
+							auto_start_stream: formData.live_stream_on_start,
+						}),
+					});
+
+					if (!response.ok) {
+						const error = await response.json();
+						throw new Error(
+							error.error || "Failed to create livestream meeting",
+						);
+					}
+
+					return response.json();
+				} else {
+					// For general meetings with high-quality recording
+					const response = await fetch("/api/meetings/high-quality", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							...requestBody,
+							recording_quality: formData.recording_quality,
+							meeting_type: formData.meeting_type,
+							max_duration_hours: formData.max_duration_hours,
+							enable_transcription: formData.enable_transcription,
+						}),
+					});
+
+					if (!response.ok) {
+						const error = await response.json();
+						throw new Error(
+							error.error || "Failed to create high-quality meeting",
+						);
+					}
+
+					return response.json();
+				}
+			}
+
+			// Standard meeting creation for non-recording meetings
 			const response = await fetch("/api/meetings", {
 				method: "POST",
 				headers: {
@@ -83,6 +175,10 @@ function CreateMeetingDialog() {
 				live_stream_on_start: false,
 				persist_chat: false,
 				summarize_on_end: false,
+				recording_quality: "1080p",
+				meeting_type: "general",
+				enable_transcription: true,
+				max_duration_hours: 2,
 			});
 
 			// Close dialog
@@ -215,6 +311,146 @@ function CreateMeetingDialog() {
 										Start recording automatically
 									</span>
 								</label>
+
+								{/* Recording Quality Options - shown only when recording is enabled */}
+								{formData.record_on_start && (
+									<div className="ml-6 space-y-3 p-4 bg-muted/30 rounded-lg border">
+										<div className="text-sm font-medium text-foreground">
+											Recording Configuration
+										</div>
+
+										<div className="grid gap-3">
+											<div className="grid gap-2">
+												<label
+													htmlFor={meetingTypeId}
+													className="text-xs font-medium text-foreground"
+												>
+													Meeting Type
+												</label>
+												<select
+													id={meetingTypeId}
+													value={formData.meeting_type}
+													onChange={(e) =>
+														setFormData({
+															...formData,
+															meeting_type: e.target
+																.value as typeof formData.meeting_type,
+														})
+													}
+													className="flex h-8 w-full rounded-md border border-input bg-background text-foreground px-2 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+												>
+													<option value="general">General Meeting</option>
+													<option value="podcast">Podcast Recording</option>
+													<option value="livestream">Livestream</option>
+													<option value="interview">Interview</option>
+												</select>
+											</div>
+
+											<div className="grid gap-2">
+												<label
+													htmlFor={recordingQualityId}
+													className="text-xs font-medium text-foreground"
+												>
+													Recording Quality
+												</label>
+												<select
+													id={recordingQualityId}
+													value={formData.recording_quality}
+													onChange={(e) =>
+														setFormData({
+															...formData,
+															recording_quality: e.target
+																.value as typeof formData.recording_quality,
+														})
+													}
+													className="flex h-8 w-full rounded-md border border-input bg-background text-foreground px-2 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+												>
+													<option value="4k">4K Ultra HD (3840×2160)</option>
+													<option value="1080p">Full HD (1920×1080)</option>
+													<option value="720p">HD (1280×720)</option>
+													<option value="audio_only">
+														Audio Only (Podcast)
+													</option>
+												</select>
+											</div>
+
+											<div className="grid gap-2">
+												<label
+													htmlFor={maxDurationId}
+													className="text-xs font-medium text-foreground"
+												>
+													Max Duration (hours)
+												</label>
+												<input
+													id={maxDurationId}
+													type="number"
+													min="0.5"
+													max="8"
+													step="0.5"
+													value={formData.max_duration_hours}
+													onChange={(e) =>
+														setFormData({
+															...formData,
+															max_duration_hours:
+																parseFloat(e.target.value) || 2,
+														})
+													}
+													className="flex h-8 w-full rounded-md border border-input bg-background text-foreground px-2 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+												/>
+											</div>
+
+											<label className="flex items-center gap-2 cursor-pointer">
+												<input
+													type="checkbox"
+													checked={formData.enable_transcription}
+													onChange={(e) =>
+														setFormData({
+															...formData,
+															enable_transcription: e.target.checked,
+														})
+													}
+													className="h-3 w-3 rounded border-input text-primary focus:ring-ring"
+												/>
+												<span className="text-xs text-muted-foreground">
+													Enable AI transcription
+												</span>
+											</label>
+										</div>
+
+										{/* Quality preview information */}
+										<div className="text-xs text-muted-foreground bg-background/50 p-2 rounded">
+											<div className="font-medium mb-1">Quality Preview:</div>
+											{formData.recording_quality === "4k" && (
+												<div>
+													• Video: 3840×2160 @ 30fps, ~25Mbps
+													<br />• Audio: 320kbps stereo, 48kHz
+													<br />• Estimated file size: ~11GB/hour
+												</div>
+											)}
+											{formData.recording_quality === "1080p" && (
+												<div>
+													• Video: 1920×1080 @ 30fps, ~8Mbps
+													<br />• Audio: 256kbps stereo, 44.1kHz
+													<br />• Estimated file size: ~3.6GB/hour
+												</div>
+											)}
+											{formData.recording_quality === "720p" && (
+												<div>
+													• Video: 1280×720 @ 30fps, ~5Mbps
+													<br />• Audio: 192kbps stereo, 44.1kHz
+													<br />• Estimated file size: ~2.3GB/hour
+												</div>
+											)}
+											{formData.recording_quality === "audio_only" && (
+												<div>
+													• Audio only: 320kbps stereo, 48kHz
+													<br />• Perfect for podcasts
+													<br />• Estimated file size: ~144MB/hour
+												</div>
+											)}
+										</div>
+									</div>
+								)}
 
 								<label className="flex items-center gap-2 cursor-pointer">
 									<input
