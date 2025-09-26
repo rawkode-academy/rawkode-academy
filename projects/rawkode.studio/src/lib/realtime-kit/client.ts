@@ -80,12 +80,18 @@ export interface VideoConfig {
 	height?: number;
 	watermark?: VideoWatermark;
 	export_file?: boolean;
+	bitrate?: number; // Video bitrate in kbps for high-quality recording
+	frame_rate?: number; // Frame rate for video recording
+	quality_preset?: "podcast" | "livestream" | "ultra_hd" | "standard"; // Preset for different use cases
 }
 
 export interface AudioConfig {
 	codec?: AudioCodec;
 	channel?: AudioChannel;
 	export_file?: boolean;
+	bitrate?: number; // Audio bitrate in kbps for high-quality recording
+	sample_rate?: number; // Sample rate (44100, 48000) for podcast/music quality
+	quality_preset?: "podcast" | "music" | "voice" | "standard"; // Preset for different use cases
 }
 
 export interface StorageConfig {
@@ -1928,6 +1934,283 @@ export class RealtimeKitClient {
 			hasApiKey: !!this.apiKey,
 			isConfigured: this.isConfigured(),
 		};
+	}
+
+	/**
+	 * Generate high-quality recording configuration for podcasts and livestreams
+	 *
+	 * @param options - Recording quality options
+	 * @param options.quality - Recording quality preset: "4k", "1080p", "720p", "podcast_audio"
+	 * @param options.use_case - Use case: "podcast", "livestream", "interview"
+	 * @param options.storage_config - Optional external storage configuration
+	 * @param options.max_duration_hours - Maximum recording duration in hours (default: 4)
+	 *
+	 * @returns RecordingConfig optimized for high-quality local recording
+	 *
+	 * @example
+	 * ```typescript
+	 * // 4K recording for high-quality podcast
+	 * const config = client.getHighQualityRecordingConfig({
+	 *   quality: "4k",
+	 *   use_case: "podcast",
+	 *   max_duration_hours: 2
+	 * });
+	 *
+	 * // Create meeting with 4K recording
+	 * const meeting = await client.createMeeting({
+	 *   title: "Podcast Episode 1",
+	 *   record_on_start: true,
+	 *   recording_config: config
+	 * });
+	 * ```
+	 */
+	getHighQualityRecordingConfig(options: {
+		quality: "4k" | "1080p" | "720p" | "podcast_audio";
+		use_case: "podcast" | "livestream" | "interview";
+		storage_config?: StorageConfig;
+		max_duration_hours?: number;
+	}): RecordingConfig {
+		const {
+			quality,
+			use_case,
+			storage_config,
+			max_duration_hours = 4,
+		} = options;
+
+		// Base configuration
+		const config: RecordingConfig = {
+			max_seconds: max_duration_hours * 3600, // Convert hours to seconds
+			file_name_prefix: `${use_case}_${quality}_${new Date().toISOString().split("T")[0]}`,
+		};
+
+		// Configure video based on quality preset
+		switch (quality) {
+			case "4k":
+				config.video_config = {
+					codec: "H264",
+					width: 3840,
+					height: 2160,
+					bitrate: 25000, // 25 Mbps for 4K
+					frame_rate: 30,
+					quality_preset: "ultra_hd",
+					export_file: true,
+				};
+				break;
+			case "1080p":
+				config.video_config = {
+					codec: "H264",
+					width: 1920,
+					height: 1080,
+					bitrate: 8000, // 8 Mbps for 1080p
+					frame_rate: 30,
+					quality_preset: use_case === "podcast" ? "podcast" : "livestream",
+					export_file: true,
+				};
+				break;
+			case "720p":
+				config.video_config = {
+					codec: "H264",
+					width: 1280,
+					height: 720,
+					bitrate: 5000, // 5 Mbps for 720p
+					frame_rate: 30,
+					quality_preset: "standard",
+					export_file: true,
+				};
+				break;
+			case "podcast_audio":
+				// Audio-only configuration for podcast
+				config.video_config = undefined;
+				break;
+		}
+
+		// Configure audio based on use case
+		switch (use_case) {
+			case "podcast":
+				config.audio_config = {
+					codec: "AAC",
+					channel: "stereo",
+					bitrate: 320, // High-quality audio for podcast
+					sample_rate: 48000, // Professional audio sample rate
+					quality_preset: "podcast",
+					export_file: true,
+				};
+				break;
+			case "livestream":
+				config.audio_config = {
+					codec: "AAC",
+					channel: "stereo",
+					bitrate: 256, // Good quality for livestream
+					sample_rate: 44100,
+					quality_preset: "music",
+					export_file: true,
+				};
+				break;
+			case "interview":
+				config.audio_config = {
+					codec: "AAC",
+					channel: "stereo",
+					bitrate: 192, // Clear voice quality
+					sample_rate: 44100,
+					quality_preset: "voice",
+					export_file: true,
+				};
+				break;
+		}
+
+		// Add storage configuration if provided
+		if (storage_config) {
+			config.storage_config = storage_config;
+		} else {
+			// Use RealtimeKit default storage for local recording
+			config.realtimekit_bucket_config = { enabled: true };
+		}
+
+		return config;
+	}
+
+	/**
+	 * Create a meeting optimized for podcast recording with 4K support
+	 *
+	 * @param options - Podcast meeting options
+	 * @param options.title - Podcast episode title
+	 * @param options.quality - Video quality: "4k", "1080p", "720p", "audio_only"
+	 * @param options.duration_hours - Expected duration in hours (default: 2)
+	 * @param options.auto_start_recording - Whether to start recording immediately (default: true)
+	 * @param options.enable_transcription - Enable AI transcription (default: true)
+	 * @param options.enable_summary - Enable AI summary (default: true)
+	 *
+	 * @returns Promise resolving to the created meeting optimized for podcast recording
+	 *
+	 * @example
+	 * ```typescript
+	 * // Create 4K podcast meeting
+	 * const meeting = await client.createPodcastMeeting({
+	 *   title: "Tech Talk Episode 5",
+	 *   quality: "4k",
+	 *   duration_hours: 1.5,
+	 *   enable_transcription: true
+	 * });
+	 *
+	 * console.log('Podcast meeting created:', meeting.id);
+	 * ```
+	 */
+	async createPodcastMeeting(options: {
+		title: string;
+		quality?: "4k" | "1080p" | "720p" | "audio_only";
+		duration_hours?: number;
+		auto_start_recording?: boolean;
+		enable_transcription?: boolean;
+		enable_summary?: boolean;
+	}): Promise<Meeting> {
+		const {
+			title,
+			quality = "1080p",
+			duration_hours = 2,
+			auto_start_recording = true,
+			enable_transcription = true,
+			enable_summary = true,
+		} = options;
+
+		// Get high-quality recording configuration
+		const recording_config = this.getHighQualityRecordingConfig({
+			quality: quality === "audio_only" ? "podcast_audio" : quality,
+			use_case: "podcast",
+			max_duration_hours: duration_hours,
+		});
+
+		// Configure AI features for podcast
+		const ai_config: AIConfig = {};
+		if (enable_transcription) {
+			ai_config.transcription = {
+				language: "en-US",
+				profanity_filter: false, // Allow natural speech for podcast
+			};
+		}
+		if (enable_summary) {
+			ai_config.summarization = {
+				text_format: "markdown",
+				summary_type: "interview", // Good for podcast format
+				word_limit: 500,
+			};
+		}
+
+		return this.createMeeting({
+			title,
+			preferred_region: "us-east-1", // Optimize for US-based recording
+			record_on_start: auto_start_recording,
+			recording_config,
+			ai_config: Object.keys(ai_config).length > 0 ? ai_config : undefined,
+			persist_chat: true, // Save chat for show notes
+			summarize_on_end: enable_summary,
+		});
+	}
+
+	/**
+	 * Create a meeting optimized for livestreaming with high-quality recording
+	 *
+	 * @param options - Livestream meeting options
+	 * @param options.title - Stream title
+	 * @param options.quality - Video quality: "4k", "1080p", "720p"
+	 * @param options.rtmp_url - RTMP endpoint for live streaming
+	 * @param options.duration_hours - Expected duration in hours (default: 3)
+	 * @param options.auto_start_recording - Whether to start recording immediately (default: true)
+	 * @param options.auto_start_stream - Whether to start streaming immediately (default: false)
+	 *
+	 * @returns Promise resolving to the created meeting optimized for livestreaming
+	 *
+	 * @example
+	 * ```typescript
+	 * // Create 4K livestream meeting
+	 * const meeting = await client.createLivestreamMeeting({
+	 *   title: "Live Coding Session",
+	 *   quality: "4k",
+	 *   rtmp_url: "rtmps://live.youtube.com/live2/YOUR_KEY",
+	 *   duration_hours: 2
+	 * });
+	 *
+	 * console.log('Livestream meeting created:', meeting.id);
+	 * ```
+	 */
+	async createLivestreamMeeting(options: {
+		title: string;
+		quality?: "4k" | "1080p" | "720p";
+		rtmp_url?: string;
+		duration_hours?: number;
+		auto_start_recording?: boolean;
+		auto_start_stream?: boolean;
+	}): Promise<Meeting> {
+		const {
+			title,
+			quality = "1080p",
+			rtmp_url,
+			duration_hours = 3,
+			auto_start_recording = true,
+			auto_start_stream = false,
+		} = options;
+
+		// Get high-quality recording configuration
+		const recording_config = this.getHighQualityRecordingConfig({
+			quality,
+			use_case: "livestream",
+			max_duration_hours: duration_hours,
+		});
+
+		// Add RTMP streaming configuration if provided
+		if (rtmp_url) {
+			recording_config.live_streaming_config = {
+				rtmp_url,
+			};
+		}
+
+		return this.createMeeting({
+			title,
+			preferred_region: "us-east-1", // Optimize for streaming
+			record_on_start: auto_start_recording,
+			live_stream_on_start: auto_start_stream,
+			recording_config,
+			persist_chat: true, // Save chat for engagement
+		});
 	}
 
 	/**
