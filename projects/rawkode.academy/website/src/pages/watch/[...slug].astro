@@ -27,58 +27,93 @@ let video: (typeof videos)[0] | undefined = videos.find(
 if (!video) {
 	const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);
 
-	const query = gql`
-		query GetVideoBySlug($slug: String!) {
-			getVideoBySlug(slug: $slug) {
-				id
-				slug
-				title
-				subtitle
-				description
-				publishedAt
-				streamUrl
-				thumbnailUrl
-				duration
-				technologies {
-					id
-					name
-					logo
-				}
-			}
-		}
-	`;
+        const query = gql`
+                query GetVideoBySlug($slug: String!) {
+                        getVideoBySlug(slug: $slug) {
+                                id
+                                slug
+                                title
+                                subtitle
+                                description
+                                publishedAt
+                                streamUrl
+                                thumbnailUrl
+                                duration
+                                technologies {
+                                        id
+                                        name
+                                        logo
+                                }
+                                episode {
+                                        show {
+                                                id
+                                                name
+                                                hosts {
+                                                        forename
+                                                        surname
+                                                }
+                                        }
+                                }
+                        }
+                }
+        `;
 
 	try {
-		const response = await graphQLClient.request<{
-			getVideoBySlug: {
-				id: string;
-				slug: string;
-				title: string;
-				subtitle?: string;
-				description: string;
-				publishedAt: string;
-				streamUrl: string;
-				thumbnailUrl: string;
-				duration: number;
-				technologies: Array<{
-					id: string;
-					name: string;
-					logo: string;
-				}>;
-			} | null;
-		}>(query, { slug });
+                const response = await graphQLClient.request<{
+                        getVideoBySlug: {
+                                id: string;
+                                slug: string;
+                                title: string;
+                                subtitle?: string;
+                                description: string;
+                                publishedAt: string;
+                                streamUrl: string;
+                                thumbnailUrl: string;
+                                duration: number;
+                                technologies: Array<{
+                                        id: string;
+                                        name: string;
+                                        logo: string;
+                                }>;
+                                episode?: {
+                                        show?: {
+                                                id: string;
+                                                name: string;
+                                                hosts?: Array<{
+                                                        forename: string;
+                                                        surname: string;
+                                                }> | null;
+                                        } | null;
+                                } | null;
+                        } | null;
+                }>(query, { slug });
 
-		if (response.getVideoBySlug) {
-			// Transform the GraphQL response to match the collection format
-			video = {
-				id: response.getVideoBySlug.slug,
-				collection: "videos",
-				data: response.getVideoBySlug,
-			} as (typeof videos)[0];
-		}
-	} catch (error) {
-		console.error("Error fetching video from GraphQL:", error);
-	}
+                if (response.getVideoBySlug) {
+                        // Transform the GraphQL response to match the collection format
+                        const { episode, ...rawVideo } = response.getVideoBySlug;
+                        const show = episode?.show
+                                ? {
+                                          id: episode.show.id,
+                                          name: episode.show.name,
+                                          hosts:
+                                                  episode.show.hosts?.map((host) => ({
+                                                          forename: host.forename,
+                                                          surname: host.surname,
+                                                  })) ?? [],
+                                  }
+                                : undefined;
+                        video = {
+                                id: rawVideo.slug,
+                                collection: "videos",
+                                data: {
+                                        ...rawVideo,
+                                        show,
+                                },
+                        } as (typeof videos)[0];
+                }
+        } catch (error) {
+                console.error("Error fetching video from GraphQL:", error);
+        }
 }
 
 // Handle 404 case if still not found
