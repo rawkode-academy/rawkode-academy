@@ -13,21 +13,30 @@ interface NavigationItem {
 }
 
 interface Technology {
-	id: string;
-	name: string;
-	description: string;
-	logo?: string;
+        id: string;
+        name: string;
+        description: string;
+        logo?: string;
 }
 
 interface GetTechnologiesResponse {
-	getTechnologies: Technology[];
+        getTechnologies: Technology[];
+}
+
+interface Show {
+        id: string;
+        name: string;
+}
+
+interface GetShowsResponse {
+        allShows?: (Show | null)[] | null;
 }
 
 interface Video {
-	id: string;
-	slug: string;
-	title: string;
-	description?: string;
+        id: string;
+        slug: string;
+        title: string;
+        description?: string;
 }
 
 interface GetVideosResponse {
@@ -80,7 +89,7 @@ async function generateNavigationItems(
                 {
                         href: "/shows",
                         title: "All Shows",
-                        category: "Videos",
+                        category: "Shows",
                         description: "Discover Rawkode Academy shows",
                 },
                 {
@@ -198,20 +207,49 @@ async function generateNavigationItems(
 		});
 
 		// Add courses
-		const courses = await getCollection("courses");
-		courses.forEach((course) => {
-			navigationItems.push({
-				id: `/courses/${course.id}`,
-				title: course.data.title,
-				description: course.data.description || "Learn this course",
-				href: `/courses/${course.id}`,
-				category: "Learning",
-				keywords: [course.data.title.toLowerCase(), "course", "learn"],
-			});
-		});
+                const courses = await getCollection("courses");
+                courses.forEach((course) => {
+                        navigationItems.push({
+                                id: `/courses/${course.id}`,
+                                title: course.data.title,
+                                description: course.data.description || "Learn this course",
+                                href: `/courses/${course.id}`,
+                                category: "Learning",
+                                keywords: [course.data.title.toLowerCase(), "course", "learn"],
+                        });
+                });
 
-		// Add technologies
-		const getTechnologiesQuery = /* GraphQL */ `
+                const endpoint = GRAPHQL_ENDPOINT;
+
+                // Add shows
+                const getShowsQuery = /* GraphQL */ `
+      query GetShows {
+        allShows {
+          id
+          name
+        }
+      }
+    `;
+
+                const showData = await request<GetShowsResponse>(endpoint, getShowsQuery);
+
+                showData.allShows?.forEach((show) => {
+                        if (!show?.id || !show?.name) {
+                                return;
+                        }
+
+                        navigationItems.push({
+                                id: `/shows/${show.id}`,
+                                title: show.name,
+                                description: "Browse episodes from this show",
+                                href: `/shows/${show.id}`,
+                                category: "Shows",
+                                keywords: [show.name.toLowerCase(), "show", "shows"],
+                        });
+                });
+
+                // Add technologies
+                const getTechnologiesQuery = /* GraphQL */ `
       query GetTechnologies($limit: Int) {
         getTechnologies(limit: $limit) {
           id
@@ -221,11 +259,10 @@ async function generateNavigationItems(
       }
     `;
 
-		const endpoint = GRAPHQL_ENDPOINT;
-		const techData = await request<GetTechnologiesResponse>(
-			endpoint,
-			getTechnologiesQuery,
-			{ limit: 100 }, // Fetch up to 100 technologies for command palette
+                const techData = await request<GetTechnologiesResponse>(
+                        endpoint,
+                        getTechnologiesQuery,
+                        { limit: 100 }, // Fetch up to 100 technologies for command palette
 		);
 
 		techData.getTechnologies.forEach((tech) => {
