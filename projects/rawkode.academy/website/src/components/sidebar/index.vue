@@ -52,10 +52,11 @@ const toggleSection = (section: keyof typeof sectionsExpanded.value) => {
 
 // Main navigation - core learning content
 const baseMenuItemsMain = [
-	{ name: "Articles", href: "/read", icon: NewspaperIcon },
-	{ name: "Videos", href: "/watch", icon: VideoCameraIcon },
-	{ name: "Courses", href: "/courses", icon: AcademicCapIcon },
-	{ name: "Technologies", href: "/technology", icon: CubeIcon },
+        { name: "Articles", href: "/read", icon: NewspaperIcon },
+        { name: "Videos", href: "/watch", icon: VideoCameraIcon },
+        { name: "Shows", href: "/shows", icon: VideoCameraIcon },
+        { name: "Courses", href: "/courses", icon: AcademicCapIcon },
+        { name: "Technologies", href: "/technology", icon: CubeIcon },
 ];
 
 // Community items

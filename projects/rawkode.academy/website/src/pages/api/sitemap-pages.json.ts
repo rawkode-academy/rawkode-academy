@@ -71,17 +71,23 @@ async function generateNavigationItems(
 			category: "About",
 			description: "About Rawkode Academy",
 		},
-		{
-			href: "/watch",
-			title: "All Videos",
-			category: "Videos",
-			description: "Browse all videos",
-		},
-		{
-			href: "/read",
-			title: "All Articles",
-			category: "Articles",
-			description: "Browse all articles",
+                {
+                        href: "/watch",
+                        title: "All Videos",
+                        category: "Videos",
+                        description: "Browse all videos",
+                },
+                {
+                        href: "/shows",
+                        title: "All Shows",
+                        category: "Videos",
+                        description: "Discover Rawkode Academy shows",
+                },
+                {
+                        href: "/read",
+                        title: "All Articles",
+                        category: "Articles",
+                        description: "Browse all articles",
 		},
 		{
 			href: "/series",
