@@ -1,0 +1,120 @@
+---
+export const prerender = false;
+
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
+import { ClientError, request } from "graphql-request";
+import ShowCard from "@/components/show/ShowCard.astro";
+import Page from "@/wrappers/page.astro";
+import type { ShowSummary } from "@/types/show";
+
+interface AllShowsResponse {
+        allShows?: (ShowSummary | null)[] | null;
+}
+
+const showsQuery = /* GraphQL */ `
+        query AllShows {
+                allShows {
+                        id
+                        name
+                        hosts {
+                                forename
+                                surname
+                        }
+                }
+        }
+`;
+
+Astro.response.headers.set(
+        "Cache-Control",
+        "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+);
+Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
+Astro.response.headers.set("Cache-Tag", "shows-page, shows-list");
+Astro.response.headers.set("X-Build-Time", new Date().toISOString());
+
+let shows: ShowSummary[] | null = null;
+let errorMessage: string | null = null;
+
+if (!GRAPHQL_ENDPOINT) {
+        errorMessage = "GraphQL endpoint is not configured.";
+} else {
+        try {
+                const data = await request<AllShowsResponse>(GRAPHQL_ENDPOINT, showsQuery);
+                shows = (data.allShows ?? []).filter((show): show is ShowSummary => Boolean(show?.id && show?.name));
+        } catch (error) {
+                console.error("Failed to fetch shows for /shows:", error);
+
+                if (error instanceof ClientError && error.response.errors?.[0]?.message) {
+                        errorMessage = error.response.errors[0].message;
+                } else if (error instanceof Error) {
+                        errorMessage = error.message;
+                } else if (typeof error === "string") {
+                        errorMessage = error;
+                } else {
+                        errorMessage = "Unable to load shows.";
+                }
+        }
+}
+
+const hasShows = Array.isArray(shows) && shows.length > 0;
+const isEmpty = Array.isArray(shows) && shows.length === 0;
+const isLoading = !errorMessage && shows === null;
+const placeholderTiles = Array.from({ length: 6 }, (_, index) => index);
+const showsToRender: ShowSummary[] = hasShows && shows ? shows : [];
+---
+
+<Page title="Shows">
+        <section class="py-12">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div class="text-center">
+                                <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+                                        Shows
+                                </h1>
+                                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400">
+                                        Browse our shows and meet the hosts behind every episode.
+                                </p>
+                        </div>
+
+                        <div class="mt-12">
+                                {isLoading && (
+                                        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                                {placeholderTiles.map((placeholder) => (
+                                                        <div
+                                                                data-placeholder-index={placeholder}
+                                                                class="h-36 animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
+                                                                aria-hidden="true"
+                                                        />
+                                                ))}
+                                        </div>
+                                )}
+
+                                {errorMessage && (
+                                        <div class="rounded-xl border border-red-200 bg-red-50 p-8 text-center dark:border-red-900/60 dark:bg-red-900/30">
+                                                <p class="text-base font-semibold text-red-700 dark:text-red-300">
+                                                        We couldn&apos;t load the shows right now.
+                                                </p>
+                                                <p class="mt-2 text-sm text-red-600 dark:text-red-200">
+                                                        {errorMessage}
+                                                </p>
+                                        </div>
+                                )}
+
+                                {isEmpty && (
+                                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-800 dark:bg-gray-900/40">
+                                                <p class="text-base text-gray-600 dark:text-gray-300">
+                                                        No shows available just yet. Please check back soon!
+                                                </p>
+                                        </div>
+                                )}
+
+                                {hasShows && (
+                                        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                                {showsToRender.map((show) => (
+                                                        <ShowCard show={show} />
+                                                ))}
+                                        </div>
+                                )}
+                        </div>
+                </div>
+        </section>
+</Page>

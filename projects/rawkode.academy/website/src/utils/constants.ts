@@ -53,10 +53,11 @@ export const ERROR_MESSAGES = {
 } as const;
 
 export const ROUTES = {
-	HOME: "/",
-	VIDEOS: "/watch",
-	ARTICLES: "/read",
-	COURSES: "/courses",
-	ABOUT: "/about",
-	SEARCH: "/search",
+        HOME: "/",
+        VIDEOS: "/watch",
+        SHOWS: "/shows",
+        ARTICLES: "/read",
+        COURSES: "/courses",
+        ABOUT: "/about",
+        SEARCH: "/search",
 } as const;
