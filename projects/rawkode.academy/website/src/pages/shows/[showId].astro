@@ -1,0 +1,227 @@
+---
+export const prerender = false;
+
+import { getCollection } from "astro:content";
+import { GRAPHQL_ENDPOINT } from "astro:env/server";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import VideoMetadata from "@/components/html/video-metadata.astro";
+import VideoFeed from "@/components/video/video-feed.astro";
+import Page from "@/wrappers/page.astro";
+import { GraphQLClient, gql } from "graphql-request";
+
+interface ShowHost {
+        forename?: string | null;
+        surname?: string | null;
+}
+
+interface EpisodeVideo {
+        slug: string;
+        title?: string | null;
+        description?: string | null;
+        thumbnailUrl?: string | null;
+        duration?: number | null;
+        publishedAt?: string | null;
+}
+
+interface ShowEpisode {
+        code?: string | null;
+        video?: EpisodeVideo | null;
+}
+
+interface ShowResponse {
+        showById?: {
+                id: string;
+                name: string;
+                description?: string | null;
+                hosts?: ShowHost[] | null;
+                episodes?: (ShowEpisode | null)[] | null;
+        } | null;
+}
+
+const { showId } = Astro.params;
+
+if (!showId) {
+        console.error("Missing showId parameter for show page.");
+        return new Response(null, { status: 404 });
+}
+
+const videos = await getCollection("videos");
+
+const videosForShow = videos.filter((video) => video.data.show?.id === showId);
+
+const fallbackHosts = videosForShow
+        .flatMap((video) => video.data.show?.hosts ?? [])
+        .reduce<ShowHost[]>((unique, host) => {
+                if (!host) {
+                        return unique;
+                }
+
+                const fullName = [host.forename, host.surname].filter(Boolean).join(" ");
+
+                if (!fullName) {
+                        return unique;
+                }
+
+                if (unique.some((existing) => [existing?.forename, existing?.surname].filter(Boolean).join(" ") === fullName)) {
+                        return unique;
+                }
+
+                return [...unique, host];
+        }, []);
+
+const fallbackShow: ShowResponse["showById"] | null = videosForShow.length
+        ? {
+                  id: showId,
+                  name: videosForShow[0]?.data.show?.name ?? showId,
+                  description: null,
+                  hosts: fallbackHosts,
+                  episodes: videosForShow.map((video) => ({
+                          code: null,
+                          video: {
+                                  slug: video.data.slug,
+                                  title: video.data.title,
+                                  description: video.data.description,
+                                  thumbnailUrl: video.data.thumbnailUrl,
+                                  duration: video.data.duration,
+                                  publishedAt: video.data.publishedAt,
+                          },
+                  })),
+          }
+        : null;
+
+let show: ShowResponse["showById"] | null = null;
+
+if (GRAPHQL_ENDPOINT) {
+        const client = new GraphQLClient(GRAPHQL_ENDPOINT);
+
+        const query = gql`
+                query GetShowById($id: String!) {
+                        showById(id: $id) {
+                                id
+                                name
+                                description
+                                hosts {
+                                        forename
+                                        surname
+                                }
+                                episodes {
+                                        code
+                                        video {
+                                                slug
+                                                title
+                                                description
+                                                thumbnailUrl
+                                                duration
+                                                publishedAt
+                                        }
+                                }
+                        }
+                }
+        `;
+
+        try {
+                const data = await client.request<ShowResponse>(query, { id: showId });
+                show = data.showById ?? null;
+        } catch (error) {
+                console.error(`Failed to fetch show ${showId}:`, error);
+        }
+}
+
+if (!show) {
+        show = fallbackShow;
+}
+
+if (!show) {
+        return new Response(null, { status: 404 });
+}
+
+Astro.response.headers.set(
+        "Cache-Control",
+        "public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
+);
+Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
+Astro.response.headers.set("Cache-Tag", `show-${show.id}, shows-page, show-detail`);
+Astro.response.headers.set("X-Build-Time", new Date().toISOString());
+
+const hostNames = (show.hosts ?? [])
+        .map((host) => [host?.forename, host?.surname].filter(Boolean).join(" "))
+        .filter((name): name is string => Boolean(name && name.trim().length > 0));
+
+const showDescription = show.description?.trim() || "Episode guide coming soon.";
+
+const validEpisodes = (show.episodes ?? []).filter(
+        (episode): episode is ShowEpisode & { video: EpisodeVideo } =>
+                Boolean(
+                        episode?.video?.slug &&
+                                episode.video.publishedAt &&
+                                episode.video.thumbnailUrl &&
+                                episode.video.title,
+                ),
+);
+
+const sortedEpisodes = [...validEpisodes].sort((a, b) => {
+        const aTime = a.video.publishedAt ? new Date(a.video.publishedAt).getTime() : 0;
+        const bTime = b.video.publishedAt ? new Date(b.video.publishedAt).getTime() : 0;
+        return bTime - aTime;
+});
+
+const feedVideos = sortedEpisodes.map((episode) => ({
+        title: episode.video.title ?? `Episode ${episode.code ?? ""}`.trim(),
+        thumbnailUrl: episode.video.thumbnailUrl ?? "",
+        duration: episode.video.duration ?? 0,
+        slug: episode.video.slug,
+        publishedAt: episode.video.publishedAt ?? new Date(0).toISOString(),
+}));
+
+const breadcrumbElements = [
+        { title: "Home", link: "/" },
+        { title: "Shows", link: "/shows" },
+        { title: show.name, link: `/shows/${show.id}` },
+];
+
+const pageTitle = `${show.name} Episodes`;
+---
+
+<Page title={pageTitle} description={showDescription}>
+        <VideoMetadata
+                slot="extra-head"
+                title={pageTitle}
+                description={showDescription}
+                isVideoList={true}
+        />
+
+        <section class="bg-gray-50 py-12 dark:bg-gray-950">
+                <div class="mx-auto flex max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:px-8">
+                        <div>
+                                <Breadcrumb elements={breadcrumbElements} />
+                        </div>
+
+                        <header class="space-y-4">
+                                <p class="text-sm font-semibold uppercase tracking-wide text-primary dark:text-primary-300">
+                                        Show
+                                </p>
+                                <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+                                        {show.name}
+                                </h1>
+                                {hostNames.length > 0 && (
+                                        <div class="flex flex-wrap gap-2">
+                                                {hostNames.map((host) => (
+                                                        <span class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/20 dark:text-primary-200">
+                                                                {host}
+                                                        </span>
+                                                ))}
+                                        </div>
+                                )}
+                                <p class="max-w-3xl text-lg text-gray-600 dark:text-gray-300">{showDescription}</p>
+                        </header>
+
+                        <div>
+                                <VideoFeed
+                                        title="Episodes"
+                                        description="Watch the latest episodes from this show."
+                                        videos={feedVideos}
+                                />
+                        </div>
+                </div>
+        </section>
+</Page>
