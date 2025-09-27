@@ -43,6 +43,10 @@ export default defineConfig({
 		ssr: {
 			external: ["node:crypto", "node:fs/promises", "node:path", "node:url"],
 		},
+		build: {
+			// Reduce noise from large UI bundle during build
+			chunkSizeWarningLimit: 3072,
+		},
 	},
 
 	env: {

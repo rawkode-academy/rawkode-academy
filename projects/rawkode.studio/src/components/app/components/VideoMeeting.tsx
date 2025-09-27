@@ -15,18 +15,8 @@ interface VideoMeetingProps {
 	onLeave?: () => void;
 }
 
-function MeetingUI({
-	showSetupScreen = false,
-	onLeave,
-}: {
-	showSetupScreen?: boolean;
-	onLeave?: () => void;
-}) {
+function MeetingUI({ showSetupScreen = false }: { showSetupScreen?: boolean }) {
 	const { meeting } = useRealtimeKitMeeting();
-
-	const handleLeave = () => {
-		onLeave?.();
-	};
 
 	return (
 		<div style={{ height: "100vh", width: "100%" }}>
@@ -34,40 +24,30 @@ function MeetingUI({
 				mode="fill"
 				meeting={meeting}
 				showSetupScreen={showSetupScreen}
-				onLeave={handleLeave}
 			/>
 		</div>
 	);
 }
 
-export function VideoMeeting({
-	meetingId,
-	authToken,
-	participantName,
-	preset,
-	showSetupScreen = false,
-	onLeave,
-}: VideoMeetingProps) {
+export function VideoMeeting(props: VideoMeetingProps) {
+	const { authToken, showSetupScreen = false } = props;
 	const [meeting, initMeeting] = useRealtimeKitClient();
 
 	useEffect(() => {
-		if (authToken && meetingId) {
+		if (authToken) {
 			initMeeting({
-				authToken: authToken,
-				meetingId: meetingId,
-				participantName: participantName,
-				preset: preset,
+				authToken,
 				defaults: {
 					audio: true,
 					video: true,
 				},
 			});
 		}
-	}, [authToken, meetingId, participantName, preset, initMeeting]);
+	}, [authToken, initMeeting]);
 
 	return (
 		<RealtimeKitProvider value={meeting}>
-			<MeetingUI showSetupScreen={showSetupScreen} onLeave={onLeave} />
+			<MeetingUI showSetupScreen={showSetupScreen} />
 		</RealtimeKitProvider>
 	);
 }

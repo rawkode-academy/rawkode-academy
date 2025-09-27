@@ -22,7 +22,7 @@ export const GET: APIRoute = async ({ locals, params }) => {
 		const chatData = await client.getSessionChat(sessionId);
 
 		// Fetch the actual CSV from the download URL
-		const response = await fetch(chatData.chat_download_url);
+		const response = await fetch(chatData.chatDownloadUrl);
 		if (!response.ok) {
 			throw new Error("Failed to download chat CSV");
 		}

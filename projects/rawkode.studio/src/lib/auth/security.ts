@@ -228,6 +228,8 @@ export function sanitizeInput(input: string): string {
 /**
  * Validate meeting session data for security
  */
+import type { MeetingSessionData } from "@/lib/meeting-session";
+
 export function validateSessionData(
 	sessionData: unknown,
 	_meetingId?: string,
@@ -238,7 +240,8 @@ export function validateSessionData(
 		return { isValid: false, reason: "Invalid session data format" };
 	}
 
-	const { token, participantName, preset, timestamp, sessionId } = sessionData;
+	const { token, participantName, preset, timestamp, sessionId } =
+		sessionData as Partial<MeetingSessionData>;
 
 	// Validate token
 	if (!token || typeof token !== "string" || token.length < 10) {

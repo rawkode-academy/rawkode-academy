@@ -15,10 +15,9 @@ export const POST: APIRoute = async ({ locals, request }) => {
 	try {
 		// Parse request body
 		const body = (await request.json()) as CreateMeetingOptions & {
-			recording_quality: "4k" | "1080p" | "720p" | "audio_only";
+			recording_quality: "1080p" | "720p" | "audio_only";
 			meeting_type: "general" | "interview";
 			max_duration_hours: number;
-			enable_transcription: boolean;
 		};
 
 		// Create RealtimeKit client
@@ -32,22 +31,20 @@ export const POST: APIRoute = async ({ locals, request }) => {
 		});
 
 		// Configure AI features if requested
-		const ai_config = body.enable_transcription
+		const ai_config = body.summarize_on_end
 			? {
 					transcription: {
 						language: "en-US" as const,
 						profanity_filter: false,
 					},
-					summarization: body.summarize_on_end
-						? {
-								text_format: "markdown" as const,
-								summary_type:
-									body.meeting_type === "interview"
-										? ("interview" as const)
-										: ("general" as const),
-								word_limit: 300,
-							}
-						: undefined,
+					summarization: {
+						text_format: "markdown" as const,
+						summary_type:
+							body.meeting_type === "interview"
+								? ("interview" as const)
+								: ("general" as const),
+						word_limit: 300,
+					},
 				}
 			: undefined;
 

@@ -43,7 +43,7 @@ function isSessionStorageAvailable(): boolean {
  */
 export function storeMeetingSession(
 	meetingId: string,
-	data: Omit<MeetingSessionData, "sessionId">,
+	data: Omit<MeetingSessionData, "sessionId" | "timestamp">,
 ): string {
 	if (!isSessionStorageAvailable()) {
 		throw new Error("Session storage not available");

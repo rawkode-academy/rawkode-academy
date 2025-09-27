@@ -13,10 +13,9 @@ export const POST: APIRoute = async ({ locals, request }) => {
 		// Parse request body
 		const body = (await request.json()) as {
 			title: string;
-			quality: "4k" | "1080p" | "720p" | "audio_only";
+			quality: "1080p" | "720p" | "audio_only";
 			duration_hours: number;
 			auto_start_recording: boolean;
-			enable_transcription: boolean;
 			enable_summary: boolean;
 		};
 
@@ -29,7 +28,6 @@ export const POST: APIRoute = async ({ locals, request }) => {
 			quality: body.quality,
 			duration_hours: body.duration_hours,
 			auto_start_recording: body.auto_start_recording,
-			enable_transcription: body.enable_transcription,
 			enable_summary: body.enable_summary,
 		});
 

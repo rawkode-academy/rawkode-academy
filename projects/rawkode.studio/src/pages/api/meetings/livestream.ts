@@ -13,7 +13,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 		// Parse request body
 		const body = (await request.json()) as {
 			title: string;
-			quality: "4k" | "1080p" | "720p";
+			quality: "1080p" | "720p";
 			rtmp_url?: string;
 			duration_hours: number;
 			auto_start_recording: boolean;
