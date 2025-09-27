@@ -1,23 +1,35 @@
 import type { Author, BaseEntity, Technology } from "./common";
 
 export interface Video extends BaseEntity {
-	title: string;
-	slug: string;
-	description: string;
-	duration: number; // in seconds
-	publishedAt: Date;
-	thumbnailUrl: string;
-	videoUrl: string;
-	manifestUrl?: string;
-	captionsUrl?: string;
-	author?: Author;
-	technologies?: Technology[];
-	tags?: string[];
-	viewCount?: number;
-	likeCount?: number;
-	commentCount?: number;
-	series?: VideoSeries;
-	chapters?: VideoChapter[];
+        title: string;
+        slug: string;
+        description: string;
+        duration: number; // in seconds
+        publishedAt: Date;
+        thumbnailUrl: string;
+        videoUrl: string;
+        manifestUrl?: string;
+        captionsUrl?: string;
+        author?: Author;
+        technologies?: Technology[];
+        tags?: string[];
+        viewCount?: number;
+        likeCount?: number;
+        commentCount?: number;
+        series?: VideoSeries;
+        chapters?: VideoChapter[];
+        show?: VideoShow;
+}
+
+export interface VideoShowHost {
+        forename: string;
+        surname: string;
+}
+
+export interface VideoShow {
+        id: string;
+        name: string;
+        hosts: VideoShowHost[];
 }
 
 export interface VideoSeries {

@@ -26,43 +26,81 @@ const graphQLQuery = gql`
         name
         logo
       }
+
+      episode {
+        show {
+          id
+          name
+          hosts {
+            forename
+            surname
+          }
+        }
+      }
     }
   }
 `;
 
-interface Video {
-	id: string;
-	slug: string;
-	title: string;
-	subtitle?: string;
-	description: string;
+interface GraphQLVideoShowHost {
+        forename: string;
+        surname: string;
+}
+
+interface GraphQLVideoShow {
+        id: string;
+        name: string;
+        hosts?: GraphQLVideoShowHost[] | null;
+}
+
+interface GraphQLVideo {
+        id: string;
+        slug: string;
+        title: string;
+        subtitle?: string;
+        description: string;
 	publishedAt: string;
 	streamUrl: string;
 	thumbnailUrl: string;
 	duration: number;
-	technologies: Array<{
-		id: string;
-		name: string;
-		logo: string;
-	}>;
+        technologies: Array<{
+                id: string;
+                name: string;
+                logo: string;
+        }>;
+        episode?: {
+                show?: GraphQLVideoShow | null;
+        } | null;
 }
 
 interface GraphQLResponse {
-	videos: Video[];
+        videos: GraphQLVideo[];
 }
 
 const videos = defineCollection({
-	loader: async () => {
-		try {
-			const { videos }: GraphQLResponse =
-				await graphQLClient.request(graphQLQuery);
+        loader: async () => {
+                try {
+                        const { videos }: GraphQLResponse =
+                                await graphQLClient.request(graphQLQuery);
 
-			return videos;
-		} catch (error) {
-			console.warn("Failed to fetch videos from GraphQL API:", error);
-			// Return empty array when GraphQL API is not accessible (e.g., during CI builds)
-			return [];
-		}
+                        return videos.map(({ episode, ...video }) => ({
+                                ...video,
+                                show: episode?.show
+                                        ? {
+                                                  id: episode.show.id,
+                                                  name: episode.show.name,
+                                                  hosts:
+                                                          episode.show.hosts?.map((host) => ({
+                                                                  forename: host.forename,
+                                                                  surname: host.surname,
+                                                          })) ?? [],
+                                          }
+                                        : undefined,
+                        }));
+                } catch (error) {
+                        console.warn("Failed to fetch videos from GraphQL API:", error);
+                        // Return empty array when GraphQL API is not accessible (e.g., during CI builds)
+                        return [];
+                }
 	},
 	schema: z.object({
 		id: z.string(),
@@ -70,18 +108,30 @@ const videos = defineCollection({
 		title: z.string(),
 		subtitle: z.string().optional(),
 		description: z.string(),
-		streamUrl: z.string(),
-		publishedAt: z.string(),
-		thumbnailUrl: z.string(),
-		duration: z.number(),
-		technologies: z.array(
-			z.object({
-				id: z.string(),
-				name: z.string(),
-				logo: z.string(),
-			}),
-		),
-	}),
+                streamUrl: z.string(),
+                publishedAt: z.string(),
+                thumbnailUrl: z.string(),
+                duration: z.number(),
+                technologies: z.array(
+                        z.object({
+                                id: z.string(),
+                                name: z.string(),
+                                logo: z.string(),
+                        }),
+                ),
+                show: z
+                        .object({
+                                id: z.string(),
+                                name: z.string(),
+                                hosts: z.array(
+                                        z.object({
+                                                forename: z.string(),
+                                                surname: z.string(),
+                                        }),
+                                ),
+                        })
+                        .optional(),
+        }),
 });
 
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections
