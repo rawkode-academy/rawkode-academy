@@ -38,6 +38,7 @@ jobs:
 
       - name: Build Storybook
         working-directory: projects/rawkode.academy/website
+        timeout-minutes: 4
         run: |
           dagger <<.
             . | buildStorybook | export storybook-static
