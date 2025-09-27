@@ -9,6 +9,7 @@ import {
 	validateMeetingAccess,
 } from "@/lib/auth/security";
 import { getRealtimeKitClient } from "@/lib/realtime-kit";
+import type { Meeting } from "@/lib/realtime-kit/client";
 
 export const GET: APIRoute = async ({ locals, params }) => {
 	// Check if user has director role for viewing participants
@@ -101,7 +102,7 @@ export const POST: APIRoute = async ({
 
 		// Get meeting to validate access
 		const client = getRealtimeKitClient();
-		let meeting: unknown;
+		let meeting: Meeting;
 		try {
 			meeting = await client.getMeeting(meetingId);
 		} catch (error) {
@@ -124,7 +125,7 @@ export const POST: APIRoute = async ({
 		}
 
 		// Validate meeting access
-		const accessResult = validateMeetingAccess(user, meeting, "join");
+		const accessResult = validateMeetingAccess(user || null, meeting, "join");
 		if (!accessResult.canAccess) {
 			logSecurityEvent(
 				createAuditLog({
@@ -170,7 +171,7 @@ export const POST: APIRoute = async ({
 
 		// Generate secure participant ID
 		const secureParticipantId =
-			custom_participant_id || generateParticipantId(user);
+			custom_participant_id || generateParticipantId(user || null);
 
 		// Add participant with validated data
 		const participant = await client.addParticipant(meetingId, {

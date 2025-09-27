@@ -96,7 +96,7 @@ function MeetingJoinContent() {
 
 			// Store sensitive data in secure session storage
 			try {
-				const sessionId = await storeMeetingSession(meetingId, {
+				const sessionId = storeMeetingSession(meetingId, {
 					token: participantData.token,
 					participantName: sanitizedName,
 					preset,

@@ -248,6 +248,25 @@ export interface ChatCsvIndices {
 	payloadType: number;
 }
 
+// Minimal types for maintenance utilities
+export interface SessionParticipantItem {
+	id: string;
+	user_id?: string;
+	custom_participant_id?: string;
+	display_name?: string;
+	preset_name?: string;
+	joined_at?: string;
+	left_at?: string | null;
+}
+
+export interface PresetItem {
+	name: string;
+	permissions?: {
+		is_recorder?: boolean;
+		recorder_type?: "RECORDER" | "LIVESTREAMER" | "NONE";
+	};
+}
+
 export interface ApiResponse<T> {
 	success: boolean;
 	data?: T;
@@ -493,6 +512,7 @@ export class RealtimeKitClient {
 		path: string,
 		options: RequestInit = {},
 		method?: string,
+		nestedKey?: string,
 	): Promise<{
 		data: T[];
 		paging?: PagingInfo;
@@ -531,12 +551,17 @@ export class RealtimeKitClient {
 				);
 			}
 
-			const result = await response.json();
+			const result: unknown = await response.json();
 
-			if (!result.success) {
+			if (
+				typeof result === "object" &&
+				result !== null &&
+				"success" in result &&
+				(result as { success?: boolean }).success === false
+			) {
 				throw new RealtimeKitError(
-					result.error?.code || 500,
-					result.error?.message ||
+					(result as { error?: { code?: number } }).error?.code || 500,
+					(result as { error?: { message?: string } }).error?.message ||
 						"Paginated request failed - API returned success: false",
 					{
 						method: method || options.method || "GET",
@@ -546,28 +571,31 @@ export class RealtimeKitClient {
 				);
 			}
 
-			// Handle different response structures from RealtimeKit API
-			let responseData: unknown[] = [];
+			// Extract array data
+			let responseData: T[] = [];
+			let paging: PagingInfo | undefined;
 
-			if (Array.isArray(result.data)) {
-				// Direct array response
-				responseData = result.data;
-			} else if (result.data && Array.isArray(result.data.sessions)) {
-				// Nested sessions array (common for sessions endpoint)
-				responseData = result.data.sessions;
-			} else if (result.data && typeof result.data === "object") {
-				// Check if any property contains an array
-				for (const [_key, value] of Object.entries(result.data)) {
-					if (Array.isArray(value)) {
-						responseData = value;
-						break;
+			if (typeof result === "object" && result !== null && "data" in result) {
+				const root = result as { data: unknown; paging?: PagingInfo };
+				paging = root.paging;
+				if (Array.isArray(root.data)) {
+					responseData = root.data as T[];
+				} else if (
+					root.data &&
+					typeof root.data === "object" &&
+					nestedKey &&
+					nestedKey in (root.data as Record<string, unknown>)
+				) {
+					const nested = (root.data as Record<string, unknown>)[nestedKey];
+					if (Array.isArray(nested)) {
+						responseData = nested as T[];
 					}
 				}
 			}
 
 			return {
 				data: responseData,
-				paging: result.paging || {
+				paging: paging || {
 					total_count: 0,
 					start_offset: 0,
 					end_offset: 0,
@@ -756,6 +784,7 @@ export class RealtimeKitClient {
 			`/meetings${query ? `?${query}` : ""}`,
 			{},
 			"listMeetings",
+			"meetings",
 		);
 	}
 
@@ -1021,6 +1050,51 @@ export class RealtimeKitClient {
 	}
 
 	/**
+	 * Get participants for an active session by session ID
+	 */
+	async getSessionParticipants(
+		sessionId: string,
+		params?: { page_no?: number; per_page?: number },
+	): Promise<{
+		data: SessionParticipantItem[];
+		paging?: PagingInfo;
+	}> {
+		if (!sessionId || typeof sessionId !== "string") {
+			throw new Error("Valid sessionId is required");
+		}
+
+		const queryParams = new URLSearchParams();
+		if (params?.page_no) queryParams.append("page_no", String(params.page_no));
+		if (params?.per_page)
+			queryParams.append("per_page", String(params.per_page));
+
+		const query = queryParams.toString();
+		return this.requestPaginated<SessionParticipantItem>(
+			`/sessions/${sessionId}/participants${query ? `?${query}` : ""}`,
+			{},
+			"getSessionParticipants",
+			"participants",
+		);
+	}
+
+	/**
+	 * Get organization presets (for mapping recorder presets)
+	 */
+	async getPresets(params?: { page_no?: number; per_page?: number }): Promise<{
+		data: PresetItem[];
+		paging?: PagingInfo;
+	}> {
+		const queryParams = new URLSearchParams();
+		if (params?.page_no) queryParams.append("page_no", String(params.page_no));
+		if (params?.per_page)
+			queryParams.append("per_page", String(params.per_page));
+		const query = queryParams.toString();
+		return this.requestPaginated<PresetItem>(
+			`/presets${query ? `?${query}` : ""}`,
+		);
+	}
+
+	/**
 	 * Get active livestream for a meeting
 	 */
 	async getActiveLivestream(meetingId: string): Promise<{
@@ -1094,7 +1168,7 @@ export class RealtimeKitClient {
 				// 500 might indicate the session already ended or other server issues
 				// We should not fail the entire stop operation for these cases
 				if (errorCode === 404) {
-					console.log("No active session to kick participants from (404)");
+					// No active session to kick participants from – treat as success, avoid log spam
 					results.participantsKicked = true;
 				} else if (errorCode === 500) {
 					console.warn(
@@ -1147,7 +1221,7 @@ export class RealtimeKitClient {
 				const errorCode = (error as RealtimeKitError)?.code;
 				// 404 means no active session, 500 might mean session already ended
 				if (errorCode === 404 || errorCode === 500) {
-					console.log(`No active session for recordings check (${errorCode})`);
+					// No active session – implies no recordings; avoid log spam
 					results.recordingsStopped = true; // No active session means no recordings
 				} else {
 					console.error("Failed to check recordings:", error);
@@ -1173,7 +1247,7 @@ export class RealtimeKitClient {
 				// 404 or 500 errors mean no active livestream or server issues
 				const errorCode = (error as RealtimeKitError)?.code;
 				if (errorCode === 404 || errorCode === 500) {
-					console.log(`No active livestream to stop (${errorCode})`);
+					// No active livestream – nothing to stop; avoid log spam
 					results.livestreamsStopped = true;
 				} else {
 					console.error("Failed to stop livestream:", error);
@@ -1297,6 +1371,9 @@ export class RealtimeKitClient {
 		const query = queryParams.toString();
 		return this.requestPaginated(
 			`/meetings/${meetingId}/participants${query ? `?${query}` : ""}`,
+			{},
+			"getParticipants",
+			"participants",
 		);
 	}
 
@@ -1329,6 +1406,9 @@ export class RealtimeKitClient {
 		const query = queryParams.toString();
 		return this.requestPaginated<Recording>(
 			`/recordings${query ? `?${query}` : ""}`,
+			{},
+			"getRecordings",
+			"recordings",
 		);
 	}
 
@@ -1408,6 +1488,9 @@ export class RealtimeKitClient {
 			const query = queryParams.toString();
 			const result = await this.requestPaginated<SessionRawData>(
 				`/sessions${query ? `?${query}` : ""}`,
+				{},
+				"getSessions",
+				"sessions",
 			);
 
 			// Validate that result.data is an array before mapping
@@ -1735,7 +1818,7 @@ export class RealtimeKitClient {
 		maxRetries: number = 3,
 		baseDelay: number = 1000,
 	): Promise<T> {
-		let lastError: Error;
+		let lastError: Error | undefined;
 
 		for (let attempt = 0; attempt <= maxRetries; attempt++) {
 			try {
@@ -1940,7 +2023,7 @@ export class RealtimeKitClient {
 	 * Generate high-quality recording configuration for podcasts and livestreams
 	 *
 	 * @param options - Recording quality options
-	 * @param options.quality - Recording quality preset: "4k", "1080p", "720p", "podcast_audio"
+	 * @param options.quality - Recording quality preset: "1080p", "720p", "audio_only"
 	 * @param options.use_case - Use case: "podcast", "livestream", "interview"
 	 * @param options.storage_config - Optional external storage configuration
 	 * @param options.max_duration_hours - Maximum recording duration in hours (default: 4)
@@ -1949,14 +2032,14 @@ export class RealtimeKitClient {
 	 *
 	 * @example
 	 * ```typescript
-	 * // 4K recording for high-quality podcast
+	 * // 1080p recording for high-quality podcast
 	 * const config = client.getHighQualityRecordingConfig({
-	 *   quality: "4k",
+	 *   quality: "1080p",
 	 *   use_case: "podcast",
 	 *   max_duration_hours: 2
 	 * });
 	 *
-	 * // Create meeting with 4K recording
+	 * // Create meeting with 1080p recording
 	 * const meeting = await client.createMeeting({
 	 *   title: "Podcast Episode 1",
 	 *   record_on_start: true,
@@ -1965,7 +2048,7 @@ export class RealtimeKitClient {
 	 * ```
 	 */
 	getHighQualityRecordingConfig(options: {
-		quality: "4k" | "1080p" | "720p" | "podcast_audio";
+		quality: "1080p" | "720p" | "audio_only";
 		use_case: "podcast" | "livestream" | "interview";
 		storage_config?: StorageConfig;
 		max_duration_hours?: number;
@@ -1985,25 +2068,12 @@ export class RealtimeKitClient {
 
 		// Configure video based on quality preset
 		switch (quality) {
-			case "4k":
-				config.video_config = {
-					codec: "H264",
-					width: 3840,
-					height: 2160,
-					bitrate: 25000, // 25 Mbps for 4K
-					frame_rate: 30,
-					quality_preset: "ultra_hd",
-					export_file: true,
-				};
-				break;
 			case "1080p":
 				config.video_config = {
 					codec: "H264",
 					width: 1920,
 					height: 1080,
-					bitrate: 8000, // 8 Mbps for 1080p
-					frame_rate: 30,
-					quality_preset: use_case === "podcast" ? "podcast" : "livestream",
+					// bitrate/frame_rate/quality_preset not supported by API schema
 					export_file: true,
 				};
 				break;
@@ -2012,13 +2082,11 @@ export class RealtimeKitClient {
 					codec: "H264",
 					width: 1280,
 					height: 720,
-					bitrate: 5000, // 5 Mbps for 720p
-					frame_rate: 30,
-					quality_preset: "standard",
+					// bitrate/frame_rate/quality_preset not supported by API schema
 					export_file: true,
 				};
 				break;
-			case "podcast_audio":
+			case "audio_only":
 				// Audio-only configuration for podcast
 				config.video_config = undefined;
 				break;
@@ -2030,9 +2098,7 @@ export class RealtimeKitClient {
 				config.audio_config = {
 					codec: "AAC",
 					channel: "stereo",
-					bitrate: 320, // High-quality audio for podcast
-					sample_rate: 48000, // Professional audio sample rate
-					quality_preset: "podcast",
+					// bitrate/sample_rate/quality_preset not supported by API schema
 					export_file: true,
 				};
 				break;
@@ -2040,9 +2106,7 @@ export class RealtimeKitClient {
 				config.audio_config = {
 					codec: "AAC",
 					channel: "stereo",
-					bitrate: 256, // Good quality for livestream
-					sample_rate: 44100,
-					quality_preset: "music",
+					// bitrate/sample_rate/quality_preset not supported by API schema
 					export_file: true,
 				};
 				break;
@@ -2050,9 +2114,7 @@ export class RealtimeKitClient {
 				config.audio_config = {
 					codec: "AAC",
 					channel: "stereo",
-					bitrate: 192, // Clear voice quality
-					sample_rate: 44100,
-					quality_preset: "voice",
+					// bitrate/sample_rate/quality_preset not supported by API schema
 					export_file: true,
 				};
 				break;
@@ -2070,26 +2132,24 @@ export class RealtimeKitClient {
 	}
 
 	/**
-	 * Create a meeting optimized for podcast recording with 4K support
+	 * Create a meeting optimized for podcast recording
 	 *
 	 * @param options - Podcast meeting options
 	 * @param options.title - Podcast episode title
-	 * @param options.quality - Video quality: "4k", "1080p", "720p", "audio_only"
+	 * @param options.quality - Video quality: "1080p", "720p", "audio_only"
 	 * @param options.duration_hours - Expected duration in hours (default: 2)
 	 * @param options.auto_start_recording - Whether to start recording immediately (default: true)
-	 * @param options.enable_transcription - Enable AI transcription (default: true)
-	 * @param options.enable_summary - Enable AI summary (default: true)
+	 * @param options.enable_summary - Enable AI summary (also enables transcription) (default: true)
 	 *
 	 * @returns Promise resolving to the created meeting optimized for podcast recording
 	 *
 	 * @example
 	 * ```typescript
-	 * // Create 4K podcast meeting
+	 * // Create podcast meeting
 	 * const meeting = await client.createPodcastMeeting({
 	 *   title: "Tech Talk Episode 5",
-	 *   quality: "4k",
+	 *   quality: "1080p",
 	 *   duration_hours: 1.5,
-	 *   enable_transcription: true
 	 * });
 	 *
 	 * console.log('Podcast meeting created:', meeting.id);
@@ -2097,10 +2157,9 @@ export class RealtimeKitClient {
 	 */
 	async createPodcastMeeting(options: {
 		title: string;
-		quality?: "4k" | "1080p" | "720p" | "audio_only";
+		quality?: "1080p" | "720p" | "audio_only";
 		duration_hours?: number;
 		auto_start_recording?: boolean;
-		enable_transcription?: boolean;
 		enable_summary?: boolean;
 	}): Promise<Meeting> {
 		const {
@@ -2108,29 +2167,27 @@ export class RealtimeKitClient {
 			quality = "1080p",
 			duration_hours = 2,
 			auto_start_recording = true,
-			enable_transcription = true,
 			enable_summary = true,
 		} = options;
 
 		// Get high-quality recording configuration
 		const recording_config = this.getHighQualityRecordingConfig({
-			quality: quality === "audio_only" ? "podcast_audio" : quality,
+			quality,
 			use_case: "podcast",
 			max_duration_hours: duration_hours,
 		});
 
 		// Configure AI features for podcast
 		const ai_config: AIConfig = {};
-		if (enable_transcription) {
+		if (enable_summary) {
+			// Summary requires transcription — enable both together
 			ai_config.transcription = {
 				language: "en-US",
-				profanity_filter: false, // Allow natural speech for podcast
+				profanity_filter: false,
 			};
-		}
-		if (enable_summary) {
 			ai_config.summarization = {
 				text_format: "markdown",
-				summary_type: "interview", // Good for podcast format
+				summary_type: "interview",
 				word_limit: 500,
 			};
 		}
@@ -2151,7 +2208,7 @@ export class RealtimeKitClient {
 	 *
 	 * @param options - Livestream meeting options
 	 * @param options.title - Stream title
-	 * @param options.quality - Video quality: "4k", "1080p", "720p"
+	 * @param options.quality - Video quality: "1080p", "720p"
 	 * @param options.rtmp_url - RTMP endpoint for live streaming
 	 * @param options.duration_hours - Expected duration in hours (default: 3)
 	 * @param options.auto_start_recording - Whether to start recording immediately (default: true)
@@ -2161,10 +2218,10 @@ export class RealtimeKitClient {
 	 *
 	 * @example
 	 * ```typescript
-	 * // Create 4K livestream meeting
+	 * // Create livestream meeting
 	 * const meeting = await client.createLivestreamMeeting({
 	 *   title: "Live Coding Session",
-	 *   quality: "4k",
+	 *   quality: "1080p",
 	 *   rtmp_url: "rtmps://live.youtube.com/live2/YOUR_KEY",
 	 *   duration_hours: 2
 	 * });
@@ -2174,7 +2231,7 @@ export class RealtimeKitClient {
 	 */
 	async createLivestreamMeeting(options: {
 		title: string;
-		quality?: "4k" | "1080p" | "720p";
+		quality?: "1080p" | "720p";
 		rtmp_url?: string;
 		duration_hours?: number;
 		auto_start_recording?: boolean;

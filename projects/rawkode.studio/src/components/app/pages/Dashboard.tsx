@@ -8,7 +8,7 @@ import {
 	type SortingState,
 	useReactTable,
 } from "@tanstack/react-table";
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { ShareMeetingDialog } from "@/components/app/components/ShareMeetingDialog";
 import { useAuth } from "@/components/app/contexts/AuthContext";
@@ -38,7 +38,7 @@ function CreateMeetingDialog() {
 	const recordingQualityId = useId();
 	const maxDurationId = useId();
 	const [open, setOpen] = useState(false);
-	const [formData, setFormData] = useState({
+	const initialFormState = {
 		title: "",
 		preferred_region: "" as PreferredRegion | "",
 		record_on_start: false,
@@ -46,15 +46,22 @@ function CreateMeetingDialog() {
 		persist_chat: false,
 		summarize_on_end: false,
 		// New recording quality options
-		recording_quality: "1080p" as "4k" | "1080p" | "720p" | "audio_only",
+		recording_quality: "1080p" as "1080p" | "720p" | "audio_only",
 		meeting_type: "general" as
 			| "podcast"
 			| "livestream"
 			| "interview"
 			| "general",
-		enable_transcription: true,
 		max_duration_hours: 2,
-	});
+	};
+	const [formData, setFormData] = useState(initialFormState);
+
+	const handleOpenChange = (nextOpen: boolean) => {
+		setOpen(nextOpen);
+		if (!nextOpen) {
+			setFormData(initialFormState);
+		}
+	};
 
 	const createMeetingMutation = useMutation({
 		mutationFn: async () => {
@@ -86,7 +93,6 @@ function CreateMeetingDialog() {
 							quality: formData.recording_quality,
 							duration_hours: formData.max_duration_hours,
 							auto_start_recording: formData.record_on_start,
-							enable_transcription: formData.enable_transcription,
 							enable_summary: formData.summarize_on_end,
 						}),
 					});
@@ -132,7 +138,6 @@ function CreateMeetingDialog() {
 							recording_quality: formData.recording_quality,
 							meeting_type: formData.meeting_type,
 							max_duration_hours: formData.max_duration_hours,
-							enable_transcription: formData.enable_transcription,
 						}),
 					});
 
@@ -167,22 +172,8 @@ function CreateMeetingDialog() {
 			// Invalidate and refetch meetings list
 			queryClient.invalidateQueries({ queryKey: ["meetings"] });
 
-			// Reset form
-			setFormData({
-				title: "",
-				preferred_region: "",
-				record_on_start: false,
-				live_stream_on_start: false,
-				persist_chat: false,
-				summarize_on_end: false,
-				recording_quality: "1080p",
-				meeting_type: "general",
-				enable_transcription: true,
-				max_duration_hours: 2,
-			});
-
-			// Close dialog
-			setOpen(false);
+			// Reset form and close dialog
+			handleOpenChange(false);
 
 			// Navigate to the new meeting
 			if (data.id) {
@@ -200,7 +191,7 @@ function CreateMeetingDialog() {
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
 				<Button variant="gradient" size="default">
 					<svg
@@ -258,7 +249,7 @@ function CreateMeetingDialog() {
 							</label>
 							<select
 								id={regionId}
-								value={formData.preferred_region}
+								value={(formData.preferred_region ?? "") as string}
 								onChange={(e) =>
 									setFormData({
 										...formData,
@@ -293,6 +284,7 @@ function CreateMeetingDialog() {
 									<input
 										type="checkbox"
 										checked={formData.record_on_start}
+										disabled={formData.live_stream_on_start}
 										onChange={(e) =>
 											setFormData({
 												...formData,
@@ -303,11 +295,9 @@ function CreateMeetingDialog() {
 													: formData.live_stream_on_start,
 											})
 										}
-										className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+										className="h-4 w-4 rounded border-input text-primary focus:ring-ring disabled:opacity-50"
 									/>
-									<span
-										className={`text-sm ${formData.live_stream_on_start ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
-									>
+									<span className="text-sm text-muted-foreground">
 										Start recording automatically
 									</span>
 								</label>
@@ -365,7 +355,7 @@ function CreateMeetingDialog() {
 													}
 													className="flex h-8 w-full rounded-md border border-input bg-background text-foreground px-2 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 												>
-													<option value="4k">4K Ultra HD (3840×2160)</option>
+													{/* 4K removed: not supported by API schema */}
 													<option value="1080p">Full HD (1920×1080)</option>
 													<option value="720p">HD (1280×720)</option>
 													<option value="audio_only">
@@ -399,34 +389,13 @@ function CreateMeetingDialog() {
 												/>
 											</div>
 
-											<label className="flex items-center gap-2 cursor-pointer">
-												<input
-													type="checkbox"
-													checked={formData.enable_transcription}
-													onChange={(e) =>
-														setFormData({
-															...formData,
-															enable_transcription: e.target.checked,
-														})
-													}
-													className="h-3 w-3 rounded border-input text-primary focus:ring-ring"
-												/>
-												<span className="text-xs text-muted-foreground">
-													Enable AI transcription
-												</span>
-											</label>
+											{/* AI transcription checkbox removed. Summary at end implies transcription. */}
 										</div>
 
 										{/* Quality preview information */}
 										<div className="text-xs text-muted-foreground bg-background/50 p-2 rounded">
 											<div className="font-medium mb-1">Quality Preview:</div>
-											{formData.recording_quality === "4k" && (
-												<div>
-													• Video: 3840×2160 @ 30fps, ~25Mbps
-													<br />• Audio: 320kbps stereo, 48kHz
-													<br />• Estimated file size: ~11GB/hour
-												</div>
-											)}
+											{/* 4K preview removed */}
 											{formData.recording_quality === "1080p" && (
 												<div>
 													• Video: 1920×1080 @ 30fps, ~8Mbps
@@ -456,6 +425,7 @@ function CreateMeetingDialog() {
 									<input
 										type="checkbox"
 										checked={formData.live_stream_on_start}
+										disabled={formData.record_on_start}
 										onChange={(e) =>
 											setFormData({
 												...formData,
@@ -466,11 +436,9 @@ function CreateMeetingDialog() {
 													: formData.record_on_start,
 											})
 										}
-										className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
+										className="h-4 w-4 rounded border-input text-primary focus:ring-ring disabled:opacity-50"
 									/>
-									<span
-										className={`text-sm ${formData.record_on_start ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
-									>
+									<span className="text-sm text-muted-foreground">
 										Start livestream automatically
 									</span>
 								</label>
@@ -515,7 +483,7 @@ function CreateMeetingDialog() {
 						<Button
 							type="button"
 							variant="outline"
-							onClick={() => setOpen(false)}
+							onClick={() => handleOpenChange(false)}
 							disabled={createMeetingMutation.isPending}
 						>
 							Cancel
@@ -736,6 +704,31 @@ export function Dashboard() {
 		page: pagination.pageIndex + 1,
 		perPage: pagination.pageSize,
 	});
+
+	// Kick off background cleanup when directors open the dashboard
+	const cleanupMutation = useMutation({
+		mutationFn: async () => {
+			const res = await fetch("/api/maintenance/cleanup", {
+				method: "GET",
+				credentials: "include",
+			});
+			if (!res.ok) {
+				throw new Error(`Cleanup failed: ${res.status}`);
+			}
+			return res.json();
+		},
+	});
+
+	// Ensure cleanup runs only once per mount after user is available
+	const hasTriggeredCleanupRef = useRef(false);
+	useEffect(() => {
+		if (hasTriggeredCleanupRef.current) return;
+		if (!user) return;
+		if (user.roles?.includes("director") && cleanupMutation.isIdle) {
+			cleanupMutation.mutate();
+			hasTriggeredCleanupRef.current = true;
+		}
+	}, [user, cleanupMutation.isIdle, cleanupMutation.mutate]);
 
 	const columns = useMemo<ColumnDef<Meeting>[]>(
 		() => [

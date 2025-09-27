@@ -36,8 +36,15 @@ export function ShareMeetingDialog({
 		}
 	};
 
+	const handleOpenChange = (nextOpen: boolean) => {
+		setIsOpen(nextOpen);
+		if (!nextOpen) {
+			setCopiedUrl(false);
+		}
+	};
+
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
 				{children || (
 					<Button variant="outline" size="sm">
@@ -106,7 +113,7 @@ export function ShareMeetingDialog({
 
 					{/* Actions */}
 					<div className="flex justify-end space-x-2 pt-2">
-						<Button variant="outline" onClick={() => setIsOpen(false)}>
+						<Button variant="outline" onClick={() => handleOpenChange(false)}>
 							Close
 						</Button>
 						<Button
