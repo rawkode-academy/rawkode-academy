@@ -1,0 +1,299 @@
+---
+title: "Building a Production-Ready CUE Library for Rust"
+description: "The technical journey of building cuengine: a high-performance FFI bridge between Rust and Go's CUE evaluator, complete with memory safety guarantees, structured error handling, and production-grade features."
+type: article
+openGraph:
+  title: "Building a Production-Ready CUE Library for Rust"
+  subtitle: "FFI, memory safety, and production-grade architecture"
+slug: building-rust-cue-library
+publishedAt: 2025-09-30
+cover:
+  image: "./cover.png"
+  alt: "Making CUE Available in Rust - Everything is better with Rust. Ferris the crab and the Gopher celebrating together with text overlaid."
+isDraft: false
+authors:
+  - rawkode
+resources:
+  - id: "1"
+    title: "cuengine on crates.io"
+    description: "Install cuengine in your Rust project"
+    type: url
+    url: "https://crates.io/crates/cuengine"
+    category: documentation
+  - id: "2"
+    title: "cuengine API Documentation"
+    description: "Complete API reference and usage examples"
+    type: url
+    url: "https://docs.rs/crate/cuengine/latest"
+    category: documentation
+  - id: "3"
+    title: "cuenv GitHub Repository"
+    description: "Complete source code and documentation"
+    type: url
+    url: "https://github.com/cuenv/cuenv"
+    category: documentation
+  - id: "4"
+    title: "CUE Language Documentation"
+    description: "Official CUE language specification and guides"
+    type: url
+    url: "https://cuelang.org"
+    category: documentation
+  - id: "5"
+    title: "Rust FFI Guide"
+    description: "The Rust FFI Omnibus - a comprehensive guide to FFI in Rust"
+    type: url
+    url: "https://jakegoulding.com/rust-ffi-omnibus/"
+    category: documentation
+---
+
+I love shiny things, and when it comes to build tools, I'm always looking for a better way. That's what led me to create [cuenv](https://github.com/cuenv/cuenv), a modern toolchain built around CUE's powerful constraint-based system. There was just one problem: I'm building `cuenv` in Rust, and CUE's only mature evaluator is written in Go.
+
+So, what do you do when you want the best of both worlds? You build a bridge.
+
+This is the story of how I built **cuengine**, a high-performance, production-grade FFI library that lets Rust speak Go. We'll dive into the nitty-gritty of FFI, memory safety, and how to create a safe, ergonomic API on top of a completely different runtime. Let's get into it.
+
+## The Core Problem: Two Runtimes, One Library
+
+If you haven't used it, CUE (Configure, Unify, Execute) is a fantastically powerful configuration language with a sophisticated type system. The official Go implementation is mature and battle-tested. But my build toolchain, `cuenv`, had to be in Rust. For me, the reasons were clear:
+
+-   **Memory Safety**: Rust's ownership model wipes out entire classes of bugs.
+-   **Performance**: I wanted zero-cost abstractions and predictable performance.
+-   **Ecosystem**: The crate ecosystem for CLI tools and system integration is second to none.
+-   **Cross-Compilation**: First-class support for targeting multiple platforms is a must.
+
+So the question was never *if* I should use Rust, but *how* to bring CUE along for the ride.
+
+### Why Not Just Port CUE to Rust?
+
+Look, I'm not a masochist—at least not for this kind of punishment. Porting an entire language implementation is a multi-year odyssey of parser rewrites, type system reimplementation, and endless compatibility testing. Even if I pulled it off, I'd be chained to maintaining it against every upstream CUE change forever.
+
+No, thanks. I chose pragmatism: build a thin, safe FFI layer that uses the existing Go implementation while exposing a clean, native Rust API.
+
+## My Solution: A Three-Layer Architecture
+
+I settled on an architecture with three carefully designed layers, each with a very specific job:
+
+### Layer 1: The Go Bridge (`bridge.go`)
+
+Over on the Go side, I wrote a simple bridge that handles the CUE evaluation and hands back structured JSON responses.
+
+```go
+type BridgeResponse struct {
+    Version string           `json:"version"`
+    Ok      *json.RawMessage `json:"ok,omitempty"`
+    Error   *BridgeError     `json:"error,omitempty"`
+}
+
+//export cue_eval_package
+func cue_eval_package(dirPath *C.char, packageName *C.char) *C.char {
+    // Evaluate CUE and return structured envelope
+}
+```
+
+A few key decisions made this work reliably:
+
+-   **Structured Envelopes**: Every response is a predictable JSON object. You either get success data (`ok`) or a typed error (`error`). No guessing.
+-   **Ordered JSON**: CUE's field order can be significant, so I couldn't rely on Go's randomized map ordering. I had to build the JSON string manually to keep it deterministic.
+-   **Panic Recovery**: An FFI boundary should *never* panic. I wrapped the core logic in a recover block to catch any panics and turn them into proper errors.
+-   **Typed Error Codes**: I created a set of error codes (and synced them with the Rust side) to let the caller know exactly what went wrong.
+
+### Layer 2: The FFI Boundary (`lib.rs`)
+
+This is where the real magic (and danger) happens. FFI in Rust means `unsafe` code, and you have to treat it with respect. My approach was to contain it as much as possible inside a safe wrapper.
+
+```rust
+pub struct CStringPtr {
+    ptr: *mut c_char,
+    _marker: PhantomData<*const ()>, // !Send + !Sync
+}
+
+impl Drop for CStringPtr {
+    fn drop(&mut self) {
+        if !self.ptr.is_null() {
+            unsafe { cue_free_string(self.ptr); }
+        }
+    }
+}
+```
+
+I built this `CStringPtr` as a RAII wrapper. It's a smart pointer that:
+-   Automatically calls the Go `cue_free_string` function when it goes out of scope.
+-   Prevents use-after-free bugs by tying the memory to Rust's ownership system.
+-   Uses `PhantomData` to mark the type as `!Send` and `!Sync`, which prevents it from being used across threads. This is critical because Go's runtime isn't thread-safe in the way Rust expects.
+
+### Layer 3: The Safe Application Layer (`builder.rs`)
+
+This is the public-facing API. I designed it to completely hide the FFI complexity behind a friendly builder pattern.
+
+```rust
+let evaluator = CueEvaluator::builder().build()?;
+let result = evaluator.evaluate(path, "cuenv")?;
+```
+
+Anyone using the `cuengine` crate never sees a raw pointer, a C string, or any `unsafe` code. They get a safe, ergonomic Rust API that provides:
+-   Input validation before FFI calls.
+-   Output size limits to prevent abuse.
+-   Rich, structured error types.
+
+## Tackling the Hard Problems
+
+Building this wasn't exactly a walk in the park. Here are some of the biggest hurdles I had to overcome.
+
+### Hurdle #1: Taming Memory Across Runtimes
+
+**The Challenge**: Go has a garbage collector. Rust has ownership. When Go allocates memory and gives Rust a pointer, who is responsible for cleaning it up?
+
+**My Solution**: Explicit ownership transfer with my `CStringPtr` RAII wrapper.
+
+When the Go bridge allocates a C string, it hands ownership over to Rust. My `CStringPtr` wrapper takes that ownership, and its `Drop` implementation guarantees that the memory is freed exactly once, even if errors occur.
+
+```rust
+let result_ptr = unsafe { cue_eval_package(c_dir.as_ptr(), c_package.as_ptr()) };
+let result = unsafe { CStringPtr::new(result_ptr) }; // Takes ownership
+// result is automatically freed when it goes out of scope. Magic!
+```
+
+The `PhantomData` marker is the unsung hero here, preventing any accidental use of the pointer across threads that could lead to subtle, horrifying bugs.
+
+### Hurdle #2: Don't Lose the Error Context!
+
+**The Challenge**: A simple string like `"CUE evaluation failed"` is a useless error. Go's errors have rich context, and I needed to preserve it across the FFI boundary.
+
+**My Solution**: Structured error envelopes with typed codes.
+
+Instead of just returning an error string, the Go bridge sends back a full JSON object for errors.
+
+```json
+{
+  "version": "bridge/1",
+  "error": {
+    "code": "LOAD_INSTANCE",
+    "message": "Failed to load CUE instance: undefined field foo",
+    "hint": "Check CUE syntax and import statements"
+  }
+}
+```
+
+I synchronized the error codes (like `LOAD_INSTANCE`) as constants in both Go and Rust. This allows the Rust code to deserialize the error and map it into a proper, typed Rust `Error`.
+
+```rust
+match bridge_error.code.as_str() {
+    ERROR_CODE_INVALID_INPUT => Err(Error::configuration(full_message)),
+    ERROR_CODE_LOAD_INSTANCE => Err(Error::cue_parse(dir_path, full_message)),
+    _ => Err(Error::ffi("cue_eval_package", full_message)),
+}
+```
+
+It's more work, but it makes debugging a thousand times easier.
+
+### Hurdle #3: Making it Build... Everywhere
+
+**The Challenge**: My build process now needed a Go compiler, a C toolchain, and the Rust compiler, all playing nicely together. How could I make this work for other developers without a 30-step setup guide?
+
+**My Solution**: A smart `build.rs` script with fallbacks.
+
+I put a lot of effort into the `build.rs` script to make it as robust as possible:
+1.  First, it checks for pre-built artifacts from my Nix-based workflow.
+2.  If it can't find any, it falls back to building the Go bridge from source.
+3.  It then configures platform-specific linking, because macOS, Linux, and Windows all need different system libraries.
+
+This approach gives me fast, reproducible builds in my environment while still allowing anyone with `go` and `rustc` installed to build the crate from scratch.
+
+### Hurdle #4: Preserving CUE's Field Order
+
+**The Challenge**: This one was subtle but critical. For `cuenv` to work as a task runner, the order of tasks defined in a CUE file *must* be preserved. But Go's standard `encoding/json` library randomizes map key order by design. This would have completely broken my task execution logic.
+
+**My Solution**: Ditching `encoding/json` and building the JSON manually.
+
+The only way to guarantee order was to walk the CUE value structure myself and build the JSON string piece by piece.
+
+```go
+func buildOrderedJSONString(v cue.Value) (string, error) {
+    switch v.Kind() {
+    case cue.StructKind:
+        var parts []string
+        // Iterate through fields in the order they appear in CUE
+        fields, err := v.Fields(cue.Optional(true))
+        // ...
+        for fields.Next() {
+            // ... manually build "key":value string parts
+        }
+        return "{" + strings.Join(parts, ",") + "}", nil
+    // ... handle lists and primitives
+    }
+}
+```
+
+This was a bit tedious to write, but it ensures the JSON output is deterministic and perfectly matches the order from the original CUE file.
+
+## Safety and Observability
+
+What separates a quick hack from a production-grade library? For me, it's about getting the fundamentals right: memory safety, fail-fast validation, and comprehensive observability. Here's what makes `cuengine` solid:
+
+-   **Comprehensive Validation**: The API validates all inputs *before* they hit the FFI boundary. Path traversal attempts, oversized inputs, and invalid names are all rejected early with clear error messages.
+-   **Structured Tracing**: I instrumented every important operation with `tracing`, providing detailed observability for debugging and monitoring in production environments.
+
+## My Testing Strategy
+
+I'm a firm believer in a multi-layered testing strategy. For `cuengine`, that meant:
+
+-   **Unit Tests**: For testing the small stuff, like my `CStringPtr` wrapper and UTF-8 conversions.
+-   **Integration Tests**: For end-to-end evaluation of real CUE files, making sure the whole pipeline works.
+-   **Property Tests**: Using `proptest` to throw randomized inputs at my validation and parsing logic to shake out edge cases.
+-   **Stress Tests**: Running the FFI calls in tight loops to check for memory leaks or race conditions.
+
+## Performance Characteristics
+
+The FFI bridge obviously adds some overhead, but for evaluating configuration files, it's more than acceptable. I ran benchmarks using `criterion` to see what I was dealing with:
+
+| Configuration Size | Time     | Notes                    |
+| ------------------ | -------- | ------------------------ |
+| 10 variables       | ~3.7ms   | Small config             |
+| 100 variables      | ~4.1ms   | Minimal parsing overhead |
+| 1,000 variables    | ~9.8ms   | Medium config            |
+| 10,000 variables   | ~136ms   | Large config             |
+| 100,000 variables  | ~11.3s   | Extreme scale test       |
+
+The benchmarks show performance scales linearly with the size of the configuration, which is exactly what I was hoping for. For a build tool, where you evaluate config once per run, this overhead is a tiny price to pay for the power of CUE.
+
+## My Key Takeaways
+
+1.  **FFI is Unsafe, So Contain It.** The public API of `cuengine` is 100% safe. All the `unsafe` code is an internal detail, carefully documented and wrapped in safe abstractions.
+2.  **Good Errors are Worth the Effort.** Moving from simple error strings to structured JSON envelopes was extra work, but it made the library immensely more robust and easier to debug.
+3.  **Build Scripts are First-Class Code.** I spent almost as much time on `build.rs` as on some of the library features. A good build experience is a feature in itself.
+4.  **Fail Fast with Clear Errors.** Input validation and structured tracing aren't things you bolt on later. Building them in from the start makes debugging infinitely easier.
+
+## What's Next
+
+`cuengine` is the solid foundation, but the real fun is the rest of the `cuenv` project I'm building on top of it:
+
+-   **A full-featured CLI** for task execution and environment management.
+-   **Nix Integration** for automatic software provisioning.
+-   **Pluggable secret management** for 1Password, AWS Secrets Manager, and more.
+
+## Try It Yourself
+
+`cuengine` is available on [crates.io](https://crates.io/crates/cuengine) with full [API documentation](https://docs.rs/crate/cuengine/latest) on docs.rs. The complete source is available at [github.com/cuenv/cuenv](https://github.com/cuenv/cuenv).
+
+To use it in your Rust project:
+
+```toml
+[dependencies]
+cuengine = "0.1.1"
+```
+
+```rust
+use cuengine::CueEvaluator;
+use std::path::Path;
+
+let evaluator = CueEvaluator::builder().build()?;
+let json = evaluator.evaluate(Path::new("./config"), "mypackage")?;
+```
+
+## Conclusion
+
+Building this FFI bridge was a fascinating journey. It taught me that you don't have to choose between safety and pragmatism. By carefully containing `unsafe` code, designing for robust error handling, and thinking about production features from the start, it's possible to bring two very different ecosystems together and get the best of both.
+
+If you're building tools that need CUE in Rust, I hope `cuengine` gives you a solid foundation. And if you're tackling any FFI project, I hope my story helps you sidestep some of the pitfalls I stumbled into!
+
+The full source code, including all the safety invariants and production features I discussed, is available under the MIT license. Contributions, feedback, and questions are always welcome. Don't be a stranger—come and join the chat on our [Zulip](https://chat.rawkode.academy) server!
