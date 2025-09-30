@@ -152,7 +152,7 @@ interface Props {
 	courseDescription: string;
 	moduleCount: number;
 	difficulty: string;
-	firstModuleSlug?: string;
+	firstModuleSlug?: string | undefined;
 }
 
 defineProps<Props>();

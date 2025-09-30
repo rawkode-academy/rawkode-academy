@@ -28,7 +28,7 @@ if (featuredCourse) {
 	const sortedModules = courseModules
 		.filter(m => !m.data.draft)
 		.sort((a, b) => a.data.order - b.data.order);
-	firstModuleSlug = sortedModules[0]?.slug;
+	firstModuleSlug = sortedModules[0]?.id;
 }
 
 const pageTitle = "Cloud Native Courses | Rawkode Academy";
