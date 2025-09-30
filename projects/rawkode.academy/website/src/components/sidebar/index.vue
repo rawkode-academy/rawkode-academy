@@ -11,6 +11,7 @@ import {
 	InformationCircleIcon,
 	NewspaperIcon,
 	RocketLaunchIcon,
+	TvIcon,
 	VideoCameraIcon,
 	WrenchScrewdriverIcon,
 } from "@heroicons/vue/24/outline";
@@ -54,7 +55,7 @@ const toggleSection = (section: keyof typeof sectionsExpanded.value) => {
 const baseMenuItemsMain = [
         { name: "Articles", href: "/read", icon: NewspaperIcon },
         { name: "Videos", href: "/watch", icon: VideoCameraIcon },
-        { name: "Shows", href: "/shows", icon: VideoCameraIcon },
+        { name: "Shows", href: "/shows", icon: TvIcon },
         { name: "Courses", href: "/courses", icon: AcademicCapIcon },
         { name: "Technologies", href: "/technology", icon: CubeIcon },
 ];
