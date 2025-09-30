@@ -99,7 +99,6 @@ if (GRAPHQL_ENDPOINT) {
                         showById(id: $id) {
                                 id
                                 name
-                                description
                                 hosts {
                                         forename
                                         surname
@@ -127,10 +126,12 @@ if (GRAPHQL_ENDPOINT) {
         }
 }
 
+// Only use fallback if GraphQL didn't return a show
 if (!show) {
         show = fallbackShow;
 }
 
+// Return 404 only if the show truly doesn't exist
 if (!show) {
         return new Response(null, { status: 404 });
 }
@@ -216,11 +217,36 @@ const pageTitle = `${show.name} Episodes`;
                         </header>
 
                         <div>
-                                <VideoFeed
-                                        title="Episodes"
-                                        description="Watch the latest episodes from this show."
-                                        videos={feedVideos}
-                                />
+                                {feedVideos.length > 0 ? (
+                                        <VideoFeed
+                                                title="Episodes"
+                                                description="Watch the latest episodes from this show."
+                                                videos={feedVideos}
+                                        />
+                                ) : (
+                                        <div class="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-12 text-center shadow-sm dark:border-gray-800 dark:from-gray-900/40 dark:to-gray-900/20">
+                                                <svg
+                                                        class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        aria-hidden="true"
+                                                >
+                                                        <path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="1.5"
+                                                                d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
+                                                        />
+                                                </svg>
+                                                <p class="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+                                                        No episodes yet
+                                                </p>
+                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                        Episodes for this show are coming soon. Check back later!
+                                                </p>
+                                        </div>
+                                )}
                         </div>
                 </div>
         </section>

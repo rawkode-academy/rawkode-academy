@@ -20,6 +20,13 @@ const showsQuery = /* GraphQL */ `
                                 forename
                                 surname
                         }
+                        episodes {
+                                video {
+                                        title
+                                        thumbnailUrl
+                                        publishedAt
+                                }
+                        }
                 }
         }
 `;
@@ -64,24 +71,46 @@ const showsToRender: ShowSummary[] = hasShows && shows ? shows : [];
 ---
 
 <Page title="Shows">
-        <section class="py-12">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div class="text-center">
-                                <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+        <section class="relative overflow-hidden py-16 sm:py-20">
+                <!-- Background gradient -->
+                <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent dark:from-primary/10" aria-hidden="true"></div>
+
+                <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <!-- Header -->
+                        <div class="mb-12 text-center">
+                                <div class="mb-4 inline-flex items-center justify-center rounded-full bg-primary/10 px-4 py-2 dark:bg-primary/20">
+                                        <svg
+                                                class="mr-2 h-5 w-5 text-primary dark:text-primary-300"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                aria-hidden="true"
+                                        >
+                                                <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
+                                                />
+                                        </svg>
+                                        <span class="text-sm font-semibold text-primary dark:text-primary-300">Original Series</span>
+                                </div>
+                                <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
                                         Shows
                                 </h1>
-                                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400">
-                                        Browse our shows and meet the hosts behind every episode.
+                                <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600 dark:text-gray-300">
+                                        Discover our collection of shows, each bringing you in-depth content and expert insights from passionate hosts.
                                 </p>
                         </div>
 
-                        <div class="mt-12">
+                        <!-- Content -->
+                        <div class="mt-16">
                                 {isLoading && (
-                                        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                                                 {placeholderTiles.map((placeholder) => (
                                                         <div
                                                                 data-placeholder-index={placeholder}
-                                                                class="h-36 animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
+                                                                class="aspect-[4/3] animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
                                                                 aria-hidden="true"
                                                         />
                                                 ))}
@@ -89,9 +118,23 @@ const showsToRender: ShowSummary[] = hasShows && shows ? shows : [];
                                 )}
 
                                 {errorMessage && (
-                                        <div class="rounded-xl border border-red-200 bg-red-50 p-8 text-center dark:border-red-900/60 dark:bg-red-900/30">
-                                                <p class="text-base font-semibold text-red-700 dark:text-red-300">
-                                                        We couldn&apos;t load the shows right now.
+                                        <div class="mx-auto max-w-2xl rounded-2xl border-2 border-red-200 bg-red-50 p-8 text-center shadow-sm dark:border-red-900/60 dark:bg-red-900/30">
+                                                <svg
+                                                        class="mx-auto h-12 w-12 text-red-400 dark:text-red-500"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        aria-hidden="true"
+                                                >
+                                                        <path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                                        />
+                                                </svg>
+                                                <p class="mt-4 text-base font-semibold text-red-700 dark:text-red-300">
+                                                        We couldn&apos;t load the shows right now
                                                 </p>
                                                 <p class="mt-2 text-sm text-red-600 dark:text-red-200">
                                                         {errorMessage}
@@ -100,15 +143,32 @@ const showsToRender: ShowSummary[] = hasShows && shows ? shows : [];
                                 )}
 
                                 {isEmpty && (
-                                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-800 dark:bg-gray-900/40">
-                                                <p class="text-base text-gray-600 dark:text-gray-300">
-                                                        No shows available just yet. Please check back soon!
+                                        <div class="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-12 text-center shadow-sm dark:border-gray-800 dark:from-gray-900/40 dark:to-gray-900/20">
+                                                <svg
+                                                        class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        aria-hidden="true"
+                                                >
+                                                        <path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="1.5"
+                                                                d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
+                                                        />
+                                                </svg>
+                                                <p class="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+                                                        No shows available yet
+                                                </p>
+                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                        We're working on bringing you exciting new content. Check back soon!
                                                 </p>
                                         </div>
                                 )}
 
                                 {hasShows && (
-                                        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                                                 {showsToRender.map((show) => (
                                                         <ShowCard show={show} />
                                                 ))}
