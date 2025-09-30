@@ -12,7 +12,6 @@ const hostNames = (show.hosts ?? [])
         .filter(Boolean);
 
 const episodes = (show.episodes ?? []).filter((ep): ep is NonNullable<typeof ep> => ep !== null && ep.video !== null);
-const episodeCount = episodes.length;
 
 const latestEpisode = episodes
         .filter(ep => ep.video?.thumbnailUrl && ep.video?.publishedAt)
