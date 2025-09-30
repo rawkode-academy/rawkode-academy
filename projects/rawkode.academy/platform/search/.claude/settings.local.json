@@ -1,0 +1,8 @@
+{
+  "enabledMcpjsonServers": [
+    "container-use",
+    "shuttle",
+    "context7"
+  ],
+  "enableAllProjectMcpServers": true
+}
