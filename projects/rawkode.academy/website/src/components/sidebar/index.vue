@@ -9,6 +9,7 @@ import {
 	CubeIcon,
 	DocumentTextIcon,
 	InformationCircleIcon,
+	MapIcon,
 	NewspaperIcon,
 	RocketLaunchIcon,
 	TvIcon,
@@ -56,6 +57,7 @@ const baseMenuItemsMain = [
         { name: "Articles", href: "/read", icon: NewspaperIcon },
         { name: "Videos", href: "/watch", icon: VideoCameraIcon },
         { name: "Shows", href: "/shows", icon: TvIcon },
+        { name: "Learning Paths", href: "/learning-paths", icon: MapIcon },
         { name: "Courses", href: "/courses", icon: AcademicCapIcon },
         { name: "Technologies", href: "/technology", icon: CubeIcon },
 ];

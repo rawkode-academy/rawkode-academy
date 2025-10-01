@@ -1,0 +1,125 @@
+---
+import AuthorAvatarGroup from "@/components/common/AuthorAvatarGroup.vue";
+import Badge from "@/components/common/Badge.vue";
+import Button from "@/components/common/Button.astro";
+import FormattedDate from "@/components/common/FormattedDate.vue";
+import type { CollectionEntry } from "astro:content";
+
+type Props = {
+	title: string;
+	description: string;
+	difficulty: "beginner" | "intermediate" | "advanced";
+	durationLabel: string;
+	technologies: string[];
+	prerequisites: string[];
+	authors: CollectionEntry<"people">[];
+	publishedAt: Date;
+};
+
+const {
+	title,
+	description,
+	difficulty,
+	durationLabel,
+	technologies,
+	prerequisites,
+	authors,
+	publishedAt,
+} = Astro.props;
+
+function getDifficultyVariant(
+	difficulty: string,
+): "success" | "warning" | "danger" | "default" {
+	switch (difficulty) {
+		case "beginner":
+			return "success";
+		case "intermediate":
+			return "warning";
+		case "advanced":
+			return "danger";
+		default:
+			return "default";
+	}
+}
+
+const difficultyLabel = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+const hasTechnologies = technologies.length > 0;
+const hasPrerequisites = prerequisites.length > 0;
+---
+
+<section class="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+	<div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 dark:from-primary/20 dark:to-secondary/30"></div>
+	<div class="relative z-10 px-6 py-12 md:px-10 lg:px-16 lg:py-16">
+		<div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+			<div class="max-w-3xl">
+				<div class="flex flex-wrap items-center gap-3 mb-6">
+					<Badge
+						variant={getDifficultyVariant(difficulty)}
+						size="sm"
+						class="shadow-sm backdrop-blur"
+					>
+						{difficultyLabel}
+					</Badge>
+					<Badge variant="info" size="sm" class="shadow-sm backdrop-blur">
+						{durationLabel}
+					</Badge>
+				</div>
+				<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-4">
+					{title}
+				</h1>
+				<p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+					{description}
+				</p>
+
+				{hasTechnologies && (
+					<div>
+						<h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+							Technologies Covered
+						</h2>
+						<div class="flex flex-wrap gap-2">
+							{technologies.map((technology) => (
+								<Badge variant="secondary" size="xs">
+									{technology}
+								</Badge>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
+
+			<div class="w-full max-w-sm lg:w-auto lg:min-w-[280px]">
+				<div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/70 backdrop-blur p-6 shadow-lg">
+					<div class="flex items-center justify-between mb-4">
+						<h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+							Your Guides
+						</h2>
+						<FormattedDate date={publishedAt} format="long" />
+					</div>
+					<AuthorAvatarGroup authors={authors} showActiveIndicator={false} />
+					<div class="mt-6">
+						<slot name="cta">
+							<Button href="#learning-path-content" size="md" fullWidth>
+								Start Learning
+							</Button>
+						</slot>
+					</div>
+					{hasPrerequisites && (
+						<div class="mt-6">
+							<h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+								Prerequisites
+							</h3>
+							<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+								{prerequisites.map((item) => (
+									<li class="flex items-start gap-2">
+										<span class="mt-1 inline-flex h-1.5 w-1.5 rounded-full bg-primary"></span>
+										<span>{item}</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

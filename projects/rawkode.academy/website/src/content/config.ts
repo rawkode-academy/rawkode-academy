@@ -376,6 +376,23 @@ const changelog = defineCollection({
 	}),
 });
 
+const learningPaths = defineCollection({
+	loader: glob({
+		pattern: ["**/*.md", "**/*.mdx"],
+		base: "./content/learning-paths",
+	}),
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+		estimatedDuration: z.number(), // in minutes
+		prerequisites: z.array(z.string()).default([]),
+		technologies: z.array(z.string()),
+		publishedAt: z.coerce.date(),
+		authors: z.array(reference("people")).default(["rawkode"]),
+	}),
+});
+
 export const collections = {
 	videos,
 	people,
@@ -387,4 +404,5 @@ export const collections = {
 	courses,
 	courseModules,
 	changelog,
+	learningPaths,
 };

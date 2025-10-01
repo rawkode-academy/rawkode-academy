@@ -1,0 +1,103 @@
+---
+import { type CollectionEntry, getEntries } from "astro:content";
+import AuthorAvatarGroup from "@/components/common/AuthorAvatarGroup.vue";
+import Badge from "@/components/common/Badge.vue";
+import BaseCard from "@/components/common/BaseCard.vue";
+import FormattedDate from "@/components/common/FormattedDate.vue";
+
+type Props = {
+	learningPath: CollectionEntry<"learningPaths">;
+};
+
+const { learningPath } = Astro.props;
+const authors = await getEntries(learningPath.data.authors);
+const slug = learningPath.id;
+
+function getDifficultyVariant(
+	difficulty: string,
+): "success" | "warning" | "danger" | "default" {
+	switch (difficulty) {
+		case "beginner":
+			return "success";
+		case "intermediate":
+			return "warning";
+		case "advanced":
+			return "danger";
+		default:
+			return "default";
+	}
+}
+
+function formatDuration(minutes: number): string {
+	if (!minutes) {
+		return "Self-paced";
+	}
+
+	const hours = Math.floor(minutes / 60);
+	const mins = minutes % 60;
+
+	if (!hours) {
+		return `${mins}m`;
+	}
+
+	if (!mins) {
+		return `${hours}h`;
+	}
+
+	return `${hours}h ${mins}m`;
+}
+
+const difficultyLabel =
+	learningPath.data.difficulty.charAt(0).toUpperCase() +
+	learningPath.data.difficulty.slice(1);
+const technologies = learningPath.data.technologies.slice(0, 3);
+---
+
+<BaseCard
+	href={`/learning-paths/${slug}`}
+	class="hover:shadow-xl hover:scale-[1.01] transition-transform"
+>
+	<Fragment slot="content">
+		<div class="flex flex-wrap items-center gap-2 mb-4">
+			<Badge
+				variant={getDifficultyVariant(learningPath.data.difficulty)}
+				size="sm"
+				class="backdrop-blur-sm shadow-sm"
+			>
+				{difficultyLabel}
+			</Badge>
+			<Badge
+				variant="info"
+				size="sm"
+				class="backdrop-blur-sm shadow-sm"
+			>
+				{formatDuration(learningPath.data.estimatedDuration)}
+			</Badge>
+		</div>
+		<h2 class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2">
+			{learningPath.data.title}
+		</h2>
+		<p class="mb-4 font-light text-gray-600 dark:text-gray-400 line-clamp-3">
+			{learningPath.data.description}
+		</p>
+		{technologies.length > 0 && (
+			<div class="flex flex-wrap gap-2">
+				{technologies.map((technology) => (
+					<Badge
+						variant="secondary"
+						size="xs"
+						class="bg-secondary/15 text-secondary dark:text-secondary/90"
+					>
+						{technology}
+					</Badge>
+				))}
+			</div>
+		)}
+	</Fragment>
+	<Fragment slot="footer">
+		<div class="flex items-center justify-between">
+			<AuthorAvatarGroup authors={authors} showActiveIndicator={false} />
+			<FormattedDate date={learningPath.data.publishedAt} format="short" />
+		</div>
+	</Fragment>
+</BaseCard>
