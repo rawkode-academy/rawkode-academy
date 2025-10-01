@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import LearningPathCard from "@/components/learning-paths/LearningPathCard.astro";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = true;
+
+const learningPaths = (await getCollection("learningPaths")).sort(
+	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+
+const pageTitle = "Learning Paths | Rawkode Academy";
+const pageDescription =
+	"Curated, video-driven journeys to help you level up your Kubernetes, platform engineering, and cloud native skills.";
+---
+
+<Page title={pageTitle} description={pageDescription}>
+	<section class="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+		<div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 dark:from-primary/20 dark:to-secondary/30"></div>
+		<div class="relative z-10 px-6 py-16 md:px-10 lg:px-16">
+			<div class="max-w-3xl">
+				<p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary mb-4">
+					Guided Learning
+				</p>
+				<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-4">
+					Learning Paths
+				</h1>
+				<p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+					Each path bundles Rawkode Academy videos into a focused curriculum with clear outcomes, prerequisites, and the context you need to succeed. Start with the challenge you're facing and follow along step-by-step.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="mt-12">
+		<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+			{learningPaths.map((learningPath) => (
+				<LearningPathCard learningPath={learningPath} />
+			))}
+		</div>
+	</section>
+</Page>
