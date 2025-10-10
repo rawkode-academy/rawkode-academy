@@ -180,7 +180,7 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 				const deepgramResponse =
 					(await deepgram.listen.prerecorded.transcribeUrl(
 						{
-							url: `https://content.rawkode.academy/videos/${videoId}/audio.mp3`,
+							url: `https://content.rawkode.academy/videos/${videoId}/original.mp3`,
 						},
 						{
 							model: "nova-3",
