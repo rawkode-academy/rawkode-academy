@@ -141,6 +141,7 @@ export default defineConfig({
             POSTHOG_API_KEY: envField.string({
                 context: "server",
                 access: "secret",
+                optional: true,
             }),
             POSTHOG_HOST: envField.string({
                 context: "server",
