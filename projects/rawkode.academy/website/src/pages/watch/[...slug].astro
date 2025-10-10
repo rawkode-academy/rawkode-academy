@@ -23,9 +23,12 @@ let video: (typeof videos)[0] | undefined = videos.find(
 	(v) => v.data.slug === slug,
 );
 
+// GraphQL client (used for fallback fetches and chapters)
+const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);
+
 // If not found in collection, try fetching from GraphQL
 if (!video) {
-	const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);
+
 
         const query = gql`
                 query GetVideoBySlug($slug: String!) {
@@ -118,7 +121,7 @@ if (!video) {
 
 // Handle 404 case if still not found
 if (!video) {
-	return Astro.redirect("/404");
+    return Astro.redirect("/404");
 }
 
 // Set cache headers for ISR
@@ -148,6 +151,33 @@ const marked = new Marked({
 // Convert literal \n escape sequences to actual newlines before processing
 const processedDescription = video.data.description.replace(/\\n/g, "\n");
 const renderedDescriptionHtml = marked.parse(processedDescription);
+
+// Fetch chapters for key moments (clips) JSON-LD
+type Chapter = { startTime: number; title: string };
+let clips: Array<{ name: string; startOffset: number; endOffset?: number }> = [];
+try {
+    if (video?.data?.id) {
+        const chaptersQuery = gql`
+            query GetVideoChapters($id: String!) {
+                videoByID(id: $id) {
+                    chapters { startTime title }
+                }
+            }
+        `;
+        const chaptersResp: { videoByID?: { chapters?: Chapter[] | null } | null } = await graphQLClient.request(chaptersQuery, { id: video.data.id });
+        const ch = chaptersResp.videoByID?.chapters || [];
+        if (ch.length > 0) {
+            ch.sort((a, b) => a.startTime - b.startTime);
+            clips = ch.map((c, i) => ({
+                name: c.title,
+                startOffset: Math.max(0, Math.floor(c.startTime || 0)),
+                ...(i < ch.length - 1 ? { endOffset: Math.max(0, Math.floor(ch[i + 1].startTime || 0)) } : {}),
+            }));
+        }
+    }
+} catch (e) {
+    console.error("Error fetching chapters for clips:", e);
+}
 
 // Format date to readable format
 const formatDate = (dateString: string) => {
@@ -180,6 +210,7 @@ const breadcrumbElements = [
 		publishedAt={video.data.publishedAt}
 		duration={video.data.duration}
 		streamUrl={video.data.streamUrl}
+		clips={clips}
 	/>
 	<div class="min-h-screen bg-gray-50 dark:bg-gray-950">
 		<div class="container mx-auto px-4 py-6 lg:py-8 max-w-screen-2xl">

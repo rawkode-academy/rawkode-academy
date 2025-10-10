@@ -6,7 +6,9 @@ interface Props {
 	publishedAt?: string;
 	duration?: number;
 	streamUrl?: string;
+	embedUrl?: string; // Only when a true embeddable player URL (e.g., YouTube/Vimeo)
 	isVideoList?: boolean;
+	clips?: Array<{ name: string; startOffset: number; endOffset?: number }>;
 }
 
 const {
@@ -16,7 +18,9 @@ const {
 	publishedAt,
 	duration,
 	streamUrl,
+	embedUrl,
 	isVideoList = false,
+	clips = [],
 } = Astro.props;
 
 // Format duration from seconds to ISO 8601
@@ -41,6 +45,17 @@ function formatDuration(seconds: number): string {
 const formattedDuration = formatDuration(duration ?? 0);
 
 // Generate structured data
+// Compute a safe embedUrl: only use if explicitly provided or clearly an embed player URL
+const computedEmbedUrl = (() => {
+  if (embedUrl) return embedUrl;
+  if (!streamUrl) return undefined;
+  const s = String(streamUrl).toLowerCase();
+  if (s.includes("youtube.com/embed/") || s.includes("youtu.be/") || s.includes("player.vimeo.com/")) {
+    return streamUrl;
+  }
+  return undefined; // Avoid using HLS/MP4 as embedUrl
+})();
+
 const structuredData = isVideoList
 	? {
 			"@context": "https://schema.org",
@@ -58,8 +73,13 @@ const structuredData = isVideoList
 			uploadDate: publishedAt,
 			duration: formattedDuration,
 			contentUrl: streamUrl,
-			embedUrl: streamUrl, // Required for Google Video Search
+			...(computedEmbedUrl ? { embedUrl: computedEmbedUrl } : {}),
 			url: Astro.url.href,
+			potentialAction: {
+				"@type": "SeekToAction",
+				target: `${Astro.url.origin}${Astro.url.pathname}?t={seek_to_second_number}`,
+				"startOffset-input": "required name=seek_to_second_number",
+			},
 			// Additional required/recommended properties for Google Video Search
 			publisher: {
 				"@type": "Organization",
@@ -82,7 +102,14 @@ const structuredData = isVideoList
 				userInteractionCount: 0, // This would ideally come from your analytics
 			},
 			expires: null, // Videos don't expire
-			hasPart: [], // Could add chapters here if available
+			hasPart: clips?.length
+				? clips.map((c) => ({
+					"@type": "Clip",
+					name: c.name,
+					startOffset: c.startOffset,
+					...(typeof c.endOffset === 'number' ? { endOffset: c.endOffset } : {}),
+				}))
+				: undefined,
 			isAccessibleForFree: true,
 			isLiveBroadcast: false,
 			isFamilyFriendly: true,
@@ -92,6 +119,11 @@ const structuredData = isVideoList
 			videoQuality: "HD",
 		};
 ---
+
+<!-- Preload video thumbnail to improve LCP on detail pages -->
+{!isVideoList && thumbnailUrl && (
+  <link rel="preload" as="image" href={thumbnailUrl} fetchpriority="high" />
+)}
 
 <!-- Video-specific meta tags -->
 <meta property="og:type" content={isVideoList ? "website" : "video.other"} />

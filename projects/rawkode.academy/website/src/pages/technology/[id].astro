@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths } from "astro";
 import { request } from "graphql-request";
@@ -225,8 +226,15 @@ const placeholderLogo = "/apple-touch-icon.png"; // Define a placeholder
 		</style>
 
 		<!-- Technology Header -->
-		<section class="tech-header w-full px-4 py-8">
+		<section class="tech-header w-full px-4 py-6">
 			<div class="max-w-7xl mx-auto">
+				<div class="mb-4">
+					<Breadcrumb elements={[
+						{ title: 'Home', link: '/' },
+						{ title: 'Technologies', link: '/technology' },
+						{ title: technology.name, link: `/technology/${technology.id}` },
+					]} />
+				</div>
 				<div
 					class="flex flex-col md:flex-row items-center md:items-start gap-8"
 				>

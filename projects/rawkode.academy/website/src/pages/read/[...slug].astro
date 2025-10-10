@@ -14,6 +14,8 @@ import Updates from "@/components/articles/Updates.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
+import ArticleJsonLd from "@/components/html/article-jsonld.astro";
+import InternalLinks from "@/components/seo/InternalLinks.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
@@ -86,6 +88,8 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 	updatedAt={article.data.updatedAt}
 	authors={authors}
 >
+	{/* Article structured data (TechArticle) */}
+	<ArticleJsonLd slot="extra-head" article={article} authors={authors} imageUrl={imageUrl} />
 	<!-- Breadcrumb Section -->
 	<div class="mb-6">
 		<Breadcrumb elements={breadcrumbElements} />
@@ -104,6 +108,9 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 	<h1 class="text-3xl md:text-4xl font-extrabold dark:text-white mb-6">
 		{article.data.title}
 	</h1>
+
+	<!-- Contextual internal links (up/sideways/down) placed high in content -->
+	<InternalLinks article={article} />
 
 	<div class="relative max-w-full overflow-x-hidden">
 		<article class="prose w-full max-w-full">

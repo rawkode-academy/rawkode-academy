@@ -15,7 +15,9 @@
 		"test:seo": "vitest run src/tests/seo.test.ts",
 		"test:watch": "vitest",
 		"test": "vitest run",
-		"validate:seo": "bun scripts/validate-seo.ts"
+		"validate:seo": "bun scripts/validate-seo.ts",
+		"check:sitemap": "bun scripts/check-sitemap.ts --base https://rawkode.academy --limit 400 --concurrency 10",
+		"check:orphans": "bun scripts/orphan-check.ts --base https://rawkode.academy --maxDepth 3 --limit 1000"
 	},
 	"dependencies": {
 		"@astrojs/check": "^0.9.4",

@@ -8,6 +8,9 @@ import tailwindcss from "@tailwindcss/vite";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
+import matter from "gray-matter";
+import { readFile, stat } from "node:fs/promises";
+import { glob } from "glob";
 import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import { fetchVideosFromGraphQL } from "./src/lib/fetch-videos";
@@ -35,12 +38,108 @@ const getSiteUrl = () => {
 	return "https://rawkode.academy";
 };
 
+// Build a per-path lastmod index from content files and GraphQL videos.
+// Keys are URL pathnames (no trailing slash), e.g. "/read/my-article".
+async function buildLastmodIndex() {
+  const index = new Map<string, Date>();
+
+  function pickDate(data: Record<string, any>): Date | undefined {
+    const u = data.updatedAt || data.updated_at;
+    const p = data.publishedAt || data.published_at;
+    const val = u || p;
+    if (!val) return undefined;
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? undefined : d;
+  }
+
+  // Articles -> /read/{id}
+  const articleFiles = await glob("content/articles/**/*.{md,mdx}");
+  for (const file of articleFiles) {
+    try {
+      const raw = await readFile(file, "utf8");
+      const fm = matter(raw).data as Record<string, any>;
+      const rel = file.replace(/^content\/articles\//, "");
+      const id = rel.replace(/\/index\.(md|mdx)$/i, "").replace(/\.(md|mdx)$/i, "");
+      const last = pickDate(fm) ?? (await stat(file)).mtime;
+      index.set(`/read/${id}`, last);
+    } catch {}
+  }
+
+  // Courses (top-level) -> /courses/{id}
+  const courseFiles = await glob("content/courses/*.{md,mdx}");
+  for (const file of courseFiles) {
+    try {
+      const raw = await readFile(file, "utf8");
+      const fm = matter(raw).data as Record<string, any>;
+      const base = file.split("/").pop() || "";
+      const id = base.replace(/\.(md|mdx)$/i, "");
+      const last = pickDate(fm) ?? (await stat(file)).mtime;
+      index.set(`/courses/${id}`, last);
+    } catch {}
+  }
+
+  // Course modules -> /courses/{courseId}/{moduleId}
+  const moduleFiles = await glob("content/courses/**/*.{md,mdx}");
+  for (const file of moduleFiles) {
+    // Skip top-level course files handled above
+    if (/^content\/courses\/[^\/]+\.(md|mdx)$/i.test(file)) continue;
+    try {
+      const raw = await readFile(file, "utf8");
+      const fm = matter(raw).data as Record<string, any>;
+      const rel = file.replace(/^content\/courses\//, "").replace(/\.(md|mdx)$/i, "");
+      const courseId = rel.split("/")[0];
+      const last = pickDate(fm) ?? (await stat(file)).mtime;
+      // Route shape is /courses/{course}/{moduleId}
+      index.set(`/courses/${courseId}/${rel}`, last);
+    } catch {}
+  }
+
+  // Series -> /series/{id}
+  const seriesFiles = await glob("content/series/**/*.{md,mdx}");
+  for (const file of seriesFiles) {
+    try {
+      const raw = await readFile(file, "utf8");
+      const fm = matter(raw).data as Record<string, any>;
+      const rel = file.replace(/^content\/series\//, "");
+      const id = rel.replace(/\/index\.(md|mdx)$/i, "").replace(/\.(md|mdx)$/i, "");
+      const last = pickDate(fm) ?? (await stat(file)).mtime;
+      index.set(`/series/${id}`, last);
+    } catch {}
+  }
+
+  // Technologies -> /technology/{id} (JSON, fallback to file mtime)
+  const techFiles = await glob("content/technologies/**/*.json");
+  for (const file of techFiles) {
+    try {
+      const rel = file.replace(/^content\/technologies\//, "");
+      const id = rel.replace(/\/index\.json$/i, "").replace(/\.json$/i, "");
+      const last = (await stat(file)).mtime;
+      index.set(`/technology/${id}`, last);
+    } catch {}
+  }
+
+  // Videos (from GraphQL) -> /watch/{slug}
+  try {
+    const videos = await fetchVideosFromGraphQL();
+    for (const v of videos) {
+      const d = new Date(v.publishedAt);
+      if (!isNaN(d.getTime())) index.set(`/watch/${v.slug}`, d);
+    }
+  } catch {}
+
+  return index;
+}
+
+// Compute lastmod index once for sitemap serialization
+const lastmodIndex = await buildLastmodIndex();
+
 export default defineConfig({
 	output: "static",
 	adapter: cloudflare({
 		imageService: "cloudflare",
 		sessionKVBindingName: "SESSION",
 	}),
+	trailingSlash: "never",
 	integrations: [
 		...(d2Available ? [d2()] : []),
 		expressiveCode({
@@ -51,13 +150,13 @@ export default defineConfig({
 		sitemap({
 			filter: (page) => !page.includes("api/") && !page.includes("sitemap-"),
 			changefreq: "weekly",
-			lastmod: new Date(),
 			priority: 0.7,
 			customPages: await (async () => {
 				try {
 					const siteUrl = getSiteUrl();
 					const videos = await fetchVideosFromGraphQL();
-					return videos.map((video) => `${siteUrl}/watch/${video.slug}/`);
+					// Use no-trailing slash to match canonical policy
+					return videos.map((video) => `${siteUrl}/watch/${video.slug}`);
 				} catch (error) {
 					console.warn(
 						"Skipping video pages in sitemap due to API unavailability:",
@@ -66,6 +165,17 @@ export default defineConfig({
 					return [];
 				}
 			})(),
+			serialize: (item) => {
+				try {
+					const u = new URL(item.url);
+					const key = u.pathname.endsWith("/") && u.pathname !== "/" ? u.pathname.slice(0, -1) : u.pathname;
+					const lm = lastmodIndex.get(key);
+					if (lm) {
+						return { ...item, lastmod: lm.toISOString() };
+					}
+				} catch {}
+				return item;
+			},
 		}),
 		vue(),
         partytown({
