@@ -1,9 +1,72 @@
-<script is:inline>
+<script is:inline type="text/partytown">
+  // PostHog minimal loader
   !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-  posthog.init(
-    'phc_8BUP734dzskih8urQFkFL1qxT5veRDm6zzXwROZND4M',
-    {
-      api_host:'https://eu.i.posthog.com'
+
+  (function(){
+    var PH_KEY = 'phc_8BUP734dzskih8urQFkFL1qxT5veRDm6zzXwROZND4M';
+    var PH_HOST = 'https://eu.i.posthog.com';
+
+    function getConsent(){
+      try{ return localStorage.getItem('consent_analytics'); }catch{ return null; }
     }
-  )
+    var consent = getConsent();
+    var consentGranted = consent === 'granted';
+
+    posthog.init(PH_KEY, {
+      api_host: PH_HOST,
+      autocapture: consentGranted,
+      capture_pageview: consentGranted,
+      opt_out_capturing_by_default: !consentGranted,
+      respect_dnt: true,
+      session_recording: {
+        maskAllInputs: true,
+        sampling: { rate: consentGranted ? 0.1 : 0.0 }
+      },
+      loaded: function(ph){
+        if (consentGranted){
+          try{ ph.opt_in_capturing(); ph.startSessionRecording && ph.startSessionRecording(); }catch{}
+        }
+      }
+    });
+
+    function getUtmParams() {
+      try {
+        var url = new URL(location.href);
+        var p = new URLSearchParams(url.search);
+        var keys = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'];
+        var out = {};
+        keys.forEach(function(k){ if (p.has(k)) out[k] = p.get(k); });
+        return out;
+      } catch(_) { return {}; }
+    }
+
+    // Persist UTM parameters for attribution
+    var utm = getUtmParams();
+    if (Object.keys(utm).length) {
+      posthog.register(utm);
+    }
+
+    // Track page exit with time on page
+    var startTime = Date.now();
+    addEventListener('beforeunload', function(){
+      var secs = Math.floor((Date.now() - startTime) / 1000);
+      try {
+        posthog.capture('page_exit', {
+          path: location.pathname,
+          time_on_page: secs,
+          referrer: document.referrer || ''
+        });
+      } catch(_){}
+    });
+
+    // Track sign-in button clicks (start of auth)
+    addEventListener('click', function(e){
+      var t = e.target;
+      if (!t) return;
+      var link = t.closest && t.closest('a');
+      if (link && link.getAttribute('href') === '/api/auth/sign-in') {
+        try { posthog.capture('auth_sign_in_start', { path: location.pathname }); } catch(_){}
+      }
+    }, true);
+  })();
 </script>

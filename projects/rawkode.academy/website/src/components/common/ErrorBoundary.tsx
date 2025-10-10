@@ -23,15 +23,16 @@ export default class ErrorBoundary extends Component<Props, State> {
 	override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
 		console.error("ErrorBoundary caught an error:", error, errorInfo);
 
-		// Log to monitoring service if available
-		if (typeof window !== "undefined" && window.GrafanaFaroWebSdk?.faro) {
-			window.GrafanaFaroWebSdk.faro.api.pushError(error, {
-				context: {
-					componentStack: errorInfo.componentStack,
-				},
-			});
-		}
-	}
+        const enableErrorCapture = (import.meta as any).env?.PUBLIC_CAPTURE_ERRORS === 'true';
+        if (enableErrorCapture && typeof window !== "undefined" && (window as any).posthog) {
+            (window as any).posthog.capture("react_error", {
+                message: error.message,
+                name: error.name,
+                stack: error.stack,
+                componentStack: errorInfo.componentStack,
+            });
+        }
+    }
 
 	resetError = (): void => {
 		this.setState({ hasError: false, error: null });

@@ -6,12 +6,11 @@ export const APP_DESCRIPTION =
 	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for developers.";
 
 export const API_ENDPOINTS = {
-	VIDEOS: "/api/videos",
-	ARTICLES: "/api/articles",
-	COMMENTS: "/api/comments",
-	SEARCH: "/api/search",
-	ANALYTICS: "/api/analytics",
-	GRAPHQL: "https://api.rawkode.academy/graphql",
+    VIDEOS: "/api/videos",
+    ARTICLES: "/api/articles",
+    COMMENTS: "/api/comments",
+    SEARCH: "/api/search",
+    GRAPHQL: "https://api.rawkode.academy/graphql",
 } as const;
 
 export const BREAKPOINTS = {

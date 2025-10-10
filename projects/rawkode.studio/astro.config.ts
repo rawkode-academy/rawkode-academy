@@ -37,8 +37,8 @@ export default defineConfig({
 
 	integrations: [react()],
 
-	vite: {
-		plugins: [tailwindcss()],
+    vite: {
+        plugins: [tailwindcss() as any],
 
 		ssr: {
 			external: ["node:crypto", "node:fs/promises", "node:path", "node:url"],
@@ -46,11 +46,11 @@ export default defineConfig({
 		build: {
 			// Reduce noise from large UI bundle during build
 			chunkSizeWarningLimit: 3072,
-		},
-	},
+        },
+    },
 
-	env: {
-		schema: {
+        env: {
+            schema: {
 			// Public variables
 			ZITADEL_URL: envField.string({
 				context: "server",
@@ -97,14 +97,23 @@ export default defineConfig({
 				optional: true,
 				default: true,
 			}),
-			REALTIMEKIT_ENABLE_ANALYTICS: envField.boolean({
-				context: "client",
-				access: "public",
-				optional: true,
-				default: true,
-			}),
-		},
-	},
+                REALTIMEKIT_ENABLE_ANALYTICS: envField.boolean({
+                    context: "client",
+                    access: "public",
+                    optional: true,
+                    default: true,
+                }),
+                // R2 for local recordings
+                R2_ACCOUNT_ID: envField.string({ context: "server", access: "secret" }),
+                R2_BUCKET: envField.string({ context: "server", access: "secret" }),
+                R2_ACCESS_KEY_ID: envField.string({ context: "server", access: "secret" }),
+                R2_SECRET_ACCESS_KEY: envField.string({ context: "server", access: "secret" }),
+                R2_PUBLIC_HOST: envField.string({ context: "server", access: "public", optional: true }),
+                // Descript
+                DESCRIPT_PARTNER_DRIVE_ID: envField.string({ context: "server", access: "secret" }),
+                DESCRIPT_API_TOKEN: envField.string({ context: "server", access: "secret" }),
+            },
+        },
 
 	experimental: {
 		fonts: [

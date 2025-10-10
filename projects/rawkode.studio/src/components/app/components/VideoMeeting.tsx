@@ -4,6 +4,7 @@ import {
 	useRealtimeKitMeeting,
 } from "@cloudflare/realtimekit-react";
 import { RtkMeeting } from "@cloudflare/realtimekit-react-ui";
+import { LocalRecorderControls } from "@/components/recording/LocalRecorderControls";
 import { useEffect } from "react";
 
 interface VideoMeetingProps {
@@ -15,23 +16,20 @@ interface VideoMeetingProps {
 	onLeave?: () => void;
 }
 
-function MeetingUI({ showSetupScreen = false }: { showSetupScreen?: boolean }) {
-	const { meeting } = useRealtimeKitMeeting();
+function MeetingUI({ showSetupScreen = false, meetingId }: { showSetupScreen?: boolean; meetingId: string }) {
+  const { meeting } = useRealtimeKitMeeting();
 
-	return (
-		<div style={{ height: "100vh", width: "100%" }}>
-			<RtkMeeting
-				mode="fill"
-				meeting={meeting}
-				showSetupScreen={showSetupScreen}
-			/>
-		</div>
-	);
+  return (
+    <div style={{ height: "100vh", width: "100%", position: "relative" }}>
+      <RtkMeeting mode="fill" meeting={meeting} showSetupScreen={showSetupScreen} />
+      <LocalRecorderControls meetingId={meetingId} participantRole="host" />
+    </div>
+  );
 }
 
 export function VideoMeeting(props: VideoMeetingProps) {
-	const { authToken, showSetupScreen = false } = props;
-	const [meeting, initMeeting] = useRealtimeKitClient();
+  const { authToken, showSetupScreen = false } = props;
+  const [meeting, initMeeting] = useRealtimeKitClient();
 
 	useEffect(() => {
 		if (authToken) {
@@ -45,9 +43,9 @@ export function VideoMeeting(props: VideoMeetingProps) {
 		}
 	}, [authToken, initMeeting]);
 
-	return (
-		<RealtimeKitProvider value={meeting}>
-			<MeetingUI showSetupScreen={showSetupScreen} />
-		</RealtimeKitProvider>
-	);
+  return (
+    <RealtimeKitProvider value={meeting}>
+      <MeetingUI showSetupScreen={showSetupScreen} meetingId={props.meetingId} />
+    </RealtimeKitProvider>
+  );
 }

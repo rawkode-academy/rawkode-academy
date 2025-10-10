@@ -69,26 +69,7 @@ bun run test \
 op run -- bunx wrangler pages deploy --branch main dist
 ```
 
-## InfluxDB 3
+## Analytics
 
-```shell
-op run -- influx bucket create \
-  --schema-type explicit \
-  --retention 0 \
-  --name analytics
-
-op run -- influx bucket-schema update \
-  --bucket analytics \
-  --name website \
-  --columns-file ./integrations/influxdb/analytics/website.json
-
-op run -- influx bucket-schema update \
-  --bucket analytics \
-  --name video \
-  --columns-file ./integrations/influxdb/analytics/video.json
-
-op run -- influx bucket-schema update \
-  --bucket analytics \
-  --name share \
-  --columns-file ./integrations/influxdb/analytics/share.json
-```
+This site uses PostHog for all analytics, error tracking, and optional session recording.
+Session recordings are sampled at ~10% with inputs masked. No InfluxDB pipeline is used anymore.

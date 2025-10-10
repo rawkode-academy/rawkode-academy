@@ -1,0 +1,77 @@
+---
+---
+
+<style>
+  .consent-banner{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:.75rem;align-items:start;max-width:56rem;margin:0 auto;padding:1rem;background:color-mix(in oklab, white 92%, transparent);border:1px solid color-mix(in oklab, black 12%, transparent);backdrop-filter:saturate(150%) blur(6px);border-bottom:0;border-left:0;border-right:0}
+  @media(min-width:768px){.consent-banner{left:50%;transform:translateX(-50%);border-radius:.5rem;margin:1rem;border-bottom:1px solid color-mix(in oklab, black 12%, transparent);border-left:1px solid color-mix(in oklab, black 12%, transparent);border-right:1px solid color-mix(in oklab, black 12%, transparent)} }
+  .consent-title{font-weight:600;margin:0 0 .25rem 0}
+  .consent-text{margin:.25rem 0 .75rem 0;font-size:.95rem;line-height:1.3}
+  .consent-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+  .btn{border-radius:.375rem;padding:.5rem .75rem;font-weight:600;font-size:.95rem;cursor:pointer}
+  .btn-primary{background:#5F5ED7;color:white;border:1px solid #514fcc}
+  .btn-muted{background:transparent;border:1px solid #d1d5db;color:#111827}
+  .hidden{display:none}
+  @media(prefers-color-scheme:dark){
+    .consent-banner{background:color-mix(in oklab, black 70%, transparent);border-color:color-mix(in oklab, white 20%, transparent)}
+    .consent-text{color:#e5e7eb}
+    .consent-title{color:#f9fafb}
+    .btn-muted{border-color:#374151;color:#e5e7eb}
+  }
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .consent-content{flex:1}
+</style>
+
+<div id="consent-banner" class="consent-banner hidden" role="dialog" aria-labelledby="consent-title" aria-describedby="consent-desc">
+  <div class="consent-content">
+    <h2 id="consent-title" class="consent-title">Analytics & Cookies</h2>
+    <p id="consent-desc" class="consent-text">
+      We use PostHog to understand usage and improve the site. Session recording may sample ~10% of visits with inputs masked. You can accept or decline; your choice is remembered.
+    </p>
+    <div class="consent-actions">
+      <button id="consent-accept" class="btn btn-primary" type="button">Accept</button>
+      <button id="consent-decline" class="btn btn-muted" type="button">Decline</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const KEY = 'consent_analytics';
+    const banner = document.getElementById('consent-banner');
+    const showIfNeeded = () => {
+      try{
+        const v = localStorage.getItem(KEY);
+        if (!v) banner?.classList.remove('hidden');
+      }catch{ /* ignore */ }
+    };
+
+    const accept = () => {
+      try{ localStorage.setItem(KEY, 'granted'); }catch{}
+      try{
+        // Forwarded via Partytown
+        if (window.posthog){
+          window.posthog.opt_in_capturing();
+          if (typeof window.posthog.startSessionRecording === 'function') {
+            window.posthog.startSessionRecording();
+          }
+          // Capture a pageview immediately upon consent
+          window.posthog.capture('$pageview');
+        }
+      }catch{}
+      banner?.classList.add('hidden');
+    };
+
+    const decline = () => {
+      try{ localStorage.setItem(KEY, 'denied'); }catch{}
+      try{ if (window.posthog){ window.posthog.opt_out_capturing(); } }catch{}
+      banner?.classList.add('hidden');
+    };
+
+    document.getElementById('consent-accept')?.addEventListener('click', accept);
+    document.getElementById('consent-decline')?.addEventListener('click', decline);
+
+    // Show the banner if no decision stored
+    showIfNeeded();
+  })();
+</script>
+

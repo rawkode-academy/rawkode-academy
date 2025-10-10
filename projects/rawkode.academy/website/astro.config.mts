@@ -4,7 +4,6 @@ import partytown from "@astrojs/partytown";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import vue from "@astrojs/vue";
-import faroUploader from "@grafana/faro-rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
@@ -69,47 +68,42 @@ export default defineConfig({
 			})(),
 		}),
 		vue(),
-		partytown({
-			config: {
-				forward: ["dataLayer.push", "gtag", "posthog", "GrafanaFaroWebSdk"],
-				lib: "/_partytown/",
-				// Prevent service worker registration attempts from Partytown
-				mainWindowAccessors: ["navigator.serviceWorker"],
-				resolveUrl: (url) => {
-					// Allow all URLs except service worker registrations
-					if (
-						url.pathname.includes("sw.js") ||
-						url.pathname.includes("service-worker")
-					) {
-						return null;
-					}
-					return url;
-				},
-			},
-		}),
-	],
-	vite: {
-		plugins: [
-			webcontainerDemosPlugin(),
-			vidstackPlugin({ include: /components\/video\// }),
-			vue({
-				template: {
-					compilerOptions: {
-						isCustomElement: (tag) => tag.startsWith("media-"),
-					},
-				},
-			}),
-			faroUploader({
-				appName: "rawkode.academy",
-				endpoint: "https://faro-api-prod-gb-south-0.grafana.net/faro/api/v1",
-				appId: "27",
-				stackId: "711132",
-				apiKey: process.env.GRAFANA_SOURCE_MAPS || "",
-				gzipContents: true,
-			}),
-			tailwindcss(),
-		],
-		resolve: {
+        partytown({
+            config: {
+                forward: ["posthog"],
+                lib: "/_partytown/",
+                // Prevent service worker registration attempts from Partytown
+                mainWindowAccessors: ["navigator.serviceWorker"],
+                resolveUrl: (url) => {
+                    // Allow all URLs except service worker registrations
+                    if (
+                        url.pathname.includes("sw.js") ||
+                        url.pathname.includes("service-worker")
+                    ) {
+                        return null;
+                    }
+                    return url;
+                },
+            },
+        }),
+    ],
+    vite: {
+        plugins: [
+            webcontainerDemosPlugin(),
+            vidstackPlugin({ include: /components\/video\// }),
+            vue({
+                template: {
+                    compilerOptions: {
+                        isCustomElement: (tag) => tag.startsWith("media-"),
+                    },
+                },
+            }),
+            tailwindcss(),
+        ],
+        build: {
+            sourcemap: true,
+        },
+        resolve: {
 			// Use react-dom/server.edge instead of react-dom/server.browser for React 19.
 			// Without this, MessageChannel from node:worker_threads needs to be polyfilled.
 			// https://github.com/withastro/adapters/pull/436
@@ -131,62 +125,56 @@ export default defineConfig({
 		},
 	},
 	site: getSiteUrl(),
-	env: {
-		validateSecrets: true,
-		schema: {
-			ZITADEL_URL: envField.string({
-				context: "server",
-				access: "public",
-				default: "https://zitadel.rawkode.academy",
-			}),
-			ZITADEL_CLIENT_ID: envField.string({
-				context: "server",
-				access: "public",
-				default: "293097955970320066",
-			}),
-			INFLUXDB_HOST: envField.string({
-				context: "server",
-				access: "public",
-				default: "https://eu-central-1-1.aws.cloud2.influxdata.com",
-			}),
-			INFLUXDB_TOKEN: envField.string({
-				context: "server",
-				access: "secret",
-				optional: true,
-			}),
-			INFLUXDB_ORG: envField.string({
-				context: "server",
-				access: "public",
-				default: "Rawkode Academy",
-			}),
-			INFLUXDB_BUCKET: envField.string({
-				context: "server",
-				access: "public",
-				default: "analytics",
-			}),
-			ZULIP_URL: envField.string({
-				context: "server",
-				access: "public",
-				default: "https://chat.rawkode.academy",
-			}),
-			ZULIP_EMAIL: envField.string({
-				context: "server",
-				access: "public",
-				default: "rocko-bot@chat.rawkode.academy",
-			}),
-			ZULIP_API_KEY: envField.string({
-				context: "server",
-				access: "secret",
-				optional: true,
-			}),
-			GRAPHQL_ENDPOINT: envField.string({
-				context: "server",
-				access: "public",
-				default:
-					process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/graphql",
-			}),
-		},
-	},
+    env: {
+        validateSecrets: true,
+        schema: {
+            ZITADEL_URL: envField.string({
+                context: "server",
+                access: "public",
+                default: "https://zitadel.rawkode.academy",
+            }),
+            ZITADEL_CLIENT_ID: envField.string({
+                context: "server",
+                access: "public",
+                default: "293097955970320066",
+            }),
+            POSTHOG_API_KEY: envField.string({
+                context: "server",
+                access: "secret",
+            }),
+            POSTHOG_HOST: envField.string({
+                context: "server",
+                access: "public",
+                default: "https://eu.i.posthog.com",
+            }),
+            ZULIP_URL: envField.string({
+                context: "server",
+                access: "public",
+                default: "https://chat.rawkode.academy",
+            }),
+            ZULIP_EMAIL: envField.string({
+                context: "server",
+                access: "public",
+                default: "rocko-bot@chat.rawkode.academy",
+            }),
+            ZULIP_API_KEY: envField.string({
+                context: "server",
+                access: "secret",
+                optional: true,
+            }),
+            GRAPHQL_ENDPOINT: envField.string({
+                context: "server",
+                access: "public",
+                default:
+                    process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/graphql",
+            }),
+            PUBLIC_CAPTURE_ERRORS: envField.string({
+                context: "server",
+                access: "public",
+                default: "false",
+            }),
+        },
+    },
 	security: {
 		checkOrigin: true,
 	},
