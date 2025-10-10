@@ -192,11 +192,18 @@ const formatDate = (dateString: string) => {
 	});
 };
 
-const breadcrumbElements = [
-	{ title: "Home", link: "/" },
-	{ title: "Videos", link: "/watch" },
-	{ title: video.data.title, link: `/watch/${video.data.slug}` },
-];
+const breadcrumbElements = video.data.show
+        ? [
+                  { title: "Home", link: "/" },
+                  { title: "Videos", link: "/watch" },
+                  { title: video.data.show.name, link: `/shows/${video.data.show.id}` },
+                  { title: video.data.title, link: `/watch/${video.data.slug}` },
+          ]
+        : [
+                  { title: "Home", link: "/" },
+                  { title: "Videos", link: "/watch" },
+                  { title: video.data.title, link: `/watch/${video.data.slug}` },
+          ];
 ---
 
 <Page
