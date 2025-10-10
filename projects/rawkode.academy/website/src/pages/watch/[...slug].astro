@@ -168,11 +168,14 @@ try {
         const ch = chaptersResp.videoByID?.chapters || [];
         if (ch.length > 0) {
             ch.sort((a, b) => a.startTime - b.startTime);
-            clips = ch.map((c, i) => ({
-                name: c.title,
-                startOffset: Math.max(0, Math.floor(c.startTime || 0)),
-                ...(i < ch.length - 1 ? { endOffset: Math.max(0, Math.floor(ch[i + 1].startTime || 0)) } : {}),
-            }));
+            clips = ch.map((c, i) => {
+                const next = ch[i + 1];
+                return {
+                    name: c.title,
+                    startOffset: Math.max(0, Math.floor(c.startTime || 0)),
+                    ...(next ? { endOffset: Math.max(0, Math.floor(next.startTime || 0)) } : {}),
+                };
+            });
         }
     }
 } catch (e) {

@@ -35,7 +35,10 @@ function extractLocsFromXml(xml: string): string[] {
   const re = /<loc>\s*([^<]+?)\s*<\/loc>/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(xml))) {
-    locs.push(m[1].trim());
+    const loc = m[1];
+    if (typeof loc === "string") {
+      locs.push(loc.trim());
+    }
   }
   return locs;
 }
@@ -116,6 +119,7 @@ async function run() {
     while (i < urls.length) {
       const idx = i++;
       const u = urls[idx];
+      if (!u) continue; // noUncheckedIndexedAccess safety
       try {
         const r = await checkUrl(u, apexHost);
         results.push(r);
@@ -146,4 +150,3 @@ run().catch((e) => {
   console.error("Failed:", e);
   process.exit(1);
 });
-

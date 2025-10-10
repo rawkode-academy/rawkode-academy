@@ -108,8 +108,9 @@ export function webcontainerDemosPlugin(): Plugin {
 				const key = `${demo.courseId}/${demo.demoId}`;
 				const globPattern = `/content/courses/${demo.path}/**/*`;
 
+				// Use Vite's updated glob options: `query` + `import`
 				imports.push(
-					`const demo${index} = import.meta.glob('${globPattern}', { as: 'raw', eager: true });`,
+					`const demo${index} = import.meta.glob('${globPattern}', { query: '?raw', import: 'default', eager: true });`,
 				);
 				demoMap.push(
 					`'${key}': { files: demo${index}, config: ${JSON.stringify(

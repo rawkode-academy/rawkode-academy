@@ -89,7 +89,11 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 	authors={authors}
 >
 	{/* Article structured data (TechArticle) */}
-	<ArticleJsonLd slot="extra-head" article={article} authors={authors} imageUrl={imageUrl} />
+	{imageUrl ? (
+		<ArticleJsonLd slot="extra-head" article={article} authors={authors} imageUrl={imageUrl} />
+	) : (
+		<ArticleJsonLd slot="extra-head" article={article} authors={authors} />
+	)}
 	<!-- Breadcrumb Section -->
 	<div class="mb-6">
 		<Breadcrumb elements={breadcrumbElements} />

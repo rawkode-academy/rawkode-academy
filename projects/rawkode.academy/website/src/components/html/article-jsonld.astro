@@ -5,6 +5,8 @@ interface Props {
   article: CollectionEntry<"articles">;
   authors: Array<{ data: { name: string } }>;
   imageUrl?: URL; // absolute URL if available
+  // Allow placement into a named slot in parents (for TS exactOptionalPropertyTypes)
+  slot?: string;
 }
 
 const { article, authors, imageUrl } = Astro.props;
@@ -22,4 +24,3 @@ const jsonLd = {
 ---
 
 <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-

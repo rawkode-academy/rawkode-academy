@@ -50,6 +50,7 @@ function extractLinks(html: string, baseUrl: string) {
   while ((m = re.exec(html))) {
     try {
       const href = m[1];
+      if (!href) continue; // noUncheckedIndexedAccess safety
       const abs = new URL(href, base).href;
       out.push(abs);
     } catch {}
