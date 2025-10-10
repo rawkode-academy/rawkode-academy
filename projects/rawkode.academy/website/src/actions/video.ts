@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { Analytics, getSessionId } from "../lib/analytics";
+import { captureServerEvent, getAnonDistinctIdFromCookies } from "../server/posthog";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
@@ -35,48 +35,51 @@ export const trackVideoEvent = defineAction({
 		try {
 			console.log("Video event received:", event);
 
-			// Get session ID from request or use anonymous
-			const sessionId = ctx.request ? getSessionId(ctx.request) : "anonymous";
-
-			// Initialize analytics
-			const analytics = new Analytics(
-				ctx.locals.runtime.env,
-				sessionId,
-				ctx.locals.user?.sub,
-			);
-
-			// Map the action to the appropriate analytics method
-			let success = false;
-			const extra: Record<string, unknown> = {};
+            // Map the action to the appropriate analytics method
+            let success = false;
+            const extra: Record<string, unknown> = {};
+            const distinctId = ctx.locals.user?.sub || (ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) || undefined;
 
 			switch (event.action) {
-				case "played":
-				case "paused":
-				case "seeked":
-					success = await analytics.trackVideoEvent(
-						event.video,
-						event.action === "played"
-							? "play"
-							: event.action === "paused"
-								? "pause"
-								: "seek",
-						event.seconds,
-					);
-					break;
-				case "progressed":
-					extra.percent = event.percent;
-					success = await analytics.trackVideoEvent(
-						event.video,
-						"progress",
-						undefined,
-						undefined,
-						extra,
-					);
-					break;
-				case "completed":
-					success = await analytics.trackVideoEvent(event.video, "complete");
-					break;
-			}
+                case "played":
+                case "paused":
+                case "seeked":
+                    await captureServerEvent({
+                        event:
+                            event.action === "played"
+                                ? "video_play"
+                                : event.action === "paused"
+                                    ? "video_pause"
+                                    : "video_seek",
+                        distinctId,
+                        properties: {
+                            video_id: event.video,
+                            position: event.seconds,
+                        },
+                    });
+                    success = true;
+                    break;
+                case "progressed":
+                    extra.percent = event.percent;
+                    await captureServerEvent({
+                        event: "video_progress",
+                        distinctId,
+                        properties: {
+                            video_id: event.video,
+                            percent: event.percent,
+                        },
+                    });
+                    success = true;
+                    break;
+                case "completed":
+                    await captureServerEvent({
+                        event: "video_complete",
+                        distinctId,
+                        properties: { video_id: event.video },
+                    });
+                    success = true;
+                    break;
+            }
 
 			return {
 				success,

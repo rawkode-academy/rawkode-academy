@@ -27,16 +27,9 @@
 		{
 			"binding": "EMOJI_REACTIONS",
 			"service": "platform-emoji-reactions-write-model"
-		},
-		{
-			"binding": "ANALYTICS",
-			"service": "analytics-event-collector"
 		}
 	],
 	"vars": {
-		"INFLUXDB_HOST": "https://eu-central-1-1.aws.cloud2.influxdata.com",
-		"INFLUXDB_ORG": "Rawkode Academy",
-		"INFLUXDB_BUCKET": "analytics",
 		"ZITADEL_CLIENT_ID": "293097955970320066",
 		"ZITADEL_URL": "https://zitadel.rawkode.academy"
 	}

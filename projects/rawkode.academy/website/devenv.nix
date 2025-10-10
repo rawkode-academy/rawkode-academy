@@ -20,7 +20,7 @@
   ];
 
   enterShell = ''
-	  export LD_LIBRARY_PATH=${pkgs.libgccjit}/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=${pkgs.libgccjit}/lib:$LD_LIBRARY_PATH
 
     bun install
 
@@ -30,3 +30,4 @@
     fi
   '';
 }
+

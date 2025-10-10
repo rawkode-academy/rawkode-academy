@@ -29,12 +29,36 @@ jobs:
         run: |
           curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
 
+      - name: Default error capture flag
+        run: echo "PUBLIC_CAPTURE_ERRORS=false" >> $GITHUB_ENV
+
+      - name: Enable error capture on main
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+        run: echo "PUBLIC_CAPTURE_ERRORS=true" >> $GITHUB_ENV
+
       - name: Build Website
         working-directory: projects/rawkode.academy/website
+        env:
+          PUBLIC_CAPTURE_ERRORS: ${{ env.PUBLIC_CAPTURE_ERRORS }}
         run: |
           dagger <<.
             . | build | export dist
           .
+
+      - name: Upload PostHog Source Maps (production)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+        uses: PostHog/upload-source-maps@v0.4.6
+        with:
+          directory: projects/rawkode.academy/website/dist
+          env-id: ${{ secrets.POSTHOG_ENV_ID }}
+          cli-token: ${{ secrets.POSTHOG_CLI_TOKEN }}
+          host: https://eu.posthog.com
+          version: ${{ github.sha }}
+
+      - name: Remove .map files from production dist
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+        run: |
+          find projects/rawkode.academy/website/dist -name "*.map" -print -delete || true
 
       - name: Build Storybook
         working-directory: projects/rawkode.academy/website
@@ -43,6 +67,10 @@ jobs:
           dagger <<.
             . | buildStorybook | export storybook-static
           .
+
+      - name: Remove .map files from Storybook
+        run: |
+          find projects/rawkode.academy/website/storybook-static -name "*.map" -print -delete || true
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -100,6 +128,11 @@ jobs:
               ${{ github.repository }} \
               ${{ github.event.pull_request.number }}
           .
+
+      - name: Remove .map files from preview dist
+        if: github.event_name == 'pull_request'
+        run: |
+          find projects/rawkode.academy/website/dist -name "*.map" -print -delete || true
 
       - name: Deploy Storybook Preview
         id: storybook-preview

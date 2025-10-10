@@ -3,6 +3,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
 import { Resend } from "resend";
+import { captureServerEvent, getAnonDistinctIdFromCookies } from "../server/posthog";
 
 const SignupSchema = z.object({
 	email: z.string().email("Please enter a valid email address").optional(),
@@ -14,7 +15,7 @@ const SignupSchema = z.object({
 export const signupForCourseUpdates = defineAction({
 	input: SignupSchema,
 	accept: "form",
-	handler: async (data, ctx) => {
+		handler: async (data, ctx) => {
 		const { audienceId, sponsorAudienceId, allowSponsorContact } = data;
 
 		// Get email from either the form or the authenticated user
@@ -91,6 +92,18 @@ export const signupForCourseUpdates = defineAction({
 				signedUpCourses[audienceId] = email;
 				ctx.session.set("signedUpCourses", signedUpCourses);
 			}
+
+			// Analytics: capture course signup (without sending PII)
+			const distinctId = ctx.locals.user?.sub || (ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) || undefined;
+			await captureServerEvent({
+				event: "course_signup",
+				distinctId,
+				properties: {
+					audience_id: audienceId,
+					allow_sponsor_contact: !!allowSponsorContact,
+					is_authenticated: !!ctx.locals.user,
+				},
+			});
 
 			// Check if the contact was already in the audience
 			if (response.data && response.data.id) {

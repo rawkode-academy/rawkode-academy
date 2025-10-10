@@ -99,19 +99,23 @@ export function isNetworkError(error: unknown): boolean {
 }
 
 export function logError(
-	error: unknown,
-	context?: Record<string, unknown>,
+    error: unknown,
+    context?: Record<string, unknown>,
 ): void {
-	console.error("Error occurred:", error, context);
+    console.error("Error occurred:", error, context);
 
-	// Log to monitoring service if available
-	if (typeof window !== "undefined" && window.GrafanaFaroWebSdk?.faro) {
-		if (error instanceof Error) {
-			window.GrafanaFaroWebSdk.faro.api.pushError(error, { context });
-		} else {
-			window.GrafanaFaroWebSdk.faro.api.pushError(new Error(String(error)), {
-				context,
-			});
-		}
-	}
+    const enableErrorCapture = (import.meta as any).env?.PUBLIC_CAPTURE_ERRORS === 'true';
+    if (enableErrorCapture && typeof window !== "undefined" && (window as any).posthog) {
+        const ph = (window as any).posthog;
+        if (error instanceof Error) {
+            ph.capture("js_error", {
+                name: error.name,
+                message: error.message,
+                stack: error.stack,
+                ...context,
+            });
+        } else {
+            ph.capture("js_error", { message: String(error), ...context });
+        }
+    }
 }

@@ -149,7 +149,7 @@ const data = await handleApiResponse(response);
 
 ## Monitoring and Analytics
 
-- Errors logged to Grafana Faro
-- Analytics tracked with PostHog
-- Performance monitored with Web Vitals
+- Errors and analytics tracked with PostHog
+- Session recordings sampled at ~10% with inputs masked
+- Performance (e.g., Web Vitals) can be sent to PostHog
 - All tracking runs in web workers via Partytown
