@@ -35,8 +35,24 @@ onMounted(() => {
 	const playerEl = document.querySelector("media-player");
 	if (!playerEl) return;
 
-	// Handle media events
-	playerEl.addEventListener("play", () => {
+  // Handle media events
+  // Support deep-link starting time via ?t=SECONDS
+  const tParam = new URL(window.location.href).searchParams.get("t");
+  const startAt = tParam ? parseInt(tParam, 10) : 0;
+  if (!isNaN(startAt) && startAt > 0) {
+    const mediaEl = playerEl.querySelector("video");
+    if (mediaEl) {
+      const setStart = () => {
+        try {
+          mediaEl.currentTime = startAt;
+        } catch {}
+      };
+      if (mediaEl.readyState >= 1) setStart();
+      else mediaEl.addEventListener("loadedmetadata", setStart, { once: true });
+    }
+  }
+
+  playerEl.addEventListener("play", () => {
 		const mediaEl = playerEl.querySelector("video");
 		if (!mediaEl) return;
 

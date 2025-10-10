@@ -83,6 +83,11 @@ const hasNextPage = allGridVideos.length > videosPerPage;
 ---
 
 <Page title="Videos">
+	{page > 1 && (
+		<Fragment slot="extra-head">
+			<meta name="robots" content="noindex,follow" />
+		</Fragment>
+	)}
 	<VideoMetadata
 		slot="extra-head"
 		title="Rawkode Academy Videos"

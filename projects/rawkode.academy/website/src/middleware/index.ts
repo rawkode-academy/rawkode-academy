@@ -1,5 +1,7 @@
 import { sequence } from "astro:middleware";
 import { authMiddleware } from "./auth";
 import { corsMiddleware } from "./cors";
+import { canonicalMiddleware } from "./canonical";
 
-export const onRequest = sequence(corsMiddleware, authMiddleware);
+// Ensure canonical redirects happen first
+export const onRequest = sequence(canonicalMiddleware, corsMiddleware, authMiddleware);

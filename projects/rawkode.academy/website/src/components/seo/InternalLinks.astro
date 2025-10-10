@@ -1,0 +1,94 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+
+interface Props {
+  article: CollectionEntry<"articles">;
+  limitSideways?: number;
+  limitDown?: number;
+}
+
+const { article, limitSideways = 2, limitDown = 2 } = Astro.props;
+
+// Helper to pick first technology if present
+const primaryTechId: string | undefined = Array.isArray(article.data.technologies) && article.data.technologies.length > 0
+  ? article.data.technologies[0]
+  : undefined;
+
+// Up (hub) links
+const upLinks: { href: string; label: string }[] = [{ href: "/read", label: "All Articles" }];
+if (primaryTechId) {
+  upLinks.unshift({ href: `/technology/${primaryTechId}`, label: "Technology Hub" });
+}
+
+// Sideways (peers)
+const allArticles = await getCollection("articles", ({ data }) => !data.draft);
+let sideways: CollectionEntry<"articles">[] = [];
+if (article.data.series) {
+  sideways = allArticles
+    .filter((a) => a.id !== article.id && a.data.series?.id === article.data.series?.id)
+    .slice(0, limitSideways);
+}
+if (sideways.length < limitSideways && Array.isArray(article.data.technologies) && article.data.technologies.length > 0) {
+  const remaining = limitSideways - sideways.length;
+  const techSet = new Set(article.data.technologies);
+  const techPeers = allArticles
+    .filter((a) => a.id !== article.id && a.data.technologies?.some((t: string) => techSet.has(t)))
+    .filter((a) => !sideways.find((s) => s.id === a.id))
+    .slice(0, remaining);
+  sideways = [...sideways, ...techPeers];
+}
+
+// Down (deep guides) – prefer videos for the same technology
+let downLinks: { href: string; label: string }[] = [];
+try {
+  const videos = await getCollection("videos");
+  if (primaryTechId) {
+    const deepVideos = videos
+      .filter((v) => v.data.technologies?.some((t: { id: string }) => t.id === primaryTechId))
+      .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
+      .slice(0, limitDown);
+    downLinks = deepVideos.map((v) => ({ href: `/watch/${v.data.slug}`, label: v.data.title }));
+  }
+} catch {
+  // videos collection may be empty in some builds; skip
+}
+
+const hasLinks = upLinks.length || sideways.length || downLinks.length;
+---
+
+{hasLinks && (
+  <aside class="mt-4 mb-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 p-4">
+    <div class="grid gap-4 md:grid-cols-3">
+      {/* Up (hub) */}
+      <div>
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Up: Hubs</h3>
+        <ul class="space-y-1 list-disc list-inside text-sm">
+          {upLinks.map((l) => (
+            <li><a href={l.href} class="text-primary hover:underline">{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Sideways (peers) */}
+      <div>
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Sideways: Related</h3>
+        <ul class="space-y-1 list-disc list-inside text-sm">
+          {sideways.map((a) => (
+            <li><a href={`/read/${a.id}`} class="text-primary hover:underline">{a.data.title}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Down (deep guides) */}
+      <div>
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Deeper: Guides & Videos</h3>
+        <ul class="space-y-1 list-disc list-inside text-sm">
+          {downLinks.map((l) => (
+            <li><a href={l.href} class="text-primary hover:underline">{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </aside>
+)}
+
