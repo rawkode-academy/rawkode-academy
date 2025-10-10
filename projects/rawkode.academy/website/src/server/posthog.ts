@@ -2,8 +2,8 @@ import { POSTHOG_API_KEY, POSTHOG_HOST } from "astro:env/server";
 
 type CaptureOptions = {
   event: string;
-  properties?: Record<string, unknown>;
-  distinctId?: string;
+  properties?: Record<string, unknown> | undefined;
+  distinctId?: string | undefined;
 };
 
 /**
@@ -18,7 +18,9 @@ export function getAnonDistinctIdFromCookies(req: Request): string | undefined {
   const match = cookieHeader.match(/(?:^|;\s*)ph_[^=]+_posthog=([^;]+)/);
   if (!match) return undefined;
   try {
-    const decoded = decodeURIComponent(match[1]);
+    const captured = match[1];
+    if (!captured) return undefined;
+    const decoded = decodeURIComponent(captured);
     const payload = JSON.parse(decoded);
     if (payload && typeof payload.distinct_id === "string") {
       return payload.distinct_id as string;
@@ -62,9 +64,9 @@ export async function captureServerEvent(
 
 type IdentifyOptions = {
   distinctId: string; // identified user id
-  anonId?: string; // optional anonymous id to merge with
-  set?: Record<string, unknown>;
-  setOnce?: Record<string, unknown>;
+  anonId?: string | undefined; // optional anonymous id to merge with
+  set?: Record<string, unknown> | undefined;
+  setOnce?: Record<string, unknown> | undefined;
 };
 
 /**
@@ -87,4 +89,3 @@ export async function identifyServerUser(opts: IdentifyOptions): Promise<void> {
 
   await posthogCapture(identifyEvent);
 }
-
