@@ -10,7 +10,11 @@ import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
 import matter from "gray-matter";
 import { readFile, stat } from "node:fs/promises";
+import { statSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { createRequire } from "node:module";
 import { glob } from "glob";
+import { searchForWorkspaceRoot } from "vite";
 import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import { fetchVideosFromGraphQL } from "./src/lib/fetch-videos";
@@ -107,12 +111,48 @@ async function buildLastmodIndex() {
     } catch {}
   }
 
-  // Technologies -> /technology/{id} (JSON, fallback to file mtime)
-  const techFiles = await glob("content/technologies/**/*.json");
+  // Technologies -> /technology/{id}
+  // MD/MDX only (content lives in workspace package under data/)
+  let techFiles: string[] = [];
+  let techBaseDir: string | undefined;
+  try {
+    const require = createRequire(import.meta.url);
+    const pkgPath = require.resolve("@rawkodeacademy/content-technologies/package.json");
+    const root = dirname(pkgPath);
+    const data = join(root, "data");
+    try {
+      const s = await stat(data);
+      techBaseDir = s.isDirectory() ? data : root;
+    } catch {
+      techBaseDir = root;
+    }
+    techFiles = await glob("**/*.{md,mdx}", { cwd: techBaseDir, absolute: true });
+  } catch {
+    // Fallback: look in common relative locations if the package isn't resolvable
+    const fallbacks = [
+      "content/technologies",
+      "../content/technologies",
+      "../../../content/technologies",
+    ];
+    for (const base of fallbacks) {
+      const withData = join(base, "data");
+      const patterns = ["**/*.{md,mdx}"];
+      const dirs = [withData, base];
+      for (const d of dirs) {
+        const matches = await glob(patterns[0], { cwd: d, absolute: true });
+        if (matches.length > 0) {
+          techFiles.push(...matches);
+          if (!techBaseDir) techBaseDir = d;
+        }
+      }
+    }
+  }
   for (const file of techFiles) {
     try {
-      const rel = file.replace(/^content\/technologies\//, "");
-      const id = rel.replace(/\/index\.json$/i, "").replace(/\.json$/i, "");
+      const rel = techBaseDir ? file.slice(techBaseDir.length + 1) : file;
+      const id = rel
+        .replace(/\/index\.(md|mdx)$/i, "")
+        .replace(/\.(md|mdx)$/i, "");
       const last = (await stat(file)).mtime;
       index.set(`/technology/${id}`, last);
     } catch {}
@@ -132,6 +172,21 @@ async function buildLastmodIndex() {
 
 // Compute lastmod index once for sitemap serialization
 const lastmodIndex = await buildLastmodIndex();
+
+// Resolve external content package directory for Vite FS allow (dev + build asset import)
+let CONTENT_TECH_DIR: string | undefined;
+try {
+  const require = createRequire(import.meta.url);
+  const pkgPath = require.resolve("@rawkodeacademy/content-technologies/package.json");
+  const root = dirname(pkgPath);
+  const data = join(root, "data");
+  try {
+    const s = statSync(data);
+    CONTENT_TECH_DIR = s.isDirectory() ? data : root;
+  } catch {
+    CONTENT_TECH_DIR = root;
+  }
+} catch {}
 
 export default defineConfig({
 	output: "static",
@@ -210,6 +265,15 @@ export default defineConfig({
             }),
             tailwindcss(),
         ],
+        server: {
+            fs: {
+                // Keep Vite's default workspace root allow-list and add our external content dir.
+                allow: [
+                    searchForWorkspaceRoot(process.cwd()),
+                    ...(CONTENT_TECH_DIR ? [CONTENT_TECH_DIR] : []),
+                ],
+            },
+        },
         build: {
             sourcemap: true,
         },

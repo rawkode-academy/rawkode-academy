@@ -1,5 +1,6 @@
 import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
+import { createSchema as createTechnologySchema, resolveDataDirSync as resolveTechnologiesDataDir } from "@rawkodeacademy/content-technologies";
 
 import { gql, GraphQLClient } from "graphql-request";
 import { GRAPHQL_ENDPOINT } from "astro:env/server";
@@ -223,27 +224,10 @@ const articles = defineCollection({
 
 const technologies = defineCollection({
 	loader: glob({
-		pattern: ["**/*.json"],
-		base: "./content/technologies",
+		pattern: ["**/*.{md,mdx}"],
+		base: resolveTechnologiesDataDir(),
 	}),
-	schema: z.object({
-		name: z.string(),
-		description: z.string(),
-		icon: z.string(),
-		website: z.string().url(),
-		source: z.string().url(),
-		documentation: z.string().url(),
-		categories: z.array(z.string()),
-		aliases: z.array(z.string()).optional(),
-		relatedTechnologies: z.array(z.string()).optional(),
-		useCases: z.array(z.string()).optional(),
-		features: z.array(z.string()).optional(),
-		learningResources: z.object({
-			official: z.array(z.string().url()).optional(),
-			community: z.array(z.string().url()).optional(),
-			tutorials: z.array(z.string().url()).optional(),
-		}),
-	}),
+	schema: createTechnologySchema(z),
 });
 
 const series = defineCollection({

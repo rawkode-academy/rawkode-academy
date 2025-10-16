@@ -1,0 +1,13 @@
+---
+name: "Kaniko"
+description: |
+  Kaniko is a tool to build container images from a Dockerfile, inside a container or Kubernetes cluster. Unlike Docker-in-Docker (DinD), Kaniko doesn't depend on a Docker daemon and executes each command in the Dockerfile completely in userspace. This allows building images in environments that can't easily or securely run a Docker daemon, such as Kubernetes clusters. Kaniko significantly enhances security and portability by eliminating the need for privileged containers or Docker daemon access during the image building process.
+  
+  Its primary use cases include building container images within CI/CD pipelines running in Kubernetes, automating image builds in cloud environments where Docker daemons are not available, and enhancing the security of image builds by avoiding privileged mode.
+icon: "./kaniko.svg"
+website: "https://github.com/GoogleContainerTools/kaniko"
+documentation: "https://github.com/GoogleContainerTools/kaniko/blob/main/README.md"
+categories: []
+status: "stable"
+---
+

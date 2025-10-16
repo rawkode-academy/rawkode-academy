@@ -36,3 +36,16 @@ invalidate-videos-cache:
 		-H "Authorization: Bearer $CLOUDFLARE_CACHE_BUSTER_TOKEN" \
 		-H "Content-Type: application/json" \
 		-d '{"tags": ["videos-latest"]}'
+
+# Generate SDL and publish the federated subgraph via Cosmo
+publish-subgraph NAMESPACE="production" ROUTING_URL="https://rawkode.academy/graphql" NAME="website-content":
+	#!/usr/bin/env bash
+	set -euo pipefail
+	# 1) Generate SDL
+	bun run subgraph:sdl
+	# 2) Publish to Cosmo
+	bunx wgc subgraph publish "${NAME}" \
+		--namespace "${NAMESPACE}" \
+		--schema subgraph/schema.gql \
+		--routing-url "${ROUTING_URL}"
+	

@@ -2,7 +2,7 @@
 	"name": "website",
 	"type": "module",
 	"version": "0.0.1",
-	"scripts": {
+  "scripts": {
 		"build-storybook": "storybook build",
 		"build": "astro check && astro build",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
@@ -17,9 +17,11 @@
 		"test": "vitest run",
 		"validate:seo": "bun scripts/validate-seo.ts",
 		"check:sitemap": "bun scripts/check-sitemap.ts --base https://rawkode.academy --limit 400 --concurrency 10",
-		"check:orphans": "bun scripts/orphan-check.ts --base https://rawkode.academy --maxDepth 3 --limit 1000"
-	},
-	"dependencies": {
+    "check:orphans": "bun scripts/orphan-check.ts --base https://rawkode.academy --maxDepth 3 --limit 1000",
+    "sync:technologies": "bun scripts/sync-technologies.ts",
+    "subgraph:sdl": "bun scripts/publish-subgraph.ts"
+  },
+  "dependencies": {
 		"@astrojs/check": "^0.9.4",
 		"@astrojs/cloudflare": "12.6.5",
 		"@astrojs/mdx": "4.3.4",
@@ -54,11 +56,16 @@
 		"@vidstack/react": "^1.12.13",
 		"@webcontainer/api": "^1.6.1",
 		"arctic": "^3.7.0",
-		"astro": "5.13.3",
+    "astro": "5.13.3",
+    "@rawkodeacademy/content-technologies": "workspace:*",
 		"astro-d2": "^0.8.0",
 		"astro-expressive-code": "^0.41.3",
 		"cmdk": "^1.1.1",
 		"graphql": "^16.11.0",
+		"graphql-yoga": "^5.13.4",
+		"@pothos/core": "^4.6.0",
+		"@pothos/plugin-directives": "^4.2.0",
+		"@pothos/plugin-federation": "^4.3.2",
 		"graphql-request": "^7.2.0",
 		"iron-session": "^8.0.4",
 		"jose": "^6.0.13",
@@ -92,7 +99,7 @@
 		"vue-boring-avatars": "^1.4.0",
 		"vue-word-highlighter": "^1.2.5",
 		"vue3-carousel": "^0.16.0"
-	},
+  },
 	"devDependencies": {
 		"@biomejs/biome": "2.2.2",
 		"@graphql-codegen/cli": "^5.0.7",

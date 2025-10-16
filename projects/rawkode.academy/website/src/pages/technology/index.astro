@@ -6,39 +6,26 @@ import PageHero from "@/components/common/PageHero.vue";
 import SectionHeader from "@/components/common/SectionHeader.vue";
 import type { Technology } from "@/pages/technology/[id].astro";
 import Page from "@/wrappers/page.astro";
-import { request } from "graphql-request";
-import { GRAPHQL_ENDPOINT } from "astro:env/server";
-
-interface GetTechnologiesResponse {
-	getTechnologies: Technology[];
-}
-
-const getTechnologiesQuery = /* GraphQL */ `
-	query GetTechnologies($limit: Int) {
-		getTechnologies(limit: $limit) {
-			id
-			name
-			description
-
-			logo
-		}
-	}
-`;
-
-// const endpoint = import.meta.env.PUBLIC_GRAPHQL_ENDPOINT; // Use hardcoded endpoint
-const endpoint = GRAPHQL_ENDPOINT;
+import { getCollection } from "astro:content";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
 let technologies: Technology[] = [];
 try {
-	const data = await request<GetTechnologiesResponse>(
-		endpoint,
-		getTechnologiesQuery,
-		{ limit: 200 }, // Fetch up to 200 technologies
-	);
-	technologies = data.getTechnologies;
+  const items = await getCollection("technologies");
+  technologies = items.map((e) => {
+    const icon = (e as any).data.icon;
+    const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
+    return {
+      id: e.id,
+      name: e.data.name,
+      description: e.data.description,
+      logo,
+      website: e.data.website,
+      documentation: e.data.documentation,
+    };
+  });
 } catch (error) {
-	console.error("Failed to fetch technologies for index page:", error);
-	// Leave technologies as empty array when API is not accessible
+  console.error("Failed to load technologies from content collection:", error);
 }
 ---
 

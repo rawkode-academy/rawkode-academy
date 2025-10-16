@@ -1,0 +1,12 @@
+{
+  "name": "rawkodeacademy",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "content/*",
+    "packages/*",
+    "projects/rawkode.academy/website",
+    "projects/rawkode.academy/code"
+  ]
+}
+
