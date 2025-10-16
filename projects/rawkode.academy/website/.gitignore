@@ -23,5 +23,11 @@ public/d2/
 .cursor
 storybook-static/
 
+# Bun
+bun.lock
+
 # Generated TypeScript definitions
 worker-configuration.d.ts
+
+# Website subgraph SDL (generated)
+subgraph/schema.gql
