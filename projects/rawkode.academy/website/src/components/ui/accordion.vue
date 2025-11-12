@@ -33,8 +33,8 @@ const isOpen = (id: string) => !!openItems[id];
 			<h2 :id="`accordion-heading-${item.id}`">
 				<button
 					type="button"
-					class="flex justify-between items-center py-5 w-full font-medium text-left border-b border-gray-200 dark:border-gray-700 transition-colors duration-200"
-					:class="isOpen(item.id) ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'"
+					class="flex justify-between items-center py-5 px-4 w-full font-medium text-left border-b border-white/20 dark:border-gray-700/40 transition-all duration-200 rounded-t-xl hover:bg-white/40 dark:hover:bg-gray-800/40 hover:backdrop-blur-md"
+					:class="isOpen(item.id) ? 'text-gray-900 dark:text-white bg-white/30 dark:bg-gray-800/30 backdrop-blur-md' : 'text-gray-500 dark:text-gray-400'"
 					@click="toggleItem(item.id)"
 					:aria-expanded="isOpen(item.id)"
 					:aria-controls="`accordion-body-${item.id}`"
@@ -70,7 +70,7 @@ const isOpen = (id: string) => !!openItems[id];
 					role="region"
 					class="overflow-hidden"
 				>
-					<div class="py-5 border-b border-gray-200 dark:border-gray-700">
+					<div class="py-5 px-4 border-b border-white/20 dark:border-gray-700/40 bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm">
 						<div class="text-gray-600 dark:text-gray-300">
 							<slot :name="`answer-${item.id}`">
 								{{ item.answer }}

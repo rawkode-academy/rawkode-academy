@@ -39,7 +39,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 <!-- Toggle button - positioned independently -->
 <button
 	id="toc-mobile-toggle"
-	class="md:hidden fixed top-24 right-0 bg-white/95 dark:bg-gray-800/95 text-gray-600 dark:text-gray-300 p-2 rounded-l-lg shadow-md dark:shadow-lg border border-gray-200 dark:border-gray-700 border-r-0 z-50"
+	class="md:hidden fixed top-24 right-0 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md text-gray-600 dark:text-gray-300 p-2 rounded-l-lg shadow-md dark:shadow-lg border border-white/40 dark:border-gray-700/40 border-r-0 z-50"
 >
 	<svg
 		id="toc-icon-open"
@@ -74,10 +74,10 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 <!-- TOC Container - Vertically centered when minimized, expands on hover -->
 <div
 	id="toc-container"
-	class={`toc-container bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 max-h-[70vh] overflow-y-auto rounded-2xl shadow-xl dark:shadow-2xl transition-all duration-300 ease-in-out ${className}`}
+	class={`toc-container relative overflow-hidden bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl border border-white/40 dark:border-gray-700/40 max-h-[70vh] overflow-y-auto rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] transition-all duration-300 ease-in-out before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/10 before:to-transparent before:pointer-events-none before:rounded-2xl ${className}`}
 >
-	<div class="p-4">
-		<div class="toc-header flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-800">
+	<div class="p-4 relative z-10">
+		<div class="toc-header flex items-center justify-between mb-4 pb-3 border-b border-white/40 dark:border-gray-700/40">
 			<h3 class="toc-title text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Contents</h3>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -535,7 +535,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		tocItems.forEach((item) => {
 			const link = item.querySelector("a");
 			if (link) {
-				link.classList.remove("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-800");
+				link.classList.remove("text-gray-900", "dark:text-white", "bg-white/50", "dark:bg-gray-800/50", "backdrop-blur-md");
 				const dot = link.querySelector(".toc-dot") as HTMLElement;
 				if (dot) {
 					dot.classList.add("hidden-opacity");
@@ -570,7 +570,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 
 		const link = currentTocItem.querySelector("a");
 		if (link) {
-			link.classList.add("text-gray-900", "dark:text-white", "bg-gray-100", "dark:bg-gray-800");
+			link.classList.add("text-gray-900", "dark:text-white", "bg-white/50", "dark:bg-gray-800/50", "backdrop-blur-md");
 			const dot = link.querySelector(".toc-dot") as HTMLElement;
 			if (dot && currentTocItem.classList.contains("toc-item")) {
 				dot.style.opacity = "1";

@@ -1,5 +1,54 @@
 @import "tailwindcss";
 
+:root {
+	/* Shared color tokens */
+	color-scheme: light dark;
+	--surface-base: #f5f7ff;
+	--surface-overlay: rgba(255, 255, 255, 0.92);
+	--surface-card: rgba(255, 255, 255, 0.85);
+	--surface-card-muted: rgba(15, 23, 42, 0.05);
+	--surface-border: rgba(15, 23, 42, 0.06);
+	--surface-border-strong: rgba(15, 23, 42, 0.12);
+	--surface-shadow: 0 30px 80px rgba(15, 23, 42, 0.15);
+	--surface-shadow-strong: 0 25px 80px rgba(15, 23, 42, 0.2);
+	--app-backdrop: radial-gradient(circle at 10% 20%, rgba(120, 119, 198, 0.35) 0%, transparent 40%),
+		radial-gradient(circle at 90% 10%, rgba(99, 102, 241, 0.25) 0%, transparent 45%),
+		radial-gradient(circle at 15% 90%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
+		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
+}
+
+html.dark {
+	--surface-base: #030617;
+	--surface-overlay: rgba(6, 11, 27, 0.92);
+	--surface-card: rgba(8, 14, 31, 0.9);
+	--surface-card-muted: rgba(148, 163, 184, 0.08);
+	--surface-border: rgba(148, 163, 184, 0.2);
+	--surface-border-strong: rgba(59, 130, 246, 0.35);
+	--surface-shadow: 0 35px 120px rgba(2, 6, 23, 0.65);
+	--surface-shadow-strong: 0 45px 120px rgba(2, 6, 23, 0.75);
+	--app-backdrop: radial-gradient(circle at 20% 10%, rgba(94, 96, 224, 0.4) 0%, transparent 35%),
+		radial-gradient(circle at 85% 15%, rgba(157, 78, 221, 0.35) 0%, transparent 45%),
+		radial-gradient(circle at 15% 90%, rgba(14, 165, 233, 0.25) 0%, transparent 45%),
+		linear-gradient(145deg, #020617 0%, #020b26 55%, #05080f 100%);
+}
+
+body {
+	position: relative;
+	min-height: 100vh;
+	background-color: var(--surface-base);
+	color: inherit;
+	overflow-x: hidden;
+}
+
+body::before {
+	content: "";
+	position: fixed;
+	inset: 0;
+	background: var(--app-backdrop);
+	z-index: -1;
+	pointer-events: none;
+}
+
 @theme {
 	--color-primary: #5f5ed7;
 	--color-secondary: #00ceff;
@@ -25,6 +74,29 @@
 }
 
 @layer components {
+	.glass-panel {
+		@apply border backdrop-blur-2xl;
+		border-radius: inherit;
+		background-color: var(--surface-card);
+		border-color: var(--surface-border);
+		box-shadow: var(--surface-shadow);
+	}
+
+	.glass-card {
+		@apply border backdrop-blur-xl;
+		border-radius: inherit;
+		background-color: var(--surface-card);
+		border-color: var(--surface-border);
+		box-shadow: var(--surface-shadow);
+	}
+
+	.glass-chip {
+		@apply inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold;
+		background-color: var(--surface-card-muted);
+		border: 1px solid var(--surface-border);
+		color: inherit;
+	}
+
 	/* Prose styles for article content */
 	.prose {
 		@apply text-gray-700 dark:text-gray-300 leading-relaxed;

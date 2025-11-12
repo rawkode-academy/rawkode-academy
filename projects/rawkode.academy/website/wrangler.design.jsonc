@@ -3,6 +3,8 @@
 	"name": "design",
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": true,
+	"preview_urls": true,
 	"routes": [
 		{
 			"pattern": "design.rawkode.academy",

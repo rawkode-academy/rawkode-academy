@@ -83,7 +83,7 @@
             <span v-else class="text-sm text-gray-500 italic">{{ status === 'ready' ? 'Server ready (check terminal for URL)' : 'Waiting for server...' }}</span>
           </div>
         </div>
-        <div class="flex-1 relative bg-white">
+        <div class="flex-1 relative bg-white dark:bg-gray-900">
           <iframe
             v-if="previewUrl"
             :src="previewUrl"

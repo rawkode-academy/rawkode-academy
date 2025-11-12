@@ -157,70 +157,133 @@ const previousPartners: Partners = [
 	</p>
 </div>
 
+
+<style is:global>
+    .partner-logo svg {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        object-fit: contain;
+    }
+
+	.partner-card {
+		position: relative;
+		overflow: hidden;
+		--partner-text-light: var(--partner-fill-light, #5f5ed7);
+		--partner-text-dark: var(--partner-fill-dark, #666cff);
+	}
+
+		.partner-card::before {
+			content: "";
+			position: absolute;
+			inset: -1px;
+			background:
+				radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--partner-fill-light, #5f5ed7) 55%, transparent) 0%, transparent 55%),
+				linear-gradient(140deg, color-mix(in srgb, var(--partner-fill-light, #5f5ed7) 35%, transparent) 0%, transparent 70%);
+			opacity: 0.4;
+			pointer-events: none;
+			z-index: 0;
+	}
+
+	.dark .partner-card::before {
+		background: radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--partner-fill-dark, #666cff) 60%, transparent) 0%, transparent 55%),
+			linear-gradient(140deg, color-mix(in srgb, var(--partner-fill-dark, #666cff) 45%, transparent) 0%, transparent 70%);
+		opacity: 0.6;
+	}
+
+	.partner-card > * {
+		position: relative;
+		z-index: 1;
+	}
+
+	.partner-cta {
+		box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+		background-image: linear-gradient(135deg, var(--cta-start, var(--partner-fill-light, #5f5ed7)), var(--cta-end, var(--partner-fill-dark, #8181ff)));
+	}
+
+		.dark .partner-cta {
+			box-shadow: 0 25px 65px rgba(0, 0, 0, 0.55);
+		}
+
+	.partner-text {
+		color: var(--partner-text-light);
+	}
+
+	.dark .partner-text {
+		color: var(--partner-text-dark);
+	}
+
+	.partner-text-muted {
+		color: color-mix(in srgb, var(--partner-text-light), white 45%);
+	}
+
+	.dark .partner-text-muted {
+		color: color-mix(in srgb, var(--partner-text-dark), black 35%);
+	}
+
+	.partner-chip {
+		border-color: color-mix(in srgb, var(--partner-text-light), white 30%);
+	}
+
+	.dark .partner-chip {
+		border-color: color-mix(in srgb, var(--partner-text-dark), black 40%);
+	}
+</style>
+
 <!-- Current Partners -->
 <div class="mb-16">
 	<h3 class="text-2xl font-bold text-center mb-8 text-gray-900 dark:text-white">Current Partners</h3>
 	<div class="grid grid-cols-1 text-center gap-8 md:grid-cols-2 xl:grid-cols-3">
 		{
 			currentPartners.map(async (partner) => (
-				<div class="group relative p-6 rounded-lg transition-all duration-300 hover:shadow-xl dark:hover:shadow-gray-800 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-primary/30 dark:hover:border-primary/30">
-					<div class="flex flex-col h-full">
-						<div class="grow">
-							<div
-								class="flex justify-center items-center w-full h-24 mx-auto mb-4 transition-transform duration-300 group-hover:scale-105"
-								style=`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`
-							>
-								<div class="w-48 flex items-center justify-center">
-									<Fragment set:html={partner.logo.image.default} />
+					<div
+						class="partner-card glass-card rounded-3xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40"
+						style={`--partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark}; --partner-text-light: ${partner.logo.fillLight}; --partner-text-dark: ${partner.logo.fillDark};`}
+					>
+						<div class="flex flex-col h-full relative z-10">
+							<div class="grow">
+								<div
+									class="partner-logo flex justify-center items-center w-full h-24 mx-auto mb-4 transition-transform duration-300 group-hover:scale-105"
+									style={`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`}
+								>
+									<div class="w-48 h-24 flex items-center justify-center">
+										<Fragment set:html={partner.logo.image.default} />
+									</div>
 								</div>
-							</div>
 
-							<div class="flex items-center justify-center gap-2 mt-3 mb-4">
-								<span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-									partner.level === "Malt"
-										? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-										: partner.level === "Blend"
-										? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-										: partner.level === "Dram"
-										? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-										: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-								}`}>
-									{partner.level} Partner
-								</span>
-								<span class="text-sm text-gray-500 dark:text-gray-400">
+							<div class="flex items-center justify-center mt-3 mb-4">
+								<span class="glass-chip partner-chip text-xs tracking-wide uppercase">
 									Since {partner.since}
 								</span>
 							</div>
 
 							{partner.industry && (
 								<div class="mb-3">
-									<span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+									<span class="text-sm font-semibold partner-text">
 										{partner.industry}
 									</span>
 								</div>
 							)}
 
 							{partner.description && (
-								<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+								<p class="text-sm partner-text-muted mb-4">
 									{partner.description}
 								</p>
 							)}
 						</div>
-						<div class="mt-auto">
-							<a
-								href={partner.url}
-								title={`Visit ${partner.name} website`}
-								target="_blank"
-								class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg focus:outline-none hover:bg-gray-50 hover:text-primary focus:z-10 focus:ring-2 focus:ring-primary/30 dark:focus:ring-primary/30 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white transition-colors duration-200"
-								role="button"
-							>
-								<svg
-									aria-hidden="true"
-									class="w-4 h-4 mr-2"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 20 20"
-									fill="currentColor"
+							<div class="mt-auto">
+								<a
+									href={partner.url}
+									title={`Visit ${partner.name} website`}
+									target="_blank"
+									class="partner-cta inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/60 focus-visible:ring-offset-white dark:focus-visible:ring-offset-transparent transition-all duration-200 gap-2 hover:-translate-y-0.5"
+									style={`--cta-start: ${partner.logo.fillLight}; --cta-end: ${partner.logo.fillDark}; --partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark};`}
+									role="button"
 								>
+								<svg aria-hidden="true" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
 									<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
 									<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
 								</svg>
@@ -242,33 +305,20 @@ const previousPartners: Partners = [
 	</p>
 	
 	<!-- Brand Wall Grid -->
-	<div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-		{
-			previousPartners.map(async (partner) => (
-				<div class="group relative flex flex-col items-center">
-					<!-- Logo -->
-					<div
-						class="flex justify-center items-center w-full h-16 mb-3 opacity-60 group-hover:opacity-75 transition-all duration-300"
-						style=`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`
-						title={partner.name}
-					>
-						<div class="w-32 flex items-center justify-center">
-							<Fragment set:html={partner.logo.image.default} />
-						</div>
-					</div>
-					
-					<!-- Level Badge -->
-					<span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-						partner.level === "Malt"
-							? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-							: partner.level === "Blend"
-							? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-							: partner.level === "Dram"
-							? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-							: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-					}`}>
-						{partner.level}
-					</span>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+        {
+            previousPartners.map(async (partner) => (
+                <div class="group relative flex flex-col items-center gap-2">
+                    <!-- Logo -->
+                    <div
+                        class="partner-logo flex justify-center items-center w-full h-16 mb-3 opacity-60 group-hover:opacity-75 transition-all duration-300"
+                        style={`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`}
+                        title={partner.name}
+                    >
+                        <div class="w-32 flex items-center justify-center">
+                            <Fragment set:html={partner.logo.image.default} />
+                        </div>
+                    </div>
 				</div>
 			))
 		}

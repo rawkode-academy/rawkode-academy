@@ -103,21 +103,28 @@ const isAuthenticated = Astro.cookies.has("accessToken");
 	@reference "@/styles/global.css";
 
 	.video-reactions {
-		@apply bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-800;
+		@apply bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl rounded-xl p-4;
+		@apply shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
+		@apply border border-white/40 dark:border-gray-700/40;
+		@apply relative overflow-hidden;
+		@apply before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/10 before:to-transparent before:pointer-events-none before:rounded-xl;
 	}
 
 	.reactions-container {
-		@apply flex items-center gap-2 flex-wrap;
+		@apply flex items-center gap-2 flex-wrap relative z-10;
 	}
 
 	.reaction-btn {
 		@apply flex items-center gap-2 px-3 py-2 rounded-lg transition-all;
-		@apply hover:bg-gray-100 dark:hover:bg-gray-800;
-		@apply focus:outline-none focus:ring-2 focus:ring-blue-500;
+		@apply bg-white/30 dark:bg-gray-800/30 backdrop-blur-md;
+		@apply border border-white/40 dark:border-gray-700/40;
+		@apply hover:bg-white/50 dark:hover:bg-gray-700/50;
+		@apply hover:shadow-md hover:scale-105;
+		@apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
 	}
 
 	.reaction-btn.active {
-		@apply ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20;
+		@apply ring-2 ring-blue-500/70 bg-blue-50/60 dark:bg-blue-900/30 backdrop-blur-md;
 	}
 
 	.emoji {
@@ -129,17 +136,23 @@ const isAuthenticated = Astro.cookies.has("accessToken");
 	}
 
 	.add-emoji {
-		@apply border-2 border-dashed border-gray-300 dark:border-gray-600;
+		@apply border-2 border-dashed border-gray-300/60 dark:border-gray-600/60;
 	}
 
 	.emoji-picker {
-		@apply mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg;
+		@apply mt-3 p-3 rounded-lg relative z-10;
+		@apply bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl;
+		@apply border border-white/40 dark:border-gray-700/40;
+		@apply shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
 		@apply grid grid-cols-8 gap-1;
 	}
 
 	.emoji-option {
-		@apply p-2 text-2xl rounded hover:bg-gray-200 dark:hover:bg-gray-700;
-		@apply transition-colors cursor-pointer;
+		@apply p-2 text-2xl rounded transition-all cursor-pointer;
+		@apply bg-white/30 dark:bg-gray-700/30 backdrop-blur-md;
+		@apply border border-white/40 dark:border-gray-700/40;
+		@apply hover:bg-white/50 dark:hover:bg-gray-600/50;
+		@apply hover:shadow-md hover:scale-105;
 	}
 </style>
 

@@ -50,13 +50,13 @@ const {
 
 	/* When user prefers dark mode, show dark image and hide light image */
 	@media (prefers-color-scheme: dark) {
-		.theme-light-only {
-			display: none;
-		}
-		.theme-dark-only {
-			display: block;
-		}
+		.theme-light-only { display: none; }
+		.theme-dark-only { display: block; }
 	}
+
+	/* Respect explicit dark mode via .dark class (overrides OS if user chose) */
+	:root.dark .theme-light-only { display: none; }
+	:root.dark .theme-dark-only { display: block; }
 
 	.theme-light-only,
 	.theme-dark-only {

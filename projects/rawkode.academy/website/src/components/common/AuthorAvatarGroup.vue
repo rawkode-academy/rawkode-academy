@@ -8,7 +8,7 @@
         :style="`z-index: ${10 - index}`"
       >
         <img
-          class="w-10 h-10 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white"
+          class="w-10 h-10 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white dark:bg-gray-800"
           :src="`https://avatars.githubusercontent.com/${author.data.handle}`"
           :alt="`Profile picture of ${author.data.name}`"
           loading="lazy"
@@ -23,7 +23,7 @@
         class="relative"
         style="z-index: 0;"
       >
-        <div class="w-10 h-10 rounded-full bg-purple-100 border-2 border-purple-500 p-0.5 bg-white flex items-center justify-center text-xs text-purple-800 font-medium">
+        <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-500 p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-xs text-purple-800 dark:text-purple-200 font-medium">
           +{{ remainingCount }}
         </div>
       </div>

@@ -3,6 +3,8 @@
 	"name": "rawkode-academy",
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": true,
+	"preview_urls": true,
 	"main": "./dist/_worker.js/index.js",
 	"assets": {
 		"binding": "ASSETS",

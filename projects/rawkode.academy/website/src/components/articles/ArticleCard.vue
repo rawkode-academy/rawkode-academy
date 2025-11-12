@@ -23,7 +23,7 @@ defineProps<Props>();
 <template>
   <a :href="`/read/${id}`" class="h-full">
     <article
-      class="p-0 bg-white rounded-xl overflow-hidden shadow-lg dark:bg-gray-800 dark:border-gray-700 h-full flex flex-col transition-all duration-300 border border-gray-100 dark:border-gray-700"
+      class="p-0 bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] h-full flex flex-col transition-all duration-300 border border-white/40 dark:border-gray-600/50 hover:bg-white/60 dark:hover:bg-gray-700/70 hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.18)] dark:hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.7)] hover:scale-[1.02]"
     >
       <div class="relative">
         <div class="absolute inset-0 bg-linear-to-tr from-purple-600/30 to-indigo-600/30 mix-blend-multiply z-10"></div>
@@ -43,7 +43,7 @@ defineProps<Props>();
         />
         <div class="absolute top-3 left-3 z-20">
           <span
-            class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-1 rounded-full dark:bg-purple-200 dark:text-purple-900 backdrop-blur-sm shadow-md"
+            class="bg-purple-500/30 dark:bg-purple-500/60 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-md border border-purple-300/40 dark:border-purple-400/60"
           >
             Article
           </span>
@@ -55,10 +55,10 @@ defineProps<Props>();
         >
           {{ title }}
         </h2>
-        <p v-if="subtitle" class="mb-4 font-light text-gray-500 dark:text-gray-400 line-clamp-3">
+        <p v-if="subtitle" class="mb-4 font-light text-gray-500 dark:text-gray-200 line-clamp-3">
           {{ subtitle }}
         </p>
-        <div class="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div class="mt-auto pt-4 border-t border-white/20 dark:border-gray-600/50">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
               <div class="flex -space-x-3">
@@ -69,18 +69,18 @@ defineProps<Props>();
                   :style="`z-index: ${10 - index}`"
                 >
                   <img
-                    class="w-10 h-10 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white"
+                    class="w-10 h-10 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white dark:bg-gray-800"
                     :src="`https://avatars.githubusercontent.com/${author.handle}`"
                     :alt="`Profile picture of ${author.name}`"
                     loading="lazy"
                   />
                   <span 
                     v-if="index === 0" 
-                    class="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"
+                    class="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-400 rounded-full border-2 border-white dark:border-gray-700"
                   ></span>
                 </div>
                 <div v-if="authors.length > 3" class="relative" style="z-index: 0;">
-                  <div class="w-10 h-10 rounded-full bg-purple-100 border-2 border-purple-500 p-0.5 bg-white flex items-center justify-center text-xs text-purple-800 font-medium">
+                  <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-500 p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-xs text-purple-800 dark:text-purple-200 font-medium">
                     +{{ authors.length - 3 }}
                   </div>
                 </div>
@@ -89,7 +89,7 @@ defineProps<Props>();
                 <div class="text-sm">{{ authors.map(a => a.name).join(", ") }}</div>
               </div>
             </div>
-            <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+            <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-300">
               <div v-if="readingTimeText" class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

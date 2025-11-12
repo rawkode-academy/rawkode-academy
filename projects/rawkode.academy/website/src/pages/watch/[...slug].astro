@@ -222,7 +222,7 @@ const breadcrumbElements = video.data.show
 		streamUrl={video.data.streamUrl}
 		clips={clips}
 	/>
-	<div class="min-h-screen bg-gray-50 dark:bg-gray-950">
+	<div class="min-h-screen bg-gray-50 dark:bg-black">
 		<div class="container mx-auto px-4 py-6 lg:py-8 max-w-screen-2xl">
 			{/* Breadcrumb */}
 			<div class="mb-6">
@@ -283,7 +283,7 @@ const breadcrumbElements = video.data.show
 									<a
 										Astro.key={technology.name}
 										href={`/technology/${technology.id}`}
-										class="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 group"
+										class="inline-flex items-center gap-2 px-3 py-2 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md border border-white/40 dark:border-gray-700/40 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 group"
 									>
 										<div class="w-6 h-6 relative overflow-hidden rounded">
 											<img
