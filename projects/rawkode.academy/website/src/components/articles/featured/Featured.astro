@@ -33,7 +33,7 @@ const otherArticles = allArticles.slice(1);
 							<div class="lg:w-1/2 relative">
 								{latestArticle.data.cover ? (
 									<div class="relative">
-										<div class="absolute inset-0 bg-linear-to-tr from-purple-600/40 to-indigo-600/40 mix-blend-multiply z-10"></div>
+										<div class="absolute inset-0 bg-linear-to-tr from-primary/40 to-secondary/40 mix-blend-multiply z-10"></div>
 										<Image
 											class="w-full h-64 lg:h-full object-cover"
 											src={latestArticle.data.cover.image}
@@ -42,7 +42,7 @@ const otherArticles = allArticles.slice(1);
 									</div>
 								) : (
 									<div class="relative">
-										<div class="absolute inset-0 bg-linear-to-tr from-purple-600/40 to-indigo-600/40 mix-blend-multiply z-10"></div>
+										<div class="absolute inset-0 bg-linear-to-tr from-primary/40 to-secondary/40 mix-blend-multiply z-10"></div>
 										<img
 											class="w-full h-64 lg:h-full object-cover"
 											src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
@@ -52,7 +52,7 @@ const otherArticles = allArticles.slice(1);
 								)}
 								<div class="absolute top-4 left-4 z-20">
 									<span
-										class="bg-purple-100 text-purple-800 text-xs font-semibold px-3 py-1.5 rounded-full dark:bg-purple-200 dark:text-purple-900 backdrop-blur-sm shadow-lg"
+										class="bg-secondary/10 text-secondary text-xs font-semibold px-3 py-1.5 rounded-full dark:bg-secondary/20 dark:text-secondary backdrop-blur-sm shadow-lg"
 									>
 										Featured
 									</span>
@@ -74,7 +74,7 @@ const otherArticles = allArticles.slice(1);
 												{latestArticleAuthors.slice(0, 3).map((author, index) => (
 													<div class="relative" style={`z-index: ${10 - index}`}>
 														<img
-                    class="w-12 h-12 rounded-full object-cover border-2 border-purple-500 p-0.5 bg-white dark:bg-gray-800"
+                    class="w-12 h-12 rounded-full object-cover border-2 border-secondary p-0.5 bg-white dark:bg-gray-800"
 															src={`https://avatars.githubusercontent.com/${author.data.handle}`}
 															alt={`Profile picture of ${author.data.name}`}
 														/>
@@ -85,7 +85,7 @@ const otherArticles = allArticles.slice(1);
 												))}
 												{latestArticleAuthors.length > 3 && (
 													<div class="relative" style="z-index: 0;">
-                  <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-500 p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-sm text-purple-800 dark:text-purple-200 font-medium">
+                  <div class="w-12 h-12 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-sm text-secondary dark:text-secondary font-medium">
 															+{latestArticleAuthors.length - 3}
 														</div>
 													</div>
@@ -96,7 +96,7 @@ const otherArticles = allArticles.slice(1);
 											</div>
 										</div>
 										<div class="flex items-center space-x-2">
-											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 											</svg>
 											<div class="text-xs font-normal text-gray-500 dark:text-gray-400">

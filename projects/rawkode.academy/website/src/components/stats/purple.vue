@@ -1,5 +1,5 @@
 <template>
-	<section class="relative mt-24 py-24 overflow-hidden bg-indigo-600 text-white">
+	<section class="relative mt-24 py-24 overflow-hidden bg-primary text-white">
 		<div class="container px-4 mx-auto">
 			<div class="flex flex-wrap -m-8">
 				<div class="w-full md:w-1/2 lg:w-1/4 p-8">

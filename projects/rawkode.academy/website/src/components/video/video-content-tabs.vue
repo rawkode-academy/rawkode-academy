@@ -10,7 +10,7 @@
         <select
           id="tabs-mobile"
           name="tabs-mobile"
-          class="block w-full pl-3 pr-10 py-2 text-base border-white/40 dark:border-gray-700/40 focus:outline-none focus:ring-blue-500/50 focus:border-blue-500/50 sm:text-sm rounded-md bg-white/30 dark:bg-gray-800/30 backdrop-blur-md text-gray-900 dark:text-gray-100 shadow-md"
+          class="block w-full pl-3 pr-10 py-2 text-base border-white/40 dark:border-gray-700/40 focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm rounded-md bg-white/30 dark:bg-gray-800/30 backdrop-blur-md text-gray-900 dark:text-gray-100 shadow-md"
           :value="activeTab"
           @change="setActiveTab($event.target.value)"
         >
@@ -29,7 +29,7 @@
           :class="[
             'tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
             activeTab === tab.id
-              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              ? 'border-primary text-primary dark:text-primary'
               : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200',
             { 'sm:ml-auto': tab.id === 'transcript' },
           ]"

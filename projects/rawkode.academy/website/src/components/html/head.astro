@@ -6,6 +6,7 @@ import PostHog from "../posthog/index.astro";
 import Opengraph from "./opengraph.astro";
 import SearchActionJsonLd from "./search-action-jsonld.astro";
 import OrganizationJsonLd from "./organization-jsonld.astro";
+import ThemeScript from "../theme/ThemeScript.astro";
 
 interface Props extends OpenGraphProps {}
 ---
@@ -112,6 +113,9 @@ interface Props extends OpenGraphProps {}
 			} catch (_) { /* no-op */ }
 		})();
 	</script>
+
+	<!-- Color theme script: initializes rawkode-green/rawkode-blue theme -->
+	<ThemeScript />
 
 	{import.meta.env.DEV && (
 		<link rel="stylesheet" href="/src/styles/global.css" />

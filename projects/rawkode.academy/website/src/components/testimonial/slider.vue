@@ -29,7 +29,7 @@ defineProps<Props>();
 					<div class="flex items-center justify-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
 						<div class="shrink-0 mr-4">
 							<img :src="testimonial.author.image" :alt="`${testimonial.author.name} profile picture`"
-								class="w-12 h-12 rounded-full object-cover border-2 border-indigo-600 dark:border-indigo-400 shadow-sm ring-2 ring-white dark:ring-gray-800" loading="lazy" />
+								class="w-12 h-12 rounded-full object-cover border-2 border-primary dark:border-primary shadow-sm ring-2 ring-white dark:ring-gray-800" loading="lazy" />
 						</div>
 						<div class="flex flex-col">
 							<a v-if="testimonial.author.link" target="_blank" :href="testimonial.author.link"
@@ -58,7 +58,11 @@ defineProps<Props>();
 /* Customize carousel navigation */
 .carousel__prev,
 .carousel__next {
-  background: linear-gradient(to bottom right, rgba(79, 70, 229, 0.9), rgba(99, 102, 241, 0.9)) !important; /* indigo gradient */
+  background: linear-gradient(
+      to bottom right,
+      rgba(var(--brand-primary), 0.9),
+      rgba(var(--brand-secondary), 0.9)
+    ) !important;
   backdrop-filter: blur(12px) !important;
   border-radius: 9999px !important;
   width: 3rem !important;
@@ -66,26 +70,38 @@ defineProps<Props>();
   margin: 0 1rem !important;
   transition: all 0.2s ease !important;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.12) !important;
-  border: 1px solid rgba(79, 70, 229, 0.3) !important;
+  border: 1px solid rgba(var(--brand-primary), 0.3) !important;
 }
 
 .dark .carousel__prev,
 .dark .carousel__next {
-  background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.9), rgba(129, 140, 248, 0.9)) !important; /* indigo gradient dark */
+  background: linear-gradient(
+      to bottom right,
+      rgba(var(--brand-primary), 0.9),
+      rgba(var(--brand-secondary), 0.9)
+    ) !important;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
-  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  border: 1px solid rgba(var(--brand-primary), 0.3) !important;
 }
 
 .carousel__prev:hover,
 .carousel__next:hover {
-  background: linear-gradient(to bottom right, rgba(79, 70, 229, 1), rgba(99, 102, 241, 1)) !important;
+  background: linear-gradient(
+      to bottom right,
+      rgba(var(--brand-primary), 1),
+      rgba(var(--brand-secondary), 1)
+    ) !important;
   transform: scale(1.05) !important;
   box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.18) !important;
 }
 
 .dark .carousel__prev:hover,
 .dark .carousel__next:hover {
-  background: linear-gradient(to bottom right, rgba(99, 102, 241, 1), rgba(129, 140, 248, 1)) !important;
+  background: linear-gradient(
+      to bottom right,
+      rgba(var(--brand-primary), 1),
+      rgba(var(--brand-secondary), 1)
+    ) !important;
   box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5) !important;
 }
 
@@ -110,10 +126,10 @@ defineProps<Props>();
 }
 
 .carousel__pagination-button--active {
-  background: linear-gradient(to bottom right, rgba(79, 70, 229, 0.9), rgba(99, 102, 241, 0.9)) !important; /* indigo gradient */
+  background: linear-gradient(to bottom right, rgba(var(--brand-primary), 0.9), rgba(var(--brand-secondary), 0.9)) !important;
   transform: scale(1.2) !important;
-  box-shadow: 0 4px 16px 0 rgba(79, 70, 229, 0.4) !important;
-  border: 1px solid rgba(79, 70, 229, 0.3) !important;
+  box-shadow: 0 4px 16px 0 rgba(var(--brand-primary), 0.4) !important;
+  border: 1px solid rgba(var(--brand-primary), 0.3) !important;
 }
 
 .dark .carousel__pagination-button {
@@ -122,9 +138,9 @@ defineProps<Props>();
 }
 
 .dark .carousel__pagination-button--active {
-  background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.9), rgba(129, 140, 248, 0.9)) !important; /* indigo gradient dark */
-  box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.4) !important;
-  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  background: linear-gradient(to bottom right, rgba(var(--brand-primary), 0.9), rgba(var(--brand-secondary), 0.9)) !important;
+  box-shadow: 0 4px 16px 0 rgba(var(--brand-primary), 0.4) !important;
+  border: 1px solid rgba(var(--brand-primary), 0.3) !important;
 }
 
 /* Responsive adjustments */

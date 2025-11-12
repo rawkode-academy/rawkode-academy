@@ -16,7 +16,7 @@ const outFile = join(outDir, "schema.gql");
 
 const schema = getSchema();
 const sdl = printSchemaWithDirectives(lexicographicSortSchema(schema), {
-  pathToDirectivesInExtensions: [""],
+	pathToDirectivesInExtensions: [""],
 });
 
 mkdirSync(outDir, { recursive: true });

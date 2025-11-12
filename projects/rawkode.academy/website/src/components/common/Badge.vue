@@ -30,7 +30,8 @@ const props = withDefaults(defineProps<Props>(), {
 	outline: false,
 });
 
-const baseClasses = "inline-flex items-center font-semibold transition-all duration-200 backdrop-blur-md shadow-sm";
+const baseClasses =
+	"inline-flex items-center font-semibold transition-all duration-200 backdrop-blur-md shadow-sm";
 
 const variantClasses = {
 	default: props.outline
@@ -55,8 +56,8 @@ const variantClasses = {
 		? "border border-red-600/50 text-red-600 dark:border-red-400/60 dark:text-red-300 bg-white/30 dark:bg-red-700/40"
 		: "bg-red-500/20 text-red-700 dark:bg-red-600/40 dark:text-red-200 border border-red-500/30 dark:border-red-500/50",
 	info: props.outline
-		? "border border-blue-600/50 text-blue-600 dark:border-blue-400/60 dark:text-blue-300 bg-white/30 dark:bg-blue-700/40"
-		: "bg-blue-500/20 text-blue-700 dark:bg-blue-600/40 dark:text-blue-200 border border-blue-500/30 dark:border-blue-500/50",
+		? "border border-primary/50 text-primary dark:border-primary/60 dark:text-primary bg-white/30 dark:bg-primary/20"
+		: "bg-primary/20 text-primary dark:bg-primary/20 dark:text-primary border border-primary/30 dark:border-primary/50",
 };
 
 const sizeClasses = {

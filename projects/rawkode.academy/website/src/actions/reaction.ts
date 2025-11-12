@@ -1,6 +1,9 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { captureServerEvent, getAnonDistinctIdFromCookies } from "../server/posthog";
+import {
+	captureServerEvent,
+	getAnonDistinctIdFromCookies,
+} from "../server/posthog";
 
 const ReactionSchema = z.object({
 	contentId: z.string(),
@@ -74,13 +77,16 @@ export const addReaction = defineAction({
 
 			const result = (await response.json()) as Record<string, unknown>;
 
-            // Track the reaction event
-            const distinctId = user.sub || (ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) || undefined;
-            await captureServerEvent({
-                event: "reaction_add",
-                distinctId,
-                properties: { content_id: contentId, emoji },
-            });
+			// Track the reaction event
+			const distinctId =
+				user.sub ||
+				(ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) ||
+				undefined;
+			await captureServerEvent({
+				event: "reaction_add",
+				distinctId,
+				properties: { content_id: contentId, emoji },
+			});
 
 			return {
 				success: true,
@@ -105,14 +111,17 @@ export const removeReaction = defineAction({
 	handler: async ({ contentId, emoji }, ctx) => {
 		// Track the reaction removal event
 		const user = ctx.locals.user;
-        if (user) {
-            const distinctId = user.sub || (ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) || undefined;
-            await captureServerEvent({
-                event: "reaction_remove",
-                distinctId,
-                properties: { content_id: contentId, emoji },
-            });
-        }
+		if (user) {
+			const distinctId =
+				user.sub ||
+				(ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) ||
+				undefined;
+			await captureServerEvent({
+				event: "reaction_remove",
+				distinctId,
+				properties: { content_id: contentId, emoji },
+			});
+		}
 
 		// For now, just return success - removal can be implemented later
 		// when the write model supports it

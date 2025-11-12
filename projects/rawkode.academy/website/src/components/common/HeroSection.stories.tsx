@@ -58,9 +58,9 @@ export const CustomGradient: Story = {
 	args: {
 		component: HeroSection,
 		props: {
-			gradientFrom: "from-blue-100",
-			gradientVia: "via-purple-50",
-			gradientTo: "to-pink-100",
+			gradientFrom: "from-primary/10",
+			gradientVia: "via-secondary/10",
+			gradientTo: "to-white/60",
 		},
 	},
 	render: (args) => (

@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "rawkodeacademy",
@@ -93,6 +92,7 @@
         "vue-boring-avatars": "^1.4.0",
         "vue-word-highlighter": "^1.2.5",
         "vue3-carousel": "^0.16.0",
+        "yaml": "^2.5.1",
       },
       "devDependencies": {
         "@biomejs/biome": "2.2.2",

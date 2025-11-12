@@ -3,7 +3,7 @@
     <svg
       v-if="showIcon"
       xmlns="http://www.w3.org/2000/svg"
-      class="h-4 w-4 text-purple-500"
+      class="h-4 w-4 text-secondary"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"

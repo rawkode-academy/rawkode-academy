@@ -2,24 +2,26 @@
 import type { ShowSummary } from "@/types/show";
 
 interface Props {
-        show: ShowSummary;
+	show: ShowSummary;
 }
 
 const { show } = Astro.props as Props;
 
 const hostNames = (show.hosts ?? [])
-        .map((host) => [host.forename, host.surname].filter(Boolean).join(" "))
-        .filter(Boolean);
+	.map((host) => [host.forename, host.surname].filter(Boolean).join(" "))
+	.filter(Boolean);
 
-const episodes = (show.episodes ?? []).filter((ep): ep is NonNullable<typeof ep> => ep !== null && ep.video !== null);
+const episodes = (show.episodes ?? []).filter(
+	(ep): ep is NonNullable<typeof ep> => ep !== null && ep.video !== null,
+);
 
 const latestEpisode = episodes
-        .filter(ep => ep.video?.thumbnailUrl && ep.video?.publishedAt)
-        .sort((a, b) => {
-                const aTime = new Date(a.video!.publishedAt!).getTime();
-                const bTime = new Date(b.video!.publishedAt!).getTime();
-                return bTime - aTime;
-        })[0];
+	.filter((ep) => ep.video?.thumbnailUrl && ep.video?.publishedAt)
+	.sort((a, b) => {
+		const aTime = new Date(a.video!.publishedAt!).getTime();
+		const bTime = new Date(b.video!.publishedAt!).getTime();
+		return bTime - aTime;
+	})[0];
 
 const thumbnailUrl = latestEpisode?.video?.thumbnailUrl;
 const latestEpisodeTitle = latestEpisode?.video?.title;

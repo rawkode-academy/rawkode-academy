@@ -12,7 +12,7 @@
 			            <dl class="space-y-8 text-base leading-7 text-gray-300">
               <div v-for="feature in features" :key="feature.name" class="relative">
                 <dt class="ml-9 inline-block font-semibold text-white">
-                  <component :is="feature.icon" class="absolute left-1 top-1 h-5 w-5 text-indigo-500" aria-hidden="true" />
+                  <component :is="feature.icon" class="absolute left-1 top-1 h-5 w-5 text-primary" aria-hidden="true" />
                   {{ feature.name }}
                 </dt>
                 {{ ' ' }}
@@ -22,7 +22,7 @@
           </div>
         </div>
         <div class="pointer-events-none absolute left-12 top-1/2 -z-10 -translate-y-1/2 transform-gpu blur-3xl lg:-bottom-48 lg:top-auto lg:translate-y-0 lg:transform-gpu" aria-hidden="true">
-          <div class="aspect-1155/678 w-288.75 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-25" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" />
+          <div class="aspect-1155/678 w-288.75 bg-linear-to-tr from-[rgba(var(--brand-primary),0.45)] to-[rgba(var(--brand-secondary),0.45)] opacity-25" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" />
         </div>
       </div>
     </div>

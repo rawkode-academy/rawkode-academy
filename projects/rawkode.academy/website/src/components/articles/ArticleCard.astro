@@ -21,7 +21,7 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 
 <BaseCard href={`/read/${article.id}`}>
 	<Fragment slot="cover">
-		<div class="absolute inset-0 bg-linear-to-tr from-purple-600/30 to-indigo-600/30 mix-blend-multiply z-10"></div>
+		<div class="absolute inset-0 bg-linear-to-tr from-primary/30 to-secondary/30 mix-blend-multiply z-10"></div>
 		{
 			article.data.cover ? (
 				<Image

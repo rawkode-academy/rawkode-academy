@@ -40,7 +40,7 @@ const baseClasses =
 
 const variantClasses = {
 	primary:
-		"text-white bg-gradient-to-r from-blue-600/90 to-blue-700/90 hover:from-blue-700/95 hover:to-blue-800/95 focus:ring-blue-300/50 border border-blue-500/30 dark:from-blue-500/90 dark:to-blue-600/90 dark:hover:from-blue-600/95 dark:hover:to-blue-700/95 dark:focus:ring-blue-400/50 dark:border-blue-400/50",
+		"text-white bg-gradient-primary hover:brightness-110 focus:ring-primary/50 border border-primary/30 dark:bg-gradient-primary dark:border-primary/50",
 	secondary:
 		"text-gray-900 bg-white/50 dark:bg-gray-700/60 backdrop-blur-lg border border-white/50 dark:border-gray-500/60 hover:bg-white/70 dark:hover:bg-gray-600/70 focus:ring-gray-200/50 dark:text-white dark:focus:ring-gray-500/50",
 	ghost:
