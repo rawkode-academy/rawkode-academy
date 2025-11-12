@@ -1,0 +1,8 @@
+---
+description: Dgraph is a fast, distributed, and scalable graph database. It's designed to be a production-ready, horizontally scalable, and ACID-compliant database capable of handling large datasets and complex relationships. Dgraph offers GraphQL-like query language (GraphQL+-) and supports GraphQL natively, making it easy to build applications that require real-time data retrieval and complex data relationships. Its value lies in providing fast and efficient traversal of graphs, enabling use cases such as social networks, knowledge graphs, recommendation engines, data integration, and fraud detection.
+name: Dgraph
+website: https://dgraph.io/
+documentation: https://dgraph.io/docs/
+categories: []
+---
+

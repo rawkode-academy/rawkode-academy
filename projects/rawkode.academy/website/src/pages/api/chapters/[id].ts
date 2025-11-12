@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
-import { gql, GraphQLClient } from "graphql-request";
-import { GRAPHQL_ENDPOINT } from "astro:env/server";
+import { getCollection } from "astro:content";
 
 // Define types for the GraphQL response
 interface Chapter {
@@ -8,30 +7,7 @@ interface Chapter {
 	title: string;
 }
 
-interface VideoData {
-	videoByID: {
-		title: string;
-		chapters: Chapter[];
-	} | null;
-}
-
 export const prerender = false;
-
-// GraphQL client setup
-const graphQLClient = new GraphQLClient(GRAPHQL_ENDPOINT);
-
-// GraphQL query to fetch video chapters
-const getVideoChaptersQuery = gql`
-  query GetVideoChapters($id: String!) {
-    videoByID(id: $id) {
-      title
-      chapters {
-        startTime
-        title
-      }
-    }
-  }
-`;
 
 // Function to format time in HH:MM:SS.mmm format for VTT
 function formatVttTime(seconds: number): string {
@@ -48,6 +24,17 @@ function formatVttTime(seconds: number): string {
 }
 
 // Generate VTT content from chapters
+function normalizeChapters(
+	chapters?: Array<{ startTime?: number | null; title?: string | null }> | null,
+): Chapter[] {
+	return (chapters ?? [])
+		.map((chapter) => ({
+			title: (chapter?.title ?? "").trim(),
+			startTime: Math.max(0, Math.floor(chapter?.startTime ?? 0)),
+		}))
+		.filter((chapter) => chapter.title.length > 0);
+}
+
 function generateVttContent(videoTitle: string, chapters: Chapter[]): string {
 	if (!chapters || chapters.length === 0) {
 		return "WEBVTT\n\n";
@@ -87,18 +74,15 @@ export const GET: APIRoute = async ({ params }): Promise<Response> => {
 			return new Response("Video ID is required", { status: 400 });
 		}
 
-		// Fetch video chapters from GraphQL API
-		const data = await graphQLClient.request<VideoData>(getVideoChaptersQuery, {
-			id: videoId,
-		});
-
-		if (!data.videoByID) {
+		const videos = await getCollection("videos");
+		const localVideo = videos.find((entry) => entry.data.videoId === videoId);
+		if (!localVideo) {
 			return new Response("Video not found", { status: 404 });
 		}
 
-		const { title, chapters } = data.videoByID;
+		const title = localVideo.data.title ?? videoId;
+		const chapters = normalizeChapters(localVideo.data.chapters as Chapter[]);
 
-		// Generate VTT content
 		const vttContent = generateVttContent(title, chapters);
 
 		// Return VTT file with appropriate headers

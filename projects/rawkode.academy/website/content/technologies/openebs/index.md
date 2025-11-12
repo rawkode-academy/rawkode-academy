@@ -1,0 +1,11 @@
+---
+description: |-
+  OpenEBS is a leading open-source Container Attached Storage (CAS) solution that transforms commodity Kubernetes nodes into storage engines, enabling DevOps and platform teams to easily manage stateful workloads in cloud-native environments. It provides a granular, per-workload approach to storage, allowing teams to define and deploy storage policies tailored to the specific needs of each application. This empowers developers to build and manage storage as code, improving agility and reducing operational overhead.
+
+  OpenEBS offers several benefits, including increased agility through automated storage provisioning, improved performance by localizing data access, enhanced resilience with built-in data protection mechanisms, and simplified operations via Kubernetes-native management. Its primary use cases include running stateful applications like databases, message queues, and CI/CD pipelines on Kubernetes, providing persistent storage for microservices, and enabling data portability across different cloud environments.
+name: OpenEBS
+website: https://openebs.io/
+documentation: https://openebs.io/docs/
+categories: []
+---
+

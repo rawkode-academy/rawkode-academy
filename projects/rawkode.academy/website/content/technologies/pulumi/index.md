@@ -1,0 +1,11 @@
+---
+description: |-
+  Pulumi is an open-source Infrastructure as Code (IaC) platform that allows you to define and deploy cloud infrastructure using familiar programming languages like Python, JavaScript, Go, TypeScript, and C#. It enables developers and DevOps teams to manage cloud resources with increased productivity and reduced complexity by leveraging the power of general-purpose programming. This allows for greater flexibility, code reuse, and access to existing tooling and libraries. 
+
+  Pulumi's primary value proposition is its ability to unify infrastructure provisioning and application development into a single workflow. It supports all major cloud providers (AWS, Azure, GCP, Kubernetes), and allows teams to manage everything from virtual machines and databases to serverless functions and container orchestration. Its use cases include provisioning and managing cloud infrastructure, automating deployments, enforcing policies as code, and enabling collaborative infrastructure management across teams and organizations.
+name: Pulumi
+website: https://www.pulumi.com/
+documentation: https://www.pulumi.com/docs/
+categories: []
+---
+

@@ -1,0 +1,10 @@
+---
+description: |-
+  DevStand is a lightweight, open-source platform designed to streamline the creation and management of consistent, reproducible development environments. It provides developers with pre-configured, isolated workspaces tailored to specific projects, eliminating dependency conflicts and configuration headaches. By standardizing the development process, DevStand reduces onboarding time for new team members and improves collaboration across different operating systems and environments.
+
+  DevStand allows teams to define development environments as code, ensuring consistency across all team members and preventing the "it works on my machine" problem. This leads to faster development cycles, reduced debugging efforts, and increased confidence in code deployment. Use cases include standardizing environments for microservice architectures, simplifying development for legacy applications, and enabling reproducible builds for continuous integration.
+name: DevStand
+website: https://devstand.app
+categories: []
+---
+

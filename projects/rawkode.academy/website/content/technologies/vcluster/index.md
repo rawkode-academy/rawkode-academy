@@ -1,0 +1,11 @@
+---
+description: |-
+  vcluster is a lightweight Kubernetes distribution that runs inside another Kubernetes cluster. It creates fully functional virtual Kubernetes clusters – each with its own control plane, data store, and worker nodes – that are isolated from the underlying host cluster and other vclusters. This allows teams to have dedicated, isolated Kubernetes environments without the overhead of managing full-blown Kubernetes clusters. This is particularly useful for development, testing, and CI/CD pipelines.
+
+  The value of vcluster lies in its ability to dramatically reduce resource consumption, simplify cluster management, and improve developer agility. It allows for multi-tenancy within a single Kubernetes cluster, reducing costs and operational complexity. It also enables rapid iteration and experimentation, as teams can spin up and tear down vclusters quickly and easily without impacting other workloads.
+name: vCluster
+website: https://www.vcluster.com/
+documentation: https://www.vcluster.com/docs/getting-started/setup
+categories: []
+---
+

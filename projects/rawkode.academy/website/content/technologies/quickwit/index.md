@@ -1,0 +1,8 @@
+---
+description: Quickwit is a cost-effective and performant search engine built for logs and analytics. It directly indexes data in object storage (like AWS S3, Google Cloud Storage, or Azure Blob Storage), eliminating the need for data ingestion and complex pipelines. This reduces operational overhead and storage costs. It's designed for petabyte-scale data volumes and offers low-latency queries, making it ideal for security information and event management (SIEM), observability, and log analytics applications where fast insights from massive datasets are crucial.
+name: Quickwit
+website: https://www.quickwit.io/
+documentation: https://www.quickwit.io/docs
+categories: []
+---
+

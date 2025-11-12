@@ -1,0 +1,11 @@
+---
+description: |-
+  DevPod is an open-source tool that allows developers to create and manage reproducible development environments directly within Kubernetes or other remote container hosts. It enables teams to standardize development setups, ensuring consistency across different environments and preventing the "works on my machine" problem. By leveraging infrastructure-as-code principles, DevPod streamlines onboarding, simplifies collaboration, and accelerates the development lifecycle by providing pre-configured, ready-to-code environments that are easily shareable and reproducible.
+
+  DevPod's primary use cases include consistent development environments for distributed teams, streamlined onboarding of new developers, isolated environments for testing and experimentation, and simplified collaboration on complex projects. It integrates with popular IDEs and allows developers to work with their preferred tools and workflows while benefiting from the scalability and reliability of containerized environments.
+name: DevPod
+website: https://www.devpod.sh/
+documentation: https://www.devpod.sh/docs/introduction
+categories: []
+---
+

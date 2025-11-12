@@ -1,0 +1,11 @@
+---
+description: |-
+  OpenFaaS (Functions as a Service) is a framework for building serverless functions on top of Kubernetes. It enables developers to package code into portable, containerized functions that can be deployed and scaled automatically. By leveraging containers and Kubernetes, OpenFaaS provides a vendor-neutral and portable solution for serverless workloads, offering an alternative to proprietary cloud provider solutions.
+
+  OpenFaaS simplifies the process of building, deploying, and managing functions, allowing developers to focus on writing code rather than infrastructure. It streamlines development workflows, reduces operational overhead, and improves resource utilization. Main use cases include event-driven processing, microservices, API endpoints, and automating repetitive tasks.
+name: OpenFaaS
+website: https://www.openfaas.com/
+documentation: https://docs.openfaas.com/
+categories: []
+---
+

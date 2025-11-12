@@ -1,0 +1,11 @@
+---
+description: |-
+  kpt is a toolkit for managing, customizing, and deploying Kubernetes configuration packages. It enables users to declaratively manage their Kubernetes configurations, including resources, policies, and application stacks, in a version-controlled manner. Kpt promotes separation of concerns by allowing configurations to be composed from reusable packages, customized without modifying the original source, and applied in a repeatable and consistent way across different environments.
+
+  Its value lies in simplifying the management of complex Kubernetes deployments by providing tools for package management, customization using Kustomize integration, and resource management. Kpt supports use cases such as managing application deployments across multiple environments (dev, staging, production), enforcing organizational policies through configuration packages, and enabling GitOps workflows for infrastructure as code.
+name: kpt
+website: https://googlecontainertools.github.io/kpt/
+documentation: https://kpt.dev/
+categories: []
+---
+

@@ -1,0 +1,8 @@
+---
+description: Promscale is an open-source observability backend designed for time-series data, specifically optimized for metrics and traces. Built on PostgreSQL and TimescaleDB, it provides a scalable and reliable storage solution for Prometheus metrics, Jaeger traces, and OpenTelemetry data. Promscale's value lies in its ability to handle high-cardinality data and complex analytical queries that can be challenging for Prometheus alone. It leverages SQL for powerful querying, allowing users to gain deeper insights into application performance and system behavior. Main use cases include monitoring microservices, analyzing infrastructure performance, and troubleshooting application issues within cloud-native environments. Promscale supports both storing and querying metrics and traces within a single system, enabling correlation of related telemetry data.
+name: Promscale
+website: https://promscale.com/
+documentation: https://docs.promscale.com/
+categories: []
+---
+

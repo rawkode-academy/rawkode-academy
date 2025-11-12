@@ -4,25 +4,34 @@ export const prerender = true;
 import Button from "@/components/common/Button.vue";
 import PageHero from "@/components/common/PageHero.vue";
 import SectionHeader from "@/components/common/SectionHeader.vue";
-import type { Technology } from "@/pages/technology/[id].astro";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+
+type Technology = {
+  id: string;
+  name: string;
+  description: string;
+  logo?: string;
+  website?: string;
+  documentation?: string;
+};
 
 let technologies: Technology[] = [];
 try {
   const items = await getCollection("technologies");
   technologies = items.map((e) => {
     const icon = (e as any).data.icon;
-    const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
-    return {
+    const logo = resolveTechnologyIconUrl(e.id, icon);
+    const tech: Technology = {
       id: e.id,
       name: e.data.name,
       description: e.data.description,
-      logo,
-      website: e.data.website,
-      documentation: e.data.documentation,
+      ...(logo && { logo }),
+      ...(e.data.website && { website: e.data.website }),
+      ...(e.data.documentation && { documentation: e.data.documentation }),
     };
+    return tech;
   });
 } catch (error) {
   console.error("Failed to load technologies from content collection:", error);
@@ -260,7 +269,7 @@ try {
 							<a href={`/technology/${tech.id}`} class="tech-card">
 								<div class="logo-container">
 									<img
-										src={tech.logo ? tech.logo : "/apple-touch-icon.png"}
+										src={tech.logo}
 										alt={`${tech.name} Logo`}
 										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
 									/>

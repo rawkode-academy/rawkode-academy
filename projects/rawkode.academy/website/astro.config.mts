@@ -18,8 +18,8 @@ import { glob } from "glob";
 import { searchForWorkspaceRoot } from "vite";
 import rehypeExternalLinks from "rehype-external-links";
 import { vite as vidstackPlugin } from "vidstack/plugins";
-import { fetchVideosFromGraphQL } from "./src/lib/fetch-videos";
 import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
+import { deriveSlugFromFile } from "./src/utils/content-slug";
 
 // Check if D2 is available (used for diagram rendering)
 let d2Available = false;
@@ -158,14 +158,18 @@ async function buildLastmodIndex() {
     } catch {}
   }
 
-  // Videos (from GraphQL) -> /watch/{slug}
-  try {
-    const videos = await fetchVideosFromGraphQL();
-    for (const v of videos) {
-      const d = new Date(v.publishedAt);
-      if (!isNaN(d.getTime())) index.set(`/watch/${v.slug}`, d);
-    }
-  } catch {}
+  // Videos (from local content) -> /watch/{slug}
+  const videoFiles = await glob("content/videos/**/*.{md,mdx}");
+  for (const file of videoFiles) {
+    try {
+      const raw = await readFile(file, "utf8");
+      const fm = matter(raw).data as Record<string, any>;
+      const slug = deriveSlugFromFile(file, fm, "content/videos/");
+      const published = fm.publishedAt ? new Date(fm.publishedAt) : undefined;
+      const last = published && !isNaN(published.getTime()) ? published : undefined;
+      if (last) index.set(`/watch/${slug}`, last);
+    } catch {}
+  }
 
   return index;
 }
@@ -206,20 +210,21 @@ export default defineConfig({
 			filter: (page) => !page.includes("api/") && !page.includes("sitemap-"),
 			changefreq: "weekly",
 			priority: 0.7,
-			customPages: await (async () => {
-				try {
-					const siteUrl = getSiteUrl();
-					const videos = await fetchVideosFromGraphQL();
-					// Use no-trailing slash to match canonical policy
-					return videos.map((video) => `${siteUrl}/watch/${video.slug}`);
-				} catch (error) {
-					console.warn(
-						"Skipping video pages in sitemap due to API unavailability:",
-						error,
-					);
-					return [];
-				}
-			})(),
+      customPages: await (async () => {
+        const siteUrl = getSiteUrl();
+        const videoFiles = await glob("content/videos/**/*.{md,mdx}");
+        const slugs: string[] = [];
+        for (const file of videoFiles) {
+          try {
+            const raw = await readFile(file, "utf8");
+            const fm = matter(raw).data as Record<string, any>;
+            const slug = deriveSlugFromFile(file, fm, "content/videos/");
+            if (slug) slugs.push(slug);
+          } catch {}
+        }
+        // Use no-trailing slash to match canonical policy
+        return slugs.map((s) => `${siteUrl}/watch/${s}`);
+      })(),
 			serialize: (item) => {
 				try {
 					const u = new URL(item.url);

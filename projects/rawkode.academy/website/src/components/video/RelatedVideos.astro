@@ -10,6 +10,8 @@ const { currentVideo, limit = 4 } = Astro.props;
 
 // Get all videos
 const allVideos = await getCollection("videos");
+const allTechnologies = await getCollection("technologies");
+const techName = new Map(allTechnologies.map((t) => [t.id, t.data.name] as const));
 
 // Find related videos based on:
 // 1. Same technologies
@@ -17,23 +19,20 @@ const allVideos = await getCollection("videos");
 const relatedVideos: CollectionEntry<"videos">[] = [];
 
 // First, add videos with overlapping technologies
-if (
-	currentVideo.data.technologies &&
-	currentVideo.data.technologies.length > 0
-) {
-	const currentTechIds = currentVideo.data.technologies.map((tech) => tech.id);
+if (currentVideo.data.technologies && currentVideo.data.technologies.length > 0) {
+	const currentTechIds = currentVideo.data.technologies as string[];
 
 	const techVideos = allVideos.filter((video) => {
 		if (video.id === currentVideo.id) return false;
 
-		const videoTechIds = video.data.technologies?.map((tech) => tech.id) || [];
+		const videoTechIds = (video.data.technologies as string[]) || [];
 		return videoTechIds.some((techId) => currentTechIds.includes(techId));
 	});
 
 	// Sort by number of matching technologies
 	techVideos.sort((a, b) => {
-		const aTechIds = a.data.technologies?.map((tech) => tech.id) || [];
-		const bTechIds = b.data.technologies?.map((tech) => tech.id) || [];
+		const aTechIds = (a.data.technologies as string[]) || [];
+		const bTechIds = (b.data.technologies as string[]) || [];
 
 		const aMatches = aTechIds.filter((id) =>
 			currentTechIds.includes(id),
@@ -70,10 +69,13 @@ if (relatedVideos.length < limit) {
 const finalRelatedVideos = relatedVideos.slice(0, limit);
 
 // Format duration
-const formatDuration = (seconds: number) => {
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const secs = seconds % 60;
+const formatDuration = (seconds?: number | null) => {
+  if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
+    return "--:--";
+  }
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
 
 	if (hours > 0) {
 		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
@@ -98,15 +100,15 @@ const formatDuration = (seconds: number) => {
 					<!-- Thumbnail -->
 					<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
 						<img
-							src={video.data.thumbnailUrl}
+							src={`https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`}
 							alt={video.data.title}
 							class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
 							loading="lazy"
 						/>
 						<!-- Duration badge -->
-						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-							{formatDuration(video.data.duration)}
-						</div>
+            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+			{formatDuration(typeof video.data.duration === "number" ? video.data.duration : undefined)}
+		</div>
 					</div>
 					
 					<!-- Content -->
@@ -122,20 +124,20 @@ const formatDuration = (seconds: number) => {
 						)}
 						
 						<!-- Technologies -->
-						{video.data.technologies && video.data.technologies.length > 0 && (
-							<div class="mt-3 flex flex-wrap gap-1">
-								{video.data.technologies.slice(0, 3).map((tech) => (
-									<span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
-										{tech.name}
-									</span>
-								))}
-								{video.data.technologies.length > 3 && (
-									<span class="text-xs text-gray-500 dark:text-gray-400 px-1">
-										+{video.data.technologies.length - 3}
-									</span>
-								)}
-							</div>
-						)}
+			{video.data.technologies && (video.data.technologies as string[]).length > 0 && (
+				<div class="mt-3 flex flex-wrap gap-1">
+					{(video.data.technologies as string[]).slice(0, 3).map((techId) => (
+						<span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
+							{techName.get(techId) || techId}
+						</span>
+					))}
+					{(video.data.technologies as string[]).length > 3 && (
+						<span class="text-xs text-gray-500 dark:text-gray-400 px-1">
+							+{(video.data.technologies as string[]).length - 3}
+						</span>
+					)}
+				</div>
+			)}
 					</div>
 				</a>
 			))}

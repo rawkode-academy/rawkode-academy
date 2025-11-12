@@ -1,35 +1,11 @@
 ---
 export const prerender = false;
 
-import { GRAPHQL_ENDPOINT } from "astro:env/server";
-import { ClientError, request } from "graphql-request";
+import { getCollection, getEntries } from "astro:content";
 import ShowCard from "@/components/show/ShowCard.astro";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
 
-interface AllShowsResponse {
-        allShows?: (ShowSummary | null)[] | null;
-}
-
-const showsQuery = /* GraphQL */ `
-        query AllShows {
-                allShows {
-                        id
-                        name
-                        hosts {
-                                forename
-                                surname
-                        }
-                        episodes {
-                                video {
-                                        title
-                                        thumbnailUrl
-                                        publishedAt
-                                }
-                        }
-                }
-        }
-`;
 
 Astro.response.headers.set(
         "Cache-Control",
@@ -39,35 +15,40 @@ Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
 Astro.response.headers.set("Cache-Tag", "shows-page, shows-list");
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-let shows: ShowSummary[] | null = null;
-let errorMessage: string | null = null;
+// Build shows from local content + videos
+const showEntries = await getCollection("shows");
+const videos = await getCollection("videos");
 
-if (!GRAPHQL_ENDPOINT) {
-        errorMessage = "GraphQL endpoint is not configured.";
-} else {
-        try {
-                const data = await request<AllShowsResponse>(GRAPHQL_ENDPOINT, showsQuery);
-                shows = (data.allShows ?? []).filter((show): show is ShowSummary => Boolean(show?.id && show?.name));
-        } catch (error) {
-                console.error("Failed to fetch shows for /shows:", error);
+const showsToRender: ShowSummary[] = await (async () => {
+  const list: ShowSummary[] = [];
+  for (const s of showEntries) {
+    const people = await getEntries(s.data.hosts);
+    const hosts = people.map((p) => {
+      const parts = String(p.data.name).trim().split(/\s+/);
+      return { forename: parts[0] || "", surname: parts.slice(1).join(" ") || "" };
+    });
+    const eps = videos
+      .filter((v) => (v.data.show as string | undefined) === s.data.id)
+      .map((v) => ({
+        video: {
+          title: v.data.title,
+          thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.videoId}/thumbnail.jpg`,
+          publishedAt:
+            v.data.publishedAt instanceof Date
+              ? v.data.publishedAt.toISOString()
+              : String(v.data.publishedAt),
+        },
+      }));
+    list.push({ id: s.data.id, name: s.data.name, hosts, episodes: eps });
+  }
+  return list;
+})();
 
-                if (error instanceof ClientError && error.response.errors?.[0]?.message) {
-                        errorMessage = error.response.errors[0].message;
-                } else if (error instanceof Error) {
-                        errorMessage = error.message;
-                } else if (typeof error === "string") {
-                        errorMessage = error;
-                } else {
-                        errorMessage = "Unable to load shows.";
-                }
-        }
-}
-
-const hasShows = Array.isArray(shows) && shows.length > 0;
-const isEmpty = Array.isArray(shows) && shows.length === 0;
-const isLoading = !errorMessage && shows === null;
+const hasShows = showsToRender.length > 0;
+const isEmpty = showsToRender.length === 0;
+const isLoading = false;
+const errorMessage = null;
 const placeholderTiles = Array.from({ length: 6 }, (_, index) => index);
-const showsToRender: ShowSummary[] = hasShows && shows ? shows : [];
 ---
 
 <Page title="Shows">

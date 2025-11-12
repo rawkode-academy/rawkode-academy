@@ -1,0 +1,8 @@
+---
+description: Cluster API is a Kubernetes sub-project focused on simplifying the creation, upgrading, and operation of Kubernetes clusters. It uses Kubernetes-style declarative APIs to manage the lifecycle of clusters, enabling infrastructure as code for Kubernetes. This allows for consistent and repeatable cluster deployments across various infrastructure providers, from on-premises data centers to public clouds. It promotes infrastructure immutability and automation for Kubernetes cluster management.
+name: Cluster API
+website: https://cluster-api.sigs.k8s.io/
+documentation: https://cluster-api.sigs.k8s.io/introduction.html
+categories: []
+---
+

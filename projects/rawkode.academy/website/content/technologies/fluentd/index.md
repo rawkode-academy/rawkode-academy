@@ -1,0 +1,11 @@
+---
+description: |-
+  Fluentd is an open-source data collector designed for unified logging layer. It allows you to unify the data collection and consumption for a better use and understanding of data. It decouples data sources from backend systems, providing a flexible and scalable solution for collecting, processing, and forwarding data. Fluentd is written in a combination of C and Ruby, making it lightweight and efficient. 
+
+  Fluentd solves the problem of disparate data sources by providing a unified logging layer. It collects logs from various sources, transforms them into a structured format (JSON), and forwards them to various destinations, such as Elasticsearch, AWS S3, and many others. This makes it a central component for observability, security monitoring, and data analysis within cloud-native and traditional environments.
+name: Fluentd
+website: https://www.fluentd.org/
+documentation: https://docs.fluentd.org/
+categories: []
+---
+
