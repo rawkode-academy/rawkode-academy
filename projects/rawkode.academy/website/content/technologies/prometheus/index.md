@@ -1,0 +1,8 @@
+---
+description: Prometheus is an open-source systems monitoring and alerting toolkit originally built at SoundCloud. It excels at recording real-time metrics in a time series database, allowing for dimensional data models, powerful querying via PromQL, and flexible alerting. Prometheus provides value by enabling comprehensive monitoring of cloud-native environments, allowing users to identify performance bottlenecks, troubleshoot issues, and optimize resource utilization. It's commonly used for monitoring applications, infrastructure, and services, especially within Kubernetes and other containerized environments.
+name: Prometheus
+website: https://prometheus.io/
+documentation: https://prometheus.io/docs/introduction/overview/
+categories: []
+---
+

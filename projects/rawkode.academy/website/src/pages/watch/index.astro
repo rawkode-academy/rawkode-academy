@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 
-import { GRAPHQL_ENDPOINT } from "astro:env/server";
+import { getCollection } from "astro:content";
 import FeaturedContent from "@/components/common/FeaturedContent.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
@@ -28,58 +28,31 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 const page = parseInt(Astro.url.searchParams.get("page") || "1", 10);
 const videosPerPage = 16;
 
-const latestVideosQuery = `
-  query GetLatestVideos($limit: Int!, $offset: Int!) {
-    getLatestVideos(limit: $limit, offset: $offset) {
-      title
-      description
-      thumbnailUrl
-      duration
-      slug
-      publishedAt
-      streamUrl
-    }
-  }
-`;
+// Load videos from local content collection
+const allVideos = (await getCollection("videos")).map((v) => v.data);
+// Sort newest first
+allVideos.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
-// Fetch featured video (only on page 1)
-let featuredVideo = null;
-if (page === 1) {
-	const featuredResponse = await fetch(GRAPHQL_ENDPOINT, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			query: latestVideosQuery,
-			variables: { limit: 1, offset: 0 },
-		}),
-	});
-	const { data: featuredData }: { data: Record<string, any[]> } =
-		await featuredResponse.json();
-	featuredVideo = featuredData?.getLatestVideos?.[0] || null;
-}
+// Featured: first item on page 1
+const featuredVideo = page === 1 ? allVideos[0] ?? null : null;
+const featuredDuration = featuredVideo && typeof featuredVideo.duration === "number"
+  ? featuredVideo.duration
+  : null;
 
-// Calculate offset for grid videos
-const gridOffset = page === 1 ? 1 : (page - 1) * videosPerPage + 1;
-
-// Fetch grid videos
-const gridVideosResponse = await fetch(GRAPHQL_ENDPOINT, {
-	method: "POST",
-	headers: {
-		"Content-Type": "application/json",
-	},
-	body: JSON.stringify({
-		query: latestVideosQuery,
-		variables: { limit: videosPerPage + 1, offset: gridOffset }, // +1 to check if there are more videos
-	}),
-});
-
-const { data: gridVideosData }: { data: Record<string, any[]> } =
-	await gridVideosResponse.json();
-const allGridVideos = gridVideosData?.getLatestVideos || [];
-const feedVideos = allGridVideos.slice(0, videosPerPage);
-const hasNextPage = allGridVideos.length > videosPerPage;
+// Pagination
+const start = page === 1 ? 1 : (page - 1) * videosPerPage;
+const end = start + videosPerPage;
+const feedVideos = allVideos.slice(start, end).map((v) => ({
+  id: v.videoId,
+  title: v.title,
+  description: v.description,
+  slug: v.slug,
+  thumbnailUrl: `https://content.rawkode.academy/videos/${v.videoId}/thumbnail.jpg`,
+  streamUrl: `https://content.rawkode.academy/videos/${v.videoId}/stream.m3u8`,
+  duration: typeof v.duration === "number" ? v.duration : 0,
+  publishedAt: (v.publishedAt instanceof Date ? v.publishedAt.toISOString() : String(v.publishedAt)),
+}));
+const hasNextPage = end < allVideos.length;
 ---
 
 <Page title="Videos">
@@ -101,10 +74,10 @@ const hasNextPage = allGridVideos.length > videosPerPage;
 			type="video"
 			title={featuredVideo.title}
 			description={featuredVideo.description}
-			thumbnailUrl={featuredVideo.thumbnailUrl}
+			thumbnailUrl={`https://content.rawkode.academy/videos/${featuredVideo.videoId}/thumbnail.jpg`}
 			thumbnailAlt={`Thumbnail for ${featuredVideo.title}`}
-			date={featuredVideo.publishedAt}
-			duration={featuredVideo.duration}
+			date={(featuredVideo.publishedAt instanceof Date ? featuredVideo.publishedAt.toISOString() : String(featuredVideo.publishedAt))}
+			duration={featuredDuration !== null ? String(featuredDuration) : undefined}
 			href={`/watch/${featuredVideo.slug}`}
 			ctaText="Watch Now"
 		/>

@@ -1,0 +1,11 @@
+---
+description: |-
+  Portainer is a lightweight management UI that allows you to easily build, manage and maintain your Docker, Docker Swarm, Kubernetes, and Nomad environments. It provides a user-friendly interface for managing containers, images, networks, volumes, and other resources, simplifying the process of deploying and monitoring applications. Portainer eliminates the need for complex command-line operations and offers a centralized view of your containerized infrastructure. 
+
+  Portainer offers a streamlined approach to container management, providing significant value by reducing the learning curve associated with container orchestration tools. Its main use cases include simplifying Docker deployments for small teams, providing a user-friendly Kubernetes interface for developers and operators, and enabling centralized management of multiple container environments.
+name: Portainer
+website: https://www.portainer.io/
+documentation: https://documentation.portainer.io/
+categories: []
+---
+

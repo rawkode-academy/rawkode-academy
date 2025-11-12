@@ -37,7 +37,7 @@ export const GET: APIRoute = async ({ params }) => {
 		const zulipApiKey = getSecret("ZULIP_API_KEY");
 
 		const videos = await getCollection("videos");
-		const video = videos.find((v) => v.data.id === videoId);
+		const video = videos.find((v) => v.data.videoId === videoId);
 
 		// This really should never happen, but let's keep the
 		// compiler happy.

@@ -1,0 +1,8 @@
+---
+description: GitLab Duo is a suite of AI-powered capabilities integrated directly into the GitLab platform to enhance the software development lifecycle. It aims to increase developer productivity, improve code quality, and accelerate delivery cycles. GitLab Duo provides features like AI-assisted code completion, code suggestions, vulnerability detection, and test generation, all designed to reduce the time spent on repetitive tasks and enable developers to focus on more strategic initiatives.
+name: GitLab Duo
+website: https://about.gitlab.com/solutions/gitlab-duo/
+documentation: https://docs.gitlab.com/ee/gitlab_duo/
+categories: []
+---
+

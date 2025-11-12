@@ -1,0 +1,11 @@
+---
+description: |-
+  WunderGraph is a serverless API developer platform that transforms existing data sources (GraphQL APIs, REST APIs, databases) into secure, high-performance GraphQL APIs with built-in authentication and authorization. It focuses on removing boilerplate and complexity from API development, enabling developers to build production-ready backends-for-frontends (BFFs) faster and with less code. It allows secure server-side composition of data from multiple sources and automates common API tasks, while providing type safety and security guarantees.
+
+  WunderGraph's primary use cases include aggregating data from various APIs and databases into a unified GraphQL API, building secure and scalable backend APIs for web and mobile applications, creating personalized data experiences, and simplifying API deployment in serverless environments. It's also used for internal tooling and data integration scenarios where simplifying the development experience and ensuring data security are critical.
+name: WunderGraph
+website: https://wundergraph.com/
+documentation: https://wundergraph.com/docs
+categories: []
+---
+

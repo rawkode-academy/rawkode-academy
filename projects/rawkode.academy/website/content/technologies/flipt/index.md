@@ -1,0 +1,8 @@
+---
+description: Flipt is an open-source feature flag solution that allows developers to release features with confidence and manage them centrally. It offers a centralized control plane to manage feature flags across multiple applications and environments, enabling techniques like dark launches, A/B testing, and canary releases. By decoupling feature releases from code deployments, Flipt reduces the risk associated with new feature rollouts and allows for faster iteration cycles. Flipt is designed to be lightweight and performant, ensuring minimal impact on application performance. It integrates seamlessly with existing application architectures and provides a user-friendly interface for managing flags, rules, and segments. The primary use cases for Flipt include controlling feature availability, experimenting with new features in production, and personalizing user experiences based on feature flag configurations.
+name: Flipt
+website: https://www.flipt.io/
+documentation: https://www.flipt.io/docs
+categories: []
+---
+

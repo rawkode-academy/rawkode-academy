@@ -1,0 +1,8 @@
+---
+description: Snyk is a developer security platform designed to find and fix vulnerabilities in open source libraries, container images, infrastructure as code, and application code. It integrates directly into developer workflows, allowing teams to identify and address security issues early in the development lifecycle. Snyk helps organizations shift security left, empowering developers to own security while maintaining velocity and reducing the burden on security teams. Its main use cases include scanning dependencies for known vulnerabilities, identifying licensing issues, scanning container images for operating system vulnerabilities and misconfigurations, and finding security flaws in code and infrastructure-as-code configurations.
+name: Snyk
+website: https://snyk.io/
+documentation: https://docs.snyk.io/
+categories: []
+---
+

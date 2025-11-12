@@ -1,0 +1,8 @@
+---
+description: Timoni is a package manager for Kubernetes, powered by CUE. It simplifies application configuration and deployment by providing a declarative and composable way to manage Kubernetes resources. Timoni helps teams define, share, and reuse application templates and configurations, reducing boilerplate and promoting consistency across environments. It enables easier management of complex applications by leveraging CUE's data validation and code generation features.
+name: Timoni
+website: https://timoni.sh/
+documentation: https://timoni.sh/get-started/
+categories: []
+---
+

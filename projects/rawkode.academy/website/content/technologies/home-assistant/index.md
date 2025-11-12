@@ -1,0 +1,11 @@
+---
+description: |-
+  Home Assistant is an open-source home automation platform that puts local control and privacy first. It allows users to integrate and control a wide variety of smart home devices and services from different manufacturers into a single, unified system. Home Assistant aggregates these diverse technologies, enabling users to create custom automation rules and dashboards to manage their homes efficiently. The platform provides local control meaning automations can continue even without an internet connection. 
+
+  Its main use cases include controlling lights, thermostats, security systems, media players, and other smart devices; creating automated routines triggered by time, events, or sensor data; monitoring energy consumption; and providing a centralized dashboard for visualizing and controlling all aspects of the smart home.
+name: Home Assistant
+website: https://www.home-assistant.io/
+documentation: https://www.home-assistant.io/docs/
+categories: []
+---
+

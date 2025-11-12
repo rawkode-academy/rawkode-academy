@@ -14,6 +14,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { resolveDataDirSync as resolveTechnologiesDataDir } from "@rawkodeacademy/content-technologies";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 
 // Define the Technology data type explicitly
 export interface Technology {
@@ -37,9 +38,10 @@ export const getStaticPaths = (async () => {
 	try {
 		const items = await getCollection("technologies");
 		if (items.length > 0) {
-			return items.map((e) => {
+			return Promise.all(items.map(async (e) => {
 				const icon = (e as any).data.icon;
 				const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
+				const videos = await getVideosForTechnology(e.id);
 				return {
 					params: { id: e.id },
 					props: {
@@ -50,11 +52,11 @@ export const getStaticPaths = (async () => {
 							documentation: e.data.documentation,
 							website: e.data.website,
 							logo,
-							videos: [],
+							videos,
 						} as Technology,
 					},
 				};
-			});
+			}));
 		}
 	} catch (error) {
 		console.warn("getCollection('technologies') failed; falling back to FS glob:", error);
@@ -83,6 +85,7 @@ export const getStaticPaths = (async () => {
 					const raw = await readFile(join(base, rel), "utf8");
 					const fm = matter(raw).data as any;
 					const logo = resolveTechnologyIconUrl(id, fm.icon) ?? undefined;
+					const videos = await getVideosForTechnology(id);
 					return {
 						params: { id },
 						props: {
@@ -93,12 +96,13 @@ export const getStaticPaths = (async () => {
 								documentation: fm.documentation,
 								website: fm.website,
 								logo,
-								videos: [],
+								videos,
 							} as Technology,
 						},
 					};
 				} catch {
-					return { params: { id }, props: { technology: { id, name: id, description: '', videos: [] } as Technology } };
+					const videos = await getVideosForTechnology(id);
+					return { params: { id }, props: { technology: { id, name: id, description: '', videos } as Technology } };
 				}
 			}),
 		);
@@ -117,6 +121,7 @@ if (!technology) {
     if (e) {
       const icon = (e as any).data.icon;
       const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
+      const videos = await getVideosForTechnology(e.id);
       technology = {
         id: e.id,
         name: e.data.name,
@@ -124,13 +129,14 @@ if (!technology) {
         documentation: e.data.documentation,
         website: e.data.website,
         logo,
-        videos: [],
+        videos,
       };
     } else {
       const base = resolveTechnologiesDataDir();
       const raw = await readFile(join(base, `${id}.mdx`), "utf8");
       const fm = matter(raw).data as any;
       const logo = resolveTechnologyIconUrl(id, fm.icon) ?? undefined;
+      const videos = await getVideosForTechnology(id);
       technology = {
         id,
         name: fm.name ?? id,
@@ -138,7 +144,7 @@ if (!technology) {
         documentation: fm.documentation,
         website: fm.website,
         logo,
-        videos: [],
+        videos,
       };
     }
   } catch (err) {

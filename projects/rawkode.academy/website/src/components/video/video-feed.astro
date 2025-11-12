@@ -1,61 +1,36 @@
 ---
-import { GRAPHQL_ENDPOINT } from "astro:env/server";
-
 interface Video {
+	id: string;
 	title: string;
 	thumbnailUrl: string;
 	duration: number;
 	slug: string;
 	publishedAt: string;
-	streamUrl?: string;
+	streamUrl: string;
 }
 
 interface Props {
 	title: string;
 	description: string;
-	query?: string;
-	operation?: string;
-	limit?: number;
-	variables?: Record<string, any>;
 	videos?: Video[];
 }
 
-const {
-	title,
-	description,
-	query,
-	operation,
-	limit,
-	variables = {},
-	videos: passedVideos,
-} = Astro.props;
+const { title, description, videos: passedVideos = [] } = Astro.props;
 
-let videos: Video[];
+const videos: Video[] = passedVideos.map((v) => ({
+	id: v.id,
+	title: v.title,
+	slug: v.slug,
+	publishedAt: v.publishedAt,
+	thumbnailUrl: v.thumbnailUrl || `https://content.rawkode.academy/videos/${v.id}/thumbnail.jpg`,
+	streamUrl: v.streamUrl || `https://content.rawkode.academy/videos/${v.id}/stream.m3u8`,
+	duration: v.duration ?? 0,
+}));
 
-if (passedVideos) {
-	videos = passedVideos;
-} else if (query && operation && limit) {
-	const response = await fetch(GRAPHQL_ENDPOINT, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			query,
-			variables: {
-				limit,
-				...variables,
-			},
-		}),
-	});
-
-	const { data }: { data: Record<string, Video[]> } = await response.json();
-	videos = data ? ((data[operation] ?? []) as Video[]) : [];
-} else {
-	videos = [];
-}
-
-function formatDuration(seconds: number) {
+function formatDuration(seconds?: number | null) {
+	if (typeof seconds !== "number" || Number.isNaN(seconds) || seconds <= 0) {
+		return "--:--";
+	}
 	const hours = Math.floor(seconds / 3600);
 	const minutes = Math.floor((seconds % 3600) / 60);
 	const remainingSeconds = Math.floor(seconds % 60);
@@ -86,7 +61,7 @@ function formatDate(dateString: string) {
         <a href={`/watch/${video.slug}`} class="group">
           <div class="relative aspect-video">
             <img
-              src={video.thumbnailUrl}
+              src={video.thumbnailUrl!}
               alt={video.title}
               class="w-full h-full object-cover rounded-lg shadow-md transition-transform group-hover:scale-105"
               loading="lazy"

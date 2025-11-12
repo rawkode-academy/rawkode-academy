@@ -1,0 +1,10 @@
+---
+description: |-
+  apko is a tool for building minimal, unprivileged container images. It emphasizes reproducibility and security by leveraging declarative configuration and cryptographic verification of all dependencies. Apko eliminates the need for Dockerfiles, offering a more streamlined and auditable process for creating base images and application containers.
+
+  Apko provides value by reducing image size, improving security posture through a minimal attack surface, and enhancing reproducibility. Its main use cases include creating base images for Kubernetes deployments, building lightweight application containers, and facilitating secure software supply chains.
+name: apko
+website: https://github.com/chainguard-dev/apko
+categories: []
+---
+

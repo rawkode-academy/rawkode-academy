@@ -5,6 +5,7 @@
   "scripts": {
 		"build-storybook": "storybook build",
 		"build": "astro check && astro build",
+		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"dev:wrangler": "wrangler dev",
 		"dev": "astro dev",
@@ -98,8 +99,9 @@
 		"vue": "^3.5.19",
 		"vue-boring-avatars": "^1.4.0",
 		"vue-word-highlighter": "^1.2.5",
-		"vue3-carousel": "^0.16.0"
-  },
+		"vue3-carousel": "^0.16.0",
+		"yaml": "^2.5.1"
+	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.2",
 		"@graphql-codegen/cli": "^5.0.7",
