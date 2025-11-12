@@ -10,15 +10,29 @@ const { title, description } = Astro.props;
 ---
 
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description || title} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0f" />
+    <script is:inline>
+      (function(){
+        try {
+          var stored = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = stored ? (stored === 'dark') : prefersDark;
+          document.documentElement.classList.toggle('dark', !!isDark);
+          var metas = document.querySelectorAll('meta[name="theme-color"]');
+          metas.forEach(function (m) { if (!m.media) m.setAttribute('content', isDark ? '#0b0b0f' : '#ffffff'); });
+        } catch(_){}
+      })();
+    </script>
   </head>
-  <body class="h-full w-full bg-gray-900 text-gray-100">
+  <body class="h-full w-full bg-white dark:bg-black text-gray-900 dark:text-gray-100">
     <slot />
   </body>
 </html>

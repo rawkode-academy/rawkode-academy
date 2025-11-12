@@ -8,7 +8,7 @@ export type TechnologyEntry = CollectionEntry<"technologies">;
 // Match content package definition exactly for compile-time safety
 export type TechnologyData = TechnologyEntry["data"] & ContentTechnologyData;
 export type LearningResources = NonNullable<TechnologyData["learningResources"]>;
-export type TechnologyItem = TechnologyData & { id: string; logo?: string };
+export type TechnologyItem = Omit<TechnologyData, "icon"> & { id: string; logo?: string | undefined; icon?: string | undefined };
 
 export async function listTechnologies(): Promise<TechnologyItem[]> {
   const { getCollection } = await import("astro:content");
@@ -24,7 +24,7 @@ export async function listTechnologies(): Promise<TechnologyItem[]> {
       icon: iconValue,
       logo: iconValue,
       categories: data.categories ?? [],
-      learningResources: data.learningResources ?? null,
+      learningResources: data.learningResources ?? undefined,
     } satisfies TechnologyItem;
   });
 }

@@ -1,15 +1,15 @@
 <template>
-  <div class="overflow-hidden bg-white py-24 sm:py-32">
+  <div class="overflow-hidden bg-white dark:bg-gray-900 py-24 sm:py-32">
 										    <div class="mx-auto px-6 lg:px-8">
 									      <div class="mx-auto grid grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:grid-cols-2">
 								        <div class="lg:pr-8 lg:pt-4">
 									          <div>
 							            <h2 class="text-base font-semibold leading-7 text-indigo-600">Deploy faster</h2>
-							            <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">A better workflow</p>
-							            <p class="mt-6 text-lg leading-8 text-gray-600">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.</p>
-								            <dl class="mt-10 space-y-8 text-base leading-7 text-gray-600">
+            <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">A better workflow</p>
+            <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.</p>
+            <dl class="mt-10 space-y-8 text-base leading-7 text-gray-600 dark:text-gray-400">
 					              <div v-for="feature in features" :key="feature.name" class="relative pl-9">
-					                <dt class="inline font-semibold text-gray-900">
+                <dt class="inline font-semibold text-gray-900 dark:text-white">
 					                  <component :is="feature.icon" class="absolute left-1 top-1 h-5 w-5 text-indigo-600" aria-hidden="true" />
 					                  {{ feature.name }}
 					                </dt>

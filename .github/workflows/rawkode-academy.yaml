@@ -25,9 +25,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Dagger
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install d2
         run: |
-          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
+          curl -fsSL https://d2lang.com/install.sh | sh -s --
+          sudo mv ~/.local/bin/d2 /usr/local/bin/d2
 
       - name: Default error capture flag
         run: echo "PUBLIC_CAPTURE_ERRORS=false" >> $GITHUB_ENV
@@ -41,9 +47,8 @@ jobs:
         env:
           PUBLIC_CAPTURE_ERRORS: ${{ env.PUBLIC_CAPTURE_ERRORS }}
         run: |
-          dagger <<.
-            . | build | export dist
-          .
+          bun install
+          bun run build
 
       - name: Upload PostHog Source Maps (production)
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
@@ -67,9 +72,7 @@ jobs:
         working-directory: projects/rawkode.academy/website
         timeout-minutes: 4
         run: |
-          dagger <<.
-            . | buildStorybook | export storybook-static
-          .
+          bun run build-storybook
 
       - name: Remove .map files from Storybook
         run: |
@@ -92,45 +95,37 @@ jobs:
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         working-directory: projects/rawkode.academy/website
         env:
-          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
         run: |
-          dagger <<.
-            ../../../dagger/cloudflare | deploy-dist \
-              ./dist \
-              wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN
-          .
+          npx wrangler deploy --config wrangler.jsonc
 
       - name: Deploy Storybook Production
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
         working-directory: projects/rawkode.academy/website
         env:
-          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
         run: |
-          dagger <<.
-            ../../../dagger/cloudflare | deployAssets \
-              ./storybook-static \
-              wrangler.design.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN
-          .
+          npx wrangler deploy --config wrangler.design.jsonc --assets ./storybook-static
 
       - name: Deploy Preview
         id: preview
         if: github.event_name == 'pull_request'
         working-directory: projects/rawkode.academy/website
         env:
-          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dagger <<.
-            ../../../dagger/cloudflare | preview \
-              ./dist \
-              wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN \
-              env:GITHUB_TOKEN \
-              ${{ github.repository }} \
-              ${{ github.event.pull_request.number }}
-          .
+          OUTPUT=$(npx wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }} 2>&1)
+          echo "$OUTPUT"
+          PREVIEW_URL=$(echo "$OUTPUT" | grep -oP 'Version Preview Alias URL:\s*\K(https://[^\s]+)' || echo "$OUTPUT" | grep -oP 'Version Preview URL:\s*\K(https://[^\s]+)' || echo "$OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
+          if [ -n "$PREVIEW_URL" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"
+          else
+            echo "Warning: Could not extract preview URL from wrangler output"
+          fi
 
       - name: Remove .map files from preview dist
         if: github.event_name == 'pull_request'
@@ -142,15 +137,15 @@ jobs:
         if: github.event_name == 'pull_request'
         working-directory: projects/rawkode.academy/website
         env:
-          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dagger <<.
-            ../../../dagger/cloudflare | previewAssets \
-              ./storybook-static \
-              wrangler.design.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN \
-              env:GITHUB_TOKEN \
-              ${{ github.repository }} \
-              ${{ github.event.pull_request.number }}
-          .
+          OUTPUT=$(npx wrangler versions upload --config wrangler.design.jsonc --assets ./storybook-static --preview-alias pr-${{ github.event.pull_request.number }} 2>&1)
+          echo "$OUTPUT"
+          PREVIEW_URL=$(echo "$OUTPUT" | grep -oP 'Version Preview Alias URL:\s*\K(https://[^\s]+)' || echo "$OUTPUT" | grep -oP 'Version Preview URL:\s*\K(https://[^\s]+)' || echo "$OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
+          if [ -n "$PREVIEW_URL" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "Storybook Preview: $PREVIEW_URL"
+          else
+            echo "Warning: Could not extract preview URL from wrangler output"
+          fi

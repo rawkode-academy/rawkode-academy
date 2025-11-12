@@ -87,124 +87,117 @@ const truncatedDescription = truncateDescription(
 );
 ---
 
-<section class="py-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-  <div class="container mx-auto px-4 md:px-6">
-    <div class="max-w-4xl mx-auto space-y-6">
-      
-      <!-- Thumbnail -->
-      <div class="relative">
-        <div class="block group">
-          <div class="relative aspect-video rounded-xl overflow-hidden shadow-2xl transition-all duration-300 group-hover:shadow-3xl group-hover:-translate-y-2">
-            <a href={href} class="block">
-              {typeof thumbnailUrl === 'string' ? (
-                <img
-                  src={thumbnailUrl}
-                  alt={thumbnailAlt}
-                  class="w-full h-full object-cover"
-                />
-              ) : (
-                <Image
-                  src={thumbnailUrl}
-                  alt={thumbnailAlt}
-                  class="w-full h-full object-cover"
-                />
-              )}
-            </a>
-            
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <Button 
-                    href={href} 
-                    variant="secondary" 
-                    size="md" 
-                    class:list={["group shadow-lg hover:shadow-xl transition-all duration-300"]}
-                  >
-                    {isVideo ? (
-                      <svg slot="icon-left" class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    ) : (
-                      <svg slot="icon-left" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                      </svg>
-                    )}
-                    {ctaText}
-                  </Button>
-                </div>
-              </div>
-            </div>
-            
-            {formattedDuration && (
-              <div class="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm text-white px-3 py-1 rounded-lg text-sm font-medium">
-                {formattedDuration}
-              </div>
-            )}
-            
-            {/* Article type badge */}
-            {type === "article" && badgeConfig && (
-              <div class="absolute top-4 left-4">
-                <span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-md`}>
-                  {badgeConfig.label}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+<section class="py-12">
+	<div class="max-w-6xl mx-auto px-4 md:px-8">
+		<div class="relative overflow-hidden rounded-[2rem] border border-white/30 dark:border-gray-800/60 bg-white/60 dark:bg-gray-950/60 backdrop-blur-2xl shadow-[0_20px_80px_rgba(15,23,42,0.25)] dark:shadow-[0_25px_100px_rgba(2,6,23,0.65)]">
+			<div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/30 dark:from-primary/30 dark:to-secondary/40 opacity-80 pointer-events-none"></div>
+			<div class="relative grid items-center gap-8 lg:grid-cols-[1.15fr,0.85fr] p-6 sm:p-10 lg:p-14">
+				<!-- Copy -->
+				<div class="order-2 space-y-6 text-center lg:text-left lg:order-1">
+					<span class="inline-flex items-center justify-center text-[0.65rem] uppercase tracking-[0.4em] text-primary/80 dark:text-primary/60">
+						Featured {isVideo ? "Video" : "Article"}
+					</span>
 
-      <!-- Content -->
-      <div class="text-center space-y-4">
-        <!-- Title -->
-        <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight">
-          <a href={href} class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-            {title}
-          </a>
-        </h1>
+					<h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
+						<a href={href} class="hover:text-primary dark:hover:text-secondary transition-colors duration-200">
+							{title}
+						</a>
+					</h1>
 
-        {truncatedDescription && (
-          <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl mx-auto">
-            {truncatedDescription}
-          </p>
-        )}
+					{truncatedDescription && (
+						<p class="text-lg text-slate-600 dark:text-slate-200 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+							{truncatedDescription}
+						</p>
+					)}
 
-        <!-- Metadata -->
-        <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
-          {author && (
-            <div class="flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span class="font-medium">{author}</span>
-            </div>
-          )}
-          
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span>{displayDate}</span>
-          </div>
+					<div class="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-sm text-slate-600 dark:text-slate-300">
+						{author && (
+							<div class="flex items-center gap-2">
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+								</svg>
+								<span class="font-medium">{author}</span>
+							</div>
+						)}
 
-          {formattedDuration && (
-            <div class="flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{formattedDuration}</span>
-            </div>
-          )}
+						<div class="flex items-center gap-2">
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+							</svg>
+							<span>{displayDate}</span>
+						</div>
 
-          {readTime && (
-            <div class="flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{readTime}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  </div>
+						{formattedDuration && (
+							<div class="flex items-center gap-2">
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+								</svg>
+								<span>{formattedDuration}</span>
+							</div>
+						)}
+
+						{readTime && (
+							<div class="flex items-center gap-2">
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+								</svg>
+								<span>{readTime}</span>
+							</div>
+						)}
+					</div>
+
+					<div class="flex justify-center lg:justify-start">
+						<Button
+							href={href}
+							variant="primary"
+							size="lg"
+							class:list={[
+								"group shadow-[0_12px_35px_rgba(59,130,246,0.35)] hover:shadow-[0_18px_45px_rgba(59,130,246,0.45)] dark:shadow-[0_14px_40px_rgba(14,116,144,0.55)]",
+							]}
+						>
+							{isVideo ? (
+								<svg slot="icon-left" class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+									<path d="M8 5v14l11-7z" />
+								</svg>
+							) : (
+								<svg slot="icon-left" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+								</svg>
+							)}
+							{ctaText}
+						</Button>
+					</div>
+				</div>
+
+				<!-- Thumbnail -->
+				<div class="order-1 lg:order-2">
+					<a href={href} class="block group">
+						<div class="relative aspect-video rounded-3xl overflow-hidden border border-white/40 dark:border-gray-700/60 bg-slate-900/60 shadow-[0_20px_60px_rgba(15,23,42,0.35)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_25px_80px_rgba(15,23,42,0.45)]">
+							{typeof thumbnailUrl === "string" ? (
+								<img src={thumbnailUrl} alt={thumbnailAlt} class="w-full h-full object-cover" />
+							) : (
+								<Image src={thumbnailUrl} alt={thumbnailAlt} class="w-full h-full object-cover" />
+							)}
+
+							<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80"></div>
+
+							{formattedDuration && (
+								<div class="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-semibold tracking-wide">
+									{formattedDuration}
+								</div>
+							)}
+
+							{type === "article" && badgeConfig && (
+								<div class="absolute top-4 left-4">
+									<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-lg`}>
+										{badgeConfig.label}
+									</span>
+								</div>
+							)}
+						</div>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>

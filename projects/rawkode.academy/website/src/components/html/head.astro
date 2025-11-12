@@ -1,5 +1,6 @@
 ---
 import { Font } from "astro:assets";
+import "@/styles/global.css";
 import type { OpenGraphProps } from "@/types/opengraph";
 import PostHog from "../posthog/index.astro";
 import Opengraph from "./opengraph.astro";
@@ -10,7 +11,7 @@ interface Props extends OpenGraphProps {}
 ---
 
 <style is:global>
-	@reference "@/styles/global.css";
+	@import "@/styles/global.css";
 
 
 
@@ -49,7 +50,9 @@ interface Props extends OpenGraphProps {}
 	<link rel="manifest" href="/site.webmanifest" />
 	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
 	<meta name="msapplication-TileColor" content="#da532c" />
-	<meta name="theme-color" content="#5F5ED7" />
+	<!-- Theme color for light/dark to match UI backgrounds -->
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0f" />
 	<meta
 		name="description"
 		content={Astro.props.description ||
@@ -78,5 +81,39 @@ interface Props extends OpenGraphProps {}
 
 	<link rel="sitemap" href="/sitemap-index.xml" />
 
+
     <PostHog />
+
+	<!-- Initial theme script: respects saved preference or OS setting; avoids FOUC -->
+	<script is:inline>
+		(function () {
+			try {
+				var stored = localStorage.getItem('theme');
+				var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+				var isDark = stored ? (stored === 'dark') : prefersDark;
+				// Apply class for environments or components relying on .dark selector
+				document.documentElement.classList.toggle('dark', !!isDark);
+				// Keep meta theme-color in sync for UAs that ignore media attribute switching
+				var metas = document.querySelectorAll('meta[name="theme-color"]');
+				metas.forEach(function (m) {
+					if (!m.media) m.setAttribute('content', isDark ? '#0b0b0f' : '#ffffff');
+				});
+				// React to OS changes
+				if (window.matchMedia) {
+					var mq = window.matchMedia('(prefers-color-scheme: dark)');
+					mq.addEventListener('change', function (e) {
+						var forced = localStorage.getItem('theme');
+						if (forced) return; // user override wins
+						var nextDark = e.matches;
+						document.documentElement.classList.toggle('dark', nextDark);
+						metas.forEach(function (m) { if (!m.media) m.setAttribute('content', nextDark ? '#0b0b0f' : '#ffffff'); });
+					});
+				}
+			} catch (_) { /* no-op */ }
+		})();
+	</script>
+
+	{import.meta.env.DEV && (
+		<link rel="stylesheet" href="/src/styles/global.css" />
+	)}
 </head>

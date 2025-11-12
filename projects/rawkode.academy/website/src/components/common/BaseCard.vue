@@ -1,7 +1,7 @@
 <template>
   <a :href="href" :class="['h-full', className]">
     <article
-      class="p-0 bg-white rounded-xl overflow-hidden shadow-lg dark:bg-gray-800 dark:border-gray-700 h-full flex flex-col transition-all duration-300 border border-gray-100 dark:border-gray-700"
+      class="p-0 bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] h-full flex flex-col transition-all duration-300 border border-white/40 dark:border-gray-600/50 hover:bg-white/60 dark:hover:bg-gray-700/70 hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.18)] dark:hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.7)] hover:scale-[1.02]"
     >
       <div v-if="$slots.cover" class="relative">
         <slot name="cover" />
@@ -14,7 +14,7 @@
         <slot name="content" />
         <div
           v-if="$slots.footer"
-          class="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700"
+          class="mt-auto pt-4 border-t border-white/20 dark:border-gray-600/50"
         >
           <slot name="footer" />
         </div>

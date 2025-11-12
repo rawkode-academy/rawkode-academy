@@ -1,16 +1,16 @@
 <template>
   <div
-    class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800"
+    class="relative overflow-hidden bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl rounded-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border border-white/40 dark:border-gray-700/40 before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/10 before:to-transparent before:pointer-events-none before:rounded-xl"
   >
     <!-- Tab Navigation -->
-    <div class="border-b border-gray-200 dark:border-gray-800">
+    <div class="border-b border-white/40 dark:border-gray-700/40 relative z-10">
       <!-- Dropdown for Mobile -->
       <div class="sm:hidden px-2 pt-2 pb-3">
         <label for="tabs-mobile" class="sr-only">Select a tab</label>
         <select
           id="tabs-mobile"
           name="tabs-mobile"
-          class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          class="block w-full pl-3 pr-10 py-2 text-base border-white/40 dark:border-gray-700/40 focus:outline-none focus:ring-blue-500/50 focus:border-blue-500/50 sm:text-sm rounded-md bg-white/30 dark:bg-gray-800/30 backdrop-blur-md text-gray-900 dark:text-gray-100 shadow-md"
           :value="activeTab"
           @change="setActiveTab($event.target.value)"
         >
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Tab Content -->
-    <div class="p-6">
+    <div class="p-6 relative z-10">
       <!-- Description Panel -->
       <div
         v-show="activeTab === 'description'"

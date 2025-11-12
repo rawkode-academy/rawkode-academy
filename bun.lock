@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "rawkodeacademy",
@@ -7,6 +8,9 @@
     "content/technologies": {
       "name": "@rawkodeacademy/content-technologies",
       "version": "0.1.0",
+      "dependencies": {
+        "zod": "^3.24.3",
+      },
     },
     "projects/rawkode.academy/website": {
       "name": "website",

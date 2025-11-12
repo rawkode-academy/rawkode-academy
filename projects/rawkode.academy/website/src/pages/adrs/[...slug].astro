@@ -69,7 +69,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                     {authors.filter(author => author && author.data).slice(0, 4).map((author, index) => (
                       <div class="relative" style={`z-index: ${10 - index}`}>
                         <img
-                          class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-purple-500 bg-white"
+                          class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-purple-500 bg-white dark:bg-gray-800"
                           src={`https://avatars.githubusercontent.com/${author.data.handle}`}
                           alt={`Profile picture of ${author.data.name}`}
                         />
@@ -80,7 +80,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                     ))}
                     {authors.filter(author => author && author.data).length > 4 && (
                       <div class="relative z-0">
-                        <div class="w-16 h-16 rounded-full bg-purple-100 border-2 border-purple-500 bg-white flex items-center justify-center text-sm text-purple-800 font-medium">
+                        <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-500 bg-white dark:bg-gray-800 flex items-center justify-center text-sm text-purple-800 dark:text-purple-200 font-medium">
                           +{authors.filter(author => author && author.data).length - 4}
                         </div>
                       </div>

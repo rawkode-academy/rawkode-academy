@@ -10,6 +10,7 @@ import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
 import matter from "gray-matter";
 import { readFile, stat } from "node:fs/promises";
+import { execSync } from "node:child_process";
 import { statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { createRequire } from "node:module";
@@ -23,11 +24,10 @@ import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-de
 // Check if D2 is available (used for diagram rendering)
 let d2Available = false;
 try {
-	const { execSync } = await import("child_process");
-	execSync("d2 --version", { stdio: "ignore" });
-	d2Available = true;
+    execSync("d2 --version", { stdio: "ignore" });
+    d2Available = true;
 } catch {
-	console.warn("D2 not available, skipping diagram support");
+    console.warn("D2 not available, skipping diagram support");
 }
 
 const getSiteUrl = () => {
@@ -139,7 +139,7 @@ async function buildLastmodIndex() {
       const patterns = ["**/*.{md,mdx}"];
       const dirs = [withData, base];
       for (const d of dirs) {
-        const matches = await glob(patterns[0], { cwd: d, absolute: true });
+        const matches = await glob(patterns[0]!, { cwd: d, absolute: true });
         if (matches.length > 0) {
           techFiles.push(...matches);
           if (!techBaseDir) techBaseDir = d;
