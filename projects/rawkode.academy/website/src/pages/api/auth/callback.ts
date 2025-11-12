@@ -1,14 +1,18 @@
 import { Zitadel } from "@/lib/zitadel";
-import { identifyServerUser, captureServerEvent, getAnonDistinctIdFromCookies } from "@/server/posthog";
+import {
+	identifyServerUser,
+	captureServerEvent,
+	getAnonDistinctIdFromCookies,
+} from "@/server/posthog";
 import { decodeJWT } from "@oslojs/jwt";
 import type { APIRoute } from "astro";
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({
-    cookies,
-    redirect,
-    request,
+	cookies,
+	redirect,
+	request,
 }): Promise<Response> => {
 	const url = new URL(request.url);
 	const searchParams = url.searchParams;
@@ -46,15 +50,15 @@ export const GET: APIRoute = async ({
 	console.log(cookieState.value);
 	console.log(cookieCodeVerifier.value);
 
-    const zitadel = new Zitadel();
+	const zitadel = new Zitadel();
 
-    let tokens = undefined;
-    try {
-        tokens = await zitadel.validateAuthorizationCode(
-            code,
-            cookieCodeVerifier.value,
-        );
-    } catch (e) {
+	let tokens = undefined;
+	try {
+		tokens = await zitadel.validateAuthorizationCode(
+			code,
+			cookieCodeVerifier.value,
+		);
+	} catch (e) {
 		console.log(e);
 
 		return new Response(null, {
@@ -63,60 +67,60 @@ export const GET: APIRoute = async ({
 		});
 	}
 
-    cookies.set("accessToken", tokens.accessToken(), {
-        secure: import.meta.env.MODE === "production",
-        httpOnly: true,
-        path: "/",
-        maxAge: tokens.accessTokenExpiresInSeconds(),
-        sameSite: "strict",
-    });
+	cookies.set("accessToken", tokens.accessToken(), {
+		secure: import.meta.env.MODE === "production",
+		httpOnly: true,
+		path: "/",
+		maxAge: tokens.accessTokenExpiresInSeconds(),
+		sameSite: "strict",
+	});
 
-    cookies.set("idToken", tokens.idToken(), {
-        secure: import.meta.env.MODE === "production",
-        httpOnly: true,
-        path: "/",
-        maxAge: tokens.accessTokenExpiresInSeconds(),
-        sameSite: "strict",
-    });
+	cookies.set("idToken", tokens.idToken(), {
+		secure: import.meta.env.MODE === "production",
+		httpOnly: true,
+		path: "/",
+		maxAge: tokens.accessTokenExpiresInSeconds(),
+		sameSite: "strict",
+	});
 
-    if (tokens.hasRefreshToken()) {
-        cookies.set("refreshToken", tokens.refreshToken(), {
-            secure: import.meta.env.MODE === "production",
-            httpOnly: true,
-            path: "/",
-            sameSite: "strict",
-        });
-    }
+	if (tokens.hasRefreshToken()) {
+		cookies.set("refreshToken", tokens.refreshToken(), {
+			secure: import.meta.env.MODE === "production",
+			httpOnly: true,
+			path: "/",
+			sameSite: "strict",
+		});
+	}
 
-    // PostHog identify and auth_sign_in capture
-    try {
-        const anonId = getAnonDistinctIdFromCookies(request);
-        const idToken = tokens.idToken();
-        const claims = decodeJWT(idToken) as any;
-        const distinctId: string | undefined = claims?.sub;
+	// PostHog identify and auth_sign_in capture
+	try {
+		const anonId = getAnonDistinctIdFromCookies(request);
+		const idToken = tokens.idToken();
+		const claims = decodeJWT(idToken) as any;
+		const distinctId: string | undefined = claims?.sub;
 
-        if (distinctId) {
-            await identifyServerUser({
-                distinctId,
-                anonId: anonId,
-                set: {
-                    email: claims?.email,
-                    name: claims?.name,
-                },
-            });
+		if (distinctId) {
+			await identifyServerUser({
+				distinctId,
+				anonId: anonId,
+				set: {
+					email: claims?.email,
+					name: claims?.name,
+				},
+			});
 
-            await captureServerEvent({
-                event: "auth_sign_in",
-                distinctId,
-                properties: {
-                    provider: "zitadel",
-                    method: "oauth",
-                },
-            });
-        }
-    } catch (err) {
-        console.error("Failed to send PostHog identify/sign-in event", err);
-    }
+			await captureServerEvent({
+				event: "auth_sign_in",
+				distinctId,
+				properties: {
+					provider: "zitadel",
+					method: "oauth",
+				},
+			});
+		}
+	} catch (err) {
+		console.error("Failed to send PostHog identify/sign-in event", err);
+	}
 
-    return redirect("/");
+	return redirect("/");
 };

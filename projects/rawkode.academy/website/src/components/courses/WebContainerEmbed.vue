@@ -8,7 +8,7 @@
           <div class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
           <span>Starting container...</span>
         </div>
-        <div v-else-if="status === 'installing'" class="flex items-center gap-2 text-sm text-blue-400">
+        <div v-else-if="status === 'installing'" class="flex items-center gap-2 text-sm text-primary">
           <div class="animate-pulse">●</div>
           <span>Installing dependencies...</span>
         </div>
@@ -38,7 +38,7 @@
         <div class="p-2 bg-gray-800 border-b border-gray-700 relative z-10">
           <select
             v-model="selectedFile"
-            class="w-full px-3 py-1 bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 focus:border-blue-500 focus:outline-none cursor-pointer transition-colors"
+            class="w-full px-3 py-1 bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 focus:border-primary focus:outline-none cursor-pointer transition-colors"
             :disabled="fileList.length === 0"
           >
             <option v-if="fileList.length === 0" value="">No files loaded</option>
@@ -72,7 +72,7 @@
               :href="previewUrl" 
               target="_blank"
               rel="noopener noreferrer"
-              class="text-sm text-blue-500 hover:text-blue-400 underline decoration-blue-500/30 hover:decoration-blue-400 transition-all cursor-pointer flex items-center gap-1"
+              class="text-sm text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary transition-all cursor-pointer flex items-center gap-1"
               @click.stop
             >
               {{ previewUrl }}

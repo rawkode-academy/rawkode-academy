@@ -22,14 +22,14 @@ const isCollapsed = ref(false);
 const communityExpanded = ref(false);
 
 // Mode: 'learn' or 'business'
-const mode = ref<'learn' | 'business'>('learn');
+const mode = ref<"learn" | "business">("learn");
 
 onMounted(() => {
 	currentPath.value = window.location.pathname;
 
 	// Auto-detect mode based on current path
 	if (currentPath.value.startsWith("/organizations")) {
-		mode.value = 'business';
+		mode.value = "business";
 	}
 
 	// Auto-expand community if on community page
@@ -52,7 +52,7 @@ onMounted(() => {
 	}
 
 	const savedMode = localStorage.getItem("sidebar-mode");
-	if (savedMode === 'business' || savedMode === 'learn') {
+	if (savedMode === "business" || savedMode === "learn") {
 		mode.value = savedMode;
 	}
 
@@ -76,12 +76,42 @@ function isCurrentPath(itemPath: string) {
 
 // Learn mode navigation items
 const learnNavItems = computed(() => [
-	{ name: "Videos", href: "/watch", icon: VideoCameraIcon, current: isCurrentPath("/watch") },
-	{ name: "Articles", href: "/read", icon: NewspaperIcon, current: isCurrentPath("/read") },
-	{ name: "Courses", href: "/courses", icon: AcademicCapIcon, current: isCurrentPath("/courses") },
-	{ name: "Learning Paths", href: "/learning-paths", icon: MapIcon, current: isCurrentPath("/learning-paths") },
-	{ name: "Technologies", href: "/technology", icon: CubeIcon, current: isCurrentPath("/technology") },
-	{ name: "Shows", href: "/shows", icon: TvIcon, current: isCurrentPath("/shows") },
+	{
+		name: "Videos",
+		href: "/watch",
+		icon: VideoCameraIcon,
+		current: isCurrentPath("/watch"),
+	},
+	{
+		name: "Articles",
+		href: "/read",
+		icon: NewspaperIcon,
+		current: isCurrentPath("/read"),
+	},
+	{
+		name: "Courses",
+		href: "/courses",
+		icon: AcademicCapIcon,
+		current: isCurrentPath("/courses"),
+	},
+	{
+		name: "Learning Paths",
+		href: "/learning-paths",
+		icon: MapIcon,
+		current: isCurrentPath("/learning-paths"),
+	},
+	{
+		name: "Technologies",
+		href: "/technology",
+		icon: CubeIcon,
+		current: isCurrentPath("/technology"),
+	},
+	{
+		name: "Shows",
+		href: "/shows",
+		icon: TvIcon,
+		current: isCurrentPath("/shows"),
+	},
 ]);
 
 // Business mode navigation items
@@ -132,12 +162,12 @@ const toggleCommunity = () => {
 };
 
 const toggleMode = () => {
-	mode.value = mode.value === 'learn' ? 'business' : 'learn';
+	mode.value = mode.value === "learn" ? "business" : "learn";
 	localStorage.setItem("sidebar-mode", mode.value);
 };
 
 const currentNavItems = computed(() => {
-	return mode.value === 'learn' ? learnNavItems.value : businessNavItems.value;
+	return mode.value === "learn" ? learnNavItems.value : businessNavItems.value;
 });
 </script>
 

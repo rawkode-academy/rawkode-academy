@@ -8,7 +8,7 @@
           type="text"
           placeholder="Search transcript..."
           aria-label="Search transcript"
-          class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent"
         />
         <svg
           class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
@@ -44,7 +44,7 @@
         :key="index"
         class="transcript-paragraph mb-6"
       >
-        <div class="text-sm text-blue-600 dark:text-blue-400 font-mono mb-2">
+        <div class="text-sm text-primary dark:text-primary font-mono mb-2">
           {{ paragraph[0].start }}
         </div>
         <div class="text-gray-900 dark:text-gray-100 leading-relaxed">

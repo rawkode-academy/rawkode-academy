@@ -2,7 +2,7 @@
 @reference "@/styles/global.css";
 
 .connected {
-	@apply border-blue-500 dark:border-blue-400;
+	@apply border-primary dark:border-primary;
 }
 
 /* Emoji Mart styling overrides for dark mode */
@@ -31,7 +31,7 @@
 }
 
 .emoji-mart-anchor-selected .emoji-mart-anchor-bar {
-	@apply !bg-blue-500;
+	@apply !bg-primary;
 }
 </style>
 
@@ -106,7 +106,7 @@
 					<span class="text-xs sm:text-sm font-medium">Save</span>
 				</button>
 				<button aria-label="Share this video"
-					:class="['flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors', { 'bg-blue-100 dark:bg-blue-900': showShareOptions }]"
+					:class="['flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors', { 'bg-primary/10 dark:bg-primary/20': showShareOptions }]"
 					@click="handleShare">
 					<svg aria-hidden="true" class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
 						xmlns="http://www.w3.org/2000/svg">
@@ -135,7 +135,7 @@
 			leave-active-class="transition-all duration-300 ease-in-out" leave-from-class="opacity-100 translate-y-0"
 			leave-to-class="opacity-0 translate-y-2">
 			<div v-if="showBanner"
-				class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+				class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-6 py-3 rounded-lg shadow-lg z-50">
 				<div class="flex items-center gap-3">
 					<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

@@ -1,10 +1,10 @@
 <template>
-  <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white">
+  <section class="relative overflow-hidden bg-gradient-to-br from-gray-900 via-[rgba(var(--brand-primary),0.25)] to-[rgba(var(--brand-secondary),0.35)] text-white">
     <!-- Animated background -->
     <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-      <div class="absolute top-40 left-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-secondary rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-primary rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div class="absolute top-40 left-1/2 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000 bg-[rgba(var(--brand-secondary),0.8)] dark:bg-[rgba(var(--brand-primary),0.6)]"></div>
     </div>
     
     <!-- Grid pattern overlay -->
@@ -15,7 +15,7 @@
         <!-- Left content -->
         <div class="max-w-xl">
           <!-- Badge -->
-          <div class="inline-flex items-center gap-2 mb-4 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-green-300 text-sm font-medium">
+          <div class="inline-flex items-center gap-2 mb-4 px-3 py-1 bg-primary/20 border border-primary/30 rounded-full text-primary text-sm font-medium">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
             </svg>
@@ -86,7 +86,7 @@
               @click="$emit('navigate', `/courses/${course.id}`)"
             >
               <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
                   <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                   </svg>

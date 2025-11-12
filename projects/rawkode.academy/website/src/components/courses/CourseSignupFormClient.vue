@@ -5,8 +5,8 @@
     <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50">
       <!-- Already Subscribed -->
       <div v-if="isAlreadySubscribed" class="text-center py-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 dark:bg-primary/20 mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>

@@ -10,7 +10,7 @@
 								        <dl class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-2 lg:gap-y-16">
           <div v-for="feature in features" :key="feature.name" class="relative pl-16">
             <dt class="text-base font-semibold leading-7 text-gray-900 dark:text-white">
-              <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
+              <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
                 <component :is="feature.icon" class="h-6 w-6 text-white" aria-hidden="true" />
               </div>
               {{ feature.name }}

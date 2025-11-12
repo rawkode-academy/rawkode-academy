@@ -12,7 +12,9 @@ const allCourses = (await getCollection("courses")).sort(
 );
 
 // Get the Zitadel course as the featured course
-const featuredCourse = allCourses.find(course => course.id === "complete-guide-zitadel") || allCourses[0];
+const featuredCourse =
+	allCourses.find((course) => course.id === "complete-guide-zitadel") ||
+	allCourses[0];
 
 // Get course modules for featured course
 let featuredModuleCount = 0;
@@ -26,7 +28,7 @@ if (featuredCourse) {
 
 	// Get the first module (lowest order number)
 	const sortedModules = courseModules
-		.filter(m => !m.data.draft)
+		.filter((m) => !m.data.draft)
 		.sort((a, b) => a.data.order - b.data.order);
 	firstModuleSlug = sortedModules[0]?.id;
 }

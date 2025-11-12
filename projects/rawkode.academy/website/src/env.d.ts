@@ -7,13 +7,13 @@ type Runtime = import("@astrojs/cloudflare").Runtime<Env>;
 
 declare global {
 	namespace App {
-        interface Locals extends Runtime {
-            user: OidcStandardClaims;
-            runtime: {
-                env: Env;
-            };
-        }
-    }
+		interface Locals extends Runtime {
+			user: OidcStandardClaims;
+			runtime: {
+				env: Env;
+			};
+		}
+	}
 }
 
 declare module "virtual:webcontainer-demos" {

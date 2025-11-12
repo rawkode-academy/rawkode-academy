@@ -1,0 +1,29 @@
+---
+/**
+ * Inline theme initialization script
+ * Should be placed in <head> as early as possible to prevent FOUC
+ */
+---
+
+<script is:inline>
+	(function () {
+		const THEME_STORAGE_KEY = "rawkode-theme";
+		const DEFAULT_THEME = "rawkode-green";
+
+		// Get stored theme or default
+		let theme = DEFAULT_THEME;
+		try {
+			const stored = localStorage.getItem(THEME_STORAGE_KEY);
+			if (stored === "rawkode-green" || stored === "rawkode-blue") {
+				theme = stored;
+			}
+		} catch (e) {
+			// localStorage might not be available
+		}
+
+		// Apply theme immediately
+		if (theme === "rawkode-blue") {
+			document.documentElement.setAttribute("data-theme", "rawkode-blue");
+		}
+	})();
+</script>

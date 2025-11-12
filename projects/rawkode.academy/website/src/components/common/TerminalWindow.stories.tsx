@@ -214,7 +214,7 @@ export const MultipleCommands: Story = {
             
             <TerminalWindow title="First Run">
               $ rawkode create my-first-app
-              <span class="text-blue-400">Creating new application 'my-first-app'...</span>
+              <span class="text-primary">Creating new application 'my-first-app'...</span>
               ✓ Generated project structure
               ✓ Installed dependencies
               ✓ Initialized git repository

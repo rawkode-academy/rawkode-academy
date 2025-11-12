@@ -22,7 +22,7 @@
         :href="zulipTopicUrl"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center mt-2 text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+        class="inline-flex items-center mt-2 text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
       >
         Join the discussion on Zulip
         <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +48,7 @@
             />
             <div
               v-else
-              class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-medium"
+              class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-medium"
             >
               {{ comment.author.charAt(0).toUpperCase() }}
             </div>
@@ -77,7 +77,7 @@
           :href="zulipTopicUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+          class="inline-flex items-center text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
         >
           Want to share your thoughts? Join the discussion on Zulip
           <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

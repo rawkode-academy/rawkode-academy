@@ -18,7 +18,7 @@
 			<div v-for="i in 4" :key="i" class="transcript-paragraph-skeleton">
 				<!-- Timestamp -->
 				<div
-					class="animate-pulse bg-blue-200 dark:bg-blue-900 rounded mb-2"
+					class="animate-pulse bg-primary/20 dark:bg-primary/20 rounded mb-2"
 					:style="{
 						height: '1rem',
 						width: getTimestampWidth(i),

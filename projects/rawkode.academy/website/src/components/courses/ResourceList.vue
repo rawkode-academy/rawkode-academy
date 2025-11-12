@@ -1,13 +1,13 @@
 <template>
   <div v-if="resources && resources.length > 0" class="space-y-6">
-    <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+    <div class="bg-gradient-to-r from-primary to-secondary text-white rounded-xl p-6 shadow-lg">
       <h3 class="text-2xl font-bold flex items-center gap-3">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
         </svg>
         Resources
       </h3>
-      <p class="text-sm mt-2 text-purple-100">Supporting materials for this module</p>
+      <p class="text-sm mt-2 text-secondary/80">Supporting materials for this module</p>
     </div>
     
     <div class="space-y-4">
@@ -58,7 +58,7 @@
                 </span>
                 <svg v-if="resource.type === 'url' || resource.type === 'embed'" 
                      class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                     :class="resource.type === 'url' ? 'text-blue-500' : 'text-purple-500'"
+                     :class="resource.type === 'url' ? 'text-primary' : 'text-secondary'"
                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                         :d="resource.type === 'url' ? 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14' : 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'"></path>
@@ -156,11 +156,11 @@ const getCategoryColorClass = (category: string) => {
 		case "slides":
 			return "text-orange-600 dark:text-orange-400";
 		case "code":
-			return "text-blue-600 dark:text-blue-400";
+			return "text-primary dark:text-primary";
 		case "documentation":
 			return "text-green-600 dark:text-green-400";
 		case "demos":
-			return "text-purple-600 dark:text-purple-400";
+			return "text-secondary dark:text-secondary";
 		default:
 			return "text-gray-600 dark:text-gray-400";
 	}
@@ -182,11 +182,11 @@ const getResourceIconPath = (type: string) => {
 const getResourceIconClass = (type: string) => {
 	switch (type) {
 		case "url":
-			return "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400";
+			return "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary";
 		case "file":
 			return "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400";
 		case "embed":
-			return "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400";
+			return "bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-secondary";
 		default:
 			return "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400";
 	}
@@ -195,11 +195,11 @@ const getResourceIconClass = (type: string) => {
 const getResourceTypeBadgeClass = (type: string) => {
 	switch (type) {
 		case "url":
-			return "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300";
+			return "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary";
 		case "file":
 			return "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300";
 		case "embed":
-			return "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300";
+			return "bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-secondary";
 		default:
 			return "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
 	}

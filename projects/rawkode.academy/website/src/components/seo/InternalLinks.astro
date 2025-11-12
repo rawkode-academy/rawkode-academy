@@ -2,55 +2,84 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 
 interface Props {
-  article: CollectionEntry<"articles">;
-  limitSideways?: number;
-  limitDown?: number;
+	article: CollectionEntry<"articles">;
+	limitSideways?: number;
+	limitDown?: number;
 }
 
 const { article, limitSideways = 2, limitDown = 2 } = Astro.props;
 
 // Helper to pick first technology if present
-const primaryTechId: string | undefined = Array.isArray(article.data.technologies) && article.data.technologies.length > 0
-  ? article.data.technologies[0]
-  : undefined;
+const primaryTechId: string | undefined =
+	Array.isArray(article.data.technologies) &&
+	article.data.technologies.length > 0
+		? article.data.technologies[0]
+		: undefined;
 
 // Up (hub) links
-const upLinks: { href: string; label: string }[] = [{ href: "/read", label: "All Articles" }];
+const upLinks: { href: string; label: string }[] = [
+	{ href: "/read", label: "All Articles" },
+];
 if (primaryTechId) {
-  upLinks.unshift({ href: `/technology/${primaryTechId}`, label: "Technology Hub" });
+	upLinks.unshift({
+		href: `/technology/${primaryTechId}`,
+		label: "Technology Hub",
+	});
 }
 
 // Sideways (peers)
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);
 let sideways: CollectionEntry<"articles">[] = [];
 if (article.data.series) {
-  sideways = allArticles
-    .filter((a) => a.id !== article.id && a.data.series?.id === article.data.series?.id)
-    .slice(0, limitSideways);
+	sideways = allArticles
+		.filter(
+			(a) =>
+				a.id !== article.id && a.data.series?.id === article.data.series?.id,
+		)
+		.slice(0, limitSideways);
 }
-if (sideways.length < limitSideways && Array.isArray(article.data.technologies) && article.data.technologies.length > 0) {
-  const remaining = limitSideways - sideways.length;
-  const techSet = new Set(article.data.technologies);
-  const techPeers = allArticles
-    .filter((a) => a.id !== article.id && a.data.technologies?.some((t: string) => techSet.has(t)))
-    .filter((a) => !sideways.find((s) => s.id === a.id))
-    .slice(0, remaining);
-  sideways = [...sideways, ...techPeers];
+if (
+	sideways.length < limitSideways &&
+	Array.isArray(article.data.technologies) &&
+	article.data.technologies.length > 0
+) {
+	const remaining = limitSideways - sideways.length;
+	const techSet = new Set(article.data.technologies);
+	const techPeers = allArticles
+		.filter(
+			(a) =>
+				a.id !== article.id &&
+				a.data.technologies?.some((t: string) => techSet.has(t)),
+		)
+		.filter((a) => !sideways.find((s) => s.id === a.id))
+		.slice(0, remaining);
+	sideways = [...sideways, ...techPeers];
 }
 
 // Down (deep guides) – prefer videos for the same technology
 let downLinks: { href: string; label: string }[] = [];
 try {
-  const videos = await getCollection("videos");
-  if (primaryTechId) {
-    const deepVideos = videos
-      .filter((v) => v.data.technologies?.some((t: { id: string }) => t.id === primaryTechId))
-      .sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime())
-      .slice(0, limitDown);
-    downLinks = deepVideos.map((v) => ({ href: `/watch/${v.data.slug}`, label: v.data.title }));
-  }
+	const videos = await getCollection("videos");
+	if (primaryTechId) {
+		const deepVideos = videos
+			.filter((v) =>
+				v.data.technologies?.some(
+					(t: { id: string }) => t.id === primaryTechId,
+				),
+			)
+			.sort(
+				(a, b) =>
+					new Date(b.data.publishedAt).getTime() -
+					new Date(a.data.publishedAt).getTime(),
+			)
+			.slice(0, limitDown);
+		downLinks = deepVideos.map((v) => ({
+			href: `/watch/${v.data.slug}`,
+			label: v.data.title,
+		}));
+	}
 } catch {
-  // videos collection may be empty in some builds; skip
+	// videos collection may be empty in some builds; skip
 }
 
 const hasLinks = upLinks.length || sideways.length || downLinks.length;

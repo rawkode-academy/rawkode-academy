@@ -50,7 +50,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 
 <Page title={`ADR-${adrNumber}: ${adr.data.title}`} description={`Architecture Decision Record: ${adr.data.title}`}>
   <h1 class="text-5xl font-extrabold dark:text-white">
-    <span class="text-purple-600 dark:text-purple-400">ADR-{adrNumber}:</span> {adr.data.title}
+    <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
   </h1>
 
   <div class="relative max-w-full overflow-x-hidden">
@@ -69,7 +69,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                     {authors.filter(author => author && author.data).slice(0, 4).map((author, index) => (
                       <div class="relative" style={`z-index: ${10 - index}`}>
                         <img
-                          class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-purple-500 bg-white dark:bg-gray-800"
+                          class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-secondary bg-white dark:bg-gray-800"
                           src={`https://avatars.githubusercontent.com/${author.data.handle}`}
                           alt={`Profile picture of ${author.data.name}`}
                         />
@@ -80,7 +80,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                     ))}
                     {authors.filter(author => author && author.data).length > 4 && (
                       <div class="relative z-0">
-                        <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-500 bg-white dark:bg-gray-800 flex items-center justify-center text-sm text-purple-800 dark:text-purple-200 font-medium">
+                        <div class="w-16 h-16 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary bg-white dark:bg-gray-800 flex items-center justify-center text-sm text-secondary dark:text-secondary font-medium">
                           +{authors.filter(author => author && author.data).length - 4}
                         </div>
                       </div>
@@ -89,17 +89,17 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                 </div>
                 <div class="flex flex-wrap gap-2 mt-2">
                   {authors.filter(author => author && author.data).map((author) => (
-                    <div class="inline-flex items-center bg-purple-50 dark:bg-gray-700 rounded-full px-3 py-1">
+                    <div class="inline-flex items-center bg-primary/10 dark:bg-primary/20 rounded-full px-3 py-1">
                       <a
                         href={`https://github.com/${author.data.handle}`}
                         target="_blank"
                         rel="author noopener noreferrer"
-                        class="text-sm font-medium text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-purple-100 transition-colors"
+                        class="text-sm font-medium text-secondary dark:text-secondary hover:text-secondary/90 dark:hover:text-secondary/90 transition-colors"
                       >
                         {author.data.name}
                       </a>
-                      <span class="mx-1 text-purple-400 dark:text-purple-500">•</span>
-                      <span class="text-xs text-purple-500 dark:text-purple-400">@{author.data.handle}</span>
+                      <span class="mx-1 text-secondary dark:text-secondary">•</span>
+                      <span class="text-xs text-secondary dark:text-secondary">@{author.data.handle}</span>
                     </div>
                   ))}
                 </div>

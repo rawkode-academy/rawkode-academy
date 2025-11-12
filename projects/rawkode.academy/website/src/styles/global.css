@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
 :root {
-	/* Shared color tokens */
+	/* Brand Colors - Default Theme: Rawkode Green (Teal + Green) */
+	--brand-primary: 4 181 156; /* Teal #04B59C */
+	--brand-secondary: 133 255 149; /* Green #85FF95 */
+	--brand-accent: 35 40 45; /* Black #23282D */
+
+	/* Shared Surface Tokens */
 	color-scheme: light dark;
 	--surface-base: #f5f7ff;
 	--surface-overlay: rgba(255, 255, 255, 0.92);
@@ -11,9 +16,49 @@
 	--surface-border-strong: rgba(15, 23, 42, 0.12);
 	--surface-shadow: 0 30px 80px rgba(15, 23, 42, 0.15);
 	--surface-shadow-strong: 0 25px 80px rgba(15, 23, 42, 0.2);
-	--app-backdrop: radial-gradient(circle at 10% 20%, rgba(120, 119, 198, 0.35) 0%, transparent 40%),
-		radial-gradient(circle at 90% 10%, rgba(99, 102, 241, 0.25) 0%, transparent 45%),
-		radial-gradient(circle at 15% 90%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
+
+	/* Theme-aware backdrop with brand colors */
+	--app-backdrop:
+		radial-gradient(
+			circle at 10% 20%,
+			rgba(var(--brand-primary), 0.15) 0%,
+			transparent 40%
+		),
+		radial-gradient(
+			circle at 90% 10%,
+			rgba(var(--brand-secondary), 0.12) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			circle at 15% 90%,
+			rgba(var(--brand-primary), 0.08) 0%,
+			transparent 50%
+		),
+		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
+}
+
+/* Alternative Theme: Rawkode Blue */
+:root[data-theme="rawkode-blue"] {
+	--brand-primary: 95 94 215; /* Purple #5F5ED7 */
+	--brand-secondary: 0 206 255; /* Cyan #00CEFF */
+	--brand-accent: 17 24 39; /* Dark Blue-Gray */
+
+	--app-backdrop:
+		radial-gradient(
+			circle at 10% 20%,
+			rgba(var(--brand-primary), 0.35) 0%,
+			transparent 40%
+		),
+		radial-gradient(
+			circle at 90% 10%,
+			rgba(var(--brand-secondary), 0.25) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			circle at 15% 90%,
+			rgba(var(--brand-primary), 0.18) 0%,
+			transparent 50%
+		),
 		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
 }
 
@@ -23,13 +68,26 @@ html.dark {
 	--surface-card: rgba(8, 14, 31, 0.9);
 	--surface-card-muted: rgba(148, 163, 184, 0.08);
 	--surface-border: rgba(148, 163, 184, 0.2);
-	--surface-border-strong: rgba(59, 130, 246, 0.35);
+	--surface-border-strong: rgba(var(--brand-primary), 0.35);
 	--surface-shadow: 0 35px 120px rgba(2, 6, 23, 0.65);
 	--surface-shadow-strong: 0 45px 120px rgba(2, 6, 23, 0.75);
-	--app-backdrop: radial-gradient(circle at 20% 10%, rgba(94, 96, 224, 0.4) 0%, transparent 35%),
-		radial-gradient(circle at 85% 15%, rgba(157, 78, 221, 0.35) 0%, transparent 45%),
-		radial-gradient(circle at 15% 90%, rgba(14, 165, 233, 0.25) 0%, transparent 45%),
-		linear-gradient(145deg, #020617 0%, #020b26 55%, #05080f 100%);
+
+	--app-backdrop:
+		radial-gradient(
+			circle at 20% 10%,
+			rgba(var(--brand-primary), 0.4) 0%,
+			transparent 35%
+		),
+		radial-gradient(
+			circle at 85% 15%,
+			rgba(var(--brand-secondary), 0.35) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			circle at 15% 90%,
+			rgba(var(--brand-primary), 0.25) 0%,
+			transparent 45%
+		), linear-gradient(145deg, #020617 0%, #020b26 55%, #05080f 100%);
 }
 
 body {
@@ -50,11 +108,14 @@ body::before {
 }
 
 @theme {
-	--color-primary: #5f5ed7;
-	--color-secondary: #00ceff;
-	--color-tertiary: #04b59c;
-	--color-quaternary: #85ff95;
-	--color-black: #111827;
+	/* Theme-aware colors using CSS custom properties */
+	--color-primary: rgb(var(--brand-primary));
+	--color-secondary: rgb(var(--brand-secondary));
+	--color-accent: rgb(var(--brand-accent));
+
+	/* Semantic color names */
+	--color-brand-primary: rgb(var(--brand-primary));
+	--color-brand-secondary: rgb(var(--brand-secondary));
 }
 
 @theme {
@@ -74,6 +135,7 @@ body::before {
 }
 
 @layer components {
+	/* Glass Morphism Components */
 	.glass-panel {
 		@apply border backdrop-blur-2xl;
 		border-radius: inherit;
@@ -95,6 +157,117 @@ body::before {
 		background-color: var(--surface-card-muted);
 		border: 1px solid var(--surface-border);
 		color: inherit;
+	}
+
+	/* Card Base Styles */
+	.card-base {
+		@apply bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl border border-white/40 dark:border-gray-600/50;
+	}
+
+	.card-shadow {
+		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.12);
+	}
+
+	.dark .card-shadow {
+		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+	}
+
+	.card-shadow-elevated {
+		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.18);
+	}
+
+	.dark .card-shadow-elevated {
+		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
+	}
+
+	.card-hover {
+		@apply transition-all duration-300 hover:bg-white/60 dark:hover:bg-gray-700/70 hover:scale-[1.02];
+	}
+
+	.card-hover:hover {
+		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.18);
+	}
+
+	.dark .card-hover:hover {
+		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
+	}
+
+	/* Border Utilities */
+	.border-glass {
+		@apply border border-white/40 dark:border-gray-600/50;
+	}
+
+	.border-glass-strong {
+		@apply border border-white/50 dark:border-gray-500/60;
+	}
+
+	.border-glass-subtle {
+		@apply border border-white/20 dark:border-gray-600/30;
+	}
+
+	/* Gradient Presets */
+	.bg-gradient-hero {
+		@apply bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-black;
+	}
+
+	.bg-gradient-hero-alt {
+		@apply bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800;
+	}
+
+	/* Brand gradient: Theme-aware at 45° angle */
+	.bg-gradient-primary {
+		background: linear-gradient(
+			135deg,
+			rgb(var(--brand-primary)) 0%,
+			rgb(var(--brand-secondary)) 100%
+		);
+	}
+
+	.bg-gradient-secondary {
+		background: linear-gradient(
+			135deg,
+			rgb(var(--brand-primary)) 0%,
+			rgb(var(--brand-secondary)) 100%
+		);
+	}
+
+	/* Subtle brand gradient for cards */
+	.bg-gradient-card {
+		background: linear-gradient(
+			135deg,
+			rgba(var(--brand-primary), 0.05) 0%,
+			rgba(var(--brand-secondary), 0.03) 100%
+		);
+	}
+
+	.dark .bg-gradient-card {
+		background: linear-gradient(
+			135deg,
+			rgba(var(--brand-primary), 0.1) 0%,
+			rgba(var(--brand-secondary), 0.05) 100%
+		);
+	}
+
+	/* Text Color Utilities */
+	.text-primary-content {
+		@apply text-gray-900 dark:text-white;
+	}
+
+	.text-secondary-content {
+		@apply text-gray-700 dark:text-gray-300;
+	}
+
+	.text-muted {
+		@apply text-gray-600 dark:text-gray-400;
+	}
+
+	/* Animation Utilities */
+	.transition-card {
+		@apply transition-all duration-300;
+	}
+
+	.transition-smooth {
+		@apply transition-all duration-200;
 	}
 
 	/* Prose styles for article content */

@@ -1,3 +1,3 @@
 interface Window {
-    posthog?: any;
+	posthog?: any;
 }

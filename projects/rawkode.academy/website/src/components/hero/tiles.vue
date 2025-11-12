@@ -12,7 +12,7 @@ const props = defineProps({
 						<p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">Join our community of learners exploring cloud native technologies together. We offer hands-on content designed to help everyone succeed, regardless of background or experience level. Our inclusive approach ensures that all participants can engage and grow their skills.</p>
 				<div class="mt-10 flex items-center gap-x-6">
 					<a href="#"
-						class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Get
+						class="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Get
 						started</a>
 					<a href="#" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white">Live demo <span
 							aria-hidden="true">→</span></a>
