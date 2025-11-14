@@ -4,7 +4,15 @@
       "Bash(bun astro add:*)",
       "Bash(bun add:*)",
       "Bash(bun run:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(cat:*)",
+      "Bash(bunx tsc:*)",
+      "Bash(bunx biome format:*)",
+      "Bash(npx drizzle-kit generate)",
+      "Bash(bun test:*)",
+      "Bash(bunx projen:*)",
+      "Bash(platform/emoji-reactions/package.json)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

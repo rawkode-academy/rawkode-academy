@@ -2,18 +2,22 @@ import { getCollection } from "astro:content";
 
 type TechnologyReferenceObject = { id?: string; slug?: string };
 
-function isTechnologyReferenceObject(value: unknown): value is TechnologyReferenceObject {
+function isTechnologyReferenceObject(
+	value: unknown,
+): value is TechnologyReferenceObject {
 	return (
 		typeof value === "object" &&
 		value !== null &&
-		("id" in (value as Record<string, unknown>) || "slug" in (value as Record<string, unknown>))
+		("id" in (value as Record<string, unknown>) ||
+			"slug" in (value as Record<string, unknown>))
 	);
 }
 
 function normalizeTechnologyReferences(values: unknown): string[] {
 	if (!Array.isArray(values)) return [];
 
-	const ensureRef = (value: string) => (value.endsWith("/index") ? value : `${value}/index`);
+	const ensureRef = (value: string) =>
+		value.endsWith("/index") ? value : `${value}/index`;
 
 	return values
 		.map((value) => {
@@ -43,8 +47,10 @@ export async function getVideosForTechnology(technologyId: string) {
 		});
 
 		// Sort by published date, most recent first
-		const sortedVideos = allVideos.sort((a, b) =>
-			new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime()
+		const sortedVideos = allVideos.sort(
+			(a, b) =>
+				new Date(b.data.publishedAt).getTime() -
+				new Date(a.data.publishedAt).getTime(),
 		);
 
 		// Map to the expected format
@@ -55,7 +61,10 @@ export async function getVideosForTechnology(technologyId: string) {
 			slug: video.data.slug,
 		}));
 	} catch (error) {
-		console.warn(`Failed to fetch videos for technology ${technologyId}:`, error);
+		console.warn(
+			`Failed to fetch videos for technology ${technologyId}:`,
+			error,
+		);
 		return [];
 	}
 }

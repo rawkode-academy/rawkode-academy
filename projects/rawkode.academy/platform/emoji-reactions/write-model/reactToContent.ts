@@ -15,6 +15,7 @@ type Params = {
 
 export class ReactToContentWorkflow extends WorkflowEntrypoint<Env, Params> {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
+		// Persist the reaction to D1
 		await step.do('persistReactionToD1', async () => {
 			const { contentId, personId, emoji, contentTimestamp } = event.payload;
 			const db = drizzle(this.env.DB);
@@ -29,6 +30,7 @@ export class ReactToContentWorkflow extends WorkflowEntrypoint<Env, Params> {
 					contentTimestamp: contentTimestamp ?? 0,
 				});
 
+			console.log(`Persisted reaction: ${personId} reacted with ${emoji} to ${contentId}`);
 			return { success: true };
 		});
 	}

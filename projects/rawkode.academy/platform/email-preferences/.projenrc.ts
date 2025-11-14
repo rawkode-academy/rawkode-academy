@@ -2,8 +2,9 @@ import { PlatformService } from "../../generators/projen-platform-service/src/";
 
 const project = new PlatformService({
 	serviceName: "email-preferences",
-	databaseId: "44d635de-dd0d-4ca1-bf51-b8f4e39a9388",
+	databaseId: "d1e7b151-f20f-4470-8c84-266fcb76e84f",
 	includeWriteModel: false,
+	includeRpcModel: true,
 });
 
 project.synth();

@@ -1,7 +1,17 @@
 import { defineMiddleware } from "astro:middleware";
-import { Zitadel } from "@/lib/zitadel/index.ts";
+import { createBetterAuthClient } from "@/lib/auth/better-auth-client.ts";
 
-export const authMiddleware = defineMiddleware((context, next) => {
+export const authMiddleware = defineMiddleware(async (context, next) => {
+	const { pathname } = context.url;
+	if (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-out")) {
+		const authService = context.locals.runtime?.env?.AUTH_SERVICE;
+		if (!authService) {
+			console.error("AUTH_SERVICE not available");
+			return new Response("Auth service not configured", { status: 500 });
+		}
+		return authService.fetch(context.request);
+	}
+
 	if (context.isPrerendered) {
 		// The runtime isn't available for pre-rendered pages and we
 		// only want this middleware to run for SSR.
@@ -9,33 +19,45 @@ export const authMiddleware = defineMiddleware((context, next) => {
 		return next();
 	}
 
-	if (context.request.url.endsWith("/api/auth/sign-out")) {
-		// Don't run on sign-out page 😂
-		console.debug("Sign-out page, skipping auth middleware");
+	try {
+		// Access the AUTH_SERVICE binding from the runtime environment
+		const authService = context.locals.runtime?.env?.AUTH_SERVICE;
+
+		if (!authService) {
+			console.warn(
+				"AUTH_SERVICE binding not available in runtime environment. Continuing without authentication.",
+			);
+			return next();
+		}
+
+		// Create Better Auth client with header forwarding
+		const authClient = createBetterAuthClient(authService, {
+			getHeaders: () => context.request.headers,
+		});
+
+		// Verify the session
+		const { data, error } = await authClient.getSession();
+
+		if (error) {
+			console.debug("Session verification error:", error);
+			return next();
+		}
+
+		if (data?.user) {
+			// Set authenticated user in context
+			const authenticatedUser = {
+				...data.user,
+				image: data.user.image ?? null,
+				// Temporary shim: expose Better Auth user ID via legacy `sub` field until consumers migrate.
+				sub: data.user.id,
+			};
+			context.locals.user = authenticatedUser;
+		}
+
+		return next();
+	} catch (error) {
+		// Log error but don't block the request
+		console.error("Auth middleware error:", error);
 		return next();
 	}
-
-	const accessToken = context.cookies.get("accessToken");
-	if (!accessToken) {
-		console.debug("No access token, skipping middleware");
-		return next();
-	}
-
-	const idTokenCookie = context.cookies.get("idToken");
-	const idToken = idTokenCookie?.value;
-	const refreshTokenCookie = context.cookies.get("refreshToken");
-	const refreshToken = refreshTokenCookie?.value;
-
-	const zitadel = new Zitadel();
-
-	const user = zitadel.fetchUser(accessToken.value, idToken, refreshToken);
-
-	if (!user) {
-		// Couldn't get a user, let's log them out
-		console.debug("No user, redirecting to sign-out");
-		return context.redirect("/api/auth/sign-out");
-	}
-
-	context.locals.user = user;
-	return next();
 });

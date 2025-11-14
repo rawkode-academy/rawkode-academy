@@ -1,9 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import {
-	captureServerEvent,
-	getAnonDistinctIdFromCookies,
-} from "../server/posthog";
+import { captureServerEvent, getDistinctId } from "../server/posthog";
 
 const ShareEventSchema = z.object({
 	action: z.enum(["share"]),
@@ -19,10 +16,7 @@ export const trackShareEvent = defineAction({
 		try {
 			console.log("Share event received:", event);
 
-			const distinctId =
-				ctx.locals.user?.sub ||
-				(ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) ||
-				undefined;
+			const distinctId = getDistinctId(ctx);
 
 			await captureServerEvent({
 				event: "share",

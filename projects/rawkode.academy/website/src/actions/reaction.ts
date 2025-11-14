@@ -1,9 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import {
-	captureServerEvent,
-	getAnonDistinctIdFromCookies,
-} from "../server/posthog";
+import { captureServerEvent, getDistinctId } from "../server/posthog";
 
 const ReactionSchema = z.object({
 	contentId: z.string(),
@@ -21,15 +18,6 @@ export const addReaction = defineAction({
 				throw new ActionError({
 					code: "UNAUTHORIZED",
 					message: "You must be signed in to react to content",
-				});
-			}
-
-			// Get the access token from cookies
-			const accessToken = ctx.cookies.get("accessToken");
-			if (!accessToken) {
-				throw new ActionError({
-					code: "UNAUTHORIZED",
-					message: "Missing access token",
 				});
 			}
 
@@ -51,16 +39,20 @@ export const addReaction = defineAction({
 			}
 
 			// Call the emoji reactions service via service binding
+			// NOTE: personId uses Better Auth's user.id (UUID format). The emoji-reactions service
+			// automatically resolves this to the canonical user ID, handling both legacy Zitadel subject IDs
+			// and new Better Auth UUIDs transparently. Service binding requests are internal
+			// (no Origin/Authorization headers), so the emoji-reactions service skips auth validation.
+			// See platform/emoji-reactions/IDENTITY_MIGRATION.md for details on identity continuity.
 			const response = await runtime.env.EMOJI_REACTIONS.fetch(
 				new Request("https://emoji-reactions.internal/", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						Authorization: `Bearer ${accessToken.value}`, // Pass the JWT token
 					},
 					body: JSON.stringify({
 						contentId,
-						personId: user.sub,
+						personId: user.id,
 						emoji,
 						contentTimestamp: contentTimestamp ?? 0,
 					}),
@@ -78,10 +70,7 @@ export const addReaction = defineAction({
 			const result = (await response.json()) as Record<string, unknown>;
 
 			// Track the reaction event
-			const distinctId =
-				user.sub ||
-				(ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) ||
-				undefined;
+			const distinctId = getDistinctId(ctx);
 			await captureServerEvent({
 				event: "reaction_add",
 				distinctId,
@@ -110,18 +99,12 @@ export const removeReaction = defineAction({
 	input: ReactionSchema,
 	handler: async ({ contentId, emoji }, ctx) => {
 		// Track the reaction removal event
-		const user = ctx.locals.user;
-		if (user) {
-			const distinctId =
-				user.sub ||
-				(ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) ||
-				undefined;
-			await captureServerEvent({
-				event: "reaction_remove",
-				distinctId,
-				properties: { content_id: contentId, emoji },
-			});
-		}
+		const distinctId = getDistinctId(ctx);
+		await captureServerEvent({
+			event: "reaction_remove",
+			distinctId,
+			properties: { content_id: contentId, emoji },
+		});
 
 		// For now, just return success - removal can be implemented later
 		// when the write model supports it

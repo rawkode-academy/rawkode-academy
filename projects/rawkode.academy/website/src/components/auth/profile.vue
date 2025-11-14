@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OidcStandardClaims } from "oidc-client-ts";
+import type { BetterAuthUser } from "../../lib/auth/better-auth-client";
 import { ref, onMounted, onUnmounted } from "vue";
 import Avatar from "vue-boring-avatars";
 
@@ -8,7 +8,7 @@ const dropdownRef = ref<HTMLDivElement>();
 const buttonRef = ref<HTMLButtonElement>();
 
 defineProps<{
-	user: OidcStandardClaims;
+	user: BetterAuthUser;
 }>();
 
 const toggleDropdown = () => {
@@ -44,7 +44,7 @@ onUnmounted(() => {
 			:aria-expanded="dropdownOpen"
 			@click="toggleDropdown">
 			<span class="sr-only">Open user menu</span>
-			<img v-if="user.picture" class="w-8 h-8 rounded-full" :src="user.picture" :alt="`Profile picture for ${user.name || 'user'}`" loading="lazy" />
+			<img v-if="user.image" class="w-8 h-8 rounded-full" :src="user.image" :alt="`Profile picture for ${user.name || 'user'}`" loading="lazy" />
 			<Avatar v-else class="w-8 h-8 rounded-full" :name="user.name || ''" variant="pixel" />
 		</button>
 		<div
@@ -59,14 +59,7 @@ onUnmounted(() => {
 			</div>
 			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="userProfileButton">
 				<li>
-					<a target="_blank" href="https://zitadel.rawkode.academy"
-						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">My
-						Profile</a>
-				</li>
-			</ul>
-			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="userProfileButton">
-				<li>
-					<a href="/api/auth/sign-out"
+					<a href="/sign-out"
 						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign
 						out</a>
 				</li>

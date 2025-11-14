@@ -23,7 +23,9 @@ export async function GET(context: APIContext) {
 		getCollection("technologies"),
 	]);
 
-	const techName = new Map(technologies.map((t) => [t.id, t.data.name] as const));
+	const techName = new Map(
+		technologies.map((t) => [t.id, t.data.name] as const),
+	);
 
 	const site = context.site?.toString() || "https://rawkode.academy";
 	const feedUrl = `${site}/api/feeds/all.atom`;
@@ -55,23 +57,25 @@ export async function GET(context: APIContext) {
 		}),
 	);
 
-// Add videos
-videos.forEach((video) => {
-  const entry: AtomEntry = {
-    title: video.data.title,
-    description: video.data.description,
-    url: `${site}/watch/${video.data.slug}/`,
-    published: new Date(video.data.publishedAt).toISOString(),
-    updated: new Date(video.data.publishedAt).toISOString(),
-    categories: (video.data.technologies as string[]).map((id) => techName.get(id) || id),
-    thumbnail: `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`,
-    type: "video",
-  };
-  if (typeof video.data.duration === "number") {
-    entry.duration = video.data.duration;
-  }
-  entries.push(entry);
-});
+	// Add videos
+	videos.forEach((video) => {
+		const entry: AtomEntry = {
+			title: video.data.title,
+			description: video.data.description,
+			url: `${site}/watch/${video.data.slug}/`,
+			published: new Date(video.data.publishedAt).toISOString(),
+			updated: new Date(video.data.publishedAt).toISOString(),
+			categories: (video.data.technologies as string[]).map(
+				(id) => techName.get(id) || id,
+			),
+			thumbnail: `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`,
+			type: "video",
+		};
+		if (typeof video.data.duration === "number") {
+			entry.duration = video.data.duration;
+		}
+		entries.push(entry);
+	});
 
 	// Sort all entries by published date desc
 	entries.sort(

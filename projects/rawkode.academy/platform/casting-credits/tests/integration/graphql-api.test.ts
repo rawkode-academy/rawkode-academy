@@ -1,25 +1,35 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { env } from "cloudflare:test";
 import { createYoga } from "graphql-yoga";
 import * as schema from "../../data-model/schema";
 import { getSchema } from "../../read-model/schema";
 import { drizzle } from "drizzle-orm/d1";
 
-declare const env: { DB: D1Database };
-
 /**
  * GraphQL API Integration Tests
  *
  * These tests verify that our GraphQL API works correctly with a real database.
- * We use Miniflare to simulate Cloudflare Workers environment.
+ * We use cloudflare:test to simulate Cloudflare Workers environment.
  */
 describe("GraphQL API Integration", () => {
 	let yoga: ReturnType<typeof createYoga>;
+	let db: ReturnType<typeof drizzle>;
 
 	beforeEach(async () => {
-		const db = drizzle(env.DB);
+		// Use cloudflare:test D1 stub
+		const d1 = env.DB;
+		db = drizzle(d1, { schema });
 
-		// Clear existing data first
-		await db.delete(schema.castingCreditsTable);
+		// Create the table using D1 exec
+		await d1.exec(`
+			CREATE TABLE IF NOT EXISTS casting_credits (
+				person_id TEXT NOT NULL,
+				role TEXT NOT NULL,
+				video_id TEXT NOT NULL,
+				created_at INTEGER DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+				PRIMARY KEY (person_id, role, video_id)
+			);
+		`);
 
 		// Seed test data
 		await db.insert(schema.castingCreditsTable).values([
@@ -31,7 +41,7 @@ describe("GraphQL API Integration", () => {
 
 		// Create the yoga server
 		yoga = createYoga({
-			schema: getSchema(env),
+			schema: getSchema({ DB: d1 } as any),
 			graphqlEndpoint: "/",
 		});
 	});
@@ -124,7 +134,6 @@ describe("GraphQL API Integration", () => {
 	});
 
 	it("should resolve Video.creditsForRole field with multiple results", async () => {
-		const db = drizzle(env.DB);
 		// Add another host for video1
 		await db.insert(schema.castingCreditsTable).values({
 			personId: "person4",

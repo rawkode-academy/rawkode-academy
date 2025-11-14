@@ -29,7 +29,9 @@ export class PlatformService extends Project {
 		this.tasks.tryFind("default")?.reset("bun run .projenrc.ts");
 
 		this.options = {
+			includeReadModel: true,
 			includeWriteModel: false,
+			includeRpcModel: false,
 			additionalDependencies: {},
 			additionalDevDependencies: {},
 			...options,
@@ -37,23 +39,31 @@ export class PlatformService extends Project {
 
 		// Initialize dependencies
 		this.dependencies = {
-			"@apollo/subgraph": "^2.10.2",
-			"@graphql-tools/utils": "^10.8.6",
 			"@paralleldrive/cuid2": "^2.2.2",
-			"@pothos/core": "^4.6.0",
-			"@pothos/plugin-directives": "^4.2.0",
-			"@pothos/plugin-drizzle": "^0.8.1",
-			"@pothos/plugin-federation": "^4.3.2",
 			"@sindresorhus/slugify": "^2.2.1",
 			"drizzle-kit": "^0.30.6",
 			"drizzle-orm": "^0.38.4",
 			"drizzle-zod": "^0.6.1",
-			graphql: "^16.10.0",
-			"graphql-scalars": "^1.24.2",
-			"graphql-yoga": "^5.13.4",
 			zod: "^3.24.3",
-			...this.options.additionalDependencies,
 		};
+
+		// Add GraphQL dependencies if read model is included
+		if (this.options.includeReadModel) {
+			Object.assign(this.dependencies, {
+				"@apollo/subgraph": "^2.10.2",
+				"@graphql-tools/utils": "^10.8.6",
+				"@pothos/core": "^4.6.0",
+				"@pothos/plugin-directives": "^4.2.0",
+				"@pothos/plugin-drizzle": "^0.8.1",
+				"@pothos/plugin-federation": "^4.3.2",
+				graphql: "^16.10.0",
+				"graphql-scalars": "^1.24.2",
+				"graphql-yoga": "^5.13.4",
+			});
+		}
+
+		// Add additional dependencies last to allow overrides
+		Object.assign(this.dependencies, this.options.additionalDependencies);
 
 		this.devDependencies = {
 			"@biomejs/biome": "^1.9.4",
@@ -67,10 +77,12 @@ export class PlatformService extends Project {
 
 		new DataModel(this);
 
-		new ReadModel(this, {
-			serviceName: this.options.serviceName,
-			databaseId: this.options.databaseId,
-		});
+		if (this.options.includeReadModel) {
+			new ReadModel(this, {
+				serviceName: this.options.serviceName,
+				databaseId: this.options.databaseId,
+			});
+		}
 
 		if (this.options.includeWriteModel) {
 			new WriteModel(this, {
@@ -78,6 +90,9 @@ export class PlatformService extends Project {
 				workflows: [],
 			});
 		}
+
+		// TODO: Add RpcModel component for includeRpcModel
+		// For now, RPC models need to be manually created in the rpc/ directory
 
 		this.createReadme();
 		this.createPackageJson();

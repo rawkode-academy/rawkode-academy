@@ -1,0 +1,54 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "package.json",
+        "knip.json",
+        "devenv.yaml",
+        "devenv.nix",
+        "env.cue",
+        "config/**/*.ts",
+        "tsconfig.json"
+      ]
+    },
+    "projects/rawkode.academy/website": {
+      "entry": [
+        "astro.config.mts",
+        "scripts/*.ts",
+        ".storybook/main.ts"
+      ],
+      "ignore": [
+        "content/**/examples/**"
+      ]
+    },
+    "dagger/*": {
+      "entry": [
+        "src/index.ts"
+      ]
+    },
+    "projects/rawkode.academy/platform/*": {
+      "entry": [
+        "rpc/main.ts",
+        "rpc/*.ts",
+        "data-model/schema.ts",
+        "read-model/**/*.ts"
+      ],
+      "ignore": [
+        ".projen/**"
+      ]
+    }
+  },
+  "astro": true,
+  "vitest": true,
+  "storybook": true,
+  "graphql-codegen": true,
+  "typescript": true,
+  "ignore": [
+    "**/dist/**",
+    "**/.astro/**",
+    "**/.dagger/**",
+    "**/node_modules/**",
+    "**/*.generated.*"
+  ]
+}

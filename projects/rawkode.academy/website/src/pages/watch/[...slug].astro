@@ -21,10 +21,9 @@ let video: (typeof videos)[0] | undefined = videos.find(
 	(v) => v.data.slug === slug,
 );
 
-
 // Handle 404 case if still not found
 if (!video) {
-    return Astro.redirect("/404");
+	return Astro.redirect("/404");
 }
 
 // Set cache headers for ISR
@@ -57,7 +56,8 @@ const renderedDescriptionHtml = marked.parse(processedDescription);
 
 // Fetch chapters for key moments (clips) JSON-LD
 type Chapter = { startTime: number; title: string };
-let clips: Array<{ name: string; startOffset: number; endOffset?: number }> = [];
+let clips: Array<{ name: string; startOffset: number; endOffset?: number }> =
+	[];
 const durationSec: number | null =
 	typeof video.data.duration === "number" ? video.data.duration : null;
 
@@ -65,7 +65,7 @@ const chapterSource: Chapter[] = Array.isArray(video.data.chapters)
 	? (video.data.chapters as Chapter[]).map((c) => ({
 			title: c.title,
 			startTime: Math.max(0, Math.floor(c?.startTime ?? 0)),
-	  }))
+		}))
 	: [];
 
 if (chapterSource.length > 0) {
@@ -92,28 +92,39 @@ const formatDate = (date: Date | string) => {
 
 // Resolve referenced show and technologies
 const showRef = video.data.show;
-const showId = typeof showRef === "string" ? showRef : (showRef && typeof showRef === "object" && "id" in showRef ? (showRef as {id: string}).id : null);
+const showId =
+	typeof showRef === "string"
+		? showRef
+		: showRef && typeof showRef === "object" && "id" in showRef
+			? (showRef as { id: string }).id
+			: null;
 const showEntry = showId ? await getEntry("shows", showId) : null;
 const techEntries = Array.isArray(video.data.technologies)
-  ? (await Promise.all(
-      (video.data.technologies as string[]).map(async (id) => {
-        try { return await getEntry("technologies", id); } catch { return null; }
-      }),
-    )).filter((t): t is NonNullable<typeof t> => Boolean(t))
-  : [];
+	? (
+			await Promise.all(
+				(video.data.technologies as string[]).map(async (id) => {
+					try {
+						return await getEntry("technologies", id);
+					} catch {
+						return null;
+					}
+				}),
+			)
+		).filter((t): t is NonNullable<typeof t> => Boolean(t))
+	: [];
 
 const breadcrumbElements = showEntry
-        ? [
-                  { title: "Home", link: "/" },
-                  { title: "Videos", link: "/watch" },
-                  { title: showEntry.data.name, link: `/shows/${showEntry.id}` },
-                  { title: video.data.title, link: `/watch/${video.data.slug}` },
-          ]
-        : [
-                  { title: "Home", link: "/" },
-                  { title: "Videos", link: "/watch" },
-                  { title: video.data.title, link: `/watch/${video.data.slug}` },
-          ];
+	? [
+			{ title: "Home", link: "/" },
+			{ title: "Videos", link: "/watch" },
+			{ title: showEntry.data.name, link: `/shows/${showEntry.id}` },
+			{ title: video.data.title, link: `/watch/${video.data.slug}` },
+		]
+	: [
+			{ title: "Home", link: "/" },
+			{ title: "Videos", link: "/watch" },
+			{ title: video.data.title, link: `/watch/${video.data.slug}` },
+		];
 
 const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/stream.m3u8`;

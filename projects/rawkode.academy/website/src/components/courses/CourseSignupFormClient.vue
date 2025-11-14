@@ -3,8 +3,19 @@
     <H2Highlight title="Stay Updated" highlightWords="Updated" />
 
     <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+      <!-- Checking Subscription -->
+      <div v-if="checkingSubscription" class="text-center py-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-6">
+          <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        <p class="text-lg text-gray-700 dark:text-gray-300">Checking subscription status...</p>
+      </div>
+
       <!-- Already Subscribed -->
-      <div v-if="isAlreadySubscribed" class="text-center py-8">
+      <div v-else-if="isAlreadySubscribed" class="text-center py-8">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 dark:bg-primary/20 mb-6">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary dark:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -90,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { actions } from "astro:actions";
 import H2Highlight from "@/components/title/h2-highlight.vue";
 
@@ -103,6 +114,7 @@ interface Props {
 	allowSponsorContact: boolean;
 	userEmail?: string | undefined;
 	isAlreadySubscribed?: boolean | undefined;
+	deferSubscriptionCheck?: boolean | undefined;
 }
 
 const props = defineProps<Props>();
@@ -113,10 +125,33 @@ const submitting = ref(false);
 const submitted = ref(false);
 const error = ref("");
 const successMessage = ref("");
+const isAlreadySubscribed = ref(props.isAlreadySubscribed ?? false);
+const checkingSubscription = ref(false);
 
 const disclaimer = props.sponsor
 	? "By signing up, you agree to receive course updates and notifications."
 	: null;
+
+// Optionally check subscription status on mount if deferred
+onMounted(async () => {
+	if (props.deferSubscriptionCheck && props.isAlreadySubscribed === undefined) {
+		checkingSubscription.value = true;
+		try {
+			const response = await fetch(
+				`/api/subscriptions/check?audienceId=${encodeURIComponent(props.audienceId)}`,
+			);
+			if (response.ok) {
+				const data = await response.json();
+				isAlreadySubscribed.value = data.isSubscribed;
+			}
+		} catch (err) {
+			// Silently fail - user can still subscribe if check fails
+			console.error("Failed to check subscription status:", err);
+		} finally {
+			checkingSubscription.value = false;
+		}
+	}
+});
 
 async function submitForm() {
 	error.value = "";

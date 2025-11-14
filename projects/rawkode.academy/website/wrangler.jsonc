@@ -29,10 +29,10 @@
 		{
 			"binding": "EMOJI_REACTIONS",
 			"service": "platform-emoji-reactions-write-model"
+		},
+		{
+			"binding": "AUTH_SERVICE",
+			"service": "platform-authentication-rpc"
 		}
-	],
-	"vars": {
-		"ZITADEL_CLIENT_ID": "293097955970320066",
-		"ZITADEL_URL": "https://zitadel.rawkode.academy"
-	}
+	]
 }

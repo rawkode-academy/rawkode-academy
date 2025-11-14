@@ -62,7 +62,7 @@ try {
 } catch (error) {
 	console.error("Failed to fetch reactions:", error);
 }
-const isAuthenticated = Astro.cookies.has("accessToken");
+const isAuthenticated = !!Astro.locals.user;
 ---
 
 <div
@@ -204,7 +204,7 @@ const isAuthenticated = Astro.cookies.has("accessToken");
 
 				// Handle authentication errors
 				if (error.code === "UNAUTHORIZED") {
-					window.location.href = "/api/auth/sign-in";
+					window.location.href = "/sign-in/github";
 				}
 			}
 		} catch {

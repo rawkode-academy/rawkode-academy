@@ -1,5 +1,6 @@
 ---
 import CourseSignupFormCompactVue from "./CourseSignupFormCompact.vue";
+import { isSubscribedToAudience } from "@/server/subscriptions";
 
 export const partial = true;
 
@@ -13,7 +14,8 @@ type Props = {
 		allowSponsorContact: boolean;
 	};
 	userEmail?: string | undefined;
-	isAlreadySubscribed: boolean;
+	isAlreadySubscribed?: boolean | undefined;
+	deferSubscriptionCheck?: boolean | undefined;
 };
 
 const {
@@ -22,48 +24,24 @@ const {
 	signupConfig,
 	userEmail,
 	isAlreadySubscribed: propsIsAlreadySubscribed,
+	deferSubscriptionCheck = false,
 } = Astro.props;
 const user = Astro.locals?.user;
 
 const { audienceId, sponsor, sponsorAudienceId, allowSponsorContact } =
 	signupConfig;
 
-// Check if user is already subscribed
+// If deferred, don't check on server - let client handle it
+// Short-circuit: if parent already determined user is subscribed, skip expensive checks
 let isAlreadySubscribed = propsIsAlreadySubscribed;
 
-// Check session for anonymous users who have already signed up
-let sessionEmail: string | undefined;
-if (Astro.session) {
-	const signedUpCourses = (await Astro.session.get("signedUpCourses")) || {};
-	sessionEmail = signedUpCourses[audienceId];
-}
-
-if (sessionEmail && !user) {
-	// Anonymous user who already signed up in this session
-	isAlreadySubscribed = true;
-} else if (user?.email) {
-	// Check if authenticated user is already subscribed
-	try {
-		const { getSecret } = await import("astro:env/server");
-		const { Resend } = await import("resend");
-		const resendApiKey =
-			getSecret("RESEND_API_KEY") || process.env.RESEND_API_KEY;
-
-		if (resendApiKey) {
-			const resend = new Resend(resendApiKey);
-			try {
-				const contact = await resend.contacts.get({
-					email: user.email,
-					audienceId: audienceId,
-				});
-				isAlreadySubscribed = contact.data !== null;
-			} catch (error) {
-				// Contact not found or other error - they're not subscribed
-			}
-		}
-	} catch (error) {
-		// Error checking subscription status
-	}
+if (!deferSubscriptionCheck && !isAlreadySubscribed) {
+	// Only perform subscription check if not deferred and not already known to be subscribed
+	isAlreadySubscribed = await isSubscribedToAudience(
+		audienceId,
+		user?.email,
+		Astro.session,
+	);
 }
 ---
 
@@ -73,5 +51,6 @@ if (sessionEmail && !user) {
 	signupConfig={{ audienceId, allowSponsorContact, ...(sponsor && { sponsor }), ...(sponsorAudienceId && { sponsorAudienceId }) }}
 	userEmail={userEmail || user?.email}
 	isAlreadySubscribed={isAlreadySubscribed}
+	deferSubscriptionCheck={deferSubscriptionCheck}
 	client:load
 />

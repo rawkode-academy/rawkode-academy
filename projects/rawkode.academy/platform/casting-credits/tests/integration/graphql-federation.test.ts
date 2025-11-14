@@ -1,19 +1,29 @@
 import { describe, it, expect, beforeEach } from "bun:test";
+import { env } from "cloudflare:test";
 import { createYoga } from "graphql-yoga";
 import * as schema from "../../data-model/schema";
 import { getSchema } from "../../read-model/schema";
 import { drizzle } from "drizzle-orm/d1";
 
-declare const env: { DB: D1Database };
-
 describe("GraphQL Federation Features", () => {
 	let yoga: ReturnType<typeof createYoga>;
+	let db: ReturnType<typeof drizzle>;
 
 	beforeEach(async () => {
-		const db = drizzle(env.DB);
+		// Use cloudflare:test D1 stub
+		const d1 = env.DB;
+		db = drizzle(d1, { schema });
 
-		// Clear existing data
-		await db.delete(schema.castingCreditsTable);
+		// Create the table using D1 exec
+		await d1.exec(`
+			CREATE TABLE IF NOT EXISTS casting_credits (
+				person_id TEXT NOT NULL,
+				role TEXT NOT NULL,
+				video_id TEXT NOT NULL,
+				created_at INTEGER DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+				PRIMARY KEY (person_id, role, video_id)
+			);
+		`);
 
 		// Seed test data
 		await db.insert(schema.castingCreditsTable).values([
@@ -26,7 +36,7 @@ describe("GraphQL Federation Features", () => {
 
 		// Create the yoga server
 		yoga = createYoga({
-			schema: getSchema(env),
+			schema: getSchema({ DB: d1 } as any),
 			graphqlEndpoint: "/",
 		});
 	});
@@ -206,7 +216,6 @@ describe("GraphQL Federation Features", () => {
 
 		it("should handle batch entity resolution", async () => {
 			// Create more test data
-			const db = drizzle(env.DB);
 			const videoIds = Array.from({ length: 10 }, (_, i) => `video${i + 10}`);
 			await db.insert(schema.castingCreditsTable).values(
 				videoIds.map((videoId) => ({
@@ -339,8 +348,6 @@ describe("GraphQL Federation Features", () => {
 	describe("Performance Characteristics", () => {
 		it("should handle large result sets", async () => {
 			// Add many credits for one video
-			const db = drizzle(env.DB);
-
 			// D1 has a limit on SQL variables, batch the inserts
 			const batchSize = 30;
 			for (let i = 0; i < 100; i += batchSize) {

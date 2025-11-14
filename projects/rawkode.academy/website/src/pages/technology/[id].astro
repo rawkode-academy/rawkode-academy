@@ -24,12 +24,14 @@ export interface Technology {
 	documentation?: string | undefined;
 	website?: string | undefined;
 	logo?: string | undefined;
-	videos?: {
-		id: string;
-		title: string;
-		thumbnailUrl: string;
-		slug: string;
-	}[] | undefined;
+	videos?:
+		| {
+				id: string;
+				title: string;
+				thumbnailUrl: string;
+				slug: string;
+		  }[]
+		| undefined;
 }
 
 // Fetch all technologies to generate static paths
@@ -38,28 +40,33 @@ export const getStaticPaths = (async () => {
 	try {
 		const items = await getCollection("technologies");
 		if (items.length > 0) {
-			return Promise.all(items.map(async (e) => {
-				const icon = (e as any).data.icon;
-				const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
-				const videos = await getVideosForTechnology(e.id);
-				return {
-					params: { id: e.id },
-					props: {
-						technology: {
-							id: e.id,
-							name: e.data.name,
-							description: e.data.description,
-							documentation: e.data.documentation,
-							website: e.data.website,
-							logo,
-							videos,
-						} as Technology,
-					},
-				};
-			}));
+			return Promise.all(
+				items.map(async (e) => {
+					const icon = (e as any).data.icon;
+					const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
+					const videos = await getVideosForTechnology(e.id);
+					return {
+						params: { id: e.id },
+						props: {
+							technology: {
+								id: e.id,
+								name: e.data.name,
+								description: e.data.description,
+								documentation: e.data.documentation,
+								website: e.data.website,
+								logo,
+								videos,
+							} as Technology,
+						},
+					};
+				}),
+			);
 		}
 	} catch (error) {
-		console.warn("getCollection('technologies') failed; falling back to FS glob:", error);
+		console.warn(
+			"getCollection('technologies') failed; falling back to FS glob:",
+			error,
+		);
 	}
 
 	// Fallback: scan MDX files directly and parse frontmatter
@@ -92,7 +99,9 @@ export const getStaticPaths = (async () => {
 							technology: {
 								id,
 								name: fm.name ?? id,
-								description: (typeof fm.description === 'string' ? fm.description : '') ?? '',
+								description:
+									(typeof fm.description === "string" ? fm.description : "") ??
+									"",
 								documentation: fm.documentation,
 								website: fm.website,
 								logo,
@@ -102,58 +111,68 @@ export const getStaticPaths = (async () => {
 					};
 				} catch {
 					const videos = await getVideosForTechnology(id);
-					return { params: { id }, props: { technology: { id, name: id, description: '', videos } as Technology } };
+					return {
+						params: { id },
+						props: {
+							technology: {
+								id,
+								name: id,
+								description: "",
+								videos,
+							} as Technology,
+						},
+					};
 				}
 			}),
 		);
 	} catch (error) {
-		console.error('FS fallback for technologies failed:', error);
+		console.error("FS fallback for technologies failed:", error);
 		return [];
 	}
 }) satisfies GetStaticPaths;
 
 let { technology } = Astro.props as { technology?: Technology };
 if (!technology) {
-  try {
-    const id = Astro.params.id as string;
-    const items = await getCollection("technologies");
-    const e = items.find((x) => x.id === id);
-    if (e) {
-      const icon = (e as any).data.icon;
-      const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
-      const videos = await getVideosForTechnology(e.id);
-      technology = {
-        id: e.id,
-        name: e.data.name,
-        description: e.data.description,
-        documentation: e.data.documentation,
-        website: e.data.website,
-        logo,
-        videos,
-      };
-    } else {
-      const base = resolveTechnologiesDataDir();
-      const raw = await readFile(join(base, `${id}.mdx`), "utf8");
-      const fm = matter(raw).data as any;
-      const logo = resolveTechnologyIconUrl(id, fm.icon) ?? undefined;
-      const videos = await getVideosForTechnology(id);
-      technology = {
-        id,
-        name: fm.name ?? id,
-        description: typeof fm.description === "string" ? fm.description : "",
-        documentation: fm.documentation,
-        website: fm.website,
-        logo,
-        videos,
-      };
-    }
-  } catch (err) {
-    console.error("Failed to load technology at runtime:", err);
-  }
+	try {
+		const id = Astro.params.id as string;
+		const items = await getCollection("technologies");
+		const e = items.find((x) => x.id === id);
+		if (e) {
+			const icon = (e as any).data.icon;
+			const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
+			const videos = await getVideosForTechnology(e.id);
+			technology = {
+				id: e.id,
+				name: e.data.name,
+				description: e.data.description,
+				documentation: e.data.documentation,
+				website: e.data.website,
+				logo,
+				videos,
+			};
+		} else {
+			const base = resolveTechnologiesDataDir();
+			const raw = await readFile(join(base, `${id}.mdx`), "utf8");
+			const fm = matter(raw).data as any;
+			const logo = resolveTechnologyIconUrl(id, fm.icon) ?? undefined;
+			const videos = await getVideosForTechnology(id);
+			technology = {
+				id,
+				name: fm.name ?? id,
+				description: typeof fm.description === "string" ? fm.description : "",
+				documentation: fm.documentation,
+				website: fm.website,
+				logo,
+				videos,
+			};
+		}
+	} catch (err) {
+		console.error("Failed to load technology at runtime:", err);
+	}
 }
 
 if (!technology) {
-  return Astro.redirect('/technology');
+	return Astro.redirect("/technology");
 }
 
 const placeholderLogo = "/apple-touch-icon.png"; // Define a placeholder

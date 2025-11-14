@@ -43,7 +43,9 @@ function escapeXml(unsafe: string): string {
 export const GET: APIRoute = async ({ site }) => {
 	const videos = await getCollection("videos");
 	const technologies = await getCollection("technologies");
-	const techName = new Map(technologies.map((t) => [t.id, t.data.name] as const));
+	const techName = new Map(
+		technologies.map((t) => [t.id, t.data.name] as const),
+	);
 
 	// Sort videos by publishedAt date (newest first)
 	const sortedVideos = videos.sort((a, b) => {
@@ -61,9 +63,7 @@ ${sortedVideos
 		const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
 		const contentUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/stream.m3u8`;
 		const durationSeconds =
-			typeof video.data.duration === "number"
-				? video.data.duration
-				: 0;
+			typeof video.data.duration === "number" ? video.data.duration : 0;
 		const duration = formatDuration(durationSeconds);
 		const publishedDate = new Date(video.data.publishedAt).toISOString();
 

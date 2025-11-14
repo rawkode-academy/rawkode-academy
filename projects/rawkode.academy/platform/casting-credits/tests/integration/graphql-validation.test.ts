@@ -1,24 +1,36 @@
 import { describe, it, expect, beforeEach } from "bun:test";
+import { env } from "cloudflare:test";
 import { createYoga } from "graphql-yoga";
 import * as schema from "../../data-model/schema";
 import { getSchema } from "../../read-model/schema";
 import { drizzle } from "drizzle-orm/d1";
 
-declare const env: { DB: D1Database };
-
 describe("GraphQL Input Validation and Error Handling", () => {
 	let yoga: ReturnType<typeof createYoga>;
+	let db: ReturnType<typeof drizzle>;
 
 	beforeEach(async () => {
-		const db = drizzle(env.DB);
-		await db.delete(schema.castingCreditsTable);
+		// Use cloudflare:test D1 stub
+		const d1 = env.DB;
+		db = drizzle(d1, { schema });
+
+		// Create the table using D1 exec
+		await d1.exec(`
+			CREATE TABLE IF NOT EXISTS casting_credits (
+				person_id TEXT NOT NULL,
+				role TEXT NOT NULL,
+				video_id TEXT NOT NULL,
+				created_at INTEGER DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+				PRIMARY KEY (person_id, role, video_id)
+			);
+		`);
 
 		await db
 			.insert(schema.castingCreditsTable)
 			.values([{ personId: "person1", role: "host", videoId: "video1" }]);
 
 		yoga = createYoga({
-			schema: getSchema(env),
+			schema: getSchema({ DB: d1 } as any),
 			graphqlEndpoint: "/",
 		});
 	});
@@ -101,7 +113,6 @@ describe("GraphQL Input Validation and Error Handling", () => {
 		});
 
 		it("should handle special characters in role", async () => {
-			const db = drizzle(env.DB);
 			const specialRole = "host & producer (main)";
 
 			await db.insert(schema.castingCreditsTable).values({
