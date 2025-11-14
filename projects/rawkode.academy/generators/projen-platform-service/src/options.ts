@@ -6,10 +6,22 @@ export interface PlatformServiceOptions {
 	readonly serviceName: string;
 
 	/**
+	 * Whether to include a GraphQL read model
+	 * @default true
+	 */
+	readonly includeReadModel?: boolean;
+
+	/**
 	 * Whether to include a write model with mutations
 	 * @default false
 	 */
 	readonly includeWriteModel?: boolean;
+
+	/**
+	 * Whether to include an RPC model (capnweb-based)
+	 * @default false
+	 */
+	readonly includeRpcModel?: boolean;
 
 	/**
 	 * Cloudflare D1 Database ID

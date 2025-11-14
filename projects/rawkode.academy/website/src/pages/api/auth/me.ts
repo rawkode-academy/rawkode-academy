@@ -16,8 +16,9 @@ export const GET: APIRoute = async ({ locals }) => {
 		JSON.stringify({
 			authenticated: true,
 			user: {
-				sub: user.sub,
+				id: user.id,
 				name: user.name,
+				email: user.email,
 			},
 		}),
 		{

@@ -11,7 +11,9 @@ const { currentVideo, limit = 4 } = Astro.props;
 // Get all videos
 const allVideos = await getCollection("videos");
 const allTechnologies = await getCollection("technologies");
-const techName = new Map(allTechnologies.map((t) => [t.id, t.data.name] as const));
+const techName = new Map(
+	allTechnologies.map((t) => [t.id, t.data.name] as const),
+);
 
 // Find related videos based on:
 // 1. Same technologies
@@ -19,7 +21,10 @@ const techName = new Map(allTechnologies.map((t) => [t.id, t.data.name] as const
 const relatedVideos: CollectionEntry<"videos">[] = [];
 
 // First, add videos with overlapping technologies
-if (currentVideo.data.technologies && currentVideo.data.technologies.length > 0) {
+if (
+	currentVideo.data.technologies &&
+	currentVideo.data.technologies.length > 0
+) {
 	const currentTechIds = currentVideo.data.technologies as string[];
 
 	const techVideos = allVideos.filter((video) => {
@@ -70,12 +75,12 @@ const finalRelatedVideos = relatedVideos.slice(0, limit);
 
 // Format duration
 const formatDuration = (seconds?: number | null) => {
-  if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
-    return "--:--";
-  }
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
+		return "--:--";
+	}
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const secs = seconds % 60;
 
 	if (hours > 0) {
 		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs

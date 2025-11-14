@@ -31,6 +31,21 @@ export function getAnonDistinctIdFromCookies(req: Request): string | undefined {
 	return undefined;
 }
 
+/**
+ * Get the distinct ID for analytics tracking from the context.
+ * Prefers authenticated user ID, falls back to anonymous ID from cookies.
+ */
+export function getDistinctId(ctx: {
+	locals: { user?: { id: string } };
+	request?: Request;
+}): string | undefined {
+	return (
+		ctx.locals.user?.id ||
+		(ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) ||
+		undefined
+	);
+}
+
 async function posthogCapture(body: Record<string, unknown>): Promise<void> {
 	try {
 		await fetch(`${POSTHOG_HOST}/capture/`, {

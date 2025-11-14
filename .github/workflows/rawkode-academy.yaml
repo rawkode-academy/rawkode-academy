@@ -118,14 +118,9 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          OUTPUT=$(npx wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }} 2>&1)
-          echo "$OUTPUT"
-          PREVIEW_URL=$(echo "$OUTPUT" | grep -oP 'Version Preview Alias URL:\s*\K(https://[^\s]+)' || echo "$OUTPUT" | grep -oP 'Version Preview URL:\s*\K(https://[^\s]+)' || echo "$OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
-          if [ -n "$PREVIEW_URL" ]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"
-          else
-            echo "Warning: Could not extract preview URL from wrangler output"
-          fi
+          npx wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }}
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}.rawkode-academy.rawkodeacademy.workers.dev"
+          gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"
 
       - name: Remove .map files from preview dist
         if: github.event_name == 'pull_request'
@@ -141,11 +136,6 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          OUTPUT=$(npx wrangler versions upload --config wrangler.design.jsonc --assets ./storybook-static --preview-alias pr-${{ github.event.pull_request.number }} 2>&1)
-          echo "$OUTPUT"
-          PREVIEW_URL=$(echo "$OUTPUT" | grep -oP 'Version Preview Alias URL:\s*\K(https://[^\s]+)' || echo "$OUTPUT" | grep -oP 'Version Preview URL:\s*\K(https://[^\s]+)' || echo "$OUTPUT" | grep -oP 'https://[^\s]+\.workers\.dev' | head -1)
-          if [ -n "$PREVIEW_URL" ]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "Storybook Preview: $PREVIEW_URL"
-          else
-            echo "Warning: Could not extract preview URL from wrangler output"
-          fi
+          npx wrangler versions upload --config wrangler.design.jsonc --assets ./storybook-static --preview-alias pr-${{ github.event.pull_request.number }}
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}.design.rawkodeacademy.workers.dev"
+          gh pr comment ${{ github.event.pull_request.number }} --body "Storybook Preview: $PREVIEW_URL"

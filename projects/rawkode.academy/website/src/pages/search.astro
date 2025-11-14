@@ -7,10 +7,10 @@ const searchQuery = (Astro.url.searchParams.get("q") || "").trim();
 const normalizedQuery = searchQuery.toLowerCase();
 
 const results = normalizedQuery
-	? (await getCollection("videos", ({ data }) => {
-		const haystack = `${data.title} ${data.description ?? ""}`.toLowerCase();
-		return haystack.includes(normalizedQuery);
-	}))
+	? await getCollection("videos", ({ data }) => {
+			const haystack = `${data.title} ${data.description ?? ""}`.toLowerCase();
+			return haystack.includes(normalizedQuery);
+		})
 	: [];
 
 const feedVideos = results

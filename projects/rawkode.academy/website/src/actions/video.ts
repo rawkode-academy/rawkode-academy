@@ -1,9 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import {
-	captureServerEvent,
-	getAnonDistinctIdFromCookies,
-} from "../server/posthog";
+import { captureServerEvent, getDistinctId } from "../server/posthog";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
@@ -41,10 +38,7 @@ export const trackVideoEvent = defineAction({
 			// Map the action to the appropriate analytics method
 			let success = false;
 			const extra: Record<string, unknown> = {};
-			const distinctId =
-				ctx.locals.user?.sub ||
-				(ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) ||
-				undefined;
+			const distinctId = getDistinctId(ctx);
 
 			switch (event.action) {
 				case "played":

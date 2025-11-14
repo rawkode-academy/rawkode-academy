@@ -1,7 +1,10 @@
 export * from "./reactToContent";
+import { createBetterAuthClient } from "./better-auth-client";
+import type { D1Database, Fetcher } from "@cloudflare/workers-types";
 
 interface Env {
 	reactToContent: Workflow;
+	AUTH_SERVICE: Fetcher;
 }
 
 export default {
@@ -36,14 +39,8 @@ export default {
 		}
 
 		try {
-			// Check for authorization header
 			const authHeader = req.headers.get("Authorization");
-			if (!authHeader || !authHeader.startsWith("Bearer ")) {
-				return Response.json(
-					{ error: "Missing or invalid authorization header" },
-					{ status: 401, headers: corsHeaders },
-				);
-			}
+			const isInternalRequest = !origin && !authHeader;
 
 			// Parse the request body
 			const body = (await req.json()) as {
@@ -61,45 +58,35 @@ export default {
 				);
 			}
 
-			// Extract token from Bearer header
-			const token = authHeader.substring(7);
+			// External requests still require a Bearer token
+			if (!isInternalRequest) {
+				if (!authHeader || !authHeader.startsWith("Bearer ")) {
+					return Response.json(
+						{ error: "Missing or invalid authorization header" },
+						{ status: 401, headers: corsHeaders },
+					);
+				}
 
-			// Validate the token using the userinfo endpoint
-			// This works for both JWT access tokens and opaque tokens
-			try {
-				const userinfoResponse = await fetch(
-					"https://zitadel.rawkode.academy/oidc/v1/userinfo",
-					{
-						method: "GET",
-						headers: {
-							"Authorization": `Bearer ${token}`,
-						},
-					},
-				);
+				const authClient = createBetterAuthClient(env.AUTH_SERVICE, {
+					getHeaders: () => req.headers,
+				});
 
-				if (!userinfoResponse.ok) {
-					console.error("Token validation failed:", userinfoResponse.status);
+				const { data, error } = await authClient.getSession();
+
+				if (error || !data?.user) {
+					console.error("Token validation failed:", error);
 					return Response.json(
 						{ error: "Invalid or expired token" },
 						{ status: 401, headers: corsHeaders },
 					);
 				}
 
-				const userinfo = await userinfoResponse.json();
-
-				// Verify that the personId in the request matches the user's subject
-				if (body.personId !== userinfo.sub) {
+				if (body.personId !== data.user.id) {
 					return Response.json(
 						{ error: "PersonId does not match authenticated user" },
 						{ status: 403, headers: corsHeaders },
 					);
 				}
-			} catch (error) {
-				console.error("Token verification failed:", error);
-				return Response.json(
-					{ error: "Token validation failed" },
-					{ status: 401, headers: corsHeaders },
-				);
 			}
 
 			// Create a new workflow instance

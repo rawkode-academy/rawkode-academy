@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "bun:test";
+import { env } from "cloudflare:test";
 import { createYoga } from "graphql-yoga";
 import { getSchema } from "../../read-model/schema";
 import { drizzle } from "drizzle-orm/d1";
@@ -8,12 +9,26 @@ import { printSchemaWithDirectives } from "@graphql-tools/utils";
 
 describe("GraphQL Federation Tests", () => {
 	let yoga: ReturnType<typeof createYoga>;
-	const db = drizzle(globalThis.env.DB);
+	let db: ReturnType<typeof drizzle>;
 
 	beforeEach(async () => {
-		await db.delete(emojiReactionsTable).execute();
+		// Use cloudflare:test D1 stub
+		const d1 = env.DB;
+		db = drizzle(d1);
 
-		const schema = getSchema(globalThis.env);
+		// Create the table using D1 exec
+		await d1.exec(`
+			CREATE TABLE IF NOT EXISTS emoji_reactions (
+				content_id TEXT NOT NULL,
+				person_id TEXT NOT NULL,
+				emoji TEXT NOT NULL,
+				reacted_at INTEGER DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+				content_timestamp INTEGER DEFAULT 0 NOT NULL,
+				PRIMARY KEY (content_id, person_id, emoji, content_timestamp)
+			);
+		`);
+
+		const schema = getSchema({ DB: d1 } as any);
 		yoga = createYoga({
 			schema,
 			graphqlEndpoint: "/",
@@ -22,7 +37,7 @@ describe("GraphQL Federation Tests", () => {
 
 	describe("Federation Schema", () => {
 		it("should include federation directives in schema", () => {
-			const schema = getSchema(globalThis.env);
+			const schema = getSchema({ DB: env.DB } as any);
 			const schemaString = printSchemaWithDirectives(schema);
 
 			expect(schemaString).toContain("@link");
@@ -35,7 +50,7 @@ describe("GraphQL Federation Tests", () => {
 		});
 
 		it("should extend Video type", () => {
-			const schema = getSchema(globalThis.env);
+			const schema = getSchema({ DB: db } as any);
 			const schemaString = printSchemaWithDirectives(schema);
 
 			expect(schemaString).toContain("type Video");
@@ -97,7 +112,6 @@ describe("GraphQL Federation Tests", () => {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ query }),
 				}),
-				globalThis.env,
 			);
 
 			const result = await response.json();
@@ -146,7 +160,6 @@ describe("GraphQL Federation Tests", () => {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ query }),
 				}),
-				globalThis.env,
 			);
 
 			const result = await response.json();
@@ -188,7 +201,6 @@ describe("GraphQL Federation Tests", () => {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ query }),
 				}),
-				globalThis.env,
 			);
 
 			const result = await response.json();
@@ -212,7 +224,6 @@ describe("GraphQL Federation Tests", () => {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ query }),
 				}),
-				globalThis.env,
 			);
 
 			const result = await response.json();
@@ -236,7 +247,6 @@ describe("GraphQL Federation Tests", () => {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ query }),
 				}),
-				globalThis.env,
 			);
 
 			const result = await response.json();

@@ -1,48 +1,56 @@
 import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
-import { createSchema as createTechnologySchema, resolveDataDirSync as resolveTechnologiesDataDir } from "@rawkodeacademy/content-technologies";
+import {
+	createSchema as createTechnologySchema,
+	resolveDataDirSync as resolveTechnologiesDataDir,
+} from "@rawkodeacademy/content-technologies";
 
 // Local, file-based content collections for videos, shows, and technologies.
 // These are populated by scripts/sync-graphql-content.ts during build or on demand.
 
 const videos = defineCollection({
-  loader: glob({ pattern: ["**/*.{md,mdx}"], base: "./content/videos" }),
-  schema: z.object({
-    id: z.string(), // canonical slug identifier
-    slug: z.string(), // kept for compatibility; equals id
-    videoId: z.string(), // source/asset id for streams, captions, etc.
-    title: z.string(),
-    subtitle: z.string().optional(),
-    description: z.string(),
-    publishedAt: z.coerce.date(),
-    duration: z.number().nonnegative().optional(),
-    // streamUrl/thumbnailUrl/duration are derived at runtime
-    // Technologies: accept plain ids (e.g., "docker") or full entry ids ("docker/index"),
-    // normalize to "<id>/index" for internal use, and verify existence.
-    technologies: z
-      .array(reference("technologies")).or(z.array(z.string()))
-      .transform((arr) => arr.map((v: any) => (typeof v === 'string' ? (v.endsWith('/index') ? v : `${v}/index`) : v)))
-      .default([]),
-    show: reference("shows").optional(),
-    chapters: z
-      .array(
-        z.object({
-          startTime: z.number().nonnegative(),
-          title: z.string(),
-        }),
-      )
-      .default([]),
-  }),
+	loader: glob({ pattern: ["**/*.{md,mdx}"], base: "./content/videos" }),
+	schema: z.object({
+		id: z.string(), // canonical slug identifier
+		slug: z.string(), // kept for compatibility; equals id
+		videoId: z.string(), // source/asset id for streams, captions, etc.
+		title: z.string(),
+		subtitle: z.string().optional(),
+		description: z.string(),
+		publishedAt: z.coerce.date(),
+		duration: z.number().nonnegative().optional(),
+		// streamUrl/thumbnailUrl/duration are derived at runtime
+		// Technologies: accept plain ids (e.g., "docker") or full entry ids ("docker/index"),
+		// normalize to "<id>/index" for internal use, and verify existence.
+		technologies: z
+			.array(reference("technologies"))
+			.or(z.array(z.string()))
+			.transform((arr) =>
+				arr.map((v: any) =>
+					typeof v === "string" ? (v.endsWith("/index") ? v : `${v}/index`) : v,
+				),
+			)
+			.default([]),
+		show: reference("shows").optional(),
+		chapters: z
+			.array(
+				z.object({
+					startTime: z.number().nonnegative(),
+					title: z.string(),
+				}),
+			)
+			.default([]),
+	}),
 });
 
 const shows = defineCollection({
-  loader: glob({ pattern: ["**/*.{md,mdx}"], base: "./content/shows" }),
-  schema: z.object({
-    id: z.string(),
-    name: z.string(),
-    description: z.string().optional(),
-    hosts: z.array(reference("people")).default([]),
-  }),
+	loader: glob({ pattern: ["**/*.{md,mdx}"], base: "./content/shows" }),
+	schema: z.object({
+		id: z.string(),
+		name: z.string(),
+		description: z.string().optional(),
+		hosts: z.array(reference("people")).default([]),
+	}),
 });
 
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections

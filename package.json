@@ -2,11 +2,28 @@
   "name": "rawkodeacademy",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "content/*",
-    "packages/*",
-    "projects/rawkode.academy/website",
-    "projects/rawkode.academy/code"
-  ]
+  "workspaces": {
+    "packages": [
+      "content/**",
+      "packages/**",
+      "projects/rawkode.academy/**"
+    ],
+    "catalogs": {
+      "auth": {
+        "better-auth": "^1.2.3",
+        "iron-session": "^8.0.4",
+        "jose": "^6.0.13",
+        "oslo": "^1.2.1",
+        "arctic": "^2.2.0"
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "knip": "^5.69.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "knip": "knip"
+  }
 }
-

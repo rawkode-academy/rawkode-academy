@@ -1,14 +1,28 @@
 import { describe, it, expect, beforeEach } from "bun:test";
+import { env } from "cloudflare:test";
 import { drizzle } from "drizzle-orm/d1";
 import { emojiReactionsTable } from "../../data-model/schema";
 import { eq, and, count } from "drizzle-orm";
 
 describe("Database Integration Tests", () => {
-	const db = drizzle(globalThis.env.DB);
+	let db: ReturnType<typeof drizzle>;
 
 	beforeEach(async () => {
-		// Clean up the database before each test
-		await db.delete(emojiReactionsTable).execute();
+		// Use cloudflare:test D1 stub
+		const d1 = env.DB;
+		db = drizzle(d1);
+
+		// Create the table using D1 exec
+		await d1.exec(`
+			CREATE TABLE IF NOT EXISTS emoji_reactions (
+				content_id TEXT NOT NULL,
+				person_id TEXT NOT NULL,
+				emoji TEXT NOT NULL,
+				reacted_at INTEGER DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+				content_timestamp INTEGER DEFAULT 0 NOT NULL,
+				PRIMARY KEY (content_id, person_id, emoji, content_timestamp)
+			);
+		`);
 	});
 
 	describe("Adding Emoji Reactions", () => {

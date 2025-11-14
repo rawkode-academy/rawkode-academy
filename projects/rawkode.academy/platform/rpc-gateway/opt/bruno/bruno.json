@@ -1,6 +1,0 @@
-{
-  "version": "1",
-  "name": "RPC Gateway - Rawkode Academy",
-  "type": "collection",
-  "description": "API collection for the Rawkode Academy RPC Gateway service. All requests require authentication via Personal Access Token (PAT) from Zitadel."
-}

@@ -1,17 +1,27 @@
 import { describe, it, expect, beforeEach } from "bun:test";
+import { env } from "cloudflare:test";
 import { drizzle } from "drizzle-orm/d1";
 import { eq, and } from "drizzle-orm";
 import * as schema from "../../data-model/schema";
-
-declare const env: { DB: D1Database };
 
 describe("Database", () => {
 	let db: ReturnType<typeof drizzle>;
 
 	beforeEach(async () => {
-		db = drizzle(env.DB, { schema });
-		// Clear existing data
-		await db.delete(schema.castingCreditsTable);
+		// Use cloudflare:test D1 stub
+		const d1 = env.DB;
+		db = drizzle(d1, { schema });
+
+		// Create the table using Drizzle schema
+		await d1.exec(`
+			CREATE TABLE IF NOT EXISTS casting_credits (
+				person_id TEXT NOT NULL,
+				role TEXT NOT NULL,
+				video_id TEXT NOT NULL,
+				created_at INTEGER DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
+				PRIMARY KEY (person_id, role, video_id)
+			);
+		`);
 	});
 
 	describe("Primary Key Constraints", () => {

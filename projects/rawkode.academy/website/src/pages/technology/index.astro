@@ -9,32 +9,32 @@ import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
 type Technology = {
-  id: string;
-  name: string;
-  description: string;
-  logo?: string;
-  website?: string;
-  documentation?: string;
+	id: string;
+	name: string;
+	description: string;
+	logo?: string;
+	website?: string;
+	documentation?: string;
 };
 
 let technologies: Technology[] = [];
 try {
-  const items = await getCollection("technologies");
-  technologies = items.map((e) => {
-    const icon = (e as any).data.icon;
-    const logo = resolveTechnologyIconUrl(e.id, icon);
-    const tech: Technology = {
-      id: e.id,
-      name: e.data.name,
-      description: e.data.description,
-      ...(logo && { logo }),
-      ...(e.data.website && { website: e.data.website }),
-      ...(e.data.documentation && { documentation: e.data.documentation }),
-    };
-    return tech;
-  });
+	const items = await getCollection("technologies");
+	technologies = items.map((e) => {
+		const icon = (e as any).data.icon;
+		const logo = resolveTechnologyIconUrl(e.id, icon);
+		const tech: Technology = {
+			id: e.id,
+			name: e.data.name,
+			description: e.data.description,
+			...(logo && { logo }),
+			...(e.data.website && { website: e.data.website }),
+			...(e.data.documentation && { documentation: e.data.documentation }),
+		};
+		return tech;
+	});
 } catch (error) {
-  console.error("Failed to load technologies from content collection:", error);
+	console.error("Failed to load technologies from content collection:", error);
 }
 ---
 

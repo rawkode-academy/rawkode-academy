@@ -5,7 +5,9 @@ import type { APIContext } from "astro";
 export async function GET(context: APIContext) {
 	const videos = await getCollection("videos");
 	const technologies = await getCollection("technologies");
-	const techName = new Map(technologies.map((t) => [t.id, t.data.name] as const));
+	const techName = new Map(
+		technologies.map((t) => [t.id, t.data.name] as const),
+	);
 
 	// Sort by publishedAt desc
 	const sortedVideos = videos.sort(
@@ -21,9 +23,7 @@ export async function GET(context: APIContext) {
 		site: context.site?.toString() || "https://rawkode.academy",
 		items: sortedVideos.map((video) => {
 			const duration =
-				typeof video.data.duration === "number"
-					? video.data.duration
-					: 0;
+				typeof video.data.duration === "number" ? video.data.duration : 0;
 			return {
 				title: video.data.title,
 				description: video.data.description,
@@ -31,9 +31,7 @@ export async function GET(context: APIContext) {
 				link: `/watch/${video.data.slug}/`,
 				customData: `
 					<enclosure url="${`https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`}" type="image/jpeg" />
-					<itunes:duration>${Math.floor(duration / 60)}:${(
-						duration % 60
-					)
+					<itunes:duration>${Math.floor(duration / 60)}:${(duration % 60)
 						.toString()
 						.padStart(2, "0")}</itunes:duration>
 					<itunes:image href="${`https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`}" />
@@ -41,11 +39,20 @@ export async function GET(context: APIContext) {
 				categories: (video.data.technologies as string[])
 					.map((id) => {
 						// Handle both string IDs and reference objects
-						const techId = typeof id === 'string' ? id : (id as any).id || id;
-						const normalizedId = techId.endsWith?.('/index') ? techId.slice(0, -6) : techId;
-						return techName.get(normalizedId + '/index') || techName.get(normalizedId) || normalizedId;
+						const techId = typeof id === "string" ? id : (id as any).id || id;
+						const normalizedId = techId.endsWith?.("/index")
+							? techId.slice(0, -6)
+							: techId;
+						return (
+							techName.get(normalizedId + "/index") ||
+							techName.get(normalizedId) ||
+							normalizedId
+						);
 					})
-					.filter((cat) => cat !== null && cat !== undefined && typeof cat === 'string'),
+					.filter(
+						(cat) =>
+							cat !== null && cat !== undefined && typeof cat === "string",
+					),
 			};
 		}),
 		customData: "<language>en-us</language>",

@@ -6,10 +6,9 @@ import ShowCard from "@/components/show/ShowCard.astro";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
 
-
 Astro.response.headers.set(
-        "Cache-Control",
-        "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+	"Cache-Control",
+	"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
 );
 Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
 Astro.response.headers.set("Cache-Tag", "shows-page, shows-list");
@@ -20,28 +19,31 @@ const showEntries = await getCollection("shows");
 const videos = await getCollection("videos");
 
 const showsToRender: ShowSummary[] = await (async () => {
-  const list: ShowSummary[] = [];
-  for (const s of showEntries) {
-    const people = await getEntries(s.data.hosts);
-    const hosts = people.map((p) => {
-      const parts = String(p.data.name).trim().split(/\s+/);
-      return { forename: parts[0] || "", surname: parts.slice(1).join(" ") || "" };
-    });
-    const eps = videos
-      .filter((v) => (v.data.show as string | undefined) === s.data.id)
-      .map((v) => ({
-        video: {
-          title: v.data.title,
-          thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.videoId}/thumbnail.jpg`,
-          publishedAt:
-            v.data.publishedAt instanceof Date
-              ? v.data.publishedAt.toISOString()
-              : String(v.data.publishedAt),
-        },
-      }));
-    list.push({ id: s.data.id, name: s.data.name, hosts, episodes: eps });
-  }
-  return list;
+	const list: ShowSummary[] = [];
+	for (const s of showEntries) {
+		const people = await getEntries(s.data.hosts);
+		const hosts = people.map((p) => {
+			const parts = String(p.data.name).trim().split(/\s+/);
+			return {
+				forename: parts[0] || "",
+				surname: parts.slice(1).join(" ") || "",
+			};
+		});
+		const eps = videos
+			.filter((v) => (v.data.show as string | undefined) === s.data.id)
+			.map((v) => ({
+				video: {
+					title: v.data.title,
+					thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.videoId}/thumbnail.jpg`,
+					publishedAt:
+						v.data.publishedAt instanceof Date
+							? v.data.publishedAt.toISOString()
+							: String(v.data.publishedAt),
+				},
+			}));
+		list.push({ id: s.data.id, name: s.data.name, hosts, episodes: eps });
+	}
+	return list;
 })();
 
 const hasShows = showsToRender.length > 0;

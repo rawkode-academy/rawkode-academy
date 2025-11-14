@@ -49,11 +49,15 @@ const createBuilder = (env: { DB: D1Database }) => {
 	};
 
 	// Helper function to check if user has reacted
+	// This function handles both legacy Zitadel IDs and new Better Auth UUIDs
 	const hasUserReacted = async (
 		contentId: string,
 		personId: string,
 		emoji: string,
 	) => {
+		// Query with the provided personId (which should already be canonical from the frontend)
+		// Since new reactions are written with canonical IDs and old reactions will be migrated,
+		// we can directly query with the personId
 		const result = await db
 			.select({ count: count() })
 			.from(dataSchema.emojiReactionsTable)
