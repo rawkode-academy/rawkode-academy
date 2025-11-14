@@ -220,6 +220,22 @@ export default defineConfig({
 	adapter: cloudflare({
 		imageService: "cloudflare",
 		sessionKVBindingName: "SESSION",
+		routes: {
+			extend: {
+				// Better Auth lives in the AUTH_SERVICE worker, so make sure these routes
+				// invoke the middleware instead of falling back to static assets.
+				include: [
+					{ pattern: "/sign-in/*" },
+					{ pattern: "/sign-up/*" },
+					{ pattern: "/sign-out" },
+					{ pattern: "/session" },
+					{ pattern: "/verify-email" },
+					{ pattern: "/update-user" },
+					{ pattern: "/delete-user" },
+					{ pattern: "/passkey/*" },
+				],
+			},
+		},
 	}),
 	trailingSlash: "never",
 	integrations: [
