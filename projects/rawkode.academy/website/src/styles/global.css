@@ -62,6 +62,147 @@
 		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
 }
 
+/* Catppuccin Theme */
+:root[data-theme="catppuccin"] {
+	--brand-primary: 203 166 247; /* Mauve #CBA6F7 */
+	--brand-secondary: 245 194 231; /* Pink #F5C2E7 */
+	--brand-accent: 30 30 46; /* Base #1E1E2E */
+
+	--app-backdrop:
+		radial-gradient(
+			circle at 10% 20%,
+			rgba(var(--brand-primary), 0.3) 0%,
+			transparent 40%
+		),
+		radial-gradient(
+			circle at 90% 10%,
+			rgba(var(--brand-secondary), 0.2) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			circle at 15% 90%,
+			rgba(var(--brand-primary), 0.15) 0%,
+			transparent 50%
+		),
+		linear-gradient(140deg, #f5e0ff 0%, #faf0ff 35%, #f0f5ff 70%, #fff0fa 100%);
+}
+
+/* Dracula Theme */
+:root[data-theme="dracula"] {
+	--brand-primary: 189 147 249; /* Purple #BD93F9 */
+	--brand-secondary: 255 121 198; /* Pink #FF79C6 */
+	--brand-accent: 40 42 54; /* Background #282A36 */
+
+	--app-backdrop:
+		radial-gradient(
+			circle at 10% 20%,
+			rgba(var(--brand-primary), 0.3) 0%,
+			transparent 40%
+		),
+		radial-gradient(
+			circle at 90% 10%,
+			rgba(var(--brand-secondary), 0.25) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			circle at 15% 90%,
+			rgba(var(--brand-primary), 0.15) 0%,
+			transparent 50%
+		),
+		linear-gradient(140deg, #f0e6ff 0%, #fff0f8 35%, #f0f0ff 70%, #ffe6f5 100%);
+}
+
+/* Solarized Theme */
+:root[data-theme="solarized"] {
+	--brand-primary: 38 139 210; /* Blue #268BD2 */
+	--brand-secondary: 42 161 152; /* Cyan #2AA198 */
+	--brand-accent: 0 43 54; /* Base03 #002B36 */
+
+	--app-backdrop:
+		radial-gradient(
+			circle at 10% 20%,
+			rgba(var(--brand-primary), 0.25) 0%,
+			transparent 40%
+		),
+		radial-gradient(
+			circle at 90% 10%,
+			rgba(var(--brand-secondary), 0.2) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			circle at 15% 90%,
+			rgba(var(--brand-primary), 0.12) 0%,
+			transparent 50%
+		),
+		linear-gradient(140deg, #fdf6e3 0%, #eee8d5 35%, #f5f5f0 70%, #fffff8 100%);
+}
+
+/* Pride Theme - Cotton Candy Palette */
+:root[data-theme="pride"] {
+	--brand-primary: 255 89 94; /* Red #FF595E */
+	--brand-secondary: 255 202 58; /* Yellow #FFCA3A */
+	--brand-accent: 106 76 147; /* Purple #6A4C93 */
+
+	--app-backdrop:
+		radial-gradient(
+			circle at 10% 20%,
+			rgba(255, 89, 94, 0.2) 0%,
+			transparent 40%
+		),
+		radial-gradient(
+			circle at 90% 10%,
+			rgba(255, 202, 58, 0.25) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			circle at 15% 90%,
+			rgba(106, 76, 147, 0.15) 0%,
+			transparent 50%
+		),
+		linear-gradient(
+			140deg,
+			#ffe6e7 0%,
+			#fff9e6 20%,
+			#f0ffe6 40%,
+			#e6f5ff 60%,
+			#ede6ff 80%,
+			#f5e6ff 100%
+		);
+}
+
+/* LGBTQ+ Theme - Transgender Pride Flag */
+:root[data-theme="lgbtq"] {
+	--brand-primary: 91 206 250; /* Light Blue #5BCEFA */
+	--brand-secondary: 245 169 184; /* Pink #F5A9B8 */
+	--brand-accent: 255 255 255; /* White #FFFFFF */
+
+	--app-backdrop:
+		radial-gradient(
+			circle at 10% 20%,
+			rgba(91, 206, 250, 0.3) 0%,
+			transparent 40%
+		),
+		radial-gradient(
+			circle at 90% 10%,
+			rgba(245, 169, 184, 0.35) 0%,
+			transparent 45%
+		),
+		radial-gradient(
+			circle at 15% 90%,
+			rgba(91, 206, 250, 0.2) 0%,
+			transparent 50%
+		),
+		linear-gradient(
+			140deg,
+			#e6f7ff 0%,
+			#ffebf0 20%,
+			#fff 40%,
+			#ffebf0 60%,
+			#e6f7ff 80%,
+			#ffffff 100%
+		);
+}
+
 html.dark {
 	--surface-base: #030617;
 	--surface-overlay: rgba(6, 11, 27, 0.92);

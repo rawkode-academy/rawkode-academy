@@ -2,26 +2,13 @@
 	<button
 		@click="handleToggle"
 		:class="buttonClasses"
-		:aria-label="`Switch to ${currentTheme === 'rawkode-green' ? 'blue' : 'green'} theme`"
+		:aria-label="`Change theme (current: ${themeDisplayName})`"
 		type="button"
 	>
-		<!-- Icon for current theme -->
+		<!-- Icon for theme -->
 		<transition name="fade" mode="out-in">
 			<svg
-				v-if="currentTheme === 'rawkode-green'"
-				key="green"
-				class="w-5 h-5"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<circle cx="12" cy="12" r="10" stroke-width="2" class="stroke-primary" />
-				<circle cx="12" cy="12" r="6" fill="currentColor" class="fill-primary" />
-			</svg>
-			<svg
-				v-else
-				key="blue"
+				:key="currentTheme"
 				class="w-5 h-5"
 				fill="none"
 				stroke="currentColor"
@@ -34,14 +21,19 @@
 		</transition>
 
 		<span v-if="showLabel" class="ml-2 text-sm font-medium">
-			{{ currentTheme === "rawkode-green" ? "Green" : "Blue" }}
+			{{ themeDisplayName }}
 		</span>
 	</button>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
-import { getTheme, toggleTheme, type Theme } from "../../lib/theme";
+import {
+	getTheme,
+	toggleTheme,
+	getThemeDisplayName,
+	type Theme,
+} from "../../lib/theme";
 
 interface Props {
 	showLabel?: boolean;
@@ -56,6 +48,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const currentTheme = ref<Theme>("rawkode-green");
+
+const themeDisplayName = computed(() => getThemeDisplayName(currentTheme.value));
 
 // Listen for theme changes from other components
 const handleThemeChange = (event: Event) => {
