@@ -1,298 +1,326 @@
 ---
 import Button from "@/components/common/Button.vue";
-import PageHero from "@/components/common/PageHero.vue";
-import Stats from "@/components/stats/simple.vue";
-import H2Highlight from "@/components/title/h2-highlight.vue";
+import { Hero } from "@/components/ui";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
+
+const stats = [
+        {
+                value: "60K+",
+                label: "Developers reached",
+                description:
+                        "Learners who've tuned into our live streams, workshops, and asynchronous paths since 2019.",
+        },
+        {
+                value: "500+",
+                label: "Hours of hands-on content",
+                description: "From Rawkode Live experiments to deep dives on Kubernetes, WASM, and platform engineering.",
+        },
+        {
+                value: "90+",
+                label: "Projects featured",
+                description: "Open-source tools explored with the maintainers and contributors who build them.",
+        },
+];
+
+const missionPillars = [
+        {
+                title: "Hands-on & honest",
+                description:
+                        "We build in the open, share the messy bits, and keep cameras rolling when things go sideways so everyone can see the real troubleshooting process.",
+        },
+        {
+                title: "Maintainer-first",
+                description:
+                        "Creators and core contributors sit beside us to explain the 'why' behind their decisions, the trade-offs they made, and what's coming next.",
+        },
+        {
+                title: "Future-looking",
+                description:
+                        "We scout emerging runtimes, infrastructure patterns, and developer workflows so you can chart a path long before it's mainstream.",
+        },
+];
+
+const timeline = [
+        {
+                period: "2003 — 2014",
+                title: "Full-stack builder & accidental SRE",
+                description:
+                        "David cut his teeth on ticketing systems for horse racing tracks across the UK, touching everything from custom kernels in C to QT point-of-sale apps and early Windows CE devices. Puppet automation in 2004 cemented a lifelong obsession with operational excellence.",
+        },
+        {
+                period: "2014 — 2016",
+                title: "Scaling TeamRock (now LouderSound)",
+                description:
+                        "As Director of Development, he led the shift from virtual machines to containerized workloads on AWS just in time for an enormous traffic spike following the passing of Lemmy Kilmister. The bet on containers paid off, proving how resilient modern infrastructure could be.",
+        },
+        {
+                period: "2016 — 2019",
+                title: "Developer advocate at InfluxData",
+                description:
+                        "Helping operators adopt InfluxDB and Telegraf for Kubernetes metrics meant speaking at meetups, writing tutorials, and working directly with engineering teams to simplify deployments—well before metrics-server replaced Heapster on clusters.",
+        },
+        {
+                period: "2019",
+                title: "Rawkode Academy officially launches",
+                description:
+                        "The first video, \"Last Week in Kubernetes,\" sets the tone: live, hands-on exploration guided by curiosity. From there the Academy became a permanent home for transparent learning.",
+        },
+        {
+                period: "2021",
+                title: "Klustered arrives",
+                description:
+                        "We invited friends and experts to debug intentionally broken Kubernetes clusters in real time. The format celebrated problem-solving under pressure and quickly became a community favorite.",
+        },
+        {
+                period: "Today",
+                title: "Still experimenting, still sharing",
+                description:
+                        "Rawkode Academy blends live streams, deep-dive series, and research-backed learning paths to help individuals and engineering organizations keep pace with cloud native change.",
+        },
+];
+
+const signatureFormats = [
+        {
+                title: "Rawkode Live",
+                description:
+                        "Pair-programming sessions with maintainers and contributors where we explore new releases, ship proof-of-concepts, and fix bugs the honest way.",
+                chips: ["Live coding", "Maintainer access", "Transparent problem-solving"],
+        },
+        {
+                title: "Klustered",
+                description:
+                        "A chaos-friendly challenge series where experts race to repair sabotaged Kubernetes clusters. Every run reveals new observability, networking, and reliability tactics.",
+                chips: ["Kubernetes", "Incident response", "Game show energy"],
+        },
+        {
+                title: "Learning paths",
+                description:
+                        "Structured, research-backed collections of shows, articles, and labs that turn sprawling topics like Platform Engineering or WASM into actionable skill trees.",
+                chips: ["Self-paced", "Curated resources", "Actionable outcomes"],
+        },
+];
 ---
 
 <style>
-	@reference "@/styles/global.css";
+        @reference "@/styles/global.css";
 
-	.section-divider {
-		@apply relative py-4 my-8;
-	}
+        .section-shell {
+                @apply relative py-16 md:py-24;
+        }
 
-	.section-divider::before {
-		content: "";
-		@apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/3 h-0.5 bg-linear-to-r from-primary to-secondary;
-	}
+        .section-shell::before {
+                content: "";
+                @apply pointer-events-none absolute inset-0 mx-auto max-w-6xl rounded-[48px] bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 blur-[140px] opacity-60;
+        }
+
+        .timeline-line {
+                @apply absolute left-5 md:left-1/2 h-full w-px -translate-x-1/2 bg-gradient-to-b from-primary/60 via-white/40 to-secondary/60 dark:via-gray-800/60;
+        }
+
+        .timeline-item {
+                @apply relative flex flex-col gap-3 rounded-3xl bg-white/60 p-6 text-left text-gray-700 shadow-[0_20px_60px_rgba(15,23,42,0.15)] dark:bg-gray-900/60 dark:text-gray-200;
+                border: 1px solid rgb(255 255 255 / 0.25);
+                backdrop-filter: blur(22px);
+        }
+
+        .dark .timeline-item {
+                border-color: rgb(255 255 255 / 0.08);
+        }
 </style>
 
-<Page title="About">
-	<!-- Hero Section -->
-	<PageHero
-		title="About the Rawkode Academy"
-		subtitle="Empowering developers with cloud native knowledge since 2019"
-		badge="Our Story"
-	>
-		<Fragment slot="actions">
-			<Button href="#mission" variant="primary" size="lg">Our Mission</Button>
-		</Fragment>
-	</PageHero>
+<Page title="About Rawkode Academy" description="Get to know the story, mission, and formats behind Rawkode Academy.">
+        <Hero
+                background="gradient-hero"
+                pattern="dots"
+                size="xl"
+                align="center"
+                badge="Our Story"
+                title="Cloud Native education built in public"
+                subtitle="We document the wins, losses, and aha moments that come from exploring the rapidly changing infrastructure landscape."
+        >
+                <Fragment slot="actions">
+                        <div class="flex flex-wrap items-center justify-center gap-4">
+                                <Button href="/shows" variant="primary" size="lg">Explore our shows</Button>
+                                <Button href="/watch" variant="ghost" size="lg">Catch the latest episode</Button>
+                        </div>
+                </Fragment>
+                <Fragment slot="stats">
+                        <span>Founded in 2019</span>
+                        <span class="inline-flex items-center gap-1 text-primary">
+                                <span class="h-2 w-2 rounded-full bg-primary"></span>
+                                Independent & community-funded
+                        </span>
+                </Fragment>
+        </Hero>
 
-	<div id="mission" class="max-w-4xl mx-auto mb-12 text-center">
-		<p class="text-xl text-gray-600 dark:text-gray-300 mb-6">
-			The Rawkode Academy was founded in 2019 by David Flanagan, née McKay, a
-			developer and operator with over 20 years of experience in the industry.
-		</p>
+        <section class="section-shell">
+                <div class="relative z-10 mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1.1fr_0.9fr]">
+                        <div class="glass-panel rounded-[32px] p-8 shadow-[0_25px_60px_rgba(14,30,37,0.15)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.65)]">
+                                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Mission</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Empower developers to navigate constant change</h2>
+                                <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                                        Rawkode Academy exists to make complex cloud native topics approachable without sanding off the hard edges. We combine
+                                        research, real production experience, and a lot of humility to show exactly how we learn.
+                                </p>
+                                <p class="mt-6 text-gray-600 dark:text-gray-300">
+                                        Whether you're a solo builder trying to keep up or leading a platform team, we want you to feel like you have a front-row seat to
+                                        every experiment, refactor, and architectural debate.
+                                </p>
+                        </div>
+                        <div class="space-y-6">
+                                {missionPillars.map((pillar) => (
+                                        <div class="glass-panel rounded-[28px] p-6">
+                                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{pillar.title}</h3>
+                                                <p class="mt-2 text-gray-600 dark:text-gray-300">{pillar.description}</p>
+                                        </div>
+                                ))}
+                        </div>
+                </div>
+        </section>
 
-		<p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
-			Our mission is to provide high-quality educational content for developers
-			and operators, focusing on <a href="/read" class="text-primary hover:underline">cloud-native technologies</a>, <a href="/technology/kubernetes" class="text-primary hover:underline">Kubernetes</a>, and
-			modern infrastructure solutions. Through live streams, tutorials, and
-			interactive content, we aim to make complex technologies accessible to
-			everyone.
-		</p>
+        <section class="py-16 sm:py-20">
+                <div class="mx-auto max-w-6xl px-4">
+                        <div class="text-center">
+                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Impact</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Proof that curiosity scales</h2>
+                                <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                        We obsess over doing the work in public—these numbers are a snapshot of what that persistence has unlocked so far.
+                                </p>
+                        </div>
+                        <div class="mt-12 grid gap-6 md:grid-cols-3">
+                                {stats.map((stat) => (
+                                        <div class="glass-panel rounded-[28px] p-8 text-center">
+                                                <p class="text-4xl font-semibold text-gray-900 dark:text-white">{stat.value}</p>
+                                                <p class="mt-2 text-lg font-medium text-gray-700 dark:text-gray-200">{stat.label}</p>
+                                                <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">{stat.description}</p>
+                                        </div>
+                                ))}
+                        </div>
+                </div>
+        </section>
 
-		<div class="section-divider"></div>
+        <section class="relative overflow-hidden bg-gradient-to-b from-transparent via-primary/5 to-transparent py-20">
+                <div class="mx-auto max-w-5xl px-4">
+                        <div class="text-center">
+                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Founder's journey</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Two decades of building, sharing, and mentoring</h2>
+                                <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                        Every experiment inside Rawkode Academy is rooted in lessons learned from running production systems, leading teams, and collaborating with
+                                        the maintainers who shape our industry.
+                                </p>
+                        </div>
+                        <div class="mt-12 relative">
+                                <div class="timeline-line"></div>
+                                <div class="space-y-10">
+                                        {timeline.map((item) => (
+                                                <div class="relative grid gap-4 md:grid-cols-2 md:items-center">
+                                                        <div class="order-2 md:order-1 md:pr-8">
+                                                                <div class="timeline-item">
+                                                                        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">{item.period}</p>
+                                                                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">{item.title}</h3>
+                                                                        <p class="text-gray-600 dark:text-gray-300">{item.description}</p>
+                                                                </div>
+                                                        </div>
+                                                        <div class="order-1 md:order-2">
+                                                                <div class="flex items-center justify-center">
+                                                                        <div class="hidden h-4 w-4 rounded-full bg-gradient-to-br from-primary to-secondary shadow-lg md:block"></div>
+                                                                </div>
+                                                        </div>
+                                                </div>
+                                        ))}
+                                </div>
+                        </div>
+                </div>
+        </section>
 
-		<Stats
-			title="Our Impact"
-			stats={[
-				{
-					label: "Views",
-					value: "1M+",
-				},
-				{
-					label: "Hours of Content",
-					value: "500+",
-				},
-				{
-					label: "Projects Covered",
-					value: "90+",
-				},
-			]}
-		/>
-		<p
-			class="text-sm font-light text-center text-gray-500 dark:text-gray-400 mb-8"
-		>
-			<span class="font-medium text-primary-600 dark:text-primary-500">*</span> These
-			numbers are a rough estimate at the moment and we'll loop in real-time numbers
-			shortly.
-		</p>
+        <section class="py-20">
+                <div class="mx-auto max-w-6xl px-4">
+                        <div class="text-center">
+                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Signature formats</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Where experimentation meets entertainment</h2>
+                                <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                        We mix long-running shows with limited series to meet people where they learn best.
+                                </p>
+                        </div>
+                        <div class="mt-12 grid gap-6 md:grid-cols-3">
+                                {signatureFormats.map((format) => (
+                                        <div class="glass-panel flex h-full flex-col rounded-[28px] p-6">
+                                                <div class="flex-1">
+                                                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{format.title}</h3>
+                                                        <p class="mt-3 text-gray-600 dark:text-gray-300">{format.description}</p>
+                                                </div>
+                                                <div class="mt-4 flex flex-wrap gap-2">
+                                                        {format.chips.map((chip) => (
+                                                                <span class="glass-chip text-xs font-medium text-gray-700 dark:text-gray-200">{chip}</span>
+                                                        ))}
+                                                </div>
+                                        </div>
+                                ))}
+                        </div>
+                </div>
+        </section>
 
-		<div class="section-divider"></div>
+        <section class="section-shell">
+                <div class="relative z-10 mx-auto max-w-6xl px-4">
+                        <div class="text-center">
+                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Moments we love</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">The clips that started it all</h2>
+                                <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                        These two episodes capture the spirit of Rawkode Academy—curiosity, collaboration, and just enough chaos to keep everyone honest.
+                                </p>
+                        </div>
+                        <div class="mt-12 grid gap-8 md:grid-cols-2">
+                                <div class="glass-panel overflow-hidden rounded-[32px] p-0">
+                                        <div class="aspect-video">
+                                                <iframe
+                                                        class="h-full w-full"
+                                                        src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
+                                                        title="Last Week in Kubernetes"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                        allowfullscreen
+                                                ></iframe>
+                                        </div>
+                                        <div class="p-6">
+                                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">2019</p>
+                                                <h3 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Last Week in Kubernetes</h3>
+                                                <p class="mt-2 text-gray-600 dark:text-gray-300">The pilot episode that proved live, unfiltered exploration resonated with our audience.</p>
+                                        </div>
+                                </div>
+                                <div class="glass-panel overflow-hidden rounded-[32px] p-0">
+                                        <div class="aspect-video">
+                                                <iframe
+                                                        class="h-full w-full"
+                                                        src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
+                                                        title="Klustered Episode One"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                        allowfullscreen
+                                                ></iframe>
+                                        </div>
+                                        <div class="p-6">
+                                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">2021</p>
+                                                <h3 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Klustered with Walid Shaari</h3>
+                                                <p class="mt-2 text-gray-600 dark:text-gray-300">A bold game show experiment that turned Kubernetes troubleshooting into an adrenaline rush.</p>
+                                        </div>
+                                </div>
+                        </div>
+                </div>
+        </section>
 
-		<H2Highlight title="Our Founder's Journey" highlightWords="Journey" />
-
-		<div class="max-w-4xl mx-auto">
-			<H2Highlight title="The Early Years" highlightWords="Early" />
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				Starting his career in 2003, David joined a small local development
-				company that specialized in ticketing systems for horse racing tracks
-				across the UK. Working at a smaller company allowed him to gain
-				experience across the entire product stack: custom kernel development
-				(C), backend servers (C & PHP), front-end point of sale terminals (C++
-				with QT3), and even mobile development (C#) on early Windows CE devices.
-			</p>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				As part of a small team, David was also responsible for the
-				infrastructure that ran the company's products, leveraging his extensive
-				Linux knowledge from running Linux on the desktop since his first Coral
-				Linux install in 2000.
-			</p>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				Working with diverse technologies early in his career, David developed a
-				passion for exploring and experimenting with new technologies to better
-				understand the problems they solved and the paradigms they introduced.
-				One of the first technologies to capture David's attention was Puppet in
-				2004. Puppet revolutionized the way the company managed their fleet of
-				servers, which were located at customer sites across the UK, eliminating
-				the need for emergency on-site visits to address server issues.
-			</p>
-
-			<div class="section-divider"></div>
-
-			<H2Highlight
-				title="Embracing Cloud-Native Technologies"
-				highlightWords="Cloud-Native"
-			/>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				David was an early adopter of cloud, containers, and cloud-native
-				technologies. As the Director of Development for TeamRock (now
-				LouderSound), a rock and metal media organization, David was responsible
-				for the software, infrastructure, and website during a significant
-				scaling challenge: a massive traffic surge following the passing of
-				Lemmy Kilmister. Thanks to forward-thinking infrastructure decisions,
-				David and his team had already migrated from traditional virtual-machine
-				infrastructure to containerized workloads running on Amazon Web Services
-				in 2014, shortly after the public launch of Docker. This preparation
-				enabled the platform to handle the unexpected traffic spike
-				successfully.
-			</p>
-
-			<div class="section-divider"></div>
-
-			<H2Highlight
-				title="The Birth of Rawkode Academy"
-				highlightWords="Rawkode Academy"
-			/>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				While David enjoyed writing software, scaling infrastructure, and
-				leading teams, he discovered that his true passion was helping others
-				learn and succeed in the field. He began presenting at local user groups
-				in 2016, gradually progressing to conferences, before transitioning to a
-				full-time Developer Advocacy position at InfluxData.
-			</p>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				At InfluxData, David worked to simplify the adoption of InfluxDB and
-				Telegraf for Kubernetes operators as their preferred solution for metric
-				collection and storage. This effort extended beyond speaking engagements
-				at conferences and user groups about monitoring Kubernetes clusters; he
-				actively collaborated with engineering teams to improve deployment and
-				management capabilities on Kubernetes.
-			</p>
-
-			<div
-				class="p-4 mb-6 border-l-4 border-primary bg-primary/5 dark:bg-gray-800 dark:border-primary"
-			>
-				<h4 class="text-lg font-medium text-primary dark:text-primary">
-					Historical Note
-				</h4>
-				<p class="text-sm text-gray-700 dark:text-gray-300">
-					Before metrics-server, Kubernetes collected monitoring information
-					through a program called Heapster, which was built on top of InfluxDB
-					1.
-				</p>
-			</div>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				It was during this time that the Rawkode Academy released its first
-				video: "Last Week in Kubernetes."
-			</p>
-
-			<div class="mb-6 flex justify-center">
-				<div class="video-container">
-					<iframe
-						width="560"
-						height="315"
-						src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
-						title="YouTube video player"
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-						allowfullscreen
-						class="shadow-lg rounded-lg"></iframe>
-					<p class="text-sm text-center mt-2 text-gray-500 dark:text-gray-400">
-						The first Rawkode Academy video on YouTube
-					</p>
-				</div>
-			</div>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				After InfluxData, David joined Equinix Metal where he continued to
-				develop and expand the Rawkode Academy. His focus was helping developers
-				and operators learn to run and use <a href="/technology/kubernetes" class="text-primary hover:underline">Kubernetes</a> and other <a href="/read" class="text-primary hover:underline">Cloud Native
-				technologies</a> on bare metal infrastructure, addressing the unique
-				challenges not present when running on cloud providers.
-			</p>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				Throughout his work with <a href="/technology/kubernetes" class="text-primary hover:underline">Kubernetes</a>, David was inspired by TGIK, a
-				weekly live stream hosted by Joe Beda, one of Kubernetes' creators. On
-				TGIK, Joe explored new <a href="/read" class="text-primary hover:underline">Cloud Native technologies</a> by working through
-				documentation and examples, often with help from project maintainers and
-				contributors in the chat. This inspired David to create his own format,
-				inviting maintainers and contributors directly onto live streams where
-				they could not only assist with technical issues but also discuss their
-				projects' history, purpose, and context.
-			</p>
-
-			<div
-				class="p-4 mb-6 border-l-4 border-primary bg-primary/5 dark:bg-gray-800 dark:border-primary"
-			>
-				<h4 class="text-lg font-medium text-primary dark:text-primary">
-					Evolution of the Format
-				</h4>
-				<p class="text-sm text-gray-700 dark:text-gray-300">
-					Before being called "Rawkode Live," the stream was named "RTFM,"
-					reflecting its premise of guiding people through open source projects
-					using official documentation and examples.
-				</p>
-			</div>
-
-			<div class="section-divider"></div>
-
-			<H2Highlight
-				title="Klustered: An Innovative Learning Format"
-				highlightWords="Innovative"
-			/>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				In 2021, David launched a bold new educational format called <a href="/search?q=Klustered" class="text-primary hover:underline">Klustered</a>.
-				The premise was simple but challenging: experts would attempt to
-				troubleshoot deliberately broken <a href="/technology/kubernetes" class="text-primary hover:underline">Kubernetes</a> clusters in real-time. This
-				innovative approach to learning through problem-solving quickly became
-				one of Rawkode Academy's most popular series, with David hosting the
-				first episode alongside guest Walid Shaari.
-			</p>
-
-			<div class="mb-6 flex justify-center">
-				<div class="video-container">
-					<iframe
-						width="560"
-						height="315"
-						src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
-						title="YouTube video player"
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-						allowfullscreen
-						class="shadow-lg rounded-lg"></iframe>
-					<p class="text-sm text-center mt-2 text-gray-500 dark:text-gray-400">
-						The first episode of Klustered
-					</p>
-				</div>
-			</div>
-
-			<div class="section-divider"></div>
-
-			<H2Highlight title="Rawkode Academy Today" highlightWords="Today" />
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				Today, Rawkode Academy continues to evolve as a premier educational
-				platform for cloud-native technologies. We offer a diverse range of
-				content including live streams with project maintainers, technical
-				tutorials, problem-solving sessions, and in-depth explorations of
-				emerging technologies in the cloud-native ecosystem.
-			</p>
-
-			<p class="mb-4 text-gray-600 dark:text-gray-300">
-				Our content is designed for developers and operators at all skill
-				levels, from those just beginning their journey with containers and
-				<a href="/technology/kubernetes" class="text-primary hover:underline">Kubernetes</a> to experienced professionals looking to deepen their
-				expertise or explore new tools and approaches.
-			</p>
-
-			<div
-				class="mt-8 mb-8 bg-linear-to-r from-primary to-secondary p-6 rounded-lg shadow-lg"
-			>
-				<h3 class="text-xl font-bold text-white mb-4">Join Our Community</h3>
-				<p class="text-white mb-4">
-					Whether you're looking to learn new skills, stay updated on the latest
-					cloud-native technologies, or connect with like-minded professionals,
-					Rawkode Academy has something for you.
-				</p>
-				<div class="flex flex-wrap justify-center mt-4 gap-4">
-                                        <a
-                                                href="/shows"
-                                                class="bg-white text-primary font-bold py-2 px-6 rounded-full hover:bg-gray-100 transition duration-300"
-                                        >
-                                                Explore Our Shows
-                                        </a>
-					<a
-						href="/articles"
-						class="bg-transparent text-white font-bold py-2 px-6 rounded-full border border-white hover:bg-white hover:text-primary transition duration-300"
-					>
-						Read Our Articles
-					</a>
-				</div>
-			</div>
-		</div>
-	</div>
+        <section class="relative isolate overflow-hidden py-20">
+                <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary/20 to-transparent opacity-50 blur-3xl"></div>
+                <div class="relative mx-auto max-w-5xl rounded-[40px] border border-white/30 bg-white/80 px-8 py-12 text-center shadow-[0_40px_120px_rgba(14,30,37,0.35)] dark:border-white/10 dark:bg-gray-900/80">
+                        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Join the community</p>
+                        <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Bring Rawkode Academy into your week</h2>
+                        <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                Subscribe to our shows, share your projects, or invite us to collaborate with your engineering organization. Together we'll keep the
+                                Cloud Native ecosystem open, welcoming, and practical.
+                        </p>
+                        <div class="mt-8 flex flex-wrap justify-center gap-4">
+                                <Button href="/shows" variant="primary" size="lg">See upcoming shows</Button>
+                                <Button href="/maintainers/share-your-project" variant="ghost" size="lg">Share your project</Button>
+                        </div>
+                </div>
+        </section>
 </Page>
