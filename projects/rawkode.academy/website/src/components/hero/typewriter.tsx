@@ -20,14 +20,18 @@ const shuffle = (array: string[]): string[] => {
 };
 
 const Typewriter = (props: Props) => {
-	return (
-		<section className="glass-panel relative my-4 md:my-6 rounded-3xl overflow-hidden">
-			<div className="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none" />
-			<div className="relative grid px-4 py-12 mx-auto lg:gap-8 xl:gap-0 lg:py-24 lg:grid-cols-12 max-w-7xl">
-				<div className="mr-auto place-self-center lg:col-span-7">
-					<h1 className="mb-6 text-4xl font-bold tracking-tight leading-none md:text-5xl xl:text-6xl text-black dark:text-white">
-						<TypeAnimation
-							className="bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent"
+        return (
+                <section className="glass-panel relative mt-8 md:mt-12 mb-6 rounded-3xl overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none" />
+                        <div className="relative grid max-w-6xl px-6 py-10 mx-auto gap-8 lg:gap-10 lg:py-20 lg:grid-cols-12">
+                                <div className="mr-auto place-self-center space-y-2 lg:col-span-7">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/90 dark:text-primary-light">
+                                                Cloud Native Education
+                                        </p>
+                                        <h1 className="text-balance text-3xl font-bold tracking-tight leading-tight text-black dark:text-white sm:text-4xl md:text-5xl xl:text-6xl">
+                                                <span className="block text-3xl sm:text-4xl md:text-5xl xl:text-6xl">
+                                                        <TypeAnimation
+                                                                className="inline-block bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap"
 							sequence={shuffle(props.rotatedPrefixes).reduce<
 								Array<string | number>
 							>((acc, prefix: string) => [...acc, prefix, 1250], [])}
@@ -38,8 +42,9 @@ const Typewriter = (props: Props) => {
 							cursor
 							repeat={Number.POSITIVE_INFINITY}
 						/>
-						<br />
-						<span>
+                                                </span>
+                                                <br />
+                                                <span className="block text-pretty">
 							{props.suffix.split(props.highlight).map((part, index, array) => {
 								// If this is the last part, just return it
 								if (index === array.length - 1) {
@@ -57,54 +62,56 @@ const Typewriter = (props: Props) => {
 								);
 							})}
 						</span>
-					</h1>
-					<p className="mb-8 text-gray-600 lg:mb-10 md:text-lg lg:text-xl dark:text-gray-400 max-w-3xl">
-						Navigating the Cloud Native landscape can be tough and just keeping
-						your head above water is a challenge.
-						<br />
-						<br />
-						<span className="font-medium text-black dark:text-white">
-							We're here to help.
-						</span>
-					</p>
-					<a
-						href={props.primaryButton.link}
-						target={props.primaryButton.newWindow ? "_blank" : "_self"}
-						className="inline-flex items-center justify-center px-5 py-3 mr-3 text-base font-medium text-center rounded-xl text-white bg-linear-to-br from-primary/90 to-secondary/90 hover:from-primary hover:to-secondary backdrop-blur-md shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 border border-primary/30"
-					>
-						{props.primaryButton.text}
-						<svg
-							className="w-5 h-5 ml-2 -mr-1"
-							fill="currentColor"
-							viewBox="0 0 20 20"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								fillRule="evenodd"
-								d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-								clipRule="evenodd"
-							/>
-						</svg>
-					</a>
+                                        </h1>
+                                        <p className="text-gray-600 md:text-lg lg:text-xl dark:text-gray-400 max-w-3xl">
+                                                Navigating the Cloud Native landscape can be tough and just keeping
+                                                your head above water is a challenge.
+                                                <br />
+                                                <br />
+                                                <span className="font-medium text-black dark:text-white">
+                                                        We're here to help.
+                                                </span>
+                                        </p>
+                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                                <a
+                                                        href={props.primaryButton.link}
+                                                        target={props.primaryButton.newWindow ? "_blank" : "_self"}
+                                                        className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-center rounded-xl text-white bg-linear-to-br from-primary/90 to-secondary/90 hover:from-primary hover:to-secondary backdrop-blur-md shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 border border-primary/30"
+                                                >
+                                                        {props.primaryButton.text}
+                                                        <svg
+                                                                className="w-5 h-5 ml-2 -mr-1"
+                                                                fill="currentColor"
+                                                                viewBox="0 0 20 20"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                                <path
+                                                                        fillRule="evenodd"
+                                                                        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                                                                        clipRule="evenodd"
+                                                                />
+                                                        </svg>
+                                                </a>
 
-					<a
-						href={props.secondaryButton.link}
-						target={props.secondaryButton.newWindow ? "_blank" : "_self"}
-						className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 dark:text-white bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg border border-white/50 dark:border-gray-600/50 rounded-xl hover:bg-white/70 dark:hover:bg-gray-700/70 focus:ring-4 focus:ring-gray-100/50 dark:focus:ring-gray-700/50 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
-					>
-						{props.secondaryButton.text}
-					</a>
-				</div>
-				<div className="hidden lg:mt-0 lg:col-span-4 lg:flex">
-					<img
-						src={props.image.src}
-						alt="Mix of Cloud Native Project Logos"
-						className="object-contain w-full h-auto"
-					/>
-				</div>
-			</div>
-		</section>
-	);
+                                                <a
+                                                        href={props.secondaryButton.link}
+                                                        target={props.secondaryButton.newWindow ? "_blank" : "_self"}
+                                                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-center text-gray-900 dark:text-white bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg border border-white/60 dark:border-gray-600/60 rounded-xl hover:bg-white/80 dark:hover:bg-gray-700/80 focus-visible:ring-2 focus-visible:ring-primary/40 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+                                                >
+                                                        {props.secondaryButton.text}
+                                                </a>
+                                        </div>
+                                </div>
+                                <div className="hidden lg:mt-0 lg:col-span-4 lg:flex">
+                                        <img
+                                                src={props.image.src}
+                                                alt="Mix of Cloud Native Project Logos"
+                                                className="object-contain w-full h-auto drop-shadow-2xl"
+                                        />
+                                </div>
+                        </div>
+                </section>
+        );
 };
 
 export default Typewriter;
