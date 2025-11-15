@@ -1,10 +1,11 @@
 import { Command } from "cmdk";
 import {
-	type ReactElement,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
+        type ReactElement,
+        useCallback,
+        useEffect,
+        useMemo,
+        useRef,
+        useState,
 } from "react";
 import { SkeletonList } from "@/components/common/SkeletonList";
 import { getCategoryIcon, GitHubIcon } from "./icons";
@@ -18,15 +19,17 @@ import {
 import "./styles.css";
 
 interface NavigationItem {
-	id: string;
-	title: string;
-	description?: string;
-	href?: string;
-	category: string;
-	keywords?: string[];
-	action?: () => void;
-	theme?: Theme;
+        id: string;
+        title: string;
+        description?: string;
+        href?: string;
+        category: string;
+        keywords?: string[];
+        action?: () => boolean | void;
+        theme?: Theme;
 }
+
+type CommandPage = "root" | "themes";
 
 interface CommandPaletteProps {
 	isOpen: boolean;
@@ -40,11 +43,25 @@ export default function CommandPalette({
 	const [search, setSearch] = useState("");
 	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
 	const [articleItems, setArticleItems] = useState<NavigationItem[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
-	const inputRef = useRef<HTMLInputElement>(null);
-	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const [currentTheme, setCurrentTheme] = useState<Theme>("rawkode-green");
+        const [isLoading, setIsLoading] = useState(true);
+        const [isSearchingArticles, setIsSearchingArticles] = useState(false);
+        const inputRef = useRef<HTMLInputElement>(null);
+        const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+        const [currentTheme, setCurrentTheme] = useState<Theme>("rawkode-green");
+        const [pages, setPages] = useState<CommandPage[]>(["root"]);
+
+        const activePage = pages[pages.length - 1];
+        const isRootPage = activePage === "root";
+
+        const goToPage = useCallback((page: CommandPage) => {
+                setPages((prev) => [...prev, page]);
+                setSearch("");
+        }, []);
+
+        const goBack = useCallback(() => {
+                setPages((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+                setSearch("");
+        }, []);
 
 	const customFilter = (value: string, search: string): number => {
 		if (!search.trim()) return 1; // Show all items when search is empty
@@ -56,22 +73,39 @@ export default function CommandPalette({
 		return searchTerms.every((term) => valueLower.includes(term)) ? 1 : 0;
 	};
 
-	const themeItems = useMemo(
-		() =>
-			ALL_THEMES.map((theme) => ({
-				id: `theme-${theme}`,
-				title: getThemeDisplayName(theme),
-				description: `Switch to ${getThemeDisplayName(theme)} theme`,
-				category: "Themes",
-				keywords: ["theme", "color", "appearance", theme],
-				theme,
-				action: () => {
-					setTheme(theme);
-					setCurrentTheme(theme);
-				},
-			})),
-		[],
-	);
+        const themeItems = useMemo(
+                () =>
+                        ALL_THEMES.map((theme) => ({
+                                id: `theme-${theme}`,
+                                title: getThemeDisplayName(theme),
+                                description: `Switch to ${getThemeDisplayName(theme)} theme`,
+                                category: "Themes",
+                                keywords: ["theme", "color", "appearance", theme],
+                                theme,
+                                action: () => {
+                                        setTheme(theme);
+                                        setCurrentTheme(theme);
+                                },
+                        })),
+                [],
+        );
+
+        const commandItems = useMemo(
+                () => [
+                        {
+                                id: "command-change-theme",
+                                title: "Change theme",
+                                description: "Choose a different color theme",
+                                category: "Commands",
+                                keywords: ["theme", "appearance", "color", "change"],
+                                action: () => {
+                                        goToPage("themes");
+                                        return false;
+                                },
+                        },
+                ],
+                [goToPage],
+        );
 
 	useEffect(() => {
 		const fetchNavigationItems = async () => {
@@ -112,15 +146,21 @@ export default function CommandPalette({
 	}, []);
 
 	// Search for articles when user types
-	useEffect(() => {
-		if (searchTimeoutRef.current) {
-			clearTimeout(searchTimeoutRef.current);
-		}
+        useEffect(() => {
+                if (searchTimeoutRef.current) {
+                        clearTimeout(searchTimeoutRef.current);
+                }
 
-		if (search.length >= 2) {
-			setIsSearchingArticles(true);
-			searchTimeoutRef.current = setTimeout(async () => {
-				try {
+                if (activePage !== "root") {
+                        setArticleItems([]);
+                        setIsSearchingArticles(false);
+                        return;
+                }
+
+                if (search.length >= 2) {
+                        setIsSearchingArticles(true);
+                        searchTimeoutRef.current = setTimeout(async () => {
+                                try {
 					const response = await fetch(
 						`/api/search-articles.json?q=${encodeURIComponent(search)}`,
 					);
@@ -144,14 +184,14 @@ export default function CommandPalette({
 				clearTimeout(searchTimeoutRef.current);
 			}
 		};
-	}, [search]);
+        }, [activePage, search]);
 
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") {
-				onClose();
-			}
-		};
+        useEffect(() => {
+                const handleKeyDown = (e: KeyboardEvent) => {
+                        if (e.key === "Escape") {
+                                onClose();
+                        }
+                };
 
 		if (isOpen) {
 			document.addEventListener("keydown", handleKeyDown);
@@ -168,12 +208,21 @@ export default function CommandPalette({
 		};
 	}, [isOpen, onClose]);
 
-	const handleSelect = (item: NavigationItem) => {
-		if (item.action) {
-			item.action();
-			onClose();
-			return;
-		}
+        useEffect(() => {
+                if (!isOpen) {
+                        setPages(["root"]);
+                        setSearch("");
+                }
+        }, [isOpen]);
+
+        const handleSelect = (item: NavigationItem) => {
+                if (item.action) {
+                        const shouldClose = item.action();
+                        if (shouldClose !== false) {
+                                onClose();
+                        }
+                        return;
+                }
 
 		if (!item.href) return;
 
@@ -201,16 +250,31 @@ export default function CommandPalette({
 		return getCategoryIcon(item.category);
 	};
 
-	if (!isOpen) return null;
+        if (!isOpen) return null;
 
-	// Combine navigation items, article items, and theme items
-	const allItems = [...themeItems, ...navigationItems, ...articleItems];
+        const rootItems = [...commandItems, ...navigationItems, ...articleItems];
+        const themePageItems = [
+                {
+                        id: "command-back-to-root",
+                        title: "Back to commands",
+                        description: "Return to the main menu",
+                        category: "Commands",
+                        keywords: ["back", "commands", "themes", "return"],
+                        action: () => {
+                                goBack();
+                                return false;
+                        },
+                },
+                ...themeItems,
+        ];
 
-	const groupedItems = allItems.reduce(
-		(acc, item) => {
-			if (!acc[item.category]) {
-				acc[item.category] = [];
-			}
+        const displayedItems = activePage === "themes" ? themePageItems : rootItems;
+
+        const groupedItems = displayedItems.reduce(
+                (acc, item) => {
+                        if (!acc[item.category]) {
+                                acc[item.category] = [];
+                        }
 			acc[item.category]?.push(item);
 			return acc;
 		},
@@ -254,12 +318,16 @@ export default function CommandPalette({
 									d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
 								/>
 							</svg>
-							<Command.Input
-								ref={inputRef}
-								placeholder="Search pages..."
-								value={search}
-								onValueChange={setSearch}
-								className="command-palette-input"
+                                                        <Command.Input
+                                                                ref={inputRef}
+                                                                placeholder={
+                                                                        activePage === "themes"
+                                                                                ? "Search themes..."
+                                                                                : "Search pages..."
+                                                                }
+                                                                value={search}
+                                                                onValueChange={setSearch}
+                                                                className="command-palette-input"
 								style={{
 									paddingLeft: "52px",
 									paddingRight: "70px",
@@ -294,10 +362,13 @@ export default function CommandPalette({
 							</div>
 						)}
 
-						{isSearchingArticles && !isLoading && search.length >= 2 && (
-							<div className="command-palette-searching">
-								<SkeletonList
-									items={3}
+                                                {isRootPage &&
+                                                        isSearchingArticles &&
+                                                        !isLoading &&
+                                                        search.length >= 2 && (
+                                                        <div className="command-palette-searching">
+                                                                <SkeletonList
+                                                                        items={3}
 									showIcon={true}
 									iconSize="1.5rem"
 									showSubtitle={true}
@@ -306,11 +377,13 @@ export default function CommandPalette({
 							</div>
 						)}
 
-						<Command.Empty className="command-palette-empty">
-							{!isLoading &&
-								!isSearchingArticles &&
-								`No results found for "${search}"`}
-						</Command.Empty>
+                                                <Command.Empty className="command-palette-empty">
+                                                        {!isLoading &&
+                                                                !isSearchingArticles &&
+                                                                (activePage === "themes"
+                                                                        ? `No themes match "${search}"`
+                                                                        : `No results found for "${search}"`)}
+                                                </Command.Empty>
 
 						{Object.entries(groupedItems).map(([category, items]) => {
 							const CategoryIcon = getCategoryIcon(category);
