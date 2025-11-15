@@ -9,21 +9,30 @@
 	(function () {
 		const THEME_STORAGE_KEY = "rawkode-theme";
 		const DEFAULT_THEME = "rawkode-green";
+		const ALL_THEMES = [
+			"rawkode-green",
+			"rawkode-blue",
+			"catppuccin",
+			"dracula",
+			"solarized",
+			"pride",
+			"lgbtq",
+		];
 
 		// Get stored theme or default
 		let theme = DEFAULT_THEME;
 		try {
 			const stored = localStorage.getItem(THEME_STORAGE_KEY);
-			if (stored === "rawkode-green" || stored === "rawkode-blue") {
+			if (stored && ALL_THEMES.includes(stored)) {
 				theme = stored;
 			}
 		} catch (e) {
 			// localStorage might not be available
 		}
 
-		// Apply theme immediately
-		if (theme === "rawkode-blue") {
-			document.documentElement.setAttribute("data-theme", "rawkode-blue");
+		// Apply theme immediately (rawkode-green is the default, so no attribute needed)
+		if (theme !== "rawkode-green") {
+			document.documentElement.setAttribute("data-theme", theme);
 		}
 	})();
 </script>
