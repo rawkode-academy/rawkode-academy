@@ -8,7 +8,7 @@ import TopicHub from "@/components/technology/TopicHub.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths } from "astro";
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import matter from "gray-matter";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -132,11 +132,28 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 let { technology } = Astro.props as { technology?: Technology };
+
+// Get the technology entry and render markdown content
+const id = Astro.params.id as string;
+const items = await getCollection("technologies");
+const technologyEntry = items.find((x) => x.id === id);
+let Content: any = null;
+let hasContent = false;
+
+if (technologyEntry) {
+	try {
+		const rendered = await render(technologyEntry);
+		Content = rendered.Content;
+		// Check if there's actual content beyond just whitespace
+		hasContent = Boolean(technologyEntry.body && technologyEntry.body.trim().length > 0);
+	} catch (err) {
+		console.warn("Failed to render technology content:", err);
+	}
+}
+
 if (!technology) {
 	try {
-		const id = Astro.params.id as string;
-		const items = await getCollection("technologies");
-		const e = items.find((x) => x.id === id);
+		const e = technologyEntry;
 		if (e) {
 			const icon = (e as any).data.icon;
 			const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
@@ -375,15 +392,46 @@ const placeholderLogo = "/apple-touch-icon.png"; // Define a placeholder
 			</div>
 		</section>
 
-		<!-- Content Sections -->
+		<!-- Videos and Related Content -->
 		<div class="w-full px-4 pb-12">
 			<div class="max-w-7xl mx-auto">
-				<TopicHub 
+				<TopicHub
 					technologyId={technology.id}
 					technologyName={technology.name}
 					videos={technology.videos || []}
 				/>
 			</div>
 		</div>
+
+		<!-- Comprehensive Guide Content -->
+		{hasContent && Content && (
+			<div class="w-full px-4 pb-12">
+				<div class="max-w-4xl mx-auto">
+					<div class="mb-8">
+						<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+							Complete Guide
+						</h2>
+						<p class="text-gray-600 dark:text-gray-400">
+							Comprehensive documentation, best practices, and getting started tutorials
+						</p>
+					</div>
+					<article class="prose prose-lg dark:prose-invert max-w-none
+						prose-headings:font-bold
+						prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4
+						prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
+						prose-p:text-gray-700 dark:prose-p:text-gray-300
+						prose-a:text-primary hover:prose-a:text-secondary prose-a:no-underline
+						prose-code:text-primary prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+						prose-pre:bg-gray-900 dark:prose-pre:bg-black prose-pre:border prose-pre:border-gray-700
+						prose-ul:list-disc prose-ol:list-decimal
+						prose-li:text-gray-700 dark:prose-li:text-gray-300
+						prose-strong:text-gray-900 dark:prose-strong:text-white
+						prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:italic
+						prose-img:rounded-lg prose-img:shadow-lg">
+						<Content />
+					</article>
+				</div>
+			</div>
+		)}
 	</div>
 </Page>
