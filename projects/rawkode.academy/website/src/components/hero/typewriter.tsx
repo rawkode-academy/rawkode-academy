@@ -20,14 +20,11 @@ const shuffle = (array: string[]): string[] => {
 };
 
 const Typewriter = (props: Props) => {
-        return (
-                <section className="glass-panel relative mt-8 md:mt-12 mb-6 rounded-3xl overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none" />
-                        <div className="relative grid max-w-6xl px-6 py-10 mx-auto gap-8 lg:gap-10 lg:py-20 lg:grid-cols-12">
-                                <div className="mr-auto place-self-center space-y-2 lg:col-span-7">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/90 dark:text-primary-light">
-                                                Cloud Native Education
-                                        </p>
+		return (
+			<section className="glass-panel relative mt-12 md:mt-8 mb-6 rounded-3xl overflow-hidden">
+				<div className="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none" />
+				<div className="relative grid max-w-6xl px-6 pt-0 pb-10 mx-auto gap-8 lg:gap-10 lg:pt-6 lg:pb-16 lg:grid-cols-12">
+                                <div className="mr-auto place-self-center space-y-4 lg:col-span-7">
                                         <h1 className="text-balance text-3xl font-bold tracking-tight leading-tight text-black dark:text-white sm:text-4xl md:text-5xl xl:text-6xl">
                                                 <span className="block text-3xl sm:text-4xl md:text-5xl xl:text-6xl">
                                                         <TypeAnimation
@@ -43,8 +40,7 @@ const Typewriter = (props: Props) => {
 							repeat={Number.POSITIVE_INFINITY}
 						/>
                                                 </span>
-                                                <br />
-                                                <span className="block text-pretty">
+                                                <span className="block text-pretty mt-2 sm:mt-3">
 							{props.suffix.split(props.highlight).map((part, index, array) => {
 								// If this is the last part, just return it
 								if (index === array.length - 1) {
