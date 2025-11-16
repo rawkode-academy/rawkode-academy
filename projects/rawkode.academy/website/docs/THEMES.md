@@ -4,6 +4,8 @@ The website supports multiple color themes that can be switched by users.
 
 ## Available Themes
 
+Each theme exposes dedicated light and dark palettes so typography, borders, and glass panels stay legible regardless of the "dark" class on the `<html>` element. During the audit we introduced shared tokens (`--surface-base`, `--surface-overlay`, `--surface-card`, `--surface-card-muted`, `--surface-border`, `--surface-border-strong`, and shadow definitions) that every theme now sets explicitly for both modes along with bespoke gradients for `--app-backdrop`.
+
 ### 1. Rawkode Green (Default)
 - **Primary Color**: `#04B59C` (Teal)
 - **Secondary Color**: `#85FF95` (Green)
@@ -34,12 +36,16 @@ The website supports multiple color themes that can be switched by users.
 - **Secondary Color**: `#FFCA3A` (Yellow)
 - **Accent Color**: `#6A4C93` (Purple)
 - Vibrant Cotton Candy color palette with 5 colors: Red, Yellow, Green, Blue, Purple
+- **Light Surfaces**: Pastel glass panels with warm highlights keep the cotton candy palette soft while maintaining contrast on white typography.
+- **Dark Surfaces**: Deep berry gradients paired with glowing yellow borders preserve the vibrancy of the pride stripes without washing out controls.
 
 ### 7. LGBTQ+ (Transgender Pride Flag)
 - **Primary Color**: `#5BCEFA` (Light Blue)
 - **Secondary Color**: `#F5A9B8` (Pink)
 - **Accent Color**: `#FFFFFF` (White)
 - Based on the transgender pride flag colors
+- **Light Surfaces**: Frosted cyan cards and subtle borders echo the white stripe of the flag while ensuring icons remain visible on bright backgrounds.
+- **Dark Surfaces**: Midnight blue gradients with luminous cyan and pink glows keep the theme readable when `.dark` is applied.
 
 ## How to Switch Themes
 
