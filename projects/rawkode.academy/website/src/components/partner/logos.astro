@@ -10,7 +10,6 @@ interface Partner {
 	url: string;
 	since: string;
 	logo: Logo;
-	level: "Malt" | "Blend" | "Dram" | "Nip";
 	description?: string;
 	industry?: string;
 }
@@ -20,7 +19,6 @@ type Partners = Partner[];
 const currentPartners: Partners = [
 	{
 		name: "Heroku",
-		level: "Malt",
 		since: "2025",
 		logo: {
 			image: await import("./logos/heroku.svg?raw"),
@@ -34,7 +32,6 @@ const currentPartners: Partners = [
 	},
 	{
 		name: "Spectro Cloud",
-		level: "Malt",
 		since: "2025",
 		logo: {
 			image: await import("./logos/spectrocloud.svg?raw"),
@@ -48,7 +45,6 @@ const currentPartners: Partners = [
 	},
 	{
 		name: "WunderGraph",
-		level: "Malt",
 		since: "2025",
 		logo: {
 			image: await import("./logos/wundergraph.svg?raw"),
@@ -62,7 +58,6 @@ const currentPartners: Partners = [
 	},
 	{
 		name: "Zitadel",
-		level: "Blend",
 		since: "2025",
 		logo: {
 			image: await import("./logos/zitadel.svg?raw"),
@@ -76,7 +71,6 @@ const currentPartners: Partners = [
 	},
 	{
 		name: "Guidepad",
-		level: "Dram",
 		since: "2024",
 		logo: {
 			image: await import("./logos/guidepad.svg?raw"),
@@ -93,7 +87,6 @@ const currentPartners: Partners = [
 const previousPartners: Partners = [
 	{
 		name: "Microsoft Azure",
-		level: "Nip",
 		since: "2024",
 		logo: {
 			image: await import("./logos/microsoft.svg?raw"),
@@ -107,7 +100,6 @@ const previousPartners: Partners = [
 	},
 	{
 		name: "Fermyon",
-		level: "Nip",
 		since: "2024",
 		logo: {
 			image: await import("./logos/fermyon.svg?raw"),
@@ -121,7 +113,6 @@ const previousPartners: Partners = [
 	},
 	{
 		name: "ControlPlane",
-		level: "Dram",
 		since: "2024",
 		logo: {
 			image: await import("./logos/controlplane.svg?raw"),
@@ -135,7 +126,6 @@ const previousPartners: Partners = [
 	},
 	{
 		name: "ngrok",
-		level: "Blend",
 		since: "2024",
 		logo: {
 			image: await import("./logos/ngrok.svg?raw"),
@@ -148,50 +138,132 @@ const previousPartners: Partners = [
 		industry: "Developer Tools",
 	},
 ];
+
 ---
 
-<div class="mb-8">
-	<p class="text-center text-lg text-gray-600 dark:text-gray-300 mb-8">
-		We're proud to collaborate with industry leaders who share our commitment to developer excellence.
-		Our partnerships drive innovation and create valuable opportunities for the developer community.
-	</p>
+<div class="partner-showcase space-y-12">
+	<div class="partner-intro text-center max-w-3xl mx-auto">
+		<p class="text-lg text-gray-600 dark:text-gray-300">
+			We collaborate with engineering-first companies that share our obsession with developer experience.
+			Each partnership helps us tell richer stories, build better tooling, and push the Cloud Native ecosystem forward.
+		</p>
+	</div>
+
+	<div class="grid gap-6 sm:gap-8 md:grid-cols-2 xl:grid-cols-3">
+		{currentPartners.map(async (partner) => (
+			<article
+				class="partner-card group"
+				style={`--partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark};`}
+			>
+				<div class="partner-top">
+					<div class="partner-logo-tile">
+						<div
+							class="partner-logo"
+							style={`color: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`}
+						>
+							<Fragment set:html={partner.logo.image.default} />
+						</div>
+					</div>
+					<div class="partner-since">
+						<span>Partner since</span>
+						<strong>{partner.since}</strong>
+					</div>
+				</div>
+
+				<div class="space-y-3">
+					<div>
+						<h3 class="text-xl font-semibold text-white">{partner.name}</h3>
+						{partner.industry && (
+							<p class="text-xs uppercase tracking-[0.2em] text-white/70">
+								{partner.industry}
+							</p>
+						)}
+					</div>
+					{partner.description && (
+						<p class="text-sm leading-relaxed text-white/85">
+							{partner.description}
+						</p>
+					)}
+				</div>
+
+				<a
+					href={partner.url}
+					title={`Visit ${partner.name} website`}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="partner-link inline-flex items-center gap-2 text-sm font-semibold"
+				>
+					Visit {partner.name}
+					<svg
+						aria-hidden="true"
+						class="w-4 h-4"
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+					>
+						<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+						<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+					</svg>
+				</a>
+			</article>
+		))}
+	</div>
+
+	<div class="partner-wall rounded-[28px] p-6 sm:p-8">
+		<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+			<div>
+				<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+					Previous Partners
+				</h3>
+				<p class="text-sm text-gray-600 dark:text-gray-300 max-w-2xl">
+					Thank you to the teams who trusted us to tell their story and educate developers around the world.
+				</p>
+			</div>
+			<span class="partner-wall-chip">
+				{previousPartners.length}+ brands
+			</span>
+		</div>
+
+		<div class="partner-wall-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+			{previousPartners.map(async (partner) => (
+				<div
+					class="partner-wall-logo"
+					title={partner.name}
+					style={`--partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark};`}
+				>
+					<Fragment set:html={partner.logo.image.default} />
+				</div>
+			))}
+		</div>
+	</div>
 </div>
 
-
 <style is:global>
-    .partner-logo svg {
-        max-width: 100%;
-        max-height: 100%;
-        width: auto;
-        height: auto;
-        display: block;
-        margin: 0 auto;
-        object-fit: contain;
-    }
-
 	.partner-card {
 		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		border-radius: 1.75rem;
+		padding: 1.75rem;
+		background-image: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--partner-fill-light) 60%, #0f172a 40%),
+			color-mix(in srgb, var(--partner-fill-dark) 70%, #020617 30%)
+		);
+		border: 1px solid color-mix(in srgb, var(--partner-fill-dark), transparent 55%);
+		color: #fff;
+		box-shadow: 0 30px 60px rgba(15, 23, 42, 0.35);
 		overflow: hidden;
-		--partner-text-light: var(--partner-fill-light, #5f5ed7);
-		--partner-text-dark: var(--partner-fill-dark, #666cff);
 	}
 
-		.partner-card::before {
-			content: "";
-			position: absolute;
-			inset: -1px;
-			background:
-				radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--partner-fill-light, #5f5ed7) 55%, transparent) 0%, transparent 55%),
-				linear-gradient(140deg, color-mix(in srgb, var(--partner-fill-light, #5f5ed7) 35%, transparent) 0%, transparent 70%);
-			opacity: 0.4;
-			pointer-events: none;
-			z-index: 0;
-	}
-
-	.dark .partner-card::before {
-		background: radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--partner-fill-dark, #666cff) 60%, transparent) 0%, transparent 55%),
-			linear-gradient(140deg, color-mix(in srgb, var(--partner-fill-dark, #666cff) 45%, transparent) 0%, transparent 70%);
+	.partner-card::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(circle at 120% -15%, rgba(255, 255, 255, 0.35), transparent 55%);
 		opacity: 0.6;
+		pointer-events: none;
 	}
 
 	.partner-card > * {
@@ -199,128 +271,124 @@ const previousPartners: Partners = [
 		z-index: 1;
 	}
 
-	.partner-cta {
-		box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
-		background-image: linear-gradient(135deg, var(--cta-start, var(--partner-fill-light, #5f5ed7)), var(--cta-end, var(--partner-fill-dark, #8181ff)));
+	.partner-top {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.25rem;
 	}
 
-		.dark .partner-cta {
-			box-shadow: 0 25px 65px rgba(0, 0, 0, 0.55);
-		}
-
-	.partner-text {
-		color: var(--partner-text-light);
+	.partner-logo-tile {
+		width: 5.5rem;
+		height: 5.5rem;
+		border-radius: 1.25rem;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		background: rgba(255, 255, 255, 0.08);
+		display: grid;
+		place-items: center;
+		padding: 0.75rem;
+		flex-shrink: 0;
 	}
 
-	.dark .partner-text {
-		color: var(--partner-text-dark);
+	.partner-logo {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	.partner-text-muted {
-		color: color-mix(in srgb, var(--partner-text-light), white 45%);
+	.partner-logo svg {
+		max-width: 100%;
+		max-height: 3.25rem;
+		width: 100%;
+		height: auto;
+		display: block;
+		color: inherit;
 	}
 
-	.dark .partner-text-muted {
-		color: color-mix(in srgb, var(--partner-text-dark), black 35%);
+	.partner-logo svg * {
+		fill: currentColor !important;
+		stroke: currentColor !important;
 	}
 
-	.partner-chip {
-		border-color: color-mix(in srgb, var(--partner-text-light), white 30%);
+	.partner-since {
+		text-transform: uppercase;
+		font-size: 0.65rem;
+		letter-spacing: 0.28em;
+		color: rgba(255, 255, 255, 0.7);
+		text-align: right;
 	}
 
-	.dark .partner-chip {
-		border-color: color-mix(in srgb, var(--partner-text-dark), black 40%);
+	.partner-since strong {
+		display: block;
+		margin-top: 0.2rem;
+		letter-spacing: normal;
+		font-size: 1rem;
+		color: #fff;
+	}
+
+	.partner-link {
+		color: #fff;
+		position: relative;
+		width: fit-content;
+	}
+
+	.partner-link::after {
+		content: "";
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -2px;
+		height: 1px;
+		background: rgba(255, 255, 255, 0.6);
+		transition: transform 0.2s ease;
+		transform-origin: left;
+	}
+
+	.partner-link:hover::after {
+		transform: scaleX(1.1);
+	}
+
+	.partner-wall {
+		background: linear-gradient(120deg, rgba(15, 23, 42, 0.04), rgba(99, 102, 241, 0.12));
+		border: 1px solid rgba(99, 102, 241, 0.15);
+		box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+	}
+
+	.partner-wall-chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem 1.25rem;
+		border-radius: 999px;
+		background: rgba(15, 23, 42, 0.06);
+		color: rgba(15, 23, 42, 0.7);
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+
+	.dark .partner-wall-chip {
+		background: rgba(255, 255, 255, 0.08);
+		color: rgba(255, 255, 255, 0.85);
+	}
+
+	.partner-wall-logo {
+		border-radius: 1.25rem;
+		border: 1px solid color-mix(in srgb, var(--partner-fill-dark, #94a3b8), rgba(148, 163, 184, 0.7));
+		background: color-mix(in srgb, var(--partner-fill-light, #f5f5f5), rgba(255, 255, 255, 0.9));
+		padding: 0.75rem 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 4.5rem;
+		opacity: 0.85;
+		transition: transform 0.2s ease, opacity 0.2s ease;
+	}
+
+	.partner-wall-logo:hover {
+		transform: translateY(-2px);
+		opacity: 1;
 	}
 </style>
-
-<!-- Current Partners -->
-<div class="mb-16">
-	<h3 class="text-2xl font-bold text-center mb-8 text-gray-900 dark:text-white">Current Partners</h3>
-	<div class="grid grid-cols-1 text-center gap-8 md:grid-cols-2 xl:grid-cols-3">
-		{
-			currentPartners.map(async (partner) => (
-					<div
-						class="partner-card glass-card rounded-3xl p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40"
-						style={`--partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark}; --partner-text-light: ${partner.logo.fillLight}; --partner-text-dark: ${partner.logo.fillDark};`}
-					>
-						<div class="flex flex-col h-full relative z-10">
-							<div class="grow">
-								<div
-									class="partner-logo flex justify-center items-center w-full h-24 mx-auto mb-4 transition-transform duration-300 group-hover:scale-105"
-									style={`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`}
-								>
-									<div class="w-48 h-24 flex items-center justify-center">
-										<Fragment set:html={partner.logo.image.default} />
-									</div>
-								</div>
-
-							<div class="flex items-center justify-center mt-3 mb-4">
-								<span class="glass-chip partner-chip text-xs tracking-wide uppercase">
-									Since {partner.since}
-								</span>
-							</div>
-
-							{partner.industry && (
-								<div class="mb-3">
-									<span class="text-sm font-semibold partner-text">
-										{partner.industry}
-									</span>
-								</div>
-							)}
-
-							{partner.description && (
-								<p class="text-sm partner-text-muted mb-4">
-									{partner.description}
-								</p>
-							)}
-						</div>
-							<div class="mt-auto">
-								<a
-									href={partner.url}
-									title={`Visit ${partner.name} website`}
-									target="_blank"
-									class="partner-cta inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/60 focus-visible:ring-offset-white dark:focus-visible:ring-offset-transparent transition-all duration-200 gap-2 hover:-translate-y-0.5"
-									style={`--cta-start: ${partner.logo.fillLight}; --cta-end: ${partner.logo.fillDark}; --partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark};`}
-									role="button"
-								>
-								<svg aria-hidden="true" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-									<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-									<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-								</svg>
-								Visit {partner.name}
-							</a>
-						</div>
-					</div>
-				</div>
-			))
-		}
-	</div>
-</div>
-
-<!-- Previous Partners -->
-<div class="mt-16 pt-16 border-t border-gray-200 dark:border-gray-700">
-	<h3 class="text-2xl font-bold text-center mb-4 text-gray-900 dark:text-white">Previous Partners</h3>
-	<p class="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
-		We're grateful for the partnerships that have shaped our journey and contributed to the developer community.
-	</p>
-	
-	<!-- Brand Wall Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-        {
-            previousPartners.map(async (partner) => (
-                <div class="group relative flex flex-col items-center gap-2">
-                    <!-- Logo -->
-                    <div
-                        class="partner-logo flex justify-center items-center w-full h-16 mb-3 opacity-60 group-hover:opacity-75 transition-all duration-300"
-                        style={`fill: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`}
-                        title={partner.name}
-                    >
-                        <div class="w-32 flex items-center justify-center">
-                            <Fragment set:html={partner.logo.image.default} />
-                        </div>
-                    </div>
-				</div>
-			))
-		}
-	</div>
-</div>

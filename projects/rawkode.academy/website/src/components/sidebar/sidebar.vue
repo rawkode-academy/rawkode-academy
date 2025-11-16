@@ -79,6 +79,12 @@ const learnNavItems = computed(() => [
 		current: isCurrentPath("/watch"),
 	},
 	{
+		name: "Shows",
+		href: "/shows",
+		icon: TvIcon,
+		current: isCurrentPath("/shows"),
+	},
+	{
 		name: "Articles",
 		href: "/read",
 		icon: NewspaperIcon,
@@ -101,12 +107,6 @@ const learnNavItems = computed(() => [
 		href: "/technology",
 		icon: CubeIcon,
 		current: isCurrentPath("/technology"),
-	},
-	{
-		name: "Shows",
-		href: "/shows",
-		icon: TvIcon,
-		current: isCurrentPath("/shows"),
 	},
 ]);
 
@@ -256,7 +256,7 @@ const currentNavItems = computed(() => {
 			</div>
 
 			<!-- Navigation -->
-			<nav class="flex-1 overflow-y-auto py-6 px-3">
+			<nav class="flex-1 overflow-y-auto py-6 px-3 scroll-fade">
 				<!-- Mode Header -->
 				<div v-if="!isCollapsed" class="mb-4 px-3">
 					<h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -307,26 +307,7 @@ const currentNavItems = computed(() => {
 				</ul>
 			</nav>
 
-			<!-- Footer Links -->
-			<div
-				v-if="!isCollapsed"
-				class="border-t border-white/20 dark:border-gray-700/40 px-3 py-4"
-			>
-				<div class="space-y-1">
-					<a
-						href="/about"
-						class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white rounded-xl border border-transparent hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-[1.02] hover:border-white/30 dark:hover:border-gray-500/50 transition-[background,scale,colors,border] duration-200 will-change-transform"
-					>
-						About
-					</a>
-					<a
-						href="/changelog"
-						class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white rounded-xl border border-transparent hover:bg-white/80 dark:hover:bg-gray-700/80 hover:scale-[1.02] hover:border-white/30 dark:hover:border-gray-500/50 transition-[background,scale,colors,border] duration-200 will-change-transform"
-					>
-						Changelog
-					</a>
-				</div>
-			</div>
+			<!-- Footer links removed from sidebar; available in site footer -->
 		</div>
 	</aside>
 
@@ -371,5 +352,11 @@ const currentNavItems = computed(() => {
 .sidebar-glassmorphism > * {
 	position: relative;
 	z-index: 2;
+}
+
+/* Subtle fade at top/bottom to hint scrollability */
+.scroll-fade {
+	-webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+	mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
 }
 </style>
