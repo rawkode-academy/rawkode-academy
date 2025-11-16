@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import SliderClient from "./slider.vue";
+import type { Testimonial } from "@/types/testimonial";
 
 interface Props {
 	type?: "maintainer" | "partner" | "consulting" | "viewer";
@@ -34,7 +35,7 @@ const filteredTestimonials = type
 	: allTestimonials;
 
 // Limit the number of testimonials if specified and manually create objects with correct property order
-const testimonials = filteredTestimonials.slice(0, limit).map((testimonial) => {
+const testimonials: Testimonial[] = filteredTestimonials.slice(0, limit).map((testimonial) => {
 	const { name, title, image, link } = testimonial.data.author;
 	return {
 		quote: testimonial.data.quote,
@@ -42,29 +43,39 @@ const testimonials = filteredTestimonials.slice(0, limit).map((testimonial) => {
 			name,
 			title,
 			image,
-			link,
+			...(link !== undefined ? { link } : {}),
 		},
 	};
 });
 ---
 
 <section
-	class="relative py-16 md:py-16 overflow-hidden bg-linear-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white"
+	class="relative py-12 sm:py-16 bg-linear-to-b from-gray-50/60 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900 text-gray-900 dark:text-white"
 >
-	<!-- Gradient line at the top -->
-	<div
-		class="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-primary to-secondary"
-	>
+	<div class="pointer-events-none absolute inset-0 opacity-70">
+		<div class="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/40 to-transparent"></div>
+		<div class="absolute inset-y-0 right-0 w-40 bg-linear-to-b from-primary/5 via-secondary/5 to-transparent blur-3xl"></div>
 	</div>
-	<div class="text-center">
-		<h2
-			class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
-		>
-			What {type == "maintainer" ? "Project" : "Our"} <span class="text-primary">{getAudience(type)}</span> Say
-		</h2>
-		<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-			{blurb}
-		</p>
+	<div class="relative mx-auto w-full max-w-6xl px-4 sm:px-6">
+		<div class="md:flex md:items-end md:justify-between md:gap-8">
+			<div class="text-center md:text-left">
+				<p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary/80">
+					Social Proof
+				</p>
+				<h2 class="mt-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+					What {type == "maintainer" ? "Project" : "Our"} <span class="text-primary">{getAudience(type)}</span> Say
+				</h2>
+				<p class="mt-3 text-base text-gray-600 dark:text-gray-300 max-w-2xl">
+					{blurb}
+				</p>
+			</div>
+			<div class="hidden md:flex flex-col text-left text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+				<span class="font-semibold text-gray-700 dark:text-gray-200">Why it matters</span>
+				<span>
+					Quick snippets highlight the impact we're having without forcing mobile visitors to scroll for ages.
+				</span>
+			</div>
+		</div>
+		<SliderClient testimonials={testimonials} client:visible />
 	</div>
-	<SliderClient testimonials={testimonials} client:visible />
 </section>
