@@ -170,6 +170,8 @@ const currentNavItems = computed(() => {
 	if (mode.value === "connect") return connectNavItems.value;
 	return collaborateNavItems.value;
 });
+
+// Note: Learn is rendered as a simple single-column list for clarity
 </script>
 
 <template>
@@ -185,56 +187,50 @@ const currentNavItems = computed(() => {
 		aria-label="Sidebar navigation"
 	>
 		<div class="flex flex-col h-full">
-			<!-- Mode Toggle (Expanded) -->
+			<!-- Mode Toggle (Expanded) - segmented control -->
 			<div
 				v-if="!isCollapsed"
-				class="px-3 py-4 border-b border-white/20 dark:border-gray-700/40"
+				class="px-3 py-3 border-b border-white/20 dark:border-gray-700/40"
 			>
-				<div class="flex flex-col gap-2">
+				<div class="inline-flex w-full rounded-xl border border-white/30 dark:border-gray-600/40 bg-white/50 dark:bg-gray-700/40 backdrop-blur-md overflow-hidden">
 					<button
 						@click="mode = 'learn'; localStorage.setItem('sidebar-mode', 'learn')"
+						:aria-pressed="mode === 'learn'"
+						:aria-label="'Learn mode'"
+						:title="'Learn mode'"
 						:class="[
-							'flex items-start gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200',
-							mode === 'learn'
-								? 'bg-gradient-to-br from-white/90 to-white/70 dark:from-gray-600/95 dark:to-gray-600/80 text-primary dark:text-white shadow-[0_2px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5)] backdrop-blur-md border dark:border-gray-400/50'
-								: 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60 border border-transparent',
+							'flex-1 inline-flex md:flex-row flex-col items-center md:justify-center justify-start gap-1.5 px-2 py-2 text-xs font-medium transition-colors whitespace-nowrap',
+							mode === 'learn' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
 						]"
 					>
-						<BookOpenIcon class="w-5 h-5 flex-shrink-0 mt-0.5" />
-						<div class="flex-1 text-left">
-							<div class="font-semibold">Learn</div>
-							<div class="text-xs opacity-80 mt-0.5">Browse educational content</div>
-						</div>
+						<BookOpenIcon class="w-4 h-4" />
+						<span class="mt-1 md:mt-0 md:ml-0 text-xs md:hidden">Learn</span>
 					</button>
 					<button
 						@click="mode = 'connect'; localStorage.setItem('sidebar-mode', 'connect')"
+						:aria-pressed="mode === 'connect'"
+						:aria-label="'Connect mode'"
+						:title="'Connect mode'"
 						:class="[
-							'flex items-start gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200',
-							mode === 'connect'
-								? 'bg-gradient-to-br from-white/90 to-white/70 dark:from-gray-600/95 dark:to-gray-600/80 text-primary dark:text-white shadow-[0_2px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5)] backdrop-blur-md border dark:border-gray-400/50'
-								: 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60 border border-transparent',
+							'flex-1 inline-flex md:flex-row flex-col items-center md:justify-center justify-start gap-1.5 px-2 py-2 text-xs font-medium transition-colors border-l border-white/30 dark:border-gray-600/40 whitespace-nowrap',
+							mode === 'connect' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
 						]"
 					>
-						<UsersIcon class="w-5 h-5 flex-shrink-0 mt-0.5" />
-						<div class="flex-1 text-left">
-							<div class="font-semibold">Connect</div>
-							<div class="text-xs opacity-80 mt-0.5">Join our community</div>
-						</div>
+						<UsersIcon class="w-4 h-4" />
+						<span class="mt-1 md:mt-0 md:ml-0 text-xs md:hidden">Connect</span>
 					</button>
 					<button
 						@click="mode = 'collaborate'; localStorage.setItem('sidebar-mode', 'collaborate')"
+						:aria-pressed="mode === 'collaborate'"
+						:aria-label="'Partner mode'"
+						:title="'Partner mode'"
 						:class="[
-							'flex items-start gap-3 px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200',
-							mode === 'collaborate'
-								? 'bg-gradient-to-br from-white/90 to-white/70 dark:from-gray-600/95 dark:to-gray-600/80 text-primary dark:text-white shadow-[0_2px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.5)] backdrop-blur-md border dark:border-gray-400/50'
-								: 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-gray-700/60 border border-transparent',
+							'flex-1 inline-flex md:flex-row flex-col items-center md:justify-center justify-start gap-1.5 px-2 py-2 text-xs font-medium transition-colors border-l border-white/30 dark:border-gray-600/40 whitespace-nowrap',
+							mode === 'collaborate' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
 						]"
 					>
-						<BuildingOfficeIcon class="w-5 h-5 flex-shrink-0 mt-0.5" />
-						<div class="flex-1 text-left">
-							<div class="font-semibold">Collaborate</div>
-							<div class="text-xs opacity-80 mt-0.5">Work with us</div>
-						</div>
+						<BuildingOfficeIcon class="w-4 h-4" />
+						<span class="mt-1 md:mt-0 md:ml-0 text-xs md:hidden">Partner</span>
 					</button>
 				</div>
 			</div>
@@ -257,54 +253,49 @@ const currentNavItems = computed(() => {
 
 			<!-- Navigation -->
 			<nav class="flex-1 overflow-y-auto py-6 px-3 scroll-fade">
-				<!-- Mode Header -->
-				<div v-if="!isCollapsed" class="mb-4 px-3">
-					<h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-						{{ mode === 'learn' ? 'Learning Resources' : mode === 'connect' ? 'Get Involved' : 'Partner With Us' }}
-					</h2>
-				</div>
+				<!-- Mode Header removed for a cleaner, denser layout -->
 
-				<!-- Main Navigation -->
-				<ul :class="['space-y-1', isCollapsed ? 'space-y-0.5 pr-1' : '']">
-					<li v-for="item in currentNavItems" :key="item.href">
-						<a
-							:href="item.href"
-							:class="[
-								'flex items-center text-sm font-medium rounded-xl transition-[background,scale,colors,border] duration-200',
-								'group relative will-change-transform border border-transparent w-full',
-								isCollapsed
-									? 'flex-col items-center justify-center text-center gap-0.5 p-2 text-[0.65rem]'
-									: 'px-3 py-2.5',
-								item.current
-									? 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary shadow-[0_2px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] backdrop-blur-md border-primary/30'
-									: isCollapsed
-										? 'text-gray-700 dark:text-gray-100 hover:text-primary dark:hover:text-primary'
-										: 'text-gray-700 dark:text-gray-100 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:text-primary hover:scale-[1.02] hover:border-white/30 dark:hover:border-gray-500/50',
-							]"
-							:aria-current="item.current ? 'page' : undefined"
-							:title="isCollapsed ? item.name : undefined"
-						>
-							<component
-								:is="item.icon"
+				<!-- Main Navigation - single column for all modes -->
+					<ul :class="['space-y-1', isCollapsed ? 'space-y-0.5 pr-1' : '']">
+						<li v-for="item in currentNavItems" :key="item.href">
+							<a
+								:href="item.href"
 								:class="[
-									'flex-shrink-0 transition-colors',
-									isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3',
-									item.current ? 'text-primary' : 'text-gray-500 dark:text-gray-200 group-hover:text-primary',
-								]"
-							/>
-							<span
-								:class="[
-									'transition-opacity duration-200',
+									'flex items-center text-sm font-medium rounded-xl transition-[background,scale,colors,border] duration-200',
+									'group relative will-change-transform border border-transparent w-full',
 									isCollapsed
-										? 'block leading-[1.05] text-center text-[0.6rem] tracking-tight max-w-[3.5rem]'
-										: '',
+										? 'flex-col items-center justify-center text-center gap-0.5 p-2 text-[0.65rem]'
+										: 'px-3 py-2.5',
+									item.current
+										? 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary shadow-[0_2px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] backdrop-blur-md border-primary/30'
+										: isCollapsed
+											? 'text-gray-700 dark:text-gray-100 hover:text-primary dark:hover:text-primary'
+											: 'text-gray-700 dark:text-gray-100 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:text-primary hover:scale-[1.02] hover:border-white/30 dark:hover:border-gray-500/50',
 								]"
+								:aria-current="item.current ? 'page' : undefined"
+								:title="isCollapsed ? item.name : undefined"
 							>
-								{{ item.name }}
-							</span>
-							</a>
-					</li>
-				</ul>
+								<component
+									:is="item.icon"
+									:class="[
+										'flex-shrink-0 transition-colors',
+										isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3',
+										item.current ? 'text-primary' : 'text-gray-500 dark:text-gray-200 group-hover:text-primary',
+									]"
+								/>
+								<span
+									:class="[
+										'transition-opacity duration-200',
+										isCollapsed
+											? 'block leading-[1.05] text-center text-[0.6rem] tracking-tight max-w-[3.5rem]'
+											: '',
+									]"
+								>
+									{{ item.name }}
+								</span>
+								</a>
+						</li>
+					</ul>
 			</nav>
 
 			<!-- Footer links removed from sidebar; available in site footer -->
