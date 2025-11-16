@@ -119,7 +119,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }}
-          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}.rawkode-academy.rawkodeacademy.workers.dev"
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}-rawkode-academy.rawkodeacademy.workers.dev"
           gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"
 
       - name: Remove .map files from preview dist
@@ -137,5 +137,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx wrangler versions upload --config wrangler.design.jsonc --assets ./storybook-static --preview-alias pr-${{ github.event.pull_request.number }}
-          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}.design.rawkodeacademy.workers.dev"
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}-design.rawkodeacademy.workers.dev"
           gh pr comment ${{ github.event.pull_request.number }} --body "Storybook Preview: $PREVIEW_URL"
