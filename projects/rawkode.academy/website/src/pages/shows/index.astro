@@ -18,6 +18,16 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 const showEntries = await getCollection("shows");
 const videos = await getCollection("videos");
 
+const getShowId = (value: unknown): string | null => {
+	if (!value) return null;
+	if (typeof value === "string") return value;
+	if (typeof value === "object" && value !== null && "id" in value) {
+		const id = (value as { id?: unknown }).id;
+		return typeof id === "string" ? id : null;
+	}
+	return null;
+};
+
 const showsToRender: ShowSummary[] = await (async () => {
 	const list: ShowSummary[] = [];
 	for (const s of showEntries) {
@@ -30,7 +40,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 			};
 		});
 		const eps = videos
-			.filter((v) => (v.data.show as string | undefined) === s.data.id)
+			.filter((v) => getShowId(v.data.show) === s.data.id)
 			.map((v) => ({
 				video: {
 					title: v.data.title,

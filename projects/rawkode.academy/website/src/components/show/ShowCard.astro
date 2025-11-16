@@ -25,6 +25,12 @@ const latestEpisode = episodes
 
 const thumbnailUrl = latestEpisode?.video?.thumbnailUrl;
 const latestEpisodeTitle = latestEpisode?.video?.title;
+const latestEpisodePublishedAt = latestEpisode?.video?.publishedAt;
+const latestEpisodeDate = latestEpisodePublishedAt
+	? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
+			new Date(latestEpisodePublishedAt),
+		)
+	: null;
 ---
 
 <a
@@ -85,8 +91,14 @@ const latestEpisodeTitle = latestEpisode?.video?.title;
                                 )}
                         </p>
                         {latestEpisodeTitle && (
-                                <p class="line-clamp-1 text-xs text-gray-400 dark:text-gray-500">
+                                <p class="line-clamp-2 text-xs text-gray-400 dark:text-gray-500">
                                         Latest: {latestEpisodeTitle}
+                                        {latestEpisodeDate && (
+                                                <>
+                                                        {" "}
+                                                        <span aria-hidden="true">·</span> {latestEpisodeDate}
+                                                </>
+                                        )}
                                 </p>
                         )}
                 </div>
