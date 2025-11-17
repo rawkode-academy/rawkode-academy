@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
 	AcademicCapIcon,
+	InformationCircleIcon,
 	CalendarIcon,
 	ChatBubbleLeftEllipsisIcon,
 	CubeIcon,
@@ -139,6 +140,12 @@ const collaborateNavItems = computed(() => [
 		href: "/organizations/training",
 		icon: AcademicCapIcon,
 		current: isCurrentPath("/organizations/training"),
+	},
+	{
+		name: "Branding",
+		href: "/organizations/branding",
+		icon: InformationCircleIcon,
+		current: isCurrentPath("/organizations/branding"),
 	},
 	{
 		name: "Let's Chat",

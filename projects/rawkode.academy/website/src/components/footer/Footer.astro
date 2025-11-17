@@ -51,6 +51,11 @@ const organizationSection: FooterSection = {
 			href: "/organizations/partnerships",
 			icon: RocketLaunchIcon,
 		},
+        {
+            name: "Branding",
+            href: "/organizations/branding",
+            icon: InformationCircleIcon,
+        },
 		{
 			name: "Consulting",
 			href: "/organizations/consulting",
@@ -105,8 +110,8 @@ const aboutSection: FooterSection = {
                 <ul class="space-y-3">
                     {learningSections.links.map((link) => (
                         <li>
-                            <a 
-                                href={link.href} 
+                            <a
+                                href={link.href}
                                 class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm"
                             >
                                 {link.name}
@@ -124,8 +129,8 @@ const aboutSection: FooterSection = {
                 <ul class="space-y-3">
                     {organizationSection.links.map((link) => (
                         <li>
-                            <a 
-                                href={link.href} 
+                            <a
+                                href={link.href}
                                 class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm"
                             >
                                 {link.name}
@@ -143,7 +148,7 @@ const aboutSection: FooterSection = {
                 <ul class="space-y-3">
                     {communitySection.links.map((link) => (
                         <li>
-                            <a 
+                            <a
                                 href={link.href}
                                 target={link.external ? "_blank" : "_self"}
                                 rel={link.external ? "noopener noreferrer" : undefined}
@@ -169,8 +174,8 @@ const aboutSection: FooterSection = {
                 <ul class="space-y-3">
                     {contributorsSection.links.map((link) => (
                         <li>
-                            <a 
-                                href={link.href} 
+                            <a
+                                href={link.href}
                                 class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm"
                             >
                                 {link.name}
@@ -188,8 +193,8 @@ const aboutSection: FooterSection = {
                 <ul class="space-y-3">
                     {aboutSection.links.map((link) => (
                         <li>
-                            <a 
-                                href={link.href} 
+                            <a
+                                href={link.href}
                                 class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm"
                             >
                                 {link.name}

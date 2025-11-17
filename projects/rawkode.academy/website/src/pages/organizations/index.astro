@@ -46,6 +46,18 @@ const services = [
 			"Ongoing learning support",
 		],
 	},
+	{
+		icon: "information",
+		title: "Branding",
+		description:
+			"Access our official brand assets — logos, palette, and usage guidelines for co-branding and partnerships.",
+		link: "/organizations/branding",
+		features: [
+			"Logo and monogram assets",
+			"Color palettes and CSS variables",
+			"Downloadable brand kit",
+		],
+	},
 ];
 ---
 
@@ -201,6 +213,11 @@ const services = [
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
               )}
+							{service.icon === 'information' && (
+								<svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z"></path>
+								</svg>
+							)}
               {service.icon === 'academic' && (
                 <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M12 14l9-5-9-5-9 5 9 5z"></path>

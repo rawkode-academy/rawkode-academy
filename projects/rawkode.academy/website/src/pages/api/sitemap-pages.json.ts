@@ -141,6 +141,12 @@ async function generateNavigationItems(
 			description: "Subscribe to RSS feeds",
 		},
 		{
+			href: "/organizations/branding",
+			title: "Branding",
+			category: "Organizations",
+			description: "Branding and logo usage guidelines",
+		},
+		{
 			href: "/organizations/consulting",
 			title: "Consulting",
 			category: "Organizations",
