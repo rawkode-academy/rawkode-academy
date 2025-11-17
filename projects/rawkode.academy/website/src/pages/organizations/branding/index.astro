@@ -1,0 +1,270 @@
+---
+import Page from "@/wrappers/page.astro";
+import PageHero from "@/components/common/PageHero.vue";
+import Button from "@/components/common/Button.vue";
+import monogramSvg from "@/components/branding/logos/RKAcademy_Monogram_Black_RGB.svg?raw";
+import wordmarkSvg from "@/components/branding/logos/RKAcademy_Logo_Black_RGB.svg?raw";
+import iconSvg from "@/components/branding/logos/RKAcademy_Icon_Black_RGB.svg?raw";
+
+export const prerender = true;
+
+const colorThemes = [
+  {
+    name: "Rawkode Green Theme",
+    badge: "Default",
+    description: "Everyday Rawkode Academy brand moments — content, docs, livestreams, and merch.",
+    gradient: "from-[#04B59C]/60 via-transparent to-[#85FF95]/50",
+    colors: [
+      { label: "Arcadia Teal", hex: "#04B59C", usage: "Primary actions & hero gradients" },
+      { label: "Neon Sprout", hex: "#85FF95", usage: "Glow accents & CTA outlines" },
+      { label: "Rawkode Black", hex: "#23282D", usage: "Typography & surfaces" },
+    ],
+  },
+  {
+    name: "Rawkode Blue Theme",
+    badge: "System",
+    description: "Use when we co-brand with developer tooling or infra partners who lean blue.",
+    gradient: "from-[#5F5ED7]/60 via-transparent to-[#00CEFF]/50",
+    colors: [
+      { label: "Indigo Core", hex: "#5F5ED7", usage: "Primary headlines & hero sweeps" },
+      { label: "Pulse Cyan", hex: "#00CEFF", usage: "Buttons, inputs, status" },
+      { label: "Rawkode Black", hex: "#23282D", usage: "Depth, borders, typography" },
+    ],
+  },
+];
+
+const brandGradients = [
+  {
+    name: "Rawkode Core Gradient",
+    angle: "45°",
+    description: "Primary Rawkode lockups transition from purple into blue as documented in the PDF (page 5).",
+    stops: [
+      { label: "Purple", hex: "#5F5ED7" },
+      { label: "Blue", hex: "#00CEFF" },
+    ],
+    usage: "Keep for Rawkode logos, backdrops, and partner lockups tied to the core company brand.",
+    background: "linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)",
+  },
+  {
+    name: "Rawkode Academy Gradient",
+    angle: "45°",
+    description: "Academy visuals run from teal into green (page 8), mirrored across hero cards and merch.",
+    stops: [
+      { label: "Teal", hex: "#04B59C" },
+      { label: "Neon Green", hex: "#85FF95" },
+    ],
+    usage: "Use when the Academy is the lead brand story: curriculum launches, learning hub surfaces, etc.",
+    background: "linear-gradient(45deg, #04B59C 0%, #85FF95 100%)",
+  },
+];
+
+const logoAssets = [
+  {
+    name: "Monogram",
+    description:
+      "Use for avatars, favicons, stickers, or anywhere the brand needs to fit in a square. Keep plenty of breathing room so the M shape stays crisp.",
+    previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
+    assetClass: "brand-logo--padded",
+    asset: monogramSvg,
+    useCases: ["Avatars & profile badges", "Social icons", "Overlays on content"],
+  },
+  {
+    name: "Icon",
+    description:
+      "Square logo built for UI chrome, app tiles, or partner lockups that need a bold geometric mark.",
+    previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
+    assetClass: "",
+    asset: iconSvg,
+    useCases: ["Product UI", "Square partner placements", "Small merch runs"],
+  },
+  {
+    name: "Wordmark",
+    description:
+      "Full logotype for hero sections, brochures, and anywhere legibility is critical. Only scale proportionally; never stretch.",
+    previewWrapper: "w-full h-24 md:h-28",
+    assetClass: "brand-logo--wide",
+    cardClass: "md:min-w-[320px]",
+    asset: wordmarkSvg,
+    useCases: ["Headers & banners", "Email signatures", "Printed materials"],
+  },
+];
+---
+
+<Page title="Branding | Rawkode Academy" description="Official Rawkode Academy brand assets — logos, colors, and usage guidelines for partners.">
+  <PageHero title="Branding Guidelines" subtitle="Our brand assets, color system, and recommended usage for partners" badge="Partner Resources">
+    <Fragment slot="actions">
+      <Button variant="primary" href="#assets">View Assets</Button>
+    </Fragment>
+  </PageHero>
+
+  <section id="assets" class="relative py-20 overflow-hidden" style="background: var(--app-backdrop);">
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute inset-0 bg-[rgba(255,255,255,0.82)] dark:bg-[rgba(2,8,23,0.9)] backdrop-blur-xl"></div>
+      <div class="absolute -left-20 top-0 w-[32rem] h-[32rem] blur-[140px]" style="background: rgba(var(--brand-primary), 0.22);"></div>
+      <div class="absolute right-[-8rem] bottom-[-6rem] w-[34rem] h-[34rem] blur-[140px]" style="background: rgba(var(--brand-secondary), 0.2);"></div>
+    </div>
+    <div class="relative max-w-6xl mx-auto px-4">
+      <div class="max-w-3xl">
+        <h2 class="text-3xl font-semibold text-gray-900 dark:text-white mb-4">Logo assets</h2>
+        <p class="mb-8 text-gray-600 dark:text-white/70">Our master artwork ships in black so you can tint it for any surface. Inline the SVGs and apply <code class="bg-black/30 px-1 rounded text-white">currentColor</code> to match blue or green palettes without exporting variants.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 mb-14">
+        {logoAssets.map((logo) => (
+          <article class={`relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-white/15 bg-white/90 dark:bg-white/5 backdrop-blur-2xl p-7 flex flex-col gap-6 shadow-[0_18px_55px_rgba(15,23,42,0.25)] ${logo.cardClass ?? ""}`}>
+            <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-[#6B46FF]/10 dark:from-white/10 pointer-events-none"></div>
+            <div class="relative flex flex-col gap-6 items-center text-center">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{logo.name}</h3>
+              <div class="flex flex-col items-center gap-5 w-full">
+                <div class={`p-4 rounded-2xl bg-white border border-gray-100 dark:bg-white/5 dark:border-white/20 flex items-center justify-center overflow-hidden ${logo.previewWrapper} mx-auto`}>
+                  <div class={`brand-logo ${logo.assetClass ?? ""}`} set:html={logo.asset}></div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-white/70 max-w-sm leading-relaxed mx-auto pb-1">{logo.description}</p>
+              </div>
+              <ul class="text-xs uppercase tracking-wide text-gray-500 dark:text-white/60 space-y-2 w-full text-center md:text-left pt-2">
+                {logo.useCases.map((useCase) => (
+                  <li class="flex items-center gap-2 justify-center md:justify-start">
+                    <span class="inline-flex w-2.5 h-2.5 rounded-full bg-gray-900 dark:bg-white/70"></span>
+                    {useCase}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="space-y-4 mb-14">
+        <div class="flex flex-col gap-2">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Official gradients</h3>
+          <p class="text-gray-600 dark:text-white/70">The PDF mandates two gradients: purple→blue for Rawkode and teal→green for Rawkode Academy, both running on a 45° angle from top-left to bottom-right. Use these for hero panels, gradient logos, and any glowing dividers.</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          {brandGradients.map((gradient) => (
+            <article class="rounded-2xl overflow-hidden border border-gray-200/60 dark:border-white/15 shadow-[0_20px_60px_rgba(15,23,42,0.2)]">
+              <div class="p-6 text-white" style={`background:${gradient.background}`}>
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <p class="text-xs tracking-[0.2em] uppercase text-white/80">{gradient.angle} sweep</p>
+                    <h4 class="text-2xl font-semibold">{gradient.name}</h4>
+                  </div>
+                  <div class="flex gap-3">
+                    {gradient.stops.map((stop) => (
+                      <div class="px-3 py-2 rounded-full bg-white/20 text-sm font-semibold">{stop.hex}</div>
+                    ))}
+                  </div>
+                </div>
+                <p class="text-sm text-white/80 mt-4 max-w-2xl">{gradient.description}</p>
+              </div>
+              <div class="bg-white/90 dark:bg-gray-900/70 p-4">
+                <p class="text-sm text-gray-700 dark:text-white/70">{gradient.usage}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex flex-col gap-2">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Core color palettes</h3>
+          <p class="text-gray-600 dark:text-white/70">Rawkode runs two first-class themes. Use the Green theme by default and switch to the Blue theme when a partner already leans blue. Partners must stick to one of these two treatments — no custom palettes.</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          {colorThemes.map((theme) => (
+            <article class="relative rounded-2xl overflow-hidden border border-gray-200/70 dark:border-white/10 bg-white/90 dark:bg-white/10 backdrop-blur-2xl p-6 shadow-[0_20px_60px_rgba(4,181,156,0.2)]">
+              <div class={`absolute inset-0 bg-gradient-to-br ${theme.gradient} opacity-70 pointer-events-none`}></div>
+              <div class="relative flex flex-col gap-5">
+                <div>
+                  <p class="text-xs tracking-[0.2em] uppercase text-gray-500 dark:text-white/70">{theme.badge}</p>
+                  <h4 class="text-2xl font-semibold text-gray-900 dark:text-white">{theme.name}</h4>
+                  <p class="text-sm text-gray-600 dark:text-white/70 mt-1">{theme.description}</p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-3">
+                  {theme.colors.map((color) => (
+                    <div class="rounded-xl border border-gray-200 dark:border-white/20 bg-white dark:bg-white/10 overflow-hidden">
+                      <div class="h-16" style={`background:${color.hex}`}></div>
+                      <div class="p-3">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-white">{color.label}</div>
+                        <div class="text-xs text-gray-600 dark:text-white/70">{color.hex}</div>
+                        <p class="text-xs text-gray-500 dark:text-white/60 mt-1">{color.usage}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <h3 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">How to theme our black SVGs</h3>
+      <p class="mb-6 text-gray-600 dark:text-white/70">We keep only the black source file in the repo and theme it with CSS. Inline SVGs work best; when using an <code>&lt;img/&gt;</code>, use <code>filter</code> or CSS masking if needed. Prefer the following approach for inline SVGs:</p>
+
+      <pre class="bg-gray-100 dark:bg-gray-900 p-4 rounded-md overflow-x-auto"><code>{`/* Define colors as variables */
+:root {
+  --brand-primary: #6B46FF;
+  --brand-on-surface: #23282D; /* base black */
+}
+
+/* Inline svg -- set svg children to currentColor */
+.brand-logo svg * {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Usage: tint the svg by setting color */
+.brand-logo--primary { color: var(--brand-primary); }
+.brand-logo--dark { color: var(--brand-on-surface); }`}</code></pre>
+
+      <h3 class="text-lg font-semibold mt-10 text-gray-900 dark:text-white">Clearspace and sizing — rules</h3>
+      <ul class="list-disc pl-6 text-gray-600 dark:text-white/70">
+        <li>Always maintain a minimum clearspace equal to the height of the monogram on all sides.</li>
+        <li>Do not place the wordmark on low-contrast or busy patterns.</li>
+        <li>For co-branding, use the black monogram with a white stroke on dark backgrounds or the black mark on light backgrounds.</li>
+      </ul>
+
+      <div class="mt-8">
+        <!-- PDF download removed per request; keep CTA for partners to reach out if they need additional assets -->
+        <Button href="/organizations/lets-chat" variant="primary">Request Detailed Kit</Button>
+      </div>
+    </div>
+  </section>
+</Page>
+
+<style is:global>
+  /* Make brand svgs themeable */
+  .brand-logo svg * {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+
+  .brand-logo {
+    color: var(--brand-on-surface);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .brand-logo--padded {
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+  }
+
+  .brand-logo svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .brand-logo--wide svg {
+    width: 100%;
+    height: auto;
+  }
+
+
+
+</style>
