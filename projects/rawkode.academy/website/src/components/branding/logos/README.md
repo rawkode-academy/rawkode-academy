@@ -7,6 +7,6 @@ Canonical logo assets live in this directory. IMPORTANT:
 - Do NOT store duplicate copies in `public/` — this avoids drift. If public URLs are required for external partners, add a script to export assets during a release instead of maintaining a second copy.
 
 Files:
-- `RKAcademy_Monogram_Black_RGB.svg` — monogram.
-- `RKAcademy_Logo_Black_RGB.svg` — wordmark.
- - `RKAcademy_Icon_Black_RGB.svg` — logo / icon.
+- `monogram.svg` — monogram.
+- `wordmark.svg` — wordmark.
+- `logo.svg` — logo / icon.
