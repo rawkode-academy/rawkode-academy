@@ -53,36 +53,34 @@ function formatDate(dateString: string) {
 }
 ---
 
-<section class="py-12">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center">
-      <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">{title}</h2>
-      <p class="mt-4 text-lg text-gray-500 dark:text-gray-400">{description}</p>
-    </div>
-    <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-      {videos.map((video: Video) => (
-        <a href={`/watch/${video.slug}`} class="group">
-          <div class="relative aspect-video">
-            <img
-              src={video.thumbnailUrl!}
-              alt={video.title}
-              class="w-full h-full object-cover rounded-lg shadow-md transition-transform group-hover:scale-105"
-              loading="lazy"
-            />
-            <div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
-              {formatDuration(video.duration)}
-            </div>
-          </div>
-          <div class="mt-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-primary/90 dark:group-hover:text-primary/90 line-clamp-2">
-              {video.title}
-            </h3>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {formatDate(video.publishedAt)}
-            </p>
-          </div>
-        </a>
-      ))}
-    </div>
-  </div>
+<section class="section-py-tight">
+	<div class="text-center stack-gap-sm">
+		<h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">{title}</h2>
+		<p class="text-lg text-gray-500 dark:text-gray-400">{description}</p>
+	</div>
+	<div class="stack-gap-lg grid md:grid-cols-2 lg:grid-cols-4">
+		{videos.map((video: Video) => (
+			<a href={`/watch/${video.slug}`} class="group">
+				<div class="relative aspect-video">
+					<img
+						src={video.thumbnailUrl!}
+						alt={video.title}
+						class="w-full h-full object-cover rounded-lg shadow-md transition-transform group-hover:scale-105"
+						loading="lazy"
+					/>
+					<div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
+						{formatDuration(video.duration)}
+					</div>
+				</div>
+				<div class="mt-4">
+					<h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-primary/90 dark:group-hover:text-primary/90 line-clamp-2">
+						{video.title}
+					</h3>
+					<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+						{formatDate(video.publishedAt)}
+					</p>
+				</div>
+			</a>
+		))}
+	</div>
 </section>

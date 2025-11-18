@@ -1,8 +1,0 @@
----
-description: Komodor is a Kubernetes troubleshooting platform designed to help DevOps engineers and developers quickly resolve incidents and maintain cluster health. It provides a centralized view of Kubernetes events, metrics, and logs, combined with automated root cause analysis and remediation recommendations. The platform aims to reduce the mean time to resolution (MTTR) for Kubernetes issues by surfacing relevant data and simplifying complex debugging processes. Common use cases include incident response, proactive monitoring, performance optimization, and overall Kubernetes cluster management.
-name: Komodor
-website: https://komodor.com/
-documentation: https://docs.komodor.com/
-categories: []
----
-

@@ -1,8 +1,0 @@
----
-description: The Operator Framework SDK (Operator SDK) provides tools to build, test, and package Kubernetes Operators. It allows developers to manage complex applications on Kubernetes in an automated and scalable way. The Operator SDK provides abstractions and libraries to manage application lifecycle events such as deployment, upgrades, backups, and scaling. Operators built with the SDK extend the Kubernetes API to represent complex application logic and state.
-name: OperatorSDK
-website: https://sdk.operatorframework.io/
-documentation: https://sdk.operatorframework.io/docs/
-categories: []
----
-

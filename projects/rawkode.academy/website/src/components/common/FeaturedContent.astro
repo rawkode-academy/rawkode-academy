@@ -26,6 +26,7 @@ interface Props {
 		| "features"
 		| "case-study"
 		| "editorial";
+	class?: string;
 }
 
 const {
@@ -42,6 +43,8 @@ const {
 	ctaText,
 	articleType,
 } = Astro.props;
+
+const sectionClass = Astro.props.class ?? "";
 
 const badgeConfig = articleType && getTypeBadgeConfig(articleType);
 
@@ -87,11 +90,10 @@ const truncatedDescription = truncateDescription(
 );
 ---
 
-<section class="py-12">
-	<div class="max-w-6xl mx-auto px-4 md:px-8">
-		<div class="relative overflow-hidden rounded-[2rem] border border-white/30 dark:border-gray-800/60 bg-white/60 dark:bg-gray-950/60 backdrop-blur-2xl shadow-[0_20px_80px_rgba(15,23,42,0.25)] dark:shadow-[0_25px_100px_rgba(2,6,23,0.65)]">
-			<div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/30 dark:from-primary/30 dark:to-secondary/40 opacity-80 pointer-events-none"></div>
-			<div class="relative grid items-center gap-8 lg:grid-cols-[1.15fr,0.85fr] p-6 sm:p-10 lg:p-14">
+<section class={`section-py-tight ${sectionClass}`.trim()}>
+	<div class="relative overflow-hidden rounded-[2rem] border border-white/30 dark:border-gray-800/60 bg-white/60 dark:bg-gray-950/60 backdrop-blur-2xl shadow-[0_20px_80px_rgba(15,23,42,0.25)] dark:shadow-[0_25px_100px_rgba(2,6,23,0.65)]">
+		<div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/30 dark:from-primary/30 dark:to-secondary/40 opacity-80 pointer-events-none"></div>
+		<div class="relative grid items-center gap-8 lg:grid-cols-[1.15fr,0.85fr] card-padding-lg">
 				<!-- Copy -->
 				<div class="order-2 space-y-6 text-center lg:text-left lg:order-1">
 					<span class="inline-flex items-center justify-center text-[0.65rem] uppercase tracking-[0.4em] text-primary/80 dark:text-primary/60">
@@ -197,7 +199,6 @@ const truncatedDescription = truncateDescription(
 						</div>
 					</a>
 				</div>
-			</div>
 		</div>
 	</div>
 </section>

@@ -35,6 +35,19 @@
 			transparent 50%
 		),
 		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
+
+	/* Layout Spacing Tokens */
+	--space-page-sm: clamp(1rem, 3vw, 1.75rem);
+	--space-page: clamp(1.5rem, 4vw, 3rem);
+	--space-page-lg: clamp(2rem, 5vw, 4rem);
+	--space-section-tight: clamp(2rem, 5vw, 3.75rem);
+	--space-section: clamp(3rem, 6vw, 5rem);
+	--space-section-relaxed: clamp(4rem, 7vw, 6rem);
+	--space-stack-sm: clamp(1rem, 3vw, 1.75rem);
+	--space-stack: clamp(1.5rem, 3.5vw, 2.5rem);
+	--space-stack-lg: clamp(2rem, 4.5vw, 3.25rem);
+	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
+	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
 }
 
 /* Alternative Theme: Rawkode Blue */
@@ -493,6 +506,20 @@ body::before {
 	--font-mono: var(--font-monaspace-neon), monospace;
 }
 
+@theme {
+	--spacing-page-sm: var(--space-page-sm);
+	--spacing-page: var(--space-page);
+	--spacing-page-lg: var(--space-page-lg);
+	--spacing-section-tight: var(--space-section-tight);
+	--spacing-section: var(--space-section);
+	--spacing-section-relaxed: var(--space-section-relaxed);
+	--spacing-stack-sm: var(--space-stack-sm);
+	--spacing-stack: var(--space-stack);
+	--spacing-stack-lg: var(--space-stack-lg);
+	--spacing-card: var(--space-card-pad);
+	--spacing-card-lg: var(--space-card-pad-lg);
+}
+
 @layer base {
 	h1 {
 		@apply text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white;
@@ -737,5 +764,55 @@ body::before {
 
 	.prose > *:last-child {
 		@apply mb-0;
+	}
+}
+
+@layer utilities {
+	.page-px-sm {
+		padding-inline: var(--space-page-sm);
+	}
+
+	.page-px {
+		padding-inline: var(--space-page);
+	}
+
+	.page-px-lg {
+		padding-inline: var(--space-page-lg);
+	}
+
+	.section-py-tight {
+		padding-block: var(--space-section-tight);
+	}
+
+	.section-py {
+		padding-block: var(--space-section);
+	}
+
+	.section-py-relaxed {
+		padding-block: var(--space-section-relaxed);
+	}
+
+	.stack-gap-sm {
+		gap: var(--space-stack-sm);
+	}
+
+	.stack-gap {
+		gap: var(--space-stack);
+	}
+
+	.stack-gap-lg {
+		gap: var(--space-stack-lg);
+	}
+
+	.card-padding {
+		padding: var(--space-card-pad);
+	}
+
+	.card-padding-lg {
+		padding: var(--space-card-pad-lg);
+	}
+
+	.section-pt-0 {
+		padding-top: 0 !important;
 	}
 }

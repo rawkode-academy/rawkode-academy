@@ -108,6 +108,13 @@ const learnNavItems = computed(() => [
 		href: "/technology",
 		icon: CubeIcon,
 		current: isCurrentPath("/technology"),
+		children: [
+			{
+				name: "Radar",
+				href: "/technology/radar",
+				current: isCurrentPath("/technology/radar"),
+			},
+		],
 	},
 ]);
 
@@ -300,7 +307,25 @@ const currentNavItems = computed(() => {
 								>
 									{{ item.name }}
 								</span>
-								</a>
+							</a>
+							<!-- Submenu items - only show when on parent route -->
+							<ul v-if="item.children && item.children.length > 0 && !isCollapsed && item.current" class="mt-1.5 ml-8 space-y-1">
+								<li v-for="child in item.children" :key="child.href">
+									<a
+										:href="child.href"
+										:class="[
+											'flex items-center text-sm font-medium rounded-lg transition-[background,colors,border,transform] duration-200',
+											'px-3 py-2 border border-transparent relative',
+											child.current
+												? 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary shadow-md backdrop-blur-sm border-primary/30'
+												: 'text-gray-600 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:text-primary hover:scale-[1.02] hover:border-white/30 dark:hover:border-gray-500/50',
+										]"
+										:aria-current="child.current ? 'page' : undefined"
+									>
+										{{ child.name }}
+									</a>
+								</li>
+							</ul>
 						</li>
 					</ul>
 			</nav>

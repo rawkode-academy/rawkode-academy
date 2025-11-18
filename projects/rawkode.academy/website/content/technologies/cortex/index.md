@@ -1,8 +1,0 @@
----
-description: Cortex is a horizontally scalable, highly available, multi-tenant, long-term storage for Prometheus. It allows you to ingest and query metrics from multiple Prometheus servers, centralizing your monitoring data. This provides a global view across all your clusters and enables long-term retention of metrics beyond Prometheus's local storage limitations. It allows you to reliably store Prometheus data for years and efficiently query it, supporting advanced analytics and historical analysis.
-name: Cortex
-website: https://cortexmetrics.io/
-documentation: https://cortexmetrics.io/docs/
-categories: []
----
-

@@ -2,7 +2,7 @@
 
 /*
   Fetch technologies from the existing GraphQL endpoint and
-  populate the shared repository folder: ../content/technologies
+  populate the workspace package: @rawkodeacademy/content-technologies
 
   Usage:
     bun scripts/sync-technologies.ts [--endpoint <url>] [--limit <n>]

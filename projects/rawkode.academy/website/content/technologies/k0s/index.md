@@ -1,8 +1,0 @@
----
-description: k0s is a fully conformant and highly distributable Kubernetes distribution. It's designed to be lightweight, single binary and simple to install. k0s can run on any infrastructure, from bare metal servers and virtual machines to public and private clouds. It's particularly useful in edge computing, IoT deployments, and other resource-constrained environments where a full-fledged Kubernetes cluster might be too heavy.
-name: k0s
-website: https://k0sproject.io/
-documentation: https://docs.k0sproject.io/
-categories: []
----
-

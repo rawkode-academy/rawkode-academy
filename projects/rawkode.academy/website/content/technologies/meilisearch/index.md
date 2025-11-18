@@ -1,8 +1,0 @@
----
-description: Meilisearch is a powerful, fast, open-source, and typo-tolerant search engine. It's designed to be developer-friendly and easy to integrate into any application. Meilisearch focuses on providing a great search experience with minimal configuration, allowing users to instantly find relevant information as they type, even with typos or misspellings. Its primary value lies in its speed, ease of use, and the ability to deliver relevant search results quickly and accurately.
-name: Meilisearch
-website: https://www.meilisearch.com/
-documentation: https://www.meilisearch.com/docs
-categories: []
----
-

@@ -1,8 +1,0 @@
----
-description: PromLens is a query builder and visualizer designed to help users explore and understand Prometheus metrics. It aims to simplify the process of writing and debugging PromQL queries, making it easier to gain insights from time-series data. PromLens provides a graphical interface for constructing queries, visualizing the results, and understanding how different query components interact. Its main use cases include exploring new metrics, debugging existing queries, and gaining a better understanding of Prometheus's query language.
-name: PromLens
-website: https://promlens.com/
-documentation: https://promlens.com/docs/
-categories: []
----
-
