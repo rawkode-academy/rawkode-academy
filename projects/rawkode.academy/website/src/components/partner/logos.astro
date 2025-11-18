@@ -150,7 +150,7 @@ const previousPartners: Partners = [
 	</div>
 
 	<div class="grid gap-6 sm:gap-8 md:grid-cols-2 xl:grid-cols-3">
-		{currentPartners.map(async (partner) => (
+		{currentPartners.map((partner) => (
 			<article
 				class="partner-card group"
 				style={`--partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark};`}
@@ -225,7 +225,7 @@ const previousPartners: Partners = [
 		</div>
 
 		<div class="partner-wall-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-			{previousPartners.map(async (partner) => (
+			{previousPartners.map((partner) => (
 				<div
 					class="partner-wall-logo"
 					title={partner.name}

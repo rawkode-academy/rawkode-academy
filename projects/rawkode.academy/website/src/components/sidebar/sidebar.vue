@@ -309,16 +309,21 @@ const currentNavItems = computed(() => {
 								</span>
 							</a>
 							<!-- Submenu items - only show when on parent route -->
-							<ul v-if="item.children && item.children.length > 0 && !isCollapsed && item.current" class="mt-1.5 ml-8 space-y-1">
-								<li v-for="child in item.children" :key="child.href">
+							<ul
+								v-if="item.children && item.children.length > 0 && !isCollapsed && item.current"
+								class="mt-2 mb-2 ml-2 mr-1 p-1.5 space-y-0.5 bg-white/40 dark:bg-white/5 backdrop-blur-xl rounded-xl border border-white/20 dark:border-white/10 shadow-sm relative overflow-hidden"
+							>
+								<!-- Decorative shine -->
+								<div class="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none opacity-50"></div>
+
+								<li v-for="child in item.children" :key="child.href" class="relative z-10">
 									<a
 										:href="child.href"
 										:class="[
-											'flex items-center text-sm font-medium rounded-lg transition-[background,colors,border,transform] duration-200',
-											'px-3 py-2 border border-transparent relative',
+											'flex items-center text-xs font-medium rounded-lg px-3 py-2 transition-all duration-200',
 											child.current
-												? 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary shadow-md backdrop-blur-sm border-primary/30'
-												: 'text-gray-600 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:text-primary hover:scale-[1.02] hover:border-white/30 dark:hover:border-gray-500/50',
+												? 'bg-white dark:bg-white/10 text-primary shadow-sm ring-1 ring-black/5 dark:ring-white/10 font-semibold'
+												: 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary',
 										]"
 										:aria-current="child.current ? 'page' : undefined"
 									>
