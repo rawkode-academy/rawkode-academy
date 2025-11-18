@@ -1,8 +1,6 @@
 ---
 export const prerender = true;
 
-import Button from "@/components/common/Button.vue";
-import PageHero from "@/components/common/PageHero.vue";
 import SectionHeader from "@/components/common/SectionHeader.vue";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
@@ -15,14 +13,33 @@ type Technology = {
 	logo?: string;
 	website?: string;
 	documentation?: string;
+	videoCount?: number;
+	articleCount?: number;
+	courseCount?: number;
 };
 
 let technologies: Technology[] = [];
 try {
 	const items = await getCollection("technologies");
+	const allVideos = await getCollection("videos");
+	const allArticles = await getCollection("articles");
+	const allCourses = await getCollection("courses");
+	
 	technologies = items.map((e) => {
 		const icon = (e as any).data.icon;
 		const logo = resolveTechnologyIconUrl(e.id, icon);
+		
+		// Count content for this technology
+		const videoCount = allVideos.filter(v => 
+			v.data.technologies?.includes(e.id)
+		).length;
+		const articleCount = allArticles.filter(a => 
+			!a.data.draft && a.data.technologies?.includes(e.id)
+		).length;
+		const courseCount = allCourses.filter(c => 
+			c.data.technologies?.includes(e.id)
+		).length;
+		
 		const tech: Technology = {
 			id: e.id,
 			name: e.data.name,
@@ -30,6 +47,9 @@ try {
 			...(logo && { logo }),
 			...(e.data.website && { website: e.data.website }),
 			...(e.data.documentation && { documentation: e.data.documentation }),
+			videoCount,
+			articleCount,
+			courseCount,
 		};
 		return tech;
 	});
@@ -60,6 +80,47 @@ try {
 			.technology-feeds > *:not(:last-child) {
 				position: relative;
 				padding-bottom: 3rem;
+			}
+
+			.technology-hero {
+				@apply max-w-7xl mx-auto rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/70 px-5 py-6 md:px-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between;
+				box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+			}
+
+			.dark .technology-hero {
+				box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+			}
+
+			.technology-hero .badge {
+				@apply inline-flex items-center gap-2 self-start text-xs font-semibold tracking-wide uppercase px-3 py-1 rounded-full bg-primary/10 text-primary dark:bg-primary/20;
+			}
+
+			.hero-copy {
+				@apply flex-1 flex flex-col gap-3;
+			}
+
+			.hero-copy h1 {
+				@apply text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white;
+			}
+
+			.hero-copy p {
+				@apply text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl;
+			}
+
+			.hero-controls {
+				@apply w-full md:max-w-md flex flex-col gap-4;
+			}
+
+			.filter-pills {
+				@apply flex flex-wrap gap-2;
+			}
+
+			.filter-pill {
+				@apply px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 transition;
+			}
+
+			.filter-pill[data-active='true'] {
+				@apply border-primary text-primary bg-primary/5 dark:bg-primary/20;
 			}
 
 			@keyframes expandFromCenter {
@@ -115,33 +176,34 @@ try {
 			}
 
 			.tech-card {
-				@apply block rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-800;
+				@apply block rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700;
 				transform: translateY(0);
 				transition:
 					transform 0.3s ease,
-					box-shadow 0.3s ease;
+					box-shadow 0.3s ease,
+					border-color 0.3s ease;
 			}
 
 			.tech-card:hover {
-				transform: translateY(-5px);
+				transform: translateY(-4px);
+				border-color: rgba(95, 94, 215, 0.3);
 			}
 
 			.tech-card .logo-container {
-				@apply relative w-full h-32 p-4 rounded-t-lg overflow-hidden;
-				/* Checkered background pattern for contrast with any logo color */
+				@apply relative w-full h-40 p-6 flex items-center justify-center overflow-hidden;
 				background:
-					linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
-					linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
-					linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
-					linear-gradient(-45deg, transparent 75%, #e5e7eb 75%);
-				background-size: 20px 20px;
+					linear-gradient(45deg, #f9fafb 25%, transparent 25%),
+					linear-gradient(-45deg, #f9fafb 25%, transparent 25%),
+					linear-gradient(45deg, transparent 75%, #f9fafb 75%),
+					linear-gradient(-45deg, transparent 75%, #f9fafb 75%);
+				background-size: 16px 16px;
 				background-position:
 					0 0,
-					0 10px,
-					10px -10px,
-					-10px 0px;
-				background-color: #f3f4f6;
-				border-bottom: 1px solid rgba(95, 94, 215, 0.1);
+					0 8px,
+					8px -8px,
+					-8px 0px;
+				background-color: #ffffff;
+				border-bottom: 1px solid #e5e7eb;
 				position: relative;
 			}
 
@@ -151,138 +213,320 @@ try {
 				inset: 0;
 				background: radial-gradient(
 					circle at center,
-					rgba(95, 94, 215, 0.03) 0%,
+					rgba(95, 94, 215, 0.02) 0%,
 					transparent 70%
 				);
 				z-index: 1;
 			}
 
-			/* Create a duplicate layer for contrast */
-			.tech-card .logo-container::after {
-				content: "";
-				position: absolute;
-				inset: 0;
-				background: linear-gradient(
-					135deg,
-					rgba(0, 0, 0, 0.03) 0%,
-					rgba(0, 0, 0, 0.06) 100%
-				);
-				z-index: 2;
-				mix-blend-mode: multiply;
-			}
-
 			.dark .tech-card .logo-container {
 				background:
-					linear-gradient(45deg, #374151 25%, transparent 25%),
-					linear-gradient(-45deg, #374151 25%, transparent 25%),
-					linear-gradient(45deg, transparent 75%, #374151 75%),
-					linear-gradient(-45deg, transparent 75%, #374151 75%);
-				background-size: 20px 20px;
+					linear-gradient(45deg, #1f2937 25%, transparent 25%),
+					linear-gradient(-45deg, #1f2937 25%, transparent 25%),
+					linear-gradient(45deg, transparent 75%, #1f2937 75%),
+					linear-gradient(-45deg, transparent 75%, #1f2937 75%);
+				background-size: 16px 16px;
 				background-position:
 					0 0,
-					0 10px,
-					10px -10px,
-					-10px 0px;
-				background-color: #4b5563;
-			}
-
-			.dark .tech-card .logo-container::after {
-				background: linear-gradient(
-					135deg,
-					rgba(255, 255, 255, 0.03) 0%,
-					rgba(255, 255, 255, 0.06) 100%
-				);
-				mix-blend-mode: screen;
+					0 8px,
+					8px -8px,
+					-8px 0px;
+				background-color: #111827;
+				border-bottom-color: #374151;
 			}
 
 			.tech-card img {
-				@apply w-full h-full object-contain relative;
+				@apply w-24 h-24 object-contain relative;
 				z-index: 10;
-				/* Multiple filters for better visibility */
-				filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5))
-					drop-shadow(0 0 1px rgba(255, 255, 255, 0.5))
-					drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) contrast(1.1);
-				mix-blend-mode: normal;
+				filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
 				transition: all 0.3s ease;
 			}
 
 			.dark .tech-card img {
-				filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.5))
-					drop-shadow(0 0 1px rgba(0, 0, 0, 0.5))
-					drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) contrast(1.1)
-					brightness(1.1);
+				filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4)) brightness(1.05);
 			}
 
 			.tech-card:hover img {
-				transform: scale(1.05);
-				filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))
-					drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
-					drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15)) contrast(1.2);
-			}
-
-			.dark .tech-card:hover img {
-				filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))
-					drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))
-					drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) contrast(1.2)
-					brightness(1.15);
+				transform: scale(1.08);
 			}
 
 			.tech-card .content {
-				@apply p-4;
+				@apply p-5 flex flex-col gap-3;
+			}
+
+			.tech-card .title-row {
+				@apply flex items-start justify-between gap-2;
 			}
 
 			.tech-card h3 {
-				@apply text-lg font-semibold mb-2 text-gray-900 dark:text-white;
+				@apply text-xl font-bold text-gray-900 dark:text-white leading-tight;
+			}
+
+			.tech-card .badges {
+				@apply flex flex-wrap gap-1.5 min-h-[24px];
+			}
+
+			.tech-card .badge {
+				@apply inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium;
+				background: rgba(95, 94, 215, 0.1);
+				color: rgba(95, 94, 215, 1);
+			}
+
+			.dark .tech-card .badge {
+				background: rgba(95, 94, 215, 0.2);
+				color: rgba(147, 147, 255, 1);
+			}
+
+			.tech-card .badge.has-content {
+				background: linear-gradient(135deg, rgba(95, 94, 215, 0.15), rgba(0, 206, 255, 0.15));
+				color: rgba(95, 94, 215, 1);
+				font-weight: 600;
+			}
+
+			.dark .tech-card .badge.has-content {
+				background: linear-gradient(135deg, rgba(95, 94, 215, 0.25), rgba(0, 206, 255, 0.25));
+				color: rgba(147, 147, 255, 1);
+			}
+
+			.tech-card .badge svg {
+				@apply w-3.5 h-3.5;
 			}
 
 			.tech-card p {
-				@apply text-gray-600 dark:text-gray-300 text-sm line-clamp-2;
+				@apply text-gray-600 dark:text-gray-400 text-sm leading-relaxed;
+				display: -webkit-box;
+				-webkit-line-clamp: 3;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+			}
+
+			.tech-card .learn-more {
+				@apply text-sm font-medium flex items-center gap-1 mt-auto;
+				color: rgba(95, 94, 215, 1);
+			}
+
+			.dark .tech-card .learn-more {
+				color: rgba(147, 147, 255, 1);
+			}
+
+			.tech-card .learn-more svg {
+				@apply w-4 h-4 transition-transform;
+			}
+
+			.tech-card:hover .learn-more svg {
+				transform: translateX(2px);
 			}
 		</style>
 
-		<!-- Hero Section -->
-		<PageHero
-			title="Explore the World of Technologies"
-			subtitle="Discover the latest technologies and expand your knowledge with Rawkode Academy."
-			badge="Technology Hub"
-			stats={[
-				{ label: `${technologies.length} Technologies` },
-				{ label: 'Expert Guides' },
-				{ label: 'Best Practices' }
-			]}
-		>
-			<Fragment slot="actions">
-				<Button href="#technologies" variant="primary" size="lg">Browse Technologies</Button>
-				<Button href="/courses" variant="secondary" size="lg">View Courses</Button>
-			</Fragment>
-		</PageHero>
-
-		<!-- Technologies Section -->
+		<!-- Technology intro -->
 		<section class="w-full px-4">
-			<div class="max-w-7xl mx-auto">
-				<SectionHeader title="Technologies" showSeparator={false} class="mb-6" />
-				<div
-					class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-				>
-					{
-						technologies.map((tech) => (
-							<a href={`/technology/${tech.id}`} class="tech-card">
-								<div class="logo-container">
-									<img
-										src={tech.logo}
-										alt={`${tech.name} Logo`}
-										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
-									/>
-								</div>
-								<div class="content">
-									<h3>{tech.name}</h3>
-									<p>{tech.description}</p>
-								</div>
-							</a>
-						))
-					}
+			<div class="technology-hero">
+				<div class="hero-copy">
+					<span class="badge">Technology Hub</span>
+					<h1>Explore the world of technologies</h1>
+					<p>
+						Scan Rawkode Academy&apos;s catalogue of tools and platforms without scrolling past fluff.
+						Start typing a name and toggle the filters to zero-in on what has real content today.
+					</p>
+					<div class="text-sm text-gray-500 dark:text-gray-400">
+						Tracking <span class="font-semibold text-gray-900 dark:text-white" data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies.
+					</div>
+				</div>
+				<div class="hero-controls">
+					<div class="flex flex-col gap-2">
+						<label for="technology-search" class="text-sm font-medium text-gray-700 dark:text-gray-200">Search by name</label>
+						<div class="relative">
+							<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+							</svg>
+							<input
+								id="technology-search"
+								type="search"
+								placeholder="e.g. Grafana, Crossplane, Envoy..."
+								class="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/70 py-3 pl-11 pr-4 text-base text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
+								autocomplete="off"
+							/>
+						</div>
+					</div>
+					<div class="flex flex-col gap-2">
+						<span class="text-sm font-medium text-gray-700 dark:text-gray-200">Filter by available content</span>
+						<div class="filter-pills" role="group" aria-label="Filter technologies by content">
+							<button type="button" class="filter-pill" data-filter-pill="all" data-active="true" aria-pressed="true">All</button>
+							<button type="button" class="filter-pill" data-filter-pill="videos" aria-pressed="false">Has videos</button>
+							<button type="button" class="filter-pill" data-filter-pill="articles" aria-pressed="false">Has articles</button>
+							<button type="button" class="filter-pill" data-filter-pill="courses" aria-pressed="false">Has courses</button>
+							<button type="button" class="filter-pill" data-filter-pill="coming-soon" aria-pressed="false">Coming soon</button>
+						</div>
+					</div>
+					<p class="text-xs text-gray-500 dark:text-gray-400">
+						Showing <span data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies.
+					</p>
 				</div>
 			</div>
 		</section>
+
+		<!-- Technologies Section -->
+		<section id="technologies" class="w-full px-4">
+			<div class="max-w-7xl mx-auto">
+				<SectionHeader title="Technologies" showSeparator={false} class="mb-6" />
+				<div
+					class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+				>
+					{
+						technologies.map((tech) => {
+							const hasVideos = (tech.videoCount || 0) > 0;
+							const hasArticles = (tech.articleCount || 0) > 0;
+							const hasCourses = (tech.courseCount || 0) > 0;
+							const hasContent = hasVideos || hasArticles || hasCourses;
+							const searchKeywords = tech.name.toLowerCase();
+							
+							return (
+								<a
+									href={`/technology/${tech.id}`}
+									class="tech-card"
+									data-keywords={searchKeywords}
+									data-videos={hasVideos ? 'true' : 'false'}
+									data-articles={hasArticles ? 'true' : 'false'}
+									data-courses={hasCourses ? 'true' : 'false'}
+									data-content={hasContent ? 'true' : 'false'}
+								>
+									<div class="logo-container">
+										<img
+											src={tech.logo ?? '/apple-touch-icon.png'}
+											alt={`${tech.name} Logo`}
+											onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
+										/>
+									</div>
+									<div class="content">
+										<div class="title-row">
+											<h3>{tech.name}</h3>
+										</div>
+										
+										<div class="badges">
+											{hasVideos && (
+												<span class="badge has-content">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+														<path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+													</svg>
+													{tech.videoCount} {tech.videoCount === 1 ? 'video' : 'videos'}
+												</span>
+											)}
+											{hasArticles && (
+												<span class="badge has-content">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+														<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+													</svg>
+													{tech.articleCount} {tech.articleCount === 1 ? 'article' : 'articles'}
+												</span>
+											)}
+											{hasCourses && (
+												<span class="badge has-content">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+														<path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+													</svg>
+													{tech.courseCount} {tech.courseCount === 1 ? 'course' : 'courses'}
+												</span>
+											)}
+											{!hasContent && (
+												<span class="badge">
+													Coming soon
+												</span>
+											)}
+										</div>
+										
+										<p>{tech.description}</p>
+										
+										<span class="learn-more">
+											Learn more
+											<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+												<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+											</svg>
+										</span>
+									</div>
+								</a>
+							);
+						})
+					}
+				</div>
+				<div id="technology-empty-state" class="hidden text-center py-12 text-gray-500 dark:text-gray-400">
+					No technologies match your filters just yet. Try a different search or content filter.
+				</div>
+			</div>
+		</section>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const searchInput = document.getElementById('technology-search');
+				const cards = Array.from(document.querySelectorAll('#technologies .tech-card'));
+				const emptyState = document.getElementById('technology-empty-state');
+				const countTargets = document.querySelectorAll('[data-tech-visible-count]');
+				const filterPills = Array.from(document.querySelectorAll('[data-filter-pill]'));
+				let activeFilter = 'all';
+
+				const updatePills = () => {
+					filterPills.forEach((pill) => {
+						const value = pill.dataset.filterPill ?? 'all';
+						const isActive = value === activeFilter;
+						pill.dataset.active = isActive ? 'true' : 'false';
+						pill.setAttribute('aria-pressed', String(isActive));
+					});
+				};
+
+				const applyFilters = () => {
+					const query = (searchInput?.value ?? '').trim().toLowerCase();
+					let visible = 0;
+
+					cards.forEach((card) => {
+						const keywords = card.dataset.keywords ?? '';
+						const matchesSearch = keywords.includes(query);
+						let matchesFilter = true;
+
+						switch (activeFilter) {
+							case 'videos':
+								matchesFilter = card.dataset.videos === 'true';
+								break;
+							case 'articles':
+								matchesFilter = card.dataset.articles === 'true';
+								break;
+							case 'courses':
+								matchesFilter = card.dataset.courses === 'true';
+								break;
+							case 'coming-soon':
+								matchesFilter = card.dataset.content === 'false';
+								break;
+							default:
+								matchesFilter = true;
+						}
+
+						const shouldShow = matchesSearch && matchesFilter;
+						card.style.display = shouldShow ? '' : 'none';
+						if (shouldShow) {
+							visible += 1;
+						}
+					});
+
+					countTargets.forEach((el) => {
+						el.textContent = visible.toString();
+					});
+
+					if (emptyState) {
+						emptyState.classList.toggle('hidden', visible !== 0);
+					}
+				};
+
+				filterPills.forEach((pill) => {
+					pill.addEventListener('click', () => {
+						const value = pill.dataset.filterPill ?? 'all';
+						activeFilter = activeFilter === value ? 'all' : value;
+						updatePills();
+						applyFilters();
+					});
+				});
+
+				searchInput?.addEventListener('input', applyFilters);
+				updatePills();
+				applyFilters();
+			});
+		</script>
 	</div>
 </Page>

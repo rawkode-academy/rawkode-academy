@@ -147,25 +147,12 @@ async function buildLastmodIndex() {
 			cwd: techBaseDir,
 			absolute: true,
 		});
-	} catch {
-		// Fallback: look in common relative locations if the package isn't resolvable
-		const fallbacks = [
-			"content/technologies",
-			"../content/technologies",
-			"../../../content/technologies",
-		];
-		for (const base of fallbacks) {
-			const withData = join(base, "data");
-			const patterns = ["**/*.{md,mdx}"];
-			const dirs = [withData, base];
-			for (const d of dirs) {
-				const matches = await glob(patterns[0]!, { cwd: d, absolute: true });
-				if (matches.length > 0) {
-					techFiles.push(...matches);
-					if (!techBaseDir) techBaseDir = d;
-				}
-			}
-		}
+	} catch (err) {
+		console.error(
+			"Failed to resolve @rawkodeacademy/content-technologies package:",
+			err,
+		);
+		// Don't fallback to local directories - workspace package is the only source
 	}
 	for (const file of techFiles) {
 		try {

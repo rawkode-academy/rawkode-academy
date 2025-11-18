@@ -78,6 +78,7 @@ const hasNextPage = end < allVideos.length;
 	<!-- Featured Content Section -->
 	{featuredVideo && (
 		<FeaturedContent
+			class="section-pt-0"
 			type="video"
 			title={featuredVideo.title}
 			description={featuredVideo.description}
@@ -89,8 +90,8 @@ const hasNextPage = end < allVideos.length;
 			ctaText="Watch Now"
 		/>
 	)}
- 
- 	<div id="latest-videos" class="flex flex-col gap-12">
+
+	<div id="latest-videos" class="flex flex-col stack-gap-lg section-py">
  		<VideoFeed
 			title={page === 1 ? "Latest Videos" : `Videos - Page ${page}`}
 			description={page === 1 ? "Stay up to date with our newest content" : "Browse our video collection"}
@@ -98,7 +99,7 @@ const hasNextPage = end < allVideos.length;
 		/>
 
 		{/* Pagination controls */}
-		<div class="flex justify-center items-center gap-4 mt-8">
+		<div class="flex justify-center items-center stack-gap-sm">
 			{page > 1 && (
 				<a
 					href={page === 2 ? "/watch" : `/watch?page=${page - 1}`}
@@ -107,11 +108,11 @@ const hasNextPage = end < allVideos.length;
 					← Previous
 				</a>
 			)}
-			
+
 			<span class="px-4 py-2 text-gray-700 dark:text-gray-300">
 				Page {page}
 			</span>
-			
+
 			{hasNextPage && (
 				<a
 					href={`/watch?page=${page + 1}`}

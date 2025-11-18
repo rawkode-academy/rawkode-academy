@@ -1,8 +1,0 @@
----
-description: Helm Dashboard, while no longer actively maintained by the Helm project itself, provided a web-based user interface for managing Helm charts and deployments within a Kubernetes cluster. It aimed to simplify the process of installing, upgrading, and deleting applications packaged as Helm charts, making it more accessible to users who preferred a visual interface over command-line interactions. Its primary value was enhancing the usability of Helm, particularly for teams less familiar with CLI tools, enabling them to easily monitor chart deployments, view release history, and inspect resources deployed by Helm.
-name: Helm Dashboard
-website: https://helm.sh/
-documentation: https://helm.sh/docs/
-categories: []
----
-

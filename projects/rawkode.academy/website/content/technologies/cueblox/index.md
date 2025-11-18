@@ -1,9 +1,0 @@
----
-description: |-
-  CueBlox is a hypothetical cloud-native orchestration platform designed to simplify the management and deployment of complex, distributed applications. It leverages a declarative configuration language (likely inspired by Cue) and integrates seamlessly with Kubernetes to provide a unified interface for defining infrastructure, application dependencies, and runtime policies. Its value lies in reducing operational overhead, enhancing application consistency, and improving developer velocity. 
-
-  Main use cases for CueBlox include managing microservice architectures, deploying serverless functions, orchestrating data pipelines, and automating infrastructure provisioning across multiple cloud environments. By abstracting away the complexities of underlying infrastructure, CueBlox enables teams to focus on building and delivering valuable software features.
-name: CueBlox
-categories: []
----
-

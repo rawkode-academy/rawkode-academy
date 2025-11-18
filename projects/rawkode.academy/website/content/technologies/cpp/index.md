@@ -1,8 +1,0 @@
----
-description: C++ is a powerful, high-performance programming language with a rich history and ongoing relevance in cloud-native environments. While not exclusively a cloud-native technology, it is employed to build the infrastructure, tools, and applications that underpin modern cloud systems. C++ excels in situations demanding low latency, high throughput, and efficient resource utilization, making it suitable for building cloud-native components like databases, message queues, service meshes, and high-performance computing applications. It is valuable for optimizing the performance of cloud infrastructure and ensuring scalability and reliability.
-name: C++
-website: https://isocpp.org/
-documentation: https://en.cppreference.com/w/
-categories: []
----
-

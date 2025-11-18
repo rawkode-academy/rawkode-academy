@@ -9,6 +9,7 @@ import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
 export const prerender = false;
 
@@ -210,7 +211,7 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 								>
 									<div class="w-6 h-6 relative overflow-hidden rounded">
 										<img
-											src={`/technologies/${tech.id.replace(/\/index$/, '')}/logo.svg`}
+											src={resolveTechnologyIconUrl(tech.id, tech.data.icon) || '/apple-touch-icon.png'}
 											alt={tech.data.name}
 											class="w-full h-full object-contain"
 											onerror="this.onerror=null; this.src='/apple-touch-icon.png'"

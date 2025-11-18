@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { join, dirname as pathDirname, basename } from "node:path";
 import { resolveDataDirSync } from "@rawkodeacademy/content-technologies";
 
@@ -32,6 +33,9 @@ export function resolveTechnologyIconUrl(
 		const base = resolveDataDirSync();
 		const subdir = entryId.includes("/") ? pathDirname(entryId) : "";
 		const abs = join(base, subdir, value);
+		if (!existsSync(abs)) {
+			return undefined;
+		}
 		if (import.meta.env.DEV) {
 			return "/@fs/" + abs;
 		}

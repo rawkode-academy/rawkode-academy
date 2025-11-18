@@ -1,0 +1,276 @@
+---
+export const prerender = true;
+
+import Page from "@/wrappers/page.astro";
+import { Hero, Card, Grid, Container, Stack } from "@/components/ui";
+import SectionHeader from "@/components/common/SectionHeader.vue";
+---
+
+<Page
+	title="Technology Radar"
+	description="Join us this December as we unveil the Rawkode Academy Technology Radar - a curated guide to the technologies shaping cloud native and platform engineering."
+>
+	<Hero
+		layout="centered"
+		background="blobs"
+		pattern="grid"
+		size="md"
+		badge="Launching December 2025"
+		badgeVariant="primary"
+	>
+		<Fragment slot="title">
+			Technology Radar
+		</Fragment>
+
+		<Fragment slot="subtitle">
+			A curated guide to the technologies shaping cloud native and platform engineering. Launching daily segments from December 1st to 23rd.
+		</Fragment>
+	</Hero>
+
+	<Container size="xl" padding="lg">
+		<Stack direction="vertical" spacing="2xl">
+			<!-- What is the Technology Radar -->
+			<section>
+				<SectionHeader
+					title="What is the Technology Radar?"
+					subtitle="Our perspective on the technologies that matter"
+					centered={true}
+					showSeparator={true}
+				/>
+
+				<div class="max-w-3xl mx-auto mt-8">
+					<div class="prose prose-lg dark:prose-invert mx-auto text-center">
+						<p class="text-secondary-content">
+							The Rawkode Academy Technology Radar is our opinionated guide to the cloud native and platform engineering landscape.
+							We assess technologies across four key categories, helping you make informed decisions about what to adopt,
+							trial, assess, or hold in your technology stack.
+						</p>
+					</div>
+				</div>
+			</section>
+
+			<!-- Categories -->
+			<section>
+				<SectionHeader
+					title="Radar Categories"
+					subtitle="Technologies organized by adoption stage"
+					centered={true}
+					showSeparator={true}
+				/>
+
+				<Grid cols={1} colsMd={2} colsLg={4} gap="lg" class="mt-8">
+					<Card variant="glass" hover={true}>
+						<div class="text-center p-6">
+							<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center">
+								<svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-primary-content mb-2">Adopt</h3>
+							<p class="text-secondary-content text-sm">
+								Proven technologies we strongly recommend for production use.
+							</p>
+						</div>
+					</Card>
+
+					<Card variant="glass" hover={true}>
+						<div class="text-center p-6">
+							<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center">
+								<svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-primary-content mb-2">Trial</h3>
+							<p class="text-secondary-content text-sm">
+								Ready for evaluation in non-critical projects with production potential.
+							</p>
+						</div>
+					</Card>
+
+					<Card variant="glass" hover={true}>
+						<div class="text-center p-6">
+							<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 flex items-center justify-center">
+								<svg class="w-8 h-8 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-primary-content mb-2">Assess</h3>
+							<p class="text-secondary-content text-sm">
+								Emerging technologies worth exploring and understanding better.
+							</p>
+						</div>
+					</Card>
+
+					<Card variant="glass" hover={true}>
+						<div class="text-center p-6">
+							<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/20 flex items-center justify-center">
+								<svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-primary-content mb-2">Hold</h3>
+							<p class="text-secondary-content text-sm">
+								Technologies to avoid or reconsider for new projects.
+							</p>
+						</div>
+					</Card>
+				</Grid>
+			</section>
+
+			<!-- Launch Timeline -->
+			<section>
+				<SectionHeader
+					title="Launch Timeline"
+					subtitle="New segments revealed daily throughout December"
+					centered={true}
+					showSeparator={true}
+				/>
+
+				<div class="max-w-4xl mx-auto mt-8">
+					<Card variant="gradient" padding="lg">
+						<div class="text-center space-y-6">
+							<div class="flex items-center justify-center gap-4">
+								<div class="flex-1 h-2 bg-gradient-primary rounded-full"></div>
+								<svg class="w-12 h-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+								</svg>
+								<div class="flex-1 h-2 bg-gradient-primary rounded-full"></div>
+							</div>
+
+							<div>
+								<h3 class="text-3xl font-bold text-primary-content mb-2">December 1st - 23rd, 2025</h3>
+								<p class="text-lg text-secondary-content">
+									Join us for 23 days of technology insights, with a new segment revealed each day.
+								</p>
+							</div>
+
+							<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 text-left">
+								<div class="flex gap-4">
+									<div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+										1
+									</div>
+									<div>
+										<div class="font-semibold text-primary-content">First Reveal</div>
+										<div class="text-sm text-secondary-content">December 1st kicks off the radar</div>
+									</div>
+								</div>
+
+								<div class="flex gap-4">
+									<div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+										23
+									</div>
+									<div>
+										<div class="font-semibold text-primary-content">Daily Updates</div>
+										<div class="text-sm text-secondary-content">New segment every day</div>
+									</div>
+								</div>
+
+								<div class="flex gap-4">
+									<div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+										🎁
+									</div>
+									<div>
+										<div class="font-semibold text-primary-content">Complete Radar</div>
+										<div class="text-sm text-secondary-content">Full picture by December 23rd</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</Card>
+				</div>
+			</section>
+
+			<!-- Why It Matters -->
+			<section>
+				<SectionHeader
+					title="Why the Technology Radar Matters"
+					subtitle="Making sense of the cloud native landscape"
+					centered={true}
+					showSeparator={true}
+				/>
+
+				<div class="max-w-5xl mx-auto mt-8">
+					<Grid cols={1} colsMd={2} gap="lg">
+						<Card variant="glass" hover={true}>
+							<div class="p-6 space-y-4">
+								<div class="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
+									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+									</svg>
+								</div>
+								<h3 class="text-xl font-bold text-primary-content">Cut Through the Noise</h3>
+								<p class="text-secondary-content">
+									The cloud native ecosystem moves fast. New tools emerge constantly, each claiming to be revolutionary.
+									Our radar helps you separate genuine innovation from hype, so you can focus on technologies that deliver real value.
+								</p>
+							</div>
+						</Card>
+
+						<Card variant="glass" hover={true}>
+							<div class="p-6 space-y-4">
+								<div class="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
+									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+									</svg>
+								</div>
+								<h3 class="text-xl font-bold text-primary-content">Battle-Tested Opinions</h3>
+								<p class="text-secondary-content">
+									Our recommendations are based on real-world experience, not vendor marketing.
+									We've deployed these technologies in production, felt their pain points, and discovered their strengths.
+								</p>
+							</div>
+						</Card>
+
+						<Card variant="glass" hover={true}>
+							<div class="p-6 space-y-4">
+								<div class="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
+									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+									</svg>
+								</div>
+								<h3 class="text-xl font-bold text-primary-content">Strategic Technology Planning</h3>
+								<p class="text-secondary-content">
+									Whether you're building a new platform or evolving an existing one, our radar provides a strategic view
+									of where the industry is heading, helping you make informed architectural decisions.
+								</p>
+							</div>
+						</Card>
+
+						<Card variant="glass" hover={true}>
+							<div class="p-6 space-y-4">
+								<div class="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
+									<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+									</svg>
+								</div>
+								<h3 class="text-xl font-bold text-primary-content">Continuous Learning Path</h3>
+								<p class="text-secondary-content">
+									Each technology in our radar is backed by hands-on tutorials, articles, and videos on Rawkode Academy.
+									Don't just read about technologies—learn how to use them effectively.
+								</p>
+							</div>
+						</Card>
+					</Grid>
+
+					<div class="mt-12 text-center">
+						<Card variant="gradient" padding="lg">
+							<div class="max-w-3xl mx-auto">
+								<h3 class="text-2xl font-bold text-primary-content mb-4">
+									Join Us on the Journey
+								</h3>
+								<p class="text-lg text-secondary-content mb-6">
+									The Rawkode Academy Technology Radar isn't just a list—it's a living guide shaped by our community's experiences.
+									As we unveil each segment throughout December, you'll gain insights that take years to accumulate through trial and error.
+								</p>
+								<p class="text-base text-muted">
+									The cloud native landscape is complex, but navigating it doesn't have to be.
+								</p>
+							</div>
+						</Card>
+					</div>
+				</div>
+			</section>
+
+		</Stack>
+	</Container>
+</Page>
