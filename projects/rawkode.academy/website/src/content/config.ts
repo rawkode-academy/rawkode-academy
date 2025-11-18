@@ -200,7 +200,7 @@ const courses = defineCollection({
 		pattern: ["*.mdx", "*.md"],
 		base: "./content/courses",
 	}),
-	schema: ({ image }) =>
+		schema: ({ image }) =>
 		z.object({
 			title: z.string(),
 			description: z.string(),
@@ -214,6 +214,19 @@ const courses = defineCollection({
 			updatedAt: z.coerce.date().optional(),
 			authors: z.array(reference("people")).default(["rawkode"]),
 			difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+			technologies: z
+				.array(reference("technologies"))
+				.or(z.array(z.string()))
+				.transform((arr) =>
+					arr.map((value: any) =>
+						typeof value === "string"
+							? value.endsWith("/index")
+								? value
+								: `${value}/index`
+							: value,
+					),
+				)
+				.default([]),
 			resources: z.array(resourceSchema).optional(),
 			signupConfig: z
 				.object({
