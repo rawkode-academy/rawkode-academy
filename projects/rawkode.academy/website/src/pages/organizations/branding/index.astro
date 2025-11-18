@@ -311,7 +311,7 @@ const defaultLogoGradient = brandGradients[0]?.background ?? "linear-gradient(45
   </section>
 </Page>
 
-<script type="module" define:vars={{ logoDownloadJson, gradientDownloadJson, defaultGradientId }}>
+<script type="module" is:inline define:vars={{ logoDownloadJson, gradientDownloadJson, defaultGradientId }}>
   const previewRoot = document.querySelector("[data-logo-preview]");
   const previewControls = document.querySelector("[data-logo-preview-controls]");
 

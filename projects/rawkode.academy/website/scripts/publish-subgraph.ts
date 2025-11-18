@@ -15,7 +15,15 @@ const outDir = join(__dirname, "..", "subgraph");
 const outFile = join(outDir, "schema.gql");
 
 const schema = getSchema();
-const sdl = printSchemaWithDirectives(lexicographicSortSchema(schema), {
+type SchemaInput = Parameters<typeof lexicographicSortSchema>[0];
+const schemaForPrinting = schema as unknown as SchemaInput;
+const sdl = printSchemaWithDirectives(
+	// GraphQL is installed in both the workspace root and the website app.
+	// Double assertion keeps the tooling happy despite the duplicate installations.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-expect-error -- different GraphQL installs declare incompatible private fields
+	lexicographicSortSchema(schemaForPrinting),
+	{
 	pathToDirectivesInExtensions: [""],
 });
 

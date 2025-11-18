@@ -13,7 +13,7 @@ export function getSchema(): GraphQLSchema {
 	// Register all domain modules
 	registerTechnologies(builder);
 
-	return builder.toSubGraphSchema({
+	const schema = builder.toSubGraphSchema({
 		linkUrl: "https://specs.apollo.dev/federation/v2.6",
 		federationDirectives: [
 			"@key",
@@ -23,6 +23,9 @@ export function getSchema(): GraphQLSchema {
 			"@requires",
 		],
 	});
+
+	// Pothos pulls GraphQL from the repo root, so cast to the local version expected by bundler tooling.
+	return schema as unknown as GraphQLSchema;
 }
 
 export default getSchema;

@@ -455,51 +455,55 @@ try {
 		</section>
 
 		<script>
-			document.addEventListener('DOMContentLoaded', () => {
-				const searchInput = document.getElementById('technology-search');
-				const cards = Array.from(document.querySelectorAll('#technologies .tech-card'));
-				const emptyState = document.getElementById('technology-empty-state');
-				const countTargets = document.querySelectorAll('[data-tech-visible-count]');
-				const filterPills = Array.from(document.querySelectorAll('[data-filter-pill]'));
-				let activeFilter = 'all';
+			document.addEventListener("DOMContentLoaded", () => {
+				const searchInput = document.getElementById("technology-search") as HTMLInputElement | null;
+				const cards = Array.from(
+					document.querySelectorAll<HTMLElement>("#technologies .tech-card"),
+				);
+				const emptyState = document.getElementById("technology-empty-state");
+				const countTargets = document.querySelectorAll<HTMLElement>("[data-tech-visible-count]");
+				const filterPills = Array.from(
+					document.querySelectorAll<HTMLButtonElement>("[data-filter-pill]"),
+				);
+				let activeFilter = "all";
 
 				const updatePills = () => {
 					filterPills.forEach((pill) => {
-						const value = pill.dataset.filterPill ?? 'all';
+						const value = pill.dataset.filterPill ?? "all";
 						const isActive = value === activeFilter;
-						pill.dataset.active = isActive ? 'true' : 'false';
-						pill.setAttribute('aria-pressed', String(isActive));
+						pill.dataset.active = isActive ? "true" : "false";
+						pill.setAttribute("aria-pressed", String(isActive));
 					});
 				};
 
 				const applyFilters = () => {
-					const query = (searchInput?.value ?? '').trim().toLowerCase();
+					const query = (searchInput?.value ?? "").trim().toLowerCase();
 					let visible = 0;
 
 					cards.forEach((card) => {
-						const keywords = card.dataset.keywords ?? '';
+						const keywords = card.dataset.keywords ?? "";
 						const matchesSearch = keywords.includes(query);
 						let matchesFilter = true;
 
 						switch (activeFilter) {
-							case 'videos':
-								matchesFilter = card.dataset.videos === 'true';
+							case "videos":
+								matchesFilter = card.dataset.videos === "true";
 								break;
-							case 'articles':
-								matchesFilter = card.dataset.articles === 'true';
+							case "articles":
+								matchesFilter = card.dataset.articles === "true";
 								break;
-							case 'courses':
-								matchesFilter = card.dataset.courses === 'true';
+							case "courses":
+								matchesFilter = card.dataset.courses === "true";
 								break;
-							case 'coming-soon':
-								matchesFilter = card.dataset.content === 'false';
+							case "coming-soon":
+								matchesFilter = card.dataset.content === "false";
 								break;
 							default:
 								matchesFilter = true;
 						}
 
 						const shouldShow = matchesSearch && matchesFilter;
-						card.style.display = shouldShow ? '' : 'none';
+						card.style.display = shouldShow ? "" : "none";
 						if (shouldShow) {
 							visible += 1;
 						}
@@ -510,20 +514,20 @@ try {
 					});
 
 					if (emptyState) {
-						emptyState.classList.toggle('hidden', visible !== 0);
+						emptyState.classList.toggle("hidden", visible !== 0);
 					}
 				};
 
 				filterPills.forEach((pill) => {
-					pill.addEventListener('click', () => {
-						const value = pill.dataset.filterPill ?? 'all';
-						activeFilter = activeFilter === value ? 'all' : value;
+					pill.addEventListener("click", () => {
+						const value = pill.dataset.filterPill ?? "all";
+						activeFilter = activeFilter === value ? "all" : value;
 						updatePills();
 						applyFilters();
 					});
 				});
 
-				searchInput?.addEventListener('input', applyFilters);
+				searchInput?.addEventListener("input", applyFilters);
 				updatePills();
 				applyFilters();
 			});
