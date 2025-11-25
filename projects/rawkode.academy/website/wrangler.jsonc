@@ -1,5 +1,5 @@
 {
-	"$schema": "../../../node_modules/wrangler/config-schema.json",
+	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy",
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
@@ -8,7 +8,8 @@
 	"main": "./dist/_worker.js/index.js",
 	"assets": {
 		"binding": "ASSETS",
-		"directory": "./dist"
+		"directory": "./dist",
+		"run_worker_first": true
 	},
 	"observability": {
 		"enabled": true
