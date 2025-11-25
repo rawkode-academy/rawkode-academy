@@ -204,7 +204,7 @@ const isAuthenticated = !!Astro.locals.user;
 
 				// Handle authentication errors
 				if (error.code === "UNAUTHORIZED") {
-					window.location.href = "/sign-in/github";
+					window.location.href = "/sign-in";
 				}
 			}
 		} catch {

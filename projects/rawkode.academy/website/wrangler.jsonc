@@ -1,5 +1,5 @@
 {
-	"$schema": "./node_modules/wrangler/config-schema.json",
+	"$schema": "../../../node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy",
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
@@ -22,17 +22,32 @@
 	"kv_namespaces": [
 		{
 			"binding": "SESSION",
-			"id": "f3a5e01c10b144f5964d060cefa1b70c"
+			"id": "f3a5e01c10b144f5964d060cefa1b70c",
+			"remote": true,
 		}
 	],
 	"services": [
 		{
 			"binding": "EMOJI_REACTIONS",
-			"service": "platform-emoji-reactions-write-model"
+			"service": "platform-emoji-reactions-write-model",
+			"remote": true,
 		},
 		{
 			"binding": "AUTH_SERVICE",
-			"service": "platform-authentication-rpc"
+			"service": "platform-authentication-rpc",
+			"remote": true,
 		}
-	]
+	],
+		"secrets_store_secrets": [
+		{
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "GITHUB_OAUTH_CLIENT_ID",
+			"binding": "GITHUB_OAUTH_CLIENT_ID",
+		},
+				{
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "GITHUB_OAUTH_CLIENT_SECRET",
+			"binding": "GITHUB_OAUTH_CLIENT_SECRET",
+		},
+	],
 }

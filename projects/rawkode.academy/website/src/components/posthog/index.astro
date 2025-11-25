@@ -64,7 +64,7 @@
       var t = e.target;
       if (!t) return;
       var link = t.closest && t.closest('a');
-      if (link && link.getAttribute('href') === '/sign-in/github') {
+      if (link && link.getAttribute('href') === '/sign-in') {
         try { posthog.capture('auth_sign_in_start', { path: location.pathname }); } catch(_){}
       }
     }, true);

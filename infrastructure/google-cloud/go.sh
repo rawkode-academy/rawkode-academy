@@ -1,15 +1,6 @@
----
-runme:
-  version: v3
-shell: bash
----
+#!/usr/bin/env bash
 
-# Google Cloud
-
-## Allow Access to a Specific Secret
-
-```sh {"name":"allow-access-to-secret"}
-export SECRET_NAME=""
+export SECRET_NAME="cloudflare-workers-token"
 
 export PROJECT_ID="458678766461"
 export POOL_ID="github"
@@ -19,4 +10,4 @@ gcloud secrets add-iam-policy-binding ${SECRET_NAME} \
  --project="${PROJECT_ID}" \
  --role="roles/secretmanager.secretAccessor" \
  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/rawkode-academy/rawkode-academy"
-```
+

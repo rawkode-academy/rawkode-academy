@@ -10,7 +10,7 @@
     ],
     "catalogs": {
       "auth": {
-        "better-auth": "^1.2.3",
+        "better-auth": "^1.4.1",
         "iron-session": "^8.0.4",
         "jose": "^6.0.13",
         "oslo": "^1.2.1",

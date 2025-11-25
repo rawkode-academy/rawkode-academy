@@ -32,6 +32,22 @@ tasks: {
 			]
 		}
 
+		dev: {
+			command: "bunx"
+			args: ["wrangler", "dev"]
+
+			workspaces: ["bun"]
+
+			inputs: [
+				"astro.config.mts",
+				"bun.lock",
+				"content/",
+				"package.json",
+				"public/",
+				"src/**"
+			]
+		}
+
 		build: {
 			command: "bun"
 			args: ["build"]
