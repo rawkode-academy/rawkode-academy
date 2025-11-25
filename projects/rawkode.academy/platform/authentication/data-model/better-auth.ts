@@ -54,6 +54,7 @@ export const createAuth = <Database extends DrizzleAdapterDatabase>({
 	const rpID = resolveRpId(env.SITE_URL);
 
 	return betterAuth({
+		basePath: "/auth",
 		database: drizzleAdapter(db, {
 			provider: "sqlite",
 			schema: dataSchema,

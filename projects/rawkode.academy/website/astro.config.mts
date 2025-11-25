@@ -209,17 +209,11 @@ export default defineConfig({
 		sessionKVBindingName: "SESSION",
 		routes: {
 			extend: {
-				// Better Auth lives in the AUTH_SERVICE worker, so make sure these routes
-				// invoke the middleware instead of falling back to static assets.
+				// Better Auth API routes (with basePath: "/auth") that need SSR middleware.
+				// The /sign-in page itself is rendered by Astro, only /auth/* API routes are proxied.
 				include: [
-					{ pattern: "/sign-in/*" },
-					{ pattern: "/sign-up/*" },
-					{ pattern: "/sign-out" },
-					{ pattern: "/session" },
-					{ pattern: "/verify-email" },
-					{ pattern: "/update-user" },
-					{ pattern: "/delete-user" },
-					{ pattern: "/passkey/*" },
+					{ pattern: "/sign-in" },
+					{ pattern: "/auth/*" },
 				],
 			},
 		},
