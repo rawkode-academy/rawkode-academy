@@ -26,5 +26,17 @@
 			"database_id": "e28d6a09-2bed-4a08-9c57-4db2e2a222e5",
 			"migrations_dir": "../data-model/migrations"
 		}
-	]
+	],
+	"secrets_store_secrets": [
+		{
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "GITHUB_OAUTH_CLIENT_ID",
+			"binding": "GITHUB_OAUTH_CLIENT_ID",
+		},
+				{
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "GITHUB_OAUTH_CLIENT_SECRET",
+			"binding": "GITHUB_OAUTH_CLIENT_SECRET",
+		},
+	],
 }

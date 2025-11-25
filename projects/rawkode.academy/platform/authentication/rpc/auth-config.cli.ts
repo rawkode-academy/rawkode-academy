@@ -14,9 +14,9 @@ const db = drizzle(sqlite, { schema: dataSchema });
 
 const env: CliAuthEnv = {
 	AUTH_SECRET: process.env.AUTH_SECRET || "auth-secret-placeholder",
-	GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || "github-client-id",
+	GITHUB_CLIENT_ID: process.env.GITHUB_OAUTH_CLIENT_ID || "github-client-id",
 	GITHUB_CLIENT_SECRET:
-		process.env.GITHUB_CLIENT_SECRET || "github-client-secret",
+		process.env.GITHUB_OAUTH_CLIENT_SECRET || "github-client-secret",
 	SITE_URL: process.env.SITE_URL,
 };
 

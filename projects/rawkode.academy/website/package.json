@@ -98,6 +98,7 @@
 		"vfile": "^6.0.3",
 		"vfile-matter": "^5.0.1",
 		"vidstack": "^1.12.13-next",
+		"vite": "^6.4.1",
 		"vitest": "^3.2.4",
 		"vue": "^3.5.19",
 		"vue-boring-avatars": "^1.4.0",
