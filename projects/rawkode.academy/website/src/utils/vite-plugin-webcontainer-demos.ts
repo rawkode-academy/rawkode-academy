@@ -1,6 +1,13 @@
-import type { Plugin } from "vite";
 import { access, readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
+
+// Minimal Vite Plugin type definition to avoid direct vite import
+interface VitePlugin {
+	name: string;
+	configResolved?: (config: { root?: string }) => void | Promise<void>;
+	resolveId?: (id: string) => string | null | undefined;
+	load?: (id: string) => string | null | undefined | Promise<string | null | undefined>;
+}
 
 const VIRTUAL_MODULE_ID = "virtual:webcontainer-demos";
 const RESOLVED_VIRTUAL_MODULE_ID = "\0" + VIRTUAL_MODULE_ID;
@@ -74,7 +81,7 @@ async function discoverDemos(coursesDir: string): Promise<DemoInfo[]> {
 	return demos;
 }
 
-export function webcontainerDemosPlugin(): Plugin {
+export function webcontainerDemosPlugin(): VitePlugin {
 	let demos: DemoInfo[] = [];
 
 	return {
