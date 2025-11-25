@@ -9,3 +9,43 @@ env: {
 	RESEND_API_KEY:                "op://Employee/Resend/api-keys/website"
 	ZULIP_API_KEY:                 "op://sa-core-infrastructure.bootstrap/Zulip Self-Hosted/bots/rocko"
 }
+
+hooks: onEnter: [{
+	command: "devenv"
+	args: ["print-dev-env"]
+	source: true
+}]
+
+workspaces: bun: {}
+
+tasks: {
+	bun: {
+		install: {
+			command: "bun"
+			args: ["install"]
+
+			workspaces: ["bun"]
+
+			inputs: [
+				"bun.lock",
+				"package.json"
+			]
+		}
+
+		build: {
+			command: "bun"
+			args: ["build"]
+
+			workspaces: ["bun"]
+
+			inputs: [
+				"astro.config.mts",
+				"bun.lock",
+				"content/",
+				"package.json",
+				"public/",
+				"src/**"
+			]
+		}
+	}
+}

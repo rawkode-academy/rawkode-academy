@@ -41,7 +41,6 @@ class ProcessingState:
         'video_uploaded_content',
         'audio_uploaded_content',
         'thumbnail_uploaded_content',
-        'thumbnail_uploaded_videos',
         'cloud_run_triggered',
         'completed'
     ]
@@ -159,24 +158,14 @@ class ProcessingState:
 
 
 class YouTubeToR2:
-    def __init__(self, videos_endpoint, videos_access_key, videos_secret_key, videos_bucket,
-                 content_endpoint, content_access_key, content_secret_key, content_bucket,
+    def __init__(self, content_endpoint, content_access_key, content_secret_key, content_bucket,
                  gcp_project, gcp_location, gcp_job_name):
         self.content_bucket = content_bucket
-        self.videos_bucket = videos_bucket
         self.gcp_project = gcp_project
         self.gcp_location = gcp_location
         self.gcp_job_name = gcp_job_name
 
-        # Separate S3 clients for each bucket
-        self.videos_client = boto3.client(
-            's3',
-            endpoint_url=videos_endpoint,
-            aws_access_key_id=videos_access_key,
-            aws_secret_access_key=videos_secret_key,
-            region_name='auto'
-        )
-        
+        # R2 client for content bucket
         self.content_client = boto3.client(
             's3',
             endpoint_url=content_endpoint,
@@ -226,10 +215,13 @@ class YouTubeToR2:
 
         # Check for PO token (for mobile web client)
         po_token = os.environ.get('YOUTUBE_PO_TOKEN')
+        
+        # Check for cookies from browser (disabled by default to match CLI behavior)
+        cookies_from_browser = os.environ.get('YOUTUBE_COOKIES_BROWSER', 'none')
 
         ydl_opts = {
-            # More flexible format selection to handle various scenarios
-            'format': None,  # Let yt-dlp auto-select the best available
+            # Remove explicit format selection to let yt-dlp auto-select like CLI
+            # This should match the default CLI behavior
             'outtmpl': os.path.join(output_dir, '%(id)s.%(ext)s'),
             'merge_output_format': 'mkv',  # Merge to MKV to ensure compatibility
             'quiet': False,
@@ -252,7 +244,7 @@ class YouTubeToR2:
             },
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['tv_embedded', 'tv', 'web'],  # TV embedded works best currently
+                    'player_client': ['tv_embedded+tv+web'],  # TV embedded works best currently
                     'player_skip': [],  # Don't skip any player configs
                 }
             },
@@ -265,14 +257,27 @@ class YouTubeToR2:
             ydl_opts['extractor_args']['youtube']['po_token'] = f'mweb.gvs+{po_token}'
             logger.info("Using PO token for mobile web client")
 
-        # Add cookies if file exists
-        if os.path.exists(cookies_file):
+        # Add cookies from browser or file (try to match CLI behavior - no cookies by default)
+        cookies_set = False
+        if cookies_from_browser and cookies_from_browser.lower() != 'none':
+            # Only add cookies if explicitly requested
+            try:
+                ydl_opts['cookiesfrombrowser'] = (cookies_from_browser,)
+                logger.info(f"Using cookies from browser: {cookies_from_browser}")
+                cookies_set = True
+            except Exception as e:
+                logger.warning(f"Failed to use cookies from browser {cookies_from_browser}: {e}")
+                logger.info("Falling back to cookies file or PO token")
+        elif os.path.exists(cookies_file):
             ydl_opts['cookiefile'] = cookies_file
             logger.info(f"Using cookies from {cookies_file}")
+            cookies_set = True
         else:
-            logger.info("No cookies file found. To bypass YouTube restrictions:")
-            logger.info("  1. Export cookies to ~/.youtube_cookies.txt")
-            logger.info("  2. OR set YOUTUBE_PO_TOKEN environment variable (see https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide)")
+            logger.info("No cookies set - using default CLI behavior")
+            logger.info("  Enable cookies if needed:")
+            logger.info("  1. Set YOUTUBE_COOKIES_BROWSER environment variable (chrome/firefox/safari/edge)")
+            logger.info("  2. OR export cookies to ~/.youtube_cookies.txt")
+            logger.info("  3. OR set YOUTUBE_PO_TOKEN environment variable (see https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide)")
 
         for attempt in range(max_retries):
             try:
@@ -540,16 +545,13 @@ class YouTubeToR2:
             logger.error(f"Error downloading thumbnail: {str(e)}")
             return None
 
-    def upload_to_r2(self, local_path, bucket, r2_key, content_type='application/octet-stream', use_videos_client=False):
+    def upload_to_r2(self, local_path, bucket, r2_key, content_type='application/octet-stream'):
         """Upload file to Cloudflare R2."""
         try:
             logger.info(f"Uploading to R2 bucket '{bucket}': {r2_key}")
-            
-            # Choose the appropriate client
-            client = self.videos_client if use_videos_client else self.content_client
 
             with open(local_path, 'rb') as file:
-                client.upload_fileobj(
+                self.content_client.upload_fileobj(
                     file,
                     bucket,
                     r2_key,
@@ -749,8 +751,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                     logger.info("Skipping thumbnail download - already completed")
                     thumbnail_path = None
                     # Re-download if needed for upload
-                    if (not state.is_step_completed('thumbnail_uploaded_content') or 
-                        not state.is_step_completed('thumbnail_uploaded_videos')):
+                    if (not state.is_step_completed('thumbnail_uploaded_content')):
                         thumbnail_path = self.download_thumbnail(video_info, temp_dir)
 
                 # Upload video to CONTENT bucket
@@ -778,7 +779,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                 else:
                     logger.info("Skipping audio upload to content bucket - already completed")
 
-                # Upload thumbnail to both buckets if it exists
+                # Upload thumbnail to CONTENT bucket if it exists
                 if thumbnail_path:
                     # Upload to CONTENT bucket
                     if not state.is_step_completed('thumbnail_uploaded_content'):
@@ -791,19 +792,6 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                         state.mark_step_completed('thumbnail_uploaded_content')
                     else:
                         logger.info("Skipping thumbnail upload to content bucket - already completed")
-
-                    # Upload to VIDEOS bucket
-                    if not state.is_step_completed('thumbnail_uploaded_videos'):
-                        self.upload_to_r2(
-                            thumbnail_path,
-                            self.videos_bucket,
-                            f"{video_cuid}/thumbnail.jpg",
-                            'image/jpeg',
-                            use_videos_client=True
-                        )
-                        state.mark_step_completed('thumbnail_uploaded_videos')
-                    else:
-                        logger.info("Skipping thumbnail upload to videos bucket - already completed")
 
                 # Trigger Cloud Run job
                 if not state.is_step_completed('cloud_run_triggered') or force_cloud_run:
@@ -839,7 +827,6 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                         'audio': f"videos/{video_cuid}/original.mp3",
                         'thumbnail': f"videos/{video_cuid}/thumbnail.jpg"
                     },
-                    'videos_bucket_thumbnail': f"{video_cuid}/thumbnail.jpg",
                     'cloud_run_operation': operation_name if not skip_cloud_run else None,
                     'sql_insert': sql_insert,
                     'video_info': {
@@ -908,11 +895,6 @@ def main():
         sys.exit(0)
 
     # Get required environment variables
-    videos_endpoint = os.environ.get('VIDEOS_ENDPOINT')
-    videos_access_key = os.environ.get('VIDEOS_ACCESS_KEY')
-    videos_secret_key = os.environ.get('VIDEOS_SECRET_KEY')
-    videos_bucket = os.environ.get('VIDEOS_BUCKET')
-    
     content_endpoint = os.environ.get('CONTENT_ENDPOINT')
     content_access_key = os.environ.get('CONTENT_ACCESS_KEY')
     content_secret_key = os.environ.get('CONTENT_SECRET_KEY')
@@ -925,14 +907,6 @@ def main():
 
     # Validate required environment variables
     missing_vars = []
-    if not videos_endpoint:
-        missing_vars.append('VIDEOS_ENDPOINT')
-    if not videos_access_key:
-        missing_vars.append('VIDEOS_ACCESS_KEY')
-    if not videos_secret_key:
-        missing_vars.append('VIDEOS_SECRET_KEY')
-    if not videos_bucket:
-        missing_vars.append('VIDEOS_BUCKET')
     if not content_endpoint:
         missing_vars.append('CONTENT_ENDPOINT')
     if not content_access_key:
@@ -949,10 +923,6 @@ def main():
 
     try:
         processor = YouTubeToR2(
-            videos_endpoint,
-            videos_access_key,
-            videos_secret_key,
-            videos_bucket,
             content_endpoint,
             content_access_key,
             content_secret_key,
@@ -978,8 +948,6 @@ def main():
         print(f"  Video: {result['content_paths']['video']}")
         print(f"  Audio: {result['content_paths']['audio']}")
         print(f"  Thumbnail: {result['content_paths']['thumbnail']}")
-        print(f"\nVideos Bucket Upload:")
-        print(f"  Thumbnail: {result['videos_bucket_thumbnail']}")
         if result.get('cloud_run_operation'):
             print(f"\nCloud Run Job:")
             print(f"  Operation: {result['cloud_run_operation']}")

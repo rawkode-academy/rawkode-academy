@@ -4,6 +4,8 @@
 
   dotenv.disableHint = true;
 
+  cachix.enable = false;
+
   languages.nix.enable = true;
 
   languages.javascript = {
@@ -20,9 +22,9 @@
   ];
 
   enterShell = ''
-    export LD_LIBRARY_PATH=${pkgs.libgccjit}/lib:$LD_LIBRARY_PATH
-
     bun install
+  '' + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+    export LD_LIBRARY_PATH=${pkgs.libgccjit}/lib:$LD_LIBRARY_PATH
 
     __patchTarget="./node_modules/@cloudflare/workerd-linux-64/bin/workerd"
     if [[ -f "$__patchTarget" ]]; then
