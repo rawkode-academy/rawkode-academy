@@ -5,7 +5,8 @@
 		"dist",
 		"node_modules",
 		"**/examples/**",
-		"content/courses/*/examples/**"
+		"content/courses/*/examples/**",
+		"scripts/publish-subgraph.ts"
 	],
 
 	"compilerOptions": {
