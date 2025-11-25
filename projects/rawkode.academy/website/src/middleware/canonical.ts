@@ -13,6 +13,24 @@ export const canonicalMiddleware: MiddlewareHandler = async (context, next) => {
 	const req = context.request;
 	const url = new URL(req.url);
 
+	// Skip canonicalization for local development (localhost, 127.0.0.1, etc.)
+	// This check runs at runtime and can't be optimized away during build
+	const hostname = url.hostname;
+	if (
+		hostname === "localhost" ||
+		hostname === "127.0.0.1" ||
+		hostname.startsWith("192.168.") ||
+		hostname.startsWith("10.") ||
+		hostname.endsWith(".local")
+	) {
+		return next();
+	}
+
+	// Also skip in DEV mode (astro dev)
+	if (import.meta.env.DEV) {
+		return next();
+	}
+
 	// Only normalize for GET/HEAD to be safe for forms/APIs.
 	const isSafeMethod = req.method === "GET" || req.method === "HEAD";
 	if (!isSafeMethod) return next();

@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+	ALL_THEMES,
 	getTheme,
+	getThemeColors,
+	getThemeDisplayName,
 	setTheme,
 	toggleTheme,
-	getThemeDisplayName,
-	getThemeColors,
-	ALL_THEMES,
 } from "../lib/theme";
 
 describe("Theme Management", () => {
@@ -13,43 +13,58 @@ describe("Theme Management", () => {
 
 	beforeEach(() => {
 		// Setup DOM environment
-		if (typeof document === "undefined") {
-			global.document = {
-				documentElement: {
-					setAttribute: () => {},
-					removeAttribute: () => {},
-				},
-			} as any;
-		}
+	if (typeof document === "undefined") {
+		global.document = {
+			documentElement: {
+				setAttribute: () => {},
+				removeAttribute: () => {},
+			},
+		} as unknown as Document;
+	}
 
-		if (typeof window === "undefined") {
-			global.window = {
-				localStorage: {
-					getItem: () => null,
-					setItem: () => {},
-					removeItem: () => {},
-				},
-				dispatchEvent: () => true,
-			} as any;
-		}
+	if (typeof window === "undefined") {
+		global.window = {
+			localStorage: {
+				getItem: () => null,
+				setItem: () => {},
+				removeItem: () => {},
+				clear: () => {},
+				key: () => null,
+				length: 0,
+			} as Storage,
+			dispatchEvent: () => true,
+			addEventListener: () => {},
+			removeEventListener: () => {},
+		} as unknown as Window & typeof globalThis;
+	}
 
 		// Mock localStorage
 		originalLocalStorage = window.localStorage;
-		const localStorageMock = {
-			store: {} as Record<string, string>,
-			getItem(key: string) {
-				return this.store[key] || null;
-			},
-			setItem(key: string, value: string) {
-				this.store[key] = value;
-			},
-			removeItem(key: string) {
-				delete this.store[key];
+	const localStorageMock: Storage = (() => {
+		const store: Record<string, string> = {};
+		return {
+			get length() {
+				return Object.keys(store).length;
 			},
 			clear() {
-				this.store = {};
+				for (const key of Object.keys(store)) {
+					delete store[key];
+				}
 			},
-		};
+			getItem(key: string) {
+				return store[key] ?? null;
+			},
+			key(index: number) {
+				return Object.keys(store)[index] ?? null;
+			},
+			removeItem(key: string) {
+				delete store[key];
+			},
+			setItem(key: string, value: string) {
+				store[key] = value;
+			},
+		} as Storage;
+	})();
 		Object.defineProperty(window, "localStorage", {
 			value: localStorageMock,
 			writable: true,
@@ -83,7 +98,7 @@ describe("Theme Management", () => {
 
 	describe("getTheme", () => {
 		it("should return default theme when no theme is stored", () => {
-			expect(getTheme()).toBe("rawkode-green");
+			expect(getTheme()).toBe("catppuccin");
 		});
 
 		it("should return stored theme when valid", () => {
@@ -93,7 +108,7 @@ describe("Theme Management", () => {
 
 		it("should return default theme when stored theme is invalid", () => {
 			localStorage.setItem("rawkode-theme", "invalid-theme");
-			expect(getTheme()).toBe("rawkode-green");
+			expect(getTheme()).toBe("catppuccin");
 		});
 	});
 

@@ -6,7 +6,6 @@
  */
 
 import { createAuthClient } from "better-auth/client";
-import { passkeyClient } from "better-auth/client/plugins";
 
 // TypeScript Interfaces based on platform/authentication/data-model/schema.ts
 
@@ -121,9 +120,8 @@ export function createBetterAuthClient(
 	return createAuthClient({
 		// Use a placeholder base URL - actual routing happens via service binding
 		baseURL: "https://auth.internal",
-
-		// Enable passkey authentication plugin
-		plugins: [passkeyClient()],
+		// Must match the basePath configured in the auth service
+		basePath: "/auth",
 
 		// Custom fetch implementation that routes through AUTH_SERVICE service binding
 		fetchOptions: {

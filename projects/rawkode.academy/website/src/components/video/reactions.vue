@@ -388,7 +388,7 @@ export default {
 
 			if (!this.isAuthenticated) {
 				// Redirect to sign in
-				window.location.href = "/sign-in/github";
+				window.location.href = "/sign-in";
 				return;
 			}
 

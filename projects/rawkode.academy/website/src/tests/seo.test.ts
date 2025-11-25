@@ -1,37 +1,79 @@
 import { describe, expect, it, vi } from "vitest";
 
+// Minimal mock types for content collections used in SEO tests
+interface MockArticleData {
+	title: string;
+	description: string;
+	openGraph: {
+		title: string;
+		subtitle: string;
+	};
+	publishedAt: Date;
+	authors: string[];
+	isDraft: boolean;
+	cover?: {
+		alt: string;
+	};
+	technologies?: string[];
+}
+
+interface MockArticleEntry {
+	id: string;
+	data: MockArticleData;
+	body?: string;
+}
+
+interface MockCourseEntry {
+	id: string;
+	data: {
+		title: string;
+		description: string;
+		publishedAt: Date;
+		difficulty: "beginner" | "intermediate" | "advanced";
+	};
+}
+
 // Mock getCollection for tests
-const getCollection = vi.fn();
+const getCollection =
+	vi.fn<
+		(
+			collection: string,
+			filter?: (entry: MockArticleEntry | MockCourseEntry) => boolean,
+		) => Promise<MockArticleEntry[] | MockCourseEntry[]>
+	>();
 
 describe("SEO Validation", () => {
 	describe("Article SEO", () => {
-		it("all articles should have required meta fields", async () => {
-			// Mock articles data
-			const mockArticles = [
-				{
-					id: "test-article",
-					data: {
-						title: "Test Article Title for SEO",
-						description:
-							"This is a test article description that meets the minimum length requirement for SEO validation",
-						openGraph: {
-							title: "OG Title",
-							subtitle: "OG Subtitle",
-						},
-						publishedAt: new Date(),
-						authors: ["test-author"],
-						isDraft: false,
+		const mockArticles: MockArticleEntry[] = [
+			{
+				id: "test-article",
+				data: {
+					title: "Test Article Title for SEO",
+					description:
+						"This is a test article description that meets the minimum length requirement for SEO validation.",
+					openGraph: {
+						title: "OG Title",
+						subtitle: "OG Subtitle",
 					},
-					body: "Test article content that is long enough",
+					publishedAt: new Date(),
+					authors: ["test-author"],
+					isDraft: false,
+					cover: {
+						alt: "Descriptive cover image alt text for SEO",
+					},
+					technologies: ["kubernetes"],
 				},
-			];
+				body: "Test article content that is long enough to satisfy SEO content checks and validates the minimum length requirement for the heading structure test.",
+			},
+		];
 
+		it("all articles should have required meta fields", async () => {
 			getCollection.mockResolvedValue(mockArticles);
 
-			const articles = await getCollection(
+			const articles = (await getCollection(
 				"articles",
-				({ data }: { data: any }) => !data.isDraft,
-			);
+				(entry) => !("isDraft" in entry.data) || !entry.data.isDraft,
+			)) as MockArticleEntry[];
 
 			for (const article of articles) {
 				// Check title length
@@ -57,10 +99,12 @@ describe("SEO Validation", () => {
 		});
 
 		it("all articles should have proper image alt text if cover exists", async () => {
-			const articles = await getCollection(
+			getCollection.mockResolvedValue(mockArticles);
+
+			const articles = (await getCollection(
 				"articles",
-				({ data }: { data: any }) => !data.isDraft,
-			);
+				(entry) => "isDraft" in entry.data && !entry.data.isDraft,
+			)) as MockArticleEntry[];
 
 			for (const article of articles) {
 				if (article.data.cover) {
@@ -74,10 +118,12 @@ describe("SEO Validation", () => {
 		});
 
 		it("all articles should have technology tags", async () => {
-			const articles = await getCollection(
+			getCollection.mockResolvedValue(mockArticles);
+
+			const articles = (await getCollection(
 				"articles",
-				({ data }: { data: any }) => !data.isDraft,
-			);
+				(entry) => "isDraft" in entry.data && !entry.data.isDraft,
+			)) as MockArticleEntry[];
 
 			for (const article of articles) {
 				// Technology tags are optional but when present should be valid
@@ -91,7 +137,22 @@ describe("SEO Validation", () => {
 
 	describe("Course SEO", () => {
 		it("all courses should have required meta fields", async () => {
-			const courses = await getCollection("courses");
+			const mockCourses: MockCourseEntry[] = [
+				{
+					id: "test-course",
+					data: {
+						title: "Test Course Title for SEO",
+						description:
+							"This is a test course description that meets the minimum length requirement for SEO validation.",
+						publishedAt: new Date(),
+						difficulty: "intermediate",
+					},
+				},
+			];
+
+			getCollection.mockResolvedValue(mockCourses);
+
+			const courses = (await getCollection("courses")) as MockCourseEntry[];
 
 			for (const course of courses) {
 				// Check title and description
@@ -113,10 +174,27 @@ describe("SEO Validation", () => {
 
 	describe("URL Structure", () => {
 		it("all article URLs should be SEO-friendly", async () => {
-			const articles = await getCollection(
+			getCollection.mockResolvedValue([
+				{
+					id: "test-article-seo-friendly-url",
+					data: {
+						title: "SEO Friendly URL Article",
+						description: "Description for SEO-friendly URL article.",
+						openGraph: {
+							title: "OG Title",
+							subtitle: "OG Subtitle",
+						},
+						publishedAt: new Date(),
+						authors: ["test-author"],
+						isDraft: false,
+					},
+				},
+			]);
+
+			const articles = (await getCollection(
 				"articles",
-				({ data }: { data: any }) => !data.isDraft,
-			);
+				(entry) => "isDraft" in entry.data && !entry.data.isDraft,
+			)) as MockArticleEntry[];
 
 			for (const article of articles) {
 				// Check URL slug format
@@ -129,10 +207,28 @@ describe("SEO Validation", () => {
 
 	describe("Content Structure", () => {
 		it("articles should have proper heading structure", async () => {
-			const articles = await getCollection(
+			getCollection.mockResolvedValue([
+				{
+					id: "test-article-with-content",
+					data: {
+						title: "Article With Sufficient Content Length",
+						description: "Description for article with long content.",
+						openGraph: {
+							title: "OG Title",
+							subtitle: "OG Subtitle",
+						},
+						publishedAt: new Date(),
+						authors: ["test-author"],
+						isDraft: false,
+					},
+					body: "This is a sufficiently long body of content to satisfy the minimal length check for the SEO content structure test. It intentionally exceeds one hundred characters.",
+				},
+			]);
+
+			const articles = (await getCollection(
 				"articles",
-				({ data }: { data: any }) => !data.isDraft,
-			);
+				(entry) => "isDraft" in entry.data && !entry.data.isDraft,
+			)) as MockArticleEntry[];
 
 			// This would need to be enhanced to actually parse the content
 			// For now, just ensure articles have content
