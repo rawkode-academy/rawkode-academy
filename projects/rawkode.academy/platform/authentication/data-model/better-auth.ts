@@ -11,8 +11,8 @@ const DEFAULT_RP_ID = "rawkode.academy";
 
 export interface AuthEnv {
 	AUTH_SECRET: string;
-	GITHUB_CLIENT_ID: string;
-	GITHUB_CLIENT_SECRET: string;
+	GITHUB_OAUTH_CLIENT_ID: string;
+	GITHUB_OAUTH_CLIENT_SECRET: string;
 	SITE_URL?: string;
 }
 
@@ -63,8 +63,8 @@ export const createAuth = <Database extends DrizzleAdapterDatabase>({
 		baseURL,
 		socialProviders: {
 			github: {
-				clientId: env.GITHUB_CLIENT_ID,
-				clientSecret: env.GITHUB_CLIENT_SECRET,
+				clientId: env.GITHUB_OAUTH_CLIENT_ID,
+				clientSecret: env.GITHUB_OAUTH_CLIENT_SECRET,
 			},
 		},
 		plugins: [

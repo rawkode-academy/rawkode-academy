@@ -286,7 +286,13 @@ export default defineConfig({
 				return item;
 			},
 		}),
-		vue(),
+		vue({
+			template: {
+				compilerOptions: {
+					isCustomElement: (tag) => tag.startsWith("media-"),
+				},
+			},
+		}),
 		partytown({
 			config: {
 				forward: ["posthog"],
@@ -310,13 +316,6 @@ export default defineConfig({
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
-			vue({
-				template: {
-					compilerOptions: {
-						isCustomElement: (tag) => tag.startsWith("media-"),
-					},
-				},
-			}),
 			tailwindcss(),
 		]),
 		server: {
