@@ -28,7 +28,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           project_id: "rawkode-academy-production"
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: Get secrets from GCP Secret Manager
         id: secrets
