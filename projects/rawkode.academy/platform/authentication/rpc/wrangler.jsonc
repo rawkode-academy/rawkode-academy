@@ -19,12 +19,6 @@
 		"mode": "smart"
 	},
 	"workers_dev": false,
-	"routes": [
-		{
-			"pattern": "auth.rawkode.academy/*",
-			"custom_domain": true
-		}
-	],
 	"d1_databases": [
 		{
 			"binding": "DB",
@@ -32,7 +26,5 @@
 			"database_id": "e28d6a09-2bed-4a08-9c57-4db2e2a222e5",
 			"migrations_dir": "../data-model/migrations"
 		}
-	],
-	"workflows": [
 	]
 }
