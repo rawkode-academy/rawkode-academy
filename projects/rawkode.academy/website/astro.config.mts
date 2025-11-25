@@ -11,12 +11,38 @@ import { defineConfig, envField, fontProviders } from "astro/config";
 import matter from "gray-matter";
 import { readFile, stat } from "node:fs/promises";
 import { execSync } from "node:child_process";
-import { statSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { statSync, readFileSync } from "node:fs";
+import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
+import { existsSync } from "node:fs";
 import { glob } from "glob";
-import { searchForWorkspaceRoot } from "vite";
 import rehypeExternalLinks from "rehype-external-links";
+
+// Local implementation of searchForWorkspaceRoot to avoid direct vite import
+function searchForWorkspaceRoot(current: string): string {
+	const root = parse(current).root;
+	const lockFiles = ["bun.lock", "pnpm-lock.yaml", "package-lock.json", "yarn.lock"];
+	let dir = current;
+	while (dir !== root) {
+		for (const lockFile of lockFiles) {
+			if (existsSync(join(dir, lockFile))) {
+				return dir;
+			}
+		}
+		// Check for package.json with workspaces
+		const pkgPath = join(dir, "package.json");
+		if (existsSync(pkgPath)) {
+			try {
+				const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+				if (pkg.workspaces) {
+					return dir;
+				}
+			} catch {}
+		}
+		dir = dirname(dir);
+	}
+	return current;
+}
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
 import { deriveSlugFromFile } from "./src/utils/content-slug";
@@ -27,7 +53,7 @@ type AstroVitePlugins = NonNullable<
 >;
 
 const asAstroVitePlugins = (
-	plugins: import("vite").PluginOption[],
+	plugins: unknown[],
 ): AstroVitePlugins => plugins as unknown as AstroVitePlugins;
 
 // Check if D2 is available (used for diagram rendering)

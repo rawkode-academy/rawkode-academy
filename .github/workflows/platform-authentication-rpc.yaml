@@ -1,0 +1,59 @@
+name: rawkode.academy/platform/authentication/rpc
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/platform-authentication-rpc.yaml"
+      - "projects/rawkode.academy/platform/authentication/**"
+  pull_request:
+    paths:
+      - ".github/workflows/platform-authentication-rpc.yaml"
+      - "projects/rawkode.academy/platform/authentication/**"
+
+jobs:
+  deploy:
+    runs-on: depot-ubuntu-latest,dagger=0.18.11
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: "rawkode-academy-production"
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: Get secrets from GCP Secret Manager
+        id: secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |
+            CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Deploy RPC Service
+        working-directory: projects/rawkode.academy/platform/authentication
+        env:
+          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+        run: |
+          (cd ../../generators/projen-platform-service && bun install && bun run types)
+          bun run .projenrc.ts
+
+          dagger <<'.'
+            codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
+
+            ../../../../dagger/cloudflare | deploy \
+              $codebase \
+              ./rpc/wrangler.jsonc \
+              env:CLOUDFLARE_WORKERS_TOKEN
+          .
