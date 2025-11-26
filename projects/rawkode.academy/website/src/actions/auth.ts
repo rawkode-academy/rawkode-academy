@@ -68,7 +68,7 @@ export const auth = {
 
 			const url = new URL(
 				"/auth/sign-in/social",
-				"https://auth.internal",
+				"https://rawkode.academy",
 			);
 
 			// Filter out headers that shouldn't be forwarded
