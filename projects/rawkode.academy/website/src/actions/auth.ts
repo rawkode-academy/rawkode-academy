@@ -86,12 +86,26 @@ export const auth = {
 				}),
 			});
 
-			const responseData = await response.json();
+			let responseData: any;
+			try {
+				const text = await response.text();
+				if (text && text.length > 0) {
+					responseData = JSON.parse(text);
+				} else {
+					responseData = {};
+				}
+			} catch (error) {
+				console.error("Failed to parse auth service response");
+				throw new ActionError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Invalid response from auth service",
+				});
+			}
 
 			if (!response.ok) {
 				throw new ActionError({
 					code: "BAD_REQUEST",
-					message: "Failed to initiate sign in",
+					message: responseData.message || "Failed to initiate sign in",
 				});
 			}
 
