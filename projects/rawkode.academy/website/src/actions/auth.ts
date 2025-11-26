@@ -14,6 +14,31 @@ interface Cookie {
 	sameSite?: boolean | "lax" | "strict" | "none";
 }
 
+type JsonRecord = Record<string, unknown>;
+type CookieOptionFields = Omit<Cookie, "name" | "value">;
+
+function isRecord(value: unknown): value is JsonRecord {
+	return typeof value === "object" && value !== null;
+}
+
+function getStringProperty(record: JsonRecord, key: string): string | undefined {
+	const value = record[key];
+	return typeof value === "string" ? value : undefined;
+}
+
+type HeadersWithGetSetCookie = Headers & {
+	getSetCookie?: () => string[];
+};
+
+function getSetCookieHeaders(headers: Headers): string[] {
+	const headerWithGetter = headers as HeadersWithGetSetCookie;
+	if (typeof headerWithGetter.getSetCookie === "function") {
+		return headerWithGetter.getSetCookie();
+	}
+	const header = headers.get("Set-Cookie");
+	return header ? [header] : [];
+}
+
 function parseSetCookieString(str: string): Cookie | null {
 	const parts = str.split(";").map((p) => p.trim());
 	const nameValue = parts[0];
@@ -37,7 +62,7 @@ function parseSetCookieString(str: string): Cookie | null {
 
 		if (lowerKey === "path") cookie.path = val;
 		else if (lowerKey === "domain") cookie.domain = val;
-		else if (lowerKey === "max-age") cookie.maxAge = Number.parseInt(val);
+		else if (lowerKey === "max-age") cookie.maxAge = Number.parseInt(val, 10);
 		else if (lowerKey === "expires") cookie.expires = new Date(val);
 		else if (lowerKey === "secure") cookie.secure = true;
 		else if (lowerKey === "httponly") cookie.httpOnly = true;
@@ -68,7 +93,7 @@ export const auth = {
 
 			const url = new URL(
 				"/auth/sign-in/social",
-				"https://rawkode.academy",
+				"https://auth.internal",
 			);
 
 			// Filter out headers that shouldn't be forwarded
@@ -89,15 +114,16 @@ export const auth = {
 				}),
 			});
 
-			let responseData: any;
+			let responseData: JsonRecord = {};
 			try {
 				const text = await response.text();
 				if (text && text.length > 0) {
-					responseData = JSON.parse(text);
-				} else {
-					responseData = {};
+					const parsed: unknown = JSON.parse(text);
+					if (isRecord(parsed)) {
+						responseData = parsed;
+					}
 				}
-			} catch (error) {
+			} catch (_error) {
 				console.error("Failed to parse auth service response");
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
@@ -107,7 +133,10 @@ export const auth = {
 
 			if (!response.ok) {
 				// Include the status and text in the error for debugging
-				const errorMessage = responseData.message || responseData.error || `Auth service failed with ${response.status}`;
+				const errorMessage =
+					getStringProperty(responseData, "message") ||
+					getStringProperty(responseData, "error") ||
+					`Auth service failed with ${response.status}`;
 				throw new ActionError({
 					code: "BAD_REQUEST",
 					message: errorMessage,
@@ -115,22 +144,12 @@ export const auth = {
 			}
 
 			// Forward Set-Cookie headers
-			// Try getSetCookie if available (Cloudflare/Node 18+)
-			let setCookieHeaders: string[] = [];
-			if (typeof (response.headers as any).getSetCookie === "function") {
-				setCookieHeaders = (response.headers as any).getSetCookie();
-			} else {
-				const header = response.headers.get("Set-Cookie");
-				if (header) {
-					setCookieHeaders = [header]; // This is imperfect for multiple cookies if checking via get()
-				}
-			}
-
+			const setCookieHeaders = getSetCookieHeaders(response.headers);
 			for (const header of setCookieHeaders) {
 				const cookie = parseSetCookieString(header);
 				if (cookie) {
 					// Construct options object to satisfy exactOptionalPropertyTypes
-					const cookieOptions: any = {};
+					const cookieOptions: CookieOptionFields = {};
 					if (cookie.domain) cookieOptions.domain = cookie.domain;
 					if (cookie.expires) cookieOptions.expires = cookie.expires;
 					if (cookie.httpOnly !== undefined) cookieOptions.httpOnly = cookie.httpOnly;
@@ -143,7 +162,15 @@ export const auth = {
 				}
 			}
 
-			return responseData as { url: string };
+			const redirectUrl = getStringProperty(responseData, "url");
+			if (!redirectUrl) {
+				throw new ActionError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "Auth service response missing redirect URL",
+				});
+			}
+
+			return { url: redirectUrl };
 		},
 	}),
 	signOut: defineAction({
@@ -168,21 +195,12 @@ export const auth = {
 			);
 
 			// Forward Set-Cookie headers
-			let setCookieHeaders: string[] = [];
-			if (typeof (response.headers as any).getSetCookie === "function") {
-				setCookieHeaders = (response.headers as any).getSetCookie();
-			} else {
-				const header = response.headers.get("Set-Cookie");
-				if (header) {
-					setCookieHeaders = [header];
-				}
-			}
-
+			const setCookieHeaders = getSetCookieHeaders(response.headers);
 			for (const header of setCookieHeaders) {
 				const cookie = parseSetCookieString(header);
 				if (cookie) {
 					// Construct options object to satisfy exactOptionalPropertyTypes
-					const cookieOptions: any = {};
+					const cookieOptions: CookieOptionFields = {};
 					if (cookie.domain) cookieOptions.domain = cookie.domain;
 					if (cookie.expires) cookieOptions.expires = cookie.expires;
 					if (cookie.httpOnly !== undefined) cookieOptions.httpOnly = cookie.httpOnly;

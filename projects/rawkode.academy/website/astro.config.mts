@@ -56,6 +56,10 @@ const asAstroVitePlugins = (
 	plugins: unknown[],
 ): AstroVitePlugins => plugins as unknown as AstroVitePlugins;
 
+const disablePlatformProxy =
+	process.env.VITEST === "true" ||
+	process.env.DISABLE_CLOUDFLARE_PLATFORM_PROXY === "true";
+
 // Check if D2 is available (used for diagram rendering)
 let d2Available = false;
 try {
@@ -233,6 +237,9 @@ export default defineConfig({
 	adapter: cloudflare({
 		imageService: "cloudflare",
 		sessionKVBindingName: "SESSION",
+		platformProxy: {
+			enabled: !disablePlatformProxy,
+		},
 		routes: {
 			extend: {
 				// Better Auth callback route
