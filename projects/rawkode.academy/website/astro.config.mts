@@ -235,11 +235,11 @@ export default defineConfig({
 		sessionKVBindingName: "SESSION",
 		routes: {
 			extend: {
-				// Better Auth API routes (with basePath: "/auth") that need SSR middleware.
-				// The /sign-in page itself is rendered by Astro, only /auth/* API routes are proxied.
+				// Better Auth callback route
 				include: [
 					{ pattern: "/sign-in" },
-					{ pattern: "/auth/*" },
+					// Auth callback routes for OAuth
+					{ pattern: "/auth/callback/*" },
 				],
 			},
 		},

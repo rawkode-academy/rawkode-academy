@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { createAuthClient } from "better-auth/client";
+import { actions } from "astro:actions";
 import Button from "@/components/common/Button.vue";
 
 const props = defineProps<{
@@ -11,11 +11,6 @@ const isLoading = ref(false);
 const loadingMethod = ref<"github" | null>(null);
 const error = ref<string | null>(null);
 
-const authClient = createAuthClient({
-	baseURL: window.location.origin,
-	basePath: "/auth",
-});
-
 const signInWithGitHub = async () => {
 	if (isLoading.value) return;
 
@@ -24,10 +19,17 @@ const signInWithGitHub = async () => {
 	error.value = null;
 
 	try {
-		await authClient.signIn.social({
-			provider: "github",
+		const { data, error: actionError } = await actions.auth.signInWithGithub({
 			callbackURL: props.returnTo || "/",
 		});
+
+		if (actionError) {
+			throw new Error(actionError.message);
+		}
+
+		if (data?.url) {
+			window.location.href = data.url;
+		}
 	} catch (err: any) {
 		error.value = err.message || "An error occurred during GitHub authentication";
 		isLoading.value = false;
