@@ -1,32 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { createBetterAuthClient } from "@/lib/auth/better-auth-client.ts";
 
-// Better Auth API routes that should be proxied to AUTH_SERVICE
-// With basePath: "/auth", all routes are under /auth/*:
-// - /auth/sign-in/social/{provider} - OAuth initiation
-// - /auth/sign-in/passkey - Passkey authentication
-// - /auth/callback/{provider} - OAuth callbacks
-// - /auth/session - Session management
-// - /auth/sign-out - Sign out
-// - /auth/passkey/* - Passkey management
-const AUTH_PROXY_PREFIXES = ["/auth"];
-
-const isAuthRoute = (pathname: string) =>
-	AUTH_PROXY_PREFIXES.some(
-		(prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-	);
-
 export const authMiddleware = defineMiddleware(async (context, next) => {
-	const { pathname } = context.url;
-	if (isAuthRoute(pathname)) {
-		const authService = context.locals.runtime?.env?.AUTH_SERVICE;
-		if (!authService) {
-			console.error("AUTH_SERVICE not available for auth route", { pathname });
-			return new Response("Auth service not configured", { status: 500 });
-		}
-		return authService.fetch(context.request);
-	}
-
 	if (context.isPrerendered) {
 		// The runtime isn't available for pre-rendered pages and we
 		// only want this middleware to run for SSR.

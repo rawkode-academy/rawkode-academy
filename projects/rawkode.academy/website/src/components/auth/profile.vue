@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { BetterAuthUser } from "../../lib/auth/better-auth-client";
 import { ref, onMounted, onUnmounted } from "vue";
+import { actions } from "astro:actions";
 import Avatar from "vue-boring-avatars";
 
 const dropdownOpen = ref(false);
@@ -23,6 +24,15 @@ const handleClickOutside = (event: MouseEvent) => {
 		!buttonRef.value.contains(event.target as Node)
 	) {
 		dropdownOpen.value = false;
+	}
+};
+
+const signOut = async () => {
+	try {
+		await actions.auth.signOut();
+		window.location.href = "/";
+	} catch (error) {
+		console.error("Failed to sign out:", error);
 	}
 };
 
@@ -59,9 +69,9 @@ onUnmounted(() => {
 			</div>
 			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="userProfileButton">
 				<li>
-					<a href="/auth/sign-out"
-						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign
-						out</a>
+					<button @click="signOut"
+						class="w-full text-left block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign
+						out</button>
 				</li>
 			</ul>
 		</div>
