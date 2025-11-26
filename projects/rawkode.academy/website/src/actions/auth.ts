@@ -66,16 +66,20 @@ export const auth = {
 			}
 
 			const url = new URL(
-				"/auth/sign-in/social/github",
+				"/auth/sign-in/social",
 				"https://auth.internal",
 			);
-			if (input.callbackURL) {
-				url.searchParams.set("callbackURL", input.callbackURL);
-			}
 
 			const response = await authService.fetch(url.toString(), {
 				method: "POST",
-				headers: context.request.headers,
+				headers: {
+					...Object.fromEntries(context.request.headers.entries()),
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					provider: "github",
+					callbackURL: input.callbackURL,
+				}),
 			});
 
 			const responseData = await response.json();
