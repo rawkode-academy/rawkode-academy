@@ -74,6 +74,9 @@ export const auth = {
 			// Filter out headers that shouldn't be forwarded
 			const headers = getProxyableHeaders(context.request.headers);
 
+			// Ensure callbackURL is absolute
+			const callbackURL = new URL(input.callbackURL || "/", "https://rawkode.academy").toString();
+
 			const response = await authService.fetch(url.toString(), {
 				method: "POST",
 				headers: {
@@ -82,7 +85,7 @@ export const auth = {
 				},
 				body: JSON.stringify({
 					provider: "github",
-					callbackURL: input.callbackURL,
+					callbackURL,
 				}),
 			});
 
@@ -103,9 +106,11 @@ export const auth = {
 			}
 
 			if (!response.ok) {
+				// Include the status and text in the error for debugging
+				const errorMessage = responseData.message || responseData.error || `Auth service failed with ${response.status}`;
 				throw new ActionError({
 					code: "BAD_REQUEST",
-					message: responseData.message || "Failed to initiate sign in",
+					message: errorMessage,
 				});
 			}
 
