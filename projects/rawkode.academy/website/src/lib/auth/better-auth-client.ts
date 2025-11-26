@@ -6,6 +6,7 @@
  */
 
 import { createAuthClient } from "better-auth/client";
+import { getProxyableHeaders } from "@/lib/http";
 
 // TypeScript Interfaces based on platform/authentication/data-model/schema.ts
 
@@ -142,16 +143,9 @@ export function createBetterAuthClient(
 					: undefined;
 				const mergedHeaders = new Headers(init?.headers);
 				if (extraHeaders) {
-					const unsafeHeaders = [
-						"content-length",
-						"content-type",
-						"host",
-						"connection",
-					];
-					for (const [key, value] of new Headers(extraHeaders).entries()) {
-						if (!unsafeHeaders.includes(key.toLowerCase())) {
-							mergedHeaders.set(key, value);
-						}
+					const proxyHeaders = getProxyableHeaders(extraHeaders);
+					for (const [key, value] of proxyHeaders.entries()) {
+						mergedHeaders.set(key, value);
 					}
 				}
 
