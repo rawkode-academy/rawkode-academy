@@ -9,8 +9,6 @@ routes = [
   { pattern = "rawkode.chat/*", zone_name = "rawkode.chat" },
   { pattern = "rawkode.community", custom_domain = true },
   { pattern = "rawkode.community/*", zone_name = "rawkode.community" },
-  { pattern = "rawkode.dev", custom_domain = true },
-  { pattern = "rawkode.dev/*", zone_name = "rawkode.dev" },
   { pattern = "rawkode.link", custom_domain = true },
   { pattern = "rawkode.link/*", zone_name = "rawkode.link" },
   { pattern = "rawkode.live", custom_domain = true },
