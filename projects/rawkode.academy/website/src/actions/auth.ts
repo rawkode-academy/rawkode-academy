@@ -1,5 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { getProxyableHeaders } from "@/lib/http";
 
 interface Cookie {
 	name: string;
@@ -71,11 +72,7 @@ export const auth = {
 			);
 
 			// Filter out headers that shouldn't be forwarded
-			const headers = new Headers(context.request.headers);
-			headers.delete("content-length");
-			headers.delete("content-type");
-			headers.delete("host");
-			headers.delete("connection");
+			const headers = getProxyableHeaders(context.request.headers);
 
 			const response = await authService.fetch(url.toString(), {
 				method: "POST",
@@ -141,11 +138,7 @@ export const auth = {
 			}
 
 			// Filter out headers that shouldn't be forwarded
-			const headers = new Headers(context.request.headers);
-			headers.delete("content-length");
-			headers.delete("content-type");
-			headers.delete("host");
-			headers.delete("connection");
+			const headers = getProxyableHeaders(context.request.headers);
 
 			const response = await authService.fetch(
 				"https://auth.internal/auth/sign-out",
