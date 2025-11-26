@@ -70,10 +70,17 @@ export const auth = {
 				"https://auth.internal",
 			);
 
+			// Filter out headers that shouldn't be forwarded
+			const headers = new Headers(context.request.headers);
+			headers.delete("content-length");
+			headers.delete("content-type");
+			headers.delete("host");
+			headers.delete("connection");
+
 			const response = await authService.fetch(url.toString(), {
 				method: "POST",
 				headers: {
-					...Object.fromEntries(context.request.headers.entries()),
+					...Object.fromEntries(headers.entries()),
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
@@ -133,11 +140,18 @@ export const auth = {
 				});
 			}
 
+			// Filter out headers that shouldn't be forwarded
+			const headers = new Headers(context.request.headers);
+			headers.delete("content-length");
+			headers.delete("content-type");
+			headers.delete("host");
+			headers.delete("connection");
+
 			const response = await authService.fetch(
 				"https://auth.internal/auth/sign-out",
 				{
 					method: "POST",
-					headers: context.request.headers,
+					headers,
 				},
 			);
 

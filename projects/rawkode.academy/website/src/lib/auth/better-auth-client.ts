@@ -142,8 +142,16 @@ export function createBetterAuthClient(
 					: undefined;
 				const mergedHeaders = new Headers(init?.headers);
 				if (extraHeaders) {
+					const unsafeHeaders = [
+						"content-length",
+						"content-type",
+						"host",
+						"connection",
+					];
 					for (const [key, value] of new Headers(extraHeaders).entries()) {
-						mergedHeaders.set(key, value);
+						if (!unsafeHeaders.includes(key.toLowerCase())) {
+							mergedHeaders.set(key, value);
+						}
 					}
 				}
 
