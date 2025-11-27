@@ -24,7 +24,11 @@ export const auth = {
 			const success = await serverSignOut(cookies, context.locals.runtime?.env);
 
 			if (success) {
-				// Clear local session cookies
+				// Clear local session cookies (both secure and non-secure variants)
+				context.cookies.delete("__Secure-better-auth.session_token", {
+					path: "/",
+					domain: ".rawkode.academy",
+				});
 				context.cookies.delete("better-auth.session_token", {
 					path: "/",
 					domain: ".rawkode.academy",
