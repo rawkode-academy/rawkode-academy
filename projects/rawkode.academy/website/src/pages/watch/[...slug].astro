@@ -7,6 +7,7 @@ import RelatedVideos from "@/components/video/RelatedVideos.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -228,6 +229,10 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 						</div>
 					</div>
 				)}
+
+				<div class="mt-12">
+					<NewsletterCTA />
+				</div>
 
 			</div>
 			
