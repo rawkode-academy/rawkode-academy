@@ -13,7 +13,7 @@ export type Theme =
 	| "lgbtq";
 
 const THEME_STORAGE_KEY = "rawkode-theme";
-const DEFAULT_THEME: Theme = "catppuccin";
+const DEFAULT_THEME: Theme = "rawkode-green";
 
 // All available themes for cycling/rotation
 export const ALL_THEMES: Theme[] = [
