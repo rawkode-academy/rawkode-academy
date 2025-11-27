@@ -1,0 +1,27 @@
+{
+  "name": "id.rawkode.academy",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "wrangler d1 migrations apply id-rawkode-academy --local",
+    "auth:generate": "bunx @better-auth/cli generate --config ./src/lib/auth.config.ts --output ./src/db/schema.ts -y"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/cloudflare": "^12.6.5",
+    "astro": "^5.16.1",
+    "better-auth": "^1.4.3",
+    "drizzle-orm": "^0.44.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250426.0",
+    "drizzle-kit": "^0.30.6",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.32.0"
+  }
+}

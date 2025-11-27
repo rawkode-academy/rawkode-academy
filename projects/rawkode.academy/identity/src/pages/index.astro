@@ -1,0 +1,51 @@
+---
+export const prerender = false;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Rawkode Academy Identity</title>
+		<style>
+			body {
+				font-family: system-ui, -apple-system, sans-serif;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-height: 100vh;
+				margin: 0;
+				background: #0f172a;
+				color: #e2e8f0;
+			}
+			.container {
+				text-align: center;
+				padding: 2rem;
+			}
+			h1 {
+				font-size: 2rem;
+				margin-bottom: 0.5rem;
+			}
+			p {
+				color: #94a3b8;
+				margin-bottom: 2rem;
+			}
+			a {
+				color: #60a5fa;
+				text-decoration: none;
+			}
+			a:hover {
+				text-decoration: underline;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>Rawkode Academy Identity</h1>
+			<p>OpenID Connect Provider for Rawkode Academy services</p>
+			<p><a href="/auth/sign-in/social?provider=github">Authenticate</a></p>
+		</div>
+	</body>
+</html>

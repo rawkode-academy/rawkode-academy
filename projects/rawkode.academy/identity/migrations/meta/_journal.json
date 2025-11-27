@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1764199433393,
+      "tag": "0000_flowery_proemial_gods",
+      "breakpoints": true
+    }
+  ]
+}
