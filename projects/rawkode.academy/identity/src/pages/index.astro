@@ -1,5 +1,13 @@
 ---
+import { createAuth } from "../lib/auth";
+
 export const prerender = false;
+
+const env = Astro.locals.runtime.env;
+const auth = await createAuth(env);
+const session = await auth.api.getSession({
+	headers: Astro.request.headers,
+});
 ---
 
 <html lang="en">
@@ -23,29 +31,96 @@ export const prerender = false;
 			.container {
 				text-align: center;
 				padding: 2rem;
+				background: #1e293b;
+				border-radius: 1rem;
+				box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+				max-width: 24rem;
+				width: 100%;
 			}
 			h1 {
-				font-size: 2rem;
+				font-size: 1.5rem;
 				margin-bottom: 0.5rem;
+				color: #f8fafc;
 			}
 			p {
 				color: #94a3b8;
-				margin-bottom: 2rem;
+				margin-bottom: 1.5rem;
 			}
-			a {
-				color: #60a5fa;
+			.btn {
+				display: inline-block;
+				background: #3b82f6;
+				color: white;
+				padding: 0.75rem 1.5rem;
+				border-radius: 0.5rem;
 				text-decoration: none;
+				font-weight: 500;
+				transition: background-color 0.2s;
+				border: none;
+				cursor: pointer;
+				font-size: 1rem;
 			}
-			a:hover {
-				text-decoration: underline;
+			.btn:hover {
+				background: #2563eb;
+			}
+			.user-info {
+				text-align: left;
+				background: #0f172a;
+				padding: 1rem;
+				border-radius: 0.5rem;
+				margin-bottom: 1.5rem;
+				font-family: monospace;
+				font-size: 0.875rem;
+				overflow-x: auto;
+			}
+			.avatar {
+				width: 4rem;
+				height: 4rem;
+				border-radius: 9999px;
+				margin-bottom: 1rem;
 			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
 			<h1>Rawkode Academy Identity</h1>
-			<p>OpenID Connect Provider for Rawkode Academy services</p>
-			<p><a href="/auth/sign-in/social?provider=github">Authenticate</a></p>
+			
+			{session ? (
+				<div>
+					{session.user.image && (
+						<img src={session.user.image} alt={session.user.name} class="avatar" />
+					)}
+					<p>Welcome back, {session.user.name}!</p>
+					
+					<div class="user-info">
+						<div>ID: {session.user.id}</div>
+						<div>Email: {session.user.email}</div>
+					</div>
+
+					<button id="logout-btn" class="btn">Sign Out</button>
+				</div>
+			) : (
+				<div>
+					<p>OpenID Connect Provider for Rawkode Academy services</p>
+					<a href="/auth/sign-in/social?provider=github" class="btn">
+						Sign in with GitHub
+					</a>
+				</div>
+			)}
 		</div>
+
+		<script>
+			const logoutBtn = document.getElementById('logout-btn');
+			if (logoutBtn) {
+				logoutBtn.addEventListener('click', async () => {
+					await fetch('/auth/sign-out', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						}
+					});
+					window.location.reload();
+				});
+			}
+		</script>
 	</body>
 </html>
