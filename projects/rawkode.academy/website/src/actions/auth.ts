@@ -21,21 +21,22 @@ export const auth = {
 	signOut: defineAction({
 		handler: async (_, context) => {
 			const cookies = context.request.headers.get("Cookie") || "";
-			const success = await serverSignOut(cookies, context.locals.runtime?.env);
 
-			if (success) {
-				// Clear local session cookies (both secure and non-secure variants)
-				context.cookies.delete("__Secure-better-auth.session_token", {
-					path: "/",
-					domain: ".rawkode.academy",
-				});
-				context.cookies.delete("better-auth.session_token", {
-					path: "/",
-					domain: ".rawkode.academy",
-				});
-			}
+			// Best-effort call to identity service to invalidate server-side session
+			await serverSignOut(cookies, context.locals.runtime?.env);
 
-			return { success };
+			// Always clear local session cookies (both secure and non-secure variants)
+			context.cookies.delete("__Secure-better-auth.session_token", {
+				path: "/",
+				domain: ".rawkode.academy",
+				secure: true,
+			});
+			context.cookies.delete("better-auth.session_token", {
+				path: "/",
+				domain: ".rawkode.academy",
+			});
+
+			return { success: true };
 		},
 	}),
 
