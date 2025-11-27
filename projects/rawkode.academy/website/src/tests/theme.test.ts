@@ -98,7 +98,7 @@ describe("Theme Management", () => {
 
 	describe("getTheme", () => {
 		it("should return default theme when no theme is stored", () => {
-			expect(getTheme()).toBe("catppuccin");
+			expect(getTheme()).toBe("rawkode-green");
 		});
 
 		it("should return stored theme when valid", () => {
@@ -108,7 +108,7 @@ describe("Theme Management", () => {
 
 		it("should return default theme when stored theme is invalid", () => {
 			localStorage.setItem("rawkode-theme", "invalid-theme");
-			expect(getTheme()).toBe("catppuccin");
+			expect(getTheme()).toBe("rawkode-green");
 		});
 	});
 
