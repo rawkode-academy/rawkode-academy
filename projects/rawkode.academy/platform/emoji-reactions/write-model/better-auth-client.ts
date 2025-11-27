@@ -1,19 +1,12 @@
 /**
- * Better Auth client wrapper for Rawkode Academy website
+ * Auth utilities for emoji-reactions service
  *
- * This module provides a configured Better Auth client that routes requests
- * through the AUTH_SERVICE service binding to the authentication platform.
+ * Validates sessions via HTTP calls to id.rawkode.academy
  */
 
-import { createAuthClient } from "better-auth/client";
-import { passkeyClient } from "better-auth/client/plugins";
+const ID_PROVIDER_URL = "https://id.rawkode.academy";
 
-// TypeScript Interfaces based on platform/authentication/data-model/schema.ts
-
-/**
- * Better Auth user entity
- */
-export interface BetterAuthUser {
+export interface User {
 	id: string;
 	email: string;
 	emailVerified: boolean;
@@ -23,10 +16,7 @@ export interface BetterAuthUser {
 	updatedAt: Date;
 }
 
-/**
- * Better Auth session entity
- */
-export interface BetterAuthSession {
+export interface Session {
 	id: string;
 	userId: string;
 	expiresAt: Date;
@@ -34,130 +24,37 @@ export interface BetterAuthSession {
 	userAgent: string | null;
 }
 
-/**
- * Better Auth passkey entity
- */
-export interface BetterAuthPasskey {
-	id: string;
-	name: string | null;
-	publicKey: string;
-	userId: string;
-	credentialID: string;
-	counter: number;
-	deviceType: string;
-	backedUp: boolean;
-	transports: string | null;
-	createdAt: Date;
-	aaguid: string | null;
+export interface SessionResponse {
+	user: User;
+	session: Session;
 }
 
 /**
- * Better Auth OAuth account entity
+ * Validate a session by calling the identity provider
  */
-export interface BetterAuthAccount {
-	id: string;
-	accountId: string;
-	providerId: string;
-	userId: string;
-	accessToken: string | null;
-	refreshToken: string | null;
-	idToken: string | null;
-	accessTokenExpiresAt: Date | null;
-	refreshTokenExpiresAt: Date | null;
-	scope: string | null;
-	password: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-/**
- * Creates a Better Auth client configured to communicate with the authentication
- * platform via the AUTH_SERVICE service binding.
- *
- * @param authService - The AUTH_SERVICE service binding (or compatible) from the Cloudflare runtime environment
- * @param options - Optional configuration such as per-request header injection
- * @returns Configured Better Auth client instance with passkey and GitHub OAuth support
- *
- * @example
- * ```ts
- * const authClient = createBetterAuthClient(runtime.env.AUTH_SERVICE);
- *
- * // Sign in with passkey
- * await authClient.signIn.passkey();
- *
- * // Register a new passkey
- * await authClient.addPasskey();
- *
- * // Sign in with GitHub OAuth
- * await authClient.signIn.social({ provider: "github" });
- *
- * // List user's passkeys
- * const passkeys = await authClient.listUserPasskeys();
- *
- * // Delete a passkey
- * await authClient.deletePasskey({ passkeyId: "passkey-id" });
- *
- * // Update passkey name
- * await authClient.updatePasskey({ passkeyId: "passkey-id", name: "My Device" });
- * ```
- */
-type ServiceBindingLike = {
-	fetch(request: Request): Promise<Response>;
-};
-
-type HeaderProvider = () =>
-	| HeadersInit
-	| undefined
-	| Promise<HeadersInit | undefined>;
-
-export interface BetterAuthClientOptions {
-	getHeaders?: HeaderProvider;
-}
-
-export function createBetterAuthClient(
-	authService: ServiceBindingLike,
-	options?: BetterAuthClientOptions,
-) {
-	return createAuthClient({
-		// Use a placeholder base URL - actual routing happens via service binding
-		baseURL: "https://auth.internal",
-
-		// Enable passkey authentication plugin
-		plugins: [passkeyClient()],
-
-		// Custom fetch implementation that routes through AUTH_SERVICE service binding
-		fetchOptions: {
-			customFetchImpl: async (url, init) => {
-				// Extract the pathname + search from the Better Auth request URL
-				const urlObj = new URL(url);
-				const pathWithSearch = `${urlObj.pathname}${urlObj.search}`;
-				const proxiedUrl = new URL(pathWithSearch, "https://auth.internal");
-
-				const extraHeaders = options?.getHeaders
-					? await options.getHeaders()
-					: undefined;
-				const mergedHeaders = new Headers(init?.headers);
-				if (extraHeaders) {
-					for (const [key, value] of new Headers(extraHeaders).entries()) {
-						mergedHeaders.set(key, value);
-					}
-				}
-
-				const requestInit: RequestInit = {
-					...(init ?? {}),
-					headers: mergedHeaders,
-				};
-
-				const request = new Request(proxiedUrl, requestInit);
-
-				return authService.fetch(request);
+export async function getSession(
+	cookies: string,
+): Promise<SessionResponse | null> {
+	try {
+		const response = await fetch(`${ID_PROVIDER_URL}/auth/get-session`, {
+			method: "GET",
+			headers: {
+				Cookie: cookies,
 			},
-		},
-	});
-}
+		});
 
-/**
- * Type alias for the Better Auth client instance
- * Use this for type inference in components and utilities
- */
-export type BetterAuthClient = ReturnType<typeof createBetterAuthClient>;
+		if (!response.ok) {
+			return null;
+		}
+
+		const data = await response.json();
+		if (!data || !data.user) {
+			return null;
+		}
+
+		return data as SessionResponse;
+	} catch (error) {
+		console.error("Failed to validate session:", error);
+		return null;
+	}
+}

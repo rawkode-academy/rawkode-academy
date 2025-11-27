@@ -10,11 +10,11 @@ env: {
 	ZULIP_API_KEY:                 "op://sa-core-infrastructure.bootstrap/Zulip Self-Hosted/bots/rocko"
 }
 
-hooks: onEnter: [{
+hooks: onEnter: devenv: {
 	command: "devenv"
 	args: ["print-dev-env"]
 	source: true
-}]
+}
 
 workspaces: bun: {}
 

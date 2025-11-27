@@ -90,6 +90,8 @@ export const createAuth = async (env: AuthEnv) => {
 				domain: ".rawkode.academy",
 			},
 		},
+
+		trustedOrigins: ["https://rawkode.academy", "http://localhost:4321"],
 	});
 };
 

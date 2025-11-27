@@ -1,4 +1,4 @@
-import type { BetterAuthUser } from "./lib/auth/better-auth-client";
+import type { User } from "./lib/auth/server";
 
 /// <reference types="astro/client" />
 /// <reference types="../worker-configuration.d.ts" />
@@ -8,7 +8,7 @@ type Runtime = import("@astrojs/cloudflare").Runtime<Env>;
 declare global {
 	namespace App {
 		interface Locals extends Runtime {
-			user?: BetterAuthUser;
+			user?: User & { sub: string };
 			runtime: {
 				env: Env;
 			};
