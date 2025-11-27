@@ -12,135 +12,158 @@ import iconSvgFile from "@/components/branding/logos/logo.svg?url";
 export const prerender = true;
 
 const colorThemes = [
-  {
-    name: "Rawkode Green Theme",
-    badge: "Default",
-    description: "Everyday Rawkode Academy brand moments — content, docs, livestreams, and merch.",
-    gradient: "from-[#04B59C]/60 via-transparent to-[#85FF95]/50",
-    colors: [
-      { label: "Teal", hex: "#04B59C", usage: "Primary actions & hero gradients" },
-      { label: "Green", hex: "#85FF95", usage: "Glow accents & CTA outlines" },
-      { label: "Black", hex: "#23282D", usage: "Typography & surfaces" },
-    ],
-  },
-  {
-    name: "Rawkode Blue Theme",
-    badge: "System",
-    description: "Use when we co-brand with developer tooling or infra partners who lean blue.",
-    gradient: "from-[#5F5ED7]/60 via-transparent to-[#00CEFF]/50",
-    colors: [
-      { label: "Purple", hex: "#5F5ED7", usage: "Primary headlines & hero sweeps" },
-      { label: "Blue", hex: "#00CEFF", usage: "Buttons, inputs, status" },
-      { label: "Black", hex: "#23282D", usage: "Depth, borders, typography" },
-    ],
-  },
+	{
+		name: "Rawkode Green Theme",
+		badge: "Default",
+		description:
+			"Everyday Rawkode Academy brand moments — content, docs, livestreams, and merch.",
+		gradient: "from-[#04B59C]/60 via-transparent to-[#85FF95]/50",
+		colors: [
+			{
+				label: "Teal",
+				hex: "#04B59C",
+				usage: "Primary actions & hero gradients",
+			},
+			{ label: "Green", hex: "#85FF95", usage: "Glow accents & CTA outlines" },
+			{ label: "Black", hex: "#23282D", usage: "Typography & surfaces" },
+		],
+	},
+	{
+		name: "Rawkode Blue Theme",
+		badge: "System",
+		description:
+			"Use when we co-brand with developer tooling or infra partners who lean blue.",
+		gradient: "from-[#5F5ED7]/60 via-transparent to-[#00CEFF]/50",
+		colors: [
+			{
+				label: "Purple",
+				hex: "#5F5ED7",
+				usage: "Primary headlines & hero sweeps",
+			},
+			{ label: "Blue", hex: "#00CEFF", usage: "Buttons, inputs, status" },
+			{ label: "Black", hex: "#23282D", usage: "Depth, borders, typography" },
+		],
+	},
 ];
 
 const brandGradients = [
-  {
-    id: "academy",
-    name: "Rawkode Academy Gradient",
-    angleLabel: "45°",
-    angleDeg: 45,
-    description: "Academy visuals run from teal into green (page 8), mirrored across hero cards and merch.",
-    stops: [
-      { label: "Teal", hex: "#04B59C", offset: "0%" },
-      { label: "Green", hex: "#85FF95", offset: "100%" },
-    ],
-    usage: "Use when the Academy is the lead brand story: curriculum launches, learning hub surfaces, etc.",
-    background: "linear-gradient(45deg, #04B59C 0%, #85FF95 100%)",
-  },
-  {
-    id: "core",
-    name: "Rawkode Core Gradient",
-    angleLabel: "45°",
-    angleDeg: 45,
-    description: "Primary Rawkode lockups transition from purple into blue as documented in the PDF (page 5).",
-    stops: [
-      { label: "Purple", hex: "#5F5ED7", offset: "0%" },
-      { label: "Blue", hex: "#00CEFF", offset: "100%" },
-    ],
-    usage: "Keep for Rawkode logos, backdrops, and partner lockups tied to the core company brand.",
-    background: "linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)",
-  },
+	{
+		id: "academy",
+		name: "Rawkode Academy Gradient",
+		angleLabel: "45°",
+		angleDeg: 45,
+		description:
+			"Academy visuals run from teal into green (page 8), mirrored across hero cards and merch.",
+		stops: [
+			{ label: "Teal", hex: "#04B59C", offset: "0%" },
+			{ label: "Green", hex: "#85FF95", offset: "100%" },
+		],
+		usage:
+			"Use when the Academy is the lead brand story: curriculum launches, learning hub surfaces, etc.",
+		background: "linear-gradient(45deg, #04B59C 0%, #85FF95 100%)",
+	},
+	{
+		id: "core",
+		name: "Rawkode Core Gradient",
+		angleLabel: "45°",
+		angleDeg: 45,
+		description:
+			"Primary Rawkode lockups transition from purple into blue as documented in the PDF (page 5).",
+		stops: [
+			{ label: "Purple", hex: "#5F5ED7", offset: "0%" },
+			{ label: "Blue", hex: "#00CEFF", offset: "100%" },
+		],
+		usage:
+			"Keep for Rawkode logos, backdrops, and partner lockups tied to the core company brand.",
+		background: "linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)",
+	},
 ];
 
 const logoAssets = [
-  {
-    slug: "monogram",
-    name: "Monogram",
-    description:
-      "Use for avatars, favicons, stickers, or anywhere the brand needs to fit in a square. Keep plenty of breathing room so the M shape stays crisp.",
-    previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
-    assetClass: "brand-logo--padded",
-    asset: monogramSvgRaw,
-    downloadUrl: monogramSvgFile,
-    downloadName: "Rawkode-Academy-Monogram.svg",
-    useCases: ["Avatars & profile badges", "Social icons", "Overlays on content"],
-  },
-  {
-    slug: "icon",
-    name: "Icon",
-    description:
-      "Square logo built for UI chrome, app tiles, or partner lockups that need a bold geometric mark.",
-    previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
-    assetClass: "",
-    asset: iconSvgRaw,
-    downloadUrl: iconSvgFile,
-    downloadName: "Rawkode-Academy-Icon.svg",
-    useCases: ["Product UI", "Square partner placements", "Small merch runs"],
-  },
-  {
-    slug: "wordmark",
-    name: "Wordmark",
-    description:
-      "Full logotype for hero sections, brochures, and anywhere legibility is critical. Only scale proportionally; never stretch.",
-    previewWrapper: "w-full h-24 md:h-28",
-    assetClass: "brand-logo--wide",
-    cardClass: "md:min-w-[320px]",
-    asset: wordmarkSvgRaw,
-    downloadUrl: wordmarkSvgFile,
-    downloadName: "Rawkode-Academy-Wordmark.svg",
-    useCases: ["Headers & banners", "Email signatures", "Printed materials"],
-  },
+	{
+		slug: "monogram",
+		name: "Monogram",
+		description:
+			"Use for avatars, favicons, stickers, or anywhere the brand needs to fit in a square. Keep plenty of breathing room so the M shape stays crisp.",
+		previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
+		assetClass: "brand-logo--padded",
+		asset: monogramSvgRaw,
+		downloadUrl: monogramSvgFile,
+		downloadName: "Rawkode-Academy-Monogram.svg",
+		useCases: [
+			"Avatars & profile badges",
+			"Social icons",
+			"Overlays on content",
+		],
+	},
+	{
+		slug: "icon",
+		name: "Icon",
+		description:
+			"Square logo built for UI chrome, app tiles, or partner lockups that need a bold geometric mark.",
+		previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
+		assetClass: "",
+		asset: iconSvgRaw,
+		downloadUrl: iconSvgFile,
+		downloadName: "Rawkode-Academy-Icon.svg",
+		useCases: ["Product UI", "Square partner placements", "Small merch runs"],
+	},
+	{
+		slug: "wordmark",
+		name: "Wordmark",
+		description:
+			"Full logotype for hero sections, brochures, and anywhere legibility is critical. Only scale proportionally; never stretch.",
+		previewWrapper: "w-full h-24 md:h-28",
+		assetClass: "brand-logo--wide",
+		cardClass: "md:min-w-[320px]",
+		asset: wordmarkSvgRaw,
+		downloadUrl: wordmarkSvgFile,
+		downloadName: "Rawkode-Academy-Wordmark.svg",
+		useCases: ["Headers & banners", "Email signatures", "Printed materials"],
+	},
 ];
 
 const encodeSvgForCss = (svg: string) =>
-  svg
-    .replace(/[\n\r]+/g, " ")
-    .replace(/\s{2,}/g, " ")
-    .replace(/"/g, "'")
-    .replace(/%/g, "%25")
-    .replace(/#/g, "%23")
-    .replace(/{/g, "%7B")
-    .replace(/}/g, "%7D")
-    .replace(/</g, "%3C")
-    .replace(/>/g, "%3E");
+	svg
+		.replace(/[\n\r]+/g, " ")
+		.replace(/\s{2,}/g, " ")
+		.replace(/"/g, "'")
+		.replace(/%/g, "%25")
+		.replace(/#/g, "%23")
+		.replace(/{/g, "%7B")
+		.replace(/}/g, "%7D")
+		.replace(/</g, "%3C")
+		.replace(/>/g, "%3E");
 
 const logoPreviewAssets = logoAssets.map((logo) => ({
-  ...logo,
-  maskUrl: `url("data:image/svg+xml,${encodeSvgForCss(logo.asset)}")`,
+	...logo,
+	maskUrl: `url("data:image/svg+xml,${encodeSvgForCss(logo.asset)}")`,
 }));
 
 const logoDownloadJson = JSON.stringify(
-  logoPreviewAssets.map((logo) => ({
-    slug: logo.slug,
-    svg: logo.asset,
-    downloadName: logo.downloadName ?? `${logo.name}.svg`,
-  })),
+	logoPreviewAssets.map((logo) => ({
+		slug: logo.slug,
+		svg: logo.asset,
+		downloadName: logo.downloadName ?? `${logo.name}.svg`,
+	})),
 ).replace(/</g, "\\u003C");
 
 const gradientDownloadJson = JSON.stringify(
-  brandGradients.map((gradient) => ({
-    id: gradient.id,
-    name: gradient.name,
-    angle: gradient.angleDeg,
-    stops: gradient.stops.map((stop) => ({ offset: stop.offset ?? "", color: stop.hex })),
-  })),
+	brandGradients.map((gradient) => ({
+		id: gradient.id,
+		name: gradient.name,
+		angle: gradient.angleDeg,
+		stops: gradient.stops.map((stop) => ({
+			offset: stop.offset ?? "",
+			color: stop.hex,
+		})),
+	})),
 ).replace(/</g, "\\u003C");
 
 const defaultGradientId = brandGradients[0]?.id ?? null;
-const defaultLogoGradient = brandGradients[0]?.background ?? "linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)";
+const defaultLogoGradient =
+	brandGradients[0]?.background ??
+	"linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)";
 ---
 
 <Page title="Branding | Rawkode Academy" description="Official Rawkode Academy brand assets — logos, colors, and usage guidelines for partners.">

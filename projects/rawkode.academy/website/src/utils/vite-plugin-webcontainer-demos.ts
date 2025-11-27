@@ -6,7 +6,9 @@ interface VitePlugin {
 	name: string;
 	configResolved?: (config: { root?: string }) => void | Promise<void>;
 	resolveId?: (id: string) => string | null | undefined;
-	load?: (id: string) => string | null | undefined | Promise<string | null | undefined>;
+	load?: (
+		id: string,
+	) => string | null | undefined | Promise<string | null | undefined>;
 }
 
 const VIRTUAL_MODULE_ID = "virtual:webcontainer-demos";

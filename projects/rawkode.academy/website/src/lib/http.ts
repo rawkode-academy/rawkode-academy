@@ -58,7 +58,9 @@ export function getProxyableHeaders(
 ): Headers {
 	const result = new Headers();
 	const source = new Headers(originalHeaders);
-	const lowerCaseExcluded = new Set(excludedHeaders.map((h) => h.toLowerCase()));
+	const lowerCaseExcluded = new Set(
+		excludedHeaders.map((h) => h.toLowerCase()),
+	);
 
 	for (const [key, value] of source.entries()) {
 		if (!lowerCaseExcluded.has(key.toLowerCase())) {

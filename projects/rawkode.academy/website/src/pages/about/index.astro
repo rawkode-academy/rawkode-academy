@@ -6,100 +6,102 @@ import Page from "@/wrappers/page.astro";
 export const prerender = true;
 
 const stats = [
-        {
-                value: "60K+",
-                label: "Developers reached",
-                description:
-                        "Learners who've tuned into our live streams, workshops, and asynchronous paths since 2019.",
-        },
-        {
-                value: "500+",
-                label: "Hours of hands-on content",
-                description: "From Rawkode Live experiments to deep dives on Kubernetes, WASM, and platform engineering.",
-        },
-        {
-                value: "90+",
-                label: "Projects featured",
-                description: "Open-source tools explored with the maintainers and contributors who build them.",
-        },
+	{
+		value: "60K+",
+		label: "Developers reached",
+		description:
+			"Learners who've tuned into our live streams, workshops, and asynchronous paths since 2019.",
+	},
+	{
+		value: "500+",
+		label: "Hours of hands-on content",
+		description:
+			"From Rawkode Live experiments to deep dives on Kubernetes, WASM, and platform engineering.",
+	},
+	{
+		value: "90+",
+		label: "Projects featured",
+		description:
+			"Open-source tools explored with the maintainers and contributors who build them.",
+	},
 ];
 
 const missionPillars = [
-        {
-                title: "Hands-on & honest",
-                description:
-                        "We build in the open, share the messy bits, and keep cameras rolling when things go sideways so everyone can see the real troubleshooting process.",
-        },
-        {
-                title: "Maintainer-first",
-                description:
-                        "Creators and core contributors sit beside us to explain the 'why' behind their decisions, the trade-offs they made, and what's coming next.",
-        },
-        {
-                title: "Future-looking",
-                description:
-                        "We scout emerging runtimes, infrastructure patterns, and developer workflows so you can chart a path long before it's mainstream.",
-        },
+	{
+		title: "Hands-on & honest",
+		description:
+			"We build in the open, share the messy bits, and keep cameras rolling when things go sideways so everyone can see the real troubleshooting process.",
+	},
+	{
+		title: "Maintainer-first",
+		description:
+			"Creators and core contributors sit beside us to explain the 'why' behind their decisions, the trade-offs they made, and what's coming next.",
+	},
+	{
+		title: "Future-looking",
+		description:
+			"We scout emerging runtimes, infrastructure patterns, and developer workflows so you can chart a path long before it's mainstream.",
+	},
 ];
 
 const timeline = [
-        {
-                period: "2003 — 2014",
-                title: "Full-stack builder & accidental SRE",
-                description:
-                        "David cut his teeth on ticketing systems for horse racing tracks across the UK, touching everything from custom kernels in C to QT point-of-sale apps and early Windows CE devices. Puppet automation in 2004 cemented a lifelong obsession with operational excellence.",
-        },
-        {
-                period: "2014 — 2016",
-                title: "Scaling TeamRock (now LouderSound)",
-                description:
-                        "As Director of Development, he led the shift from virtual machines to containerized workloads on AWS just in time for an enormous traffic spike following the passing of Lemmy Kilmister. The bet on containers paid off, proving how resilient modern infrastructure could be.",
-        },
-        {
-                period: "2016 — 2019",
-                title: "Developer advocate at InfluxData",
-                description:
-                        "Helping operators adopt InfluxDB and Telegraf for Kubernetes metrics meant speaking at meetups, writing tutorials, and working directly with engineering teams to simplify deployments—well before metrics-server replaced Heapster on clusters.",
-        },
-        {
-                period: "2019",
-                title: "Rawkode Academy officially launches",
-                description:
-                        "The first video, \"Last Week in Kubernetes,\" sets the tone: live, hands-on exploration guided by curiosity. From there the Academy became a permanent home for transparent learning.",
-        },
-        {
-                period: "2021",
-                title: "Klustered arrives",
-                description:
-                        "We invited friends and experts to debug intentionally broken Kubernetes clusters in real time. The format celebrated problem-solving under pressure and quickly became a community favorite.",
-        },
-        {
-                period: "Today",
-                title: "Still experimenting, still sharing",
-                description:
-                        "Rawkode Academy blends live streams, deep-dive series, and research-backed learning paths to help individuals and engineering organizations keep pace with cloud native change.",
-        },
+	{
+		period: "2003 — 2014",
+		title: "Full-stack builder & accidental SRE",
+		description:
+			"David cut his teeth on ticketing systems for horse racing tracks across the UK, touching everything from custom kernels in C to QT point-of-sale apps and early Windows CE devices. Puppet automation in 2004 cemented a lifelong obsession with operational excellence.",
+	},
+	{
+		period: "2014 — 2016",
+		title: "Scaling TeamRock (now LouderSound)",
+		description:
+			"As Director of Development, he led the shift from virtual machines to containerized workloads on AWS just in time for an enormous traffic spike following the passing of Lemmy Kilmister. The bet on containers paid off, proving how resilient modern infrastructure could be.",
+	},
+	{
+		period: "2016 — 2019",
+		title: "Developer advocate at InfluxData",
+		description:
+			"Helping operators adopt InfluxDB and Telegraf for Kubernetes metrics meant speaking at meetups, writing tutorials, and working directly with engineering teams to simplify deployments—well before metrics-server replaced Heapster on clusters.",
+	},
+	{
+		period: "2019",
+		title: "Rawkode Academy officially launches",
+		description:
+			'The first video, "Last Week in Kubernetes," sets the tone: live, hands-on exploration guided by curiosity. From there the Academy became a permanent home for transparent learning.',
+	},
+	{
+		period: "2021",
+		title: "Klustered arrives",
+		description:
+			"We invited friends and experts to debug intentionally broken Kubernetes clusters in real time. The format celebrated problem-solving under pressure and quickly became a community favorite.",
+	},
+	{
+		period: "Today",
+		title: "Still experimenting, still sharing",
+		description:
+			"Rawkode Academy blends live streams, deep-dive series, and research-backed learning paths to help individuals and engineering organizations keep pace with cloud native change.",
+	},
 ];
 
 const signatureFormats = [
-        {
-                title: "Rawkode Live",
-                description:
-                        "Pair-programming sessions with maintainers and contributors where we explore new releases, ship proof-of-concepts, and fix bugs the honest way.",
-                chips: ["Live coding", "Maintainer access", "Transparent problem-solving"],
-        },
-        {
-                title: "Klustered",
-                description:
-                        "A chaos-friendly challenge series where experts race to repair sabotaged Kubernetes clusters. Every run reveals new observability, networking, and reliability tactics.",
-                chips: ["Kubernetes", "Incident response", "Game show energy"],
-        },
-        {
-                title: "Learning paths",
-                description:
-                        "Structured, research-backed collections of shows, articles, and labs that turn sprawling topics like Platform Engineering or WASM into actionable skill trees.",
-                chips: ["Self-paced", "Curated resources", "Actionable outcomes"],
-        },
+	{
+		title: "Rawkode Live",
+		description:
+			"Pair-programming sessions with maintainers and contributors where we explore new releases, ship proof-of-concepts, and fix bugs the honest way.",
+		chips: ["Live coding", "Maintainer access", "Transparent problem-solving"],
+	},
+	{
+		title: "Klustered",
+		description:
+			"A chaos-friendly challenge series where experts race to repair sabotaged Kubernetes clusters. Every run reveals new observability, networking, and reliability tactics.",
+		chips: ["Kubernetes", "Incident response", "Game show energy"],
+	},
+	{
+		title: "Learning paths",
+		description:
+			"Structured, research-backed collections of shows, articles, and labs that turn sprawling topics like Platform Engineering or WASM into actionable skill trees.",
+		chips: ["Self-paced", "Curated resources", "Actionable outcomes"],
+	},
 ];
 ---
 

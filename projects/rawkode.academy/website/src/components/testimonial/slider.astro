@@ -35,18 +35,20 @@ const filteredTestimonials = type
 	: allTestimonials;
 
 // Limit the number of testimonials if specified and manually create objects with correct property order
-const testimonials: Testimonial[] = filteredTestimonials.slice(0, limit).map((testimonial) => {
-	const { name, title, image, link } = testimonial.data.author;
-	return {
-		quote: testimonial.data.quote,
-		author: {
-			name,
-			title,
-			image,
-			...(link !== undefined ? { link } : {}),
-		},
-	};
-});
+const testimonials: Testimonial[] = filteredTestimonials
+	.slice(0, limit)
+	.map((testimonial) => {
+		const { name, title, image, link } = testimonial.data.author;
+		return {
+			quote: testimonial.data.quote,
+			author: {
+				name,
+				title,
+				image,
+				...(link !== undefined ? { link } : {}),
+			},
+		};
+	});
 ---
 
 <div class="relative w-full">

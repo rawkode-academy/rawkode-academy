@@ -7,11 +7,12 @@ let isSubscribed = false;
 
 if (user) {
 	try {
-		const prefs = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
-			user.id,
-			"newsletter",
-			"academy",
-		);
+		const prefs =
+			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+				user.id,
+				"newsletter",
+				"academy",
+			);
 		isSubscribed = prefs.length > 0;
 	} catch (e) {
 		console.error("Failed to fetch preferences", e);
@@ -23,6 +24,7 @@ const returnTo = Astro.url.pathname;
 const { class: className } = Astro.props;
 ---
 
+{!isSubscribed && (
 <section class:list={["w-full max-w-4xl mx-auto px-6", className ?? "my-24"]}>
 	<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-sm">
 		
@@ -41,7 +43,7 @@ const { class: className } = Astro.props;
 			<div class="w-full md:w-auto min-w-[240px] flex flex-col gap-3 justify-center">
 				{user ? (
 					<div class="scale-105 origin-center md:origin-top-right">
-						<SubscribeButton client:visible isSubscribed={isSubscribed} />
+						<SubscribeButton client:visible />
 					</div>
 				) : (
 					<Button href={`/sign-in?returnTo=${encodeURIComponent(returnTo)}`} variant="primary" class="w-full justify-center py-3">
@@ -56,3 +58,4 @@ const { class: className } = Astro.props;
 		</div>
 	</div>
 </section>
+)}

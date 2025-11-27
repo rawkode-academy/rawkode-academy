@@ -1,0 +1,82 @@
+---
+import Page from "@/wrappers/page.astro";
+import EmailPreferences from "@/components/settings/EmailPreferences.vue";
+import Avatar from "vue-boring-avatars";
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+
+if (!user) {
+	return Astro.redirect(`/sign-in?returnTo=${encodeURIComponent("/settings")}`);
+}
+
+let isNewsletterSubscribed = false;
+
+try {
+	const prefs = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+		user.id,
+		"newsletter",
+		"academy",
+	);
+	isNewsletterSubscribed = prefs.length > 0;
+} catch (e) {
+	console.error("Failed to fetch email preferences", e);
+}
+---
+
+<Page title="Settings - Rawkode Academy" description="Manage your account settings and email preferences.">
+	<div class="max-w-3xl mx-auto py-8 px-4">
+		<h1 class="text-3xl font-bold text-neutral-900 dark:text-white mb-8">
+			Settings
+		</h1>
+
+		<div class="space-y-8">
+			<!-- Profile Section -->
+			<section class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+				<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
+					<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+						Profile
+					</h2>
+				</div>
+				<div class="p-6">
+					<div class="flex items-center gap-4">
+						{user.image ? (
+							<img 
+								src={user.image} 
+								alt={`Profile picture for ${user.name || 'user'}`}
+								class="w-16 h-16 rounded-full"
+								loading="lazy"
+							/>
+						) : (
+							<Avatar client:load name={user.name || ""} variant="pixel" class="w-16 h-16 rounded-full" />
+						)}
+						<div>
+							<p class="text-lg font-medium text-neutral-900 dark:text-white">
+								{user.name}
+							</p>
+							<p class="text-sm text-neutral-500 dark:text-neutral-400">
+								{user.email}
+							</p>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Email Preferences Section -->
+			<section class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+				<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
+					<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+						Email Preferences
+					</h2>
+					<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+						Manage what emails you receive from Rawkode Academy.
+					</p>
+				</div>
+				<div class="p-6">
+					<EmailPreferences client:load isSubscribed={isNewsletterSubscribed} />
+				</div>
+			</section>
+		</div>
+	</div>
+</Page>
