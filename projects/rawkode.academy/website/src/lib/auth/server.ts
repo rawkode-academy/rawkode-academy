@@ -31,11 +31,13 @@ export interface SessionResponse {
 }
 
 function getAuthCookies(cookies: string): string {
-	return cookies
-		.split(";")
-		.map((c) => c.trim())
-		.filter((c) => c.startsWith("better-auth."))
-		.join("; ");
+	const allCookies = cookies.split(";").map((c) => c.trim());
+	// Match both "better-auth." and "__Secure-better-auth." prefixes
+	const authCookies = allCookies.filter(
+		(c) => c.startsWith("better-auth.") || c.startsWith("__Secure-better-auth.")
+	);
+	
+	return authCookies.join("; ");
 }
 
 /**
@@ -46,6 +48,10 @@ export async function getSession(
 	env?: any,
 ): Promise<SessionResponse | null> {
 	const authCookies = getAuthCookies(cookies);
+
+	if (!authCookies) {
+		return null;
+	}
 
 	try {
 		let response: Response;

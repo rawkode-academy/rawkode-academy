@@ -3,7 +3,6 @@ import { getSession, type User } from "@/lib/auth/server";
 
 export const authMiddleware = defineMiddleware(async (context, next) => {
 	if (context.isPrerendered) {
-		console.debug("Prerendered: skipping auth middleware");
 		return next();
 	}
 
