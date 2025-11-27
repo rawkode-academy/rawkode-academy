@@ -25,6 +25,15 @@ export class EmailPreferencesService extends WorkerEntrypoint<Env> {
 		return drizzle(this.env.DB, { schema: dataSchema });
 	}
 
+	async fetch(request: Request): Promise<Response> {
+		// Health check endpoint
+		if (new URL(request.url).pathname === "/health") {
+			return new Response("ok", { headers: { "Content-Type": "text/plain" } });
+		}
+
+		return new Response("Not Found", { status: 404 });
+	}
+
 	/**
 	 * Set email preference for a user
 	 */
