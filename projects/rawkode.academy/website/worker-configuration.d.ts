@@ -8,7 +8,7 @@ declare namespace Cloudflare {
 	interface Env {
 		SESSION: KVNamespace;
 		EMOJI_REACTIONS: Fetcher /* platform-emoji-reactions-write-model */;
-		AUTH_SERVICE: Fetcher /* platform-authentication-rpc */;
+		IDENTITY: Fetcher /* rawkode-academy-identity */;
 		ASSETS: Fetcher;
 	}
 }

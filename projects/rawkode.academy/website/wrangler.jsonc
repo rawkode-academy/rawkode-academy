@@ -31,12 +31,12 @@
 		{
 			"binding": "EMOJI_REACTIONS",
 			"service": "platform-emoji-reactions-write-model",
-			"remote": true,
+			"remote": true
 		},
 		{
-			"binding": "AUTH_SERVICE",
-			"service": "platform-authentication-rpc",
-			"remote": true,
+			"binding": "IDENTITY",
+			"service": "rawkode-academy-identity",
+			"remote": true
 		}
 	]
 }

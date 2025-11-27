@@ -12,7 +12,9 @@
       "Bash(bun test:*)",
       "Bash(bunx projen:*)",
       "Bash(platform/emoji-reactions/package.json)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(xargs cat:*)",
+      "Bash(bun install)"
     ],
     "deny": []
   }
