@@ -158,36 +158,34 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 			}
 		</ul>
 
-		{!isSubscribed && (
-			<div class="mt-6 pt-4 border-t border-white/40 dark:border-gray-700/40">
-				<div class="group flex items-center py-2 pl-2 rounded-lg relative">
-					<div class="absolute left-3 flex items-center justify-center text-xl w-6 h-6">
-						<span class="animate-pulse">📡</span>
-					</div>
-					<div class="toc-content ml-10 flex flex-col gap-3 overflow-hidden">
-						<div class="min-w-[180px]">
-							<div>
-								<p class="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap font-mono tracking-tight uppercase">
-									System_Update
-								</p>
-								<p class="text-xs text-gray-500 dark:text-gray-400 leading-tight mt-1 font-mono">
-									// Receive critical tutorials.
-								</p>
-							</div>
-							<div class="w-full mt-3">
-								{user ? (
-									<SubscribeButton client:visible />
-								) : (
-									<Button href={`/sign-in?returnTo=${encodeURIComponent(returnTo)}`} variant="primary" size="sm" class="w-full justify-center !font-mono !uppercase !tracking-widest !text-xs !py-2">
-										[ Connect ]
-									</Button>
-								)}
-							</div>
+		<div class="mt-6 pt-4 border-t border-white/40 dark:border-gray-700/40">
+			<div class="group flex items-center py-2 pl-2 rounded-lg relative">
+				<div class="absolute left-3 flex items-center justify-center text-xl w-6 h-6">
+					<span class="animate-pulse">📡</span>
+				</div>
+				<div class="toc-content ml-10 flex flex-col gap-3 overflow-hidden">
+					<div class="min-w-[180px]">
+						<div>
+							<p class="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap font-mono tracking-tight uppercase">
+								System_Update
+							</p>
+							<p class="text-xs text-gray-500 dark:text-gray-400 leading-tight mt-1 font-mono">
+								// Receive critical tutorials.
+							</p>
+						</div>
+						<div class="w-full mt-3">
+							{user ? (
+								<SubscribeButton client:visible isSubscribed={isSubscribed} />
+							) : (
+								<Button href={`/sign-in?returnTo=${encodeURIComponent(returnTo)}`} variant="primary" size="sm" class="w-full justify-center !font-mono !uppercase !tracking-widest !text-xs !py-2">
+									[ Connect ]
+								</Button>
+							)}
 						</div>
 					</div>
 				</div>
 			</div>
-		)}
+		</div>
 	</div>
 </div>
 

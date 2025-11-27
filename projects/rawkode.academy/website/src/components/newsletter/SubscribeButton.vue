@@ -2,8 +2,12 @@
 import { ref } from "vue";
 import { actions } from "astro:actions";
 
+const props = defineProps<{
+	isSubscribed?: boolean;
+}>();
+
 const isLoading = ref(false);
-const isSuccess = ref(false);
+const isSuccess = ref(props.isSubscribed ?? false);
 const error = ref<string | null>(null);
 
 const subscribe = async () => {
