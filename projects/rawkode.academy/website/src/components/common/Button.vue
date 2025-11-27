@@ -23,6 +23,7 @@ interface Props {
 	type?: "button" | "submit" | "reset";
 	disabled?: boolean;
 	fullWidth?: boolean;
+	class?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -62,6 +63,7 @@ const buttonClasses = computed(() => {
 		sizeClasses[props.size],
 		props.disabled && "opacity-50 cursor-not-allowed",
 		props.fullWidth && "w-full",
+		props.class,
 	].filter(Boolean);
 
 	return classes.join(" ");
