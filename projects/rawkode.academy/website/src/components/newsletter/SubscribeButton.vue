@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { actions } from "astro:actions";
-import Button from "@/components/common/Button.vue";
 
 const isLoading = ref(false);
 const isSuccess = ref(false);
@@ -26,7 +25,7 @@ const subscribe = async () => {
 			isSuccess.value = true;
 		}
 	} catch (err: any) {
-		error.value = err.message || "An error occurred";
+		error.value = err.message || "Connection failed";
 	} finally {
 		isLoading.value = false;
 	}
@@ -34,34 +33,66 @@ const subscribe = async () => {
 </script>
 
 <template>
-	<div>
-		<div v-if="isSuccess" class="flex items-center text-green-600 dark:text-green-400 font-medium">
-			<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-			</svg>
-			Subscribed!
+	<div class="relative group">
+		<!-- Success State -->
+		<div v-if="isSuccess" class="flex items-center gap-3 text-green-500 font-mono tracking-wide">
+			<span class="relative flex h-3 w-3">
+			  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+			  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+			</span>
+			<span>ACCESS_GRANTED</span>
 		</div>
 		
-		<div v-else>
-			<Button 
-				@click="subscribe" 
-				:disabled="isLoading"
-				variant="primary"
+		<!-- Error State -->
+		<div v-else-if="error" class="flex flex-col gap-2">
+			<button 
+				@click="subscribe"
+				class="w-full relative overflow-hidden bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 font-mono py-3 px-6 rounded transition-all duration-300 uppercase tracking-wider text-sm group-hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]"
 			>
+				<span class="relative z-10 flex items-center justify-center gap-2">
+					<span>⚠ RETRY_CONNECTION</span>
+				</span>
+			</button>
+			<span class="text-xs font-mono text-red-400 text-center">Error: {{ error }}</span>
+		</div>
+
+		<!-- Idle / Loading State -->
+		<button 
+			v-else
+			@click="subscribe" 
+			:disabled="isLoading"
+			class="w-full relative overflow-hidden font-mono py-3 px-6 rounded border transition-all duration-300 uppercase tracking-wider text-sm min-w-[200px]"
+			:class="[
+				isLoading 
+					? 'bg-primary/10 border-primary/30 text-primary cursor-wait' 
+					: 'bg-white/5 dark:bg-white/5 hover:bg-primary hover:border-primary border-white/20 dark:border-white/10 text-gray-900 dark:text-white hover:text-white hover:shadow-[0_0_20px_rgba(var(--brand-primary),0.4)]'
+			]"
+		>
+			<!-- Background Scanline Effect on Hover -->
+			<div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_50%,transparent_75%)] -translate-x-[100%] group-hover:animate-[shimmer_1s_infinite]" v-if="!isLoading"></div>
+
+			<span class="relative z-10 flex items-center justify-center gap-3">
 				<template v-if="isLoading">
-					<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-					</svg>
-					Subscribing...
+					<span class="animate-pulse">ESTABLISHING_UPLINK...</span>
+					<span class="flex gap-0.5">
+						<span class="w-1 h-1 bg-primary rounded-full animate-[bounce_1s_infinite_0ms]"></span>
+						<span class="w-1 h-1 bg-primary rounded-full animate-[bounce_1s_infinite_200ms]"></span>
+						<span class="w-1 h-1 bg-primary rounded-full animate-[bounce_1s_infinite_400ms]"></span>
+					</span>
 				</template>
 				<template v-else>
-					Subscribe for Updates
+					<span>[ JOIN_NEWSLETTER ]</span>
 				</template>
-			</Button>
-			<p v-if="error" class="mt-2 text-sm text-red-600 dark:text-red-400">
-				{{ error }}
-			</p>
-		</div>
+			</span>
+		</button>
 	</div>
 </template>
+
+<style scoped>
+@keyframes shimmer {
+	100% {
+		transform: translateX(100%);
+	}
+}
+</style>
+
