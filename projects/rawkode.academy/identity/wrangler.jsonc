@@ -1,0 +1,47 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "rawkode-academy-identity",
+	"compatibility_date": "2025-05-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": true,
+	"preview_urls": true,
+	"main": "./dist/_worker.js/index.js",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist",
+		"run_worker_first": true
+	},
+	"observability": {
+		"enabled": true
+	},
+	"routes": [
+		{
+			"pattern": "id.rawkode.academy",
+			"custom_domain": true
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "identity",
+			"database_id": "a10a3030-d566-4a98-9d6d-4ae5fb1b15be"
+		}
+	],
+	"secrets_store_secrets": [
+		{
+			"binding": "AUTH_SECRET",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "IDENTITY_AUTH_SECRET"
+		},
+		{
+			"binding": "GITHUB_OAUTH_CLIENT_ID",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "GITHUB_OAUTH_CLIENT_ID"
+		},
+		{
+			"binding": "GITHUB_OAUTH_CLIENT_SECRET",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "GITHUB_OAUTH_CLIENT_SECRET"
+		}
+	]
+}
