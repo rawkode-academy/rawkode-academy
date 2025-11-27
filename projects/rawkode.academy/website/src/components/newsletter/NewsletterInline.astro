@@ -1,0 +1,54 @@
+---
+import SubscribeButton from "./SubscribeButton.vue";
+import Button from "@/components/common/Button.vue";
+
+const user = Astro.locals.user;
+let isSubscribed = false;
+
+if (user) {
+	try {
+		const prefs = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+			user.id,
+			"newsletter",
+			"academy",
+		);
+		isSubscribed = prefs.length > 0;
+	} catch (e) {
+		console.error("Failed to fetch preferences", e);
+	}
+}
+
+const returnTo = Astro.url.pathname;
+
+if (isSubscribed) {
+	return null;
+}
+---
+
+<div class="w-full rounded-2xl glass-panel border border-white/20 bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 p-6 my-8">
+	<div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+		<div class="flex items-center gap-4">
+            <div class="hidden sm:flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-2xl">
+                📧
+            </div>
+			<div class="text-center sm:text-left">
+				<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+					Don't miss out!
+				</h3>
+				<p class="text-sm text-gray-600 dark:text-gray-300">
+					Get the latest updates delivered to your inbox.
+				</p>
+			</div>
+		</div>
+		
+		<div class="flex-shrink-0">
+			{user ? (
+				<SubscribeButton client:visible />
+			) : (
+				<Button href={`/sign-in?returnTo=${encodeURIComponent(returnTo)}`} variant="primary" size="sm">
+					Subscribe
+				</Button>
+			)}
+		</div>
+	</div>
+</div>
