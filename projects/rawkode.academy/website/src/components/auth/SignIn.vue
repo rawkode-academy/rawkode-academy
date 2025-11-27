@@ -31,13 +31,16 @@ const signInWithGitHub = async () => {
 			window.location.href = data.url;
 		}
 	} catch (err: any) {
-		error.value = err.message || "An error occurred during GitHub authentication";
+		error.value =
+			err.message || "An error occurred during GitHub authentication";
 		isLoading.value = false;
 		loadingMethod.value = null;
 	}
 };
 
-const isGitHubLoading = computed(() => isLoading.value && loadingMethod.value === "github");
+const isGitHubLoading = computed(
+	() => isLoading.value && loadingMethod.value === "github",
+);
 </script>
 
 <template>

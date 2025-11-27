@@ -49,7 +49,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const currentTheme = ref<Theme>("rawkode-green");
 
-const themeDisplayName = computed(() => getThemeDisplayName(currentTheme.value));
+const themeDisplayName = computed(() =>
+	getThemeDisplayName(currentTheme.value),
+);
 
 // Listen for theme changes from other components
 const handleThemeChange = (event: Event) => {

@@ -21,7 +21,12 @@ import rehypeExternalLinks from "rehype-external-links";
 // Local implementation of searchForWorkspaceRoot to avoid direct vite import
 function searchForWorkspaceRoot(current: string): string {
 	const root = parse(current).root;
-	const lockFiles = ["bun.lock", "pnpm-lock.yaml", "package-lock.json", "yarn.lock"];
+	const lockFiles = [
+		"bun.lock",
+		"pnpm-lock.yaml",
+		"package-lock.json",
+		"yarn.lock",
+	];
 	let dir = current;
 	while (dir !== root) {
 		for (const lockFile of lockFiles) {
@@ -52,9 +57,8 @@ type AstroVitePlugins = NonNullable<
 	NonNullable<AstroUserConfig["vite"]>["plugins"]
 >;
 
-const asAstroVitePlugins = (
-	plugins: unknown[],
-): AstroVitePlugins => plugins as unknown as AstroVitePlugins;
+const asAstroVitePlugins = (plugins: unknown[]): AstroVitePlugins =>
+	plugins as unknown as AstroVitePlugins;
 
 const disablePlatformProxy =
 	process.env.VITEST === "true" ||

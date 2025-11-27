@@ -200,7 +200,7 @@ const courses = defineCollection({
 		pattern: ["*.mdx", "*.md"],
 		base: "./content/courses",
 	}),
-		schema: ({ image }) =>
+	schema: ({ image }) =>
 		z.object({
 			title: z.string(),
 			description: z.string(),

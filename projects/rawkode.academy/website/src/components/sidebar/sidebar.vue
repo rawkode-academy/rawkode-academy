@@ -49,7 +49,11 @@ onMounted(() => {
 	}
 
 	const savedMode = localStorage.getItem("sidebar-mode");
-	if (savedMode === "learn" || savedMode === "connect" || savedMode === "collaborate") {
+	if (
+		savedMode === "learn" ||
+		savedMode === "connect" ||
+		savedMode === "collaborate"
+	) {
 		mode.value = savedMode;
 	}
 
