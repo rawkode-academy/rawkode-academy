@@ -22,8 +22,8 @@ export const newsletter = {
 			);
 
 			return {
-				success: true,
 				...result,
+				success: true,
 			};
 		},
 	}),
