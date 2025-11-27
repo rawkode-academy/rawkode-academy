@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/minimal.astro";
 import SignIn from "@/components/auth/SignIn.vue";
+import logoUrl from "@/components/branding/logos/logo.svg?url";
 
 export const prerender = false;
 
@@ -18,7 +19,7 @@ const returnTo = Astro.url.searchParams.get("returnTo") || "/";
 		<div class="w-full max-w-md">
 			<div class="text-center mb-8">
 				<a href="/" class="inline-block mb-6">
-					<img src="/logo.svg" alt="Rawkode Academy" class="h-12 w-auto mx-auto dark:invert" />
+					<img src={logoUrl} alt="Rawkode Academy" class="h-12 w-auto mx-auto dark:invert" />
 				</a>
 				<h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
 					Welcome back
