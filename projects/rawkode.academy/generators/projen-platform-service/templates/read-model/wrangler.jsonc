@@ -19,12 +19,57 @@
 		"mode": "smart"
 	},
 	"workers_dev": true,
-	"d1_databases": [
+	"d1_databases": [{% for db in bindings.d1Databases %}
 		{
-			"binding": "DB",
-			"database_name": "platform-{{ serviceName }}",
-			"database_id": "{{ databaseId }}",
-			"migrations_dir": "../data-model/migrations"
-		}
-	]
+			"binding": "{{ db.binding }}",
+			"database_name": "{{ db.database_name }}",
+			"database_id": "{{ db.database_id }}"{% if db.migrations_dir %},
+			"migrations_dir": "{{ db.migrations_dir }}"{% endif %}
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% if bindings.kvNamespaces.size > 0 %},
+	"kv_namespaces": [{% for kv in bindings.kvNamespaces %}
+		{
+			"binding": "{{ kv.binding }}",
+			"id": "{{ kv.id }}"
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% endif %}{% if bindings.r2Buckets.size > 0 %},
+	"r2_buckets": [{% for bucket in bindings.r2Buckets %}
+		{
+			"binding": "{{ bucket.binding }}",
+			"bucket_name": "{{ bucket.bucket_name }}"
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% endif %}{% if bindings.services.size > 0 %},
+	"services": [{% for svc in bindings.services %}
+		{
+			"binding": "{{ svc.binding }}",
+			"service": "{{ svc.service }}"
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% endif %}{% if bindings.workflows.size > 0 %},
+	"workflows": [{% for wf in bindings.workflows %}
+		{
+			"binding": "{{ wf.binding }}",
+			"name": "{{ wf.name }}",
+			"class_name": "{{ wf.class_name }}"{% if wf.script_name %},
+			"script_name": "{{ wf.script_name }}"{% endif %}
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% endif %}{% if bindings.secretStoreSecrets.size > 0 %},
+	"secrets_store_secrets": [{% for secret in bindings.secretStoreSecrets %}
+		{
+			"binding": "{{ secret.binding }}",
+			"store_id": "{{ secret.store_id }}",
+			"secret_name": "{{ secret.secret_name }}"
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% endif %}{% if bindings.ai %},
+	"ai": {
+		"binding": "{{ bindings.ai.binding }}"
+	}{% endif %}{% if bindings.vars.size > 0 %},
+	"vars": {
+		{% for var in bindings.vars %}"{{ var[0] }}": "{{ var[1] }}"{% unless forloop.last %},
+		{% endunless %}{% endfor %}
+	}{% endif %}{% if bindings.crons.size > 0 %},
+	"triggers": {
+		"crons": [{% for cron in bindings.crons %}
+			"{{ cron }}"{% unless forloop.last %},{% endunless %}{% endfor %}
+		]
+	}{% endif %}
 }

@@ -1,10 +1,8 @@
 export * from "./reactToContent";
-import { createBetterAuthClient } from "./better-auth-client";
-import type { D1Database, Fetcher } from "@cloudflare/workers-types";
+import { getSession } from "./better-auth-client";
 
 interface Env {
 	reactToContent: Workflow;
-	AUTH_SERVICE: Fetcher;
 }
 
 export default {
@@ -22,7 +20,8 @@ export default {
 				? origin!
 				: "https://rawkode.academy",
 			"Access-Control-Allow-Methods": "POST, OPTIONS",
-			"Access-Control-Allow-Headers": "Content-Type, Authorization",
+			"Access-Control-Allow-Headers": "Content-Type, Cookie",
+			"Access-Control-Allow-Credentials": "true",
 		};
 
 		// Handle preflight requests
@@ -39,8 +38,8 @@ export default {
 		}
 
 		try {
-			const authHeader = req.headers.get("Authorization");
-			const isInternalRequest = !origin && !authHeader;
+			const cookies = req.headers.get("Cookie") || "";
+			const isInternalRequest = !origin && !cookies;
 
 			// Parse the request body
 			const body = (await req.json()) as {
@@ -58,30 +57,26 @@ export default {
 				);
 			}
 
-			// External requests still require a Bearer token
+			// External requests require session validation
 			if (!isInternalRequest) {
-				if (!authHeader || !authHeader.startsWith("Bearer ")) {
+				if (!cookies) {
 					return Response.json(
-						{ error: "Missing or invalid authorization header" },
+						{ error: "Missing session cookies" },
 						{ status: 401, headers: corsHeaders },
 					);
 				}
 
-				const authClient = createBetterAuthClient(env.AUTH_SERVICE, {
-					getHeaders: () => req.headers,
-				});
+				const sessionData = await getSession(cookies);
 
-				const { data, error } = await authClient.getSession();
-
-				if (error || !data?.user) {
-					console.error("Token validation failed:", error);
+				if (!sessionData?.user) {
+					console.error("Session validation failed");
 					return Response.json(
-						{ error: "Invalid or expired token" },
+						{ error: "Invalid or expired session" },
 						{ status: 401, headers: corsHeaders },
 					);
 				}
 
-				if (body.personId !== data.user.id) {
+				if (body.personId !== sessionData.user.id) {
 					return Response.json(
 						{ error: "PersonId does not match authenticated user" },
 						{ status: 403, headers: corsHeaders },
@@ -100,7 +95,6 @@ export default {
 			});
 
 			// Return the workflow instance details
-			// Workflows run asynchronously, so we return immediately
 			return Response.json(
 				{
 					success: true,

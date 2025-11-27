@@ -1,6 +1,6 @@
-import { Liquid } from "liquidjs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+import { Liquid } from "liquidjs";
 import { JsonFile, Project, TextFile } from "projen";
 import { Biome } from "./biome";
 import { Bun } from "./bun";
@@ -15,7 +15,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export class PlatformService extends Project {
-	private readonly options: Required<PlatformServiceOptions>;
+	private readonly options: Omit<
+		Required<PlatformServiceOptions>,
+		"bindings"
+	> & { bindings?: PlatformServiceOptions["bindings"] };
 	private readonly dependencies: Record<string, string>;
 	private readonly devDependencies: Record<string, string>;
 
@@ -29,6 +32,7 @@ export class PlatformService extends Project {
 		this.tasks.tryFind("default")?.reset("bun run .projenrc.ts");
 
 		this.options = {
+			includeDataModel: true,
 			includeReadModel: true,
 			includeWriteModel: false,
 			includeRpcModel: false,
@@ -37,15 +41,36 @@ export class PlatformService extends Project {
 			...options,
 		};
 
-		// Initialize dependencies
-		this.dependencies = {
-			"@paralleldrive/cuid2": "^2.2.2",
-			"@sindresorhus/slugify": "^2.2.1",
-			"drizzle-kit": "^0.30.6",
-			"drizzle-orm": "^0.38.4",
-			"drizzle-zod": "^0.6.1",
-			zod: "^3.24.3",
-		};
+		// Validation: D1 database with binding "DB" required if any data-using model is enabled
+		const needsDatabase =
+			this.options.includeDataModel ||
+			this.options.includeReadModel ||
+			this.options.includeWriteModel;
+
+		const hasDbBinding = this.options.bindings?.d1Databases?.some(
+			(db) => db.binding === "DB",
+		);
+
+		if (needsDatabase && !hasDbBinding) {
+			throw new Error(
+				'bindings.d1Databases must include a database with binding "DB" when includeDataModel, includeReadModel, or includeWriteModel is true',
+			);
+		}
+
+		// Initialize dependencies conditionally
+		this.dependencies = {};
+
+		// Add data model dependencies only if data model is included
+		if (this.options.includeDataModel) {
+			Object.assign(this.dependencies, {
+				"@paralleldrive/cuid2": "^2.2.2",
+				"@sindresorhus/slugify": "^2.2.1",
+				"drizzle-kit": "^0.30.6",
+				"drizzle-orm": "^0.38.4",
+				"drizzle-zod": "^0.6.1",
+				zod: "^3.24.3",
+			});
+		}
 
 		// Add GraphQL dependencies if read model is included
 		if (this.options.includeReadModel) {
@@ -75,24 +100,24 @@ export class PlatformService extends Project {
 			...this.options.additionalDevDependencies,
 		};
 
-		new DataModel(this);
+		// Only create DataModel if includeDataModel is true
+		if (this.options.includeDataModel) {
+			new DataModel(this);
+		}
 
 		if (this.options.includeReadModel) {
 			new ReadModel(this, {
 				serviceName: this.options.serviceName,
-				databaseId: this.options.databaseId,
+				bindings: this.options.bindings,
 			});
 		}
 
 		if (this.options.includeWriteModel) {
 			new WriteModel(this, {
-				databaseId: this.options.databaseId,
 				workflows: [],
+				bindings: this.options.bindings,
 			});
 		}
-
-		// TODO: Add RpcModel component for includeRpcModel
-		// For now, RPC models need to be manually created in the rpc/ directory
 
 		this.createReadme();
 		this.createPackageJson();
@@ -185,6 +210,8 @@ export class PlatformService extends Project {
 			serviceName: this.options.serviceName,
 			serviceNameCamel: this.toCamelCase(this.options.serviceName),
 			serviceNamePascal: this.toPascalCase(this.options.serviceName),
+			includeDataModel: this.options.includeDataModel,
+			includeReadModel: this.options.includeReadModel,
 			includeWriteModel: this.options.includeWriteModel,
 		};
 

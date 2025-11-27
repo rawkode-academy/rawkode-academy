@@ -1,7 +1,8 @@
-import { Liquid } from "liquidjs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Component, type Project, TextFile } from "projen";
+import { Liquid } from "liquidjs";
+import { Component, TextFile } from "projen";
+import type { CloudflareBindings } from "../../options";
 import type { PlatformService } from "../../project";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,8 +16,8 @@ export interface WorkflowDefinition {
 }
 
 interface Options {
-	databaseId: string;
 	workflows: WorkflowDefinition[];
+	bindings?: CloudflareBindings;
 }
 
 export class WriteModel extends Component {
@@ -40,12 +41,41 @@ export class WriteModel extends Component {
 		this.project.addDependency("hono", "^4.8.3");
 	}
 
-	private createWranglerConfig() {
-		const content = this.liquid.renderFileSync("wrangler.jsonc", {
+	private getTemplateContext() {
+		const bindings = this.options.bindings ?? {};
+
+		// Merge legacy workflows with bindings.workflows
+		const workflows = [
+			...this.options.workflows.map((w) => ({
+				binding: w.binding,
+				name: w.name,
+				class_name: w.className,
+				script_name: w.scriptName,
+			})),
+			...(bindings.workflows ?? []),
+		];
+
+		return {
 			serviceName: this.project.name,
-			databaseId: this.options.databaseId,
-			workflows: this.options.workflows,
-		});
+			bindings: {
+				d1Databases: bindings.d1Databases ?? [],
+				secretStoreSecrets: bindings.secretStoreSecrets ?? [],
+				kvNamespaces: bindings.kvNamespaces ?? [],
+				r2Buckets: bindings.r2Buckets ?? [],
+				services: bindings.services ?? [],
+				workflows,
+				ai: bindings.ai,
+				vars: bindings.vars ?? {},
+				crons: bindings.crons ?? [],
+			},
+		};
+	}
+
+	private createWranglerConfig() {
+		const content = this.liquid.renderFileSync(
+			"wrangler.jsonc",
+			this.getTemplateContext(),
+		);
 
 		new TextFile(this.project, "write-model/wrangler.jsonc", {
 			lines: content.split("\n"),

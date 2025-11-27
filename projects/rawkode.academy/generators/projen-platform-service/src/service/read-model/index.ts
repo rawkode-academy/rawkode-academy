@@ -2,13 +2,14 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Liquid } from "liquidjs";
 import { Component, type Project, TextFile } from "projen";
+import type { CloudflareBindings } from "../../options";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 interface Options {
 	serviceName: string;
-	databaseId: string;
+	bindings?: CloudflareBindings;
 }
 
 export class ReadModel extends Component {
@@ -34,8 +35,38 @@ export class ReadModel extends Component {
 		this.createWranglerConfig();
 	}
 
+	private getTemplateContext() {
+		const bindings = this.options.bindings ?? {};
+
+		// Ensure DB binding has migrations_dir for read-model
+		const d1Databases = (bindings.d1Databases ?? []).map((db) => {
+			if (db.binding === "DB" && !db.migrations_dir) {
+				return { ...db, migrations_dir: "../data-model/migrations" };
+			}
+			return db;
+		});
+
+		return {
+			serviceName: this.options.serviceName,
+			bindings: {
+				d1Databases,
+				secretStoreSecrets: bindings.secretStoreSecrets ?? [],
+				kvNamespaces: bindings.kvNamespaces ?? [],
+				r2Buckets: bindings.r2Buckets ?? [],
+				services: bindings.services ?? [],
+				workflows: bindings.workflows ?? [],
+				ai: bindings.ai,
+				vars: bindings.vars ?? {},
+				crons: bindings.crons ?? [],
+			},
+		};
+	}
+
 	private createApi() {
-		const content = this.liquid.renderFileSync("main.ts", this.options);
+		const content = this.liquid.renderFileSync(
+			"main.ts",
+			this.getTemplateContext(),
+		);
 
 		new TextFile(this.project, "read-model/main.ts", {
 			lines: content.split("\n"),
@@ -43,7 +74,10 @@ export class ReadModel extends Component {
 	}
 
 	private createSchemaWriter() {
-		const content = this.liquid.renderFileSync("publish.ts", this.options);
+		const content = this.liquid.renderFileSync(
+			"publish.ts",
+			this.getTemplateContext(),
+		);
 
 		new TextFile(this.project, "read-model/publish.ts", {
 			lines: content.split("\n"),
@@ -51,7 +85,10 @@ export class ReadModel extends Component {
 	}
 
 	private createWranglerConfig() {
-		const content = this.liquid.renderFileSync("wrangler.jsonc", this.options);
+		const content = this.liquid.renderFileSync(
+			"wrangler.jsonc",
+			this.getTemplateContext(),
+		);
 
 		new TextFile(this.project, "read-model/wrangler.jsonc", {
 			lines: content.split("\n"),
