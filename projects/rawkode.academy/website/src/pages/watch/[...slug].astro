@@ -8,6 +8,7 @@ import VideoPlayer from "@/components/video/player.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import NewsletterInline from "@/components/newsletter/NewsletterInline.astro";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -188,6 +189,11 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 						videoId={video.data.videoId}
 					/>
 					{/* ShareButton will be managed internally by VideoReactions */}
+				</div>
+
+				{/* Newsletter Signup - High Value Placement */}
+				<div class="mt-6">
+					<NewsletterInline />
 				</div>
 
 				{/* Tabbed Content: Description & Transcript */}
