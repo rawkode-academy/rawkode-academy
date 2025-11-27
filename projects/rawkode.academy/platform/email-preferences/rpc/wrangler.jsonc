@@ -1,7 +1,7 @@
 {
 	"$schema": "../node_modules/wrangler/config-schema.json",
 	"name": "platform-email-preferences-rpc",
-	"main": "./main.ts",
+	"main": "main.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
 	"keep_vars": false,
