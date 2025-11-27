@@ -1,6 +1,7 @@
 import { auth } from "./auth";
 import { signupForCommunityDay } from "./community-day";
 import { signupForCourseUpdates } from "./courses";
+import { newsletter } from "./newsletter";
 import { addReaction, removeReaction } from "./reaction";
 import { trackShareEvent } from "./share";
 import { trackVideoEvent } from "./video";
@@ -10,6 +11,7 @@ export const server = {
 	trackVideoEvent,
 	signupForCommunityDay,
 	signupForCourseUpdates,
+	newsletter,
 	trackShareEvent,
 	addReaction,
 	removeReaction,

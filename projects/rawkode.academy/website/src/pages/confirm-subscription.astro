@@ -1,0 +1,42 @@
+---
+import Page from "@/wrappers/page.astro";
+
+const user = Astro.locals.user;
+
+if (!user) {
+	return Astro.redirect("/sign-in?returnTo=/confirm-subscription");
+}
+
+// Auto-subscribe the user
+await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(user.id, {
+	audience: "academy",
+	channel: "newsletter",
+	status: "subscribed",
+	source: "registration-flow",
+});
+---
+
+<Page title="Subscription Confirmed" description="You are now subscribed to the Rawkode Academy newsletter.">
+	<div class="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
+		<div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-8">
+			<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+			</svg>
+		</div>
+		
+		<h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+			Subscription Confirmed!
+		</h1>
+		
+		<p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mb-8">
+			Thanks for joining the Rawkode Academy newsletter. You'll now receive updates about our latest courses, videos, and articles.
+		</p>
+		
+		<a 
+			href="/"
+			class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
+		>
+			Back to Home
+		</a>
+	</div>
+</Page>

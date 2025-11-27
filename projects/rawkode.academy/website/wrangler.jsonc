@@ -37,6 +37,11 @@
 			"binding": "IDENTITY",
 			"service": "rawkode-academy-identity",
 			"remote": true
+		},
+		{
+			"binding": "EMAIL_PREFERENCES",
+			"service": "platform-email-preferences-rpc",
+			"remote": true
 		}
 	]
 }
