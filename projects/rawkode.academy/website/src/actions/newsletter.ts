@@ -11,15 +11,16 @@ export const newsletter = {
 				throw new Error("Unauthorized");
 			}
 
-			const result = await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
-				context.locals.user.id,
-				{
-					audience: "academy",
-					channel: "newsletter",
-					status: "subscribed",
-					source: input.source || "website-cta",
-				},
-			);
+			const result =
+				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+					context.locals.user.id,
+					{
+						audience: "academy",
+						channel: "newsletter",
+						status: "subscribed",
+						source: input.source || "website-cta",
+					},
+				);
 
 			return {
 				...result,

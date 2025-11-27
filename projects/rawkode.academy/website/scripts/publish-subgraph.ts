@@ -23,8 +23,9 @@ const sdl = printSchemaWithDirectives(
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	lexicographicSortSchema(schemaForPrinting),
 	{
-	pathToDirectivesInExtensions: [""],
-});
+		pathToDirectivesInExtensions: [""],
+	},
+);
 
 mkdirSync(outDir, { recursive: true });
 writeFileSync(outFile, sdl);

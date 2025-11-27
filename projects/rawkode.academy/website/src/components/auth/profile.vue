@@ -69,6 +69,10 @@ onUnmounted(() => {
 			</div>
 			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="userProfileButton">
 				<li>
+					<a href="/settings"
+						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
+				</li>
+				<li>
 					<button @click="signOut"
 						class="w-full text-left block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign
 						out</button>

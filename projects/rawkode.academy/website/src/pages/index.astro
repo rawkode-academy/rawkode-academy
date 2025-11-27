@@ -19,7 +19,7 @@ const allVideos = await getCollection("videos");
 const latestVideos = allVideos
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 4); // Showing 4 videos looks better in a 2x2 or 4-col grid, but 3 matches articles. Let's do 3 for symmetry or 4 for a grid. Let's do 3 and use a 3-col grid.
-	// Actually, let's stick to 3 to match the 3 articles if we do a 3-col grid.
+// Actually, let's stick to 3 to match the 3 articles if we do a 3-col grid.
 
 const pageTitle = "Cloud Native & Kubernetes Education | Rawkode Academy";
 const pageDescription =

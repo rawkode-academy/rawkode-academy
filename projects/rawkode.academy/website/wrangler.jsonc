@@ -24,7 +24,7 @@
 		{
 			"binding": "SESSION",
 			"id": "f3a5e01c10b144f5964d060cefa1b70c",
-			"remote": true,
+			"remote": true
 		}
 	],
 	"services": [

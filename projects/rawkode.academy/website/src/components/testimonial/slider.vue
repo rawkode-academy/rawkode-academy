@@ -1,11 +1,5 @@
 <script setup lang="ts">
-import {
-	computed,
-	onBeforeUnmount,
-	onMounted,
-	ref,
-	watch,
-} from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { Testimonial } from "@/types/testimonial";
 
 const AUTOPLAY_INTERVAL = 8000;
@@ -55,7 +49,7 @@ watch(
 		}
 		startAutoplay();
 	},
-	{ deep: true }
+	{ deep: true },
 );
 
 watch(activeIndex, () => {

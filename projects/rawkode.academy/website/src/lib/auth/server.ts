@@ -34,9 +34,10 @@ function getAuthCookies(cookies: string): string {
 	const allCookies = cookies.split(";").map((c) => c.trim());
 	// Match both "better-auth." and "__Secure-better-auth." prefixes
 	const authCookies = allCookies.filter(
-		(c) => c.startsWith("better-auth.") || c.startsWith("__Secure-better-auth.")
+		(c) =>
+			c.startsWith("better-auth.") || c.startsWith("__Secure-better-auth."),
 	);
-	
+
 	return authCookies.join("; ");
 }
 
@@ -115,10 +116,7 @@ export function getSignOutUrl(): string {
 /**
  * Sign out by calling the identity provider
  */
-export async function signOut(
-	cookies: string,
-	env?: any,
-): Promise<boolean> {
+export async function signOut(cookies: string, env?: any): Promise<boolean> {
 	const authCookies = getAuthCookies(cookies);
 
 	try {

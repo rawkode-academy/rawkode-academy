@@ -13,58 +13,58 @@ describe("Theme Management", () => {
 
 	beforeEach(() => {
 		// Setup DOM environment
-	if (typeof document === "undefined") {
-		global.document = {
-			documentElement: {
-				setAttribute: () => {},
-				removeAttribute: () => {},
-			},
-		} as unknown as Document;
-	}
+		if (typeof document === "undefined") {
+			global.document = {
+				documentElement: {
+					setAttribute: () => {},
+					removeAttribute: () => {},
+				},
+			} as unknown as Document;
+		}
 
-	if (typeof window === "undefined") {
-		global.window = {
-			localStorage: {
-				getItem: () => null,
-				setItem: () => {},
-				removeItem: () => {},
-				clear: () => {},
-				key: () => null,
-				length: 0,
-			} as Storage,
-			dispatchEvent: () => true,
-			addEventListener: () => {},
-			removeEventListener: () => {},
-		} as unknown as Window & typeof globalThis;
-	}
+		if (typeof window === "undefined") {
+			global.window = {
+				localStorage: {
+					getItem: () => null,
+					setItem: () => {},
+					removeItem: () => {},
+					clear: () => {},
+					key: () => null,
+					length: 0,
+				} as Storage,
+				dispatchEvent: () => true,
+				addEventListener: () => {},
+				removeEventListener: () => {},
+			} as unknown as Window & typeof globalThis;
+		}
 
 		// Mock localStorage
 		originalLocalStorage = window.localStorage;
-	const localStorageMock: Storage = (() => {
-		const store: Record<string, string> = {};
-		return {
-			get length() {
-				return Object.keys(store).length;
-			},
-			clear() {
-				for (const key of Object.keys(store)) {
+		const localStorageMock: Storage = (() => {
+			const store: Record<string, string> = {};
+			return {
+				get length() {
+					return Object.keys(store).length;
+				},
+				clear() {
+					for (const key of Object.keys(store)) {
+						delete store[key];
+					}
+				},
+				getItem(key: string) {
+					return store[key] ?? null;
+				},
+				key(index: number) {
+					return Object.keys(store)[index] ?? null;
+				},
+				removeItem(key: string) {
 					delete store[key];
-				}
-			},
-			getItem(key: string) {
-				return store[key] ?? null;
-			},
-			key(index: number) {
-				return Object.keys(store)[index] ?? null;
-			},
-			removeItem(key: string) {
-				delete store[key];
-			},
-			setItem(key: string, value: string) {
-				store[key] = value;
-			},
-		} as Storage;
-	})();
+				},
+				setItem(key: string, value: string) {
+					store[key] = value;
+				},
+			} as Storage;
+		})();
 		Object.defineProperty(window, "localStorage", {
 			value: localStorageMock,
 			writable: true,

@@ -24,22 +24,22 @@ try {
 	const allVideos = await getCollection("videos");
 	const allArticles = await getCollection("articles");
 	const allCourses = await getCollection("courses");
-	
+
 	technologies = items.map((e) => {
 		const icon = (e as any).data.icon;
 		const logo = resolveTechnologyIconUrl(e.id, icon);
-		
+
 		// Count content for this technology
-		const videoCount = allVideos.filter(v => 
-			v.data.technologies?.includes(e.id)
+		const videoCount = allVideos.filter((v) =>
+			v.data.technologies?.includes(e.id),
 		).length;
-		const articleCount = allArticles.filter(a => 
-			!a.data.draft && a.data.technologies?.includes(e.id)
+		const articleCount = allArticles.filter(
+			(a) => !a.data.draft && a.data.technologies?.includes(e.id),
 		).length;
-		const courseCount = allCourses.filter(c => 
-			c.data.technologies?.includes(e.id)
+		const courseCount = allCourses.filter((c) =>
+			c.data.technologies?.includes(e.id),
 		).length;
-		
+
 		const tech: Technology = {
 			id: e.id,
 			name: e.data.name,

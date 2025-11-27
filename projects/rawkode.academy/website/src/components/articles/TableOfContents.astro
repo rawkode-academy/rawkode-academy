@@ -15,11 +15,12 @@ let isSubscribed = false;
 
 if (user) {
 	try {
-		const prefs = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
-			user.id,
-			"newsletter",
-			"academy",
-		);
+		const prefs =
+			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+				user.id,
+				"newsletter",
+				"academy",
+			);
 		isSubscribed = prefs.length > 0;
 	} catch (e) {
 		console.error("Failed to fetch preferences", e);
