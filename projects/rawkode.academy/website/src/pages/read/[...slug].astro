@@ -276,12 +276,14 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 
 			<Updates updates={article.data.updates} />
 
+			<NewsletterCTA class="my-8 not-prose" />
+
 			<Content />
+
+			<NewsletterCTA />
 
 			<!-- Resources -->
 			<Resources resources={article.data.resources} />
-
-			<NewsletterCTA />
 
 			<!-- Related Articles -->
 			<RelatedArticles currentArticle={article} limit={3} />
