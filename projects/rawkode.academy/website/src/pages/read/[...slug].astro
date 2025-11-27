@@ -16,6 +16,7 @@ import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
 import ArticleJsonLd from "@/components/html/article-jsonld.astro";
 import InternalLinks from "@/components/seo/InternalLinks.astro";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
@@ -279,6 +280,8 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 
 			<!-- Resources -->
 			<Resources resources={article.data.resources} />
+
+			<NewsletterCTA />
 
 			<!-- Related Articles -->
 			<RelatedArticles currentArticle={article} limit={3} />
