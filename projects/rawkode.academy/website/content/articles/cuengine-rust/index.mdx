@@ -44,6 +44,12 @@ resources:
     type: url
     url: "https://jakegoulding.com/rust-ffi-omnibus/"
     category: documentation
+  - id: "6"
+    title: "libcue - Official CUE C Library"
+    description: "The official C library for using CUE from C and C-like languages"
+    type: url
+    url: "https://github.com/cue-lang/libcue"
+    category: documentation
 ---
 
 I love shiny things, and when it comes to build tools, I'm always looking for a better way. That's what led me to create [cuenv](https://github.com/cuenv/cuenv), a modern toolchain built around CUE's powerful constraint-based system. There was just one problem: I'm building `cuenv` in Rust, and CUE's only mature evaluator is written in Go.
@@ -68,6 +74,17 @@ So the question was never *if* I should use Rust, but *how* to bring CUE along f
 Look, I'm not a masochist—at least not for this kind of punishment. Porting an entire language implementation is a multi-year odyssey of parser rewrites, type system reimplementation, and endless compatibility testing. Even if I pulled it off, I'd be chained to maintaining it against every upstream CUE change forever.
 
 No, thanks. I chose pragmatism: build a thin, safe FFI layer that uses the existing Go implementation while exposing a clean, native Rust API.
+
+### What About libcue?
+
+The CUE team has been working on [libcue](https://github.com/cue-lang/libcue), an official C library for using CUE from C and C-like languages. It's a great initiative, but it didn't fit my needs for a few reasons:
+
+-   **Low-level API**: libcue exposes primitives like `cue_compile_string` and `cue_unify` for working with CUE values directly. It's designed for fine-grained control, not high-level package evaluation.
+-   **No package loading**: For `cuenv`, I need to load entire CUE packages from directories with full module resolution, imports, and registry support. libcue compiles strings and bytes—you'd have to build the package loading yourself.
+-   **Still maturing**: The libcue README explicitly warns "expect constant churn and breakage." For a production tool, I needed something stable today.
+-   **Different abstraction level**: I wanted a Rust-idiomatic API with caching, retry logic, structured errors, and tracing built in—not a thin C binding.
+
+That said, libcue is worth watching. As it matures and potentially adds higher-level features like package loading, cuengine could be reimplemented on top of it. For now, building my own FFI bridge gave me exactly the abstraction level I needed.
 
 ## My Solution: A Three-Layer Architecture
 
@@ -178,8 +195,8 @@ I synchronized the error codes (like `LOAD_INSTANCE`) as constants in both Go an
 
 ```rust
 match bridge_error.code.as_str() {
-    ERROR_CODE_INVALID_INPUT => Err(Error::configuration(full_message)),
-    ERROR_CODE_LOAD_INSTANCE => Err(Error::cue_parse(dir_path, full_message)),
+    ERROR_CODE_INVALID_INPUT | ERROR_CODE_REGISTRY_INIT => Err(Error::configuration(full_message)),
+    ERROR_CODE_LOAD_INSTANCE | ERROR_CODE_BUILD_VALUE => Err(Error::cue_parse(dir_path, full_message)),
     _ => Err(Error::ffi("cue_eval_package", full_message)),
 }
 ```
@@ -198,33 +215,6 @@ I put a lot of effort into the `build.rs` script to make it as robust as possibl
 3.  It then configures platform-specific linking, because macOS, Linux, and Windows all need different system libraries.
 
 This approach gives me fast, reproducible builds in my environment while still allowing anyone with `go` and `rustc` installed to build the crate from scratch.
-
-### Hurdle #4: Preserving CUE's Field Order
-
-**The Challenge**: This one was subtle but critical. For `cuenv` to work as a task runner, the order of tasks defined in a CUE file *must* be preserved. But Go's standard `encoding/json` library randomizes map key order by design. This would have completely broken my task execution logic.
-
-**My Solution**: Ditching `encoding/json` and building the JSON manually.
-
-The only way to guarantee order was to walk the CUE value structure myself and build the JSON string piece by piece.
-
-```go
-func buildOrderedJSONString(v cue.Value) (string, error) {
-    switch v.Kind() {
-    case cue.StructKind:
-        var parts []string
-        // Iterate through fields in the order they appear in CUE
-        fields, err := v.Fields(cue.Optional(true))
-        // ...
-        for fields.Next() {
-            // ... manually build "key":value string parts
-        }
-        return "{" + strings.Join(parts, ",") + "}", nil
-    // ... handle lists and primitives
-    }
-}
-```
-
-This was a bit tedious to write, but it ensures the JSON output is deterministic and perfectly matches the order from the original CUE file.
 
 ## Safety and Observability
 
@@ -279,7 +269,7 @@ To use it in your Rust project:
 
 ```toml
 [dependencies]
-cuengine = "0.1.1"
+cuengine = "0.4"
 ```
 
 ```rust
@@ -296,4 +286,4 @@ Building this FFI bridge was a fascinating journey. It taught me that you don't 
 
 If you're building tools that need CUE in Rust, I hope `cuengine` gives you a solid foundation. And if you're tackling any FFI project, I hope my story helps you sidestep some of the pitfalls I stumbled into!
 
-The full source code, including all the safety invariants and production features I discussed, is available under the MIT license. Contributions, feedback, and questions are always welcome. Don't be a stranger—come and join the chat on our [Zulip](https://chat.rawkode.academy) server!
+The full source code, including all the safety invariants and production features I discussed, is available under the AGPL-3.0-or-later license. Contributions, feedback, and questions are always welcome. Don't be a stranger—come and join the chat on our [Zulip](https://chat.rawkode.academy) server!
