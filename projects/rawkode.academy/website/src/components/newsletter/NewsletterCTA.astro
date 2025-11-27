@@ -19,10 +19,6 @@ if (user) {
 }
 
 const returnTo = Astro.url.pathname;
-
-if (isSubscribed) {
-	return null;
-}
 ---
 
 <div class="relative w-full max-w-5xl mx-auto my-16 group">
@@ -80,7 +76,7 @@ if (isSubscribed) {
 						</div>
 						
 						{user ? (
-							<SubscribeButton client:visible />
+							<SubscribeButton client:visible isSubscribed={isSubscribed} />
 						) : (
 							<Button href={`/sign-in?returnTo=${encodeURIComponent(returnTo)}`} variant="primary" class="w-full justify-center !font-mono !tracking-widest !uppercase !py-3">
 								[ AUTHENTICATE ]
