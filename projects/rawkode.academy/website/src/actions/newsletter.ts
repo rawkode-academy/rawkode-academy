@@ -28,4 +28,30 @@ export const newsletter = {
 			};
 		},
 	}),
+	unsubscribe: defineAction({
+		input: z.object({
+			source: z.string().optional(),
+		}),
+		handler: async (input, context) => {
+			if (!context.locals.user) {
+				throw new Error("Unauthorized");
+			}
+
+			const result =
+				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+					context.locals.user.id,
+					{
+						audience: "academy",
+						channel: "newsletter",
+						status: "unsubscribed",
+						source: input.source || "website-cta",
+					},
+				);
+
+			return {
+				...result,
+				success: true,
+			};
+		},
+	}),
 };
