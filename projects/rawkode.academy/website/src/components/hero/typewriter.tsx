@@ -26,14 +26,14 @@ const shuffle = (array: string[]): string[] => {
 
 const Typewriter = (props: Props) => {
 	return (
-		<section className="glass-panel relative mt-12 md:mt-8 mb-6 rounded-3xl overflow-hidden">
+		<section className="glass-panel relative mb-6 rounded-3xl overflow-hidden">
 			<div className="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none" />
 			<div className="relative grid max-w-6xl px-6 pt-0 pb-10 mx-auto gap-8 lg:gap-6 lg:pt-6 lg:pb-16 lg:grid-cols-12">
 				<div className="mr-auto place-self-center space-y-4 lg:col-span-6">
 					<h1 className="text-balance text-3xl font-bold tracking-tight leading-tight text-black dark:text-white sm:text-4xl md:text-5xl xl:text-6xl">
 						<span className="block text-3xl sm:text-4xl md:text-5xl xl:text-5xl">
 							<TypeAnimation
-								className="inline-block bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap"
+								className="inline-block bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap pb-2"
 								sequence={shuffle(props.rotatedPrefixes).reduce<
 									Array<string | number>
 								>((acc, prefix: string) => [...acc, prefix, 1250], [])}
@@ -109,7 +109,7 @@ const Typewriter = (props: Props) => {
 						Uses theme colors via CSS variables for consistency across themes.
 					*/}
 					<div className="grid grid-cols-2 gap-4 w-full max-w-[400px]">
-						{props.logos.slice(0, 4).map((logo, index) => (
+						{props.logos.slice(0, 4).map((logo) => (
 							<div
 								key={logo.name}
 								className="relative aspect-square overflow-hidden rounded-2xl shadow-md group bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl border border-white/40 dark:border-gray-600/50 flex items-center justify-center"
@@ -149,20 +149,22 @@ const Typewriter = (props: Props) => {
 										*/}
 										<div
 											className="absolute inset-0"
-											style={{
-												backgroundColor: "rgb(var(--brand-secondary))",
-												opacity: 0.3,
-												maskImage: `url(${logo.iconUrl})`,
-												WebkitMaskImage: `url(${logo.iconUrl})`,
-												maskMode: "alpha",
-												WebkitMaskMode: "alpha",
-												maskRepeat: "no-repeat",
-												maskPosition: "center",
-												maskSize: "contain",
-												WebkitMaskRepeat: "no-repeat",
-												WebkitMaskPosition: "center",
-												WebkitMaskSize: "contain",
-											}}
+											style={
+												{
+													backgroundColor: "rgb(var(--brand-secondary))",
+													opacity: 0.3,
+													maskImage: `url(${logo.iconUrl})`,
+													WebkitMaskImage: `url(${logo.iconUrl})`,
+													maskMode: "alpha",
+													WebkitMaskMode: "alpha",
+													maskRepeat: "no-repeat",
+													maskPosition: "center",
+													maskSize: "contain",
+													WebkitMaskRepeat: "no-repeat",
+													WebkitMaskPosition: "center",
+													WebkitMaskSize: "contain",
+												} as React.CSSProperties
+											}
 										/>
 
 										{/* 
@@ -172,19 +174,21 @@ const Typewriter = (props: Props) => {
 										*/}
 										<div
 											className="absolute inset-0"
-											style={{
-												backgroundColor: "rgb(var(--brand-primary))",
-												maskImage: `url(${logo.iconUrl})`,
-												WebkitMaskImage: `url(${logo.iconUrl})`,
-												maskMode: "luminance",
-												WebkitMaskMode: "luminance",
-												maskRepeat: "no-repeat",
-												maskPosition: "center",
-												maskSize: "contain",
-												WebkitMaskRepeat: "no-repeat",
-												WebkitMaskPosition: "center",
-												WebkitMaskSize: "contain",
-											}}
+											style={
+												{
+													backgroundColor: "rgb(var(--brand-primary))",
+													maskImage: `url(${logo.iconUrl})`,
+													WebkitMaskImage: `url(${logo.iconUrl})`,
+													maskMode: "luminance",
+													WebkitMaskMode: "luminance",
+													maskRepeat: "no-repeat",
+													maskPosition: "center",
+													maskSize: "contain",
+													WebkitMaskRepeat: "no-repeat",
+													WebkitMaskPosition: "center",
+													WebkitMaskSize: "contain",
+												} as React.CSSProperties
+											}
 										/>
 									</div>
 								</div>
