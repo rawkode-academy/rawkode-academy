@@ -114,15 +114,15 @@ const Typewriter = (props: Props) => {
 								key={logo.name}
 								className="relative aspect-square overflow-hidden rounded-2xl shadow-md group bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl border border-white/40 dark:border-gray-600/50 flex items-center justify-center"
 							>
-								{/* The Logo with Scanline Mask */}
-								<div className="relative w-2/3 h-2/3 transition-transform duration-300 group-hover:scale-110">
+								{/* The Logo with Scanline Mask (Default State) */}
+								<div className="relative w-2/3 h-2/3 transition-all duration-300 group-hover:scale-110 group-hover:opacity-0">
 									{/* 
 										Scanline Mask Container 
 										This div applies the scrolling scanline mask to all layers inside.
 										The mask consists of opaque lines (black) and transparent gaps.
 									*/}
 									<div
-										className="absolute inset-0 group-hover:animate-[scanline-scroll_0.5s_linear_infinite]"
+										className="absolute inset-0 animate-[scanline-scroll_1s_linear_infinite]"
 										style={{
 											maskImage: `repeating-linear-gradient(
 												to bottom,
@@ -188,6 +188,13 @@ const Typewriter = (props: Props) => {
 										/>
 									</div>
 								</div>
+
+								{/* The Real Logo (Hover State) */}
+								<img
+									src={logo.iconUrl}
+									alt={logo.name}
+									className="absolute w-2/3 h-2/3 object-contain opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:scale-110"
+								/>
 
 								{/* Label on hover */}
 								<div className="absolute inset-x-0 bottom-4 flex justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
