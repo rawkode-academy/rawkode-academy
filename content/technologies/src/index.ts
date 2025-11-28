@@ -30,8 +30,15 @@ export const technologyZod = zod.object({
   name: zod.string(),
   description: zod.string(),
 
-  // Presentation
-  icon: zod.string(),
+  // Presentation - logos available for this technology
+  // YAML parses empty `logos:` as null, so we accept null and transform to undefined
+  logos: zod
+    .object({
+      icon: zod.boolean().optional(),
+      horizontal: zod.boolean().optional(),
+      stacked: zod.boolean().optional(),
+    })
+    .nullish(),
 
   // Links
   website: zod.string(),
@@ -68,9 +75,16 @@ export function createSchema(z: typeof zod, _helpers?: { image?: (opts?: any) =>
     name: z.string(),
     description: z.string(),
 
-    // Presentation: keep as string to avoid image metadata parsing issues with some SVGs.
-    // Accept either remote URLs or relative paths ("./logo.svg").
-    icon: z.string(),
+    // Presentation - logos available for this technology
+    // Files are expected at ./icon.svg, ./horizontal.svg, ./stacked.svg
+    // YAML parses empty `logos:` as null, so we accept null and transform to undefined
+    logos: z
+      .object({
+        icon: z.boolean().optional(),
+        horizontal: z.boolean().optional(),
+        stacked: z.boolean().optional(),
+      })
+      .nullish(),
 
     // Links
     website: z.string(),
