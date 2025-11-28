@@ -6,11 +6,16 @@ interface ButtonProps {
 	newWindow?: boolean;
 }
 
+interface TechLogo {
+	name: string;
+	iconUrl: string;
+}
+
 interface Props {
 	rotatedPrefixes: string[];
 	suffix: string;
 	highlight: string;
-	image: ImageMetadata;
+	logos: TechLogo[];
 	primaryButton: ButtonProps;
 	secondaryButton: ButtonProps;
 }
@@ -98,12 +103,73 @@ const Typewriter = (props: Props) => {
 						</a>
 					</div>
 				</div>
-				<div className="hidden lg:mt-0 lg:col-span-4 lg:flex">
-					<img
-						src={props.image.src}
-						alt="Mix of Cloud Native Project Logos"
-						className="object-contain w-full h-auto drop-shadow-2xl"
-					/>
+				<div className="hidden lg:col-span-5 lg:flex lg:items-center lg:justify-center">
+					{/* 
+						Duotone logo grid with CRT scanline effect.
+						Uses theme colors via CSS variables for consistency across themes.
+					*/}
+					<div className="grid grid-cols-2 gap-4 w-full max-w-[400px]">
+						{props.logos.slice(0, 4).map((logo, index) => (
+							<div
+								key={logo.name}
+								className="relative aspect-square overflow-hidden rounded-2xl shadow-md group"
+								style={{
+									background:
+										index % 2 === 0
+											? `linear-gradient(135deg, rgb(var(--brand-secondary)) 0%, rgb(var(--brand-primary)) 100%)`
+											: `linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)`,
+								}}
+							>
+								{/* 
+									Default State: Monochrome Icon 
+									- Light Mode: White (brightness-0 invert)
+									- Dark Mode: Black (brightness-0 dark:invert-0)
+								*/}
+								<div className="absolute inset-0 flex items-center justify-center p-6 z-10 transition-opacity duration-300 group-hover:opacity-0">
+									<img
+										src={logo.iconUrl}
+										alt={logo.name}
+										title={logo.name}
+										className="w-full h-full object-contain brightness-0 invert dark:invert-0 opacity-90"
+									/>
+								</div>
+
+								{/* 
+									Hover State: Full Color Logo + Name 
+									- Reveals the logo normally
+									- Includes name of the project
+								*/}
+								<div className="absolute inset-0 flex flex-col items-center justify-center p-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white dark:bg-gray-900 rounded-2xl">
+									<img
+										src={logo.iconUrl}
+										alt={logo.name}
+										className="w-12 h-12 object-contain mb-2"
+									/>
+									<span className="text-sm font-bold text-center text-gray-900 dark:text-white leading-tight">
+										{logo.name}
+									</span>
+								</div>
+
+								{/* CRT Scanlines (Per Square) */}
+								<div
+									className="absolute inset-0 pointer-events-none opacity-50"
+									style={{
+										backgroundImage:
+											"repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,0,0,0.1) 1px, rgba(0,0,0,0.1) 2px)",
+										backgroundSize: "100% 2px",
+									}}
+								/>
+
+								{/* Vignette (Per Square) */}
+								<div
+									className="absolute inset-0 pointer-events-none"
+									style={{
+										boxShadow: "inset 0 0 40px rgba(0,0,0,0.1)",
+									}}
+								/>
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
 		</section>

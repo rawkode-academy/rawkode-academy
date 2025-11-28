@@ -28,7 +28,7 @@ export async function listTechnologies(): Promise<TechnologyItem[]> {
 	const items = await getCollection("technologies");
 	return items.map((e: TechnologyEntry) => {
 		const data = technologyZod.parse((e as any).data);
-		const iconValue = resolveTechnologyIconUrl(e.id, (e as any).data.icon);
+		const iconValue = resolveTechnologyIconUrl(e.id, (e as any).data.logos);
 		return {
 			id: e.id,
 			...data,

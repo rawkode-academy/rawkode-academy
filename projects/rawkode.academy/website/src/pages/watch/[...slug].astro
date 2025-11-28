@@ -215,7 +215,7 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 								>
 									<div class="w-6 h-6 relative overflow-hidden rounded">
 										<img
-											src={resolveTechnologyIconUrl(tech.id, tech.data.icon) || '/apple-touch-icon.png'}
+											src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || '/apple-touch-icon.png'}
 											alt={tech.data.name}
 											class="w-full h-full object-contain"
 											onerror="this.onerror=null; this.src='/apple-touch-icon.png'"

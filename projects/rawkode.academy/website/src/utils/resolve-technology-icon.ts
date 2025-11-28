@@ -1,48 +1,36 @@
 import { existsSync } from "node:fs";
-import { join, dirname as pathDirname, basename } from "node:path";
+import { join } from "node:path";
 import { resolveDataDirSync } from "@rawkodeacademy/content-technologies";
+
+interface LogosConfig {
+	icon?: boolean | undefined;
+	horizontal?: boolean | undefined;
+	stacked?: boolean | undefined;
+}
 
 export function resolveTechnologyIconUrl(
 	entryId: string,
-	icon: unknown,
+	logos?: LogosConfig | null,
 ): string | undefined {
-	// If already an Astro ImageMetadata, prefer .src
-	if (icon && typeof icon === "object" && (icon as any).src) {
-		return (icon as any).src as string;
-	}
+	if (!logos?.icon) return undefined;
 
-	if (typeof icon !== "string") return undefined;
+	// entryId is like "kubernetes/index" -> extract "kubernetes"
+	const slug = entryId.replace(/\/index$/, "");
 
-	// Normalize: trim, strip wrapping quotes, and fix accidental ./ prefix on remote urls
-	let value = icon.trim();
-	if (
-		(value.startsWith('"') && value.endsWith('"')) ||
-		(value.startsWith("'") && value.endsWith("'"))
-	) {
-		value = value.slice(1, -1);
-	}
-	if (/^\.\/["']?https?:\/\//i.test(value)) {
-		value = value.replace(/^\.\/["']?/i, "");
-	}
-
-	// Remote URL passthrough
-	if (/^https?:\/\//i.test(value)) return value;
-
-	// For relative paths like "./id.svg", create a dev-safe @fs URL.
 	try {
 		const base = resolveDataDirSync();
-		const subdir = entryId.includes("/") ? pathDirname(entryId) : "";
-		const abs = join(base, subdir, value);
-		if (!existsSync(abs)) {
+		const iconPath = join(base, slug, "icon.svg");
+
+		if (!existsSync(iconPath)) {
 			return undefined;
 		}
+
 		if (import.meta.env.DEV) {
-			return "/@fs/" + abs;
+			return "/@fs/" + iconPath;
 		}
-		// In production builds, prefer the content CDN for technology logos.
-		// Fall back to the basename of the icon file.
-		const file = basename(value);
-		return `https://content.rawkode.academy/logos/technologies/${file}`;
+
+		return `https://content.rawkode.academy/logos/technologies/${slug}/icon.svg`;
 	} catch {}
-	return value;
+
+	return undefined;
 }

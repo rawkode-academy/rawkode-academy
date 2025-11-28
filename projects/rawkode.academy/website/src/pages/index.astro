@@ -4,10 +4,24 @@ import HeroTypewriter from "@/components/hero/typewriter.tsx";
 import PartnerLogos from "@/components/partner/logos.astro";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
 import Page from "@/wrappers/page.astro";
-import HeroImage from "./_hero.png";
 import { getCollection } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+
+// Fetch random technologies for hero
+const allTechnologies = await getCollection("technologies");
+const shuffledTechnologies = allTechnologies
+	.filter((tech) => tech.data.logos?.icon) // Only include techs with icons
+	.sort(() => Math.random() - 0.5)
+	.slice(0, 4);
+
+const heroLogos = shuffledTechnologies
+	.map((tech) => ({
+		name: tech.data.name,
+		iconUrl: resolveTechnologyIconUrl(tech.id, tech.data.logos) || "",
+	}))
+	.filter((logo) => logo.iconUrl);
 
 // Fetch latest content
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);
@@ -44,15 +58,11 @@ const formatDuration = (seconds?: number | null) => {
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<Fragment slot="extra-head">
-		<!-- Preload hero image to improve LCP -->
-		<link rel="preload" as="image" href={HeroImage.src} imagesrcset={HeroImage.src} fetchpriority="high" />
-	</Fragment>
 	<HeroTypewriter
 		client:only="react"
 		highlight="hard"
-		image={HeroImage}
-				primaryButton={{
+		logos={heroLogos}
+		primaryButton={{
 					text: "Latest Videos",
 					link: "/watch",
 				}}

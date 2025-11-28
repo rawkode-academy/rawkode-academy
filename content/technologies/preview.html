@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technology Icons Preview</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 { margin-bottom: 10px; }
+    .nav-info {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .nav-info kbd {
+      background: #333;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .progress {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .progress .current { color: #4ade80; font-weight: bold; }
+    .progress .total { color: #888; }
+    .progress-bar {
+      width: 400px;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #4ade80;
+      transition: width 0.3s;
+    }
+    .card {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 30px;
+      width: 500px;
+      text-align: center;
+    }
+    .card.has-missing { border: 3px solid #f87171; }
+    .card h2 {
+      margin: 0 0 5px 0;
+      font-size: 28px;
+    }
+    .card .slug {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 25px;
+    }
+    .icons {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+    .icon-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .icon-box span {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .icon-container {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: 
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      background-color: #fff;
+      overflow: hidden;
+    }
+    .icon-container.present { border: 3px solid #4ade80; }
+    .icon-container.missing-icon {
+      border: 3px dashed #f87171;
+      color: #f87171;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .icon-container.not-declared {
+      border: 3px dashed #444;
+      color: #666;
+      font-size: 12px;
+    }
+    .icon-container img {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: contain;
+    }
+    .status {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      display: inline-block;
+    }
+    .status.complete { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
+    .status.incomplete { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .controls button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: #eee;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .controls button:hover { background: #444; }
+    .controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .loading {
+      text-align: center;
+      padding: 50px;
+      font-size: 18px;
+    }
+    .filter-toggle {
+      margin-top: 15px;
+    }
+    .filter-toggle label {
+      cursor: pointer;
+      color: #888;
+    }
+    .filter-toggle input:checked + span { color: #f87171; }
+  </style>
+</head>
+<body>
+  <h1>Technology Icons Preview</h1>
+  <div class="nav-info">Use <kbd>&larr;</kbd> <kbd>&rarr;</kbd> arrow keys to navigate</div>
+  <div class="progress" id="progress">Loading...</div>
+  <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <div id="card"><div class="loading">Loading technologies...</div></div>
+  <div class="controls">
+    <button id="prevBtn" onclick="navigate(-1)">&larr; Previous</button>
+    <button id="nextBtn" onclick="navigate(1)">Next &rarr;</button>
+  </div>
+  <div class="filter-toggle">
+    <label>
+      <input type="checkbox" id="showMissingOnly" onchange="applyFilter()">
+      <span>Show only technologies with missing icons</span>
+    </label>
+  </div>
+
+  <script>
+    const TECHNOLOGIES = [
+      'acorn', 'apko', 'aquaproj', 'buildkit', 'carvel', 'cdk8s', 'cilium',
+      'cluster-api', 'comtrya', 'containerd', 'coredns', 'cortex', 'cpp',
+      'crossplane', 'cue', 'cueblox', 'dagger', 'dapr', 'daytona', 'devenv',
+      'devpod', 'devspace', 'devstand', 'dgraph', 'docker', 'docker-build-cloud',
+      'docker-compose', 'ebpf', 'env0', 'falco', 'firecracker', 'fleet', 'flipt',
+      'fluent-bit', 'fluentd', 'fluxcd', 'gimlet', 'gitea', 'gitlab', 'gitlab-duo',
+      'gitpod', 'grafana', 'grafbase', 'guidepad', 'helm-dashboard', 'home-assistant',
+      'infisical', 'influxdb', 'inlets', 'istio', 'jspolicy', 'k0s', 'k3s', 'kamaji',
+      'kaniko', 'kapitan', 'keptn', 'kluctl', 'komodor', 'kpt', 'krr', 'kube-vip',
+      'kubeflow', 'kubernetes', 'kubescape', 'kubevious', 'kwasm', 'kyverno',
+      'laravel', 'lens', 'linkerd', 'litestream', 'litmus', 'loki', 'lumigo',
+      'meilisearch', 'melange', 'mirrord', 'n8n', 'namespace', 'ngrok', 'okteto',
+      'open-policy-agent', 'openebs', 'openfaas', 'opentelemetry', 'openunison',
+      'operatorsdk', 'otterize', 'parca', 'php', 'pipedream', 'pixie', 'pkgx',
+      'podman', 'policy-reporter', 'portainer', 'postgresql', 'prometheus',
+      'promlens', 'promscale', 'pulumi', 'qovery', 'questdb', 'quickwit', 'rancher',
+      'restate', 'robusta', 'runme', 'rust', 'salt', 'schemahero', 'second-state',
+      'security-profiles-operator', 'sigstore', 'skaffold', 'slim-toolkit', 'snyk',
+      'spin', 'suborbital', 'sveltos', 'system-initiative', 'tektoncd', 'telegraf',
+      'teleport', 'telepresence', 'terraform', 'tetragon', 'thanos', 'tilt',
+      'timescale', 'timoni', 'tremor', 'trivy', 'tyk', 'universal-blue', 'vcluster',
+      'velero', 'vitess', 'waypoint', 'webassembly', 'wundergraph', 'xdebug', 'zitadel'
+    ];
+
+    const ICON_TYPES = ['icon', 'horizontal', 'stacked'];
+    let allTechnologies = [];
+    let filteredTechnologies = [];
+    let currentIndex = 0;
+
+    function parseFrontmatter(content) {
+      const match = content.match(/^---\n([\s\S]*?)\n---/);
+      if (!match) return {};
+      const yaml = match[1];
+      const result = {};
+      
+      const nameMatch = yaml.match(/^name:\s*["']?([^"'\n]+)["']?/m);
+      if (nameMatch) result.name = nameMatch[1].trim();
+      
+      const logosMatch = yaml.match(/logos:\s*\n((?:\s+\w+:\s*\w+\n?)*)/);
+      if (logosMatch) {
+        result.logos = {};
+        const logosBlock = logosMatch[1];
+        for (const type of ICON_TYPES) {
+          const typeMatch = logosBlock.match(new RegExp(`${type}:\\s*(true|false)`));
+          if (typeMatch) result.logos[type] = typeMatch[1] === 'true';
+        }
+      }
+      return result;
+    }
+
+    async function checkImageExists(url) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+      });
+    }
+
+    async function loadTechnology(slug) {
+      try {
+        const response = await fetch(`data/${slug}/index.mdx`);
+        if (!response.ok) return null;
+        const content = await response.text();
+        const frontmatter = parseFrontmatter(content);
+        
+        const icons = {};
+        for (const type of ICON_TYPES) {
+          const declared = frontmatter.logos?.[type] === true;
+          const url = `data/${slug}/${type}.svg`;
+          const exists = await checkImageExists(url);
+          icons[type] = { declared, exists, url };
+        }
+        
+        return {
+          slug,
+          name: frontmatter.name || slug,
+          icons,
+          hasMissing: ICON_TYPES.some(t => icons[t].declared && !icons[t].exists)
+        };
+      } catch (e) {
+        console.error(`Error loading ${slug}:`, e);
+        return null;
+      }
+    }
+
+    function renderCard(tech) {
+      let iconsHtml = '';
+      for (const type of ICON_TYPES) {
+        const icon = tech.icons[type];
+        let containerClass = 'icon-container ';
+        let content = '';
+        
+        if (icon.exists) {
+          containerClass += 'present';
+          content = `<img src="${icon.url}" alt="${type}">`;
+        } else if (icon.declared) {
+          containerClass += 'missing-icon';
+          content = 'MISSING';
+        } else {
+          containerClass += 'not-declared';
+          content = 'N/A';
+        }
+        
+        iconsHtml += `
+          <div class="icon-box">
+            <span>${type}</span>
+            <div class="${containerClass}">${content}</div>
+          </div>
+        `;
+      }
+
+      const statusClass = tech.hasMissing ? 'incomplete' : 'complete';
+      const statusText = tech.hasMissing ? 'Missing Icons' : 'Complete';
+      
+      document.getElementById('card').innerHTML = `
+        <div class="card${tech.hasMissing ? ' has-missing' : ''}">
+          <h2>${tech.name}</h2>
+          <div class="slug">${tech.slug}</div>
+          <div class="icons">${iconsHtml}</div>
+          <div class="status ${statusClass}">${statusText}</div>
+        </div>
+      `;
+    }
+
+    function updateProgress() {
+      const total = filteredTechnologies.length;
+      document.getElementById('progress').innerHTML = `
+        <span class="current">${currentIndex + 1}</span> / <span class="total">${total}</span>
+      `;
+      document.getElementById('progressFill').style.width = `${((currentIndex + 1) / total) * 100}%`;
+      document.getElementById('prevBtn').disabled = currentIndex === 0;
+      document.getElementById('nextBtn').disabled = currentIndex === total - 1;
+    }
+
+    function navigate(direction) {
+      const newIndex = currentIndex + direction;
+      if (newIndex >= 0 && newIndex < filteredTechnologies.length) {
+        currentIndex = newIndex;
+        renderCard(filteredTechnologies[currentIndex]);
+        updateProgress();
+        window.location.hash = filteredTechnologies[currentIndex].slug;
+      }
+    }
+
+    function applyFilter() {
+      const showMissingOnly = document.getElementById('showMissingOnly').checked;
+      filteredTechnologies = showMissingOnly 
+        ? allTechnologies.filter(t => t.hasMissing)
+        : allTechnologies;
+      currentIndex = 0;
+      if (filteredTechnologies.length > 0) {
+        renderCard(filteredTechnologies[currentIndex]);
+        updateProgress();
+      } else {
+        document.getElementById('card').innerHTML = '<div class="card"><h2>No technologies match filter</h2></div>';
+        document.getElementById('progress').innerHTML = '0 / 0';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') navigate(-1);
+      if (e.key === 'ArrowRight') navigate(1);
+    });
+
+    async function init() {
+      for (const slug of TECHNOLOGIES) {
+        const tech = await loadTechnology(slug);
+        if (tech) allTechnologies.push(tech);
+      }
+      
+      allTechnologies.sort((a, b) => a.name.localeCompare(b.name));
+      filteredTechnologies = allTechnologies;
+      
+      if (filteredTechnologies.length > 0) {
+        const hash = window.location.hash.slice(1);
+        if (hash) {
+          const idx = filteredTechnologies.findIndex(t => t.slug === hash);
+          if (idx !== -1) currentIndex = idx;
+        }
+        renderCard(filteredTechnologies[currentIndex]);
+        updateProgress();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

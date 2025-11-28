@@ -23,12 +23,28 @@ export const Default: Story = {
 		],
 		suffix: "with Rawkode Academy",
 		highlight: "Rawkode Academy",
-		image: {
-			src: "/apple-touch-icon.png",
-			width: 400,
-			height: 400,
-			format: "svg",
-		},
+		logos: [
+			{
+				name: "Kubernetes",
+				iconUrl:
+					"https://content.rawkode.academy/logos/technologies/kubernetes/icon.svg",
+			},
+			{
+				name: "Docker",
+				iconUrl:
+					"https://content.rawkode.academy/logos/technologies/docker/icon.svg",
+			},
+			{
+				name: "Cilium",
+				iconUrl:
+					"https://content.rawkode.academy/logos/technologies/cilium/icon.svg",
+			},
+			{
+				name: "FluxCD",
+				iconUrl:
+					"https://content.rawkode.academy/logos/technologies/fluxcd/icon.svg",
+			},
+		],
 		primaryButton: {
 			text: "Get Started",
 			link: "/courses",
