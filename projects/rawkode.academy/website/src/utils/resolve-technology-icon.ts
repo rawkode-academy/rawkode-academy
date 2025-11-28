@@ -17,20 +17,20 @@ export function resolveTechnologyIconUrl(
 	// entryId is like "kubernetes/index" -> extract "kubernetes"
 	const slug = entryId.replace(/\/index$/, "");
 
-	try {
-		const base = resolveDataDirSync();
-		const iconPath = join(base, slug, "icon.svg");
+	if (import.meta.env.DEV) {
+		try {
+			const base = resolveDataDirSync();
+			const iconPath = join(base, slug, "icon.svg");
 
-		if (!existsSync(iconPath)) {
+			if (!existsSync(iconPath)) {
+				return undefined;
+			}
+
+			return "/@fs/" + iconPath;
+		} catch {
 			return undefined;
 		}
+	}
 
-		if (import.meta.env.DEV) {
-			return "/@fs/" + iconPath;
-		}
-
-		return `https://content.rawkode.academy/logos/technologies/${slug}/icon.svg`;
-	} catch {}
-
-	return undefined;
+	return `https://content.rawkode.academy/logos/technologies/${slug}/icon.svg`;
 }
