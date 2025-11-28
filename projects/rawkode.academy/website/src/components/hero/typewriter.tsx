@@ -120,8 +120,8 @@ const Typewriter = (props: Props) => {
 									style={{
 										backgroundImage: `repeating-linear-gradient(
 											to bottom,
-											rgb(var(--brand-primary)) 0px,
-											rgb(var(--brand-primary)) 2px,
+											rgb(var(--brand-primary) / 50%) 0px,
+											rgb(var(--brand-primary) / 50%) 2px,
 											transparent 2px,
 											transparent 4px
 										)`,
