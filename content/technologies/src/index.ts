@@ -34,9 +34,9 @@ export const technologyZod = zod.object({
   // YAML parses empty `logos:` as null, so we accept null and transform to undefined
   logos: zod
     .object({
-      icon: zod.boolean().optional(),
-      horizontal: zod.boolean().optional(),
-      stacked: zod.boolean().optional(),
+      icon: zod.any().optional(),
+      horizontal: zod.any().optional(),
+      stacked: zod.any().optional(),
     })
     .nullish(),
 
@@ -69,7 +69,9 @@ export type TechnologyData = zod.infer<typeof technologyZod>;
 
 // Export a schema factory colocated with the content package.
 // Consumers (e.g., the website's content config) will call this with their `z`.
-export function createSchema(z: typeof zod, _helpers?: { image?: (opts?: any) => any }) {
+export function createSchema(z: typeof zod, helpers?: { image?: () => any }) {
+  const imageSchema = helpers?.image ? helpers.image() : z.string();
+
   return z.object({
     // Core identity
     name: z.string(),
@@ -80,9 +82,9 @@ export function createSchema(z: typeof zod, _helpers?: { image?: (opts?: any) =>
     // YAML parses empty `logos:` as null, so we accept null and transform to undefined
     logos: z
       .object({
-        icon: z.boolean().optional(),
-        horizontal: z.boolean().optional(),
-        stacked: z.boolean().optional(),
+        icon: imageSchema.optional(),
+        horizontal: imageSchema.optional(),
+        stacked: imageSchema.optional(),
       })
       .nullish(),
 

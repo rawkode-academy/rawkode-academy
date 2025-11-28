@@ -1,36 +1,22 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { resolveDataDirSync } from "@rawkodeacademy/content-technologies";
-
 interface LogosConfig {
-	icon?: boolean | undefined;
-	horizontal?: boolean | undefined;
-	stacked?: boolean | undefined;
+	icon?: { src: string } | string | undefined;
+	horizontal?: { src: string } | string | undefined;
+	stacked?: { src: string } | string | undefined;
 }
 
 export function resolveTechnologyIconUrl(
-	entryId: string,
+	_entryId: string,
 	logos?: LogosConfig | null,
 ): string | undefined {
 	if (!logos?.icon) return undefined;
 
-	// entryId is like "kubernetes/index" -> extract "kubernetes"
-	const slug = entryId.replace(/\/index$/, "");
-
-	if (import.meta.env.DEV) {
-		try {
-			const base = resolveDataDirSync();
-			const iconPath = join(base, slug, "icon.svg");
-
-			if (!existsSync(iconPath)) {
-				return undefined;
-			}
-
-			return "/@fs/" + iconPath;
-		} catch {
-			return undefined;
-		}
+	if (typeof logos.icon === "string") {
+		return logos.icon;
 	}
 
-	return `https://content.rawkode.academy/logos/technologies/${slug}/icon.svg`;
+	if (typeof logos.icon === "object" && "src" in logos.icon) {
+		return logos.icon.src;
+	}
+
+	return undefined;
 }
