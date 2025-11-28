@@ -28,10 +28,10 @@ const Typewriter = (props: Props) => {
 	return (
 		<section className="glass-panel relative mt-12 md:mt-8 mb-6 rounded-3xl overflow-hidden">
 			<div className="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none" />
-			<div className="relative grid max-w-6xl px-6 pt-0 pb-10 mx-auto gap-8 lg:gap-10 lg:pt-6 lg:pb-16 lg:grid-cols-12">
-				<div className="mr-auto place-self-center space-y-4 lg:col-span-7">
+			<div className="relative grid max-w-6xl px-6 pt-0 pb-10 mx-auto gap-8 lg:gap-6 lg:pt-6 lg:pb-16 lg:grid-cols-12">
+				<div className="mr-auto place-self-center space-y-4 lg:col-span-6">
 					<h1 className="text-balance text-3xl font-bold tracking-tight leading-tight text-black dark:text-white sm:text-4xl md:text-5xl xl:text-6xl">
-						<span className="block text-3xl sm:text-4xl md:text-5xl xl:text-6xl">
+						<span className="block text-3xl sm:text-4xl md:text-5xl xl:text-5xl">
 							<TypeAnimation
 								className="inline-block bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap"
 								sequence={shuffle(props.rotatedPrefixes).reduce<
@@ -103,7 +103,7 @@ const Typewriter = (props: Props) => {
 						</a>
 					</div>
 				</div>
-				<div className="hidden lg:col-span-5 lg:flex lg:items-center lg:justify-center">
+				<div className="hidden lg:col-span-6 lg:flex lg:items-center lg:justify-center">
 					{/* 
 						Duotone logo grid with CRT scanline effect.
 						Uses theme colors via CSS variables for consistency across themes.
@@ -120,34 +120,18 @@ const Typewriter = (props: Props) => {
 											: `linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)`,
 								}}
 							>
-								{/* 
-									Default State: Monochrome Icon 
-									- Light Mode: White (brightness-0 invert)
-									- Dark Mode: Black (brightness-0 dark:invert-0)
-								*/}
-								<div className="absolute inset-0 flex items-center justify-center p-6 z-10 transition-opacity duration-300 group-hover:opacity-0">
-									<img
-										src={logo.iconUrl}
-										alt={logo.name}
-										title={logo.name}
-										className="w-full h-full object-contain brightness-0 invert dark:invert-0 opacity-90"
-									/>
-								</div>
-
-								{/* 
-									Hover State: Full Color Logo + Name 
-									- Reveals the logo normally
-									- Includes name of the project
-								*/}
-								<div className="absolute inset-0 flex flex-col items-center justify-center p-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white dark:bg-gray-900 rounded-2xl">
-									<img
-										src={logo.iconUrl}
-										alt={logo.name}
-										className="w-12 h-12 object-contain mb-2"
-									/>
-									<span className="text-sm font-bold text-center text-gray-900 dark:text-white leading-tight">
-										{logo.name}
-									</span>
+								<div className="absolute inset-0 z-10 flex items-center justify-center p-6">
+									<div className="relative flex h-full w-full items-center justify-center">
+										<img
+											src={logo.iconUrl}
+											alt={logo.name}
+											title={logo.name}
+											className="w-full h-full object-contain grayscale invert mix-blend-screen brightness-125 contrast-75 opacity-70 drop-shadow-[0_0_12px_rgba(255,255,255,0.35)] transition-all duration-300 group-hover:grayscale-0 group-hover:invert-0 group-hover:mix-blend-normal group-hover:brightness-100 group-hover:contrast-100 group-hover:opacity-100 group-hover:drop-shadow-none"
+										/>
+										<div className="pointer-events-none absolute inset-x-4 bottom-4 rounded-xl bg-black/60 px-3 py-1 text-center text-xs font-semibold uppercase tracking-wide text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+											{logo.name}
+										</div>
+									</div>
 								</div>
 
 								{/* CRT Scanlines (Per Square) */}
