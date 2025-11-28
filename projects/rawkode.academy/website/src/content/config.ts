@@ -145,7 +145,7 @@ const technologies = defineCollection({
 		pattern: ["**/*.{md,mdx}"],
 		base: resolveTechnologiesDataDir(),
 	}),
-	schema: createTechnologySchema(z),
+	schema: ({ image }) => createTechnologySchema(z, { image }),
 });
 
 const series = defineCollection({
