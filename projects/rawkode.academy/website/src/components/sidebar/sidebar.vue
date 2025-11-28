@@ -194,7 +194,7 @@ const currentNavItems = computed(() => {
 
 <template>
 	<aside
-		class="sidebar-glassmorphism"
+		class="glass-panel"
 		:class="[
 			'fixed top-28 left-4 md:left-8 bottom-4 z-30 transition-all duration-300 ease-in-out',
 			'rounded-2xl',
@@ -204,7 +204,8 @@ const currentNavItems = computed(() => {
 		]"
 		aria-label="Sidebar navigation"
 	>
-		<div class="flex flex-col h-full">
+		<div class="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none rounded-2xl" />
+		<div class="flex flex-col h-full relative z-10">
 			<!-- Mode Toggle (Expanded) - segmented control -->
 			<div
 				v-if="!isCollapsed"
@@ -217,12 +218,12 @@ const currentNavItems = computed(() => {
 						:aria-label="'Learn mode'"
 						:title="'Learn mode'"
 						:class="[
-							'flex-1 inline-flex md:flex-row flex-col items-center md:justify-center justify-start gap-1.5 px-2 py-2 text-xs font-medium transition-colors whitespace-nowrap',
+							'flex-1 inline-flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors whitespace-nowrap',
 							mode === 'learn' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
 						]"
 					>
 						<BookOpenIcon class="w-4 h-4" />
-						<span class="mt-1 md:mt-0 md:ml-0 text-xs md:hidden">Learn</span>
+						<span class="mt-1 text-xs">Learn</span>
 					</button>
 					<button
 						@click="mode = 'connect'; localStorage.setItem('sidebar-mode', 'connect')"
@@ -230,12 +231,12 @@ const currentNavItems = computed(() => {
 						:aria-label="'Connect mode'"
 						:title="'Connect mode'"
 						:class="[
-							'flex-1 inline-flex md:flex-row flex-col items-center md:justify-center justify-start gap-1.5 px-2 py-2 text-xs font-medium transition-colors border-l border-white/30 dark:border-gray-600/40 whitespace-nowrap',
+							'flex-1 inline-flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors border-l border-white/30 dark:border-gray-600/40 whitespace-nowrap',
 							mode === 'connect' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
 						]"
 					>
 						<UsersIcon class="w-4 h-4" />
-						<span class="mt-1 md:mt-0 md:ml-0 text-xs md:hidden">Connect</span>
+						<span class="mt-1 text-xs">Connect</span>
 					</button>
 					<button
 						@click="mode = 'collaborate'; localStorage.setItem('sidebar-mode', 'collaborate')"
@@ -243,12 +244,12 @@ const currentNavItems = computed(() => {
 						:aria-label="'Partner mode'"
 						:title="'Partner mode'"
 						:class="[
-							'flex-1 inline-flex md:flex-row flex-col items-center md:justify-center justify-start gap-1.5 px-2 py-2 text-xs font-medium transition-colors border-l border-white/30 dark:border-gray-600/40 whitespace-nowrap',
+							'flex-1 inline-flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors border-l border-white/30 dark:border-gray-600/40 whitespace-nowrap',
 							mode === 'collaborate' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
 						]"
 					>
 						<BuildingOfficeIcon class="w-4 h-4" />
-						<span class="mt-1 md:mt-0 md:ml-0 text-xs md:hidden">Partner</span>
+						<span class="mt-1 text-xs">Partner</span>
 					</button>
 				</div>
 			</div>
@@ -353,39 +354,6 @@ const currentNavItems = computed(() => {
 </template>
 
 <style scoped>
-.sidebar-glassmorphism {
-	background: var(--surface-card);
-	backdrop-filter: blur(32px) saturate(170%);
-	-webkit-backdrop-filter: blur(32px) saturate(170%);
-	border: 1px solid var(--surface-border);
-	box-shadow: var(--surface-shadow);
-}
-
-.sidebar-glassmorphism::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(to bottom, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.08) 60%, transparent);
-	border-radius: inherit;
-	pointer-events: none;
-	z-index: 1;
-}
-
-.sidebar-glassmorphism::after {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.1) 100%);
-	border-radius: inherit;
-	pointer-events: none;
-	z-index: 1;
-}
-
-.sidebar-glassmorphism > * {
-	position: relative;
-	z-index: 2;
-}
-
 /* Subtle fade at top/bottom to hint scrollability */
 .scroll-fade {
 	-webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
