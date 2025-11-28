@@ -115,26 +115,79 @@ const Typewriter = (props: Props) => {
 								className="relative aspect-square overflow-hidden rounded-2xl shadow-md group bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl border border-white/40 dark:border-gray-600/50 flex items-center justify-center"
 							>
 								{/* The Logo with Scanline Mask */}
-								<div
-									className="w-2/3 h-2/3 transition-all duration-300 group-hover:scale-110 group-hover:animate-[scanline-scroll_0.5s_linear_infinite]"
-									style={{
-										backgroundImage: `repeating-linear-gradient(
-											to bottom,
-											rgb(var(--brand-primary) / 50%) 0px,
-											rgb(var(--brand-primary) / 50%) 2px,
-											transparent 2px,
-											transparent 4px
-										)`,
-										maskImage: `url(${logo.iconUrl})`,
-										WebkitMaskImage: `url(${logo.iconUrl})`,
-										maskSize: "contain",
-										WebkitMaskSize: "contain",
-										maskRepeat: "no-repeat",
-										WebkitMaskRepeat: "no-repeat",
-										maskPosition: "center",
-										WebkitMaskPosition: "center",
-									}}
-								/>
+								<div className="relative w-2/3 h-2/3 transition-transform duration-300 group-hover:scale-110">
+									{/* 
+										Scanline Mask Container 
+										This div applies the scrolling scanline mask to all layers inside.
+										The mask consists of opaque lines (black) and transparent gaps.
+									*/}
+									<div
+										className="absolute inset-0 group-hover:animate-[scanline-scroll_0.5s_linear_infinite]"
+										style={{
+											maskImage: `repeating-linear-gradient(
+												to bottom,
+												black 0px,
+												black 2px,
+												transparent 2px,
+												transparent 4px
+											)`,
+											WebkitMaskImage: `repeating-linear-gradient(
+												to bottom,
+												black 0px,
+												black 2px,
+												transparent 2px,
+												transparent 4px
+											)`,
+											maskSize: "100% 4px",
+											WebkitMaskSize: "100% 4px",
+										}}
+									>
+										{/* 
+											Layer 1: Secondary Color (Background/Shadows) 
+											Masked by Logo Alpha -> Shows full shape of the logo.
+											Lower opacity to fade out the "blob" background.
+										*/}
+										<div
+											className="absolute inset-0"
+											style={{
+												backgroundColor: "rgb(var(--brand-secondary))",
+												opacity: 0.3,
+												maskImage: `url(${logo.iconUrl})`,
+												WebkitMaskImage: `url(${logo.iconUrl})`,
+												maskMode: "alpha",
+												WebkitMaskMode: "alpha",
+												maskRepeat: "no-repeat",
+												maskPosition: "center",
+												maskSize: "contain",
+												WebkitMaskRepeat: "no-repeat",
+												WebkitMaskPosition: "center",
+												WebkitMaskSize: "contain",
+											}}
+										/>
+
+										{/* 
+											Layer 2: Primary Color (Foreground/Whites) 
+											Masked by Logo Luminance -> Shows bright parts (whites) of the logo.
+											This creates the "Luma Key" effect where whites become Primary color.
+										*/}
+										<div
+											className="absolute inset-0"
+											style={{
+												backgroundColor: "rgb(var(--brand-primary))",
+												maskImage: `url(${logo.iconUrl})`,
+												WebkitMaskImage: `url(${logo.iconUrl})`,
+												maskMode: "luminance",
+												WebkitMaskMode: "luminance",
+												maskRepeat: "no-repeat",
+												maskPosition: "center",
+												maskSize: "contain",
+												WebkitMaskRepeat: "no-repeat",
+												WebkitMaskPosition: "center",
+												WebkitMaskSize: "contain",
+											}}
+										/>
+									</div>
+								</div>
 
 								{/* Label on hover */}
 								<div className="absolute inset-x-0 bottom-4 flex justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
