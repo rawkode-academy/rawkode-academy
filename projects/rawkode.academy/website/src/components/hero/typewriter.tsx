@@ -112,45 +112,36 @@ const Typewriter = (props: Props) => {
 						{props.logos.slice(0, 4).map((logo, index) => (
 							<div
 								key={logo.name}
-								className="relative aspect-square overflow-hidden rounded-2xl shadow-md group"
-								style={{
-									background:
-										index % 2 === 0
-											? `linear-gradient(135deg, rgb(var(--brand-secondary)) 0%, rgb(var(--brand-primary)) 100%)`
-											: `linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)`,
-								}}
+								className="relative aspect-square overflow-hidden rounded-2xl shadow-md group bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl border border-white/40 dark:border-gray-600/50 flex items-center justify-center"
 							>
-								<div className="absolute inset-0 z-10 flex items-center justify-center p-6">
-									<div className="relative flex h-full w-full items-center justify-center">
-										<img
-											src={logo.iconUrl}
-											alt={logo.name}
-											title={logo.name}
-											className="w-full h-full object-contain grayscale invert mix-blend-screen brightness-125 contrast-75 opacity-70 drop-shadow-[0_0_12px_rgba(255,255,255,0.35)] transition-all duration-300 group-hover:grayscale-0 group-hover:invert-0 group-hover:mix-blend-normal group-hover:brightness-100 group-hover:contrast-100 group-hover:opacity-100 group-hover:drop-shadow-none"
-										/>
-										<div className="pointer-events-none absolute inset-x-4 bottom-4 rounded-xl bg-black/60 px-3 py-1 text-center text-xs font-semibold uppercase tracking-wide text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
-											{logo.name}
-										</div>
-									</div>
+								{/* The Logo with Scanline Mask */}
+								<div
+									className="w-2/3 h-2/3 transition-all duration-300 group-hover:scale-110 group-hover:animate-[scanline-scroll_0.5s_linear_infinite]"
+									style={{
+										backgroundImage: `repeating-linear-gradient(
+											to bottom,
+											rgb(var(--brand-primary)) 0px,
+											rgb(var(--brand-primary)) 2px,
+											transparent 2px,
+											transparent 4px
+										)`,
+										maskImage: `url(${logo.iconUrl})`,
+										WebkitMaskImage: `url(${logo.iconUrl})`,
+										maskSize: "contain",
+										WebkitMaskSize: "contain",
+										maskRepeat: "no-repeat",
+										WebkitMaskRepeat: "no-repeat",
+										maskPosition: "center",
+										WebkitMaskPosition: "center",
+									}}
+								/>
+
+								{/* Label on hover */}
+								<div className="absolute inset-x-0 bottom-4 flex justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
+									<span className="bg-black/70 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg backdrop-blur-md border border-white/10">
+										{logo.name}
+									</span>
 								</div>
-
-								{/* CRT Scanlines (Per Square) */}
-								<div
-									className="absolute inset-0 pointer-events-none opacity-50"
-									style={{
-										backgroundImage:
-											"repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,0,0,0.1) 1px, rgba(0,0,0,0.1) 2px)",
-										backgroundSize: "100% 2px",
-									}}
-								/>
-
-								{/* Vignette (Per Square) */}
-								<div
-									className="absolute inset-0 pointer-events-none"
-									style={{
-										boxShadow: "inset 0 0 40px rgba(0,0,0,0.1)",
-									}}
-								/>
 							</div>
 						))}
 					</div>

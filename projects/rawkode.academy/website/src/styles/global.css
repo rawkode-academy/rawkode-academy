@@ -809,4 +809,17 @@ body::before {
 	.section-pt-0 {
 		padding-top: 0 !important;
 	}
+
+	@keyframes scanline-scroll {
+		0% {
+			background-position: 0 0;
+		}
+		100% {
+			background-position: 0 4px; /* Match the pattern size (4px) for seamless loop */
+		}
+	}
+
+	.animate-scanline {
+		animation: scanline-scroll 1s linear infinite;
+	}
 }
