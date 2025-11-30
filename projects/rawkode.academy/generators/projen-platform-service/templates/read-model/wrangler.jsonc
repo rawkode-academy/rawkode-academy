@@ -52,6 +52,13 @@
 			"class_name": "{{ wf.class_name }}"{% if wf.script_name %},
 			"script_name": "{{ wf.script_name }}"{% endif %}
 		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% endif %}{% if bindings.sendEmail.size > 0 %},
+	"send_email": [{% for email in bindings.sendEmail %}
+		{
+			"name": "{{ email.name }}"{% if email.destination_address %},
+			"destination_address": "{{ email.destination_address }}"{% endif %}{% if email.allowed_destination_addresses %},
+			"allowed_destination_addresses": [{% for addr in email.allowed_destination_addresses %}"{{ addr }}"{% unless forloop.last %}, {% endunless %}{% endfor %}]{% endif %}
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
 	]{% endif %}{% if bindings.secretStoreSecrets.size > 0 %},
 	"secrets_store_secrets": [{% for secret in bindings.secretStoreSecrets %}
 		{

@@ -42,6 +42,11 @@
 			"binding": "EMAIL_PREFERENCES",
 			"service": "platform-email-preferences-rpc",
 			"remote": true
+		},
+		{
+			"binding": "EMAIL_SERVICE",
+			"service": "platform-email-service-rpc",
+			"remote": true
 		}
 	]
 }

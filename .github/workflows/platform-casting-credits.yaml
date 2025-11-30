@@ -25,5 +25,3 @@ jobs:
       service-name: casting-credits
       service-path: projects/rawkode.academy/platform/casting-credits
       has-write-model: true
-    secrets:
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}

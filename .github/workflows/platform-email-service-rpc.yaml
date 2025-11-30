@@ -1,20 +1,42 @@
-name: rawkode.academy/platform/authentication/rpc
+name: rawkode.academy/platform/email-service/rpc
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/platform-authentication-rpc.yaml"
-      - "projects/rawkode.academy/platform/authentication/**"
+      - ".github/workflows/platform-email-service-rpc.yaml"
+      - "projects/rawkode.academy/platform/email-service/**"
   pull_request:
     paths:
-      - ".github/workflows/platform-authentication-rpc.yaml"
-      - "projects/rawkode.academy/platform/authentication/**"
+      - ".github/workflows/platform-email-service-rpc.yaml"
+      - "projects/rawkode.academy/platform/email-service/**"
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: projects/rawkode.academy/platform/email-service
+        run: bun install
+
+      - name: Run tests
+        working-directory: projects/rawkode.academy/platform/email-service
+        run: bun run test
+
   deploy:
     runs-on: depot-ubuntu-latest,dagger=0.18.11
+    needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
@@ -42,7 +64,7 @@ jobs:
           bun-version: latest
 
       - name: Deploy RPC Service
-        working-directory: projects/rawkode.academy/platform/authentication
+        working-directory: projects/rawkode.academy/platform/email-service
         env:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
         run: |
