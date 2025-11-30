@@ -1,0 +1,29 @@
+{
+  "name": "@rawkodeacademy/content",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared Rawkode Academy content (videos, shows, articles, courses, etc.)",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/**/*",
+    "adrs/**/*",
+    "articles/**/*",
+    "changelog/**/*",
+    "courses/**/*",
+    "learning-paths/**/*",
+    "people/**/*",
+    "series/**/*",
+    "shows/**/*",
+    "technologies/**/*",
+    "testimonials/**/*",
+    "videos/**/*",
+    "review_technologies.py"
+  ]
+}

@@ -1,17 +1,15 @@
 import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolveContentDir } from "@rawkodeacademy/content";
 import {
-	createSchema as createTechnologySchema,
-	resolveDataDirSync as resolveTechnologiesDataDir,
+        createSchema as createTechnologySchema,
+        resolveDataDirSync as resolveTechnologiesDataDir,
 } from "@rawkodeacademy/content-technologies";
 
 // Local, file-based content collections for videos, shows, and technologies.
 // These are populated by scripts/sync-graphql-content.ts during build or on demand.
 
-const CONTENT_ROOT = fileURLToPath(new URL("../../../../../../content", import.meta.url));
-const contentDir = (...segments: string[]) => join(CONTENT_ROOT, ...segments);
+const contentDir = (...segments: string[]) => resolveContentDir(...segments);
 
 const videos = defineCollection({
         loader: glob({ pattern: ["**/*.{md,mdx}"], base: contentDir("videos") }),

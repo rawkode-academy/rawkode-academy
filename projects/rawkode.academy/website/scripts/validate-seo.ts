@@ -3,9 +3,9 @@ import { glob } from "glob";
 import matter from "gray-matter";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolveContentDir } from "@rawkodeacademy/content";
 
-const CONTENT_ROOT = fileURLToPath(new URL("../../../../content", import.meta.url));
+const CONTENT_ROOT = resolveContentDir();
 
 interface ValidationError {
 	file: string;

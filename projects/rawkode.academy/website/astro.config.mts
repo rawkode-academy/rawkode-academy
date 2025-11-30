@@ -15,6 +15,7 @@ import { statSync, readFileSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
 import { existsSync } from "node:fs";
+import { resolveContentDir } from "@rawkodeacademy/content";
 import { glob } from "glob";
 import rehypeExternalLinks from "rehype-external-links";
 
@@ -86,7 +87,7 @@ const getSiteUrl = () => {
 };
 
 const WORKSPACE_ROOT = searchForWorkspaceRoot(process.cwd());
-const CONTENT_ROOT = join(WORKSPACE_ROOT, "content");
+const CONTENT_ROOT = resolveContentDir();
 
 const withTrailingSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 
