@@ -8,12 +8,14 @@ on:
       - "projects/rawkode.academy/api/**"
       - "projects/rawkode.academy/platform/*/read-model/schema.ts"
       - "projects/rawkode.academy/platform/*/read-model/publish.ts"
+      - "projects/rawkode.academy/website/src/subgraph/**"
   pull_request:
     paths:
       - ".github/workflows/platform-api-gateway.yaml"
       - "projects/rawkode.academy/api/**"
       - "projects/rawkode.academy/platform/*/read-model/schema.ts"
       - "projects/rawkode.academy/platform/*/read-model/publish.ts"
+      - "projects/rawkode.academy/website/src/subgraph/**"
   workflow_dispatch:
 
 concurrency:
@@ -44,12 +46,8 @@ jobs:
         run: |
           mkdir -p projects/rawkode.academy/api/schemas
 
-          for service in videos episodes people shows emoji-reactions \
-                         casting-credits chapters people-biographies \
-                         people-links show-hosts transcription-terms \
-                         video-guests video-likes video-technologies \
-                         email-preferences; do
-
+          # User interaction services (still separate workers)
+          for service in emoji-reactions video-likes email-preferences; do
             SERVICE_DIR="projects/rawkode.academy/platform/$service"
 
             if [ ! -d "$SERVICE_DIR/read-model" ]; then
@@ -81,6 +79,19 @@ jobs:
 
             cd - > /dev/null
           done
+
+          # Website subgraph (serves all content: videos, shows, people, technologies, etc.)
+          echo "Processing website subgraph..."
+          cd projects/rawkode.academy/website
+          bun install --frozen-lockfile || bun install
+          bun run src/subgraph/publish.ts || echo "Warning: Failed to generate website schema"
+          if [ -f "src/subgraph/schema.gql" ]; then
+            cp src/subgraph/schema.gql ../api/schemas/website.graphql
+            echo "  Collected schema for website"
+          else
+            echo "  Warning: No schema.gql for website"
+          fi
+          cd - > /dev/null
 
           echo ""
           echo "Collected schemas:"
