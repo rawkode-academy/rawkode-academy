@@ -3,7 +3,7 @@ import { PlatformService } from "../../generators/projen-platform-service/src/";
 const project = new PlatformService({
 	serviceName: "email-preferences",
 	includeWriteModel: false,
-	includeRpcModel: true,
+	includeRpc: true,
 	bindings: {
 		d1Databases: [{
 			binding: "DB",

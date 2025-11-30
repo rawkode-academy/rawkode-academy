@@ -7,11 +7,13 @@ on:
     paths:
       - ".github/workflows/platform-videos.yaml"
       - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/generators/projen-platform-service/**"
       - "projects/rawkode.academy/platform/videos/**"
   pull_request:
     paths:
       - ".github/workflows/platform-videos.yaml"
       - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/generators/projen-platform-service/**"
       - "projects/rawkode.academy/platform/videos/**"
 
 jobs:
