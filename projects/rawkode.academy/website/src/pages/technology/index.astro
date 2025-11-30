@@ -13,32 +13,15 @@ type Technology = {
 	logo?: string;
 	website?: string;
 	documentation?: string;
-	videoCount?: number;
-	articleCount?: number;
-	courseCount?: number;
 };
 
 let technologies: Technology[] = [];
 try {
 	const items = await getCollection("technologies");
-	const allVideos = await getCollection("videos");
-	const allArticles = await getCollection("articles");
-	const allCourses = await getCollection("courses");
 
 	technologies = items.map((e) => {
 		const icon = (e as any).data.icon;
 		const logo = resolveTechnologyIconUrl(e.id, icon);
-
-		// Count content for this technology
-		const videoCount = allVideos.filter((v) =>
-			v.data.technologies?.includes(e.id),
-		).length;
-		const articleCount = allArticles.filter(
-			(a) => !a.data.draft && a.data.technologies?.includes(e.id),
-		).length;
-		const courseCount = allCourses.filter((c) =>
-			c.data.technologies?.includes(e.id),
-		).length;
 
 		const tech: Technology = {
 			id: e.id,
@@ -47,9 +30,6 @@ try {
 			...(logo && { logo }),
 			...(e.data.website && { website: e.data.website }),
 			...(e.data.documentation && { documentation: e.data.documentation }),
-			videoCount,
-			articleCount,
-			courseCount,
 		};
 		return tech;
 	});
@@ -109,18 +89,6 @@ try {
 
 			.hero-controls {
 				@apply w-full md:max-w-md flex flex-col gap-4;
-			}
-
-			.filter-pills {
-				@apply flex flex-wrap gap-2;
-			}
-
-			.filter-pill {
-				@apply px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 transition;
-			}
-
-			.filter-pill[data-active='true'] {
-				@apply border-primary text-primary bg-primary/5 dark:bg-primary/20;
 			}
 
 			@keyframes expandFromCenter {
@@ -262,36 +230,6 @@ try {
 				@apply text-xl font-bold text-gray-900 dark:text-white leading-tight;
 			}
 
-			.tech-card .badges {
-				@apply flex flex-wrap gap-1.5 min-h-[24px];
-			}
-
-			.tech-card .badge {
-				@apply inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium;
-				background: rgba(95, 94, 215, 0.1);
-				color: rgba(95, 94, 215, 1);
-			}
-
-			.dark .tech-card .badge {
-				background: rgba(95, 94, 215, 0.2);
-				color: rgba(147, 147, 255, 1);
-			}
-
-			.tech-card .badge.has-content {
-				background: linear-gradient(135deg, rgba(95, 94, 215, 0.15), rgba(0, 206, 255, 0.15));
-				color: rgba(95, 94, 215, 1);
-				font-weight: 600;
-			}
-
-			.dark .tech-card .badge.has-content {
-				background: linear-gradient(135deg, rgba(95, 94, 215, 0.25), rgba(0, 206, 255, 0.25));
-				color: rgba(147, 147, 255, 1);
-			}
-
-			.tech-card .badge svg {
-				@apply w-3.5 h-3.5;
-			}
-
 			.tech-card p {
 				@apply text-gray-600 dark:text-gray-400 text-sm leading-relaxed;
 				display: -webkit-box;
@@ -326,7 +264,7 @@ try {
 					<h1>Explore the world of technologies</h1>
 					<p>
 						Scan Rawkode Academy&apos;s catalogue of tools and platforms without scrolling past fluff.
-						Start typing a name and toggle the filters to zero-in on what has real content today.
+						Start typing a name to find what you&apos;re looking for.
 					</p>
 					<div class="text-sm text-gray-500 dark:text-gray-400">
 						Tracking <span class="font-semibold text-gray-900 dark:text-white" data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies.
@@ -348,16 +286,6 @@ try {
 							/>
 						</div>
 					</div>
-					<div class="flex flex-col gap-2">
-						<span class="text-sm font-medium text-gray-700 dark:text-gray-200">Filter by available content</span>
-						<div class="filter-pills" role="group" aria-label="Filter technologies by content">
-							<button type="button" class="filter-pill" data-filter-pill="all" data-active="true" aria-pressed="true">All</button>
-							<button type="button" class="filter-pill" data-filter-pill="videos" aria-pressed="false">Has videos</button>
-							<button type="button" class="filter-pill" data-filter-pill="articles" aria-pressed="false">Has articles</button>
-							<button type="button" class="filter-pill" data-filter-pill="courses" aria-pressed="false">Has courses</button>
-							<button type="button" class="filter-pill" data-filter-pill="coming-soon" aria-pressed="false">Coming soon</button>
-						</div>
-					</div>
 					<p class="text-xs text-gray-500 dark:text-gray-400">
 						Showing <span data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies.
 					</p>
@@ -374,10 +302,6 @@ try {
 				>
 					{
 						technologies.map((tech) => {
-							const hasVideos = (tech.videoCount || 0) > 0;
-							const hasArticles = (tech.articleCount || 0) > 0;
-							const hasCourses = (tech.courseCount || 0) > 0;
-							const hasContent = hasVideos || hasArticles || hasCourses;
 							const searchKeywords = tech.name.toLowerCase();
 							
 							return (
@@ -385,10 +309,6 @@ try {
 									href={`/technology/${tech.id}`}
 									class="tech-card"
 									data-keywords={searchKeywords}
-									data-videos={hasVideos ? 'true' : 'false'}
-									data-articles={hasArticles ? 'true' : 'false'}
-									data-courses={hasCourses ? 'true' : 'false'}
-									data-content={hasContent ? 'true' : 'false'}
 								>
 									<div class="logo-container">
 										<img
@@ -400,38 +320,6 @@ try {
 									<div class="content">
 										<div class="title-row">
 											<h3>{tech.name}</h3>
-										</div>
-										
-										<div class="badges">
-											{hasVideos && (
-												<span class="badge has-content">
-													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-													</svg>
-													{tech.videoCount} {tech.videoCount === 1 ? 'video' : 'videos'}
-												</span>
-											)}
-											{hasArticles && (
-												<span class="badge has-content">
-													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-													</svg>
-													{tech.articleCount} {tech.articleCount === 1 ? 'article' : 'articles'}
-												</span>
-											)}
-											{hasCourses && (
-												<span class="badge has-content">
-													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
-													</svg>
-													{tech.courseCount} {tech.courseCount === 1 ? 'course' : 'courses'}
-												</span>
-											)}
-											{!hasContent && (
-												<span class="badge">
-													Coming soon
-												</span>
-											)}
 										</div>
 										
 										<p>{tech.description}</p>
@@ -449,7 +337,7 @@ try {
 					}
 				</div>
 				<div id="technology-empty-state" class="hidden text-center py-12 text-gray-500 dark:text-gray-400">
-					No technologies match your filters just yet. Try a different search or content filter.
+					No technologies match your search. Try a different term.
 				</div>
 			</div>
 		</section>
@@ -462,49 +350,17 @@ try {
 				);
 				const emptyState = document.getElementById("technology-empty-state");
 				const countTargets = document.querySelectorAll<HTMLElement>("[data-tech-visible-count]");
-				const filterPills = Array.from(
-					document.querySelectorAll<HTMLButtonElement>("[data-filter-pill]"),
-				);
-				let activeFilter = "all";
 
-				const updatePills = () => {
-					filterPills.forEach((pill) => {
-						const value = pill.dataset.filterPill ?? "all";
-						const isActive = value === activeFilter;
-						pill.dataset.active = isActive ? "true" : "false";
-						pill.setAttribute("aria-pressed", String(isActive));
-					});
-				};
-
-				const applyFilters = () => {
+				const applySearch = () => {
 					const query = (searchInput?.value ?? "").trim().toLowerCase();
 					let visible = 0;
 
 					cards.forEach((card) => {
 						const keywords = card.dataset.keywords ?? "";
 						const matchesSearch = keywords.includes(query);
-						let matchesFilter = true;
 
-						switch (activeFilter) {
-							case "videos":
-								matchesFilter = card.dataset.videos === "true";
-								break;
-							case "articles":
-								matchesFilter = card.dataset.articles === "true";
-								break;
-							case "courses":
-								matchesFilter = card.dataset.courses === "true";
-								break;
-							case "coming-soon":
-								matchesFilter = card.dataset.content === "false";
-								break;
-							default:
-								matchesFilter = true;
-						}
-
-						const shouldShow = matchesSearch && matchesFilter;
-						card.style.display = shouldShow ? "" : "none";
-						if (shouldShow) {
+						card.style.display = matchesSearch ? "" : "none";
+						if (matchesSearch) {
 							visible += 1;
 						}
 					});
@@ -518,18 +374,8 @@ try {
 					}
 				};
 
-				filterPills.forEach((pill) => {
-					pill.addEventListener("click", () => {
-						const value = pill.dataset.filterPill ?? "all";
-						activeFilter = activeFilter === value ? "all" : value;
-						updatePills();
-						applyFilters();
-					});
-				});
-
-				searchInput?.addEventListener("input", applyFilters);
-				updatePills();
-				applyFilters();
+				searchInput?.addEventListener("input", applySearch);
+				applySearch();
 			});
 		</script>
 	</div>
