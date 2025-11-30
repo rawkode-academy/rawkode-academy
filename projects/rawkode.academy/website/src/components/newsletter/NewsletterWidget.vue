@@ -152,46 +152,46 @@ const toggleEmailForm = () => {
 
 <template>
 	<!-- Hide widget entirely for anonymous users with cookie -->
-	<template v-if="!shouldHide">
-		<!-- Success/Subscribed State -->
-                <div
-                        v-if="showSubscribedState"
-                        class="flex flex-col items-center gap-4 rounded-xl border border-green-200 dark:border-green-900/60 bg-green-50/70 dark:bg-green-900/20 px-4 py-5 text-green-700 dark:text-green-300 text-center"
-                >
-                        <div class="flex items-center gap-3">
-                                <span class="relative flex h-3 w-3">
-                                        <span
-                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-                                        ></span>
-                                        <span
-                                                class="relative inline-flex rounded-full h-3 w-3 bg-green-500"
-                                        ></span>
-                                </span>
-                                <span class="font-semibold">
-                                        {{ isSuccess ? "Thanks for subscribing!" : "You're subscribed!" }}
-                                </span>
-                        </div>
-                        <p class="text-sm text-green-700/90 dark:text-green-200">Expect your next issue soon.</p>
-                        <a
-                                v-if="isSignedIn"
-                                href="/settings"
-                                class="text-sm font-medium text-green-700 dark:text-green-200 hover:text-primary dark:hover:text-primary underline"
-                        >
-                                Manage your email preferences in Settings
-                        </a>
-                </div>
-
-                <!-- Main CTA for non-subscribed users -->
-                <div v-else class="w-full space-y-5">
-                        <!-- Error State -->
+        <template v-if="!shouldHide">
+                <div class="w-full rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 shadow-xl p-5 sm:p-6 space-y-5">
+                        <!-- Success/Subscribed State -->
                         <div
-                                v-if="error"
-                                class="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm"
+                                v-if="showSubscribedState"
+                                class="flex flex-col items-center gap-4 rounded-xl border border-green-200 dark:border-green-900/60 bg-green-50/70 dark:bg-green-900/20 px-4 py-5 text-green-700 dark:text-green-300 text-center"
                         >
-                                {{ error }}
+                                <div class="flex items-center gap-3">
+                                        <span class="relative flex h-3 w-3">
+                                                <span
+                                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+                                                ></span>
+                                                <span
+                                                        class="relative inline-flex rounded-full h-3 w-3 bg-green-500"
+                                                ></span>
+                                        </span>
+                                        <span class="font-semibold">
+                                                {{ isSuccess ? "Thanks for subscribing!" : "You're subscribed!" }}
+                                        </span>
+                                </div>
+                                <p class="text-sm text-green-700/90 dark:text-green-200">Expect your next issue soon.</p>
+                                <a
+                                        v-if="isSignedIn"
+                                        href="/settings"
+                                        class="text-sm font-medium text-green-700 dark:text-green-200 hover:text-primary dark:hover:text-primary underline"
+                                >
+                                        Manage your email preferences in Settings
+                                </a>
                         </div>
 
-                        <div class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/60 dark:bg-neutral-800/60 backdrop-blur px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-inner">
+                        <!-- Main CTA for non-subscribed users -->
+                        <div v-else class="w-full space-y-4">
+                                <!-- Error State -->
+                                <div
+                                        v-if="error"
+                                        class="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm"
+                                >
+                                        {{ error }}
+                                </div>
+
                                 <div class="flex items-start justify-between gap-4">
                                         <div class="space-y-1">
                                                 <p class="text-xs uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400">Choose your path</p>
@@ -226,7 +226,7 @@ const toggleEmailForm = () => {
                                 <!-- Anonymous user: Two options -->
                                 <template v-else>
                                         <!-- Option 1: Sign in to subscribe -->
-                                        <div v-if="!showEmailForm" class="space-y-3">
+                                        <div v-if="!showEmailForm" class="space-y-4">
                                                 <a
                                                         :href="signInUrl"
                                                         class="w-full inline-flex items-center justify-center py-3 px-6 rounded-xl border border-primary/80 bg-primary text-white hover:bg-primary/90 transition-all duration-300 text-sm font-semibold shadow-sm"
@@ -242,7 +242,7 @@ const toggleEmailForm = () => {
                                                         </div>
                                                         <div class="relative flex justify-center text-sm">
                                                                 <span
-                                                                        class="px-2 bg-neutral-50/80 dark:bg-neutral-800/80 text-neutral-500 dark:text-neutral-400"
+                                                                        class="px-2 bg-white dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400"
                                                                 >
                                                                         or
                                                                 </span>
@@ -251,7 +251,7 @@ const toggleEmailForm = () => {
 
                                                 <button
                                                         @click="toggleEmailForm"
-                                                        class="w-full py-3 px-6 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary transition-all duration-300 text-sm font-medium bg-white dark:bg-neutral-900 shadow-sm"
+                                                        class="w-full py-3 px-6 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary transition-all duration-300 text-sm font-medium bg-neutral-50 dark:bg-neutral-800/70 shadow-sm"
                                                 >
                                                         Sign up with email only
                                                 </button>

@@ -56,7 +56,7 @@ const shouldHide = !user && hasNewsletterCookie;
                                 </p>
                         </div>
 
-                        <div class="grid gap-8 lg:gap-12 lg:grid-cols-[1.35fr_1fr] items-start">
+                        <div class="grid gap-8 lg:gap-12 lg:grid-cols-2 items-start">
                                 <div class="space-y-5">
                                         <div class="grid gap-3 sm:grid-cols-2">
                                                 <div class="flex items-start gap-3 rounded-2xl bg-white/70 dark:bg-neutral-900/60 border border-neutral-200/80 dark:border-neutral-800 p-4 shadow-sm">
@@ -92,15 +92,13 @@ const shouldHide = !user && hasNewsletterCookie;
                                 </div>
 
                                 <div class="w-full min-w-0 flex flex-col gap-4">
-                                        <div class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-neutral-800 shadow-xl p-5 sm:p-6">
-                                                <NewsletterWidget
-                                                        client:visible
-                                                        isSignedIn={!!user}
-                                                        isSubscribed={isSubscribed}
-                                                        signInUrl={signInUrl}
-                                                        pagePath={pagePath}
-                                                />
-                                        </div>
+                                        <NewsletterWidget
+                                                client:visible
+                                                isSignedIn={!!user}
+                                                isSubscribed={isSubscribed}
+                                                signInUrl={signInUrl}
+                                                pagePath={pagePath}
+                                        />
                                         <p class="text-xs text-center text-neutral-500 dark:text-neutral-400">We only email when we have something genuinely useful to share.</p>
                                 </div>
                         </div>
