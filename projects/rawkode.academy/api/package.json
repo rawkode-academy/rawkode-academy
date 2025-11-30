@@ -1,0 +1,25 @@
+{
+	"name": "api",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"collect-schemas": "bun run scripts/collect-schemas.ts",
+		"compose": "bun run scripts/compose.ts",
+		"build": "bun run collect-schemas && bun run compose",
+		"types": "wrangler types"
+	},
+	"dependencies": {
+		"@graphql-hive/gateway-runtime": "^1.8.0",
+		"@graphql-mesh/transport-common": "^0.7.0",
+		"@theguild/federation-composition": "^0.20.2",
+		"graphql": "^16.10.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@cloudflare/workers-types": "^4.20250426.0",
+		"@types/node": "^22.15.2",
+		"wrangler": "^4.13.2"
+	}
+}
