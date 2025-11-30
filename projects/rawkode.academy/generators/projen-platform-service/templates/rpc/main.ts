@@ -1,4 +1,4 @@
-import { {{ serviceName | pascalCase }}Service } from "./rpc-service.js";
+import { {{ serviceName | pascalCase }} } from "./rpc-service.js";
 
 export interface Env {
 {%- for db in bindings.d1Databases %}
@@ -24,4 +24,4 @@ export interface Env {
 {%- endfor %}
 }
 
-export default {{ serviceName | pascalCase }}Service;
+export default {{ serviceName | pascalCase }};
