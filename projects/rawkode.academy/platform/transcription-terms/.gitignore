@@ -8,6 +8,7 @@ node_modules/
 /read-model/main.ts
 /read-model/publish.ts
 /read-model/wrangler.jsonc
+/read-model/schema.gql
 /README.md
 /package.json
 /tsconfig.json

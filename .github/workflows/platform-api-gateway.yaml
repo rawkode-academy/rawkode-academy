@@ -1,0 +1,163 @@
+name: rawkode.academy/api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/platform-api-gateway.yaml"
+      - "projects/rawkode.academy/api/**"
+      - "projects/rawkode.academy/platform/*/read-model/schema.ts"
+      - "projects/rawkode.academy/platform/*/read-model/publish.ts"
+  pull_request:
+    paths:
+      - ".github/workflows/platform-api-gateway.yaml"
+      - "projects/rawkode.academy/api/**"
+      - "projects/rawkode.academy/platform/*/read-model/schema.ts"
+      - "projects/rawkode.academy/platform/*/read-model/publish.ts"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Force Deploy: 1
+
+jobs:
+  collect-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install generator dependencies
+        working-directory: projects/rawkode.academy/generators/projen-platform-service
+        run: |
+          bun install
+          bun run types
+
+      - name: Collect subgraph schemas
+        run: |
+          mkdir -p projects/rawkode.academy/api/schemas
+
+          for service in videos episodes people shows emoji-reactions \
+                         casting-credits chapters people-biographies \
+                         people-links show-hosts transcription-terms \
+                         video-guests video-likes video-technologies \
+                         email-preferences; do
+
+            SERVICE_DIR="projects/rawkode.academy/platform/$service"
+
+            if [ ! -d "$SERVICE_DIR/read-model" ]; then
+              echo "Skipping $service: no read-model directory"
+              continue
+            fi
+
+            echo "Processing $service..."
+            cd "$SERVICE_DIR"
+
+            # Run projen to ensure files are up to date
+            bun run .projenrc.ts || true
+
+            # Install dependencies
+            bun install --frozen-lockfile || bun install
+
+            # Generate schema if publish.ts exists
+            if [ -f "read-model/publish.ts" ]; then
+              bun run read-model/publish.ts || echo "Warning: Failed to generate schema for $service"
+            fi
+
+            # Copy schema if it exists
+            if [ -f "read-model/schema.gql" ]; then
+              cp read-model/schema.gql ../../api/schemas/$service.graphql
+              echo "  Collected schema for $service"
+            else
+              echo "  Warning: No schema.gql for $service"
+            fi
+
+            cd - > /dev/null
+          done
+
+          echo ""
+          echo "Collected schemas:"
+          ls -la projects/rawkode.academy/api/schemas/ || echo "No schemas collected"
+
+      - name: Upload schemas
+        uses: actions/upload-artifact@v4
+        with:
+          name: schemas
+          path: projects/rawkode.academy/api/schemas/
+          retention-days: 1
+
+  compose-and-deploy:
+    needs: collect-schemas
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download schemas
+        uses: actions/download-artifact@v4
+        with:
+          name: schemas
+          path: projects/rawkode.academy/api/schemas/
+
+      - name: List collected schemas
+        run: |
+          echo "Schemas to compose:"
+          ls -la projects/rawkode.academy/api/schemas/
+
+      - name: Install dependencies
+        working-directory: projects/rawkode.academy/api
+        run: bun install
+
+      - name: Compose supergraph
+        working-directory: projects/rawkode.academy/api
+        run: bun run compose
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: "rawkode-academy-production"
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: Get secrets from GCP Secret Manager
+        id: secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |
+            CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
+
+      - name: Deploy Gateway
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: projects/rawkode.academy/api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
+        run: npx wrangler deploy
+
+      - name: Deploy Preview
+        if: github.event_name == 'pull_request'
+        working-directory: projects/rawkode.academy/api
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx wrangler versions upload --preview-alias pr-${{ github.event.pull_request.number }}
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}-platform-api-gateway.rawkodeacademy.workers.dev"
+          gh pr comment ${{ github.event.pull_request.number }} --body "API Gateway Preview: $PREVIEW_URL"

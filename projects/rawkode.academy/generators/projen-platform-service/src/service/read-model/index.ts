@@ -33,6 +33,9 @@ export class ReadModel extends Component {
 		this.createApi();
 		this.createSchemaWriter();
 		this.createWranglerConfig();
+
+		// Ignore generated schema file (output by publish.ts)
+		project.addGitIgnore("/read-model/schema.gql");
 	}
 
 	private getTemplateContext() {
