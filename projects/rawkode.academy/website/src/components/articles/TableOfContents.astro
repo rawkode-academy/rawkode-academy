@@ -1,7 +1,5 @@
 ---
 import type { MarkdownHeading } from "astro";
-import NewsletterWidget from "@/components/newsletter/NewsletterWidget.vue";
-import { createLearnerId } from "@/actions/newsletter";
 
 type Props = {
 	headings: MarkdownHeading[];
@@ -9,36 +7,6 @@ type Props = {
 };
 
 const { headings, class: className = "" } = Astro.props;
-
-const user = Astro.locals.user;
-let isSubscribed = false;
-
-if (user) {
-	try {
-		const prefixedUserId = createLearnerId(user.id);
-		const prefs =
-			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
-				prefixedUserId,
-				"newsletter",
-				"academy",
-			);
-		isSubscribed = prefs.length > 0;
-	} catch (e) {
-		console.error("Failed to fetch preferences", e);
-	}
-}
-
-const pagePath = Astro.url.pathname;
-const signInUrl = `/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
-
-// Check for the newsletter subscription cookie (server-side)
-const hasNewsletterCookie =
-	Astro.cookies.get("newsletter:academy:updates")?.value === "true";
-
-// Show newsletter section for:
-// - Signed-in users who are not subscribed, OR
-// - Anonymous users without the subscription cookie
-const shouldShowNewsletter = (user || !hasNewsletterCookie) && !isSubscribed;
 
 // Define types for our TOC structure
 type TocHeading = MarkdownHeading & { subheadings: MarkdownHeading[] };
@@ -170,36 +138,6 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 			}
 		</ul>
 
-		{shouldShowNewsletter && (
-		<div class="mt-6 pt-4 border-t border-white/40 dark:border-gray-700/40">
-			<div class="group flex items-center py-2 pl-2 rounded-lg relative">
-				<div class="absolute left-3 flex items-center justify-center text-xl w-6 h-6">
-					<span class="animate-pulse">📡</span>
-				</div>
-				<div class="toc-content ml-10 flex flex-col gap-3 overflow-hidden">
-					<div class="min-w-[180px]">
-						<div>
-							<p class="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap font-mono tracking-tight uppercase">
-								System_Update
-							</p>
-							<p class="text-xs text-gray-500 dark:text-gray-400 leading-tight mt-1 font-mono">
-								// Receive critical tutorials.
-							</p>
-						</div>
-						<div class="w-full mt-3">
-							<NewsletterWidget
-								client:visible
-								isSignedIn={!!user}
-								isSubscribed={isSubscribed}
-								signInUrl={signInUrl}
-								pagePath={pagePath}
-							/>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		)}
 	</div>
 </div>
 
