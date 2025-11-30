@@ -299,19 +299,17 @@ export default {
 			try {
 				const query = `
 					query GetVideoReactions($videoId: String!) {
-						_entities(representations: [{ __typename: "Video", id: $videoId }]) {
-							... on Video {
-								id
-								emojiReactions {
-									emoji
-									count
-								}
+						videoByID(id: $videoId) {
+							id
+							emojiReactions {
+								emoji
+								count
 							}
 						}
 					}
 				`;
 
-				const response = await fetch("https://api.rawkode.academy/graphql", {
+				const response = await fetch("https://api.rawkode.academy/", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -327,7 +325,7 @@ export default {
 				}
 
 				const data = await response.json();
-				const videoEntity = data.data?._entities?.[0];
+				const videoEntity = data.data?.videoByID;
 
 				if (videoEntity?.emojiReactions) {
 					// Create reaction objects from the GraphQL response
