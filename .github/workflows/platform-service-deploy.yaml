@@ -69,17 +69,15 @@ jobs:
         with:
           secrets: |
             CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
-            COSMO_API_KEY:projects/458678766461/secrets/cosmo-api-key
 
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      - name: Deploy Read Model and Register Subgraph
+      - name: Deploy Read Model
         working-directory: ${{ inputs.service-path }}
         env:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
-          COSMO_API_KEY: ${{ steps.secrets.outputs.COSMO_API_KEY }}
           SERVICE_NAME: ${{ inputs.service-name }}
         run: |
           (cd ../../generators/projen-platform-service && bun install && bun run types)
@@ -97,17 +95,7 @@ jobs:
               $codebase \
               ./read-model/wrangler.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN
-
-            ../../../../dagger/wundergraph | generateAndPublishSubgraph \
-              ${SERVICE_NAME} \
-              production \
-              $codebase \
-              https://platform-${SERVICE_NAME}-read-model.rawkodeacademy.workers.dev \
-              env:COSMO_API_KEY | export schema.gql
           .
-
-          bunx wgc subgraph update ${SERVICE_NAME} --routing-url https://platform-${{ inputs.service-name }}-read-model.rawkodeacademy.workers.dev --namespace production
-          bunx wgc subgraph publish ${SERVICE_NAME} --schema schema.gql --routing-url https://platform-${{ inputs.service-name }}-read-model.rawkodeacademy.workers.dev --namespace production
 
       - name: Deploy Write Model
         if: inputs.has-write-model
