@@ -1,15 +1,16 @@
 ---
-import SubscribeButton from "./SubscribeButton.vue";
-import Button from "@/components/common/Button.astro";
+import NewsletterWidget from "./NewsletterWidget.vue";
+import { createLearnerId } from "@/actions/newsletter";
 
 const user = Astro.locals.user;
 let isSubscribed = false;
 
 if (user) {
 	try {
+		const prefixedUserId = createLearnerId(user.id);
 		const prefs =
 			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
-				user.id,
+				prefixedUserId,
 				"newsletter",
 				"academy",
 			);
@@ -20,11 +21,19 @@ if (user) {
 }
 
 const returnTo = Astro.url.pathname;
+const signInUrl = `/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
 
 const { class: className } = Astro.props;
+
+// Check for the newsletter subscription cookie (server-side)
+const hasNewsletterCookie =
+	Astro.cookies.get("ra_newsletter_subscribed")?.value === "true";
+
+// For anonymous users with the cookie, hide the CTA entirely
+const shouldHide = !user && hasNewsletterCookie;
 ---
 
-{!isSubscribed && (
+{!shouldHide && (
 <section class:list={["w-full max-w-4xl mx-auto px-6", className ?? "my-24"]}>
 	<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-sm">
 		
@@ -40,19 +49,13 @@ const { class: className } = Astro.props;
 				</p>
 			</div>
 
-			<div class="w-full md:w-auto min-w-[240px] flex flex-col gap-3 justify-center">
-				{user ? (
-					<div class="scale-105 origin-center md:origin-top-right">
-						<SubscribeButton client:visible />
-					</div>
-				) : (
-					<Button href={`/sign-in?returnTo=${encodeURIComponent(returnTo)}`} variant="primary" class="w-full justify-center py-3">
-						Subscribe for Updates
-					</Button>
-				)}
-				<p class="text-sm text-neutral-500 text-center md:text-right">
-					No spam. Unsubscribe anytime.
-				</p>
+			<div class="w-full md:w-auto min-w-[280px] flex flex-col gap-3 justify-center">
+				<NewsletterWidget 
+					client:visible 
+					isSignedIn={!!user}
+					isSubscribed={isSubscribed}
+					signInUrl={signInUrl}
+				/>
 			</div>
 
 		</div>

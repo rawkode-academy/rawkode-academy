@@ -1,5 +1,6 @@
 ---
 import Page from "@/wrappers/page.astro";
+import { createLearnerId } from "@/actions/newsletter";
 
 const user = Astro.locals.user;
 
@@ -7,8 +8,10 @@ if (!user) {
 	return Astro.redirect("/sign-in?returnTo=/confirm-subscription");
 }
 
+const prefixedUserId = createLearnerId(user.id);
+
 // Auto-subscribe the user
-await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(user.id, {
+await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
 	audience: "academy",
 	channel: "newsletter",
 	status: "subscribed",
