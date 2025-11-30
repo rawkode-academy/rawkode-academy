@@ -45,7 +45,7 @@ interface EmailRecipient {
 interface EmailContent {
   subject: string;
   htmlBody: string;
-  textBody?: string;
+  textBody: string;
 }
 
 interface EmailOptions {
@@ -81,6 +81,7 @@ const result = await env.EMAIL_SERVICE.sendServiceEmail({
   content: {
     subject: "Welcome to Rawkode Academy!",
     htmlBody: "<h1>Welcome!</h1><p>Thanks for signing up.</p>",
+    textBody: "Welcome! Thanks for signing up.",
   },
 });
 ```

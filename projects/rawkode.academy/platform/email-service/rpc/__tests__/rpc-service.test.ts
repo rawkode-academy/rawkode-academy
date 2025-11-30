@@ -72,6 +72,7 @@ describe("EmailService", () => {
 				content: {
 					subject: "Test Subject",
 					htmlBody: "<h1>Hello</h1>",
+					textBody: "Hello",
 				},
 			});
 
@@ -90,6 +91,7 @@ describe("EmailService", () => {
 				content: {
 					subject: "Test Subject",
 					htmlBody: "<h1>Hello</h1>",
+					textBody: "Hello",
 				},
 			});
 
@@ -109,6 +111,7 @@ describe("EmailService", () => {
 				content: {
 					subject: "Newsletter",
 					htmlBody: "<h1>Newsletter Content</h1>",
+					textBody: "Newsletter Content",
 				},
 			});
 
@@ -144,6 +147,7 @@ describe("EmailService", () => {
 				content: {
 					subject: "Event Registration",
 					htmlBody: "<h1>You are registered!</h1>",
+					textBody: "You are registered!",
 				},
 				unsubscribeUrl: "https://custom.example.com/unsubscribe",
 				preferencesUrl: "https://custom.example.com/preferences",
@@ -163,6 +167,7 @@ describe("EmailService", () => {
 				content: {
 					subject: "Test",
 					htmlBody: "<p>Hello</p>",
+					textBody: "Hello",
 				},
 			});
 
@@ -177,6 +182,7 @@ describe("EmailService", () => {
 				content: {
 					subject: "Test",
 					htmlBody: "<p>Hello</p>",
+					textBody: "Hello",
 				},
 				replyTo: "support@rawkode.academy",
 			});
