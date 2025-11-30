@@ -30,16 +30,38 @@ export interface SessionResponse {
 }
 
 /**
+ * Filter cookies to only include Better Auth session cookies.
+ * Better Auth uses cookies prefixed with "better-auth." or "__Secure-better-auth."
+ */
+function getAuthCookies(cookies: string): string {
+	const allCookies = cookies.split(";").map((c) => c.trim());
+	// Match both "better-auth." and "__Secure-better-auth." prefixes
+	const authCookies = allCookies.filter(
+		(c) =>
+			c.startsWith("better-auth.") || c.startsWith("__Secure-better-auth."),
+	);
+
+	return authCookies.join("; ");
+}
+
+/**
  * Validate a session by calling the identity provider
  */
 export async function getSession(
 	cookies: string,
 ): Promise<SessionResponse | null> {
+	const authCookies = getAuthCookies(cookies);
+
+	if (!authCookies) {
+		return null;
+	}
+
 	try {
 		const response = await fetch(`${ID_PROVIDER_URL}/auth/get-session`, {
 			method: "GET",
 			headers: {
-				Cookie: cookies,
+				Cookie: authCookies,
+				Origin: "https://rawkode.academy",
 			},
 		});
 
