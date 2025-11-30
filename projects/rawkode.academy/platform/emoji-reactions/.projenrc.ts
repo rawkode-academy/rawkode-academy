@@ -13,6 +13,11 @@ const project = new PlatformService({
 			database_name: "platform-emoji-reactions",
 			database_id: "86e45a3f-6d07-48d7-9bbb-4edfacfbe1ca",
 		}],
+		workflows: [{
+			binding: "reactToContent",
+			name: "react-to-content",
+			class_name: "ReactToContentWorkflow",
+		}],
 	},
 });
 
