@@ -58,16 +58,36 @@ if (Astro.request.method === "POST" && !user) {
 // Handle form submission for signed-in users
 if (Astro.request.method === "POST" && user) {
 	try {
-		const prefixedUserId = createLearnerId(user.id);
-		await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
-			prefixedUserId,
-			{
-				audience: "academy",
-				channel: "newsletter",
-				status: "unsubscribed",
-				source: `website:newsletter:${pagePath}`,
-			},
-		);
+		// If an email query parameter is provided, unsubscribe the email-based subscription
+		// This handles the case where a user subscribed anonymously via email and later
+		// clicks an unsubscribe link while logged in
+		if (email) {
+			const prefixedEmailId = createEmailId(email.toLowerCase().trim());
+			await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				prefixedEmailId,
+				{
+					audience: "academy",
+					channel: "newsletter",
+					status: "unsubscribed",
+					source: `website:newsletter:${pagePath}`,
+				},
+			);
+
+			// Clear the newsletter cookie if present
+			Astro.cookies.delete("newsletter:academy:updates", { path: "/" });
+		} else {
+			// No email provided, unsubscribe the learner subscription
+			const prefixedUserId = createLearnerId(user.id);
+			await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				prefixedUserId,
+				{
+					audience: "academy",
+					channel: "newsletter",
+					status: "unsubscribed",
+					source: `website:newsletter:${pagePath}`,
+				},
+			);
+		}
 
 		// Redirect to success state
 		return Astro.redirect(`/unsubscribe?success=true`);
