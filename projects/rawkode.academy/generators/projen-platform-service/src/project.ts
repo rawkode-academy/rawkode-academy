@@ -8,6 +8,7 @@ import { Dagger } from "./dagger";
 import type { PlatformServiceOptions } from "./options";
 import { DataModel } from "./service/data-model";
 import { ReadModel } from "./service/read-model";
+import { RpcModel } from "./service/rpc-model";
 import { WriteModel } from "./service/write-model";
 import { TypeScriptConfig } from "./tsconfig";
 
@@ -115,6 +116,13 @@ export class PlatformService extends Project {
 		if (this.options.includeWriteModel) {
 			new WriteModel(this, {
 				workflows: [],
+				bindings: this.options.bindings,
+			});
+		}
+
+		if (this.options.includeRpcModel) {
+			new RpcModel(this, {
+				serviceName: this.options.serviceName,
 				bindings: this.options.bindings,
 			});
 		}

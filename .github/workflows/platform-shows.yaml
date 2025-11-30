@@ -25,5 +25,3 @@ jobs:
       service-name: shows
       service-path: projects/rawkode.academy/platform/shows
       has-write-model: false
-    secrets:
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}

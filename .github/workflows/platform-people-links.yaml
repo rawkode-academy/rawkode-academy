@@ -25,5 +25,3 @@ jobs:
       service-name: people-links
       service-path: projects/rawkode.academy/platform/people-links
       has-write-model: false
-    secrets:
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
