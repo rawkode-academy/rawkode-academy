@@ -289,7 +289,7 @@ const currentNavItems = computed(() => {
 			<!-- Navigation -->
 			<nav class="flex-1 overflow-y-auto py-4 px-3 scroll-fade">
 				<ul :class="['space-y-1', isCollapsed ? 'space-y-0.5 pr-1' : '']">
-					<template v-for="(item, index) in currentNavItems" :key="item.href || `sep-${index}`">
+					<template v-for="(item, index) in currentNavItems" :key="'href' in item ? item.href : `sep-${index}`">
 						<!-- Separator -->
 						<li v-if="item.separator" :class="isCollapsed ? 'py-1' : 'py-2'">
 							<div class="border-t border-gray-200/50 dark:border-gray-700/50 mx-2"></div>
