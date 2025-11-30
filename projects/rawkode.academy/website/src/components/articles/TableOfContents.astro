@@ -1,7 +1,7 @@
 ---
 import type { MarkdownHeading } from "astro";
-import SubscribeButton from "@/components/newsletter/SubscribeButton.vue";
-import Button from "@/components/common/Button.astro";
+import NewsletterWidget from "@/components/newsletter/NewsletterWidget.vue";
+import { createLearnerId } from "@/actions/newsletter";
 
 type Props = {
 	headings: MarkdownHeading[];
@@ -15,9 +15,10 @@ let isSubscribed = false;
 
 if (user) {
 	try {
+		const prefixedUserId = createLearnerId(user.id);
 		const prefs =
 			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
-				user.id,
+				prefixedUserId,
 				"newsletter",
 				"academy",
 			);
@@ -28,6 +29,14 @@ if (user) {
 }
 
 const returnTo = Astro.url.pathname;
+const signInUrl = `/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
+
+// Check for the newsletter subscription cookie (server-side)
+const hasNewsletterCookie =
+	Astro.cookies.get("ra_newsletter_subscribed")?.value === "true";
+
+// For anonymous users with the cookie, hide the newsletter section
+const shouldShowNewsletter = !(!user && hasNewsletterCookie) && !isSubscribed;
 
 // Define types for our TOC structure
 type TocHeading = MarkdownHeading & { subheadings: MarkdownHeading[] };
@@ -159,6 +168,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 			}
 		</ul>
 
+		{shouldShowNewsletter && (
 		<div class="mt-6 pt-4 border-t border-white/40 dark:border-gray-700/40">
 			<div class="group flex items-center py-2 pl-2 rounded-lg relative">
 				<div class="absolute left-3 flex items-center justify-center text-xl w-6 h-6">
@@ -175,18 +185,18 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 							</p>
 						</div>
 						<div class="w-full mt-3">
-							{user ? (
-								<SubscribeButton client:visible isSubscribed={isSubscribed} />
-							) : (
-								<Button href={`/sign-in?returnTo=${encodeURIComponent(returnTo)}`} variant="primary" size="sm" class="w-full justify-center !font-mono !uppercase !tracking-widest !text-xs !py-2">
-									[ Connect ]
-								</Button>
-							)}
+							<NewsletterWidget
+								client:visible
+								isSignedIn={!!user}
+								isSubscribed={isSubscribed}
+								signInUrl={signInUrl}
+							/>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+		)}
 	</div>
 </div>
 
