@@ -711,12 +711,20 @@ body::before {
 		@apply text-sm font-medium transition-all duration-200;
 		background: transparent;
 		border: 1px solid rgba(255, 255, 255, 0.3);
-		@apply text-secondary-content;
+		color: rgb(55 65 81); /* gray-700 */
+	}
+
+	html.dark .btn-glass-subtle {
+		color: rgb(209 213 219); /* gray-300 */
 	}
 
 	.btn-glass-subtle:hover {
 		background: rgba(255, 255, 255, 0.2);
-		@apply text-primary-content;
+		color: rgb(17 24 39); /* gray-900 */
+	}
+
+	html.dark .btn-glass-subtle:hover {
+		color: rgb(255 255 255); /* white */
 	}
 
 	html.dark .btn-glass-subtle {
@@ -740,14 +748,7 @@ body::before {
 		filter: brightness(1.1);
 	}
 
-	/* Link Utilities */
-	.link-muted {
-		@apply text-muted transition-colors duration-200;
-	}
-
-	.link-muted:hover {
-		color: rgb(var(--brand-primary));
-	}
+	/* Link Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
 	/* Gradient Presets */
 	.bg-gradient-hero {
@@ -830,18 +831,7 @@ body::before {
 		);
 	}
 
-	/* Text Color Utilities */
-	.text-primary-content {
-		@apply text-gray-900 dark:text-white;
-	}
-
-	.text-secondary-content {
-		@apply text-gray-700 dark:text-gray-300;
-	}
-
-	.text-muted {
-		@apply text-gray-600 dark:text-gray-400;
-	}
+	/* Text Color Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
 	/* Animation Utilities */
 	.transition-card {
@@ -1043,5 +1033,45 @@ body::before {
 
 	.animate-scanline {
 		animation: scanline-scroll 1s linear infinite;
+	}
+}
+
+/* Tailwind v4 @utility directives for custom text utilities */
+@utility text-primary-content {
+	color: rgb(17 24 39);
+
+	:root.dark & {
+		color: rgb(255 255 255);
+	}
+}
+
+@utility text-secondary-content {
+	color: rgb(55 65 81);
+
+	:root.dark & {
+		color: rgb(209 213 219);
+	}
+}
+
+@utility text-muted {
+	color: rgb(75 85 99);
+
+	:root.dark & {
+		color: rgb(156 163 175);
+	}
+}
+
+@utility link-muted {
+	color: rgb(75 85 99);
+	transition-property: color;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 200ms;
+
+	:root.dark & {
+		color: rgb(156 163 175);
+	}
+
+	&:hover {
+		color: rgb(var(--brand-primary));
 	}
 }
