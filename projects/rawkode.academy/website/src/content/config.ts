@@ -40,6 +40,7 @@ const videos = defineCollection({
 				}),
 			)
 			.default([]),
+		guests: z.array(reference("people")).default([]),
 	}),
 });
 
@@ -91,6 +92,17 @@ const people = defineCollection({
 	schema: z.object({
 		name: z.string(),
 		handle: z.string(),
+		forename: z.string().optional(),
+		surname: z.string().optional(),
+		biography: z.string().optional(),
+		links: z
+			.array(
+				z.object({
+					url: z.string().url(),
+					name: z.string(),
+				}),
+			)
+			.default([]),
 	}),
 });
 
