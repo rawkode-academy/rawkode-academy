@@ -148,102 +148,97 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 		streamUrl={streamUrl}
 		clips={clips}
 	/>
-	<div class="min-h-screen bg-gray-50 dark:bg-black">
-		<div class="container mx-auto px-4 py-6 lg:py-8 max-w-screen-2xl">
-			{/* Breadcrumb */}
-			<div class="mb-6">
-				<Breadcrumb elements={breadcrumbElements} />
-			</div>
-			
-			{/* Hero Section with Title */}
-			<div class="mb-8">
-				<h1 class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">{video.data.title}</h1>
-				<div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-					<time datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)} class="flex items-center gap-2">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-						</svg>
-						{formatDate(video.data.publishedAt)}
-					</time>
-					<span class="text-gray-400 dark:text-gray-600">•</span>
-					<span>{Math.floor((durationSec ?? 0) / 60)} min watch</span>
-				</div>
-			</div>
+        <div class="min-h-screen bg-gray-50 dark:bg-black">
+                <div class="container mx-auto max-w-screen-2xl px-4 py-6 lg:py-8">
+                        {/* Breadcrumb */}
+                        <div class="mb-6">
+                                <Breadcrumb elements={breadcrumbElements} />
+                        </div>
 
-			{/* Main Content - Single Column */}
-			<div class="max-w-4xl mx-auto">
-				{/* Video Player */}
-				<div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl">
-					<VideoPlayer
-						client:only="vue"
-						video={video.data.videoId}
-						thumbnailUrl={thumbnailUrl}
-					/>
-				</div>
+                        {/* Hero Section with Title */}
+                        <div class="mb-8 mx-auto w-full max-w-4xl">
+                                <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">{video.data.title}</h1>
+                                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                                        <time datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)} class="flex items-center gap-2">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                {formatDate(video.data.publishedAt)}
+                                        </time>
+                                        <span class="text-gray-400 dark:text-gray-600">•</span>
+                                        <span>{Math.floor((durationSec ?? 0) / 60)} min watch</span>
+                                </div>
+                        </div>
 
-				{/* Video Controls & Social Features */}
-				<div class="mt-4">
-					<VideoReactions
-						server:defer
-						videoId={video.data.id}
-					/>
-					{/* ShareButton will be managed internally by VideoReactions */}
-				</div>
+                        {/* Main Content - Single Column */}
+                        <div class="mx-auto w-full max-w-4xl space-y-6">
+                                {/* Video Player */}
+                                <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl">
+                                        <VideoPlayer
+                                                client:only="vue"
+                                                video={video.data.videoId}
+                                                thumbnailUrl={thumbnailUrl}
+                                        />
+                                </div>
 
-				{/* Newsletter Signup - High Value Placement */}
-				<NewsletterCTA class="my-6" />
+                                {/* Video Controls & Social Features */}
+                                <VideoReactions
+                                        server:defer
+                                        videoId={video.data.id}
+                                />
+                                {/* ShareButton will be managed internally by VideoReactions */}
 
-				{/* Tabbed Content: Description & Transcript */}
-				<div class="mt-6">
-					<VideoContentTabs
-						client:idle
-						descriptionHtml={renderedDescriptionHtml}
-						videoId={video.data.videoId}
-					/>
-				</div>
+                                {/* Newsletter Signup - High Value Placement */}
+                                <NewsletterCTA class="m-0" />
 
-				{/* Technologies Section */}
-				{techEntries.length > 0 && (
-					<div class="mt-6">
-						<h3 class="text-base font-medium text-gray-700 dark:text-gray-300 mb-3">Technologies used in this video</h3>
-						<div class="flex flex-wrap gap-2">
-							{techEntries.map((tech) => (
-								<a
-									Astro.key={tech.id}
-									href={`/technology/${tech.id.replace(/\/index$/, '')}`}
-									class="inline-flex items-center gap-2 px-3 py-2 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md border border-white/40 dark:border-gray-700/40 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 group"
-								>
-									<div class="w-6 h-6 relative overflow-hidden rounded">
-										<img
-											src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || '/apple-touch-icon.png'}
-											alt={tech.data.name}
-											class="w-full h-full object-contain"
-											onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
-										/>
-									</div>
-									<span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
-										{tech.data.name}
-									</span>
-									<svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-									</svg>
-								</a>
-							))}
-						</div>
-					</div>
-				)}
+                                {/* Tabbed Content: Description & Transcript */}
+                                <VideoContentTabs
+                                        client:idle
+                                        descriptionHtml={renderedDescriptionHtml}
+                                        videoId={video.data.videoId}
+                                />
 
-				<div class="mt-12">
-					<NewsletterCTA />
-				</div>
+                                {/* Technologies Section */}
+                                {techEntries.length > 0 && (
+                                        <div class="space-y-3">
+                                                <h3 class="text-base font-medium text-gray-700 dark:text-gray-300">Technologies used in this video</h3>
+                                                <div class="flex flex-wrap gap-2">
+                                                        {techEntries.map((tech) => (
+                                                                <a
+                                                                        Astro.key={tech.id}
+                                                                        href={`/technology/${tech.id.replace(/\/index$/, '')}`}
+                                                                        class="inline-flex items-center gap-2 px-3 py-2 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md border border-white/40 dark:border-gray-700/40 hover:bg-white/60 dark:hover:bg-gray-700/60 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 group"
+                                                                >
+                                                                        <div class="w-6 h-6 relative overflow-hidden rounded">
+                                                                                <img
+                                                                                        src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || '/apple-touch-icon.png'}
+                                                                                        alt={tech.data.name}
+                                                                                        class="w-full h-full object-contain"
+                                                                                        onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
+                                                                                />
+                                                                        </div>
+                                                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                                                                                {tech.data.name}
+                                                                        </span>
+                                                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                                        </svg>
+                                                                </a>
+                                                        ))}
+                                                </div>
+                                        </div>
+                                )}
 
-			</div>
-			
-			{/* Related Videos */}
-			<RelatedVideos currentVideo={video} limit={4} />
-			</div>
-		</div>
-	</div>
+                                <NewsletterCTA class="m-0" />
+
+                        </div>
+
+                        {/* Related Videos */}
+                        <div class="mx-auto w-full max-w-5xl">
+                                <RelatedVideos currentVideo={video} limit={4} />
+                        </div>
+                </div>
+        </div>
 </Page>
 
 <style>
