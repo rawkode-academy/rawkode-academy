@@ -1,5 +1,7 @@
 name: rawkode.academy/platform/emoji-reactions
 
+# Force Deploy: 1
+
 on:
   push:
     branches:
