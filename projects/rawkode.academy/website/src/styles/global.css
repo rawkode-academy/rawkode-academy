@@ -527,19 +527,64 @@ body::before {
 @layer components {
 	/* Glass Morphism Components */
 	.glass-panel {
-		@apply border backdrop-blur-2xl;
-		border-radius: inherit;
+		@apply border backdrop-blur-2xl rounded-xl;
 		background-color: var(--surface-card);
 		border-color: var(--surface-border);
 		box-shadow: var(--surface-shadow);
 	}
 
 	.glass-card {
-		@apply border backdrop-blur-xl;
-		border-radius: inherit;
+		@apply border backdrop-blur-xl rounded-xl;
 		background-color: var(--surface-card);
 		border-color: var(--surface-border);
 		box-shadow: var(--surface-shadow);
+	}
+
+	/* Glass card with shimmer effect overlay */
+	.glass-card-shimmer {
+		@apply relative overflow-hidden border backdrop-blur-xl rounded-xl;
+		background-color: var(--surface-card);
+		border-color: var(--surface-border);
+		box-shadow: var(--surface-shadow);
+	}
+
+	.glass-card-shimmer::before {
+		content: "";
+		@apply absolute inset-0 pointer-events-none rounded-xl;
+		background: linear-gradient(
+			to bottom,
+			rgba(255, 255, 255, 0.1) 0%,
+			transparent 100%
+		);
+	}
+
+	html.dark .glass-card-shimmer::before {
+		background: linear-gradient(
+			to bottom,
+			rgba(255, 255, 255, 0.05) 0%,
+			transparent 100%
+		);
+	}
+
+	/* Interactive element inside glass cards */
+	.glass-interactive {
+		@apply backdrop-blur-md rounded-lg transition-all;
+		background: rgba(255, 255, 255, 0.3);
+		border: 1px solid rgba(255, 255, 255, 0.4);
+	}
+
+	.glass-interactive:hover {
+		background: rgba(255, 255, 255, 0.5);
+		@apply shadow-md scale-105;
+	}
+
+	html.dark .glass-interactive {
+		background: rgba(31, 41, 55, 0.3);
+		border-color: rgba(75, 85, 99, 0.4);
+	}
+
+	html.dark .glass-interactive:hover {
+		background: rgba(55, 65, 81, 0.5);
 	}
 
 	.glass-chip {
@@ -549,7 +594,7 @@ body::before {
 		color: inherit;
 	}
 
-	/* Card Base Styles */
+	/* Card Base Styles - legacy, prefer glass-card-shimmer */
 	.card-base {
 		@apply bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl border border-white/40 dark:border-gray-600/50;
 	}
