@@ -1,5 +1,21 @@
-import { defineAction } from "astro:actions";
+import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
+
+/**
+ * Helper to create a prefixed user ID for email preferences.
+ * - For registered learners: `learner:{userId}`
+ * - For email-only subscribers: `email:{email}`
+ */
+export function createLearnerId(userId: string): string {
+	return `learner:${userId}`;
+}
+
+export function createEmailId(email: string): string {
+	return `email:${email.toLowerCase().trim()}`;
+}
+
+const NEWSLETTER_COOKIE_NAME = "ra_newsletter_subscribed";
+const NEWSLETTER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year in seconds
 
 export const newsletter = {
 	subscribe: defineAction({
@@ -11,9 +27,11 @@ export const newsletter = {
 				throw new Error("Unauthorized");
 			}
 
+			const prefixedUserId = createLearnerId(context.locals.user.id);
+
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
-					context.locals.user.id,
+					prefixedUserId,
 					{
 						audience: "academy",
 						channel: "newsletter",
@@ -37,9 +55,11 @@ export const newsletter = {
 				throw new Error("Unauthorized");
 			}
 
+			const prefixedUserId = createLearnerId(context.locals.user.id);
+
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
-					context.locals.user.id,
+					prefixedUserId,
 					{
 						audience: "academy",
 						channel: "newsletter",
@@ -47,6 +67,86 @@ export const newsletter = {
 						source: input.source || "website-cta",
 					},
 				);
+
+			return {
+				...result,
+				success: true,
+			};
+		},
+	}),
+	subscribeWithEmail: defineAction({
+		input: z.object({
+			email: z.string().email("Please enter a valid email address"),
+			source: z.string().optional(),
+		}),
+		handler: async (input, context) => {
+			const email = input.email.toLowerCase().trim();
+
+			if (!email) {
+				throw new ActionError({
+					code: "BAD_REQUEST",
+					message: "Email address is required",
+				});
+			}
+
+			const prefixedUserId = createEmailId(email);
+
+			const result =
+				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+					prefixedUserId,
+					{
+						audience: "academy",
+						channel: "newsletter",
+						status: "subscribed",
+						source: input.source || "website-cta-anonymous",
+					},
+				);
+
+			// Set cookie for anonymous users to suppress CTA in future visits
+			context.cookies.set(NEWSLETTER_COOKIE_NAME, "true", {
+				path: "/",
+				maxAge: NEWSLETTER_COOKIE_MAX_AGE,
+				httpOnly: false, // Allow client-side reading for CTA suppression
+				secure: true,
+				sameSite: "lax",
+			});
+
+			return {
+				...result,
+				success: true,
+			};
+		},
+	}),
+	unsubscribeWithEmail: defineAction({
+		input: z.object({
+			email: z.string().email("Please enter a valid email address"),
+			source: z.string().optional(),
+		}),
+		handler: async (input, context) => {
+			const email = input.email.toLowerCase().trim();
+
+			if (!email) {
+				throw new ActionError({
+					code: "BAD_REQUEST",
+					message: "Email address is required",
+				});
+			}
+
+			const prefixedUserId = createEmailId(email);
+
+			const result =
+				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+					prefixedUserId,
+					{
+						audience: "academy",
+						channel: "newsletter",
+						status: "unsubscribed",
+						source: input.source || "website-unsubscribe",
+					},
+				);
+
+			// Clear the newsletter cookie on unsubscribe
+			context.cookies.delete(NEWSLETTER_COOKIE_NAME, { path: "/" });
 
 			return {
 				...result,
