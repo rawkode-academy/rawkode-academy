@@ -5,6 +5,6 @@ export * from "./options";
 export * from "./project";
 export * from "./service/data-model";
 export * from "./service/read-model";
-export * from "./service/rpc-model";
+export * from "./service/rpc";
 export * from "./service/write-model";
 export * from "./tsconfig";

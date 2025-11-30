@@ -79,10 +79,10 @@ export interface PlatformServiceOptions {
 	readonly includeWriteModel?: boolean;
 
 	/**
-	 * Whether to include an RPC model (capnweb-based)
+	 * Whether to include an RPC service
 	 * @default false
 	 */
-	readonly includeRpcModel?: boolean;
+	readonly includeRpc?: boolean;
 
 	/**
 	 * Cloudflare environment bindings configuration

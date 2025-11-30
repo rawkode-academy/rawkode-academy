@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Liquid } from "liquidjs";
-import { Component, TextFile } from "projen";
+import { Component, SampleFile, TextFile } from "projen";
 import type { CloudflareBindings } from "../../options";
 import type { PlatformService } from "../../project";
 
@@ -13,7 +13,7 @@ interface Options {
 	bindings?: CloudflareBindings;
 }
 
-export class RpcModel extends Component {
+export class Rpc extends Component {
 	public readonly project: PlatformService;
 	private options: Options;
 	private liquid: Liquid;
@@ -25,7 +25,7 @@ export class RpcModel extends Component {
 		this.options = options;
 
 		this.liquid = new Liquid({
-			root: path.join(__dirname, "../../../templates/rpc-model"),
+			root: path.join(__dirname, "../../../templates/rpc"),
 		});
 
 		// Register custom filters
@@ -60,7 +60,7 @@ export class RpcModel extends Component {
 	private getTemplateContext() {
 		const bindings = this.options.bindings ?? {};
 
-		// Ensure DB binding has migrations_dir for rpc-model
+		// Ensure DB binding has migrations_dir for rpc
 		const d1Databases = (bindings.d1Databases ?? []).map((db) => {
 			if (db.binding === "DB" && !db.migrations_dir) {
 				return { ...db, migrations_dir: "../data-model/migrations" };
@@ -102,8 +102,8 @@ export class RpcModel extends Component {
 			this.getTemplateContext(),
 		);
 
-		new TextFile(this.project, "rpc/rpc-service.ts", {
-			lines: content.split("\n"),
+		new SampleFile(this.project, "rpc/rpc-service.ts", {
+			contents: content,
 		});
 	}
 
