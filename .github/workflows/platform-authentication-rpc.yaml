@@ -54,6 +54,6 @@ jobs:
 
             ../../../../dagger/cloudflare | deploy \
               $codebase \
-              ./rpc/wrangler.jsonc \
+              ./wrangler.jsonc \
               env:CLOUDFLARE_WORKERS_TOKEN
           .
