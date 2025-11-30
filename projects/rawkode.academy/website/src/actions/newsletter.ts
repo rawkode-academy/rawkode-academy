@@ -1,4 +1,4 @@
-import { ActionError, defineAction } from "astro:actions";
+import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
 /**
@@ -81,14 +81,6 @@ export const newsletter = {
 		}),
 		handler: async (input, context) => {
 			const email = input.email.toLowerCase().trim();
-
-			if (!email) {
-				throw new ActionError({
-					code: "BAD_REQUEST",
-					message: "Email address is required",
-				});
-			}
-
 			const prefixedUserId = createEmailId(email);
 
 			const result =
@@ -124,14 +116,6 @@ export const newsletter = {
 		}),
 		handler: async (input, context) => {
 			const email = input.email.toLowerCase().trim();
-
-			if (!email) {
-				throw new ActionError({
-					code: "BAD_REQUEST",
-					message: "Email address is required",
-				});
-			}
-
 			const prefixedUserId = createEmailId(email);
 
 			const result =

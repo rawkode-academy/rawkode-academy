@@ -35,8 +35,10 @@ const signInUrl = `/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
 const hasNewsletterCookie =
 	Astro.cookies.get("ra_newsletter_subscribed")?.value === "true";
 
-// For anonymous users with the cookie, hide the newsletter section
-const shouldShowNewsletter = !(!user && hasNewsletterCookie) && !isSubscribed;
+// Show newsletter section for:
+// - Signed-in users who are not subscribed, OR
+// - Anonymous users without the subscription cookie
+const shouldShowNewsletter = (user || !hasNewsletterCookie) && !isSubscribed;
 
 // Define types for our TOC structure
 type TocHeading = MarkdownHeading & { subheadings: MarkdownHeading[] };

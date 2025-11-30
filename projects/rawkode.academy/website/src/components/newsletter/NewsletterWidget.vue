@@ -17,12 +17,34 @@ const error = ref<string | null>(null);
 const showEmailForm = ref(false);
 const hasCookieSubscription = ref(false);
 
+/**
+ * Safely check if the newsletter subscription cookie is present.
+ * Uses try-catch to handle any edge cases with cookie parsing.
+ */
+function checkNewsletterCookie(): boolean {
+	try {
+		const cookies = document.cookie;
+		if (!cookies) return false;
+
+		// Parse cookies safely
+		const cookiePairs = cookies.split(";");
+		for (const pair of cookiePairs) {
+			const [name, value] = pair.trim().split("=");
+			if (name === NEWSLETTER_COOKIE_NAME && value === "true") {
+				return true;
+			}
+		}
+		return false;
+	} catch {
+		// If any error occurs during cookie parsing, assume not subscribed
+		return false;
+	}
+}
+
 // Check for newsletter cookie on mount (client-side only)
 onMounted(() => {
 	if (!props.isSignedIn) {
-		hasCookieSubscription.value = document.cookie
-			.split("; ")
-			.some((row) => row.startsWith(`${NEWSLETTER_COOKIE_NAME}=true`));
+		hasCookieSubscription.value = checkNewsletterCookie();
 	}
 });
 
