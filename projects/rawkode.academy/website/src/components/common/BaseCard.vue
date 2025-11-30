@@ -1,7 +1,7 @@
 <template>
   <a :href="href" :class="['h-full', className]">
     <article
-      class="p-0 bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] h-full flex flex-col transition-all duration-300 border border-white/40 dark:border-gray-600/50 hover:bg-white/60 dark:hover:bg-gray-700/70 hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.18)] dark:hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.7)] hover:scale-[1.02]"
+      class="glass-card-shimmer card-shadow card-hover p-0 h-full flex flex-col overflow-hidden"
     >
       <div v-if="$slots.cover" class="relative">
         <slot name="cover" />
@@ -10,7 +10,7 @@
           <slot name="badge" />
         </div>
       </div>
-      <div class="p-6 flex flex-col grow">
+      <div class="p-6 flex flex-col grow relative z-10">
         <slot name="content" />
         <div
           v-if="$slots.footer"

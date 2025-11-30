@@ -104,7 +104,7 @@ const aboutSection: FooterSection = {
         <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
             <!-- Learning Section -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase mb-4">
+                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
                     {learningSections.title}
                 </h3>
                 <ul class="space-y-3">
@@ -112,7 +112,7 @@ const aboutSection: FooterSection = {
                         <li>
                             <a
                                 href={link.href}
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm"
+                                class="text-muted hover:text-primary transition-colors duration-200 text-sm"
                             >
                                 {link.name}
                             </a>
@@ -123,7 +123,7 @@ const aboutSection: FooterSection = {
 
             <!-- Organizations Section -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase mb-4">
+                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
                     {organizationSection.title}
                 </h3>
                 <ul class="space-y-3">
@@ -131,7 +131,7 @@ const aboutSection: FooterSection = {
                         <li>
                             <a
                                 href={link.href}
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm"
+                                class="text-muted hover:text-primary transition-colors duration-200 text-sm"
                             >
                                 {link.name}
                             </a>
@@ -142,7 +142,7 @@ const aboutSection: FooterSection = {
 
             <!-- Community Section -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase mb-4">
+                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
                     {communitySection.title}
                 </h3>
                 <ul class="space-y-3">
@@ -152,7 +152,7 @@ const aboutSection: FooterSection = {
                                 href={link.href}
                                 target={link.external ? "_blank" : "_self"}
                                 rel={link.external ? "noopener noreferrer" : undefined}
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm flex items-center gap-1"
+                                class="text-muted hover:text-primary transition-colors duration-200 text-sm flex items-center gap-1"
                             >
                                 {link.name}
                                 {link.external && (
@@ -168,7 +168,7 @@ const aboutSection: FooterSection = {
 
             <!-- Contributors Section -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase mb-4">
+                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
                     {contributorsSection.title}
                 </h3>
                 <ul class="space-y-3">
@@ -176,7 +176,7 @@ const aboutSection: FooterSection = {
                         <li>
                             <a
                                 href={link.href}
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm"
+                                class="text-muted hover:text-primary transition-colors duration-200 text-sm"
                             >
                                 {link.name}
                             </a>
@@ -187,7 +187,7 @@ const aboutSection: FooterSection = {
 
             <!-- About Section -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase mb-4">
+                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
                     {aboutSection.title}
                 </h3>
                 <ul class="space-y-3">
@@ -195,7 +195,7 @@ const aboutSection: FooterSection = {
                         <li>
                             <a
                                 href={link.href}
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200 text-sm"
+                                class="text-muted hover:text-primary transition-colors duration-200 text-sm"
                             >
                                 {link.name}
                             </a>
@@ -206,12 +206,12 @@ const aboutSection: FooterSection = {
         </div>
 
         <!-- Bottom section with logo and social links -->
-        <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
+        <div class="mt-8 pt-8 border-t border-white/20 dark:border-gray-700/30">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="flex items-center mb-4 md:mb-0">
-                    <a href="/" aria-label="return to the home page">
+                    <a href="/" class="text-muted" aria-label="return to the home page">
                         <svg
-                            class="fill-gray-600 dark:fill-gray-400 h-6"
+                            class="fill-current h-6"
                             id="Layer_1"
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 559.671 143.20864"
@@ -222,7 +222,7 @@ const aboutSection: FooterSection = {
                         </svg>
                     </a>
                 </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">
+                <div class="text-sm text-muted">
                     © {currentYear} Rawkode Academy. All rights reserved.
                 </div>
                 <div class="flex space-x-6 mt-4 md:mt-0">
@@ -230,7 +230,7 @@ const aboutSection: FooterSection = {
                         href="https://github.com/RawkodeAcademy/RawkodeAcademy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+                        class="text-muted hover:text-primary transition-colors duration-200"
                         aria-label="GitHub"
                     >
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -241,7 +241,7 @@ const aboutSection: FooterSection = {
                         href="https://x.com/RawkodeAcademy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+                        class="text-muted hover:text-primary transition-colors duration-200"
                         aria-label="X (Twitter)"
                     >
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -252,7 +252,7 @@ const aboutSection: FooterSection = {
                         href="https://bsky.app/profile/rawkode.academy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+                        class="text-muted hover:text-primary transition-colors duration-200"
                         aria-label="Bluesky"
                     >
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -263,7 +263,7 @@ const aboutSection: FooterSection = {
                         href="https://uk.linkedin.com/company/rawkodeacademy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+                        class="text-muted hover:text-primary transition-colors duration-200"
                         aria-label="LinkedIn"
                     >
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">

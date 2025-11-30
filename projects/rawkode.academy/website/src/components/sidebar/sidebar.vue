@@ -231,7 +231,7 @@ const currentNavItems = computed(() => {
 							'flex-1 inline-flex flex-col items-center justify-center gap-1 px-2 py-2.5 text-xs font-medium transition-all duration-200 whitespace-nowrap',
 							mode === 'learn'
 								? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-								: 'text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
+								: 'text-muted hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
 						]"
 					>
 						<BookOpenIcon class="w-4 h-4" />
@@ -246,7 +246,7 @@ const currentNavItems = computed(() => {
 							'flex-1 inline-flex flex-col items-center justify-center gap-1 px-2 py-2.5 text-xs font-medium transition-all duration-200 border-l border-white/20 dark:border-gray-600/30 whitespace-nowrap',
 							mode === 'collaborate'
 								? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-								: 'text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
+								: 'text-muted hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
 						]"
 					>
 						<BuildingOfficeIcon class="w-4 h-4" />
@@ -261,7 +261,7 @@ const currentNavItems = computed(() => {
 							'flex-1 inline-flex flex-col items-center justify-center gap-1 px-2 py-2.5 text-xs font-medium transition-all duration-200 border-l border-white/20 dark:border-gray-600/30 whitespace-nowrap',
 							mode === 'connect'
 								? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-								: 'text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
+								: 'text-muted hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
 						]"
 					>
 						<UsersIcon class="w-4 h-4" />
@@ -308,7 +308,7 @@ const currentNavItems = computed(() => {
 										: 'px-3 py-2.5',
 									item.current
 										? 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary border-primary/20'
-										: 'text-gray-600 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:text-primary',
+										: 'text-secondary-content hover:bg-white/60 dark:hover:bg-gray-700/60 hover:text-primary',
 								]"
 								:aria-current="item.current ? 'page' : undefined"
 								:title="isCollapsed ? item.name : undefined"
@@ -318,7 +318,7 @@ const currentNavItems = computed(() => {
 									:class="[
 										'flex-shrink-0 transition-colors',
 										isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3',
-										item.current ? 'text-primary' : 'text-gray-400 dark:text-gray-400 group-hover:text-primary',
+										item.current ? 'text-primary' : 'text-muted group-hover:text-primary',
 									]"
 								/>
 								<span
@@ -334,7 +334,7 @@ const currentNavItems = computed(() => {
 								<!-- External link indicator -->
 								<svg
 									v-if="item.external && !isCollapsed"
-									class="w-3.5 h-3.5 ml-auto text-gray-400 group-hover:text-primary"
+									class="w-3.5 h-3.5 ml-auto text-muted group-hover:text-primary"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -355,7 +355,7 @@ const currentNavItems = computed(() => {
 											'flex items-center text-xs font-medium rounded-lg px-3 py-2 transition-all duration-200',
 											child.current
 												? 'bg-white dark:bg-white/10 text-primary'
-												: 'text-gray-500 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary',
+												: 'text-muted hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary',
 										]"
 										:aria-current="child.current ? 'page' : undefined"
 									>
