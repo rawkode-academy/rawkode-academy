@@ -5,6 +5,7 @@
 export const prerender = true;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
+import TechnologyCTA from "@/components/technology/TechnologyCTA.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths } from "astro";
@@ -400,6 +401,16 @@ const placeholderLogo = "/apple-touch-icon.png"; // Define a placeholder
 					technologyId={technology.id}
 					technologyName={technology.name}
 					videos={technology.videos || []}
+				/>
+			</div>
+		</div>
+
+		<!-- Technology CTA - Subscribe for updates or request content -->
+		<div class="w-full px-4 pb-12">
+			<div class="max-w-xl mx-auto">
+				<TechnologyCTA
+					technologyId={technology.id}
+					technologyName={technology.name}
 				/>
 			</div>
 		</div>
