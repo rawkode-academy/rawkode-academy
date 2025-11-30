@@ -1,4 +1,4 @@
-import { defineAction } from "astro:actions";
+import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { createEmailId, createLearnerId } from "./newsletter";
 
@@ -24,7 +24,10 @@ export const technology = {
 		}),
 		handler: async (input, context) => {
 			if (!context.locals.user) {
-				throw new Error("Unauthorized");
+				throw new ActionError({
+					code: "UNAUTHORIZED",
+					message: "Unauthorized",
+				});
 			}
 
 			const prefixedUserId = createLearnerId(context.locals.user.id);
@@ -100,7 +103,10 @@ export const technology = {
 		}),
 		handler: async (input, context) => {
 			if (!context.locals.user) {
-				throw new Error("Unauthorized");
+				throw new ActionError({
+					code: "UNAUTHORIZED",
+					message: "Unauthorized",
+				});
 			}
 
 			const prefixedUserId = createLearnerId(context.locals.user.id);

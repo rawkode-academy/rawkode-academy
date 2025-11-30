@@ -254,15 +254,28 @@ const toggleEmailForm = () => {
 	showEmailForm.value = !showEmailForm.value;
 	error.value = null;
 };
+
+/**
+ * Switch between tabs and reset form state
+ */
+const switchTab = (tab: "updates" | "request") => {
+	activeTab.value = tab;
+	email.value = "";
+	error.value = null;
+	showEmailForm.value = false;
+};
 </script>
 
 <template>
 	<div class="w-full">
 		<!-- Tab Navigation -->
-		<div class="flex border-b border-neutral-200 dark:border-neutral-700 mb-6">
+		<div class="flex border-b border-neutral-200 dark:border-neutral-700 mb-6" role="tablist">
 			<button
 				type="button"
-				@click="activeTab = 'updates'"
+				role="tab"
+				:aria-selected="activeTab === 'updates'"
+				aria-controls="updates-panel"
+				@click="switchTab('updates')"
 				:class="[
 					'flex-1 py-3 px-4 text-sm font-medium transition-colors',
 					activeTab === 'updates'
@@ -274,7 +287,10 @@ const toggleEmailForm = () => {
 			</button>
 			<button
 				type="button"
-				@click="activeTab = 'request'"
+				role="tab"
+				:aria-selected="activeTab === 'request'"
+				aria-controls="request-panel"
+				@click="switchTab('request')"
 				:class="[
 					'flex-1 py-3 px-4 text-sm font-medium transition-colors',
 					activeTab === 'request'
@@ -295,7 +311,7 @@ const toggleEmailForm = () => {
 		</div>
 
 		<!-- Updates Tab -->
-		<div v-if="activeTab === 'updates'">
+		<div v-if="activeTab === 'updates'" role="tabpanel" id="updates-panel">
 			<!-- Already Subscribed State -->
 			<div
 				v-if="showUpdatesSuccess"
@@ -428,7 +444,7 @@ const toggleEmailForm = () => {
 		</div>
 
 		<!-- Request Content Tab -->
-		<div v-if="activeTab === 'request'">
+		<div v-if="activeTab === 'request'" role="tabpanel" id="request-panel">
 			<!-- Already Requested State -->
 			<div
 				v-if="showContentRequestSuccess"
