@@ -748,6 +748,17 @@ body::before {
 		filter: brightness(1.1);
 	}
 
+	/* Social share button base - for branded social buttons with custom colors */
+	.btn-social {
+		@apply inline-flex items-center justify-center px-3 sm:px-4 py-2 rounded-lg;
+		@apply text-sm font-medium text-white gap-2;
+		@apply transition-colors cursor-pointer;
+	}
+
+	.btn-social:hover {
+		filter: brightness(0.9);
+	}
+
 	/* Link Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
 	/* Gradient Presets */

@@ -91,7 +91,7 @@ const isAuthenticated = !!Astro.locals.user;
 	<div class="emoji-picker hidden mt-3 p-2 sm:p-3 glass-card grid grid-cols-5 sm:grid-cols-7 gap-1 relative z-10">
 		{
 			EXTRA_EMOJIS.map((emoji) => (
-				<button class="glass-interactive p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" data-emoji={emoji}>
+				<button class="emoji-option glass-interactive p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" data-emoji={emoji}>
 					{emoji}
 				</button>
 			))
