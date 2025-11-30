@@ -1,5 +1,9 @@
 import { createYoga } from "graphql-yoga";
 import { getSchema } from "./schema";
+{%- for wf in bindings.workflows %}
+
+export { {{ wf.class_name }} } from "../write-model/{{ wf.binding }}";
+{%- endfor %}
 
 export interface Env {
 {%- for db in bindings.d1Databases %}
