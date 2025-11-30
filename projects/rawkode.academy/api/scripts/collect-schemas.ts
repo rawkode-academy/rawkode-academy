@@ -3,31 +3,20 @@ import {
 	copyFileSync,
 	existsSync,
 	mkdirSync,
-	readdirSync,
+	writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const platformDir = join(__dirname, "../../platform");
+const websiteDir = join(__dirname, "../../website");
 const schemasDir = join(__dirname, "../schemas");
 
-// Services with GraphQL read models
+// User interaction services (still separate workers with D1)
 const SERVICES = [
-	"videos",
-	"episodes",
-	"people",
-	"shows",
 	"emoji-reactions",
-	"casting-credits",
-	"chapters",
-	"people-biographies",
-	"people-links",
-	"show-hosts",
-	"transcription-terms",
-	"video-guests",
 	"video-likes",
-	"video-technologies",
 	"email-preferences",
 ];
 
@@ -91,12 +80,45 @@ async function collectSchemas() {
 		}
 	}
 
+	// Collect website subgraph schema
+	console.log("\nCollecting website subgraph schema...");
+	const websitePublishPath = join(websiteDir, "src/subgraph/publish.ts");
+
+	if (existsSync(websitePublishPath)) {
+		try {
+			console.log("  Running website publish.ts...");
+			execSync("bun run src/subgraph/publish.ts", {
+				cwd: websiteDir,
+				stdio: "pipe",
+			});
+
+			const websiteSchemaPath = join(websiteDir, "src/subgraph/schema.gql");
+			if (existsSync(websiteSchemaPath)) {
+				const destPath = join(schemasDir, "website.graphql");
+				copyFileSync(websiteSchemaPath, destPath);
+				console.log("  Success: copied to schemas/website.graphql");
+				successCount++;
+			} else {
+				console.log("  Failed: schema.gql not generated");
+				failCount++;
+			}
+		} catch (error) {
+			console.log(
+				`  Failed: ${error instanceof Error ? error.message : "unknown error"}`,
+			);
+			failCount++;
+		}
+	} else {
+		console.log("  Skipped: no publish.ts script found");
+		failCount++;
+	}
+
 	console.log(`\nSchema collection complete:`);
 	console.log(`  Success: ${successCount}`);
 	console.log(`  Failed: ${failCount}`);
 
 	if (successCount === 0) {
-		console.error("\nNo schemas were collected. Ensure services have publish.ts scripts.");
+		console.error("\nNo schemas were collected.");
 		process.exit(1);
 	}
 }
