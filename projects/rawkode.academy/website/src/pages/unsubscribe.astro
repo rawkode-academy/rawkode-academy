@@ -4,7 +4,8 @@ import { createEmailId, createLearnerId } from "@/actions/newsletter";
 
 export const prerender = false;
 
-// Get email from query parameter
+// Get email from query parameter (only used to pre-populate the form for anonymous users)
+// TODO: Replace with signed token-based unsubscribe links for security
 const email = Astro.url.searchParams.get("email");
 const success = Astro.url.searchParams.get("success");
 const user = Astro.locals.user;
