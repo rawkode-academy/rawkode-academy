@@ -329,9 +329,10 @@ Manage email preferences: ${preferencesLink}
 
 	/**
 	 * Encode content as quoted-printable (RFC 2045)
+	 * Lines are wrapped at 76 characters maximum, accounting for the soft line break
 	 */
 	private encodeQuotedPrintable(text: string): string {
-		return text
+		const encoded = text
 			.split("")
 			.map((char) => {
 				const code = char.charCodeAt(0);
@@ -348,8 +349,49 @@ Manage email preferences: ${preferencesLink}
 				}
 				return `=${code.toString(16).toUpperCase().padStart(2, "0")}`;
 			})
-			.join("")
-			.replace(/(.{75})/g, "$1=\r\n");
+			.join("");
+
+		// Wrap lines at 76 characters maximum (73 chars + "=\r\n" = 76)
+		// Avoid breaking in the middle of encoded sequences (=XX)
+		const lines: string[] = [];
+		let currentLine = "";
+
+		for (let i = 0; i < encoded.length; i++) {
+			const char = encoded[i];
+
+			// Check if this is a newline
+			if (char === "\r" && encoded[i + 1] === "\n") {
+				lines.push(currentLine);
+				currentLine = "";
+				i++; // Skip the \n
+				continue;
+			}
+			if (char === "\n") {
+				lines.push(currentLine);
+				currentLine = "";
+				continue;
+			}
+
+			// Check if we need to wrap before this character
+			const potentialLength = currentLine.length + (char === "=" ? 3 : 1);
+			if (potentialLength > 73) {
+				lines.push(currentLine + "=");
+				currentLine = char;
+			} else {
+				currentLine += char;
+				// If this starts an encoded sequence, include the full sequence
+				if (char === "=" && i + 2 < encoded.length) {
+					currentLine += encoded[i + 1] + encoded[i + 2];
+					i += 2;
+				}
+			}
+		}
+
+		if (currentLine) {
+			lines.push(currentLine);
+		}
+
+		return lines.join("\r\n");
 	}
 
 	/**
