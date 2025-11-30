@@ -1,7 +1,7 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
 import type { Env } from "./main.js";
 
-export class {{ serviceName | pascalCase }}Service extends WorkerEntrypoint<Env> {
+export class {{ serviceName | pascalCase }} extends WorkerEntrypoint<Env> {
 	async fetch(request: Request): Promise<Response> {
 		// Health check endpoint
 		if (new URL(request.url).pathname === "/health") {
