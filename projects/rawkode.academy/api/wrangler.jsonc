@@ -33,20 +33,9 @@
 	},
 	"workers_dev": true,
 	"services": [
-		{ "binding": "VIDEOS", "service": "platform-videos-read-model" },
-		{ "binding": "EPISODES", "service": "platform-episodes-read-model" },
-		{ "binding": "PEOPLE", "service": "platform-people-read-model" },
-		{ "binding": "SHOWS", "service": "platform-shows-read-model" },
+		{ "binding": "WEBSITE", "service": "rawkode-academy" },
 		{ "binding": "EMOJI_REACTIONS", "service": "platform-emoji-reactions-read-model" },
-		{ "binding": "CASTING_CREDITS", "service": "platform-casting-credits-read-model" },
-		{ "binding": "CHAPTERS", "service": "platform-chapters-read-model" },
-		{ "binding": "PEOPLE_BIOGRAPHIES", "service": "platform-people-biographies-read-model" },
-		{ "binding": "PEOPLE_LINKS", "service": "platform-people-links-read-model" },
-		{ "binding": "SHOW_HOSTS", "service": "platform-show-hosts-read-model" },
-		{ "binding": "TRANSCRIPTION_TERMS", "service": "platform-transcription-terms-read-model" },
-		{ "binding": "VIDEO_GUESTS", "service": "platform-video-guests-read-model" },
 		{ "binding": "VIDEO_LIKES", "service": "platform-video-likes-read-model" },
-		{ "binding": "VIDEO_TECHNOLOGIES", "service": "platform-video-technologies-read-model" },
 		{ "binding": "EMAIL_PREFERENCES", "service": "platform-email-preferences-read-model" },
 		{ "binding": "IDENTITY", "service": "rawkode-academy-identity" }
 	]
