@@ -1,0 +1,10 @@
+node_modules/
+.wrangler/
+.dev.vars
+
+# Generated artifacts - these are created during CI/CD
+# Subgraph schemas collected from platform services
+schemas/
+
+# Composed supergraph (generated from subgraph schemas)
+supergraph.graphql

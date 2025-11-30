@@ -37,15 +37,12 @@ invalidate-videos-cache:
 		-H "Content-Type: application/json" \
 		-d '{"tags": ["videos-latest"]}'
 
-# Generate SDL and publish the federated subgraph via Cosmo
-publish-subgraph NAMESPACE="production" ROUTING_URL="https://rawkode.academy/graphql" NAME="website-content":
+# Generate SDL for the federated subgraph
+# Note: Supergraph composition is now handled by the API gateway workflow
+# See: .github/workflows/platform-api-gateway.yaml
+generate-subgraph-sdl:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	# 1) Generate SDL
 	bun run subgraph:sdl
-	# 2) Publish to Cosmo
-	bunx wgc subgraph publish "${NAME}" \
-		--namespace "${NAMESPACE}" \
-		--schema subgraph/schema.gql \
-		--routing-url "${ROUTING_URL}"
-	
+	echo "SDL generated at subgraph/schema.gql"
+
