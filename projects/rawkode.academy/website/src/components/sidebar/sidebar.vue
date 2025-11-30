@@ -14,6 +14,7 @@ import {
 	BuildingOfficeIcon,
 	BookOpenIcon,
 	UsersIcon,
+	ChatBubbleLeftRightIcon,
 } from "@heroicons/vue/24/outline";
 import { computed, onMounted, ref } from "vue";
 
@@ -75,7 +76,7 @@ function isCurrentPath(itemPath: string) {
 	return itemPath !== "/" && currentPath.value.startsWith(itemPath);
 }
 
-// Learn mode navigation items
+// Learn mode navigation items - grouped with separators
 const learnNavItems = computed(() => [
 	{
 		name: "Videos",
@@ -84,16 +85,17 @@ const learnNavItems = computed(() => [
 		current: isCurrentPath("/watch"),
 	},
 	{
-		name: "Shows",
-		href: "/shows",
-		icon: TvIcon,
-		current: isCurrentPath("/shows"),
-	},
-	{
 		name: "Articles",
 		href: "/read",
 		icon: NewspaperIcon,
 		current: isCurrentPath("/read"),
+	},
+	{ separator: true },
+	{
+		name: "Learning Paths",
+		href: "/learning-paths",
+		icon: MapIcon,
+		current: isCurrentPath("/learning-paths"),
 	},
 	{
 		name: "Courses",
@@ -101,11 +103,12 @@ const learnNavItems = computed(() => [
 		icon: AcademicCapIcon,
 		current: isCurrentPath("/courses"),
 	},
+	{ separator: true },
 	{
-		name: "Learning Paths",
-		href: "/learning-paths",
-		icon: MapIcon,
-		current: isCurrentPath("/learning-paths"),
+		name: "Shows",
+		href: "/shows",
+		icon: TvIcon,
+		current: isCurrentPath("/shows"),
 	},
 	{
 		name: "Technologies",
@@ -129,6 +132,13 @@ const connectNavItems = computed(() => [
 		href: "/community-day",
 		icon: CalendarIcon,
 		current: isCurrentPath("/community-day"),
+	},
+	{
+		name: "Discord",
+		href: "https://rawkode.chat",
+		icon: ChatBubbleLeftRightIcon,
+		current: false,
+		external: true,
 	},
 ]);
 
@@ -172,11 +182,11 @@ const toggleCollapse = () => {
 };
 
 const toggleMode = () => {
-	// Cycle through modes: learn -> connect -> collaborate -> learn
+	// Cycle through modes: learn -> collaborate -> connect -> learn
 	if (mode.value === "learn") {
-		mode.value = "connect";
-	} else if (mode.value === "connect") {
 		mode.value = "collaborate";
+	} else if (mode.value === "collaborate") {
+		mode.value = "connect";
 	} else {
 		mode.value = "learn";
 	}
@@ -211,45 +221,51 @@ const currentNavItems = computed(() => {
 				v-if="!isCollapsed"
 				class="px-3 py-3 border-b border-white/20 dark:border-gray-700/40"
 			>
-				<div class="inline-flex w-full rounded-xl border border-white/30 dark:border-gray-600/40 bg-white/50 dark:bg-gray-700/40 backdrop-blur-md overflow-hidden">
+				<div class="inline-flex w-full rounded-xl border border-white/20 dark:border-gray-600/30 bg-white/40 dark:bg-gray-800/50 backdrop-blur-md overflow-hidden shadow-sm">
 					<button
 						@click="mode = 'learn'; localStorage.setItem('sidebar-mode', 'learn')"
 						:aria-pressed="mode === 'learn'"
-						:aria-label="'Learn mode'"
-						:title="'Learn mode'"
+						aria-label="Learn mode"
+						title="Learn mode"
 						:class="[
-							'flex-1 inline-flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors whitespace-nowrap',
-							mode === 'learn' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
+							'flex-1 inline-flex flex-col items-center justify-center gap-1 px-2 py-2.5 text-xs font-medium transition-all duration-200 whitespace-nowrap',
+							mode === 'learn'
+								? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
+								: 'text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
 						]"
 					>
 						<BookOpenIcon class="w-4 h-4" />
-						<span class="mt-1 text-xs">Learn</span>
-					</button>
-					<button
-						@click="mode = 'connect'; localStorage.setItem('sidebar-mode', 'connect')"
-						:aria-pressed="mode === 'connect'"
-						:aria-label="'Connect mode'"
-						:title="'Connect mode'"
-						:class="[
-							'flex-1 inline-flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors border-l border-white/30 dark:border-gray-600/40 whitespace-nowrap',
-							mode === 'connect' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
-						]"
-					>
-						<UsersIcon class="w-4 h-4" />
-						<span class="mt-1 text-xs">Connect</span>
+						<span class="text-[0.65rem] font-semibold tracking-wide uppercase">Learn</span>
 					</button>
 					<button
 						@click="mode = 'collaborate'; localStorage.setItem('sidebar-mode', 'collaborate')"
 						:aria-pressed="mode === 'collaborate'"
-						:aria-label="'Partner mode'"
-						:title="'Partner mode'"
+						aria-label="Partner mode"
+						title="Partner mode"
 						:class="[
-							'flex-1 inline-flex flex-col items-center justify-center gap-1.5 px-2 py-2 text-xs font-medium transition-colors border-l border-white/30 dark:border-gray-600/40 whitespace-nowrap',
-							mode === 'collaborate' ? 'bg-white dark:bg-gray-600 text-primary shadow-inner' : 'text-gray-600 dark:text-gray-200 hover:text-primary'
+							'flex-1 inline-flex flex-col items-center justify-center gap-1 px-2 py-2.5 text-xs font-medium transition-all duration-200 border-l border-white/20 dark:border-gray-600/30 whitespace-nowrap',
+							mode === 'collaborate'
+								? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
+								: 'text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
 						]"
 					>
 						<BuildingOfficeIcon class="w-4 h-4" />
-						<span class="mt-1 text-xs">Partner</span>
+						<span class="text-[0.65rem] font-semibold tracking-wide uppercase">Partner</span>
+					</button>
+					<button
+						@click="mode = 'connect'; localStorage.setItem('sidebar-mode', 'connect')"
+						:aria-pressed="mode === 'connect'"
+						aria-label="Connect mode"
+						title="Connect mode"
+						:class="[
+							'flex-1 inline-flex flex-col items-center justify-center gap-1 px-2 py-2.5 text-xs font-medium transition-all duration-200 border-l border-white/20 dark:border-gray-600/30 whitespace-nowrap',
+							mode === 'connect'
+								? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
+								: 'text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-white/50 dark:hover:bg-gray-700/50'
+						]"
+					>
+						<UsersIcon class="w-4 h-4" />
+						<span class="text-[0.65rem] font-semibold tracking-wide uppercase">Connect</span>
 					</button>
 				</div>
 			</div>
@@ -271,25 +287,28 @@ const currentNavItems = computed(() => {
 			</div>
 
 			<!-- Navigation -->
-			<nav class="flex-1 overflow-y-auto py-6 px-3 scroll-fade">
-				<!-- Mode Header removed for a cleaner, denser layout -->
-
-				<!-- Main Navigation - single column for all modes -->
-					<ul :class="['space-y-1', isCollapsed ? 'space-y-0.5 pr-1' : '']">
-						<li v-for="item in currentNavItems" :key="item.href">
+			<nav class="flex-1 overflow-y-auto py-4 px-3 scroll-fade">
+				<ul :class="['space-y-1', isCollapsed ? 'space-y-0.5 pr-1' : '']">
+					<template v-for="(item, index) in currentNavItems" :key="item.href || `sep-${index}`">
+						<!-- Separator -->
+						<li v-if="item.separator" :class="isCollapsed ? 'py-1' : 'py-2'">
+							<div class="border-t border-gray-200/50 dark:border-gray-700/50 mx-2"></div>
+						</li>
+						<!-- Navigation Item -->
+						<li v-else>
 							<a
 								:href="item.href"
+								:target="item.external ? '_blank' : undefined"
+								:rel="item.external ? 'noopener noreferrer' : undefined"
 								:class="[
-									'flex items-center text-sm font-medium rounded-xl transition-[background,scale,colors,border] duration-200',
-									'group relative will-change-transform border border-transparent w-full',
+									'flex items-center text-sm font-medium rounded-xl transition-all duration-200',
+									'group relative border border-transparent w-full',
 									isCollapsed
 										? 'flex-col items-center justify-center text-center gap-0.5 p-2 text-[0.65rem]'
 										: 'px-3 py-2.5',
 									item.current
-										? 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary shadow-[0_2px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] backdrop-blur-md border-primary/30'
-										: isCollapsed
-											? 'text-gray-700 dark:text-gray-100 hover:text-primary dark:hover:text-primary'
-											: 'text-gray-700 dark:text-gray-100 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:text-primary hover:scale-[1.02] hover:border-white/30 dark:hover:border-gray-500/50',
+										? 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary border-primary/20'
+										: 'text-gray-600 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:text-primary',
 								]"
 								:aria-current="item.current ? 'page' : undefined"
 								:title="isCollapsed ? item.name : undefined"
@@ -299,7 +318,7 @@ const currentNavItems = computed(() => {
 									:class="[
 										'flex-shrink-0 transition-colors',
 										isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3',
-										item.current ? 'text-primary' : 'text-gray-500 dark:text-gray-200 group-hover:text-primary',
+										item.current ? 'text-primary' : 'text-gray-400 dark:text-gray-400 group-hover:text-primary',
 									]"
 								/>
 								<span
@@ -312,23 +331,30 @@ const currentNavItems = computed(() => {
 								>
 									{{ item.name }}
 								</span>
+								<!-- External link indicator -->
+								<svg
+									v-if="item.external && !isCollapsed"
+									class="w-3.5 h-3.5 ml-auto text-gray-400 group-hover:text-primary"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+								</svg>
 							</a>
-							<!-- Submenu items - only show when on parent route -->
+							<!-- Submenu items -->
 							<ul
 								v-if="item.children && item.children.length > 0 && !isCollapsed && item.current"
-								class="mt-2 mb-2 ml-2 mr-1 p-1.5 space-y-0.5 bg-white/40 dark:bg-white/5 backdrop-blur-xl rounded-xl border border-white/20 dark:border-white/10 shadow-sm relative overflow-hidden"
+								class="mt-1.5 mb-1.5 ml-2 mr-1 p-1.5 space-y-0.5 bg-white/30 dark:bg-white/5 backdrop-blur-sm rounded-lg border border-white/20 dark:border-white/10"
 							>
-								<!-- Decorative shine -->
-								<div class="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none opacity-50"></div>
-
-								<li v-for="child in item.children" :key="child.href" class="relative z-10">
+								<li v-for="child in item.children" :key="child.href">
 									<a
 										:href="child.href"
 										:class="[
 											'flex items-center text-xs font-medium rounded-lg px-3 py-2 transition-all duration-200',
 											child.current
-												? 'bg-white dark:bg-white/10 text-primary shadow-sm ring-1 ring-black/5 dark:ring-white/10 font-semibold'
-												: 'text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary',
+												? 'bg-white dark:bg-white/10 text-primary'
+												: 'text-gray-500 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary',
 										]"
 										:aria-current="child.current ? 'page' : undefined"
 									>
@@ -337,7 +363,8 @@ const currentNavItems = computed(() => {
 								</li>
 							</ul>
 						</li>
-					</ul>
+					</template>
+				</ul>
 			</nav>
 
 			<!-- Footer links removed from sidebar; available in site footer -->
