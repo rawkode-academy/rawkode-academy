@@ -33,6 +33,12 @@ export interface WorkflowBinding {
 	script_name?: string;
 }
 
+export interface SendEmailBinding {
+	name: string;
+	destination_address?: string;
+	allowed_destination_addresses?: string[];
+}
+
 export interface CloudflareBindings {
 	d1Databases?: D1DatabaseBinding[];
 	secretStoreSecrets?: SecretStoreSecretBinding[];
@@ -40,6 +46,7 @@ export interface CloudflareBindings {
 	r2Buckets?: R2BucketBinding[];
 	services?: ServiceBinding[];
 	workflows?: WorkflowBinding[];
+	sendEmail?: SendEmailBinding[];
 	ai?: { binding: string };
 	vars?: Record<string, string>;
 	crons?: string[];

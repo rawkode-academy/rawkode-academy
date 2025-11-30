@@ -25,5 +25,3 @@ jobs:
       service-name: emoji-reactions
       service-path: projects/rawkode.academy/platform/emoji-reactions
       has-write-model: true
-    secrets:
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}

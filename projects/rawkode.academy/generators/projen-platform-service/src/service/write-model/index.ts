@@ -64,6 +64,7 @@ export class WriteModel extends Component {
 				r2Buckets: bindings.r2Buckets ?? [],
 				services: bindings.services ?? [],
 				workflows,
+				sendEmail: bindings.sendEmail ?? [],
 				ai: bindings.ai,
 				vars: bindings.vars ?? {},
 				crons: bindings.crons ?? [],

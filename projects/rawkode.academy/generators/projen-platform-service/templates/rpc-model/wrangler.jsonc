@@ -1,7 +1,7 @@
 {
-	"$schema": "https://unpkg.com/wrangler/config-schema.json",
-	"name": "platform-{{ serviceName }}-write-model",
-	"main": "./main.ts",
+	"$schema": "../node_modules/wrangler/config-schema.json",
+	"name": "platform-{{ serviceName }}-rpc",
+	"main": "main.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
 	"keep_vars": false,
@@ -18,21 +18,13 @@
 	"placement": {
 		"mode": "smart"
 	},
-	"workers_dev": true,
+	"workers_dev": true{% if bindings.d1Databases.size > 0 %},
 	"d1_databases": [{% for db in bindings.d1Databases %}
 		{
 			"binding": "{{ db.binding }}",
 			"database_name": "{{ db.database_name }}",
 			"database_id": "{{ db.database_id }}"{% if db.migrations_dir %},
 			"migrations_dir": "{{ db.migrations_dir }}"{% endif %}
-		}{% unless forloop.last %},{% endunless %}{% endfor %}
-	]{% if bindings.workflows.size > 0 %},
-	"workflows": [{% for wf in bindings.workflows %}
-		{
-			"binding": "{{ wf.binding }}",
-			"name": "{{ wf.name }}",
-			"class_name": "{{ wf.class_name }}"{% if wf.script_name %},
-			"script_name": "{{ wf.script_name }}"{% endif %}
 		}{% unless forloop.last %},{% endunless %}{% endfor %}
 	]{% endif %}{% if bindings.kvNamespaces.size > 0 %},
 	"kv_namespaces": [{% for kv in bindings.kvNamespaces %}
@@ -51,6 +43,14 @@
 		{
 			"binding": "{{ svc.binding }}",
 			"service": "{{ svc.service }}"
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% endif %}{% if bindings.workflows.size > 0 %},
+	"workflows": [{% for wf in bindings.workflows %}
+		{
+			"binding": "{{ wf.binding }}",
+			"name": "{{ wf.name }}",
+			"class_name": "{{ wf.class_name }}"{% if wf.script_name %},
+			"script_name": "{{ wf.script_name }}"{% endif %}
 		}{% unless forloop.last %},{% endunless %}{% endfor %}
 	]{% endif %}{% if bindings.sendEmail.size > 0 %},
 	"send_email": [{% for email in bindings.sendEmail %}

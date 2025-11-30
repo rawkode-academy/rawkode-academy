@@ -1,0 +1,33 @@
+{
+	"$schema": "../node_modules/wrangler/config-schema.json",
+	"name": "platform-email-service-rpc",
+	"main": "main.ts",
+	"compatibility_date": "2025-04-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"keep_vars": false,
+	"minify": true,
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1
+		}
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": true,
+	"send_email": [
+		{
+			"name": "SEND_EMAIL"
+		}
+	],
+	"services": [
+		{
+			"binding": "EMAIL_PREFERENCES",
+			"service": "platform-email-preferences-rpc"
+		}
+	]
+}

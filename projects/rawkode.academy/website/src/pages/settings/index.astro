@@ -1,6 +1,7 @@
 ---
 import Page from "@/wrappers/page.astro";
 import EmailPreferences from "@/components/settings/EmailPreferences.vue";
+import TestEmailButton from "@/components/settings/TestEmailButton.vue";
 import Avatar from "vue-boring-avatars";
 import { createLearnerId } from "@/actions/newsletter";
 
@@ -66,19 +67,34 @@ try {
 			</section>
 
 			<!-- Email Preferences Section -->
-			<section class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-				<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-					<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
-						Email Preferences
-					</h2>
+				<section class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+					<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
+						<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+							Email Preferences
+						</h2>
 					<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
 						Manage what emails you receive from Rawkode Academy.
 					</p>
 				</div>
-				<div class="p-6">
-					<EmailPreferences client:load isSubscribed={isNewsletterSubscribed} />
-				</div>
-			</section>
+					<div class="p-6">
+						<EmailPreferences client:load isSubscribed={isNewsletterSubscribed} />
+					</div>
+				</section>
+
+				<!-- Email Tools -->
+				<section class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+					<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
+						<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+							Email Tools
+						</h2>
+						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+							Send yourself a quick test message to confirm email delivery works.
+						</p>
+					</div>
+					<div class="p-6">
+						<TestEmailButton client:load />
+					</div>
+				</section>
+			</div>
 		</div>
-	</div>
-</Page>
+	</Page>

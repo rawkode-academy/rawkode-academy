@@ -42,6 +42,15 @@ declare namespace Cloudflare {
 				}[]
 			>;
 		}>;
+		EMAIL_SERVICE: Service<{
+			sendServiceEmail(options: {
+				recipient: { email: string; name?: string; userId?: string };
+				content: { subject: string; htmlBody: string; textBody: string };
+				replyTo?: string;
+				unsubscribeUrl?: string;
+				preferencesUrl?: string;
+			}): Promise<{ success: boolean; messageId?: string; error?: string }>;
+		}>;
 		ASSETS: Fetcher;
 	}
 }

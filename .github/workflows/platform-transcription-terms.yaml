@@ -25,5 +25,3 @@ jobs:
       service-name: transcription-terms
       service-path: projects/rawkode.academy/platform/transcription-terms
       has-write-model: false
-    secrets:
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}

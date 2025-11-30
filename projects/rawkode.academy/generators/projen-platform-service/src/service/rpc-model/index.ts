@@ -1,8 +1,9 @@
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Liquid } from "liquidjs";
-import { Component, type Project, TextFile } from "projen";
+import { Component, TextFile } from "projen";
 import type { CloudflareBindings } from "../../options";
+import type { PlatformService } from "../../project";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,33 +13,54 @@ interface Options {
 	bindings?: CloudflareBindings;
 }
 
-export class ReadModel extends Component {
-	public readonly project: Project;
+export class RpcModel extends Component {
+	public readonly project: PlatformService;
 	private options: Options;
 	private liquid: Liquid;
 
-	constructor(project: Project, options: Options) {
+	constructor(project: PlatformService, options: Options) {
 		super(project);
-
-		console.log("read-model");
 
 		this.project = project;
 		this.options = options;
 
 		this.liquid = new Liquid({
-			root: path.join(__dirname, "../../../templates/read-model"),
+			root: path.join(__dirname, "../../../templates/rpc-model"),
 		});
 
-		// Create files during construction, not in synthesize
-		this.createApi();
-		this.createSchemaWriter();
+		// Register custom filters
+		this.liquid.registerFilter("pascalCase", (str: string) =>
+			this.toPascalCase(str),
+		);
+		this.liquid.registerFilter("camelCase", (str: string) =>
+			this.toCamelCase(str),
+		);
+
+		this.createMain();
+		this.createRpcService();
 		this.createWranglerConfig();
+	}
+
+	private toPascalCase(str: string): string {
+		return str
+			.split("-")
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.join("");
+	}
+
+	private toCamelCase(str: string): string {
+		return str
+			.split("-")
+			.map((word, index) =>
+				index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1),
+			)
+			.join("");
 	}
 
 	private getTemplateContext() {
 		const bindings = this.options.bindings ?? {};
 
-		// Ensure DB binding has migrations_dir for read-model
+		// Ensure DB binding has migrations_dir for rpc-model
 		const d1Databases = (bindings.d1Databases ?? []).map((db) => {
 			if (db.binding === "DB" && !db.migrations_dir) {
 				return { ...db, migrations_dir: "../data-model/migrations" };
@@ -63,24 +85,24 @@ export class ReadModel extends Component {
 		};
 	}
 
-	private createApi() {
+	private createMain() {
 		const content = this.liquid.renderFileSync(
 			"main.ts",
 			this.getTemplateContext(),
 		);
 
-		new TextFile(this.project, "read-model/main.ts", {
+		new TextFile(this.project, "rpc/main.ts", {
 			lines: content.split("\n"),
 		});
 	}
 
-	private createSchemaWriter() {
+	private createRpcService() {
 		const content = this.liquid.renderFileSync(
-			"publish.ts",
+			"rpc-service.ts",
 			this.getTemplateContext(),
 		);
 
-		new TextFile(this.project, "read-model/publish.ts", {
+		new TextFile(this.project, "rpc/rpc-service.ts", {
 			lines: content.split("\n"),
 		});
 	}
@@ -91,7 +113,7 @@ export class ReadModel extends Component {
 			this.getTemplateContext(),
 		);
 
-		new TextFile(this.project, "read-model/wrangler.jsonc", {
+		new TextFile(this.project, "rpc/wrangler.jsonc", {
 			lines: content.split("\n"),
 		});
 	}
