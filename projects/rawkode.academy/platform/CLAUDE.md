@@ -1,14 +1,16 @@
 # GraphQL Microservices Guide
 
-This guide explains how to add new GraphQL microservices to the Rawkode Academy platform. Our architecture uses WunderGraph Cosmo for GraphQL federation, enabling small, focused services that are composed into a unified API.
+This guide explains how to add new GraphQL microservices to the Rawkode Academy platform. Our architecture uses GraphQL Hive Gateway for federation, enabling small, focused services that are composed into a unified API.
 
 ## Architecture Overview
 
-- **GraphQL Federation**: We use WunderGraph Cosmo Router for federation (see `infrastructure/cosmo/`)
+- **GraphQL Federation**: We use GraphQL Hive Gateway running on Cloudflare Workers (see `projects/rawkode.academy/api/`)
+- **Service Bindings**: The gateway uses Cloudflare Service Bindings for zero-latency worker-to-worker communication
 - **Microservice Pattern**: Each service is minimal and focused on a single domain
 - **Read/Write Separation**: Services typically have separate read and write models
 - **Deployment**: Services are deployed to Cloudflare Workers using Wrangler
 - **Database**: All new services should use Cloudflare D1 with Drizzle ORM (Turso is being phased out)
+- **Supergraph Composition**: Subgraph schemas are composed into a supergraph during CI/CD using `@theguild/federation-composition`
 
 ## Service Structure
 
