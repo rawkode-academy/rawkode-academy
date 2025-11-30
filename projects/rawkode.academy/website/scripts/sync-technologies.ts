@@ -2,7 +2,7 @@
 
 /*
   Fetch technologies from the existing GraphQL endpoint and
-  populate the workspace package: @rawkodeacademy/content-technologies
+  populate the workspace package: @rawkodeacademy/content
 
   Usage:
     bun scripts/sync-technologies.ts [--endpoint <url>] [--limit <n>]
@@ -11,7 +11,7 @@
 import { GraphQLClient, gql } from "graphql-request";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { createRequire } from "node:module";
+import { technologies } from "@rawkodeacademy/content";
 
 type Args = { endpoint: string; limit: number; outDir: string };
 
@@ -26,12 +26,8 @@ function parseArgs(): Args {
 		process.env.GRAPHQL_ENDPOINT ||
 		"https://api.rawkode.academy/graphql";
 	const limit = parseInt(get("--limit", "1000")!, 10);
-	const require = createRequire(import.meta.url);
-	const pkgPath = require.resolve(
-		"@rawkodeacademy/content-technologies/package.json",
-	);
-	const outDir = join(dirname(pkgPath), "data");
-	return { endpoint, limit, outDir };
+        const outDir = join(dirname(technologies.resolveDataDirSync()), "data");
+        return { endpoint, limit, outDir };
 }
 
 const query = gql /* GraphQL */`

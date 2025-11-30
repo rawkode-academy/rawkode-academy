@@ -9,6 +9,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./astro": "./src/astro.ts",
+    "./technologies": "./src/technologies.ts",
     "./package.json": "./package.json"
   },
   "files": [

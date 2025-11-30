@@ -9,7 +9,7 @@ This project now synchronizes video, show, and technology data from the Rawkode 
   - Standalone: `content/videos/standalone/<YYYY>/<slug>.md`
 - `content/shows/*.md` — one Markdown file per show
 - Videos and shows are consumed via the shared workspace package `@rawkodeacademy/content`
-- Technologies are stored in the workspace package `@rawkodeacademy/content-technologies` under `content/technologies/data/*.md`
+- Technologies live in the shared workspace package `@rawkodeacademy/content` under `content/technologies/data/*.md`
  - For each technology `id`, files are placed under `data/<id>.mdx` with metadata in frontmatter
  - Technology data is shared across all projects in the monorepo
 

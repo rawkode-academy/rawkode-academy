@@ -10,3 +10,5 @@ export { CONTENT_ROOT };
 export function resolveContentDir(...segments: string[]): string {
   return segments.length === 0 ? CONTENT_ROOT : join(CONTENT_ROOT, ...segments);
 }
+
+export * as technologies from "./technologies";

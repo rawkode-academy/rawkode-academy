@@ -13,7 +13,7 @@ import { getCollection, render } from "astro:content";
 import matter from "gray-matter";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { resolveDataDirSync as resolveTechnologiesDataDir } from "@rawkodeacademy/content-technologies";
+import { technologies } from "@rawkodeacademy/content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 
@@ -72,7 +72,7 @@ export const getStaticPaths = (async () => {
 
 	// Fallback: scan MDX files directly and parse frontmatter
 	try {
-		const base = resolveTechnologiesDataDir();
+                const base = technologies.resolveDataDirSync();
 		async function walk(dir: string, rel = ""): Promise<string[]> {
 			const out: string[] = [];
 			const entries = await readdir(dir, { withFileTypes: true });

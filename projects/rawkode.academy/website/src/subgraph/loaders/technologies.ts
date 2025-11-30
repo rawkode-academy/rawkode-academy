@@ -3,9 +3,9 @@
 // to ensure compile-time safety with zero drift.
 import type { CollectionEntry } from "astro:content";
 import {
-	technologyZod,
-	type TechnologyData as ContentTechnologyData,
-} from "@rawkodeacademy/content-technologies";
+        technologyZod,
+        type TechnologyData as ContentTechnologyData,
+} from "@rawkodeacademy/content/technologies";
 
 export type TechnologyEntry = CollectionEntry<"technologies">;
 // Match content package definition exactly for compile-time safety

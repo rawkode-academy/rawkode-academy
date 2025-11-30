@@ -31,13 +31,6 @@
         "typescript": "^5",
       },
     },
-    "content/technologies": {
-      "name": "@rawkodeacademy/content-technologies",
-      "version": "0.1.0",
-      "dependencies": {
-        "zod": "^3.24.3",
-      },
-    },
     "projects/rawkode.academy/api": {
       "name": "api",
       "dependencies": {
@@ -222,7 +215,6 @@
         "@pothos/plugin-drizzle": "^0.13.0",
         "@pothos/plugin-federation": "^4.3.2",
         "@rawkodeacademy/content": "workspace:*",
-        "@rawkodeacademy/content-technologies": "workspace:*",
         "@tailwindcss/forms": "^0.5",
         "@tailwindcss/vite": "^4.1.12",
         "@trigger.dev/astro": "^3.3.12",
@@ -1323,8 +1315,6 @@
     "@radix-ui/react-use-layout-effect": ["@radix-ui/react-use-layout-effect@1.1.1", "", { "peerDependencies": { "@types/react": "*", "react": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react"] }, "sha512-RbJRS4UWQFkzHTTwVymMTUv8EqYhOp8dOOviLj2ugtTiXRaRQS7GLGxZTLL1jWhMeoSCf5zmcZkqTl9IiYfXcQ=="],
 
     "@rawkodeacademy/content": ["@rawkodeacademy/content@workspace:content"],
-
-    "@rawkodeacademy/content-technologies": ["@rawkodeacademy/content-technologies@workspace:content/technologies"],
 
     "@react-email/render": ["@react-email/render@0.0.9", "", { "dependencies": { "html-to-text": "9.0.5", "pretty": "2.0.0", "react": "18.2.0", "react-dom": "18.2.0" } }, "sha512-nrim7wiACnaXsGtL7GF6jp3Qmml8J6vAjAH88jkC8lIbfNZaCyuPQHANjyYIXlvQeAbsWADQJFZgOHUqFqjh/A=="],
 

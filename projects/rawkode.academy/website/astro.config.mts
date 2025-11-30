@@ -15,7 +15,7 @@ import { statSync, readFileSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
 import { existsSync } from "node:fs";
-import { resolveContentDir } from "@rawkodeacademy/content";
+import { resolveContentDir, technologies } from "@rawkodeacademy/content";
 import { glob } from "glob";
 import rehypeExternalLinks from "rehype-external-links";
 
@@ -180,34 +180,19 @@ async function buildLastmodIndex() {
 		} catch {}
 	}
 
-	// Technologies -> /technology/{id}
-	// MD/MDX only (content lives in workspace package under data/)
-	let techFiles: string[] = [];
-	let techBaseDir: string | undefined;
-	try {
-		const require = createRequire(import.meta.url);
-		const pkgPath = require.resolve(
-			"@rawkodeacademy/content-technologies/package.json",
-		);
-		const root = dirname(pkgPath);
-		const data = join(root, "data");
-		try {
-			const s = await stat(data);
-			techBaseDir = s.isDirectory() ? data : root;
-		} catch {
-			techBaseDir = root;
-		}
-		techFiles = await glob("**/*.{md,mdx}", {
-			cwd: techBaseDir,
-			absolute: true,
-		});
-	} catch (err) {
-		console.error(
-			"Failed to resolve @rawkodeacademy/content-technologies package:",
-			err,
-		);
-		// Don't fallback to local directories - workspace package is the only source
-	}
+        // Technologies -> /technology/{id}
+        // MD/MDX only (content lives in workspace content package under data/)
+        let techFiles: string[] = [];
+        let techBaseDir: string | undefined;
+        try {
+                techBaseDir = await technologies.resolveDataDir();
+                techFiles = await glob("**/*.{md,mdx}", {
+                        cwd: techBaseDir,
+                        absolute: true,
+                });
+        } catch (err) {
+                console.error("Failed to resolve technologies content directory:", err);
+        }
 	for (const file of techFiles) {
 		try {
 			const rel = techBaseDir ? file.slice(techBaseDir.length + 1) : file;
@@ -247,18 +232,7 @@ const lastmodIndex = await buildLastmodIndex();
 // Resolve external content package directory for Vite FS allow (dev + build asset import)
 let CONTENT_TECH_DIR: string | undefined;
 try {
-	const require = createRequire(import.meta.url);
-	const pkgPath = require.resolve(
-		"@rawkodeacademy/content-technologies/package.json",
-	);
-	const root = dirname(pkgPath);
-	const data = join(root, "data");
-	try {
-		const s = statSync(data);
-		CONTENT_TECH_DIR = s.isDirectory() ? data : root;
-	} catch {
-		CONTENT_TECH_DIR = root;
-	}
+        CONTENT_TECH_DIR = technologies.resolveDataDirSync();
 } catch {}
 
 export default defineConfig({

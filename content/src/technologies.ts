@@ -1,8 +1,8 @@
-import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
-import { stat } from "node:fs/promises";
 import { statSync } from "node:fs";
+import { stat } from "node:fs/promises";
+import { join } from "node:path";
 import { z as zod } from "zod";
+import { resolveContentDir } from "./index";
 
 export const TECHNOLOGY_STATUS_VALUES = [
   "alpha",
@@ -19,19 +19,15 @@ const technologyStatusEnumValues = [...TECHNOLOGY_STATUS_VALUES] as [
   ...(typeof TECHNOLOGY_STATUS_VALUES)[number][]
 ];
 
-export const DEFAULT_TECHNOLOGY_STATUS: (typeof TECHNOLOGY_STATUS_VALUES)[number] = "stable";
+export const DEFAULT_TECHNOLOGY_STATUS: (typeof TECHNOLOGY_STATUS_VALUES)[number] =
+  "stable";
 
 export type TechnologyStatus = (typeof TECHNOLOGY_STATUS_VALUES)[number];
 export const technologyStatusEnum = zod.enum(technologyStatusEnumValues);
 
-// Pure Zod schema for cross-environment validation & type inference
 export const technologyZod = zod.object({
-  // Core identity
   name: zod.string(),
   description: zod.string(),
-
-  // Presentation - logos available for this technology
-  // YAML parses empty `logos:` as null, so we accept null and transform to undefined
   logos: zod
     .object({
       icon: zod.any().optional(),
@@ -39,18 +35,12 @@ export const technologyZod = zod.object({
       stacked: zod.any().optional(),
     })
     .nullish(),
-
-  // Links
   website: zod.string(),
   source: zod.string().optional(),
   documentation: zod.string().optional(),
-
-  // Taxonomy / relationships
   categories: zod.array(zod.string()).default([]),
   aliases: zod.array(zod.string()).optional(),
   relatedTechnologies: zod.array(zod.string()).optional(),
-
-  // Content hints
   useCases: zod.array(zod.string()).optional(),
   features: zod.array(zod.string()).optional(),
   learningResources: zod
@@ -60,26 +50,17 @@ export const technologyZod = zod.object({
       tutorials: zod.array(zod.string()).optional(),
     })
     .optional(),
-
-  // Lifecycle
   status: technologyStatusEnum.default(DEFAULT_TECHNOLOGY_STATUS),
 });
 
 export type TechnologyData = zod.infer<typeof technologyZod>;
 
-// Export a schema factory colocated with the content package.
-// Consumers (e.g., the website's content config) will call this with their `z`.
 export function createSchema(z: typeof zod, helpers?: { image?: () => any }) {
   const imageSchema = helpers?.image ? helpers.image() : z.string();
 
   return z.object({
-    // Core identity
     name: z.string(),
     description: z.string(),
-
-    // Presentation - logos available for this technology
-    // Files are expected at ./icon.svg, ./horizontal.svg, ./stacked.svg
-    // YAML parses empty `logos:` as null, so we accept null and transform to undefined
     logos: z
       .object({
         icon: imageSchema.optional(),
@@ -87,18 +68,12 @@ export function createSchema(z: typeof zod, helpers?: { image?: () => any }) {
         stacked: imageSchema.optional(),
       })
       .nullish(),
-
-    // Links
     website: z.string(),
     source: z.string().optional(),
     documentation: z.string().optional(),
-
-    // Taxonomy / relationships
     categories: z.array(z.string()).default([]),
     aliases: z.array(z.string()).optional(),
     relatedTechnologies: z.array(z.string()).optional(),
-
-    // Content hints
     useCases: z.array(z.string()).optional(),
     features: z.array(z.string()).optional(),
     learningResources: z
@@ -108,35 +83,25 @@ export function createSchema(z: typeof zod, helpers?: { image?: () => any }) {
         tutorials: z.array(z.string()).optional(),
       })
       .optional(),
-
-    // Lifecycle
     status: z.enum(technologyStatusEnumValues).default(DEFAULT_TECHNOLOGY_STATUS),
   });
 }
 
-// Resolve the absolute directory for data files inside this package.
-// Prefers the `data/` subdirectory if present; falls back to the package root
-// to remain compatible with existing JSON files at the package root.
+const technologiesDir = resolveContentDir("technologies");
+const technologiesDataDir = join(technologiesDir, "data");
+
 export async function resolveDataDir(): Promise<string> {
-  const require = createRequire(import.meta.url);
-  const pkgPath = require.resolve("@rawkodeacademy/content-technologies/package.json");
-  const root = dirname(pkgPath);
-  const dataDir = join(root, "data");
   try {
-    const s = await stat(dataDir);
-    if (s.isDirectory()) return dataDir;
+    const s = await stat(technologiesDataDir);
+    if (s.isDirectory()) return technologiesDataDir;
   } catch {}
-  return root;
+  return technologiesDir;
 }
 
 export function resolveDataDirSync(): string {
-  const require = createRequire(import.meta.url);
-  const pkgPath = require.resolve("@rawkodeacademy/content-technologies/package.json");
-  const root = dirname(pkgPath);
-  const dataDir = join(root, "data");
   try {
-    const s = statSync(dataDir);
-    if (s.isDirectory()) return dataDir;
+    const s = statSync(technologiesDataDir);
+    if (s.isDirectory()) return technologiesDataDir;
   } catch {}
-  return root;
+  return technologiesDir;
 }
