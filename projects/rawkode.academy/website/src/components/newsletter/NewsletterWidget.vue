@@ -20,7 +20,8 @@ const hasCookieSubscription = ref(false);
 
 /**
  * Create a source string for tracking newsletter subscriptions.
- * Format: website:newsletter:{path}
+ * Format: website:newsletter:{pagePath} where pagePath is the current page pathname
+ * Examples: website:newsletter:/ or website:newsletter:/watch/slug
  */
 function createSource(): string {
 	return `website:newsletter:${props.pagePath}`;
