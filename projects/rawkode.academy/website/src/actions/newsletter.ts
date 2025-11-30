@@ -14,7 +14,7 @@ export function createEmailId(email: string): string {
 	return `email:${email.toLowerCase().trim()}`;
 }
 
-const NEWSLETTER_COOKIE_NAME = "ra_newsletter_subscribed";
+const NEWSLETTER_COOKIE_NAME = "newsletter:academy:updates";
 const NEWSLETTER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year in seconds
 
 export const newsletter = {
@@ -36,7 +36,7 @@ export const newsletter = {
 						audience: "academy",
 						channel: "newsletter",
 						status: "subscribed",
-						source: input.source || "website-cta",
+						source: input.source || "website:cta:learner-button",
 					},
 				);
 
@@ -64,7 +64,7 @@ export const newsletter = {
 						audience: "academy",
 						channel: "newsletter",
 						status: "unsubscribed",
-						source: input.source || "website-cta",
+						source: input.source || "website:cta:learner-button",
 					},
 				);
 
@@ -90,7 +90,7 @@ export const newsletter = {
 						audience: "academy",
 						channel: "newsletter",
 						status: "subscribed",
-						source: input.source || "website-cta-anonymous",
+						source: input.source || "website:cta:email-form",
 					},
 				);
 
@@ -125,7 +125,7 @@ export const newsletter = {
 						audience: "academy",
 						channel: "newsletter",
 						status: "unsubscribed",
-						source: input.source || "website-unsubscribe",
+						source: input.source || "website:action:unsubscribe",
 					},
 				);
 

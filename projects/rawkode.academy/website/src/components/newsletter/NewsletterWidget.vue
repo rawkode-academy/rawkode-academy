@@ -8,7 +8,7 @@ const props = defineProps<{
 	signInUrl: string;
 }>();
 
-const NEWSLETTER_COOKIE_NAME = "ra_newsletter_subscribed";
+const NEWSLETTER_COOKIE_NAME = "newsletter:academy:updates";
 
 const email = ref("");
 const isLoading = ref(false);
@@ -74,7 +74,7 @@ const subscribeAsLearner = async () => {
 
 	try {
 		const { data, error: actionError } = await actions.newsletter.subscribe({
-			source: "website-cta",
+			source: "website:cta:learner-button",
 		});
 
 		if (actionError) {
@@ -104,7 +104,7 @@ const subscribeWithEmail = async () => {
 		const { data, error: actionError } =
 			await actions.newsletter.subscribeWithEmail({
 				email: email.value.trim(),
-				source: "website-cta-anonymous",
+				source: "website:cta:email-form",
 			});
 
 		if (actionError) {
