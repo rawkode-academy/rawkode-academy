@@ -14,7 +14,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: depot-ubuntu-latest,dagger=0.18.11
+    runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
@@ -23,6 +23,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies and generate types
+        working-directory: projects/rawkode.academy/generators/projen-platform-service
+        run: |
+          bun install
+          bun run types
+
+      - name: Run projen
+        working-directory: projects/rawkode.academy/platform/email-preferences
+        run: bun run .projenrc.ts
+
+      - name: Install service dependencies
+        working-directory: projects/rawkode.academy/platform/email-preferences
+        run: bun install
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -37,28 +56,11 @@ jobs:
           secrets: |
             CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
       - name: Deploy RPC Service
         working-directory: projects/rawkode.academy/platform/email-preferences
         env:
-          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
         run: |
-          (cd ../../generators/projen-platform-service && bun install && bun run types)
-          bun run .projenrc.ts
-
-          dagger <<'.'
-            codebase=$(../../../../dagger/bun | install-no-cache . | directory /code)
-
-            ../../../../dagger/cloudflare | deploy \
-              $codebase \
-              ./rpc/wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN
-
-            ../../../../dagger/cloudflare | applyMigrations \
-              $codebase \
-              ./rpc/wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN
-          .
+          npx wrangler deploy --config ./rpc/wrangler.jsonc
+          npx wrangler d1 migrations apply --config ./rpc/wrangler.jsonc --remote $(jq -r '.d1_databases[0].database_name' ./rpc/wrangler.jsonc) || true
