@@ -16,7 +16,7 @@ export async function listShows(): Promise<ShowItem[]> {
 	return items.map((e: ShowEntry) => {
 		const data = e.data;
 		return {
-			id: e.id,
+			id: data.id,
 			name: data.name,
 			description: data.description,
 			hosts: (data.hosts ?? []).map((h: any) =>
