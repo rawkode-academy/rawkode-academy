@@ -1,16 +1,16 @@
-name: rawkode.academy/platform/authentication/rpc
+name: rawkode.academy/platform/email-service/rpc
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/platform-authentication-rpc.yaml"
-      - "projects/rawkode.academy/platform/authentication/**"
+      - ".github/workflows/platform-email-service-rpc.yaml"
+      - "projects/rawkode.academy/platform/email-service/**"
   pull_request:
     paths:
-      - ".github/workflows/platform-authentication-rpc.yaml"
-      - "projects/rawkode.academy/platform/authentication/**"
+      - ".github/workflows/platform-email-service-rpc.yaml"
+      - "projects/rawkode.academy/platform/email-service/**"
 
 jobs:
   deploy:
@@ -42,7 +42,7 @@ jobs:
           bun-version: latest
 
       - name: Deploy RPC Service
-        working-directory: projects/rawkode.academy/platform/authentication
+        working-directory: projects/rawkode.academy/platform/email-service
         env:
           CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
         run: |

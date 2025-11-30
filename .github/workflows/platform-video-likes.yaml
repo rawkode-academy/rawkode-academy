@@ -25,6 +25,4 @@ jobs:
       service-name: video-likes
       service-path: projects/rawkode.academy/platform/video-likes
       has-write-model: false
-    secrets:
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
 
