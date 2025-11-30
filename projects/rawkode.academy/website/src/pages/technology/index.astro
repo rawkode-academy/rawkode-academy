@@ -20,8 +20,7 @@ try {
 	const items = await getCollection("technologies");
 
 	technologies = items.map((e) => {
-		const icon = (e as any).data.icon;
-		const logo = resolveTechnologyIconUrl(e.id, icon);
+		const logo = resolveTechnologyIconUrl(e.id, e.data.logos);
 
 		const tech: Technology = {
 			id: e.id,

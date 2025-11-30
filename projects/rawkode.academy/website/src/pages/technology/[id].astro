@@ -42,8 +42,8 @@ export const getStaticPaths = (async () => {
 		if (items.length > 0) {
 			return Promise.all(
 				items.map(async (e) => {
-					const icon = (e as any).data.icon;
-					const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
+					const logo =
+						resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
 					const videos = await getVideosForTechnology(e.id);
 					return {
 						params: { id: e.id },
@@ -91,7 +91,7 @@ export const getStaticPaths = (async () => {
 				try {
 					const raw = await readFile(join(base, rel), "utf8");
 					const fm = matter(raw).data as any;
-					const logo = resolveTechnologyIconUrl(id, fm.icon) ?? undefined;
+					const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
 					const videos = await getVideosForTechnology(id);
 					return {
 						params: { id },
@@ -157,8 +157,7 @@ if (!technology) {
 	try {
 		const e = technologyEntry;
 		if (e) {
-			const icon = (e as any).data.icon;
-			const logo = resolveTechnologyIconUrl(e.id, icon) ?? undefined;
+			const logo = resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
 			const videos = await getVideosForTechnology(e.id);
 			technology = {
 				id: e.id,
@@ -173,7 +172,7 @@ if (!technology) {
 			const base = resolveTechnologiesDataDir();
 			const raw = await readFile(join(base, `${id}.mdx`), "utf8");
 			const fm = matter(raw).data as any;
-			const logo = resolveTechnologyIconUrl(id, fm.icon) ?? undefined;
+			const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
 			const videos = await getVideosForTechnology(id);
 			technology = {
 				id,
