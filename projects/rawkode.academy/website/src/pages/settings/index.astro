@@ -2,6 +2,7 @@
 import Page from "@/wrappers/page.astro";
 import EmailPreferences from "@/components/settings/EmailPreferences.vue";
 import Avatar from "vue-boring-avatars";
+import { createLearnerId } from "@/actions/newsletter";
 
 export const prerender = false;
 
@@ -12,10 +13,11 @@ if (!user) {
 }
 
 let isNewsletterSubscribed = false;
+const prefixedUserId = createLearnerId(user.id);
 
 try {
 	const prefs = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
-		user.id,
+		prefixedUserId,
 		"newsletter",
 		"academy",
 	);
