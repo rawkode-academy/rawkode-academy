@@ -26,8 +26,8 @@ export async function listVideos(): Promise<VideoItem[]> {
 	return items.map((e: VideoEntry) => {
 		const data = e.data;
 		return {
-			id: data.id,
-			slug: data.slug ?? data.id,
+			id: data.slug,
+			slug: data.slug,
 			videoId: data.videoId,
 			title: data.title,
 			subtitle: data.subtitle,
