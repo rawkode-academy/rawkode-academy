@@ -2,6 +2,9 @@
 	"name": "email-service",
 	"private": true,
 	"type": "module",
+	"scripts": {
+		"test": "vitest run"
+	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@cloudflare/workers-types": "^4.20250426.0",
