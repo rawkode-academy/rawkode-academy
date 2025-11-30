@@ -218,14 +218,17 @@ const placeholderLogo = "/apple-touch-icon.png"; // Define a placeholder
 
 			.tech-logo {
 				@apply w-32 h-32 object-contain rounded-lg overflow-hidden;
-				background: white;
+				background: #f3f4f6; /* gray-100 - ensures white logos are visible */
+				padding: 0.5rem;
+				border: 1px solid #e5e7eb; /* gray-200 border for definition */
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+				transition: transform 0.3s ease;
 			}
 
 			:root.dark .tech-logo {
 				background: #111827; /* gray-900 */
-				padding: 0.5rem;
-				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-				transition: transform 0.3s ease;
+				border-color: #374151; /* gray-700 */
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 			}
 
 			.tech-logo:hover {
