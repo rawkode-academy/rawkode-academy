@@ -29,12 +29,12 @@ if (Astro.request.method === "POST" && !user) {
 					audience: "academy",
 					channel: "newsletter",
 					status: "unsubscribed",
-					source: "website-unsubscribe-page",
+					source: "website:page:unsubscribe",
 				},
 			);
 
 			// Clear the newsletter cookie if present
-			Astro.cookies.delete("ra_newsletter_subscribed", { path: "/" });
+			Astro.cookies.delete("newsletter:academy:updates", { path: "/" });
 
 			// Redirect to success state
 			return Astro.redirect(`/unsubscribe?success=true`);
@@ -64,7 +64,7 @@ if (Astro.request.method === "POST" && user) {
 				audience: "academy",
 				channel: "newsletter",
 				status: "unsubscribed",
-				source: "website-unsubscribe-page",
+				source: "website:page:unsubscribe",
 			},
 		);
 
