@@ -33,7 +33,7 @@ export interface SessionResponse {
  * Filter cookies to only include Better Auth session cookies.
  * Better Auth uses cookies prefixed with "better-auth." or "__Secure-better-auth."
  */
-function getAuthCookies(cookies: string): string {
+export function getAuthCookies(cookies: string): string {
 	const allCookies = cookies.split(";").map((c) => c.trim());
 	// Match both "better-auth." and "__Secure-better-auth." prefixes
 	const authCookies = allCookies.filter(
