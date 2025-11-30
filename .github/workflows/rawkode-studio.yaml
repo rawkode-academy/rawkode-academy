@@ -24,16 +24,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Dagger
-        run: |
-          curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=/usr/local/bin sh
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: projects/rawkode.studio
+        run: bun install
 
       - name: Build Studio
         working-directory: projects/rawkode.studio
-        run: |
-          dagger <<.
-            . | build | export dist
-          .
+        run: bun run build
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -52,29 +54,20 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         working-directory: projects/rawkode.studio
         env:
-          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
         run: |
-          dagger <<.
-            ../../dagger/cloudflare | deploy-dist \
-              ./dist \
-              wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN
-          .
+          npx wrangler deploy --config wrangler.jsonc
 
       - name: Deploy Preview
         id: preview
         if: github.event_name == 'pull_request'
         working-directory: projects/rawkode.studio
         env:
-          CLOUDFLARE_WORKERS_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dagger <<.
-            ../../dagger/cloudflare | preview \
-              ./dist \
-              wrangler.jsonc \
-              env:CLOUDFLARE_WORKERS_TOKEN \
-              env:GITHUB_TOKEN \
-              ${{ github.repository }} \
-              ${{ github.event.pull_request.number }}
-          .
+          npx wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }}
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}-rawkode-studio.rawkodeacademy.workers.dev"
+          gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"
