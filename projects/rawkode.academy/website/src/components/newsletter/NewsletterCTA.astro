@@ -20,8 +20,8 @@ if (user) {
 	}
 }
 
-const returnTo = Astro.url.pathname;
-const signInUrl = `/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
+const pagePath = Astro.url.pathname;
+const signInUrl = `/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
 
 const { class: className } = Astro.props;
 
@@ -55,6 +55,7 @@ const shouldHide = !user && hasNewsletterCookie;
 					isSignedIn={!!user}
 					isSubscribed={isSubscribed}
 					signInUrl={signInUrl}
+					pagePath={pagePath}
 				/>
 			</div>
 
