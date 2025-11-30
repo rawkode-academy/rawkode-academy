@@ -2,9 +2,10 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 # Configuration
-CONTENT_DIR = '/Users/rawkode/Code/src/github.com/RawkodeAcademy/RawkodeAcademy/projects/rawkode.academy/website/content/videos'
+CONTENT_DIR = Path(__file__).parent / "videos"
 EDITOR = os.environ.get('EDITOR', 'code')
 
 def get_metadata(file_path):

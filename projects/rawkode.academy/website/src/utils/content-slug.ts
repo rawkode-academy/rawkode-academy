@@ -20,9 +20,12 @@ export function deriveSlugFromFile(
 	let slug = file;
 
 	// Strip content directory prefix if provided
-	if (contentDir) {
-		slug = slug.replace(new RegExp(`^${contentDir}`), "");
-	}
+        if (contentDir) {
+                const prefix = contentDir.endsWith("/") ? contentDir : `${contentDir}/`;
+                if (slug.startsWith(prefix)) {
+                        slug = slug.slice(prefix.length);
+                }
+        }
 
 	// Remove index files and extensions
 	slug = slug.replace(/\/index\.(md|mdx)$/i, "").replace(/\.(md|mdx)$/i, "");

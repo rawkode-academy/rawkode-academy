@@ -1,7 +1,11 @@
 #!/usr/bin/env bun
 import { glob } from "glob";
-import { readFile } from "node:fs/promises";
 import matter from "gray-matter";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const CONTENT_ROOT = fileURLToPath(new URL("../../../../content", import.meta.url));
 
 interface ValidationError {
 	file: string;
@@ -112,7 +116,10 @@ async function main() {
 	const validationErrors: ValidationError[] = [];
 
 	// Validate articles
-	const articleFiles = await glob("content/articles/**/*.{md,mdx}");
+        const articleFiles = await glob("**/*.{md,mdx}", {
+                cwd: join(CONTENT_ROOT, "articles"),
+                absolute: true,
+        });
 	for (const file of articleFiles) {
 		const errors = await validateArticle(file);
 		if (errors.length > 0) {
@@ -121,7 +128,10 @@ async function main() {
 	}
 
 	// Validate courses
-	const courseFiles = await glob("content/courses/**/*.{md,mdx}");
+        const courseFiles = await glob("**/*.{md,mdx}", {
+                cwd: join(CONTENT_ROOT, "courses"),
+                absolute: true,
+        });
 	for (const file of courseFiles) {
 		const errors = await validateCourse(file);
 		if (errors.length > 0) {

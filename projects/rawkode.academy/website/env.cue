@@ -29,7 +29,7 @@ tasks: {
 			inputs: [
 				"astro.config.mts",
 				"bun.lock",
-				"content/",
+                                "../../content/",
 				"package.json",
 				"public/",
 				"src/**"
@@ -45,7 +45,7 @@ tasks: {
 			inputs: [
 				"astro.config.mts",
 				"bun.lock",
-				"content/",
+                                "../../content/",
 				"package.json",
 				"public/",
 				"src/**"

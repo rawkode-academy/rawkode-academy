@@ -1,5 +1,7 @@
 import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
 	createSchema as createTechnologySchema,
 	resolveDataDirSync as resolveTechnologiesDataDir,
@@ -8,8 +10,11 @@ import {
 // Local, file-based content collections for videos, shows, and technologies.
 // These are populated by scripts/sync-graphql-content.ts during build or on demand.
 
+const CONTENT_ROOT = fileURLToPath(new URL("../../../../../../content", import.meta.url));
+const contentDir = (...segments: string[]) => join(CONTENT_ROOT, ...segments);
+
 const videos = defineCollection({
-	loader: glob({ pattern: ["**/*.{md,mdx}"], base: "./content/videos" }),
+        loader: glob({ pattern: ["**/*.{md,mdx}"], base: contentDir("videos") }),
 	schema: z.object({
 		id: z.string(), // canonical slug identifier
 		slug: z.string(), // kept for compatibility; equals id
@@ -45,7 +50,7 @@ const videos = defineCollection({
 });
 
 const shows = defineCollection({
-	loader: glob({ pattern: ["**/*.{md,mdx}"], base: "./content/shows" }),
+        loader: glob({ pattern: ["**/*.{md,mdx}"], base: contentDir("shows") }),
 	schema: z.object({
 		id: z.string(),
 		name: z.string(),
@@ -85,10 +90,10 @@ const resourceSchema = z.object({
 });
 
 const people = defineCollection({
-	loader: glob({
-		pattern: ["**/*.json"],
-		base: "./content/people",
-	}),
+        loader: glob({
+                pattern: ["**/*.json"],
+                base: contentDir("people"),
+        }),
 	schema: z.object({
 		name: z.string(),
 		handle: z.string(),
@@ -107,10 +112,10 @@ const people = defineCollection({
 });
 
 const articles = defineCollection({
-	loader: glob({
-		pattern: ["**/*.{md,mdx}"],
-		base: "./content/articles",
-	}),
+        loader: glob({
+                pattern: ["**/*.{md,mdx}"],
+                base: contentDir("articles"),
+        }),
 	schema: ({ image }) =>
 		z.object({
 			title: z.string(),
@@ -161,10 +166,10 @@ const technologies = defineCollection({
 });
 
 const series = defineCollection({
-	loader: glob({
-		pattern: ["**/*.mdx"],
-		base: "./content/series",
-	}),
+        loader: glob({
+                pattern: ["**/*.mdx"],
+                base: contentDir("series"),
+        }),
 	schema: ({ image }) =>
 		z.object({
 			title: z.string(),
@@ -178,10 +183,10 @@ const series = defineCollection({
 });
 
 const adrs = defineCollection({
-	loader: glob({
-		pattern: ["**/*.md"],
-		base: "./content/adrs",
-	}),
+        loader: glob({
+                pattern: ["**/*.md"],
+                base: contentDir("adrs"),
+        }),
 	schema: () =>
 		z.object({
 			title: z.string(),
@@ -191,10 +196,10 @@ const adrs = defineCollection({
 });
 
 const testimonials = defineCollection({
-	loader: glob({
-		pattern: ["**/*.yaml", "**/*.yml"],
-		base: "./content/testimonials",
-	}),
+        loader: glob({
+                pattern: ["**/*.yaml", "**/*.yml"],
+                base: contentDir("testimonials"),
+        }),
 	schema: z.object({
 		quote: z.string(),
 		author: z.object({
@@ -208,10 +213,10 @@ const testimonials = defineCollection({
 });
 
 const courses = defineCollection({
-	loader: glob({
-		pattern: ["*.mdx", "*.md"],
-		base: "./content/courses",
-	}),
+        loader: glob({
+                pattern: ["*.mdx", "*.md"],
+                base: contentDir("courses"),
+        }),
 	schema: ({ image }) =>
 		z.object({
 			title: z.string(),
@@ -252,10 +257,10 @@ const courses = defineCollection({
 });
 
 const courseModules = defineCollection({
-	loader: glob({
-		pattern: ["*/*.mdx", "*/*.md"],
-		base: "./content/courses",
-	}),
+        loader: glob({
+                pattern: ["*/*.mdx", "*/*.md"],
+                base: contentDir("courses"),
+        }),
 	schema: ({ image }) =>
 		z.object({
 			title: z.string(),
@@ -289,10 +294,10 @@ const courseModules = defineCollection({
 });
 
 const changelog = defineCollection({
-	loader: glob({
-		pattern: ["**/*.md", "**/*.mdx"],
-		base: "./content/changelog",
-	}),
+        loader: glob({
+                pattern: ["**/*.md", "**/*.mdx"],
+                base: contentDir("changelog"),
+        }),
 	schema: z.object({
 		title: z.string(),
 		date: z.coerce.date(),
@@ -304,10 +309,10 @@ const changelog = defineCollection({
 });
 
 const learningPaths = defineCollection({
-	loader: glob({
-		pattern: ["**/*.md", "**/*.mdx"],
-		base: "./content/learning-paths",
-	}),
+        loader: glob({
+                pattern: ["**/*.md", "**/*.mdx"],
+                base: contentDir("learning-paths"),
+        }),
 	schema: z.object({
 		title: z.string(),
 		description: z.string(),

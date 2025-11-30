@@ -1,5 +1,5 @@
 import { access, readdir, readFile } from "node:fs/promises";
-import { join, relative } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 // Minimal Vite Plugin type definition to avoid direct vite import
 interface VitePlugin {
@@ -65,13 +65,13 @@ async function discoverDemos(coursesDir: string): Promise<DemoInfo[]> {
 						};
 					}
 
-					demos.push({
-						courseId: course.name,
-						demoId: example.name,
-						path: relative(coursesDir, demoPath),
-						config,
-					});
-				}
+                                        demos.push({
+                                                courseId: course.name,
+                                                demoId: example.name,
+                                                path: relative(coursesDir, demoPath),
+                                                config,
+                                        });
+                                }
 			} catch {
 				// No examples directory for this course
 			}
@@ -83,19 +83,23 @@ async function discoverDemos(coursesDir: string): Promise<DemoInfo[]> {
 	return demos;
 }
 
+const toPosixPath = (value: string) => value.replace(/\\/g, "/");
+
 export function webcontainerDemosPlugin(): VitePlugin {
-	let demos: DemoInfo[] = [];
+        let demos: DemoInfo[] = [];
+        let coursesDir: string;
 
 	return {
 		name: "vite-plugin-webcontainer-demos",
 
 		async configResolved(config) {
 			// Discover all demos at build time
-			const root = config.root || process.cwd();
-			const coursesDir = join(root, "content", "courses");
-			demos = await discoverDemos(coursesDir);
-			console.log(`Discovered ${demos.length} WebContainer demos`);
-		},
+                        const root = config.root || process.cwd();
+                        const workspaceRoot = resolve(root, "..", "..", "..");
+                        coursesDir = join(workspaceRoot, "content", "courses");
+                        demos = await discoverDemos(coursesDir);
+                        console.log(`Discovered ${demos.length} WebContainer demos`);
+                },
 
 		resolveId(id) {
 			if (id === VIRTUAL_MODULE_ID) {
@@ -113,20 +117,21 @@ export function webcontainerDemosPlugin(): VitePlugin {
 			const imports: string[] = [];
 			const demoMap: string[] = [];
 
-			demos.forEach((demo, index) => {
-				const key = `${demo.courseId}/${demo.demoId}`;
-				const globPattern = `/content/courses/${demo.path}/**/*`;
+                        demos.forEach((demo, index) => {
+                                const key = `${demo.courseId}/${demo.demoId}`;
+                                const demoPath = toPosixPath(demo.path);
+                                const globPattern = `${toPosixPath(coursesDir)}/${demoPath}/**/*`;
 
 				// Use Vite's updated glob options: `query` + `import`
 				imports.push(
 					`const demo${index} = import.meta.glob('${globPattern}', { query: '?raw', import: 'default', eager: true });`,
 				);
-				demoMap.push(
-					`'${key}': { files: demo${index}, config: ${JSON.stringify(
-						demo.config,
-					)}, path: '${demo.path}' }`,
-				);
-			});
+                                demoMap.push(
+                                        `'${key}': { files: demo${index}, config: ${JSON.stringify(
+                                                demo.config,
+                                        )}, path: '${demoPath}' }`,
+                                );
+                        });
 
 			return `
 ${imports.join("\n")}
@@ -144,7 +149,7 @@ export function loadDemoFiles(courseId, demoId) {
   }
   
   const processedFiles = {};
-  const basePath = \`/content/courses/\${demo.path}/\`;
+  const basePath = \`${toPosixPath(coursesDir)}/\${demo.path}/\`;
   
   for (const [path, content] of Object.entries(demo.files)) {
     if (path.startsWith(basePath)) {

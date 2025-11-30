@@ -85,10 +85,15 @@ const getSiteUrl = () => {
 	return "https://rawkode.academy";
 };
 
+const WORKSPACE_ROOT = searchForWorkspaceRoot(process.cwd());
+const CONTENT_ROOT = join(WORKSPACE_ROOT, "content");
+
+const withTrailingSlash = (path: string) => (path.endsWith("/") ? path : `${path}/`);
+
 // Build a per-path lastmod index from content files and GraphQL videos.
 // Keys are URL pathnames (no trailing slash), e.g. "/read/my-article".
 async function buildLastmodIndex() {
-	const index = new Map<string, Date>();
+        const index = new Map<string, Date>();
 
 	function pickDate(data: Record<string, any>): Date | undefined {
 		const u = data.updatedAt || data.updated_at;
@@ -100,61 +105,75 @@ async function buildLastmodIndex() {
 	}
 
 	// Articles -> /read/{id}
-	const articleFiles = await glob("content/articles/**/*.{md,mdx}");
-	for (const file of articleFiles) {
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const rel = file.replace(/^content\/articles\//, "");
-			const id = rel
-				.replace(/\/index\.(md|mdx)$/i, "")
-				.replace(/\.(md|mdx)$/i, "");
+        const articlesDir = join(CONTENT_ROOT, "articles");
+        const articleFiles = await glob("**/*.{md,mdx}", {
+                cwd: articlesDir,
+                absolute: true,
+        });
+        for (const file of articleFiles) {
+                try {
+                        const raw = await readFile(file, "utf8");
+                        const fm = matter(raw).data as Record<string, any>;
+                        const rel = file.slice(articlesDir.length + 1);
+                        const id = rel
+                                .replace(/\/index\.(md|mdx)$/i, "")
+                                .replace(/\.(md|mdx)$/i, "");
 			const last = pickDate(fm) ?? (await stat(file)).mtime;
 			index.set(`/read/${id}`, last);
 		} catch {}
 	}
 
 	// Courses (top-level) -> /courses/{id}
-	const courseFiles = await glob("content/courses/*.{md,mdx}");
-	for (const file of courseFiles) {
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const base = file.split("/").pop() || "";
-			const id = base.replace(/\.(md|mdx)$/i, "");
-			const last = pickDate(fm) ?? (await stat(file)).mtime;
-			index.set(`/courses/${id}`, last);
-		} catch {}
-	}
+        const coursesDir = join(CONTENT_ROOT, "courses");
+        const courseFiles = await glob("*.{md,mdx}", {
+                cwd: coursesDir,
+                absolute: true,
+        });
+        for (const file of courseFiles) {
+                try {
+                        const raw = await readFile(file, "utf8");
+                        const fm = matter(raw).data as Record<string, any>;
+                        const rel = file.slice(coursesDir.length + 1);
+                        const id = rel.replace(/\.(md|mdx)$/i, "");
+                        const last = pickDate(fm) ?? (await stat(file)).mtime;
+                        index.set(`/courses/${id}`, last);
+                } catch {}
+        }
 
-	// Course modules -> /courses/{courseId}/{moduleId}
-	const moduleFiles = await glob("content/courses/**/*.{md,mdx}");
-	for (const file of moduleFiles) {
-		// Skip top-level course files handled above
-		if (/^content\/courses\/[^\/]+\.(md|mdx)$/i.test(file)) continue;
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const rel = file
-				.replace(/^content\/courses\//, "")
-				.replace(/\.(md|mdx)$/i, "");
-			const courseId = rel.split("/")[0];
-			const last = pickDate(fm) ?? (await stat(file)).mtime;
-			// Route shape is /courses/{course}/{moduleId}
-			index.set(`/courses/${courseId}/${rel}`, last);
-		} catch {}
-	}
+        // Course modules -> /courses/{courseId}/{moduleId}
+        const moduleFiles = await glob("**/*.{md,mdx}", {
+                cwd: coursesDir,
+                absolute: true,
+        });
+        for (const file of moduleFiles) {
+                // Skip top-level course files handled above
+                const rel = file.slice(coursesDir.length + 1);
+                if (!rel.includes("/")) continue;
+                try {
+                        const raw = await readFile(file, "utf8");
+                        const fm = matter(raw).data as Record<string, any>;
+                        const modulePath = rel.replace(/\.(md|mdx)$/i, "");
+                        const courseId = modulePath.split("/")[0];
+                        const last = pickDate(fm) ?? (await stat(file)).mtime;
+                        // Route shape is /courses/{course}/{moduleId}
+                        index.set(`/courses/${courseId}/${modulePath}`, last);
+                } catch {}
+        }
 
-	// Series -> /series/{id}
-	const seriesFiles = await glob("content/series/**/*.{md,mdx}");
-	for (const file of seriesFiles) {
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const rel = file.replace(/^content\/series\//, "");
-			const id = rel
-				.replace(/\/index\.(md|mdx)$/i, "")
-				.replace(/\.(md|mdx)$/i, "");
+        // Series -> /series/{id}
+        const seriesDir = join(CONTENT_ROOT, "series");
+        const seriesFiles = await glob("**/*.{md,mdx}", {
+                cwd: seriesDir,
+                absolute: true,
+        });
+        for (const file of seriesFiles) {
+                try {
+                        const raw = await readFile(file, "utf8");
+                        const fm = matter(raw).data as Record<string, any>;
+                        const rel = file.slice(seriesDir.length + 1);
+                        const id = rel
+                                .replace(/\/index\.(md|mdx)$/i, "")
+                                .replace(/\.(md|mdx)$/i, "");
 			const last = pickDate(fm) ?? (await stat(file)).mtime;
 			index.set(`/series/${id}`, last);
 		} catch {}
@@ -200,12 +219,17 @@ async function buildLastmodIndex() {
 	}
 
 	// Videos (from local content) -> /watch/{slug}
-	const videoFiles = await glob("content/videos/**/*.{md,mdx}");
-	for (const file of videoFiles) {
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const slug = deriveSlugFromFile(file, fm, "content/videos/");
+        const videosDir = join(CONTENT_ROOT, "videos");
+        const videosPrefix = withTrailingSlash(videosDir);
+        const videoFiles = await glob("**/*.{md,mdx}", {
+                cwd: videosDir,
+                absolute: true,
+        });
+        for (const file of videoFiles) {
+                try {
+                        const raw = await readFile(file, "utf8");
+                        const fm = matter(raw).data as Record<string, any>;
+                        const slug = deriveSlugFromFile(file, fm, videosPrefix);
 			const published = fm.publishedAt ? new Date(fm.publishedAt) : undefined;
 			const last =
 				published && !isNaN(published.getTime()) ? published : undefined;
@@ -269,13 +293,18 @@ export default defineConfig({
 			priority: 0.7,
 			customPages: await (async () => {
 				const siteUrl = getSiteUrl();
-				const videoFiles = await glob("content/videos/**/*.{md,mdx}");
-				const slugs: string[] = [];
-				for (const file of videoFiles) {
-					try {
-						const raw = await readFile(file, "utf8");
-						const fm = matter(raw).data as Record<string, any>;
-						const slug = deriveSlugFromFile(file, fm, "content/videos/");
+                                const videosDir = join(CONTENT_ROOT, "videos");
+                                const videosPrefix = withTrailingSlash(videosDir);
+                                const videoFiles = await glob("**/*.{md,mdx}", {
+                                        cwd: videosDir,
+                                        absolute: true,
+                                });
+                                const slugs: string[] = [];
+                                for (const file of videoFiles) {
+                                        try {
+                                                const raw = await readFile(file, "utf8");
+                                                const fm = matter(raw).data as Record<string, any>;
+                                                const slug = deriveSlugFromFile(file, fm, videosPrefix);
 						if (slug) slugs.push(slug);
 					} catch {}
 				}
@@ -332,10 +361,10 @@ export default defineConfig({
 		server: {
 			fs: {
 				// Keep Vite's default workspace root allow-list and add our external content dir.
-				allow: [
-					searchForWorkspaceRoot(process.cwd()),
-					...(CONTENT_TECH_DIR ? [CONTENT_TECH_DIR] : []),
-				],
+                                allow: [
+                                        WORKSPACE_ROOT,
+                                        ...(CONTENT_TECH_DIR ? [CONTENT_TECH_DIR] : []),
+                                ],
 			},
 		},
 		build: {
