@@ -28,8 +28,8 @@ if (user) {
 	}
 }
 
-const returnTo = Astro.url.pathname;
-const signInUrl = `/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
+const pagePath = Astro.url.pathname;
+const signInUrl = `/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
 
 // Check for the newsletter subscription cookie (server-side)
 const hasNewsletterCookie =
@@ -192,6 +192,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 								isSignedIn={!!user}
 								isSubscribed={isSubscribed}
 								signInUrl={signInUrl}
+								pagePath={pagePath}
 							/>
 						</div>
 					</div>

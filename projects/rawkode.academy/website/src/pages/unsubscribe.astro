@@ -8,6 +8,7 @@ export const prerender = false;
 const email = Astro.url.searchParams.get("email");
 const success = Astro.url.searchParams.get("success");
 const user = Astro.locals.user;
+const pagePath = Astro.url.pathname;
 
 let unsubscribeResult: { success: boolean; message: string } | null = null;
 
@@ -29,7 +30,7 @@ if (Astro.request.method === "POST" && !user) {
 					audience: "academy",
 					channel: "newsletter",
 					status: "unsubscribed",
-					source: "website:page:unsubscribe",
+					source: `website:newsletter:${pagePath}`,
 				},
 			);
 
@@ -64,7 +65,7 @@ if (Astro.request.method === "POST" && user) {
 				audience: "academy",
 				channel: "newsletter",
 				status: "unsubscribed",
-				source: "website:page:unsubscribe",
+				source: `website:newsletter:${pagePath}`,
 			},
 		);
 
