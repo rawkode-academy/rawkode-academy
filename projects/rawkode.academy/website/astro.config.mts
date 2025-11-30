@@ -395,7 +395,7 @@ export default defineConfig({
 				context: "server",
 				access: "public",
 				default:
-					process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/graphql",
+					process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/",
 			}),
 			PUBLIC_CAPTURE_ERRORS: envField.string({
 				context: "server",
