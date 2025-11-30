@@ -34,8 +34,8 @@ const shouldHide = !user && hasNewsletterCookie;
 ---
 
 {!shouldHide && (
-<section class:list={["w-full max-w-3xl mx-auto px-4", className ?? "my-12"]}>
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-white/90 to-primary/5 dark:from-neutral-900 dark:via-neutral-900 dark:to-primary/10 border border-neutral-200/80 dark:border-neutral-800 shadow-md">
+<section class:list={["w-full", className ?? "my-12"]}>
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-white via-white/90 to-primary/5 dark:from-neutral-900 dark:via-neutral-900 dark:to-primary/10 border border-neutral-200/80 dark:border-neutral-800 shadow-md">
                 <div class="relative p-5 sm:p-6">
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                                 <div class="flex-1 min-w-0 space-y-1">

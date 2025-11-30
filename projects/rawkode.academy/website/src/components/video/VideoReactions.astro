@@ -103,7 +103,7 @@ const isAuthenticated = !!Astro.locals.user;
 	@reference "@/styles/global.css";
 
 	.video-reactions {
-		@apply bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl rounded-xl p-4;
+		@apply bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl rounded-xl p-3 sm:p-4;
 		@apply shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
 		@apply border border-white/40 dark:border-gray-700/40;
 		@apply relative overflow-hidden;
@@ -111,11 +111,11 @@ const isAuthenticated = !!Astro.locals.user;
 	}
 
 	.reactions-container {
-		@apply flex items-center gap-2 flex-wrap relative z-10;
+		@apply flex items-center gap-1.5 sm:gap-2 flex-wrap relative z-10;
 	}
 
 	.reaction-btn {
-		@apply flex items-center gap-2 px-3 py-2 rounded-lg transition-all;
+		@apply flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-all;
 		@apply bg-white/30 dark:bg-gray-800/30 backdrop-blur-md;
 		@apply border border-white/40 dark:border-gray-700/40;
 		@apply hover:bg-white/50 dark:hover:bg-gray-700/50;
@@ -128,11 +128,11 @@ const isAuthenticated = !!Astro.locals.user;
 	}
 
 	.emoji {
-		@apply text-xl;
+		@apply text-base sm:text-xl;
 	}
 
 	.count {
-		@apply text-sm font-medium text-gray-700 dark:text-gray-300;
+		@apply text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300;
 	}
 
 	.add-emoji {
@@ -140,15 +140,15 @@ const isAuthenticated = !!Astro.locals.user;
 	}
 
 	.emoji-picker {
-		@apply mt-3 p-3 rounded-lg relative z-10;
+		@apply mt-3 p-2 sm:p-3 rounded-lg relative z-10;
 		@apply bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl;
 		@apply border border-white/40 dark:border-gray-700/40;
 		@apply shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
-		@apply grid grid-cols-8 gap-1;
+		@apply grid grid-cols-5 sm:grid-cols-7 gap-1;
 	}
 
 	.emoji-option {
-		@apply p-2 text-2xl rounded transition-all cursor-pointer;
+		@apply p-1.5 sm:p-2 text-lg sm:text-2xl rounded transition-all cursor-pointer;
 		@apply bg-white/30 dark:bg-gray-700/30 backdrop-blur-md;
 		@apply border border-white/40 dark:border-gray-700/40;
 		@apply hover:bg-white/50 dark:hover:bg-gray-600/50;

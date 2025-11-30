@@ -44,7 +44,7 @@
     </div>
 
     <!-- Tab Content -->
-    <div class="p-6 relative z-10">
+    <div class="p-4 sm:p-6 relative z-10">
       <!-- Description Panel -->
       <div
         v-show="activeTab === 'description'"
