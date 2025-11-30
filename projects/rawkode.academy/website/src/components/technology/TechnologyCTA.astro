@@ -1,0 +1,39 @@
+---
+import TechnologyCTAWidget from "./TechnologyCTAWidget.vue";
+
+interface Props {
+	technologyId: string;
+	technologyName: string;
+	class?: string;
+}
+
+const { technologyId, technologyName, class: className } = Astro.props;
+
+// For pre-rendered pages, we pass the page path and let the Vue component
+// handle all user/subscription state dynamically on the client side.
+const pagePath = Astro.url.pathname;
+const signInUrl = `/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
+---
+
+<section class:list={["w-full", className]}>
+	<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-sm">
+		<div class="p-6 md:p-8">
+			<div class="text-center mb-6">
+				<h2 class="text-2xl font-display font-semibold tracking-tight text-neutral-900 dark:text-white mb-2">
+					Stay Updated on {technologyName}
+				</h2>
+				<p class="text-neutral-600 dark:text-neutral-400">
+					Be the first to know when we publish new content.
+				</p>
+			</div>
+
+			<TechnologyCTAWidget
+				client:visible
+				technologyId={technologyId}
+				technologyName={technologyName}
+				signInUrl={signInUrl}
+				pagePath={pagePath}
+			/>
+		</div>
+	</div>
+</section>
