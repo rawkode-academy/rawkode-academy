@@ -49,7 +49,7 @@ export interface SendEmailResult {
  * Email service configuration
  */
 const EMAIL_CONFIG = {
-	fromAddress: "notifications@rawkode.academy",
+	fromAddress: "david@rawkode.email",
 	fromName: "Rawkode Academy",
 	defaultUnsubscribeUrl: "https://rawkode.academy/email/unsubscribe",
 	defaultPreferencesUrl: "https://rawkode.academy/email/preferences",
@@ -265,7 +265,7 @@ Manage email preferences: ${preferencesLink}
 		unsubscribeUrl: string;
 	}): string {
 		const boundary = `----=_Part_${crypto.randomUUID().replace(/-/g, "")}`;
-		const messageId = `<${crypto.randomUUID()}@rawkode.academy>`;
+		const messageId = `<${crypto.randomUUID()}@rawkode.email>`;
 		const date = new Date().toUTCString();
 
 		const headers = [
