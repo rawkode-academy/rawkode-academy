@@ -1,7 +1,7 @@
 <template>
   <div class="glass-card-shimmer">
     <!-- Tab Navigation -->
-    <div class="border-b border-white/20 dark:border-gray-600/30 relative z-10">
+    <div class="border-b border-subtle relative z-10">
       <!-- Dropdown for Mobile -->
       <div class="sm:hidden px-2 pt-2 pb-3">
         <label for="tabs-mobile" class="sr-only">Select a tab</label>

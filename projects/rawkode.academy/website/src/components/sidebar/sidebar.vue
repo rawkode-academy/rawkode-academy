@@ -219,7 +219,7 @@ const currentNavItems = computed(() => {
 			<!-- Mode Toggle (Expanded) - segmented control -->
 			<div
 				v-if="!isCollapsed"
-				class="px-3 py-3 border-b border-white/20 dark:border-gray-700/40"
+				class="px-3 py-3 border-b border-subtle"
 			>
 				<div class="inline-flex w-full rounded-xl border border-white/20 dark:border-gray-600/30 bg-white/40 dark:bg-gray-800/50 backdrop-blur-md overflow-hidden shadow-sm">
 					<button
@@ -273,7 +273,7 @@ const currentNavItems = computed(() => {
 			<!-- Mode Toggle (Collapsed) -->
 			<div
 				v-else
-				class="p-2 border-b border-white/20 dark:border-gray-700/40 group relative"
+				class="p-2 border-b border-subtle group relative"
 			>
 				<button
 					@click="toggleMode"
