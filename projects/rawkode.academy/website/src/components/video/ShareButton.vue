@@ -1,20 +1,21 @@
 <template>
-  <div class="share-button-container">
-    <button @click="copyLink" class="share-button copy-link-button">
-      <font-awesome-icon icon="copy" class="icon" />
-      {{ copyButtonText }}
+  <div class="flex flex-wrap gap-2 sm:gap-3 items-center my-4">
+    <button @click="copyLink" class="glass-interactive inline-flex items-center justify-center px-3 sm:px-4 py-2 text-sm font-medium gap-2 text-secondary-content">
+      <font-awesome-icon icon="copy" class="w-4 h-4" />
+      <span class="hidden sm:inline">{{ copyButtonText }}</span>
+      <span class="sm:hidden">Copy</span>
     </button>
-    <a :href="blueskyShareUrl" target="_blank" rel="noopener noreferrer" class="share-button social-button bluesky-button" @click="() => trackShare('bluesky')">
-      <font-awesome-icon :icon="['fab', 'bluesky']" class="icon" />
-      Share on BlueSky
+    <a :href="blueskyShareUrl" target="_blank" rel="noopener noreferrer" class="btn-social bg-[#0077FF] hover:bg-[#005fcc]" @click="() => trackShare('bluesky')">
+      <font-awesome-icon :icon="['fab', 'bluesky']" class="w-4 h-4" />
+      <span class="hidden sm:inline">BlueSky</span>
     </a>
-    <a :href="linkedinShareUrl" target="_blank" rel="noopener noreferrer" class="share-button social-button linkedin-button" @click="() => trackShare('linkedin')">
-      <font-awesome-icon :icon="['fab', 'linkedin']" class="icon" />
-      Share on LinkedIn
+    <a :href="linkedinShareUrl" target="_blank" rel="noopener noreferrer" class="btn-social bg-[#0A66C2] hover:bg-[#004182]" @click="() => trackShare('linkedin')">
+      <font-awesome-icon :icon="['fab', 'linkedin']" class="w-4 h-4" />
+      <span class="hidden sm:inline">LinkedIn</span>
     </a>
-    <a :href="redditShareUrl" target="_blank" rel="noopener noreferrer" class="share-button social-button reddit-button" @click="() => trackShare('reddit')">
-      <font-awesome-icon :icon="['fab', 'reddit']" class="icon" />
-      Share on Reddit
+    <a :href="redditShareUrl" target="_blank" rel="noopener noreferrer" class="btn-social bg-[#FF4500] hover:bg-[#cc3700]" @click="() => trackShare('reddit')">
+      <font-awesome-icon :icon="['fab', 'reddit']" class="w-4 h-4" />
+      <span class="hidden sm:inline">Reddit</span>
     </a>
   </div>
 </template>
@@ -97,105 +98,3 @@ const redditShareUrl = computed(() => {
 });
 </script>
 
-<style scoped>
-.share-button-container {
-  display: flex;
-  gap: 0.75rem; /* 12px */
-  align-items: center;
-  margin: 1rem 0; /* 16px */
-}
-
-.share-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem; /* 8px 16px */
-  border-radius: 0.375rem; /* 6px */
-  font-weight: 500;
-  font-size: 0.875rem; /* 14px */
-  line-height: 1.25rem; /* 20px */
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-  border: 1px solid transparent;
-  gap: 0.5rem; /* 8px */
-}
-
-.share-button .icon {
-  width: 1.25rem; /* 20px */
-  height: 1.25rem; /* 20px */
-  margin-right: 0.5rem; /* 8px */
-}
-
-.copy-link-button {
-  background-color: #4a5568; /* gray-700 */
-  color: #ffffff;
-  border-color: #2d3748; /* gray-800 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.copy-link-button:hover {
-  background-color: #2d3748; /* gray-800 */
-  border-color: #2d3748; /* gray-800 */
-}
-
-.social-button {
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.x-button {
-  background-color: #000000; /* Black */
-  border-color: #000000; /* Black */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.x-button:hover {
-  background-color: #1a1a1a; /* Slightly lighter black on hover */
-  border-color: #1a1a1a;
-  color: #ffffff;
-}
-
-.linkedin-button {
-  background-color: #0A66C2;
-  border-color: #004182;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.linkedin-button:hover {
-  background-color: #004182;
-  border-color: #004182;
-  color: #ffffff;
-}
-
-.bluesky-button {
-  background-color: #0077FF; /* Example BlueSky color */
-  border-color: #005fcc; /* Darker shade */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.bluesky-button:hover {
-  background-color: #005fcc;
-  border-color: #005fcc;
-  color: #ffffff;
-}
-
-.reddit-button {
-  background-color: #FF4500; /* Reddit orange */
-  border-color: #cc3700; /* Darker shade */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.reddit-button:hover {
-  background-color: #cc3700;
-  border-color: #cc3700;
-  color: #ffffff;
-}
-</style>
