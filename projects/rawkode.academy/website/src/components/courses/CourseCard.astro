@@ -39,7 +39,7 @@ function getDifficultyVariant(
 
 <BaseCard href={`/courses/${course.id}`} class="hover:shadow-xl hover:scale-105">
 	<Fragment slot="cover">
-		<div class="absolute inset-0 bg-linear-to-tr from-primary/30 to-secondary/30 mix-blend-multiply z-10"></div>
+		<div class="absolute inset-0 bg-gradient-overlay z-10"></div>
 		{
 			course.data.cover ? (
 				<Image
@@ -67,17 +67,17 @@ function getDifficultyVariant(
 			<Badge
 				variant="default"
 				size="sm"
-				class="backdrop-blur-sm shadow-md bg-white/90 text-gray-800 dark:bg-gray-800/90 dark:text-gray-100"
+				class="backdrop-blur-sm shadow-md bg-white/90 dark:bg-gray-800/90 text-secondary-content"
 			>
 				{totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}
 			</Badge>
 		</div>
 	</Fragment>
 	<Fragment slot="content">
-		<h2 class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2">
+		<h2 class="mb-3 text-xl font-bold tracking-tight text-primary-content line-clamp-2">
 			{course.data.title}
 		</h2>
-		<p class="mb-4 font-light text-gray-500 dark:text-gray-400 line-clamp-3 flex-grow">
+		<p class="mb-4 font-light text-muted line-clamp-3 flex-grow">
 			{course.data.description}
 		</p>
 	</Fragment>
