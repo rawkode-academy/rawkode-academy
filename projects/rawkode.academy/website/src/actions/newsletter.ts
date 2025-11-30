@@ -36,7 +36,7 @@ export const newsletter = {
 						audience: "academy",
 						channel: "newsletter",
 						status: "subscribed",
-						source: input.source || "website:cta:learner-button",
+						source: input.source || "website:newsletter:unknown",
 					},
 				);
 
@@ -64,7 +64,7 @@ export const newsletter = {
 						audience: "academy",
 						channel: "newsletter",
 						status: "unsubscribed",
-						source: input.source || "website:cta:learner-button",
+						source: input.source || "website:newsletter:unknown",
 					},
 				);
 
@@ -90,7 +90,7 @@ export const newsletter = {
 						audience: "academy",
 						channel: "newsletter",
 						status: "subscribed",
-						source: input.source || "website:cta:email-form",
+						source: input.source || "website:newsletter:unknown",
 					},
 				);
 
@@ -125,7 +125,7 @@ export const newsletter = {
 						audience: "academy",
 						channel: "newsletter",
 						status: "unsubscribed",
-						source: input.source || "website:action:unsubscribe",
+						source: input.source || "website:newsletter:unknown",
 					},
 				);
 

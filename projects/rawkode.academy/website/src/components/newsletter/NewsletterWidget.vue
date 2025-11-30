@@ -6,6 +6,7 @@ const props = defineProps<{
 	isSignedIn: boolean;
 	isSubscribed: boolean;
 	signInUrl: string;
+	pagePath: string;
 }>();
 
 const NEWSLETTER_COOKIE_NAME = "newsletter:academy:updates";
@@ -16,6 +17,14 @@ const isSuccess = ref(false);
 const error = ref<string | null>(null);
 const showEmailForm = ref(false);
 const hasCookieSubscription = ref(false);
+
+/**
+ * Create a source string for tracking newsletter subscriptions.
+ * Format: website:newsletter:{path}
+ */
+function createSource(): string {
+	return `website:newsletter:${props.pagePath}`;
+}
 
 /**
  * Safely check if the newsletter subscription cookie is present.
@@ -74,7 +83,7 @@ const subscribeAsLearner = async () => {
 
 	try {
 		const { data, error: actionError } = await actions.newsletter.subscribe({
-			source: "website:cta:learner-button",
+			source: createSource(),
 		});
 
 		if (actionError) {
@@ -104,7 +113,7 @@ const subscribeWithEmail = async () => {
 		const { data, error: actionError } =
 			await actions.newsletter.subscribeWithEmail({
 				email: email.value.trim(),
-				source: "website:cta:email-form",
+				source: createSource(),
 			});
 
 		if (actionError) {
