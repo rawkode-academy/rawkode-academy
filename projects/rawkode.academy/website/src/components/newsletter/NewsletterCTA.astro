@@ -27,7 +27,7 @@ const { class: className } = Astro.props;
 
 // Check for the newsletter subscription cookie (server-side)
 const hasNewsletterCookie =
-	Astro.cookies.get("ra_newsletter_subscribed")?.value === "true";
+	Astro.cookies.get("newsletter:academy:updates")?.value === "true";
 
 // For anonymous users with the cookie, hide the CTA entirely
 const shouldHide = !user && hasNewsletterCookie;
