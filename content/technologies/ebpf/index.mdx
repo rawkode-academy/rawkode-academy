@@ -1,0 +1,41 @@
+---
+name: "eBPF"
+description: |
+  eBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows users to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. This enables powerful and efficient observation, monitoring, and control of system behavior at runtime. eBPF provides unprecedented visibility into the kernel and user space, enabling developers to trace system calls, monitor network traffic, profile application performance, and enforce security policies, all with minimal overhead.
+  
+  Its primary value lies in its ability to provide deep insights into system behavior without requiring kernel modifications, leading to faster development cycles and improved security. Main use cases include network performance monitoring, security observability (detecting malicious activity), application performance profiling, and load balancing in cloud native environments.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://ebpf.io/"
+documentation: "https://ebpf.io/what-is-ebpf#documentation"
+license: "GPL-2.0"
+categories:
+  - "kernel"
+  - "networking"
+  - "observability"
+  - "security"
+  - "performance"
+status: "stable"
+---
+
+eBPF (extended Berkeley Packet Filter) is a groundbreaking technology that allows sandboxed programs to be run in the Linux kernel. It dramatically extends the kernel's capabilities without requiring changes to the kernel source code or loading kernel modules, enabling a new generation of high-performance and secure tools for networking, observability, and security.
+
+## Core Concepts
+
+-   **Kernel Programmability:** eBPF allows developers to write programs that can be loaded into the Linux kernel and executed when specific events occur (e.g., a network packet arrival, a system call).
+-   **Safe Execution:** All eBPF programs undergo strict verification by an in-kernel verifier to ensure they are safe, will terminate, and will not negatively impact kernel stability.
+-   **JIT Compilation:** Verified eBPF bytecode is translated into native machine code by a Just-In-Time (JIT) compiler, enabling near-native execution speed.
+-   **Hook Points:** Programs can attach to various hook points throughout the kernel, providing deep introspection and control.
+-   **eBPF Maps:** Data structures (`maps`) allow eBPF programs to store and share data with user-space applications or with other eBPF programs.
+
+## How It Works
+
+An eBPF program is typically written in a subset of C, compiled to eBPF bytecode (often using LLVM/Clang), and then loaded into the kernel via the `bpf()` system call. The kernel's verifier then validates the program for safety and ensures it doesn't contain loops or other constructs that could lead to crashes. If successful, the program is JIT-compiled and attached to its designated hook point. When the associated kernel event occurs, the eBPF program executes, performing its logic with minimal overhead.
+
+## Key Use Cases & Benefits
+
+-   **Networking:** High-performance load balancing, traffic steering, firewalling, and custom network policies (e.g., Cilium).
+-   **Observability:** Deep visibility into system calls, network events, process execution, and application behavior (e.g., Hubble, Pixie).
+-   **Security:** Real-time threat detection, policy enforcement, and auditing of system activity without heavy performance impact (e.g., Falco, Tetragon).
+-   **Performance Analysis:** Advanced tracing and profiling of kernel and user-space functions to identify bottlenecks and optimize applications.
+-   **Dynamic Extensibility:** Extend kernel functionality at runtime, allowing for rapid innovation and customization without kernel recompilation.

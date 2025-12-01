@@ -1,0 +1,41 @@
+---
+name: "kpt"
+description: |
+  kpt is a toolkit for managing, customizing, and deploying Kubernetes configuration packages. It enables users to declaratively manage their Kubernetes configurations, including resources, policies, and application stacks, in a version-controlled manner. Kpt promotes separation of concerns by allowing configurations to be composed from reusable packages, customized without modifying the original source, and applied in a repeatable and consistent way across different environments.
+  
+  Its value lies in simplifying the management of complex Kubernetes deployments by providing tools for package management, customization using Kustomize integration, and resource management. Kpt supports use cases such as managing application deployments across multiple environments (dev, staging, production), enforcing organizational policies through configuration packages, and enabling GitOps workflows for infrastructure as code.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://googlecontainertools.github.io/kpt/"
+documentation: "https://kpt.dev/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "configuration-management"
+  - "package-management"
+  - "gitops"
+  - "developer-tools"
+status: "stable"
+---
+
+kpt (Kubernetes Package Toolkit) is a set of open-source command-line tools designed to help engineers manage, customize, and deploy Kubernetes configurations declaratively. It focuses on enabling robust GitOps workflows for Kubernetes configuration management by treating configurations as data that can be manipulated programmatically.
+
+## Key Features
+
+-   **Configuration as Data:** kpt treats Kubernetes configurations as declarative, version-controlled data. This data can be easily transformed, validated, and managed, providing a consistent and auditable workflow.
+-   **Package Management:** Organizes Kubernetes configurations into reusable packages. These packages can be fetched, updated, and published, promoting modularity and sharing of best practices.
+-   **Functions for Customization:** Utilizes "kpt functions" (written in Go, JavaScript, TypeScript, or any language compiled to WASM) to programmatically modify and validate Kubernetes resources. This allows for powerful and repeatable customizations without directly editing the source.
+-   **Integration with Kustomize:** Works seamlessly with Kustomize for patching and layering configurations, providing a flexible approach to environment-specific adjustments.
+-   **GitOps Workflow:** Designed for GitOps, enabling configurations to be stored in Git repositories, with changes flowing through a pull request workflow and automated deployments.
+-   **Imperative-style Operations on Declarative Configs:** The `kpt` CLI allows users to perform imperative-style operations (e.g., adding resources, setting fields) directly on declarative configuration files, generating "Configuration as Data" that can be committed to Git.
+
+## Benefits
+
+-   **Reproducible & Consistent Deployments:** Ensures that Kubernetes configurations are applied consistently across all environments, reducing configuration drift and human error.
+-   **Simplified Configuration Management:** Provides a structured way to manage complex Kubernetes configurations, especially in multi-team or multi-environment setups.
+-   **Enhanced Automation:** Automates the customization and deployment of configurations, integrating well with CI/CD pipelines.
+-   **Improved Collaboration:** Facilitates collaboration by making configurations easily reviewable and version-controlled in Git.
+-   **Separation of Concerns:** Promotes a clear separation between base configurations and environment-specific customizations.
+-   **Validation & Safety:** Functions can validate configurations, catching errors early in the development cycle.

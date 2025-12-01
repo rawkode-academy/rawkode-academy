@@ -1,8 +1,5 @@
 ---
 import BreadcrumbJsonLd from "./BreadcrumbJsonLd.astro";
-import End from "./End.astro";
-import First from "./First.astro";
-import Middle from "./Middle.astro";
 
 interface BreadcrumbElement {
 	title: string;
@@ -14,25 +11,115 @@ type Props = {
 };
 
 const { elements } = Astro.props;
+
+// Remove the last element (current page) - we only show the path
+const pathElements = elements.slice(0, -1);
 ---
 
 <BreadcrumbJsonLd elements={elements} />
-<nav class="flex py-3" aria-label="Breadcrumb">
-	<ol
-		class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse bg-gray-50 dark:bg-gray-800/50 px-4 py-2 rounded-full backdrop-blur-sm border border-gray-200 dark:border-gray-700"
-	>
-		{
-			elements.map((element, index) => {
-				if (index === 0) {
-					return <First title={element.title} link={element.link} />;
-				}
 
-				if (index === elements.length - 1) {
-					return <End title={element.title} />;
-				}
+{pathElements.length > 0 && (
+	<nav class="breadcrumb" aria-label="Breadcrumb">
+		<ol>
+			{pathElements.map((el, i) => (
+				<li>
+					{i === 0 ? (
+						<a href={el.link} class="home-link">
+							<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+								<path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+							</svg>
+						</a>
+					) : (
+						<>
+							<svg class="chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+								<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+							</svg>
+							<a href={el.link}>{el.title}</a>
+						</>
+					)}
+				</li>
+			))}
+		</ol>
+	</nav>
+)}
 
-				return <Middle title={element.title} link={element.link} />;
-			})
-		}
-	</ol>
-</nav>
+<style>
+	.breadcrumb {
+		margin-bottom: 1.25rem;
+	}
+
+	ol {
+		display: inline-flex;
+		align-items: center;
+		list-style: none;
+		margin: 0;
+		padding: 0.375rem 0.75rem;
+		gap: 0.25rem;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 9999px;
+		font-size: 0.8125rem;
+	}
+
+	li {
+		display: flex;
+		align-items: center;
+	}
+
+	.home-link {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		color: rgb(107 114 128);
+		background: rgb(var(--brand-primary) / 0.1);
+		border-radius: 50%;
+		transition: all 0.15s ease;
+	}
+
+	:root.dark .home-link {
+		color: rgb(156 163 175);
+		background: rgb(var(--brand-primary) / 0.15);
+	}
+
+	.home-link:hover {
+		color: rgb(var(--brand-primary));
+		background: rgb(var(--brand-primary) / 0.2);
+		transform: scale(1.1);
+	}
+
+	.home-link svg {
+		width: 0.875rem;
+		height: 0.875rem;
+	}
+
+	.chevron {
+		width: 1rem;
+		height: 1rem;
+		color: rgb(209 213 219);
+		margin: 0 0.125rem;
+	}
+
+	:root.dark .chevron {
+		color: rgb(75 85 99);
+	}
+
+	a:not(.home-link) {
+		color: rgb(107 114 128);
+		text-decoration: none;
+		font-weight: 500;
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.375rem;
+		transition: all 0.15s ease;
+	}
+
+	:root.dark a:not(.home-link) {
+		color: rgb(156 163 175);
+	}
+
+	a:not(.home-link):hover {
+		color: rgb(var(--brand-primary));
+		background: rgb(var(--brand-primary) / 0.1);
+	}
+</style>

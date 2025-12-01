@@ -1,0 +1,50 @@
+---
+name: "OperatorSDK"
+description: |
+  The Operator Framework SDK (Operator SDK) provides tools to build, test, and package Kubernetes Operators. It allows developers to manage complex applications on Kubernetes in an automated and scalable way. The Operator SDK provides abstractions and libraries to manage application lifecycle events such as deployment, upgrades, backups, and scaling. Operators built with the SDK extend the Kubernetes API to represent complex application logic and state.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://sdk.operatorframework.io/"
+documentation: "https://sdk.operatorframework.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "operator"
+  - "developer-tools"
+  - "automation"
+  - "application-management"
+status: "stable"
+---
+
+The Operator SDK (Software Development Kit) is a foundational component of the Operator Framework, providing tools to build, test, and package Kubernetes Operators. Operators automate the management of complex, stateful applications on Kubernetes by extending the Kubernetes API, encoding human operational knowledge into software.
+
+## Key Features
+
+-   **Project Scaffolding:** Quickly generates a new Operator project with a basic structure, reducing boilerplate and accelerating development.
+-   **Code Generation:** Automates the generation of Custom Resource Definitions (CRDs), clients, and other Kubernetes API objects from high-level definitions.
+-   **High-Level APIs & Abstractions:** Provides libraries and abstractions (like the `controller-runtime` project) to simplify writing complex operational logic for managing application lifecycle events (e.g., deployment, upgrades, backups, scaling).
+-   **Local Development & Testing:** Offers tools for local development and testing of Operators, making the development process faster and more efficient.
+-   **Multiple Operator Types:** Supports building various types of Operators, including:
+    -   **Go-based Operators:** Leverage the power of Go and the `controller-runtime` library.
+    -   **Ansible-based Operators:** Use existing Ansible playbooks to manage applications.
+    -   **Helm-based Operators:** Convert Helm charts into Operators, providing lifecycle management capabilities.
+-   **Packaging & Deployment:** Provides tools to package Operators for deployment to Kubernetes clusters or OperatorHub.
+
+## How it Works
+
+The Operator SDK helps developers implement the "Operator Pattern." An Operator essentially watches a custom resource (representing the application's desired state) and takes actions to bring the cluster's actual state in line with that desired state. The SDK provides the framework to:
+
+1.  **Define a Custom Resource:** Specify the API for your application (e.g., a "Database" custom resource).
+2.  **Implement Reconciliation Logic:** Write code (or use Ansible/Helm) that defines how to create, update, or delete the underlying Kubernetes resources (Deployments, Services, PersistentVolumes) needed to run your application.
+3.  **Run as a Controller:** Deploy the Operator to Kubernetes, where it acts as a specialized controller, continuously monitoring your custom resources and the cluster state.
+
+## Benefits
+
+-   **Automated Application Management:** Automates complex operational tasks, reducing manual intervention and human error.
+-   **Scalable & Reliable:** Enables self-managing, self-healing applications on Kubernetes, improving reliability and scalability.
+-   **Reduced Operational Overhead:** Frees up operations teams from repetitive tasks, allowing them to focus on higher-value activities.
+-   **Consistent Deployments:** Ensures that applications are deployed and managed consistently across different environments.
+-   **Encodes Human Expertise:** Captures operational knowledge and best practices in code, making them reusable and auditable.
+-   **Empowers Developers:** Allows developers to extend Kubernetes with application-specific logic, integrating application lifecycle management directly into Kubernetes.

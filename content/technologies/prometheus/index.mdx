@@ -1,0 +1,47 @@
+---
+name: "Prometheus"
+description: |
+  Prometheus is an open-source systems monitoring and alerting toolkit originally built at SoundCloud. It excels at recording real-time metrics in a time series database, allowing for dimensional data models, powerful querying via PromQL, and flexible alerting. Prometheus provides value by enabling comprehensive monitoring of cloud-native environments, allowing users to identify performance bottlenecks, troubleshoot issues, and optimize resource utilization. It's commonly used for monitoring applications, infrastructure, and services, especially within Kubernetes and other containerized environments.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://prometheus.io/"
+documentation: "https://prometheus.io/docs/introduction/overview/"
+license: "Apache-2.0"
+categories:
+  - "monitoring"
+  - "observability"
+  - "time-series-database"
+  - "alerting"
+  - "cncf"
+  - "metrics"
+status: "stable"
+---
+
+Prometheus is a powerful open-source monitoring and alerting toolkit widely adopted in cloud-native environments. It provides a robust, highly flexible solution for collecting, storing, and querying time-series data, making it the de facto standard for infrastructure and application monitoring.
+
+## Key Features
+
+-   **Dimensional Data Model:** Stores metrics as time series identified by a metric name and key-value pairs (labels). This allows for flexible and powerful data segmentation and querying.
+-   **PromQL (Prometheus Query Language):** A functional query language that lets users select and aggregate time series data in real-time. It's designed for operational use, making it easy to create dashboards and alerts.
+-   **Autonomous Single Server Node:** Each Prometheus server is independent, enhancing reliability. It pulls metrics from configured targets at specified intervals via HTTP.
+-   **Service Discovery:** Integrates with Kubernetes, Consul, DNS, and other services to dynamically discover new targets to scrape metrics from.
+-   **Alertmanager Integration:** Integrates with Alertmanager to handle alerts, de-duplicate, group, and route them to various notification channels.
+-   **Pushgateway:** Supports short-lived jobs that can push their metrics to a Pushgateway, which then exposes them for Prometheus to scrape.
+-   **Grafana Integration:** Widely used with Grafana for powerful data visualization and dashboarding.
+-   **High Availability:** Can be deployed in a highly available setup, though it's primarily designed as a single-node solution for data collection. Federation and remote storage allow for scaling beyond a single instance.
+
+## How It Works
+
+Prometheus primarily uses a "pull" model: it scrapes metrics endpoints (exposed over HTTP) from configured targets at regular intervals. These metrics are stored locally in its time-series database. Users can then query this data using PromQL for ad-hoc analysis, dashboarding (e.g., in Grafana), or defining alerting rules. When an alert condition is met, Prometheus sends an alert to Alertmanager, which handles the notification process.
+
+## Benefits
+
+-   **Comprehensive Monitoring:** Provides a holistic view of infrastructure and application health, enabling detailed performance analysis.
+-   **Flexible Data Model:** The label-based data model offers unparalleled flexibility for querying and aggregating data.
+-   **Powerful Alerting:** PromQL enables sophisticated alerting rules, ensuring timely notification of critical issues.
+-   **Open Source & Community Driven:** Benefits from a large and active community, extensive documentation, and a rich ecosystem of exporters and integrations.
+-   **Scalable & Resilient:** Designed to be horizontally scalable and resilient, capable of monitoring large and dynamic cloud-native environments.
+-   **Developer-Friendly:** Easy to set up and use, with a clear and concise data model.
+-   **Cloud-Native Standard:** The de facto standard for monitoring Kubernetes and other cloud-native applications.

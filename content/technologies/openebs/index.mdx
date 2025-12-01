@@ -1,0 +1,43 @@
+---
+name: "OpenEBS"
+description: |
+  OpenEBS is a leading open-source Container Attached Storage (CAS) solution that transforms commodity Kubernetes nodes into storage engines, enabling DevOps and platform teams to easily manage stateful workloads in cloud-native environments. It provides a granular, per-workload approach to storage, allowing teams to define and deploy storage policies tailored to the specific needs of each application. This empowers developers to build and manage storage as code, improving agility and reducing operational overhead.
+  
+  OpenEBS offers several benefits, including increased agility through automated storage provisioning, improved performance by localizing data access, enhanced resilience with built-in data protection mechanisms, and simplified operations via Kubernetes-native management. Its primary use cases include running stateful applications like databases, message queues, and CI/CD pipelines on Kubernetes, providing persistent storage for microservices, and enabling data portability across different cloud environments.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://openebs.io/"
+documentation: "https://openebs.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "storage"
+  - "cncf"
+  - "persistent-storage"
+  - "data-management"
+status: "stable"
+---
+
+OpenEBS is an open-source, Container Attached Storage (CAS) solution for Kubernetes that allows you to provision persistent storage directly from the Kubernetes control plane. It transforms available storage on your Kubernetes nodes into highly flexible and resilient storage volumes, enabling stateful applications to run seamlessly in cloud-native environments.
+
+## Key Features
+
+-   **Kubernetes-Native Storage:** OpenEBS is managed entirely through Kubernetes APIs, using Custom Resources (CRs) to define and manage storage volumes, making it easy to integrate into existing Kubernetes workflows.
+-   **Container Attached Storage (CAS):** It turns each Kubernetes node into a storage server, providing storage to containers from local disks or attached storage. This architecture brings storage intelligence directly to the application.
+-   **Multiple Storage Engines:** Supports various storage engines like Mayastor (NVMe-optimized), cStor (replicated storage), Jiva (replicated, highly available), and LocalPV (high-performance local storage).
+-   **Dynamic Volume Provisioning:** Dynamically provisions persistent volumes for stateful workloads based on StorageClass definitions.
+-   **Snapshots & Clones:** Provides capabilities for creating snapshots and clones of volumes, enabling data protection and efficient development/testing workflows.
+-   **High Availability & Disaster Recovery:** Offers data replication and high availability features to protect against data loss and ensure application uptime.
+-   **Performance Optimization:** Different engines are optimized for various performance needs, from high IOPS for databases to cost-effective archival.
+
+## Benefits
+
+-   **Runs Stateful Workloads on Kubernetes:** Enables databases, message queues, and other stateful applications to run reliably on Kubernetes with robust persistent storage.
+-   **Cost-Efficient:** Leverages existing node storage, potentially reducing cloud storage costs.
+-   **Increased Agility:** Automates storage provisioning and management, empowering developers with self-service capabilities for their storage needs.
+-   **Flexibility:** Offers a range of storage engines to match the performance and resilience requirements of different workloads.
+-   **Avoids Vendor Lock-in:** Provides a portable storage solution that works across any Kubernetes environment.
+-   **Simplified Operations:** Integrates seamlessly with Kubernetes, reducing the complexity of storage management for cloud-native applications.
+-   **Data Portability:** Facilitates moving data across different cloud environments or on-premises infrastructure.

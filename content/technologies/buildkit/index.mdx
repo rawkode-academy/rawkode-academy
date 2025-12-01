@@ -1,0 +1,32 @@
+---
+name: "BuildKit"
+description: |
+  BuildKit is a toolkit for converting source code to build artifacts in an efficient, expressive and reproducible manner. It's designed as a replacement for the classic Dockerfile build system, offering features such as concurrent dependency resolution, optimized layer caching, and support for sophisticated build strategies. It addresses common pain points of traditional Docker builds, like slow build times and inefficient image layering, leading to faster builds, smaller images, and improved security.
+logos:
+
+website: "https://github.com/moby/buildkit"
+documentation: "https://docs.docker.com/build/buildkit/"
+license: "Apache-2.0"
+categories:
+  - "container-build"
+  - "ci-cd"
+status: "stable"
+---
+
+BuildKit is a modern build subsystem for Docker and other container platforms, designed to improve performance, storage management, and feature extensibility compared to the legacy builder.
+
+## Key Features
+
+- **Concurrent Building:** BuildKit constructs a dependency graph of your build steps and executes independent steps in parallel, significantly speeding up build times.
+- **Advanced Caching:** It offers flexible caching mechanisms, including the ability to export build caches to a registry, allowing CI/CD pipelines to reuse cache layers across different runners.
+- ** LLB (Low-Level Build):** BuildKit uses an intermediate binary format called LLB. This decouples the frontend (like Dockerfile syntax) from the backend, allowing developers to extend build capabilities or create entirely new build languages without changing the core builder.
+- **Secret Management:** BuildKit provides secure ways to mount secrets (like API keys or SSH credentials) into the build process without persisting them in the final image layers.
+- **Rootless Execution:** It supports running in rootless mode, improving security by not requiring root privileges on the host system.
+
+## Architecture
+
+BuildKit consists of two main components:
+1.  **`buildkitd` (Daemon):** The background service that manages the build process, cache, and workers.
+2.  **`buildctl` (Client):** The command-line tool used to communicate with the daemon and trigger builds.
+
+While often used transparently within Docker (via `DOCKER_BUILDKIT=1`), it can also be used as a standalone tool for advanced use cases.

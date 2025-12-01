@@ -1,0 +1,43 @@
+---
+name: "Kamaji"
+description: |
+  Kamaji is an open-source Kubernetes control plane manager that drastically simplifies the management of multiple Kubernetes clusters. It allows you to create lightweight Kubernetes clusters, called Tenant Clusters, on top of a management cluster, without the overhead of managing full-blown Kubernetes distributions. Kamaji leverages the Kubernetes API itself to manage these Tenant Clusters, providing a native and familiar experience.
+  
+  Its value lies in reducing the cost and complexity associated with running numerous Kubernetes clusters, particularly in scenarios like multi-tenancy, development environments, and edge computing. It optimizes resource utilization, centralizes management, and simplifies the operational burden of maintaining multiple control planes.
+logos:
+  stacked: ./stacked.svg
+website: "https://kamaji.clastix.io/"
+documentation: "https://kamaji.clastix.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "cluster-management"
+  - "multi-tenancy"
+  - "platform-engineering"
+status: "stable"
+---
+
+Kamaji is an open-source Kubernetes Control Plane Manager that revolutionizes the way multiple Kubernetes clusters are managed. It enables the creation of lightweight, isolated "Tenant Clusters" by running their control plane components (API server, controller manager, scheduler, etcd) as standard Pods within a larger "Management Cluster." This innovative approach significantly reduces the operational overhead and resource consumption associated with managing numerous full-blown Kubernetes clusters.
+
+## Key Features
+
+-   **Hosted Control Planes:** Kamaji provisions and manages Kubernetes control planes as Pods, abstracting away the underlying infrastructure for the Tenant Clusters.
+-   **Multi-Tenancy:** Provides strong isolation and resource optimization for creating numerous tenant-specific Kubernetes clusters on a shared management plane.
+-   **Fast Provisioning:** Quickly spin up new Tenant Clusters, accelerating development, testing, and deployment workflows.
+-   **Streamlined Updates:** Simplifies the process of upgrading Kubernetes versions for Tenant Clusters, leveraging the management cluster's capabilities.
+-   **Resource Optimization:** By consolidating control planes, Kamaji reduces the overall resource footprint and operational costs of running multiple clusters.
+-   **Automated Management:** Handles the automated management of critical components like certificates and core add-ons for Tenant Clusters.
+-   **CNCF-Compliant:** Ensures that the provisioned Tenant Clusters are fully compliant with CNCF Kubernetes standards.
+
+## How it Works
+
+Kamaji deploys and manages Tenant Cluster control planes by creating custom resources within the Management Cluster. Its controllers watch these custom resources and orchestrate the deployment of Pods that make up the API server, controller manager, scheduler, and etcd for each Tenant Cluster. The worker nodes of the Tenant Clusters then connect to this hosted control plane.
+
+## Benefits
+
+-   **Reduced Operational Cost:** Significantly lowers the infrastructure and operational costs associated with managing a large number of Kubernetes clusters.
+-   **Simplified Cluster Lifecycle:** Automates the creation, management, and scaling of Kubernetes clusters.
+-   **Enhanced Agility:** Enables organizations to provide developers with on-demand Kubernetes clusters for various projects and environments.
+-   **Increased Security:** Provides isolation between tenant clusters, enhancing the security posture for multi-tenant platforms.
+-   **Abstraction:** Abstracts away the complexities of running Kubernetes control planes, allowing focus on application development.
+-   **Ideal for Platform-as-a-Service (PaaS) & Edge:** Perfect for building internal PaaS offerings, hybrid infrastructures, or managing clusters at the edge.

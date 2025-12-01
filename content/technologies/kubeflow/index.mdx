@@ -1,0 +1,43 @@
+---
+name: "Kubeflow"
+description: |
+  Kubeflow is an open-source machine learning (ML) platform designed to make deployments of ML workflows on Kubernetes simple, portable, and scalable. It provides a framework for building and deploying end-to-end ML pipelines, enabling data scientists and engineers to easily experiment, iterate, and manage ML models in production. Kubeflow abstracts away much of the underlying infrastructure complexity, allowing users to focus on developing and training their models.
+  
+  Kubeflow simplifies the process of deploying machine learning models across diverse environments, from local laptops to cloud platforms. It offers components for tasks such as data preprocessing, model training, hyperparameter tuning, model serving, and pipeline orchestration. By leveraging Kubernetes, Kubeflow enables users to scale their ML workloads on demand, improve resource utilization, and automate the deployment and management of ML applications. Main use cases include building and deploying ML-powered applications, streamlining ML workflows, and democratizing access to ML capabilities within organizations.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://www.kubeflow.org/"
+documentation: "https://www.kubeflow.org/docs/started/"
+license: "Apache-2.0"
+categories:
+  - "machine-learning"
+  - "kubernetes"
+  - "mlops"
+  - "ai"
+  - "data-science"
+status: "stable"
+---
+
+Kubeflow is an open-source platform dedicated to making machine learning (ML) deployments on Kubernetes simple, portable, and scalable. It provides a comprehensive toolkit for building, deploying, and managing end-to-end ML workflows, allowing data scientists and ML engineers to focus on model development rather than infrastructure complexities.
+
+## Key Features (Components)
+
+Kubeflow consists of various components that can be used together or independently to manage different stages of the ML lifecycle:
+
+-   **Jupyter Notebooks:** Provides JupyterLab instances for interactive development, experimentation, and data exploration directly within Kubernetes.
+-   **Training Operators:** Supports distributed training of ML models using popular frameworks like TensorFlow (TFJob), PyTorch (PyTorchJob), and Apache MXNet (MXJob) on Kubernetes.
+-   **KFServing (KServe):** A serverless inference platform for deploying and managing ML models at scale, offering features like autoscaling, canary rollouts, and explainability.
+-   **Kubeflow Pipelines:** An orchestration engine for building and executing reproducible ML workflows, from data preparation to model deployment.
+-   **Katib:** A scalable and flexible hyperparameter tuning and neural architecture search (NAS) system for optimizing ML models.
+-   **Metadata:** Tracks artifacts, executions, and other metadata generated during ML workflows for better lineage and reproducibility.
+
+## Benefits
+
+-   **Portability:** ML workflows can run consistently across various environments, from local machines to public clouds and on-premise Kubernetes clusters.
+-   **Scalability:** Leverages Kubernetes to scale ML workloads on demand, efficiently utilizing cluster resources for training and serving.
+-   **Simplified ML Operations (MLOps):** Provides tools for automating, managing, and monitoring ML pipelines, bridging the gap between data science and operations.
+-   **Democratized ML:** Makes advanced ML capabilities accessible to a broader audience of data scientists and developers.
+-   **Resource Efficiency:** Optimizes the use of compute resources (CPUs and GPUs) for ML tasks.
+-   **Community Driven:** Benefits from a vibrant open-source community contributing tools, integrations, and best practices.

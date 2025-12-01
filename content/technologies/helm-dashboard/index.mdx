@@ -1,0 +1,39 @@
+---
+name: "Helm Dashboard"
+description: |
+  Helm Dashboard, while no longer actively maintained by the Helm project itself, provided a web-based user interface for managing Helm charts and deployments within a Kubernetes cluster. It aimed to simplify the process of installing, upgrading, and deleting applications packaged as Helm charts, making it more accessible to users who preferred a visual interface over command-line interactions. Its primary value was enhancing the usability of Helm, particularly for teams less familiar with CLI tools, enabling them to easily monitor chart deployments, view release history, and inspect resources deployed by Helm.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://helm.sh/"
+documentation: "https://helm.sh/docs/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "helm"
+  - "dashboard"
+  - "developer-tools"
+  - "ui"
+status: "abandoned"
+---
+
+Helm Dashboard is an open-source web-based user interface designed to provide a visual overview and management capabilities for Helm charts and releases within a Kubernetes cluster. While it was once a valuable tool for simplifying Helm operations, it is currently unmaintained.
+
+## Key Features (as of its active development)
+
+-   **Visual Release Management:** Provided a clear overview of all installed Helm charts (releases) across your Kubernetes clusters.
+-   **Revision History:** Allowed users to inspect the history of each Helm release, including manifest differences between revisions.
+-   **Resource Inspection:** Enabled browsing of the actual Kubernetes resources (Deployments, Services, Pods, etc.) that were deployed by a specific Helm chart.
+-   **Rollback & Upgrade:** Facilitated easy rollback to previous versions or upgrades to new versions of applications directly from the UI.
+-   **Problem Scanning Integration:** Supported integration with various problem scanners to identify issues within deployed applications.
+-   **Multi-Cluster Support:** Capable of managing Helm releases across multiple Kubernetes clusters from a single interface.
+-   **Local or In-Cluster Deployment:** Could be run as a standalone binary locally or deployed directly into a Kubernetes cluster.
+
+## Benefits
+
+-   **Simplified Helm Operations:** Made Helm more accessible to users who preferred a graphical interface over command-line tools.
+-   **Enhanced Visibility:** Provided a visual "pane of glass" for understanding the state of Helm-managed applications.
+-   **Faster Troubleshooting:** Visual diffs and resource inspection aided in quickly identifying and debugging deployment issues.
+
+## Current Status
+
+It is important to note that **Helm Dashboard is currently unmaintained**. While the core Helm project is actively developed by the CNCF community, the dashboard component, as provided by Komodor, is no longer receiving updates. Users should be aware of this status when considering its use in production environments.

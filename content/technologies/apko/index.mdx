@@ -1,0 +1,40 @@
+---
+name: "apko"
+description: |
+  apko is a tool for building minimal, unprivileged container images. It emphasizes reproducibility and security by leveraging declarative configuration and cryptographic verification of all dependencies. Apko eliminates the need for Dockerfiles, offering a more streamlined and auditable process for creating base images and application containers.
+  
+  Apko provides value by reducing image size, improving security posture through a minimal attack surface, and enhancing reproducibility. Its main use cases include creating base images for Kubernetes deployments, building lightweight application containers, and facilitating secure software supply chains.
+logos:
+
+website: "https://github.com/chainguard-dev/apko"
+documentation: "https://github.com/chainguard-dev/apko#readme"
+license: "Apache-2.0"
+categories:
+  - "container-build"
+  - "supply-chain"
+status: "stable"
+---
+
+apko is a command-line tool for building OCI container images from APK packages. It is designed to replace traditional `Dockerfile` builds with a purely declarative approach, resulting in smaller, safer, and more reproducible images.
+
+## Key Features
+
+- **Reproducibility:** apko builds are fully reproducible. Given the same configuration file and source repositories, it produces a bitwise-identical image every time.
+- **Security by Design:** It builds "distroless" style images by default—containing only the packages you explicitly request. This minimizes the attack surface and reduces vulnerability noise.
+- **SBOM Generation:** Every build automatically generates a comprehensive Software Bill of Materials (SBOM), making it easier to track dependencies and comply with security standards.
+- **No Dockerfiles:** Images are defined in declarative YAML, removing the need for imperative build steps and ensuring a cleaner build process.
+
+## How It Works
+
+Instead of running `RUN` commands in a Dockerfile, you define your image in a YAML file. This configuration specifies:
+
+1.  **Repositories:** Where to fetch APK packages (e.g., Alpine Linux or Wolfi repositories).
+2.  **Packages:** The list of packages to install.
+3.  **Accounts:** Users and groups to create.
+4.  **Entrypoint:** The command to run when the container starts.
+
+apko then resolves the dependencies, fetches the packages, and assembles the filesystem layer-by-layer without needing a container runtime daemon.
+
+## Integration
+
+apko is often used in conjunction with **melange**, a tool for building APK packages from source. Together, they provide a complete pipeline for building secure software supply chains: `melange` compiles the software into APKs, and `apko` assembles those APKs into a final OCI image.

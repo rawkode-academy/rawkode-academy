@@ -1,7 +1,6 @@
 ---
 export const prerender = true;
 
-import SectionHeader from "@/components/common/SectionHeader.vue";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -41,264 +40,56 @@ try {
 	title="Technologies"
 	description="Explore the various technologies covered on Rawkode Academy."
 >
-	<div class="flex flex-col gap-12 technology-feeds">
-		<style>
-			@reference "@/styles/global.css";
-
-			:root {
-				--primary: #5f5ed7;
-				--secondary: #00ceff;
-			}
-
-			.technology-feeds {
-				display: flex;
-				flex-direction: column;
-				gap: 3rem;
-			}
-
-			.technology-feeds > *:not(:last-child) {
-				position: relative;
-				padding-bottom: 3rem;
-			}
-
-			.technology-hero {
-				@apply max-w-7xl mx-auto rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/70 px-5 py-6 md:px-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between;
-				box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-			}
-
-			.dark .technology-hero {
-				box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
-			}
-
-			.technology-hero .badge {
-				@apply inline-flex items-center gap-2 self-start text-xs font-semibold tracking-wide uppercase px-3 py-1 rounded-full bg-primary/10 text-primary dark:bg-primary/20;
-			}
-
-			.hero-copy {
-				@apply flex-1 flex flex-col gap-3;
-			}
-
-			.hero-copy h1 {
-				@apply text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white;
-			}
-
-			.hero-copy p {
-				@apply text-sm md:text-base text-gray-600 dark:text-gray-300 max-w-2xl;
-			}
-
-			.hero-controls {
-				@apply w-full md:max-w-md flex flex-col gap-4;
-			}
-
-			@keyframes expandFromCenter {
-				0% {
-					transform: scaleX(0);
-					opacity: 0;
-				}
-				100% {
-					transform: scaleX(1);
-					opacity: 1;
-				}
-			}
-
-			@keyframes separatorScroll {
-				0% {
-					transform: scaleX(0);
-					opacity: 0;
-				}
-				25%,
-				75% {
-					transform: scaleX(1);
-					opacity: 1;
-				}
-				100% {
-					transform: scaleX(0);
-					opacity: 0;
-				}
-			}
-
-			.technology-feeds > *:not(:last-child)::after {
-				content: "";
-				position: absolute;
-				bottom: 0;
-				left: 0;
-				width: 100%;
-				height: 4px;
-				background: linear-gradient(
-					to right,
-					var(--primary),
-					var(--secondary),
-					var(--primary)
-				);
-				transform-origin: center;
-
-				/* Fallback animation */
-				animation: expandFromCenter 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-
-				/* Scroll-linked animation */
-				animation-timeline: view();
-				animation-name: separatorScroll;
-				animation-range: entry-crossing exit-crossing; /* More fluid range */
-				animation-timing-function: ease; /* Smooth easing */
-			}
-
-			.tech-card {
-				@apply block rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700;
-				transform: translateY(0);
-				transition:
-					transform 0.3s ease,
-					box-shadow 0.3s ease,
-					border-color 0.3s ease;
-			}
-
-			.tech-card:hover {
-				transform: translateY(-4px);
-				border-color: rgba(95, 94, 215, 0.3);
-			}
-
-			.tech-card .logo-container {
-				@apply relative w-full h-40 p-6 flex items-center justify-center overflow-hidden;
-				background:
-					linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
-					linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
-					linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
-					linear-gradient(-45deg, transparent 75%, #e5e7eb 75%);
-				background-size: 16px 16px;
-				background-position:
-					0 0,
-					0 8px,
-					8px -8px,
-					-8px 0px;
-				background-color: #f3f4f6;
-				border-bottom: 1px solid #e5e7eb;
-				position: relative;
-			}
-
-			.tech-card .logo-container::before {
-				content: "";
-				position: absolute;
-				inset: 0;
-				background: radial-gradient(
-					circle at center,
-					rgba(95, 94, 215, 0.02) 0%,
-					transparent 70%
-				);
-				z-index: 1;
-			}
-
-			.dark .tech-card .logo-container {
-				background:
-					linear-gradient(45deg, #1f2937 25%, transparent 25%),
-					linear-gradient(-45deg, #1f2937 25%, transparent 25%),
-					linear-gradient(45deg, transparent 75%, #1f2937 75%),
-					linear-gradient(-45deg, transparent 75%, #1f2937 75%);
-				background-size: 16px 16px;
-				background-position:
-					0 0,
-					0 8px,
-					8px -8px,
-					-8px 0px;
-				background-color: #111827;
-				border-bottom-color: #374151;
-			}
-
-			.tech-card img {
-				@apply w-24 h-24 object-contain relative;
-				z-index: 10;
-				filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
-				transition: all 0.3s ease;
-			}
-
-			.dark .tech-card img {
-				filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4)) brightness(1.05);
-			}
-
-			.tech-card:hover img {
-				transform: scale(1.08);
-			}
-
-			.tech-card .content {
-				@apply p-5 flex flex-col gap-3;
-			}
-
-			.tech-card .title-row {
-				@apply flex items-start justify-between gap-2;
-			}
-
-			.tech-card h3 {
-				@apply text-xl font-bold text-gray-900 dark:text-white leading-tight;
-			}
-
-			.tech-card p {
-				@apply text-gray-600 dark:text-gray-400 text-sm leading-relaxed;
-				display: -webkit-box;
-				-webkit-line-clamp: 3;
-				-webkit-box-orient: vertical;
-				overflow: hidden;
-			}
-
-			.tech-card .learn-more {
-				@apply text-sm font-medium flex items-center gap-1 mt-auto;
-				color: rgba(95, 94, 215, 1);
-			}
-
-			.dark .tech-card .learn-more {
-				color: rgba(147, 147, 255, 1);
-			}
-
-			.tech-card .learn-more svg {
-				@apply w-4 h-4 transition-transform;
-			}
-
-			.tech-card:hover .learn-more svg {
-				transform: translateX(2px);
-			}
-		</style>
-
-		<!-- Technology intro -->
-		<section class="w-full px-4">
-			<div class="technology-hero">
-				<div class="hero-copy">
-					<span class="badge">Technology Hub</span>
-					<h1>Explore the world of technologies</h1>
-					<p>
-						Scan Rawkode Academy&apos;s catalogue of tools and platforms without scrolling past fluff.
-						Start typing a name to find what you&apos;re looking for.
-					</p>
-					<div class="text-sm text-gray-500 dark:text-gray-400">
-						Tracking <span class="font-semibold text-gray-900 dark:text-white" data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies.
+	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
+		<!-- Hero Section -->
+		<section class="w-full">
+			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
+				<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+					<!-- Hero Copy -->
+					<div class="flex-1 space-y-4">
+						<span class="glass-chip">
+							<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+							</svg>
+							Technology Hub
+						</span>
+						<h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
+							Explore technologies
+						</h1>
+						<p class="text-gray-600 dark:text-gray-300 max-w-xl">
+							Browse Rawkode Academy's catalogue of tools and platforms. Start typing to find what you're looking for.
+						</p>
 					</div>
-				</div>
-				<div class="hero-controls">
-					<div class="flex flex-col gap-2">
-						<label for="technology-search" class="text-sm font-medium text-gray-700 dark:text-gray-200">Search by name</label>
+
+					<!-- Search Controls -->
+					<div class="w-full lg:w-96 space-y-3">
+						<label for="technology-search" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+							Search technologies
+						</label>
 						<div class="relative">
-							<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+							<svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 							</svg>
 							<input
 								id="technology-search"
 								type="search"
-								placeholder="e.g. Grafana, Crossplane, Envoy..."
-								class="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/70 py-3 pl-11 pr-4 text-base text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
+								placeholder="e.g. Grafana, Crossplane, Kubernetes..."
+								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-gray-900 dark:text-white placeholder-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
 								autocomplete="off"
 							/>
 						</div>
+						<p class="text-sm text-gray-500 dark:text-gray-400">
+							Showing <span class="font-medium text-gray-700 dark:text-gray-200" data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies
+						</p>
 					</div>
-					<p class="text-xs text-gray-500 dark:text-gray-400">
-						Showing <span data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies.
-					</p>
 				</div>
 			</div>
 		</section>
 
-		<!-- Technologies Section -->
-		<section id="technologies" class="w-full px-4">
+		<!-- Technologies Grid -->
+		<section id="technologies" class="w-full">
 			<div class="max-w-7xl mx-auto">
-				<SectionHeader title="Technologies" showSeparator={false} class="mb-6" />
-				<div
-					class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-				>
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 					{
 						technologies.map((tech) => {
 							const searchKeywords = tech.name.toLowerCase();
@@ -306,26 +97,30 @@ try {
 							return (
 								<a
 									href={`/technology/${tech.id}`}
-									class="tech-card"
+									class="tech-card-link glass-card-shimmer card-hover flex flex-col overflow-hidden"
 									data-keywords={searchKeywords}
 								>
-									<div class="logo-container">
+									{/* Logo Container */}
+									<div class="glass-media-brand h-36 flex items-center justify-center p-6">
 										<img
 											src={tech.logo ?? '/apple-touch-icon.png'}
 											alt={`${tech.name} Logo`}
+											class="w-20 h-20 object-contain drop-shadow-lg"
 											onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
 										/>
 									</div>
-									<div class="content">
-										<div class="title-row">
-											<h3>{tech.name}</h3>
-										</div>
-										
-										<p>{tech.description}</p>
-										
-										<span class="learn-more">
+									
+									{/* Content */}
+									<div class="flex-1 p-5 flex flex-col gap-3 relative z-10">
+										<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+											{tech.name}
+										</h3>
+										<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 flex-1">
+											{tech.description}
+										</p>
+										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
 											Learn more
-											<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+											<svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
 												<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
 											</svg>
 										</span>
@@ -335,8 +130,16 @@ try {
 						})
 					}
 				</div>
-				<div id="technology-empty-state" class="hidden text-center py-12 text-gray-500 dark:text-gray-400">
-					No technologies match your search. Try a different term.
+				
+				<!-- Empty State -->
+				<div id="technology-empty-state" class="hidden">
+					<div class="glass-card-shimmer rounded-2xl p-12 text-center max-w-md mx-auto">
+						<svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+						</svg>
+						<p class="text-gray-600 dark:text-gray-400 font-medium">No technologies match your search</p>
+						<p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different term</p>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -345,7 +148,7 @@ try {
 			document.addEventListener("DOMContentLoaded", () => {
 				const searchInput = document.getElementById("technology-search") as HTMLInputElement | null;
 				const cards = Array.from(
-					document.querySelectorAll<HTMLElement>("#technologies .tech-card"),
+					document.querySelectorAll<HTMLElement>("#technologies .tech-card-link"),
 				);
 				const emptyState = document.getElementById("technology-empty-state");
 				const countTargets = document.querySelectorAll<HTMLElement>("[data-tech-visible-count]");

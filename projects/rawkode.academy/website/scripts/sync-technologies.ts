@@ -28,9 +28,9 @@ function parseArgs(): Args {
 	const limit = parseInt(get("--limit", "1000")!, 10);
 	const require = createRequire(import.meta.url);
 	const pkgPath = require.resolve(
-		"@rawkodeacademy/content-technologies/package.json",
+		"@rawkodeacademy/content/package.json",
 	);
-	const outDir = join(dirname(pkgPath), "data");
+	const outDir = join(dirname(pkgPath), "technologies");
 	return { endpoint, limit, outDir };
 }
 

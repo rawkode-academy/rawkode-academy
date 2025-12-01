@@ -1,0 +1,40 @@
+---
+name: "CUE"
+description: |
+  CUE (Configure, Unify, Execute) is a constraint-based, gradual typing configuration language. It allows users to define configurations that are both human-readable and machine-verifiable. CUE unifies data definition, configuration, validation, and data templating into a single language, providing a powerful tool for managing complexity in modern software systems.
+  
+  The value of CUE lies in its ability to simplify configuration management, reduce errors, and improve the reliability of deployments. Its use cases include defining Kubernetes configurations, generating API schemas, managing infrastructure as code, data validation, and simplifying CI/CD pipelines. It promotes consistency and avoids configuration drift by enforcing constraints.
+logos:
+  icon: ./icon.svg
+website: "https://cuelang.org/"
+documentation: "https://cuelang.org/docs/"
+license: "Apache-2.0"
+categories:
+  - "configuration"
+  - "validation"
+  - "templating"
+  - "schema"
+status: "stable"
+---
+
+CUE is a powerful open-source language and runtime that brings declarative configuration, schema validation, and code generation together. It's designed to simplify the complex world of modern system configuration, particularly in cloud-native environments.
+
+## Core Principles
+
+-   **Configuration as Data:** CUE treats configuration as data, allowing it to be validated, unified, and reasoned about programmatically.
+-   **Unification:** The core operation in CUE is unification. When two CUE values are unified, they produce a new value that satisfies the constraints of both, or an error if they conflict. This is used for merging configurations and validating against schemas.
+-   **Gradual Typing:** CUE supports gradual typing, meaning you can start with loosely defined configurations and incrementally add strictness and validation as your needs evolve.
+
+## Key Features
+
+-   **Schema Definition & Validation:** Define precise schemas for your configurations. CUE can then validate your configuration files against these schemas, catching errors before deployment.
+-   **Code & Configuration Generation:** Generate configuration files (JSON, YAML), API schemas (OpenAPI), and even code from CUE definitions. This ensures consistency between your systems.
+-   **Templating & Overlays:** CUE's unification model provides a powerful and safe alternative to traditional templating languages. You can apply overlays to base configurations without introducing unexpected side effects.
+-   **Cross-Domain Integration:** Seamlessly integrate CUE with various tools and formats, including Kubernetes, OpenAPI, Protobuf, and JSON Schema.
+
+## Use Cases
+
+-   **Kubernetes Configuration:** Define and validate Kubernetes manifests, ensuring they conform to best practices and operational policies.
+-   **API Design:** Use CUE to define API schemas, which can then be used to generate OpenAPI specifications and client/server code.
+-   **Infrastructure as Code:** Manage infrastructure configurations with strong validation and modularity.
+-   **Data Validation:** Validate any structured data, ensuring correctness and consistency.

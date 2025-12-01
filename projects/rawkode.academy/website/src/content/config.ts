@@ -1,15 +1,15 @@
 import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
 import {
-	createSchema as createTechnologySchema,
-	resolveDataDirSync as resolveTechnologiesDataDir,
-} from "@rawkodeacademy/content-technologies";
+	createTechnologySchema,
+	resolveContentDirSync,
+} from "@rawkodeacademy/content";
 
 // Local, file-based content collections for videos, shows, and technologies.
 // These are populated by scripts/sync-graphql-content.ts during build or on demand.
 
 const videos = defineCollection({
-	loader: glob({ pattern: ["**/*.{md,mdx}"], base: "./content/videos" }),
+	loader: glob({ pattern: ["**/*.{md,mdx}"], base: resolveContentDirSync("videos") }),
 	schema: z.object({
 		id: z.string(), // canonical slug identifier
 		slug: z.string(), // kept for compatibility; equals id
@@ -45,7 +45,7 @@ const videos = defineCollection({
 });
 
 const shows = defineCollection({
-	loader: glob({ pattern: ["**/*.{md,mdx}"], base: "./content/shows" }),
+	loader: glob({ pattern: ["**/*.{md,mdx}"], base: resolveContentDirSync("shows") }),
 	schema: z.object({
 		id: z.string(),
 		name: z.string(),
@@ -62,7 +62,7 @@ const resourceSchema = z.object({
 	title: z.string(),
 	description: z.string().optional(),
 	type: z.enum(["url", "file", "embed"]),
-	url: z.string().url().optional(),
+	url: z.union([z.string().url(), z.string().startsWith("/")]).optional(),
 	filePath: z.string().optional(),
 	embedConfig: z
 		.object({
@@ -87,7 +87,7 @@ const resourceSchema = z.object({
 const people = defineCollection({
 	loader: glob({
 		pattern: ["**/*.json"],
-		base: "./content/people",
+		base: resolveContentDirSync("people"),
 	}),
 	schema: z.object({
 		name: z.string(),
@@ -109,7 +109,7 @@ const people = defineCollection({
 const articles = defineCollection({
 	loader: glob({
 		pattern: ["**/*.{md,mdx}"],
-		base: "./content/articles",
+		base: resolveContentDirSync("articles"),
 	}),
 	schema: ({ image }) =>
 		z.object({
@@ -155,7 +155,7 @@ const articles = defineCollection({
 const technologies = defineCollection({
 	loader: glob({
 		pattern: ["**/*.{md,mdx}"],
-		base: resolveTechnologiesDataDir(),
+		base: resolveContentDirSync("technologies"),
 	}),
 	schema: ({ image }) => createTechnologySchema(z, { image }),
 });
@@ -163,7 +163,7 @@ const technologies = defineCollection({
 const series = defineCollection({
 	loader: glob({
 		pattern: ["**/*.mdx"],
-		base: "./content/series",
+		base: resolveContentDirSync("series"),
 	}),
 	schema: ({ image }) =>
 		z.object({
@@ -180,7 +180,7 @@ const series = defineCollection({
 const adrs = defineCollection({
 	loader: glob({
 		pattern: ["**/*.md"],
-		base: "./content/adrs",
+		base: resolveContentDirSync("adrs"),
 	}),
 	schema: () =>
 		z.object({
@@ -193,7 +193,7 @@ const adrs = defineCollection({
 const testimonials = defineCollection({
 	loader: glob({
 		pattern: ["**/*.yaml", "**/*.yml"],
-		base: "./content/testimonials",
+		base: resolveContentDirSync("testimonials"),
 	}),
 	schema: z.object({
 		quote: z.string(),
@@ -210,7 +210,7 @@ const testimonials = defineCollection({
 const courses = defineCollection({
 	loader: glob({
 		pattern: ["*.mdx", "*.md"],
-		base: "./content/courses",
+		base: resolveContentDirSync("courses"),
 	}),
 	schema: ({ image }) =>
 		z.object({
@@ -254,7 +254,7 @@ const courses = defineCollection({
 const courseModules = defineCollection({
 	loader: glob({
 		pattern: ["*/*.mdx", "*/*.md"],
-		base: "./content/courses",
+		base: resolveContentDirSync("courses"),
 	}),
 	schema: ({ image }) =>
 		z.object({
@@ -291,7 +291,7 @@ const courseModules = defineCollection({
 const changelog = defineCollection({
 	loader: glob({
 		pattern: ["**/*.md", "**/*.mdx"],
-		base: "./content/changelog",
+		base: resolveContentDirSync("changelog"),
 	}),
 	schema: z.object({
 		title: z.string(),
@@ -306,7 +306,7 @@ const changelog = defineCollection({
 const learningPaths = defineCollection({
 	loader: glob({
 		pattern: ["**/*.md", "**/*.mdx"],
-		base: "./content/learning-paths",
+		base: resolveContentDirSync("learning-paths"),
 	}),
 	schema: z.object({
 		title: z.string(),

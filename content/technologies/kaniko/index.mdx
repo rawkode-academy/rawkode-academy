@@ -1,0 +1,48 @@
+---
+name: "Kaniko"
+description: |
+  Kaniko is a tool to build container images from a Dockerfile, inside a container or Kubernetes cluster. Unlike Docker-in-Docker (DinD), Kaniko doesn't depend on a Docker daemon and executes each command in the Dockerfile completely in userspace. This allows building images in environments that can't easily or securely run a Docker daemon, such as Kubernetes clusters. Kaniko significantly enhances security and portability by eliminating the need for privileged containers or Docker daemon access during the image building process.
+  
+  Its primary use cases include building container images within CI/CD pipelines running in Kubernetes, automating image builds in cloud environments where Docker daemons are not available, and enhancing the security of image builds by avoiding privileged mode.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://github.com/GoogleContainerTools/kaniko"
+documentation: "https://github.com/GoogleContainerTools/kaniko/blob/main/README.md"
+license: "Apache-2.0"
+categories:
+  - "container-build"
+  - "ci-cd"
+  - "kubernetes"
+  - "security"
+  - "image-management"
+status: "stable"
+---
+
+Kaniko is an open-source tool developed by Google that enables building container images from a Dockerfile, entirely within a container or a Kubernetes cluster, without relying on a Docker daemon. This approach addresses key security and operational challenges associated with traditional Docker builds in cloud-native environments.
+
+## Key Features
+
+-   **Daemonless Builds:** Unlike traditional Docker builds, Kaniko does not require a Docker daemon. It executes each command in the Dockerfile in userspace within the container, making it ideal for environments where running a Docker daemon is not feasible or desirable (e.g., in CI/CD pipelines within Kubernetes).
+-   **Security:** Eliminates the need for privileged containers (like Docker-in-Docker) and Docker socket access, significantly reducing the attack surface and enhancing the security of your build processes.
+-   **Reproducibility:** Kaniko aims for reproducible builds by executing Dockerfile commands sequentially and capturing changes to the filesystem.
+-   **Cloud-Native Integration:** Designed to work seamlessly within Kubernetes and other containerized environments, making it a natural fit for cloud-native CI/CD pipelines.
+-   **Flexible Build Contexts:** Supports various sources for the build context, including local directories, GCS, S3, and Git repositories.
+-   **Layer & Base Image Caching:** Provides efficient caching mechanisms for layers and base images to speed up subsequent builds.
+-   **Multi-Registry Support:** Can push built images to multiple container registries, including Docker Hub, Google Container Registry (GCR), Amazon Elastic Container Registry (ECR), and Azure Container Registry (ACR).
+
+## How it Works
+
+Kaniko is typically run as a container. You provide it with a Dockerfile, a build context, and a destination for the built image. Kaniko then:
+
+1.  Fetches the base image specified in the Dockerfile.
+2.  Executes each instruction in the Dockerfile step-by-step.
+3.  Each command's outcome is committed as a new layer.
+4.  Finally, pushes the completed image to the target container registry.
+
+## Benefits
+
+-   **Enhanced Security:** Build images in non-privileged containers, reducing security risks in shared environments.
+-   **Simplified CI/CD:** Streamlines container image builds in Kubernetes-native CI/CD pipelines (e.g., Tekton, Argo Workflows).
+-   **No Docker Daemon Dependency:** Eliminates the overhead and complexity of managing a Docker daemon on build agents.
+-   **Improved Portability:** Builds are isolated and self-contained, ensuring consistency across different build environments.
+-   **Faster Feedback Loops:** Enables quick and efficient image builds directly within your cluster.

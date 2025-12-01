@@ -1,0 +1,40 @@
+---
+name: "jsPolicy"
+description: |
+  jsPolicy is a lightweight, policy-as-code engine designed for modern cloud-native environments. It allows you to define and enforce policies using JavaScript, providing a flexible and programmable way to govern various aspects of your infrastructure, such as security, compliance, and resource management. By leveraging JavaScript, jsPolicy simplifies policy creation, testing, and deployment, enabling organizations to automate policy enforcement and improve operational efficiency.
+  
+  jsPolicy's main use cases include validating Kubernetes resources, enforcing security best practices across applications, controlling API access, and automating compliance checks. It integrates seamlessly with existing DevOps workflows and tools, allowing you to build a robust and scalable policy enforcement system.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://jspolicy.com/"
+documentation: "https://jspolicy.com/docs/"
+license: "Apache-2.0"
+categories:
+  - "policy-engine"
+  - "kubernetes"
+  - "security"
+  - "developer-tools"
+  - "governance"
+status: "stable"
+---
+
+jsPolicy is a powerful policy-as-code engine for Kubernetes that allows platform engineers and developers to define and enforce policies using JavaScript or TypeScript. It provides a flexible, fast, and programmable way to govern various aspects of your Kubernetes infrastructure and applications.
+
+## Key Features
+
+-   **JavaScript/TypeScript for Policies:** Write policies using familiar JavaScript or TypeScript, leveraging the vast ecosystem of NPM packages and existing programming skills.
+-   **Three Policy Types:** Supports Validating Policies (preventing invalid resources), Mutating Policies (modifying resources before creation/update), and Controller Policies (automating actions based on resource changes).
+-   **Fast Execution (V8 Engine):** Policies are executed with Google's V8 JavaScript engine, ensuring high performance and low latency.
+-   **Easy Cluster Access:** Provides a simple API to interact with Kubernetes resources within your policies, enabling dynamic decision-making.
+-   **Testing & Debugging:** Policies can be easily tested and debugged locally using standard JavaScript tooling.
+-   **Version Control:** Store policies in Git alongside your application code, enabling GitOps workflows for policy management.
+-   **WebAssembly (WASM) Support:** Can compile policies to WebAssembly for even greater portability and security.
+
+## Benefits
+
+-   **Enhanced Security:** Enforce security best practices, prevent misconfigurations, and ensure compliance across your Kubernetes clusters.
+-   **Simplified Policy Logic:** Express complex policy logic in a familiar programming language, making policies easier to write, read, and maintain compared to YAML-based solutions.
+-   **Improved Governance:** Automate governance over Kubernetes resources, reducing manual intervention and human error.
+-   **Increased Developer Productivity:** Empowers developers to define and manage policies themselves, reducing bottlenecks and accelerating development.
+-   **Extensibility:** Leverage the rich JavaScript ecosystem for advanced policy logic and integrations.
+-   **Faster Feedback Loop:** Test policies locally before deployment, catching issues early in the development cycle.

@@ -1,0 +1,49 @@
+---
+name: "melange"
+description: |
+  Melange is a tool from Chainguard for building container images from source in a reproducible and secure manner. It focuses on producing minimal, distroless-style images with a strong emphasis on supply chain security. Melange addresses the challenges of traditional Dockerfile-based builds by utilizing a declarative pipeline defined in a YAML configuration. This declarative approach improves reproducibility and allows for precise control over the build process.
+  
+  Melange's value lies in its ability to generate highly secure and lightweight container images with reproducible builds, reducing the attack surface and improving overall security posture. Main use cases include building base images for cloud-native applications, creating secure and reproducible build environments, and securing the software supply chain for containerized workloads. It's particularly useful for organizations that prioritize security and want to ensure the integrity of their container images.
+logos:
+  # Logo files (icon.svg, horizontal.svg, stacked.svg) are missing.
+website: "https://github.com/chainguard-dev/melange"
+documentation: "https://github.com/chainguard-dev/melange#readme"
+license: "Apache-2.0"
+categories:
+  - "container-build"
+  - "supply-chain"
+  - "reproducible-builds"
+  - "apk-packaging"
+  - "security"
+status: "stable"
+---
+
+Melange is a declarative image build tool developed by Chainguard, focused on creating minimal, secure, and reproducible container images from source. It leverages a YAML-based definition to specify build steps and dependencies, providing a robust solution for enhancing software supply chain security.
+
+## Key Features
+
+-   **Declarative Build Pipelines:** Define the entire build process, including dependencies, compilers, and build commands, in a declarative YAML file, ensuring reproducibility.
+-   **Reproducible Builds:** Melange aims for bit-for-bit reproducible builds, meaning that given the same source code and build instructions, it will always produce an identical output image. This is crucial for software supply chain integrity.
+-   **Minimal Images (Distroless-style):** Builds highly optimized, "distroless" container images that contain only the necessary application components and their dependencies, significantly reducing the attack surface.
+-   **Software Bill of Materials (SBOM) Generation:** Automatically generates a comprehensive SBOM for every built image, providing transparency into all included components and their versions.
+-   **No Docker Daemon Dependency:** Operates independently of a Docker daemon, allowing for secure builds within CI/CD environments without privileged access.
+-   **APK Package Generation:** Specializes in creating APK packages, making it a powerful tool for building images based on Alpine Linux or Chainguard's Wolfi distribution.
+
+## How It Works
+
+Melange uses a declarative YAML specification to outline:
+
+1.  **Package Definition:** Details about the software being built (name, version, description).
+2.  **Build Steps:** Commands to fetch source code, compile, and install the software.
+3.  **Dependencies:** Runtime and build-time dependencies, which are resolved and installed by Melange.
+
+Melange then executes these steps within a hermetic build environment, producing an APK package and optionally assembling it into a container image.
+
+## Benefits
+
+-   **Enhanced Supply Chain Security:** By providing reproducible builds, SBOMs, and minimal images, Melange significantly strengthens the security posture of your software supply chain.
+-   **Reduced Attack Surface:** Minimal images containing only essential components reduce the number of potential vulnerabilities.
+-   **Faster Builds:** Optimized build processes and minimal image sizes contribute to faster build times.
+-   **Consistency Across Environments:** Ensures that the same image is built every time, regardless of the build environment.
+-   **Compliance:** Facilitates compliance with security standards that require SBOMs and verifiable builds.
+-   **Integration with apko:** Often used in conjunction with `apko` (another Chainguard tool) to assemble APK packages built by Melange into complete OCI images.

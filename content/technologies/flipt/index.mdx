@@ -1,0 +1,44 @@
+---
+name: "Flipt"
+description: |
+  Flipt is an open-source feature flag solution that allows developers to release features with confidence and manage them centrally. It offers a centralized control plane to manage feature flags across multiple applications and environments, enabling techniques like dark launches, A/B testing, and canary releases. By decoupling feature releases from code deployments, Flipt reduces the risk associated with new feature rollouts and allows for faster iteration cycles. Flipt is designed to be lightweight and performant, ensuring minimal impact on application performance. It integrates seamlessly with existing application architectures and provides a user-friendly interface for managing flags, rules, and segments. The primary use cases for Flipt include controlling feature availability, experimenting with new features in production, and personalizing user experiences based on feature flag configurations.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://www.flipt.io/"
+documentation: "https://www.flipt.io/docs"
+license: "Mixed (Fair Core / MIT)"
+categories:
+  - "feature-flags"
+  - "developer-tools"
+  - "testing"
+  - "gitops"
+  - "feature-management"
+status: "stable"
+---
+
+Flipt is an open-source, enterprise-ready feature flag solution that empowers development teams to manage and experiment with features across their applications and environments. It brings robust feature management capabilities directly into your workflow, often leveraging Git as the source of truth.
+
+## Key Features
+
+-   **Centralized Feature Control:** Manage all your feature flags, rules, and segments from a single, intuitive interface or API.
+-   **Git-Native Storage:** Store feature flag configurations in Git, enabling full version control, auditability, and GitOps workflows for feature management.
+-   **Multi-Environment Support:** Easily manage different flag states and configurations across development, staging, and production environments.
+-   **Advanced Targeting:** Define complex rules based on user properties, segments, and context to target specific users or groups for feature exposure.
+-   **Experimentation & A/B Testing:** Facilitate A/B testing and other experimentation techniques by rolling out features to a percentage of users or specific cohorts.
+-   **Decoupled Releases:** Decouple feature releases from code deployments, allowing for dark launches, canary releases, and instant rollbacks without new code deployments.
+-   **Client-Side SDKs:** Provides SDKs for various programming languages to easily integrate feature flag evaluation into your applications.
+-   **Secrets Management & Security:** Designed with security in mind, offering robust secrets management capabilities.
+
+## License Details
+
+Flipt utilizes a mixed licensing model:
+-   **Client-side code** (RPC, Go SDK, etc.) is typically licensed under the **MIT License**.
+-   **Server-side code** uses the **Fair Core License, Version 1.0, MIT Future License**. This license typically allows free usage for non-commercial purposes but requires a commercial license for certain commercial uses. Please refer to the official GitHub repository for precise terms.
+
+## Benefits
+
+-   **Faster Iteration:** Quickly roll out, test, and revert features without new deployments.
+-   **Reduced Risk:** Decouple feature deployments from code changes, minimizing the risk of breaking production.
+-   **Enhanced User Experience:** Personalize user experiences and test new features with specific user segments.
+-   **Improved Collaboration:** Provides a shared platform for product, development, and QA teams to manage feature lifecycles.
+-   **Trunk-Based Development:** Facilitates trunk-based development by allowing features to be merged into `main` behind a flag.

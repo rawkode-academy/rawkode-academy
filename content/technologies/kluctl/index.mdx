@@ -1,0 +1,41 @@
+---
+name: "Kluctl"
+description: |
+  Kluctl is a declarative Kubernetes deployment tool that extends Helm and Kustomize by providing a comprehensive framework for managing complex multi-environment and multi-cluster deployments. It focuses on GitOps workflows and allows you to define your entire infrastructure as code. Kluctl provides features like image tagging, parameterization, dependencies between deployments, and drift detection, simplifying the process of consistently deploying and managing applications across various environments. 
+  
+  Kluctl's value lies in its ability to streamline Kubernetes deployments, promote consistency, and reduce manual errors. Its main use cases include managing deployments across development, staging, and production environments; orchestrating complex application deployments involving multiple Kubernetes clusters; and enabling GitOps-driven infrastructure management.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://kluctl.io/"
+documentation: "https://kluctl.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "deployment"
+  - "gitops"
+  - "configuration-management"
+  - "ci-cd"
+status: "stable"
+---
+
+Kluctl is a powerful, declarative Kubernetes deployment tool that acts as the "missing glue" to manage complex applications and infrastructure across multiple environments and clusters. It extends popular tools like Helm and Kustomize, providing a comprehensive framework for robust GitOps-driven deployments.
+
+## Key Features
+
+-   **Multi-Environment & Multi-Cluster Management:** Designed to orchestrate deployments across various environments (dev, staging, prod) and multiple Kubernetes clusters from a single configuration.
+-   **Native Git Support:** Embraces GitOps principles by using Git as the single source of truth for all deployment configurations.
+-   **Composable Deployments:** Allows you to define your application and infrastructure as a collection of reusable components (e.g., Helm charts, Kustomize bases).
+-   **Image Tagging & Parameterization:** Provides flexible ways to manage image tags and parameterize configurations, enabling easy promotion of deployments across environments.
+-   **Drift Detection & Reconciliation:** Automatically detects differences between your desired state (in Git) and the actual state of your clusters, with tools to reconcile discrepancies.
+-   **Dependencies Management:** Define dependencies between different deployment components, ensuring resources are deployed in the correct order.
+-   **Built-in Templating:** Offers templating capabilities to keep configurations DRY (Don't Repeat Yourself).
+-   **Validation & Pruning:** Validates configurations before applying them and can prune resources that are no longer defined in your Git repository.
+
+## Benefits
+
+-   **Streamlined Kubernetes Deployments:** Simplifies the process of deploying and managing complex applications on Kubernetes.
+-   **Promotes Consistency & Reproducibility:** Ensures consistent deployments across all environments, reducing configuration drift and human error.
+-   **Enhanced Visibility & Debugging:** Provides clear insights into what is being deployed and why, making it easier to troubleshoot issues.
+-   **Robust GitOps Workflows:** Integrates deeply with Git, enabling full auditability, version control, and automated delivery pipelines.
+-   **Reduces Operational Burden:** Automates many manual deployment tasks, freeing up DevOps and platform teams.
+-   **Flexibility:** Works with existing Helm charts and Kustomize configurations, allowing for gradual adoption.

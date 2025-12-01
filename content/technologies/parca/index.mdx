@@ -1,0 +1,41 @@
+---
+name: "Parca"
+description: |
+  Parca is an open-source continuous profiling tool designed for performance analysis in production environments. It continuously collects profiles of your applications, enabling you to identify performance bottlenecks and optimize resource utilization. It stores profile data efficiently, allowing you to query and visualize performance trends over time. This helps improve application efficiency, reduce infrastructure costs, and enhance overall system performance by pinpointing the exact lines of code or functions that are consuming the most resources.
+  
+  Parca's primary use cases include identifying CPU-intensive code, memory leaks, lock contention, and other performance issues. By providing detailed insights into resource consumption, Parca helps developers and operations teams proactively address performance bottlenecks and optimize their applications. It's particularly valuable in cloud-native environments, where resource efficiency is crucial for cost optimization and scalability.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://www.parca.dev/"
+documentation: "https://www.parca.dev/docs/"
+license: "Apache-2.0"
+categories:
+  - "observability"
+  - "profiling"
+  - "performance"
+  - "ebpf"
+  - "developer-tools"
+status: "stable"
+---
+
+Parca is an open-source, continuous profiling platform that provides deep insights into the resource consumption of your applications in production. By continuously collecting CPU and memory usage profiles, it helps developers and operations teams identify performance bottlenecks and optimize their software for efficiency and cost.
+
+## Key Features
+
+-   **Continuous Profiling:** Collects CPU and memory profiles of all code running in your infrastructure 24/7, with minimal overhead, using eBPF.
+-   **eBPF-based Profiler:** Leverages eBPF for efficient and safe in-kernel profiling, allowing it to collect data from any language or runtime without recompilation or instrumentation.
+-   **Open Standards (pprof):** Adheres to the pprof format, making it compatible with existing profiling tools and visualizations.
+-   **Queryable Profile Data:** Stores profile data in a highly efficient database, enabling fast and flexible querying and aggregation over long periods.
+-   **Web UI & Visualization:** Provides an intuitive web interface for visualizing profiles (e.g., flame graphs), comparing performance changes, and drilling down into specific code paths.
+-   **Metrics Integration:** Integrates seamlessly with Prometheus, allowing you to correlate profile data with other operational metrics.
+-   **Target Discovery:** Automatically discovers targets to profile across your infrastructure, particularly in Kubernetes environments.
+
+## Benefits
+
+-   **Performance Optimization:** Pinpoints the exact lines of code or functions that consume the most CPU and memory, allowing for targeted optimizations.
+-   **Cost Savings:** By identifying and resolving inefficient code, Parca helps reduce cloud infrastructure costs through better resource utilization.
+-   **Reduced Latency:** Optimizing critical code paths directly contributes to lower application latency and improved user experience.
+-   **Faster Incident Response:** Provides crucial context during incidents by allowing teams to examine performance profiles leading up to an issue.
+-   **Proactive Performance Management:** Continuously monitors performance, enabling proactive identification and resolution of bottlenecks before they become critical.
+-   **Language Agnostic:** Works across various programming languages and runtimes thanks to its eBPF-based profiling.
+-   **Shift-Left Performance:** Empowers developers to address performance issues early in the development cycle.

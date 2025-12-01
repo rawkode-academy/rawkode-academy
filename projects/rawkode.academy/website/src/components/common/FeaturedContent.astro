@@ -91,114 +91,231 @@ const truncatedDescription = truncateDescription(
 ---
 
 <section class={`section-py-tight ${sectionClass}`.trim()}>
-	<div class="relative overflow-hidden rounded-[2rem] border border-white/30 dark:border-gray-800/60 bg-white/60 dark:bg-gray-950/60 backdrop-blur-2xl shadow-[0_20px_80px_rgba(15,23,42,0.25)] dark:shadow-[0_25px_100px_rgba(2,6,23,0.65)]">
-		<div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/30 dark:from-primary/30 dark:to-secondary/40 opacity-80 pointer-events-none"></div>
-		<div class="relative grid items-center gap-8 lg:grid-cols-[1.15fr,0.85fr] card-padding-lg">
-				<!-- Copy -->
-				<div class="order-2 space-y-6 text-center lg:text-left lg:order-1">
-					<span class="inline-flex items-center justify-center text-[0.65rem] uppercase tracking-[0.4em] text-primary/80 dark:text-primary/60">
-						Featured {isVideo ? "Video" : "Article"}
-					</span>
+	<!-- Mobile/Tablet layout - matches desktop aesthetic -->
+	<a href={href} class="lg:hidden block group">
+		<div class="overflow-hidden rounded-2xl bg-slate-950 shadow-[0_15px_50px_rgba(15,23,42,0.3)] dark:shadow-[0_20px_70px_rgba(2,6,23,0.7)]">
+			<!-- Image section -->
+			<div class="relative aspect-[16/9] overflow-hidden">
+				{typeof thumbnailUrl === "string" ? (
+					<img 
+						src={thumbnailUrl} 
+						alt={thumbnailAlt} 
+						class="w-full h-full object-cover transition-transform duration-500 group-active:scale-105" 
+					/>
+				) : (
+					<Image 
+						src={thumbnailUrl} 
+						alt={thumbnailAlt} 
+						class="w-full h-full object-cover transition-transform duration-500 group-active:scale-105" 
+					/>
+				)}
+				
+				<!-- Gradient overlay -->
+				<div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+				
+				<!-- Badge -->
+				{type === "article" && badgeConfig && (
+					<div class="absolute top-3 left-3">
+						<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-lg`}>
+							{badgeConfig.label}
+						</span>
+					</div>
+				)}
 
-					<h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
-						<a href={href} class="hover:text-primary dark:hover:text-secondary transition-colors duration-200">
-							{title}
-						</a>
+				<!-- Duration for videos -->
+				{formattedDuration && (
+					<div class="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-xs font-semibold">
+						{formattedDuration}
+					</div>
+				)}
+			</div>
+
+			<!-- Content section -->
+			<div class="relative p-5 space-y-4">
+				<!-- Accent line -->
+				<div class="absolute top-0 left-5 right-5 h-px bg-gradient-to-r from-primary via-secondary to-primary opacity-50"></div>
+
+				<!-- Featured label -->
+				<div class="flex items-center gap-2">
+					<span class="inline-flex items-center gap-1.5 text-[0.6rem] uppercase tracking-[0.2em] text-primary font-semibold">
+						<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+						</svg>
+						Featured
+					</span>
+				</div>
+
+				<!-- Title -->
+				<h2 class="text-xl font-bold text-white leading-tight tracking-tight">
+					{title}
+				</h2>
+
+				<!-- Description -->
+				{truncatedDescription && (
+					<p class="text-slate-400 text-sm leading-relaxed line-clamp-2">
+						{truncatedDescription}
+					</p>
+				)}
+
+				<!-- Meta row -->
+				<div class="flex items-center gap-4 text-xs text-slate-500 pt-1">
+					{author && (
+						<div class="flex items-center gap-2">
+							<div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-[0.6rem] font-bold">
+								{author.charAt(0)}
+							</div>
+							<span class="text-slate-300 font-medium">{author}</span>
+						</div>
+					)}
+					<div class="flex items-center gap-1.5 text-slate-400">
+						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+						</svg>
+						<span>{displayDate}</span>
+					</div>
+				</div>
+
+				<!-- CTA Button -->
+				<div class="pt-2">
+					<span class="inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary text-white text-sm font-semibold rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+						{isVideo ? (
+							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M8 5v14l11-7z" />
+							</svg>
+						) : (
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+							</svg>
+						)}
+						{ctaText}
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+						</svg>
+					</span>
+				</div>
+			</div>
+		</div>
+	</a>
+
+	<!-- Hero layout for lg+ viewports: Side-by-side with prominent image -->
+	<a href={href} class="hidden lg:block group">
+		<div class="flex rounded-[2rem] overflow-hidden bg-slate-950 shadow-[0_25px_100px_rgba(15,23,42,0.3)] dark:shadow-[0_30px_120px_rgba(2,6,23,0.7)] min-h-[400px] xl:min-h-[450px]">
+			
+			<!-- Left: Content Panel -->
+			<div class="relative flex flex-col justify-center p-8 xl:p-12 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 w-[40%] xl:w-[35%] shrink-0">
+				<!-- Decorative accent line -->
+				<div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-secondary to-primary/50"></div>
+				
+				<!-- Decorative dots pattern -->
+				<div class="absolute top-8 right-8 grid grid-cols-3 gap-1.5 opacity-20">
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+				</div>
+
+				<!-- Content -->
+				<div class="relative z-10 space-y-5">
+					<!-- Featured label + Badge -->
+					<div class="flex items-center gap-3 flex-wrap">
+						<span class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary font-semibold">
+							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+							</svg>
+							Featured
+						</span>
+						{type === "article" && badgeConfig && (
+							<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full`}>
+								{badgeConfig.label}
+							</span>
+						)}
+					</div>
+
+					<!-- Title -->
+					<h1 class="text-xl xl:text-2xl 2xl:text-3xl font-bold text-white leading-tight tracking-tight">
+						{title}
 					</h1>
 
+					<!-- Description -->
 					{truncatedDescription && (
-						<p class="text-lg text-slate-600 dark:text-slate-200 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+						<p class="text-slate-400 text-sm xl:text-base leading-relaxed line-clamp-2">
 							{truncatedDescription}
 						</p>
 					)}
 
-					<div class="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-sm text-slate-600 dark:text-slate-300">
+					<!-- Divider -->
+					<div class="w-12 h-0.5 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
+
+					<!-- Meta info -->
+					<div class="flex flex-wrap items-center gap-4 text-sm text-slate-500">
 						{author && (
 							<div class="flex items-center gap-2">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-								</svg>
-								<span class="font-medium">{author}</span>
+								<div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold ring-2 ring-slate-800">
+									{author.charAt(0)}
+								</div>
+								<span class="font-medium text-slate-300">{author}</span>
 							</div>
 						)}
-
-						<div class="flex items-center gap-2">
+						<div class="flex items-center gap-1.5 text-slate-400">
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 							</svg>
 							<span>{displayDate}</span>
 						</div>
-
-						{formattedDuration && (
-							<div class="flex items-center gap-2">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
-								<span>{formattedDuration}</span>
-							</div>
-						)}
-
-						{readTime && (
-							<div class="flex items-center gap-2">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
-								<span>{readTime}</span>
-							</div>
-						)}
 					</div>
 
-					<div class="flex justify-center lg:justify-start">
-						<Button
-							href={href}
-							variant="primary"
-							size="lg"
-							class:list={[
-								"group shadow-[0_12px_35px_rgba(59,130,246,0.35)] hover:shadow-[0_18px_45px_rgba(59,130,246,0.45)] dark:shadow-[0_14px_40px_rgba(14,116,144,0.55)]",
-							]}
-						>
+					<!-- CTA Button -->
+					<div class="pt-1">
+						<span class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-primary/20 group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:translate-x-1">
 							{isVideo ? (
-								<svg slot="icon-left" class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
 									<path d="M8 5v14l11-7z" />
 								</svg>
 							) : (
-								<svg slot="icon-left" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
 								</svg>
 							)}
 							{ctaText}
-						</Button>
+							<svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+							</svg>
+						</span>
 					</div>
 				</div>
+			</div>
 
-				<!-- Thumbnail -->
-				<div class="order-1 lg:order-2">
-					<a href={href} class="block group">
-						<div class="relative aspect-video rounded-3xl overflow-hidden border border-white/40 dark:border-gray-700/60 bg-slate-900/60 shadow-[0_20px_60px_rgba(15,23,42,0.35)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_25px_80px_rgba(15,23,42,0.45)]">
-							{typeof thumbnailUrl === "string" ? (
-								<img src={thumbnailUrl} alt={thumbnailAlt} class="w-full h-full object-cover" />
-							) : (
-								<Image src={thumbnailUrl} alt={thumbnailAlt} class="w-full h-full object-cover" />
-							)}
+			<!-- Right: Image Panel - takes remaining space -->
+			<div class="relative flex-1 overflow-hidden">
+				{typeof thumbnailUrl === "string" ? (
+					<img 
+						src={thumbnailUrl} 
+						alt={thumbnailAlt} 
+						class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+					/>
+				) : (
+					<Image 
+						src={thumbnailUrl} 
+						alt={thumbnailAlt} 
+						class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+					/>
+				)}
+				
+				<!-- Subtle overlay on hover -->
+				<div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500"></div>
 
-							<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80"></div>
-
-							{formattedDuration && (
-								<div class="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-semibold tracking-wide">
-									{formattedDuration}
-								</div>
-							)}
-
-							{type === "article" && badgeConfig && (
-								<div class="absolute top-4 left-4">
-									<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm shadow-lg`}>
-										{badgeConfig.label}
-									</span>
-								</div>
-							)}
-						</div>
-					</a>
-				</div>
+				<!-- Duration badge for videos -->
+				{formattedDuration && (
+					<div class="absolute top-4 right-4 bg-black/70 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-semibold tracking-wide border border-white/10">
+						{formattedDuration}
+					</div>
+				)}
+			</div>
 		</div>
-	</div>
+	</a>
 </section>
