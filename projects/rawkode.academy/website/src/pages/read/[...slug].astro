@@ -104,7 +104,7 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 			<!-- Byline: Author + Meta in one row -->
 			<div class="byline">
 				<div class="byline-authors">
-					{authors.map((author, i) => (
+					{authors.map((author) => (
 						<a
 							href={`https://github.com/${author.data.handle}`}
 							target="_blank"

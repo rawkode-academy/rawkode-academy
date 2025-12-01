@@ -520,8 +520,6 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	function initTOC() {
 		const container = document.getElementById('toc-container');
 		const toggle = document.getElementById('toc-mobile-toggle');
-		const iconOpen = document.getElementById('toc-icon-open');
-		const iconClose = document.getElementById('toc-icon-close');
 
 		if (!container || !toggle) return;
 
@@ -543,11 +541,11 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		// Close on outside click
 		function handleOutsideClick(e: MouseEvent) {
 			if (
-				container.classList.contains('mobile-visible') &&
-				!container.contains(e.target as Node) &&
+				container?.classList.contains('mobile-visible') &&
+				!container?.contains(e.target as Node) &&
 				!newToggle.contains(e.target as Node)
 			) {
-				container.classList.remove('mobile-visible');
+				container?.classList.remove('mobile-visible');
 				const openIcon = newToggle.querySelector('#toc-icon-open');
 				const closeIcon = newToggle.querySelector('#toc-icon-close');
 				openIcon?.classList.remove('hidden');
@@ -600,16 +598,17 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		// Find active headings - use the one we've scrolled past
 		for (let i = 0; i < headings.length; i++) {
 			const h = headings[i];
-			if (h.offsetTop <= scrollY) {
+			if (h && h.offsetTop <= scrollY) {
 				activeSlug = h.id;
 				if (h.tagName === 'H2') activeH2Slug = h.id;
 			}
 		}
 
 		// If no heading scrolled past yet, use the first one
-		if (!activeH2Slug && h2Headings.length > 0) {
-			activeH2Slug = h2Headings[0].id;
-			activeSlug = h2Headings[0].id;
+		const firstH2 = h2Headings[0];
+		if (!activeH2Slug && firstH2) {
+			activeH2Slug = firstH2.id;
+			activeSlug = firstH2.id;
 		}
 
 		// Find index by matching dot slug to activeH2Slug
@@ -677,6 +676,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 						if (activeH2Index < h2Headings.length - 1) {
 							const currentH2 = h2Headings[activeH2Index];
 							const nextH2 = h2Headings[activeH2Index + 1];
+							if (!currentH2 || !nextH2) return;
 							const sectionStart = currentH2.offsetTop;
 							const sectionEnd = nextH2.offsetTop;
 							const sectionProgress = Math.min(1, Math.max(0, 
@@ -691,11 +691,11 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 							}
 						} else {
 							// Last section - fill to end as we scroll through
+							const lastCurrentH2 = h2Headings[activeH2Index];
 							const articleEnd = document.querySelector('.prose')?.getBoundingClientRect();
-							if (articleEnd) {
+							if (articleEnd && lastCurrentH2) {
 								const endY = articleEnd.bottom + window.scrollY;
-								const currentH2 = h2Headings[activeH2Index];
-								const sectionStart = currentH2.offsetTop;
+								const sectionStart = lastCurrentH2.offsetTop;
 								const sectionProgress = Math.min(1, Math.max(0,
 									(scrollY - sectionStart) / (endY - sectionStart)
 								));
