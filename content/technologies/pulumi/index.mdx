@@ -1,0 +1,47 @@
+---
+name: "Pulumi"
+description: |
+  Pulumi is an open-source Infrastructure as Code (IaC) platform that allows you to define and deploy cloud infrastructure using familiar programming languages like Python, JavaScript, Go, TypeScript, and C#. It enables developers and DevOps teams to manage cloud resources with increased productivity and reduced complexity by leveraging the power of general-purpose programming. This allows for greater flexibility, code reuse, and access to existing tooling and libraries. 
+  
+  Pulumi's primary value proposition is its ability to unify infrastructure provisioning and application development into a single workflow. It supports all major cloud providers (AWS, Azure, GCP, Kubernetes), and allows teams to manage everything from virtual machines and databases to serverless functions and container orchestration. Its use cases include provisioning and managing cloud infrastructure, automating deployments, enforcing policies as code, and enabling collaborative infrastructure management across teams and organizations.
+logos:
+  stacked: ./stacked.svg
+website: "https://www.pulumi.com/"
+documentation: "https://www.pulumi.com/docs/"
+license: "Apache-2.0"
+categories:
+  - "iac"
+  - "cloud-management"
+  - "developer-tools"
+  - "programming"
+  - "devops"
+status: "stable"
+---
+
+Pulumi is an open-source Infrastructure as Code (IaC) platform that allows you to define, deploy, and manage cloud infrastructure using familiar programming languages. Unlike traditional IaC tools that rely on domain-specific languages (DSLs) like HCL (Terraform), Pulumi leverages general-purpose languages, enabling developers to use existing programming skills, IDEs, testing frameworks, and package managers.
+
+## Key Features
+
+-   **Multi-Language Support:** Write your infrastructure code in TypeScript, JavaScript, Python, Go, C#, F#, VB.NET, or Java.
+-   **Multi-Cloud & Kubernetes:** Supports all major cloud providers (AWS, Azure, Google Cloud) and Kubernetes, allowing you to manage diverse infrastructure from a single codebase.
+-   **Preview & Update:** Provides a detailed preview of infrastructure changes before they are applied, preventing unexpected modifications.
+-   **Secrets Management:** Securely manages sensitive data, such as API keys and database credentials, using built-in encryption.
+-   **Policy as Code:** Enforce organizational policies and best practices by writing policies in code, integrating security and compliance directly into your IaC workflows.
+-   **State Management:** Tracks the state of your infrastructure, enabling reliable updates and rollbacks.
+-   **Extensible:** A rich ecosystem of providers and components allows you to manage virtually any cloud resource.
+
+## How it Works
+
+1.  **Write Code:** Define your infrastructure resources using a supported programming language (e.g., Python, TypeScript).
+2.  **Preview Changes:** Run `pulumi preview` to see a detailed plan of what changes will be applied to your cloud environment.
+3.  **Deploy Infrastructure:** Execute `pulumi up` to provision or update your infrastructure. Pulumi intelligently determines the minimal set of changes required.
+4.  **Manage State:** Pulumi maintains a state file that maps your code to the deployed cloud resources, enabling reliable updates and deletions.
+
+## Benefits
+
+-   **Increased Developer Productivity:** Leverage existing programming skills and tools, accelerating infrastructure development.
+-   **Reduced Complexity:** Simplifies IaC by removing the need to learn a new DSL, integrating infrastructure into the application development workflow.
+-   **Code Reusability:** Create reusable components and abstractions using familiar programming constructs (functions, classes, packages).
+-   **Stronger Type Safety & Testing:** Benefit from compile-time checks, unit testing, and integration testing frameworks available in general-purpose languages.
+-   **Unified Workflow:** Bridge the gap between application code and infrastructure code, fostering better collaboration between developers and operations teams.
+-   **Policy Enforcement:** Embed security and compliance policies directly into your IaC, ensuring adherence to organizational standards.

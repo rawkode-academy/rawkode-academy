@@ -1,0 +1,41 @@
+---
+name: "QuestDB"
+description: |
+  QuestDB is a high-performance, open-source SQL database for time-series data. It's designed for speed and efficiency, optimized for ingesting, processing, and analyzing time-stamped data at scale. QuestDB distinguishes itself with its vectorized execution engine, SIMD instructions, and various optimizations that significantly outperform traditional relational databases in time-series workloads.
+  
+  QuestDB is valuable for applications requiring real-time analytics, financial modeling, IoT sensor data processing, application performance monitoring (APM), and observability. Its SQL interface makes it easy to query and integrate with existing data pipelines and visualization tools, while its performance enables building low-latency applications and dashboards.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://questdb.io/"
+documentation: "https://questdb.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "database"
+  - "time-series-database"
+  - "sql"
+  - "observability"
+  - "iot"
+status: "stable"
+---
+
+QuestDB is a high-performance, open-source SQL database specifically engineered for time-series data. It is optimized for incredibly fast ingestion, complex querying, and real-time analytics, making it an ideal choice for applications dealing with large volumes of time-stamped data such as financial market data, IoT sensor telemetry, and application performance monitoring.
+
+## Key Features
+
+-   **High-Performance Time-Series Database:** Built from the ground up to handle time-series data efficiently, offering superior ingestion and query speeds compared to traditional databases.
+-   **SQL with Time-Series Extensions:** Provides a familiar SQL interface with powerful time-series specific extensions (e.g., `ASOF JOIN`, `SAMPLE BY`, `LATEST ON`) to simplify complex time-series queries.
+-   **Vectorized Execution Engine:** Leverages a vectorized query execution engine and SIMD (Single Instruction, Multiple Data) instructions for parallel processing and maximizing CPU utilization.
+-   **Low-Latency Ingestion:** Designed for high-speed data ingestion, capable of handling millions of rows per second.
+-   **No-SQL-like Flexibility, SQL-like Power:** Combines the schema flexibility often associated with NoSQL databases with the analytical power and familiarity of SQL.
+-   **Multi-Tier Storage:** Supports efficient storage across different tiers, optimizing for both hot and cold data.
+-   **Web Console:** Includes a built-in web console for interacting with the database, running queries, and visualizing data.
+-   **Out-of-Order Data Handling:** Efficiently handles out-of-order data ingestion, a common challenge in real-time streaming scenarios.
+
+## Benefits
+
+-   **Real-time Analytics:** Enables real-time dashboards and analytics for applications requiring instant insights from time-series data.
+-   **Cost-Effective:** Efficient resource utilization and open-source licensing contribute to lower operational costs.
+-   **Simplified Data Processing:** Its SQL interface and time-series extensions make it easier to process and analyze complex time-series datasets.
+-   **Scalability:** Designed for high-volume data ingestion and querying, suitable for petabyte-scale deployments.
+-   **Developer Friendly:** Easy to integrate into existing data pipelines and applications, with client libraries available for various languages.
+-   **Enhanced Performance:** Significantly outperforms other databases in time-series workloads, leading to faster application response times.

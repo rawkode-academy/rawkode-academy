@@ -1,5 +1,6 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
+import { resolveContentDir } from "@rawkodeacademy/content";
 
 // Minimal Vite Plugin type definition to avoid direct vite import
 interface VitePlugin {
@@ -85,14 +86,14 @@ async function discoverDemos(coursesDir: string): Promise<DemoInfo[]> {
 
 export function webcontainerDemosPlugin(): VitePlugin {
 	let demos: DemoInfo[] = [];
+	let coursesDir: string;
 
 	return {
 		name: "vite-plugin-webcontainer-demos",
 
-		async configResolved(config) {
+		async configResolved(_config) {
 			// Discover all demos at build time
-			const root = config.root || process.cwd();
-			const coursesDir = join(root, "content", "courses");
+			coursesDir = await resolveContentDir("courses");
 			demos = await discoverDemos(coursesDir);
 			console.log(`Discovered ${demos.length} WebContainer demos`);
 		},
@@ -115,7 +116,7 @@ export function webcontainerDemosPlugin(): VitePlugin {
 
 			demos.forEach((demo, index) => {
 				const key = `${demo.courseId}/${demo.demoId}`;
-				const globPattern = `/content/courses/${demo.path}/**/*`;
+				const globPattern = `${coursesDir}/${demo.path}/**/*`;
 
 				// Use Vite's updated glob options: `query` + `import`
 				imports.push(
@@ -144,7 +145,7 @@ export function loadDemoFiles(courseId, demoId) {
   }
   
   const processedFiles = {};
-  const basePath = \`/content/courses/\${demo.path}/\`;
+  const basePath = \`${coursesDir}/\${demo.path}/\`;
   
   for (const [path, content] of Object.entries(demo.files)) {
     if (path.startsWith(basePath)) {

@@ -1,0 +1,49 @@
+---
+name: "Inlets"
+description: |
+  Inlets is a Cloud Native tunnel that exposes your local endpoint to the Internet. It provides an alternative to ngrok, exposing local services securely without relying on centralized services. It enables use cases such as exposing local Kubernetes clusters for remote access, testing webhooks on local development environments, or sharing local applications for demos or collaboration.
+logos:
+  stacked: ./stacked.svg
+website: "https://inlets.dev/"
+documentation: "https://docs.inlets.dev/"
+license: "Commercial"
+categories:
+  - "networking"
+  - "tunneling"
+  - "developer-tools"
+  - "edge-computing"
+  - "security"
+status: "stable"
+---
+
+Inlets is a cloud-native tunnel designed to securely expose local services and endpoints to the internet. Developed by OpenFaaS Ltd., it provides a self-hosted alternative to SaaS tunnel solutions like ngrok, giving users full control over their data and infrastructure.
+
+## Key Features
+
+-   **Secure Tunnels:** Establishes secure tunnels over websockets with TLS encryption, ensuring that data in transit is protected.
+-   **Cloud Native Design:** Built for modern cloud and Kubernetes environments, making it easy to integrate into existing infrastructure.
+-   **L7 (HTTP) & L4 (TCP) Tunneling:** Supports both HTTP-level and raw TCP tunneling, allowing you to expose a wide variety of services, including web applications, databases, SSH, and more.
+-   **Multiple Endpoints:** Capable of exposing multiple services through a single tunnel.
+-   **Load Balancing:** Includes built-in load balancing capabilities for HTTP tunnels.
+-   **Self-Hosted Control:** Unlike many SaaS alternatives, Inlets is self-hosted, meaning you deploy and manage the components (client and server) yourself, maintaining full control over your network traffic.
+
+## How it Works
+
+Inlets operates with two main components:
+
+1.  **Inlets Client:** Runs on your local machine or within your private network, pointing to the service you want to expose.
+2.  **Inlets Server (or "Exit-server"):** Runs on a public cloud VM or Kubernetes cluster with a public IP address.
+
+The client establishes an outbound websocket connection to the server. Traffic destined for the public server is then securely forwarded through this websocket tunnel to your local service.
+
+## Benefits
+
+-   **Data Control & Privacy:** Since it's self-hosted, you retain full control over your data, unlike third-party SaaS tunnel providers.
+-   **Versatility:** Ideal for a wide range of use cases, including:
+    -   Exposing local development environments for webhooks testing.
+    -   Providing remote access to local Kubernetes clusters.
+    -   Sharing local applications for demos or collaboration.
+    -   Connecting on-premise services to cloud resources.
+-   **Reduced Latency:** By choosing the geographic location of your exit-server, you can minimize latency for your users.
+-   **Cost-Effective:** Often more cost-effective than proprietary SaaS tunnel solutions, especially for continuous or high-volume usage.
+-   **Cloud & Edge Integration:** Designed to work seamlessly in cloud-native and edge computing scenarios.

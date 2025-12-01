@@ -5,7 +5,7 @@ import type { CollectionEntry } from "astro:content";
 import {
 	technologyZod,
 	type TechnologyData as ContentTechnologyData,
-} from "@rawkodeacademy/content-technologies";
+} from "@rawkodeacademy/content";
 
 export type TechnologyEntry = CollectionEntry<"technologies">;
 // Match content package definition exactly for compile-time safety

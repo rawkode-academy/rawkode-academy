@@ -1,0 +1,48 @@
+---
+name: "Fluentd"
+description: |
+  Fluentd is an open-source data collector designed for unified logging layer. It allows you to unify the data collection and consumption for a better use and understanding of data. It decouples data sources from backend systems, providing a flexible and scalable solution for collecting, processing, and forwarding data. Fluentd is written in a combination of C and Ruby, making it lightweight and efficient. 
+  
+  Fluentd solves the problem of disparate data sources by providing a unified logging layer. It collects logs from various sources, transforms them into a structured format (JSON), and forwards them to various destinations, such as Elasticsearch, AWS S3, and many others. This makes it a central component for observability, security monitoring, and data analysis within cloud-native and traditional environments.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://www.fluentd.org/"
+documentation: "https://docs.fluentd.org/"
+license: "Apache-2.0"
+categories:
+  - "logging"
+  - "observability"
+  - "data-streaming"
+  - "cncf"
+  - "data-collection"
+status: "stable"
+---
+
+Fluentd is a popular open-source data collector that serves as a unified logging layer for managing data streams. It allows you to collect, process, and forward logs and events from various data sources to multiple destinations, providing a flexible and scalable solution for modern data pipelines.
+
+## Key Features
+
+-   **Unified Logging Layer:** Fluentd standardizes all incoming log data into a structured JSON format, making it easier to process and analyze.
+-   **Pluggable Architecture:** With over 1000 plugins, Fluentd can connect to a vast array of data sources (inputs) and destinations (outputs), including databases, message queues, cloud services, and storage systems.
+-   **Reliable Data Buffering:** Designed to prevent data loss, Fluentd buffers data to disk or memory, ensuring that events are not dropped even if the destination is temporarily unavailable.
+-   **Flexible Filtering & Tagging:** Apply filters, transformations, and tags to incoming data streams, allowing for complex routing and enrichment logic.
+-   **High Performance:** Written in a combination of C and Ruby, Fluentd is engineered for high throughput and low resource consumption.
+-   **Kubernetes Integration:** Widely used in Kubernetes environments to collect container logs and route them to centralized logging systems.
+
+## How it Works
+
+Fluentd operates as a daemon that sits between your data sources and destinations. It receives data from various inputs, processes it according to its configuration (parsing, filtering, tagging), and then forwards it to the specified outputs. The core components are:
+
+-   **Sources:** Define where Fluentd collects data from (e.g., files, network ports, system logs).
+-   **Filters:** Modify or enrich data before it's sent to outputs.
+-   **Matchers (Outputs):** Define where data should be sent and in what format.
+
+## Benefits
+
+-   **Simplifies Logging Infrastructure:** Unifies the collection and processing of logs from diverse sources, reducing operational complexity.
+-   **Enhanced Data Quality:** Standardizes log data into JSON, making it easier for downstream systems to consume and analyze.
+-   **Scalability & Reliability:** Provides a robust and scalable solution for handling large volumes of log data without data loss.
+-   **Flexibility:** Its extensive plugin ecosystem allows for highly customizable data pipelines.
+-   **Real-time Analytics:** Enables real-time processing and routing of log data, supporting immediate insights and alerts.

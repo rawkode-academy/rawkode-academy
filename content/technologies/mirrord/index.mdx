@@ -1,0 +1,42 @@
+---
+name: "mirrord"
+description: |
+  mirrord lets you run your local code in the context of your cloud environment. It intercepts network traffic, file system access, and environment variables from a pod in your Kubernetes cluster and forwards them to your local development environment. This allows developers to debug and test code locally as if it were running inside the cluster, without the need for containerization, deployment, or remote debugging setups. 
+  
+  mirrord streamlines development workflows by significantly reducing iteration cycles. Developers can work with real-world data, configurations, and dependencies directly from their local machines, making it easier to identify and fix bugs, test new features, and ensure compatibility with the production environment. Main use cases include debugging complex microservice interactions, testing local code against production-like data, and validating changes before deploying them to a live environment.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://mirrord.dev/"
+documentation: "https://mirrord.dev/docs/"
+license: "MIT"
+categories:
+  - "developer-tools"
+  - "kubernetes"
+  - "debugging"
+  - "remote-development"
+  - "productivity"
+status: "stable"
+---
+
+mirrord is an open-source tool that drastically accelerates the Kubernetes development workflow by allowing developers to run their local code in the exact context of their cloud environment. It eliminates the need for constant rebuilds and redeployments, enabling a seamless local-to-remote development experience.
+
+## Key Features
+
+-   **Traffic Interception & Mirroring:** Intercepts incoming network traffic from a chosen Kubernetes pod and forwards it directly to your local development environment, or mirrors it without affecting the live pod.
+-   **Environment Synchronization:** Mirrors environment variables and file system access from the remote Kubernetes pod to your local machine, ensuring your local application runs with the same configurations and secrets as in the cluster.
+-   **Local Debugging:** Debug your local code as if it were running directly inside the Kubernetes cluster, using your preferred IDE's debugger.
+-   **No Containerization Needed:** Run your local code without having to build a Docker image or deploy it to the cluster for every change.
+-   **Seamless Integration:** Works with any programming language, framework, and IDE.
+
+## How it Works
+
+mirrord injects a lightweight agent into a target pod in your Kubernetes cluster. This agent then intercepts or mirrors traffic, file access, and environment variables. When running your application locally with mirrord, your local process effectively "becomes" the remote pod, allowing it to receive incoming traffic, access the cluster's services, and read configurations and secrets as if it were running natively in Kubernetes.
+
+## Benefits
+
+-   **Accelerated Development Cycles:** Significantly reduces the feedback loop by eliminating repetitive build-deploy-test cycles, allowing for much faster iteration.
+-   **Improved Debugging:** Enables debugging of complex microservice interactions and issues within a realistic cloud environment, using familiar local debugging tools.
+-   **High Fidelity Testing:** Test local changes against real data, dependencies, and configurations from your staging or production-like Kubernetes cluster, ensuring compatibility.
+-   **Reduced Cognitive Load:** Developers can focus on writing code without worrying about managing local Kubernetes setups or complex remote debugging configurations.
+-   **Cost Efficiency:** Saves cloud resources by not requiring full redeployments for every local test.
+-   **Enhanced Productivity:** Streamlines the development process for Kubernetes-native applications, leading to more efficient and confident development.

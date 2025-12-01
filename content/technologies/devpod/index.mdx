@@ -1,0 +1,43 @@
+---
+name: "DevPod"
+description: |
+  DevPod is an open-source tool that allows developers to create and manage reproducible development environments directly within Kubernetes or other remote container hosts. It enables teams to standardize development setups, ensuring consistency across different environments and preventing the "works on my machine" problem. By leveraging infrastructure-as-code principles, DevPod streamlines onboarding, simplifies collaboration, and accelerates the development lifecycle by providing pre-configured, ready-to-code environments that are easily shareable and reproducible.
+  
+  DevPod's primary use cases include consistent development environments for distributed teams, streamlined onboarding of new developers, isolated environments for testing and experimentation, and simplified collaboration on complex projects. It integrates with popular IDEs and allows developers to work with their preferred tools and workflows while benefiting from the scalability and reliability of containerized environments.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://www.devpod.sh/"
+documentation: "https://www.devpod.sh/docs/introduction"
+license: "MPL-2.0"
+categories:
+  - "development-environment"
+  - "cde"
+  - "kubernetes"
+  - "remote-development"
+status: "stable"
+---
+
+DevPod is an open-source solution that brings Codespaces-like developer environments to your infrastructure. It allows you to provision consistent, reproducible, and isolated development environments on any Kubernetes cluster, cloud provider, or even your local machine.
+
+## Key Features
+
+-   **Reproducible Environments:** Utilizes the `devcontainer.json` standard to define the exact development environment, ensuring everyone works with the same setup.
+-   **Client-Only Architecture:** DevPod runs as a client-side tool, connecting your local IDE (VS Code, JetBrains, etc.) to a remote development environment. There's no server-side component to manage, reducing overhead and costs.
+-   **Backend Flexibility:** Supports various backends including local Docker, Kubernetes, AWS, Azure, GCP, DigitalOcean, and more.
+-   **Cross-IDE Support:** Seamlessly integrates with popular Integrated Development Environments (IDEs) to maintain a familiar developer workflow.
+-   **Prebuilds:** Pre-build environments to minimize setup time, making new environments available almost instantly.
+-   **Cost Efficiency:** Provides a cost-effective alternative to hosted CDE solutions by leveraging your existing infrastructure and auto-inactivity shutdown features.
+
+## How it Works
+
+1.  **Define your environment:** Create a `devcontainer.json` file in your repository, specifying tools, dependencies, and configurations.
+2.  **Choose a provider:** Select where DevPod should provision your environment (e.g., local Docker, a Kubernetes cluster, a cloud VM).
+3.  **Connect your IDE:** DevPod launches the remote environment and sets up the connection to your local IDE, allowing you to code as if everything is local.
+
+## Benefits
+
+-   **Standardized Development:** Ensures consistency across all developers and projects.
+-   **Accelerated Onboarding:** New team members can start coding within minutes.
+-   **"Works on My Machine" Eliminated:** Environment parity guarantees that code behaves identically everywhere.
+-   **Resource Optimization:** Efficiently utilize cloud resources by dynamically provisioning and de-provisioning environments.
+-   **Vendor Neutrality:** Avoids lock-in to specific cloud providers or hosted solutions.

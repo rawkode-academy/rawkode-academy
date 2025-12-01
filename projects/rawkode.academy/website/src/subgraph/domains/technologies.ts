@@ -1,5 +1,5 @@
 import type { TechnologyItem } from "../loaders/technologies";
-import type { TechnologyData } from "@rawkodeacademy/content-technologies";
+import type { TechnologyData } from "@rawkodeacademy/content";
 import { listTechnologies, getTechnologyById } from "../loaders/technologies";
 import SchemaBuilder from "@pothos/core";
 

@@ -1,0 +1,32 @@
+---
+name: "containerd"
+description: |
+  containerd is a container runtime that is a CNCF graduated project. It provides an industry-standard core container runtime that can be embedded into larger systems. containerd manages the complete container lifecycle of its host system, from image transfer and storage to container execution and supervision. It provides a minimal set of primitives needed to manage containers effectively. 
+  
+  It offers a reliable and efficient foundation for building container platforms and orchestration systems like Kubernetes. containerd's design prioritizes stability, simplicity, and portability, allowing developers to focus on higher-level features without worrying about the underlying container execution details. Its main use cases include serving as the container runtime for Kubernetes, Docker, and other container management platforms; enabling efficient and reliable container execution in production environments; and providing a foundation for building custom container solutions.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://containerd.io/"
+documentation: "https://github.com/containerd/containerd/blob/main/docs/getting-started.md"
+license: "Apache-2.0"
+categories:
+  - "container-runtime"
+  - "kubernetes"
+status: "stable"
+---
+
+containerd is the industry-standard container runtime, emphasizing simplicity, robustness, and portability. It was designed to be embedded into larger systems, such as Docker and Kubernetes, rather than being used directly by end-users.
+
+## Core Capabilities
+
+-   **Container Lifecycle:** Manages the entire lifecycle of a container, from creation to deletion.
+-   **Image Transfer & Storage:** Handles pulling and pushing images from registries, as well as managing image layers on disk.
+-   **Execution:** Executes containers using runc (or other OCI-compliant runtimes).
+-   **Snapshot Management:** Manages filesystem snapshots for container layers.
+-   **Task Management:** Supervises container processes.
+
+## Role in Kubernetes
+
+In the Kubernetes ecosystem, containerd acts as the interface between the Kubelet (the node agent) and the low-level runtime (like runc). It implements the Kubernetes Container Runtime Interface (CRI), allowing Kubernetes to run containers without needing the full Docker daemon overhead.

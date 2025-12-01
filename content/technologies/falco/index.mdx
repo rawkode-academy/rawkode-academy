@@ -1,0 +1,49 @@
+---
+name: "Falco"
+description: |
+  Falco is a cloud-native runtime security project. It's a behavioral activity monitor designed to detect anomalous activity and security threats within Kubernetes, containers, and the underlying host. Falco leverages system calls from the Linux kernel as its primary data source, allowing it to identify unexpected application behavior, policy violations, intrusions, and data exfiltration attempts in real-time. It provides valuable insights into application security and system integrity.
+  
+  Falco's value lies in its ability to provide deep visibility into runtime behavior without requiring code instrumentation. Its main use cases include detecting security breaches, identifying misconfigurations, monitoring compliance with security policies, auditing system activity, and troubleshooting application performance issues. It's highly configurable through a rules engine that can be tailored to specific environments and security needs.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://falco.org/"
+documentation: "https://falco.org/docs/"
+license: "Apache-2.0"
+categories:
+  - "security"
+  - "runtime-security"
+  - "ebpf"
+  - "kubernetes"
+  - "cncf"
+status: "stable"
+---
+
+Falco is the industry-standard for cloud-native runtime security, detecting unexpected application behavior and potential threats in real-time within Kubernetes, containers, and host systems. As a Cloud Native Computing Foundation (CNCF) incubating project, it's a powerful tool for enhancing the security posture of modern distributed environments.
+
+## How Falco Works
+
+Falco operates by acting as a behavioral activity monitor. It leverages two primary drivers to capture system activity:
+
+1.  **Kernel Module:** A traditional Linux kernel module (though eBPF is becoming the preferred modern driver).
+2.  **eBPF Probe:** An eBPF program loaded into the Linux kernel, providing a highly efficient and safe way to collect system call events.
+
+These drivers intercept system calls and other kernel events, which Falco then filters against a set of customizable rules. When a rule is violated, Falco generates an alert, which can be sent to various outputs (syslog, files, HTTP endpoints, gRPC, etc.).
+
+## Key Features
+
+-   **Real-time Threat Detection:** Monitors system activity for suspicious behavior based on a powerful rules engine.
+-   **Rich Event Sources:** Observes Linux system calls, Kubernetes API audit events, and other data sources for comprehensive coverage.
+-   **Customizable Rules:** Define your own rules using a YAML-based syntax to detect specific threats and policy violations relevant to your environment.
+-   **Container & Kubernetes Awareness:** Enriches events with context from containers and Kubernetes metadata (pod names, namespaces, labels), making alerts more actionable.
+-   **Integration with Alerting Systems:** Integrates with popular tools like Prometheus, Alertmanager, Slack, PagerDuty, and SIEM systems for immediate notification and response.
+-   **eBPF-Powered Performance:** Utilizes eBPF for efficient and low-overhead event collection from the kernel.
+
+## Benefits
+
+-   **Enhanced Cloud-Native Security:** Provides deep visibility into application behavior at runtime, crucial for detecting advanced threats that static analysis misses.
+-   **Compliance & Auditing:** Helps meet compliance requirements by auditing system calls and enforcing security policies.
+-   **Reduced Mean Time to Respond (MTTR):** Real-time alerts enable faster detection and response to security incidents.
+-   **Non-Intrusive:** Monitors activity without requiring changes to application code or container images.
+-   **Highly Extensible:** The rule engine and output mechanisms are highly customizable to fit various operational and security needs.

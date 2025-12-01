@@ -1,0 +1,43 @@
+---
+name: "Dgraph"
+description: |
+  Dgraph is a fast, distributed, and scalable graph database. It's designed to be a production-ready, horizontally scalable, and ACID-compliant database capable of handling large datasets and complex relationships. Dgraph offers GraphQL-like query language (GraphQL+-) and supports GraphQL natively, making it easy to build applications that require real-time data retrieval and complex data relationships. Its value lies in providing fast and efficient traversal of graphs, enabling use cases such as social networks, knowledge graphs, recommendation engines, data integration, and fraud detection.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://dgraph.io/"
+documentation: "https://dgraph.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "database"
+  - "graph-database"
+  - "graphql"
+  - "distributed-system"
+status: "stable"
+---
+
+Dgraph is a horizontally scalable, distributed, and ACID-compliant graph database designed for handling complex data relationships and large datasets with high performance. It offers native GraphQL support, making it an ideal choice for applications that rely on graph-based data models.
+
+## Key Features
+
+-   **Native Graph Database:** Built from the ground up as a graph database, optimizing for graph traversal and queries.
+-   **GraphQL Native:** Supports GraphQL natively, allowing developers to query and manipulate their data using a familiar and powerful API. It even extends GraphQL with features like `GraphQL+-` for more advanced graph queries.
+-   **Horizontal Scalability:** Designed to scale horizontally across multiple machines, handling massive datasets and high query loads.
+-   **ACID Transactions:** Ensures data consistency and reliability with support for atomic, consistent, isolated, and durable transactions.
+-   **Real-time Queries:** Optimized for low-latency queries, enabling real-time applications such as social networks, recommendation engines, and fraud detection systems.
+-   **Flexible Schema:** Supports a flexible schema that can evolve with your application's needs.
+
+## Architecture
+
+Dgraph is built as a distributed system, comprising several components:
+
+-   **Zero (dgraph-zero):** Manages cluster membership, shard assignments, and provides consistent timestamps for transactions.
+-   **Server (dgraph):** Handles data storage, indexing, and query execution. Data is sharded across multiple Dgraph instances for scalability.
+-   **Client:** Provides language-specific clients (Go, Java, JavaScript, Python, etc.) to interact with the Dgraph cluster.
+
+## Use Cases
+
+-   **Social Networks:** Model intricate connections between users, posts, and interactions.
+-   **Knowledge Graphs:** Organize and query vast amounts of interconnected information.
+-   **Recommendation Engines:** Power personalized recommendations based on user behavior and product relationships.
+-   **Fraud Detection:** Identify complex patterns and relationships indicative of fraudulent activities.
+-   **Identity and Access Management:** Manage user roles, permissions, and relationships across systems.

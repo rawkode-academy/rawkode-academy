@@ -8,23 +8,18 @@ type Props = {
 
 const { headings, class: className = "" } = Astro.props;
 
-// Define types for our TOC structure
 type TocHeading = MarkdownHeading & { subheadings: MarkdownHeading[] };
 
-// Filter headings to only include h2 and h3
 const filteredHeadings = headings.filter(
 	(heading) => heading.depth === 2 || heading.depth === 3,
 );
 
-// Group headings by their hierarchy using reduce
 const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	(acc, heading) => {
 		if (heading.depth === 2) {
-			// Create a new h2 heading with empty subheadings
 			const h2Heading: TocHeading = { ...heading, subheadings: [] };
 			acc.push(h2Heading);
 		} else if (heading.depth === 3 && acc.length > 0) {
-			// Add h3 to the last h2's subheadings
 			const lastH2 = acc[acc.length - 1];
 			if (lastH2) {
 				lastH2.subheadings.push(heading);
@@ -36,649 +31,706 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 );
 ---
 
-<!-- Toggle button - positioned independently -->
+<!-- Mobile toggle -->
 <button
 	id="toc-mobile-toggle"
-	class="md:hidden fixed top-24 right-0 glass-interactive text-muted p-2 rounded-l-lg shadow-md border-r-0 z-50"
+	class="md:hidden fixed top-24 right-0 z-50 p-2.5 rounded-l-xl shadow-lg"
+	style="background: var(--surface-card); border: 1px solid var(--surface-border); border-right: none;"
+	aria-label="Toggle table of contents"
 >
 	<svg
 		id="toc-icon-open"
 		xmlns="http://www.w3.org/2000/svg"
-		class="h-6 w-6"
+		class="h-5 w-5 text-primary"
 		fill="none"
 		viewBox="0 0 24 24"
 		stroke="currentColor"
+		stroke-width="2"
 	>
-		<path
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			stroke-width="2"
-			d="M4 6h16M4 12h16M4 18h7"></path>
+		<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
 	</svg>
 	<svg
 		id="toc-icon-close"
 		xmlns="http://www.w3.org/2000/svg"
-		class="h-6 w-6 hidden"
+		class="h-5 w-5 text-primary hidden"
 		fill="none"
 		viewBox="0 0 24 24"
 		stroke="currentColor"
+		stroke-width="2"
 	>
-		<path
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			stroke-width="2"
-			d="M6 18L18 6M6 6l12 12"></path>
+		<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
 	</svg>
 </button>
 
-<!-- TOC Container - Vertically centered when minimized, expands on hover -->
-<div
+<!-- TOC Container -->
+<aside
 	id="toc-container"
-	class={`toc-container glass-card-shimmer max-h-[70vh] overflow-y-auto transition-all duration-300 ease-in-out ${className}`}
+	class={`toc-container ${className}`}
+	aria-label="Table of contents"
 >
-	<div class="p-4 relative z-10">
-		<div class="toc-header flex items-center justify-between mb-4 pb-3 border-b border-subtle">
-			<h3 class="toc-title text-sm font-semibold text-primary-content uppercase tracking-wider">Contents</h3>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="toc-icon h-5 w-5 text-muted"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 6h16M4 12h16M4 18h7"></path>
-			</svg>
+	<!-- Glass background -->
+	<div class="toc-glass"></div>
+	
+	<!-- Content wrapper -->
+	<div class="toc-content-wrapper">
+		<!-- Minimized: dot navigation with progress track -->
+		<div class="toc-dots">
+			<!-- Progress track background -->
+			<div class="toc-track"></div>
+			<!-- Animated progress fill -->
+			<div class="toc-progress" id="toc-progress"></div>
+			<!-- Dots -->
+			{tocHeadings.map((heading, i) => (
+				<a
+					href={`#${heading.slug}`}
+					class="toc-dot"
+					data-index={i}
+					data-slug={heading.slug}
+					title={heading.text}
+				>
+					<span class="toc-dot-inner"></span>
+					<span class="toc-dot-ring"></span>
+				</a>
+			))}
 		</div>
-		<ul class="space-y-1 text-muted relative list-none">
-			{
-				tocHeadings.map((heading) => (
-					<li class="list-none">
-						<div class="toc-item" data-heading-slug={heading.slug}>
-							<a
-								href={`#${heading.slug}`}
-								class="group flex items-center hover:text-primary-content transition-all duration-200 py-2 pl-4 pr-2 rounded-lg relative"
-							>
-								<div class="toc-dot absolute left-0 w-1 h-full bg-gradient-to-b from-primary to-secondary rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-								<div class="toc-content flex items-center">
-									<span class="text-sm font-medium">
-										{heading.text}
-									</span>
-								</div>
+
+		<!-- Expanded: full TOC -->
+		<div class="toc-full">
+			<div class="toc-header">
+				<span class="toc-label">Contents</span>
+			</div>
+			<nav class="toc-nav">
+				<ul class="toc-list">
+					{tocHeadings.map((heading) => (
+						<li class="toc-item" data-slug={heading.slug}>
+							<a href={`#${heading.slug}`} class="toc-link">
+								<span class="toc-marker"></span>
+								<span class="toc-text">{heading.text}</span>
 							</a>
-						</div>
-
-						{heading.subheadings.length > 0 && (
-							<ul class="ml-4 mt-1 space-y-1 list-none">
-								{heading.subheadings.map((subheading) => (
-									<li
-										class="toc-subitem list-none"
-										data-heading-slug={subheading.slug}
-									>
-										<a
-											href={`#${subheading.slug}`}
-											class="group flex items-center hover:text-secondary-content transition-all duration-200 py-1 pl-6 pr-2 text-sm relative"
-										>
-											<div class="absolute left-2 w-1.5 h-1.5 bg-current opacity-50 rounded-full group-hover:bg-primary group-hover:opacity-100 transition-colors duration-200" />
-											<div class="toc-content flex items-center">
-												<span class="text-xs">
-													{subheading.text}
-												</span>
-											</div>
-										</a>
-									</li>
-								))}
-							</ul>
-						)}
-					</li>
-				))
-			}
-		</ul>
-
+							{heading.subheadings.length > 0 && (
+								<ul class="toc-sublist">
+									{heading.subheadings.map((sub) => (
+										<li class="toc-subitem" data-slug={sub.slug}>
+											<a href={`#${sub.slug}`} class="toc-sublink">
+												{sub.text}
+											</a>
+										</li>
+									))}
+								</ul>
+							)}
+						</li>
+					))}
+				</ul>
+			</nav>
+		</div>
 	</div>
-</div>
+</aside>
 
 <style>
-	/* Define primary color RGB values */
-	:root {
-		--color-primary-rgb: 95, 94, 215; /* RGB values for #5F5ED7 */
+	.toc-container {
+		position: fixed;
+		right: 0.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 40;
+		width: 3rem;
+		transition: width 0.25s ease;
 	}
 
-	/* Remove underlines from TOC links */
-	#toc-container a {
-		text-decoration: none;
+	.toc-container:hover,
+	.toc-container.expanded {
+		width: 18rem;
 	}
 
-	/* Pulsing animation for touch devices to indicate interactivity */
-	@keyframes pulse {
-		0% {
-			transform: scale(1);
-			opacity: 0.7;
-		}
-		50% {
-			transform: scale(1);
-			opacity: 0.5;
-		}
-		100% {
-			transform: scale(1);
-			opacity: 0.7;
+	@media (min-width: 1280px) {
+		.toc-container:hover,
+		.toc-container.expanded {
+			width: 22rem;
 		}
 	}
 
-	/* Collapsed/expanded state styling */
-	.toc-content,
-	.toc-title {
+	.toc-glass {
+		position: absolute;
+		inset: 0;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		box-shadow: var(--surface-shadow);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+	}
+
+	.toc-content-wrapper {
+		position: relative;
+		z-index: 1;
+		padding: 1rem 0.5rem;
+		max-height: 70vh;
+		overflow: hidden;
+	}
+
+	.toc-container:hover .toc-content-wrapper,
+	.toc-container.expanded .toc-content-wrapper {
+		overflow-y: auto;
+		padding: 1rem;
+	}
+
+	/* Minimized dots with progress track */
+	.toc-dots {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 0;
+		transition: opacity 0.2s ease;
+	}
+
+	.toc-container:hover .toc-dots,
+	.toc-container.expanded .toc-dots {
 		opacity: 0;
-		width: 0;
-		transition:
-			opacity 0.3s ease,
-			width 0.3s ease;
-	}
-
-	/* For non-touch devices (hover) */
-	#toc-container:hover {
-		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-	}
-
-	#toc-container:hover .toc-content,
-	#toc-container:hover .toc-title {
-		opacity: 1;
-		width: auto;
-	}
-
-	/* Modern dot styles */
-	#toc-container .toc-dot {
-		opacity: 0;
-		transition: opacity 0.3s ease;
-		z-index: 20;
+		visibility: hidden;
 		position: absolute;
 	}
 
-	/* For touch devices (click/tap) */
-	#toc-container.touch-device.expanded {
-		width: 16rem !important;
-		opacity: 1;
+	/* Vertical track line (background) - positioned via JS */
+	.toc-track {
+		position: absolute;
+		left: 50%;
+		width: 3px;
+		transform: translateX(-50%);
+		background: rgb(var(--brand-primary) / 0.12);
+		border-radius: 2px;
+		z-index: 0;
+		/* Default position, will be updated by JS */
+		top: calc(0.5rem + 7px);
+		bottom: calc(0.5rem + 7px);
 	}
 
-	#toc-container.touch-device.expanded .toc-content,
-	#toc-container.touch-device.expanded .toc-title {
-		opacity: 1;
-		width: auto;
+	/* Animated progress fill - starts from first dot center */
+	.toc-progress {
+		position: absolute;
+		left: 50%;
+		width: 3px;
+		height: 0;
+		transform: translateX(-50%);
+		background: linear-gradient(180deg, 
+			rgb(var(--brand-primary)) 0%, 
+			rgb(var(--brand-secondary)) 100%
+		);
+		border-radius: 2px;
+		z-index: 1;
+		transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		/* Will be positioned via JS to match first dot center */
+		top: calc(0.5rem + 7px);
+		box-shadow: 0 0 6px 1px rgb(var(--brand-primary) / 0.4);
 	}
 
-	#toc-container.touch-device .toc-dot {
-		animation: pulse 2s infinite ease-in-out;
-	}
-
-	#toc-container.touch-device.expanded .toc-dot {
-		animation: none;
-		transform: scale(1.5);
+	/* Glowing effect on the progress line tip */
+	.toc-progress::after {
+		content: '';
+		position: absolute;
+		bottom: -4px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 10px;
+		height: 10px;
+		background: rgb(var(--brand-primary));
+		border-radius: 50%;
+		box-shadow: 0 0 12px 4px rgb(var(--brand-primary) / 0.7);
 		opacity: 1;
+		transition: opacity 0.25s ease;
 	}
 
 	.toc-dot {
-		transition: all 0.3s ease;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: var(--surface-card);
+		border: 2px solid rgb(var(--brand-primary) / 0.3);
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+		z-index: 2;
 	}
 
-	#toc-container:hover .toc-dot {
+	.toc-dot-inner {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: rgb(var(--brand-primary) / 0.3);
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.toc-dot:hover {
+		border-color: rgb(var(--brand-primary) / 0.6);
+		transform: scale(1.15);
+	}
+
+	.toc-dot:hover .toc-dot-inner {
+		background: rgb(var(--brand-primary) / 0.6);
 		transform: scale(1.2);
 	}
 
-	/* Mobile-specific styles */
-	@media (max-width: 768px) {
-		#toc-container {
-			transform: translateX(100%);
-			width: calc(
-				100% - 2rem
-			) !important; /* Match content width minus padding */
-			max-width: calc(100vw - 2rem); /* Ensure it doesn't exceed viewport */
-			border-radius: 8px 0 0 8px;
-			z-index: 50;
-			opacity: 0;
-			pointer-events: none;
-			right: 0;
-		}
-
-		#toc-container.mobile-visible {
-			transform: translateX(0);
-			opacity: 1;
-			pointer-events: auto;
-		}
-
-		#toc-container .toc-content,
-		#toc-container .toc-title {
-			opacity: 1;
-			width: auto;
-		}
-
-		/* Override parent hover behavior on mobile */
-		#toc-container:hover {
-			width: calc(100% - 2rem) !important;
-		}
-
-		/* Hide dots container on mobile */
-		.toc-dots-container {
-			display: none !important;
-		}
+	/* Passed state - sections already scrolled past */
+	.toc-dot.passed {
+		border-color: rgb(var(--brand-primary));
+		background: rgb(var(--brand-primary));
+		box-shadow: 0 0 6px 2px rgb(var(--brand-primary) / 0.3);
 	}
 
-	/* Medium screens */
-	@media (min-width: 769px) and (max-width: 1023px) {
-		#toc-container {
-			width: 2rem !important; /* Collapsed width */
-			max-width: 2rem;
-			transition: all 0.3s ease;
-			position: fixed;
-			right: 0;
-			top: 50%;
-			transform: translateY(-50%);
-			z-index: 40;
-			overflow-x: hidden;
-			padding-right: 0.5rem;
-		}
-
-		#toc-container.mobile-visible,
-		#toc-container:hover {
-			width: min(
-				16rem,
-				calc(100% - 2rem)
-			) !important; /* Smaller width for medium screens */
-			max-width: min(16rem, calc(100% - 2rem));
-			right: 1rem;
-			transform: translateY(-50%);
-		}
+	.toc-dot.passed .toc-dot-inner {
+		background: white;
+		width: 6px;
+		height: 6px;
 	}
 
-	/* Large screens and up */
-	@media (min-width: 1024px) {
-		#toc-container {
-			width: 2rem !important; /* Collapsed width */
-			max-width: 2rem;
-			transition: all 0.3s ease;
+	/* Active state - current section */
+	.toc-dot.active {
+		border-color: rgb(var(--brand-primary));
+		border-width: 2px;
+		background: var(--surface-card);
+		transform: scale(1.25);
+		box-shadow: 0 0 10px 3px rgb(var(--brand-primary) / 0.5);
+	}
+
+	.toc-dot.active .toc-dot-inner {
+		background: rgb(var(--brand-primary));
+		width: 6px;
+		height: 6px;
+		animation: dot-pulse 1.5s ease-in-out infinite;
+	}
+
+	.toc-dot.active .toc-dot-ring {
+		position: absolute;
+		inset: -6px;
+		border: 2px solid rgb(var(--brand-primary) / 0.5);
+		border-radius: 50%;
+		animation: ring-pulse 1.5s ease-out infinite;
+	}
+
+	@keyframes dot-pulse {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.15); }
+	}
+
+	@keyframes ring-pulse {
+		0% { transform: scale(1); opacity: 0.8; }
+		50% { transform: scale(1.3); opacity: 0.4; }
+		100% { transform: scale(1.5); opacity: 0; }
+	}
+
+	/* Expanded full TOC */
+	.toc-full {
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity 0.2s ease;
+	}
+
+	.toc-container:hover .toc-full,
+	.toc-container.expanded .toc-full {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.toc-header {
+		padding-bottom: 0.75rem;
+		margin-bottom: 0.75rem;
+		border-bottom: 1px solid var(--surface-border);
+	}
+
+	.toc-label {
+		font-size: 0.625rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.15em;
+		color: rgb(var(--brand-primary));
+	}
+
+	.toc-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.toc-item {
+		margin-bottom: 0.125rem;
+	}
+
+	.toc-link {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.625rem;
+		padding: 0.5rem 0.625rem;
+		margin: 0 -0.625rem;
+		border-radius: 0.5rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: rgb(107 114 128);
+		text-decoration: none;
+		line-height: 1.4;
+		transition: all 0.15s ease;
+	}
+
+	:root.dark .toc-link {
+		color: rgb(156 163 175);
+	}
+
+	.toc-link:hover {
+		color: rgb(var(--brand-primary));
+		background: rgb(var(--brand-primary) / 0.08);
+	}
+
+	:root.dark .toc-link:hover {
+		background: rgb(var(--brand-primary) / 0.12);
+	}
+
+	.toc-link.active {
+		color: rgb(var(--brand-primary));
+		background: rgb(var(--brand-primary) / 0.1);
+	}
+
+	:root.dark .toc-link.active {
+		background: rgb(var(--brand-primary) / 0.15);
+	}
+
+	.toc-marker {
+		flex-shrink: 0;
+		width: 6px;
+		height: 6px;
+		margin-top: 0.4em;
+		border-radius: 50%;
+		background: currentColor;
+		opacity: 0.4;
+		transition: all 0.15s ease;
+	}
+
+	.toc-link.active .toc-marker {
+		background: rgb(var(--brand-primary));
+		opacity: 1;
+		box-shadow: 0 0 0 3px rgb(var(--brand-primary) / 0.2);
+	}
+
+	.toc-text {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.toc-sublist {
+		list-style: none;
+		margin: 0;
+		padding: 0 0 0 1.25rem;
+	}
+
+	.toc-subitem {
+		margin: 0;
+	}
+
+	.toc-sublink {
+		display: block;
+		padding: 0.3rem 0.625rem;
+		margin: 0 -0.625rem;
+		font-size: 0.75rem;
+		color: rgb(107 114 128);
+		text-decoration: none;
+		line-height: 1.4;
+		border-radius: 0.375rem;
+		transition: all 0.15s ease;
+	}
+
+	:root.dark .toc-sublink {
+		color: rgb(156 163 175);
+	}
+
+	.toc-sublink:hover {
+		color: rgb(var(--brand-secondary));
+		background: rgb(var(--brand-secondary) / 0.08);
+	}
+
+	.toc-sublink.active {
+		color: rgb(var(--brand-secondary));
+	}
+
+	/* Mobile styles */
+	@media (max-width: 767px) {
+		.toc-container {
 			position: fixed;
 			right: 0;
-			top: 50%;
-			transform: translateY(-50%);
-			z-index: 40;
-			overflow-x: hidden;
-			padding-right: 0.5rem;
+			left: 0;
+			top: auto;
+			bottom: 0;
+			width: 100%;
+			transform: translateY(100%);
+			transition: transform 0.3s ease;
 		}
 
-		#toc-container.mobile-visible,
-		#toc-container:hover {
-			width: min(
-				24rem,
-				calc(100% - 2rem)
-			) !important; /* Responsive width that doesn't exceed content */
-			max-width: min(24rem, calc(100% - 2rem));
-			right: 1rem;
-			transform: translateY(-50%);
+		.toc-container.mobile-visible {
+			transform: translateY(0);
+		}
+
+		.toc-glass {
+			border-radius: 1.5rem 1.5rem 0 0;
+			border-bottom: none;
+		}
+
+		.toc-glass::before {
+			display: none;
+		}
+
+		.toc-dots,
+		.toc-track,
+		.toc-progress {
+			display: none;
+		}
+
+		.toc-full {
+			opacity: 1;
+			visibility: visible;
+		}
+
+		.toc-content-wrapper {
+			padding: 1.5rem;
+			max-height: 50vh;
+			overflow-y: auto;
+		}
+
+		.toc-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		.toc-header::after {
+			content: '';
+			width: 3rem;
+			height: 4px;
+			background: rgb(var(--brand-primary) / 0.3);
+			border-radius: 2px;
+			position: absolute;
+			top: 0.75rem;
+			left: 50%;
+			transform: translateX(-50%);
 		}
 	}
 </style>
 
 <script>
-	// Helper function to get DOM elements with null checks
-	const getElement = (id: string): HTMLElement | null =>
-		document.getElementById(id);
+	// Initialize TOC functionality
+	function initTOC() {
+		const container = document.getElementById('toc-container');
+		const toggle = document.getElementById('toc-mobile-toggle');
+		const iconOpen = document.getElementById('toc-icon-open');
+		const iconClose = document.getElementById('toc-icon-close');
 
-	// Helper function to toggle icon visibility
-	const toggleIcons = (
-		iconOpen: HTMLElement | null,
-		iconClose: HTMLElement | null,
-		showClose = false
-	): void => {
-		if (!iconOpen || !iconClose) return;
+		if (!container || !toggle) return;
 
-		iconOpen.classList.toggle("hidden", showClose);
-		iconClose.classList.toggle("hidden", !showClose);
-	};
+		// Remove old listeners by cloning
+		const newToggle = toggle.cloneNode(true) as HTMLElement;
+		toggle.parentNode?.replaceChild(newToggle, toggle);
 
-	// Setup touch device behavior
-	const setupTouchDevice = (tocContainer: HTMLElement): void => {
-		if (!tocContainer) return;
-
-		const isTouchDevice =
-			"ontouchstart" in window || navigator.maxTouchPoints > 0;
-		if (!isTouchDevice) return;
-
-		// Add a class to identify touch devices
-		tocContainer.classList.add("touch-device");
-
-		// Add click event to toggle expanded state
-		tocContainer.addEventListener("click", (e: MouseEvent) => {
-			const target = e.target as HTMLElement;
-			// Only toggle if clicking on the container itself or a dot, not on links
-			if (
-				target === tocContainer ||
-				(target && target.classList.contains("toc-dot"))
-			) {
-				tocContainer.classList.toggle("expanded");
-				// Prevent the click from triggering links
-				e.preventDefault();
-			}
-		});
-	};
-
-	// Setup mobile toggle button
-	const setupMobileToggle = (
-		tocContainer: HTMLElement,
-		mobileToggle: HTMLElement,
-		iconOpen: HTMLElement,
-		iconClose: HTMLElement
-	): void => {
-		if (!tocContainer || !mobileToggle || !iconOpen || !iconClose) return;
-
-		// Toggle button functionality
-		mobileToggle.addEventListener("click", (e: MouseEvent) => {
-			const isVisible = tocContainer.classList.toggle("mobile-visible");
-			toggleIcons(iconOpen, iconClose, isVisible);
+		// Mobile toggle click
+		newToggle.addEventListener('click', (e) => {
+			e.preventDefault();
 			e.stopPropagation();
+			const isVisible = container.classList.toggle('mobile-visible');
+			const openIcon = newToggle.querySelector('#toc-icon-open');
+			const closeIcon = newToggle.querySelector('#toc-icon-close');
+			openIcon?.classList.toggle('hidden', isVisible);
+			closeIcon?.classList.toggle('hidden', !isVisible);
 		});
 
-		// Close TOC when clicking outside
-		document.addEventListener("click", (e: MouseEvent) => {
-			const target = e.target as HTMLElement;
+		// Close on outside click
+		function handleOutsideClick(e: MouseEvent) {
 			if (
-				tocContainer.classList.contains("mobile-visible") &&
-				!tocContainer.contains(target) &&
-				target !== mobileToggle
+				container.classList.contains('mobile-visible') &&
+				!container.contains(e.target as Node) &&
+				!newToggle.contains(e.target as Node)
 			) {
-				tocContainer.classList.remove("mobile-visible");
-				toggleIcons(iconOpen, iconClose, false);
+				container.classList.remove('mobile-visible');
+				const openIcon = newToggle.querySelector('#toc-icon-open');
+				const closeIcon = newToggle.querySelector('#toc-icon-close');
+				openIcon?.classList.remove('hidden');
+				closeIcon?.classList.add('hidden');
 			}
-		});
-	};
-
-	// Handle window resize
-	const setupResizeHandler = (
-		tocContainer: HTMLElement,
-		iconOpen: HTMLElement,
-		iconClose: HTMLElement
-	): void => {
-		if (!tocContainer || !iconOpen || !iconClose) return;
-
-		window.addEventListener("resize", () => {
-			// Check if it's a mobile device now
-			const isMobile = window.innerWidth < 768;
-
-			// If we're on desktop and TOC is in mobile visible state, reset it
-			if (!isMobile && tocContainer.classList.contains("mobile-visible")) {
-				tocContainer.classList.remove("mobile-visible");
-				toggleIcons(iconOpen, iconClose, false);
-			}
-		});
-	};
-
-	// Create a separate container for dots in minimized state
-	const createDotsContainer = (
-		tocContainer: HTMLElement
-	): HTMLElement | null => {
-		if (!tocContainer) return null;
-
-		// Create a container for the dots
-		const dotsContainer = document.createElement("div");
-		dotsContainer.id = "toc-dots-container";
-		dotsContainer.className = "toc-dots-container";
-		dotsContainer.style.position = "absolute";
-		dotsContainer.style.top = "50%";
-		dotsContainer.style.left = "50%";
-		dotsContainer.style.transform = "translate(-50%, -50%)";
-		dotsContainer.style.display = "flex";
-		dotsContainer.style.flexDirection = "column";
-		dotsContainer.style.alignItems = "center";
-		dotsContainer.style.justifyContent = "center";
-		dotsContainer.style.height = "80%"; // Use most of the container height
-		dotsContainer.style.zIndex = "30";
-
-		// Hide on mobile
-		if (window.innerWidth <= 768) {
-			dotsContainer.style.display = "none";
 		}
+		document.removeEventListener('click', handleOutsideClick);
+		document.addEventListener('click', handleOutsideClick);
 
-		// Get only h2 TOC items (toc-item class)
-		const tocItems = tocContainer.querySelectorAll(".toc-item");
-		const itemCount = tocItems.length;
-
-		// Create a dot for each h2 TOC item
-		tocItems.forEach((item, index) => {
-			const dot = document.createElement("div");
-			const slug = item.getAttribute("data-heading-slug");
-			dot.className = "toc-dot-clone";
-			dot.setAttribute("data-heading-slug", slug || "");
-			dot.style.width = "6px";
-			dot.style.height = "6px";
-			dot.style.borderRadius = "50%";
-			dot.style.backgroundColor = "#5f5ed7";
-			dot.style.opacity = "0.7";
-			dot.style.marginBottom = index < itemCount - 1 ? "1.5rem" : "0";
-			dot.style.transition =
-				"transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease";
-			dot.style.cursor = "pointer";
-
-			// Add click event to navigate to the corresponding heading
-			dot.addEventListener("click", (e) => {
-				if (slug) {
-					window.location.hash = slug;
-				}
-				// Stop propagation to prevent interfering with mobile toggle
-				e.stopPropagation();
-			});
-
-			// Add hover effect
-			dot.addEventListener("mouseenter", () => {
-				dot.style.opacity = "1";
-				dot.style.transform = "scale(1.5)";
-			});
-
-			dot.addEventListener("mouseleave", () => {
-				// Only reset if not the active dot
-				if (!dot.classList.contains("active-dot")) {
-					dot.style.opacity = "0.7";
-					dot.style.transform = "scale(1)";
+		// Close when clicking a link inside TOC
+		container.querySelectorAll('a').forEach(link => {
+			link.addEventListener('click', () => {
+				if (window.innerWidth < 768) {
+					container.classList.remove('mobile-visible');
+					const openIcon = newToggle.querySelector('#toc-icon-open');
+					const closeIcon = newToggle.querySelector('#toc-icon-close');
+					openIcon?.classList.remove('hidden');
+					closeIcon?.classList.add('hidden');
 				}
 			});
-
-			dotsContainer.appendChild(dot);
 		});
 
-		tocContainer.appendChild(dotsContainer);
-
-		// Show/hide dots container based on hover (desktop only)
-		tocContainer.addEventListener("mouseenter", () => {
-			if (window.innerWidth > 768) {
-				dotsContainer.style.display = "none";
-			}
-		});
-
-		tocContainer.addEventListener("mouseleave", () => {
-			if (window.innerWidth > 768) {
-				dotsContainer.style.display = "flex";
-			}
-		});
-
-		// Update dots visibility on window resize
-		window.addEventListener("resize", () => {
-			if (window.innerWidth <= 768) {
-				dotsContainer.style.display = "none";
-			} else if (!tocContainer.matches(":hover")) {
-				dotsContainer.style.display = "flex";
-			}
-		});
-
-		return dotsContainer;
-	};
-
-	// Main setup function for TOC
-	const setupTOC = (): void => {
-		const tocContainer = getElement("toc-container");
-		const mobileToggle = getElement("toc-mobile-toggle");
-		const iconOpen = getElement("toc-icon-open");
-		const iconClose = getElement("toc-icon-close");
-
-		if (!tocContainer || !mobileToggle || !iconOpen || !iconClose) return;
-
-		setupTouchDevice(tocContainer);
-		setupMobileToggle(tocContainer, mobileToggle, iconOpen, iconClose);
-		setupResizeHandler(tocContainer, iconOpen, iconClose);
-
-		// Only create dots container on desktop
-		if (window.innerWidth > 768) {
-			createDotsContainer(tocContainer);
+		// Touch: tap to expand on tablet
+		if ('ontouchstart' in window && window.innerWidth >= 768) {
+			container.addEventListener('click', (e) => {
+				if ((e.target as HTMLElement).closest('a')) return;
+				container.classList.toggle('expanded');
+			});
 		}
-	};
+	}
 
-	// Reset all TOC items to inactive state
-	const resetTocItems = (tocItems: NodeListOf<Element>): void => {
-		tocItems.forEach((item) => {
-			const link = item.querySelector("a");
-			if (link) {
-				link.classList.remove("text-primary-content", "bg-white/50", "dark:bg-gray-800/50", "backdrop-blur-md");
-				const dot = link.querySelector(".toc-dot") as HTMLElement;
-				if (dot) {
-					dot.classList.add("hidden-opacity");
-				}
-			}
-		});
-	};
+	// Update active state and progress based on scroll
+	function updateActive() {
+		// Only look for headings within the article prose content
+		const headings = Array.from(document.querySelectorAll('.prose h2[id], .prose h3[id]')) as HTMLElement[];
+		const h2Headings = Array.from(document.querySelectorAll('.prose h2[id]')) as HTMLElement[];
+		
+		const dots = document.querySelectorAll('.toc-dot');
+		const links = document.querySelectorAll('.toc-link, .toc-sublink');
+		const progress = document.getElementById('toc-progress');
+		const dotsContainer = document.querySelector('.toc-dots');
 
-	// Find current heading based on scroll position
-	const findCurrentHeadingIndex = (
-		headings: HTMLElement[],
-		scrollPosition: number
-	): number => {
-		let currentHeadingIndex = -1;
+		if (!headings.length || !h2Headings.length || !dots.length) return;
 
+		const scrollY = window.scrollY + 160;
+		let activeSlug = '';
+		let activeH2Slug = '';
+		let activeH2Index = 0; // Default to first heading
+
+		// Find active headings - use the one we've scrolled past
 		for (let i = 0; i < headings.length; i++) {
-			const heading = headings[i] as HTMLElement;
-			if (heading.offsetTop > scrollPosition) {
-				break;
-			}
-			currentHeadingIndex = i;
-		}
-
-		return currentHeadingIndex;
-	};
-
-	// No highlight line or trail functions needed
-
-	// Activate the current TOC item
-	const activateTocItem = (currentTocItem: HTMLElement): void => {
-		if (!currentTocItem) return;
-
-		const link = currentTocItem.querySelector("a");
-		if (link) {
-			link.classList.add("text-primary-content", "bg-white/50", "dark:bg-gray-800/50", "backdrop-blur-md");
-			const dot = link.querySelector(".toc-dot") as HTMLElement;
-			if (dot && currentTocItem.classList.contains("toc-item")) {
-				dot.style.opacity = "1";
+			const h = headings[i];
+			if (h.offsetTop <= scrollY) {
+				activeSlug = h.id;
+				if (h.tagName === 'H2') activeH2Slug = h.id;
 			}
 		}
-	};
 
-	// Find TOC item corresponding to a heading
-	const findTocItem = (headingId: string): HTMLElement | null => {
-		// First try to find it as a main item
-		let tocItem = document.querySelector(
-			`.toc-item[data-heading-slug="${headingId}"]`
-		) as HTMLElement;
-
-		// If not found, try as a subitem
-		if (!tocItem) {
-			tocItem = document.querySelector(
-				`.toc-subitem[data-heading-slug="${headingId}"]`
-			) as HTMLElement;
+		// If no heading scrolled past yet, use the first one
+		if (!activeH2Slug && h2Headings.length > 0) {
+			activeH2Slug = h2Headings[0].id;
+			activeSlug = h2Headings[0].id;
 		}
 
-		return tocItem;
-	};
-
-	// Function to highlight the current heading in the TOC
-	const updateTOC = (): void => {
-		const headings = Array.from(
-			document.querySelectorAll("h2[id], h3[id]")
-		) as HTMLElement[];
-		const tocItems = document.querySelectorAll(".toc-item, .toc-subitem");
-		const dotsContainer = document.getElementById("toc-dots-container");
-
-		if (headings.length === 0 || tocItems.length === 0) return;
-
-		// Get the current scroll position with a small offset
-		const scrollPosition = window.scrollY + 150;
-
-		// Find the current heading
-		const currentHeadingIndex = findCurrentHeadingIndex(
-			headings,
-			scrollPosition
-		);
-
-		// Reset all TOC items
-		resetTocItems(tocItems);
-
-		// Reset all dot clones
-		if (dotsContainer) {
-			const dotClones = dotsContainer.querySelectorAll(".toc-dot-clone");
-			dotClones.forEach((dot) => {
-				dot.classList.remove("active-dot");
-				(dot as HTMLElement).style.opacity = "0.7";
-				(dot as HTMLElement).style.transform = "scale(1)";
-				(dot as HTMLElement).style.backgroundColor = "#5f5ed7";
+		// Find index by matching dot slug to activeH2Slug
+		const dotSlugs = Array.from(dots).map(d => d.getAttribute('data-slug'));
+		const matchedIndex = dotSlugs.indexOf(activeH2Slug);
+		if (matchedIndex !== -1) {
+			activeH2Index = matchedIndex;
+		} else {
+			// Fallback: find by position in h2 list
+			h2Headings.forEach((h, i) => {
+				if (h.id === activeH2Slug && i < dots.length) activeH2Index = i;
 			});
 		}
 
-		// Handle active heading if found
-		if (currentHeadingIndex >= 0) {
-			const currentHeading = headings[currentHeadingIndex];
-			if (currentHeading && currentHeading.id) {
-				const currentTocItem = findTocItem(currentHeading.id);
+		// Update links
+		links.forEach((link) => {
+			const href = link.getAttribute('href')?.slice(1);
+			const isActive = href === activeSlug;
+			const isParentActive = link.classList.contains('toc-link') && 
+				link.closest('.toc-item')?.getAttribute('data-slug') === activeH2Slug;
+			link.classList.toggle('active', isActive || (isParentActive && activeSlug !== activeH2Slug));
+		});
 
-				if (currentTocItem) {
-					activateTocItem(currentTocItem);
+		// Update dots with passed/active states
+		dots.forEach((dot, index) => {
+			const isActive = dot.getAttribute('data-slug') === activeH2Slug;
+			const isPassed = index < activeH2Index;
+			
+			dot.classList.toggle('active', isActive);
+			dot.classList.toggle('passed', isPassed);
+		});
 
-					// Also highlight the corresponding dot in the dots container
-					if (dotsContainer) {
-						// Find the closest h2 heading if current is h3
-						let h2Slug = currentHeading.id;
-						if (currentHeading.tagName === "H3") {
-							// Find the parent h2 by traversing up the DOM
-							let h2 = currentHeading.previousElementSibling;
-							while (h2 && h2.tagName !== "H2") {
-								h2 = h2.previousElementSibling;
+		// Update progress line and track positioning
+		if (progress && dotsContainer && dots.length > 0) {
+			const firstDot = dots[0] as HTMLElement;
+			const lastDot = dots[dots.length - 1] as HTMLElement;
+			const track = document.querySelector('.toc-track') as HTMLElement;
+			
+			if (firstDot && lastDot) {
+				// Calculate the track bounds (from first dot center to last dot center)
+				const firstDotCenter = firstDot.offsetTop + firstDot.offsetHeight / 2;
+				const lastDotCenter = lastDot.offsetTop + lastDot.offsetHeight / 2;
+				const trackHeight = lastDotCenter - firstDotCenter;
+				
+				// Update track position to span from first to last dot center
+				if (track) {
+					track.style.top = `${firstDotCenter}px`;
+					track.style.height = `${trackHeight}px`;
+					track.style.bottom = 'auto';
+				}
+				
+				// Update progress start position
+				progress.style.top = `${firstDotCenter}px`;
+				
+				// Calculate progress based on active section
+				let progressHeight = 0;
+				
+				if (trackHeight > 0) {
+					const activeDot = dots[activeH2Index] as HTMLElement;
+					if (activeDot) {
+						const activeDotCenter = activeDot.offsetTop + activeDot.offsetHeight / 2;
+						progressHeight = activeDotCenter - firstDotCenter;
+						
+						// Add progress within the current section
+						if (activeH2Index < h2Headings.length - 1) {
+							const currentH2 = h2Headings[activeH2Index];
+							const nextH2 = h2Headings[activeH2Index + 1];
+							const sectionStart = currentH2.offsetTop;
+							const sectionEnd = nextH2.offsetTop;
+							const sectionProgress = Math.min(1, Math.max(0, 
+								(scrollY - sectionStart) / (sectionEnd - sectionStart)
+							));
+							
+							// Calculate the segment height to the next dot
+							if (activeH2Index < dots.length - 1) {
+								const nextDot = dots[activeH2Index + 1] as HTMLElement;
+								const segmentHeight = nextDot.offsetTop - activeDot.offsetTop;
+								progressHeight += segmentHeight * sectionProgress * 0.95;
 							}
-							if (h2 && h2.id) {
-								h2Slug = h2.id;
+						} else {
+							// Last section - fill to end as we scroll through
+							const articleEnd = document.querySelector('.prose')?.getBoundingClientRect();
+							if (articleEnd) {
+								const endY = articleEnd.bottom + window.scrollY;
+								const currentH2 = h2Headings[activeH2Index];
+								const sectionStart = currentH2.offsetTop;
+								const sectionProgress = Math.min(1, Math.max(0,
+									(scrollY - sectionStart) / (endY - sectionStart)
+								));
+								const remainingHeight = trackHeight - progressHeight;
+								progressHeight += remainingHeight * sectionProgress;
 							}
-						}
-
-						// Find and highlight the dot
-						const activeDot = dotsContainer.querySelector(
-							`.toc-dot-clone[data-heading-slug="${h2Slug}"]`
-						) as HTMLElement;
-
-						if (activeDot) {
-							activeDot.classList.add("active-dot");
-							activeDot.style.opacity = "1";
-							activeDot.style.transform = "scale(1.5)";
-							activeDot.style.backgroundColor = "#7f7ef2"; // Slightly lighter for better visibility
 						}
 					}
 				}
+				
+				// Apply the progress height
+				progress.style.height = `${Math.max(0, progressHeight)}px`;
 			}
 		}
-	};
+	}
 
-	// Initialize everything when the DOM is ready
-	document.addEventListener("DOMContentLoaded", () => {
-		setupTOC();
-		updateTOC(); // Initial TOC update
+	// Initialize on page load
+	initTOC();
+	updateActive();
+	// Run again after a short delay to handle hash navigation
+	setTimeout(updateActive, 100);
+	setTimeout(updateActive, 300);
+
+	// Re-init on Astro page navigation
+	document.addEventListener('astro:page-load', () => {
+		initTOC();
+		updateActive();
+		setTimeout(updateActive, 100);
+		setTimeout(updateActive, 300);
 	});
 
-	// Update TOC on scroll
-	window.addEventListener("scroll", updateTOC, { passive: true });
+	// Handle hash changes (when clicking TOC links)
+	window.addEventListener('hashchange', () => {
+		setTimeout(updateActive, 50);
+	});
 
-	// Update on window resize
-	window.addEventListener("resize", updateTOC, { passive: true });
+	window.addEventListener('scroll', updateActive, { passive: true });
 </script>

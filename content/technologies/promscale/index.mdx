@@ -1,0 +1,41 @@
+---
+name: "Promscale"
+description: |
+  Promscale is an open-source observability backend designed for time-series data, specifically optimized for metrics and traces. Built on PostgreSQL and TimescaleDB, it provides a scalable and reliable storage solution for Prometheus metrics, Jaeger traces, and OpenTelemetry data. Promscale's value lies in its ability to handle high-cardinality data and complex analytical queries that can be challenging for Prometheus alone. It leverages SQL for powerful querying, allowing users to gain deeper insights into application performance and system behavior. Main use cases include monitoring microservices, analyzing infrastructure performance, and troubleshooting application issues within cloud-native environments. Promscale supports both storing and querying metrics and traces within a single system, enabling correlation of related telemetry data.
+logos:
+  stacked: ./stacked.svg
+website: "https://promscale.com/"
+documentation: "https://docs.promscale.com/"
+license: "Apache-2.0"
+categories:
+  - "prometheus"
+  - "observability"
+  - "time-series-database"
+  - "postgresql"
+  - "metrics"
+  - "tracing"
+status: "deprecated"
+---
+
+Promscale was an open-source, unified observability backend designed for long-term storage and analysis of Prometheus metrics, Jaeger traces, and OpenTelemetry data. Built on top of PostgreSQL and TimescaleDB, it provided a scalable and robust solution for handling high-cardinality time-series data and complex analytical queries within a single system.
+
+## Key Features (historical)
+
+-   **Unified Telemetry Storage:** Stored metrics (from Prometheus) and traces (from Jaeger/OpenTelemetry) in a single, correlated backend.
+-   **PromQL Compatibility:** Provided 100% PromQL compatibility, allowing users to leverage their existing Prometheus queries and dashboards.
+-   **SQL Querying:** Leveraged the power of SQL (via PostgreSQL) for advanced analytical queries across metrics and traces, enabling richer data analysis.
+-   **High Cardinality Support:** Optimized for handling high-cardinality data, a common challenge in large-scale monitoring environments.
+-   **Long-Term Retention:** Enabled long-term storage of observability data, going beyond Prometheus's local storage limitations.
+-   **Grafana Integration:** Integrated seamlessly with Grafana for visualization and dashboarding of metrics and traces.
+-   **OpenTelemetry Support:** Provided a backend for OpenTelemetry traces, facilitating distributed tracing.
+
+## Benefits (historical)
+
+-   **Simplified Observability Stack:** Consolidated metrics and traces into a single datastore, reducing operational complexity and cost.
+-   **Enhanced Analytical Capabilities:** SQL-based querying allowed for deeper and more complex analysis of observability data.
+-   **Improved Troubleshooting:** Enabled better correlation between metrics and traces, accelerating root cause analysis.
+-   **Scalability & Reliability:** Leveraged the robustness of PostgreSQL and the time-series capabilities of TimescaleDB for scalable and reliable storage.
+
+## Current Status
+
+It is important to note that **Promscale is now deprecated and unmaintained as of April 2, 2024**. While it offered valuable features, users should be aware of its unmaintained status when considering it for new deployments or ongoing operations. The project suggests users consider other solutions for their long-term storage and observability needs.
