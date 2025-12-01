@@ -1,0 +1,61 @@
+---
+name: "PostgreSQL"
+description: "Advanced open-source relational database with strong SQL and extensibility."
+logos:
+  icon: ./icon.svg
+website: "https://www.postgresql.org/"
+source: "https://github.com/postgres/postgres"
+documentation: "https://www.postgresql.org/docs/"
+license: "PostgreSQL License"
+categories:
+  - "database"
+  - "sql"
+  - "relational-database"
+status: "stable"
+aliases:
+  - "postgres"
+  - "psql"
+relatedTechnologies:
+  - "pgbouncer"
+  - "timescaledb"
+useCases:
+  - "OLTP"
+  - "OLAP"
+  - "Extensions"
+features:
+  - "MVCC"
+  - "JSONB"
+  - "Extensions"
+learningResources:
+  official:
+    - https://www.postgresql.org/docs/
+  community:
+    - https://wiki.postgresql.org/
+---
+
+PostgreSQL, often referred to as Postgres, is a powerful, open-source object-relational database system with a strong reputation for reliability, feature robustness, and performance. It is a highly extensible and SQL-compliant database that supports both relational (SQL) and non-relational (JSON) data types, making it suitable for a wide range of applications.
+
+## Key Features
+
+-   **Object-Relational Model:** Supports traditional relational database features alongside object-oriented concepts, enabling complex data modeling.
+-   **ACID Compliance:** Ensures data integrity and reliability through Atomicity, Consistency, Isolation, and Durability (ACID) properties.
+-   **Extensibility:** Highly extensible, allowing users to define their own data types, functions, operators, and even programming languages. This is a cornerstone feature, enabling powerful custom solutions.
+-   **Advanced SQL Support:** Fully supports SQL standards, including advanced features like complex queries, foreign keys, triggers, views, and stored procedures.
+-   **Concurrency (MVCC):** Utilizes Multi-Version Concurrency Control (MVCC) to allow multiple transactions to access the same data simultaneously without locking, improving performance.
+-   **JSON/JSONB Support:** Offers native support for JSON and binary JSON (JSONB) data types, allowing it to function as a NoSQL database while retaining ACID properties.
+-   **Geospatial Data (PostGIS):** With extensions like PostGIS, PostgreSQL becomes a leading database for geospatial data.
+-   **Replication & High Availability:** Provides robust replication mechanisms (streaming replication, logical replication) for high availability and disaster recovery.
+
+## Benefits
+
+-   **Reliability & Data Integrity:** Proven stability and strong adherence to ACID principles ensure data safety and consistency.
+-   **Feature Richness:** A vast array of features makes it suitable for almost any application, from simple web apps to complex data warehousing solutions.
+-   **Performance:** Continuously optimized for performance, handling large datasets and high transaction volumes efficiently.
+-   **Open Source & Community Driven:** Benefits from a vibrant global community, ensuring continuous development, extensive documentation, and widespread support.
+-   **Cost-Effective:** Free to use under a permissive open-source license, reducing licensing costs significantly.
+-   **Scalability:** Supports both vertical scaling (more powerful hardware) and horizontal scaling (read replicas, sharding with extensions).
+-   **Extensibility:** Its extensibility allows it to adapt to future needs and integrate with new technologies.
+
+## Licensing
+
+PostgreSQL is released under the **PostgreSQL License**, which is a liberal Open Source license similar to the BSD or MIT licenses. It allows users to use, modify, and distribute PostgreSQL without restriction, provided that the original copyright notice and license are included.

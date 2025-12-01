@@ -1,0 +1,42 @@
+---
+name: "k3s"
+description: |
+  K3s is a lightweight Kubernetes distribution built for resource-constrained environments and edge computing. It packages Kubernetes components into a single binary that is less than 40MB, reducing the footprint and simplifying deployment. K3s is fully certified by the CNCF as a conformant Kubernetes distribution, meaning applications designed to run on any Kubernetes cluster will run on K3s. 
+  
+  It is designed to be easy to install, lightweight, and reliable, making it ideal for edge computing, IoT devices, CI/CD, and situations where a full-fledged Kubernetes cluster is overkill. Its small footprint allows it to run on resource-constrained devices and makes it perfect for environments with limited connectivity.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://k3s.io/"
+documentation: "https://docs.k3s.io/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "distribution"
+  - "edge-computing"
+  - "iot"
+  - "lightweight"
+status: "stable"
+---
+
+K3s is a highly popular, lightweight, and fully conformant Kubernetes distribution designed for environments where resources are limited, or simplicity is paramount. It bundles all necessary Kubernetes components into a single binary, making it incredibly easy to install and operate.
+
+## Key Features
+
+-   **Lightweight Single Binary:** K3s packages a full Kubernetes cluster into a single binary that is small in size (under 100MB), dramatically reducing its footprint.
+-   **Resource Efficiency:** Optimized to run on resource-constrained devices, making it ideal for edge computing, IoT, and ARM processors.
+-   **Simplified Installation:** A single command installs a complete Kubernetes cluster, including a local storage provider, a service load balancer, and an embedded network policy controller.
+-   **Fully Conformant Kubernetes:** K3s is CNCF-certified, ensuring full compatibility with standard Kubernetes APIs and workloads.
+-   **Embedded Components:** By default, K3s includes Containerd as the container runtime, Flannel for CNI, CoreDNS for DNS, and Traefik as an ingress controller, reducing the need for manual configuration.
+-   **SQLite as Default Storage:** Uses SQLite as its default datastore, further simplifying operations by eliminating external database dependencies for smaller deployments. PostgreSQL and etcd are also supported.
+-   **Automated Updates:** Designed for ease of updates with minimal downtime.
+
+## Benefits
+
+-   **Ease of Use:** Simplifies Kubernetes deployment and management, making it accessible for developers and operations teams.
+-   **Edge & IoT Ready:** Its small footprint and low resource usage make it perfect for edge devices, IoT gateways, and remote locations with limited connectivity.
+-   **CI/CD Accelerator:** Provides a fast, ephemeral Kubernetes environment for CI/CD pipelines and testing.
+-   **Cost-Effective:** Runs on less powerful and more affordable hardware, reducing infrastructure costs.
+-   **Robust & Stable:** Despite its lightweight nature, K3s is production-grade and highly reliable.
+-   **Developer Friendly:** Quickly spin up local Kubernetes environments for application development and testing.

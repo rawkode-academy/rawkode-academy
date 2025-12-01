@@ -1,7 +1,4 @@
 ---
-// Pre-render technology detail pages so they exist in static builds.
-// This fixes 404s on routes like /technology/devspace when deploying
-// with `output: "static"` in astro.config.mts.
 export const prerender = true;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
@@ -13,11 +10,10 @@ import { getCollection, render } from "astro:content";
 import matter from "gray-matter";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { resolveDataDirSync as resolveTechnologiesDataDir } from "@rawkodeacademy/content-technologies";
+import { resolveContentDirSync } from "@rawkodeacademy/content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 
-// Define the Technology data type explicitly
 export interface Technology {
 	id: string;
 	name: string;
@@ -35,9 +31,7 @@ export interface Technology {
 		| undefined;
 }
 
-// Fetch all technologies to generate static paths
 export const getStaticPaths = (async () => {
-	// Primary path generation via Astro content API
 	try {
 		const items = await getCollection("technologies");
 		if (items.length > 0) {
@@ -70,9 +64,8 @@ export const getStaticPaths = (async () => {
 		);
 	}
 
-	// Fallback: scan MDX files directly and parse frontmatter
 	try {
-		const base = resolveTechnologiesDataDir();
+		const base = resolveContentDirSync("technologies");
 		async function walk(dir: string, rel = ""): Promise<string[]> {
 			const out: string[] = [];
 			const entries = await readdir(dir, { withFileTypes: true });
@@ -134,7 +127,6 @@ export const getStaticPaths = (async () => {
 
 let { technology } = Astro.props as { technology?: Technology };
 
-// Get the technology entry and render markdown content
 const id = Astro.params.id as string;
 const items = await getCollection("technologies");
 const technologyEntry = items.find((x) => x.id === id);
@@ -145,7 +137,6 @@ if (technologyEntry) {
 	try {
 		const rendered = await render(technologyEntry);
 		Content = rendered.Content;
-		// Check if there's actual content beyond just whitespace
 		hasContent = Boolean(
 			technologyEntry.body && technologyEntry.body.trim().length > 0,
 		);
@@ -170,7 +161,7 @@ if (!technology) {
 				videos,
 			};
 		} else {
-			const base = resolveTechnologiesDataDir();
+			const base = resolveContentDirSync("technologies");
 			const raw = await readFile(join(base, `${id}.mdx`), "utf8");
 			const fm = matter(raw).data as any;
 			const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
@@ -194,211 +185,80 @@ if (!technology) {
 	return Astro.redirect("/technology");
 }
 
-const placeholderLogo = "/apple-touch-icon.png"; // Define a placeholder
+const placeholderLogo = "/apple-touch-icon.png";
 ---
 
 <Page title={technology.name} description={technology.description}>
-	<div class="flex flex-col gap-12 dark:bg-black dark:text-white min-h-screen">
-		<style>
-			@reference "@/styles/global.css";
-
-			:root {
-				--primary: #5f5ed7;
-				--secondary: #00ceff;
-			}
-
-			.tech-header {
-				background: linear-gradient(
-					to bottom right,
-					rgba(95, 94, 215, 0.1),
-					rgba(0, 206, 255, 0.1)
-				);
-				border-bottom: 1px solid rgba(95, 94, 215, 0.2);
-			}
-
-			.tech-logo {
-				@apply w-32 h-32 object-contain rounded-lg overflow-hidden;
-				background: #f3f4f6; /* gray-100 - ensures white logos are visible */
-				padding: 0.5rem;
-				border: 1px solid #e5e7eb; /* gray-200 border for definition */
-				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-				transition: transform 0.3s ease;
-			}
-
-			:root.dark .tech-logo {
-				background: #111827; /* gray-900 */
-				border-color: #374151; /* gray-700 */
-				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-			}
-
-			.tech-logo:hover {
-				transform: scale(1.05);
-			}
-
-			.link-button {
-				@apply inline-flex items-center px-4 py-2 rounded-lg text-white font-medium transition-all duration-300;
-				background: linear-gradient(to right, var(--primary), var(--secondary));
-				box-shadow: 0 4px 10px rgba(95, 94, 215, 0.3);
-			}
-
-			.link-button:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 6px 15px rgba(95, 94, 215, 0.4);
-			}
-
-			.link-button svg {
-				@apply w-5 h-5 mr-2;
-			}
-
-			.content-section {
-				@apply bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8;
-			}
-
-			.section-title {
-				@apply text-2xl font-bold mb-4 text-gray-900 dark:text-white;
-				position: relative;
-				padding-left: 1rem;
-			}
-
-			.section-title::before {
-				content: "";
-				position: absolute;
-				left: 0;
-				top: 0.25rem;
-				bottom: 0.25rem;
-				width: 4px;
-				background: linear-gradient(
-					to bottom,
-					var(--primary),
-					var(--secondary)
-				);
-				border-radius: 2px;
-			}
-
-			.empty-state {
-				@apply flex flex-col items-center justify-center p-8 rounded-lg;
-				background: rgba(95, 94, 215, 0.03);
-				border: 2px dashed rgba(95, 94, 215, 0.1);
-			}
-
-			.empty-state svg {
-				@apply w-16 h-16 mb-4 text-gray-400;
-			}
-
-			.content-card {
-				@apply bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300;
-				border: 1px solid rgba(95, 94, 215, 0.1);
-			}
-
-			.content-card:hover {
-				transform: translateY(-5px);
-				box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-			}
-
-			.content-card img {
-				@apply w-full h-40 object-cover;
-			}
-
-			.content-card .content {
-				@apply p-4;
-			}
-
-			.content-card h3 {
-				@apply text-lg font-semibold mb-2 text-gray-900 dark:text-white;
-			}
-
-			.content-card p {
-				@apply text-gray-600 dark:text-gray-300 text-sm;
-			}
-		</style>
-
-		<!-- Technology Header -->
-		<section class="tech-header w-full px-4 py-6">
-			<div class="max-w-7xl mx-auto">
-				<div class="mb-4">
+	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
+		<!-- Header Section -->
+		<section class="w-full">
+			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
+				<!-- Breadcrumb -->
+				<div class="mb-6">
 					<Breadcrumb elements={[
 						{ title: 'Home', link: '/' },
 						{ title: 'Technologies', link: '/technology' },
 						{ title: technology.name, link: `/technology/${technology.id}` },
 					]} />
 				</div>
-				<div
-					class="flex flex-col md:flex-row items-center md:items-start gap-8"
-				>
-					<img
-						src={technology.logo ? technology.logo : placeholderLogo}
-						alt={`${technology.name} Logo`}
-						class="tech-logo"
-						onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
-					/>
-					<div class="flex-1">
-						<h1
-							class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white"
-						>
+
+				<!-- Technology Header -->
+				<div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+					<!-- Logo -->
+					<div class="glass-media-brand w-28 h-28 md:w-32 md:h-32 rounded-2xl p-4 flex items-center justify-center flex-shrink-0 shadow-lg">
+						<img
+							src={technology.logo ? technology.logo : placeholderLogo}
+							alt={`${technology.name} Logo`}
+							class="w-full h-full object-contain drop-shadow-lg"
+							onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
+						/>
+					</div>
+
+					<!-- Info -->
+					<div class="flex-1 text-center md:text-left">
+						<h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
 							{technology.name}
 						</h1>
-						<p class="text-lg text-gray-700 dark:text-gray-300 mb-6 max-w-3xl">
+						<p class="text-lg text-gray-600 dark:text-gray-300 mb-6 max-w-3xl">
 							{technology.description}
 						</p>
-						<div class="flex flex-wrap gap-4">
-							{
-								technology.website && (
-									<a
-										href={technology.website}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="link-button"
-									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke-width="1.5"
-											stroke="currentColor"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
-											/>
-										</svg>
-										Official Website
-									</a>
-								)
-							}
-							{
-								technology.documentation && (
-									<a
-										href={technology.documentation}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="link-button"
-									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke-width="1.5"
-											stroke="currentColor"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-											/>
-										</svg>
-										Documentation
-									</a>
-								)
-							}
+
+						<!-- Action Buttons -->
+						<div class="flex flex-wrap gap-3 justify-center md:justify-start">
+							{technology.website && (
+								<a
+									href={technology.website}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="btn-solid inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
+								>
+									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+									</svg>
+									Official Website
+								</a>
+							)}
+							{technology.documentation && (
+								<a
+									href={technology.documentation}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="btn-glass inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
+								>
+									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+									</svg>
+									Documentation
+								</a>
+							)}
 						</div>
 					</div>
 				</div>
 			</div>
 		</section>
 
-		<!-- Videos and Related Content -->
-		<div class="w-full px-4 pb-12">
+		<!-- Related Content (Videos & Articles) -->
+		<section class="w-full">
 			<div class="max-w-7xl mx-auto">
 				<TopicHub
 					technologyId={technology.id}
@@ -406,47 +266,37 @@ const placeholderLogo = "/apple-touch-icon.png"; // Define a placeholder
 					videos={technology.videos || []}
 				/>
 			</div>
-		</div>
+		</section>
 
-		<!-- Technology CTA - Subscribe for updates or request content -->
-		<div class="w-full px-4 pb-12">
+		<!-- CTA Section -->
+		<section class="w-full">
 			<div class="max-w-xl mx-auto">
 				<TechnologyCTA
 					technologyId={technology.id}
 					technologyName={technology.name}
 				/>
 			</div>
-		</div>
+		</section>
 
 		<!-- Comprehensive Guide Content -->
 		{hasContent && Content && (
-			<div class="w-full px-4 pb-12">
+			<section class="w-full">
 				<div class="max-w-4xl mx-auto">
-					<div class="mb-8">
-						<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-							Complete Guide
-						</h2>
-						<p class="text-gray-600 dark:text-gray-400">
-							Comprehensive documentation, best practices, and getting started tutorials
-						</p>
+					<div class="glass-panel rounded-3xl p-6 md:p-10">
+						<div class="mb-8">
+							<h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+								Complete Guide
+							</h2>
+							<p class="text-gray-600 dark:text-gray-400">
+								Comprehensive documentation, best practices, and getting started tutorials
+							</p>
+						</div>
+						<article class="prose prose-lg dark:prose-invert max-w-none">
+							<Content />
+						</article>
 					</div>
-					<article class="prose prose-lg dark:prose-invert max-w-none
-						prose-headings:font-bold
-						prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4
-						prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
-						prose-p:text-gray-700 dark:prose-p:text-gray-300
-						prose-a:text-primary hover:prose-a:text-secondary prose-a:no-underline
-						prose-code:text-primary prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-						prose-pre:bg-gray-900 dark:prose-pre:bg-black prose-pre:border prose-pre:border-gray-700
-						prose-ul:list-disc prose-ol:list-decimal
-						prose-li:text-gray-700 dark:prose-li:text-gray-300
-						prose-strong:text-gray-900 dark:prose-strong:text-white
-						prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:italic
-						prose-img:rounded-lg prose-img:shadow-lg">
-						<Content />
-					</article>
 				</div>
-			</div>
+			</section>
 		)}
 	</div>
 </Page>

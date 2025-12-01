@@ -1,0 +1,48 @@
+---
+name: "DevSpace"
+description: |
+  DevSpace is an open-source developer tool for Kubernetes that allows you to develop, test, and debug your applications directly within your Kubernetes cluster. It eliminates the need for local development environments and long build-deploy-test cycles by providing hot reloading, automatic container restarts, and direct debugging capabilities in the cluster. This accelerates development and reduces the friction of working with containerized applications.
+  
+  DevSpace streamlines the Kubernetes development workflow, enabling developers to iterate rapidly on their code while working with the actual target environment. It supports features like automatic code synchronization, port forwarding, and integrated logging, which makes it easier to diagnose and resolve issues quickly. This is especially valuable for microservices architectures, where testing interactions between services can be complex.
+logos:
+  icon: ./icon.svg
+  stacked: ./stacked.svg
+website: "https://devspace.sh/"
+documentation: "https://devspace.sh/docs/getting-started/introduction"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "development-environment"
+  - "ci-cd"
+  - "developer-experience"
+status: "stable"
+---
+
+DevSpace is a command-line tool that empowers developers to build, test, and debug cloud-native applications directly inside their Kubernetes clusters. It aims to significantly reduce the development feedback loop and simplify the complexities of Kubernetes-native development.
+
+## Key Features
+
+-   **Hot Reloading & Live Sync:** Automatically synchronize code changes from your local machine to containers running in Kubernetes, enabling instant feedback without rebuilding and redeploying images.
+-   **In-Cluster Debugging:** Attach your local debugger directly to containers running in the cluster, providing a familiar debugging experience for remote applications.
+-   **Unified Workflow:** Streamlines the entire development workflow, from building and deploying to debugging and testing, all within Kubernetes.
+-   **Automated Deployments:** Define your deployment logic once and let DevSpace handle repetitive tasks like image building, tagging, pushing, and deploying manifests.
+-   **Port Forwarding & Proxying:** Easily expose services running in your cluster to your local machine, or proxy traffic for seamless interaction.
+-   **Multi-Context Support:** Work with multiple Kubernetes clusters and contexts effortlessly.
+
+## How it Works
+
+DevSpace uses a declarative `devspace.yaml` configuration file to define how your project should be built, deployed, and developed within Kubernetes. When you run `devspace dev`, it sets up a development-optimized environment:
+
+1.  **Image Building:** Builds container images (if necessary) and pushes them to a registry.
+2.  **Deployment:** Deploys your application manifests (Helm, Kubernetes YAML, Kustomize).
+3.  **Hot Reloading:** Establishes a connection to sync local code changes to running containers.
+4.  **Port Forwarding:** Sets up local port forwards to access services.
+5.  **Logging & Debugging:** Streams container logs and allows debugger attachment.
+
+## Benefits
+
+-   **Faster Feedback Loops:** Iterate on code changes in real-time, reducing development cycles from minutes to seconds.
+-   **"Works on Cluster" Guarantee:** Develop and test against the actual production-like environment, catching issues earlier.
+-   **Simplified Kubernetes Development:** Abstracts away many Kubernetes complexities, allowing developers to focus on application logic.
+-   **Consistent Environments:** Ensures that all team members are developing against the same Kubernetes setup.
+-   **Cost-Effective:** Reduces local resource consumption and leverages existing cluster resources.

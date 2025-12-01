@@ -1,0 +1,38 @@
+---
+name: "Fleet"
+description: |
+  Fleet is a lightweight Kubernetes distribution manager. It simplifies the process of managing and deploying Kubernetes across a fleet of machines, especially edge and bare metal servers. It enables GitOps-style management, allowing you to define desired cluster states in Git repositories and automatically reconcile the actual state with the desired state, ensuring consistency and simplified management at scale.
+  
+  Fleet's value lies in its ability to bring centralized and declarative management to distributed Kubernetes deployments. Common use cases include managing edge clusters for IoT applications, deploying Kubernetes on bare metal servers without the complexity of traditional infrastructure setup, and simplifying the management of multiple Kubernetes clusters spread across different environments.
+logos:
+  icon: ./icon.svg
+website: "https://fleet.rancher.io/"
+documentation: "https://fleet.rancher.io/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "gitops"
+  - "fleet-management"
+  - "cluster-management"
+  - "edge-computing"
+status: "stable"
+---
+
+Fleet is a powerful GitOps-driven deployment engine designed by Rancher to manage and deploy applications to a vast number of Kubernetes clusters, from a single central Git repository. It simplifies the operational challenges of managing many clusters, especially in edge computing and bare metal environments.
+
+## Key Features & How It Works
+
+-   **GitOps at Scale:** Fleet embraces the GitOps philosophy, using Git as the single source of truth for all cluster configurations and applications. It continuously reconciles the desired state defined in Git with the actual state of your clusters.
+-   **Helm-Centric Deployment:** Regardless of whether your source manifests are raw Kubernetes YAML, Kustomize configurations, or Helm charts, Fleet internally converts them into Helm releases for consistent and auditable deployments.
+-   **Multi-Cluster Management:** Designed specifically for managing a "fleet" of Kubernetes clusters, Fleet provides a centralized mechanism to deploy applications and configurations across all of them.
+-   **Application & Cluster Management:** It allows you to group clusters, target specific applications to specific groups, and manage the lifecycle of those applications declaratively.
+-   **Scalable Architecture:** Built to handle thousands of clusters, Fleet uses a lightweight agent deployed on each managed cluster to communicate with the central Fleet controller.
+
+## Benefits
+
+-   **Centralized Control:** Manage all your Kubernetes clusters and their deployed applications from a single Git repository.
+-   **Consistency & Reproducibility:** Ensures that applications and configurations are consistent across all managed clusters, reducing configuration drift.
+-   **Simplified Operations:** Automates deployments and updates, significantly reducing the manual effort required for large-scale Kubernetes management.
+-   **Edge & Bare Metal Optimized:** Particularly well-suited for environments where clusters are distributed or have limited resources, common in edge computing and IoT.
+-   **Auditability:** Every change is tracked in Git, providing a complete audit trail and simplifying rollbacks.
+-   **Developer Empowerment:** Developers can update applications by simply pushing changes to Git, with Fleet handling the deployment to all relevant clusters.

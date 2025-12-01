@@ -1,0 +1,42 @@
+---
+name: "Pixie"
+description: |
+  Pixie is an open-source observability platform for Kubernetes applications. It uses eBPF to automatically capture telemetry data (metrics, traces, logs, profiles) without requiring manual instrumentation. Pixie provides instant visibility into application behavior, allowing developers to quickly identify performance bottlenecks, troubleshoot errors, and understand system-wide interactions in real-time. It's particularly valuable for debugging and optimizing complex microservices architectures running on Kubernetes by offering out-of-the-box dashboards and a powerful query language (PxL) for exploring data.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://pixie.dev/"
+documentation: "https://docs.pixie.dev/"
+license: "Apache-2.0"
+categories:
+  - "observability"
+  - "ebpf"
+  - "kubernetes"
+  - "troubleshooting"
+  - "apm"
+  - "distributed-tracing"
+status: "stable"
+---
+
+Pixie is an open-source, Kubernetes-native observability platform that provides instant, automated telemetry data collection (metrics, traces, logs, and profiles) from your applications without requiring any code changes or manual instrumentation. It leverages eBPF technology to gather comprehensive data directly from the Linux kernel.
+
+## Key Features
+
+-   **Auto-Telemetry with eBPF:** Automatically collects a wide range of telemetry data (full-body requests, application-level traces, logs, CPU profiles) from your Kubernetes applications using eBPF, without the need for manual code instrumentation.
+-   **In-Cluster Edge Computing:** Data is processed and stored locally within your Kubernetes cluster, minimizing data egress costs and improving query performance.
+-   **Scriptable Observability (PxL):** Provides PxL (Pixie Language), a Pythonic query language, for performing complex queries, aggregations, and transformations on the collected telemetry data.
+-   **Instant Visibility:** Offers immediate insights into application performance, network interactions, and resource utilization, enabling rapid troubleshooting.
+-   **Pre-built Dashboards:** Comes with a rich set of out-of-the-box dashboards for common use cases like HTTP service monitoring, database query analysis, and JVM performance.
+-   **No Sampled Data:** Captures 100% of telemetry data, providing a complete picture of your application's behavior.
+-   **Seamless Integration:** Integrates with popular tools like Grafana for external visualization and alerts.
+
+## Benefits
+
+-   **Accelerated Troubleshooting:** Quickly pinpoint the root cause of issues in complex microservices architectures by providing deep, real-time insights.
+-   **Reduced Operational Overhead:** Eliminates the need for manual instrumentation, agent management, and complex data pipeline configurations.
+-   **Comprehensive Observability:** Provides a holistic view of your application's performance and behavior, from network traffic to application-level details.
+-   **Cost-Effective:** By processing data in-cluster and reducing data egress, it can significantly lower observability costs.
+-   **Enhanced Developer Productivity:** Empowers developers to debug, optimize, and understand their code's behavior in production with greater ease.
+-   **Improved Security:** Provides insights into network communication and process execution, aiding in security analysis.
+-   **eBPF Advantage:** Leverages eBPF for secure, low-overhead data collection directly from the kernel.

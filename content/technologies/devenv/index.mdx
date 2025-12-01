@@ -1,0 +1,35 @@
+---
+name: "Devenv"
+description: |
+  Devenv is a Nix-based tool designed to streamline and standardize development environments. It enables developers to define their environment dependencies, including language versions, libraries, and system tools, declaratively in a Nix configuration file. This ensures that everyone on the team has the same development setup, eliminating the "works on my machine" problem and improving collaboration. Devenv utilizes Nix to create reproducible and isolated development environments, allowing for easy setup and consistent behavior across different platforms and operating systems.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://devenv.sh/"
+documentation: "https://devenv.sh/reference/"
+license: "Apache-2.0"
+categories:
+  - "development-environment"
+  - "nix"
+  - "reproducible-builds"
+  - "configuration-management"
+status: "stable"
+---
+
+Devenv provides a declarative way to create and manage development environments using the Nix ecosystem. It aims to make your development setup fast, consistent, and reproducible, eliminating environmental discrepancies between developers and CI/CD.
+
+## Key Features
+
+-   **Declarative Configuration:** Define your entire development environment (packages, language versions, services, shell hooks) in `devenv.nix` and `devenv.yaml` files.
+-   **Reproducible Environments:** Leverage Nix's purity to ensure that every developer and CI/CD pipeline gets the exact same environment, every time.
+-   **Fast Development Loop:** Quickly activate and deactivate environments, with intelligent caching that speeds up setup.
+-   **Process Management:** Define background services and processes that start automatically with your development environment (e.g., databases, local servers).
+-   **Container Integration:** Build OCI images directly from your `devenv.nix` configuration, ensuring your production containers match your development environment.
+-   **Cross-Platform:** Works seamlessly across Linux and macOS.
+
+## Benefits
+
+-   **Eliminates "Works on My Machine":** Guarantees consistent environments across your team and in CI/CD.
+-   **Simplified Onboarding:** New developers can set up their environment with a single command.
+-   **Project Isolation:** Each project can have its own isolated development environment, preventing dependency conflicts.
+-   **Version Control:** Your development environment is defined as code, allowing you to version control it and track changes.
+-   **Reduced Cognitive Load:** Developers focus on code, not environment setup and maintenance.

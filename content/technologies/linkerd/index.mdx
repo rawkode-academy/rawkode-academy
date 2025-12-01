@@ -1,0 +1,44 @@
+---
+name: "Linkerd"
+description: |
+  Linkerd is a service mesh designed for Kubernetes, providing observability, security, and reliability to microservices applications. It acts as a transparent layer over existing applications, without requiring code changes in many cases. Linkerd provides request routing, load balancing, service discovery, automatic retries, and circuit breaking capabilities, all while offering deep insights into application performance through metrics, tracing, and dashboards. It simplifies the complexities of managing distributed systems, allowing developers to focus on business logic instead of infrastructure concerns. Main use cases include improving application resilience, enhancing security with mutual TLS, gaining visibility into service-to-service communication, and simplifying the implementation of complex deployment patterns like canary releases and A/B testing.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://linkerd.io/"
+documentation: "https://linkerd.io/2/overview/"
+license: "Apache-2.0"
+categories:
+  - "service-mesh"
+  - "kubernetes"
+  - "networking"
+  - "observability"
+  - "cncf"
+  - "security"
+status: "stable"
+---
+
+Linkerd is an ultralight, security-first service mesh for Kubernetes, designed to bring mission-critical features like observability, reliability, and security to cloud-native applications without requiring any code changes. It is a Cloud Native Computing Foundation (CNCF) graduated project, known for its focus on simplicity and performance.
+
+## Key Features
+
+-   **Automatic mTLS (Mutual TLS):** Provides transparent, automatic encryption and authentication for all service-to-service communication within the mesh, enhancing security without developer effort.
+-   **Telemetry & Observability:** Automatically collects golden metrics (latency, requests/second, success rate) for all service communications, offering deep insights into application behavior through its built-in dashboard.
+-   **Traffic Management:** Offers powerful traffic routing capabilities, including retries, timeouts, and circuit breakers, to improve the resilience of microservices.
+-   **Service Identity:** Provides strong cryptographically verified identity for each service, enabling fine-grained access control.
+-   **Minimal Resource Footprint:** Designed to be extremely lightweight and performant, minimizing overhead on your application.
+-   **Debugging Tools:** Includes a powerful CLI and dashboard to inspect and debug live service interactions.
+
+## How it Works
+
+Linkerd works by injecting a transparent proxy (a "sidecar") written in Rust alongside each application instance (Pod) in your Kubernetes cluster. All network traffic to and from your application passes through this proxy. The proxies communicate with a central control plane that provides configuration and collects telemetry. This sidecar pattern allows Linkerd to add its features without requiring any changes to your application code.
+
+## Benefits
+
+-   **Enhanced Reliability:** Automatic retries, timeouts, and circuit breaking make your microservices more resilient to failures.
+-   **Improved Security:** Automatic mTLS encrypts all communication, and service identity provides a strong foundation for zero-trust security.
+-   **Deep Visibility:** Gain unparalleled insight into service performance, dependencies, and health, making troubleshooting much faster.
+-   **Simplified Operations:** Abstracts away complex networking and security concerns, allowing developers to focus on business logic.
+-   **Ultralight & Performant:** Its Rust-powered proxies are highly efficient, ensuring minimal latency and resource consumption.
+-   **Progressive Delivery:** Facilitates safe deployments with features for canary releases and traffic splitting.

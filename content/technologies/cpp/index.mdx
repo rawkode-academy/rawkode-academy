@@ -1,0 +1,34 @@
+---
+name: "C++"
+description: |
+  C++ is a powerful, high-performance programming language with a rich history and ongoing relevance in cloud-native environments. While not exclusively a cloud-native technology, it is employed to build the infrastructure, tools, and applications that underpin modern cloud systems. C++ excels in situations demanding low latency, high throughput, and efficient resource utilization, making it suitable for building cloud-native components like databases, message queues, service meshes, and high-performance computing applications. It is valuable for optimizing the performance of cloud infrastructure and ensuring scalability and reliability.
+logos:
+  icon: ./icon.svg
+website: "https://isocpp.org/"
+documentation: "https://en.cppreference.com/w/"
+license: "None"
+categories:
+  - "language"
+  - "systems-programming"
+status: "stable"
+---
+
+C++ is a general-purpose programming language created by Bjarne Stroustrup as an extension of the C language, or "C with Classes". It has evolved significantly over the decades, with modern C++ (`C++11` and later) incorporating features that make it more powerful, safer, and easier to use.
+
+## Why C++ in Cloud-Native?
+
+While often associated with desktop applications and embedded systems, C++ plays a crucial role in the cloud-native ecosystem due to its unparalleled performance characteristics:
+
+-   **Performance-Critical Infrastructure:** Many foundational components of cloud-native systems, such as database engines (e.g., ScyllaDB, ClickHouse), message brokers (e.g., Kafka, Envoy proxy for service mesh), and container runtimes, leverage C++ for its efficiency.
+-   **Low-Latency Services:** For applications requiring extreme low latency and high throughput (e.g., financial trading platforms, real-time analytics), C++ remains a top choice.
+-   **Resource Optimization:** C++ allows for fine-grained control over system resources, leading to more efficient utilization of CPU and memory, which translates to lower operational costs in large-scale cloud deployments.
+-   **eBPF and Kernel Development:** As eBPF gains prominence in cloud-native networking and security (e.g., Cilium, Falco), C++ (or C) is essential for developing and optimizing kernel-level programs.
+
+## Key Concepts
+
+-   **Object-Oriented Programming (OOP):** Supports classes, objects, inheritance, polymorphism, and encapsulation.
+-   **Generic Programming:** Utilizes templates to write code that works with arbitrary types, enhancing reusability.
+-   **Memory Management:** Provides direct memory manipulation through pointers and allows for manual or smart-pointer-based memory management.
+-   **Standard Library:** A rich set of libraries, including the Standard Template Library (STL) for containers, algorithms, and iterators.
+
+Modern C++ continues to adapt, offering features that improve safety (e.g., smart pointers, `std::optional`), concurrency (`std::thread`, `std::future`), and readability, ensuring its relevance in the ever-evolving landscape of cloud-native development.

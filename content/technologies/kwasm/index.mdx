@@ -1,0 +1,41 @@
+---
+name: "KWasm"
+description: |
+  KWasm is a technology that enables running WebAssembly (Wasm) workloads directly within Kubernetes without requiring a full container runtime like Docker or containerd. It offers a lightweight and efficient alternative for executing microservices and functions by leveraging the portability and security benefits of WebAssembly. KWasm significantly reduces resource consumption and improves startup times compared to traditional containerized applications, making it well-suited for edge computing, serverless functions, and scenarios where density and speed are critical. It allows developers to deploy Wasm modules as first-class citizens within their Kubernetes clusters, integrating seamlessly with existing tooling and infrastructure.
+logos:
+  icon: ./icon.svg
+website: "https://kwasm.sh/"
+documentation: "https://kwasm.sh/docs/"
+license: "Apache-2.0"
+categories:
+  - "webassembly"
+  - "kubernetes"
+  - "serverless"
+  - "edge-computing"
+  - "container-runtime"
+status: "stable"
+---
+
+KWasm is a Kubernetes Operator that bridges the gap between WebAssembly (Wasm) workloads and the Kubernetes orchestration platform. It enables Kubernetes clusters to run Wasm modules directly on their nodes, offering a highly efficient, secure, and lightweight alternative to traditional containerized applications.
+
+## Key Features
+
+-   **WebAssembly Integration:** Installs and configures the necessary components on Kubernetes nodes to enable native execution of WebAssembly modules.
+-   **Kubernetes Operator:** Manages the lifecycle of WebAssembly runtimes and configurations on Kubernetes nodes in an automated and declarative manner.
+-   **Lightweight Execution:** Leverages the inherent lightweight nature of WebAssembly, leading to significantly reduced resource consumption and faster startup times for applications.
+-   **Enhanced Security:** Wasm modules run in a secure, sandboxed environment, providing strong isolation and a reduced attack surface compared to traditional containers.
+-   **Broad Compatibility:** Designed to work with various Kubernetes distributions and node operating systems (e.g., Ubuntu/Debian with Containerd).
+-   **Fine-Grained Node Provisioning:** Offers control over how nodes are provisioned and configured for Wasm workloads.
+
+## How It Works
+
+The KWasm Operator is deployed in a Kubernetes cluster. It watches for custom resources that define Wasm runtime configurations. Upon detecting these resources, it provisions the necessary components (like a Wasm runtime shim for Containerd) on the target Kubernetes nodes. This allows developers to deploy Wasm modules as if they were standard containers, with Kubernetes handling the orchestration, scaling, and lifecycle management.
+
+## Benefits
+
+-   **Reduced Resource Footprint:** WebAssembly modules are extremely small and efficient, leading to lower memory and CPU usage per workload.
+-   **Faster Startup Times:** Wasm modules can start in milliseconds, making them ideal for serverless functions and event-driven architectures where rapid responsiveness is crucial.
+-   **Improved Security:** The sandboxed nature of Wasm provides a higher level of isolation and security than many traditional container runtimes.
+-   **Cost Efficiency:** Lower resource consumption translates directly to reduced infrastructure costs, especially at scale.
+-   **Edge Computing Advantage:** The lightweight and portable nature of KWasm makes it perfectly suited for deploying applications on edge devices with limited resources.
+-   **Language Agnostic:** Supports Wasm modules compiled from various programming languages, giving developers flexibility.

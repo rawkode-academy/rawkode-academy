@@ -236,7 +236,7 @@
 
     async function loadTechnology(slug) {
       try {
-        const response = await fetch(`data/${slug}/index.mdx`);
+        const response = await fetch(`${slug}/index.mdx`);
         if (!response.ok) return null;
         const content = await response.text();
         const frontmatter = parseFrontmatter(content);
@@ -244,7 +244,7 @@
         const icons = {};
         for (const type of ICON_TYPES) {
           const declared = frontmatter.logos?.[type] === true;
-          const url = `data/${slug}/${type}.svg`;
+          const url = `${slug}/${type}.svg`;
           const exists = await checkImageExists(url);
           icons[type] = { declared, exists, url };
         }

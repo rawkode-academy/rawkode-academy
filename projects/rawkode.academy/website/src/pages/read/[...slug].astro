@@ -32,27 +32,18 @@ const computeImageUrl = async (
 ): Promise<URL | undefined> => {
 	if (article.data.cover) {
 		const image = await getImage({ src: article.data.cover.image });
-
 		return new URL(image.src, Astro.site);
 	}
-
 	return undefined;
 };
 
 export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
 		const articles = await getCollection("articles");
-
-		return articles.map((article: CollectionEntry<"articles">) => {
-			return {
-				params: {
-					slug: article.id,
-				},
-				props: {
-					article,
-				},
-			};
-		});
+		return articles.map((article: CollectionEntry<"articles">) => ({
+			params: { slug: article.id },
+			props: { article },
+		}));
 	};
 
 const { article } = Astro.props;
@@ -72,6 +63,12 @@ const breadcrumbElements = [
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
+
+const publishDate = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "numeric",
+	year: "numeric",
+}).format(article.data.publishedAt);
 ---
 
 <Page
@@ -89,238 +86,211 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 	updatedAt={article.data.updatedAt}
 	authors={authors}
 >
-	{/* Article structured data (TechArticle) */}
 	{imageUrl ? (
 		<ArticleJsonLd slot="extra-head" article={article} authors={authors} imageUrl={imageUrl} />
 	) : (
 		<ArticleJsonLd slot="extra-head" article={article} authors={authors} />
 	)}
-	<!-- Breadcrumb Section -->
-	<div class="mb-6">
+
+	<div class="article-page">
+		<!-- Breadcrumb -->
 		<Breadcrumb elements={breadcrumbElements} />
-	</div>
 
-	<!-- Article Type Badge -->
-	<div class="mb-4">
-		<span class={`${badgeConfig.bg} ${badgeConfig.text} text-sm font-semibold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5`}>
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={badgeConfig.icon} />
-			</svg>
-			{badgeConfig.label}
-		</span>
-	</div>
+		<!-- Article Header -->
+		<header class="article-header">
+			<!-- Title -->
+			<h1>{article.data.title}</h1>
 
-	<h1 class="text-3xl md:text-4xl font-extrabold dark:text-white mb-6">
-		{article.data.title}
-	</h1>
-
-	<!-- Contextual internal links (up/sideways/down) placed high in content -->
-	<InternalLinks article={article} />
-
-	<div class="relative max-w-full overflow-x-hidden">
-		<article class="prose w-full max-w-full">
-			<!-- TOC for all screen sizes -->
-			<div class="hidden md:block">
-				<TableOfContents
-					headings={headings}
-					class="fixed top-24 right-4 h-[calc(80vh-6rem)] w-8 hover:w-48 transition-all duration-300 ease-in-out overflow-hidden z-10"
-				/>
-			</div>
-			<header class="mb-6">
-				<!-- Author and metadata card - compact modern design -->
-				<div
-					class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400"
-				>
-					<!-- Author avatars and names -->
-					<div class="flex items-center gap-3">
-						{authors.length > 0 && (
-							<div class="flex -space-x-2">
-								{authors.slice(0, 3).map((author, index) => (
-									<img
-										class="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-900 shadow-sm"
-										src={`https://avatars.githubusercontent.com/${author.data.handle}`}
-										alt={`Profile picture of ${author.data.name}`}
-										style={`z-index: ${3 - index}`}
-									/>
-								))}
-								{authors.length > 3 && (
-									<div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-900 flex items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-300">
-										+{authors.length - 3}
-									</div>
-								)}
-							</div>
-						)}
-						<div>
-							<div class="flex flex-wrap items-center gap-2">
-								{authors.map((author, index) => (
-									<>
-										<a
-											href={`https://github.com/${author.data.handle}`}
-											target="_blank"
-											rel="author noopener noreferrer"
-											class="font-medium text-gray-900 dark:text-white hover:text-primary transition-colors"
-										>
-											{author.data.name}
-										</a>
-										{index < authors.length - 1 && (
-											index === authors.length - 2 ?
-											<span class="text-gray-400 dark:text-gray-600">&</span> :
-											<span class="text-gray-400 dark:text-gray-600">,</span>
-										)}
-									</>
-								))}
-							</div>
-							{authors.length > 1 && (
-								<div class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-									{authors.map(author => `@${author.data.handle}`).join(' · ')}
-								</div>
-							)}
-						</div>
-					</div>
-
-					<!-- Separator -->
-					<span class="text-gray-400 dark:text-gray-600">·</span>
-
-					<!-- Metadata items -->
-					<div class="flex flex-wrap items-center gap-3">
-						<!-- Published date -->
-						<div class="flex items-center gap-1">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-								></path>
-							</svg>
-							<time
-								itemprop="datePublished"
-								datetime={article.data.publishedAt.toString()}
-							>
-								{
-									new Intl.DateTimeFormat("en-US", {
-										year: "numeric",
-										month: "short",
-										day: "numeric",
-									}).format(article.data.publishedAt)
-								}
-							</time>
-						</div>
-
-						<!-- Updated date (if available) -->
-						{
-							article.data.updatedAt && (
-								<>
-									<span class="text-gray-400 dark:text-gray-600">·</span>
-									<div class="flex items-center gap-1">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											class="h-4 w-4"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-											/>
-										</svg>
-										<span>Updated {new Intl.DateTimeFormat("en-US", {
-											year: "numeric",
-											month: "short",
-											day: "numeric",
-										}).format(article.data.updatedAt)}</span>
-									</div>
-								</>
-							)
-						}
-
-						<!-- Reading time -->
-						<span class="text-gray-400 dark:text-gray-600">·</span>
-						<div class="flex items-center gap-1">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-							</svg>
-							<span>{readingTime.text}</span>
-						</div>
-					</div>
+			<!-- Byline: Author + Meta in one row -->
+			<div class="byline">
+				<div class="byline-authors">
+					{authors.map((author, i) => (
+						<a
+							href={`https://github.com/${author.data.handle}`}
+							target="_blank"
+							rel="author noopener noreferrer"
+							class="author"
+						>
+							<img
+								src={`https://avatars.githubusercontent.com/${author.data.handle}`}
+								alt=""
+								class="author-avatar"
+								loading="lazy"
+							/>
+							<span class="author-name">{author.data.name}</span>
+						</a>
+					))}
 				</div>
 
-				<!-- Series link if available -->
-				{
-					maybeSeries && (
-						<div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-							<SeriesLink series={maybeSeries} />
-						</div>
-					)
-				}
-			</header>
+				<span class="byline-sep">·</span>
 
-			<Updates updates={article.data.updates} />
+				<time datetime={article.data.publishedAt.toString()} class="byline-date">
+					{publishDate}
+				</time>
 
-			<NewsletterCTA class="my-8 not-prose" />
+				<span class="byline-sep">·</span>
 
-			<Content />
+				<span class="byline-read">{readingTime.text}</span>
 
-			<NewsletterCTA />
+				<span class="byline-type">
+					{badgeConfig.label}
+				</span>
+			</div>
 
-			<!-- Resources -->
-			<Resources resources={article.data.resources} />
+			<!-- Series -->
+			{maybeSeries && (
+				<div class="series-link">
+					<SeriesLink series={maybeSeries} />
+				</div>
+			)}
+		</header>
 
-			<!-- Related Articles -->
-			<RelatedArticles currentArticle={article} limit={3} />
-		</article>
+		<!-- Internal Links -->
+		<InternalLinks article={article} />
+
+		<!-- Content -->
+		<div class="article-content">
+			<TableOfContents headings={headings} />
+
+			<article class="prose">
+				<Updates updates={article.data.updates} />
+				<Content />
+				<NewsletterCTA class="my-12 not-prose" />
+				<Resources resources={article.data.resources} />
+				<RelatedArticles currentArticle={article} limit={3} />
+			</article>
+		</div>
 	</div>
 </Page>
 
 <style>
-	/* Base article styles */
-	article {
+	.article-page {
+		max-width: 100%;
+	}
+
+	/* Header - needs right padding for TOC */
+	.article-header {
+		margin-bottom: 2rem;
+		padding-right: 4rem;
+	}
+
+	@media (max-width: 767px) {
+		.article-header {
+			padding-right: 0;
+		}
+	}
+
+	h1 {
+		font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+		font-weight: 800;
+		line-height: 1.2;
+		letter-spacing: -0.02em;
+		color: rgb(17 24 39);
+		margin: 0 0 1rem;
+	}
+
+	:root.dark h1 {
+		color: white;
+	}
+
+	/* Byline */
+	.byline {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 0.625rem;
+		font-size: 0.875rem;
+		color: rgb(107 114 128);
+	}
+
+	:root.dark .byline {
+		color: rgb(156 163 175);
+	}
+
+	.byline-authors {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.author {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: rgb(17 24 39);
+		text-decoration: none;
+		font-weight: 500;
+		transition: color 0.15s;
+	}
+
+	:root.dark .author {
+		color: white;
+	}
+
+	.author:hover {
+		color: rgb(var(--brand-primary));
+	}
+
+	.author-avatar {
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	.byline-sep {
+		color: rgb(209 213 219);
+	}
+
+	:root.dark .byline-sep {
+		color: rgb(75 85 99);
+	}
+
+	.byline-date,
+	.byline-read {
+		white-space: nowrap;
+	}
+
+	.byline-type {
+		padding: 0.25rem 0.625rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: rgb(var(--brand-primary));
+		background: rgb(var(--brand-primary) / 0.1);
+		border-radius: 4px;
+	}
+
+	:root.dark .byline-type {
+		background: rgb(var(--brand-primary) / 0.2);
+	}
+
+	/* Series */
+	.series-link {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--surface-border);
+	}
+
+	/* Content */
+	.article-content {
+		position: relative;
+	}
+
+	.prose {
 		width: 100%;
-		box-sizing: border-box;
-		padding-right: 0;
-		margin-bottom: 12rem;
+		margin-bottom: 6rem;
+		padding-right: 4rem;
 	}
 
-	/* Medium screens - add padding for TOC and constrain width */
-	@media (min-width: 768px) and (max-width: 1023px) {
-		article {
-			padding-right: 3.5rem;
-			max-width: calc(100vw - 64px); /* Account for sidebar and some padding */
-		}
-
-		div.relative {
-			max-width: 100%;
-			overflow-x: hidden;
+	@media (max-width: 767px) {
+		.prose {
+			padding-right: 0;
 		}
 	}
 
-	/* Large screens */
-	@media (min-width: 1024px) {
-		article {
-			padding-right: 5rem;
-		}
-	}
-
-	/* Ensure content elements don't overflow */
+	/* Prose overrides */
 	:global(.prose pre),
 	:global(.prose code),
 	:global(.prose table),
@@ -330,31 +300,16 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 		overflow-x: auto;
 	}
 
-	/* Medium screen specific content adjustments */
-	@media (min-width: 768px) and (max-width: 1023px) {
-		:global(.prose img),
-		:global(.prose pre),
-		:global(.prose table) {
-			max-width: calc(100% - 3.5rem);
-		}
-	}
-
-	/* Ensure long words break properly */
 	:global(.prose p),
 	:global(.prose li),
 	:global(.prose h1),
 	:global(.prose h2),
 	:global(.prose h3),
-	:global(.prose h4),
-	:global(.prose h5),
-	:global(.prose h6) {
+	:global(.prose h4) {
 		overflow-wrap: break-word;
-		word-wrap: break-word;
 		word-break: break-word;
-		hyphens: auto;
 	}
 
-	/* Fix for code blocks */
 	:global(.prose pre) {
 		white-space: pre-wrap;
 	}

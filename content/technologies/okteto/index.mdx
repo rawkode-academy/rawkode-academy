@@ -1,0 +1,41 @@
+---
+name: "Okteto"
+description: |
+  Okteto is a platform that enables developers to build and test cloud-native applications directly in Kubernetes environments. It provides a fast and iterative development loop by allowing developers to work with their local development tools and IDEs, while seamlessly integrating with remote Kubernetes clusters. This eliminates the need for constant rebuilding and redeploying of code, significantly accelerating the development process.
+  
+  Okteto's value lies in its ability to streamline the developer experience for cloud-native applications. By providing a familiar and efficient local development environment connected directly to Kubernetes, it reduces the friction and complexity associated with developing and testing in a cloud-native context. Main use cases include developing microservices, testing applications in production-like environments, and collaborating on cloud-native projects.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://www.okteto.com/"
+documentation: "https://www.okteto.com/docs/"
+license: "Apache-2.0"
+categories:
+  - "developer-tools"
+  - "kubernetes"
+  - "remote-development"
+  - "cde"
+  - "developer-experience"
+status: "stable"
+---
+
+Okteto is a cloud-native development platform that allows developers to code, build, and test applications directly within their Kubernetes clusters. It aims to provide a fast and iterative inner development loop, enabling developers to bypass the traditional build-deploy-test cycle and work with their applications in a live, production-like environment.
+
+## Key Features
+
+-   **Cloud-Native Development Environments:** Creates isolated development environments within Kubernetes, accessible from your local IDE and tools.
+-   **Live Reloading:** Synchronizes local code changes to your application running in the cluster in real-time, providing instant feedback.
+-   **Local Tooling Integration:** Connects your local IDE and development tools to the remote Kubernetes environment, allowing you to debug, edit, and test as if everything were local.
+-   **`okteto up` Command:** The core command that launches your development environment, sets up port forwarding, and synchronizes your code.
+-   **Context Management:** Easily manage and switch between different Kubernetes contexts and development environments.
+-   **Dynamic Manifests:** Allows for dynamic modification of Kubernetes manifests to inject development-specific configurations.
+-   **Ephemeral Environments:** Quickly provision and tear down development environments, ideal for feature branches and pull requests.
+
+## Benefits
+
+-   **Accelerated Development Workflow:** Significantly reduces the inner development loop by eliminating constant rebuilds, pushes, and redeployments.
+-   **Realistic Environments:** Develop and test against a production-like Kubernetes environment, catching issues earlier and ensuring higher fidelity.
+-   **Developer Productivity:** Empowers developers to code faster, debug more effectively, and focus on application logic rather than environment setup.
+-   **Resource Optimization:** Leverages cluster resources for development, potentially reducing local machine strain and standardizing development infrastructure.
+-   **Simplified Collaboration:** Enables teams to share and collaborate on development environments, ensuring consistency across the team.
+-   **Deployment Independence:** Develop and test applications without affecting other running services in the cluster.
+-   **Cross-Platform Compatibility:** Works across various operating systems and development setups.

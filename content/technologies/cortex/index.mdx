@@ -1,0 +1,30 @@
+---
+name: "Cortex"
+description: |
+  Cortex is a horizontally scalable, highly available, multi-tenant, long-term storage for Prometheus. It allows you to ingest and query metrics from multiple Prometheus servers, centralizing your monitoring data. This provides a global view across all your clusters and enables long-term retention of metrics beyond Prometheus's local storage limitations. It allows you to reliably store Prometheus data for years and efficiently query it, supporting advanced analytics and historical analysis.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://cortexmetrics.io/"
+documentation: "https://cortexmetrics.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "observability"
+  - "monitoring"
+  - "prometheus"
+status: "stable"
+---
+
+Cortex provides a scalable, long-term storage solution for Prometheus metrics, solving the "global view" and "long-term retention" challenges of standard Prometheus deployments.
+
+## Key Features
+
+-   **Horizontal Scalability:** Cortex can run across multiple machines, allowing you to scale ingestion and query capacity independently.
+-   **High Availability:** It supports replication of data, ensuring no single point of failure.
+-   **Multi-Tenancy:** A single Cortex cluster can isolate data and queries for multiple independent tenants (e.g., different teams or customers), secured by authentication.
+-   **Long-Term Storage:** Designed to store metrics for years, typically using object storage (like S3 or GCS) as a backend.
+
+## Architecture
+
+Cortex is composed of several microservices (Ingesters, Distributors, Queriers, Query Frontend, etc.) that work together to handle the read and write paths efficiently. This microservices architecture allows for fine-grained scaling based on your specific workload (e.g., heavy write vs. heavy read).

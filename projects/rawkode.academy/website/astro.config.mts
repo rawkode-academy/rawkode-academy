@@ -18,6 +18,17 @@ import { existsSync } from "node:fs";
 import { glob } from "glob";
 import rehypeExternalLinks from "rehype-external-links";
 
+// Load CUE language grammar for syntax highlighting
+let cueLanguageGrammar: import("shiki").LanguageRegistration | undefined;
+try {
+	const grammarPath = join(process.cwd(), "src/grammars/cue.tmLanguage.json");
+	if (existsSync(grammarPath)) {
+		cueLanguageGrammar = JSON.parse(readFileSync(grammarPath, "utf-8")) as import("shiki").LanguageRegistration;
+	}
+} catch (e) {
+	console.warn("Failed to load CUE grammar:", e);
+}
+
 // Local implementation of searchForWorkspaceRoot to avoid direct vite import
 function searchForWorkspaceRoot(current: string): string {
 	const root = parse(current).root;
@@ -167,10 +178,10 @@ async function buildLastmodIndex() {
 	try {
 		const require = createRequire(import.meta.url);
 		const pkgPath = require.resolve(
-			"@rawkodeacademy/content-technologies/package.json",
+			"@rawkodeacademy/content/package.json",
 		);
 		const root = dirname(pkgPath);
-		const data = join(root, "data");
+		const data = join(root, "technologies");
 		try {
 			const s = await stat(data);
 			techBaseDir = s.isDirectory() ? data : root;
@@ -183,7 +194,7 @@ async function buildLastmodIndex() {
 		});
 	} catch (err) {
 		console.error(
-			"Failed to resolve @rawkodeacademy/content-technologies package:",
+			"Failed to resolve @rawkodeacademy/content package:",
 			err,
 		);
 		// Don't fallback to local directories - workspace package is the only source
@@ -224,10 +235,10 @@ let CONTENT_TECH_DIR: string | undefined;
 try {
 	const require = createRequire(import.meta.url);
 	const pkgPath = require.resolve(
-		"@rawkodeacademy/content-technologies/package.json",
+		"@rawkodeacademy/content/package.json",
 	);
 	const root = dirname(pkgPath);
-	const data = join(root, "data");
+	const data = join(root, "technologies");
 	try {
 		const s = statSync(data);
 		CONTENT_TECH_DIR = s.isDirectory() ? data : root;
@@ -260,6 +271,11 @@ export default defineConfig({
 		...(d2Available ? [d2()] : []),
 		expressiveCode({
 			themes: ["catppuccin-mocha", "catppuccin-latte"],
+			...(cueLanguageGrammar && {
+				shiki: {
+					langs: [cueLanguageGrammar],
+				},
+			}),
 		}),
 		mdx(),
 		react({ experimentalReactChildren: true }),
@@ -332,8 +348,10 @@ export default defineConfig({
 		server: {
 			fs: {
 				// Keep Vite's default workspace root allow-list and add our external content dir.
+				// Also allow the root node_modules for bun's .bun symlink structure.
 				allow: [
 					searchForWorkspaceRoot(process.cwd()),
+					join(searchForWorkspaceRoot(process.cwd()), "node_modules"),
 					...(CONTENT_TECH_DIR ? [CONTENT_TECH_DIR] : []),
 				],
 			},

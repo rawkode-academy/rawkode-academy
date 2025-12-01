@@ -1,0 +1,36 @@
+---
+name: "cdk8s"
+description: |
+  cdk8s (Cloud Development Kit for Kubernetes) is an open-source software development framework for defining Kubernetes applications and reusable abstractions using familiar programming languages like TypeScript, Python, Java, and Go. It allows developers to define infrastructure as code, offering a strongly-typed and programmatic approach to Kubernetes configuration, which is an alternative to YAML. cdk8s simplifies the creation, validation, and deployment of Kubernetes manifests.
+  
+  cdk8s provides value by enabling developers to leverage their existing programming skills and toolsets to manage Kubernetes resources. It promotes code reuse, simplifies complex configurations, and provides compile-time validation, reducing the risk of runtime errors. Main use cases include creating complex Kubernetes deployments, generating reusable Kubernetes components, and integrating Kubernetes configurations into existing software development workflows.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://cdk8s.io/"
+documentation: "https://cdk8s.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "iac"
+  - "programming"
+status: "stable"
+---
+
+cdk8s (Cloud Development Kit for Kubernetes) revolutionizes how developers interact with Kubernetes by allowing them to define applications and reusable infrastructure components using standard programming languages instead of static YAML.
+
+## Key Features
+
+-   **Polyglot Support:** Define your Kubernetes resources in TypeScript, Python, Java, Go, and more. This allows teams to use the languages they are already comfortable with.
+-   **Synthesis to YAML:** cdk8s programs run locally and synthesize standard Kubernetes YAML manifests. These manifests can be applied to any Kubernetes cluster using `kubectl` or GitOps tools, meaning cdk8s requires no cluster-side changes.
+-   **Reusable Abstractions (Constructs):** Developers can create high-level components ("Constructs") that encapsulate complex Kubernetes configurations. These constructs can be shared and reused across teams and projects, promoting standardization.
+-   **Type Safety & Validation:** By using strong-typed languages, cdk8s catches configuration errors at compile-time rather than deployment-time. IDE autocompletion and documentation integration further enhance the developer experience.
+
+## How It Works
+
+1.  **Define:** You write code in your preferred language to define a tree of constructs (your application).
+2.  **Synthesize:** You run the synthesis command (e.g., `cdk8s synth`).
+3.  **Deploy:** cdk8s outputs a standard `dist/` directory containing pure Kubernetes YAML, which you then deploy as usual.
+
+This approach bridges the gap between application code and infrastructure configuration, bringing software engineering best practices—like testing, versioning, and modularity—to Kubernetes management.

@@ -1,0 +1,45 @@
+---
+name: "Fluent Bit"
+description: |
+  Fluent Bit is a fast, lightweight, and highly scalable Log Processor and Forwarder. It allows you to collect logs and data from various sources, enrich them with filters, and forward them to multiple destinations. It is designed for high performance with a small memory footprint and minimal CPU usage, making it ideal for resource-constrained environments like embedded systems, containers, and Kubernetes clusters. Fluent Bit simplifies log management by providing a unified logging layer across your infrastructure. 
+  
+  Fluent Bit's primary value lies in its ability to centralize and streamline log aggregation and routing. It enables real-time data processing and analysis, allowing you to gain insights into application performance, security events, and system behavior. Common use cases include: collecting logs from Kubernetes clusters and forwarding them to Elasticsearch, aggregating system logs and metrics from edge devices, and routing application logs to cloud storage or monitoring platforms.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://fluentbit.io/"
+documentation: "https://docs.fluentbit.io/"
+license: "Apache-2.0"
+categories:
+  - "logging"
+  - "observability"
+  - "data-streaming"
+  - "edge-computing"
+  - "cncf"
+status: "stable"
+---
+
+Fluent Bit is a high-performance, lightweight telemetry agent designed for collecting, parsing, filtering, and routing logs, metrics, and traces. It's built for resource-constrained environments and is often used as a data forwarder in cloud-native setups, especially within Kubernetes.
+
+## Key Features
+
+-   **Minimal Footprint:** Designed for efficiency, Fluent Bit boasts a very small memory footprint and low CPU usage, making it suitable for edge devices, embedded systems, and high-density container environments.
+-   **Pluggable Architecture:** Supports a wide array of input, filter, and output plugins, allowing it to collect data from various sources and send it to diverse destinations.
+-   **High Throughput:** Optimized for performance, capable of handling high volumes of data with minimal latency.
+-   **Rich Filtering & Parsing:** Offers robust filtering and parsing capabilities, including regular expressions and structured processing, to transform raw data into actionable insights.
+-   **Kubernetes-Native:** Widely adopted in Kubernetes environments for collecting container and node logs, often acting as the primary log forwarder.
+-   **Security:** Supports TLS/SSL for secure data transmission and authentication.
+-   **SQL Stream Processing:** Allows for real-time analysis and aggregation of data streams using SQL queries.
+
+## How it Works
+
+Fluent Bit sits between your data sources (e.g., application logs, system metrics, trace events) and your data destinations (e.g., Elasticsearch, Prometheus, Kafka, S3). It collects data, applies parsing and filtering rules as defined in its configuration, and then reliably forwards the processed data to one or more configured outputs. Its architecture is modular, allowing you to configure exactly which plugins you need.
+
+## Benefits
+
+-   **Centralized Logging:** Provides a unified solution for collecting and routing all your operational data.
+-   **Cost-Effective:** Its lightweight nature reduces resource consumption, leading to lower infrastructure costs.
+-   **Reliable Data Delivery:** Built with mechanisms to ensure data is not lost during transit, even in the event of network issues or destination unavailability.
+-   **Scalability:** Easily scales horizontally to handle increasing data volumes.
+-   **Flexibility:** Adaptable to almost any logging or observability pipeline due to its extensive plugin ecosystem.

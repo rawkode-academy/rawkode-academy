@@ -1,0 +1,42 @@
+---
+name: "Otterize"
+description: |
+  Otterize provides fine-grained access control and network policies for cloud-native applications, simplifying and automating zero-trust security. It enables developers and security teams to define and enforce access control policies at the service level, based on application intent, automatically generating and managing network policies for Kubernetes. This reduces the risk of unauthorized access and lateral movement within the cluster, improving security posture and streamlining compliance efforts.
+logos:
+  horizontal: ./horizontal.svg
+website: "https://otterize.com/"
+documentation: "https://docs.otterize.com/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "security"
+  - "zero-trust"
+  - "policy-engine"
+  - "access-control"
+status: "stable"
+---
+
+Otterize is an open-source project focused on simplifying and automating fine-grained access control and network policies for cloud-native applications, primarily within Kubernetes environments. It helps organizations implement zero-trust security principles by allowing service-level authorization based on intent.
+
+## Key Features
+
+-   **Fine-Grained Access Control:** Enables definition and enforcement of granular access control policies between services, ensuring that only authorized services can communicate with each other.
+-   **Intent-Based Policies:** Developers declare the intended communication patterns between services (who needs to talk to whom), and Otterize translates this into actionable policies.
+-   **Automated Network Policy Generation:** Automatically generates and applies Kubernetes Network Policies based on the defined service intents, eliminating manual configuration and potential misconfigurations.
+-   **Zero-Trust Security:** Helps achieve a zero-trust security posture by default, where every service interaction is explicitly authorized.
+-   **Kubernetes-Native:** Integrates directly with Kubernetes, leveraging Custom Resources (CRs) for policy definition and management.
+-   **Network Mapper:** Provides visibility into actual service-to-service communication, helping to discover dependencies and refine policies.
+-   **Policy-as-Code:** Policies are defined in a declarative manner as code, enabling GitOps workflows for security policy management.
+
+## How it Works
+
+Otterize operates with an agent (the Network Mapper) deployed in your Kubernetes cluster that observes service-to-service communication. Based on observed traffic and developer-defined intent (`ClientIntents` custom resources), the Otterize controller automatically generates and applies the necessary Kubernetes Network Policies and other access control mechanisms (like mTLS configurations via a service mesh) to enforce the desired security posture.
+
+## Benefits
+
+-   **Enhanced Security:** Significantly reduces the attack surface and prevents unauthorized lateral movement within your Kubernetes cluster.
+-   **Simplified Policy Management:** Automates the creation and management of complex network policies, reducing manual effort and human error.
+-   **Developer Empowerment:** Developers can declare service communication intent, enabling them to build secure applications from the start without deep security expertise.
+-   **Improved Compliance:** Streamlines compliance efforts by providing an automated, auditable way to enforce access control policies.
+-   **Faster Incident Response:** By clearly defining and enforcing communication, it helps in quickly identifying and isolating suspicious activity.
+-   **Operational Efficiency:** Reduces the burden on security and operations teams by automating policy enforcement.

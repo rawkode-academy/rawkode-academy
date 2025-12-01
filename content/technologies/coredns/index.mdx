@@ -1,0 +1,37 @@
+---
+name: "CoreDNS"
+description: |
+  CoreDNS is a fast, flexible, and extensible DNS server that can serve as a cluster DNS for Kubernetes. Written in Go, it is designed to be a modular and pluggable DNS server, where functionality is provided through a chain of plugins. These plugins can be configured and chained together to provide various DNS features, such as service discovery, load balancing, and external service resolution.
+  
+  CoreDNS is valuable because it offers a highly customizable and scalable solution for managing DNS within containerized environments. Its integration with Kubernetes simplifies service discovery and provides a robust and reliable way for applications to resolve service names. Main use cases include Kubernetes cluster DNS, service discovery in cloud-native architectures, and general-purpose DNS server replacement.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://coredns.io/"
+documentation: "https://coredns.io/manual/"
+license: "Apache-2.0"
+categories:
+  - "networking"
+  - "dns"
+  - "kubernetes"
+status: "stable"
+---
+
+CoreDNS is a cloud-native DNS server that focuses on flexibility through a unique plugin-based architecture. It is the default DNS server for Kubernetes.
+
+## Plugin Architecture
+
+The core strength of CoreDNS lies in its plugins. Every feature, from serving a zone file to caching responses to Kubernetes service discovery, is implemented as a middleware plugin. This means:
+
+-   **Extensibility:** You can easily write custom plugins to handle specific DNS logic.
+-   **Efficiency:** You only load the plugins you need.
+-   **Chaining:** Plugins are chained together; a request passes through the chain until a plugin handles it.
+
+## Key Plugins
+
+-   **`kubernetes`:** Serves DNS records for Kubernetes Services and Pods.
+-   **`etcd`:** Serves records stored in an etcd cluster.
+-   **`promethus`:** Exposes metrics for Prometheus monitoring.
+-   **`cache`:** Caches DNS responses to improve performance.
+-   **`forward`:** Forwards queries to upstream DNS servers (like 8.8.8.8).

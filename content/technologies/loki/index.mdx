@@ -1,0 +1,46 @@
+---
+name: "Loki"
+description: |
+  Loki is a horizontally scalable, highly available, multi-tenant log aggregation system inspired by Prometheus. Unlike traditional log aggregators, Loki indexes only metadata (labels) about the log content, not the log messages themselves. This makes Loki very cost-effective and efficient, especially for environments with high log volume. Loki is designed to work well with existing infrastructure like Prometheus and Grafana, allowing users to leverage familiar tools for querying and visualizing logs.
+  
+  Its primary value proposition is providing a centralized and scalable logging solution without the high indexing costs associated with traditional log management systems. Main use cases include troubleshooting application issues, monitoring system performance, and auditing security events within cloud-native environments, especially those orchestrated by Kubernetes.
+logos:
+  stacked: ./stacked.svg
+website: "https://grafana.com/loki/"
+documentation: "https://grafana.com/docs/loki/latest/"
+license: "AGPL-3.0"
+categories:
+  - "logging"
+  - "observability"
+  - "cloud-native"
+  - "distributed-systems"
+status: "stable"
+---
+
+Loki is a powerful, horizontally scalable, and highly available log aggregation system from Grafana Labs. Inspired by Prometheus, it is designed to be cost-effective and easy to operate, especially for cloud-native environments with high log volumes. Unlike traditional log management systems that index the entire log message, Loki indexes only the metadata (labels) associated with logs.
+
+## Key Features
+
+-   **Prometheus-Inspired Labeling:** Uses the same service discovery and labeling mechanisms as Prometheus, allowing for seamless correlation between metrics and logs.
+-   **Cost-Effective:** By indexing only metadata, Loki significantly reduces storage and indexing costs compared to full-text indexing solutions.
+-   **Efficient Querying:** Leverages Grafana's LogQL (a PromQL-like query language) to efficiently query logs based on labels, with optional Grep-like filtering for log content.
+-   **Multi-Tenant:** Supports multi-tenancy out-of-the-box, enabling logical separation of logs for different teams or applications within a single Loki instance.
+-   **Integration with Grafana:** Designed to integrate seamlessly with Grafana, allowing users to switch between metrics and logs contextually within their dashboards.
+-   **Scalable Architecture:** Built to scale horizontally, ensuring high availability and the ability to handle massive log ingest rates.
+-   **Push-Based Log Collection:** Works with clients like Promtail (tailing logs and sending them to Loki), Fluent Bit, or Fluentd.
+
+## How it Works
+
+1.  **Log Collection:** Agents like Promtail (or Fluent Bit/Fluentd) tail logs from your applications and infrastructure.
+2.  **Labeling:** These agents add metadata labels (e.g., `app`, `namespace`, `pod`) to the log streams before sending them to Loki.
+3.  **Ingestion & Storage:** Loki receives these labeled log streams, indexes only the labels, and stores the raw log data in a cheaper object store (e.g., S3, GCS) or filesystem.
+4.  **Querying:** When a query is made, Loki first uses the indexed labels to quickly narrow down the relevant log streams. Then, it fetches only the necessary raw log data for full-text filtering.
+
+## Benefits
+
+-   **Reduced Operational Costs:** Lower storage and indexing requirements lead to significant cost savings for log management.
+-   **High Performance for Cloud-Native:** Optimized for Kubernetes and microservices environments, providing fast query performance.
+-   **Simplified Stack:** Integrates tightly with Prometheus and Grafana, simplifying your observability stack.
+-   **Scalability & Reliability:** Horizontally scalable architecture ensures it can handle growing log volumes reliably.
+-   **Developer & SRE Friendly:** Enables quick debugging and troubleshooting by easily correlating logs with metrics.
+-   **Open Source:** A fully open-source solution, backed by Grafana Labs.

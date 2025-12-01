@@ -1,0 +1,43 @@
+---
+name: "Kubernetes Resource Recommender (KRR)"
+description: |
+  Robusta KRR (Kubernetes Resource Recommender) is a CLI tool for optimizing resource allocation in Kubernetes clusters. It gathers pod usage data from Prometheus and recommends requests and limits for CPU and memory. This reduces costs and improves performance.
+logos:
+
+website: "https://github.com/robusta-dev/krr"
+documentation: "https://github.com/robusta-dev/krr#readme"
+license: "MIT"
+categories:
+  - "kubernetes"
+  - "optimization"
+  - "cost-optimization"
+  - "observability"
+  - "performance"
+status: "stable"
+---
+
+Robusta KRR (Kubernetes Resource Recommender) is a powerful CLI tool designed to optimize resource allocation within Kubernetes clusters. By analyzing historical usage data from Prometheus-compatible metrics stores, KRR provides intelligent recommendations for CPU and memory requests and limits for your Pods, leading to significant cost savings and improved cluster performance.
+
+## Key Features
+
+-   **Agentless Operation:** KRR runs as a CLI tool locally or in-cluster, eliminating the need to deploy an agent to your Kubernetes clusters.
+-   **Prometheus Integration:** Integrates with various Prometheus-compatible metric stores (Prometheus, Thanos, Mimir, etc.) to gather granular resource usage data.
+-   **Intelligent Recommendations:** Uses advanced algorithms to recommend optimal CPU and memory requests and limits for your Kubernetes workloads.
+-   **Explainability:** Provides detailed graphs and explanations to help you understand the rationale behind its recommendations.
+-   **Customizable Strategies:** Allows users to define and implement custom strategies for resource recommendation calculations.
+-   **Versatile Output Formats:** Generates recommendations in multiple formats including JSON, CSV, Markdown, and a Web UI.
+-   **Cost Savings Reporting:** Highlights potential cost savings by right-sizing containers.
+-   **Auto-Apply (Beta):** Includes a beta feature for automatically applying recommendations to your cluster.
+
+## How It Works
+
+KRR connects to your Prometheus-compatible metrics store and queries historical CPU and memory usage data for your Kubernetes Pods. It then applies its analysis algorithms to this data to determine the ideal resource requests and limits. These recommendations aim to prevent over-provisioning (which wastes resources and costs money) and under-provisioning (which can lead to performance issues and evictions).
+
+## Benefits
+
+-   **Significant Cost Savings:** Users often report substantial reductions in cloud costs by optimizing resource allocations.
+-   **Improved Performance & Stability:** Ensures your applications have the right amount of resources, preventing throttling and enhancing stability.
+-   **Operational Efficiency:** Automates the complex task of right-sizing resources, freeing up engineering time.
+-   **Data-Driven Decisions:** Provides actionable, data-backed recommendations for resource optimization.
+-   **Ease of Use:** Simple to integrate into existing workflows without requiring complex cluster modifications.
+-   **No Vendor Lock-in:** Open-source and leverages standard Kubernetes and Prometheus APIs.

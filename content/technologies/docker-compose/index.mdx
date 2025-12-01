@@ -1,0 +1,43 @@
+---
+name: "Docker Compose"
+description: |
+  Docker Compose is a tool for defining and running multi-container Docker applications. It uses a YAML file to configure your application's services, networks, and volumes. With Compose, you can spin up an entire application stack with a single command, making it incredibly easy to manage complex deployments.
+  
+  Docker Compose simplifies the process of developing, testing, and deploying applications that rely on multiple interconnected containers. It's particularly useful for local development environments, continuous integration pipelines, and small to medium-sized production deployments where the full orchestration capabilities of tools like Kubernetes aren't needed.
+logos:
+  stacked: ./stacked.svg
+website: "https://www.docker.com/"
+documentation: "https://docs.docker.com/compose/"
+license: "Apache-2.0"
+categories:
+  - "containerization"
+  - "orchestration"
+  - "developer-tools"
+  - "local-development"
+status: "stable"
+---
+
+Docker Compose simplifies the management of multi-container Docker applications by allowing you to define your entire application stack in a single, declarative YAML file. This makes it easy to set up, run, and scale complex applications that consist of multiple interdependent services.
+
+## Key Concepts
+
+-   **`compose.yaml` (or `docker-compose.yml`):** The configuration file where you define your application's services, networks, and volumes. This file specifies how your application components should be built and run.
+-   **Services:** Individual containers that make up your application (e.g., a web server, a database, an API).
+-   **Networks:** Define how services can communicate with each other. Compose sets up a default network for your application.
+-   **Volumes:** Used for persistent data storage, ensuring that data is not lost when containers are stopped or removed.
+
+## Features & Benefits
+
+-   **Single-Command Setup:** Spin up your entire application with a single command (`docker compose up`), greatly simplifying development and deployment.
+-   **Isolated Environments:** Services run in isolated environments, ensuring no conflicts between dependencies.
+-   **Reproducibility:** The `compose.yaml` file acts as an infrastructure-as-code definition for your application, ensuring consistent environments across different machines and team members.
+-   **Local Development:** Ideal for setting up complex local development environments, mimicking production setups.
+-   **Simplified Orchestration:** Provides a lightweight orchestration solution for small to medium-sized deployments where a full Kubernetes setup might be overkill.
+-   **Portability:** Your `compose.yaml` file can be shared and used on any machine with Docker and Docker Compose installed.
+
+## Common Use Cases
+
+-   **Local Development:** Quickly spin up all dependencies (database, cache, API) for a development environment.
+-   **Testing:** Set up isolated test environments for integration and end-to-end testing.
+-   **Single-Host Deployments:** Deploy small to medium-sized applications to a single server.
+-   **CI/CD Pipelines:** Use Compose to build and test multi-service applications in automated pipelines.

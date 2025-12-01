@@ -1,0 +1,50 @@
+---
+name: "Istio"
+description: |
+  Istio is an open-source service mesh that provides a way to control and secure traffic between microservices. It adds a layer of infrastructure on top of a Kubernetes cluster (or other deployment environments) without requiring changes to application code. Istio manages service discovery, traffic routing, load balancing, service-to-service authentication, authorization, and observability. 
+  
+  The primary value of Istio lies in its ability to improve the reliability, security, and observability of microservice architectures. Common use cases include A/B testing, canary deployments, fault injection, rate limiting, mutual TLS authentication, and detailed monitoring and tracing of service interactions.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://istio.io/"
+documentation: "https://istio.io/latest/docs/"
+license: "Apache-2.0"
+categories:
+  - "service-mesh"
+  - "networking"
+  - "security"
+  - "observability"
+  - "kubernetes"
+status: "stable"
+---
+
+Istio is an open-source service mesh that provides a transparent and language-agnostic way to connect, secure, control, and observe services within a microservices architecture. It layers robust infrastructure capabilities onto existing distributed applications, typically in a Kubernetes environment, without requiring any changes to the application code itself.
+
+## Key Features
+
+-   **Traffic Management:** Easily control the flow of traffic and API calls between services. Implement advanced routing rules, A/B testing, canary rollouts, gradual upgrades, and fault injection (e.g., retries, timeouts, circuit breakers).
+-   **Security:** Automates secure service-to-service communication with strong identity-based authentication (mTLS), authorization policies, and encryption. It provides a secure communication channel for all services.
+-   **Observability:** Provides rich telemetry, including metrics, logs, and traces for all service communication. This allows for deep insights into application performance and behavior without modifying application code.
+-   **Policy Enforcement:** Enforce organizational policies for access control, rate limits, and quotas across the service mesh.
+-   **Platform Agnostic:** While deeply integrated with Kubernetes, Istio can also be deployed in other environments.
+
+## Architecture
+
+Istio's architecture is logically split into a data plane and a control plane:
+
+-   **Data Plane:** Composed of intelligent proxies (Envoy sidecars) deployed alongside your service containers. These proxies mediate all inbound and outbound network traffic to and from your services, providing transparent control over traffic management, telemetry collection, and policy enforcement.
+-   **Control Plane:** Manages and configures the Envoy proxies to route traffic. It includes components like:
+    -   **Pilot:** Configures the Envoy sidecars for traffic management.
+    -   **Citadel:** Provides strong service identity and manages mTLS.
+    -   **Galley:** Validates, ingests, and aggregates Istio configuration.
+    -   **Mixer (deprecated in newer versions):** Used for policy enforcement and telemetry reporting.
+
+## Benefits
+
+-   **Improved Reliability:** Traffic management features like retries, timeouts, and circuit breakers enhance the resilience of microservices.
+-   **Enhanced Security:** Automates mTLS, provides fine-grained access control, and secures communication between services.
+-   **Deep Observability:** Collects comprehensive metrics, logs, and traces, offering unparalleled visibility into service interactions and performance.
+-   **Accelerated Development:** Developers can focus on business logic while Istio handles the complex operational concerns of distributed systems.
+-   **Reduced Operational Complexity:** Centralizes management of service communication, policy enforcement, and security, simplifying operations for platform teams.

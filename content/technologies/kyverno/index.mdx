@@ -1,0 +1,42 @@
+---
+name: "Kyverno"
+description: |
+  Kyverno is a policy engine designed for Kubernetes. It allows you to manage, validate, mutate, and generate Kubernetes resources using declarative configuration. Kyverno operates directly in Kubernetes, eliminating the need for a separate language or custom code to define policies. Policies are written as Kubernetes resources themselves, making them easy to manage, version, and distribute.
+logos:
+  icon: ./icon.svg
+  horizontal: ./horizontal.svg
+  stacked: ./stacked.svg
+website: "https://kyverno.io/"
+documentation: "https://kyverno.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "policy-engine"
+  - "security"
+  - "governance"
+  - "admission-controller"
+status: "stable"
+---
+
+Kyverno is a Kubernetes-native policy engine that provides comprehensive policy management capabilities directly within your cluster. It allows you to manage, validate, mutate, and generate Kubernetes resources using declarative policies written as standard Kubernetes resources, eliminating the need for a new language or custom code.
+
+## Key Features
+
+-   **Policy-as-Code:** Policies are defined as native Kubernetes resources (Custom Resources), enabling them to be managed, versioned, and distributed using familiar Kubernetes tools and workflows (e.g., GitOps).
+-   **Validation Policies:** Enforce rules to ensure Kubernetes resources conform to best practices, security standards, and organizational policies. Invalid resources are blocked.
+-   **Mutation Policies:** Automatically modify resources before they are admitted to the cluster. This can be used for injecting sidecars, adding labels, setting default values, or transforming resource configurations.
+-   **Generation Policies:** Automatically generate new resources based on other existing resources. For example, generating a network policy for every new namespace.
+-   **Cleanup Policies:** Define rules to automatically clean up resources (e.g., old ConfigMaps, secrets, or temporary resources) based on specific criteria.
+-   **Image Verification:** Verify container image signatures and attestations to ensure only trusted images are deployed.
+-   **No New Language:** Policies are written in YAML, like any other Kubernetes manifest, making them accessible to Kubernetes users.
+-   **Admission Controller:** Kyverno operates as a dynamic admission controller, intercepting API requests to validate, mutate, or generate resources.
+
+## Benefits
+
+-   **Enhanced Security:** Enforces security policies and best practices, preventing misconfigurations and potential vulnerabilities.
+-   **Improved Compliance:** Helps achieve and maintain compliance with regulatory standards by enforcing specific resource configurations.
+-   **Operational Automation:** Automates routine tasks like setting defaults, generating resources, and enforcing naming conventions.
+-   **Reduced Human Error:** Eliminates manual errors by automating policy enforcement and resource manipulation.
+-   **Developer Guardrails:** Provides developers with guardrails, ensuring that their deployments adhere to organizational policies without hindering their velocity.
+-   **Kubernetes-Native Experience:** Policies are managed like any other Kubernetes resource, integrating seamlessly with existing tools and workflows.
+-   **Transparency:** Provides clear reporting and auditing of policy violations.

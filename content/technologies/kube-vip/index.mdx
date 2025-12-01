@@ -1,0 +1,46 @@
+---
+name: "kube-vip"
+description: |
+  kube-vip provides a high-availability load balancer solution for Kubernetes clusters. It uses Address Resolution Protocol (ARP) or Border Gateway Protocol (BGP) to manage a virtual IP address (VIP), ensuring that services remain accessible even if a node fails. Kube-vip eliminates the need for external load balancers in many scenarios, simplifying infrastructure and reducing costs.
+  
+  Its primary use cases include providing a reliable control plane for Kubernetes clusters, load balancing ingress traffic to applications, and managing database cluster endpoints. By providing a stable IP address that floats between nodes, kube-vip ensures that services remain available and consistent, improving the overall resilience of Kubernetes deployments.
+logos:
+  icon: ./icon.svg
+website: "https://kube-vip.io/"
+documentation: "https://kube-vip.io/docs/"
+license: "Apache-2.0"
+categories:
+  - "kubernetes"
+  - "networking"
+  - "load-balancing"
+  - "high-availability"
+  - "bare-metal"
+status: "stable"
+---
+
+kube-vip is an open-source project designed to provide high-availability and load-balancing capabilities for Kubernetes clusters, particularly in bare-metal, edge, and virtualized environments where external cloud load balancers might not be available or cost-effective. It achieves this by managing a virtual IP address (VIP) that floats between nodes.
+
+## Key Features
+
+-   **High-Availability (HA) Control Plane:** kube-vip can be used to provide a highly available control plane for Kubernetes clusters, ensuring that the Kubernetes API server remains accessible even if a master node fails.
+-   **Service Load Balancing:** Acts as a load balancer for Kubernetes services, distributing incoming traffic across multiple pods.
+-   **Layer 2 (ARP) and Layer 3 (BGP) Support:** Offers flexible deployment options by supporting both ARP (for local network high availability) and BGP (for integrating with network routers for more advanced routing).
+-   **Lightweight & Efficient:** Designed to be lightweight and consume minimal resources, making it suitable for resource-constrained environments.
+-   **Native Kubernetes Integration:** Deploys as a static Pod or DaemonSet within Kubernetes, integrating seamlessly with the cluster.
+-   **IPv4 and IPv6 Support:** Supports both IP address families for its virtual IPs.
+
+<h2>How it Works</h2>
+
+kube-vip typically operates in one of two modes:
+
+1.  **Layer 2 (ARP) Mode:** In this mode, kube-vip uses ARP announcements to broadcast the VIP from an active node to the network. If the active node fails, another kube-vip instance on a healthy node takes over the VIP and sends out new ARP announcements, ensuring seamless failover.
+2.  **Layer 3 (BGP) Mode:** For more complex network setups, kube-vip can peer with network routers using BGP. It announces the VIP to the routers, which then route traffic to the active node. This provides more robust routing and can span multiple network segments.
+
+## Benefits
+
+-   **Reduced Costs:** Eliminates the need for expensive external cloud load balancers in many scenarios.
+-   **Simplified Infrastructure:** Streamlines the deployment and management of highly available Kubernetes clusters, especially on bare metal.
+-   **High Availability:** Ensures continuous access to the Kubernetes control plane and services, improving cluster resilience.
+-   **Flexibility:** Adaptable to various network topologies and deployment environments.
+-   **Self-Contained:** Runs directly within Kubernetes, minimizing external dependencies.
+-   **Edge & Bare Metal Ready:** Particularly valuable for edge deployments and on-premises bare metal setups where traditional load balancing solutions are complex.
