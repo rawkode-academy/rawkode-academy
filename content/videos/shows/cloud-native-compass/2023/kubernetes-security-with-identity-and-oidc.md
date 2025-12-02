@@ -104,5 +104,7 @@ chapters:
   - startTime: 2260
     title: Shameless Plugs
 duration: 2326
+guests:
+  - marc-boorshtein
 ---
 

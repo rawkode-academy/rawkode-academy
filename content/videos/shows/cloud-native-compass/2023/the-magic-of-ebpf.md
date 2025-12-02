@@ -121,5 +121,7 @@ chapters:
   - startTime: 1887
     title: Conclusion & Outro
 duration: 1920
+guests:
+  - liz-rice
 ---
 

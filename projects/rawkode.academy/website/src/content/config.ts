@@ -50,12 +50,29 @@ const shows = defineCollection({
 		pattern: ["**/*.{md,mdx}"],
 		base: resolveContentDirSync("shows"),
 	}),
-	schema: z.object({
-		id: z.string(),
-		name: z.string(),
-		description: z.string().optional(),
-		hosts: z.array(reference("people")).default([]),
-	}),
+	schema: ({ image }) =>
+		z.object({
+			id: z.string(),
+			name: z.string(),
+			description: z.string().optional(),
+			hosts: z.array(reference("people")).default([]),
+			publish: z.boolean().default(false),
+			cover: z
+				.object({
+					image: image(),
+					alt: z.string(),
+				})
+				.optional(),
+			podcast: z
+				.object({
+					email: z.string().email(),
+					category: z.string(),
+					subcategory: z.string().optional(),
+					explicit: z.boolean().default(false),
+					copyright: z.string().optional(),
+				})
+				.optional(),
+		}),
 });
 
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections

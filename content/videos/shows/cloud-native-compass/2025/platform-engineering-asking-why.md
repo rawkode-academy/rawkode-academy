@@ -14,5 +14,7 @@ technologies: []
 show: cloud-native-compass
 videoId: vfp66kn6d9xrndl6vkiekok0
 duration: 0
+guests:
+  - evelyn-osman
 ---
 

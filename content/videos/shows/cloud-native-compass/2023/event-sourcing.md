@@ -107,5 +107,7 @@ chapters:
   - startTime: 2665
     title: Plugs & Conclusion
 duration: 2729
+guests:
+  - frank-de-jonge
 ---
 

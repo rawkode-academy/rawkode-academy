@@ -19,5 +19,7 @@ technologies: []
 show: cloud-native-compass
 videoId: xxti5u3ooj17j37cavljrukn
 duration: 1777
+guests:
+  - otavio-santana
 ---
 

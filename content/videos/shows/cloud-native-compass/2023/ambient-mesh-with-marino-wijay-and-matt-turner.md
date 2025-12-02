@@ -95,5 +95,8 @@ chapters:
   - startTime: 2931
     title: Conclusion & Outro
 duration: 2962
+guests:
+  - marino-wijay
+  - matt-turner
 ---
 

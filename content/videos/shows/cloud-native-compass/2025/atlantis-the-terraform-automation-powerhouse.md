@@ -16,5 +16,7 @@ technologies: []
 show: cloud-native-compass
 videoId: xz8t49tipn0ol7mjxdexva0r
 duration: 2371
+guests:
+  - jose-amengual
 ---
 

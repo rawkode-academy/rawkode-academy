@@ -85,5 +85,7 @@ chapters:
   - startTime: 3312
     title: Conclusion
 duration: 3371
+guests:
+  - jason-hall
 ---
 
