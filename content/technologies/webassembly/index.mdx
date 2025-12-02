@@ -1,11 +1,35 @@
 ---
-name: WebAssembly
+name: WebAssembly & WASI
+aliases:
+  - WASM
+  - WASI
 logos:
   stacked: true
 website: 'https://webassembly.org/'
 documentation: 'https://webassembly.github.io/docs/'
 license: Apache-2.0 OR MIT
 status: stable
+matrix:
+  status: advocate
+  grouping: plumbing
+  confidence: deep-experience
+  trajectory: rising
+  firstUsed: 2021-06
+  lastUsed: Present
+  makesMeFeel: "\U0001F9E9"
+  why: >-
+    WASM gives you a post-container execution model without discarding
+    containers: a universal, language-agnostic runtime that behaves like a
+    Rosetta Stone for compute. You write in whatever language fits the problem,
+    compile to a portable artifact, and run it anywhere from edge to cloud to
+    browser. The component model elevates this further by letting WASM modules
+    interoperate cleanly with each other and with non-WASM systems, turning
+    composability into a first-class primitive.
+  spicyTake: >-
+    WASM represents the next major platform shift, and the component model is
+    the inflection point. Engineers who cling to today’s comfort zones will get
+    left behind while WASM quietly becomes the new baseline for portable,
+    modular compute.
 ---
 WebAssembly (Wasm) is a binary instruction format for a stack-based virtual machine. It is designed as a portable compilation target for programming languages, enabling deployment on the web for client-side scripting or on servers for cloud computing. WebAssembly's primary value proposition lies in its near-native performance, security, and cross-platform compatibility, allowing developers to build high-performance applications that can run in a variety of environments. 
 

@@ -878,7 +878,10 @@ body::before {
 		font-size: 1.125rem; /* 18px base for comfortable reading */
 		line-height: 1.75; /* Optimal for long-form reading */
 		color: rgb(55 65 81); /* gray-700 */
-		font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+		font-feature-settings:
+			"kern" 1,
+			"liga" 1,
+			"calt" 1;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 	}

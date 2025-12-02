@@ -9,7 +9,10 @@ import {
 // These are populated by scripts/sync-graphql-content.ts during build or on demand.
 
 const videos = defineCollection({
-	loader: glob({ pattern: ["**/*.{md,mdx}"], base: resolveContentDirSync("videos") }),
+	loader: glob({
+		pattern: ["**/*.{md,mdx}"],
+		base: resolveContentDirSync("videos"),
+	}),
 	schema: z.object({
 		id: z.string(), // canonical slug identifier
 		slug: z.string(), // kept for compatibility; equals id
@@ -45,7 +48,10 @@ const videos = defineCollection({
 });
 
 const shows = defineCollection({
-	loader: glob({ pattern: ["**/*.{md,mdx}"], base: resolveContentDirSync("shows") }),
+	loader: glob({
+		pattern: ["**/*.{md,mdx}"],
+		base: resolveContentDirSync("shows"),
+	}),
 	schema: z.object({
 		id: z.string(),
 		name: z.string(),

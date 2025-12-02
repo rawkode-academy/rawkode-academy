@@ -7,6 +7,10 @@
     ".": "./src/index.ts",
     "./package.json": "./package.json"
   },
+  "scripts": {
+    "categorize": "bun run scripts/categorize.ts",
+    "enrich-advocates": "bun run scripts/enrich-advocates.ts"
+  },
   "dependencies": {
     "@inquirer/prompts": "^8.0.1",
     "gray-matter": "^4.0.3",

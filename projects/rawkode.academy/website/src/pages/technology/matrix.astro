@@ -34,71 +34,56 @@ for (const video of allVideos) {
 	}
 }
 
+import {
+	DIMENSIONS,
+	MATRIX_STATUS_VALUES,
+	MATRIX_CONFIDENCE_VALUES,
+	MATRIX_TRAJECTORY_VALUES,
+	type TechnologyStatus,
+} from "@/lib/explorer/dimensions";
+
 // Types
-type Grouping = "plumbing" | "platform" | "observability" | "security";
-type PipelineStage =
-	| "skip"
-	| "watch"
-	| "explore"
-	| "learn"
-	| "adopt"
-	| "advocate";
-type Confidence = "gut" | "some-experience" | "deep-experience";
-type Trajectory = "rising" | "stable" | "falling";
+type PipelineStage = (typeof MATRIX_STATUS_VALUES)[number];
+type Confidence = (typeof MATRIX_CONFIDENCE_VALUES)[number];
+type Trajectory = (typeof MATRIX_TRAJECTORY_VALUES)[number];
 
-const groupings: Grouping[] = [
-	"plumbing",
-	"platform",
-	"observability",
-	"security",
-];
-const pipelineStages: PipelineStage[] = [
-	"skip",
-	"watch",
-	"explore",
-	"learn",
-	"adopt",
-	"advocate",
-];
+// CNCF Categories (dynamically discovered from data)
+const pipelineStages = MATRIX_STATUS_VALUES.filter(
+	(s) => s !== "graveyard" && s !== "guilty-pleasure",
+);
 
-const groupingLabels: Record<Grouping, string> = {
-	plumbing: "Plumbing",
-	platform: "Platform",
-	observability: "Observability",
-	security: "Security",
+// Category display metadata
+const categoryIcons: Record<string, string> = {
+	Provisioning: "🔧",
+	"App Definition and Development": "💻",
+	"Orchestration & Management": "🎯",
+	Runtime: "⚡",
+	"Observability and Analysis": "📊",
+	Platform: "🏗️",
+	Wasm: "🌐",
+	Serverless: "☁️",
+	CNAI: "🤖",
 };
 
-const groupingDescriptions: Record<Grouping, string> = {
-	plumbing: "The invisible infrastructure",
-	platform: "Building blocks for developers",
-	observability: "Understanding what's happening",
-	security: "Keeping things safe",
+const categoryDescriptions: Record<string, string> = {
+	Provisioning: "Infrastructure automation and setup",
+	"App Definition and Development": "Build, package, and deploy applications",
+	"Orchestration & Management": "Container and workload management",
+	Runtime: "Container runtimes and execution",
+	"Observability and Analysis": "Monitoring, logging, and tracing",
+	Platform: "Developer platforms and tooling",
+	Wasm: "WebAssembly technologies",
+	Serverless: "Function-as-a-service and event-driven",
+	CNAI: "Cloud Native AI and ML",
 };
 
-const groupingIcons: Record<Grouping, string> = {
-	plumbing: "🔧",
-	platform: "🏗️",
-	observability: "📊",
-	security: "🔒",
-};
+const stageLabels = Object.fromEntries(
+	DIMENSIONS["matrix.status"].values.map((v) => [v.value, v.label]),
+);
 
-const stageLabels: Record<PipelineStage, string> = {
-	skip: "Skip",
-	watch: "Watch",
-	explore: "Explore",
-	learn: "Learn",
-	adopt: "Adopt",
-	advocate: "Advocate",
-};
-
-const stageDescriptions: Record<PipelineStage, string> = {
-	skip: "Not for me",
-	watch: "On my radar",
-	explore: "Worth a look",
-	learn: "Investing time",
-	adopt: "Production ready",
-	advocate: "Championing",
-};
+const stageDescriptions = Object.fromEntries(
+	DIMENSIONS["matrix.status"].values.map((v) => [v.value, v.description]),
+);
 
 const trajectoryEmoji: Record<Trajectory, string> = {
 	rising: "↗",
@@ -109,11 +94,11 @@ const trajectoryEmoji: Record<Trajectory, string> = {
 // Get all technologies with matrix data
 const allTechnologies = await getCollection("technologies");
 const matrixTechnologies = allTechnologies
-	.filter((tech) => tech.data.matrix?.status && tech.data.matrix?.grouping)
+	.filter((tech) => tech.data.matrix?.status && tech.data.category)
 	.map((tech) => ({
 		id: tech.id,
 		name: tech.data.name,
-		grouping: tech.data.matrix!.grouping as Grouping,
+		category: tech.data.category as string,
 		status: tech.data.matrix!.status as PipelineStage,
 		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
 		confidence: tech.data.matrix!.confidence as Confidence | undefined,
@@ -128,17 +113,29 @@ const matrixTechnologies = allTechnologies
 		articleCount: 0, // TODO: Wire up when articles have technology links
 	}));
 
-// Build pipeline lanes (by grouping)
-const pipelineLanes = groupings.map((grouping) => ({
-	grouping,
-	label: groupingLabels[grouping],
-	description: groupingDescriptions[grouping],
-	icon: groupingIcons[grouping],
+// Get unique categories from data, sorted by count (most technologies first)
+const categoryCounts = new Map<string, number>();
+matrixTechnologies.forEach((tech) => {
+	categoryCounts.set(
+		tech.category,
+		(categoryCounts.get(tech.category) || 0) + 1,
+	);
+});
+const categories = [...categoryCounts.entries()]
+	.sort((a, b) => b[1] - a[1])
+	.map(([cat]) => cat);
+
+// Build pipeline lanes (by category)
+const pipelineLanes = categories.map((category) => ({
+	category,
+	label: category,
+	description: categoryDescriptions[category] || "Cloud native technologies",
+	icon: categoryIcons[category] || "📦",
 	stages: Object.fromEntries(
 		pipelineStages.map((stage) => [
 			stage,
 			matrixTechnologies.filter(
-				(t) => t.grouping === grouping && t.status === stage,
+				(t) => t.category === category && t.status === stage,
 			),
 		]),
 	) as Record<PipelineStage, typeof matrixTechnologies>,
@@ -155,7 +152,7 @@ const legacyMapping: Record<string, PipelineStage> = {
 pipelineLanes.forEach((lane) => {
 	Object.entries(legacyMapping).forEach(([legacy, modern]) => {
 		const legacyTech = matrixTechnologies.filter(
-			(t) => t.grouping === lane.grouping && t.status === legacy,
+			(t) => t.category === lane.category && (t.status as string) === legacy,
 		);
 		if (legacyTech.length > 0) {
 			lane.stages[modern] = [...lane.stages[modern], ...legacyTech];
@@ -172,14 +169,6 @@ const stageStats = Object.fromEntries(
 ) as Record<PipelineStage, number>;
 
 // Graveyard: technologies with graveyard status OR deprecated/abandoned status
-type TechnologyStatus =
-	| "alpha"
-	| "beta"
-	| "stable"
-	| "preview"
-	| "superseded"
-	| "deprecated"
-	| "abandoned";
 const graveyardTechnologies = allTechnologies
 	.filter(
 		(tech) =>
@@ -191,7 +180,7 @@ const graveyardTechnologies = allTechnologies
 		id: tech.id,
 		name: tech.data.name,
 		status: tech.data.status as TechnologyStatus,
-		grouping: tech.data.matrix?.grouping as Grouping | undefined,
+		category: tech.data.category as string | undefined,
 		matrixStatus: tech.data.matrix?.status,
 		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
 		confidence: tech.data.matrix?.confidence as Confidence | undefined,
@@ -205,10 +194,9 @@ const graveyardTechnologies = allTechnologies
 		articleCount: 0,
 	}));
 
-const techStatusLabels: Record<string, string> = {
-	deprecated: "Deprecated",
-	abandoned: "Abandoned",
-};
+const techStatusLabels = Object.fromEntries(
+	DIMENSIONS["status"].values.map((v) => [v.value, v.label]),
+);
 ---
 
 <Page
@@ -236,30 +224,80 @@ const techStatusLabels: Record<string, string> = {
 					From first glance to full advocacy.
 				</p>
 
-				<!-- Mini pipeline preview / Filter buttons -->
-				<div class="hero-pipeline-preview" role="group" aria-label="Filter by stage">
+				<!-- Mini pipeline preview / Filter links to Advanced Mode -->
+				<div class="hero-pipeline-preview" role="group" aria-label="Explore by stage">
 					{pipelineStages.map((stage) => (
-						<button
-							type="button"
+						<a
+							href={`/technology/matrix/advanced?fs=${stage}`}
 							class={`preview-stage preview-${stage}`}
-							data-filter={stage}
-							aria-pressed="false"
 						>
 							<span class="preview-count">{stageStats[stage]}</span>
 							<span class="preview-label">{stageLabels[stage]}</span>
-						</button>
+						</a>
 					))}
-					<button
-						type="button"
+					<a
+						href="/technology/matrix/advanced?fs=graveyard"
 						class="preview-stage preview-graveyard"
-						data-filter="graveyard"
-						aria-pressed="false"
 					>
 						<span class="preview-count">{graveyardTechnologies.length}</span>
 						<span class="preview-label">Graveyard</span>
-					</button>
+					</a>
 				</div>
+
+				<!-- Advanced Mode CTA -->
+				<a href="/technology/matrix/advanced" class="advanced-mode-link">
+					<span>Advanced Mode</span>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+					</svg>
+				</a>
 			</div>
+		</Container>
+	</section>
+
+	<!-- Legend Section -->
+	<section class="matrix-legend">
+		<Container size="xl" padding="lg">
+			<details class="legend-details">
+				<summary class="legend-summary">
+					<span class="legend-icon">📖</span>
+					<span class="legend-title">How to Read This Matrix</span>
+					<svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					</svg>
+				</summary>
+				<div class="legend-content">
+					<p class="legend-intro">
+						This matrix represents my personal journey with cloud native technologies. Each stage reflects where a technology sits in my evaluation and adoption process—from first impression to full advocacy. It's opinionated, based on my experience, and constantly evolving.
+					</p>
+					<div class="legend-stages">
+						{pipelineStages.map((stage) => (
+							<div class={`legend-stage legend-stage-${stage}`}>
+								<div class="stage-indicator"></div>
+								<div class="stage-info">
+									<span class="stage-name">{stageLabels[stage]}</span>
+									<span class="stage-desc">{
+										stage === "skip" ? "This technology isn't for me right now, or I haven't played with it yet. This is not a reflection on the technology itself—it's about what I need at this moment." :
+										stage === "watch" ? "Something here piqued my interest. I want to learn more and I'm keeping an eye on its development." :
+										stage === "explore" ? "I think people should kick the tyres on this. While I can't recommend it yet, I believe it has a lot to teach you." :
+										stage === "learn" ? "A technology I think will be useful to you even if you don't adopt it. Learn it and expand your mind." :
+										stage === "adopt" ? "Safe to adopt if it fits your needs. I'd confidently use this in real projects." :
+										stage === "advocate" ? "I suggest everyone learn and utilise this technology. I'm actively championing it." :
+										stageDescriptions[stage]
+									}</span>
+								</div>
+							</div>
+						))}
+						<div class="legend-stage legend-stage-graveyard">
+							<div class="stage-indicator"></div>
+							<div class="stage-info">
+								<span class="stage-name">Graveyard</span>
+								<span class="stage-desc">I don't think this project should be noticed, nevermind adopted. These technologies burned me, were abandoned, or have been superseded.</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</details>
 		</Container>
 	</section>
 
@@ -282,11 +320,10 @@ const techStatusLabels: Record<string, string> = {
 				{pipelineStages.map((stage, idx) => (
 					<div class={`header-stage header-${stage}`} style={`--stage-index: ${idx}`}>
 						<div class="stage-arrow">
-							<div class="arrow-body">
+							<div class="stage-content">
 								<span class="stage-label">{stageLabels[stage]}</span>
 								<span class="stage-sublabel">{stageDescriptions[stage]}</span>
 							</div>
-							<div class="arrow-point"></div>
 						</div>
 					</div>
 				))}
@@ -295,16 +332,12 @@ const techStatusLabels: Record<string, string> = {
 			<!-- Pipeline Lanes -->
 			<div class="pipeline-lanes">
 				{pipelineLanes.map((lane, laneIdx) => (
-					<div class="lane-wrapper" style={`--lane-index: ${laneIdx}`} data-lane={lane.grouping}>
+					<div class="lane-wrapper" style={`--lane-index: ${laneIdx}`} data-lane={lane.category}>
 						<div class="lane-tabs">
 							<div class="lane-tab">
 								<span class="lane-icon">{lane.icon}</span>
 								<span class="lane-title">{lane.label}</span>
 								<span class="lane-desc text-muted">— {lane.description}</span>
-							</div>
-							<div class="lane-hover-tab" aria-hidden="true">
-								<span class="hover-tab-name"></span>
-								<span class="hover-tab-arrow">→</span>
 							</div>
 						</div>
 						<div class="lane glass-card">
@@ -314,13 +347,13 @@ const techStatusLabels: Record<string, string> = {
 										{lane.stages[stage].length > 0 ? (
 											<div class="cell-content">
 												{lane.stages[stage].map((tech) => (
-													<a
-														href={`/technology/${tech.id}`}
+													<button
+														type="button"
 														class={`tech-icon chip-${stage}`}
 														data-name={tech.name}
 														data-id={tech.id}
 														data-status={tech.status}
-														data-grouping={tech.grouping}
+														data-category={tech.category}
 														data-why={tech.why || ""}
 														data-first-used={tech.firstUsed || ""}
 														data-last-used={tech.lastUsed || ""}
@@ -342,7 +375,7 @@ const techStatusLabels: Record<string, string> = {
 																{trajectoryEmoji[tech.trajectory]}
 															</span>
 														)}
-													</a>
+													</button>
 												))}
 											</div>
 										) : (
@@ -350,68 +383,6 @@ const techStatusLabels: Record<string, string> = {
 										)}
 									</div>
 								))}
-							</div>
-						</div>
-						<!-- Card Back (slides down on hover) - Playing Card Style -->
-						<div class="card-back" aria-hidden="true">
-							<div class="playing-card">
-								<!-- Card Inner Frame -->
-								<div class="card-frame">
-									<!-- Top Section: Icon + Name -->
-									<div class="card-top">
-										<div class="card-identity">
-											<img class="card-back-icon" src="" alt="" />
-											<div class="card-titles">
-												<h3 class="card-back-name"></h3>
-												<span class="card-back-position"></span>
-											</div>
-										</div>
-										<span class="card-emoji"></span>
-									</div>
-
-									<!-- Center: The Why -->
-									<div class="card-center">
-										<p class="card-back-why"></p>
-									</div>
-
-									<!-- Stats Strip -->
-									<div class="card-stats-strip">
-										<div class="card-stat">
-											<span class="stat-value stat-videos">0</span>
-											<span class="stat-label">Videos</span>
-										</div>
-										<div class="card-stat">
-											<span class="stat-value stat-articles">0</span>
-											<span class="stat-label">Articles</span>
-										</div>
-										<div class="card-stat">
-											<span class="stat-value stat-first-used">—</span>
-											<span class="stat-label">First Used</span>
-										</div>
-										<div class="card-stat">
-											<span class="stat-value stat-last-used">—</span>
-											<span class="stat-label">Last Used</span>
-										</div>
-										<div class="card-stat">
-											<span class="stat-value stat-confidence">—</span>
-											<span class="stat-label">Confidence</span>
-										</div>
-									</div>
-
-									<!-- Spicy Take -->
-									<div class="card-back-spicy">
-										<span class="spicy-icon">🌶️</span>
-										<span class="spicy-take"></span>
-									</div>
-
-									<!-- Bottom CTA -->
-									<a class="card-cta-link" href="">
-										<span>View Details</span>
-										<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-										</svg>
-									</a>
-								</div>
 							</div>
 						</div>
 					</div>
@@ -430,13 +401,13 @@ const techStatusLabels: Record<string, string> = {
 					</div>
 					<div class="graveyard-grid glass-card">
 						{graveyardTechnologies.map((tech) => (
-							<a
-								href={`/technology/${tech.id}`}
+							<button
+								type="button"
 								class="graveyard-item"
 								data-name={tech.name}
 								data-id={tech.id}
-								data-status={tech.matrixStatus || ""}
-								data-grouping={tech.grouping || ""}
+								data-status={tech.matrixStatus || "graveyard"}
+								data-category={tech.category || ""}
 								data-why={tech.why || ""}
 								data-first-used={tech.firstUsed || ""}
 								data-last-used={tech.lastUsed || ""}
@@ -461,7 +432,7 @@ const techStatusLabels: Record<string, string> = {
 										{techStatusLabels[tech.status] || tech.status}
 									</span>
 								</div>
-							</a>
+							</button>
 						))}
 					</div>
 				</div>
@@ -469,9 +440,212 @@ const techStatusLabels: Record<string, string> = {
 
 		</div>
 	</Container>
+
+	<!-- Card Popup Modal -->
+	<div id="tech-card-modal" class="modal-backdrop" aria-hidden="true">
+		<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-tech-name">
+			<button type="button" class="modal-close" aria-label="Close">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+				</svg>
+			</button>
+
+			<div class="modal-card-frame">
+				<!-- Header -->
+				<div class="modal-header">
+					<div class="modal-icon-wrapper">
+						<img id="modal-icon" src="" alt="" class="modal-icon" />
+						<div id="modal-icon-placeholder" class="modal-icon-placeholder"></div>
+					</div>
+					<div class="modal-titles">
+						<h3 id="modal-tech-name" class="modal-name"></h3>
+						<div class="modal-meta">
+							<span id="modal-status-badge" class="modal-status-badge"></span>
+							<span id="modal-category" class="modal-category"></span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Body -->
+				<div class="modal-body">
+					<div id="modal-why-section" class="modal-section">
+						<div class="section-label">Why I use it</div>
+						<p id="modal-why" class="section-text"></p>
+					</div>
+
+					<div class="modal-stats">
+						<div class="modal-stat">
+							<span id="modal-videos" class="stat-value">0</span>
+							<span class="stat-label">Videos</span>
+						</div>
+						<div class="modal-stat">
+							<span id="modal-articles" class="stat-value">0</span>
+							<span class="stat-label">Articles</span>
+						</div>
+						<div class="modal-stat">
+							<span id="modal-first-used" class="stat-value">—</span>
+							<span class="stat-label">First Used</span>
+						</div>
+						<div class="modal-stat">
+							<span id="modal-trajectory" class="stat-value">—</span>
+							<span class="stat-label">Trajectory</span>
+						</div>
+					</div>
+
+					<div id="modal-spicy-section" class="modal-spicy">
+						<span class="spicy-icon">🌶️</span>
+						<span id="modal-spicy-take" class="spicy-text"></span>
+					</div>
+				</div>
+
+				<!-- Footer -->
+				<div class="modal-footer">
+					<a id="modal-cta-link" href="" class="modal-cta">
+						<span>View Details</span>
+						<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+						</svg>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
 </Page>
 
 <style>
+	/* ===== LEGEND ===== */
+	.matrix-legend {
+		padding: 0;
+		margin-bottom: 2rem;
+	}
+
+	.legend-details {
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	.legend-summary {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 1rem 1.25rem;
+		cursor: pointer;
+		user-select: none;
+		transition: background 0.2s ease;
+	}
+
+	.legend-summary:hover {
+		background: var(--surface-card-muted);
+	}
+
+	.legend-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.legend-summary::marker {
+		display: none;
+		content: "";
+	}
+
+	.legend-icon {
+		font-size: 1.25rem;
+	}
+
+	.legend-title {
+		flex: 1;
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: var(--text-primary-content);
+	}
+
+	.legend-summary .chevron {
+		transition: transform 0.2s ease;
+		color: var(--text-muted);
+	}
+
+	.legend-details[open] .chevron {
+		transform: rotate(180deg);
+	}
+
+	.legend-content {
+		padding: 0 1.25rem 1.25rem;
+		border-top: 1px solid var(--surface-border);
+	}
+
+	.legend-intro {
+		margin: 1rem 0 1.5rem;
+		font-size: 0.9rem;
+		line-height: 1.6;
+		color: var(--text-secondary-content);
+	}
+
+	.legend-stages {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 0.75rem;
+	}
+
+	.legend-stage {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		border-radius: 8px;
+		background: var(--surface-card-muted);
+	}
+
+	.legend-stage .stage-indicator {
+		flex-shrink: 0;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		margin-top: 0.375rem;
+	}
+
+	.legend-stage-skip .stage-indicator { background: rgb(239, 68, 68); }
+	.legend-stage-watch .stage-indicator { background: rgb(249, 115, 22); }
+	.legend-stage-explore .stage-indicator { background: rgb(202, 138, 4); }
+	.legend-stage-learn .stage-indicator { background: rgb(59, 130, 246); }
+	.legend-stage-adopt .stage-indicator { background: rgb(34, 197, 94); }
+	.legend-stage-advocate .stage-indicator { background: rgb(var(--brand-primary)); }
+	.legend-stage-graveyard .stage-indicator { background: rgb(107, 114, 128); }
+
+	.legend-stage .stage-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.legend-stage .stage-name {
+		font-size: 0.8rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--text-primary-content);
+	}
+
+	.legend-stage .stage-desc {
+		font-size: 0.8rem;
+		line-height: 1.5;
+		color: var(--text-secondary-content);
+	}
+
+	@media (max-width: 768px) {
+		.legend-stages {
+			grid-template-columns: 1fr;
+		}
+
+		.legend-summary {
+			padding: 0.875rem 1rem;
+		}
+
+		.legend-content {
+			padding: 0 1rem 1rem;
+		}
+	}
+
 	/* ===== HERO ===== */
 	.matrix-hero {
 		position: relative;
@@ -608,20 +782,49 @@ const techStatusLabels: Record<string, string> = {
 	.preview-graveyard { background: rgba(107, 114, 128, 0.15); color: rgb(107, 114, 128); }
 	html.dark .preview-graveyard { background: rgba(107, 114, 128, 0.25); color: rgb(156, 163, 175); }
 
-	/* Filter button interactivity */
+	/* Preview stage link styles */
 	.preview-stage {
 		cursor: pointer;
 		font-family: inherit;
+		text-decoration: none;
 	}
 
-	.preview-stage[aria-pressed="true"] {
-		transform: translateY(-2px);
-		box-shadow: 0 0 0 2px currentColor;
+	.preview-stage:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 	}
 
 	.preview-stage:focus-visible {
 		outline: 2px solid currentColor;
 		outline-offset: 2px;
+	}
+
+	/* Advanced Mode link */
+	.advanced-mode-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1.5rem;
+		padding: 0.625rem 1.25rem;
+		background: rgb(var(--brand-primary));
+		color: white;
+		font-size: 0.85rem;
+		font-weight: 600;
+		border-radius: 9999px;
+		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.advanced-mode-link:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgb(var(--brand-primary) / 0.3);
+	}
+
+	.advanced-mode-link svg {
+		transition: transform 0.2s ease;
+	}
+
+	.advanced-mode-link:hover svg {
+		transform: translateX(3px);
 	}
 
 	/* ===== MATRIX CONTENT ===== */
@@ -631,138 +834,127 @@ const techStatusLabels: Record<string, string> = {
 		gap: 1rem;
 	}
 
-	/* Filter states */
-	.matrix-content[data-filter="graveyard"] .pipeline-header,
-	.matrix-content[data-filter="graveyard"] .pipeline-lanes {
-		display: none;
-	}
-
-	.matrix-content:not([data-filter="graveyard"])[data-filter] .graveyard-section {
-		display: none;
-	}
-
-	/* Highlight filtered stage cells */
-	.matrix-content[data-filter] .lane-cell {
-		opacity: 0.3;
-		transition: opacity 0.2s ease;
-	}
-
-	.matrix-content[data-filter="skip"] .lane-cell.cell-skip,
-	.matrix-content[data-filter="watch"] .lane-cell.cell-watch,
-	.matrix-content[data-filter="explore"] .lane-cell.cell-explore,
-	.matrix-content[data-filter="learn"] .lane-cell.cell-learn,
-	.matrix-content[data-filter="adopt"] .lane-cell.cell-adopt,
-	.matrix-content[data-filter="advocate"] .lane-cell.cell-advocate {
-		opacity: 1;
-	}
-
 	/* ===== PIPELINE HEADER ===== */
 	.pipeline-header {
 		display: flex;
 		position: relative;
-		gap: 4px;
+		gap: 0.25rem;
 		padding: 0 0 0.5rem;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	.pipeline-header::-webkit-scrollbar {
+		display: none;
 	}
 
 	.header-flow-line {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		height: 2px;
-		background: linear-gradient(90deg,
-			rgb(239, 68, 68),
-			rgb(249, 115, 22),
-			rgb(234, 179, 8),
-			rgb(59, 130, 246),
-			rgb(34, 197, 94),
-			rgb(var(--brand-primary))
-		);
-		border-radius: 2px;
-		opacity: 0.5;
+		display: none; /* Replaced by chevron shapes */
 	}
 
 	.header-stage {
 		flex: 1;
-		min-width: 0;
+		min-width: 130px;
 	}
 
 	.stage-arrow {
 		display: flex;
 		align-items: stretch;
 		height: 100%;
+		filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+		transition: transform 0.2s ease;
 	}
 
-	.arrow-body {
+	.stage-arrow:hover {
+		transform: translateY(-2px);
+		filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15));
+		z-index: 10;
+	}
+
+	.stage-content {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		padding: 1rem 0.5rem 1rem 1rem;
-		border-radius: 12px 0 0 12px;
-		position: relative;
+		padding: 1rem 1.5rem 1rem 2.5rem; /* Left padding for notch */
+		background: var(--stage-color);
+		clip-path: polygon(
+			0% 0%,
+			calc(100% - 1.2rem) 0%,
+			100% 50%,
+			calc(100% - 1.2rem) 100%,
+			0% 100%,
+			1.2rem 50%
+		);
 		transition: all 0.2s ease;
 	}
 
-	.arrow-point {
-		width: 20px;
-		position: relative;
-		flex-shrink: 0;
+	/* First stage: Flat left */
+	.header-stage:first-child .stage-content {
+		padding-left: 1.5rem;
+		clip-path: polygon(
+			0% 0%,
+			calc(100% - 1.2rem) 0%,
+			100% 50%,
+			calc(100% - 1.2rem) 100%,
+			0% 100%
+		);
+		border-top-left-radius: 8px;
+		border-bottom-left-radius: 8px;
 	}
 
-	.arrow-point::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 0;
-		height: 0;
-		border-top: 32px solid transparent;
-		border-bottom: 32px solid transparent;
-		border-left: 20px solid;
-		border-left-color: inherit;
+	/* Last stage: Pointed right */
+	.header-stage:last-child .stage-content {
+		clip-path: polygon(
+			0% 0%,
+			100% 0%,
+			100% 50%,
+			100% 100%,
+			0% 100%,
+			1.2rem 50%
+		);
+		padding-right: 1.5rem;
 	}
 
-	.header-stage:last-child .arrow-body {
-		border-radius: 12px;
+	/* Stage colors */
+	.header-skip .stage-content { background: rgb(239, 68, 68); }
+	.header-watch .stage-content { background: rgb(249, 115, 22); }
+	.header-explore .stage-content { background: rgb(202, 138, 4); }
+	.header-learn .stage-content { background: rgb(59, 130, 246); }
+	.header-adopt .stage-content { background: rgb(22, 163, 74); }
+	
+	/* Advocate: Special cool styling */
+	.header-advocate .stage-content {
+		background: linear-gradient(
+			135deg,
+			rgb(var(--brand-primary)) 0%,
+			rgb(var(--brand-secondary)) 100%
+		);
+		background-size: 200% 200%;
+		animation: shimmer 3s ease infinite;
 	}
 
-	.header-stage:last-child .arrow-point {
-		display: none;
+	@keyframes shimmer {
+		0% { background-position: 0% 50%; }
+		50% { background-position: 100% 50%; }
+		100% { background-position: 0% 50%; }
 	}
-
-	/* Stage colors - semantic to matrix */
-	.header-skip .arrow-body { background: rgb(239, 68, 68); }
-	.header-skip .arrow-point::before { border-left-color: rgb(239, 68, 68); }
-
-	.header-watch .arrow-body { background: rgb(249, 115, 22); }
-	.header-watch .arrow-point::before { border-left-color: rgb(249, 115, 22); }
-
-	.header-explore .arrow-body { background: rgb(202, 138, 4); }
-	.header-explore .arrow-point::before { border-left-color: rgb(202, 138, 4); }
-
-	.header-learn .arrow-body { background: rgb(59, 130, 246); }
-	.header-learn .arrow-point::before { border-left-color: rgb(59, 130, 246); }
-
-	.header-adopt .arrow-body { background: rgb(22, 163, 74); }
-	.header-adopt .arrow-point::before { border-left-color: rgb(22, 163, 74); }
-
-	.header-advocate .arrow-body { background: rgb(var(--brand-primary)); }
-	.header-advocate .arrow-point::before { border-left-color: rgb(var(--brand-primary)); }
 
 	.stage-label {
 		font-size: 0.85rem;
-		font-weight: 700;
+		font-weight: 800;
 		color: white;
 		text-transform: uppercase;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.05em;
+		text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 	}
 
 	.stage-sublabel {
 		font-size: 0.65rem;
-		color: rgba(255, 255, 255, 0.75);
+		color: rgba(255, 255, 255, 0.9);
 		margin-top: 0.125rem;
+		font-weight: 500;
 	}
 
 	/* ===== PIPELINE LANES ===== */
@@ -809,43 +1001,6 @@ const techStatusLabels: Record<string, string> = {
 		position: relative;
 		z-index: 1;
 		margin-bottom: -1px;
-	}
-
-	/* Hover tab on right */
-	.lane-hover-tab {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 1rem 0.375rem;
-		background: rgb(var(--brand-primary));
-		border: 1px solid rgb(var(--brand-primary));
-		border-bottom: none;
-		border-radius: 10px 10px 0 0;
-		margin-right: 1rem;
-		margin-bottom: -1px;
-		opacity: 0;
-		visibility: hidden;
-		transform: translateY(4px);
-		transition: all 0.15s ease;
-	}
-
-	.lane-hover-tab.visible {
-		opacity: 1;
-		visibility: visible;
-		transform: translateY(0);
-	}
-
-	.hover-tab-name {
-		font-size: 0.75rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: white;
-	}
-
-	.hover-tab-arrow {
-		font-size: 0.875rem;
-		color: rgba(255, 255, 255, 0.8);
 	}
 
 	.lane-icon {
@@ -932,10 +1087,13 @@ const techStatusLabels: Record<string, string> = {
 		justify-content: center;
 		width: 36px;
 		height: 36px;
+		padding: 0;
 		background: var(--surface-card);
 		border: 1px solid var(--surface-border);
 		border-radius: 10px;
 		text-decoration: none;
+		cursor: pointer;
+		font-family: inherit;
 		transition: all 0.2s ease;
 	}
 
@@ -943,6 +1101,73 @@ const techStatusLabels: Record<string, string> = {
 		transform: scale(1.15);
 		border-color: rgb(var(--brand-primary));
 		box-shadow: 0 0 0 3px rgb(var(--brand-primary) / 0.2);
+	}
+
+	/* Tech icon tooltip */
+	.tech-icon::after {
+		content: attr(data-name);
+		position: absolute;
+		bottom: calc(100% + 12px);
+		left: 50%;
+		transform: translateX(-50%) translateY(4px);
+		padding: 0.625rem 1rem;
+		background: rgba(17, 24, 39, 0.85);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-top: 2px solid rgb(var(--brand-primary));
+		border-radius: 10px;
+		font-size: 0.8rem;
+		font-weight: 600;
+		letter-spacing: 0.01em;
+		color: #f9fafb;
+		white-space: nowrap;
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.3),
+			0 4px 12px rgba(0, 0, 0, 0.2),
+			inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		pointer-events: none;
+		z-index: 100;
+	}
+
+	html.dark .tech-icon::after {
+		background: rgba(0, 0, 0, 0.8);
+		border-color: rgba(255, 255, 255, 0.15);
+		border-top-color: rgb(var(--brand-primary));
+	}
+
+	/* Tooltip arrow */
+	.tech-icon::before {
+		content: "";
+		position: absolute;
+		bottom: calc(100% + 4px);
+		left: 50%;
+		transform: translateX(-50%) translateY(4px);
+		width: 0;
+		height: 0;
+		border-left: 8px solid transparent;
+		border-right: 8px solid transparent;
+		border-top: 8px solid rgba(17, 24, 39, 0.85);
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		pointer-events: none;
+		z-index: 100;
+	}
+
+	html.dark .tech-icon::before {
+		border-top-color: rgba(0, 0, 0, 0.8);
+	}
+
+	.tech-icon:hover::after,
+	.tech-icon:hover::before {
+		opacity: 1;
+		visibility: visible;
+		transform: translateX(-50%) translateY(0);
 	}
 
 
@@ -1000,12 +1225,7 @@ const techStatusLabels: Record<string, string> = {
 	/* ===== RESPONSIVE ===== */
 	@media (max-width: 1024px) {
 		.pipeline-header {
-			overflow-x: auto;
 			padding-bottom: 1rem;
-		}
-
-		.header-stage {
-			min-width: 100px;
 		}
 
 		.lane-desc {
@@ -1098,269 +1318,322 @@ const techStatusLabels: Record<string, string> = {
 			height: 24px;
 		}
 
-		.lane-hover-tab {
-			display: none;
-		}
-
-		.card-back {
-			display: none;
-		}
 	}
 
-	/* ===== PLAYING CARD ===== */
-	.card-back {
-		max-height: 0;
-		overflow: hidden;
-		opacity: 0;
-		transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin 0.3s ease;
-		margin-top: 0;
-	}
-
-	.card-back.visible {
-		max-height: 600px;
-		opacity: 1;
-		margin-top: 1rem;
-	}
-
-	/* Outer card wrapper - cream/off-white like real playing cards */
-	.playing-card {
-		background: #fffef5;
-		border-radius: 16px;
-		padding: 8px;
-		box-shadow:
-			0 1px 2px rgba(0, 0, 0, 0.06),
-			0 4px 12px rgba(0, 0, 0, 0.08),
-			0 12px 32px rgba(0, 0, 0, 0.12);
-	}
-
-	html.dark .playing-card {
-		background: #1c2333;
-		box-shadow:
-			0 1px 2px rgba(0, 0, 0, 0.2),
-			0 4px 12px rgba(0, 0, 0, 0.3),
-			0 12px 32px rgba(0, 0, 0, 0.4);
-	}
-
-	/* Inner frame with border - like the printed area of a card */
-	.card-frame {
-		background: white;
-		border: 2px solid #e5e0d5;
-		border-radius: 12px;
-		padding: 1.25rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	html.dark .card-frame {
-		background: #0d1117;
-		border-color: #30363d;
-	}
-
-	/* Card Top - Identity section */
-	.card-top {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid #e5e0d5;
-	}
-
-	html.dark .card-top {
-		border-bottom-color: #30363d;
-	}
-
-	.card-identity {
-		display: flex;
-		align-items: center;
-		gap: 0.875rem;
-	}
-
-	.card-back-icon {
-		width: 52px;
-		height: 52px;
-		object-fit: contain;
-		border-radius: 10px;
-		background: #fafaf8;
-		padding: 6px;
-		border: 1px solid #e5e0d5;
-	}
-
-	html.dark .card-back-icon {
-		background: #161b22;
-		border-color: #30363d;
-	}
-
-	.card-titles {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-
-	.card-back-name {
-		font-size: 1.25rem;
-		font-weight: 700;
-		color: #1a1a1a;
-		margin: 0;
-	}
-
-	html.dark .card-back-name {
-		color: #e6edf3;
-	}
-
-	.card-back-position {
-		font-size: 0.7rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.card-back-position.status-skip { color: #cf222e; }
-	.card-back-position.status-watch { color: #bf5700; }
-	.card-back-position.status-explore { color: #9a6700; }
-	.card-back-position.status-learn { color: #0969da; }
-	.card-back-position.status-adopt { color: #1a7f37; }
-	.card-back-position.status-advocate { color: rgb(var(--brand-primary)); }
-
-	/* Large emoji on the right */
-	.card-emoji {
-		font-size: 2.75rem;
-		line-height: 1;
-	}
-
-	/* Card Center - The Why */
-	.card-center {
-		min-height: 32px;
-	}
-
-	.card-back-why {
-		font-size: 0.925rem;
-		line-height: 1.55;
-		color: #57606a;
-		margin: 0;
-	}
-
-	html.dark .card-back-why {
-		color: #8b949e;
-	}
-
-	/* Stats Strip */
-	.card-stats-strip {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-		padding: 0.875rem;
-		background: #fafaf8;
-		border-radius: 10px;
-		border: 1px solid #e5e0d5;
-	}
-
-	html.dark .card-stats-strip {
-		background: #161b22;
-		border-color: #30363d;
-	}
-
-	.card-stat {
-		flex: 1;
-		min-width: 65px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 0.5rem 0.625rem;
-		background: white;
-		border-radius: 8px;
-		border: 1px solid #e5e0d5;
-	}
-
-	html.dark .card-stat {
-		background: #0d1117;
-		border-color: #30363d;
-	}
-
-	.card-stat .stat-value {
-		font-size: 1rem;
-		font-weight: 800;
-		color: #1a1a1a;
-	}
-
-	html.dark .card-stat .stat-value {
-		color: #e6edf3;
-	}
-
-	.card-stat .stat-label {
-		font-size: 0.55rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.03em;
-		color: #8b949e;
-	}
-
-	/* Spicy Take */
-	.card-back-spicy {
-		display: none;
-		align-items: flex-start;
-		gap: 0.5rem;
-		padding: 0.75rem 1rem;
-		background: #fff5f5;
-		border-radius: 10px;
-		border: 1px solid #fecdd3;
-	}
-
-	.card-back-spicy.has-take {
-		display: flex;
-	}
-
-	html.dark .card-back-spicy {
-		background: rgba(248, 113, 113, 0.1);
-		border-color: rgba(248, 113, 113, 0.3);
-	}
-
-	.spicy-icon {
-		font-size: 1rem;
-		flex-shrink: 0;
-	}
-
-	.spicy-take {
-		font-size: 0.875rem;
-		font-style: italic;
-		color: #be123c;
-		line-height: 1.45;
-	}
-
-	html.dark .spicy-take {
-		color: #fda4af;
-	}
-
-	/* Card CTA */
-	.card-cta-link {
+	/* ===== MODAL POPUP ===== */
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 999;
+		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(4px);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.875rem 1.25rem;
-		background: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%);
-		color: white;
-		border-radius: 10px;
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity 0.2s ease, visibility 0.2s ease;
+	}
+
+	.modal-backdrop.visible {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.modal-content {
+		position: relative;
+		width: 480px;
+		max-width: calc(100vw - 3rem);
+		max-height: calc(100vh - 4rem);
+		overflow-y: auto;
+		transform: scale(0.95);
+		transition: transform 0.2s ease;
+	}
+
+	.modal-backdrop.visible .modal-content {
+		transform: scale(1);
+	}
+
+	.modal-close {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		z-index: 10;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 50%;
+		color: var(--text-muted);
+		cursor: pointer;
+		transition: all 0.15s ease;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.modal-close:hover {
+		background: var(--surface-card-muted);
+		color: var(--text-primary-content);
+		transform: scale(1.05);
+	}
+
+	.modal-card-frame {
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 1.5rem;
+		overflow: hidden;
+		box-shadow:
+			0 25px 50px rgba(0, 0, 0, 0.25),
+			0 0 0 1px rgba(0, 0, 0, 0.05);
+	}
+
+	.modal-header {
+		display: flex;
+		align-items: center;
+		gap: 1.25rem;
+		padding: 1.75rem;
+		background: var(--surface-card-muted);
+		border-bottom: 4px solid var(--text-muted);
+	}
+
+	.modal-header.status-skip { border-bottom-color: #ef4444; }
+	.modal-header.status-watch { border-bottom-color: #f97316; }
+	.modal-header.status-explore { border-bottom-color: #ca8a04; }
+	.modal-header.status-learn { border-bottom-color: #3b82f6; }
+	.modal-header.status-adopt { border-bottom-color: #22c55e; }
+	.modal-header.status-advocate { border-bottom-color: rgb(var(--brand-primary)); }
+	.modal-header.status-graveyard { border-bottom-color: #6b7280; }
+
+	.modal-icon-wrapper {
+		flex-shrink: 0;
+	}
+
+	.modal-icon {
+		width: 80px;
+		height: 80px;
+		object-fit: contain;
+		border-radius: 1rem;
+		background: var(--surface-card);
+		padding: 0.875rem;
+		border: 1px solid var(--surface-border);
+	}
+
+	.modal-icon-placeholder {
+		width: 80px;
+		height: 80px;
+		display: none;
+		align-items: center;
+		justify-content: center;
+		background: var(--surface-card);
+		border-radius: 1rem;
+		border: 1px solid var(--surface-border);
+		font-size: 2rem;
+		font-weight: 700;
+		color: var(--text-primary-content);
+	}
+
+	.modal-titles {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.modal-name {
+		font-size: 1.75rem;
+		font-weight: 700;
+		color: var(--text-primary-content);
+		margin: 0 0 0.625rem;
+		line-height: 1.2;
+	}
+
+	.modal-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.modal-status-badge {
 		font-size: 0.75rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.04em;
+		padding: 0.375rem 0.75rem;
+		border-radius: 0.375rem;
+		color: white;
+		background: var(--text-muted);
+	}
+
+	.modal-status-badge.status-skip { background: #ef4444; }
+	.modal-status-badge.status-watch { background: #f97316; }
+	.modal-status-badge.status-explore { background: #ca8a04; }
+	.modal-status-badge.status-learn { background: #3b82f6; }
+	.modal-status-badge.status-adopt { background: #22c55e; }
+	.modal-status-badge.status-advocate { background: rgb(var(--brand-primary)); }
+	.modal-status-badge.status-graveyard { background: #6b7280; }
+
+	.modal-category {
+		font-size: 0.875rem;
+		color: var(--text-secondary-content);
+	}
+
+	.modal-body {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		padding: 1.5rem 1.75rem;
+	}
+
+	.modal-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.modal-section .section-label {
+		font-size: 0.6875rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text-muted);
+	}
+
+	.modal-section .section-text {
+		font-size: 0.9375rem;
+		line-height: 1.6;
+		color: var(--text-secondary-content);
+		margin: 0;
+	}
+
+	.modal-stats {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 0.75rem;
+	}
+
+	.modal-stat {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.875rem 0.5rem;
+		background: var(--surface-card-muted);
+		border-radius: 0.75rem;
+	}
+
+	.modal-stat .stat-value {
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--text-primary-content);
+	}
+
+	.modal-stat .stat-label {
+		font-size: 0.625rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--text-muted);
+		text-align: center;
+	}
+
+	.modal-spicy {
+		display: none;
+		align-items: flex-start;
+		gap: 0.75rem;
+		padding: 1rem;
+		background: rgba(239, 68, 68, 0.08);
+		border: 1px solid rgba(239, 68, 68, 0.15);
+		border-radius: 0.75rem;
+	}
+
+	.modal-spicy.visible {
+		display: flex;
+	}
+
+	.modal-spicy .spicy-icon {
+		font-size: 1.125rem;
+		flex-shrink: 0;
+		line-height: 1.4;
+	}
+
+	.modal-spicy .spicy-text {
+		font-size: 0.875rem;
+		font-style: italic;
+		color: #be123c;
+		line-height: 1.5;
+	}
+
+	html.dark .modal-spicy .spicy-text {
+		color: #fda4af;
+	}
+
+	.modal-footer {
+		padding: 0 1.75rem 1.75rem;
+	}
+
+	.modal-cta {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.625rem;
+		width: 100%;
+		padding: 1rem 1.5rem;
+		background: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%);
+		color: white;
+		border-radius: 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 		text-decoration: none;
 		transition: all 0.2s ease;
 	}
 
-	.card-cta-link:hover {
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgb(var(--brand-primary) / 0.3);
+	.modal-cta:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 20px rgb(var(--brand-primary) / 0.35);
 	}
 
-	.card-cta-link svg {
+	.modal-cta svg {
 		transition: transform 0.2s ease;
 	}
 
-	.card-cta-link:hover svg {
-		transform: translateX(3px);
+	.modal-cta:hover svg {
+		transform: translateX(4px);
+	}
+
+	@media (max-width: 540px) {
+		.modal-content {
+			width: calc(100vw - 2rem);
+		}
+
+		.modal-header {
+			padding: 1.25rem;
+			gap: 1rem;
+		}
+
+		.modal-icon,
+		.modal-icon-placeholder {
+			width: 64px;
+			height: 64px;
+		}
+
+		.modal-name {
+			font-size: 1.375rem;
+		}
+
+		.modal-body {
+			padding: 1.25rem;
+		}
+
+		.modal-stats {
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		.modal-footer {
+			padding: 0 1.25rem 1.25rem;
+		}
 	}
 
 	/* ===== GRAVEYARD SECTION ===== */
@@ -1417,6 +1690,7 @@ const techStatusLabels: Record<string, string> = {
 	}
 
 	.graveyard-item {
+		position: relative;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -1425,8 +1699,76 @@ const techStatusLabels: Record<string, string> = {
 		border: 1px solid var(--surface-border);
 		border-radius: 10px;
 		text-decoration: none;
+		cursor: pointer;
+		font-family: inherit;
+		font-size: inherit;
 		transition: all 0.2s ease;
 		opacity: 0.7;
+	}
+
+	/* Graveyard item tooltip */
+	.graveyard-item::after {
+		content: "View details";
+		position: absolute;
+		bottom: calc(100% + 10px);
+		left: 50%;
+		transform: translateX(-50%) translateY(4px);
+		padding: 0.5rem 0.875rem;
+		background: rgba(17, 24, 39, 0.85);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-top: 2px solid #6b7280;
+		border-radius: 8px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: #f9fafb;
+		white-space: nowrap;
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.3),
+			0 4px 12px rgba(0, 0, 0, 0.2),
+			inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		pointer-events: none;
+		z-index: 100;
+	}
+
+	html.dark .graveyard-item::after {
+		background: rgba(0, 0, 0, 0.8);
+		border-color: rgba(255, 255, 255, 0.15);
+		border-top-color: #6b7280;
+	}
+
+	.graveyard-item::before {
+		content: "";
+		position: absolute;
+		bottom: calc(100% + 2px);
+		left: 50%;
+		transform: translateX(-50%) translateY(4px);
+		width: 0;
+		height: 0;
+		border-left: 6px solid transparent;
+		border-right: 6px solid transparent;
+		border-top: 6px solid rgba(17, 24, 39, 0.85);
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		pointer-events: none;
+		z-index: 100;
+	}
+
+	html.dark .graveyard-item::before {
+		border-top-color: rgba(0, 0, 0, 0.8);
+	}
+
+	.graveyard-item:hover::after,
+	.graveyard-item:hover::before {
+		opacity: 1;
+		visibility: visible;
+		transform: translateX(-50%) translateY(0);
 	}
 
 	.graveyard-item:hover {
@@ -1544,22 +1886,15 @@ const techStatusLabels: Record<string, string> = {
 		"learn": "Learn",
 		"adopt": "Adopt",
 		"advocate": "Advocate",
+		"graveyard": "Graveyard",
 	};
 
-	const confidenceLabels: Record<string, string> = {
-		"gut": "Gut",
-		"some-experience": "Some XP",
-		"deep-experience": "Deep XP",
+	const trajectoryIcons: Record<string, string> = {
+		"rising": "↗️",
+		"stable": "→",
+		"falling": "↘️",
 	};
 
-	const groupingLabels: Record<string, string> = {
-		"plumbing": "Plumbing",
-		"platform": "Platform",
-		"observability": "Observability",
-		"security": "Security",
-	};
-
-	// Format date string like "2020-03" to "Mar 2020"
 	function formatDate(dateStr: string): string {
 		if (!dateStr) return "—";
 		const [year, month] = dateStr.split("-");
@@ -1568,193 +1903,134 @@ const techStatusLabels: Record<string, string> = {
 		return `${months[parseInt(month, 10) - 1]} ${year}`;
 	}
 
-	// ===== FILTER LOGIC =====
-	const matrixContent = document.querySelector('.matrix-content');
-	const filterButtons = document.querySelectorAll('.preview-stage[data-filter]');
-	let activeFilter: string | null = null;
+	// Modal elements
+	const modal = document.getElementById('tech-card-modal');
+	const modalIcon = document.getElementById('modal-icon') as HTMLImageElement;
+	const modalIconPlaceholder = document.getElementById('modal-icon-placeholder');
+	const modalName = document.getElementById('modal-tech-name');
+	const modalStatusBadge = document.getElementById('modal-status-badge');
+	const modalCategory = document.getElementById('modal-category');
+	const modalHeader = modal?.querySelector('.modal-header');
+	const modalWhySection = document.getElementById('modal-why-section');
+	const modalWhy = document.getElementById('modal-why');
+	const modalVideos = document.getElementById('modal-videos');
+	const modalArticles = document.getElementById('modal-articles');
+	const modalFirstUsed = document.getElementById('modal-first-used');
+	const modalTrajectory = document.getElementById('modal-trajectory');
+	const modalSpicySection = document.getElementById('modal-spicy-section');
+	const modalSpicyTake = document.getElementById('modal-spicy-take');
+	const modalCtaLink = document.getElementById('modal-cta-link') as HTMLAnchorElement;
+	const modalClose = modal?.querySelector('.modal-close');
 
-	filterButtons.forEach(button => {
-		button.addEventListener('click', () => {
-			const filter = button.getAttribute('data-filter');
+	function showModal(button: Element) {
+		const id = button.getAttribute('data-id') || "";
+		const name = button.getAttribute('data-name') || "";
+		const status = button.getAttribute('data-status') || "";
+		const category = button.getAttribute('data-category') || "";
+		const why = button.getAttribute('data-why') || "";
+		const firstUsed = button.getAttribute('data-first-used') || "";
+		const spicy = button.getAttribute('data-spicy-take') || "";
+		const videoCount = button.getAttribute('data-video-count') || "0";
+		const articleCount = button.getAttribute('data-article-count') || "0";
+		const trajectory = button.getAttribute('data-trajectory') || "";
+		const iconUrl = button.getAttribute('data-icon') || "";
 
-			if (activeFilter === filter) {
-				// Toggle off - clear filter
-				activeFilter = null;
-				matrixContent?.removeAttribute('data-filter');
-				filterButtons.forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+		// Populate modal
+		if (modalIcon && modalIconPlaceholder) {
+			if (iconUrl) {
+				modalIcon.src = iconUrl;
+				modalIcon.alt = name;
+				modalIcon.style.display = 'block';
+				modalIconPlaceholder.style.display = 'none';
 			} else {
-				// Set new filter
-				activeFilter = filter;
-				matrixContent?.setAttribute('data-filter', filter || '');
-				filterButtons.forEach(btn => {
-					btn.setAttribute('aria-pressed', btn.getAttribute('data-filter') === filter ? 'true' : 'false');
-				});
+				modalIcon.style.display = 'none';
+				modalIconPlaceholder.textContent = name[0] || '?';
+				modalIconPlaceholder.style.display = 'flex';
 			}
+		}
+
+		if (modalName) modalName.textContent = name;
+
+		if (modalStatusBadge) {
+			modalStatusBadge.textContent = statusLabels[status] || status;
+			modalStatusBadge.className = `modal-status-badge status-${status}`;
+		}
+
+		if (modalCategory) modalCategory.textContent = category || "Uncategorized";
+
+		if (modalHeader) {
+			modalHeader.className = `modal-header status-${status}`;
+		}
+
+		if (modalWhySection && modalWhy) {
+			if (why) {
+				modalWhy.textContent = why;
+				modalWhySection.style.display = 'flex';
+			} else {
+				modalWhySection.style.display = 'none';
+			}
+		}
+
+		if (modalVideos) modalVideos.textContent = videoCount;
+		if (modalArticles) modalArticles.textContent = articleCount;
+		if (modalFirstUsed) modalFirstUsed.textContent = formatDate(firstUsed);
+		if (modalTrajectory) modalTrajectory.textContent = trajectoryIcons[trajectory] || "—";
+
+		if (modalSpicySection && modalSpicyTake) {
+			if (spicy) {
+				modalSpicyTake.textContent = spicy;
+				modalSpicySection.classList.add('visible');
+			} else {
+				modalSpicySection.classList.remove('visible');
+			}
+		}
+
+		if (modalCtaLink) {
+			modalCtaLink.href = `/technology/${id}`;
+		}
+
+		// Show modal
+		modal?.classList.add('visible');
+		modal?.setAttribute('aria-hidden', 'false');
+		document.body.style.overflow = 'hidden';
+	}
+
+	function hideModal() {
+		modal?.classList.remove('visible');
+		modal?.setAttribute('aria-hidden', 'true');
+		document.body.style.overflow = '';
+	}
+
+	// Close modal on backdrop click
+	modal?.addEventListener('click', (e) => {
+		if (e.target === modal) {
+			hideModal();
+		}
+	});
+
+	// Close modal on close button click
+	modalClose?.addEventListener('click', hideModal);
+
+	// Close modal on escape key
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && modal?.classList.contains('visible')) {
+			hideModal();
+		}
+	});
+
+	// Add click handlers to all tech icons
+	document.querySelectorAll('.tech-icon').forEach(button => {
+		button.addEventListener('click', (e) => {
+			e.preventDefault();
+			showModal(button);
 		});
 	});
 
-	// ===== CARD BACK HOVER LOGIC =====
-	let hideTimeout: ReturnType<typeof setTimeout> | null = null;
-	let showTimeout: ReturnType<typeof setTimeout> | null = null;
-	let currentIcon: Element | null = null;
-
-	document.querySelectorAll('.lane-wrapper').forEach(lane => {
-		const hoverTab = lane.querySelector('.lane-hover-tab');
-		const hoverName = lane.querySelector('.hover-tab-name');
-		const cardBack = lane.querySelector('.card-back');
-
-		if (!cardBack) return;
-
-		const cardIcon = cardBack.querySelector('.card-back-icon') as HTMLImageElement;
-		const cardName = cardBack.querySelector('.card-back-name');
-		const cardPosition = cardBack.querySelector('.card-back-position');
-		const cardWhy = cardBack.querySelector('.card-back-why');
-		const statVideos = cardBack.querySelector('.stat-videos');
-		const statArticles = cardBack.querySelector('.stat-articles');
-		const statFirstUsed = cardBack.querySelector('.stat-first-used');
-		const statLastUsed = cardBack.querySelector('.stat-last-used');
-		const statConfidence = cardBack.querySelector('.stat-confidence');
-		const spicyContainer = cardBack.querySelector('.card-back-spicy');
-		const spicyTake = cardBack.querySelector('.spicy-take');
-		const cardEmoji = cardBack.querySelector('.card-emoji');
-		const ctaLink = cardBack.querySelector('.card-cta-link') as HTMLAnchorElement;
-
-		function populateCardBack(icon: Element) {
-			if (hideTimeout) {
-				clearTimeout(hideTimeout);
-				hideTimeout = null;
-			}
-
-			currentIcon = icon;
-
-			const id = icon.getAttribute('data-id') || "";
-			const name = icon.getAttribute('data-name') || "";
-			const status = icon.getAttribute('data-status') || "";
-			const grouping = icon.getAttribute('data-grouping') || "";
-			const why = icon.getAttribute('data-why') || "";
-			const firstUsed = icon.getAttribute('data-first-used') || "";
-			const lastUsed = icon.getAttribute('data-last-used') || "";
-			const makesMeFeel = icon.getAttribute('data-makes-me-feel') || "";
-			const spicy = icon.getAttribute('data-spicy-take') || "";
-			const videoCount = icon.getAttribute('data-video-count') || "0";
-			const articleCount = icon.getAttribute('data-article-count') || "0";
-			const confidence = icon.getAttribute('data-confidence') || "";
-			const iconUrl = icon.getAttribute('data-icon') || "";
-
-			// Populate card
-			if (cardIcon) {
-				cardIcon.src = iconUrl || "/apple-touch-icon.png";
-				cardIcon.alt = name;
-			}
-			if (cardName) cardName.textContent = name;
-			if (cardPosition) {
-				cardPosition.textContent = `${statusLabels[status] || status} · ${groupingLabels[grouping] || grouping}`;
-				cardPosition.className = `card-back-position status-${status}`;
-			}
-
-			// Populate emoji (large on the right side)
-			if (cardEmoji) {
-				cardEmoji.textContent = makesMeFeel || "🎯";
-			}
-
-			if (cardWhy) cardWhy.textContent = why || "No detailed notes yet.";
-			if (statVideos) statVideos.textContent = videoCount;
-			if (statArticles) statArticles.textContent = articleCount;
-			if (statFirstUsed) statFirstUsed.textContent = formatDate(firstUsed);
-			if (statLastUsed) statLastUsed.textContent = formatDate(lastUsed);
-			if (statConfidence) statConfidence.textContent = confidenceLabels[confidence] || "—";
-
-			if (spicyContainer && spicyTake) {
-				if (spicy) {
-					spicyTake.textContent = spicy;
-					spicyContainer.classList.add('has-take');
-				} else {
-					spicyContainer.classList.remove('has-take');
-				}
-			}
-
-			// Update CTA link
-			if (ctaLink) {
-				ctaLink.href = `/technology/${id}`;
-			}
-
-			// Show
-			cardBack?.classList.add('visible');
-		}
-
-		function scheduleShowCardBack(icon: Element) {
-			// Cancel any pending show
-			if (showTimeout) {
-				clearTimeout(showTimeout);
-				showTimeout = null;
-			}
-
-			// If card is already visible with same icon, do nothing
-			if (currentIcon === icon && cardBack?.classList.contains('visible')) {
-				return;
-			}
-
-			// If card is already visible but different icon, wait 100ms before switching
-			if (cardBack?.classList.contains('visible') && currentIcon !== icon) {
-				showTimeout = setTimeout(() => {
-					populateCardBack(icon);
-				}, 100);
-			} else {
-				// First hover - show immediately
-				populateCardBack(icon);
-			}
-		}
-
-		function hideCardBack() {
-			// Cancel any pending show
-			if (showTimeout) {
-				clearTimeout(showTimeout);
-				showTimeout = null;
-			}
-
-			hideTimeout = setTimeout(() => {
-				cardBack?.classList.remove('visible');
-				currentIcon = null;
-			}, 150);
-		}
-
-		lane.querySelectorAll('.tech-icon').forEach(icon => {
-			icon.addEventListener('mouseenter', () => {
-				const name = icon.getAttribute('data-name');
-				if (hoverName && hoverTab) {
-					hoverName.textContent = name;
-					hoverTab.classList.add('visible');
-				}
-				scheduleShowCardBack(icon);
-			});
-
-			icon.addEventListener('mouseleave', () => {
-				if (hoverTab) {
-					hoverTab.classList.remove('visible');
-				}
-				// Don't hide immediately - let the user move to card back
-			});
-		});
-
-		// Track if mouse leaves the lane entirely
-		lane.addEventListener('mouseleave', () => {
-			hideCardBack();
-		});
-
-		// Keep card visible when hovering over it
-		cardBack.addEventListener('mouseenter', () => {
-			if (hideTimeout) {
-				clearTimeout(hideTimeout);
-				hideTimeout = null;
-			}
-			if (showTimeout) {
-				clearTimeout(showTimeout);
-				showTimeout = null;
-			}
-		});
-
-		cardBack.addEventListener('mouseleave', () => {
-			hideCardBack();
+	// Add click handlers to graveyard items
+	document.querySelectorAll('.graveyard-item').forEach(button => {
+		button.addEventListener('click', (e) => {
+			e.preventDefault();
+			showModal(button);
 		});
 	});
 </script>

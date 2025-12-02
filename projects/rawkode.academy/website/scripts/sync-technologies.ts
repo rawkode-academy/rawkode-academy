@@ -27,9 +27,7 @@ function parseArgs(): Args {
 		"https://api.rawkode.academy/graphql";
 	const limit = parseInt(get("--limit", "1000")!, 10);
 	const require = createRequire(import.meta.url);
-	const pkgPath = require.resolve(
-		"@rawkodeacademy/content/package.json",
-	);
+	const pkgPath = require.resolve("@rawkodeacademy/content/package.json");
 	const outDir = join(dirname(pkgPath), "technologies");
 	return { endpoint, limit, outDir };
 }

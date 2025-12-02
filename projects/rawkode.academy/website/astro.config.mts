@@ -23,7 +23,9 @@ let cueLanguageGrammar: import("shiki").LanguageRegistration | undefined;
 try {
 	const grammarPath = join(process.cwd(), "src/grammars/cue.tmLanguage.json");
 	if (existsSync(grammarPath)) {
-		cueLanguageGrammar = JSON.parse(readFileSync(grammarPath, "utf-8")) as import("shiki").LanguageRegistration;
+		cueLanguageGrammar = JSON.parse(
+			readFileSync(grammarPath, "utf-8"),
+		) as import("shiki").LanguageRegistration;
 	}
 } catch (e) {
 	console.warn("Failed to load CUE grammar:", e);
@@ -177,9 +179,7 @@ async function buildLastmodIndex() {
 	let techBaseDir: string | undefined;
 	try {
 		const require = createRequire(import.meta.url);
-		const pkgPath = require.resolve(
-			"@rawkodeacademy/content/package.json",
-		);
+		const pkgPath = require.resolve("@rawkodeacademy/content/package.json");
 		const root = dirname(pkgPath);
 		const data = join(root, "technologies");
 		try {
@@ -193,10 +193,7 @@ async function buildLastmodIndex() {
 			absolute: true,
 		});
 	} catch (err) {
-		console.error(
-			"Failed to resolve @rawkodeacademy/content package:",
-			err,
-		);
+		console.error("Failed to resolve @rawkodeacademy/content package:", err);
 		// Don't fallback to local directories - workspace package is the only source
 	}
 	for (const file of techFiles) {
@@ -234,9 +231,7 @@ const lastmodIndex = await buildLastmodIndex();
 let CONTENT_TECH_DIR: string | undefined;
 try {
 	const require = createRequire(import.meta.url);
-	const pkgPath = require.resolve(
-		"@rawkodeacademy/content/package.json",
-	);
+	const pkgPath = require.resolve("@rawkodeacademy/content/package.json");
 	const root = dirname(pkgPath);
 	const data = join(root, "technologies");
 	try {
@@ -412,8 +407,7 @@ export default defineConfig({
 			GRAPHQL_ENDPOINT: envField.string({
 				context: "server",
 				access: "public",
-				default:
-					process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/",
+				default: process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/",
 			}),
 			PUBLIC_CAPTURE_ERRORS: envField.string({
 				context: "server",
