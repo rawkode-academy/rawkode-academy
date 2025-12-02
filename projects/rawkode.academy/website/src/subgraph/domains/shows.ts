@@ -22,8 +22,7 @@ export function registerShows(builder: InstanceType<typeof SchemaBuilder<{}>>) {
 			args: {
 				id: t.arg.string({ required: true }),
 			},
-			resolve: async (_root: any, args: { id: string }) =>
-				getShowById(args.id),
+			resolve: async (_root: any, args: { id: string }) => getShowById(args.id),
 		}),
 		allShows: t.field({
 			type: [ShowRef],

@@ -34,15 +34,11 @@ export function registerRelationships(
 				const techIds = video.technologies ?? [];
 				const techs = await Promise.all(
 					techIds.map((id) => {
-						const normalizedId = id.endsWith("/index")
-							? id
-							: `${id}/index`;
+						const normalizedId = id.endsWith("/index") ? id : `${id}/index`;
 						return getTechnologyById(normalizedId);
 					}),
 				);
-				return techs.filter(
-					(t): t is NonNullable<typeof t> => t !== null,
-				);
+				return techs.filter((t): t is NonNullable<typeof t> => t !== null);
 			},
 		}),
 	);
@@ -55,9 +51,7 @@ export function registerRelationships(
 				const guests = await Promise.all(
 					guestIds.map((id) => getPersonById(id)),
 				);
-				return guests.filter(
-					(g): g is NonNullable<typeof g> => g !== null,
-				);
+				return guests.filter((g): g is NonNullable<typeof g> => g !== null);
 			},
 		}),
 	);
@@ -67,12 +61,8 @@ export function registerRelationships(
 			type: [PersonRef],
 			resolve: async (show: ShowItem) => {
 				const hostIds = show.hosts ?? [];
-				const hosts = await Promise.all(
-					hostIds.map((id) => getPersonById(id)),
-				);
-				return hosts.filter(
-					(h): h is NonNullable<typeof h> => h !== null,
-				);
+				const hosts = await Promise.all(hostIds.map((id) => getPersonById(id)));
+				return hosts.filter((h): h is NonNullable<typeof h> => h !== null);
 			},
 		}),
 	);
@@ -102,9 +92,7 @@ export function registerRelationships(
 					(v) =>
 						v.publishedAt <= now &&
 						v.technologies.some((t) => {
-							const normalizedTechId = t.endsWith("/index")
-								? t
-								: `${t}/index`;
+							const normalizedTechId = t.endsWith("/index") ? t : `${t}/index`;
 							return normalizedTechId === tech.id;
 						}),
 				);
@@ -119,8 +107,7 @@ export function registerRelationships(
 				const videos = await listVideos();
 				const now = new Date();
 				return videos.filter(
-					(v) =>
-						v.publishedAt <= now && v.guests.includes(person.id),
+					(v) => v.publishedAt <= now && v.guests.includes(person.id),
 				);
 			},
 		}),

@@ -1,0 +1,200 @@
+---
+export const prerender = true;
+
+import { getCollection } from "astro:content";
+import Page from "@/wrappers/page.astro";
+import { Container } from "@/components/ui";
+import {
+	normalizeTechnology,
+	serializeForClient,
+	type RawTechnology,
+} from "@/lib/explorer/data-layer";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import TechnologyExplorer from "@/components/explorer/TechnologyExplorer.vue";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+
+const breadcrumbElements = [
+	{ title: "Home", link: "/" },
+	{ title: "Technology", link: "/technology" },
+	{ title: "Matrix", link: "/technology/matrix" },
+	{ title: "Advanced Mode", link: "/technology/matrix/advanced" },
+];
+
+// Helper to normalize technology references from videos
+function normalizeTechnologyRef(value: unknown): string | undefined {
+	if (typeof value === "string") {
+		return value.replace(/\/index$/, "");
+	}
+	if (typeof value === "object" && value !== null) {
+		const ref = (value as any).id ?? (value as any).slug;
+		if (typeof ref === "string") return ref.replace(/\/index$/, "");
+	}
+	return undefined;
+}
+
+// Compute video counts per technology
+const allVideos = await getCollection("videos");
+const videoCountsByTech = new Map<string, number>();
+for (const video of allVideos) {
+	const techs = video.data.technologies;
+	if (Array.isArray(techs)) {
+		for (const tech of techs) {
+			const techId = normalizeTechnologyRef(tech);
+			if (techId) {
+				videoCountsByTech.set(techId, (videoCountsByTech.get(techId) || 0) + 1);
+			}
+		}
+	}
+}
+
+// Get all technologies
+const allTechnologies = await getCollection("technologies");
+
+// Normalize technologies for the explorer
+const normalizedTechnologies = allTechnologies.map((tech) => {
+	const rawTech: RawTechnology = {
+		id: tech.id,
+		data: tech.data as RawTechnology["data"],
+	};
+	// Resolve icon URL using Vite's asset processing
+	const iconUrl = resolveTechnologyIconUrl(tech.id, tech.data.logos) ?? null;
+	return normalizeTechnology(
+		rawTech,
+		videoCountsByTech.get(tech.id) || 0,
+		0, // articleCount - TODO: wire up when available
+		iconUrl,
+	);
+});
+
+// Serialize for client
+const technologiesJson = serializeForClient(normalizedTechnologies);
+
+// Stats for meta
+const totalTechnologies = normalizedTechnologies.length;
+---
+
+<Page
+	title="Technology Matrix - Advanced Mode"
+	description="Explore cloud native and platform engineering technologies with interactive visualizations. Filter by CNCF status, category, adoption stage, and more."
+>
+	<!-- Hero Section -->
+	<section class="explorer-hero">
+		<div class="hero-background">
+			<div class="hero-gradient"></div>
+			<div class="hero-grid"></div>
+		</div>
+		<Container size="xl" padding="lg">
+			<div class="hero-content">
+				<Breadcrumb elements={breadcrumbElements} />
+				<div class="hero-badge glass-chip">
+					<span class="badge-dot"></span>
+					<span>{totalTechnologies} Technologies</span>
+				</div>
+				<h1 class="hero-title">
+					<span class="title-accent">Advanced</span> Mode
+				</h1>
+				<p class="hero-subtitle text-secondary-content">
+					Interactive visualization of cloud native technologies.
+					<br class="hidden md:block" />
+					Filter, group, and explore by any dimension.
+				</p>
+			</div>
+		</Container>
+	</section>
+
+	<Container size="xl" padding="lg">
+		<!-- Vue Explorer Component -->
+		<TechnologyExplorer
+			client:load
+			technologies={JSON.parse(technologiesJson)}
+		/>
+	</Container>
+</Page>
+
+<style>
+	/* ===== HERO ===== */
+	.explorer-hero {
+		position: relative;
+		padding: 3rem 0 2rem;
+		overflow: hidden;
+	}
+
+	.hero-background {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+	}
+
+	.hero-gradient {
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--brand-primary) / 0.15), transparent),
+			radial-gradient(ellipse 60% 40% at 80% 50%, rgb(var(--brand-secondary) / 0.1), transparent),
+			radial-gradient(ellipse 50% 30% at 20% 80%, rgb(var(--brand-primary) / 0.08), transparent);
+	}
+
+	.hero-grid {
+		position: absolute;
+		inset: 0;
+		background-image:
+			linear-gradient(var(--surface-border) 1px, transparent 1px),
+			linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
+		background-size: 60px 60px;
+		mask-image: radial-gradient(ellipse at center, black, transparent 70%);
+	}
+
+	.hero-content {
+		position: relative;
+		z-index: 1;
+		text-align: center;
+	}
+
+	.hero-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.badge-dot {
+		width: 6px;
+		height: 6px;
+		background: rgb(var(--brand-primary));
+		border-radius: 50%;
+		animation: pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		0%, 100% { opacity: 1; transform: scale(1); }
+		50% { opacity: 0.5; transform: scale(1.2); }
+	}
+
+	.hero-title {
+		font-size: clamp(2rem, 5vw, 3rem);
+		font-weight: 800;
+		letter-spacing: -0.03em;
+		line-height: 1.1;
+		margin: 0 0 0.75rem;
+	}
+
+	.title-accent {
+		background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-secondary)));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.hero-subtitle {
+		font-size: 1rem;
+		margin: 0;
+		line-height: 1.6;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.explorer-hero {
+			padding: 2rem 0 1.5rem;
+		}
+	}
+</style>

@@ -91,7 +91,7 @@ const truncatedDescription = truncateDescription(
 <section class={`section-py-tight ${sectionClass}`.trim()}>
 	<!-- Mobile/Tablet layout - matches desktop aesthetic -->
 	<a href={href} class="lg:hidden block group">
-		<div class="overflow-hidden rounded-2xl bg-slate-950 shadow-[0_15px_50px_rgba(15,23,42,0.3)] dark:shadow-[0_20px_70px_rgba(2,6,23,0.7)]">
+		<div class="glass-card-shimmer overflow-hidden rounded-2xl">
 			<!-- Image section -->
 			<div class="relative aspect-[16/9] overflow-hidden">
 				{typeof thumbnailUrl === "string" ? (
@@ -109,7 +109,7 @@ const truncatedDescription = truncateDescription(
 				)}
 				
 				<!-- Gradient overlay -->
-				<div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+				<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent dark:from-black/80"></div>
 				
 				<!-- Badge -->
 				{type === "article" && badgeConfig && (
@@ -144,28 +144,28 @@ const truncatedDescription = truncateDescription(
 				</div>
 
 				<!-- Title -->
-				<h2 class="text-xl font-bold text-white leading-tight tracking-tight">
+				<h2 class="text-xl font-bold text-primary-content leading-tight tracking-tight">
 					{title}
 				</h2>
 
 				<!-- Description -->
 				{truncatedDescription && (
-					<p class="text-slate-400 text-sm leading-relaxed line-clamp-2">
+					<p class="text-secondary-content text-sm leading-relaxed line-clamp-2">
 						{truncatedDescription}
 					</p>
 				)}
 
 				<!-- Meta row -->
-				<div class="flex items-center gap-4 text-xs text-slate-500 pt-1">
+				<div class="flex items-center gap-4 text-xs text-muted pt-1">
 					{author && (
 						<div class="flex items-center gap-2">
 							<div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-[0.6rem] font-bold">
 								{author.charAt(0)}
 							</div>
-							<span class="text-slate-300 font-medium">{author}</span>
+							<span class="text-primary-content font-medium">{author}</span>
 						</div>
 					)}
-					<div class="flex items-center gap-1.5 text-slate-400">
+					<div class="flex items-center gap-1.5 text-muted">
 						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 						</svg>
@@ -197,24 +197,24 @@ const truncatedDescription = truncateDescription(
 
 	<!-- Hero layout for lg+ viewports: Side-by-side with prominent image -->
 	<a href={href} class="hidden lg:block group">
-		<div class="flex rounded-[2rem] overflow-hidden bg-slate-950 shadow-[0_25px_100px_rgba(15,23,42,0.3)] dark:shadow-[0_30px_120px_rgba(2,6,23,0.7)] min-h-[400px] xl:min-h-[450px]">
+		<div class="glass-card-shimmer flex rounded-[2rem] overflow-hidden min-h-[400px] xl:min-h-[450px]">
 			
 			<!-- Left: Content Panel -->
-			<div class="relative flex flex-col justify-center p-8 xl:p-12 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 w-[40%] xl:w-[35%] shrink-0">
+			<div class="relative flex flex-col justify-center p-8 xl:p-12 bg-surface/50 w-[40%] xl:w-[35%] shrink-0">
 				<!-- Decorative accent line -->
 				<div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-secondary to-primary/50"></div>
 				
 				<!-- Decorative dots pattern -->
 				<div class="absolute top-8 right-8 grid grid-cols-3 gap-1.5 opacity-20">
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
 				</div>
 
 				<!-- Content -->
@@ -235,13 +235,13 @@ const truncatedDescription = truncateDescription(
 					</div>
 
 					<!-- Title -->
-					<h1 class="text-xl xl:text-2xl 2xl:text-3xl font-bold text-white leading-tight tracking-tight">
+					<h1 class="text-xl xl:text-2xl 2xl:text-3xl font-bold text-primary-content leading-tight tracking-tight">
 						{title}
 					</h1>
 
 					<!-- Description -->
 					{truncatedDescription && (
-						<p class="text-slate-400 text-sm xl:text-base leading-relaxed line-clamp-2">
+						<p class="text-secondary-content text-sm xl:text-base leading-relaxed line-clamp-2">
 							{truncatedDescription}
 						</p>
 					)}
@@ -250,16 +250,16 @@ const truncatedDescription = truncateDescription(
 					<div class="w-12 h-0.5 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
 
 					<!-- Meta info -->
-					<div class="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+					<div class="flex flex-wrap items-center gap-4 text-sm text-muted">
 						{author && (
 							<div class="flex items-center gap-2">
-								<div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold ring-2 ring-slate-800">
+								<div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold ring-2 ring-surface-card">
 									{author.charAt(0)}
 								</div>
-								<span class="font-medium text-slate-300">{author}</span>
+								<span class="font-medium text-primary-content">{author}</span>
 							</div>
 						)}
-						<div class="flex items-center gap-1.5 text-slate-400">
+						<div class="flex items-center gap-1.5 text-muted">
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 							</svg>

@@ -25,7 +25,12 @@ export function getSchema(): GraphQLSchema {
 	// Register domains that extend core entities
 	registerEpisodes(builder, { VideoRef, ShowRef });
 	registerChapters(builder, { VideoRef });
-	registerRelationships(builder, { VideoRef, ShowRef, PersonRef, TechnologyRef });
+	registerRelationships(builder, {
+		VideoRef,
+		ShowRef,
+		PersonRef,
+		TechnologyRef,
+	});
 
 	const schema = builder.toSubGraphSchema({
 		linkUrl: "https://specs.apollo.dev/federation/v2.6",

@@ -19,37 +19,35 @@ hooks: onEnter: devenv: {
 workspaces: bun: {}
 
 tasks: {
-	bun: {
-		dev: {
-			command: "bun"
-			args: ["run", "dev"]
+	dev: {
+		command: "bun"
+		args: ["run", "dev"]
 
-			workspaces: ["bun"]
+		workspaces: ["bun"]
 
-			inputs: [
-				"astro.config.mts",
-				"bun.lock",
-				"content/",
-				"package.json",
-				"public/",
-				"src/**"
-			]
-		}
+		inputs: [
+			"astro.config.mts",
+			"bun.lock",
+			"content/",
+			"package.json",
+			"public/",
+			"src/**",
+		]
+	}
 
-		build: {
-			command: "bun"
-			args: ["build"]
+	build: {
+		command: "bun"
+		args: ["build"]
 
-			workspaces: ["bun"]
+		workspaces: ["bun"]
 
-			inputs: [
-				"astro.config.mts",
-				"bun.lock",
-				"content/",
-				"package.json",
-				"public/",
-				"src/**"
-			]
-		}
+		inputs: [
+			"astro.config.mts",
+			"bun.lock",
+			"content/",
+			"package.json",
+			"public/",
+			"src/**",
+		]
 	}
 }

@@ -17,6 +17,8 @@ import {
 	ChatBubbleLeftRightIcon,
 } from "@heroicons/vue/24/outline";
 import { computed, onMounted, ref } from "vue";
+import NavItem from "./NavItem.vue";
+import type { NavItemData } from "./NavItem.vue";
 
 // Get the current path from the window location
 const currentPath = ref("");
@@ -119,7 +121,16 @@ const learnNavItems = computed(() => [
 			{
 				name: "Matrix",
 				href: "/technology/matrix",
-				current: isCurrentPath("/technology/matrix"),
+				current:
+					isCurrentPath("/technology/matrix") &&
+					!isCurrentPath("/technology/matrix/advanced"),
+				children: [
+					{
+						name: "Advanced",
+						href: "/technology/matrix/advanced",
+						current: isCurrentPath("/technology/matrix/advanced"),
+					},
+				],
 			},
 		],
 	},
@@ -191,6 +202,11 @@ const toggleMode = () => {
 		mode.value = "learn";
 	}
 	localStorage.setItem("sidebar-mode", mode.value);
+};
+
+const expandSidebar = () => {
+	isCollapsed.value = false;
+	localStorage.setItem("sidebar-collapsed", "false");
 };
 
 const currentNavItems = computed(() => {
@@ -296,73 +312,11 @@ const currentNavItems = computed(() => {
 						</li>
 						<!-- Navigation Item -->
 						<li v-else>
-							<a
-								:href="item.href"
-								:target="item.external ? '_blank' : undefined"
-								:rel="item.external ? 'noopener noreferrer' : undefined"
-								:class="[
-									'flex items-center text-sm font-medium rounded-xl transition-all duration-200',
-									'group relative border border-transparent w-full',
-									isCollapsed
-										? 'flex-col items-center justify-center text-center gap-0.5 p-2 text-[0.65rem]'
-										: 'px-3 py-2.5',
-									item.current
-										? 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary border-primary/20'
-										: 'text-secondary-content hover:bg-white/60 dark:hover:bg-gray-700/60 hover:text-primary',
-								]"
-								:aria-current="item.current ? 'page' : undefined"
-								:title="isCollapsed ? item.name : undefined"
-							>
-								<component
-									:is="item.icon"
-									:class="[
-										'flex-shrink-0 transition-colors',
-										isCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3',
-										item.current ? 'text-primary' : 'text-muted group-hover:text-primary',
-									]"
-								/>
-								<span
-									:class="[
-										'transition-opacity duration-200',
-										isCollapsed
-											? 'block leading-[1.05] text-center text-[0.6rem] tracking-tight max-w-[3.5rem]'
-											: '',
-									]"
-								>
-									{{ item.name }}
-								</span>
-								<!-- External link indicator -->
-								<svg
-									v-if="item.external && !isCollapsed"
-									class="w-3.5 h-3.5 ml-auto text-muted group-hover:text-primary"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-									aria-hidden="true"
-								>
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-								</svg>
-							</a>
-							<!-- Submenu items -->
-							<ul
-								v-if="item.children && item.children.length > 0 && !isCollapsed && item.current"
-								class="mt-1.5 mb-1.5 ml-2 mr-1 p-1.5 space-y-0.5 bg-white/30 dark:bg-white/5 backdrop-blur-sm rounded-lg border border-white/20 dark:border-white/10"
-							>
-								<li v-for="child in item.children" :key="child.href">
-									<a
-										:href="child.href"
-										:class="[
-											'flex items-center text-xs font-medium rounded-lg px-3 py-2 transition-all duration-200',
-											child.current
-												? 'bg-white dark:bg-white/10 text-primary'
-												: 'text-muted hover:bg-white/50 dark:hover:bg-white/5 hover:text-primary',
-										]"
-										:aria-current="child.current ? 'page' : undefined"
-									>
-										{{ child.name }}
-									</a>
-								</li>
-							</ul>
+							<NavItem
+								:item="item as NavItemData"
+								:isCollapsed="isCollapsed"
+								@expand="expandSidebar"
+							/>
 						</li>
 					</template>
 				</ul>
