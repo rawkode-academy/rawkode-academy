@@ -70,6 +70,7 @@ const shows = defineCollection({
 					subcategory: z.string().optional(),
 					explicit: z.boolean().default(false),
 					copyright: z.string().optional(),
+					artwork: z.string().url().optional(),
 				})
 				.optional(),
 		}),
