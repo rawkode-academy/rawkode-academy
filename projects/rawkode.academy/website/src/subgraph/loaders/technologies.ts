@@ -34,7 +34,6 @@ export async function listTechnologies(): Promise<TechnologyItem[]> {
 			...data,
 			icon: iconValue,
 			logo: iconValue,
-			categories: data.categories ?? [],
 			learningResources: data.learningResources ?? undefined,
 		} satisfies TechnologyItem;
 	});

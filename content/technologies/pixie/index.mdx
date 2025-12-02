@@ -1,23 +1,39 @@
 ---
-name: "Pixie"
-description: |
-  Pixie is an open-source observability platform for Kubernetes applications. It uses eBPF to automatically capture telemetry data (metrics, traces, logs, profiles) without requiring manual instrumentation. Pixie provides instant visibility into application behavior, allowing developers to quickly identify performance bottlenecks, troubleshoot errors, and understand system-wide interactions in real-time. It's particularly valuable for debugging and optimizing complex microservices architectures running on Kubernetes by offering out-of-the-box dashboards and a powerful query language (PxL) for exploring data.
+name: Pixie
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://pixie.dev/"
-documentation: "https://docs.pixie.dev/"
-license: "Apache-2.0"
-categories:
-  - "observability"
-  - "ebpf"
-  - "kubernetes"
-  - "troubleshooting"
-  - "apm"
-  - "distributed-tracing"
-status: "stable"
+website: 'https://pixie.dev/'
+documentation: 'https://docs.pixie.dev/'
+license: Apache-2.0
+status: stable
+category: Observability and Analysis
+subcategory: Observability
+cncf:
+  status: sandbox
+  accepted: '2021-06-22'
+  devStatsUrl: 'https://pixie.devstats.cncf.io/'
+  personas:
+    - Cluster Administrators
+    - Developers
+    - SREs
+  tags:
+    - eBPF
+    - observability
+    - profiling
+  useCase: '>'
+  releaseRate: weekly
+  integrations:
+    - OpenTelemetry
+    - Grafana
+community:
+  twitter: 'https://twitter.com/pixie_run'
+  youtube: 'https://www.youtube.com/channel/UCOMCDRvBVNIS0lCyOmst7eg'
+  slack: 'https://slackin.px.dev/'
+  blog: 'https://blog.px.dev/'
 ---
+Pixie is an open-source observability platform for Kubernetes applications. It uses eBPF to automatically capture telemetry data (metrics, traces, logs, profiles) without requiring manual instrumentation. Pixie provides instant visibility into application behavior, allowing developers to quickly identify performance bottlenecks, troubleshoot errors, and understand system-wide interactions in real-time. It's particularly valuable for debugging and optimizing complex microservices architectures running on Kubernetes by offering out-of-the-box dashboards and a powerful query language (PxL) for exploring data.
 
 Pixie is an open-source, Kubernetes-native observability platform that provides instant, automated telemetry data collection (metrics, traces, logs, and profiles) from your applications without requiring any code changes or manual instrumentation. It leverages eBPF technology to gather comprehensive data directly from the Linux kernel.
 

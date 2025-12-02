@@ -1,27 +1,50 @@
 ---
-name: "Falco"
-description: |
-  Falco is a cloud-native runtime security project. It's a behavioral activity monitor designed to detect anomalous activity and security threats within Kubernetes, containers, and the underlying host. Falco leverages system calls from the Linux kernel as its primary data source, allowing it to identify unexpected application behavior, policy violations, intrusions, and data exfiltration attempts in real-time. It provides valuable insights into application security and system integrity.
-  
-  Falco's value lies in its ability to provide deep visibility into runtime behavior without requiring code instrumentation. Its main use cases include detecting security breaches, identifying misconfigurations, monitoring compliance with security policies, auditing system activity, and troubleshooting application performance issues. It's highly configurable through a rules engine that can be tailored to specific environments and security needs.
+name: Falco
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://falco.org/"
-documentation: "https://falco.org/docs/"
-license: "Apache-2.0"
-categories:
-  - "security"
-  - "runtime-security"
-  - "ebpf"
-  - "kubernetes"
-  - "cncf"
-status: "stable"
-radar:
-  quadrant: security
-  ring: adopt
+website: 'https://falco.org/'
+documentation: 'https://falco.org/docs/'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: security
+  status: adopt
+category: Provisioning
+subcategory: Security & Compliance
+cncf:
+  status: graduated
+  accepted: '2018-10-10'
+  incubating: '2020-01-08'
+  graduated: '2024-02-29'
+  devStatsUrl: 'https://falco.devstats.cncf.io/'
+  personas:
+    - SREs
+    - Cloud Architects
+    - Platform Engineers
+    - DevOps Engineer
+    - DevOps practitioners
+    - DevSecOps practitioners
+  tags:
+    - '>-'
+  useCase: '>-'
+  businessUseCase: '>-'
+  releaseRate: '3 times per year (end of Jan, June, Sept)'
+  integrations:
+    - Kubernetes Audit Logs
+    - AWS Cloudtrail
+    - GitHub Audit Events
+    - and the 40+ outputs supported by Falcosidekick (e.g. Slack
+    - AWS Lambda
+    - etc)
+community:
+  twitter: 'https://twitter.com/falco_org'
+  slack: 'https://kubernetes.slack.com/messages/falco'
 ---
+Falco is a cloud-native runtime security project. It's a behavioral activity monitor designed to detect anomalous activity and security threats within Kubernetes, containers, and the underlying host. Falco leverages system calls from the Linux kernel as its primary data source, allowing it to identify unexpected application behavior, policy violations, intrusions, and data exfiltration attempts in real-time. It provides valuable insights into application security and system integrity.
+
+Falco's value lies in its ability to provide deep visibility into runtime behavior without requiring code instrumentation. Its main use cases include detecting security breaches, identifying misconfigurations, monitoring compliance with security policies, auditing system activity, and troubleshooting application performance issues. It's highly configurable through a rules engine that can be tailored to specific environments and security needs.
 
 Falco is the industry-standard for cloud-native runtime security, detecting unexpected application behavior and potential threats in real-time within Kubernetes, containers, and host systems. As a Cloud Native Computing Foundation (CNCF) incubating project, it's a powerful tool for enhancing the security posture of modern distributed environments.
 

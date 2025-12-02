@@ -1,22 +1,24 @@
 ---
-name: "DevSpace"
-description: |
-  DevSpace is an open-source developer tool for Kubernetes that allows you to develop, test, and debug your applications directly within your Kubernetes cluster. It eliminates the need for local development environments and long build-deploy-test cycles by providing hot reloading, automatic container restarts, and direct debugging capabilities in the cluster. This accelerates development and reduces the friction of working with containerized applications.
-  
-  DevSpace streamlines the Kubernetes development workflow, enabling developers to iterate rapidly on their code while working with the actual target environment. It supports features like automatic code synchronization, port forwarding, and integrated logging, which makes it easier to diagnose and resolve issues quickly. This is especially valuable for microservices architectures, where testing interactions between services can be complex.
+name: DevSpace
 logos:
   icon: true
   stacked: true
-website: "https://devspace.sh/"
-documentation: "https://devspace.sh/docs/getting-started/introduction"
-license: "Apache-2.0"
-categories:
-  - "kubernetes"
-  - "development-environment"
-  - "ci-cd"
-  - "developer-experience"
-status: "stable"
+website: 'https://devspace.sh/'
+documentation: 'https://devspace.sh/docs/getting-started/introduction'
+license: Apache-2.0
+status: stable
+category: App Definition and Development
+subcategory: Application Definition & Image Build
+cncf:
+  status: sandbox
+  accepted: '2022-12-13'
+community:
+  twitter: 'https://twitter.com/DevSpace'
+  slack: 'https://kubernetes.slack.com/messages/devspace'
 ---
+DevSpace is an open-source developer tool for Kubernetes that allows you to develop, test, and debug your applications directly within your Kubernetes cluster. It eliminates the need for local development environments and long build-deploy-test cycles by providing hot reloading, automatic container restarts, and direct debugging capabilities in the cluster. This accelerates development and reduces the friction of working with containerized applications.
+
+DevSpace streamlines the Kubernetes development workflow, enabling developers to iterate rapidly on their code while working with the actual target environment. It supports features like automatic code synchronization, port forwarding, and integrated logging, which makes it easier to diagnose and resolve issues quickly. This is especially valuable for microservices architectures, where testing interactions between services can be complex.
 
 DevSpace is a command-line tool that empowers developers to build, test, and debug cloud-native applications directly inside their Kubernetes clusters. It aims to significantly reduce the development feedback loop and simplify the complexities of Kubernetes-native development.
 

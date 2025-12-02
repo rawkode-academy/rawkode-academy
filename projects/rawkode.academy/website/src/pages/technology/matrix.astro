@@ -5,6 +5,7 @@ import { getCollection } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 
 // Helper to normalize technology references from videos
 function normalizeTechnologyRef(value: unknown): string | undefined {
@@ -34,30 +35,47 @@ for (const video of allVideos) {
 }
 
 // Types
-type Quadrant = "plumbing" | "platform" | "observability" | "security";
-type PipelineStage = "skip" | "watch" | "explore" | "learn" | "adopt" | "advocate";
-type Ring = PipelineStage;
+type Grouping = "plumbing" | "platform" | "observability" | "security";
+type PipelineStage =
+	| "skip"
+	| "watch"
+	| "explore"
+	| "learn"
+	| "adopt"
+	| "advocate";
 type Confidence = "gut" | "some-experience" | "deep-experience";
 type Trajectory = "rising" | "stable" | "falling";
 
-const quadrants: Quadrant[] = ["plumbing", "platform", "observability", "security"];
-const pipelineStages: PipelineStage[] = ["skip", "watch", "explore", "learn", "adopt", "advocate"];
+const groupings: Grouping[] = [
+	"plumbing",
+	"platform",
+	"observability",
+	"security",
+];
+const pipelineStages: PipelineStage[] = [
+	"skip",
+	"watch",
+	"explore",
+	"learn",
+	"adopt",
+	"advocate",
+];
 
-const quadrantLabels: Record<Quadrant, string> = {
+const groupingLabels: Record<Grouping, string> = {
 	plumbing: "Plumbing",
 	platform: "Platform",
 	observability: "Observability",
 	security: "Security",
 };
 
-const quadrantDescriptions: Record<Quadrant, string> = {
+const groupingDescriptions: Record<Grouping, string> = {
 	plumbing: "The invisible infrastructure",
 	platform: "Building blocks for developers",
 	observability: "Understanding what's happening",
 	security: "Keeping things safe",
 };
 
-const quadrantIcons: Record<Quadrant, string> = {
+const groupingIcons: Record<Grouping, string> = {
 	plumbing: "🔧",
 	platform: "🏗️",
 	observability: "📊",
@@ -65,21 +83,21 @@ const quadrantIcons: Record<Quadrant, string> = {
 };
 
 const stageLabels: Record<PipelineStage, string> = {
-	"skip": "Skip",
-	"watch": "Watch",
-	"explore": "Explore",
-	"learn": "Learn",
-	"adopt": "Adopt",
-	"advocate": "Advocate",
+	skip: "Skip",
+	watch: "Watch",
+	explore: "Explore",
+	learn: "Learn",
+	adopt: "Adopt",
+	advocate: "Advocate",
 };
 
 const stageDescriptions: Record<PipelineStage, string> = {
-	"skip": "Not for me",
-	"watch": "On my radar",
-	"explore": "Worth a look",
-	"learn": "Investing time",
-	"adopt": "Production ready",
-	"advocate": "Championing",
+	skip: "Not for me",
+	watch: "On my radar",
+	explore: "Worth a look",
+	learn: "Investing time",
+	adopt: "Production ready",
+	advocate: "Championing",
 };
 
 const trajectoryEmoji: Record<Trajectory, string> = {
@@ -91,41 +109,42 @@ const trajectoryEmoji: Record<Trajectory, string> = {
 // Get all technologies with matrix data
 const allTechnologies = await getCollection("technologies");
 const matrixTechnologies = allTechnologies
-	.filter((tech) => tech.data.radar?.ring && tech.data.radar?.quadrant)
+	.filter((tech) => tech.data.matrix?.status && tech.data.matrix?.grouping)
 	.map((tech) => ({
 		id: tech.id,
 		name: tech.data.name,
-		description: tech.data.description,
-		quadrant: tech.data.radar!.quadrant as Quadrant,
-		ring: tech.data.radar!.ring as Ring,
+		grouping: tech.data.matrix!.grouping as Grouping,
+		status: tech.data.matrix!.status as PipelineStage,
 		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
-		confidence: tech.data.radar!.confidence as Confidence | undefined,
-		trajectory: tech.data.radar!.trajectory as Trajectory | undefined,
+		confidence: tech.data.matrix!.confidence as Confidence | undefined,
+		trajectory: tech.data.matrix!.trajectory as Trajectory | undefined,
 		// Card back fields
-		why: tech.data.radar!.why,
-		firstUsed: tech.data.radar!.firstUsed,
-		lastUsed: tech.data.radar!.lastUsed,
-		makesMeFeel: tech.data.radar!.makesMeFeel,
-		spicyTake: tech.data.radar!.spicyTake,
+		why: tech.data.matrix!.why,
+		firstUsed: tech.data.matrix!.firstUsed,
+		lastUsed: tech.data.matrix!.lastUsed,
+		makesMeFeel: tech.data.matrix!.makesMeFeel,
+		spicyTake: tech.data.matrix!.spicyTake,
 		videoCount: videoCountsByTech.get(tech.id) || 0,
 		articleCount: 0, // TODO: Wire up when articles have technology links
 	}));
 
-// Build pipeline lanes (by quadrant)
-const pipelineLanes = quadrants.map((quadrant) => ({
-	quadrant,
-	label: quadrantLabels[quadrant],
-	description: quadrantDescriptions[quadrant],
-	icon: quadrantIcons[quadrant],
+// Build pipeline lanes (by grouping)
+const pipelineLanes = groupings.map((grouping) => ({
+	grouping,
+	label: groupingLabels[grouping],
+	description: groupingDescriptions[grouping],
+	icon: groupingIcons[grouping],
 	stages: Object.fromEntries(
 		pipelineStages.map((stage) => [
 			stage,
-			matrixTechnologies.filter((t) => t.quadrant === quadrant && t.ring === stage),
-		])
+			matrixTechnologies.filter(
+				(t) => t.grouping === grouping && t.status === stage,
+			),
+		]),
 	) as Record<PipelineStage, typeof matrixTechnologies>,
 }));
 
-// Check for legacy ring values and map them (only truly legacy values)
+// Check for legacy status values and map them (only truly legacy values)
 const legacyMapping: Record<string, PipelineStage> = {
 	hold: "skip",
 	assess: "watch",
@@ -136,7 +155,7 @@ const legacyMapping: Record<string, PipelineStage> = {
 pipelineLanes.forEach((lane) => {
 	Object.entries(legacyMapping).forEach(([legacy, modern]) => {
 		const legacyTech = matrixTechnologies.filter(
-			(t) => t.quadrant === lane.quadrant && t.ring === legacy
+			(t) => t.grouping === lane.grouping && t.status === legacy,
 		);
 		if (legacyTech.length > 0) {
 			lane.stages[modern] = [...lane.stages[modern], ...legacyTech];
@@ -148,9 +167,48 @@ pipelineLanes.forEach((lane) => {
 const stageStats = Object.fromEntries(
 	pipelineStages.map((stage) => [
 		stage,
-		matrixTechnologies.filter((t) => t.ring === stage).length,
-	])
+		matrixTechnologies.filter((t) => t.status === stage).length,
+	]),
 ) as Record<PipelineStage, number>;
+
+// Graveyard: technologies with graveyard status OR deprecated/abandoned status
+type TechnologyStatus =
+	| "alpha"
+	| "beta"
+	| "stable"
+	| "preview"
+	| "superseded"
+	| "deprecated"
+	| "abandoned";
+const graveyardTechnologies = allTechnologies
+	.filter(
+		(tech) =>
+			tech.data.matrix?.status === "graveyard" ||
+			tech.data.status === "deprecated" ||
+			tech.data.status === "abandoned",
+	)
+	.map((tech) => ({
+		id: tech.id,
+		name: tech.data.name,
+		status: tech.data.status as TechnologyStatus,
+		grouping: tech.data.matrix?.grouping as Grouping | undefined,
+		matrixStatus: tech.data.matrix?.status,
+		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
+		confidence: tech.data.matrix?.confidence as Confidence | undefined,
+		trajectory: tech.data.matrix?.trajectory as Trajectory | undefined,
+		why: tech.data.matrix?.why,
+		firstUsed: tech.data.matrix?.firstUsed,
+		lastUsed: tech.data.matrix?.lastUsed,
+		makesMeFeel: tech.data.matrix?.makesMeFeel,
+		spicyTake: tech.data.matrix?.spicyTake,
+		videoCount: videoCountsByTech.get(tech.id) || 0,
+		articleCount: 0,
+	}));
+
+const techStatusLabels: Record<string, string> = {
+	deprecated: "Deprecated",
+	abandoned: "Abandoned",
+};
 ---
 
 <Page
@@ -178,20 +236,44 @@ const stageStats = Object.fromEntries(
 					From first glance to full advocacy.
 				</p>
 
-				<!-- Mini pipeline preview -->
-				<div class="hero-pipeline-preview">
+				<!-- Mini pipeline preview / Filter buttons -->
+				<div class="hero-pipeline-preview" role="group" aria-label="Filter by stage">
 					{pipelineStages.map((stage) => (
-						<div class={`preview-stage preview-${stage}`}>
+						<button
+							type="button"
+							class={`preview-stage preview-${stage}`}
+							data-filter={stage}
+							aria-pressed="false"
+						>
 							<span class="preview-count">{stageStats[stage]}</span>
 							<span class="preview-label">{stageLabels[stage]}</span>
-						</div>
+						</button>
 					))}
+					<button
+						type="button"
+						class="preview-stage preview-graveyard"
+						data-filter="graveyard"
+						aria-pressed="false"
+					>
+						<span class="preview-count">{graveyardTechnologies.length}</span>
+						<span class="preview-label">Graveyard</span>
+					</button>
 				</div>
 			</div>
 		</Container>
 	</section>
 
 	<Container size="xl" padding="lg">
+		<!-- Matrix Updates CTA -->
+		<NewsletterCTA
+			server:defer
+			class="mb-8"
+			audience="matrix"
+			badge="Matrix updates in your inbox"
+			headline="Track my technology journey"
+			subtitle="Get notified when I move technologies through the matrix—new discoveries, changed opinions, and spicy takes."
+		/>
+
 		<div class="matrix-content">
 
 			<!-- Pipeline Header -->
@@ -213,7 +295,7 @@ const stageStats = Object.fromEntries(
 			<!-- Pipeline Lanes -->
 			<div class="pipeline-lanes">
 				{pipelineLanes.map((lane, laneIdx) => (
-					<div class="lane-wrapper" style={`--lane-index: ${laneIdx}`} data-lane={lane.quadrant}>
+					<div class="lane-wrapper" style={`--lane-index: ${laneIdx}`} data-lane={lane.grouping}>
 						<div class="lane-tabs">
 							<div class="lane-tab">
 								<span class="lane-icon">{lane.icon}</span>
@@ -237,9 +319,8 @@ const stageStats = Object.fromEntries(
 														class={`tech-icon chip-${stage}`}
 														data-name={tech.name}
 														data-id={tech.id}
-														data-description={tech.description}
-														data-ring={tech.ring}
-														data-quadrant={tech.quadrant}
+														data-status={tech.status}
+														data-grouping={tech.grouping}
 														data-why={tech.why || ""}
 														data-first-used={tech.firstUsed || ""}
 														data-last-used={tech.lastUsed || ""}
@@ -271,51 +352,65 @@ const stageStats = Object.fromEntries(
 								))}
 							</div>
 						</div>
-						<!-- Card Back (slides down on hover) -->
+						<!-- Card Back (slides down on hover) - Playing Card Style -->
 						<div class="card-back" aria-hidden="true">
-							<div class="card-back-content">
-								<div class="card-back-header">
-									<div class="card-back-identity">
-										<img class="card-back-icon" src="" alt="" />
-										<div class="card-back-titles">
-											<h3 class="card-back-name"></h3>
-											<span class="card-back-position"></span>
+							<div class="playing-card">
+								<!-- Card Inner Frame -->
+								<div class="card-frame">
+									<!-- Top Section: Icon + Name -->
+									<div class="card-top">
+										<div class="card-identity">
+											<img class="card-back-icon" src="" alt="" />
+											<div class="card-titles">
+												<h3 class="card-back-name"></h3>
+												<span class="card-back-position"></span>
+											</div>
+										</div>
+										<span class="card-emoji"></span>
+									</div>
+
+									<!-- Center: The Why -->
+									<div class="card-center">
+										<p class="card-back-why"></p>
+									</div>
+
+									<!-- Stats Strip -->
+									<div class="card-stats-strip">
+										<div class="card-stat">
+											<span class="stat-value stat-videos">0</span>
+											<span class="stat-label">Videos</span>
+										</div>
+										<div class="card-stat">
+											<span class="stat-value stat-articles">0</span>
+											<span class="stat-label">Articles</span>
+										</div>
+										<div class="card-stat">
+											<span class="stat-value stat-first-used">—</span>
+											<span class="stat-label">First Used</span>
+										</div>
+										<div class="card-stat">
+											<span class="stat-value stat-last-used">—</span>
+											<span class="stat-label">Last Used</span>
+										</div>
+										<div class="card-stat">
+											<span class="stat-value stat-confidence">—</span>
+											<span class="stat-label">Confidence</span>
 										</div>
 									</div>
-									<span class="card-back-emoji"></span>
-								</div>
-								<p class="card-back-why"></p>
-								<div class="card-back-stats">
-									<div class="stat">
-										<span class="stat-value stat-videos">0</span>
-										<span class="stat-label">Videos</span>
+
+									<!-- Spicy Take -->
+									<div class="card-back-spicy">
+										<span class="spicy-icon">🌶️</span>
+										<span class="spicy-take"></span>
 									</div>
-									<div class="stat">
-										<span class="stat-value stat-articles">0</span>
-										<span class="stat-label">Articles</span>
-									</div>
-									<div class="stat">
-										<span class="stat-value stat-first-used">—</span>
-										<span class="stat-label">First Used</span>
-									</div>
-									<div class="stat">
-										<span class="stat-value stat-last-used">—</span>
-										<span class="stat-label">Last Used</span>
-									</div>
-									<div class="stat">
-										<span class="stat-value stat-confidence">—</span>
-										<span class="stat-label">Confidence</span>
-									</div>
-								</div>
-								<div class="card-back-spicy">
-									<span class="spicy-icon">🌶️</span>
-									<span class="spicy-take"></span>
-								</div>
-								<div class="card-back-cta">
-									<span>View Details</span>
-									<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-									</svg>
+
+									<!-- Bottom CTA -->
+									<a class="card-cta-link" href="">
+										<span>View Details</span>
+										<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+										</svg>
+									</a>
 								</div>
 							</div>
 						</div>
@@ -323,6 +418,54 @@ const stageStats = Object.fromEntries(
 				))}
 			</div>
 
+			<!-- Graveyard Section -->
+			{graveyardTechnologies.length > 0 && (
+				<div class="graveyard-section">
+					<div class="graveyard-header">
+						<div class="graveyard-title-group">
+							<span class="graveyard-icon">🪦</span>
+							<h2 class="graveyard-title">Graveyard</h2>
+						</div>
+						<p class="graveyard-subtitle text-muted">Deprecated, abandoned, or burned me</p>
+					</div>
+					<div class="graveyard-grid glass-card">
+						{graveyardTechnologies.map((tech) => (
+							<a
+								href={`/technology/${tech.id}`}
+								class="graveyard-item"
+								data-name={tech.name}
+								data-id={tech.id}
+								data-status={tech.matrixStatus || ""}
+								data-grouping={tech.grouping || ""}
+								data-why={tech.why || ""}
+								data-first-used={tech.firstUsed || ""}
+								data-last-used={tech.lastUsed || ""}
+								data-makes-me-feel={tech.makesMeFeel || ""}
+								data-spicy-take={tech.spicyTake || ""}
+								data-video-count={tech.videoCount}
+								data-article-count={tech.articleCount}
+								data-confidence={tech.confidence || ""}
+								data-trajectory={tech.trajectory || ""}
+								data-icon={tech.icon || ""}
+							>
+								<div class="graveyard-icon-wrapper">
+									{tech.icon ? (
+										<img src={tech.icon} alt={tech.name} class="graveyard-img" loading="lazy" />
+									) : (
+										<span class="graveyard-initial">{tech.name[0]}</span>
+									)}
+								</div>
+								<div class="graveyard-info">
+									<span class="graveyard-name">{tech.name}</span>
+									<span class={`graveyard-status status-${tech.status}`}>
+										{techStatusLabels[tech.status] || tech.status}
+									</span>
+								</div>
+							</a>
+						))}
+					</div>
+				</div>
+			)}
 
 		</div>
 	</Container>
@@ -461,11 +604,56 @@ const stageStats = Object.fromEntries(
 	html.dark .preview-adopt { background: rgba(34, 197, 94, 0.2); color: rgb(134, 239, 172); }
 	html.dark .preview-advocate { background: rgb(var(--brand-primary) / 0.25); color: rgb(var(--brand-secondary)); }
 
+	/* Graveyard preview button */
+	.preview-graveyard { background: rgba(107, 114, 128, 0.15); color: rgb(107, 114, 128); }
+	html.dark .preview-graveyard { background: rgba(107, 114, 128, 0.25); color: rgb(156, 163, 175); }
+
+	/* Filter button interactivity */
+	.preview-stage {
+		cursor: pointer;
+		font-family: inherit;
+	}
+
+	.preview-stage[aria-pressed="true"] {
+		transform: translateY(-2px);
+		box-shadow: 0 0 0 2px currentColor;
+	}
+
+	.preview-stage:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
 	/* ===== MATRIX CONTENT ===== */
 	.matrix-content {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
+	}
+
+	/* Filter states */
+	.matrix-content[data-filter="graveyard"] .pipeline-header,
+	.matrix-content[data-filter="graveyard"] .pipeline-lanes {
+		display: none;
+	}
+
+	.matrix-content:not([data-filter="graveyard"])[data-filter] .graveyard-section {
+		display: none;
+	}
+
+	/* Highlight filtered stage cells */
+	.matrix-content[data-filter] .lane-cell {
+		opacity: 0.3;
+		transition: opacity 0.2s ease;
+	}
+
+	.matrix-content[data-filter="skip"] .lane-cell.cell-skip,
+	.matrix-content[data-filter="watch"] .lane-cell.cell-watch,
+	.matrix-content[data-filter="explore"] .lane-cell.cell-explore,
+	.matrix-content[data-filter="learn"] .lane-cell.cell-learn,
+	.matrix-content[data-filter="adopt"] .lane-cell.cell-adopt,
+	.matrix-content[data-filter="advocate"] .lane-cell.cell-advocate {
+		opacity: 1;
 	}
 
 	/* ===== PIPELINE HEADER ===== */
@@ -919,139 +1107,213 @@ const stageStats = Object.fromEntries(
 		}
 	}
 
-	/* ===== CARD BACK ===== */
+	/* ===== PLAYING CARD ===== */
 	.card-back {
 		max-height: 0;
 		overflow: hidden;
 		opacity: 0;
-		transition: max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease;
+		transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin 0.3s ease;
 		margin-top: 0;
 	}
 
 	.card-back.visible {
-		max-height: 500px;
+		max-height: 600px;
 		opacity: 1;
-		margin-top: 0.75rem;
+		margin-top: 1rem;
 	}
 
-	.card-back-content {
-		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
+	/* Outer card wrapper - cream/off-white like real playing cards */
+	.playing-card {
+		background: #fffef5;
 		border-radius: 16px;
+		padding: 8px;
+		box-shadow:
+			0 1px 2px rgba(0, 0, 0, 0.06),
+			0 4px 12px rgba(0, 0, 0, 0.08),
+			0 12px 32px rgba(0, 0, 0, 0.12);
+	}
+
+	html.dark .playing-card {
+		background: #1c2333;
+		box-shadow:
+			0 1px 2px rgba(0, 0, 0, 0.2),
+			0 4px 12px rgba(0, 0, 0, 0.3),
+			0 12px 32px rgba(0, 0, 0, 0.4);
+	}
+
+	/* Inner frame with border - like the printed area of a card */
+	.card-frame {
+		background: white;
+		border: 2px solid #e5e0d5;
+		border-radius: 12px;
 		padding: 1.25rem;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 	}
 
-	html.dark .card-back-content {
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	html.dark .card-frame {
+		background: #0d1117;
+		border-color: #30363d;
 	}
 
-	.card-back-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		gap: 1rem;
-	}
-
-	.card-back-identity {
+	/* Card Top - Identity section */
+	.card-top {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid #e5e0d5;
+	}
+
+	html.dark .card-top {
+		border-bottom-color: #30363d;
+	}
+
+	.card-identity {
+		display: flex;
+		align-items: center;
+		gap: 0.875rem;
 	}
 
 	.card-back-icon {
-		width: 48px;
-		height: 48px;
+		width: 52px;
+		height: 52px;
 		object-fit: contain;
 		border-radius: 10px;
-		background: var(--surface-card-muted);
+		background: #fafaf8;
 		padding: 6px;
+		border: 1px solid #e5e0d5;
 	}
 
-	.card-back-titles {
+	html.dark .card-back-icon {
+		background: #161b22;
+		border-color: #30363d;
+	}
+
+	.card-titles {
 		display: flex;
 		flex-direction: column;
-		gap: 0.125rem;
+		gap: 2px;
 	}
 
 	.card-back-name {
-		font-size: 1.125rem;
+		font-size: 1.25rem;
 		font-weight: 700;
-		color: var(--text-primary-content);
+		color: #1a1a1a;
 		margin: 0;
+	}
+
+	html.dark .card-back-name {
+		color: #e6edf3;
 	}
 
 	.card-back-position {
-		font-size: 0.75rem;
-		font-weight: 600;
+		font-size: 0.7rem;
+		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.05em;
 	}
 
-	.card-back-position.ring-skip { color: rgb(239, 68, 68); }
-	.card-back-position.ring-watch { color: rgb(249, 115, 22); }
-	.card-back-position.ring-explore { color: rgb(202, 138, 4); }
-	.card-back-position.ring-learn { color: rgb(59, 130, 246); }
-	.card-back-position.ring-adopt { color: rgb(34, 197, 94); }
-	.card-back-position.ring-advocate { color: rgb(var(--brand-primary)); }
+	.card-back-position.status-skip { color: #cf222e; }
+	.card-back-position.status-watch { color: #bf5700; }
+	.card-back-position.status-explore { color: #9a6700; }
+	.card-back-position.status-learn { color: #0969da; }
+	.card-back-position.status-adopt { color: #1a7f37; }
+	.card-back-position.status-advocate { color: rgb(var(--brand-primary)); }
 
-	.card-back-emoji {
-		font-size: 2rem;
+	/* Large emoji on the right */
+	.card-emoji {
+		font-size: 2.75rem;
 		line-height: 1;
 	}
 
+	/* Card Center - The Why */
+	.card-center {
+		min-height: 32px;
+	}
+
 	.card-back-why {
-		font-size: 0.9rem;
-		line-height: 1.5;
-		color: var(--text-secondary-content);
+		font-size: 0.925rem;
+		line-height: 1.55;
+		color: #57606a;
 		margin: 0;
 	}
 
-	.card-back-stats {
-		display: flex;
-		gap: 1rem;
-		flex-wrap: wrap;
+	html.dark .card-back-why {
+		color: #8b949e;
 	}
 
-	.stat {
+	/* Stats Strip */
+	.card-stats-strip {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		padding: 0.875rem;
+		background: #fafaf8;
+		border-radius: 10px;
+		border: 1px solid #e5e0d5;
+	}
+
+	html.dark .card-stats-strip {
+		background: #161b22;
+		border-color: #30363d;
+	}
+
+	.card-stat {
+		flex: 1;
+		min-width: 65px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 0.5rem 0.75rem;
-		background: var(--surface-card-muted);
-		border-radius: 10px;
-		min-width: 70px;
+		padding: 0.5rem 0.625rem;
+		background: white;
+		border-radius: 8px;
+		border: 1px solid #e5e0d5;
 	}
 
-	.stat-value {
+	html.dark .card-stat {
+		background: #0d1117;
+		border-color: #30363d;
+	}
+
+	.card-stat .stat-value {
 		font-size: 1rem;
-		font-weight: 700;
-		color: var(--text-primary-content);
+		font-weight: 800;
+		color: #1a1a1a;
 	}
 
-	.stat-label {
-		font-size: 0.6rem;
+	html.dark .card-stat .stat-value {
+		color: #e6edf3;
+	}
+
+	.card-stat .stat-label {
+		font-size: 0.55rem;
 		font-weight: 600;
 		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: var(--text-muted);
+		letter-spacing: 0.03em;
+		color: #8b949e;
 	}
 
+	/* Spicy Take */
 	.card-back-spicy {
 		display: none;
 		align-items: flex-start;
 		gap: 0.5rem;
-		padding: 0.75rem;
-		background: rgba(239, 68, 68, 0.08);
+		padding: 0.75rem 1rem;
+		background: #fff5f5;
 		border-radius: 10px;
-		border: 1px solid rgba(239, 68, 68, 0.2);
+		border: 1px solid #fecdd3;
 	}
 
 	.card-back-spicy.has-take {
 		display: flex;
+	}
+
+	html.dark .card-back-spicy {
+		background: rgba(248, 113, 113, 0.1);
+		border-color: rgba(248, 113, 113, 0.3);
 	}
 
 	.spicy-icon {
@@ -1060,35 +1322,222 @@ const stageStats = Object.fromEntries(
 	}
 
 	.spicy-take {
-		font-size: 0.85rem;
+		font-size: 0.875rem;
 		font-style: italic;
-		color: var(--text-secondary-content);
-		line-height: 1.4;
+		color: #be123c;
+		line-height: 1.45;
 	}
 
-	.card-back-cta {
+	html.dark .spicy-take {
+		color: #fda4af;
+	}
+
+	/* Card CTA */
+	.card-cta-link {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		padding: 0.625rem 1rem;
-		background: rgb(var(--brand-primary));
+		padding: 0.875rem 1.25rem;
+		background: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%);
 		color: white;
 		border-radius: 10px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.card-cta-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgb(var(--brand-primary) / 0.3);
+	}
+
+	.card-cta-link svg {
+		transition: transform 0.2s ease;
+	}
+
+	.card-cta-link:hover svg {
+		transform: translateX(3px);
+	}
+
+	/* ===== GRAVEYARD SECTION ===== */
+	.graveyard-section {
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid var(--surface-border);
+	}
+
+	.graveyard-header {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin-bottom: 1rem;
+	}
+
+	.graveyard-title-group {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.graveyard-icon {
+		font-size: 1.5rem;
+	}
+
+	.graveyard-title {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: rgb(107, 114, 128);
+		margin: 0;
+	}
+
+	html.dark .graveyard-title {
+		color: rgb(156, 163, 175);
+	}
+
+	.graveyard-subtitle {
+		font-size: 0.85rem;
+		margin: 0;
+		padding-left: 2.25rem;
+	}
+
+	.graveyard-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		padding: 1rem;
+		background: rgba(107, 114, 128, 0.05);
+	}
+
+	html.dark .graveyard-grid {
+		background: rgba(55, 65, 81, 0.3);
+	}
+
+	.graveyard-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 10px;
+		text-decoration: none;
+		transition: all 0.2s ease;
+		opacity: 0.7;
+	}
+
+	.graveyard-item:hover {
+		opacity: 1;
+		transform: translateY(-2px);
+		border-color: rgb(107, 114, 128);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	}
+
+	html.dark .graveyard-item:hover {
+		border-color: rgb(156, 163, 175);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	}
+
+	.graveyard-icon-wrapper {
+		width: 28px;
+		height: 28px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		filter: grayscale(70%);
+		transition: filter 0.2s ease;
+	}
+
+	.graveyard-item:hover .graveyard-icon-wrapper {
+		filter: grayscale(30%);
+	}
+
+	.graveyard-img {
+		width: 24px;
+		height: 24px;
+		object-fit: contain;
+		border-radius: 4px;
+	}
+
+	.graveyard-initial {
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--surface-card-muted);
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 700;
+		color: rgb(107, 114, 128);
+	}
+
+	.graveyard-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.graveyard-name {
 		font-size: 0.8rem;
+		font-weight: 600;
+		color: rgb(75, 85, 99);
+		line-height: 1.2;
+	}
+
+	html.dark .graveyard-name {
+		color: rgb(209, 213, 219);
+	}
+
+	.graveyard-status {
+		font-size: 0.6rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		transition: background 0.2s ease;
 	}
 
-	.card-back-cta:hover {
-		background: rgb(var(--brand-secondary));
+	.graveyard-status.status-deprecated {
+		color: rgb(234, 179, 8);
+	}
+
+	.graveyard-status.status-abandoned {
+		color: rgb(239, 68, 68);
+	}
+
+	html.dark .graveyard-status.status-deprecated {
+		color: rgb(253, 224, 71);
+	}
+
+	html.dark .graveyard-status.status-abandoned {
+		color: rgb(252, 165, 165);
+	}
+
+	@media (max-width: 768px) {
+		.graveyard-section {
+			margin-top: 2rem;
+			padding-top: 1.5rem;
+		}
+
+		.graveyard-grid {
+			gap: 0.5rem;
+			padding: 0.75rem;
+		}
+
+		.graveyard-item {
+			padding: 0.375rem 0.5rem;
+		}
+
+		.graveyard-name {
+			font-size: 0.75rem;
+		}
 	}
 </style>
 
 <script>
-	const ringLabels: Record<string, string> = {
+	const statusLabels: Record<string, string> = {
 		"skip": "Skip",
 		"watch": "Watch",
 		"explore": "Explore",
@@ -1103,7 +1552,7 @@ const stageStats = Object.fromEntries(
 		"deep-experience": "Deep XP",
 	};
 
-	const quadrantLabels: Record<string, string> = {
+	const groupingLabels: Record<string, string> = {
 		"plumbing": "Plumbing",
 		"platform": "Platform",
 		"observability": "Observability",
@@ -1119,6 +1568,32 @@ const stageStats = Object.fromEntries(
 		return `${months[parseInt(month, 10) - 1]} ${year}`;
 	}
 
+	// ===== FILTER LOGIC =====
+	const matrixContent = document.querySelector('.matrix-content');
+	const filterButtons = document.querySelectorAll('.preview-stage[data-filter]');
+	let activeFilter: string | null = null;
+
+	filterButtons.forEach(button => {
+		button.addEventListener('click', () => {
+			const filter = button.getAttribute('data-filter');
+
+			if (activeFilter === filter) {
+				// Toggle off - clear filter
+				activeFilter = null;
+				matrixContent?.removeAttribute('data-filter');
+				filterButtons.forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+			} else {
+				// Set new filter
+				activeFilter = filter;
+				matrixContent?.setAttribute('data-filter', filter || '');
+				filterButtons.forEach(btn => {
+					btn.setAttribute('aria-pressed', btn.getAttribute('data-filter') === filter ? 'true' : 'false');
+				});
+			}
+		});
+	});
+
+	// ===== CARD BACK HOVER LOGIC =====
 	let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 	let showTimeout: ReturnType<typeof setTimeout> | null = null;
 	let currentIcon: Element | null = null;
@@ -1133,7 +1608,6 @@ const stageStats = Object.fromEntries(
 		const cardIcon = cardBack.querySelector('.card-back-icon') as HTMLImageElement;
 		const cardName = cardBack.querySelector('.card-back-name');
 		const cardPosition = cardBack.querySelector('.card-back-position');
-		const cardEmoji = cardBack.querySelector('.card-back-emoji');
 		const cardWhy = cardBack.querySelector('.card-back-why');
 		const statVideos = cardBack.querySelector('.stat-videos');
 		const statArticles = cardBack.querySelector('.stat-articles');
@@ -1142,6 +1616,8 @@ const stageStats = Object.fromEntries(
 		const statConfidence = cardBack.querySelector('.stat-confidence');
 		const spicyContainer = cardBack.querySelector('.card-back-spicy');
 		const spicyTake = cardBack.querySelector('.spicy-take');
+		const cardEmoji = cardBack.querySelector('.card-emoji');
+		const ctaLink = cardBack.querySelector('.card-cta-link') as HTMLAnchorElement;
 
 		function populateCardBack(icon: Element) {
 			if (hideTimeout) {
@@ -1151,9 +1627,10 @@ const stageStats = Object.fromEntries(
 
 			currentIcon = icon;
 
+			const id = icon.getAttribute('data-id') || "";
 			const name = icon.getAttribute('data-name') || "";
-			const ring = icon.getAttribute('data-ring') || "";
-			const quadrant = icon.getAttribute('data-quadrant') || "";
+			const status = icon.getAttribute('data-status') || "";
+			const grouping = icon.getAttribute('data-grouping') || "";
 			const why = icon.getAttribute('data-why') || "";
 			const firstUsed = icon.getAttribute('data-first-used') || "";
 			const lastUsed = icon.getAttribute('data-last-used') || "";
@@ -1171,10 +1648,15 @@ const stageStats = Object.fromEntries(
 			}
 			if (cardName) cardName.textContent = name;
 			if (cardPosition) {
-				cardPosition.textContent = `${ringLabels[ring] || ring} · ${quadrantLabels[quadrant] || quadrant}`;
-				cardPosition.className = `card-back-position ring-${ring}`;
+				cardPosition.textContent = `${statusLabels[status] || status} · ${groupingLabels[grouping] || grouping}`;
+				cardPosition.className = `card-back-position status-${status}`;
 			}
-			if (cardEmoji) cardEmoji.textContent = makesMeFeel || "";
+
+			// Populate emoji (large on the right side)
+			if (cardEmoji) {
+				cardEmoji.textContent = makesMeFeel || "🎯";
+			}
+
 			if (cardWhy) cardWhy.textContent = why || "No detailed notes yet.";
 			if (statVideos) statVideos.textContent = videoCount;
 			if (statArticles) statArticles.textContent = articleCount;
@@ -1189,6 +1671,11 @@ const stageStats = Object.fromEntries(
 				} else {
 					spicyContainer.classList.remove('has-take');
 				}
+			}
+
+			// Update CTA link
+			if (ctaLink) {
+				ctaLink.href = `/technology/${id}`;
 			}
 
 			// Show

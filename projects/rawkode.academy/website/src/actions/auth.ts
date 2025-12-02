@@ -7,11 +7,9 @@ export const auth = {
 		input: z.object({
 			callbackURL: z.string().optional(),
 		}),
-		handler: async (input) => {
-			const callbackURL = new URL(
-				input.callbackURL || "/",
-				"https://rawkode.academy",
-			).toString();
+		handler: async (input, context) => {
+			const origin = new URL(context.request.url).origin;
+			const callbackURL = new URL(input.callbackURL || "/", origin).toString();
 
 			const url = getSignInUrl(callbackURL);
 			return { url };
@@ -44,9 +42,10 @@ export const auth = {
 		input: z.object({
 			callbackURL: z.string().optional(),
 		}),
-		handler: async (input) => {
+		handler: async (input, context) => {
+			const origin = new URL(context.request.url).origin;
 			const callbackURL = input.callbackURL
-				? new URL(input.callbackURL, "https://rawkode.academy").toString()
+				? new URL(input.callbackURL, origin).toString()
 				: undefined;
 
 			return { url: getSignInUrl(callbackURL) };

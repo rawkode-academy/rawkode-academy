@@ -1,18 +1,46 @@
 ---
-name: "zot"
-description: |
-  Zot is an OCI-native container registry for distributing container images and OCI artifacts.
+name: zot
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://zotregistry.dev/"
-source: "https://github.com/project-zot/zot"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-sandbox"
-status: "stable"
+website: 'https://zotregistry.dev/'
+source: 'https://github.com/project-zot/zot'
+license: Apache-2.0
+status: stable
+category: Provisioning
+subcategory: Security & Compliance
+cncf:
+  status: sandbox
+  accepted: '2022-12-13'
+  devStatsUrl: 'https://zot.devstats.cncf.io/'
+  personas:
+    - SREs
+    - Cloud Architects
+    - Platform Engineers
+    - DevOps Engineer
+    - DevOps practitioners
+    - DevSecOps practitioners
+  tags:
+    - registry
+    - images
+    - OCI
+    - container
+    - artifacts
+    - vulnerability scanning
+    - self-hosted
+    - zot
+    - edge
+    - image-sync
+  integrations:
+    - trivy
+    - cosign
+    - notary
+    - github
+community:
+  twitter: 'https://twitter.com/zothub'
+  slack: 'https://cloud-native.slack.com/archives/C03EGRE4QGH'
 ---
+Zot is an OCI-native container registry for distributing container images and OCI artifacts.
 
 zot is a Cloud Native Computing Foundation (CNCF) sandbox project.

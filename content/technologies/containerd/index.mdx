@@ -1,24 +1,46 @@
 ---
-name: "containerd"
-description: |
-  containerd is a container runtime that is a CNCF graduated project. It provides an industry-standard core container runtime that can be embedded into larger systems. containerd manages the complete container lifecycle of its host system, from image transfer and storage to container execution and supervision. It provides a minimal set of primitives needed to manage containers effectively. 
-  
-  It offers a reliable and efficient foundation for building container platforms and orchestration systems like Kubernetes. containerd's design prioritizes stability, simplicity, and portability, allowing developers to focus on higher-level features without worrying about the underlying container execution details. Its main use cases include serving as the container runtime for Kubernetes, Docker, and other container management platforms; enabling efficient and reliable container execution in production environments; and providing a foundation for building custom container solutions.
+name: containerd
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://containerd.io/"
-documentation: "https://github.com/containerd/containerd/blob/main/docs/getting-started.md"
-license: "Apache-2.0"
-categories:
-  - "container-runtime"
-  - "kubernetes"
-status: "stable"
-radar:
-  quadrant: plumbing
-  ring: adopt
+website: 'https://containerd.io/'
+documentation: 'https://github.com/containerd/containerd/blob/main/docs/getting-started.md'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: plumbing
+  status: adopt
+category: Runtime
+subcategory: Container Runtime
+cncf:
+  status: graduated
+  accepted: '2017-03-29'
+  incubating: '2017-03-29'
+  graduated: '2019-02-28'
+  devStatsUrl: 'https://containerd.devstats.cncf.io/'
+  personas:
+    - Cluster Administrators
+    - SREs
+    - DevOps and Platform Engineers
+  tags:
+    - Container Runtime
+    - OCI
+    - CRI
+    - Data Plane
+    - Cloud-Native
+    - Cross-Platform
+  useCase: '>-'
+  businessUseCase: '>-'
+  integrations:
+    - '>-'
+community:
+  twitter: 'https://twitter.com/containerd'
+  slack: 'https://slack.cncf.io/'
 ---
+containerd is a container runtime that is a CNCF graduated project. It provides an industry-standard core container runtime that can be embedded into larger systems. containerd manages the complete container lifecycle of its host system, from image transfer and storage to container execution and supervision. It provides a minimal set of primitives needed to manage containers effectively. 
+
+It offers a reliable and efficient foundation for building container platforms and orchestration systems like Kubernetes. containerd's design prioritizes stability, simplicity, and portability, allowing developers to focus on higher-level features without worrying about the underlying container execution details. Its main use cases include serving as the container runtime for Kubernetes, Docker, and other container management platforms; enabling efficient and reliable container execution in production environments; and providing a foundation for building custom container solutions.
 
 containerd is the industry-standard container runtime, emphasizing simplicity, robustness, and portability. It was designed to be embedded into larger systems, such as Docker and Kubernetes, rather than being used directly by end-users.
 

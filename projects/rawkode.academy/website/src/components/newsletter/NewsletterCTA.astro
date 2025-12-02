@@ -1,6 +1,24 @@
 ---
+export const prerender = false;
+
 import NewsletterWidget from "./NewsletterWidget.vue";
 import { createLearnerId } from "@/actions/newsletter";
+
+interface Props {
+	class?: string;
+	badge?: string;
+	headline?: string;
+	subtitle?: string;
+	audience?: string;
+}
+
+const {
+	class: className,
+	badge = "Weekly Cloud Native insights",
+	headline = "Stay ahead in cloud native",
+	subtitle = "Tutorials, deep dives, and curated events—no fluff.",
+	audience = "academy",
+} = Astro.props;
 
 const user = Astro.locals.user;
 let isSubscribed = false;
@@ -12,7 +30,7 @@ if (user) {
 			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
 				prefixedUserId,
 				"newsletter",
-				"academy",
+				audience,
 			);
 		isSubscribed = prefs.length > 0;
 	} catch (e) {
@@ -23,11 +41,9 @@ if (user) {
 const pagePath = Astro.url.pathname;
 const signInUrl = `/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
 
-const { class: className } = Astro.props;
-
 // Check for the newsletter subscription cookie (server-side)
 const hasNewsletterCookie =
-	Astro.cookies.get("newsletter:academy:updates")?.value === "true";
+	Astro.cookies.get(`newsletter:${audience}:updates`)?.value === "true";
 
 // For anonymous users with the cookie, hide the CTA entirely
 const shouldHide = !user && hasNewsletterCookie;
@@ -40,13 +56,13 @@ const shouldHide = !user && hasNewsletterCookie;
                         <div class="flex-1 min-w-0 space-y-1">
                                 <div class="flex items-center gap-2">
                                         <span class="h-2 w-2 rounded-full bg-primary"></span>
-                                        <span class="text-xs font-medium text-primary">Weekly Cloud Native insights</span>
+                                        <span class="text-xs font-medium text-primary">{badge}</span>
                                 </div>
                                 <h2 class="text-lg sm:text-xl font-display font-semibold tracking-tight text-primary-content">
-                                        Stay ahead in cloud native
+                                        {headline}
                                 </h2>
                                 <p class="text-sm text-muted">
-                                        Tutorials, deep dives, and curated events—no fluff.
+                                        {subtitle}
                                 </p>
                         </div>
 
@@ -57,6 +73,7 @@ const shouldHide = !user && hasNewsletterCookie;
                                         isSubscribed={isSubscribed}
                                         signInUrl={signInUrl}
                                         pagePath={pagePath}
+                                        audience={audience}
                                 />
                         </div>
                 </div>

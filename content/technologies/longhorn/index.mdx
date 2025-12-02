@@ -1,18 +1,33 @@
 ---
-name: "Longhorn"
-description: |
-  Cloud-native distributed storage for Kubernetes
+name: Longhorn
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://longhorn.io/"
-source: "https://github.com/longhorn/longhorn"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-incubating"
-status: "stable"
+website: 'https://longhorn.io/'
+source: 'https://github.com/longhorn/longhorn'
+license: Apache-2.0
+status: stable
+category: Runtime
+subcategory: Cloud Native Storage
+cncf:
+  status: incubating
+  accepted: '2019-10-11'
+  incubating: '2021-11-04'
+  devStatsUrl: 'https://longhorn.devstats.cncf.io/'
+  personas:
+    - Kubernetes users who need persistent storage in their cluster.
+  tags:
+    - kubernetes
+    - storage
+    - csi
+    - backup
+  useCase: '>-'
+  businessUseCase: >-
+    Anyone running a stateful workload, like database, kafka, elasticsearch etc,
+    in a Kubernetes cluster.
+  releaseRate: 1.0 GA released on May 2020. Latest v1.4.0 was released on Dec 2022.
 ---
+Cloud-native distributed storage for Kubernetes
 
 Longhorn is a Cloud Native Computing Foundation (CNCF) incubating project.

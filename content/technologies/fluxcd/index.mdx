@@ -1,26 +1,18 @@
 ---
-name: "FluxCD"
-description: |
-  FluxCD is a GitOps operator for Kubernetes, designed to automate the deployment and management of applications. It synchronizes the state of your Kubernetes cluster with configurations stored in Git repositories. FluxCD continuously monitors these repositories for changes and automatically applies updates to the cluster, ensuring that the desired state defined in Git is always reflected in your running environment. This approach enhances consistency, auditability, and reliability in Kubernetes deployments by leveraging Git as the single source of truth. It also provides a way to roll back to previous versions in case of errors or unexpected issues.
+name: FluxCD
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://fluxcd.io/"
-documentation: "https://fluxcd.io/flux/get-started/"
-license: "Apache-2.0"
-categories:
-  - "gitops"
-  - "kubernetes"
-  - "ci-cd"
-  - "cncf"
-  - "continuous-delivery"
-status: "stable"
-radar:
-  quadrant: platform
-  ring: adopt
+website: 'https://fluxcd.io/'
+documentation: 'https://fluxcd.io/flux/get-started/'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: platform
+  status: adopt
 ---
-
+FluxCD is a GitOps operator for Kubernetes, designed to automate the deployment and management of applications. It synchronizes the state of your Kubernetes cluster with configurations stored in Git repositories. FluxCD continuously monitors these repositories for changes and automatically applies updates to the cluster, ensuring that the desired state defined in Git is always reflected in your running environment. This approach enhances consistency, auditability, and reliability in Kubernetes deployments by leveraging Git as the single source of truth. It also provides a way to roll back to previous versions in case of errors or unexpected issues.
 
 FluxCD is the leading GitOps tool for Kubernetes, enabling teams to manage infrastructure and applications declaratively through Git. If you're looking to automate Kubernetes deployments, improve security, and establish Git as your single source of truth, FluxCD is the solution.
 

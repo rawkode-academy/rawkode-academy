@@ -8,7 +8,6 @@ import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 type Technology = {
 	id: string;
 	name: string;
-	description: string;
 	logo?: string;
 	website?: string;
 	documentation?: string;
@@ -24,7 +23,6 @@ try {
 		const tech: Technology = {
 			id: e.id,
 			name: e.data.name,
-			description: e.data.description,
 			...(logo && { logo }),
 			...(e.data.website && { website: e.data.website }),
 			...(e.data.documentation && { documentation: e.data.documentation }),
@@ -115,9 +113,6 @@ try {
 										<h3 class="text-lg font-bold text-gray-900 dark:text-white">
 											{tech.name}
 										</h3>
-										<p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 flex-1">
-											{tech.description}
-										</p>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
 											Learn more
 											<svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">

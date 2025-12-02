@@ -1,21 +1,46 @@
 ---
-name: "etcd"
-description: |
-  etcd is a CNCF graduated project.
+name: etcd
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://etcd.io/"
-source: "https://github.com/etcd-io/etcd"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-graduated"
-status: "stable"
-radar:
-  quadrant: plumbing
-  ring: adopt
+website: 'https://etcd.io/'
+source: 'https://github.com/etcd-io/etcd'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: plumbing
+  status: adopt
+category: Orchestration & Management
+subcategory: Coordination & Service Discovery
+cncf:
+  status: graduated
+  accepted: '2018-12-11'
+  incubating: '2018-12-11'
+  graduated: '2020-11-24'
+  devStatsUrl: 'https://etcd.devstats.cncf.io/'
+  personas:
+    - Architects
+    - Platform Engineers
+    - SREs
+  tags:
+    - distributed
+    - key-value
+    - consistent
+    - datastore
+    - reliability
+  useCase: '>-'
+  businessUseCase: '>-'
+  releaseRate: >-
+    Major or Minor release approximately every 2 years, and patch release every
+    1-3 months
+  integrations:
+    - '>-'
+community:
+  twitter: 'https://twitter.com/etcdio'
+  slack: 'http://slack.k8s.io/'
+  mailingList: 'https://groups.google.com/forum/?hl=en#!forum/etcd-dev'
 ---
+etcd is a CNCF graduated project.
 
 etcd is a Cloud Native Computing Foundation (CNCF) graduated project.

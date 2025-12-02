@@ -1,22 +1,41 @@
 ---
-name: "Kyverno"
-description: |
-  Kyverno is a policy engine designed for Kubernetes. It allows you to manage, validate, mutate, and generate Kubernetes resources using declarative configuration. Kyverno operates directly in Kubernetes, eliminating the need for a separate language or custom code to define policies. Policies are written as Kubernetes resources themselves, making them easy to manage, version, and distribute.
+name: Kyverno
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://kyverno.io/"
-documentation: "https://kyverno.io/docs/"
-license: "Apache-2.0"
-categories:
-  - "kubernetes"
-  - "policy-engine"
-  - "security"
-  - "governance"
-  - "admission-controller"
-status: "stable"
+website: 'https://kyverno.io/'
+documentation: 'https://kyverno.io/docs/'
+license: Apache-2.0
+status: stable
+category: Provisioning
+subcategory: Security & Compliance
+cncf:
+  status: incubating
+  accepted: '2020-11-10'
+  incubating: '2022-07-13'
+  devStatsUrl: 'https://kyverno.devstats.cncf.io/'
+  personas:
+    - Platform engineering
+    - DevOps engineers
+    - Security admins
+    - Cluster admins
+    - Policy authors
+  tags:
+    - policy
+    - policy-as-code
+    - governance
+    - software supply chain
+  useCase: 'Pod security,Policy-as-code,Governance,Software supply chain'
+  businessUseCase: '>-'
+  releaseRate: Approximately monthly for patches and quarterly for minor releases.
+  integrations:
+    - Sigstore Cosign
+community:
+  twitter: 'https://twitter.com/kyverno'
+  slack: 'https://kubernetes.slack.com/'
 ---
+Kyverno is a policy engine designed for Kubernetes. It allows you to manage, validate, mutate, and generate Kubernetes resources using declarative configuration. Kyverno operates directly in Kubernetes, eliminating the need for a separate language or custom code to define policies. Policies are written as Kubernetes resources themselves, making them easy to manage, version, and distribute.
 
 Kyverno is a Kubernetes-native policy engine that provides comprehensive policy management capabilities directly within your cluster. It allows you to manage, validate, mutate, and generate Kubernetes resources using declarative policies written as standard Kubernetes resources, eliminating the need for a new language or custom code.
 
