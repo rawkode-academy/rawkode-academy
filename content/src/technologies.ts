@@ -81,12 +81,15 @@ export const technologyZod = zod.object({
       ]),
       // Confidence in this placement
       confidence: zod.enum(["gut", "some-experience", "deep-experience"]).optional(),
-      // When was this last touched/evaluated
-      lastTouched: zod.string().optional(), // e.g., "2024-01"
       // Direction of travel
       trajectory: zod.enum(["rising", "stable", "falling"]).optional(),
-      // The personal "why" - one-liner reasoning
-      why: zod.string().optional(),
+
+      // Card back - the personal story
+      firstUsed: zod.string().optional(),  // e.g., "2020-03"
+      lastUsed: zod.string().optional(),   // e.g., "2024-11"
+      makesMeFeel: zod.string().optional(), // emoji reaction
+      why: zod.string().optional(),         // reasoning for placement
+      spicyTake: zod.string().optional(),   // the hot take 🌶️
     })
     .optional(),
 });
@@ -155,12 +158,15 @@ export function createTechnologySchema(z: typeof zod) {
         ]),
         // Confidence in this placement
         confidence: z.enum(["gut", "some-experience", "deep-experience"]).optional(),
-        // When was this last touched/evaluated
-        lastTouched: z.string().optional(), // e.g., "2024-01"
         // Direction of travel
         trajectory: z.enum(["rising", "stable", "falling"]).optional(),
-        // The personal "why" - one-liner reasoning
-        why: z.string().optional(),
+
+        // Card back - the personal story
+        firstUsed: z.string().optional(),  // e.g., "2020-03"
+        lastUsed: z.string().optional(),   // e.g., "2024-11"
+        makesMeFeel: z.string().optional(), // emoji reaction
+        why: z.string().optional(),         // reasoning for placement
+        spicyTake: z.string().optional(),   // the hot take 🌶️
       })
       .optional(),
   });

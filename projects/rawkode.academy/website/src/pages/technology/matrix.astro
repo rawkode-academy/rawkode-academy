@@ -6,6 +6,33 @@ import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
+// Helper to normalize technology references from videos
+function normalizeTechnologyRef(value: unknown): string | undefined {
+	if (typeof value === "string") {
+		return value.replace(/\/index$/, "");
+	}
+	if (typeof value === "object" && value !== null) {
+		const ref = (value as any).id ?? (value as any).slug;
+		if (typeof ref === "string") return ref.replace(/\/index$/, "");
+	}
+	return undefined;
+}
+
+// Compute video counts per technology
+const allVideos = await getCollection("videos");
+const videoCountsByTech = new Map<string, number>();
+for (const video of allVideos) {
+	const techs = video.data.technologies;
+	if (Array.isArray(techs)) {
+		for (const tech of techs) {
+			const techId = normalizeTechnologyRef(tech);
+			if (techId) {
+				videoCountsByTech.set(techId, (videoCountsByTech.get(techId) || 0) + 1);
+			}
+		}
+	}
+}
+
 // Types
 type Quadrant = "plumbing" | "platform" | "observability" | "security";
 type PipelineStage = "skip" | "watch" | "explore" | "learn" | "adopt" | "advocate";
@@ -73,9 +100,15 @@ const matrixTechnologies = allTechnologies
 		ring: tech.data.radar!.ring as Ring,
 		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
 		confidence: tech.data.radar!.confidence as Confidence | undefined,
-		lastTouched: tech.data.radar!.lastTouched,
 		trajectory: tech.data.radar!.trajectory as Trajectory | undefined,
+		// Card back fields
 		why: tech.data.radar!.why,
+		firstUsed: tech.data.radar!.firstUsed,
+		lastUsed: tech.data.radar!.lastUsed,
+		makesMeFeel: tech.data.radar!.makesMeFeel,
+		spicyTake: tech.data.radar!.spicyTake,
+		videoCount: videoCountsByTech.get(tech.id) || 0,
+		articleCount: 0, // TODO: Wire up when articles have technology links
 	}));
 
 // Build pipeline lanes (by quadrant)
@@ -203,6 +236,20 @@ const stageStats = Object.fromEntries(
 														href={`/technology/${tech.id}`}
 														class={`tech-icon chip-${stage}`}
 														data-name={tech.name}
+														data-id={tech.id}
+														data-description={tech.description}
+														data-ring={tech.ring}
+														data-quadrant={tech.quadrant}
+														data-why={tech.why || ""}
+														data-first-used={tech.firstUsed || ""}
+														data-last-used={tech.lastUsed || ""}
+														data-makes-me-feel={tech.makesMeFeel || ""}
+														data-spicy-take={tech.spicyTake || ""}
+														data-video-count={tech.videoCount}
+														data-article-count={tech.articleCount}
+														data-confidence={tech.confidence || ""}
+														data-trajectory={tech.trajectory || ""}
+														data-icon={tech.icon || ""}
 													>
 														{tech.icon ? (
 															<img src={tech.icon} alt={tech.name} class="icon-img" loading="lazy" />
@@ -222,6 +269,54 @@ const stageStats = Object.fromEntries(
 										)}
 									</div>
 								))}
+							</div>
+						</div>
+						<!-- Card Back (slides down on hover) -->
+						<div class="card-back" aria-hidden="true">
+							<div class="card-back-content">
+								<div class="card-back-header">
+									<div class="card-back-identity">
+										<img class="card-back-icon" src="" alt="" />
+										<div class="card-back-titles">
+											<h3 class="card-back-name"></h3>
+											<span class="card-back-position"></span>
+										</div>
+									</div>
+									<span class="card-back-emoji"></span>
+								</div>
+								<p class="card-back-why"></p>
+								<div class="card-back-stats">
+									<div class="stat">
+										<span class="stat-value stat-videos">0</span>
+										<span class="stat-label">Videos</span>
+									</div>
+									<div class="stat">
+										<span class="stat-value stat-articles">0</span>
+										<span class="stat-label">Articles</span>
+									</div>
+									<div class="stat">
+										<span class="stat-value stat-first-used">—</span>
+										<span class="stat-label">First Used</span>
+									</div>
+									<div class="stat">
+										<span class="stat-value stat-last-used">—</span>
+										<span class="stat-label">Last Used</span>
+									</div>
+									<div class="stat">
+										<span class="stat-value stat-confidence">—</span>
+										<span class="stat-label">Confidence</span>
+									</div>
+								</div>
+								<div class="card-back-spicy">
+									<span class="spicy-icon">🌶️</span>
+									<span class="spicy-take"></span>
+								</div>
+								<div class="card-back-cta">
+									<span>View Details</span>
+									<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+									</svg>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -818,14 +913,323 @@ const stageStats = Object.fromEntries(
 		.lane-hover-tab {
 			display: none;
 		}
+
+		.card-back {
+			display: none;
+		}
+	}
+
+	/* ===== CARD BACK ===== */
+	.card-back {
+		max-height: 0;
+		overflow: hidden;
+		opacity: 0;
+		transition: max-height 0.3s ease, opacity 0.2s ease, margin 0.3s ease;
+		margin-top: 0;
+	}
+
+	.card-back.visible {
+		max-height: 500px;
+		opacity: 1;
+		margin-top: 0.75rem;
+	}
+
+	.card-back-content {
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 16px;
+		padding: 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+	}
+
+	html.dark .card-back-content {
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	}
+
+	.card-back-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+	}
+
+	.card-back-identity {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.card-back-icon {
+		width: 48px;
+		height: 48px;
+		object-fit: contain;
+		border-radius: 10px;
+		background: var(--surface-card-muted);
+		padding: 6px;
+	}
+
+	.card-back-titles {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.card-back-name {
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: var(--text-primary-content);
+		margin: 0;
+	}
+
+	.card-back-position {
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	.card-back-position.ring-skip { color: rgb(239, 68, 68); }
+	.card-back-position.ring-watch { color: rgb(249, 115, 22); }
+	.card-back-position.ring-explore { color: rgb(202, 138, 4); }
+	.card-back-position.ring-learn { color: rgb(59, 130, 246); }
+	.card-back-position.ring-adopt { color: rgb(34, 197, 94); }
+	.card-back-position.ring-advocate { color: rgb(var(--brand-primary)); }
+
+	.card-back-emoji {
+		font-size: 2rem;
+		line-height: 1;
+	}
+
+	.card-back-why {
+		font-size: 0.9rem;
+		line-height: 1.5;
+		color: var(--text-secondary-content);
+		margin: 0;
+	}
+
+	.card-back-stats {
+		display: flex;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.stat {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 0.5rem 0.75rem;
+		background: var(--surface-card-muted);
+		border-radius: 10px;
+		min-width: 70px;
+	}
+
+	.stat-value {
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--text-primary-content);
+	}
+
+	.stat-label {
+		font-size: 0.6rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--text-muted);
+	}
+
+	.card-back-spicy {
+		display: none;
+		align-items: flex-start;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background: rgba(239, 68, 68, 0.08);
+		border-radius: 10px;
+		border: 1px solid rgba(239, 68, 68, 0.2);
+	}
+
+	.card-back-spicy.has-take {
+		display: flex;
+	}
+
+	.spicy-icon {
+		font-size: 1rem;
+		flex-shrink: 0;
+	}
+
+	.spicy-take {
+		font-size: 0.85rem;
+		font-style: italic;
+		color: var(--text-secondary-content);
+		line-height: 1.4;
+	}
+
+	.card-back-cta {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.625rem 1rem;
+		background: rgb(var(--brand-primary));
+		color: white;
+		border-radius: 10px;
+		font-size: 0.8rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		transition: background 0.2s ease;
+	}
+
+	.card-back-cta:hover {
+		background: rgb(var(--brand-secondary));
 	}
 </style>
 
 <script>
-	// Hover tab functionality
+	const ringLabels: Record<string, string> = {
+		"skip": "Skip",
+		"watch": "Watch",
+		"explore": "Explore",
+		"learn": "Learn",
+		"adopt": "Adopt",
+		"advocate": "Advocate",
+	};
+
+	const confidenceLabels: Record<string, string> = {
+		"gut": "Gut",
+		"some-experience": "Some XP",
+		"deep-experience": "Deep XP",
+	};
+
+	const quadrantLabels: Record<string, string> = {
+		"plumbing": "Plumbing",
+		"platform": "Platform",
+		"observability": "Observability",
+		"security": "Security",
+	};
+
+	// Format date string like "2020-03" to "Mar 2020"
+	function formatDate(dateStr: string): string {
+		if (!dateStr) return "—";
+		const [year, month] = dateStr.split("-");
+		if (!year || !month) return dateStr;
+		const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+		return `${months[parseInt(month, 10) - 1]} ${year}`;
+	}
+
+	let hideTimeout: ReturnType<typeof setTimeout> | null = null;
+	let showTimeout: ReturnType<typeof setTimeout> | null = null;
+	let currentIcon: Element | null = null;
+
 	document.querySelectorAll('.lane-wrapper').forEach(lane => {
 		const hoverTab = lane.querySelector('.lane-hover-tab');
 		const hoverName = lane.querySelector('.hover-tab-name');
+		const cardBack = lane.querySelector('.card-back');
+
+		if (!cardBack) return;
+
+		const cardIcon = cardBack.querySelector('.card-back-icon') as HTMLImageElement;
+		const cardName = cardBack.querySelector('.card-back-name');
+		const cardPosition = cardBack.querySelector('.card-back-position');
+		const cardEmoji = cardBack.querySelector('.card-back-emoji');
+		const cardWhy = cardBack.querySelector('.card-back-why');
+		const statVideos = cardBack.querySelector('.stat-videos');
+		const statArticles = cardBack.querySelector('.stat-articles');
+		const statFirstUsed = cardBack.querySelector('.stat-first-used');
+		const statLastUsed = cardBack.querySelector('.stat-last-used');
+		const statConfidence = cardBack.querySelector('.stat-confidence');
+		const spicyContainer = cardBack.querySelector('.card-back-spicy');
+		const spicyTake = cardBack.querySelector('.spicy-take');
+
+		function populateCardBack(icon: Element) {
+			if (hideTimeout) {
+				clearTimeout(hideTimeout);
+				hideTimeout = null;
+			}
+
+			currentIcon = icon;
+
+			const name = icon.getAttribute('data-name') || "";
+			const ring = icon.getAttribute('data-ring') || "";
+			const quadrant = icon.getAttribute('data-quadrant') || "";
+			const why = icon.getAttribute('data-why') || "";
+			const firstUsed = icon.getAttribute('data-first-used') || "";
+			const lastUsed = icon.getAttribute('data-last-used') || "";
+			const makesMeFeel = icon.getAttribute('data-makes-me-feel') || "";
+			const spicy = icon.getAttribute('data-spicy-take') || "";
+			const videoCount = icon.getAttribute('data-video-count') || "0";
+			const articleCount = icon.getAttribute('data-article-count') || "0";
+			const confidence = icon.getAttribute('data-confidence') || "";
+			const iconUrl = icon.getAttribute('data-icon') || "";
+
+			// Populate card
+			if (cardIcon) {
+				cardIcon.src = iconUrl || "/apple-touch-icon.png";
+				cardIcon.alt = name;
+			}
+			if (cardName) cardName.textContent = name;
+			if (cardPosition) {
+				cardPosition.textContent = `${ringLabels[ring] || ring} · ${quadrantLabels[quadrant] || quadrant}`;
+				cardPosition.className = `card-back-position ring-${ring}`;
+			}
+			if (cardEmoji) cardEmoji.textContent = makesMeFeel || "";
+			if (cardWhy) cardWhy.textContent = why || "No detailed notes yet.";
+			if (statVideos) statVideos.textContent = videoCount;
+			if (statArticles) statArticles.textContent = articleCount;
+			if (statFirstUsed) statFirstUsed.textContent = formatDate(firstUsed);
+			if (statLastUsed) statLastUsed.textContent = formatDate(lastUsed);
+			if (statConfidence) statConfidence.textContent = confidenceLabels[confidence] || "—";
+
+			if (spicyContainer && spicyTake) {
+				if (spicy) {
+					spicyTake.textContent = spicy;
+					spicyContainer.classList.add('has-take');
+				} else {
+					spicyContainer.classList.remove('has-take');
+				}
+			}
+
+			// Show
+			cardBack?.classList.add('visible');
+		}
+
+		function scheduleShowCardBack(icon: Element) {
+			// Cancel any pending show
+			if (showTimeout) {
+				clearTimeout(showTimeout);
+				showTimeout = null;
+			}
+
+			// If card is already visible with same icon, do nothing
+			if (currentIcon === icon && cardBack?.classList.contains('visible')) {
+				return;
+			}
+
+			// If card is already visible but different icon, wait 100ms before switching
+			if (cardBack?.classList.contains('visible') && currentIcon !== icon) {
+				showTimeout = setTimeout(() => {
+					populateCardBack(icon);
+				}, 100);
+			} else {
+				// First hover - show immediately
+				populateCardBack(icon);
+			}
+		}
+
+		function hideCardBack() {
+			// Cancel any pending show
+			if (showTimeout) {
+				clearTimeout(showTimeout);
+				showTimeout = null;
+			}
+
+			hideTimeout = setTimeout(() => {
+				cardBack?.classList.remove('visible');
+				currentIcon = null;
+			}, 150);
+		}
 
 		lane.querySelectorAll('.tech-icon').forEach(icon => {
 			icon.addEventListener('mouseenter', () => {
@@ -834,13 +1238,36 @@ const stageStats = Object.fromEntries(
 					hoverName.textContent = name;
 					hoverTab.classList.add('visible');
 				}
+				scheduleShowCardBack(icon);
 			});
 
 			icon.addEventListener('mouseleave', () => {
 				if (hoverTab) {
 					hoverTab.classList.remove('visible');
 				}
+				// Don't hide immediately - let the user move to card back
 			});
+		});
+
+		// Track if mouse leaves the lane entirely
+		lane.addEventListener('mouseleave', () => {
+			hideCardBack();
+		});
+
+		// Keep card visible when hovering over it
+		cardBack.addEventListener('mouseenter', () => {
+			if (hideTimeout) {
+				clearTimeout(hideTimeout);
+				hideTimeout = null;
+			}
+			if (showTimeout) {
+				clearTimeout(showTimeout);
+				showTimeout = null;
+			}
+		});
+
+		cardBack.addEventListener('mouseleave', () => {
+			hideCardBack();
 		});
 	});
 </script>
