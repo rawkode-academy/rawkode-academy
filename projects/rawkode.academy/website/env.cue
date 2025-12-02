@@ -37,7 +37,7 @@ tasks: {
 
 	build: {
 		command: "bun"
-		args: ["build"]
+		args: ["run", "build"]
 
 		workspaces: ["bun"]
 
