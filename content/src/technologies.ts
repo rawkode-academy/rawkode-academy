@@ -28,12 +28,13 @@ export const technologyZod = zod.object({
   description: zod.string(),
 
   // Presentation - logos available for this technology
+  // Booleans indicate whether icon.svg, horizontal.svg, stacked.svg exist
   // YAML parses empty `logos:` as null, so we accept null and transform to undefined
   logos: zod
     .object({
-      icon: zod.any().optional(),
-      horizontal: zod.any().optional(),
-      stacked: zod.any().optional(),
+      icon: zod.boolean().optional(),
+      horizontal: zod.boolean().optional(),
+      stacked: zod.boolean().optional(),
     })
     .nullish(),
 
@@ -61,28 +62,53 @@ export const technologyZod = zod.object({
 
   // Lifecycle
   status: technologyStatusEnum.default(DEFAULT_TECHNOLOGY_STATUS),
+
+  // Technology Matrix - Rawkode's opinionated take
+  radar: zod
+    .object({
+      quadrant: zod.enum(["plumbing", "platform", "observability", "security"]),
+      // Pipeline stages (left to right journey)
+      ring: zod.enum([
+        "skip",           // Not for me
+        "watch",          // Keeping an eye on it
+        "explore",        // Worth exploring
+        "learn",          // Worth investing time to understand
+        "adopt",          // Ready for production use
+        "advocate",       // Actively championing
+        // Special zones (outside pipeline)
+        "graveyard",      // Tried, got burned, walked away
+        "guilty-pleasure", // Know it's "wrong" but keep using
+      ]),
+      // Confidence in this placement
+      confidence: zod.enum(["gut", "some-experience", "deep-experience"]).optional(),
+      // When was this last touched/evaluated
+      lastTouched: zod.string().optional(), // e.g., "2024-01"
+      // Direction of travel
+      trajectory: zod.enum(["rising", "stable", "falling"]).optional(),
+      // The personal "why" - one-liner reasoning
+      why: zod.string().optional(),
+    })
+    .optional(),
 });
 
 export type TechnologyData = zod.infer<typeof technologyZod>;
 
 // Export a schema factory colocated with the content package.
 // Consumers (e.g., the website's content config) will call this with their `z`.
-export function createTechnologySchema(z: typeof zod, helpers?: { image?: () => any }) {
-  const imageSchema = helpers?.image ? helpers.image() : z.string();
-
+export function createTechnologySchema(z: typeof zod) {
   return z.object({
     // Core identity
     name: z.string(),
     description: z.string(),
 
     // Presentation - logos available for this technology
-    // Files are expected at ./icon.svg, ./horizontal.svg, ./stacked.svg
+    // Booleans indicate whether icon.svg, horizontal.svg, stacked.svg exist
     // YAML parses empty `logos:` as null, so we accept null and transform to undefined
     logos: z
       .object({
-        icon: imageSchema.optional(),
-        horizontal: imageSchema.optional(),
-        stacked: imageSchema.optional(),
+        icon: z.boolean().optional(),
+        horizontal: z.boolean().optional(),
+        stacked: z.boolean().optional(),
       })
       .nullish(),
 
@@ -110,5 +136,32 @@ export function createTechnologySchema(z: typeof zod, helpers?: { image?: () => 
 
     // Lifecycle
     status: z.enum(technologyStatusEnumValues).default(DEFAULT_TECHNOLOGY_STATUS),
+
+    // Technology Matrix - Rawkode's opinionated take
+    radar: z
+      .object({
+        quadrant: z.enum(["plumbing", "platform", "observability", "security"]),
+        // Pipeline stages (left to right journey)
+        ring: z.enum([
+          "skip",           // Not for me
+          "watch",          // Keeping an eye on it
+          "explore",        // Worth exploring
+          "learn",          // Worth investing time to understand
+          "adopt",          // Ready for production use
+          "advocate",       // Actively championing
+          // Special zones (outside pipeline)
+          "graveyard",      // Tried, got burned, walked away
+          "guilty-pleasure", // Know it's "wrong" but keep using
+        ]),
+        // Confidence in this placement
+        confidence: z.enum(["gut", "some-experience", "deep-experience"]).optional(),
+        // When was this last touched/evaluated
+        lastTouched: z.string().optional(), // e.g., "2024-01"
+        // Direction of travel
+        trajectory: z.enum(["rising", "stable", "falling"]).optional(),
+        // The personal "why" - one-liner reasoning
+        why: z.string().optional(),
+      })
+      .optional(),
   });
 }

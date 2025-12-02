@@ -1,18 +1,298 @@
 ---
 name: "Terraform"
 description: |
-  Terraform is an open-source infrastructure as code (IaC) software tool created by HashiCorp. It allows users to define and provision infrastructure using a declarative configuration language. Terraform manages infrastructure as code, enabling repeatable infrastructure deployment across various cloud providers (AWS, Azure, GCP), on-premises environments, and even software-as-a-service (SaaS) platforms.
-  
-  Terraform's value lies in its ability to automate infrastructure management, reduce errors, and improve consistency. It provides a single workflow for managing diverse resources, promoting collaboration among development and operations teams. Common use cases include provisioning virtual machines, setting up networking configurations, deploying databases, and managing application deployments, all described and managed through configuration files.
+  Terraform is an infrastructure as code (IaC) tool created by HashiCorp that enables users to define and provision infrastructure using a declarative configuration language called HCL (HashiCorp Configuration Language). Terraform manages infrastructure across cloud providers (AWS, Azure, GCP), on-premises environments, and SaaS platforms through a unified workflow.
+
+  Terraform's value lies in its ability to automate infrastructure management, ensure consistency across environments, and enable version-controlled infrastructure changes. It provides a single workflow for managing diverse resources, promoting collaboration between development and operations teams through its plan-and-apply model that shows exactly what changes will occur before they're made.
 logos:
-  stacked: ./stacked.svg
-website: "https://www.terraform.io/"
+  icon: true
+  horizontal: true
+  stacked: true
+website: "https://developer.hashicorp.com/terraform"
 documentation: "https://developer.hashicorp.com/terraform/docs"
 license: "BUSL-1.1"
 categories:
-  - Infrastructure as Code
-  - Automation
-  - Cloud
+  - "infrastructure-as-code"
+  - "automation"
+  - "cloud"
+  - "devops"
 status: "stable"
+radar:
+  quadrant: plumbing
+  ring: adopt
 ---
 
+Terraform has become one of the most widely adopted infrastructure as code tools, enabling teams to define, provision, and manage infrastructure across virtually any platform. Whether you're managing cloud resources, on-premises infrastructure, or SaaS configurations, Terraform provides a consistent workflow for infrastructure automation.
+
+## What is Terraform?
+
+Terraform is an infrastructure as code tool that lets you build, change, and version infrastructure safely and efficiently. Created by HashiCorp in 2014, it uses a declarative configuration language (HCL - HashiCorp Configuration Language) to describe your desired infrastructure state.
+
+At its core, Terraform provides:
+
+- **Declarative Configuration**: Define what infrastructure you want, not how to create it
+- **Resource Graph**: Automatically determines dependencies and parallelizes operations
+- **Plan and Apply**: Preview changes before applying them with `terraform plan`
+- **State Management**: Tracks the current state of your infrastructure
+- **Provider Ecosystem**: Supports thousands of providers for cloud, SaaS, and on-premises resources
+- **Modules**: Reusable, shareable infrastructure components
+
+**Note on Licensing**: In August 2023, HashiCorp changed Terraform's license from MPL 2.0 to the Business Source License (BUSL 1.1). This remains free for internal use but restricts competitive commercial offerings. The community created OpenTofu as an open-source fork under the Linux Foundation.
+
+## Why Terraform Matters in 2025
+
+Infrastructure complexity continues to grow as organizations adopt multi-cloud strategies, Kubernetes, and platform engineering practices. Terraform addresses these challenges by providing a single tool and workflow for managing all infrastructure types.
+
+**Key Benefits:**
+
+1. **Multi-Cloud Support**: Manage AWS, Azure, GCP, and other providers with the same tool and workflow
+2. **Version Control**: Store infrastructure as code in Git for history, review, and collaboration
+3. **Reproducibility**: Create identical environments for development, staging, and production
+4. **Drift Detection**: Identify when infrastructure differs from its defined state
+5. **Collaboration**: Teams can review infrastructure changes through standard code review processes
+
+## Core Terraform Concepts
+
+### Providers
+
+Providers are plugins that enable Terraform to interact with cloud platforms, SaaS providers, and other APIs. Each provider offers resources and data sources for managing specific infrastructure types.
+
+```hcl
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "us-west-2"
+}
+```
+
+### Resources
+
+Resources are the fundamental building blocks of Terraform configurations. Each resource block describes one or more infrastructure objects.
+
+```hcl
+resource "aws_instance" "web" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t3.micro"
+
+  tags = {
+    Name = "web-server"
+  }
+}
+```
+
+### Variables and Outputs
+
+Variables parameterize configurations for reuse across environments. Outputs expose values for other configurations or external use.
+
+```hcl
+variable "environment" {
+  description = "Deployment environment"
+  type        = string
+  default     = "development"
+}
+
+output "instance_ip" {
+  value = aws_instance.web.public_ip
+}
+```
+
+### State
+
+Terraform stores the state of your managed infrastructure in a state file. This file maps real-world resources to your configuration and tracks metadata.
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket = "my-terraform-state"
+    key    = "prod/terraform.tfstate"
+    region = "us-west-2"
+  }
+}
+```
+
+### Modules
+
+Modules are containers for multiple resources that are used together. They enable code reuse and abstraction.
+
+```hcl
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.0.0"
+
+  name = "my-vpc"
+  cidr = "10.0.0.0/16"
+
+  azs             = ["us-west-2a", "us-west-2b"]
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24"]
+}
+```
+
+## Getting Started with Terraform
+
+### Installation
+
+```bash
+# macOS with Homebrew
+brew install terraform
+
+# Or download from HashiCorp
+# https://developer.hashicorp.com/terraform/downloads
+
+# Verify installation
+terraform version
+```
+
+### Basic Workflow
+
+```bash
+# Initialize working directory (download providers)
+terraform init
+
+# Format configuration files
+terraform fmt
+
+# Validate configuration syntax
+terraform validate
+
+# Preview changes
+terraform plan
+
+# Apply changes
+terraform apply
+
+# Destroy infrastructure
+terraform destroy
+```
+
+### Your First Configuration
+
+Create a file named `main.tf`:
+
+```hcl
+terraform {
+  required_providers {
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
+  }
+}
+
+resource "local_file" "hello" {
+  content  = "Hello, Terraform!"
+  filename = "${path.module}/hello.txt"
+}
+```
+
+Then run:
+
+```bash
+terraform init
+terraform apply
+```
+
+## Common Use Cases
+
+### 1. Cloud Infrastructure Provisioning
+
+Provision and manage cloud resources like VPCs, compute instances, databases, and load balancers across AWS, Azure, GCP, and other providers.
+
+### 2. Kubernetes Infrastructure
+
+Deploy Kubernetes clusters (EKS, AKS, GKE) and manage cluster resources alongside your cloud infrastructure.
+
+### 3. Multi-Environment Management
+
+Use workspaces or directory structures to manage development, staging, and production environments with the same codebase.
+
+### 4. Platform Engineering
+
+Build internal developer platforms by codifying infrastructure patterns as reusable modules that development teams can consume.
+
+### 5. Disaster Recovery
+
+Define infrastructure as code enables quick recreation of entire environments in different regions or providers.
+
+## Best Practices for Production
+
+### State Management
+
+1. **Remote State**: Always use remote backends (S3, GCS, Azure Blob, Terraform Cloud) for team collaboration
+2. **State Locking**: Enable state locking to prevent concurrent modifications
+3. **Sensitive Data**: Use encryption for state files containing sensitive information
+
+### Code Organization
+
+```
+infrastructure/
+├── modules/
+│   ├── networking/
+│   ├── compute/
+│   └── database/
+├── environments/
+│   ├── dev/
+│   ├── staging/
+│   └── prod/
+└── global/
+    └── iam/
+```
+
+### Security
+
+1. **Never Commit Secrets**: Use environment variables, secret managers, or Terraform Cloud variable sets
+2. **Least Privilege**: IAM roles for Terraform should have minimal required permissions
+3. **Policy as Code**: Use Sentinel or OPA to enforce security policies
+
+### CI/CD Integration
+
+```yaml
+# Example GitHub Actions workflow
+- name: Terraform Plan
+  run: |
+    terraform init
+    terraform plan -out=tfplan
+
+- name: Terraform Apply
+  if: github.ref == 'refs/heads/main'
+  run: terraform apply tfplan
+```
+
+## Terraform Ecosystem and Tools
+
+### HashiCorp Tools
+
+- **HCP Terraform** (formerly Terraform Cloud): Managed service for team collaboration
+- **Terraform Enterprise**: Self-hosted version for enterprises
+- **Packer**: Build machine images for use with Terraform
+- **Vault**: Secrets management integration
+
+### Community Tools
+
+- **Terragrunt**: Wrapper for keeping configurations DRY
+- **tfsec**: Security scanner for Terraform code
+- **Checkov**: Policy-as-code for infrastructure
+- **Infracost**: Cloud cost estimates for Terraform changes
+- **Atlantis**: Pull request automation for Terraform
+
+### Alternatives
+
+- **OpenTofu**: Open-source fork under the Linux Foundation (MPL 2.0 licensed)
+- **Pulumi**: Infrastructure as code using general-purpose languages
+- **AWS CDK/CDKTF**: Define infrastructure using TypeScript, Python, etc.
+- **Crossplane**: Kubernetes-native infrastructure management
+
+## Conclusion
+
+Terraform remains a foundational tool for infrastructure automation, providing a declarative, provider-agnostic approach to managing infrastructure as code. Its extensive provider ecosystem, module registry, and mature tooling make it suitable for organizations of all sizes.
+
+While the license change to BUSL 1.1 has implications for commercial usage, Terraform continues to be free for internal use. Organizations should evaluate their needs and consider both Terraform and OpenTofu based on licensing requirements.
+
+**Ready to dive deeper?** Explore our hands-on content covering Terraform patterns, module development, and integration with Kubernetes and GitOps workflows.

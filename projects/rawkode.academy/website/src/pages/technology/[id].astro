@@ -29,6 +29,14 @@ export interface Technology {
 				slug: string;
 		  }[]
 		| undefined;
+	radar?: {
+		quadrant: "plumbing" | "platform" | "observability" | "security";
+		ring: "skip" | "watch" | "explore" | "learn" | "adopt" | "advocate" | "graveyard" | "guilty-pleasure";
+		confidence?: "gut" | "some-experience" | "deep-experience" | undefined;
+		trajectory?: "rising" | "stable" | "falling" | undefined;
+		why?: string | undefined;
+		lastTouched?: string | undefined;
+	} | undefined;
 }
 
 export const getStaticPaths = (async () => {
@@ -51,6 +59,7 @@ export const getStaticPaths = (async () => {
 								website: e.data.website,
 								logo,
 								videos,
+								radar: e.data.radar,
 							} as Technology,
 						},
 					};
@@ -100,6 +109,7 @@ export const getStaticPaths = (async () => {
 								website: fm.website,
 								logo,
 								videos,
+								radar: fm.radar,
 							} as Technology,
 						},
 					};
@@ -159,6 +169,7 @@ if (!technology) {
 				website: e.data.website,
 				logo,
 				videos,
+				radar: e.data.radar,
 			};
 		} else {
 			const base = resolveContentDirSync("technologies");
@@ -174,6 +185,7 @@ if (!technology) {
 				website: fm.website,
 				logo,
 				videos,
+				radar: fm.radar,
 			};
 		}
 	} catch (err) {
@@ -186,6 +198,26 @@ if (!technology) {
 }
 
 const placeholderLogo = "/apple-touch-icon.png";
+
+// Ring display helpers
+const ringLabels: Record<string, string> = {
+	"skip": "Skip",
+	"watch": "Watch",
+	"explore": "Explore",
+	"learn": "Learn",
+	"adopt": "Adopt",
+	"advocate": "Advocate",
+	"graveyard": "Graveyard",
+	"guilty-pleasure": "Guilty Pleasure",
+	// Legacy values
+	"hold": "Skip",
+	"assess": "Watch",
+	"trial": "Explore",
+};
+const trajectoryEmoji: Record<string, string> = { rising: "↗️", stable: "→", falling: "↘️" };
+
+const ringLabel = technology.radar?.ring ? (ringLabels[technology.radar.ring] || technology.radar.ring) : "";
+const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology.radar.trajectory] : null;
 ---
 
 <Page title={technology.name} description={technology.description}>
@@ -216,6 +248,24 @@ const placeholderLogo = "/apple-touch-icon.png";
 
 					<!-- Info -->
 					<div class="flex-1 text-center md:text-left">
+						{technology.radar && (
+							<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 mb-3 group">
+								<span class={`matrix-badge matrix-badge-${technology.radar.ring}`}>
+									{ringLabel}
+								</span>
+								<span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-primary transition-colors">
+									{technology.radar.quadrant.charAt(0).toUpperCase() + technology.radar.quadrant.slice(1)}
+								</span>
+								{trajectoryIcon && (
+									<span class="text-sm" title={`Trajectory: ${technology.radar.trajectory}`}>
+										{trajectoryIcon}
+									</span>
+								)}
+								<svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+								</svg>
+							</a>
+						)}
 						<h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
 							{technology.name}
 						</h1>
@@ -300,3 +350,110 @@ const placeholderLogo = "/apple-touch-icon.png";
 		)}
 	</div>
 </Page>
+
+<style>
+	.matrix-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	/* Skip - red */
+	.matrix-badge-skip,
+	.matrix-badge-hold {
+		background: rgba(239, 68, 68, 0.15);
+		color: rgb(185, 28, 28);
+		border: 1px solid rgba(239, 68, 68, 0.3);
+	}
+
+	/* Watch - orange */
+	.matrix-badge-watch,
+	.matrix-badge-assess {
+		background: rgba(249, 115, 22, 0.15);
+		color: rgb(194, 65, 12);
+		border: 1px solid rgba(249, 115, 22, 0.3);
+	}
+
+	/* Explore - yellow */
+	.matrix-badge-explore,
+	.matrix-badge-trial {
+		background: rgba(234, 179, 8, 0.15);
+		color: rgb(161, 98, 7);
+		border: 1px solid rgba(234, 179, 8, 0.3);
+	}
+
+	/* Learn - blue */
+	.matrix-badge-learn {
+		background: rgba(59, 130, 246, 0.15);
+		color: rgb(29, 78, 216);
+		border: 1px solid rgba(59, 130, 246, 0.3);
+	}
+
+	/* Adopt - green */
+	.matrix-badge-adopt {
+		background: rgba(34, 197, 94, 0.15);
+		color: rgb(21, 128, 61);
+		border: 1px solid rgba(34, 197, 94, 0.3);
+	}
+
+	/* Advocate - purple */
+	.matrix-badge-advocate {
+		background: rgba(139, 92, 246, 0.15);
+		color: rgb(109, 40, 217);
+		border: 1px solid rgba(139, 92, 246, 0.3);
+	}
+
+	/* Special zones */
+	.matrix-badge-graveyard {
+		background: rgba(107, 114, 128, 0.15);
+		color: rgb(75, 85, 99);
+		border: 1px solid rgba(107, 114, 128, 0.3);
+	}
+
+	.matrix-badge-guilty-pleasure {
+		background: rgba(236, 72, 153, 0.15);
+		color: rgb(190, 24, 93);
+		border: 1px solid rgba(236, 72, 153, 0.3);
+	}
+
+	/* Dark mode adjustments */
+	:global(.dark) .matrix-badge-skip,
+	:global(.dark) .matrix-badge-hold {
+		color: rgb(252, 165, 165);
+	}
+
+	:global(.dark) .matrix-badge-watch,
+	:global(.dark) .matrix-badge-assess {
+		color: rgb(253, 186, 116);
+	}
+
+	:global(.dark) .matrix-badge-explore,
+	:global(.dark) .matrix-badge-trial {
+		color: rgb(253, 224, 71);
+	}
+
+	:global(.dark) .matrix-badge-learn {
+		color: rgb(147, 197, 253);
+	}
+
+	:global(.dark) .matrix-badge-adopt {
+		color: rgb(134, 239, 172);
+	}
+
+	:global(.dark) .matrix-badge-advocate {
+		color: rgb(196, 181, 253);
+	}
+
+	:global(.dark) .matrix-badge-graveyard {
+		color: rgb(156, 163, 175);
+	}
+
+	:global(.dark) .matrix-badge-guilty-pleasure {
+		color: rgb(249, 168, 212);
+	}
+</style>
