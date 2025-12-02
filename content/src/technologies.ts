@@ -25,7 +25,6 @@ export const technologyStatusEnum = zod.enum(technologyStatusEnumValues);
 export const technologyZod = zod.object({
   // Core identity
   name: zod.string(),
-  description: zod.string(),
 
   // Presentation - logos available for this technology
   // Booleans indicate whether icon.svg, horizontal.svg, stacked.svg exist
@@ -44,10 +43,48 @@ export const technologyZod = zod.object({
   documentation: zod.string().optional(),
   license: zod.string().default(DEFAULT_TECHNOLOGY_LICENSE),
 
-  // Taxonomy / relationships
-  categories: zod.array(zod.string()).default([]),
+  // CNCF Landscape Taxonomy (hierarchical category structure)
+  category: zod.string().optional(),        // e.g., "Provisioning"
+  subcategory: zod.string().optional(),     // e.g., "Automation & Configuration"
+
+  // Relationships
   aliases: zod.array(zod.string()).optional(),
   relatedTechnologies: zod.array(zod.string()).optional(),
+
+  // CNCF Project Metadata
+  cncf: zod.object({
+    // Project lifecycle status
+    status: zod.enum(['sandbox', 'incubating', 'graduated', 'archived']).optional(),
+
+    // Timeline
+    accepted: zod.string().optional(),        // ISO date string
+    incubating: zod.string().optional(),
+    graduated: zod.string().optional(),
+    archived: zod.string().optional(),
+
+    // External CNCF links
+    devStatsUrl: zod.string().url().optional(),
+    annualReviewUrl: zod.string().url().optional(),
+
+    // Rich metadata from CNCF landscape
+    personas: zod.array(zod.string()).optional(),         // Target users
+    tags: zod.array(zod.string()).optional(),             // Categorical tags
+    useCase: zod.string().optional(),                     // Primary use case
+    businessUseCase: zod.string().optional(),             // Enterprise value prop
+    releaseRate: zod.string().optional(),                 // Release cadence
+    integrations: zod.array(zod.string()).optional(),     // Compatible systems
+  }).optional(),
+
+  // Community & Social Links (enriched from CNCF + our data)
+  community: zod.object({
+    twitter: zod.string().url().optional(),
+    youtube: zod.string().url().optional(),
+    slack: zod.string().url().optional(),
+    chat: zod.string().optional(),                // Generic chat link
+    blog: zod.string().url().optional(),
+    mailingList: zod.string().url().optional(),
+    githubDiscussions: zod.string().url().optional(),
+  }).optional(),
 
   // Content hints
   useCases: zod.array(zod.string()).optional(),
@@ -64,11 +101,11 @@ export const technologyZod = zod.object({
   status: technologyStatusEnum.default(DEFAULT_TECHNOLOGY_STATUS),
 
   // Technology Matrix - Rawkode's opinionated take
-  radar: zod
+  matrix: zod
     .object({
-      quadrant: zod.enum(["plumbing", "platform", "observability", "security"]),
+      grouping: zod.enum(["plumbing", "platform", "observability", "security"]),
       // Pipeline stages (left to right journey)
-      ring: zod.enum([
+      status: zod.enum([
         "skip",           // Not for me
         "watch",          // Keeping an eye on it
         "explore",        // Worth exploring
@@ -102,7 +139,6 @@ export function createTechnologySchema(z: typeof zod) {
   return z.object({
     // Core identity
     name: z.string(),
-    description: z.string(),
 
     // Presentation - logos available for this technology
     // Booleans indicate whether icon.svg, horizontal.svg, stacked.svg exist
@@ -121,10 +157,48 @@ export function createTechnologySchema(z: typeof zod) {
     documentation: z.string().optional(),
     license: z.string().default(DEFAULT_TECHNOLOGY_LICENSE),
 
-    // Taxonomy / relationships
-    categories: z.array(z.string()).default([]),
+    // CNCF Landscape Taxonomy (hierarchical category structure)
+    category: z.string().optional(),        // e.g., "Provisioning"
+    subcategory: z.string().optional(),     // e.g., "Automation & Configuration"
+
+    // Relationships
     aliases: z.array(z.string()).optional(),
     relatedTechnologies: z.array(z.string()).optional(),
+
+    // CNCF Project Metadata
+    cncf: z.object({
+      // Project lifecycle status
+      status: z.enum(['sandbox', 'incubating', 'graduated', 'archived']).optional(),
+
+      // Timeline
+      accepted: z.string().optional(),        // ISO date string
+      incubating: z.string().optional(),
+      graduated: z.string().optional(),
+      archived: z.string().optional(),
+
+      // External CNCF links
+      devStatsUrl: z.string().url().optional(),
+      annualReviewUrl: z.string().url().optional(),
+
+      // Rich metadata from CNCF landscape
+      personas: z.array(z.string()).optional(),         // Target users
+      tags: z.array(z.string()).optional(),             // Categorical tags
+      useCase: z.string().optional(),                     // Primary use case
+      businessUseCase: z.string().optional(),             // Enterprise value prop
+      releaseRate: z.string().optional(),                 // Release cadence
+      integrations: z.array(z.string()).optional(),     // Compatible systems
+    }).optional(),
+
+    // Community & Social Links (enriched from CNCF + our data)
+    community: z.object({
+      twitter: z.string().url().optional(),
+      youtube: z.string().url().optional(),
+      slack: z.string().url().optional(),
+      chat: z.string().optional(),                // Generic chat link
+      blog: z.string().url().optional(),
+      mailingList: z.string().url().optional(),
+      githubDiscussions: z.string().url().optional(),
+    }).optional(),
 
     // Content hints
     useCases: z.array(z.string()).optional(),
@@ -141,11 +215,11 @@ export function createTechnologySchema(z: typeof zod) {
     status: z.enum(technologyStatusEnumValues).default(DEFAULT_TECHNOLOGY_STATUS),
 
     // Technology Matrix - Rawkode's opinionated take
-    radar: z
+    matrix: z
       .object({
-        quadrant: z.enum(["plumbing", "platform", "observability", "security"]),
+        grouping: z.enum(["plumbing", "platform", "observability", "security"]),
         // Pipeline stages (left to right journey)
-        ring: z.enum([
+        status: z.enum([
           "skip",           // Not for me
           "watch",          // Keeping an eye on it
           "explore",        // Worth exploring

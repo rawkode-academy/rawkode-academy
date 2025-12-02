@@ -1,24 +1,35 @@
 ---
-name: "k3s"
-description: |
-  K3s is a lightweight Kubernetes distribution built for resource-constrained environments and edge computing. It packages Kubernetes components into a single binary that is less than 40MB, reducing the footprint and simplifying deployment. K3s is fully certified by the CNCF as a conformant Kubernetes distribution, meaning applications designed to run on any Kubernetes cluster will run on K3s. 
-  
-  It is designed to be easy to install, lightweight, and reliable, making it ideal for edge computing, IoT devices, CI/CD, and situations where a full-fledged Kubernetes cluster is overkill. Its small footprint allows it to run on resource-constrained devices and makes it perfect for environments with limited connectivity.
+name: k3s
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://k3s.io/"
-documentation: "https://docs.k3s.io/"
-license: "Apache-2.0"
-categories:
-  - "kubernetes"
-  - "distribution"
-  - "edge-computing"
-  - "iot"
-  - "lightweight"
-status: "stable"
+website: 'https://k3s.io/'
+documentation: 'https://docs.k3s.io/'
+license: Apache-2.0
+status: stable
+category: Platform
+subcategory: Certified Kubernetes - Distribution
+cncf:
+  status: sandbox
+  accepted: '2020-08-19'
+  devStatsUrl: 'https://k3s.devstats.cncf.io/'
+  personas:
+    - SREs
+    - Cloud Architects
+    - Platform Engineers
+    - DevOps Engineer
+    - DevOps practitioners
+    - DevSecOps practitioners
+  useCase: '>-'
+  businessUseCase: '>-'
+  releaseRate: >-
+    Roughly every 3-4 months, shortly after each upstream Kubernetes minor
+    release.
 ---
+K3s is a lightweight Kubernetes distribution built for resource-constrained environments and edge computing. It packages Kubernetes components into a single binary that is less than 40MB, reducing the footprint and simplifying deployment. K3s is fully certified by the CNCF as a conformant Kubernetes distribution, meaning applications designed to run on any Kubernetes cluster will run on K3s. 
+
+It is designed to be easy to install, lightweight, and reliable, making it ideal for edge computing, IoT devices, CI/CD, and situations where a full-fledged Kubernetes cluster is overkill. Its small footprint allows it to run on resource-constrained devices and makes it perfect for environments with limited connectivity.
 
 K3s is a highly popular, lightweight, and fully conformant Kubernetes distribution designed for environments where resources are limited, or simplicity is paramount. It bundles all necessary Kubernetes components into a single binary, making it incredibly easy to install and operate.
 

@@ -2,7 +2,7 @@
 export const prerender = true;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
-import TechnologyCTA from "@/components/technology/TechnologyCTA.astro";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths } from "astro";
@@ -17,10 +17,13 @@ import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 export interface Technology {
 	id: string;
 	name: string;
-	description: string;
 	documentation?: string | undefined;
 	website?: string | undefined;
+	source?: string | undefined;
+	license?: string | undefined;
 	logo?: string | undefined;
+	category?: string | undefined;
+	subcategory?: string | undefined;
 	videos?:
 		| {
 				id: string;
@@ -29,9 +32,9 @@ export interface Technology {
 				slug: string;
 		  }[]
 		| undefined;
-	radar?: {
-		quadrant: "plumbing" | "platform" | "observability" | "security";
-		ring: "skip" | "watch" | "explore" | "learn" | "adopt" | "advocate" | "graveyard" | "guilty-pleasure";
+	matrix?: {
+		grouping: "plumbing" | "platform" | "observability" | "security";
+		status: "skip" | "watch" | "explore" | "learn" | "adopt" | "advocate" | "graveyard" | "guilty-pleasure";
 		confidence?: "gut" | "some-experience" | "deep-experience" | undefined;
 		trajectory?: "rising" | "stable" | "falling" | undefined;
 		why?: string | undefined;
@@ -39,6 +42,30 @@ export interface Technology {
 		lastUsed?: string | undefined;
 		makesMeFeel?: string | undefined;
 		spicyTake?: string | undefined;
+	} | undefined;
+	cncf?: {
+		status?: "sandbox" | "incubating" | "graduated" | "archived" | undefined;
+		accepted?: string | undefined;
+		incubating?: string | undefined;
+		graduated?: string | undefined;
+		archived?: string | undefined;
+		devStatsUrl?: string | undefined;
+		annualReviewUrl?: string | undefined;
+		personas?: string[] | undefined;
+		tags?: string[] | undefined;
+		useCase?: string | undefined;
+		businessUseCase?: string | undefined;
+		releaseRate?: string | undefined;
+		integrations?: string[] | undefined;
+	} | undefined;
+	community?: {
+		twitter?: string | undefined;
+		youtube?: string | undefined;
+		slack?: string | undefined;
+		blog?: string | undefined;
+		mailingList?: string | undefined;
+		githubDiscussions?: string | undefined;
+		chat?: string | undefined;
 	} | undefined;
 	videoCount?: number | undefined;
 	articleCount?: number | undefined;
@@ -59,12 +86,17 @@ export const getStaticPaths = (async () => {
 							technology: {
 								id: e.id,
 								name: e.data.name,
-								description: e.data.description,
 								documentation: e.data.documentation,
 								website: e.data.website,
+								source: e.data.source,
+								license: e.data.license,
+								category: e.data.category,
+								subcategory: e.data.subcategory,
 								logo,
 								videos,
-								radar: e.data.radar,
+								matrix: e.data.matrix,
+								cncf: e.data.cncf,
+								community: e.data.community,
 							} as Technology,
 						},
 					};
@@ -107,14 +139,17 @@ export const getStaticPaths = (async () => {
 							technology: {
 								id,
 								name: fm.name ?? id,
-								description:
-									(typeof fm.description === "string" ? fm.description : "") ??
-									"",
 								documentation: fm.documentation,
 								website: fm.website,
+								source: fm.source,
+								license: fm.license,
+								category: fm.category,
+								subcategory: fm.subcategory,
 								logo,
 								videos,
-								radar: fm.radar,
+								matrix: fm.matrix,
+								cncf: fm.cncf,
+								community: fm.community,
 							} as Technology,
 						},
 					};
@@ -126,7 +161,6 @@ export const getStaticPaths = (async () => {
 							technology: {
 								id,
 								name: id,
-								description: "",
 								videos,
 							} as Technology,
 						},
@@ -169,12 +203,17 @@ if (!technology) {
 			technology = {
 				id: e.id,
 				name: e.data.name,
-				description: e.data.description,
 				documentation: e.data.documentation,
 				website: e.data.website,
+				source: e.data.source,
+				license: e.data.license,
+				category: e.data.category,
+				subcategory: e.data.subcategory,
 				logo,
 				videos,
-				radar: e.data.radar,
+				matrix: e.data.matrix,
+				cncf: e.data.cncf,
+				community: e.data.community,
 			};
 		} else {
 			const base = resolveContentDirSync("technologies");
@@ -185,12 +224,17 @@ if (!technology) {
 			technology = {
 				id,
 				name: fm.name ?? id,
-				description: typeof fm.description === "string" ? fm.description : "",
 				documentation: fm.documentation,
 				website: fm.website,
+				source: fm.source,
+				license: fm.license,
+				category: fm.category,
+				subcategory: fm.subcategory,
 				logo,
 				videos,
-				radar: fm.radar,
+				matrix: fm.matrix,
+				cncf: fm.cncf,
+				community: fm.community,
 			};
 		}
 	} catch (err) {
@@ -204,8 +248,8 @@ if (!technology) {
 
 const placeholderLogo = "/apple-touch-icon.png";
 
-// Ring display helpers
-const ringLabels: Record<string, string> = {
+// Status display helpers
+const statusLabels: Record<string, string> = {
 	"skip": "Skip",
 	"watch": "Watch",
 	"explore": "Explore",
@@ -219,13 +263,45 @@ const ringLabels: Record<string, string> = {
 	"assess": "Watch",
 	"trial": "Explore",
 };
+const groupingLabels: Record<string, string> = {
+	"plumbing": "Plumbing",
+	"platform": "Platform",
+	"observability": "Observability",
+	"security": "Security",
+};
 const trajectoryEmoji: Record<string, string> = { rising: "↗️", stable: "→", falling: "↘️" };
 
-const ringLabel = technology.radar?.ring ? (ringLabels[technology.radar.ring] || technology.radar.ring) : "";
-const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology.radar.trajectory] : null;
+const statusLabel = technology.matrix?.status ? (statusLabels[technology.matrix.status] || technology.matrix.status) : "";
+const groupingLabel = technology.matrix?.grouping ? (groupingLabels[technology.matrix.grouping] || technology.matrix.grouping) : "";
+const trajectoryIcon = technology.matrix?.trajectory ? trajectoryEmoji[technology.matrix.trajectory] : null;
+
+// CNCF status helpers
+const cncfStatusLabels: Record<string, string> = {
+	"sandbox": "Sandbox",
+	"incubating": "Incubating",
+	"graduated": "Graduated",
+	"archived": "Archived",
+};
+const cncfStatusColors: Record<string, string> = {
+	"sandbox": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+	"incubating": "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+	"graduated": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800",
+	"archived": "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-700",
+};
+
+// Check if we have community links to display
+const hasCommunityLinks = technology.community && (
+	technology.community.twitter ||
+	technology.community.youtube ||
+	technology.community.slack ||
+	technology.community.blog ||
+	technology.community.mailingList ||
+	technology.community.githubDiscussions ||
+	technology.community.chat
+);
 ---
 
-<Page title={technology.name} description={technology.description}>
+<Page title={technology.name} description={`Learn about ${technology.name} - tutorials, videos, and guides from Rawkode Academy.`}>
 	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
 		<!-- Header Section -->
 		<section class="w-full">
@@ -253,30 +329,43 @@ const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology
 
 					<!-- Info -->
 					<div class="flex-1 text-center md:text-left">
-						{technology.radar && (
-							<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 mb-3 group">
-								<span class={`matrix-badge matrix-badge-${technology.radar.ring}`}>
-									{ringLabel}
-								</span>
-								<span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-primary transition-colors">
-									{technology.radar.quadrant.charAt(0).toUpperCase() + technology.radar.quadrant.slice(1)}
-								</span>
-								{trajectoryIcon && (
-									<span class="text-sm" title={`Trajectory: ${technology.radar.trajectory}`}>
-										{trajectoryIcon}
+						<!-- Badges Row -->
+						<div class="flex flex-wrap items-center gap-2 mb-3 justify-center md:justify-start">
+							{technology.matrix && (
+								<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 group">
+									<span class={`matrix-badge matrix-badge-${technology.matrix.status}`}>
+										{statusLabel}
 									</span>
-								)}
-								<svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-								</svg>
-							</a>
-						)}
+									<span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-primary transition-colors">
+										{groupingLabel}
+									</span>
+									{trajectoryIcon && (
+										<span class="text-sm" title={`Trajectory: ${technology.matrix.trajectory}`}>
+											{trajectoryIcon}
+										</span>
+									)}
+									<svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+									</svg>
+								</a>
+							)}
+							{technology.cncf?.status && (
+								<span class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${cncfStatusColors[technology.cncf.status]}`}>
+									<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+										<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+									CNCF {cncfStatusLabels[technology.cncf.status]}
+								</span>
+							)}
+							{technology.category && (
+								<span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+									{technology.category}{technology.subcategory && ` / ${technology.subcategory}`}
+								</span>
+							)}
+						</div>
 						<h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
 							{technology.name}
 						</h1>
-						<p class="text-lg text-gray-600 dark:text-gray-300 mb-6 max-w-3xl">
-							{technology.description}
-						</p>
 
 						<!-- Action Buttons -->
 						<div class="flex flex-wrap gap-3 justify-center md:justify-start">
@@ -306,38 +395,56 @@ const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology
 									Documentation
 								</a>
 							)}
+							{technology.source && (
+								<a
+									href={technology.source}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="btn-glass inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
+								>
+									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+									</svg>
+									Source Code
+								</a>
+							)}
 						</div>
+						{technology.license && (
+							<p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+								License: <span class="font-medium text-gray-700 dark:text-gray-300">{technology.license}</span>
+							</p>
+						)}
 					</div>
 				</div>
 			</div>
 		</section>
 
 		<!-- Rawkode's Take (Card Back) -->
-		{technology.radar && (technology.radar.why || technology.radar.spicyTake || technology.radar.makesMeFeel) && (
+		{technology.matrix && (technology.matrix.why || technology.matrix.spicyTake || technology.matrix.makesMeFeel) && (
 			<section class="w-full">
 				<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
 					<div class="flex flex-col md:flex-row gap-6">
 						<!-- Left: Emoji & Why -->
 						<div class="flex-1">
 							<div class="flex items-center gap-3 mb-4">
-								{technology.radar.makesMeFeel && (
-									<span class="text-4xl">{technology.radar.makesMeFeel}</span>
+								{technology.matrix.makesMeFeel && (
+									<span class="text-4xl">{technology.matrix.makesMeFeel}</span>
 								)}
 								<div>
 									<h2 class="text-xl font-bold text-gray-900 dark:text-white">Rawkode's Take</h2>
 									<p class="text-sm text-gray-500 dark:text-gray-400">Personal opinion, not gospel</p>
 								</div>
 							</div>
-							{technology.radar.why && (
+							{technology.matrix.why && (
 								<p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-									{technology.radar.why}
+									{technology.matrix.why}
 								</p>
 							)}
-							{technology.radar.spicyTake && (
+							{technology.matrix.spicyTake && (
 								<div class="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-xl">
 									<span class="text-lg flex-shrink-0">🌶️</span>
 									<p class="text-sm italic text-red-800 dark:text-red-200">
-										{technology.radar.spicyTake}
+										{technology.matrix.spicyTake}
 									</p>
 								</div>
 							)}
@@ -345,24 +452,24 @@ const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology
 
 						<!-- Right: Stats -->
 						<div class="flex flex-wrap md:flex-col gap-3 md:gap-2 md:min-w-[140px]">
-							{technology.radar.firstUsed && (
+							{technology.matrix.firstUsed && (
 								<div class="stat-pill">
 									<span class="stat-pill-label">First Used</span>
-									<span class="stat-pill-value">{technology.radar.firstUsed}</span>
+									<span class="stat-pill-value">{technology.matrix.firstUsed}</span>
 								</div>
 							)}
-							{technology.radar.lastUsed && (
+							{technology.matrix.lastUsed && (
 								<div class="stat-pill">
 									<span class="stat-pill-label">Last Used</span>
-									<span class="stat-pill-value">{technology.radar.lastUsed}</span>
+									<span class="stat-pill-value">{technology.matrix.lastUsed}</span>
 								</div>
 							)}
-							{technology.radar.confidence && (
+							{technology.matrix.confidence && (
 								<div class="stat-pill">
 									<span class="stat-pill-label">Confidence</span>
 									<span class="stat-pill-value">
-										{technology.radar.confidence === 'deep-experience' ? 'Deep XP' :
-										 technology.radar.confidence === 'some-experience' ? 'Some XP' : 'Gut'}
+										{technology.matrix.confidence === 'deep-experience' ? 'Deep XP' :
+										 technology.matrix.confidence === 'some-experience' ? 'Some XP' : 'Gut'}
 									</span>
 								</div>
 							)}
@@ -374,6 +481,207 @@ const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology
 							)}
 						</div>
 					</div>
+				</div>
+			</section>
+		)}
+
+		<!-- CNCF & Community Info Grid -->
+		{(technology.cncf || hasCommunityLinks) && (
+			<section class="w-full">
+				<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<!-- CNCF Details -->
+					{technology.cncf && (
+						<div class="glass-panel rounded-3xl p-6">
+							<div class="flex items-center gap-3 mb-5">
+								<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+									<svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+									</svg>
+								</div>
+								<div>
+									<h3 class="text-lg font-bold text-gray-900 dark:text-white">CNCF Project</h3>
+									<p class="text-sm text-gray-500 dark:text-gray-400">Cloud Native Computing Foundation</p>
+								</div>
+							</div>
+
+							<!-- CNCF Timeline -->
+							<div class="space-y-3 mb-5">
+								{technology.cncf.accepted && (
+									<div class="flex items-center gap-3">
+										<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+										<span class="text-sm text-gray-600 dark:text-gray-300">
+											Accepted: <span class="font-medium">{technology.cncf.accepted}</span>
+										</span>
+									</div>
+								)}
+								{technology.cncf.incubating && (
+									<div class="flex items-center gap-3">
+										<div class="w-2 h-2 rounded-full bg-purple-500"></div>
+										<span class="text-sm text-gray-600 dark:text-gray-300">
+											Incubating: <span class="font-medium">{technology.cncf.incubating}</span>
+										</span>
+									</div>
+								)}
+								{technology.cncf.graduated && (
+									<div class="flex items-center gap-3">
+										<div class="w-2 h-2 rounded-full bg-green-500"></div>
+										<span class="text-sm text-gray-600 dark:text-gray-300">
+											Graduated: <span class="font-medium">{technology.cncf.graduated}</span>
+										</span>
+									</div>
+								)}
+								{technology.cncf.archived && (
+									<div class="flex items-center gap-3">
+										<div class="w-2 h-2 rounded-full bg-gray-400"></div>
+										<span class="text-sm text-gray-600 dark:text-gray-300">
+											Archived: <span class="font-medium">{technology.cncf.archived}</span>
+										</span>
+									</div>
+								)}
+							</div>
+
+							<!-- CNCF Links -->
+							<div class="flex flex-wrap gap-2">
+								{technology.cncf.devStatsUrl && (
+									<a
+										href={technology.cncf.devStatsUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+										</svg>
+										Dev Stats
+									</a>
+								)}
+								{technology.cncf.annualReviewUrl && (
+									<a
+										href={technology.cncf.annualReviewUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+										</svg>
+										Annual Review
+									</a>
+								)}
+							</div>
+						</div>
+					)}
+
+					<!-- Community Links -->
+					{hasCommunityLinks && (
+						<div class="glass-panel rounded-3xl p-6">
+							<div class="flex items-center gap-3 mb-5">
+								<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
+									<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+									</svg>
+								</div>
+								<div>
+									<h3 class="text-lg font-bold text-gray-900 dark:text-white">Community</h3>
+									<p class="text-sm text-gray-500 dark:text-gray-400">Join the conversation</p>
+								</div>
+							</div>
+
+							<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+								{technology.community?.twitter && (
+									<a
+										href={technology.community.twitter}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+											<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+										</svg>
+										Twitter/X
+									</a>
+								)}
+								{technology.community?.youtube && (
+									<a
+										href={technology.community.youtube}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+											<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+										</svg>
+										YouTube
+									</a>
+								)}
+								{technology.community?.slack && (
+									<a
+										href={technology.community.slack}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+											<path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+										</svg>
+										Slack
+									</a>
+								)}
+								{technology.community?.blog && (
+									<a
+										href={technology.community.blog}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+										</svg>
+										Blog
+									</a>
+								)}
+								{technology.community?.mailingList && (
+									<a
+										href={technology.community.mailingList}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+										</svg>
+										Mailing List
+									</a>
+								)}
+								{technology.community?.githubDiscussions && (
+									<a
+										href={technology.community.githubDiscussions}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+											<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+										</svg>
+										Discussions
+									</a>
+								)}
+								{technology.community?.chat && (
+									<a
+										href={technology.community.chat}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+									>
+										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+										</svg>
+										Chat
+									</a>
+								)}
+							</div>
+						</div>
+					)}
 				</div>
 			</section>
 		)}
@@ -392,9 +700,12 @@ const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology
 		<!-- CTA Section -->
 		<section class="w-full">
 			<div class="max-w-xl mx-auto">
-				<TechnologyCTA
-					technologyId={technology.id}
-					technologyName={technology.name}
+				<NewsletterCTA
+					server:defer
+					audience={`technology:${technology.id}`}
+					badge={`${technology.name} updates`}
+					headline={`Stay Updated on ${technology.name}`}
+					subtitle="Get notified when we publish new tutorials, courses, and videos."
 				/>
 			</div>
 		</section>

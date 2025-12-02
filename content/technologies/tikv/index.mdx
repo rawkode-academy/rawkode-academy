@@ -1,21 +1,50 @@
 ---
-name: "TiKV"
-description: |
-  A distributed transactional key-value database. Based on the design of Google Spanner and HBase, but simpler to manage and without dependencies on any distributed filesystem
+name: TiKV
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://tikv.org"
-source: "https://github.com/tikv/tikv"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-graduated"
-status: "stable"
-radar:
-  quadrant: plumbing
-  ring: adopt
+website: 'https://tikv.org'
+source: 'https://github.com/tikv/tikv'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: plumbing
+  status: adopt
+category: App Definition and Development
+subcategory: Database
+cncf:
+  status: graduated
+  accepted: '2018-08-28'
+  incubating: '2018-08-28'
+  graduated: '2020-09-02'
+  devStatsUrl: 'https://tikv.devstats.cncf.io/'
+  personas:
+    - Application Developers
+    - ML Engineers
+    - DevOps Engineers
+    - Architects
+    - Platform Engineers
+    - DBA
+  tags:
+    - Key-value database
+    - Cloud storage
+    - Transactional
+    - TiDB
+    - Strong consistency
+    - Raft
+    - RocksDB
+    - Titan
+    - Raft-Engine
+  useCase: '>-'
+  businessUseCase: '>-'
+  releaseRate: Per month
+community:
+  twitter: 'https://twitter.com/tikvproject'
+  youtube: 'https://www.youtube.com/channel/UCXyuUR4qEm0HLDniz46k6sg'
+  blog: 'https://tikv.org/blog/'
+  mailingList: 'https://tikv.org/community/community/'
 ---
+A distributed transactional key-value database. Based on the design of Google Spanner and HBase, but simpler to manage and without dependencies on any distributed filesystem
 
 TiKV is a Cloud Native Computing Foundation (CNCF) graduated project.

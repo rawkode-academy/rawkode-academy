@@ -1,20 +1,41 @@
 ---
-name: "Cortex"
-description: |
-  Cortex is a horizontally scalable, highly available, multi-tenant, long-term storage for Prometheus. It allows you to ingest and query metrics from multiple Prometheus servers, centralizing your monitoring data. This provides a global view across all your clusters and enables long-term retention of metrics beyond Prometheus's local storage limitations. It allows you to reliably store Prometheus data for years and efficiently query it, supporting advanced analytics and historical analysis.
+name: Cortex
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://cortexmetrics.io/"
-documentation: "https://cortexmetrics.io/docs/"
-license: "Apache-2.0"
-categories:
-  - "observability"
-  - "monitoring"
-  - "prometheus"
-status: "stable"
+website: 'https://cortexmetrics.io/'
+documentation: 'https://cortexmetrics.io/docs/'
+license: Apache-2.0
+status: stable
+category: Observability and Analysis
+subcategory: Observability
+cncf:
+  status: incubating
+  accepted: '2018-09-20'
+  incubating: '2020-08-20'
+  devStatsUrl: 'https://cortex.devstats.cncf.io/'
+  tags:
+    - observability
+    - prometheus
+  useCase: >-
+    Horizontally scalable, highly available, multi-tenant, long term storage for
+    Prometheus.
+  businessUseCase: '|'
+  releaseRate: Every few months
+  integrations:
+    - Grafana
+    - Prometheus
+    - Slack
+    - PagerDuty
+    - Webhook
+    - AWS SNS
+    - etc.
+community:
+  twitter: 'https://twitter.com/cortexmetrics'
+  slack: 'https://cloud-native.slack.com/messages/cortex/'
 ---
+Cortex is a horizontally scalable, highly available, multi-tenant, long-term storage for Prometheus. It allows you to ingest and query metrics from multiple Prometheus servers, centralizing your monitoring data. This provides a global view across all your clusters and enables long-term retention of metrics beyond Prometheus's local storage limitations. It allows you to reliably store Prometheus data for years and efficiently query it, supporting advanced analytics and historical analysis.
 
 Cortex provides a scalable, long-term storage solution for Prometheus metrics, solving the "global view" and "long-term retention" challenges of standard Prometheus deployments.
 

@@ -1,35 +1,43 @@
 ---
-name: "Kubernetes"
-description: |
-  Kubernetes is an open-source container orchestration system for automating application deployment, scaling, and management. It provides a platform to manage containerized workloads and services, declaring desired states and automating the processes to achieve and maintain them. Kubernetes simplifies complex deployments by abstracting away the underlying infrastructure and offering features like self-healing, rolling updates, and resource management.
-
-  The primary value proposition of Kubernetes lies in its ability to increase application availability, reduce operational overhead, and improve resource utilization. It is widely used for deploying microservices, running batch processing jobs, and managing stateful applications, making it a cornerstone of modern cloud-native application development and deployment practices.
+name: Kubernetes
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://kubernetes.io/"
-documentation: "https://kubernetes.io/docs/home/"
-license: "Apache-2.0"
-categories:
-  - "container-orchestration"
-  - "cloud-native"
-  - "devops"
-  - "cncf"
-  - "platform"
-status: "stable"
-radar:
-  quadrant: plumbing
-  ring: adopt
+website: 'https://kubernetes.io/'
+documentation: 'https://kubernetes.io/docs/home/'
+license: Apache-2.0
+status: stable
+cncf:
+  status: graduated
+  accepted: '2016-03-10'
+  incubating: '2016-03-10'
+  graduated: '2018-03-06'
+  devStatsUrl: 'https://k8s.devstats.cncf.io/'
+community:
+  twitter: 'https://twitter.com/kubernetesio'
+  youtube: 'https://www.youtube.com/channel/UCZ2bu0qutTOM0tHYa_jkIwg'
+  slack: 'http://slack.k8s.io/'
+  blog: 'http://blog.kubernetes.io/'
+  mailingList: 'https://groups.google.com/forum/#!forum/kubernetes-dev'
+matrix:
   trajectory: rising
   confidence: deep-experience
-  firstUsed: "2017-03"
-  lastUsed: "Present"
-  makesMeFeel: "🚀"
-  why: "Everyone should adopt Kubernetes, otherwise you're missing out on the collective knowledge and tooling of the cloud-native ecosystem."
-  spicyTake: "You can even run Java on it now, so there's really no excuse not to."
+  firstUsed: 2017-03
+  lastUsed: Present
+  makesMeFeel: "\U0001F680"
+  why: >-
+    Everyone should adopt Kubernetes, otherwise you're missing out on the
+    collective knowledge and tooling of the cloud-native ecosystem.
+  spicyTake: 'You can even run Java on it now, so there''s really no excuse not to.'
+  grouping: plumbing
+  status: adopt
+category: Orchestration & Management
+subcategory: Scheduling & Orchestration
 ---
+Kubernetes is an open-source container orchestration system for automating application deployment, scaling, and management. It provides a platform to manage containerized workloads and services, declaring desired states and automating the processes to achieve and maintain them. Kubernetes simplifies complex deployments by abstracting away the underlying infrastructure and offering features like self-healing, rolling updates, and resource management.
 
+The primary value proposition of Kubernetes lies in its ability to increase application availability, reduce operational overhead, and improve resource utilization. It is widely used for deploying microservices, running batch processing jobs, and managing stateful applications, making it a cornerstone of modern cloud-native application development and deployment practices.
 
 Kubernetes has become the de facto standard for container orchestration, powering everything from small startups to Fortune 500 companies. Whether you're building microservices, deploying machine learning workloads, or managing complex distributed systems, understanding Kubernetes is essential for modern infrastructure engineering.
 

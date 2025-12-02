@@ -1,18 +1,36 @@
 ---
-name: "Kepler"
-description: |
-  Kepler (Kubernetes-based Efficient Power Level Exporter) uses eBPF to probe energy related system stats and exports as Prometheus metrics.
+name: Kepler
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://sustainable-computing.io/"
-source: "https://github.com/sustainable-computing-io/kepler"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-sandbox"
-status: "stable"
+website: 'https://sustainable-computing.io/'
+source: 'https://github.com/sustainable-computing-io/kepler'
+license: Apache-2.0
+status: stable
+category: Observability and Analysis
+subcategory: Observability
+cncf:
+  status: sandbox
+  accepted: '2023-05-17'
+  devStatsUrl: 'https://kepler.devstats.cncf.io/'
+  personas:
+    - Developers
+    - SREs
+    - Sustainability Officers
+    - IT Managers
+  tags:
+    - sustainability
+    - power monitoring
+    - observability
+    - metrics
+    - ebpf
+    - machine learning
+  useCase: Enabling workload power monitoring for cloud-native systems.
+  integrations:
+    - Kubernetes
+    - Prometheus.
 ---
+Kepler (Kubernetes-based Efficient Power Level Exporter) uses eBPF to probe energy related system stats and exports as Prometheus metrics.
 
 Kepler is a Cloud Native Computing Foundation (CNCF) sandbox project.

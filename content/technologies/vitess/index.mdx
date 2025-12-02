@@ -1,23 +1,45 @@
 ---
-name: "Vitess"
-description: |
-  Vitess is a database clustering system for horizontal scaling of MySQL. It enables you to shard and scale MySQL databases without application-level changes. It's particularly well-suited for cloud-native environments where scalability, fault tolerance, and operational simplicity are critical. Vitess provides features like connection pooling, query rewriting, and traffic shaping, allowing you to manage large MySQL deployments efficiently.
-  
-  Vitess helps organizations address the challenges of scaling MySQL beyond the limits of a single instance. It improves performance, reduces operational overhead, and enhances resilience. Common use cases include large web applications, SaaS platforms, and any database-driven application requiring high availability, scalability, and consistent performance.
+name: Vitess
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://vitess.io/"
-documentation: "https://vitess.io/docs/"
-license: "Apache-2.0"
-categories:
-  - Database
-  - MySQL
-  - Scaling
-status: "stable"
-radar:
-  quadrant: platform
-  ring: adopt
+website: 'https://vitess.io/'
+documentation: 'https://vitess.io/docs/'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: platform
+  status: adopt
+category: App Definition and Development
+subcategory: Database
+cncf:
+  status: graduated
+  accepted: '2018-02-05'
+  incubating: '2018-02-05'
+  graduated: '2019-11-05'
+  devStatsUrl: 'https://vitess.devstats.cncf.io/'
+  personas:
+    - Infrastructure teams
+  tags:
+    - Scalable
+    - reliable
+    - MySQL
+    - distributed
+    - cloud-native
+    - kubernetes
+    - cloud
+    - database
+  useCase: >-
+    Scaling out existing MySQL deployments, or building out internal database
+    solutions for application teams to build products on.
+  businessUseCase: 'Scalability, Reliability, reduce human cost of running databases.'
+  releaseRate: Every 4 months
+community:
+  twitter: 'https://twitter.com/vitessio'
+  blog: 'https://vitess.io/blog/'
+  mailingList: 'https://lists.cncf.io/g/cncf-vitess-users'
 ---
+Vitess is a database clustering system for horizontal scaling of MySQL. It enables you to shard and scale MySQL databases without application-level changes. It's particularly well-suited for cloud-native environments where scalability, fault tolerance, and operational simplicity are critical. Vitess provides features like connection pooling, query rewriting, and traffic shaping, allowing you to manage large MySQL deployments efficiently.
 
+Vitess helps organizations address the challenges of scaling MySQL beyond the limits of a single instance. It improves performance, reduces operational overhead, and enhances resilience. Common use cases include large web applications, SaaS platforms, and any database-driven application requiring high availability, scalability, and consistent performance.
