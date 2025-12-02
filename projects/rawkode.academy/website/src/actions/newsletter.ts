@@ -79,6 +79,74 @@ export const newsletter = {
 			};
 		},
 	}),
+	setPreference: defineAction({
+		input: z.object({
+			channel: z.enum(["newsletter", "marketing", "service"]),
+			audience: z.string().default("academy"),
+			subscribed: z.boolean(),
+			source: z.string().optional(),
+		}),
+		handler: async (input, context) => {
+			if (!context.locals.user) {
+				throw new Error("Unauthorized");
+			}
+
+			const prefixedUserId = createLearnerId(context.locals.user.id);
+
+			const result =
+				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+					prefixedUserId,
+					{
+						audience: input.audience,
+						channel: input.channel,
+						status: input.subscribed ? "subscribed" : "unsubscribed",
+						source: input.source || "website:settings",
+					},
+				);
+
+			return {
+				...result,
+				success: true,
+			};
+		},
+	}),
+	unsubscribeAll: defineAction({
+		input: z.object({
+			source: z.string().optional(),
+		}),
+		handler: async (input, context) => {
+			if (!context.locals.user) {
+				throw new Error("Unauthorized");
+			}
+
+			const prefixedUserId = createLearnerId(context.locals.user.id);
+			const source = input.source || "website:settings:unsubscribe-all";
+
+			const allPrefs =
+				await context.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+					prefixedUserId,
+				);
+
+			const unsubscribePromises = allPrefs.map((pref) =>
+				context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+					prefixedUserId,
+					{
+						audience: pref.audience,
+						channel: pref.channel,
+						status: "unsubscribed",
+						source,
+					},
+				),
+			);
+
+			await Promise.all(unsubscribePromises);
+
+			return {
+				success: true,
+				unsubscribedCount: allPrefs.length,
+			};
+		},
+	}),
 	subscribeWithEmail: defineAction({
 		input: z.object({
 			email: z.string().email("Please enter a valid email address"),
