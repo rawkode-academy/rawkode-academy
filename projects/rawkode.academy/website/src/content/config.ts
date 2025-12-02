@@ -1,9 +1,7 @@
 import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
-import {
-	createTechnologySchema,
-	resolveContentDirSync,
-} from "@rawkodeacademy/content";
+import { createTechnologySchema } from "@rawkodeacademy/content";
+import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 
 // Local, file-based content collections for videos, shows, and technologies.
 // These are populated by scripts/sync-graphql-content.ts during build or on demand.

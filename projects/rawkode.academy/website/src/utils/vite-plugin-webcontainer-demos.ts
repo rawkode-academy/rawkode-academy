@@ -1,6 +1,6 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
-import { resolveContentDir } from "@rawkodeacademy/content";
+import { resolveContentDir } from "@rawkodeacademy/content/utils";
 
 // Minimal Vite Plugin type definition to avoid direct vite import
 interface VitePlugin {

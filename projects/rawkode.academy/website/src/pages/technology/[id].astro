@@ -11,10 +11,10 @@ import matter from "gray-matter";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
-	resolveContentDirSync,
 	type TechnologyData,
 	DEFAULT_TECHNOLOGY_STATUS,
 } from "@rawkodeacademy/content";
+import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 
