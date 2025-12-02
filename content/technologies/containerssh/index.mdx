@@ -1,15 +1,19 @@
 ---
-name: "ContainerSSH"
-description: |
-  ContainerSSH launches a new container for each SSH connection in Kubernetes, Podman or Docker. The user is transparently dropped in the container and the container is removed when the user disconnects. Authentication and container configuration are dynamic using webhooks, no system users required.
-logos:
-website: "https://containerssh.io"
-source: "https://github.com/containerssh/containerssh"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-sandbox"
-status: "stable"
+name: ContainerSSH
+logos: null
+website: 'https://containerssh.io'
+source: 'https://github.com/containerssh/containerssh'
+license: Apache-2.0
+status: stable
+category: Provisioning
+subcategory: Security & Compliance
+cncf:
+  status: sandbox
+  accepted: '2022-09-14'
+  devStatsUrl: 'https://containerssh.devstats.cncf.io/'
+community:
+  slack: 'https://cloud-native.slack.com/'
 ---
+ContainerSSH launches a new container for each SSH connection in Kubernetes, Podman or Docker. The user is transparently dropped in the container and the container is removed when the user disconnects. Authentication and container configuration are dynamic using webhooks, no system users required.
 
 ContainerSSH is a Cloud Native Computing Foundation (CNCF) sandbox project.

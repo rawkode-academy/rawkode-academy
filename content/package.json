@@ -8,6 +8,8 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@inquirer/prompts": "^8.0.1",
+    "gray-matter": "^4.0.3",
     "zod": "^3.24.3"
   }
 }

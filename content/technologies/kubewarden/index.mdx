@@ -1,18 +1,53 @@
 ---
-name: "Kubewarden"
-description: |
-  Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML, and others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and test policies out of cluster.
+name: Kubewarden
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://www.kubewarden.io"
-source: "https://github.com/kubewarden/kubewarden-controller"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-sandbox"
-status: "stable"
+website: 'https://www.kubewarden.io'
+source: 'https://github.com/kubewarden/kubewarden-controller'
+license: Apache-2.0
+status: stable
+category: Provisioning
+subcategory: Security & Compliance
+cncf:
+  status: sandbox
+  accepted: '2022-06-17'
+  devStatsUrl: 'https://kubewarden.devstats.cncf.io/'
+  personas:
+    - Platform engineering
+    - DevOps engineers
+    - Security admins
+    - Cluster admins
+    - Policy authors
+  tags:
+    - wasm
+    - webassembly
+    - web assembly
+    - policy
+    - policy-as-code
+    - governance
+    - software supply chain
+    - pod security
+    - compliance
+  useCase: '>-'
+  businessUseCase: '>-'
+  releaseRate: 'Approximately monthly for minor releases, when needed for patch releases.'
+  integrations:
+    - Sigstore
+    - Cosign
+    - OpenTelemetry
+    - Prometheus
+    - Grafana
+    - Jaeger
+    - Policy Reporter
+community:
+  twitter: 'https://twitter.com/kubewarden'
+  slack: 'https://kubernetes.slack.com/'
+  blog: 'https://kubewarden.io/blog'
+  githubDiscussions: 'https://github.com/kubewarden/community/discussions'
+  mailingList: 'https://lists.cncf.io/g/cncf-kubewarden-maintainers'
 ---
+Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML, and others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and test policies out of cluster.
 
 Kubewarden is a Cloud Native Computing Foundation (CNCF) sandbox project.

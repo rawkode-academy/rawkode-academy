@@ -1,26 +1,47 @@
 ---
-name: "Prometheus"
-description: |
-  Prometheus is an open-source systems monitoring and alerting toolkit originally built at SoundCloud. It excels at recording real-time metrics in a time series database, allowing for dimensional data models, powerful querying via PromQL, and flexible alerting. Prometheus provides value by enabling comprehensive monitoring of cloud-native environments, allowing users to identify performance bottlenecks, troubleshoot issues, and optimize resource utilization. It's commonly used for monitoring applications, infrastructure, and services, especially within Kubernetes and other containerized environments.
+name: Prometheus
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://prometheus.io/"
-documentation: "https://prometheus.io/docs/introduction/overview/"
-license: "Apache-2.0"
-categories:
-  - "monitoring"
-  - "observability"
-  - "time-series-database"
-  - "alerting"
-  - "cncf"
-  - "metrics"
-status: "stable"
-radar:
-  quadrant: observability
-  ring: adopt
+website: 'https://prometheus.io/'
+documentation: 'https://prometheus.io/docs/introduction/overview/'
+license: Apache-2.0
+status: stable
+cncf:
+  status: graduated
+  accepted: '2016-05-09'
+  incubating: '2016-05-09'
+  graduated: '2018-08-09'
+  devStatsUrl: 'https://prometheus.devstats.cncf.io/'
+  personas:
+    - Cluster Administrators
+    - Developers
+    - SREs
+    - Platform Engineers
+    - Network Engineers
+  tags:
+    - monitoring
+    - alerting
+    - observability
+    - instrumentation
+  useCase: metrics-based monitoring and alerting
+  releaseRate: every 6 weeks for prometheus/prometheus
+  integrations:
+    - '>-'
+community:
+  twitter: 'https://twitter.com/PrometheusIO'
+  youtube: 'https://www.youtube.com/channel/UC4pLFely0-Odea4B2NL1nWA'
+  slack: 'https://libera.chat/'
+  blog: 'https://prometheus.io/blog/'
+  mailingList: 'https://prometheus.io/community/'
+matrix:
+  grouping: observability
+  status: adopt
+category: Observability and Analysis
+subcategory: Observability
 ---
+Prometheus is an open-source systems monitoring and alerting toolkit originally built at SoundCloud. It excels at recording real-time metrics in a time series database, allowing for dimensional data models, powerful querying via PromQL, and flexible alerting. Prometheus provides value by enabling comprehensive monitoring of cloud-native environments, allowing users to identify performance bottlenecks, troubleshoot issues, and optimize resource utilization. It's commonly used for monitoring applications, infrastructure, and services, especially within Kubernetes and other containerized environments.
 
 Prometheus is a powerful open-source monitoring and alerting toolkit widely adopted in cloud-native environments. It provides a robust, highly flexible solution for collecting, storing, and querying time-series data, making it the de facto standard for infrastructure and application monitoring.
 

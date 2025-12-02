@@ -1,27 +1,53 @@
 ---
-name: "Istio"
-description: |
-  Istio is an open-source service mesh that provides a way to control and secure traffic between microservices. It adds a layer of infrastructure on top of a Kubernetes cluster (or other deployment environments) without requiring changes to application code. Istio manages service discovery, traffic routing, load balancing, service-to-service authentication, authorization, and observability. 
-  
-  The primary value of Istio lies in its ability to improve the reliability, security, and observability of microservice architectures. Common use cases include A/B testing, canary deployments, fault injection, rate limiting, mutual TLS authentication, and detailed monitoring and tracing of service interactions.
+name: Istio
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://istio.io/"
-documentation: "https://istio.io/latest/docs/"
-license: "Apache-2.0"
-categories:
-  - "service-mesh"
-  - "networking"
-  - "security"
-  - "observability"
-  - "kubernetes"
-status: "stable"
-radar:
-  quadrant: platform
-  ring: adopt
+website: 'https://istio.io/'
+documentation: 'https://istio.io/latest/docs/'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: platform
+  status: adopt
+category: Orchestration & Management
+subcategory: Service Mesh
+cncf:
+  status: graduated
+  accepted: '2022-09-30'
+  incubating: '2022-09-30'
+  graduated: '2023-07-12'
+  devStatsUrl: 'https://istio.devstats.cncf.io/'
+  personas:
+    - SREs
+    - DevOps Engineers
+    - Architects
+    - Platform Engineers
+  tags:
+    - observability
+    - Service Mesh
+    - mTLS
+    - traffic management
+    - multi-cluster
+    - load balancing
+    - policy
+    - security
+    - extensibility
+  useCase: '>-'
+  businessUseCase: 'Security, Traffic Management, Observability, Policy Enforcement.'
+  releaseRate: Every 3 months
+  integrations:
+    - 'https://istio.io/latest/docs/ops/integrations/'
+community:
+  twitter: 'https://twitter.com/IstioMesh'
+  youtube: 'https://www.youtube.com/c/Istio'
+  slack: 'https://slack.istio.io/'
+  blog: 'https://istio.io/blog/'
 ---
+Istio is an open-source service mesh that provides a way to control and secure traffic between microservices. It adds a layer of infrastructure on top of a Kubernetes cluster (or other deployment environments) without requiring changes to application code. Istio manages service discovery, traffic routing, load balancing, service-to-service authentication, authorization, and observability. 
+
+The primary value of Istio lies in its ability to improve the reliability, security, and observability of microservice architectures. Common use cases include A/B testing, canary deployments, fault injection, rate limiting, mutual TLS authentication, and detailed monitoring and tracing of service interactions.
 
 Istio is an open-source service mesh that provides a transparent and language-agnostic way to connect, secure, control, and observe services within a microservices architecture. It layers robust infrastructure capabilities onto existing distributed applications, typically in a Kubernetes environment, without requiring any changes to the application code itself.
 

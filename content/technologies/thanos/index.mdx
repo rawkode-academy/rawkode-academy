@@ -1,18 +1,39 @@
 ---
-name: "Thanos"
-description: |
-  Thanos is a highly available, distributed system built on top of Prometheus. It allows you to query metrics from multiple Prometheus instances, providing a global view of your application performance and infrastructure. This enables long-term storage and analysis of Prometheus data beyond the limited retention capabilities of individual Prometheus servers. Thanos achieves this through components like Store Gateway, Compactor, Querier, and Ruler, which work together to fetch, store, and process Prometheus data across multiple deployments and time spans. Its value lies in providing unified observability, enabling scaling Prometheus beyond single clusters, and facilitating reliable long-term metric storage.
+name: Thanos
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://thanos.io/"
-documentation: "https://thanos.io/tip/thanos/getting-started.md/"
-license: "Apache-2.0"
-categories:
-  - Observability
-  - Monitoring
-  - Prometheus
-status: "stable"
+website: 'https://thanos.io/'
+documentation: 'https://thanos.io/tip/thanos/getting-started.md/'
+license: Apache-2.0
+status: stable
+category: Observability and Analysis
+subcategory: Observability
+cncf:
+  status: incubating
+  accepted: '2019-07-14'
+  incubating: '2020-08-19'
+  devStatsUrl: 'https://thanos.devstats.cncf.io/'
+  personas:
+    - Cluster Administrators
+    - Developers
+    - SREs
+    - Platform Engineers
+    - Network Engineers
+  tags:
+    - monitoring
+    - alerting
+    - observability
+    - instrumentation
+  useCase: global scale metrics-based monitoring and alerting
+  businessUseCase: global scale metrics-based monitoring and alerting
+  releaseRate: every 6 weeks
+  integrations:
+    - '>-'
+community:
+  twitter: 'https://twitter.com/ThanosMetrics'
+  slack: 'https://cloud-native.slack.com/messages/CK5RSSC10'
+  blog: 'https://thanos.io/blog/'
 ---
-
+Thanos is a highly available, distributed system built on top of Prometheus. It allows you to query metrics from multiple Prometheus instances, providing a global view of your application performance and infrastructure. This enables long-term storage and analysis of Prometheus data beyond the limited retention capabilities of individual Prometheus servers. Thanos achieves this through components like Store Gateway, Compactor, Querier, and Ruler, which work together to fetch, store, and process Prometheus data across multiple deployments and time spans. Its value lies in providing unified observability, enabling scaling Prometheus beyond single clusters, and facilitating reliable long-term metric storage.

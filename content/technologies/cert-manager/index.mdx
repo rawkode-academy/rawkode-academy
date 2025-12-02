@@ -1,20 +1,53 @@
 ---
-name: "cert-manager"
-description: |
-  cert-manager is a CNCF graduated project.
+name: cert-manager
 logos:
   icon: true
   stacked: true
-website: "https://cert-manager.io/"
-source: "https://github.com/cert-manager/cert-manager"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-graduated"
-status: "stable"
-radar:
-  quadrant: security
-  ring: adopt
+website: 'https://cert-manager.io/'
+source: 'https://github.com/cert-manager/cert-manager'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: security
+  status: adopt
+category: Provisioning
+subcategory: Security & Compliance
+cncf:
+  status: graduated
+  accepted: '2020-11-10'
+  incubating: '2022-09-19'
+  graduated: '2024-09-29'
+  devStatsUrl: 'https://certmanager.devstats.cncf.io/'
+  personas:
+    - Cluster administrators
+    - developers
+    - platform engineers
+  tags:
+    - certificates
+    - acme
+    - letsencrypt
+    - security
+    - encryption
+    - tls
+    - ssl
+    - x509
+  useCase: >-
+    cert-manager\_is a powerful and extensible X.509 certificate controller for
+    Kubernetes and OpenShift workloads. It will obtain certificates from a
+    variety of Issuers, both popular public Issuers as well as private Issuers,
+    and ensure the certificates are valid and up-to-date, and will attempt to
+    renew certificates at a configured time before expiry.
+  businessUseCase: '>-'
+  releaseRate: >-
+    Major release every 2 months, with each major release supported for 4
+    months.
+  integrations:
+    - '>-'
+community:
+  twitter: 'https://twitter.com/CertManager'
+  youtube: 'https://www.youtube.com/@cert-manager'
+  slack: 'https://kubernetes.slack.com/messages/cert-manager'
 ---
+cert-manager is a CNCF graduated project.
 
 cert-manager is a Cloud Native Computing Foundation (CNCF) graduated project.

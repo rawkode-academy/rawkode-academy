@@ -1,21 +1,69 @@
 ---
-name: "Harbor"
-description: |
-  Harbor is a CNCF graduated project.
+name: Harbor
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://goharbor.io/"
-source: "https://github.com/goharbor/harbor"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-graduated"
-status: "stable"
-radar:
-  quadrant: platform
-  ring: adopt
+website: 'https://goharbor.io/'
+source: 'https://github.com/goharbor/harbor'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: platform
+  status: adopt
+category: Provisioning
+subcategory: Container Registry
+cncf:
+  status: graduated
+  accepted: '2018-07-31'
+  incubating: '2018-11-14'
+  graduated: '2020-06-15'
+  devStatsUrl: 'https://harbor.devstats.cncf.io/'
+  personas:
+    - SREs
+    - Cloud Architects
+    - Platform Engineers
+    - DevOps Engineer
+    - DevOps practitioners
+    - DevSecOps practitioners
+  tags:
+    - registry
+    - images
+    - OCI
+    - container
+    - artefacts
+    - vulnerability scanning
+    - self-hosted
+    - harbor
+    - edge
+    - replication
+  useCase: '>-'
+  businessUseCase: >-
+    Self-hosted container registry with multiple integrations for security and
+    validation.
+  releaseRate: We aim to have 3 big releases per year with many patch releases in between.
+  integrations:
+    - trivy
+    - cosing
+    - notary
+    - github
+    - gce
+    - jfrog
+    - snyk
+    - clair
+    - sysdig
+    - oidc
+    - ldap
+    - ecr
+    - acr
+    - docker
+    - quay
+    - helm
+community:
+  twitter: 'https://twitter.com/project_harbor'
+  slack: 'https://cloud-native.slack.com/messages/harbor/'
+  mailingList: 'https://lists.cncf.io/g/harbor-users/topics'
 ---
+Harbor is a CNCF graduated project.
 
 Harbor is a Cloud Native Computing Foundation (CNCF) graduated project.

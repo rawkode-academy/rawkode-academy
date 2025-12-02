@@ -33,7 +33,6 @@ export function registerTechnologies(
 		fields: (t: any) => ({
 			id: t.exposeID("id"),
 			name: t.exposeString("name"),
-			description: t.exposeString("description"),
 			icon: t.field({
 				type: "String",
 				nullable: true,
@@ -56,9 +55,15 @@ export function registerTechnologies(
 			documentation: t.string({
 				resolve: (r: TechnologyItem) => r.documentation ?? "",
 			}),
-			categories: t.field({
-				type: ["String"],
-				resolve: (r: TechnologyItem) => r.categories ?? [],
+			category: t.field({
+				type: "String",
+				nullable: true,
+				resolve: (r: TechnologyItem) => r.category ?? undefined,
+			}),
+			subcategory: t.field({
+				type: "String",
+				nullable: true,
+				resolve: (r: TechnologyItem) => r.subcategory ?? undefined,
 			}),
 			aliases: t.field({
 				type: ["String"],

@@ -1,35 +1,64 @@
 ---
-name: "Cilium"
-description: |
-  Cilium is an open-source, cloud-native networking, security, and observability solution. It provides a modern approach to securing and connecting container workloads by leveraging eBPF (extended Berkeley Packet Filter) technology. This enables deep visibility and control over network traffic and application behavior at the Linux kernel level, providing significant performance benefits and enabling advanced security policies based on application identities rather than network addresses.
-
-  Cilium offers several key benefits, including network policy enforcement, service mesh functionality, load balancing, observability, and security for microservices architectures. Its main use cases involve securing Kubernetes clusters, providing fine-grained network policies based on application identities, implementing service mesh features without sidecars in some cases, and enabling advanced observability for debugging and troubleshooting distributed applications.
+name: Cilium
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://cilium.io/"
-documentation: "https://docs.cilium.io/en/stable/"
-license: "Apache-2.0"
-categories:
-  - "networking"
-  - "security"
-  - "observability"
-  - "ebpf"
-  - "kubernetes"
-status: "stable"
-radar:
-  quadrant: plumbing
-  ring: adopt
+website: 'https://cilium.io/'
+documentation: 'https://docs.cilium.io/en/stable/'
+license: Apache-2.0
+status: stable
+matrix:
   trajectory: rising
   confidence: deep-experience
-  firstUsed: "2020-06"
-  lastUsed: "Present"
-  makesMeFeel: "🚀"
-  why: "eBPF-powered networking that replaces kube-proxy, provides incredible observability with Hubble, and makes service mesh sidecars optional. The future of K8s networking."
-  spicyTake: "If you're still running Calico in 2024, you're leaving performance and observability on the table."
+  firstUsed: 2020-06
+  lastUsed: Present
+  makesMeFeel: "\U0001F680"
+  why: >-
+    eBPF-powered networking that replaces kube-proxy, provides incredible
+    observability with Hubble, and makes service mesh sidecars optional. The
+    future of K8s networking.
+  spicyTake: >-
+    If you're still running Calico in 2024, you're leaving performance and
+    observability on the table.
+  grouping: plumbing
+  status: adopt
+category: Runtime
+subcategory: Cloud Native Network
+cncf:
+  status: graduated
+  accepted: '2021-10-13'
+  incubating: '2021-10-13'
+  graduated: '2023-10-11'
+  devStatsUrl: 'https://cilium.devstats.cncf.io/'
+  personas:
+    - Platform engineers
+    - Network teams
+    - SRE
+    - DevOps Engineers
+    - Security teams
+  tags:
+    - CNI
+    - Networking
+    - Load Balancing
+    - Service Mesh
+    - Observability
+    - Runtime Security
+    - eBPF
+    - Cluster Mesh
+    - Multicloud
+  useCase: '>-'
+  businessUseCase: '>-'
+  releaseRate: >-
+    2-3 major releases a year, plus minor and point releases for bug fixes and
+    security updates
+community:
+  twitter: 'https://twitter.com/ciliumproject'
+  slack: 'https://cilium.herokuapp.com/'
 ---
+Cilium is an open-source, cloud-native networking, security, and observability solution. It provides a modern approach to securing and connecting container workloads by leveraging eBPF (extended Berkeley Packet Filter) technology. This enables deep visibility and control over network traffic and application behavior at the Linux kernel level, providing significant performance benefits and enabling advanced security policies based on application identities rather than network addresses.
 
+Cilium offers several key benefits, including network policy enforcement, service mesh functionality, load balancing, observability, and security for microservices architectures. Its main use cases involve securing Kubernetes clusters, providing fine-grained network policies based on application identities, implementing service mesh features without sidecars in some cases, and enabling advanced observability for debugging and troubleshooting distributed applications.
 
 Cilium represents the future of Kubernetes networking and security. By leveraging eBPF (extended Berkeley Packet Filter), Cilium delivers unparalleled performance, deep observability, and advanced security features that traditional solutions simply cannot match.
 

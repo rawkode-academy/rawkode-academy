@@ -1,21 +1,48 @@
 ---
-name: "Jaeger"
-description: |
-  Jaeger is a CNCF graduated project.
+name: Jaeger
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://www.jaegertracing.io/"
-source: "https://github.com/jaegertracing/jaeger"
-license: "Apache-2.0"
-categories:
-  - "cncf"
-  - "cncf-graduated"
-status: "stable"
-radar:
-  quadrant: observability
-  ring: adopt
+website: 'https://www.jaegertracing.io/'
+source: 'https://github.com/jaegertracing/jaeger'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: observability
+  status: adopt
+category: Observability and Analysis
+subcategory: Observability
+cncf:
+  status: graduated
+  accepted: '2017-09-13'
+  incubating: '2017-09-13'
+  graduated: '2019-10-31'
+  devStatsUrl: 'https://jaeger.devstats.cncf.io/'
+  personas:
+    - Developers
+    - SREs
+    - Platform Engineers
+    - Network Engineers
+  tags:
+    - monitoring
+    - observability
+    - tracing
+  useCase: tracing-based observability for distributed systems
+  businessUseCase: '>-'
+  releaseRate: monthly
+  integrations:
+    - OpenTelemetry
+    - Prometheus
+    - >-
+      multiple [storage
+      backends](https://www.jaegertracing.io/docs/latest/deployment/#span-storage-backends).
+community:
+  twitter: 'https://twitter.com/JaegerTracing'
+  slack: 'https://slack.cncf.io/'
+  blog: 'https://medium.com/jaegertracing/'
+  mailingList: 'https://groups.google.com/forum/#!forum/jaeger-tracing'
 ---
+Jaeger is a CNCF graduated project.
 
 Jaeger is a Cloud Native Computing Foundation (CNCF) graduated project.

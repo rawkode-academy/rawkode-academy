@@ -5,7 +5,6 @@ import { email } from "./email";
 import { newsletter } from "./newsletter";
 import { addReaction, removeReaction } from "./reaction";
 import { trackShareEvent } from "./share";
-import { technology } from "./technology";
 import { trackVideoEvent } from "./video";
 
 export const server = {
@@ -15,7 +14,6 @@ export const server = {
 	signupForCourseUpdates,
 	newsletter,
 	email,
-	technology,
 	trackShareEvent,
 	addReaction,
 	removeReaction,

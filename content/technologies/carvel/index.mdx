@@ -1,22 +1,27 @@
 ---
-name: "Carvel"
-description: |
-  Carvel is a suite of reliable, single-purpose, composable tools that provide simple building blocks to create and manage Kubernetes applications. It aims to make Kubernetes more accessible and manageable by providing tools that focus on specific tasks like packaging, configuration, and deployment. Carvel simplifies application delivery and management by enabling users to define, package, and deploy applications in a declarative and repeatable way. It helps to manage the complexity of Kubernetes manifests and configurations, reducing errors and improving overall application lifecycle management.
-  
-  Carvel tools include: `kapp` (for application deployment and lifecycle management), `ytt` (for YAML templating), `kbld` (for building container images), `imgpkg` (for packaging and distributing container images and configuration), and `vendir` (for declarative vendoring of configuration from various sources). These tools can be used individually or in combination to streamline Kubernetes workflows and improve developer productivity.
+name: Carvel
 logos:
   icon: true
   horizontal: true
   stacked: true
-website: "https://carvel.dev/"
-documentation: "https://carvel.dev/docs/"
-license: "Apache-2.0"
-categories:
-  - "kubernetes"
-  - "configuration-management"
-  - "ci-cd"
-status: "stable"
+website: 'https://carvel.dev/'
+documentation: 'https://carvel.dev/docs/'
+license: Apache-2.0
+status: stable
+category: App Definition and Development
+subcategory: Application Definition & Image Build
+cncf:
+  status: sandbox
+  accepted: '2022-09-14'
+  devStatsUrl: 'https://carvel.devstats.cncf.io/'
+community:
+  twitter: 'https://twitter.com/carvel_dev'
+  slack: 'https://kubernetes.slack.com/archives/CH8KCCKA5'
+  blog: 'https://carvel.dev/blog/'
 ---
+Carvel is a suite of reliable, single-purpose, composable tools that provide simple building blocks to create and manage Kubernetes applications. It aims to make Kubernetes more accessible and manageable by providing tools that focus on specific tasks like packaging, configuration, and deployment. Carvel simplifies application delivery and management by enabling users to define, package, and deploy applications in a declarative and repeatable way. It helps to manage the complexity of Kubernetes manifests and configurations, reducing errors and improving overall application lifecycle management.
+
+Carvel tools include: `kapp` (for application deployment and lifecycle management), `ytt` (for YAML templating), `kbld` (for building container images), `imgpkg` (for packaging and distributing container images and configuration), and `vendir` (for declarative vendoring of configuration from various sources). These tools can be used individually or in combination to streamline Kubernetes workflows and improve developer productivity.
 
 Carvel provides a powerful collection of tools designed to enhance the experience of deploying and managing applications on Kubernetes. By offering focused, composable utilities, Carvel enables users to automate complex Kubernetes workflows and maintain consistency across environments.
 

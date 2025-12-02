@@ -1,0 +1,88 @@
+name: Sync CNCF Landscape Data
+
+on:
+  schedule:
+    # Every Monday at 9am UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no PR creation)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-landscape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+        working-directory: content
+
+      - name: Run CNCF landscape sync
+        run: bun scripts/sync-landscape.ts --apply
+        working-directory: content
+
+      - name: Validate technology data
+        run: bun scripts/validate-technologies.ts
+        working-directory: content
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [[ -n $(git status --porcelain content/technologies/) ]]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            change_count=$(git diff --stat content/technologies/ | tail -1)
+            echo "change_count=$change_count" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true' && !inputs.dry_run
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automated/cncf-landscape-sync
+          delete-branch: true
+          title: 'chore(content): sync CNCF landscape data'
+          body-path: content/landscape-sync-report.md
+          commit-message: |
+            chore(content): sync CNCF landscape data
+
+            Automated sync from CNCF landscape repository.
+
+            Changes: ${{ steps.changes.outputs.change_count }}
+
+            🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+            Co-Authored-By: Claude <noreply@anthropic.com>
+          labels: |
+            automated
+            content
+            cncf-sync
+          assignees: rawkode
+
+      - name: Summary
+        if: always()
+        run: |
+          if [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
+            echo "✅ Changes detected and processed"
+            echo "📊 ${{ steps.changes.outputs.change_count }}"
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+              echo "ℹ️ Dry-run mode: PR creation skipped"
+            fi
+          else
+            echo "ℹ️ No changes detected - all technologies are up-to-date"
+          fi

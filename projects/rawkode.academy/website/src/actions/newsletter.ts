@@ -14,12 +14,16 @@ export function createEmailId(email: string): string {
 	return `email:${email.toLowerCase().trim()}`;
 }
 
-const NEWSLETTER_COOKIE_NAME = "newsletter:academy:updates";
 const NEWSLETTER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year in seconds
+
+function getNewsletterCookieName(audience: string): string {
+	return `newsletter:${audience}:updates`;
+}
 
 export const newsletter = {
 	subscribe: defineAction({
 		input: z.object({
+			audience: z.string().default("academy"),
 			source: z.string().optional(),
 		}),
 		handler: async (input, context) => {
@@ -33,7 +37,7 @@ export const newsletter = {
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
-						audience: "academy",
+						audience: input.audience,
 						channel: "newsletter",
 						status: "subscribed",
 						source: input.source || "website:newsletter:unknown",
@@ -48,6 +52,7 @@ export const newsletter = {
 	}),
 	unsubscribe: defineAction({
 		input: z.object({
+			audience: z.string().default("academy"),
 			source: z.string().optional(),
 		}),
 		handler: async (input, context) => {
@@ -61,7 +66,7 @@ export const newsletter = {
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
-						audience: "academy",
+						audience: input.audience,
 						channel: "newsletter",
 						status: "unsubscribed",
 						source: input.source || "website:newsletter:unknown",
@@ -77,6 +82,7 @@ export const newsletter = {
 	subscribeWithEmail: defineAction({
 		input: z.object({
 			email: z.string().email("Please enter a valid email address"),
+			audience: z.string().default("academy"),
 			source: z.string().optional(),
 		}),
 		handler: async (input, context) => {
@@ -87,7 +93,7 @@ export const newsletter = {
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
-						audience: "academy",
+						audience: input.audience,
 						channel: "newsletter",
 						status: "subscribed",
 						source: input.source || "website:newsletter:unknown",
@@ -95,7 +101,7 @@ export const newsletter = {
 				);
 
 			// Set cookie for anonymous users to suppress CTA in future visits
-			context.cookies.set(NEWSLETTER_COOKIE_NAME, "true", {
+			context.cookies.set(getNewsletterCookieName(input.audience), "true", {
 				path: "/",
 				maxAge: NEWSLETTER_COOKIE_MAX_AGE,
 				httpOnly: false, // Allow client-side reading for CTA suppression
@@ -112,6 +118,7 @@ export const newsletter = {
 	unsubscribeWithEmail: defineAction({
 		input: z.object({
 			email: z.string().email("Please enter a valid email address"),
+			audience: z.string().default("academy"),
 			source: z.string().optional(),
 		}),
 		handler: async (input, context) => {
@@ -122,7 +129,7 @@ export const newsletter = {
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
-						audience: "academy",
+						audience: input.audience,
 						channel: "newsletter",
 						status: "unsubscribed",
 						source: input.source || "website:newsletter:unknown",
@@ -130,7 +137,9 @@ export const newsletter = {
 				);
 
 			// Clear the newsletter cookie on unsubscribe
-			context.cookies.delete(NEWSLETTER_COOKIE_NAME, { path: "/" });
+			context.cookies.delete(getNewsletterCookieName(input.audience), {
+				path: "/",
+			});
 
 			return {
 				...result,
