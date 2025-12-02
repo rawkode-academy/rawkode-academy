@@ -13,16 +13,37 @@ if (!user) {
 	return Astro.redirect(`/sign-in?returnTo=${encodeURIComponent("/settings")}`);
 }
 
-let isNewsletterSubscribed = false;
 const prefixedUserId = createLearnerId(user.id);
 
+interface EmailPreference {
+	channel: string;
+	audience: string;
+}
+
+let academyNewsletter = false;
+let matrixNewsletter = false;
+let marketingEmails = false;
+let serviceEmails = false;
+let technologySubscriptions: string[] = [];
+
 try {
-	const prefs = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+	const allPrefs: EmailPreference[] = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
 		prefixedUserId,
-		"newsletter",
-		"academy",
 	);
-	isNewsletterSubscribed = prefs.length > 0;
+
+	for (const pref of allPrefs) {
+		if (pref.channel === "newsletter" && pref.audience === "academy") {
+			academyNewsletter = true;
+		} else if (pref.channel === "newsletter" && pref.audience === "matrix") {
+			matrixNewsletter = true;
+		} else if (pref.channel === "marketing" && pref.audience === "academy") {
+			marketingEmails = true;
+		} else if (pref.channel === "service" && pref.audience === "academy") {
+			serviceEmails = true;
+		} else if (pref.channel === "newsletter" && pref.audience.startsWith("technology:")) {
+			technologySubscriptions.push(pref.audience.replace("technology:", ""));
+		}
+	}
 } catch (e) {
 	console.error("Failed to fetch email preferences", e);
 }
@@ -77,7 +98,14 @@ try {
 					</p>
 				</div>
 					<div class="p-6">
-						<EmailPreferences client:load isSubscribed={isNewsletterSubscribed} />
+						<EmailPreferences
+							client:load
+							academyNewsletter={academyNewsletter}
+							matrixNewsletter={matrixNewsletter}
+							marketingEmails={marketingEmails}
+							serviceEmails={serviceEmails}
+							technologySubscriptions={technologySubscriptions}
+						/>
 					</div>
 				</section>
 
