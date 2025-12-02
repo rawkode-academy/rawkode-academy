@@ -117,9 +117,9 @@ const learnNavItems = computed(() => [
 		current: isCurrentPath("/technology"),
 		children: [
 			{
-				name: "Radar",
-				href: "/technology/radar",
-				current: isCurrentPath("/technology/radar"),
+				name: "Matrix",
+				href: "/technology/matrix",
+				current: isCurrentPath("/technology/matrix"),
 			},
 		],
 	},
