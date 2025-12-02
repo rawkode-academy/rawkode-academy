@@ -7,10 +7,12 @@ on:
     paths:
       - ".github/workflows/rawkode-academy.yaml"
       - "projects/rawkode.academy/website/**"
+      - "content/**"
   pull_request:
     paths:
       - ".github/workflows/rawkode-academy.yaml"
       - "projects/rawkode.academy/website/**"
+      - "content/**"
   workflow_dispatch:
 
 concurrency:
