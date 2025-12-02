@@ -36,7 +36,7 @@ description: >-
   (49:08) - Diagrid's Role with Dapr
 
   (52:00) - Conclusion and Sign-Off
-publishedAt: 2025-03-20T12:00:00.000Z
+publishedAt: 2025-03-21T12:00:00.000Z
 technologies: []
 show: cloud-native-compass
 videoId: xnmoo3urafyt4khqozj6d0af

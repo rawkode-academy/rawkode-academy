@@ -50,7 +50,7 @@ const shouldHide = !user && hasNewsletterCookie;
 ---
 
 {!shouldHide && (
-<section class:list={["w-full", className ?? "my-12"]}>
+<section class:list={["w-full py-12 relative z-10", className]}>
         <div class="glass-card bg-gradient-card card-shadow p-4 sm:p-6">
                 <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
                         <div class="flex-1 min-w-0 space-y-1">

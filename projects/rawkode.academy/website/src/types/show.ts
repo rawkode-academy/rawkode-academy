@@ -18,8 +18,11 @@ export interface ShowSummary {
 	name: string;
 	hosts?: ShowHost[] | null;
 	episodes?: (ShowEpisode | null)[] | null;
-	cover?: {
-		image: ImageMetadata;
-		alt: string;
-	} | null | undefined;
+	cover?:
+		| {
+				image: ImageMetadata;
+				alt: string;
+		  }
+		| null
+		| undefined;
 }

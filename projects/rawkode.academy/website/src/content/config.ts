@@ -107,15 +107,22 @@ const resourceSchema = z.object({
 
 const people = defineCollection({
 	loader: glob({
-		pattern: ["**/*.json"],
+		pattern: ["**/*.{md,mdx}"],
 		base: resolveContentDirSync("people"),
 	}),
 	schema: z.object({
 		name: z.string(),
-		handle: z.string(),
+		id: z.string(),
+		github: z.string().optional(),
+		twitter: z.string().optional(),
+		bluesky: z.string().optional(),
+		mastodon: z.string().optional(),
+		linkedin: z.string().optional(),
+		website: z.string().optional(),
+		youtube: z.string().optional(),
 		forename: z.string().optional(),
 		surname: z.string().optional(),
-		biography: z.string().optional(),
+		// biography: z.string().optional(), // Moved to MDX body
 		links: z
 			.array(
 				z.object({
@@ -124,6 +131,20 @@ const people = defineCollection({
 				}),
 			)
 			.default([]),
+	}).transform((person) => {
+		let avatarUrl = undefined;
+
+		if (person.github) {
+			const githubHandle = person.github.split("/").pop();
+			if (githubHandle) {
+				avatarUrl = `https://github.com/${githubHandle}.png`;
+			}
+		}
+
+		return {
+			...person,
+			avatarUrl,
+		};
 	}),
 });
 
