@@ -27,9 +27,10 @@ let serviceEmails = false;
 let technologySubscriptions: string[] = [];
 
 try {
-	const allPrefs: EmailPreference[] = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
-		prefixedUserId,
-	);
+	const allPrefs: EmailPreference[] =
+		await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+			prefixedUserId,
+		);
 
 	for (const pref of allPrefs) {
 		if (pref.channel === "newsletter" && pref.audience === "academy") {
@@ -40,7 +41,10 @@ try {
 			marketingEmails = true;
 		} else if (pref.channel === "service" && pref.audience === "academy") {
 			serviceEmails = true;
-		} else if (pref.channel === "newsletter" && pref.audience.startsWith("technology:")) {
+		} else if (
+			pref.channel === "newsletter" &&
+			pref.audience.startsWith("technology:")
+		) {
 			technologySubscriptions.push(pref.audience.replace("technology:", ""));
 		}
 	}
