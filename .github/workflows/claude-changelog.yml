@@ -1,0 +1,88 @@
+name: Claude Changelog Generator
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  generate-changelog:
+    # Only run when a PR is actually merged (not just closed)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Changelog Generator
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            A pull request has just been merged to main. Analyze the changes and determine if they warrant a changelog entry for the Rawkode Academy website.
+
+            ## Merged PR Details
+            - **PR Number**: ${{ github.event.pull_request.number }}
+            - **Title**: ${{ github.event.pull_request.title }}
+            - **Author**: ${{ github.event.pull_request.user.login }}
+            - **Body**: ${{ github.event.pull_request.body }}
+
+            ## Instructions
+
+            1. First, use `gh pr diff ${{ github.event.pull_request.number }}` to see what changed in this PR.
+
+            2. Evaluate if this PR deserves a changelog entry. Create a changelog entry ONLY if the changes are **user-facing and noteworthy**, such as:
+               - New features visible to users
+               - Significant UI/UX improvements
+               - Important bug fixes that affected users
+               - Breaking changes
+
+               Do NOT create changelog entries for:
+               - Internal refactoring
+               - CI/CD changes
+               - Documentation updates (unless it's a new docs section)
+               - Dependency updates
+               - Code cleanup or minor fixes
+               - Test additions
+
+            3. If a changelog entry IS warranted:
+               - Create a new file at `content/changelog/YYYY-MM-DD-<slug>.md` where:
+                 - YYYY-MM-DD is today's date
+                 - <slug> is a kebab-case summary of the feature (e.g., "dark-mode-toggle")
+               - The file must follow this exact format:
+
+               ```markdown
+               ---
+               title: "<Concise Feature Title>"
+               description: "<A compelling description with **What's New** and **Why This Matters** sections formatted with bullet points using asterisks>"
+               type: <feature|fix|improvement|breaking>
+               date: YYYY-MM-DDTHH:MM:SS.000Z
+               author: rawkode
+               pullRequest: ${{ github.event.pull_request.number }}
+               ---
+
+               <Body content - repeat description in a more readable format with proper markdown bullet lists using dashes>
+               ```
+
+               - Look at existing changelog entries in `content/changelog/` for style reference
+               - The description in frontmatter uses `*` for bullets, the body uses `-` for bullets
+               - Match the writing style: professional, informative, focusing on user value
+
+            4. After creating the changelog file (if applicable):
+               - Create a new branch named `changelog/pr-${{ github.event.pull_request.number }}`
+               - Commit the changelog file
+               - Push the branch
+               - Create a PR with title "docs(changelog): add entry for PR #${{ github.event.pull_request.number }}"
+               - The PR body should briefly explain what changelog entry was created
+
+            5. If no changelog entry is needed, simply comment on the original PR explaining why no changelog was generated (keep it brief).
+
+          claude_args: '--allowed-tools "Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr create:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git branch:*),Bash(date:*),Read,Write,Glob"'
