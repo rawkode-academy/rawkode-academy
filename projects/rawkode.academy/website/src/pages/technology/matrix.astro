@@ -39,7 +39,6 @@ import {
 	MATRIX_STATUS_VALUES,
 	MATRIX_CONFIDENCE_VALUES,
 	MATRIX_TRAJECTORY_VALUES,
-	type TechnologyStatus,
 } from "@/lib/explorer/dimensions";
 
 // Types
@@ -49,7 +48,7 @@ type Trajectory = (typeof MATRIX_TRAJECTORY_VALUES)[number];
 
 // CNCF Categories (dynamically discovered from data)
 const pipelineStages = MATRIX_STATUS_VALUES.filter(
-	(s) => s !== "graveyard" && s !== "guilty-pleasure",
+	(s) => s !== "graveyard" && s !== "guilty-pleasure" && s !== "skip",
 );
 
 // Category display metadata
@@ -167,36 +166,6 @@ const stageStats = Object.fromEntries(
 		matrixTechnologies.filter((t) => t.status === stage).length,
 	]),
 ) as Record<PipelineStage, number>;
-
-// Graveyard: technologies with graveyard status OR deprecated/abandoned status
-const graveyardTechnologies = allTechnologies
-	.filter(
-		(tech) =>
-			tech.data.matrix?.status === "graveyard" ||
-			tech.data.status === "deprecated" ||
-			tech.data.status === "abandoned",
-	)
-	.map((tech) => ({
-		id: tech.id,
-		name: tech.data.name,
-		status: tech.data.status as TechnologyStatus,
-		category: tech.data.category as string | undefined,
-		matrixStatus: tech.data.matrix?.status,
-		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
-		confidence: tech.data.matrix?.confidence as Confidence | undefined,
-		trajectory: tech.data.matrix?.trajectory as Trajectory | undefined,
-		why: tech.data.matrix?.why,
-		firstUsed: tech.data.matrix?.firstUsed,
-		lastUsed: tech.data.matrix?.lastUsed,
-		makesMeFeel: tech.data.matrix?.makesMeFeel,
-		spicyTake: tech.data.matrix?.spicyTake,
-		videoCount: videoCountsByTech.get(tech.id) || 0,
-		articleCount: 0,
-	}));
-
-const techStatusLabels = Object.fromEntries(
-	DIMENSIONS["status"].values.map((v) => [v.value, v.label]),
-);
 ---
 
 <Page
@@ -235,13 +204,6 @@ const techStatusLabels = Object.fromEntries(
 							<span class="preview-label">{stageLabels[stage]}</span>
 						</a>
 					))}
-					<a
-						href="/technology/matrix/advanced?fs=graveyard"
-						class="preview-stage preview-graveyard"
-					>
-						<span class="preview-count">{graveyardTechnologies.length}</span>
-						<span class="preview-label">Graveyard</span>
-					</a>
 				</div>
 
 				<!-- Advanced Mode CTA -->
@@ -277,7 +239,6 @@ const techStatusLabels = Object.fromEntries(
 								<div class="stage-info">
 									<span class="stage-name">{stageLabels[stage]}</span>
 									<span class="stage-desc">{
-										stage === "skip" ? "This technology isn't for me right now, or I haven't played with it yet. This is not a reflection on the technology itself—it's about what I need at this moment." :
 										stage === "watch" ? "Something here piqued my interest. I want to learn more and I'm keeping an eye on its development." :
 										stage === "explore" ? "I think people should kick the tyres on this. While I can't recommend it yet, I believe it has a lot to teach you." :
 										stage === "learn" ? "A technology I think will be useful to you even if you don't adopt it. Learn it and expand your mind." :
@@ -288,13 +249,6 @@ const techStatusLabels = Object.fromEntries(
 								</div>
 							</div>
 						))}
-						<div class="legend-stage legend-stage-graveyard">
-							<div class="stage-indicator"></div>
-							<div class="stage-info">
-								<span class="stage-name">Graveyard</span>
-								<span class="stage-desc">I don't think this project should be noticed, nevermind adopted. These technologies burned me, were abandoned, or have been superseded.</span>
-							</div>
-						</div>
 					</div>
 				</div>
 			</details>
@@ -389,54 +343,7 @@ const techStatusLabels = Object.fromEntries(
 				))}
 			</div>
 
-			<!-- Graveyard Section -->
-			{graveyardTechnologies.length > 0 && (
-				<div class="graveyard-section">
-					<div class="graveyard-header">
-						<div class="graveyard-title-group">
-							<span class="graveyard-icon">🪦</span>
-							<h2 class="graveyard-title">Graveyard</h2>
-						</div>
-						<p class="graveyard-subtitle text-muted">Deprecated, abandoned, or burned me</p>
-					</div>
-					<div class="graveyard-grid glass-card">
-						{graveyardTechnologies.map((tech) => (
-							<button
-								type="button"
-								class="graveyard-item"
-								data-name={tech.name}
-								data-id={tech.id}
-								data-status={tech.matrixStatus || "graveyard"}
-								data-category={tech.category || ""}
-								data-why={tech.why || ""}
-								data-first-used={tech.firstUsed || ""}
-								data-last-used={tech.lastUsed || ""}
-								data-makes-me-feel={tech.makesMeFeel || ""}
-								data-spicy-take={tech.spicyTake || ""}
-								data-video-count={tech.videoCount}
-								data-article-count={tech.articleCount}
-								data-confidence={tech.confidence || ""}
-								data-trajectory={tech.trajectory || ""}
-								data-icon={tech.icon || ""}
-							>
-								<div class="graveyard-icon-wrapper">
-									{tech.icon ? (
-										<img src={tech.icon} alt={tech.name} class="graveyard-img" loading="lazy" />
-									) : (
-										<span class="graveyard-initial">{tech.name[0]}</span>
-									)}
-								</div>
-								<div class="graveyard-info">
-									<span class="graveyard-name">{tech.name}</span>
-									<span class={`graveyard-status status-${tech.status}`}>
-										{techStatusLabels[tech.status] || tech.status}
-									</span>
-								</div>
-							</button>
-						))}
-					</div>
-				</div>
-			)}
+
 
 		</div>
 	</Container>
@@ -610,7 +517,6 @@ const techStatusLabels = Object.fromEntries(
 	.legend-stage-learn .stage-indicator { background: rgb(59, 130, 246); }
 	.legend-stage-adopt .stage-indicator { background: rgb(34, 197, 94); }
 	.legend-stage-advocate .stage-indicator { background: rgb(var(--brand-primary)); }
-	.legend-stage-graveyard .stage-indicator { background: rgb(107, 114, 128); }
 
 	.legend-stage .stage-info {
 		display: flex;
@@ -778,10 +684,6 @@ const techStatusLabels = Object.fromEntries(
 	html.dark .preview-adopt { background: rgba(34, 197, 94, 0.2); color: rgb(134, 239, 172); }
 	html.dark .preview-advocate { background: rgb(var(--brand-primary) / 0.25); color: rgb(var(--brand-secondary)); }
 
-	/* Graveyard preview button */
-	.preview-graveyard { background: rgba(107, 114, 128, 0.15); color: rgb(107, 114, 128); }
-	html.dark .preview-graveyard { background: rgba(107, 114, 128, 0.25); color: rgb(156, 163, 175); }
-
 	/* Preview stage link styles */
 	.preview-stage {
 		cursor: pointer;
@@ -838,6 +740,7 @@ const techStatusLabels = Object.fromEntries(
 	.pipeline-header {
 		display: flex;
 		position: relative;
+		z-index: 1;
 		gap: 0.25rem;
 		padding: 0 0 0.5rem;
 		overflow-x: auto;
@@ -971,7 +874,7 @@ const techStatusLabels = Object.fromEntries(
 	}
 
 	.lane-wrapper:has(.tech-icon:hover) {
-		z-index: 10;
+		z-index: 100;
 	}
 
 	@keyframes fadeInUp {
@@ -1032,12 +935,17 @@ const techStatusLabels = Object.fromEntries(
 	}
 
 	.lane {
-		overflow: hidden;
+		overflow: visible;
+		position: relative;
+	}
+
+	.lane:has(.tech-icon:hover) {
+		z-index: 10;
 	}
 
 	.lane-grid {
 		display: grid;
-		grid-template-columns: repeat(6, 1fr);
+		grid-template-columns: repeat(5, 1fr);
 	}
 
 	.lane-cell {
@@ -1090,8 +998,8 @@ const techStatusLabels = Object.fromEntries(
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 36px;
-		height: 36px;
+		width: 44px;
+		height: 44px;
 		padding: 0;
 		background: var(--surface-card);
 		border: 1px solid var(--surface-border);
@@ -1177,15 +1085,15 @@ const techStatusLabels = Object.fromEntries(
 
 
 	.icon-img {
-		width: 22px;
-		height: 22px;
+		width: 28px;
+		height: 28px;
 		object-fit: contain;
 		border-radius: 4px;
 	}
 
 	.icon-initial {
-		width: 22px;
-		height: 22px;
+		width: 28px;
+		height: 28px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -1641,246 +1549,6 @@ const techStatusLabels = Object.fromEntries(
 		}
 	}
 
-	/* ===== GRAVEYARD SECTION ===== */
-	.graveyard-section {
-		margin-top: 3rem;
-		padding-top: 2rem;
-		border-top: 1px solid var(--surface-border);
-	}
-
-	.graveyard-header {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		margin-bottom: 1rem;
-	}
-
-	.graveyard-title-group {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.graveyard-icon {
-		font-size: 1.5rem;
-	}
-
-	.graveyard-title {
-		font-size: 1.25rem;
-		font-weight: 700;
-		color: rgb(107, 114, 128);
-		margin: 0;
-	}
-
-	html.dark .graveyard-title {
-		color: rgb(156, 163, 175);
-	}
-
-	.graveyard-subtitle {
-		font-size: 0.85rem;
-		margin: 0;
-		padding-left: 2.25rem;
-	}
-
-	.graveyard-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-		padding: 1rem;
-		background: rgba(107, 114, 128, 0.05);
-	}
-
-	html.dark .graveyard-grid {
-		background: rgba(55, 65, 81, 0.3);
-	}
-
-	.graveyard-item {
-		position: relative;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.75rem;
-		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
-		border-radius: 10px;
-		text-decoration: none;
-		cursor: pointer;
-		font-family: inherit;
-		font-size: inherit;
-		transition: all 0.2s ease;
-		opacity: 0.7;
-	}
-
-	/* Graveyard item tooltip */
-	.graveyard-item::after {
-		content: "View details";
-		position: absolute;
-		bottom: calc(100% + 10px);
-		left: 50%;
-		transform: translateX(-50%) translateY(4px);
-		padding: 0.5rem 0.875rem;
-		background: rgba(17, 24, 39, 0.85);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-top: 2px solid #6b7280;
-		border-radius: 8px;
-		font-size: 0.75rem;
-		font-weight: 600;
-		letter-spacing: 0.02em;
-		color: #f9fafb;
-		white-space: nowrap;
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.3),
-			0 4px 12px rgba(0, 0, 0, 0.2),
-			inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-		opacity: 0;
-		visibility: hidden;
-		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-		pointer-events: none;
-		z-index: 100;
-	}
-
-	html.dark .graveyard-item::after {
-		background: rgba(0, 0, 0, 0.8);
-		border-color: rgba(255, 255, 255, 0.15);
-		border-top-color: #6b7280;
-	}
-
-	.graveyard-item::before {
-		content: "";
-		position: absolute;
-		bottom: calc(100% + 2px);
-		left: 50%;
-		transform: translateX(-50%) translateY(4px);
-		width: 0;
-		height: 0;
-		border-left: 6px solid transparent;
-		border-right: 6px solid transparent;
-		border-top: 6px solid rgba(17, 24, 39, 0.85);
-		opacity: 0;
-		visibility: hidden;
-		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-		pointer-events: none;
-		z-index: 100;
-	}
-
-	html.dark .graveyard-item::before {
-		border-top-color: rgba(0, 0, 0, 0.8);
-	}
-
-	.graveyard-item:hover::after,
-	.graveyard-item:hover::before {
-		opacity: 1;
-		visibility: visible;
-		transform: translateX(-50%) translateY(0);
-	}
-
-	.graveyard-item:hover {
-		opacity: 1;
-		transform: translateY(-2px);
-		border-color: rgb(107, 114, 128);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	}
-
-	html.dark .graveyard-item:hover {
-		border-color: rgb(156, 163, 175);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-	}
-
-	.graveyard-icon-wrapper {
-		width: 28px;
-		height: 28px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		filter: grayscale(70%);
-		transition: filter 0.2s ease;
-	}
-
-	.graveyard-item:hover .graveyard-icon-wrapper {
-		filter: grayscale(30%);
-	}
-
-	.graveyard-img {
-		width: 24px;
-		height: 24px;
-		object-fit: contain;
-		border-radius: 4px;
-	}
-
-	.graveyard-initial {
-		width: 24px;
-		height: 24px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--surface-card-muted);
-		border-radius: 4px;
-		font-size: 0.7rem;
-		font-weight: 700;
-		color: rgb(107, 114, 128);
-	}
-
-	.graveyard-info {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-	}
-
-	.graveyard-name {
-		font-size: 0.8rem;
-		font-weight: 600;
-		color: rgb(75, 85, 99);
-		line-height: 1.2;
-	}
-
-	html.dark .graveyard-name {
-		color: rgb(209, 213, 219);
-	}
-
-	.graveyard-status {
-		font-size: 0.6rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-	}
-
-	.graveyard-status.status-deprecated {
-		color: rgb(234, 179, 8);
-	}
-
-	.graveyard-status.status-abandoned {
-		color: rgb(239, 68, 68);
-	}
-
-	html.dark .graveyard-status.status-deprecated {
-		color: rgb(253, 224, 71);
-	}
-
-	html.dark .graveyard-status.status-abandoned {
-		color: rgb(252, 165, 165);
-	}
-
-	@media (max-width: 768px) {
-		.graveyard-section {
-			margin-top: 2rem;
-			padding-top: 1.5rem;
-		}
-
-		.graveyard-grid {
-			gap: 0.5rem;
-			padding: 0.75rem;
-		}
-
-		.graveyard-item {
-			padding: 0.375rem 0.5rem;
-		}
-
-		.graveyard-name {
-			font-size: 0.75rem;
-		}
-	}
 </style>
 
 <script>
@@ -2025,14 +1693,6 @@ const techStatusLabels = Object.fromEntries(
 
 	// Add click handlers to all tech icons
 	document.querySelectorAll('.tech-icon').forEach(button => {
-		button.addEventListener('click', (e) => {
-			e.preventDefault();
-			showModal(button);
-		});
-	});
-
-	// Add click handlers to graveyard items
-	document.querySelectorAll('.graveyard-item').forEach(button => {
 		button.addEventListener('click', (e) => {
 			e.preventDefault();
 			showModal(button);

@@ -10,6 +10,7 @@ env: {
 	GITHUB_OAUTH_CLIENT_SECRET: "dummy"
 
 	environment: production: {
+		CLOUDFLARE_ENV: "production"
 		AUTH_SECRET: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/identity/auth-token"}
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"}
 		GITHUB_OAUTH_CLIENT_ID: schema.#OnePasswordRef & {ref: "op://sa.rawkode.academy/identity/github-oauth/client-id"}
