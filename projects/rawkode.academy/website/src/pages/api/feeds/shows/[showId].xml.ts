@@ -72,11 +72,12 @@ export async function GET(context: APIContext) {
 		return `${minutes}:${secs.toString().padStart(2, "0")}`;
 	};
 
-	const showImageUrl =
-		podcastConfig?.artwork ||
-		(firstVideo
+	const coverImage = show.data.cover?.image;
+	const showImageUrl = coverImage
+		? `${site}${typeof coverImage === "string" ? coverImage : coverImage.src}`
+		: firstVideo
 			? `https://content.rawkode.academy/videos/${firstVideo.data.videoId}/thumbnail.jpg`
-			: "");
+			: "";
 
 	const items = showVideos.map((video, index) => {
 		const episodeNumber = showVideos.length - index;

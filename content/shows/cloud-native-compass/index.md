@@ -6,6 +6,9 @@ hosts:
   - rawkode
   - nimbinatus
 publish: true
+cover:
+  image: ./cover.png
+  alt: Cloud Native Compass podcast artwork
 podcast:
   email: team@rawkode.academy
   category: Technology
