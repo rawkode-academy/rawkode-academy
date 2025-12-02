@@ -35,8 +35,13 @@ export interface Technology {
 		confidence?: "gut" | "some-experience" | "deep-experience" | undefined;
 		trajectory?: "rising" | "stable" | "falling" | undefined;
 		why?: string | undefined;
-		lastTouched?: string | undefined;
+		firstUsed?: string | undefined;
+		lastUsed?: string | undefined;
+		makesMeFeel?: string | undefined;
+		spicyTake?: string | undefined;
 	} | undefined;
+	videoCount?: number | undefined;
+	articleCount?: number | undefined;
 }
 
 export const getStaticPaths = (async () => {
@@ -307,6 +312,72 @@ const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology
 			</div>
 		</section>
 
+		<!-- Rawkode's Take (Card Back) -->
+		{technology.radar && (technology.radar.why || technology.radar.spicyTake || technology.radar.makesMeFeel) && (
+			<section class="w-full">
+				<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
+					<div class="flex flex-col md:flex-row gap-6">
+						<!-- Left: Emoji & Why -->
+						<div class="flex-1">
+							<div class="flex items-center gap-3 mb-4">
+								{technology.radar.makesMeFeel && (
+									<span class="text-4xl">{technology.radar.makesMeFeel}</span>
+								)}
+								<div>
+									<h2 class="text-xl font-bold text-gray-900 dark:text-white">Rawkode's Take</h2>
+									<p class="text-sm text-gray-500 dark:text-gray-400">Personal opinion, not gospel</p>
+								</div>
+							</div>
+							{technology.radar.why && (
+								<p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+									{technology.radar.why}
+								</p>
+							)}
+							{technology.radar.spicyTake && (
+								<div class="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-xl">
+									<span class="text-lg flex-shrink-0">🌶️</span>
+									<p class="text-sm italic text-red-800 dark:text-red-200">
+										{technology.radar.spicyTake}
+									</p>
+								</div>
+							)}
+						</div>
+
+						<!-- Right: Stats -->
+						<div class="flex flex-wrap md:flex-col gap-3 md:gap-2 md:min-w-[140px]">
+							{technology.radar.firstUsed && (
+								<div class="stat-pill">
+									<span class="stat-pill-label">First Used</span>
+									<span class="stat-pill-value">{technology.radar.firstUsed}</span>
+								</div>
+							)}
+							{technology.radar.lastUsed && (
+								<div class="stat-pill">
+									<span class="stat-pill-label">Last Used</span>
+									<span class="stat-pill-value">{technology.radar.lastUsed}</span>
+								</div>
+							)}
+							{technology.radar.confidence && (
+								<div class="stat-pill">
+									<span class="stat-pill-label">Confidence</span>
+									<span class="stat-pill-value">
+										{technology.radar.confidence === 'deep-experience' ? 'Deep XP' :
+										 technology.radar.confidence === 'some-experience' ? 'Some XP' : 'Gut'}
+									</span>
+								</div>
+							)}
+							{(technology.videos?.length ?? 0) > 0 && (
+								<div class="stat-pill">
+									<span class="stat-pill-label">Videos</span>
+									<span class="stat-pill-value">{technology.videos?.length ?? 0}</span>
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+			</section>
+		)}
+
 		<!-- Related Content (Videos & Articles) -->
 		<section class="w-full">
 			<div class="max-w-7xl mx-auto">
@@ -455,5 +526,41 @@ const trajectoryIcon = technology.radar?.trajectory ? trajectoryEmoji[technology
 
 	:global(.dark) .matrix-badge-guilty-pleasure {
 		color: rgb(249, 168, 212);
+	}
+
+	/* Stat Pills for Card Back */
+	.stat-pill {
+		display: flex;
+		flex-direction: column;
+		padding: 0.5rem 0.75rem;
+		background: rgba(0, 0, 0, 0.03);
+		border-radius: 10px;
+		min-width: 90px;
+	}
+
+	:global(.dark) .stat-pill {
+		background: rgba(255, 255, 255, 0.05);
+	}
+
+	.stat-pill-label {
+		font-size: 0.65rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: rgb(107, 114, 128);
+	}
+
+	:global(.dark) .stat-pill-label {
+		color: rgb(156, 163, 175);
+	}
+
+	.stat-pill-value {
+		font-size: 0.9rem;
+		font-weight: 700;
+		color: rgb(17, 24, 39);
+	}
+
+	:global(.dark) .stat-pill-value {
+		color: rgb(255, 255, 255);
 	}
 </style>
