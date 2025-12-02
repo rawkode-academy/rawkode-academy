@@ -10,20 +10,17 @@ import { getCollection, render } from "astro:content";
 import matter from "gray-matter";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { resolveContentDirSync } from "@rawkodeacademy/content";
+import {
+	resolveContentDirSync,
+	type TechnologyData,
+	DEFAULT_TECHNOLOGY_STATUS,
+} from "@rawkodeacademy/content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 
-export interface Technology {
+export interface Technology extends Omit<TechnologyData, "logos"> {
 	id: string;
-	name: string;
-	documentation?: string | undefined;
-	website?: string | undefined;
-	source?: string | undefined;
-	license?: string | undefined;
 	logo?: string | undefined;
-	category?: string | undefined;
-	subcategory?: string | undefined;
 	videos?:
 		| {
 				id: string;
@@ -32,43 +29,8 @@ export interface Technology {
 				slug: string;
 		  }[]
 		| undefined;
-	matrix?: {
-		grouping: "plumbing" | "platform" | "observability" | "security";
-		status: "skip" | "watch" | "explore" | "learn" | "adopt" | "advocate" | "graveyard" | "guilty-pleasure";
-		confidence?: "gut" | "some-experience" | "deep-experience" | undefined;
-		trajectory?: "rising" | "stable" | "falling" | undefined;
-		why?: string | undefined;
-		firstUsed?: string | undefined;
-		lastUsed?: string | undefined;
-		makesMeFeel?: string | undefined;
-		spicyTake?: string | undefined;
-	} | undefined;
-	cncf?: {
-		status?: "sandbox" | "incubating" | "graduated" | "archived" | undefined;
-		accepted?: string | undefined;
-		incubating?: string | undefined;
-		graduated?: string | undefined;
-		archived?: string | undefined;
-		devStatsUrl?: string | undefined;
-		annualReviewUrl?: string | undefined;
-		personas?: string[] | undefined;
-		tags?: string[] | undefined;
-		useCase?: string | undefined;
-		businessUseCase?: string | undefined;
-		releaseRate?: string | undefined;
-		integrations?: string[] | undefined;
-	} | undefined;
-	community?: {
-		twitter?: string | undefined;
-		youtube?: string | undefined;
-		slack?: string | undefined;
-		blog?: string | undefined;
-		mailingList?: string | undefined;
-		githubDiscussions?: string | undefined;
-		chat?: string | undefined;
-	} | undefined;
-	videoCount?: number | undefined;
-	articleCount?: number | undefined;
+	videoCount?: number;
+	articleCount?: number;
 }
 
 export const getStaticPaths = (async () => {
@@ -92,6 +54,7 @@ export const getStaticPaths = (async () => {
 								license: e.data.license,
 								category: e.data.category,
 								subcategory: e.data.subcategory,
+								status: e.data.status,
 								logo,
 								videos,
 								matrix: e.data.matrix,
@@ -145,6 +108,7 @@ export const getStaticPaths = (async () => {
 								license: fm.license,
 								category: fm.category,
 								subcategory: fm.subcategory,
+								status: fm.status,
 								logo,
 								videos,
 								matrix: fm.matrix,
@@ -162,6 +126,7 @@ export const getStaticPaths = (async () => {
 								id,
 								name: id,
 								videos,
+								status: DEFAULT_TECHNOLOGY_STATUS,
 							} as Technology,
 						},
 					};
@@ -209,6 +174,7 @@ if (!technology) {
 				license: e.data.license,
 				category: e.data.category,
 				subcategory: e.data.subcategory,
+				status: e.data.status,
 				logo,
 				videos,
 				matrix: e.data.matrix,
@@ -230,6 +196,7 @@ if (!technology) {
 				license: fm.license,
 				category: fm.category,
 				subcategory: fm.subcategory,
+				status: fm.status,
 				logo,
 				videos,
 				matrix: fm.matrix,
@@ -250,55 +217,69 @@ const placeholderLogo = "/apple-touch-icon.png";
 
 // Status display helpers
 const statusLabels: Record<string, string> = {
-	"skip": "Skip",
-	"watch": "Watch",
-	"explore": "Explore",
-	"learn": "Learn",
-	"adopt": "Adopt",
-	"advocate": "Advocate",
-	"graveyard": "Graveyard",
+	skip: "Skip",
+	watch: "Watch",
+	explore: "Explore",
+	learn: "Learn",
+	adopt: "Adopt",
+	advocate: "Advocate",
+	graveyard: "Graveyard",
 	"guilty-pleasure": "Guilty Pleasure",
 	// Legacy values
-	"hold": "Skip",
-	"assess": "Watch",
-	"trial": "Explore",
+	hold: "Skip",
+	assess: "Watch",
+	trial: "Explore",
 };
 const groupingLabels: Record<string, string> = {
-	"plumbing": "Plumbing",
-	"platform": "Platform",
-	"observability": "Observability",
-	"security": "Security",
+	plumbing: "Plumbing",
+	platform: "Platform",
+	observability: "Observability",
+	security: "Security",
 };
-const trajectoryEmoji: Record<string, string> = { rising: "↗️", stable: "→", falling: "↘️" };
+const trajectoryEmoji: Record<string, string> = {
+	rising: "↗️",
+	stable: "→",
+	falling: "↘️",
+};
 
-const statusLabel = technology.matrix?.status ? (statusLabels[technology.matrix.status] || technology.matrix.status) : "";
-const groupingLabel = technology.matrix?.grouping ? (groupingLabels[technology.matrix.grouping] || technology.matrix.grouping) : "";
-const trajectoryIcon = technology.matrix?.trajectory ? trajectoryEmoji[technology.matrix.trajectory] : null;
+const statusLabel = technology.matrix?.status
+	? statusLabels[technology.matrix.status] || technology.matrix.status
+	: "";
+const groupingLabel = technology.matrix?.grouping
+	? groupingLabels[technology.matrix.grouping] || technology.matrix.grouping
+	: "";
+const trajectoryIcon = technology.matrix?.trajectory
+	? trajectoryEmoji[technology.matrix.trajectory]
+	: null;
 
 // CNCF status helpers
 const cncfStatusLabels: Record<string, string> = {
-	"sandbox": "Sandbox",
-	"incubating": "Incubating",
-	"graduated": "Graduated",
-	"archived": "Archived",
+	sandbox: "Sandbox",
+	incubating: "Incubating",
+	graduated: "Graduated",
+	archived: "Archived",
 };
 const cncfStatusColors: Record<string, string> = {
-	"sandbox": "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800",
-	"incubating": "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-	"graduated": "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800",
-	"archived": "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-700",
+	sandbox:
+		"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+	incubating:
+		"bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+	graduated:
+		"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800",
+	archived:
+		"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-700",
 };
 
 // Check if we have community links to display
-const hasCommunityLinks = technology.community && (
-	technology.community.twitter ||
-	technology.community.youtube ||
-	technology.community.slack ||
-	technology.community.blog ||
-	technology.community.mailingList ||
-	technology.community.githubDiscussions ||
-	technology.community.chat
-);
+const hasCommunityLinks =
+	technology.community &&
+	(technology.community.twitter ||
+		technology.community.youtube ||
+		technology.community.slack ||
+		technology.community.blog ||
+		technology.community.mailingList ||
+		technology.community.githubDiscussions ||
+		technology.community.chat);
 ---
 
 <Page title={technology.name} description={`Learn about ${technology.name} - tutorials, videos, and guides from Rawkode Academy.`}>

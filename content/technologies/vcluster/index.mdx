@@ -8,6 +8,8 @@ license: Apache-2.0
 status: stable
 category: Platform
 subcategory: Certified Kubernetes - Distribution
+matrix:
+  status: watch
 ---
 vcluster is a lightweight Kubernetes distribution that runs inside another Kubernetes cluster. It creates fully functional virtual Kubernetes clusters – each with its own control plane, data store, and worker nodes – that are isolated from the underlying host cluster and other vclusters. This allows teams to have dedicated, isolated Kubernetes environments without the overhead of managing full-blown Kubernetes clusters. This is particularly useful for development, testing, and CI/CD pipelines.
 

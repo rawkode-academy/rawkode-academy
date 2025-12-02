@@ -9,7 +9,9 @@ import {
 	searchVideos,
 } from "../loaders/videos";
 
-export function registerVideos(builder: InstanceType<typeof SchemaBuilder<{}>>) {
+export function registerVideos(
+	builder: InstanceType<typeof SchemaBuilder<{}>>,
+) {
 	(builder as any).addScalarType("Date", DateResolver);
 
 	const VideoRef = builder.objectRef<VideoItem>("Video");
@@ -83,10 +85,8 @@ export function registerVideos(builder: InstanceType<typeof SchemaBuilder<{}>>) 
 					term: t.arg.string({ required: true }),
 					limit: t.arg.int({ required: false, defaultValue: 15 }),
 				},
-				resolve: async (
-					_root: any,
-					args: { term: string; limit?: number },
-				) => searchVideos(args.term, args.limit ?? 15),
+				resolve: async (_root: any, args: { term: string; limit?: number }) =>
+					searchVideos(args.term, args.limit ?? 15),
 			}),
 		}),
 	});

@@ -1,10 +1,15 @@
-schema @link(url: "https://specs.apollo.dev/federation/v2.6", import: ["@key", "@extends", "@external", "@provides", "@requires"]) {
-  query: Query
+schema
+	@link(
+		url: "https://specs.apollo.dev/federation/v2.6"
+		import: ["@key", "@extends", "@external", "@provides", "@requires"]
+	)
+{
+	query: Query
 }
 
 type Chapter {
-  startTime: Int
-  title: String
+	startTime: Int
+	title: String
 }
 
 """
@@ -13,90 +18,90 @@ A date string, such as 2007-12-03, compliant with the `full-date` format outline
 scalar Date
 
 type Episode @key(fields: "id") {
-  code: String
-  id: String
-  show: Show
-  video: Video
+	code: String
+	id: String
+	show: Show
+	video: Video
 }
 
 type LearningResources {
-  community: [String!]
-  official: [String!]
-  tutorials: [String!]
+	community: [String!]
+	official: [String!]
+	tutorials: [String!]
 }
 
 type Person @key(fields: "id") {
-  biography: String
-  forename: String
-  guestAppearances: [Video!]
-  hostedShows: [Show!]
-  id: String
-  links: [PersonLink!]
-  surname: String
+	biography: String
+	forename: String
+	guestAppearances: [Video!]
+	hostedShows: [Show!]
+	id: String
+	links: [PersonLink!]
+	surname: String
 }
 
 type PersonLink {
-  name: String
-  url: String
+	name: String
+	url: String
 }
 
 type Query {
-  _entities(representations: [_Any!]!): [_Entity]!
-  _service: _Service!
-  allShows: [Show!]
-  episodeByShowCode(code: String!, showId: String!): Episode
-  episodeByVideoId(videoId: String!): Episode
-  episodesForShow(showId: String!): [Episode!]
-  getAllVideos: [Video!]
-  getLatestVideos(limit: Int = 15, offset: Int = 0): [Video!]
-  getRandomVideos(limit: Int = 5): [Video!]
-  getTechnologies(limit: Int = 15, offset: Int = 0): [Technology!]
-  me: Person
-  showById(id: String!): Show
-  simpleSearch(limit: Int = 15, term: String!): [Video!]
-  videoByID(id: String!): Video
+	_entities(representations: [_Any!]!): [_Entity]!
+	_service: _Service!
+	allShows: [Show!]
+	episodeByShowCode(code: String!, showId: String!): Episode
+	episodeByVideoId(videoId: String!): Episode
+	episodesForShow(showId: String!): [Episode!]
+	getAllVideos: [Video!]
+	getLatestVideos(limit: Int = 15, offset: Int = 0): [Video!]
+	getRandomVideos(limit: Int = 5): [Video!]
+	getTechnologies(limit: Int = 15, offset: Int = 0): [Technology!]
+	me: Person
+	showById(id: String!): Show
+	simpleSearch(limit: Int = 15, term: String!): [Video!]
+	videoByID(id: String!): Video
 }
 
 type Show @key(fields: "id") {
-  episodes: [Episode!]
-  hosts: [Person!]
-  id: String
-  name: String
+	episodes: [Episode!]
+	hosts: [Person!]
+	id: String
+	name: String
 }
 
 type Technology @key(fields: "id") {
-  aliases: [String!]
-  categories: [String!]
-  description: String
-  documentation: String
-  features: [String!]
-  icon: String
-  id: ID
-  learningResources: LearningResources
-  logo: String
-  name: String
-  relatedTechnologies: [String!]
-  source: String
-  status: String
-  useCases: [String!]
-  videos: [Video!]
-  website: String
+	aliases: [String!]
+	categories: [String!]
+	description: String
+	documentation: String
+	features: [String!]
+	icon: String
+	id: ID
+	learningResources: LearningResources
+	logo: String
+	name: String
+	relatedTechnologies: [String!]
+	source: String
+	status: String
+	useCases: [String!]
+	videos: [Video!]
+	website: String
 }
 
 type Video @key(fields: "id") {
-  chapters: [Chapter!]
-  description: String
-  duration: Int
-  episode: Episode
-  guests: [Person!]
-  id: String
-  publishedAt: Date
-  slug: String
-  streamUrl: String
-  subtitle: String
-  technologies: [Technology!]
-  thumbnailUrl: String
-  title: String
+	chapters: [Chapter!]
+	description: String
+	duration: Int
+	episode: Episode
+	guests: [Person!]
+	id: String
+	publishedAt: Date
+	slug: String
+	streamUrl: String
+	subtitle: String
+	technologies: [Technology!]
+	thumbnailUrl: String
+	title: String
 }
 
 scalar _Any
@@ -104,8 +109,8 @@ scalar _Any
 union _Entity = Episode | Person | Show | Technology | Video
 
 type _Service {
-  """
-  The sdl representing the federated service capabilities. Includes federation directives, removes federation types, and includes rest of full schema after schema directives have been applied
-  """
-  sdl: String
+	"""
+	The sdl representing the federated service capabilities. Includes federation directives, removes federation types, and includes rest of full schema after schema directives have been applied
+	"""
+	sdl: String
 }

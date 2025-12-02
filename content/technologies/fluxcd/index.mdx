@@ -1,5 +1,7 @@
 ---
 name: FluxCD
+aliases:
+  - Flux
 logos:
   icon: true
   horizontal: true
@@ -10,7 +12,59 @@ license: Apache-2.0
 status: stable
 matrix:
   grouping: platform
-  status: adopt
+  status: advocate
+  confidence: deep-experience
+  trajectory: rising
+  firstUsed: 2018-01
+  lastUsed: Present
+  makesMeFeel: "\U0001F9D8‍♂️"
+  why: >-
+    FluxCD gives you a calm, predictable delivery pipeline built on the right
+    abstractions. Its componentized architecture is disciplined and extensible,
+    which makes it feel trustworthy in production. It solves the hard problems
+    cleanly instead of distracting you with ornamental features.
+  spicyTake: >-
+    Argo wins popularity because people chase a shiny web UI instead of a sound
+    operational model. FluxCD is the grown-up option, and most teams don’t
+    realize it because they’re busy clicking around dashboards.
+category: App Definition and Development
+subcategory: Continuous Integration & Delivery
+cncf:
+  status: graduated
+  accepted: '2019-07-15'
+  incubating: '2021-03-12'
+  graduated: '2022-11-30'
+  devStatsUrl: 'https://flux.devstats.cncf.io/'
+  personas:
+    - SREs
+    - DevOps & Platform Engineers
+    - Architects
+    - Developers
+  tags:
+    - OCI
+    - container
+    - security
+    - gitops
+    - Kubernetes
+    - Helm
+    - Observability
+    - Software Supply Chain
+    - Policy
+    - CICD
+    - Multi-Tenancy
+    - API Gateway
+  useCase: '>-'
+  businessUseCase: '>-'
+  releaseRate: '>-'
+  integrations:
+    - all standard Cloud Native
+    - Git provider and observability tooling
+community:
+  twitter: 'https://twitter.com/fluxcd'
+  youtube: 'https://www.youtube.com/channel/UCoZxt-YMhGHb20ZkvcCc5KA'
+  slack: 'https://cloud-native.slack.com/messages/flux'
+  blog: 'https://fluxcd.io/blog/'
+  mailingList: 'https://github.com/fluxcd/flux2/discussions'
 ---
 FluxCD is a GitOps operator for Kubernetes, designed to automate the deployment and management of applications. It synchronizes the state of your Kubernetes cluster with configurations stored in Git repositories. FluxCD continuously monitors these repositories for changes and automatically applies updates to the cluster, ensuring that the desired state defined in Git is always reflected in your running environment. This approach enhances consistency, auditability, and reliability in Kubernetes deployments by leveraging Git as the single source of truth. It also provides a way to roll back to previous versions in case of errors or unexpected issues.
 

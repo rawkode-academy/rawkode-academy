@@ -1,14 +1,21 @@
 import { z as zod } from "zod";
+import {
+  CNCF_STATUS_VALUES,
+  MATRIX_CONFIDENCE_VALUES,
+  MATRIX_GROUPING_VALUES,
+  MATRIX_STATUS_VALUES,
+  MATRIX_TRAJECTORY_VALUES,
+  TECHNOLOGY_STATUS_VALUES,
+} from "./dimensions.js";
 
-export const TECHNOLOGY_STATUS_VALUES = [
-  "alpha",
-  "beta",
-  "stable",
-  "preview",
-  "superseded",
-  "deprecated",
-  "abandoned",
-] as const;
+export {
+  CNCF_STATUS_VALUES,
+  MATRIX_CONFIDENCE_VALUES,
+  MATRIX_GROUPING_VALUES,
+  MATRIX_STATUS_VALUES,
+  MATRIX_TRAJECTORY_VALUES,
+  TECHNOLOGY_STATUS_VALUES,
+};
 
 const technologyStatusEnumValues = [...TECHNOLOGY_STATUS_VALUES] as [
   (typeof TECHNOLOGY_STATUS_VALUES)[number],
@@ -54,7 +61,7 @@ export const technologyZod = zod.object({
   // CNCF Project Metadata
   cncf: zod.object({
     // Project lifecycle status
-    status: zod.enum(['sandbox', 'incubating', 'graduated', 'archived']).optional(),
+    status: zod.enum([...CNCF_STATUS_VALUES] as [string, ...string[]]).optional(),
 
     // Timeline
     accepted: zod.string().optional(),        // ISO date string
@@ -103,23 +110,13 @@ export const technologyZod = zod.object({
   // Technology Matrix - Rawkode's opinionated take
   matrix: zod
     .object({
-      grouping: zod.enum(["plumbing", "platform", "observability", "security"]),
+      grouping: zod.enum([...MATRIX_GROUPING_VALUES] as [string, ...string[]]).optional(),
       // Pipeline stages (left to right journey)
-      status: zod.enum([
-        "skip",           // Not for me
-        "watch",          // Keeping an eye on it
-        "explore",        // Worth exploring
-        "learn",          // Worth investing time to understand
-        "adopt",          // Ready for production use
-        "advocate",       // Actively championing
-        // Special zones (outside pipeline)
-        "graveyard",      // Tried, got burned, walked away
-        "guilty-pleasure", // Know it's "wrong" but keep using
-      ]),
+      status: zod.enum([...MATRIX_STATUS_VALUES] as [string, ...string[]]),
       // Confidence in this placement
-      confidence: zod.enum(["gut", "some-experience", "deep-experience"]).optional(),
+      confidence: zod.enum([...MATRIX_CONFIDENCE_VALUES] as [string, ...string[]]).optional(),
       // Direction of travel
-      trajectory: zod.enum(["rising", "stable", "falling"]).optional(),
+      trajectory: zod.enum([...MATRIX_TRAJECTORY_VALUES] as [string, ...string[]]).optional(),
 
       // Card back - the personal story
       firstUsed: zod.string().optional(),  // e.g., "2020-03"
@@ -168,7 +165,7 @@ export function createTechnologySchema(z: typeof zod) {
     // CNCF Project Metadata
     cncf: z.object({
       // Project lifecycle status
-      status: z.enum(['sandbox', 'incubating', 'graduated', 'archived']).optional(),
+      status: z.enum([...CNCF_STATUS_VALUES] as [string, ...string[]]).optional(),
 
       // Timeline
       accepted: z.string().optional(),        // ISO date string
@@ -217,23 +214,13 @@ export function createTechnologySchema(z: typeof zod) {
     // Technology Matrix - Rawkode's opinionated take
     matrix: z
       .object({
-        grouping: z.enum(["plumbing", "platform", "observability", "security"]),
+        grouping: z.enum([...MATRIX_GROUPING_VALUES] as [string, ...string[]]).optional(),
         // Pipeline stages (left to right journey)
-        status: z.enum([
-          "skip",           // Not for me
-          "watch",          // Keeping an eye on it
-          "explore",        // Worth exploring
-          "learn",          // Worth investing time to understand
-          "adopt",          // Ready for production use
-          "advocate",       // Actively championing
-          // Special zones (outside pipeline)
-          "graveyard",      // Tried, got burned, walked away
-          "guilty-pleasure", // Know it's "wrong" but keep using
-        ]),
+        status: z.enum([...MATRIX_STATUS_VALUES] as [string, ...string[]]),
         // Confidence in this placement
-        confidence: z.enum(["gut", "some-experience", "deep-experience"]).optional(),
+        confidence: z.enum([...MATRIX_CONFIDENCE_VALUES] as [string, ...string[]]).optional(),
         // Direction of travel
-        trajectory: z.enum(["rising", "stable", "falling"]).optional(),
+        trajectory: z.enum([...MATRIX_TRAJECTORY_VALUES] as [string, ...string[]]).optional(),
 
         // Card back - the personal story
         firstUsed: z.string().optional(),  // e.g., "2020-03"
