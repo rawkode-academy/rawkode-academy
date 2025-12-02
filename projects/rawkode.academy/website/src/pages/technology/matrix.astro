@@ -1,0 +1,846 @@
+---
+export const prerender = true;
+
+import { getCollection } from "astro:content";
+import Page from "@/wrappers/page.astro";
+import { Container } from "@/components/ui";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+
+// Types
+type Quadrant = "plumbing" | "platform" | "observability" | "security";
+type PipelineStage = "skip" | "watch" | "explore" | "learn" | "adopt" | "advocate";
+type Ring = PipelineStage;
+type Confidence = "gut" | "some-experience" | "deep-experience";
+type Trajectory = "rising" | "stable" | "falling";
+
+const quadrants: Quadrant[] = ["plumbing", "platform", "observability", "security"];
+const pipelineStages: PipelineStage[] = ["skip", "watch", "explore", "learn", "adopt", "advocate"];
+
+const quadrantLabels: Record<Quadrant, string> = {
+	plumbing: "Plumbing",
+	platform: "Platform",
+	observability: "Observability",
+	security: "Security",
+};
+
+const quadrantDescriptions: Record<Quadrant, string> = {
+	plumbing: "The invisible infrastructure",
+	platform: "Building blocks for developers",
+	observability: "Understanding what's happening",
+	security: "Keeping things safe",
+};
+
+const quadrantIcons: Record<Quadrant, string> = {
+	plumbing: "🔧",
+	platform: "🏗️",
+	observability: "📊",
+	security: "🔒",
+};
+
+const stageLabels: Record<PipelineStage, string> = {
+	"skip": "Skip",
+	"watch": "Watch",
+	"explore": "Explore",
+	"learn": "Learn",
+	"adopt": "Adopt",
+	"advocate": "Advocate",
+};
+
+const stageDescriptions: Record<PipelineStage, string> = {
+	"skip": "Not for me",
+	"watch": "On my radar",
+	"explore": "Worth a look",
+	"learn": "Investing time",
+	"adopt": "Production ready",
+	"advocate": "Championing",
+};
+
+const trajectoryEmoji: Record<Trajectory, string> = {
+	rising: "↗",
+	stable: "→",
+	falling: "↘",
+};
+
+// Get all technologies with matrix data
+const allTechnologies = await getCollection("technologies");
+const matrixTechnologies = allTechnologies
+	.filter((tech) => tech.data.radar?.ring && tech.data.radar?.quadrant)
+	.map((tech) => ({
+		id: tech.id,
+		name: tech.data.name,
+		description: tech.data.description,
+		quadrant: tech.data.radar!.quadrant as Quadrant,
+		ring: tech.data.radar!.ring as Ring,
+		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
+		confidence: tech.data.radar!.confidence as Confidence | undefined,
+		lastTouched: tech.data.radar!.lastTouched,
+		trajectory: tech.data.radar!.trajectory as Trajectory | undefined,
+		why: tech.data.radar!.why,
+	}));
+
+// Build pipeline lanes (by quadrant)
+const pipelineLanes = quadrants.map((quadrant) => ({
+	quadrant,
+	label: quadrantLabels[quadrant],
+	description: quadrantDescriptions[quadrant],
+	icon: quadrantIcons[quadrant],
+	stages: Object.fromEntries(
+		pipelineStages.map((stage) => [
+			stage,
+			matrixTechnologies.filter((t) => t.quadrant === quadrant && t.ring === stage),
+		])
+	) as Record<PipelineStage, typeof matrixTechnologies>,
+}));
+
+// Check for legacy ring values and map them (only truly legacy values)
+const legacyMapping: Record<string, PipelineStage> = {
+	hold: "skip",
+	assess: "watch",
+	trial: "explore",
+};
+
+// Remap legacy values in pipeline lanes
+pipelineLanes.forEach((lane) => {
+	Object.entries(legacyMapping).forEach(([legacy, modern]) => {
+		const legacyTech = matrixTechnologies.filter(
+			(t) => t.quadrant === lane.quadrant && t.ring === legacy
+		);
+		if (legacyTech.length > 0) {
+			lane.stages[modern] = [...lane.stages[modern], ...legacyTech];
+		}
+	});
+});
+
+// Calculate stats per stage
+const stageStats = Object.fromEntries(
+	pipelineStages.map((stage) => [
+		stage,
+		matrixTechnologies.filter((t) => t.ring === stage).length,
+	])
+) as Record<PipelineStage, number>;
+---
+
+<Page
+	title="Technology Matrix"
+	description="Rawkode's opinionated guide to cloud native and platform engineering technologies."
+>
+	<!-- Custom Hero -->
+	<section class="matrix-hero">
+		<div class="hero-background">
+			<div class="hero-gradient"></div>
+			<div class="hero-grid"></div>
+		</div>
+		<Container size="xl" padding="lg">
+			<div class="hero-content">
+				<div class="hero-badge glass-chip">
+					<span class="badge-dot"></span>
+					<span>{matrixTechnologies.length} Technologies Mapped</span>
+				</div>
+				<h1 class="hero-title">
+					Technology <span class="title-accent">Matrix</span>
+				</h1>
+				<p class="hero-subtitle text-secondary-content">
+					My opinionated journey through cloud native technologies.
+					<br class="hidden md:block" />
+					From first glance to full advocacy.
+				</p>
+
+				<!-- Mini pipeline preview -->
+				<div class="hero-pipeline-preview">
+					{pipelineStages.map((stage) => (
+						<div class={`preview-stage preview-${stage}`}>
+							<span class="preview-count">{stageStats[stage]}</span>
+							<span class="preview-label">{stageLabels[stage]}</span>
+						</div>
+					))}
+				</div>
+			</div>
+		</Container>
+	</section>
+
+	<Container size="xl" padding="lg">
+		<div class="matrix-content">
+
+			<!-- Pipeline Header -->
+			<div class="pipeline-header" role="img" aria-label="Pipeline stages from Skip to Advocate">
+				<div class="header-flow-line"></div>
+				{pipelineStages.map((stage, idx) => (
+					<div class={`header-stage header-${stage}`} style={`--stage-index: ${idx}`}>
+						<div class="stage-arrow">
+							<div class="arrow-body">
+								<span class="stage-label">{stageLabels[stage]}</span>
+								<span class="stage-sublabel">{stageDescriptions[stage]}</span>
+							</div>
+							<div class="arrow-point"></div>
+						</div>
+					</div>
+				))}
+			</div>
+
+			<!-- Pipeline Lanes -->
+			<div class="pipeline-lanes">
+				{pipelineLanes.map((lane, laneIdx) => (
+					<div class="lane-wrapper" style={`--lane-index: ${laneIdx}`} data-lane={lane.quadrant}>
+						<div class="lane-tabs">
+							<div class="lane-tab">
+								<span class="lane-icon">{lane.icon}</span>
+								<span class="lane-title">{lane.label}</span>
+								<span class="lane-desc text-muted">— {lane.description}</span>
+							</div>
+							<div class="lane-hover-tab" aria-hidden="true">
+								<span class="hover-tab-name"></span>
+								<span class="hover-tab-arrow">→</span>
+							</div>
+						</div>
+						<div class="lane glass-card">
+							<div class="lane-grid">
+								{pipelineStages.map((stage) => (
+									<div class={`lane-cell cell-${stage}`}>
+										{lane.stages[stage].length > 0 ? (
+											<div class="cell-content">
+												{lane.stages[stage].map((tech) => (
+													<a
+														href={`/technology/${tech.id}`}
+														class={`tech-icon chip-${stage}`}
+														data-name={tech.name}
+													>
+														{tech.icon ? (
+															<img src={tech.icon} alt={tech.name} class="icon-img" loading="lazy" />
+														) : (
+															<span class="icon-initial">{tech.name[0]}</span>
+														)}
+														{tech.trajectory && (
+															<span class={`icon-trajectory trajectory-${tech.trajectory}`}>
+																{trajectoryEmoji[tech.trajectory]}
+															</span>
+														)}
+													</a>
+												))}
+											</div>
+										) : (
+											<div class="cell-empty"></div>
+										)}
+									</div>
+								))}
+							</div>
+						</div>
+					</div>
+				))}
+			</div>
+
+
+		</div>
+	</Container>
+</Page>
+
+<style>
+	/* ===== HERO ===== */
+	.matrix-hero {
+		position: relative;
+		padding: 4rem 0 3rem;
+		overflow: hidden;
+	}
+
+	.hero-background {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+	}
+
+	.hero-gradient {
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--brand-primary) / 0.15), transparent),
+			radial-gradient(ellipse 60% 40% at 80% 50%, rgb(var(--brand-secondary) / 0.1), transparent),
+			radial-gradient(ellipse 50% 30% at 20% 80%, rgb(var(--brand-primary) / 0.08), transparent);
+	}
+
+	.hero-grid {
+		position: absolute;
+		inset: 0;
+		background-image:
+			linear-gradient(var(--surface-border) 1px, transparent 1px),
+			linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
+		background-size: 60px 60px;
+		mask-image: radial-gradient(ellipse at center, black, transparent 70%);
+	}
+
+	.hero-content {
+		position: relative;
+		z-index: 1;
+		text-align: center;
+	}
+
+	.hero-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.badge-dot {
+		width: 6px;
+		height: 6px;
+		background: rgb(var(--brand-primary));
+		border-radius: 50%;
+		animation: pulse 2s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		0%, 100% { opacity: 1; transform: scale(1); }
+		50% { opacity: 0.5; transform: scale(1.2); }
+	}
+
+	.hero-title {
+		font-size: clamp(2.5rem, 6vw, 4rem);
+		font-weight: 800;
+		letter-spacing: -0.03em;
+		line-height: 1.1;
+		margin: 0 0 1rem;
+	}
+
+	.title-accent {
+		background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-secondary)));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.hero-subtitle {
+		font-size: 1.125rem;
+		margin: 0 0 2.5rem;
+		line-height: 1.6;
+	}
+
+	/* Hero Pipeline Preview */
+	.hero-pipeline-preview {
+		display: flex;
+		justify-content: center;
+		gap: 0.25rem;
+		flex-wrap: wrap;
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+	.preview-stage {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 0.75rem 1rem;
+		border-radius: 8px;
+		min-width: 70px;
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		border: 1px solid var(--surface-border);
+	}
+
+	.preview-stage:hover {
+		transform: translateY(-2px);
+	}
+
+	.preview-count {
+		font-size: 1.25rem;
+		font-weight: 700;
+	}
+
+	.preview-label {
+		font-size: 0.65rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		opacity: 0.8;
+	}
+
+	/* Pipeline stage colors - these are semantic to the matrix concept */
+	.preview-skip { background: rgba(239, 68, 68, 0.15); color: rgb(239, 68, 68); }
+	.preview-watch { background: rgba(249, 115, 22, 0.15); color: rgb(249, 115, 22); }
+	.preview-explore { background: rgba(234, 179, 8, 0.15); color: rgb(180, 130, 0); }
+	.preview-learn { background: rgba(59, 130, 246, 0.15); color: rgb(59, 130, 246); }
+	.preview-adopt { background: rgba(34, 197, 94, 0.15); color: rgb(34, 197, 94); }
+	.preview-advocate { background: rgb(var(--brand-primary) / 0.15); color: rgb(var(--brand-primary)); }
+
+	html.dark .preview-skip { background: rgba(239, 68, 68, 0.2); color: rgb(252, 165, 165); }
+	html.dark .preview-watch { background: rgba(249, 115, 22, 0.2); color: rgb(253, 186, 116); }
+	html.dark .preview-explore { background: rgba(234, 179, 8, 0.2); color: rgb(253, 224, 71); }
+	html.dark .preview-learn { background: rgba(59, 130, 246, 0.2); color: rgb(147, 197, 253); }
+	html.dark .preview-adopt { background: rgba(34, 197, 94, 0.2); color: rgb(134, 239, 172); }
+	html.dark .preview-advocate { background: rgb(var(--brand-primary) / 0.25); color: rgb(var(--brand-secondary)); }
+
+	/* ===== MATRIX CONTENT ===== */
+	.matrix-content {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	/* ===== PIPELINE HEADER ===== */
+	.pipeline-header {
+		display: flex;
+		position: relative;
+		gap: 4px;
+		padding: 0 0 0.5rem;
+	}
+
+	.header-flow-line {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: linear-gradient(90deg,
+			rgb(239, 68, 68),
+			rgb(249, 115, 22),
+			rgb(234, 179, 8),
+			rgb(59, 130, 246),
+			rgb(34, 197, 94),
+			rgb(var(--brand-primary))
+		);
+		border-radius: 2px;
+		opacity: 0.5;
+	}
+
+	.header-stage {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.stage-arrow {
+		display: flex;
+		align-items: stretch;
+		height: 100%;
+	}
+
+	.arrow-body {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: 1rem 0.5rem 1rem 1rem;
+		border-radius: 12px 0 0 12px;
+		position: relative;
+		transition: all 0.2s ease;
+	}
+
+	.arrow-point {
+		width: 20px;
+		position: relative;
+		flex-shrink: 0;
+	}
+
+	.arrow-point::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 0;
+		height: 0;
+		border-top: 32px solid transparent;
+		border-bottom: 32px solid transparent;
+		border-left: 20px solid;
+		border-left-color: inherit;
+	}
+
+	.header-stage:last-child .arrow-body {
+		border-radius: 12px;
+	}
+
+	.header-stage:last-child .arrow-point {
+		display: none;
+	}
+
+	/* Stage colors - semantic to matrix */
+	.header-skip .arrow-body { background: rgb(239, 68, 68); }
+	.header-skip .arrow-point::before { border-left-color: rgb(239, 68, 68); }
+
+	.header-watch .arrow-body { background: rgb(249, 115, 22); }
+	.header-watch .arrow-point::before { border-left-color: rgb(249, 115, 22); }
+
+	.header-explore .arrow-body { background: rgb(202, 138, 4); }
+	.header-explore .arrow-point::before { border-left-color: rgb(202, 138, 4); }
+
+	.header-learn .arrow-body { background: rgb(59, 130, 246); }
+	.header-learn .arrow-point::before { border-left-color: rgb(59, 130, 246); }
+
+	.header-adopt .arrow-body { background: rgb(22, 163, 74); }
+	.header-adopt .arrow-point::before { border-left-color: rgb(22, 163, 74); }
+
+	.header-advocate .arrow-body { background: rgb(var(--brand-primary)); }
+	.header-advocate .arrow-point::before { border-left-color: rgb(var(--brand-primary)); }
+
+	.stage-label {
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: white;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	.stage-sublabel {
+		font-size: 0.65rem;
+		color: rgba(255, 255, 255, 0.75);
+		margin-top: 0.125rem;
+	}
+
+	/* ===== PIPELINE LANES ===== */
+	.pipeline-lanes {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.lane-wrapper {
+		animation: fadeInUp 0.4s ease-out backwards;
+		animation-delay: calc(var(--lane-index) * 0.1s);
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* Tab container */
+	.lane-tabs {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+	}
+
+	/* Manila folder tab */
+	.lane-tab {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem 0.375rem;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-bottom: none;
+		border-radius: 10px 10px 0 0;
+		margin-left: 1rem;
+		position: relative;
+		z-index: 1;
+		margin-bottom: -1px;
+	}
+
+	/* Hover tab on right */
+	.lane-hover-tab {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem 0.375rem;
+		background: rgb(var(--brand-primary));
+		border: 1px solid rgb(var(--brand-primary));
+		border-bottom: none;
+		border-radius: 10px 10px 0 0;
+		margin-right: 1rem;
+		margin-bottom: -1px;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(4px);
+		transition: all 0.15s ease;
+	}
+
+	.lane-hover-tab.visible {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0);
+	}
+
+	.hover-tab-name {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: white;
+	}
+
+	.hover-tab-arrow {
+		font-size: 0.875rem;
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+	.lane-icon {
+		font-size: 1rem;
+	}
+
+	.lane-title {
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: rgb(17, 24, 39);
+	}
+
+	html.dark .lane-title {
+		color: rgb(255, 255, 255);
+	}
+
+	.lane-desc {
+		font-size: 0.7rem;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.lane {
+		overflow: hidden;
+	}
+
+	.lane-grid {
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+	}
+
+	.lane-cell {
+		padding: 0.5rem;
+		min-height: 48px;
+		border-right: 1px solid var(--surface-border);
+		transition: background 0.2s ease;
+		display: flex;
+		align-items: center;
+	}
+
+	.lane-cell:last-child {
+		border-right: none;
+	}
+
+	.lane-cell:hover {
+		background: var(--surface-card-muted);
+	}
+
+	/* Subtle stage tints */
+	.cell-skip { background: rgba(239, 68, 68, 0.03); }
+	.cell-watch { background: rgba(249, 115, 22, 0.03); }
+	.cell-explore { background: rgba(234, 179, 8, 0.03); }
+	.cell-learn { background: rgba(59, 130, 246, 0.03); }
+	.cell-adopt { background: rgba(34, 197, 94, 0.04); }
+	.cell-advocate { background: rgb(var(--brand-primary) / 0.04); }
+
+	html.dark .cell-skip { background: rgba(239, 68, 68, 0.06); }
+	html.dark .cell-watch { background: rgba(249, 115, 22, 0.06); }
+	html.dark .cell-explore { background: rgba(234, 179, 8, 0.06); }
+	html.dark .cell-learn { background: rgba(59, 130, 246, 0.06); }
+	html.dark .cell-adopt { background: rgba(34, 197, 94, 0.08); }
+	html.dark .cell-advocate { background: rgb(var(--brand-primary) / 0.08); }
+
+	.cell-content {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-content: center;
+		align-items: center;
+	}
+
+	.cell-empty {
+		min-height: 20px;
+	}
+
+	/* ===== TECH ICONS ===== */
+	.tech-icon {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 10px;
+		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.tech-icon:hover {
+		transform: scale(1.15);
+		border-color: rgb(var(--brand-primary));
+		box-shadow: 0 0 0 3px rgb(var(--brand-primary) / 0.2);
+	}
+
+
+	.icon-img {
+		width: 22px;
+		height: 22px;
+		object-fit: contain;
+		border-radius: 4px;
+	}
+
+	.icon-initial {
+		width: 22px;
+		height: 22px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--surface-card-muted);
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 700;
+		color: rgb(17, 24, 39);
+	}
+
+	html.dark .icon-initial {
+		color: rgb(255, 255, 255);
+	}
+
+	.icon-trajectory {
+		position: absolute;
+		bottom: -2px;
+		right: -2px;
+		font-size: 0.6rem;
+		font-weight: 700;
+		width: 14px;
+		height: 14px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--surface-card);
+		border-radius: 50%;
+		border: 1px solid var(--surface-border);
+		line-height: 1;
+	}
+
+	.trajectory-rising { color: rgb(34, 197, 94); }
+	.trajectory-stable { color: rgb(156, 163, 175); }
+	.trajectory-falling { color: rgb(239, 68, 68); }
+
+	html.dark .trajectory-rising { color: rgb(134, 239, 172); }
+	html.dark .trajectory-stable { color: rgb(156, 163, 175); }
+	html.dark .trajectory-falling { color: rgb(252, 165, 165); }
+
+
+
+	/* ===== RESPONSIVE ===== */
+	@media (max-width: 1024px) {
+		.pipeline-header {
+			overflow-x: auto;
+			padding-bottom: 1rem;
+		}
+
+		.header-stage {
+			min-width: 100px;
+		}
+
+		.lane-desc {
+			display: none;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.matrix-hero {
+			padding: 3rem 0 2rem;
+		}
+
+		.hero-pipeline-preview {
+			gap: 0.375rem;
+		}
+
+		.preview-stage {
+			padding: 0.5rem 0.75rem;
+			min-width: 50px;
+		}
+
+		.preview-count {
+			font-size: 1rem;
+		}
+
+		.preview-label {
+			font-size: 0.55rem;
+		}
+
+		.pipeline-header {
+			display: none;
+		}
+
+		.lane-tab {
+			margin-left: 0.5rem;
+		}
+
+		.lane-desc {
+			display: none;
+		}
+
+		.lane-grid {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.lane-cell {
+			border-right: none;
+			border-bottom: 1px solid var(--surface-border);
+			min-height: auto;
+			padding: 0.75rem;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.5rem;
+		}
+
+		.lane-cell:empty,
+		.lane-cell:has(.cell-empty) {
+			display: none;
+		}
+
+		.lane-cell::before {
+			content: attr(data-stage);
+			display: block;
+			font-size: 0.6rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			opacity: 0.7;
+		}
+
+		.cell-skip::before { content: 'Skip'; color: rgb(239, 68, 68); }
+		.cell-watch::before { content: 'Watch'; color: rgb(249, 115, 22); }
+		.cell-explore::before { content: 'Explore'; color: rgb(202, 138, 4); }
+		.cell-learn::before { content: 'Learn'; color: rgb(59, 130, 246); }
+		.cell-adopt::before { content: 'Adopt'; color: rgb(34, 197, 94); }
+		.cell-advocate::before { content: 'Advocate'; color: rgb(var(--brand-primary)); }
+
+		.cell-content {
+			gap: 0.75rem;
+		}
+
+		.tech-icon {
+			width: 40px;
+			height: 40px;
+		}
+
+		.icon-img {
+			width: 24px;
+			height: 24px;
+		}
+
+		.lane-hover-tab {
+			display: none;
+		}
+	}
+</style>
+
+<script>
+	// Hover tab functionality
+	document.querySelectorAll('.lane-wrapper').forEach(lane => {
+		const hoverTab = lane.querySelector('.lane-hover-tab');
+		const hoverName = lane.querySelector('.hover-tab-name');
+
+		lane.querySelectorAll('.tech-icon').forEach(icon => {
+			icon.addEventListener('mouseenter', () => {
+				const name = icon.getAttribute('data-name');
+				if (hoverName && hoverTab) {
+					hoverName.textContent = name;
+					hoverTab.classList.add('visible');
+				}
+			});
+
+			icon.addEventListener('mouseleave', () => {
+				if (hoverTab) {
+					hoverTab.classList.remove('visible');
+				}
+			});
+		});
+	});
+</script>

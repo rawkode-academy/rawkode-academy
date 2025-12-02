@@ -11,17 +11,15 @@ import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
 // Fetch random technologies for hero
 const allTechnologies = await getCollection("technologies");
-const shuffledTechnologies = allTechnologies
-	.filter((tech) => tech.data.logos?.icon) // Only include techs with icons
-	.sort(() => Math.random() - 0.5)
-	.slice(0, 4);
-
-const heroLogos = shuffledTechnologies
+const heroLogos = allTechnologies
+	.filter((tech) => tech.data.logos?.icon === true)
 	.map((tech) => ({
 		name: tech.data.name,
 		iconUrl: resolveTechnologyIconUrl(tech.id, tech.data.logos) || "",
 	}))
-	.filter((logo) => logo.iconUrl);
+	.filter((logo) => logo.iconUrl)
+	.sort(() => Math.random() - 0.5)
+	.slice(0, 4);
 
 // Fetch latest content
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);

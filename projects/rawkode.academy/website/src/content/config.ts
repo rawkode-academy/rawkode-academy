@@ -157,7 +157,7 @@ const technologies = defineCollection({
 		pattern: ["**/*.{md,mdx}"],
 		base: resolveContentDirSync("technologies"),
 	}),
-	schema: ({ image }) => createTechnologySchema(z, { image }),
+	schema: () => createTechnologySchema(z),
 });
 
 const series = defineCollection({
