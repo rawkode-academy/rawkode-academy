@@ -10,7 +10,10 @@ export async function getStaticPaths() {
 
 export async function GET(context: APIContext) {
 	const { showId } = context.params;
-	const site = context.site?.toString() || "https://rawkode.academy";
+	const site = (context.site?.toString() || "https://rawkode.academy").replace(
+		/\/$/,
+		"",
+	);
 
 	const shows = await getCollection("shows");
 	const show = shows.find((s) => s.data.id === showId);
@@ -69,6 +72,10 @@ export async function GET(context: APIContext) {
 		return `${minutes}:${secs.toString().padStart(2, "0")}`;
 	};
 
+	const showImageUrl = firstVideo
+		? `https://content.rawkode.academy/videos/${firstVideo.data.videoId}/thumbnail.jpg`
+		: "";
+
 	const items = showVideos.map((video, index) => {
 		const episodeNumber = showVideos.length - index;
 		const duration =
@@ -87,6 +94,7 @@ export async function GET(context: APIContext) {
       <enclosure url="${audioUrl}" type="audio/mpeg" length="0"/>
       <itunes:title><![CDATA[${video.data.title}]]></itunes:title>
       <itunes:episode>${episodeNumber}</itunes:episode>
+      <itunes:episodeType>full</itunes:episodeType>
       <itunes:duration>${formatDuration(duration)}</itunes:duration>
       <itunes:image href="${thumbnailUrl}"/>
       <itunes:explicit>${podcastConfig?.explicit ? "true" : "false"}</itunes:explicit>
@@ -112,6 +120,8 @@ export async function GET(context: APIContext) {
       ${podcastConfig?.email ? `<itunes:email>${escapeXml(podcastConfig.email)}</itunes:email>` : ""}
     </itunes:owner>
     <itunes:explicit>${podcastConfig?.explicit ? "true" : "false"}</itunes:explicit>
+    <itunes:type>episodic</itunes:type>
+    ${showImageUrl ? `<itunes:image href="${showImageUrl}"/>` : ""}
     ${podcastConfig?.category ? `<itunes:category text="${escapeXml(podcastConfig.category)}"${podcastConfig.subcategory ? `><itunes:category text="${escapeXml(podcastConfig.subcategory)}"/></itunes:category>` : "/>"}` : ""}
     ${podcastConfig?.copyright ? `<copyright>${escapeXml(podcastConfig.copyright)}</copyright>` : ""}
     <generator>Rawkode Academy</generator>
