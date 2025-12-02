@@ -965,8 +965,13 @@ const techStatusLabels = Object.fromEntries(
 	}
 
 	.lane-wrapper {
+		position: relative;
 		animation: fadeInUp 0.4s ease-out backwards;
 		animation-delay: calc(var(--lane-index) * 0.1s);
+	}
+
+	.lane-wrapper:has(.tech-icon:hover) {
+		z-index: 10;
 	}
 
 	@keyframes fadeInUp {
