@@ -21,7 +21,7 @@ interface EmailPreference {
 
 const CHANNELS = new Set(["marketing", "newsletter", "service"]);
 
-export class EmailPreferencesService extends WorkerEntrypoint<Env> {
+export class EmailPreferences extends WorkerEntrypoint<Env> {
 	private get db() {
 		return drizzle(this.env.DB, { schema: dataSchema });
 	}
