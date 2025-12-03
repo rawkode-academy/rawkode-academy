@@ -1,0 +1,121 @@
+---
+name: SpiceDB
+logos:
+  icon: true
+  stacked: true
+  horizontal: true
+website: 'https://authzed.com/spicedb'
+documentation: 'https://authzed.com/docs'
+source: 'https://github.com/authzed/spicedb'
+license: Apache-2.0
+status: stable
+matrix:
+  grouping: platform
+  status: advocate
+  confidence: some-experience
+  trajectory: rising
+  firstUsed: 2022-01
+  lastUsed: Present
+  makesMeFeel: "\U0001F9F1"
+  why: >-
+    SpiceDB is the first time in two decades of building your own auth systems
+    that something finally feels correct. It encodes the hard-won lessons behind
+    Google’s Zanzibar model and exposes them through a clean, predictable API
+    that hides the brutal complexity of real authorization. Relationship-based
+    modeling gives you a precise, expressive way to define access without the
+    brittle logic and homegrown hacks that have plagued every past attempt.
+  spicyTake: >-
+    Too many vendors have wrapped Zanzibar-style systems in proprietary walls,
+    slapped enterprise price tags on them, and called it innovation. SpiceDB is
+    the only implementation that’s both technically sound and philosophically
+    aligned with how authZ should be done. Support the team that’s doing it
+    right instead of subsidizing closed, lower-integrity clones.
+category: Provisioning
+subcategory: Security & Compliance
+community:
+  twitter: 'https://twitter.com/authaboratory'
+  slack: 'https://discord.gg/spicedb'
+  blog: 'https://authzed.com/blog'
+---
+SpiceDB is an open-source, Google Zanzibar-inspired database for storing and computing permissions data at global scale. Created by AuthZed, it enables developers to build fine-grained authorization systems that can handle millions of permission checks per second while maintaining consistency guarantees.
+
+SpiceDB provides a foundation for implementing relationship-based access control (ReBAC), attribute-based access control (ABAC), or hybrid authorization models through its expressive schema language and powerful APIs.
+
+## Architecture: Zanzibar-Inspired Design
+
+SpiceDB implements the core concepts from Google's Zanzibar paper, which powers authorization for Google services like Drive, Calendar, and Cloud. The system stores authorization data as relationships (tuples) between objects and subjects, then computes permissions by traversing these relationship graphs.
+
+The architecture provides:
+
+- **Relationship Storage:** Persists tuples like "user:alice is a member of group:engineering"
+- **Permission Computation:** Evaluates whether a subject can perform an action on a resource
+- **Consistency Guarantees:** Protects against the "New Enemy Problem" using ZedTokens
+
+## Key Features
+
+- **Expressive APIs:** gRPC and HTTP/JSON interfaces for CheckPermission, LookupResources, LookupSubjects, and WriteRelationships operations
+- **Schema Language:** An intuitive DSL for defining object types, relations, and permission rules with full CI/CD integration support
+- **Multi-Paradigm Authorization:** Combines ReBAC with ABAC through caveated relationships for context-aware permissions
+- **Pluggable Storage:** Supports PostgreSQL, MySQL, CockroachDB, Google Cloud Spanner, and in-memory backends
+- **Deep Observability:** Built-in Prometheus metrics, structured logging, OpenTelemetry tracing, and pprof profiling
+- **Global Consistency:** Configurable per-request consistency balancing correctness and latency
+
+## Performance at Scale
+
+SpiceDB is designed for production workloads at scale:
+
+- **5ms p95 latency** for permission checks
+- **Millions of queries per second** throughput
+- **Billions of relationships** storage capacity
+- Used in production by organizations including GitHub, Adobe, Google, Fastly, Plaid, Red Hat, and Reddit
+
+## Getting Started
+
+Define your authorization schema:
+
+```zed
+definition user {}
+
+definition document {
+    relation owner: user
+    relation editor: user
+    relation viewer: user
+
+    permission edit = owner + editor
+    permission view = edit + viewer
+}
+```
+
+Write relationships and check permissions using the API:
+
+```bash
+# Write a relationship
+zed relationship create document:readme owner user:alice
+
+# Check permission
+zed permission check document:readme edit user:alice
+```
+
+## Common Use Cases
+
+- **Multi-tenant SaaS applications:** Implement organization-based access control with teams, roles, and resource hierarchies
+- **Document collaboration:** Model complex sharing rules like "editors can share with viewers"
+- **Microservices authorization:** Centralize permission decisions across distributed services
+- **Enterprise compliance:** Audit permission changes and answer "who has access to what" queries
+- **IoT and device management:** Control access to devices, fleets, and telemetry data
+
+## Best Practices for Production
+
+- **Use ZedTokens:** Always pass ZedTokens from write operations to subsequent reads to ensure consistency
+- **Design schemas carefully:** Model your domain's natural relationships rather than forcing RBAC patterns
+- **Leverage caveats:** Use caveated relationships for time-based, attribute-based, or context-aware permissions
+- **Monitor performance:** Set up dashboards for latency percentiles, cache hit rates, and dispatch counts
+- **Test with zed CLI:** Use the playground and test assertions to validate schema changes before deployment
+
+## Ecosystem and Tools
+
+- **zed CLI:** Command-line tool for schema management, relationship operations, and testing
+- **Playground:** Web-based environment for experimenting with schemas and permissions
+- **Client Libraries:** Official SDKs for Go, Python, Java, Ruby, Node.js, and more
+- **AuthZed Cloud:** Managed SpiceDB service with additional enterprise features
+- **SpiceDB Operator:** Kubernetes operator for deploying and managing SpiceDB clusters
