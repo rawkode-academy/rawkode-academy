@@ -25,17 +25,17 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 							</svg>
 							Community
 						</span>
-						<h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
+						<h1 class="text-3xl md:text-4xl font-extrabold text-primary-content">
 							Meet the People
 						</h1>
-						<p class="text-gray-600 dark:text-gray-300 max-w-xl">
+						<p class="text-muted max-w-xl">
 							Hosts, guests, and contributors who make Rawkode Academy possible.
 						</p>
 					</div>
 
 					<!-- Search Controls -->
 					<div class="w-full lg:w-96 space-y-3">
-						<label for="people-search" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+						<label for="people-search" class="block text-sm font-medium text-secondary-content">
 							Search people
 						</label>
 						<div class="relative">
@@ -46,12 +46,12 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 								id="people-search"
 								type="search"
 								placeholder="e.g. Rawkode, Guests..."
-								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-gray-900 dark:text-white placeholder-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
+								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-primary-content placeholder-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
 								autocomplete="off"
 							/>
 						</div>
-						<p class="text-sm text-gray-500 dark:text-gray-400">
-							Showing <span class="font-medium text-gray-700 dark:text-gray-200" data-people-visible-count>{people.length}</span> of {people.length} people
+						<p class="text-sm text-muted">
+							Showing <span class="font-medium text-secondary-content" data-people-visible-count>{people.length}</span> of {people.length} people
 						</p>
 					</div>
 				</div>
@@ -84,7 +84,7 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 									
 									{/* Content */}
 									<div class="flex-1 flex flex-col gap-2 relative z-10 w-full">
-										<h3 class="text-lg font-bold text-gray-900 dark:text-white truncate">
+										<h3 class="text-lg font-bold text-primary-content truncate">
 											{person.data.name}
 										</h3>
                                         {person.data.twitter && (
@@ -103,7 +103,7 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 						<svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 						</svg>
-						<p class="text-gray-600 dark:text-gray-400 font-medium">No people match your search</p>
+						<p class="text-muted font-medium">No people match your search</p>
 						<p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different name</p>
 					</div>
 				</div>

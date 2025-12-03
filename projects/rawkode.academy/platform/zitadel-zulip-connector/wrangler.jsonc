@@ -2,6 +2,17 @@
 	"name": "zitadel-zulip-connector",
 	"main": "src/main.ts",
 	"compatibility_date": "2025-05-05",
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
+		},
+		"traces": {
+			"enabled": true,
+			"destinations": ["grafana-traces"]
+		}
+	},
 	"vars": {
 		"ZITADEL_DOMAIN": "zitadel.rawkode.academy",
 		"ZULIP_SITE": "https://chat.rawkode.academy"

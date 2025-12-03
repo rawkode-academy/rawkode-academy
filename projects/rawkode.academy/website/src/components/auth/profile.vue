@@ -3,6 +3,9 @@ import type { BetterAuthUser } from "../../lib/auth/better-auth-client";
 import { ref, onMounted, onUnmounted } from "vue";
 import { actions } from "astro:actions";
 import Avatar from "vue-boring-avatars";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("auth");
 
 const dropdownOpen = ref(false);
 const dropdownRef = ref<HTMLDivElement>();
@@ -32,7 +35,7 @@ const signOut = async () => {
 		await actions.auth.signOut();
 		window.location.href = "/";
 	} catch (error) {
-		console.error("Failed to sign out:", error);
+		logger.error("Failed to sign out", error);
 	}
 };
 

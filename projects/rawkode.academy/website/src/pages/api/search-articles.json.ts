@@ -1,5 +1,8 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("search");
 
 interface NavigationItem {
 	id: string;
@@ -52,7 +55,7 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error searching articles:", error);
+		logger.error("Error searching articles", error);
 
 		return new Response(
 			JSON.stringify({ error: "Failed to search articles" }),

@@ -12,7 +12,15 @@
 		"run_worker_first": true
 	},
 	"observability": {
-		"enabled": true
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
+		},
+		"traces": {
+			"enabled": true,
+			"destinations": ["grafana-traces"]
+		}
 	},
 	"routes": [
 		{

@@ -120,10 +120,11 @@ onMounted(() => {
 
 <template>
 	<div class="w-full aspect-video">
-		<media-player 
-			:autoplay="!!autoPlay" 
+		<media-player
+			:autoplay="!!autoPlay"
 			class="w-full h-full"
 			playsinline
+			data-faro-user-action-name="video_play"
 		>
 			<media-provider>
 				<source :src="`https://content.rawkode.academy/videos/${video}/stream.m3u8`" type="application/x-mpegurl" />

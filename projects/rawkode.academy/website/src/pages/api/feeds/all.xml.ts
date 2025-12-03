@@ -2,8 +2,11 @@ import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
+import { createLogger } from "@/lib/logger";
 
 import type { RSSFeedItem } from "@astrojs/rss";
+
+const logger = createLogger("feeds");
 
 export async function GET(context: APIContext) {
 	const [articles, videos, technologies] = await Promise.all([
@@ -27,7 +30,7 @@ export async function GET(context: APIContext) {
 				const description = (article.data.description || "").trim();
 
 				if (!title || !description) {
-					console.warn(
+					logger.warn(
 						`Skipping article with missing title or description: ${article.id}`,
 					);
 					return null;
@@ -61,7 +64,7 @@ export async function GET(context: APIContext) {
 			const description = (video.data.description || "").trim();
 
 			if (!title || !description) {
-				console.warn(
+				logger.warn(
 					`Skipping video with missing title or description: ${video.id}`,
 				);
 				return null;

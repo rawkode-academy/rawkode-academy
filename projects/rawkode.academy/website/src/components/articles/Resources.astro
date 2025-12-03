@@ -57,7 +57,7 @@ const getCategoryLabel = (category: string) => {
 {
 	resources && resources.length > 0 && (
 		<div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-			<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Resources & References</h2>
+			<h2 class="text-xl font-bold text-primary-content mb-6">Resources & References</h2>
 			
 			<style>
 				@keyframes highlight-pulse {
@@ -95,7 +95,7 @@ const getCategoryLabel = (category: string) => {
 			<div class="space-y-6">
 				{Object.entries(groupResourcesByCategory(resources)).map(([category, categoryResources]) => (
 					<div>
-						<h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">
+						<h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
 							{getCategoryLabel(category)}
 						</h3>
 						<div class="grid gap-3">
@@ -126,11 +126,11 @@ const getCategoryLabel = (category: string) => {
 										/>
 									</svg>
 									<div class="flex-1 min-w-0">
-										<div class="font-medium text-gray-900 dark:text-white group-hover:text-primary">
+										<div class="font-medium text-primary-content group-hover:text-primary">
 											{resource.title}
 										</div>
 										{resource.description && (
-											<div class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+											<div class="text-sm text-muted mt-0.5">
 												{resource.description}
 											</div>
 										)}

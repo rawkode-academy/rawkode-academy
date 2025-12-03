@@ -6,6 +6,14 @@
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
+		},
+		"traces": {
+			"enabled": true,
+			"destinations": ["grafana-traces"]
+		}
 	},
 	"workflows": [
 		{

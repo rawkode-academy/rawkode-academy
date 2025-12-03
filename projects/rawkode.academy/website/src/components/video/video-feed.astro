@@ -55,8 +55,8 @@ function formatDate(dateString: string) {
 
 <section class="section-py-tight">
 	<div class="text-center stack-gap-sm">
-		<h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">{title}</h2>
-		<p class="text-lg text-gray-500 dark:text-gray-400">{description}</p>
+		<h2 class="text-3xl font-extrabold text-primary-content sm:text-4xl">{title}</h2>
+		<p class="text-lg text-muted">{description}</p>
 	</div>
 	<div class="stack-gap-lg grid md:grid-cols-2 lg:grid-cols-4">
 		{videos.map((video: Video) => (
@@ -73,10 +73,10 @@ function formatDate(dateString: string) {
 					</div>
 				</div>
 				<div class="mt-4">
-					<h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-primary/90 dark:group-hover:text-primary/90 line-clamp-2">
+					<h3 class="text-lg font-medium text-primary-content group-hover:text-primary/90 dark:group-hover:text-primary/90 line-clamp-2">
 						{video.title}
 					</h3>
-					<p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+					<p class="mt-1 text-sm text-muted">
 						{formatDate(video.publishedAt)}
 					</p>
 				</div>

@@ -4,6 +4,9 @@ export const prerender = true;
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("technology");
 
 type Technology = {
 	id: string;
@@ -30,7 +33,7 @@ try {
 		return tech;
 	});
 } catch (error) {
-	console.error("Failed to load technologies from content collection:", error);
+	logger.error("Failed to load technologies from content collection", error);
 }
 ---
 
@@ -51,7 +54,7 @@ try {
 							</svg>
 							Technology Hub
 						</span>
-						<h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
+						<h1 class="text-3xl md:text-4xl font-extrabold text-primary-content">
 							Explore technologies
 						</h1>
 						<p class="text-gray-600 dark:text-gray-300 max-w-xl">
@@ -72,7 +75,7 @@ try {
 								id="technology-search"
 								type="search"
 								placeholder="e.g. Grafana, Crossplane, Kubernetes..."
-								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-gray-900 dark:text-white placeholder-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
+								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-primary-content placeholder-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
 								autocomplete="off"
 							/>
 						</div>
@@ -110,7 +113,7 @@ try {
 									
 									{/* Content */}
 									<div class="flex-1 p-5 flex flex-col gap-3 relative z-10">
-										<h3 class="text-lg font-bold text-gray-900 dark:text-white">
+										<h3 class="text-lg font-bold text-primary-content">
 											{tech.name}
 										</h3>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
@@ -132,7 +135,7 @@ try {
 						<svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 						</svg>
-						<p class="text-gray-600 dark:text-gray-400 font-medium">No technologies match your search</p>
+						<p class="text-muted font-medium">No technologies match your search</p>
 						<p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different term</p>
 					</div>
 				</div>

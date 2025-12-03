@@ -43,6 +43,7 @@
 			<div class="flex items-center gap-1 sm:gap-2">
 				<button v-for="reaction in topReactions" :key="reaction.emoji"
 					:aria-label="`${reaction.label} (${reaction.count} ${reaction.count === 1 ? 'reaction' : 'reactions'})`"
+					data-faro-user-action-name="video_reaction"
 					class="group flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
 					@click="handleReaction(reaction)">
 					<span aria-hidden="true" class="text-xl sm:text-2xl group-hover:scale-110 transition-transform">
@@ -106,6 +107,7 @@
 					<span class="text-xs sm:text-sm font-medium">Save</span>
 				</button>
 				<button aria-label="Share this video"
+					data-faro-user-action-name="video_share_toggle"
 					:class="['flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors', { 'bg-primary/10 dark:bg-primary/20': showShareOptions }]"
 					@click="handleShare">
 					<svg aria-hidden="true" class="w-4 sm:w-5 h-4 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"

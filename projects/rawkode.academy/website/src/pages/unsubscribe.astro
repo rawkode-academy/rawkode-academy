@@ -1,8 +1,11 @@
 ---
 import Page from "@/wrappers/page.astro";
 import { createEmailId, createLearnerId } from "@/actions/newsletter";
+import { createLogger } from "@/lib/logger";
 
 export const prerender = false;
+
+const logger = createLogger("unsubscribe");
 
 // Get email from query parameter
 const email = Astro.url.searchParams.get("email");
@@ -40,7 +43,7 @@ if (Astro.request.method === "POST" && !user) {
 			// Redirect to success state
 			return Astro.redirect(`/unsubscribe?success=true`);
 		} catch (e) {
-			console.error("Failed to unsubscribe", e);
+			logger.error("Failed to unsubscribe", e);
 			unsubscribeResult = {
 				success: false,
 				message:
@@ -72,7 +75,7 @@ if (Astro.request.method === "POST" && user) {
 		// Redirect to success state
 		return Astro.redirect(`/unsubscribe?success=true`);
 	} catch (e) {
-		console.error("Failed to unsubscribe", e);
+		logger.error("Failed to unsubscribe", e);
 		unsubscribeResult = {
 			success: false,
 			message: "Failed to process your unsubscribe request. Please try again.",
@@ -91,11 +94,11 @@ if (Astro.request.method === "POST" && user) {
 					</svg>
 				</div>
 				
-				<h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+				<h1 class="text-4xl font-bold text-primary-content mb-4">
 					Unsubscribed Successfully
 				</h1>
 				
-				<p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mb-8">
+				<p class="text-xl text-muted max-w-2xl mb-8">
 					You have been unsubscribed from the Rawkode Academy newsletter. We're sorry to see you go!
 				</p>
 				
@@ -108,11 +111,11 @@ if (Astro.request.method === "POST" && user) {
 			</>
 		) : (
 			<>
-				<h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+				<h1 class="text-4xl font-bold text-primary-content mb-4">
 					Unsubscribe from Newsletter
 				</h1>
 				
-				<p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mb-8">
+				<p class="text-xl text-muted max-w-2xl mb-8">
 					{user 
 						? "Click the button below to unsubscribe from the Rawkode Academy newsletter."
 						: "Enter your email address to unsubscribe from the Rawkode Academy newsletter."
@@ -145,7 +148,7 @@ if (Astro.request.method === "POST" && user) {
 					</button>
 				</form>
 
-				<p class="mt-8 text-sm text-gray-500 dark:text-gray-400">
+				<p class="mt-8 text-sm text-muted">
 					Changed your mind? <a href="/" class="text-primary hover:underline">Go back home</a>
 				</p>
 			</>

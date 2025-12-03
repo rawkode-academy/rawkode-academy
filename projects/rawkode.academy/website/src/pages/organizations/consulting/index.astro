@@ -3,7 +3,7 @@ import Badge from "@/components/common/Badge.vue";
 import Button from "@/components/common/Button.vue";
 import FeatureCard from "@/components/common/FeatureCard.vue";
 import GridLayout from "@/components/common/GridLayout.vue";
-import PageHero from "@/components/common/PageHero.vue";
+import { Hero } from "@/components/ui";
 import FAQ from "@/components/faq/consulting-list.vue";
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import Page from "@/wrappers/page.astro";
@@ -68,21 +68,25 @@ const consultingFAQs = [
 >
 	<FAQJsonLD questions={consultingFAQs} slot="head" />
 	<!-- Hero Section -->
-	<PageHero
+	<Hero
 		title="Expert Technical Consulting"
 		subtitle="Accelerate your technical initiatives with expert guidance and hands-on implementation."
 		badge="Consulting Services"
+		background="blobs"
+		pattern="grid"
+		wave={true}
 		stats={[
 			{ label: '20+ Years Experience' },
 			{ label: 'Cloud Native Focus' },
 			{ label: 'Hands-on Approach' }
 		]}
+		client:load
 	>
 		<Fragment slot="actions">
 			<Button href="#services" variant="primary" size="lg">Our Services</Button>
 			<Button href="/organizations/lets-chat" variant="secondary" size="lg">Schedule Consultation</Button>
 		</Fragment>
-	</PageHero>
+	</Hero>
 
 	<div class="max-w-5xl mx-auto mb-16 text-center pt-16">
 		<p class="text-xl text-gray-700 dark:text-gray-200 mb-8 leading-relaxed">
@@ -169,7 +173,7 @@ const consultingFAQs = [
 				>
 					Our Consulting Services
 				</h2>
-				<p class="text-lg text-gray-600 dark:text-gray-300">
+				<p class="text-lg text-muted">
 					Tailored expertise to address your specific technical challenges
 				</p>
 			</div>
@@ -199,7 +203,7 @@ const consultingFAQs = [
 							Developer Experience Optimization
 						</h3>
 					</div>
-					<p class="mb-4 text-gray-600 dark:text-gray-300">
+					<p class="mb-4 text-muted">
 						Improve your development workflows, tooling, and environments to
 						boost developer productivity and satisfaction.
 					</p>
@@ -216,7 +220,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>CI/CD pipeline optimization</span
 							>
 						</li>
@@ -232,7 +236,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Development environment setup</span
 							>
 						</li>
@@ -248,7 +252,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Docker and containerization strategies</span
 							>
 						</li>
@@ -280,7 +284,7 @@ const consultingFAQs = [
 							Cloud Native Architecture
 						</h3>
 					</div>
-					<p class="mb-4 text-gray-600 dark:text-gray-300">
+					<p class="mb-4 text-muted">
 						Design, implement, and optimize cloud-native architectures that
 						leverage Kubernetes and modern infrastructure patterns.
 					</p>
@@ -297,7 +301,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Kubernetes deployment strategies</span
 							>
 						</li>
@@ -313,7 +317,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Microservices architecture design</span
 							>
 						</li>
@@ -329,7 +333,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Service mesh implementation</span
 							>
 						</li>
@@ -361,7 +365,7 @@ const consultingFAQs = [
 							Platform Engineering
 						</h3>
 					</div>
-					<p class="mb-4 text-gray-600 dark:text-gray-300">
+					<p class="mb-4 text-muted">
 						Build internal developer platforms that streamline operations and
 						empower engineering teams to focus on value delivery.
 					</p>
@@ -378,7 +382,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Self-service infrastructure portals</span
 							>
 						</li>
@@ -394,7 +398,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>GitOps and Infrastructure as Code</span
 							>
 						</li>
@@ -410,7 +414,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Developer tooling standardization</span
 							>
 						</li>
@@ -442,7 +446,7 @@ const consultingFAQs = [
 							Technical Team Development
 						</h3>
 					</div>
-					<p class="mb-4 text-gray-600 dark:text-gray-300">
+					<p class="mb-4 text-muted">
 						Upskill your engineering teams with targeted workshops, pair
 						programming, and knowledge transfer sessions.
 					</p>
@@ -459,7 +463,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Custom technical workshops</span
 							>
 						</li>
@@ -475,7 +479,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Mentoring and technical guidance</span
 							>
 						</li>
@@ -491,7 +495,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Technology architecture reviews</span
 							>
 						</li>
@@ -509,7 +513,7 @@ const consultingFAQs = [
 				>
 					Engagement Models
 				</h2>
-				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+				<p class="text-lg text-muted max-w-3xl mx-auto">
 					Flexible consulting arrangements designed to meet your specific needs
 					and timeline
 				</p>
@@ -526,7 +530,7 @@ const consultingFAQs = [
 						</h3>
 						<Badge variant="primary" size="sm">1-2 weeks</Badge>
 					</div>
-					<p class="mb-4 text-gray-600 dark:text-gray-300">
+					<p class="mb-4 text-muted">
 						Comprehensive analysis of your current technology stack,
 						architecture, and development workflows with actionable
 						recommendations.
@@ -536,7 +540,7 @@ const consultingFAQs = [
 						<span class="text-2xl font-bold text-gray-900 dark:text-white"
 							>$10,000</span
 						>
-						<span class="text-gray-500 dark:text-gray-400"> fixed price</span>
+						<span class="text-muted"> fixed price</span>
 					</div>
 
 					<ul class="space-y-2 mb-6">
@@ -552,7 +556,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Deep-dive technical discovery</span
 							>
 						</li>
@@ -568,7 +572,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Prioritized recommendations</span
 							>
 						</li>
@@ -584,7 +588,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Detailed documentation</span
 							>
 						</li>
@@ -600,7 +604,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Executive presentation</span
 							>
 						</li>
@@ -630,7 +634,7 @@ const consultingFAQs = [
 						</h3>
 						<Badge variant="secondary" size="sm">2-4 weeks</Badge>
 					</div>
-					<p class="mb-4 text-gray-600 dark:text-gray-300">
+					<p class="mb-4 text-muted">
 						Hands-on implementation of specific technical initiatives with your
 						team, delivering immediate improvement to your systems.
 					</p>
@@ -639,7 +643,7 @@ const consultingFAQs = [
 						<span class="text-2xl font-bold text-gray-900 dark:text-white"
 							>$25,000</span
 						>
-						<span class="text-gray-500 dark:text-gray-400"> fixed price</span>
+						<span class="text-muted"> fixed price</span>
 					</div>
 
 					<ul class="space-y-2 mb-6">
@@ -655,7 +659,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Focused technical project</span
 							>
 						</li>
@@ -671,7 +675,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Direct hands-on coding</span
 							>
 						</li>
@@ -687,7 +691,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Knowledge transfer sessions</span
 							>
 						</li>
@@ -703,7 +707,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Complete documentation</span
 							>
 						</li>
@@ -719,7 +723,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>2 weeks of follow-up support</span
 							>
 						</li>
@@ -743,7 +747,7 @@ const consultingFAQs = [
 						</h3>
 						<Badge variant="tertiary" size="sm">Flexible</Badge>
 					</div>
-					<p class="mb-4 text-gray-600 dark:text-gray-300">
+					<p class="mb-4 text-muted">
 						Embed our expertise within your team on a recurring basis to provide
 						ongoing guidance, implementation, and support.
 					</p>
@@ -752,7 +756,7 @@ const consultingFAQs = [
 						<span class="text-2xl font-bold text-gray-900 dark:text-white"
 							>$2,400</span
 						>
-						<span class="text-gray-500 dark:text-gray-400"> per day</span>
+						<span class="text-muted"> per day</span>
 					</div>
 
 					<ul class="space-y-2 mb-6">
@@ -768,7 +772,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Minimum 5-day commitment</span
 							>
 						</li>
@@ -784,7 +788,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Flexible scheduling</span
 							>
 						</li>
@@ -800,7 +804,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Direct collaboration with your team</span
 							>
 						</li>
@@ -816,7 +820,7 @@ const consultingFAQs = [
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 									clip-rule="evenodd"></path>
 							</svg>
-							<span class="text-gray-700 dark:text-gray-300"
+							<span class="text-secondary-content"
 								>Volume discounts available</span
 							>
 						</li>
@@ -841,7 +845,7 @@ const consultingFAQs = [
 				>
 					Our Approach
 				</h2>
-				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+				<p class="text-lg text-muted max-w-3xl mx-auto">
 					A collaborative process designed to deliver practical solutions and
 					lasting capabilities
 				</p>
@@ -860,7 +864,7 @@ const consultingFAQs = [
 					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">
 						Discovery
 					</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<p class="text-muted">
 						We start by understanding your specific challenges, technical
 						environment, and team capabilities.
 					</p>
@@ -878,7 +882,7 @@ const consultingFAQs = [
 					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">
 						Planning
 					</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<p class="text-muted">
 						Together we define clear objectives, determine success metrics, and
 						create an actionable implementation plan.
 					</p>
@@ -896,7 +900,7 @@ const consultingFAQs = [
 					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">
 						Execution
 					</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<p class="text-muted">
 						Our experts work alongside your team to implement solutions, sharing
 						knowledge throughout the process.
 					</p>
@@ -914,7 +918,7 @@ const consultingFAQs = [
 					<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 mt-2">
 						Transition
 					</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<p class="text-muted">
 						We ensure your team is fully equipped to maintain and extend the
 						implemented solutions with comprehensive documentation.
 					</p>
@@ -934,7 +938,7 @@ const consultingFAQs = [
 					Ready to Start?
 				</h2>
 				<p
-					class="mb-10 text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
+					class="mb-10 text-xl text-muted max-w-3xl mx-auto"
 				>
 					Schedule a no-obligation consultation to discuss your technical
 					challenges and explore how we can help
@@ -970,7 +974,7 @@ const consultingFAQs = [
 				>
 					Frequently Asked Questions
 				</h2>
-				<p class="text-lg text-gray-600 dark:text-gray-300">
+				<p class="text-lg text-muted">
 					Learn more about our consulting services
 				</p>
 			</div>

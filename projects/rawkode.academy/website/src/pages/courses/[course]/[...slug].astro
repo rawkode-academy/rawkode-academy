@@ -9,8 +9,11 @@ import VideoPlayer from "@/components/video/player.vue";
 import Page from "@/wrappers/page.astro";
 import { loadWebContainerFiles } from "@/utils/webcontainer-loader";
 import type { GetStaticPaths } from "astro";
+import { createLogger } from "@/lib/logger";
 
 export const prerender = true;
+
+const logger = createLogger("courses");
 
 type Props = {
 	module: CollectionEntry<"courseModules">;
@@ -93,7 +96,7 @@ const processedResources = await Promise.all(
 					},
 				};
 			} catch (error) {
-				console.error(`Failed to load files for ${resource.title}:`, error);
+				logger.error(`Failed to load files for ${resource.title}`, error);
 				return resource;
 			}
 		}

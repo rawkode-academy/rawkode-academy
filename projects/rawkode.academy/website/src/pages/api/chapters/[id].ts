@@ -1,5 +1,8 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("chapters");
 
 // Define types for the GraphQL response
 interface Chapter {
@@ -94,7 +97,7 @@ export const GET: APIRoute = async ({ params }): Promise<Response> => {
 			},
 		});
 	} catch (error) {
-		console.error("Error generating chapters VTT:", error);
+		logger.error("Error generating chapters VTT", error);
 		return new Response("Error generating chapters VTT", { status: 500 });
 	}
 };

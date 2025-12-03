@@ -3,8 +3,11 @@ import { getCollection, getEntries, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { createLogger } from "@/lib/logger";
 
 export const prerender = true;
+
+const logger = createLogger("adrs");
 
 type Props = {
 	adr: CollectionEntry<"adrs">;
@@ -33,7 +36,7 @@ let authors: CollectionEntry<"people">[] = [];
 try {
 	authors = await getEntries(adr.data.authors);
 } catch (error) {
-	console.error(`Error fetching authors for ADR ${adr.id}:`, error);
+	logger.error(`Error fetching authors for ADR ${adr.id}`, error);
 }
 
 const formatDate = (date: Date): string => {

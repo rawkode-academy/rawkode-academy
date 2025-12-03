@@ -1,19 +1,19 @@
 <template>
   <div class="flex flex-wrap gap-2 sm:gap-3 items-center my-4">
-    <button @click="copyLink" class="glass-interactive inline-flex items-center justify-center px-3 sm:px-4 py-2 text-sm font-medium gap-2 text-secondary-content">
+    <button @click="copyLink" data-faro-user-action-name="video_share_copy" class="glass-interactive inline-flex items-center justify-center px-3 sm:px-4 py-2 text-sm font-medium gap-2 text-secondary-content">
       <font-awesome-icon icon="copy" class="w-4 h-4" />
       <span class="hidden sm:inline">{{ copyButtonText }}</span>
       <span class="sm:hidden">Copy</span>
     </button>
-    <a :href="blueskyShareUrl" target="_blank" rel="noopener noreferrer" class="btn-social bg-[#0077FF] hover:bg-[#005fcc]" @click="() => trackShare('bluesky')">
+    <a :href="blueskyShareUrl" target="_blank" rel="noopener noreferrer" data-faro-user-action-name="video_share_bluesky" class="btn-social bg-[#0077FF] hover:bg-[#005fcc]" @click="() => trackShare('bluesky')">
       <font-awesome-icon :icon="['fab', 'bluesky']" class="w-4 h-4" />
       <span class="hidden sm:inline">BlueSky</span>
     </a>
-    <a :href="linkedinShareUrl" target="_blank" rel="noopener noreferrer" class="btn-social bg-[#0A66C2] hover:bg-[#004182]" @click="() => trackShare('linkedin')">
+    <a :href="linkedinShareUrl" target="_blank" rel="noopener noreferrer" data-faro-user-action-name="video_share_linkedin" class="btn-social bg-[#0A66C2] hover:bg-[#004182]" @click="() => trackShare('linkedin')">
       <font-awesome-icon :icon="['fab', 'linkedin']" class="w-4 h-4" />
       <span class="hidden sm:inline">LinkedIn</span>
     </a>
-    <a :href="redditShareUrl" target="_blank" rel="noopener noreferrer" class="btn-social bg-[#FF4500] hover:bg-[#cc3700]" @click="() => trackShare('reddit')">
+    <a :href="redditShareUrl" target="_blank" rel="noopener noreferrer" data-faro-user-action-name="video_share_reddit" class="btn-social bg-[#FF4500] hover:bg-[#cc3700]" @click="() => trackShare('reddit')">
       <font-awesome-icon :icon="['fab', 'reddit']" class="w-4 h-4" />
       <span class="hidden sm:inline">Reddit</span>
     </a>
