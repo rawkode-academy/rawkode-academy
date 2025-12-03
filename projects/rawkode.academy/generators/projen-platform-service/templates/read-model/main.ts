@@ -19,7 +19,7 @@ export interface Env {
 	{{ bucket.binding }}: R2Bucket;
 {%- endfor %}
 {%- for svc in bindings.services %}
-	{{ svc.binding }}: Fetcher;
+	{{ svc.binding }}: Service;
 {%- endfor %}
 {%- for wf in bindings.workflows %}
 	{{ wf.binding }}: Workflow;

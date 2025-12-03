@@ -39,6 +39,12 @@ export interface SendEmailBinding {
 	allowed_destination_addresses?: string[];
 }
 
+export interface RouteBinding {
+	pattern: string;
+	custom_domain?: boolean;
+	zone_name?: string;
+}
+
 export interface CloudflareBindings {
 	d1Databases?: D1DatabaseBinding[];
 	secretStoreSecrets?: SecretStoreSecretBinding[];
@@ -50,6 +56,7 @@ export interface CloudflareBindings {
 	ai?: { binding: string };
 	vars?: Record<string, string>;
 	crons?: string[];
+	routes?: RouteBinding[];
 }
 
 export interface PlatformServiceOptions {
@@ -79,10 +86,10 @@ export interface PlatformServiceOptions {
 	readonly includeWriteModel?: boolean;
 
 	/**
-	 * Whether to include an RPC service
+	 * Whether to include an HTTP service (basic WorkerEntrypoint)
 	 * @default false
 	 */
-	readonly includeRpc?: boolean;
+	readonly includeHttp?: boolean;
 
 	/**
 	 * Cloudflare environment bindings configuration

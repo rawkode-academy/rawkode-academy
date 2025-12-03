@@ -5,7 +5,7 @@ const project = new PlatformService({
 	includeDataModel: false,
 	includeReadModel: false,
 	includeWriteModel: false,
-	includeRpc: true,
+	includeHttp: true,
 	bindings: {
 		sendEmail: [{
 			name: "SEND_EMAIL",

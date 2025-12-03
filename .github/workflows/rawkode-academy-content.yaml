@@ -1,0 +1,65 @@
+name: rawkode.academy/content
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/rawkode-academy-content.yaml"
+      - "projects/rawkode.academy/content/**"
+      - "projects/rawkode.academy/generators/projen-platform-service/**"
+  pull_request:
+    paths:
+      - ".github/workflows/rawkode-academy-content.yaml"
+      - "projects/rawkode.academy/content/**"
+      - "projects/rawkode.academy/generators/projen-platform-service/**"
+
+jobs:
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install generator dependencies
+        working-directory: projects/rawkode.academy/generators/projen-platform-service
+        run: bun install
+
+      - name: Run projen
+        working-directory: projects/rawkode.academy/content
+        run: bun run .projenrc.ts
+
+      - name: Install service dependencies
+        working-directory: projects/rawkode.academy/content
+        run: bun install
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: "rawkode-academy-production"
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: Get Cloudflare token from Secret Manager
+        id: secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |
+            CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
+
+      - name: Deploy Content Worker
+        working-directory: projects/rawkode.academy/content
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
+        run: |
+          npx wrangler deploy --config ./rpc/wrangler.jsonc

@@ -13,7 +13,7 @@ interface Options {
 	bindings?: CloudflareBindings;
 }
 
-export class Rpc extends Component {
+export class Http extends Component {
 	public readonly project: PlatformService;
 	private options: Options;
 	private liquid: Liquid;
@@ -25,7 +25,7 @@ export class Rpc extends Component {
 		this.options = options;
 
 		this.liquid = new Liquid({
-			root: path.join(__dirname, "../../../templates/rpc"),
+			root: path.join(__dirname, "../../../templates/http"),
 		});
 
 		// Register custom filters
@@ -37,7 +37,7 @@ export class Rpc extends Component {
 		);
 
 		this.createMain();
-		this.createRpcService();
+		this.createHttpService();
 		this.createWranglerConfig();
 	}
 
@@ -60,7 +60,7 @@ export class Rpc extends Component {
 	private getTemplateContext() {
 		const bindings = this.options.bindings ?? {};
 
-		// Ensure DB binding has migrations_dir for rpc
+		// Ensure DB binding has migrations_dir for http
 		const d1Databases = (bindings.d1Databases ?? []).map((db) => {
 			if (db.binding === "DB" && !db.migrations_dir) {
 				return { ...db, migrations_dir: "../data-model/migrations" };
@@ -81,6 +81,7 @@ export class Rpc extends Component {
 				ai: bindings.ai,
 				vars: bindings.vars ?? {},
 				crons: bindings.crons ?? [],
+				routes: bindings.routes ?? [],
 			},
 		};
 	}
@@ -91,18 +92,18 @@ export class Rpc extends Component {
 			this.getTemplateContext(),
 		);
 
-		new TextFile(this.project, "rpc/main.ts", {
+		new TextFile(this.project, "http/main.ts", {
 			lines: content.split("\n"),
 		});
 	}
 
-	private createRpcService() {
+	private createHttpService() {
 		const content = this.liquid.renderFileSync(
-			"rpc-service.ts",
+			"http-service.ts",
 			this.getTemplateContext(),
 		);
 
-		new SampleFile(this.project, "rpc/rpc-service.ts", {
+		new SampleFile(this.project, "http/http-service.ts", {
 			contents: content,
 		});
 	}
@@ -113,7 +114,7 @@ export class Rpc extends Component {
 			this.getTemplateContext(),
 		);
 
-		new TextFile(this.project, "rpc/wrangler.jsonc", {
+		new TextFile(this.project, "http/wrangler.jsonc", {
 			lines: content.split("\n"),
 		});
 	}
