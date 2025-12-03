@@ -1,6 +1,0 @@
-{
-	"name": "rawkode-dev",
-	"devDependencies": {
-		"wrangler": "3.25.0"
-	}
-}
