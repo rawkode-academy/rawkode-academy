@@ -1,4 +1,4 @@
-import { {{ serviceName | pascalCase }} } from "./rpc-service.js";
+import { {{ serviceName | pascalCase }} } from "./http-service.js";
 
 export interface Env {
 {%- for db in bindings.d1Databases %}
@@ -11,7 +11,7 @@ export interface Env {
 	{{ bucket.binding }}: R2Bucket;
 {%- endfor %}
 {%- for svc in bindings.services %}
-	{{ svc.binding }}: Fetcher;
+	{{ svc.binding }}: Service;
 {%- endfor %}
 {%- for email in bindings.sendEmail %}
 	{{ email.name }}: SendEmail;

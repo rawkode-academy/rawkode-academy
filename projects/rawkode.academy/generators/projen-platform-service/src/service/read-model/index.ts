@@ -62,6 +62,7 @@ export class ReadModel extends Component {
 				ai: bindings.ai,
 				vars: bindings.vars ?? {},
 				crons: bindings.crons ?? [],
+				routes: bindings.routes ?? [],
 			},
 		};
 	}

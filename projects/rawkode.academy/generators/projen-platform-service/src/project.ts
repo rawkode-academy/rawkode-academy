@@ -8,7 +8,7 @@ import { Dagger } from "./dagger";
 import type { PlatformServiceOptions } from "./options";
 import { DataModel } from "./service/data-model";
 import { ReadModel } from "./service/read-model";
-import { Rpc } from "./service/rpc";
+import { Http } from "./service/http";
 import { WriteModel } from "./service/write-model";
 import { TypeScriptConfig } from "./tsconfig";
 
@@ -36,7 +36,7 @@ export class PlatformService extends Project {
 			includeDataModel: true,
 			includeReadModel: true,
 			includeWriteModel: false,
-			includeRpc: false,
+			includeHttp: false,
 			additionalDependencies: {},
 			additionalDevDependencies: {},
 			...options,
@@ -143,8 +143,8 @@ export class PlatformService extends Project {
 			});
 		}
 
-		if (this.options.includeRpc) {
-			new Rpc(this, {
+		if (this.options.includeHttp) {
+			new Http(this, {
 				serviceName: this.options.serviceName,
 				bindings: this.options.bindings,
 			});

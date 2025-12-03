@@ -3,7 +3,7 @@ import { PlatformService } from "../../generators/projen-platform-service/src/";
 const project = new PlatformService({
 	serviceName: "email-preferences",
 	includeWriteModel: false,
-	includeRpc: true,
+	includeHttp: true,
 	additionalDependencies: {
 		cloudevents: "^8.0.2",
 	},
