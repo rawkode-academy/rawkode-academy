@@ -4,6 +4,9 @@ const project = new PlatformService({
 	serviceName: "email-preferences",
 	includeWriteModel: false,
 	includeRpc: true,
+	additionalDependencies: {
+		cloudevents: "^8.0.2",
+	},
 	bindings: {
 		d1Databases: [{
 			binding: "DB",
