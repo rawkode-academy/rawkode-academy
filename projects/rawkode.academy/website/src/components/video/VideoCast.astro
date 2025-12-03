@@ -1,0 +1,72 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+	hosts: CollectionEntry<"people">[];
+	guests: CollectionEntry<"people">[];
+}
+
+const { hosts, guests } = Astro.props;
+const hasSpeakers = hosts.length > 0 || guests.length > 0;
+---
+
+{hasSpeakers && (
+	<section class="section-gap pt-8 border-t border-secondary/20">
+		<h2 class="text-2xl font-bold text-primary-content mb-6">
+			Meet the Cast
+		</h2>
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+			{hosts.map((person) => (
+				<div
+					class="glass-panel group flex items-center p-4 gap-4 hover:border-primary/50 transition-colors"
+				>
+					<div class="relative shrink-0">
+						<img
+							src={person.data.avatarUrl || '/images/avatars/default.png'}
+							alt={person.data.name}
+							class="w-12 h-12 rounded-full object-cover border-2 border-primary"
+							loading="lazy"
+						/>
+						<span class="absolute -bottom-1 -right-1 bg-primary text-primary-content text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-primary-content/10 shadow-sm">
+							HOST
+						</span>
+					</div>
+					<div class="min-w-0">
+						<h3 class="font-medium text-primary-content truncate group-hover:text-primary transition-colors">
+							{person.data.name}
+						</h3>
+						<p class="text-xs text-secondary-content truncate">
+							@{person.data.github ? person.data.github.split('/').pop() : person.data.id}
+						</p>
+					</div>
+				</div>
+			))}
+			
+			{guests.map((person) => (
+				<div
+					class="glass-panel group flex items-center p-4 gap-4 hover:border-secondary transition-colors"
+				>
+					<div class="relative shrink-0">
+						<img
+							src={person.data.avatarUrl || '/images/avatars/default.png'}
+							alt={person.data.name}
+							class="w-12 h-12 rounded-full object-cover border-2 border-secondary/50"
+							loading="lazy"
+						/>
+						<span class="absolute -bottom-1 -right-1 bg-secondary text-secondary-content text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-secondary-content/10 shadow-sm">
+							GUEST
+						</span>
+					</div>
+					<div class="min-w-0">
+						<h3 class="font-medium text-primary-content truncate group-hover:text-secondary transition-colors">
+							{person.data.name}
+						</h3>
+						<p class="text-xs text-secondary-content truncate">
+							@{person.data.github ? person.data.github.split('/').pop() : person.data.id}
+						</p>
+					</div>
+				</div>
+			))}
+		</div>
+	</section>
+)}

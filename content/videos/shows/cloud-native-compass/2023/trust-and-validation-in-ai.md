@@ -73,5 +73,8 @@ chapters:
   - startTime: 2535
     title: Hosts' Wrap-up and Outro
 duration: 2591
+audioFileSize: 62183063
+guests:
+  - jj-asghar
 ---
 

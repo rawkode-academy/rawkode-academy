@@ -92,7 +92,7 @@ const getAdrNumber = (id: string): string => {
                           <div class="relative" style={`z-index: ${10 - index}`}>
                             <img
                               class="w-8 h-8 rounded-full object-cover border-2 border-secondary p-0.5 bg-white dark:bg-gray-800"
-                              src={`https://avatars.githubusercontent.com/${author.data.handle}`}
+                              src={author.data.avatarUrl}
                               alt={`Profile picture of ${author.data.name}`}
                               title={author.data.name}
                             />

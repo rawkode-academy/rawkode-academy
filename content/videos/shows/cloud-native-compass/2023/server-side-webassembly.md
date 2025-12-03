@@ -99,5 +99,10 @@ chapters:
   - startTime: 2835
     title: Shameless Plugs
 duration: 2975
+audioFileSize: 71404079
+guests:
+  - kate-goldenring
+  - connor-hicks
+  - kevin-hoffman
 ---
 

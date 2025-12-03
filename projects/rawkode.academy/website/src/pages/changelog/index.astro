@@ -15,27 +15,6 @@ marked.setOptions({
 // Get all changelog entries from the content collection
 const changelogEntries = await getCollection("changelog");
 
-// Helper function to fetch GitHub user data
-async function fetchGitHubUser(username: string) {
-	try {
-		const response = await fetch(`https://api.github.com/users/${username}`);
-		if (response.ok) {
-			const data: { name?: string; avatar_url: string } = await response.json();
-			return {
-				name: data.name || username,
-				avatar_url: data.avatar_url,
-			};
-		}
-	} catch (error) {
-		console.error(`Failed to fetch GitHub user data for ${username}:`, error);
-	}
-	// Fallback values
-	return {
-		name: username,
-		avatar_url: `https://avatars.githubusercontent.com/${username}`,
-	};
-}
-
 // Sort by date (newest first)
 const sortedChangelog = changelogEntries.sort((a, b) => {
 	return b.data.date.getTime() - a.data.date.getTime();
@@ -46,15 +25,15 @@ const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
 		const renderedContent = marked(entry.body || "");
 		const authorEntry = await getEntry(entry.data.author);
-		const authorData = await fetchGitHubUser(
-			authorEntry?.data.handle || "unknown",
-		);
 
 		return {
 			...entry.data,
 			id: entry.id,
 			renderedContent: String(renderedContent),
-			author: authorData,
+			author: {
+				name: authorEntry?.data.name || "Unknown",
+				avatar_url: authorEntry?.data.avatarUrl || "",
+			},
 		};
 	}),
 );

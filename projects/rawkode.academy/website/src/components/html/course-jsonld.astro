@@ -71,7 +71,7 @@ const courseJsonLd = {
 	creator: authors.map((author) => ({
 		"@type": "Person",
 		name: author.data.name,
-		url: `https://github.com/${author.data.handle}`,
+		url: author.data.github,
 	})),
 	teaches: modules.map((module) => module.data.title).join(", "),
 	educationalLevel: getSkillLevel(course.data.difficulty),

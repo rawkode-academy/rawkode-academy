@@ -1,5 +1,6 @@
 ---
 import type { ShowSummary } from "@/types/show";
+import { Image } from "astro:assets";
 
 interface Props {
 	show: ShowSummary;
@@ -37,7 +38,20 @@ const latestEpisodeDate = latestEpisodePublishedAt
         href={`/shows/${show.id}`}
         class="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40 dark:border-gray-800 dark:bg-gray-900"
 >
-        {thumbnailUrl ? (
+        {show.cover ? (
+                <div class="relative aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                        <Image
+                                src={show.cover.image}
+                                alt={show.cover.alt}
+                                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                        />
+                        {episodes.length > 0 && (
+                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                                        {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
+                                </div>
+                        )}
+                </div>
+        ) : thumbnailUrl ? (
                 <div class="relative aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                         <img
                                 src={thumbnailUrl}

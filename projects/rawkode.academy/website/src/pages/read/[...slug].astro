@@ -106,13 +106,13 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 				<div class="byline-authors">
 					{authors.map((author) => (
 						<a
-							href={`https://github.com/${author.data.handle}`}
+							href={author.data.github}
 							target="_blank"
 							rel="author noopener noreferrer"
 							class="author"
 						>
 							<img
-								src={`https://avatars.githubusercontent.com/${author.data.handle}`}
+								src={author.data.avatarUrl}
 								alt=""
 								class="author-avatar"
 								loading="lazy"
