@@ -7,6 +7,7 @@ import RelatedVideos from "@/components/video/RelatedVideos.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
+import VideoCast from "@/components/video/VideoCast.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
@@ -115,6 +116,34 @@ const techEntries = Array.isArray(video.data.technologies)
 		).filter((t): t is NonNullable<typeof t> => Boolean(t))
 	: [];
 
+const hostEntries = showEntry && Array.isArray(showEntry.data.hosts)
+	? (
+			await Promise.all(
+				(showEntry.data.hosts).map(async (hostRef) => {
+					try {
+						return await getEntry("people", hostRef.id);
+					} catch {
+						return null;
+					}
+				}),
+			)
+		).filter((h): h is NonNullable<typeof h> => Boolean(h))
+	: [];
+
+const guestEntries = Array.isArray(video.data.guests)
+	? (
+			await Promise.all(
+				video.data.guests.map(async (guestRef) => {
+					try {
+						return await getEntry("people", guestRef.id);
+					} catch {
+						return null;
+					}
+				}),
+			)
+		).filter((g): g is NonNullable<typeof g> => Boolean(g))
+	: [];
+
 const breadcrumbElements = showEntry
 	? [
 			{ title: "Home", link: "/" },
@@ -186,6 +215,9 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 					server:defer
 					videoId={video.data.slug}
 				/>
+
+				{/* Cast & Speakers */}
+				<VideoCast hosts={hostEntries} guests={guestEntries} />
 
 				{/* Newsletter Signup - High Value Placement */}
 				<NewsletterCTA class="!my-0" />

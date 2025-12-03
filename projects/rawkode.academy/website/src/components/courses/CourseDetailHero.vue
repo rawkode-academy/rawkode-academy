@@ -97,8 +97,8 @@
             <div class="flex items-center gap-3">
               <img
                 v-for="author in authors"
-                :key="author.handle"
-                :src="`https://avatars.githubusercontent.com/${author.handle}`"
+                :key="author.name"
+                :src="author.avatarUrl"
                 :alt="author.name"
                 class="w-10 h-10 rounded-full ring-2 ring-gray-300 dark:ring-gray-700"
                 loading="lazy"
@@ -184,7 +184,7 @@ import Button from "../common/Button.vue";
 
 interface Author {
 	name: string;
-	handle: string;
+	avatarUrl?: string | undefined;
 }
 
 interface Props {

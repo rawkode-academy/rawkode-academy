@@ -121,5 +121,8 @@ chapters:
   - startTime: 1887
     title: Conclusion & Outro
 duration: 1920
+audioFileSize: 46069483
+guests:
+  - liz-rice
 ---
 

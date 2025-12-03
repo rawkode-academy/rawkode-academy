@@ -67,7 +67,7 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
 		<>
 			<meta property="article:publisher" content="https://rawkode.academy" />
 			{authors && authors.map((author: CollectionEntry<"people">) => (
-				<meta property="article:author" content={`https://github.com/${author.data.handle}`} />
+				author.data.github && <meta property="article:author" content={author.data.github} />
 			))}
 		</>
 	)
@@ -111,11 +111,11 @@ const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
 			author: authors.map((author: CollectionEntry<"people">) => ({
 				"@type": "Person",
 				name: author.data.name,
-				url: `https://github.com/${author.data.handle}`,
+				url: author.data.github,
 				sameAs: [
-					`https://github.com/${author.data.handle}`,
-					`https://twitter.com/${author.data.handle}`,
-				],
+					author.data.github,
+					author.data.twitter,
+				].filter(Boolean),
 			})),
 		}),
 	})}

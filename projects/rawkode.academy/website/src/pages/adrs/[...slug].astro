@@ -70,7 +70,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                       <div class="relative" style={`z-index: ${10 - index}`}>
                         <img
                           class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-secondary bg-white dark:bg-gray-800"
-                          src={`https://avatars.githubusercontent.com/${author.data.handle}`}
+                          src={author.data.avatarUrl}
                           alt={`Profile picture of ${author.data.name}`}
                         />
                         {index === 0 && (
@@ -91,7 +91,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                   {authors.filter(author => author && author.data).map((author) => (
                     <div class="inline-flex items-center bg-primary/10 dark:bg-primary/20 rounded-full px-3 py-1">
                       <a
-                        href={`https://github.com/${author.data.handle}`}
+                        href={author.data.github}
                         target="_blank"
                         rel="author noopener noreferrer"
                         class="text-sm font-medium text-secondary dark:text-secondary hover:text-secondary/90 dark:hover:text-secondary/90 transition-colors"
@@ -99,7 +99,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                         {author.data.name}
                       </a>
                       <span class="mx-1 text-secondary dark:text-secondary">•</span>
-                      <span class="text-xs text-secondary dark:text-secondary">@{author.data.handle}</span>
+                      <span class="text-xs text-secondary dark:text-secondary">@{author.id}</span>
                     </div>
                   ))}
                 </div>

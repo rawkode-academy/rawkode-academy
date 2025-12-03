@@ -7,10 +7,13 @@ title: >-
   Navigating Kubernetes: Insights, Challenges, and the Release Cycle with Kat
   Cosgrove
 description: 'Video content coming soon.'
-publishedAt: 2024-01-31T17:00:00.000Z
+publishedAt: 2025-01-30T17:00:00.000Z
 technologies: []
 show: cloud-native-compass
 videoId: fqasod5sk7o8fk3pnzng0thp
 duration: 2366
+audioFileSize: 56784493
+guests:
+  - kat-cosgrove
 ---
 

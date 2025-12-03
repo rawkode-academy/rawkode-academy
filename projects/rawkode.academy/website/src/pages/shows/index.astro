@@ -51,7 +51,13 @@ const showsToRender: ShowSummary[] = await (async () => {
 							: String(v.data.publishedAt),
 				},
 			}));
-		list.push({ id: s.data.id, name: s.data.name, hosts, episodes: eps });
+		list.push({
+			id: s.data.id,
+			name: s.data.name,
+			hosts,
+			episodes: eps,
+			cover: s.data.cover,
+		});
 	}
 	return list;
 })();

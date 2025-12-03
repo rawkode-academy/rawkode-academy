@@ -135,5 +135,8 @@ chapters:
   - startTime: 3300
     title: Shameless Plugs
 duration: 3368
+audioFileSize: 80837626
+guests:
+  - paul-dix
 ---
 

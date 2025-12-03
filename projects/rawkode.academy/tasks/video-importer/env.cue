@@ -14,20 +14,11 @@ env: {
 	CLOUDFLARE_ZONE_ID: "789be9a4588576db675cc2053ea3a89d"
 
 	environment: production: {
-		VIDEOS_ACCESS_KEY: schema.#OnePasswordRef & {
-			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/rawkode-academy-videos/access-key"
-		}
-		VIDEOS_SECRET_KEY: schema.#OnePasswordRef & {
-			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/rawkode-academy-videos/secret-key"
-		}
 		CONTENT_ACCESS_KEY: schema.#OnePasswordRef & {
 			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/rawkode-academy-content/access-key-id"
 		}
 		CONTENT_SECRET_KEY: schema.#OnePasswordRef & {
 			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/rawkode-academy-content/secret-access-key"
-		}
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/api-tokens/all-access"
 		}
 	}
 }

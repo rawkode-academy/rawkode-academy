@@ -10,10 +10,9 @@ export interface PersonLink {
 export interface PersonItem {
 	id: string;
 	name: string;
-	handle: string;
 	forename: string;
 	surname: string;
-	biography: string | undefined;
+	biography: string;
 	links: PersonLink[];
 }
 
@@ -37,10 +36,9 @@ export async function listPeople(): Promise<PersonItem[]> {
 		return {
 			id: e.id,
 			name: data.name,
-			handle: data.handle,
 			forename: data.forename ?? parsed.forename,
 			surname: data.surname ?? parsed.surname,
-			biography: data.biography,
+			biography: e.body ?? "",
 			links: data.links ?? [],
 		} satisfies PersonItem;
 	});
@@ -49,11 +47,4 @@ export async function listPeople(): Promise<PersonItem[]> {
 export async function getPersonById(id: string): Promise<PersonItem | null> {
 	const list = await listPeople();
 	return list.find((p) => p.id === id) ?? null;
-}
-
-export async function getPersonByHandle(
-	handle: string,
-): Promise<PersonItem | null> {
-	const list = await listPeople();
-	return list.find((p) => p.handle === handle) ?? null;
 }
