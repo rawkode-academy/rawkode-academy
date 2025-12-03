@@ -1,6 +1,7 @@
 import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
 import { generateRssFeed } from "feedsmith";
+import { getImage } from "astro:assets";
 
 export async function getStaticPaths() {
 	const shows = await getCollection("shows");
@@ -68,10 +69,19 @@ export async function GET(context: APIContext) {
 			const duration =
 				typeof video.data.duration === "number" ? video.data.duration : 0;
 			const audioUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/original.mp3`;
-			const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
+			const originalThumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
 			const episodeUrl = `${site}/watch/${video.data.slug}/`;
 			const audioFileSize = video.data.audioFileSize || 0;
 			const chaptersUrl = `${site}/api/feeds/shows/${showId}/${video.data.slug}/chapters.json`;
+
+			// Optimize thumbnail for square aspect ratio
+			const optimizedThumbnail = await getImage({
+				src: originalThumbnailUrl,
+				width: 1400,
+				height: 1400,
+				format: "jpeg",
+			});
+			const thumbnailUrl = optimizedThumbnail.src;
 
 			// Fetch guest data for podcast:person tags
 			const guestEntries = video.data.guests?.length
@@ -82,12 +92,20 @@ export async function GET(context: APIContext) {
 				display: guest.data.name,
 				role: "guest",
 				img: guest.data.avatarUrl,
+				href:
+					guest.data.website ||
+					guest.data.twitter ||
+					`https://rawkode.academy/people/${guest.data.id}`,
 			}));
 
 			const hostPersons = hostEntries.map((host) => ({
 				display: host.data.name,
 				role: "host",
 				img: host.data.avatarUrl,
+				href:
+					host.data.website ||
+					host.data.twitter ||
+					`https://rawkode.academy/people/${host.data.id}`,
 			}));
 
 			const hasChapters = video.data.chapters && video.data.chapters.length > 0;
