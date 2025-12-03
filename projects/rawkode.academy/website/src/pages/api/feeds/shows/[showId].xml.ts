@@ -1,7 +1,17 @@
 import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
 import { generateRssFeed } from "feedsmith";
-import { getImage } from "astro:assets";
+
+/**
+ * Generate a squared podcast artwork URL using Cloudflare Image Resizing.
+ * Apple Podcasts requires square artwork (1400x1400 to 3000x3000 pixels).
+ */
+function getSquaredArtworkUrl(site: string, originalUrl: string): string {
+	// Use Cloudflare Image Resizing to crop to square
+	// fit=cover crops the image to fill the dimensions
+	const params = "width=1400,height=1400,fit=cover,format=jpeg,quality=90";
+	return `${site}/cdn-cgi/image/${params}/${originalUrl}`;
+}
 
 export async function getStaticPaths() {
 	const shows = await getCollection("shows");
@@ -39,10 +49,6 @@ export async function GET(context: APIContext) {
 		);
 
 	const hostEntries = await getEntries(show.data.hosts);
-	const hostNames = hostEntries
-		.map((host) => host.data.name)
-		.filter(Boolean)
-		.join(", ");
 
 	const podcastConfig = show.data.podcast;
 	const showDescription =
@@ -56,11 +62,15 @@ export async function GET(context: APIContext) {
 		: new Date();
 
 	// Use podcast.artworkUrl if available, otherwise fall back to thumbnail
-	const showImageUrl = podcastConfig?.artworkUrl
+	// Apply square cropping for Apple Podcasts requirements
+	const originalShowImageUrl = podcastConfig?.artworkUrl
 		? podcastConfig.artworkUrl
 		: firstVideo
 			? `https://content.rawkode.academy/videos/${firstVideo.data.videoId}/thumbnail.jpg`
 			: "";
+	const showImageUrl = originalShowImageUrl
+		? getSquaredArtworkUrl(site, originalShowImageUrl)
+		: "";
 
 	// Build items
 	const items = await Promise.all(
@@ -74,14 +84,8 @@ export async function GET(context: APIContext) {
 			const audioFileSize = video.data.audioFileSize || 0;
 			const chaptersUrl = `${site}/api/feeds/shows/${showId}/${video.data.slug}/chapters.json`;
 
-			// Optimize thumbnail for square aspect ratio
-			const optimizedThumbnail = await getImage({
-				src: originalThumbnailUrl,
-				width: 1400,
-				height: 1400,
-				format: "jpeg",
-			});
-			const thumbnailUrl = optimizedThumbnail.src;
+			// Generate squared thumbnail URL using Cloudflare Image Resizing
+			const thumbnailUrl = getSquaredArtworkUrl(site, originalThumbnailUrl);
 
 			// Fetch guest data for podcast:person tags
 			const guestEntries = video.data.guests?.length
@@ -131,7 +135,7 @@ export async function GET(context: APIContext) {
 					duration: duration,
 					image: thumbnailUrl,
 					explicit: podcastConfig?.explicit ?? false,
-					author: hostNames,
+					author: "Rawkode Academy",
 					episode: episodeNumber,
 					episodeType: "full",
 				},
@@ -188,14 +192,14 @@ export async function GET(context: APIContext) {
 			],
 		},
 		itunes: {
-			author: hostNames,
+			author: "Rawkode Academy",
 			explicit: podcastConfig?.explicit ?? false,
 			type: "episodic",
 			image: showImageUrl || undefined,
 			categories: itunesCategories,
 			...(podcastConfig?.email && {
 				owner: {
-					name: hostNames,
+					name: "Rawkode Academy",
 					email: podcastConfig.email,
 				},
 			}),
