@@ -17,5 +17,24 @@ podcast:
   explicit: false
   copyright: Rawkode Academy
   artworkUrl: https://content.rawkode.academy/shows/cloud-native-compass/artwork.jpg
+subscribeLinks:
+  - platform: Apple Podcasts
+    url: https://podcasts.apple.com/us/podcast/cloud-native-compass/id1685669024
+    icon: apple-podcasts
+  - platform: Spotify
+    url: https://open.spotify.com/show/2YORr9h22aGsU6nvsIWc2m
+    icon: spotify
+  - platform: YouTube
+    url: https://youtube.com/@RawkodeAcademy
+    icon: youtube
+  - platform: Amazon Music
+    url: https://music.amazon.com/podcasts/7a41de2c-e34b-4ed6-bc65-5dce30e2b9b3
+    icon: amazon-music
+  - platform: Pocket Casts
+    url: https://pca.st/itunes/1685669024
+    icon: pocket-casts
+  - platform: Overcast
+    url: https://overcast.fm/itunes1685669024
+    icon: overcast
 ---
 
