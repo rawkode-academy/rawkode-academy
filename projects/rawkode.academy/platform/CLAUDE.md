@@ -11,6 +11,33 @@ This guide explains how to add new GraphQL microservices to the Rawkode Academy 
 - **Deployment**: Services are deployed to Cloudflare Workers using Wrangler
 - **Database**: All new services should use Cloudflare D1 with Drizzle ORM (Turso is being phased out)
 - **Supergraph Composition**: Subgraph schemas are composed into a supergraph during CI/CD using `@theguild/federation-composition`
+- **Analytics**: All services automatically receive an `ANALYTICS` service binding for Grafana integration
+
+## Analytics Binding
+
+The projen generator automatically injects an `ANALYTICS` service binding into every platform service. This binding connects to `platform-analytics-rpc` and enables services to track events to Grafana.
+
+**You do not need to manually add ANALYTICS to your `.projenrc.ts`** - it is injected automatically by the generator.
+
+Usage in your service code:
+
+```typescript
+// The ANALYTICS binding is available in your Env interface
+export interface Env {
+  DB: D1Database;
+  ANALYTICS: Fetcher;  // Auto-injected
+}
+
+// Track events via the analytics service
+await this.env.ANALYTICS.fetch("https://analytics.internal/track", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    event: cloudEvent,
+    attributes: ["user_id", "channel"],
+  }),
+});
+```
 
 ## Service Structure
 

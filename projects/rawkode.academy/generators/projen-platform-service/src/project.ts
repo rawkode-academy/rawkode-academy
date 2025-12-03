@@ -58,6 +58,29 @@ export class PlatformService extends Project {
 			);
 		}
 
+		// Automatically inject ANALYTICS service binding for all services
+		const analyticsBinding = {
+			binding: "ANALYTICS",
+			service: "platform-analytics-rpc",
+		};
+
+		if (this.options.bindings) {
+			const existingServices = this.options.bindings.services ?? [];
+			const hasAnalytics = existingServices.some(
+				(s) => s.binding === "ANALYTICS",
+			);
+			if (!hasAnalytics) {
+				this.options.bindings = {
+					...this.options.bindings,
+					services: [...existingServices, analyticsBinding],
+				};
+			}
+		} else {
+			this.options.bindings = {
+				services: [analyticsBinding],
+			};
+		}
+
 		// Initialize dependencies conditionally
 		this.dependencies = {};
 
