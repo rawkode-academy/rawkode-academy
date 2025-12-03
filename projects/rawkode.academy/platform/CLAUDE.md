@@ -15,7 +15,7 @@ This guide explains how to add new GraphQL microservices to the Rawkode Academy 
 
 ## Analytics Binding
 
-The projen generator automatically injects an `ANALYTICS` service binding into every platform service. This binding connects to `platform-analytics-rpc` and enables services to track events to Grafana.
+The projen generator automatically injects an `ANALYTICS` service binding into every platform service. This binding connects to `analytics` and enables services to track events to Grafana.
 
 **You do not need to manually add ANALYTICS to your `.projenrc.ts`** - it is injected automatically by the generator.
 
