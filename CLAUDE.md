@@ -4,175 +4,74 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Monorepo Overview
 
-This is a Bun workspace monorepo containing the Rawkode Academy platform - an educational platform for cloud-native technologies. Key domains:
+This is a Bun workspace monorepo containing the Rawkode Academy platform. Key domains:
 
 - **`projects/rawkode.academy/`** - Main website and platform services
-- **`projects/rawkode.studio/`** - Video meeting platform with RealTimeKit
-- **`content/`** - Content management (technologies, articles, courses, videos)
+- **`projects/rawkode.studio/`** - Video meeting platform
+- **`content/`** - Content management (technologies, articles, courses)
 - **`dagger/`** - CI/CD pipeline modules
-- **`infrastructure/`** - Terraform CDK and Kubernetes configurations
+- **`infrastructure/`** - Terraform and DNS configurations
 
 ## Environment & Runtime
 
-**Always use Bun**, not Node.js/npm. This monorepo uses Bun as the package manager and runtime.
+**Always use Bun**, not Node.js/npm.
 
-**Use `cuenv` when `env.cue` exists.** Many directories contain an `env.cue` file that manages environment variables (via 1Password) and defines tasks. When present:
+**Use `cuenv` when `env.cue` exists.** Many directories have an `env.cue` file for environment variables and tasks:
+
 ```bash
-cuenv task dev                 # Run the dev task with proper env vars
-cuenv task build               # Run the build task
-cuenv env print                # Print environment variables
+cuenv task dev       # Run dev task with env vars
+cuenv task build     # Run build task
 ```
 
 If no `env.cue` exists, use `bun run <script>` directly.
 
-### env.cue File Structure
-
-`cuenv` is a build toolchain that provides typed environments and CUE-powered task orchestration. The `env.cue` file defines:
-
-```cue
-package cuenv
-
-import "github.com/cuenv/cuenv/schema"
-
-schema.#Cuenv
-
-// Environment variables (plain values or 1Password refs)
-env: {
-	GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
-
-	// Environment-specific secrets from 1Password
-	environment: production: {
-		API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://vault/item/field"
-		}
-	}
-}
-
-// Hooks run on events like entering directory
-hooks: onEnter: devenv: {
-	command: "devenv"
-	args: ["print-dev-env"]
-	source: true
-}
-
-// Workspace integrations
-workspaces: bun: {}
-
-// Task definitions
-tasks: {
-	dev: {
-		command: "bun"
-		args: ["run", "dev"]
-		workspaces: ["bun"]
-		inputs: ["src/**", "package.json"]  // For caching
-	}
-	deploy: {
-		command: "bunx"
-		args: ["wrangler", "deploy"]
-		dependsOn: ["build"]  // Task dependencies
-	}
-}
-
-// CI pipeline definitions (optional)
-ci: pipelines: [{
-	name: "default"
-	when: branch: ["main"]
-	tasks: ["install", "deploy"]
-}]
-```
-
-**Common cuenv commands:**
-- `cuenv task <name>` - Run a defined task with env vars
-- `cuenv exec <cmd>` - Run a command with env vars
-- `cuenv env print` - Print environment variables
-- `cuenv shell` - Shell hook integration (for directory entry)
-
 ## Common Commands
 
-### Root Level
 ```bash
-bun install                    # Install all workspace dependencies
-bun run knip                   # Detect unused dependencies
+bun install          # Install all workspace dependencies
+bun run knip         # Detect unused dependencies
 ```
 
-### Website (`projects/rawkode.academy/website/`)
-```bash
-cuenv task dev                 # Start Astro dev server (preferred, loads env)
-cuenv task build               # Type check + build
-bun run test                   # Run vitest
-bun run test:watch             # Watch mode
-bun run format                 # Biome format
-bun run storybook              # Component development
-bun run codegen                # GraphQL codegen
-bun run sync:content           # Sync GraphQL content
-```
+## Tech Stack
 
-### Studio (`projects/rawkode.studio/`)
-```bash
-bun run dev                    # Start Astro dev server
-bun run build                  # Type check + build
-bun run format && bun run lint # Format and lint before committing
-```
-
-### Platform Services (`projects/rawkode.academy/platform/<service>/`)
-```bash
-cuenv shell                    # Load env vars first (if env.cue exists)
-bun run wrangler dev --local   # Local development
-bun run wrangler deploy        # Deploy to Cloudflare
-```
-
-## Architecture
-
-### Tech Stack
-- **Runtime**: Bun (package manager & runtime)
-- **Framework**: Astro 5 with React/Vue islands
-- **Styling**: Tailwind CSS v4
-- **API**: GraphQL federation (Hive Gateway) on Cloudflare Workers
-- **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
-- **Schema**: Pothos GraphQL with federation plugin
-- **Testing**: Vitest with happy-dom
-- **Linting**: Biome (replaces ESLint/Prettier)
-- **CI/CD**: Dagger (TypeScript SDK) + GitHub Actions
-
-### GraphQL Microservices Pattern
-Each service in `platform/` follows:
-```
-platform/<service>/
-├── data-model/         # Drizzle schema, migrations
-├── read-model/         # GraphQL read API (Pothos + Yoga)
-└── write-model/        # Cloudflare Workflows for writes
-```
-
-All new services must use Cloudflare D1 (not Turso/LibSQL).
+- **Runtime:** Bun
+- **Framework:** Astro 5 with React/Vue islands
+- **Styling:** Tailwind CSS v4
+- **API:** GraphQL federation (Hive Gateway) on Cloudflare Workers
+- **Database:** Cloudflare D1 with Drizzle ORM
+- **Testing:** Vitest
+- **Linting:** Biome
+- **CI/CD:** Dagger (TypeScript SDK) + GitHub Actions
 
 ## Commit Convention
 
 Format: `type(scope): description`
 
-**Types**: `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `test`, `build`, `ci`, `perf`, `revert`
+**Types:** `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `test`, `build`, `ci`, `perf`, `revert`
 
-**Scope**: Project path (e.g., `rawkode.academy/website`, `rawkode.studio`, `github`)
+**Scope:** Project path (e.g., `rawkode.academy/website`, `rawkode.studio`)
 
-Examples:
 ```
 feat(rawkode.academy/website): add theme toggle
 fix(rawkode.studio): resolve dialog transparency
-chore(github): update workflow
 ```
 
 ## Code Formatting
 
 Follow `.editorconfig`:
-- **Indentation**: Tabs (size 2)
-- **Line endings**: LF
-- **Charset**: UTF-8
-- **YAML files**: Use spaces for indentation
-
-Always run linting and type checking before committing.
+- **Indentation:** Tabs (size 2)
+- **Line endings:** LF
+- **Charset:** UTF-8
+- **YAML:** Use spaces for indentation
 
 ## Project-Specific Guides
 
-Check for `CLAUDE.md` files in subdirectories:
-- `projects/rawkode.academy/website/CLAUDE.md` - Design system & component library
-- `projects/rawkode.studio/CLAUDE.md` - Video platform conventions
-- `projects/rawkode.academy/platform/CLAUDE.md` - GraphQL microservices guide
+| Path | Purpose |
+|------|---------|
+| `projects/rawkode.academy/CLAUDE.md` | Academy project overview |
+| `projects/rawkode.academy/platform/CLAUDE.md` | GraphQL microservices guide |
+| `projects/rawkode.academy/website/CLAUDE.md` | Design system & components |
+| `projects/rawkode.studio/CLAUDE.md` | Video platform conventions |
+| `content/CLAUDE.md` | Content management |
+| `dagger/CLAUDE.md` | CI/CD modules |
+| `infrastructure/CLAUDE.md` | Infrastructure configuration |
