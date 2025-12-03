@@ -1,6 +1,6 @@
 ---
 import Button from "@/components/common/Button.vue";
-import PageHero from "@/components/common/PageHero.vue";
+import { Hero } from "@/components/ui";
 import FAQ from "@/components/faq/list.vue";
 import FeatureListIcons from "@/components/feature/list-icons.vue";
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
@@ -71,24 +71,28 @@ const partnershipFAQs = [
 >
 	<FAQJsonLD questions={partnershipFAQs} slot="head" />
 	<!-- Hero Section -->
-	<PageHero
+	<Hero
 		title="Strategic Technology Partnerships"
 		subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance."
 		badge="Partner With Us"
+		background="blobs"
+		pattern="grid"
+		wave={true}
 		stats={[
 			{ label: '100K+ Developers' },
 			{ label: 'Global Reach' },
 			{ label: 'Proven Results' }
 		]}
+		client:load
 	>
 		<Fragment slot="actions">
 			<Button href="#benefits" variant="primary" size="lg">Explore Benefits</Button>
 			<Button href="/organizations/lets-chat" variant="secondary" size="lg">Become a Partner</Button>
 		</Fragment>
-	</PageHero>
+	</Hero>
 
 	<div class="max-w-5xl mx-auto mb-16 text-center pt-16">
-		<p class="text-xl text-gray-700 dark:text-gray-200 mb-8 leading-relaxed">
+		<p class="text-xl text-secondary-content mb-8 leading-relaxed">
 			At Rawkode Academy, we connect cutting-edge technologies with the
 			developers who bring them to life. Our expertise bridges the critical gap
 			between technical innovation and developer understanding.
@@ -116,7 +120,7 @@ const partnershipFAQs = [
 					</div>
 					<h3 class="text-lg font-bold">Amplify Your Reach</h3>
 				</div>
-				<p class="text-gray-600 dark:text-gray-300">
+				<p class="text-muted">
 					Extend your message to our engaged community of developers and
 					technical decision-makers through authentic, expert-led content.
 				</p>
@@ -144,7 +148,7 @@ const partnershipFAQs = [
 					</div>
 					<h3 class="text-lg font-bold">Accelerate Adoption</h3>
 				</div>
-				<p class="text-gray-600 dark:text-gray-300">
+				<p class="text-muted">
 					Remove barriers to entry through strategic educational content that
 					showcases your product's unique value and practical applications.
 				</p>
@@ -172,7 +176,7 @@ const partnershipFAQs = [
 					</div>
 					<h3 class="text-lg font-bold">Strategic Growth</h3>
 				</div>
-				<p class="text-gray-600 dark:text-gray-300">
+				<p class="text-muted">
 					Refine your developer experience and go-to-market approach with expert
 					guidance that drives measurable business outcomes.
 				</p>
@@ -188,11 +192,11 @@ const partnershipFAQs = [
 		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
 			<div class="text-center mb-10">
 				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
+					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
 				>
 					Proven Developer Engagement
 				</h2>
-				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+				<p class="text-lg text-muted max-w-3xl mx-auto">
 					Our strategic partnerships deliver measurable results for technology
 					companies worldwide
 				</p>
@@ -228,7 +232,7 @@ const partnershipFAQs = [
 		<div class="py-2 px-4 mx-auto lg:px-6 max-w-7xl">
 			<div class="mb-12 lg:mb-16 text-center">
 				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl"
+					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
 				>
 					Our <span class="text-primary">Trusted</span> Partners
 				</h2>
@@ -262,7 +266,7 @@ const partnershipFAQs = [
 		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
 			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-12">
 				<h2
-					class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+					class="mb-4 text-4xl tracking-tight font-extrabold text-primary-content"
 				>
 					Partnership Tiers
 				</h2>
@@ -312,14 +316,14 @@ const partnershipFAQs = [
 				</div>
 
 				<h2
-					class="mb-6 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+					class="mb-6 text-4xl tracking-tight font-extrabold text-primary-content"
 				>
 					Ready to Transform Your <span class="text-primary"
 						>Developer Strategy</span
 					>?
 				</h2>
 				<p
-					class="mb-10 text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
+					class="mb-10 text-xl text-muted max-w-3xl mx-auto"
 				>
 					Schedule a consultation to explore how a strategic partnership can
 					align with your specific business objectives and connect your
@@ -352,11 +356,11 @@ const partnershipFAQs = [
 		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
 			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
 				<h2
-					class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+					class="mb-4 text-3xl tracking-tight font-extrabold text-primary-content"
 				>
 					Frequently Asked Questions
 				</h2>
-				<p class="text-lg text-gray-600 dark:text-gray-300">
+				<p class="text-lg text-muted">
 					Learn more about partnering with Rawkode Academy
 				</p>
 			</div>

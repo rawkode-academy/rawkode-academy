@@ -1,6 +1,9 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { resolveContentDir } from "@rawkodeacademy/content/utils";
+import { createLogger } from "../lib/logger";
+
+const logger = createLogger("webcontainer-demos");
 
 // Minimal Vite Plugin type definition to avoid direct vite import
 interface VitePlugin {
@@ -78,7 +81,7 @@ async function discoverDemos(coursesDir: string): Promise<DemoInfo[]> {
 			}
 		}
 	} catch (error) {
-		console.error("Failed to discover demos:", error);
+		logger.error("Failed to discover demos", error);
 	}
 
 	return demos;
@@ -95,7 +98,7 @@ export function webcontainerDemosPlugin(): VitePlugin {
 			// Discover all demos at build time
 			coursesDir = await resolveContentDir("courses");
 			demos = await discoverDemos(coursesDir);
-			console.log(`Discovered ${demos.length} WebContainer demos`);
+			logger.info(`Discovered ${demos.length} WebContainer demos`);
 		},
 
 		resolveId(id) {

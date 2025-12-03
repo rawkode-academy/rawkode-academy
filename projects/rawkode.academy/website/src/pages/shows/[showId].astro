@@ -9,11 +9,13 @@ import SubscribeLinks from "@/components/show/SubscribeLinks.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Image } from "astro:assets";
+import { createLogger } from "@/lib/logger";
 
+const logger = createLogger("shows");
 const { showId } = Astro.params;
 
 if (!showId) {
-	console.error("Missing showId parameter for show page.");
+	logger.error("Missing showId parameter for show page");
 	return new Response(null, { status: 404 });
 }
 
@@ -115,7 +117,7 @@ const pageTitle = `${showEntry.data.name} Episodes`;
                                         <p class="text-sm font-semibold uppercase tracking-wide text-primary dark:text-primary-300">
                                                 Show
                                         </p>
-                                        <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+                                        <h1 class="text-4xl font-bold tracking-tight text-primary-content sm:text-5xl">
                                                 {showEntry.data.name}
                                         </h1>
                                         {hostNames.length > 0 && (
@@ -127,7 +129,7 @@ const pageTitle = `${showEntry.data.name} Episodes`;
                                                         ))}
                                                 </div>
                                         )}
-                                        <p class="text-lg text-gray-600 dark:text-gray-300">{showDescription}</p>
+                                        <p class="text-lg text-muted">{showDescription}</p>
 
                                         <SubscribeLinks links={showEntry.data.subscribeLinks} client:load />
                                 </div>
@@ -163,10 +165,10 @@ const pageTitle = `${showEntry.data.name} Episodes`;
                                                                 d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
                                                         />
                                                 </svg>
-                                                <p class="mt-4 text-lg font-medium text-gray-700 dark:text-gray-300">
+                                                <p class="mt-4 text-lg font-medium text-secondary-content">
                                                         No episodes yet
                                                 </p>
-                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                <p class="mt-2 text-sm text-muted">
                                                         Episodes for this show are coming soon. Check back later!
                                                 </p>
                                         </div>

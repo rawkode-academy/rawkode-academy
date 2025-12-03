@@ -4,6 +4,7 @@
 		:class="buttonClasses"
 		:aria-label="`Change theme (current: ${themeDisplayName})`"
 		type="button"
+		data-faro-user-action-name="theme_toggle"
 	>
 		<!-- Icon for theme -->
 		<transition name="fade" mode="out-in">

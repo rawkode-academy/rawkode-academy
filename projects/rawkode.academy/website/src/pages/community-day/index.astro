@@ -1,7 +1,7 @@
 ---
 import { actions } from "astro:actions";
 import Button from "@/components/common/Button.vue";
-import PageHero from "@/components/common/PageHero.vue";
+import { Hero } from "@/components/ui";
 import H2Highlight from "@/components/title/h2-highlight.vue";
 import Page from "@/wrappers/page.astro";
 
@@ -117,21 +117,25 @@ export const prerender = false;
 	</style>
 
 	<!-- Hero Section -->
-	<PageHero
+	<Hero
 		title="Community Day"
 		subtitle="A premier one-day conference celebrating the Rawkode Academy community and cutting-edge cloud-native technologies."
 		badge="Coming Soon"
+		background="blobs"
+		pattern="grid"
+		wave={true}
 		stats={[
 			{ label: 'European Location' },
 			{ label: 'Expert Speakers' },
 			{ label: 'Hands-on Workshops' }
 		]}
+		client:load
 	>
 		<Fragment slot="actions">
 			<Button href="#register" variant="primary" size="lg">Get Notified</Button>
 			<Button href="#event-details" variant="ghost" size="lg">Learn More</Button>
 		</Fragment>
-	</PageHero>
+	</Hero>
 
 	<div class="relative isolate px-6 lg:px-8 py-16">
 		<div class="mx-auto max-w-4xl">
@@ -139,7 +143,7 @@ export const prerender = false;
 			<div id="event-details" class="relative mt-8 mb-16 animate-slideUp animate-delay-400">
 				<div class="absolute inset-0 bg-linear-to-r from-primary to-secondary blur-xl opacity-20 rounded-xl gradient-animation"></div>
 				<div class="relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-8 rounded-xl shadow-xl border border-gray-200/50 dark:border-gray-700/50">
-					<h2 class="text-2xl font-bold text-gray-800 dark:text-white flex justify-center items-center mb-4">
+					<h2 class="text-2xl font-bold text-primary-content flex justify-center items-center mb-4">
 						<span class="bg-linear-to-r from-primary to-secondary p-3 rounded-full mr-3 animate-pulse">
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
 								<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -151,13 +155,13 @@ export const prerender = false;
 						Event Details
 					</h2>
 
-					<p class="text-center text-gray-700 dark:text-gray-300 mb-6">
+					<p class="text-center text-secondary-content mb-6">
 						The Rawkode Academy Community Day brings together developers, operators, and enthusiasts for a day packed with insights, hands-on learning, and meaningful connections.
 					</p>
 
 					<div class="grid md:grid-cols-2 gap-6">
 						<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-700 transform transition-all duration-300 hover:scale-[1.05] hover:shadow-xl animate-slideInRight animate-delay-600">
-							<h3 class="font-bold text-gray-800 dark:text-white text-lg flex items-center mb-3">
+							<h3 class="font-bold text-primary-content text-lg flex items-center mb-3">
 								<span class="text-primary mr-2">
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -165,13 +169,13 @@ export const prerender = false;
 								</span>
 								Date Coming Soon
 							</h3>
-							<p class="text-gray-600 dark:text-gray-300">
+							<p class="text-muted">
 								We're finalizing the details for our first-ever Community Day. This exclusive event will feature expert-led sessions, interactive workshops, and unique networking opportunities. Sign up below to be the first to know when registration opens!
 							</p>
 						</div>
 
 						<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md border border-gray-100 dark:border-gray-700 transform transition-all duration-300 hover:scale-[1.05] hover:shadow-xl animate-slideInRight animate-delay-700">
-							<h3 class="font-bold text-gray-800 dark:text-white text-lg flex items-center mb-3">
+							<h3 class="font-bold text-primary-content text-lg flex items-center mb-3">
 								<span class="text-primary mr-2">
 									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -180,7 +184,7 @@ export const prerender = false;
 								</span>
 								European Location
 							</h3>
-							<p class="text-gray-600 dark:text-gray-300">
+							<p class="text-muted">
 								The event will be held in Europe. The exact city will be announced soon, but we're planning for a central European location with excellent transportation links, premium venues, and accommodation options to ensure an exceptional experience for all attendees.
 							</p>
 						</div>
@@ -190,7 +194,7 @@ export const prerender = false;
 
 			<div class="mt-16 mb-16">
 				<div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 animate-fadeIn animate-delay-700">
-					<h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 text-center">Why Attend Community Day?</h2>
+					<h2 class="text-2xl font-bold text-primary-content mb-4 text-center">Why Attend Community Day?</h2>
 
 					<div class="grid md:grid-cols-3 gap-6 mt-6">
 						<div class="flex flex-col items-center text-center">
@@ -199,8 +203,8 @@ export const prerender = false;
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
 								</svg>
 							</div>
-							<h3 class="font-semibold text-gray-800 dark:text-white mb-2">Cutting-Edge Content</h3>
-							<p class="text-gray-600 dark:text-gray-300 text-sm">Gain insights into the latest cloud-native technologies and practices from industry leaders and innovators.</p>
+							<h3 class="font-semibold text-primary-content mb-2">Cutting-Edge Content</h3>
+							<p class="text-muted text-sm">Gain insights into the latest cloud-native technologies and practices from industry leaders and innovators.</p>
 						</div>
 
 						<div class="flex flex-col items-center text-center">
@@ -209,8 +213,8 @@ export const prerender = false;
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
 								</svg>
 							</div>
-							<h3 class="font-semibold text-gray-800 dark:text-white mb-2">Valuable Connections</h3>
-							<p class="text-gray-600 dark:text-gray-300 text-sm">Network with like-minded professionals, potential collaborators, and community members who share your passion.</p>
+							<h3 class="font-semibold text-primary-content mb-2">Valuable Connections</h3>
+							<p class="text-muted text-sm">Network with like-minded professionals, potential collaborators, and community members who share your passion.</p>
 						</div>
 
 						<div class="flex flex-col items-center text-center">
@@ -219,8 +223,8 @@ export const prerender = false;
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
 								</svg>
 							</div>
-							<h3 class="font-semibold text-gray-800 dark:text-white mb-2">Practical Skills</h3>
-							<p class="text-gray-600 dark:text-gray-300 text-sm">Take home actionable knowledge and techniques that you can immediately apply to your projects and workflows.</p>
+							<h3 class="font-semibold text-primary-content mb-2">Practical Skills</h3>
+							<p class="text-muted text-sm">Take home actionable knowledge and techniques that you can immediately apply to your projects and workflows.</p>
 						</div>
 					</div>
 				</div>
@@ -243,7 +247,7 @@ export const prerender = false;
 									</svg>
 								</div>
 								<h3 class="text-2xl font-bold bg-linear-to-r from-primary to-secondary inline-block text-transparent bg-clip-text mb-3 gradient-animation">Thank You!</h3>
-								<p class="text-lg text-gray-700 dark:text-gray-300 mb-6 animate-slideUp animate-delay-200">
+								<p class="text-lg text-secondary-content mb-6 animate-slideUp animate-delay-200">
 									We've added your email to our notification list. We'll let you know as soon as we have more details about the Community Day!
 								</p>
 							</div>
@@ -263,7 +267,7 @@ export const prerender = false;
 									<div>
 										<label
 											for="email"
-											class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+											class="block text-sm font-medium text-secondary-content mb-2"
 											>Email address</label
 										>
 										<div class="relative">
@@ -278,7 +282,7 @@ export const prerender = false;
 												name="email"
 												required
 												placeholder="your@email.com"
-												class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-300 hover:shadow-md"
+												class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-white dark:bg-gray-700 text-primary-content transition-all duration-300 hover:shadow-md"
 											/>
 										</div>
 									</div>
@@ -301,7 +305,7 @@ export const prerender = false;
 
 			<div class="mt-20 space-y-8 animate-fadeIn animate-delay-1000">
 				<H2Highlight title="What to Expect" highlightWords="Expect" />
-				<p class="text-center text-gray-700 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+				<p class="text-center text-secondary-content mb-8 max-w-3xl mx-auto">
 					Our carefully curated program ensures a perfect balance of learning, networking, and inspiration. Here's what you can look forward to at Community Day:
 				</p>
 
@@ -315,9 +319,9 @@ export const prerender = false;
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
 								</svg>
 							</div>
-							<h3 class="text-xl font-semibold ml-4 text-gray-800 dark:text-white">Expert Speakers</h3>
+							<h3 class="text-xl font-semibold ml-4 text-primary-content">Expert Speakers</h3>
 						</div>
-						<p class="text-gray-600 dark:text-gray-300 ml-14">
+						<p class="text-muted ml-14">
 							Learn directly from industry experts and project maintainers in the
 							cloud-native ecosystem. Gain exclusive insights into emerging technologies, best practices, and real-world case studies.
 						</p>
@@ -332,9 +336,9 @@ export const prerender = false;
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
 								</svg>
 							</div>
-							<h3 class="text-xl font-semibold ml-4 text-gray-800 dark:text-white">Hands-on Workshops</h3>
+							<h3 class="text-xl font-semibold ml-4 text-primary-content">Hands-on Workshops</h3>
 						</div>
-						<p class="text-gray-600 dark:text-gray-300 ml-14">
+						<p class="text-muted ml-14">
 							Get practical, hands-on experience with guided workshops on the latest
 							technologies. These interactive sessions will help you develop new skills and deepen your understanding of key concepts.
 						</p>
@@ -349,9 +353,9 @@ export const prerender = false;
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
 								</svg>
 							</div>
-							<h3 class="text-xl font-semibold ml-4 text-gray-800 dark:text-white">Networking</h3>
+							<h3 class="text-xl font-semibold ml-4 text-primary-content">Networking</h3>
 						</div>
-						<p class="text-gray-600 dark:text-gray-300 ml-14">
+						<p class="text-muted ml-14">
 							Connect with like-minded professionals and build your community. Our structured networking sessions and social events create the perfect environment for meaningful conversations and collaboration opportunities.
 						</p>
 					</div>
@@ -365,16 +369,16 @@ export const prerender = false;
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
 								</svg>
 							</div>
-							<h3 class="text-xl font-semibold ml-4 text-gray-800 dark:text-white">Project Showcases</h3>
+							<h3 class="text-xl font-semibold ml-4 text-primary-content">Project Showcases</h3>
 						</div>
-						<p class="text-gray-600 dark:text-gray-300 ml-14">
+						<p class="text-muted ml-14">
 							Discover exciting new projects in the cloud-native space. Get a first look at innovative tools and technologies that are shaping the future of cloud computing and infrastructure.
 						</p>
 					</div>
 				</div>
 
 				<div class="mt-12 text-center">
-					<p class="text-lg text-gray-700 dark:text-gray-300 font-medium animate-pulse">
+					<p class="text-lg text-secondary-content font-medium animate-pulse">
 						<span class="bg-linear-to-r from-primary to-secondary text-transparent bg-clip-text">Limited spots available!</span> Sign up now to secure your place at this exclusive event.
 					</p>
 				</div>

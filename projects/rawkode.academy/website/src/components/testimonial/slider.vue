@@ -127,7 +127,7 @@ const formattedPosition = computed(() => {
 			<button
 				v-if="hasMultiple"
 				type="button"
-				class="hidden md:grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 h-12 w-12 place-items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 text-gray-600 dark:text-gray-300 hover:border-primary hover:text-primary hover:bg-white dark:hover:bg-gray-900 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+				class="hidden md:grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 h-12 w-12 place-items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 text-muted hover:border-primary hover:text-primary hover:bg-white dark:hover:bg-gray-900 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
 				aria-label="Show previous testimonial"
 				@click="goPrev"
 			>
@@ -178,14 +178,14 @@ const formattedPosition = computed(() => {
 										:href="activeTestimonial.author.link"
 										target="_blank"
 										rel="noopener noreferrer"
-										class="text-lg font-bold text-gray-900 dark:text-white hover:text-primary transition-colors"
+										class="text-lg font-bold text-primary-content hover:text-primary transition-colors"
 									>
 										{{ activeTestimonial.author.name }}
 									</a>
-									<p v-else class="text-lg font-bold text-gray-900 dark:text-white">
+									<p v-else class="text-lg font-bold text-primary-content">
 										{{ activeTestimonial.author.name }}
 									</p>
-									<p class="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">
+									<p class="text-sm text-muted font-medium mt-1">
 										{{ activeTestimonial.author.title }}
 									</p>
 								</div>
@@ -199,7 +199,7 @@ const formattedPosition = computed(() => {
 			<button
 				v-if="hasMultiple"
 				type="button"
-				class="hidden md:grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 h-12 w-12 place-items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 text-gray-600 dark:text-gray-300 hover:border-primary hover:text-primary hover:bg-white dark:hover:bg-gray-900 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+				class="hidden md:grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 h-12 w-12 place-items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 text-muted hover:border-primary hover:text-primary hover:bg-white dark:hover:bg-gray-900 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
 				aria-label="Show next testimonial"
 				@click="goNext"
 			>
@@ -215,7 +215,7 @@ const formattedPosition = computed(() => {
 			>
 				<button
 					type="button"
-					class="h-12 w-12 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 grid place-items-center hover:border-primary hover:text-primary shadow-sm"
+					class="h-12 w-12 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-muted grid place-items-center hover:border-primary hover:text-primary shadow-sm"
 					aria-label="Show previous testimonial"
 					@click="goPrev"
 				>
@@ -224,13 +224,13 @@ const formattedPosition = computed(() => {
 					</svg>
 				</button>
 				
-				<span class="text-sm font-medium text-gray-500 dark:text-gray-400 tabular-nums">
+				<span class="text-sm font-medium text-muted tabular-nums">
 					{{ formattedPosition }}
 				</span>
 
 				<button
 					type="button"
-					class="h-12 w-12 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 grid place-items-center hover:border-primary hover:text-primary shadow-sm"
+					class="h-12 w-12 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-muted grid place-items-center hover:border-primary hover:text-primary shadow-sm"
 					aria-label="Show next testimonial"
 					@click="goNext"
 				>
@@ -241,7 +241,7 @@ const formattedPosition = computed(() => {
 			</div>
 		</div>
 	</div>
-	<p v-else class="mt-6 text-center text-gray-500 dark:text-gray-400">
+	<p v-else class="mt-6 text-center text-muted">
 		No testimonials available just yet.
 	</p>
 </template>

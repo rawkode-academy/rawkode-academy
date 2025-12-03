@@ -1,5 +1,8 @@
 import type { APIRoute } from "astro";
 import { isSubscribedToAudience } from "@/server/subscriptions";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("subscriptions");
 
 /**
  * API endpoint to check if a user is subscribed to an audience
@@ -46,7 +49,7 @@ export const GET: APIRoute = async ({ url, locals, session }) => {
 			},
 		);
 	} catch (error) {
-		console.error("Error checking subscription:", error);
+		logger.error("Error checking subscription", error);
 		return new Response(
 			JSON.stringify({
 				error: "Failed to check subscription status",
