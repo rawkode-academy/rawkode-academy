@@ -20,6 +20,7 @@ const videos = defineCollection({
 		description: z.string(),
 		publishedAt: z.coerce.date(),
 		duration: z.number().nonnegative().optional(),
+		audioFileSize: z.number().positive().optional(), // bytes, for podcast enclosure
 		// streamUrl/thumbnailUrl/duration are derived at runtime
 		// Technologies: accept plain ids (e.g., "docker") or full entry ids ("docker/index"),
 		// normalize to "<id>/index" for internal use, and verify existence.
@@ -50,12 +51,31 @@ const shows = defineCollection({
 		pattern: ["**/*.{md,mdx}"],
 		base: resolveContentDirSync("shows"),
 	}),
-	schema: z.object({
-		id: z.string(),
-		name: z.string(),
-		description: z.string().optional(),
-		hosts: z.array(reference("people")).default([]),
-	}),
+	schema: ({ image }) =>
+		z.object({
+			id: z.string(),
+			name: z.string(),
+			description: z.string().optional(),
+			hosts: z.array(reference("people")).default([]),
+			publish: z.boolean().default(false),
+			cover: z
+				.object({
+					image: image(),
+					alt: z.string(),
+				})
+				.optional(),
+			podcast: z
+				.object({
+					guid: z.string().uuid().optional(),
+					email: z.string().email(),
+					category: z.string(),
+					subcategory: z.string().optional(),
+					explicit: z.boolean().default(false),
+					copyright: z.string().optional(),
+					artworkUrl: z.string().url().optional(),
+				})
+				.optional(),
+		}),
 });
 
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections
@@ -90,15 +110,22 @@ const resourceSchema = z.object({
 
 const people = defineCollection({
 	loader: glob({
-		pattern: ["**/*.json"],
+		pattern: ["**/*.{md,mdx}"],
 		base: resolveContentDirSync("people"),
 	}),
 	schema: z.object({
 		name: z.string(),
-		handle: z.string(),
+		id: z.string(),
+		github: z.string().optional(),
+		twitter: z.string().optional(),
+		bluesky: z.string().optional(),
+		mastodon: z.string().optional(),
+		linkedin: z.string().optional(),
+		website: z.string().optional(),
+		youtube: z.string().optional(),
 		forename: z.string().optional(),
 		surname: z.string().optional(),
-		biography: z.string().optional(),
+		// biography: z.string().optional(), // Moved to MDX body
 		links: z
 			.array(
 				z.object({
@@ -107,6 +134,20 @@ const people = defineCollection({
 				}),
 			)
 			.default([]),
+	}).transform((person) => {
+		let avatarUrl = undefined;
+
+		if (person.github) {
+			const githubHandle = person.github.split("/").pop();
+			if (githubHandle) {
+				avatarUrl = `https://github.com/${githubHandle}.png`;
+			}
+		}
+
+		return {
+			...person,
+			avatarUrl,
+		};
 	}),
 });
 

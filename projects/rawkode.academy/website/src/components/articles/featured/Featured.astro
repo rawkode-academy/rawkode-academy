@@ -75,7 +75,7 @@ const otherArticles = allArticles.slice(1);
 													<div class="relative" style={`z-index: ${10 - index}`}>
 														<img
                     class="w-12 h-12 rounded-full object-cover border-2 border-secondary p-0.5 bg-surface"
-															src={`https://avatars.githubusercontent.com/${author.data.handle}`}
+															src={author.data.avatarUrl}
 															alt={`Profile picture of ${author.data.name}`}
 														/>
 														{index === 0 && (

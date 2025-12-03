@@ -45,5 +45,8 @@ chapters:
   - startTime: 2468
     title: Conclusion & Final Remarks (Including Plugs & Outlook)
 duration: 2588
+audioFileSize: 62100934
+guests:
+  - laszlo-fogas
 ---
 

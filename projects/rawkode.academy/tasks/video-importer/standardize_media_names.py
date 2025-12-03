@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """
-Standardize media file names in R2 bucket:
-- original.mkv -> video.mkv
-- {videoId}.mkv -> video.mkv  
-- {videoId}.mp3 -> audio.mp3
-- original.mp3 -> audio.mp3
+Restore original media file names in R2 bucket:
+- video.mkv -> original.mkv
+- audio.mp3 -> original.mp3
 """
 
 import os
@@ -143,14 +141,12 @@ class MediaNameStandardizer:
             if any(item['video_id'] == video_id for item in self.state['renamed']):
                 return {'status': 'skipped', 'reason': 'already_processed', 'video_id': video_id}
         
-        # Define possible source files and their standard names
+        # Define source files and their original names
         file_mappings = [
             # Video files
-            (f"{base_path}/original.mkv", f"{base_path}/video.mkv"),
-            (f"{base_path}/{video_id}.mkv", f"{base_path}/video.mkv"),
+            (f"{base_path}/video.mkv", f"{base_path}/original.mkv"),
             # Audio files
-            (f"{base_path}/original.mp3", f"{base_path}/audio.mp3"),
-            (f"{base_path}/{video_id}.mp3", f"{base_path}/audio.mp3"),
+            (f"{base_path}/audio.mp3", f"{base_path}/original.mp3"),
         ]
         
         for source, dest in file_mappings:
@@ -236,10 +232,8 @@ class MediaNameStandardizer:
                 
                 # Check what needs renaming
                 mappings = [
-                    (f"{base_path}/original.mkv", f"{base_path}/video.mkv"),
-                    (f"{base_path}/{video_id}.mkv", f"{base_path}/video.mkv"),
-                    (f"{base_path}/original.mp3", f"{base_path}/audio.mp3"),
-                    (f"{base_path}/{video_id}.mp3", f"{base_path}/audio.mp3"),
+                    (f"{base_path}/video.mkv", f"{base_path}/original.mkv"),
+                    (f"{base_path}/audio.mp3", f"{base_path}/original.mp3"),
                 ]
                 
                 for source, dest in mappings:
@@ -343,7 +337,7 @@ class MediaNameStandardizer:
 def main():
     import argparse
     
-    parser = argparse.ArgumentParser(description='Standardize media file names in R2 bucket')
+    parser = argparse.ArgumentParser(description='Restore original media file names in R2 bucket')
     parser.add_argument('--dry-run', action='store_true', help='Show what would be done without actually doing it')
     parser.add_argument('--reset-state', action='store_true', help='Reset state and start fresh')
     parser.add_argument('--show-state', action='store_true', help='Show current state and exit')

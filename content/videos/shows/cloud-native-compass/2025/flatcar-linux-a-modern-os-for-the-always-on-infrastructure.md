@@ -34,4 +34,9 @@ chapters:
   - startTime: 2707
     title: Quick-fire questions
 duration: 3080
+audioFileSize: 73924995
+guests:
+  - thilo
+  - mathieu-tortuyaux
+  - james-le-cuirot
 ---

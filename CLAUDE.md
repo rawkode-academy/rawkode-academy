@@ -20,10 +20,72 @@ This is a Bun workspace monorepo containing the Rawkode Academy platform - an ed
 ```bash
 cuenv task dev                 # Run the dev task with proper env vars
 cuenv task build               # Run the build task
-cuenv shell                    # Enter shell with env vars loaded
+cuenv env print                # Print environment variables
 ```
 
 If no `env.cue` exists, use `bun run <script>` directly.
+
+### env.cue File Structure
+
+`cuenv` is a build toolchain that provides typed environments and CUE-powered task orchestration. The `env.cue` file defines:
+
+```cue
+package cuenv
+
+import "github.com/cuenv/cuenv/schema"
+
+schema.#Cuenv
+
+// Environment variables (plain values or 1Password refs)
+env: {
+	GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
+
+	// Environment-specific secrets from 1Password
+	environment: production: {
+		API_TOKEN: schema.#OnePasswordRef & {
+			ref: "op://vault/item/field"
+		}
+	}
+}
+
+// Hooks run on events like entering directory
+hooks: onEnter: devenv: {
+	command: "devenv"
+	args: ["print-dev-env"]
+	source: true
+}
+
+// Workspace integrations
+workspaces: bun: {}
+
+// Task definitions
+tasks: {
+	dev: {
+		command: "bun"
+		args: ["run", "dev"]
+		workspaces: ["bun"]
+		inputs: ["src/**", "package.json"]  // For caching
+	}
+	deploy: {
+		command: "bunx"
+		args: ["wrangler", "deploy"]
+		dependsOn: ["build"]  // Task dependencies
+	}
+}
+
+// CI pipeline definitions (optional)
+ci: pipelines: [{
+	name: "default"
+	when: branch: ["main"]
+	tasks: ["install", "deploy"]
+}]
+```
+
+**Common cuenv commands:**
+- `cuenv task <name>` - Run a defined task with env vars
+- `cuenv exec <cmd>` - Run a command with env vars
+- `cuenv env print` - Print environment variables
+- `cuenv shell` - Shell hook integration (for directory entry)
 
 ## Common Commands
 
