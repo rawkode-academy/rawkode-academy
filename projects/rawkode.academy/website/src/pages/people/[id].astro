@@ -1,0 +1,186 @@
+---
+export const prerender = true;
+
+import Page from "@/wrappers/page.astro";
+import { getCollection, getEntries } from "astro:content";
+import VideoFeed from "@/components/video/video-feed.astro";
+import ShowCard from "@/components/show/ShowCard.astro";
+import type { ShowSummary } from "@/types/show";
+
+export async function getStaticPaths() {
+	const people = await getCollection("people");
+	return people.map((person) => ({
+		params: { id: person.data.id },
+		props: { person },
+	}));
+}
+
+const { person } = Astro.props;
+
+const videos = await getCollection("videos");
+const shows = await getCollection("shows");
+
+// Helper to match references
+const matchRef = (ref: { collection: string; id: string } | string, id: string) => {
+    if (typeof ref === 'string') return ref === id;
+    return ref.id === id;
+};
+
+const hostedShows = shows.filter((show) =>
+    show.data.hosts.some((h) => matchRef(h, person.data.id))
+);
+
+const guestVideos = videos.filter((video) =>
+    video.data.guests.some((g) => matchRef(g, person.data.id))
+);
+
+// Prepare Show Summaries
+const showSummaries: ShowSummary[] = await Promise.all(hostedShows.map(async (show) => {
+    const showVideos = videos.filter(v => v.data.show?.id === show.data.id);
+    const hosts = await getEntries(show.data.hosts);
+
+    return {
+        id: show.data.id,
+        name: show.data.name,
+        hosts: hosts.map(h => ({ forename: h.data.forename ?? null, surname: h.data.surname ?? null })),
+        cover: show.data.cover,
+        episodes: showVideos.map(v => ({
+            video: {
+                title: v.data.title,
+                thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.videoId}/thumbnail.jpg`,
+                publishedAt: v.data.publishedAt.toISOString()
+            }
+        }))
+    };
+}));
+
+// Prepare Guest Videos for Feed
+const guestVideoFeed = guestVideos.map((video) => ({
+    id: video.data.videoId,
+    title: video.data.title,
+    thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`,
+    streamUrl: `https://content.rawkode.academy/videos/${video.data.videoId}/stream.m3u8`,
+    duration: typeof video.data.duration === "number" ? video.data.duration : 0,
+    slug: video.data.slug,
+    publishedAt: video.data.publishedAt instanceof Date
+        ? video.data.publishedAt.toISOString()
+        : String(video.data.publishedAt),
+})).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+const pageTitle = `${person.data.name} - Rawkode Academy`;
+const pageDescription = `Meet ${person.data.name}, a contributor to Rawkode Academy.`;
+
+const socialLinks = [
+    person.data.twitter && { name: "Twitter", url: person.data.twitter, icon: "M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" },
+    person.data.github && { name: "GitHub", url: person.data.github, icon: "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" },
+    person.data.linkedin && { name: "LinkedIn", url: person.data.linkedin, icon: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M2 4a2 2 0 1 1 4 0 2 2 0 0 1-4 0z" },
+    person.data.website && { name: "Website", url: person.data.website, icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" },
+].filter(Boolean);
+
+---
+
+<Page title={pageTitle} description={pageDescription}>
+    <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
+        <!-- Profile Header -->
+        <section class="w-full">
+            <div class="glass-panel rounded-3xl p-8 md:p-12 max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
+                    <!-- Avatar -->
+                    <div class="flex-shrink-0">
+                        <div class="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/50 dark:border-gray-700/50 shadow-xl">
+                            <img
+                                src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
+                                alt={person.data.name}
+                                class="w-full h-full object-cover"
+                                onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="flex-1 text-center md:text-left space-y-6">
+                        <div>
+                            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-2">
+                                {person.data.name}
+                            </h1>
+                            {person.data.twitter && (
+                                <p class="text-lg text-primary font-medium">
+                                    @{person.data.twitter.split('/').pop()}
+                                </p>
+                            )}
+                        </div>
+
+                        <!-- Social Links -->
+                        <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                            {socialLinks.map((link: any) => (
+                                <a
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
+                                    aria-label={link.name}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <path d={link.icon} />
+                                    </svg>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hosted Shows -->
+        {showSummaries.length > 0 && (
+            <section class="w-full max-w-7xl mx-auto">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-2 rounded-lg bg-primary/10 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                        Shows Hosted
+                    </h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {showSummaries.map((show) => (
+                        <ShowCard show={show} />
+                    ))}
+                </div>
+            </section>
+        )}
+
+        <!-- Guest Appearances -->
+        {guestVideoFeed.length > 0 && (
+            <section class="w-full max-w-7xl mx-auto">
+                 <div class="flex items-center gap-3 mb-8">
+                    <div class="p-2 rounded-lg bg-secondary/10 text-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                        Guest Appearances
+                    </h2>
+                </div>
+                <VideoFeed
+                    title=""
+                    description=""
+                    videos={guestVideoFeed}
+                />
+            </section>
+        )}
+    </div>
+</Page>
