@@ -4,7 +4,7 @@
 ---
 
 <script>
-  import { initializeFaro, getWebInstrumentations } from '@grafana/faro-web-sdk';
+  import { initializeFaro, getWebInstrumentations, LogLevel } from '@grafana/faro-web-sdk';
   import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
   const FARO_URL = import.meta.env.PUBLIC_GRAFANA_FARO_URL;

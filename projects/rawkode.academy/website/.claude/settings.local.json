@@ -27,7 +27,9 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:opensource.microsoft.com)",
       "WebFetch(domain:docs.astro.build)",
-      "WebFetch(domain:cloudnativecompass.fm)"
+      "WebFetch(domain:cloudnativecompass.fm)",
+      "Bash(grep:*)",
+      "Bash(xargs basename:*)"
     ],
     "deny": []
   }

@@ -2,7 +2,7 @@
 
 > Video meeting platform built with Astro, React, and Cloudflare RealTimeKit
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 bun install           # Install dependencies
@@ -14,22 +14,22 @@ bun run build        # Build for production (always run before committing)
 
 **Note**: Claude will NEVER start the dev server automatically - you control when to start it.
 
-## ⚡ Critical Rules
+## Critical Rules
 
 **NEVER break these:**
-- ✅ Use **tabs** for indentation (not spaces)
-- ✅ Use **double quotes** for strings
-- ✅ Always use **Tailwind CSS v4** (not v3)
-- ✅ All imports must use **@/** prefix (e.g., `@/lib/utils`, `@/components/ui/button`)
-- ✅ Use **Radix UI** as the component library base
-- ✅ Use **Astro's env mechanism** for all environment variables (`astro:env/server`, `astro:env/client`)
-- ✅ Consult `src/lib/realtime-kit/api.yaml` OpenAPI spec when implementing methods in `src/lib/realtime-kit/client.ts`
-- ✅ Run `bun run format && bun run lint && bun run build` before committing
-- ✅ **NEVER** start the dev server automatically (user will start it)
-- ✅ Use TypeScript strict mode
-- ✅ Follow component patterns in `src/components/ui/`
+- Use **tabs** for indentation (not spaces)
+- Use **double quotes** for strings
+- Always use **Tailwind CSS v4** (not v3)
+- All imports must use **@/** prefix (e.g., `@/lib/utils`, `@/components/ui/button`)
+- Use **Radix UI** as the component library base
+- Use **Astro's env mechanism** for all environment variables (`astro:env/server`, `astro:env/client`)
+- Consult `src/lib/realtime-kit/api.yaml` OpenAPI spec when implementing methods in `src/lib/realtime-kit/client.ts`
+- Run `bun run format && bun run lint && bun run build` before committing
+- **NEVER** start the dev server automatically (user will start it)
+- Use TypeScript strict mode
+- Follow component patterns in `src/components/ui/`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -42,7 +42,7 @@ src/
 └── styles/               # Global styles with CSS variables
 ```
 
-## 🛠️ Common Tasks
+## Common Tasks
 
 ### Adding a New UI Component
 1. Create component in `src/components/ui/component-name.tsx`
@@ -164,7 +164,7 @@ export class RealtimeKitClient {
 
 **Configuration**: Define env vars in `astro.config.ts` with proper schema validation.
 
-## 🔧 Tech Stack Essentials
+## Tech Stack
 
 | Category | Technology | Usage |
 |----------|------------|-------|
@@ -177,7 +177,7 @@ export class RealtimeKitClient {
 | **Auth** | Zitadel (OIDC) | Identity provider |
 | **Deployment** | Cloudflare Pages/Workers | Edge deployment |
 
-## 🎨 Styling Guidelines
+## Styling Guidelines
 
 ### Theme System with CSS Variables
 The project uses Tailwind CSS v4's `@theme` directive combined with CSS custom properties:
@@ -247,7 +247,7 @@ const { theme, setTheme, actualTheme } = useTheme();
 "flex items-center justify-between px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors"
 ```
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Transparent Backgrounds
 **Problem**: Components appear transparent
@@ -300,7 +300,7 @@ import { Button } from "../../components/ui/button";
 import { useAuth } from "../contexts/AuthContext";
 ```
 
-## 📝 Commit Convention
+## Commit Convention
 
 ```
 type(scope): description
@@ -318,7 +318,7 @@ chore(rawkode.studio): update dependencies
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-## 🔍 Key Files to Know
+## Key Files
 
 | File | Purpose |
 |------|---------|
@@ -329,14 +329,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 | `src/lib/realtime-kit/client.ts` | RealTimeKit API client |
 | `src/styles/global.css` | CSS variables and global styles |
 
-## 🎯 Performance Notes
+## Performance Notes
 
 - Use `client:only="react"` for React components in Astro
 - Implement lazy loading for meeting components
 - Use TanStack Query for server state management
 - Leverage Cloudflare edge caching
 
-## 🔐 Security Reminders
+## Security Reminders
 
 - **Never store secrets in code** - Always use Astro's env mechanism
 - **Environment Variables**: Use `astro:env/server` for secrets (API keys, tokens, database URLs)
