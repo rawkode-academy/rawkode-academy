@@ -12,10 +12,10 @@ cover:
 podcast:
   guid: 560bcde1-b824-5054-b333-8be7ec30dd02
   email: team@rawkode.academy
-  category: Technology
-  subcategory: Software How-To
+  category: Education
+  subcategory: How To
   explicit: false
   copyright: Rawkode Academy
-  artworkUrl: https://content.rawkode.academy/shows/cloud-native-compass/artwork.jpg
+  artworkUrl: https://content.rawkode.academy/shows/cloud-native-compass/cover.png
 ---
 
