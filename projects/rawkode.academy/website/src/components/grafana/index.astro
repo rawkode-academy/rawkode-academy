@@ -41,9 +41,9 @@
         enabled: true,
         persistent: true,
       },
-      // Faro v2: Disable console capture (configured at top level)
+      // Faro v2: Capture WARN and ERROR console levels only
       consoleInstrumentation: {
-        disabledLevels: [LogLevel.DEBUG, LogLevel.TRACE, LogLevel.LOG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR],
+        disabledLevels: [LogLevel.DEBUG, LogLevel.TRACE, LogLevel.LOG, LogLevel.INFO],
       },
     };
   }
@@ -75,13 +75,40 @@
       }
     }
 
-    // Set UTM params as session attributes
+    // Set session attributes with UTM params and enhanced context
     const utm = getUtmParams();
-    if (Object.keys(utm).length && faro) {
+    if (faro) {
       faro.api.setSession({
-        attributes: utm,
+        attributes: {
+          ...utm,
+          viewport: `${window.innerWidth}x${window.innerHeight}`,
+          language: navigator.language,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
       });
     }
+
+    // Global error handlers for unhandled errors
+    window.addEventListener('unhandledrejection', (event) => {
+      if (faro) {
+        const message = event.reason?.message || String(event.reason);
+        faro.api.pushError(new Error(message), {
+          context: { type: 'unhandledrejection' },
+        });
+      }
+    });
+
+    window.addEventListener('error', (event) => {
+      if (faro && event.error) {
+        faro.api.pushError(event.error, {
+          context: {
+            type: 'global_error',
+            filename: event.filename || '',
+            lineno: String(event.lineno || 0),
+          },
+        });
+      }
+    });
 
     // Track pageview
     if (faro) {
@@ -105,19 +132,6 @@
       }
     });
 
-    // Track sign-in button clicks
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (!target) return;
-      const link = target.closest('a');
-      if (link && link.getAttribute('href') === '/sign-in') {
-        if (faro) {
-          faro.api.pushEvent('auth_sign_in_start', {
-            path: location.pathname,
-          });
-        }
-      }
-    }, true);
   }
 
   // Expose faro instance and helper for consent banner and other components

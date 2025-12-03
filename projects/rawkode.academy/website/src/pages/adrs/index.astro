@@ -1,8 +1,11 @@
 ---
 import { getCollection, getEntries } from "astro:content";
 import Page from "@/wrappers/page.astro";
+import { createLogger } from "@/lib/logger";
 
 export const prerender = true;
+
+const logger = createLogger("adrs");
 
 // Get all ADRs and sort alphanumerically by ID
 const allAdrs = await getCollection("adrs");
@@ -22,7 +25,7 @@ const adrAuthors = await Promise.all(
 				authors: await getEntries(adr.data.authors),
 			};
 		} catch (error) {
-			console.error(`Error fetching authors for ADR ${adr.id}:`, error);
+			logger.error(`Error fetching authors for ADR ${adr.id}`, error);
 			return {
 				id: adr.id,
 				authors: [],
@@ -47,7 +50,7 @@ const getAdrNumber = (id: string): string => {
 
 <Page title="Architecture Decision Records" subtitle="Documentation of architecture decisions">
   <div class="max-w-(--breakpoint-xl) mx-auto">
-    <h1 class="text-5xl font-extrabold mb-6 text-gray-900 dark:text-white">
+    <h1 class="text-5xl font-extrabold mb-6 text-primary-content">
       Architecture Decision Records
     </h1>
 
@@ -66,13 +69,13 @@ const getAdrNumber = (id: string): string => {
             <div class="transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl rounded-xl overflow-hidden backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 shadow-md">
               <div class="p-6">
                 <div class="flex items-center gap-4 mb-4">
-                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white my-auto">
+                  <h2 class="text-2xl font-bold text-primary-content my-auto">
                     <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
                   </h2>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-4 mt-2">
-                  <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <div class="flex items-center text-sm text-muted">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -106,7 +109,7 @@ const getAdrNumber = (id: string): string => {
                           </div>
                         )}
                       </div>
-                      <span class="text-sm text-gray-600 dark:text-gray-400">
+                      <span class="text-sm text-muted">
                         {authors.filter(author => author && author.data).map(author => author.data.name).join(", ")}
                       </span>
                     </div>

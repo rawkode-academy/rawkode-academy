@@ -99,17 +99,17 @@ const pageDescription = learningPath.data.description;
 		</article>
 		<aside class="space-y-6">
 			<div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-lg">
-				<h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
+				<h2 class="text-sm font-semibold uppercase tracking-wide text-muted mb-3">
 					At a Glance
 				</h2>
-				<ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+				<ul class="space-y-3 text-sm text-muted">
 					<li class="flex items-start gap-3">
 						<svg class="w-5 h-5 mt-0.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0-6v2m0 16v2m10-10h-2M6 12H4m15.364-7.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-12.728 1.414 1.414M16.95 16.95l1.414 1.414" />
 						</svg>
 						<div>
-							<p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Estimated time</p>
-							<p class="font-semibold text-gray-900 dark:text-white">{durationLabel}</p>
+							<p class="text-xs uppercase tracking-wide text-muted">Estimated time</p>
+							<p class="font-semibold text-primary-content">{durationLabel}</p>
 						</div>
 					</li>
 					<li class="flex items-start gap-3">
@@ -117,15 +117,15 @@ const pageDescription = learningPath.data.description;
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 21.5 12.083 12.083 0 015.84 10.578L12 14z" />
 						</svg>
 						<div>
-							<p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Difficulty</p>
-							<p class="font-semibold text-gray-900 dark:text-white">
+							<p class="text-xs uppercase tracking-wide text-muted">Difficulty</p>
+							<p class="font-semibold text-primary-content">
 								{learningPath.data.difficulty.charAt(0).toUpperCase() + learningPath.data.difficulty.slice(1)}
 							</p>
 						</div>
 					</li>
 					{technologies.length > 0 && (
 						<li>
-							<p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Technologies</p>
+							<p class="text-xs uppercase tracking-wide text-muted mb-2">Technologies</p>
 							<div class="flex flex-wrap gap-2">
 								{technologies.map((technology) => (
 									<span class="inline-flex items-center rounded-full bg-secondary/15 px-3 py-1 text-xs font-medium text-secondary dark:bg-secondary/20 dark:text-secondary/90">
@@ -137,7 +137,7 @@ const pageDescription = learningPath.data.description;
 					)}
 					{prerequisites.length > 0 && (
 						<li>
-							<p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Prerequisites</p>
+							<p class="text-xs uppercase tracking-wide text-muted mb-2">Prerequisites</p>
 							<ul class="space-y-2">
 								{prerequisites.map((item) => (
 									<li class="flex items-start gap-2 text-sm">
@@ -153,10 +153,10 @@ const pageDescription = learningPath.data.description;
 
 			{outline.length > 0 && (
 				<div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-lg">
-					<h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
+					<h2 class="text-sm font-semibold uppercase tracking-wide text-muted mb-3">
 						Curriculum Overview
 					</h2>
-					<ol class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+					<ol class="space-y-3 text-sm text-muted">
 						{outline.map((heading, index) => (
 							<li class="flex items-start gap-3">
 								<span class="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
@@ -175,10 +175,10 @@ const pageDescription = learningPath.data.description;
 
 	<footer class="mt-16">
 		<div class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
-			<h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+			<h2 class="text-2xl font-semibold text-primary-content mb-4">
 				Ready for another challenge?
 			</h2>
-			<p class="text-gray-600 dark:text-gray-400 mb-6">
+			<p class="text-muted mb-6">
 				Explore more curated journeys, or jump back into the Rawkode Academy video library.
 			</p>
 			<div class="flex flex-wrap justify-center gap-4">
@@ -190,7 +190,7 @@ const pageDescription = learningPath.data.description;
 				</a>
 				<a
 					href="/watch"
-					class="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 px-5 py-2.5 text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+					class="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 px-5 py-2.5 text-secondary-content font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
 				>
 					View All Videos
 				</a>

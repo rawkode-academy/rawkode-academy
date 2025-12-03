@@ -1,7 +1,7 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import Button from "@/components/common/Button.vue";
-import PageHero from "@/components/common/PageHero.vue";
+import { Hero } from "@/components/ui";
 import { marked } from "marked";
 import PageWrapper from "../../wrappers/page.astro";
 
@@ -53,21 +53,25 @@ const typeColors = {
 	description="Stay up to date with the latest changes and improvements to Rawkode Academy."
 >
 	<!-- Hero Section -->
-	<PageHero
+	<Hero
 		title="Changelog"
 		subtitle="Stay up to date with the latest updates, features, and improvements to Rawkode Academy."
 		badge="What's New"
+		background="blobs"
+		pattern="grid"
+		wave={true}
 		stats={[
 			{ label: `${changelogEntries.length} Updates` },
 			{ label: 'Weekly Releases' },
 			{ label: 'Open Source' }
 		]}
+		client:load
 	>
 		<Fragment slot="actions">
 			<Button href="#latest" variant="primary" size="lg">View Latest</Button>
 			<Button href="https://github.com/RawkodeAcademy" variant="ghost" size="lg">GitHub</Button>
 		</Fragment>
-	</PageHero>
+	</Hero>
 
 	<div id="latest" class="max-w-4xl mx-auto px-4 py-8">
 
@@ -91,11 +95,11 @@ const typeColors = {
 											{entry.type}
 										</span>
 									</div>
-									<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+									<h2 class="text-xl font-semibold text-primary-content mb-2">
 										{entry.title}
 									</h2>
 									<div
-										class="text-gray-600 dark:text-gray-300 mb-3 prose prose-sm dark:prose-invert max-w-none [&>p]:mb-4 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>li]:mb-1"
+										class="text-muted mb-3 prose prose-sm dark:prose-invert max-w-none [&>p]:mb-4 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>li]:mb-1"
 										set:html={entry.renderedContent}
 									/>
 								</div>

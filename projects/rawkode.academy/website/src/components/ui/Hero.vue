@@ -60,8 +60,15 @@
 					</div>
 
 					<!-- Stats/Metadata -->
-					<div v-if="$slots.stats" class="flex flex-wrap items-center gap-6 text-sm text-muted">
-						<slot name="stats" />
+					<div v-if="$slots.stats || (stats && stats.length > 0)" class="flex flex-wrap items-center justify-center gap-6 text-sm text-muted">
+						<slot name="stats">
+							<template v-if="stats">
+								<div v-for="(stat, index) in stats" :key="index" class="flex items-center gap-2">
+									<component v-if="stat.icon" :is="stat.icon" class="w-5 h-5" />
+									<span>{{ stat.label }}</span>
+								</div>
+							</template>
+						</slot>
 					</div>
 
 					<!-- Custom content -->
@@ -92,9 +99,15 @@
 </template>
 
 <script setup lang="ts">
+import type { Component } from "vue";
 import { computed } from "vue";
 import Badge from "../common/Badge.vue";
 import Heading from "../common/Heading.vue";
+
+interface Stat {
+	icon?: Component;
+	label: string;
+}
 
 interface Props {
 	layout?: "centered" | "split" | "full-width";
@@ -121,6 +134,7 @@ interface Props {
 		| "danger"
 		| "info";
 	wave?: boolean;
+	stats?: Stat[];
 	class?: string;
 }
 

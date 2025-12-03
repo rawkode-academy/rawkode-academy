@@ -1,4 +1,7 @@
 import { getCollection } from "astro:content";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("videos");
 
 type TechnologyReferenceObject = { id?: string; slug?: string };
 
@@ -61,10 +64,9 @@ export async function getVideosForTechnology(technologyId: string) {
 			slug: video.data.slug,
 		}));
 	} catch (error) {
-		console.warn(
-			`Failed to fetch videos for technology ${technologyId}:`,
+		logger.warn(`Failed to fetch videos for technology ${technologyId}`, {
 			error,
-		);
+		});
 		return [];
 	}
 }

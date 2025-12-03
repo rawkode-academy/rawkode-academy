@@ -102,24 +102,8 @@ export function logError(
 	error: unknown,
 	context?: Record<string, unknown>,
 ): void {
-	console.error("Error occurred:", error, context);
-
-	const enableErrorCapture =
-		(import.meta as any).env?.PUBLIC_CAPTURE_ERRORS === "true";
-	if (
-		enableErrorCapture &&
-		typeof window !== "undefined" &&
-		(window as any).grafanaFaro
-	) {
-		const faro = (window as any).grafanaFaro;
-		if (error instanceof Error) {
-			faro.api.pushError(error, {
-				context: context as Record<string, string>,
-			});
-		} else {
-			faro.api.pushError(new Error(String(error)), {
-				context: context as Record<string, string>,
-			});
-		}
-	}
+	// Use the centralized logger - import dynamically to avoid circular deps
+	import("@/lib/logger").then(({ logger }) => {
+		logger.error("Error occurred", error, context);
+	});
 }

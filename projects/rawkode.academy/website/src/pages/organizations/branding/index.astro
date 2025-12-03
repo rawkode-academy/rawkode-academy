@@ -1,6 +1,6 @@
 ---
 import Page from "@/wrappers/page.astro";
-import PageHero from "@/components/common/PageHero.vue";
+import { Hero } from "@/components/ui";
 import Button from "@/components/common/Button.vue";
 import monogramSvgRaw from "@/components/branding/logos/monogram.svg?raw";
 import monogramSvgFile from "@/components/branding/logos/monogram.svg?url";
@@ -167,11 +167,11 @@ const defaultLogoGradient =
 ---
 
 <Page title="Branding | Rawkode Academy" description="Official Rawkode Academy brand assets — logos, colors, and usage guidelines for partners.">
-  <PageHero title="Branding Guidelines" subtitle="Our brand assets, color system, and recommended usage for partners" badge="Partner Resources">
+  <Hero title="Branding Guidelines" subtitle="Our brand assets, color system, and recommended usage for partners" badge="Partner Resources" background="blobs" pattern="grid" wave={true} client:load>
     <Fragment slot="actions">
       <Button variant="primary" href="#assets">View Assets</Button>
     </Fragment>
-  </PageHero>
+  </Hero>
 
   <section id="assets" class="relative py-20 overflow-hidden" style="background: var(--app-backdrop);">
     <div class="pointer-events-none absolute inset-0">

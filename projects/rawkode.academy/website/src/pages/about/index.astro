@@ -161,12 +161,12 @@ const signatureFormats = [
                 <div class="relative z-10 mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1.1fr_0.9fr]">
                         <div class="glass-panel rounded-[32px] p-8 shadow-[0_25px_60px_rgba(14,30,37,0.15)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.65)]">
                                 <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Mission</p>
-                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Empower developers to navigate constant change</h2>
-                                <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">Empower developers to navigate constant change</h2>
+                                <p class="mt-4 text-lg text-muted">
                                         Rawkode Academy exists to make complex cloud native topics approachable without sanding off the hard edges. We combine
                                         research, real production experience, and a lot of humility to show exactly how we learn.
                                 </p>
-                                <p class="mt-6 text-gray-600 dark:text-gray-300">
+                                <p class="mt-6 text-muted">
                                         Whether you're a solo builder trying to keep up or leading a platform team, we want you to feel like you have a front-row seat to
                                         every experiment, refactor, and architectural debate.
                                 </p>
@@ -174,8 +174,8 @@ const signatureFormats = [
                         <div class="space-y-6">
                                 {missionPillars.map((pillar) => (
                                         <div class="glass-panel rounded-[28px] p-6">
-                                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{pillar.title}</h3>
-                                                <p class="mt-2 text-gray-600 dark:text-gray-300">{pillar.description}</p>
+                                                <h3 class="text-xl font-semibold text-primary-content">{pillar.title}</h3>
+                                                <p class="mt-2 text-muted">{pillar.description}</p>
                                         </div>
                                 ))}
                         </div>
@@ -186,17 +186,17 @@ const signatureFormats = [
                 <div class="mx-auto max-w-6xl px-4">
                         <div class="text-center">
                                 <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Impact</p>
-                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Proof that curiosity scales</h2>
-                                <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">Proof that curiosity scales</h2>
+                                <p class="mt-3 text-lg text-muted">
                                         We obsess over doing the work in public—these numbers are a snapshot of what that persistence has unlocked so far.
                                 </p>
                         </div>
                         <div class="mt-12 grid gap-6 md:grid-cols-3">
                                 {stats.map((stat) => (
                                         <div class="glass-panel rounded-[28px] p-8 text-center">
-                                                <p class="text-4xl font-semibold text-gray-900 dark:text-white">{stat.value}</p>
-                                                <p class="mt-2 text-lg font-medium text-gray-700 dark:text-gray-200">{stat.label}</p>
-                                                <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">{stat.description}</p>
+                                                <p class="text-4xl font-semibold text-primary-content">{stat.value}</p>
+                                                <p class="mt-2 text-lg font-medium text-secondary-content">{stat.label}</p>
+                                                <p class="mt-3 text-sm text-muted">{stat.description}</p>
                                         </div>
                                 ))}
                         </div>
@@ -207,8 +207,8 @@ const signatureFormats = [
                 <div class="mx-auto max-w-5xl px-4">
                         <div class="text-center">
                                 <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Founder's journey</p>
-                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Two decades of building, sharing, and mentoring</h2>
-                                <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">Two decades of building, sharing, and mentoring</h2>
+                                <p class="mt-3 text-lg text-muted">
                                         Every experiment inside Rawkode Academy is rooted in lessons learned from running production systems, leading teams, and collaborating with
                                         the maintainers who shape our industry.
                                 </p>
@@ -221,8 +221,8 @@ const signatureFormats = [
                                                         <div class="order-2 md:order-1 md:pr-8">
                                                                 <div class="timeline-item">
                                                                         <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">{item.period}</p>
-                                                                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                                                                        <p class="text-gray-600 dark:text-gray-300">{item.description}</p>
+                                                                        <h3 class="text-2xl font-semibold text-primary-content">{item.title}</h3>
+                                                                        <p class="text-muted">{item.description}</p>
                                                                 </div>
                                                         </div>
                                                         <div class="order-1 md:order-2">
@@ -241,8 +241,8 @@ const signatureFormats = [
                 <div class="mx-auto max-w-6xl px-4">
                         <div class="text-center">
                                 <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Signature formats</p>
-                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Where experimentation meets entertainment</h2>
-                                <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">Where experimentation meets entertainment</h2>
+                                <p class="mt-3 text-lg text-muted">
                                         We mix long-running shows with limited series to meet people where they learn best.
                                 </p>
                         </div>
@@ -250,12 +250,12 @@ const signatureFormats = [
                                 {signatureFormats.map((format) => (
                                         <div class="glass-panel flex h-full flex-col rounded-[28px] p-6">
                                                 <div class="flex-1">
-                                                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{format.title}</h3>
-                                                        <p class="mt-3 text-gray-600 dark:text-gray-300">{format.description}</p>
+                                                        <h3 class="text-xl font-semibold text-primary-content">{format.title}</h3>
+                                                        <p class="mt-3 text-muted">{format.description}</p>
                                                 </div>
                                                 <div class="mt-4 flex flex-wrap gap-2">
                                                         {format.chips.map((chip) => (
-                                                                <span class="glass-chip text-xs font-medium text-gray-700 dark:text-gray-200">{chip}</span>
+                                                                <span class="glass-chip text-xs font-medium text-secondary-content">{chip}</span>
                                                         ))}
                                                 </div>
                                         </div>
@@ -268,8 +268,8 @@ const signatureFormats = [
                 <div class="relative z-10 mx-auto max-w-6xl px-4">
                         <div class="text-center">
                                 <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Moments we love</p>
-                                <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">The clips that started it all</h2>
-                                <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">The clips that started it all</h2>
+                                <p class="mt-3 text-lg text-muted">
                                         These two episodes capture the spirit of Rawkode Academy—curiosity, collaboration, and just enough chaos to keep everyone honest.
                                 </p>
                         </div>
@@ -286,8 +286,8 @@ const signatureFormats = [
                                         </div>
                                         <div class="p-6">
                                                 <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">2019</p>
-                                                <h3 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Last Week in Kubernetes</h3>
-                                                <p class="mt-2 text-gray-600 dark:text-gray-300">The pilot episode that proved live, unfiltered exploration resonated with our audience.</p>
+                                                <h3 class="mt-2 text-2xl font-semibold text-primary-content">Last Week in Kubernetes</h3>
+                                                <p class="mt-2 text-muted">The pilot episode that proved live, unfiltered exploration resonated with our audience.</p>
                                         </div>
                                 </div>
                                 <div class="glass-panel overflow-hidden rounded-[32px] p-0">
@@ -302,8 +302,8 @@ const signatureFormats = [
                                         </div>
                                         <div class="p-6">
                                                 <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">2021</p>
-                                                <h3 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Klustered with Walid Shaari</h3>
-                                                <p class="mt-2 text-gray-600 dark:text-gray-300">A bold game show experiment that turned Kubernetes troubleshooting into an adrenaline rush.</p>
+                                                <h3 class="mt-2 text-2xl font-semibold text-primary-content">Klustered with Walid Shaari</h3>
+                                                <p class="mt-2 text-muted">A bold game show experiment that turned Kubernetes troubleshooting into an adrenaline rush.</p>
                                         </div>
                                 </div>
                         </div>
@@ -314,8 +314,8 @@ const signatureFormats = [
                 <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary/20 to-transparent opacity-50 blur-3xl"></div>
                 <div class="relative mx-auto max-w-5xl rounded-[40px] border border-white/30 bg-white/80 px-8 py-12 text-center shadow-[0_40px_120px_rgba(14,30,37,0.35)] dark:border-white/10 dark:bg-gray-900/80">
                         <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Join the community</p>
-                        <h2 class="mt-4 text-3xl font-semibold text-gray-900 dark:text-white">Bring Rawkode Academy into your week</h2>
-                        <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
+                        <h2 class="mt-4 text-3xl font-semibold text-primary-content">Bring Rawkode Academy into your week</h2>
+                        <p class="mt-3 text-lg text-muted">
                                 Subscribe to our shows, share your projects, or invite us to collaborate with your engineering organization. Together we'll keep the
                                 Cloud Native ecosystem open, welcoming, and practical.
                         </p>

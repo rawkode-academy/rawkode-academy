@@ -1,6 +1,6 @@
 ---
 import Button from "@/components/common/Button.vue";
-import PageHero from "@/components/common/PageHero.vue";
+import { Hero } from "@/components/ui";
 import PartnerLogos from "@/components/partner/logos.astro";
 import Page from "@/wrappers/page.astro";
 
@@ -85,7 +85,7 @@ const services = [
 	}
 
 	.stat-label {
-		@apply text-gray-600 dark:text-gray-300 text-sm uppercase tracking-wide;
+		@apply text-muted text-sm uppercase tracking-wide;
 	}
 </style>
 
@@ -94,21 +94,25 @@ const services = [
 	description="Partner with Rawkode Academy for strategic partnerships, expert consulting, and team training to accelerate your cloud native journey."
 >
 	<!-- Hero Section -->
-	<PageHero
+	<Hero
 		title="Enterprise Solutions for Modern Teams"
 		subtitle="Accelerate your cloud native journey with strategic partnerships, expert consulting, and hands-on training programs designed to drive measurable results."
 		badge="For Organizations"
+		background="blobs"
+		pattern="grid"
+		wave={true}
 		stats={[
 			{ label: 'Global Reach' },
 			{ label: 'Proven Expertise' },
 			{ label: 'Measurable Impact' }
 		]}
+		client:load
 	>
 		<Fragment slot="actions">
 			<Button href="#services" variant="primary" size="lg">Explore Services</Button>
 			<Button href="/organizations/lets-chat" variant="secondary" size="lg">Schedule a Call</Button>
 		</Fragment>
-	</PageHero>
+	</Hero>
 
 	<!-- Stats Section -->
 	<section class="py-16 bg-gray-50 dark:bg-gray-900">
@@ -138,10 +142,10 @@ const services = [
 	<section class="py-16 bg-white dark:bg-gray-800">
 		<div class="max-w-6xl mx-auto px-4">
 			<div class="text-center mb-12">
-				<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+				<h2 class="text-3xl md:text-4xl font-bold text-primary-content mb-4">
 					Why Choose Rawkode Academy?
 				</h2>
-				<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+				<p class="text-xl text-muted max-w-3xl mx-auto">
 					We bridge the critical gap between technical innovation and developer understanding
 				</p>
 			</div>
@@ -153,8 +157,8 @@ const services = [
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
 						</svg>
 					</div>
-					<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Authentic Expertise</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<h3 class="text-xl font-bold text-primary-content mb-3">Authentic Expertise</h3>
+					<p class="text-muted">
 						Deep technical knowledge combined with real-world experience building and deploying cloud native applications
 					</p>
 				</div>
@@ -165,8 +169,8 @@ const services = [
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
 						</svg>
 					</div>
-					<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Engaged Community</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<h3 class="text-xl font-bold text-primary-content mb-3">Engaged Community</h3>
+					<p class="text-muted">
 						Access to a passionate, global community of developers actively seeking to learn and adopt new technologies
 					</p>
 				</div>
@@ -177,8 +181,8 @@ const services = [
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
 						</svg>
 					</div>
-					<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Measurable Results</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<h3 class="text-xl font-bold text-primary-content mb-3">Measurable Results</h3>
+					<p class="text-muted">
 						Data-driven approach with comprehensive analytics and reporting to track engagement and adoption
 					</p>
 				</div>
@@ -190,10 +194,10 @@ const services = [
 	<section id="services" class="py-20 bg-gray-50 dark:bg-gray-900">
 		<div class="max-w-7xl mx-auto px-4">
 			<div class="text-center mb-16">
-				<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+				<h2 class="text-3xl md:text-4xl font-bold text-primary-content mb-4">
 					Our Services
 				</h2>
-				<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+				<p class="text-xl text-muted max-w-3xl mx-auto">
 					Tailored solutions to meet your organization's unique needs
 				</p>
 			</div>
@@ -227,11 +231,11 @@ const services = [
               )}
             </div>
 
-						<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+						<h3 class="text-2xl font-bold text-primary-content mb-3">
 							{service.title}
 						</h3>
 
-						<p class="text-gray-600 dark:text-gray-300 mb-6">
+						<p class="text-muted mb-6">
 							{service.description}
 						</p>
 
@@ -265,10 +269,10 @@ const services = [
 	<section class="py-16 bg-white dark:bg-gray-800">
 		<div class="max-w-6xl mx-auto px-4">
 			<div class="text-center mb-12">
-				<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+				<h2 class="text-3xl md:text-4xl font-bold text-primary-content mb-4">
 					Trusted by Innovative Companies
 				</h2>
-				<p class="text-xl text-gray-600 dark:text-gray-300">
+				<p class="text-xl text-muted">
 					Join these organizations who have partnered with us to accelerate their cloud native journey
 				</p>
 			</div>

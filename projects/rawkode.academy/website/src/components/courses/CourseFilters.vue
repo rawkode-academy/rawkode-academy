@@ -8,6 +8,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search courses..."
+            data-faro-user-action-name="course_search"
             class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             @input="$emit('search', searchQuery)"
           />
@@ -22,6 +23,7 @@
           <div class="relative">
             <button
               @click="showDifficultyMenu = !showDifficultyMenu"
+              data-faro-user-action-name="course_filter_difficulty"
               class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <span>Difficulty</span>
@@ -57,6 +59,7 @@
           <div class="relative">
             <button
               @click="showTechMenu = !showTechMenu"
+              data-faro-user-action-name="course_filter_technology"
               class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <span>Technology</span>
@@ -95,6 +98,7 @@
           <div class="relative">
             <button
               @click="showSortMenu = !showSortMenu"
+              data-faro-user-action-name="course_filter_sort"
               class="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

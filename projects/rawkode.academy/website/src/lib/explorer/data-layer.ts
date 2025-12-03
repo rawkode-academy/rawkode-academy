@@ -313,42 +313,6 @@ const EXCLUDE_NULL_DIMENSIONS: DimensionKey[] = [
 ];
 
 /**
- * Get ordered dimension values (for consistent axis ordering)
- * @deprecated Use getAxisValuesFromTechnologies for filtered data
- */
-export function getOrderedDimensionValues(
-	dimension: DimensionKey,
-	index: DataIndex,
-): (string | null)[] {
-	const definedValues = DIMENSIONS[dimension].values.map((v) => v.value);
-	const actualValues = index.dimensionValues.get(dimension) ?? new Set();
-	const excludeNull = EXCLUDE_NULL_DIMENSIONS.includes(dimension);
-
-	// For dimensions with predefined order, use that order
-	if (definedValues.length > 0) {
-		const ordered = definedValues.filter((v) => actualValues.has(v));
-		// Add null if there are techs without this dimension (unless excluded)
-		if (!excludeNull) {
-			const nullGroup = index.byDimension.get(dimension)?.get(null);
-			if (nullGroup && nullGroup.size > 0) {
-				ordered.push(null as unknown as string);
-			}
-		}
-		return ordered;
-	}
-
-	// For dynamic dimensions (category, subcategory), sort alphabetically
-	const sorted = [...actualValues].sort();
-	if (!excludeNull) {
-		const nullGroup = index.byDimension.get(dimension)?.get(null);
-		if (nullGroup && nullGroup.size > 0) {
-			sorted.push(null as unknown as string);
-		}
-	}
-	return sorted;
-}
-
-/**
  * Get ordered dimension values from a filtered set of technologies
  * This ensures axis values match the visible data
  */

@@ -1,4 +1,7 @@
 import { CloudEvent } from "cloudevents";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("analytics");
 
 type CaptureOptions = {
 	event: string;
@@ -105,14 +108,13 @@ export async function captureServerEvent(
 				}),
 			});
 		} catch (err) {
-			console.error("Analytics service binding call failed", err);
+			logger.error("Analytics service binding call failed", err);
 		}
 	} else {
 		// Fallback: log warning (service binding should always be available in production)
-		console.warn(
-			"Analytics service binding not available; event not tracked",
+		logger.warn("Analytics service binding not available; event not tracked", {
 			event,
-		);
+		});
 	}
 }
 
@@ -157,7 +159,7 @@ export async function identifyServerUser(
 				}),
 			});
 		} catch (err) {
-			console.error("Analytics identify call failed", err);
+			logger.error("Analytics identify call failed", err);
 		}
 	}
 }

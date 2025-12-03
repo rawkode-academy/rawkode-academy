@@ -2,6 +2,9 @@ import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 import { GRAPHQL_ENDPOINT } from "astro:env/server";
 import { request } from "graphql-request";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("sitemap");
 
 interface NavigationItem {
 	id: string;
@@ -311,7 +314,7 @@ async function generateNavigationItems(
 			});
 		});
 	} catch (error) {
-		console.error("Error loading collections or technologies:", error);
+		logger.error("Error loading collections or technologies", error);
 	}
 
 	return navigationItems;
@@ -345,7 +348,7 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		});
 	} catch (error) {
-		console.error("Error generating navigation items:", error);
+		logger.error("Error generating navigation items", error);
 
 		return new Response(
 			JSON.stringify({ error: "Failed to generate navigation items" }),

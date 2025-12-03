@@ -1,5 +1,8 @@
 import { defineMiddleware } from "astro:middleware";
 import { getSession, type User } from "@/lib/auth/server";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("auth");
 
 export const authMiddleware = defineMiddleware(async (context, next) => {
 	if (context.isPrerendered) {
@@ -26,7 +29,7 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
 
 		return next();
 	} catch (error) {
-		console.error("Auth middleware error:", error);
+		logger.error("Auth middleware error", error);
 		return next();
 	}
 });

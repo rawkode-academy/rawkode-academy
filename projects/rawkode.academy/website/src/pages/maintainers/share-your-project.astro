@@ -96,7 +96,7 @@ const faqItems = [
 		<div class="mx-auto max-w-4xl py-12 sm:py-16 lg:py-20">
 			<div class="hidden sm:mb-8 sm:flex sm:justify-center">
 				<div
-					class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 dark:text-gray-400 ring-1 ring-gray-900/10 dark:ring-gray-700 hover:ring-gray-900/20 dark:hover:ring-gray-600"
+					class="relative rounded-full px-3 py-1 text-sm leading-6 text-muted ring-1 ring-gray-900/10 dark:ring-gray-700 hover:ring-gray-900/20 dark:hover:ring-gray-600"
 				>
 					Join over 100 projects that have been featured on Rawkode Live. <a
 						href="#booking"
@@ -108,10 +108,10 @@ const faqItems = [
 				</div>
 			</div>
 			<div class="text-center">
-				<h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+				<h1 class="text-4xl font-bold tracking-tight text-primary-content sm:text-6xl">
 					Showcase Your Open Source Project
 				</h1>
-				<p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
+				<p class="mt-6 text-lg leading-8 text-muted">
 					Get your project in front of thousands of developers, receive valuable feedback, and connect with potential contributors through a live, interactive session with David (Rawkode).
 				</p>
 				<div class="mt-10 flex items-center justify-center gap-x-6">
@@ -120,7 +120,7 @@ const faqItems = [
 						class="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 						>Book Your Slot</a
 					>
-					<a href="#process" class="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-300"
+					<a href="#process" class="text-sm font-semibold leading-6 text-secondary-content"
 						>Learn how it works <span aria-hidden="true">→</span></a
 					>
 				</div>
@@ -158,7 +158,7 @@ const faqItems = [
 					</div>
 					<h3 class="text-xl font-bold dark:text-white">Gain Visibility</h3>
 				</div>
-				<p class="text-gray-600 dark:text-gray-300">
+				<p class="text-muted">
 					Introduce your project to a dedicated audience of developers, potential contributors, and early adopters. Get valuable exposure for your hard work and reach developers who are actively looking for new tools and technologies.
 				</p>
 			</div>
@@ -171,7 +171,7 @@ const faqItems = [
 					</div>
 					<h3 class="text-xl font-bold dark:text-white">Get Feedback</h3>
 				</div>
-				<p class="text-gray-600 dark:text-gray-300">
+				<p class="text-muted">
 					Engage in a live Q&A session with an audience that understands technical challenges. Receive constructive feedback, answer questions, and spark discussions that can help shape your project's future and identify blind spots.
 				</p>
 			</div>
@@ -184,7 +184,7 @@ const faqItems = [
 					</div>
 					<h3 class="text-xl font-bold dark:text-white">Connect with the Community</h3>
 				</div>
-				<p class="text-gray-600 dark:text-gray-300">
+				<p class="text-muted">
 					Become part of the Rawkode community. Connect with like-minded individuals, find collaborators, and build relationships with other maintainers and developers who share your passion for open source and innovation.
 				</p>
 			</div>
@@ -197,7 +197,7 @@ const faqItems = [
 					</div>
 					<h3 class="text-xl font-bold dark:text-white">It's Fun!</h3>
 				</div>
-				<p class="text-gray-600 dark:text-gray-300">
+				<p class="text-muted">
 					Join David (Rawkode) for a relaxed, informal chat about your project. We keep it fun, engaging, and focused on celebrating your work. No corporate speak or marketing pitches—just authentic conversations about cool technology.
 				</p>
 			</div>
@@ -215,10 +215,10 @@ const faqItems = [
 						<span class="absolute flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full -left-4 ring-4 ring-white dark:ring-gray-800 dark:bg-primary/20">
 							<span class="text-primary font-bold">{index + 1}</span>
 						</span>
-						<h3 class="flex items-center mb-1 text-lg font-semibold text-gray-900 dark:text-white">
+						<h3 class="flex items-center mb-1 text-lg font-semibold text-primary-content">
 							{step.title}
 						</h3>
-						<p class="mb-4 text-base font-normal text-gray-600 dark:text-gray-300">{step.description}</p>
+						<p class="mb-4 text-base font-normal text-muted">{step.description}</p>
 					</li>
 				))}
 			</ol>
@@ -229,7 +229,7 @@ const faqItems = [
 	<section class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
 		<Title title="What to Expect" />
 		<div class="text-center max-w-3xl mx-auto">
-			<p class="mb-6 text-gray-600 dark:text-gray-300 lg:text-lg">
+			<p class="mb-6 text-muted lg:text-lg">
 				Our sessions are typically 60-90 minutes long and follow this format:
 			</p>
 
@@ -239,7 +239,7 @@ const faqItems = [
 						<span class="text-primary font-bold">1</span>
 					</div>
 					<h3 class="mb-2 text-xl font-bold text-center dark:text-white">Introduction</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<p class="text-muted">
 						We'll start with introductions and background on you and your project. What problem does it solve? What inspired you to create it?
 					</p>
 				</div>
@@ -249,7 +249,7 @@ const faqItems = [
 						<span class="text-primary font-bold">2</span>
 					</div>
 					<h3 class="mb-2 text-xl font-bold text-center dark:text-white">Demo & Walkthrough</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<p class="text-muted">
 						Show your project in action with a live demonstration. Walk through key features, architecture decisions, and what makes your approach unique.
 					</p>
 				</div>
@@ -259,13 +259,13 @@ const faqItems = [
 						<span class="text-primary font-bold">3</span>
 					</div>
 					<h3 class="mb-2 text-xl font-bold text-center dark:text-white">Q&A & Discussion</h3>
-					<p class="text-gray-600 dark:text-gray-300">
+					<p class="text-muted">
 						Engage with the audience through live Q&A. Discuss challenges, future plans, and how others can contribute to your project.
 					</p>
 				</div>
 			</div>
 
-			<p class="mt-8 text-gray-600 dark:text-gray-300 lg:text-lg">
+			<p class="mt-8 text-muted lg:text-lg">
 				To help you prepare and ensure everything runs smoothly, please read our <a class="text-primary hover:underline font-medium" href="https://rawkode.link/live-prep">live preparation document</a>.
 			</p>
 		</div>
@@ -279,12 +279,12 @@ const faqItems = [
 	<!-- FAQ Section -->
 	<section class="bg-white dark:bg-gray-900 py-12">
 		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
-			<h2 class="mb-8 text-3xl lg:text-4xl tracking-tight font-extrabold text-center text-gray-900 dark:text-white">
+			<h2 class="mb-8 text-3xl lg:text-4xl tracking-tight font-extrabold text-center text-primary-content">
 				Frequently Asked Questions
 			</h2>
 			<div class="mx-auto max-w-(--breakpoint-md)">
 				<div id="accordion-flush" data-accordion="collapse"
-					data-active-classes="bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+					data-active-classes="bg-white dark:bg-gray-900 text-primary-content"
 					data-inactive-classes="text-gray-500 dark:text-gray-400">
 
 					{faqItems.map((item, index) => (
@@ -306,7 +306,7 @@ const faqItems = [
 							</h2>
 							<div id={`accordion-flush-body-${index + 1}`} class={index === 0 ? '' : 'hidden'} aria-labelledby={`accordion-flush-heading-${index + 1}`}>
 								<div class="py-5 border-b border-gray-200 dark:border-gray-700">
-									<p class="mb-2 text-gray-600 dark:text-gray-300">{item.answer}</p>
+									<p class="mb-2 text-muted">{item.answer}</p>
 								</div>
 							</div>
 						</>
@@ -320,7 +320,7 @@ const faqItems = [
 	<section id="booking" class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
 		<Title title="Ready to Share?" />
 		<div class="text-center max-w-3xl mx-auto">
-			<p class="mb-8 text-gray-600 dark:text-gray-300 lg:text-lg">
+			<p class="mb-8 text-muted lg:text-lg">
 				Awesome! Find a time that works for you using the calendar below. Select any available slot, and we'll follow up with all the details you need before the show.
 			</p>
 		</div>

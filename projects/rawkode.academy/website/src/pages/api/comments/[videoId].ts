@@ -1,8 +1,11 @@
 import { getCollection } from "astro:content";
 import { getSecret, ZULIP_EMAIL, ZULIP_URL } from "astro:env/server";
 import type { APIRoute } from "astro";
+import { createLogger } from "@/lib/logger";
 
 export const prerender = false;
+
+const logger = createLogger("comments");
 
 interface ZulipMessage {
 	id: number;
@@ -73,11 +76,10 @@ export const GET: APIRoute = async ({ params }) => {
 		});
 
 		if (!response.ok) {
-			console.error(
-				"Failed to fetch from Zulip:",
-				response.status,
-				response.statusText,
-			);
+			logger.error("Failed to fetch from Zulip", {
+				status: response.status,
+				statusText: response.statusText,
+			});
 			return new Response(JSON.stringify({ comments: [] }), {
 				status: 200,
 				headers: { "Content-Type": "application/json" },
@@ -118,7 +120,7 @@ export const GET: APIRoute = async ({ params }) => {
 			},
 		);
 	} catch (error) {
-		console.error("Failed to fetch comments:", error);
+		logger.error("Failed to fetch comments", error);
 		return new Response(
 			JSON.stringify({
 				error: "Failed to fetch comments",
