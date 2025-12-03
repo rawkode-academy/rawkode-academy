@@ -5,6 +5,8 @@ import { getCollection, getEntries } from "astro:content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
+import SubscribeLinks from "@/components/show/SubscribeLinks.vue";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Image } from "astro:assets";
 
@@ -126,8 +128,17 @@ const pageTitle = `${showEntry.data.name} Episodes`;
                                                 </div>
                                         )}
                                         <p class="text-lg text-gray-600 dark:text-gray-300">{showDescription}</p>
+
+                                        <SubscribeLinks links={showEntry.data.subscribeLinks} client:load />
                                 </div>
                         </header>
+
+                        <NewsletterCTA
+                                audience={`show:${showEntry.data.id}`}
+                                badge="Get notified of new episodes"
+                                headline={`Subscribe to ${showEntry.data.name}`}
+                                subtitle="Be the first to know when new episodes drop."
+                        />
 
                         <div>
                                 {feedVideos.length > 0 ? (

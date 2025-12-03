@@ -75,6 +75,26 @@ const shows = defineCollection({
 					artworkUrl: z.string().url().optional(),
 				})
 				.optional(),
+			subscribeLinks: z
+				.array(
+					z.object({
+						platform: z.string(),
+						url: z.string().url(),
+						icon: z
+							.enum([
+								"apple-podcasts",
+								"spotify",
+								"youtube",
+								"pocket-casts",
+								"amazon-music",
+								"overcast",
+								"rss",
+								"other",
+							])
+							.default("other"),
+					}),
+				)
+				.default([]),
 		}),
 });
 
