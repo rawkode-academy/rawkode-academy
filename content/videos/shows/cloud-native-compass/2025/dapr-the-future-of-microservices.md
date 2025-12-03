@@ -41,6 +41,7 @@ technologies: []
 show: cloud-native-compass
 videoId: xnmoo3urafyt4khqozj6d0af
 duration: 3189
+audioFileSize: 76517386
 guests:
   - mark-fussell
 ---

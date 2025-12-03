@@ -45,4 +45,5 @@ technologies: []
 show: cloud-native-compass
 videoId: xy48jlregckbk64dc6gqbq1l
 duration: 2518
+audioFileSize: 60425030
 ---

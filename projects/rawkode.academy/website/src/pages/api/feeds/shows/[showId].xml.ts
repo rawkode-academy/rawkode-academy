@@ -1,5 +1,6 @@
 import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
+import { generateRssFeed } from "feedsmith";
 
 export async function getStaticPaths() {
 	const shows = await getCollection("shows");
@@ -50,87 +51,157 @@ export async function GET(context: APIContext) {
 
 	const firstVideo = showVideos[0];
 	const lastBuildDate = firstVideo
-		? new Date(firstVideo.data.publishedAt).toUTCString()
-		: new Date().toUTCString();
+		? new Date(firstVideo.data.publishedAt)
+		: new Date();
 
-	const escapeXml = (str: string): string => {
-		return str
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;")
-			.replace(/"/g, "&quot;")
-			.replace(/'/g, "&apos;");
-	};
-
-	const formatDuration = (seconds: number): string => {
-		const hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-		const secs = seconds % 60;
-		if (hours > 0) {
-			return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-		}
-		return `${minutes}:${secs.toString().padStart(2, "0")}`;
-	};
-
-	const coverImage = show.data.cover?.image;
-	const showImageUrl = coverImage
-		? `${site}${typeof coverImage === "string" ? coverImage : coverImage.src}`
+	// Use podcast.artworkUrl if available, otherwise fall back to thumbnail
+	const showImageUrl = podcastConfig?.artworkUrl
+		? podcastConfig.artworkUrl
 		: firstVideo
 			? `https://content.rawkode.academy/videos/${firstVideo.data.videoId}/thumbnail.jpg`
 			: "";
 
-	const items = showVideos.map((video, index) => {
-		const episodeNumber = showVideos.length - index;
-		const duration =
-			typeof video.data.duration === "number" ? video.data.duration : 0;
-		const audioUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/audio.mp3`;
-		const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
-		const episodeUrl = `${site}/watch/${video.data.slug}/`;
-		const pubDate = new Date(video.data.publishedAt).toUTCString();
+	// Build items
+	const items = await Promise.all(
+		showVideos.map(async (video, index) => {
+			const episodeNumber = showVideos.length - index;
+			const duration =
+				typeof video.data.duration === "number" ? video.data.duration : 0;
+			const audioUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/original.mp3`;
+			const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
+			const episodeUrl = `${site}/watch/${video.data.slug}/`;
+			const audioFileSize = video.data.audioFileSize || 0;
+			const chaptersUrl = `${site}/api/feeds/shows/${showId}/${video.data.slug}/chapters.json`;
 
-		return `    <item>
-      <title><![CDATA[${video.data.title}]]></title>
-      <link>${episodeUrl}</link>
-      <description><![CDATA[${video.data.description}]]></description>
-      <guid isPermaLink="false">${video.data.videoId}</guid>
-      <pubDate>${pubDate}</pubDate>
-      <enclosure url="${audioUrl}" type="audio/mpeg" length="0"/>
-      <itunes:title><![CDATA[${video.data.title}]]></itunes:title>
-      <itunes:episode>${episodeNumber}</itunes:episode>
-      <itunes:episodeType>full</itunes:episodeType>
-      <itunes:duration>${formatDuration(duration)}</itunes:duration>
-      <itunes:image href="${thumbnailUrl}"/>
-      <itunes:explicit>${podcastConfig?.explicit ? "true" : "false"}</itunes:explicit>
-      <itunes:author>${escapeXml(hostNames)}</itunes:author>
-    </item>`;
-	});
+			// Fetch guest data for podcast:person tags
+			const guestEntries = video.data.guests?.length
+				? await getEntries(video.data.guests)
+				: [];
 
-	const rss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"
-  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
-  xmlns:content="http://purl.org/rss/1.0/modules/content/"
-  xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title><![CDATA[${show.data.name}]]></title>
-    <link>${showLink}</link>
-    <description><![CDATA[${showDescription}]]></description>
-    <language>en-us</language>
-    <lastBuildDate>${lastBuildDate}</lastBuildDate>
-    <atom:link href="${feedUrl}" rel="self" type="application/rss+xml"/>
-    <itunes:author>${escapeXml(hostNames)}</itunes:author>
-    <itunes:owner>
-      <itunes:name><![CDATA[${hostNames}]]></itunes:name>
-      ${podcastConfig?.email ? `<itunes:email>${escapeXml(podcastConfig.email)}</itunes:email>` : ""}
-    </itunes:owner>
-    <itunes:explicit>${podcastConfig?.explicit ? "true" : "false"}</itunes:explicit>
-    <itunes:type>episodic</itunes:type>
-    ${showImageUrl ? `<itunes:image href="${showImageUrl}"/>` : ""}
-    ${podcastConfig?.category ? `<itunes:category text="${escapeXml(podcastConfig.category)}"${podcastConfig.subcategory ? `><itunes:category text="${escapeXml(podcastConfig.subcategory)}"/></itunes:category>` : "/>"}` : ""}
-    ${podcastConfig?.copyright ? `<copyright>${escapeXml(podcastConfig.copyright)}</copyright>` : ""}
-    <generator>Rawkode Academy</generator>
-${items.join("\n")}
-  </channel>
-</rss>`;
+			const guestPersons = guestEntries.map((guest) => ({
+				display: guest.data.name,
+				role: "guest",
+				img: guest.data.avatarUrl,
+			}));
+
+			const hostPersons = hostEntries.map((host) => ({
+				display: host.data.name,
+				role: "host",
+				img: host.data.avatarUrl,
+			}));
+
+			const hasChapters = video.data.chapters && video.data.chapters.length > 0;
+
+			return {
+				title: video.data.title,
+				link: episodeUrl,
+				description: video.data.description,
+				guid: {
+					value: video.data.videoId,
+					isPermaLink: false,
+				},
+				pubDate: new Date(video.data.publishedAt),
+				enclosures: [
+					{
+						url: audioUrl,
+						type: "audio/mpeg",
+						length: audioFileSize,
+					},
+				],
+				itunes: {
+					title: video.data.title,
+					duration: duration,
+					image: thumbnailUrl,
+					explicit: podcastConfig?.explicit ?? false,
+					author: hostNames,
+					episode: episodeNumber,
+					episodeType: "full",
+				},
+				podcast: {
+					persons: [...hostPersons, ...guestPersons],
+					...(hasChapters && {
+						chapters: {
+							url: chaptersUrl,
+							type: "application/json+chapters",
+						},
+					}),
+				},
+			};
+		}),
+	);
+
+	// Build iTunes categories
+	const itunesCategories = podcastConfig?.category
+		? [
+				{
+					text: podcastConfig.category,
+					...(podcastConfig.subcategory && {
+						categories: [{ text: podcastConfig.subcategory }],
+					}),
+				},
+			]
+		: undefined;
+
+	// biome-ignore lint/suspicious/noExplicitAny: feedsmith types are overly strict with exactOptionalPropertyTypes
+	const feed: any = {
+		title: show.data.name,
+		link: showLink,
+		description: showDescription,
+		language: "en-us",
+		lastBuildDate: lastBuildDate,
+		copyright: podcastConfig?.copyright,
+		generator: "Rawkode Academy",
+		// Standard RSS image element
+		...(showImageUrl && {
+			image: {
+				url: showImageUrl,
+				title: show.data.name,
+				link: showLink,
+			},
+		}),
+		items: items,
+		atom: {
+			links: [
+				{
+					href: feedUrl,
+					rel: "self",
+					type: "application/rss+xml",
+				},
+			],
+		},
+		itunes: {
+			author: hostNames,
+			explicit: podcastConfig?.explicit ?? false,
+			type: "episodic",
+			image: showImageUrl || undefined,
+			categories: itunesCategories,
+			...(podcastConfig?.email && {
+				owner: {
+					name: hostNames,
+					email: podcastConfig.email,
+				},
+			}),
+		},
+		podcast: {
+			locked: {
+				value: false,
+			},
+			medium: "podcast",
+			// Podcast GUID for feed identity
+			...(podcastConfig?.guid && {
+				guid: podcastConfig.guid,
+			}),
+			// Channel-level hosts
+			persons: hostEntries.map((host) => ({
+				display: host.data.name,
+				role: "host",
+				img: host.data.avatarUrl,
+				href: host.data.website || host.data.twitter,
+			})),
+		},
+	};
+
+	const rss = generateRssFeed(feed);
 
 	return new Response(rss, {
 		headers: {

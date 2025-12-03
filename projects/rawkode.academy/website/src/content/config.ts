@@ -20,6 +20,7 @@ const videos = defineCollection({
 		description: z.string(),
 		publishedAt: z.coerce.date(),
 		duration: z.number().nonnegative().optional(),
+		audioFileSize: z.number().positive().optional(), // bytes, for podcast enclosure
 		// streamUrl/thumbnailUrl/duration are derived at runtime
 		// Technologies: accept plain ids (e.g., "docker") or full entry ids ("docker/index"),
 		// normalize to "<id>/index" for internal use, and verify existence.
@@ -65,11 +66,13 @@ const shows = defineCollection({
 				.optional(),
 			podcast: z
 				.object({
+					guid: z.string().uuid().optional(),
 					email: z.string().email(),
 					category: z.string(),
 					subcategory: z.string().optional(),
 					explicit: z.boolean().default(false),
 					copyright: z.string().optional(),
+					artworkUrl: z.string().url().optional(),
 				})
 				.optional(),
 		}),

@@ -8,6 +8,7 @@ technologies: []
 show: cloud-native-compass
 videoId: e683nfwoau6e8epn8g9zmwn9
 duration: 2296
+audioFileSize: 55097401
 guests:
   - mikkel-mork-hegnhoj
 ---

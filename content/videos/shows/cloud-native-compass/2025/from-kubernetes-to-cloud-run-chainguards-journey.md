@@ -85,6 +85,7 @@ chapters:
   - startTime: 3312
     title: Conclusion
 duration: 3371
+audioFileSize: 80894581
 guests:
   - jason-hall
 ---

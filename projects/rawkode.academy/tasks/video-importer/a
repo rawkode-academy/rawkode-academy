@@ -1,0 +1,1513 @@
+cuenv exec -e production -- uv run standardize_media_names.py
+2025-12-02 23:50:10,058 - INFO - Creating MediaNameStandardizer instance...
+2025-12-02 23:50:10,058 - INFO - Initializing MediaNameStandardizer...
+2025-12-02 23:50:10,058 - INFO - Content bucket: rawkode-academy-content
+2025-12-02 23:50:10,142 - INFO - ============================================================
+2025-12-02 23:50:10,142 - INFO - Starting media name standardization...
+2025-12-02 23:50:10,142 - INFO - Max parallel workers: 10
+2025-12-02 23:50:10,142 - INFO - ============================================================
+2025-12-02 23:50:10,152 - INFO - Discovering video IDs in bucket...
+2025-12-02 23:50:17,765 - INFO - Found 438 video IDs
+2025-12-02 23:50:17,766 - INFO -
+Processing 438 video IDs...
+
+2025-12-02 23:50:17,962 - INFO - Found videos/f8kozfxzp1vtykj2na0sye5w/video.mkv -> will rename to videos/f8kozfxzp1vtykj2na0sye5w/original.mkv
+2025-12-02 23:50:18,015 - INFO - Found videos/jtqwn91v0x5dxjuy02z7a8j8/video.mkv -> will rename to videos/jtqwn91v0x5dxjuy02z7a8j8/original.mkv
+2025-12-02 23:50:18,016 - INFO - Found videos/quf89w98qubjoz9x181dsy21/video.mkv -> will rename to videos/quf89w98qubjoz9x181dsy21/original.mkv
+2025-12-02 23:50:18,017 - INFO - Found videos/afzrby1hf2vpr1ist5fpg5sf/video.mkv -> will rename to videos/afzrby1hf2vpr1ist5fpg5sf/original.mkv
+2025-12-02 23:50:18,019 - INFO - Found videos/my23g8vi21qfb16ei845jdjv/video.mkv -> will rename to videos/my23g8vi21qfb16ei845jdjv/original.mkv
+2025-12-02 23:50:18,020 - INFO - Found videos/anqlwoom4i6r10uwbjwo7dit/video.mkv -> will rename to videos/anqlwoom4i6r10uwbjwo7dit/original.mkv
+2025-12-02 23:50:18,024 - INFO - Found videos/kogj0nz5i8swzqjxljifkk61/video.mkv -> will rename to videos/kogj0nz5i8swzqjxljifkk61/original.mkv
+2025-12-02 23:50:18,024 - INFO - Found videos/njqr1itw4orxr5oxr2y0la97/video.mkv -> will rename to videos/njqr1itw4orxr5oxr2y0la97/original.mkv
+2025-12-02 23:50:18,028 - INFO - Found videos/zulwy18xrdwe8tycwbcj7fgp/video.mkv -> will rename to videos/zulwy18xrdwe8tycwbcj7fgp/original.mkv
+2025-12-02 23:50:18,086 - INFO - Renaming videos/f8kozfxzp1vtykj2na0sye5w/video.mkv -> videos/f8kozfxzp1vtykj2na0sye5w/original.mkv
+2025-12-02 23:50:18,139 - INFO - Renaming videos/njqr1itw4orxr5oxr2y0la97/video.mkv -> videos/njqr1itw4orxr5oxr2y0la97/original.mkv
+2025-12-02 23:50:18,142 - INFO - Renaming videos/anqlwoom4i6r10uwbjwo7dit/video.mkv -> videos/anqlwoom4i6r10uwbjwo7dit/original.mkv
+2025-12-02 23:50:18,144 - INFO - Renaming videos/jtqwn91v0x5dxjuy02z7a8j8/video.mkv -> videos/jtqwn91v0x5dxjuy02z7a8j8/original.mkv
+2025-12-02 23:50:18,146 - INFO - Found videos/kogj0nz5i8swzqjxljifkk61/audio.mp3 -> will rename to videos/kogj0nz5i8swzqjxljifkk61/original.mp3
+2025-12-02 23:50:18,146 - INFO - Renaming videos/afzrby1hf2vpr1ist5fpg5sf/video.mkv -> videos/afzrby1hf2vpr1ist5fpg5sf/original.mkv
+2025-12-02 23:50:18,146 - INFO - Renaming videos/kogj0nz5i8swzqjxljifkk61/video.mkv -> videos/kogj0nz5i8swzqjxljifkk61/original.mkv
+2025-12-02 23:50:18,148 - INFO - Renaming videos/zulwy18xrdwe8tycwbcj7fgp/video.mkv -> videos/zulwy18xrdwe8tycwbcj7fgp/original.mkv
+2025-12-02 23:50:18,153 - INFO - Found videos/my23g8vi21qfb16ei845jdjv/audio.mp3 -> will rename to videos/my23g8vi21qfb16ei845jdjv/original.mp3
+2025-12-02 23:50:18,153 - INFO - Renaming videos/my23g8vi21qfb16ei845jdjv/video.mkv -> videos/my23g8vi21qfb16ei845jdjv/original.mkv
+2025-12-02 23:50:18,170 - INFO - Renaming videos/quf89w98qubjoz9x181dsy21/video.mkv -> videos/quf89w98qubjoz9x181dsy21/original.mkv
+2025-12-02 23:50:18,172 - INFO - Found videos/xdsfjfob4ga9ylqipr64cqen/video.mkv -> will rename to videos/xdsfjfob4ga9ylqipr64cqen/original.mkv
+2025-12-02 23:50:18,368 - INFO - Renaming videos/xdsfjfob4ga9ylqipr64cqen/video.mkv -> videos/xdsfjfob4ga9ylqipr64cqen/original.mkv
+2025-12-02 23:50:19,702 - INFO - [2/438] ✓ Renamed 1 files for quf89w98qubjoz9x181dsy21
+2025-12-02 23:50:19,828 - INFO - Found videos/akvx71sbz8fsyk50yhcde4vz/video.mkv -> will rename to videos/akvx71sbz8fsyk50yhcde4vz/original.mkv
+2025-12-02 23:50:20,001 - INFO - Renaming videos/akvx71sbz8fsyk50yhcde4vz/video.mkv -> videos/akvx71sbz8fsyk50yhcde4vz/original.mkv
+2025-12-02 23:50:20,622 - INFO - [3/438] ✓ Renamed 1 files for f8kozfxzp1vtykj2na0sye5w
+2025-12-02 23:50:20,779 - INFO - Found videos/yd4z5rt8qgwxouhdzkzpt8ly/video.mkv -> will rename to videos/yd4z5rt8qgwxouhdzkzpt8ly/original.mkv
+2025-12-02 23:50:20,985 - INFO - Renaming videos/yd4z5rt8qgwxouhdzkzpt8ly/video.mkv -> videos/yd4z5rt8qgwxouhdzkzpt8ly/original.mkv
+2025-12-02 23:50:22,035 - INFO - [4/438] ✓ Renamed 1 files for xdsfjfob4ga9ylqipr64cqen
+2025-12-02 23:50:22,445 - INFO - Found videos/nyxygq8akdwhroctp7hnmjnw/video.mkv -> will rename to videos/nyxygq8akdwhroctp7hnmjnw/original.mkv
+2025-12-02 23:50:22,623 - INFO - Renaming videos/nyxygq8akdwhroctp7hnmjnw/video.mkv -> videos/nyxygq8akdwhroctp7hnmjnw/original.mkv
+2025-12-02 23:50:24,384 - INFO - Renaming videos/kogj0nz5i8swzqjxljifkk61/audio.mp3 -> videos/kogj0nz5i8swzqjxljifkk61/original.mp3
+2025-12-02 23:50:24,663 - INFO - [6/438] ✓ Renamed 2 files for kogj0nz5i8swzqjxljifkk61
+2025-12-02 23:50:24,766 - INFO - Found videos/eaev2s8b2r56vaeu61fr9qsr/video.mkv -> will rename to videos/eaev2s8b2r56vaeu61fr9qsr/original.mkv
+2025-12-02 23:50:24,878 - INFO - Renaming videos/eaev2s8b2r56vaeu61fr9qsr/video.mkv -> videos/eaev2s8b2r56vaeu61fr9qsr/original.mkv
+2025-12-02 23:50:40,873 - INFO - [7/438] ✓ Renamed 1 files for zulwy18xrdwe8tycwbcj7fgp
+2025-12-02 23:50:40,887 - INFO - [8/438] ✓ Renamed 1 files for yd4z5rt8qgwxouhdzkzpt8ly
+2025-12-02 23:50:40,995 - INFO - Found videos/jk9tbioqoc16ukeec1z9fi5h/video.mkv -> will rename to videos/jk9tbioqoc16ukeec1z9fi5h/original.mkv
+2025-12-02 23:50:41,035 - INFO - Found videos/flgpktp3odrmizcskj38xa0v/video.mkv -> will rename to videos/flgpktp3odrmizcskj38xa0v/original.mkv
+2025-12-02 23:50:41,139 - INFO - Renaming videos/jk9tbioqoc16ukeec1z9fi5h/video.mkv -> videos/jk9tbioqoc16ukeec1z9fi5h/original.mkv
+2025-12-02 23:50:41,194 - INFO - Renaming videos/flgpktp3odrmizcskj38xa0v/video.mkv -> videos/flgpktp3odrmizcskj38xa0v/original.mkv
+2025-12-02 23:50:44,874 - INFO - [9/438] ✓ Renamed 1 files for anqlwoom4i6r10uwbjwo7dit
+2025-12-02 23:50:44,987 - INFO - Found videos/m8xeaa8bqd2gszto4g6j9xku/video.mkv -> will rename to videos/m8xeaa8bqd2gszto4g6j9xku/original.mkv
+2025-12-02 23:50:45,158 - INFO - Found videos/m8xeaa8bqd2gszto4g6j9xku/audio.mp3 -> will rename to videos/m8xeaa8bqd2gszto4g6j9xku/original.mp3
+2025-12-02 23:50:45,158 - INFO - Renaming videos/m8xeaa8bqd2gszto4g6j9xku/video.mkv -> videos/m8xeaa8bqd2gszto4g6j9xku/original.mkv
+2025-12-02 23:50:47,955 - INFO - [10/438] ✓ Renamed 1 files for akvx71sbz8fsyk50yhcde4vz
+2025-12-02 23:50:47,956 - INFO -
+Progress: 10/438 - Renamed: 8 videos (9 files), Skipped: 2, Failed: 0
+
+2025-12-02 23:50:48,025 - INFO - Renaming videos/m8xeaa8bqd2gszto4g6j9xku/audio.mp3 -> videos/m8xeaa8bqd2gszto4g6j9xku/original.mp3
+2025-12-02 23:50:48,089 - INFO - Found videos/ddivo405dfsxz4vrvlr3xgmy/video.mkv -> will rename to videos/ddivo405dfsxz4vrvlr3xgmy/original.mkv
+2025-12-02 23:50:48,251 - INFO - Found videos/ddivo405dfsxz4vrvlr3xgmy/audio.mp3 -> will rename to videos/ddivo405dfsxz4vrvlr3xgmy/original.mp3
+2025-12-02 23:50:48,252 - INFO - [11/438] ✓ Renamed 1 files for nyxygq8akdwhroctp7hnmjnw
+2025-12-02 23:50:48,253 - INFO - Renaming videos/ddivo405dfsxz4vrvlr3xgmy/video.mkv -> videos/ddivo405dfsxz4vrvlr3xgmy/original.mkv
+2025-12-02 23:50:48,369 - INFO - Found videos/e683nfwoau6e8epn8g9zmwn9/video.mkv -> will rename to videos/e683nfwoau6e8epn8g9zmwn9/original.mkv
+2025-12-02 23:50:48,483 - INFO - Found videos/e683nfwoau6e8epn8g9zmwn9/audio.mp3 -> will rename to videos/e683nfwoau6e8epn8g9zmwn9/original.mp3
+2025-12-02 23:50:48,483 - INFO - Renaming videos/e683nfwoau6e8epn8g9zmwn9/video.mkv -> videos/e683nfwoau6e8epn8g9zmwn9/original.mkv
+2025-12-02 23:50:48,780 - INFO - [12/438] ✓ Renamed 2 files for m8xeaa8bqd2gszto4g6j9xku
+2025-12-02 23:50:49,027 - INFO - Found videos/ierbuewtemudd1i0w0wru28j/video.mkv -> will rename to videos/ierbuewtemudd1i0w0wru28j/original.mkv
+2025-12-02 23:50:49,145 - INFO - Found videos/ierbuewtemudd1i0w0wru28j/audio.mp3 -> will rename to videos/ierbuewtemudd1i0w0wru28j/original.mp3
+2025-12-02 23:50:49,145 - INFO - Renaming videos/ierbuewtemudd1i0w0wru28j/video.mkv -> videos/ierbuewtemudd1i0w0wru28j/original.mkv
+2025-12-02 23:50:52,282 - INFO - Renaming videos/ierbuewtemudd1i0w0wru28j/audio.mp3 -> videos/ierbuewtemudd1i0w0wru28j/original.mp3
+2025-12-02 23:50:53,216 - INFO - [13/438] ✓ Renamed 2 files for ierbuewtemudd1i0w0wru28j
+2025-12-02 23:50:53,343 - INFO - Found videos/ywd7rvmdaz445o5wf0snvwx9/video.mkv -> will rename to videos/ywd7rvmdaz445o5wf0snvwx9/original.mkv
+2025-12-02 23:50:53,549 - INFO - Renaming videos/ywd7rvmdaz445o5wf0snvwx9/video.mkv -> videos/ywd7rvmdaz445o5wf0snvwx9/original.mkv
+2025-12-02 23:50:54,542 - INFO - [14/438] ✓ Renamed 1 files for njqr1itw4orxr5oxr2y0la97
+2025-12-02 23:50:54,659 - INFO - Found videos/p2b72nkxzbj3rgb4v4knvo4y/video.mkv -> will rename to videos/p2b72nkxzbj3rgb4v4knvo4y/original.mkv
+2025-12-02 23:50:54,775 - INFO - Renaming videos/p2b72nkxzbj3rgb4v4knvo4y/video.mkv -> videos/p2b72nkxzbj3rgb4v4knvo4y/original.mkv
+2025-12-02 23:50:55,705 - INFO - [15/438] ✓ Renamed 1 files for ywd7rvmdaz445o5wf0snvwx9
+2025-12-02 23:50:55,825 - INFO - Found videos/byfqy7h28x7wcs80mweqt6kb/video.mkv -> will rename to videos/byfqy7h28x7wcs80mweqt6kb/original.mkv
+2025-12-02 23:50:55,919 - INFO - Renaming videos/byfqy7h28x7wcs80mweqt6kb/video.mkv -> videos/byfqy7h28x7wcs80mweqt6kb/original.mkv
+2025-12-02 23:50:57,310 - INFO - Renaming videos/e683nfwoau6e8epn8g9zmwn9/audio.mp3 -> videos/e683nfwoau6e8epn8g9zmwn9/original.mp3
+2025-12-02 23:50:57,999 - INFO - [16/438] ✓ Renamed 1 files for afzrby1hf2vpr1ist5fpg5sf
+2025-12-02 23:50:58,123 - INFO - Found videos/s7ne8fr53irbz5wmwl6biim8/video.mkv -> will rename to videos/s7ne8fr53irbz5wmwl6biim8/original.mkv
+2025-12-02 23:50:58,332 - INFO - Renaming videos/s7ne8fr53irbz5wmwl6biim8/video.mkv -> videos/s7ne8fr53irbz5wmwl6biim8/original.mkv
+2025-12-02 23:50:59,123 - INFO - [17/438] ✓ Renamed 1 files for flgpktp3odrmizcskj38xa0v
+2025-12-02 23:50:59,335 - INFO - Found videos/xpwyfhf9f3ka6djqq6c9pgp7/video.mkv -> will rename to videos/xpwyfhf9f3ka6djqq6c9pgp7/original.mkv
+2025-12-02 23:50:59,474 - INFO - Renaming videos/xpwyfhf9f3ka6djqq6c9pgp7/video.mkv -> videos/xpwyfhf9f3ka6djqq6c9pgp7/original.mkv
+2025-12-02 23:50:59,942 - INFO - [18/438] ✓ Renamed 2 files for e683nfwoau6e8epn8g9zmwn9
+2025-12-02 23:51:00,064 - INFO - Found videos/i3y48lfgt09qvoupcis4dkov/video.mkv -> will rename to videos/i3y48lfgt09qvoupcis4dkov/original.mkv
+2025-12-02 23:51:00,186 - INFO - Renaming videos/i3y48lfgt09qvoupcis4dkov/video.mkv -> videos/i3y48lfgt09qvoupcis4dkov/original.mkv
+2025-12-02 23:51:03,821 - INFO - Renaming videos/ddivo405dfsxz4vrvlr3xgmy/audio.mp3 -> videos/ddivo405dfsxz4vrvlr3xgmy/original.mp3
+2025-12-02 23:51:03,980 - INFO - [19/438] ✓ Renamed 1 files for xpwyfhf9f3ka6djqq6c9pgp7
+2025-12-02 23:51:04,108 - INFO - Found videos/bnm6zwwjramkcoxe3yqumjut/video.mkv -> will rename to videos/bnm6zwwjramkcoxe3yqumjut/original.mkv
+2025-12-02 23:51:04,248 - INFO - Renaming videos/bnm6zwwjramkcoxe3yqumjut/video.mkv -> videos/bnm6zwwjramkcoxe3yqumjut/original.mkv
+2025-12-02 23:51:05,557 - INFO - [20/438] ✓ Renamed 1 files for jk9tbioqoc16ukeec1z9fi5h
+2025-12-02 23:51:05,558 - INFO -
+Progress: 20/438 - Renamed: 18 videos (22 files), Skipped: 2, Failed: 0
+
+2025-12-02 23:51:05,672 - INFO - Found videos/c9f0hpfx8tqg9x0djfy53p2m/video.mkv -> will rename to videos/c9f0hpfx8tqg9x0djfy53p2m/original.mkv
+2025-12-02 23:51:05,787 - INFO - Renaming videos/c9f0hpfx8tqg9x0djfy53p2m/video.mkv -> videos/c9f0hpfx8tqg9x0djfy53p2m/original.mkv
+2025-12-02 23:51:06,967 - INFO - [21/438] ✓ Renamed 1 files for c9f0hpfx8tqg9x0djfy53p2m
+2025-12-02 23:51:07,123 - INFO - Found videos/dnydfhmxiemb2o68j9hgltgj/video.mkv -> will rename to videos/dnydfhmxiemb2o68j9hgltgj/original.mkv
+2025-12-02 23:51:07,245 - INFO - Renaming videos/dnydfhmxiemb2o68j9hgltgj/video.mkv -> videos/dnydfhmxiemb2o68j9hgltgj/original.mkv
+2025-12-02 23:51:08,334 - INFO - [22/438] ✓ Renamed 2 files for ddivo405dfsxz4vrvlr3xgmy
+2025-12-02 23:51:08,588 - INFO - Found videos/nif2kkr7kig9n82jxsjyd2ds/video.mkv -> will rename to videos/nif2kkr7kig9n82jxsjyd2ds/original.mkv
+2025-12-02 23:51:08,777 - INFO - Renaming videos/nif2kkr7kig9n82jxsjyd2ds/video.mkv -> videos/nif2kkr7kig9n82jxsjyd2ds/original.mkv
+2025-12-02 23:51:09,399 - INFO - [24/438] ✓ Renamed 1 files for bnm6zwwjramkcoxe3yqumjut
+2025-12-02 23:51:09,514 - INFO - Found videos/cvahj7nb3ypukon4fm4mreaa/video.mkv -> will rename to videos/cvahj7nb3ypukon4fm4mreaa/original.mkv
+2025-12-02 23:51:09,644 - INFO - Renaming videos/cvahj7nb3ypukon4fm4mreaa/video.mkv -> videos/cvahj7nb3ypukon4fm4mreaa/original.mkv
+2025-12-02 23:51:10,557 - INFO - [25/438] ✓ Renamed 1 files for eaev2s8b2r56vaeu61fr9qsr
+2025-12-02 23:51:10,674 - INFO - Found videos/chf9r0pa0ypqa70iucjn897m/video.mkv -> will rename to videos/chf9r0pa0ypqa70iucjn897m/original.mkv
+2025-12-02 23:51:10,862 - INFO - Renaming videos/chf9r0pa0ypqa70iucjn897m/video.mkv -> videos/chf9r0pa0ypqa70iucjn897m/original.mkv
+2025-12-02 23:51:11,014 - INFO - [26/438] ✓ Renamed 1 files for dnydfhmxiemb2o68j9hgltgj
+2025-12-02 23:51:11,123 - INFO - Found videos/wth5h0zbyz34gd904nuiuauu/video.mkv -> will rename to videos/wth5h0zbyz34gd904nuiuauu/original.mkv
+2025-12-02 23:51:11,235 - INFO - Renaming videos/wth5h0zbyz34gd904nuiuauu/video.mkv -> videos/wth5h0zbyz34gd904nuiuauu/original.mkv
+2025-12-02 23:51:13,507 - INFO - [27/438] ✓ Renamed 1 files for jtqwn91v0x5dxjuy02z7a8j8
+2025-12-02 23:51:13,626 - INFO - Found videos/w6ui2iu1ib1yzoir8k1bolqa/video.mkv -> will rename to videos/w6ui2iu1ib1yzoir8k1bolqa/original.mkv
+2025-12-02 23:51:13,739 - INFO - Renaming videos/w6ui2iu1ib1yzoir8k1bolqa/video.mkv -> videos/w6ui2iu1ib1yzoir8k1bolqa/original.mkv
+2025-12-02 23:51:13,853 - INFO - [28/438] ✓ Renamed 1 files for i3y48lfgt09qvoupcis4dkov
+2025-12-02 23:51:14,064 - INFO - Found videos/u4zql5xiqn4tc11jnb7ith6t/video.mkv -> will rename to videos/u4zql5xiqn4tc11jnb7ith6t/original.mkv
+2025-12-02 23:51:14,183 - INFO - Found videos/u4zql5xiqn4tc11jnb7ith6t/audio.mp3 -> will rename to videos/u4zql5xiqn4tc11jnb7ith6t/original.mp3
+2025-12-02 23:51:14,184 - INFO - Renaming videos/u4zql5xiqn4tc11jnb7ith6t/video.mkv -> videos/u4zql5xiqn4tc11jnb7ith6t/original.mkv
+2025-12-02 23:51:14,259 - INFO - [29/438] ✓ Renamed 1 files for s7ne8fr53irbz5wmwl6biim8
+2025-12-02 23:51:14,391 - INFO - Found videos/phhk3ymh8qjb3pzwmmtofefz/video.mkv -> will rename to videos/phhk3ymh8qjb3pzwmmtofefz/original.mkv
+2025-12-02 23:51:14,512 - INFO - Found videos/phhk3ymh8qjb3pzwmmtofefz/audio.mp3 -> will rename to videos/phhk3ymh8qjb3pzwmmtofefz/original.mp3
+2025-12-02 23:51:14,512 - INFO - Renaming videos/phhk3ymh8qjb3pzwmmtofefz/video.mkv -> videos/phhk3ymh8qjb3pzwmmtofefz/original.mkv
+2025-12-02 23:51:16,465 - INFO - [30/438] ✓ Renamed 1 files for cvahj7nb3ypukon4fm4mreaa
+2025-12-02 23:51:16,466 - INFO -
+Progress: 30/438 - Renamed: 27 videos (32 files), Skipped: 3, Failed: 0
+
+2025-12-02 23:51:16,589 - INFO - Found videos/fd8h2x0iq6qy06gui4vev807/video.mkv -> will rename to videos/fd8h2x0iq6qy06gui4vev807/original.mkv
+2025-12-02 23:51:16,739 - INFO - Found videos/fd8h2x0iq6qy06gui4vev807/audio.mp3 -> will rename to videos/fd8h2x0iq6qy06gui4vev807/original.mp3
+2025-12-02 23:51:16,739 - INFO - Renaming videos/fd8h2x0iq6qy06gui4vev807/video.mkv -> videos/fd8h2x0iq6qy06gui4vev807/original.mkv
+2025-12-02 23:51:17,632 - INFO - [31/438] ✓ Renamed 1 files for p2b72nkxzbj3rgb4v4knvo4y
+2025-12-02 23:51:17,746 - INFO - Found videos/nbmmmzl4etklri5aruv7hbgq/video.mkv -> will rename to videos/nbmmmzl4etklri5aruv7hbgq/original.mkv
+2025-12-02 23:51:17,872 - INFO - Renaming videos/nbmmmzl4etklri5aruv7hbgq/video.mkv -> videos/nbmmmzl4etklri5aruv7hbgq/original.mkv
+2025-12-02 23:51:19,516 - INFO - Renaming videos/phhk3ymh8qjb3pzwmmtofefz/audio.mp3 -> videos/phhk3ymh8qjb3pzwmmtofefz/original.mp3
+2025-12-02 23:51:20,107 - INFO - [32/438] ✓ Renamed 1 files for byfqy7h28x7wcs80mweqt6kb
+2025-12-02 23:51:20,348 - INFO - Found videos/qzf07xf4d395p3bm5ugkqxp0/video.mkv -> will rename to videos/qzf07xf4d395p3bm5ugkqxp0/original.mkv
+2025-12-02 23:51:20,455 - INFO - Renaming videos/qzf07xf4d395p3bm5ugkqxp0/video.mkv -> videos/qzf07xf4d395p3bm5ugkqxp0/original.mkv
+2025-12-02 23:51:20,771 - INFO - [34/438] ✓ Renamed 2 files for phhk3ymh8qjb3pzwmmtofefz
+2025-12-02 23:51:20,875 - INFO - Found videos/g8ln43qrv5dyrv109fnk9led/video.mkv -> will rename to videos/g8ln43qrv5dyrv109fnk9led/original.mkv
+2025-12-02 23:51:20,982 - INFO - Renaming videos/g8ln43qrv5dyrv109fnk9led/video.mkv -> videos/g8ln43qrv5dyrv109fnk9led/original.mkv
+2025-12-02 23:51:22,578 - INFO - [35/438] ✓ Renamed 1 files for nif2kkr7kig9n82jxsjyd2ds
+2025-12-02 23:51:22,699 - INFO - Found videos/nkb7uezm4s80fze37vjfqyfb/video.mkv -> will rename to videos/nkb7uezm4s80fze37vjfqyfb/original.mkv
+2025-12-02 23:51:22,810 - INFO - Renaming videos/nkb7uezm4s80fze37vjfqyfb/video.mkv -> videos/nkb7uezm4s80fze37vjfqyfb/original.mkv
+2025-12-02 23:51:29,529 - INFO - [36/438] ✓ Renamed 1 files for wth5h0zbyz34gd904nuiuauu
+2025-12-02 23:51:29,709 - INFO - Found videos/r2k90dplmf5hcmmqb7cztonv/video.mkv -> will rename to videos/r2k90dplmf5hcmmqb7cztonv/original.mkv
+2025-12-02 23:51:29,821 - INFO - Renaming videos/r2k90dplmf5hcmmqb7cztonv/video.mkv -> videos/r2k90dplmf5hcmmqb7cztonv/original.mkv
+2025-12-02 23:51:32,501 - INFO - Renaming videos/fd8h2x0iq6qy06gui4vev807/audio.mp3 -> videos/fd8h2x0iq6qy06gui4vev807/original.mp3
+2025-12-02 23:51:33,586 - INFO - [37/438] ✓ Renamed 1 files for r2k90dplmf5hcmmqb7cztonv
+2025-12-02 23:51:33,708 - INFO - Found videos/ua00ojunaspa1sus0ykiqxxr/video.mkv -> will rename to videos/ua00ojunaspa1sus0ykiqxxr/original.mkv
+2025-12-02 23:51:33,907 - INFO - Renaming videos/ua00ojunaspa1sus0ykiqxxr/video.mkv -> videos/ua00ojunaspa1sus0ykiqxxr/original.mkv
+2025-12-02 23:51:35,080 - INFO - [38/438] ✓ Renamed 1 files for nkb7uezm4s80fze37vjfqyfb
+2025-12-02 23:51:35,201 - INFO - Found videos/flmtm74zdx99fbmay7emexpj/video.mkv -> will rename to videos/flmtm74zdx99fbmay7emexpj/original.mkv
+2025-12-02 23:51:35,326 - INFO - Renaming videos/flmtm74zdx99fbmay7emexpj/video.mkv -> videos/flmtm74zdx99fbmay7emexpj/original.mkv
+2025-12-02 23:51:38,123 - INFO - [39/438] ✓ Renamed 2 files for fd8h2x0iq6qy06gui4vev807
+2025-12-02 23:51:38,245 - INFO - Found videos/ns56m0h117hrt9hyszmvahv8/video.mkv -> will rename to videos/ns56m0h117hrt9hyszmvahv8/original.mkv
+2025-12-02 23:51:38,371 - INFO - Renaming videos/ns56m0h117hrt9hyszmvahv8/video.mkv -> videos/ns56m0h117hrt9hyszmvahv8/original.mkv
+2025-12-02 23:51:38,916 - INFO - [40/438] ✓ Renamed 1 files for chf9r0pa0ypqa70iucjn897m
+2025-12-02 23:51:38,917 - INFO -
+Progress: 40/438 - Renamed: 36 videos (43 files), Skipped: 4, Failed: 0
+
+2025-12-02 23:51:39,086 - INFO - Found videos/x4rldszcgc1ho4ld8bdsww46/video.mkv -> will rename to videos/x4rldszcgc1ho4ld8bdsww46/original.mkv
+2025-12-02 23:51:39,210 - INFO - Renaming videos/x4rldszcgc1ho4ld8bdsww46/video.mkv -> videos/x4rldszcgc1ho4ld8bdsww46/original.mkv
+2025-12-02 23:51:39,787 - INFO - [41/438] ✓ Renamed 1 files for flmtm74zdx99fbmay7emexpj
+2025-12-02 23:51:39,925 - INFO - Found videos/g179fxks66spn3ni7749lzdd/video.mkv -> will rename to videos/g179fxks66spn3ni7749lzdd/original.mkv
+2025-12-02 23:51:40,136 - INFO - Found videos/g179fxks66spn3ni7749lzdd/audio.mp3 -> will rename to videos/g179fxks66spn3ni7749lzdd/original.mp3
+2025-12-02 23:51:40,136 - INFO - Renaming videos/g179fxks66spn3ni7749lzdd/video.mkv -> videos/g179fxks66spn3ni7749lzdd/original.mkv
+2025-12-02 23:51:47,659 - INFO - [42/438] ✓ Renamed 1 files for qzf07xf4d395p3bm5ugkqxp0
+2025-12-02 23:51:47,787 - INFO - Found videos/ypthw3fx8bmyo8cdfywuewog/video.mkv -> will rename to videos/ypthw3fx8bmyo8cdfywuewog/original.mkv
+2025-12-02 23:51:47,997 - INFO - Found videos/ypthw3fx8bmyo8cdfywuewog/audio.mp3 -> will rename to videos/ypthw3fx8bmyo8cdfywuewog/original.mp3
+2025-12-02 23:51:47,998 - INFO - Renaming videos/ypthw3fx8bmyo8cdfywuewog/video.mkv -> videos/ypthw3fx8bmyo8cdfywuewog/original.mkv
+2025-12-02 23:51:48,604 - INFO - [43/438] ✓ Renamed 1 files for ns56m0h117hrt9hyszmvahv8
+2025-12-02 23:51:48,751 - INFO - Found videos/usrtepif1xbykez9jc0au8w0/video.mkv -> will rename to videos/usrtepif1xbykez9jc0au8w0/original.mkv
+2025-12-02 23:51:48,866 - INFO - Found videos/usrtepif1xbykez9jc0au8w0/audio.mp3 -> will rename to videos/usrtepif1xbykez9jc0au8w0/original.mp3
+2025-12-02 23:51:48,866 - INFO - Renaming videos/usrtepif1xbykez9jc0au8w0/video.mkv -> videos/usrtepif1xbykez9jc0au8w0/original.mkv
+2025-12-02 23:51:49,298 - INFO - [44/438] ✓ Renamed 1 files for g8ln43qrv5dyrv109fnk9led
+2025-12-02 23:51:49,420 - INFO - Found videos/tc5brqmm5d3ginvs1mujvomn/video.mkv -> will rename to videos/tc5brqmm5d3ginvs1mujvomn/original.mkv
+2025-12-02 23:51:49,621 - INFO - Renaming videos/tc5brqmm5d3ginvs1mujvomn/video.mkv -> videos/tc5brqmm5d3ginvs1mujvomn/original.mkv
+2025-12-02 23:51:51,967 - INFO - Renaming videos/u4zql5xiqn4tc11jnb7ith6t/audio.mp3 -> videos/u4zql5xiqn4tc11jnb7ith6t/original.mp3
+2025-12-02 23:51:52,576 - INFO - [45/438] ✓ Renamed 1 files for tc5brqmm5d3ginvs1mujvomn
+2025-12-02 23:51:52,773 - INFO - Found videos/kkrf9s0hptal6q3nvtpy75bk/video.mkv -> will rename to videos/kkrf9s0hptal6q3nvtpy75bk/original.mkv
+2025-12-02 23:51:52,916 - INFO - Found videos/kkrf9s0hptal6q3nvtpy75bk/audio.mp3 -> will rename to videos/kkrf9s0hptal6q3nvtpy75bk/original.mp3
+2025-12-02 23:51:52,916 - INFO - Renaming videos/kkrf9s0hptal6q3nvtpy75bk/video.mkv -> videos/kkrf9s0hptal6q3nvtpy75bk/original.mkv
+2025-12-02 23:51:55,343 - INFO - [46/438] ✓ Renamed 2 files for u4zql5xiqn4tc11jnb7ith6t
+2025-12-02 23:51:55,435 - INFO - [47/438] ✓ Renamed 1 files for x4rldszcgc1ho4ld8bdsww46
+2025-12-02 23:51:55,461 - INFO - Found videos/v32afbzo0mzowipaa30orbtz/video.mkv -> will rename to videos/v32afbzo0mzowipaa30orbtz/original.mkv
+2025-12-02 23:51:55,556 - INFO - Found videos/b3oefzhoncogvr5cyijfckcj/video.mkv -> will rename to videos/b3oefzhoncogvr5cyijfckcj/original.mkv
+2025-12-02 23:51:55,580 - INFO - Found videos/v32afbzo0mzowipaa30orbtz/audio.mp3 -> will rename to videos/v32afbzo0mzowipaa30orbtz/original.mp3
+2025-12-02 23:51:55,581 - INFO - Renaming videos/v32afbzo0mzowipaa30orbtz/video.mkv -> videos/v32afbzo0mzowipaa30orbtz/original.mkv
+2025-12-02 23:51:55,684 - INFO - Found videos/b3oefzhoncogvr5cyijfckcj/audio.mp3 -> will rename to videos/b3oefzhoncogvr5cyijfckcj/original.mp3
+2025-12-02 23:51:55,684 - INFO - Renaming videos/b3oefzhoncogvr5cyijfckcj/video.mkv -> videos/b3oefzhoncogvr5cyijfckcj/original.mkv
+2025-12-02 23:51:55,866 - INFO - [48/438] ✓ Renamed 1 files for w6ui2iu1ib1yzoir8k1bolqa
+2025-12-02 23:51:55,982 - INFO - Found videos/jc8t4h91wok4bgq10t1s3fiv/video.mkv -> will rename to videos/jc8t4h91wok4bgq10t1s3fiv/original.mkv
+2025-12-02 23:51:56,086 - INFO - Found videos/jc8t4h91wok4bgq10t1s3fiv/audio.mp3 -> will rename to videos/jc8t4h91wok4bgq10t1s3fiv/original.mp3
+2025-12-02 23:51:56,086 - INFO - Renaming videos/jc8t4h91wok4bgq10t1s3fiv/video.mkv -> videos/jc8t4h91wok4bgq10t1s3fiv/original.mkv
+2025-12-02 23:51:59,433 - INFO - [49/438] ✓ Renamed 1 files for ua00ojunaspa1sus0ykiqxxr
+2025-12-02 23:51:59,540 - INFO -
+Progress: 50/438 - Renamed: 45 videos (53 files), Skipped: 5, Failed: 0
+
+2025-12-02 23:51:59,658 - INFO - Found videos/u9am3xv0jl569rid7aeljmcv/video.mkv -> will rename to videos/u9am3xv0jl569rid7aeljmcv/original.mkv
+2025-12-02 23:51:59,792 - INFO - Renaming videos/u9am3xv0jl569rid7aeljmcv/video.mkv -> videos/u9am3xv0jl569rid7aeljmcv/original.mkv
+2025-12-02 23:52:01,176 - INFO - Renaming videos/v32afbzo0mzowipaa30orbtz/audio.mp3 -> videos/v32afbzo0mzowipaa30orbtz/original.mp3
+2025-12-02 23:52:01,357 - INFO - Renaming videos/jc8t4h91wok4bgq10t1s3fiv/audio.mp3 -> videos/jc8t4h91wok4bgq10t1s3fiv/original.mp3
+2025-12-02 23:52:01,489 - INFO - Renaming videos/kkrf9s0hptal6q3nvtpy75bk/audio.mp3 -> videos/kkrf9s0hptal6q3nvtpy75bk/original.mp3
+2025-12-02 23:52:02,662 - INFO - [51/438] ✓ Renamed 1 files for u9am3xv0jl569rid7aeljmcv
+2025-12-02 23:52:02,767 - INFO - Found videos/d52og3gdtmtu7w8nhkyg1uyt/video.mkv -> will rename to videos/d52og3gdtmtu7w8nhkyg1uyt/original.mkv
+2025-12-02 23:52:02,868 - INFO - Renaming videos/d52og3gdtmtu7w8nhkyg1uyt/video.mkv -> videos/d52og3gdtmtu7w8nhkyg1uyt/original.mkv
+2025-12-02 23:52:02,889 - INFO - [52/438] ✓ Renamed 2 files for jc8t4h91wok4bgq10t1s3fiv
+2025-12-02 23:52:02,923 - INFO - [53/438] ✓ Renamed 2 files for v32afbzo0mzowipaa30orbtz
+2025-12-02 23:52:03,005 - INFO - Found videos/p4bjwtw1dwufd4yipdrp7dhi/video.mkv -> will rename to videos/p4bjwtw1dwufd4yipdrp7dhi/original.mkv
+2025-12-02 23:52:03,028 - INFO - Found videos/cyqpt0xn8clheirech4q40ml/video.mkv -> will rename to videos/cyqpt0xn8clheirech4q40ml/original.mkv
+2025-12-02 23:52:03,108 - INFO - Renaming videos/p4bjwtw1dwufd4yipdrp7dhi/video.mkv -> videos/p4bjwtw1dwufd4yipdrp7dhi/original.mkv
+2025-12-02 23:52:03,135 - INFO - Renaming videos/cyqpt0xn8clheirech4q40ml/video.mkv -> videos/cyqpt0xn8clheirech4q40ml/original.mkv
+2025-12-02 23:52:04,003 - INFO - [54/438] ✓ Renamed 1 files for nbmmmzl4etklri5aruv7hbgq
+2025-12-02 23:52:04,116 - INFO - Found videos/ogx55a28acwbzuwd1d1ic3lm/video.mkv -> will rename to videos/ogx55a28acwbzuwd1d1ic3lm/original.mkv
+2025-12-02 23:52:04,221 - INFO - Renaming videos/ogx55a28acwbzuwd1d1ic3lm/video.mkv -> videos/ogx55a28acwbzuwd1d1ic3lm/original.mkv
+2025-12-02 23:52:05,065 - INFO - [55/438] ✓ Renamed 2 files for kkrf9s0hptal6q3nvtpy75bk
+2025-12-02 23:52:05,177 - INFO - Found videos/vovcpubi5o3rsa0o2niw7hob/video.mkv -> will rename to videos/vovcpubi5o3rsa0o2niw7hob/original.mkv
+2025-12-02 23:52:05,289 - INFO - Found videos/vovcpubi5o3rsa0o2niw7hob/audio.mp3 -> will rename to videos/vovcpubi5o3rsa0o2niw7hob/original.mp3
+2025-12-02 23:52:05,289 - INFO - Renaming videos/vovcpubi5o3rsa0o2niw7hob/video.mkv -> videos/vovcpubi5o3rsa0o2niw7hob/original.mkv
+2025-12-02 23:52:08,309 - INFO - Renaming videos/usrtepif1xbykez9jc0au8w0/audio.mp3 -> videos/usrtepif1xbykez9jc0au8w0/original.mp3
+2025-12-02 23:52:08,587 - INFO - [56/438] ✓ Renamed 2 files for usrtepif1xbykez9jc0au8w0
+2025-12-02 23:52:08,715 - INFO - Found videos/jckf793apc62vgj4uvzbq91m/video.mkv -> will rename to videos/jckf793apc62vgj4uvzbq91m/original.mkv
+2025-12-02 23:52:08,894 - INFO - Renaming videos/jckf793apc62vgj4uvzbq91m/video.mkv -> videos/jckf793apc62vgj4uvzbq91m/original.mkv
+2025-12-02 23:52:10,404 - INFO - Renaming videos/ypthw3fx8bmyo8cdfywuewog/audio.mp3 -> videos/ypthw3fx8bmyo8cdfywuewog/original.mp3
+2025-12-02 23:52:12,920 - INFO - [57/438] ✓ Renamed 1 files for d52og3gdtmtu7w8nhkyg1uyt
+2025-12-02 23:52:13,084 - INFO - Found videos/mw4k6xorz7ks3vg0gmqmogyl/video.mkv -> will rename to videos/mw4k6xorz7ks3vg0gmqmogyl/original.mkv
+2025-12-02 23:52:13,221 - INFO - [58/438] ✓ Renamed 1 files for cyqpt0xn8clheirech4q40ml
+2025-12-02 23:52:13,275 - INFO - Found videos/mw4k6xorz7ks3vg0gmqmogyl/audio.mp3 -> will rename to videos/mw4k6xorz7ks3vg0gmqmogyl/original.mp3
+2025-12-02 23:52:13,275 - INFO - Renaming videos/mw4k6xorz7ks3vg0gmqmogyl/video.mkv -> videos/mw4k6xorz7ks3vg0gmqmogyl/original.mkv
+2025-12-02 23:52:13,444 - INFO - Found videos/fkojb4nty2dmx3byhpltqwnn/video.mkv -> will rename to videos/fkojb4nty2dmx3byhpltqwnn/original.mkv
+2025-12-02 23:52:13,607 - INFO - Renaming videos/fkojb4nty2dmx3byhpltqwnn/video.mkv -> videos/fkojb4nty2dmx3byhpltqwnn/original.mkv
+2025-12-02 23:52:13,745 - INFO - [60/438] ✓ Renamed 2 files for ypthw3fx8bmyo8cdfywuewog
+2025-12-02 23:52:13,745 - INFO -
+Progress: 60/438 - Renamed: 54 videos (67 files), Skipped: 6, Failed: 0
+
+2025-12-02 23:52:13,857 - INFO - Found videos/fvez8xw9it644rtfzl5xclpd/video.mkv -> will rename to videos/fvez8xw9it644rtfzl5xclpd/original.mkv
+2025-12-02 23:52:13,956 - INFO - Renaming videos/fvez8xw9it644rtfzl5xclpd/video.mkv -> videos/fvez8xw9it644rtfzl5xclpd/original.mkv
+2025-12-02 23:52:14,159 - INFO - [61/438] ✓ Renamed 1 files for jckf793apc62vgj4uvzbq91m
+2025-12-02 23:52:14,329 - INFO - Found videos/mdv5rucpczre2hmjslcad38r/video.mkv -> will rename to videos/mdv5rucpczre2hmjslcad38r/original.mkv
+2025-12-02 23:52:14,441 - INFO - Renaming videos/mdv5rucpczre2hmjslcad38r/video.mkv -> videos/mdv5rucpczre2hmjslcad38r/original.mkv
+2025-12-02 23:52:18,464 - INFO - Renaming videos/vovcpubi5o3rsa0o2niw7hob/audio.mp3 -> videos/vovcpubi5o3rsa0o2niw7hob/original.mp3
+2025-12-02 23:52:18,633 - INFO - [62/438] ✓ Renamed 1 files for p4bjwtw1dwufd4yipdrp7dhi
+2025-12-02 23:52:18,797 - INFO - Found videos/n75jis3j9h700q4ltfja62ek/video.mkv -> will rename to videos/n75jis3j9h700q4ltfja62ek/original.mkv
+2025-12-02 23:52:18,985 - INFO - Found videos/n75jis3j9h700q4ltfja62ek/audio.mp3 -> will rename to videos/n75jis3j9h700q4ltfja62ek/original.mp3
+2025-12-02 23:52:18,985 - INFO - Renaming videos/n75jis3j9h700q4ltfja62ek/video.mkv -> videos/n75jis3j9h700q4ltfja62ek/original.mkv
+2025-12-02 23:52:20,453 - INFO - Renaming videos/b3oefzhoncogvr5cyijfckcj/audio.mp3 -> videos/b3oefzhoncogvr5cyijfckcj/original.mp3
+2025-12-02 23:52:22,351 - INFO - [63/438] ✓ Renamed 2 files for vovcpubi5o3rsa0o2niw7hob
+2025-12-02 23:52:22,522 - INFO - Found videos/tjd3afh6vpijjepecyc2c9j5/video.mkv -> will rename to videos/tjd3afh6vpijjepecyc2c9j5/original.mkv
+2025-12-02 23:52:22,717 - INFO - Found videos/tjd3afh6vpijjepecyc2c9j5/audio.mp3 -> will rename to videos/tjd3afh6vpijjepecyc2c9j5/original.mp3
+2025-12-02 23:52:22,717 - INFO - Renaming videos/tjd3afh6vpijjepecyc2c9j5/video.mkv -> videos/tjd3afh6vpijjepecyc2c9j5/original.mkv
+2025-12-02 23:52:24,565 - INFO - [64/438] ✓ Renamed 2 files for b3oefzhoncogvr5cyijfckcj
+2025-12-02 23:52:24,680 - INFO - Found videos/czi3j87pkjuupnifphnpqnor/video.mkv -> will rename to videos/czi3j87pkjuupnifphnpqnor/original.mkv
+2025-12-02 23:52:24,791 - INFO - Renaming videos/czi3j87pkjuupnifphnpqnor/video.mkv -> videos/czi3j87pkjuupnifphnpqnor/original.mkv
+2025-12-02 23:52:27,060 - INFO - Renaming videos/n75jis3j9h700q4ltfja62ek/audio.mp3 -> videos/n75jis3j9h700q4ltfja62ek/original.mp3
+2025-12-02 23:52:28,364 - INFO - Renaming videos/mw4k6xorz7ks3vg0gmqmogyl/audio.mp3 -> videos/mw4k6xorz7ks3vg0gmqmogyl/original.mp3
+2025-12-02 23:52:28,932 - INFO - [65/438] ✓ Renamed 2 files for n75jis3j9h700q4ltfja62ek
+2025-12-02 23:52:29,047 - INFO - Found videos/dxxgafdnayd30spjingobsv8/video.mkv -> will rename to videos/dxxgafdnayd30spjingobsv8/original.mkv
+2025-12-02 23:52:29,148 - INFO - Renaming videos/dxxgafdnayd30spjingobsv8/video.mkv -> videos/dxxgafdnayd30spjingobsv8/original.mkv
+2025-12-02 23:52:29,285 - INFO - [66/438] ✓ Renamed 1 files for fkojb4nty2dmx3byhpltqwnn
+2025-12-02 23:52:29,500 - INFO - Found videos/s1mnje3g7rel848ryv470bix/video.mkv -> will rename to videos/s1mnje3g7rel848ryv470bix/original.mkv
+2025-12-02 23:52:29,597 - INFO - Found videos/s1mnje3g7rel848ryv470bix/audio.mp3 -> will rename to videos/s1mnje3g7rel848ryv470bix/original.mp3
+2025-12-02 23:52:29,597 - INFO - Renaming videos/s1mnje3g7rel848ryv470bix/video.mkv -> videos/s1mnje3g7rel848ryv470bix/original.mkv
+2025-12-02 23:52:31,702 - INFO - [68/438] ✓ Renamed 1 files for ogx55a28acwbzuwd1d1ic3lm
+2025-12-02 23:52:31,904 - INFO - Found videos/dcjov47ebu5lv9zvbe787zpj/video.mkv -> will rename to videos/dcjov47ebu5lv9zvbe787zpj/original.mkv
+2025-12-02 23:52:32,025 - INFO - Found videos/dcjov47ebu5lv9zvbe787zpj/audio.mp3 -> will rename to videos/dcjov47ebu5lv9zvbe787zpj/original.mp3
+2025-12-02 23:52:32,025 - INFO - Renaming videos/dcjov47ebu5lv9zvbe787zpj/video.mkv -> videos/dcjov47ebu5lv9zvbe787zpj/original.mkv
+2025-12-02 23:52:32,034 - INFO - Renaming videos/my23g8vi21qfb16ei845jdjv/audio.mp3 -> videos/my23g8vi21qfb16ei845jdjv/original.mp3
+2025-12-02 23:52:33,031 - INFO - [69/438] ✓ Renamed 2 files for my23g8vi21qfb16ei845jdjv
+2025-12-02 23:52:33,147 - INFO - Found videos/tpt5t0dgsrai5h4lzutozcvm/video.mkv -> will rename to videos/tpt5t0dgsrai5h4lzutozcvm/original.mkv
+2025-12-02 23:52:33,254 - INFO - Renaming videos/tpt5t0dgsrai5h4lzutozcvm/video.mkv -> videos/tpt5t0dgsrai5h4lzutozcvm/original.mkv
+2025-12-02 23:52:34,741 - INFO - [70/438] ✓ Renamed 2 files for mw4k6xorz7ks3vg0gmqmogyl
+2025-12-02 23:52:34,742 - INFO -
+Progress: 70/438 - Renamed: 63 videos (81 files), Skipped: 7, Failed: 0
+
+2025-12-02 23:52:34,868 - INFO - Found videos/xbfhkuz66nc3g08axlx7zffb/video.mkv -> will rename to videos/xbfhkuz66nc3g08axlx7zffb/original.mkv
+2025-12-02 23:52:35,050 - INFO - Renaming videos/xbfhkuz66nc3g08axlx7zffb/video.mkv -> videos/xbfhkuz66nc3g08axlx7zffb/original.mkv
+2025-12-02 23:52:38,816 - INFO - Renaming videos/g179fxks66spn3ni7749lzdd/audio.mp3 -> videos/g179fxks66spn3ni7749lzdd/original.mp3
+2025-12-02 23:52:38,952 - INFO - Renaming videos/dcjov47ebu5lv9zvbe787zpj/audio.mp3 -> videos/dcjov47ebu5lv9zvbe787zpj/original.mp3
+2025-12-02 23:52:39,018 - INFO - [71/438] ✓ Renamed 1 files for czi3j87pkjuupnifphnpqnor
+2025-12-02 23:52:39,137 - INFO - Found videos/ginyfhjvgzhz8nykq3ocxn7n/video.mkv -> will rename to videos/ginyfhjvgzhz8nykq3ocxn7n/original.mkv
+2025-12-02 23:52:39,301 - INFO - Renaming videos/ginyfhjvgzhz8nykq3ocxn7n/video.mkv -> videos/ginyfhjvgzhz8nykq3ocxn7n/original.mkv
+2025-12-02 23:52:39,400 - INFO - [72/438] ✓ Renamed 1 files for fvez8xw9it644rtfzl5xclpd
+2025-12-02 23:52:39,525 - INFO - Found videos/xf99ugju3sc16q7f4iw3llv8/video.mkv -> will rename to videos/xf99ugju3sc16q7f4iw3llv8/original.mkv
+2025-12-02 23:52:39,648 - INFO - Renaming videos/xf99ugju3sc16q7f4iw3llv8/video.mkv -> videos/xf99ugju3sc16q7f4iw3llv8/original.mkv
+2025-12-02 23:52:41,187 - INFO - [73/438] ✓ Renamed 2 files for dcjov47ebu5lv9zvbe787zpj
+2025-12-02 23:52:41,317 - INFO - Found videos/zyhmjyaw82rle721vow1lv08/video.mkv -> will rename to videos/zyhmjyaw82rle721vow1lv08/original.mkv
+2025-12-02 23:52:41,435 - INFO - Renaming videos/zyhmjyaw82rle721vow1lv08/video.mkv -> videos/zyhmjyaw82rle721vow1lv08/original.mkv
+2025-12-02 23:52:42,659 - INFO - [74/438] ✓ Renamed 1 files for ginyfhjvgzhz8nykq3ocxn7n
+2025-12-02 23:52:42,773 - INFO - Found videos/wpypzqdx7xd2yns85cx0daty/video.mkv -> will rename to videos/wpypzqdx7xd2yns85cx0daty/original.mkv
+2025-12-02 23:52:42,897 - INFO - Renaming videos/wpypzqdx7xd2yns85cx0daty/video.mkv -> videos/wpypzqdx7xd2yns85cx0daty/original.mkv
+2025-12-02 23:52:42,913 - INFO - [75/438] ✓ Renamed 1 files for xf99ugju3sc16q7f4iw3llv8
+2025-12-02 23:52:43,026 - INFO - Found videos/eyps5shz1242dx4h4oovg9jk/video.mkv -> will rename to videos/eyps5shz1242dx4h4oovg9jk/original.mkv
+2025-12-02 23:52:43,134 - INFO - Found videos/eyps5shz1242dx4h4oovg9jk/audio.mp3 -> will rename to videos/eyps5shz1242dx4h4oovg9jk/original.mp3
+2025-12-02 23:52:43,134 - INFO - Renaming videos/eyps5shz1242dx4h4oovg9jk/video.mkv -> videos/eyps5shz1242dx4h4oovg9jk/original.mkv
+2025-12-02 23:52:45,653 - INFO - [76/438] ✓ Renamed 2 files for g179fxks66spn3ni7749lzdd
+2025-12-02 23:52:45,769 - INFO - Found videos/qsajojlbooovvzl4r05aabx8/video.mkv -> will rename to videos/qsajojlbooovvzl4r05aabx8/original.mkv
+2025-12-02 23:52:45,896 - INFO - Renaming videos/qsajojlbooovvzl4r05aabx8/video.mkv -> videos/qsajojlbooovvzl4r05aabx8/original.mkv
+2025-12-02 23:52:48,531 - INFO - Renaming videos/s1mnje3g7rel848ryv470bix/audio.mp3 -> videos/s1mnje3g7rel848ryv470bix/original.mp3
+2025-12-02 23:52:48,838 - INFO - Renaming videos/tjd3afh6vpijjepecyc2c9j5/audio.mp3 -> videos/tjd3afh6vpijjepecyc2c9j5/original.mp3
+2025-12-02 23:52:50,312 - INFO - [77/438] ✓ Renamed 1 files for zyhmjyaw82rle721vow1lv08
+2025-12-02 23:52:50,500 - INFO - Found videos/n3stgo6fo3yvmf5xmh08gacw/video.mkv -> will rename to videos/n3stgo6fo3yvmf5xmh08gacw/original.mkv
+2025-12-02 23:52:50,631 - INFO - Renaming videos/n3stgo6fo3yvmf5xmh08gacw/video.mkv -> videos/n3stgo6fo3yvmf5xmh08gacw/original.mkv
+2025-12-02 23:52:52,616 - INFO - [78/438] ✓ Renamed 2 files for s1mnje3g7rel848ryv470bix
+2025-12-02 23:52:52,734 - INFO - Found videos/xxti5u3ooj17j37cavljrukn/video.mkv -> will rename to videos/xxti5u3ooj17j37cavljrukn/original.mkv
+2025-12-02 23:52:52,923 - INFO - Found videos/xxti5u3ooj17j37cavljrukn/audio.mp3 -> will rename to videos/xxti5u3ooj17j37cavljrukn/original.mp3
+2025-12-02 23:52:52,923 - INFO - Renaming videos/xxti5u3ooj17j37cavljrukn/video.mkv -> videos/xxti5u3ooj17j37cavljrukn/original.mkv
+2025-12-02 23:52:53,485 - INFO - [79/438] ✓ Renamed 2 files for tjd3afh6vpijjepecyc2c9j5
+2025-12-02 23:52:53,646 - INFO - Found videos/qshwgc7yn849od7jf50q0h3e/video.mkv -> will rename to videos/qshwgc7yn849od7jf50q0h3e/original.mkv
+2025-12-02 23:52:53,758 - INFO - Found videos/qshwgc7yn849od7jf50q0h3e/audio.mp3 -> will rename to videos/qshwgc7yn849od7jf50q0h3e/original.mp3
+2025-12-02 23:52:53,758 - INFO - Renaming videos/qshwgc7yn849od7jf50q0h3e/video.mkv -> videos/qshwgc7yn849od7jf50q0h3e/original.mkv
+2025-12-02 23:52:54,515 - INFO - [80/438] ✓ Renamed 1 files for n3stgo6fo3yvmf5xmh08gacw
+2025-12-02 23:52:54,515 - INFO -
+Progress: 80/438 - Renamed: 73 videos (95 files), Skipped: 7, Failed: 0
+
+2025-12-02 23:52:54,687 - INFO - Found videos/k42oh0xm4308e1k5b12vzy8q/video.mkv -> will rename to videos/k42oh0xm4308e1k5b12vzy8q/original.mkv
+2025-12-02 23:52:54,800 - INFO - Renaming videos/k42oh0xm4308e1k5b12vzy8q/video.mkv -> videos/k42oh0xm4308e1k5b12vzy8q/original.mkv
+2025-12-02 23:52:54,971 - INFO - [81/438] ✓ Renamed 1 files for mdv5rucpczre2hmjslcad38r
+2025-12-02 23:52:55,160 - INFO - Found videos/f85p38gkhu1pxtu1bnnixglq/video.mkv -> will rename to videos/f85p38gkhu1pxtu1bnnixglq/original.mkv
+2025-12-02 23:52:55,275 - INFO - Renaming videos/f85p38gkhu1pxtu1bnnixglq/video.mkv -> videos/f85p38gkhu1pxtu1bnnixglq/original.mkv
+2025-12-02 23:52:55,278 - INFO - [82/438] ✓ Renamed 1 files for k42oh0xm4308e1k5b12vzy8q
+2025-12-02 23:52:55,378 - INFO - Found videos/lcz9j59zo663yngesf8a0k1m/video.mkv -> will rename to videos/lcz9j59zo663yngesf8a0k1m/original.mkv
+2025-12-02 23:52:55,551 - INFO - Renaming videos/lcz9j59zo663yngesf8a0k1m/video.mkv -> videos/lcz9j59zo663yngesf8a0k1m/original.mkv
+2025-12-02 23:52:57,346 - INFO - Renaming videos/eyps5shz1242dx4h4oovg9jk/audio.mp3 -> videos/eyps5shz1242dx4h4oovg9jk/original.mp3
+2025-12-02 23:53:00,366 - INFO - Renaming videos/qshwgc7yn849od7jf50q0h3e/audio.mp3 -> videos/qshwgc7yn849od7jf50q0h3e/original.mp3
+2025-12-02 23:53:00,567 - INFO - [83/438] ✓ Renamed 2 files for qshwgc7yn849od7jf50q0h3e
+2025-12-02 23:53:00,731 - INFO - Found videos/q6rdfil6z5qc6sx4jvomp320/video.mkv -> will rename to videos/q6rdfil6z5qc6sx4jvomp320/original.mkv
+2025-12-02 23:53:00,842 - INFO - Renaming videos/q6rdfil6z5qc6sx4jvomp320/video.mkv -> videos/q6rdfil6z5qc6sx4jvomp320/original.mkv
+2025-12-02 23:53:00,875 - INFO - [84/438] ✓ Renamed 1 files for wpypzqdx7xd2yns85cx0daty
+2025-12-02 23:53:00,875 - INFO - [85/438] ✓ Renamed 2 files for eyps5shz1242dx4h4oovg9jk
+2025-12-02 23:53:00,997 - INFO - Found videos/zb8cln0wrv0dgidw8avdwhc1/video.mkv -> will rename to videos/zb8cln0wrv0dgidw8avdwhc1/original.mkv
+2025-12-02 23:53:01,005 - INFO - Found videos/ziso8d5pctrrqhxqeqbgvkfo/video.mkv -> will rename to videos/ziso8d5pctrrqhxqeqbgvkfo/original.mkv
+2025-12-02 23:53:01,125 - INFO - Renaming videos/ziso8d5pctrrqhxqeqbgvkfo/video.mkv -> videos/ziso8d5pctrrqhxqeqbgvkfo/original.mkv
+2025-12-02 23:53:01,125 - INFO - Renaming videos/zb8cln0wrv0dgidw8avdwhc1/video.mkv -> videos/zb8cln0wrv0dgidw8avdwhc1/original.mkv
+2025-12-02 23:53:02,460 - INFO - Renaming videos/xxti5u3ooj17j37cavljrukn/audio.mp3 -> videos/xxti5u3ooj17j37cavljrukn/original.mp3
+2025-12-02 23:53:04,063 - INFO - [86/438] ✓ Renamed 2 files for xxti5u3ooj17j37cavljrukn
+2025-12-02 23:53:04,169 - INFO - Found videos/inel7yn0hye5yshls8n7o6n1/video.mkv -> will rename to videos/inel7yn0hye5yshls8n7o6n1/original.mkv
+2025-12-02 23:53:04,272 - INFO - Found videos/inel7yn0hye5yshls8n7o6n1/audio.mp3 -> will rename to videos/inel7yn0hye5yshls8n7o6n1/original.mp3
+2025-12-02 23:53:04,272 - INFO - Renaming videos/inel7yn0hye5yshls8n7o6n1/video.mkv -> videos/inel7yn0hye5yshls8n7o6n1/original.mkv
+2025-12-02 23:53:04,299 - INFO - [87/438] ✓ Renamed 1 files for xbfhkuz66nc3g08axlx7zffb
+2025-12-02 23:53:04,572 - INFO - Found videos/cle88zfeqmv5z0rl6g7mi083/video.mkv -> will rename to videos/cle88zfeqmv5z0rl6g7mi083/original.mkv
+2025-12-02 23:53:04,677 - INFO - Renaming videos/cle88zfeqmv5z0rl6g7mi083/video.mkv -> videos/cle88zfeqmv5z0rl6g7mi083/original.mkv
+2025-12-02 23:53:05,615 - INFO - [89/438] ✓ Renamed 1 files for dxxgafdnayd30spjingobsv8
+2025-12-02 23:53:05,721 - INFO - Found videos/x372c0fhltxzq4h7ll4mfqh1/video.mkv -> will rename to videos/x372c0fhltxzq4h7ll4mfqh1/original.mkv
+2025-12-02 23:53:05,833 - INFO - [90/438] ✓ Renamed 1 files for zb8cln0wrv0dgidw8avdwhc1
+2025-12-02 23:53:05,833 - INFO - Renaming videos/x372c0fhltxzq4h7ll4mfqh1/video.mkv -> videos/x372c0fhltxzq4h7ll4mfqh1/original.mkv
+2025-12-02 23:53:05,833 - INFO -
+Progress: 90/438 - Renamed: 82 videos (107 files), Skipped: 8, Failed: 0
+
+2025-12-02 23:53:06,034 - INFO - Found videos/ilkfv3h1hogphgvniv3s85fe/video.mkv -> will rename to videos/ilkfv3h1hogphgvniv3s85fe/original.mkv
+2025-12-02 23:53:06,150 - INFO - Renaming videos/ilkfv3h1hogphgvniv3s85fe/video.mkv -> videos/ilkfv3h1hogphgvniv3s85fe/original.mkv
+2025-12-02 23:53:07,110 - INFO - [91/438] ✓ Renamed 1 files for ilkfv3h1hogphgvniv3s85fe
+2025-12-02 23:53:07,234 - INFO - Found videos/mz5vxfrc99wrjxi90wn40101/video.mkv -> will rename to videos/mz5vxfrc99wrjxi90wn40101/original.mkv
+2025-12-02 23:53:07,348 - INFO - Renaming videos/mz5vxfrc99wrjxi90wn40101/video.mkv -> videos/mz5vxfrc99wrjxi90wn40101/original.mkv
+2025-12-02 23:53:07,390 - INFO - [92/438] ✓ Renamed 1 files for lcz9j59zo663yngesf8a0k1m
+2025-12-02 23:53:07,554 - INFO - Found videos/hfapvsi85id7mkl1gx13otso/video.mkv -> will rename to videos/hfapvsi85id7mkl1gx13otso/original.mkv
+2025-12-02 23:53:07,660 - INFO - Renaming videos/hfapvsi85id7mkl1gx13otso/video.mkv -> videos/hfapvsi85id7mkl1gx13otso/original.mkv
+2025-12-02 23:53:08,916 - INFO - [93/438] ✓ Renamed 1 files for hfapvsi85id7mkl1gx13otso
+2025-12-02 23:53:09,025 - INFO - Found videos/gpflupb79utj4zwvq76deu98/video.mkv -> will rename to videos/gpflupb79utj4zwvq76deu98/original.mkv
+2025-12-02 23:53:09,186 - INFO - Renaming videos/gpflupb79utj4zwvq76deu98/video.mkv -> videos/gpflupb79utj4zwvq76deu98/original.mkv
+2025-12-02 23:53:12,548 - INFO - [94/438] ✓ Renamed 1 files for mz5vxfrc99wrjxi90wn40101
+2025-12-02 23:53:12,673 - INFO - Found videos/rsw40rgcoonqyww03xtucrk7/video.mkv -> will rename to videos/rsw40rgcoonqyww03xtucrk7/original.mkv
+2025-12-02 23:53:12,858 - INFO - Renaming videos/rsw40rgcoonqyww03xtucrk7/video.mkv -> videos/rsw40rgcoonqyww03xtucrk7/original.mkv
+2025-12-02 23:53:17,169 - INFO - [95/438] ✓ Renamed 1 files for rsw40rgcoonqyww03xtucrk7
+2025-12-02 23:53:17,284 - INFO - Found videos/ky254d2nn054eqfenglt63ws/video.mkv -> will rename to videos/ky254d2nn054eqfenglt63ws/original.mkv
+2025-12-02 23:53:17,394 - INFO - Renaming videos/ky254d2nn054eqfenglt63ws/video.mkv -> videos/ky254d2nn054eqfenglt63ws/original.mkv
+2025-12-02 23:53:17,630 - INFO - [96/438] ✓ Renamed 1 files for f85p38gkhu1pxtu1bnnixglq
+2025-12-02 23:53:17,745 - INFO - Found videos/fhspicv0ccs7sce6vc047vt3/video.mkv -> will rename to videos/fhspicv0ccs7sce6vc047vt3/original.mkv
+2025-12-02 23:53:17,813 - INFO - Renaming videos/inel7yn0hye5yshls8n7o6n1/audio.mp3 -> videos/inel7yn0hye5yshls8n7o6n1/original.mp3
+2025-12-02 23:53:17,863 - INFO - Renaming videos/fhspicv0ccs7sce6vc047vt3/video.mkv -> videos/fhspicv0ccs7sce6vc047vt3/original.mkv
+2025-12-02 23:53:18,331 - INFO - [97/438] ✓ Renamed 1 files for cle88zfeqmv5z0rl6g7mi083
+2025-12-02 23:53:18,431 - INFO - Found videos/g1ppzdpiwzsd46nyyi3dlyg3/video.mkv -> will rename to videos/g1ppzdpiwzsd46nyyi3dlyg3/original.mkv
+2025-12-02 23:53:18,621 - INFO - Renaming videos/g1ppzdpiwzsd46nyyi3dlyg3/video.mkv -> videos/g1ppzdpiwzsd46nyyi3dlyg3/original.mkv
+2025-12-02 23:53:19,848 - INFO - [98/438] ✓ Renamed 1 files for ziso8d5pctrrqhxqeqbgvkfo
+2025-12-02 23:53:19,956 - INFO - Found videos/hra9gzdlf1vw7cuqheos7hnm/video.mkv -> will rename to videos/hra9gzdlf1vw7cuqheos7hnm/original.mkv
+2025-12-02 23:53:20,138 - INFO - Renaming videos/hra9gzdlf1vw7cuqheos7hnm/video.mkv -> videos/hra9gzdlf1vw7cuqheos7hnm/original.mkv
+2025-12-02 23:53:21,327 - INFO - [99/438] ✓ Renamed 2 files for inel7yn0hye5yshls8n7o6n1
+2025-12-02 23:53:21,433 - INFO -
+Progress: 100/438 - Renamed: 91 videos (117 files), Skipped: 9, Failed: 0
+
+2025-12-02 23:53:21,542 - INFO - Found videos/gy8w7dfqeaszt1c49v5k1ah0/video.mkv -> will rename to videos/gy8w7dfqeaszt1c49v5k1ah0/original.mkv
+2025-12-02 23:53:21,711 - INFO - Renaming videos/gy8w7dfqeaszt1c49v5k1ah0/video.mkv -> videos/gy8w7dfqeaszt1c49v5k1ah0/original.mkv
+2025-12-02 23:53:26,087 - INFO - [101/438] ✓ Renamed 1 files for g1ppzdpiwzsd46nyyi3dlyg3
+2025-12-02 23:53:26,216 - INFO - Found videos/nzngv0j5wn5xgxps9qrg2i2i/video.mkv -> will rename to videos/nzngv0j5wn5xgxps9qrg2i2i/original.mkv
+2025-12-02 23:53:26,333 - INFO - Found videos/nzngv0j5wn5xgxps9qrg2i2i/audio.mp3 -> will rename to videos/nzngv0j5wn5xgxps9qrg2i2i/original.mp3
+2025-12-02 23:53:26,333 - INFO - Renaming videos/nzngv0j5wn5xgxps9qrg2i2i/video.mkv -> videos/nzngv0j5wn5xgxps9qrg2i2i/original.mkv
+2025-12-02 23:53:28,869 - INFO - [102/438] ✓ Renamed 1 files for tpt5t0dgsrai5h4lzutozcvm
+2025-12-02 23:53:29,029 - INFO - [103/438] ✓ Renamed 1 files for q6rdfil6z5qc6sx4jvomp320
+2025-12-02 23:53:29,148 - INFO - Found videos/rujosgsnsqo4uhwbwnwpqais/video.mkv -> will rename to videos/rujosgsnsqo4uhwbwnwpqais/original.mkv
+2025-12-02 23:53:29,162 - INFO - Found videos/ej38e2ppxfi1xzbwvoy3o4o2/video.mkv -> will rename to videos/ej38e2ppxfi1xzbwvoy3o4o2/original.mkv
+2025-12-02 23:53:29,274 - INFO - Renaming videos/ej38e2ppxfi1xzbwvoy3o4o2/video.mkv -> videos/ej38e2ppxfi1xzbwvoy3o4o2/original.mkv
+2025-12-02 23:53:29,275 - INFO - Renaming videos/rujosgsnsqo4uhwbwnwpqais/video.mkv -> videos/rujosgsnsqo4uhwbwnwpqais/original.mkv
+2025-12-02 23:53:30,264 - INFO - [105/438] ✓ Renamed 1 files for gy8w7dfqeaszt1c49v5k1ah0
+2025-12-02 23:53:30,385 - INFO - Found videos/kqm64emgqfw4l7aztieetkj6/video.mkv -> will rename to videos/kqm64emgqfw4l7aztieetkj6/original.mkv
+2025-12-02 23:53:30,404 - INFO - [106/438] ✓ Renamed 1 files for rujosgsnsqo4uhwbwnwpqais
+2025-12-02 23:53:30,475 - INFO - Renaming videos/kqm64emgqfw4l7aztieetkj6/video.mkv -> videos/kqm64emgqfw4l7aztieetkj6/original.mkv
+2025-12-02 23:53:30,521 - INFO - Found videos/ratw2atcqa376ktfpvj2joo4/video.mkv -> will rename to videos/ratw2atcqa376ktfpvj2joo4/original.mkv
+2025-12-02 23:53:30,639 - INFO - Found videos/ratw2atcqa376ktfpvj2joo4/audio.mp3 -> will rename to videos/ratw2atcqa376ktfpvj2joo4/original.mp3
+2025-12-02 23:53:30,639 - INFO - Renaming videos/ratw2atcqa376ktfpvj2joo4/video.mkv -> videos/ratw2atcqa376ktfpvj2joo4/original.mkv
+2025-12-02 23:53:32,001 - INFO - [107/438] ✓ Renamed 1 files for qsajojlbooovvzl4r05aabx8
+2025-12-02 23:53:32,256 - INFO - Found videos/nhlrkalhb9qeyfo4pzlxcqic/video.mkv -> will rename to videos/nhlrkalhb9qeyfo4pzlxcqic/original.mkv
+2025-12-02 23:53:32,374 - INFO - Found videos/nhlrkalhb9qeyfo4pzlxcqic/audio.mp3 -> will rename to videos/nhlrkalhb9qeyfo4pzlxcqic/original.mp3
+2025-12-02 23:53:32,374 - INFO - Renaming videos/nhlrkalhb9qeyfo4pzlxcqic/video.mkv -> videos/nhlrkalhb9qeyfo4pzlxcqic/original.mkv
+2025-12-02 23:53:32,799 - INFO - Renaming videos/nhlrkalhb9qeyfo4pzlxcqic/audio.mp3 -> videos/nhlrkalhb9qeyfo4pzlxcqic/original.mp3
+2025-12-02 23:53:32,988 - INFO - [109/438] ✓ Renamed 2 files for nhlrkalhb9qeyfo4pzlxcqic
+2025-12-02 23:53:33,170 - INFO - Found videos/lqoxvc2zwgos1jkwcst7aj6z/video.mkv -> will rename to videos/lqoxvc2zwgos1jkwcst7aj6z/original.mkv
+2025-12-02 23:53:33,358 - INFO - Renaming videos/lqoxvc2zwgos1jkwcst7aj6z/video.mkv -> videos/lqoxvc2zwgos1jkwcst7aj6z/original.mkv
+2025-12-02 23:53:33,639 - INFO - [110/438] ✓ Renamed 1 files for ky254d2nn054eqfenglt63ws
+2025-12-02 23:53:33,639 - INFO -
+Progress: 110/438 - Renamed: 99 videos (126 files), Skipped: 11, Failed: 0
+
+2025-12-02 23:53:33,831 - INFO - Found videos/qatht83waplqejze8yf2865b/video.mkv -> will rename to videos/qatht83waplqejze8yf2865b/original.mkv
+2025-12-02 23:53:33,951 - INFO - Renaming videos/qatht83waplqejze8yf2865b/video.mkv -> videos/qatht83waplqejze8yf2865b/original.mkv
+2025-12-02 23:53:36,671 - INFO - [111/438] ✓ Renamed 1 files for kqm64emgqfw4l7aztieetkj6
+2025-12-02 23:53:36,846 - INFO - Found videos/ydqpwfanic1vdp76g6xaq23s/video.mkv -> will rename to videos/ydqpwfanic1vdp76g6xaq23s/original.mkv
+2025-12-02 23:53:37,034 - INFO - Renaming videos/ydqpwfanic1vdp76g6xaq23s/video.mkv -> videos/ydqpwfanic1vdp76g6xaq23s/original.mkv
+2025-12-02 23:53:37,065 - INFO - [112/438] ✓ Renamed 1 files for fhspicv0ccs7sce6vc047vt3
+2025-12-02 23:53:37,175 - INFO - Found videos/jevfafsrta5dekkl6td02hhc/video.mkv -> will rename to videos/jevfafsrta5dekkl6td02hhc/original.mkv
+2025-12-02 23:53:37,365 - INFO - Renaming videos/jevfafsrta5dekkl6td02hhc/video.mkv -> videos/jevfafsrta5dekkl6td02hhc/original.mkv
+2025-12-02 23:53:42,912 - INFO - [113/438] ✓ Renamed 1 files for x372c0fhltxzq4h7ll4mfqh1
+2025-12-02 23:53:43,076 - INFO - Found videos/ovgas80n8hqlkknowpijiqbb/video.mkv -> will rename to videos/ovgas80n8hqlkknowpijiqbb/original.mkv
+2025-12-02 23:53:43,180 - INFO - Found videos/ovgas80n8hqlkknowpijiqbb/audio.mp3 -> will rename to videos/ovgas80n8hqlkknowpijiqbb/original.mp3
+2025-12-02 23:53:43,180 - INFO - Renaming videos/ovgas80n8hqlkknowpijiqbb/video.mkv -> videos/ovgas80n8hqlkknowpijiqbb/original.mkv
+2025-12-02 23:53:43,181 - INFO - Renaming videos/nzngv0j5wn5xgxps9qrg2i2i/audio.mp3 -> videos/nzngv0j5wn5xgxps9qrg2i2i/original.mp3
+2025-12-02 23:53:46,225 - INFO - [114/438] ✓ Renamed 2 files for nzngv0j5wn5xgxps9qrg2i2i
+2025-12-02 23:53:46,414 - INFO - Found videos/zh6x60pfsxnaglf391e673pj/video.mkv -> will rename to videos/zh6x60pfsxnaglf391e673pj/original.mkv
+2025-12-02 23:53:46,538 - INFO - Found videos/zh6x60pfsxnaglf391e673pj/audio.mp3 -> will rename to videos/zh6x60pfsxnaglf391e673pj/original.mp3
+2025-12-02 23:53:46,538 - INFO - Renaming videos/zh6x60pfsxnaglf391e673pj/video.mkv -> videos/zh6x60pfsxnaglf391e673pj/original.mkv
+2025-12-02 23:53:47,465 - INFO - [115/438] ✓ Renamed 1 files for hra9gzdlf1vw7cuqheos7hnm
+2025-12-02 23:53:47,567 - INFO - Found videos/wijc7xmuwznuvi1niptmi2li/video.mkv -> will rename to videos/wijc7xmuwznuvi1niptmi2li/original.mkv
+2025-12-02 23:53:47,679 - INFO - Renaming videos/wijc7xmuwznuvi1niptmi2li/video.mkv -> videos/wijc7xmuwznuvi1niptmi2li/original.mkv
+2025-12-02 23:53:49,984 - INFO - Renaming videos/ratw2atcqa376ktfpvj2joo4/audio.mp3 -> videos/ratw2atcqa376ktfpvj2joo4/original.mp3
+2025-12-02 23:53:50,242 - INFO - [116/438] ✓ Renamed 1 files for ej38e2ppxfi1xzbwvoy3o4o2
+2025-12-02 23:53:50,418 - INFO - Found videos/cmcp750zcoi58w150z7e1ekp/video.mkv -> will rename to videos/cmcp750zcoi58w150z7e1ekp/original.mkv
+2025-12-02 23:53:50,608 - INFO - Renaming videos/cmcp750zcoi58w150z7e1ekp/video.mkv -> videos/cmcp750zcoi58w150z7e1ekp/original.mkv
+2025-12-02 23:53:53,755 - INFO - [117/438] ✓ Renamed 2 files for ratw2atcqa376ktfpvj2joo4
+2025-12-02 23:53:53,874 - INFO - Found videos/ivg9hwb376cu64psybqhd5k0/video.mkv -> will rename to videos/ivg9hwb376cu64psybqhd5k0/original.mkv
+2025-12-02 23:53:53,985 - INFO - Renaming videos/ivg9hwb376cu64psybqhd5k0/video.mkv -> videos/ivg9hwb376cu64psybqhd5k0/original.mkv
+2025-12-02 23:53:55,952 - INFO - [118/438] ✓ Renamed 1 files for wijc7xmuwznuvi1niptmi2li
+2025-12-02 23:53:56,230 - INFO - Found videos/tzx0c1g2al9hmwgrzmhzpoap/video.mkv -> will rename to videos/tzx0c1g2al9hmwgrzmhzpoap/original.mkv
+2025-12-02 23:53:56,374 - INFO - Renaming videos/tzx0c1g2al9hmwgrzmhzpoap/video.mkv -> videos/tzx0c1g2al9hmwgrzmhzpoap/original.mkv
+2025-12-02 23:53:56,458 - INFO - [120/438] ✓ Renamed 1 files for qatht83waplqejze8yf2865b
+2025-12-02 23:53:56,458 - INFO -
+Progress: 120/438 - Renamed: 108 videos (137 files), Skipped: 12, Failed: 0
+
+2025-12-02 23:53:56,763 - INFO - Found videos/dbs5yf9vg0tg7k73uo0gfivh/video.mkv -> will rename to videos/dbs5yf9vg0tg7k73uo0gfivh/original.mkv
+2025-12-02 23:53:56,903 - INFO - [122/438] ✓ Renamed 1 files for ivg9hwb376cu64psybqhd5k0
+2025-12-02 23:53:56,958 - INFO - Renaming videos/dbs5yf9vg0tg7k73uo0gfivh/video.mkv -> videos/dbs5yf9vg0tg7k73uo0gfivh/original.mkv
+2025-12-02 23:53:57,012 - INFO - Found videos/f7rvx2rb04zl2vhgoltwedf5/video.mkv -> will rename to videos/f7rvx2rb04zl2vhgoltwedf5/original.mkv
+2025-12-02 23:53:57,125 - INFO - Renaming videos/f7rvx2rb04zl2vhgoltwedf5/video.mkv -> videos/f7rvx2rb04zl2vhgoltwedf5/original.mkv
+2025-12-02 23:53:57,252 - INFO - Renaming videos/zh6x60pfsxnaglf391e673pj/audio.mp3 -> videos/zh6x60pfsxnaglf391e673pj/original.mp3
+2025-12-02 23:53:58,369 - INFO - [123/438] ✓ Renamed 1 files for lqoxvc2zwgos1jkwcst7aj6z
+2025-12-02 23:53:58,529 - INFO - Found videos/nkhgy2xrrgh6ljas65ds3nrd/video.mkv -> will rename to videos/nkhgy2xrrgh6ljas65ds3nrd/original.mkv
+2025-12-02 23:53:58,643 - INFO - Renaming videos/nkhgy2xrrgh6ljas65ds3nrd/video.mkv -> videos/nkhgy2xrrgh6ljas65ds3nrd/original.mkv
+2025-12-02 23:53:58,806 - INFO - [124/438] ✓ Renamed 2 files for zh6x60pfsxnaglf391e673pj
+2025-12-02 23:53:58,884 - INFO - [125/438] ✓ Renamed 1 files for gpflupb79utj4zwvq76deu98
+2025-12-02 23:53:59,000 - INFO - Found videos/ytmz11lcuyrxd14ykxqb4wu2/video.mkv -> will rename to videos/ytmz11lcuyrxd14ykxqb4wu2/original.mkv
+2025-12-02 23:53:59,062 - INFO - Found videos/xv2v8qdigpu0kphaelrjmr5i/video.mkv -> will rename to videos/xv2v8qdigpu0kphaelrjmr5i/original.mkv
+2025-12-02 23:53:59,084 - INFO - Renaming videos/ovgas80n8hqlkknowpijiqbb/audio.mp3 -> videos/ovgas80n8hqlkknowpijiqbb/original.mp3
+2025-12-02 23:53:59,157 - INFO - Renaming videos/ytmz11lcuyrxd14ykxqb4wu2/video.mkv -> videos/ytmz11lcuyrxd14ykxqb4wu2/original.mkv
+2025-12-02 23:53:59,184 - INFO - Renaming videos/xv2v8qdigpu0kphaelrjmr5i/video.mkv -> videos/xv2v8qdigpu0kphaelrjmr5i/original.mkv
+2025-12-02 23:54:03,671 - INFO - [126/438] ✓ Renamed 2 files for ovgas80n8hqlkknowpijiqbb
+2025-12-02 23:54:03,778 - INFO - Found videos/r6seigg9ay2yn6pwr591hbln/video.mkv -> will rename to videos/r6seigg9ay2yn6pwr591hbln/original.mkv
+2025-12-02 23:54:03,874 - INFO - Renaming videos/r6seigg9ay2yn6pwr591hbln/video.mkv -> videos/r6seigg9ay2yn6pwr591hbln/original.mkv
+2025-12-02 23:54:05,732 - INFO - [127/438] ✓ Renamed 1 files for jevfafsrta5dekkl6td02hhc
+2025-12-02 23:54:05,867 - INFO - Found videos/e77ystszag55ta6fcq7uc69d/video.mkv -> will rename to videos/e77ystszag55ta6fcq7uc69d/original.mkv
+2025-12-02 23:54:05,983 - INFO - Renaming videos/e77ystszag55ta6fcq7uc69d/video.mkv -> videos/e77ystszag55ta6fcq7uc69d/original.mkv
+2025-12-02 23:54:12,011 - INFO - [128/438] ✓ Renamed 1 files for e77ystszag55ta6fcq7uc69d
+2025-12-02 23:54:12,123 - INFO - Found videos/ts7glm4w4d8yxlmd2qnduu7q/video.mkv -> will rename to videos/ts7glm4w4d8yxlmd2qnduu7q/original.mkv
+2025-12-02 23:54:12,240 - INFO - Renaming videos/ts7glm4w4d8yxlmd2qnduu7q/video.mkv -> videos/ts7glm4w4d8yxlmd2qnduu7q/original.mkv
+2025-12-02 23:54:13,811 - INFO - [129/438] ✓ Renamed 1 files for ytmz11lcuyrxd14ykxqb4wu2
+2025-12-02 23:54:13,920 - INFO - Found videos/t0syi87suw4qezpmy1gkht9k/video.mkv -> will rename to videos/t0syi87suw4qezpmy1gkht9k/original.mkv
+2025-12-02 23:54:14,026 - INFO - Found videos/t0syi87suw4qezpmy1gkht9k/audio.mp3 -> will rename to videos/t0syi87suw4qezpmy1gkht9k/original.mp3
+2025-12-02 23:54:14,026 - INFO - Renaming videos/t0syi87suw4qezpmy1gkht9k/video.mkv -> videos/t0syi87suw4qezpmy1gkht9k/original.mkv
+2025-12-02 23:54:14,133 - INFO - [130/438] ✓ Renamed 1 files for cmcp750zcoi58w150z7e1ekp
+2025-12-02 23:54:14,134 - INFO -
+Progress: 130/438 - Renamed: 117 videos (148 files), Skipped: 13, Failed: 0
+
+2025-12-02 23:54:14,248 - INFO - Found videos/nf0c2zf2w370qg9s6d74ywjd/video.mkv -> will rename to videos/nf0c2zf2w370qg9s6d74ywjd/original.mkv
+2025-12-02 23:54:14,402 - INFO - Renaming videos/nf0c2zf2w370qg9s6d74ywjd/video.mkv -> videos/nf0c2zf2w370qg9s6d74ywjd/original.mkv
+2025-12-02 23:54:14,850 - INFO - [131/438] ✓ Renamed 1 files for xv2v8qdigpu0kphaelrjmr5i
+2025-12-02 23:54:14,958 - INFO - Found videos/t9v6vfqfjcxjfohd2vrxpeet/video.mkv -> will rename to videos/t9v6vfqfjcxjfohd2vrxpeet/original.mkv
+2025-12-02 23:54:15,058 - INFO - Renaming videos/t9v6vfqfjcxjfohd2vrxpeet/video.mkv -> videos/t9v6vfqfjcxjfohd2vrxpeet/original.mkv
+2025-12-02 23:54:18,572 - INFO - [132/438] ✓ Renamed 1 files for nkhgy2xrrgh6ljas65ds3nrd
+2025-12-02 23:54:18,730 - INFO - Found videos/mkpg23vllzcc5ld4672zgzgv/video.mkv -> will rename to videos/mkpg23vllzcc5ld4672zgzgv/original.mkv
+2025-12-02 23:54:18,920 - INFO - Renaming videos/mkpg23vllzcc5ld4672zgzgv/video.mkv -> videos/mkpg23vllzcc5ld4672zgzgv/original.mkv
+2025-12-02 23:54:22,923 - INFO - [133/438] ✓ Renamed 1 files for r6seigg9ay2yn6pwr591hbln
+2025-12-02 23:54:23,030 - INFO - Found videos/cjjyrounj8qpdyd9addol7py/video.mkv -> will rename to videos/cjjyrounj8qpdyd9addol7py/original.mkv
+2025-12-02 23:54:23,210 - INFO - Renaming videos/cjjyrounj8qpdyd9addol7py/video.mkv -> videos/cjjyrounj8qpdyd9addol7py/original.mkv
+2025-12-02 23:54:24,579 - INFO - [134/438] ✓ Renamed 1 files for f7rvx2rb04zl2vhgoltwedf5
+2025-12-02 23:54:24,742 - INFO - Found videos/smfs8gq5vnmr3fa0nifjjtq1/video.mkv -> will rename to videos/smfs8gq5vnmr3fa0nifjjtq1/original.mkv
+2025-12-02 23:54:24,859 - INFO - Renaming videos/smfs8gq5vnmr3fa0nifjjtq1/video.mkv -> videos/smfs8gq5vnmr3fa0nifjjtq1/original.mkv
+2025-12-02 23:54:26,922 - INFO - [135/438] ✓ Renamed 1 files for ts7glm4w4d8yxlmd2qnduu7q
+2025-12-02 23:54:27,026 - INFO - Found videos/dcbrb2qy3wm14ehhz2bgspfi/video.mkv -> will rename to videos/dcbrb2qy3wm14ehhz2bgspfi/original.mkv
+2025-12-02 23:54:27,222 - INFO - Renaming videos/dcbrb2qy3wm14ehhz2bgspfi/video.mkv -> videos/dcbrb2qy3wm14ehhz2bgspfi/original.mkv
+2025-12-02 23:54:28,360 - INFO - [136/438] ✓ Renamed 1 files for t9v6vfqfjcxjfohd2vrxpeet
+2025-12-02 23:54:28,478 - INFO - Found videos/yfckcs2o7zkas1e87be9ob1u/video.mkv -> will rename to videos/yfckcs2o7zkas1e87be9ob1u/original.mkv
+2025-12-02 23:54:28,592 - INFO - Renaming videos/yfckcs2o7zkas1e87be9ob1u/video.mkv -> videos/yfckcs2o7zkas1e87be9ob1u/original.mkv
+2025-12-02 23:54:29,931 - INFO - [137/438] ✓ Renamed 1 files for nf0c2zf2w370qg9s6d74ywjd
+2025-12-02 23:54:30,039 - INFO - Found videos/f7khc4rj85zkkohcpkeqrpks/video.mkv -> will rename to videos/f7khc4rj85zkkohcpkeqrpks/original.mkv
+2025-12-02 23:54:30,124 - INFO - [138/438] ✓ Renamed 1 files for dbs5yf9vg0tg7k73uo0gfivh
+2025-12-02 23:54:30,141 - INFO - Found videos/f7khc4rj85zkkohcpkeqrpks/audio.mp3 -> will rename to videos/f7khc4rj85zkkohcpkeqrpks/original.mp3
+2025-12-02 23:54:30,141 - INFO - Renaming videos/f7khc4rj85zkkohcpkeqrpks/video.mkv -> videos/f7khc4rj85zkkohcpkeqrpks/original.mkv
+2025-12-02 23:54:30,321 - INFO - Found videos/emlycwa6qjji1saoicrkwbpr/video.mkv -> will rename to videos/emlycwa6qjji1saoicrkwbpr/original.mkv
+2025-12-02 23:54:30,502 - INFO - Renaming videos/emlycwa6qjji1saoicrkwbpr/video.mkv -> videos/emlycwa6qjji1saoicrkwbpr/original.mkv
+2025-12-02 23:54:31,137 - INFO - [139/438] ✓ Renamed 1 files for ydqpwfanic1vdp76g6xaq23s
+2025-12-02 23:54:31,312 - INFO - Found videos/szryg6h4y89lh067p26a2g1f/video.mkv -> will rename to videos/szryg6h4y89lh067p26a2g1f/original.mkv
+2025-12-02 23:54:31,503 - INFO - Renaming videos/szryg6h4y89lh067p26a2g1f/video.mkv -> videos/szryg6h4y89lh067p26a2g1f/original.mkv
+2025-12-02 23:54:31,505 - INFO - [140/438] ✓ Renamed 1 files for tzx0c1g2al9hmwgrzmhzpoap
+2025-12-02 23:54:31,505 - INFO -
+Progress: 140/438 - Renamed: 127 videos (158 files), Skipped: 13, Failed: 0
+
+2025-12-02 23:54:31,650 - INFO - Found videos/c3p1ypeqfmorfwwy2ypcrigm/video.mkv -> will rename to videos/c3p1ypeqfmorfwwy2ypcrigm/original.mkv
+2025-12-02 23:54:31,836 - INFO - Renaming videos/c3p1ypeqfmorfwwy2ypcrigm/video.mkv -> videos/c3p1ypeqfmorfwwy2ypcrigm/original.mkv
+2025-12-02 23:54:34,125 - INFO - [141/438] ✓ Renamed 1 files for yfckcs2o7zkas1e87be9ob1u
+2025-12-02 23:54:34,237 - INFO - Found videos/viahl5hfrft2mpg2sr7wxjtb/video.mkv -> will rename to videos/viahl5hfrft2mpg2sr7wxjtb/original.mkv
+2025-12-02 23:54:34,345 - INFO - Renaming videos/viahl5hfrft2mpg2sr7wxjtb/video.mkv -> videos/viahl5hfrft2mpg2sr7wxjtb/original.mkv
+2025-12-02 23:54:37,397 - INFO - [142/438] ✓ Renamed 1 files for viahl5hfrft2mpg2sr7wxjtb
+2025-12-02 23:54:37,504 - INFO - Found videos/llclhowidfbrvg93zt05v77m/video.mkv -> will rename to videos/llclhowidfbrvg93zt05v77m/original.mkv
+2025-12-02 23:54:37,659 - INFO - Renaming videos/llclhowidfbrvg93zt05v77m/video.mkv -> videos/llclhowidfbrvg93zt05v77m/original.mkv
+2025-12-02 23:54:46,625 - INFO - [143/438] ✓ Renamed 1 files for cjjyrounj8qpdyd9addol7py
+2025-12-02 23:54:46,738 - INFO - Found videos/xz8t49tipn0ol7mjxdexva0r/video.mkv -> will rename to videos/xz8t49tipn0ol7mjxdexva0r/original.mkv
+2025-12-02 23:54:46,856 - INFO - Found videos/xz8t49tipn0ol7mjxdexva0r/audio.mp3 -> will rename to videos/xz8t49tipn0ol7mjxdexva0r/original.mp3
+2025-12-02 23:54:46,856 - INFO - Renaming videos/xz8t49tipn0ol7mjxdexva0r/video.mkv -> videos/xz8t49tipn0ol7mjxdexva0r/original.mkv
+2025-12-02 23:54:47,831 - INFO - [144/438] ✓ Renamed 1 files for c3p1ypeqfmorfwwy2ypcrigm
+2025-12-02 23:54:47,940 - INFO - Found videos/gkvfatiptx9zm9zmvcyipvt7/video.mkv -> will rename to videos/gkvfatiptx9zm9zmvcyipvt7/original.mkv
+2025-12-02 23:54:48,051 - INFO - Renaming videos/gkvfatiptx9zm9zmvcyipvt7/video.mkv -> videos/gkvfatiptx9zm9zmvcyipvt7/original.mkv
+2025-12-02 23:54:51,822 - INFO - [145/438] ✓ Renamed 1 files for smfs8gq5vnmr3fa0nifjjtq1
+2025-12-02 23:54:51,944 - INFO - Found videos/d4p1so8omkjzyrpsgvyf5n6d/video.mkv -> will rename to videos/d4p1so8omkjzyrpsgvyf5n6d/original.mkv
+2025-12-02 23:54:52,058 - INFO - Renaming videos/d4p1so8omkjzyrpsgvyf5n6d/video.mkv -> videos/d4p1so8omkjzyrpsgvyf5n6d/original.mkv
+2025-12-02 23:54:56,093 - INFO - [146/438] ✓ Renamed 1 files for emlycwa6qjji1saoicrkwbpr
+2025-12-02 23:54:56,226 - INFO - Found videos/xi7tekr74r3qfd7pv30lkp0s/video.mkv -> will rename to videos/xi7tekr74r3qfd7pv30lkp0s/original.mkv
+2025-12-02 23:54:56,354 - INFO - Renaming videos/xi7tekr74r3qfd7pv30lkp0s/video.mkv -> videos/xi7tekr74r3qfd7pv30lkp0s/original.mkv
+2025-12-02 23:54:56,985 - INFO - [147/438] ✓ Renamed 1 files for dcbrb2qy3wm14ehhz2bgspfi
+2025-12-02 23:54:57,219 - INFO - Found videos/hsykkz8ovuiwzlj438z8ddav/video.mkv -> will rename to videos/hsykkz8ovuiwzlj438z8ddav/original.mkv
+2025-12-02 23:54:57,335 - INFO - Renaming videos/hsykkz8ovuiwzlj438z8ddav/video.mkv -> videos/hsykkz8ovuiwzlj438z8ddav/original.mkv
+2025-12-02 23:54:59,917 - INFO - Renaming videos/xz8t49tipn0ol7mjxdexva0r/audio.mp3 -> videos/xz8t49tipn0ol7mjxdexva0r/original.mp3
+2025-12-02 23:55:01,081 - INFO - Renaming videos/t0syi87suw4qezpmy1gkht9k/audio.mp3 -> videos/t0syi87suw4qezpmy1gkht9k/original.mp3
+2025-12-02 23:55:01,721 - INFO - [149/438] ✓ Renamed 1 files for xi7tekr74r3qfd7pv30lkp0s
+2025-12-02 23:55:01,914 - INFO - Found videos/hos1sdpgmmnfaq5sfjqladqf/video.mkv -> will rename to videos/hos1sdpgmmnfaq5sfjqladqf/original.mkv
+2025-12-02 23:55:02,030 - INFO - [150/438] ✓ Renamed 2 files for xz8t49tipn0ol7mjxdexva0r
+2025-12-02 23:55:02,030 - INFO -
+Progress: 150/438 - Renamed: 136 videos (168 files), Skipped: 14, Failed: 0
+
+2025-12-02 23:55:02,046 - INFO - Renaming videos/hos1sdpgmmnfaq5sfjqladqf/video.mkv -> videos/hos1sdpgmmnfaq5sfjqladqf/original.mkv
+2025-12-02 23:55:02,144 - INFO - Found videos/hbkqmiw7xfe2dxrarck938yl/video.mkv -> will rename to videos/hbkqmiw7xfe2dxrarck938yl/original.mkv
+2025-12-02 23:55:02,303 - INFO - Found videos/hbkqmiw7xfe2dxrarck938yl/audio.mp3 -> will rename to videos/hbkqmiw7xfe2dxrarck938yl/original.mp3
+2025-12-02 23:55:02,303 - INFO - Renaming videos/hbkqmiw7xfe2dxrarck938yl/video.mkv -> videos/hbkqmiw7xfe2dxrarck938yl/original.mkv
+2025-12-02 23:55:02,534 - INFO - [151/438] ✓ Renamed 1 files for llclhowidfbrvg93zt05v77m
+2025-12-02 23:55:02,642 - INFO - Found videos/aqa3padkfm9asmv94ky774rc/video.mkv -> will rename to videos/aqa3padkfm9asmv94ky774rc/original.mkv
+2025-12-02 23:55:02,829 - INFO - Renaming videos/aqa3padkfm9asmv94ky774rc/video.mkv -> videos/aqa3padkfm9asmv94ky774rc/original.mkv
+2025-12-02 23:55:03,173 - INFO - Renaming videos/f7khc4rj85zkkohcpkeqrpks/audio.mp3 -> videos/f7khc4rj85zkkohcpkeqrpks/original.mp3
+2025-12-02 23:55:05,474 - INFO - [152/438] ✓ Renamed 2 files for t0syi87suw4qezpmy1gkht9k
+2025-12-02 23:55:05,636 - INFO - Found videos/e0osaaguckezvjzf42dm6zbc/video.mkv -> will rename to videos/e0osaaguckezvjzf42dm6zbc/original.mkv
+2025-12-02 23:55:05,738 - INFO - Renaming videos/e0osaaguckezvjzf42dm6zbc/video.mkv -> videos/e0osaaguckezvjzf42dm6zbc/original.mkv
+2025-12-02 23:55:09,341 - INFO - [153/438] ✓ Renamed 2 files for f7khc4rj85zkkohcpkeqrpks
+2025-12-02 23:55:09,449 - INFO - Found videos/cbeascecdg8e9r04gjnagspj/video.mkv -> will rename to videos/cbeascecdg8e9r04gjnagspj/original.mkv
+2025-12-02 23:55:09,642 - INFO - Renaming videos/cbeascecdg8e9r04gjnagspj/video.mkv -> videos/cbeascecdg8e9r04gjnagspj/original.mkv
+2025-12-02 23:55:12,209 - INFO - [154/438] ✓ Renamed 1 files for szryg6h4y89lh067p26a2g1f
+2025-12-02 23:55:12,319 - INFO - Found videos/wijy1wsp03lfq5mjrhjvtwm0/video.mkv -> will rename to videos/wijy1wsp03lfq5mjrhjvtwm0/original.mkv
+2025-12-02 23:55:12,443 - INFO - Found videos/wijy1wsp03lfq5mjrhjvtwm0/audio.mp3 -> will rename to videos/wijy1wsp03lfq5mjrhjvtwm0/original.mp3
+2025-12-02 23:55:12,443 - INFO - Renaming videos/wijy1wsp03lfq5mjrhjvtwm0/video.mkv -> videos/wijy1wsp03lfq5mjrhjvtwm0/original.mkv
+2025-12-02 23:55:12,733 - INFO - Renaming videos/hbkqmiw7xfe2dxrarck938yl/audio.mp3 -> videos/hbkqmiw7xfe2dxrarck938yl/original.mp3
+2025-12-02 23:55:13,543 - INFO - [155/438] ✓ Renamed 1 files for mkpg23vllzcc5ld4672zgzgv
+2025-12-02 23:55:13,650 - INFO - Found videos/vt7ini6wdrms1hbc8z9rk44u/video.mkv -> will rename to videos/vt7ini6wdrms1hbc8z9rk44u/original.mkv
+2025-12-02 23:55:13,845 - INFO - Renaming videos/vt7ini6wdrms1hbc8z9rk44u/video.mkv -> videos/vt7ini6wdrms1hbc8z9rk44u/original.mkv
+2025-12-02 23:55:15,129 - INFO - [156/438] ✓ Renamed 2 files for hbkqmiw7xfe2dxrarck938yl
+2025-12-02 23:55:15,239 - INFO - Found videos/x8efqt1yyt322hn0ubi52pis/video.mkv -> will rename to videos/x8efqt1yyt322hn0ubi52pis/original.mkv
+2025-12-02 23:55:15,416 - INFO - Renaming videos/x8efqt1yyt322hn0ubi52pis/video.mkv -> videos/x8efqt1yyt322hn0ubi52pis/original.mkv
+2025-12-02 23:55:16,926 - INFO - [157/438] ✓ Renamed 1 files for gkvfatiptx9zm9zmvcyipvt7
+2025-12-02 23:55:17,035 - INFO - Found videos/tfahqa0n2pld6jvnu7a8k5w9/video.mkv -> will rename to videos/tfahqa0n2pld6jvnu7a8k5w9/original.mkv
+2025-12-02 23:55:17,133 - INFO - Found videos/tfahqa0n2pld6jvnu7a8k5w9/audio.mp3 -> will rename to videos/tfahqa0n2pld6jvnu7a8k5w9/original.mp3
+2025-12-02 23:55:17,133 - INFO - Renaming videos/tfahqa0n2pld6jvnu7a8k5w9/video.mkv -> videos/tfahqa0n2pld6jvnu7a8k5w9/original.mkv
+2025-12-02 23:55:18,598 - INFO - [158/438] ✓ Renamed 1 files for hos1sdpgmmnfaq5sfjqladqf
+2025-12-02 23:55:19,024 - INFO - Found videos/p78opknhykk7739gvc7kf5z5/video.mkv -> will rename to videos/p78opknhykk7739gvc7kf5z5/original.mkv
+2025-12-02 23:55:19,147 - INFO - Renaming videos/p78opknhykk7739gvc7kf5z5/video.mkv -> videos/p78opknhykk7739gvc7kf5z5/original.mkv
+2025-12-02 23:55:23,643 - INFO - [160/438] ✓ Renamed 1 files for d4p1so8omkjzyrpsgvyf5n6d
+2025-12-02 23:55:23,643 - INFO -
+Progress: 160/438 - Renamed: 145 videos (180 files), Skipped: 15, Failed: 0
+
+2025-12-02 23:55:23,796 - INFO - Found videos/f0wmaop52ejdvdwajkq4cr9s/video.mkv -> will rename to videos/f0wmaop52ejdvdwajkq4cr9s/original.mkv
+2025-12-02 23:55:23,911 - INFO - Renaming videos/f0wmaop52ejdvdwajkq4cr9s/video.mkv -> videos/f0wmaop52ejdvdwajkq4cr9s/original.mkv
+2025-12-02 23:55:25,317 - INFO - Renaming videos/wijy1wsp03lfq5mjrhjvtwm0/audio.mp3 -> videos/wijy1wsp03lfq5mjrhjvtwm0/original.mp3
+2025-12-02 23:55:26,972 - INFO - [161/438] ✓ Renamed 2 files for wijy1wsp03lfq5mjrhjvtwm0
+2025-12-02 23:55:27,086 - INFO - Found videos/ez0cfnojsmfa5wwlgwzwu0kg/video.mkv -> will rename to videos/ez0cfnojsmfa5wwlgwzwu0kg/original.mkv
+2025-12-02 23:55:27,188 - INFO - Renaming videos/ez0cfnojsmfa5wwlgwzwu0kg/video.mkv -> videos/ez0cfnojsmfa5wwlgwzwu0kg/original.mkv
+2025-12-02 23:55:28,194 - INFO - [162/438] ✓ Renamed 1 files for aqa3padkfm9asmv94ky774rc
+2025-12-02 23:55:28,312 - INFO - Found videos/gstsdlvy9sstecquu9q1vf7f/video.mkv -> will rename to videos/gstsdlvy9sstecquu9q1vf7f/original.mkv
+2025-12-02 23:55:28,463 - INFO - Renaming videos/gstsdlvy9sstecquu9q1vf7f/video.mkv -> videos/gstsdlvy9sstecquu9q1vf7f/original.mkv
+2025-12-02 23:55:29,203 - INFO - Renaming videos/tfahqa0n2pld6jvnu7a8k5w9/audio.mp3 -> videos/tfahqa0n2pld6jvnu7a8k5w9/original.mp3
+2025-12-02 23:55:31,233 - INFO - [163/438] ✓ Renamed 2 files for tfahqa0n2pld6jvnu7a8k5w9
+2025-12-02 23:55:31,342 - INFO - Found videos/dxx8gdculzrd3zyc6m8nuxms/video.mkv -> will rename to videos/dxx8gdculzrd3zyc6m8nuxms/original.mkv
+2025-12-02 23:55:31,506 - INFO - Renaming videos/dxx8gdculzrd3zyc6m8nuxms/video.mkv -> videos/dxx8gdculzrd3zyc6m8nuxms/original.mkv
+2025-12-02 23:55:33,474 - INFO - [164/438] ✓ Renamed 1 files for e0osaaguckezvjzf42dm6zbc
+2025-12-02 23:55:33,576 - INFO - Found videos/rtbqgjn51b7o47pidcfpzog5/video.mkv -> will rename to videos/rtbqgjn51b7o47pidcfpzog5/original.mkv
+2025-12-02 23:55:33,679 - INFO - Found videos/rtbqgjn51b7o47pidcfpzog5/audio.mp3 -> will rename to videos/rtbqgjn51b7o47pidcfpzog5/original.mp3
+2025-12-02 23:55:33,679 - INFO - Renaming videos/rtbqgjn51b7o47pidcfpzog5/video.mkv -> videos/rtbqgjn51b7o47pidcfpzog5/original.mkv
+2025-12-02 23:55:34,792 - INFO - [165/438] ✓ Renamed 1 files for cbeascecdg8e9r04gjnagspj
+2025-12-02 23:55:34,893 - INFO - Found videos/cxwpwr732hsc2olh2072h59i/video.mkv -> will rename to videos/cxwpwr732hsc2olh2072h59i/original.mkv
+2025-12-02 23:55:35,002 - INFO - Found videos/cxwpwr732hsc2olh2072h59i/audio.mp3 -> will rename to videos/cxwpwr732hsc2olh2072h59i/original.mp3
+2025-12-02 23:55:35,002 - INFO - Renaming videos/cxwpwr732hsc2olh2072h59i/video.mkv -> videos/cxwpwr732hsc2olh2072h59i/original.mkv
+2025-12-02 23:55:37,031 - INFO - [166/438] ✓ Renamed 1 files for f0wmaop52ejdvdwajkq4cr9s
+2025-12-02 23:55:37,146 - INFO - Found videos/fehk0hl4a1z3tpdrcdvnwvqz/video.mkv -> will rename to videos/fehk0hl4a1z3tpdrcdvnwvqz/original.mkv
+2025-12-02 23:55:37,260 - INFO - Renaming videos/fehk0hl4a1z3tpdrcdvnwvqz/video.mkv -> videos/fehk0hl4a1z3tpdrcdvnwvqz/original.mkv
+2025-12-02 23:55:39,606 - INFO - [167/438] ✓ Renamed 1 files for p78opknhykk7739gvc7kf5z5
+2025-12-02 23:55:39,716 - INFO - Found videos/sgekw05ckjl1lweoumx4kkp9/video.mkv -> will rename to videos/sgekw05ckjl1lweoumx4kkp9/original.mkv
+2025-12-02 23:55:39,828 - INFO - Renaming videos/sgekw05ckjl1lweoumx4kkp9/video.mkv -> videos/sgekw05ckjl1lweoumx4kkp9/original.mkv
+2025-12-02 23:55:40,915 - INFO - [168/438] ✓ Renamed 1 files for hsykkz8ovuiwzlj438z8ddav
+2025-12-02 23:55:41,027 - INFO - Found videos/hn0j9iu8ps7jaegq6iykq50c/video.mkv -> will rename to videos/hn0j9iu8ps7jaegq6iykq50c/original.mkv
+2025-12-02 23:55:41,141 - INFO - Renaming videos/hn0j9iu8ps7jaegq6iykq50c/video.mkv -> videos/hn0j9iu8ps7jaegq6iykq50c/original.mkv
+2025-12-02 23:55:47,293 - INFO - [169/438] ✓ Renamed 1 files for gstsdlvy9sstecquu9q1vf7f
+2025-12-02 23:55:47,442 - INFO - Found videos/nl7ui50173lbqlmqxck2mw3q/video.mkv -> will rename to videos/nl7ui50173lbqlmqxck2mw3q/original.mkv
+2025-12-02 23:55:47,546 - INFO - Found videos/nl7ui50173lbqlmqxck2mw3q/audio.mp3 -> will rename to videos/nl7ui50173lbqlmqxck2mw3q/original.mp3
+2025-12-02 23:55:47,546 - INFO - Renaming videos/nl7ui50173lbqlmqxck2mw3q/video.mkv -> videos/nl7ui50173lbqlmqxck2mw3q/original.mkv
+2025-12-02 23:55:48,679 - INFO - [170/438] ✓ Renamed 1 files for x8efqt1yyt322hn0ubi52pis
+2025-12-02 23:55:48,679 - INFO -
+Progress: 170/438 - Renamed: 155 videos (192 files), Skipped: 15, Failed: 0
+
+2025-12-02 23:55:48,828 - INFO - Found videos/xakqjecrktz236keekzkj3t7/video.mkv -> will rename to videos/xakqjecrktz236keekzkj3t7/original.mkv
+2025-12-02 23:55:48,969 - INFO - Renaming videos/xakqjecrktz236keekzkj3t7/video.mkv -> videos/xakqjecrktz236keekzkj3t7/original.mkv
+2025-12-02 23:55:50,651 - INFO - Renaming videos/rtbqgjn51b7o47pidcfpzog5/audio.mp3 -> videos/rtbqgjn51b7o47pidcfpzog5/original.mp3
+2025-12-02 23:55:52,640 - INFO - [171/438] ✓ Renamed 2 files for rtbqgjn51b7o47pidcfpzog5
+2025-12-02 23:55:52,751 - INFO - Found videos/hxbuzyco4hyknxqtjbvsap2j/video.mkv -> will rename to videos/hxbuzyco4hyknxqtjbvsap2j/original.mkv
+2025-12-02 23:55:52,855 - INFO - Renaming videos/hxbuzyco4hyknxqtjbvsap2j/video.mkv -> videos/hxbuzyco4hyknxqtjbvsap2j/original.mkv
+2025-12-02 23:55:53,058 - INFO - Renaming videos/cxwpwr732hsc2olh2072h59i/audio.mp3 -> videos/cxwpwr732hsc2olh2072h59i/original.mp3
+2025-12-02 23:55:53,808 - INFO - [172/438] ✓ Renamed 1 files for sgekw05ckjl1lweoumx4kkp9
+2025-12-02 23:55:54,351 - INFO - [175/438] ✓ Renamed 1 files for ez0cfnojsmfa5wwlgwzwu0kg
+2025-12-02 23:55:54,388 - INFO - Found videos/ryc93p7fu30bh4kkv3ru71nk/video.mkv -> will rename to videos/ryc93p7fu30bh4kkv3ru71nk/original.mkv
+2025-12-02 23:55:54,447 - INFO - Found videos/quiidc7e2t4pu03cgvxtkxmi/video.mkv -> will rename to videos/quiidc7e2t4pu03cgvxtkxmi/original.mkv
+2025-12-02 23:55:54,545 - INFO - Renaming videos/ryc93p7fu30bh4kkv3ru71nk/video.mkv -> videos/ryc93p7fu30bh4kkv3ru71nk/original.mkv
+2025-12-02 23:55:54,596 - INFO - Found videos/quiidc7e2t4pu03cgvxtkxmi/audio.mp3 -> will rename to videos/quiidc7e2t4pu03cgvxtkxmi/original.mp3
+2025-12-02 23:55:54,596 - INFO - Renaming videos/quiidc7e2t4pu03cgvxtkxmi/video.mkv -> videos/quiidc7e2t4pu03cgvxtkxmi/original.mkv
+2025-12-02 23:55:54,817 - INFO - Renaming videos/nl7ui50173lbqlmqxck2mw3q/audio.mp3 -> videos/nl7ui50173lbqlmqxck2mw3q/original.mp3
+2025-12-02 23:55:55,262 - INFO - [176/438] ✓ Renamed 2 files for cxwpwr732hsc2olh2072h59i
+2025-12-02 23:55:55,353 - INFO - [177/438] ✓ Renamed 1 files for vt7ini6wdrms1hbc8z9rk44u
+2025-12-02 23:55:55,366 - INFO - Found videos/fq72twya4m9ymyey6u0ut3qo/video.mkv -> will rename to videos/fq72twya4m9ymyey6u0ut3qo/original.mkv
+2025-12-02 23:55:55,471 - INFO - Found videos/ecc8n8zd3p5xk96h52qdp2p7/video.mkv -> will rename to videos/ecc8n8zd3p5xk96h52qdp2p7/original.mkv
+2025-12-02 23:55:55,474 - INFO - Found videos/fq72twya4m9ymyey6u0ut3qo/audio.mp3 -> will rename to videos/fq72twya4m9ymyey6u0ut3qo/original.mp3
+2025-12-02 23:55:55,474 - INFO - Renaming videos/fq72twya4m9ymyey6u0ut3qo/video.mkv -> videos/fq72twya4m9ymyey6u0ut3qo/original.mkv
+2025-12-02 23:55:55,647 - INFO - Renaming videos/ecc8n8zd3p5xk96h52qdp2p7/video.mkv -> videos/ecc8n8zd3p5xk96h52qdp2p7/original.mkv
+2025-12-02 23:55:55,881 - INFO - [178/438] ✓ Renamed 2 files for nl7ui50173lbqlmqxck2mw3q
+2025-12-02 23:55:56,000 - INFO - Found videos/a2fq3imoh0w5zz0vx1p9czm4/video.mkv -> will rename to videos/a2fq3imoh0w5zz0vx1p9czm4/original.mkv
+2025-12-02 23:55:56,171 - INFO - Renaming videos/a2fq3imoh0w5zz0vx1p9czm4/video.mkv -> videos/a2fq3imoh0w5zz0vx1p9czm4/original.mkv
+2025-12-02 23:55:59,674 - INFO - Renaming videos/fq72twya4m9ymyey6u0ut3qo/audio.mp3 -> videos/fq72twya4m9ymyey6u0ut3qo/original.mp3
+2025-12-02 23:56:00,535 - INFO - [179/438] ✓ Renamed 2 files for fq72twya4m9ymyey6u0ut3qo
+2025-12-02 23:56:00,549 - INFO - [180/438] ✓ Renamed 1 files for ryc93p7fu30bh4kkv3ru71nk
+2025-12-02 23:56:00,549 - INFO -
+Progress: 180/438 - Renamed: 163 videos (204 files), Skipped: 17, Failed: 0
+
+2025-12-02 23:56:00,643 - INFO - Found videos/njiqkooyv0wnwu9qjpfcweqp/video.mkv -> will rename to videos/njiqkooyv0wnwu9qjpfcweqp/original.mkv
+2025-12-02 23:56:00,674 - INFO - Found videos/q29r22us2pmcizlk0v0zifyb/video.mkv -> will rename to videos/q29r22us2pmcizlk0v0zifyb/original.mkv
+2025-12-02 23:56:00,832 - INFO - Renaming videos/q29r22us2pmcizlk0v0zifyb/video.mkv -> videos/q29r22us2pmcizlk0v0zifyb/original.mkv
+2025-12-02 23:56:00,832 - INFO - Found videos/njiqkooyv0wnwu9qjpfcweqp/audio.mp3 -> will rename to videos/njiqkooyv0wnwu9qjpfcweqp/original.mp3
+2025-12-02 23:56:00,833 - INFO - Renaming videos/njiqkooyv0wnwu9qjpfcweqp/video.mkv -> videos/njiqkooyv0wnwu9qjpfcweqp/original.mkv
+2025-12-02 23:56:06,196 - INFO - [181/438] ✓ Renamed 1 files for hn0j9iu8ps7jaegq6iykq50c
+2025-12-02 23:56:06,424 - INFO - Found videos/vctezk0aahkq0ey2o0pvftdg/video.mkv -> will rename to videos/vctezk0aahkq0ey2o0pvftdg/original.mkv
+2025-12-02 23:56:06,604 - INFO - Found videos/vctezk0aahkq0ey2o0pvftdg/audio.mp3 -> will rename to videos/vctezk0aahkq0ey2o0pvftdg/original.mp3
+2025-12-02 23:56:06,604 - INFO - Renaming videos/vctezk0aahkq0ey2o0pvftdg/video.mkv -> videos/vctezk0aahkq0ey2o0pvftdg/original.mkv
+2025-12-02 23:56:07,731 - INFO - [183/438] ✓ Renamed 1 files for dxx8gdculzrd3zyc6m8nuxms
+2025-12-02 23:56:07,843 - INFO - Found videos/yfaj0ov3z8zu0sv4lp8songu/video.mkv -> will rename to videos/yfaj0ov3z8zu0sv4lp8songu/original.mkv
+2025-12-02 23:56:07,963 - INFO - Renaming videos/yfaj0ov3z8zu0sv4lp8songu/video.mkv -> videos/yfaj0ov3z8zu0sv4lp8songu/original.mkv
+2025-12-02 23:56:09,837 - INFO - [184/438] ✓ Renamed 1 files for fehk0hl4a1z3tpdrcdvnwvqz
+2025-12-02 23:56:09,951 - INFO - Found videos/abih5lxnfz58vl1ariozmar5/video.mkv -> will rename to videos/abih5lxnfz58vl1ariozmar5/original.mkv
+2025-12-02 23:56:10,092 - INFO - Renaming videos/abih5lxnfz58vl1ariozmar5/video.mkv -> videos/abih5lxnfz58vl1ariozmar5/original.mkv
+2025-12-02 23:56:11,060 - INFO - [185/438] ✓ Renamed 1 files for q29r22us2pmcizlk0v0zifyb
+2025-12-02 23:56:11,176 - INFO - Found videos/ny3894ofmg0wckadbxrcum2l/video.mkv -> will rename to videos/ny3894ofmg0wckadbxrcum2l/original.mkv
+2025-12-02 23:56:11,377 - INFO - Renaming videos/ny3894ofmg0wckadbxrcum2l/video.mkv -> videos/ny3894ofmg0wckadbxrcum2l/original.mkv
+2025-12-02 23:56:11,850 - INFO - [186/438] ✓ Renamed 1 files for hxbuzyco4hyknxqtjbvsap2j
+2025-12-02 23:56:11,953 - INFO - Found videos/e88n95c3276uqeoi7per1v6r/video.mkv -> will rename to videos/e88n95c3276uqeoi7per1v6r/original.mkv
+2025-12-02 23:56:12,058 - INFO - Renaming videos/e88n95c3276uqeoi7per1v6r/video.mkv -> videos/e88n95c3276uqeoi7per1v6r/original.mkv
+2025-12-02 23:56:13,079 - INFO - Renaming videos/quiidc7e2t4pu03cgvxtkxmi/audio.mp3 -> videos/quiidc7e2t4pu03cgvxtkxmi/original.mp3
+2025-12-02 23:56:13,418 - INFO - [187/438] ✓ Renamed 1 files for a2fq3imoh0w5zz0vx1p9czm4
+2025-12-02 23:56:13,528 - INFO - Found videos/i5nzkd2k3rgebh7w1o233lgn/video.mkv -> will rename to videos/i5nzkd2k3rgebh7w1o233lgn/original.mkv
+2025-12-02 23:56:13,632 - INFO - Found videos/i5nzkd2k3rgebh7w1o233lgn/audio.mp3 -> will rename to videos/i5nzkd2k3rgebh7w1o233lgn/original.mp3
+2025-12-02 23:56:13,632 - INFO - Renaming videos/i5nzkd2k3rgebh7w1o233lgn/video.mkv -> videos/i5nzkd2k3rgebh7w1o233lgn/original.mkv
+2025-12-02 23:56:16,357 - INFO - [188/438] ✓ Renamed 2 files for quiidc7e2t4pu03cgvxtkxmi
+2025-12-02 23:56:16,463 - INFO - Found videos/ogaami9wop6jhog6miiplwgd/video.mkv -> will rename to videos/ogaami9wop6jhog6miiplwgd/original.mkv
+2025-12-02 23:56:16,564 - INFO - Found videos/ogaami9wop6jhog6miiplwgd/audio.mp3 -> will rename to videos/ogaami9wop6jhog6miiplwgd/original.mp3
+2025-12-02 23:56:16,564 - INFO - Renaming videos/ogaami9wop6jhog6miiplwgd/video.mkv -> videos/ogaami9wop6jhog6miiplwgd/original.mkv
+2025-12-02 23:56:19,065 - INFO - Renaming videos/njiqkooyv0wnwu9qjpfcweqp/audio.mp3 -> videos/njiqkooyv0wnwu9qjpfcweqp/original.mp3
+2025-12-02 23:56:22,228 - INFO - [189/438] ✓ Renamed 1 files for xakqjecrktz236keekzkj3t7
+2025-12-02 23:56:22,327 - INFO - Found videos/l7t356j2oeuhjpwdkt18tzzl/video.mkv -> will rename to videos/l7t356j2oeuhjpwdkt18tzzl/original.mkv
+2025-12-02 23:56:22,433 - INFO - Renaming videos/l7t356j2oeuhjpwdkt18tzzl/video.mkv -> videos/l7t356j2oeuhjpwdkt18tzzl/original.mkv
+2025-12-02 23:56:22,517 - INFO - [190/438] ✓ Renamed 1 files for ecc8n8zd3p5xk96h52qdp2p7
+2025-12-02 23:56:22,517 - INFO -
+Progress: 190/438 - Renamed: 172 videos (214 files), Skipped: 18, Failed: 0
+
+2025-12-02 23:56:22,635 - INFO - Found videos/tpw7gzgjwcw3wwnx4wh7ot7c/video.mkv -> will rename to videos/tpw7gzgjwcw3wwnx4wh7ot7c/original.mkv
+2025-12-02 23:56:22,740 - INFO - Renaming videos/tpw7gzgjwcw3wwnx4wh7ot7c/video.mkv -> videos/tpw7gzgjwcw3wwnx4wh7ot7c/original.mkv
+2025-12-02 23:56:24,823 - INFO - [191/438] ✓ Renamed 2 files for njiqkooyv0wnwu9qjpfcweqp
+2025-12-02 23:56:25,015 - INFO - Found videos/kve3zukm0zulgvbw9j6m1995/video.mkv -> will rename to videos/kve3zukm0zulgvbw9j6m1995/original.mkv
+2025-12-02 23:56:25,117 - INFO - Renaming videos/kve3zukm0zulgvbw9j6m1995/video.mkv -> videos/kve3zukm0zulgvbw9j6m1995/original.mkv
+2025-12-02 23:56:26,092 - INFO - [192/438] ✓ Renamed 1 files for tpw7gzgjwcw3wwnx4wh7ot7c
+2025-12-02 23:56:26,250 - INFO - Found videos/popprfhv2ze7u6le7f5hh6sm/video.mkv -> will rename to videos/popprfhv2ze7u6le7f5hh6sm/original.mkv
+2025-12-02 23:56:26,372 - INFO - Renaming videos/popprfhv2ze7u6le7f5hh6sm/video.mkv -> videos/popprfhv2ze7u6le7f5hh6sm/original.mkv
+2025-12-02 23:56:27,651 - INFO - Renaming videos/vctezk0aahkq0ey2o0pvftdg/audio.mp3 -> videos/vctezk0aahkq0ey2o0pvftdg/original.mp3
+2025-12-02 23:56:28,896 - INFO - [193/438] ✓ Renamed 1 files for popprfhv2ze7u6le7f5hh6sm
+2025-12-02 23:56:29,203 - INFO - Found videos/ehkjl0gek4o7beg3ds705tap/video.mkv -> will rename to videos/ehkjl0gek4o7beg3ds705tap/original.mkv
+2025-12-02 23:56:29,391 - INFO - Renaming videos/ehkjl0gek4o7beg3ds705tap/video.mkv -> videos/ehkjl0gek4o7beg3ds705tap/original.mkv
+2025-12-02 23:56:30,020 - INFO - [195/438] ✓ Renamed 1 files for ehkjl0gek4o7beg3ds705tap
+2025-12-02 23:56:30,083 - INFO - [196/438] ✓ Renamed 1 files for e88n95c3276uqeoi7per1v6r
+2025-12-02 23:56:30,194 - INFO - Found videos/hea5aobhyt84z99fvl9m92t6/video.mkv -> will rename to videos/hea5aobhyt84z99fvl9m92t6/original.mkv
+2025-12-02 23:56:30,249 - INFO - Found videos/df2ymw7hboo6o05ifm73f196/video.mkv -> will rename to videos/df2ymw7hboo6o05ifm73f196/original.mkv
+2025-12-02 23:56:30,386 - INFO - Renaming videos/hea5aobhyt84z99fvl9m92t6/video.mkv -> videos/hea5aobhyt84z99fvl9m92t6/original.mkv
+2025-12-02 23:56:30,440 - INFO - Renaming videos/df2ymw7hboo6o05ifm73f196/video.mkv -> videos/df2ymw7hboo6o05ifm73f196/original.mkv
+2025-12-02 23:56:31,318 - INFO - Renaming videos/i5nzkd2k3rgebh7w1o233lgn/audio.mp3 -> videos/i5nzkd2k3rgebh7w1o233lgn/original.mp3
+2025-12-02 23:56:31,961 - INFO - [197/438] ✓ Renamed 2 files for vctezk0aahkq0ey2o0pvftdg
+2025-12-02 23:56:32,051 - INFO - [198/438] ✓ Renamed 1 files for ny3894ofmg0wckadbxrcum2l
+2025-12-02 23:56:32,082 - INFO - Found videos/oin5nhxbs9t5ndp2iym0jdk5/video.mkv -> will rename to videos/oin5nhxbs9t5ndp2iym0jdk5/original.mkv
+2025-12-02 23:56:32,169 - INFO - Found videos/lz9asjenvnxctyheh2554ow8/video.mkv -> will rename to videos/lz9asjenvnxctyheh2554ow8/original.mkv
+2025-12-02 23:56:32,192 - INFO - Renaming videos/oin5nhxbs9t5ndp2iym0jdk5/video.mkv -> videos/oin5nhxbs9t5ndp2iym0jdk5/original.mkv
+2025-12-02 23:56:32,347 - INFO - Renaming videos/lz9asjenvnxctyheh2554ow8/video.mkv -> videos/lz9asjenvnxctyheh2554ow8/original.mkv
+2025-12-02 23:56:32,561 - INFO - [199/438] ✓ Renamed 1 files for kve3zukm0zulgvbw9j6m1995
+2025-12-02 23:56:32,678 - INFO - Found videos/jqetzwc4xdsjsvd2dg58hgpw/video.mkv -> will rename to videos/jqetzwc4xdsjsvd2dg58hgpw/original.mkv
+2025-12-02 23:56:32,870 - INFO - Renaming videos/jqetzwc4xdsjsvd2dg58hgpw/video.mkv -> videos/jqetzwc4xdsjsvd2dg58hgpw/original.mkv
+2025-12-02 23:56:33,421 - INFO - [200/438] ✓ Renamed 1 files for df2ymw7hboo6o05ifm73f196
+2025-12-02 23:56:33,421 - INFO -
+Progress: 200/438 - Renamed: 181 videos (225 files), Skipped: 19, Failed: 0
+
+2025-12-02 23:56:33,591 - INFO - Found videos/ymhs0sxdh5vb6uwi88xcfiuw/video.mkv -> will rename to videos/ymhs0sxdh5vb6uwi88xcfiuw/original.mkv
+2025-12-02 23:56:33,702 - INFO - Renaming videos/ymhs0sxdh5vb6uwi88xcfiuw/video.mkv -> videos/ymhs0sxdh5vb6uwi88xcfiuw/original.mkv
+2025-12-02 23:56:33,738 - INFO - [201/438] ✓ Renamed 1 files for yfaj0ov3z8zu0sv4lp8songu
+2025-12-02 23:56:33,921 - INFO - Found videos/kpfeh5ghghzqkarckn9sxme0/video.mkv -> will rename to videos/kpfeh5ghghzqkarckn9sxme0/original.mkv
+2025-12-02 23:56:34,106 - INFO - Renaming videos/kpfeh5ghghzqkarckn9sxme0/video.mkv -> videos/kpfeh5ghghzqkarckn9sxme0/original.mkv
+2025-12-02 23:56:36,152 - INFO - [202/438] ✓ Renamed 1 files for oin5nhxbs9t5ndp2iym0jdk5
+2025-12-02 23:56:36,269 - INFO - Found videos/o1184zljah5ebqa0sj8h0i43/video.mkv -> will rename to videos/o1184zljah5ebqa0sj8h0i43/original.mkv
+2025-12-02 23:56:36,385 - INFO - Renaming videos/o1184zljah5ebqa0sj8h0i43/video.mkv -> videos/o1184zljah5ebqa0sj8h0i43/original.mkv
+2025-12-02 23:56:36,680 - INFO - [203/438] ✓ Renamed 2 files for i5nzkd2k3rgebh7w1o233lgn
+2025-12-02 23:56:36,779 - INFO - Found videos/w0uip58s7736ttgcf5gg6mau/video.mkv -> will rename to videos/w0uip58s7736ttgcf5gg6mau/original.mkv
+2025-12-02 23:56:36,845 - INFO - Renaming videos/ogaami9wop6jhog6miiplwgd/audio.mp3 -> videos/ogaami9wop6jhog6miiplwgd/original.mp3
+2025-12-02 23:56:36,886 - INFO - Renaming videos/w0uip58s7736ttgcf5gg6mau/video.mkv -> videos/w0uip58s7736ttgcf5gg6mau/original.mkv
+2025-12-02 23:56:40,582 - INFO - [204/438] ✓ Renamed 1 files for w0uip58s7736ttgcf5gg6mau
+2025-12-02 23:56:40,733 - INFO - Found videos/iu23nk9tr6alciejrlbxmto1/video.mkv -> will rename to videos/iu23nk9tr6alciejrlbxmto1/original.mkv
+2025-12-02 23:56:40,833 - INFO - Found videos/iu23nk9tr6alciejrlbxmto1/audio.mp3 -> will rename to videos/iu23nk9tr6alciejrlbxmto1/original.mp3
+2025-12-02 23:56:40,833 - INFO - Renaming videos/iu23nk9tr6alciejrlbxmto1/video.mkv -> videos/iu23nk9tr6alciejrlbxmto1/original.mkv
+2025-12-02 23:56:40,846 - INFO - [205/438] ✓ Renamed 1 files for abih5lxnfz58vl1ariozmar5
+2025-12-02 23:56:40,967 - INFO - Found videos/h0e270cxlhdgnr6x20mcno3d/video.mkv -> will rename to videos/h0e270cxlhdgnr6x20mcno3d/original.mkv
+2025-12-02 23:56:41,090 - INFO - Found videos/h0e270cxlhdgnr6x20mcno3d/audio.mp3 -> will rename to videos/h0e270cxlhdgnr6x20mcno3d/original.mp3
+2025-12-02 23:56:41,090 - INFO - Renaming videos/h0e270cxlhdgnr6x20mcno3d/video.mkv -> videos/h0e270cxlhdgnr6x20mcno3d/original.mkv
+2025-12-02 23:56:43,827 - INFO - [206/438] ✓ Renamed 1 files for jqetzwc4xdsjsvd2dg58hgpw
+2025-12-02 23:56:43,827 - INFO - [207/438] ✓ Renamed 1 files for l7t356j2oeuhjpwdkt18tzzl
+2025-12-02 23:56:43,934 - INFO - Found videos/psekx95vb79ashjkm2ibmc3k/video.mkv -> will rename to videos/psekx95vb79ashjkm2ibmc3k/original.mkv
+2025-12-02 23:56:44,047 - INFO - Found videos/htbqsbretwpet6gemsqu80yx/video.mkv -> will rename to videos/htbqsbretwpet6gemsqu80yx/original.mkv
+2025-12-02 23:56:44,050 - INFO - Renaming videos/psekx95vb79ashjkm2ibmc3k/video.mkv -> videos/psekx95vb79ashjkm2ibmc3k/original.mkv
+2025-12-02 23:56:44,154 - INFO - Renaming videos/htbqsbretwpet6gemsqu80yx/video.mkv -> videos/htbqsbretwpet6gemsqu80yx/original.mkv
+2025-12-02 23:56:44,190 - INFO - [209/438] ✓ Renamed 2 files for ogaami9wop6jhog6miiplwgd
+2025-12-02 23:56:44,350 - INFO - Found videos/sv0mv7oqjeu35421sjkffdou/video.mkv -> will rename to videos/sv0mv7oqjeu35421sjkffdou/original.mkv
+2025-12-02 23:56:44,453 - INFO - Renaming videos/sv0mv7oqjeu35421sjkffdou/video.mkv -> videos/sv0mv7oqjeu35421sjkffdou/original.mkv
+2025-12-02 23:56:47,585 - INFO - [210/438] ✓ Renamed 1 files for hea5aobhyt84z99fvl9m92t6
+2025-12-02 23:56:47,585 - INFO -
+Progress: 210/438 - Renamed: 190 videos (236 files), Skipped: 20, Failed: 0
+
+2025-12-02 23:56:47,698 - INFO - Found videos/mmc8esyg7i2qkrni256w8t5s/video.mkv -> will rename to videos/mmc8esyg7i2qkrni256w8t5s/original.mkv
+2025-12-02 23:56:47,810 - INFO - Found videos/mmc8esyg7i2qkrni256w8t5s/audio.mp3 -> will rename to videos/mmc8esyg7i2qkrni256w8t5s/original.mp3
+2025-12-02 23:56:47,810 - INFO - Renaming videos/mmc8esyg7i2qkrni256w8t5s/video.mkv -> videos/mmc8esyg7i2qkrni256w8t5s/original.mkv
+2025-12-02 23:56:47,915 - INFO - Renaming videos/h0e270cxlhdgnr6x20mcno3d/audio.mp3 -> videos/h0e270cxlhdgnr6x20mcno3d/original.mp3
+2025-12-02 23:56:48,412 - INFO - [211/438] ✓ Renamed 1 files for htbqsbretwpet6gemsqu80yx
+2025-12-02 23:56:48,606 - INFO - Found videos/tz2zluiv36gqzos7fcrnx1gx/video.mkv -> will rename to videos/tz2zluiv36gqzos7fcrnx1gx/original.mkv
+2025-12-02 23:56:48,640 - INFO - [212/438] ✓ Renamed 2 files for h0e270cxlhdgnr6x20mcno3d
+2025-12-02 23:56:48,711 - INFO - Renaming videos/tz2zluiv36gqzos7fcrnx1gx/video.mkv -> videos/tz2zluiv36gqzos7fcrnx1gx/original.mkv
+2025-12-02 23:56:48,858 - INFO - Found videos/lb152fahj4mgnkhcx1lsnejr/video.mkv -> will rename to videos/lb152fahj4mgnkhcx1lsnejr/original.mkv
+2025-12-02 23:56:49,067 - INFO - Renaming videos/lb152fahj4mgnkhcx1lsnejr/video.mkv -> videos/lb152fahj4mgnkhcx1lsnejr/original.mkv
+2025-12-02 23:56:49,428 - INFO - [214/438] ✓ Renamed 1 files for tz2zluiv36gqzos7fcrnx1gx
+2025-12-02 23:56:49,697 - INFO - Found videos/knjh17mds1g14mv1smmzoqoq/video.mkv -> will rename to videos/knjh17mds1g14mv1smmzoqoq/original.mkv
+2025-12-02 23:56:49,809 - INFO - Renaming videos/knjh17mds1g14mv1smmzoqoq/video.mkv -> videos/knjh17mds1g14mv1smmzoqoq/original.mkv
+2025-12-02 23:56:49,864 - INFO - [216/438] ✓ Renamed 1 files for o1184zljah5ebqa0sj8h0i43
+2025-12-02 23:56:49,975 - INFO - Found videos/a3fgm13ik7jug2x4xzh7w7sb/video.mkv -> will rename to videos/a3fgm13ik7jug2x4xzh7w7sb/original.mkv
+2025-12-02 23:56:50,174 - INFO - Renaming videos/a3fgm13ik7jug2x4xzh7w7sb/video.mkv -> videos/a3fgm13ik7jug2x4xzh7w7sb/original.mkv
+2025-12-02 23:56:51,590 - INFO - [217/438] ✓ Renamed 1 files for ymhs0sxdh5vb6uwi88xcfiuw
+2025-12-02 23:56:51,740 - INFO - Found videos/gz9ugwq7gwf0gl4mstpf6v7q/video.mkv -> will rename to videos/gz9ugwq7gwf0gl4mstpf6v7q/original.mkv
+2025-12-02 23:56:51,844 - INFO - Renaming videos/gz9ugwq7gwf0gl4mstpf6v7q/video.mkv -> videos/gz9ugwq7gwf0gl4mstpf6v7q/original.mkv
+2025-12-02 23:56:54,068 - INFO - [218/438] ✓ Renamed 1 files for gz9ugwq7gwf0gl4mstpf6v7q
+2025-12-02 23:56:54,164 - INFO - Found videos/gz1nbyatbi6h3q1usddwkdqh/video.mkv -> will rename to videos/gz1nbyatbi6h3q1usddwkdqh/original.mkv
+2025-12-02 23:56:54,316 - INFO - Renaming videos/gz1nbyatbi6h3q1usddwkdqh/video.mkv -> videos/gz1nbyatbi6h3q1usddwkdqh/original.mkv
+2025-12-02 23:56:54,411 - INFO - [219/438] ✓ Renamed 1 files for lz9asjenvnxctyheh2554ow8
+2025-12-02 23:56:54,528 - INFO - Found videos/lb438p217zya3imz0gaex2gb/video.mkv -> will rename to videos/lb438p217zya3imz0gaex2gb/original.mkv
+2025-12-02 23:56:54,648 - INFO - Renaming videos/lb438p217zya3imz0gaex2gb/video.mkv -> videos/lb438p217zya3imz0gaex2gb/original.mkv
+2025-12-02 23:56:54,921 - INFO - Renaming videos/iu23nk9tr6alciejrlbxmto1/audio.mp3 -> videos/iu23nk9tr6alciejrlbxmto1/original.mp3
+2025-12-02 23:56:55,969 - INFO - [220/438] ✓ Renamed 1 files for psekx95vb79ashjkm2ibmc3k
+2025-12-02 23:56:55,969 - INFO -
+Progress: 220/438 - Renamed: 198 videos (245 files), Skipped: 22, Failed: 0
+
+2025-12-02 23:56:56,081 - INFO - Found videos/hmi73u4rxevdc9jb39tu1lxq/video.mkv -> will rename to videos/hmi73u4rxevdc9jb39tu1lxq/original.mkv
+2025-12-02 23:56:56,184 - INFO - Found videos/hmi73u4rxevdc9jb39tu1lxq/audio.mp3 -> will rename to videos/hmi73u4rxevdc9jb39tu1lxq/original.mp3
+2025-12-02 23:56:56,184 - INFO - Renaming videos/hmi73u4rxevdc9jb39tu1lxq/video.mkv -> videos/hmi73u4rxevdc9jb39tu1lxq/original.mkv
+2025-12-02 23:56:58,436 - INFO - [221/438] ✓ Renamed 2 files for iu23nk9tr6alciejrlbxmto1
+2025-12-02 23:56:58,542 - INFO - Found videos/wnyx8wdix9q5qxff46mrjrfg/video.mkv -> will rename to videos/wnyx8wdix9q5qxff46mrjrfg/original.mkv
+2025-12-02 23:56:58,649 - INFO - Renaming videos/wnyx8wdix9q5qxff46mrjrfg/video.mkv -> videos/wnyx8wdix9q5qxff46mrjrfg/original.mkv
+2025-12-02 23:57:00,285 - INFO - [222/438] ✓ Renamed 1 files for gz1nbyatbi6h3q1usddwkdqh
+2025-12-02 23:57:00,375 - INFO - Found videos/lo9o8fuuanvpurseh8sv6ef8/video.mkv -> will rename to videos/lo9o8fuuanvpurseh8sv6ef8/original.mkv
+2025-12-02 23:57:00,484 - INFO - Found videos/lo9o8fuuanvpurseh8sv6ef8/audio.mp3 -> will rename to videos/lo9o8fuuanvpurseh8sv6ef8/original.mp3
+2025-12-02 23:57:00,484 - INFO - Renaming videos/lo9o8fuuanvpurseh8sv6ef8/video.mkv -> videos/lo9o8fuuanvpurseh8sv6ef8/original.mkv
+2025-12-02 23:57:07,290 - INFO - [223/438] ✓ Renamed 1 files for wnyx8wdix9q5qxff46mrjrfg
+2025-12-02 23:57:07,480 - INFO - Found videos/p795mbb7u556q13aap1d4m1j/video.mkv -> will rename to videos/p795mbb7u556q13aap1d4m1j/original.mkv
+2025-12-02 23:57:07,579 - INFO - Renaming videos/p795mbb7u556q13aap1d4m1j/video.mkv -> videos/p795mbb7u556q13aap1d4m1j/original.mkv
+2025-12-02 23:57:09,391 - INFO - Renaming videos/hmi73u4rxevdc9jb39tu1lxq/audio.mp3 -> videos/hmi73u4rxevdc9jb39tu1lxq/original.mp3
+2025-12-02 23:57:10,332 - INFO - [224/438] ✓ Renamed 2 files for hmi73u4rxevdc9jb39tu1lxq
+2025-12-02 23:57:10,498 - INFO - Found videos/l87s0mff9plb3tn1r8b1l3ie/video.mkv -> will rename to videos/l87s0mff9plb3tn1r8b1l3ie/original.mkv
+2025-12-02 23:57:10,678 - INFO - Renaming videos/l87s0mff9plb3tn1r8b1l3ie/video.mkv -> videos/l87s0mff9plb3tn1r8b1l3ie/original.mkv
+2025-12-02 23:57:11,835 - INFO - Renaming videos/mmc8esyg7i2qkrni256w8t5s/audio.mp3 -> videos/mmc8esyg7i2qkrni256w8t5s/original.mp3
+2025-12-02 23:57:12,532 - INFO - [225/438] ✓ Renamed 1 files for p795mbb7u556q13aap1d4m1j
+2025-12-02 23:57:12,725 - INFO - Found videos/shduj6ini35ebkqltlqfdagb/video.mkv -> will rename to videos/shduj6ini35ebkqltlqfdagb/original.mkv
+2025-12-02 23:57:12,726 - INFO - [226/438] ✓ Renamed 1 files for sv0mv7oqjeu35421sjkffdou
+2025-12-02 23:57:12,850 - INFO - Renaming videos/shduj6ini35ebkqltlqfdagb/video.mkv -> videos/shduj6ini35ebkqltlqfdagb/original.mkv
+2025-12-02 23:57:12,851 - INFO - Found videos/l7vd0dst1evod87rrxy0zc1c/video.mkv -> will rename to videos/l7vd0dst1evod87rrxy0zc1c/original.mkv
+2025-12-02 23:57:12,958 - INFO - Renaming videos/l7vd0dst1evod87rrxy0zc1c/video.mkv -> videos/l7vd0dst1evod87rrxy0zc1c/original.mkv
+2025-12-02 23:57:13,060 - INFO - [227/438] ✓ Renamed 1 files for knjh17mds1g14mv1smmzoqoq
+2025-12-02 23:57:13,060 - INFO - [228/438] ✓ Renamed 1 files for a3fgm13ik7jug2x4xzh7w7sb
+2025-12-02 23:57:13,249 - INFO - Found videos/czct26lrzw3y5ylu4tjvfsq5/video.mkv -> will rename to videos/czct26lrzw3y5ylu4tjvfsq5/original.mkv
+2025-12-02 23:57:13,249 - INFO - Found videos/kda08fq63i5ibx1panb4xixj/video.mkv -> will rename to videos/kda08fq63i5ibx1panb4xixj/original.mkv
+2025-12-02 23:57:13,353 - INFO - Renaming videos/kda08fq63i5ibx1panb4xixj/video.mkv -> videos/kda08fq63i5ibx1panb4xixj/original.mkv
+2025-12-02 23:57:13,369 - INFO - Found videos/czct26lrzw3y5ylu4tjvfsq5/audio.mp3 -> will rename to videos/czct26lrzw3y5ylu4tjvfsq5/original.mp3
+2025-12-02 23:57:13,369 - INFO - Renaming videos/czct26lrzw3y5ylu4tjvfsq5/video.mkv -> videos/czct26lrzw3y5ylu4tjvfsq5/original.mkv
+2025-12-02 23:57:13,937 - INFO - Renaming videos/lo9o8fuuanvpurseh8sv6ef8/audio.mp3 -> videos/lo9o8fuuanvpurseh8sv6ef8/original.mp3
+2025-12-02 23:57:16,203 - INFO - [229/438] ✓ Renamed 2 files for mmc8esyg7i2qkrni256w8t5s
+2025-12-02 23:57:16,396 - INFO - Found videos/h1kngbg4x4wka60t4n8e4wp3/video.mkv -> will rename to videos/h1kngbg4x4wka60t4n8e4wp3/original.mkv
+2025-12-02 23:57:16,526 - INFO - Found videos/h1kngbg4x4wka60t4n8e4wp3/audio.mp3 -> will rename to videos/h1kngbg4x4wka60t4n8e4wp3/original.mp3
+2025-12-02 23:57:16,526 - INFO - Renaming videos/h1kngbg4x4wka60t4n8e4wp3/video.mkv -> videos/h1kngbg4x4wka60t4n8e4wp3/original.mkv
+2025-12-02 23:57:16,563 - INFO - [230/438] ✓ Renamed 1 files for l7vd0dst1evod87rrxy0zc1c
+2025-12-02 23:57:16,563 - INFO -
+Progress: 230/438 - Renamed: 208 videos (258 files), Skipped: 22, Failed: 0
+
+2025-12-02 23:57:16,730 - INFO - Found videos/pouwf0236kergibtt5mza0l8/video.mkv -> will rename to videos/pouwf0236kergibtt5mza0l8/original.mkv
+2025-12-02 23:57:16,919 - INFO - Renaming videos/pouwf0236kergibtt5mza0l8/video.mkv -> videos/pouwf0236kergibtt5mza0l8/original.mkv
+2025-12-02 23:57:18,302 - INFO - [231/438] ✓ Renamed 1 files for pouwf0236kergibtt5mza0l8
+2025-12-02 23:57:18,491 - INFO - Found videos/mh60f0f2hl456ojllosxzfod/video.mkv -> will rename to videos/mh60f0f2hl456ojllosxzfod/original.mkv
+2025-12-02 23:57:18,586 - INFO - Renaming videos/mh60f0f2hl456ojllosxzfod/video.mkv -> videos/mh60f0f2hl456ojllosxzfod/original.mkv
+2025-12-02 23:57:19,349 - INFO - [232/438] ✓ Renamed 2 files for lo9o8fuuanvpurseh8sv6ef8
+2025-12-02 23:57:19,540 - INFO - Found videos/vxnm3rycgt9l71t5svvca8s5/video.mkv -> will rename to videos/vxnm3rycgt9l71t5svvca8s5/original.mkv
+2025-12-02 23:57:19,644 - INFO - Renaming videos/vxnm3rycgt9l71t5svvca8s5/video.mkv -> videos/vxnm3rycgt9l71t5svvca8s5/original.mkv
+2025-12-02 23:57:20,923 - INFO - [233/438] ✓ Renamed 1 files for lb438p217zya3imz0gaex2gb
+2025-12-02 23:57:21,113 - INFO - Found videos/cltp71j8isrwr6jhdiiikdbw/video.mkv -> will rename to videos/cltp71j8isrwr6jhdiiikdbw/original.mkv
+2025-12-02 23:57:21,236 - INFO - Renaming videos/cltp71j8isrwr6jhdiiikdbw/video.mkv -> videos/cltp71j8isrwr6jhdiiikdbw/original.mkv
+2025-12-02 23:57:23,968 - INFO - [234/438] ✓ Renamed 1 files for kda08fq63i5ibx1panb4xixj
+2025-12-02 23:57:24,118 - INFO - Found videos/qkzz0unysafq2cec03jmyhyr/video.mkv -> will rename to videos/qkzz0unysafq2cec03jmyhyr/original.mkv
+2025-12-02 23:57:24,325 - INFO - Renaming videos/qkzz0unysafq2cec03jmyhyr/video.mkv -> videos/qkzz0unysafq2cec03jmyhyr/original.mkv
+2025-12-02 23:57:29,917 - INFO - [235/438] ✓ Renamed 1 files for kpfeh5ghghzqkarckn9sxme0
+2025-12-02 23:57:30,023 - INFO - Found videos/pg8dyt42vac1gmldqsjnkswg/video.mkv -> will rename to videos/pg8dyt42vac1gmldqsjnkswg/original.mkv
+2025-12-02 23:57:30,149 - INFO - Renaming videos/pg8dyt42vac1gmldqsjnkswg/video.mkv -> videos/pg8dyt42vac1gmldqsjnkswg/original.mkv
+2025-12-02 23:57:31,820 - INFO - [236/438] ✓ Renamed 1 files for cltp71j8isrwr6jhdiiikdbw
+2025-12-02 23:57:31,987 - INFO - Found videos/r1erhp4o2yh4y37tpd8lruey/video.mkv -> will rename to videos/r1erhp4o2yh4y37tpd8lruey/original.mkv
+2025-12-02 23:57:32,097 - INFO - Renaming videos/r1erhp4o2yh4y37tpd8lruey/video.mkv -> videos/r1erhp4o2yh4y37tpd8lruey/original.mkv
+2025-12-02 23:57:33,822 - INFO - [237/438] ✓ Renamed 1 files for mh60f0f2hl456ojllosxzfod
+2025-12-02 23:57:33,924 - INFO - Found videos/gh80b8535py01j2wjsqlc12z/video.mkv -> will rename to videos/gh80b8535py01j2wjsqlc12z/original.mkv
+2025-12-02 23:57:34,087 - INFO - Renaming videos/gh80b8535py01j2wjsqlc12z/video.mkv -> videos/gh80b8535py01j2wjsqlc12z/original.mkv
+2025-12-02 23:57:34,641 - INFO - Renaming videos/czct26lrzw3y5ylu4tjvfsq5/audio.mp3 -> videos/czct26lrzw3y5ylu4tjvfsq5/original.mp3
+2025-12-02 23:57:37,012 - INFO - [238/438] ✓ Renamed 1 files for lb152fahj4mgnkhcx1lsnejr
+2025-12-02 23:57:37,175 - INFO - Found videos/c2q3win8puhpdiozuaenozl0/video.mkv -> will rename to videos/c2q3win8puhpdiozuaenozl0/original.mkv
+2025-12-02 23:57:37,279 - INFO - Renaming videos/c2q3win8puhpdiozuaenozl0/video.mkv -> videos/c2q3win8puhpdiozuaenozl0/original.mkv
+2025-12-02 23:57:37,967 - INFO - [239/438] ✓ Renamed 2 files for czct26lrzw3y5ylu4tjvfsq5
+2025-12-02 23:57:38,074 - INFO - Found videos/t6z7vbrzz03zq1xvwlugnyoz/video.mkv -> will rename to videos/t6z7vbrzz03zq1xvwlugnyoz/original.mkv
+2025-12-02 23:57:38,223 - INFO - Renaming videos/h1kngbg4x4wka60t4n8e4wp3/audio.mp3 -> videos/h1kngbg4x4wka60t4n8e4wp3/original.mp3
+2025-12-02 23:57:38,224 - INFO - Renaming videos/t6z7vbrzz03zq1xvwlugnyoz/video.mkv -> videos/t6z7vbrzz03zq1xvwlugnyoz/original.mkv
+2025-12-02 23:57:41,175 - INFO - [240/438] ✓ Renamed 1 files for shduj6ini35ebkqltlqfdagb
+2025-12-02 23:57:41,175 - INFO -
+Progress: 240/438 - Renamed: 218 videos (270 files), Skipped: 22, Failed: 0
+
+2025-12-02 23:57:41,279 - INFO - Found videos/bwo73aoo2k6ae9lrukcj6onr/video.mkv -> will rename to videos/bwo73aoo2k6ae9lrukcj6onr/original.mkv
+2025-12-02 23:57:41,382 - INFO - Found videos/bwo73aoo2k6ae9lrukcj6onr/audio.mp3 -> will rename to videos/bwo73aoo2k6ae9lrukcj6onr/original.mp3
+2025-12-02 23:57:41,382 - INFO - Renaming videos/bwo73aoo2k6ae9lrukcj6onr/video.mkv -> videos/bwo73aoo2k6ae9lrukcj6onr/original.mkv
+2025-12-02 23:57:42,249 - INFO - [241/438] ✓ Renamed 2 files for h1kngbg4x4wka60t4n8e4wp3
+2025-12-02 23:57:42,362 - INFO - Found videos/vdrhgslpog6635j9qhfw2faj/video.mkv -> will rename to videos/vdrhgslpog6635j9qhfw2faj/original.mkv
+2025-12-02 23:57:42,478 - INFO - Renaming videos/vdrhgslpog6635j9qhfw2faj/video.mkv -> videos/vdrhgslpog6635j9qhfw2faj/original.mkv
+2025-12-02 23:57:43,183 - INFO - [242/438] ✓ Renamed 1 files for pg8dyt42vac1gmldqsjnkswg
+2025-12-02 23:57:43,288 - INFO - Found videos/dpcat5afr4tp3p580cp0370w/video.mkv -> will rename to videos/dpcat5afr4tp3p580cp0370w/original.mkv
+2025-12-02 23:57:43,388 - INFO - Renaming videos/dpcat5afr4tp3p580cp0370w/video.mkv -> videos/dpcat5afr4tp3p580cp0370w/original.mkv
+2025-12-02 23:57:43,443 - INFO - [243/438] ✓ Renamed 1 files for qkzz0unysafq2cec03jmyhyr
+2025-12-02 23:57:43,642 - INFO - Found videos/fqasod5sk7o8fk3pnzng0thp/video.mkv -> will rename to videos/fqasod5sk7o8fk3pnzng0thp/original.mkv
+2025-12-02 23:57:43,737 - INFO - Found videos/fqasod5sk7o8fk3pnzng0thp/audio.mp3 -> will rename to videos/fqasod5sk7o8fk3pnzng0thp/original.mp3
+2025-12-02 23:57:43,737 - INFO - Renaming videos/fqasod5sk7o8fk3pnzng0thp/video.mkv -> videos/fqasod5sk7o8fk3pnzng0thp/original.mkv
+2025-12-02 23:57:44,455 - INFO - [245/438] ✓ Renamed 1 files for vxnm3rycgt9l71t5svvca8s5
+2025-12-02 23:57:44,678 - INFO - Found videos/lrjealvghd3l5zbmh367lk6x/video.mkv -> will rename to videos/lrjealvghd3l5zbmh367lk6x/original.mkv
+2025-12-02 23:57:44,784 - INFO - Renaming videos/lrjealvghd3l5zbmh367lk6x/video.mkv -> videos/lrjealvghd3l5zbmh367lk6x/original.mkv
+2025-12-02 23:57:46,010 - INFO - [247/438] ✓ Renamed 1 files for t6z7vbrzz03zq1xvwlugnyoz
+2025-12-02 23:57:46,083 - INFO - Renaming videos/bwo73aoo2k6ae9lrukcj6onr/audio.mp3 -> videos/bwo73aoo2k6ae9lrukcj6onr/original.mp3
+2025-12-02 23:57:46,144 - INFO - Found videos/ycuvz85u2a7678qr5o4a488z/video.mkv -> will rename to videos/ycuvz85u2a7678qr5o4a488z/original.mkv
+2025-12-02 23:57:46,268 - INFO - Renaming videos/ycuvz85u2a7678qr5o4a488z/video.mkv -> videos/ycuvz85u2a7678qr5o4a488z/original.mkv
+2025-12-02 23:57:46,949 - INFO - [248/438] ✓ Renamed 2 files for bwo73aoo2k6ae9lrukcj6onr
+2025-12-02 23:57:47,068 - INFO - Found videos/zybh1hw8655u5i7j6njntv59/video.mkv -> will rename to videos/zybh1hw8655u5i7j6njntv59/original.mkv
+2025-12-02 23:57:47,194 - INFO - Renaming videos/zybh1hw8655u5i7j6njntv59/video.mkv -> videos/zybh1hw8655u5i7j6njntv59/original.mkv
+2025-12-02 23:57:48,367 - INFO - [249/438] ✓ Renamed 1 files for l87s0mff9plb3tn1r8b1l3ie
+2025-12-02 23:57:48,487 - INFO - Found videos/y1slpx2oa6kqxb59w11ohtte/video.mkv -> will rename to videos/y1slpx2oa6kqxb59w11ohtte/original.mkv
+2025-12-02 23:57:48,606 - INFO - Renaming videos/y1slpx2oa6kqxb59w11ohtte/video.mkv -> videos/y1slpx2oa6kqxb59w11ohtte/original.mkv
+2025-12-02 23:57:48,699 - INFO - [250/438] ✓ Renamed 1 files for vdrhgslpog6635j9qhfw2faj
+2025-12-02 23:57:48,699 - INFO -
+Progress: 250/438 - Renamed: 226 videos (280 files), Skipped: 24, Failed: 0
+
+2025-12-02 23:57:48,812 - INFO - Found videos/gcyhdcr1fqccea0s1idebvw9/video.mkv -> will rename to videos/gcyhdcr1fqccea0s1idebvw9/original.mkv
+2025-12-02 23:57:48,933 - INFO - Renaming videos/gcyhdcr1fqccea0s1idebvw9/video.mkv -> videos/gcyhdcr1fqccea0s1idebvw9/original.mkv
+2025-12-02 23:57:51,476 - INFO - Renaming videos/fqasod5sk7o8fk3pnzng0thp/audio.mp3 -> videos/fqasod5sk7o8fk3pnzng0thp/original.mp3
+2025-12-02 23:57:51,918 - INFO - [251/438] ✓ Renamed 1 files for lrjealvghd3l5zbmh367lk6x
+2025-12-02 23:57:52,033 - INFO - Found videos/phimrqhbsfj1y0gl2as0s3ce/video.mkv -> will rename to videos/phimrqhbsfj1y0gl2as0s3ce/original.mkv
+2025-12-02 23:57:52,116 - INFO - Renaming videos/phimrqhbsfj1y0gl2as0s3ce/video.mkv -> videos/phimrqhbsfj1y0gl2as0s3ce/original.mkv
+2025-12-02 23:57:54,201 - INFO - [252/438] ✓ Renamed 2 files for fqasod5sk7o8fk3pnzng0thp
+2025-12-02 23:57:54,346 - INFO - Found videos/usjlx0m96px21ont4ouar9a7/video.mkv -> will rename to videos/usjlx0m96px21ont4ouar9a7/original.mkv
+2025-12-02 23:57:54,442 - INFO - Renaming videos/usjlx0m96px21ont4ouar9a7/video.mkv -> videos/usjlx0m96px21ont4ouar9a7/original.mkv
+2025-12-02 23:57:54,871 - INFO - [253/438] ✓ Renamed 1 files for y1slpx2oa6kqxb59w11ohtte
+2025-12-02 23:57:55,061 - INFO - Found videos/yefvbphvn4f2frn2g1n9srlh/video.mkv -> will rename to videos/yefvbphvn4f2frn2g1n9srlh/original.mkv
+2025-12-02 23:57:55,177 - INFO - Renaming videos/yefvbphvn4f2frn2g1n9srlh/video.mkv -> videos/yefvbphvn4f2frn2g1n9srlh/original.mkv
+2025-12-02 23:57:58,540 - INFO - [254/438] ✓ Renamed 1 files for gcyhdcr1fqccea0s1idebvw9
+2025-12-02 23:57:58,644 - INFO - Found videos/x7i5glnt55z23vrd3th0wgbb/video.mkv -> will rename to videos/x7i5glnt55z23vrd3th0wgbb/original.mkv
+2025-12-02 23:57:58,789 - INFO - Renaming videos/x7i5glnt55z23vrd3th0wgbb/video.mkv -> videos/x7i5glnt55z23vrd3th0wgbb/original.mkv
+2025-12-02 23:58:00,194 - INFO - [255/438] ✓ Renamed 1 files for gh80b8535py01j2wjsqlc12z
+2025-12-02 23:58:00,361 - INFO - Found videos/lxx8tfrfnnhiv1ur4h6t60t0/video.mkv -> will rename to videos/lxx8tfrfnnhiv1ur4h6t60t0/original.mkv
+2025-12-02 23:58:00,462 - INFO - Found videos/lxx8tfrfnnhiv1ur4h6t60t0/audio.mp3 -> will rename to videos/lxx8tfrfnnhiv1ur4h6t60t0/original.mp3
+2025-12-02 23:58:00,462 - INFO - Renaming videos/lxx8tfrfnnhiv1ur4h6t60t0/video.mkv -> videos/lxx8tfrfnnhiv1ur4h6t60t0/original.mkv
+2025-12-02 23:58:01,360 - INFO - [256/438] ✓ Renamed 1 files for c2q3win8puhpdiozuaenozl0
+2025-12-02 23:58:01,687 - INFO - Found videos/jmjdponjje5ueukwqlprmcbq/video.mkv -> will rename to videos/jmjdponjje5ueukwqlprmcbq/original.mkv
+2025-12-02 23:58:01,877 - INFO - Found videos/jmjdponjje5ueukwqlprmcbq/audio.mp3 -> will rename to videos/jmjdponjje5ueukwqlprmcbq/original.mp3
+2025-12-02 23:58:01,877 - INFO - Renaming videos/jmjdponjje5ueukwqlprmcbq/video.mkv -> videos/jmjdponjje5ueukwqlprmcbq/original.mkv
+2025-12-02 23:58:03,974 - INFO - [258/438] ✓ Renamed 1 files for ycuvz85u2a7678qr5o4a488z
+2025-12-02 23:58:04,102 - INFO - Found videos/eoabgl7qts1lx2b0e5wwt3nf/video.mkv -> will rename to videos/eoabgl7qts1lx2b0e5wwt3nf/original.mkv
+2025-12-02 23:58:04,210 - INFO - Found videos/eoabgl7qts1lx2b0e5wwt3nf/audio.mp3 -> will rename to videos/eoabgl7qts1lx2b0e5wwt3nf/original.mp3
+2025-12-02 23:58:04,210 - INFO - Renaming videos/eoabgl7qts1lx2b0e5wwt3nf/video.mkv -> videos/eoabgl7qts1lx2b0e5wwt3nf/original.mkv
+2025-12-02 23:58:05,020 - INFO - Renaming videos/lxx8tfrfnnhiv1ur4h6t60t0/audio.mp3 -> videos/lxx8tfrfnnhiv1ur4h6t60t0/original.mp3
+2025-12-02 23:58:05,463 - INFO - [259/438] ✓ Renamed 1 files for r1erhp4o2yh4y37tpd8lruey
+2025-12-02 23:58:05,546 - INFO - [260/438] ✓ Renamed 1 files for zybh1hw8655u5i7j6njntv59
+2025-12-02 23:58:05,546 - INFO -
+Progress: 260/438 - Renamed: 235 videos (290 files), Skipped: 25, Failed: 0
+
+2025-12-02 23:58:05,661 - INFO - Found videos/jocpdohtl9lz7fg6kxnxmaob/video.mkv -> will rename to videos/jocpdohtl9lz7fg6kxnxmaob/original.mkv
+2025-12-02 23:58:05,669 - INFO - Found videos/ympxzz6i18n05jt20duju7if/video.mkv -> will rename to videos/ympxzz6i18n05jt20duju7if/original.mkv
+2025-12-02 23:58:05,774 - INFO - Found videos/jocpdohtl9lz7fg6kxnxmaob/audio.mp3 -> will rename to videos/jocpdohtl9lz7fg6kxnxmaob/original.mp3
+2025-12-02 23:58:05,774 - INFO - Renaming videos/jocpdohtl9lz7fg6kxnxmaob/video.mkv -> videos/jocpdohtl9lz7fg6kxnxmaob/original.mkv
+2025-12-02 23:58:05,783 - INFO - Renaming videos/ympxzz6i18n05jt20duju7if/video.mkv -> videos/ympxzz6i18n05jt20duju7if/original.mkv
+2025-12-02 23:58:05,952 - INFO - [261/438] ✓ Renamed 2 files for lxx8tfrfnnhiv1ur4h6t60t0
+2025-12-02 23:58:06,127 - INFO - Found videos/lkysm009ui6nosn3n72uy8hz/video.mkv -> will rename to videos/lkysm009ui6nosn3n72uy8hz/original.mkv
+2025-12-02 23:58:06,232 - INFO - Renaming videos/lkysm009ui6nosn3n72uy8hz/video.mkv -> videos/lkysm009ui6nosn3n72uy8hz/original.mkv
+2025-12-02 23:58:07,735 - INFO - [262/438] ✓ Renamed 1 files for usjlx0m96px21ont4ouar9a7
+2025-12-02 23:58:07,828 - INFO - Found videos/wl4qofn1pion1tpxmcfdog4b/video.mkv -> will rename to videos/wl4qofn1pion1tpxmcfdog4b/original.mkv
+2025-12-02 23:58:08,029 - INFO - Renaming videos/wl4qofn1pion1tpxmcfdog4b/video.mkv -> videos/wl4qofn1pion1tpxmcfdog4b/original.mkv
+2025-12-02 23:58:09,946 - INFO - [263/438] ✓ Renamed 1 files for dpcat5afr4tp3p580cp0370w
+2025-12-02 23:58:10,132 - INFO - Found videos/m33ycy3p5m13rbpi3h4bkbv0/video.mkv -> will rename to videos/m33ycy3p5m13rbpi3h4bkbv0/original.mkv
+2025-12-02 23:58:10,319 - INFO - Renaming videos/m33ycy3p5m13rbpi3h4bkbv0/video.mkv -> videos/m33ycy3p5m13rbpi3h4bkbv0/original.mkv
+2025-12-02 23:58:12,173 - INFO - [264/438] ✓ Renamed 1 files for wl4qofn1pion1tpxmcfdog4b
+2025-12-02 23:58:12,265 - INFO - Found videos/iujjbzvjr482rvlakapnby4u/video.mkv -> will rename to videos/iujjbzvjr482rvlakapnby4u/original.mkv
+2025-12-02 23:58:12,364 - INFO - Renaming videos/jmjdponjje5ueukwqlprmcbq/audio.mp3 -> videos/jmjdponjje5ueukwqlprmcbq/original.mp3
+2025-12-02 23:58:12,424 - INFO - Renaming videos/iujjbzvjr482rvlakapnby4u/video.mkv -> videos/iujjbzvjr482rvlakapnby4u/original.mkv
+2025-12-02 23:58:12,450 - INFO - [265/438] ✓ Renamed 1 files for x7i5glnt55z23vrd3th0wgbb
+2025-12-02 23:58:12,572 - INFO - Found videos/p573rqpaddgcyckqamxoe83g/video.mkv -> will rename to videos/p573rqpaddgcyckqamxoe83g/original.mkv
+2025-12-02 23:58:12,750 - INFO - Renaming videos/p573rqpaddgcyckqamxoe83g/video.mkv -> videos/p573rqpaddgcyckqamxoe83g/original.mkv
+2025-12-02 23:58:13,048 - INFO - [266/438] ✓ Renamed 1 files for phimrqhbsfj1y0gl2as0s3ce
+2025-12-02 23:58:13,221 - INFO - Found videos/te9uhekxxgat60sku1r85kuv/video.mkv -> will rename to videos/te9uhekxxgat60sku1r85kuv/original.mkv
+2025-12-02 23:58:13,326 - INFO - Renaming videos/te9uhekxxgat60sku1r85kuv/video.mkv -> videos/te9uhekxxgat60sku1r85kuv/original.mkv
+2025-12-02 23:58:15,020 - INFO - [267/438] ✓ Renamed 1 files for lkysm009ui6nosn3n72uy8hz
+2025-12-02 23:58:15,860 - INFO -
+Progress: 270/438 - Renamed: 242 videos (298 files), Skipped: 28, Failed: 0
+
+2025-12-02 23:58:16,115 - INFO - Found videos/dpkvcbk3w2osjcrn0szxm8oz/video.mkv -> will rename to videos/dpkvcbk3w2osjcrn0szxm8oz/original.mkv
+2025-12-02 23:58:16,374 - INFO - Renaming videos/dpkvcbk3w2osjcrn0szxm8oz/video.mkv -> videos/dpkvcbk3w2osjcrn0szxm8oz/original.mkv
+2025-12-02 23:58:16,375 - INFO - [271/438] ✓ Renamed 2 files for jmjdponjje5ueukwqlprmcbq
+2025-12-02 23:58:16,592 - INFO - Found videos/ezj8fcmms54ae9r8jk0ixwtf/video.mkv -> will rename to videos/ezj8fcmms54ae9r8jk0ixwtf/original.mkv
+2025-12-02 23:58:16,746 - INFO - Renaming videos/ezj8fcmms54ae9r8jk0ixwtf/video.mkv -> videos/ezj8fcmms54ae9r8jk0ixwtf/original.mkv
+2025-12-02 23:58:18,161 - INFO - [272/438] ✓ Renamed 1 files for ympxzz6i18n05jt20duju7if
+2025-12-02 23:58:18,288 - INFO - Found videos/peig5ghfiyldrd5pm4u9opzu/video.mkv -> will rename to videos/peig5ghfiyldrd5pm4u9opzu/original.mkv
+2025-12-02 23:58:18,468 - INFO - Renaming videos/peig5ghfiyldrd5pm4u9opzu/video.mkv -> videos/peig5ghfiyldrd5pm4u9opzu/original.mkv
+2025-12-02 23:58:21,607 - INFO - Renaming videos/jocpdohtl9lz7fg6kxnxmaob/audio.mp3 -> videos/jocpdohtl9lz7fg6kxnxmaob/original.mp3
+2025-12-02 23:58:23,774 - INFO - [273/438] ✓ Renamed 1 files for ezj8fcmms54ae9r8jk0ixwtf
+2025-12-02 23:58:23,888 - INFO - [274/438] ✓ Renamed 1 files for dpkvcbk3w2osjcrn0szxm8oz
+2025-12-02 23:58:23,889 - INFO - Found videos/asn46r4vc2cye6ihgp2zamoh/video.mkv -> will rename to videos/asn46r4vc2cye6ihgp2zamoh/original.mkv
+2025-12-02 23:58:24,008 - INFO - Renaming videos/asn46r4vc2cye6ihgp2zamoh/video.mkv -> videos/asn46r4vc2cye6ihgp2zamoh/original.mkv
+2025-12-02 23:58:24,184 - INFO - Found videos/wcnatz94skvrifq7xlm94s2s/video.mkv -> will rename to videos/wcnatz94skvrifq7xlm94s2s/original.mkv
+2025-12-02 23:58:24,301 - INFO - Renaming videos/wcnatz94skvrifq7xlm94s2s/video.mkv -> videos/wcnatz94skvrifq7xlm94s2s/original.mkv
+2025-12-02 23:58:25,570 - INFO - [276/438] ✓ Renamed 1 files for asn46r4vc2cye6ihgp2zamoh
+2025-12-02 23:58:25,678 - INFO - [277/438] ✓ Renamed 2 files for jocpdohtl9lz7fg6kxnxmaob
+2025-12-02 23:58:25,680 - INFO - Found videos/mbehnf2kqdrdmagxryh6e7tc/video.mkv -> will rename to videos/mbehnf2kqdrdmagxryh6e7tc/original.mkv
+2025-12-02 23:58:25,688 - INFO - [278/438] ✓ Renamed 1 files for m33ycy3p5m13rbpi3h4bkbv0
+2025-12-02 23:58:25,793 - INFO - Renaming videos/mbehnf2kqdrdmagxryh6e7tc/video.mkv -> videos/mbehnf2kqdrdmagxryh6e7tc/original.mkv
+2025-12-02 23:58:25,799 - INFO - Found videos/diok2rek56nt6nq7z3839qei/video.mkv -> will rename to videos/diok2rek56nt6nq7z3839qei/original.mkv
+2025-12-02 23:58:25,801 - INFO - Found videos/xi2o5y78avwfqa0pz184rd6r/video.mkv -> will rename to videos/xi2o5y78avwfqa0pz184rd6r/original.mkv
+2025-12-02 23:58:25,912 - INFO - Found videos/diok2rek56nt6nq7z3839qei/audio.mp3 -> will rename to videos/diok2rek56nt6nq7z3839qei/original.mp3
+2025-12-02 23:58:25,912 - INFO - Renaming videos/diok2rek56nt6nq7z3839qei/video.mkv -> videos/diok2rek56nt6nq7z3839qei/original.mkv
+2025-12-02 23:58:25,935 - INFO - Renaming videos/xi2o5y78avwfqa0pz184rd6r/video.mkv -> videos/xi2o5y78avwfqa0pz184rd6r/original.mkv
+2025-12-02 23:58:27,714 - INFO - [279/438] ✓ Renamed 1 files for p573rqpaddgcyckqamxoe83g
+2025-12-02 23:58:27,830 - INFO - Found videos/jder260f0z8zix9nh7u198mx/video.mkv -> will rename to videos/jder260f0z8zix9nh7u198mx/original.mkv
+2025-12-02 23:58:27,944 - INFO - Renaming videos/jder260f0z8zix9nh7u198mx/video.mkv -> videos/jder260f0z8zix9nh7u198mx/original.mkv
+2025-12-02 23:58:28,015 - INFO - [280/438] ✓ Renamed 1 files for yefvbphvn4f2frn2g1n9srlh
+2025-12-02 23:58:28,015 - INFO -
+Progress: 280/438 - Renamed: 251 videos (309 files), Skipped: 29, Failed: 0
+
+2025-12-02 23:58:28,122 - INFO - Found videos/lksy7dn1gol1tpatlye4oh6b/video.mkv -> will rename to videos/lksy7dn1gol1tpatlye4oh6b/original.mkv
+2025-12-02 23:58:28,222 - INFO - Renaming videos/lksy7dn1gol1tpatlye4oh6b/video.mkv -> videos/lksy7dn1gol1tpatlye4oh6b/original.mkv
+2025-12-02 23:58:28,857 - INFO - Renaming videos/diok2rek56nt6nq7z3839qei/audio.mp3 -> videos/diok2rek56nt6nq7z3839qei/original.mp3
+2025-12-02 23:58:29,822 - INFO - [281/438] ✓ Renamed 2 files for diok2rek56nt6nq7z3839qei
+2025-12-02 23:58:29,925 - INFO - Found videos/g3x1yu2xp7s1d9u19lp2rcoa/video.mkv -> will rename to videos/g3x1yu2xp7s1d9u19lp2rcoa/original.mkv
+2025-12-02 23:58:30,044 - INFO - Renaming videos/g3x1yu2xp7s1d9u19lp2rcoa/video.mkv -> videos/g3x1yu2xp7s1d9u19lp2rcoa/original.mkv
+2025-12-02 23:58:30,336 - INFO - Renaming videos/eoabgl7qts1lx2b0e5wwt3nf/audio.mp3 -> videos/eoabgl7qts1lx2b0e5wwt3nf/original.mp3
+2025-12-02 23:58:31,367 - INFO - [282/438] ✓ Renamed 1 files for wcnatz94skvrifq7xlm94s2s
+2025-12-02 23:58:31,478 - INFO - Found videos/tl0buwq41h0dywtit9z7tdz7/video.mkv -> will rename to videos/tl0buwq41h0dywtit9z7tdz7/original.mkv
+2025-12-02 23:58:31,587 - INFO - Renaming videos/tl0buwq41h0dywtit9z7tdz7/video.mkv -> videos/tl0buwq41h0dywtit9z7tdz7/original.mkv
+2025-12-02 23:58:33,226 - INFO - [283/438] ✓ Renamed 2 files for eoabgl7qts1lx2b0e5wwt3nf
+2025-12-02 23:58:33,399 - INFO - Found videos/c1hn6xaw51c7lj22g4p4q93k/video.mkv -> will rename to videos/c1hn6xaw51c7lj22g4p4q93k/original.mkv
+2025-12-02 23:58:33,563 - INFO - Renaming videos/c1hn6xaw51c7lj22g4p4q93k/video.mkv -> videos/c1hn6xaw51c7lj22g4p4q93k/original.mkv
+2025-12-02 23:58:38,751 - INFO - [284/438] ✓ Renamed 1 files for te9uhekxxgat60sku1r85kuv
+2025-12-02 23:58:38,978 - INFO - Found videos/oareyzu0nuanx1h7tz478z14/video.mkv -> will rename to videos/oareyzu0nuanx1h7tz478z14/original.mkv
+2025-12-02 23:58:39,136 - INFO - Renaming videos/oareyzu0nuanx1h7tz478z14/video.mkv -> videos/oareyzu0nuanx1h7tz478z14/original.mkv
+2025-12-02 23:58:41,262 - INFO - [286/438] ✓ Renamed 1 files for oareyzu0nuanx1h7tz478z14
+2025-12-02 23:58:41,428 - INFO - Found videos/b5ezd2815ffos2t8d3h2qljv/video.mkv -> will rename to videos/b5ezd2815ffos2t8d3h2qljv/original.mkv
+2025-12-02 23:58:41,558 - INFO - Renaming videos/b5ezd2815ffos2t8d3h2qljv/video.mkv -> videos/b5ezd2815ffos2t8d3h2qljv/original.mkv
+2025-12-02 23:58:46,516 - INFO - [287/438] ✓ Renamed 1 files for iujjbzvjr482rvlakapnby4u
+2025-12-02 23:58:46,659 - INFO - Found videos/ni90hh70rr77srzpo199bbfv/video.mkv -> will rename to videos/ni90hh70rr77srzpo199bbfv/original.mkv
+2025-12-02 23:58:46,760 - INFO - Renaming videos/ni90hh70rr77srzpo199bbfv/video.mkv -> videos/ni90hh70rr77srzpo199bbfv/original.mkv
+2025-12-02 23:58:47,779 - INFO - [288/438] ✓ Renamed 1 files for mbehnf2kqdrdmagxryh6e7tc
+2025-12-02 23:58:47,900 - INFO - Found videos/ejdg797b14vzlcxalspzht7o/video.mkv -> will rename to videos/ejdg797b14vzlcxalspzht7o/original.mkv
+2025-12-02 23:58:48,051 - INFO - Found videos/ejdg797b14vzlcxalspzht7o/audio.mp3 -> will rename to videos/ejdg797b14vzlcxalspzht7o/original.mp3
+2025-12-02 23:58:48,051 - INFO - Renaming videos/ejdg797b14vzlcxalspzht7o/video.mkv -> videos/ejdg797b14vzlcxalspzht7o/original.mkv
+2025-12-02 23:58:50,093 - INFO - [289/438] ✓ Renamed 1 files for g3x1yu2xp7s1d9u19lp2rcoa
+2025-12-02 23:58:50,284 - INFO - Found videos/jwtqlsuu39ser8y365oo3ic3/video.mkv -> will rename to videos/jwtqlsuu39ser8y365oo3ic3/original.mkv
+2025-12-02 23:58:50,367 - INFO - [290/438] ✓ Renamed 1 files for lksy7dn1gol1tpatlye4oh6b
+2025-12-02 23:58:50,367 - INFO -
+Progress: 290/438 - Renamed: 260 videos (320 files), Skipped: 30, Failed: 0
+
+2025-12-02 23:58:50,392 - INFO - Renaming videos/jwtqlsuu39ser8y365oo3ic3/video.mkv -> videos/jwtqlsuu39ser8y365oo3ic3/original.mkv
+2025-12-02 23:58:50,473 - INFO - Found videos/c57swxa7xohfmduusfj3apz6/video.mkv -> will rename to videos/c57swxa7xohfmduusfj3apz6/original.mkv
+2025-12-02 23:58:50,667 - INFO - Renaming videos/c57swxa7xohfmduusfj3apz6/video.mkv -> videos/c57swxa7xohfmduusfj3apz6/original.mkv
+2025-12-02 23:58:51,015 - INFO - [291/438] ✓ Renamed 1 files for jwtqlsuu39ser8y365oo3ic3
+2025-12-02 23:58:51,195 - INFO - Found videos/ncbb7hjqxhn4oev9ezbtrgu8/video.mkv -> will rename to videos/ncbb7hjqxhn4oev9ezbtrgu8/original.mkv
+2025-12-02 23:58:51,334 - INFO - Renaming videos/ncbb7hjqxhn4oev9ezbtrgu8/video.mkv -> videos/ncbb7hjqxhn4oev9ezbtrgu8/original.mkv
+2025-12-02 23:58:53,239 - INFO - [292/438] ✓ Renamed 1 files for peig5ghfiyldrd5pm4u9opzu
+2025-12-02 23:58:53,345 - INFO - Found videos/mrdik35fprvp6caj44dpkhnz/video.mkv -> will rename to videos/mrdik35fprvp6caj44dpkhnz/original.mkv
+2025-12-02 23:58:53,538 - INFO - Renaming videos/mrdik35fprvp6caj44dpkhnz/video.mkv -> videos/mrdik35fprvp6caj44dpkhnz/original.mkv
+2025-12-02 23:58:55,527 - INFO - [293/438] ✓ Renamed 1 files for c1hn6xaw51c7lj22g4p4q93k
+2025-12-02 23:58:55,641 - INFO - Found videos/thctwzl2bu0j7nx0vxonxb0m/video.mkv -> will rename to videos/thctwzl2bu0j7nx0vxonxb0m/original.mkv
+2025-12-02 23:58:55,750 - INFO - Found videos/thctwzl2bu0j7nx0vxonxb0m/audio.mp3 -> will rename to videos/thctwzl2bu0j7nx0vxonxb0m/original.mp3
+2025-12-02 23:58:55,750 - INFO - Renaming videos/thctwzl2bu0j7nx0vxonxb0m/video.mkv -> videos/thctwzl2bu0j7nx0vxonxb0m/original.mkv
+2025-12-02 23:58:57,434 - INFO - [294/438] ✓ Renamed 1 files for jder260f0z8zix9nh7u198mx
+2025-12-02 23:58:57,659 - INFO - Found videos/wkbhvz7pos9b1z431hb4dqxe/video.mkv -> will rename to videos/wkbhvz7pos9b1z431hb4dqxe/original.mkv
+2025-12-02 23:58:57,778 - INFO - Renaming videos/wkbhvz7pos9b1z431hb4dqxe/video.mkv -> videos/wkbhvz7pos9b1z431hb4dqxe/original.mkv
+2025-12-02 23:59:00,949 - INFO - [296/438] ✓ Renamed 1 files for c57swxa7xohfmduusfj3apz6
+2025-12-02 23:59:01,061 - INFO - Found videos/k5xzx8dfmvu7s3nzdqy32kzy/video.mkv -> will rename to videos/k5xzx8dfmvu7s3nzdqy32kzy/original.mkv
+2025-12-02 23:59:01,181 - INFO - Renaming videos/k5xzx8dfmvu7s3nzdqy32kzy/video.mkv -> videos/k5xzx8dfmvu7s3nzdqy32kzy/original.mkv
+2025-12-02 23:59:04,251 - INFO - [297/438] ✓ Renamed 1 files for k5xzx8dfmvu7s3nzdqy32kzy
+2025-12-02 23:59:04,370 - INFO - Found videos/nnnb1s0hvh5ypbwavjppy3ze/video.mkv -> will rename to videos/nnnb1s0hvh5ypbwavjppy3ze/original.mkv
+2025-12-02 23:59:04,483 - INFO - Found videos/nnnb1s0hvh5ypbwavjppy3ze/audio.mp3 -> will rename to videos/nnnb1s0hvh5ypbwavjppy3ze/original.mp3
+2025-12-02 23:59:04,483 - INFO - Renaming videos/nnnb1s0hvh5ypbwavjppy3ze/video.mkv -> videos/nnnb1s0hvh5ypbwavjppy3ze/original.mkv
+2025-12-02 23:59:06,677 - INFO - Renaming videos/ejdg797b14vzlcxalspzht7o/audio.mp3 -> videos/ejdg797b14vzlcxalspzht7o/original.mp3
+2025-12-02 23:59:08,830 - INFO - Renaming videos/thctwzl2bu0j7nx0vxonxb0m/audio.mp3 -> videos/thctwzl2bu0j7nx0vxonxb0m/original.mp3
+2025-12-02 23:59:09,036 - INFO - [298/438] ✓ Renamed 2 files for thctwzl2bu0j7nx0vxonxb0m
+2025-12-02 23:59:09,285 - INFO - Found videos/ce0y3h3wgv2vt9m4rcux1s7x/video.mkv -> will rename to videos/ce0y3h3wgv2vt9m4rcux1s7x/original.mkv
+2025-12-02 23:59:09,403 - INFO - Found videos/ce0y3h3wgv2vt9m4rcux1s7x/audio.mp3 -> will rename to videos/ce0y3h3wgv2vt9m4rcux1s7x/original.mp3
+2025-12-02 23:59:09,403 - INFO - Renaming videos/ce0y3h3wgv2vt9m4rcux1s7x/video.mkv -> videos/ce0y3h3wgv2vt9m4rcux1s7x/original.mkv
+2025-12-02 23:59:10,132 - INFO - [300/438] ✓ Renamed 1 files for b5ezd2815ffos2t8d3h2qljv
+2025-12-02 23:59:10,132 - INFO -
+Progress: 300/438 - Renamed: 268 videos (329 files), Skipped: 32, Failed: 0
+
+2025-12-02 23:59:10,240 - INFO - Found videos/e9e5rtr0uxk1h3c4cs5jcg57/video.mkv -> will rename to videos/e9e5rtr0uxk1h3c4cs5jcg57/original.mkv
+2025-12-02 23:59:10,345 - INFO - Renaming videos/e9e5rtr0uxk1h3c4cs5jcg57/video.mkv -> videos/e9e5rtr0uxk1h3c4cs5jcg57/original.mkv
+2025-12-02 23:59:11,384 - INFO - [301/438] ✓ Renamed 2 files for ejdg797b14vzlcxalspzht7o
+2025-12-02 23:59:11,503 - INFO - Found videos/klzxhw3ow8qzrua89xr91717/video.mkv -> will rename to videos/klzxhw3ow8qzrua89xr91717/original.mkv
+2025-12-02 23:59:11,590 - INFO - [302/438] ✓ Renamed 1 files for ni90hh70rr77srzpo199bbfv
+2025-12-02 23:59:11,634 - INFO - Found videos/klzxhw3ow8qzrua89xr91717/audio.mp3 -> will rename to videos/klzxhw3ow8qzrua89xr91717/original.mp3
+2025-12-02 23:59:11,634 - INFO - Renaming videos/klzxhw3ow8qzrua89xr91717/video.mkv -> videos/klzxhw3ow8qzrua89xr91717/original.mkv
+2025-12-02 23:59:11,700 - INFO - Found videos/affci60zjdq4xb6e1l6yklau/video.mkv -> will rename to videos/affci60zjdq4xb6e1l6yklau/original.mkv
+2025-12-02 23:59:11,814 - INFO - Renaming videos/affci60zjdq4xb6e1l6yklau/video.mkv -> videos/affci60zjdq4xb6e1l6yklau/original.mkv
+2025-12-02 23:59:14,536 - INFO - [303/438] ✓ Renamed 1 files for e9e5rtr0uxk1h3c4cs5jcg57
+2025-12-02 23:59:14,604 - INFO - Renaming videos/klzxhw3ow8qzrua89xr91717/audio.mp3 -> videos/klzxhw3ow8qzrua89xr91717/original.mp3
+2025-12-02 23:59:14,663 - INFO - Found videos/aqzmvsr41szkg2uqg0yp2cu4/video.mkv -> will rename to videos/aqzmvsr41szkg2uqg0yp2cu4/original.mkv
+2025-12-02 23:59:14,852 - INFO - Renaming videos/aqzmvsr41szkg2uqg0yp2cu4/video.mkv -> videos/aqzmvsr41szkg2uqg0yp2cu4/original.mkv
+2025-12-02 23:59:16,235 - INFO - [304/438] ✓ Renamed 2 files for klzxhw3ow8qzrua89xr91717
+2025-12-02 23:59:16,394 - INFO - Found videos/fhcygenvjeckkjctk9brbnu6/video.mkv -> will rename to videos/fhcygenvjeckkjctk9brbnu6/original.mkv
+2025-12-02 23:59:16,510 - INFO - Renaming videos/fhcygenvjeckkjctk9brbnu6/video.mkv -> videos/fhcygenvjeckkjctk9brbnu6/original.mkv
+2025-12-02 23:59:17,474 - INFO - [305/438] ✓ Renamed 1 files for fhcygenvjeckkjctk9brbnu6
+2025-12-02 23:59:17,587 - INFO - Found videos/weym8gw0c6g1ol7qjtde1521/video.mkv -> will rename to videos/weym8gw0c6g1ol7qjtde1521/original.mkv
+2025-12-02 23:59:17,778 - INFO - Renaming videos/weym8gw0c6g1ol7qjtde1521/video.mkv -> videos/weym8gw0c6g1ol7qjtde1521/original.mkv
+2025-12-02 23:59:18,248 - INFO - [306/438] ✓ Renamed 1 files for aqzmvsr41szkg2uqg0yp2cu4
+2025-12-02 23:59:18,439 - INFO - Found videos/kwnsha6wlix5dnusjdijj0me/video.mkv -> will rename to videos/kwnsha6wlix5dnusjdijj0me/original.mkv
+2025-12-02 23:59:18,562 - INFO - Renaming videos/kwnsha6wlix5dnusjdijj0me/video.mkv -> videos/kwnsha6wlix5dnusjdijj0me/original.mkv
+2025-12-02 23:59:20,119 - INFO - [307/438] ✓ Renamed 1 files for wkbhvz7pos9b1z431hb4dqxe
+2025-12-02 23:59:20,237 - INFO - Found videos/j6uehaw57ynwqnbkjs3m1to6/video.mkv -> will rename to videos/j6uehaw57ynwqnbkjs3m1to6/original.mkv
+2025-12-02 23:59:20,401 - INFO - Renaming videos/j6uehaw57ynwqnbkjs3m1to6/video.mkv -> videos/j6uehaw57ynwqnbkjs3m1to6/original.mkv
+2025-12-02 23:59:20,731 - INFO - [308/438] ✓ Renamed 1 files for mrdik35fprvp6caj44dpkhnz
+2025-12-02 23:59:21,101 - INFO - Found videos/ut7wtzh1qyyey0y07q43yfd6/video.mkv -> will rename to videos/ut7wtzh1qyyey0y07q43yfd6/original.mkv
+2025-12-02 23:59:21,210 - INFO - Renaming videos/ut7wtzh1qyyey0y07q43yfd6/video.mkv -> videos/ut7wtzh1qyyey0y07q43yfd6/original.mkv
+2025-12-02 23:59:21,396 - INFO - [310/438] ✓ Renamed 1 files for kwnsha6wlix5dnusjdijj0me
+2025-12-02 23:59:21,397 - INFO -
+Progress: 310/438 - Renamed: 277 videos (340 files), Skipped: 33, Failed: 0
+
+2025-12-02 23:59:21,585 - INFO - Found videos/xn5lyqrxw1a9e6c39zsi17s2/video.mkv -> will rename to videos/xn5lyqrxw1a9e6c39zsi17s2/original.mkv
+2025-12-02 23:59:21,710 - INFO - Renaming videos/xn5lyqrxw1a9e6c39zsi17s2/video.mkv -> videos/xn5lyqrxw1a9e6c39zsi17s2/original.mkv
+2025-12-02 23:59:22,113 - INFO - [311/438] ✓ Renamed 1 files for tl0buwq41h0dywtit9z7tdz7
+2025-12-02 23:59:22,249 - INFO - Found videos/xe94jp57r2l5615gqo6xu5ql/video.mkv -> will rename to videos/xe94jp57r2l5615gqo6xu5ql/original.mkv
+2025-12-02 23:59:22,441 - INFO - Renaming videos/xe94jp57r2l5615gqo6xu5ql/video.mkv -> videos/xe94jp57r2l5615gqo6xu5ql/original.mkv
+2025-12-02 23:59:23,392 - INFO - Renaming videos/nnnb1s0hvh5ypbwavjppy3ze/audio.mp3 -> videos/nnnb1s0hvh5ypbwavjppy3ze/original.mp3
+2025-12-02 23:59:27,769 - INFO - [312/438] ✓ Renamed 2 files for nnnb1s0hvh5ypbwavjppy3ze
+2025-12-02 23:59:27,936 - INFO - Found videos/jufccm4nmljpvfjbskmoc03s/video.mkv -> will rename to videos/jufccm4nmljpvfjbskmoc03s/original.mkv
+2025-12-02 23:59:28,047 - INFO - Found videos/jufccm4nmljpvfjbskmoc03s/audio.mp3 -> will rename to videos/jufccm4nmljpvfjbskmoc03s/original.mp3
+2025-12-02 23:59:28,047 - INFO - Renaming videos/jufccm4nmljpvfjbskmoc03s/video.mkv -> videos/jufccm4nmljpvfjbskmoc03s/original.mkv
+2025-12-02 23:59:28,309 - INFO - [313/438] ✓ Renamed 1 files for ut7wtzh1qyyey0y07q43yfd6
+2025-12-02 23:59:28,460 - INFO - Found videos/n7tneoc9na93g1cpnfz7cx6i/video.mkv -> will rename to videos/n7tneoc9na93g1cpnfz7cx6i/original.mkv
+2025-12-02 23:59:28,566 - INFO - Renaming videos/n7tneoc9na93g1cpnfz7cx6i/video.mkv -> videos/n7tneoc9na93g1cpnfz7cx6i/original.mkv
+2025-12-02 23:59:32,759 - INFO - [314/438] ✓ Renamed 1 files for ncbb7hjqxhn4oev9ezbtrgu8
+2025-12-02 23:59:32,926 - INFO - Found videos/wsxnftsmvohcoqr4izm8mur6/video.mkv -> will rename to videos/wsxnftsmvohcoqr4izm8mur6/original.mkv
+2025-12-02 23:59:33,036 - INFO - Renaming videos/wsxnftsmvohcoqr4izm8mur6/video.mkv -> videos/wsxnftsmvohcoqr4izm8mur6/original.mkv
+2025-12-02 23:59:35,727 - INFO - [315/438] ✓ Renamed 1 files for wsxnftsmvohcoqr4izm8mur6
+2025-12-02 23:59:35,836 - INFO - Found videos/d666gdq02orhku2weur35p76/video.mkv -> will rename to videos/d666gdq02orhku2weur35p76/original.mkv
+2025-12-02 23:59:35,944 - INFO - Renaming videos/d666gdq02orhku2weur35p76/video.mkv -> videos/d666gdq02orhku2weur35p76/original.mkv
+2025-12-02 23:59:36,976 - INFO - [316/438] ✓ Renamed 1 files for d666gdq02orhku2weur35p76
+2025-12-02 23:59:37,122 - INFO - Found videos/vrcg27shk5pnn4sbrqycnbgr/video.mkv -> will rename to videos/vrcg27shk5pnn4sbrqycnbgr/original.mkv
+2025-12-02 23:59:37,235 - INFO - Renaming videos/vrcg27shk5pnn4sbrqycnbgr/video.mkv -> videos/vrcg27shk5pnn4sbrqycnbgr/original.mkv
+2025-12-02 23:59:37,652 - INFO - Renaming videos/jufccm4nmljpvfjbskmoc03s/audio.mp3 -> videos/jufccm4nmljpvfjbskmoc03s/original.mp3
+2025-12-02 23:59:39,308 - INFO - [317/438] ✓ Renamed 1 files for vrcg27shk5pnn4sbrqycnbgr
+2025-12-02 23:59:39,447 - INFO - Found videos/xgp6tiusatvjqsse8tour3hl/video.mkv -> will rename to videos/xgp6tiusatvjqsse8tour3hl/original.mkv
+2025-12-02 23:59:39,564 - INFO - Renaming videos/xgp6tiusatvjqsse8tour3hl/video.mkv -> videos/xgp6tiusatvjqsse8tour3hl/original.mkv
+2025-12-02 23:59:40,140 - INFO - [318/438] ✓ Renamed 1 files for n7tneoc9na93g1cpnfz7cx6i
+2025-12-02 23:59:40,336 - INFO - Found videos/xfzsftp8rjujzki3y0iaw75e/video.mkv -> will rename to videos/xfzsftp8rjujzki3y0iaw75e/original.mkv
+2025-12-02 23:59:40,465 - INFO - Found videos/xfzsftp8rjujzki3y0iaw75e/audio.mp3 -> will rename to videos/xfzsftp8rjujzki3y0iaw75e/original.mp3
+2025-12-02 23:59:40,466 - INFO - Renaming videos/xfzsftp8rjujzki3y0iaw75e/video.mkv -> videos/xfzsftp8rjujzki3y0iaw75e/original.mkv
+2025-12-02 23:59:42,733 - INFO - [319/438] ✓ Renamed 1 files for affci60zjdq4xb6e1l6yklau
+2025-12-02 23:59:42,753 - INFO - [320/438] ✓ Renamed 2 files for jufccm4nmljpvfjbskmoc03s
+2025-12-02 23:59:42,754 - INFO -
+Progress: 320/438 - Renamed: 287 videos (352 files), Skipped: 33, Failed: 0
+
+2025-12-02 23:59:42,894 - INFO - Found videos/aopb87s3u3cgcitqacbz0glh/video.mkv -> will rename to videos/aopb87s3u3cgcitqacbz0glh/original.mkv
+2025-12-02 23:59:42,951 - INFO - Found videos/x2f0csy494v9sk7kmp20jwlr/video.mkv -> will rename to videos/x2f0csy494v9sk7kmp20jwlr/original.mkv
+2025-12-02 23:59:43,011 - INFO - Found videos/aopb87s3u3cgcitqacbz0glh/audio.mp3 -> will rename to videos/aopb87s3u3cgcitqacbz0glh/original.mp3
+2025-12-02 23:59:43,011 - INFO - Renaming videos/aopb87s3u3cgcitqacbz0glh/video.mkv -> videos/aopb87s3u3cgcitqacbz0glh/original.mkv
+2025-12-02 23:59:43,064 - INFO - Renaming videos/x2f0csy494v9sk7kmp20jwlr/video.mkv -> videos/x2f0csy494v9sk7kmp20jwlr/original.mkv
+2025-12-02 23:59:43,261 - INFO - Renaming videos/ce0y3h3wgv2vt9m4rcux1s7x/audio.mp3 -> videos/ce0y3h3wgv2vt9m4rcux1s7x/original.mp3
+2025-12-02 23:59:46,135 - INFO - [321/438] ✓ Renamed 2 files for ce0y3h3wgv2vt9m4rcux1s7x
+2025-12-02 23:59:46,268 - INFO - Found videos/xz2p2q4vt899p3n3gx5m3r43/video.mkv -> will rename to videos/xz2p2q4vt899p3n3gx5m3r43/original.mkv
+2025-12-02 23:59:46,400 - INFO - Found videos/xz2p2q4vt899p3n3gx5m3r43/audio.mp3 -> will rename to videos/xz2p2q4vt899p3n3gx5m3r43/original.mp3
+2025-12-02 23:59:46,401 - INFO - Renaming videos/xz2p2q4vt899p3n3gx5m3r43/video.mkv -> videos/xz2p2q4vt899p3n3gx5m3r43/original.mkv
+2025-12-02 23:59:49,262 - INFO - Renaming videos/xfzsftp8rjujzki3y0iaw75e/audio.mp3 -> videos/xfzsftp8rjujzki3y0iaw75e/original.mp3
+2025-12-02 23:59:51,529 - INFO - [322/438] ✓ Renamed 1 files for xn5lyqrxw1a9e6c39zsi17s2
+2025-12-02 23:59:51,549 - INFO - [323/438] ✓ Renamed 2 files for xfzsftp8rjujzki3y0iaw75e
+2025-12-02 23:59:51,634 - INFO - Found videos/d6x3tfwo4ijvoew49ycderha/video.mkv -> will rename to videos/d6x3tfwo4ijvoew49ycderha/original.mkv
+2025-12-02 23:59:51,635 - INFO - Renaming videos/aopb87s3u3cgcitqacbz0glh/audio.mp3 -> videos/aopb87s3u3cgcitqacbz0glh/original.mp3
+2025-12-02 23:59:51,675 - INFO - Found videos/o91kaudm4lsng4edd88nanlr/video.mkv -> will rename to videos/o91kaudm4lsng4edd88nanlr/original.mkv
+2025-12-02 23:59:51,757 - INFO - Renaming videos/d6x3tfwo4ijvoew49ycderha/video.mkv -> videos/d6x3tfwo4ijvoew49ycderha/original.mkv
+2025-12-02 23:59:51,801 - INFO - Renaming videos/o91kaudm4lsng4edd88nanlr/video.mkv -> videos/o91kaudm4lsng4edd88nanlr/original.mkv
+2025-12-02 23:59:52,725 - INFO - [324/438] ✓ Renamed 2 files for aopb87s3u3cgcitqacbz0glh
+2025-12-02 23:59:52,838 - INFO - Found videos/wzhshy9zuzyde89hac0g0jdm/video.mkv -> will rename to videos/wzhshy9zuzyde89hac0g0jdm/original.mkv
+2025-12-02 23:59:52,953 - INFO - Renaming videos/wzhshy9zuzyde89hac0g0jdm/video.mkv -> videos/wzhshy9zuzyde89hac0g0jdm/original.mkv
+2025-12-02 23:59:54,163 - INFO - [325/438] ✓ Renamed 1 files for wzhshy9zuzyde89hac0g0jdm
+2025-12-02 23:59:54,276 - INFO - Found videos/wjbc4rn7siavu2yg490msojv/video.mkv -> will rename to videos/wjbc4rn7siavu2yg490msojv/original.mkv
+2025-12-02 23:59:54,388 - INFO - Renaming videos/wjbc4rn7siavu2yg490msojv/video.mkv -> videos/wjbc4rn7siavu2yg490msojv/original.mkv
+2025-12-02 23:59:57,452 - INFO - [326/438] ✓ Renamed 1 files for weym8gw0c6g1ol7qjtde1521
+2025-12-02 23:59:57,575 - INFO - Found videos/sfaxl0f1exnq55pehzutmt3u/video.mkv -> will rename to videos/sfaxl0f1exnq55pehzutmt3u/original.mkv
+2025-12-02 23:59:57,698 - INFO - Renaming videos/sfaxl0f1exnq55pehzutmt3u/video.mkv -> videos/sfaxl0f1exnq55pehzutmt3u/original.mkv
+2025-12-02 23:59:59,365 - INFO - [327/438] ✓ Renamed 1 files for xe94jp57r2l5615gqo6xu5ql
+2025-12-02 23:59:59,476 - INFO - Found videos/a7z1litz91j0xw2nzuvxh240/video.mkv -> will rename to videos/a7z1litz91j0xw2nzuvxh240/original.mkv
+2025-12-02 23:59:59,666 - INFO - Renaming videos/a7z1litz91j0xw2nzuvxh240/video.mkv -> videos/a7z1litz91j0xw2nzuvxh240/original.mkv
+2025-12-03 00:00:02,411 - INFO - [328/438] ✓ Renamed 1 files for sfaxl0f1exnq55pehzutmt3u
+2025-12-03 00:00:02,542 - INFO - Found videos/jpgna191w3vhmazhx8q5gypb/video.mkv -> will rename to videos/jpgna191w3vhmazhx8q5gypb/original.mkv
+2025-12-03 00:00:02,577 - INFO - Renaming videos/xz2p2q4vt899p3n3gx5m3r43/audio.mp3 -> videos/xz2p2q4vt899p3n3gx5m3r43/original.mp3
+2025-12-03 00:00:02,673 - INFO - Renaming videos/jpgna191w3vhmazhx8q5gypb/video.mkv -> videos/jpgna191w3vhmazhx8q5gypb/original.mkv
+2025-12-03 00:00:03,008 - INFO - [329/438] ✓ Renamed 1 files for o91kaudm4lsng4edd88nanlr
+2025-12-03 00:00:03,123 - INFO - Found videos/vo4mciktypxluitmdqzzxp1v/video.mkv -> will rename to videos/vo4mciktypxluitmdqzzxp1v/original.mkv
+2025-12-03 00:00:03,235 - INFO - Renaming videos/vo4mciktypxluitmdqzzxp1v/video.mkv -> videos/vo4mciktypxluitmdqzzxp1v/original.mkv
+2025-12-03 00:00:06,483 - INFO - [330/438] ✓ Renamed 2 files for xz2p2q4vt899p3n3gx5m3r43
+2025-12-03 00:00:06,484 - INFO -
+Progress: 330/438 - Renamed: 297 videos (366 files), Skipped: 33, Failed: 0
+
+2025-12-03 00:00:06,677 - INFO - Found videos/zqewe448cngv52g0ciwnd8oq/video.mkv -> will rename to videos/zqewe448cngv52g0ciwnd8oq/original.mkv
+2025-12-03 00:00:06,800 - INFO - Renaming videos/zqewe448cngv52g0ciwnd8oq/video.mkv -> videos/zqewe448cngv52g0ciwnd8oq/original.mkv
+2025-12-03 00:00:12,458 - INFO - [331/438] ✓ Renamed 1 files for xgp6tiusatvjqsse8tour3hl
+2025-12-03 00:00:12,564 - INFO - Found videos/n3ub5yilclec48k398q64zi2/video.mkv -> will rename to videos/n3ub5yilclec48k398q64zi2/original.mkv
+2025-12-03 00:00:12,675 - INFO - Renaming videos/n3ub5yilclec48k398q64zi2/video.mkv -> videos/n3ub5yilclec48k398q64zi2/original.mkv
+2025-12-03 00:00:12,776 - INFO - [332/438] ✓ Renamed 1 files for j6uehaw57ynwqnbkjs3m1to6
+2025-12-03 00:00:12,900 - INFO - Found videos/pixbg0khkdubmvl7ydy78v5y/video.mkv -> will rename to videos/pixbg0khkdubmvl7ydy78v5y/original.mkv
+2025-12-03 00:00:13,028 - INFO - Found videos/pixbg0khkdubmvl7ydy78v5y/audio.mp3 -> will rename to videos/pixbg0khkdubmvl7ydy78v5y/original.mp3
+2025-12-03 00:00:13,028 - INFO - Renaming videos/pixbg0khkdubmvl7ydy78v5y/video.mkv -> videos/pixbg0khkdubmvl7ydy78v5y/original.mkv
+2025-12-03 00:00:14,716 - INFO - [333/438] ✓ Renamed 1 files for zqewe448cngv52g0ciwnd8oq
+2025-12-03 00:00:14,869 - INFO - Found videos/e7rvosjxxl0lvyoros7d9ez9/video.mkv -> will rename to videos/e7rvosjxxl0lvyoros7d9ez9/original.mkv
+2025-12-03 00:00:14,985 - INFO - Renaming videos/e7rvosjxxl0lvyoros7d9ez9/video.mkv -> videos/e7rvosjxxl0lvyoros7d9ez9/original.mkv
+2025-12-03 00:00:16,005 - INFO - [334/438] ✓ Renamed 1 files for x2f0csy494v9sk7kmp20jwlr
+2025-12-03 00:00:16,110 - INFO - Found videos/sajnda4phubtk0zz60xpdfch/video.mkv -> will rename to videos/sajnda4phubtk0zz60xpdfch/original.mkv
+2025-12-03 00:00:16,215 - INFO - Renaming videos/sajnda4phubtk0zz60xpdfch/video.mkv -> videos/sajnda4phubtk0zz60xpdfch/original.mkv
+2025-12-03 00:00:17,627 - INFO - [335/438] ✓ Renamed 1 files for e7rvosjxxl0lvyoros7d9ez9
+2025-12-03 00:00:17,865 - INFO - Found videos/ilwszy3zkvzjrijebbn58eps/video.mkv -> will rename to videos/ilwszy3zkvzjrijebbn58eps/original.mkv
+2025-12-03 00:00:18,016 - INFO - Renaming videos/ilwszy3zkvzjrijebbn58eps/video.mkv -> videos/ilwszy3zkvzjrijebbn58eps/original.mkv
+2025-12-03 00:00:18,403 - INFO - [337/438] ✓ Renamed 1 files for n3ub5yilclec48k398q64zi2
+2025-12-03 00:00:18,593 - INFO - Found videos/lj6gg6ry3uvh6vguavo5nl18/video.mkv -> will rename to videos/lj6gg6ry3uvh6vguavo5nl18/original.mkv
+2025-12-03 00:00:18,697 - INFO - Renaming videos/lj6gg6ry3uvh6vguavo5nl18/video.mkv -> videos/lj6gg6ry3uvh6vguavo5nl18/original.mkv
+2025-12-03 00:00:19,673 - INFO - Renaming videos/pixbg0khkdubmvl7ydy78v5y/audio.mp3 -> videos/pixbg0khkdubmvl7ydy78v5y/original.mp3
+2025-12-03 00:00:21,313 - INFO - [338/438] ✓ Renamed 2 files for pixbg0khkdubmvl7ydy78v5y
+2025-12-03 00:00:21,443 - INFO - Found videos/cwauu9hyqp49qiqdn5c2vq4i/video.mkv -> will rename to videos/cwauu9hyqp49qiqdn5c2vq4i/original.mkv
+2025-12-03 00:00:21,549 - INFO - Renaming videos/cwauu9hyqp49qiqdn5c2vq4i/video.mkv -> videos/cwauu9hyqp49qiqdn5c2vq4i/original.mkv
+2025-12-03 00:00:24,602 - INFO - [339/438] ✓ Renamed 1 files for lj6gg6ry3uvh6vguavo5nl18
+2025-12-03 00:00:24,703 - INFO - Found videos/ck185zb8r3zzexy490hywv3j/video.mkv -> will rename to videos/ck185zb8r3zzexy490hywv3j/original.mkv
+2025-12-03 00:00:24,884 - INFO - Renaming videos/ck185zb8r3zzexy490hywv3j/video.mkv -> videos/ck185zb8r3zzexy490hywv3j/original.mkv
+2025-12-03 00:00:26,219 - INFO - [340/438] ✓ Renamed 1 files for d6x3tfwo4ijvoew49ycderha
+2025-12-03 00:00:26,220 - INFO -
+Progress: 340/438 - Renamed: 306 videos (376 files), Skipped: 34, Failed: 0
+
+2025-12-03 00:00:26,237 - INFO - [341/438] ✓ Renamed 1 files for wjbc4rn7siavu2yg490msojv
+2025-12-03 00:00:26,406 - INFO - Found videos/gi1tfiebqhxvoltreesym7xv/video.mkv -> will rename to videos/gi1tfiebqhxvoltreesym7xv/original.mkv
+2025-12-03 00:00:26,407 - INFO - Found videos/dq85nsceev5vy0vot6fdf9sd/video.mkv -> will rename to videos/dq85nsceev5vy0vot6fdf9sd/original.mkv
+2025-12-03 00:00:26,520 - INFO - Renaming videos/dq85nsceev5vy0vot6fdf9sd/video.mkv -> videos/dq85nsceev5vy0vot6fdf9sd/original.mkv
+2025-12-03 00:00:26,653 - INFO - Found videos/gi1tfiebqhxvoltreesym7xv/audio.mp3 -> will rename to videos/gi1tfiebqhxvoltreesym7xv/original.mp3
+2025-12-03 00:00:26,653 - INFO - Renaming videos/gi1tfiebqhxvoltreesym7xv/video.mkv -> videos/gi1tfiebqhxvoltreesym7xv/original.mkv
+2025-12-03 00:00:29,028 - INFO - [342/438] ✓ Renamed 1 files for dq85nsceev5vy0vot6fdf9sd
+2025-12-03 00:00:29,136 - INFO - Found videos/kuzv09qa7pptdqchkv2ci5p9/video.mkv -> will rename to videos/kuzv09qa7pptdqchkv2ci5p9/original.mkv
+2025-12-03 00:00:29,239 - INFO - Renaming videos/kuzv09qa7pptdqchkv2ci5p9/video.mkv -> videos/kuzv09qa7pptdqchkv2ci5p9/original.mkv
+2025-12-03 00:00:29,639 - INFO - [343/438] ✓ Renamed 1 files for sajnda4phubtk0zz60xpdfch
+2025-12-03 00:00:29,761 - INFO - Found videos/sgubcsu43ub6ki8cqpmygwha/video.mkv -> will rename to videos/sgubcsu43ub6ki8cqpmygwha/original.mkv
+2025-12-03 00:00:29,882 - INFO - Found videos/sgubcsu43ub6ki8cqpmygwha/audio.mp3 -> will rename to videos/sgubcsu43ub6ki8cqpmygwha/original.mp3
+2025-12-03 00:00:29,883 - INFO - Renaming videos/sgubcsu43ub6ki8cqpmygwha/video.mkv -> videos/sgubcsu43ub6ki8cqpmygwha/original.mkv
+2025-12-03 00:00:35,531 - INFO - [344/438] ✓ Renamed 1 files for a7z1litz91j0xw2nzuvxh240
+2025-12-03 00:00:35,644 - INFO - Found videos/d5eemig2f9f43ouu9rcmxcj6/video.mkv -> will rename to videos/d5eemig2f9f43ouu9rcmxcj6/original.mkv
+2025-12-03 00:00:35,744 - INFO - Renaming videos/d5eemig2f9f43ouu9rcmxcj6/video.mkv -> videos/d5eemig2f9f43ouu9rcmxcj6/original.mkv
+2025-12-03 00:00:35,917 - INFO - [345/438] ✓ Renamed 1 files for vo4mciktypxluitmdqzzxp1v
+2025-12-03 00:00:36,026 - INFO - Found videos/fd5l8yd2xbh033dpnkvftg35/video.mkv -> will rename to videos/fd5l8yd2xbh033dpnkvftg35/original.mkv
+2025-12-03 00:00:36,139 - INFO - Found videos/fd5l8yd2xbh033dpnkvftg35/audio.mp3 -> will rename to videos/fd5l8yd2xbh033dpnkvftg35/original.mp3
+2025-12-03 00:00:36,139 - INFO - Renaming videos/fd5l8yd2xbh033dpnkvftg35/video.mkv -> videos/fd5l8yd2xbh033dpnkvftg35/original.mkv
+2025-12-03 00:00:38,782 - INFO - [346/438] ✓ Renamed 1 files for jpgna191w3vhmazhx8q5gypb
+2025-12-03 00:00:38,899 - INFO - Found videos/v0i31x8ecolt41m670pt9cto/video.mkv -> will rename to videos/v0i31x8ecolt41m670pt9cto/original.mkv
+2025-12-03 00:00:39,012 - INFO - Renaming videos/v0i31x8ecolt41m670pt9cto/video.mkv -> videos/v0i31x8ecolt41m670pt9cto/original.mkv
+2025-12-03 00:00:40,901 - INFO - [347/438] ✓ Renamed 1 files for cwauu9hyqp49qiqdn5c2vq4i
+2025-12-03 00:00:41,019 - INFO - Found videos/x8vpuucy7wox7g35vofxrjtn/video.mkv -> will rename to videos/x8vpuucy7wox7g35vofxrjtn/original.mkv
+2025-12-03 00:00:41,123 - INFO - Renaming videos/x8vpuucy7wox7g35vofxrjtn/video.mkv -> videos/x8vpuucy7wox7g35vofxrjtn/original.mkv
+2025-12-03 00:00:41,280 - INFO - [348/438] ✓ Renamed 1 files for d5eemig2f9f43ouu9rcmxcj6
+2025-12-03 00:00:41,407 - INFO - Found videos/pjn9r9a0dhxd8y05nnsc99d8/video.mkv -> will rename to videos/pjn9r9a0dhxd8y05nnsc99d8/original.mkv
+2025-12-03 00:00:41,513 - INFO - Found videos/pjn9r9a0dhxd8y05nnsc99d8/audio.mp3 -> will rename to videos/pjn9r9a0dhxd8y05nnsc99d8/original.mp3
+2025-12-03 00:00:41,513 - INFO - Renaming videos/pjn9r9a0dhxd8y05nnsc99d8/video.mkv -> videos/pjn9r9a0dhxd8y05nnsc99d8/original.mkv
+2025-12-03 00:00:43,306 - INFO - Renaming videos/gi1tfiebqhxvoltreesym7xv/audio.mp3 -> videos/gi1tfiebqhxvoltreesym7xv/original.mp3
+2025-12-03 00:00:43,496 - INFO - [349/438] ✓ Renamed 2 files for gi1tfiebqhxvoltreesym7xv
+2025-12-03 00:00:43,606 - INFO - Found videos/oua0v79haem7e7klh0bwydsw/video.mkv -> will rename to videos/oua0v79haem7e7klh0bwydsw/original.mkv
+2025-12-03 00:00:43,715 - INFO - Renaming videos/oua0v79haem7e7klh0bwydsw/video.mkv -> videos/oua0v79haem7e7klh0bwydsw/original.mkv
+2025-12-03 00:00:45,342 - INFO - [350/438] ✓ Renamed 1 files for ilwszy3zkvzjrijebbn58eps
+2025-12-03 00:00:45,342 - INFO -
+Progress: 350/438 - Renamed: 316 videos (387 files), Skipped: 34, Failed: 0
+
+2025-12-03 00:00:45,538 - INFO - Found videos/wqob01glppj9tkopb81c1cp5/video.mkv -> will rename to videos/wqob01glppj9tkopb81c1cp5/original.mkv
+2025-12-03 00:00:45,657 - INFO - Renaming videos/wqob01glppj9tkopb81c1cp5/video.mkv -> videos/wqob01glppj9tkopb81c1cp5/original.mkv
+2025-12-03 00:00:47,348 - INFO - [351/438] ✓ Renamed 1 files for x8vpuucy7wox7g35vofxrjtn
+2025-12-03 00:00:47,467 - INFO - Found videos/wm4rgxicr5rl3zm6m1109dh0/video.mkv -> will rename to videos/wm4rgxicr5rl3zm6m1109dh0/original.mkv
+2025-12-03 00:00:47,615 - INFO - Renaming videos/wm4rgxicr5rl3zm6m1109dh0/video.mkv -> videos/wm4rgxicr5rl3zm6m1109dh0/original.mkv
+2025-12-03 00:00:49,016 - INFO - Renaming videos/fd5l8yd2xbh033dpnkvftg35/audio.mp3 -> videos/fd5l8yd2xbh033dpnkvftg35/original.mp3
+2025-12-03 00:00:52,441 - INFO - [352/438] ✓ Renamed 2 files for fd5l8yd2xbh033dpnkvftg35
+2025-12-03 00:00:52,540 - INFO - Found videos/h9myn3s1d0z4rjleaspu4z2f/video.mkv -> will rename to videos/h9myn3s1d0z4rjleaspu4z2f/original.mkv
+2025-12-03 00:00:52,648 - INFO - Renaming videos/h9myn3s1d0z4rjleaspu4z2f/video.mkv -> videos/h9myn3s1d0z4rjleaspu4z2f/original.mkv
+2025-12-03 00:00:52,749 - INFO - [353/438] ✓ Renamed 1 files for ck185zb8r3zzexy490hywv3j
+2025-12-03 00:00:52,854 - INFO - Found videos/etr47c1p01p3mefltqwanwhv/video.mkv -> will rename to videos/etr47c1p01p3mefltqwanwhv/original.mkv
+2025-12-03 00:00:52,959 - INFO - Found videos/etr47c1p01p3mefltqwanwhv/audio.mp3 -> will rename to videos/etr47c1p01p3mefltqwanwhv/original.mp3
+2025-12-03 00:00:52,959 - INFO - Renaming videos/etr47c1p01p3mefltqwanwhv/video.mkv -> videos/etr47c1p01p3mefltqwanwhv/original.mkv
+2025-12-03 00:00:53,948 - INFO - Renaming videos/sgubcsu43ub6ki8cqpmygwha/audio.mp3 -> videos/sgubcsu43ub6ki8cqpmygwha/original.mp3
+2025-12-03 00:00:55,762 - INFO - [354/438] ✓ Renamed 1 files for v0i31x8ecolt41m670pt9cto
+2025-12-03 00:00:55,883 - INFO - Found videos/dbu691yhqo4pp5pwa15ogysd/video.mkv -> will rename to videos/dbu691yhqo4pp5pwa15ogysd/original.mkv
+2025-12-03 00:00:56,002 - INFO - Renaming videos/dbu691yhqo4pp5pwa15ogysd/video.mkv -> videos/dbu691yhqo4pp5pwa15ogysd/original.mkv
+2025-12-03 00:00:58,055 - INFO - Renaming videos/etr47c1p01p3mefltqwanwhv/audio.mp3 -> videos/etr47c1p01p3mefltqwanwhv/original.mp3
+2025-12-03 00:00:58,056 - INFO - [355/438] ✓ Renamed 2 files for sgubcsu43ub6ki8cqpmygwha
+2025-12-03 00:00:58,165 - INFO - Found videos/wlmkeyi2ain92p240tlugp07/video.mkv -> will rename to videos/wlmkeyi2ain92p240tlugp07/original.mkv
+2025-12-03 00:00:58,262 - INFO - Renaming videos/wlmkeyi2ain92p240tlugp07/video.mkv -> videos/wlmkeyi2ain92p240tlugp07/original.mkv
+2025-12-03 00:00:58,997 - INFO - [356/438] ✓ Renamed 2 files for etr47c1p01p3mefltqwanwhv
+2025-12-03 00:00:59,151 - INFO - Found videos/pa7r65u76f3gfxp1ygtjgxu2/video.mkv -> will rename to videos/pa7r65u76f3gfxp1ygtjgxu2/original.mkv
+2025-12-03 00:00:59,257 - INFO - Renaming videos/pa7r65u76f3gfxp1ygtjgxu2/video.mkv -> videos/pa7r65u76f3gfxp1ygtjgxu2/original.mkv
+2025-12-03 00:01:01,438 - INFO - [357/438] ✓ Renamed 1 files for oua0v79haem7e7klh0bwydsw
+2025-12-03 00:01:01,599 - INFO - Found videos/tq4z0nov4d8znm2y0pubx56b/video.mkv -> will rename to videos/tq4z0nov4d8znm2y0pubx56b/original.mkv
+2025-12-03 00:01:01,782 - INFO - Renaming videos/tq4z0nov4d8znm2y0pubx56b/video.mkv -> videos/tq4z0nov4d8znm2y0pubx56b/original.mkv
+2025-12-03 00:01:02,919 - INFO - [358/438] ✓ Renamed 1 files for dbu691yhqo4pp5pwa15ogysd
+2025-12-03 00:01:03,108 - INFO - Found videos/goqkk7nqn4bh9oufvgbg6e4s/video.mkv -> will rename to videos/goqkk7nqn4bh9oufvgbg6e4s/original.mkv
+2025-12-03 00:01:03,299 - INFO - Renaming videos/goqkk7nqn4bh9oufvgbg6e4s/video.mkv -> videos/goqkk7nqn4bh9oufvgbg6e4s/original.mkv
+2025-12-03 00:01:04,554 - INFO - [359/438] ✓ Renamed 1 files for wqob01glppj9tkopb81c1cp5
+2025-12-03 00:01:04,738 - INFO - Found videos/mz4qbj0rv0214w4idf272hhw/video.mkv -> will rename to videos/mz4qbj0rv0214w4idf272hhw/original.mkv
+2025-12-03 00:01:04,932 - INFO - Renaming videos/mz4qbj0rv0214w4idf272hhw/video.mkv -> videos/mz4qbj0rv0214w4idf272hhw/original.mkv
+2025-12-03 00:01:09,030 - INFO - [360/438] ✓ Renamed 1 files for wlmkeyi2ain92p240tlugp07
+2025-12-03 00:01:09,030 - INFO -
+Progress: 360/438 - Renamed: 326 videos (400 files), Skipped: 34, Failed: 0
+
+2025-12-03 00:01:09,048 - INFO - [361/438] ✓ Renamed 1 files for goqkk7nqn4bh9oufvgbg6e4s
+2025-12-03 00:01:09,129 - INFO - Found videos/c46r2bn411wdonadyion4cxd/video.mkv -> will rename to videos/c46r2bn411wdonadyion4cxd/original.mkv
+2025-12-03 00:01:09,165 - INFO - Found videos/n9usdizv6skyhuv5603ivcuh/video.mkv -> will rename to videos/n9usdizv6skyhuv5603ivcuh/original.mkv
+2025-12-03 00:01:09,231 - INFO - Renaming videos/c46r2bn411wdonadyion4cxd/video.mkv -> videos/c46r2bn411wdonadyion4cxd/original.mkv
+2025-12-03 00:01:09,253 - INFO - Renaming videos/pjn9r9a0dhxd8y05nnsc99d8/audio.mp3 -> videos/pjn9r9a0dhxd8y05nnsc99d8/original.mp3
+2025-12-03 00:01:09,272 - INFO - Found videos/n9usdizv6skyhuv5603ivcuh/audio.mp3 -> will rename to videos/n9usdizv6skyhuv5603ivcuh/original.mp3
+2025-12-03 00:01:09,272 - INFO - Renaming videos/n9usdizv6skyhuv5603ivcuh/video.mkv -> videos/n9usdizv6skyhuv5603ivcuh/original.mkv
+2025-12-03 00:01:12,840 - INFO - Renaming videos/n9usdizv6skyhuv5603ivcuh/audio.mp3 -> videos/n9usdizv6skyhuv5603ivcuh/original.mp3
+2025-12-03 00:01:12,944 - INFO - [362/438] ✓ Renamed 2 files for pjn9r9a0dhxd8y05nnsc99d8
+2025-12-03 00:01:13,120 - INFO - Found videos/nrszh83p0vnfftsmbpfjinkw/video.mkv -> will rename to videos/nrszh83p0vnfftsmbpfjinkw/original.mkv
+2025-12-03 00:01:13,229 - INFO - Renaming videos/nrszh83p0vnfftsmbpfjinkw/video.mkv -> videos/nrszh83p0vnfftsmbpfjinkw/original.mkv
+2025-12-03 00:01:14,198 - INFO - [363/438] ✓ Renamed 2 files for n9usdizv6skyhuv5603ivcuh
+2025-12-03 00:01:14,245 - INFO - [364/438] ✓ Renamed 1 files for wm4rgxicr5rl3zm6m1109dh0
+2025-12-03 00:01:14,325 - INFO - Found videos/enzppzcpuou2qem5iy98z2sf/video.mkv -> will rename to videos/enzppzcpuou2qem5iy98z2sf/original.mkv
+2025-12-03 00:01:14,368 - INFO - Found videos/nv3julzu1xz6tcw457hjs5so/video.mkv -> will rename to videos/nv3julzu1xz6tcw457hjs5so/original.mkv
+2025-12-03 00:01:14,445 - INFO - Found videos/enzppzcpuou2qem5iy98z2sf/audio.mp3 -> will rename to videos/enzppzcpuou2qem5iy98z2sf/original.mp3
+2025-12-03 00:01:14,445 - INFO - Renaming videos/enzppzcpuou2qem5iy98z2sf/video.mkv -> videos/enzppzcpuou2qem5iy98z2sf/original.mkv
+2025-12-03 00:01:14,482 - INFO - Found videos/nv3julzu1xz6tcw457hjs5so/audio.mp3 -> will rename to videos/nv3julzu1xz6tcw457hjs5so/original.mp3
+2025-12-03 00:01:14,482 - INFO - Renaming videos/nv3julzu1xz6tcw457hjs5so/video.mkv -> videos/nv3julzu1xz6tcw457hjs5so/original.mkv
+2025-12-03 00:01:19,023 - INFO - [365/438] ✓ Renamed 1 files for c46r2bn411wdonadyion4cxd
+2025-12-03 00:01:19,129 - INFO - Found videos/rzoehfxdwc2ldk4xbxgmcdb9/video.mkv -> will rename to videos/rzoehfxdwc2ldk4xbxgmcdb9/original.mkv
+2025-12-03 00:01:19,236 - INFO - Found videos/rzoehfxdwc2ldk4xbxgmcdb9/audio.mp3 -> will rename to videos/rzoehfxdwc2ldk4xbxgmcdb9/original.mp3
+2025-12-03 00:01:19,236 - INFO - Renaming videos/rzoehfxdwc2ldk4xbxgmcdb9/video.mkv -> videos/rzoehfxdwc2ldk4xbxgmcdb9/original.mkv
+2025-12-03 00:01:22,212 - INFO - [366/438] ✓ Renamed 1 files for mz4qbj0rv0214w4idf272hhw
+2025-12-03 00:01:22,362 - INFO - Found videos/st3tvvzjqscd51gam6o0h5jv/video.mkv -> will rename to videos/st3tvvzjqscd51gam6o0h5jv/original.mkv
+2025-12-03 00:01:22,559 - INFO - Found videos/st3tvvzjqscd51gam6o0h5jv/audio.mp3 -> will rename to videos/st3tvvzjqscd51gam6o0h5jv/original.mp3
+2025-12-03 00:01:22,559 - INFO - Renaming videos/st3tvvzjqscd51gam6o0h5jv/video.mkv -> videos/st3tvvzjqscd51gam6o0h5jv/original.mkv
+2025-12-03 00:01:23,117 - INFO - [367/438] ✓ Renamed 1 files for kuzv09qa7pptdqchkv2ci5p9
+2025-12-03 00:01:23,228 - INFO - Found videos/ncgxuu1vyx5yl7psezcz79dk/video.mkv -> will rename to videos/ncgxuu1vyx5yl7psezcz79dk/original.mkv
+2025-12-03 00:01:23,335 - INFO - Found videos/ncgxuu1vyx5yl7psezcz79dk/audio.mp3 -> will rename to videos/ncgxuu1vyx5yl7psezcz79dk/original.mp3
+2025-12-03 00:01:23,335 - INFO - Renaming videos/ncgxuu1vyx5yl7psezcz79dk/video.mkv -> videos/ncgxuu1vyx5yl7psezcz79dk/original.mkv
+2025-12-03 00:01:23,636 - INFO - [368/438] ✓ Renamed 1 files for h9myn3s1d0z4rjleaspu4z2f
+2025-12-03 00:01:23,865 - INFO - Found videos/ag2zatp44xhj015i1fe4ejs1/video.mkv -> will rename to videos/ag2zatp44xhj015i1fe4ejs1/original.mkv
+2025-12-03 00:01:23,967 - INFO - Renaming videos/ag2zatp44xhj015i1fe4ejs1/video.mkv -> videos/ag2zatp44xhj015i1fe4ejs1/original.mkv
+2025-12-03 00:01:24,168 - INFO - [370/438] ✓ Renamed 1 files for tq4z0nov4d8znm2y0pubx56b
+2025-12-03 00:01:24,169 - INFO -
+Progress: 370/438 - Renamed: 335 videos (411 files), Skipped: 35, Failed: 0
+
+2025-12-03 00:01:24,286 - INFO - Found videos/xtay8a6iyr4u6ow9kc6iojpe/video.mkv -> will rename to videos/xtay8a6iyr4u6ow9kc6iojpe/original.mkv
+2025-12-03 00:01:24,411 - INFO - Renaming videos/xtay8a6iyr4u6ow9kc6iojpe/video.mkv -> videos/xtay8a6iyr4u6ow9kc6iojpe/original.mkv
+2025-12-03 00:01:26,384 - INFO - [371/438] ✓ Renamed 1 files for nrszh83p0vnfftsmbpfjinkw
+2025-12-03 00:01:26,486 - INFO - Found videos/qz1c7g1dlbmnpf2ubudxvf2v/video.mkv -> will rename to videos/qz1c7g1dlbmnpf2ubudxvf2v/original.mkv
+2025-12-03 00:01:26,609 - INFO - Found videos/qz1c7g1dlbmnpf2ubudxvf2v/audio.mp3 -> will rename to videos/qz1c7g1dlbmnpf2ubudxvf2v/original.mp3
+2025-12-03 00:01:26,609 - INFO - Renaming videos/qz1c7g1dlbmnpf2ubudxvf2v/video.mkv -> videos/qz1c7g1dlbmnpf2ubudxvf2v/original.mkv
+2025-12-03 00:01:26,905 - INFO - Renaming videos/ncgxuu1vyx5yl7psezcz79dk/audio.mp3 -> videos/ncgxuu1vyx5yl7psezcz79dk/original.mp3
+2025-12-03 00:01:28,154 - INFO - [372/438] ✓ Renamed 2 files for ncgxuu1vyx5yl7psezcz79dk
+2025-12-03 00:01:28,258 - INFO - Found videos/dlz3w6ojomalhbj1j2anqgxd/video.mkv -> will rename to videos/dlz3w6ojomalhbj1j2anqgxd/original.mkv
+2025-12-03 00:01:28,374 - INFO - Renaming videos/dlz3w6ojomalhbj1j2anqgxd/video.mkv -> videos/dlz3w6ojomalhbj1j2anqgxd/original.mkv
+2025-12-03 00:01:30,824 - INFO - [373/438] ✓ Renamed 1 files for pa7r65u76f3gfxp1ygtjgxu2
+2025-12-03 00:01:30,922 - INFO - Found videos/bxlvg3jfdk6jqbfck4nmrcas/video.mkv -> will rename to videos/bxlvg3jfdk6jqbfck4nmrcas/original.mkv
+2025-12-03 00:01:31,028 - INFO - Renaming videos/bxlvg3jfdk6jqbfck4nmrcas/video.mkv -> videos/bxlvg3jfdk6jqbfck4nmrcas/original.mkv
+2025-12-03 00:01:31,052 - INFO - Renaming videos/enzppzcpuou2qem5iy98z2sf/audio.mp3 -> videos/enzppzcpuou2qem5iy98z2sf/original.mp3
+2025-12-03 00:01:34,825 - INFO - Renaming videos/qz1c7g1dlbmnpf2ubudxvf2v/audio.mp3 -> videos/qz1c7g1dlbmnpf2ubudxvf2v/original.mp3
+2025-12-03 00:01:35,874 - INFO - [374/438] ✓ Renamed 2 files for enzppzcpuou2qem5iy98z2sf
+2025-12-03 00:01:36,041 - INFO - Found videos/xn11gt75dscahop47hm3hznw/video.mkv -> will rename to videos/xn11gt75dscahop47hm3hznw/original.mkv
+2025-12-03 00:01:36,223 - INFO - Renaming videos/xn11gt75dscahop47hm3hznw/video.mkv -> videos/xn11gt75dscahop47hm3hznw/original.mkv
+2025-12-03 00:01:36,415 - INFO - [375/438] ✓ Renamed 1 files for ag2zatp44xhj015i1fe4ejs1
+2025-12-03 00:01:36,537 - INFO - Found videos/fg5n3s12kpi526uupu0w7tav/video.mkv -> will rename to videos/fg5n3s12kpi526uupu0w7tav/original.mkv
+2025-12-03 00:01:36,721 - INFO - Renaming videos/fg5n3s12kpi526uupu0w7tav/video.mkv -> videos/fg5n3s12kpi526uupu0w7tav/original.mkv
+2025-12-03 00:01:37,480 - INFO - [376/438] ✓ Renamed 2 files for qz1c7g1dlbmnpf2ubudxvf2v
+2025-12-03 00:01:37,528 - INFO - [377/438] ✓ Renamed 1 files for xtay8a6iyr4u6ow9kc6iojpe
+2025-12-03 00:01:37,593 - INFO - Found videos/kkgwv4we5d9rtmark85srps0/video.mkv -> will rename to videos/kkgwv4we5d9rtmark85srps0/original.mkv
+2025-12-03 00:01:37,732 - INFO - Found videos/qww7evo7swib3zs5bfzeo6k4/video.mkv -> will rename to videos/qww7evo7swib3zs5bfzeo6k4/original.mkv
+2025-12-03 00:01:37,798 - INFO - Found videos/kkgwv4we5d9rtmark85srps0/audio.mp3 -> will rename to videos/kkgwv4we5d9rtmark85srps0/original.mp3
+2025-12-03 00:01:37,798 - INFO - Renaming videos/kkgwv4we5d9rtmark85srps0/video.mkv -> videos/kkgwv4we5d9rtmark85srps0/original.mkv
+2025-12-03 00:01:37,921 - INFO - Renaming videos/qww7evo7swib3zs5bfzeo6k4/video.mkv -> videos/qww7evo7swib3zs5bfzeo6k4/original.mkv
+2025-12-03 00:01:40,006 - INFO - [378/438] ✓ Renamed 1 files for fg5n3s12kpi526uupu0w7tav
+2025-12-03 00:01:40,146 - INFO - Found videos/wdrgonuy73469iogpfz4afx3/video.mkv -> will rename to videos/wdrgonuy73469iogpfz4afx3/original.mkv
+2025-12-03 00:01:40,346 - INFO - Renaming videos/wdrgonuy73469iogpfz4afx3/video.mkv -> videos/wdrgonuy73469iogpfz4afx3/original.mkv
+2025-12-03 00:01:41,057 - INFO - [379/438] ✓ Renamed 1 files for qww7evo7swib3zs5bfzeo6k4
+2025-12-03 00:01:41,177 - INFO - Found videos/mq6iyahwdxmkgsfthongzl40/video.mkv -> will rename to videos/mq6iyahwdxmkgsfthongzl40/original.mkv
+2025-12-03 00:01:41,285 - INFO - Renaming videos/mq6iyahwdxmkgsfthongzl40/video.mkv -> videos/mq6iyahwdxmkgsfthongzl40/original.mkv
+2025-12-03 00:01:44,158 - INFO - [380/438] ✓ Renamed 1 files for wdrgonuy73469iogpfz4afx3
+2025-12-03 00:01:44,159 - INFO -
+Progress: 380/438 - Renamed: 345 videos (424 files), Skipped: 35, Failed: 0
+
+2025-12-03 00:01:44,315 - INFO - Found videos/xga6a9uvs6yot1u103nmv77z/video.mkv -> will rename to videos/xga6a9uvs6yot1u103nmv77z/original.mkv
+2025-12-03 00:01:44,434 - INFO - Renaming videos/xga6a9uvs6yot1u103nmv77z/video.mkv -> videos/xga6a9uvs6yot1u103nmv77z/original.mkv
+2025-12-03 00:01:48,194 - INFO - Renaming videos/rzoehfxdwc2ldk4xbxgmcdb9/audio.mp3 -> videos/rzoehfxdwc2ldk4xbxgmcdb9/original.mp3
+2025-12-03 00:01:49,768 - INFO - Renaming videos/st3tvvzjqscd51gam6o0h5jv/audio.mp3 -> videos/st3tvvzjqscd51gam6o0h5jv/original.mp3
+2025-12-03 00:01:50,080 - INFO - [381/438] ✓ Renamed 2 files for rzoehfxdwc2ldk4xbxgmcdb9
+2025-12-03 00:01:50,188 - INFO - Found videos/a1djak0y4g0irt3wnrg17uwa/video.mkv -> will rename to videos/a1djak0y4g0irt3wnrg17uwa/original.mkv
+2025-12-03 00:01:50,343 - INFO - Renaming videos/a1djak0y4g0irt3wnrg17uwa/video.mkv -> videos/a1djak0y4g0irt3wnrg17uwa/original.mkv
+2025-12-03 00:01:52,512 - INFO - [382/438] ✓ Renamed 2 files for st3tvvzjqscd51gam6o0h5jv
+2025-12-03 00:01:52,628 - INFO - Found videos/utnahjy4xcvi6bfwh6a6uboi/video.mkv -> will rename to videos/utnahjy4xcvi6bfwh6a6uboi/original.mkv
+2025-12-03 00:01:52,730 - INFO - Renaming videos/utnahjy4xcvi6bfwh6a6uboi/video.mkv -> videos/utnahjy4xcvi6bfwh6a6uboi/original.mkv
+2025-12-03 00:01:54,188 - INFO - [383/438] ✓ Renamed 1 files for utnahjy4xcvi6bfwh6a6uboi
+2025-12-03 00:01:54,597 - INFO - Found videos/u3iqqcgeoamsqzclierrpqdl/video.mkv -> will rename to videos/u3iqqcgeoamsqzclierrpqdl/original.mkv
+2025-12-03 00:01:54,715 - INFO - Renaming videos/u3iqqcgeoamsqzclierrpqdl/video.mkv -> videos/u3iqqcgeoamsqzclierrpqdl/original.mkv
+2025-12-03 00:01:56,951 - INFO - Renaming videos/kkgwv4we5d9rtmark85srps0/audio.mp3 -> videos/kkgwv4we5d9rtmark85srps0/original.mp3
+2025-12-03 00:01:59,730 - INFO - [385/438] ✓ Renamed 1 files for mq6iyahwdxmkgsfthongzl40
+2025-12-03 00:01:59,833 - INFO - Found videos/aby09ynwn40wa8dtsvxwf7ho/video.mkv -> will rename to videos/aby09ynwn40wa8dtsvxwf7ho/original.mkv
+2025-12-03 00:01:59,944 - INFO - Renaming videos/aby09ynwn40wa8dtsvxwf7ho/video.mkv -> videos/aby09ynwn40wa8dtsvxwf7ho/original.mkv
+2025-12-03 00:02:00,121 - INFO - [386/438] ✓ Renamed 2 files for kkgwv4we5d9rtmark85srps0
+2025-12-03 00:02:00,306 - INFO - Found videos/f16s0b5y1alxj0sq3kojd7ql/video.mkv -> will rename to videos/f16s0b5y1alxj0sq3kojd7ql/original.mkv
+2025-12-03 00:02:00,413 - INFO - Renaming videos/f16s0b5y1alxj0sq3kojd7ql/video.mkv -> videos/f16s0b5y1alxj0sq3kojd7ql/original.mkv
+2025-12-03 00:02:03,216 - INFO - [387/438] ✓ Renamed 1 files for a1djak0y4g0irt3wnrg17uwa
+2025-12-03 00:02:03,526 - INFO - Found videos/cpyas1mgays442brvl0fdi77/video.mkv -> will rename to videos/cpyas1mgays442brvl0fdi77/original.mkv
+2025-12-03 00:02:03,625 - INFO - Found videos/cpyas1mgays442brvl0fdi77/audio.mp3 -> will rename to videos/cpyas1mgays442brvl0fdi77/original.mp3
+2025-12-03 00:02:03,625 - INFO - Renaming videos/cpyas1mgays442brvl0fdi77/video.mkv -> videos/cpyas1mgays442brvl0fdi77/original.mkv
+2025-12-03 00:02:06,158 - INFO - Renaming videos/nv3julzu1xz6tcw457hjs5so/audio.mp3 -> videos/nv3julzu1xz6tcw457hjs5so/original.mp3
+2025-12-03 00:02:07,222 - INFO - [389/438] ✓ Renamed 1 files for bxlvg3jfdk6jqbfck4nmrcas
+2025-12-03 00:02:07,361 - INFO - Found videos/qamuh4bhe90e6gwbs5bsoufk/video.mkv -> will rename to videos/qamuh4bhe90e6gwbs5bsoufk/original.mkv
+2025-12-03 00:02:07,462 - INFO - Renaming videos/qamuh4bhe90e6gwbs5bsoufk/video.mkv -> videos/qamuh4bhe90e6gwbs5bsoufk/original.mkv
+2025-12-03 00:02:07,796 - INFO - [390/438] ✓ Renamed 1 files for xga6a9uvs6yot1u103nmv77z
+2025-12-03 00:02:07,796 - INFO -
+Progress: 390/438 - Renamed: 353 videos (435 files), Skipped: 37, Failed: 0
+
+2025-12-03 00:02:07,919 - INFO - Found videos/ezs86udmqn9pn48ejffruyph/video.mkv -> will rename to videos/ezs86udmqn9pn48ejffruyph/original.mkv
+2025-12-03 00:02:08,026 - INFO - Renaming videos/ezs86udmqn9pn48ejffruyph/video.mkv -> videos/ezs86udmqn9pn48ejffruyph/original.mkv
+2025-12-03 00:02:08,643 - INFO - [391/438] ✓ Renamed 2 files for nv3julzu1xz6tcw457hjs5so
+2025-12-03 00:02:08,760 - INFO - Found videos/hh96tponmukkii1cu0nnhzv5/video.mkv -> will rename to videos/hh96tponmukkii1cu0nnhzv5/original.mkv
+2025-12-03 00:02:08,888 - INFO - Renaming videos/hh96tponmukkii1cu0nnhzv5/video.mkv -> videos/hh96tponmukkii1cu0nnhzv5/original.mkv
+2025-12-03 00:02:09,333 - INFO - Renaming videos/cpyas1mgays442brvl0fdi77/audio.mp3 -> videos/cpyas1mgays442brvl0fdi77/original.mp3
+2025-12-03 00:02:11,022 - INFO - [392/438] ✓ Renamed 2 files for cpyas1mgays442brvl0fdi77
+2025-12-03 00:02:11,145 - INFO - Found videos/x19zjl7plya11i3eqjkt2zra/video.mkv -> will rename to videos/x19zjl7plya11i3eqjkt2zra/original.mkv
+2025-12-03 00:02:11,247 - INFO - Renaming videos/x19zjl7plya11i3eqjkt2zra/video.mkv -> videos/x19zjl7plya11i3eqjkt2zra/original.mkv
+2025-12-03 00:02:12,351 - INFO - [393/438] ✓ Renamed 1 files for dlz3w6ojomalhbj1j2anqgxd
+2025-12-03 00:02:12,477 - INFO - Found videos/z7fzq9jqcn0m0noy4qkmevjq/video.mkv -> will rename to videos/z7fzq9jqcn0m0noy4qkmevjq/original.mkv
+2025-12-03 00:02:12,592 - INFO - Found videos/z7fzq9jqcn0m0noy4qkmevjq/audio.mp3 -> will rename to videos/z7fzq9jqcn0m0noy4qkmevjq/original.mp3
+2025-12-03 00:02:12,592 - INFO - Renaming videos/z7fzq9jqcn0m0noy4qkmevjq/video.mkv -> videos/z7fzq9jqcn0m0noy4qkmevjq/original.mkv
+2025-12-03 00:02:12,909 - INFO - [394/438] ✓ Renamed 1 files for ezs86udmqn9pn48ejffruyph
+2025-12-03 00:02:13,038 - INFO - Found videos/krr31oe2upl14q4rc7qufyls/video.mkv -> will rename to videos/krr31oe2upl14q4rc7qufyls/original.mkv
+2025-12-03 00:02:13,147 - INFO - Renaming videos/krr31oe2upl14q4rc7qufyls/video.mkv -> videos/krr31oe2upl14q4rc7qufyls/original.mkv
+2025-12-03 00:02:14,748 - INFO - [395/438] ✓ Renamed 1 files for xn11gt75dscahop47hm3hznw
+2025-12-03 00:02:14,986 - INFO - Found videos/p2bdruj3hkr4cs4huaoqcti5/video.mkv -> will rename to videos/p2bdruj3hkr4cs4huaoqcti5/original.mkv
+2025-12-03 00:02:15,110 - INFO - Renaming videos/p2bdruj3hkr4cs4huaoqcti5/video.mkv -> videos/p2bdruj3hkr4cs4huaoqcti5/original.mkv
+2025-12-03 00:02:16,923 - INFO - [397/438] ✓ Renamed 1 files for f16s0b5y1alxj0sq3kojd7ql
+2025-12-03 00:02:17,031 - INFO - Found videos/wm654x7yh3u93du0p8g2vfd3/video.mkv -> will rename to videos/wm654x7yh3u93du0p8g2vfd3/original.mkv
+2025-12-03 00:02:17,136 - INFO - Renaming videos/wm654x7yh3u93du0p8g2vfd3/video.mkv -> videos/wm654x7yh3u93du0p8g2vfd3/original.mkv
+2025-12-03 00:02:18,556 - INFO - [398/438] ✓ Renamed 1 files for u3iqqcgeoamsqzclierrpqdl
+2025-12-03 00:02:18,667 - INFO - Found videos/lkg0k1i6xj1a738ziwwhsw0f/video.mkv -> will rename to videos/lkg0k1i6xj1a738ziwwhsw0f/original.mkv
+2025-12-03 00:02:18,781 - INFO - Found videos/lkg0k1i6xj1a738ziwwhsw0f/audio.mp3 -> will rename to videos/lkg0k1i6xj1a738ziwwhsw0f/original.mp3
+2025-12-03 00:02:18,781 - INFO - Renaming videos/lkg0k1i6xj1a738ziwwhsw0f/video.mkv -> videos/lkg0k1i6xj1a738ziwwhsw0f/original.mkv
+2025-12-03 00:02:19,128 - INFO - [399/438] ✓ Renamed 1 files for hh96tponmukkii1cu0nnhzv5
+2025-12-03 00:02:19,465 - INFO -
+Progress: 400/438 - Renamed: 361 videos (445 files), Skipped: 39, Failed: 0
+
+2025-12-03 00:02:19,653 - INFO - Found videos/dtax4c66pvgyj704bvojhsou/video.mkv -> will rename to videos/dtax4c66pvgyj704bvojhsou/original.mkv
+2025-12-03 00:02:19,842 - INFO - Renaming videos/dtax4c66pvgyj704bvojhsou/video.mkv -> videos/dtax4c66pvgyj704bvojhsou/original.mkv
+2025-12-03 00:02:20,060 - INFO - [401/438] ✓ Renamed 1 files for krr31oe2upl14q4rc7qufyls
+2025-12-03 00:02:20,230 - INFO - Found videos/f9qr4s42d566gqtkdzzknxn9/video.mkv -> will rename to videos/f9qr4s42d566gqtkdzzknxn9/original.mkv
+2025-12-03 00:02:20,419 - INFO - Renaming videos/f9qr4s42d566gqtkdzzknxn9/video.mkv -> videos/f9qr4s42d566gqtkdzzknxn9/original.mkv
+2025-12-03 00:02:26,822 - INFO - [402/438] ✓ Renamed 1 files for qamuh4bhe90e6gwbs5bsoufk
+2025-12-03 00:02:26,995 - INFO - Found videos/t7zdnxgt54j4s3973zac3mjj/video.mkv -> will rename to videos/t7zdnxgt54j4s3973zac3mjj/original.mkv
+2025-12-03 00:02:27,184 - INFO - Renaming videos/t7zdnxgt54j4s3973zac3mjj/video.mkv -> videos/t7zdnxgt54j4s3973zac3mjj/original.mkv
+2025-12-03 00:02:29,699 - INFO - [403/438] ✓ Renamed 1 files for f9qr4s42d566gqtkdzzknxn9
+2025-12-03 00:02:29,861 - INFO - Found videos/ufjrlupsc2rko3zckf49bwv6/video.mkv -> will rename to videos/ufjrlupsc2rko3zckf49bwv6/original.mkv
+2025-12-03 00:02:29,976 - INFO - Renaming videos/ufjrlupsc2rko3zckf49bwv6/video.mkv -> videos/ufjrlupsc2rko3zckf49bwv6/original.mkv
+2025-12-03 00:02:32,074 - INFO - Renaming videos/z7fzq9jqcn0m0noy4qkmevjq/audio.mp3 -> videos/z7fzq9jqcn0m0noy4qkmevjq/original.mp3
+2025-12-03 00:02:33,182 - INFO - [404/438] ✓ Renamed 2 files for z7fzq9jqcn0m0noy4qkmevjq
+2025-12-03 00:02:33,337 - INFO - Found videos/ad51s1b7h8fhtsexscspmy3x/video.mkv -> will rename to videos/ad51s1b7h8fhtsexscspmy3x/original.mkv
+2025-12-03 00:02:33,453 - INFO - Renaming videos/ad51s1b7h8fhtsexscspmy3x/video.mkv -> videos/ad51s1b7h8fhtsexscspmy3x/original.mkv
+2025-12-03 00:02:33,615 - INFO - [405/438] ✓ Renamed 1 files for p2bdruj3hkr4cs4huaoqcti5
+2025-12-03 00:02:33,811 - INFO - Found videos/xoxto2j554x45exxx6t3jewk/video.mkv -> will rename to videos/xoxto2j554x45exxx6t3jewk/original.mkv
+2025-12-03 00:02:33,950 - INFO - Renaming videos/xoxto2j554x45exxx6t3jewk/video.mkv -> videos/xoxto2j554x45exxx6t3jewk/original.mkv
+2025-12-03 00:02:35,471 - INFO - [406/438] ✓ Renamed 1 files for dtax4c66pvgyj704bvojhsou
+2025-12-03 00:02:35,498 - INFO - [407/438] ✓ Renamed 1 files for t7zdnxgt54j4s3973zac3mjj
+2025-12-03 00:02:35,602 - INFO - Found videos/l2iuanpln1slft075q8ahyon/video.mkv -> will rename to videos/l2iuanpln1slft075q8ahyon/original.mkv
+2025-12-03 00:02:35,623 - INFO - Found videos/f8t62y8ho1mwh6nhqqhb4567/video.mkv -> will rename to videos/f8t62y8ho1mwh6nhqqhb4567/original.mkv
+2025-12-03 00:02:35,724 - INFO - Renaming videos/l2iuanpln1slft075q8ahyon/video.mkv -> videos/l2iuanpln1slft075q8ahyon/original.mkv
+2025-12-03 00:02:35,724 - INFO - Renaming videos/f8t62y8ho1mwh6nhqqhb4567/video.mkv -> videos/f8t62y8ho1mwh6nhqqhb4567/original.mkv
+2025-12-03 00:02:36,852 - INFO - [408/438] ✓ Renamed 1 files for ad51s1b7h8fhtsexscspmy3x
+2025-12-03 00:02:37,149 - INFO - Found videos/xnf4m31i1f66lwhv09u3az2q/video.mkv -> will rename to videos/xnf4m31i1f66lwhv09u3az2q/original.mkv
+2025-12-03 00:02:37,266 - INFO - Renaming videos/xnf4m31i1f66lwhv09u3az2q/video.mkv -> videos/xnf4m31i1f66lwhv09u3az2q/original.mkv
+2025-12-03 00:02:38,004 - INFO - [410/438] ✓ Renamed 1 files for xoxto2j554x45exxx6t3jewk
+2025-12-03 00:02:38,004 - INFO -
+Progress: 410/438 - Renamed: 370 videos (455 files), Skipped: 40, Failed: 0
+
+2025-12-03 00:02:38,247 - INFO - Found videos/sx8a3ihcu4qum6du7ejlif7i/video.mkv -> will rename to videos/sx8a3ihcu4qum6du7ejlif7i/original.mkv
+2025-12-03 00:02:38,364 - INFO - Renaming videos/sx8a3ihcu4qum6du7ejlif7i/video.mkv -> videos/sx8a3ihcu4qum6du7ejlif7i/original.mkv
+2025-12-03 00:02:40,274 - INFO - [411/438] ✓ Renamed 1 files for aby09ynwn40wa8dtsvxwf7ho
+2025-12-03 00:02:40,375 - INFO - Found videos/rla2vnoi2ylmmpf1bjsb4djg/video.mkv -> will rename to videos/rla2vnoi2ylmmpf1bjsb4djg/original.mkv
+2025-12-03 00:02:40,493 - INFO - Renaming videos/rla2vnoi2ylmmpf1bjsb4djg/video.mkv -> videos/rla2vnoi2ylmmpf1bjsb4djg/original.mkv
+2025-12-03 00:02:43,874 - INFO - [412/438] ✓ Renamed 1 files for xnf4m31i1f66lwhv09u3az2q
+2025-12-03 00:02:43,891 - INFO - [413/438] ✓ Renamed 1 files for f8t62y8ho1mwh6nhqqhb4567
+2025-12-03 00:02:43,988 - INFO - Found videos/k85jwdt76e8iww8ljpoykkze/video.mkv -> will rename to videos/k85jwdt76e8iww8ljpoykkze/original.mkv
+2025-12-03 00:02:43,998 - INFO - Found videos/wogx7o39wy4eodmd70kbc8o9/video.mkv -> will rename to videos/wogx7o39wy4eodmd70kbc8o9/original.mkv
+2025-12-03 00:02:44,095 - INFO - Renaming videos/k85jwdt76e8iww8ljpoykkze/video.mkv -> videos/k85jwdt76e8iww8ljpoykkze/original.mkv
+2025-12-03 00:02:44,099 - INFO - Renaming videos/wogx7o39wy4eodmd70kbc8o9/video.mkv -> videos/wogx7o39wy4eodmd70kbc8o9/original.mkv
+2025-12-03 00:02:45,955 - INFO - [414/438] ✓ Renamed 1 files for x19zjl7plya11i3eqjkt2zra
+2025-12-03 00:02:46,393 - INFO - Found videos/zun7qn3xym7pzttsckp91ame/video.mkv -> will rename to videos/zun7qn3xym7pzttsckp91ame/original.mkv
+2025-12-03 00:02:46,517 - INFO - Renaming videos/zun7qn3xym7pzttsckp91ame/video.mkv -> videos/zun7qn3xym7pzttsckp91ame/original.mkv
+2025-12-03 00:02:47,728 - INFO - [417/438] ✓ Renamed 1 files for sx8a3ihcu4qum6du7ejlif7i
+2025-12-03 00:02:47,841 - INFO - Found videos/lb726vjf8g0nqc3y1ln2sfou/video.mkv -> will rename to videos/lb726vjf8g0nqc3y1ln2sfou/original.mkv
+2025-12-03 00:02:48,023 - INFO - Renaming videos/lb726vjf8g0nqc3y1ln2sfou/video.mkv -> videos/lb726vjf8g0nqc3y1ln2sfou/original.mkv
+2025-12-03 00:02:53,561 - INFO - Renaming videos/lkg0k1i6xj1a738ziwwhsw0f/audio.mp3 -> videos/lkg0k1i6xj1a738ziwwhsw0f/original.mp3
+2025-12-03 00:02:53,572 - INFO - [418/438] ✓ Renamed 1 files for l2iuanpln1slft075q8ahyon
+2025-12-03 00:02:53,952 - INFO - Found videos/vuv2ktqhud7ol49f7cm9t9ex/video.mkv -> will rename to videos/vuv2ktqhud7ol49f7cm9t9ex/original.mkv
+2025-12-03 00:02:54,067 - INFO - Renaming videos/vuv2ktqhud7ol49f7cm9t9ex/video.mkv -> videos/vuv2ktqhud7ol49f7cm9t9ex/original.mkv
+2025-12-03 00:02:55,356 - INFO - [420/438] ✓ Renamed 1 files for ufjrlupsc2rko3zckf49bwv6
+2025-12-03 00:02:55,356 - INFO -
+Progress: 420/438 - Renamed: 377 videos (462 files), Skipped: 43, Failed: 0
+
+2025-12-03 00:02:55,464 - INFO - Found videos/iu73cnmo4xit3a5g7olhizfo/video.mkv -> will rename to videos/iu73cnmo4xit3a5g7olhizfo/original.mkv
+2025-12-03 00:02:55,564 - INFO - Renaming videos/iu73cnmo4xit3a5g7olhizfo/video.mkv -> videos/iu73cnmo4xit3a5g7olhizfo/original.mkv
+2025-12-03 00:02:58,897 - INFO - [421/438] ✓ Renamed 1 files for k85jwdt76e8iww8ljpoykkze
+2025-12-03 00:02:59,000 - INFO - Found videos/pgrokuuhvovem0ajyew4tncu/video.mkv -> will rename to videos/pgrokuuhvovem0ajyew4tncu/original.mkv
+2025-12-03 00:02:59,105 - INFO - Renaming videos/pgrokuuhvovem0ajyew4tncu/video.mkv -> videos/pgrokuuhvovem0ajyew4tncu/original.mkv
+2025-12-03 00:02:59,730 - INFO - [422/438] ✓ Renamed 2 files for lkg0k1i6xj1a738ziwwhsw0f
+2025-12-03 00:02:59,864 - INFO - Found videos/xls03x1eryvd5y7lpzbwgblt/video.mkv -> will rename to videos/xls03x1eryvd5y7lpzbwgblt/original.mkv
+2025-12-03 00:02:59,989 - INFO - Renaming videos/xls03x1eryvd5y7lpzbwgblt/video.mkv -> videos/xls03x1eryvd5y7lpzbwgblt/original.mkv
+2025-12-03 00:03:00,052 - INFO - [423/438] ✓ Renamed 1 files for wm654x7yh3u93du0p8g2vfd3
+2025-12-03 00:03:00,174 - INFO - Found videos/ln4np34ziqhps5xk39cwkjp0/video.mkv -> will rename to videos/ln4np34ziqhps5xk39cwkjp0/original.mkv
+2025-12-03 00:03:00,279 - INFO - Renaming videos/ln4np34ziqhps5xk39cwkjp0/video.mkv -> videos/ln4np34ziqhps5xk39cwkjp0/original.mkv
+2025-12-03 00:03:01,683 - INFO - [424/438] ✓ Renamed 1 files for pgrokuuhvovem0ajyew4tncu
+2025-12-03 00:03:01,791 - INFO - Found videos/idafk86yfg7uq201z7v4p0wv/video.mkv -> will rename to videos/idafk86yfg7uq201z7v4p0wv/original.mkv
+2025-12-03 00:03:01,903 - INFO - Renaming videos/idafk86yfg7uq201z7v4p0wv/video.mkv -> videos/idafk86yfg7uq201z7v4p0wv/original.mkv
+2025-12-03 00:03:03,249 - INFO - [425/438] ✓ Renamed 1 files for rla2vnoi2ylmmpf1bjsb4djg
+2025-12-03 00:03:03,357 - INFO - Found videos/mgrp2hpv2alb27fi2sqj1ck4/video.mkv -> will rename to videos/mgrp2hpv2alb27fi2sqj1ck4/original.mkv
+2025-12-03 00:03:03,449 - INFO - Renaming videos/mgrp2hpv2alb27fi2sqj1ck4/video.mkv -> videos/mgrp2hpv2alb27fi2sqj1ck4/original.mkv
+2025-12-03 00:03:05,047 - INFO - [426/438] ✓ Renamed 1 files for idafk86yfg7uq201z7v4p0wv
+2025-12-03 00:03:05,155 - INFO - Found videos/amlf5sohn10i3vuzoqcmzm0a/video.mkv -> will rename to videos/amlf5sohn10i3vuzoqcmzm0a/original.mkv
+2025-12-03 00:03:05,260 - INFO - Renaming videos/amlf5sohn10i3vuzoqcmzm0a/video.mkv -> videos/amlf5sohn10i3vuzoqcmzm0a/original.mkv
+2025-12-03 00:03:12,105 - INFO - [427/438] ✓ Renamed 1 files for lb726vjf8g0nqc3y1ln2sfou
+2025-12-03 00:03:12,187 - INFO - [428/438] ✓ Renamed 1 files for iu73cnmo4xit3a5g7olhizfo
+2025-12-03 00:03:12,222 - INFO - Found videos/kmhmcc41uglftsqr66vbo0di/video.mkv -> will rename to videos/kmhmcc41uglftsqr66vbo0di/original.mkv
+2025-12-03 00:03:12,300 - INFO - Found videos/x4szsngpepdfp7umx1u35jrr/video.mkv -> will rename to videos/x4szsngpepdfp7umx1u35jrr/original.mkv
+2025-12-03 00:03:12,338 - INFO - Renaming videos/kmhmcc41uglftsqr66vbo0di/video.mkv -> videos/kmhmcc41uglftsqr66vbo0di/original.mkv
+2025-12-03 00:03:12,410 - INFO - Renaming videos/x4szsngpepdfp7umx1u35jrr/video.mkv -> videos/x4szsngpepdfp7umx1u35jrr/original.mkv
+2025-12-03 00:03:18,566 - INFO - [429/438] ✓ Renamed 1 files for xls03x1eryvd5y7lpzbwgblt
+2025-12-03 00:03:21,614 - INFO - [430/438] ✓ Renamed 1 files for vuv2ktqhud7ol49f7cm9t9ex
+2025-12-03 00:03:21,614 - INFO -
+Progress: 430/438 - Renamed: 387 videos (473 files), Skipped: 43, Failed: 0
+
+2025-12-03 00:03:22,965 - INFO - [431/438] ✓ Renamed 1 files for x4szsngpepdfp7umx1u35jrr
+2025-12-03 00:03:24,140 - INFO - [432/438] ✓ Renamed 1 files for amlf5sohn10i3vuzoqcmzm0a
+2025-12-03 00:03:26,150 - INFO - [433/438] ✓ Renamed 1 files for zun7qn3xym7pzttsckp91ame
+2025-12-03 00:03:28,611 - INFO - [434/438] ✓ Renamed 1 files for mgrp2hpv2alb27fi2sqj1ck4
+2025-12-03 00:03:28,666 - INFO - [435/438] ✓ Renamed 1 files for ln4np34ziqhps5xk39cwkjp0
+2025-12-03 00:03:31,607 - ERROR - Error copying videos/xi2o5y78avwfqa0pz184rd6r/video.mkv to videos/xi2o5y78avwfqa0pz184rd6r/original.mkv: Read timeout on endpoint URL: "https://0aeb879de8e3cdde5fb3d413025222ce.r2.cloudflarestorage.com/rawkode-academy-content/videos/xi2o5y78avwfqa0pz184rd6r/original.mkv"
+2025-12-03 00:03:31,607 - ERROR - [436/438] ✗ Failed: xi2o5y78avwfqa0pz184rd6r
+2025-12-03 00:03:34,627 - INFO - [437/438] ✓ Renamed 1 files for kmhmcc41uglftsqr66vbo0di
+2025-12-03 00:03:35,718 - INFO - [438/438] ✓ Renamed 1 files for wogx7o39wy4eodmd70kbc8o9
+2025-12-03 00:03:35,720 - INFO -
+============================================================
+2025-12-03 00:03:35,720 - INFO - STANDARDIZATION COMPLETE
+2025-12-03 00:03:35,720 - INFO - ============================================================
+2025-12-03 00:03:35,720 - INFO - Total video IDs processed: 438
+2025-12-03 00:03:35,720 - INFO - ✓ Videos with renamed files: 394
+2025-12-03 00:03:35,720 - INFO - ✓ Total files renamed: 480
+2025-12-03 00:03:35,720 - INFO - ⚠ Skipped (no changes needed): 43
+2025-12-03 00:03:35,720 - INFO - ✗ Failed: 1
+2025-12-03 00:03:35,720 - INFO - ============================================================
+
+…at/podcast-rss-feed* is 📦 v0.1.0 via 🐍 v3.9.6 cuenv detected env.cue, but approval is required because this configuration contains 1 hook.
+Run 'cuenv allow' to approve. 13m32s

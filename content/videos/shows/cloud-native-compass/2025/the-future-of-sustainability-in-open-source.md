@@ -39,6 +39,7 @@ technologies: []
 show: cloud-native-compass
 videoId: nld4g7u2s213v93y76jbmnjm
 duration: 2875
+audioFileSize: 68999671
 guests:
   - hazel-weakly
 ---

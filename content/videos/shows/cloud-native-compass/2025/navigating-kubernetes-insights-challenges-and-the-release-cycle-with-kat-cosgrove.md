@@ -12,6 +12,7 @@ technologies: []
 show: cloud-native-compass
 videoId: fqasod5sk7o8fk3pnzng0thp
 duration: 2366
+audioFileSize: 56784493
 guests:
   - kat-cosgrove
 ---

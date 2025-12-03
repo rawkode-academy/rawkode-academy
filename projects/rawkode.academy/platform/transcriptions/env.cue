@@ -46,4 +46,14 @@ tasks: {
 		args: ["wrangler", "deploy", "--config", "./wrangler.jsonc"]
 		dependsOn: ["install"]
 	}
+	"check-missing": {
+		command: "bun"
+		args: ["scripts/schedule_missing.ts"]
+		dependsOn: ["install"]
+	}
+	"schedule-missing": {
+		command: "bun"
+		args: ["scripts/schedule_missing.ts", "--execute"]
+		dependsOn: ["install"]
+	}
 }

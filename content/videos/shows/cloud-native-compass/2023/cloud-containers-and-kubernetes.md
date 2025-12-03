@@ -64,6 +64,7 @@ chapters:
   - startTime: 3800
     title: Shameless Plugs
 duration: 3931
+audioFileSize: 94345022
 guests:
   - neil-cresswell
   - eli-holderness
