@@ -15,7 +15,6 @@
 
   packages = with pkgs; [
     biome
-    bun
     d2
     influxdb2
     nixfmt-rfc-style
