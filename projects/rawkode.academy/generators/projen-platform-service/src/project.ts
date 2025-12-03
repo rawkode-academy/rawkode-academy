@@ -61,7 +61,7 @@ export class PlatformService extends Project {
 		// Automatically inject ANALYTICS service binding for all services
 		const analyticsBinding = {
 			binding: "ANALYTICS",
-			service: "platform-analytics-rpc",
+			service: "analytics",
 		};
 
 		if (this.options.bindings) {
