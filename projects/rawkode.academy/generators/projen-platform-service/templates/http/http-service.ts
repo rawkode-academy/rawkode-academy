@@ -11,7 +11,7 @@ export class {{ serviceName | pascalCase }} extends WorkerEntrypoint<Env> {
 		return new Response("Not Found", { status: 404 });
 	}
 
-	// Add your RPC methods here
+	// Add your HTTP methods here
 	// async myMethod(arg: string): Promise<string> {
 	//   return `Hello, ${arg}!`;
 	// }

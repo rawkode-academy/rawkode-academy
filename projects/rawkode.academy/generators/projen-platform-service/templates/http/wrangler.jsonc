@@ -1,6 +1,6 @@
 {
 	"$schema": "../node_modules/wrangler/config-schema.json",
-	"name": "platform-{{ serviceName }}-rpc",
+	"name": "platform-{{ serviceName }}-http",
 	"main": "main.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
@@ -23,7 +23,14 @@
 	"placement": {
 		"mode": "smart"
 	},
-	"workers_dev": true{% if bindings.d1Databases.size > 0 %},
+	"workers_dev": true{% if bindings.routes.size > 0 %},
+	"routes": [{% for route in bindings.routes %}
+		{
+			"pattern": "{{ route.pattern }}"{% if route.custom_domain %},
+			"custom_domain": true{% endif %}{% if route.zone_name %},
+			"zone_name": "{{ route.zone_name }}"{% endif %}
+		}{% unless forloop.last %},{% endunless %}{% endfor %}
+	]{% endif %}{% if bindings.d1Databases.size > 0 %},
 	"d1_databases": [{% for db in bindings.d1Databases %}
 		{
 			"binding": "{{ db.binding }}",
