@@ -6,7 +6,7 @@
     "packages": [
       "content",
       "packages/**",
-      "projects/rawkode.academy/**"
+      "projects/**"
     ],
     "catalogs": {
       "auth": {

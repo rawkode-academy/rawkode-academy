@@ -9,9 +9,6 @@ env: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
 			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/api-tokens/all-access"
 		}
-		INFLUXDB_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa-core-infrastructure/influxdb/password"
-		}
 	}
 }
 

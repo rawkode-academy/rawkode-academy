@@ -1,0 +1,35 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "analytics",
+	"main": "./src/index.ts",
+	"compatibility_date": "2025-04-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"minify": true,
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1
+		}
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": true,
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "EVENT_BUFFER",
+				"class_name": "EventBuffer"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["EventBuffer"]
+		}
+	]
+}

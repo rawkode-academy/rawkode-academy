@@ -12,7 +12,5 @@
 		"typescript": "^5.1.6",
 		"wrangler": "^3.4.0"
 	},
-	"dependencies": {
-		"@influxdata/influxdb-client": "1.33.2"
-	}
+	"dependencies": {}
 }
