@@ -3,7 +3,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
 import { Resend } from "resend";
-import { captureServerEvent, getDistinctId } from "../server/posthog";
+import { captureServerEvent, getDistinctId } from "../server/grafana";
 
 const SignupSchema = z.object({
 	email: z.string().email("Please enter a valid email address").optional(),
@@ -95,15 +95,20 @@ export const signupForCourseUpdates = defineAction({
 
 			// Analytics: capture course signup (without sending PII)
 			const distinctId = getDistinctId(ctx);
-			await captureServerEvent({
-				event: "course_signup",
-				distinctId,
-				properties: {
-					audience_id: audienceId,
-					allow_sponsor_contact: !!allowSponsorContact,
-					is_authenticated: !!ctx.locals.user,
+			const runtime = (ctx as any).locals?.runtime;
+			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+			await captureServerEvent(
+				{
+					event: "course_signup",
+					distinctId,
+					properties: {
+						audience_id: audienceId,
+						allow_sponsor_contact: !!allowSponsorContact,
+						is_authenticated: !!ctx.locals.user,
+					},
 				},
-			});
+				analytics,
+			);
 
 			// Check if the contact was already in the audience
 			if (response.data && response.data.id) {

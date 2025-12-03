@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { captureServerEvent, getDistinctId } from "../server/posthog";
+import { captureServerEvent, getDistinctId } from "../server/grafana";
 
 const ReactionSchema = z.object({
 	contentId: z.string(),
@@ -70,12 +70,16 @@ export const addReaction = defineAction({
 			const result = (await response.json()) as Record<string, unknown>;
 
 			// Track the reaction event
+			const analytics = runtime.env.ANALYTICS;
 			const distinctId = getDistinctId(ctx);
-			await captureServerEvent({
-				event: "reaction_add",
-				distinctId,
-				properties: { content_id: contentId, emoji },
-			});
+			await captureServerEvent(
+				{
+					event: "reaction_add",
+					distinctId,
+					properties: { content_id: contentId, emoji },
+				},
+				analytics,
+			);
 
 			return {
 				success: true,
@@ -98,13 +102,20 @@ export const addReaction = defineAction({
 export const removeReaction = defineAction({
 	input: ReactionSchema,
 	handler: async ({ contentId, emoji }, ctx) => {
+		// Get analytics service binding from runtime
+		const runtime = ctx.locals.runtime;
+		const analytics = runtime?.env?.ANALYTICS;
+
 		// Track the reaction removal event
 		const distinctId = getDistinctId(ctx);
-		await captureServerEvent({
-			event: "reaction_remove",
-			distinctId,
-			properties: { content_id: contentId, emoji },
-		});
+		await captureServerEvent(
+			{
+				event: "reaction_remove",
+				distinctId,
+				properties: { content_id: contentId, emoji },
+			},
+			analytics,
+		);
 
 		// For now, just return success - removal can be implemented later
 		// when the write model supports it

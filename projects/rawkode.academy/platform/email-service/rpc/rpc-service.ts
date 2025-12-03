@@ -1,4 +1,5 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
+import { CloudEvent } from "cloudevents";
 import { EmailMessage } from "cloudflare:email";
 import type { Env } from "./main.js";
 
@@ -63,6 +64,42 @@ export class EmailService extends WorkerEntrypoint<Env> {
 		}
 
 		return new Response("Not Found", { status: 404 });
+	}
+
+	/**
+	 * Track an analytics event via the analytics service
+	 */
+	private async trackAnalyticsEvent(
+		eventType: string,
+		data: Record<string, unknown>,
+	): Promise<void> {
+		if (!this.env.ANALYTICS) {
+			console.warn("Analytics service not configured");
+			return;
+		}
+
+		const cloudEvent = new CloudEvent({
+			specversion: "1.0",
+			type: eventType,
+			source: "/email-service",
+			id: crypto.randomUUID(),
+			time: new Date().toISOString(),
+			datacontenttype: "application/json",
+			data,
+		});
+
+		try {
+			await this.env.ANALYTICS.fetch("https://analytics.internal/track", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					event: cloudEvent,
+					attributes: ["email_type", "recipient_email"],
+				}),
+			});
+		} catch (err) {
+			console.error("Failed to track analytics event", err);
+		}
 	}
 
 	/**
@@ -131,9 +168,20 @@ export class EmailService extends WorkerEntrypoint<Env> {
 
 			await this.env.SEND_EMAIL.send(message);
 
+			const messageId = crypto.randomUUID();
+
+			// Track email sent analytics event
+			await this.trackAnalyticsEvent("com.rawkode.academy.email.sent", {
+				email_type: envelopeType,
+				recipient_email: recipient.email,
+				recipient_user_id: recipient.userId,
+				message_id: messageId,
+				subject: content.subject,
+			});
+
 			return {
 				success: true,
-				messageId: crypto.randomUUID(),
+				messageId,
 			};
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : "Unknown error";

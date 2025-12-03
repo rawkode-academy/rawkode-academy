@@ -109,18 +109,17 @@ export function logError(
 	if (
 		enableErrorCapture &&
 		typeof window !== "undefined" &&
-		(window as any).posthog
+		(window as any).grafanaFaro
 	) {
-		const ph = (window as any).posthog;
+		const faro = (window as any).grafanaFaro;
 		if (error instanceof Error) {
-			ph.capture("js_error", {
-				name: error.name,
-				message: error.message,
-				stack: error.stack,
-				...context,
+			faro.api.pushError(error, {
+				context: context as Record<string, string>,
 			});
 		} else {
-			ph.capture("js_error", { message: String(error), ...context });
+			faro.api.pushError(new Error(String(error)), {
+				context: context as Record<string, string>,
+			});
 		}
 	}
 }

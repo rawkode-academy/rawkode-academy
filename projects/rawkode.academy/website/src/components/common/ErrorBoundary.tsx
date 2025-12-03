@@ -28,13 +28,12 @@ export default class ErrorBoundary extends Component<Props, State> {
 		if (
 			enableErrorCapture &&
 			typeof window !== "undefined" &&
-			(window as any).posthog
+			(window as any).grafanaFaro
 		) {
-			(window as any).posthog.capture("react_error", {
-				message: error.message,
-				name: error.name,
-				stack: error.stack,
-				componentStack: errorInfo.componentStack,
+			(window as any).grafanaFaro.api.pushError(error, {
+				context: {
+					componentStack: errorInfo.componentStack || "",
+				},
 			});
 		}
 	}

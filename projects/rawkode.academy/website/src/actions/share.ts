@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { captureServerEvent, getDistinctId } from "../server/posthog";
+import { captureServerEvent, getDistinctId } from "../server/grafana";
 
 const ShareEventSchema = z.object({
 	action: z.enum(["share"]),
@@ -16,17 +16,24 @@ export const trackShareEvent = defineAction({
 		try {
 			console.log("Share event received:", event);
 
+			// Get analytics service binding from runtime
+			const runtime = ctx.locals.runtime;
+			const analytics = runtime?.env?.ANALYTICS;
+
 			const distinctId = getDistinctId(ctx);
 
-			await captureServerEvent({
-				event: "share",
-				distinctId,
-				properties: {
-					url: `${event.content_type}/${event.content_id}`,
-					channel: event.platform,
-					success: event.success,
+			await captureServerEvent(
+				{
+					event: "share",
+					distinctId,
+					properties: {
+						url: `${event.content_type}/${event.content_id}`,
+						channel: event.platform,
+						success: event.success,
+					},
 				},
-			});
+				analytics,
+			);
 
 			const success = true;
 

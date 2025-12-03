@@ -139,10 +139,10 @@ const people = defineCollection({
 		github: z.string().optional(),
 		twitter: z.string().optional(),
 		bluesky: z.string().optional(),
-		mastodon: z.string().optional(),
+		mastodon: z.string().url().optional(),
 		linkedin: z.string().optional(),
-		website: z.string().optional(),
-		youtube: z.string().optional(),
+		website: z.string().url().optional(),
+		youtube: z.string().url().optional(),
 		forename: z.string().optional(),
 		surname: z.string().optional(),
 		// biography: z.string().optional(), // Moved to MDX body
@@ -155,18 +155,28 @@ const people = defineCollection({
 			)
 			.default([]),
 	}).transform((person) => {
-		let avatarUrl = undefined;
-
-		if (person.github) {
-			const githubHandle = person.github.split("/").pop();
-			if (githubHandle) {
-				avatarUrl = `https://github.com/${githubHandle}.png`;
-			}
-		}
+		// Build full URLs from handles
+		// website, youtube, and mastodon are kept as full URLs (too variable to derive)
+		const githubUrl = person.github ? `https://github.com/${person.github}` : undefined;
+		const twitterUrl = person.twitter ? `https://x.com/${person.twitter}` : undefined;
+		const blueskyUrl = person.bluesky ? `https://bsky.app/profile/${person.bluesky}` : undefined;
+		const linkedinUrl = person.linkedin ? `https://www.linkedin.com/in/${person.linkedin}` : undefined;
+		const avatarUrl = person.github ? `https://github.com/${person.github}.png` : undefined;
 
 		return {
 			...person,
+			github: githubUrl,
+			twitter: twitterUrl,
+			bluesky: blueskyUrl,
+			linkedin: linkedinUrl,
 			avatarUrl,
+			// Keep original handles for display
+			handles: {
+				github: person.github,
+				twitter: person.twitter,
+				bluesky: person.bluesky,
+				linkedin: person.linkedin,
+			},
 		};
 	}),
 });

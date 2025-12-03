@@ -87,6 +87,7 @@ export const technologyZod = zod.object({
     twitter: zod.string().url().optional(),
     youtube: zod.string().url().optional(),
     slack: zod.string().url().optional(),
+    discord: zod.string().url().optional(),
     chat: zod.string().optional(),                // Generic chat link
     blog: zod.string().url().optional(),
     mailingList: zod.string().url().optional(),
@@ -191,6 +192,7 @@ export function createTechnologySchema(z: typeof zod) {
       twitter: z.string().url().optional(),
       youtube: z.string().url().optional(),
       slack: z.string().url().optional(),
+      discord: z.string().url().optional(),
       chat: z.string().optional(),                // Generic chat link
       blog: z.string().url().optional(),
       mailingList: z.string().url().optional(),

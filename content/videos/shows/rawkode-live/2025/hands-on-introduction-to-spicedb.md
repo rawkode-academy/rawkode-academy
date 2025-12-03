@@ -7,6 +7,8 @@ description: "**\U0001F680 Hands-On SpiceDB Demo + Q&A with AuthZed CPO Jimmy Ze
 publishedAt: 2025-04-14T17:00:00.000Z
 technologies:
   - spicedb
+guests:
+  - jimmy-zelinskie
 show: rawkode-live
 videoId: pjn9r9a0dhxd8y05nnsc99d8
 duration: 5427
