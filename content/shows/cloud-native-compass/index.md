@@ -16,6 +16,6 @@ podcast:
   subcategory: Software How-To
   explicit: false
   copyright: Rawkode Academy
-  artworkUrl: https://content.rawkode.academy/shows/cloud-native-compass/artwork.jpg
+  artworkUrl: https://content.rawkode.academy/videos/hbkqmiw7xfe2dxrarck938yl/thumbnail.jpg
 ---
 

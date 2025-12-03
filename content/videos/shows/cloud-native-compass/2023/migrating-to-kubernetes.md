@@ -86,6 +86,7 @@ chapters:
   - startTime: 2379
     title: Conclusion & Guest Plugs
 duration: 2470
+audioFileSize: 59289114
 guests:
   - rachel-sweeney
 ---

@@ -8,6 +8,7 @@ technologies: []
 show: cloud-native-compass
 videoId: nv3julzu1xz6tcw457hjs5so
 duration: 2239
+audioFileSize: 53732551
 guests:
   - koray-oksay
 ---
