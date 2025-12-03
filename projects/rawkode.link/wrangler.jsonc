@@ -1,0 +1,30 @@
+{
+  "name": "rawkode-link",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-05-01",
+  "workers_dev": false,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "services": [
+    { "binding": "ANALYTICS", "service": "analytics" }
+  ],
+  "routes": [
+		{ "pattern": "cloudnativecompass.fm", "custom_domain": true },
+		{ "pattern": "cloudnativecompass.fm/*", "zone_name": "cloudnativecompass.fm" },
+    { "pattern": "rawkode.chat", "custom_domain": true },
+    { "pattern": "rawkode.chat/*", "zone_name": "rawkode.chat" },
+    { "pattern": "rawkode.community", "custom_domain": true },
+    { "pattern": "rawkode.community/*", "zone_name": "rawkode.community" },
+    { "pattern": "rawkode.link", "custom_domain": true },
+    { "pattern": "rawkode.link/*", "zone_name": "rawkode.link" },
+    { "pattern": "rawkode.live", "custom_domain": true },
+    { "pattern": "rawkode.live/*", "zone_name": "rawkode.live" }
+  ]
+}
