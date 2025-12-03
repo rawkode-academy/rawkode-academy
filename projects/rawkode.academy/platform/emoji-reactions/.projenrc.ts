@@ -6,6 +6,7 @@ const project = new PlatformService({
 	includeWriteModel: true,
 	additionalDependencies: {
 		'better-auth': 'catalog:auth',
+		cloudevents: '^8.0.2',
 	},
 	bindings: {
 		d1Databases: [{
