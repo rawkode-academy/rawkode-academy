@@ -1,3 +1,6 @@
+import type { Faro } from "@grafana/faro-web-sdk";
+
 interface Window {
-	posthog?: any;
+	grafanaFaro?: Faro | null;
+	enableGrafanaFaro?: () => void;
 }

@@ -25,6 +25,7 @@
 	"dependencies": {
 		"@astrojs/check": "0.9.6",
 		"@astrojs/cloudflare": "12.6.12",
+		"cloudevents": "^8.0.2",
 		"@astrojs/mdx": "4.3.12",
 		"@astrojs/node": "9.5.1",
 		"@astrojs/partytown": "^2.1.4",
@@ -40,8 +41,8 @@
 		"@fortawesome/free-solid-svg-icons": "^7.0.0",
 		"@fortawesome/vue-fontawesome": "^3.1.1",
 		"@grafana/faro-rollup-plugin": "0.5.2",
-		"@grafana/faro-web-sdk": "^1.19.0",
-		"@grafana/faro-web-tracing": "^1.19.0",
+		"@grafana/faro-web-sdk": "^2.0.0-beta",
+		"@grafana/faro-web-tracing": "^2.0.0-beta",
 		"@headlessui/vue": "^1.7.23",
 		"@heroicons/react": "^2.2.0",
 		"@heroicons/vue": "^2.2.0",

@@ -103,9 +103,9 @@ const socialLinks = [
                             <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-2">
                                 {person.data.name}
                             </h1>
-                            {person.data.twitter && (
+                            {person.data.handles.twitter && (
                                 <p class="text-lg text-primary font-medium">
-                                    @{person.data.twitter.split('/').pop()}
+                                    @{person.data.handles.twitter}
                                 </p>
                             )}
                         </div>

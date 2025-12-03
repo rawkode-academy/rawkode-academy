@@ -1,4 +1,5 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
+import { CloudEvent } from "cloudevents";
 import { drizzle } from "drizzle-orm/d1";
 import { and, eq } from "drizzle-orm";
 import * as dataSchema from "../data-model/schema.js";
@@ -23,6 +24,42 @@ const CHANNELS = new Set(["marketing", "newsletter", "service"]);
 export class EmailPreferencesService extends WorkerEntrypoint<Env> {
 	private get db() {
 		return drizzle(this.env.DB, { schema: dataSchema });
+	}
+
+	/**
+	 * Track an analytics event via the analytics service
+	 */
+	private async trackAnalyticsEvent(
+		eventType: string,
+		data: Record<string, unknown>,
+	): Promise<void> {
+		if (!this.env.ANALYTICS) {
+			console.warn("Analytics service not configured");
+			return;
+		}
+
+		const cloudEvent = new CloudEvent({
+			specversion: "1.0",
+			type: eventType,
+			source: "/email-preferences",
+			id: crypto.randomUUID(),
+			time: new Date().toISOString(),
+			datacontenttype: "application/json",
+			data,
+		});
+
+		try {
+			await this.env.ANALYTICS.fetch("https://analytics.internal/track", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					event: cloudEvent,
+					attributes: ["user_id", "channel", "audience"],
+				}),
+			});
+		} catch (err) {
+			console.error("Failed to track analytics event", err);
+		}
 	}
 
 	async fetch(request: Request): Promise<Response> {
@@ -86,13 +123,26 @@ export class EmailPreferencesService extends WorkerEntrypoint<Env> {
 			}
 		}
 
-		// Record the event
+		// Record the event in database
 		await this.db.insert(dataSchema.emailPreferenceEventsTable).values({
 			userId,
 			channel: normalized.channel,
 			audience: normalized.audience,
 			action: normalized.status,
 			occurredAt: now,
+		});
+
+		// Track analytics event to Grafana
+		const eventType =
+			normalized.status === "subscribed"
+				? "com.rawkode.academy.email.subscribed"
+				: "com.rawkode.academy.email.unsubscribed";
+
+		await this.trackAnalyticsEvent(eventType, {
+			user_id: userId,
+			channel: normalized.channel,
+			audience: normalized.audience,
+			source: normalized.source,
 		});
 
 		const preference: EmailPreference = {

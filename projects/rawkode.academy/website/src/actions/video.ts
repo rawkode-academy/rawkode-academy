@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { captureServerEvent, getDistinctId } from "../server/posthog";
+import { captureServerEvent, getDistinctId } from "../server/grafana";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
 	z.object({
@@ -35,6 +35,10 @@ export const trackVideoEvent = defineAction({
 		try {
 			console.log("Video event received:", event);
 
+			// Get analytics service binding from runtime
+			const runtime = ctx.locals.runtime;
+			const analytics = runtime?.env?.ANALYTICS;
+
 			// Map the action to the appropriate analytics method
 			let success = false;
 			const extra: Record<string, unknown> = {};
@@ -44,39 +48,48 @@ export const trackVideoEvent = defineAction({
 				case "played":
 				case "paused":
 				case "seeked":
-					await captureServerEvent({
-						event:
-							event.action === "played"
-								? "video_play"
-								: event.action === "paused"
-									? "video_pause"
-									: "video_seek",
-						distinctId,
-						properties: {
-							video_id: event.video,
-							position: event.seconds,
+					await captureServerEvent(
+						{
+							event:
+								event.action === "played"
+									? "video_play"
+									: event.action === "paused"
+										? "video_pause"
+										: "video_seek",
+							distinctId,
+							properties: {
+								video_id: event.video,
+								position: event.seconds,
+							},
 						},
-					});
+						analytics,
+					);
 					success = true;
 					break;
 				case "progressed":
 					extra.percent = event.percent;
-					await captureServerEvent({
-						event: "video_progress",
-						distinctId,
-						properties: {
-							video_id: event.video,
-							percent: event.percent,
+					await captureServerEvent(
+						{
+							event: "video_progress",
+							distinctId,
+							properties: {
+								video_id: event.video,
+								percent: event.percent,
+							},
 						},
-					});
+						analytics,
+					);
 					success = true;
 					break;
 				case "completed":
-					await captureServerEvent({
-						event: "video_complete",
-						distinctId,
-						properties: { video_id: event.video },
-					});
+					await captureServerEvent(
+						{
+							event: "video_complete",
+							distinctId,
+							properties: { video_id: event.video },
+						},
+						analytics,
+					);
 					success = true;
 					break;
 			}

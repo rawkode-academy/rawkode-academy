@@ -1,7 +1,8 @@
-import { EmailPreferences } from "./rpc-service.js";
+import { EmailPreferencesService } from "./rpc-service.js";
 
 export interface Env {
 	DB: D1Database;
+	ANALYTICS: Fetcher;
 }
 
-export default EmailPreferences;
+export default EmailPreferencesService;
