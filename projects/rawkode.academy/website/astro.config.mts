@@ -396,16 +396,6 @@ export default defineConfig({
 	env: {
 		validateSecrets: true,
 		schema: {
-			PUBLIC_GRAFANA_FARO_URL: envField.string({
-				context: "client",
-				access: "public",
-				optional: true,
-			}),
-			PUBLIC_GRAFANA_FARO_APP_NAME: envField.string({
-				context: "client",
-				access: "public",
-				default: "rawkode-academy-website",
-			}),
 			ZULIP_URL: envField.string({
 				context: "server",
 				access: "public",

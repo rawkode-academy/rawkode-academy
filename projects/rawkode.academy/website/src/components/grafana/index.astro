@@ -7,8 +7,8 @@
   import { initializeFaro, getWebInstrumentations, LogLevel } from '@grafana/faro-web-sdk';
   import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
-  const FARO_URL = import.meta.env.PUBLIC_GRAFANA_FARO_URL;
-  const FARO_APP_NAME = import.meta.env.PUBLIC_GRAFANA_FARO_APP_NAME || 'rawkode-academy-website';
+  const FARO_URL = 'https://faro-collector-prod-gb-south-1.grafana.net/collect/b8e6c95e9ef352ba577b11e06a79a0e4';
+  const FARO_APP_NAME = 'rawkode.academy';
 
   function getConsent(): string | null {
     try {
