@@ -317,7 +317,7 @@ export default defineConfig({
 		}),
 		partytown({
 			config: {
-				forward: ["posthog"],
+				forward: [],
 				lib: "/_partytown/",
 				// Prevent service worker registration attempts from Partytown
 				mainWindowAccessors: ["navigator.serviceWorker"],
@@ -379,15 +379,15 @@ export default defineConfig({
 	env: {
 		validateSecrets: true,
 		schema: {
-			POSTHOG_API_KEY: envField.string({
-				context: "server",
-				access: "secret",
+			PUBLIC_GRAFANA_FARO_URL: envField.string({
+				context: "client",
+				access: "public",
 				optional: true,
 			}),
-			POSTHOG_HOST: envField.string({
-				context: "server",
+			PUBLIC_GRAFANA_FARO_APP_NAME: envField.string({
+				context: "client",
 				access: "public",
-				default: "https://eu.i.posthog.com",
+				default: "rawkode-academy-website",
 			}),
 			ZULIP_URL: envField.string({
 				context: "server",

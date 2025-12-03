@@ -5,6 +5,9 @@
 	"scripts": {
 		"test": "vitest run"
 	},
+	"dependencies": {
+		"cloudevents": "^8.0.2"
+	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@cloudflare/workers-types": "^4.20250426.0",

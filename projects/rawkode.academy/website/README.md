@@ -71,5 +71,4 @@ op run -- bunx wrangler pages deploy --branch main dist
 
 ## Analytics
 
-This site uses PostHog for all analytics, error tracking, and optional session recording.
-Session recordings are sampled at ~10% with inputs masked. No InfluxDB pipeline is used anymore.
+This site uses Grafana Faro SDK v2 for frontend observability and the `@rawkode.tools/analytics` service for server-side events. All events are formatted as CloudEvents and sent to Grafana Cloud via OTLP.

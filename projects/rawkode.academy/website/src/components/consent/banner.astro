@@ -25,7 +25,7 @@
   <div class="consent-content">
     <h2 id="consent-title" class="consent-title">Analytics & Cookies</h2>
     <p id="consent-desc" class="consent-text">
-      We use PostHog to understand usage and improve the site. Session recording may sample ~10% of visits with inputs masked. You can accept or decline; your choice is remembered.
+      We use analytics to understand usage and improve the site. You can accept or decline; your choice is remembered.
     </p>
     <div class="consent-actions">
       <button id="consent-accept" class="btn btn-primary" type="button">Accept</button>
@@ -48,14 +48,9 @@
     const accept = () => {
       try{ localStorage.setItem(KEY, 'granted'); }catch{}
       try{
-        // Forwarded via Partytown
-        if (window.posthog){
-          window.posthog.opt_in_capturing();
-          if (typeof window.posthog.startSessionRecording === 'function') {
-            window.posthog.startSessionRecording();
-          }
-          // Capture a pageview immediately upon consent
-          window.posthog.capture('$pageview');
+        // Enable Grafana Faro tracking after consent
+        if (typeof window.enableGrafanaFaro === 'function') {
+          window.enableGrafanaFaro();
         }
       }catch{}
       banner?.classList.add('hidden');
@@ -63,7 +58,7 @@
 
     const decline = () => {
       try{ localStorage.setItem(KEY, 'denied'); }catch{}
-      try{ if (window.posthog){ window.posthog.opt_out_capturing(); } }catch{}
+      // No need to explicitly disable - Faro won't initialize without consent
       banner?.classList.add('hidden');
     };
 

@@ -4,7 +4,10 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Cuenv
 
-env: GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
+env: {
+	GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
+	PUBLIC_GRAFANA_FARO_URL: "https://faro-collector-prod-gb-south-1.grafana.net/collect/b8e6c95e9ef352ba577b11e06a79a0e4"
+}
 
 hooks: onEnter: devenv: {
 	command: "devenv"
