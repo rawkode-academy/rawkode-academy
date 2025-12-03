@@ -113,6 +113,12 @@ const learnNavItems = computed(() => [
 		current: isCurrentPath("/shows"),
 	},
 	{
+		name: "People",
+		href: "/people",
+		icon: UsersIcon,
+		current: isCurrentPath("/people"),
+	},
+	{
 		name: "Technologies",
 		href: "/technology",
 		icon: CubeIcon,
