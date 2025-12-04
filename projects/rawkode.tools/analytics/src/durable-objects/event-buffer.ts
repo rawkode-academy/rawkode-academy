@@ -17,6 +17,13 @@ interface StoredEvent {
 	attributes?: string[];
 }
 
+interface StoredMetric {
+	name: string;
+	value: number;
+	attributes: Record<string, string>;
+	timestamp: number;
+}
+
 export interface Env {
 	GRAFANA_OTLP_ENDPOINT: string;
 	GRAFANA_OTLP_USERNAME: string;
@@ -25,6 +32,7 @@ export interface Env {
 
 const FLUSH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const EVENTS_KEY = "events";
+const METRICS_KEY = "metrics";
 
 export class EventBuffer extends DurableObject<Env> {
 	async addEvent(event: CloudEvent, attributes?: string[]): Promise<void> {
@@ -38,17 +46,43 @@ export class EventBuffer extends DurableObject<Env> {
 		}
 	}
 
+	async addMetric(metric: Omit<StoredMetric, "timestamp">): Promise<void> {
+		const metrics = await this.getMetrics();
+		metrics.push({ ...metric, timestamp: Date.now() });
+		await this.ctx.storage.put(METRICS_KEY, metrics);
+
+		const alarm = await this.ctx.storage.getAlarm();
+		if (alarm === null) {
+			await this.ctx.storage.setAlarm(Date.now() + FLUSH_INTERVAL_MS);
+		}
+	}
+
 	async alarm(): Promise<void> {
+		let hasErrors = false;
+
 		const events = await this.getEvents();
-		if (events.length === 0) {
-			return;
+		if (events.length > 0) {
+			try {
+				await this.flushLogsToGrafana(events);
+				await this.ctx.storage.delete(EVENTS_KEY);
+			} catch (error) {
+				console.error("Failed to flush events to Grafana:", error);
+				hasErrors = true;
+			}
 		}
 
-		try {
-			await this.flushToGrafana(events);
-			await this.ctx.storage.delete(EVENTS_KEY);
-		} catch (error) {
-			console.error("Failed to flush events to Grafana:", error);
+		const metrics = await this.getMetrics();
+		if (metrics.length > 0) {
+			try {
+				await this.flushMetricsToGrafana(metrics);
+				await this.ctx.storage.delete(METRICS_KEY);
+			} catch (error) {
+				console.error("Failed to flush metrics to Grafana:", error);
+				hasErrors = true;
+			}
+		}
+
+		if (hasErrors) {
 			await this.ctx.storage.setAlarm(Date.now() + FLUSH_INTERVAL_MS);
 		}
 	}
@@ -68,7 +102,12 @@ export class EventBuffer extends DurableObject<Env> {
 		});
 	}
 
-	private async flushToGrafana(events: StoredEvent[]): Promise<void> {
+	private async getMetrics(): Promise<StoredMetric[]> {
+		const metrics = await this.ctx.storage.get<StoredMetric[]>(METRICS_KEY);
+		return metrics ?? [];
+	}
+
+	private async flushLogsToGrafana(events: StoredEvent[]): Promise<void> {
 		const otlpPayload = this.toOtlpLogs(events);
 		const credentials = btoa(`${this.env.GRAFANA_OTLP_USERNAME}:${this.env.GRAFANA_OTLP_TOKEN}`);
 
@@ -150,6 +189,65 @@ export class EventBuffer extends DurableObject<Env> {
 			attributes,
 		};
 	}
+
+	private async flushMetricsToGrafana(metrics: StoredMetric[]): Promise<void> {
+		const payload: OtlpMetricsPayload = {
+			resourceMetrics: [
+				{
+					resource: {
+						attributes: [
+							{ key: "service.name", value: { stringValue: "analytics" } },
+						],
+					},
+					scopeMetrics: [
+						{
+							scope: { name: "metrics" },
+							metrics: metrics.map((m) => ({
+								name: m.name,
+								gauge: {
+									dataPoints: [
+										{
+											asInt: String(m.value),
+											timeUnixNano: String(m.timestamp * 1_000_000),
+											attributes: Object.entries(m.attributes).map(
+												([k, v]) => ({
+													key: k,
+													value: { stringValue: v },
+												}),
+											),
+										},
+									],
+								},
+							})),
+						},
+					],
+				},
+			],
+		};
+
+		const credentials = btoa(
+			`${this.env.GRAFANA_OTLP_USERNAME}:${this.env.GRAFANA_OTLP_TOKEN}`,
+		);
+
+		const response = await fetch(
+			`${this.env.GRAFANA_OTLP_ENDPOINT}/v1/metrics`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Basic ${credentials}`,
+				},
+				body: JSON.stringify(payload),
+			},
+		);
+
+		if (!response.ok) {
+			const body = await response.text();
+			throw new Error(
+				`Grafana OTLP metrics request failed: ${response.status} ${body}`,
+			);
+		}
+	}
 }
 
 interface OtlpLogsPayload {
@@ -175,4 +273,25 @@ interface OtlpLogRecord {
 interface OtlpAttribute {
 	key: string;
 	value: { stringValue: string };
+}
+
+interface OtlpMetricsPayload {
+	resourceMetrics: {
+		resource: {
+			attributes: OtlpAttribute[];
+		};
+		scopeMetrics: {
+			scope: { name: string };
+			metrics: {
+				name: string;
+				gauge: {
+					dataPoints: {
+						asInt: string;
+						timeUnixNano: string;
+						attributes: OtlpAttribute[];
+					}[];
+				};
+			}[];
+		}[];
+	}[];
 }
