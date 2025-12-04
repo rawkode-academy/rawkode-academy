@@ -131,6 +131,21 @@ export class Analytics extends WorkerEntrypoint<Env> {
 		}
 		return "global";
 	}
+
+	async trackMetric(
+		name: string,
+		value: number,
+		attributes: Record<string, string>,
+	): Promise<TrackEventResult> {
+		console.log("trackMetric called", { name, value, attributes });
+
+		const id = this.env.EVENT_BUFFER.idFromName("metrics-global");
+		const buffer = this.env.EVENT_BUFFER.get(id);
+		await buffer.addMetric({ name, value, attributes });
+
+		console.log("Metric stored successfully");
+		return { success: true };
+	}
 }
 
 export { EventBuffer } from "./durable-objects/event-buffer";

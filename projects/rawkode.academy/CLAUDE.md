@@ -65,6 +65,29 @@ bunx wrangler d1 migrations apply DB   # Apply migrations
 bunx wrangler deploy --config ./read-model/wrangler.jsonc
 ```
 
+## Observability
+
+All Cloudflare Workers must configure observability sinks for Grafana. Add to `wrangler.jsonc`:
+
+```jsonc
+"observability": {
+  "enabled": true,
+  "head_sampling_rate": 1,
+  "logs": {
+    "enabled": true,
+    "invocation_logs": true,
+    "head_sampling_rate": 1,
+    "destinations": ["grafana-otel-logs"]
+  },
+  "traces": {
+    "enabled": true,
+    "destinations": ["grafana-otel-traces"]
+  }
+}
+```
+
+The `grafana-otel-logs` and `grafana-otel-traces` sinks are pre-configured at the Cloudflare account level.
+
 ## Related Documentation
 
 - `platform/CLAUDE.md` - GraphQL microservices architecture

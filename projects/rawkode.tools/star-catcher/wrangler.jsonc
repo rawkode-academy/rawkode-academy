@@ -1,10 +1,9 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "analytics",
-	"main": "./src/index.ts",
+	"name": "star-catcher",
+	"main": "src/index.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
-	"minify": true,
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,
@@ -19,22 +18,10 @@
 			"destinations": ["grafana-otel-traces"]
 		}
 	},
-	"placement": {
-		"mode": "smart"
+	"triggers": {
+		"crons": ["0 6 * * *"]
 	},
-	"workers_dev": true,
-	"durable_objects": {
-		"bindings": [
-			{
-				"name": "EVENT_BUFFER",
-				"class_name": "EventBuffer"
-			}
-		]
-	},
-	"migrations": [
-		{
-			"tag": "v1",
-			"new_classes": ["EventBuffer"]
-		}
+	"services": [
+		{ "binding": "ANALYTICS", "service": "analytics" }
 	]
 }

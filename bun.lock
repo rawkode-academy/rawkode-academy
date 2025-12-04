@@ -446,6 +446,13 @@
         "wrangler": "^4.17.0",
       },
     },
+    "projects/rawkode.tools/star-catcher": {
+      "name": "star-catcher",
+      "devDependencies": {
+        "@cloudflare/workers-types": "^4.20241205.0",
+        "wrangler": "^4.17.0",
+      },
+    },
     "projects/workshop-automation": {
       "name": "kubernetes-course",
       "dependencies": {
@@ -4129,6 +4136,8 @@
     "stackback": ["stackback@0.0.2", "", {}, "sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw=="],
 
     "stacktracey": ["stacktracey@2.1.8", "", { "dependencies": { "as-table": "^1.0.36", "get-source": "^2.0.12" } }, "sha512-Kpij9riA+UNg7TnphqjH7/CzctQ/owJGNbFkfEeve4Z4uxT5+JapVLFXcsurIfN34gnTWZNJ/f7NMG0E8JDzTw=="],
+
+    "star-catcher": ["star-catcher@workspace:projects/rawkode.tools/star-catcher"],
 
     "statuses": ["statuses@2.0.2", "", {}, "sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw=="],
 
