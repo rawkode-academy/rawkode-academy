@@ -1,0 +1,36 @@
+---
+import PageWrapper from "@/wrappers/page.astro";
+---
+
+<PageWrapper
+	title="Secret of Kubernetes Island"
+	description="A verbal combat game where you breach Kubernetes clusters one insult at a time"
+>
+	<div class="game-wrapper">
+		<div id="game-root"></div>
+	</div>
+</PageWrapper>
+
+<script>
+	import { createApp } from "vue";
+	import Game from "@/components/game/Game.vue";
+
+	const app = createApp(Game);
+	app.mount("#game-root");
+</script>
+
+<style>
+	.game-wrapper {
+		width: 100%;
+		min-height: calc(100vh - 200px);
+		background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	#game-root {
+		width: 100%;
+		height: 100%;
+		min-height: calc(100vh - 200px);
+	}
+</style>
