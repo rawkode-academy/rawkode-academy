@@ -1,4 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
+import { CloudEvent } from "cloudevents";
 
 interface CloudEventData {
 	specversion: string;
@@ -26,9 +27,9 @@ const FLUSH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const EVENTS_KEY = "events";
 
 export class EventBuffer extends DurableObject<Env> {
-	async addEvent(event: CloudEventData, attributes?: string[]): Promise<void> {
+	async addEvent(event: CloudEvent, attributes?: string[]): Promise<void> {
 		const events = await this.getEvents();
-		events.push({ event, attributes });
+		events.push({ event: event.toJSON() as unknown as CloudEventData, attributes });
 		await this.ctx.storage.put(EVENTS_KEY, events);
 
 		const alarm = await this.ctx.storage.getAlarm();
@@ -53,8 +54,18 @@ export class EventBuffer extends DurableObject<Env> {
 	}
 
 	private async getEvents(): Promise<StoredEvent[]> {
-		const events = await this.ctx.storage.get<StoredEvent[]>(EVENTS_KEY);
-		return events ?? [];
+		const raw = await this.ctx.storage.get<StoredEvent[]>(EVENTS_KEY);
+		if (!raw) return [];
+
+		return raw.filter((stored) => {
+			try {
+				new CloudEvent(stored.event as unknown as Record<string, unknown>, true);
+				return true;
+			} catch (error) {
+				console.warn("Filtering invalid stored CloudEvent:", error, stored);
+				return false;
+			}
+		});
 	}
 
 	private async flushToGrafana(events: StoredEvent[]): Promise<void> {
