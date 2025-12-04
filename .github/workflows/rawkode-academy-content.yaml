@@ -35,6 +35,10 @@ jobs:
         working-directory: projects/rawkode.academy/generators/projen-platform-service
         run: bun install
 
+      - name: Generate Biome types
+        working-directory: projects/rawkode.academy/generators/projen-platform-service
+        run: bun run types
+
       - name: Run projen
         working-directory: projects/rawkode.academy/content
         run: bun run .projenrc.ts
