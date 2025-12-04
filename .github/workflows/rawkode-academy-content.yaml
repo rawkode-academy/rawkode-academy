@@ -66,4 +66,4 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
         run: |
-          npx wrangler deploy --config ./rpc/wrangler.jsonc
+          npx wrangler deploy --config ./http/wrangler.jsonc
