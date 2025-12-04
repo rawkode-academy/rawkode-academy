@@ -64,5 +64,5 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
         run: |
-          npx wrangler deploy --config ./rpc/wrangler.jsonc
-          npx wrangler d1 migrations apply --config ./rpc/wrangler.jsonc --remote $(jq -r '.d1_databases[0].database_name' ./rpc/wrangler.jsonc) || true
+          npx wrangler deploy --config ./http/wrangler.jsonc
+          npx wrangler d1 migrations apply --config ./http/wrangler.jsonc --remote $(jq -r '.d1_databases[0].database_name' ./http/wrangler.jsonc) || true
