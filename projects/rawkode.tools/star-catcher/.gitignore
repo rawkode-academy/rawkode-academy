@@ -1,0 +1,6 @@
+# Cloudflare
+.wrangler
+.dev.vars
+
+# Generated TypeScript definitions
+worker-configuration.d.ts
