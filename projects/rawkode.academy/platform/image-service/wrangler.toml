@@ -8,11 +8,11 @@ enabled = true
 
 [observability.logs]
 enabled = true
-destinations = [ "grafana-logs" ]
+destinations = [ "grafana-otel-logs" ]
 
 [observability.traces]
 enabled = true
-destinations = [ "grafana-traces" ]
+destinations = [ "grafana-otel-traces" ]
 
 [env.production]
 compatibility_date = "2024-07-01"

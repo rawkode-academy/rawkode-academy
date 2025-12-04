@@ -6,11 +6,11 @@
 		"enabled": true,
 		"logs": {
 			"enabled": true,
-			"destinations": ["grafana-logs"]
+			"destinations": ["grafana-otel-logs"]
 		},
 		"traces": {
 			"enabled": true,
-			"destinations": ["grafana-traces"]
+			"destinations": ["grafana-otel-traces"]
 		}
 	},
 	"vars": {
