@@ -91,9 +91,7 @@ export class Analytics extends WorkerEntrypoint<Env> {
 		const id = this.env.EVENT_BUFFER.idFromName(bufferId);
 		const buffer = this.env.EVENT_BUFFER.get(id);
 
-		// Convert CloudEvent class instance to plain object for serialization
-		const plainEvent = JSON.parse(JSON.stringify(validation.event));
-		await buffer.addEvent(plainEvent, options?.attributes);
+		await buffer.addEvent(validation.event, options?.attributes);
 
 		console.log("Event stored successfully");
 		return { success: true };
