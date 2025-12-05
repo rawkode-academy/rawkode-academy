@@ -19,13 +19,15 @@
   }
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .consent-content{flex:1}
+  .consent-link{color:#5F5ED7;text-decoration:underline}
+  .consent-link:hover{opacity:0.8}
 </style>
 
 <div id="consent-banner" class="consent-banner hidden" role="dialog" aria-labelledby="consent-title" aria-describedby="consent-desc">
   <div class="consent-content">
     <h2 id="consent-title" class="consent-title">Analytics & Cookies</h2>
     <p id="consent-desc" class="consent-text">
-      We use analytics to understand usage and improve the site. You can accept or decline; your choice is remembered.
+      We use analytics to understand usage and improve the site. You can accept or decline; your choice is remembered. <a href="/privacy" class="consent-link">Learn more</a>
     </p>
     <div class="consent-actions">
       <button id="consent-accept" class="btn btn-primary" type="button">Accept</button>
