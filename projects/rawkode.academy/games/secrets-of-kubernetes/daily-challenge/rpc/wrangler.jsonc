@@ -1,0 +1,41 @@
+{
+	"$schema": "../node_modules/wrangler/config-schema.json",
+	"name": "platform-ski-daily-challenge-rpc",
+	"main": "main.ts",
+	"compatibility_date": "2025-04-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"keep_vars": false,
+	"minify": true,
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1,
+			"destinations": ["grafana-otel-logs"]
+		},
+		"traces": {
+			"enabled": true,
+			"destinations": ["grafana-otel-traces"]
+		}
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "ski-daily-challenge",
+			"database_id": "REPLACE_WITH_D1_DATABASE_ID",
+			"migrations_dir": "../data-model/migrations"
+		}
+	],
+	"services": [
+		{
+			"binding": "ANALYTICS",
+			"service": "analytics"
+		}
+	]
+}

@@ -69,11 +69,15 @@ import { insults, comebacks, getEffectiveComebacks } from "@/game/data/insults";
 
 const props = defineProps<{
 	enemy: EnemyData;
+	learnedInsults: Insult[];
+	learnedComebacks: Comeback[];
 }>();
 
 const emit = defineEmits<{
 	victory: [];
 	defeat: [];
+	learnInsult: [insult: Insult];
+	learnComeback: [comeback: Comeback];
 }>();
 
 const playerHealth = ref(3);
@@ -100,6 +104,7 @@ function startRound() {
 	currentInsult.value = available[Math.floor(Math.random() * available.length)] || null;
 
 	if (currentInsult.value) {
+		learnInsultOnSight(currentInsult.value);
 		availableComebacks.value = getRandomComebacks(currentInsult.value);
 	}
 
@@ -107,14 +112,42 @@ function startRound() {
 	selectedComeback.value = null;
 }
 
-function getRandomComebacks(insult: Insult): Comeback[] {
-	const effective = getEffectiveComebacks(insult.id);
-	const ineffective = comebacks.filter((c) => !effective.includes(c));
+function getRandomComebacks(_insult: Insult): Comeback[] {
+	const shuffledLearned = [...props.learnedComebacks].sort(() => Math.random() - 0.5);
+	const choices: Comeback[] = shuffledLearned.slice(0, 2);
 
-	const shuffled = [...ineffective].sort(() => Math.random() - 0.5).slice(0, 2);
-	const choices = effective.length > 0 ? [effective[0], ...shuffled] : shuffled.slice(0, 3);
+	if (choices.length < 3) {
+		const unlearned = comebacks.filter((c) => !props.learnedComebacks.some((l) => l.id === c.id));
+		const shuffledUnlearned = [...unlearned].sort(() => Math.random() - 0.5);
 
-	return choices.filter((c): c is Comeback => c !== undefined).sort(() => Math.random() - 0.5);
+		for (const candidate of shuffledUnlearned) {
+			choices.push(candidate);
+			learnComebackOnSight(candidate);
+			if (choices.length >= 3) break;
+		}
+	}
+
+	if (choices.length < 3) {
+		for (const extra of shuffledLearned) {
+			if (choices.some((c) => c.id === extra.id)) continue;
+			choices.push(extra);
+			if (choices.length >= 3) break;
+		}
+	}
+
+	return choices.slice(0, 3).sort(() => Math.random() - 0.5);
+}
+
+function learnInsultOnSight(insult: Insult) {
+	if (!props.learnedInsults.some((i) => i.id === insult.id)) {
+		emit("learnInsult", insult);
+	}
+}
+
+function learnComebackOnSight(comeback: Comeback) {
+	if (!props.learnedComebacks.some((c) => c.id === comeback.id)) {
+		emit("learnComeback", comeback);
+	}
 }
 
 function selectComeback(comeback: Comeback) {
