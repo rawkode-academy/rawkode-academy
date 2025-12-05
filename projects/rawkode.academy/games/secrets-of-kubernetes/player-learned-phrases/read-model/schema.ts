@@ -38,63 +38,35 @@ export const getSchema = (env: Env): GraphQLSchema => {
 		},
 	});
 
-	const playerLearnedPhrasesRef = builder.objectRef<{
-		personId: string;
-		learnedInsults: string[];
-		learnedComebacks: string[];
-	}>('PlayerLearnedPhrases').implement({
+	const playerProgressRef = builder.externalRef(
+		'PlayerProgress',
+		builder.selection<{ personId: string }>('personId'),
+	).implement({
+		externalFields: (t) => ({
+			personId: t.string(),
+		}),
 		fields: (t) => ({
-			personId: t.exposeString('personId'),
 			learnedInsults: t.stringList({
-				resolve: (parent) => parent.learnedInsults,
+				resolve: async (parent) => {
+					const insults = await db.query.playerLearnedInsultsTable.findMany({
+						where: eq(dataSchema.playerLearnedInsultsTable.personId, parent.personId),
+					});
+					return insults.map((i) => i.insultId);
+				},
 			}),
 			learnedComebacks: t.stringList({
-				resolve: (parent) => parent.learnedComebacks,
+				resolve: async (parent) => {
+					const comebacks = await db.query.playerLearnedComebacksTable.findMany({
+						where: eq(dataSchema.playerLearnedComebacksTable.personId, parent.personId),
+					});
+					return comebacks.map((c) => c.comebackId);
+				},
 			}),
 		}),
 	});
 
-	builder.asEntity(playerLearnedPhrasesRef, {
-		key: builder.selection<{ personId: string }>('personId'),
-		resolveReference: async (ref) => {
-			const insults = await db.query.playerLearnedInsultsTable.findMany({
-				where: eq(dataSchema.playerLearnedInsultsTable.personId, ref.personId),
-			});
-			const comebacks = await db.query.playerLearnedComebacksTable.findMany({
-				where: eq(dataSchema.playerLearnedComebacksTable.personId, ref.personId),
-			});
-
-			return {
-				personId: ref.personId,
-				learnedInsults: insults.map((i) => i.insultId),
-				learnedComebacks: comebacks.map((c) => c.comebackId),
-			};
-		},
-	});
-
 	builder.queryType({
 		fields: (t) => ({
-			playerLearnedPhrases: t.field({
-				type: playerLearnedPhrasesRef,
-				nullable: true,
-				args: {
-					personId: t.arg.string({ required: true }),
-				},
-				resolve: async (_root, args) => {
-					const insults = await db.query.playerLearnedInsultsTable.findMany({
-						where: eq(dataSchema.playerLearnedInsultsTable.personId, args.personId),
-					});
-					const comebacks = await db.query.playerLearnedComebacksTable.findMany({
-						where: eq(dataSchema.playerLearnedComebacksTable.personId, args.personId),
-					});
-
-					return {
-						personId: args.personId,
-						learnedInsults: insults.map((i) => i.insultId),
-						learnedComebacks: comebacks.map((c) => c.comebackId),
-					};
-				},
-			}),
 			allInsultIds: t.stringList({ resolve: () => ALL_INSULT_IDS }),
 			allComebackIds: t.stringList({ resolve: () => ALL_COMEBACK_IDS }),
 		}),
