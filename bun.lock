@@ -34,6 +34,157 @@
         "wrangler": "^4.13.2",
       },
     },
+    "projects/rawkode.academy/games/secrets-of-kubernetes/achievements": {
+      "name": "ski-achievements",
+      "dependencies": {
+        "@apollo/subgraph": "^2.10.2",
+        "@graphql-tools/utils": "^10.8.6",
+        "@paralleldrive/cuid2": "^2.2.2",
+        "@pothos/core": "^4.6.0",
+        "@pothos/plugin-directives": "^4.2.0",
+        "@pothos/plugin-drizzle": "^0.8.1",
+        "@pothos/plugin-federation": "^4.3.2",
+        "@sindresorhus/slugify": "^2.2.1",
+        "drizzle-kit": "^0.30.6",
+        "drizzle-orm": "^0.38.4",
+        "drizzle-zod": "^0.6.1",
+        "graphql": "^16.10.0",
+        "graphql-scalars": "^1.24.2",
+        "graphql-yoga": "^5.13.4",
+        "zod": "^3.24.3",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@cloudflare/workers-types": "^4.20250426.0",
+        "@types/bun": "latest",
+        "@types/node": "^22.15.2",
+        "vitest": "^1.2.17",
+        "wrangler": "^4.13.2",
+      },
+    },
+    "projects/rawkode.academy/games/secrets-of-kubernetes/daily-challenge": {
+      "name": "ski-daily-challenge",
+      "dependencies": {
+        "@apollo/subgraph": "^2.10.2",
+        "@graphql-tools/utils": "^10.8.6",
+        "@paralleldrive/cuid2": "^2.2.2",
+        "@pothos/core": "^4.6.0",
+        "@pothos/plugin-directives": "^4.2.0",
+        "@pothos/plugin-drizzle": "^0.8.1",
+        "@pothos/plugin-federation": "^4.3.2",
+        "@sindresorhus/slugify": "^2.2.1",
+        "drizzle-kit": "^0.30.6",
+        "drizzle-orm": "^0.38.4",
+        "drizzle-zod": "^0.6.1",
+        "graphql": "^16.10.0",
+        "graphql-scalars": "^1.24.2",
+        "graphql-yoga": "^5.13.4",
+        "zod": "^3.24.3",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@cloudflare/workers-types": "^4.20250426.0",
+        "@types/bun": "latest",
+        "@types/node": "^22.15.2",
+        "vitest": "^1.2.17",
+        "wrangler": "^4.13.2",
+      },
+    },
+    "projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard": {
+      "name": "ski-leaderboard",
+      "dependencies": {
+        "@apollo/subgraph": "^2.10.2",
+        "@graphql-tools/utils": "^10.8.6",
+        "@paralleldrive/cuid2": "^2.2.2",
+        "@pothos/core": "^4.6.0",
+        "@pothos/plugin-directives": "^4.2.0",
+        "@pothos/plugin-drizzle": "^0.8.1",
+        "@pothos/plugin-federation": "^4.3.2",
+        "@sindresorhus/slugify": "^2.2.1",
+        "drizzle-kit": "^0.30.6",
+        "drizzle-orm": "^0.38.4",
+        "drizzle-zod": "^0.6.1",
+        "graphql": "^16.10.0",
+        "graphql-scalars": "^1.24.2",
+        "graphql-yoga": "^5.13.4",
+        "zod": "^3.24.3",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@cloudflare/workers-types": "^4.20250426.0",
+        "@types/bun": "latest",
+        "@types/node": "^22.15.2",
+        "vitest": "^1.2.17",
+        "wrangler": "^4.13.2",
+      },
+    },
+    "projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases": {
+      "name": "ski-player-learned-phrases",
+      "dependencies": {
+        "@apollo/subgraph": "^2.10.2",
+        "@graphql-tools/utils": "^10.8.6",
+        "@paralleldrive/cuid2": "^2.2.2",
+        "@pothos/core": "^4.6.0",
+        "@pothos/plugin-directives": "^4.2.0",
+        "@pothos/plugin-drizzle": "^0.8.1",
+        "@pothos/plugin-federation": "^4.3.2",
+        "@sindresorhus/slugify": "^2.2.1",
+        "drizzle-kit": "^0.30.6",
+        "drizzle-orm": "^0.38.4",
+        "drizzle-zod": "^0.6.1",
+        "graphql": "^16.10.0",
+        "graphql-scalars": "^1.24.2",
+        "graphql-yoga": "^5.13.4",
+        "zod": "^3.24.3",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@cloudflare/workers-types": "^4.20250426.0",
+        "@types/bun": "latest",
+        "@types/node": "^22.15.2",
+        "vitest": "^1.2.17",
+        "wrangler": "^4.13.2",
+      },
+    },
+    "projects/rawkode.academy/games/secrets-of-kubernetes/player-stats": {
+      "name": "ski-player-stats",
+      "dependencies": {
+        "@apollo/subgraph": "^2.10.2",
+        "@graphql-tools/utils": "^10.8.6",
+        "@paralleldrive/cuid2": "^2.2.2",
+        "@pothos/core": "^4.6.0",
+        "@pothos/plugin-directives": "^4.2.0",
+        "@pothos/plugin-drizzle": "^0.8.1",
+        "@pothos/plugin-federation": "^4.3.2",
+        "@sindresorhus/slugify": "^2.2.1",
+        "drizzle-kit": "^0.30.6",
+        "drizzle-orm": "^0.38.4",
+        "drizzle-zod": "^0.6.1",
+        "graphql": "^16.10.0",
+        "graphql-scalars": "^1.24.2",
+        "graphql-yoga": "^5.13.4",
+        "zod": "^3.24.3",
+      },
+      "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@cloudflare/workers-types": "^4.20250426.0",
+        "@types/bun": "latest",
+        "@types/node": "^22.15.2",
+        "vitest": "^1.2.17",
+        "wrangler": "^4.13.2",
+      },
+    },
+    "projects/rawkode.academy/games/secrets-of-kubernetes/share-cards": {
+      "name": "ski-share-cards",
+      "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@cloudflare/workers-types": "^4.20250426.0",
+        "@types/bun": "latest",
+        "@types/node": "^22.15.2",
+        "vitest": "^1.2.17",
+        "wrangler": "^4.13.2",
+      },
+    },
     "projects/rawkode.academy/generators/projen-platform-service": {
       "name": "projen-platform-service",
       "version": "0.1.0",
@@ -4051,6 +4202,18 @@
 
     "sitemap": ["sitemap@8.0.2", "", { "dependencies": { "@types/node": "^17.0.5", "@types/sax": "^1.2.1", "arg": "^5.0.0", "sax": "^1.4.1" }, "bin": { "sitemap": "dist/cli.js" } }, "sha512-LwktpJcyZDoa0IL6KT++lQ53pbSrx2c9ge41/SeLTyqy2XUNA6uR4+P9u5IVo5lPeL2arAcOKn1aZAxoYbCKlQ=="],
 
+    "ski-achievements": ["ski-achievements@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/achievements"],
+
+    "ski-daily-challenge": ["ski-daily-challenge@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/daily-challenge"],
+
+    "ski-leaderboard": ["ski-leaderboard@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard"],
+
+    "ski-player-learned-phrases": ["ski-player-learned-phrases@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases"],
+
+    "ski-player-stats": ["ski-player-stats@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/player-stats"],
+
+    "ski-share-cards": ["ski-share-cards@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/share-cards"],
+
     "slash": ["slash@3.0.0", "", {}, "sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q=="],
 
     "slice-ansi": ["slice-ansi@3.0.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "astral-regex": "^2.0.0", "is-fullwidth-code-point": "^3.0.0" } }, "sha512-pSyv7bSTC7ig9Dcgbw9AuRNUb5k5V6oDudjZoMBSr13qpLBG7tB+zgCkARjq7xIUgdz5P1Qe8u+rSGdouOOIyQ=="],
@@ -5131,6 +5294,18 @@
 
     "sitemap/arg": ["arg@5.0.2", "", {}, "sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg=="],
 
+    "ski-achievements/@types/node": ["@types/node@22.19.1", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ=="],
+
+    "ski-daily-challenge/@types/node": ["@types/node@22.19.1", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ=="],
+
+    "ski-leaderboard/@types/node": ["@types/node@22.19.1", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ=="],
+
+    "ski-player-learned-phrases/@types/node": ["@types/node@22.19.1", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ=="],
+
+    "ski-player-stats/@types/node": ["@types/node@22.19.1", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ=="],
+
+    "ski-share-cards/@types/node": ["@types/node@22.19.1", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ=="],
+
     "slice-ansi/ansi-styles": ["ansi-styles@4.3.0", "", { "dependencies": { "color-convert": "^2.0.1" } }, "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg=="],
 
     "stack-utils/escape-string-regexp": ["escape-string-regexp@2.0.0", "", {}, "sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w=="],
@@ -5720,6 +5895,18 @@
     "restore-cursor/onetime/mimic-fn": ["mimic-fn@2.1.0", "", {}, "sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg=="],
 
     "shelljs/glob/minimatch": ["minimatch@3.1.2", "", { "dependencies": { "brace-expansion": "^1.1.7" } }, "sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw=="],
+
+    "ski-achievements/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "ski-daily-challenge/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "ski-leaderboard/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "ski-player-learned-phrases/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "ski-player-stats/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
+
+    "ski-share-cards/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
     "storybook/@vitest/expect/@vitest/utils": ["@vitest/utils@3.2.4", "", { "dependencies": { "@vitest/pretty-format": "3.2.4", "loupe": "^3.1.4", "tinyrainbow": "^2.0.0" } }, "sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA=="],
 
