@@ -32,7 +32,6 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 		const { pathname } = url;
 		const method = request.method;
 
-		// CORS preflight
 		if (method === "OPTIONS") {
 			return new Response(null, {
 				status: 204,
@@ -43,28 +42,23 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 			});
 		}
 
-		// Health check
 		if (pathname === "/health") {
 			return new Response("ok", { headers: { "Content-Type": "text/plain" } });
 		}
 
-		// POST /issue
 		if (method === "POST" && pathname === "/issue") {
 			return this.handleIssueBadge(request);
 		}
 
-		// GET /issuer
 		if (method === "GET" && pathname === "/issuer") {
 			return this.handleGetIssuer();
 		}
 
-		// GET /badge/:id/json
 		const jsonMatch = pathname.match(/^\/badge\/([^/]+)\/json$/);
 		if (method === "GET" && jsonMatch) {
 			return this.handleGetBadgeJson(jsonMatch[1]);
 		}
 
-		// GET /badge/:id/image
 		const imageMatch = pathname.match(/^\/badge\/([^/]+)\/image$/);
 		if (method === "GET" && imageMatch) {
 			return this.handleGetBadgeImage(imageMatch[1]);
@@ -142,7 +136,6 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				validUntil,
 			} = validated;
 
-			// Validate user exists
 			const userValidation = await this.validateUser(userId);
 			if (!userValidation.valid) {
 				return new Response(JSON.stringify({ error: "User not found" }), {
@@ -153,26 +146,21 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 
 			const userEmail = userValidation.email ?? `${userId}@rawkode.academy`;
 
-			// Load RSA keys
 			const keys = await loadRSAKeys(this.env);
 
-			// Generate badge ID
 			const badgeId = crypto.randomUUID();
 
-			// Create issuer profile
 			const issuerProfile = createIssuerProfile(
 				this.env.BADGE_ISSUER_URL,
 				"Rawkode Academy",
 				"badges@rawkode.academy",
 			);
 
-			// Generate badge image URL
 			const imageUrl = generateBadgeImageUrl({
 				title: achievementName,
 				subtitle: achievementType,
 			});
 
-			// Build achievement
 			const achievement = buildAchievement({
 				id: `${this.env.BADGE_ISSUER_URL}/badge/${badgeId}/achievement`,
 				name: achievementName,
@@ -181,7 +169,6 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				creatorProfile: issuerProfile,
 			});
 
-			// Create signed credential
 			const validFromDate = new Date();
 			const validUntilDate = validUntil ?? undefined;
 
@@ -199,7 +186,6 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				this.env.BADGE_ISSUER_URL,
 			);
 
-			// Store in database
 			const db = drizzle(this.env.DB, { schema: dataSchema });
 			await db.insert(badgeCredentialsTable).values({
 				id: badgeId,
@@ -210,7 +196,6 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				expiresAt: validUntilDate ?? null,
 			});
 
-			// Track analytics
 			await this.trackAnalyticsEvent("com.rawkode.academy.badge.issued", {
 				user_id: userId,
 				achievement_type: achievementType,
@@ -268,7 +253,6 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 
 			const decoded = decodeJwt(badge.credentialJson) as AchievementCredential;
 
-			// Extract credential body and include JWT proof for external verification
 			const credential = {
 				"@context": decoded["@context"],
 				id: decoded.id,

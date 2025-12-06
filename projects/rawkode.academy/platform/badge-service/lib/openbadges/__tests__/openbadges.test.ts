@@ -1,4 +1,4 @@
-import { decodeJwt } from "jose";
+import { decodeJwt, exportPKCS8, exportSPKI } from "jose";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
 	DEFAULT_IMAGE_SERVICE_BASE_URL,
@@ -23,34 +23,23 @@ import {
 
 const TEST_ISSUER_URL = "https://badges.rawkode.academy";
 
-const TEST_RSA_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
-MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC7QXdoLMHLyRcw
-h5CfH3KgWv7kqHkjjjxr9Q7Rz6v5L6WV8L8lzK8zWJNhN5F6kJ7Qv6Z9w3X6c6hY
-YQh3V8T9x4b6X5Y8D6m7vP9xN3r5sLl3F6h9j8K2mQ5y7v4B3w8Y6R5t9e2K5H6L
-8J9M6N5O4P3Q2R1S0T9U8V7W6X5Y4Z3A2B1C0D9E8F7G6H5I4J3K2L1M0N9O8P7Q
-6R5S4T3U2V1W0X9Y8Z7A6B5C4D3E2F1G0H9I8J7K6L5M4N3O2P1Q0R9S8T7U6V5W
-4X3Y2Z1A0B9C8D7E6F5G4H3I2J1K0L9M8N7O6P5Q4R3S2T1U0V9W8X7Y6Z5A4B3C
-2D1E0F9G8H7AgMBAAECggEAYQi9bEQZCVBEu8C4WbQ4pF6K6J5X7k2h3L6m9n0o1
-P2Q3R4S5T6U7V8W9X0Y1Z2A3B4C5D6E7F8G9H0I1J2K3L4M5N6O7P8Q9R0S1T2U
-3V4W5X6Y7Z8A9B0C1D2E3F4G5H6I7J8K9L0M1N2O3P4Q5R6S7T8U9V0W1X2Y3Z4
-A5B6C7D8E9F0G1H2I3J4K5L6M7N8O9P0Q1R2S3T4U5V6W7X8Y9Z0A1B2C3D4E5F
-6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2G3H4I5J6K7L
-8M9N0O1P2Q3R4S5T6U7V8W9X0Y1Z2A3B4C5D6E7F8G9H0I1J2K3L4M5N6QKBgQD
-q0r1s2t3u4v5w6x7y8z9a0b1c2d3e4f5g6h7i8j9k0l1m2n3o4p5q6r7s8t9u0v1w
-2x3y4z5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0p1q2r3s4t5u6v7w8x9y0z1a2b3c4
-d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4h5i6j
-7k8l9m0n1o2p3q4r5s6t7u8v9w0x1y2z3a4b5c6d7e8f9g0h1i2j3k4l5m6n7o8p9
------END PRIVATE KEY-----`;
+let TEST_RSA_PRIVATE_KEY: string;
+let TEST_RSA_PUBLIC_KEY: string;
 
-const TEST_RSA_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu0F3aCzBy8kXMIeQnx9y
-oFr+5Kh5I448a/UO0c+r+S+llfC/JcyvM1iTYTeRepCe0L+mfcN1+nOoWGEId1fE
-/ceG+l+WPA+pu7z/cTd6+bC5dxeofY/CtpkOcu7+Ad8PGOkebfXtiuR+i/CfTOje
-TuD90kLg/dJC4P3SQuD90kLg/dJC4P3SQuD90kLg/dJC4P3SQuD90kLg/dJC4P3S
-QuD90kLg/dJC4P3SQuD90kLg/dJC4P3SQuD90kLg/dJC4P3SQuD90kLg/dJC4P3S
-QuD90kLg/dJC4P3SQuD90kLg/dJC4P3SQuD90kLg/dJC4P3SQuD90kLg/dJC4P3S
-QwIDAQAB
------END PUBLIC KEY-----`;
+beforeAll(async () => {
+	const { privateKey, publicKey } = await crypto.subtle.generateKey(
+		{
+			name: "RSASSA-PKCS1-v1_5",
+			modulusLength: 2048,
+			publicExponent: new Uint8Array([1, 0, 1]),
+			hash: "SHA-256",
+		},
+		true,
+		["sign", "verify"],
+	);
+	TEST_RSA_PRIVATE_KEY = await exportPKCS8(privateKey);
+	TEST_RSA_PUBLIC_KEY = await exportSPKI(publicKey);
+});
 
 describe("OpenBadge Types", () => {
 	it("should have correct OPENBADGE_CONTEXT", () => {
@@ -142,6 +131,7 @@ describe("buildCredential", () => {
 
 		const credential = buildCredential({
 			id: `${TEST_ISSUER_URL}/credentials/cred123`,
+			name: "Kubernetes Basics",
 			issuerProfile,
 			recipientEmail: "user@example.com",
 			achievement,
@@ -180,6 +170,7 @@ describe("buildCredential", () => {
 
 		const credential = buildCredential({
 			id: `${TEST_ISSUER_URL}/credentials/cred123`,
+			name: "Test",
 			issuerProfile,
 			recipientEmail: "user@example.com",
 			achievement,
@@ -208,6 +199,7 @@ describe("validateCredential", () => {
 
 		const credential = buildCredential({
 			id: `${TEST_ISSUER_URL}/credentials/cred123`,
+			name: "Test Achievement",
 			issuerProfile,
 			recipientEmail: "user@example.com",
 			achievement,
@@ -366,6 +358,7 @@ describe("signCredentialAsJWT", () => {
 
 		const credential = buildCredential({
 			id: `${TEST_ISSUER_URL}/credentials/cred123`,
+			name: "Test Achievement",
 			issuerProfile,
 			recipientEmail: "user@example.com",
 			achievement,
@@ -416,6 +409,7 @@ describe("signCredentialAsJWT", () => {
 
 		const credential = buildCredential({
 			id: `${TEST_ISSUER_URL}/credentials/cred123`,
+			name: "Test Achievement",
 			issuerProfile,
 			recipientEmail: "user@example.com",
 			achievement,
@@ -462,6 +456,7 @@ describe("createSignedCredential", () => {
 
 		const params: BuildCredentialParams = {
 			id: `${TEST_ISSUER_URL}/credentials/cred123`,
+			name: "Test Achievement",
 			issuerProfile,
 			recipientEmail: "user@example.com",
 			achievement,
