@@ -27,9 +27,6 @@ const project = new PlatformService({
 		jose: "catalog:auth",
 		utf64: "^1.0.0",
 	},
-	additionalScripts: {
-		"generate-keys": "bun run scripts/generate-rsa-keys.ts",
-	},
 });
 
 project.synth();
