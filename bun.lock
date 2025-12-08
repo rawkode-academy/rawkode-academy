@@ -1811,7 +1811,7 @@
 
     "@types/body-parser": ["@types/body-parser@1.19.6", "", { "dependencies": { "@types/connect": "*", "@types/node": "*" } }, "sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g=="],
 
-    "@types/bun": ["@types/bun@1.3.3", "", { "dependencies": { "bun-types": "1.3.3" } }, "sha512-ogrKbJ2X5N0kWLLFKeytG0eHDleBYtngtlbu9cyBKFtNL3cnpDZkNdQj8flVf6WTZUX5ulI9AY1oa7ljhSrp+g=="],
+    "@types/bun": ["@types/bun@1.3.4", "", { "dependencies": { "bun-types": "1.3.4" } }, "sha512-EEPTKXHP+zKGPkhRLv+HI0UEX8/o+65hqARxLy8Ov5rIxMBPNTjeZww00CIihrIQGEQBYg+0roO5qOnS/7boGA=="],
 
     "@types/cacheable-request": ["@types/cacheable-request@6.0.3", "", { "dependencies": { "@types/http-cache-semantics": "*", "@types/keyv": "^3.1.4", "@types/node": "*", "@types/responselike": "^1.0.0" } }, "sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw=="],
 
@@ -4735,6 +4735,8 @@
 
     "@tufjs/models/minimatch": ["minimatch@9.0.5", "", { "dependencies": { "brace-expansion": "^2.0.1" } }, "sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow=="],
 
+    "@types/bun/bun-types": ["bun-types@1.3.4", "", { "dependencies": { "@types/node": "*" } }, "sha512-5ua817+BZPZOlNaRgGBpZJOSAQ9RQ17pkwPD0yR7CfJg+r8DgIILByFifDTa+IPDDxzf5VNhtNlcKqFzDgJvlQ=="],
+
     "@types/chai/assertion-error": ["assertion-error@2.0.1", "", {}, "sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA=="],
 
     "@vitejs/plugin-vue/@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-beta.50", "", {}, "sha512-5e76wQiQVeL1ICOZVUg4LSOVYg9jyhGCin+icYozhsUzM+fHE7kddi1bdiE0jwVqTfkjba3jUFbEkoC9WkdvyA=="],
@@ -5162,6 +5164,8 @@
     "youtube-scraper/@types/node": ["@types/node@22.19.1", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ=="],
 
     "zitadel-zulip-connector/@cloudflare/workers-types": ["@cloudflare/workers-types@4.20250525.0", "", {}, "sha512-3loeNVJkcDLb9giarUIHmDgvh+/4RtH+R/rHn4BCmME1qKdu73n/hvECYhH8BabCZplF8zQy1wok1MKwXEWC/A=="],
+
+    "zitadel-zulip-connector/@types/bun": ["@types/bun@1.3.3", "", { "dependencies": { "bun-types": "1.3.3" } }, "sha512-ogrKbJ2X5N0kWLLFKeytG0eHDleBYtngtlbu9cyBKFtNL3cnpDZkNdQj8flVf6WTZUX5ulI9AY1oa7ljhSrp+g=="],
 
     "zitadel-zulip-connector/wrangler": ["wrangler@4.16.1", "", { "dependencies": { "@cloudflare/kv-asset-handler": "0.4.0", "@cloudflare/unenv-preset": "2.3.2", "blake3-wasm": "2.1.5", "esbuild": "0.25.4", "miniflare": "4.20250508.3", "path-to-regexp": "6.3.0", "unenv": "2.0.0-rc.17", "workerd": "1.20250508.0" }, "optionalDependencies": { "fsevents": "~2.3.2", "sharp": "^0.33.5" }, "peerDependencies": { "@cloudflare/workers-types": "^4.20250508.0" }, "optionalPeers": ["@cloudflare/workers-types"], "bin": { "wrangler": "bin/wrangler.js", "wrangler2": "bin/wrangler.js" } }, "sha512-YiLdWXcaQva2K/bqokpsZbySPmoT8TJFyJPsQPZumnkgimM9+/g/yoXArByA+pf+xU8jhw7ybQ8X1yBGXv731g=="],
 
