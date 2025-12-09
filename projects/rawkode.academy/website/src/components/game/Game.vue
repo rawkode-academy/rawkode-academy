@@ -176,6 +176,12 @@ onMounted(async () => {
 	try {
 		// Try to get player progress - will fail with 401 if not authenticated
 		const progress = await getPlayerProgress();
+		console.log("[Game] Loaded player progress:", {
+			personId: progress?.personId,
+			hasProgress: !!progress,
+			insultsCount: progress?.learnedInsults?.length ?? 0,
+			comebacksCount: progress?.learnedComebacks?.length ?? 0,
+		});
 
 		if (progress) {
 			// Existing player
@@ -187,14 +193,17 @@ onMounted(async () => {
 			// Convert IDs to full objects
 			learnedInsults.value = idsToInsults(progress.learnedInsults);
 			learnedComebacks.value = idsToComebacks(progress.learnedComebacks);
+			console.log("[Game] Loaded phrases - insults:", learnedInsults.value.length, "comebacks:", learnedComebacks.value.length);
 		} else {
 			// Player exists in auth but not in game services - will initialize on first play
+			console.log("[Game] No player progress found - treating as new player");
 			isAuthenticated.value = true;
 			isNewPlayer.value = true;
 		}
 	} catch (error: unknown) {
 		// Check if it's an auth error
 		if (error instanceof Error && error.message.includes("401")) {
+			console.log("[Game] Authentication error - user not logged in");
 			isAuthenticated.value = false;
 		} else if (
 			error instanceof Error &&
@@ -202,10 +211,12 @@ onMounted(async () => {
 			"statusCode" in error &&
 			(error as { statusCode: number }).statusCode === 401
 		) {
+			console.log("[Game] Authentication error (GameApiError 401)");
 			isAuthenticated.value = false;
 		} else {
 			// Other error - assume authenticated but new player
 			console.error("Failed to load player progress:", error);
+			console.log("[Game] Non-auth error - treating as new player");
 			isAuthenticated.value = true;
 			isNewPlayer.value = true;
 		}
@@ -215,23 +226,28 @@ onMounted(async () => {
 });
 
 async function handleStart() {
+	console.log("[Game] handleStart called - isNewPlayer:", isNewPlayer.value);
 	if (isNewPlayer.value) {
 		// Initialize player in backend first to get assigned phrases
 		try {
+			console.log("[Game] Initializing new player...");
 			const progress = await initializePlayer();
 			playerProgress.value = progress;
 			playerName.value = progress.personName ?? "Player";
 			// Set the phrases that were assigned by the backend
 			learnedInsults.value = idsToInsults(progress.learnedInsults);
 			learnedComebacks.value = idsToComebacks(progress.learnedComebacks);
+			console.log("[Game] Player initialized - insults:", learnedInsults.value.length, "comebacks:", learnedComebacks.value.length);
 		} catch (error) {
 			console.error("Failed to initialize player:", error);
 			// Fallback to random local phrases if backend fails
 			learnedInsults.value = getRandomItems(allInsults, 2);
 			learnedComebacks.value = getRandomItems(allComebacks, 2);
+			console.log("[Game] Using fallback phrases - insults:", learnedInsults.value.length, "comebacks:", learnedComebacks.value.length);
 		}
 		gameState.value = "allocation";
 	} else {
+		console.log("[Game] Existing player - going to map with", learnedInsults.value.length, "insults and", learnedComebacks.value.length, "comebacks");
 		gameState.value = "map";
 	}
 }
@@ -329,31 +345,39 @@ function handleFlee() {
 
 async function handleLearnInsult(insult: Insult) {
 	if (!learnedInsults.value.some((i) => i.id === insult.id)) {
+		console.log("[Game] Learning new insult:", insult.id);
 		learnedInsults.value.push(insult);
 		// Track for current combat session
 		combatLearnedInsults.value.push(insult);
 
 		// Persist to backend
 		try {
-			await apiLearnInsult(insult.id);
+			const success = await apiLearnInsult(insult.id);
+			console.log("[Game] Insult saved to backend:", success);
 		} catch (error) {
 			console.error("Failed to save learned insult:", error);
 		}
+	} else {
+		console.log("[Game] Insult already learned:", insult.id);
 	}
 }
 
 async function handleLearnComeback(comeback: Comeback) {
 	if (!learnedComebacks.value.some((c) => c.id === comeback.id)) {
+		console.log("[Game] Learning new comeback:", comeback.id);
 		learnedComebacks.value.push(comeback);
 		// Track for current combat session
 		combatLearnedComebacks.value.push(comeback);
 
 		// Persist to backend
 		try {
-			await apiLearnComeback(comeback.id);
+			const success = await apiLearnComeback(comeback.id);
+			console.log("[Game] Comeback saved to backend:", success);
 		} catch (error) {
 			console.error("Failed to save learned comeback:", error);
 		}
+	} else {
+		console.log("[Game] Comeback already learned:", comeback.id);
 	}
 }
 
