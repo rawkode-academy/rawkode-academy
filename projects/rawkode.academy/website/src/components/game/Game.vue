@@ -29,6 +29,8 @@
 			/>
 			<InitialAllocationScreen
 				v-else-if="gameState === 'allocation'"
+				:assigned-insults="learnedInsults"
+				:assigned-comebacks="learnedComebacks"
 				@continue="handleAllocationComplete"
 			/>
 			<ClusterMap
@@ -214,28 +216,34 @@ onMounted(async () => {
 
 async function handleStart() {
 	if (isNewPlayer.value) {
+		// Initialize player in backend first to get assigned phrases
+		try {
+			const progress = await initializePlayer();
+			playerProgress.value = progress;
+			playerName.value = progress.personName ?? "Player";
+			// Set the phrases that were assigned by the backend
+			learnedInsults.value = idsToInsults(progress.learnedInsults);
+			learnedComebacks.value = idsToComebacks(progress.learnedComebacks);
+		} catch (error) {
+			console.error("Failed to initialize player:", error);
+			// Fallback to random local phrases if backend fails
+			learnedInsults.value = getRandomItems(allInsults, 2);
+			learnedComebacks.value = getRandomItems(allComebacks, 2);
+		}
 		gameState.value = "allocation";
 	} else {
 		gameState.value = "map";
 	}
 }
 
-async function handleAllocationComplete(insults: Insult[], comebacks: Comeback[]) {
-	learnedInsults.value = insults;
-	learnedComebacks.value = comebacks;
+function getRandomItems<T>(array: T[], count: number): T[] {
+	const shuffled = [...array].sort(() => Math.random() - 0.5);
+	return shuffled.slice(0, count);
+}
 
-	// Initialize player in backend
-	try {
-		const progress = await initializePlayer();
-		playerProgress.value = progress;
-		playerName.value = progress.personName ?? "Player";
-		isNewPlayer.value = false;
-	} catch (error) {
-		console.error("Failed to initialize player:", error);
-		// Continue anyway - local state is set
-		isNewPlayer.value = false;
-	}
-
+function handleAllocationComplete() {
+	// Player already initialized in handleStart, just transition to map
+	isNewPlayer.value = false;
 	gameState.value = "map";
 }
 
