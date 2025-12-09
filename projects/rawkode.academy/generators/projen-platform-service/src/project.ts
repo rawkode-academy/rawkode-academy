@@ -37,6 +37,7 @@ export class PlatformService extends Project {
 			includeReadModel: true,
 			includeWriteModel: false,
 			includeHttp: false,
+			servicePrefix: "platform",
 			additionalDependencies: {},
 			additionalDevDependencies: {},
 			...options,
@@ -132,6 +133,7 @@ export class PlatformService extends Project {
 		if (this.options.includeReadModel) {
 			new ReadModel(this, {
 				serviceName: this.options.serviceName,
+				servicePrefix: this.options.servicePrefix,
 				bindings: this.options.bindings,
 			});
 		}
@@ -146,6 +148,7 @@ export class PlatformService extends Project {
 		if (this.options.includeHttp) {
 			new Http(this, {
 				serviceName: this.options.serviceName,
+				servicePrefix: this.options.servicePrefix,
 				bindings: this.options.bindings,
 			});
 		}

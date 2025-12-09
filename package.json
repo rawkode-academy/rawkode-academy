@@ -6,7 +6,8 @@
     "packages": [
       "content",
       "packages/**",
-      "projects/**"
+      "projects/**",
+      "!projects/**/generators/**"
     ],
     "catalogs": {
       "auth": {

@@ -1,6 +1,5 @@
 import type { Transport } from "@graphql-mesh/transport-common";
 import { print } from "graphql";
-import type { Env } from "../env.d.ts";
 
 /**
  * Map subgraph names (as they appear in the supergraph) to service binding keys.

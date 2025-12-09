@@ -1,6 +1,6 @@
 {
 	"$schema": "../node_modules/wrangler/config-schema.json",
-	"name": "platform-{{ serviceName }}-http",
+	"name": "{{ servicePrefix }}-{{ serviceName }}-rpc",
 	"main": "main.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
