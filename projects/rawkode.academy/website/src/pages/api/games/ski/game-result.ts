@@ -134,9 +134,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			currentStreak: statsResult.stats.currentStreak,
 			insultsCollected: phrases?.learnedInsults.length ?? 0,
 			comebacksCollected: phrases?.learnedComebacks.length ?? 0,
-			fastestBreachSeconds: statsResult.stats.fastestBreachSeconds ?? undefined,
-			noDamageWin,
-			firstTryWin,
+			...(statsResult.stats.fastestBreachSeconds != null && {
+				fastestBreachSeconds: statsResult.stats.fastestBreachSeconds,
+			}),
+			...(noDamageWin != null && { noDamageWin }),
+			...(firstTryWin != null && { firstTryWin }),
 		};
 
 		await env.SKI_ACHIEVEMENTS.checkAndUnlockAchievements(

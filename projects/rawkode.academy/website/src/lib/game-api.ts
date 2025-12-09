@@ -89,9 +89,11 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
 	});
 
 	if (!response.ok) {
-		const error = await response
+		const error = (await response
 			.json()
-			.catch((): { error: string } => ({ error: "Unknown error" }));
+			.catch((): { error: string } => ({ error: "Unknown error" }))) as {
+			error?: string;
+		};
 		throw new GameApiError(
 			error.error || `Request failed: ${response.status}`,
 			response.status,

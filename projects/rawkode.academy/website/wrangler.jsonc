@@ -45,11 +45,8 @@
 		},
 		{
 			"binding": "EMAIL_PREFERENCES",
-			"service": "platform-email-preferences-rpc"
-		},
-		{
-			"binding": "EMAIL_SERVICE",
-			"service": "platform-email-service-rpc"
+			"service": "platform-email-preferences-rpc",
+			"entrypoint": "EmailPreferences"
 		},
 		{
 			"binding": "ANALYTICS",
@@ -57,31 +54,28 @@
 		},
 		{
 			"binding": "SKI_PLAYER_STATS",
-			"service": "games-ski-player-stats-rpc"
+			"service": "games-ski-player-stats-rpc",
+			"entrypoint": "SkiPlayerStats"
 		},
 		{
 			"binding": "SKI_PLAYER_LEARNED_PHRASES",
-			"service": "games-ski-player-learned-phrases-rpc"
+			"service": "games-ski-player-learned-phrases-rpc",
+			"entrypoint": "SkiPlayerLearnedPhrases"
 		},
 		{
 			"binding": "SKI_ACHIEVEMENTS",
-			"service": "games-ski-achievements-rpc"
+			"service": "games-ski-achievements-rpc",
+			"entrypoint": "SkiAchievements"
 		},
 		{
 			"binding": "SKI_LEADERBOARD",
-			"service": "games-ski-leaderboard-rpc"
-		},
-		{
-			"binding": "SKI_DAILY_CHALLENGE_READ",
-			"service": "platform-ski-daily-challenge-read-model"
-		},
-		{
-			"binding": "SKI_DAILY_CHALLENGE_RPC",
-			"service": "platform-ski-daily-challenge-rpc"
+			"service": "games-ski-leaderboard-rpc",
+			"entrypoint": "SkiLeaderboard"
 		},
 		{
 			"binding": "SKI_SHARE_CARDS",
-			"service": "games-ski-share-cards-rpc"
+			"service": "games-ski-share-cards-rpc",
+			"entrypoint": "SkiShareCards"
 		}
 	]
 }

@@ -5,10 +5,6 @@ node_modules/
 !/.projen/deps.json
 !/.projen/files.json
 /drizzle.config.ts
-/read-model/main.ts
-/read-model/publish.ts
-/read-model/wrangler.jsonc
-/read-model/schema.gql
 /http/main.ts
 /http/wrangler.jsonc
 /README.md

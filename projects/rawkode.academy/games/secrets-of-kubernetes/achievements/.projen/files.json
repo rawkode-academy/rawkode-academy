@@ -10,9 +10,6 @@
     "http/main.ts",
     "http/wrangler.jsonc",
     "package.json",
-    "read-model/main.ts",
-    "read-model/publish.ts",
-    "read-model/wrangler.jsonc",
     "README.md",
     "tsconfig.json"
   ],

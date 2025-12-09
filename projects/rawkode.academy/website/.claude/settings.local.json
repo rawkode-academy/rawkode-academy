@@ -31,7 +31,9 @@
       "Bash(grep:*)",
       "Bash(xargs basename:*)",
       "Bash(magick:*)",
-      "Bash(cwebp:*)"
+      "Bash(cwebp:*)",
+      "Bash(bunx wrangler:*)",
+      "WebFetch(domain:developers.cloudflare.com)"
     ],
     "deny": []
   }
