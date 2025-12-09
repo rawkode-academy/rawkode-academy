@@ -163,6 +163,33 @@ function idsToComebacks(ids: string[]): Comeback[] {
 		.filter((c): c is Comeback => c !== undefined);
 }
 
+// Check if an error is an authentication error (401)
+function isAuthenticationError(error: unknown): boolean {
+	if (error instanceof Error && error.message.includes("401")) {
+		return true;
+	}
+	if (
+		error instanceof Error &&
+		error.name === "GameApiError" &&
+		"statusCode" in error &&
+		(error as { statusCode: number }).statusCode === 401
+	) {
+		return true;
+	}
+	return false;
+}
+
+// Load player progress from the backend and update state
+function loadPlayerProgress(progress: PlayerProgress): void {
+	isAuthenticated.value = true;
+	playerProgress.value = progress;
+	isNewPlayer.value = false;
+	playerName.value = progress.personName ?? "Player";
+	learnedInsults.value = idsToInsults(progress.learnedInsults);
+	learnedComebacks.value = idsToComebacks(progress.learnedComebacks);
+	console.log("[Game] Loaded phrases - insults:", learnedInsults.value.length, "comebacks:", learnedComebacks.value.length);
+}
+
 // Load player progress on mount
 onMounted(async () => {
 	// Check for dev auth bypass
@@ -190,15 +217,7 @@ onMounted(async () => {
 
 		if (progress) {
 			// Existing player - load their saved progress
-			isAuthenticated.value = true;
-			playerProgress.value = progress;
-			isNewPlayer.value = false;
-			playerName.value = progress.personName ?? "Player";
-
-			// Convert IDs to full objects
-			learnedInsults.value = idsToInsults(progress.learnedInsults);
-			learnedComebacks.value = idsToComebacks(progress.learnedComebacks);
-			console.log("[Game] Loaded phrases - insults:", learnedInsults.value.length, "comebacks:", learnedComebacks.value.length);
+			loadPlayerProgress(progress);
 		} else {
 			// Player exists in auth but not in game services - will initialize on first play
 			console.log("[Game] No player progress found - treating as new player");
@@ -207,16 +226,8 @@ onMounted(async () => {
 		}
 	} catch (error: unknown) {
 		// Check if it's an auth error
-		if (error instanceof Error && error.message.includes("401")) {
+		if (isAuthenticationError(error)) {
 			console.log("[Game] Authentication error - user not logged in");
-			isAuthenticated.value = false;
-		} else if (
-			error instanceof Error &&
-			error.name === "GameApiError" &&
-			"statusCode" in error &&
-			(error as { statusCode: number }).statusCode === 401
-		) {
-			console.log("[Game] Authentication error (GameApiError 401)");
 			isAuthenticated.value = false;
 		} else {
 			// Network or server error - retry once before giving up
@@ -225,12 +236,7 @@ onMounted(async () => {
 				const progress = await getPlayerProgress();
 				if (progress) {
 					console.log("[Game] Retry successful - loaded", progress.learnedInsults.length, "insults and", progress.learnedComebacks.length, "comebacks");
-					isAuthenticated.value = true;
-					playerProgress.value = progress;
-					isNewPlayer.value = false;
-					playerName.value = progress.personName ?? "Player";
-					learnedInsults.value = idsToInsults(progress.learnedInsults);
-					learnedComebacks.value = idsToComebacks(progress.learnedComebacks);
+					loadPlayerProgress(progress);
 				} else {
 					console.log("[Game] Retry returned null - treating as new player");
 					isAuthenticated.value = true;
@@ -239,13 +245,7 @@ onMounted(async () => {
 			} catch (retryError) {
 				console.error("Retry also failed:", retryError);
 				// If retry fails with auth error, not authenticated
-				if (
-					(retryError instanceof Error && retryError.message.includes("401")) ||
-					(retryError instanceof Error &&
-						retryError.name === "GameApiError" &&
-						"statusCode" in retryError &&
-						(retryError as { statusCode: number }).statusCode === 401)
-				) {
+				if (isAuthenticationError(retryError)) {
 					isAuthenticated.value = false;
 				} else {
 					// Other error - assume authenticated but couldn't load progress
