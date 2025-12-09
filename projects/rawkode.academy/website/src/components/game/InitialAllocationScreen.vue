@@ -433,4 +433,38 @@ function animateSlots() {
 	color: rgb(var(--brand-primary));
 	margin-top: 0.5rem;
 }
+
+@media (max-width: 768px) {
+	.allocation-screen {
+		padding: 1.5rem 1rem;
+		min-height: calc(100vh - 140px);
+		align-items: flex-start;
+	}
+
+	.title {
+		font-size: 2rem;
+	}
+
+	.subtitle {
+		font-size: 1rem;
+	}
+
+	.slot-section {
+		padding: 1rem;
+	}
+
+	.slots {
+		flex-direction: column;
+	}
+
+	.slot {
+		max-width: none;
+	}
+
+	.spin-btn,
+	.continue-btn {
+		width: 100%;
+		max-width: 320px;
+	}
+}
 </style>

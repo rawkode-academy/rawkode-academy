@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import type { EnemyData, Insult, Comeback, InsultLayer } from "@/game/data/types";
 import { insults, comebacks, getEffectiveComebacks } from "@/game/data/insults";
 import { layerScenes } from "@/game/data/scenes";
@@ -147,6 +147,9 @@ const enemyHit = ref(false);
 const playerAttacking = ref(false);
 const enemyAttacking = ref(false);
 
+const MIN_CHOICE_KEY_STRING = "1";
+const MAX_CHOICE_KEY_STRING = "4";
+
 const sceneBackground = computed(() => layerScenes[props.enemy.layer]);
 const playerSprite = "/games/secret-of-kubernetes-island/player.webp";
 
@@ -156,7 +159,45 @@ function flee() {
 
 onMounted(() => {
 	startCombat();
+	window.addEventListener("keydown", handleKeydown);
 });
+
+onBeforeUnmount(() => {
+	window.removeEventListener("keydown", handleKeydown);
+});
+
+function handleKeydown(event: KeyboardEvent) {
+	if (isProcessing.value || showResult.value) return;
+
+	const target = event.target as HTMLElement | null;
+	if (
+		target &&
+		(target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+	) {
+		return;
+	}
+
+	if (event.key >= MIN_CHOICE_KEY_STRING && event.key <= MAX_CHOICE_KEY_STRING) {
+		const index = Number(event.key) - 1;
+		let handled = false;
+
+		if (phase.value === 'player-pick-insult') {
+			handled = tryKeyboardSelect(availableInsults.value, index, playerInsult);
+		} else if (phase.value === 'player-pick-comeback') {
+			handled = tryKeyboardSelect(availableComebacks.value, index, playerComeback);
+		}
+
+		if (handled) event.preventDefault();
+	}
+}
+
+function tryKeyboardSelect<T>(options: T[], index: number, handler: (item: T) => void): boolean {
+	if (index < 0 || index >= options.length) return false;
+	const option = options[index];
+
+	handler(option);
+	return true;
+}
 
 function startCombat() {
 	// Randomly decide who starts
@@ -747,5 +788,57 @@ function learnComeback(comeback: Comeback) {
 :root.dark .flee-key {
 	background: rgb(255 255 255 / 0.15);
 	color: rgb(156 163 175);
+}
+
+@media (max-width: 768px) {
+	.combat-screen {
+		padding: 1rem;
+		gap: 1rem;
+	}
+
+	.combat-header {
+		flex-direction: column;
+		gap: 0.75rem;
+		padding: 0 1rem;
+	}
+
+	.health-bar {
+		font-size: 1.25rem;
+	}
+
+	.combat-arena {
+		padding: 1rem;
+		min-height: 220px;
+		max-height: none;
+		aspect-ratio: 4 / 5;
+	}
+
+	.combatant-sprite {
+		width: 140px;
+		height: 140px;
+	}
+
+	.dialogue-box {
+		padding: 1rem;
+		max-height: 50vh;
+		overflow-y: auto;
+	}
+
+	.phrase-text {
+		font-size: 1rem;
+	}
+
+	.turn-indicator {
+		font-size: 0.8rem;
+	}
+
+	.choices {
+		gap: 0.5rem;
+	}
+
+	.choice-btn {
+		font-size: 0.95rem;
+		padding: 0.85rem 1rem;
+	}
 }
 </style>
