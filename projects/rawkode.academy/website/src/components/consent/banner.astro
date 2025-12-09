@@ -50,9 +50,9 @@
     const accept = () => {
       try{ localStorage.setItem(KEY, 'granted'); }catch{}
       try{
-        // Enable Grafana Faro tracking after consent
-        if (typeof window.enableGrafanaFaro === 'function') {
-          window.enableGrafanaFaro();
+        // Enable PostHog tracking after consent
+        if (typeof window.enablePostHog === 'function') {
+          window.enablePostHog();
         }
       }catch{}
       banner?.classList.add('hidden');
@@ -60,7 +60,7 @@
 
     const decline = () => {
       try{ localStorage.setItem(KEY, 'denied'); }catch{}
-      // No need to explicitly disable - Faro won't initialize without consent
+      // No need to explicitly disable - PostHog won't capture without consent
       banner?.classList.add('hidden');
     };
 

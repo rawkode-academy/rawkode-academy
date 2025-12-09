@@ -61,7 +61,6 @@ const subscribe = async () => {
 			v-else
 			@click="subscribe"
 			:disabled="isLoading"
-			data-faro-user-action-name="newsletter_subscribe"
 			class="w-full relative overflow-hidden py-3 px-6 rounded border transition-all duration-300 text-sm min-w-[200px]"
 			:class="[
 				isLoading 
