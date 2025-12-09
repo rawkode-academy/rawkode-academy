@@ -2,7 +2,7 @@
 import { Font } from "astro:assets";
 import "@/styles/global.css";
 import type { OpenGraphProps } from "@/types/opengraph";
-import GrafanaFaro from "../grafana/index.astro";
+import PostHog from "../posthog/index.astro";
 import Opengraph from "./opengraph.astro";
 import SearchActionJsonLd from "./search-action-jsonld.astro";
 import OrganizationJsonLd from "./organization-jsonld.astro";
@@ -81,8 +81,9 @@ interface Props extends OpenGraphProps {}
 
 	<link rel="sitemap" href="/sitemap-index.xml" />
 
-
-    <GrafanaFaro />
+	<!-- PostHog analytics -->
+	<link rel="preconnect" href="https://eu.i.posthog.com" />
+    <PostHog />
 
 	<!-- Initial theme script: respects saved preference or OS setting; avoids FOUC -->
 	<script is:inline>

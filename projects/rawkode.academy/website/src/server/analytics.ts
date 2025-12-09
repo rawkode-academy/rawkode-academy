@@ -91,7 +91,7 @@ export async function captureServerEvent(
 		distinct_id: distinctId ?? "anonymous",
 	});
 
-	// Determine which attributes to promote to OTLP attributes
+	// Determine which attributes to promote to PostHog properties
 	const attributesToPromote = ["distinct_id", "video_id", "content_id"];
 
 	if (analytics) {
@@ -127,7 +127,7 @@ type IdentifyOptions = {
 
 /**
  * Associate an anonymous id with an identified user.
- * With Grafana, we track this as a custom event.
+ * Tracked as a custom CloudEvent via the analytics service.
  */
 export async function identifyServerUser(
 	opts: IdentifyOptions,

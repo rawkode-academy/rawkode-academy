@@ -25,9 +25,8 @@ interface StoredMetric {
 }
 
 export interface Env {
-	GRAFANA_OTLP_ENDPOINT: string;
-	GRAFANA_OTLP_USERNAME: string;
-	GRAFANA_OTLP_TOKEN: string;
+	POSTHOG_API_KEY: string;
+	POSTHOG_HOST: string;
 }
 
 const FLUSH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -63,10 +62,10 @@ export class EventBuffer extends DurableObject<Env> {
 		const events = await this.getEvents();
 		if (events.length > 0) {
 			try {
-				await this.flushLogsToGrafana(events);
+				await this.flushEventsToPostHog(events);
 				await this.ctx.storage.delete(EVENTS_KEY);
 			} catch (error) {
-				console.error("Failed to flush events to Grafana:", error);
+				console.error("Failed to flush events to PostHog:", error);
 				hasErrors = true;
 			}
 		}
@@ -74,10 +73,10 @@ export class EventBuffer extends DurableObject<Env> {
 		const metrics = await this.getMetrics();
 		if (metrics.length > 0) {
 			try {
-				await this.flushMetricsToGrafana(metrics);
+				await this.flushMetricsToPostHog(metrics);
 				await this.ctx.storage.delete(METRICS_KEY);
 			} catch (error) {
-				console.error("Failed to flush metrics to Grafana:", error);
+				console.error("Failed to flush metrics to PostHog:", error);
 				hasErrors = true;
 			}
 		}
@@ -107,191 +106,108 @@ export class EventBuffer extends DurableObject<Env> {
 		return metrics ?? [];
 	}
 
-	private async flushLogsToGrafana(events: StoredEvent[]): Promise<void> {
-		const otlpPayload = this.toOtlpLogs(events);
-		const credentials = btoa(`${this.env.GRAFANA_OTLP_USERNAME}:${this.env.GRAFANA_OTLP_TOKEN}`);
+	private async flushEventsToPostHog(events: StoredEvent[]): Promise<void> {
+		const batch = events.map((stored) => this.cloudEventToPostHogEvent(stored.event, stored.attributes));
 
-		const response = await fetch(`${this.env.GRAFANA_OTLP_ENDPOINT}/v1/logs`, {
+		const response = await fetch(`${this.env.POSTHOG_HOST}/batch`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Basic ${credentials}`,
 			},
-			body: JSON.stringify(otlpPayload),
+			body: JSON.stringify({
+				api_key: this.env.POSTHOG_API_KEY,
+				batch,
+			}),
 		});
 
 		if (!response.ok) {
 			const body = await response.text();
-			throw new Error(`Grafana OTLP request failed: ${response.status} ${body}`);
+			throw new Error(`PostHog batch request failed: ${response.status} ${body}`);
 		}
 	}
 
-	private toOtlpLogs(events: StoredEvent[]): OtlpLogsPayload {
-		return {
-			resourceLogs: [
-				{
-					resource: {
-						attributes: [
-							{ key: "service.name", value: { stringValue: "analytics" } },
-						],
-					},
-					scopeLogs: [
-						{
-							scope: { name: "cloudevents" },
-							logRecords: events.map((stored) =>
-								this.cloudEventToLogRecord(stored.event, stored.attributes),
-							),
-						},
-					],
-				},
-			],
-		};
-	}
-
-	private cloudEventToLogRecord(
+	private cloudEventToPostHogEvent(
 		event: CloudEventData,
 		promoteAttributes?: string[],
-	): OtlpLogRecord {
-		const attributes: OtlpAttribute[] = [
-			{ key: "cloudevents.specversion", value: { stringValue: event.specversion } },
-			{ key: "cloudevents.id", value: { stringValue: event.id } },
-			{ key: "cloudevents.source", value: { stringValue: event.source } },
-			{ key: "cloudevents.type", value: { stringValue: event.type } },
-		];
+	): PostHogEvent {
+		const properties: Record<string, unknown> = {
+			$lib: "analytics-worker",
+			cloudevents_specversion: event.specversion,
+			cloudevents_id: event.id,
+			cloudevents_source: event.source,
+		};
 
 		if (event.subject) {
-			attributes.push({ key: "cloudevents.subject", value: { stringValue: event.subject } });
+			properties.cloudevents_subject = event.subject;
 		}
 
 		if (event.datacontenttype) {
-			attributes.push({ key: "cloudevents.datacontenttype", value: { stringValue: event.datacontenttype } });
+			properties.cloudevents_datacontenttype = event.datacontenttype;
 		}
 
-		// Promote specified fields from event.data to attributes
-		if (promoteAttributes && event.data && typeof event.data === "object") {
+		// Include event data as properties
+		if (event.data && typeof event.data === "object") {
 			const data = event.data as Record<string, unknown>;
-			for (const key of promoteAttributes) {
-				if (key in data && data[key] != null) {
-					const value = data[key];
-					const stringValue = typeof value === "string" ? value : String(value);
-					attributes.push({ key, value: { stringValue } });
-				}
+			for (const [key, value] of Object.entries(data)) {
+				properties[key] = value;
 			}
 		}
 
-		const timestamp = event.time ? new Date(event.time).getTime() : Date.now();
+		// Determine distinct_id from event data or source
+		let distinctId = "anonymous";
+		if (event.data && typeof event.data === "object") {
+			const data = event.data as Record<string, unknown>;
+			if (typeof data.userId === "string") {
+				distinctId = data.userId;
+			} else if (typeof data.sessionId === "string") {
+				distinctId = data.sessionId;
+			} else if (typeof data.distinct_id === "string") {
+				distinctId = data.distinct_id;
+			}
+		}
 
 		return {
-			timeUnixNano: String(timestamp * 1_000_000),
-			severityNumber: 9, // INFO
-			severityText: "INFO",
-			body: event.data ? { stringValue: JSON.stringify(event.data) } : undefined,
-			attributes,
+			event: event.type,
+			distinct_id: distinctId,
+			properties,
+			timestamp: event.time || new Date().toISOString(),
 		};
 	}
 
-	private async flushMetricsToGrafana(metrics: StoredMetric[]): Promise<void> {
-		const payload: OtlpMetricsPayload = {
-			resourceMetrics: [
-				{
-					resource: {
-						attributes: [
-							{ key: "service.name", value: { stringValue: "analytics" } },
-						],
-					},
-					scopeMetrics: [
-						{
-							scope: { name: "metrics" },
-							metrics: metrics.map((m) => ({
-								name: m.name,
-								gauge: {
-									dataPoints: [
-										{
-											asInt: String(m.value),
-											timeUnixNano: String(m.timestamp * 1_000_000),
-											attributes: Object.entries(m.attributes).map(
-												([k, v]) => ({
-													key: k,
-													value: { stringValue: v },
-												}),
-											),
-										},
-									],
-								},
-							})),
-						},
-					],
-				},
-			],
-		};
-
-		const credentials = btoa(
-			`${this.env.GRAFANA_OTLP_USERNAME}:${this.env.GRAFANA_OTLP_TOKEN}`,
-		);
-
-		const response = await fetch(
-			`${this.env.GRAFANA_OTLP_ENDPOINT}/v1/metrics`,
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Basic ${credentials}`,
-				},
-				body: JSON.stringify(payload),
+	private async flushMetricsToPostHog(metrics: StoredMetric[]): Promise<void> {
+		const batch: PostHogEvent[] = metrics.map((m) => ({
+			event: "$metric",
+			distinct_id: m.attributes.userId || m.attributes.sessionId || "system",
+			properties: {
+				$lib: "analytics-worker",
+				metric_name: m.name,
+				metric_value: m.value,
+				...m.attributes,
 			},
-		);
+			timestamp: new Date(m.timestamp).toISOString(),
+		}));
+
+		const response = await fetch(`${this.env.POSTHOG_HOST}/batch`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				api_key: this.env.POSTHOG_API_KEY,
+				batch,
+			}),
+		});
 
 		if (!response.ok) {
 			const body = await response.text();
-			throw new Error(
-				`Grafana OTLP metrics request failed: ${response.status} ${body}`,
-			);
+			throw new Error(`PostHog batch metrics request failed: ${response.status} ${body}`);
 		}
 	}
 }
 
-interface OtlpLogsPayload {
-	resourceLogs: {
-		resource: {
-			attributes: OtlpAttribute[];
-		};
-		scopeLogs: {
-			scope: { name: string };
-			logRecords: OtlpLogRecord[];
-		}[];
-	}[];
-}
-
-interface OtlpLogRecord {
-	timeUnixNano: string;
-	severityNumber: number;
-	severityText: string;
-	body?: { stringValue: string };
-	attributes: OtlpAttribute[];
-}
-
-interface OtlpAttribute {
-	key: string;
-	value: { stringValue: string };
-}
-
-interface OtlpMetricsPayload {
-	resourceMetrics: {
-		resource: {
-			attributes: OtlpAttribute[];
-		};
-		scopeMetrics: {
-			scope: { name: string };
-			metrics: {
-				name: string;
-				gauge: {
-					dataPoints: {
-						asInt: string;
-						timeUnixNano: string;
-						attributes: OtlpAttribute[];
-					}[];
-				};
-			}[];
-		}[];
-	}[];
+interface PostHogEvent {
+	event: string;
+	distinct_id: string;
+	properties: Record<string, unknown>;
+	timestamp: string;
 }
