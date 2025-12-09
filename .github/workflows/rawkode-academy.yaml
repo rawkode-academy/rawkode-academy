@@ -46,6 +46,7 @@ jobs:
           # Install projen generator dependencies
           cd projects/rawkode.academy/generators/projen-platform-service
           bun install
+          bun run types
           cd -
 
           # Generate projen files for platform services
