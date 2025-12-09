@@ -324,4 +324,33 @@ function selectEnemy(enemy: EnemyData) {
 :root.dark .enemy-difficulty {
 	color: #f1c40f;
 }
+
+@media (max-width: 768px) {
+	.cluster-map {
+		padding: 1.25rem 1rem;
+		min-height: calc(100vh - 140px);
+	}
+
+	.map-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.map-nav {
+		flex-wrap: wrap;
+	}
+
+	.layer {
+		padding: 1rem;
+	}
+
+	.layer-enemies {
+		gap: 0.75rem;
+	}
+
+	.enemy-node {
+		width: 100%;
+		min-width: auto;
+	}
+}
 </style>
