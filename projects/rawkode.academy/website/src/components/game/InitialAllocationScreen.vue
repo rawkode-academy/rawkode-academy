@@ -63,7 +63,7 @@
 			<button
 				v-if="allRevealed"
 				class="continue-btn"
-				@click="$emit('continue', selectedInsults, selectedComebacks)"
+				@click="$emit('continue')"
 			>
 				<span class="btn-text">[ BEGIN MISSION ]</span>
 			</button>
@@ -88,8 +88,13 @@ interface SlotState<T> {
 	result: T | null;
 }
 
+const props = defineProps<{
+	assignedInsults: Insult[];
+	assignedComebacks: Comeback[];
+}>();
+
 const emit = defineEmits<{
-	continue: [insults: Insult[], comebacks: Comeback[]];
+	continue: [];
 }>();
 
 const allInsults = insults;
@@ -112,35 +117,19 @@ const allRevealed = computed(() =>
 	comebackSlots.value.every((s) => s.revealed)
 );
 
-const selectedInsults = computed(() =>
-	insultSlots.value.map((s) => s.result).filter((r): r is Insult => r !== null)
-);
-
-const selectedComebacks = computed(() =>
-	comebackSlots.value.map((s) => s.result).filter((r): r is Comeback => r !== null)
-);
-
-function getRandomItems<T>(array: T[], count: number, exclude: T[] = []): T[] {
-	const available = array.filter((item) => !exclude.includes(item));
-	const shuffled = [...available].sort(() => Math.random() - 0.5);
-	return shuffled.slice(0, count);
-}
-
 function startSpin() {
 	if (isSpinning.value) return;
 	isSpinning.value = true;
 
-	const selectedInsultItems = getRandomItems(allInsults, 2);
-	const selectedComebackItems = getRandomItems(allComebacks, 2);
-
+	// Use the pre-assigned phrases from the backend
 	insultSlots.value.forEach((slot, index) => {
 		slot.spinning = true;
-		slot.result = selectedInsultItems[index] || null;
+		slot.result = props.assignedInsults[index] || null;
 	});
 
 	comebackSlots.value.forEach((slot, index) => {
 		slot.spinning = true;
-		slot.result = selectedComebackItems[index] || null;
+		slot.result = props.assignedComebacks[index] || null;
 	});
 
 	animateSlots();
