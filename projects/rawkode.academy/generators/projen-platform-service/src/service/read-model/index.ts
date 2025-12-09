@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 interface Options {
 	serviceName: string;
+	servicePrefix: string;
 	bindings?: CloudflareBindings;
 }
 
@@ -51,6 +52,7 @@ export class ReadModel extends Component {
 
 		return {
 			serviceName: this.options.serviceName,
+			servicePrefix: this.options.servicePrefix,
 			bindings: {
 				d1Databases,
 				secretStoreSecrets: bindings.secretStoreSecrets ?? [],

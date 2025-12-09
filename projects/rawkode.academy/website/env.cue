@@ -6,6 +6,7 @@ schema.#Cuenv
 
 env: {
 	GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
+	DISABLE_GAME_AUTH: true
 }
 
 hooks: onEnter: devenv: {

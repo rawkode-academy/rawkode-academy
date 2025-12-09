@@ -1,0 +1,94 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "2b5995a7-7879-419e-a4b0-d3e1bb5472b6",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "leaderboard_entries": {
+      "name": "leaderboard_entries",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "person_name": {
+          "name": "person_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "score_type": {
+          "name": "score_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "score_value": {
+          "name": "score_value",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "achieved_at": {
+          "name": "achieved_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "score_type_idx": {
+          "name": "score_type_idx",
+          "columns": [
+            "score_type"
+          ],
+          "isUnique": false
+        },
+        "person_score_idx": {
+          "name": "person_score_idx",
+          "columns": [
+            "person_id",
+            "score_type"
+          ],
+          "isUnique": false
+        },
+        "score_value_idx": {
+          "name": "score_value_idx",
+          "columns": [
+            "score_type",
+            "score_value"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

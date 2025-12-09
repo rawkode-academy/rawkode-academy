@@ -13,17 +13,62 @@ const platformDir = join(__dirname, "../../platform");
 const websiteDir = join(__dirname, "../../website");
 const schemasDir = join(__dirname, "../schemas");
 
-// User interaction services (still separate workers with D1)
-const SERVICES = [
+// User interaction services (platform/ directory)
+const PLATFORM_SERVICES = [
 	"emoji-reactions",
 	"video-likes",
 	"email-preferences",
 ];
 
+// Helper function to collect schema from a service directory
+function collectServiceSchema(
+	serviceDir: string,
+	schemaName: string,
+): boolean {
+	const readModelDir = join(serviceDir, "read-model");
+	const schemaPath = join(readModelDir, "schema.gql");
+	const publishPath = join(readModelDir, "publish.ts");
+
+	console.log(`Processing ${schemaName}...`);
+
+	if (!existsSync(readModelDir)) {
+		console.log(`  Skipped: no read-model directory`);
+		return false;
+	}
+
+	if (!existsSync(publishPath)) {
+		console.log(`  Skipped: no publish.ts script`);
+		return false;
+	}
+
+	try {
+		console.log(`  Running publish.ts...`);
+		// Safe: hardcoded command with no user input
+		execSync("bun run read-model/publish.ts", {
+			cwd: serviceDir,
+			stdio: "pipe",
+		});
+
+		if (!existsSync(schemaPath)) {
+			console.log(`  Failed: schema.gql not generated`);
+			return false;
+		}
+
+		const destPath = join(schemasDir, `${schemaName}.graphql`);
+		copyFileSync(schemaPath, destPath);
+		console.log(`  Success: copied to schemas/${schemaName}.graphql`);
+		return true;
+	} catch (error) {
+		console.log(
+			`  Failed: ${error instanceof Error ? error.message : "unknown error"}`,
+		);
+		return false;
+	}
+}
+
 async function collectSchemas() {
 	console.log("Collecting subgraph schemas...\n");
 
-	// Ensure schemas directory exists
 	if (!existsSync(schemasDir)) {
 		mkdirSync(schemasDir, { recursive: true });
 	}
@@ -31,51 +76,13 @@ async function collectSchemas() {
 	let successCount = 0;
 	let failCount = 0;
 
-	for (const service of SERVICES) {
+	// Collect platform service schemas
+	console.log("=== Platform Services ===\n");
+	for (const service of PLATFORM_SERVICES) {
 		const serviceDir = join(platformDir, service);
-		const readModelDir = join(serviceDir, "read-model");
-		const schemaPath = join(readModelDir, "schema.gql");
-		const publishPath = join(readModelDir, "publish.ts");
-
-		console.log(`Processing ${service}...`);
-
-		if (!existsSync(readModelDir)) {
-			console.log(`  Skipped: no read-model directory`);
-			failCount++;
-			continue;
-		}
-
-		// Check if publish.ts exists
-		if (!existsSync(publishPath)) {
-			console.log(`  Skipped: no publish.ts script`);
-			failCount++;
-			continue;
-		}
-
-		try {
-			// Run publish.ts to generate schema.gql
-			console.log(`  Running publish.ts...`);
-			execSync("bun run read-model/publish.ts", {
-				cwd: serviceDir,
-				stdio: "pipe",
-			});
-
-			// Check if schema.gql was generated
-			if (!existsSync(schemaPath)) {
-				console.log(`  Failed: schema.gql not generated`);
-				failCount++;
-				continue;
-			}
-
-			// Copy to schemas directory
-			const destPath = join(schemasDir, `${service}.graphql`);
-			copyFileSync(schemaPath, destPath);
-			console.log(`  Success: copied to schemas/${service}.graphql`);
+		if (collectServiceSchema(serviceDir, service)) {
 			successCount++;
-		} catch (error) {
-			console.log(
-				`  Failed: ${error instanceof Error ? error.message : "unknown error"}`,
-			);
+		} else {
 			failCount++;
 		}
 	}

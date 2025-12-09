@@ -19,6 +19,11 @@ const SUBGRAPHS = [
 	"emoji-reactions",
 	"video-likes",
 	"email-preferences",
+	// Secret of Kubernetes Island game services
+	"ski-achievements",
+	"ski-leaderboard",
+	"ski-player-learned-phrases",
+	"ski-player-stats",
 ];
 
 async function composeSupergraph() {

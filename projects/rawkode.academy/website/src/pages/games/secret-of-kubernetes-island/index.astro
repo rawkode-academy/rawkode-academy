@@ -1,0 +1,38 @@
+---
+import PageWrapper from "@/wrappers/page.astro";
+import { DISABLE_GAME_AUTH } from "astro:env/server";
+
+const disableAuth = DISABLE_GAME_AUTH === "true";
+---
+
+<PageWrapper
+	title="Secret of Kubernetes Island"
+	description="A verbal combat game where you breach Kubernetes clusters one insult at a time"
+>
+	<div class="game-wrapper bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
+		<div id="game-root" data-disable-auth={disableAuth ? "true" : "false"}></div>
+	</div>
+</PageWrapper>
+
+<script>
+	import { createApp } from "vue";
+	import Game from "@/components/game/Game.vue";
+
+	const app = createApp(Game);
+	app.mount("#game-root");
+</script>
+
+<style>
+	.game-wrapper {
+		width: 100%;
+		min-height: calc(100vh - 200px);
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	#game-root {
+		width: 100%;
+		height: 100%;
+		min-height: calc(100vh - 200px);
+	}
+</style>

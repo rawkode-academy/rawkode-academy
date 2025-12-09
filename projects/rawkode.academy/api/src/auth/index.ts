@@ -1,5 +1,4 @@
 import type { GatewayPlugin } from "@graphql-hive/gateway-runtime";
-import type { Env } from "../env.d.ts";
 
 export interface User {
 	id: string;
