@@ -8,6 +8,11 @@
 			</div>
 		</div>
 
+		<!-- Dev mode warning -->
+		<div v-if="devMode" class="dev-mode-banner">
+			⚠️ DEV MODE - Progress will not persist across sessions
+		</div>
+
 		<!-- Auth required state -->
 		<div v-else-if="!isAuthenticated" class="auth-screen">
 			<div class="auth-content">
@@ -184,7 +189,7 @@ onMounted(async () => {
 		});
 
 		if (progress) {
-			// Existing player
+			// Existing player - load their saved progress
 			isAuthenticated.value = true;
 			playerProgress.value = progress;
 			isNewPlayer.value = false;
@@ -214,11 +219,40 @@ onMounted(async () => {
 			console.log("[Game] Authentication error (GameApiError 401)");
 			isAuthenticated.value = false;
 		} else {
-			// Other error - assume authenticated but new player
-			console.error("Failed to load player progress:", error);
-			console.log("[Game] Non-auth error - treating as new player");
-			isAuthenticated.value = true;
-			isNewPlayer.value = true;
+			// Network or server error - retry once before giving up
+			console.error("Failed to load player progress, retrying once:", error);
+			try {
+				const progress = await getPlayerProgress();
+				if (progress) {
+					console.log("[Game] Retry successful - loaded", progress.learnedInsults.length, "insults and", progress.learnedComebacks.length, "comebacks");
+					isAuthenticated.value = true;
+					playerProgress.value = progress;
+					isNewPlayer.value = false;
+					playerName.value = progress.personName ?? "Player";
+					learnedInsults.value = idsToInsults(progress.learnedInsults);
+					learnedComebacks.value = idsToComebacks(progress.learnedComebacks);
+				} else {
+					console.log("[Game] Retry returned null - treating as new player");
+					isAuthenticated.value = true;
+					isNewPlayer.value = true;
+				}
+			} catch (retryError) {
+				console.error("Retry also failed:", retryError);
+				// If retry fails with auth error, not authenticated
+				if (
+					(retryError instanceof Error && retryError.message.includes("401")) ||
+					(retryError instanceof Error &&
+						retryError.name === "GameApiError" &&
+						"statusCode" in retryError &&
+						(retryError as { statusCode: number }).statusCode === 401)
+				) {
+					isAuthenticated.value = false;
+				} else {
+					// Other error - assume authenticated but couldn't load progress
+					isAuthenticated.value = true;
+					isNewPlayer.value = true;
+				}
+			}
 		}
 	} finally {
 		isLoading.value = false;
@@ -564,5 +598,27 @@ function returnFromOverlay() {
 	50% {
 		opacity: 0.7;
 	}
+}
+
+/* Dev mode banner */
+.dev-mode-banner {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	background: #f59e0b;
+	color: #78350f;
+	padding: 0.5rem 1rem;
+	text-align: center;
+	font-weight: 600;
+	font-size: 0.875rem;
+	z-index: 9999;
+	border-bottom: 2px solid #d97706;
+}
+
+:root.dark .dev-mode-banner {
+	background: #92400e;
+	color: #fef3c7;
+	border-bottom-color: #78350f;
 }
 </style>
