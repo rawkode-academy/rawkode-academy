@@ -33,6 +33,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	const { type, phraseId } = payload;
+	console.log("[SKI API] Learning phrase for", personId, "- type:", type, "id:", phraseId);
 
 	if (!type || !phraseId || (type !== "insult" && type !== "comeback")) {
 		return new Response(

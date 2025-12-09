@@ -16,6 +16,7 @@ export const GET: APIRoute = async ({ locals }) => {
 
 	const env = locals.runtime.env;
 	const personId = user.id;
+	console.log("[SKI API] Getting player progress for:", personId);
 
 	try {
 		const [statsData, phrasesData, allAchievements, playerAchievements] = await Promise.all([

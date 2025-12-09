@@ -16,6 +16,7 @@ export const POST: APIRoute = async ({ locals }) => {
 
 	const env = locals.runtime.env;
 	const personId = user.id;
+	console.log("[SKI API] Initializing player:", personId);
 
 	try {
 		// Initialize player in all services and get achievements
