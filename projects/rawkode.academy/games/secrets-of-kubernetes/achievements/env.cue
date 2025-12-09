@@ -16,7 +16,7 @@ ci: pipelines: [
 	{
 		name: "default"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 		}
 		tasks: ["install", "deploy"]
@@ -29,19 +29,15 @@ ci: pipelines: [
 ]
 
 tasks: {
-	install: {
+	projen: {
 		command: "bun"
-		args: ["install"]
+		args: ["run", ".projenrc.ts"]
 	}
+
 	deploy: {
-		read: {
-			command: "npx"
-			args: ["wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
+		http: {
+			command: "bun"
+			args: ["run", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 		}
-		rpc: {
-			command: "npx"
-			args: ["wrangler", "deploy", "--config", "./rpc/wrangler.jsonc"]
-		}
-		dependsOn: ["install"]
 	}
 }

@@ -14,6 +14,15 @@
 				<span class="btn-text">[ START GAME ]</span>
 			</button>
 
+			<div class="menu-nav">
+				<button class="nav-btn" @click="$emit('viewAchievements')">
+					[ ACHIEVEMENTS ]
+				</button>
+				<button class="nav-btn" @click="$emit('viewLeaderboard')">
+					[ LEADERBOARD ]
+				</button>
+			</div>
+
 			<div class="instructions">
 				<p>Navigate the cluster layers</p>
 				<p>Challenge security services</p>
@@ -26,6 +35,8 @@
 <script setup lang="ts">
 defineEmits<{
 	start: [];
+	viewAchievements: [];
+	viewLeaderboard: [];
 }>();
 </script>
 
@@ -45,8 +56,8 @@ defineEmits<{
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgba(4, 181, 156, 0.1) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(4, 181, 156, 0.1) 1px, transparent 1px);
+		linear-gradient(rgb(var(--brand-primary) / 0.1) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(var(--brand-primary) / 0.1) 1px, transparent 1px);
 	background-size: 40px 40px;
 	animation: grid-move 20s linear infinite;
 }
@@ -73,10 +84,10 @@ defineEmits<{
 	display: block;
 	font-size: 4rem;
 	font-weight: 700;
-	color: #04b59c;
+	color: rgb(var(--brand-primary));
 	text-shadow:
-		0 0 20px rgba(4, 181, 156, 0.5),
-		0 0 40px rgba(4, 181, 156, 0.3);
+		0 0 20px rgb(var(--brand-primary) / 0.5),
+		0 0 40px rgb(var(--brand-primary) / 0.3);
 	letter-spacing: 0.1em;
 }
 
@@ -84,21 +95,25 @@ defineEmits<{
 	display: block;
 	font-size: 2.5rem;
 	font-weight: 300;
-	color: #85ff95;
+	color: rgb(var(--brand-secondary));
 	letter-spacing: 0.3em;
 	margin-top: 0.5rem;
 }
 
 .tagline {
-	color: #888;
+	color: rgb(107 114 128);
 	font-size: 1.1rem;
 	margin-bottom: 3rem;
 }
 
+:root.dark .tagline {
+	color: rgb(156 163 175);
+}
+
 .start-btn {
 	background: transparent;
-	border: 2px solid #04b59c;
-	color: #04b59c;
+	border: 2px solid rgb(var(--brand-primary));
+	color: rgb(var(--brand-primary));
 	padding: 1rem 2.5rem;
 	font-family: inherit;
 	font-size: 1.2rem;
@@ -112,14 +127,18 @@ defineEmits<{
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: #04b59c;
+	background: rgb(var(--brand-primary));
 	transform: translateX(-100%);
 	transition: transform 0.3s ease;
 	z-index: -1;
 }
 
 .start-btn:hover {
-	color: #1a1a2e;
+	color: white;
+}
+
+:root.dark .start-btn:hover {
+	color: rgb(17 24 39);
 }
 
 .start-btn:hover::before {
@@ -140,10 +159,38 @@ defineEmits<{
 	}
 }
 
+.menu-nav {
+	display: flex;
+	justify-content: center;
+	gap: 1rem;
+	margin-top: 1.5rem;
+}
+
+.nav-btn {
+	background: transparent;
+	border: 1px solid rgb(var(--brand-primary) / 0.5);
+	color: rgb(var(--brand-primary) / 0.8);
+	padding: 0.75rem 1.5rem;
+	font-family: inherit;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+	border-color: rgb(var(--brand-primary));
+	color: rgb(var(--brand-primary));
+	background: rgb(var(--brand-primary) / 0.1);
+}
+
 .instructions {
 	margin-top: 3rem;
-	color: #555;
+	color: rgb(107 114 128);
 	font-size: 0.9rem;
 	line-height: 1.8;
+}
+
+:root.dark .instructions {
+	color: rgb(107 114 128);
 }
 </style>

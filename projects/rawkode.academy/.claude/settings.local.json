@@ -14,7 +14,9 @@
       "Bash(platform/emoji-reactions/package.json)",
       "Bash(chmod:*)",
       "Bash(xargs cat:*)",
-      "Bash(bun install)"
+      "Bash(bun install)",
+      "Bash(find:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

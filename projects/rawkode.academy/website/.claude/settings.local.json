@@ -29,7 +29,9 @@
       "WebFetch(domain:docs.astro.build)",
       "WebFetch(domain:cloudnativecompass.fm)",
       "Bash(grep:*)",
-      "Bash(xargs basename:*)"
+      "Bash(xargs basename:*)",
+      "Bash(magick:*)",
+      "Bash(cwebp:*)"
     ],
     "deny": []
   }

@@ -203,8 +203,8 @@ function animateSlots() {
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgba(4, 181, 156, 0.1) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(4, 181, 156, 0.1) 1px, transparent 1px);
+		linear-gradient(rgb(var(--brand-primary) / 0.1) 1px, transparent 1px),
+		linear-gradient(90deg, rgb(var(--brand-primary) / 0.1) 1px, transparent 1px);
 	background-size: 40px 40px;
 	animation: grid-move 20s linear infinite;
 }
@@ -228,16 +228,20 @@ function animateSlots() {
 .title {
 	font-size: 2.5rem;
 	font-weight: 700;
-	color: #04b59c;
-	text-shadow: 0 0 20px rgba(4, 181, 156, 0.5);
+	color: rgb(var(--brand-primary));
+	text-shadow: 0 0 20px rgb(var(--brand-primary) / 0.5);
 	letter-spacing: 0.1em;
 	margin-bottom: 0.5rem;
 }
 
 .subtitle {
-	color: #888;
+	color: rgb(107 114 128);
 	font-size: 1.1rem;
 	margin-bottom: 2rem;
+}
+
+:root.dark .subtitle {
+	color: rgb(156 163 175);
 }
 
 .slots-container {
@@ -248,14 +252,19 @@ function animateSlots() {
 }
 
 .slot-section {
-	background: rgba(0, 0, 0, 0.6);
-	border: 1px solid rgba(4, 181, 156, 0.3);
+	background: rgb(255 255 255 / 0.8);
+	border: 1px solid rgb(var(--brand-primary) / 0.3);
 	border-radius: 12px;
 	padding: 1.5rem;
+	backdrop-filter: blur(8px);
+}
+
+:root.dark .slot-section {
+	background: rgb(0 0 0 / 0.6);
 }
 
 .section-title {
-	color: #04b59c;
+	color: rgb(var(--brand-primary));
 	font-size: 1rem;
 	letter-spacing: 0.2em;
 	margin-bottom: 1rem;
@@ -271,27 +280,34 @@ function animateSlots() {
 	width: 100%;
 	max-width: 350px;
 	height: 80px;
-	background: rgba(0, 0, 0, 0.8);
-	border: 2px solid #333;
+	background: rgb(255 255 255 / 0.9);
+	border: 2px solid rgb(0 0 0 / 0.1);
 	border-radius: 8px;
 	overflow: hidden;
 	position: relative;
 }
 
+:root.dark .slot {
+	background: rgb(0 0 0 / 0.8);
+	border-color: rgb(255 255 255 / 0.2);
+}
+
 .slot.spinning {
-	border-color: #04b59c;
-	box-shadow: 0 0 20px rgba(4, 181, 156, 0.3);
+	border-color: rgb(var(--brand-primary));
+	box-shadow: 0 0 20px rgb(var(--brand-primary) / 0.3);
 }
 
 .slot.revealed {
-	border-color: #85ff95;
-	box-shadow: 0 0 20px rgba(133, 255, 149, 0.3);
+	border-color: rgb(var(--brand-secondary));
+	box-shadow: 0 0 20px rgb(var(--brand-secondary) / 0.3);
 }
 
 .slot-reel {
 	position: absolute;
 	width: 100%;
 	transition: transform 0.05s linear;
+	user-select: none;
+	pointer-events: none;
 }
 
 .slot-item {
@@ -300,10 +316,15 @@ function animateSlots() {
 	align-items: center;
 	justify-content: center;
 	padding: 0.5rem;
-	color: #666;
+	color: rgb(107 114 128);
 	font-size: 0.8rem;
 	text-align: center;
-	border-bottom: 1px solid #222;
+	border-bottom: 1px solid rgb(0 0 0 / 0.1);
+}
+
+:root.dark .slot-item {
+	color: rgb(156 163 175);
+	border-bottom-color: rgb(255 255 255 / 0.1);
 }
 
 .revealed-item {
@@ -314,8 +335,12 @@ function animateSlots() {
 	justify-content: center;
 	gap: 0.75rem;
 	padding: 0.75rem;
-	background: rgba(0, 0, 0, 0.95);
+	background: rgb(255 255 255 / 0.95);
 	animation: reveal-pop 0.3s ease;
+}
+
+:root.dark .revealed-item {
+	background: rgb(0 0 0 / 0.95);
 }
 
 @keyframes reveal-pop {
@@ -335,7 +360,7 @@ function animateSlots() {
 }
 
 .item-text {
-	color: #85ff95;
+	color: rgb(var(--brand-secondary));
 	font-size: 0.85rem;
 	text-align: left;
 	line-height: 1.4;
@@ -344,8 +369,8 @@ function animateSlots() {
 .spin-btn,
 .continue-btn {
 	background: transparent;
-	border: 2px solid #04b59c;
-	color: #04b59c;
+	border: 2px solid rgb(var(--brand-primary));
+	color: rgb(var(--brand-primary));
 	padding: 1rem 2.5rem;
 	font-family: inherit;
 	font-size: 1.2rem;
@@ -361,7 +386,7 @@ function animateSlots() {
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: #04b59c;
+	background: rgb(var(--brand-primary));
 	transform: translateX(-100%);
 	transition: transform 0.3s ease;
 	z-index: -1;
@@ -369,7 +394,12 @@ function animateSlots() {
 
 .spin-btn:hover,
 .continue-btn:hover {
-	color: #1a1a2e;
+	color: white;
+}
+
+:root.dark .spin-btn:hover,
+:root.dark .continue-btn:hover {
+	color: rgb(17 24 39);
 }
 
 .spin-btn:hover::before,
@@ -378,12 +408,12 @@ function animateSlots() {
 }
 
 .continue-btn {
-	border-color: #85ff95;
-	color: #85ff95;
+	border-color: rgb(var(--brand-secondary));
+	color: rgb(var(--brand-secondary));
 }
 
 .continue-btn::before {
-	background: #85ff95;
+	background: rgb(var(--brand-secondary));
 }
 
 .btn-text {
@@ -402,12 +432,16 @@ function animateSlots() {
 
 .summary {
 	margin-top: 2rem;
-	color: #666;
+	color: rgb(107 114 128);
 	font-size: 0.9rem;
 }
 
+:root.dark .summary {
+	color: rgb(156 163 175);
+}
+
 .hint {
-	color: #04b59c;
+	color: rgb(var(--brand-primary));
 	margin-top: 0.5rem;
 }
 </style>

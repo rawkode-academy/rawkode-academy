@@ -3,7 +3,7 @@ import { createId } from "@paralleldrive/cuid2";
 import type { Env } from "./main.js";
 
 const ENEMY_NAMES: Record<string, string> = {
-	'nginx-ingress': 'NGINX Ingress',
+	'nginx-ingress': 'Ingress Controller',
 	'kubernetes-dashboard': 'Kubernetes Dashboard',
 	'traefik': 'Traefik',
 	'load-balancer': 'Load Balancer',
@@ -21,6 +21,38 @@ const RANK_NAMES: Record<string, string> = {
 	'SECURITY_RESEARCHER': 'Security Researcher',
 	'CISO_SLAYER': 'CISO Slayer',
 };
+
+const VALID_ENEMIES = new Set(Object.keys(ENEMY_NAMES));
+const VALID_RANKS = new Set(Object.keys(RANK_NAMES));
+
+function escapeXml(unsafe: string): string {
+	return unsafe
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
+function validateAndSanitizeParams(params: {
+	enemyDefeated: string;
+	moveCount: number;
+	timeSeconds: number;
+	rank?: string;
+}): { enemyDefeated: string; moveCount: number; timeSeconds: number; rank: string } {
+	const enemyDefeated = VALID_ENEMIES.has(params.enemyDefeated)
+		? params.enemyDefeated
+		: 'api-server';
+
+	const rank = params.rank && VALID_RANKS.has(params.rank)
+		? params.rank
+		: 'SCRIPT_KIDDIE';
+
+	const moveCount = Math.max(0, Math.min(9999, Math.floor(params.moveCount)));
+	const timeSeconds = Math.max(0, Math.min(3600, Math.floor(params.timeSeconds)));
+
+	return { enemyDefeated, moveCount, timeSeconds, rank };
+}
 
 function generateShareText(params: {
 	enemyDefeated: string;
@@ -152,12 +184,19 @@ export class SkiShareCards extends WorkerEntrypoint<Env> {
 	}
 
 	async generateCard(params: ShareCardParams): Promise<ShareCardResult> {
-		const cardId = createId();
-		const svg = generateSvgCard({
+		const sanitized = validateAndSanitizeParams({
 			enemyDefeated: params.enemyDefeated,
 			moveCount: params.moveCount,
 			timeSeconds: params.timeSeconds,
 			rank: params.rank,
+		});
+
+		const cardId = createId();
+		const svg = generateSvgCard({
+			enemyDefeated: sanitized.enemyDefeated,
+			moveCount: sanitized.moveCount,
+			timeSeconds: sanitized.timeSeconds,
+			rank: sanitized.rank,
 			personName: params.personName,
 		});
 
@@ -168,15 +207,15 @@ export class SkiShareCards extends WorkerEntrypoint<Env> {
 		});
 
 		const shareText = generateShareText({
-			enemyDefeated: params.enemyDefeated,
-			moveCount: params.moveCount,
-			timeSeconds: params.timeSeconds,
-			rank: params.rank,
+			enemyDefeated: sanitized.enemyDefeated,
+			moveCount: sanitized.moveCount,
+			timeSeconds: sanitized.timeSeconds,
+			rank: sanitized.rank,
 		});
 
 		const baseUrl = "https://rawkode.academy";
 		const gameUrl = `${baseUrl}/games/secret-of-kubernetes-island`;
-		const imageUrl = `${baseUrl}/api/ski-share-cards/cards/${cardId}.svg`;
+		const imageUrl = `${baseUrl}/api/games/ski/share-card/${cardId}.svg`;
 
 		return {
 			cardId,

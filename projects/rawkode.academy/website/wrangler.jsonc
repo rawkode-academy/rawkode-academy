@@ -58,6 +58,34 @@
 		{
 			"binding": "ANALYTICS",
 			"service": "analytics"
+		},
+		{
+			"binding": "SKI_PLAYER_STATS",
+			"service": "games-ski-player-stats-rpc"
+		},
+		{
+			"binding": "SKI_PLAYER_LEARNED_PHRASES",
+			"service": "games-ski-player-learned-phrases-rpc"
+		},
+		{
+			"binding": "SKI_ACHIEVEMENTS",
+			"service": "games-ski-achievements-rpc"
+		},
+		{
+			"binding": "SKI_LEADERBOARD",
+			"service": "games-ski-leaderboard-rpc"
+		},
+		{
+			"binding": "SKI_DAILY_CHALLENGE_READ",
+			"service": "platform-ski-daily-challenge-read-model"
+		},
+		{
+			"binding": "SKI_DAILY_CHALLENGE_RPC",
+			"service": "platform-ski-daily-challenge-rpc"
+		},
+		{
+			"binding": "SKI_SHARE_CARDS",
+			"service": "games-ski-share-cards-rpc"
 		}
 	]
 }

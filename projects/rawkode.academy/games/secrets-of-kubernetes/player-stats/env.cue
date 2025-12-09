@@ -34,13 +34,9 @@ tasks: {
 		args: ["install"]
 	}
 	deploy: {
-		read: {
+		http: {
 			command: "npx"
-			args: ["wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
-		}
-		rpc: {
-			command: "npx"
-			args: ["wrangler", "deploy", "--config", "./rpc/wrangler.jsonc"]
+			args: ["wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 		}
 		dependsOn: ["install"]
 	}
