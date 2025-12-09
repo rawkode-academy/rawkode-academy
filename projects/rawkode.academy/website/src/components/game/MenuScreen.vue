@@ -193,4 +193,42 @@ defineEmits<{
 :root.dark .instructions {
 	color: rgb(107 114 128);
 }
+
+@media (max-width: 768px) {
+	.menu-screen {
+		padding: 1.5rem 1rem;
+		min-height: calc(100vh - 140px);
+	}
+
+	.title-main {
+		font-size: 2.5rem;
+		letter-spacing: 0.08em;
+	}
+
+	.title-sub {
+		font-size: 1.5rem;
+		letter-spacing: 0.15em;
+	}
+
+	.tagline {
+		font-size: 1rem;
+		margin-bottom: 2rem;
+	}
+
+	.start-btn,
+	.nav-btn {
+		width: 100%;
+		max-width: 320px;
+	}
+
+	.menu-nav {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.instructions {
+		margin-top: 2rem;
+		font-size: 0.85rem;
+	}
+}
 </style>
