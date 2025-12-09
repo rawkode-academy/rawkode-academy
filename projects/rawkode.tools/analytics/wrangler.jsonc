@@ -5,6 +5,9 @@
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
 	"minify": true,
+	"vars": {
+		"POSTHOG_HOST": "https://eu.i.posthog.com"
+	},
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,

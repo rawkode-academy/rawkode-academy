@@ -172,7 +172,6 @@ const expandForm = async () => {
 					<button
 						@click="subscribeAsLearner"
 						:disabled="isLoading"
-						data-faro-user-action-name="newsletter_subscribe"
 						class="group w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-primary text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-wait disabled:hover:translate-y-0 disabled:hover:shadow-none"
 					>
 						<span class="flex items-center justify-center gap-2">
@@ -203,7 +202,6 @@ const expandForm = async () => {
 						<button
 							v-if="!isExpanded"
 							@click="expandForm"
-							data-faro-user-action-name="newsletter_expand"
 							class="group w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-primary text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0"
 						>
 							<span class="flex items-center justify-center gap-2">
@@ -230,7 +228,6 @@ const expandForm = async () => {
 								<button
 									type="submit"
 									:disabled="isLoading || !email.trim()"
-									data-faro-user-action-name="newsletter_subscribe"
 									class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-primary text-white transition-all duration-200 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
 									:title="isLoading ? 'Subscribing...' : 'Subscribe'"
 								>

@@ -4,9 +4,8 @@ import type { EventBuffer } from "./durable-objects/event-buffer";
 
 export interface Env {
 	EVENT_BUFFER: DurableObjectNamespace<EventBuffer>;
-	GRAFANA_OTLP_ENDPOINT: string;
-	GRAFANA_OTLP_USERNAME: string;
-	GRAFANA_OTLP_TOKEN: string;
+	POSTHOG_API_KEY: string;
+	POSTHOG_HOST: string;
 }
 
 export interface TrackEventResult {
@@ -21,7 +20,7 @@ export interface TrackEventOptions {
 		continent?: string;
 		country?: string;
 	};
-	/** Fields from event.data to promote to OTLP attributes */
+	/** Fields from event.data to promote to PostHog properties */
 	attributes?: string[];
 }
 

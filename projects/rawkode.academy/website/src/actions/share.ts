@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { captureServerEvent, getDistinctId } from "../server/grafana";
+import { captureServerEvent, getDistinctId } from "../server/analytics";
 
 const ShareEventSchema = z.object({
 	action: z.enum(["share"]),
