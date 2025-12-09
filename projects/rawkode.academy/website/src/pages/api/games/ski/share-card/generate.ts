@@ -74,7 +74,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		if (!response.ok) {
 			const error = await response
 				.json()
-				.catch(() => ({ error: "Unknown error" }));
+				.catch((): { error: string } => ({ error: "Unknown error" }));
 			return new Response(JSON.stringify(error), {
 				status: response.status,
 				headers: { "Content-Type": "application/json" },
