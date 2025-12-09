@@ -4,14 +4,6 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Cuenv
 
-env: {
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://sa.rawkode.academy/cloudflare/password"
-		}
-	}
-}
-
 ci: pipelines: [
 	{
 		name: "default"
@@ -33,9 +25,19 @@ tasks: {
 		command: "bun"
 		args: ["install"]
 	}
+	"collect-schemas": {
+		command: "bun"
+		args: ["run", "scripts/collect-schemas.ts"]
+		dependsOn: ["install"]
+	}
+	compose: {
+		command: "bun"
+		args: ["run", "scripts/compose.ts"]
+		dependsOn: ["collect-schemas"]
+	}
 	deploy: {
 		command: "npx"
 		args: ["wrangler", "deploy"]
-		dependsOn: ["install"]
+		dependsOn: ["compose"]
 	}
 }

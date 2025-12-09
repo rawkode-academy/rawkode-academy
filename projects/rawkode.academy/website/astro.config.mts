@@ -405,6 +405,11 @@ export default defineConfig({
 				access: "public",
 				default: process.env.GRAPHQL_ENDPOINT || "https://api.rawkode.academy/",
 			}),
+			DISABLE_GAME_AUTH: envField.string({
+				context: "server",
+				access: "public",
+				optional: true,
+			}),
 			PUBLIC_CAPTURE_ERRORS: envField.string({
 				context: "server",
 				access: "public",

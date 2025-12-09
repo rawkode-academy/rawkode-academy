@@ -67,6 +67,13 @@ export interface PlatformServiceOptions {
 	readonly serviceName: string;
 
 	/**
+	 * Prefix for the Cloudflare Worker name
+	 * @default "platform"
+	 * @example "games" results in "games-{serviceName}-http"
+	 */
+	readonly servicePrefix?: string;
+
+	/**
 	 * Whether to include a data model with Drizzle schema
 	 * Set to false for bare services that manage their own data layer
 	 * @default true

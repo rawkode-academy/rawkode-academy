@@ -14,7 +14,14 @@
       "Bash(platform/emoji-reactions/package.json)",
       "Bash(chmod:*)",
       "Bash(xargs cat:*)",
-      "Bash(bun install)"
+      "Bash(bun install)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "Bash(bunx wrangler types:*)",
+      "Bash(bunx wrangler:*)",
+      "Bash(for dir in leaderboard player-learned-phrases player-stats share-cards)",
+      "Bash(do echo \"=== $dir ===\" cat /Users/rawkode/Code/src/github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/games/secrets-of-kubernetes/$dir/package.json)"
     ],
     "deny": []
   }

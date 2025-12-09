@@ -1,6 +1,5 @@
 import { createGatewayRuntime } from "@graphql-hive/gateway-runtime";
 import { createAuthPlugin } from "./auth";
-import type { Env } from "./env.d.ts";
 import { createServiceBindingTransport } from "./transport/service-binding";
 
 // Import the composed supergraph SDL as text

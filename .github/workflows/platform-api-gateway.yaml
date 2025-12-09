@@ -8,6 +8,8 @@ on:
       - "projects/rawkode.academy/api/**"
       - "projects/rawkode.academy/platform/*/read-model/schema.ts"
       - "projects/rawkode.academy/platform/*/read-model/publish.ts"
+      - "projects/rawkode.academy/games/secrets-of-kubernetes/*/read-model/schema.ts"
+      - "projects/rawkode.academy/games/secrets-of-kubernetes/*/read-model/publish.ts"
       - "projects/rawkode.academy/website/src/subgraph/**"
   pull_request:
     paths:
@@ -15,6 +17,8 @@ on:
       - "projects/rawkode.academy/api/**"
       - "projects/rawkode.academy/platform/*/read-model/schema.ts"
       - "projects/rawkode.academy/platform/*/read-model/publish.ts"
+      - "projects/rawkode.academy/games/secrets-of-kubernetes/*/read-model/schema.ts"
+      - "projects/rawkode.academy/games/secrets-of-kubernetes/*/read-model/publish.ts"
       - "projects/rawkode.academy/website/src/subgraph/**"
   workflow_dispatch:
 
@@ -75,6 +79,40 @@ jobs:
               echo "  Collected schema for $service"
             else
               echo "  Warning: No schema.gql for $service"
+            fi
+
+            cd - > /dev/null
+          done
+
+          # Secret of Kubernetes Island game services
+          for service in achievements leaderboard player-learned-phrases player-stats; do
+            SERVICE_DIR="projects/rawkode.academy/games/secrets-of-kubernetes/$service"
+
+            if [ ! -d "$SERVICE_DIR/read-model" ]; then
+              echo "Skipping ski-$service: no read-model directory"
+              continue
+            fi
+
+            echo "Processing ski-$service..."
+            cd "$SERVICE_DIR"
+
+            # Run projen to ensure files are up to date
+            bun run .projenrc.ts || true
+
+            # Install dependencies
+            bun install --frozen-lockfile || bun install
+
+            # Generate schema if publish.ts exists
+            if [ -f "read-model/publish.ts" ]; then
+              bun run read-model/publish.ts || echo "Warning: Failed to generate schema for ski-$service"
+            fi
+
+            # Copy schema if it exists (prefixed with ski-)
+            if [ -f "read-model/schema.gql" ]; then
+              cp read-model/schema.gql ../../../api/schemas/ski-$service.graphql
+              echo "  Collected schema for ski-$service"
+            else
+              echo "  Warning: No schema.gql for ski-$service"
             fi
 
             cd - > /dev/null
