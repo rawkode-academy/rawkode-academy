@@ -4,7 +4,6 @@ import partytown from "@astrojs/partytown";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import vue from "@astrojs/vue";
-import faroUploader from "@grafana/faro-rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
@@ -318,7 +317,13 @@ export default defineConfig({
 		}),
 		partytown({
 			config: {
-				forward: [],
+				forward: [
+					"posthog.capture",
+					"posthog.identify",
+					"posthog.register",
+					"posthog.opt_in_capturing",
+					"posthog.opt_out_capturing",
+				],
 				lib: "/_partytown/",
 				// Prevent service worker registration attempts from Partytown
 				mainWindowAccessors: ["navigator.serviceWorker"],
@@ -340,22 +345,6 @@ export default defineConfig({
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
 			tailwindcss(),
-			// Faro sourcemap upload - only in production builds with API key
-			...(process.env.GRAFANA_SOURCEMAP_API_KEY
-				? [
-						faroUploader({
-							appName: "rawkode.academy",
-							endpoint:
-								"https://faro-api-prod-gb-south-1.grafana.net/faro/api/v1",
-							appId: "378",
-							stackId: "1457812",
-							apiKey: process.env.GRAFANA_SOURCEMAP_API_KEY,
-							gzipContents: true,
-							keepSourcemaps: false,
-							verbose: true,
-						}),
-					]
-				: []),
 		]),
 		server: {
 			fs: {
@@ -425,12 +414,6 @@ export default defineConfig({
 				context: "server",
 				access: "public",
 				default: "true",
-			}),
-			// Grafana Faro sourcemap upload API key (build-time only)
-			GRAFANA_SOURCEMAP_API_KEY: envField.string({
-				context: "server",
-				access: "secret",
-				optional: true,
 			}),
 		},
 	},

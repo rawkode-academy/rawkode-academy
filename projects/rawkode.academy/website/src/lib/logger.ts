@@ -1,6 +1,6 @@
 /**
  * Centralized logging utility with environment-aware configuration.
- * Integrates with Grafana Faro for production error tracking.
+ * Integrates with PostHog for production error tracking.
  */
 
 type LogLevel = "debug" | "info" | "warn" | "error";
@@ -12,7 +12,7 @@ interface LogContext {
 interface LoggerConfig {
 	minLevel: LogLevel;
 	enableConsole: boolean;
-	enableFaro: boolean;
+	enablePostHog: boolean;
 }
 
 const LOG_LEVELS: Record<LogLevel, number> = {
@@ -37,7 +37,7 @@ function getConfig(): LoggerConfig {
 	return {
 		minLevel: isProd ? "warn" : "debug",
 		enableConsole: isDev || typeof window === "undefined",
-		enableFaro: captureErrors,
+		enablePostHog: captureErrors,
 	};
 }
 
@@ -49,7 +49,7 @@ function formatMessage(scope: string | null, message: string): string {
 	return scope ? `[${scope}] ${message}` : message;
 }
 
-function logToFaro(
+function logToPostHog(
 	level: LogLevel,
 	message: string,
 	error?: unknown,
@@ -57,14 +57,17 @@ function logToFaro(
 ): void {
 	if (typeof window === "undefined") return;
 
-	const faro = (window as { grafanaFaro?: { api: { pushError: Function } } })
-		.grafanaFaro;
-	if (!faro) return;
+	const posthog = (window as { posthog?: { capture: Function } }).posthog;
+	if (!posthog) return;
 
 	if (level === "error" && error) {
 		const errorObj = error instanceof Error ? error : new Error(String(error));
-		faro.api.pushError(errorObj, {
-			context: { message, ...context } as Record<string, string>,
+		posthog.capture("$exception", {
+			$exception_message: errorObj.message,
+			$exception_stack_trace_raw: errorObj.stack,
+			$exception_type: errorObj.name,
+			message,
+			...context,
 		});
 	}
 }
@@ -116,8 +119,8 @@ function createLogFunction(
 			}
 		}
 
-		if (config.enableFaro) {
-			logToFaro(level, formattedMessage, error, ctx);
+		if (config.enablePostHog) {
+			logToPostHog(level, formattedMessage, error, ctx);
 		}
 	};
 }
