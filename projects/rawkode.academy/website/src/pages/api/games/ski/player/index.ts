@@ -25,11 +25,22 @@ export const GET: APIRoute = async ({ locals }) => {
 			env.SKI_ACHIEVEMENTS.getPlayerAchievements(personId),
 		]);
 
-		if (!statsData) {
+		// Check if player has any learned phrases
+		const hasLearnedPhrases = phrasesData &&
+			(phrasesData.learnedInsults.length > 0 || phrasesData.learnedComebacks.length > 0);
+
+		// Only return 404 if player has neither stats nor phrases
+		if (!statsData && !hasLearnedPhrases) {
 			return new Response(JSON.stringify({ error: "Player not found" }), {
 				status: 404,
 				headers: { "Content-Type": "application/json" },
 			});
+		}
+
+		// If player has phrases but no stats, heal the inconsistent state
+		let finalStatsData = statsData;
+		if (!statsData && hasLearnedPhrases) {
+			finalStatsData = await env.SKI_PLAYER_STATS.initializePlayer(personId);
 		}
 
 		const unlockedMap = new Map(
@@ -40,8 +51,8 @@ export const GET: APIRoute = async ({ locals }) => {
 			JSON.stringify({
 				personId,
 				personName: user.name ?? null,
-				stats: statsData.stats,
-				rank: statsData.rank,
+				stats: finalStatsData!.stats,
+				rank: finalStatsData!.rank,
 				learnedInsults: phrasesData?.learnedInsults ?? [],
 				learnedComebacks: phrasesData?.learnedComebacks ?? [],
 				achievements: allAchievements.map((a) => ({
