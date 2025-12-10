@@ -1,0 +1,36 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "posthog-collector",
+	"main": "./src/index.ts",
+	"compatibility_date": "2025-04-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"minify": true,
+	"vars": {
+		"POSTHOG_HOST": "https://eu.i.posthog.com"
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": true,
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "DATA_BUFFER",
+				"class_name": "DataBuffer"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["DataBuffer"]
+		}
+	],
+	"secrets_store_secrets": [
+		{
+			"binding": "POSTHOG_PROJECT_TOKEN",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "POSTHOG_PROJECT_TOKEN"
+		}
+	]
+}

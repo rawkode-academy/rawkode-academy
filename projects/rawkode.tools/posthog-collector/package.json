@@ -1,0 +1,12 @@
+{
+	"name": "posthog-collector",
+	"type": "module",
+	"dependencies": {
+		"cloudevents": "^8.0.2",
+		"posthog-node": "^5.17.2"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20241205.0",
+		"wrangler": "^4.17.0"
+	}
+}

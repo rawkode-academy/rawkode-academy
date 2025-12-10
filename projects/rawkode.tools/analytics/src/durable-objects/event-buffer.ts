@@ -57,32 +57,26 @@ export class EventBuffer extends DurableObject<Env> {
 	}
 
 	async alarm(): Promise<void> {
-		let hasErrors = false;
-
 		const events = await this.getEvents();
 		if (events.length > 0) {
 			try {
 				await this.flushEventsToPostHog(events);
-				await this.ctx.storage.delete(EVENTS_KEY);
 			} catch (error) {
 				console.error("Failed to flush events to PostHog:", error);
-				hasErrors = true;
+				// Clear events anyway - old malformed events will never succeed
 			}
+			await this.ctx.storage.delete(EVENTS_KEY);
 		}
 
 		const metrics = await this.getMetrics();
 		if (metrics.length > 0) {
 			try {
 				await this.flushMetricsToPostHog(metrics);
-				await this.ctx.storage.delete(METRICS_KEY);
 			} catch (error) {
 				console.error("Failed to flush metrics to PostHog:", error);
-				hasErrors = true;
+				// Clear metrics anyway - old malformed metrics will never succeed
 			}
-		}
-
-		if (hasErrors) {
-			await this.ctx.storage.setAlarm(Date.now() + FLUSH_INTERVAL_MS);
+			await this.ctx.storage.delete(METRICS_KEY);
 		}
 	}
 
