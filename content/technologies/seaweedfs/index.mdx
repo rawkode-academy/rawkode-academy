@@ -1,0 +1,56 @@
+---
+name: SeaweedFS
+website: 'https://seaweedfs.github.io/'
+documentation: 'https://github.com/seaweedfs/seaweedfs/wiki'
+license: Apache-2.0
+status: stable
+category: Runtime
+subcategory: Cloud Native Storage
+matrix:
+  status: explore
+  grouping: platform
+  confidence: some-experience
+  trajectory: rising
+  why: >-
+    SeaweedFS is a fast, simple, and scalable distributed file system with
+    S3 compatibility. It's the community-friendly alternative to MinIO with
+    a permissive Apache 2.0 license that won't change overnight.
+  spicyTake: >-
+    SeaweedFS might not have MinIO's marketing budget, but it has something
+    more valuable: a license you can trust and a community that isn't
+    treated like a legal liability.
+---
+
+SeaweedFS is a fast distributed storage system for blobs, objects, files, and data lake. It implements an object store with O(1) disk seek, a Filer supporting cross-cluster active-active replication, and Hadoop-compatible filesystem support.
+
+## Key Features
+
+- **S3 API Compatibility:** Drop-in replacement for S3-based workflows
+- **O(1) Disk Seek:** Fast read performance regardless of file count
+- **Filer:** POSIX-like file system interface with directory structure
+- **Erasure Coding:** Efficient storage with data protection
+- **Tiered Storage:** Hot, warm, cold data management
+- **Cross-Datacenter Replication:** Active-active replication support
+
+## Architecture
+
+SeaweedFS separates metadata from data:
+
+- **Master Server:** Manages volume servers and file ID allocation
+- **Volume Server:** Stores actual file data in volumes
+- **Filer:** Optional component providing file system semantics
+
+## Use Cases
+
+- Object storage for cloud-native applications
+- Media and asset storage
+- Backup and archival systems
+- Data lake storage layer
+- CDN origin storage
+
+## Why SeaweedFS over MinIO?
+
+- **Apache 2.0 License:** Permissive license with no surprise changes
+- **Community-Friendly:** Active development without hostile legal tactics
+- **Feature Parity:** S3 compatibility without enterprise paywalls
+- **Transparent Roadmap:** Open development process

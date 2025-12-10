@@ -1,0 +1,52 @@
+---
+name: MinIO
+website: 'https://min.io/'
+documentation: 'https://min.io/docs/'
+license: AGPL-3.0
+status: deprecated
+category: Runtime
+subcategory: Cloud Native Storage
+matrix:
+  status: graveyard
+  grouping: platform
+  confidence: deep-experience
+  trajectory: falling
+  why: >-
+    MinIO systematically destroyed community trust through silent license
+    changes, aggressive legal theatrics, gutted features behind a $96K paywall,
+    and locking GitHub threads when people pushed back.
+  spicyTake: >-
+    A billion Docker downloads and years of community goodwill, all gone.
+    MinIO's community edition entering maintenance mode isn't a tragedy—it's
+    the inevitable conclusion of treating your community as a liability
+    rather than an asset.
+---
+
+MinIO is a high-performance, S3-compatible object storage system. Originally designed for cloud-native workloads, it became popular for self-hosted object storage due to its simplicity and S3 API compatibility.
+
+## History of Controversy
+
+MinIO's relationship with its community has been troubled:
+
+- **2019:** Silent switch from Apache 2.0 to AGPL license
+- **Legal Actions:** Aggressive pursuit of companies using MinIO, including the Weka fiasco
+- **Feature Stripping:** Key features moved behind a $96K/year enterprise paywall
+- **Community Hostility:** Locking GitHub issues when users pushed back on changes
+- **Docker Abandonment:** Left Docker images unpatched during critical CVEs
+
+## Technical Features
+
+- S3-compatible API
+- Erasure coding for data protection
+- Bucket versioning
+- Object locking for compliance
+- Server-side encryption
+- Multi-site replication (enterprise only)
+
+## Alternatives
+
+If you're evaluating object storage solutions, consider:
+
+- **SeaweedFS** - Apache 2.0 licensed, community-friendly
+- **Ceph** - Full-featured distributed storage
+- **Garage** - Lightweight, geo-distributed storage
