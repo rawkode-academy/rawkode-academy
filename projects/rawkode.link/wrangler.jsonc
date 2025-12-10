@@ -13,7 +13,7 @@
     }
   },
   "services": [
-    { "binding": "ANALYTICS", "service": "analytics" }
+    { "binding": "ANALYTICS", "service": "posthog-collector" }
   ],
   "routes": [
 		{ "pattern": "cloudnativecompass.fm", "custom_domain": true },
