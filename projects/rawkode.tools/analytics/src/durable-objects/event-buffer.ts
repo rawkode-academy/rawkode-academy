@@ -29,7 +29,7 @@ export interface Env {
 	POSTHOG_HOST: string;
 }
 
-const FLUSH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const FLUSH_INTERVAL_MS = 30 * 1000; // 30 seconds
 const EVENTS_KEY = "events";
 const METRICS_KEY = "metrics";
 
@@ -107,7 +107,9 @@ export class EventBuffer extends DurableObject<Env> {
 	}
 
 	private async flushEventsToPostHog(events: StoredEvent[]): Promise<void> {
+		console.log("Flushing events to PostHog", { count: events.length, events: JSON.stringify(events) });
 		const batch = events.map((stored) => this.cloudEventToPostHogEvent(stored.event, stored.attributes));
+		console.log("PostHog batch payload", { batch: JSON.stringify(batch) });
 
 		const response = await fetch(`${this.env.POSTHOG_HOST}/batch`, {
 			method: "POST",
@@ -167,6 +169,7 @@ export class EventBuffer extends DurableObject<Env> {
 		}
 
 		return {
+			type: "capture",
 			event: event.type,
 			distinct_id: distinctId,
 			properties,
@@ -176,6 +179,7 @@ export class EventBuffer extends DurableObject<Env> {
 
 	private async flushMetricsToPostHog(metrics: StoredMetric[]): Promise<void> {
 		const batch: PostHogEvent[] = metrics.map((m) => ({
+			type: "capture",
 			event: "$metric",
 			distinct_id: m.attributes.userId || m.attributes.sessionId || "system",
 			properties: {
@@ -206,6 +210,7 @@ export class EventBuffer extends DurableObject<Env> {
 }
 
 interface PostHogEvent {
+	type: "capture";
 	event: string;
 	distinct_id: string;
 	properties: Record<string, unknown>;
