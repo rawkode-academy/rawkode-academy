@@ -35,12 +35,12 @@ const Typewriter = (props: Props) => {
 	return (
 		<section className="glass-panel relative mb-6 rounded-3xl overflow-hidden">
 			<div className="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none" />
-			<div className="relative grid max-w-6xl px-6 pt-0 pb-10 mx-auto gap-8 lg:gap-6 lg:pt-6 lg:pb-16 lg:grid-cols-12">
-				<div className="mr-auto place-self-center space-y-4 lg:col-span-6">
+			<div className="relative grid max-w-6xl px-4 sm:px-6 pt-0 pb-10 mx-auto gap-8 lg:gap-6 lg:pt-6 lg:pb-16 lg:grid-cols-12">
+				<div className="place-self-center space-y-4 lg:col-span-6 min-w-0 w-full">
 					<h1 className="text-balance text-3xl font-bold tracking-tight leading-tight text-black dark:text-white sm:text-4xl md:text-5xl xl:text-6xl">
-						<span className="block text-3xl sm:text-4xl md:text-5xl xl:text-5xl">
+						<span className="block text-2xl sm:text-3xl md:text-4xl xl:text-5xl">
 							<TypeAnimation
-								className="inline-block bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap pb-2"
+								className="bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent pb-2"
 								sequence={shuffle(props.rotatedPrefixes).reduce<
 									Array<string | number>
 								>((acc, prefix: string) => [...acc, prefix, 1250], [])}
@@ -52,7 +52,7 @@ const Typewriter = (props: Props) => {
 								repeat={Number.POSITIVE_INFINITY}
 							/>
 						</span>
-						<span className="block text-pretty mt-2 sm:mt-3">
+						<span className="block text-pretty mt-2 sm:mt-3 text-[1.4rem] sm:text-[1.7rem] md:text-[2.1rem] xl:text-[2.7rem]">
 							{props.suffix.split(props.highlight).map((part, index, array) => {
 								// If this is the last part, just return it
 								if (index === array.length - 1) {
@@ -112,12 +112,12 @@ const Typewriter = (props: Props) => {
 
 					{/* Social Proof - Clean stat badges */}
 					{props.socialProof && props.socialProof.length > 0 && (
-						<div className="flex items-center gap-2 sm:gap-4 pt-4">
+						<div className="flex flex-wrap items-center gap-2 sm:gap-4 pt-4">
 							{props.socialProof.map((stat, index) => (
-								<div key={index} className="flex items-center gap-2">
+								<div key={index} className="flex items-center gap-1 sm:gap-2">
 									<span className="text-lg">{stat.icon}</span>
 									<span className="font-bold text-gray-900 dark:text-white">{stat.value}</span>
-									<span className="text-gray-500 dark:text-gray-400 text-sm">{stat.label}</span>
+									<span className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">{stat.label}</span>
 								</div>
 							))}
 						</div>
