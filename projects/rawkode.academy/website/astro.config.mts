@@ -385,20 +385,10 @@ export default defineConfig({
 	env: {
 		validateSecrets: true,
 		schema: {
-			ZULIP_URL: envField.string({
+			DISCORD_INVITE_URL: envField.string({
 				context: "server",
 				access: "public",
-				default: "https://chat.rawkode.academy",
-			}),
-			ZULIP_EMAIL: envField.string({
-				context: "server",
-				access: "public",
-				default: "rocko-bot@chat.rawkode.academy",
-			}),
-			ZULIP_API_KEY: envField.string({
-				context: "server",
-				access: "secret",
-				optional: true,
+				default: "https://discord.gg/rawkode",
 			}),
 			GRAPHQL_ENDPOINT: envField.string({
 				context: "server",

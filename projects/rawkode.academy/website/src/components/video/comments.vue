@@ -16,15 +16,15 @@
     />
 
     <div v-else-if="comments.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-      <p>No comments yet. Be the first to comment on Zulip!</p>
+      <p>No comments yet. Join the discussion on Discord!</p>
       <a
-        v-if="zulipTopicUrl"
-        :href="zulipTopicUrl"
+        v-if="discordInviteUrl"
+        :href="discordInviteUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="inline-flex items-center mt-2 text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
       >
-        Join the discussion on Zulip
+        Join the discussion on Discord
         <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
         </svg>
@@ -72,14 +72,14 @@
         </div>
       </div>
 
-      <div v-if="zulipTopicUrl" class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div v-if="discordInviteUrl" class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
         <a
-          :href="zulipTopicUrl"
+          :href="discordInviteUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="inline-flex items-center text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
         >
-          Want to share your thoughts? Join the discussion on Zulip
+          Want to share your thoughts? Join the discussion on Discord
           <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
           </svg>
@@ -113,7 +113,7 @@ const props = defineProps<Props>();
 const comments = ref<Comment[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
-const zulipTopicUrl = ref<string | null>(null);
+const discordInviteUrl = ref<string | null>(null);
 
 const fetchComments = async () => {
 	try {
@@ -123,7 +123,7 @@ const fetchComments = async () => {
 		const response = await fetch(`/api/comments/${props.videoId}`);
 		const data = await handleApiResponse<{
 			comments?: Comment[];
-			zulipTopicUrl?: string;
+			discordInviteUrl?: string;
 			error?: string;
 		}>(response);
 
@@ -132,7 +132,7 @@ const fetchComments = async () => {
 		}
 
 		comments.value = data.comments || [];
-		zulipTopicUrl.value = data.zulipTopicUrl || null;
+		discordInviteUrl.value = data.discordInviteUrl || null;
 	} catch (err) {
 		error.value = getErrorMessage(err);
 	} finally {
@@ -161,8 +161,8 @@ const formatDate = (timestamp: string): string => {
 };
 
 const formatContent = (content: string): string => {
-	// Basic Zulip markdown to HTML conversion
-	// This is a simplified version - you might want to use a proper markdown parser
+	// Basic markdown to HTML conversion (keep lightweight for client)
+	// This is a simplified version - use a proper markdown parser if content expands
 	return content
 		.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
 		.replace(/\*(.*?)\*/g, "<em>$1</em>")
