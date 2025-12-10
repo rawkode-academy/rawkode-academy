@@ -24,6 +24,7 @@ export const newsletter = {
 	subscribe: defineAction({
 		input: z.object({
 			audience: z.string().default("academy"),
+			channel: z.string().default("newsletter"),
 			source: z.string().optional(),
 		}),
 		handler: async (input, context) => {
@@ -38,9 +39,9 @@ export const newsletter = {
 					prefixedUserId,
 					{
 						audience: input.audience,
-						channel: "newsletter",
+						channel: input.channel,
 						status: "subscribed",
-						source: input.source || "website:newsletter:unknown",
+						source: input.source || `website:${input.channel}:unknown`,
 					},
 				);
 
@@ -151,6 +152,7 @@ export const newsletter = {
 		input: z.object({
 			email: z.string().email("Please enter a valid email address"),
 			audience: z.string().default("academy"),
+			channel: z.string().default("newsletter"),
 			source: z.string().optional(),
 		}),
 		handler: async (input, context) => {
@@ -162,9 +164,9 @@ export const newsletter = {
 					prefixedUserId,
 					{
 						audience: input.audience,
-						channel: "newsletter",
+						channel: input.channel,
 						status: "subscribed",
-						source: input.source || "website:newsletter:unknown",
+						source: input.source || `website:${input.channel}:unknown`,
 					},
 				);
 
