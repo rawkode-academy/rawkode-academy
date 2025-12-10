@@ -112,25 +112,6 @@ const formatDuration = (seconds?: number | null) => {
 				</p>
 			</div>
 
-			<NewsletterCTA class="mb-16" />
-
-			{/* Latest Articles */}
-			<div class="mb-16">
-				<div class="flex items-center justify-between mb-8">
-					<h3 class="text-2xl font-bold text-primary-content flex items-center gap-2">
-						<span class="text-primary">📝</span> Latest Articles
-					</h3>
-					<a href="/read" class="text-primary hover:text-secondary font-medium flex items-center transition-colors">
-						View All <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-					</a>
-				</div>
-				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{latestArticles.map((article) => (
-						<ArticleCard article={article} />
-					))}
-				</div>
-			</div>
-
 			{/* Latest Videos */}
 			<div class="mb-16">
 				<div class="flex items-center justify-between mb-8">
@@ -172,7 +153,7 @@ const formatDuration = (seconds?: number | null) => {
 								<h3 class="text-lg font-semibold text-primary-content line-clamp-2 group-hover:text-primary transition-colors mb-2">
 									{video.data.title}
 								</h3>
-								
+
 								<div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
 									<svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -184,6 +165,25 @@ const formatDuration = (seconds?: number | null) => {
 					))}
 				</div>
 			</div>
+
+			{/* Latest Articles */}
+			<div class="mb-16">
+				<div class="flex items-center justify-between mb-8">
+					<h3 class="text-2xl font-bold text-primary-content flex items-center gap-2">
+						<span class="text-primary">📝</span> Latest Articles
+					</h3>
+					<a href="/read" class="text-primary hover:text-secondary font-medium flex items-center transition-colors">
+						View All <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+					</a>
+				</div>
+				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{latestArticles.map((article) => (
+						<ArticleCard article={article} />
+					))}
+				</div>
+			</div>
+
+			<NewsletterCTA class="mb-16" />
 
 			{/* Featured Technologies Highlight */}
 			<div class="glass-panel rounded-3xl p-8">
