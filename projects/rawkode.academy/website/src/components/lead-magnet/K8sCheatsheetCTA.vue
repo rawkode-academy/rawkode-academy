@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { actions } from "astro:actions";
+import Card from "@/components/ui/Card.vue";
 
 const props = defineProps<{
 	isSignedIn: boolean;
@@ -16,7 +17,102 @@ const CHANNEL = "newsletter";
 const isLoading = ref(false);
 const isSuccess = ref(false);
 const error = ref<string | null>(null);
-const hasCookieSubscription = ref(false);
+const hasCookieSubscription = ref(props.isSubscribed);
+
+// Expandable features state
+const expandedFeatures = ref<Set<string>>(new Set());
+
+interface Feature {
+	id: string;
+	category: "breaking" | "ga" | "aiml" | "security";
+	title: string;
+	subtitle: string;
+	detail: string;
+}
+
+const categoryConfig = {
+	breaking: {
+		label: "Breaking",
+		bgClass: "bg-amber-500",
+	},
+	ga: {
+		label: "GA",
+		bgClass: "bg-emerald-500",
+	},
+	aiml: {
+		label: "AI/ML",
+		bgClass: "bg-violet-500",
+	},
+	security: {
+		label: "Security",
+		bgClass: "bg-sky-500",
+	},
+};
+
+const features: Feature[] = [
+	{
+		id: "cgroup-v2",
+		category: "breaking",
+		title: "cgroup v2 mandatory",
+		subtitle: "kubelet fails on v1",
+		detail:
+			"Starting in 1.35, kubelet will fail to start on nodes running cgroup v1. Ensure all nodes are migrated before upgrading.",
+	},
+	{
+		id: "containerd",
+		category: "breaking",
+		title: "containerd 2.0",
+		subtitle: "last v1.x support",
+		detail:
+			"This is the last release supporting containerd 1.x. Plan your container runtime upgrade path now.",
+	},
+	{
+		id: "in-place-scaling",
+		category: "ga",
+		title: "In-place scaling",
+		subtitle: "resize without restarts",
+		detail:
+			"Pods can now have their CPU/memory requests and limits changed without restart. Enabled by default.",
+	},
+	{
+		id: "structured-auth",
+		category: "ga",
+		title: "Structured auth",
+		subtitle: "hot-swap OIDC",
+		detail:
+			"Hot-swap OIDC providers without API server restart. Configure multiple identity providers simultaneously.",
+	},
+	{
+		id: "gang-scheduling",
+		category: "aiml",
+		title: "Gang scheduling",
+		subtitle: "all-or-nothing pods",
+		detail:
+			"Schedule pod groups atomically - all pods start together or none do. Essential for distributed ML training.",
+	},
+	{
+		id: "user-namespaces",
+		category: "security",
+		title: "User namespaces",
+		subtitle: "root in container only",
+		detail:
+			"Pods run as root inside container but unprivileged on host. Major security improvement for multi-tenant clusters.",
+	},
+];
+
+function toggleFeature(id: string) {
+	if (expandedFeatures.value.has(id)) {
+		expandedFeatures.value.delete(id);
+	} else {
+		expandedFeatures.value.add(id);
+	}
+	// Trigger reactivity
+	expandedFeatures.value = new Set(expandedFeatures.value);
+}
+
+function isExpanded(id: string): boolean {
+	return expandedFeatures.value.has(id);
+}
 
 function createSource(): string {
 	return `website:lead-magnet:k8s-1-35:${props.pagePath}`;
@@ -40,7 +136,8 @@ function checkCheatsheetCookie(): boolean {
 }
 
 onMounted(() => {
-	hasCookieSubscription.value = checkCheatsheetCookie();
+	hasCookieSubscription.value =
+		hasCookieSubscription.value || checkCheatsheetCookie();
 });
 
 const showSuccessState = computed(() => {
@@ -61,8 +158,6 @@ const subscribeAsLearner = async () => {
 		if (actionError) throw new Error(actionError.message);
 		if (data?.success) {
 			isSuccess.value = true;
-			// Redirect to cheatsheet page
-			window.location.href = "/resources/kubernetes-1-35-cheatsheet?subscribed=1";
 		}
 	} catch (err: unknown) {
 		error.value =
@@ -73,10 +168,11 @@ const subscribeAsLearner = async () => {
 		isLoading.value = false;
 	}
 };
+
 </script>
 
 <template>
-	<section class="relative overflow-hidden glass-card-shimmer p-8 md:p-12 bg-gradient-primary">
+	<section class="relative overflow-hidden glass-card-shimmer p-6 sm:p-8 md:p-12 bg-gradient-primary rounded-2xl">
 		<!-- Dark overlay for text contrast -->
 		<div class="absolute inset-0 bg-black/30"></div>
 
@@ -86,82 +182,106 @@ const subscribeAsLearner = async () => {
 			<div class="absolute bottom-0 right-0 w-96 h-96 bg-brand-primary rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
 		</div>
 
-		<!-- Kubernetes helm icon decoration -->
-		<div class="absolute top-4 right-4 md:top-8 md:right-8 opacity-20">
-			<svg class="w-24 h-24 md:w-32 md:h-32 text-white" viewBox="0 0 32 32" fill="currentColor">
+		<!-- Kubernetes helm icon decoration with slow rotation -->
+		<div class="absolute top-4 right-4 md:top-8 md:right-8 opacity-20 animate-[spin_20s_linear_infinite]">
+			<svg class="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 text-white" viewBox="0 0 32 32" fill="currentColor">
 				<path d="M15.9.476a2.14 2.14 0 0 0-.823.218L3.932 6.01c-.582.277-1.005.804-1.15 1.432L.054 19.373c-.13.56-.015 1.15.314 1.627l.039.048 7.64 9.814c.39.5.99.793 1.63.793h12.648a2.14 2.14 0 0 0 1.63-.793l7.64-9.814.039-.048a2.14 2.14 0 0 0 .314-1.627l-2.728-11.93a2.14 2.14 0 0 0-1.15-1.432L16.924.694A2.14 2.14 0 0 0 15.9.476Zm.1 2.96 10.947 5.207 2.592 11.342-7.253 9.315H9.715l-7.253-9.315L5.054 8.643Z"/>
 				<path d="M16.002 7.27a1.07 1.07 0 0 0-.424.096c-.152.065-.296.168-.424.319-.476.558-.588 1.608-.283 2.8a9.2 9.2 0 0 0-3.202 1.837c-.924-.596-1.867-.856-2.57-.639-.238.074-.432.198-.58.374-.15.176-.245.412-.26.68-.059.992.7 2.242 1.99 3.287a9.2 9.2 0 0 0-.093 3.694c-1.131.638-1.91 1.478-2.084 2.381-.06.306-.036.6.068.877.104.277.299.518.583.709.767.515 1.934.52 3.162.063a9.2 9.2 0 0 0 2.529 2.711c-.294 1.137-.256 2.135.15 2.715.138.197.318.34.538.427.22.086.483.105.753.05.98-.2 2.038-1.006 2.811-2.2a9.2 9.2 0 0 0 3.548.041c.759 1.213 1.808 2.039 2.794 2.256.27.06.534.043.756-.042.221-.084.403-.225.542-.42.41-.576.458-1.574.17-2.72a9.2 9.2 0 0 0 2.521-2.682c1.216.458 2.377.46 3.147-.044.286-.188.483-.427.588-.702.105-.275.13-.567.072-.871-.17-.896-.94-1.729-2.052-2.368a9.2 9.2 0 0 0-.088-3.723c1.294-1.04 2.06-2.282 2.008-3.272-.014-.266-.107-.5-.255-.675a1.07 1.07 0 0 0-.576-.38c-.705-.222-1.654.033-2.587.625a9.2 9.2 0 0 0-3.186-1.849c.3-1.185.19-2.229-.282-2.788a1.07 1.07 0 0 0-.424-.32c-.152-.068-.323-.095-.5-.086-.978.049-1.939 1.043-2.568 2.593a9.2 9.2 0 0 0-3.534-.012c-.622-1.57-1.58-2.586-2.567-2.649a1.07 1.07 0 0 0-.076-.003Z"/>
 			</svg>
 		</div>
 
-		<div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+		<div class="relative z-10 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
 			<!-- Content -->
 			<div class="flex-1 max-w-2xl">
-				<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-sm font-medium mb-4">
+				<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/30 text-white text-sm font-medium mb-4">
 					<span class="relative flex h-2 w-2">
-						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-secondary opacity-75"></span>
-						<span class="relative inline-flex rounded-full h-2 w-2 bg-brand-secondary"></span>
+						<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+						<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
 					</span>
 					Release: December 17, 2025
 				</div>
 
-				<h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 font-display">
+				<h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 font-display">
 					Kubernetes 1.35 Cheat Sheet
 				</h2>
 
-				<p class="text-lg text-white/90 mb-6">
-					The release that changes everything: mandatory cgroup v2 enforcement, AI/ML scheduler primitives,
-					and structured authentication going GA. Don't get caught off-guard.
+				<p class="text-base sm:text-lg text-white/90 mb-6">
+					Your comprehensive guide to 1.35: mandatory cgroup v2, AI/ML scheduler primitives,
+					and structured authentication going GA. Everything you need in one place.
 				</p>
 
-				<!-- Feature highlights with category icons -->
-				<ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-					<!-- Breaking Changes (red warning) -->
-					<li class="flex items-center gap-2 text-white/90">
-						<svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-						</svg>
-						<span><strong class="text-red-300">cgroup v2 mandatory</strong> - kubelet fails on v1</span>
-					</li>
-					<li class="flex items-center gap-2 text-white/90">
-						<svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-						</svg>
-						<span><strong class="text-red-300">containerd 2.0</strong> - last v1.x support</span>
-					</li>
-					<!-- GA Features (green checkmark) -->
-					<li class="flex items-center gap-2 text-white/90">
-						<svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-						<span><strong class="text-green-300">In-place scaling</strong> - resize without restarts</span>
-					</li>
-					<li class="flex items-center gap-2 text-white/90">
-						<svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-						<span><strong class="text-green-300">Structured auth</strong> - hot-swap OIDC</span>
-					</li>
-					<!-- AI/ML (purple chip) -->
-					<li class="flex items-center gap-2 text-white/90">
-						<svg class="w-5 h-5 text-purple-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-						</svg>
-						<span><strong class="text-purple-300">Gang scheduling</strong> - all-or-nothing pods</span>
-					</li>
-					<!-- Security (blue shield) -->
-					<li class="flex items-center gap-2 text-white/90">
-						<svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-						</svg>
-						<span><strong class="text-blue-300">User namespaces</strong> - root in container only</span>
-					</li>
-				</ul>
+				<!-- Expandable Feature highlights -->
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-6 lg:mb-0">
+					<button
+						v-for="feature in features"
+						:key="feature.id"
+						@click="toggleFeature(feature.id)"
+						:aria-expanded="isExpanded(feature.id)"
+						class="group text-left rounded-lg p-3 transition-all duration-200 bg-black/20 hover:bg-black/30 focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
+					>
+						<div class="flex items-start gap-3">
+							<!-- Category pill -->
+							<span
+								:class="[
+									'inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold text-white flex-shrink-0 mt-0.5',
+									categoryConfig[feature.category].bgClass
+								]"
+							>
+								{{ categoryConfig[feature.category].label }}
+							</span>
+
+							<div class="flex-1 min-w-0">
+								<div class="flex items-center justify-between gap-2">
+									<span class="text-white font-medium text-sm sm:text-base">
+										{{ feature.title }}
+									</span>
+									<svg
+										:class="[
+											'w-4 h-4 text-white/60 transition-transform duration-200 flex-shrink-0',
+											isExpanded(feature.id) ? 'rotate-180' : ''
+										]"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+										stroke-width="2"
+									>
+										<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+									</svg>
+								</div>
+								<span class="text-white/70 text-sm">{{ feature.subtitle }}</span>
+
+								<!-- Expandable detail -->
+								<Transition
+									enter-active-class="transition-all duration-200 ease-out"
+									enter-from-class="opacity-0 max-h-0"
+									enter-to-class="opacity-100 max-h-24"
+									leave-active-class="transition-all duration-150 ease-in"
+									leave-from-class="opacity-100 max-h-24"
+									leave-to-class="opacity-0 max-h-0"
+								>
+									<p
+										v-if="isExpanded(feature.id)"
+										class="mt-2 text-sm text-white/80 leading-relaxed overflow-hidden"
+									>
+										{{ feature.detail }}
+									</p>
+								</Transition>
+							</div>
+						</div>
+					</button>
+				</div>
 			</div>
 
-			<!-- Form -->
-			<div class="w-full lg:w-auto lg:min-w-[340px]">
-				<div class="glass-card card-padding">
+			<!-- Form Card -->
+			<div class="w-full lg:w-auto lg:min-w-[320px] lg:max-w-[380px] mt-4 lg:mt-0">
+				<Card
+					variant="glass"
+					padding="lg"
+					rounded="2xl"
+					shadow="elevated"
+					:hover="false"
+					class="ring-1 ring-white/10"
+				>
 					<!-- Success State -->
 					<Transition
 						enter-active-class="transition duration-300 ease-out"
@@ -170,17 +290,26 @@ const subscribeAsLearner = async () => {
 					>
 						<div
 							v-if="showSuccessState"
-							class="text-center py-4"
+							class="text-center py-2"
 						>
-							<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-secondary/20 flex items-center justify-center">
-								<svg class="w-8 h-8 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
+								<svg class="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 								</svg>
 							</div>
-							<h3 class="text-lg font-semibold text-primary-content mb-2 font-display">You're on the list!</h3>
-							<p class="text-sm text-secondary-content">
-								Redirecting to your cheatsheet...
+							<h3 class="text-xl font-semibold text-primary-content mb-2 font-display">You're on the list!</h3>
+							<p class="text-sm text-secondary-content mb-6">
+								Your cheat sheet is ready. Click below to view it now.
 							</p>
+							<a
+								href="/resources/kubernetes/1.35-cheatsheet"
+								class="btn-solid flex items-center justify-center w-full py-3 px-4 text-base font-semibold shadow-lg hover:shadow-xl"
+							>
+								<svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+								</svg>
+								View Cheat Sheet
+							</a>
 						</div>
 					</Transition>
 
@@ -190,7 +319,7 @@ const subscribeAsLearner = async () => {
 							Get the free cheat sheet
 						</h3>
 						<p class="text-sm text-secondary-content mb-4">
-							Join 30K+ cloud native engineers
+							Trusted by 30K+ cloud native engineers
 						</p>
 
 						<!-- Error State -->
@@ -201,9 +330,15 @@ const subscribeAsLearner = async () => {
 						>
 							<div
 								v-if="error"
-								class="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 text-sm"
+								class="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50"
 							>
-								{{ error }}
+								<p class="text-red-600 dark:text-red-400 text-sm mb-2">{{ error }}</p>
+								<button
+									@click="subscribeAsLearner"
+									class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline"
+								>
+									Try again
+								</button>
 							</div>
 						</Transition>
 
@@ -212,7 +347,7 @@ const subscribeAsLearner = async () => {
 							<button
 								@click="subscribeAsLearner"
 								:disabled="isLoading"
-								class="btn-solid w-full py-3 px-4 text-base font-semibold shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-wait"
+								class="btn-solid w-full py-3 px-4 text-base font-semibold shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-wait min-h-[48px]"
 							>
 								<span class="flex items-center justify-center gap-2">
 									<svg v-if="isLoading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -220,9 +355,9 @@ const subscribeAsLearner = async () => {
 										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
 									</svg>
 									<svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+										<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 									</svg>
-									{{ isLoading ? "Please wait..." : "Download Free Cheat Sheet" }}
+									{{ isLoading ? "Please wait..." : "Get the Free Cheat Sheet" }}
 								</span>
 							</button>
 						</template>
@@ -231,11 +366,11 @@ const subscribeAsLearner = async () => {
 						<template v-else>
 							<div class="space-y-4">
 								<p class="text-sm text-secondary-content">
-									Sign in with GitHub to get instant access to the cheat sheet and join 30K+ cloud native engineers.
+									Sign in with GitHub to get instant access to the cheat sheet.
 								</p>
 								<a
 									:href="signInUrl"
-									class="btn-solid flex items-center justify-center w-full py-3 px-4 text-base font-semibold shadow-lg hover:shadow-xl"
+									class="btn-solid flex items-center justify-center w-full py-3 px-4 text-base font-semibold shadow-lg hover:shadow-xl min-h-[48px]"
 								>
 									<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
 										<path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
@@ -249,7 +384,7 @@ const subscribeAsLearner = async () => {
 							No spam. Unsubscribe anytime.
 						</p>
 					</div>
-				</div>
+				</Card>
 			</div>
 		</div>
 	</section>
