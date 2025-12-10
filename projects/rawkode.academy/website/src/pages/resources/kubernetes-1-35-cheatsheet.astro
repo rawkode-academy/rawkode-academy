@@ -1,0 +1,699 @@
+---
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+
+// Require authentication to view this resource
+if (!user) {
+	return Astro.redirect(`/sign-in?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
+}
+
+const pageTitle = "Kubernetes 1.35 Cheat Sheet | Rawkode Academy";
+const pageDescription =
+	"Your comprehensive guide to Kubernetes 1.35 - new features, deprecated APIs, migration tips, and kubectl commands all in one place. Release date: December 17, 2025.";
+
+// Set the cookie to track that user has accessed this resource (for CTA suppression)
+if (Astro.url.searchParams.has("subscribed")) {
+	Astro.cookies.set("lead-magnet:k8s-1-35-cheatsheet", "true", {
+		path: "/",
+		maxAge: 60 * 60 * 24 * 365, // 1 year
+		sameSite: "lax",
+	});
+}
+---
+
+<Page title={pageTitle} description={pageDescription}>
+	<section class="py-16 px-4 sm:py-20">
+		<div class="mx-auto max-w-4xl">
+			<!-- Success Header -->
+			<div class="text-center mb-12">
+				<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-6">
+					<svg class="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+				</div>
+				<h1 class="text-3xl md:text-4xl font-bold text-primary-content mb-4">
+					Your Kubernetes 1.35 Cheat Sheet is Ready!
+				</h1>
+				<p class="text-lg text-muted max-w-2xl mx-auto">
+					Thank you for joining the Rawkode Academy community. Here's everything you need to know about Kubernetes 1.35.
+				</p>
+			</div>
+
+			<!-- Release Info Banner -->
+			<div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl p-6 mb-8 border border-blue-200 dark:border-blue-800/50">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<div>
+						<h2 class="text-lg font-semibold text-primary-content">📅 Release Date: December 17, 2025</h2>
+						<p class="text-sm text-muted">Cycle started September 15, 2025 • Code Freeze: November 6, 2025</p>
+					</div>
+					<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-medium">
+						<span class="relative flex h-2 w-2">
+							<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+							<span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+						</span>
+						17 Enhancements
+					</div>
+				</div>
+			</div>
+
+			<!-- Cheatsheet Content Card -->
+			<div class="glass-panel rounded-3xl p-8 md:p-12 mb-12">
+				<h2 class="text-2xl font-bold text-primary-content mb-8">
+					What's New in Kubernetes 1.35
+				</h2>
+
+				<div class="space-y-10">
+					<!-- Breaking Changes - Most Important -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-red-500">🚨</span> Breaking Changes (Action Required!)
+						</h3>
+						<div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-6 border border-red-200 dark:border-red-800/50 space-y-6">
+
+							<!-- cgroup v1 -->
+							<div>
+								<h4 class="font-semibold text-primary-content mb-2">cgroup v1 Support Disabled by Default</h4>
+								<p class="text-muted text-sm mb-3">The Kubelet config <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">failCgroupV1</code> now defaults to <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">true</code>. If a node boots with legacy cgroup v1 hierarchy, the Kubelet <strong>crashes immediately on startup</strong>. This effectively deprecates CentOS 7, Ubuntu 18.04, and older RHEL versions.</p>
+								<div class="bg-gray-900 rounded-lg p-4 font-mono text-sm overflow-x-auto space-y-2">
+									<div>
+										<p class="text-gray-400"># Check if your nodes use cgroups v2</p>
+										<p class="text-green-400">stat -fc %T /sys/fs/cgroup/</p>
+										<p class="text-gray-400"># Returns: cgroup2fs (v2) or tmpfs (v1 - WILL FAIL!)</p>
+									</div>
+									<div>
+										<p class="text-gray-400"># Temporary override (NOT recommended for production)</p>
+										<p class="text-green-400">--fail-cgroup-v1=false</p>
+										<p class="text-gray-400"># Will be removed entirely in v1.38</p>
+									</div>
+								</div>
+								<p class="text-muted text-xs mt-2">Upgrade to Ubuntu 22.04+, Amazon Linux 2023, Flatcar, or Bottlerocket.</p>
+							</div>
+
+							<!-- containerd deprecation -->
+							<div>
+								<h4 class="font-semibold text-primary-content mb-2">containerd 1.x End of Support</h4>
+								<p class="text-muted text-sm mb-3">Kubernetes 1.35 is the <strong>last version</strong> to support containerd 1.7. You must upgrade to containerd 2.0+ before upgrading to Kubernetes 1.36.</p>
+								<div class="bg-gray-900 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+									<p class="text-gray-400"># Monitor affected nodes with this metric</p>
+									<p class="text-green-400">kubelet_cri_losing_support</p>
+								</div>
+							</div>
+
+							<!-- SPDY to WebSockets -->
+							<div>
+								<h4 class="font-semibold text-primary-content mb-2">SPDY → WebSockets Transition (RBAC Impact)</h4>
+								<p class="text-muted text-sm mb-3">kubectl exec/attach/port-forward now uses WebSockets. This requires <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">create</code> verb permissions for connection upgrades.</p>
+								<div class="bg-gray-900 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+									<p class="text-gray-400"># Update RBAC: users need 'create' permission for pods/exec</p>
+									<p class="text-green-400">kubectl auth can-i create pods/exec --as=your-user</p>
+								</div>
+							</div>
+
+							<!-- Image Pull Verification -->
+							<div>
+								<h4 class="font-semibold text-primary-content mb-2">Image Pull Credential Verification (Enabled by Default)</h4>
+								<p class="text-muted text-sm mb-3">The <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">KubeletEnsureSecretPulledImages</code> feature is now enabled. Pods must have valid credentials for cached images.</p>
+								<div class="bg-yellow-100 dark:bg-yellow-900/30 rounded-lg p-3 text-sm text-yellow-800 dark:text-yellow-200">
+									May cause pod creation failures if credentials are missing. Use <code>imagePullCredentialsVerificationPolicy: NeverVerify</code> as a temporary workaround.
+								</div>
+							</div>
+
+							<!-- Gogo Protobuf Removal -->
+							<div>
+								<h4 class="font-semibold text-primary-content mb-2">Gogo Protobuf Removal (Go Developers)</h4>
+								<p class="text-muted text-sm mb-3">The <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">gogo/protobuf</code> library is removed from Kubernetes API Go types. Custom controllers using client-go will see compilation failures if they rely on gogo-specific extensions.</p>
+								<div class="bg-gray-900 rounded-lg p-4 font-mono text-sm overflow-x-auto space-y-2">
+									<div>
+										<p class="text-gray-400"># One-release escape hatch (deleted in 1.36)</p>
+										<p class="text-green-400">go build -tags kubernetes_protomessage_one_more_release</p>
+									</div>
+								</div>
+								<p class="text-muted text-xs mt-2">Migrate to <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">google.golang.org/protobuf</code> before upgrading to 1.36.</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Graduating to Stable (GA) -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-green-500">🎓</span> Graduating to Stable (GA)
+						</h3>
+						<div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 border border-green-200 dark:border-green-800/50">
+							<ul class="space-y-4 text-primary-content">
+								<li class="flex items-start gap-3">
+									<span class="text-green-500 mt-1 font-bold">✓</span>
+									<div>
+										<strong>In-place Pod Resource Updates</strong>
+										<p class="text-sm text-muted mt-1">Adjust CPU and memory without restarting pods! No more recreating stateful workloads for vertical scaling.</p>
+										<div class="bg-gray-900 rounded-lg p-3 mt-2 font-mono text-xs overflow-x-auto">
+											<p class="text-green-400">kubectl patch pod my-pod --subresource='resize' -p '&#123;"spec":&#123;"containers":[&#123;"name":"app","resources":&#123;"requests":&#123;"memory":"512Mi"&#125;&#125;&#125;]&#125;&#125;'</p>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- New Beta Features -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-blue-500">🚀</span> Now Enabled by Default (Beta → On)
+						</h3>
+						<div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800/50">
+							<ul class="space-y-4 text-primary-content">
+								<li class="flex items-start gap-3">
+									<span class="text-blue-500 mt-1">•</span>
+									<div>
+										<strong>User Namespaces Support</strong> (<code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">UserNamespacesSupport</code>)
+										<p class="text-sm text-muted mt-1">Run containers as UID 0 inside, but unprivileged on the host. Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">hostUsers: false</code> in your pod spec.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-blue-500 mt-1">•</span>
+									<div>
+										<strong>OCI Image Volumes</strong> (<code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">ImageVolume</code>)
+										<p class="text-sm text-muted mt-1">Mount OCI artifacts/images as volumes. Perfect for ML models, configs, or static assets.</p>
+										<div class="bg-gray-900 rounded-lg p-3 mt-2 font-mono text-xs overflow-x-auto">
+<pre class="text-green-400">volumes:
+- name: oci-data
+  image:
+    reference: "myregistry.io/my-data:v1"
+    pullPolicy: IfNotPresent</pre>
+										</div>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-blue-500 mt-1">•</span>
+									<div>
+										<strong>Pod Certificates</strong> (<code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">PodCertificateRequest</code>)
+										<p class="text-sm text-muted mt-1">Native workload identity! Kubelet provisions and rotates mTLS certificates automatically via projected volumes.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-blue-500 mt-1">•</span>
+									<div>
+										<strong>kuberc User Preferences</strong>
+										<p class="text-sm text-muted mt-1">Separate kubectl preferences from cluster configs with <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">~/.kube/kuberc</code>. New <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">credentialPluginPolicy</code> restricts credential plugins for security.</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- New Alpha Features -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-purple-500">🧪</span> New Alpha Features (Try These!)
+						</h3>
+						<div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border border-purple-200 dark:border-purple-800/50">
+							<ul class="space-y-4 text-primary-content">
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1">α</span>
+									<div>
+										<strong>Node Declared Features</strong>
+										<p class="text-sm text-muted mt-1">Nodes report their supported features to <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">.status.declaredFeatures</code>. Prevents scheduling pods on incompatible nodes during version skew.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1">α</span>
+									<div>
+										<strong>Constrained Impersonation</strong>
+										<p class="text-sm text-muted mt-1">When impersonating another user, you can't do anything you couldn't do yourself. Closes privilege escalation risk.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1">α</span>
+									<div>
+										<strong>Numeric Taints for SLA Scheduling</strong>
+										<p class="text-sm text-muted mt-1">Use <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">Gt</code> (greater than) and <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">Lt</code> (less than) operators in tolerations. Example: only schedule on nodes with SLA > 99.5%.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1">α</span>
+									<div>
+										<strong>HostNetwork + User Namespaces</strong>
+										<p class="text-sm text-muted mt-1">Pods can now access host network stack while keeping user namespace isolation (<code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">hostNetwork: true</code> + <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">hostUsers: false</code>).</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1">α</span>
+									<div>
+										<strong>Kubelet Certificate CN Validation</strong>
+										<p class="text-sm text-muted mt-1">API server validates kubelet certificate Common Name matches <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">system:node:&lt;nodename&gt;</code>. Prevents node impersonation attacks.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1">α</span>
+									<div>
+										<strong>Flagz Endpoint</strong>
+										<p class="text-sm text-muted mt-1">Runtime diagnostics showing command-line args used to start Kubernetes components. Great for compliance auditing.</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- AI/ML & Scheduler Enhancements -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-purple-500">🤖</span> AI/ML & Scheduler Enhancements
+						</h3>
+						<div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border border-purple-200 dark:border-purple-800/50">
+							<p class="text-sm text-muted mb-4">Kubernetes 1.35 aggressively targets AI/ML workloads with scheduler primitives designed for expensive, hardware-bound training jobs.</p>
+							<ul class="space-y-4 text-primary-content">
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1 font-bold">α</span>
+									<div>
+										<strong>Gang Scheduling (PodGroup)</strong>
+										<p class="text-sm text-muted mt-1">Native "all-or-nothing" scheduling for distributed training. If a job needs 16 GPUs and only 10 are free, the scheduler waits for all 16 rather than starting partial workers that idle.</p>
+										<div class="bg-gray-900 rounded-lg p-3 mt-2 font-mono text-xs overflow-x-auto">
+<pre class="text-green-400">apiVersion: scheduling.x-k8s.io/v1alpha1
+kind: PodGroup
+metadata:
+  name: llama-training-job
+spec:
+  minMember: 16
+  scheduleTimeoutSeconds: 300</pre>
+										</div>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1 font-bold">β</span>
+									<div>
+										<strong>DRA Binding Conditions</strong>
+										<p class="text-sm text-muted mt-1">Dynamic Resource Allocation now waits for hardware initialization. GPUs and FPGAs that take seconds to configure won't cause pod failures from race conditions.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1 font-bold">GA</span>
+									<div>
+										<strong>JobManagedBy</strong>
+										<p class="text-sm text-muted mt-1">Jobs can delegate pod management to external controllers (Kueue, Volcano). Use standard Job API while custom schedulers handle execution.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-purple-500 mt-1 font-bold">β</span>
+									<div>
+										<strong>Mutable Resources for Suspended Jobs</strong>
+										<p class="text-sm text-muted mt-1">Modify <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">nodeSelector</code>, <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">tolerations</code>, and <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">resources</code> on suspended Jobs. Right-size pending workloads based on real-time capacity.</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Security Architecture -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-blue-500">🔐</span> Security Architecture
+						</h3>
+						<div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800/50">
+							<p class="text-sm text-muted mb-4">Security moves from flag-based configuration to structured, versioned APIs. "Identity as Code" enables GitOps for authentication.</p>
+							<ul class="space-y-4 text-primary-content">
+								<li class="flex items-start gap-3">
+									<span class="text-blue-500 mt-1 font-bold">GA</span>
+									<div>
+										<strong>Structured Authentication Configuration</strong>
+										<p class="text-sm text-muted mt-1">Configure multiple OIDC providers via file, not flags. Hot-reload without API server restarts. Use CEL expressions for complex claim mapping.</p>
+										<div class="bg-gray-900 rounded-lg p-3 mt-2 font-mono text-xs overflow-x-auto">
+<pre class="text-green-400"># Example: Multi-tenant claim transformation
+claimMappings:
+  username:
+    expression: 'claims.tenant_id + ":" + claims.email'
+  groups:
+    expression: 'claims.groups.filter(g, g.startsWith("k8s-"))'</pre>
+										</div>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-blue-500 mt-1 font-bold">α</span>
+									<div>
+										<strong>Constrained Impersonation</strong>
+										<p class="text-sm text-muted mt-1">When impersonating another user, you can't escalate beyond your own privileges. Closes a long-standing privilege escalation vector.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-blue-500 mt-1 font-bold">α</span>
+									<div>
+										<strong>ServiceAccount Tokens in CSI Secrets</strong>
+										<p class="text-sm text-muted mt-1">CSI drivers receive tokens via the secrets field, not disk mounts. Reduces attack surface if driver container is compromised.</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Networking Updates -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-cyan-500">🌐</span> Networking Updates
+						</h3>
+						<div class="bg-cyan-50 dark:bg-cyan-900/20 rounded-xl p-6 border border-cyan-200 dark:border-cyan-800/50">
+							<ul class="space-y-4 text-primary-content">
+								<li class="flex items-start gap-3">
+									<span class="text-cyan-500 mt-1 font-bold">GA</span>
+									<div>
+										<strong>SPDY → WebSockets Transition</strong>
+										<p class="text-sm text-muted mt-1"><code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">kubectl exec</code>, <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">attach</code>, and <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">port-forward</code> now use WebSockets (RFC 6455). Better reliability through corporate proxies and ALBs.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-cyan-500 mt-1 font-bold">GA</span>
+									<div>
+										<strong>Traffic Distribution: PreferSameNode</strong>
+										<p class="text-sm text-muted mt-1">Services prefer local endpoints when available. Reduces cross-zone latency and data transfer costs for DaemonSet-backed services.</p>
+										<div class="bg-gray-900 rounded-lg p-3 mt-2 font-mono text-xs overflow-x-auto">
+<pre class="text-green-400">spec:
+  trafficDistribution: PreferSameNode</pre>
+										</div>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-cyan-500 mt-1 font-bold">v1.4</span>
+									<div>
+										<strong>Gateway API v1.4</strong>
+										<p class="text-sm text-muted mt-1">BackendTLSPolicy standardizes TLS re-encryption to backends. Named rules in routes improve debugging complex routing tables.</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Storage Enhancements -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-orange-500">💾</span> Storage Enhancements
+						</h3>
+						<div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-6 border border-orange-200 dark:border-orange-800/50">
+							<ul class="space-y-4 text-primary-content">
+								<li class="flex items-start gap-3">
+									<span class="text-orange-500 mt-1 font-bold">β</span>
+									<div>
+										<strong>VolumeAttributesClass</strong>
+										<p class="text-sm text-muted mt-1">Modify volume attributes (IOPS, throughput) without unmounting. StorageClass defines immutable props, VolumeAttributesClass defines mutable ones.</p>
+										<div class="bg-gray-900 rounded-lg p-3 mt-2 font-mono text-xs overflow-x-auto">
+<pre class="text-green-400"># Change EBS IOPS without pod restart
+kubectl patch pvc my-pvc -p \
+  '&#123;"spec":&#123;"volumeAttributesClassName":"high-iops"&#125;&#125;'</pre>
+										</div>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-orange-500 mt-1 font-bold">β</span>
+									<div>
+										<strong>Volume Attach Limits + Autoscaler</strong>
+										<p class="text-sm text-muted mt-1">Cluster Autoscaler now simulates CSINode volume limits when scaling. Prevents spinning up nodes that can't actually host pending pods due to EBS/disk attachment caps.</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Deprecations -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-yellow-500">⚠️</span> Deprecations
+						</h3>
+						<div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-6 border border-yellow-200 dark:border-yellow-800/50">
+							<ul class="space-y-3 text-primary-content">
+								<li class="flex items-start gap-3">
+									<span class="text-yellow-500 mt-1">⚠</span>
+									<div>
+										<strong>kube-proxy ipvs mode</strong>
+										<p class="text-sm text-muted mt-1">Deprecated in favor of <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">nftables</code> mode. Feature parity became too difficult to maintain.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-yellow-500 mt-1">⚠</span>
+									<div>
+										<strong>cgroup v1 (removal imminent)</strong>
+										<p class="text-sm text-muted mt-1">Disabled by default now. Will be fully removed in a future release.</p>
+									</div>
+								</li>
+								<li class="flex items-start gap-3">
+									<span class="text-yellow-500 mt-1">⚠</span>
+									<div>
+										<strong>CSI tokens in VolumeContext</strong>
+										<p class="text-sm text-muted mt-1">Service account tokens should now use the new <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">Secrets</code> field via <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">serviceAccountTokenInSecrets: true</code>.</p>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- kubectl Quick Reference -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-blue-500">$</span> kubectl Quick Reference for 1.35
+						</h3>
+						<div class="bg-gray-900 rounded-xl p-6 font-mono text-sm overflow-x-auto">
+							<div class="space-y-4">
+								<div>
+									<p class="text-gray-400"># Check cluster version</p>
+									<p class="text-green-400">kubectl version</p>
+								</div>
+								<div>
+									<p class="text-gray-400"># Check if your nodes support cgroups v2</p>
+									<p class="text-green-400">kubectl get nodes -o jsonpath='&#123;range .items[*]&#125;&#123;.metadata.name&#125;&#123;"\t"&#125;&#123;.status.nodeInfo.containerRuntimeVersion&#125;&#123;"\n"&#125;&#123;end&#125;'</p>
+								</div>
+								<div>
+									<p class="text-gray-400"># Check for deprecated API usage</p>
+									<p class="text-green-400">kubectl get --raw /metrics | grep apiserver_requested_deprecated_apis</p>
+								</div>
+								<div>
+									<p class="text-gray-400"># In-place resize a pod's memory (1.35 GA feature!)</p>
+									<p class="text-green-400">kubectl patch pod my-pod --subresource='resize' \</p>
+									<p class="text-green-400">  -p '&#123;"spec":&#123;"containers":[&#123;"name":"app","resources":&#123;"requests":&#123;"memory":"1Gi"&#125;&#125;&#125;]&#125;&#125;'</p>
+								</div>
+								<div>
+									<p class="text-gray-400"># Check containerd version (before 1.36 upgrade)</p>
+									<p class="text-green-400">kubectl get nodes -o jsonpath='&#123;range .items[*]&#125;&#123;.metadata.name&#125;: &#123;.status.nodeInfo.containerRuntimeVersion&#125;&#123;"\n"&#125;&#123;end&#125;'</p>
+								</div>
+								<div>
+									<p class="text-gray-400"># Dry-run manifest validation</p>
+									<p class="text-green-400">kubectl apply --dry-run=server -f manifest.yaml</p>
+								</div>
+								<div>
+									<p class="text-gray-400"># Debug with custom profile (new in 1.35)</p>
+									<p class="text-green-400">kubectl debug my-pod --image=busybox \</p>
+									<p class="text-green-400">  --custom=debug-profile.yaml</p>
+								</div>
+								<div>
+									<p class="text-gray-400"># Check authentication config reload timestamp</p>
+									<p class="text-green-400">kubectl get --raw /metrics | grep \</p>
+									<p class="text-green-400">  apiserver_authentication_config_controller_automatic_reload</p>
+								</div>
+								<div>
+									<p class="text-gray-400"># Verify RBAC for WebSocket exec (breaking change!)</p>
+									<p class="text-green-400">kubectl auth can-i create pods/exec -n default</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Migration Checklist -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-purple-500">✓</span> 1.35 Migration Checklist
+						</h3>
+						<div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border border-purple-200 dark:border-purple-800/50">
+							<ul class="space-y-3">
+								<li class="flex items-center gap-3">
+									<input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+									<span class="text-primary-content"><strong>Verify cgroups v2</strong> - Run <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">stat -fc %T /sys/fs/cgroup/</code> on all nodes</span>
+								</li>
+								<li class="flex items-center gap-3">
+									<input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+									<span class="text-primary-content"><strong>Check containerd version</strong> - Must be 1.7+ (2.0+ recommended)</span>
+								</li>
+								<li class="flex items-center gap-3">
+									<input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+									<span class="text-primary-content"><strong>Update RBAC policies</strong> - Add <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">create</code> verb for pods/exec users</span>
+								</li>
+								<li class="flex items-center gap-3">
+									<input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+									<span class="text-primary-content"><strong>Verify image pull secrets</strong> - Pods need valid credentials for cached images</span>
+								</li>
+								<li class="flex items-center gap-3">
+									<input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+									<span class="text-primary-content"><strong>Review kube-proxy mode</strong> - Migrate from ipvs to nftables if applicable</span>
+								</li>
+								<li class="flex items-center gap-3">
+									<input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+									<span class="text-primary-content"><strong>Check kubelet certificates</strong> - CN should match <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-sm">system:node:&lt;nodename&gt;</code></span>
+								</li>
+								<li class="flex items-center gap-3">
+									<input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+									<span class="text-primary-content"><strong>Test in staging</strong> - Upgrade staging cluster first</span>
+								</li>
+								<li class="flex items-center gap-3">
+									<input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+									<span class="text-primary-content"><strong>Backup etcd</strong> - Always before any upgrade</span>
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Feature Gates Reference -->
+					<div>
+						<h3 class="text-xl font-semibold text-primary-content mb-4 flex items-center gap-2">
+							<span class="text-gray-500">⚙️</span> Key Feature Gates
+						</h3>
+						<div class="overflow-x-auto">
+							<table class="w-full text-sm">
+								<thead>
+									<tr class="border-b border-gray-200 dark:border-gray-700">
+										<th class="text-left py-3 px-4 text-primary-content">Feature Gate</th>
+										<th class="text-left py-3 px-4 text-primary-content">Stage</th>
+										<th class="text-left py-3 px-4 text-primary-content">Default</th>
+									</tr>
+								</thead>
+								<tbody class="text-muted">
+									<!-- GA Features -->
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">InPlacePodVerticalScaling</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">GA</span></td>
+										<td class="py-3 px-4">true (locked)</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">StructuredAuthenticationConfiguration</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">GA</span></td>
+										<td class="py-3 px-4">true (locked)</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">JobManagedBy</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">GA</span></td>
+										<td class="py-3 px-4">true (locked)</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">SidecarContainers</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">GA</span></td>
+										<td class="py-3 px-4">true (locked)</td>
+									</tr>
+									<!-- Beta Features -->
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">UserNamespacesSupport</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">Beta</span></td>
+										<td class="py-3 px-4">true</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">ImageVolume</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">Beta</span></td>
+										<td class="py-3 px-4">true</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">PodCertificateRequest</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">Beta</span></td>
+										<td class="py-3 px-4">true</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">KubeletEnsureSecretPulledImages</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">Beta</span></td>
+										<td class="py-3 px-4">true</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">DeviceBindingConditions</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">Beta</span></td>
+										<td class="py-3 px-4">false</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">VolumeAttributesClass</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">Beta</span></td>
+										<td class="py-3 px-4">false</td>
+									</tr>
+									<!-- Alpha Features -->
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">ConstrainedImpersonation</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">Alpha</span></td>
+										<td class="py-3 px-4">false</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">NodeDeclaredFeatures</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">Alpha</span></td>
+										<td class="py-3 px-4">false</td>
+									</tr>
+									<tr class="border-b border-gray-100 dark:border-gray-800">
+										<td class="py-3 px-4 font-mono text-xs">ServiceAccountTokenInCSISecrets</td>
+										<td class="py-3 px-4"><span class="px-2 py-1 rounded text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">Alpha</span></td>
+										<td class="py-3 px-4">false</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Official Resources -->
+			<div class="glass-panel rounded-2xl p-8 mb-8">
+				<h3 class="text-xl font-semibold text-primary-content mb-4">📚 Official Resources</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<a href="https://kubernetes.io/blog/2025/11/26/kubernetes-v1-35-sneak-peek/" target="_blank" rel="noopener" class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+						<span class="text-2xl">📰</span>
+						<div>
+							<p class="font-medium text-primary-content">Official Sneak Peek</p>
+							<p class="text-sm text-muted">kubernetes.io/blog</p>
+						</div>
+					</a>
+					<a href="https://www.kubernetes.dev/resources/release/" target="_blank" rel="noopener" class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+						<span class="text-2xl">📅</span>
+						<div>
+							<p class="font-medium text-primary-content">Release Timeline</p>
+							<p class="text-sm text-muted">kubernetes.dev</p>
+						</div>
+					</a>
+					<a href="https://www.sysdig.com/blog/kubernetes-1-35-whats-new" target="_blank" rel="noopener" class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+						<span class="text-2xl">🔒</span>
+						<div>
+							<p class="font-medium text-primary-content">Security Features Deep Dive</p>
+							<p class="text-sm text-muted">Sysdig Blog</p>
+						</div>
+					</a>
+					<a href="https://github.com/kubernetes/kubernetes/milestone/69" target="_blank" rel="noopener" class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+						<span class="text-2xl">🐙</span>
+						<div>
+							<p class="font-medium text-primary-content">GitHub Milestone</p>
+							<p class="text-sm text-muted">Track Issues & PRs</p>
+						</div>
+					</a>
+				</div>
+			</div>
+
+			<!-- Stay Updated CTA -->
+			<div class="text-center">
+				<div class="glass-panel rounded-2xl p-8">
+					<h3 class="text-xl font-semibold text-primary-content mb-2">
+						Continue Your Cloud Native Journey
+					</h3>
+					<p class="text-muted mb-6">
+						Watch our hands-on Kubernetes tutorials and stay up-to-date with the latest cloud native content.
+					</p>
+					<div class="flex flex-col sm:flex-row gap-4 justify-center">
+						<a
+							href="/"
+							class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
+						>
+							<svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+							</svg>
+							Back to Academy
+						</a>
+						<a
+							href="/watch"
+							class="inline-flex items-center justify-center px-6 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-primary-content font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+						>
+							<svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+								<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+							Watch Kubernetes Videos
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</Page>

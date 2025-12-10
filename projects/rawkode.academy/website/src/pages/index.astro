@@ -7,6 +7,7 @@ import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
 // Fetch random technologies for hero
@@ -32,6 +33,23 @@ const latestVideos = allVideos
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 4); // Showing 4 videos looks better in a 2x2 or 4-col grid, but 3 matches articles. Let's do 3 for symmetry or 4 for a grid. Let's do 3 and use a 3-col grid.
 // Actually, let's stick to 3 to match the 3 articles if we do a 3-col grid.
+
+// Social proof stats - simplified metrics
+const allCourses = await getCollection("courses");
+const totalContent = allVideos.length + allArticles.length + allCourses.length;
+
+// Calculate total hours from video durations (duration is in seconds)
+const totalSeconds = allVideos.reduce((acc, video) => {
+	const duration = video.data.duration;
+	return acc + (typeof duration === "number" && duration > 0 ? duration : 0);
+}, 0);
+const totalHours = Math.floor(totalSeconds / 3600);
+
+const socialProofStats = [
+	{ icon: "📚", value: `${totalContent}+`, label: "Resources" },
+	{ icon: "⏱️", value: `${totalHours}+`, label: "Hours of Video" },
+	{ icon: "👥", value: "30K+", label: "Learners" },
+];
 
 const pageTitle = "Cloud Native & Kubernetes Education | Rawkode Academy";
 const pageDescription =
@@ -61,7 +79,7 @@ const formatDuration = (seconds?: number | null) => {
 		highlight="hard"
 		logos={heroLogos}
 		primaryButton={{
-					text: "Latest Videos",
+					text: "Start Watching Free",
 					link: "/watch",
 				}}
 		secondaryButton={{
@@ -80,7 +98,11 @@ const formatDuration = (seconds?: number | null) => {
 			"Infrastructure as Code",
 		]}
 		suffix="may be complex, but it doesn't need to be hard."
+		socialProof={socialProofStats}
 	/>
+
+	{/* Lead Magnet - Kubernetes 1.35 Cheatsheet */}
+	<K8sCheatsheetCTA class="py-12 px-4 sm:py-16" />
 
 	{/* Latest Content Section */}
 	<section class="py-16 px-4 sm:py-20">
