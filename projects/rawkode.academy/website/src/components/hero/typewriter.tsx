@@ -11,6 +11,12 @@ interface TechLogo {
 	iconUrl: string;
 }
 
+interface SocialProofStat {
+	icon: string;
+	value: string;
+	label: string;
+}
+
 interface Props {
 	rotatedPrefixes: string[];
 	suffix: string;
@@ -18,6 +24,7 @@ interface Props {
 	logos: TechLogo[];
 	primaryButton: ButtonProps;
 	secondaryButton: ButtonProps;
+	socialProof?: SocialProofStat[];
 }
 
 const shuffle = (array: string[]): string[] => {
@@ -102,6 +109,19 @@ const Typewriter = (props: Props) => {
 							{props.secondaryButton.text}
 						</a>
 					</div>
+
+					{/* Social Proof - Clean stat badges */}
+					{props.socialProof && props.socialProof.length > 0 && (
+						<div className="flex flex-wrap items-center gap-4 pt-4">
+							{props.socialProof.map((stat, index) => (
+								<div key={index} className="flex items-center gap-2">
+									<span className="text-lg">{stat.icon}</span>
+									<span className="font-bold text-gray-900 dark:text-white">{stat.value}</span>
+									<span className="text-gray-500 dark:text-gray-400 text-sm">{stat.label}</span>
+								</div>
+							))}
+						</div>
+					)}
 				</div>
 				<div className="hidden lg:col-span-6 lg:flex lg:items-center lg:justify-center">
 					{/* 
