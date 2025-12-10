@@ -52,4 +52,5 @@
 			"secret_name": "DEEPGRAM_API_TOKEN",
 		},
 	],
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

@@ -90,5 +90,6 @@
 		"crons": [{% for cron in bindings.crons %}
 			"{{ cron }}"{% unless forloop.last %},{% endunless %}{% endfor %}
 		]
-	}{% endif %}
+	}{% endif %},
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

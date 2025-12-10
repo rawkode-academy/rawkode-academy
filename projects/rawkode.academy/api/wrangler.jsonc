@@ -43,5 +43,6 @@
 		{ "binding": "VIDEO_LIKES", "service": "platform-video-likes-read-model" },
 		{ "binding": "EMAIL_PREFERENCES", "service": "platform-email-preferences-read-model" },
 		{ "binding": "IDENTITY", "service": "rawkode-academy-identity" }
-	]
+	],
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

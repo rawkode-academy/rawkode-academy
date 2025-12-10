@@ -8,6 +8,7 @@ export interface Env {
 	POSTHOG_HOST: string;
 }
 
+
 export interface TrackEventResult {
 	success: boolean;
 	error?: string;
@@ -148,4 +149,13 @@ export class PostHogCollector extends WorkerEntrypoint<Env> {
 export { DataBuffer } from "./durable-objects/data-buffer";
 export type { CloudEvent } from "./cloudevents";
 
-export default PostHogCollector;
+export default class extends PostHogCollector {
+	async tail(events: TraceItem[]): Promise<void> {
+		const id = this.env.DATA_BUFFER.idFromName("buffer-tail");
+		const buffer = this.env.DATA_BUFFER.get(id);
+
+		for (const trace of events) {
+			await buffer.addTailEvent(trace);
+		}
+	}
+}
