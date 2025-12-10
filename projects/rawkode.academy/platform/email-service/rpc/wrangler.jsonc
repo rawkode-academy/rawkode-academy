@@ -36,7 +36,8 @@
 		},
 		{
 			"binding": "ANALYTICS",
-			"service": "analytics"
+			"service": "posthog-collector"
 		}
-	]
+	],
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

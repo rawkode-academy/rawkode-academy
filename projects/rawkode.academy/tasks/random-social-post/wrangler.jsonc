@@ -42,5 +42,6 @@
 			"binding": "BLUESKY_APP_PASSWORD",
 			"secret_name": "BLUESKY_APP_PASSWORD",
 		}
-	]
+	],
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

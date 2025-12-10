@@ -51,5 +51,6 @@
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
 			"secret_name": "GITHUB_OAUTH_CLIENT_SECRET"
 		}
-	]
+	],
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

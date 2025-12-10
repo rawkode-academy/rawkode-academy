@@ -32,6 +32,11 @@ interface StoredLog {
 	timestamp: number;
 }
 
+interface StoredTailEvent {
+	trace: TraceItem;
+	timestamp: number;
+}
+
 export interface Env {
 	POSTHOG_PROJECT_TOKEN: SecretsStoreSecret;
 	POSTHOG_HOST: string;
@@ -42,6 +47,7 @@ const EVENTS_KEY = "events";
 const METRICS_KEY = "metrics";
 const LOGS_KEY = "logs";
 const EXCEPTIONS_KEY = "exceptions";
+const TAIL_EVENTS_KEY = "tail_events";
 
 export class DataBuffer extends DurableObject<Env> {
 	async addEvent(
@@ -82,6 +88,13 @@ export class DataBuffer extends DurableObject<Env> {
 		await this.ensureAlarm();
 	}
 
+	async addTailEvent(trace: TraceItem): Promise<void> {
+		const tailEvents = await this.getTailEvents();
+		tailEvents.push({ trace, timestamp: Date.now() });
+		await this.ctx.storage.put(TAIL_EVENTS_KEY, tailEvents);
+		await this.ensureAlarm();
+	}
+
 	private async ensureAlarm(): Promise<void> {
 		const alarm = await this.ctx.storage.getAlarm();
 		if (alarm === null) {
@@ -101,20 +114,27 @@ export class DataBuffer extends DurableObject<Env> {
 			await this.ctx.storage.delete(LOGS_KEY);
 		}
 
-		// Flush events, metrics, and exceptions using PostHog SDK
+		// Flush events, metrics, exceptions, and tail events using PostHog SDK
 		const events = await this.getEvents();
 		const metrics = await this.getMetrics();
 		const exceptions = await this.getExceptions();
+		const tailEvents = await this.getTailEvents();
 
-		if (events.length > 0 || metrics.length > 0 || exceptions.length > 0) {
+		if (
+			events.length > 0 ||
+			metrics.length > 0 ||
+			exceptions.length > 0 ||
+			tailEvents.length > 0
+		) {
 			try {
-				await this.flushToPostHogSDK(events, metrics, exceptions);
+				await this.flushToPostHogSDK(events, metrics, exceptions, tailEvents);
 			} catch (error) {
 				console.error("Failed to flush to PostHog SDK:", error);
 			}
 			await this.ctx.storage.delete(EVENTS_KEY);
 			await this.ctx.storage.delete(METRICS_KEY);
 			await this.ctx.storage.delete(EXCEPTIONS_KEY);
+			await this.ctx.storage.delete(TAIL_EVENTS_KEY);
 		}
 	}
 
@@ -152,6 +172,12 @@ export class DataBuffer extends DurableObject<Env> {
 		return exceptions ?? [];
 	}
 
+	private async getTailEvents(): Promise<StoredTailEvent[]> {
+		const tailEvents =
+			await this.ctx.storage.get<StoredTailEvent[]>(TAIL_EVENTS_KEY);
+		return tailEvents ?? [];
+	}
+
 	private async flushLogsToPostHog(logs: StoredLog[]): Promise<void> {
 		// PostHog accepts OTLP logs at /i/v1/logs
 		// We need to forward each log batch
@@ -183,6 +209,7 @@ export class DataBuffer extends DurableObject<Env> {
 		events: StoredEvent[],
 		metrics: StoredMetric[],
 		exceptions: ExceptionData[],
+		tailEvents: StoredTailEvent[] = [],
 	): Promise<void> {
 		const token = await this.env.POSTHOG_PROJECT_TOKEN.get();
 		const posthog = new PostHog(token, {
@@ -258,8 +285,6 @@ export class DataBuffer extends DurableObject<Env> {
 
 		// Process exceptions
 		for (const exception of exceptions) {
-			// PostHog SDK's captureException expects an Error object or specific format
-			// We'll capture as a $exception event with the right properties
 			posthog.capture({
 				distinctId: exception.distinctId || "anonymous",
 				event: "$exception",
@@ -272,6 +297,69 @@ export class DataBuffer extends DurableObject<Env> {
 				},
 				timestamp: new Date(exception.timestamp),
 			});
+		}
+
+		// Process tail events from worker traces
+		for (const stored of tailEvents) {
+			const trace = stored.trace;
+			const eventInfo = trace.event;
+
+			// Extract request info if available (fetch events)
+			let requestUrl: string | undefined;
+			let requestMethod: string | undefined;
+			let colo: string | undefined;
+
+			if (eventInfo && "request" in eventInfo) {
+				const fetchEvent = eventInfo as { request?: { url?: string; method?: string; cf?: { colo?: string } } };
+				requestUrl = fetchEvent.request?.url;
+				requestMethod = fetchEvent.request?.method;
+				colo = fetchEvent.request?.cf?.colo;
+			}
+
+			// Capture worker invocation as an event
+			posthog.capture({
+				distinctId: "system",
+				event: "$worker_invocation",
+				properties: {
+					$lib: "posthog-collector",
+					worker_name: trace.scriptName ?? "unknown",
+					outcome: trace.outcome,
+					request_url: requestUrl,
+					request_method: requestMethod,
+					colo,
+				},
+				timestamp: trace.eventTimestamp ? new Date(trace.eventTimestamp) : new Date(),
+			});
+
+			// Capture console logs
+			for (const log of trace.logs) {
+				posthog.capture({
+					distinctId: "system",
+					event: "$worker_log",
+					properties: {
+						$lib: "posthog-collector",
+						worker_name: trace.scriptName ?? "unknown",
+						level: log.level,
+						message: log.message.map(String).join(" "),
+					},
+					timestamp: new Date(log.timestamp),
+				});
+			}
+
+			// Capture exceptions from tail
+			for (const exc of trace.exceptions) {
+				posthog.capture({
+					distinctId: "system",
+					event: "$exception",
+					properties: {
+						$lib: "posthog-collector",
+						$exception_message: exc.message,
+						$exception_type: exc.name,
+						worker_name: trace.scriptName ?? "unknown",
+					},
+					timestamp: new Date(exc.timestamp),
+				});
+			}
 		}
 
 		// Flush all queued events

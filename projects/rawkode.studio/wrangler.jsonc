@@ -19,5 +19,6 @@
 	],
 	"observability": {
 		"enabled": true
-	}
+	},
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

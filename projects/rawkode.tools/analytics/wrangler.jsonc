@@ -39,5 +39,6 @@
 			"tag": "v1",
 			"new_classes": ["EventBuffer"]
 		}
-	]
+	],
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }
