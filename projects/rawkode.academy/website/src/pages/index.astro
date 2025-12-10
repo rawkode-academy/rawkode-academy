@@ -7,7 +7,6 @@ import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
-import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
 // Fetch random technologies for hero
@@ -100,9 +99,6 @@ const formatDuration = (seconds?: number | null) => {
 		suffix="may be complex, but it doesn't need to be hard."
 		socialProof={socialProofStats}
 	/>
-
-	{/* Lead Magnet - Kubernetes 1.35 Cheatsheet */}
-	<K8sCheatsheetCTA class="py-12 px-4 sm:py-16" />
 
 	{/* Latest Content Section */}
 	<section class="py-16 px-4 sm:py-20">
