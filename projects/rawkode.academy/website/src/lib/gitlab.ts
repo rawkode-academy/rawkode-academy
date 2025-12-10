@@ -34,7 +34,7 @@ interface ChangelogEntry {
 }
 
 const GITLAB_API_BASE = "https://code.rawkode.academy/api/v4";
-const PROJECT_ID = "RawkodeAcademy%2FRawkodeAcademy"; // URL encoded project path
+const PROJECT_ID = "rawkode-academy%2Frawkode-academy"; // URL encoded project path
 
 function getChangelogType(labels: string[]): string {
 	// Look for Type:: prefixed labels first

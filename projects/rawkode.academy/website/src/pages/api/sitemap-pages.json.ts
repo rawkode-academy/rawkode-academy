@@ -51,14 +51,14 @@ const externalNavigationItems: NavigationItem[] = [
 	{
 		id: "github",
 		title: "GitHub",
-		href: "https://github.com/RawkodeAcademy/RawkodeAcademy",
+		href: "https://github.com/rawkode-academy/rawkode-academy",
 		category: "External",
 		description: "Visit our GitHub",
 	},
 	{
 		id: "github-issues",
 		title: "Report Issue",
-		href: "https://github.com/RawkodeAcademy/RawkodeAcademy/issues",
+		href: "https://github.com/rawkode-academy/rawkode-academy/issues",
 		category: "External",
 		description: "Report a bug or request a feature",
 	},
