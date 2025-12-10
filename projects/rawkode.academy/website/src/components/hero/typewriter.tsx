@@ -112,7 +112,7 @@ const Typewriter = (props: Props) => {
 
 					{/* Social Proof - Clean stat badges */}
 					{props.socialProof && props.socialProof.length > 0 && (
-						<div className="flex flex-wrap items-center gap-4 pt-4">
+						<div className="flex items-center gap-2 sm:gap-4 pt-4">
 							{props.socialProof.map((stat, index) => (
 								<div key={index} className="flex items-center gap-2">
 									<span className="text-lg">{stat.icon}</span>
