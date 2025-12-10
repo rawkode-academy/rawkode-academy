@@ -31,5 +31,6 @@
 			"database_id": "d1e7b151-f20f-4470-8c84-266fcb76e84f",
 			"migrations_dir": "../data-model/migrations"
 		}
-	]
+	],
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

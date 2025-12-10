@@ -50,7 +50,7 @@
 		},
 		{
 			"binding": "ANALYTICS",
-			"service": "analytics"
+			"service": "posthog-collector"
 		},
 		{
 			"binding": "SKI_PLAYER_STATS",
@@ -77,5 +77,6 @@
 			"service": "games-ski-share-cards-rpc",
 			"entrypoint": "SkiShareCards"
 		}
-	]
+	],
+	"tail_consumers": [{ "service": "posthog-collector" }]
 }

@@ -15,6 +15,7 @@
   "services": [
     { "binding": "ANALYTICS", "service": "posthog-collector" }
   ],
+  "tail_consumers": [{ "service": "posthog-collector" }],
   "routes": [
 		{ "pattern": "cloudnativecompass.fm", "custom_domain": true },
 		{ "pattern": "cloudnativecompass.fm/*", "zone_name": "cloudnativecompass.fm" },
