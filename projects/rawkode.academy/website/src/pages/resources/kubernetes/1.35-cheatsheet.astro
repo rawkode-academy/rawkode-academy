@@ -1,6 +1,7 @@
 ---
 import Page from "@/wrappers/page.astro";
 import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.vue";
+import { createLearnerId } from "@/actions/newsletter";
 
 export const prerender = false;
 
@@ -21,8 +22,23 @@ if (Astro.url.searchParams.has("subscribed")) {
 	});
 }
 
-// User has access if they have the cookie (meaning they subscribed)
-const hasAccess = hasCheatsheetCookie || Astro.url.searchParams.has("subscribed");
+// Check if signed-in user has subscribed to kubernetes-release-updates newsletter
+let hasNewsletterSubscription = false;
+if (user) {
+	try {
+		const prefixedUserId = createLearnerId(user.id);
+		const allPrefs = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(prefixedUserId);
+		hasNewsletterSubscription = allPrefs.some(
+			(pref: { channel: string; audience: string }) =>
+				pref.channel === "newsletter" && pref.audience === "kubernetes-release-updates"
+		);
+	} catch (e) {
+		console.error("Failed to fetch email preferences", e);
+	}
+}
+
+// User has access if they've subscribed (via preferences, cookie, or query param)
+const hasAccess = hasNewsletterSubscription || hasCheatsheetCookie || Astro.url.searchParams.has("subscribed");
 
 const pageTitle = "Kubernetes 1.35 Cheat Sheet | Rawkode Academy";
 const pageDescription =
