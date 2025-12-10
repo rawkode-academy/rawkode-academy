@@ -34,9 +34,9 @@ const EVENTS_KEY = "events";
 const METRICS_KEY = "metrics";
 
 export class EventBuffer extends DurableObject<Env> {
-	async addEvent(event: CloudEvent, attributes?: string[]): Promise<void> {
+	async addEvent(event: Record<string, unknown>, attributes?: string[]): Promise<void> {
 		const events = await this.getEvents();
-		events.push({ event: event.toJSON() as unknown as CloudEventData, attributes });
+		events.push({ event: event as unknown as CloudEventData, attributes });
 		await this.ctx.storage.put(EVENTS_KEY, events);
 
 		const alarm = await this.ctx.storage.getAlarm();

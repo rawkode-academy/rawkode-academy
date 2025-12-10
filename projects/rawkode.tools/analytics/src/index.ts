@@ -90,7 +90,7 @@ export class Analytics extends WorkerEntrypoint<Env> {
 		const id = this.env.EVENT_BUFFER.idFromName(bufferId);
 		const buffer = this.env.EVENT_BUFFER.get(id);
 
-		await buffer.addEvent(validation.event, options?.attributes);
+		await buffer.addEvent(validation.event.toJSON(), options?.attributes);
 
 		console.log("Event stored successfully");
 		return { success: true };
