@@ -3,6 +3,15 @@ import { ref, computed, onMounted } from "vue";
 import { actions } from "astro:actions";
 import Card from "@/components/ui/Card.vue";
 
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 const props = defineProps<{
 	isSignedIn: boolean;
 	isSubscribed: boolean;
@@ -138,6 +147,14 @@ function checkCheatsheetCookie(): boolean {
 onMounted(() => {
 	hasCookieSubscription.value =
 		hasCookieSubscription.value || checkCheatsheetCookie();
+
+	// Track lead magnet viewed
+	trackEvent("lead_magnet_viewed", {
+		lead_magnet: "k8s-1-35-cheatsheet",
+		page_path: props.pagePath,
+		is_signed_in: props.isSignedIn,
+		already_subscribed: hasCookieSubscription.value,
+	});
 });
 
 const showSuccessState = computed(() => {
@@ -158,6 +175,12 @@ const subscribeAsLearner = async () => {
 		if (actionError) throw new Error(actionError.message);
 		if (data?.success) {
 			isSuccess.value = true;
+			// Track lead magnet signup
+			trackEvent("lead_magnet_signup", {
+				lead_magnet: "k8s-1-35-cheatsheet",
+				page_path: props.pagePath,
+				audience: AUDIENCE,
+			});
 		}
 	} catch (err: unknown) {
 		error.value =

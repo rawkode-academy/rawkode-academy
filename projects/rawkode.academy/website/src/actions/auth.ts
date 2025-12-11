@@ -1,6 +1,7 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { getSignInUrl, signOut as serverSignOut } from "@/lib/auth/server";
+import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 export const auth = {
 	signInWithGithub: defineAction({
@@ -12,6 +13,22 @@ export const auth = {
 			const callbackURL = new URL(input.callbackURL || "/", origin).toString();
 
 			const url = getSignInUrl(callbackURL);
+
+			const runtime = context.locals.runtime;
+			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+			await captureServerEvent(
+				{
+					event: "sign_in_initiated",
+					properties: {
+						auth_method: "github",
+						callback_url: callbackURL,
+						from_page: new URL(context.request.url).pathname,
+					},
+					distinctId: getDistinctId(context),
+				},
+				analytics,
+			);
+
 			return { url };
 		},
 	}),
@@ -19,6 +36,7 @@ export const auth = {
 	signOut: defineAction({
 		handler: async (_, context) => {
 			const cookies = context.request.headers.get("Cookie") || "";
+			const userId = context.locals.user?.id;
 
 			// Best-effort call to identity service to invalidate server-side session
 			await serverSignOut(cookies, context.locals.runtime?.env);
@@ -33,6 +51,19 @@ export const auth = {
 				path: "/",
 				domain: ".rawkode.academy",
 			});
+
+			const runtime = context.locals.runtime;
+			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+			await captureServerEvent(
+				{
+					event: "sign_out_completed",
+					properties: {
+						user_id: userId,
+					},
+					distinctId: userId ?? getDistinctId(context),
+				},
+				analytics,
+			);
 
 			return { success: true };
 		},

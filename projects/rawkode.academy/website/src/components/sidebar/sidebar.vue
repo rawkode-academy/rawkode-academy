@@ -20,6 +20,15 @@ import { computed, onMounted, ref } from "vue";
 import NavItem from "./NavItem.vue";
 import type { NavItemData } from "./NavItem.vue";
 
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 // Get the current path from the window location
 const currentPath = ref("");
 const isCollapsed = ref(false);
@@ -199,6 +208,7 @@ const toggleCollapse = () => {
 };
 
 const toggleMode = () => {
+	const previousMode = mode.value;
 	// Cycle through modes: learn -> collaborate -> connect -> learn
 	if (mode.value === "learn") {
 		mode.value = "collaborate";
@@ -208,6 +218,11 @@ const toggleMode = () => {
 		mode.value = "learn";
 	}
 	localStorage.setItem("sidebar-mode", mode.value);
+	// Track sidebar mode switch
+	trackEvent("sidebar_mode_switched", {
+		from_mode: previousMode,
+		to_mode: mode.value,
+	});
 };
 
 const expandSidebar = () => {

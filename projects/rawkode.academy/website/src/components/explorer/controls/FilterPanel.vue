@@ -6,7 +6,7 @@
         v-if="hasActiveFilters"
         type="button"
         class="clear-btn"
-        @click="$emit('clear')"
+        @click="handleClear"
       >
         Clear all
       </button>
@@ -35,17 +35,26 @@
         :label="dimension.label"
         :values="availableValues[dimension.key] || []"
         :selected="(filters[dimension.key] as string[]) || []"
-        @update:selected="(values: string[]) => $emit('update:filter', dimension.key, values)"
+        @update:selected="(values: string[]) => handleFilterUpdate(dimension.key, values)"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import type { DimensionKey } from "@/lib/explorer/dimensions";
 import type { ExplorerFilters } from "@/lib/explorer/presets";
 import MultiSelectFilter from "./MultiSelectFilter.vue";
+
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
 
 interface Props {
 	filters: ExplorerFilters;
@@ -55,10 +64,29 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-	"update:filter": [dimension: DimensionKey, values: string[]];
-	"update:search": [query: string];
-	clear: [];
+	(e: "update:filter", dimension: DimensionKey, values: string[]): void;
+	(e: "update:search", query: string): void;
+	(e: "clear"): void;
 }>();
+
+// Track filter changes
+const handleFilterUpdate = (dimension: DimensionKey, values: string[]) => {
+	trackEvent("filter_applied", {
+		filter_type: dimension,
+		filter_values: values,
+		values_count: values.length,
+		context: "explorer",
+	});
+	emit("update:filter", dimension, values);
+};
+
+// Track clear filters
+const handleClear = () => {
+	trackEvent("filter_cleared", {
+		context: "explorer",
+	});
+	emit("clear");
+};
 
 // Dimensions to show as filters
 const filterDimensions: Array<{ key: DimensionKey; label: string }> = [

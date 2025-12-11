@@ -36,6 +36,15 @@ interface CommandPaletteProps {
 	onClose: () => void;
 }
 
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		window.posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 export default function CommandPalette({
 	isOpen,
 	onClose,
@@ -49,6 +58,7 @@ export default function CommandPalette({
 	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const [currentTheme, setCurrentTheme] = useState<Theme>("rawkode-green");
 	const [pages, setPages] = useState<CommandPage[]>(["root"]);
+	const hasTrackedOpen = useRef(false);
 
 	const activePage = pages[pages.length - 1];
 	const isRootPage = activePage === "root";
@@ -83,11 +93,18 @@ export default function CommandPalette({
 				keywords: ["theme", "color", "appearance", theme],
 				theme,
 				action: () => {
+					const previousTheme = currentTheme;
 					setTheme(theme);
 					setCurrentTheme(theme);
+					// Track theme switch
+					trackEvent("theme_switched", {
+						from_theme: previousTheme,
+						to_theme: theme,
+						source: "command_palette",
+					});
 				},
 			})),
-		[],
+		[currentTheme],
 	);
 
 	const commandItems = useMemo(
@@ -212,10 +229,27 @@ export default function CommandPalette({
 		if (!isOpen) {
 			setPages(["root"]);
 			setSearch("");
+			hasTrackedOpen.current = false;
+		} else if (!hasTrackedOpen.current) {
+			// Track command palette opened
+			trackEvent("command_palette_opened", {
+				trigger: "keyboard_shortcut",
+			});
+			hasTrackedOpen.current = true;
 		}
 	}, [isOpen]);
 
 	const handleSelect = (item: NavigationItem) => {
+		// Track navigation event
+		trackEvent("command_palette_navigation", {
+			item_id: item.id,
+			item_title: item.title,
+			category: item.category,
+			is_external: item.href?.startsWith("http") ?? false,
+			has_action: !!item.action,
+			search_query: search || undefined,
+		});
+
 		if (item.action) {
 			const shouldClose = item.action();
 			if (shouldClose !== false) {

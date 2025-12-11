@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import type { Component } from "vue";
 
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 export interface NavItemData {
 	name: string;
 	href: string;
@@ -41,6 +50,19 @@ const handleClick = (e: Event) => {
 	if (props.isCollapsed) {
 		e.preventDefault();
 		emit("expand");
+		return;
+	}
+
+	// Track external link clicks (like Discord)
+	if (props.item.external) {
+		const eventName = props.item.href.includes("rawkode.chat") || props.item.href.includes("discord")
+			? "discord_link_clicked"
+			: "external_link_clicked";
+		trackEvent(eventName, {
+			link_name: props.item.name,
+			destination_url: props.item.href,
+			source: "sidebar",
+		});
 	}
 };
 </script>

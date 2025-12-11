@@ -29,6 +29,31 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Install generator dependencies
+        working-directory: projects/rawkode.academy/generators/projen-platform-service
+        run: |
+          bun install
+          bun run types
+
+      - name: Run projen for all platform services
+        run: |
+          for service in email-preferences email-service emoji-reactions video-likes; do
+            SERVICE_DIR="projects/rawkode.academy/platform/$service"
+            if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
+              cd "$SERVICE_DIR"
+              bun run .projenrc.ts
+              cd -
+            fi
+          done
+
+      - name: Run projen for all game services
+        run: |
+          for service in achievements leaderboard player-learned-phrases player-stats share-cards; do
+            cd "projects/rawkode.academy/games/secrets-of-kubernetes/$service"
+            bun run .projenrc.ts
+            cd -
+          done
+
       - name: Install dependencies
         working-directory: projects/rawkode.tools/analytics
         run: bun install
