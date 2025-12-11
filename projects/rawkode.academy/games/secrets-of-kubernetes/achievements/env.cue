@@ -32,6 +32,7 @@ tasks: {
 	projen: {
 		command: "bun"
 		args: ["run", ".projenrc.ts"]
+		labels: ["projen"]
 	}
 
 	deploy: {

@@ -31,10 +31,12 @@ ci: pipelines: [
 ]
 
 tasks: {
-	install: {
+	projen: synth: {
 		command: "bun"
-		args: ["install"]
+		args: ["run", ".projenrc.ts"]
+		labels: ["projen"]
 	}
+
 	deploy: {
 		read: {
 			command: "npx"
