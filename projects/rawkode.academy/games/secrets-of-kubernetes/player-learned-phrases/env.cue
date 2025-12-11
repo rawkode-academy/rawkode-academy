@@ -29,6 +29,11 @@ ci: pipelines: [
 ]
 
 tasks: {
+	projen: {
+		command: "bun"
+		args: ["run", ".projenrc.ts"]
+		labels: ["projen"]
+	}
 	install: {
 		command: "bun"
 		args: ["install"]
