@@ -18,7 +18,6 @@ interface NavigationItem {
 interface Technology {
 	id: string;
 	name: string;
-	description: string;
 	logo?: string;
 }
 
@@ -263,7 +262,6 @@ async function generateNavigationItems(
         getTechnologies(limit: $limit) {
           id
           name
-          description
         }
       }
     `;
@@ -278,7 +276,7 @@ async function generateNavigationItems(
 			navigationItems.push({
 				id: `/technology/${tech.id}`,
 				title: tech.name,
-				description: tech.description || "Explore this technology",
+				description: "Explore this technology",
 				href: `/technology/${tech.id}`,
 				category: "Technology",
 				keywords: [tech.name.toLowerCase(), "technology", "tech"],
