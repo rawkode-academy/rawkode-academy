@@ -88,7 +88,7 @@ export class EmailPreferences extends WorkerEntrypoint<Env> {
 		}
 
 		const normalized = validation.value;
-		
+
 		// Check if preference already exists
 		const existing = await this.db.query.emailPreferencesTable.findFirst({
 			where: and(
@@ -163,7 +163,7 @@ export class EmailPreferences extends WorkerEntrypoint<Env> {
 	 * Get email preferences for a user
 	 */
 	async getPreferences(
-		userId: string, 
+		userId: string,
 		channel?: string,
 		audience?: string
 	): Promise<EmailPreference[]> {

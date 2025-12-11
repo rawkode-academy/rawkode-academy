@@ -9,8 +9,8 @@ node_modules/
 /read-model/publish.ts
 /read-model/wrangler.jsonc
 /read-model/schema.gql
-/rpc/main.ts
-/rpc/wrangler.jsonc
+/http/main.ts
+/http/wrangler.jsonc
 /README.md
 /package.json
 /tsconfig.json
