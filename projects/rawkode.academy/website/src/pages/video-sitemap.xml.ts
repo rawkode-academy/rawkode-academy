@@ -70,8 +70,7 @@ ${sortedVideos
 		// Create tags from technologies
 		const tags = (video.data.technologies || [])
 			.map((id) => techName.get(id) || id)
-			.slice(0, 32)
-			.join(", ");
+			.slice(0, 32);
 
 		return `  <url>
     <loc>${videoUrl}</loc>
@@ -82,14 +81,13 @@ ${sortedVideos
 				video.data.description,
 			)}</video:description>
       <video:content_loc>${escapeXml(contentUrl)}</video:content_loc>
-      <video:player_loc>${escapeXml(contentUrl)}</video:player_loc>
       <video:duration>${duration}</video:duration>
       <video:publication_date>${publishedDate}</video:publication_date>
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>
       <video:requires_subscription>no</video:requires_subscription>
       <video:uploader info="${site}">Rawkode Academy</video:uploader>
-      ${tags ? `<video:tag>${escapeXml(tags)}</video:tag>` : ""}
+      ${tags.map((tag) => `<video:tag>${escapeXml(tag)}</video:tag>`).join("\n      ")}
     </video:video>
   </url>`;
 	})
