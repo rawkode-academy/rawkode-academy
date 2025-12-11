@@ -103,6 +103,15 @@
 import VideoComments from "./comments.vue";
 import VideoTranscript from "./transcript.vue";
 
+// Track analytics events client-side
+const trackEvent = (event, properties) => {
+	try {
+		window.posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 export default {
 	name: "VideoContentTabs",
 	components: {
@@ -133,7 +142,14 @@ export default {
 	},
 	methods: {
 		setActiveTab(tabId) {
+			const previousTab = this.activeTab;
 			this.activeTab = tabId;
+			// Track tab view
+			trackEvent("video_tab_viewed", {
+				tab_id: tabId,
+				previous_tab: previousTab,
+				video_id: this.videoId,
+			});
 		},
 	},
 };

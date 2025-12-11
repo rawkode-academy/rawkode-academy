@@ -113,6 +113,15 @@ import {
 	type PlayerProgress,
 } from "@/lib/game-api";
 
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 type GameState = "menu" | "allocation" | "map" | "combat" | "victory" | "defeat" | "achievements" | "leaderboard" | "inventory";
 
 const gameState = ref<GameState>("menu");
@@ -215,6 +224,12 @@ onMounted(async () => {
 });
 
 async function handleStart() {
+	// Track game started
+	trackEvent("game_started", {
+		game: "secrets-of-kubernetes",
+		is_new_player: isNewPlayer.value,
+	});
+
 	if (isNewPlayer.value) {
 		// Initialize player in backend first to get assigned phrases
 		try {
@@ -273,6 +288,16 @@ async function handleVictory(moveCount: number) {
 			timeSeconds: playTimeSeconds,
 		};
 
+		// Track game completed (victory)
+		trackEvent("game_completed", {
+			game: "secrets-of-kubernetes",
+			result: "victory",
+			enemy_id: currentEnemy.value.id,
+			enemy_name: currentEnemy.value.name,
+			move_count: moveCount,
+			play_time_seconds: playTimeSeconds,
+		});
+
 		// Record game result
 		try {
 			const progress = await recordGameResult({
@@ -303,6 +328,15 @@ async function handleDefeat() {
 		learnedInsults: [...combatLearnedInsults.value],
 		learnedComebacks: [...combatLearnedComebacks.value],
 	};
+
+	// Track game failed (defeat)
+	trackEvent("game_failed", {
+		game: "secrets-of-kubernetes",
+		enemy_id: currentEnemy.value?.id,
+		enemy_name: currentEnemy.value?.name ?? "Unknown",
+		play_time_seconds: playTimeSeconds,
+		phrases_learned: combatLearnedInsults.value.length + combatLearnedComebacks.value.length,
+	});
 
 	// Record game result
 	try {
