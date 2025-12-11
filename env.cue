@@ -18,3 +18,43 @@ env: {
 		TF_WORKSPACE: "production"
 	}
 }
+
+tasks: {
+	"bun.install": {
+		script: """
+			set -e
+
+			# Build projen generator dependencies first
+			cd projects/rawkode.academy/generators/projen-platform-service
+			bun install
+			bun run types
+			cd -
+
+			# Generate projen files for platform services
+			for service in email-preferences emoji-reactions video-likes; do
+				SERVICE_DIR="projects/rawkode.academy/platform/$service"
+				if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
+					echo "Running projen for $service..."
+					cd "$SERVICE_DIR"
+					bun run .projenrc.ts
+					cd -
+				fi
+			done
+
+			# Generate projen files for game services
+			for service in achievements leaderboard player-learned-phrases player-stats share-cards; do
+				SERVICE_DIR="projects/rawkode.academy/games/secrets-of-kubernetes/$service"
+				if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
+					echo "Running projen for ski-$service..."
+					cd "$SERVICE_DIR"
+					bun run .projenrc.ts
+					cd -
+				fi
+			done
+
+			# Install all workspace dependencies after projen generates package.json files
+			bun install
+			"""
+	}
+}
+
