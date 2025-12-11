@@ -45,6 +45,14 @@ export class Content extends WorkerEntrypoint<Env> {
 
 		if (!object) return new Response("Not Found", { status: 404, headers: this.corsHeaders });
 
+		// Handle conditional request (304 Not Modified)
+		// When onlyIf conditions fail, R2 returns object without body
+		if (!("body" in object) || object.body === null) {
+			const headers = new Headers(this.corsHeaders);
+			headers.set("etag", object.httpEtag);
+			return new Response(null, { status: 304, headers });
+		}
+
 		// Track mp3 downloads via RPC (fire-and-forget)
 		if (request.method === "GET" && key.endsWith("/original.mp3")) {
 			const videoId = key.match(/^videos\/([^/]+)\/original\.mp3$/)?.[1];
