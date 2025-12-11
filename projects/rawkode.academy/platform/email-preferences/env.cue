@@ -44,6 +44,5 @@ tasks: {
 			command: "npx"
 			args: ["wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 		}
-		dependsOn: ["install"]
 	}
 }
