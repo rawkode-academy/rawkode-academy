@@ -11,7 +11,7 @@ const project = new PlatformService({
 		d1Databases: [{
 			binding: "DB",
 			database_name: "platform-email-preferences",
-			database_id: "d1e7b151-f20f-4470-8c84-266fcb76e84f",
+			database_id: "68560d7f-2136-4cf5-9192-aa6d730df300",
 		}],
 	},
 });

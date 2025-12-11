@@ -40,9 +40,9 @@ tasks: {
 			command: "npx"
 			args: ["wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
 		}
-		write: {
+		http: {
 			command: "npx"
-			args: ["wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
+			args: ["wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 		}
 		dependsOn: ["install"]
 	}

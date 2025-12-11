@@ -204,6 +204,7 @@
         "@pothos/plugin-federation": "^4.3.2",
         "@sindresorhus/slugify": "^2.2.1",
         "better-auth": "catalog:auth",
+        "cloudevents": "^8.0.2",
         "drizzle-kit": "^0.30.6",
         "drizzle-orm": "^0.38.4",
         "drizzle-zod": "^0.6.1",
