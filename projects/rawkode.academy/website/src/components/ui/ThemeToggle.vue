@@ -35,6 +35,15 @@ import {
 	type Theme,
 } from "../../lib/theme";
 
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 interface Props {
 	showLabel?: boolean;
 	variant?: "icon" | "button";
@@ -71,7 +80,14 @@ onUnmounted(() => {
 });
 
 const handleToggle = () => {
+	const previousTheme = currentTheme.value;
 	currentTheme.value = toggleTheme();
+	// Track theme switch
+	trackEvent("theme_switched", {
+		from_theme: previousTheme,
+		to_theme: currentTheme.value,
+		source: "theme_toggle_button",
+	});
 };
 
 const buttonClasses = computed(() => {

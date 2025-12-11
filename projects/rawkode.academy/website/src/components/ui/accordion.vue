@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { reactive } from "vue";
+
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
 
 interface AccordionItem {
 	id: string;
@@ -20,8 +29,13 @@ const openItems = reactive<Record<string, boolean>>(
 );
 
 const toggleItem = (id: string) => {
-	console.log("Toggling item:", id, "Current state:", openItems[id]);
+	const wasOpen = openItems[id];
 	openItems[id] = !openItems[id];
+	// Track accordion toggle
+	trackEvent("accordion_toggled", {
+		item_id: id,
+		action: wasOpen ? "collapsed" : "expanded",
+	});
 };
 
 const isOpen = (id: string) => !!openItems[id];

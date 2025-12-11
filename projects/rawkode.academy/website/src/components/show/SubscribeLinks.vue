@@ -11,6 +11,7 @@
 				target="_blank"
 				rel="noopener noreferrer"
 				class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 hover:shadow dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:bg-gray-700"
+				@click="handleSubscribeClick(link)"
 			>
 				<font-awesome-icon :icon="getIcon(link.icon)" class="h-4 w-4" />
 				{{ link.platform }}
@@ -32,6 +33,15 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 library.add(faSpotify, faYoutube, faApple, faAmazon, faPodcast, faRss, faLink);
 
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 interface SubscribeLink {
 	platform: string;
 	url: string;
@@ -41,6 +51,14 @@ interface SubscribeLink {
 defineProps<{
 	links: SubscribeLink[];
 }>();
+
+const handleSubscribeClick = (link: SubscribeLink) => {
+	trackEvent("podcast_subscribe_clicked", {
+		platform: link.platform,
+		icon_type: link.icon,
+		destination_url: link.url,
+	});
+};
 
 function getIcon(iconType: string): string | [string, string] {
 	switch (iconType) {

@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
+import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 const searchQuery = (Astro.url.searchParams.get("q") || "").trim();
 const normalizedQuery = searchQuery.toLowerCase();
@@ -12,6 +13,24 @@ const results = normalizedQuery
 			return haystack.includes(normalizedQuery);
 		})
 	: [];
+
+// Track search event if there's a query
+if (normalizedQuery) {
+	const runtime = Astro.locals.runtime;
+	const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+	await captureServerEvent(
+		{
+			event: "search_performed",
+			properties: {
+				query: searchQuery,
+				results_count: results.length,
+				search_type: "video",
+			},
+			distinctId: getDistinctId(Astro),
+		},
+		analytics,
+	);
+}
 
 const feedVideos = results
 	.sort(

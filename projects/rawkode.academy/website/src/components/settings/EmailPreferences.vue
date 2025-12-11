@@ -5,6 +5,7 @@ import { actions } from "astro:actions";
 const props = defineProps<{
 	academyNewsletter: boolean;
 	matrixNewsletter: boolean;
+	kubernetesReleaseUpdates: boolean;
 	marketingEmails: boolean;
 	serviceEmails: boolean;
 	technologySubscriptions: string[];
@@ -13,6 +14,7 @@ const props = defineProps<{
 const preferences = ref({
 	academyNewsletter: props.academyNewsletter,
 	matrixNewsletter: props.matrixNewsletter,
+	kubernetesReleaseUpdates: props.kubernetesReleaseUpdates,
 	marketingEmails: props.marketingEmails,
 	serviceEmails: props.serviceEmails,
 });
@@ -28,6 +30,7 @@ const hasAnySubscription = computed(() => {
 	return (
 		preferences.value.academyNewsletter ||
 		preferences.value.matrixNewsletter ||
+		preferences.value.kubernetesReleaseUpdates ||
 		preferences.value.marketingEmails ||
 		preferences.value.serviceEmails ||
 		techSubs.value.length > 0
@@ -108,6 +111,7 @@ const unsubscribeFromAll = async () => {
 		preferences.value = {
 			academyNewsletter: false,
 			matrixNewsletter: false,
+			kubernetesReleaseUpdates: false,
 			marketingEmails: false,
 			serviceEmails: false,
 		};
@@ -219,6 +223,47 @@ const formatTechName = (id: string) => {
 							:class="[
 								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
 								preferences.matrixNewsletter
+									? 'translate-x-5'
+									: 'translate-x-0',
+							]"
+						/>
+					</button>
+				</div>
+
+				<!-- Kubernetes Release Updates -->
+				<div
+					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
+				>
+					<div class="flex-1 pr-4">
+						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
+							Kubernetes Release Updates
+						</h4>
+						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+							Get notified about new Kubernetes releases, cheat sheets, and
+							upgrade guides.
+						</p>
+					</div>
+					<button
+						type="button"
+						:disabled="isLoading === 'kubernetesReleaseUpdates'"
+						@click="
+							togglePreference('kubernetesReleaseUpdates', 'newsletter', 'kubernetes-release-updates')
+						"
+						:class="[
+							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-neutral-900',
+							preferences.kubernetesReleaseUpdates
+								? 'bg-primary'
+								: 'bg-neutral-300 dark:bg-neutral-700',
+							isLoading === 'kubernetesReleaseUpdates' ? 'opacity-50 cursor-wait' : '',
+						]"
+						role="switch"
+						:aria-checked="preferences.kubernetesReleaseUpdates"
+					>
+						<span class="sr-only">Toggle Kubernetes release updates</span>
+						<span
+							:class="[
+								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+								preferences.kubernetesReleaseUpdates
 									? 'translate-x-5'
 									: 'translate-x-0',
 							]"

@@ -169,6 +169,15 @@
 import { ref, computed } from "vue";
 import Badge from "../common/Badge.vue";
 
+// Track analytics events client-side
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
+	try {
+		(window as any).posthog?.capture(event, properties);
+	} catch {
+		// Ignore tracking errors
+	}
+};
+
 interface Props {
 	availableTechnologies: string[];
 }
@@ -222,28 +231,51 @@ function getDifficultyVariant(
 }
 
 function selectDifficulty(difficulty: string) {
-	selectedDifficulty.value = difficulty === "all" ? "" : difficulty;
+	const newDifficulty = difficulty === "all" ? "" : difficulty;
+	trackEvent("filter_applied", {
+		filter_type: "difficulty",
+		filter_value: newDifficulty || "all",
+		context: "courses",
+	});
+	selectedDifficulty.value = newDifficulty;
 	showDifficultyMenu.value = false;
 	emitFilterChange();
 }
 
 function toggleTechnology(tech: string) {
 	const index = selectedTechnologies.value.indexOf(tech);
+	const action = index > -1 ? "removed" : "added";
 	if (index > -1) {
 		selectedTechnologies.value.splice(index, 1);
 	} else {
 		selectedTechnologies.value.push(tech);
 	}
+	trackEvent("filter_applied", {
+		filter_type: "technology",
+		filter_value: tech,
+		action,
+		context: "courses",
+	});
 	emitFilterChange();
 }
 
 function selectSort(sort: string) {
+	trackEvent("filter_applied", {
+		filter_type: "sort",
+		filter_value: sort,
+		context: "courses",
+	});
 	selectedSort.value = sort;
 	showSortMenu.value = false;
 	emitFilterChange();
 }
 
 function clearFilters() {
+	trackEvent("filter_cleared", {
+		context: "courses",
+		had_difficulty: !!selectedDifficulty.value,
+		had_technologies: selectedTechnologies.value.length > 0,
+	});
 	searchQuery.value = "";
 	selectedDifficulty.value = "";
 	selectedTechnologies.value = [];
