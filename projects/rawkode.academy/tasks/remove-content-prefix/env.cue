@@ -2,7 +2,7 @@ package cuenv
 
 import "github.com/cuenv/cuenv/schema"
 
-schema.#Cuenv
+schema.#Project
 
 env: {
 	R2_BUCKET_NAME: "rawkode-academy-content"
