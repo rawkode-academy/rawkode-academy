@@ -14,6 +14,8 @@ description: >-
   interactive visualization of your resources will have you thinking in graphs
   in no time.
 publishedAt: 2025-01-10T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: s1mnje3g7rel848ryv470bix

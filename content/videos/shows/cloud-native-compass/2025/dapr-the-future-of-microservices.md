@@ -37,6 +37,8 @@ description: >-
 
   (52:00) - Conclusion and Sign-Off
 publishedAt: 2025-03-21T12:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: xnmoo3urafyt4khqozj6d0af

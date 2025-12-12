@@ -8,6 +8,8 @@ description: |-
 
   #InfluxDB #Tutorial
 publishedAt: 2022-01-26T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - influxdb
 videoId: f8kozfxzp1vtykj2na0sye5w

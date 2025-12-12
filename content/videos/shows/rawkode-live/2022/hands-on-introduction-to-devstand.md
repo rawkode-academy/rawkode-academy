@@ -11,6 +11,8 @@ description: >-
 
   All stored in a single file, no Kubernetes knowledge required.
 publishedAt: 2022-10-08T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - devstand
 show: rawkode-live

@@ -6,6 +6,8 @@ description: >-
   Fast, Declarative, Reproducible and Composable Developer Environments using
   Nix
 publishedAt: 2024-06-14T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - devenv
 show: rawkode-live

@@ -7,6 +7,8 @@ description: >-
   compatible pprof endpoint, so let's take a look at configuring our Parca
   server to do just that.
 publishedAt: 2023-07-11T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - parca
 videoId: hmi73u4rxevdc9jb39tu1lxq

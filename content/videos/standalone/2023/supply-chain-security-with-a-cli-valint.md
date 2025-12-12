@@ -23,6 +23,8 @@ description: >-
   provenance. With Valint, you can sign and verify artifacts against their
   origin and signer identity in the supply chain.
 publishedAt: 2023-05-22T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies: []
 videoId: ncgxuu1vyx5yl7psezcz79dk
 chapters:

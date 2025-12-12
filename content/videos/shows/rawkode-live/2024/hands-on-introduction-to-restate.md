@@ -28,6 +28,8 @@ description: >-
   flexible and can be used in various environments, including FaaS, Kubernetes,
   servers, and containers, both self-hosted and fully managed
 publishedAt: 2024-09-11T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - restate
 show: rawkode-live

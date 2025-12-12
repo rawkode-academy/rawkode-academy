@@ -4,6 +4,8 @@ slug: introduction-to-falco
 title: Introduction to Falco
 description: "Falco, the open-source cloud-native runtime security project, is the de facto Kubernetes threat detection engine. Falco was created by Sysdig in 2016 and is the first runtime security project to join CNCF as an incubation-level project. Falco detects unexpected application behavior and alerts on threats at runtime.\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:30 - Introductions\n05:40 - What is Falco?\n12:40 - Linux requirements for Falco\n17:30 - Installing Falco\n25:40 - Making Falco angry (Breaking a Falco rule)\n31:00 - Falco default rules\n43:50 - Manually sending Kubernetes events to Falco web-hook receiver\n49:00 - Adding Kubernetes Auditing to Falco\n1:02:00 - Triggering Falco from Kubernetes (Storing \"secret\" in a ConfigMap)\n1:10:00 - What is Falco Evolution repository?\n1:11:30 - Falco pdig (Userspace Falco)\n1:16:10 - Question: Is there a GUI?\n\n\U0001F30E Resources\n\nFalco - https://falco.org\nLeo Di Donato - https://twitter.com/leodido\nLorenzo Fontana - https://twitter.com/fntlnz\nFalco Evolution - https://github.com/falcosecurity/evolution"
 publishedAt: 2020-10-30T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - falco
 show: rawkode-live

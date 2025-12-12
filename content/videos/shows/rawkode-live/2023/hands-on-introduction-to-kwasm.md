@@ -7,6 +7,8 @@ description: >-
   Kubernetes nodes. It does so by using a container image that contains binaries
   and configuration variables needed to run pure WebAssembly images.
 publishedAt: 2023-03-18T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - kwasm
 show: rawkode-live

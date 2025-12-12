@@ -6,10 +6,6 @@ subtitle: >-
   MinIO just announced maintenance mode for their community edition — and
   honestly? Good riddance.
 description: >-
-  MinIO just announced maintenance mode for their community edition — and
-  honestly? Good riddance.
-
-
   This isn't about open source companies needing to make money. That's valid.
   This is about how MinIO systematically destroyed community trust through
   silent license changes, aggressive legal theatrics, gutted features behind a
@@ -29,6 +25,8 @@ description: >-
 
   Adam's tweet: https://x.com/adamhjk/status/1640368244484902912
 publishedAt: 2025-12-04T00:00:00.000Z
+type: recorded
+category: editorial
 technologies:
   - minio
   - seaweedfs

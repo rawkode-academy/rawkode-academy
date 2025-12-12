@@ -9,6 +9,8 @@ description: >-
 
   Let's find out!
 publishedAt: 2023-12-13T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - komodor
   - kubernetes

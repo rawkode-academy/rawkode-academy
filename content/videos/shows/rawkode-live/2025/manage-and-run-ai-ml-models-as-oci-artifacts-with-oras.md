@@ -30,6 +30,8 @@ description: >-
   developers and DevOps engineers looking to enhance their AI/ML deployment
   strategies in a Kubernetes environment.
 publishedAt: 2025-03-21T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: jocpdohtl9lz7fg6kxnxmaob

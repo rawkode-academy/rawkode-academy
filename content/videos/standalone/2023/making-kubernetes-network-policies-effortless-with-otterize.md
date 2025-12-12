@@ -21,6 +21,8 @@ description: >-
   Starting from scratch? No worries! Bootstrap client intents effortlessly by
   using network mapper to learn from existing traffic patterns.
 publishedAt: 2023-11-29T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - otterize
 videoId: wijy1wsp03lfq5mjrhjvtwm0

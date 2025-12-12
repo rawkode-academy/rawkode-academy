@@ -18,6 +18,8 @@ description: >-
   understanding of Dagger's capabilities and how to apply them to their own
   projects.
 publishedAt: 2024-08-08T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - dagger
 videoId: t0syi87suw4qezpmy1gkht9k

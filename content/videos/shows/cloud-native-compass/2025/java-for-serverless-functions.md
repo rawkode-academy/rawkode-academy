@@ -15,6 +15,8 @@ description: >-
   and Frameworks\n18:37 Java's Flexibility and Community Support\n28:14 Java in
   Kubernetes and Future Prospects\n29:44 Conclusion and Final Thoughts
 publishedAt: 2025-03-27T17:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: xxti5u3ooj17j37cavljrukn

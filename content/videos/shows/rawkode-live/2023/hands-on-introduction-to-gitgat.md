@@ -22,6 +22,8 @@ description: >-
   information about the state configurable for each module is available in each
   module's corresponding section.
 publishedAt: 2023-03-09T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: ziso8d5pctrrqhxqeqbgvkfo

@@ -22,6 +22,8 @@ description: >-
   future Kubernetes & tooling deep dives.\nDrop your questions in chat—will
   answer live.
 publishedAt: 2025-10-08T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: d4uyd6zny0quu8l9y7urx17r

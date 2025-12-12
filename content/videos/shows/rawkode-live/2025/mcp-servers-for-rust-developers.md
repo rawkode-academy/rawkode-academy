@@ -25,6 +25,8 @@ description: >-
   work together to create a streamlined path from code discovery to production
   deployment!
 publishedAt: 2025-09-18T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: ob97b14ky0u0nqgxnhmsqg7s

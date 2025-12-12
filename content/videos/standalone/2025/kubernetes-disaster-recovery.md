@@ -20,6 +20,8 @@ description: |
   Spectro Cloud Palette Docs: https://docs.spectrocloud.com
   Velero: https://velero.io
 publishedAt: 2025-11-25T14:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - kubernetes
   - velero

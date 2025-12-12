@@ -28,6 +28,8 @@ description: >-
 
   FREE hosting for Spin apps with Fermyon Cloud: https://cloud.fermyon.com
 publishedAt: 2023-01-31T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - spin
 videoId: xf99ugju3sc16q7f4iw3llv8

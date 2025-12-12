@@ -13,6 +13,8 @@ description: >-
   immutable data such as conversational data (emails, texts, messaging
   platforms) and event-based analytics.
 publishedAt: 2024-01-20T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - quickwit
 show: rawkode-live

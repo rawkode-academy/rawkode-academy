@@ -16,6 +16,8 @@ description: >-
   dashboard deployment\n\nResources:\n\nGitHub:
   https://github.com/perses/perses\nDocumentation: https://perses.dev
 publishedAt: 2025-07-21T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: znv8ogcndba61rk08pd7dbzy

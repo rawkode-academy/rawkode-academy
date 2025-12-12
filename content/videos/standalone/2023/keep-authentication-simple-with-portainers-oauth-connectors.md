@@ -4,6 +4,8 @@ slug: keep-authentication-simple-with-portainers-oauth-connectors
 title: Keep Authentication Simple with Portainers OAuth Connectors
 description: 'Video content coming soon.'
 publishedAt: 2023-03-06T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - portainer
 videoId: aqzmvsr41szkg2uqg0yp2cu4

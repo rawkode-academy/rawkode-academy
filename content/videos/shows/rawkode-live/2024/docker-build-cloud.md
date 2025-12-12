@@ -4,6 +4,8 @@ slug: docker-build-cloud
 title: Docker Build Cloud
 description: 'Video content coming soon.'
 publishedAt: 2024-03-06T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - docker
   - docker-build-cloud

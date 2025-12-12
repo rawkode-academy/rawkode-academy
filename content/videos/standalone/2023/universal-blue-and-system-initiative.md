@@ -18,6 +18,8 @@ description: >-
   System Initiative is a collaborative power tool designed to remove the
   papercuts from DevOps work.
 publishedAt: 2023-08-03T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - system-initiative
   - universal-blue

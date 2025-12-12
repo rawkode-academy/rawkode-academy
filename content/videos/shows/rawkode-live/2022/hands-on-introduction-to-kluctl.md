@@ -26,6 +26,8 @@ description: >-
 
   - https://github.com/kluctl/kluctl
 publishedAt: 2022-10-20T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - kluctl
 show: rawkode-live

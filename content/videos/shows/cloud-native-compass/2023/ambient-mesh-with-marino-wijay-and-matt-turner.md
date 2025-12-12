@@ -23,6 +23,8 @@ description: >-
 
   39:50 - Istio Graduation!
 publishedAt: 2023-08-04T17:00:00.000Z
+type: recorded
+category: interview
 technologies:
   - istio
 show: cloud-native-compass

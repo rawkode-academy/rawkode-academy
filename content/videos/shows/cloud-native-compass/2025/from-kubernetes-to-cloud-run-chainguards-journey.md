@@ -52,6 +52,8 @@ description: >-
 
   54:45 Final Thoughts and Farewells
 publishedAt: 2025-01-16T17:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: hbkqmiw7xfe2dxrarck938yl

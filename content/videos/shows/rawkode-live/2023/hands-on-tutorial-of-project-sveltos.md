@@ -11,6 +11,8 @@ description: >-
   easily manage permissions for tenant admins, thereby facilitating
   multi-tenancy.
 publishedAt: 2023-08-05T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - sveltos
 show: rawkode-live

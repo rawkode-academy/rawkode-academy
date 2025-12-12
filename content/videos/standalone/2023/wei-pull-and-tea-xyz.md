@@ -23,6 +23,8 @@ description: >-
 
   03:58 tea.xyz
 publishedAt: 2023-08-24T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - pkgx
 videoId: n9usdizv6skyhuv5603ivcuh

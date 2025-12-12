@@ -69,6 +69,8 @@ description: >-
 
   ● Find me on Twitter @ https://twitter.com/rawkode
 publishedAt: 2022-08-11T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: tl0buwq41h0dywtit9z7tdz7

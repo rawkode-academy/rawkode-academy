@@ -12,6 +12,8 @@ description: >-
 
   Let's take a look
 publishedAt: 2022-07-30T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - teleport
 videoId: m33ycy3p5m13rbpi3h4bkbv0

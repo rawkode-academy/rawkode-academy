@@ -11,6 +11,8 @@ description: >-
   This second video guides you through using Kubescape on your local machine and
   adopting Kubescape in CI with GitHub Actions.
 publishedAt: 2022-12-20T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - kubescape
 videoId: d52og3gdtmtu7w8nhkyg1uyt

@@ -4,6 +4,8 @@ slug: monitoring-your-security-posture-with-prometheus
 title: Monitoring Your Security Posture with Prometheus
 description: 'Video content coming soon.'
 publishedAt: 2023-01-31T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - kubescape
 videoId: cvahj7nb3ypukon4fm4mreaa

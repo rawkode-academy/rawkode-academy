@@ -8,6 +8,8 @@ description: |-
 
   #InfluxDB #Telegraf #Tutorial
 publishedAt: 2022-01-26T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - influxdb
 videoId: fg5n3s12kpi526uupu0w7tav

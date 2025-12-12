@@ -18,6 +18,8 @@ description: >-
   The Kluctl Webui offers a visualisation and control of your GitOps deployments
   shows past deployments (from the CLI and from GitOps).
 publishedAt: 2023-09-27T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - kluctl
 show: rawkode-live

@@ -6,6 +6,8 @@ description: >-
   ♾ Infisical is the open-source secret management platform: Sync secrets across
   your team/infrastructure and prevent secret leaks.
 publishedAt: 2024-03-01T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - infisical
 show: rawkode-live

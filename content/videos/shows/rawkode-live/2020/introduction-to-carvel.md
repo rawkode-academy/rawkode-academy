@@ -4,6 +4,8 @@ slug: introduction-to-carvel
 title: Introduction to Carvel
 description: "In this episode, I am joined by Dmitriy Kalinin (VMware); the maintainer of Carvel.\n\nCarvel is a set of tools designed to ease lifecycle management of your Kubernetes workloads. The origin of Carvel begins with Dmitriy Kalinin and Nima Kaviani not being satisfied with existing tools to deploy Kubernetes workloads. These tools were monolithic, error-prone, and hard to debug. Carvel promises a better way, one that extracts common app configuration into a library for use by all your applications.\n\nCarvel is built with UNIX philosophy in mind. We believe each tool should be optimized for a single purpose, and have clear boundaries. This allows you to weave Carvel into your Kubernetes environment however you want. It’s up to you to choose one element of Carvel, or the entire set of tools.\n\n\U0001F570    Timeline\n\n00:00 - Holding screen\n01:15 - Introductions\n02:00 - What is Carvel?\n06:40 - Installing Carvel\n08:20 - Why did it change name from k14s to Carvel?\n11:20 - Hands on with kapp\n25:00 - Introduction to kapp-controller\n30:00 - Hands on with ytt\n1:00:00 - Introduction to kbld\n1:03:30 - Introduction to imgpkg\n\n\U0001F481\U0001F3FB‍♂️    Want some help?\n\n\U0001F4AC  Leave a comment\n\U0001F426  Ping me on Twitter - https://twitter.com/rawkode\n\U0001F4C6  Schedule some time during my office-hours - https://rawko.de/office-hours\n\n\U0001F30E    Links\n\nDmitriy Kalinin - https://twitter.com/dmitriykalinin\nCarvel - https://carvel.dev"
 publishedAt: 2020-09-30T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - carvel
 show: rawkode-live

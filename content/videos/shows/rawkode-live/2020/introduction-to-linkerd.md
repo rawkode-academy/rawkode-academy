@@ -4,6 +4,8 @@ slug: introduction-to-linkerd
 title: Introduction to Linkerd
 description: "Linkerd is a service mesh for Kubernetes. It makes running services easier and safer by giving you runtime debugging, observability, reliability, and security—all without requiring any changes to your code.\n\nLinkerd works by installing a set of ultralight, transparent proxies next to each service instance. These proxies automatically handle all traffic to and from the service. Because they're transparent, these proxies act as highly instrumented out-of-process network stacks, sending telemetry to, and receiving control signals from, the control plane. This design allows Linkerd to measure and manipulate traffic to and from your service without introducing excessive latency.\n\nIn order to be as small, lightweight, and safe as possible, Linkerd's proxies are written in Rust and specialized for Linkerd.\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:25 - Introductions\n03:10 - What is a service mesh?\n06:50 - What are we working with?\n07:30 - Installing Linkerd\n12:50 - Linkerd dashboard\n15:40 - Linkerd top\n18:10 - Deploying the demo app\n20:40 - Injecting the Linkerd sidecar\n24:15 - Stat command\n28:20 - Tap command\n31:30 - Fault injection / TrafficSplit / Canary Deploys\n40:50 - Time outs and retries\n49:20 - mTLS\n55:30 - Multi-cluster\n1:09:00 - Closing\n\n\n\U0001F30E Resources\n\nLinkerd - https://linkerd.io\nThomas Rampelberg - https://twitter.com/grampelberg"
 publishedAt: 2020-11-04T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - linkerd
 show: rawkode-live

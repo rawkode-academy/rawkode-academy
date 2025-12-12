@@ -19,6 +19,8 @@ description: >-
 
   13:20 Infisical
 publishedAt: 2023-08-10T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - infisical
   - podman

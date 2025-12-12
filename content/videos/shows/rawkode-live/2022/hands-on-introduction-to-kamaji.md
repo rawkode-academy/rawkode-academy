@@ -10,6 +10,8 @@ description: >-
   a fraction of the operational burden. With Kamaji, you can deploy and operate
   hundreds of Kubernetes clusters as a hyper-scale cloud provider.
 publishedAt: 2022-08-13T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - kamaji
 show: rawkode-live

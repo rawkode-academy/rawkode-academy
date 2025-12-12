@@ -35,6 +35,8 @@ description: >-
 
   47:07 Conclusion and Farewell
 publishedAt: 2025-06-12T10:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: nld4g7u2s213v93y76jbmnjm

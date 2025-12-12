@@ -15,6 +15,8 @@ description: >-
 
   Learn more at https://www.guidepad.io/
 publishedAt: 2023-06-26T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - guidepad
 videoId: lxx8tfrfnnhiv1ur4h6t60t0

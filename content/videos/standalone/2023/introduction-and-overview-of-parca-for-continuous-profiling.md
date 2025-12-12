@@ -15,6 +15,8 @@ description: >-
 
   Let me show you how to get started.
 publishedAt: 2023-06-05T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - parca
 videoId: pixbg0khkdubmvl7ydy78v5y

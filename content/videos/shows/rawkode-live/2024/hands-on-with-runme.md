@@ -22,6 +22,8 @@ description: >-
   into successive cells. Runme persists your runbooks in markdown, which your
   docs are likely already using.
 publishedAt: 2024-10-04T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - runme
 show: rawkode-live

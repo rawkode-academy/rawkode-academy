@@ -9,6 +9,8 @@ description: >-
   Learn how to install Teleport, as well as a high level overview of what
   Teleport can do.
 publishedAt: 2021-10-29T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - teleport
 videoId: pgrokuuhvovem0ajyew4tncu
