@@ -24,11 +24,7 @@ workspaces: bun: {
 		beforeInstall: [
 			// Set up projen-platform-service before generators run
 			{ref: "#projen-generator:types"},
+			{match: labels: ["projen"]},
 		]
-	}
-
-	generators: projen: {
-		labels: ["projen"]
-		parallel: true
 	}
 }
