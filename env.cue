@@ -2,7 +2,7 @@ package cuenv
 
 import "github.com/cuenv/cuenv/schema"
 
-schema.#Cuenv
+schema.#Base
 
 env: {
 	environment: production: {
@@ -23,8 +23,8 @@ workspaces: bun: {
 	hooks: {
 		beforeInstall: [
 			// Set up projen-platform-service before generators run
-			{ref: "#projen-generator:types"},
-			{match: labels: ["projen"]},
+			schema.#TaskRef & {ref: "#projen-generator:types"},
+			schema.#MatchHook & {match: labels: ["projen"]},
 		]
 	}
 }

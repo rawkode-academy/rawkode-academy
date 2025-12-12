@@ -2,7 +2,7 @@ package cuenv
 
 import "github.com/cuenv/cuenv/schema"
 
-schema.#Cuenv
+schema.#Base
 
 env: {
 	AUTH_SECRET:                "dummy-for-cli"
