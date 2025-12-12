@@ -177,8 +177,7 @@ jobs:
           echo "Schemas to compose:"
           ls -la projects/rawkode.academy/api/schemas/
 
-      - name: Install dependencies
-        working-directory: projects/rawkode.academy/api
+      - name: Install workspace dependencies
         run: bun install
 
       - name: Compose supergraph
