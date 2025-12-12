@@ -1,3 +1,8 @@
+import { execSync } from "node:child_process";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { readFile, stat } from "node:fs/promises";
+import { createRequire } from "node:module";
+import { dirname, join, parse } from "node:path";
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import partytown from "@astrojs/partytown";
@@ -5,17 +10,11 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import vue from "@astrojs/vue";
 import tailwindcss from "@tailwindcss/vite";
+import { defineConfig, envField, fontProviders } from "astro/config";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
-import { defineConfig, envField, fontProviders } from "astro/config";
-import matter from "gray-matter";
-import { readFile, stat } from "node:fs/promises";
-import { execSync } from "node:child_process";
-import { statSync, readFileSync } from "node:fs";
-import { dirname, join, parse } from "node:path";
-import { createRequire } from "node:module";
-import { existsSync } from "node:fs";
 import { glob } from "glob";
+import matter from "gray-matter";
 import rehypeExternalLinks from "rehype-external-links";
 
 // Load CUE language grammar for syntax highlighting
@@ -61,9 +60,11 @@ function searchForWorkspaceRoot(current: string): string {
 	}
 	return current;
 }
+
 import { vite as vidstackPlugin } from "vidstack/plugins";
-import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
+import guessTheLogo from "../games/guess-the-logo/plugin";
 import { deriveSlugFromFile } from "./src/utils/content-slug";
+import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
 
 type AstroUserConfig = Parameters<typeof defineConfig>[0];
 type AstroVitePlugins = NonNullable<
@@ -144,7 +145,7 @@ async function buildLastmodIndex() {
 	const moduleFiles = await glob("content/courses/**/*.{md,mdx}");
 	for (const file of moduleFiles) {
 		// Skip top-level course files handled above
-		if (/^content\/courses\/[^\/]+\.(md|mdx)$/i.test(file)) continue;
+		if (/^content\/courses\/[^/]+\.(md|mdx)$/i.test(file)) continue;
 		try {
 			const raw = await readFile(file, "utf8");
 			const fm = matter(raw).data as Record<string, any>;
@@ -315,6 +316,7 @@ export default defineConfig({
 				},
 			},
 		}),
+		guessTheLogo(),
 		partytown({
 			config: {
 				forward: [

@@ -20,6 +20,11 @@ function getNewsletterCookieName(audience: string): string {
 	return `newsletter:${audience}:updates`;
 }
 
+type EmailPreference = {
+	audience: string;
+	channel: string;
+};
+
 export const newsletter = {
 	subscribe: defineAction({
 		input: z.object({
@@ -124,9 +129,9 @@ export const newsletter = {
 			const source = input.source || "website:settings:unsubscribe-all";
 
 			const allPrefs =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+				(await context.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
 					prefixedUserId,
-				);
+				)) as EmailPreference[];
 
 			const unsubscribePromises = allPrefs.map((pref) =>
 				context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(

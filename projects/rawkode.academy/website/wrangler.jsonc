@@ -76,6 +76,16 @@
 			"binding": "SKI_SHARE_CARDS",
 			"service": "games-ski-share-cards-rpc",
 			"entrypoint": "SkiShareCards"
+		},
+		{
+			"binding": "GTL_PLAYER_STATS",
+			"service": "games-gtl-player-stats-rpc",
+			"entrypoint": "GtlPlayerStats"
+		},
+		{
+			"binding": "GTL_LEADERBOARD",
+			"service": "games-gtl-leaderboard-rpc",
+			"entrypoint": "GtlLeaderboard"
 		}
 	],
 	"tail_consumers": [{ "service": "posthog-collector" }]
