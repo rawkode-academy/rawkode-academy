@@ -23,11 +23,13 @@ workspaces: bun: {
 	hooks: {
 		beforeInstall: [
 			{ref: "#projen-generator:types"},
+			{
+				name: "projen"
+				match: {
+					labels: ["projen"]
+					parallel: true
+				}
+			},
 		]
-	}
-
-	generators: projen: {
-		labels: ["projen"]
-		parallel: true
 	}
 }

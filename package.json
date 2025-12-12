@@ -5,7 +5,8 @@
   "workspaces": [
     "content",
     "packages/**",
-    "projects/**"
+    "projects/**",
+    "!projects/rawkode.academy/generators/projen-platform-service"
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",

@@ -15,8 +15,6 @@ hooks: onEnter: devenv: {
 	source: true
 }
 
-workspaces: bun: {}
-
 tasks: {
 	dev: {
 		command: "bun"
