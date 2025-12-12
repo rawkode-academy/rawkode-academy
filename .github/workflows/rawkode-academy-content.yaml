@@ -43,8 +43,7 @@ jobs:
         working-directory: projects/rawkode.academy/content
         run: bun run .projenrc.ts
 
-      - name: Install service dependencies
-        working-directory: projects/rawkode.academy/content
+      - name: Install workspace dependencies
         run: bun install
 
       - name: Authenticate to Google Cloud
