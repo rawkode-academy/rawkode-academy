@@ -75,6 +75,11 @@ export function registerTechnologies(
 				nullable: true,
 				resolve: (r: TechnologyItem) => r.relatedTechnologies ?? null,
 			}),
+			terms: t.field({
+				type: ["String"],
+				nullable: true,
+				resolve: (r: TechnologyItem) => r.terms ?? null,
+			}),
 			useCases: t.field({
 				type: ["String"],
 				nullable: true,
