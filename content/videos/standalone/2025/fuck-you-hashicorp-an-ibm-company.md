@@ -33,6 +33,8 @@ description: >-
   What Now: It is time to switch to Pulumi, generate JSON, or look at
   Crossplane.
 publishedAt: 2025-12-11T00:00:00.000Z
+type: recorded
+category: editorial
 technologies:
   - terraform
 videoId: h5nbnjit38i94obymum2ke22

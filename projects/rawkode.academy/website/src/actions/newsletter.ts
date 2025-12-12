@@ -128,7 +128,7 @@ export const newsletter = {
 					prefixedUserId,
 				);
 
-			const unsubscribePromises = allPrefs.map((pref) =>
+			const unsubscribePromises = allPrefs.map((pref: { channel: string; audience: string }) =>
 				context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{

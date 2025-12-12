@@ -21,6 +21,10 @@ const videos = defineCollection({
 		publishedAt: z.coerce.date(),
 		duration: z.number().nonnegative().optional(),
 		audioFileSize: z.number().positive().optional(), // bytes, for podcast enclosure
+		type: z.enum(["live", "recorded"]).optional(),
+		category: z
+			.enum(["editorial", "tutorial", "review", "interview", "announcement"])
+			.optional(),
 		// streamUrl/thumbnailUrl/duration are derived at runtime
 		// Technologies: accept plain ids (e.g., "docker") or full entry ids ("docker/index"),
 		// normalize to "<id>/index" for internal use, and verify existence.
