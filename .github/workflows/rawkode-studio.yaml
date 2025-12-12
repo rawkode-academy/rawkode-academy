@@ -30,29 +30,34 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install generator dependencies
-        working-directory: projects/rawkode.academy/generators/projen-platform-service
+      - name: Generate projen files
         run: |
+          # Install projen generator dependencies
+          cd projects/rawkode.academy/generators/projen-platform-service
           bun install
           bun run types
+          cd -
 
-      - name: Run projen for all platform services
-        run: |
+          # Generate projen files for platform services
           for service in email-preferences email-service emoji-reactions video-likes; do
             SERVICE_DIR="projects/rawkode.academy/platform/$service"
             if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
+              echo "Running projen for $service..."
               cd "$SERVICE_DIR"
               bun run .projenrc.ts
               cd -
             fi
           done
 
-      - name: Run projen for all game services
-        run: |
+          # Generate projen files for game services
           for service in achievements leaderboard player-learned-phrases player-stats share-cards; do
-            cd "projects/rawkode.academy/games/secrets-of-kubernetes/$service"
-            bun run .projenrc.ts
-            cd -
+            SERVICE_DIR="projects/rawkode.academy/games/secrets-of-kubernetes/$service"
+            if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
+              echo "Running projen for ski-$service..."
+              cd "$SERVICE_DIR"
+              bun run .projenrc.ts
+              cd -
+            fi
           done
 
       - name: Install workspace dependencies
