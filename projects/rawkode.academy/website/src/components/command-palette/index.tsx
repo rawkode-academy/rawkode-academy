@@ -7,6 +7,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { actions } from "astro:actions";
 import { SkeletonList } from "@/components/common/SkeletonList";
 import { getCategoryIcon, GitHubIcon } from "./icons";
 import {
@@ -52,6 +53,7 @@ export default function CommandPalette({
 	const [search, setSearch] = useState("");
 	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
 	const [articleItems, setArticleItems] = useState<NavigationItem[]>([]);
+	const [aiResponse, setAiResponse] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -162,7 +164,7 @@ export default function CommandPalette({
 		};
 	}, []);
 
-	// Search for articles when user types
+	// Search using AutoRAG when user types
 	useEffect(() => {
 		if (searchTimeoutRef.current) {
 			clearTimeout(searchTimeoutRef.current);
@@ -170,6 +172,7 @@ export default function CommandPalette({
 
 		if (activePage !== "root") {
 			setArticleItems([]);
+			setAiResponse(null);
 			setIsSearchingArticles(false);
 			return;
 		}
@@ -178,21 +181,64 @@ export default function CommandPalette({
 			setIsSearchingArticles(true);
 			searchTimeoutRef.current = setTimeout(async () => {
 				try {
-					const response = await fetch(
-						`/api/search-articles.json?q=${encodeURIComponent(search)}`,
-					);
-					if (response.ok) {
-						const articles: NavigationItem[] = await response.json();
-						setArticleItems(articles);
+					const { data, error } = await actions.search({
+						query: search,
+					});
+
+					if (error) {
+						console.error("Failed to search:", error);
+						setArticleItems([]);
+						setAiResponse(null);
+						return;
 					}
+
+					// Store the AI-generated response
+					setAiResponse(data?.response || null);
+
+					// Transform AutoRAG results to NavigationItem format
+					interface AutoRAGResult {
+						file_id: string;
+						filename: string;
+						score: number;
+						attributes: Record<string, string | number | boolean | null>;
+						content: Array<{
+							type: "text";
+							text: string;
+						}>;
+					}
+
+					const searchResults: NavigationItem[] =
+						data?.data?.map((result: AutoRAGResult, index: number) => {
+							// Extract first content block as description
+							const contentPreview =
+								result.content?.[0]?.text?.slice(0, 100) || "";
+
+							return {
+								id: `search-${index}-${result.file_id}`,
+								title: result.filename
+									.replace(/\.[^/.]+$/, "")
+									.replace(/-/g, " "),
+								description: contentPreview
+									? `${contentPreview}...`
+									: `Relevance: ${Math.round(result.score * 100)}%`,
+								href: `/${result.filename.replace(/\.[^/.]+$/, "")}`,
+								category: "Search Results",
+								keywords: [search],
+							};
+						}) || [];
+
+					setArticleItems(searchResults);
 				} catch (error) {
-					console.error("Failed to search articles:", error);
+					console.error("Failed to search:", error);
+					setArticleItems([]);
+					setAiResponse(null);
 				} finally {
 					setIsSearchingArticles(false);
 				}
 			}, 300); // Debounce search
 		} else {
 			setArticleItems([]);
+			setAiResponse(null);
 			setIsSearchingArticles(false);
 		}
 
@@ -229,6 +275,7 @@ export default function CommandPalette({
 		if (!isOpen) {
 			setPages(["root"]);
 			setSearch("");
+			setAiResponse(null);
 			hasTrackedOpen.current = false;
 		} else if (!hasTrackedOpen.current) {
 			// Track command palette opened
@@ -389,6 +436,29 @@ export default function CommandPalette({
 					</div>
 
 					<Command.List className="command-palette-list">
+						{/* AI Response Summary */}
+						{isRootPage && aiResponse && !isSearchingArticles && (
+							<div className="command-palette-ai-response">
+								<div className="command-palette-ai-header">
+									<svg
+										className="command-palette-ai-icon"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth={2}
+											d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+										/>
+									</svg>
+									<span>AI Summary</span>
+								</div>
+								<p className="command-palette-ai-text">{aiResponse}</p>
+							</div>
+						)}
+
 						{isLoading && (
 							<div className="command-palette-loading">
 								<SkeletonList
