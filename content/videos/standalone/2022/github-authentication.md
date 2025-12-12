@@ -9,6 +9,8 @@ description: >-
   In this live demo, David will walk you through adding GitHub authentication to
   your Teleport cluster.
 publishedAt: 2022-05-04T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - teleport
 videoId: gz1nbyatbi6h3q1usddwkdqh

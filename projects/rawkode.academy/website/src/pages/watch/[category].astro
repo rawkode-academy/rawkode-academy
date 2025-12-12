@@ -1,0 +1,163 @@
+---
+export const prerender = false;
+
+import { getCollection } from "astro:content";
+import VideoMetadata from "@/components/html/video-metadata.astro";
+import VideoFeed from "@/components/video/video-feed.astro";
+import Page from "@/wrappers/page.astro";
+
+// Map plural URL slugs to singular category values used in video frontmatter
+const validCategories = {
+	editorials: {
+		title: "Editorial",
+		description: "Opinion pieces, commentary, and industry analysis",
+		frontmatterValue: "editorial",
+	},
+	tutorials: {
+		title: "Tutorials",
+		description: "Step-by-step guides and educational content",
+		frontmatterValue: "tutorial",
+	},
+	reviews: {
+		title: "Reviews",
+		description: "In-depth reviews of tools, platforms, and technologies",
+		frontmatterValue: "review",
+	},
+	interviews: {
+		title: "Interviews",
+		description: "Conversations with industry experts and thought leaders",
+		frontmatterValue: "interview",
+	},
+	announcements: {
+		title: "Announcements",
+		description: "News, updates, and important announcements",
+		frontmatterValue: "announcement",
+	},
+} as const;
+
+type CategorySlug = keyof typeof validCategories;
+
+const { category } = Astro.params;
+
+if (!category || !(category in validCategories)) {
+	return Astro.redirect("/watch");
+}
+
+const categorySlug = category as CategorySlug;
+const categoryInfo = validCategories[categorySlug];
+
+// Set cache headers
+Astro.response.headers.set(
+	"Cache-Control",
+	"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+);
+Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
+Astro.response.headers.set(
+	"Cache-Tag",
+	`videos-page, videos-list, videos-${categorySlug}`,
+);
+Astro.response.headers.set("X-Build-Time", new Date().toISOString());
+
+// Get page parameter from URL
+const page = parseInt(Astro.url.searchParams.get("page") || "1", 10);
+const videosPerPage = 16;
+
+// Load and filter videos by category (using frontmatter value, not URL slug)
+const allVideos = (await getCollection("videos"))
+	.map((v) => v.data)
+	.filter((v) => v.category === categoryInfo.frontmatterValue);
+
+// Sort newest first
+allVideos.sort(
+	(a, b) =>
+		new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+);
+
+// Pagination
+const start = (page - 1) * videosPerPage;
+const end = start + videosPerPage;
+const feedVideos = allVideos.slice(start, end).map((v) => ({
+	id: v.videoId,
+	title: v.title,
+	description: v.description,
+	slug: v.slug,
+	thumbnailUrl: `https://content.rawkode.academy/videos/${v.videoId}/thumbnail.jpg`,
+	streamUrl: `https://content.rawkode.academy/videos/${v.videoId}/stream.m3u8`,
+	duration: typeof v.duration === "number" ? v.duration : 0,
+	publishedAt:
+		v.publishedAt instanceof Date
+			? v.publishedAt.toISOString()
+			: String(v.publishedAt),
+}));
+const hasNextPage = end < allVideos.length;
+const totalVideos = allVideos.length;
+---
+
+<Page title={`${categoryInfo.title} Videos`}>
+	{page > 1 && (
+		<Fragment slot="extra-head">
+			<meta name="robots" content="noindex,follow" />
+		</Fragment>
+	)}
+	<VideoMetadata
+		slot="extra-head"
+		title={`${categoryInfo.title} - Rawkode Academy Videos`}
+		description={categoryInfo.description}
+		isVideoList={true}
+	/>
+
+	<div class="flex flex-col stack-gap-lg section-py">
+		{totalVideos === 0 ? (
+			<div class="text-center py-12">
+				<h1 class="text-2xl font-bold text-primary-content mb-4">
+					{categoryInfo.title}
+				</h1>
+				<p class="text-secondary-content mb-8">
+					{categoryInfo.description}
+				</p>
+				<p class="text-muted">
+					No videos in this category yet. Check back soon!
+				</p>
+				<a
+					href="/watch"
+					class="inline-block mt-6 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+				>
+					Browse All Videos
+				</a>
+			</div>
+		) : (
+			<>
+				<VideoFeed
+					title={page === 1 ? categoryInfo.title : `${categoryInfo.title} - Page ${page}`}
+					description={categoryInfo.description}
+					videos={feedVideos}
+				/>
+
+				{/* Pagination controls */}
+				<div class="flex justify-center items-center stack-gap-sm">
+					{page > 1 && (
+						<a
+							href={page === 2 ? `/watch/${categorySlug}` : `/watch/${categorySlug}?page=${page - 1}`}
+							class="inline-block px-4 py-2 bg-gray-200 dark:bg-gray-700 text-secondary-content rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+						>
+							← Previous
+						</a>
+					)}
+
+					<span class="px-4 py-2 text-secondary-content">
+						Page {page} of {Math.ceil(totalVideos / videosPerPage)}
+					</span>
+
+					{hasNextPage && (
+						<a
+							href={`/watch/${categorySlug}?page=${page + 1}`}
+							class="inline-block px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+						>
+							Next →
+						</a>
+					)}
+				</div>
+			</>
+		)}
+	</div>
+</Page>

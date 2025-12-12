@@ -78,6 +78,8 @@ description: >-
 
   55:00 Shameless Plugs
 publishedAt: 2023-11-08T17:00:00.000Z
+type: recorded
+category: interview
 technologies:
   - influxdb
   - rust

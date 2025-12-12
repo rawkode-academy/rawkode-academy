@@ -1,0 +1,469 @@
+standalone/2022/part-3-tutorial-2-getting-started-with-influxdb.md
+  Title: Part 3 - Tutorial 2: Getting Started with InfluxDB
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (10 min)
+
+standalone/2022/part-2-tutorial-1-installation.md
+  Title: Part 2 - Tutorial 1: Installation
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (9 min)
+
+standalone/2025/unlocking-global-edge-services-with-ngrok.md
+  Title: Unlocking Global Edge Services with ngrok
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (4 min)
+
+standalone/2025/relaunching-klustered-with-heroku-vibes.md
+  Title: Relaunching Klustered ... with Heroku Vibes
+  Suggested: type=live, category=announcement
+  Reason: Contains "launch"
+
+standalone/2025/minio-we-wont-miss-you.md
+  Title: MinIO, we won't miss you.
+  Suggested: type=recorded, category=editorial
+  Reason: Contains "we won't miss"
+
+standalone/2024/ebpf-for-runtime-enforcement.md
+  Title: eBPF for Runtime Enforcement
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (9 min)
+
+standalone/2023/automated-kubernetes-operations-with-komodor-and-vcluster.md
+  Title: Automated Kubernetes Operations with Komodor and vcluster
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (6 min)
+
+standalone/2023/empowering-eks-cluster-deployments-and-gitops-with-portainers-simplified-workflow.md
+  Title: 
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (10 min)
+
+standalone/2023/have-you-ever-seen-a-production-grade-server-side-webassembly-application.md
+  Title: Have You Ever Seen a Production Grade, Server Side, WebAssembly Application?
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (1 min)
+
+standalone/2023/custom-controls-with-gpt.md
+  Title: Custom Controls with GPT
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (10 min)
+
+standalone/2023/rust-sdk-walkthrough.md
+  Title: Rust SDK Walkthrough
+  Suggested: type=recorded, category=tutorial
+  Reason: Contains "walkthrough"
+
+standalone/2023/sentry-prometheus-and-grafana-integrations.md
+  Title: Sentry, Prometheus, & Grafana Integrations
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+standalone/2023/stateful-webassembly-apps-with-key-value-stores.md
+  Title: Stateful WebAssembly Apps with Key-Value Stores
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (8 min)
+
+standalone/2023/komodor-vs-klustered.md
+  Title: Komodor Vs. Klustered
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+standalone/2023/secure-container-images-the-easy-way.md
+  Title: Secure Container Images The EASY Way
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (10 min)
+
+standalone/2023/whats-new-with-spin-v0-8.md
+  Title: What's New with Spin (v0.8)
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (8 min)
+
+standalone/2023/ngroks-kubernetes-ingress-controller-is-amazing-2.md
+  Title: ngrok's Kubernetes Ingress Controller is AMAZING
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (8 min)
+
+standalone/2023/keep-authentication-simple-with-portainers-oauth-connectors.md
+  Title: Keep Authentication Simple with Portainers OAuth Connectors
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (9 min)
+
+standalone/2023/bluesky-embed-with-spin-webassembly.md
+  Title: BlueSky Embed with Spin WebAssembly
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (9 min)
+
+standalone/2023/parca-and-grafana.md
+  Title: Parca & Grafana
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (9 min)
+
+standalone/2023/building-and-running-spin-applications-with-docker.md
+  Title: Building & Running Spin Applications with Docker
+  Suggested: type=recorded, category=tutorial
+  Reason: Short duration (8 min)
+
+shows/klustered/2022/22-borko-vs-bojan.md
+  Title: 22. Borko Vs. Bojan
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2022/klustered-teams-chainguard-vs-chainguard-2.md
+  Title: Klustered Teams - Chainguard Vs. Chainguard
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2022/the-community-vs-rawkode.md
+  Title: The Community Vs. Rawkode
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2022/rawkode-and-the-null-channel-vs-the-community.md
+  Title: Rawkode & The Null Channel Vs. The Community
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2022/22-leigh-capili-vs-marcus-noble.md
+  Title: 22. Leigh Capili vs. Marcus Noble
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-17.md
+  Title: Klustered #17
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-community-vs-rawkode.md
+  Title: Klustered: Community vs. Rawkode
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-vii.md
+  Title: Klustered (Part VII)
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-13.md
+  Title: Klustered #13
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-v.md
+  Title: Klustered (Part V)
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-teams-digitalocean-and-skyscanner.md
+  Title: Klustered Teams: DigitalOcean & Skyscanner
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-19.md
+  Title: Klustered #19
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-iii.md
+  Title: Klustered (Part III)
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-9.md
+  Title: Klustered #9
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-18.md
+  Title: Klustered #18
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-ii.md
+  Title: Klustered (Part II)
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-iv.md
+  Title: Klustered (Part IV)
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-viii.md
+  Title: Klustered (Part VIII)
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-teams-container-solutions-and-civo-cloud.md
+  Title: Klustered Teams: Container Solutions & Civo Cloud
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-teams-carta-and-fairwinds.md
+  Title: Klustered Teams: Carta & Fairwinds
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-teams-redhat-and-talos-systems.md
+  Title: Klustered Teams: RedHat & Talos Systems
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-vi.md
+  Title: Klustered (Part VI)
+  Suggested: type=live, category=editorial
+  Reason: Contains "problem with"
+
+shows/klustered/2021/klustered-newcomers-1.md
+  Title: Klustered: Newcomers #1
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-11.md
+  Title: Klustered #11
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-i.md
+  Title: Klustered (Part I)
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-part-viii-ii.md
+  Title: Klustered (Part VIII-II)
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-teams-control-plane-and-learnk8s.md
+  Title: Klustered Teams: Control Plane & Learnk8s
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-teams-raft-and-rx-m.md
+  Title: Klustered Teams: Raft & RX-M
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-15.md
+  Title: Klustered #15
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-14.md
+  Title: Klustered #14
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/klustered/2021/klustered-10.md
+  Title: Klustered #10
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2022/hands-on-introduction-to-devstand.md
+  Title: Hands-on Introduction to DevStand
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2022/acing-the-devops-interview.md
+  Title: Acing the DevOps Interview
+  Suggested: type=live, category=interview
+  Reason: Contains "interview"
+
+shows/rawkode-live/2022/introducing-apko-and-melange.md
+  Title: Introducing apko & melange
+  Suggested: type=live, category=announcement
+  Reason: Contains "introducing"
+
+shows/rawkode-live/2022/hands-on-introduction-to-devspace.md
+  Title: Hands-on Introduction to DevSpace
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2025/hands-on-introduction-to-k0rdent.md
+  Title: Hands-on Introduction to k0rdent
+  Suggested: type=live, category=editorial
+  Reason: Contains "rant"
+
+shows/rawkode-live/2025/hands-on-introduction-lightpanda.md
+  Title: Hands-on Introduction to lightpanda
+  Suggested: type=live, category=review
+  Reason: Contains "compared"
+
+shows/rawkode-live/2025/hands-on-introduction-to-spicedb.md
+  Title: Hands-on Introduction to SpiceDB
+  Suggested: type=live, category=interview
+  Reason: Contains "q&a with"
+
+shows/rawkode-live/2025/introducing-wassette-securing-mcp-with-webassembly.md
+  Title: Introducing Wassette: Securing MCP with WebAssembly
+  Suggested: type=live, category=announcement
+  Reason: Contains "introducing"
+
+shows/rawkode-live/2024/hands-on-introduction-to-quickwit.md
+  Title: Hands-on Introduction to Quickwit
+  Suggested: type=recorded, category=tutorial
+  Reason: Contains "quick"
+
+shows/rawkode-live/2023/hands-on-overview-of-komodor.md
+  Title: Hands-on Overview of Komodor
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2021/hands-on-introduction-to-k0s.md
+  Title: Hands-on Introduction to K0s
+  Suggested: type=live, category=editorial
+  Reason: Contains "rant"
+
+shows/rawkode-live/2021/hands-on-introduction-to-vcluster.md
+  Title: Hands-on Introduction to vcluster
+  Suggested: type=live, category=interview
+  Reason: Contains "interview"
+
+shows/rawkode-live/2021/hands-on-introduction-to-firecracker.md
+  Title: Hands-on Introduction to Firecracker
+  Suggested: type=live, category=review
+  Reason: Contains "review"
+
+shows/rawkode-live/2021/hands-on-with-litmus-2-0.md
+  Title: Hands-on with Litmus 2.0
+  Suggested: type=live, category=review
+  Reason: Contains "benchmark"
+
+shows/rawkode-live/2021/bdd-test-automation.md
+  Title: BDD Test Automation
+  Suggested: type=live, category=editorial
+  Reason: Contains "rant"
+
+shows/rawkode-live/2021/writing-a-kubernetes-controller.md
+  Title: Writing a Kubernetes Controller
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2021/introduction-to-fluentd-and-fluent-bit.md
+  Title: Introduction to Fluentd & Fluent Bit
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2021/hands-on-introduction-to-okteto.md
+  Title: Hands-on Introduction to Okteto
+  Suggested: type=live, category=review
+  Reason: Contains "review"
+
+shows/rawkode-live/2021/hands-on-introduction-to-jspolicy.md
+  Title: Hands-on Introduction to jsPolicy
+  Suggested: type=live, category=interview
+  Reason: Contains "interview"
+
+shows/rawkode-live/2021/introduction-to-timescale.md
+  Title: Introduction to Timescale
+  Suggested: type=live, category=announcement
+  Reason: Contains "launch"
+
+shows/rawkode-live/2021/introduction-to-kyverno.md
+  Title: Introduction to Kyverno
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2021/introduction-to-litmus-chaos.md
+  Title: Introduction to Litmus Chaos
+  Suggested: type=live, category=review
+  Reason: Contains "benchmark"
+
+shows/rawkode-live/2021/kubernetes-security-lab.md
+  Title: Kubernetes Security Lab
+  Suggested: type=live, category=announcement
+  Reason: Contains "launch"
+
+shows/rawkode-live/2021/hands-on-with-rust-async-await.md
+  Title: Hands-on with Rust: Async / Await
+  Suggested: type=live, category=editorial
+  Reason: Contains "rant"
+
+shows/rawkode-live/2021/how-to-write-a-kubectl-plugin-from-scratch.md
+  Title: How to Write a kubectl Plugin from Scratch
+  Suggested: type=recorded, category=editorial
+  Reason: Contains "why i"
+
+shows/rawkode-live/2021/crossplane-in-action.md
+  Title: Crossplane in Action
+  Suggested: type=live, category=editorial
+  Reason: Contains "opinion"
+
+shows/rawkode-live/2021/hands-on-with-rust-lifetimes-and-ownership.md
+  Title: Hands-on with Rust: Lifetimes & Ownership
+  Suggested: type=live, category=editorial
+  Reason: Contains "rant"
+
+shows/rawkode-live/2020/managing-linux-in-real-time-with-saltstack.md
+  Title: Managing Linux in Real Time with SaltStack
+  Suggested: type=live, category=editorial
+  Reason: Contains "fuck"
+
+shows/rawkode-live/2020/introduction-to-thanos.md
+  Title: Introduction to Thanos
+  Suggested: type=live, category=interview
+  Reason: Contains "guest:"
+
+shows/rawkode-live/2020/ipv6-only-kubernetes-clusters-rtfm-with-rawkode.md
+  Title: IPv6 ONLY Kubernetes Clusters (RTFM with Rawkode)
+  Suggested: type=live, category=editorial
+  Reason: Contains "why i"
+
+shows/rawkode-live/2020/introduction-to-dgraph.md
+  Title: Introduction to Dgraph
+  Suggested: type=live, category=interview
+  Reason: Contains "guest:"
+
+shows/rawkode-live/2020/introduction-to-openebs.md
+  Title: Introduction to OpenEBS
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2020/introduction-to-carvel.md
+  Title: Introduction to Carvel
+  Suggested: type=live, category=review
+  Reason: Contains "hands on"
+
+shows/rawkode-live/2020/introduction-to-kube-vip-bare-metal-load-balancing-rtfm-with-rawkode.md
+  Title: Introduction to kube-vip: Bare Metal Load Balancing (RTFM with Rawkode)
+  Suggested: type=live, category=review
+  Reason: Contains "hands on"
+
+shows/rawkode-live/2020/introduction-to-rust-part-iii.md
+  Title: Introduction to Rust (Part III)
+  Suggested: type=live, category=editorial
+  Reason: Contains "rant"
+
+shows/rawkode-live/2020/introduction-to-fleet-k3s-and-rancher.md
+  Title: Introduction to Fleet, k3s, & Rancher
+  Suggested: type=live, category=review
+  Reason: Contains "hands on"
+
+shows/rawkode-live/2020/introduction-to-containerd.md
+  Title: Introduction to containerd
+  Suggested: type=live, category=review
+  Reason: Contains "hands on"
+
+shows/rawkode-live/2020/introduction-to-rust-part-i.md
+  Title: Introduction to Rust (Part I)
+  Suggested: type=live, category=editorial
+  Reason: Contains "rant"
+
+shows/rawkode-live/2020/introduction-to-rust-part-ii.md
+  Title: Introduction to Rust (Part II)
+  Suggested: type=live, category=editorial
+  Reason: Contains "rant"
+
+shows/rawkode-live/2020/introduction-to-linkerd.md
+  Title: Introduction to Linkerd
+  Suggested: type=live, category=announcement
+  Reason: Contains "introducing"
+
+shows/rawkode-live/2020/introduction-to-tilt.md
+  Title: Introduction to Tilt
+  Suggested: type=live, category=review
+  Reason: Contains "vs"
+
+shows/rawkode-live/2020/introduction-to-open-policy-agent.md
+  Title: Introduction to Open Policy Agent
+  Suggested: type=live, category=interview
+  Reason: Contains "guest:"

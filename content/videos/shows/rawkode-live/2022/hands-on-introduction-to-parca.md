@@ -7,6 +7,8 @@ description: >-
   applications with Parca; an open-source project from the team at Polar
   Signals.
 publishedAt: 2022-01-26T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - parca
 show: rawkode-live

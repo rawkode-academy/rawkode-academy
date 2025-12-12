@@ -7,6 +7,8 @@ description: >-
   a toolset for building distroless container images in a declarative fashion
   with Alpine's APK.
 publishedAt: 2022-03-17T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - apko
   - melange

@@ -4,6 +4,8 @@ slug: hands-on-introduction-to-dapr
 title: Hands-on Introduction to Dapr
 description: 'Video content coming soon.'
 publishedAt: 2023-12-14T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - dapr
 show: rawkode-live

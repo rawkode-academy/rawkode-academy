@@ -18,6 +18,8 @@ description: >-
   cat.  And for the love of all that is holy, could you please decide on a
   package manager and stick with it?
 publishedAt: 2024-07-17T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies: []
 videoId: fd8h2x0iq6qy06gui4vev807
 chapters:

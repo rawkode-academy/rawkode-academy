@@ -10,6 +10,8 @@ description: >-
 
   https://www.youtube.com/watch?v=n2wdPgW8TNU
 publishedAt: 2023-02-24T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - spin
 videoId: k42oh0xm4308e1k5b12vzy8q

@@ -38,6 +38,8 @@ description: >-
   Rachel loves traveling, culture, meeting new people, networking, and helping
   others grow. Feel free to reach out on LinkedIn with a message and connect!
 publishedAt: 2023-05-22T17:00:00.000Z
+type: recorded
+category: interview
 technologies:
   - kubernetes
 show: cloud-native-compass

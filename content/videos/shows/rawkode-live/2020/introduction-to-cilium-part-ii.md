@@ -4,6 +4,8 @@ slug: introduction-to-cilium-part-ii
 title: Introduction to Cilium (Part II)
 description: "In this episode, joined by Ilya Dmitrichenko, we'll take a look at Cilium; a CNI implementation for Kubernetes, integrated with eBPF.\n\nCilium is open source software for transparently securing the network connectivity between application services deployed using Linux container management platforms like Docker and Kubernetes.\n\nAt the foundation of Cilium is a new Linux kernel technology called BPF, which enables the dynamic insertion of powerful security visibility and control logic within Linux itself. Because BPF runs inside the Linux kernel, Cilium security policies can be applied and updated without any changes to the application code or container configuration.\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:00 - Introductions\n05:20 - What was setup in advance\n06:30 - Installing Cilium / Connectivity Tests\n10:00 - Cilium endpoints\n15:00 - Layer 3/4 network policies\n22:50 - Layer 7 network policies\n31:40 - Hubble UI\n43:10 - DNS network policies\n56:30 - Replacing kube-proxy\n\n\U0001F30E Resources\n\nIlya Dmitrichenko - https://twitter.com/errordeveloper\nCilium - https://cilium.io"
 publishedAt: 2020-11-12T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - cilium
 show: rawkode-live

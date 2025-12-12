@@ -48,6 +48,8 @@ description: >-
 
   https://www.wix.engineering/
 publishedAt: 2023-06-19T17:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: rzoehfxdwc2ldk4xbxgmcdb9

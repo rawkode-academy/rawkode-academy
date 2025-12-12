@@ -4,6 +4,8 @@ slug: hands-on-introduction-to-tektoncd
 title: Hands-on Introduction to TektonCD
 description: "Want to try Equinix Metal? Use the code \"rawkode-live\" for $50 of credit, which is roughly 100 hours of compute on our smaller instances. Sign up at https://equinixmetal.com\n\n---\n\nTekton is a powerful and flexible open-source framework for creating CI/CD systems, allowing developers to build, test, and deploy across cloud providers and on-premise systems.\n\nStandardization\nTekton standardizes CI/CD tooling and processes across vendors, languages, and deployment environments. It works well with Jenkins, Jenkins X, Skaffold, Knative, and many other popular CI/CD tools.\n\nBuilt-in best practices\nTekton lets you create CI/CD systems quickly, giving you scalable, serverless, cloud native execution out of the box.\n\nMaximum flexibility\nTekton abstracts the underlying implementation so that you can choose the build, test, and deploy workflow based on your team’s requirements.\n\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:40 - Introductions\n03:00 - What is TektonCD?\n07:00 - Installing TektonCD\n10:10 - Creating our first tasks\n27:50 - Creating our first pipeline\n44:20 - Building our first container image with buildah\n56:30 - Triggering a build from GitHub events\n\n\n\U0001F30E Resources\n\n\nKevin McDermott - https://twitter.com/bigkevmcd\n\nTektonCD - https://tekton.dev"
 publishedAt: 2020-12-11T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - tektoncd
 show: rawkode-live

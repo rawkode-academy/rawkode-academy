@@ -4,6 +4,8 @@ slug: hands-on-tutorial-of-mirrord
 title: Hands-on Tutorial of mirrord
 description: Hands-on introduction to local Kubernetes development with mirrord
 publishedAt: 2023-07-20T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - mirrord
 show: rawkode-live

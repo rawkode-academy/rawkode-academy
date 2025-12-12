@@ -4,6 +4,8 @@ slug: hands-on-introduction-to-k0s
 title: Hands-on Introduction to K0s
 description: "In this episode, Jussi will guide us through everything we need to know about K0s.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:00 - Introductions\n04:40 - What is k0s?\n22:15 - Installing k0s\n36:00 - Installing with k0sctl\n49:00 - k0sctl with Terraform\n\n\U0001F465 About the Guests\n\nJussi Nummelin\n\n  Technical generalist, Staff Engineer at Mirantis\n\n\n\U0001F426 https://twitter.com/JNummelin\n\U0001F9E9 https://github.com/jnummelin\n\n\n\n\U0001F528 About the Technologies\n\nK0s\n\nThe Simple, Solid & Certified Kubernetes Distribution\n\nDeploy and run Kubernetes workloads at any scale on any infrastructure.\nAll batteries included. 100% open source & free.\n\n\U0001F30F https://k0sproject.io/\n\U0001F426 https://twitter.com/k0sproject\n\U0001F9E9 https://github.com/k0sproject/k0s"
 publishedAt: 2021-08-12T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - k0s
 show: rawkode-live

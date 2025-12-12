@@ -4,6 +4,8 @@ slug: introduction-to-keptn-part-ii
 title: Introduction to Keptn (Part II)
 description: "In this episode, we will continue with our look into Keptn; including automatic remediation.\n\n\nThis episode is part of the Guide to Keptn series.\n  -- Introduction to Keptn (Part I) - https://youtu.be/fjfj97Vb4ds\n  -- Introduction to Keptn (Part II) - This Video\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n00:37 - Introductions\n03:15 - Overview of Part I (Slides)\n16:30 - Quality Gates for Continuous Delivery\n53:00 - Automatic Remediation\n\n\U0001F465 About the Guests\n\nJürgen Etzlstorfer\n\nJürgen is a maintainer of the Keptn open-source project since its beginning. He also takes care of its community and ecosystem and loves to welcome new contributors. Join him! :)\n\n\U0001F426 https://twitter.com/jetzlstorfer\n\U0001F9E9 https://github.com/jetzlstorfer\n\n\n\n\U0001F528 About the Technologies\n\nKeptn\n\nKeptn is a control-plane for DevOps automation of cloud-native applications. Keptn uses a declarative approach to build scalable automation for delivery and operations which can be scaled to a large number of services.\n\n\U0001F30F https://keptn.sh\n\U0001F426 https://twitter.com/keptnProject\n\U0001F9E9 https://github.com/keptn/keptn"
 publishedAt: 2021-01-28T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - keptn
 show: rawkode-live

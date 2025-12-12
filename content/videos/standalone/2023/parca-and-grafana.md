@@ -6,6 +6,8 @@ description: >-
   Learn how to bake your Parca profiling information into Grafana to provide a
   single pane of glass for all your observability data.
 publishedAt: 2023-07-10T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - grafana
   - parca

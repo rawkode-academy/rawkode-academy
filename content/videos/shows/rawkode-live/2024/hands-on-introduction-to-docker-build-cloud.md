@@ -8,6 +8,8 @@ description: >-
   dimensioned for your workloads, no configuration required. The service uses a
   remote build cache, ensuring fast builds anywhere and for all team members.
 publishedAt: 2024-03-06T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - docker
   - docker-build-cloud

@@ -17,6 +17,8 @@ description: >-
   party APIs into your own Firebase-like Developer Toolkit in seconds, without
   getting locked into a specific vendor.
 publishedAt: 2023-01-21T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - wundergraph
 show: rawkode-live

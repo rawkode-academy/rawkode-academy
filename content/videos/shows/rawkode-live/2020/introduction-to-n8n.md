@@ -4,6 +4,8 @@ slug: introduction-to-n8n
 title: Introduction to n8n
 description: "n8n (pronounced n-eight-n) helps you to interconnect every app with an API in the world with each other to share and manipulate its data without a single line of code. It is an easy to use, user-friendly and highly customizable service, which uses an intuitive user interface for you to design your unique workflows very fast. Hosted on your server and not based in the cloud, it keeps your sensible data very secure in your own trusted database.\n\n\U0001F570 Timeline\n\n00:00 - Introductions\n00:50 - Who is Tanay?\n03:00 - What is n8n?\n09:50 - Installing n8n\n16:10 - Simple HTTP workflow\n28:45 - Working with JSON from HTTP\n38:00 - Philips Hue integration\n49:30 - OpenWeatherMap integration\n1:12:00 - Writing a Telegram bot\n\n\n\U0001F30E Resources\n\nTanay Pant - https://twitter.com/tanay1337\nn8n - https://n8n.io"
 publishedAt: 2020-11-06T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - n8n
 show: rawkode-live

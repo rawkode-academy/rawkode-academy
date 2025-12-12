@@ -26,6 +26,8 @@ description: >-
 
   https://twitter.com/rawkode
 publishedAt: 2022-12-22T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - kubernetes
 videoId: n3ub5yilclec48k398q64zi2

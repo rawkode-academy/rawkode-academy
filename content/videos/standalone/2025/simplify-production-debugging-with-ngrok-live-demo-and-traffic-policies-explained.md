@@ -21,6 +21,8 @@ description: >-
   Techniques\n08:43 Exploring ngrok's Full Potential\n09:49 Conclusion and Next
   Steps
 publishedAt: 2025-03-27T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies: []
 videoId: z7fzq9jqcn0m0noy4qkmevjq
 duration: 624

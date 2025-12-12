@@ -13,6 +13,8 @@ description: >-
   Thanks to Equinix Metal for providing the hardware! Get 200USD credit with the
   code "rawkode". Learn more about Equinix Metal at https://rawkode.live/metal
 publishedAt: 2022-11-11T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - kubernetes
 show: klustered

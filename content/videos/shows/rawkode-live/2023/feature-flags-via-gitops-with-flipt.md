@@ -6,6 +6,8 @@ description: >-
   Flipt is an open-source, self-hosted feature flag application that allows you
   to run experiments across services in your environment.
 publishedAt: 2023-11-18T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - flipt
 show: rawkode-live

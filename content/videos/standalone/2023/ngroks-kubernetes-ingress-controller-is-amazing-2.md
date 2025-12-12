@@ -13,6 +13,8 @@ description: >-
   modules using Custom Resource Definitions (CRDs) and Kubernetes-native
   tooling.
 publishedAt: 2023-09-22T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - ngrok
 videoId: m8xeaa8bqd2gszto4g6j9xku

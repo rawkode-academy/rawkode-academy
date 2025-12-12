@@ -35,6 +35,8 @@ description: >-
 
   11:06 Rate Limiting
 publishedAt: 2024-10-03T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - ngrok
 videoId: my23g8vi21qfb16ei845jdjv

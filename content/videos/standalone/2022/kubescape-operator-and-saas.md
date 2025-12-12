@@ -11,6 +11,8 @@ description: >-
   This first video guides you through deploying Kubescape to a Kubernetes
   cluster and understanding the report through the SaaS based GUI.
 publishedAt: 2022-12-20T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - kubescape
 videoId: q29r22us2pmcizlk0v0zifyb

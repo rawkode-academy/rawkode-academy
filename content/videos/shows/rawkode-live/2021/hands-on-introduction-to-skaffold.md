@@ -4,6 +4,8 @@ slug: hands-on-introduction-to-skaffold
 title: Hands-on Introduction to Skaffold
 description: "In this episode, Vic will guide us through everything we need to know to get started developing for #Kubernetes, locally, with Skaffold.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n00:50 - Introductions\n03:00 - WHat is Skaffold? (Slides)\n15:00 - Microservice Demo\n22:30 - TypeScript Demo\n31:30 - CloudNative BuildPacks Demo\n40:00 - Multiple Config Demo\n51:00 - Helm Demo\n53:00 - React Hot Reload Demo\n58:20 - Custom Command / Test Demo\n1:02:00 - Advanced Demo (Using it all together)\n\n\U0001F465 About the Guests\n\nVic Iglesias\n\n  Fun - Techno House Niners Syrah; Work - @googlecloud. DevEx PM. Argentino\n\n\n\U0001F426 https://twitter.com/vicnastea\n\U0001F9E9 https://github.com/viglesiasce\n\U0001F30F https://testingclouds.wordpress.com/\n\n\n\U0001F528 About the Technologies\n\nSkaffold\n\nFast. Repeatable. Simple. Local Kubernetes Development.\n\nSkaffold handles the workflow for building, pushing and deploying your application, allowing you to focus on what matters most: writing code. \n\n\n\U0001F30F https://skaffold.dev/\n\n\U0001F9E9 https://github.com/GoogleContainerTools/skaffold\n\n#Skaffold"
 publishedAt: 2021-04-28T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - skaffold
 show: rawkode-live

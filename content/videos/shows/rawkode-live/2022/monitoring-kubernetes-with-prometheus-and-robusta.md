@@ -12,6 +12,8 @@ description: >-
   somewhat like Zapier/IFTTT for devops, written in Python, with an emphasis on
   prebuilt useful automations and not just "build your own".
 publishedAt: 2022-12-14T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - robusta
 show: rawkode-live

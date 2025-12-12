@@ -17,6 +17,8 @@ description: >-
   Jenkins, CircleCI, Github workflows, Prometheus, and Slack, and supports
   multi-cloud K8s deployments like EKS, GKE, and AKS.
 publishedAt: 2022-02-22T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - kubescape
 show: rawkode-live

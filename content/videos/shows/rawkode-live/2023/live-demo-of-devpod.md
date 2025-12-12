@@ -14,6 +14,8 @@ description: >-
   computer, a Kubernetes cluster, any reachable remote machine or in a VM in the
   cloud.
 publishedAt: 2023-05-24T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - devpod
 show: rawkode-live

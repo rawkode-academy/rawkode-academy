@@ -7,6 +7,8 @@ description: >-
   that by writing a small backend service with Spin: the WebAssembly serverless
   framework.
 publishedAt: 2023-06-23T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - spin
 videoId: ierbuewtemudd1i0w0wru28j

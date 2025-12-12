@@ -19,6 +19,8 @@ description: >-
   We'll be guiding you through broadcasting your first BGP address with the help
   of Equinix Metal, the bare metal cloud.
 publishedAt: 2022-07-14T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies: []
 videoId: cle88zfeqmv5z0rl6g7mi083
 chapters:

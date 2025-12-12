@@ -4,6 +4,8 @@ slug: hands-on-introduction-to-cdk8s
 title: Hands-on Introduction to cdk8s
 description: "In this episode, we'll learn everything we need to know to get started with cdk8s\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:50 - Introductions\n14:00 - Installing CDK8s\n24:20 - Introduction to Snapshot Testing\n28:20 - What are Apps and Charts?\n34:00 - Adding Our First Resource\n28:20 - What are Apps and Charts?\n47:00 - Introduction to CDK8s Plus\n54:30 - Working with Custom Resources\n\n\U0001F465 About the Guests\n\nElad Ben-Israel\n\n  I believe in software abstractions and I build the CDK at AWS\n\n\n\U0001F426 https://twitter.com/emeshbi\n\U0001F9E9 https://github.com/eladb\n\U0001F30F http://eladb.github.io/\n\n\n\U0001F528 About the Technologies\n\ncdk8s\n\nCDK8s\_is a software development framework for defining Kubernetes applications and reusable abstractions using familiar programming languages and rich object-oriented APIs. CDK8s generates pure Kubernetes YAML - you can use CDK8s to define applications for any Kubernetes cluster running anywhere.\n\n\U0001F30F https://cdk8s.io/\n\n\U0001F9E9 https://github.com/cdk8s-team/cdk8s\n\n#Kubernetes #Infrastructure as Code"
 publishedAt: 2021-04-01T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - cdk8s
 show: rawkode-live

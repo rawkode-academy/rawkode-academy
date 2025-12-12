@@ -17,6 +17,8 @@ description: >-
   and a focus on usability, Gitpod contains your entire dev workflow in a
   browser tab.
 publishedAt: 2020-12-15T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - gitpod
 show: rawkode-live

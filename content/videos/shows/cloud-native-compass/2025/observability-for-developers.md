@@ -44,6 +44,8 @@ description: >-
 
   47:20 Final Thoughts
 publishedAt: 2025-06-19T10:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: ftzk1o7srttxqo5z9vdpjrxs

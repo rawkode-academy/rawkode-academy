@@ -34,6 +34,8 @@ description: >-
 
   41:40 Exciting Futures
 publishedAt: 2023-05-15T17:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: eoabgl7qts1lx2b0e5wwt3nf

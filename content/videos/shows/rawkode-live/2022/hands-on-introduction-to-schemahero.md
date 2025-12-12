@@ -6,6 +6,8 @@ description: >-
   In this episode, we take a look at making your database migrations declarative
   and cloud native with Kubernetes.
 publishedAt: 2022-01-28T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - schemahero
 show: rawkode-live

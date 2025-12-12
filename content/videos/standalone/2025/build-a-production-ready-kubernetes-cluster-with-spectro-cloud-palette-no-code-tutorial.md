@@ -41,6 +41,8 @@ description: >-
   Creating a Reusable Monitoring Add-on\n00:09:39 - Deploying Your Cluster to
   GCP\n00:13:02 - Day 2 Operations: Updating a Live Cluster
 publishedAt: 2025-07-07T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies: []
 videoId: d3u3h2ac951stfgdrlwvkysh
 duration: 987

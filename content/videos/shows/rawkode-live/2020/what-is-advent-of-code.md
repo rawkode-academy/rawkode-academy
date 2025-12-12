@@ -23,6 +23,8 @@ description: >-
   Nor do you need a fancy computer; every problem has a solution that completes
   in at most 15 seconds on ten-year-old hardware.
 publishedAt: 2020-12-08T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: g8ln43qrv5dyrv109fnk9led

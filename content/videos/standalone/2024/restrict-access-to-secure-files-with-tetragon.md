@@ -81,6 +81,8 @@ description: >-
   the process before it has a chance to complete the syscall and potentially run
   additional syscalls.
 publishedAt: 2024-02-22T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - tetragon
 videoId: tfahqa0n2pld6jvnu7a8k5w9

@@ -10,6 +10,8 @@ description: >-
   As well as covering the basic UI/dashboarding of Kubernetes resources, David
   focuses on showing you how to secure a Kubernetes cluster with EASE.
 publishedAt: 2023-03-14T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - portainer
 videoId: k5xzx8dfmvu7s3nzdqy32kzy

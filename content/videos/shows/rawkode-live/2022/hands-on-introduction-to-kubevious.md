@@ -67,6 +67,8 @@ description: >-
 
   LinkedIn: https://www.linkedin.com/in/rubenhak/
 publishedAt: 2022-08-27T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - kubevious
 show: rawkode-live

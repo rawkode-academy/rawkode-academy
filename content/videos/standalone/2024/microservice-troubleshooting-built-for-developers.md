@@ -21,6 +21,8 @@ description: >-
 
   05:41 Demo
 publishedAt: 2024-01-24T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - lumigo
 videoId: zh6x60pfsxnaglf391e673pj

@@ -15,6 +15,8 @@ description: >-
 
   Let's dive in
 publishedAt: 2023-01-30T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - kubescape
 videoId: ts7glm4w4d8yxlmd2qnduu7q

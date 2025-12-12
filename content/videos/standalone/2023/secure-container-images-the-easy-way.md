@@ -16,6 +16,8 @@ description: >-
 
   Let's see how
 publishedAt: 2023-04-25T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - slim-toolkit
 videoId: diok2rek56nt6nq7z3839qei

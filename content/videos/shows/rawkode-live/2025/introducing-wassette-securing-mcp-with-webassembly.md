@@ -18,6 +18,8 @@ description: >-
   building AI agents, or exploring WebAssembly beyond the browser, this session
   will give you a forward-looking and hands-on perspective.
 publishedAt: 2025-09-19T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: bkszh959ep2dcbc4ujujqbjp

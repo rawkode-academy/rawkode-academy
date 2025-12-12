@@ -13,6 +13,8 @@ description: >-
   Code:
   https://github.com/rawkode-academy/courses/tree/main/teleport-complete-guide/3-running-teleport-with-docker
 publishedAt: 2021-11-03T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - docker
   - teleport

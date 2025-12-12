@@ -62,6 +62,8 @@ description: >-
   fundamentally abstracted from Kubernetes, then we can drastically reduce the
   operational side.
 publishedAt: 2022-08-25T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - acorn
 show: rawkode-live

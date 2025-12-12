@@ -53,6 +53,8 @@ description: >-
 
   - Exploring user management and RBAC features in Portainer
 publishedAt: 2023-08-24T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - portainer
 videoId: aopb87s3u3cgcitqacbz0glh
