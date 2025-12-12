@@ -25,6 +25,8 @@ description: >-
   "action" or "actions" refer to some scripts/plugins to be used, like
   "actions/checkout@v3" or "actions/cache@v3".
 publishedAt: 2024-01-18T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - gitea
 show: rawkode-live

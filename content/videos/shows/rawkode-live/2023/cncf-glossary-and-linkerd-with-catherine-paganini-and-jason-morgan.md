@@ -15,6 +15,8 @@ description: >-
 
   As well as discussing the glossary, we dive into service mesh and Linkerd.
 publishedAt: 2023-03-07T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: vxnm3rycgt9l71t5svvca8s5

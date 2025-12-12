@@ -17,6 +17,8 @@ description: >-
   continue recognizing IaC benefits, you eventually need to properly manage IaC
   as part of your SDLC.
 publishedAt: 2023-03-29T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - env0
   - pulumi

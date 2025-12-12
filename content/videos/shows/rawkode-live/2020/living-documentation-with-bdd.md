@@ -4,6 +4,8 @@ slug: living-documentation-with-bdd
 title: Living Documentation with BDD
 description: 'Video content coming soon.'
 publishedAt: 2020-12-16T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: xtay8a6iyr4u6ow9kc6iojpe

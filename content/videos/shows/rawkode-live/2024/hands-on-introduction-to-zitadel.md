@@ -28,6 +28,8 @@ description: >-
   computed states. The SOR needs to be transaction safe to make sure all
   operations are in order.
 publishedAt: 2024-01-31T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - zitadel
 show: rawkode-live

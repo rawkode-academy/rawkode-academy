@@ -18,6 +18,8 @@ description: >-
   your Dockerfile. You shouldn't have to throw away your tools and your workflow
   to have small container images.
 publishedAt: 2022-09-01T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - slim-toolkit
 show: rawkode-live

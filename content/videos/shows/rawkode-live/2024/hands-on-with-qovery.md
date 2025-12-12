@@ -25,6 +25,8 @@ description: >-
       Powerful CLI: Use the provided Qovery Engine CLI to deploy your app on your Cloud account seamlessly.
       Web Interface: Qovery provides a web interface through qovery.com
 publishedAt: 2024-10-11T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - qovery
 show: rawkode-live

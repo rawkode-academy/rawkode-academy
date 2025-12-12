@@ -35,6 +35,8 @@ description: >-
 
   19:43 - Running Dagger Pipelines
 publishedAt: 2023-05-25T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - dagger
 videoId: v32afbzo0mzowipaa30orbtz

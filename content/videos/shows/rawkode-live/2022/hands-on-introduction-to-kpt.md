@@ -8,6 +8,8 @@ description: >-
   Kubernetes platforms and KRM-driven infrastructure at scale by manipulating
   declarative Configuration as Data, separated from the code that transforms it.
 publishedAt: 2022-07-15T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - kpt
 show: rawkode-live

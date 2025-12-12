@@ -45,6 +45,8 @@ description: >-
 
   1:03:20: Shameless Plugs
 publishedAt: 2023-05-21T17:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: b3oefzhoncogvr5cyijfckcj

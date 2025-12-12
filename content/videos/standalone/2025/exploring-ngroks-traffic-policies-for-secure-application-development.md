@@ -28,6 +28,8 @@ description: >-
 
   13:41 Summary
 publishedAt: 2025-01-20T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - ngrok
 videoId: ovgas80n8hqlkknowpijiqbb

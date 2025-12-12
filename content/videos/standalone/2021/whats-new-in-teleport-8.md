@@ -4,6 +4,8 @@ slug: whats-new-in-teleport-8
 title: What's New in Teleport 8?
 description: "In this episode, we'll ne joined by Steve Martin from the Teleport team to introduce us to all the new features in Teleport 8.\n\nWant to learn more about Teleport? Visit https://rawkode.live/teleport\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat"
 publishedAt: 2021-12-21T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - teleport
 videoId: usjlx0m96px21ont4ouar9a7

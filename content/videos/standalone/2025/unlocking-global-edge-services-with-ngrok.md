@@ -22,6 +22,8 @@ description: >-
   ease of using ngrok to manage global requests efficiently and keep your
   customers happy.
 publishedAt: 2025-01-23T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - ngrok
 videoId: h0e270cxlhdgnr6x20mcno3d

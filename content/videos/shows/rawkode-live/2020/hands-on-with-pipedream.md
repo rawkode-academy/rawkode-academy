@@ -39,6 +39,8 @@ description: >-
   Send a message to Slack or Discord, store data in S3 or Snowflake, and more,
   all without writing any code (or customize it to your needs).
 publishedAt: 2020-12-16T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - pipedream
 show: rawkode-live

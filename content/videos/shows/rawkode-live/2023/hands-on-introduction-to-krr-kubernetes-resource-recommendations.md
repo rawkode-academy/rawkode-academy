@@ -37,6 +37,8 @@ description: >-
   By right-sizing your containers with KRR, you can save an average of 69% on
   cloud costs.
 publishedAt: 2023-05-25T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - krr
 show: rawkode-live

@@ -28,6 +28,8 @@ description: >-
 
   Easy switch between multiple clusters
 publishedAt: 2022-10-27T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - helm-dashboard
 show: rawkode-live

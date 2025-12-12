@@ -7,6 +7,8 @@ description: >-
   proclaimed WebAssembly sceptic. They discuss the future of Cloud Native and
   improving the broken developer experience.
 publishedAt: 2023-07-21T17:00:00.000Z
+type: recorded
+category: interview
 technologies:
   - webassembly
 show: cloud-native-compass

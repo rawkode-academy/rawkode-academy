@@ -34,6 +34,8 @@ description: >-
 
   https://guidepad.io
 publishedAt: 2024-01-29T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - guidepad
 videoId: klzxhw3ow8qzrua89xr91717

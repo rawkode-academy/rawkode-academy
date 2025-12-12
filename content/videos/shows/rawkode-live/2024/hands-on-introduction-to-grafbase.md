@@ -7,6 +7,8 @@ description: >-
   performance GraphQL APIs close to your users. Compose and connect data sources
   across microservices using GraphQL Federation.
 publishedAt: 2024-02-21T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - grafbase
 show: rawkode-live

@@ -27,6 +27,8 @@ description: >-
 
   Enjoy
 publishedAt: 2023-02-21T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - spin
 videoId: asn46r4vc2cye6ihgp2zamoh

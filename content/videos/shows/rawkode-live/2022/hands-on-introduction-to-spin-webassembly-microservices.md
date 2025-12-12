@@ -18,6 +18,8 @@ description: >-
   applications, and in the next sections we will learn more about Spin
   applications and how to get started.
 publishedAt: 2022-11-11T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - spin
 show: rawkode-live

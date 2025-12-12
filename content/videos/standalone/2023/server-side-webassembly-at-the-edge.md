@@ -8,6 +8,8 @@ description: >-
   server-side WASM binaries on Equinix Metal with low-latency routing, using
   BGP.
 publishedAt: 2023-03-07T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - spin
 videoId: pg8dyt42vac1gmldqsjnkswg

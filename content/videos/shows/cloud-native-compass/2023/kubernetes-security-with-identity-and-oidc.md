@@ -44,6 +44,8 @@ description: >-
 
   Guest: Marc Boorshtein, Tremolo Security
 publishedAt: 2023-05-29T17:00:00.000Z
+type: recorded
+category: interview
 technologies:
   - kubernetes
 show: cloud-native-compass

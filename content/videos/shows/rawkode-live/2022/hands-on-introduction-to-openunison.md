@@ -15,6 +15,8 @@ description: >-
 
   - Web Services
 publishedAt: 2022-09-03T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - openunison
 show: rawkode-live

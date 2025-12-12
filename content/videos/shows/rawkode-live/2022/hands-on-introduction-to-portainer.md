@@ -30,6 +30,8 @@ description: >-
   Docker, Swarm, Nomad, and Kubernetes running in any Data Center, Cloud,
   Network Edge or IIoT Device.
 publishedAt: 2022-10-15T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - portainer
 show: rawkode-live

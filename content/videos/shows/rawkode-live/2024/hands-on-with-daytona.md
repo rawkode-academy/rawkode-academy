@@ -31,6 +31,8 @@ description: >-
   As a developer, you can immediately start focusing on what matters most—your
   code.
 publishedAt: 2024-09-25T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - daytona
 show: rawkode-live

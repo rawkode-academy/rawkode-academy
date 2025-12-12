@@ -12,6 +12,8 @@ description: >-
 
   Let's have some fun.
 publishedAt: 2022-12-09T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - portainer
 videoId: ivg9hwb376cu64psybqhd5k0

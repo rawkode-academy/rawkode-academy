@@ -24,6 +24,8 @@ description: |-
    - Creating sessions
    - Joining sessions
 publishedAt: 2021-11-05T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - teleport
 videoId: hn0j9iu8ps7jaegq6iykq50c

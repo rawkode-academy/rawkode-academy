@@ -50,6 +50,8 @@ description: >-
 
   - More about the CUE project: https://cuelang.org
 publishedAt: 2025-12-10T00:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - cue
 videoId: eihdoemxfyzm33pxzcix5ci5

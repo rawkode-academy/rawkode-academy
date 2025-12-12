@@ -20,6 +20,8 @@ description: >-
   supports, including Linux, macOS, and Windows, on x86, amd64, ARM and PowerPC
   architectures. You can try it out using the online demo.
 publishedAt: 2022-09-03T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - gitea
 show: rawkode-live

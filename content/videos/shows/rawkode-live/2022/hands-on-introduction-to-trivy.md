@@ -7,6 +7,8 @@ description: >-
   misconfiguration and vulnerabilities within your container images with Aqua's
   open source project, Trivy.
 publishedAt: 2022-02-05T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - trivy
 show: rawkode-live

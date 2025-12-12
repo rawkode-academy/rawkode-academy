@@ -13,6 +13,8 @@ description: >-
 
   Let's take a look
 publishedAt: 2023-06-07T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - spin
 videoId: bwo73aoo2k6ae9lrukcj6onr

@@ -26,6 +26,8 @@ description: >-
   Namespace brings an opinionated but extensible all-in-one development and
   production experience to teams of all sizes.
 publishedAt: 2022-12-01T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - namespace
 show: rawkode-live

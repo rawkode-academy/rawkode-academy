@@ -23,6 +23,8 @@ description: >-
   Remember to join the Discord to ask questions or seek help:
   https://rawkode.chat
 publishedAt: 2022-01-26T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - influxdb
 videoId: ywd7rvmdaz445o5wf0snvwx9

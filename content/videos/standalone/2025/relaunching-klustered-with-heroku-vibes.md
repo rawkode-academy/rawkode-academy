@@ -17,6 +17,8 @@ description: >-
   for a fun and informative session, perfect for developers looking to harness
   the power of AI for rapid application development.
 publishedAt: 2025-12-02T00:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - heroku
 videoId: mbi5212lbf8b3yvidkeamkkm

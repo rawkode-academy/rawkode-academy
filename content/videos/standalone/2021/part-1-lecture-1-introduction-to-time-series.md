@@ -17,6 +17,8 @@ description: |-
 
   #InfluxDB #TimeSeries
 publishedAt: 2021-07-29T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - influxdb
 videoId: gcyhdcr1fqccea0s1idebvw9

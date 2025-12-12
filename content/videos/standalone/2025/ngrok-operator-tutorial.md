@@ -19,6 +19,8 @@ description: >-
   Kubernetes networking or looking for a simpler way to share your applications
   with the world, this tutorial shows you how ngrok makes the complex simple.
 publishedAt: 2025-07-23T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies: []
 videoId: vsyhv7s6wvz4p9fuq507u28g
 duration: 888

@@ -21,6 +21,8 @@ description: >-
   and policies\n- Deploy your container images on K8s and check results\n-
   What’s next
 publishedAt: 2025-03-01T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: njiqkooyv0wnwu9qjpfcweqp

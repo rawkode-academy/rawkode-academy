@@ -12,6 +12,8 @@ description: >-
   Atlantis\n03:40 What is Atlantis?\n22:05 Security Aspects of Atlantis\n11:09
   Future of Atlantis
 publishedAt: 2025-04-03T17:00:00.000Z
+type: recorded
+category: interview
 technologies: []
 show: cloud-native-compass
 videoId: xz8t49tipn0ol7mjxdexva0r

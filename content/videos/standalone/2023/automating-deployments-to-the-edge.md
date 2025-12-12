@@ -17,6 +17,8 @@ description: >-
 
   https://github.com/RawkodeAcademy/portainer-in-production
 publishedAt: 2023-01-16T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - portainer
 videoId: f9qr4s42d566gqtkdzzknxn9

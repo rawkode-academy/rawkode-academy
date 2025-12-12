@@ -51,6 +51,8 @@ description: >-
 
   27:11 Future of eBPF
 publishedAt: 2023-08-25T17:00:00.000Z
+type: recorded
+category: interview
 technologies:
   - ebpf
 show: cloud-native-compass

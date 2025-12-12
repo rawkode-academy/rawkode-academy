@@ -21,6 +21,8 @@ description: >-
 
   05:55 Dagger
 publishedAt: 2023-08-17T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - aquaproj
   - dagger

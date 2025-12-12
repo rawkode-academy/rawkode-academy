@@ -18,6 +18,8 @@ description: >-
   and what doesn't.\n\nNo fluff, just practical knowledge from someone who
   builds the tools.
 publishedAt: 2025-07-02T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: nnercpug678oiuwve10y4tr7

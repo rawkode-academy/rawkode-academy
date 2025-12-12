@@ -20,6 +20,8 @@ description: >-
   (Twitter): https://x.com/ThorstenHans\nBluesky:
   https://bsky.app/profile/thorstenhans.bsky.social
 publishedAt: 2025-04-15T17:00:00.000Z
+type: live
+category: tutorial
 technologies: []
 show: rawkode-live
 videoId: kkgwv4we5d9rtmark85srps0

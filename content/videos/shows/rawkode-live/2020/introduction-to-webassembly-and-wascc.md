@@ -4,6 +4,8 @@ slug: introduction-to-webassembly-and-wascc
 title: Introduction to WebAssembly & waSCC
 description: "WebAssembly (abbreviated Wasm) is a binary instruction format for a stack-based virtual machine. Wasm is designed as a portable compilation target for programming languages, enabling deployment on the web for client and server applications.\n\nwaSCC, WebAssembly Secure Capabilities Connector, is a WebAssembly host runtime that dynamically and securely binds WebAssembly modules to capability providers. These provider plug-ins provide abstractions around and connectivity to cloud-native services—message brokers, databases, HTTP—or they can expose special-purpose capabilities like IoT, embedded hardware, and more.\n\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n01:09 - Introductions\n01:50 - What is WebAssembly?\n03:45 - What is waSCC?\n05:00 - WebAssembly basics: Text format (WAT) and wasmtime\n11:40 - waSCC is capability secure - what does that mean?\n15:20 - Our first waSCC project\n28:30 - Signing our waSCC project\n40:00 - Lattice: waSCC clusters\n48:50 - wascap: Inspecting the capabilities\n54:00 - waSCC providers\n\n1:00:00 - Closing\n\n\n\U0001F30E Resources\n\n\nKevin Hoffman - https://twitter.com/kevinhoffman\nwaSCC - https://wascc.dev\nwaSCC videos - https://www.youtube.com/watch?v=MkbtZRt5ikg&list=PL9bhKL87N5_GQOunnhzgYBLKOT8TBCWZ6"
 publishedAt: 2020-10-22T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - webassembly
 show: rawkode-live

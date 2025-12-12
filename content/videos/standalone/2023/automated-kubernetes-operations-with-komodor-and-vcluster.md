@@ -4,6 +4,8 @@ slug: automated-kubernetes-operations-with-komodor-and-vcluster
 title: Automated Kubernetes Operations with Komodor and vcluster
 description: 'Video content coming soon.'
 publishedAt: 2023-03-29T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies:
   - komodor
   - vcluster

@@ -25,6 +25,8 @@ description: >-
   not require a server-side component as it communicates directly to your
   Kubernetes cluster using your kube-context, just like kubectl.
 publishedAt: 2022-09-17T17:00:00.000Z
+type: live
+category: tutorial
 technologies:
   - devspace
 show: rawkode-live

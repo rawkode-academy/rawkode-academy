@@ -10,6 +10,8 @@ description: >-
   wants to increase awareness and visibility into your supply chain security
   pipeline.
 publishedAt: 2023-04-19T17:00:00.000Z
+type: recorded
+category: tutorial
 technologies: []
 videoId: ad51s1b7h8fhtsexscspmy3x
 chapters:
