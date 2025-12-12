@@ -100,11 +100,6 @@ const structuredData = isVideoList
 				name: "David McKay",
 				url: "https://rawkode.academy",
 			},
-			interactionStatistic: {
-				"@type": "InteractionCounter",
-				interactionType: { "@type": "WatchAction" },
-				userInteractionCount: 0, // This would ideally come from your analytics
-			},
 			expires: null, // Videos don't expire
 			hasPart: clips?.length
 				? clips.map((c) => ({
@@ -135,8 +130,10 @@ const structuredData = isVideoList
 <meta property="og:type" content={isVideoList ? "website" : "video.other"} />
 {!isVideoList && streamUrl && <meta property="og:video" content={streamUrl} />}
 {!isVideoList && streamUrl && <meta property="og:video:url" content={streamUrl} />}
+{!isVideoList && streamUrl && streamUrl.endsWith(".m3u8") && <meta property="og:video:type" content="application/x-mpegURL" />}
 {!isVideoList && thumbnailUrl && <meta property="og:video:thumbnail" content={thumbnailUrl} />}
-{!isVideoList && duration && <meta property="og:video:duration" content={formattedDuration} />}
+{!isVideoList && duration && <meta property="og:video:duration" content={String(Math.floor(duration))} />}
+{!isVideoList && publishedAt && <meta property="og:video:release_date" content={publishedAt} />}
 
 <!-- Additional SEO meta tags -->
 <meta name="twitter:card" content={thumbnailUrl ? "summary_large_image" : "summary"} />

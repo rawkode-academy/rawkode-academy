@@ -18,6 +18,8 @@ appear in Google Video Search results.
 - Includes all required video metadata
 - Automatically generated from video collection
 - Added to robots.txt for discovery
+- **Updated:** Removed invalid `video:player_loc` (was pointing to media file). Now relies on `video:content_loc`.
+- **Updated:** Correctly generates multiple `video:tag` elements.
 
 ### 3. Video Player Markup (✅ Existing)
 
@@ -47,7 +49,6 @@ appear in Google Video Search results.
 
 - ✅ **publisher** - Organization info
 - ✅ **creator** - Person who created the video
-- ✅ **interactionStatistic** - View count (placeholder)
 - ✅ **videoQuality** - HD indicator
 - ✅ **videoFrameSize** - Resolution
 - ✅ **inLanguage** - Language code
@@ -65,11 +66,13 @@ appear in Google Video Search results.
    - Complete VideoObject schema on every video page
    - ItemList schema on video listing pages
    - Proper nesting and formatting
+   - **Updated:** Removed hardcoded 0 views for `interactionStatistic`
 
 3. **Technical Requirements**
    - Videos hosted on reliable CDN
    - HLS streaming for adaptive quality
    - Proper CORS headers for embedding
+   - **Added:** `og:video:type` and correct `og:video:duration` (seconds)
 
 4. **User Experience**
    - Fast loading with lazy loading
@@ -111,8 +114,7 @@ Track these metrics in Google Search Console:
    - Would enable chapter previews in search
 
 2. **View Count Integration**
-   - Update interactionStatistic with real analytics
-   - Currently set to 0 as placeholder
+   - Implement interactionStatistic with real analytics (currently removed)
 
 3. **Transcript/Captions**
    - Already implemented in player
