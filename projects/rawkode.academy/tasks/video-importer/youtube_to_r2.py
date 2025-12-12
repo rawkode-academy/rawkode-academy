@@ -16,6 +16,7 @@ import requests
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
 import yt_dlp
+import ffmpeg
 from cuid2 import Cuid
 import json
 import time
@@ -177,14 +178,23 @@ class YouTubeToR2:
         # Cloud Run Jobs client
         self.jobs_client = run_v2.JobsClient()
 
-    def fetch_metadata_only(self, youtube_id):
+    def fetch_metadata_only(self, youtube_id, cookies_from_browser=None):
         """Fetch YouTube video metadata without downloading the video."""
         url = f"https://www.youtube.com/watch?v={youtube_id}"
+
+        # Check for cookies file
+        cookies_file = os.path.expanduser('~/.youtube_cookies.txt')
+
+        # Check for cookies from browser (CLI arg > env var > none)
+        if cookies_from_browser is None:
+            cookies_from_browser = os.environ.get('YOUTUBE_COOKIES_BROWSER', 'none')
 
         ydl_opts = {
             'quiet': False,
             'no_warnings': False,
             'logger': logger,
+            # Don't fail if no downloadable formats are found (we only need metadata)
+            'ignore_no_formats_error': True,
             # Add headers to bypass potential restrictions
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'http_headers': {
@@ -194,6 +204,14 @@ class YouTubeToR2:
                 'Sec-Fetch-Mode': 'navigate',
             },
         }
+
+        # Add cookie authentication if available
+        if cookies_from_browser and cookies_from_browser.lower() != 'none':
+            ydl_opts['cookiesfrombrowser'] = (cookies_from_browser.lower(),)
+            logger.info(f"Using cookies from browser: {cookies_from_browser}")
+        elif os.path.exists(cookies_file):
+            ydl_opts['cookiefile'] = cookies_file
+            logger.info(f"Using cookies file: {cookies_file}")
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -206,7 +224,7 @@ class YouTubeToR2:
             logger.error(f"Error fetching metadata: {str(e)}")
             raise
 
-    def download_video(self, youtube_id, output_dir, max_retries=3):
+    def download_video(self, youtube_id, output_dir, max_retries=3, cookies_from_browser=None):
         """Download YouTube video in highest quality with retry logic."""
         url = f"https://www.youtube.com/watch?v={youtube_id}"
 
@@ -215,9 +233,10 @@ class YouTubeToR2:
 
         # Check for PO token (for mobile web client)
         po_token = os.environ.get('YOUTUBE_PO_TOKEN')
-        
-        # Check for cookies from browser (disabled by default to match CLI behavior)
-        cookies_from_browser = os.environ.get('YOUTUBE_COOKIES_BROWSER', 'none')
+
+        # Check for cookies from browser (CLI arg > env var > none)
+        if cookies_from_browser is None:
+            cookies_from_browser = os.environ.get('YOUTUBE_COOKIES_BROWSER', 'none')
 
         ydl_opts = {
             # Remove explicit format selection to let yt-dlp auto-select like CLI
@@ -430,40 +449,33 @@ class YouTubeToR2:
         source_format = os.path.splitext(video_path)[1].lstrip('.')
         logger.info(f"Converting {source_format.upper()} to MKV for Cloud Run compatibility...")
 
-        # Try advanced conversion with all stream mapping first
-        cmd = [
-            'ffmpeg',
-            '-i', video_path,
-            '-c:v', 'copy',       # Copy video codec
-            '-c:a', 'copy',       # Copy audio codec
-            '-c:s', 'copy',       # Copy subtitle streams if present
-            '-map', '0',          # Map all streams from input
-            '-movflags', 'faststart',  # Optimize for streaming
-            '-y',                 # Overwrite output
-            mkv_path
-        ]
+        input_stream = ffmpeg.input(video_path)
 
-        logger.debug(f"Running ffmpeg command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        # Try conversion with all streams first
+        try:
+            logger.debug("Attempting conversion with all streams...")
+            (
+                ffmpeg
+                .output(input_stream, mkv_path, vcodec='copy', acodec='copy', scodec='copy')
+                .overwrite_output()
+                .run(capture_stdout=True, capture_stderr=True)
+            )
+        except ffmpeg.Error as e:
+            logger.warning(f"Full stream conversion failed: {e.stderr.decode()[:500] if e.stderr else 'Unknown error'}")
+            logger.info("Trying conversion without subtitles (mov_text not supported in MKV)...")
 
-        # If advanced conversion fails, try simpler approach
-        if result.returncode != 0:
-            logger.warning(f"Advanced conversion failed: {result.stderr[:500]}")
-            logger.info("Trying simplified conversion...")
-
-            cmd_simple = [
-                'ffmpeg',
-                '-i', video_path,
-                '-c', 'copy',     # Copy all streams without re-encoding
-                '-y',             # Overwrite output
-                mkv_path
-            ]
-
-            result = subprocess.run(cmd_simple, capture_output=True, text=True)
-
-            if result.returncode != 0:
-                logger.error(f"Simple conversion also failed: {result.stderr}")
-                raise Exception(f"Failed to convert {source_format} to MKV: {result.stderr}")
+            # Fallback: exclude subtitles which often have incompatible codecs
+            try:
+                (
+                    ffmpeg
+                    .output(input_stream, mkv_path, vcodec='copy', acodec='copy', sn=None)
+                    .overwrite_output()
+                    .run(capture_stdout=True, capture_stderr=True)
+                )
+            except ffmpeg.Error as e2:
+                error_msg = e2.stderr.decode() if e2.stderr else 'Unknown error'
+                logger.error(f"Conversion without subtitles also failed: {error_msg}")
+                raise Exception(f"Failed to convert {source_format} to MKV: {error_msg}")
 
         # Verify the output file exists and has content
         if os.path.exists(mkv_path):
@@ -489,31 +501,23 @@ class YouTubeToR2:
 
     def extract_audio(self, video_path, output_dir):
         """Extract audio from video as MP3."""
+        output_path = os.path.join(output_dir, 'audio.mp3')
+        logger.info(f"Extracting audio to MP3")
+
         try:
-            output_path = os.path.join(output_dir, 'audio.mp3')
-            logger.info(f"Extracting audio to MP3")
-
-            cmd = [
-                'ffmpeg',
-                '-i', video_path,
-                '-vn',  # No video
-                '-acodec', 'mp3',
-                '-ab', '192k',  # Audio bitrate
-                '-y',  # Overwrite output
-                output_path
-            ]
-
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            if result.returncode != 0:
-                logger.error(f"FFmpeg error: {result.stderr}")
-                raise Exception(f"Audio extraction failed: {result.stderr}")
-
+            (
+                ffmpeg
+                .input(video_path)
+                .output(output_path, vn=None, acodec='mp3', audio_bitrate='192k')
+                .overwrite_output()
+                .run(capture_stdout=True, capture_stderr=True)
+            )
             logger.info(f"Audio extracted to: {output_path}")
             return output_path
-
-        except Exception as e:
-            logger.error(f"Error extracting audio: {str(e)}")
-            raise
+        except ffmpeg.Error as e:
+            error_msg = e.stderr.decode() if e.stderr else 'Unknown error'
+            logger.error(f"FFmpeg error: {error_msg}")
+            raise Exception(f"Audio extraction failed: {error_msg}")
 
     def download_thumbnail(self, video_info, output_dir):
         """Download the best quality thumbnail."""
@@ -668,7 +672,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
 
         return sql
 
-    def process_video(self, youtube_id, resume=True, skip_cloud_run=False, force_cloud_run=False, local_video_path=None):
+    def process_video(self, youtube_id, resume=True, skip_cloud_run=False, force_cloud_run=False, local_video_path=None, cookies_from_browser=None):
         """Download video, extract audio, and upload all assets."""
         # Initialize state management
         state = ProcessingState(youtube_id)
@@ -697,7 +701,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                             raise FileNotFoundError(f"Local video file not found: {local_video_path}")
 
                         # Fetch metadata from YouTube
-                        video_info = self.fetch_metadata_only(youtube_id)
+                        video_info = self.fetch_metadata_only(youtube_id, cookies_from_browser=cookies_from_browser)
 
                         # Copy local file to temp directory and ensure MKV format
                         import shutil
@@ -711,7 +715,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                         logger.info(f"Successfully prepared local video: {video_path}")
                     else:
                         # Download from YouTube
-                        video_path, video_info = self.download_video(youtube_id, temp_dir)
+                        video_path, video_info = self.download_video(youtube_id, temp_dir, cookies_from_browser=cookies_from_browser)
                         state.set_artifact('video_path', video_path)
                         state.set_video_info(video_info)  # This now extracts only serializable data
                         state.mark_step_completed('video_downloaded')
@@ -727,7 +731,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                             shutil.copy2(local_video_path, temp_video_path)
                             video_path = self.ensure_mkv_format(temp_video_path, temp_dir)
                         else:
-                            video_path, _ = self.download_video(youtube_id, temp_dir)
+                            video_path, _ = self.download_video(youtube_id, temp_dir, cookies_from_browser=cookies_from_browser)
 
                 # Extract audio
                 if not state.is_step_completed('audio_extracted'):
@@ -850,6 +854,8 @@ def main():
     parser.add_argument('--skip-cloud-run', action='store_true', help='Skip Cloud Run job trigger even if not completed')
     parser.add_argument('--force-cloud-run', action='store_true', help='Force Cloud Run job trigger even if already completed')
     parser.add_argument('--local-video', help='Path to local video file (skip YouTube download, fetch metadata only)')
+    parser.add_argument('--cookies-from-browser', choices=['chrome', 'firefox', 'safari', 'edge', 'opera', 'brave', 'chromium', 'vivaldi'],
+                        help='Browser to extract cookies from (overrides YOUTUBE_COOKIES_BROWSER env var)')
 
     # Handle the special case where YouTube ID starts with hyphen
     args, remaining = parser.parse_known_args()
@@ -937,7 +943,8 @@ def main():
             resume=not args.no_resume,
             skip_cloud_run=args.skip_cloud_run,
             force_cloud_run=args.force_cloud_run,
-            local_video_path=args.local_video
+            local_video_path=args.local_video,
+            cookies_from_browser=args.cookies_from_browser
         )
 
         print(f"\nSuccess!")
