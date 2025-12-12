@@ -14,6 +14,20 @@ export function registerVideos(
 ) {
 	(builder as any).addScalarType("Date", DateResolver);
 
+	const VideoTypeEnum = (builder as any).enumType("VideoType", {
+		values: ["live", "recorded"] as const,
+	});
+
+	const VideoCategoryEnum = (builder as any).enumType("VideoCategory", {
+		values: [
+			"editorial",
+			"tutorial",
+			"review",
+			"interview",
+			"announcement",
+		] as const,
+	});
+
 	const VideoRef = builder.objectRef<VideoItem>("Video");
 	builder.objectType(VideoRef, {
 		fields: (t: any) => ({
@@ -34,6 +48,16 @@ export function registerVideos(
 				type: "Int",
 				nullable: true,
 				resolve: (v: VideoItem) => v.duration ?? null,
+			}),
+			type: t.field({
+				type: VideoTypeEnum,
+				nullable: true,
+				resolve: (v: VideoItem) => v.type ?? null,
+			}),
+			category: t.field({
+				type: VideoCategoryEnum,
+				nullable: true,
+				resolve: (v: VideoItem) => v.category ?? null,
 			}),
 			streamUrl: t.exposeString("streamUrl"),
 			thumbnailUrl: t.exposeString("thumbnailUrl"),

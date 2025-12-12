@@ -2,6 +2,14 @@ import type { CollectionEntry } from "astro:content";
 
 export type VideoEntry = CollectionEntry<"videos">;
 
+export type VideoType = "live" | "recorded";
+export type VideoCategory =
+	| "editorial"
+	| "tutorial"
+	| "review"
+	| "interview"
+	| "announcement";
+
 export interface VideoItem {
 	id: string;
 	slug: string;
@@ -11,6 +19,8 @@ export interface VideoItem {
 	description: string;
 	publishedAt: Date;
 	duration: number | undefined;
+	type: VideoType | undefined;
+	category: VideoCategory | undefined;
 	streamUrl: string;
 	thumbnailUrl: string;
 	technologies: string[];
@@ -34,6 +44,8 @@ export async function listVideos(): Promise<VideoItem[]> {
 			description: data.description,
 			publishedAt: data.publishedAt,
 			duration: data.duration,
+			type: data.type,
+			category: data.category,
 			streamUrl: `https://content.rawkode.academy/videos/${data.videoId}/stream.m3u8`,
 			thumbnailUrl: `https://content.rawkode.academy/videos/${data.videoId}/thumbnail.jpg`,
 			technologies: (data.technologies ?? []).map((t: any) =>
