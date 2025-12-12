@@ -58,6 +58,9 @@ export const technologyZod = zod.object({
   aliases: zod.array(zod.string()).optional(),
   relatedTechnologies: zod.array(zod.string()).optional(),
 
+  // Transcription terms - alternative spellings/pronunciations for accurate transcription
+  terms: zod.array(zod.string()).optional(),
+
   // CNCF Project Metadata
   cncf: zod.object({
     // Project lifecycle status
@@ -162,6 +165,9 @@ export function createTechnologySchema(z: typeof zod) {
     // Relationships
     aliases: z.array(z.string()).optional(),
     relatedTechnologies: z.array(z.string()).optional(),
+
+    // Transcription terms - alternative spellings/pronunciations for accurate transcription
+    terms: z.array(z.string()).optional(),
 
     // CNCF Project Metadata
     cncf: z.object({

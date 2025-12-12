@@ -27,9 +27,7 @@ const GET_VIDEO_TERMS = gql`
       technologies {
         id
         name
-        terms {
-          term
-        }
+        terms
       }
     }
   }
@@ -37,7 +35,7 @@ const GET_VIDEO_TERMS = gql`
 
 interface VideoResponse {
 	videoByID: {
-		technologies: { id: string; name: string; terms: { term: string }[] }[];
+		technologies: { id: string; name: string; terms: string[] | null }[];
 	};
 }
 
@@ -46,10 +44,17 @@ async function fetchVideoTerms(videoId: string): Promise<string[]> {
 	const data = (await request(endpoint, GET_VIDEO_TERMS, {
 		videoId,
 	})) as VideoResponse;
-	const terms: string[] = data.videoByID.technologies.map(
-		(tech: any) => tech.name,
-	);
-	return [...new Set(terms)];
+
+	// Collect technology names and all transcription terms
+	const allTerms: string[] = [];
+	for (const tech of data.videoByID.technologies) {
+		allTerms.push(tech.name);
+		if (tech.terms) {
+			allTerms.push(...tech.terms);
+		}
+	}
+
+	return [...new Set(allTerms)];
 }
 
 // Split WebVTT into chunks based on line breaks, targeting ~50k tokens per chunk
