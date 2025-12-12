@@ -25,3 +25,5 @@ export const GET: APIRoute = ({ site }) => {
 
 	return new Response(getRobotsTxt(sitemapURL, videoSitemapURL));
 };
+
+export const prerender = true;
