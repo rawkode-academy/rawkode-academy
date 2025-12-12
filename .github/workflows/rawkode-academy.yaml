@@ -85,14 +85,15 @@ jobs:
             CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
             GRAFANA_SOURCEMAP_API_KEY:projects/458678766461/secrets/grafana-cloud-source-maps-api-key
 
+      - name: Install workspace dependencies
+        run: bun install
+
       - name: Build Website
         working-directory: projects/rawkode.academy/website
         env:
           # Faro uploads sourcemaps during build on production (keepSourcemaps: false removes them from bundle)
           GRAFANA_SOURCEMAP_API_KEY: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && steps.secrets.outputs.GRAFANA_SOURCEMAP_API_KEY || '' }}
-        run: |
-          bun install
-          bun run build
+        run: bun run build
 
       - name: Build Storybook
         working-directory: projects/rawkode.academy/website
