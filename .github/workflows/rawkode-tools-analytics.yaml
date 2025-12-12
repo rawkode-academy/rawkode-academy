@@ -54,8 +54,7 @@ jobs:
             cd -
           done
 
-      - name: Install dependencies
-        working-directory: projects/rawkode.tools/analytics
+      - name: Install workspace dependencies
         run: bun install
 
       - name: Authenticate to Google Cloud
