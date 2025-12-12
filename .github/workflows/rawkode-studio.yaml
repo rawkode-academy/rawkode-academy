@@ -1,6 +1,7 @@
 name: rawkode.studio/website
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
