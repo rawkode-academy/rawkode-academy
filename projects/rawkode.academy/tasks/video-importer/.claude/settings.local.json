@@ -4,7 +4,8 @@
       "Bash(devenv:*)",
       "Bash(direnv allow:*)",
       "Bash(ls:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cuenv -e production exec -- uv run:*)"
     ],
     "deny": []
   }
