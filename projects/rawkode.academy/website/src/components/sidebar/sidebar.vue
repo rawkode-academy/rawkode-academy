@@ -94,33 +94,6 @@ const learnNavItems = computed(() => [
 		href: "/watch",
 		icon: VideoCameraIcon,
 		current: isCurrentPath("/watch"),
-		children: [
-			{
-				name: "Announcements",
-				href: "/watch/announcements",
-				current: isCurrentPath("/watch/announcements"),
-			},
-			{
-				name: "Editorial",
-				href: "/watch/editorials",
-				current: isCurrentPath("/watch/editorials"),
-			},
-			{
-				name: "Tutorials",
-				href: "/watch/tutorials",
-				current: isCurrentPath("/watch/tutorials"),
-			},
-			{
-				name: "Interviews",
-				href: "/watch/interviews",
-				current: isCurrentPath("/watch/interviews"),
-			},
-			{
-				name: "Reviews",
-				href: "/watch/reviews",
-				current: isCurrentPath("/watch/reviews"),
-			},
-		],
 	},
 	{
 		name: "Articles",
