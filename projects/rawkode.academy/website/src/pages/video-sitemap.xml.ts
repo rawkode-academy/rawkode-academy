@@ -21,7 +21,9 @@ function formatDuration(seconds: number): string {
 }
 
 // Escape XML entities
-function escapeXml(unsafe: string): string {
+function escapeXml(value: unknown): string {
+	const unsafe =
+		typeof value === "string" ? value : value == null ? "" : String(value);
 	return unsafe.replace(/[<>&'"]/g, (c) => {
 		switch (c) {
 			case "<":
@@ -69,8 +71,18 @@ ${sortedVideos
 
 		// Create tags from technologies
 		const tags = (video.data.technologies || [])
-			.map((id) => techName.get(id) || id)
+			.map((id) => {
+				if (typeof id !== "string") return undefined;
+				return techName.get(id) ?? id.replace(/\/index$/, "");
+			})
+			.filter((tag): tag is string => typeof tag === "string" && tag.length > 0)
 			.slice(0, 32);
+
+		const tagsXml = tags.length
+			? tags
+					.map((tag) => `<video:tag>${escapeXml(tag)}</video:tag>`)
+					.join("\n      ")
+			: "";
 
 		return `  <url>
     <loc>${videoUrl}</loc>
@@ -87,7 +99,7 @@ ${sortedVideos
       <video:live>no</video:live>
       <video:requires_subscription>no</video:requires_subscription>
       <video:uploader info="${site}">Rawkode Academy</video:uploader>
-      ${tags.map((tag) => `<video:tag>${escapeXml(tag)}</video:tag>`).join("\n      ")}
+      ${tagsXml}
     </video:video>
   </url>`;
 	})
