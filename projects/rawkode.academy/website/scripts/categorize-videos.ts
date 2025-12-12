@@ -62,12 +62,12 @@ function parseFrontmatter(content: string): {
 	raw: string;
 } {
 	const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-	if (!match) {
+	if (!match || !match[1]) {
 		return { frontmatter: {}, body: content, raw: "" };
 	}
 
 	const raw = match[1];
-	const body = match[2];
+	const body = match[2] ?? "";
 
 	// Simple YAML parsing for our needs
 	const frontmatter: Record<string, unknown> = {};
@@ -92,10 +92,10 @@ function updateFrontmatter(
 	updates: { type?: string; category?: string }
 ): string {
 	const match = content.match(/^(---\n)([\s\S]*?)(\n---\n?)([\s\S]*)$/);
-	if (!match) return content;
+	if (!match || !match[2]) return content;
 
-	let frontmatter = match[2];
-	const rest = match[4];
+	let frontmatter: string = match[2];
+	const rest = match[4] ?? "";
 
 	// Remove existing type/category if present
 	frontmatter = frontmatter
@@ -118,7 +118,7 @@ function updateFrontmatter(
 }
 
 async function main() {
-	const scriptsDir = import.meta.dir;
+	const scriptsDir = import.meta.dirname;
 	const videosDir = join(scriptsDir, VIDEOS_DIR);
 
 	console.log("\n🎬 Video Categorization Script\n");
@@ -131,7 +131,7 @@ async function main() {
 	let skipped = 0;
 
 	for (let i = 0; i < videoFiles.length; i++) {
-		const filePath = videoFiles[i];
+		const filePath = videoFiles[i]!;
 		const content = await readFile(filePath, "utf-8");
 		const { frontmatter } = parseFrontmatter(content);
 
@@ -208,10 +208,10 @@ async function main() {
 			(selectedType && selectedType !== currentType) ||
 			(selectedCategory && selectedCategory !== currentCategory)
 		) {
-			const updatedContent = updateFrontmatter(content, {
-				type: selectedType,
-				category: selectedCategory,
-			});
+			const updates: { type?: string; category?: string } = {};
+			if (selectedType) updates.type = selectedType;
+			if (selectedCategory) updates.category = selectedCategory;
+			const updatedContent = updateFrontmatter(content, updates);
 			await writeFile(filePath, updatedContent);
 			console.log(`\n✅ Updated: type=${selectedType}, category=${selectedCategory}\n`);
 			updated++;

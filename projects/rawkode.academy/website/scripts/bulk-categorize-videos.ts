@@ -59,7 +59,7 @@ async function findVideoFiles(dir: string): Promise<string[]> {
 
 function parseFrontmatter(content: string): Record<string, unknown> {
 	const match = content.match(/^---\n([\s\S]*?)\n---/);
-	if (!match) return {};
+	if (!match || !match[1]) return {};
 
 	const frontmatter: Record<string, unknown> = {};
 	const lines = match[1].split("\n");
@@ -80,10 +80,10 @@ function parseFrontmatter(content: string): Record<string, unknown> {
 
 function updateFrontmatter(content: string, type: string, category: string): string {
 	const match = content.match(/^(---\n)([\s\S]*?)(\n---\n?)([\s\S]*)$/);
-	if (!match) return content;
+	if (!match || !match[2]) return content;
 
-	let frontmatter = match[2];
-	const rest = match[4];
+	let frontmatter: string = match[2];
+	const rest = match[4] ?? "";
 
 	// Remove existing type/category if present
 	frontmatter = frontmatter
@@ -146,7 +146,7 @@ function detectType(title: string, duration: number | undefined): { type: string
 }
 
 async function main() {
-	const scriptsDir = import.meta.dir;
+	const scriptsDir = import.meta.dirname;
 	const videosDir = join(scriptsDir, VIDEOS_DIR);
 
 	console.log("\n🎬 Bulk Video Categorization\n");
