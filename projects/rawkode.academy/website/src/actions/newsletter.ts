@@ -128,16 +128,17 @@ export const newsletter = {
 					prefixedUserId,
 				);
 
-			const unsubscribePromises = allPrefs.map((pref: { channel: string; audience: string }) =>
-				context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
-					{
-						audience: pref.audience,
-						channel: pref.channel,
-						status: "unsubscribed",
-						source,
-					},
-				),
+			const unsubscribePromises = allPrefs.map(
+				(pref: { channel: string; audience: string }) =>
+					context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+						prefixedUserId,
+						{
+							audience: pref.audience,
+							channel: pref.channel,
+							status: "unsubscribed",
+							source,
+						},
+					),
 			);
 
 			await Promise.all(unsubscribePromises);
