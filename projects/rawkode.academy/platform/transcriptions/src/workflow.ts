@@ -18,6 +18,7 @@ type Env = {
 
 export type Params = {
 	videoId: string;
+	id: string;
 	language: string;
 };
 
@@ -39,10 +40,10 @@ interface VideoResponse {
 	};
 }
 
-async function fetchVideoTerms(videoId: string): Promise<string[]> {
+async function fetchVideoTerms(id: string): Promise<string[]> {
 	const endpoint = "https://api.rawkode.academy/graphql";
 	const data = (await request(endpoint, GET_VIDEO_TERMS, {
-		videoId,
+		videoId: id,
 	})) as VideoResponse;
 
 	// Collect technology names and all transcription terms
@@ -143,7 +144,7 @@ function stitchWebVTTChunks(chunks: string[]): string {
 
 export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
-		const { videoId, language } = event.payload;
+		const { videoId, id, language } = event.payload;
 		const env = this.env;
 
 		// Check if captions already exist
@@ -159,7 +160,7 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 		}
 
 		const videoTerms = await step.do("fetch video terms", () =>
-			fetchVideoTerms(videoId),
+			fetchVideoTerms(id),
 		);
 		const keyterms = [
 			"Flanagan",

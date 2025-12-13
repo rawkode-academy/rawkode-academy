@@ -71,31 +71,37 @@ function parseArgs(argv: string[]): ParsedArgs {
 	return { execute, concurrency };
 }
 
-function extractVideoId(content: string): string | null {
+function extractVideoMetadata(content: string): {
+	videoId: string | null;
+	id: string | null;
+} {
 	// Match videoId in YAML frontmatter
 	const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-	if (!frontmatterMatch) return null;
+	if (!frontmatterMatch) return { videoId: null, id: null };
 
 	const frontmatter = frontmatterMatch[1];
 	const videoIdMatch = frontmatter.match(/^videoId:\s*(.+)$/m);
-	if (videoIdMatch) {
-		return videoIdMatch[1].trim();
-	}
+	const idMatch = frontmatter.match(/^id:\s*(.+)$/m);
 
-	return null;
+	return {
+		videoId: videoIdMatch ? videoIdMatch[1].trim() : null,
+		id: idMatch ? idMatch[1].trim() : null,
+	};
 }
 
-async function scanVideoIds(): Promise<{ videoId: string; file: string }[]> {
-	const videos: { videoId: string; file: string }[] = [];
+async function scanVideoIds(): Promise<
+	{ videoId: string; id: string; file: string }[]
+> {
+	const videos: { videoId: string; id: string; file: string }[] = [];
 	const glob = new Glob("**/*.md");
 
 	for await (const file of glob.scan(CONTENT_VIDEOS_PATH)) {
 		const fullPath = resolve(CONTENT_VIDEOS_PATH, file);
 		const content = readFileSync(fullPath, "utf-8");
-		const videoId = extractVideoId(content);
+		const { videoId, id } = extractVideoMetadata(content);
 
-		if (videoId) {
-			videos.push({ videoId, file });
+		if (videoId && id) {
+			videos.push({ videoId, id, file });
 		}
 	}
 
@@ -113,10 +119,10 @@ async function checkTranscriptExists(videoId: string): Promise<boolean> {
 }
 
 async function checkTranscriptsInBatches(
-	videos: { videoId: string; file: string }[],
+	videos: { videoId: string; id: string; file: string }[],
 	concurrency: number,
-): Promise<{ videoId: string; file: string }[]> {
-	const missing: { videoId: string; file: string }[] = [];
+): Promise<{ videoId: string; id: string; file: string }[]> {
+	const missing: { videoId: string; id: string; file: string }[] = [];
 	const total = videos.length;
 	let completed = 0;
 
@@ -145,6 +151,7 @@ async function checkTranscriptsInBatches(
 
 async function triggerTranscription(
 	videoId: string,
+	id: string,
 ): Promise<{ success: boolean; workflowId?: string; error?: string }> {
 	const token = process.env.HTTP_TRANSCRIPTION_TOKEN;
 	if (!token) {
@@ -158,7 +165,7 @@ async function triggerTranscription(
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${token}`,
 			},
-			body: JSON.stringify({ videoId, language: "en" }),
+			body: JSON.stringify({ videoId, id, language: "en" }),
 		});
 
 		if (!response.ok) {
@@ -219,8 +226,8 @@ async function main() {
 	let failCount = 0;
 
 	for (let i = 0; i < missing.length; i++) {
-		const { videoId } = missing[i];
-		const result = await triggerTranscription(videoId);
+		const { videoId, id } = missing[i];
+		const result = await triggerTranscription(videoId, id);
 
 		if (result.success) {
 			console.log(
