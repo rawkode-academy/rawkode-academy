@@ -17,14 +17,16 @@ type Env = {
 };
 
 export type Params = {
-	videoId: string;
 	id: string;
 	language: string;
 };
 
-const GET_VIDEO_TERMS = gql`
-  query GetVideoTerms($videoId: String!) {
-    videoByID(id: $videoId) {
+const GET_VIDEO_DETAILS = gql`
+  query GetVideoDetails($id: String!) {
+    videoByID(id: $id) {
+      id
+      streamUrl
+      thumbnailUrl
       technologies {
         id
         name
@@ -36,17 +38,43 @@ const GET_VIDEO_TERMS = gql`
 
 interface VideoResponse {
 	videoByID: {
+		id: string;
+		streamUrl?: string | null;
+		thumbnailUrl?: string | null;
 		technologies: { id: string; name: string; terms: string[] | null }[];
-	};
+	} | null;
 }
 
-async function fetchVideoTerms(id: string): Promise<string[]> {
-	const endpoint = "https://api.rawkode.academy/graphql";
-	const data = (await request(endpoint, GET_VIDEO_TERMS, {
-		videoId: id,
+function extractVideoId(
+	streamUrl?: string | null,
+	thumbnailUrl?: string | null,
+): string | null {
+	const source = streamUrl ?? thumbnailUrl ?? "";
+	const match = source.match(/\/videos\/([^/]+)\//);
+	return match ? match[1] : null;
+}
+
+async function fetchVideoDetails(
+	id: string,
+): Promise<{ videoId: string; keyterms: string[] }> {
+	const endpoint = "https://api.rawkode.academy";
+	const data = (await request(endpoint, GET_VIDEO_DETAILS, {
+		id,
 	})) as VideoResponse;
 
-	// Collect technology names and all transcription terms
+	if (!data.videoByID) {
+		throw new Error(`Video ${id} not found in GraphQL`);
+	}
+
+	const videoId = extractVideoId(
+		data.videoByID.streamUrl,
+		data.videoByID.thumbnailUrl,
+	);
+
+	if (!videoId) {
+		throw new Error(`Unable to derive videoId for video ${id}`);
+	}
+
 	const allTerms: string[] = [];
 	for (const tech of data.videoByID.technologies) {
 		allTerms.push(tech.name);
@@ -55,7 +83,10 @@ async function fetchVideoTerms(id: string): Promise<string[]> {
 		}
 	}
 
-	return [...new Set(allTerms)];
+	return {
+		videoId,
+		keyterms: [...new Set(allTerms)],
+	};
 }
 
 // Split WebVTT into chunks based on line breaks, targeting ~50k tokens per chunk
@@ -144,8 +175,13 @@ function stitchWebVTTChunks(chunks: string[]): string {
 
 export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
-		const { videoId, id, language } = event.payload;
+		const { id, language } = event.payload;
 		const env = this.env;
+
+		const { videoId, keyterms: videoTerms } = await step.do(
+			"fetch video details",
+			() => fetchVideoDetails(id),
+		);
 
 		// Check if captions already exist
 		const captionsExist = await step.do("check if captions exist", async () => {
@@ -159,9 +195,6 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 			return { success: true, skipped: true };
 		}
 
-		const videoTerms = await step.do("fetch video terms", () =>
-			fetchVideoTerms(id),
-		);
 		const keyterms = [
 			"Flanagan",
 			"Rawkode",
