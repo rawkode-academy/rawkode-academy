@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "presentation-lets-meet-cdktf-python"
+
 env: {
 	ABC: "123"
 

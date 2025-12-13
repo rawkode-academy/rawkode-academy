@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "cloudnativecompass-fm"
+
 env: environment: production: {
 	TF_VAR_cloudflare_account_id: env.environment.production.CLOUDFLARE_ACCOUNT_ID
 }

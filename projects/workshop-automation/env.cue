@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "workshop-automation"
+
 env: {
 	GITHUB_OWNER: "RawkodeAcademy"
 
