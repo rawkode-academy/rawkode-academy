@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "rawkode-academy-api"
+
 ci: pipelines: [
 	{
 		name: "default"

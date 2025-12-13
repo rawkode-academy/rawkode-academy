@@ -2,23 +2,12 @@
   "name": "rawkodeacademy",
   "private": true,
   "type": "module",
-  "workspaces": {
-    "packages": [
-      "content",
-      "packages/**",
-      "projects/**",
-      "!projects/**/generators/**"
-    ],
-    "catalogs": {
-      "auth": {
-        "better-auth": "^1.4.1",
-        "iron-session": "^8.0.4",
-        "jose": "^6.0.13",
-        "oslo": "^1.2.1",
-        "arctic": "^2.2.0"
-      }
-    }
-  },
+  "workspaces": [
+    "content",
+    "packages/**",
+    "projects/**",
+    "!projects/**/generators/**"
+  ],
   "devDependencies": {
     "@types/node": "^24.10.1",
     "knip": "^5.71.0",

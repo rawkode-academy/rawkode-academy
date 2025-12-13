@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "rawkode-tools-analytics"
+
 env: {
 	SERVICE_NAME: "analytics"
 

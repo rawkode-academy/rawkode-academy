@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "rawkode-academy-platform-search"
+
 hooks: onEnter: nix: schema.#NixFlake
 
 ci: pipelines: [

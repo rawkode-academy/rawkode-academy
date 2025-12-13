@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "rawkode-tools-posthog-collector"
+
 env: {
 	SERVICE_NAME: "posthog-collector"
 
