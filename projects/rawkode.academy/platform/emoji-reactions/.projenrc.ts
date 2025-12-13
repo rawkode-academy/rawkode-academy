@@ -5,7 +5,7 @@ const project = new PlatformService({
   serviceName: 'emoji-reactions',
 	includeWriteModel: true,
 	additionalDependencies: {
-		'better-auth': 'catalog:auth',
+		'better-auth': '^1.4.3',
 		cloudevents: '^8.0.2',
 	},
 	bindings: {
