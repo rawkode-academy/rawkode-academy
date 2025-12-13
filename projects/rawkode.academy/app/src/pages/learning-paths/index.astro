@@ -1,0 +1,195 @@
+---
+export const prerender = false;
+
+import { getCollection } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const learningPaths = (await getCollection("learningPaths")).sort(
+	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+---
+
+<AppLayout title="Learning Paths - Rawkode Academy">
+	<div class="page">
+		<header class="page-header">
+			<h1>Learning Paths</h1>
+			<p>Curated sequences to guide your learning journey</p>
+		</header>
+
+		<div class="content-grid">
+			{
+				learningPaths.map((path) => (
+					<a href={`/learning-paths/${path.id}`} class="content-card">
+						<div class="card-content">
+							<div class="card-meta">
+								<span class="card-difficulty">{path.data.difficulty}</span>
+								<span class="card-duration">
+									{Math.floor(path.data.estimatedDuration / 60)}h{" "}
+									{path.data.estimatedDuration % 60}m
+								</span>
+							</div>
+							<h3>{path.data.title}</h3>
+							<p>{path.data.description.slice(0, 150)}...</p>
+							<div class="card-technologies">
+								{path.data.technologies.slice(0, 3).map((tech) => (
+									<span class="tech-tag">{tech}</span>
+								))}
+								{path.data.technologies.length > 3 && (
+									<span class="tech-more">
+										+{path.data.technologies.length - 3}
+									</span>
+								)}
+							</div>
+						</div>
+					</a>
+				))
+			}
+		</div>
+
+		{
+			learningPaths.length === 0 && (
+				<div class="empty-state">
+					<p>No learning paths available yet. Check back soon!</p>
+				</div>
+			)
+		}
+	</div>
+</AppLayout>
+
+<style>
+	.page {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.page-header {
+		margin-bottom: 2rem;
+	}
+
+	.page-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.page-header p {
+		color: var(--text-secondary);
+	}
+
+	.content-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.content-card {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		overflow: hidden;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s;
+	}
+
+	.content-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	}
+
+	.card-content {
+		padding: 1.5rem;
+	}
+
+	.card-meta {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.card-difficulty,
+	.card-duration {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: capitalize;
+	}
+
+	.card-difficulty {
+		background: rgba(133, 255, 149, 0.2);
+		color: rgb(22, 101, 52);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.card-difficulty {
+			background: rgba(133, 255, 149, 0.15);
+			color: rgb(133, 255, 149);
+		}
+	}
+
+	.card-duration {
+		background: var(--surface-border);
+		color: var(--text-secondary);
+	}
+
+	.card-content h3 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+		line-height: 1.4;
+	}
+
+	.card-content p {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		line-height: 1.5;
+		margin-bottom: 1rem;
+	}
+
+	.card-technologies {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.tech-tag {
+		display: inline-block;
+		padding: 0.2rem 0.5rem;
+		background: rgba(4, 181, 156, 0.1);
+		color: var(--brand-primary);
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+	}
+
+	.tech-more {
+		color: var(--text-muted);
+		font-size: 0.75rem;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: 3rem;
+		color: var(--text-muted);
+	}
+
+	:root {
+		--brand-primary: rgb(4, 181, 156);
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+</style>

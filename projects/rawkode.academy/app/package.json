@@ -1,0 +1,40 @@
+{
+	"name": "rawkode-academy-app",
+	"type": "module",
+	"version": "0.0.1",
+	"scripts": {
+		"prepare": "panda codegen",
+		"dev": "astro dev",
+		"build": "panda codegen && astro check && astro build",
+		"preview": "astro preview",
+		"format": "biome format --write"
+	},
+	"dependencies": {
+		"@astrojs/check": "0.9.6",
+		"@astrojs/cloudflare": "12.6.12",
+		"@astrojs/mdx": "4.3.12",
+		"@astrojs/react": "4.4.2",
+		"@astrojs/vue": "5.1.3",
+		"@heroicons/vue": "^2.2.0",
+		"@rawkodeacademy/content": "workspace:*",
+		"astro": "5.16.3",
+		"graphql": "^16.11.0",
+		"graphql-request": "^7.2.0",
+		"react": "^19.1.1",
+		"react-dom": "^19.1.1",
+		"typescript": "^5.9.2",
+		"vidstack": "^1.12.13-next",
+		"vue": "^3.5.19"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.2",
+		"@pandacss/dev": "^0.52.0",
+		"@types/react": "^19.1.11",
+		"@types/react-dom": "^19.1.7",
+		"wrangler": "^4.32.0"
+	},
+	"trustedDependencies": [
+		"esbuild",
+		"workerd"
+	]
+}

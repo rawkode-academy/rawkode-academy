@@ -1,0 +1,243 @@
+---
+export const prerender = false;
+
+import { getCollection, getEntries, render } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const { slug } = Astro.params;
+const paths = await getCollection("learningPaths");
+const path = paths.find((p) => p.id === slug);
+
+if (!path) {
+	return Astro.redirect("/learning-paths");
+}
+
+const { Content } = await render(path);
+const authors = await getEntries(path.data.authors);
+---
+
+<AppLayout title={`${path.data.title} - Rawkode Academy`}>
+	<div class="path-page">
+		<nav class="breadcrumb">
+			<a href="/learning-paths">Learning Paths</a>
+			<span>/</span>
+			<span>{path.data.title}</span>
+		</nav>
+
+		<header class="path-header">
+			<div class="path-meta">
+				<span class="path-difficulty">{path.data.difficulty}</span>
+				<span class="path-duration">
+					{Math.floor(path.data.estimatedDuration / 60)}h{" "}
+					{path.data.estimatedDuration % 60}m
+				</span>
+			</div>
+			<h1>{path.data.title}</h1>
+			<p class="description">{path.data.description}</p>
+
+			<div class="technologies">
+				<span class="tech-label">Technologies:</span>
+				{path.data.technologies.map((tech) => <span class="tech-tag">{tech}</span>)}
+			</div>
+
+			{path.data.prerequisites.length > 0 && (
+				<div class="prerequisites">
+					<span class="prereq-label">Prerequisites:</span>
+					{path.data.prerequisites.map((prereq) => (
+						<span class="prereq-tag">{prereq}</span>
+					))}
+				</div>
+			)}
+
+			<div class="authors-section">
+				<span class="authors-label">Created by:</span>
+				{authors.map((author) => (
+					<div class="author">
+						{author.data.avatarUrl && (
+							<img
+								src={author.data.avatarUrl}
+								alt={author.data.name}
+								class="author-avatar"
+							/>
+						)}
+						<span>{author.data.name}</span>
+					</div>
+				))}
+			</div>
+		</header>
+
+		<section class="path-content prose">
+			<Content />
+		</section>
+	</div>
+</AppLayout>
+
+<style>
+	.path-page {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+		font-size: 0.875rem;
+		color: var(--text-muted);
+	}
+
+	.breadcrumb a {
+		color: var(--brand-primary);
+		text-decoration: none;
+	}
+
+	.breadcrumb a:hover {
+		text-decoration: underline;
+	}
+
+	.path-header {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 2rem;
+		margin-bottom: 2rem;
+	}
+
+	.path-meta {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.path-difficulty,
+	.path-duration {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: capitalize;
+	}
+
+	.path-difficulty {
+		background: rgba(133, 255, 149, 0.2);
+		color: rgb(22, 101, 52);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.path-difficulty {
+			background: rgba(133, 255, 149, 0.15);
+			color: rgb(133, 255, 149);
+		}
+	}
+
+	.path-duration {
+		background: var(--surface-border);
+		color: var(--text-secondary);
+	}
+
+	.path-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.75rem;
+	}
+
+	.description {
+		color: var(--text-secondary);
+		font-size: 1.1rem;
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
+	}
+
+	.technologies,
+	.prerequisites {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.tech-label,
+	.prereq-label {
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+
+	.tech-tag {
+		display: inline-block;
+		padding: 0.25rem 0.5rem;
+		background: rgba(4, 181, 156, 0.1);
+		color: var(--brand-primary);
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+	}
+
+	.prereq-tag {
+		display: inline-block;
+		padding: 0.25rem 0.5rem;
+		background: var(--surface-border);
+		color: var(--text-secondary);
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+	}
+
+	.authors-section {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--surface-border);
+	}
+
+	.authors-label {
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+
+	.author {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.author-avatar {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+	}
+
+	.author span {
+		font-weight: 500;
+		font-size: 0.875rem;
+	}
+
+	.path-content {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 2rem;
+		line-height: 1.7;
+	}
+
+	:root {
+		--brand-primary: rgb(4, 181, 156);
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+</style>

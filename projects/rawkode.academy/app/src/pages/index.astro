@@ -1,0 +1,301 @@
+---
+export const prerender = false;
+
+import { getCollection } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const user = Astro.locals.user!;
+
+const recentVideos = (await getCollection("videos"))
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+	.slice(0, 4);
+
+const recentArticles = (await getCollection("articles"))
+	.filter((a) => !a.data.draft)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+	.slice(0, 4);
+
+const courses = (await getCollection("courses")).slice(0, 3);
+---
+
+<AppLayout title="Dashboard - Rawkode Academy">
+	<div class="dashboard">
+		<header class="dashboard-header">
+			<h1>Welcome back, {user.name}</h1>
+			<p>Continue your learning journey</p>
+		</header>
+
+		<!-- Quick Stats -->
+		<section class="stats-grid">
+			<div class="stat-card">
+				<span class="stat-value">{recentVideos.length}</span>
+				<span class="stat-label">New Videos</span>
+			</div>
+			<div class="stat-card">
+				<span class="stat-value">{recentArticles.length}</span>
+				<span class="stat-label">New Articles</span>
+			</div>
+			<div class="stat-card">
+				<span class="stat-value">{courses.length}</span>
+				<span class="stat-label">Active Courses</span>
+			</div>
+		</section>
+
+		<!-- Latest Videos -->
+		<section class="content-section">
+			<div class="section-header">
+				<h2>Latest Videos</h2>
+				<a href="/watch" class="view-all">View all</a>
+			</div>
+			<div class="content-grid">
+				{
+					recentVideos.map((video) => (
+						<a href={`/watch/${video.data.slug}`} class="content-card">
+							<div class="card-content">
+								<span class="card-type">Video</span>
+								<h3>{video.data.title}</h3>
+								<p>{video.data.description.slice(0, 100)}...</p>
+								<time>
+									{video.data.publishedAt.toLocaleDateString("en-US", {
+										month: "short",
+										day: "numeric",
+										year: "numeric",
+									})}
+								</time>
+							</div>
+						</a>
+					))
+				}
+			</div>
+		</section>
+
+		<!-- Latest Articles -->
+		<section class="content-section">
+			<div class="section-header">
+				<h2>Latest Articles</h2>
+				<a href="/read" class="view-all">View all</a>
+			</div>
+			<div class="content-grid">
+				{
+					recentArticles.map((article) => (
+						<a href={`/read/${article.id}`} class="content-card">
+							<div class="card-content">
+								<span class="card-type">{article.data.type}</span>
+								<h3>{article.data.title}</h3>
+								<p>{article.data.description.slice(0, 100)}...</p>
+								<time>
+									{article.data.publishedAt.toLocaleDateString("en-US", {
+										month: "short",
+										day: "numeric",
+										year: "numeric",
+									})}
+								</time>
+							</div>
+						</a>
+					))
+				}
+			</div>
+		</section>
+
+		<!-- Courses -->
+		<section class="content-section">
+			<div class="section-header">
+				<h2>Featured Courses</h2>
+				<a href="/courses" class="view-all">View all</a>
+			</div>
+			<div class="content-grid courses">
+				{
+					courses.map((course) => (
+						<a href={`/courses/${course.id}`} class="content-card course">
+							<div class="card-content">
+								<span class="card-difficulty">{course.data.difficulty}</span>
+								<h3>{course.data.title}</h3>
+								<p>{course.data.description.slice(0, 120)}...</p>
+							</div>
+						</a>
+					))
+				}
+			</div>
+		</section>
+	</div>
+</AppLayout>
+
+<style>
+	.dashboard {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.dashboard-header {
+		margin-bottom: 2rem;
+	}
+
+	.dashboard-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.dashboard-header p {
+		color: var(--text-secondary);
+	}
+
+	/* Stats Grid */
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: 1rem;
+		margin-bottom: 2.5rem;
+	}
+
+	.stat-card {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 1.5rem;
+		text-align: center;
+	}
+
+	.stat-value {
+		display: block;
+		font-size: 2rem;
+		font-weight: 700;
+		color: var(--brand-primary);
+		font-family: "Quicksand", sans-serif;
+	}
+
+	.stat-label {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+	}
+
+	/* Content Sections */
+	.content-section {
+		margin-bottom: 2.5rem;
+	}
+
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+
+	.section-header h2 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+	}
+
+	.view-all {
+		color: var(--brand-primary);
+		text-decoration: none;
+		font-weight: 500;
+		font-size: 0.875rem;
+	}
+
+	.view-all:hover {
+		text-decoration: underline;
+	}
+
+	/* Content Grid */
+	.content-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 1rem;
+	}
+
+	.content-grid.courses {
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	}
+
+	/* Content Card */
+	.content-card {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		overflow: hidden;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s;
+	}
+
+	.content-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	}
+
+	.card-content {
+		padding: 1.25rem;
+	}
+
+	.card-type,
+	.card-difficulty {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: capitalize;
+		margin-bottom: 0.75rem;
+	}
+
+	.card-type {
+		background: rgba(4, 181, 156, 0.1);
+		color: var(--brand-primary);
+	}
+
+	.card-difficulty {
+		background: rgba(133, 255, 149, 0.2);
+		color: rgb(22, 101, 52);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.card-difficulty {
+			background: rgba(133, 255, 149, 0.15);
+			color: rgb(133, 255, 149);
+		}
+	}
+
+	.card-content h3 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+		line-height: 1.4;
+	}
+
+	.card-content p {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		line-height: 1.5;
+		margin-bottom: 0.75rem;
+	}
+
+	.card-content time {
+		color: var(--text-muted);
+		font-size: 0.75rem;
+	}
+
+	:root {
+		--brand-primary: rgb(4, 181, 156);
+		--brand-secondary: rgb(133, 255, 149);
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-primary: rgb(17, 24, 39);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-primary: rgb(255, 255, 255);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+</style>

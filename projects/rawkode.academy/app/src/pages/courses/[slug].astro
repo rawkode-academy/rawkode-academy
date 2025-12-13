@@ -1,0 +1,284 @@
+---
+export const prerender = false;
+
+import { getCollection, getEntries, render } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const { slug } = Astro.params;
+const courses = await getCollection("courses");
+const course = courses.find((c) => c.id === slug);
+
+if (!course) {
+	return Astro.redirect("/courses");
+}
+
+const { Content } = await render(course);
+const authors = await getEntries(course.data.authors);
+
+// Get modules for this course
+const allModules = await getCollection("courseModules");
+const modules = allModules
+	.filter((m) => m.data.course.id === course.id && !m.data.draft)
+	.sort((a, b) => a.data.order - b.data.order);
+---
+
+<AppLayout title={`${course.data.title} - Rawkode Academy`}>
+	<div class="course-page">
+		<nav class="breadcrumb">
+			<a href="/courses">Courses</a>
+			<span>/</span>
+			<span>{course.data.title}</span>
+		</nav>
+
+		<header class="course-header">
+			<span class="course-difficulty">{course.data.difficulty}</span>
+			<h1>{course.data.title}</h1>
+			<p class="description">{course.data.description}</p>
+
+			<div class="course-meta">
+				<div class="authors">
+					{
+						authors.map((author) => (
+							<div class="author">
+								{author.data.avatarUrl && (
+									<img
+										src={author.data.avatarUrl}
+										alt={author.data.name}
+										class="author-avatar"
+									/>
+								)}
+								<span>{author.data.name}</span>
+							</div>
+						))
+					}
+				</div>
+				<span class="module-count">{modules.length} modules</span>
+			</div>
+		</header>
+
+		{
+			modules.length > 0 && (
+				<section class="modules-section">
+					<h2>Course Modules</h2>
+					<div class="modules-list">
+						{modules.map((module, index) => (
+							<a
+								href={`/courses/${course.id}/${module.id.split("/").pop()}`}
+								class="module-card"
+							>
+								<span class="module-number">{index + 1}</span>
+								<div class="module-info">
+									<h3>{module.data.title}</h3>
+									<p>{module.data.description}</p>
+									{module.data.duration && (
+										<span class="module-duration">
+											{module.data.duration} min
+										</span>
+									)}
+								</div>
+							</a>
+						))}
+					</div>
+				</section>
+			)
+		}
+
+		<section class="course-content prose">
+			<Content />
+		</section>
+	</div>
+</AppLayout>
+
+<style>
+	.course-page {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+		font-size: 0.875rem;
+		color: var(--text-muted);
+	}
+
+	.breadcrumb a {
+		color: var(--brand-primary);
+		text-decoration: none;
+	}
+
+	.breadcrumb a:hover {
+		text-decoration: underline;
+	}
+
+	.course-header {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 2rem;
+		margin-bottom: 2rem;
+	}
+
+	.course-difficulty {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: capitalize;
+		background: rgba(133, 255, 149, 0.2);
+		color: rgb(22, 101, 52);
+		margin-bottom: 1rem;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.course-difficulty {
+			background: rgba(133, 255, 149, 0.15);
+			color: rgb(133, 255, 149);
+		}
+	}
+
+	.course-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.75rem;
+	}
+
+	.description {
+		color: var(--text-secondary);
+		font-size: 1.1rem;
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
+	}
+
+	.course-meta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-top: 1rem;
+		border-top: 1px solid var(--surface-border);
+	}
+
+	.authors {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.author {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.author-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+	}
+
+	.author span {
+		font-weight: 500;
+	}
+
+	.module-count {
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+
+	.modules-section {
+		margin-bottom: 2rem;
+	}
+
+	.modules-section h2 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 1.5rem;
+		font-weight: 700;
+		margin-bottom: 1rem;
+	}
+
+	.modules-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.module-card {
+		display: flex;
+		align-items: flex-start;
+		gap: 1rem;
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 0.75rem;
+		padding: 1rem 1.25rem;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s;
+	}
+
+	.module-card:hover {
+		transform: translateX(4px);
+		border-color: var(--brand-primary);
+	}
+
+	.module-number {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: var(--brand-primary);
+		color: white;
+		font-weight: 600;
+		font-size: 0.875rem;
+		flex-shrink: 0;
+	}
+
+	.module-info h3 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin-bottom: 0.25rem;
+	}
+
+	.module-info p {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.module-duration {
+		color: var(--text-muted);
+		font-size: 0.75rem;
+	}
+
+	.course-content {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 2rem;
+		line-height: 1.7;
+	}
+
+	:root {
+		--brand-primary: rgb(4, 181, 156);
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+</style>

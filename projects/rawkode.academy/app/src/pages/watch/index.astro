@@ -1,0 +1,158 @@
+---
+export const prerender = false;
+
+import { getCollection } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const videos = (await getCollection("videos"))
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+---
+
+<AppLayout title="Videos - Rawkode Academy">
+	<div class="page">
+		<header class="page-header">
+			<h1>Videos</h1>
+			<p>Watch tutorials, live streams, and educational content</p>
+		</header>
+
+		<div class="content-grid">
+			{
+				videos.map((video) => (
+					<a href={`/watch/${video.data.slug}`} class="content-card">
+						<div class="card-content">
+							<div class="card-meta">
+								{video.data.type && (
+									<span class="card-type">{video.data.type}</span>
+								)}
+								{video.data.duration && (
+									<span class="card-duration">
+										{Math.floor(video.data.duration / 60)}m
+									</span>
+								)}
+							</div>
+							<h3>{video.data.title}</h3>
+							<p>{video.data.description.slice(0, 120)}...</p>
+							<time>
+								{video.data.publishedAt.toLocaleDateString("en-US", {
+									month: "short",
+									day: "numeric",
+									year: "numeric",
+								})}
+							</time>
+						</div>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</AppLayout>
+
+<style>
+	.page {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.page-header {
+		margin-bottom: 2rem;
+	}
+
+	.page-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.page-header p {
+		color: var(--text-secondary);
+	}
+
+	.content-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.content-card {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		overflow: hidden;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s;
+	}
+
+	.content-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	}
+
+	.card-content {
+		padding: 1.25rem;
+	}
+
+	.card-meta {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.card-type,
+	.card-duration {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: capitalize;
+	}
+
+	.card-type {
+		background: rgba(4, 181, 156, 0.1);
+		color: var(--brand-primary);
+	}
+
+	.card-duration {
+		background: var(--surface-border);
+		color: var(--text-secondary);
+	}
+
+	.card-content h3 {
+		font-size: 1.1rem;
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+		line-height: 1.4;
+	}
+
+	.card-content p {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		line-height: 1.5;
+		margin-bottom: 0.75rem;
+	}
+
+	.card-content time {
+		color: var(--text-muted);
+		font-size: 0.75rem;
+	}
+
+	:root {
+		--brand-primary: rgb(4, 181, 156);
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+</style>
