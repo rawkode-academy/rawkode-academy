@@ -8,11 +8,11 @@ name: "projen-generator"
 
 tasks: {
 	install: {
-		command: "bun"
+		command: "npm"
 		args: ["install"]
 	}
 	types: {
-		command: "bun"
+		command: "npm"
 		args: ["run", "types"]
 		dependsOn: ["install"]
 	}
