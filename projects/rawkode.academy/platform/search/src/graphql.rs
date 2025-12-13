@@ -2,7 +2,7 @@ use crate::models::{GraphQLQuery, GraphQLResponse, Video};
 use anyhow::{Context, Result};
 use reqwest::Client;
 
-const GRAPHQL_ENDPOINT: &str = "https://api.rawkode.academy/graphql";
+const GRAPHQL_ENDPOINT: &str = "https://api.rawkode.academy";
 
 pub async fn fetch_all_videos() -> Result<Vec<Video>> {
     let client = Client::new();
