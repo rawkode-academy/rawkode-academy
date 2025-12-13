@@ -1,0 +1,19 @@
+{
+  "workspace": [
+    "./content",
+    "./projects/rawkode.academy/api",
+    "./projects/rawkode.academy/identity",
+    "./projects/rawkode.academy/platform/email-service",
+    "./projects/rawkode.academy/platform/image-service",
+    "./projects/rawkode.academy/platform/transcriptions",
+    "./projects/rawkode.academy/platform/youtube-scraper",
+    "./projects/rawkode.academy/tasks/random-social-post",
+    "./projects/rawkode.academy/website",
+    "./projects/rawkode.link",
+    "./projects/rawkode.studio",
+    "./projects/rawkode.tools/analytics",
+    "./projects/rawkode.tools/posthog-collector",
+    "./projects/rawkode.tools/star-catcher",
+    "./projects/workshop-automation"
+  ]
+}
