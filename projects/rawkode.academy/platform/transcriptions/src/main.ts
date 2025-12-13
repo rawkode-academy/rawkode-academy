@@ -11,6 +11,7 @@ export interface Env {
 
 type Payload = {
 	videoId: string;
+	id: string;
 	language: string;
 };
 
@@ -42,8 +43,8 @@ export default {
 
 			console.log(`Payload: ${JSON.stringify(params)}`);
 
-			if (!params.videoId || !params.language) {
-				return new Response("Missing videoId or language in request body", {
+			if (!params.videoId || !params.id || !params.language) {
+				return new Response("Missing videoId, id, or language in request body", {
 					status: 400,
 				});
 			}
