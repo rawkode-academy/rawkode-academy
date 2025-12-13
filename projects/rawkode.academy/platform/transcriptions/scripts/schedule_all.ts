@@ -1,4 +1,6 @@
-const GRAPHQL_ENDPOINT = "https://api.rawkode.academy/graphql";
+import { triggerTranscriptionJob } from "./transcriptions";
+
+const GRAPHQL_ENDPOINT = "https://api.rawkode.academy";
 const LIMIT = 100;
 
 interface Technology {
@@ -88,36 +90,21 @@ async function fetchVideos(offset: number): Promise<Video[]> {
 	}
 }
 
-const CLOUDFLARE_TRANSCRIPTION_ENDPOINT =
-	"https://transcriptions.rawkodeacademy.workers.dev";
-
-async function triggerTranscription(videoId: string): Promise<void> {
-	console.log(`Triggering transcription for video ID: ${videoId}`);
+async function triggerTranscription(id: string): Promise<void> {
+	console.log(`Triggering transcription for video ID: ${id}`);
 	try {
-		const response = await fetch(CLOUDFLARE_TRANSCRIPTION_ENDPOINT, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"Authorization": `Bearer ${process.env.HTTP_TRANSCRIPTION_TOKEN}`,
-			},
-			body: JSON.stringify({ videoId: videoId, language: "en" }),
-		});
+		const result = (await triggerTranscriptionJob({
+			id,
+			language: "en",
+		})) as { workflowId: string };
 
-		if (!response.ok) {
-			const errorBody = await response.text();
-			console.error(
-				`Error triggering transcription for ${videoId}: ${response.status} - ${errorBody}`,
-			);
-		} else {
-			const result = (await response.json()) as { workflowId: string };
-			console.log(
-				`Successfully triggered transcription for video ID: ${videoId}, workflow ID: ${result.workflowId}`,
-			);
-		}
+		console.log(
+			`Successfully triggered transcription for video ID: ${id}, workflow ID: ${result.workflowId}`,
+		);
 	} catch (error) {
 		console.error(
-			`Network or other error triggering transcription for ${videoId}:`,
-			error,
+			`Error triggering transcription for ${id}:`,
+			error instanceof Error ? error.message : error,
 		);
 	}
 }

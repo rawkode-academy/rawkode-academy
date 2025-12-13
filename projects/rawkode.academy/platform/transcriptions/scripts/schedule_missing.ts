@@ -1,22 +1,39 @@
-import { Glob } from "bun";
-import { readFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { gql, request } from "graphql-request";
+import { triggerTranscriptionJob } from "./transcriptions";
 
-const CLOUDFLARE_TRANSCRIPTION_ENDPOINT =
-	"https://transcriptions.rawkodeacademy.workers.dev";
+const GRAPHQL_ENDPOINT = "https://api.rawkode.academy";
 const CONTENT_CDN_BASE = "https://content.rawkode.academy/videos";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const CONTENT_VIDEOS_PATH = resolve(
-	__dirname,
-	"../../../../../content/videos",
-);
+const PAGE_SIZE = 100;
 
 interface ParsedArgs {
 	execute: boolean;
 	concurrency: number;
 }
+
+interface GraphQLVideo {
+	id: string;
+	streamUrl?: string | null;
+	thumbnailUrl?: string | null;
+}
+
+interface GraphQLResponse {
+	getLatestVideos?: GraphQLVideo[];
+}
+
+interface VideoRecord {
+	id: string;
+	videoId: string;
+}
+
+const GET_LATEST_VIDEOS = gql`
+  query GetLatestVideos($limit: Int!, $offset: Int!) {
+    getLatestVideos(limit: $limit, offset: $offset) {
+      id
+      streamUrl
+      thumbnailUrl
+    }
+  }
+`;
 
 function usage(code = 1) {
 	console.log(
@@ -31,6 +48,7 @@ function usage(code = 1) {
 			"",
 			"Env:",
 			"  HTTP_TRANSCRIPTION_TOKEN   Bearer token for the Worker (required with --execute)",
+			"  TRANSCRIPTIONS_SERVICE     Service binding to the transcriptions Worker",
 			"",
 			"Examples:",
 			"  bun scripts/schedule_missing.ts                    # Dry-run: list missing transcripts",
@@ -71,38 +89,38 @@ function parseArgs(argv: string[]): ParsedArgs {
 	return { execute, concurrency };
 }
 
-function extractVideoMetadata(content: string): {
-	videoId: string | null;
-	id: string | null;
-} {
-	// Match videoId in YAML frontmatter
-	const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-	if (!frontmatterMatch) return { videoId: null, id: null };
-
-	const frontmatter = frontmatterMatch[1];
-	const videoIdMatch = frontmatter.match(/^videoId:\s*(.+)$/m);
-	const idMatch = frontmatter.match(/^id:\s*(.+)$/m);
-
-	return {
-		videoId: videoIdMatch ? videoIdMatch[1].trim() : null,
-		id: idMatch ? idMatch[1].trim() : null,
-	};
+function extractVideoIdFromUrl(url?: string | null): string | null {
+	if (!url) return null;
+	const match = url.match(/\/videos\/([^/]+)\//);
+	return match ? match[1] : null;
 }
 
-async function scanVideoIds(): Promise<
-	{ videoId: string; id: string; file: string }[]
-> {
-	const videos: { videoId: string; id: string; file: string }[] = [];
-	const glob = new Glob("**/*.md");
+async function fetchVideosFromGraphQL(): Promise<VideoRecord[]> {
+	const videos: VideoRecord[] = [];
+	let offset = 0;
 
-	for await (const file of glob.scan(CONTENT_VIDEOS_PATH)) {
-		const fullPath = resolve(CONTENT_VIDEOS_PATH, file);
-		const content = readFileSync(fullPath, "utf-8");
-		const { videoId, id } = extractVideoMetadata(content);
+	while (true) {
+		const data = (await request(
+			GRAPHQL_ENDPOINT,
+			GET_LATEST_VIDEOS,
+			{ limit: PAGE_SIZE, offset },
+		)) as GraphQLResponse;
 
-		if (videoId && id) {
-			videos.push({ videoId, id, file });
-		}
+		const batch = data.getLatestVideos ?? [];
+		const mapped = batch
+			.map(({ id, streamUrl, thumbnailUrl }) => {
+				const videoId =
+					extractVideoIdFromUrl(streamUrl) ??
+					extractVideoIdFromUrl(thumbnailUrl);
+
+				return videoId ? { id, videoId } : null;
+			})
+			.filter((v): v is VideoRecord => v !== null);
+
+		videos.push(...mapped);
+
+		if (batch.length < PAGE_SIZE) break;
+		offset += PAGE_SIZE;
 	}
 
 	return videos;
@@ -119,14 +137,13 @@ async function checkTranscriptExists(videoId: string): Promise<boolean> {
 }
 
 async function checkTranscriptsInBatches(
-	videos: { videoId: string; id: string; file: string }[],
+	videos: VideoRecord[],
 	concurrency: number,
-): Promise<{ videoId: string; id: string; file: string }[]> {
-	const missing: { videoId: string; id: string; file: string }[] = [];
+): Promise<VideoRecord[]> {
+	const missing: VideoRecord[] = [];
 	const total = videos.length;
 	let completed = 0;
 
-	// Process in batches
 	for (let i = 0; i < videos.length; i += concurrency) {
 		const batch = videos.slice(i, i + concurrency);
 		const results = await Promise.all(
@@ -145,38 +162,17 @@ async function checkTranscriptsInBatches(
 		}
 	}
 
-	console.log(); // New line after progress
+	console.log();
 	return missing;
 }
 
-async function triggerTranscription(
-	videoId: string,
-	id: string,
-): Promise<{ success: boolean; workflowId?: string; error?: string }> {
-	const token = process.env.HTTP_TRANSCRIPTION_TOKEN;
-	if (!token) {
-		return { success: false, error: "Missing HTTP_TRANSCRIPTION_TOKEN" };
-	}
-
+async function triggerTranscription(id: string): Promise<{
+	success: boolean;
+	workflowId?: string;
+	error?: string;
+}> {
 	try {
-		const response = await fetch(CLOUDFLARE_TRANSCRIPTION_ENDPOINT, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${token}`,
-			},
-			body: JSON.stringify({ videoId, id, language: "en" }),
-		});
-
-		if (!response.ok) {
-			const body = await response.text();
-			return {
-				success: false,
-				error: `${response.status} ${response.statusText}: ${body}`,
-			};
-		}
-
-		const result = (await response.json()) as { workflowId: string };
+		const result = await triggerTranscriptionJob({ id, language: "en" });
 		return { success: true, workflowId: result.workflowId };
 	} catch (err) {
 		return {
@@ -189,9 +185,9 @@ async function triggerTranscription(
 async function main() {
 	const { execute, concurrency } = parseArgs(process.argv);
 
-	console.log(`Scanning ${CONTENT_VIDEOS_PATH} for video IDs...`);
-	const videos = await scanVideoIds();
-	console.log(`Found ${videos.length} videos\n`);
+	console.log("Fetching video metadata from GraphQL...");
+	const videos = await fetchVideosFromGraphQL();
+	console.log(`Found ${videos.length} published videos\n`);
 
 	console.log(`Checking for existing transcripts (concurrency: ${concurrency})...`);
 	const missing = await checkTranscriptsInBatches(videos, concurrency);
@@ -204,8 +200,8 @@ async function main() {
 	}
 
 	console.log("Videos without transcripts:");
-	for (const { videoId, file } of missing) {
-		console.log(`  - ${videoId} (${file})`);
+	for (const { videoId, id } of missing) {
+		console.log(`  - ${videoId} (${id})`);
 	}
 
 	if (!execute) {
@@ -213,8 +209,10 @@ async function main() {
 		return;
 	}
 
-	// Check for token before triggering
-	if (!process.env.HTTP_TRANSCRIPTION_TOKEN) {
+	if (
+		typeof process !== "undefined" &&
+		!process.env.HTTP_TRANSCRIPTION_TOKEN
+	) {
 		console.error(
 			"\nMissing env HTTP_TRANSCRIPTION_TOKEN. Export your Worker API token.",
 		);
@@ -226,8 +224,8 @@ async function main() {
 	let failCount = 0;
 
 	for (let i = 0; i < missing.length; i++) {
-		const { videoId, id } = missing[i];
-		const result = await triggerTranscription(videoId, id);
+		const { id, videoId } = missing[i];
+		const result = await triggerTranscription(id);
 
 		if (result.success) {
 			console.log(
@@ -241,7 +239,6 @@ async function main() {
 			failCount++;
 		}
 
-		// Delay between requests (except for the last one)
 		if (i < missing.length - 1) {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 		}
