@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "rawkode-academy-platform-zitadel-zulip-connector"
+
 env: {
 	environment: production: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {

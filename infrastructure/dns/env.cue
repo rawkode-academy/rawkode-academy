@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "infrastructure-dns"
+
 env: {
 	environment: production: {
 		TF_HTTP_USERNAME: "terraform"

@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "presentation-cloud-native-2"
+
 env: {
 	environment: production: {
 		SCW_ACCESS_KEY: schema.#OnePasswordRef & {

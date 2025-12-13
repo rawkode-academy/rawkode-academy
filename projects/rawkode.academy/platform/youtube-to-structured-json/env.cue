@@ -4,6 +4,8 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
+name: "rawkode-academy-platform-youtube-to-structured-json"
+
 env: {
 	environment: production: {
 		GEMINI_API_KEY: schema.#OnePasswordRef & {
