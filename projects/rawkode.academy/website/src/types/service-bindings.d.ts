@@ -14,6 +14,7 @@ import type { SkiShareCards } from "ski-share-cards/http/http-service.js";
 
 export interface TypedEnv {
 	SESSION: KVNamespace;
+	AI: Ai;
 	EMOJI_REACTIONS: Fetcher;
 	IDENTITY: Fetcher;
 	ANALYTICS: Fetcher;
