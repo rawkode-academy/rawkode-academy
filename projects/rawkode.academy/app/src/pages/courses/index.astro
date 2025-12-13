@@ -1,0 +1,127 @@
+---
+export const prerender = false;
+
+import { getCollection } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const courses = (await getCollection("courses")).sort(
+	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+---
+
+<AppLayout title="Courses - Rawkode Academy">
+	<div class="page">
+		<header class="page-header">
+			<h1>Courses</h1>
+			<p>Structured learning paths to master cloud native technologies</p>
+		</header>
+
+		<div class="content-grid">
+			{
+				courses.map((course) => (
+					<a href={`/courses/${course.id}`} class="content-card">
+						<div class="card-content">
+							<span class="card-difficulty">{course.data.difficulty}</span>
+							<h3>{course.data.title}</h3>
+							<p>{course.data.description.slice(0, 150)}...</p>
+						</div>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</AppLayout>
+
+<style>
+	.page {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.page-header {
+		margin-bottom: 2rem;
+	}
+
+	.page-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.page-header p {
+		color: var(--text-secondary);
+	}
+
+	.content-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.content-card {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		overflow: hidden;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s;
+	}
+
+	.content-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	}
+
+	.card-content {
+		padding: 1.5rem;
+	}
+
+	.card-difficulty {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: capitalize;
+		background: rgba(133, 255, 149, 0.2);
+		color: rgb(22, 101, 52);
+		margin-bottom: 0.75rem;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.card-difficulty {
+			background: rgba(133, 255, 149, 0.15);
+			color: rgb(133, 255, 149);
+		}
+	}
+
+	.card-content h3 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+		line-height: 1.4;
+	}
+
+	.card-content p {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		line-height: 1.5;
+	}
+
+	:root {
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-secondary: rgb(55, 65, 81);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-secondary: rgb(209, 213, 219);
+		}
+	}
+</style>

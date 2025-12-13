@@ -1,0 +1,122 @@
+---
+export const prerender = false;
+
+import { getCollection } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const shows = (await getCollection("shows")).filter((s) => s.data.publish);
+---
+
+<AppLayout title="Shows - Rawkode Academy">
+	<div class="page">
+		<header class="page-header">
+			<h1>Shows</h1>
+			<p>Live streams, podcasts, and video series</p>
+		</header>
+
+		<div class="content-grid">
+			{
+				shows.map((show) => (
+					<a href={`/shows/${show.data.id}`} class="content-card">
+						<div class="card-content">
+							<h3>{show.data.name}</h3>
+							{show.data.description && (
+								<p>{show.data.description.slice(0, 150)}...</p>
+							)}
+						</div>
+					</a>
+				))
+			}
+		</div>
+
+		{
+			shows.length === 0 && (
+				<div class="empty-state">
+					<p>No shows available yet. Check back soon!</p>
+				</div>
+			)
+		}
+	</div>
+</AppLayout>
+
+<style>
+	.page {
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.page-header {
+		margin-bottom: 2rem;
+	}
+
+	.page-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.page-header p {
+		color: var(--text-secondary);
+	}
+
+	.content-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.content-card {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		overflow: hidden;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s;
+	}
+
+	.content-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	}
+
+	.card-content {
+		padding: 1.5rem;
+	}
+
+	.card-content h3 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+	}
+
+	.card-content p {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		line-height: 1.5;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: 3rem;
+		color: var(--text-muted);
+	}
+
+	:root {
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+</style>

@@ -1,0 +1,292 @@
+---
+export const prerender = false;
+
+import { getCollection, getEntries, render } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const { showId } = Astro.params;
+const shows = await getCollection("shows");
+const show = shows.find((s) => s.data.id === showId);
+
+if (!show) {
+	return Astro.redirect("/shows");
+}
+
+const { Content } = await render(show);
+const hosts = await getEntries(show.data.hosts);
+
+// Get videos for this show
+const videos = (await getCollection("videos"))
+	.filter((v) => v.data.show?.id === show.id)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+---
+
+<AppLayout title={`${show.data.name} - Rawkode Academy`}>
+	<div class="show-page">
+		<nav class="breadcrumb">
+			<a href="/shows">Shows</a>
+			<span>/</span>
+			<span>{show.data.name}</span>
+		</nav>
+
+		<header class="show-header">
+			<h1>{show.data.name}</h1>
+			{show.data.description && <p class="description">{show.data.description}</p>}
+
+			{hosts.length > 0 && (
+				<div class="hosts">
+					<span class="hosts-label">Hosts:</span>
+					{hosts.map((host) => (
+						<div class="host">
+							{host.data.avatarUrl && (
+								<img
+									src={host.data.avatarUrl}
+									alt={host.data.name}
+									class="host-avatar"
+								/>
+							)}
+							<span>{host.data.name}</span>
+						</div>
+					))}
+				</div>
+			)}
+		</header>
+
+		{show.data.subscribeLinks.length > 0 && (
+			<section class="subscribe-section">
+				<h2>Subscribe</h2>
+				<div class="subscribe-links">
+					{show.data.subscribeLinks.map((link) => (
+						<a
+							href={link.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="subscribe-link"
+						>
+							{link.platform}
+						</a>
+					))}
+				</div>
+			</section>
+		)}
+
+		{videos.length > 0 && (
+			<section class="episodes-section">
+				<h2>Episodes</h2>
+				<div class="episodes-list">
+					{videos.map((video) => (
+						<a href={`/watch/${video.data.slug}`} class="episode-card">
+							<div class="episode-info">
+								<h3>{video.data.title}</h3>
+								<p>{video.data.description.slice(0, 100)}...</p>
+								<time>
+									{video.data.publishedAt.toLocaleDateString("en-US", {
+										month: "short",
+										day: "numeric",
+										year: "numeric",
+									})}
+								</time>
+							</div>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
+
+		<section class="show-content prose">
+			<Content />
+		</section>
+	</div>
+</AppLayout>
+
+<style>
+	.show-page {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+		font-size: 0.875rem;
+		color: var(--text-muted);
+	}
+
+	.breadcrumb a {
+		color: var(--brand-primary);
+		text-decoration: none;
+	}
+
+	.breadcrumb a:hover {
+		text-decoration: underline;
+	}
+
+	.show-header {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 2rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.show-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.75rem;
+	}
+
+	.description {
+		color: var(--text-secondary);
+		font-size: 1.1rem;
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
+	}
+
+	.hosts {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--surface-border);
+	}
+
+	.hosts-label {
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+
+	.host {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.host-avatar {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+	}
+
+	.host span {
+		font-weight: 500;
+		font-size: 0.875rem;
+	}
+
+	.subscribe-section {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 1.5rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.subscribe-section h2 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		margin-bottom: 1rem;
+	}
+
+	.subscribe-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+
+	.subscribe-link {
+		display: inline-block;
+		padding: 0.5rem 1rem;
+		background: var(--brand-primary);
+		color: white;
+		border-radius: 0.5rem;
+		text-decoration: none;
+		font-size: 0.875rem;
+		font-weight: 500;
+		transition: all 0.2s;
+	}
+
+	.subscribe-link:hover {
+		filter: brightness(1.1);
+	}
+
+	.episodes-section {
+		margin-bottom: 1.5rem;
+	}
+
+	.episodes-section h2 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 1.5rem;
+		font-weight: 700;
+		margin-bottom: 1rem;
+	}
+
+	.episodes-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.episode-card {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 0.75rem;
+		padding: 1rem 1.25rem;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s;
+	}
+
+	.episode-card:hover {
+		transform: translateX(4px);
+		border-color: var(--brand-primary);
+	}
+
+	.episode-info h3 {
+		font-size: 1rem;
+		font-weight: 600;
+		margin-bottom: 0.25rem;
+	}
+
+	.episode-info p {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.episode-info time {
+		color: var(--text-muted);
+		font-size: 0.75rem;
+	}
+
+	.show-content {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 2rem;
+		line-height: 1.7;
+	}
+
+	:root {
+		--brand-primary: rgb(4, 181, 156);
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+</style>

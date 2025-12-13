@@ -1,0 +1,320 @@
+---
+export const prerender = false;
+
+import "@/styles/index.css";
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description = "Rawkode Academy - Cloud Native Education" } =
+	Astro.props;
+const user = Astro.locals.user;
+
+const navItems = [
+	{ href: "/", label: "Dashboard", icon: "home" },
+	{ href: "/watch", label: "Videos", icon: "play" },
+	{ href: "/read", label: "Articles", icon: "book" },
+	{ href: "/courses", label: "Courses", icon: "academic" },
+	{ href: "/shows", label: "Shows", icon: "mic" },
+	{ href: "/learning-paths", label: "Learning Paths", icon: "path" },
+];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content={description} />
+		<title>{title}</title>
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	</head>
+	<body>
+		<div class="app-layout">
+			<!-- Sidebar -->
+			<aside class="sidebar">
+				<div class="sidebar-header">
+					<a href="/" class="logo">
+						<svg width="32" height="32" viewBox="0 0 100 100" fill="none">
+							<circle cx="50" cy="50" r="45" fill="rgb(4, 181, 156)" />
+							<text
+								x="50"
+								y="65"
+								text-anchor="middle"
+								fill="white"
+								font-size="40"
+								font-weight="bold"
+								font-family="system-ui"
+							>
+								R
+							</text>
+						</svg>
+						<span class="logo-text">Academy</span>
+					</a>
+				</div>
+
+				<nav class="sidebar-nav">
+					{
+						navItems.map((item) => (
+							<a
+								href={item.href}
+								class:list={[
+									"nav-item",
+									{ active: Astro.url.pathname === item.href },
+								]}
+							>
+								{item.label}
+							</a>
+						))
+					}
+				</nav>
+
+				<div class="sidebar-footer">
+					<a href="/settings" class="nav-item">Settings</a>
+				</div>
+			</aside>
+
+			<!-- Main Content -->
+			<div class="main-wrapper">
+				<!-- Header -->
+				<header class="header">
+					<div class="header-content">
+						<div class="header-left">
+							<!-- Mobile menu toggle could go here -->
+						</div>
+						<div class="header-right">
+							{
+								user && (
+									<div class="user-menu">
+										{user.image ? (
+											<img
+												src={user.image}
+												alt={user.name}
+												class="user-avatar"
+											/>
+										) : (
+											<div class="user-avatar-placeholder">
+												{user.name.charAt(0).toUpperCase()}
+											</div>
+										)}
+										<span class="user-name">{user.name}</span>
+									</div>
+								)
+							}
+						</div>
+					</div>
+				</header>
+
+				<!-- Page Content -->
+				<main class="main-content">
+					<slot />
+				</main>
+			</div>
+		</div>
+	</body>
+</html>
+
+<style>
+	:root {
+		--sidebar-width: 240px;
+		--header-height: 64px;
+		--brand-primary: rgb(4, 181, 156);
+		--brand-secondary: rgb(133, 255, 149);
+		--surface-base: #f5f7ff;
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-primary: rgb(17, 24, 39);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-base: #030617;
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-primary: rgb(255, 255, 255);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	body {
+		font-family: "Poppins", system-ui, -apple-system, sans-serif;
+		background: var(--surface-base);
+		color: var(--text-primary);
+		min-height: 100vh;
+	}
+
+	.app-layout {
+		display: flex;
+		min-height: 100vh;
+	}
+
+	/* Sidebar */
+	.sidebar {
+		position: fixed;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: var(--sidebar-width);
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border-right: 1px solid var(--surface-border);
+		display: flex;
+		flex-direction: column;
+		z-index: 100;
+	}
+
+	.sidebar-header {
+		padding: 1.25rem;
+		border-bottom: 1px solid var(--surface-border);
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		text-decoration: none;
+		color: var(--text-primary);
+	}
+
+	.logo-text {
+		font-family: "Quicksand", sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+	}
+
+	.sidebar-nav {
+		flex: 1;
+		padding: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.nav-item {
+		display: flex;
+		align-items: center;
+		padding: 0.75rem 1rem;
+		border-radius: 0.5rem;
+		text-decoration: none;
+		color: var(--text-secondary);
+		font-weight: 500;
+		transition: all 0.2s;
+	}
+
+	.nav-item:hover {
+		background: var(--surface-border);
+		color: var(--text-primary);
+	}
+
+	.nav-item.active {
+		background: var(--brand-primary);
+		color: white;
+	}
+
+	.sidebar-footer {
+		padding: 1rem;
+		border-top: 1px solid var(--surface-border);
+	}
+
+	/* Main Wrapper */
+	.main-wrapper {
+		flex: 1;
+		margin-left: var(--sidebar-width);
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Header */
+	.header {
+		position: sticky;
+		top: 0;
+		height: var(--header-height);
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border-bottom: 1px solid var(--surface-border);
+		z-index: 50;
+	}
+
+	.header-content {
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 1.5rem;
+	}
+
+	.header-left {
+		display: flex;
+		align-items: center;
+	}
+
+	.header-right {
+		display: flex;
+		align-items: center;
+	}
+
+	.user-menu {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.user-avatar,
+	.user-avatar-placeholder {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	.user-avatar-placeholder {
+		background: var(--brand-primary);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+	}
+
+	.user-name {
+		font-weight: 500;
+		color: var(--text-primary);
+	}
+
+	/* Main Content */
+	.main-content {
+		flex: 1;
+		padding: 1.5rem;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.sidebar {
+			transform: translateX(-100%);
+			transition: transform 0.3s;
+		}
+
+		.sidebar.open {
+			transform: translateX(0);
+		}
+
+		.main-wrapper {
+			margin-left: 0;
+		}
+
+		.user-name {
+			display: none;
+		}
+	}
+</style>

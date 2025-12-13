@@ -1,0 +1,230 @@
+---
+export const prerender = false;
+
+import AppLayout from "@/layouts/app.astro";
+
+const user = Astro.locals.user!;
+---
+
+<AppLayout title="Settings - Rawkode Academy">
+	<div class="settings-page">
+		<header class="page-header">
+			<h1>Settings</h1>
+			<p>Manage your account and preferences</p>
+		</header>
+
+		<div class="settings-grid">
+			<!-- Profile Section -->
+			<section class="settings-card">
+				<h2>Profile</h2>
+				<div class="profile-info">
+					{
+						user.image ? (
+							<img
+								src={user.image}
+								alt={user.name}
+								class="profile-avatar"
+							/>
+						) : (
+							<div class="profile-avatar-placeholder">
+								{user.name.charAt(0).toUpperCase()}
+							</div>
+						)
+					}
+					<div class="profile-details">
+						<p class="profile-name">{user.name}</p>
+						<p class="profile-email">{user.email}</p>
+					</div>
+				</div>
+			</section>
+
+			<!-- Account Section -->
+			<section class="settings-card">
+				<h2>Account</h2>
+				<div class="settings-list">
+					<div class="settings-item">
+						<div class="settings-item-info">
+							<span class="settings-item-label">Email verified</span>
+							<span class="settings-item-value">
+								{user.emailVerified ? "Yes" : "No"}
+							</span>
+						</div>
+					</div>
+					<div class="settings-item">
+						<div class="settings-item-info">
+							<span class="settings-item-label">Member since</span>
+							<span class="settings-item-value">
+								{
+									new Date(user.createdAt).toLocaleDateString("en-US", {
+										month: "long",
+										day: "numeric",
+										year: "numeric",
+									})
+								}
+							</span>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Sign Out Section -->
+			<section class="settings-card danger">
+				<h2>Session</h2>
+				<p class="settings-description">
+					Sign out of your account on this device.
+				</p>
+				<form action="/auth/sign-out" method="POST">
+					<button type="submit" class="sign-out-button"> Sign Out </button>
+				</form>
+			</section>
+		</div>
+	</div>
+</AppLayout>
+
+<style>
+	.settings-page {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	.page-header {
+		margin-bottom: 2rem;
+	}
+
+	.page-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.page-header p {
+		color: var(--text-secondary);
+	}
+
+	.settings-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.settings-card {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 1.5rem;
+	}
+
+	.settings-card h2 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		margin-bottom: 1rem;
+	}
+
+	.settings-card.danger {
+		border-color: rgba(239, 68, 68, 0.3);
+	}
+
+	.profile-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.profile-avatar,
+	.profile-avatar-placeholder {
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	.profile-avatar-placeholder {
+		background: var(--brand-primary);
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 700;
+		font-size: 1.5rem;
+	}
+
+	.profile-name {
+		font-weight: 600;
+		font-size: 1.1rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.profile-email {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+	}
+
+	.settings-list {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.settings-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid var(--surface-border);
+	}
+
+	.settings-item:last-child {
+		border-bottom: none;
+	}
+
+	.settings-item-label {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+	}
+
+	.settings-item-value {
+		font-weight: 500;
+	}
+
+	.settings-description {
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		margin-bottom: 1rem;
+	}
+
+	.sign-out-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.75rem 1.5rem;
+		background: rgb(239, 68, 68);
+		color: white;
+		border: none;
+		border-radius: 0.5rem;
+		font-weight: 500;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.sign-out-button:hover {
+		background: rgb(220, 38, 38);
+	}
+
+	:root {
+		--brand-primary: rgb(4, 181, 156);
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-secondary: rgb(55, 65, 81);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-secondary: rgb(209, 213, 219);
+		}
+	}
+</style>

@@ -1,0 +1,245 @@
+---
+export const prerender = false;
+
+import { getCollection, render } from "astro:content";
+import AppLayout from "@/layouts/app.astro";
+
+const { slug } = Astro.params;
+const videos = await getCollection("videos");
+const video = videos.find((v) => v.data.slug === slug);
+
+if (!video) {
+	return Astro.redirect("/watch");
+}
+
+const { Content } = await render(video);
+---
+
+<AppLayout title={`${video.data.title} - Rawkode Academy`}>
+	<div class="video-page">
+		<nav class="breadcrumb">
+			<a href="/watch">Videos</a>
+			<span>/</span>
+			<span>{video.data.title}</span>
+		</nav>
+
+		<div class="video-container">
+			<!-- Video player placeholder - integrate with vidstack -->
+			<div class="video-placeholder">
+				<p>Video Player: {video.data.videoId}</p>
+			</div>
+		</div>
+
+		<div class="video-info">
+			<header class="video-header">
+				<div class="video-meta">
+					{video.data.type && <span class="badge">{video.data.type}</span>}
+					{
+						video.data.category && (
+							<span class="badge secondary">{video.data.category}</span>
+						)
+					}
+				</div>
+				<h1>{video.data.title}</h1>
+				{video.data.subtitle && <p class="subtitle">{video.data.subtitle}</p>}
+				<time>
+					{
+						video.data.publishedAt.toLocaleDateString("en-US", {
+							month: "long",
+							day: "numeric",
+							year: "numeric",
+						})
+					}
+				</time>
+			</header>
+
+			<div class="video-description">
+				<p>{video.data.description}</p>
+			</div>
+
+			{
+				video.data.chapters.length > 0 && (
+					<div class="chapters">
+						<h2>Chapters</h2>
+						<ul>
+							{video.data.chapters.map((chapter) => (
+								<li>
+									<span class="chapter-time">
+										{Math.floor(chapter.startTime / 60)}:
+										{String(chapter.startTime % 60).padStart(2, "0")}
+									</span>
+									<span class="chapter-title">{chapter.title}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				)
+			}
+
+			<div class="video-content prose">
+				<Content />
+			</div>
+		</div>
+	</div>
+</AppLayout>
+
+<style>
+	.video-page {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1.5rem;
+		font-size: 0.875rem;
+		color: var(--text-muted);
+	}
+
+	.breadcrumb a {
+		color: var(--brand-primary);
+		text-decoration: none;
+	}
+
+	.breadcrumb a:hover {
+		text-decoration: underline;
+	}
+
+	.video-container {
+		margin-bottom: 1.5rem;
+	}
+
+	.video-placeholder {
+		aspect-ratio: 16 / 9;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--text-muted);
+	}
+
+	.video-info {
+		background: var(--surface-card);
+		backdrop-filter: blur(24px);
+		border: 1px solid var(--surface-border);
+		border-radius: 1rem;
+		padding: 1.5rem;
+	}
+
+	.video-header {
+		margin-bottom: 1.5rem;
+	}
+
+	.video-meta {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.badge {
+		display: inline-block;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: capitalize;
+		background: rgba(4, 181, 156, 0.1);
+		color: var(--brand-primary);
+	}
+
+	.badge.secondary {
+		background: var(--surface-border);
+		color: var(--text-secondary);
+	}
+
+	.video-header h1 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 1.75rem;
+		font-weight: 700;
+		margin-bottom: 0.5rem;
+	}
+
+	.subtitle {
+		color: var(--text-secondary);
+		font-size: 1.1rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.video-header time {
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+
+	.video-description {
+		padding: 1rem 0;
+		border-top: 1px solid var(--surface-border);
+		border-bottom: 1px solid var(--surface-border);
+		margin-bottom: 1.5rem;
+	}
+
+	.video-description p {
+		color: var(--text-secondary);
+		line-height: 1.6;
+	}
+
+	.chapters {
+		margin-bottom: 1.5rem;
+	}
+
+	.chapters h2 {
+		font-family: "Quicksand", sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		margin-bottom: 0.75rem;
+	}
+
+	.chapters ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.chapters li {
+		display: flex;
+		gap: 1rem;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid var(--surface-border);
+	}
+
+	.chapter-time {
+		font-family: monospace;
+		color: var(--brand-primary);
+		min-width: 50px;
+	}
+
+	.chapter-title {
+		color: var(--text-primary);
+	}
+
+	.video-content {
+		line-height: 1.7;
+	}
+
+	:root {
+		--brand-primary: rgb(4, 181, 156);
+		--surface-card: rgba(255, 255, 255, 0.85);
+		--surface-border: rgba(0, 0, 0, 0.08);
+		--text-primary: rgb(17, 24, 39);
+		--text-secondary: rgb(55, 65, 81);
+		--text-muted: rgb(107, 114, 128);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--surface-card: rgba(8, 14, 31, 0.9);
+			--surface-border: rgba(255, 255, 255, 0.08);
+			--text-primary: rgb(255, 255, 255);
+			--text-secondary: rgb(209, 213, 219);
+			--text-muted: rgb(156, 163, 175);
+		}
+	}
+</style>
