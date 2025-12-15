@@ -1,8 +1,16 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { oidcProvider } from "better-auth/plugins";
+import { oidcProvider, organization } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
+import {
+	ac,
+	owner,
+	admin,
+	moderator,
+	contributor,
+	member,
+} from "./access-control";
 
 type SecretsStoreSecret =
 	import("@cloudflare/workers-types").SecretsStoreSecret;
@@ -71,6 +79,25 @@ export const createAuth = async (env: AuthEnv) => {
 						metadata: null,
 					},
 				],
+			}),
+			organization({
+				ac,
+				roles: {
+					owner,
+					admin,
+					moderator,
+					contributor,
+					member,
+				},
+				teams: {
+					enabled: true,
+					maximumTeams: 10,
+				},
+				allowUserToCreateOrganization: true,
+				organizationLimit: 5,
+				creatorRole: "owner",
+				membershipLimit: 100,
+				invitationExpiresIn: 60 * 60 * 48,
 			}),
 		],
 
