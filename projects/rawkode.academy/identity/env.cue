@@ -39,7 +39,7 @@ tasks: {
 	}
 
 	migrations: {
-		production: {
+		remote: {
 			command: "bun"
 			args: ["wrangler", "d1", "migrations", "apply", "identity", "--remote"]
 			workspaces: ["bun"]
