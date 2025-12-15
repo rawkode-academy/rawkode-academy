@@ -1,11 +1,10 @@
-import {
-	createAccessControl,
-	defaultStatements,
-} from "better-auth/plugins/access";
+import { createAccessControl } from "better-auth/plugins/access";
 
 const statement = {
-	...defaultStatements,
-	content: ["create", "update", "delete", "publish"],
+	organization: ["update", "delete"],
+	member: ["create", "update", "delete"],
+	invitation: ["create", "cancel"],
+	content: ["read", "create", "update", "delete", "publish"],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -38,5 +37,7 @@ export const contributor = ac.newRole({
 	content: ["create", "update"],
 });
 
-// Member: Read-only (no explicit permissions needed)
-export const member = ac.newRole({});
+// Member: Read-only access to content
+export const member = ac.newRole({
+	content: ["read"],
+});
