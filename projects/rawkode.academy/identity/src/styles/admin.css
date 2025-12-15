@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* Admin panel base styles */
+:root {
+	--color-primary: #3b82f6;
+	--color-primary-hover: #2563eb;
+	--color-danger: #ef4444;
+	--color-danger-hover: #dc2626;
+	--color-success: #22c55e;
+	--color-warning: #f59e0b;
+}
+
+body {
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		"Helvetica Neue", Arial, sans-serif;
+	background-color: #f9fafb;
+	color: #111827;
+}

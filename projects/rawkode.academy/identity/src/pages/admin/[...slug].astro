@@ -1,0 +1,39 @@
+---
+import { createAuth, type AuthEnv } from "../../lib/auth";
+import { isAdmin } from "../../lib/admin-config";
+import { AdminApp } from "../../components/admin/App";
+import "../../styles/admin.css";
+
+export const prerender = false;
+
+const env = Astro.locals.runtime.env as AuthEnv;
+const auth = await createAuth(env);
+
+const session = await auth.api.getSession({
+	headers: Astro.request.headers,
+});
+
+if (!session?.user) {
+	return Astro.redirect("/auth/sign-in/social?provider=github");
+}
+
+if (!isAdmin(session.user.email)) {
+	return new Response("Forbidden - Admin access required", {
+		status: 403,
+		headers: { "Content-Type": "text/plain" },
+	});
+}
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Admin - Rawkode Academy Identity</title>
+		<meta name="robots" content="noindex, nofollow" />
+	</head>
+	<body>
+		<AdminApp client:only="react" />
+	</body>
+</html>
