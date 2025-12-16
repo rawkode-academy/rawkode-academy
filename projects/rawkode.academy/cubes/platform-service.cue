@@ -1,10 +1,11 @@
-package platformservice
+package cubes
 
 import (
 	"encoding/json"
 	"list"
 	"strings"
 	"github.com/cuenv/cuenv/schema"
+	"github.com/cuenv/cuenv/schema/cubes"
 )
 
 // #PlatformService generates a Cloudflare Workers service with GraphQL Federation
@@ -25,11 +26,14 @@ import (
 	bindings: #CloudflareBindings
 
 	// Additional npm dependencies
-	additionalDependencies:    {[string]: string} | *{}
+	additionalDependencies: {[string]: string} | *{}
 	additionalDevDependencies: {[string]: string} | *{}
 
 	// Computed values
 	_pascalName: strings.Replace(strings.ToTitle(serviceName), "-", "", -1)
+
+	// Note: When includeDataModel or includeReadModel is true, you should
+	// provide a D1 database binding with binding: "DB" in bindings.d1Databases
 
 	// Auto-inject ANALYTICS service binding
 	_analyticsBinding: #ServiceBinding & {
@@ -63,51 +67,58 @@ import (
 
 		files: {
 			// Core config files - always managed
-			"package.json": schema.#JSON & {
+			"package.json": cubes.#JSONFile & {
 				mode:    "managed"
 				content: json.Indent(json.Marshal(_packageJson), "", "  ")
 			}
 
-			"tsconfig.json": schema.#JSON & {
+			"tsconfig.json": cubes.#JSONFile & {
 				mode:    "managed"
 				content: json.Indent(json.Marshal(_tsconfigJson), "", "  ")
 			}
 
-			"biome.json": schema.#JSON & {
+			"biome.json": cubes.#JSONFile & {
 				mode:    "managed"
 				content: json.Indent(json.Marshal(_biomeJson), "", "  ")
 			}
 
+			"README.md": cubes.#MarkdownFile & {
+				mode:    "managed"
+				content: _readme
+			}
+
 			// Data model
 			if includeDataModel {
-				"drizzle.config.ts": schema.#TypeScript & {
-					mode: "managed"
+				"drizzle.config.ts": cubes.#TypeScriptFile & {
+					mode:     "managed"
+					language: "typescript"
 					content: """
-						import { defineConfig } from "drizzle-kit";
+						import type { Config } from "drizzle-kit";
 
-						export default defineConfig({
+						export default {
 							schema: "./data-model/schema.ts",
-							out: "./migrations",
+							out: "./data-model/migrations",
 							dialect: "sqlite",
-						});
+							driver: "d1-http",
+						} satisfies Config;
 						"""
 				}
 			}
 
 			// Read model
 			if includeReadModel {
-				"read-model/wrangler.jsonc": schema.#JSONC & {
+				"read-model/wrangler.jsonc": cubes.#JSONCFile & {
 					mode:    "managed"
 					content: json.Indent(json.Marshal(_readModelWrangler), "", "\t")
 				}
 
-				"read-model/main.ts": schema.#TypeScript & {
-					mode:    "scaffold"
+				"read-model/main.ts": cubes.#TypeScriptFile & {
+					mode:    "managed"
 					content: _readModelMainTs
 				}
 
-				"read-model/publish.ts": schema.#TypeScript & {
-					mode: "scaffold"
+				"read-model/publish.ts": cubes.#TypeScriptFile & {
+					mode: "managed"
 					content: """
 						import { writeFileSync } from "node:fs";
 						import { printSubgraphSchema } from "@apollo/subgraph";
@@ -124,25 +135,30 @@ import (
 
 			// Write model
 			if includeWriteModel {
-				"write-model/wrangler.jsonc": schema.#JSONC & {
+				"write-model/wrangler.jsonc": cubes.#JSONCFile & {
 					mode:    "managed"
 					content: json.Indent(json.Marshal(_writeModelWrangler), "", "\t")
+				}
+
+				"write-model/main.ts": cubes.#TypeScriptFile & {
+					mode:    "scaffold"
+					content: _writeModelMainTs
 				}
 			}
 
 			// HTTP service
 			if includeHttp {
-				"http/wrangler.jsonc": schema.#JSONC & {
+				"http/wrangler.jsonc": cubes.#JSONCFile & {
 					mode:    "managed"
 					content: json.Indent(json.Marshal(_httpWrangler), "", "\t")
 				}
 
-				"http/main.ts": schema.#TypeScript & {
+				"http/main.ts": cubes.#TypeScriptFile & {
 					mode:    "scaffold"
 					content: _httpMainTs
 				}
 
-				"http/http-service.ts": schema.#TypeScript & {
+				"http/http-service.ts": cubes.#TypeScriptFile & {
 					mode:    "scaffold"
 					content: _httpServiceTs
 				}
@@ -178,6 +194,9 @@ import (
 				"graphql-scalars":           "^1.24.2"
 				"graphql-yoga":              "^5.13.4"
 			}
+			if includeWriteModel {
+				"hono": "^4.8.3"
+			}
 			for k, v in additionalDependencies {
 				"\(k)": v
 			}
@@ -201,53 +220,96 @@ import (
 
 	_tsconfigJson: {
 		compilerOptions: {
-			target:                       "ESNext"
-			module:                       "ESNext"
-			moduleResolution:             "bundler"
-			strict:                       true
-			skipLibCheck:                 true
-			esModuleInterop:              true
-			allowSyntheticDefaultImports: true
-			resolveJsonModule:            true
-			isolatedModules:              true
-			noEmit:                       true
-			types: ["@cloudflare/workers-types", "node", "bun"]
+			lib: ["ESNext"]
+			target:                           "ESNext"
+			module:                           "NodeNext"
+			moduleDetection:                  "force"
+			jsx:                              "react-jsx"
+			allowJs:                          true
+			moduleResolution:                 "nodenext"
+			allowImportingTsExtensions:       true
+			verbatimModuleSyntax:             true
+			noEmit:                           true
+			skipLibCheck:                     true
+			strict:                           true
+			noFallthroughCasesInSwitch:       true
+			forceConsistentCasingInFileNames: true
 		}
-		include: ["**/*.ts"]
-		exclude: ["node_modules"]
+		fileNames: []
+		errors: []
 	}
 
 	_biomeJson: {
-		"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json"
+		"$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
 		vcs: {
 			enabled:       true
 			clientKind:    "git"
 			useIgnoreFile: true
-			defaultBranch: "main"
-		}
-		files: {
-			ignoreUnknown: true
-			ignore: ["*.d.ts", "migrations/**"]
 		}
 		formatter: {
-			enabled:     true
-			indentStyle: "tab"
-			lineWidth:   120
+			enabled:         true
+			useEditorconfig: true
+			indentStyle:     "tab"
+			indentWidth:     2
 		}
-		organizeImports: enabled: true
 		linter: {
 			enabled: true
 			rules: recommended: true
 		}
+		javascript: formatter: quoteStyle: "double"
+		assist: {
+			enabled: true
+			actions: source: organizeImports: "on"
+		}
 	}
+
+	// List of enabled components for README
+	_components: strings.Join([
+		if includeDataModel {"data-model"},
+		if includeReadModel {"read-model"},
+		if includeWriteModel {"write-model"},
+		if includeHttp {"http"},
+	], ", ")
+
+	_readme: """
+		# \(serviceName)
+
+		A platform service for the Rawkode Academy.
+
+		## Components
+
+		This service includes: \(_components)
+
+		## Development
+
+		```bash
+		# Install dependencies
+		bun install
+
+		# Run development server (read-model)
+		bunx wrangler dev --config ./read-model/wrangler.jsonc
+
+		# Generate database migrations
+		bunx drizzle-kit generate
+
+		# Apply migrations
+		bunx wrangler d1 migrations apply DB --config ./read-model/wrangler.jsonc
+		```
+
+		## Deployment
+
+		```bash
+		bunx wrangler deploy --config ./read-model/wrangler.jsonc
+		```
+		"""
 
 	// ========================================================================
 	// Wrangler configs
 	// ========================================================================
 
 	_baseWrangler: {
-		"$schema":            "./node_modules/wrangler/config-schema.json"
-		compatibility_date:   "2025-04-05"
+		"$schema":          "./node_modules/wrangler/config-schema.json"
+		compatibility_date: "2025-04-05"
 		compatibility_flags: ["nodejs_compat"]
 		keep_vars:   false
 		minify:      true
@@ -400,6 +462,24 @@ import (
 			// Add your HTTP methods here
 		}
 		"""
+
+	_writeModelMainTs: """
+		import { WorkerEntrypoint } from "cloudflare:workers";
+
+		export interface Env {
+			\(_envInterface)
+		}
+
+		export class \(_pascalName)WriteModel extends WorkerEntrypoint<Env> {
+			async fetch(request: Request): Promise<Response> {
+				return new Response("Not Found", { status: 404 });
+			}
+
+			// Add your workflow handlers here
+		}
+
+		export default \(_pascalName)WriteModel;
+		"""
 }
 
 // ============================================================================
@@ -456,15 +536,15 @@ import (
 }
 
 #SendEmailBinding: {
-	name!:                        string
-	destinationAddress?:          string
+	name!:               string
+	destinationAddress?: string
 	allowedDestinationAddresses?: [...string]
 }
 
 #RouteBinding: {
-	pattern!:     string
+	pattern!:      string
 	customDomain?: bool
-	zoneName?:    string
+	zoneName?:     string
 }
 
 #AiBinding: {

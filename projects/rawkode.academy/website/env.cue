@@ -50,6 +50,7 @@ tasks: {
 			"public/",
 			"src/**",
 		]
+
 	}
 
 	deploy: {
