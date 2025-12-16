@@ -7,7 +7,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Bun workspace monorepo containing the Rawkode Academy platform. Key domains:
 
 - **`projects/rawkode.academy/`** - Main website and platform services
-- **`projects/rawkode.studio/`** - Video meeting platform
 - **`content/`** - Content management (technologies, articles, courses)
 - **`dagger/`** - CI/CD pipeline modules
 - **`infrastructure/`** - Terraform and DNS configurations
@@ -49,11 +48,10 @@ Format: `type(scope): description`
 
 **Types:** `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `test`, `build`, `ci`, `perf`, `revert`
 
-**Scope:** Project path (e.g., `rawkode.academy/website`, `rawkode.studio`)
+**Scope:** Project path (e.g., `rawkode.academy/website`)
 
 ```
 feat(rawkode.academy/website): add theme toggle
-fix(rawkode.studio): resolve dialog transparency
 ```
 
 ## Code Formatting
@@ -71,7 +69,6 @@ Follow `.editorconfig`:
 | `projects/rawkode.academy/CLAUDE.md` | Academy project overview |
 | `projects/rawkode.academy/platform/CLAUDE.md` | GraphQL microservices guide |
 | `projects/rawkode.academy/website/CLAUDE.md` | Design system & components |
-| `projects/rawkode.studio/CLAUDE.md` | Video platform conventions |
 | `content/CLAUDE.md` | Content management |
 | `dagger/CLAUDE.md` | CI/CD modules |
 | `infrastructure/CLAUDE.md` | Infrastructure configuration |
