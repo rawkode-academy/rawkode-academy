@@ -21,7 +21,12 @@
       "Bash(bunx wrangler types:*)",
       "Bash(bunx wrangler:*)",
       "Bash(for dir in leaderboard player-learned-phrases player-stats share-cards)",
-      "Bash(do echo \"=== $dir ===\" cat /Users/rawkode/Code/src/github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/games/secrets-of-kubernetes/$dir/package.json)"
+      "Bash(do echo \"=== $dir ===\" cat /Users/rawkode/Code/src/github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/games/secrets-of-kubernetes/$dir/package.json)",
+      "Bash(python3:*)",
+      "Bash(bun -e:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(cue mod tidy:*)",
+      "Bash(cue mod get:*)"
     ],
     "deny": []
   }
