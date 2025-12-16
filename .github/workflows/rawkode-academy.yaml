@@ -41,6 +41,15 @@ jobs:
           curl -fsSL https://d2lang.com/install.sh | sh -s --
           sudo mv ~/.local/bin/d2 /usr/local/bin/d2
 
+      - name: Setup cuenv
+        uses: cuenv/setup-cuenv@v0
+
+      - name: Sync cuenv files for video-likes
+        run: |
+          cd projects/rawkode.academy/platform/video-likes
+          cuenv sync
+          cd -
+
       - name: Generate projen files
         run: |
           # Install projen generator dependencies
@@ -50,7 +59,7 @@ jobs:
           cd -
 
           # Generate projen files for platform services
-          for service in email-preferences emoji-reactions video-likes; do
+          for service in email-preferences emoji-reactions; do
             SERVICE_DIR="projects/rawkode.academy/platform/$service"
             if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
               echo "Running projen for $service..."
