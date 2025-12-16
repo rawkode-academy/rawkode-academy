@@ -19,6 +19,8 @@ env: {
 	}
 }
 
+owners: defaultOwners: [ "@rawkode" ]
+
 workspaces: bun: {
 	hooks: {
 		beforeInstall: [

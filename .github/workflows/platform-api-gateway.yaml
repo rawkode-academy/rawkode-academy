@@ -40,6 +40,15 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Setup cuenv
+        uses: cuenv/setup-cuenv@v0
+
+      - name: Sync cuenv files for video-likes
+        run: |
+          cd projects/rawkode.academy/platform/video-likes
+          cuenv sync
+          cd -
+
       - name: Generate projen files
         run: |
           # Install projen generator dependencies
@@ -49,7 +58,7 @@ jobs:
           cd -
 
           # Generate projen files for platform services
-          for service in email-preferences email-service emoji-reactions video-likes; do
+          for service in email-preferences email-service emoji-reactions; do
             SERVICE_DIR="projects/rawkode.academy/platform/$service"
             if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
               echo "Running projen for $service..."
@@ -78,7 +87,7 @@ jobs:
           mkdir -p projects/rawkode.academy/api/schemas
 
           # User interaction services (still separate workers)
-          for service in emoji-reactions video-likes email-preferences; do
+          for service in emoji-reactions email-preferences; do
             SERVICE_DIR="projects/rawkode.academy/platform/$service"
 
             if [ ! -d "$SERVICE_DIR/read-model" ]; then
@@ -182,6 +191,15 @@ jobs:
           echo "Schemas to compose:"
           ls -la projects/rawkode.academy/api/schemas/
 
+      - name: Setup cuenv
+        uses: cuenv/setup-cuenv@v0
+
+      - name: Sync cuenv files for video-likes
+        run: |
+          cd projects/rawkode.academy/platform/video-likes
+          cuenv sync
+          cd -
+
       - name: Generate projen files
         run: |
           # Install projen generator dependencies
@@ -191,7 +209,7 @@ jobs:
           cd -
 
           # Generate projen files for platform services
-          for service in email-preferences email-service emoji-reactions video-likes; do
+          for service in email-preferences email-service emoji-reactions; do
             SERVICE_DIR="projects/rawkode.academy/platform/$service"
             if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
               echo "Running projen for $service..."
