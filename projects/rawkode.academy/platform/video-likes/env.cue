@@ -1,10 +1,27 @@
 package cuenv
 
-import "github.com/cuenv/cuenv/schema"
+import (
+	"github.com/cuenv/cuenv/schema"
+	"github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/cubes"
+)
 
 schema.#Project
 
 name: "rawkode-academy-platform-video-likes"
+
+let _service = cubes.#PlatformService & {
+	serviceName:       "video-likes"
+	includeWriteModel: false
+	bindings: {
+		d1Databases: [{
+			binding:      "DB"
+			databaseName: "platform-video-likes"
+			databaseId:   "a21ba9e6-f246-4bf1-a71f-c9ef4a45733b"
+		}]
+	}
+}
+
+cube: _service.cube
 
 env: {
 	SERVICE_NAME:     "video-likes"
@@ -16,7 +33,7 @@ ci: pipelines: [
 	{
 		name: "default"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 		}
 		tasks: ["install", "deploy"]
@@ -29,11 +46,6 @@ ci: pipelines: [
 ]
 
 tasks: {
-	projen: {
-		command: "bun"
-		args: ["run", ".projenrc.ts"]
-		labels: ["projen"]
-	}
 	install: {
 		command: "bun"
 		args: ["install"]
