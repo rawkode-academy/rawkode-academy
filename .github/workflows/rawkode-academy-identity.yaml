@@ -78,6 +78,10 @@ jobs:
           secrets: |
             CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
 
+      - name: Build
+        working-directory: projects/rawkode.academy/identity
+        run: bun run build
+
       - name: Deploy to Production
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         working-directory: projects/rawkode.academy/identity
