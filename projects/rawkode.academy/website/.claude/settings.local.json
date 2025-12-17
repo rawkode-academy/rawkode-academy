@@ -33,7 +33,20 @@
       "Bash(magick:*)",
       "Bash(cwebp:*)",
       "Bash(bunx wrangler:*)",
-      "WebFetch(domain:developers.cloudflare.com)"
+      "WebFetch(domain:developers.cloudflare.com)",
+      "Bash(done)",
+      "Bash(wc:*)",
+      "mcp__posthog__event-definitions-list",
+      "mcp__posthog__properties-list",
+      "Bash(head:*)",
+      "mcp__posthog__dashboard-create",
+      "mcp__posthog__query-run",
+      "mcp__posthog__insight-create-from-query",
+      "mcp__posthog__add-insight-to-dashboard",
+      "Bash(curl:*)",
+      "mcp__posthog__docs-search",
+      "Bash(cat:*)",
+      "mcp__MCP_DOCKER__fetch"
     ],
     "deny": []
   }
