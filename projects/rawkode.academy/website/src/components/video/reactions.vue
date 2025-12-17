@@ -1,5 +1,5 @@
 <style>
-@reference "@/styles/global.css";
+@reference "../../styles/global.css";
 
 .connected {
 	@apply border-primary dark:border-primary;

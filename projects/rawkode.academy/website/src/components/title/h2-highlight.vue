@@ -11,7 +11,7 @@ defineProps<Props>();
 </script>
 
 <style>
-@reference "@/styles/global.css";
+@reference "../../styles/global.css";
 
 mark {
 	@apply bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent;
