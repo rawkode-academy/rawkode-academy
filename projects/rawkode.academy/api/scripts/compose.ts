@@ -17,7 +17,6 @@ const SUBGRAPHS = [
 	"website",
 	// User interaction services (dynamic data requiring D1)
 	"emoji-reactions",
-	"video-likes",
 	"email-preferences",
 	// Secret of Kubernetes Island game services
 	"ski-achievements",

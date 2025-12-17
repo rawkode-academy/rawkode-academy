@@ -44,12 +44,6 @@ jobs:
       - name: Setup cuenv
         uses: cuenv/setup-cuenv@v1
 
-      - name: Sync cuenv files for video-likes
-        run: |
-          cd projects/rawkode.academy/platform/video-likes
-          cuenv sync
-          cd -
-
       - name: Generate projen files
         run: |
           # Install projen generator dependencies
