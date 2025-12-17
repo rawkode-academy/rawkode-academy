@@ -6,10 +6,13 @@ import "@/styles/global.css";
 import ConsentBanner from "@/components/consent/banner.astro";
 
 interface Props extends OpenGraphProps {}
+
+// Get user ID for PostHog identification (links browser sessions to server-side events)
+const userId = Astro.locals.user?.id;
 ---
 
 <html lang="en" class="scroll-smooth focus:scroll-auto">
-	<DefaultHead {...Astro.props}>
+	<DefaultHead {...Astro.props} userId={userId}>
 		<slot name="extra-head" slot="extra-head" />
 	</DefaultHead>
 

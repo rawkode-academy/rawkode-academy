@@ -1,5 +1,10 @@
 ---
 // PostHog analytics initialization with Partytown web worker isolation
+interface Props {
+	userId?: string | undefined;
+}
+
+const { userId } = Astro.props;
 ---
 
 <script is:inline type="text/partytown">
@@ -87,3 +92,13 @@
     }
   };
 </script>
+
+{userId && (
+  <script is:inline define:vars={{ userId }}>
+    // Identify logged-in user to link browser sessions with server-side events
+    // PostHog queues commands automatically before library loads - no retries needed
+    if (typeof window.posthog !== 'undefined') {
+      window.posthog.identify(userId);
+    }
+  </script>
+)}

@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { oidcProvider, organization } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
@@ -11,6 +12,7 @@ import {
 	contributor,
 	member,
 } from "./access-control";
+import { captureAuthEvent } from "./analytics";
 
 type SecretsStoreSecret =
 	import("@cloudflare/workers-types").SecretsStoreSecret;
@@ -21,6 +23,7 @@ export interface AuthEnv {
 	GITHUB_OAUTH_CLIENT_ID: SecretsStoreSecret;
 	GITHUB_OAUTH_CLIENT_SECRET: SecretsStoreSecret;
 	SITE_URL?: string;
+	ANALYTICS?: Fetcher;
 }
 
 const DEFAULT_SITE_URL = "https://id.rawkode.academy";
@@ -119,6 +122,54 @@ export const createAuth = async (env: AuthEnv) => {
 		},
 
 		trustedOrigins: ["https://rawkode.academy", "http://localhost:4321"],
+
+		databaseHooks: {
+			user: {
+				create: {
+					after: async (user) => {
+						await captureAuthEvent(
+							{
+								event: "auth.user_registered",
+								distinctId: user.id,
+								properties: {
+									$set: {
+										email: user.email,
+										name: user.name,
+									},
+									$set_once: {
+										registered_at: new Date().toISOString(),
+									},
+								},
+							},
+							env.ANALYTICS,
+						);
+					},
+				},
+			},
+		},
+
+		hooks: {
+			after: createAuthMiddleware(async (ctx) => {
+				if (ctx.path.startsWith("/sign-in") && ctx.context.newSession) {
+					const session = ctx.context.newSession;
+					await captureAuthEvent(
+						{
+							event: "auth.sign_in_completed",
+							distinctId: session.user.id,
+							properties: {
+								auth_method: "github",
+								$set: {
+									email: session.user.email,
+									name: session.user.name,
+									last_sign_in: new Date().toISOString(),
+								},
+							},
+						},
+						env.ANALYTICS,
+					);
+				}
+			}),
+		},
 	});
 };
 

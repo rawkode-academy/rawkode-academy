@@ -33,6 +33,11 @@ const handleClickOutside = (event: MouseEvent) => {
 const signOut = async () => {
 	try {
 		await actions.auth.signOut();
+		// Reset PostHog to unlink browser session from user
+		// Prevents next user's events being attributed to this user
+		if ((window as any).posthog?.reset) {
+			(window as any).posthog.reset();
+		}
 		window.location.href = "/";
 	} catch (error) {
 		logger.error("Failed to sign out", error);
