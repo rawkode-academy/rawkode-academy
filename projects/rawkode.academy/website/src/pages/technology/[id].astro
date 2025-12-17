@@ -13,6 +13,7 @@ import { join } from "node:path";
 import {
 	type TechnologyData,
 	DEFAULT_TECHNOLOGY_STATUS,
+	DEFAULT_TECHNOLOGY_LICENSE,
 } from "@rawkodeacademy/content";
 import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -127,6 +128,8 @@ export const getStaticPaths = (async () => {
 								name: id,
 								videos,
 								status: DEFAULT_TECHNOLOGY_STATUS,
+								website: '',
+								license: DEFAULT_TECHNOLOGY_LICENSE,
 							} as Technology,
 						},
 					};
