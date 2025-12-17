@@ -78,7 +78,7 @@ export const GET: APIRoute = async ({ params }): Promise<Response> => {
 		}
 
 		const videos = await getCollection("videos");
-		const localVideo = videos.find((entry) => entry.data.videoId === videoId);
+		const localVideo = videos.find((entry) => entry.data.id === videoId);
 		if (!localVideo) {
 			return new Response("Video not found", { status: 404 });
 		}

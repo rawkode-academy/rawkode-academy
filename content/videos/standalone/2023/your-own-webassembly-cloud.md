@@ -1,5 +1,5 @@
 ---
-id: your-own-webassembly-cloud
+id: jckf793apc62vgj4uvzbq91m
 slug: your-own-webassembly-cloud
 title: Your Own WebAssembly Cloud
 description: >-
@@ -11,7 +11,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: jckf793apc62vgj4uvzbq91m
 chapters:
   - startTime: 56
     title: Introduction

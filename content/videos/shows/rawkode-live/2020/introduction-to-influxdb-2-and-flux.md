@@ -1,5 +1,5 @@
 ---
-id: introduction-to-influxdb-2-and-flux
+id: ln4np34ziqhps5xk39cwkjp0
 slug: introduction-to-influxdb-2-and-flux
 title: Introduction to InfluxDB 2 & Flux
 description: "InfluxDB is an open source time series platform. This includes APIs for storing and querying data, processing it in the background for ETL or monitoring and alerting purposes, user dashboards, and visualizing and exploring the data and more. The master branch on this repo now represents the latest InfluxDB, which now includes functionality for Kapacitor (background processing) and Chronograf (the UI) all in a single binary.\n\nFlux is a lightweight scripting language for querying databases (like InfluxDB) and working with data. It is part of InfluxDB 1.7 and 2.0, but can be run independently of those. This repository contains the language definition and an implementation of the language core.\n\n\U0001F570 Timeline\n\n00:00 - Holding\n00:45 - Introductions\n08:00 - Installing InfluxDB 2\n09:30 - Configuring InfluxDB 2\n15:40 - InfluxDB vocbabulary\n18:15 - Exploring metrics\n44:20 - Dashboards\n50:00 - Tasks and downsampling\n54:00 - Alerting\n\n\U0001F30E Resources\n\n@rawkode | David McKay - https://twitter.com/rawkode\nInfluxDB - https://github.com/influxdata/influxdb"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - influxdb
 show: rawkode-live
-videoId: ln4np34ziqhps5xk39cwkjp0
 chapters:
   - startTime: 0
     title: Holding

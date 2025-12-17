@@ -1,5 +1,5 @@
 ---
-id: introduction-to-the-operatorsdk
+id: x7i5glnt55z23vrd3th0wgbb
 slug: introduction-to-the-operatorsdk
 title: Introduction to the OperatorSDK
 description: "Want to try Equinix Metal? Use the code \"rawkode-live\" for $50 of credit, which is roughly 100 hours of compute on our smaller instances. Sign up at https://equinixmetal.com\n\n---\n\nThis Operator SDK is a component of the Operator Framework, an open source toolkit to manage Kubernetes native applications, called Operators, in an effective, automated, and scalable way.\n\nThe Operator SDK provides the tools to build, test, and package Operators. Initially, the SDK facilitates the marriage of an application’s business logic (for example, how to scale, upgrade, or backup) with the Kubernetes API to execute those operations. Over time, the SDK can allow engineers to make applications smarter and have the user experience of cloud services. Leading practices and code patterns that are shared across Operators are included in the SDK to help prevent reinventing the wheel.\n\nThe Operator SDK is a framework that uses the controller-runtime library to make writing operators easier by providing:\n\n- High level APIs and abstractions to write the operational logic more intuitively\n- Tools for scaffolding and code generation to bootstrap a new project fast\n- Extensions to cover common Operator use cases\n\n\n\U0001F570 Timeline\n\n\n00:00 - Holding\n00:30 - Introductions\n03:20 - What is an operator / What is Operator SDK\n06:15 - Creating a new operator\n13:50 - Adding fields to our custom resource definition\n15:40 - Adding our business logic / Reconcile\n24:00 - Deploying / running our operator on a Kubernetes cluster\n\n\n\U0001F30E Resources\n\nDennis Kelly - https://twitter.com/DennoVonDiesel\n\nOperator Framework - https://operatorframework.io/"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - operatorsdk
 show: rawkode-live
-videoId: x7i5glnt55z23vrd3th0wgbb
 chapters:
   - startTime: 0
     title: Holding

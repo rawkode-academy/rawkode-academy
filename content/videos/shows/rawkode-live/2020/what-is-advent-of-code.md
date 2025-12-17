@@ -1,5 +1,5 @@
 ---
-id: what-is-advent-of-code
+id: g8ln43qrv5dyrv109fnk9led
 slug: what-is-advent-of-code
 title: What is Advent of Code?
 description: >-
@@ -27,7 +27,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: g8ln43qrv5dyrv109fnk9led
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

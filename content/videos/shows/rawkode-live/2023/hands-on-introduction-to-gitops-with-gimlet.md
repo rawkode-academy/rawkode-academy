@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-gitops-with-gimlet
+id: ddivo405dfsxz4vrvlr3xgmy
 slug: hands-on-introduction-to-gitops-with-gimlet
 title: Hands-on Introduction to GitOps with Gimlet
 description: >-
@@ -18,7 +18,6 @@ category: tutorial
 technologies:
   - gimlet
 show: rawkode-live
-videoId: ddivo405dfsxz4vrvlr3xgmy
 chapters:
   - startTime: 108
     title: Introduction & Welcome

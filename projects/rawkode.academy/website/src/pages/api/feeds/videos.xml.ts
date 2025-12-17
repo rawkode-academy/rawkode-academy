@@ -30,11 +30,11 @@ export async function GET(context: APIContext) {
 				pubDate: new Date(video.data.publishedAt),
 				link: `/watch/${video.data.slug}/`,
 				customData: `
-					<enclosure url="${`https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`}" type="image/jpeg" />
+					<enclosure url="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" type="image/jpeg" />
 					<itunes:duration>${Math.floor(duration / 60)}:${(duration % 60)
 						.toString()
 						.padStart(2, "0")}</itunes:duration>
-					<itunes:image href="${`https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`}" />
+					<itunes:image href="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" />
 				`,
 				categories: (video.data.technologies as string[])
 					.map((id) => {

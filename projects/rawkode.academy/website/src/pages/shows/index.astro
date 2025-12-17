@@ -44,7 +44,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 			.map((v) => ({
 				video: {
 					title: v.data.title,
-					thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.videoId}/thumbnail.jpg`,
+					thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
 					publishedAt:
 						v.data.publishedAt instanceof Date
 							? v.data.publishedAt.toISOString()

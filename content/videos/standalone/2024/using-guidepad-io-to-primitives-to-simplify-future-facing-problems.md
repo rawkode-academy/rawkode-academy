@@ -1,5 +1,5 @@
 ---
-id: using-guidepad-io-to-primitives-to-simplify-future-facing-problems
+id: klzxhw3ow8qzrua89xr91717
 slug: using-guidepad-io-to-primitives-to-simplify-future-facing-problems
 title: Using Guidepad.io to Primitives to Simplify Future Facing Problems
 description: >-
@@ -38,7 +38,6 @@ type: recorded
 category: tutorial
 technologies:
   - guidepad
-videoId: klzxhw3ow8qzrua89xr91717
 chapters:
   - startTime: 0
     title: Introduction

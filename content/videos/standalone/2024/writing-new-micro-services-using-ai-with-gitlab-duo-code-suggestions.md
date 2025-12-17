@@ -1,5 +1,5 @@
 ---
-id: writing-new-micro-services-using-ai-with-gitlab-duo-code-suggestions
+id: czct26lrzw3y5ylu4tjvfsq5
 slug: writing-new-micro-services-using-ai-with-gitlab-duo-code-suggestions
 title: Writing New Micro-services Using AI with GitLab Duo Code Suggestions
 description: 'Video content coming soon.'
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - gitlab
   - gitlab-duo
-videoId: czct26lrzw3y5ylu4tjvfsq5
 chapters:
   - startTime: 0
     title: Starting with an AI Prompt

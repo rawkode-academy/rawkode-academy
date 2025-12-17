@@ -9,7 +9,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: luwalhnnh9j8wt1tab5de6wx
 chapters:
   - startTime: 0
     title: Introduction

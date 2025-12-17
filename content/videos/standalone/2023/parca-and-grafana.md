@@ -1,5 +1,5 @@
 ---
-id: parca-and-grafana
+id: nl7ui50173lbqlmqxck2mw3q
 slug: parca-and-grafana
 title: Parca & Grafana
 description: >-
@@ -11,7 +11,6 @@ category: tutorial
 technologies:
   - grafana
   - parca
-videoId: nl7ui50173lbqlmqxck2mw3q
 chapters:
   - startTime: 0
     title: Intro

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-restate
+id: i5nzkd2k3rgebh7w1o233lgn
 slug: hands-on-introduction-to-restate
 title: Hands-on Introduction to Restate
 description: >-
@@ -33,7 +33,6 @@ category: tutorial
 technologies:
   - restate
 show: rawkode-live
-videoId: i5nzkd2k3rgebh7w1o233lgn
 chapters:
   - startTime: 153
     title: Introduction to Rawkode Academy and Guest

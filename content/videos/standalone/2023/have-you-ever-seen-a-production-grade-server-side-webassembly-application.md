@@ -1,5 +1,5 @@
 ---
-id: have-you-ever-seen-a-production-grade-server-side-webassembly-application
+id: k42oh0xm4308e1k5b12vzy8q
 slug: have-you-ever-seen-a-production-grade-server-side-webassembly-application
 title: 'Have You Ever Seen a Production Grade, Server Side, WebAssembly Application?'
 description: >-
@@ -14,7 +14,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: k42oh0xm4308e1k5b12vzy8q
 chapters:
   - startTime: 0
     title: 'Introduction: The Rarity of Production Server-Side Wasm'

@@ -1,5 +1,5 @@
 ---
-id: automated-kubernetes-operations-with-komodor-and-vcluster
+id: oareyzu0nuanx1h7tz478z14
 slug: automated-kubernetes-operations-with-komodor-and-vcluster
 title: Automated Kubernetes Operations with Komodor and vcluster
 description: 'Video content coming soon.'
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - komodor
   - vcluster
-videoId: oareyzu0nuanx1h7tz478z14
 chapters:
   - startTime: 0
     title: Introduction

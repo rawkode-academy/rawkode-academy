@@ -1,5 +1,5 @@
 ---
-id: migrating-to-kubernetes
+id: st3tvvzjqscd51gam6o0h5jv
 slug: migrating-to-kubernetes
 title: Migrating to Kubernetes
 description: >-
@@ -43,7 +43,6 @@ category: interview
 technologies:
   - kubernetes
 show: cloud-native-compass
-videoId: st3tvvzjqscd51gam6o0h5jv
 chapters:
   - startTime: 0
     title: Introduction & Guest Background

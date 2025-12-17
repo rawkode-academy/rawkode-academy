@@ -1,5 +1,5 @@
 ---
-id: infrastructure-as-code-and-gitops
+id: yfaj0ov3z8zu0sv4lp8songu
 slug: infrastructure-as-code-and-gitops
 title: Infrastructure as Code & GitOps
 description: "In this episode, we'll take a look at the lifecycle of our Infrastructure as Code (IaC) automation, focusing on the first-pass / bootstrapping.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:50 - Introductions\n02:40 - What do we want to do?\n05:00 - Using Pulumi to Build a Kubernetes Cluster\n43:30 - Deploying Flux\n51:00 - Flux Setup Explained\n1:03:00 - Deploying an Update\n1:12:40 - GitOps CI Checks\n\n\U0001F465 About the Guests\n\nSteven Wade\n\nIndependent Kubernetes Consultant & Trainer. Currently Senior Platform Engineer UnderwriteMe UK\n.\n\n\U0001F426 https://twitter.com/swade1987\n\U0001F9E9 https://github.com/swade1987\n\U0001F30F https://www.stevenwade.co.uk/\n\n\n\U0001F528 About the Technologies"
@@ -8,7 +8,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: yfaj0ov3z8zu0sv4lp8songu
 chapters:
   - startTime: 0
     title: Holding screen

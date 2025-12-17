@@ -30,9 +30,9 @@ export async function getVideosForTechnology(technologyId: string) {
 
 		// Map to the expected format
 		return sortedVideos.map((video) => ({
-			id: video.data.id,
+			id: video.data.id, // video asset ID
 			title: video.data.title,
-			thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`,
+			thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
 			slug: video.data.slug,
 			duration: video.data.duration,
 		}));

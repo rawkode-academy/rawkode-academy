@@ -179,8 +179,8 @@ const breadcrumbElements = showEntry
 			{ title: video.data.title, link: `/watch/${video.data.slug}` },
 		];
 
-const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
-const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/stream.m3u8`;
+const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
+const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 ---
 
 <Page
@@ -227,7 +227,7 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 				<div class="relative w-full aspect-video rounded-xl overflow-hidden card-shadow-elevated">
 					<VideoPlayer
 						client:only="vue"
-						video={video.data.videoId}
+						video={video.data.id}
 						thumbnailUrl={thumbnailUrl}
 					/>
 				</div>
@@ -279,7 +279,7 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 				<VideoContentTabs
 					client:idle
 					descriptionHtml={renderedDescriptionHtml}
-					videoId={video.data.videoId}
+					videoId={video.data.id}
 				/>
 
 				{/* More Videos by Technology */}

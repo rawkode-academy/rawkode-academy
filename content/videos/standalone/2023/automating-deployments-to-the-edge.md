@@ -1,5 +1,5 @@
 ---
-id: automating-deployments-to-the-edge
+id: f9qr4s42d566gqtkdzzknxn9
 slug: automating-deployments-to-the-edge
 title: Automating Deployments to the Edge
 description: >-
@@ -21,7 +21,6 @@ type: recorded
 category: tutorial
 technologies:
   - portainer
-videoId: f9qr4s42d566gqtkdzzknxn9
 chapters:
   - startTime: 0
     title: Introduction

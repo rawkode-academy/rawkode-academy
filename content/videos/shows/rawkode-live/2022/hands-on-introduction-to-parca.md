@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-parca
+id: fvez8xw9it644rtfzl5xclpd
 slug: hands-on-introduction-to-parca
 title: Hands-on Introduction to Parca
 description: >-
@@ -12,7 +12,6 @@ category: tutorial
 technologies:
   - parca
 show: rawkode-live
-videoId: fvez8xw9it644rtfzl5xclpd
 chapters:
   - startTime: 0
     title: Intro

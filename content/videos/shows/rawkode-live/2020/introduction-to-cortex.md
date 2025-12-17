@@ -1,5 +1,5 @@
 ---
-id: introduction-to-cortex
+id: p2b72nkxzbj3rgb4v4knvo4y
 slug: introduction-to-cortex
 title: Introduction to Cortex
 description: "Cortex: horizontally scalable, highly available, multi-tenant, long term storage for Prometheus.\n\nCortex provides horizontally scalable, highly available, multi-tenant, long term storage for Prometheus.\n\n    Horizontally scalable: Cortex can run across multiple machines in a cluster, exceeding the throughput and storage of a single machine. This enables you to send the metrics from multiple Prometheus servers to a single Cortex cluster and run \"globally aggregated\" queries across all data in a single place.\n    Highly available: When run in a cluster, Cortex can replicate data between machines. This allows you to survive machine failure without gaps in your graphs.\n    Multi-tenant: Cortex can isolate data and queries from multiple different independent Prometheus sources in a single cluster, allowing untrusted parties to share the same cluster.\n    Long term storage: Cortex supports Amazon DynamoDB, Google Bigtable, Cassandra, S3, GCS and Microsoft Azure for long term storage of metric data. This allows you to durably store data for longer than the lifetime of any single machine, and use this data for long term capacity planning.\n\nCortex is a CNCF incubation project used in several production systems including Weave Cloud and Grafana Cloud. Cortex is primarily used as a remote write destination for Prometheus, with a Prometheus-compatible query API.\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:25 - Introductions\n03:45 - What problem is Cortex solving?\n07:20 - What was prepared upfront?\n08:15 - Building Cortex from source\n14:30 - Running Prometheus with Cortex\n25:20 - Slides and demo - Cortex architecture and scaling\n45:00 - Walking through the demo ourselves\n54:00 - Cortex architecture\n\n\U0001F30E Resources\n\nGanesh Vernekar - https://twitter.com/_codesome\nCortex - https://cortex.io"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - cortex
 show: rawkode-live
-videoId: p2b72nkxzbj3rgb4v4knvo4y
 chapters:
   - startTime: 0
     title: Holding screen

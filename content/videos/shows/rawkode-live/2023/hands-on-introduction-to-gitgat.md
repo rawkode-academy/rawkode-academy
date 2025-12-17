@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-gitgat
+id: ziso8d5pctrrqhxqeqbgvkfo
 slug: hands-on-introduction-to-gitgat
 title: Hands-on Introduction to GitGat
 description: >-
@@ -26,7 +26,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: ziso8d5pctrrqhxqeqbgvkfo
 chapters:
   - startTime: 0
     title: Introduction

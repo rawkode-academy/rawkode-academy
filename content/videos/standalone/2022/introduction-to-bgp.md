@@ -1,5 +1,5 @@
 ---
-id: introduction-to-bgp
+id: cle88zfeqmv5z0rl6g7mi083
 slug: introduction-to-bgp
 title: Introduction to BGP
 description: >-
@@ -22,7 +22,6 @@ publishedAt: 2022-07-14T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies: []
-videoId: cle88zfeqmv5z0rl6g7mi083
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

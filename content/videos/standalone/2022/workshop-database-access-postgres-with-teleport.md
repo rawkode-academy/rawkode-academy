@@ -1,5 +1,5 @@
 ---
-id: workshop-database-access-postgres-with-teleport
+id: ag2zatp44xhj015i1fe4ejs1
 slug: workshop-database-access-postgres-with-teleport
 title: Workshop - Database Access (Postgres) with Teleport
 description: 'Find out more at https://rawkode.live/teleport'
@@ -8,7 +8,6 @@ type: recorded
 category: tutorial
 technologies:
   - teleport
-videoId: ag2zatp44xhj015i1fe4ejs1
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

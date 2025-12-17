@@ -1,5 +1,5 @@
 ---
-id: introduction-to-thanos
+id: p78opknhykk7739gvc7kf5z5
 slug: introduction-to-thanos
 title: Introduction to Thanos
 description: "Special Guest: Bartłomiej Płotka (https://twitter.com/bwplotka)\n\nBartek Plotka is a Principal Software Engineer at Red Hat with a background in SRE, currently working on OpenShift Observability. As the co-author of the CNCF Thanos project and core maintainer of various open-source projects including Prometheus, he enjoys building OSS communities and maintainable, reliable distributed systems. On top of that, he is active in the CNCF SIG Observability as the technical lead. Volleyball player in free time.\n\nThanos is a set of components that can be composed into a highly available metric system with unlimited storage capacity, which can be added seamlessly on top of existing Prometheus deployments.\n\nThanos is a CNCF Incubating project.\n\nThanos leverages the Prometheus 2.0 storage format to cost-efficiently store historical metric data in any object storage while retaining fast query latencies. Additionally, it provides a global query view across all Prometheus installations and can merge data from Prometheus HA pairs on the fly.\n\nConcretely the aims of the project are:\n\n- Global query view of metrics.\n- Unlimited retention of metrics.\n- High availability of components, including Prometheus.\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:00 - Introductions\n04:50 - What is Thanos?\n20:00 - Generating some fake time series data with thanosbench\n26:00 - Running three Prometheus servers\n40:00 - Running the Thanos sidecars\n45:20 - Running the Thanos querier\n58:10 - Connecting Thanos to S3 / Minio\n1:14:00 - Enabling compaction and downsampling\n\n\U0001F30E Resources\n\nBartek Plotka - https://twitter.com/bwplotka\nThanos - https://thanos.io"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - thanos
 show: rawkode-live
-videoId: p78opknhykk7739gvc7kf5z5
 chapters:
   - startTime: 0
     title: Holding screen

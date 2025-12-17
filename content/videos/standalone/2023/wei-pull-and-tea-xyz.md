@@ -1,5 +1,5 @@
 ---
-id: wei-pull-and-tea-xyz
+id: n9usdizv6skyhuv5603ivcuh
 slug: wei-pull-and-tea-xyz
 title: wei/pull and tea.xyz
 description: >-
@@ -27,7 +27,6 @@ type: recorded
 category: tutorial
 technologies:
   - pkgx
-videoId: n9usdizv6skyhuv5603ivcuh
 chapters:
   - startTime: 0
     title: Intro

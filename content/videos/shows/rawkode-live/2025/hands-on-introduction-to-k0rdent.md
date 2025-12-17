@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-k0rdent
+id: f7khc4rj85zkkohcpkeqrpks
 slug: hands-on-introduction-to-k0rdent
 title: Hands-on Introduction to k0rdent
 subtitle: '**Hands-on Introduction to k0rdent**'
@@ -9,7 +9,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: f7khc4rj85zkkohcpkeqrpks
 duration: 6422
 ---
 

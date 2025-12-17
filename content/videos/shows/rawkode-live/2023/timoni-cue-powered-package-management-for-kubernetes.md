@@ -1,5 +1,5 @@
 ---
-id: timoni-cue-powered-package-management-for-kubernetes
+id: ogaami9wop6jhog6miiplwgd
 slug: timoni-cue-powered-package-management-for-kubernetes
 title: 'Timoni: CUE Powered Package Management for Kubernetes'
 description: 'Video content coming soon.'
@@ -10,7 +10,6 @@ technologies:
   - cue
   - timoni
 show: rawkode-live
-videoId: ogaami9wop6jhog6miiplwgd
 duration: 7580
 ---
 

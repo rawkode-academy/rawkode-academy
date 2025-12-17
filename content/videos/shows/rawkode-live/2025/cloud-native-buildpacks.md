@@ -1,5 +1,5 @@
 ---
-id: cloud-native-buildpacks
+id: nnercpug678oiuwve10y4tr7
 slug: cloud-native-buildpacks
 title: Cloud Native BuildPacks
 subtitle: >-
@@ -22,7 +22,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: nnercpug678oiuwve10y4tr7
 duration: 5583
 ---
 

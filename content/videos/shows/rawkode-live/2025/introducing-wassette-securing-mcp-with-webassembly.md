@@ -1,5 +1,5 @@
 ---
-id: introducing-wassette-securing-mcp-with-webassembly
+id: bkszh959ep2dcbc4ujujqbjp
 slug: introducing-wassette-securing-mcp-with-webassembly
 title: 'Introducing Wassette: Securing MCP with WebAssembly'
 subtitle: >-
@@ -22,7 +22,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: bkszh959ep2dcbc4ujujqbjp
 duration: 5559
 ---
 

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-dockerslim
+id: s7ne8fr53irbz5wmwl6biim8
 slug: hands-on-introduction-to-dockerslim
 title: Hands-on Introduction to DockerSlim
 description: >-
@@ -23,7 +23,6 @@ category: tutorial
 technologies:
   - slim-toolkit
 show: rawkode-live
-videoId: s7ne8fr53irbz5wmwl6biim8
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

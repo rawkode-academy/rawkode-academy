@@ -1,5 +1,5 @@
 ---
-id: developing-and-building-open-source-with-dagger-for-kargo
+id: t0syi87suw4qezpmy1gkht9k
 slug: developing-and-building-open-source-with-dagger-for-kargo
 title: Developing & Building Open Source with Dagger for Kargo
 description: >-
@@ -22,7 +22,6 @@ type: recorded
 category: tutorial
 technologies:
   - dagger
-videoId: t0syi87suw4qezpmy1gkht9k
 chapters:
   - startTime: 129
     title: Introduction to Daggerizing and Cargo

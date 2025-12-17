@@ -1,5 +1,5 @@
 ---
-id: influxdb-3-and-rust
+id: tjd3afh6vpijjepecyc2c9j5
 slug: influxdb-3-and-rust
 title: InfluxDB 3 & Rust
 description: >-
@@ -84,7 +84,6 @@ technologies:
   - influxdb
   - rust
 show: cloud-native-compass
-videoId: tjd3afh6vpijjepecyc2c9j5
 chapters:
   - startTime: 0
     title: Introduction

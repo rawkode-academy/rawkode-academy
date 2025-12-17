@@ -1,5 +1,5 @@
 ---
-id: writing-server-side-webassembly-with-python
+id: p795mbb7u556q13aap1d4m1j
 slug: writing-server-side-webassembly-with-python
 title: Writing Server Side WebAssembly with Python
 description: >-
@@ -32,7 +32,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: p795mbb7u556q13aap1d4m1j
 chapters:
   - startTime: 0
     title: Introduction & Python SDK Overview

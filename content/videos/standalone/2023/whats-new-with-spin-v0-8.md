@@ -1,5 +1,5 @@
 ---
-id: whats-new-with-spin-v0-8
+id: asn46r4vc2cye6ihgp2zamoh
 slug: whats-new-with-spin-v0-8
 title: What's New with Spin (v0.8)
 description: >-
@@ -31,7 +31,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: asn46r4vc2cye6ihgp2zamoh
 chapters:
   - startTime: 0
     title: Introduction

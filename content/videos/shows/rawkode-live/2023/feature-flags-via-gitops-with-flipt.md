@@ -1,5 +1,5 @@
 ---
-id: feature-flags-via-gitops-with-flipt
+id: nzngv0j5wn5xgxps9qrg2i2i
 slug: feature-flags-via-gitops-with-flipt
 title: Feature Flags via GitOps with Flipt
 description: >-
@@ -11,7 +11,6 @@ category: tutorial
 technologies:
   - flipt
 show: rawkode-live
-videoId: nzngv0j5wn5xgxps9qrg2i2i
 chapters:
   - startTime: 31
     title: Introduction to Rawkode Live and Feature Flags with Flipt

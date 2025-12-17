@@ -1,5 +1,5 @@
 ---
-id: how-to-write-a-kubectl-plugin-from-scratch
+id: c1hn6xaw51c7lj22g4p4q93k
 slug: how-to-write-a-kubectl-plugin-from-scratch
 title: How to Write a kubectl Plugin from Scratch
 description: "In this episode, we build a kubectl plugin from scratch. We aim to solve the biggest problem in Kubernetes ... noun/verb ordering.\n#KubernetesTutorial #Tutorial\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:50 - Introductions\n02:00 - Context: Why is Kubernetes wrong\n06:20 - What is a kubectl plugin?\n32:00 - Publishing our plugin with Krew\n\n\U0001F465 About the Guests\n\nMatt Turner\n\n  Clouds , automation , Kubernetes (CKA) , Istio\n\n\n\U0001F426 https://twitter.com/mt165\n\U0001F9E9 https://github.com/mt165\n\U0001F30F https://mt165.co.uk/\n\n\n\U0001F528 About the Technologies\n\nKubernetes\n\nKubernetes is a portable, extensible, open-source platform for managing containerized workloads and services, that facilitates both declarative configuration and automation. It has a large, rapidly growing ecosystem. Kubernetes services, support, and tools are widely \navailable.\nThe name Kubernetes originates from Greek, meaning helmsman or pilot. Google open-sourced the Kubernetes project in 2014. Kubernetes combines over 15 years of Google's experience running production workloads at scale with best-of-breed ideas and practices from the community.\nDesigned on the same principles that allows Google to run billions of containers a week, Kubernetes can scale without increasing your ops team.\nWhether testing locally or running a global enterprise, Kubernetes flexibility grows with you to deliver your applications consistently and easily no matter how complex your need is.\nKubernetes is open source giving you the freedom to take advantage of on-premises, hybrid, or public cloud infrastructure, letting you effortlessly move workloads to where it matters to you.\n\n\U0001F30F https://kubernetes.io/\n\U0001F426 https://twitter.com/kubernetesio\n\U0001F9E9 https://github.com/kubernetes/kubernetes\n\n#CloudNative #Kubernetes"
@@ -8,7 +8,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: c1hn6xaw51c7lj22g4p4q93k
 chapters:
   - startTime: 0
     title: Holding screen

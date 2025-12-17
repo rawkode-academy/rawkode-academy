@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-helm-dashboard
+id: lcz9j59zo663yngesf8a0k1m
 slug: hands-on-introduction-to-helm-dashboard
 title: Hands-on Introduction to helm-dashboard
 description: >-
@@ -33,7 +33,6 @@ category: tutorial
 technologies:
   - helm-dashboard
 show: rawkode-live
-videoId: lcz9j59zo663yngesf8a0k1m
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

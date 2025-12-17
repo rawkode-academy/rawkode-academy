@@ -1,5 +1,5 @@
 ---
-id: introduction-to-teleport
+id: qamuh4bhe90e6gwbs5bsoufk
 slug: introduction-to-teleport
 title: Introduction to Teleport
 description: "Want to try Equinix Metal? Use the code \"rawkode-live\" for $50 of credit, which is roughly 100 hours of compute on our smaller instances. Sign up at https://equinixmetal.com\n\n---\n\nGravitational Teleport is a gateway for managing access to clusters of Linux servers via SSH or the Kubernetes API. It is intended to be used instead of traditional OpenSSH for organisations that need to:\n\n- Secure their infrastructure and comply with security best-practices and regulatory requirements.\n- Have complete visibility into activity happening across their infrastructure.\n- Reduce the operational overhead of privileged access management across both traditional and cloud-native infrastructure.\n\n\n\U0001F570 Timeline\n\n00:00 - Holding\n\n00:20 - Introductions\n02:45 - What is Teleport?\n08:00 - Installing Teleport\n19:00 - Creating our first user\n26:30 - SSH Recordings and Auditing\n31:30 - Using Teleport locally with the CLI\n44:00 - Installing Teleport to Kubernetes\n1:02:00 - Teleport on Kubernetes demo\n\n\n\U0001F30E Resources\n\nSteven Martin - https://twitter.com/StevenMGravy\nTeleport - https://goteleport.com/teleport/"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - teleport
 show: rawkode-live
-videoId: qamuh4bhe90e6gwbs5bsoufk
 chapters:
   - startTime: 0
     title: Holding

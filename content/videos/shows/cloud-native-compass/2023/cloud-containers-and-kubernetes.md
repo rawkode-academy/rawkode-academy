@@ -1,5 +1,5 @@
 ---
-id: cloud-containers-and-kubernetes
+id: b3oefzhoncogvr5cyijfckcj
 slug: cloud-containers-and-kubernetes
 title: 'Cloud, Containers, & Kubernetes'
 description: >-
@@ -49,7 +49,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: b3oefzhoncogvr5cyijfckcj
 chapters:
   - startTime: 0
     title: Introductions

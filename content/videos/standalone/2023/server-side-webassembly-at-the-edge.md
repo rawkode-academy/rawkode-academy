@@ -1,5 +1,5 @@
 ---
-id: server-side-webassembly-at-the-edge
+id: pg8dyt42vac1gmldqsjnkswg
 slug: server-side-webassembly-at-the-edge
 title: Server Side WebAssembly at the Edge
 description: >-
@@ -12,7 +12,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: pg8dyt42vac1gmldqsjnkswg
 chapters:
   - startTime: 61
     title: Introduction and Episode Goal

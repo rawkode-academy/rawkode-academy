@@ -1,5 +1,5 @@
 ---
-id: making-kubernetes-network-policies-effortless-with-otterize
+id: wijy1wsp03lfq5mjrhjvtwm0
 slug: making-kubernetes-network-policies-effortless-with-otterize
 title: Making Kubernetes Network Policies Effortless with Otterize
 description: >-
@@ -25,7 +25,6 @@ type: recorded
 category: tutorial
 technologies:
   - otterize
-videoId: wijy1wsp03lfq5mjrhjvtwm0
 chapters:
   - startTime: 0
     title: Introduction

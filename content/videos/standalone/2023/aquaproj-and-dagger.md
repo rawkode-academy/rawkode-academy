@@ -1,5 +1,5 @@
 ---
-id: aquaproj-and-dagger
+id: phhk3ymh8qjb3pzwmmtofefz
 slug: aquaproj-and-dagger
 title: aquaproj & Dagger
 description: >-
@@ -26,7 +26,6 @@ category: tutorial
 technologies:
   - aquaproj
   - dagger
-videoId: phhk3ymh8qjb3pzwmmtofefz
 chapters:
   - startTime: 0
     title: Introductions

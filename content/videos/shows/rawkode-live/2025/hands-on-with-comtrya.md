@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-comtrya
+id: lo9o8fuuanvpurseh8sv6ef8
 slug: hands-on-with-comtrya
 title: Hands-on with Comtrya
 description: >-
@@ -32,7 +32,6 @@ category: tutorial
 technologies:
   - comtrya
 show: rawkode-live
-videoId: lo9o8fuuanvpurseh8sv6ef8
 chapters:
   - startTime: 205
     title: Introduction and Guest Introduction (Todd Martin)

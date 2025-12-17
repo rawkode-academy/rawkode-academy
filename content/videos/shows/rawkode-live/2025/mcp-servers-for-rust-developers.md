@@ -1,5 +1,5 @@
 ---
-id: mcp-servers-for-rust-developers
+id: ob97b14ky0u0nqgxnhmsqg7s
 slug: mcp-servers-for-rust-developers
 title: MCP Servers for Rust Developers
 subtitle: >-
@@ -29,7 +29,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: ob97b14ky0u0nqgxnhmsqg7s
 duration: 5198
 ---
 

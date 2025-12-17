@@ -1,5 +1,5 @@
 ---
-id: microservice-troubleshooting-built-for-developers
+id: zh6x60pfsxnaglf391e673pj
 slug: microservice-troubleshooting-built-for-developers
 title: 'Microservice Troubleshooting, Built for Developers'
 description: >-
@@ -25,7 +25,6 @@ type: recorded
 category: tutorial
 technologies:
   - lumigo
-videoId: zh6x60pfsxnaglf391e673pj
 chapters:
   - startTime: 0
     title: Introduction

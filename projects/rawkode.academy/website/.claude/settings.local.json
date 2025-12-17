@@ -46,7 +46,9 @@
       "Bash(curl:*)",
       "mcp__posthog__docs-search",
       "Bash(cat:*)",
-      "mcp__MCP_DOCKER__fetch"
+      "mcp__MCP_DOCKER__fetch",
+      "mcp__posthog__dashboard-get",
+      "mcp__posthog__query-generate-hogql-from-question"
     ],
     "deny": []
   }

@@ -19,7 +19,7 @@ export const GET: APIRoute = async ({ params }) => {
 		}
 
 		const videos = await getCollection("videos");
-		const video = videos.find((v) => v.data.videoId === videoId);
+		const video = videos.find((v) => v.data.id === videoId);
 
 		if (!video) {
 			return new Response(JSON.stringify({ comments: [], discordInviteUrl: DISCORD_INVITE_URL }), {

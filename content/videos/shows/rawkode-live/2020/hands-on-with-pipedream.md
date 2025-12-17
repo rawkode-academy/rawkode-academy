@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-pipedream
+id: psekx95vb79ashjkm2ibmc3k
 slug: hands-on-with-pipedream
 title: Hands-on with Pipedream
 description: >-
@@ -44,7 +44,6 @@ category: tutorial
 technologies:
   - pipedream
 show: rawkode-live
-videoId: psekx95vb79ashjkm2ibmc3k
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

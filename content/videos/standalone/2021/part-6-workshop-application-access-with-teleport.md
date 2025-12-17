@@ -1,5 +1,5 @@
 ---
-id: part-6-workshop-application-access-with-teleport
+id: n7tneoc9na93g1cpnfz7cx6i
 slug: part-6-workshop-application-access-with-teleport
 title: Part 6. Workshop - Application Access with Teleport
 description: 'Find out more at https://rawkode.live/teleport'
@@ -8,7 +8,6 @@ type: recorded
 category: tutorial
 technologies:
   - teleport
-videoId: n7tneoc9na93g1cpnfz7cx6i
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

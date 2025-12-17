@@ -1,5 +1,5 @@
 ---
-id: secure-container-images-the-easy-way
+id: diok2rek56nt6nq7z3839qei
 slug: secure-container-images-the-easy-way
 title: Secure Container Images The EASY Way
 description: >-
@@ -20,7 +20,6 @@ type: recorded
 category: tutorial
 technologies:
   - slim-toolkit
-videoId: diok2rek56nt6nq7z3839qei
 chapters:
   - startTime: 0
     title: Introduction and the Problem

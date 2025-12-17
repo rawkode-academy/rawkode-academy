@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-lens
+id: gy8w7dfqeaszt1c49v5k1ah0
 slug: hands-on-introduction-to-lens
 title: Hands-on Introduction to Lens
 description: "In this episode, Edwards walks us through everything we need to know to get started with Lens, the Kubernetes IDE.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:12 - Introductions\n04:55 - What is Lens: The Kubernetes IDE\n45:20 - Sharing Cluster Access Through Spaces\n\n\U0001F465 About the Guests\n\nEdward Ionel\n\n  OSS Technology Enthusiast\n\n\n\U0001F426 https://twitter.com/IonelEdward\n\U0001F9E9 https://github.com/Eionel\n\n\n\n\U0001F528 About the Technologies\n\nLens\n\nLens is the only IDE you’ll ever need to take control of your Kubernetes clusters. It's built on open source and free. \n\n\U0001F30F https://k8slens.dev\n\U0001F426 https://twitter.com/k8slens\n\U0001F9E9 https://github.com/lensapp/lens"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - lens
 show: rawkode-live
-videoId: gy8w7dfqeaszt1c49v5k1ah0
 chapters:
   - startTime: 0
     title: Holding screen

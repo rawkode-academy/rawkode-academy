@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-preq-community-driven-reliability-problem-detection
+id: h1kngbg4x4wka60t4n8e4wp3
 slug: hands-on-with-preq-community-driven-reliability-problem-detection
 title: Hands-On with Preq - Community-Driven Reliability Problem Detection
 subtitle: >-
@@ -12,7 +12,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: h1kngbg4x4wka60t4n8e4wp3
 duration: 3847
 ---
 

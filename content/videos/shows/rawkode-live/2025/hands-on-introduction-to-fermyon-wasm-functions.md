@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-fermyon-wasm-functions
+id: kkgwv4we5d9rtmark85srps0
 slug: hands-on-introduction-to-fermyon-wasm-functions
 title: Hands-on Introduction to Fermyon WASM Functions
 subtitle: >-
@@ -24,7 +24,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: kkgwv4we5d9rtmark85srps0
 duration: 4849
 ---
 

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-kpt
+id: cbeascecdg8e9r04gjnagspj
 slug: hands-on-introduction-to-kpt
 title: Hands-on Introduction to kpt
 description: >-
@@ -13,7 +13,6 @@ category: tutorial
 technologies:
   - kpt
 show: rawkode-live
-videoId: cbeascecdg8e9r04gjnagspj
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

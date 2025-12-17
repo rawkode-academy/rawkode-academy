@@ -1,5 +1,5 @@
 ---
-id: restrict-access-to-secure-files-with-tetragon
+id: tfahqa0n2pld6jvnu7a8k5w9
 slug: restrict-access-to-secure-files-with-tetragon
 title: Restrict Access to Secure Files with Tetragon
 description: >-
@@ -85,7 +85,6 @@ type: recorded
 category: tutorial
 technologies:
   - tetragon
-videoId: tfahqa0n2pld6jvnu7a8k5w9
 chapters:
   - startTime: 0
     title: Introduction to File Access Enforcement with Tetragon

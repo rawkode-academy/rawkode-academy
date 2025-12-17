@@ -135,8 +135,8 @@ export class EmailPreferences extends WorkerEntrypoint<Env> {
 		// Track analytics event to Grafana
 		const eventType =
 			normalized.status === "subscribed"
-				? "com.rawkode.academy.email.subscribed"
-				: "com.rawkode.academy.email.unsubscribed";
+				? "email.subscribed"
+				: "email.unsubscribed";
 
 		await this.trackAnalyticsEvent(eventType, {
 			user_id: userId,

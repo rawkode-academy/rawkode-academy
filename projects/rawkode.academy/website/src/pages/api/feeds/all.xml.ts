@@ -100,9 +100,9 @@ export async function GET(context: APIContext) {
 
 			if (duration) {
 				item.customData = `
-				<enclosure url="${`https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`}" type="image/jpeg" />
+				<enclosure url="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" type="image/jpeg" />
 				<itunes:duration>${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, "0")}</itunes:duration>
-				<itunes:image href="${`https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`}" />
+				<itunes:image href="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" />
 			`;
 			}
 

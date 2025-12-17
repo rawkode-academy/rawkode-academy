@@ -1,5 +1,5 @@
 ---
-id: simplify-kubernetes-ingress-and-api-gateways-using-ngrok-2
+id: my23g8vi21qfb16ei845jdjv
 slug: simplify-kubernetes-ingress-and-api-gateways-using-ngrok-2
 title: Simplify Kubernetes Ingress & API Gateways using ngrok
 description: >-
@@ -39,7 +39,6 @@ type: recorded
 category: tutorial
 technologies:
   - ngrok
-videoId: my23g8vi21qfb16ei845jdjv
 chapters:
   - startTime: 0
     title: Introduction

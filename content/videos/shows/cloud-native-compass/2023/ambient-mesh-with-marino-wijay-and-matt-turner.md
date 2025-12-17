@@ -1,5 +1,5 @@
 ---
-id: ambient-mesh-with-marino-wijay-and-matt-turner
+id: u4zql5xiqn4tc11jnb7ith6t
 slug: ambient-mesh-with-marino-wijay-and-matt-turner
 title: Ambient Mesh with Marino Wijay & Matt Turner
 description: >-
@@ -28,7 +28,6 @@ category: interview
 technologies:
   - istio
 show: cloud-native-compass
-videoId: u4zql5xiqn4tc11jnb7ith6t
 chapters:
   - startTime: 0
     title: Introductions

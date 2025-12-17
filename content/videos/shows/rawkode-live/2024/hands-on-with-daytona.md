@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-daytona
+id: inel7yn0hye5yshls8n7o6n1
 slug: hands-on-with-daytona
 title: Hands-on with Daytona
 description: >-
@@ -36,7 +36,6 @@ category: tutorial
 technologies:
   - daytona
 show: rawkode-live
-videoId: inel7yn0hye5yshls8n7o6n1
 chapters:
   - startTime: 0
     title: Intro Music

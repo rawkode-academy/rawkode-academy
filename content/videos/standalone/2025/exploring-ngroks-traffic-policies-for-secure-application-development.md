@@ -1,5 +1,5 @@
 ---
-id: exploring-ngroks-traffic-policies-for-secure-application-development
+id: ovgas80n8hqlkknowpijiqbb
 slug: exploring-ngroks-traffic-policies-for-secure-application-development
 title: Exploring ngrok's Traffic Policies for Secure Application Development
 description: >-
@@ -32,7 +32,6 @@ type: recorded
 category: tutorial
 technologies:
   - ngrok
-videoId: ovgas80n8hqlkknowpijiqbb
 chapters:
   - startTime: 0
     title: Introduction & What We'll Cover

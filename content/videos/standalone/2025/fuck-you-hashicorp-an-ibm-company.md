@@ -1,5 +1,5 @@
 ---
-id: fuck-you-hashicorp-an-ibm-company
+id: h5nbnjit38i94obymum2ke22
 slug: fuck-you-hashicorp-an-ibm-company
 title: Fuck you, Hashicorp ... an IBM Company.
 subtitle: >-
@@ -37,6 +37,5 @@ type: recorded
 category: editorial
 technologies:
   - terraform
-videoId: h5nbnjit38i94obymum2ke22
 duration: 403
 ---
