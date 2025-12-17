@@ -4,35 +4,6 @@ import { getSignInUrl, signOut as serverSignOut } from "@/lib/auth/server";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 export const auth = {
-	signInWithGithub: defineAction({
-		input: z.object({
-			callbackURL: z.string().optional(),
-		}),
-		handler: async (input, context) => {
-			const origin = new URL(context.request.url).origin;
-			const callbackURL = new URL(input.callbackURL || "/", origin).toString();
-
-			const url = getSignInUrl(callbackURL);
-
-			const runtime = context.locals.runtime;
-			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
-			await captureServerEvent(
-				{
-					event: "sign_in_initiated",
-					properties: {
-						auth_method: "github",
-						callback_url: callbackURL,
-						from_page: new URL(context.request.url).pathname,
-					},
-					distinctId: getDistinctId(context),
-				},
-				analytics,
-			);
-
-			return { url };
-		},
-	}),
-
 	signOut: defineAction({
 		handler: async (_, context) => {
 			const cookies = context.request.headers.get("Cookie") || "";

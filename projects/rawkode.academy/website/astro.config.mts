@@ -252,9 +252,7 @@ export default defineConfig({
 		},
 		routes: {
 			extend: {
-				// Better Auth callback route
 				include: [
-					{ pattern: "/sign-in" },
 					// Auth callback routes for OAuth
 					{ pattern: "/auth/callback/*" },
 				],
