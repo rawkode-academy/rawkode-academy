@@ -67,7 +67,7 @@ bunx wrangler deploy --config ./read-model/wrangler.jsonc
 
 ## Observability
 
-All Cloudflare Workers must configure observability sinks for Grafana. Add to `wrangler.jsonc`:
+All Cloudflare Workers must configure observability for PostHog. Add to `wrangler.jsonc`:
 
 ```jsonc
 "observability": {
@@ -77,16 +77,16 @@ All Cloudflare Workers must configure observability sinks for Grafana. Add to `w
     "enabled": true,
     "invocation_logs": true,
     "head_sampling_rate": 1,
-    "destinations": ["grafana-otel-logs"]
+    "destinations": ["posthog-eu"]
   },
   "traces": {
     "enabled": true,
-    "destinations": ["grafana-otel-traces"]
+    "destinations": []
   }
 }
 ```
 
-The `grafana-otel-logs` and `grafana-otel-traces` sinks are pre-configured at the Cloudflare account level.
+The `posthog-eu` log destination is a Cloudflare account-level OTLP endpoint that sends telemetry directly to PostHog.
 
 ## Related Documentation
 

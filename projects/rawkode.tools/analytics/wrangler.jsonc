@@ -15,11 +15,11 @@
 			"enabled": true,
 			"invocation_logs": true,
 			"head_sampling_rate": 1,
-			"destinations": ["grafana-otel-logs"]
+			"destinations": ["posthog-eu"]
 		},
 		"traces": {
 			"enabled": true,
-			"destinations": ["grafana-otel-traces"]
+			"destinations": []
 		}
 	},
 	"placement": {
@@ -39,6 +39,5 @@
 			"tag": "v1",
 			"new_classes": ["EventBuffer"]
 		}
-	],
-	"tail_consumers": [{ "service": "posthog-collector" }]
+	]
 }

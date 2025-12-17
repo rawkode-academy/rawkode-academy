@@ -6,7 +6,7 @@
 		"enabled": true,
 		"logs": {
 			"enabled": true,
-			"destinations": ["posthog-collector-logs"]
+			"destinations": ["posthog-eu"]
 		},
 		"traces": {
 			"enabled": true,
@@ -22,6 +22,5 @@
 			"binding": "USER_MAPPINGS",
 			"id": "582378020f874b558deb6270a4c63fa8"
 		}
-	],
-	"tail_consumers": [{ "service": "posthog-collector" }]
+	]
 }
