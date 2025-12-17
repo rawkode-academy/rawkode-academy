@@ -42,7 +42,7 @@ jobs:
           sudo mv ~/.local/bin/d2 /usr/local/bin/d2
 
       - name: Setup cuenv
-        uses: cuenv/setup-cuenv@v0
+        uses: cuenv/setup-cuenv@v1
 
       - name: Sync cuenv files for video-likes
         run: |

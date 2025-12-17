@@ -31,7 +31,7 @@ jobs:
           bun-version: latest
 
       - name: Setup cuenv
-        uses: cuenv/setup-cuenv@v0
+        uses: cuenv/setup-cuenv@v1
 
       - name: Sync cuenv files for video-likes
         run: |
@@ -94,7 +94,7 @@ jobs:
           bun-version: latest
 
       - name: Setup cuenv
-        uses: cuenv/setup-cuenv@v0
+        uses: cuenv/setup-cuenv@v1
 
       - name: Sync cuenv files for video-likes
         run: |
