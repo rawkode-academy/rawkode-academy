@@ -1,0 +1,95 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+
+interface Props {
+	technology: CollectionEntry<"technologies">;
+	videos: Array<{
+		id: string;
+		title: string;
+		thumbnailUrl: string;
+		slug: string;
+		duration: number | undefined;
+	}>;
+	totalVideos?: number;
+}
+
+const { technology, videos, totalVideos } = Astro.props;
+
+const techId = technology.id.replace(/\/index$/, "");
+const techName = technology.data.name;
+const iconUrl = resolveTechnologyIconUrl(technology.id, technology.data.logos);
+
+const formatDuration = (seconds?: number | null) => {
+	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
+		return "--:--";
+	}
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const secs = seconds % 60;
+
+	if (hours > 0) {
+		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+	}
+	return `${minutes}:${secs.toString().padStart(2, "0")}`;
+};
+
+const hasMoreVideos = totalVideos && totalVideos > videos.length;
+---
+
+{videos.length > 0 && (
+	<section class="mt-8">
+		<div class="flex items-center justify-between mb-4">
+			<div class="flex items-center gap-3">
+				{iconUrl && (
+					<div class="w-6 h-6 relative overflow-hidden rounded">
+						<img
+							src={iconUrl}
+							alt={techName}
+							class="w-full h-full object-contain"
+							onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
+						/>
+					</div>
+				)}
+				<h3 class="text-lg font-semibold text-primary-content">
+					More about {techName}
+				</h3>
+			</div>
+			<a
+				href={`/technology/${techId}`}
+				class="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+			>
+				{hasMoreVideos ? `View all ${totalVideos} videos` : "View technology"}
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</a>
+		</div>
+
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{videos.map((video) => (
+				<a
+					href={`/watch/${video.slug}`}
+					class="group block glass-interactive rounded-lg overflow-hidden"
+				>
+					<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
+						<img
+							src={video.thumbnailUrl}
+							alt={video.title}
+							class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+							loading="lazy"
+						/>
+						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+							{formatDuration(video.duration)}
+						</div>
+					</div>
+					<div class="p-3">
+						<h4 class="font-medium text-secondary-content group-hover:text-primary-content line-clamp-2 transition-colors text-sm">
+							{video.title}
+						</h4>
+					</div>
+				</a>
+			))}
+		</div>
+	</section>
+)}

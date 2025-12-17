@@ -1,38 +1,8 @@
 import { getCollection } from "astro:content";
 import { createLogger } from "@/lib/logger";
+import { normalizeTechnologyReferences } from "./normalize-technology-refs";
 
 const logger = createLogger("videos");
-
-type TechnologyReferenceObject = { id?: string; slug?: string };
-
-function isTechnologyReferenceObject(
-	value: unknown,
-): value is TechnologyReferenceObject {
-	return (
-		typeof value === "object" &&
-		value !== null &&
-		("id" in (value as Record<string, unknown>) ||
-			"slug" in (value as Record<string, unknown>))
-	);
-}
-
-function normalizeTechnologyReferences(values: unknown): string[] {
-	if (!Array.isArray(values)) return [];
-
-	const ensureRef = (value: string) =>
-		value.endsWith("/index") ? value : `${value}/index`;
-
-	return values
-		.map((value) => {
-			if (typeof value === "string") return ensureRef(value);
-			if (isTechnologyReferenceObject(value)) {
-				const ref = value.id ?? value.slug;
-				if (typeof ref === "string") return ensureRef(ref);
-			}
-			return undefined;
-		})
-		.filter((value): value is string => Boolean(value));
-}
 
 /**
  * Fetches videos associated with a specific technology.
@@ -41,12 +11,14 @@ function normalizeTechnologyReferences(values: unknown): string[] {
  */
 export async function getVideosForTechnology(technologyId: string) {
 	try {
-		// Normalize technology ID to match the reference format used in the schema
-		const technologyRef = `${technologyId}/index`;
+		// Strip /index suffix if present to get the base technology ID
+		const normalizedTechId = technologyId.endsWith("/index")
+			? technologyId.slice(0, -6)
+			: technologyId;
 
 		const allVideos = await getCollection("videos", ({ data }) => {
 			const technologyRefs = normalizeTechnologyReferences(data.technologies);
-			return technologyRefs.includes(technologyRef);
+			return technologyRefs.includes(normalizedTechId);
 		});
 
 		// Sort by published date, most recent first
@@ -62,6 +34,7 @@ export async function getVideosForTechnology(technologyId: string) {
 			title: video.data.title,
 			thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`,
 			slug: video.data.slug,
+			duration: video.data.duration,
 		}));
 	} catch (error) {
 		logger.warn(`Failed to fetch videos for technology ${technologyId}`, {
