@@ -35,6 +35,12 @@
 			"database_id": "a10a3030-d566-4a98-9d6d-4ae5fb1b15be"
 		}
 	],
+	"services": [
+		{
+			"binding": "ANALYTICS",
+			"service": "posthog-collector"
+		}
+	],
 	"secrets_store_secrets": [
 		{
 			"binding": "AUTH_SECRET",
