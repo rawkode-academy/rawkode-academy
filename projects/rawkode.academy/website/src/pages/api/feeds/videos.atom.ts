@@ -1,18 +1,13 @@
 import { getCollection } from "astro:content";
+import { getPublishedVideos } from "@/lib/content";
 import type { APIContext } from "astro";
 
 export async function GET(context: APIContext) {
-	const videos = await getCollection("videos");
+	// Get published videos only (filters out future-dated for scheduled publishing)
+	const sortedVideos = await getPublishedVideos();
 	const technologies = await getCollection("technologies");
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
-	);
-
-	// Sort by publishedAt desc
-	const sortedVideos = videos.sort(
-		(a, b) =>
-			new Date(b.data.publishedAt).getTime() -
-			new Date(a.data.publishedAt).getTime(),
 	);
 
 	const site = context.site?.toString() || "https://rawkode.academy";
