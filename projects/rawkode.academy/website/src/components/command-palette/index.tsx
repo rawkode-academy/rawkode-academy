@@ -457,11 +457,6 @@ export default function CommandPalette({
 															</span>
 														)}
 													</div>
-													{item.description && (
-														<div className="command-palette-item-description">
-															{item.description}
-														</div>
-													)}
 												</div>
 												{item.href && item.href.startsWith("http") && (
 													<svg
