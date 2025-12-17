@@ -35,7 +35,8 @@
       "mcp__posthog__docs-search",
       "mcp__posthog__insight-create-from-query",
       "mcp__posthog__add-insight-to-dashboard",
-      "Bash(bunx astro check:*)"
+      "Bash(bunx astro check:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

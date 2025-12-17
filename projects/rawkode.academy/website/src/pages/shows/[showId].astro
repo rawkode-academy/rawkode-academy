@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
+import { getPublishedVideos } from "@/lib/content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
@@ -26,7 +27,8 @@ if (!showEntry) {
 	return new Response(null, { status: 404 });
 }
 
-const videos = await getCollection("videos");
+// Get published videos only (filters out future-dated for scheduled publishing)
+const videos = await getPublishedVideos();
 
 const getShowId = (value: unknown): string | null => {
 	if (!value) return null;
