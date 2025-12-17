@@ -1,5 +1,5 @@
 ---
-import { getCollection, getEntry } from "astro:content";
+import { getCollection, getEntries } from "astro:content";
 import Button from "@/components/common/Button.vue";
 import { Hero } from "@/components/ui";
 import { marked } from "marked";
@@ -12,40 +12,32 @@ marked.setOptions({
 	pedantic: false,
 });
 
-// Get all changelog entries from the content collection
-const changelogEntries = await getCollection("changelog");
+// Get all changelog entries from the articles collection
+const changelogEntries = await getCollection("articles", ({ data }) => data.type === "changelog");
 
 // Sort by date (newest first)
 const sortedChangelog = changelogEntries.sort((a, b) => {
-	return b.data.date.getTime() - a.data.date.getTime();
+	return b.data.publishedAt.getTime() - a.data.publishedAt.getTime();
 });
 
 // Process entries to render markdown and fetch author data
 const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
 		const renderedContent = marked(entry.body || "");
-		const authorEntry = await getEntry(entry.data.author);
+		const authorEntries = await getEntries(entry.data.authors);
+		const firstAuthor = authorEntries[0];
 
 		return {
 			...entry.data,
 			id: entry.id,
 			renderedContent: String(renderedContent),
 			author: {
-				name: authorEntry?.data.name || "Unknown",
-				avatar_url: authorEntry?.data.avatarUrl || "",
+				name: firstAuthor?.data.name || "Unknown",
+				avatar_url: firstAuthor?.data.avatarUrl || "",
 			},
 		};
 	}),
 );
-
-const typeColors = {
-	feature: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-	fix: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-	chore: "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary",
-	docs: "bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary",
-	breaking:
-		"bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-};
 ---
 
 <PageWrapper
@@ -88,13 +80,6 @@ const typeColors = {
 						<article class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
 							<div class="flex items-start justify-between mb-4">
 								<div class="flex-1">
-									<div class="flex items-center gap-3 mb-2">
-										<span
-											class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeColors[entry.type as keyof typeof typeColors] || typeColors.chore}`}
-										>
-											{entry.type}
-										</span>
-									</div>
 									<h2 class="text-xl font-semibold text-primary-content mb-2">
 										{entry.title}
 									</h2>
@@ -107,8 +92,8 @@ const typeColors = {
 
 							<div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
 								<div class="flex items-center gap-4">
-									<time datetime={entry.date.toISOString()}>
-										{entry.date.toLocaleDateString("en-US", {
+									<time datetime={entry.publishedAt.toISOString()}>
+										{entry.publishedAt.toLocaleDateString("en-US", {
 											year: "numeric",
 											month: "long",
 											day: "numeric",

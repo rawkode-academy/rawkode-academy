@@ -54,26 +54,24 @@ jobs:
                - Test additions
 
             3. If a changelog entry IS warranted:
-               - Create a new file at `content/changelog/YYYY-MM-DD-<slug>.md` where:
-                 - YYYY-MM-DD is today's date
+               - Create a new directory and file at `content/articles/<slug>/index.md` where:
                  - <slug> is a kebab-case summary of the feature (e.g., "dark-mode-toggle")
                - The file must follow this exact format:
 
                ```markdown
                ---
                title: "<Concise Feature Title>"
-               description: "<A compelling description with **What's New** and **Why This Matters** sections formatted with bullet points using asterisks>"
-               type: <feature|fix|improvement|breaking>
-               date: YYYY-MM-DDTHH:MM:SS.000Z
-               author: rawkode
-               pullRequest: ${{ github.event.pull_request.number }}
+               description: "<A brief one-line description of the change>"
+               type: changelog
+               publishedAt: YYYY-MM-DDTHH:MM:SS.000Z
+               authors:
+                 - rawkode
                ---
 
-               <Body content - repeat description in a more readable format with proper markdown bullet lists using dashes>
+               <Body content with **What's New** and **Why This Matters** sections formatted with markdown bullet lists using dashes>
                ```
 
-               - Look at existing changelog entries in `content/changelog/` for style reference
-               - The description in frontmatter uses `*` for bullets, the body uses `-` for bullets
+               - Look at existing changelog articles in `content/articles/` with `type: changelog` for style reference
                - Match the writing style: professional, informative, focusing on user value
 
             4. After creating the changelog file (if applicable):
@@ -85,4 +83,4 @@ jobs:
 
             5. If no changelog entry is needed, simply comment on the original PR explaining why no changelog was generated (keep it brief).
 
-          claude_args: '--allowed-tools "Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr create:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git branch:*),Bash(date:*),Read,Write,Glob"'
+          claude_args: '--allowed-tools "Bash(gh pr diff:*),Bash(gh pr comment:*),Bash(gh pr create:*),Bash(git checkout:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git branch:*),Bash(date:*),Bash(mkdir:*),Read,Write,Glob"'

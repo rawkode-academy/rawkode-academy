@@ -8,14 +8,13 @@ This directory contains all content for the Rawkode Academy platform, structured
 |-----------|---------|----------------|
 | `technologies/` | Technology profiles (320+) | name, website, cncf status, matrix |
 | `people/` | Guest/contributor profiles | id, name, social links |
-| `articles/` | Blog articles | title, description, date |
+| `articles/` | Blog articles and changelogs | title, description, type, publishedAt |
 | `courses/` | Course metadata | title, description, lessons |
 | `shows/` | Show metadata | title, schedule |
 | `videos/` | Video content | title, youtube ID |
 | `testimonials/` | User testimonials | quote, author |
 | `learning-paths/` | Curated learning paths | title, technologies |
 | `series/` | Content series | title, parts |
-| `changelog/` | Platform updates | version, changes |
 | `adrs/` | Architecture Decision Records | title, status, context |
 
 ## Adding Content
@@ -63,7 +62,21 @@ website: https://example.com/
 
 ### Article
 
-Create `articles/<slug>/index.mdx` with appropriate frontmatter for title, description, date, and author.
+Create `articles/<slug>/index.mdx` with appropriate frontmatter:
+
+```mdx
+---
+title: "Article Title"
+description: "Brief description"
+type: article  # article, tutorial, guide, news, or changelog
+publishedAt: 2025-01-01T00:00:00.000Z
+authors:
+  - rawkode
+---
+Content here...
+```
+
+For changelog entries, use `type: changelog`.
 
 ## Directory Structure
 

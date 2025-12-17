@@ -209,7 +209,7 @@ const articles = defineCollection({
 				.optional(),
 			// Additional properties that are used in components
 			type: z
-				.enum(["tutorial", "article", "guide", "news"])
+				.enum(["tutorial", "article", "guide", "news", "changelog"])
 				.default("tutorial"),
 			series: reference("series").optional(),
 			technologies: z.array(z.string()).optional(),
@@ -367,21 +367,6 @@ const courseModules = defineCollection({
 		}),
 });
 
-const changelog = defineCollection({
-	loader: glob({
-		pattern: ["**/*.md", "**/*.mdx"],
-		base: resolveContentDirSync("changelog"),
-	}),
-	schema: z.object({
-		title: z.string(),
-		date: z.coerce.date(),
-		type: z.enum(["feature", "fix", "improvement", "breaking"]),
-		description: z.string(),
-		pullRequest: z.number().optional(),
-		author: reference("people"),
-	}),
-});
-
 const learningPaths = defineCollection({
 	loader: glob({
 		pattern: ["**/*.md", "**/*.mdx"],
@@ -410,6 +395,5 @@ export const collections = {
 	testimonials,
 	courses,
 	courseModules,
-	changelog,
 	learningPaths,
 };

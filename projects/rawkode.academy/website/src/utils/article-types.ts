@@ -66,6 +66,12 @@ export const typeBadgeConfig = {
 		label: "Editorial",
 		icon: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z", // Star icon for opinion/editorial
 	},
+	changelog: {
+		bg: "bg-pink-100 dark:bg-pink-200",
+		text: "text-pink-800 dark:text-pink-900",
+		label: "Changelog",
+		icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z", // Sparkles icon
+	},
 } as const satisfies Record<string, TypeBadgeConfig>;
 
 export function getTypeBadgeConfig(type: string): TypeBadgeConfig {
