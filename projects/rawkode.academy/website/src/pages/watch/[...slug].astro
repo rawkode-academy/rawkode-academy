@@ -1,17 +1,18 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
-// ShareButton is now internal to VideoReactions
 import VideoMetadata from "@/components/html/video-metadata.astro";
-import RelatedVideos from "@/components/video/RelatedVideos.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import VideoCast from "@/components/video/VideoCast.astro";
+import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 
 export const prerender = false;
 
@@ -102,19 +103,40 @@ const showId =
 			? (showRef as { id: string }).id
 			: null;
 const showEntry = showId ? await getEntry("shows", showId) : null;
-const techEntries = Array.isArray(video.data.technologies)
-	? (
-			await Promise.all(
-				(video.data.technologies as string[]).map(async (id) => {
-					try {
-						return await getEntry("technologies", id);
-					} catch {
-						return null;
-					}
-				}),
-			)
-		).filter((t): t is NonNullable<typeof t> => Boolean(t))
-	: [];
+
+// Normalize technology references (handles both string IDs and Astro reference objects)
+const normalizedTechIds = normalizeTechnologyReferences(video.data.technologies);
+const techEntries = (
+	await Promise.all(
+		normalizedTechIds.map(async (id) => {
+			try {
+				return await getEntry("technologies", id);
+			} catch {
+				return null;
+			}
+		}),
+	)
+).filter((t): t is NonNullable<typeof t> => Boolean(t));
+
+// Fetch videos for each technology (excluding current video)
+const videosPerTechnology = await Promise.all(
+	techEntries.map(async (tech) => {
+		const techId = tech.id.replace(/\/index$/, "");
+		const allVideos = await getVideosForTechnology(techId);
+		const filteredVideos = allVideos
+			.filter((v) => v.slug !== slug)
+			.slice(0, 3);
+		return {
+			technology: tech,
+			videos: filteredVideos,
+			totalVideos: allVideos.filter((v) => v.slug !== slug).length,
+		};
+	}),
+);
+
+const technologiesWithVideos = videosPerTechnology.filter(
+	(t) => t.videos.length > 0,
+);
 
 const hostEntries = showEntry && Array.isArray(showEntry.data.hosts)
 	? (
@@ -216,23 +238,10 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 					videoId={video.data.slug}
 				/>
 
-				{/* Cast & Speakers */}
-				<VideoCast hosts={hostEntries} guests={guestEntries} />
-
-				{/* Newsletter Signup - High Value Placement */}
-				<NewsletterCTA class="!my-0" />
-
-				{/* Tabbed Content: Description & Transcript */}
-				<VideoContentTabs
-					client:idle
-					descriptionHtml={renderedDescriptionHtml}
-					videoId={video.data.videoId}
-				/>
-
 				{/* Technologies Section */}
 				{techEntries.length > 0 && (
 					<div>
-						<h3 class="text-base font-medium text-secondary-content mb-3">Technologies used in this video</h3>
+						<h3 class="text-base font-medium text-secondary-content mb-3">Technologies featured in this video</h3>
 						<div class="flex flex-wrap gap-2">
 							{techEntries.map((tech) => (
 								<a
@@ -259,10 +268,30 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/
 						</div>
 					</div>
 				)}
+
+				{/* Cast & Speakers */}
+				<VideoCast hosts={hostEntries} guests={guestEntries} />
+
+				{/* Newsletter Signup - High Value Placement */}
+				<NewsletterCTA class="!my-0" />
+
+				{/* Tabbed Content: Description & Transcript */}
+				<VideoContentTabs
+					client:idle
+					descriptionHtml={renderedDescriptionHtml}
+					videoId={video.data.videoId}
+				/>
+
+				{/* More Videos by Technology */}
+				{technologiesWithVideos.map(({ technology, videos, totalVideos }) => (
+					<TechnologyVideoSection
+						technology={technology}
+						videos={videos}
+						totalVideos={totalVideos}
+					/>
+				))}
 			</div>
 
-			{/* Related Videos */}
-			<RelatedVideos currentVideo={video} limit={4} />
 		</div>
 	</div>
 </Page>
