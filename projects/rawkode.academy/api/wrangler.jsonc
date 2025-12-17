@@ -26,7 +26,7 @@
 			"enabled": true,
 			"invocation_logs": true,
 			"head_sampling_rate": 1,
-			"destinations": ["posthog-collector-logs"]
+			"destinations": ["posthog-eu"]
 		},
 		"traces": {
 			"enabled": true,
@@ -43,6 +43,5 @@
 		{ "binding": "VIDEO_LIKES", "service": "platform-video-likes-read-model" },
 		{ "binding": "EMAIL_PREFERENCES", "service": "platform-email-preferences-read-model" },
 		{ "binding": "IDENTITY", "service": "rawkode-academy-identity" }
-	],
-	"tail_consumers": [{ "service": "posthog-collector" }]
+	]
 }

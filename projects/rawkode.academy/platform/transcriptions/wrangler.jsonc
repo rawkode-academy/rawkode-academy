@@ -16,7 +16,7 @@
 			"enabled": true,
 			"invocation_logs": true,
 			"head_sampling_rate": 1,
-			"destinations": ["posthog-collector-logs"]
+			"destinations": ["posthog-eu"]
 		},
 		"traces": {
 			"enabled": true,
@@ -51,6 +51,5 @@
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
 			"secret_name": "DEEPGRAM_API_TOKEN",
 		},
-	],
-	"tail_consumers": [{ "service": "posthog-collector" }]
+	]
 }

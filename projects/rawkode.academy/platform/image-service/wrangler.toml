@@ -8,11 +8,11 @@ enabled = true
 
 [observability.logs]
 enabled = true
-destinations = [ "grafana-otel-logs" ]
+destinations = [ "posthog-eu" ]
 
 [observability.traces]
 enabled = true
-destinations = [ "grafana-otel-traces" ]
+destinations = [ ]
 
 [env.production]
 compatibility_date = "2024-07-01"
