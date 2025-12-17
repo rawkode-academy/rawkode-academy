@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-qovery
+id: ejdg797b14vzlcxalspzht7o
 slug: hands-on-with-qovery
 title: Hands-on with Qovery
 description: >-
@@ -30,7 +30,6 @@ category: tutorial
 technologies:
   - qovery
 show: rawkode-live
-videoId: ejdg797b14vzlcxalspzht7o
 chapters:
   - startTime: 166
     title: Introduction & Welcome

@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-cyhernetes
+id: s1mnje3g7rel848ryv470bix
 slug: hands-on-with-cyhernetes
 title: Hands-on with Cyhernetes
 subtitle: >-
@@ -18,7 +18,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: s1mnje3g7rel848ryv470bix
 duration: 4057
 ---
 

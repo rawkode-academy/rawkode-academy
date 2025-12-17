@@ -171,7 +171,7 @@ export class EmailService extends WorkerEntrypoint<Env> {
 			const messageId = crypto.randomUUID();
 
 			// Track email sent analytics event
-			await this.trackAnalyticsEvent("com.rawkode.academy.email.sent", {
+			await this.trackAnalyticsEvent("email.sent", {
 				email_type: envelopeType,
 				recipient_email: recipient.email,
 				recipient_user_id: recipient.userId,

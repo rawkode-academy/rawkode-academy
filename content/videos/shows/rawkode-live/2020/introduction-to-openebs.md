@@ -1,5 +1,5 @@
 ---
-id: introduction-to-openebs
+id: t9v6vfqfjcxjfohd2vrxpeet
 slug: introduction-to-openebs
 title: Introduction to OpenEBS
 description: "OpenEBS builds on Kubernetes to enable Stateful applications to easily access Dynamic Local PVs or Replicated PVs. By using the Container Attached Storage pattern users report lower costs, easier management, and more control for their teams.\n\nOpenEBS is a 100% Open Source CNCF project made with heart by MayaData & the community. Prominent users include Arista, Optoro, Orange, Comcast and the CNCF itself.\n\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n02:10 - Introductions\n03:35 - Slides - Introduction to OpenEBS\n16:15 - What is DPDK (Data Plane Development Kit) and SPDK (Storage Performance Development Kit)\n22:30 - My summary of what we've covered\n31:00 - Why Huge Pages / Enabling Huge Pages on Linux\n38:40 - Deploying OpenEBS with Mayastor\n44:00 - Fixing my unhealthy cluster\n47:30 - Adding the nvme kernel modules\n52:30 - Configuring Mayastor\n59:30 - Requesting a PersistentVolumeClaim\n1:11:30 - Deploying fio to run some benchmarks\n1:18:00 - Closing thoughts\n\n\n\U0001F30E Resources\n\nKiran Mova - https://twitter.com/kiranmova\nPaul Burt - https://twitter.com/idvoretskyi\nJeffry Molanus - https://twitter.com/JeffryMolanus\nOpenEBS - https://openebs.io/"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - openebs
 show: rawkode-live
-videoId: t9v6vfqfjcxjfohd2vrxpeet
 chapters:
   - startTime: 0
     title: Holding Screen

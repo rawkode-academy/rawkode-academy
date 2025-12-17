@@ -1,5 +1,5 @@
 ---
-id: alex-jones-and-alistair-hey
+id: dpcat5afr4tp3p580cp0370w
 slug: alex-jones-and-alistair-hey
 title: Alex Jones & Alistair Hey
 description: >-
@@ -18,7 +18,6 @@ category: tutorial
 technologies:
   - kubernetes
 show: klustered
-videoId: dpcat5afr4tp3p580cp0370w
 chapters:
   - startTime: 124
     title: Introduction & Welcome

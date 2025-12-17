@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-runme
+id: quiidc7e2t4pu03cgvxtkxmi
 slug: hands-on-with-runme
 title: Hands-on with RUNME
 description: >-
@@ -27,7 +27,6 @@ category: tutorial
 technologies:
   - runme
 show: rawkode-live
-videoId: quiidc7e2t4pu03cgvxtkxmi
 chapters:
   - startTime: 240
     title: Introduction

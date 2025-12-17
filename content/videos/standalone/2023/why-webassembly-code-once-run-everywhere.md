@@ -1,5 +1,5 @@
 ---
-id: why-webassembly-code-once-run-everywhere
+id: tpw7gzgjwcw3wwnx4wh7ot7c
 slug: why-webassembly-code-once-run-everywhere
 title: 'Why WebAssembly? Code Once, Run Everywhere'
 description: >-
@@ -27,7 +27,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: tpw7gzgjwcw3wwnx4wh7ot7c
 chapters:
   - startTime: 0
     title: Introduction to Course & Topic

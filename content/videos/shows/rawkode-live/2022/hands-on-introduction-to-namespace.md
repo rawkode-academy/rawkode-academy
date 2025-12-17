@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-namespace
+id: cjjyrounj8qpdyd9addol7py
 slug: hands-on-introduction-to-namespace
 title: Hands-on Introduction to Namespace
 description: >-
@@ -31,7 +31,6 @@ category: tutorial
 technologies:
   - namespace
 show: rawkode-live
-videoId: cjjyrounj8qpdyd9addol7py
 chapters:
   - startTime: 0
     title: Introduction

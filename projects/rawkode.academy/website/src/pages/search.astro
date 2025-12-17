@@ -40,12 +40,12 @@ const feedVideos = results
 	)
 	.slice(0, 24)
 	.map((video) => ({
-		id: video.data.videoId,
+		id: video.data.id,
 		title: video.data.title,
 		description: video.data.description,
 		slug: video.data.slug,
-		thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`,
-		streamUrl: `https://content.rawkode.academy/videos/${video.data.videoId}/stream.m3u8`,
+		thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
 		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
 		publishedAt:
 			video.data.publishedAt instanceof Date

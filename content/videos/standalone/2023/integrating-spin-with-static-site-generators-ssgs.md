@@ -1,5 +1,5 @@
 ---
-id: integrating-spin-with-static-site-generators-ssgs
+id: bwo73aoo2k6ae9lrukcj6onr
 slug: integrating-spin-with-static-site-generators-ssgs
 title: Integrating Spin with Static Site Generators (SSGs)
 description: >-
@@ -17,7 +17,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: bwo73aoo2k6ae9lrukcj6onr
 chapters:
   - startTime: 0
     title: Introduction and Project Overview

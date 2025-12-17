@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-dapr
+id: jmjdponjje5ueukwqlprmcbq
 slug: hands-on-introduction-to-dapr
 title: Hands-on Introduction to Dapr
 description: 'Video content coming soon.'
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - dapr
 show: rawkode-live
-videoId: jmjdponjje5ueukwqlprmcbq
 chapters:
   - startTime: 108
     title: Introduction and Guest Introduction

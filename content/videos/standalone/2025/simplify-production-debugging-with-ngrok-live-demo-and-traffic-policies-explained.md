@@ -1,5 +1,5 @@
 ---
-id: >-
+id: z7fzq9jqcn0m0noy4qkmevjq
   simplify-production-debugging-with-ngrok-live-demo-and-traffic-policies-explained
 slug: >-
   simplify-production-debugging-with-ngrok-live-demo-and-traffic-policies-explained
@@ -24,7 +24,6 @@ publishedAt: 2025-03-27T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies: []
-videoId: z7fzq9jqcn0m0noy4qkmevjq
 duration: 624
 ---
 

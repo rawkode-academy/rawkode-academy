@@ -11,9 +11,8 @@ export type VideoCategory =
 	| "announcement";
 
 export interface VideoItem {
-	id: string;
-	slug: string;
-	videoId: string;
+	id: string; // video asset ID (used for CDN URLs, PostHog events)
+	slug: string; // human-readable URL identifier
 	title: string;
 	subtitle: string | undefined;
 	description: string;
@@ -36,9 +35,8 @@ export async function listVideos(): Promise<VideoItem[]> {
 	return items.map((e: VideoEntry) => {
 		const data = e.data;
 		return {
-			id: data.slug,
-			slug: data.slug,
-			videoId: data.videoId,
+			id: data.id, // video asset ID
+			slug: data.slug, // human-readable URL identifier
 			title: data.title,
 			subtitle: data.subtitle,
 			description: data.description,
@@ -46,8 +44,8 @@ export async function listVideos(): Promise<VideoItem[]> {
 			duration: data.duration,
 			type: data.type,
 			category: data.category,
-			streamUrl: `https://content.rawkode.academy/videos/${data.videoId}/stream.m3u8`,
-			thumbnailUrl: `https://content.rawkode.academy/videos/${data.videoId}/thumbnail.jpg`,
+			streamUrl: `https://content.rawkode.academy/videos/${data.id}/stream.m3u8`,
+			thumbnailUrl: `https://content.rawkode.academy/videos/${data.id}/thumbnail.jpg`,
 			technologies: (data.technologies ?? []).map((t: any) =>
 				typeof t === "string" ? t : t.id,
 			),
@@ -67,6 +65,11 @@ export async function listVideos(): Promise<VideoItem[]> {
 export async function getVideoById(id: string): Promise<VideoItem | null> {
 	const list = await listVideos();
 	return list.find((v) => v.id === id) ?? null;
+}
+
+export async function getVideoBySlug(slug: string): Promise<VideoItem | null> {
+	const list = await listVideos();
+	return list.find((v) => v.slug === slug) ?? null;
 }
 
 export async function getVideosByShow(showId: string): Promise<VideoItem[]> {

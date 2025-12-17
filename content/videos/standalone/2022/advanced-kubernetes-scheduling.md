@@ -1,5 +1,5 @@
 ---
-id: advanced-kubernetes-scheduling
+id: n3ub5yilclec48k398q64zi2
 slug: advanced-kubernetes-scheduling
 title: Advanced Kubernetes Scheduling
 description: >-
@@ -30,7 +30,6 @@ type: recorded
 category: tutorial
 technologies:
   - kubernetes
-videoId: n3ub5yilclec48k398q64zi2
 chapters:
   - startTime: 5
     title: Introduction and Topic Overview

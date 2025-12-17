@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-kamaji
+id: iu73cnmo4xit3a5g7olhizfo
 slug: hands-on-introduction-to-kamaji
 title: Hands-on Introduction to Kamaji
 description: >-
@@ -15,7 +15,6 @@ category: tutorial
 technologies:
   - kamaji
 show: rawkode-live
-videoId: iu73cnmo4xit3a5g7olhizfo
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

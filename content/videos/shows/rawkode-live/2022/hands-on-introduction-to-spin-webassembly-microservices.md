@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-spin-webassembly-microservices
+id: jqetzwc4xdsjsvd2dg58hgpw
 slug: hands-on-introduction-to-spin-webassembly-microservices
 title: 'Hands-on Introduction to Spin: WebAssembly Microservices'
 description: >-
@@ -23,7 +23,6 @@ category: tutorial
 technologies:
   - spin
 show: rawkode-live
-videoId: jqetzwc4xdsjsvd2dg58hgpw
 chapters:
   - startTime: 162
     title: Introduction and Overview

@@ -1,5 +1,5 @@
 ---
-id: live-demo-of-devpod
+id: kkrf9s0hptal6q3nvtpy75bk
 slug: live-demo-of-devpod
 title: Live Demo of DevPod
 description: >-
@@ -19,7 +19,6 @@ category: tutorial
 technologies:
   - devpod
 show: rawkode-live
-videoId: kkrf9s0hptal6q3nvtpy75bk
 chapters:
   - startTime: 0
     title: 'Introduction (Host, Guest, Topic)'

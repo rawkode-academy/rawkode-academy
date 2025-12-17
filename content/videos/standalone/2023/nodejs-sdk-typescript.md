@@ -1,5 +1,5 @@
 ---
-id: nodejs-sdk-typescript
+id: krr31oe2upl14q4rc7qufyls
 slug: nodejs-sdk-typescript
 title: NodeJS SDK (TypeScript)
 description: >-
@@ -32,7 +32,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: krr31oe2upl14q4rc7qufyls
 chapters:
   - startTime: 0
     title: Introduction to the Node.js SDK

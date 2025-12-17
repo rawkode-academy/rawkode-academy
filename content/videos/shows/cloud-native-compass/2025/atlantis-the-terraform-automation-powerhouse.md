@@ -1,5 +1,5 @@
 ---
-id: atlantis-the-terraform-automation-powerhouse
+id: xz8t49tipn0ol7mjxdexva0r
 slug: atlantis-the-terraform-automation-powerhouse
 title: 'Atlantis: The Terraform Automation Powerhouse'
 description: >-
@@ -16,7 +16,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: xz8t49tipn0ol7mjxdexva0r
 duration: 2371
 audioFileSize: 56911135
 guests:

@@ -1,5 +1,5 @@
 ---
-id: building-ai-applications-with-webassembly-spin
+id: mw4k6xorz7ks3vg0gmqmogyl
 slug: building-ai-applications-with-webassembly-spin
 title: Building AI Applications with WebAssembly & Spin
 subtitle: "\U0001F525 Dive into the Future of Cloud Microservices with WebAssembly & Spin! \U0001F525"
@@ -9,7 +9,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: mw4k6xorz7ks3vg0gmqmogyl
 duration: 6370
 ---
 

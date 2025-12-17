@@ -1,5 +1,5 @@
 ---
-id: building-a-real-application-with-guidepad
+id: lkg0k1i6xj1a738ziwwhsw0f
 slug: building-a-real-application-with-guidepad
 title: Building a Real Application with Guidepad
 description: 'Video content coming soon.'
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - guidepad
 show: rawkode-live
-videoId: lkg0k1i6xj1a738ziwwhsw0f
 chapters:
   - startTime: 117
     title: Introduction

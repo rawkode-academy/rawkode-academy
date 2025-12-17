@@ -1,5 +1,5 @@
 ---
-id: monitoring-kubernetes-with-prometheus-and-robusta
+id: e88n95c3276uqeoi7per1v6r
 slug: monitoring-kubernetes-with-prometheus-and-robusta
 title: Monitoring Kubernetes with Prometheus & Robusta
 description: >-
@@ -17,7 +17,6 @@ category: tutorial
 technologies:
   - robusta
 show: rawkode-live
-videoId: e88n95c3276uqeoi7per1v6r
 chapters:
   - startTime: 168
     title: Welcome and Introduction

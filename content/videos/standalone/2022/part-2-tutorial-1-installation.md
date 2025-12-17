@@ -1,5 +1,5 @@
 ---
-id: part-2-tutorial-1-installation
+id: ywd7rvmdaz445o5wf0snvwx9
 slug: part-2-tutorial-1-installation
 title: 'Part 2 - Tutorial 1: Installation'
 description: >-
@@ -27,7 +27,6 @@ type: recorded
 category: tutorial
 technologies:
   - influxdb
-videoId: ywd7rvmdaz445o5wf0snvwx9
 chapters:
   - startTime: 0
     title: Introduction

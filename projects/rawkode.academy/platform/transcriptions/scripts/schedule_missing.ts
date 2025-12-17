@@ -1,5 +1,4 @@
 import { gql, request } from "graphql-request";
-import { triggerTranscriptionJob } from "./transcriptions";
 
 const GRAPHQL_ENDPOINT = "https://api.rawkode.academy";
 const CONTENT_CDN_BASE = "https://content.rawkode.academy/videos";
@@ -46,9 +45,8 @@ function usage(code = 1) {
 			"  --concurrency N  Number of concurrent HTTP checks (default: 10)",
 			"  -h, --help       Show this help message",
 			"",
-			"Env:",
-			"  HTTP_TRANSCRIPTION_TOKEN   Bearer token for the Worker (required with --execute)",
-			"  TRANSCRIPTIONS_SERVICE     Service binding to the transcriptions Worker",
+			"Requires:",
+			"  Wrangler CLI configured with Cloudflare credentials",
 			"",
 			"Examples:",
 			"  bun scripts/schedule_missing.ts                    # Dry-run: list missing transcripts",
@@ -172,8 +170,22 @@ async function triggerTranscription(id: string): Promise<{
 	error?: string;
 }> {
 	try {
-		const result = await triggerTranscriptionJob({ id, language: "en" });
-		return { success: true, workflowId: result.workflowId };
+		const params = JSON.stringify({ id, language: "en" });
+		const proc = Bun.spawn(
+			["bunx", "wrangler", "workflows", "trigger", "transcribe", params],
+			{ stdout: "pipe", stderr: "pipe" },
+		);
+
+		const output = await new Response(proc.stdout).text();
+		const exitCode = await proc.exited;
+
+		if (exitCode !== 0) {
+			const stderr = await new Response(proc.stderr).text();
+			return { success: false, error: stderr };
+		}
+
+		const match = output.match(/([a-f0-9-]{36})/i);
+		return { success: true, workflowId: match?.[1] ?? "unknown" };
 	} catch (err) {
 		return {
 			success: false,
@@ -209,17 +221,7 @@ async function main() {
 		return;
 	}
 
-	if (
-		typeof process !== "undefined" &&
-		!process.env.HTTP_TRANSCRIPTION_TOKEN
-	) {
-		console.error(
-			"\nMissing env HTTP_TRANSCRIPTION_TOKEN. Export your Worker API token.",
-		);
-		process.exit(2);
-	}
-
-	console.log("\nTriggering transcription jobs...\n");
+	console.log("\nTriggering transcription jobs via wrangler...\n");
 	let successCount = 0;
 	let failCount = 0;
 

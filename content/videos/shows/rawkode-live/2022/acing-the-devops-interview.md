@@ -1,5 +1,5 @@
 ---
-id: acing-the-devops-interview
+id: tl0buwq41h0dywtit9z7tdz7
 slug: acing-the-devops-interview
 title: Acing the DevOps Interview
 description: >-
@@ -73,7 +73,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: tl0buwq41h0dywtit9z7tdz7
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

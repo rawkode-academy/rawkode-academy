@@ -1,5 +1,5 @@
 ---
-id: introduction-to-vitess
+id: lksy7dn1gol1tpatlye4oh6b
 slug: introduction-to-vitess
 title: Introduction to Vitess
 description: "In this episode, we'll teach and guide you through everything you need to know to get started with Vitess.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:45 - Introductions\n04:00 - What is Vitess?\n18:00 - Installing Vitess\n25:00 - Creating MySQL Cluster\n39:00 - Deploying WordPress\n49:00 - Vitess UI\n53:20 - Scaling Our MySQL Cluster\n1:09:50 - Chatting about Sharding, Backup/Restore, & Misc.\n\n\U0001F465 About the Guests\n\n Deepthi Sigireddi\n\nEngineer. @vitessio maintainer.\n\n\U0001F426 https://twitter.com/ATechGirl\n\U0001F9E9 https://github.com/deepthi\n\U0001F30F https://github.com/deepthi\n\n\nAlkin Tezuysal\n\nOpen Source Database Evangelist\n\n\U0001F426 https://twitter.com/ask_dba\n\U0001F9E9 https://github.com/askdba\n\U0001F30F https://askdbablog.wordpress.com/blog/\n\n\n\U0001F528 About the Technologies\n\nVitess\n\nVitess is a database clustering system for horizontal scaling of MySQL through generalized sharding.\nBy encapsulating shard-routing logic, Vitess allows application code and database queries to remain agnostic to the distribution of data onto multiple shards. With Vitess, you can even split and merge shards as your needs grow, with an atomic cutover step that takes only a few seconds.\nVitess has been a core component of YouTube's database infrastructure since 2011, and has grown to encompass tens of thousands of MySQL nodes.\n\n\U0001F30F https://vitess.io/\n\U0001F426 https://twitter.com/vitessio\n\U0001F9E9 https://github.com/vitessio/vitess\n\n#MySQL #CloudNative"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - vitess
 show: rawkode-live
-videoId: lksy7dn1gol1tpatlye4oh6b
 chapters:
   - startTime: 0
     title: Holding screen

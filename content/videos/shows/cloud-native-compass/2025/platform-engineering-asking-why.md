@@ -1,5 +1,5 @@
 ---
-id: platform-engineering-asking-why
+id: vfp66kn6d9xrndl6vkiekok0
 slug: platform-engineering-asking-why
 title: 'Platform Engineering: Asking "Why"? with Evelyn Osman'
 subtitle: >-
@@ -14,7 +14,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: vfp66kn6d9xrndl6vkiekok0
 duration: 2636
 audioFileSize: 63253254
 guests:

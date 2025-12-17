@@ -1,5 +1,5 @@
 ---
-id: replace-your-github-actions-yaml-with-cue
+id: eihdoemxfyzm33pxzcix5ci5
 slug: replace-your-github-actions-yaml-with-cue
 title: Replace Your GitHub Actions YAML with CUE
 subtitle: >-
@@ -54,6 +54,5 @@ type: recorded
 category: tutorial
 technologies:
   - cue
-videoId: eihdoemxfyzm33pxzcix5ci5
 duration: 1198
 ---

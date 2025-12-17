@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-kaniko
+id: nf0c2zf2w370qg9s6d74ywjd
 slug: hands-on-introduction-to-kaniko
 title: Hands-on Introduction to Kaniko
 description: "In this episode, we'll guide you through everything you need to know to get started with Kaniko\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:30 - Introductions\n02:55 - What is Kaniko?\n08:20 - Building an Image\n27:30 - Build Caching\n40:00 - Image Snapshotting\n\n\U0001F465 About the Guests\n\nTejal Desai\n\n  Google Cloud Platform\n\n\n\U0001F426 https://twitter.com/tejal29\n\U0001F9E9 https://github.com/tejal29\n\n\n\n\U0001F528 About the Technologies\n\nKaniko\n\nkaniko is a tool to build container images from a Dockerfile, inside a container or Kubernetes cluster.\nkaniko doesn't depend on a Docker daemon and executes each command \nwithin a Dockerfile completely in userspace.\nThis enables building container images in environments that can't easily\n or securely run a Docker daemon, such as a standard Kubernetes cluster.\nkaniko is meant to be run as an image: gcr.io/kaniko-project/executor. We do not recommend running the kaniko executor binary in another image, as it might not work.\n\n\n\n\U0001F9E9 https://github.com/GoogleContainerTools/kaniko"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - kaniko
 show: rawkode-live
-videoId: nf0c2zf2w370qg9s6d74ywjd
 chapters:
   - startTime: 0
     title: Holding screen

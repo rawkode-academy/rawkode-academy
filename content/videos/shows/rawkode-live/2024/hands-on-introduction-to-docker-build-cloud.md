@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-docker-build-cloud
+id: n75jis3j9h700q4ltfja62ek
 slug: hands-on-introduction-to-docker-build-cloud
 title: Hands-on Introduction to Docker Build Cloud
 description: >-
@@ -14,7 +14,6 @@ technologies:
   - docker
   - docker-build-cloud
 show: rawkode-live
-videoId: n75jis3j9h700q4ltfja62ek
 chapters:
   - startTime: 89
     title: Introduction to Rawkode Live and Host

@@ -16,11 +16,11 @@
 			"enabled": true,
 			"invocation_logs": true,
 			"head_sampling_rate": 1,
-			"destinations": ["grafana-otel-logs"]
+			"destinations": ["posthog-collector-logs"]
 		},
 		"traces": {
 			"enabled": true,
-			"destinations": ["grafana-otel-traces"]
+			"destinations": []
 		}
 	},
 	"r2_buckets": [

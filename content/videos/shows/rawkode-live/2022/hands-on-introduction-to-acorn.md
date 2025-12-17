@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-acorn
+id: c3p1ypeqfmorfwwy2ypcrigm
 slug: hands-on-introduction-to-acorn
 title: Hands-on Introduction to Acorn
 description: >-
@@ -67,7 +67,6 @@ category: tutorial
 technologies:
   - acorn
 show: rawkode-live
-videoId: c3p1ypeqfmorfwwy2ypcrigm
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

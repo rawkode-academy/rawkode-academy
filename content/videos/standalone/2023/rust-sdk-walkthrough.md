@@ -1,5 +1,5 @@
 ---
-id: rust-sdk-walkthrough
+id: ryc93p7fu30bh4kkv3ru71nk
 slug: rust-sdk-walkthrough
 title: Rust SDK Walkthrough
 description: >-
@@ -32,7 +32,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: ryc93p7fu30bh4kkv3ru71nk
 chapters:
   - startTime: 0
     title: Introduction

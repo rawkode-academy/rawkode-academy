@@ -1,5 +1,5 @@
 ---
-id: part-4-tutorial-3-collecting-metrics-with-telegraf
+id: fg5n3s12kpi526uupu0w7tav
 slug: part-4-tutorial-3-collecting-metrics-with-telegraf
 title: 'Part 4 - Tutorial 3: Collecting Metrics with Telegraf'
 description: |-
@@ -12,7 +12,6 @@ type: recorded
 category: tutorial
 technologies:
   - influxdb
-videoId: fg5n3s12kpi526uupu0w7tav
 chapters:
   - startTime: 0
     title: Introduction

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-dagger
+id: u3iqqcgeoamsqzclierrpqdl
 slug: hands-on-introduction-to-dagger
 title: Hands-on Introduction to Dagger
 description: "In this episode, we get hands-on with Dagger.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n00:50 - Introductions\n03:20 - What is Dagger?\n07:45 - Why CUE and BuildKit\n10:45 - Installing Dagger\n16:00 - Dagger Example: Static Todo Deployment\n\n\U0001F465 About the Guests\n\nSolomon Hykes\n\n  Cofounder of Docker\n\n\n\U0001F426 https://twitter.com/solomonstre\n\U0001F9E9 https://github.com/shykes\n\n\n\n\U0001F528 About the Technologies\n\nDagger\n\nDagger is a programmable deployment system.\nUsing Dagger, software builders can automate the deployment of any application to any infrastructure, in just a few lines of code.\n\n\U0001F30F https://dagger.io/\n\n\U0001F9E9 https://github.com/dagger/dagger"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - dagger
 show: rawkode-live
-videoId: u3iqqcgeoamsqzclierrpqdl
 chapters:
   - startTime: 0
     title: Holding Screen

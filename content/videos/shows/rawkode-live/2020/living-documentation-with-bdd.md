@@ -1,5 +1,5 @@
 ---
-id: living-documentation-with-bdd
+id: xtay8a6iyr4u6ow9kc6iojpe
 slug: living-documentation-with-bdd
 title: Living Documentation with BDD
 description: 'Video content coming soon.'
@@ -8,7 +8,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: xtay8a6iyr4u6ow9kc6iojpe
 chapters:
   - startTime: 75
     title: Introduction and Sponsor

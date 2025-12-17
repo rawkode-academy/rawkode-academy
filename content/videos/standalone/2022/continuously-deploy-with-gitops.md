@@ -1,5 +1,5 @@
 ---
-id: continuously-deploy-with-gitops
+id: xi7tekr74r3qfd7pv30lkp0s
 slug: continuously-deploy-with-gitops
 title: Continuously Deploy with GitOps
 description: >-
@@ -17,7 +17,6 @@ type: recorded
 category: tutorial
 technologies:
   - portainer
-videoId: xi7tekr74r3qfd7pv30lkp0s
 chapters:
   - startTime: 0
     title: Introduction

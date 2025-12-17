@@ -1,5 +1,5 @@
 ---
-id: >-
+id: d3u3h2ac951stfgdrlwvkysh
   build-a-production-ready-kubernetes-cluster-with-spectro-cloud-palette-no-code-tutorial
 slug: >-
   build-a-production-ready-kubernetes-cluster-with-spectro-cloud-palette-no-code-tutorial
@@ -44,7 +44,6 @@ publishedAt: 2025-07-07T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies: []
-videoId: d3u3h2ac951stfgdrlwvkysh
 duration: 987
 ---
 

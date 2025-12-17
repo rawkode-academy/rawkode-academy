@@ -1,5 +1,5 @@
 ---
-id: managing-tls
+id: ivg9hwb376cu64psybqhd5k0
 slug: managing-tls
 title: Managing TLS
 description: >-
@@ -16,7 +16,6 @@ type: recorded
 category: tutorial
 technologies:
   - portainer
-videoId: ivg9hwb376cu64psybqhd5k0
 chapters:
   - startTime: 0
     title: Introduction and Course Overview

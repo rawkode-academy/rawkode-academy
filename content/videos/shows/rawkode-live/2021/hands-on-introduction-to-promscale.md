@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-promscale
+id: ua00ojunaspa1sus0ykiqxxr
 slug: hands-on-introduction-to-promscale
 title: Hands-on Introduction to Promscale
 description: "In this episode, Vineeth and Mat will teach us everything we need to know to get started with Promscale.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:30 - Introductions\n03:40 - Introduction to Promscale (Slides)\n20:40 - Installing Promscale with TOBS\n40:00 - Promscale's Vision (Slides)\n30:20 - Q&A\n41:30 - The TOBs CLI\n44:00 - Dashboards\n53:00 - SQL for Prometheus\n\n\U0001F465 About the Guests\n\nVineeth Pothulapati\n\n  Vineeth is a cloud, distributed systems enthusiast and contributor to Kubernetes, Cortex and Open Policy Agent. He worked as a shadow for previous Kubernetes releases and was also a docs lead for Kubernetes 1.18 release. He is currently working on Promscale & Tobs as a software engineer with Timescale. Previously, he was a CNCF mentee with Cortex and Open Policy Agent and a Google Summer of Code intern with The Postgres Operator. Vineeth co-founded and organizes CNCF Hyderabad meetups and also given several talks on CNCF technologies.\n\n\n\U0001F426 https://twitter.com/VineethReddy02\n\U0001F9E9 https://github.com/VineethReddy02\n\U0001F30F https://www.vineethweb.com/\n\n\nMat Arye\n\n  Mat has been working on data infrastructure in both academia and industry for the past decade. Currently, he is leading the Promscale team, to make it easy for people to store and analyze their Prometheus data in both PromQL and SQL. Previously, he worked as one of TimescaleDB's core architects where he concentrated on performance, scalability, and query power.\n\n\n\U0001F426 https://twitter.com/cevianNY\n\U0001F9E9 https://github.com/cevian\n\n\n\n\U0001F528 About the Technologies\n\nPromscale\n\nPromscale is an open-source long-term store for Prometheus data designed for analytics. It is a horizontally scalable, highly-compressed, and operationally mature platform for Prometheus data that offers the combined power of PromQL and SQL, enabling developers to ask any question, create any dashboard, and achieve greater visibility into their systems. Promscale is built on top of TimescaleDB, the leading relational database for time-series.\n\n\n\n\U0001F9E9 https://github.com/timescale/promscale"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - promscale
 show: rawkode-live
-videoId: ua00ojunaspa1sus0ykiqxxr
 chapters:
   - startTime: 0
     title: Holding screen

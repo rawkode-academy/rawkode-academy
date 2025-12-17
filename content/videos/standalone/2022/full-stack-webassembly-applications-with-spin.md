@@ -1,5 +1,5 @@
 ---
-id: full-stack-webassembly-applications-with-spin
+id: sx8a3ihcu4qum6du7ejlif7i
 slug: full-stack-webassembly-applications-with-spin
 title: Full Stack WebAssembly Applications with Spin
 description: 'Video content coming soon.'
@@ -8,7 +8,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: sx8a3ihcu4qum6du7ejlif7i
 chapters:
   - startTime: 44
     title: 'Introduction: Spin and Full Stack WebAssembly'

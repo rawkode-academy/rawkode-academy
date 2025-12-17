@@ -47,12 +47,12 @@ const featuredDuration =
 const start = page === 1 ? 1 : (page - 1) * videosPerPage;
 const end = start + videosPerPage;
 const feedVideos = allVideos.slice(start, end).map((v) => ({
-	id: v.videoId,
+	id: v.id,
 	title: v.title,
 	description: v.description,
 	slug: v.slug,
-	thumbnailUrl: `https://content.rawkode.academy/videos/${v.videoId}/thumbnail.jpg`,
-	streamUrl: `https://content.rawkode.academy/videos/${v.videoId}/stream.m3u8`,
+	thumbnailUrl: `https://content.rawkode.academy/videos/${v.id}/thumbnail.jpg`,
+	streamUrl: `https://content.rawkode.academy/videos/${v.id}/stream.m3u8`,
 	duration: typeof v.duration === "number" ? v.duration : 0,
 	publishedAt:
 		v.publishedAt instanceof Date
@@ -82,7 +82,7 @@ const hasNextPage = end < allVideos.length;
 			type="video"
 			title={featuredVideo.title}
 			description={featuredVideo.description}
-			thumbnailUrl={`https://content.rawkode.academy/videos/${featuredVideo.videoId}/thumbnail.jpg`}
+			thumbnailUrl={`https://content.rawkode.academy/videos/${featuredVideo.id}/thumbnail.jpg`}
 			thumbnailAlt={`Thumbnail for ${featuredVideo.title}`}
 			date={(featuredVideo.publishedAt instanceof Date ? featuredVideo.publishedAt.toISOString() : String(featuredVideo.publishedAt))}
 			duration={featuredDuration !== null ? String(featuredDuration) : undefined}

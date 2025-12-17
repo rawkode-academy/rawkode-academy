@@ -1,5 +1,5 @@
 ---
-id: bringing-clarity-to-infrastructure-as-code-with-env0
+id: t7zdnxgt54j4s3973zac3mjj
 slug: bringing-clarity-to-infrastructure-as-code-with-env0
 title: Bringing Clarity to Infrastructure as Code with Env0
 description: >-
@@ -23,7 +23,6 @@ technologies:
   - env0
   - pulumi
   - terraform
-videoId: t7zdnxgt54j4s3973zac3mjj
 chapters:
   - startTime: 0
     title: 'Introduction: Problem with Multiple IaC'

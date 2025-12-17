@@ -1,5 +1,5 @@
 ---
-id: kubernetes-security-with-identity-and-oidc
+id: ratw2atcqa376ktfpvj2joo4
 slug: kubernetes-security-with-identity-and-oidc
 title: Kubernetes Security with Identity & OIDC
 description: >-
@@ -49,7 +49,6 @@ category: interview
 technologies:
   - kubernetes
 show: cloud-native-compass
-videoId: ratw2atcqa376ktfpvj2joo4
 chapters:
   - startTime: 0
     title: Introductions

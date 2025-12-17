@@ -1,5 +1,5 @@
 ---
-id: development-environments-with-devenv
+id: mmc8esyg7i2qkrni256w8t5s
 slug: development-environments-with-devenv
 title: Development Environments with Devenv
 description: >-
@@ -11,7 +11,6 @@ category: tutorial
 technologies:
   - devenv
 show: rawkode-live
-videoId: mmc8esyg7i2qkrni256w8t5s
 chapters:
   - startTime: 111
     title: Introduction

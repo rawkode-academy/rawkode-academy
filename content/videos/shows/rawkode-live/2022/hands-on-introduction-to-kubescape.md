@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-kubescape
+id: c2q3win8puhpdiozuaenozl0
 slug: hands-on-introduction-to-kubescape
 title: Hands-on Introduction to Kubescape
 description: >-
@@ -22,7 +22,6 @@ category: tutorial
 technologies:
   - kubescape
 show: rawkode-live
-videoId: c2q3win8puhpdiozuaenozl0
 chapters:
   - startTime: 0
     title: Intro

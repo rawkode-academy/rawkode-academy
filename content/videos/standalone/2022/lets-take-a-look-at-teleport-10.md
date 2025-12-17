@@ -1,5 +1,5 @@
 ---
-id: lets-take-a-look-at-teleport-10
+id: m33ycy3p5m13rbpi3h4bkbv0
 slug: lets-take-a-look-at-teleport-10
 title: Let's Take a Look at Teleport 10
 description: >-
@@ -16,7 +16,6 @@ type: recorded
 category: tutorial
 technologies:
   - teleport
-videoId: m33ycy3p5m13rbpi3h4bkbv0
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

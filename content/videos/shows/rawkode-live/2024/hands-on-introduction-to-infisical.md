@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-infisical
+id: vovcpubi5o3rsa0o2niw7hob
 slug: hands-on-introduction-to-infisical
 title: Hands-on Introduction to Infisical
 description: >-
@@ -11,7 +11,6 @@ category: tutorial
 technologies:
   - infisical
 show: rawkode-live
-videoId: vovcpubi5o3rsa0o2niw7hob
 chapters:
   - startTime: 108
     title: Introduction and Guest Welcome

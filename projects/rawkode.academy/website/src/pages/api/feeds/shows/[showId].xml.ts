@@ -66,7 +66,7 @@ export async function GET(context: APIContext) {
 	const originalShowImageUrl = podcastConfig?.artworkUrl
 		? podcastConfig.artworkUrl
 		: firstVideo
-			? `https://content.rawkode.academy/videos/${firstVideo.data.videoId}/thumbnail.jpg`
+			? `https://content.rawkode.academy/videos/${firstVideo.data.id}/thumbnail.jpg`
 			: "";
 	const showImageUrl = originalShowImageUrl
 		? getSquaredArtworkUrl(site, originalShowImageUrl)
@@ -78,8 +78,8 @@ export async function GET(context: APIContext) {
 			const episodeNumber = showVideos.length - index;
 			const duration =
 				typeof video.data.duration === "number" ? video.data.duration : 0;
-			const audioUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/original.mp3`;
-			const originalThumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
+			const audioUrl = `https://content.rawkode.academy/videos/${video.data.id}/original.mp3`;
+			const originalThumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
 			const episodeUrl = `${site}/watch/${video.data.slug}/`;
 			const audioFileSize = video.data.audioFileSize || 0;
 			const chaptersUrl = `${site}/api/feeds/shows/${showId}/${video.data.slug}/chapters.json`;
@@ -119,7 +119,7 @@ export async function GET(context: APIContext) {
 				link: episodeUrl,
 				description: video.data.description,
 				guid: {
-					value: video.data.videoId,
+					value: video.data.id,
 					isPermaLink: false,
 				},
 				pubDate: new Date(video.data.publishedAt),

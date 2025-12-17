@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-krr-kubernetes-resource-recommendations
+id: fd5l8yd2xbh033dpnkvftg35
 slug: hands-on-introduction-to-krr-kubernetes-resource-recommendations
 title: Hands-on Introduction to KRR (Kubernetes Resource Recommendations)
 description: >-
@@ -42,7 +42,6 @@ category: tutorial
 technologies:
   - krr
 show: rawkode-live
-videoId: fd5l8yd2xbh033dpnkvftg35
 chapters:
   - startTime: 0
     title: Introduction

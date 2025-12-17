@@ -1,5 +1,5 @@
 ---
-id: keep-authentication-simple-with-portainers-oauth-connectors
+id: aqzmvsr41szkg2uqg0yp2cu4
 slug: keep-authentication-simple-with-portainers-oauth-connectors
 title: Keep Authentication Simple with Portainers OAuth Connectors
 description: 'Video content coming soon.'
@@ -8,7 +8,6 @@ type: recorded
 category: tutorial
 technologies:
   - portainer
-videoId: aqzmvsr41szkg2uqg0yp2cu4
 chapters:
   - startTime: 0
     title: Introduction & Problem

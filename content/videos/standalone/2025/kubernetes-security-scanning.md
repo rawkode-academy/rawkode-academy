@@ -1,5 +1,5 @@
 ---
-id: kubernetes-security-scanning
+id: sgs7tm99rldi3ev42yzacukd
 slug: kubernetes-security-scanning
 title: "Kubernetes Security Scanning: The 4 Tools You Actually Need"
 subtitle: >-
@@ -39,7 +39,6 @@ technologies:
   - sonobuoy
   - syft
   - grype
-videoId: sgs7tm99rldi3ev42yzacukd
 duration: 1117
 chapters:
   - startTime: 0

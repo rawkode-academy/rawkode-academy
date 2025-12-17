@@ -1,5 +1,5 @@
 ---
-id: kubescape-cli-and-github-action
+id: d52og3gdtmtu7w8nhkyg1uyt
 slug: kubescape-cli-and-github-action
 title: Kubescape CLI & GitHub Action
 description: >-
@@ -15,7 +15,6 @@ type: recorded
 category: tutorial
 technologies:
   - kubescape
-videoId: d52og3gdtmtu7w8nhkyg1uyt
 chapters:
   - startTime: 0
     title: Introduction

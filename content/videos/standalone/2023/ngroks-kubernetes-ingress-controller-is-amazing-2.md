@@ -1,5 +1,5 @@
 ---
-id: ngroks-kubernetes-ingress-controller-is-amazing-2
+id: m8xeaa8bqd2gszto4g6j9xku
 slug: ngroks-kubernetes-ingress-controller-is-amazing-2
 title: ngrok's Kubernetes Ingress Controller is AMAZING
 description: >-
@@ -17,7 +17,6 @@ type: recorded
 category: tutorial
 technologies:
   - ngrok
-videoId: m8xeaa8bqd2gszto4g6j9xku
 chapters:
   - startTime: 0
     title: Introduction

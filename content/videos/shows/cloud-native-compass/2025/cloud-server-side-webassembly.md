@@ -1,5 +1,5 @@
 ---
-id: cloud-server-side-webassembly
+id: e683nfwoau6e8epn8g9zmwn9
 slug: cloud-server-side-webassembly
 title: Cloud Server-Side WebAssembly
 description: 'Video content coming soon.'
@@ -8,7 +8,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: e683nfwoau6e8epn8g9zmwn9
 duration: 2296
 audioFileSize: 55097401
 guests:

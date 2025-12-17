@@ -101,7 +101,7 @@ export class Content extends WorkerEntrypoint<Env> {
 
 		const event = {
 			specversion: "1.0",
-			type: "com.rawkode.academy.podcast.download",
+			type: "podcast.download",
 			source: "/content",
 			id: crypto.randomUUID(),
 			time: new Date().toISOString(),

@@ -25,7 +25,6 @@ category: tutorial
 technologies:
   - kubernetes
   - velero
-videoId: rwhw1lpmbqe2tfflabrd0ys9
 chapters:
   - startTime: 0
     title: Intro

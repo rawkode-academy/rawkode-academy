@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-kairos-edge-kubernetes-made-simple
+id: sgubcsu43ub6ki8cqpmygwha
 slug: hands-on-with-kairos-edge-kubernetes-made-simple
 title: Hands-On with Kairos - Edge Kubernetes Made Simple
 subtitle: >-
@@ -12,7 +12,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: sgubcsu43ub6ki8cqpmygwha
 duration: 5369
 ---
 

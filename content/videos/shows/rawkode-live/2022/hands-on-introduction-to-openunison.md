@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-openunison
+id: bxlvg3jfdk6jqbfck4nmrcas
 slug: hands-on-introduction-to-openunison
 title: Hands-on Introduction to OpenUnison
 description: >-
@@ -20,7 +20,6 @@ category: tutorial
 technologies:
   - openunison
 show: rawkode-live
-videoId: bxlvg3jfdk6jqbfck4nmrcas
 chapters:
   - startTime: 163
     title: Introduction

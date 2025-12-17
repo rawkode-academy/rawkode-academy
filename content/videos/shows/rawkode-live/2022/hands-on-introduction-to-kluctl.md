@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-kluctl
+id: nif2kkr7kig9n82jxsjyd2ds
 slug: hands-on-introduction-to-kluctl
 title: Hands-on Introduction to kluctl
 description: >-
@@ -31,7 +31,6 @@ category: tutorial
 technologies:
   - kluctl
 show: rawkode-live
-videoId: nif2kkr7kig9n82jxsjyd2ds
 chapters:
   - startTime: 161
     title: Introduction

@@ -1,5 +1,5 @@
 ---
-id: ebpf-for-runtime-enforcement
+id: etr47c1p01p3mefltqwanwhv
 slug: ebpf-for-runtime-enforcement
 title: eBPF for Runtime Enforcement
 description: >-
@@ -85,7 +85,6 @@ type: recorded
 category: tutorial
 technologies:
   - tetragon
-videoId: etr47c1p01p3mefltqwanwhv
 chapters:
   - startTime: 0
     title: Introduction

@@ -1,5 +1,5 @@
 ---
-id: kluctl-new-features-and-updates
+id: nnnb1s0hvh5ypbwavjppy3ze
 slug: kluctl-new-features-and-updates
 title: Kluctl New Features & Updates
 description: >-
@@ -23,7 +23,6 @@ category: tutorial
 technologies:
   - kluctl
 show: rawkode-live
-videoId: nnnb1s0hvh5ypbwavjppy3ze
 chapters:
   - startTime: 108
     title: Introduction

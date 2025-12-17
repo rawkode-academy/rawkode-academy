@@ -26,7 +26,8 @@
       "Bash(bun -e:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(cue mod tidy:*)",
-      "Bash(cue mod get:*)"
+      "Bash(cue mod get:*)",
+      "WebFetch(domain:posthog.com)"
     ],
     "deny": []
   }

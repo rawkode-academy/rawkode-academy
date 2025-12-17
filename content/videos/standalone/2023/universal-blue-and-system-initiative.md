@@ -1,5 +1,5 @@
 ---
-id: universal-blue-and-system-initiative
+id: jc8t4h91wok4bgq10t1s3fiv
 slug: universal-blue-and-system-initiative
 title: Universal Blue & System Initiative
 description: >-
@@ -23,7 +23,6 @@ category: tutorial
 technologies:
   - system-initiative
   - universal-blue
-videoId: jc8t4h91wok4bgq10t1s3fiv
 chapters:
   - startTime: 0
     title: Introduction to AlphaBits

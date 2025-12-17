@@ -1,5 +1,5 @@
 ---
-id: part-3-tutorial-2-getting-started-with-influxdb
+id: f8kozfxzp1vtykj2na0sye5w
 slug: part-3-tutorial-2-getting-started-with-influxdb
 title: 'Part 3 - Tutorial 2: Getting Started with InfluxDB'
 description: |-
@@ -12,7 +12,6 @@ type: recorded
 category: tutorial
 technologies:
   - influxdb
-videoId: f8kozfxzp1vtykj2na0sye5w
 chapters:
   - startTime: 0
     title: Intro

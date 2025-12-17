@@ -1,5 +1,5 @@
 ---
-id: helm-kustomize-and-pod-security-policies
+id: k5xzx8dfmvu7s3nzdqy32kzy
 slug: helm-kustomize-and-pod-security-policies
 title: 'Helm, Kustomize, and Pod Security Policies'
 description: >-
@@ -14,7 +14,6 @@ type: recorded
 category: tutorial
 technologies:
   - portainer
-videoId: k5xzx8dfmvu7s3nzdqy32kzy
 chapters:
   - startTime: 0
     title: Introduction

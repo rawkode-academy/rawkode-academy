@@ -1,5 +1,5 @@
 ---
-id: part-4-workshop-server-access-with-teleport
+id: hn0j9iu8ps7jaegq6iykq50c
 slug: part-4-workshop-server-access-with-teleport
 title: Part 4. Workshop - Server Access with Teleport
 description: |-
@@ -28,7 +28,6 @@ type: recorded
 category: tutorial
 technologies:
   - teleport
-videoId: hn0j9iu8ps7jaegq6iykq50c
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

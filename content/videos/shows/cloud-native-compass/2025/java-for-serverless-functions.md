@@ -1,5 +1,5 @@
 ---
-id: java-for-serverless-functions
+id: xxti5u3ooj17j37cavljrukn
 slug: java-for-serverless-functions
 title: Java for Serverless Functions
 description: >-
@@ -19,7 +19,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: xxti5u3ooj17j37cavljrukn
 duration: 1777
 audioFileSize: 42648905
 guests:

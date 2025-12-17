@@ -70,50 +70,49 @@ export async function captureServerEvent(
 ): Promise<void> {
 	const { event, properties = {}, distinctId } = opts;
 
-	// Map event names to CloudEvent types
+	// Map event names to CloudEvent types (domain events only, prefix added by posthog-collector)
 	const eventTypeMap: Record<string, string> = {
 		// Video events
-		video_play: "com.rawkode.academy.video.play",
-		video_pause: "com.rawkode.academy.video.pause",
-		video_seek: "com.rawkode.academy.video.seek",
-		video_progress: "com.rawkode.academy.video.progress",
-		video_complete: "com.rawkode.academy.video.complete",
-		video_tab_viewed: "com.rawkode.academy.video.tab_viewed",
+		video_play: "video.play",
+		video_pause: "video.pause",
+		video_seek: "video.seek",
+		video_progress: "video.progress",
+		video_complete: "video.complete",
+		video_tab_viewed: "video.tab_viewed",
 		// Content events
-		share: "com.rawkode.academy.share.created",
-		reaction_add: "com.rawkode.academy.reaction.added",
-		reaction_remove: "com.rawkode.academy.reaction.removed",
+		share: "share.created",
+		reaction_add: "reaction.added",
+		reaction_remove: "reaction.removed",
 		// Course/signup events
-		course_signup: "com.rawkode.academy.course.signup",
-		lead_magnet_viewed: "com.rawkode.academy.lead_magnet.viewed",
-		lead_magnet_signup: "com.rawkode.academy.lead_magnet.signup",
+		course_signup: "course.signup",
+		lead_magnet_viewed: "lead_magnet.viewed",
+		lead_magnet_signup: "lead_magnet.signup",
 		// Auth events
-		sign_in_initiated: "com.rawkode.academy.auth.sign_in_initiated",
-		sign_out_completed: "com.rawkode.academy.auth.sign_out_completed",
+		sign_in_initiated: "auth.sign_in_initiated",
+		sign_out_completed: "auth.sign_out_completed",
 		// Search events
-		search_performed: "com.rawkode.academy.search.performed",
-		command_palette_opened: "com.rawkode.academy.command_palette.opened",
-		command_palette_navigation: "com.rawkode.academy.command_palette.navigation",
+		search_performed: "search.performed",
+		command_palette_opened: "command_palette.opened",
+		command_palette_navigation: "command_palette.navigation",
 		// Filter events
-		filter_applied: "com.rawkode.academy.filter.applied",
-		filter_cleared: "com.rawkode.academy.filter.cleared",
+		filter_applied: "filter.applied",
+		filter_cleared: "filter.cleared",
 		// UI events
-		theme_switched: "com.rawkode.academy.ui.theme_switched",
-		sidebar_mode_switched: "com.rawkode.academy.ui.sidebar_mode_switched",
-		accordion_toggled: "com.rawkode.academy.ui.accordion_toggled",
+		theme_switched: "ui.theme_switched",
+		sidebar_mode_switched: "ui.sidebar_mode_switched",
+		accordion_toggled: "ui.accordion_toggled",
 		// External link events
-		external_link_clicked: "com.rawkode.academy.external_link.clicked",
-		discord_link_clicked: "com.rawkode.academy.external_link.discord",
-		podcast_subscribe_clicked: "com.rawkode.academy.external_link.podcast_subscribe",
+		external_link_clicked: "external_link.clicked",
+		discord_link_clicked: "external_link.discord",
+		podcast_subscribe_clicked: "external_link.podcast_subscribe",
 		// Game events
-		game_started: "com.rawkode.academy.game.started",
-		game_completed: "com.rawkode.academy.game.completed",
-		game_failed: "com.rawkode.academy.game.failed",
-		achievement_unlocked: "com.rawkode.academy.game.achievement_unlocked",
+		game_started: "game.started",
+		game_completed: "game.completed",
+		game_failed: "game.failed",
+		achievement_unlocked: "game.achievement_unlocked",
 	};
 
-	const cloudEventType =
-		eventTypeMap[event] || `com.rawkode.academy.custom.${event}`;
+	const cloudEventType = eventTypeMap[event] || `custom.${event}`;
 
 	const cloudEvent = createCloudEvent(cloudEventType, "/website", {
 		...properties,
@@ -165,7 +164,7 @@ export async function identifyServerUser(
 	const { distinctId, anonId, set, setOnce } = opts;
 
 	const cloudEvent = createCloudEvent(
-		"com.rawkode.academy.user.identified",
+		"user.identified",
 		"/website",
 		{
 			distinct_id: distinctId,
