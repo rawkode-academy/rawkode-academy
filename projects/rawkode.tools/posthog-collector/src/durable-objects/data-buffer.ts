@@ -250,6 +250,8 @@ export class DataBuffer extends DurableObject<Env> {
 				const data = event.data as Record<string, unknown>;
 				if (typeof data.userId === "string") {
 					distinctId = data.userId;
+				} else if (typeof data.user_id === "string") {
+					distinctId = data.user_id;
 				} else if (typeof data.sessionId === "string") {
 					distinctId = data.sessionId;
 				} else if (typeof data.distinct_id === "string") {

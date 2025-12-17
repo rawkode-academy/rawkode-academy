@@ -27,7 +27,15 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(cue mod tidy:*)",
       "Bash(cue mod get:*)",
-      "WebFetch(domain:posthog.com)"
+      "WebFetch(domain:posthog.com)",
+      "mcp__posthog__event-definitions-list",
+      "mcp__posthog__properties-list",
+      "mcp__posthog__dashboard-create",
+      "mcp__posthog__query-run",
+      "mcp__posthog__docs-search",
+      "mcp__posthog__insight-create-from-query",
+      "mcp__posthog__add-insight-to-dashboard",
+      "Bash(bunx astro check:*)"
     ],
     "deny": []
   }
