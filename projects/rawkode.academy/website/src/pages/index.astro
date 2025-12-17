@@ -5,6 +5,7 @@ import PartnerLogos from "@/components/partner/logos.astro";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
+import { getPublishedVideos } from "@/lib/content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -27,11 +28,9 @@ const latestArticles = allArticles
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 3);
 
-const allVideos = await getCollection("videos");
-const latestVideos = allVideos
-	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-	.slice(0, 4); // Showing 4 videos looks better in a 2x2 or 4-col grid, but 3 matches articles. Let's do 3 for symmetry or 4 for a grid. Let's do 3 and use a 3-col grid.
-// Actually, let's stick to 3 to match the 3 articles if we do a 3-col grid.
+// Get published videos only (filters out future-dated for scheduled publishing)
+const allVideos = await getPublishedVideos();
+const latestVideos = allVideos.slice(0, 4); // Already sorted by getPublishedVideos
 
 // Social proof stats - simplified metrics
 const allCourses = await getCollection("courses");
