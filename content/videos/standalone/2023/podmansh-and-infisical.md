@@ -1,5 +1,5 @@
 ---
-id: podmansh-and-infisical
+id: cpyas1mgays442brvl0fdi77
 slug: podmansh-and-infisical
 title: podmansh & Infisical
 description: >-
@@ -24,7 +24,6 @@ category: tutorial
 technologies:
   - infisical
   - podman
-videoId: cpyas1mgays442brvl0fdi77
 chapters:
   - startTime: 0
     title: Introductions

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-waypoint
+id: wm4rgxicr5rl3zm6m1109dh0
 slug: hands-on-introduction-to-waypoint
 title: Hands-on Introduction to Waypoint
 description: "In this episode, Taylor will guide us through everything we need to know to get started with Waypoint \n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:18 - Introductions\n09:50 - GitOps (Demo 1)\n40:00 - Deploying to Kubernetes (Demo 2)\n01:00:00 - Deploying minecraft (Demo 3)\n\n\U0001F465 About the Guests\n\nTaylor Dolezal\n\n  Kubernetes 1.19 Release Lead ☸️ CNCF Ambassador \U0001F5FA Developer Advocate @HashiCorp \U0001F64C\U0001F3FC ex @DisneyStudios \U0001F42D Bookworm \n\n\n\U0001F426 https://twitter.com/onlydole\n\U0001F9E9 https://github.com/onlydole\n\n\n\n\U0001F528 About the Technologies\n\nWaypoint\n\nWaypoint is a tool that enables developers to describe how to get their applications from development to production in a single file and deploy using a single command: waypoint up. After deployment, Waypoint provides tools such as logs, exec, and more to validate and debug any deployments. Waypoint is fully extensible based on a plugin system which allows Waypoint to work with any tools and platforms.\n\nWaypoint Goals\n    Consistency of Workflows. Waypoint aims to provide an easy-to-use, consistent workflow for getting applications from development to production: waypoint up. We believe that fragmentation in workflow based on platform is a big challenge for teams that attempt to use multiple build, deploy, release tooling.\n    Confidence in Deployment. The first thing any developer does after deploying is validate it works: open a browser, refresh the page, check logs, etc. Waypoint provides tools such as logs and exec to give you confidence that deployments succeed.\n    Extensibility with the Ecosystem. Consistency is only useful if Waypoint works with all the tools and patterns you work with. Waypoint is fully extensible via a plugin system that allows you to bring in custom builders, deployment platforms, and more.\n\n\U0001F30F https://www.waypointproject.io\n\n\U0001F9E9 https://github.com/hashicorp/waypoint"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - waypoint
 show: rawkode-live
-videoId: wm4rgxicr5rl3zm6m1109dh0
 chapters:
   - startTime: 0
     title: Holding screen

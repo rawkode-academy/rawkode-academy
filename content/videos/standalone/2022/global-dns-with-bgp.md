@@ -1,5 +1,5 @@
 ---
-id: global-dns-with-bgp
+id: v0i31x8ecolt41m670pt9cto
 slug: global-dns-with-bgp
 title: Global DNS with BGP
 description: >-
@@ -9,7 +9,6 @@ publishedAt: 2022-08-11T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies: []
-videoId: v0i31x8ecolt41m670pt9cto
 chapters:
   - startTime: 0
     title: Introduction

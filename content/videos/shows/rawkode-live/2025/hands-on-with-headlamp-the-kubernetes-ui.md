@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-headlamp-the-kubernetes-ui
+id: d4uyd6zny0quu8l9y7urx17r
 slug: hands-on-with-headlamp-the-kubernetes-ui
 title: 'Hands-on with Headlamp: The Kubernetes UI'
 subtitle: >-
@@ -26,7 +26,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: d4uyd6zny0quu8l9y7urx17r
 duration: 3547
 ---
 

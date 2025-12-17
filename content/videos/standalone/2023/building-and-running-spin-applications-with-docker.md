@@ -1,5 +1,5 @@
 ---
-id: building-and-running-spin-applications-with-docker
+id: fq72twya4m9ymyey6u0ut3qo
 slug: building-and-running-spin-applications-with-docker
 title: Building & Running Spin Applications with Docker
 description: >-
@@ -14,7 +14,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: fq72twya4m9ymyey6u0ut3qo
 chapters:
   - startTime: 0
     title: Introduction

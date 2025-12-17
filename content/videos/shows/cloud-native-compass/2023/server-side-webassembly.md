@@ -1,5 +1,5 @@
 ---
-id: server-side-webassembly
+id: ypthw3fx8bmyo8cdfywuewog
 slug: server-side-webassembly
 title: Server-Side WebAssembly
 description: >-
@@ -54,7 +54,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: ypthw3fx8bmyo8cdfywuewog
 chapters:
   - startTime: 0
     title: Introductions

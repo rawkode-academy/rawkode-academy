@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-portainer
+id: hea5aobhyt84z99fvl9m92t6
 slug: hands-on-introduction-to-portainer
 title: Hands-on Introduction to Portainer
 description: >-
@@ -35,7 +35,6 @@ category: tutorial
 technologies:
   - portainer
 show: rawkode-live
-videoId: hea5aobhyt84z99fvl9m92t6
 chapters:
   - startTime: 161
     title: Introduction and Speaker Welcome

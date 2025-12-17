@@ -1,7 +1,3 @@
-import { triggerTranscriptionJob } from "./transcriptions";
-
-type TriggerResult = { workflowId: string };
-
 function usage(code = 1) {
   console.log(
     [
@@ -9,9 +5,8 @@ function usage(code = 1) {
       "  bun scripts/schedule_one.ts <id> [language]",
       "  bun scripts/schedule_one.ts --id <id> [--language en]",
       "",
-      "Env:",
-      "  HTTP_TRANSCRIPTION_TOKEN   Bearer token for the Worker",
-      "  TRANSCRIPTIONS_SERVICE     Service binding to the transcriptions Worker",
+      "Requires:",
+      "  Wrangler CLI configured with Cloudflare credentials",
     ].join("\n"),
   );
   process.exit(code);
@@ -51,8 +46,23 @@ function parseArgs(argv: string[]) {
 
 async function triggerTranscription(id: string, language: string) {
   console.log(`Triggering transcription: id=${id} language=${language}`);
-  const result = (await triggerTranscriptionJob({ id, language })) as TriggerResult;
-  console.log(`Success. Workflow scheduled. workflowId=${result.workflowId}`);
+
+  const params = JSON.stringify({ id, language });
+  const proc = Bun.spawn(
+    ["bunx", "wrangler", "workflows", "trigger", "transcribe", params],
+    { stdout: "pipe", stderr: "pipe" },
+  );
+
+  const output = await new Response(proc.stdout).text();
+  const exitCode = await proc.exited;
+
+  if (exitCode !== 0) {
+    const stderr = await new Response(proc.stderr).text();
+    throw new Error(`Wrangler failed: ${stderr}`);
+  }
+
+  const match = output.match(/([a-f0-9-]{36})/i);
+  console.log(`Success. Workflow scheduled. workflowId=${match?.[1] ?? "unknown"}`);
 }
 
 async function main() {

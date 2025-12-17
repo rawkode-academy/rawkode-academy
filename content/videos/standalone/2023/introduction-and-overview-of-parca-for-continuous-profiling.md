@@ -1,5 +1,5 @@
 ---
-id: introduction-and-overview-of-parca-for-continuous-profiling
+id: pixbg0khkdubmvl7ydy78v5y
 slug: introduction-and-overview-of-parca-for-continuous-profiling
 title: Introduction & Overview of Parca for Continuous Profiling
 description: >-
@@ -19,7 +19,6 @@ type: recorded
 category: tutorial
 technologies:
   - parca
-videoId: pixbg0khkdubmvl7ydy78v5y
 chapters:
   - startTime: 0
     title: Introduction

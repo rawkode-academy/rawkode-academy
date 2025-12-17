@@ -1,5 +1,5 @@
 ---
-id: from-kubernetes-to-cloud-run-chainguards-journey
+id: hbkqmiw7xfe2dxrarck938yl
 slug: from-kubernetes-to-cloud-run-chainguards-journey
 title: 'From Kubernetes to Cloud Run: Chainguard''s Journey'
 description: >-
@@ -56,7 +56,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: hbkqmiw7xfe2dxrarck938yl
 chapters:
   - startTime: 0
     title: Introduction

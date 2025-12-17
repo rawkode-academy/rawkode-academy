@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-tyk
+id: shduj6ini35ebkqltlqfdagb
 slug: hands-on-introduction-to-tyk
 title: Hands-on Introduction to Tyk
 description: "In this episode, we'll be guided through everything we need to know to get started with Tyk.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n\n\U0001F465 About the Guests\n\nBudha Bhattacharya \n\n  .\n\n\n\U0001F426 https://twitter.com/hellobudha\n\U0001F9E9 https://github.com/hellobudha\n\n\n\nAndy Smith\n\n  .\n\n\n\U0001F426 https://twitter.com/tyk_io\n\U0001F9E9 https://github.com/rewsmith\n\n\n\n\U0001F528 About the Technologies\n\nTyk API Gateway\n\nTyk is an open source Enterprise API Gateway, supporting REST, GraphQL, TCP and gRPC protocols.\nTyk Gateway is provided ‘Batteries-included’, with no feature lockout. Enabling your organization to control who accesses your APIs, when they access, and how they access it.\nTyk Technologies uses the same API Gateway for all it’s applications. Protecting, securing, and processing APIs for thousands of organizations and businesses around the world. Ideal for Open Banking, building software in the clouds as well as exposing APIs to teams, partners & consumers.\nBuilt from the ground up to be the fastest API gateway on the planet. It does not depend on a legacy proxy underneath. It has no 3rd party dependencies aside from Redis for distributed rate-limiting and token storage. Tyk Gateway can also be deployed as part of a larger Full Lifecycle API Management platform Tyk Self-Managed which also includes Management Control Plane, Dashboard GUI and Developer Portal.\n\n\U0001F30F https://tyk.io/open-source/\n\U0001F426 https://twitter.com/tyk_io\n\U0001F9E9 https://github.com/TykTechnologies/tyk"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - tyk
 show: rawkode-live
-videoId: shduj6ini35ebkqltlqfdagb
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

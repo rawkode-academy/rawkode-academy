@@ -1,5 +1,5 @@
 ---
-id: kubescape-operator-and-saas
+id: q29r22us2pmcizlk0v0zifyb
 slug: kubescape-operator-and-saas
 title: Kubescape Operator & SaaS
 description: >-
@@ -15,7 +15,6 @@ type: recorded
 category: tutorial
 technologies:
   - kubescape
-videoId: q29r22us2pmcizlk0v0zifyb
 chapters:
   - startTime: 0
     title: Introduction

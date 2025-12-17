@@ -1,5 +1,5 @@
 ---
-id: >-
+id: fqasod5sk7o8fk3pnzng0thp
   navigating-kubernetes-insights-challenges-and-the-release-cycle-with-kat-cosgrove
 slug: >-
   navigating-kubernetes-insights-challenges-and-the-release-cycle-with-kat-cosgrove
@@ -12,7 +12,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: fqasod5sk7o8fk3pnzng0thp
 duration: 2366
 audioFileSize: 56784493
 guests:

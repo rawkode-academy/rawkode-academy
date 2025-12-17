@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-spicedb
+id: pjn9r9a0dhxd8y05nnsc99d8
 slug: hands-on-introduction-to-spicedb
 title: Hands-on Introduction to SpiceDB
 subtitle: "**\U0001F680 Hands-On SpiceDB Demo + Q&A with AuthZed CPO Jimmy Zelinskie \U0001F680**"
@@ -12,7 +12,6 @@ technologies:
 guests:
   - jimmy-zelinskie
 show: rawkode-live
-videoId: pjn9r9a0dhxd8y05nnsc99d8
 duration: 5427
 ---
 

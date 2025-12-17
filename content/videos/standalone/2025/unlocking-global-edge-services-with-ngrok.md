@@ -1,5 +1,5 @@
 ---
-id: unlocking-global-edge-services-with-ngrok
+id: h0e270cxlhdgnr6x20mcno3d
 slug: unlocking-global-edge-services-with-ngrok
 title: Unlocking Global Edge Services with ngrok
 description: >-
@@ -26,7 +26,6 @@ type: recorded
 category: tutorial
 technologies:
   - ngrok
-videoId: h0e270cxlhdgnr6x20mcno3d
 chapters:
   - startTime: 0
     title: 'Introduction: The Challenge of Global Edge Services'

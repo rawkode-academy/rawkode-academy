@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-zitadel
+id: enzppzcpuou2qem5iy98z2sf
 slug: hands-on-introduction-to-zitadel
 title: Hands-on Introduction to Zitadel
 description: >-
@@ -33,7 +33,6 @@ category: tutorial
 technologies:
   - zitadel
 show: rawkode-live
-videoId: enzppzcpuou2qem5iy98z2sf
 chapters:
   - startTime: 108
     title: Introduction and Why Identity is Hard

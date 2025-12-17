@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-wundergraph
+id: xn11gt75dscahop47hm3hznw
 slug: hands-on-introduction-to-wundergraph
 title: Hands-on Introduction to WunderGraph
 description: >-
@@ -22,7 +22,6 @@ category: tutorial
 technologies:
   - wundergraph
 show: rawkode-live
-videoId: xn11gt75dscahop47hm3hznw
 chapters:
   - startTime: 0
     title: Introduction

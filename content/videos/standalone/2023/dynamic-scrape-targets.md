@@ -1,5 +1,5 @@
 ---
-id: dynamic-scrape-targets
+id: hmi73u4rxevdc9jb39tu1lxq
 slug: dynamic-scrape-targets
 title: Dynamic Scrape Targets
 description: >-
@@ -11,7 +11,6 @@ type: recorded
 category: tutorial
 technologies:
   - parca
-videoId: hmi73u4rxevdc9jb39tu1lxq
 chapters:
   - startTime: 0
     title: Introduction

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-devstand
+id: ns56m0h117hrt9hyszmvahv8
 slug: hands-on-introduction-to-devstand
 title: Hands-on Introduction to DevStand
 description: >-
@@ -16,7 +16,6 @@ category: tutorial
 technologies:
   - devstand
 show: rawkode-live
-videoId: ns56m0h117hrt9hyszmvahv8
 chapters:
   - startTime: 162
     title: Introduction

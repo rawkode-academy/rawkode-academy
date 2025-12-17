@@ -1,5 +1,5 @@
 ---
-id: custom-controls-with-gpt
+id: wsxnftsmvohcoqr4izm8mur6
 slug: custom-controls-with-gpt
 title: Custom Controls with GPT
 description: >-
@@ -14,7 +14,6 @@ type: recorded
 category: tutorial
 technologies:
   - kubescape
-videoId: wsxnftsmvohcoqr4izm8mur6
 chapters:
   - startTime: 0
     title: 'Introduction: ChatGPT, Kubescape, and the Rego Challenge'

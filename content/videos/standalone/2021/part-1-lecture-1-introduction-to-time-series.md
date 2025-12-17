@@ -1,5 +1,5 @@
 ---
-id: part-1-lecture-1-introduction-to-time-series
+id: gcyhdcr1fqccea0s1idebvw9
 slug: part-1-lecture-1-introduction-to-time-series
 title: 'Part 1 - Lecture 1: Introduction to Time Series'
 description: |-
@@ -21,7 +21,6 @@ type: recorded
 category: tutorial
 technologies:
   - influxdb
-videoId: gcyhdcr1fqccea0s1idebvw9
 chapters:
   - startTime: 0
     title: Introduction

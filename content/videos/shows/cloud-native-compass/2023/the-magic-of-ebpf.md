@@ -1,5 +1,5 @@
 ---
-id: the-magic-of-ebpf
+id: cxwpwr732hsc2olh2072h59i
 slug: the-magic-of-ebpf
 title: The Magic of eBPF
 description: >-
@@ -56,7 +56,6 @@ category: interview
 technologies:
   - ebpf
 show: cloud-native-compass
-videoId: cxwpwr732hsc2olh2072h59i
 chapters:
   - startTime: 0
     title: Introductions

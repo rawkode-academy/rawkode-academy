@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-grafbase
+id: jufccm4nmljpvfjbskmoc03s
 slug: hands-on-introduction-to-grafbase
 title: Hands-on Introduction to Grafbase
 description: >-
@@ -12,7 +12,6 @@ category: tutorial
 technologies:
   - grafbase
 show: rawkode-live
-videoId: jufccm4nmljpvfjbskmoc03s
 chapters:
   - startTime: 108
     title: Introduction

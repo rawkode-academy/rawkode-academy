@@ -1,5 +1,5 @@
 ---
-id: introduction-to-suborbital
+id: aqa3padkfm9asmv94ky774rc
 slug: introduction-to-suborbital
 title: Introduction to Suborbital
 description: "In this episode, we'll be taking at look at getting started with Suborbital; a WebAssembly based functions runtime.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n00:35 - Introduction\n01:20 - What is Suborbital (Presentation)\n12:30 - Installing the CLI: subo\n20:50 - Creating our first project\n38:00 - HTTP Request Body\n52:00 - Workflows through function composition\n01:01:00 - Running steps in parallel\n01:06:00 - Debugging workflows\n01:11:00 - Advanced Demo: HTTP and Caching\n\n\U0001F465 About the Guests\n\nConnor Hicks\n\nConnor Hicks is a software developer based in Ottawa, Canada. Connor works on security and distributed systems projects, leading Product Discovery at 1Password as well as building the Suborbital open source project. Connor is a strong believer in building security and privacy into the core of all software, and is exploring the next generation of web service development with technologies like WebAssembly.\n\n\U0001F426 https://twitter.com/cohix\n\U0001F9E9 https://github.com/cohix\n\n\n\n\U0001F528 About the Technologies\n\nSuborbital\n\nThe Suborbital Development Platform is a family of open source tools and frameworks that help you build web services that are powerful, but never complicated.\n\n\U0001F30F https://suborbital.dev\n\U0001F426 https://twitter.com/SuborbitalDev\n\U0001F9E9 https://github.com/suborbital\n\n#WebAssembly #WASM #FaaS #Serverless\n\n\n\U0001F30F Show Links\nhttps://bit.ly/wasmsurvey"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - suborbital
 show: rawkode-live
-videoId: aqa3padkfm9asmv94ky774rc
 chapters:
   - startTime: 0
     title: Holding Screen

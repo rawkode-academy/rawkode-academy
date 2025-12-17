@@ -1,5 +1,5 @@
 ---
-id: event-driven-architectures-at-wix
+id: rzoehfxdwc2ldk4xbxgmcdb9
 slug: event-driven-architectures-at-wix
 title: Event-Driven Architectures at Wix
 description: >-
@@ -52,7 +52,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: rzoehfxdwc2ldk4xbxgmcdb9
 chapters:
   - startTime: 0
     title: Introduction

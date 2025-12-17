@@ -1,5 +1,5 @@
 ---
-id: hands-on-tutorial-of-project-sveltos
+id: vctezk0aahkq0ey2o0pvftdg
 slug: hands-on-tutorial-of-project-sveltos
 title: Hands-on Tutorial of Project Sveltos
 description: >-
@@ -16,7 +16,6 @@ category: tutorial
 technologies:
   - sveltos
 show: rawkode-live
-videoId: vctezk0aahkq0ey2o0pvftdg
 chapters:
   - startTime: 108
     title: Introduction & Guest Welcome

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-trivy
+id: gstsdlvy9sstecquu9q1vf7f
 slug: hands-on-introduction-to-trivy
 title: Hands-on Introduction to Trivy
 description: >-
@@ -12,7 +12,6 @@ category: tutorial
 technologies:
   - trivy
 show: rawkode-live
-videoId: gstsdlvy9sstecquu9q1vf7f
 chapters:
   - startTime: 0
     title: Introduction

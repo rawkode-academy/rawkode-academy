@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-gitea
+id: ytmz11lcuyrxd14ykxqb4wu2
 slug: hands-on-introduction-to-gitea
 title: Hands-on Introduction to Gitea
 description: >-
@@ -25,7 +25,6 @@ category: tutorial
 technologies:
   - gitea
 show: rawkode-live
-videoId: ytmz11lcuyrxd14ykxqb4wu2
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

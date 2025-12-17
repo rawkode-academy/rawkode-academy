@@ -62,8 +62,8 @@ export const GET: APIRoute = async ({ site }) => {
 ${sortedVideos
 	.map((video) => {
 		const videoUrl = `${site}watch/${video.data.slug}/`;
-		const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`;
-		const contentUrl = `https://content.rawkode.academy/videos/${video.data.videoId}/stream.m3u8`;
+		const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
+		const contentUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 		const durationSeconds =
 			typeof video.data.duration === "number" ? video.data.duration : 0;
 		const duration = formatDuration(durationSeconds);

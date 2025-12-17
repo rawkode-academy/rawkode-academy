@@ -1,5 +1,5 @@
 ---
-id: stateful-webassembly-apps-with-key-value-stores
+id: viahl5hfrft2mpg2sr7wxjtb
 slug: stateful-webassembly-apps-with-key-value-stores
 title: Stateful WebAssembly Apps with Key-Value Stores
 description: >-
@@ -10,7 +10,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: viahl5hfrft2mpg2sr7wxjtb
 chapters:
   - startTime: 0
     title: Introduction

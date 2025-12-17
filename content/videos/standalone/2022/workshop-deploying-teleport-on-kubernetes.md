@@ -1,5 +1,5 @@
 ---
-id: workshop-deploying-teleport-on-kubernetes
+id: dtax4c66pvgyj704bvojhsou
 slug: workshop-deploying-teleport-on-kubernetes
 title: Workshop - Deploying Teleport on Kubernetes
 description: 'Find out more at https://rawkode.live/teleport'
@@ -8,7 +8,6 @@ type: recorded
 category: tutorial
 technologies:
   - teleport
-videoId: dtax4c66pvgyj704bvojhsou
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

@@ -1,5 +1,5 @@
 ---
-id: introduction-to-meilisearch
+id: sgekw05ckjl1lweoumx4kkp9
 slug: introduction-to-meilisearch
 title: Introduction to Meilisearch
 description: "In this episode, we'll get you up to speed with everything you need to know about Meilisearch\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n\n\U0001F465 About the Guests\n\nFrédéric Harper\n\nAs the Director of Developer Relations at MeiliSearch, Frédéric Harper helps developers empower their users with our open source search engine. Fred has shared his passion for technology on the stage at dozens of events around the world. He's served the communities at npm, Mozilla, Microsoft, DigitalOcean and Fitbit, and is the author of the book on personal branding for developers at Apress. Behind this extrovert is a very passionate individual who believes in the power of communication... and cat videos.\n\n\U0001F426 https://twitter.com/fharper\n\U0001F9E9 https://github.com/fharper\n\U0001F30F https://fred.dev/\n\n\nCarolina Ferreira\n\nAs a Developer Advocate, Carolina Ferreira helps developers have the best possible experience with the open-source search engine MeiliSearch. A former teacher turned developer, Carolina brings her patience and experience in the classroom to her new role in the tech industry. She believes that success comes hand in hand with helping, sharing, and elevating others.\n\n\U0001F426 https://twitter.com/CarolainFG\n\U0001F9E9 https://github.com/CaroFG\n\n\n\n\U0001F528 About the Technologies\n\nMeiliSearch\n\nMeiliSearch is a powerful, fast, open-source, easy to use and deploy search engine. Both searching and indexing are highly customizable. Features such as typo-tolerance, filters, and synonyms are provided out-of-the-box.\n\n\U0001F30F https://www.meilisearch.com/\n\U0001F426 https://twitter.com/meilisearch\n\U0001F9E9 https://github.com/meilisearch/MeiliSearch"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - meilisearch
 show: rawkode-live
-videoId: sgekw05ckjl1lweoumx4kkp9
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

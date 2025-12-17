@@ -1,5 +1,5 @@
 ---
-id: part-2-tutorial-installing-teleport
+id: pgrokuuhvovem0ajyew4tncu
 slug: part-2-tutorial-installing-teleport
 title: Part 2. Tutorial -  Installing Teleport
 description: >-
@@ -13,7 +13,6 @@ type: recorded
 category: tutorial
 technologies:
   - teleport
-videoId: pgrokuuhvovem0ajyew4tncu
 chapters:
   - startTime: 0
     title: Introduction

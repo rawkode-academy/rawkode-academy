@@ -1,5 +1,5 @@
 ---
-id: relaunching-klustered-with-heroku-vibes
+id: mbi5212lbf8b3yvidkeamkkm
 slug: relaunching-klustered-with-heroku-vibes
 title: Relaunching Klustered ... with Heroku Vibes
 subtitle: >-
@@ -21,7 +21,6 @@ type: recorded
 category: tutorial
 technologies:
   - heroku
-videoId: mbi5212lbf8b3yvidkeamkkm
 chapters:
   - startTime: 0
     title: Introduction to Heroku Vibes

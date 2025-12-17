@@ -1,5 +1,5 @@
 ---
-id: hands-on-tutorial-of-mirrord
+id: eyps5shz1242dx4h4oovg9jk
 slug: hands-on-tutorial-of-mirrord
 title: Hands-on Tutorial of mirrord
 description: Hands-on introduction to local Kubernetes development with mirrord
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - mirrord
 show: rawkode-live
-videoId: eyps5shz1242dx4h4oovg9jk
 chapters:
   - startTime: 168
     title: Introduction & Guest Introductions

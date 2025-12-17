@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-perses
+id: znv8ogcndba61rk08pd7dbzy
 slug: hands-on-introduction-to-perses
 title: Hands-on Introduction to Perses
 subtitle: >-
@@ -20,7 +20,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: znv8ogcndba61rk08pd7dbzy
 duration: 4318
 ---
 

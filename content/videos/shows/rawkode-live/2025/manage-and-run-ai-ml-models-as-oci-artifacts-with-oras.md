@@ -1,5 +1,5 @@
 ---
-id: manage-and-run-ai-ml-models-as-oci-artifacts-with-oras
+id: jocpdohtl9lz7fg6kxnxmaob
 slug: manage-and-run-ai-ml-models-as-oci-artifacts-with-oras
 title: Manage and Run AI/ML Models as OCI Artifacts with ORAS
 subtitle: >-
@@ -34,7 +34,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: jocpdohtl9lz7fg6kxnxmaob
 duration: 3995
 ---
 

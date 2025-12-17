@@ -1,5 +1,5 @@
 ---
-id: >-
+id: ni90hh70rr77srzpo199bbfv
   building-php-applications-with-docker-docker-compose-and-kubernetes-rtfm-with-rawkode
 slug: >-
   building-php-applications-with-docker-docker-compose-and-kubernetes-rtfm-with-rawkode
@@ -16,7 +16,6 @@ technologies:
   - kubernetes
   - php
 show: rawkode-live
-videoId: ni90hh70rr77srzpo199bbfv
 chapters:
   - startTime: 0
     title: Holding screen

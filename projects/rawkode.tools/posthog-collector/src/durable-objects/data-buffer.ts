@@ -257,9 +257,14 @@ export class DataBuffer extends DurableObject<Env> {
 				}
 			}
 
+			// Add rawkode.academy prefix to event type for PostHog
+			const eventName = event.type.startsWith("rawkode.academy.")
+				? event.type
+				: `rawkode.academy.${event.type}`;
+
 			posthog.capture({
 				distinctId,
-				event: event.type,
+				event: eventName,
 				properties,
 				timestamp: event.time ? new Date(event.time) : new Date(),
 			});

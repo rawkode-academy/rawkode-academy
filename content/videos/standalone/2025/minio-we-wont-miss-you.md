@@ -1,5 +1,5 @@
 ---
-id: minio-we-wont-miss-you
+id: xqw6ifttca4q4sdninffrwml
 slug: minio-we-wont-miss-you
 title: MinIO, we won't miss you.
 subtitle: >-
@@ -30,6 +30,5 @@ category: editorial
 technologies:
   - minio
   - seaweedfs
-videoId: xqw6ifttca4q4sdninffrwml
 duration: 369
 ---

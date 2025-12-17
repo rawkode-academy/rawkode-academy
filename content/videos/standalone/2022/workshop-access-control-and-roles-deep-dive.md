@@ -1,5 +1,5 @@
 ---
-id: workshop-access-control-and-roles-deep-dive
+id: ecc8n8zd3p5xk96h52qdp2p7
 slug: workshop-access-control-and-roles-deep-dive
 title: Workshop - Access Control & Roles Deep Dive
 description: 'Find out more at https://rawkode.live/teleport'
@@ -8,7 +8,6 @@ type: recorded
 category: tutorial
 technologies:
   - teleport
-videoId: ecc8n8zd3p5xk96h52qdp2p7
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

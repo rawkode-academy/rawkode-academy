@@ -1,5 +1,5 @@
 ---
-id: supply-chain-security-with-a-cli-valint
+id: ncgxuu1vyx5yl7psezcz79dk
 slug: supply-chain-security-with-a-cli-valint
 title: 'Supply Chain Security with a CLI: valint'
 description: >-
@@ -26,7 +26,6 @@ publishedAt: 2023-05-22T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies: []
-videoId: ncgxuu1vyx5yl7psezcz79dk
 chapters:
   - startTime: 0
     title: Introduction

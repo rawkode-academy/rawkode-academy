@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-devspace
+id: p573rqpaddgcyckqamxoe83g
 slug: hands-on-introduction-to-devspace
 title: Hands-on Introduction to DevSpace
 description: >-
@@ -30,7 +30,6 @@ category: tutorial
 technologies:
   - devspace
 show: rawkode-live
-videoId: p573rqpaddgcyckqamxoe83g
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

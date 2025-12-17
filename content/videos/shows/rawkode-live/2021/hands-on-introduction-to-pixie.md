@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-pixie
+id: ymhs0sxdh5vb6uwi88xcfiuw
 slug: hands-on-introduction-to-pixie
 title: Hands-on Introduction to Pixie
 description: "In this episode, we take a look at observability within Kubernetes with Pixie.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:51 - Introductions\n02:50 - What is Pixie?\n04:15 - How eBPF Powers Pixie\n06:28 - CNCF Sandbox Project\n09:13 - Deploying Pixie\n17:18 - Running Scripts in the CLI & UI\n21:59 - Pixie Stores Data on the Cluster\n24:40 - Inspect a Script\n28:44 - Flamegraph (Continuous Profiling)\n32:27 - Protocols Traced by Pixie\n35:35 - Network Flow Graph Script\n39:56 - HTTP Data Script (Full Request & Response Body)\n40:50 - Editing a Script: Filter HTTP Requests for Errors\n49:08 - Using the Pixie API to Create Slack Alerts\n59:01 - Data Source Tables\n1:04:16 - Wrap Up\n\n\U0001F465 About the Guests\n\nNatalie Serrino\n\n  Natalie is a Principal Engineer and Tech Lead at New Relic. She works on the Pixie auto-telemetry observability platform, which was acquired and open sourced by New Relic. She focuses primarily on Pixie’s data layer, including its query language, compiler, and query execution engine.\n\n\n\U0001F426 https://twitter.com/nserrino\n\U0001F9E9 https://github.com/nserrino\n\n\n\n\U0001F528 About the Technologies\n\nPixie\n\nPixie gives you instant visibility by giving access to metrics, events, traces and logs without changing code. Instantly troubleshoot your applications on Kubernetes. No instrumentation. Debug with scripts. All inside Kubernetes.\n\n\U0001F30F https://pixielabs.ai/\n\U0001F426 https://twitter.com/pixie_run\n\U0001F9E9 https://github.com/pixie-labs/pixie\n\n#Observability #Monitoring #Logging #Kubernetes"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - pixie
 show: rawkode-live
-videoId: ymhs0sxdh5vb6uwi88xcfiuw
 chapters:
   - startTime: 0
     title: Holding screen

@@ -1,5 +1,3 @@
-import { triggerTranscriptionJob } from "./transcriptions";
-
 const GRAPHQL_ENDPOINT = "https://api.rawkode.academy";
 const LIMIT = 100;
 
@@ -93,13 +91,23 @@ async function fetchVideos(offset: number): Promise<Video[]> {
 async function triggerTranscription(id: string): Promise<void> {
 	console.log(`Triggering transcription for video ID: ${id}`);
 	try {
-		const result = (await triggerTranscriptionJob({
-			id,
-			language: "en",
-		})) as { workflowId: string };
+		const params = JSON.stringify({ id, language: "en" });
+		const proc = Bun.spawn(
+			["bunx", "wrangler", "workflows", "trigger", "transcribe", params],
+			{ stdout: "pipe", stderr: "pipe" },
+		);
 
+		const output = await new Response(proc.stdout).text();
+		const exitCode = await proc.exited;
+
+		if (exitCode !== 0) {
+			const stderr = await new Response(proc.stderr).text();
+			throw new Error(`Wrangler failed: ${stderr}`);
+		}
+
+		const match = output.match(/([a-f0-9-]{36})/i);
 		console.log(
-			`Successfully triggered transcription for video ID: ${id}, workflow ID: ${result.workflowId}`,
+			`Successfully triggered transcription for video ID: ${id}, workflow ID: ${match?.[1] ?? "unknown"}`,
 		);
 	} catch (error) {
 		console.error(

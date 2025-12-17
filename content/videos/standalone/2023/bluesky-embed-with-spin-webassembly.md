@@ -1,5 +1,5 @@
 ---
-id: bluesky-embed-with-spin-webassembly
+id: ierbuewtemudd1i0w0wru28j
 slug: bluesky-embed-with-spin-webassembly
 title: BlueSky Embed with Spin WebAssembly
 description: >-
@@ -11,7 +11,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: ierbuewtemudd1i0w0wru28j
 chapters:
   - startTime: 0
     title: Introduction

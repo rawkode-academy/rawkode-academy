@@ -1,5 +1,5 @@
 ---
-id: the-roast-of-the-linux-desktop
+id: fd8h2x0iq6qy06gui4vev807
 slug: the-roast-of-the-linux-desktop
 title: The Roast of the Linux Desktop
 description: >-
@@ -21,7 +21,6 @@ publishedAt: 2024-07-17T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies: []
-videoId: fd8h2x0iq6qy06gui4vev807
 chapters:
   - startTime: 0
     title: Introduction & Mobile OS Chat

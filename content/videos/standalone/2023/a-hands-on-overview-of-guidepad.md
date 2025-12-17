@@ -1,5 +1,5 @@
 ---
-id: a-hands-on-overview-of-guidepad
+id: lxx8tfrfnnhiv1ur4h6t60t0
 slug: a-hands-on-overview-of-guidepad
 title: A Hands-on Overview of guidepad
 description: >-
@@ -19,7 +19,6 @@ type: recorded
 category: tutorial
 technologies:
   - guidepad
-videoId: lxx8tfrfnnhiv1ur4h6t60t0
 chapters:
   - startTime: 0
     title: Introduction & The Problem

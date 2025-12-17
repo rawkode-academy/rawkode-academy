@@ -1,5 +1,5 @@
 ---
-id: event-sourcing
+id: eoabgl7qts1lx2b0e5wwt3nf
 slug: event-sourcing
 title: Event Sourcing
 description: >-
@@ -38,7 +38,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: eoabgl7qts1lx2b0e5wwt3nf
 chapters:
   - startTime: 0
     title: Introductions

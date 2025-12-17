@@ -68,7 +68,7 @@ export async function GET(context: APIContext) {
 			categories: (video.data.technologies as string[]).map(
 				(id) => techName.get(id) || id,
 			),
-			thumbnail: `https://content.rawkode.academy/videos/${video.data.videoId}/thumbnail.jpg`,
+			thumbnail: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
 			type: "video",
 		};
 		if (typeof video.data.duration === "number") {

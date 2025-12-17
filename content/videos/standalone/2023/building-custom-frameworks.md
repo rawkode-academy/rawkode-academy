@@ -1,5 +1,5 @@
 ---
-id: building-custom-frameworks
+id: ts7glm4w4d8yxlmd2qnduu7q
 slug: building-custom-frameworks
 title: Building Custom Frameworks
 description: >-
@@ -19,7 +19,6 @@ type: recorded
 category: tutorial
 technologies:
   - kubescape
-videoId: ts7glm4w4d8yxlmd2qnduu7q
 duration: 966
 ---
 

@@ -1,5 +1,5 @@
 ---
-id: cncf-glossary-and-linkerd-with-catherine-paganini-and-jason-morgan
+id: vxnm3rycgt9l71t5svvca8s5
 slug: cncf-glossary-and-linkerd-with-catherine-paganini-and-jason-morgan
 title: CNCF Glossary & Linkerd with Catherine Paganini & Jason Morgan
 description: >-
@@ -19,7 +19,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: vxnm3rycgt9l71t5svvca8s5
 chapters:
   - startTime: 0
     title: Introduction & Speakers

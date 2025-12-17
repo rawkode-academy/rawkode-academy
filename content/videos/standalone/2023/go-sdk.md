@@ -1,5 +1,5 @@
 ---
-id: go-sdk
+id: xf99ugju3sc16q7f4iw3llv8
 slug: go-sdk
 title: Go SDK
 description: >-
@@ -32,7 +32,6 @@ type: recorded
 category: tutorial
 technologies:
   - spin
-videoId: xf99ugju3sc16q7f4iw3llv8
 chapters:
   - startTime: 0
     title: Introduction

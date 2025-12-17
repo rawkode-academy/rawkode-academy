@@ -1,5 +1,5 @@
 ---
-id: introduction-to-gitpod
+id: l2iuanpln1slft075q8ahyon
 slug: introduction-to-gitpod
 title: Introduction to Gitpod
 description: >-
@@ -22,7 +22,6 @@ category: tutorial
 technologies:
   - gitpod
 show: rawkode-live
-videoId: l2iuanpln1slft075q8ahyon
 chapters:
   - startTime: 0
     title: Introduction

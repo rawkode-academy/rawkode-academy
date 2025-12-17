@@ -1,5 +1,5 @@
 ---
-id: part-3-tutorial-running-teleport-with-docker
+id: wdrgonuy73469iogpfz4afx3
 slug: part-3-tutorial-running-teleport-with-docker
 title: Part 3. Tutorial - Running Teleport with Docker
 description: >-
@@ -18,7 +18,6 @@ category: tutorial
 technologies:
   - docker
   - teleport
-videoId: wdrgonuy73469iogpfz4afx3
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

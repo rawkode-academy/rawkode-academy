@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-quickwit
+id: iu23nk9tr6alciejrlbxmto1
 slug: hands-on-introduction-to-quickwit
 title: Hands-on Introduction to Quickwit
 description: >-
@@ -18,7 +18,6 @@ category: tutorial
 technologies:
   - quickwit
 show: rawkode-live
-videoId: iu23nk9tr6alciejrlbxmto1
 chapters:
   - startTime: 74
     title: Introduction

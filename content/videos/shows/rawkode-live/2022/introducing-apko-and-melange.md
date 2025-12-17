@@ -1,5 +1,5 @@
 ---
-id: introducing-apko-and-melange
+id: f7rvx2rb04zl2vhgoltwedf5
 slug: introducing-apko-and-melange
 title: Introducing apko & melange
 description: >-
@@ -13,7 +13,6 @@ technologies:
   - apko
   - melange
 show: rawkode-live
-videoId: f7rvx2rb04zl2vhgoltwedf5
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

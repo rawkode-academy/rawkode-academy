@@ -46,7 +46,7 @@ export class ReactToContentWorkflow extends WorkflowEntrypoint<Env, Params> {
 
 			const cloudEvent = new CloudEvent({
 				specversion: "1.0",
-				type: "com.rawkode.academy.reaction.added",
+				type: "reaction.added",
 				source: "/emoji-reactions",
 				id: crypto.randomUUID(),
 				time: new Date().toISOString(),

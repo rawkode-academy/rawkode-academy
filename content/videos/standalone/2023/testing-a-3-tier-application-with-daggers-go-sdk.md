@@ -1,5 +1,5 @@
 ---
-id: testing-a-3-tier-application-with-daggers-go-sdk
+id: v32afbzo0mzowipaa30orbtz
 slug: testing-a-3-tier-application-with-daggers-go-sdk
 title: Testing a 3-Tier Application with Dagger's Go SDK
 description: >-
@@ -39,7 +39,6 @@ type: recorded
 category: tutorial
 technologies:
   - dagger
-videoId: v32afbzo0mzowipaa30orbtz
 chapters:
   - startTime: 0
     title: Local Dev & Test without Dagger

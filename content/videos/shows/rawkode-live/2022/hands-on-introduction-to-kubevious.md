@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-kubevious
+id: nyxygq8akdwhroctp7hnmjnw
 slug: hands-on-introduction-to-kubevious
 title: Hands-on Introduction to Kubevious
 description: >-
@@ -72,7 +72,6 @@ category: tutorial
 technologies:
   - kubevious
 show: rawkode-live
-videoId: nyxygq8akdwhroctp7hnmjnw
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-kwasm
+id: a3fgm13ik7jug2x4xzh7w7sb
 slug: hands-on-introduction-to-kwasm
 title: Hands-on Introduction to KWasm
 description: >-
@@ -12,7 +12,6 @@ category: tutorial
 technologies:
   - kwasm
 show: rawkode-live
-videoId: a3fgm13ik7jug2x4xzh7w7sb
 chapters:
   - startTime: 163
     title: Introduction to KWasm and Guests

@@ -1,5 +1,5 @@
 ---
-id: is-webassembly-the-future-of-cloud-native
+id: rtbqgjn51b7o47pidcfpzog5
 slug: is-webassembly-the-future-of-cloud-native
 title: Is WebAssembly the Future of Cloud Native?
 description: >-
@@ -12,7 +12,6 @@ category: interview
 technologies:
   - webassembly
 show: cloud-native-compass
-videoId: rtbqgjn51b7o47pidcfpzog5
 chapters:
   - startTime: 0
     title: Introduction

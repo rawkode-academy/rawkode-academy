@@ -1,5 +1,5 @@
 ---
-id: komodor-vs-klustered
+id: dcjov47ebu5lv9zvbe787zpj
 slug: komodor-vs-klustered
 title: Komodor Vs. Klustered
 description: >-
@@ -14,7 +14,6 @@ category: tutorial
 technologies:
   - komodor
   - kubernetes
-videoId: dcjov47ebu5lv9zvbe787zpj
 chapters:
   - startTime: 0
     title: Introduction and Challenge Setup

@@ -1,5 +1,5 @@
 ---
-id: introduction-to-grafana
+id: xls03x1eryvd5y7lpzbwgblt
 slug: introduction-to-grafana
 title: Introduction to Grafana
 description: "Grafana is open source visualization and analytics software. It allows you to query, visualize, alert on, and explore your metrics no matter where they are stored. In plain English, it provides you with tools to turn your time-series database (TSDB) data into beautiful graphs and visualizations.\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n02:20 - Introductions\n03:30 - What is Grafana?\n07:00 - What was prepared upfront?\n08:10 - Installing Grafana\n09:45 - Login / Default authentication\n10:50 - Adding data sources (InfluxDB and Prometheus)\n15:40 - Exploring metrics\n27:40 - Building Dashboards\n36:15 - Alerting on metrics\n51:30 - Importing a community dashboard from https://grafana.com/dashboards\n53:08 - Explaining the different visualizations\n58:20 - Closing\n\n\U0001F30E Resources\n\nMarcus Olsson - https://twitter.com/marcusolsson\nGrafana - https://grafana.com"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - grafana
 show: rawkode-live
-videoId: xls03x1eryvd5y7lpzbwgblt
 chapters:
   - startTime: 0
     title: Holding screen

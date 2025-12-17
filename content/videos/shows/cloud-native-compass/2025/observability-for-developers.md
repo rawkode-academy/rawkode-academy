@@ -48,7 +48,6 @@ type: recorded
 category: interview
 technologies: []
 show: cloud-native-compass
-videoId: ftzk1o7srttxqo5z9vdpjrxs
 duration: 2922
 audioFileSize: 70129415
 guests:

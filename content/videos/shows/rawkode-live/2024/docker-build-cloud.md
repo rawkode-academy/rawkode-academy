@@ -1,5 +1,5 @@
 ---
-id: docker-build-cloud
+id: qz1c7g1dlbmnpf2ubudxvf2v
 slug: docker-build-cloud
 title: Docker Build Cloud
 description: 'Video content coming soon.'
@@ -10,7 +10,6 @@ technologies:
   - docker
   - docker-build-cloud
 show: rawkode-live
-videoId: qz1c7g1dlbmnpf2ubudxvf2v
 chapters:
   - startTime: 5
     title: Welcome Back & Continuing the Demo

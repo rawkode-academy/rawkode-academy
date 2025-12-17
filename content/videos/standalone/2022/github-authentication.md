@@ -1,5 +1,5 @@
 ---
-id: github-authentication
+id: gz1nbyatbi6h3q1usddwkdqh
 slug: github-authentication
 title: GitHub Authentication
 description: >-
@@ -13,7 +13,6 @@ type: recorded
 category: tutorial
 technologies:
   - teleport
-videoId: gz1nbyatbi6h3q1usddwkdqh
 chapters:
   - startTime: 26
     title: Introduction to GitHub Authentication with Teleport SSO

@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-snyk
+id: xbfhkuz66nc3g08axlx7zffb
 slug: hands-on-introduction-to-snyk
 title: Hands-on Introduction to Snyk
 description: ".\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n01:20 - Introductions\n04:40 - What is Snyk?\n13:40 - Adding a Repository to Snyk Web UI\n16:00 - Dependency Security Alerts\n34:00 - Code Analysis\n41:30 - Container Image Scanning\n59:00 - Snyk CLI\n01:07:00 - Kubernetes YAML Scanning\n\n\U0001F465 About the Guests\n\nMatt Jarvis\n\n  Senior Developer Advocate @snyksec. Co-founder Cloud Native Manchester, Co-founder Cloud Native Edinburgh. Ex-OpenStacker\n\n\n\U0001F426 https://twitter.com/mattj_io\n\U0001F9E9 https://github.com/snyk-matt\n\n\n\n\U0001F528 About the Technologies\n\nSnyk\n\nSnyk helps you find, fix and monitor known vulnerabilities in open source \n\n\U0001F30F https://snyk.io/\n\U0001F426 https://twitter.com/snyksec\n\U0001F9E9 https://github.com/snyk/snyk"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - snyk
 show: rawkode-live
-videoId: xbfhkuz66nc3g08axlx7zffb
 chapters:
   - startTime: 0
     title: Holding Screen

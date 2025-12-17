@@ -1,5 +1,5 @@
 ---
-id: introduction-to-rust-part-ii
+id: d6x3tfwo4ijvoew49ycderha
 slug: introduction-to-rust-part-ii
 title: Introduction to Rust (Part II)
 description: "Want to try Equinix Metal? Use the code \"rawkode-live\" for $50 of credit, which is roughly 100 hours of compute on our smaller instances. Sign up at https://equinixmetal.com\n\n---\n\nRust is a multi-paradigm programming language designed for performance and safety, especially safe concurrency. Rust is syntactically similar to C++ but can guarantee memory safety by using a borrow checker to validate references. Rust achieves memory safety without garbage collection, and reference counting is optional.\n\nRust was originally designed by Graydon Hoare at Mozilla Research, with contributions from Dave Herman, Brendan Eich, and others. The designers refined the language while writing the Servo layout or browser engine, and the Rust compiler. It has gained increasing use in industry, and Microsoft has been experimenting with the language for secure and safety-critical software components.\n\nRust has been voted the \"most loved programming language\" in the Stack Overflow Developer Survey every year since 2016.\n\n\n\U0001F570 Timeline\n\n00:00 - Holding\n\n00:30 - Introductions\n04:00 - If statements / conditionals\n11:00 - Match statements\n13:00 - Move semantics\n29:00 - Options\n51:00 - Enums\n1:06:00 - Clippy\n1:13:00 - Tests\n\n\n\U0001F30E Resources\n\n\nManish Goregaokar - https://twitter.com/Manishearth\nRust - https://rustlang.com\nRustlings - https://github.com/rust-lang/rustlings"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - rust
 show: rawkode-live
-videoId: d6x3tfwo4ijvoew49ycderha
 chapters:
   - startTime: 0
     title: Holding

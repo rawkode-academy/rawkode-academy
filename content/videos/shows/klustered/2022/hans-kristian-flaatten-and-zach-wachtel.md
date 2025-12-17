@@ -1,5 +1,5 @@
 ---
-id: hans-kristian-flaatten-and-zach-wachtel
+id: fehk0hl4a1z3tpdrcdvnwvqz
 slug: hans-kristian-flaatten-and-zach-wachtel
 title: Hans Kristian Flaatten & Zach Wachtel
 description: >-
@@ -18,7 +18,6 @@ category: tutorial
 technologies:
   - kubernetes
 show: klustered
-videoId: fehk0hl4a1z3tpdrcdvnwvqz
 chapters:
   - startTime: 161
     title: Introduction

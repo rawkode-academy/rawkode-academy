@@ -1,5 +1,5 @@
 ---
-id: securing-cloud-native-workloads-hands-on-with-notary-project-oras-and-ratify
+id: njiqkooyv0wnwu9qjpfcweqp
 slug: securing-cloud-native-workloads-hands-on-with-notary-project-oras-and-ratify
 title: >-
   Securing Cloud-Native Workloads: Hands-On with Notary Project, ORAS, and
@@ -25,7 +25,6 @@ type: live
 category: tutorial
 technologies: []
 show: rawkode-live
-videoId: njiqkooyv0wnwu9qjpfcweqp
 duration: 5700
 ---
 

@@ -1,5 +1,5 @@
 ---
-id: pulumi-multi-language-packages
+id: vuv2ktqhud7ol49f7cm9t9ex
 slug: pulumi-multi-language-packages
 title: 'Pulumi: Multi Language Packages'
 description: "In this episode, Lee will guide us through the latest changes in Pulumi that allows building components in your language of choice and consuming them in any other supported language.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:40 - Introductions\n02:20 - What are Pulumi Multi Language Components?\n07:00 - Building a Multi Language Component\n\n\U0001F465 About the Guests\n\nLee Briggs\n\n  Lee Briggs is a Staff Software Engineer at Pulumi. With almost 10 years of experience designing, building and maintaining distributed and complex systems, he wears the scars of many deployment tools. When he’s not trying to fit monolithic applications into containers, he playing and watching Soccer and walks with his dog, Cindy.\n\n\n\U0001F426 https://twitter.com/briggsl\n\U0001F9E9 https://github.com/jaxxstorm\n\U0001F30F https://www.leebriggs.co.uk/\n\n\n\U0001F528 About the Technologies\n\nPulumi\n\nPulumi's Infrastructure as Code SDK is the easiest way to create and deploy cloud software that use containers, serverless functions, hosted services, and infrastructure, on any cloud.\nSimply write code in your favorite language and Pulumi automatically provisions and manages your AWS, Azure, Google Cloud Platform, and/or Kubernetes resources, using an infrastructure-as-code approach. Skip the YAML, and use standard language features like loops, functions, classes, and package management that you already know and love.\n\n\U0001F30F https://pulumi.com/\n\U0001F426 https://twitter.com/PulumiCorp\n\U0001F9E9 https://github.com/pulumi/pulumi\n\n#Infrastructure #Automation #Cloud"
@@ -9,7 +9,6 @@ category: tutorial
 technologies:
   - pulumi
 show: rawkode-live
-videoId: vuv2ktqhud7ol49f7cm9t9ex
 chapters:
   - startTime: 0
     title: Holding screen

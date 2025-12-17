@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-gitea-actions
+id: xfzsftp8rjujzki3y0iaw75e
 slug: hands-on-introduction-to-gitea-actions
 title: Hands-on Introduction to Gitea Actions
 description: >-
@@ -30,7 +30,6 @@ category: tutorial
 technologies:
   - gitea
 show: rawkode-live
-videoId: xfzsftp8rjujzki3y0iaw75e
 chapters:
   - startTime: 77
     title: Introduction & Guest Welcome

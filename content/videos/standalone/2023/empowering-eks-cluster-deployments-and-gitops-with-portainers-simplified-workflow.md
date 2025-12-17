@@ -1,5 +1,5 @@
 ---
-id: >-
+id: aopb87s3u3cgcitqacbz0glh
   empowering-eks-cluster-deployments-and-gitops-with-portainers-simplified-workflow
 slug: >-
   empowering-eks-cluster-deployments-and-gitops-with-portainers-simplified-workflow
@@ -57,7 +57,6 @@ type: recorded
 category: tutorial
 technologies:
   - portainer
-videoId: aopb87s3u3cgcitqacbz0glh
 chapters:
   - startTime: 0
     title: Portainer is TOO Easy

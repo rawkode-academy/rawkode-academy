@@ -1,5 +1,5 @@
 ---
-id: hands-on-introduction-to-schemahero
+id: qatht83waplqejze8yf2865b
 slug: hands-on-introduction-to-schemahero
 title: Hands-on Introduction to SchemaHero
 description: >-
@@ -11,7 +11,6 @@ category: tutorial
 technologies:
   - schemahero
 show: rawkode-live
-videoId: qatht83waplqejze8yf2865b
 chapters:
   - startTime: 0
     title: Introduction

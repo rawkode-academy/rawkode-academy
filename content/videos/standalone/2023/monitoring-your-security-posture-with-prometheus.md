@@ -1,5 +1,5 @@
 ---
-id: monitoring-your-security-posture-with-prometheus
+id: cvahj7nb3ypukon4fm4mreaa
 slug: monitoring-your-security-posture-with-prometheus
 title: Monitoring Your Security Posture with Prometheus
 description: 'Video content coming soon.'
@@ -8,7 +8,6 @@ type: recorded
 category: tutorial
 technologies:
   - kubescape
-videoId: cvahj7nb3ypukon4fm4mreaa
 chapters:
   - startTime: 0
     title: Introduction and Overview

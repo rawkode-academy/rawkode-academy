@@ -12,9 +12,8 @@ const videos = defineCollection({
 		base: resolveContentDirSync("videos"),
 	}),
 	schema: z.object({
-		id: z.string(), // canonical slug identifier
-		slug: z.string(), // kept for compatibility; equals id
-		videoId: z.string(), // source/asset id for streams, captions, etc.
+		id: z.string(), // video asset ID (used for CDN URLs, PostHog events)
+		slug: z.string(), // human-readable URL identifier
 		title: z.string(),
 		subtitle: z.string().optional(),
 		description: z.string(),

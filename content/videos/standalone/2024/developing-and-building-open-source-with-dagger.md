@@ -1,5 +1,5 @@
 ---
-id: developing-and-building-open-source-with-dagger
+id: g179fxks66spn3ni7749lzdd
 slug: developing-and-building-open-source-with-dagger
 title: Developing & Building Open Source with Dagger
 description: >-
@@ -23,7 +23,6 @@ category: tutorial
 technologies:
   - dagger
   - openunison
-videoId: g179fxks66spn3ni7749lzdd
 chapters:
   - startTime: 0
     title: Intro & Apology

@@ -1,5 +1,5 @@
 ---
-id: hands-on-with-faasd-and-inlets
+id: mdv5rucpczre2hmjslcad38r
 slug: hands-on-with-faasd-and-inlets
 title: Hands-on with faasd & Inlets
 description: "faasd is OpenFaaS reimagined, but without the cost and complexity of Kubernetes. It runs on a single host with very modest requirements, making it fast and easy to manage. Under the hood it uses containerd and Container Networking Interface (CNI) along with the same core OpenFaaS components from the main project.\n\nWhen should you use faasd over OpenFaaS on Kubernetes?\nYou have a cost sensitive project - run faasd on a 5-10 USD VPS or on your Raspberry Pi\nWhen you just need a few functions or microservices, without the cost of a cluster\nWhen you don't have the bandwidth to learn or manage Kubernetes\nTo deploy embedded apps in IoT and edge use-cases\nTo shrink-wrap applications for use with a customer or client\nfaasd does not create the same maintenance burden you'll find with maintaining, upgrading, and securing a Kubernetes cluster. You can deploy it and walk away, in the worst case, just deploy a new VM and deploy your functions again.\n\n\ninlets® combines a reverse proxy and websocket tunnels to expose your internal and development endpoints to the public Internet via an exit-server. An exit-server may be a 5-10 USD VPS or any other computer with an IPv4 IP address. You can also tunnel services without exposing them on the Internet, making inlets a suitable replacement for a VPN.\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n01:20 - Introductions\n10:15 - Installing faasd with cloud-init on Equinix Metal\n15:00 - Installing faasd manually\n17:00 - What is faasd?\n25:25 - Adding containers to faasd\n34:00 - Building our first FaaS function\n49:00 - Super fast cold starts with faasd\n57:50 - Introduction to inlets\n1:00:00 - Exposing a service with inlets and the inlets operator with arkade\n\n\n\n\U0001F30E Resources\n\nAlex Ellis - https://twitter.com/alexellisuk\nOpenFaaS - https://www.openfaas.com/\nFaasd - https://github.com/openfaas/faasd\nInlets - https://github.com/inlets/inlets"
@@ -10,7 +10,6 @@ technologies:
   - inlets
   - openfaas
 show: rawkode-live
-videoId: mdv5rucpczre2hmjslcad38r
 chapters:
   - startTime: 0
     title: Holding screen

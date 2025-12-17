@@ -1,5 +1,5 @@
 ---
-id: sentry-prometheus-and-grafana-integrations
+id: idafk86yfg7uq201z7v4p0wv
 slug: sentry-prometheus-and-grafana-integrations
 title: 'Sentry, Prometheus, & Grafana Integrations'
 description: "Turn hours of K8s management & troubleshooting into minutes. Trusted by Ops \U0001F609 Loved by Devs ❤️\n\nKomodor tracks changes across your entire K8s stack, analyzing their ripple effect and providing you with the context you need to troubleshoot efficiently and independently.\n\nKomodor is a Kubernetes operations platform for developers, complete with automated playbooks for every K8s resource, and static-prevention monitors that enrich live & historical data with contextual insights to help enforce best practices and stop incidents in their tracks.\n\nBy baking K8s expertise directly into the product, Komodor is accelerating development cycles, reducing MTTR, and empowering dev teams to manage their K8s apps efficiently and independently."
@@ -8,7 +8,6 @@ type: recorded
 category: tutorial
 technologies:
   - komodor
-videoId: idafk86yfg7uq201z7v4p0wv
 chapters:
   - startTime: 5
     title: Introduction
