@@ -3,7 +3,25 @@ import { getSignInUrl } from "@/lib/auth/server";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 export const GET: APIRoute = async (context) => {
-	const returnTo = context.url.searchParams.get("returnTo") || "/";
+	let returnTo = context.url.searchParams.get("returnTo") || "/";
+
+	// Fallback to Referer header if returnTo is a server island path
+	// (Server islands have their own internal URL context)
+	if (returnTo.startsWith("/_server-islands/") || returnTo === "/") {
+		const referer = context.request.headers.get("referer");
+		if (referer) {
+			try {
+				const refererUrl = new URL(referer);
+				// Only use referer if it's same-origin
+				if (refererUrl.origin === context.url.origin) {
+					returnTo = refererUrl.pathname;
+				}
+			} catch {
+				// Invalid referer URL, keep default
+			}
+		}
+	}
+
 	const origin = context.url.origin;
 	const callbackURL = new URL(returnTo, origin).toString();
 
