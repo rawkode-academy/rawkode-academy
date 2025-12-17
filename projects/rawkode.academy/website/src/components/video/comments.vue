@@ -179,7 +179,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@reference "@/styles/global.css";
+@reference "../../styles/global.css";
 .comments-section {
   max-width: 100%;
 }
