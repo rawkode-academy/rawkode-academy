@@ -150,7 +150,8 @@ export const createAuth = async (env: AuthEnv) => {
 
 		hooks: {
 			after: createAuthMiddleware(async (ctx) => {
-				if (ctx.path.startsWith("/sign-in") && ctx.context.newSession) {
+				// OAuth callbacks come through /callback/github, not /sign-in
+				if (ctx.path.startsWith("/callback") && ctx.context.newSession) {
 					const session = ctx.context.newSession;
 					await captureAuthEvent(
 						{
