@@ -8,7 +8,6 @@ declare namespace Cloudflare {
 	interface Env {
 		WEBSITE: Fetcher /* rawkode-academy */;
 		EMOJI_REACTIONS: Fetcher /* platform-emoji-reactions-read-model */;
-		VIDEO_LIKES: Fetcher /* platform-video-likes-read-model */;
 		EMAIL_PREFERENCES: Fetcher /* platform-email-preferences-read-model */;
 		IDENTITY: Fetcher /* rawkode-academy-identity */;
 	}

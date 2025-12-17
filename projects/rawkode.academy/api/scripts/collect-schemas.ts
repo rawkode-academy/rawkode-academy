@@ -16,7 +16,6 @@ const schemasDir = join(__dirname, "../schemas");
 // User interaction services (platform/ directory)
 const PLATFORM_SERVICES = [
 	"emoji-reactions",
-	"video-likes",
 	"email-preferences",
 ];
 

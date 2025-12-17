@@ -40,7 +40,6 @@
 	"services": [
 		{ "binding": "WEBSITE", "service": "rawkode-academy" },
 		{ "binding": "EMOJI_REACTIONS", "service": "platform-emoji-reactions-read-model" },
-		{ "binding": "VIDEO_LIKES", "service": "platform-video-likes-read-model" },
 		{ "binding": "EMAIL_PREFERENCES", "service": "platform-email-preferences-read-model" },
 		{ "binding": "IDENTITY", "service": "rawkode-academy-identity" }
 	]

@@ -13,7 +13,6 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	website: "WEBSITE",
 	// User interaction services (dynamic data)
 	"emoji-reactions": "EMOJI_REACTIONS",
-	"video-likes": "VIDEO_LIKES",
 	"email-preferences": "EMAIL_PREFERENCES",
 };
 
