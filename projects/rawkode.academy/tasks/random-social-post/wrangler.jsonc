@@ -8,7 +8,7 @@
 		"head_sampling_rate": 1,
 		"logs": {
 			"enabled": true,
-			"destinations": ["posthog-collector-logs"]
+			"destinations": ["posthog-eu"]
 		},
 		"traces": {
 			"enabled": true,
@@ -42,6 +42,5 @@
 			"binding": "BLUESKY_APP_PASSWORD",
 			"secret_name": "BLUESKY_APP_PASSWORD",
 		}
-	],
-	"tail_consumers": [{ "service": "posthog-collector" }]
+	]
 }

@@ -15,7 +15,7 @@
 		"enabled": true,
 		"logs": {
 			"enabled": true,
-			"destinations": ["posthog-collector-logs"]
+			"destinations": ["posthog-eu"]
 		},
 		"traces": {
 			"enabled": true,
@@ -77,6 +77,5 @@
 			"service": "games-ski-share-cards-rpc",
 			"entrypoint": "SkiShareCards"
 		}
-	],
-	"tail_consumers": [{ "service": "posthog-collector" }]
+	]
 }

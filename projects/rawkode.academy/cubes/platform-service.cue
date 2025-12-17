@@ -322,14 +322,13 @@ import (
 				enabled:            true
 				invocation_logs:    true
 				head_sampling_rate: 1
-				destinations: ["grafana-otel-logs"]
+				destinations: ["posthog-eu"]
 			}
 			traces: {
-				enabled: true
-				destinations: ["grafana-otel-traces"]
+				enabled:      true
+				destinations: []
 			}
 		}
-		tail_consumers: [{service: "posthog-collector"}]
 
 		if len(_bindings.d1Databases) > 0 {
 			d1_databases: [for db in _bindings.d1Databases {
