@@ -1,5 +1,4 @@
 import { betterAuth } from "better-auth";
-import { createAuthMiddleware } from "better-auth/api";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { oidcProvider, organization } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
@@ -146,30 +145,25 @@ export const createAuth = async (env: AuthEnv) => {
 					},
 				},
 			},
-		},
-
-		hooks: {
-			after: createAuthMiddleware(async (ctx) => {
-				// OAuth callbacks come through /callback/github, not /sign-in
-				if (ctx.path.startsWith("/callback") && ctx.context.newSession) {
-					const session = ctx.context.newSession;
-					await captureAuthEvent(
-						{
-							event: "auth.sign_in_completed",
-							distinctId: session.user.id,
-							properties: {
-								auth_method: "github",
-								$set: {
-									email: session.user.email,
-									name: session.user.name,
-									last_sign_in: new Date().toISOString(),
+			session: {
+				create: {
+					after: async (session) => {
+						await captureAuthEvent(
+							{
+								event: "auth.sign_in_completed",
+								distinctId: session.userId,
+								properties: {
+									auth_method: "github",
+									$set: {
+										last_sign_in: new Date().toISOString(),
+									},
 								},
 							},
-						},
-						env.ANALYTICS,
-					);
-				}
-			}),
+							env.ANALYTICS,
+						);
+					},
+				},
+			},
 		},
 	});
 };
