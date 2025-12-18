@@ -107,9 +107,19 @@ const ctaSection = css({
 	animation: "fadeInUp 0.8s ease-out 0.4s both",
 });
 
+const poweredBy = css({
+	marginTop: "4rem",
+	fontSize: "1.1rem",
+	fontWeight: 600,
+	color: "rgba(255, 255, 255, 0.9)",
+	letterSpacing: "0.05em",
+	textTransform: "uppercase",
+	animation: "fadeInUp 0.8s ease-out 0.5s both",
+});
+
 const backgroundLogo = css({
 	position: "absolute",
-	top: "50%",
+	top: "20%",
 	left: "50%",
 	transform: "translate(-50%, -50%)",
 	maxWidth: "min(80vw, 600px)",
@@ -199,6 +209,7 @@ const backgroundLogo = css({
 						badge="Viewer Updates"
 					/>
 				</div>
+				<p class={poweredBy}>Powered by Rawkode Academy</p>
 			</div>
 		</main>
 	</body>
