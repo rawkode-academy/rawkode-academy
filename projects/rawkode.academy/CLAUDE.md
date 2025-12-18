@@ -67,9 +67,10 @@ bunx wrangler deploy --config ./read-model/wrangler.jsonc
 
 ## Observability
 
-All Cloudflare Workers must configure observability for PostHog. Add to `wrangler.jsonc`:
+All Cloudflare Workers must configure observability for PostHog using the `posthog-collector` tail worker. Add to `wrangler.jsonc`:
 
 ```jsonc
+"tail_consumers": [{ "service": "posthog-collector" }],
 "observability": {
   "enabled": true,
   "head_sampling_rate": 1,
@@ -77,7 +78,7 @@ All Cloudflare Workers must configure observability for PostHog. Add to `wrangle
     "enabled": true,
     "invocation_logs": true,
     "head_sampling_rate": 1,
-    "destinations": ["posthog-eu"]
+    "destinations": []
   },
   "traces": {
     "enabled": true,
@@ -86,7 +87,7 @@ All Cloudflare Workers must configure observability for PostHog. Add to `wrangle
 }
 ```
 
-The `posthog-eu` log destination is a Cloudflare account-level OTLP endpoint that sends telemetry directly to PostHog.
+The `posthog-collector` tail worker receives logs from all producer workers and forwards them to PostHog with full control over batching and transformation.
 
 ## Related Documentation
 

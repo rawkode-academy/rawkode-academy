@@ -3,12 +3,13 @@
 	"name": "random-video-social-post",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-06-10",
+	"tail_consumers": [{ "service": "posthog-collector" }],
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,
 		"logs": {
 			"enabled": true,
-			"destinations": ["posthog-eu"]
+			"destinations": []
 		},
 		"traces": {
 			"enabled": true,

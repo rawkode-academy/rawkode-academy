@@ -11,11 +11,12 @@
 	},
 	"workers_dev": true,
 	"preview_urls": true,
+	"tail_consumers": [{ "service": "posthog-collector" }],
 	"observability": {
 		"enabled": true,
 		"logs": {
 			"enabled": true,
-			"destinations": ["posthog-eu"]
+			"destinations": []
 		},
 		"traces": {
 			"enabled": true,
