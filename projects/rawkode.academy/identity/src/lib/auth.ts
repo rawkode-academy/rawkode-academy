@@ -81,14 +81,14 @@ export const createAuth = async (env: AuthEnv) => {
 						metadata: null,
 					},
 					{
-						clientId: "klustered-live",
-						name: "Klustered Live",
+						clientId: "klustered-dev",
+						name: "Klustered Dev",
 						type: "public",
 						// Workaround for https://github.com/better-auth/better-auth/issues/6651
 						// Better Auth incorrectly requires a secret for ID token signing even for public clients
 						clientSecret: "pkce-public-client-placeholder",
 						redirectUrls: [
-							"https://klustered.live/api/auth/callback",
+							"https://klustered.dev/api/auth/callback",
 							"http://localhost:4322/api/auth/callback",
 						],
 						disabled: false,
@@ -138,7 +138,7 @@ export const createAuth = async (env: AuthEnv) => {
 		trustedOrigins: [
 			"https://rawkode.academy",
 			"http://localhost:4321",
-			"https://klustered.live",
+			"https://klustered.dev",
 			"http://localhost:4322",
 		],
 
