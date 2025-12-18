@@ -66,7 +66,7 @@ export const createAuth = async (env: AuthEnv) => {
 
 		plugins: [
 			oidcProvider({
-				loginPage: "/auth/sign-in/social?provider=github",
+				loginPage: "/auth/sign-in/social",
 				trustedClients: [
 					{
 						clientId: "rawkode-academy-website",
