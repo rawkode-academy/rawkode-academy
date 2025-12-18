@@ -48,6 +48,12 @@ export const createAuth = async (env: AuthEnv) => {
 		env.GITHUB_OAUTH_CLIENT_SECRET.get(),
 	]);
 
+	console.log("[auth] Secret lengths:", {
+		authSecret: authSecret?.length ?? "null",
+		githubClientId: githubClientId?.length ?? "null",
+		githubClientSecret: githubClientSecret?.length ?? "null",
+	});
+
 	return betterAuth({
 		basePath: "/auth",
 		baseURL,
