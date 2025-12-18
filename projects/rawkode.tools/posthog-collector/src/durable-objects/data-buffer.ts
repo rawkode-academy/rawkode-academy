@@ -59,6 +59,41 @@ interface StoredTailEvent {
 	timestamp: number;
 }
 
+// OTLP Log types for PostHog /i/v1/logs endpoint
+interface OTLPAttribute {
+	key: string;
+	value: { stringValue: string };
+}
+
+interface OTLPLogRecord {
+	timeUnixNano: string;
+	severityNumber: number;
+	severityText: string;
+	body: { stringValue: string };
+	attributes: OTLPAttribute[];
+}
+
+interface OTLPExportLogsServiceRequest {
+	resourceLogs: Array<{
+		resource: {
+			attributes: OTLPAttribute[];
+		};
+		scopeLogs: Array<{
+			scope: { name: string };
+			logRecords: OTLPLogRecord[];
+		}>;
+	}>;
+}
+
+// Map Cloudflare log levels to OTLP severity
+const LOG_LEVEL_TO_SEVERITY: Record<string, { number: number; text: string }> = {
+	debug: { number: 5, text: "DEBUG" },
+	log: { number: 9, text: "INFO" },
+	info: { number: 9, text: "INFO" },
+	warn: { number: 13, text: "WARN" },
+	error: { number: 17, text: "ERROR" },
+};
+
 export interface Env {
 	POSTHOG_PROJECT_TOKEN: SecretsStoreSecret;
 	POSTHOG_HOST: string;
@@ -136,27 +171,31 @@ export class DataBuffer extends DurableObject<Env> {
 			await this.ctx.storage.delete(LOGS_KEY);
 		}
 
-		// Flush events, metrics, exceptions, and tail events using PostHog SDK
+		// Flush tail events as OTLP logs
+		const tailEvents = await this.getTailEvents();
+		if (tailEvents.length > 0) {
+			try {
+				await this.flushTailEventsAsOTLP(tailEvents);
+			} catch (error) {
+				console.error("Failed to flush tail events as OTLP:", error);
+			}
+			await this.ctx.storage.delete(TAIL_EVENTS_KEY);
+		}
+
+		// Flush events, metrics, and exceptions using PostHog SDK
 		const events = await this.getEvents();
 		const metrics = await this.getMetrics();
 		const exceptions = await this.getExceptions();
-		const tailEvents = await this.getTailEvents();
 
-		if (
-			events.length > 0 ||
-			metrics.length > 0 ||
-			exceptions.length > 0 ||
-			tailEvents.length > 0
-		) {
+		if (events.length > 0 || metrics.length > 0 || exceptions.length > 0) {
 			try {
-				await this.flushToPostHogSDK(events, metrics, exceptions, tailEvents);
+				await this.flushToPostHogSDK(events, metrics, exceptions);
 			} catch (error) {
 				console.error("Failed to flush to PostHog SDK:", error);
 			}
 			await this.ctx.storage.delete(EVENTS_KEY);
 			await this.ctx.storage.delete(METRICS_KEY);
 			await this.ctx.storage.delete(EXCEPTIONS_KEY);
-			await this.ctx.storage.delete(TAIL_EVENTS_KEY);
 		}
 	}
 
@@ -200,6 +239,135 @@ export class DataBuffer extends DurableObject<Env> {
 		return tailEvents ?? [];
 	}
 
+	private async flushTailEventsAsOTLP(
+		tailEvents: StoredTailEvent[],
+	): Promise<void> {
+		if (tailEvents.length === 0) return;
+
+		const token = await this.env.POSTHOG_PROJECT_TOKEN.get();
+
+		// Group tail events by worker name for efficient batching
+		const eventsByWorker = new Map<string, StoredTailEvent[]>();
+		for (const event of tailEvents) {
+			const workerName = event.trace.scriptName ?? "unknown";
+			const existing = eventsByWorker.get(workerName) ?? [];
+			existing.push(event);
+			eventsByWorker.set(workerName, existing);
+		}
+
+		// Build OTLP request with resourceLogs per worker
+		const resourceLogs: OTLPExportLogsServiceRequest["resourceLogs"] = [];
+
+		for (const [workerName, events] of eventsByWorker) {
+			const logRecords: OTLPLogRecord[] = [];
+
+			for (const stored of events) {
+				const trace = stored.trace;
+
+				// Convert each console log to an OTLP LogRecord
+				for (const log of trace.logs) {
+					const severity = LOG_LEVEL_TO_SEVERITY[log.level] ?? {
+						number: 9,
+						text: "INFO",
+					};
+					const message = log.message.map(String).join(" ");
+
+					logRecords.push({
+						timeUnixNano: (log.timestamp * 1_000_000).toString(),
+						severityNumber: severity.number,
+						severityText: severity.text,
+						body: { stringValue: message },
+						attributes: [
+							{ key: "worker.name", value: { stringValue: workerName } },
+							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
+							...(trace.request?.url
+								? [
+										{
+											key: "http.url",
+											value: { stringValue: trace.request.url },
+										},
+									]
+								: []),
+							...(trace.request?.method
+								? [
+										{
+											key: "http.method",
+											value: { stringValue: trace.request.method },
+										},
+									]
+								: []),
+							...(trace.request?.colo
+								? [
+										{
+											key: "cloudflare.colo",
+											value: { stringValue: trace.request.colo },
+										},
+									]
+								: []),
+						],
+					});
+				}
+
+				// Convert exceptions to error logs
+				for (const exc of trace.exceptions) {
+					logRecords.push({
+						timeUnixNano: (exc.timestamp * 1_000_000).toString(),
+						severityNumber: 17, // ERROR
+						severityText: "ERROR",
+						body: { stringValue: `${exc.name}: ${exc.message}` },
+						attributes: [
+							{ key: "worker.name", value: { stringValue: workerName } },
+							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
+							{ key: "exception.type", value: { stringValue: exc.name } },
+							{ key: "exception.message", value: { stringValue: exc.message } },
+						],
+					});
+				}
+			}
+
+			if (logRecords.length > 0) {
+				resourceLogs.push({
+					resource: {
+						attributes: [
+							{ key: "service.name", value: { stringValue: workerName } },
+							{
+								key: "service.namespace",
+								value: { stringValue: "cloudflare-workers" },
+							},
+						],
+					},
+					scopeLogs: [
+						{
+							scope: { name: "posthog-collector" },
+							logRecords,
+						},
+					],
+				});
+			}
+		}
+
+		if (resourceLogs.length === 0) return;
+
+		const otlpRequest: OTLPExportLogsServiceRequest = { resourceLogs };
+
+		const response = await fetch(`${this.env.POSTHOG_HOST}/i/v1/logs`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify(otlpRequest),
+		});
+
+		if (!response.ok) {
+			const text = await response.text();
+			console.error("PostHog OTLP logs request failed:", {
+				status: response.status,
+				body: text,
+			});
+		}
+	}
+
 	private async flushLogsToPostHog(logs: StoredLog[]): Promise<void> {
 		// PostHog accepts OTLP logs at /i/v1/logs
 		// We need to forward each log batch
@@ -231,7 +399,6 @@ export class DataBuffer extends DurableObject<Env> {
 		events: StoredEvent[],
 		metrics: StoredMetric[],
 		exceptions: ExceptionData[],
-		tailEvents: StoredTailEvent[] = [],
 	): Promise<void> {
 		const token = await this.env.POSTHOG_PROJECT_TOKEN.get();
 		const posthog = new PostHog(token, {
@@ -326,56 +493,6 @@ export class DataBuffer extends DurableObject<Env> {
 				},
 				timestamp: new Date(exception.timestamp),
 			});
-		}
-
-		// Process tail events from worker traces
-		for (const stored of tailEvents) {
-			const trace = stored.trace;
-
-			// Capture worker invocation as an event
-			posthog.capture({
-				distinctId: "system",
-				event: "$worker_invocation",
-				properties: {
-					$lib: "posthog-collector",
-					worker_name: trace.scriptName ?? "unknown",
-					outcome: trace.outcome,
-					request_url: trace.request?.url,
-					request_method: trace.request?.method,
-					colo: trace.request?.colo,
-				},
-				timestamp: trace.eventTimestamp ? new Date(trace.eventTimestamp) : new Date(),
-			});
-
-			// Capture console logs
-			for (const log of trace.logs) {
-				posthog.capture({
-					distinctId: "system",
-					event: "$worker_log",
-					properties: {
-						$lib: "posthog-collector",
-						worker_name: trace.scriptName ?? "unknown",
-						level: log.level,
-						message: log.message.map(String).join(" "),
-					},
-					timestamp: new Date(log.timestamp),
-				});
-			}
-
-			// Capture exceptions from tail
-			for (const exc of trace.exceptions) {
-				posthog.capture({
-					distinctId: "system",
-					event: "$exception",
-					properties: {
-						$lib: "posthog-collector",
-						$exception_message: exc.message,
-						$exception_type: exc.name,
-						worker_name: trace.scriptName ?? "unknown",
-					},
-					timestamp: new Date(exc.timestamp),
-				});
-			}
 		}
 
 		// Flush all queued events
