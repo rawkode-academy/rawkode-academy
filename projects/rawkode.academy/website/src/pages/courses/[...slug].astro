@@ -115,6 +115,7 @@ const formattedAuthors = authors.map((author) => ({
 		moduleCount={totalModules}
 		totalDuration={formatDuration(totalDuration)}
 		difficulty={course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
+		learningPath={course.data.learningPath}
 		authors={formattedAuthors}
 	>
 		<Fragment slot="signup-form">
