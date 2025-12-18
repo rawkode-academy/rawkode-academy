@@ -1,16 +1,16 @@
-name: klustered.live
+name: klustered.dev
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/klustered.live.yaml"
-      - "projects/klustered.live/**"
+      - ".github/workflows/klustered.dev.yaml"
+      - "projects/klustered.dev/**"
   pull_request:
     paths:
-      - ".github/workflows/klustered.live.yaml"
-      - "projects/klustered.live/**"
+      - ".github/workflows/klustered.dev.yaml"
+      - "projects/klustered.dev/**"
   workflow_dispatch:
 
 concurrency:
@@ -51,14 +51,14 @@ jobs:
         run: deno install
 
       - name: Build Website
-        working-directory: projects/klustered.live
+        working-directory: projects/klustered.dev
         run: |
           deno run -A npm:@pandacss/dev codegen
           deno run -A npm:astro build
 
       - name: Deploy Production
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
-        working-directory: projects/klustered.live
+        working-directory: projects/klustered.dev
         env:
           CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
@@ -68,12 +68,12 @@ jobs:
       - name: Deploy Preview
         id: preview
         if: github.event_name == 'pull_request'
-        working-directory: projects/klustered.live
+        working-directory: projects/klustered.dev
         env:
           CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           deno run -A npm:wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }}
-          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}--klustered-live-website.rawkodeacademy.workers.dev"
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}--klustered-dev-website.rawkodeacademy.workers.dev"
           gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"
