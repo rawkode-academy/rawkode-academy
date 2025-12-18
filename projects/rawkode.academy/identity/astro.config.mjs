@@ -25,6 +25,8 @@ export default defineConfig({
     },
   },
   security: {
-    checkOrigin: true,
+    // Disabled: better-auth handles origin checking via trustedOrigins config
+    // OAuth token endpoints need to accept cross-origin POSTs
+    checkOrigin: false,
   },
 });
