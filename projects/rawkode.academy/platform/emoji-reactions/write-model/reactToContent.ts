@@ -33,7 +33,6 @@ export class ReactToContentWorkflow extends WorkflowEntrypoint<Env, Params> {
 					contentTimestamp: contentTimestamp ?? 0,
 				});
 
-			console.log(`Persisted reaction: ${personId} reacted with ${emoji} to ${contentId}`);
 			return { success: true };
 		});
 
@@ -68,7 +67,6 @@ export class ReactToContentWorkflow extends WorkflowEntrypoint<Env, Params> {
 						attributes: ["content_id", "user_id", "emoji"],
 					}),
 				});
-				console.log(`Tracked analytics event for reaction: ${personId} -> ${emoji} on ${contentId}`);
 				return { success: true };
 			} catch (err) {
 				console.error("Failed to track analytics event", err);

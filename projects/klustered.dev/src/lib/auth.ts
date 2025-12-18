@@ -91,14 +91,6 @@ export async function exchangeCodeForTokens(
 	const callbackUrl = getCallbackUrl(origin);
 	const tokenUrl = `${ID_PROVIDER_URL}/auth/oauth2/token`;
 
-	console.log("[auth] Token exchange request:", {
-		url: tokenUrl,
-		redirect_uri: callbackUrl,
-		client_id: CLIENT_ID,
-		code_length: code.length,
-		has_code_verifier: !!codeVerifier,
-	});
-
 	const tokenResponse = await fetch(tokenUrl, {
 		method: "POST",
 		headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -112,19 +104,11 @@ export async function exchangeCodeForTokens(
 	});
 
 	if (!tokenResponse.ok) {
-		const responseText = await tokenResponse.text();
-		console.error("[auth] Token exchange failed:", {
-			status: tokenResponse.status,
-			statusText: tokenResponse.statusText,
-			headers: Object.fromEntries(tokenResponse.headers.entries()),
-			body: responseText,
-		});
+		console.error("[auth] Token exchange failed:", tokenResponse.status);
 		return null;
 	}
 
-	const tokens = await tokenResponse.json();
-	console.log("[auth] Token exchange successful, got access_token");
-	return tokens;
+	return await tokenResponse.json();
 }
 
 export async function getUserInfo(
@@ -136,28 +120,17 @@ export async function getUserInfo(
 	picture?: string;
 } | null> {
 	const userinfoUrl = `${ID_PROVIDER_URL}/auth/oauth2/userinfo`;
-	console.log("[auth] Fetching user info from:", userinfoUrl);
 
 	const userResponse = await fetch(userinfoUrl, {
 		headers: { Authorization: `Bearer ${accessToken}` },
 	});
 
 	if (!userResponse.ok) {
-		const responseText = await userResponse.text();
-		console.error("[auth] User info fetch failed:", {
-			status: userResponse.status,
-			statusText: userResponse.statusText,
-			body: responseText,
-		});
+		console.error("[auth] User info fetch failed:", userResponse.status);
 		return null;
 	}
 
-	const userInfo = await userResponse.json();
-	console.log("[auth] User info fetched successfully:", {
-		sub: userInfo.sub,
-		email: userInfo.email,
-	});
-	return userInfo;
+	return await userResponse.json();
 }
 
 export function createSession(user: {

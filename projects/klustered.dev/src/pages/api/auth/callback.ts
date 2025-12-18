@@ -15,14 +15,6 @@ export const GET: APIRoute = async (context) => {
 	const error = context.url.searchParams.get("error");
 	const codeVerifier = context.cookies.get(PKCE_COOKIE_NAME)?.value;
 
-	console.log("[callback] OAuth callback received:", {
-		hasCode: !!code,
-		hasState: !!state,
-		hasCodeVerifier: !!codeVerifier,
-		error: error || null,
-		origin: context.url.origin,
-	});
-
 	if (error) {
 		console.error("[callback] OAuth error from provider:", error);
 		return context.redirect("/?error=auth_failed", 302);
@@ -42,29 +34,24 @@ export const GET: APIRoute = async (context) => {
 	context.cookies.delete(PKCE_COOKIE_NAME, { path: "/" });
 
 	const { returnTo } = state ? parseState(state) : { returnTo: "/" };
-	console.log("[callback] Parsed returnTo:", returnTo);
 
 	// Exchange code for tokens with PKCE verifier
-	console.log("[callback] Starting token exchange...");
 	const tokens = await exchangeCodeForTokens(code, context.url.origin, codeVerifier);
 	if (!tokens) {
-		console.error("[callback] Token exchange returned null");
+		console.error("[callback] Token exchange failed");
 		return context.redirect("/?error=token_exchange_failed", 302);
 	}
 
 	// Get user info
-	console.log("[callback] Fetching user info...");
 	const userInfo = await getUserInfo(tokens.access_token);
 	if (!userInfo) {
-		console.error("[callback] User info fetch returned null");
+		console.error("[callback] User info fetch failed");
 		return context.redirect("/?error=userinfo_failed", 302);
 	}
 
 	// Create local session
 	const sessionId = crypto.randomUUID();
 	const session = createSession(userInfo);
-
-	console.log("[callback] Creating session:", { sessionId, userId: session.userId });
 
 	await context.locals.runtime.env.SESSION.put(
 		`session:${sessionId}`,
@@ -81,6 +68,5 @@ export const GET: APIRoute = async (context) => {
 		maxAge: SESSION_DURATION_SECONDS,
 	});
 
-	console.log("[callback] Auth complete, redirecting to:", returnTo);
 	return context.redirect(returnTo, 302);
 };

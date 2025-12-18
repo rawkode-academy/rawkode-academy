@@ -22,12 +22,9 @@ export default {
 		env: Env,
 		ctx: ExecutionContext,
 	): Promise<void> {
-		console.log("Star catcher triggered", { cron: controller.cron });
-
 		for (const repo of REPOSITORIES) {
 			const stars = await fetchStarCount(repo);
 			if (stars !== null) {
-				console.log(`Fetched stars for ${repo}:`, stars);
 				ctx.waitUntil(
 					env.ANALYTICS.trackMetric("github.stars", stars, { repository: repo }),
 				);
