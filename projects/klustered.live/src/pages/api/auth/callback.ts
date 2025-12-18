@@ -7,15 +7,18 @@ import {
 	SESSION_COOKIE_NAME,
 	SESSION_DURATION_SECONDS,
 } from "@/lib/auth";
+import { PKCE_COOKIE_NAME } from "./sign-in";
 
 export const GET: APIRoute = async (context) => {
 	const code = context.url.searchParams.get("code");
 	const state = context.url.searchParams.get("state");
 	const error = context.url.searchParams.get("error");
+	const codeVerifier = context.cookies.get(PKCE_COOKIE_NAME)?.value;
 
 	console.log("[callback] OAuth callback received:", {
 		hasCode: !!code,
 		hasState: !!state,
+		hasCodeVerifier: !!codeVerifier,
 		error: error || null,
 		origin: context.url.origin,
 	});
@@ -30,12 +33,20 @@ export const GET: APIRoute = async (context) => {
 		return context.redirect("/?error=missing_code", 302);
 	}
 
+	if (!codeVerifier) {
+		console.error("[callback] No PKCE code verifier found in cookie");
+		return context.redirect("/?error=missing_pkce_verifier", 302);
+	}
+
+	// Clear the PKCE cookie immediately
+	context.cookies.delete(PKCE_COOKIE_NAME, { path: "/" });
+
 	const { returnTo } = state ? parseState(state) : { returnTo: "/" };
 	console.log("[callback] Parsed returnTo:", returnTo);
 
-	// Exchange code for tokens
+	// Exchange code for tokens with PKCE verifier
 	console.log("[callback] Starting token exchange...");
-	const tokens = await exchangeCodeForTokens(code, context.url.origin);
+	const tokens = await exchangeCodeForTokens(code, context.url.origin, codeVerifier);
 	if (!tokens) {
 		console.error("[callback] Token exchange returned null");
 		return context.redirect("/?error=token_exchange_failed", 302);
