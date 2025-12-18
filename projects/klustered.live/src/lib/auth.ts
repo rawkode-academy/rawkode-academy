@@ -18,11 +18,23 @@ export function getCallbackUrl(origin: string): string {
 	return `${origin}/api/auth/callback`;
 }
 
+function encodeBase64Url(str: string): string {
+	return btoa(str)
+		.replace(/\+/g, "-")
+		.replace(/\//g, "_")
+		.replace(/=+$/, "");
+}
+
+function decodeBase64Url(str: string): string {
+	const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+	return atob(base64);
+}
+
 export function buildAuthorizationUrl(
 	origin: string,
 	returnTo: string,
 ): string {
-	const state = Buffer.from(JSON.stringify({ returnTo })).toString("base64url");
+	const state = encodeBase64Url(JSON.stringify({ returnTo }));
 	const callbackUrl = getCallbackUrl(origin);
 
 	const authUrl = new URL("/api/auth/oauth2/authorize", ID_PROVIDER_URL);
@@ -37,7 +49,7 @@ export function buildAuthorizationUrl(
 
 export function parseState(state: string): { returnTo: string } {
 	try {
-		const decoded = JSON.parse(Buffer.from(state, "base64url").toString());
+		const decoded = JSON.parse(decodeBase64Url(state));
 		return { returnTo: decoded.returnTo || "/" };
 	} catch {
 		return { returnTo: "/" };

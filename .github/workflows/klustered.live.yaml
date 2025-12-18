@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -75,5 +75,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           deno run -A npm:wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }}
-          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}-klustered-live-website.rawkodeacademy.workers.dev"
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}--klustered-live-website.rawkodeacademy.workers.dev"
           gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"
