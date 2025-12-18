@@ -111,4 +111,36 @@ export const newsletter = {
 			};
 		},
 	}),
+
+	updateCompetitorRegistration: defineAction({
+		input: z.object({
+			type: z.enum(["solo", "team"]),
+			action: z.enum(["subscribe", "unsubscribe"]),
+			source: z.string().optional(),
+		}),
+		handler: async (input, context) => {
+			if (!context.locals.user) {
+				throw new Error("Unauthorized");
+			}
+
+			const prefixedUserId = createLearnerId(context.locals.user.id);
+			const audience = `klustered-${input.type}`;
+
+			const result =
+				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+					prefixedUserId,
+					{
+						audience,
+						channel: "newsletter",
+						status: input.action === "subscribe" ? "subscribed" : "unsubscribed",
+						source: input.source || `klustered.live:compete-registration:${input.type}`,
+					},
+				);
+
+			return {
+				...result,
+				success: true,
+			};
+		},
+	}),
 };
