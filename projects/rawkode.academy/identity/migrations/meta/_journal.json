@@ -15,6 +15,13 @@
       "when": 1765816023246,
       "tag": "0001_watery_infant_terrible",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1734520800000,
+      "tag": "0002_seed_oauth_clients",
+      "breakpoints": true
     }
   ]
 }
