@@ -12,22 +12,32 @@ interface Props {
 const { class: className } = Astro.props;
 
 const user = Astro.locals.user;
-let isRegistered = false;
+let isSoloRegistered = false;
+let isTeamRegistered = false;
 
 if (user) {
 	try {
 		const prefixedUserId = createLearnerId(user.id);
-		const prefs =
-			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+		const [soloPrefs, teamPrefs] = await Promise.all([
+			Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
 				prefixedUserId,
 				"newsletter",
-				"klustered-compete",
-			);
-		isRegistered = prefs.length > 0;
+				"klustered-solo",
+			),
+			Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+				prefixedUserId,
+				"newsletter",
+				"klustered-team",
+			),
+		]);
+		isSoloRegistered = soloPrefs.length > 0;
+		isTeamRegistered = teamPrefs.length > 0;
 	} catch (e) {
 		console.error("Failed to fetch competitor status", e);
 	}
 }
+
+const isRegistered = isSoloRegistered || isTeamRegistered;
 
 const pagePath = Astro.url.pathname;
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
@@ -73,19 +83,20 @@ const buttonContainerStyles = css({
 <section class:list={[containerStyles, className]}>
 	<div class={cardStyles}>
 		<h2 class={headlineStyles}>
-			{isRegistered ? "You're Registered!" : "Ready to Compete?"}
+			{isRegistered ? "Your Registration" : "Ready to Compete?"}
 		</h2>
 		<p class={subtitleStyles}>
 			{isRegistered
-				? "You're signed up for Klustered '26. We'll notify you when registration opens."
-				: "Sign up to compete in Klustered '26 and test your Kubernetes skills."
+				? "Manage your competition registration for Klustered '26."
+				: "Choose how you want to compete in Klustered '26."
 			}
 		</p>
 		<div class={buttonContainerStyles}>
 			<RegisterButton
 				client:visible
 				isSignedIn={!!user}
-				isRegistered={isRegistered}
+				isSoloRegistered={isSoloRegistered}
+				isTeamRegistered={isTeamRegistered}
 				signInUrl={signInUrl}
 				pagePath={pagePath}
 			/>

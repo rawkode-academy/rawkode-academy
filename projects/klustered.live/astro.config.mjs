@@ -13,7 +13,7 @@ export default defineConfig({
 		},
 	}),
 	integrations: [vue()],
-	site: "https://klustered.live",
+	site: "https://klustered.dev",
 	security: {
 		checkOrigin: true,
 	},
