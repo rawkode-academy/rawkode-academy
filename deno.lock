@@ -16118,7 +16118,7 @@
           ]
         }
       },
-      "projects/klustered.live": {
+      "projects/klustered.dev": {
         "packageJson": {
           "dependencies": [
             "npm:@astrojs/cloudflare@12.6.12",
