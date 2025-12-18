@@ -80,6 +80,18 @@ export const createAuth = async (env: AuthEnv) => {
 						skipConsent: true,
 						metadata: null,
 					},
+					{
+						clientId: "klustered-live",
+						name: "Klustered Live",
+						type: "web",
+						redirectUrls: [
+							"https://klustered.live/api/auth/callback",
+							"http://localhost:4322/api/auth/callback",
+						],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
 				],
 			}),
 			organization({
@@ -120,7 +132,12 @@ export const createAuth = async (env: AuthEnv) => {
 			},
 		},
 
-		trustedOrigins: ["https://rawkode.academy", "http://localhost:4321"],
+		trustedOrigins: [
+			"https://rawkode.academy",
+			"http://localhost:4321",
+			"https://klustered.live",
+			"http://localhost:4322",
+		],
 
 		databaseHooks: {
 			user: {
