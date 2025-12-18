@@ -310,13 +310,15 @@ Cloudflare Worker configuration:
   "keep_vars": false,
   "minify": true,
 
+  "tail_consumers": [{ "service": "posthog-collector" }],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
     "logs": {
       "enabled": true,
       "invocation_logs": true,
-      "head_sampling_rate": 1
+      "head_sampling_rate": 1,
+      "destinations": []
     }
   },
 
@@ -325,7 +327,7 @@ Cloudflare Worker configuration:
   },
 
   "workers_dev": true,
-  
+
   // D1 Database binding
   "d1_databases": [
     {
@@ -515,13 +517,15 @@ export default {
   "keep_vars": false,
   "minify": true,
 
+  "tail_consumers": [{ "service": "posthog-collector" }],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
     "logs": {
       "enabled": true,
       "invocation_logs": true,
-      "head_sampling_rate": 1
+      "head_sampling_rate": 1,
+      "destinations": []
     }
   },
 
@@ -530,7 +534,7 @@ export default {
   },
 
   "workers_dev": true,
-  
+
   // D1 Database binding
   "d1_databases": [
     {
@@ -539,7 +543,7 @@ export default {
       "database_id": "<your-database-id>"
     }
   ],
-  
+
   // Workflow binding
   "workflows": [
     {
