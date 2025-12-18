@@ -1,0 +1,94 @@
+---
+export const prerender = false;
+
+import RegisterButton from "./RegisterButton.vue";
+import { createLearnerId } from "@/actions/newsletter";
+import { css } from "styled-system/css";
+
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+
+const user = Astro.locals.user;
+let isRegistered = false;
+
+if (user) {
+	try {
+		const prefixedUserId = createLearnerId(user.id);
+		const prefs =
+			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+				prefixedUserId,
+				"newsletter",
+				"klustered-compete",
+			);
+		isRegistered = prefs.length > 0;
+	} catch (e) {
+		console.error("Failed to fetch competitor status", e);
+	}
+}
+
+const pagePath = Astro.url.pathname;
+const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
+
+const containerStyles = css({
+	width: "100%",
+	padding: "2rem 0",
+	position: "relative",
+	zIndex: 10,
+});
+
+const cardStyles = css({
+	background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.05))",
+	backdropFilter: "blur(10px)",
+	borderRadius: "1rem",
+	border: "1px solid rgba(139, 92, 246, 0.2)",
+	padding: "2rem",
+	textAlign: "center",
+});
+
+const headlineStyles = css({
+	fontSize: "1.5rem",
+	fontWeight: 700,
+	color: "white",
+	marginBottom: "0.5rem",
+	"@media (min-width: 640px)": {
+		fontSize: "1.75rem",
+	},
+});
+
+const subtitleStyles = css({
+	fontSize: "1rem",
+	color: "rgba(255, 255, 255, 0.7)",
+	marginBottom: "1.5rem",
+});
+
+const buttonContainerStyles = css({
+	display: "flex",
+	justifyContent: "center",
+});
+---
+
+<section class:list={[containerStyles, className]}>
+	<div class={cardStyles}>
+		<h2 class={headlineStyles}>
+			{isRegistered ? "You're Registered!" : "Ready to Compete?"}
+		</h2>
+		<p class={subtitleStyles}>
+			{isRegistered
+				? "You're signed up for Klustered '26. We'll notify you when registration opens."
+				: "Sign up to compete in Klustered '26 and test your Kubernetes skills."
+			}
+		</p>
+		<div class={buttonContainerStyles}>
+			<RegisterButton
+				client:visible
+				isSignedIn={!!user}
+				isRegistered={isRegistered}
+				signInUrl={signInUrl}
+				pagePath={pagePath}
+			/>
+		</div>
+	</div>
+</section>

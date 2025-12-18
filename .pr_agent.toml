@@ -1,0 +1,50 @@
+# .pr_agent.toml - Qodo Pro configuration for rawkode-academy
+
+[config]
+git_provider = "github"
+publish_output = true
+publish_output_progress = true
+
+# Use repo's CLAUDE.md for context
+add_repo_metadata = true
+add_repo_metadata_file_list = ["CLAUDE.MD"]
+
+[pr_description]
+publish_labels = true
+add_original_user_description = true
+generate_ai_title = false
+use_bullet_points = true
+enable_pr_type = true
+enable_pr_diagram = true
+enable_semantic_files_types = true
+collapsible_file_list = "adaptive"
+collapsible_file_list_threshold = 6
+
+[pr_reviewer]
+require_tests_review = true
+require_security_review = true
+require_estimate_effort_to_review = true
+require_ticket_analysis_review = false
+num_max_findings = 5
+enable_review_labels_security = true
+enable_review_labels_effort = true
+persistent_comment = true
+enable_help_text = false
+
+[pr_code_suggestions]
+commitable_code_suggestions = false
+apply_suggestions_checkbox = true
+suggestions_score_threshold = 5
+auto_extended_mode = true
+num_code_suggestions_per_chunk = 4
+persistent_comment = true
+focus_only_on_problems = true
+enable_help_text = false
+
+[github_app]
+handle_pr_actions = ["opened", "reopened", "ready_for_review"]
+pr_commands = [
+    "/describe --pr_description.final_update_message=false",
+    "/review",
+    "/improve",
+]
