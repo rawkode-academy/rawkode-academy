@@ -83,7 +83,7 @@ export const createAuth = async (env: AuthEnv) => {
 					{
 						clientId: "klustered-live",
 						name: "Klustered Live",
-						type: "web",
+						type: "public",
 						redirectUrls: [
 							"https://klustered.live/api/auth/callback",
 							"http://localhost:4322/api/auth/callback",
