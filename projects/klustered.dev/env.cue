@@ -4,7 +4,7 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
-name: "klustered-live"
+name: "klustered-dev"
 
 tasks: {
 	codegen: {

@@ -22,7 +22,7 @@ const hasCookieSubscription = ref(false);
 const emailInput = ref<HTMLInputElement | null>(null);
 
 function createSource(): string {
-	return `klustered.live:newsletter:${props.pagePath}`;
+	return `klustered.dev:newsletter:${props.pagePath}`;
 }
 
 function checkNewsletterCookie(): boolean {

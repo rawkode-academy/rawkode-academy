@@ -35,7 +35,7 @@ export const newsletter = {
 						audience: input.audience,
 						channel: "newsletter",
 						status: "subscribed",
-						source: input.source || `klustered.live:newsletter`,
+						source: input.source || `klustered.dev:newsletter`,
 					},
 				);
 
@@ -63,7 +63,7 @@ export const newsletter = {
 						audience: input.audience,
 						channel: "newsletter",
 						status: "subscribed",
-						source: input.source || `klustered.live:newsletter`,
+						source: input.source || `klustered.dev:newsletter`,
 					},
 				);
 
@@ -101,7 +101,7 @@ export const newsletter = {
 						audience: "klustered-compete",
 						channel: "newsletter",
 						status: "subscribed",
-						source: input.source || "klustered.live:compete-registration",
+						source: input.source || "klustered.dev:compete-registration",
 					},
 				);
 
@@ -133,7 +133,7 @@ export const newsletter = {
 						audience,
 						channel: "newsletter",
 						status: input.action === "subscribe" ? "subscribed" : "unsubscribed",
-						source: input.source || `klustered.live:compete-registration:${input.type}`,
+						source: input.source || `klustered.dev:compete-registration:${input.type}`,
 					},
 				);
 

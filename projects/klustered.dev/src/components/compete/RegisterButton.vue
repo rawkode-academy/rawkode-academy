@@ -28,7 +28,7 @@ const isPartiallyRegistered = computed(() =>
 );
 
 function createSource(): string {
-	return `klustered.live:compete-registration:${props.pagePath}`;
+	return `klustered.dev:compete-registration:${props.pagePath}`;
 }
 
 function getCardSelectedState(cardId: string): boolean {
