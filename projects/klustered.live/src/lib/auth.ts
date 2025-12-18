@@ -61,27 +61,40 @@ export async function exchangeCodeForTokens(
 	origin: string,
 ): Promise<{ access_token: string; id_token?: string } | null> {
 	const callbackUrl = getCallbackUrl(origin);
+	const tokenUrl = `${ID_PROVIDER_URL}/auth/oauth2/token`;
 
-	const tokenResponse = await fetch(
-		`${ID_PROVIDER_URL}/auth/oauth2/token`,
-		{
-			method: "POST",
-			headers: { "Content-Type": "application/x-www-form-urlencoded" },
-			body: new URLSearchParams({
-				grant_type: "authorization_code",
-				code,
-				redirect_uri: callbackUrl,
-				client_id: CLIENT_ID,
-			}),
-		},
-	);
+	console.log("[auth] Token exchange request:", {
+		url: tokenUrl,
+		redirect_uri: callbackUrl,
+		client_id: CLIENT_ID,
+		code_length: code.length,
+	});
+
+	const tokenResponse = await fetch(tokenUrl, {
+		method: "POST",
+		headers: { "Content-Type": "application/x-www-form-urlencoded" },
+		body: new URLSearchParams({
+			grant_type: "authorization_code",
+			code,
+			redirect_uri: callbackUrl,
+			client_id: CLIENT_ID,
+		}),
+	});
 
 	if (!tokenResponse.ok) {
-		console.error("Token exchange failed:", await tokenResponse.text());
+		const responseText = await tokenResponse.text();
+		console.error("[auth] Token exchange failed:", {
+			status: tokenResponse.status,
+			statusText: tokenResponse.statusText,
+			headers: Object.fromEntries(tokenResponse.headers.entries()),
+			body: responseText,
+		});
 		return null;
 	}
 
-	return tokenResponse.json();
+	const tokens = await tokenResponse.json();
+	console.log("[auth] Token exchange successful, got access_token");
+	return tokens;
 }
 
 export async function getUserInfo(
@@ -92,19 +105,29 @@ export async function getUserInfo(
 	name?: string;
 	picture?: string;
 } | null> {
-	const userResponse = await fetch(
-		`${ID_PROVIDER_URL}/auth/oauth2/userinfo`,
-		{
-			headers: { Authorization: `Bearer ${accessToken}` },
-		},
-	);
+	const userinfoUrl = `${ID_PROVIDER_URL}/auth/oauth2/userinfo`;
+	console.log("[auth] Fetching user info from:", userinfoUrl);
+
+	const userResponse = await fetch(userinfoUrl, {
+		headers: { Authorization: `Bearer ${accessToken}` },
+	});
 
 	if (!userResponse.ok) {
-		console.error("User info fetch failed:", await userResponse.text());
+		const responseText = await userResponse.text();
+		console.error("[auth] User info fetch failed:", {
+			status: userResponse.status,
+			statusText: userResponse.statusText,
+			body: responseText,
+		});
 		return null;
 	}
 
-	return userResponse.json();
+	const userInfo = await userResponse.json();
+	console.log("[auth] User info fetched successfully:", {
+		sub: userInfo.sub,
+		email: userInfo.email,
+	});
+	return userInfo;
 }
 
 export function createSession(user: {
