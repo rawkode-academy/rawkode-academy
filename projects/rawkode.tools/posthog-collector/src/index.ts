@@ -155,7 +155,36 @@ export default class extends PostHogCollector {
 		const buffer = this.env.DATA_BUFFER.get(id);
 
 		for (const trace of events) {
-			await buffer.addTailEvent(trace);
+			// Extract request info from fetch events
+			const eventInfo = trace.event as
+				| { request?: { url?: string; method?: string; cf?: { colo?: string } } }
+				| undefined;
+
+			// Serialize TraceItem to a plain object for Durable Object storage
+			const serializedTrace = {
+				scriptName: trace.scriptName,
+				outcome: trace.outcome,
+				eventTimestamp: trace.eventTimestamp,
+				logs: trace.logs.map((log) => ({
+					level: log.level,
+					message: log.message,
+					timestamp: log.timestamp,
+				})),
+				exceptions: trace.exceptions.map((ex) => ({
+					message: ex.message,
+					name: ex.name,
+					timestamp: ex.timestamp,
+				})),
+				request: eventInfo?.request
+					? {
+							url: eventInfo.request.url,
+							method: eventInfo.request.method,
+							colo: eventInfo.request.cf?.colo,
+						}
+					: undefined,
+			};
+
+			await buffer.addTailEvent(serializedTrace);
 		}
 	}
 }
