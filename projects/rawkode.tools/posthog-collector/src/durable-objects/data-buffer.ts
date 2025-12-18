@@ -270,7 +270,12 @@ export class DataBuffer extends DurableObject<Env> {
 						number: 9,
 						text: "INFO",
 					};
-					const message = log.message.map(String).join(" ");
+					// Properly serialize objects in log messages
+					const message = log.message
+						.map((part) =>
+							typeof part === "object" ? JSON.stringify(part) : String(part),
+						)
+						.join(" ");
 
 					logRecords.push({
 						timeUnixNano: (log.timestamp * 1_000_000).toString(),
