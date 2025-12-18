@@ -19,6 +19,7 @@
 			"custom_domain": true
 		}
 	],
+	"tail_consumers": [{ "service": "posthog-collector" }],
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,
@@ -26,7 +27,7 @@
 			"enabled": true,
 			"invocation_logs": true,
 			"head_sampling_rate": 1,
-			"destinations": ["posthog-eu"]
+			"destinations": []
 		},
 		"traces": {
 			"enabled": true,
