@@ -8,10 +8,7 @@ const handler: APIRoute = async (context) => {
 	const pathname = url.pathname;
 
 	if (context.request.method === "GET" && pathname === "/auth/sign-in/social") {
-		const provider = url.searchParams.get("provider") ?? "github";
-		if (provider !== "github") {
-			return new Response("Unsupported provider", { status: 400 });
-		}
+		const provider = "github";
 
 		const callbackURL = url.searchParams.get("callbackURL") ?? undefined;
 
