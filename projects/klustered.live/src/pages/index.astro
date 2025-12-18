@@ -119,7 +119,7 @@ const poweredBy = css({
 
 const backgroundLogo = css({
 	position: "absolute",
-	top: "20%",
+	top: "30%",
 	left: "50%",
 	transform: "translate(-50%, -50%)",
 	maxWidth: "min(80vw, 600px)",
@@ -185,7 +185,7 @@ const backgroundLogo = css({
 
 			<img src="/logo-exploding-helm.png" alt="" class={backgroundLogo} aria-hidden="true" />
 
-			{Array.from({ length: 20 }).map((_, i) => (
+			{Array.from({ length: 50 }).map((_, i) => (
 				<div
 					class={floatingParticle}
 					style={`left: ${Math.random() * 100}%; animation-delay: ${Math.random() * 20}s; animation-duration: ${15 + Math.random() * 10}s;`}
