@@ -37,7 +37,7 @@ export function buildAuthorizationUrl(
 	const state = encodeBase64Url(JSON.stringify({ returnTo }));
 	const callbackUrl = getCallbackUrl(origin);
 
-	const authUrl = new URL("/api/auth/oauth2/authorize", ID_PROVIDER_URL);
+	const authUrl = new URL("/auth/oauth2/authorize", ID_PROVIDER_URL);
 	authUrl.searchParams.set("client_id", CLIENT_ID);
 	authUrl.searchParams.set("redirect_uri", callbackUrl);
 	authUrl.searchParams.set("response_type", "code");
@@ -63,7 +63,7 @@ export async function exchangeCodeForTokens(
 	const callbackUrl = getCallbackUrl(origin);
 
 	const tokenResponse = await fetch(
-		`${ID_PROVIDER_URL}/api/auth/oauth2/token`,
+		`${ID_PROVIDER_URL}/auth/oauth2/token`,
 		{
 			method: "POST",
 			headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -93,7 +93,7 @@ export async function getUserInfo(
 	picture?: string;
 } | null> {
 	const userResponse = await fetch(
-		`${ID_PROVIDER_URL}/api/auth/oauth2/userinfo`,
+		`${ID_PROVIDER_URL}/auth/oauth2/userinfo`,
 		{
 			headers: { Authorization: `Bearer ${accessToken}` },
 		},
