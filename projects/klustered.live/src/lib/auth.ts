@@ -25,15 +25,40 @@ function encodeBase64Url(str: string): string {
 		.replace(/=+$/, "");
 }
 
+function encodeBase64UrlFromBytes(bytes: Uint8Array): string {
+	let binary = "";
+	for (const byte of bytes) {
+		binary += String.fromCharCode(byte);
+	}
+	return encodeBase64Url(binary);
+}
+
 function decodeBase64Url(str: string): string {
 	const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
 	return atob(base64);
 }
 
-export function buildAuthorizationUrl(
+// PKCE: Generate a random code verifier (43-128 chars)
+function generateCodeVerifier(): string {
+	const bytes = new Uint8Array(32);
+	crypto.getRandomValues(bytes);
+	return encodeBase64UrlFromBytes(bytes);
+}
+
+// PKCE: Create code challenge from verifier using SHA-256
+async function generateCodeChallenge(verifier: string): Promise<string> {
+	const encoder = new TextEncoder();
+	const data = encoder.encode(verifier);
+	const hash = await crypto.subtle.digest("SHA-256", data);
+	return encodeBase64UrlFromBytes(new Uint8Array(hash));
+}
+
+export async function buildAuthorizationUrl(
 	origin: string,
 	returnTo: string,
-): string {
+): Promise<{ url: string; codeVerifier: string }> {
+	const codeVerifier = generateCodeVerifier();
+	const codeChallenge = await generateCodeChallenge(codeVerifier);
 	const state = encodeBase64Url(JSON.stringify({ returnTo }));
 	const callbackUrl = getCallbackUrl(origin);
 
@@ -43,8 +68,10 @@ export function buildAuthorizationUrl(
 	authUrl.searchParams.set("response_type", "code");
 	authUrl.searchParams.set("scope", "openid profile email");
 	authUrl.searchParams.set("state", state);
+	authUrl.searchParams.set("code_challenge", codeChallenge);
+	authUrl.searchParams.set("code_challenge_method", "S256");
 
-	return authUrl.toString();
+	return { url: authUrl.toString(), codeVerifier };
 }
 
 export function parseState(state: string): { returnTo: string } {
@@ -59,6 +86,7 @@ export function parseState(state: string): { returnTo: string } {
 export async function exchangeCodeForTokens(
 	code: string,
 	origin: string,
+	codeVerifier: string,
 ): Promise<{ access_token: string; id_token?: string } | null> {
 	const callbackUrl = getCallbackUrl(origin);
 	const tokenUrl = `${ID_PROVIDER_URL}/auth/oauth2/token`;
@@ -68,6 +96,7 @@ export async function exchangeCodeForTokens(
 		redirect_uri: callbackUrl,
 		client_id: CLIENT_ID,
 		code_length: code.length,
+		has_code_verifier: !!codeVerifier,
 	});
 
 	const tokenResponse = await fetch(tokenUrl, {
@@ -78,6 +107,7 @@ export async function exchangeCodeForTokens(
 			code,
 			redirect_uri: callbackUrl,
 			client_id: CLIENT_ID,
+			code_verifier: codeVerifier,
 		}),
 	});
 
