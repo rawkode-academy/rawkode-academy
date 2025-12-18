@@ -36,6 +36,13 @@
       "when": 1734530000000,
       "tag": "0004_add_klustered_client_secret",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1734535000000,
+      "tag": "0005_rename_klustered_dev",
+      "breakpoints": true
     }
   ]
 }
