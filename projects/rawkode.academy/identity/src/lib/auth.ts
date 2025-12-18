@@ -48,12 +48,6 @@ export const createAuth = async (env: AuthEnv) => {
 		env.GITHUB_OAUTH_CLIENT_SECRET.get(),
 	]);
 
-	console.log("[auth] Secret lengths:", {
-		authSecret: authSecret?.length ?? "null",
-		githubClientId: githubClientId?.length ?? "null",
-		githubClientSecret: githubClientSecret?.length ?? "null",
-	});
-
 	return betterAuth({
 		basePath: "/auth",
 		baseURL,
@@ -90,6 +84,9 @@ export const createAuth = async (env: AuthEnv) => {
 						clientId: "klustered-live",
 						name: "Klustered Live",
 						type: "public",
+						// Workaround for https://github.com/better-auth/better-auth/issues/6651
+						// Better Auth incorrectly requires a secret for ID token signing even for public clients
+						clientSecret: "pkce-public-client-placeholder",
 						redirectUrls: [
 							"https://klustered.live/api/auth/callback",
 							"http://localhost:4322/api/auth/callback",
