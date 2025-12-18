@@ -31,7 +31,7 @@
 	],
 	"routes": [
 		{
-			"pattern": "klustered.live",
+			"pattern": "klustered.dev",
 			"custom_domain": true
 		}
 	],
