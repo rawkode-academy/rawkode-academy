@@ -1,5 +1,5 @@
 export const ID_PROVIDER_URL = "https://id.rawkode.academy";
-export const CLIENT_ID = "klustered-live";
+export const CLIENT_ID = "klustered-dev";
 export const SESSION_COOKIE_NAME = "klustered-session";
 export const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
