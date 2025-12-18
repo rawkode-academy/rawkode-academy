@@ -1,0 +1,79 @@
+name: klustered.live
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/klustered.live.yaml"
+      - "projects/klustered.live/**"
+  pull_request:
+    paths:
+      - ".github/workflows/klustered.live.yaml"
+      - "projects/klustered.live/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: "rawkode-academy-production"
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
+      - name: Get secrets from GCP Secret Manager
+        id: secrets
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |
+            CLOUDFLARE_WORKERS_TOKEN:projects/458678766461/secrets/cloudflare-workers-token
+
+      - name: Install workspace dependencies
+        run: deno install
+
+      - name: Build Website
+        working-directory: projects/klustered.live
+        run: |
+          deno run -A npm:@pandacss/dev codegen
+          deno run -A npm:astro build
+
+      - name: Deploy Production
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+        working-directory: projects/klustered.live
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
+        run: |
+          deno run -A npm:wrangler deploy --config wrangler.jsonc
+
+      - name: Deploy Preview
+        id: preview
+        if: github.event_name == 'pull_request'
+        working-directory: projects/klustered.live
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          deno run -A npm:wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }}
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}-klustered-live-website.rawkodeacademy.workers.dev"
+          gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"
