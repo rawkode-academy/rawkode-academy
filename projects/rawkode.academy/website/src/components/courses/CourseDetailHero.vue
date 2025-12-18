@@ -63,7 +63,10 @@
           </div>
           
           <!-- Compact Learning Path -->
-          <div class="bg-white/50 dark:bg-gray-800/20 rounded-lg p-4 border border-gray-200 dark:border-gray-700/30">
+          <div
+            v-if="learningPath.length > 0"
+            class="bg-white/50 dark:bg-gray-800/20 rounded-lg p-4 border border-gray-200 dark:border-gray-700/30"
+          >
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <svg class="w-4 h-4 text-primary dark:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
@@ -71,23 +74,15 @@
               Your Learning Path
             </h3>
             <div class="grid grid-cols-1 gap-2 text-sm">
-              <div class="flex items-center gap-2">
-                <div class="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-green-600 dark:text-green-400 text-xs font-semibold">1</span>
-                </div>
-                <p class="text-gray-700 dark:text-gray-300">Master fundamentals and setup</p>
-              </div>
-              <div class="flex items-center gap-2">
+              <div
+                v-for="(step, index) in learningPath"
+                :key="`${index}-${step}`"
+                class="flex items-center gap-2"
+              >
                 <div class="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-primary dark:text-primary text-xs font-semibold">2</span>
+                  <span class="text-primary dark:text-primary text-xs font-semibold">{{ index + 1 }}</span>
                 </div>
-                <p class="text-gray-700 dark:text-gray-300">Implement core features</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="w-6 h-6 bg-secondary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-secondary dark:text-secondary text-xs font-semibold">3</span>
-                </div>
-                <p class="text-gray-700 dark:text-gray-300">Build production-ready applications</p>
+                <p class="text-gray-700 dark:text-gray-300">{{ step }}</p>
               </div>
             </div>
           </div>
@@ -193,6 +188,7 @@ interface Props {
 	moduleCount: number;
 	totalDuration: string;
 	difficulty: string;
+	learningPath: string[];
 	authors: Author[];
 }
 

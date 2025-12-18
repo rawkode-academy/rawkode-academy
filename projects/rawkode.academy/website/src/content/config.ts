@@ -304,6 +304,7 @@ const courses = defineCollection({
 			updatedAt: z.coerce.date().optional(),
 			authors: z.array(reference("people")).default(["rawkode"]),
 			difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+			learningPath: z.array(z.string()).default([]),
 			technologies: z
 				.array(reference("technologies"))
 				.or(z.array(z.string()))
