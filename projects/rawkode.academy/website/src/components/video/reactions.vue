@@ -270,13 +270,10 @@ export default {
 		},
 	},
 	async mounted() {
-		console.log("VideoReactions mounted with videoId:", this.videoId);
 		// Check if user is authenticated
 		await this.checkAuth();
-		console.log("Auth check complete, isAuthenticated:", this.isAuthenticated);
 		// Fetch reactions for this video
 		await this.fetchReactions();
-		console.log("Reactions fetched:", this.reactions);
 		// Add click outside listener
 		document.addEventListener("click", this.handleClickOutside);
 	},
@@ -381,9 +378,6 @@ export default {
 			return labels[emoji] || `React with ${emoji}`;
 		},
 		async handleReaction(reaction) {
-			console.log("handleReaction called with:", reaction);
-			console.log("isAuthenticated:", this.isAuthenticated);
-
 			if (!this.isAuthenticated) {
 				// Redirect to sign in
 				window.location.href = "/sign-in";

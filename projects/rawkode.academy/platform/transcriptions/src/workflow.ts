@@ -191,7 +191,6 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 		});
 
 		if (captionsExist) {
-			console.log(`Captions already exist for video ${videoId}, skipping transcription`);
 			return { success: true, skipped: true };
 		}
 
@@ -319,7 +318,6 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 
 				// Split WebVTT into chunks
 				const chunks = splitWebVTTIntoChunks(vttContent);
-				console.log(`Split WebVTT into ${chunks.length} chunks`);
 
 				const context = `Rawkode Academy is a technology education platform. The host, David Flanagan (aka Rawkode), is known for deep technical content, especially in cloud native, Kubernetes, and developer tooling. Keyterms: ${keyterms.join(", ")}`;
 
