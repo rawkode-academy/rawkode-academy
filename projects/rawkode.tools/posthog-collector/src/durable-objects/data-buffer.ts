@@ -32,8 +32,30 @@ interface StoredLog {
 	timestamp: number;
 }
 
+// Serializable version of TraceItem for Durable Object storage
+export interface SerializedTraceItem {
+	scriptName?: string;
+	outcome: string;
+	eventTimestamp?: number;
+	logs: Array<{
+		level: string;
+		message: unknown[];
+		timestamp: number;
+	}>;
+	exceptions: Array<{
+		message: string;
+		name: string;
+		timestamp: number;
+	}>;
+	request?: {
+		url?: string;
+		method?: string;
+		colo?: string;
+	};
+}
+
 interface StoredTailEvent {
-	trace: TraceItem;
+	trace: SerializedTraceItem;
 	timestamp: number;
 }
 
@@ -88,7 +110,7 @@ export class DataBuffer extends DurableObject<Env> {
 		await this.ensureAlarm();
 	}
 
-	async addTailEvent(trace: TraceItem): Promise<void> {
+	async addTailEvent(trace: SerializedTraceItem): Promise<void> {
 		const tailEvents = await this.getTailEvents();
 		tailEvents.push({ trace, timestamp: Date.now() });
 		await this.ctx.storage.put(TAIL_EVENTS_KEY, tailEvents);
@@ -309,19 +331,6 @@ export class DataBuffer extends DurableObject<Env> {
 		// Process tail events from worker traces
 		for (const stored of tailEvents) {
 			const trace = stored.trace;
-			const eventInfo = trace.event;
-
-			// Extract request info if available (fetch events)
-			let requestUrl: string | undefined;
-			let requestMethod: string | undefined;
-			let colo: string | undefined;
-
-			if (eventInfo && "request" in eventInfo) {
-				const fetchEvent = eventInfo as { request?: { url?: string; method?: string; cf?: { colo?: string } } };
-				requestUrl = fetchEvent.request?.url;
-				requestMethod = fetchEvent.request?.method;
-				colo = fetchEvent.request?.cf?.colo;
-			}
 
 			// Capture worker invocation as an event
 			posthog.capture({
@@ -331,9 +340,9 @@ export class DataBuffer extends DurableObject<Env> {
 					$lib: "posthog-collector",
 					worker_name: trace.scriptName ?? "unknown",
 					outcome: trace.outcome,
-					request_url: requestUrl,
-					request_method: requestMethod,
-					colo,
+					request_url: trace.request?.url,
+					request_method: trace.request?.method,
+					colo: trace.request?.colo,
 				},
 				timestamp: trace.eventTimestamp ? new Date(trace.eventTimestamp) : new Date(),
 			});
