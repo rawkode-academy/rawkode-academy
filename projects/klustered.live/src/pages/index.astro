@@ -284,7 +284,7 @@ const episodeSubtitle = css({
 		<link rel="apple-touch-icon" sizes="192x192" href="/logo-192.png" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<link rel="preload" as="image" type="image/webp" href="/og-image.webp" fetchpriority="high" />
+		<link rel="preload" as="image" type="image/webp" href="/background.webp" fetchpriority="high" />
 		<title>Klustered '26 - Live Kubernetes Debugging Competition</title>
 		<meta name="description" content="Where Kubernetes clusters meet their ultimate challenge. Watch experts debug sabotaged clusters live, with real chaos and no safety nets. Sign up to compete or spectate." />
 
@@ -368,7 +368,7 @@ const episodeSubtitle = css({
 			<div class={glowOrb} style="width: 400px; height: 400px; background: #6366f1; bottom: -100px; right: -100px; animation-delay: -4s;"></div>
 			<div class={glowOrb} style="width: 300px; height: 300px; background: #a855f7; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -2s;"></div>
 
-			<img src="/og-image.webp" alt="" class={backgroundLogo} aria-hidden="true" width="2848" height="1504" />
+			<img src="/background.webp" alt="" class={backgroundLogo} aria-hidden="true" />
 
 			{Array.from({ length: 40 }).map((_, i) => {
 				const left = (i * 17 + 7) % 100;
