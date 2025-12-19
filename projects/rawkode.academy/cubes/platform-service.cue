@@ -417,9 +417,26 @@ import (
 		}
 	}
 
+	// D1 databases with auto-injected migrations_dir for read-model/http
+	_d1WithMigrations: [for db in _bindings.d1Databases {
+		binding:       db.binding
+		database_name: db.databaseName
+		database_id:   db.databaseId
+		// Auto-inject migrations_dir for DB binding
+		if db.binding == "DB" {
+			migrations_dir: db.migrationsDir | *"../data-model/migrations"
+		}
+		if db.binding != "DB" && db.migrationsDir != _|_ {
+			migrations_dir: db.migrationsDir
+		}
+	}]
+
 	_readModelWrangler: _baseWrangler & {
 		name: "\(servicePrefix)-\(serviceName)-read-model"
 		main: "./main.ts"
+		if len(_d1WithMigrations) > 0 {
+			d1_databases: _d1WithMigrations
+		}
 	}
 
 	_writeModelWrangler: _baseWrangler & {
@@ -430,6 +447,9 @@ import (
 	_httpWrangler: _baseWrangler & {
 		name: "\(servicePrefix)-\(serviceName)-rpc"
 		main: "main.ts"
+		if len(_d1WithMigrations) > 0 {
+			d1_databases: _d1WithMigrations
+		}
 	}
 
 	// ========================================================================
