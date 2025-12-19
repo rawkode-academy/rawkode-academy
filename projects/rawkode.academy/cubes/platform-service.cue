@@ -32,8 +32,13 @@ import (
 	// Computed values
 	_pascalName: strings.Replace(strings.ToTitle(serviceName), "-", "", -1)
 
-	// Note: When includeDataModel or includeReadModel is true, you should
-	// provide a D1 database binding with binding: "DB" in bindings.d1Databases
+	// Validation: require D1 database with binding "DB" when data models are enabled
+	_dbBindingRequired: includeDataModel || includeReadModel || includeWriteModel
+	_hasDbBinding: len([for db in bindings.d1Databases if db.binding == "DB" {db}]) > 0
+	// This constraint forces evaluation failure if DB binding is required but missing
+	if _dbBindingRequired {
+		_hasDbBinding: true
+	}
 
 	// Auto-inject ANALYTICS service binding
 	_analyticsBinding: #ServiceBinding & {
@@ -318,15 +323,15 @@ import (
 		observability: {
 			enabled:            true
 			head_sampling_rate: 1
+			traces: {
+				enabled: true
+				destinations: ["grafana-traces"]
+			}
 			logs: {
 				enabled:            true
 				invocation_logs:    true
 				head_sampling_rate: 1
-				destinations: ["posthog-eu"]
-			}
-			traces: {
-				enabled:      true
-				destinations: []
+				destinations: ["grafana-logs"]
 			}
 		}
 
@@ -384,6 +389,32 @@ import (
 				}
 			}]
 		}
+
+		if len(_bindings.sendEmail) > 0 {
+			send_email: [for email in _bindings.sendEmail {
+				name: email.name
+				if email.destinationAddress != _|_ {
+					destination_address: email.destinationAddress
+				}
+				if email.allowedDestinationAddresses != _|_ {
+					allowed_destination_addresses: email.allowedDestinationAddresses
+				}
+			}]
+		}
+
+		if len(_bindings.secretStoreSecrets) > 0 {
+			secrets_store_secrets: [for secret in _bindings.secretStoreSecrets {
+				binding:     secret.binding
+				store_id:    secret.storeId
+				secret_name: secret.secretName
+			}]
+		}
+
+		if len(_bindings.crons) > 0 {
+			triggers: {
+				crons: _bindings.crons
+			}
+		}
 	}
 
 	_readModelWrangler: _baseWrangler & {
@@ -413,11 +444,18 @@ import (
 		for svc in _bindings.services {"\(svc.binding): Service;"},
 		for wf in _bindings.workflows {"\(wf.binding): Workflow;"},
 		if _bindings.ai != _|_ {"\(_bindings.ai.binding): Ai;"},
+		for k, _ in _bindings.vars {"\(k): string;"},
 	], "\n\t")
+
+	// Workflow re-exports for read-model/main.ts
+	_workflowExports: strings.Join([
+		for wf in _bindings.workflows {"export { \(wf.className) } from \"../write-model/\(wf.binding)\";"},
+	], "\n")
 
 	_readModelMainTs: """
 		import { createYoga } from "graphql-yoga";
 		import { getSchema } from "./schema";
+		\(_workflowExports)
 
 		export interface Env {
 			\(_envInterface)
