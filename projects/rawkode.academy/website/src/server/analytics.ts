@@ -70,7 +70,7 @@ export async function captureServerEvent(
 ): Promise<void> {
 	const { event, properties = {}, distinctId } = opts;
 
-	// Map event names to CloudEvent types (domain events only, prefix added by posthog-collector)
+	// Map event names to CloudEvent types (domain events only, prefix added by observability-collector)
 	const eventTypeMap: Record<string, string> = {
 		// Video events
 		video_play: "video.play",

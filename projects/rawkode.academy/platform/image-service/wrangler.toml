@@ -4,7 +4,7 @@ compatibility_date = "2023-01-23"
 compatibility_flags = [ "nodejs_compat" ]
 
 [[tail_consumers]]
-service = "posthog-collector"
+service = "observability-collector"
 
 [observability]
 enabled = true

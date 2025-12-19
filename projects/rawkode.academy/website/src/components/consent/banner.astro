@@ -54,6 +54,10 @@
         if (typeof window.enablePostHog === 'function') {
           window.enablePostHog();
         }
+        // Enable Grafana Faro observability after consent
+        if (typeof window.enableGrafanaFaro === 'function') {
+          window.enableGrafanaFaro();
+        }
       }catch{}
       banner?.classList.add('hidden');
     };

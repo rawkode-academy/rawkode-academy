@@ -38,7 +38,7 @@ import (
 	// Auto-inject ANALYTICS service binding
 	_analyticsBinding: #ServiceBinding & {
 		binding: "ANALYTICS"
-		service: "posthog-collector"
+		service: "observability-collector"
 	}
 	_allServices: list.Concat([[_analyticsBinding], bindings.services])
 	_bindings: {

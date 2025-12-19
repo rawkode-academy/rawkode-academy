@@ -1,5 +1,5 @@
 {
-	"name": "posthog-collector",
+	"name": "observability-collector",
 	"type": "module",
 	"dependencies": {
 		"cloudevents": "^8.0.2",

@@ -67,10 +67,10 @@ bunx wrangler deploy --config ./read-model/wrangler.jsonc
 
 ## Observability
 
-All Cloudflare Workers must configure observability for PostHog using the `posthog-collector` tail worker. Add to `wrangler.jsonc`:
+All Cloudflare Workers must configure observability for PostHog using the `observability-collector` tail worker. Add to `wrangler.jsonc`:
 
 ```jsonc
-"tail_consumers": [{ "service": "posthog-collector" }],
+"tail_consumers": [{ "service": "observability-collector" }],
 "observability": {
   "enabled": true,
   "head_sampling_rate": 1,
@@ -87,7 +87,7 @@ All Cloudflare Workers must configure observability for PostHog using the `posth
 }
 ```
 
-The `posthog-collector` tail worker receives logs from all producer workers and forwards them to PostHog with full control over batching and transformation.
+The `observability-collector` tail worker receives logs from all producer workers and forwards them to PostHog with full control over batching and transformation.
 
 ## Related Documentation
 

@@ -62,7 +62,7 @@ export class PlatformService extends Project {
 		// Automatically inject ANALYTICS service binding for all services
 		const analyticsBinding = {
 			binding: "ANALYTICS",
-			service: "posthog-collector",
+			service: "observability-collector",
 		};
 
 		if (this.options.bindings) {
