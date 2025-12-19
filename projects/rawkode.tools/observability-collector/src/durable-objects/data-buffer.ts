@@ -94,6 +94,17 @@ const LOG_LEVEL_TO_SEVERITY: Record<string, { number: number; text: string }> = 
 	error: { number: 17, text: "ERROR" },
 };
 
+// Map CloudEvent source to actual Worker names
+const SOURCE_TO_WORKER: Record<string, string> = {
+	"/identity": "rawkode-academy-identity",
+	"/website": "rawkode-academy-website",
+};
+
+function getWorkerName(source: string | undefined): string {
+	if (!source) return "unknown";
+	return SOURCE_TO_WORKER[source] || source.replace(/^\//, "");
+}
+
 export interface Env {
 	POSTHOG_PROJECT_TOKEN: SecretsStoreSecret;
 	POSTHOG_HOST: string;
@@ -483,10 +494,9 @@ export class DataBuffer extends DurableObject<Env> {
 				}
 			}
 
-			// Add rawkode.academy prefix to event type for PostHog
-			const eventName = event.type.startsWith("rawkode.academy.")
-				? event.type
-				: `rawkode.academy.${event.type}`;
+			// Use actual Worker name as prefix for event type
+			const workerName = getWorkerName(event.source);
+			const eventName = `${workerName}.${event.type}`;
 
 			posthog.capture({
 				distinctId,
@@ -688,12 +698,19 @@ export class DataBuffer extends DurableObject<Env> {
 		const token = await this.env.GRAFANA_OTLP_TOKEN.get();
 		const authHeader = btoa(`${this.env.GRAFANA_INSTANCE_ID}:${token}`);
 
-		// Convert events, metrics, and exceptions to OTLP log format
-		const logRecords: OTLPLogRecord[] = [];
+		// Group log records by worker name
+		const logRecordsByWorker = new Map<string, OTLPLogRecord[]>();
 
-		// Process CloudEvents as logs
+		const addLogRecord = (workerName: string, record: OTLPLogRecord) => {
+			const existing = logRecordsByWorker.get(workerName) ?? [];
+			existing.push(record);
+			logRecordsByWorker.set(workerName, existing);
+		};
+
+		// Process CloudEvents as logs (grouped by source/worker)
 		for (const stored of events) {
 			const event = stored.event;
+			const workerName = getWorkerName(event.source);
 			const attributes: OTLPAttribute[] = [
 				{ key: "cloudevents.specversion", value: { stringValue: event.specversion } },
 				{ key: "cloudevents.id", value: { stringValue: event.id } },
@@ -715,7 +732,7 @@ export class DataBuffer extends DurableObject<Env> {
 				}
 			}
 
-			logRecords.push({
+			addLogRecord(workerName, {
 				timeUnixNano: (event.time ? new Date(event.time).getTime() : Date.now()).toString() + "000000",
 				severityNumber: 9,
 				severityText: "INFO",
@@ -724,7 +741,7 @@ export class DataBuffer extends DurableObject<Env> {
 			});
 		}
 
-		// Process metrics as logs
+		// Process metrics as logs (use "observability-collector" as service)
 		for (const metric of metrics) {
 			const attributes: OTLPAttribute[] = [
 				{ key: "metric.name", value: { stringValue: metric.name } },
@@ -735,7 +752,7 @@ export class DataBuffer extends DurableObject<Env> {
 				attributes.push({ key: `metric.${key}`, value: { stringValue: value } });
 			}
 
-			logRecords.push({
+			addLogRecord("observability-collector", {
 				timeUnixNano: metric.timestamp.toString() + "000000",
 				severityNumber: 9,
 				severityText: "INFO",
@@ -744,7 +761,7 @@ export class DataBuffer extends DurableObject<Env> {
 			});
 		}
 
-		// Process exceptions as error logs
+		// Process exceptions as error logs (use "observability-collector" as service)
 		for (const exception of exceptions) {
 			const attributes: OTLPAttribute[] = [
 				{ key: "exception.type", value: { stringValue: exception.name || "Error" } },
@@ -759,7 +776,7 @@ export class DataBuffer extends DurableObject<Env> {
 				attributes.push({ key: "user.id", value: { stringValue: exception.distinctId } });
 			}
 
-			logRecords.push({
+			addLogRecord("observability-collector", {
 				timeUnixNano: new Date(exception.timestamp).getTime().toString() + "000000",
 				severityNumber: 17,
 				severityText: "ERROR",
@@ -768,26 +785,28 @@ export class DataBuffer extends DurableObject<Env> {
 			});
 		}
 
-		if (logRecords.length === 0) return;
+		if (logRecordsByWorker.size === 0) return;
 
-		const otlpRequest: OTLPExportLogsServiceRequest = {
-			resourceLogs: [
-				{
-					resource: {
-						attributes: [
-							{ key: "service.name", value: { stringValue: "rawkode.academy" } },
-							{ key: "service.namespace", value: { stringValue: "cloudflare-workers" } },
-						],
-					},
-					scopeLogs: [
-						{
-							scope: { name: "observability-collector" },
-							logRecords,
-						},
+		// Build resourceLogs with one entry per worker
+		const resourceLogs: OTLPExportLogsServiceRequest["resourceLogs"] = [];
+		for (const [workerName, logRecords] of logRecordsByWorker) {
+			resourceLogs.push({
+				resource: {
+					attributes: [
+						{ key: "service.name", value: { stringValue: workerName } },
+						{ key: "service.namespace", value: { stringValue: "cloudflare-workers" } },
 					],
 				},
-			],
-		};
+				scopeLogs: [
+					{
+						scope: { name: "observability-collector" },
+						logRecords,
+					},
+				],
+			});
+		}
+
+		const otlpRequest: OTLPExportLogsServiceRequest = { resourceLogs };
 
 		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
 			method: "POST",

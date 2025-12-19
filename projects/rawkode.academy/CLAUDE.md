@@ -67,27 +67,31 @@ bunx wrangler deploy --config ./read-model/wrangler.jsonc
 
 ## Observability
 
-All Cloudflare Workers must configure observability for PostHog using the `observability-collector` tail worker. Add to `wrangler.jsonc`:
+All Cloudflare Workers must configure observability for Grafana. Add to `wrangler.jsonc`:
 
 ```jsonc
-"tail_consumers": [{ "service": "observability-collector" }],
 "observability": {
-  "enabled": true,
-  "head_sampling_rate": 1,
-  "logs": {
-    "enabled": true,
-    "invocation_logs": true,
-    "head_sampling_rate": 1,
-    "destinations": []
-  },
   "traces": {
     "enabled": true,
-    "destinations": []
+    "destinations": ["grafana-traces"]
+  },
+  "logs": {
+    "enabled": true,
+    "destinations": ["grafana-logs"]
   }
 }
 ```
 
-The `observability-collector` tail worker receives logs from all producer workers and forwards them to PostHog with full control over batching and transformation.
+Workers that need analytics should also add the ANALYTICS service binding:
+
+```jsonc
+"services": [
+  {
+    "binding": "ANALYTICS",
+    "service": "rawkode-tools-observability-collector"
+  }
+]
+```
 
 ## Related Documentation
 

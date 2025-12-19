@@ -4,25 +4,20 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
-	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
-		"enabled": true,
-		"head_sampling_rate": 1,
-		"logs": {
-			"enabled": true,
-			"invocation_logs": true,
-			"head_sampling_rate": 1,
-			"destinations": []
-		},
 		"traces": {
 			"enabled": true,
-			"destinations": []
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
 		}
 	},
 	"triggers": {
 		"crons": ["0 6 * * *"]
 	},
 	"services": [
-		{ "binding": "ANALYTICS", "service": "observability-collector" }
+		{ "binding": "ANALYTICS", "service": "rawkode-tools-observability-collector" }
 	]
 }

@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "rawkode-academy",
+	"name": "rawkode-academy-website",
 	"main": "./dist/_worker.js/index.js",
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
@@ -11,16 +11,14 @@
 	},
 	"workers_dev": true,
 	"preview_urls": true,
-	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
-		"enabled": true,
-		"logs": {
-			"enabled": true,
-			"destinations": []
-		},
 		"traces": {
 			"enabled": true,
-			"destinations": []
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
 		}
 	},
 	"kv_namespaces": [
@@ -51,7 +49,7 @@
 		},
 		{
 			"binding": "ANALYTICS",
-			"service": "observability-collector"
+			"service": "rawkode-tools-observability-collector"
 		},
 		{
 			"binding": "SKI_PLAYER_STATS",
