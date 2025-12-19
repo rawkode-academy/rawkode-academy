@@ -8,11 +8,13 @@ on:
     paths:
       - ".github/workflows/rawkode-academy-content.yaml"
       - "projects/rawkode.academy/content/**"
+      - "projects/rawkode.academy/cubes/**"
       - "projects/rawkode.academy/generators/projen-platform-service/**"
   pull_request:
     paths:
       - ".github/workflows/rawkode-academy-content.yaml"
       - "projects/rawkode.academy/content/**"
+      - "projects/rawkode.academy/cubes/**"
       - "projects/rawkode.academy/generators/projen-platform-service/**"
 
 jobs:
@@ -35,6 +37,9 @@ jobs:
       - name: Setup cuenv
         uses: cuenv/setup-cuenv@v1
 
+      - name: Generate CUE cube files
+        run: cuenv sync cubes -A
+
       - name: Generate projen files
         run: |
           # Install projen generator dependencies
@@ -43,7 +48,7 @@ jobs:
           bun run types
           cd -
 
-          # Generate projen files for platform services
+          # Generate projen files for platform services (legacy - services not yet migrated to CUE)
           for service in email-preferences email-service emoji-reactions; do
             SERVICE_DIR="projects/rawkode.academy/platform/$service"
             if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
@@ -54,7 +59,7 @@ jobs:
             fi
           done
 
-          # Generate projen files for game services
+          # Generate projen files for game services (legacy - services not yet migrated to CUE)
           for service in achievements leaderboard player-learned-phrases player-stats share-cards; do
             SERVICE_DIR="projects/rawkode.academy/games/secrets-of-kubernetes/$service"
             if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
@@ -65,10 +70,12 @@ jobs:
             fi
           done
 
-          # Generate projen files for content
-          cd projects/rawkode.academy/content
-          bun run .projenrc.ts
-          cd -
+          # Generate projen files for content (legacy - if not yet migrated to CUE)
+          if [ -f "projects/rawkode.academy/content/.projenrc.ts" ]; then
+            cd projects/rawkode.academy/content
+            bun run .projenrc.ts
+            cd -
+          fi
 
       - name: Install workspace dependencies
         run: bun install
