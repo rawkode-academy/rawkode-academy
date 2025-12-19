@@ -28,7 +28,7 @@ export async function captureAuthEvent(
 ): Promise<void> {
 	const { event, properties = {}, distinctId } = opts;
 
-	const cloudEvent = createCloudEvent(event, "/identity", {
+	const cloudEvent = createCloudEvent(event, "/rawkode-academy-identity", {
 		...properties,
 		distinct_id: distinctId,
 	});
