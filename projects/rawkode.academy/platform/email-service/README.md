@@ -1,37 +1,29 @@
-# EmailService Service
+# email-service
 
-## Overview
+A platform service for the Rawkode Academy.
 
-This is a GraphQL microservice that provides email-service functionality for the Rawkode Academy platform. It uses:
-- **Runtime**: Cloudflare Workers
-- **Language**: TypeScript with strict mode
+## Components
 
-## Service Structure
-
-```
-email-service/
-└── package.json
-```
+This service includes: http
 
 ## Development
 
-### Prerequisites
-
-- Bun runtime
-- Wrangler CLI
-
-### Setup
-
-1. Install dependencies:
-   ```bash
-   bun install
-   ```
-
-### Local Development
-
 ```bash
+# Install dependencies
+bun install
+
+# Run development server (read-model)
+bunx wrangler dev --config ./read-model/wrangler.jsonc
+
+# Generate database migrations
+bunx drizzle-kit generate
+
+# Apply migrations
+bunx wrangler d1 migrations apply DB --config ./read-model/wrangler.jsonc
 ```
 
 ## Deployment
 
-Just merge to main, we got this.
+```bash
+bunx wrangler deploy --config ./read-model/wrangler.jsonc
+```
