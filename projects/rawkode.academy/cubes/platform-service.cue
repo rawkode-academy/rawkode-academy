@@ -30,7 +30,8 @@ import (
 	additionalDevDependencies: {[string]: string} | *{}
 
 	// Computed values
-	_pascalName: strings.Replace(strings.ToTitle(serviceName), "-", "", -1)
+	_nameParts:  strings.Split(serviceName, "-")
+	_pascalName: strings.Join([for p in _nameParts {strings.ToTitle(p)}], "")
 
 	// Validation: require D1 database with binding "DB" when data models are enabled
 	_dbBindingRequired: includeDataModel || includeReadModel || includeWriteModel
