@@ -14,8 +14,6 @@ export const trackShareEvent = defineAction({
 	input: ShareEventSchema,
 	handler: async (event, ctx) => {
 		try {
-			console.log("Share event received:", event);
-
 			// Get analytics service binding from runtime
 			const runtime = ctx.locals.runtime;
 			const analytics = runtime?.env?.ANALYTICS;

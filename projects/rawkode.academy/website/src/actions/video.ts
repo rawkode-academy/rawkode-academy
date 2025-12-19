@@ -33,8 +33,6 @@ export const trackVideoEvent = defineAction({
 	input: VideoEventSchema,
 	handler: async (event, ctx) => {
 		try {
-			console.log("Video event received:", event);
-
 			// Get analytics service binding from runtime
 			const runtime = ctx.locals.runtime;
 			const analytics = runtime?.env?.ANALYTICS;

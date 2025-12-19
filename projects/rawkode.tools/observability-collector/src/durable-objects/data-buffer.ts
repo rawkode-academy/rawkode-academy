@@ -86,13 +86,14 @@ interface OTLPExportLogsServiceRequest {
 }
 
 // Map Cloudflare log levels to OTLP severity
-const LOG_LEVEL_TO_SEVERITY: Record<string, { number: number; text: string }> = {
-	debug: { number: 5, text: "DEBUG" },
-	log: { number: 9, text: "INFO" },
-	info: { number: 9, text: "INFO" },
-	warn: { number: 13, text: "WARN" },
-	error: { number: 17, text: "ERROR" },
-};
+const LOG_LEVEL_TO_SEVERITY: Record<string, { number: number; text: string }> =
+	{
+		debug: { number: 5, text: "DEBUG" },
+		log: { number: 9, text: "INFO" },
+		info: { number: 9, text: "INFO" },
+		warn: { number: 13, text: "WARN" },
+		error: { number: 17, text: "ERROR" },
+	};
 
 // Extract Worker name from CloudEvent source
 function getWorkerName(source: string | undefined): string {
@@ -134,9 +135,7 @@ export class DataBuffer extends DurableObject<Env> {
 
 	async addLog(body: ArrayBuffer, contentType: string): Promise<void> {
 		const logs = await this.getLogs();
-		const base64Body = btoa(
-			String.fromCharCode(...new Uint8Array(body)),
-		);
+		const base64Body = btoa(String.fromCharCode(...new Uint8Array(body)));
 		logs.push({
 			body: base64Body,
 			contentType,
@@ -504,9 +503,7 @@ export class DataBuffer extends DurableObject<Env> {
 		for (const metric of metrics) {
 			posthog.capture({
 				distinctId:
-					metric.attributes.userId ||
-					metric.attributes.sessionId ||
-					"system",
+					metric.attributes.userId || metric.attributes.sessionId || "system",
 				event: "$metric",
 				properties: {
 					$lib: "observability-collector",
@@ -614,13 +611,28 @@ export class DataBuffer extends DurableObject<Env> {
 							{ key: "worker.name", value: { stringValue: workerName } },
 							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
 							...(trace.request?.url
-								? [{ key: "http.url", value: { stringValue: trace.request.url } }]
+								? [
+										{
+											key: "http.url",
+											value: { stringValue: trace.request.url },
+										},
+									]
 								: []),
 							...(trace.request?.method
-								? [{ key: "http.method", value: { stringValue: trace.request.method } }]
+								? [
+										{
+											key: "http.method",
+											value: { stringValue: trace.request.method },
+										},
+									]
 								: []),
 							...(trace.request?.colo
-								? [{ key: "cloudflare.colo", value: { stringValue: trace.request.colo } }]
+								? [
+										{
+											key: "cloudflare.colo",
+											value: { stringValue: trace.request.colo },
+										},
+									]
 								: []),
 						],
 					});
@@ -647,7 +659,10 @@ export class DataBuffer extends DurableObject<Env> {
 					resource: {
 						attributes: [
 							{ key: "service.name", value: { stringValue: workerName } },
-							{ key: "service.namespace", value: { stringValue: "cloudflare-workers" } },
+							{
+								key: "service.namespace",
+								value: { stringValue: "cloudflare-workers" },
+							},
 						],
 					},
 					scopeLogs: [
@@ -706,31 +721,60 @@ export class DataBuffer extends DurableObject<Env> {
 			const event = stored.event;
 			const workerName = getWorkerName(event.source);
 			const attributes: OTLPAttribute[] = [
-				{ key: "cloudevents.specversion", value: { stringValue: event.specversion } },
+				{
+					key: "cloudevents.specversion",
+					value: { stringValue: event.specversion },
+				},
 				{ key: "cloudevents.id", value: { stringValue: event.id } },
 				{ key: "cloudevents.source", value: { stringValue: event.source } },
 				{ key: "cloudevents.type", value: { stringValue: event.type } },
 			];
 
 			if (event.subject) {
-				attributes.push({ key: "cloudevents.subject", value: { stringValue: event.subject } });
+				attributes.push({
+					key: "cloudevents.subject",
+					value: { stringValue: event.subject },
+				});
 			}
 
 			// Add event data as attributes
 			if (event.data && typeof event.data === "object") {
 				const data = event.data as Record<string, unknown>;
 				for (const [key, value] of Object.entries(data)) {
-					if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-						attributes.push({ key: `data.${key}`, value: { stringValue: String(value) } });
+					if (
+						typeof value === "string" ||
+						typeof value === "number" ||
+						typeof value === "boolean"
+					) {
+						attributes.push({
+							key: `data.${key}`,
+							value: { stringValue: String(value) },
+						});
 					}
 				}
 			}
 
 			addLogRecord(workerName, {
-				timeUnixNano: (event.time ? new Date(event.time).getTime() : Date.now()).toString() + "000000",
+				timeUnixNano:
+					(event.time
+						? new Date(event.time).getTime()
+						: Date.now()
+					).toString() + "000000",
 				severityNumber: 9,
 				severityText: "INFO",
-				body: { stringValue: `Event: ${event.type}` },
+				body: {
+					stringValue: JSON.stringify({
+						specversion: event.specversion,
+						id: event.id,
+						type: event.type,
+						source: event.source,
+						time: event.time,
+						...(event.subject && { subject: event.subject }),
+						...(typeof event.data === "object"
+							? (event.data as Record<string, unknown>)
+							: {}),
+					}),
+				},
 				attributes,
 			});
 		}
@@ -743,7 +787,10 @@ export class DataBuffer extends DurableObject<Env> {
 			];
 
 			for (const [key, value] of Object.entries(metric.attributes)) {
-				attributes.push({ key: `metric.${key}`, value: { stringValue: value } });
+				attributes.push({
+					key: `metric.${key}`,
+					value: { stringValue: value },
+				});
 			}
 
 			addLogRecord("observability-collector", {
@@ -758,20 +805,30 @@ export class DataBuffer extends DurableObject<Env> {
 		// Process exceptions as error logs (use "observability-collector" as service)
 		for (const exception of exceptions) {
 			const attributes: OTLPAttribute[] = [
-				{ key: "exception.type", value: { stringValue: exception.name || "Error" } },
+				{
+					key: "exception.type",
+					value: { stringValue: exception.name || "Error" },
+				},
 				{ key: "exception.message", value: { stringValue: exception.message } },
 			];
 
 			if (exception.stack) {
-				attributes.push({ key: "exception.stacktrace", value: { stringValue: exception.stack } });
+				attributes.push({
+					key: "exception.stacktrace",
+					value: { stringValue: exception.stack },
+				});
 			}
 
 			if (exception.distinctId) {
-				attributes.push({ key: "user.id", value: { stringValue: exception.distinctId } });
+				attributes.push({
+					key: "user.id",
+					value: { stringValue: exception.distinctId },
+				});
 			}
 
 			addLogRecord("observability-collector", {
-				timeUnixNano: new Date(exception.timestamp).getTime().toString() + "000000",
+				timeUnixNano:
+					new Date(exception.timestamp).getTime().toString() + "000000",
 				severityNumber: 17,
 				severityText: "ERROR",
 				body: { stringValue: `Exception: ${exception.message}` },
@@ -788,7 +845,10 @@ export class DataBuffer extends DurableObject<Env> {
 				resource: {
 					attributes: [
 						{ key: "service.name", value: { stringValue: workerName } },
-						{ key: "service.namespace", value: { stringValue: "cloudflare-workers" } },
+						{
+							key: "service.namespace",
+							value: { stringValue: "cloudflare-workers" },
+						},
 					],
 				},
 				scopeLogs: [
