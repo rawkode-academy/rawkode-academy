@@ -46,7 +46,7 @@ export class ReactToContentWorkflow extends WorkflowEntrypoint<Env, Params> {
 			const cloudEvent = new CloudEvent({
 				specversion: "1.0",
 				type: "reaction.added",
-				source: "/emoji-reactions",
+				source: "platform-emoji-reactions-write-model",
 				id: crypto.randomUUID(),
 				time: new Date().toISOString(),
 				datacontenttype: "application/json",
