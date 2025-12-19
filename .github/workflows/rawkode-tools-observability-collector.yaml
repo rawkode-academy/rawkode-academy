@@ -1,16 +1,16 @@
-name: rawkode.tools/posthog-collector
+name: rawkode.tools/observability-collector
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/rawkode-tools-posthog-collector.yaml"
-      - "projects/rawkode.tools/posthog-collector/**"
+      - ".github/workflows/rawkode-tools-observability-collector.yaml"
+      - "projects/rawkode.tools/observability-collector/**"
   pull_request:
     paths:
-      - ".github/workflows/rawkode-tools-posthog-collector.yaml"
-      - "projects/rawkode.tools/posthog-collector/**"
+      - ".github/workflows/rawkode-tools-observability-collector.yaml"
+      - "projects/rawkode.tools/observability-collector/**"
 
 jobs:
   deploy:
@@ -80,7 +80,7 @@ jobs:
 
       - name: Deploy to Production
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: projects/rawkode.tools/posthog-collector
+        working-directory: projects/rawkode.tools/observability-collector
         env:
           CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
@@ -90,12 +90,12 @@ jobs:
       - name: Deploy Preview
         id: preview
         if: github.event_name == 'pull_request'
-        working-directory: projects/rawkode.tools/posthog-collector
+        working-directory: projects/rawkode.tools/observability-collector
         env:
           CLOUDFLARE_API_TOKEN: ${{ steps.secrets.outputs.CLOUDFLARE_WORKERS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx wrangler versions upload --config wrangler.jsonc --preview-alias pr-${{ github.event.pull_request.number }}
-          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}-posthog-collector.rawkodeacademy.workers.dev"
+          PREVIEW_URL="https://pr-${{ github.event.pull_request.number }}-observability-collector.rawkodeacademy.workers.dev"
           gh pr comment ${{ github.event.pull_request.number }} --body "Deployment Preview: $PREVIEW_URL"

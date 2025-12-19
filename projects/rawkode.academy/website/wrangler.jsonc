@@ -11,7 +11,7 @@
 	},
 	"workers_dev": true,
 	"preview_urls": true,
-	"tail_consumers": [{ "service": "posthog-collector" }],
+	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
 		"enabled": true,
 		"logs": {
@@ -51,7 +51,7 @@
 		},
 		{
 			"binding": "ANALYTICS",
-			"service": "posthog-collector"
+			"service": "observability-collector"
 		},
 		{
 			"binding": "SKI_PLAYER_STATS",

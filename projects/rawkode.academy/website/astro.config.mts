@@ -4,6 +4,7 @@ import partytown from "@astrojs/partytown";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import vue from "@astrojs/vue";
+import faroUploader from "@grafana/faro-rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
@@ -343,6 +344,21 @@ export default defineConfig({
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
 			tailwindcss(),
+			...(process.env.NODE_ENV === "production" && process.env.GRAFANA_SOURCEMAP_API_KEY
+				? [
+						faroUploader({
+							appName: "rawkode.academy",
+							endpoint:
+								"https://faro-api-prod-gb-south-1.grafana.net/faro/api/v1",
+							appId: "378",
+							stackId: "1457812",
+							apiKey: process.env.GRAFANA_SOURCEMAP_API_KEY,
+							gzipContents: true,
+							keepSourcemaps: false,
+							verbose: true,
+						}),
+					]
+				: []),
 		]),
 		server: {
 			fs: {

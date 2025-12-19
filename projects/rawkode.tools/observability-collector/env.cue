@@ -4,10 +4,10 @@ import "github.com/cuenv/cuenv/schema"
 
 schema.#Project
 
-name: "rawkode-tools-posthog-collector"
+name: "rawkode-tools-observability-collector"
 
 env: {
-	SERVICE_NAME: "posthog-collector"
+	SERVICE_NAME: "observability-collector"
 
 	environment: production: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {

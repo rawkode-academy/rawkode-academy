@@ -3,7 +3,7 @@
 	"name": "random-video-social-post",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-06-10",
-	"tail_consumers": [{ "service": "posthog-collector" }],
+	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,

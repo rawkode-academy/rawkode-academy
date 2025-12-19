@@ -310,7 +310,7 @@ Cloudflare Worker configuration:
   "keep_vars": false,
   "minify": true,
 
-  "tail_consumers": [{ "service": "posthog-collector" }],
+  "tail_consumers": [{ "service": "observability-collector" }],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
@@ -517,7 +517,7 @@ export default {
   "keep_vars": false,
   "minify": true,
 
-  "tail_consumers": [{ "service": "posthog-collector" }],
+  "tail_consumers": [{ "service": "observability-collector" }],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
