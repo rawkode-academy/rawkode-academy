@@ -114,7 +114,7 @@ export async function captureServerEvent(
 
 	const cloudEventType = eventTypeMap[event] || `custom.${event}`;
 
-	const cloudEvent = createCloudEvent(cloudEventType, "/rawkode-academy-website", {
+	const cloudEvent = createCloudEvent(cloudEventType, "rawkode-academy-website", {
 		...properties,
 		distinct_id: distinctId ?? "anonymous",
 	});
@@ -165,7 +165,7 @@ export async function identifyServerUser(
 
 	const cloudEvent = createCloudEvent(
 		"user.identified",
-		"/rawkode-academy-website",
+		"rawkode-academy-website",
 		{
 			distinct_id: distinctId,
 			anon_id: anonId,
