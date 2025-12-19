@@ -6,19 +6,14 @@
 	"compatibility_flags": ["nodejs_compat"],
 	"keep_vars": false,
 	"minify": true,
-	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
-		"enabled": true,
-		"head_sampling_rate": 1,
-		"logs": {
-			"enabled": true,
-			"invocation_logs": true,
-			"head_sampling_rate": 1,
-			"destinations": []
-		},
 		"traces": {
 			"enabled": true,
-			"destinations": []
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
 		}
 	},
 	"placement": {
@@ -37,7 +32,7 @@
 		},
 		{
 			"binding": "ANALYTICS",
-			"service": "observability-collector"
+			"service": "rawkode-tools-observability-collector"
 		}
 	]
 }
