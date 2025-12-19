@@ -64,10 +64,11 @@ const logAnalytics = async (
 	const event = {
 		specversion: "1.0",
 		type: "link.redirect",
-		source: `https://${hostname}`,
+		source: "rawkode-link",
 		id: crypto.randomUUID(),
 		time: new Date().toISOString(),
 		data: {
+			domain: hostname,
 			path,
 			referrer: request.headers.get("Referer") || "",
 			country: (request.cf?.country as string) || "",

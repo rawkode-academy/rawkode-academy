@@ -94,10 +94,9 @@ const LOG_LEVEL_TO_SEVERITY: Record<string, { number: number; text: string }> = 
 	error: { number: 17, text: "ERROR" },
 };
 
-// Extract Worker name from CloudEvent source (e.g., "/rawkode-academy-website" -> "rawkode-academy-website")
+// Extract Worker name from CloudEvent source
 function getWorkerName(source: string | undefined): string {
-	if (!source) return "unknown";
-	return source.replace(/^\//, "");
+	return source || "unknown";
 }
 
 export interface Env {
