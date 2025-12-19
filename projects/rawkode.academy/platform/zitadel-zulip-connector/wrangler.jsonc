@@ -2,16 +2,14 @@
 	"name": "zitadel-zulip-connector",
 	"main": "src/main.ts",
 	"compatibility_date": "2025-05-05",
-	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
-		"enabled": true,
-		"logs": {
-			"enabled": true,
-			"destinations": []
-		},
 		"traces": {
 			"enabled": true,
-			"destinations": []
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
 		}
 	},
 	"vars": {

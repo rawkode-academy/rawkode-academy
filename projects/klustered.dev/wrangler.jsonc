@@ -4,19 +4,14 @@
 	"main": "./dist/_worker.js/index.js",
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
-	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
-		"enabled": true,
-		"head_sampling_rate": 1,
-		"logs": {
-			"enabled": true,
-			"invocation_logs": true,
-			"head_sampling_rate": 1,
-			"destinations": []
-		},
 		"traces": {
 			"enabled": true,
-			"destinations": []
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
 		}
 	},
 	"assets": {

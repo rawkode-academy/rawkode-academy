@@ -3,19 +3,13 @@ pages_build_output_dir = "dist"
 compatibility_date = "2023-01-23"
 compatibility_flags = [ "nodejs_compat" ]
 
-[[tail_consumers]]
-service = "observability-collector"
-
-[observability]
+[observability.traces]
 enabled = true
+destinations = ["grafana-traces"]
 
 [observability.logs]
 enabled = true
-destinations = [ ]
-
-[observability.traces]
-enabled = true
-destinations = [ ]
+destinations = ["grafana-logs"]
 
 [env.production]
 compatibility_date = "2024-07-01"

@@ -19,19 +19,14 @@
 			"custom_domain": true
 		}
 	],
-	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
-		"enabled": true,
-		"head_sampling_rate": 1,
-		"logs": {
-			"enabled": true,
-			"invocation_logs": true,
-			"head_sampling_rate": 1,
-			"destinations": []
-		},
 		"traces": {
 			"enabled": true,
-			"destinations": []
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
 		}
 	},
 	"placement": {
@@ -39,7 +34,7 @@
 	},
 	"workers_dev": true,
 	"services": [
-		{ "binding": "WEBSITE", "service": "rawkode-academy" },
+		{ "binding": "WEBSITE", "service": "rawkode-academy-website" },
 		{ "binding": "EMOJI_REACTIONS", "service": "platform-emoji-reactions-read-model" },
 		{ "binding": "EMAIL_PREFERENCES", "service": "platform-email-preferences-read-model" },
 		{ "binding": "IDENTITY", "service": "rawkode-academy-identity" }

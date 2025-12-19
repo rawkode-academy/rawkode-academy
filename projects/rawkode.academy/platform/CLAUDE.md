@@ -310,15 +310,14 @@ Cloudflare Worker configuration:
   "keep_vars": false,
   "minify": true,
 
-  "tail_consumers": [{ "service": "observability-collector" }],
   "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1,
+    "traces": {
+      "enabled": true,
+      "destinations": ["grafana-traces"]
+    },
     "logs": {
       "enabled": true,
-      "invocation_logs": true,
-      "head_sampling_rate": 1,
-      "destinations": []
+      "destinations": ["grafana-logs"]
     }
   },
 
@@ -517,15 +516,14 @@ export default {
   "keep_vars": false,
   "minify": true,
 
-  "tail_consumers": [{ "service": "observability-collector" }],
   "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1,
+    "traces": {
+      "enabled": true,
+      "destinations": ["grafana-traces"]
+    },
     "logs": {
       "enabled": true,
-      "invocation_logs": true,
-      "head_sampling_rate": 1,
-      "destinations": []
+      "destinations": ["grafana-logs"]
     }
   },
 
