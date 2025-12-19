@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - ".github/workflows/platform-email-preferences-rpc.yaml"
+      - "projects/rawkode.academy/cubes/**"
       - "projects/rawkode.academy/generators/projen-platform-service/**"
       - "projects/rawkode.academy/platform/email-preferences/**"
   pull_request:
     paths:
       - ".github/workflows/platform-email-preferences-rpc.yaml"
+      - "projects/rawkode.academy/cubes/**"
       - "projects/rawkode.academy/generators/projen-platform-service/**"
       - "projects/rawkode.academy/platform/email-preferences/**"
 

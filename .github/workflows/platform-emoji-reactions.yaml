@@ -9,12 +9,14 @@ on:
     paths:
       - ".github/workflows/platform-emoji-reactions.yaml"
       - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/cubes/**"
       - "projects/rawkode.academy/generators/projen-platform-service/**"
       - "projects/rawkode.academy/platform/emoji-reactions/**"
   pull_request:
     paths:
       - ".github/workflows/platform-emoji-reactions.yaml"
       - ".github/workflows/platform-service-deploy.yaml"
+      - "projects/rawkode.academy/cubes/**"
       - "projects/rawkode.academy/generators/projen-platform-service/**"
       - "projects/rawkode.academy/platform/emoji-reactions/**"
 
