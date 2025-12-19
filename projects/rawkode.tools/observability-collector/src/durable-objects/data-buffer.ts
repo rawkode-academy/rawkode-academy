@@ -94,15 +94,10 @@ const LOG_LEVEL_TO_SEVERITY: Record<string, { number: number; text: string }> = 
 	error: { number: 17, text: "ERROR" },
 };
 
-// Map CloudEvent source to actual Worker names
-const SOURCE_TO_WORKER: Record<string, string> = {
-	"/identity": "rawkode-academy-identity",
-	"/website": "rawkode-academy-website",
-};
-
+// Extract Worker name from CloudEvent source (e.g., "/rawkode-academy-website" -> "rawkode-academy-website")
 function getWorkerName(source: string | undefined): string {
 	if (!source) return "unknown";
-	return SOURCE_TO_WORKER[source] || source.replace(/^\//, "");
+	return source.replace(/^\//, "");
 }
 
 export interface Env {
