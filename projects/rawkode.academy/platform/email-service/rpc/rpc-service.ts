@@ -81,7 +81,7 @@ export class EmailService extends WorkerEntrypoint<Env> {
 		const cloudEvent = new CloudEvent({
 			specversion: "1.0",
 			type: eventType,
-			source: "/email-service",
+			source: "platform-email-service-rpc",
 			id: crypto.randomUUID(),
 			time: new Date().toISOString(),
 			datacontenttype: "application/json",
