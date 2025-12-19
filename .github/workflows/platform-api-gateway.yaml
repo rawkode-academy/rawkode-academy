@@ -43,6 +43,9 @@ jobs:
       - name: Setup cuenv
         uses: cuenv/setup-cuenv@v1
 
+      - name: Generate CUE cube files
+        run: cuenv sync cubes -A
+
       - name: Generate projen files
         run: |
           # Install projen generator dependencies
@@ -187,6 +190,9 @@ jobs:
 
       - name: Setup cuenv
         uses: cuenv/setup-cuenv@v1
+
+      - name: Generate CUE cube files
+        run: cuenv sync cubes -A
 
       - name: Generate projen files
         run: |

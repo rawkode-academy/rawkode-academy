@@ -1,0 +1,48 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2025-04-05",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"keep_vars": false,
+	"minify": true,
+	"name": "platform-email-service-rpc",
+	"main": "main.ts",
+	"send_email": [
+		{
+			"name": "SEND_EMAIL"
+		}
+	],
+	"services": [
+		{
+			"binding": "ANALYTICS",
+			"service": "rawkode-tools-observability-collector"
+		},
+		{
+			"binding": "EMAIL_PREFERENCES",
+			"service": "platform-email-preferences-rpc"
+		}
+	],
+	"workers_dev": true,
+	"placement": {
+		"mode": "smart"
+	},
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"traces": {
+			"enabled": true,
+			"destinations": [
+				"grafana-traces"
+			]
+		},
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1,
+			"destinations": [
+				"grafana-logs"
+			]
+		}
+	}
+}
