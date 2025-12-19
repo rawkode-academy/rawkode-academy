@@ -464,11 +464,11 @@ export class DataBuffer extends DurableObject<Env> {
 				properties.cloudevents_datacontenttype = event.datacontenttype;
 			}
 
-			// Include event data as properties
+			// Include event data as properties (prefixed to avoid collisions)
 			if (event.data && typeof event.data === "object") {
 				const data = event.data as Record<string, unknown>;
 				for (const [key, value] of Object.entries(data)) {
-					properties[key] = value;
+					properties[`data.${key}`] = value;
 				}
 			}
 
@@ -770,9 +770,7 @@ export class DataBuffer extends DurableObject<Env> {
 						source: event.source,
 						time: event.time,
 						...(event.subject && { subject: event.subject }),
-						...(typeof event.data === "object"
-							? (event.data as Record<string, unknown>)
-							: {}),
+						...(typeof event.data === "object" && { data: event.data }),
 					}),
 				},
 				attributes,
