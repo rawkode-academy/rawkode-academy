@@ -4,7 +4,7 @@
 	"main": "./dist/_worker.js/index.js",
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
-	"tail_consumers": [{ "service": "posthog-collector" }],
+	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,

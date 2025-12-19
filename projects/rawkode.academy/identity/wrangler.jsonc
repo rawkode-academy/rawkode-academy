@@ -11,7 +11,7 @@
 		"directory": "./dist",
 		"run_worker_first": true
 	},
-	"tail_consumers": [{ "service": "posthog-collector" }],
+	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,
@@ -42,7 +42,7 @@
 	"services": [
 		{
 			"binding": "ANALYTICS",
-			"service": "posthog-collector"
+			"service": "observability-collector"
 		}
 	],
 	"secrets_store_secrets": [

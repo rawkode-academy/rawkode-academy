@@ -23,6 +23,9 @@
 		"subgraph:sdl": "bun scripts/publish-subgraph.ts"
 	},
 	"dependencies": {
+		"@grafana/faro-web-sdk": "^2.0.0-beta",
+		"@grafana/faro-web-tracing": "^2.0.0-beta",
+		"@grafana/faro-rollup-plugin": "0.5.2",
 		"@astrojs/check": "0.9.6",
 		"@astrojs/cloudflare": "12.6.12",
 		"@astrojs/mdx": "4.3.12",

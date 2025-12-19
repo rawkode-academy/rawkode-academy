@@ -1,12 +1,14 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "posthog-collector",
+	"name": "observability-collector",
 	"main": "./src/index.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
 	"minify": true,
 	"vars": {
-		"POSTHOG_HOST": "https://eu.i.posthog.com"
+		"POSTHOG_HOST": "https://eu.i.posthog.com",
+		"GRAFANA_OTLP_HOST": "https://otlp-gateway-prod-gb-south-1.grafana.net/otlp",
+		"GRAFANA_INSTANCE_ID": "1457812"
 	},
 	"placement": {
 		"mode": "smart"
@@ -31,6 +33,11 @@
 			"binding": "POSTHOG_PROJECT_TOKEN",
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
 			"secret_name": "POSTHOG_PROJECT_TOKEN"
+		},
+		{
+			"binding": "GRAFANA_OTLP_TOKEN",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "grafana-cloud-otlp-write"
 		}
 	]
 }

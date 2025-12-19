@@ -71,4 +71,4 @@ op run -- bunx wrangler pages deploy --branch main dist
 
 ## Analytics
 
-This site uses Grafana Faro SDK v2 for frontend observability and the `@rawkode.tools/posthog-collector` service for server-side events. All events are sent to PostHog via OTLP.
+This site uses Grafana Faro SDK v2 for frontend observability and the `@rawkode.tools/observability-collector` service for server-side events. All events are sent to PostHog via OTLP.

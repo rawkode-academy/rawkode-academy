@@ -97,6 +97,9 @@ const LOG_LEVEL_TO_SEVERITY: Record<string, { number: number; text: string }> = 
 export interface Env {
 	POSTHOG_PROJECT_TOKEN: SecretsStoreSecret;
 	POSTHOG_HOST: string;
+	GRAFANA_OTLP_TOKEN?: SecretsStoreSecret;
+	GRAFANA_OTLP_HOST?: string;
+	GRAFANA_INSTANCE_ID?: string;
 }
 
 const FLUSH_INTERVAL_MS = 30 * 1000; // 30 seconds
@@ -160,32 +163,28 @@ export class DataBuffer extends DurableObject<Env> {
 	}
 
 	async alarm(): Promise<void> {
-		// Flush logs (raw OTLP passthrough)
 		const logs = await this.getLogs();
+		const tailEvents = await this.getTailEvents();
+		const events = await this.getEvents();
+		const metrics = await this.getMetrics();
+		const exceptions = await this.getExceptions();
+
+		// Flush to PostHog
 		if (logs.length > 0) {
 			try {
 				await this.flushLogsToPostHog(logs);
 			} catch (error) {
 				console.error("Failed to flush logs to PostHog:", error);
 			}
-			await this.ctx.storage.delete(LOGS_KEY);
 		}
 
-		// Flush tail events as OTLP logs
-		const tailEvents = await this.getTailEvents();
 		if (tailEvents.length > 0) {
 			try {
 				await this.flushTailEventsAsOTLP(tailEvents);
 			} catch (error) {
-				console.error("Failed to flush tail events as OTLP:", error);
+				console.error("Failed to flush tail events to PostHog:", error);
 			}
-			await this.ctx.storage.delete(TAIL_EVENTS_KEY);
 		}
-
-		// Flush events, metrics, and exceptions using PostHog SDK
-		const events = await this.getEvents();
-		const metrics = await this.getMetrics();
-		const exceptions = await this.getExceptions();
 
 		if (events.length > 0 || metrics.length > 0 || exceptions.length > 0) {
 			try {
@@ -193,10 +192,41 @@ export class DataBuffer extends DurableObject<Env> {
 			} catch (error) {
 				console.error("Failed to flush to PostHog SDK:", error);
 			}
-			await this.ctx.storage.delete(EVENTS_KEY);
-			await this.ctx.storage.delete(METRICS_KEY);
-			await this.ctx.storage.delete(EXCEPTIONS_KEY);
 		}
+
+		// Flush to Grafana (if configured)
+		if (this.env.GRAFANA_OTLP_TOKEN && this.env.GRAFANA_OTLP_HOST) {
+			if (logs.length > 0) {
+				try {
+					await this.flushLogsToGrafana(logs);
+				} catch (error) {
+					console.error("Failed to flush logs to Grafana:", error);
+				}
+			}
+
+			if (tailEvents.length > 0) {
+				try {
+					await this.flushTailEventsToGrafana(tailEvents);
+				} catch (error) {
+					console.error("Failed to flush tail events to Grafana:", error);
+				}
+			}
+
+			if (events.length > 0 || metrics.length > 0 || exceptions.length > 0) {
+				try {
+					await this.flushToGrafanaOTLP(events, metrics, exceptions);
+				} catch (error) {
+					console.error("Failed to flush to Grafana OTLP:", error);
+				}
+			}
+		}
+
+		// Clear storage after flushing to all destinations
+		if (logs.length > 0) await this.ctx.storage.delete(LOGS_KEY);
+		if (tailEvents.length > 0) await this.ctx.storage.delete(TAIL_EVENTS_KEY);
+		if (events.length > 0) await this.ctx.storage.delete(EVENTS_KEY);
+		if (metrics.length > 0) await this.ctx.storage.delete(METRICS_KEY);
+		if (exceptions.length > 0) await this.ctx.storage.delete(EXCEPTIONS_KEY);
 	}
 
 	private async getEvents(): Promise<StoredEvent[]> {
@@ -343,7 +373,7 @@ export class DataBuffer extends DurableObject<Env> {
 					},
 					scopeLogs: [
 						{
-							scope: { name: "posthog-collector" },
+							scope: { name: "observability-collector" },
 							logRecords,
 						},
 					],
@@ -416,7 +446,7 @@ export class DataBuffer extends DurableObject<Env> {
 		for (const stored of events) {
 			const event = stored.event;
 			const properties: Record<string, unknown> = {
-				$lib: "posthog-collector",
+				$lib: "observability-collector",
 				cloudevents_specversion: event.specversion,
 				cloudevents_id: event.id,
 				cloudevents_source: event.source,
@@ -475,7 +505,7 @@ export class DataBuffer extends DurableObject<Env> {
 					"system",
 				event: "$metric",
 				properties: {
-					$lib: "posthog-collector",
+					$lib: "observability-collector",
 					metric_name: metric.name,
 					metric_value: metric.value,
 					...metric.attributes,
@@ -490,7 +520,7 @@ export class DataBuffer extends DurableObject<Env> {
 				distinctId: exception.distinctId || "anonymous",
 				event: "$exception",
 				properties: {
-					$lib: "posthog-collector",
+					$lib: "observability-collector",
 					$exception_message: exception.message,
 					$exception_stack_trace_raw: exception.stack,
 					$exception_type: exception.name,
@@ -502,5 +532,278 @@ export class DataBuffer extends DurableObject<Env> {
 
 		// Flush all queued events
 		await posthog.shutdown();
+	}
+
+	// Grafana OTLP flush methods
+	private async flushLogsToGrafana(logs: StoredLog[]): Promise<void> {
+		if (!this.env.GRAFANA_OTLP_TOKEN || !this.env.GRAFANA_OTLP_HOST) return;
+
+		const token = await this.env.GRAFANA_OTLP_TOKEN.get();
+		const authHeader = btoa(`${this.env.GRAFANA_INSTANCE_ID}:${token}`);
+
+		for (const log of logs) {
+			const body = Uint8Array.from(atob(log.body), (c) => c.charCodeAt(0));
+
+			const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
+				method: "POST",
+				headers: {
+					"Content-Type": log.contentType,
+					Authorization: `Basic ${authHeader}`,
+				},
+				body: body,
+			});
+
+			if (!response.ok) {
+				const text = await response.text();
+				console.error("Grafana OTLP logs request failed:", {
+					status: response.status,
+					body: text,
+				});
+			}
+		}
+	}
+
+	private async flushTailEventsToGrafana(
+		tailEvents: StoredTailEvent[],
+	): Promise<void> {
+		if (!this.env.GRAFANA_OTLP_TOKEN || !this.env.GRAFANA_OTLP_HOST) return;
+		if (tailEvents.length === 0) return;
+
+		const token = await this.env.GRAFANA_OTLP_TOKEN.get();
+		const authHeader = btoa(`${this.env.GRAFANA_INSTANCE_ID}:${token}`);
+
+		// Group tail events by worker name for efficient batching
+		const eventsByWorker = new Map<string, StoredTailEvent[]>();
+		for (const event of tailEvents) {
+			const workerName = event.trace.scriptName ?? "unknown";
+			const existing = eventsByWorker.get(workerName) ?? [];
+			existing.push(event);
+			eventsByWorker.set(workerName, existing);
+		}
+
+		// Build OTLP request with resourceLogs per worker
+		const resourceLogs: OTLPExportLogsServiceRequest["resourceLogs"] = [];
+
+		for (const [workerName, events] of eventsByWorker) {
+			const logRecords: OTLPLogRecord[] = [];
+
+			for (const stored of events) {
+				const trace = stored.trace;
+
+				for (const log of trace.logs) {
+					const severity = LOG_LEVEL_TO_SEVERITY[log.level] ?? {
+						number: 9,
+						text: "INFO",
+					};
+					const message = log.message
+						.map((part) =>
+							typeof part === "object" ? JSON.stringify(part) : String(part),
+						)
+						.join(" ");
+
+					logRecords.push({
+						timeUnixNano: (log.timestamp * 1_000_000).toString(),
+						severityNumber: severity.number,
+						severityText: severity.text,
+						body: { stringValue: message },
+						attributes: [
+							{ key: "worker.name", value: { stringValue: workerName } },
+							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
+							...(trace.request?.url
+								? [{ key: "http.url", value: { stringValue: trace.request.url } }]
+								: []),
+							...(trace.request?.method
+								? [{ key: "http.method", value: { stringValue: trace.request.method } }]
+								: []),
+							...(trace.request?.colo
+								? [{ key: "cloudflare.colo", value: { stringValue: trace.request.colo } }]
+								: []),
+						],
+					});
+				}
+
+				for (const exc of trace.exceptions) {
+					logRecords.push({
+						timeUnixNano: (exc.timestamp * 1_000_000).toString(),
+						severityNumber: 17,
+						severityText: "ERROR",
+						body: { stringValue: `${exc.name}: ${exc.message}` },
+						attributes: [
+							{ key: "worker.name", value: { stringValue: workerName } },
+							{ key: "worker.outcome", value: { stringValue: trace.outcome } },
+							{ key: "exception.type", value: { stringValue: exc.name } },
+							{ key: "exception.message", value: { stringValue: exc.message } },
+						],
+					});
+				}
+			}
+
+			if (logRecords.length > 0) {
+				resourceLogs.push({
+					resource: {
+						attributes: [
+							{ key: "service.name", value: { stringValue: workerName } },
+							{ key: "service.namespace", value: { stringValue: "cloudflare-workers" } },
+						],
+					},
+					scopeLogs: [
+						{
+							scope: { name: "observability-collector" },
+							logRecords,
+						},
+					],
+				});
+			}
+		}
+
+		if (resourceLogs.length === 0) return;
+
+		const otlpRequest: OTLPExportLogsServiceRequest = { resourceLogs };
+
+		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Basic ${authHeader}`,
+			},
+			body: JSON.stringify(otlpRequest),
+		});
+
+		if (!response.ok) {
+			const text = await response.text();
+			console.error("Grafana OTLP tail events request failed:", {
+				status: response.status,
+				body: text,
+			});
+		}
+	}
+
+	private async flushToGrafanaOTLP(
+		events: StoredEvent[],
+		metrics: StoredMetric[],
+		exceptions: ExceptionData[],
+	): Promise<void> {
+		if (!this.env.GRAFANA_OTLP_TOKEN || !this.env.GRAFANA_OTLP_HOST) return;
+
+		const token = await this.env.GRAFANA_OTLP_TOKEN.get();
+		const authHeader = btoa(`${this.env.GRAFANA_INSTANCE_ID}:${token}`);
+
+		// Convert events, metrics, and exceptions to OTLP log format
+		const logRecords: OTLPLogRecord[] = [];
+
+		// Process CloudEvents as logs
+		for (const stored of events) {
+			const event = stored.event;
+			const attributes: OTLPAttribute[] = [
+				{ key: "cloudevents.specversion", value: { stringValue: event.specversion } },
+				{ key: "cloudevents.id", value: { stringValue: event.id } },
+				{ key: "cloudevents.source", value: { stringValue: event.source } },
+				{ key: "cloudevents.type", value: { stringValue: event.type } },
+			];
+
+			if (event.subject) {
+				attributes.push({ key: "cloudevents.subject", value: { stringValue: event.subject } });
+			}
+
+			// Add event data as attributes
+			if (event.data && typeof event.data === "object") {
+				const data = event.data as Record<string, unknown>;
+				for (const [key, value] of Object.entries(data)) {
+					if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+						attributes.push({ key: `data.${key}`, value: { stringValue: String(value) } });
+					}
+				}
+			}
+
+			logRecords.push({
+				timeUnixNano: (event.time ? new Date(event.time).getTime() : Date.now()).toString() + "000000",
+				severityNumber: 9,
+				severityText: "INFO",
+				body: { stringValue: `Event: ${event.type}` },
+				attributes,
+			});
+		}
+
+		// Process metrics as logs
+		for (const metric of metrics) {
+			const attributes: OTLPAttribute[] = [
+				{ key: "metric.name", value: { stringValue: metric.name } },
+				{ key: "metric.value", value: { stringValue: String(metric.value) } },
+			];
+
+			for (const [key, value] of Object.entries(metric.attributes)) {
+				attributes.push({ key: `metric.${key}`, value: { stringValue: value } });
+			}
+
+			logRecords.push({
+				timeUnixNano: metric.timestamp.toString() + "000000",
+				severityNumber: 9,
+				severityText: "INFO",
+				body: { stringValue: `Metric: ${metric.name} = ${metric.value}` },
+				attributes,
+			});
+		}
+
+		// Process exceptions as error logs
+		for (const exception of exceptions) {
+			const attributes: OTLPAttribute[] = [
+				{ key: "exception.type", value: { stringValue: exception.name || "Error" } },
+				{ key: "exception.message", value: { stringValue: exception.message } },
+			];
+
+			if (exception.stack) {
+				attributes.push({ key: "exception.stacktrace", value: { stringValue: exception.stack } });
+			}
+
+			if (exception.distinctId) {
+				attributes.push({ key: "user.id", value: { stringValue: exception.distinctId } });
+			}
+
+			logRecords.push({
+				timeUnixNano: new Date(exception.timestamp).getTime().toString() + "000000",
+				severityNumber: 17,
+				severityText: "ERROR",
+				body: { stringValue: `Exception: ${exception.message}` },
+				attributes,
+			});
+		}
+
+		if (logRecords.length === 0) return;
+
+		const otlpRequest: OTLPExportLogsServiceRequest = {
+			resourceLogs: [
+				{
+					resource: {
+						attributes: [
+							{ key: "service.name", value: { stringValue: "rawkode.academy" } },
+							{ key: "service.namespace", value: { stringValue: "cloudflare-workers" } },
+						],
+					},
+					scopeLogs: [
+						{
+							scope: { name: "observability-collector" },
+							logRecords,
+						},
+					],
+				},
+			],
+		};
+
+		const response = await fetch(`${this.env.GRAFANA_OTLP_HOST}/v1/logs`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Basic ${authHeader}`,
+			},
+			body: JSON.stringify(otlpRequest),
+		});
+
+		if (!response.ok) {
+			const text = await response.text();
+			console.error("Grafana OTLP events request failed:", {
+				status: response.status,
+				body: text,
+			});
+		}
 	}
 }

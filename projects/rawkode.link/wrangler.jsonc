@@ -3,7 +3,7 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-05-01",
   "workers_dev": false,
-  "tail_consumers": [{ "service": "posthog-collector" }],
+  "tail_consumers": [{ "service": "observability-collector" }],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
@@ -19,7 +19,7 @@
     }
   },
   "services": [
-    { "binding": "ANALYTICS", "service": "posthog-collector" }
+    { "binding": "ANALYTICS", "service": "observability-collector" }
   ],
   "routes": [
 		{ "pattern": "cloudnativecompass.fm", "custom_domain": true },

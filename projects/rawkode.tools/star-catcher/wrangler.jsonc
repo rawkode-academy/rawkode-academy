@@ -4,7 +4,7 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2025-04-05",
 	"compatibility_flags": ["nodejs_compat"],
-	"tail_consumers": [{ "service": "posthog-collector" }],
+	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1,
@@ -23,6 +23,6 @@
 		"crons": ["0 6 * * *"]
 	},
 	"services": [
-		{ "binding": "ANALYTICS", "service": "posthog-collector" }
+		{ "binding": "ANALYTICS", "service": "observability-collector" }
 	]
 }

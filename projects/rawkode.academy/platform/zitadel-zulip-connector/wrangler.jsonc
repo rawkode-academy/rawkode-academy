@@ -2,7 +2,7 @@
 	"name": "zitadel-zulip-connector",
 	"main": "src/main.ts",
 	"compatibility_date": "2025-05-05",
-	"tail_consumers": [{ "service": "posthog-collector" }],
+	"tail_consumers": [{ "service": "observability-collector" }],
 	"observability": {
 		"enabled": true,
 		"logs": {

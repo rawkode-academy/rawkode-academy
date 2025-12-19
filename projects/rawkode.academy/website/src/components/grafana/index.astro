@@ -1,0 +1,170 @@
+---
+// Grafana Faro SDK v2 initialization component
+// Runs alongside PostHog for frontend observability
+---
+
+<script>
+  import { initializeFaro, getWebInstrumentations, LogLevel } from '@grafana/faro-web-sdk';
+  import { TracingInstrumentation } from '@grafana/faro-web-tracing';
+
+  const FARO_URL = 'https://faro-collector-prod-gb-south-1.grafana.net/collect/b8e6c95e9ef352ba577b11e06a79a0e4';
+  const FARO_APP_NAME = 'rawkode.academy';
+
+  function getConsent(): string | null {
+    try {
+      return localStorage.getItem('consent_analytics');
+    } catch {
+      return null;
+    }
+  }
+
+  function checkDoNotTrack(): boolean {
+    return navigator.doNotTrack === '1' || (window as any).doNotTrack === '1';
+  }
+
+  // Faro v2 configuration factory
+  function createFaroConfig() {
+    return {
+      url: FARO_URL,
+      app: {
+        name: FARO_APP_NAME,
+        version: '1.0.0',
+        environment: import.meta.env.PROD ? 'production' : 'development',
+      },
+      // Faro v2: getWebInstrumentations() no longer accepts console config
+      // Console instrumentation is configured globally if needed
+      instrumentations: [
+        ...getWebInstrumentations(),
+        new TracingInstrumentation(),
+      ],
+      sessionTracking: {
+        enabled: true,
+        persistent: true,
+      },
+      // Faro v2: Capture WARN and ERROR console levels only
+      consoleInstrumentation: {
+        disabledLevels: [LogLevel.DEBUG, LogLevel.TRACE, LogLevel.LOG, LogLevel.INFO],
+      },
+    };
+  }
+
+  const consent = getConsent();
+  const consentGranted = consent === 'granted';
+  const shouldTrack = consentGranted && !checkDoNotTrack() && FARO_URL;
+
+  // Initialize Faro if consent is granted and URL is configured
+  let faro: ReturnType<typeof initializeFaro> | null = null;
+
+  if (shouldTrack) {
+    faro = initializeFaro(createFaroConfig());
+
+    // Get UTM parameters
+    function getUtmParams(): Record<string, string> {
+      try {
+        const url = new URL(location.href);
+        const params = new URLSearchParams(url.search);
+        const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+        const out: Record<string, string> = {};
+        keys.forEach((k) => {
+          const v = params.get(k);
+          if (v) out[k] = v;
+        });
+        return out;
+      } catch {
+        return {};
+      }
+    }
+
+    // Set session attributes with UTM params and enhanced context
+    const utm = getUtmParams();
+    if (faro) {
+      faro.api.setSession({
+        attributes: {
+          ...utm,
+          viewport: `${window.innerWidth}x${window.innerHeight}`,
+          language: navigator.language,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      });
+    }
+
+    // Global error handlers for unhandled errors
+    window.addEventListener('unhandledrejection', (event) => {
+      if (faro) {
+        const message = event.reason?.message || String(event.reason);
+        faro.api.pushError(new Error(message), {
+          context: { type: 'unhandledrejection' },
+        });
+      }
+    });
+
+    window.addEventListener('error', (event) => {
+      if (faro && event.error) {
+        faro.api.pushError(event.error, {
+          context: {
+            type: 'global_error',
+            filename: event.filename || '',
+            lineno: String(event.lineno || 0),
+          },
+        });
+      }
+    });
+
+    // Track pageview
+    if (faro) {
+      faro.api.pushEvent('page_view', {
+        path: location.pathname,
+        referrer: document.referrer || '',
+        title: document.title,
+      });
+    }
+
+    // Track page exit with time on page
+    const startTime = Date.now();
+    window.addEventListener('beforeunload', () => {
+      const secs = Math.floor((Date.now() - startTime) / 1000);
+      if (faro) {
+        faro.api.pushEvent('page_exit', {
+          path: location.pathname,
+          time_on_page: secs.toString(),
+          referrer: document.referrer || '',
+        });
+      }
+    });
+
+  }
+
+  // Expose faro instance and helper for consent banner and other components
+  declare global {
+    interface Window {
+      grafanaFaro: typeof faro;
+      enableGrafanaFaro: () => void;
+    }
+  }
+
+  window.grafanaFaro = faro;
+
+  // Function to enable tracking after consent is granted
+  window.enableGrafanaFaro = () => {
+    if (window.grafanaFaro) {
+      // Already initialized
+      return;
+    }
+
+    if (!FARO_URL || checkDoNotTrack()) {
+      return;
+    }
+
+    window.grafanaFaro = initializeFaro(createFaroConfig());
+
+    // Track pageview immediately after consent
+    if (window.grafanaFaro) {
+      window.grafanaFaro.api.pushEvent('page_view', {
+        path: location.pathname,
+        referrer: document.referrer || '',
+        title: document.title,
+        consent_granted: 'true',
+      });
+    }
+  };
+</script>
