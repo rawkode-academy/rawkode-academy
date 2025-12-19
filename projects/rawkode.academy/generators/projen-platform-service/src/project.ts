@@ -62,7 +62,7 @@ export class PlatformService extends Project {
 		// Automatically inject ANALYTICS service binding for all services
 		const analyticsBinding = {
 			binding: "ANALYTICS",
-			service: "observability-collector",
+			service: "rawkode-tools-observability-collector",
 		};
 
 		if (this.options.bindings) {
