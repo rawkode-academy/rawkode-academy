@@ -33,12 +33,6 @@ ci: pipelines: [
 ]
 
 tasks: {
-	projen: synth: {
-		command: "bun"
-		args: ["run", ".projenrc.ts"]
-		labels: ["projen"]
-	}
-
 	deploy: {
 		read: {
 			command: "npx"
