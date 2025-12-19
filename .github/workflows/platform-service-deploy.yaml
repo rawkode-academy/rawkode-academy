@@ -37,6 +37,9 @@ jobs:
       - name: Setup cuenv
         uses: cuenv/setup-cuenv@v1
 
+      - name: Generate CUE cube files
+        run: cuenv sync cubes -A
+
       - name: Generate projen files
         run: |
           # Install projen generator dependencies
@@ -45,7 +48,7 @@ jobs:
           bun run types
           cd -
 
-          # Generate projen files for platform services
+          # Generate projen files for platform services (legacy - services not yet migrated to CUE)
           for service in email-preferences email-service emoji-reactions; do
             SERVICE_DIR="projects/rawkode.academy/platform/$service"
             if [ -f "$SERVICE_DIR/.projenrc.ts" ]; then
