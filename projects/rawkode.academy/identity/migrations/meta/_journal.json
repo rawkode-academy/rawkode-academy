@@ -43,6 +43,13 @@
       "when": 1734535000000,
       "tag": "0005_rename_klustered_dev",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1734540000000,
+      "tag": "0006_add_rawkode_news_oauth",
+      "breakpoints": true
     }
   ]
 }
