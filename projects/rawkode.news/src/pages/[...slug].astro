@@ -6,13 +6,22 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 const queryClient = new QueryClient();
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
 const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
-const response = await fetch(
-	`${Astro.url.origin}/api/posts?category=new&page=${page}`
-);
-if (response.ok) {
-	const data = await response.json();
-	queryClient.setQueryData(["posts", "new", page], data);
+const path = Astro.url.pathname.replace(/^\/+|\/+$/g, "");
+const [segment] = path.split("/");
+const feedCategory = ["new", "rka", "show", "ask"].includes(segment)
+	? segment
+	: null;
+
+if (feedCategory) {
+	const response = await fetch(
+		`${Astro.url.origin}/api/posts?category=${feedCategory}&page=${page}`
+	);
+	if (response.ok) {
+		const data = await response.json();
+		queryClient.setQueryData(["posts", feedCategory, page], data);
+	}
 }
+
 const dehydratedState = dehydrate(queryClient);
 ---
 
