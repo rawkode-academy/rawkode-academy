@@ -33,6 +33,14 @@
 			"id": "43609d841c1f451481ffe836b3979eb9"
 		}
 	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "rawkode-news",
+			"database_id": "e0b5fca4-c343-47ef-a6e6-aa9be75753ea",
+			"migrations_dir": "drizzle"
+		}
+	],
 	"routes": [
 		{
 			"pattern": "rawkode.news",
