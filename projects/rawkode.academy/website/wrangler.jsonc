@@ -39,6 +39,10 @@
 			"service": "platform-emoji-reactions-write-model"
 		},
 		{
+			"binding": "WATCH_HISTORY",
+			"service": "platform-watch-history-write-model"
+		},
+		{
 			"binding": "IDENTITY",
 			"service": "rawkode-academy-identity"
 		},

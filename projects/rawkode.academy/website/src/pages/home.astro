@@ -1,0 +1,118 @@
+---
+import { getCollection } from "astro:content";
+import VideoFeed from "@/components/video/video-feed.astro";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+
+if (!user) {
+	return Astro.redirect(`/sign-in?returnTo=${encodeURIComponent("/home")}`);
+}
+
+// No caching for personalized content
+Astro.response.headers.set("Cache-Control", "private, no-store");
+
+// Fetch continue watching list from the API
+interface WatchPosition {
+	videoId: string;
+	positionSeconds: number;
+	updatedAt: string;
+}
+
+let continueWatchingData: WatchPosition[] = [];
+
+try {
+	const response = await fetch("https://api.rawkode.academy/graphql", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			query: `
+				query ContinueWatching($userId: String!, $limit: Int) {
+					continueWatching(userId: $userId, limit: $limit) {
+						videoId
+						positionSeconds
+						updatedAt
+					}
+				}
+			`,
+			variables: { userId: user.id, limit: 12 },
+		}),
+	});
+	const result = (await response.json()) as {
+		data?: { continueWatching?: WatchPosition[] };
+	};
+	continueWatchingData = result?.data?.continueWatching ?? [];
+} catch {
+	// Silently fail - show empty state
+}
+
+// Get all videos from collection to match with watch history
+const allVideos = await getCollection("videos");
+
+// Map watch history to video data, preserving the order from watch history
+const continueWatchingVideos = continueWatchingData
+	.map((watchItem) => {
+		const video = allVideos.find((v) => v.data.id === watchItem.videoId);
+		if (!video) return null;
+
+		return {
+			id: video.data.id,
+			title: video.data.title,
+			slug: video.data.slug,
+			thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+			streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
+			duration: typeof video.data.duration === "number" ? video.data.duration : 0,
+			publishedAt:
+				video.data.publishedAt instanceof Date
+					? video.data.publishedAt.toISOString()
+					: String(video.data.publishedAt),
+			positionSeconds: watchItem.positionSeconds,
+		};
+	})
+	.filter((v): v is NonNullable<typeof v> => v !== null);
+---
+
+<Page title="Home - Rawkode Academy" description="Your personalized dashboard">
+	<div class="container-content content-px py-8">
+		<div class="mb-8">
+			<h1 class="text-3xl font-bold text-primary-content mb-2">
+				Welcome back{user.name ? `, ${user.name.split(" ")[0]}` : ""}
+			</h1>
+			<p class="text-secondary-content">
+				Pick up where you left off
+			</p>
+		</div>
+
+		{continueWatchingVideos.length > 0 ? (
+			<VideoFeed
+				title="Continue Watching"
+				description="Resume your recently watched videos"
+				videos={continueWatchingVideos}
+			/>
+		) : (
+			<div class="text-center py-16">
+				<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+					<svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+				</div>
+				<h2 class="text-xl font-semibold text-primary-content mb-2">No watch history yet</h2>
+				<p class="text-secondary-content mb-6">
+					Start watching videos and they'll appear here so you can easily continue where you left off.
+				</p>
+				<a
+					href="/watch"
+					class="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors"
+				>
+					Browse Videos
+					<svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+					</svg>
+				</a>
+			</div>
+		)}
+	</div>
+</Page>

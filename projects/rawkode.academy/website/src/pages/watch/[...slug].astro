@@ -181,6 +181,36 @@ const breadcrumbElements = showEntry
 
 const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
+
+// Get user authentication status and watch position
+const user = Astro.locals.user;
+const isAuthenticated = !!user;
+
+let initialPosition = 0;
+if (isAuthenticated && user?.id) {
+	try {
+		const response = await fetch("https://api.rawkode.academy/graphql", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				query: `
+					query GetWatchPosition($userId: String!, $videoId: String!) {
+						getWatchPosition(userId: $userId, videoId: $videoId) {
+							positionSeconds
+						}
+					}
+				`,
+				variables: { userId: user.id, videoId: video.data.id },
+			}),
+		});
+		const result = await response.json() as {
+			data?: { getWatchPosition?: { positionSeconds?: number } };
+		};
+		initialPosition = result?.data?.getWatchPosition?.positionSeconds ?? 0;
+	} catch {
+		// Silently fail - not critical
+	}
+}
 ---
 
 <Page
@@ -229,6 +259,8 @@ const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/strea
 						client:only="vue"
 						video={video.data.id}
 						thumbnailUrl={thumbnailUrl}
+						initialPosition={initialPosition}
+						isAuthenticated={isAuthenticated}
 					/>
 				</div>
 

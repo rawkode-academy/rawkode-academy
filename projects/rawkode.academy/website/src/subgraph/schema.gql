@@ -78,12 +78,14 @@ type Technology @key(fields: "id") {
   source: String
   status: String
   subcategory: String
+  terms: [String!]
   useCases: [String!]
   videos: [Video!]
   website: String
 }
 
 type Video @key(fields: "id") {
+  category: VideoCategory
   chapters: [Chapter!]
   description: String
   duration: Int
@@ -97,6 +99,20 @@ type Video @key(fields: "id") {
   technologies: [Technology!]
   thumbnailUrl: String
   title: String
+  type: VideoType
+}
+
+enum VideoCategory {
+  announcement
+  editorial
+  interview
+  review
+  tutorial
+}
+
+enum VideoType {
+  live
+  recorded
 }
 
 scalar _Any
