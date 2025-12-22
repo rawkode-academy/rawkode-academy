@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { oidcProvider, organization } from "better-auth/plugins";
+import { eq, and, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
 import {
@@ -61,6 +62,9 @@ export const createAuth = async (env: AuthEnv) => {
 			github: {
 				clientId: githubClientId,
 				clientSecret: githubClientSecret,
+				mapProfileToUser: (profile) => ({
+					username: profile.login,
+				}),
 			},
 		},
 
@@ -196,6 +200,53 @@ export const createAuth = async (env: AuthEnv) => {
 							},
 							env.ANALYTICS,
 						);
+
+						// Backfill username for existing users who don't have one
+						const userRecord = await db.query.user.findFirst({
+							where: eq(schema.user.id, session.userId),
+						});
+
+						if (!userRecord?.username) {
+							const accountRecord = await db.query.account.findFirst({
+								where: and(
+									eq(schema.account.userId, session.userId),
+									eq(schema.account.providerId, "github"),
+								),
+							});
+
+							if (accountRecord?.accessToken) {
+								try {
+									const response = await fetch("https://api.github.com/user", {
+										headers: {
+											Authorization: `Bearer ${accountRecord.accessToken}`,
+											Accept: "application/vnd.github+json",
+											"User-Agent": "rawkode-academy-identity",
+										},
+									});
+
+									if (response.ok) {
+										const profile = (await response.json()) as { login?: string };
+										if (profile.login) {
+											await db
+												.update(schema.user)
+												.set({ username: profile.login })
+												.where(eq(schema.user.id, session.userId));
+										}
+									}
+								} catch (error) {
+									await captureAuthEvent(
+										{
+											event: "auth.username_backfill_failed",
+											distinctId: session.userId,
+											properties: {
+												error: error instanceof Error ? error.message : "Unknown error",
+											},
+										},
+										env.ANALYTICS,
+									);
+								}
+							}
+						}
 					},
 				},
 			},
