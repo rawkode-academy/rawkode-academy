@@ -17,6 +17,7 @@ const schemasDir = join(__dirname, "../schemas");
 const PLATFORM_SERVICES = [
 	"emoji-reactions",
 	"email-preferences",
+	"watch-history",
 ];
 
 // Helper function to collect schema from a service directory
