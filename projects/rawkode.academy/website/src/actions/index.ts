@@ -5,6 +5,7 @@ import { newsletter } from "./newsletter";
 import { addReaction, removeReaction } from "./reaction";
 import { trackShareEvent } from "./share";
 import { trackVideoEvent } from "./video";
+import { updateWatchPosition } from "./watch-history";
 
 export const server = {
 	auth,
@@ -15,4 +16,5 @@ export const server = {
 	trackShareEvent,
 	addReaction,
 	removeReaction,
+	updateWatchPosition,
 };

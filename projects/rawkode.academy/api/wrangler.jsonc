@@ -37,6 +37,7 @@
 		{ "binding": "WEBSITE", "service": "rawkode-academy-website" },
 		{ "binding": "EMOJI_REACTIONS", "service": "platform-emoji-reactions-read-model" },
 		{ "binding": "EMAIL_PREFERENCES", "service": "platform-email-preferences-read-model" },
+		{ "binding": "WATCH_HISTORY", "service": "platform-watch-history-read-model" },
 		{ "binding": "IDENTITY", "service": "rawkode-academy-identity" }
 	]
 }

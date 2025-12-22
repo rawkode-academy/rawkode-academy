@@ -36,7 +36,24 @@
       "mcp__posthog__insight-create-from-query",
       "mcp__posthog__add-insight-to-dashboard",
       "Bash(bunx astro check:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(xargs ls:*)",
+      "Bash(git reset:*)",
+      "Bash(projects/rawkode.academy/platform/watch-history/.gitignore )",
+      "Bash(projects/rawkode.academy/platform/watch-history/service.cue )",
+      "Bash(projects/rawkode.academy/cubes/platform-service.cue)",
+      "Bash(projects/rawkode.academy/api/scripts/collect-schemas.ts )",
+      "Bash(projects/rawkode.academy/api/scripts/compose.ts )",
+      "Bash(projects/rawkode.academy/api/src/transport/service-binding.ts )",
+      "Bash(projects/rawkode.academy/api/wrangler.jsonc )",
+      "Bash(projects/rawkode.academy/website/src/actions/index.ts )",
+      "Bash(projects/rawkode.academy/website/src/actions/watch-history.ts )",
+      "Bash(projects/rawkode.academy/website/src/components/video/player.vue )",
+      "Bash(projects/rawkode.academy/website/src/pages/api/watch-position.ts )",
+      "Bash(projects/rawkode.academy/website/src/pages/home.astro )",
+      "Bash(projects/rawkode.academy/website/src/pages/watch/[...slug].astro )",
+      "Bash(projects/rawkode.academy/website/src/types/service-bindings.d.ts )",
+      "Bash(projects/rawkode.academy/website/wrangler.jsonc)"
     ],
     "deny": []
   }

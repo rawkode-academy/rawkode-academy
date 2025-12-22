@@ -14,6 +14,7 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	// User interaction services (dynamic data)
 	"emoji-reactions": "EMOJI_REACTIONS",
 	"email-preferences": "EMAIL_PREFERENCES",
+	"watch-history": "WATCH_HISTORY",
 };
 
 export interface ServiceBindingTransportContext {
