@@ -12,6 +12,8 @@ category: interview
 technologies:
   - kairos
 show: cloud-native-compass
+duration: 2399
+audioFileSize: 57588862
 chapters:
   - startTime: 0
     title: Introduction to Kairos - The Immutable OS
