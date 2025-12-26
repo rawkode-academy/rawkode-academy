@@ -27,7 +27,7 @@ jobs:
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: collect-schemas
-      run: cuenv task collect-schemas --skip-dependencies
+      run: cuenv task collect-schemas -e production --skip-dependencies
       working-directory: projects/rawkode.academy/api
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +44,7 @@ jobs:
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: compose
-      run: cuenv task compose --skip-dependencies
+      run: cuenv task compose -e production --skip-dependencies
       working-directory: projects/rawkode.academy/api
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,7 +61,7 @@ jobs:
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: deploy
-      run: cuenv task deploy --skip-dependencies
+      run: cuenv task deploy -e production --skip-dependencies
       working-directory: projects/rawkode.academy/api
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +76,7 @@ jobs:
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: install
-      run: cuenv task install --skip-dependencies
+      run: cuenv task install -e production --skip-dependencies
       working-directory: projects/rawkode.academy/api
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

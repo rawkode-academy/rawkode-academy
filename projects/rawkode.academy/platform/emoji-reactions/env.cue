@@ -16,7 +16,8 @@ env: {
 
 ci: pipelines: [
 	{
-		name: "default"
+		name:        "default"
+		environment: "production"
 		when: {
 			branch:        ["main"]
 			defaultBranch: true
