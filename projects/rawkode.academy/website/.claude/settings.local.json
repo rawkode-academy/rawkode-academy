@@ -54,7 +54,13 @@
       "Bash(for f in **/*.md)",
       "Bash(do if ! grep -q \"audioFileSize:\" \"$f\")",
       "Bash(then echo \"$f\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(gh run list:*)",
+      "Bash(gh run rerun:*)",
+      "Bash(xargs:*)",
+      "Bash(for id in 20525565380 20525565367 20525565352 20525565347 20525565344 20525565341 20525565339 20525565338 20525565337 20525565336 20525565333 20525565331 20525565330 20525565328 20525565327 20525565324)",
+      "Bash(do echo \"Retrying $id...\")",
+      "Bash(gh run view:*)"
     ],
     "deny": []
   }
