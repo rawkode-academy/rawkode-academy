@@ -22,6 +22,10 @@
     return navigator.doNotTrack === '1' || (window as any).doNotTrack === '1';
   }
 
+  function isLocalhost(): boolean {
+    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  }
+
   // Faro v2 configuration factory
   function createFaroConfig() {
     return {
@@ -50,7 +54,7 @@
 
   const consent = getConsent();
   const consentGranted = consent === 'granted';
-  const shouldTrack = consentGranted && !checkDoNotTrack() && FARO_URL;
+  const shouldTrack = consentGranted && !checkDoNotTrack() && !isLocalhost() && FARO_URL;
 
   // Initialize Faro if consent is granted and URL is configured
   let faro: ReturnType<typeof initializeFaro> | null = null;
@@ -151,7 +155,7 @@
       return;
     }
 
-    if (!FARO_URL || checkDoNotTrack()) {
+    if (!FARO_URL || checkDoNotTrack() || isLocalhost()) {
       return;
     }
 
