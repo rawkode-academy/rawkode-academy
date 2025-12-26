@@ -16,3 +16,14 @@ read-model/main.ts
 read-model/publish.ts
 read-model/schema.gql
 write-model/wrangler.jsonc
+
+# Cube-generated files
+README.md
+biome.json
+drizzle.config.ts
+package.json
+read-model/main.ts
+read-model/publish.ts
+read-model/wrangler.jsonc
+tsconfig.json
+write-model/wrangler.jsonc
