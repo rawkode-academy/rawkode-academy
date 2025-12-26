@@ -3,7 +3,12 @@
 
 name: rawkode-academy-platform-emoji-reactions-pull-request
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+    - cue.mod/**
+    - projects/rawkode.academy/platform/emoji-reactions/**
+    - projects/rawkode.academy/platform/emoji-reactions/env.cue
+    - projects/rawkode.academy/platform/emoji-reactions/schema/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

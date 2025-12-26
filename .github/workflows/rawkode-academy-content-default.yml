@@ -6,6 +6,11 @@ on:
   push:
     branches:
     - main
+    paths:
+    - cue.mod/**
+    - projects/rawkode.academy/content/**
+    - projects/rawkode.academy/content/env.cue
+    - projects/rawkode.academy/content/schema/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
@@ -26,11 +31,16 @@ jobs:
         fetch-depth: 2
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
+    - name: Setup 1Password
+      run: cuenv secrets setup onepassword
+      env:
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: deploy
       run: cuenv task deploy -e production --skip-dependencies
       working-directory: projects/rawkode.academy/content
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
   install:
     name: install
     runs-on: ubuntu-latest
@@ -41,8 +51,13 @@ jobs:
         fetch-depth: 2
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
+    - name: Setup 1Password
+      run: cuenv secrets setup onepassword
+      env:
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: install
       run: cuenv task install -e production --skip-dependencies
       working-directory: projects/rawkode.academy/content
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

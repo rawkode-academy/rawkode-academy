@@ -21,15 +21,10 @@ ci: pipelines: [
 		name:        "default"
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 		}
-		tasks: ["install", "deploy"]
-	},
-	{
-		name: "pull-request"
-		when: pullRequest: true
-		tasks: ["install"]
+		tasks: ["deploy"]
 	},
 ]
 

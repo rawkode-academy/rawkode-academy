@@ -3,7 +3,12 @@
 
 name: infrastructure-dns-pull-request
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+    - cue.mod/**
+    - infrastructure/dns/**
+    - infrastructure/dns/env.cue
+    - infrastructure/dns/schema/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

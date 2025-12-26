@@ -3,7 +3,12 @@
 
 name: rawkode-academy-platform-zitadel-zulip-connector-pull-request
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+    - cue.mod/**
+    - projects/rawkode.academy/platform/zitadel-zulip-connector/**
+    - projects/rawkode.academy/platform/zitadel-zulip-connector/env.cue
+    - projects/rawkode.academy/platform/zitadel-zulip-connector/schema/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

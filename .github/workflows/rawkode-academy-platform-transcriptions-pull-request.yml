@@ -3,7 +3,12 @@
 
 name: rawkode-academy-platform-transcriptions-pull-request
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+    - cue.mod/**
+    - projects/rawkode.academy/platform/transcriptions/**
+    - projects/rawkode.academy/platform/transcriptions/env.cue
+    - projects/rawkode.academy/platform/transcriptions/schema/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
