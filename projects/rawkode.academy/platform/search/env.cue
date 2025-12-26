@@ -6,7 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-platform-search"
 
-hooks: onEnter: nix: schema.#NixFlake
+runtime: schema.#DevenvRuntime
+hooks: onEnter: devenv: schema.#Devenv
 
 ci: pipelines: [
 	{
