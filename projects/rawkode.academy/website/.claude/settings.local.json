@@ -48,7 +48,13 @@
       "Bash(cat:*)",
       "mcp__MCP_DOCKER__fetch",
       "mcp__posthog__dashboard-get",
-      "mcp__posthog__query-generate-hogql-from-question"
+      "mcp__posthog__query-generate-hogql-from-question",
+      "WebFetch(domain:rawkode.academy)",
+      "Bash(xargs ls:*)",
+      "Bash(for f in **/*.md)",
+      "Bash(do if ! grep -q \"audioFileSize:\" \"$f\")",
+      "Bash(then echo \"$f\")",
+      "Bash(fi)"
     ],
     "deny": []
   }

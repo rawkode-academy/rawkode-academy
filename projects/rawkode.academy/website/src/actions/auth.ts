@@ -1,6 +1,9 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { getSignInUrl, signOut as serverSignOut } from "@/lib/auth/server";
+import {
+	signOut as serverSignOut,
+	SESSION_COOKIE_NAME,
+} from "@/lib/auth/server";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
 export const auth = {
@@ -12,7 +15,19 @@ export const auth = {
 			// Best-effort call to identity service to invalidate server-side session
 			await serverSignOut(cookies, context.locals.runtime?.env);
 
-			// Always clear local session cookies (both secure and non-secure variants)
+			// Clear local OIDC session cookie
+			const localSessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value;
+			if (localSessionId) {
+				const sessionKv = context.locals.runtime?.env?.SESSION as
+					| KVNamespace
+					| undefined;
+				if (sessionKv) {
+					await sessionKv.delete(`session:${localSessionId}`);
+				}
+			}
+			context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
+
+			// Clear legacy Better Auth session cookies (both secure and non-secure variants)
 			context.cookies.delete("__Secure-better-auth.session_token", {
 				path: "/",
 				domain: ".rawkode.academy",
@@ -42,15 +57,12 @@ export const auth = {
 
 	getLoginUrl: defineAction({
 		input: z.object({
-			callbackURL: z.string().optional(),
+			returnTo: z.string().optional(),
 		}),
-		handler: async (input, context) => {
-			const origin = new URL(context.request.url).origin;
-			const callbackURL = input.callbackURL
-				? new URL(input.callbackURL, origin).toString()
-				: undefined;
-
-			return { url: getSignInUrl(callbackURL) };
+		handler: async (input) => {
+			const returnTo = input.returnTo || "/";
+			// Return the sign-in endpoint URL which handles the OIDC flow
+			return { url: `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}` };
 		},
 	}),
 };
