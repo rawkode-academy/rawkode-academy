@@ -1,4 +1,6 @@
 ---
+import VideoProgressBar from "@/components/video/VideoProgressBar.vue";
+
 interface Video {
 	id: string;
 	title: string;
@@ -13,9 +15,11 @@ interface Props {
 	title: string;
 	description: string;
 	videos?: Video[];
+	watchPositions?: Record<string, number>;
+	isAuthenticated?: boolean;
 }
 
-const { title, description, videos: passedVideos = [] } = Astro.props;
+const { title, description, videos: passedVideos = [], watchPositions = {}, isAuthenticated = false } = Astro.props;
 
 const videos: Video[] = passedVideos.map((v) => ({
 	id: v.id,
@@ -51,6 +55,15 @@ function formatDate(dateString: string) {
 		day: "numeric",
 	});
 }
+
+function calculateProgress(videoId: string, duration: number): number | null {
+	const positionSeconds = watchPositions[videoId];
+	if (!positionSeconds || duration <= 0) {
+		return null;
+	}
+	const progress = (positionSeconds / duration) * 100;
+	return Math.min(progress, 100);
+}
 ---
 
 <section class="section-py-tight">
@@ -68,6 +81,17 @@ function formatDate(dateString: string) {
 						class="w-full h-full object-cover rounded-lg shadow-md transition-transform group-hover:scale-105"
 						loading="lazy"
 					/>
+					{(() => {
+						if (!isAuthenticated) return null;
+						const progress = calculateProgress(video.id, video.duration);
+						return progress !== null ? (
+							<VideoProgressBar 
+								progress={progress} 
+								overlay={true}
+								client:visible 
+							/>
+						) : null;
+					})()}
 					<div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
 						{formatDuration(video.duration)}
 					</div>
