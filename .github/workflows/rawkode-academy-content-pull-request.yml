@@ -3,7 +3,12 @@
 
 name: rawkode-academy-content-pull-request
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+    - cue.mod/**
+    - projects/rawkode.academy/content/**
+    - projects/rawkode.academy/content/env.cue
+    - projects/rawkode.academy/content/schema/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
