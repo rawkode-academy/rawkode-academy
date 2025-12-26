@@ -17,31 +17,18 @@ permissions:
   checks: write
   pull-requests: write
 jobs:
-  install:
-    name: install
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 2
-    - name: Setup cuenv (release)
-      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
-    - name: install
-      run: cuenv task install --skip-dependencies
-      working-directory: infrastructure/dns
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   plan:
     name: plan
     runs-on: ubuntu-latest
-    needs:
-    - install
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 2
+    - name: Install Nix
+      uses: DeterminateSystems/nix-installer-action@v16
+      with:
+        extra-conf: accept-flake-config = true
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: plan
