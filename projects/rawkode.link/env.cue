@@ -6,17 +6,12 @@ schema.#Project
 
 name: "rawkode-link"
 
-env: {
-	environment: production: {
-		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
-			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/api-tokens/all-access"
-		}
-	}
-}
+
 
 ci: pipelines: [
 	{
-		name: "default"
+		name:        "default"
+		environment: "production"
 		when: {
 			branch:        ["main"]
 			defaultBranch: true
