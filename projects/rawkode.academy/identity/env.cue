@@ -18,13 +18,6 @@ tasks: {
 	}
 
 	bun: {
-		install: {
-			command: "bun"
-			args: ["install"]
-			workspaces: ["bun"]
-			inputs: ["bun.lock", "package.json"]
-		}
-
 		dev: {
 			command: "bunx"
 			args: ["wrangler", "dev"]
