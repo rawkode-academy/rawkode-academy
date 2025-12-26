@@ -13,12 +13,5 @@ env: {
 	}
 }
 
-workspaces: bun: {
-	hooks: {
-		beforeInstall: [
-			// Set up projen-platform-service before generators run
-			schema.#TaskRef & {ref: "#projen-generator:types"},
-			schema.#MatchHook & {match: labels: ["projen"]},
-		]
-	}
-}
+workspaces: bun: {}
+
