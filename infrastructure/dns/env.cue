@@ -6,6 +6,9 @@ schema.#Project
 
 name: "infrastructure-dns"
 
+runtime: schema.#NixRuntime
+hooks: onEnter: nix: schema.#NixFlake
+
 env: {
 	environment: production: {
 		TF_HTTP_USERNAME: "terraform"

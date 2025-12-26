@@ -6,15 +6,12 @@ schema.#Project
 
 name: "rawkode-academy-website"
 
+runtime: schema.#DevenvRuntime
+hooks: onEnter: devenv: schema.#Devenv
+
 env: {
 	GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
 	DISABLE_GAME_AUTH: true
-}
-
-hooks: onEnter: devenv: {
-	command: "devenv"
-	args: ["print-dev-env"]
-	source: true
 }
 
 tasks: {
