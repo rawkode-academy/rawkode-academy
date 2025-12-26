@@ -25,7 +25,7 @@ jobs:
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: deploy.http
-      run: cuenv task deploy.http --skip-dependencies
+      run: cuenv task deploy.http -e production --skip-dependencies
       working-directory: projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,7 +40,7 @@ jobs:
     - name: Setup cuenv (release)
       run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: install
-      run: cuenv task install --skip-dependencies
+      run: cuenv task install -e production --skip-dependencies
       working-directory: projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
