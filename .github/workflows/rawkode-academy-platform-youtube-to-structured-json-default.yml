@@ -19,31 +19,9 @@ permissions:
   checks: write
   pull-requests: write
 jobs:
-  install:
-    name: install
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 2
-    - name: Setup cuenv (release)
-      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
-    - name: Setup 1Password
-      run: cuenv secrets setup onepassword
-      env:
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    - name: install
-      run: cuenv task install -e production --skip-dependencies
-      working-directory: projects/rawkode.academy/platform/youtube-to-structured-json
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
   run:
     name: run
     runs-on: ubuntu-latest
-    needs:
-    - install
     steps:
     - name: Checkout
       uses: actions/checkout@v4
