@@ -3,7 +3,12 @@
 
 name: rawkode-link-pull-request
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+    - cue.mod/**
+    - projects/rawkode.link/**
+    - projects/rawkode.link/env.cue
+    - projects/rawkode.link/schema/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

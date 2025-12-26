@@ -3,7 +3,12 @@
 
 name: rawkode-academy-platform-watch-history-pull-request
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+    - cue.mod/**
+    - projects/rawkode.academy/platform/watch-history/**
+    - projects/rawkode.academy/platform/watch-history/env.cue
+    - projects/rawkode.academy/platform/watch-history/schema/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

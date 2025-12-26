@@ -16,23 +16,13 @@ ci: pipelines: [
 			branch:        ["main"]
 			defaultBranch: true
 		}
-		tasks: ["install", "deploy"]
+		tasks: ["deploy"]
 	},
-	{
-		name: "pull-request"
-		when: pullRequest: true
-		tasks: ["install"]
-	},
-]
+	]
 
 tasks: {
-	install: {
-		command: "bun"
-		args: ["install"]
-	}
 	deploy: {
 		command: "npx"
 		args: ["wrangler", "deploy"]
-		dependsOn: ["install"]
 	}
 }
