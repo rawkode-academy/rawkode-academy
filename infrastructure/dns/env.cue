@@ -25,23 +25,17 @@ ci: pipelines: [
 	{
 		name: "pull-request"
 		when: pullRequest: true
-		tasks: ["install", "plan"]
+		tasks: ["plan"]
 	},
 ]
 
 tasks: {
-	install: {
-		command: "npm"
-		args: ["install"]
-	}
 	plan: {
 		command: "npx"
 		args: ["cdktf", "plan"]
-		dependsOn: ["install"]
 	}
 	apply: {
 		command: "npx"
 		args: ["cdktf", "apply", "--auto-approve"]
-		dependsOn: ["install"]
 	}
 }

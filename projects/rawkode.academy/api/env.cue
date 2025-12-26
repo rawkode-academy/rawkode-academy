@@ -14,24 +14,14 @@ ci: pipelines: [
 			branch:        ["main"]
 			defaultBranch: true
 		}
-		tasks: ["install", "deploy"]
-	},
-	{
-		name: "pull-request"
-		when: pullRequest: true
-		tasks: ["install"]
+		tasks: ["deploy"]
 	},
 ]
 
 tasks: {
-	install: {
-		command: "bun"
-		args: ["install"]
-	}
 	"collect-schemas": {
 		command: "bun"
 		args: ["run", "scripts/collect-schemas.ts"]
-		dependsOn: ["install"]
 	}
 	compose: {
 		command: "bun"

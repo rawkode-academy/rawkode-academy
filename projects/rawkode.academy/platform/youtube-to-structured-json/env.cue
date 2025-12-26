@@ -28,23 +28,13 @@ ci: pipelines: [
 			branch:        ["main"]
 			defaultBranch: true
 		}
-		tasks: ["install", "run"]
-	},
-	{
-		name: "pull-request"
-		when: pullRequest: true
-		tasks: ["install"]
+		tasks: ["run"]
 	},
 ]
 
 tasks: {
-	install: {
-		command: "bun"
-		args: ["install"]
-	}
 	run: {
 		command: "bun"
 		args: ["run", "start"]
-		dependsOn: ["install"]
 	}
 }

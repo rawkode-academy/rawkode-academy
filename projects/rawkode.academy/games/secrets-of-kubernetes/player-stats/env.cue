@@ -22,25 +22,15 @@ ci: pipelines: [
 			branch:        ["main"]
 			defaultBranch: true
 		}
-		tasks: ["install", "deploy"]
-	},
-	{
-		name: "pull-request"
-		when: pullRequest: true
-		tasks: ["install"]
+		tasks: ["deploy"]
 	},
 ]
 
 tasks: {
-	install: {
-		command: "bun"
-		args: ["install"]
-	}
 	deploy: {
 		http: {
 			command: "npx"
 			args: ["wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 		}
-		dependsOn: ["install"]
 	}
 }
