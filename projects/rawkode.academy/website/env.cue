@@ -10,9 +10,21 @@ runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
 
 env: {
-	GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
+	GRAPHQL_ENDPOINT:  "https://api.rawkode.academy/"
 	DISABLE_GAME_AUTH: true
 }
+
+ci: pipelines: [
+	{
+		name:        "default"
+		environment: "production"
+		when: {
+			branch: ["main"]
+			defaultBranch: true
+		}
+		tasks: ["deploy"]
+	},
+]
 
 tasks: {
 	dev: {
