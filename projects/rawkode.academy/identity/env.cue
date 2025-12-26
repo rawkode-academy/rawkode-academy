@@ -8,6 +8,18 @@ name: "rawkode-academy-identity"
 
 workspaces: bun: {}
 
+ci: pipelines: [
+	{
+		name:        "default"
+		environment: "production"
+		when: {
+			branch: ["main"]
+			defaultBranch: true
+		}
+		tasks: ["deploy"]
+	},
+]
+
 tasks: {
 	auth: {
 		generate: {
@@ -43,6 +55,7 @@ tasks: {
 		command: "bun"
 		args: ["wrangler", "deploy"]
 		workspaces: ["bun"]
+		dependsOn: ["migrations.remote"]
 		inputs: [
 			"astro.config.mjs",
 			"bun.lock",
