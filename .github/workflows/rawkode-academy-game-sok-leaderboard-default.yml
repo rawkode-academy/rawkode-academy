@@ -23,7 +23,7 @@ jobs:
       with:
         fetch-depth: 2
     - name: Setup cuenv (release)
-      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv
+      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: deploy.http
       run: cuenv task deploy.http --skip-dependencies
       working-directory: projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard
@@ -38,7 +38,7 @@ jobs:
       with:
         fetch-depth: 2
     - name: Setup cuenv (release)
-      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv
+      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
     - name: install
       run: cuenv task install --skip-dependencies
       working-directory: projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard
