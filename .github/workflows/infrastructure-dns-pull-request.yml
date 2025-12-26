@@ -26,10 +26,10 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 2
-    - name: Setup cuenv
-      run: . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv
+    - name: Setup cuenv (release)
+      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv
     - name: install
-      run: cuenv task install
+      run: cuenv task install --skip-dependencies
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   plan:
@@ -42,9 +42,9 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 2
-    - name: Setup cuenv
-      run: . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv
+    - name: Setup cuenv (release)
+      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv
     - name: plan
-      run: cuenv task plan
+      run: cuenv task plan --skip-dependencies
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
