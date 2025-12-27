@@ -1,4 +1,5 @@
 import { getCollection, getEntries } from "astro:content";
+import { getImage } from "astro:assets";
 import type { APIContext } from "astro";
 import { generateRssFeed } from "feedsmith";
 
@@ -11,6 +12,38 @@ function getSquaredArtworkUrl(site: string, originalUrl: string): string {
 	// fit=cover crops the image to fill the dimensions
 	const params = "width=1400,height=1400,fit=cover,format=jpeg,quality=90";
 	return `${site}/cdn-cgi/image/${params}/${originalUrl}`;
+}
+
+/**
+ * Ensure itunes:explicit is present in the feed.
+ * feedsmith omits itunes:explicit when value is false, but PSP-1 and Apple require it.
+ * This function adds <itunes:explicit>false</itunes:explicit> where missing.
+ */
+function ensureItunesExplicit(rss: string, isExplicit: boolean): string {
+	const explicitValue = isExplicit ? "true" : "false";
+
+	// Add channel-level itunes:explicit if missing (after itunes:author or itunes:type)
+	if (!rss.includes("<itunes:explicit>")) {
+		// Insert after <itunes:author> or <itunes:type> in the channel
+		rss = rss.replace(
+			/(<itunes:author>[^<]*<\/itunes:author>)/,
+			`$1\n    <itunes:explicit>${explicitValue}</itunes:explicit>`,
+		);
+	}
+
+	// Add item-level itunes:explicit if missing (after each item's itunes:author)
+	// Match items that have itunes elements but no itunes:explicit
+	rss = rss.replace(
+		/(<item>[\s\S]*?)(<itunes:author>[^<]*<\/itunes:author>)([\s\S]*?)(<\/item>)/g,
+		(match, before, author, after, close) => {
+			if (!match.includes("<itunes:explicit>")) {
+				return `${before}${author}\n      <itunes:explicit>${explicitValue}</itunes:explicit>${after}${close}`;
+			}
+			return match;
+		},
+	);
+
+	return rss;
 }
 
 export async function getStaticPaths() {
@@ -61,16 +94,28 @@ export async function GET(context: APIContext) {
 		? new Date(firstVideo.data.publishedAt)
 		: new Date();
 
-	// Use podcast.artworkUrl if available, otherwise fall back to thumbnail
-	// Apply square cropping for Apple Podcasts requirements
-	const originalShowImageUrl = podcastConfig?.artworkUrl
-		? podcastConfig.artworkUrl
-		: firstVideo
-			? `https://content.rawkode.academy/videos/${firstVideo.data.id}/thumbnail.jpg`
-			: "";
-	const showImageUrl = originalShowImageUrl
-		? getSquaredArtworkUrl(site, originalShowImageUrl)
-		: "";
+	// Get show artwork URL from cover image, artworkUrl config, or fall back to first video thumbnail
+	// Priority: 1) show.cover.image (local asset), 2) podcast.artworkUrl, 3) first video thumbnail
+	let showImageUrl = "";
+
+	if (show.data.cover?.image) {
+		// Use Astro's getImage to process the local cover image
+		// Resize to 1400x1400 for Apple Podcasts requirements
+		const processedImage = await getImage({
+			src: show.data.cover.image,
+			width: 1400,
+			height: 1400,
+			format: "jpeg",
+		});
+		showImageUrl = `${site}${processedImage.src}`;
+	} else if (podcastConfig?.artworkUrl) {
+		// Fall back to configured artworkUrl with Cloudflare resizing
+		showImageUrl = getSquaredArtworkUrl(site, podcastConfig.artworkUrl);
+	} else if (firstVideo) {
+		// Fall back to first video thumbnail
+		const originalThumbnail = `https://content.rawkode.academy/videos/${firstVideo.data.id}/thumbnail.jpg`;
+		showImageUrl = getSquaredArtworkUrl(site, originalThumbnail);
+	}
 
 	// Build items
 	const items = await Promise.all(
@@ -223,7 +268,11 @@ export async function GET(context: APIContext) {
 		},
 	};
 
-	const rss = generateRssFeed(feed);
+	let rss = generateRssFeed(feed);
+
+	// Ensure itunes:explicit is present (feedsmith omits it when false)
+	const isExplicit = podcastConfig?.explicit ?? false;
+	rss = ensureItunesExplicit(rss, isExplicit);
 
 	return new Response(rss, {
 		headers: {
