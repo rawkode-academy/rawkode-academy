@@ -7,19 +7,33 @@ import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
 
-// Set cache headers for ISR
-// Client cache: 5 minutes, Edge cache: 1 hour, Serve stale content for 24 hours during revalidation
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
-);
-Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
+const user = Astro.locals.user;
 
-// Add cache tags for targeted invalidation
-Astro.response.headers.set(
-	"Cache-Tag",
-	"videos-page, videos-list, videos-latest",
-);
+interface WatchPosition {
+	videoId: string;
+	positionSeconds: number;
+	updatedAt: string;
+}
+
+// Set cache headers based on authentication state
+if (user) {
+	// Personalized content must not be publicly cached
+	Astro.response.headers.set("Cache-Control", "private, no-store");
+} else {
+	// Public caching for unauthenticated requests (ISR)
+	// Client cache: 5 minutes, Edge cache: 1 hour, Serve stale content for 24 hours during revalidation
+	Astro.response.headers.set(
+		"Cache-Control",
+		"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+	);
+	Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
+
+	// Add cache tags for targeted invalidation (only for public responses)
+	Astro.response.headers.set(
+		"Cache-Tag",
+		"videos-page, videos-list, videos-latest",
+	);
+}
 
 // Add build timestamp for debugging
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
@@ -30,6 +44,44 @@ const videosPerPage = 16;
 
 // Load published videos (filters out future-dated for scheduled publishing)
 const allVideos = (await getPublishedVideos()).map((v) => v.data);
+
+// Fetch watch positions for authenticated users
+let watchPositionData: WatchPosition[] = [];
+if (user) {
+	try {
+		const response = await fetch("https://api.rawkode.academy/graphql", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				query: `
+					query ContinueWatching($userId: String!, $limit: Int) {
+						continueWatching(userId: $userId, limit: $limit) {
+							videoId
+							positionSeconds
+							updatedAt
+						}
+					}
+				`,
+				variables: { userId: user.id, limit: 100 },
+			}),
+		});
+		const json = (await response.json()) as {
+			data?: { continueWatching?: WatchPosition[] };
+		};
+		watchPositionData = json.data?.continueWatching ?? [];
+	} catch {
+		// Silent failure - page still renders without watch history
+	}
+}
+
+// Transform watch positions into a map
+const watchPositionsMap = watchPositionData.reduce(
+	(acc, item) => {
+		acc[item.videoId] = item.positionSeconds;
+		return acc;
+	},
+	{} as Record<string, number>,
+);
 
 // Featured: first item on page 1
 const featuredVideo = page === 1 ? (allVideos[0] ?? null) : null;
@@ -91,6 +143,8 @@ const hasNextPage = end < allVideos.length;
 			title={page === 1 ? "Latest Videos" : `Videos - Page ${page}`}
 			description={page === 1 ? "Stay up to date with our newest content" : "Browse our video collection"}
 			videos={feedVideos}
+			watchPositions={watchPositionsMap}
+			isAuthenticated={!!user}
 		/>
 
 		{/* Pagination controls */}
