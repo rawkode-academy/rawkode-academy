@@ -33,14 +33,6 @@ import (
 	_nameParts:  strings.Split(serviceName, "-")
 	_pascalName: strings.Join([for p in _nameParts {strings.ToTitle(p)}], "")
 
-	// Validation: require D1 database with binding "DB" when data models are enabled
-	_dbBindingRequired: includeDataModel || includeReadModel || includeWriteModel
-	_hasDbBinding: len([for db in bindings.d1Databases if db.binding == "DB" {db}]) > 0
-	// This constraint forces evaluation failure if DB binding is required but missing
-	if _dbBindingRequired {
-		_hasDbBinding: true
-	}
-
 	// Auto-inject ANALYTICS service binding
 	_analyticsBinding: #ServiceBinding & {
 		binding: "ANALYTICS"
