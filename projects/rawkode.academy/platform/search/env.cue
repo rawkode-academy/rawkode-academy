@@ -20,7 +20,7 @@ ci: pipelines: [
 
 tasks: {
 	deploy: {
-		command: "npx"
+		command: "bunx"
 		args: ["wrangler", "deploy"]
 	}
 }
