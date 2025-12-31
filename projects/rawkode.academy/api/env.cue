@@ -29,7 +29,7 @@ tasks: {
 		dependsOn: ["collect-schemas"]
 	}
 	deploy: {
-		command: "npx"
+		command: "bunx"
 		args: ["wrangler", "deploy"]
 		dependsOn: ["compose"]
 	}

@@ -36,7 +36,7 @@ ci: pipelines: [
 
 tasks: {
 	deploy: {
-		command: "npx"
+		command: "bunx"
 		args: ["wrangler", "deploy", "--config", "./wrangler.jsonc"]
 	}
 	"check-missing": {
