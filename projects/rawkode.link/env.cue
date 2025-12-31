@@ -22,7 +22,7 @@ ci: pipelines: [
 
 tasks: {
 	deploy: {
-		command: "bunx"
-		args: ["wrangler", "deploy"]
+		command: "bun"
+		args: ["x", "wrangler", "deploy"]
 	}
 }
