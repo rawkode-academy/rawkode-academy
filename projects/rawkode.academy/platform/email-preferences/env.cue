@@ -31,12 +31,12 @@ ci: pipelines: [
 tasks: {
 	deploy: {
 		read: {
-			command: "bunx"
-			args: ["wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
+			command: "bun"
+			args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
 		}
 		http: {
-			command: "bunx"
-			args: ["wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+			command: "bun"
+			args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 		}
 	}
 }

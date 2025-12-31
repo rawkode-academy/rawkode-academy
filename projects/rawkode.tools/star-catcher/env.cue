@@ -31,22 +31,22 @@ ci: pipelines: [
 tasks: {
 	cloudflare: {
 		types: {
-			command: "bunx"
-			args: ["wrangler", "types"]
+			command: "bun"
+			args: ["x", "wrangler", "types"]
 			inputs: ["wrangler.jsonc"]
 			outputs: ["worker-configuration.d.ts"]
 		}
 	}
 
 	dev: {
-		command: "bunx"
-		args: ["wrangler", "dev"]
+		command: "bun"
+		args: ["x", "wrangler", "dev"]
 		dependsOn: ["cloudflare.types"]
 	}
 
 	deploy: {
-		command: "bunx"
-		args: ["wrangler", "deploy"]
+		command: "bun"
+		args: ["x", "wrangler", "deploy"]
 		dependsOn: ["cloudflare.types"]
 	}
 }
