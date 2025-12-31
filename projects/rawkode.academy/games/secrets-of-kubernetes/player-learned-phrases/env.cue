@@ -29,8 +29,8 @@ ci: pipelines: [
 tasks: {
 	deploy: {
 		http: {
-			command: "bunx"
-			args: ["wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+			command: "bun"
+			args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 		}
 	}
 }

@@ -34,11 +34,11 @@ ci: pipelines: [
 
 tasks: {
 	plan: {
-		command: "bunx"
-		args: ["cdktf", "plan"]
+		command: "bun"
+		args: ["x", "cdktf", "plan"]
 	}
 	apply: {
-		command: "bunx"
-		args: ["cdktf", "apply", "--auto-approve"]
+		command: "bun"
+		args: ["x", "cdktf", "apply", "--auto-approve"]
 	}
 }

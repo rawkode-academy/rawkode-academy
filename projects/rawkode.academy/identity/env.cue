@@ -23,16 +23,16 @@ ci: pipelines: [
 tasks: {
 	auth: {
 		generate: {
-			command: "bunx"
-			args: ["@better-auth/cli", "generate", "--config", "./src/lib/auth.config.ts", "--output", "./src/db/schema.ts", "-y"]
+			command: "bun"
+			args: ["x", "@better-auth/cli", "generate", "--config", "./src/lib/auth.config.ts", "--output", "./src/db/schema.ts", "-y"]
 			workspaces: ["bun"]
 		}
 	}
 
 	bun: {
 		dev: {
-			command: "bunx"
-			args: ["wrangler", "dev"]
+			command: "bun"
+			args: ["x", "wrangler", "dev"]
 			workspaces: ["bun"]
 			inputs: [
 				"astro.config.mjs",

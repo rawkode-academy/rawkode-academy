@@ -36,8 +36,8 @@ ci: pipelines: [
 
 tasks: {
 	deploy: {
-		command: "bunx"
-		args: ["wrangler", "deploy", "--config", "./wrangler.jsonc"]
+		command: "bun"
+		args: ["x", "wrangler", "deploy", "--config", "./wrangler.jsonc"]
 	}
 	"check-missing": {
 		command: "bun"

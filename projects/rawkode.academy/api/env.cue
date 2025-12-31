@@ -29,8 +29,8 @@ tasks: {
 		dependsOn: ["collect-schemas"]
 	}
 	deploy: {
-		command: "bunx"
-		args: ["wrangler", "deploy"]
+		command: "bun"
+		args: ["x", "wrangler", "deploy"]
 		dependsOn: ["compose"]
 	}
 }

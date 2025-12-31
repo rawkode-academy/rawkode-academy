@@ -30,17 +30,17 @@ ci: pipelines: [
 
 tasks: {
 	dev: {
-		command: "bunx"
-		args: ["wrangler", "dev"]
+		command: "bun"
+		args: ["x", "wrangler", "dev"]
 	}
 
 	deploy: {
-		command: "bunx"
-		args: ["wrangler", "deploy"]
+		command: "bun"
+		args: ["x", "wrangler", "deploy"]
 	}
 
 	typegen: {
-		command: "bunx"
-		args: ["wrangler", "types", "--env-interface", "CloudflareBindings"]
+		command: "bun"
+		args: ["x", "wrangler", "types", "--env-interface", "CloudflareBindings"]
 	}
 }
