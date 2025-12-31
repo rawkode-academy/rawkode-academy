@@ -6,9 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-platform-search"
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
-
 ci: pipelines: [
 	{
 		name:        "default"
