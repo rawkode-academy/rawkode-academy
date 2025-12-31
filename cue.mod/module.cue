@@ -5,6 +5,6 @@ language: {
 // CI force: 2
 deps: {
 	"github.com/cuenv/cuenv@v0": {
-		v: "v0.20.3"
+		v: "v0.20.4"
 	}
 }

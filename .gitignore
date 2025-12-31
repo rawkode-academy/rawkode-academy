@@ -1,6 +1,9 @@
 # age / sops
 .env.local
 
+# cuenv local config
+local.cue
+
 # Devenv
 .devenv*
 devenv.local.nix

@@ -6,9 +6,6 @@ schema.#Project
 
 name: "rawkode-social-video-to-post"
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
-
 env: {
 	environment: production: {
 		DEEPGRAM_API_KEY: schema.#OnePasswordRef & {
