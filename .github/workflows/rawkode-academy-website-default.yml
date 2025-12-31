@@ -7,6 +7,7 @@ on:
     branches:
     - main
     paths:
+    - .github/workflows/rawkode-academy-website-default.yml
     - cue.mod/**
     - projects/rawkode.academy/website/**
     - projects/rawkode.academy/website/env.cue
@@ -32,7 +33,7 @@ jobs:
       with:
         extra-conf: accept-flake-config = true
     - name: Setup cuenv (release)
-      run: curl -sSL https://github.com/cuenv/cuenv/releases/latest/download/cuenv-x86_64-linux.tar.gz | tar -xzf - -C /usr/local/bin && chmod +x /usr/local/bin/cuenv && cuenv sync -A
+      run: curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && chmod +x /usr/local/bin/cuenv && /usr/local/bin/cuenv sync -A
     - name: Setup 1Password
       run: cuenv secrets setup onepassword
       env:
