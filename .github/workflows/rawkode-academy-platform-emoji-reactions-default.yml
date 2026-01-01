@@ -12,6 +12,7 @@ on:
     - projects/rawkode.academy/platform/emoji-reactions/**
     - projects/rawkode.academy/platform/emoji-reactions/env.cue
     - projects/rawkode.academy/platform/emoji-reactions/schema/**
+  workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

@@ -185,6 +185,40 @@ import (
 
 	ignore: git: _ignorePatterns
 
+	// CI pipeline with workflow_dispatch enabled
+	ci: pipelines: [{
+		name:        "default"
+		environment: "production"
+		when: {
+			branch:        ["main"]
+			defaultBranch: true
+			manual:        true
+		}
+		tasks: ["deploy"]
+	}]
+
+	// Auto-generated deploy tasks based on enabled features
+	tasks: deploy: {
+		if includeReadModel {
+			read: {
+				command: "bun"
+				args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
+			}
+		}
+		if includeWriteModel {
+			write: {
+				command: "bun"
+				args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
+			}
+		}
+		if includeHttp {
+			http: {
+				command: "bun"
+				args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+			}
+		}
+	}
+
 	// ========================================================================
 	// Package.json
 	// ========================================================================

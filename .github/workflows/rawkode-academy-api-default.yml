@@ -12,6 +12,7 @@ on:
     - projects/rawkode.academy/api/**
     - projects/rawkode.academy/api/env.cue
     - projects/rawkode.academy/api/schema/**
+  workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
