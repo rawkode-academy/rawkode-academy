@@ -39,13 +39,16 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy", "--config", "./wrangler.jsonc"]
+		workspaces: ["bun"]
 	}
 	"check-missing": {
 		command: "bun"
 		args: ["scripts/schedule_missing.ts"]
+		workspaces: ["bun"]
 	}
 	"schedule-missing": {
 		command: "bun"
 		args: ["scripts/schedule_missing.ts", "--execute"]
+		workspaces: ["bun"]
 	}
 }

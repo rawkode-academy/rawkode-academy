@@ -34,6 +34,7 @@ tasks: {
 		types: {
 			command: "bun"
 			args: ["x", "wrangler", "types"]
+			workspaces: ["bun"]
 			inputs: ["wrangler.jsonc"]
 			outputs: ["worker-configuration.d.ts"]
 		}
@@ -42,12 +43,14 @@ tasks: {
 	dev: {
 		command: "bun"
 		args: ["x", "wrangler", "dev"]
+		workspaces: ["bun"]
 		dependsOn: ["cloudflare.types"]
 	}
 
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
+		workspaces: ["bun"]
 		dependsOn: ["cloudflare.types"]
 	}
 }
