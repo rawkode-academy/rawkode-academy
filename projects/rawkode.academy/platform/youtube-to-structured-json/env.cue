@@ -22,19 +22,6 @@ env: {
 	}
 }
 
-ci: pipelines: [
-	{
-		name:        "default"
-		environment: "production"
-		when: {
-			branch:        ["main"]
-			defaultBranch: true
-			manual:        true
-		}
-		tasks: ["run"]
-	},
-]
-
 tasks: {
 	run: {
 		command: "bun"
