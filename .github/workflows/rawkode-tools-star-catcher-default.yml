@@ -41,6 +41,8 @@ jobs:
       run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Install Bun dependencies
+      run: bun install --frozen-lockfile
     - name: cloudflare.types
       run: cuenv task cloudflare.types -e production --skip-dependencies
       working-directory: projects/rawkode.tools/star-catcher
@@ -75,6 +77,8 @@ jobs:
       run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Install Bun dependencies
+      run: bun install --frozen-lockfile
     - name: deploy
       run: cuenv task deploy -e production --skip-dependencies
       working-directory: projects/rawkode.tools/star-catcher
