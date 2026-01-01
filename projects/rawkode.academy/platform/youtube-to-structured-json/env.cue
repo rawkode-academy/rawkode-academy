@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-platform-youtube-to-structured-json"
 
-workspaces: bun: {}
-
 env: {
 	environment: production: {
 		GEMINI_API_KEY: schema.#OnePasswordRef & {
@@ -26,6 +24,5 @@ tasks: {
 	run: {
 		command: "bun"
 		args: ["run", "start"]
-		workspaces: ["bun"]
 	}
 }

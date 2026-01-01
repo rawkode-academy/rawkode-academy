@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-tools-star-catcher"
 
-workspaces: bun: {}
-
 env: {
 	SERVICE_NAME: "star-catcher"
 
@@ -36,8 +34,7 @@ tasks: {
 		types: {
 			command: "bun"
 			args: ["x", "wrangler", "types"]
-			workspaces: ["bun"]
-			inputs: ["wrangler.jsonc"]
+				inputs: ["wrangler.jsonc"]
 			outputs: ["worker-configuration.d.ts"]
 		}
 	}
@@ -45,14 +42,12 @@ tasks: {
 	dev: {
 		command: "bun"
 		args: ["x", "wrangler", "dev"]
-		workspaces: ["bun"]
 		dependsOn: ["cloudflare.types"]
 	}
 
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		workspaces: ["bun"]
 		dependsOn: ["cloudflare.types"]
 	}
 }

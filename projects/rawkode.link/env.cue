@@ -6,10 +6,6 @@ schema.#Project
 
 name: "rawkode-link"
 
-workspaces: bun: {}
-
-
-
 ci: pipelines: [
 	{
 		name:        "default"
@@ -27,6 +23,5 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		workspaces: ["bun"]
 	}
 }

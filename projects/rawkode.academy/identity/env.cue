@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-identity"
 
-workspaces: bun: {}
-
 ci: pipelines: [
 	{
 		name:        "default"
@@ -26,7 +24,6 @@ tasks: {
 		generate: {
 			command: "bun"
 			args: ["x", "@better-auth/cli", "generate", "--config", "./src/lib/auth.config.ts", "--output", "./src/db/schema.ts", "-y"]
-			workspaces: ["bun"]
 		}
 	}
 
@@ -34,7 +31,6 @@ tasks: {
 		dev: {
 			command: "bun"
 			args: ["x", "wrangler", "dev"]
-			workspaces: ["bun"]
 			inputs: [
 				"astro.config.mjs",
 				"bun.lock",
@@ -48,14 +44,12 @@ tasks: {
 		remote: {
 			command: "bun"
 			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
-			workspaces: ["bun"]
 		}
 	}
 
 	build: {
 		command: "bun"
 		args: ["run", "build"]
-		workspaces: ["bun"]
 		inputs: [
 			"astro.config.mjs",
 			"bun.lock",
@@ -67,7 +61,6 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		workspaces: ["bun"]
 		dependsOn: ["migrations.remote", "build"]
 		inputs: [
 			"astro.config.mjs",
