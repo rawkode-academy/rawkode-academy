@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-link"
 
+workspaces: bun: {}
+
 
 
 ci: pipelines: [

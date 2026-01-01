@@ -6,6 +6,8 @@ schema.#Project
 
 name: "klustered-dev"
 
+workspaces: bun: {}
+
 tasks: {
 	codegen: {
 		command: "bun"

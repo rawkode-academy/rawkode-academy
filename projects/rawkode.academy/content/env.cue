@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-content"
 
+workspaces: bun: {}
+
 env: {
 	SERVICE_NAME: "content"
 
