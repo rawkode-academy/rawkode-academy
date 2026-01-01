@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-game-sok-player-learned-phrases"
 
-workspaces: bun: {}
-
 env: {
 	environment: production: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
@@ -34,7 +32,6 @@ tasks: {
 		http: {
 			command: "bun"
 			args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
-			workspaces: ["bun"]
 		}
 	}
 }

@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-platform-zitadel-zulip-connector"
 
-workspaces: bun: {}
-
 env: {
 	environment: production: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
@@ -33,6 +31,5 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		workspaces: ["bun"]
 	}
 }

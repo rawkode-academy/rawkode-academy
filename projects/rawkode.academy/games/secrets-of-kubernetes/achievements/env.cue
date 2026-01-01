@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-game-sok-achievements"
 
-workspaces: bun: {}
-
 env: {
 	environment: production: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {

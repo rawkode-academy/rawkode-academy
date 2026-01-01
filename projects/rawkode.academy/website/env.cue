@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-website"
 
-workspaces: bun: {}
-
 env: {
 	GRAPHQL_ENDPOINT:  "https://api.rawkode.academy/"
 	DISABLE_GAME_AUTH: true
@@ -31,7 +29,6 @@ tasks: {
 		command: "bun"
 		args: ["run", "dev"]
 
-		workspaces: ["bun"]
 
 		inputs: [
 			"astro.config.mts",
@@ -47,7 +44,6 @@ tasks: {
 		command: "bun"
 		args: ["run", "build"]
 
-		workspaces: ["bun"]
 
 		inputs: [
 			"astro.config.mts",
@@ -66,7 +62,6 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		workspaces: ["bun"]
 		dependsOn: ["build"]
 	}
 }

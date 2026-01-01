@@ -6,19 +6,15 @@ schema.#Project
 
 name: "klustered-dev"
 
-workspaces: bun: {}
-
 tasks: {
 	codegen: {
 		command: "bun"
 		args: ["panda", "codegen"]
-		workspaces: ["bun"]
 	}
 
 	dev: {
 		command: "bun"
 		args: ["astro", "dev"]
-		workspaces: ["bun"]
 		dependsOn: ["codegen"]
 
 		inputs: [
@@ -33,7 +29,6 @@ tasks: {
 	build: {
 		command: "bun"
 		args: ["astro", "build"]
-		workspaces: ["bun"]
 		dependsOn: ["codegen"]
 
 		inputs: [
@@ -48,6 +43,5 @@ tasks: {
 	preview: {
 		command: "bun"
 		args: ["astro", "preview"]
-		workspaces: ["bun"]
 	}
 }
