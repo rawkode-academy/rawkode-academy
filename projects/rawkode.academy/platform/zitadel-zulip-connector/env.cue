@@ -31,5 +31,6 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
+		workspaces: ["bun"]
 	}
 }

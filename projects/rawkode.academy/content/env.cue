@@ -33,5 +33,6 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+		workspaces: ["bun"]
 	}
 }
