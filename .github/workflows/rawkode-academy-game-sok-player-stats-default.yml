@@ -41,7 +41,7 @@ jobs:
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Install Bun dependencies
-      run: bun install --frozen-lockfile
+      run: cuenv exec -- bun install --frozen-lockfile
     - name: deploy.http
       run: cuenv task deploy.http -e production --skip-dependencies
       working-directory: projects/rawkode.academy/games/secrets-of-kubernetes/player-stats

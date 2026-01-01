@@ -44,7 +44,7 @@ jobs:
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Install Bun dependencies
-      run: bun install --frozen-lockfile
+      run: cuenv exec -- bun install --frozen-lockfile
     - name: build
       run: cuenv task build -e production --skip-dependencies
       working-directory: projects/rawkode.academy/identity
@@ -74,7 +74,7 @@ jobs:
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Install Bun dependencies
-      run: bun install --frozen-lockfile
+      run: cuenv exec -- bun install --frozen-lockfile
     - name: deploy
       run: cuenv task deploy -e production --skip-dependencies
       working-directory: projects/rawkode.academy/identity
@@ -101,7 +101,7 @@ jobs:
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Install Bun dependencies
-      run: bun install --frozen-lockfile
+      run: cuenv exec -- bun install --frozen-lockfile
     - name: migrations.remote
       run: cuenv task migrations.remote -e production --skip-dependencies
       working-directory: projects/rawkode.academy/identity
