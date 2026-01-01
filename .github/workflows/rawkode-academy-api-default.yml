@@ -9,9 +9,17 @@ on:
     paths:
     - .github/workflows/rawkode-academy-api-default.yml
     - cue.mod/**
-    - projects/rawkode.academy/api/**
+    - projects/rawkode.academy/api/../platform/*/read-model/schema.gql
+    - projects/rawkode.academy/api/../website/schema/*.gql
     - projects/rawkode.academy/api/env.cue
+    - projects/rawkode.academy/api/package.json
     - projects/rawkode.academy/api/schema/**
+    - projects/rawkode.academy/api/schemas/**
+    - projects/rawkode.academy/api/scripts/collect-schemas.ts
+    - projects/rawkode.academy/api/scripts/compose.ts
+    - projects/rawkode.academy/api/src/**
+    - projects/rawkode.academy/api/supergraph.graphql
+    - projects/rawkode.academy/api/wrangler.jsonc
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -20,6 +28,7 @@ permissions:
   contents: read
   checks: write
   pull-requests: write
+  packages: write
 jobs:
   collect-schemas:
     name: collect-schemas
@@ -43,6 +52,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: collect-schemas-artifacts
+        path: schemas/**
+        if-no-files-found: ignore
+        include-hidden-files: true
   compose:
     name: compose
     runs-on: ubuntu-latest
@@ -67,6 +83,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: compose-artifacts
+        path: supergraph.graphql
+        if-no-files-found: ignore
+        include-hidden-files: true
   deploy:
     name: deploy
     runs-on: ubuntu-latest
