@@ -49,6 +49,7 @@ jobs:
         name: cloudflare-types-artifacts
         path: worker-configuration.d.ts
         if-no-files-found: ignore
+        include-hidden-files: true
   deploy:
     name: deploy
     runs-on: ubuntu-latest
