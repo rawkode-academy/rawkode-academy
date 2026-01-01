@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-tools-star-catcher"
 
+workspaces: bun: {}
+
 env: {
 	SERVICE_NAME: "star-catcher"
 

@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-tools-observability-collector"
 
+workspaces: bun: {}
+
 env: {
 	SERVICE_NAME: "observability-collector"
 

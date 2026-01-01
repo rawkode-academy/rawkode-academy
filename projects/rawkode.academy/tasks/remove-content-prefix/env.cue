@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-task-remove-content-prefix"
 
+workspaces: bun: {}
+
 env: {
 	R2_BUCKET_NAME: "rawkode-academy-content"
 
