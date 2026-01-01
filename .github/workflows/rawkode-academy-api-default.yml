@@ -49,6 +49,8 @@ jobs:
       run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Install Bun dependencies
+      run: bun install --frozen-lockfile
     - name: collect-schemas
       run: cuenv task collect-schemas -e production --skip-dependencies
       working-directory: projects/rawkode.academy/api
@@ -83,6 +85,8 @@ jobs:
       run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Install Bun dependencies
+      run: bun install --frozen-lockfile
     - name: compose
       run: cuenv task compose -e production --skip-dependencies
       working-directory: projects/rawkode.academy/api
@@ -117,6 +121,8 @@ jobs:
       run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Install Bun dependencies
+      run: bun install --frozen-lockfile
     - name: deploy
       run: cuenv task deploy -e production --skip-dependencies
       working-directory: projects/rawkode.academy/api

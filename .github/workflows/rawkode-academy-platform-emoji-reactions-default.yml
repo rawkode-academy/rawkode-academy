@@ -40,6 +40,8 @@ jobs:
       run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Install Bun dependencies
+      run: bun install --frozen-lockfile
     - name: deploy.read
       run: cuenv task deploy.read -e production --skip-dependencies
       working-directory: projects/rawkode.academy/platform/emoji-reactions
@@ -65,6 +67,8 @@ jobs:
       run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Install Bun dependencies
+      run: bun install --frozen-lockfile
     - name: deploy.write
       run: cuenv task deploy.write -e production --skip-dependencies
       working-directory: projects/rawkode.academy/platform/emoji-reactions
