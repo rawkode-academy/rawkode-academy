@@ -13,6 +13,7 @@ ci: pipelines: [
 		when: {
 			branch:        ["main"]
 			defaultBranch: true
+			manual:        true
 		}
 		tasks: ["deploy"]
 	},

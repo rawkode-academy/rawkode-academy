@@ -12,6 +12,7 @@ on:
     - projects/rawkode.academy/platform/youtube-to-structured-json/**
     - projects/rawkode.academy/platform/youtube-to-structured-json/env.cue
     - projects/rawkode.academy/platform/youtube-to-structured-json/schema/**
+  workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

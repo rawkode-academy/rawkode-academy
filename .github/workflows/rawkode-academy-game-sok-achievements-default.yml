@@ -12,6 +12,7 @@ on:
     - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/env.cue
     - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/schema/**
+  workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
