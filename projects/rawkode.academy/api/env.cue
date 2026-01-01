@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-api"
 
-workspaces: bun: {}
-
 ci: pipelines: [
 	{
 		name:        "default"
@@ -25,7 +23,6 @@ tasks: {
 	"collect-schemas": {
 		command: "bun"
 		args: ["run", "scripts/collect-schemas.ts"]
-		workspaces: ["bun"]
 
 		inputs: [
 			"scripts/collect-schemas.ts",
@@ -40,7 +37,6 @@ tasks: {
 	compose: {
 		command: "bun"
 		args: ["run", "scripts/compose.ts"]
-		workspaces: ["bun"]
 		dependsOn: ["collect-schemas"]
 
 		inputs: [
@@ -55,7 +51,6 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		workspaces: ["bun"]
 		dependsOn: ["compose"]
 
 		inputs: [

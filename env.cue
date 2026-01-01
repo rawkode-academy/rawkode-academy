@@ -3,6 +3,7 @@ package cuenv
 import (
 	"github.com/cuenv/cuenv/schema"
 	xBun "github.com/cuenv/cuenv/contrib/bun"
+	c "github.com/cuenv/cuenv/contrib/contributors"
 )
 
 schema.#Base
@@ -16,7 +17,11 @@ runtime: schema.#ToolsRuntime & {
 
 hooks: onEnter: tools: schema.#ToolsActivate
 
-config: ci: cuenv: source: "release"
+ci: contributors: [
+	c.#Nix,
+	c.#CuenvRelease,
+	c.#OnePassword,
+]
 
 env: {
 	environment: production: {
@@ -24,5 +29,3 @@ env: {
 		TF_WORKSPACE:          "production"
 	}
 }
-
-workspaces: bun: {}

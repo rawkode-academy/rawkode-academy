@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-content"
 
-workspaces: bun: {}
-
 env: {
 	SERVICE_NAME: "content"
 
@@ -35,6 +33,5 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
-		workspaces: ["bun"]
 	}
 }

@@ -30,7 +30,10 @@ jobs:
       with:
         fetch-depth: 2
     - name: Setup cuenv (release)
-      run: curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && chmod +x /usr/local/bin/cuenv && /usr/local/bin/cuenv sync -A
+      run: |-
+        curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && \
+        chmod +x /usr/local/bin/cuenv && \
+        /usr/local/bin/cuenv sync -A
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Setup 1Password
@@ -52,7 +55,10 @@ jobs:
       with:
         fetch-depth: 2
     - name: Setup cuenv (release)
-      run: curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && chmod +x /usr/local/bin/cuenv && /usr/local/bin/cuenv sync -A
+      run: |-
+        curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && \
+        chmod +x /usr/local/bin/cuenv && \
+        /usr/local/bin/cuenv sync -A
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Setup 1Password

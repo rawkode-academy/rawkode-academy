@@ -6,8 +6,6 @@ schema.#Project
 
 name: "rawkode-tools-observability-collector"
 
-workspaces: bun: {}
-
 env: {
 	SERVICE_NAME: "observability-collector"
 
@@ -35,18 +33,15 @@ tasks: {
 	dev: {
 		command: "bun"
 		args: ["x", "wrangler", "dev"]
-		workspaces: ["bun"]
 	}
 
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		workspaces: ["bun"]
 	}
 
 	typegen: {
 		command: "bun"
 		args: ["x", "wrangler", "types", "--env-interface", "CloudflareBindings"]
-		workspaces: ["bun"]
 	}
 }

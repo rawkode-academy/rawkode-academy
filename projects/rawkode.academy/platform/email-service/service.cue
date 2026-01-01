@@ -19,5 +19,4 @@ _service: cubes.#PlatformService & {
 	}
 }
 
-cube:   _service.cube
-ignore: _service.ignore
+cube: _service.cube
