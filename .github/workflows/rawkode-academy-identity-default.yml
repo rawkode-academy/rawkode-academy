@@ -15,6 +15,7 @@ on:
     - projects/rawkode.academy/identity/package.json
     - projects/rawkode.academy/identity/schema/**
     - projects/rawkode.academy/identity/src/**
+  workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

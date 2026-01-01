@@ -6,4 +6,5 @@ schema.#Project
 
 name: "rawkode-academy-platform-email-service"
 
-tasks: {}
+ci:    _service.ci
+tasks: _service.tasks

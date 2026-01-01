@@ -12,6 +12,7 @@ on:
     - projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/env.cue
     - projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/schema/**
+  workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

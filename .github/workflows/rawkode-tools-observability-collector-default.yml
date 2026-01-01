@@ -12,6 +12,7 @@ on:
     - projects/rawkode.tools/observability-collector/**
     - projects/rawkode.tools/observability-collector/env.cue
     - projects/rawkode.tools/observability-collector/schema/**
+  workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
