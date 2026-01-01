@@ -47,14 +47,14 @@ tasks: {
 	migrations: {
 		remote: {
 			command: "bun"
-			args: ["wrangler", "d1", "migrations", "apply", "identity", "--remote"]
+			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
 			workspaces: ["bun"]
 		}
 	}
 
 	deploy: {
 		command: "bun"
-		args: ["wrangler", "deploy"]
+		args: ["x", "wrangler", "deploy"]
 		workspaces: ["bun"]
 		dependsOn: ["migrations.remote"]
 		inputs: [
