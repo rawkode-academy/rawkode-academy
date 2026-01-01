@@ -3,17 +3,6 @@ version = 2
 [tools.bun]
 version = "1.3.5"
 
-[tools.bun.platforms.darwin-x86_64]
-provider = "github"
-digest = "sha256:15dd00fb3156a8c84f1c9c5317c62cf8944e1663f9cd1e88713c79a9e45a33aa"
-
-[tools.bun.platforms.darwin-x86_64.source]
-asset = "bun-darwin-x64.zip"
-path = "bun-darwin-x64/bun"
-repo = "oven-sh/bun"
-tag = "bun-v1.3.5"
-type = "github"
-
 [tools.bun.platforms.darwin-arm64]
 provider = "github"
 digest = "sha256:627932cdd0a4ea67325512474f5bca7e8ea690a3c320d9f23afb0d8c83076641"
@@ -21,6 +10,17 @@ digest = "sha256:627932cdd0a4ea67325512474f5bca7e8ea690a3c320d9f23afb0d8c8307664
 [tools.bun.platforms.darwin-arm64.source]
 asset = "bun-darwin-aarch64.zip"
 path = "bun-darwin-aarch64/bun"
+repo = "oven-sh/bun"
+tag = "bun-v1.3.5"
+type = "github"
+
+[tools.bun.platforms.darwin-x86_64]
+provider = "github"
+digest = "sha256:15dd00fb3156a8c84f1c9c5317c62cf8944e1663f9cd1e88713c79a9e45a33aa"
+
+[tools.bun.platforms.darwin-x86_64.source]
+asset = "bun-darwin-x64.zip"
+path = "bun-darwin-x64/bun"
 repo = "oven-sh/bun"
 tag = "bun-v1.3.5"
 type = "github"
