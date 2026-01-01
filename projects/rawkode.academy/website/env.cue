@@ -58,6 +58,9 @@ tasks: {
 			"src/**",
 		]
 
+		outputs: [
+			"dist/**",
+		]
 	}
 
 	deploy: {
