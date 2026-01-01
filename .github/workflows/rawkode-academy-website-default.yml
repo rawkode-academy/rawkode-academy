@@ -25,6 +25,7 @@ permissions:
   contents: read
   checks: write
   pull-requests: write
+  packages: write
 jobs:
   build:
     name: build
@@ -48,6 +49,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: dist/**
+        if-no-files-found: ignore
+        include-hidden-files: true
   deploy:
     name: deploy
     runs-on: ubuntu-latest
