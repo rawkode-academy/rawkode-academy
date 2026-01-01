@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-task-video-importer"
 
+workspaces: bun: {}
+
 env: {
 	VIDEOS_ENDPOINT:    "https://0aeb879de8e3cdde5fb3d413025222ce.eu.r2.cloudflarestorage.com"
 	VIDEOS_BUCKET:      "rawkode-academy-videos"

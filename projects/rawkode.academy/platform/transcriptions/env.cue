@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-platform-transcriptions"
 
+workspaces: bun: {}
+
 env: {
 	SERVICE_NAME: "transcriptions"
 

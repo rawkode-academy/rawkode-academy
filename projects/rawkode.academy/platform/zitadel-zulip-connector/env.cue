@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-platform-zitadel-zulip-connector"
 
+workspaces: bun: {}
+
 env: {
 	environment: production: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
