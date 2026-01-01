@@ -23,6 +23,7 @@ tasks: {
 	"collect-schemas": {
 		command: "bun"
 		args: ["run", "scripts/collect-schemas.ts"]
+		workspaces: ["bun"]
 	}
 	compose: {
 		command: "bun"

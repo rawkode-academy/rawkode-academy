@@ -52,11 +52,23 @@ tasks: {
 		}
 	}
 
+	build: {
+		command: "bun"
+		args: ["run", "build"]
+		workspaces: ["bun"]
+		inputs: [
+			"astro.config.mjs",
+			"bun.lock",
+			"package.json",
+			"src/**",
+		]
+	}
+
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
 		workspaces: ["bun"]
-		dependsOn: ["migrations.remote"]
+		dependsOn: ["migrations.remote", "build"]
 		inputs: [
 			"astro.config.mjs",
 			"bun.lock",

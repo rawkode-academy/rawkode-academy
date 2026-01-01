@@ -37,5 +37,6 @@ tasks: {
 	run: {
 		command: "bun"
 		args: ["run", "start"]
+		workspaces: ["bun"]
 	}
 }

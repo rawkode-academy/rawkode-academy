@@ -203,18 +203,21 @@ import (
 			read: {
 				command: "bun"
 				args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
+				workspaces: ["bun"]
 			}
 		}
 		if includeWriteModel {
 			write: {
 				command: "bun"
 				args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
+				workspaces: ["bun"]
 			}
 		}
 		if includeHttp {
 			http: {
 				command: "bun"
 				args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+				workspaces: ["bun"]
 			}
 		}
 	}
