@@ -14,9 +14,8 @@ env: {
 	}
 }
 
-ci: pipelines: [
-	{
-		name:        "default"
+ci: pipelines: {
+	default: {
 		environment: "production"
 		when: {
 			branch:        ["main"]
@@ -24,8 +23,8 @@ ci: pipelines: [
 			manual:        true
 		}
 		tasks: ["deploy"]
-	},
-]
+	}
+}
 
 tasks: {
 	deploy: {

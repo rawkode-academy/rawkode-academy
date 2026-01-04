@@ -20,16 +20,18 @@ permissions:
   contents: read
   checks: write
   pull-requests: write
-  packages: write
 jobs:
-  cloudflare-types:
-    name: cloudflare.types
+  rawkode-tools-star-catcher-default:
+    name: rawkode-tools-star-catcher-default
     runs-on: ubuntu-latest
+    environment: production
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Install Nix
+      uses: DeterminateSystems/nix-installer-action@v16
       with:
-        fetch-depth: 2
+        extra-conf: accept-flake-config = true
     - name: Setup cuenv (release)
       run: |-
         curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && \
@@ -43,45 +45,9 @@ jobs:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
-    - name: cloudflare.types
-      run: cuenv task cloudflare.types -e production --skip-dependencies
-      working-directory: projects/rawkode.tools/star-catcher
+    - name: 'Run pipeline: default'
+      run: cuenv ci --pipeline default --path projects/rawkode.tools/star-catcher
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: cloudflare-types-artifacts
-        path: worker-configuration.d.ts
-        if-no-files-found: ignore
-        include-hidden-files: true
-  deploy:
-    name: deploy
-    runs-on: ubuntu-latest
-    needs:
-    - cloudflare-types
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 2
-    - name: Setup cuenv (release)
-      run: |-
-        curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && \
-        chmod +x /usr/local/bin/cuenv && \
-        /usr/local/bin/cuenv sync -A
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Setup 1Password
-      run: cuenv secrets setup onepassword
-      env:
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    - name: Install Bun dependencies
-      run: cuenv exec -- bun install --frozen-lockfile
-    - name: deploy
-      run: cuenv task deploy -e production --skip-dependencies
-      working-directory: projects/rawkode.tools/star-catcher
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CUENV_ENVIRONMENT: production
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
