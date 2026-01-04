@@ -6,9 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-api"
 
-ci: pipelines: [
-	{
-		name:        "default"
+ci: pipelines: {
+	default: {
 		environment: "production"
 		when: {
 			branch:        ["main"]
@@ -16,8 +15,8 @@ ci: pipelines: [
 			manual:        true
 		}
 		tasks: ["install", "deploy"]
-	},
-]
+	}
+}
 
 tasks: {
 	"collect-schemas": {

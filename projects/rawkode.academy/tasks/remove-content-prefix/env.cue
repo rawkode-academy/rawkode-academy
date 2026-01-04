@@ -22,6 +22,8 @@ env: {
 	}
 }
 
+ci: pipelines: {}
+
 tasks: {
 	run: {
 		command: "bun"

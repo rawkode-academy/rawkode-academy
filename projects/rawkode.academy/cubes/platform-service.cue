@@ -165,16 +165,17 @@ import (
 	}
 
 	// CI pipeline with workflow_dispatch enabled
-	ci: pipelines: [{
-		name:        "default"
-		environment: "production"
-		when: {
-			branch:        ["main"]
-			defaultBranch: true
-			manual:        true
+	ci: pipelines: {
+		default: {
+			environment: "production"
+			when: {
+				branch:        ["main"]
+				defaultBranch: true
+				manual:        true
+			}
+			tasks: ["deploy"]
 		}
-		tasks: ["deploy"]
-	}]
+	}
 
 	// Auto-generated deploy tasks based on enabled features
 	tasks: deploy: {
