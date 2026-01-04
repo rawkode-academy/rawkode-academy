@@ -1,8 +1,8 @@
 package cuenv
 
-import "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/cubes"
+import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/codegen"
 
-_service: cubes.#PlatformService & {
+_service: gen.#PlatformService & {
 	serviceName:      "ski-achievements"
 	servicePrefix:    "games"
 	includeReadModel: false
@@ -16,4 +16,4 @@ _service: cubes.#PlatformService & {
 	}
 }
 
-cube: _service.cube
+codegen: _service.codegen

@@ -14,23 +14,6 @@ env: {
 	}
 }
 
-ci: pipelines: {
-	default: {
-		environment: "production"
-		when: {
-			branch:        ["main"]
-			defaultBranch: true
-			manual:        true
-		}
-		tasks: ["deploy"]
-	}
-}
-
-tasks: {
-	deploy: {
-		http: {
-			command: "bun"
-			args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
-		}
-	}
-}
+ci:      _service.ci
+tasks:   _service.tasks
+codegen: _service.codegen

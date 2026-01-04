@@ -19,7 +19,7 @@ hooks: onEnter: tools: schema.#ToolsActivate
 
 ci: contributors: [
 	c.#Nix,
-	c.#Bun,
+	c.#BunWorkspace,
 	c.#CuenvRelease,
 	c.#OnePassword,
 ]
