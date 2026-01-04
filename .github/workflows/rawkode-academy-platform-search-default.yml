@@ -43,11 +43,12 @@ jobs:
       run: cuenv secrets setup onepassword
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    - name: Install Bun dependencies
-      run: cuenv exec -- bun install --frozen-lockfile
     - name: 'Run pipeline: default'
       run: cuenv ci --pipeline default --path projects/rawkode.academy/platform/search
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CUENV_ENVIRONMENT: production
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    - name: Install Bun dependencies
+      if: success()
+      run: cuenv exec -- bun install --frozen-lockfile

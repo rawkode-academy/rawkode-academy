@@ -35,9 +35,10 @@ jobs:
         /usr/local/bin/cuenv sync -A
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Install Bun dependencies
-      run: cuenv exec -- bun install --frozen-lockfile
     - name: 'Run pipeline: pull-request'
       run: cuenv ci --pipeline pull-request --path projects/rawkode.academy/games/secrets-of-kubernetes/achievements
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Install Bun dependencies
+      if: success()
+      run: cuenv exec -- bun install --frozen-lockfile
