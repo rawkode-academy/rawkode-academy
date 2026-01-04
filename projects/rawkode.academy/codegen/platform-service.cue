@@ -1,11 +1,11 @@
-package cubes
+package codegen
 
 import (
 	"encoding/json"
 	"list"
 	"strings"
 	"github.com/cuenv/cuenv/schema"
-	"github.com/cuenv/cuenv/schema/cubes"
+	gen "github.com/cuenv/cuenv/schema/codegen"
 )
 
 // #PlatformService generates a Cloudflare Workers service with GraphQL Federation
@@ -55,8 +55,8 @@ import (
 		services: _allServices
 	}
 
-	// Generate the cube configuration
-	cube: schema.#Cube & {
+	// Generate the codegen configuration
+	codegen: schema.#Codegen & {
 		context: {
 			"serviceName":   serviceName
 			"servicePrefix": servicePrefix
@@ -65,29 +65,29 @@ import (
 
 		files: {
 			// Core config files - always managed
-			"package.json": cubes.#JSONFile & {
+			"package.json": gen.#JSONFile & {
 				mode:    "managed"
 				content: json.Indent(json.Marshal(_packageJson), "", "  ")
 			}
 
-			"tsconfig.json": cubes.#JSONFile & {
+			"tsconfig.json": gen.#JSONFile & {
 				mode:    "managed"
 				content: json.Indent(json.Marshal(_tsconfigJson), "", "  ")
 			}
 
-			"biome.json": cubes.#JSONFile & {
+			"biome.json": gen.#JSONFile & {
 				mode:    "managed"
 				content: json.Indent(json.Marshal(_biomeJson), "", "  ")
 			}
 
-			"README.md": cubes.#MarkdownFile & {
+			"README.md": gen.#MarkdownFile & {
 				mode:    "managed"
 				content: _readme
 			}
 
 			// Data model
 			if includeDataModel {
-				"drizzle.config.ts": cubes.#TypeScriptFile & {
+				"drizzle.config.ts": gen.#TypeScriptFile & {
 					mode:     "managed"
 					language: "typescript"
 					content: """
@@ -105,17 +105,17 @@ import (
 
 			// Read model
 			if includeReadModel {
-				"read-model/wrangler.jsonc": cubes.#JSONCFile & {
+				"read-model/wrangler.jsonc": gen.#JSONCFile & {
 					mode:    "managed"
 					content: json.Indent(json.Marshal(_readModelWrangler), "", "\t")
 				}
 
-				"read-model/main.ts": cubes.#TypeScriptFile & {
+				"read-model/main.ts": gen.#TypeScriptFile & {
 					mode:    "managed"
 					content: _readModelMainTs
 				}
 
-				"read-model/publish.ts": cubes.#TypeScriptFile & {
+				"read-model/publish.ts": gen.#TypeScriptFile & {
 					mode: "managed"
 					content: """
 						import { writeFileSync } from "node:fs";
@@ -133,12 +133,12 @@ import (
 
 			// Write model
 			if includeWriteModel {
-				"write-model/wrangler.jsonc": cubes.#JSONCFile & {
+				"write-model/wrangler.jsonc": gen.#JSONCFile & {
 					mode:    "managed"
 					content: json.Indent(json.Marshal(_writeModelWrangler), "", "\t")
 				}
 
-				"write-model/main.ts": cubes.#TypeScriptFile & {
+				"write-model/main.ts": gen.#TypeScriptFile & {
 					mode:    "scaffold"
 					content: _writeModelMainTs
 				}
@@ -146,17 +146,17 @@ import (
 
 			// HTTP service
 			if includeHttp {
-				"http/wrangler.jsonc": cubes.#JSONCFile & {
+				"http/wrangler.jsonc": gen.#JSONCFile & {
 					mode:    "managed"
 					content: json.Indent(json.Marshal(_httpWrangler), "", "\t")
 				}
 
-				"http/main.ts": cubes.#TypeScriptFile & {
+				"http/main.ts": gen.#TypeScriptFile & {
 					mode:    "scaffold"
 					content: _httpMainTs
 				}
 
-				"http/http-service.ts": cubes.#TypeScriptFile & {
+				"http/http-service.ts": gen.#TypeScriptFile & {
 					mode:    "scaffold"
 					content: _httpServiceTs
 				}

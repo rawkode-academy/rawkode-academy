@@ -4,6 +4,6 @@ language: {
 }
 deps: {
 	"github.com/cuenv/cuenv@v0": {
-		v: "v0.23.6"
+		v: "v0.24.0"
 	}
 }
