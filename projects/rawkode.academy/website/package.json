@@ -134,9 +134,6 @@
 		"tsx": "^4.20.5",
 		"wrangler": "^4.32.0"
 	},
-	"trigger.dev": {
-		"endpointId": "rawkode-academy-Gpkz"
-	},
 	"trustedDependencies": [
 		"@tailwindcss/oxide",
 		"esbuild",
