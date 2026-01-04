@@ -1,7 +1,6 @@
 {
 	"name": "website",
 	"type": "module",
-	"version": "0.0.1",
 	"scripts": {
 		"build-storybook": "storybook build",
 		"build": "astro check && astro build",
