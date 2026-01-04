@@ -21,14 +21,17 @@ permissions:
   checks: write
   pull-requests: write
 jobs:
-  deploy:
-    name: deploy
+  rawkode-academy-platform-transcriptions-default:
+    name: rawkode-academy-platform-transcriptions-default
     runs-on: ubuntu-latest
+    environment: production
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Install Nix
+      uses: DeterminateSystems/nix-installer-action@v16
       with:
-        fetch-depth: 2
+        extra-conf: accept-flake-config = true
     - name: Setup cuenv (release)
       run: |-
         curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && \
@@ -42,9 +45,9 @@ jobs:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
-    - name: deploy
-      run: cuenv task deploy -e production --skip-dependencies
-      working-directory: projects/rawkode.academy/platform/transcriptions
+    - name: 'Run pipeline: default'
+      run: cuenv ci --pipeline default --path projects/rawkode.academy/platform/transcriptions
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CUENV_ENVIRONMENT: production
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

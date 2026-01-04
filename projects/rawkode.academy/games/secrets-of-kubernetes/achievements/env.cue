@@ -14,9 +14,8 @@ env: {
 	}
 }
 
-ci: pipelines: [
-	{
-		name:        "default"
+ci: pipelines: {
+	default: {
 		environment: "production"
 		when: {
 			branch:        ["main"]
@@ -24,13 +23,12 @@ ci: pipelines: [
 			manual:        true
 		}
 		tasks: ["install", "deploy"]
-	},
-	{
-		name: "pull-request"
+	}
+	"pull-request": {
 		when: pullRequest: true
 		tasks: ["install"]
-	},
-]
+	}
+}
 
 tasks: {
 	deploy: {

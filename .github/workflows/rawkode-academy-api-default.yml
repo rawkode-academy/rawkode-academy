@@ -28,16 +28,18 @@ permissions:
   contents: read
   checks: write
   pull-requests: write
-  packages: write
 jobs:
-  collect-schemas:
-    name: collect-schemas
+  rawkode-academy-api-default:
+    name: rawkode-academy-api-default
     runs-on: ubuntu-latest
+    environment: production
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Install Nix
+      uses: DeterminateSystems/nix-installer-action@v16
       with:
-        fetch-depth: 2
+        extra-conf: accept-flake-config = true
     - name: Setup cuenv (release)
       run: |-
         curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && \
@@ -51,81 +53,9 @@ jobs:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
-    - name: collect-schemas
-      run: cuenv task collect-schemas -e production --skip-dependencies
-      working-directory: projects/rawkode.academy/api
+    - name: 'Run pipeline: default'
+      run: cuenv ci --pipeline default --path projects/rawkode.academy/api
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: collect-schemas-artifacts
-        path: schemas/**
-        if-no-files-found: ignore
-        include-hidden-files: true
-  compose:
-    name: compose
-    runs-on: ubuntu-latest
-    needs:
-    - collect-schemas
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 2
-    - name: Setup cuenv (release)
-      run: |-
-        curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && \
-        chmod +x /usr/local/bin/cuenv && \
-        /usr/local/bin/cuenv sync -A
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Setup 1Password
-      run: cuenv secrets setup onepassword
-      env:
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    - name: Install Bun dependencies
-      run: cuenv exec -- bun install --frozen-lockfile
-    - name: compose
-      run: cuenv task compose -e production --skip-dependencies
-      working-directory: projects/rawkode.academy/api
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: compose-artifacts
-        path: supergraph.graphql
-        if-no-files-found: ignore
-        include-hidden-files: true
-  deploy:
-    name: deploy
-    runs-on: ubuntu-latest
-    needs:
-    - compose
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 2
-    - name: Setup cuenv (release)
-      run: |-
-        curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && \
-        chmod +x /usr/local/bin/cuenv && \
-        /usr/local/bin/cuenv sync -A
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Setup 1Password
-      run: cuenv secrets setup onepassword
-      env:
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    - name: Install Bun dependencies
-      run: cuenv exec -- bun install --frozen-lockfile
-    - name: deploy
-      run: cuenv task deploy -e production --skip-dependencies
-      working-directory: projects/rawkode.academy/api
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CUENV_ENVIRONMENT: production
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

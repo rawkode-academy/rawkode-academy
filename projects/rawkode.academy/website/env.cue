@@ -11,9 +11,8 @@ env: {
 	DISABLE_GAME_AUTH: true
 }
 
-ci: pipelines: [
-	{
-		name:        "default"
+ci: pipelines: {
+	default: {
 		environment: "production"
 		when: {
 			branch:        ["main"]
@@ -21,8 +20,8 @@ ci: pipelines: [
 			manual:        true
 		}
 		tasks: ["install", "deploy"]
-	},
-]
+	}
+}
 
 tasks: {
 	dev: {
