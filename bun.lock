@@ -366,7 +366,6 @@
     },
     "projects/rawkode.academy/website": {
       "name": "website",
-      "version": "0.0.1",
       "dependencies": {
         "@astrojs/check": "0.9.6",
         "@astrojs/cloudflare": "12.6.12",
