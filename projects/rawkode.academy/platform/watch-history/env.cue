@@ -14,5 +14,6 @@ env: {
 	}
 }
 
-ci:    _service.ci
-tasks: _service.tasks
+ci:      _service.ci
+tasks:   _service.tasks
+codegen: _service.codegen
