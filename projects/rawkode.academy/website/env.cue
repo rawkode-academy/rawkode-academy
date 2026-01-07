@@ -19,14 +19,14 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["deploy.upload", "deploy.activate"]
+		tasks: ["deploy.main"]
 	}
 
 	pullRequest: {
 		when: {
 			pullRequest: true
 		}
-		tasks: ["deploy.upload-preview"]
+		tasks: ["deploy.preview"]
 	}
 }
 
@@ -59,21 +59,15 @@ tasks: {
 		]
 	}
 
-	deploy: upload: {
+	deploy: main: {
 		command: "bun"
-		args: ["x", "wrangler", "versions", "upload"]
+		args: ["x", "wrangler", "deploy"]
 		dependsOn: ["build"]
 	}
 
-	deploy: "upload-preview": {
+	deploy: preview: {
 		command: "bun"
 		args: ["x", "wrangler", "versions", "upload", "--preview-alias", "pr-${{ github.event.pull_request.number }}"]
 		dependsOn: ["build"]
-	}
-
-	deploy: activate: {
-		command: "bun"
-		args: ["x", "wrangler", "versions", "deploy"]
-		dependsOn: ["deploy.upload"]
 	}
 }
