@@ -1,0 +1,50 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"main": "dist/_worker.js/index.js",
+	"name": "rawkode-news",
+	"compatibility_date": "2025-12-17",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist",
+		"run_worker_first": true
+	},
+	"workers_dev": true,
+	"preview_urls": true,
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+			"destinations": [
+				"posthog-eu"
+			]
+		},
+		"traces": {
+			"enabled": true,
+			"destinations": []
+		}
+	},
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "43609d841c1f451481ffe836b3979eb9"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "rawkode-news",
+			"database_id": "e0b5fca4-c343-47ef-a6e6-aa9be75753ea",
+			"migrations_dir": "drizzle"
+		}
+	],
+	"routes": [
+		{
+			"pattern": "rawkode.news",
+			"custom_domain": true
+		}
+	]
+}
