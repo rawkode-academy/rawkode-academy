@@ -30,6 +30,7 @@ ci: pipelines: {
 
 tasks: {
 	cloudflare: {
+		type: "group"
 		types: {
 			command: "bun"
 			args: ["x", "wrangler", "types"]
@@ -41,12 +42,12 @@ tasks: {
 	dev: {
 		command: "bun"
 		args: ["x", "wrangler", "dev"]
-		dependsOn: ["cloudflare.types"]
+		dependsOn: [cloudflare.types]
 	}
 
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		dependsOn: ["cloudflare.types"]
+		dependsOn: [cloudflare.types]
 	}
 }
