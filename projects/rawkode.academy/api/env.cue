@@ -36,7 +36,7 @@ tasks: {
 	compose: {
 		command: "bun"
 		args: ["run", "scripts/compose.ts"]
-		dependsOn: ["collect-schemas"]
+		dependsOn: [tasks["collect-schemas"]]
 
 		inputs: [
 			"scripts/compose.ts",
@@ -50,7 +50,7 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		dependsOn: ["compose"]
+		dependsOn: [compose]
 
 		inputs: [
 			"src/**",

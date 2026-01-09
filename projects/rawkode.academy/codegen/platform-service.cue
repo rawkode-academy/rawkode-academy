@@ -179,6 +179,7 @@ import (
 
 	// Auto-generated deploy tasks based on enabled features
 	tasks: deploy: {
+		type: "group"
 		if includeReadModel {
 			read: {
 				command: "bun"

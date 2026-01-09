@@ -9,6 +9,7 @@ name: "cloudnativecompass-fm"
 
 tasks: {
 	terraform: {
+		type: "group"
 		plan: {
 			command: "terraform"
 			args: ["plan", "-out=.terraform.plan.json"]
@@ -16,7 +17,7 @@ tasks: {
 		apply: {
 			command: "terraform"
 			args: ["apply", ".terraform.plan.json"]
-			dependsOn: ["terraform.plan"]
+			dependsOn: [plan]
 		}
 	}
 }

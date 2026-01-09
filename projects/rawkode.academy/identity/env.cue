@@ -20,6 +20,7 @@ ci: pipelines: {
 
 tasks: {
 	auth: {
+		type: "group"
 		generate: {
 			command: "bun"
 			args: ["x", "@better-auth/cli", "generate", "--config", "./src/lib/auth.config.ts", "--output", "./src/db/schema.ts", "-y"]
@@ -27,6 +28,7 @@ tasks: {
 	}
 
 	bun: {
+		type: "group"
 		dev: {
 			command: "bun"
 			args: ["x", "wrangler", "dev"]
@@ -40,6 +42,7 @@ tasks: {
 	}
 
 	migrations: {
+		type: "group"
 		remote: {
 			command: "bun"
 			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
@@ -60,7 +63,7 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		dependsOn: ["migrations.remote", "build"]
+		dependsOn: [migrations.remote, build]
 		inputs: [
 			"astro.config.mjs",
 			"bun.lock",
