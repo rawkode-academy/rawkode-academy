@@ -59,15 +59,17 @@ tasks: {
 		]
 	}
 
-	deploy: main: {
-		command: "bun"
-		args: ["x", "wrangler", "deploy"]
-		dependsOn: ["build"]
-	}
-
-	deploy: preview: {
-		command: "bun"
-		args: ["x", "wrangler", "versions", "upload", "--preview-alias", "pr-${{ github.event.pull_request.number }}"]
-		dependsOn: ["build"]
+	deploy: {
+		type: "group"
+		main: {
+			command: "bun"
+			args: ["x", "wrangler", "deploy"]
+			dependsOn: [build]
+		}
+		preview: {
+			command: "bun"
+			args: ["x", "wrangler", "versions", "upload", "--preview-alias", "pr-${{ github.event.pull_request.number }}"]
+			dependsOn: [build]
+		}
 	}
 }
