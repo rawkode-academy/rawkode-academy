@@ -15,11 +15,18 @@ ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["deploy"]
+		tasks: ["deploy.main"]
+	}
+
+	pullRequest: {
+		when: {
+			pullRequest: true
+		}
+		tasks: ["deploy.preview"]
 	}
 }
 
@@ -28,13 +35,10 @@ tasks: {
 		command: "bun"
 		args: ["run", "dev"]
 
-
 		inputs: [
 			"astro.config.mts",
-			"bun.lock",
-			"content/",
 			"package.json",
-			"public/",
+			"public/**",
 			"src/**",
 		]
 	}
@@ -43,13 +47,10 @@ tasks: {
 		command: "bun"
 		args: ["run", "build"]
 
-
 		inputs: [
 			"astro.config.mts",
-			"bun.lock",
-			"content/",
 			"package.json",
-			"public/",
+			"public/**",
 			"src/**",
 		]
 
@@ -59,8 +60,16 @@ tasks: {
 	}
 
 	deploy: {
-		command: "bun"
-		args: ["x", "wrangler", "deploy"]
-		dependsOn: [build]
+		type: "group"
+		main: {
+			command: "bun"
+			args: ["x", "wrangler", "deploy"]
+			dependsOn: [build]
+		}
+		preview: {
+			command: "bun"
+			args: ["x", "wrangler", "versions", "upload", "--preview-alias", "pr-${{ github.event.pull_request.number }}"]
+			dependsOn: [build]
+		}
 	}
 }
