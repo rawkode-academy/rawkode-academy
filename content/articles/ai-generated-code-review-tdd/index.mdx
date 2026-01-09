@@ -1,0 +1,93 @@
+---
+title: "I Don't Review Every Line of AI-Generated Code"
+description: "You don't need to review everything an LLM generates. You need to review the right things: directory structure, file names, and function names."
+type: article
+openGraph:
+  title: "I Don't Review Every Line of AI-Generated Code"
+  subtitle: "The secret? Knowing where to look."
+publishedAt: 2026-01-02
+draft: false
+authors:
+  - rawkode
+categories:
+  - ai
+  - software-engineering
+  - code-review
+cover:
+  image: "./cover.jpeg"
+  alt: "Reviewing AI-generated code by watching structure, not implementation"
+---
+
+Something that might get my engineering card revoked: I don't review every line of code that LLMs generate for me.
+
+And yet, the quality of my codebases hasn't suffered. If anything, it's improved.
+
+## The secret? Knowing where to look.
+
+There's an assumption in our industry that code review means reading every line, understanding every branch, mentally executing every loop. This was already unsustainable at scale. With AI assistants generating code faster than we can read it, it's become impossible.
+
+But after working with LLMs on real projects, I've found you don't need to review everything. You need to review the *right* things.
+
+## What I actually watch
+
+When I'm working with an LLM, I'm watching three things: directory structure, file names, and function names.
+
+**Directory structure.** This is the skeleton of your codebase. When directories start proliferating without clear purpose, when naming becomes inconsistent, when you see `utils/`, `helpers/`, and `common/` all appearing in the same project—something has gone wrong at the conceptual level. No amount of clean implementation will save a confused architecture.
+
+**File names.** A well-named file tells you exactly what's inside without opening it. When file names become vague (`handler.go`, `service.py`, `main2.js`) or overly specific (`handleUserCreationWithValidationAndNotification.ts`), it's a smell. Either the LLM has lost the plot, or the requirements were unclear to begin with.
+
+**Function names.** These are your API contracts with yourself. They should read like a story: `validateCredentials`, `createSession`, `notifyUser`. When functions start getting named `processData` or `doThing` or `handleStuff`, the underlying logic is almost certainly tangled.
+
+These three signals form a hierarchy of abstraction. Problems at higher levels cascade down. Confusion in directory structure manifests as confused file organisation, which manifests as confused function naming, which manifests as confused implementation.
+
+By the time you're reading implementation details, you're debugging symptoms instead of causes.
+
+## The TDD connection
+
+If this sounds familiar, it should. It's the same principle behind test-driven development.
+
+When you write tests first, you're not testing implementation—you're designing the interface. You're saying "I expect a function called `validateCredentials` that takes a username and password and returns a boolean." The test defines the contract before a single line of implementation exists.
+
+TDD forces you to think about the *shape* of your code before you think about how it works. Does this function name make sense? Is this the right place for this logic? Will this API be pleasant to use?
+
+That's exactly what I'm doing when I review AI-generated code. I'm checking the contracts, not the implementation. Did the LLM design sensible interfaces? Are the abstractions in the right places? Do the names tell a coherent story?
+
+If the design is right, the implementation usually follows. If the design is wrong, no amount of correct implementation will save it.
+
+## The tech lead mental model
+
+Think about how a senior engineer actually operates on a large team. They don't review every pull request line-by-line. They establish patterns, set conventions, and then trust their team to execute—intervening only when something seems off.
+
+Working with LLMs is the same dynamic. You establish the architecture. You set the naming conventions. You define the boundaries. Then you let the AI execute, keeping one eye on the structural signals that indicate whether things are staying on track.
+
+When the signals are clean, you can move fast. When they start degrading, you slow down and dig in.
+
+## What this looks like day-to-day
+
+My workflow on a typical feature:
+
+I tell the LLM what I want to build and how I want it organised. I'm specific about directory structure and naming conventions. As code gets generated, I'm scanning file names, function signatures, and where things are landing in the project structure.
+
+Then the smell test: Does this organisation make sense? Could a new developer understand the codebase from the file tree alone? Do the function names tell a coherent story?
+
+If everything looks right structurally, I might skim implementations or just run tests. If something smells off, I read the actual code to understand what went wrong. And crucially, when I do correct, I correct at the right level. If the implementation is messy but the structure is sound, I ask for a rewrite. If the structure is confused, I step back and re-establish the architecture before generating more code.
+
+## The experience factor
+
+This approach requires experience.
+
+You need to have seen enough codebases to recognise when a directory structure is heading somewhere bad. You need enough pattern recognition to know which function names are yellow flags. You need the architectural intuition to smell entropy before it becomes visible in the implementation.
+
+This is where senior developers become *more* valuable in the AI era, not less. The mechanical skills of translating requirements into syntax are increasingly commoditised. The strategic skills of architectural design, code organisation, and quality judgment are more important than ever.
+
+Junior developers watching LLMs generate code learn syntax. Senior developers watching LLMs generate code learn to see the structural patterns that separate good code from bad.
+
+## Give it a try
+
+Next time you're working with an LLM on a coding task:
+
+Before you start, decide on your directory structure and naming conventions. Write them down. As code is generated, don't read the implementations—just watch the file names and function signatures. When something feels off structurally, stop and figure out why before continuing.
+
+At the end, notice how much of the implementation you actually needed to read to feel confident in the quality.
+
+You might be surprised.
