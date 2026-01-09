@@ -61,6 +61,6 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		dependsOn: ["build"]
+		dependsOn: [build]
 	}
 }

@@ -15,7 +15,7 @@ tasks: {
 	dev: {
 		command: "bun"
 		args: ["astro", "dev"]
-		dependsOn: ["codegen"]
+		dependsOn: [codegen]
 
 		inputs: [
 			"astro.config.mjs",
@@ -29,7 +29,7 @@ tasks: {
 	build: {
 		command: "bun"
 		args: ["astro", "build"]
-		dependsOn: ["codegen"]
+		dependsOn: [codegen]
 
 		inputs: [
 			"astro.config.mjs",
