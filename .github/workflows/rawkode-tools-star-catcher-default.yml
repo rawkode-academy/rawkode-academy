@@ -9,9 +9,9 @@ on:
     paths:
     - .github/workflows/rawkode-tools-star-catcher-default.yml
     - cue.mod/**
-    - projects/rawkode.tools/star-catcher/**
     - projects/rawkode.tools/star-catcher/env.cue
     - projects/rawkode.tools/star-catcher/schema/**
+    - projects/rawkode.tools/star-catcher/wrangler.jsonc
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

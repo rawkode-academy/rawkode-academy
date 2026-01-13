@@ -24,6 +24,7 @@ jobs:
   rawkode-academy-website-pullrequest:
     name: rawkode-academy-website-pullRequest
     runs-on: ubuntu-latest
+    environment: production
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -39,7 +40,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: Setup 1Password
+      run: cuenv exec -- cuenv secrets setup onepassword
+      env:
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: pullRequest'
       run: cuenv ci --pipeline pullRequest --path projects/rawkode.academy/website
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CUENV_ENVIRONMENT: production
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

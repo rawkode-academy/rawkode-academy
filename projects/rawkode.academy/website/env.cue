@@ -71,7 +71,7 @@ tasks: {
 		}
 		preview: {
 			command: "bun"
-			args: ["x", "wrangler", "versions", "upload", "--preview-alias", "pr-${{ github.event.pull_request.number }}"]
+			args: ["x", "wrangler", "versions", "upload"]
 			dependsOn: [_t.build]
 		}
 	}
