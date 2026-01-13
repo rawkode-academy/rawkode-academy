@@ -64,12 +64,12 @@ tasks: {
 		main: {
 			command: "bun"
 			args: ["x", "wrangler", "deploy"]
-			dependsOn: [build]
+			dependsOn: ["build"]
 		}
 		preview: {
 			command: "bun"
 			args: ["x", "wrangler", "versions", "upload", "--preview-alias", "pr-${{ github.event.pull_request.number }}"]
-			dependsOn: [build]
+			dependsOn: ["build"]
 		}
 	}
 }
