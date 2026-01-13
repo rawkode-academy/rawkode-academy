@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-link"
 
+let _t = tasks
+
 ci: pipelines: {
 	default: {
 		environment: "production"
@@ -14,7 +16,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["deploy"]
+		tasks: [_t.deploy]
 	}
 }
 

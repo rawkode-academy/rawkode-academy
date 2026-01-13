@@ -6,6 +6,7 @@ schema.#Project
 
 name: "cloudnativecompass-fm"
 
+let _t = tasks
 
 tasks: {
 	terraform: {
@@ -17,7 +18,7 @@ tasks: {
 		apply: {
 			command: "terraform"
 			args: ["apply", ".terraform.plan.json"]
-			dependsOn: [plan]
+			dependsOn: [_t.terraform.plan]
 		}
 	}
 }

@@ -6,6 +6,8 @@ schema.#Project
 
 name: "klustered-dev"
 
+let _t = tasks
+
 tasks: {
 	codegen: {
 		command: "bun"
@@ -15,7 +17,7 @@ tasks: {
 	dev: {
 		command: "bun"
 		args: ["astro", "dev"]
-		dependsOn: [codegen]
+		dependsOn: [_t.codegen]
 
 		inputs: [
 			"astro.config.mjs",
@@ -29,7 +31,7 @@ tasks: {
 	build: {
 		command: "bun"
 		args: ["astro", "build"]
-		dependsOn: [codegen]
+		dependsOn: [_t.codegen]
 
 		inputs: [
 			"astro.config.mjs",
