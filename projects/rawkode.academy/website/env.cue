@@ -25,6 +25,7 @@ ci: pipelines: {
 	}
 
 	pullRequest: {
+		environment: "production"
 		when: {
 			pullRequest: true
 		}
