@@ -14,7 +14,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["deploy"]
+		tasks: [tasks.deploy]
 	}
 }
 

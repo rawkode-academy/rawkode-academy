@@ -19,14 +19,14 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["deploy.main"]
+		tasks: [tasks.deploy.main]
 	}
 
 	pullRequest: {
 		when: {
 			pullRequest: true
 		}
-		tasks: ["deploy.preview"]
+		tasks: [tasks.deploy.preview]
 	}
 }
 
