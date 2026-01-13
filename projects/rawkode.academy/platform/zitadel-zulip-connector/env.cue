@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-platform-zitadel-zulip-connector"
 
+let _t = tasks
+
 env: {
 	environment: production: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
@@ -22,7 +24,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [tasks.deploy]
+		tasks: [_t.deploy]
 	}
 }
 

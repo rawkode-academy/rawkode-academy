@@ -164,6 +164,8 @@ import (
 		}
 	}
 
+	let _t = tasks
+
 	// CI pipeline with workflow_dispatch enabled
 	ci: pipelines: {
 		default: {
@@ -173,27 +175,28 @@ import (
 				defaultBranch: true
 				manual:        true
 			}
-			tasks: [tasks.deploy]
+			tasks: [_t.deploy]
 		}
 	}
 
 	// Auto-generated deploy tasks based on enabled features
 	tasks: deploy: {
 		type: "group"
+
 		if includeReadModel {
-			read: {
+			read: schema.#Task & {
 				command: "bun"
 				args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
 			}
 		}
 		if includeWriteModel {
-			write: {
+			write: schema.#Task & {
 				command: "bun"
 				args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
 			}
 		}
 		if includeHttp {
-			http: {
+			http: schema.#Task & {
 				command: "bun"
 				args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 			}

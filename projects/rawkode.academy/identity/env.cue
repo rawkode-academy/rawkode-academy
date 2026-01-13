@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-identity"
 
+let _t = tasks
+
 ci: pipelines: {
 	default: {
 		environment: "production"
@@ -14,7 +16,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [tasks.deploy]
+		tasks: [_t.deploy]
 	}
 }
 
@@ -63,7 +65,7 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		dependsOn: [migrations.remote, build]
+		dependsOn: [_t.migrations.remote, _t.build]
 		inputs: [
 			"astro.config.mjs",
 			"bun.lock",

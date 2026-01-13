@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-website"
 
+let _t = tasks
+
 env: {
 	GRAPHQL_ENDPOINT:  "https://api.rawkode.academy/"
 	DISABLE_GAME_AUTH: true
@@ -19,14 +21,14 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [tasks.deploy.main]
+		tasks: [_t.deploy.main]
 	}
 
 	pullRequest: {
 		when: {
 			pullRequest: true
 		}
-		tasks: [tasks.deploy.preview]
+		tasks: [_t.deploy.preview]
 	}
 }
 
@@ -64,12 +66,12 @@ tasks: {
 		main: {
 			command: "bun"
 			args: ["x", "wrangler", "deploy"]
-			dependsOn: ["build"]
+			dependsOn: [_t.build]
 		}
 		preview: {
 			command: "bun"
 			args: ["x", "wrangler", "versions", "upload", "--preview-alias", "pr-${{ github.event.pull_request.number }}"]
-			dependsOn: ["build"]
+			dependsOn: [_t.build]
 		}
 	}
 }
