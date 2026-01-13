@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-api"
 
+let _t = tasks
+
 ci: pipelines: {
 	default: {
 		environment: "production"
@@ -14,7 +16,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["install", "deploy"]
+		tasks: [_t.deploy]
 	}
 }
 
@@ -36,7 +38,7 @@ tasks: {
 	compose: {
 		command: "bun"
 		args: ["run", "scripts/compose.ts"]
-		dependsOn: [tasks["collect-schemas"]]
+		dependsOn: [_t["collect-schemas"]]
 
 		inputs: [
 			"scripts/compose.ts",
@@ -50,7 +52,7 @@ tasks: {
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		dependsOn: [compose]
+		dependsOn: [_t.compose]
 
 		inputs: [
 			"src/**",
