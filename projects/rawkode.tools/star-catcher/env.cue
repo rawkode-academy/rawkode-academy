@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-tools-star-catcher"
 
+let _t = tasks
+
 env: {
 	SERVICE_NAME: "star-catcher"
 
@@ -24,7 +26,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["deploy"]
+		tasks: [_t.deploy]
 	}
 }
 
@@ -42,12 +44,12 @@ tasks: {
 	dev: {
 		command: "bun"
 		args: ["x", "wrangler", "dev"]
-		dependsOn: [cloudflare.types]
+		dependsOn: [_t.cloudflare.types]
 	}
 
 	deploy: {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
-		dependsOn: [cloudflare.types]
+		dependsOn: [_t.cloudflare.types]
 	}
 }

@@ -68,10 +68,18 @@ const continueWatchingVideos = continueWatchingData
 				video.data.publishedAt instanceof Date
 					? video.data.publishedAt.toISOString()
 					: String(video.data.publishedAt),
-			positionSeconds: watchItem.positionSeconds,
 		};
 	})
 	.filter((v): v is NonNullable<typeof v> => v !== null);
+
+// Build watch positions map for progress bars
+const watchPositionsMap = continueWatchingData.reduce(
+	(acc, item) => {
+		acc[item.videoId] = item.positionSeconds;
+		return acc;
+	},
+	{} as Record<string, number>,
+);
 ---
 
 <Page title="Home - Rawkode Academy" description="Your personalized dashboard">
@@ -90,6 +98,8 @@ const continueWatchingVideos = continueWatchingData
 				title="Continue Watching"
 				description="Resume your recently watched videos"
 				videos={continueWatchingVideos}
+				watchPositions={watchPositionsMap}
+				isAuthenticated={true}
 			/>
 		) : (
 			<div class="text-center py-16">

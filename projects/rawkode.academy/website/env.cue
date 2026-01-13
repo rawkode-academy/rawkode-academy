@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-academy-website"
 
+let _t = tasks
+
 env: {
 	GRAPHQL_ENDPOINT:  "https://api.rawkode.academy/"
 	DISABLE_GAME_AUTH: true
@@ -15,11 +17,19 @@ ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["deploy"]
+		tasks: [_t.deploy.main]
+	}
+
+	pullRequest: {
+		environment: "production"
+		when: {
+			pullRequest: true
+		}
+		tasks: [_t.deploy.preview]
 	}
 }
 
@@ -28,13 +38,10 @@ tasks: {
 		command: "bun"
 		args: ["run", "dev"]
 
-
 		inputs: [
 			"astro.config.mts",
-			"bun.lock",
-			"content/",
 			"package.json",
-			"public/",
+			"public/**",
 			"src/**",
 		]
 	}
@@ -43,13 +50,10 @@ tasks: {
 		command: "bun"
 		args: ["run", "build"]
 
-
 		inputs: [
 			"astro.config.mts",
-			"bun.lock",
-			"content/",
 			"package.json",
-			"public/",
+			"public/**",
 			"src/**",
 		]
 
@@ -59,8 +63,16 @@ tasks: {
 	}
 
 	deploy: {
-		command: "bun"
-		args: ["x", "wrangler", "deploy"]
-		dependsOn: [build]
+		type: "group"
+		main: {
+			command: "bun"
+			args: ["x", "wrangler", "deploy"]
+			dependsOn: [_t.build]
+		}
+		preview: {
+			command: "bun"
+			args: ["x", "wrangler", "versions", "upload"]
+			dependsOn: [_t.build]
+		}
 	}
 }

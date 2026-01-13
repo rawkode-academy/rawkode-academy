@@ -6,6 +6,8 @@ schema.#Project
 
 name: "rawkode-tools-observability-collector"
 
+let _t = tasks
+
 env: {
 	SERVICE_NAME: "observability-collector"
 
@@ -24,7 +26,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: ["deploy"]
+		tasks: [_t.deploy]
 	}
 }
 
