@@ -1,0 +1,150 @@
+---
+export const prerender = false;
+
+import { css } from "styled-system/css";
+import "../../styles/global.css";
+import ConfirmationCard from "@/components/bracket/ConfirmationCard.vue";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+
+if (!user) {
+	return Astro.redirect(`/api/auth/sign-in?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
+}
+
+const { data: participations, error } = await Astro.callAction(actions.bracket.getMyParticipation, undefined);
+
+const pageStyles = css({
+	minHeight: "100vh",
+	background: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)",
+	paddingBlock: "4rem",
+	paddingInline: "1rem",
+});
+
+const containerStyles = css({
+	maxWidth: "800px",
+	marginInline: "auto",
+});
+
+const headerStyles = css({
+	textAlign: "center",
+	marginBottom: "3rem",
+});
+
+const titleStyles = css({
+	fontSize: "clamp(2rem, 5vw, 3rem)",
+	fontWeight: 700,
+	color: "white",
+	marginBottom: "0.5rem",
+});
+
+const subtitleStyles = css({
+	fontSize: "1rem",
+	color: "rgba(255, 255, 255, 0.6)",
+});
+
+const cardsGridStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1.5rem",
+});
+
+const emptyStateStyles = css({
+	textAlign: "center",
+	padding: "4rem 2rem",
+	background: "rgba(255, 255, 255, 0.05)",
+	borderRadius: "1rem",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+});
+
+const emptyTitleStyles = css({
+	fontSize: "1.25rem",
+	fontWeight: 600,
+	color: "white",
+	marginBottom: "0.5rem",
+});
+
+const emptyTextStyles = css({
+	color: "rgba(255, 255, 255, 0.6)",
+	marginBottom: "1.5rem",
+});
+
+const linkStyles = css({
+	color: "#a78bfa",
+	textDecoration: "none",
+	fontWeight: 500,
+	"&:hover": {
+		textDecoration: "underline",
+	},
+});
+
+const backLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.5rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	textDecoration: "none",
+	fontSize: "0.875rem",
+	marginBottom: "2rem",
+	transition: "color 0.2s",
+	"&:hover": {
+		color: "white",
+	},
+});
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Confirm Participation - Klustered '26</title>
+	</head>
+	<body>
+		<main class={pageStyles}>
+			<div class={containerStyles}>
+				<a href="/" class={backLinkStyles}>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+					</svg>
+					Back to Home
+				</a>
+
+				<header class={headerStyles}>
+					<h1 class={titleStyles}>Confirm Participation</h1>
+					<p class={subtitleStyles}>
+						Review and confirm your bracket registrations
+					</p>
+				</header>
+
+				{error ? (
+					<div class={emptyStateStyles}>
+						<h2 class={emptyTitleStyles}>Error Loading Participations</h2>
+						<p class={emptyTextStyles}>{error.message}</p>
+						<a href="/" class={linkStyles}>Return to Home</a>
+					</div>
+				) : participations && participations.length > 0 ? (
+					<div class={cardsGridStyles}>
+						{participations.map(({ bracket, competitor }) => (
+							bracket && (
+								<ConfirmationCard
+									client:load
+									bracket={bracket}
+									competitor={competitor}
+								/>
+							)
+						))}
+					</div>
+				) : (
+					<div class={emptyStateStyles}>
+						<h2 class={emptyTitleStyles}>No Registrations Found</h2>
+						<p class={emptyTextStyles}>
+							You haven't registered for any competitions yet.
+						</p>
+						<a href="/" class={linkStyles}>Register to Compete</a>
+					</div>
+				)}
+			</div>
+		</main>
+	</body>
+</html>

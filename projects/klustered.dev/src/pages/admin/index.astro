@@ -1,0 +1,249 @@
+---
+export const prerender = false;
+
+import { css } from "styled-system/css";
+import "../../styles/global.css";
+import { actions } from "astro:actions";
+
+const user = Astro.locals.user;
+
+const ADMIN_USER_IDS = ["rawkode"];
+const isAdmin = user && ADMIN_USER_IDS.includes(user.id);
+
+if (!user) {
+	return Astro.redirect(`/api/auth/sign-in?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
+}
+
+if (!isAdmin) {
+	return Astro.redirect("/");
+}
+
+const { data: brackets } = await Astro.callAction(actions.bracket.getAllBrackets, undefined);
+
+const pageStyles = css({
+	minHeight: "100vh",
+	background: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)",
+	paddingBlock: "2rem",
+	paddingInline: "1rem",
+});
+
+const containerStyles = css({
+	maxWidth: "1200px",
+	marginInline: "auto",
+});
+
+const headerStyles = css({
+	display: "flex",
+	justifyContent: "space-between",
+	alignItems: "center",
+	marginBottom: "2rem",
+	flexWrap: "wrap",
+	gap: "1rem",
+});
+
+const titleStyles = css({
+	fontSize: "1.5rem",
+	fontWeight: 700,
+	color: "white",
+});
+
+const btnStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.5rem",
+	padding: "0.75rem 1.25rem",
+	background: "linear-gradient(135deg, #8b5cf6, #6366f1)",
+	color: "white",
+	borderRadius: "0.5rem",
+	textDecoration: "none",
+	fontWeight: 600,
+	fontSize: "0.875rem",
+	transition: "all 0.2s",
+	"&:hover": {
+		transform: "translateY(-2px)",
+		boxShadow: "0 4px 12px rgba(139, 92, 246, 0.3)",
+	},
+});
+
+const cardStyles = css({
+	background: "rgba(255, 255, 255, 0.03)",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+	borderRadius: "1rem",
+	overflow: "hidden",
+});
+
+const tableStyles = css({
+	width: "100%",
+	borderCollapse: "collapse",
+});
+
+const thStyles = css({
+	textAlign: "left",
+	padding: "1rem",
+	fontSize: "0.75rem",
+	fontWeight: 600,
+	textTransform: "uppercase",
+	color: "rgba(255, 255, 255, 0.5)",
+	borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+});
+
+const tdStyles = css({
+	padding: "1rem",
+	borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+	verticalAlign: "middle",
+});
+
+const bracketNameStyles = css({
+	fontWeight: 600,
+	color: "white",
+});
+
+const bracketSlugStyles = css({
+	fontSize: "0.75rem",
+	color: "rgba(255, 255, 255, 0.5)",
+});
+
+const typeBadgeStyles = css({
+	display: "inline-block",
+	padding: "0.25rem 0.5rem",
+	fontSize: "0.625rem",
+	fontWeight: 600,
+	textTransform: "uppercase",
+	borderRadius: "9999px",
+});
+
+const statusBadgeStyles = css({
+	display: "inline-block",
+	padding: "0.25rem 0.5rem",
+	fontSize: "0.625rem",
+	fontWeight: 600,
+	textTransform: "uppercase",
+	borderRadius: "9999px",
+});
+
+const linkStyles = css({
+	color: "#a78bfa",
+	textDecoration: "none",
+	fontSize: "0.875rem",
+	"&:hover": {
+		textDecoration: "underline",
+	},
+});
+
+const backLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.5rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	textDecoration: "none",
+	fontSize: "0.875rem",
+	marginBottom: "1.5rem",
+	transition: "color 0.2s",
+	"&:hover": {
+		color: "white",
+	},
+});
+
+const emptyStyles = css({
+	padding: "4rem 2rem",
+	textAlign: "center",
+	color: "rgba(255, 255, 255, 0.5)",
+});
+
+function getStatusColor(status: string) {
+	switch (status) {
+		case "draft": return "background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6);";
+		case "registration": return "background: rgba(251, 191, 36, 0.2); color: #fde047;";
+		case "active": return "background: rgba(34, 197, 94, 0.2); color: #86efac;";
+		case "completed": return "background: rgba(99, 102, 241, 0.2); color: #a5b4fc;";
+		default: return "";
+	}
+}
+
+function getTypeColor(type: string) {
+	return type === "solo"
+		? "background: rgba(99, 102, 241, 0.2); color: #a5b4fc;"
+		: "background: rgba(168, 85, 247, 0.2); color: #d8b4fe;";
+}
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Admin - Klustered '26</title>
+	</head>
+	<body>
+		<main class={pageStyles}>
+			<div class={containerStyles}>
+				<a href="/" class={backLinkStyles}>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+					</svg>
+					Back to Home
+				</a>
+
+				<header class={headerStyles}>
+					<h1 class={titleStyles}>Bracket Administration</h1>
+					<a href="/admin/brackets/new" class={btnStyles}>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+						</svg>
+						New Bracket
+					</a>
+				</header>
+
+				<div class={cardStyles}>
+					{brackets && brackets.length > 0 ? (
+						<table class={tableStyles}>
+							<thead>
+								<tr>
+									<th class={thStyles}>Bracket</th>
+									<th class={thStyles}>Type</th>
+									<th class={thStyles}>Status</th>
+									<th class={thStyles}>Created</th>
+									<th class={thStyles}></th>
+								</tr>
+							</thead>
+							<tbody>
+								{brackets.map((b) => (
+									<tr>
+										<td class={tdStyles}>
+											<div class={bracketNameStyles}>{b.name}</div>
+											<div class={bracketSlugStyles}>/{b.slug}</div>
+										</td>
+										<td class={tdStyles}>
+											<span class={typeBadgeStyles} style={getTypeColor(b.type)}>
+												{b.type}
+											</span>
+										</td>
+										<td class={tdStyles}>
+											<span class={statusBadgeStyles} style={getStatusColor(b.status)}>
+												{b.status}
+											</span>
+										</td>
+										<td class={tdStyles}>
+											<span style="color: rgba(255, 255, 255, 0.5); font-size: 0.875rem;">
+												{new Date(b.createdAt).toLocaleDateString()}
+											</span>
+										</td>
+										<td class={tdStyles}>
+											<a href={`/admin/brackets/${b.id}`} class={linkStyles}>
+												Manage &rarr;
+											</a>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					) : (
+						<div class={emptyStyles}>
+							<p>No brackets yet. Create your first one!</p>
+						</div>
+					)}
+				</div>
+			</div>
+		</main>
+	</body>
+</html>

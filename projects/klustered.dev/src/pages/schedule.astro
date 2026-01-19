@@ -1,0 +1,434 @@
+---
+export const prerender = false;
+
+import { actions } from "astro:actions";
+import { css } from "styled-system/css";
+import "../styles/global.css";
+import ScheduleList from "@/components/schedule/ScheduleList.vue";
+
+const { data: scheduleData, error } = await Astro.callAction(actions.bracket.getFullSchedule, {});
+
+const pageStyles = css({
+	minHeight: "100vh",
+	background: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)",
+	position: "relative",
+	overflow: "hidden",
+});
+
+const gridOverlay = css({
+	position: "fixed",
+	inset: 0,
+	backgroundImage: `
+		linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px)
+	`,
+	backgroundSize: "60px 60px",
+	pointerEvents: "none",
+	zIndex: 0,
+});
+
+const containerStyles = css({
+	position: "relative",
+	zIndex: 10,
+	maxWidth: "1000px",
+	marginInline: "auto",
+	paddingBlock: "2rem 4rem",
+	paddingInline: "1rem",
+});
+
+const headerStyles = css({
+	marginBottom: "2rem",
+});
+
+const backLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.5rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	textDecoration: "none",
+	fontSize: "0.875rem",
+	marginBottom: "1.5rem",
+	transition: "color 0.2s",
+	"&:hover": {
+		color: "white",
+	},
+});
+
+const titleStyles = css({
+	fontSize: "clamp(2rem, 5vw, 3rem)",
+	fontWeight: 700,
+	color: "white",
+	marginBottom: "0.5rem",
+});
+
+const subtitleStyles = css({
+	fontSize: "1rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	maxWidth: "600px",
+});
+
+const navLinksStyles = css({
+	display: "flex",
+	gap: "1rem",
+	marginTop: "1.5rem",
+	flexWrap: "wrap",
+});
+
+const navLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.375rem",
+	padding: "0.5rem 0.875rem",
+	background: "rgba(255, 255, 255, 0.05)",
+	border: "1px solid rgba(255, 255, 255, 0.15)",
+	borderRadius: "0.5rem",
+	color: "rgba(255, 255, 255, 0.8)",
+	fontSize: "0.8125rem",
+	textDecoration: "none",
+	transition: "all 0.2s",
+	"&:hover": {
+		background: "rgba(139, 92, 246, 0.15)",
+		borderColor: "rgba(139, 92, 246, 0.4)",
+		color: "white",
+	},
+});
+
+const emptyStateStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "2rem",
+});
+
+const timelineSectionStyles = css({
+	padding: "2rem",
+	background: "rgba(139, 92, 246, 0.05)",
+	border: "1px solid rgba(139, 92, 246, 0.2)",
+	borderRadius: "0.75rem",
+});
+
+const timelineTitleStyles = css({
+	fontSize: "1.25rem",
+	fontWeight: 600,
+	color: "white",
+	marginBottom: "1.5rem",
+	display: "flex",
+	alignItems: "center",
+	gap: "0.5rem",
+});
+
+const bracketListStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1rem",
+});
+
+const bracketItemStyles = css({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	padding: "1rem",
+	background: "rgba(255, 255, 255, 0.03)",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+	borderRadius: "0.5rem",
+	flexWrap: "wrap",
+	gap: "0.75rem",
+});
+
+const bracketNameStyles = css({
+	fontSize: "0.9375rem",
+	fontWeight: 500,
+	color: "white",
+});
+
+const bracketStatusStyles = css({
+	fontSize: "0.6875rem",
+	fontWeight: 600,
+	textTransform: "uppercase",
+	padding: "0.25rem 0.625rem",
+	borderRadius: "9999px",
+});
+
+const statusDraftStyles = css({
+	background: "rgba(255, 255, 255, 0.1)",
+	color: "rgba(255, 255, 255, 0.5)",
+});
+
+const statusRegistrationStyles = css({
+	background: "rgba(34, 197, 94, 0.15)",
+	color: "#86efac",
+});
+
+const statusActiveStyles = css({
+	background: "rgba(251, 191, 36, 0.15)",
+	color: "#fcd34d",
+});
+
+const statusCompletedStyles = css({
+	background: "rgba(139, 92, 246, 0.15)",
+	color: "#c4b5fd",
+});
+
+const infoCardStyles = css({
+	padding: "1.5rem",
+	background: "rgba(255, 255, 255, 0.03)",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+	borderRadius: "0.75rem",
+});
+
+const infoCardTitleStyles = css({
+	fontSize: "1rem",
+	fontWeight: 600,
+	color: "white",
+	marginBottom: "0.75rem",
+	display: "flex",
+	alignItems: "center",
+	gap: "0.5rem",
+});
+
+const infoCardTextStyles = css({
+	fontSize: "0.875rem",
+	color: "rgba(255, 255, 255, 0.7)",
+	lineHeight: 1.6,
+	marginBottom: "1rem",
+});
+
+const streamLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.5rem",
+	padding: "0.625rem 1rem",
+	background: "rgba(139, 92, 246, 0.15)",
+	border: "1px solid rgba(139, 92, 246, 0.3)",
+	borderRadius: "0.5rem",
+	color: "#c4b5fd",
+	fontSize: "0.875rem",
+	fontWeight: 500,
+	textDecoration: "none",
+	transition: "all 0.2s",
+	"&:hover": {
+		background: "rgba(139, 92, 246, 0.25)",
+		borderColor: "rgba(139, 92, 246, 0.5)",
+		color: "white",
+	},
+});
+
+const ctaGridStyles = css({
+	display: "grid",
+	gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+	gap: "1rem",
+});
+
+const ctaCardStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
+	gap: "0.75rem",
+	padding: "1.5rem",
+	background: "rgba(255, 255, 255, 0.03)",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+	borderRadius: "0.75rem",
+	textAlign: "center",
+	textDecoration: "none",
+	transition: "all 0.2s",
+	"&:hover": {
+		borderColor: "rgba(139, 92, 246, 0.4)",
+		background: "rgba(139, 92, 246, 0.05)",
+	},
+});
+
+const ctaIconStyles = css({
+	width: "3rem",
+	height: "3rem",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	background: "rgba(139, 92, 246, 0.15)",
+	borderRadius: "0.75rem",
+	color: "#a78bfa",
+});
+
+const ctaTitleStyles = css({
+	fontSize: "0.9375rem",
+	fontWeight: 600,
+	color: "white",
+});
+
+const ctaDescStyles = css({
+	fontSize: "0.8125rem",
+	color: "rgba(255, 255, 255, 0.6)",
+});
+
+const pendingNoteStyles = css({
+	fontSize: "0.875rem",
+	color: "rgba(255, 255, 255, 0.5)",
+	textAlign: "center",
+	fontStyle: "italic",
+	padding: "1rem",
+});
+
+function getStatusLabel(status: string): string {
+	switch (status) {
+		case "draft": return "Coming Soon";
+		case "registration": return "Registration Open";
+		case "active": return "In Progress";
+		case "completed": return "Completed";
+		default: return status;
+	}
+}
+
+function getStatusClass(status: string): string {
+	switch (status) {
+		case "draft": return statusDraftStyles;
+		case "registration": return statusRegistrationStyles;
+		case "active": return statusActiveStyles;
+		case "completed": return statusCompletedStyles;
+		default: return statusDraftStyles;
+	}
+}
+
+const hasMatches = scheduleData && scheduleData.matches.length > 0;
+const hasBrackets = scheduleData && scheduleData.brackets.length > 0;
+const hasRegistrationOpen = scheduleData?.brackets.some(b => b.status === "registration");
+
+// Show informative empty state instead of error when data can't be loaded
+// This provides a better UX than showing an error message
+const showEmptyState = !hasMatches;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Schedule - Klustered '26</title>
+		<meta name="description" content="Full competition schedule for Klustered '26. View all match times, add to your calendar, and never miss a match." />
+	</head>
+	<body>
+		<main class={pageStyles}>
+			<div class={gridOverlay}></div>
+
+			<div class={containerStyles}>
+				<header class={headerStyles}>
+					<a href="/" class={backLinkStyles}>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+						</svg>
+						Back to Home
+					</a>
+
+					<h1 class={titleStyles}>Competition Schedule</h1>
+					<p class={subtitleStyles}>
+						All scheduled matches across all brackets. Add matches to your calendar so you never miss the action.
+					</p>
+
+					<nav class={navLinksStyles}>
+						<a href="/rules" class={navLinkStyles}>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+							</svg>
+							Competition Rules
+						</a>
+						<a href="/faq" class={navLinkStyles}>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+							FAQ
+						</a>
+					</nav>
+				</header>
+
+				{hasMatches ? (
+					<ScheduleList
+						client:load
+						matches={scheduleData.matches}
+						brackets={scheduleData.brackets}
+					/>
+				) : (
+					<div class={emptyStateStyles}>
+						{hasBrackets && (
+							<section class={timelineSectionStyles}>
+								<h2 class={timelineTitleStyles}>
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+									</svg>
+									Competition Timeline
+								</h2>
+								<div class={bracketListStyles}>
+									{scheduleData.brackets.map((bracket) => (
+										<div class={bracketItemStyles}>
+											<div>
+												<span class={bracketNameStyles}>{bracket.name}</span>
+												<span style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); margin-left: 0.5rem;">
+													{bracket.type === "solo" ? "Individual" : "Team"} Competition
+												</span>
+											</div>
+											<span class={`${bracketStatusStyles} ${getStatusClass(bracket.status)}`}>
+												{getStatusLabel(bracket.status)}
+											</span>
+										</div>
+									))}
+								</div>
+								<p class={pendingNoteStyles}>
+									Match times will be announced once the bracket is generated and competitors are confirmed.
+								</p>
+							</section>
+						)}
+
+						<section class={infoCardStyles}>
+							<h2 class={infoCardTitleStyles}>
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+								</svg>
+								Watch the Action
+							</h2>
+							<p class={infoCardTextStyles}>
+								All matches are streamed live on the Rawkode Academy YouTube channel. Subscribe to get notified when we go live!
+							</p>
+							<a href="https://rawkode.academy" target="_blank" rel="noopener" class={streamLinkStyles}>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+									<path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+								</svg>
+								Rawkode Academy
+							</a>
+						</section>
+
+						<div class={ctaGridStyles}>
+							{hasRegistrationOpen && (
+								<a href="/" class={ctaCardStyles}>
+									<div class={ctaIconStyles}>
+										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+										</svg>
+									</div>
+									<span class={ctaTitleStyles}>Register to Compete</span>
+									<span class={ctaDescStyles}>Sign up now while registration is open</span>
+								</a>
+							)}
+							<a href="/bracket" class={ctaCardStyles}>
+								<div class={ctaIconStyles}>
+									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+									</svg>
+								</div>
+								<span class={ctaTitleStyles}>View Brackets</span>
+								<span class={ctaDescStyles}>See the competition structure</span>
+							</a>
+							<a href="/rules" class={ctaCardStyles}>
+								<div class={ctaIconStyles}>
+									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+									</svg>
+								</div>
+								<span class={ctaTitleStyles}>Competition Rules</span>
+								<span class={ctaDescStyles}>Learn how Klustered works</span>
+							</a>
+						</div>
+					</div>
+				)}
+			</div>
+		</main>
+	</body>
+</html>
