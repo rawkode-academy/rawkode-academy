@@ -1,7 +1,8 @@
 import { bracket } from "./bracket";
-import { newsletter } from "./newsletter";
+import { bracket as bracketActions } from "./bracket.ts";
+import { newsletter } from "./newsletter.ts";
 
 export const server = {
-	bracket,
+	bracket: bracketActions,
 	newsletter,
 };

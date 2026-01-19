@@ -3,7 +3,7 @@ export const prerender = false;
 
 import { css } from "styled-system/css";
 import "../../styles/global.css";
-import { actions } from "astro:actions";
+import { getBracketBySlug } from "@/lib/klustered-brackets";
 import BracketViewer from "@/components/bracket/BracketViewer.vue";
 
 const { slug } = Astro.params;
@@ -12,13 +12,14 @@ if (!slug) {
 	return Astro.redirect("/bracket");
 }
 
-const { data, error } = await Astro.callAction(actions.bracket.getBracket, { slug });
+const bracketData = getBracketBySlug(slug);
 
-if (error || !data) {
+if (!bracketData) {
 	return Astro.redirect("/bracket");
 }
 
-const { bracket, competitors, matches } = data;
+const { competitors, matches } = bracketData;
+const bracket = bracketData;
 
 const pageStyles = css({
 	minHeight: "100vh",

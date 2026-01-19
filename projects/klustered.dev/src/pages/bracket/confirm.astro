@@ -3,16 +3,6 @@ export const prerender = false;
 
 import { css } from "styled-system/css";
 import "../../styles/global.css";
-import ConfirmationCard from "@/components/bracket/ConfirmationCard.vue";
-import { actions } from "astro:actions";
-
-const user = Astro.locals.user;
-
-if (!user) {
-	return Astro.redirect(`/api/auth/sign-in?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
-}
-
-const { data: participations, error } = await Astro.callAction(actions.bracket.getMyParticipation, undefined);
 
 const pageStyles = css({
 	minHeight: "100vh",
@@ -22,73 +12,36 @@ const pageStyles = css({
 });
 
 const containerStyles = css({
-	maxWidth: "800px",
+	maxWidth: "720px",
 	marginInline: "auto",
-});
-
-const headerStyles = css({
 	textAlign: "center",
-	marginBottom: "3rem",
+	background: "rgba(255, 255, 255, 0.03)",
+	borderRadius: "1rem",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+	padding: "3rem 2rem",
 });
 
 const titleStyles = css({
-	fontSize: "clamp(2rem, 5vw, 3rem)",
+	fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
 	fontWeight: 700,
 	color: "white",
-	marginBottom: "0.5rem",
+	marginBottom: "1rem",
 });
 
-const subtitleStyles = css({
+const textStyles = css({
 	fontSize: "1rem",
-	color: "rgba(255, 255, 255, 0.6)",
-});
-
-const cardsGridStyles = css({
-	display: "flex",
-	flexDirection: "column",
-	gap: "1.5rem",
-});
-
-const emptyStateStyles = css({
-	textAlign: "center",
-	padding: "4rem 2rem",
-	background: "rgba(255, 255, 255, 0.05)",
-	borderRadius: "1rem",
-	border: "1px solid rgba(255, 255, 255, 0.1)",
-});
-
-const emptyTitleStyles = css({
-	fontSize: "1.25rem",
-	fontWeight: 600,
-	color: "white",
-	marginBottom: "0.5rem",
-});
-
-const emptyTextStyles = css({
-	color: "rgba(255, 255, 255, 0.6)",
-	marginBottom: "1.5rem",
+	color: "rgba(255, 255, 255, 0.7)",
+	lineHeight: 1.6,
+	marginBottom: "2rem",
 });
 
 const linkStyles = css({
 	color: "#a78bfa",
+	fontWeight: 600,
 	textDecoration: "none",
-	fontWeight: 500,
+	fontSize: "0.95rem",
 	"&:hover": {
 		textDecoration: "underline",
-	},
-});
-
-const backLinkStyles = css({
-	display: "inline-flex",
-	alignItems: "center",
-	gap: "0.5rem",
-	color: "rgba(255, 255, 255, 0.6)",
-	textDecoration: "none",
-	fontSize: "0.875rem",
-	marginBottom: "2rem",
-	transition: "color 0.2s",
-	"&:hover": {
-		color: "white",
 	},
 });
 ---
@@ -103,47 +56,12 @@ const backLinkStyles = css({
 	<body>
 		<main class={pageStyles}>
 			<div class={containerStyles}>
-				<a href="/" class={backLinkStyles}>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-					</svg>
-					Back to Home
-				</a>
-
-				<header class={headerStyles}>
-					<h1 class={titleStyles}>Confirm Participation</h1>
-					<p class={subtitleStyles}>
-						Review and confirm your bracket registrations
-					</p>
-				</header>
-
-				{error ? (
-					<div class={emptyStateStyles}>
-						<h2 class={emptyTitleStyles}>Error Loading Participations</h2>
-						<p class={emptyTextStyles}>{error.message}</p>
-						<a href="/" class={linkStyles}>Return to Home</a>
-					</div>
-				) : participations && participations.length > 0 ? (
-					<div class={cardsGridStyles}>
-						{participations.map(({ bracket, competitor }) => (
-							bracket && (
-								<ConfirmationCard
-									client:load
-									bracket={bracket}
-									competitor={competitor}
-								/>
-							)
-						))}
-					</div>
-				) : (
-					<div class={emptyStateStyles}>
-						<h2 class={emptyTitleStyles}>No Registrations Found</h2>
-						<p class={emptyTextStyles}>
-							You haven't registered for any competitions yet.
-						</p>
-						<a href="/" class={linkStyles}>Register to Compete</a>
-					</div>
-				)}
+				<h1 class={titleStyles}>Participation Confirmations Paused</h1>
+				<p class={textStyles}>
+					Bracket participation is now managed in YAML content files, so confirmations are
+					no longer required here. Check the live brackets for the latest roster updates.
+				</p>
+				<a href="/bracket" class={linkStyles}>View current brackets</a>
 			</div>
 		</main>
 	</body>

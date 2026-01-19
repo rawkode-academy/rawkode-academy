@@ -1,7 +1,6 @@
 ---
 export const prerender = false;
 
-import { actions } from "astro:actions";
 import { css } from "styled-system/css";
 import "../styles/global.css";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -11,29 +10,11 @@ import RecentResults from "@/components/bracket/RecentResults.vue";
 import UpcomingMatches from "@/components/bracket/UpcomingMatches.vue";
 import CompetitionCTA from "@/components/bracket/CompetitionCTA.vue";
 import ChampionBanner from "@/components/bracket/ChampionBanner.vue";
+import { getHomepageData } from "@/lib/klustered-brackets";
 
-const user = Astro.locals.user;
-const pagePath = Astro.url.pathname;
-const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
+const homepageData = getHomepageData();
 
-let homepageData = {
-	brackets: [],
-	liveMatches: [],
-	recentCompleted: [],
-	upcomingScheduled: [],
-	userParticipation: [],
-} as Awaited<ReturnType<typeof actions.bracket.getHomepageData>>["data"];
-
-try {
-	const { data, error } = await Astro.callAction(actions.bracket.getHomepageData, undefined);
-	if (!error && data) {
-		homepageData = data;
-	}
-} catch (e) {
-	console.error("Failed to fetch homepage data", e);
-}
-
-const { brackets, liveMatches, recentCompleted, upcomingScheduled, userParticipation } = homepageData;
+const { brackets, liveMatches, recentCompleted, upcomingScheduled } = homepageData;
 const hasCompetitionContent = brackets.length > 0 || liveMatches.length > 0;
 const hasActiveBrackets = brackets.some(b => b.status === "active");
 const completedBracketsWithChampions = brackets.filter(b => b.status === "completed" && b.champion);
@@ -461,9 +442,6 @@ const championsSection = css({
 					<CompetitionCTA
 						client:visible
 						brackets={brackets}
-						userParticipation={userParticipation}
-						isSignedIn={!!user}
-						signInUrl={signInUrl}
 					/>
 				</section>
 

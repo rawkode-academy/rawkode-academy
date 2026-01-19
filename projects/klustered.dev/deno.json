@@ -5,6 +5,7 @@
 		"@astrojs/vue": "npm:@astrojs/vue@^5.0.4",
 		"@pandacss/dev": "npm:@pandacss/dev@^1.7.1",
 		"@paralleldrive/cuid2": "npm:@paralleldrive/cuid2@^2.2.2",
+		"@rawkodeacademy/content": "../../content/src/index.ts",
 		"astro": "npm:astro@^5.7.0",
 		"dotenv": "npm:dotenv@^16.4.5",
 		"drizzle-kit": "npm:drizzle-kit@^0.30.0",

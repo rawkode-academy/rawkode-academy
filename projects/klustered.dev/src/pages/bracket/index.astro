@@ -3,9 +3,9 @@ export const prerender = false;
 
 import { css } from "styled-system/css";
 import "../../styles/global.css";
-import { actions } from "astro:actions";
+import { getActiveBrackets } from "@/lib/klustered-brackets";
 
-const { data: brackets } = await Astro.callAction(actions.bracket.getActiveBrackets, undefined);
+const brackets = getActiveBrackets();
 
 const pageStyles = css({
 	minHeight: "100vh",

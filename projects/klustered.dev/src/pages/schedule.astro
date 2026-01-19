@@ -1,12 +1,12 @@
 ---
 export const prerender = false;
 
-import { actions } from "astro:actions";
 import { css } from "styled-system/css";
 import "../styles/global.css";
 import ScheduleList from "@/components/schedule/ScheduleList.vue";
+import { getFullSchedule } from "@/lib/klustered-brackets";
 
-const { data: scheduleData, error } = await Astro.callAction(actions.bracket.getFullSchedule, {});
+const scheduleData = getFullSchedule();
 
 const pageStyles = css({
 	minHeight: "100vh",
