@@ -1,0 +1,127 @@
+---
+title: "Introduction"
+slug: "introduction"
+description: |
+    Rust for the Rusty: a practical re-introduction to Rust for busy engineers and brave beginners who want modern, confident Rust.
+course: "rust-for-the-rusty"
+section: "Getting Started"
+order: 1
+publishedAt: 2026-01-28
+draft: false
+authors:
+  - icepuma
+resources:
+  - title: "The Rust Programming Language (The Book)"
+    description: "The official Rust book for fundamentals and deeper context"
+    type: "url"
+    url: "https://doc.rust-lang.org/book/"
+    category: "documentation"
+---
+
+## Welcome
+
+Let the journey begin. We're walking through the depths of the compiler,
+touch the build ecosystem, get up to speed with the features of the language to end up writing our own small WASM runtime.
+I think the best way to start things is to talk a bit about the history of Rust.
+
+### The history of Rust
+
+Like many languages, Rust started out as a hobby project. Here's a small timeline of notable milestones:
+
+* 2006
+  * Graydon Hoare starts Rust as his pet project while working at Mozilla
+  * Rust was initially written in OCaml
+* 2009
+  * Mozilla offially sponsors Rust for a potential safe browser engine
+  * The OCaml based compiler is switched to an LLVM based backend
+* 2012
+  * Rust 0.1 is released for Windows, Linux and macOS
+* 2015
+  * Rust 1.0 drops
+* 2016
+  * The first version of Servo is released
+  * Servo was developed in parallel with Rust. Both ecosystems participated from each other
+* 2021
+  * The Rust foundation is founded by AWS, Google, Huawei, Microsoft and Mozilla
+
+Here's a small list of resources you can read more in-depth about the history of Rust:
+* [Steve Klabnik - History of Rust](https://steveklabnik.github.io/history-of-rust/)
+* [Graydon Hoare - 10 Years of Stable Rust: An Infrastructure Story](https://rustfoundation.org/media/10-years-of-stable-rust-an-infrastructure-story/)
+* [Clive Thompson - How Rust went from a side project to the world's most-loved programming language](https://www.technologyreview.com/2023/02/14/1067869/rust-worlds-fastest-growing-programming-language/)
+* [releases.rs - Rust Changelogs](https://releases.rs)
+
+### How to get started with the development of Rust
+
+Now let's get our hands dirty and install Rust on our machine.
+I usually setup a new Rust installation with [Rustup](https://rustup.rs).
+As I'm on macOS I use [homebrew](https://rust-lang.github.io/rustup/installation/other.html#homebrew),
+but there's a lot more [installation methods](https://rust-lang.github.io/rustup/installation/other.html#other-installation-methods) you can choose from.
+
+Rust has different release channels (`stable` is the default one, there's also `beta` and `nightly`),
+so running `rustup default stable` for the first time installs the `stable` rust toolchain with tools like `cargo`, `rustc` and more.
+After setting up the toolchain, we can run `rustc --version` to reveal the version of the Rust compiler.
+
+> When you see the message "error: linker `cc` not found", you have to install the `C` linker e.g. by running `apt install cmake`
+
+To see if the Rust compiler really works, we can write a small "hello rust" program, compile and run it:
+```shell
+echo 'fn main() { println!("🦀"); }' > hello_rust.rs
+rustc hello_rust.rs
+./hello_rust
+🦀
+```
+
+As you notice, we have to surround the `println!()` with a `main` function to run properly.
+What happens when we run `rustc` with the code without the function:
+```shell
+rustc hello_rust.rs
+error: macro expansion ignores `{` and any tokens following
+   --> /Users/icepuma/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/macros.rs:142:23
+    |
+142 |     ($($arg:tt)*) => {{
+    |                       ^
+    |
+   ::: hello_rust.rs:1:1
+    |
+  1 | println!("🦀");
+    | -------------- caused by the macro expansion here
+    |
+    = note: the usage of `println!` is likely invalid in item context
+
+error[E0601]: `main` function not found in crate `hello_rust`
+ --> hello_rust.rs:1:15
+  |
+1 | println!("🦀");
+  |                ^ consider adding a `main` function to `hello_rust.rs`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0601`.
+```
+
+We ignore the first error for now (we'll cover macros later).
+The one cool thing about the Rust compiler is, that we get really informative error messages.
+For example, if we run `rustc --explain E0601`, we get:
+```shell
+No main function was found in a binary crate.
+
+To fix this error, add a main function:
+
+fn main() {
+    // Your program will start here.
+    println!("Hello world!");
+}
+
+If you don't know the basics of Rust, you can look at the Rust Book to get started.
+```
+
+Rust programs are organized in "crates",
+where the `main` function is the entry point for a binary crate (e.g. our `hello_rust.rs`). Rust also has "library" crates,
+which should not contain a "main" function (it is possible, but it's dead code unless you explicitely call it).
+Libraries are typically used to distribute code, that might be used as a dependency in another crate.
+
+Now we're able to compile and run Rust code. Let's see what's next :)
+
+## What's next
+
+Next module will be all about `cargo` and the Rust toolchain.
