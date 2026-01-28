@@ -1,4 +1,4 @@
-import { defineAction } from "astro:actions";
+import { defineAction, type ActionAPIContext } from "astro:actions";
 import { z } from "astro:schema";
 
 export function createLearnerId(userId: string): string {
@@ -15,6 +15,10 @@ function getNewsletterCookieName(audience: string): string {
 	return `newsletter:${audience}:updates`;
 }
 
+function getEnv(context: ActionAPIContext) {
+	return context.locals.runtime.env;
+}
+
 export const newsletter = {
 	subscribe: defineAction({
 		input: z.object({
@@ -26,10 +30,11 @@ export const newsletter = {
 				throw new Error("Unauthorized");
 			}
 
+			const env = getEnv(context);
 			const prefixedUserId = createLearnerId(context.locals.user.id);
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience: input.audience,
@@ -53,11 +58,12 @@ export const newsletter = {
 			source: z.string().optional(),
 		}),
 		handler: async (input, context) => {
+			const env = getEnv(context);
 			const email = input.email.toLowerCase().trim();
 			const prefixedUserId = createEmailId(email);
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience: input.audience,
@@ -92,10 +98,11 @@ export const newsletter = {
 				throw new Error("Unauthorized");
 			}
 
+			const env = getEnv(context);
 			const prefixedUserId = createLearnerId(context.locals.user.id);
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience: "klustered-compete",
@@ -123,11 +130,12 @@ export const newsletter = {
 				throw new Error("Unauthorized");
 			}
 
+			const env = getEnv(context);
 			const prefixedUserId = createLearnerId(context.locals.user.id);
 			const audience = `klustered-${input.type}`;
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience,
