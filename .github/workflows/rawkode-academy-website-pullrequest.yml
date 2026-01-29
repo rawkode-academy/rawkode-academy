@@ -6,6 +6,7 @@ on:
   pull_request:
     paths:
     - .github/workflows/rawkode-academy-website-pullrequest.yml
+    - content/**
     - cue.mod/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/env.cue
