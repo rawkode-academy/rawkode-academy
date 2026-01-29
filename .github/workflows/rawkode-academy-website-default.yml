@@ -8,6 +8,7 @@ on:
     - main
     paths:
     - .github/workflows/rawkode-academy-website-default.yml
+    - content/**
     - cue.mod/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/env.cue
