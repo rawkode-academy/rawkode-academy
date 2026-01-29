@@ -164,7 +164,7 @@ const people = defineCollection({
 		const twitterUrl = person.twitter ? `https://x.com/${person.twitter}` : undefined;
 		const blueskyUrl = person.bluesky ? `https://bsky.app/profile/${person.bluesky}` : undefined;
 		const linkedinUrl = person.linkedin ? `https://www.linkedin.com/in/${person.linkedin}` : undefined;
-		const avatarUrl = person.github ? `https://github.com/${person.github}.png` : undefined;
+		const avatarUrl = person.github ? `https://avatars.githubusercontent.com/${person.github}` : undefined;
 
 		return {
 			...person,
