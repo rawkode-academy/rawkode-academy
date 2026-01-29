@@ -3,13 +3,13 @@
     <div class="flex -space-x-3">
       <div
         v-for="(author, index) in displayAuthors"
-        :key="author.data.handle"
+        :key="author.id"
         class="relative"
         :style="`z-index: ${10 - index}`"
       >
         <img
           class="w-10 h-10 rounded-full object-cover border-2 border-secondary p-0.5 bg-white dark:bg-gray-800"
-          :src="`https://avatars.githubusercontent.com/${author.data.handle}`"
+          :src="author.data.avatarUrl ?? '/apple-touch-icon.png'"
           :alt="`Profile picture of ${author.data.name}`"
           loading="lazy"
         />
