@@ -972,7 +972,7 @@ body::before {
 	.prose ul {
 		list-style: none;
 		margin-bottom: 1.5rem;
-		padding-left: 1.5rem;
+		padding-left: 2rem;
 	}
 
 	.prose ul > li {
@@ -984,12 +984,30 @@ body::before {
 	.prose ul > li::before {
 		content: "";
 		position: absolute;
-		left: -1rem;
+		left: -2rem;
 		top: 0.6em;
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
 		background: rgb(var(--brand-primary));
+	}
+
+	.prose li > p {
+		margin: 0.5rem 0;
+	}
+
+	.prose li > p:first-child {
+		margin-top: 0;
+	}
+
+	.prose li > p:last-child {
+		margin-bottom: 0;
+	}
+
+	.prose li > ul,
+	.prose li > ol {
+		margin-top: 0.75rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.prose ol {
@@ -1361,4 +1379,3 @@ body::before {
 		color: rgb(var(--brand-primary));
 	}
 }
-
