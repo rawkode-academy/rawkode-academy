@@ -1,0 +1,46 @@
+---
+title: "What happens, when I press CTRL+C?"
+description: "A practical walkthrough of what actually happens in your terminal and OS when you hit CTRL+C, from SIGINT delivery to cleanup and exit codes."
+type: article
+openGraph:
+  title: "What happens, when I press CTRL+C?"
+  subtitle: "SIGINT, process groups, and how terminals decide what gets interrupted."
+slug: what-happens-when-i-press-ctrl-c
+publishedAt: 2026-01-30
+cover:
+  image: "./cover.jpg"
+  alt: "Terminal window showing a running process interrupted with CTRL+C."
+isDraft: true
+authors:
+  - icepuma
+---
+
+Intro: one-paragraph overview of the question and why it matters.
+
+## The 10-second answer
+
+TODO: Briefly explain that CTRL+C usually sends SIGINT to the foreground process group.
+
+## From keyboard to signal
+
+TODO: Trace the path from terminal driver to signal delivery.
+
+## Foreground jobs, process groups, and shells
+
+TODO: Explain job control, foreground process group, and what happens with pipelines.
+
+## What your program does when SIGINT arrives
+
+TODO: Default behavior, exit codes, cleanup handlers, and retries.
+
+## Variations and edge cases
+
+TODO: tmux/screen, SSH, containers, and Windows differences.
+
+## How to handle CTRL+C in your own programs
+
+TODO: Minimal guidance for safe cleanup and idempotent shutdown.
+
+## Summary
+
+TODO: Recap the key steps in the CTRL+C path and practical takeaways.
