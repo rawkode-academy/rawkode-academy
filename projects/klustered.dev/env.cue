@@ -10,40 +10,40 @@ let _t = tasks
 
 tasks: {
 	codegen: {
-		command: "bun"
-		args: ["panda", "codegen"]
+		command: "deno"
+		args: ["task", "codegen"]
 	}
 
 	dev: {
-		command: "bun"
-		args: ["astro", "dev"]
+		command: "deno"
+		args: ["task", "dev"]
 		dependsOn: [_t.codegen]
 
 		inputs: [
 			"astro.config.mjs",
-			"bun.lock",
-			"package.json",
+			"deno.json",
+			"deno.lock",
 			"public/",
 			"src/**",
 		]
 	}
 
 	build: {
-		command: "bun"
-		args: ["astro", "build"]
+		command: "deno"
+		args: ["task", "build"]
 		dependsOn: [_t.codegen]
 
 		inputs: [
 			"astro.config.mjs",
-			"bun.lock",
-			"package.json",
+			"deno.json",
+			"deno.lock",
 			"public/",
 			"src/**",
 		]
 	}
 
 	preview: {
-		command: "bun"
-		args: ["astro", "preview"]
+		command: "deno"
+		args: ["task", "preview"]
 	}
 }

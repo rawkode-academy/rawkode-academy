@@ -53,7 +53,8 @@ export const GET: APIRoute = async (context) => {
 	const sessionId = crypto.randomUUID();
 	const session = createSession(userInfo);
 
-	await context.locals.runtime.env.SESSION.put(
+	const env = context.locals.runtime.env;
+	await env.SESSION.put(
 		`session:${sessionId}`,
 		JSON.stringify(session),
 		{ expirationTtl: SESSION_DURATION_SECONDS },
