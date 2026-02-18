@@ -17,12 +17,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
         with:
-          bun-version: latest
+          extra-conf: accept-flake-config = true
+
+      - name: cuenv:contributor:bun.workspace.setup
+        run: "true"
+
+      - name: Setup cuenv (release)
+        run: curl -sSL -o /usr/local/bin/cuenv https://github.com/cuenv/cuenv/releases/latest/download/cuenv-linux-x64 && chmod +x /usr/local/bin/cuenv && /usr/local/bin/cuenv sync -A
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Bun dependencies
+        run: cuenv exec -- bun install --frozen-lockfile
 
       - name: Run CWV guardrail checks
+        run: cuenv exec -- bun projects/rawkode.academy/website/scripts/check-cwv.ts --base https://rawkode.academy
         env:
           PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
-        run: bun projects/rawkode.academy/website/scripts/check-cwv.ts --base https://rawkode.academy
