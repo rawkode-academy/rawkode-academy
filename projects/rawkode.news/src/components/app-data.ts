@@ -5,7 +5,7 @@ export type FeedCategory = (typeof feedCategories)[number];
 export type PostCategory = (typeof postCategories)[number];
 
 export type ApiPost = {
-  id: number;
+  id: string;
   title: string;
   category: FeedCategory;
   url: string | null;
@@ -16,9 +16,9 @@ export type ApiPost = {
 };
 
 export type ApiComment = {
-  id: number;
-  postId: number;
-  parentId: number | null;
+  id: string;
+  postId: string;
+  parentId: string | null;
   author: string;
   body: string;
   createdAt: string;
@@ -49,7 +49,7 @@ export type ApiSession = {
   };
 };
 
-export const postPath = (post: { id: number }) => `/item/${post.id}`;
+export const postPath = (post: { id: string }) => `/item/${post.id}`;
 
 export const commentAnchor = (comment: ApiComment) => `c-${comment.id}`;
 
@@ -70,7 +70,7 @@ export const formatRelativeTime = (value: string | number) => {
 };
 
 export const buildCommentTree = (items: ApiComment[]): CommentNode[] => {
-  const byId = new Map<number, CommentNode>();
+  const byId = new Map<string, CommentNode>();
   const roots: CommentNode[] = [];
 
   items.forEach((comment) => {
