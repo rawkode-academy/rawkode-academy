@@ -10,6 +10,7 @@ export interface StoredSession {
     email: string;
     name: string;
     image: string | null;
+    identity?: unknown;
   };
   expiresAt: number;
 }
@@ -112,6 +113,7 @@ export async function getUserInfo(
   email?: string;
   name?: string;
   picture?: string;
+  identity?: unknown;
 } | null> {
   const userinfoUrl = `${ID_PROVIDER_URL}/auth/oauth2/userinfo`;
 
@@ -132,6 +134,7 @@ export function createSession(user: {
   email?: string;
   name?: string;
   picture?: string;
+  identity?: unknown;
 }): StoredSession {
   return {
     userId: user.sub,
@@ -140,6 +143,7 @@ export function createSession(user: {
       email: user.email || "",
       name: user.name || "",
       image: user.picture || null,
+      identity: user.identity ?? null,
     },
     expiresAt: Date.now() + SESSION_DURATION_SECONDS * 1000,
   };

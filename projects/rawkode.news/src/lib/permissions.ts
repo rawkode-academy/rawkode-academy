@@ -23,11 +23,7 @@ export type Permissions = {
 export const getPermissions = (user: UserIdentity): Permissions => {
   const allowlist = getAllowlist();
   const nameToken = normalize(user.name);
-  const emailToken = normalize(user.email);
-  const emailHandle = emailToken.split("@")[0] ?? "";
-  const canSubmitRka =
-    allowlist.has(nameToken) ||
-    (emailHandle.length > 0 && allowlist.has(emailHandle));
+  const canSubmitRka = allowlist.has(nameToken);
 
   return {
     canSubmitRka,
