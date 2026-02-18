@@ -33,13 +33,10 @@ tasks: {
 		command: "bun"
 		args: ["run", "dev"]
 
-		workspaces: ["bun"]
-
 		inputs: [
 			"astro.config.ts",
-			"bun.lock",
 			"package.json",
-			"public/",
+			"public/**",
 			"src/**",
 		]
 	}
@@ -48,13 +45,10 @@ tasks: {
 		command: "bun"
 		args: ["run", "build"]
 
-		workspaces: ["bun"]
-
 		inputs: [
 			"astro.config.ts",
-			"bun.lock",
 			"package.json",
-			"public/",
+			"public/**",
 			"src/**",
 		]
 		outputs: [
