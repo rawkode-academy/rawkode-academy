@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ReactNode } from "react";
 import { createBrowserRouter, redirect } from "react-router-dom";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router-dom";
 import type { ApiPost, FeedCategory } from "@/components/app-data";
@@ -5,8 +6,6 @@ import { postPath } from "@/components/app-data";
 import { Shell } from "@/components/shell";
 import { FeedPage } from "@/components/routes/feed-page";
 import { ProfilePage } from "@/components/routes/profile-page";
-import { PostPage } from "@/components/routes/post-page";
-import SubmitPage from "@/components/submit-page";
 import {
   commentsQueryOptions,
   getPageFromRequest,
@@ -15,6 +14,24 @@ import {
   queryClient,
 } from "@/components/query-client";
 import { sessionQueryOptions } from "@/components/session";
+
+const PostPage = lazy(() =>
+  import("@/components/routes/post-page").then((module) => ({
+    default: module.PostPage,
+  }))
+);
+
+const SubmitPage = lazy(() => import("@/components/submit-page"));
+
+const routeFallback = (
+  <main className="flex w-full flex-col gap-6 py-6">
+    <p className="text-sm text-muted-foreground">Loading...</p>
+  </main>
+);
+
+const withSuspense = (node: ReactNode) => (
+  <Suspense fallback={routeFallback}>{node}</Suspense>
+);
 
 const redirectToRoot = (request: Request) => {
   const url = new URL(request.url);
@@ -104,9 +121,13 @@ export const router = createBrowserRouter([
         path: "submit",
         loader: submitLoader,
         action: submitAction,
-        element: <SubmitPage />,
+        element: withSuspense(<SubmitPage />),
       },
-      { path: "item/:id", loader: postLoader, element: <PostPage /> },
+      {
+        path: "item/:id",
+        loader: postLoader,
+        element: withSuspense(<PostPage />),
+      },
     ],
   },
 ]);

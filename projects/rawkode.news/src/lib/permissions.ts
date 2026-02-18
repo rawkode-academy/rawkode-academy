@@ -11,8 +11,8 @@ const normalize = (value?: string | null) => value?.trim().toLowerCase() ?? "";
 const getAllowlist = () =>
   new Set(
     RKA_ALLOWED_NAMES.split(",")
-      .map((name) => normalize(name))
-      .filter(Boolean),
+      .map((name: string) => normalize(name))
+      .filter((name: string) => Boolean(name)),
   );
 
 export type Permissions = {
@@ -26,7 +26,8 @@ export const getPermissions = (user: UserIdentity): Permissions => {
   const emailToken = normalize(user.email);
   const emailHandle = emailToken.split("@")[0] ?? "";
   const canSubmitRka =
-    allowlist.has(nameToken) || (emailHandle && allowlist.has(emailHandle));
+    allowlist.has(nameToken) ||
+    (emailHandle.length > 0 && allowlist.has(emailHandle));
 
   return {
     canSubmitRka,

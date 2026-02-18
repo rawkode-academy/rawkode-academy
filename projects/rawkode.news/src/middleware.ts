@@ -18,7 +18,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
       }
     } catch {
-      return;
+      // Ignore unreadable session payloads and continue the request.
     }
   }
 

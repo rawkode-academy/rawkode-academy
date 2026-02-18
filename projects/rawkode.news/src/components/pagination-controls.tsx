@@ -40,6 +40,7 @@ export function PaginationControls({
   const halfWindow = Math.floor(windowSize / 2);
   let start = Math.max(1, page - halfWindow);
   let end = Math.min(pageCount, page + halfWindow);
+
   if (end - start + 1 < windowSize) {
     if (start === 1) {
       end = Math.min(pageCount, start + windowSize - 1);
@@ -55,9 +56,11 @@ export function PaginationControls({
       pageItems.push("ellipsis-start");
     }
   }
+
   for (let i = start; i <= end; i += 1) {
     pageItems.push(i);
   }
+
   if (end < pageCount) {
     if (end < pageCount - 1) {
       pageItems.push("ellipsis-end");
@@ -68,9 +71,9 @@ export function PaginationControls({
   return (
     <nav
       aria-label="Pagination"
-      className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground"
+      className="flex flex-wrap items-center justify-between gap-3 border-t border-border/75 px-1 pt-3 text-xs text-muted-foreground"
     >
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         {prevDisabled ? (
           <Button variant="ghost" size="sm" disabled>
             Previous
@@ -82,14 +85,16 @@ export function PaginationControls({
             </Link>
           </Button>
         )}
+
         {pageItems.map((item) => {
           if (typeof item !== "number") {
             return (
-              <span key={item} aria-hidden className="px-1 text-muted-foreground/70">
+              <span key={item} aria-hidden className="px-1 text-muted-foreground/75">
                 …
               </span>
             );
           }
+
           const to = { search: buildPageSearch(searchParams, item) };
           const isActive = item === page;
           return (
@@ -99,11 +104,13 @@ export function PaginationControls({
               size="sm"
               asChild={!isActive}
               disabled={isActive}
+              aria-current={isActive ? "page" : undefined}
             >
               {isActive ? <span>{item}</span> : <Link to={to}>{item}</Link>}
             </Button>
           );
         })}
+
         {nextDisabled ? (
           <Button variant="ghost" size="sm" disabled>
             Next
@@ -116,6 +123,7 @@ export function PaginationControls({
           </Button>
         )}
       </div>
+
       <span>
         Page {page} of {pageCount}
       </span>

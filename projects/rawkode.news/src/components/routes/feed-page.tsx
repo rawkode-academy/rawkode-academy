@@ -1,12 +1,33 @@
 import * as React from "react";
 import { useSearchParams } from "react-router-dom";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { PaginationControls } from "@/components/pagination-controls";
 import { PostRow } from "@/components/post-row";
 import type { FeedCategory } from "@/components/app-data";
 import { postsQueryOptions, parsePage } from "@/components/query-client";
+
+const feedMeta: Record<FeedCategory, { title: string; strapline: string; detail: string }> = {
+  new: {
+    title: "New",
+    strapline: "Latest signals from the community",
+    detail: "Fresh links and ideas ordered by recency.",
+  },
+  rka: {
+    title: "RKA",
+    strapline: "Rawkode Academy submissions",
+    detail: "Deep engineering topics curated by the academy community.",
+  },
+  show: {
+    title: "Show",
+    strapline: "What people are building",
+    detail: "Projects, releases, and technical demos worth a look.",
+  },
+  ask: {
+    title: "Ask",
+    strapline: "Questions for experienced builders",
+    detail: "Practical questions with discussion from engineers in the field.",
+  },
+};
 
 export function FeedPage({ type }: { type: FeedCategory }) {
   const [searchParams] = useSearchParams();
@@ -17,9 +38,11 @@ export function FeedPage({ type }: { type: FeedCategory }) {
     ...postsQueryOptions({ category: type, page }),
     placeholderData: keepPreviousData,
   });
+
   const posts = postsQuery.data?.items ?? [];
   const hasMore = postsQuery.data?.hasMore ?? false;
   const totalPages = postsQuery.data?.totalPages ?? 0;
+  const meta = feedMeta[type];
 
   React.useEffect(() => {
     if (!hasMore || (totalPages && page >= totalPages)) return;
@@ -27,42 +50,45 @@ export function FeedPage({ type }: { type: FeedCategory }) {
   }, [hasMore, page, queryClient, totalPages, type]);
 
   return (
-    <main className="flex w-full flex-col gap-6 py-6">
-      <header className="flex flex-col">
-        <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {type}
-        </p>
-      </header>
-      <Card>
-        <CardContent className="space-y-3">
+    <main className="space-y-4 py-7">
+      <section className="space-y-4">
+        <header className="space-y-2">
+          <p className="rkn-kicker">{meta.title}</p>
+          <h1 className="rkn-page-title">{meta.strapline}</h1>
+          <p className="max-w-[70ch] text-sm text-muted-foreground">{meta.detail}</p>
+        </header>
+
+        <div className="rkn-panel overflow-hidden">
           {postsQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading posts…</p>
+            <p className="px-5 py-6 text-sm text-muted-foreground">Loading posts…</p>
           ) : null}
           {postsQuery.isError ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="px-5 py-6 text-sm text-muted-foreground">
               Could not load posts yet. Try again shortly.
             </p>
           ) : null}
           {!postsQuery.isLoading && posts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No posts yet. Be the first to submit.
+            <p className="px-5 py-6 text-sm text-muted-foreground">
+              No posts yet. Be the first to share something useful.
             </p>
           ) : null}
+
           {posts.map((post, index) => (
             <React.Fragment key={post.id}>
-              <PostRow post={post} rank={index + 1} showCategoryBadge={type === "new"} />
-              {index < posts.length - 1 ? <Separator /> : null}
+              <PostRow post={post} showCategoryBadge={type === "new"} />
+              {index < posts.length - 1 ? <hr className="border-border/75" /> : null}
             </React.Fragment>
           ))}
-        </CardContent>
-      </Card>
-      <PaginationControls
-        page={page}
-        totalPages={totalPages}
-        hasMore={hasMore}
-        isLoading={postsQuery.isLoading}
-        searchParams={searchParams}
-      />
+        </div>
+
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          hasMore={hasMore}
+          isLoading={postsQuery.isLoading}
+          searchParams={searchParams}
+        />
+      </section>
     </main>
   );
 }
