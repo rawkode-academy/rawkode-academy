@@ -41,6 +41,7 @@ export type ApiSession = {
     email: string;
     name: string;
     image: string | null;
+    identity?: unknown;
   };
   permissions?: {
     canSubmitRka: boolean;
