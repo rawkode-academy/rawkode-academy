@@ -7,6 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://rawkode.news",
   output: "server",
   adapter: cloudflare({ imageService: "compile" }),
   integrations: [react()],
