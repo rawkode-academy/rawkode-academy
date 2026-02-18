@@ -150,7 +150,6 @@ export function Shell() {
                 </div>
                 <div className="min-w-0">
                   <p className="truncate font-display text-base font-semibold leading-tight">Rawkode News</p>
-                  <p className="truncate text-xs text-muted-foreground">Engineering signal, no vanity noise.</p>
                 </div>
               </Link>
 
