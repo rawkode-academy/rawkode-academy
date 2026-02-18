@@ -2,8 +2,6 @@ import * as React from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { PaginationControls } from "@/components/pagination-controls";
 import { PostRow } from "@/components/post-row";
 import { postsQueryOptions, parsePage } from "@/components/query-client";
@@ -18,6 +16,7 @@ export function ProfilePage() {
     const next = `${location.pathname}${location.search}${location.hash}`;
     return next.startsWith("/") ? next : "/profile";
   }, [location]);
+
   const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
   const sessionQuery = useSession();
   const user = sessionQuery.data?.user ?? null;
@@ -41,77 +40,74 @@ export function ProfilePage() {
 
   if (isLoadingSession) {
     return (
-      <main className="flex w-full flex-col gap-6 py-6">
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">Checking sign-in…</p>
-          </CardContent>
-        </Card>
+      <main className="py-7">
+        <section className="rounded-none border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground">Checking sign-in…</p>
+        </section>
       </main>
     );
   }
 
   if (!user) {
     return (
-      <main className="flex w-full flex-col gap-6 py-6">
-        <Card>
-          <CardContent className="flex flex-col gap-3 py-6">
-            <p className="text-sm text-muted-foreground">
-              Sign in to view your profile.
-            </p>
-            <div>
-              <Button variant="secondary" size="sm" asChild>
-                <a href={signInUrl}>Sign in</a>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <main className="py-7">
+        <section className="space-y-3 rounded-none border border-border bg-card p-5">
+          <p className="rkn-kicker">Profile</p>
+          <h1 className="rkn-page-title">Sign in to view your profile</h1>
+          <p className="text-sm text-muted-foreground">
+            Your submissions and discussion activity are available once you sign in.
+          </p>
+          <div>
+            <Button variant="secondary" size="sm" asChild>
+              <a href={signInUrl}>Sign in</a>
+            </Button>
+          </div>
+        </section>
       </main>
     );
   }
 
   return (
-    <main className="flex w-full flex-col gap-6 py-6">
-      <header className="flex flex-col gap-1">
-        <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Profile
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Signed in as {displayName}
-        </p>
+    <main className="space-y-5 py-7">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="rkn-kicker">Profile</p>
+          <h1 className="rkn-page-title">{displayName}</h1>
+          <p className="text-sm text-muted-foreground">Signed in and ready to publish.</p>
+        </div>
+        <Button size="sm" asChild>
+          <a href="/submit">Create post</a>
+        </Button>
       </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your submissions</CardTitle>
-          <CardDescription>
-            Posts you have shared with the Rawkode News community.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      <section className="rkn-panel overflow-hidden">
+        <header className="border-b border-border/70 px-5 py-4">
+          <h2 className="font-display text-lg font-semibold">Your submissions</h2>
+          <p className="text-sm text-muted-foreground">Posts shared with the Rawkode News community.</p>
+        </header>
+
+        <div>
           {submissionsQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">
-              Loading your submissions…
-            </p>
+            <p className="px-5 py-6 text-sm text-muted-foreground">Loading your submissions…</p>
           ) : null}
           {submissionsQuery.isError ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="px-5 py-6 text-sm text-muted-foreground">
               Could not load your submissions. Please sign in again.
             </p>
           ) : null}
           {!submissionsQuery.isLoading && submissions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              You have not submitted anything yet.
-            </p>
+            <p className="px-5 py-6 text-sm text-muted-foreground">You have not submitted anything yet.</p>
           ) : null}
+
           {submissions.map((post, index) => (
             <React.Fragment key={post.id}>
-              <PostRow post={post} rank={index + 1} />
-              {index < submissions.length - 1 ? <Separator /> : null}
+              <PostRow post={post} />
+              {index < submissions.length - 1 ? <hr className="border-border/75" /> : null}
             </React.Fragment>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
+
       <PaginationControls
         page={page}
         totalPages={totalPages}

@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  sqliteTable,
+  text,
+  type AnySQLiteColumn,
+} from "drizzle-orm/sqlite-core";
 
 export const posts = sqliteTable(
   "posts",
@@ -29,7 +35,7 @@ export const comments = sqliteTable(
     postId: integer("post_id")
       .notNull()
       .references(() => posts.id, { onDelete: "cascade" }),
-    parentId: integer("parent_id").references(() => comments.id, {
+    parentId: integer("parent_id").references((): AnySQLiteColumn => comments.id, {
       onDelete: "cascade",
     }),
     author: text("author").notNull(),

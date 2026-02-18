@@ -5,8 +5,11 @@ import {
   type DehydratedState,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import {
+  type PersistedClient,
+  type Persister,
+  PersistQueryClientProvider,
+} from "@tanstack/react-query-persist-client";
 import { router } from "@/components/router";
 import { persistMaxAge, queryClient } from "@/components/query-client";
 
@@ -14,12 +17,38 @@ type AppProps = {
   dehydratedState?: DehydratedState;
 };
 
+const PERSIST_KEY = "rkn-query-cache";
+
+const createLocalStoragePersister = (): Persister | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return {
+    persistClient: async (persistedClient: PersistedClient) => {
+      window.localStorage.setItem(PERSIST_KEY, JSON.stringify(persistedClient));
+    },
+    restoreClient: async () => {
+      const cached = window.localStorage.getItem(PERSIST_KEY);
+      if (!cached) {
+        return undefined;
+      }
+
+      try {
+        return JSON.parse(cached) as PersistedClient;
+      } catch {
+        window.localStorage.removeItem(PERSIST_KEY);
+        return undefined;
+      }
+    },
+    removeClient: async () => {
+      window.localStorage.removeItem(PERSIST_KEY);
+    },
+  };
+};
+
 export default function App({ dehydratedState }: AppProps) {
-  const [persister] = React.useState(() =>
-    typeof window !== "undefined"
-      ? createSyncStoragePersister({ storage: window.localStorage })
-      : null
-  );
+  const [persister] = React.useState(createLocalStoragePersister);
 
   if (!persister) {
     return (

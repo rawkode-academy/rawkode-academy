@@ -1,9 +1,15 @@
 import type { APIRoute } from "astro";
 import { asc, eq, sql } from "drizzle-orm";
 
-import { getDb, type Env } from "../../../../db";
+import { getDb } from "../../../../db";
 import { comments, posts } from "../../../../db/schema";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
+import type { TypedEnv } from "@/types/service-bindings";
+
+type CreateCommentPayload = {
+  body?: unknown;
+  parentId?: unknown;
+};
 
 const normalizeTimestamp = (value: Date | number) => {
   const date = value instanceof Date ? value : new Date(value);
@@ -15,7 +21,7 @@ const serializeComment = (comment: typeof comments.$inferSelect) => ({
 });
 
 export const GET: APIRoute = async ({ params, locals }) => {
-  const env = locals.runtime.env as Env;
+  const env = locals.runtime.env as TypedEnv;
   const db = getDb(env);
   const postId = Number(params.id);
 
@@ -33,7 +39,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
 };
 
 export const POST: APIRoute = async ({ params, request, locals, cookies }) => {
-  const env = locals.runtime.env as Env;
+  const env = locals.runtime.env as TypedEnv;
   const db = getDb(env);
   const postId = Number(params.id);
 
@@ -64,7 +70,9 @@ export const POST: APIRoute = async ({ params, request, locals, cookies }) => {
     return new Response("User profile missing name", { status: 400 });
   }
 
-  const payload = await request.json().catch(() => null);
+  const payload = (await request.json().catch(() => null)) as
+    | CreateCommentPayload
+    | null;
   if (!payload || typeof payload.body !== "string") {
     return new Response("Comment body is required", { status: 400 });
   }
@@ -79,7 +87,7 @@ export const POST: APIRoute = async ({ params, request, locals, cookies }) => {
       ? payload.parentId
       : null;
 
-  const [created] = await db
+  const [created] = (await db
     .insert(comments)
     .values({
       postId,
@@ -87,7 +95,7 @@ export const POST: APIRoute = async ({ params, request, locals, cookies }) => {
       author,
       body,
     })
-    .returning();
+    .returning()) as (typeof comments.$inferSelect)[];
 
   await db
     .update(posts)
