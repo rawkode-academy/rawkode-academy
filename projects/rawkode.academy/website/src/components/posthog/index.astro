@@ -1,6 +1,4 @@
 ---
-// PostHog analytics initialization on main thread.
-// RKA-89: Partytown + PostHog produced runtime crashes in production.
 interface Props {
 	userId?: string | undefined;
 }
@@ -8,98 +6,199 @@ interface Props {
 const { userId } = Astro.props;
 ---
 
-<script is:inline>
-  // PostHog loader
-  !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+<script define:vars={{ userId }}>
+	const PH_KEY = "phc_8BUP734dzskih8urQFkFL1qxT5veRDm6zzXwROZND4M";
+	const PH_HOST = "https://eu.i.posthog.com";
+	const CONSENT_KEY = "consent_analytics";
 
-  (function(){
-    var PH_KEY = 'phc_8BUP734dzskih8urQFkFL1qxT5veRDm6zzXwROZND4M';
-    var PH_HOST = 'https://eu.i.posthog.com';
+	let posthogInitialized = false;
+	let enableInFlight = false;
+	let pageExitHandlerAttached = false;
+	let pageStartTime = Date.now();
 
-    function getConsent(){
-      try{ return localStorage.getItem('consent_analytics'); }catch{ return null; }
-    }
+	const getConsent = () => {
+		try {
+			return localStorage.getItem(CONSENT_KEY);
+		} catch {
+			return null;
+		}
+	};
 
-    function checkDoNotTrack(){
-      return navigator.doNotTrack === '1' || window.doNotTrack === '1';
-    }
+	const checkDoNotTrack = () =>
+		navigator.doNotTrack === "1" || window.doNotTrack === "1";
 
-    var consent = getConsent();
-    var consentGranted = consent === 'granted';
-    var shouldTrack = consentGranted && !checkDoNotTrack();
+	const shouldEnableTracking = () =>
+		getConsent() === "granted" && !checkDoNotTrack();
 
-    posthog.init(PH_KEY, {
-      api_host: PH_HOST,
-      autocapture: shouldTrack,
-      capture_pageview: shouldTrack,
-      opt_out_capturing_by_default: !shouldTrack,
-      respect_dnt: true,
-      session_recording: {
-        maskAllInputs: true,
-        sampling: { rate: 0 }
-      },
-      loaded: function(ph){
-        if (shouldTrack){
-          try{ ph.opt_in_capturing(); }catch{}
-        }
-      }
-    });
+	const getUtmParams = () => {
+		try {
+			const url = new URL(location.href);
+			const params = new URLSearchParams(url.search);
+			const keys = [
+				"utm_source",
+				"utm_medium",
+				"utm_campaign",
+				"utm_term",
+				"utm_content",
+			];
+			const out = {};
+			for (const key of keys) {
+				if (params.has(key)) {
+					out[key] = params.get(key);
+				}
+			}
+			return out;
+		} catch {
+			return {};
+		}
+	};
 
-    function getUtmParams() {
-      try {
-        var url = new URL(location.href);
-        var p = new URLSearchParams(url.search);
-        var keys = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'];
-        var out = {};
-        keys.forEach(function(k){ if (p.has(k)) out[k] = p.get(k); });
-        return out;
-      } catch(_) { return {}; }
-    }
+	const bootstrapPostHog = () => {
+		!(function (t, e) {
+			let o;
+			let n;
+			let p;
+			let r;
+			if (e.__SV) return;
+			window.posthog = e;
+			e._i = [];
+			e.init = function (i, s, a) {
+				function g(target, fn) {
+					const parts = fn.split(".");
+					if (parts.length === 2) {
+						target = target[parts[0]];
+						fn = parts[1];
+					}
+					target[fn] = function () {
+						target.push(
+							[fn].concat(Array.prototype.slice.call(arguments, 0)),
+						);
+					};
+				}
+				p = t.createElement("script");
+				p.type = "text/javascript";
+				p.crossOrigin = "anonymous";
+				p.async = true;
+				p.src = `${s.api_host}/static/array.js`;
+				r = t.getElementsByTagName("script")[0];
+				if (r?.parentNode) {
+					r.parentNode.insertBefore(p, r);
+				} else {
+					document.head.appendChild(p);
+				}
+				let u = e;
+				if (a !== undefined) {
+					u = e[a] = [];
+				} else {
+					a = "posthog";
+				}
+				u.people = u.people || [];
+				u.toString = function (noStub) {
+					let d = "posthog";
+					if (a !== "posthog") {
+						d += `.${a}`;
+					}
+					if (!noStub) {
+						d += " (stub)";
+					}
+					return d;
+				};
+				u.people.toString = function () {
+					return `${u.toString(1)}.people (stub)`;
+				};
+				o =
+					"capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(
+						" ",
+					);
+				for (n = 0; n < o.length; n++) {
+					g(u, o[n]);
+				}
+				e._i.push([i, s, a]);
+			};
+			e.__SV = 1;
+		})(document, window.posthog || []);
+	};
 
-    // Persist UTM parameters for attribution
-    var utm = getUtmParams();
-    if (Object.keys(utm).length) {
-      posthog.register(utm);
-    }
+	const enablePostHogNow = () => {
+		if (posthogInitialized || enableInFlight || !shouldEnableTracking()) {
+			return;
+		}
+		enableInFlight = true;
+		bootstrapPostHog();
 
-    // Track page exit with time on page
-    var startTime = Date.now();
-    addEventListener('beforeunload', function(){
-      var secs = Math.floor((Date.now() - startTime) / 1000);
-      try {
-        posthog.capture('page_exit', {
-          path: location.pathname,
-          time_on_page: secs,
-          referrer: document.referrer || ''
-        });
-      } catch(_){}
-    });
-  })();
+		window.posthog.init(PH_KEY, {
+			api_host: PH_HOST,
+			autocapture: true,
+			capture_pageview: false,
+			opt_out_capturing_by_default: false,
+			respect_dnt: true,
+			session_recording: {
+				maskAllInputs: true,
+				sampling: { rate: 0 },
+			},
+			loaded: function (ph) {
+				try {
+					ph.opt_in_capturing();
+				} catch {}
+			},
+		});
+
+		const utm = getUtmParams();
+		if (Object.keys(utm).length > 0) {
+			window.posthog.register(utm);
+		}
+
+		if (userId) {
+			window.posthog.identify(userId);
+		}
+
+		window.posthog.capture("page_view", {
+			path: location.pathname,
+			referrer: document.referrer || "",
+			title: document.title,
+		});
+
+		if (!pageExitHandlerAttached) {
+			pageStartTime = Date.now();
+			window.addEventListener("beforeunload", () => {
+				const seconds = Math.floor((Date.now() - pageStartTime) / 1000);
+				try {
+					window.posthog.capture("page_exit", {
+						path: location.pathname,
+						time_on_page: seconds,
+						referrer: document.referrer || "",
+					});
+				} catch {}
+			});
+			pageExitHandlerAttached = true;
+		}
+
+		posthogInitialized = true;
+		enableInFlight = false;
+	};
+
+	const schedulePostHogEnable = () => {
+		if (!shouldEnableTracking()) return;
+
+		const start = () => enablePostHogNow();
+		if ("requestIdleCallback" in window) {
+			window.requestIdleCallback(start, { timeout: 3000 });
+			return;
+		}
+		window.setTimeout(start, 1500);
+	};
+
+	// Called by consent banner after user grants consent.
+	window.enablePostHog = () => {
+		schedulePostHogEnable();
+	};
+
+	// Returning visitors with existing consent should initialize analytics lazily.
+	if (shouldEnableTracking()) {
+		if (document.readyState === "complete") {
+			schedulePostHogEnable();
+		} else {
+			window.addEventListener("load", schedulePostHogEnable, { once: true });
+		}
+	}
 </script>
-
-<script is:inline>
-  // Enable PostHog after consent is granted (called from consent banner)
-  window.enablePostHog = function() {
-    if (typeof window.posthog !== 'undefined' && window.posthog.opt_in_capturing) {
-      try {
-        window.posthog.opt_in_capturing();
-        window.posthog.capture('page_view', {
-          path: location.pathname,
-          referrer: document.referrer || '',
-          title: document.title,
-          consent_granted: true
-        });
-      } catch(_) {}
-    }
-  };
-</script>
-
-{userId && (
-  <script is:inline define:vars={{ userId }}>
-    // Identify logged-in user to link browser sessions with server-side events
-    // PostHog queues commands automatically before library loads - no retries needed
-    if (typeof window.posthog !== 'undefined') {
-      window.posthog.identify(userId);
-    }
-  </script>
-)}

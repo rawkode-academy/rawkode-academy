@@ -1,0 +1,28 @@
+name: rawkode-academy-website-cwv-monitor
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  cwv-monitor:
+    name: cwv-monitor
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Run CWV guardrail checks
+        env:
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+        run: bun projects/rawkode.academy/website/scripts/check-cwv.ts --base https://rawkode.academy

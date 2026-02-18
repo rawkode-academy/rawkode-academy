@@ -54,6 +54,14 @@ deno run --allow-all npm:astro check
 deno run test
 ```
 
+## Core Web Vitals Monitoring
+
+```shell {"name": "cwv"}
+bun run check:cwv
+```
+
+Set `PAGESPEED_API_KEY` to avoid API rate limiting in CI and local checks.
+
 We also provide a useful logging / debugging configuration for tests:
 
 ```shell {"name": "test-debug"}
