@@ -8,6 +8,7 @@ import { FeedPage } from "@/components/routes/feed-page";
 import { NotFoundPage } from "@/components/routes/not-found-page";
 import { ProfilePage } from "@/components/routes/profile-page";
 import { RouteErrorPage } from "@/components/routes/route-error-page";
+import { SearchPage } from "@/components/routes/search-page";
 import {
   getPageFromRequest,
   postsQueryOptions,
@@ -168,6 +169,7 @@ export const router = createBrowserRouter([
         element: <FeedPage type="ask" />,
         hydrateFallbackElement: routeFallback,
       },
+      { path: "search", element: <SearchPage />, hydrateFallbackElement: routeFallback },
       { path: "profile", loader: profileLoader, element: <ProfilePage />, hydrateFallbackElement: routeFallback },
       {
         path: "submit",

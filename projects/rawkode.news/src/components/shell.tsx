@@ -13,6 +13,7 @@ const navItems: NavItem[] = [
   { label: "RKA", to: "/rka" },
   { label: "Show", to: "/show" },
   { label: "Ask", to: "/ask" },
+  { label: "Search", to: "/search" },
 ];
 
 const desktopActionSizeClass = "h-10 min-w-36";
