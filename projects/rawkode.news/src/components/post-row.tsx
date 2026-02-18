@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { ApiPost } from "@/components/app-data";
 import { formatRelativeTime, postPath } from "@/components/app-data";
 import { MarkdownInline } from "@/components/markdown";
@@ -10,57 +10,73 @@ export function PostRow({
   showCategoryBadge = false,
 }: {
   post: ApiPost;
-  rank: number;
   showCategoryBadge?: boolean;
 }) {
-  const domain = post.url ? new URL(post.url).hostname.replace("www.", "") : null;
+  const location = useLocation();
+  const postUrl = post.url ?? undefined;
+  const domain = postUrl ? new URL(postUrl).hostname.replace("www.", "") : null;
   const detailPath = postPath(post);
-  const summary = post.body?.trim() || "link submission";
+  const fromPath = `${location.pathname}${location.search}`;
+  const summary = post.body?.trim() || null;
+
   return (
-    <div className="flex items-start gap-2">
-      <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex min-w-0 items-center gap-2 text-sm">
-          <div className="min-w-0 flex-1 truncate">
-            <Link to={detailPath} className="font-semibold hover:underline">
+    <article className="px-5 py-4">
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+            <Link
+              to={detailPath}
+              state={{ from: fromPath }}
+              className="min-w-0 text-[0.96rem] leading-6 font-semibold text-foreground hover:underline"
+            >
               {post.title}
             </Link>
             {domain ? (
-              <>
-                <span className="text-muted-foreground"> · </span>
-                <a
-                  href={post.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-muted-foreground"
-                >
-                  {domain}
-                </a>
-              </>
+              <a
+                href={postUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+              >
+                ({domain})
+              </a>
+            ) : null}
+            {showCategoryBadge ? (
+              <Badge variant="outline" className={["md:hidden", getCategoryBadgeClass(post.category)].join(" ")}>
+                {post.category}
+              </Badge>
             ) : null}
           </div>
-          {showCategoryBadge ? (
-            <Badge
-              variant="outline"
-              className={[
-                "h-5 shrink-0 px-2 text-[10px] uppercase tracking-wide leading-none self-center",
-                getCategoryBadgeClass(post.category),
-              ].join(" ")}
+
+          {summary ? (
+            <div className="text-sm text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
+              <MarkdownInline source={summary} />
+            </div>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+            <span>by {post.author}</span>
+            <span>•</span>
+            <span>{formatRelativeTime(post.createdAt)}</span>
+            <span>•</span>
+            <Link
+              to={detailPath}
+              state={{ from: fromPath }}
+              className="font-medium text-muted-foreground hover:text-foreground"
             >
+              {post.commentCount} comments
+            </Link>
+          </div>
+        </div>
+
+        <div className="hidden pt-1 md:block">
+          {showCategoryBadge ? (
+            <Badge variant="outline" className={getCategoryBadgeClass(post.category)}>
               {post.category}
             </Badge>
           ) : null}
         </div>
-        <div className="truncate text-[11px] text-muted-foreground">
-          <MarkdownInline source={summary} />
-          <span> · </span>
-          <span>by {post.author}</span>
-          <span> · </span>
-          <span>{formatRelativeTime(post.createdAt)}</span>
-          <span> · </span>
-          <span>{post.commentCount} comments</span>
-        </div>
       </div>
-
-    </div>
+    </article>
   );
 }

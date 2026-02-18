@@ -1,12 +1,20 @@
 import type { APIRoute } from "astro";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
-import { getDb, type Env } from "../../../db";
+import { getDb } from "../../../db";
 import { posts } from "../../../db/schema";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
 import { getPermissions } from "@/lib/permissions";
+import type { TypedEnv } from "@/types/service-bindings";
 
 const categories = new Set(["rka", "show", "ask"]);
+type CreatePostPayload = {
+  title?: unknown;
+  category?: unknown;
+  url?: unknown;
+  body?: unknown;
+};
+
 const normalizeTimestamp = (value: Date | number) => {
   const date = value instanceof Date ? value : new Date(value);
   return date.toISOString();
@@ -29,7 +37,7 @@ const parsePageSize = (value: string | null) => {
 };
 
 export const GET: APIRoute = async ({ request, locals, cookies }) => {
-  const env = locals.runtime.env as Env;
+  const env = locals.runtime.env as TypedEnv;
   const db = getDb(env);
   const url = new URL(request.url);
   const category = url.searchParams.get("category")?.toLowerCase();
@@ -125,9 +133,11 @@ export const GET: APIRoute = async ({ request, locals, cookies }) => {
 };
 
 export const POST: APIRoute = async ({ request, locals, cookies }) => {
-  const env = locals.runtime.env as Env;
+  const env = locals.runtime.env as TypedEnv;
   const db = getDb(env);
-  const payload = await request.json().catch(() => null);
+  const payload = (await request.json().catch(() => null)) as
+    | CreatePostPayload
+    | null;
 
   const sessionId = cookies.get(SESSION_COOKIE_NAME)?.value;
   if (!sessionId) {
