@@ -32,6 +32,12 @@ export const technologyStatusEnum = zod.enum(technologyStatusEnumValues);
 export const technologyZod = zod.object({
   // Core identity
   name: zod.string(),
+  seo: zod
+    .object({
+      title: zod.string().optional(),
+      description: zod.string().optional(),
+    })
+    .optional(),
 
   // Presentation - logos available for this technology
   // Booleans indicate whether icon.svg, horizontal.svg, stacked.svg exist
@@ -140,6 +146,12 @@ export function createTechnologySchema(z: typeof zod) {
   return z.object({
     // Core identity
     name: z.string(),
+    seo: z
+      .object({
+        title: z.string().optional(),
+        description: z.string().optional(),
+      })
+      .optional(),
 
     // Presentation - logos available for this technology
     // Booleans indicate whether icon.svg, horizontal.svg, stacked.svg exist
