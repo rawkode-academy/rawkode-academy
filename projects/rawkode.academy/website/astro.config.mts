@@ -1,6 +1,5 @@
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
-import partytown from "@astrojs/partytown";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import vue from "@astrojs/vue";
@@ -311,30 +310,6 @@ export default defineConfig({
 			template: {
 				compilerOptions: {
 					isCustomElement: (tag) => tag.startsWith("media-"),
-				},
-			},
-		}),
-		partytown({
-			config: {
-				forward: [
-					"posthog.capture",
-					"posthog.identify",
-					"posthog.register",
-					"posthog.opt_in_capturing",
-					"posthog.opt_out_capturing",
-				],
-				lib: "/_partytown/",
-				// Prevent service worker registration attempts from Partytown
-				mainWindowAccessors: ["navigator.serviceWorker"],
-				resolveUrl: (url) => {
-					// Allow all URLs except service worker registrations
-					if (
-						url.pathname.includes("sw.js") ||
-						url.pathname.includes("service-worker")
-					) {
-						return null;
-					}
-					return url;
 				},
 			},
 		}),
