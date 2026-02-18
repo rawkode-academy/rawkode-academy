@@ -124,57 +124,62 @@ const { userId } = Astro.props;
 			return;
 		}
 		enableInFlight = true;
-		bootstrapPostHog();
+		try {
+			bootstrapPostHog();
 
-		window.posthog.init(PH_KEY, {
-			api_host: PH_HOST,
-			autocapture: true,
-			capture_pageview: false,
-			opt_out_capturing_by_default: false,
-			respect_dnt: true,
-			session_recording: {
-				maskAllInputs: true,
-				sampling: { rate: 0 },
-			},
-			loaded: function (ph) {
-				try {
-					ph.opt_in_capturing();
-				} catch {}
-			},
-		});
-
-		const utm = getUtmParams();
-		if (Object.keys(utm).length > 0) {
-			window.posthog.register(utm);
-		}
-
-		if (userId) {
-			window.posthog.identify(userId);
-		}
-
-		window.posthog.capture("page_view", {
-			path: location.pathname,
-			referrer: document.referrer || "",
-			title: document.title,
-		});
-
-		if (!pageExitHandlerAttached) {
-			pageStartTime = Date.now();
-			window.addEventListener("beforeunload", () => {
-				const seconds = Math.floor((Date.now() - pageStartTime) / 1000);
-				try {
-					window.posthog.capture("page_exit", {
-						path: location.pathname,
-						time_on_page: seconds,
-						referrer: document.referrer || "",
-					});
-				} catch {}
+			window.posthog.init(PH_KEY, {
+				api_host: PH_HOST,
+				autocapture: true,
+				capture_pageview: false,
+				opt_out_capturing_by_default: false,
+				respect_dnt: true,
+				session_recording: {
+					maskAllInputs: true,
+					sampling: { rate: 0 },
+				},
+				loaded: function (ph) {
+					try {
+						ph.opt_in_capturing();
+					} catch {}
+				},
 			});
-			pageExitHandlerAttached = true;
-		}
 
-		posthogInitialized = true;
-		enableInFlight = false;
+			const utm = getUtmParams();
+			if (Object.keys(utm).length > 0) {
+				window.posthog.register(utm);
+			}
+
+			if (userId) {
+				window.posthog.identify(userId);
+			}
+
+			window.posthog.capture("page_view", {
+				path: location.pathname,
+				referrer: document.referrer || "",
+				title: document.title,
+			});
+
+			if (!pageExitHandlerAttached) {
+				pageStartTime = Date.now();
+				window.addEventListener("beforeunload", () => {
+					const seconds = Math.floor((Date.now() - pageStartTime) / 1000);
+					try {
+						window.posthog.capture("page_exit", {
+							path: location.pathname,
+							time_on_page: seconds,
+							referrer: document.referrer || "",
+						});
+					} catch {}
+				});
+				pageExitHandlerAttached = true;
+			}
+
+			posthogInitialized = true;
+		} catch (error) {
+			console.warn("Failed to initialize PostHog:", error);
+		} finally {
+			enableInFlight = false;
+		}
 	};
 
 	const schedulePostHogEnable = () => {
