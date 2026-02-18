@@ -7,4 +7,12 @@ interface Window {
 		opt_out_capturing: () => void;
 	};
 	enablePostHog?: () => void;
+	grafanaFaro?: {
+		api: {
+			pushEvent: (event: string, attributes?: Record<string, unknown>) => void;
+			pushError: (error: Error, context?: Record<string, unknown>) => void;
+			setSession: (session: { attributes?: Record<string, unknown> }) => void;
+		};
+	} | null;
+	enableGrafanaFaro?: () => void;
 }
