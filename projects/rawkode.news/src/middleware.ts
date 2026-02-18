@@ -1,7 +1,25 @@
 import { defineMiddleware } from "astro:middleware";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
+import { acceptsMarkdown } from "@/lib/content-negotiation";
+
+const itemPathPattern = /^\/item\/([^/]+)\/?$/;
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  const itemMatch = context.url.pathname.match(itemPathPattern);
+  if (itemMatch && acceptsMarkdown(context.request)) {
+    const itemId = itemMatch[1];
+    const targetUrl = new URL(
+      `/api/posts/${encodeURIComponent(itemId)}${context.url.search}`,
+      context.url,
+    );
+    const targetRequest = new Request(targetUrl.toString(), {
+      method: "GET",
+      headers: context.request.headers,
+    });
+
+    return context.rewrite(targetRequest);
+  }
+
   const sessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value;
 
   if (sessionId) {
