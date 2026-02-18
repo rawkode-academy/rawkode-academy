@@ -77,12 +77,12 @@ const formatDuration = (seconds?: number | null) => {
 		highlight="hard"
 		logos={heroLogos}
 		primaryButton={{
-					text: "Start Watching Free",
-					link: "/watch",
+					text: "Get Weekly Insights",
+					link: "#newsletter-signup",
 				}}
 		secondaryButton={{
-			text: "About Us",
-			link: "/about",
+			text: "Start Watching Free",
+			link: "/watch",
 		}}
 		rotatedPrefixes={[
 			"Cloud Native",
@@ -98,6 +98,18 @@ const formatDuration = (seconds?: number | null) => {
 		suffix="may be complex, but it doesn't need to be hard."
 		socialProof={socialProofStats}
 	/>
+
+	<section id="newsletter-signup" class="px-4 pt-6 sm:pt-8">
+		<div class="mx-auto max-w-3xl scroll-mt-24">
+			<NewsletterCTA
+				server:defer
+				class="mb-12"
+				badge="Weekly Cloud Native insights"
+				headline="Get cloud native insights weekly"
+				subtitle="Tutorials, deep dives, and curated events. No spam, unsubscribe anytime."
+			/>
+		</div>
+	</section>
 
 	{/* Latest Content Section */}
 	<section class="py-16 px-4 sm:py-20">
@@ -181,8 +193,6 @@ const formatDuration = (seconds?: number | null) => {
 					))}
 				</div>
 			</div>
-
-			<NewsletterCTA class="mb-16" />
 
 			{/* Featured Technologies Highlight */}
 			<div class="glass-panel rounded-3xl p-8">
