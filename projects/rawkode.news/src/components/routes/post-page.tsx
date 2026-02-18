@@ -24,7 +24,7 @@ function CommentBlock({
 }: {
   comment: CommentNode;
   depth: number;
-  onReply: (text: string, parentId?: number) => void;
+  onReply: (text: string, parentId?: string) => void;
   basePath: string;
   activeAnchor: string;
   canReply: boolean;
@@ -150,7 +150,7 @@ export function PostPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const postId = Number(id);
+  const postId = id?.trim() ?? "";
   const queryClient = useQueryClient();
   const [newComment, setNewComment] = React.useState("");
   const [pendingAnchor, setPendingAnchor] = React.useState<string | null>(null);
@@ -166,7 +166,7 @@ export function PostPage() {
 
   const postQuery = useQuery({
     ...postQueryOptions(postId),
-    enabled: Number.isFinite(postId),
+    enabled: Boolean(postId),
   });
 
   React.useEffect(() => {
@@ -193,7 +193,7 @@ export function PostPage() {
 
   const commentsQuery = useQuery({
     ...commentsQueryOptions(postId),
-    enabled: Number.isFinite(postId),
+    enabled: Boolean(postId),
   });
 
   const thread = React.useMemo(() => buildCommentTree(commentsQuery.data ?? []), [commentsQuery.data]);
@@ -204,7 +204,7 @@ export function PostPage() {
       parentId,
     }: {
       body: string;
-      parentId?: number;
+      parentId?: string;
     }) => {
       const response = await fetch(`/api/posts/${postId}/comments`, {
         method: "POST",
@@ -260,8 +260,8 @@ export function PostPage() {
     }
   }, [location.hash, thread]);
 
-  const addComment = (text: string, parentId?: number) => {
-    if (!user || !text.trim() || !Number.isFinite(postId) || commentMutation.isPending) {
+  const addComment = (text: string, parentId?: string) => {
+    if (!user || !text.trim() || !postId || commentMutation.isPending) {
       return;
     }
     commentMutation.mutate({ body: text.trim(), parentId });

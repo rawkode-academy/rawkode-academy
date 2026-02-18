@@ -1,15 +1,15 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { createBrowserRouter, redirect } from "react-router-dom";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router-dom";
-import type { ApiPost, FeedCategory } from "@/components/app-data";
+import type { ApiComment, ApiPost, FeedCategory } from "@/components/app-data";
 import { postPath } from "@/components/app-data";
 import { Shell } from "@/components/shell";
 import { FeedPage } from "@/components/routes/feed-page";
+import { NotFoundPage } from "@/components/routes/not-found-page";
 import { ProfilePage } from "@/components/routes/profile-page";
+import { RouteErrorPage } from "@/components/routes/route-error-page";
 import {
-  commentsQueryOptions,
   getPageFromRequest,
-  postQueryOptions,
   postsQueryOptions,
   queryClient,
 } from "@/components/query-client";
@@ -60,15 +60,45 @@ const submitLoader = async () => {
   return null;
 };
 
-const postLoader = async ({ params }: LoaderFunctionArgs) => {
-  const postId = Number(params.id);
-  if (!Number.isFinite(postId)) {
+const postLoader = async ({ params, request }: LoaderFunctionArgs) => {
+  const postId = params.id?.trim();
+  if (!postId) {
     throw new Response("Invalid post id", { status: 400 });
   }
-  await Promise.all([
-    queryClient.ensureQueryData(postQueryOptions(postId)),
-    queryClient.ensureQueryData(commentsQueryOptions(postId)),
-  ]);
+
+  let postResponse: Response;
+  try {
+    postResponse = await fetch(`/api/posts/${postId}`, { signal: request.signal });
+  } catch {
+    throw new Response("Failed to load post", { status: 502 });
+  }
+
+  if (postResponse.status === 404) {
+    throw new Response("Post not found", { status: 404 });
+  }
+  if (postResponse.status === 400) {
+    throw new Response("Invalid post id", { status: 400 });
+  }
+
+  if (!postResponse.ok) {
+    throw new Response("Failed to load post", { status: 502 });
+  }
+
+  const post = (await postResponse.json()) as ApiPost;
+  queryClient.setQueryData(["post", postId], post);
+
+  try {
+    const commentsResponse = await fetch(`/api/posts/${postId}/comments`, { signal: request.signal });
+    if (commentsResponse.ok) {
+      const comments = (await commentsResponse.json()) as ApiComment[];
+      queryClient.setQueryData(["comments", postId], comments);
+    } else if (commentsResponse.status === 404) {
+      queryClient.setQueryData(["comments", postId], []);
+    }
+  } catch {
+    // Non-fatal: PostPage handles comments loading and error states.
+  }
+
   return { postId };
 };
 
@@ -110,6 +140,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <Shell />,
+    errorElement: <RouteErrorPage scope="app" />,
     children: [
       { index: true, loader: feedLoader("new"), element: <FeedPage type="new" /> },
       { path: "new", loader: ({ request }) => redirectToRoot(request) },
@@ -127,7 +158,9 @@ export const router = createBrowserRouter([
         path: "item/:id",
         loader: postLoader,
         element: withSuspense(<PostPage />),
+        errorElement: <RouteErrorPage scope="post" />,
       },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);

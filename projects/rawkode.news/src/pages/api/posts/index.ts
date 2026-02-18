@@ -4,6 +4,7 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { posts } from "../../../db/schema";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
+import { createEntityId } from "@/lib/ids";
 import { getPermissions } from "@/lib/permissions";
 import type { TypedEnv } from "@/types/service-bindings";
 
@@ -21,6 +22,7 @@ const normalizeTimestamp = (value: Date | number) => {
 };
 const serializePost = (post: typeof posts.$inferSelect) => ({
   ...post,
+  id: String(post.id),
   createdAt: normalizeTimestamp(post.createdAt),
 });
 const parsePageValue = (value: string | null) => {
@@ -192,6 +194,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
   const [created] = await db
     .insert(posts)
     .values({
+      id: createEntityId(),
       title,
       category,
       url: url || null,
