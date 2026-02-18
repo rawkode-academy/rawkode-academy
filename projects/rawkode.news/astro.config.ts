@@ -8,7 +8,7 @@ import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  adapter: cloudflare(),
+  adapter: cloudflare({ imageService: "compile" }),
   integrations: [react()],
   env: {
     schema: {
@@ -29,23 +29,50 @@ export default defineConfig({
         "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
     },
-
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes("node_modules")) {
+              return;
+            }
+            if (
+              id.includes("@uiw/react-md-editor") ||
+              id.includes("@uiw/react-markdown-preview")
+            ) {
+              return "uiw";
+            }
+            if (
+              id.includes("react-markdown") ||
+              id.includes("remark-") ||
+              id.includes("rehype-") ||
+              id.includes("unified")
+            ) {
+              return "markdown";
+            }
+            if (id.includes("prismjs")) {
+              return "prism";
+            }
+          },
+        },
+      },
+    },
     plugins: [tailwindcss()],
   },
   experimental: {
     fonts: [
       {
         provider: fontProviders.google(),
-        name: "Quicksand",
-        cssVariable: "--font-quicksand",
-        weights: ["400", "700"],
+        name: "Sora",
+        cssVariable: "--font-sora",
+        weights: ["500", "600", "700"],
         styles: ["normal"],
       },
       {
         provider: fontProviders.google(),
-        name: "Poppins",
-        cssVariable: "--font-poppins",
-        weights: ["400", "600"],
+        name: "IBM Plex Sans",
+        cssVariable: "--font-ibm-plex-sans",
+        weights: ["400", "500", "600"],
         styles: ["normal"],
       },
       {
