@@ -145,8 +145,8 @@ export function Shell() {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 md:flex md:items-center md:gap-4">
               <Link to="/" className="inline-flex min-w-0 shrink-0 items-center gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-none bg-primary text-sm font-semibold text-primary-foreground">
-                  RN
+                <div className="grid h-10 w-12 shrink-0 place-items-center rounded-none bg-primary text-xs font-semibold tracking-wide text-primary-foreground">
+                  RKN
                 </div>
                 <div className="min-w-0">
                   <p className="truncate font-display text-base font-semibold leading-tight">Rawkode News</p>
