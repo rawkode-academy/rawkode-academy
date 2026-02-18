@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-const getRobotsTxt = (sitemapURL: URL, videoSitemapURL: URL) => `
+const getRobotsTxt = (sitemapIndexURL: URL) => `
 # Host directive to specify canonical domain
 Host: rawkode.academy
 
@@ -19,15 +19,14 @@ Disallow: /api/subscriptions/
 Disallow: /graphql
 
 # Sitemap locations
-Sitemap: ${sitemapURL.href}
-Sitemap: ${videoSitemapURL.href}
+Sitemap: ${sitemapIndexURL.href}
 `;
 
 export const GET: APIRoute = ({ site }) => {
-	const sitemapURL = new URL("sitemap-index.xml", site);
-	const videoSitemapURL = new URL("video-sitemap.xml", site);
+	const siteUrl = site ?? new URL("https://rawkode.academy");
+	const sitemapIndexURL = new URL("sitemap-index.xml", siteUrl);
 
-	return new Response(getRobotsTxt(sitemapURL, videoSitemapURL));
+	return new Response(getRobotsTxt(sitemapIndexURL));
 };
 
 export const prerender = true;

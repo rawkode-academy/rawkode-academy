@@ -1,21 +1,17 @@
 import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
-import sitemap from "@astrojs/sitemap";
 import vue from "@astrojs/vue";
 import faroUploader from "@grafana/faro-rollup-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
-import matter from "gray-matter";
-import { readFile, stat } from "node:fs/promises";
 import { execSync } from "node:child_process";
 import { statSync, readFileSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
 import { existsSync } from "node:fs";
-import { glob } from "glob";
 import rehypeExternalLinks from "rehype-external-links";
 
 // Load CUE language grammar for syntax highlighting
@@ -63,7 +59,6 @@ function searchForWorkspaceRoot(current: string): string {
 }
 import { vite as vidstackPlugin } from "vidstack/plugins";
 import { webcontainerDemosPlugin } from "./src/utils/vite-plugin-webcontainer-demos";
-import { deriveSlugFromFile } from "./src/utils/content-slug";
 
 type AstroUserConfig = Parameters<typeof defineConfig>[0];
 type AstroVitePlugins = NonNullable<
@@ -97,135 +92,6 @@ const getSiteUrl = () => {
 
 	return "https://rawkode.academy";
 };
-
-// Build a per-path lastmod index from content files and GraphQL videos.
-// Keys are URL pathnames (no trailing slash), e.g. "/read/my-article".
-async function buildLastmodIndex() {
-	const index = new Map<string, Date>();
-
-	function pickDate(data: Record<string, any>): Date | undefined {
-		const u = data.updatedAt || data.updated_at;
-		const p = data.publishedAt || data.published_at;
-		const val = u || p;
-		if (!val) return undefined;
-		const d = new Date(val);
-		return isNaN(d.getTime()) ? undefined : d;
-	}
-
-	// Articles -> /read/{id}
-	const articleFiles = await glob("content/articles/**/*.{md,mdx}");
-	for (const file of articleFiles) {
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const rel = file.replace(/^content\/articles\//, "");
-			const id = rel
-				.replace(/\/index\.(md|mdx)$/i, "")
-				.replace(/\.(md|mdx)$/i, "");
-			const last = pickDate(fm) ?? (await stat(file)).mtime;
-			index.set(`/read/${id}`, last);
-		} catch {}
-	}
-
-	// Courses (top-level) -> /courses/{id}
-	const courseFiles = await glob("content/courses/*.{md,mdx}");
-	for (const file of courseFiles) {
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const base = file.split("/").pop() || "";
-			const id = base.replace(/\.(md|mdx)$/i, "");
-			const last = pickDate(fm) ?? (await stat(file)).mtime;
-			index.set(`/courses/${id}`, last);
-		} catch {}
-	}
-
-	// Course modules -> /courses/{courseId}/{moduleId}
-	const moduleFiles = await glob("content/courses/**/*.{md,mdx}");
-	for (const file of moduleFiles) {
-		// Skip top-level course files handled above
-		if (/^content\/courses\/[^\/]+\.(md|mdx)$/i.test(file)) continue;
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const rel = file
-				.replace(/^content\/courses\//, "")
-				.replace(/\.(md|mdx)$/i, "");
-			const courseId = rel.split("/")[0];
-			const last = pickDate(fm) ?? (await stat(file)).mtime;
-			// Route shape is /courses/{course}/{moduleId}
-			index.set(`/courses/${courseId}/${rel}`, last);
-		} catch {}
-	}
-
-	// Series -> /series/{id}
-	const seriesFiles = await glob("content/series/**/*.{md,mdx}");
-	for (const file of seriesFiles) {
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const rel = file.replace(/^content\/series\//, "");
-			const id = rel
-				.replace(/\/index\.(md|mdx)$/i, "")
-				.replace(/\.(md|mdx)$/i, "");
-			const last = pickDate(fm) ?? (await stat(file)).mtime;
-			index.set(`/series/${id}`, last);
-		} catch {}
-	}
-
-	// Technologies -> /technology/{id}
-	// MD/MDX only (content lives in workspace package under data/)
-	let techFiles: string[] = [];
-	let techBaseDir: string | undefined;
-	try {
-		const require = createRequire(import.meta.url);
-		const pkgPath = require.resolve("@rawkodeacademy/content/package.json");
-		const root = dirname(pkgPath);
-		const data = join(root, "technologies");
-		try {
-			const s = await stat(data);
-			techBaseDir = s.isDirectory() ? data : root;
-		} catch {
-			techBaseDir = root;
-		}
-		techFiles = await glob("**/*.{md,mdx}", {
-			cwd: techBaseDir,
-			absolute: true,
-		});
-	} catch (err) {
-		console.error("Failed to resolve @rawkodeacademy/content package:", err);
-		// Don't fallback to local directories - workspace package is the only source
-	}
-	for (const file of techFiles) {
-		try {
-			const rel = techBaseDir ? file.slice(techBaseDir.length + 1) : file;
-			const id = rel
-				.replace(/\/index\.(md|mdx)$/i, "")
-				.replace(/\.(md|mdx)$/i, "");
-			const last = (await stat(file)).mtime;
-			index.set(`/technology/${id}`, last);
-		} catch {}
-	}
-
-	// Videos (from local content) -> /watch/{slug}
-	const videoFiles = await glob("content/videos/**/*.{md,mdx}");
-	for (const file of videoFiles) {
-		try {
-			const raw = await readFile(file, "utf8");
-			const fm = matter(raw).data as Record<string, any>;
-			const slug = deriveSlugFromFile(file, fm, "content/videos/");
-			const published = fm.publishedAt ? new Date(fm.publishedAt) : undefined;
-			const last =
-				published && !isNaN(published.getTime()) ? published : undefined;
-			if (last) index.set(`/watch/${slug}`, last);
-		} catch {}
-	}
-
-	return index;
-}
-
-// Compute lastmod index once for sitemap serialization
-const lastmodIndex = await buildLastmodIndex();
 
 // Resolve external content package directory for Vite FS allow (dev + build asset import)
 let CONTENT_TECH_DIR: string | undefined;
@@ -272,40 +138,6 @@ export default defineConfig({
 		}),
 		mdx(),
 		react({ experimentalReactChildren: true }),
-		sitemap({
-			filter: (page) => !page.includes("api/") && !page.includes("sitemap-"),
-			changefreq: "weekly",
-			priority: 0.7,
-			customPages: await (async () => {
-				const siteUrl = getSiteUrl();
-				const videoFiles = await glob("content/videos/**/*.{md,mdx}");
-				const slugs: string[] = [];
-				for (const file of videoFiles) {
-					try {
-						const raw = await readFile(file, "utf8");
-						const fm = matter(raw).data as Record<string, any>;
-						const slug = deriveSlugFromFile(file, fm, "content/videos/");
-						if (slug) slugs.push(slug);
-					} catch {}
-				}
-				// Use no-trailing slash to match canonical policy
-				return slugs.map((s) => `${siteUrl}/watch/${s}`);
-			})(),
-			serialize: (item) => {
-				try {
-					const u = new URL(item.url);
-					const key =
-						u.pathname.endsWith("/") && u.pathname !== "/"
-							? u.pathname.slice(0, -1)
-							: u.pathname;
-					const lm = lastmodIndex.get(key);
-					if (lm) {
-						return { ...item, lastmod: lm.toISOString() };
-					}
-				} catch {}
-				return item;
-			},
-		}),
 		vue({
 			template: {
 				compilerOptions: {
