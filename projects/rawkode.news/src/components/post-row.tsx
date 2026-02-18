@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ExternalLink } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { ApiPost } from "@/components/app-data";
 import { formatRelativeTime, postPath } from "@/components/app-data";
 import { MarkdownInline } from "@/components/markdown";
@@ -23,6 +23,10 @@ export function PostRow({
   const fromPath = `${location.pathname}${location.search}`;
   const summary = post.body?.trim() || null;
 
+  const navigateToDetails = React.useCallback(() => {
+    navigate(detailPath, { state: { from: fromPath } });
+  }, [detailPath, fromPath, navigate]);
+
   const handleLeftColumnClick = React.useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
       if (event.defaultPrevented) return;
@@ -40,9 +44,9 @@ export function PostRow({
         if (interactive) return;
       }
 
-      navigate(detailPath, { state: { from: fromPath } });
+      navigateToDetails();
     },
-    [detailPath, fromPath, navigate]
+    [navigateToDetails]
   );
 
   return (
@@ -53,14 +57,7 @@ export function PostRow({
           onClick={handleLeftColumnClick}
         >
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-            <Link
-              to={detailPath}
-              state={{ from: fromPath }}
-              className="min-w-0 text-[0.96rem] leading-6 font-semibold text-foreground hover:underline"
-              aria-label={`View details for: ${post.title}`}
-            >
-              {post.title}
-            </Link>
+            <h2 className="min-w-0 text-[0.96rem] leading-6 font-semibold text-foreground">{post.title}</h2>
           </div>
 
           {summary ? (

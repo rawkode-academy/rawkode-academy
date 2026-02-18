@@ -345,9 +345,7 @@ export function PostPage() {
                 }
               `}</style>
             </>
-          ) : (
-            <p className="text-sm text-muted-foreground">Link submission.</p>
-          )}
+          ) : null}
         </section>
       </article>
 
