@@ -101,10 +101,15 @@
 		});
 
 		window.addEventListener("error", (event) => {
-			if (!faroInstance || !event.error) return;
-			faroInstance.api.pushError(event.error, {
+			if (!faroInstance) return;
+			const normalizedError =
+				event.error instanceof Error
+					? event.error
+					: new Error(event.message || String(event.error || "Unknown error"));
+			faroInstance.api.pushError(normalizedError, {
 				context: {
 					type: "global_error",
+					message: event.message || "",
 					filename: event.filename || "",
 					lineno: String(event.lineno || 0),
 				},
@@ -166,6 +171,8 @@
 				return faro;
 			})().catch((error) => {
 				console.warn("Failed to initialize Grafana Faro:", error);
+				// Clear cached promise so future calls can retry initialization.
+				faroInitPromise = null;
 				return null;
 			});
 		}

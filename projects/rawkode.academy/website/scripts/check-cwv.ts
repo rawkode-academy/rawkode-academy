@@ -103,6 +103,23 @@ function getAuditNumericValue(
 	return typeof value === "number" ? value : null;
 }
 
+function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function parseRetryAfterMs(retryAfter: string | null): number | null {
+	if (!retryAfter) return null;
+	const seconds = Number.parseInt(retryAfter, 10);
+	if (!Number.isNaN(seconds)) {
+		return Math.max(seconds * 1000, 0);
+	}
+
+	const retryDate = new Date(retryAfter);
+	const retryTime = retryDate.getTime();
+	if (Number.isNaN(retryTime)) return null;
+	return Math.max(retryTime - Date.now(), 0);
+}
+
 async function runPageSpeed(
 	url: string,
 	strategy: Strategy,
@@ -116,11 +133,32 @@ async function runPageSpeed(
 	endpoint.searchParams.set("category", "performance");
 	if (apiKey) endpoint.searchParams.set("key", apiKey);
 
-	const response = await fetch(endpoint, {
-		headers: { Accept: "application/json" },
-	});
-	if (!response.ok) {
-		throw new Error(`PageSpeed API failed (${response.status} ${response.statusText})`);
+	const maxRetries = 3;
+	const baseDelayMs = 1000;
+	let response: Response | null = null;
+
+	for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
+		response = await fetch(endpoint, {
+			headers: { Accept: "application/json" },
+		});
+
+		if (response.ok) {
+			break;
+		}
+
+		const status = response.status;
+		const retryable = status === 429 || status >= 500;
+		if (!retryable || attempt === maxRetries) {
+			throw new Error(`PageSpeed API failed (${response.status} ${response.statusText})`);
+		}
+
+		const retryAfterMs = parseRetryAfterMs(response.headers.get("Retry-After"));
+		const backoffMs = Math.min(baseDelayMs * 2 ** (attempt - 1), 10000);
+		await sleep(retryAfterMs ?? backoffMs);
+	}
+
+	if (!response || !response.ok) {
+		throw new Error("PageSpeed API failed after retries");
 	}
 
 	const data = (await response.json()) as PageSpeedResponse;
@@ -138,16 +176,19 @@ async function runPageSpeed(
 	const tbtMs = getAuditNumericValue(audits, "total-blocking-time");
 	const inpOrTbtMs = inpMs ?? tbtMs;
 	const inpSource: "INP" | "TBT" = inpMs !== null ? "INP" : "TBT";
+	const lcpDisplay = lcpMs === null ? "missing" : `${lcpMs}ms`;
+	const inpOrTbtDisplay =
+		inpOrTbtMs === null ? "missing" : `${inpOrTbtMs}ms`;
 
 	const failures: string[] = [];
 	if (lcpMs === null || lcpMs > 2500) {
-		failures.push(`LCP ${lcpMs ?? "missing"}ms > 2500ms`);
+		failures.push(`LCP ${lcpDisplay} > 2500ms`);
 	}
 	if (cls === null || cls > 0.1) {
 		failures.push(`CLS ${cls ?? "missing"} > 0.1`);
 	}
 	if (inpOrTbtMs === null || inpOrTbtMs > 200) {
-		failures.push(`${inpSource} ${inpOrTbtMs ?? "missing"}ms > 200ms`);
+		failures.push(`${inpSource} ${inpOrTbtDisplay} > 200ms`);
 	}
 
 	return {
