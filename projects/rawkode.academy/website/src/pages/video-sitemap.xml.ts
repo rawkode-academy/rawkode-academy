@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
+import { getPublishedVideos } from "@/lib/content";
 
 // Format duration from seconds to ISO 8601
 function formatDuration(seconds: number): string {
@@ -43,8 +44,9 @@ function escapeXml(value: unknown): string {
 }
 
 export const GET: APIRoute = async ({ site }) => {
-	const videos = await getCollection("videos");
+	const videos = await getPublishedVideos();
 	const technologies = await getCollection("technologies");
+	const siteUrl = site ?? new URL("https://rawkode.academy");
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
@@ -61,7 +63,7 @@ export const GET: APIRoute = async ({ site }) => {
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 ${sortedVideos
 	.map((video) => {
-		const videoUrl = `${site}watch/${video.data.slug}/`;
+		const videoUrl = new URL(`/watch/${video.data.slug}`, siteUrl).href;
 		const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
 		const contentUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 		const durationSeconds =
@@ -86,6 +88,8 @@ ${sortedVideos
 
 		return `  <url>
     <loc>${videoUrl}</loc>
+    <lastmod>${publishedDate}</lastmod>
+    <changefreq>daily</changefreq>
     <video:video>
       <video:thumbnail_loc>${escapeXml(thumbnailUrl)}</video:thumbnail_loc>
       <video:title>${escapeXml(video.data.title)}</video:title>
@@ -98,7 +102,7 @@ ${sortedVideos
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>
       <video:requires_subscription>no</video:requires_subscription>
-      <video:uploader info="${site}">Rawkode Academy</video:uploader>
+      <video:uploader info="${siteUrl.href}">Rawkode Academy</video:uploader>
       ${tagsXml}
     </video:video>
   </url>`;
