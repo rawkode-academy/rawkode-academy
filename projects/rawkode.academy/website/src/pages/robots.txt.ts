@@ -8,11 +8,15 @@ Host: rawkode.academy
 User-agent: *
 Allow: /
 
-# Except for
-Disallow: /api/
+# Keep private areas out of search
 Disallow: /admin/
 Disallow: /private/
-Disallow: /_server-islands/
+Disallow: /settings/
+Disallow: /api/auth/
+Disallow: /api/comments/
+Disallow: /api/watch-position
+Disallow: /api/subscriptions/
+Disallow: /graphql
 
 # Sitemap locations
 Sitemap: ${sitemapURL.href}
