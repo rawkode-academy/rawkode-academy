@@ -10,6 +10,7 @@ import CourseModules from "@/components/courses/CourseModules.astro";
 import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
 import CourseDetailHero from "@/components/courses/CourseDetailHero.vue";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
@@ -134,6 +135,16 @@ const formattedAuthors = authors.map((author) => ({
 	<div class="bg-gray-100 dark:bg-gray-900">
 		<!-- Main Content -->
 		<div class="py-16 px-4 mx-auto max-w-screen-xl">
+			<div class="mb-16 max-w-3xl mx-auto">
+				<NewsletterCTA
+					server:defer
+					audience={`course:${course.id}`}
+					badge={`${course.data.title} updates`}
+					headline={`Get updates for ${course.data.title}`}
+					subtitle="Get notified about new modules and weekly cloud native insights."
+				/>
+			</div>
+
 			<!-- Course Overview Content -->
 			{Content && (
 				<div class="mb-16">
