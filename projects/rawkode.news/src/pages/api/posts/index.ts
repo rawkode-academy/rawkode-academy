@@ -168,7 +168,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     return new Response("Title is required", { status: 400 });
   }
 
-  const title = payload.title.trim().toLowerCase();
+  const title = payload.title.trim();
   if (!title) {
     return new Response("Title is required", { status: 400 });
   }
