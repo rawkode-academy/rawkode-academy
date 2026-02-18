@@ -7,13 +7,15 @@
     bun scripts/check-cwv.ts --base https://rawkode.academy --strategies mobile,desktop
 */
 
+export {};
+
 type Strategy = "mobile" | "desktop";
 
 type Args = {
 	base: string;
 	pages: string[];
 	strategies: Strategy[];
-	apiKey?: string;
+	apiKey: string | undefined;
 };
 
 type CwvResult = {
@@ -26,6 +28,17 @@ type CwvResult = {
 	performanceScore: number | null;
 	passed: boolean;
 	failures: string[];
+};
+
+type PageSpeedResponse = {
+	lighthouseResult?: {
+		audits?: Record<string, { numericValue?: number }>;
+		categories?: {
+			performance?: {
+				score?: number;
+			};
+		};
+	};
 };
 
 const DEFAULT_PAGES = [
@@ -110,7 +123,7 @@ async function runPageSpeed(
 		throw new Error(`PageSpeed API failed (${response.status} ${response.statusText})`);
 	}
 
-	const data = await response.json();
+	const data = (await response.json()) as PageSpeedResponse;
 	const audits = (data?.lighthouseResult?.audits ??
 		{}) as Record<string, { numericValue?: number }>;
 	const performanceScoreRaw = data?.lighthouseResult?.categories?.performance?.score;
