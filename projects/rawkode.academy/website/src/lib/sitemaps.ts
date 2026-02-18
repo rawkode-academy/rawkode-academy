@@ -216,13 +216,14 @@ function sortByPath(entries: SitemapUrlEntry[]): SitemapUrlEntry[] {
 }
 
 function getLatestLastmod(entries: SitemapUrlEntry[]): Date | undefined {
-	if (entries.length === 0) {
+	const firstEntry = entries[0];
+	if (!firstEntry) {
 		return undefined;
 	}
 	return entries.reduce(
 		(latest, entry) =>
 			entry.lastmod.getTime() > latest.getTime() ? entry.lastmod : latest,
-		entries[0].lastmod,
+		firstEntry.lastmod,
 	);
 }
 
@@ -524,20 +525,20 @@ export const sitemapDefinitions = [
 ] as const;
 
 export async function getSitemapIndexEntries(): Promise<SitemapIndexEntry[]> {
-	const sitemapEntries = await Promise.all(
-		sitemapDefinitions.map(async (definition) => {
-			const entries = await definition.getEntries();
-			if (entries.length === 0) {
-				return undefined;
-			}
-			return {
-				path: definition.path,
-				lastmod: getLatestLastmod(entries),
-			} satisfies SitemapIndexEntry;
-		}),
-	);
+	const sitemapEntries: SitemapIndexEntry[] = [];
 
-	return sitemapEntries.filter(
-		(entry): entry is SitemapIndexEntry => entry !== undefined,
-	);
+	for (const definition of sitemapDefinitions) {
+		const entries = await definition.getEntries();
+		const lastmod = getLatestLastmod(entries);
+		if (!lastmod) {
+			continue;
+		}
+
+		sitemapEntries.push({
+			path: definition.path,
+			lastmod,
+		});
+	}
+
+	return sitemapEntries;
 }
