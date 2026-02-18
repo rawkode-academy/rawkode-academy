@@ -4,6 +4,7 @@ import { asc, eq, sql } from "drizzle-orm";
 import { getDb } from "../../../../db";
 import { comments, posts } from "../../../../db/schema";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
+import { createEntityId, parseEntityId } from "@/lib/ids";
 import type { TypedEnv } from "@/types/service-bindings";
 
 type CreateCommentPayload = {
@@ -17,15 +18,18 @@ const normalizeTimestamp = (value: Date | number) => {
 };
 const serializeComment = (comment: typeof comments.$inferSelect) => ({
   ...comment,
+  id: String(comment.id),
+  postId: String(comment.postId),
+  parentId: comment.parentId ? String(comment.parentId) : null,
   createdAt: normalizeTimestamp(comment.createdAt),
 });
 
 export const GET: APIRoute = async ({ params, locals }) => {
   const env = locals.runtime.env as TypedEnv;
   const db = getDb(env);
-  const postId = Number(params.id);
+  const postId = parseEntityId(params.id);
 
-  if (!Number.isFinite(postId)) {
+  if (!postId) {
     return new Response("Invalid post id", { status: 400 });
   }
 
@@ -41,9 +45,9 @@ export const GET: APIRoute = async ({ params, locals }) => {
 export const POST: APIRoute = async ({ params, request, locals, cookies }) => {
   const env = locals.runtime.env as TypedEnv;
   const db = getDb(env);
-  const postId = Number(params.id);
+  const postId = parseEntityId(params.id);
 
-  if (!Number.isFinite(postId)) {
+  if (!postId) {
     return new Response("Invalid post id", { status: 400 });
   }
 
@@ -82,14 +86,15 @@ export const POST: APIRoute = async ({ params, request, locals, cookies }) => {
     return new Response("Comment body is required", { status: 400 });
   }
 
-  const parentId =
-    typeof payload.parentId === "number" && Number.isFinite(payload.parentId)
-      ? payload.parentId
-      : null;
+  const parentId = payload.parentId == null ? null : parseEntityId(payload.parentId);
+  if (payload.parentId != null && !parentId) {
+    return new Response("Invalid parent id", { status: 400 });
+  }
 
   const [created] = (await db
     .insert(comments)
     .values({
+      id: createEntityId(),
       postId,
       parentId,
       author,

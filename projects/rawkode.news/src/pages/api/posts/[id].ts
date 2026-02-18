@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { getDb, type Env } from "../../../db";
 import { posts } from "../../../db/schema";
+import { parseEntityId } from "@/lib/ids";
 
 const normalizeTimestamp = (value: Date | number) => {
   const date = value instanceof Date ? value : new Date(value);
@@ -12,9 +13,9 @@ const normalizeTimestamp = (value: Date | number) => {
 export const GET: APIRoute = async ({ params, locals }) => {
   const env = locals.runtime.env as Env;
   const db = getDb(env);
-  const id = Number(params.id);
+  const id = parseEntityId(params.id);
 
-  if (!Number.isFinite(id)) {
+  if (!id) {
     return new Response("Invalid post id", { status: 400 });
   }
 
@@ -26,6 +27,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
 
   return Response.json({
     ...post,
+    id: String(post.id),
     createdAt: normalizeTimestamp(post.createdAt),
   });
 };

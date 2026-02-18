@@ -10,7 +10,7 @@ import {
 export const posts = sqliteTable(
   "posts",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id").primaryKey(),
     title: text("title").notNull(),
     category: text("category").notNull(),
     url: text("url"),
@@ -31,11 +31,11 @@ export const posts = sqliteTable(
 export const comments = sqliteTable(
   "comments",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    postId: integer("post_id")
+    id: text("id").primaryKey(),
+    postId: text("post_id")
       .notNull()
       .references(() => posts.id, { onDelete: "cascade" }),
-    parentId: integer("parent_id").references((): AnySQLiteColumn => comments.id, {
+    parentId: text("parent_id").references((): AnySQLiteColumn => comments.id, {
       onDelete: "cascade",
     }),
     author: text("author").notNull(),

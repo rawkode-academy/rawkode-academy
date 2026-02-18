@@ -78,7 +78,7 @@ export const postsQueryOptions = ({
   queryFn: () => fetchPosts({ category, page, mine }),
 });
 
-const fetchPost = async (postId: number) => {
+const fetchPost = async (postId: string) => {
   const response = await fetch(`/api/posts/${postId}`);
   if (!response.ok) {
     throw new Error("Failed to load post");
@@ -86,12 +86,12 @@ const fetchPost = async (postId: number) => {
   return (await response.json()) as ApiPost;
 };
 
-export const postQueryOptions = (postId: number) => ({
+export const postQueryOptions = (postId: string) => ({
   queryKey: ["post", postId],
   queryFn: () => fetchPost(postId),
 });
 
-const fetchComments = async (postId: number) => {
+const fetchComments = async (postId: string) => {
   const response = await fetch(`/api/posts/${postId}/comments`);
   if (!response.ok) {
     throw new Error("Failed to load comments");
@@ -99,7 +99,7 @@ const fetchComments = async (postId: number) => {
   return (await response.json()) as ApiComment[];
 };
 
-export const commentsQueryOptions = (postId: number) => ({
+export const commentsQueryOptions = (postId: string) => ({
   queryKey: ["comments", postId],
   queryFn: () => fetchComments(postId),
 });
