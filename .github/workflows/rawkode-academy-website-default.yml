@@ -10,6 +10,12 @@ on:
     - .github/workflows/rawkode-academy-website-default.yml
     - content/**
     - cue.mod/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/**
+    - projects/rawkode.academy/platform/email-preferences/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/env.cue
     - projects/rawkode.academy/website/package.json
