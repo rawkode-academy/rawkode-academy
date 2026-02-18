@@ -1,6 +1,5 @@
 ---
 import { Font } from "astro:assets";
-import "@/styles/global.css";
 import type { OpenGraphProps } from "@/types/opengraph";
 import PostHog from "../posthog/index.astro";
 import Grafana from "../grafana/index.astro";
@@ -17,9 +16,7 @@ const { userId } = Astro.props;
 ---
 
 <style is:global>
-	@import "@/styles/global.css";
-
-
+	@reference "@/styles/global.css";
 
 	h1,
 	h2,
@@ -44,7 +41,7 @@ const { userId } = Astro.props;
 </style>
 
 <head>
-	<Font cssVariable="--font-quicksand" preload />
+	<Font cssVariable="--font-quicksand" />
 	<Font cssVariable="--font-poppins" preload />
 	<Font cssVariable="--font-monaspace-neon" />
 	<meta charset="utf-8" />
@@ -77,7 +74,7 @@ const { userId } = Astro.props;
 	<!-- Resource hints for performance -->
 	<link rel="preconnect" href="https://content.rawkode.academy" />
 	<link rel="preconnect" href="https://avatars.githubusercontent.com" />
-    <link rel="preconnect" href="https://unpkg.com" />
+	<link rel="preconnect" href="https://unpkg.com" />
 	<link rel="dns-prefetch" href="https://discord.gg" />
 
 	<!-- Preload critical fonts -->
@@ -86,12 +83,10 @@ const { userId } = Astro.props;
 
 	<link rel="sitemap" href="/sitemap-index.xml" />
 
-	<!-- PostHog analytics -->
-	<link rel="preconnect" href="https://eu.i.posthog.com" />
+	<!-- PostHog analytics (loaded lazily after consent) -->
 	<PostHog userId={userId} />
 
-	<!-- Grafana Faro observability -->
-	<link rel="preconnect" href="https://faro-collector-prod-gb-south-1.grafana.net" />
+	<!-- Grafana Faro observability (loaded lazily after consent) -->
 	<Grafana />
 
 	<!-- Initial theme script: respects saved preference or OS setting; avoids FOUC -->
