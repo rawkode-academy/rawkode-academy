@@ -9,7 +9,8 @@ type Props = {
 	robots?: "index, follow" | "noindex, nofollow";
 	ogType?: "website" | "article";
 	siteName?: string;
-	twitterCard?: "summary";
+	ogImagePath?: string | null;
+	twitterCard?: "summary" | "summary_large_image";
 };
 
 const {
@@ -19,13 +20,17 @@ const {
 	robots = "index, follow",
 	ogType = "website",
 	siteName = "Rawkode News",
-	twitterCard = "summary",
+	ogImagePath = "/og.webp",
+	twitterCard = ogImagePath ? "summary_large_image" : "summary",
 } = Astro.props as Props;
 
 const canonicalHref = canonicalPath
 	? new URL(canonicalPath, Astro.site ?? Astro.url).toString()
 	: null;
 const pageUrl = canonicalHref ?? Astro.url.toString();
+const ogImageUrl = ogImagePath
+	? new URL(ogImagePath, Astro.site ?? Astro.url).toString()
+	: null;
 ---
 
 <html lang="en">
@@ -51,10 +56,13 @@ const pageUrl = canonicalHref ?? Astro.url.toString();
 		<meta property="og:url" content={pageUrl} />
 		<meta property="og:site_name" content={siteName} />
 		<meta property="og:locale" content="en_US" />
+		{ogImageUrl ? <meta property="og:image" content={ogImageUrl} /> : null}
+		{ogImageUrl ? <meta property="og:image:alt" content={`${siteName} social preview`} /> : null}
 		<meta name="twitter:card" content={twitterCard} />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:url" content={pageUrl} />
+		{ogImageUrl ? <meta name="twitter:image" content={ogImageUrl} /> : null}
 		<title>{title}</title>
 	</head>
 	<body>
