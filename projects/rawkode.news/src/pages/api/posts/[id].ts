@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { getDb, type Env } from "../../../db";
 import { posts } from "../../../db/schema";
-import { acceptsMarkdown } from "@/lib/content-negotiation";
+import { acceptsAiHtml } from "@/lib/content-negotiation";
 import { parseEntityId } from "@/lib/ids";
 
 const normalizeTimestamp = (value: Date | number) => {
@@ -11,9 +11,15 @@ const normalizeTimestamp = (value: Date | number) => {
   return date.toISOString();
 };
 
-const yamlString = (value: string) => JSON.stringify(value);
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
-const toFrontmatterMarkdown = (post: {
+const toAiHtmlDocument = (post: {
   id: string;
   title: string;
   category: string;
@@ -24,25 +30,21 @@ const toFrontmatterMarkdown = (post: {
   createdAt: string;
 }) => {
   const title = post.title.replace(/\s+/g, " ").trim();
-  const lines = [
-    "---",
-    `id: ${yamlString(post.id)}`,
-    `title: ${yamlString(title)}`,
-    `category: ${yamlString(post.category)}`,
-    `author: ${yamlString(post.author)}`,
-    `publishedAt: ${yamlString(post.createdAt)}`,
-    `commentCount: ${post.commentCount}`,
-  ];
+  const content = post.body?.trim() ?? "";
+  const lines = ["<!doctype html>", "<html lang=\"en\">", "<head>", "  <meta charset=\"utf-8\" />"];
 
-  if (post.url) {
-    lines.push(`source: ${yamlString(post.url)}`);
-  }
-
-  lines.push("---");
-
-  if (post.body?.trim()) {
-    lines.push("", post.body.trim());
-  }
+  lines.push(`  <title>${escapeHtml(title)}</title>`);
+  lines.push(`  <meta name="ai:id" content="${escapeHtml(post.id)}" />`);
+  lines.push(`  <meta name="ai:title" content="${escapeHtml(title)}" />`);
+  lines.push(`  <meta name="ai:category" content="${escapeHtml(post.category)}" />`);
+  lines.push(`  <meta name="ai:author" content="${escapeHtml(post.author)}" />`);
+  lines.push(`  <meta name="ai:published-at" content="${escapeHtml(post.createdAt)}" />`);
+  lines.push(`  <meta name="ai:comment-count" content="${post.commentCount}" />`);
+  if (post.url) lines.push(`  <meta name="ai:source" content="${escapeHtml(post.url)}" />`);
+  lines.push("</head>", "<body>", "  <article>");
+  lines.push(`    <h1>${escapeHtml(title)}</h1>`);
+  lines.push(`    <div id="content">${escapeHtml(content)}</div>`);
+  lines.push("  </article>", "</body>", "</html>");
 
   return lines.join("\n");
 };
@@ -68,11 +70,11 @@ export const GET: APIRoute = async ({ params, locals, request }) => {
     createdAt: normalizeTimestamp(post.createdAt),
   };
 
-  if (acceptsMarkdown(request)) {
-    return new Response(toFrontmatterMarkdown(serialized), {
+  if (acceptsAiHtml(request)) {
+    return new Response(toAiHtmlDocument(serialized), {
       status: 200,
       headers: {
-        "content-type": "text/markdown; charset=utf-8",
+        "content-type": "ai/html; charset=utf-8",
         vary: "Accept",
       },
     });
