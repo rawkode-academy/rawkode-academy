@@ -2,6 +2,8 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import { feedCategories, formatRelativeTime, type FeedCategory } from "@/components/app-data";
+import { getCategoryTextClass } from "@/components/category-styles";
 import { useSession } from "@/components/session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,9 +14,14 @@ const MAX_QUERY_LENGTH = 200;
 const SEARCH_RESULT_LIMIT = 20;
 
 type ParsedSearchContent = {
+  id: string | null;
   title: string | null;
+  author: string | null;
   content: string | null;
   source: string | null;
+  category: string | null;
+  publishedAt: string | null;
+  comments: number | null;
 };
 
 type SearchResultItem = {
@@ -79,6 +86,19 @@ const errorMessage = (error: unknown) => {
   }
 
   return "Search is unavailable right now. Try again shortly.";
+};
+
+const formatCommentCount = (count: number) =>
+  `${count} comment${count === 1 ? "" : "s"}`;
+
+const asFeedCategory = (value: string | null) => {
+  if (!value) {
+    return null;
+  }
+
+  return feedCategories.includes(value as FeedCategory)
+    ? (value as FeedCategory)
+    : null;
 };
 
 export function SearchPage() {
@@ -212,27 +232,55 @@ export function SearchPage() {
               </p>
             ) : null}
 
-            {results.map((result, index) => (
-              <React.Fragment key={result.id}>
-                <article className="px-5 py-4">
-                  <a
-                    href={result.url}
-                    className="group block space-y-1.5"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <h2 className="text-[0.96rem] leading-6 font-semibold text-foreground transition-colors group-hover:text-primary">
-                        {result.title}
-                      </h2>
-                      <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
-                    </div>
-                    {result.parsed?.content ? (
-                      <p className="text-sm text-muted-foreground">{result.parsed.content}</p>
-                    ) : null}
-                  </a>
-                </article>
-                {index < results.length - 1 ? <hr className="border-border/75" /> : null}
-              </React.Fragment>
-            ))}
+            {results.map((result, index) => {
+              const parsed = result.parsed;
+              const category = asFeedCategory(parsed?.category ?? null);
+              const hasCategory = Boolean(category);
+              const hasPublishedAt = Boolean(parsed?.publishedAt);
+              const hasComments = parsed?.comments !== null && parsed?.comments !== undefined;
+              const hasMeta = hasCategory || hasPublishedAt || hasComments;
+
+              return (
+                <React.Fragment key={result.id}>
+                  <article className="px-5 py-4">
+                    <a
+                      href={result.url}
+                      className="group block space-y-1.5"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <h2 className="text-[0.96rem] leading-6 font-semibold text-foreground transition-colors group-hover:text-primary">
+                          {result.title}
+                        </h2>
+                        <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
+                      </div>
+                      {hasMeta ? (
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                          {hasCategory ? (
+                            <span className={`font-semibold uppercase ${getCategoryTextClass(category!)}`}>
+                              {category}
+                            </span>
+                          ) : null}
+                          {hasCategory && (hasPublishedAt || hasComments) ? (
+                            <span>•</span>
+                          ) : null}
+                          {hasPublishedAt ? (
+                            <span>{formatRelativeTime(parsed?.publishedAt ?? "")}</span>
+                          ) : null}
+                          {hasPublishedAt && hasComments ? <span>•</span> : null}
+                          {hasComments ? (
+                            <span>{formatCommentCount(parsed?.comments ?? 0)}</span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {parsed?.content ? (
+                        <p className="text-sm text-muted-foreground">{parsed.content}</p>
+                      ) : null}
+                    </a>
+                  </article>
+                  {index < results.length - 1 ? <hr className="border-border/75" /> : null}
+                </React.Fragment>
+              );
+            })}
           </div>
         ) : null}
       </section>
