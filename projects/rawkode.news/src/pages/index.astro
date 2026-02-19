@@ -2,6 +2,7 @@
 import { QueryClient, dehydrate } from "@tanstack/react-query";
 import App from "@/components/app";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { buildCanonicalPath } from "@/lib/seo";
 
 const queryClient = new QueryClient();
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
@@ -14,8 +15,16 @@ if (response.ok) {
 	queryClient.setQueryData(["posts", "new", page], data);
 }
 const dehydratedState = dehydrate(queryClient);
+const canonicalPath = buildCanonicalPath("/", Astro.url.searchParams, ["page"]);
+const title = page > 1 ? `Rawkode News — Page ${page}` : "Rawkode News";
 ---
 
-<BaseLayout title="Rawkode News">
+<BaseLayout
+	title={title}
+	description="Latest signals from the Rawkode News community."
+	canonicalPath={canonicalPath}
+	robots="index, follow"
+	ogType="website"
+>
 	<App client:only="react" dehydratedState={dehydratedState} />
 </BaseLayout>

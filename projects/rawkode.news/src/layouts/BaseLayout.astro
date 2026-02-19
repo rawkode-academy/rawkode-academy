@@ -2,7 +2,30 @@
 import { Font } from "astro:assets";
 import "@/styles/global.css";
 
-const { title = "Rawkode News" } = Astro.props;
+type Props = {
+	title?: string;
+	description?: string;
+	canonicalPath?: string;
+	robots?: "index, follow" | "noindex, nofollow";
+	ogType?: "website" | "article";
+	siteName?: string;
+	twitterCard?: "summary";
+};
+
+const {
+	title = "Rawkode News",
+	description = "Rawkode News community links, discussions, and engineering write-ups.",
+	canonicalPath,
+	robots = "index, follow",
+	ogType = "website",
+	siteName = "Rawkode News",
+	twitterCard = "summary",
+} = Astro.props as Props;
+
+const canonicalHref = canonicalPath
+	? new URL(canonicalPath, Astro.site ?? Astro.url).toString()
+	: null;
+const pageUrl = canonicalHref ?? Astro.url.toString();
 ---
 
 <html lang="en">
@@ -19,6 +42,19 @@ const { title = "Rawkode News" } = Astro.props;
 		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
+		<meta name="description" content={description} />
+		<meta name="robots" content={robots} />
+		{canonicalHref ? <link rel="canonical" href={canonicalHref} /> : null}
+		<meta property="og:type" content={ogType} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={pageUrl} />
+		<meta property="og:site_name" content={siteName} />
+		<meta property="og:locale" content="en_US" />
+		<meta name="twitter:card" content={twitterCard} />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:url" content={pageUrl} />
 		<title>{title}</title>
 	</head>
 	<body>
