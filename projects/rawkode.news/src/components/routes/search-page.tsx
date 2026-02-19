@@ -11,11 +11,17 @@ const MIN_QUERY_LENGTH = 2;
 const MAX_QUERY_LENGTH = 200;
 const SEARCH_RESULT_LIMIT = 20;
 
+type ParsedSearchContent = {
+  title: string | null;
+  content: string | null;
+  source: string | null;
+};
+
 type SearchResultItem = {
   id: string;
   title: string;
   url: string;
-  snippet: string | null;
+  parsed: ParsedSearchContent | null;
   source: string | null;
 };
 
@@ -73,15 +79,6 @@ const errorMessage = (error: unknown) => {
   }
 
   return "Search is unavailable right now. Try again shortly.";
-};
-
-const fallbackSource = (value: string) => {
-  try {
-    const url = new URL(value);
-    return url.hostname.replace(/^www\./, "");
-  } catch {
-    return null;
-  }
 };
 
 export function SearchPage() {
@@ -220,8 +217,6 @@ export function SearchPage() {
                 <article className="px-5 py-4">
                   <a
                     href={result.url}
-                    target="_blank"
-                    rel="noreferrer"
                     className="group block space-y-1.5"
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -230,11 +225,8 @@ export function SearchPage() {
                       </h2>
                       <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {result.source ?? fallbackSource(result.url) ?? "Unknown source"}
-                    </p>
-                    {result.snippet ? (
-                      <p className="text-sm text-muted-foreground">{result.snippet}</p>
+                    {result.parsed?.content ? (
+                      <p className="text-sm text-muted-foreground">{result.parsed.content}</p>
                     ) : null}
                   </a>
                 </article>
