@@ -6,7 +6,9 @@ const parseQuality = (value: string) => {
   return Math.max(0, Math.min(1, parsed));
 };
 
-export const acceptsAiHtml = (request: Request) => {
+const ARTICLE_HTML_MEDIA_TYPES = new Set(["ai/html"]);
+
+export const acceptsArticleHtml = (request: Request) => {
   const accept = request.headers.get("accept");
   if (!accept) {
     return false;
@@ -15,7 +17,7 @@ export const acceptsAiHtml = (request: Request) => {
   for (const rawPart of accept.split(",")) {
     const [mediaTypePart, ...params] = rawPart.split(";");
     const mediaType = mediaTypePart.trim().toLowerCase();
-    if (mediaType !== "ai/html") {
+    if (!ARTICLE_HTML_MEDIA_TYPES.has(mediaType)) {
       continue;
     }
 

@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { getDb, type Env } from "../../../db";
 import { posts } from "../../../db/schema";
-import { acceptsAiHtml } from "@/lib/content-negotiation";
+import { acceptsArticleHtml } from "@/lib/content-negotiation";
 import { parseEntityId } from "@/lib/ids";
 
 const normalizeTimestamp = (value: Date | number) => {
@@ -19,7 +19,35 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
-const toAiHtmlDocument = (post: {
+const formatPublishedLabel = (value: string) => {
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) {
+    return value;
+  }
+  return new Date(timestamp).toUTCString();
+};
+
+const renderBodyHtml = (value: string | null) => {
+  const content = value?.trim();
+  if (!content) {
+    return "<p>No summary provided.</p>";
+  }
+
+  const paragraphs = content
+    .replace(/\r\n?/g, "\n")
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, "<br />")}</p>`);
+
+  if (paragraphs.length === 0) {
+    return "<p>No summary provided.</p>";
+  }
+
+  return paragraphs.join("\n      ");
+};
+
+const toArticleHtmlDocument = (post: {
   id: string;
   title: string;
   category: string;
@@ -30,21 +58,47 @@ const toAiHtmlDocument = (post: {
   createdAt: string;
 }) => {
   const title = post.title.replace(/\s+/g, " ").trim();
-  const content = post.body?.trim() ?? "";
-  const lines = ["<!doctype html>", "<html lang=\"en\">", "<head>", "  <meta charset=\"utf-8\" />"];
+  const createdAtLabel = formatPublishedLabel(post.createdAt);
+  const sourceUrl = post.url ? escapeHtml(post.url) : null;
+  const lines = [
+    "<!doctype html>",
+    "<html lang=\"en\">",
+    "<head>",
+    "  <meta charset=\"utf-8\" />",
+    "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />",
+  ];
 
   lines.push(`  <title>${escapeHtml(title)}</title>`);
-  lines.push(`  <meta name="ai:id" content="${escapeHtml(post.id)}" />`);
-  lines.push(`  <meta name="ai:title" content="${escapeHtml(title)}" />`);
-  lines.push(`  <meta name="ai:category" content="${escapeHtml(post.category)}" />`);
-  lines.push(`  <meta name="ai:author" content="${escapeHtml(post.author)}" />`);
-  lines.push(`  <meta name="ai:published-at" content="${escapeHtml(post.createdAt)}" />`);
-  lines.push(`  <meta name="ai:comment-count" content="${post.commentCount}" />`);
-  if (post.url) lines.push(`  <meta name="ai:source" content="${escapeHtml(post.url)}" />`);
-  lines.push("</head>", "<body>", "  <article>");
-  lines.push(`    <h1>${escapeHtml(title)}</h1>`);
-  lines.push(`    <div id="content">${escapeHtml(content)}</div>`);
-  lines.push("  </article>", "</body>", "</html>");
+  lines.push("</head>");
+  lines.push("<body>");
+  lines.push("  <main>");
+  lines.push("    <article>");
+  lines.push("      <header>");
+  lines.push(`        <h1>${escapeHtml(title)}</h1>`);
+  lines.push("        <p>");
+  lines.push(`          <strong>Category:</strong> ${escapeHtml(post.category)} |`);
+  lines.push(`          <strong>Author:</strong> ${escapeHtml(post.author)} |`);
+  lines.push(
+    `          <strong>Published:</strong> <time datetime="${escapeHtml(post.createdAt)}">${escapeHtml(createdAtLabel)}</time> |`,
+  );
+  lines.push(`          <strong>Comments:</strong> ${post.commentCount}`);
+  lines.push("        </p>");
+  if (sourceUrl) {
+    lines.push("        <p>");
+    lines.push(`          <strong>Source:</strong> <a href="${sourceUrl}">${sourceUrl}</a>`);
+    lines.push("        </p>");
+  }
+  lines.push("      </header>");
+  lines.push("      <section>");
+  lines.push(`      ${renderBodyHtml(post.body)}`);
+  lines.push("      </section>");
+  lines.push("      <footer>");
+  lines.push(`        <small>Post ID: ${escapeHtml(post.id)}</small>`);
+  lines.push("      </footer>");
+  lines.push("    </article>");
+  lines.push("  </main>");
+  lines.push("</body>");
+  lines.push("</html>");
 
   return lines.join("\n");
 };
@@ -70,8 +124,8 @@ export const GET: APIRoute = async ({ params, locals, request }) => {
     createdAt: normalizeTimestamp(post.createdAt),
   };
 
-  if (acceptsAiHtml(request)) {
-    return new Response(toAiHtmlDocument(serialized), {
+  if (acceptsArticleHtml(request)) {
+    return new Response(toArticleHtmlDocument(serialized), {
       status: 200,
       headers: {
         "content-type": "ai/html; charset=utf-8",
