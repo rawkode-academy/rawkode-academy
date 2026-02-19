@@ -152,6 +152,12 @@ export const router = createBrowserRouter([
       },
       { path: "new", loader: ({ request }) => redirectToRoot(request), hydrateFallbackElement: routeFallback },
       {
+        path: "news",
+        loader: feedLoader("news"),
+        element: <FeedPage type="news" />,
+        hydrateFallbackElement: routeFallback,
+      },
+      {
         path: "rka",
         loader: feedLoader("rka"),
         element: <FeedPage type="rka" />,
