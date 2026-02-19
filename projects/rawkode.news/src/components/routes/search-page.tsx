@@ -1,111 +1,71 @@
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink } from "lucide-react";
-import { useLocation, useSearchParams } from "react-router-dom";
-import { feedCategories, formatRelativeTime, type FeedCategory } from "@/components/app-data";
+import Fuse from "fuse.js";
+import { useSearchParams } from "react-router-dom";
+import { formatRelativeTime, type ApiPost } from "@/components/app-data";
 import { getCategoryTextClass } from "@/components/category-styles";
-import { useSession } from "@/components/session";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const SEARCH_DEBOUNCE_MS = 350;
 const MIN_QUERY_LENGTH = 2;
 const MAX_QUERY_LENGTH = 200;
-const SEARCH_RESULT_LIMIT = 20;
+const SEARCH_RESULT_LIMIT = 40;
 
-type ParsedSearchContent = {
-  id: string | null;
-  title: string | null;
-  author: string | null;
-  content: string | null;
-  source: string | null;
-  category: string | null;
-  publishedAt: string | null;
-  comments: number | null;
-};
-
-type SearchResultItem = {
-  id: string;
-  title: string;
-  url: string;
-  parsed: ParsedSearchContent | null;
-  source: string | null;
-};
-
-type SearchResponse = {
-  items: SearchResultItem[];
-  total: number;
-  nextCursor: string | null;
-};
-
-class SearchRequestError extends Error {
-  status: number;
-
-  constructor(status: number, message: string) {
-    super(message);
-    this.status = status;
-  }
-}
+type FuseSearchPost = ApiPost;
 
 const normalizeSearchQuery = (value: string) =>
   value.trim().slice(0, MAX_QUERY_LENGTH);
 
-const fetchSearchResults = async (query: string, signal?: AbortSignal) => {
-  const params = new URLSearchParams({
-    q: query,
-    limit: String(SEARCH_RESULT_LIMIT),
-  });
-  const response = await fetch(`/api/ai/search?${params.toString()}`, { signal });
+const fetchSearchPosts = async (signal?: AbortSignal) => {
+  const response = await fetch("/api/posts", { signal });
   if (!response.ok) {
-    const message = await response.text().catch(() => "");
-    throw new SearchRequestError(statusToErrorCode(response.status), message || "Search failed");
+    throw new Error("Failed to load search index");
   }
-  return (await response.json()) as SearchResponse;
-};
-
-const statusToErrorCode = (status: number) => {
-  if (status === 401) return 401;
-  if (status === 429) return 429;
-  if (status === 504) return 504;
-  return 502;
-};
-
-const errorMessage = (error: unknown) => {
-  if (!(error instanceof SearchRequestError)) {
-    return "Search is unavailable right now. Try again shortly.";
+  const data = (await response.json()) as unknown;
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid search index response");
   }
-
-  if (error.status === 401) {
-    return "Sign in is required to use search.";
-  }
-  if (error.status === 429) {
-    return "Search is temporarily rate-limited. Please retry in a moment.";
-  }
-  if (error.status === 504) {
-    return "Search timed out. Please try a shorter query.";
-  }
-
-  return "Search is unavailable right now. Try again shortly.";
+  return data as ApiPost[];
 };
 
 const formatCommentCount = (count: number) =>
   `${count} comment${count === 1 ? "" : "s"}`;
 
-const asFeedCategory = (value: string | null) => {
+const sourceDomain = (value: string | null) => {
   if (!value) {
     return null;
   }
 
-  return feedCategories.includes(value as FeedCategory)
-    ? (value as FeedCategory)
-    : null;
+  try {
+    return new URL(value).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+};
+
+const stripMarkdown = (value: string) =>
+  value
+    .replace(/!\[[^\]]*]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
+    .replace(/`{1,3}[^`]*`{1,3}/g, " ")
+    .replace(/[#>*_~|-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const searchSnippet = (post: FuseSearchPost) => {
+  const body = post.body?.trim();
+  if (body) {
+    const plain = stripMarkdown(body);
+    if (plain) {
+      return plain.slice(0, 220);
+    }
+  }
+
+  return sourceDomain(post.url);
 };
 
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
-  const sessionQuery = useSession();
-  const user = sessionQuery.data?.user ?? null;
   const queryFromUrl = normalizeSearchQuery(searchParams.get("q") ?? "");
   const [draftQuery, setDraftQuery] = React.useState(queryFromUrl);
   const [debouncedQuery, setDebouncedQuery] = React.useState(queryFromUrl);
@@ -139,27 +99,43 @@ export function SearchPage() {
   }, [debouncedQuery, searchParamsKey, setSearchParams]);
 
   const hasQuery = debouncedQuery.length > 0;
-  const canSearch = Boolean(user) && debouncedQuery.length >= MIN_QUERY_LENGTH;
+  const canSearch = debouncedQuery.length >= MIN_QUERY_LENGTH;
 
-  const searchResultsQuery = useQuery({
-    queryKey: ["ai-search", debouncedQuery],
-    queryFn: ({ signal }) => fetchSearchResults(debouncedQuery, signal),
-    enabled: canSearch,
-    staleTime: 30_000,
+  const postsQuery = useQuery({
+    queryKey: ["search-posts-index"],
+    queryFn: ({ signal }) => fetchSearchPosts(signal),
+    staleTime: 60_000,
     retry: false,
     refetchOnWindowFocus: false,
   });
 
-  const signInUrl = React.useMemo(() => {
-    const next = `${location.pathname}${location.search}${location.hash}`;
-    const returnTo = next.startsWith("/") ? next : "/search";
-    return `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
-  }, [location.pathname, location.search, location.hash]);
+  const fuseIndex = React.useMemo(() => {
+    if (!postsQuery.data || postsQuery.data.length === 0) {
+      return null;
+    }
 
-  const results = React.useMemo(
-    () => searchResultsQuery.data?.items ?? [],
-    [searchResultsQuery.data?.items],
-  );
+    return new Fuse<FuseSearchPost>(postsQuery.data, {
+      includeScore: true,
+      threshold: 0.4,
+      ignoreLocation: true,
+      minMatchCharLength: MIN_QUERY_LENGTH,
+      keys: [
+        { name: "title", weight: 0.5 },
+        { name: "body", weight: 0.3 },
+        { name: "author", weight: 0.12 },
+        { name: "url", weight: 0.08 },
+      ],
+    });
+  }, [postsQuery.data]);
+
+  const results = React.useMemo(() => {
+    if (!fuseIndex || !canSearch) {
+      return [] as FuseSearchPost[];
+    }
+    return fuseIndex
+      .search(debouncedQuery, { limit: SEARCH_RESULT_LIMIT })
+      .map((entry) => entry.item);
+  }, [canSearch, debouncedQuery, fuseIndex]);
 
   return (
     <main className="space-y-4 py-7">
@@ -168,7 +144,7 @@ export function SearchPage() {
           <p className="rkn-kicker">Search</p>
           <h1 className="rkn-page-title">Find posts across Rawkode News</h1>
           <p className="max-w-[70ch] text-sm text-muted-foreground">
-            Link-first search across indexed content from Rawkode News.
+            Client-side fuzzy search across published posts.
           </p>
         </header>
 
@@ -181,99 +157,77 @@ export function SearchPage() {
               id="search-posts-input"
               value={draftQuery}
               onChange={(event) => setDraftQuery(event.target.value)}
-              placeholder="Search by title, topic, or source"
-              disabled={!user}
+              placeholder="Search by title, topic, author, or source"
             />
           </div>
 
-          {sessionQuery.isLoading ? (
+          {postsQuery.isLoading ? (
             <p className="text-sm text-muted-foreground">
-              Checking sign-in status...
+              Loading search index...
             </p>
           ) : null}
 
-          {!sessionQuery.isLoading && !user ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-sm text-muted-foreground">
-                Sign in to use AI-powered search.
-              </p>
-              <Button size="sm" variant="secondary" asChild>
-                <a href={signInUrl}>Sign in</a>
-              </Button>
-            </div>
+          {postsQuery.isError ? (
+            <p className="text-sm text-muted-foreground">
+              Could not load search data. Try again shortly.
+            </p>
           ) : null}
         </div>
 
-        {!user ? null : !hasQuery ? (
+        {!hasQuery ? (
           <p className="text-sm text-muted-foreground">Type a query to start searching.</p>
         ) : null}
 
-        {user && hasQuery && !canSearch ? (
+        {hasQuery && !canSearch ? (
           <p className="text-sm text-muted-foreground">
             Type at least {MIN_QUERY_LENGTH} characters to search.
           </p>
         ) : null}
 
-        {user && canSearch ? (
+        {canSearch ? (
           <div className="rkn-panel overflow-hidden">
-            {searchResultsQuery.isLoading ? (
+            {postsQuery.isLoading ? (
               <p className="px-5 py-6 text-sm text-muted-foreground">Searching...</p>
             ) : null}
 
-            {searchResultsQuery.isError ? (
-              <p className="px-5 py-6 text-sm text-muted-foreground">
-                {errorMessage(searchResultsQuery.error)}
-              </p>
-            ) : null}
-
-            {!searchResultsQuery.isLoading && !searchResultsQuery.isError && results.length === 0 ? (
+            {!postsQuery.isLoading && !postsQuery.isError && results.length === 0 ? (
               <p className="px-5 py-6 text-sm text-muted-foreground">
                 No matches for “{debouncedQuery}”.
               </p>
             ) : null}
 
-            {results.map((result, index) => {
-              const parsed = result.parsed;
-              const category = asFeedCategory(parsed?.category ?? null);
-              const hasCategory = Boolean(category);
-              const hasPublishedAt = Boolean(parsed?.publishedAt);
-              const hasComments = parsed?.comments !== null && parsed?.comments !== undefined;
-              const hasMeta = hasCategory || hasPublishedAt || hasComments;
+            {results.map((post, index) => {
+              const hasSource = Boolean(post.url);
+              const source = sourceDomain(post.url);
+              const snippet = searchSnippet(post);
 
               return (
-                <React.Fragment key={result.id}>
+                <React.Fragment key={post.id}>
                   <article className="px-5 py-4">
                     <a
-                      href={result.url}
+                      href={`/item/${post.id}`}
                       className="group block space-y-1.5"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <h2 className="text-[0.96rem] leading-6 font-semibold text-foreground transition-colors group-hover:text-primary">
-                          {result.title}
-                        </h2>
-                        <ExternalLink className="mt-1 h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" />
-                      </div>
-                      {hasMeta ? (
-                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                          {hasCategory ? (
-                            <span className={`font-semibold uppercase ${getCategoryTextClass(category!)}`}>
-                              {category}
-                            </span>
-                          ) : null}
-                          {hasCategory && (hasPublishedAt || hasComments) ? (
+                      <h2 className="text-[0.96rem] leading-6 font-semibold text-foreground transition-colors group-hover:text-primary">
+                        {post.title}
+                      </h2>
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                        <span className={`font-semibold uppercase ${getCategoryTextClass(post.category)}`}>
+                          {post.category}
+                        </span>
+                        <span>•</span>
+                        <span>{formatRelativeTime(post.createdAt)}</span>
+                        <span>•</span>
+                        <span>{formatCommentCount(post.commentCount)}</span>
+                        {hasSource && source ? (
+                          <>
                             <span>•</span>
-                          ) : null}
-                          {hasPublishedAt ? (
-                            <span>{formatRelativeTime(parsed?.publishedAt ?? "")}</span>
-                          ) : null}
-                          {hasPublishedAt && hasComments ? <span>•</span> : null}
-                          {hasComments ? (
-                            <span>{formatCommentCount(parsed?.comments ?? 0)}</span>
-                          ) : null}
-                        </div>
-                      ) : null}
-                      {parsed?.content ? (
-                        <p className="text-sm text-muted-foreground">{parsed.content}</p>
+                            <span className="font-mono">{source}</span>
+                          </>
+                        ) : null}
+                      </div>
+                      {snippet ? (
+                        <p className="text-sm text-muted-foreground">{snippet}</p>
                       ) : null}
                     </a>
                   </article>
