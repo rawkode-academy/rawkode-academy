@@ -12,6 +12,11 @@ const feedMeta: Record<FeedCategory, { title: string; strapline: string; detail:
     strapline: "Latest signals from the community",
     detail: "Fresh links and ideas ordered by recency.",
   },
+  news: {
+    title: "News",
+    strapline: "General news from across the ecosystem",
+    detail: "Industry updates and relevant developments beyond project showcases.",
+  },
   rka: {
     title: "RKA",
     strapline: "Rawkode Academy submissions",
@@ -19,8 +24,8 @@ const feedMeta: Record<FeedCategory, { title: string; strapline: string; detail:
   },
   show: {
     title: "Show",
-    strapline: "What people are building",
-    detail: "Projects, releases, and technical demos worth a look.",
+    strapline: "Show what you're building",
+    detail: "Personal projects, launches, and demos shared directly by their builders.",
   },
   ask: {
     title: "Ask",

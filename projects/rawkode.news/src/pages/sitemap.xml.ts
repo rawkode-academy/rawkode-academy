@@ -31,7 +31,7 @@ export const GET: APIRoute = async ({ locals, site, url }) => {
 
   const latestPostDate = entries.length > 0 ? formatLastMod(entries[0].createdAt) : undefined;
 
-  const staticPaths = ["/", "/new", "/rka", "/show", "/ask", "/search", "/rss.xml"];
+  const staticPaths = ["/", "/new", "/news", "/rka", "/show", "/ask", "/search", "/rss.xml"];
 
   const staticUrls = staticPaths.map((path) => ({
     loc: new URL(path, baseUrl).toString(),

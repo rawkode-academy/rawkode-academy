@@ -11,6 +11,7 @@ type NavItem = { label: string; to: string };
 const navItems: NavItem[] = [
   { label: "New", to: "/" },
   { label: "RKA", to: "/rka" },
+  { label: "News", to: "/news" },
   { label: "Show", to: "/show" },
   { label: "Ask", to: "/ask" },
   { label: "Search", to: "/search" },

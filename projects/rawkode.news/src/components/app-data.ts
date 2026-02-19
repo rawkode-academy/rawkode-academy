@@ -1,5 +1,5 @@
-export const feedCategories = ["new", "rka", "show", "ask"] as const;
-export const postCategories = ["rka", "show", "ask"] as const;
+export const feedCategories = ["new", "rka", "news", "show", "ask"] as const;
+export const postCategories = ["rka", "news", "show", "ask"] as const;
 
 export type FeedCategory = (typeof feedCategories)[number];
 export type PostCategory = (typeof postCategories)[number];
