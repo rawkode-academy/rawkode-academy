@@ -8,6 +8,7 @@ const MAX_QUERY_LENGTH = 200;
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 20;
 const DEFAULT_AI_SEARCH_INSTANCE = "rawkode-news";
+const VALID_CATEGORIES = new Set(["new", "rka", "show", "ask"]);
 
 type SearchResultItem = {
   id: string;
@@ -24,9 +25,14 @@ type SearchResult = {
 };
 
 type ParsedSearchContent = {
+  id: string | null;
   title: string | null;
+  author: string | null;
   content: string | null;
   source: string | null;
+  category: string | null;
+  publishedAt: string | null;
+  comments: number | null;
 };
 
 const parseLimit = (value: string | null) => {
@@ -78,6 +84,47 @@ const normalizeUrl = (value: unknown) => {
   }
 };
 
+const parseDate = (value: unknown) => {
+  const candidate = asString(value);
+  if (!candidate) {
+    return null;
+  }
+
+  const timestamp = Date.parse(candidate);
+  if (!Number.isFinite(timestamp)) {
+    return null;
+  }
+
+  return new Date(timestamp).toISOString();
+};
+
+const parseNumber = (value: unknown) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.trunc(value);
+  }
+
+  if (typeof value === "string") {
+    const match = value.match(/-?\d+/);
+    if (!match) {
+      return null;
+    }
+    const parsed = Number(match[0]);
+    return Number.isFinite(parsed) ? Math.trunc(parsed) : null;
+  }
+
+  return null;
+};
+
+const parseCategory = (value: unknown) => {
+  const candidate = asString(value);
+  if (!candidate) {
+    return null;
+  }
+
+  const normalized = candidate.toLowerCase();
+  return VALID_CATEGORIES.has(normalized) ? normalized : null;
+};
+
 const hostnameFromUrl = (value: string) => {
   try {
     const parsed = new URL(value);
@@ -106,34 +153,86 @@ const contentSnippet = (value: AutoRagSearchDataItem) => {
   }
 
   return parts
-    .join("\n\n")
+    .join("")
     .replace(/\r\n?/g, "\n")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
     .trim();
 };
 
-const parseJsonCandidate = (value: string) => {
-  try {
-    return asRecord(JSON.parse(value));
-  } catch {
+const FRONTMATTER_START = "---\n";
+const FRONTMATTER_END = "\n---";
+
+const parseFrontmatterValue = (rawValue: string) => {
+  const value = rawValue.trim();
+  if (!value) {
     return null;
   }
+
+  if (
+    (value.startsWith("\"") && value.endsWith("\"")) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    if (value.startsWith("'")) {
+      return value.slice(1, -1);
+    }
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value.slice(1, -1);
+    }
+  }
+
+  if (/^-?\d+(?:\.\d+)?$/.test(value)) {
+    return Number(value);
+  }
+
+  if (value === "true") return true;
+  if (value === "false") return false;
+  if (value === "null") return null;
+
+  return value;
 };
 
-const extractJsonObject = (value: string) => {
-  const direct = parseJsonCandidate(value);
-  if (direct) {
-    return direct;
-  }
-
-  const start = value.indexOf("{");
-  const end = value.lastIndexOf("}");
-  if (start < 0 || end <= start) {
+const parseFrontmatterMarkdown = (value: string) => {
+  const normalized = value.replace(/\r\n?/g, "\n").trim();
+  if (!normalized.startsWith(FRONTMATTER_START)) {
     return null;
   }
 
-  return parseJsonCandidate(value.slice(start, end + 1));
+  const endIndex = normalized.indexOf(FRONTMATTER_END, FRONTMATTER_START.length);
+  if (endIndex < 0) {
+    return null;
+  }
+
+  const metaSection = normalized.slice(FRONTMATTER_START.length, endIndex);
+  const bodySection = normalized
+    .slice(endIndex + FRONTMATTER_END.length)
+    .replace(/^\n/, "");
+
+  const metadata: Record<string, unknown> = {};
+  for (const line of metaSection.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) {
+      continue;
+    }
+
+    const separatorIndex = trimmed.indexOf(":");
+    if (separatorIndex < 0) {
+      return null;
+    }
+
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const rawValue = trimmed.slice(separatorIndex + 1);
+    if (!key) {
+      return null;
+    }
+
+    metadata[key] = parseFrontmatterValue(rawValue);
+  }
+
+  return {
+    metadata,
+    body: bodySection.trim(),
+  };
 };
 
 const parseSearchContent = (value: string | null): ParsedSearchContent | null => {
@@ -141,35 +240,31 @@ const parseSearchContent = (value: string | null): ParsedSearchContent | null =>
     return null;
   }
 
-  const normalized = value
-    .replace(/\r\n?/g, "\n")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-  if (!normalized) {
+  const parsedDocument = parseFrontmatterMarkdown(value);
+  if (!parsedDocument) {
     return null;
   }
 
-  const parsedObject = extractJsonObject(normalized);
-  if (!parsedObject) {
-    return {
-      title: null,
-      content: normalized,
-      source: null,
-    };
+  const title = asString(parsedDocument.metadata.title);
+  const id = asString(parsedDocument.metadata.id);
+  const author = asString(parsedDocument.metadata.author);
+  const category = parseCategory(parsedDocument.metadata.category);
+  const publishedAt = parseDate(parsedDocument.metadata.publishedAt);
+  const comments = parseNumber(parsedDocument.metadata.commentCount);
+
+  if (!id || !title || !author || !category || !publishedAt || comments === null) {
+    return null;
   }
 
   return {
-    title: asString(parsedObject.title) ?? null,
-    content:
-      asString(parsedObject.body) ??
-      asString(parsedObject.content) ??
-      asString(parsedObject.description) ??
-      null,
-    source:
-      normalizeUrl(parsedObject.url) ??
-      normalizeUrl(parsedObject.source) ??
-      normalizeUrl(parsedObject.source_url),
+    id,
+    title,
+    author,
+    content: asString(parsedDocument.body),
+    source: normalizeUrl(parsedDocument.metadata.source),
+    category,
+    publishedAt,
+    comments,
   };
 };
 
