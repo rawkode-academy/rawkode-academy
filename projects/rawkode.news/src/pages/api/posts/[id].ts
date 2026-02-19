@@ -3,7 +3,6 @@ import { eq } from "drizzle-orm";
 
 import { getDb, type Env } from "../../../db";
 import { posts } from "../../../db/schema";
-import { acceptsMarkdown } from "@/lib/content-negotiation";
 import { parseEntityId } from "@/lib/ids";
 
 const normalizeTimestamp = (value: Date | number) => {
@@ -11,39 +10,7 @@ const normalizeTimestamp = (value: Date | number) => {
   return date.toISOString();
 };
 
-const toMarkdown = (post: {
-  id: string;
-  title: string;
-  category: string;
-  url: string | null;
-  body: string | null;
-  author: string;
-  commentCount: number;
-  createdAt: string;
-}) => {
-  const title = post.title.replace(/\s+/g, " ").trim();
-  const lines = [
-    `# ${title}`,
-    "",
-    `- ID: ${post.id}`,
-    `- Category: ${post.category}`,
-    `- Author: ${post.author}`,
-    `- Published: ${post.createdAt}`,
-    `- Comments: ${post.commentCount}`,
-  ];
-
-  if (post.url) {
-    lines.push(`- Source: ${post.url}`);
-  }
-
-  if (post.body?.trim()) {
-    lines.push("", "## Content", "", post.body.trim());
-  }
-
-  return lines.join("\n");
-};
-
-export const GET: APIRoute = async ({ params, locals, request }) => {
+export const GET: APIRoute = async ({ params, locals }) => {
   const env = locals.runtime.env as Env;
   const db = getDb(env);
   const id = parseEntityId(params.id);
@@ -64,19 +31,10 @@ export const GET: APIRoute = async ({ params, locals, request }) => {
     createdAt: normalizeTimestamp(post.createdAt),
   };
 
-  if (acceptsMarkdown(request)) {
-    return new Response(toMarkdown(serialized), {
-      status: 200,
-      headers: {
-        "content-type": "text/markdown; charset=utf-8",
-        vary: "Accept",
-      },
-    });
-  }
-
-  return Response.json(serialized, {
+  return new Response(JSON.stringify(serialized), {
     status: 200,
     headers: {
+      "content-type": "application/json; charset=utf-8",
       vary: "Accept",
     },
   });
