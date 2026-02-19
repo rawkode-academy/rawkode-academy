@@ -97,12 +97,9 @@ if (feedCategory) {
 
 	if (post) {
 		const bodyText = post.body ? stripMarkdownToText(post.body) : "";
-		const fallbackDescription = `Discussion on "${post.title}" by ${post.author} in ${post.category}.`;
 		routeMeta = {
 			title: `${post.title} | Rawkode News`,
-			description: bodyText
-				? truncateDescription(bodyText, 180)
-				: fallbackDescription,
+			description: bodyText ? truncateDescription(bodyText, 180) : "",
 			canonicalPath: `/item/${post.id}`,
 			robots: "index, follow",
 			ogType: "article",
