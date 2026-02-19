@@ -1,6 +1,10 @@
 import type { APIRoute, AstroCookies } from "astro";
+import { inArray } from "drizzle-orm";
 
+import { getDb } from "@/db";
+import { posts } from "@/db/schema";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
+import { parseEntityId } from "@/lib/ids";
 import type { TypedEnv } from "@/types/service-bindings";
 
 const MIN_QUERY_LENGTH = 2;
@@ -9,6 +13,7 @@ const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 20;
 const DEFAULT_AI_SEARCH_INSTANCE = "rawkode-news";
 const VALID_CATEGORIES = new Set(["new", "rka", "show", "ask"]);
+const ITEM_PATH_PATTERN = /^\/item\/([^/]+)\/?$/;
 
 type SearchResultItem = {
   id: string;
@@ -35,6 +40,17 @@ type ParsedSearchContent = {
   comments: number | null;
 };
 
+type SearchPostRow = {
+  id: string;
+  title: string;
+  category: string;
+  url: string | null;
+  body: string | null;
+  author: string;
+  commentCount: number;
+  createdAt: string;
+};
+
 const parseLimit = (value: string | null) => {
   if (!value) {
     return DEFAULT_LIMIT;
@@ -51,6 +67,22 @@ const parseLimit = (value: string | null) => {
 type AutoRagSearchDataItem = Awaited<
   ReturnType<ReturnType<Ai["autorag"]>["search"]>
 >["data"][number];
+
+const normalizeTimestamp = (value: Date | number) => {
+  const date = value instanceof Date ? value : new Date(value);
+  return date.toISOString();
+};
+
+const normalizePostRow = (value: typeof posts.$inferSelect): SearchPostRow => ({
+  id: value.id,
+  title: value.title,
+  category: value.category,
+  url: value.url,
+  body: value.body,
+  author: value.author,
+  commentCount: value.commentCount,
+  createdAt: normalizeTimestamp(value.createdAt),
+});
 
 const asRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -82,37 +114,6 @@ const normalizeUrl = (value: unknown) => {
   } catch {
     return null;
   }
-};
-
-const parseDate = (value: unknown) => {
-  const candidate = asString(value);
-  if (!candidate) {
-    return null;
-  }
-
-  const timestamp = Date.parse(candidate);
-  if (!Number.isFinite(timestamp)) {
-    return null;
-  }
-
-  return new Date(timestamp).toISOString();
-};
-
-const parseNumber = (value: unknown) => {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return Math.trunc(value);
-  }
-
-  if (typeof value === "string") {
-    const match = value.match(/-?\d+/);
-    if (!match) {
-      return null;
-    }
-    const parsed = Number(match[0]);
-    return Number.isFinite(parsed) ? Math.trunc(parsed) : null;
-  }
-
-  return null;
 };
 
 const parseCategory = (value: unknown) => {
@@ -153,114 +154,113 @@ const contentSnippet = (value: AutoRagSearchDataItem) => {
   }
 
   return parts
-    .join("")
+    .join("\n")
     .replace(/\r\n?/g, "\n")
     .trim();
 };
 
-const decodeHtml = (value: string) =>
-  value
-    .replace(/&quot;/g, "\"")
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&");
-
-const getHtmlAttribute = (tag: string, attribute: string) => {
-  const pattern = new RegExp(
-    `${attribute}\\s*=\\s*(\"([^\"]*)\"|'([^']*)')`,
-    "i"
+const resultUrl = (value: AutoRagSearchDataItem) => {
+  const attributes = asRecord(value.attributes);
+  return (
+    normalizeUrl(value.filename) ??
+    normalizeUrl(attributes?.url) ??
+    normalizeUrl(attributes?.source_url)
   );
-  const match = tag.match(pattern);
-  if (!match) {
-    return null;
-  }
-  return decodeHtml(match[2] ?? match[3] ?? "");
 };
 
-const parseAiHtmlDocument = (value: string) => {
-  const normalized = value.replace(/\r\n?/g, "\n").trim();
-  if (!/^<!doctype html>/i.test(normalized) || !/<html[\s>]/i.test(normalized)) {
-    return null;
-  }
-
-  const metadata = new Map<string, string>();
-  const metaTags = normalized.match(/<meta\b[^>]*>/gi) ?? [];
-  for (const tag of metaTags) {
-    const name = getHtmlAttribute(tag, "name");
-    const content = getHtmlAttribute(tag, "content");
-    if (!name || content === null) {
-      continue;
+const itemIdFromUrl = (value: string) => {
+  try {
+    const parsed = new URL(value);
+    const match = parsed.pathname.match(ITEM_PATH_PATTERN);
+    if (!match) {
+      return null;
     }
-    metadata.set(name.toLowerCase(), content);
-  }
 
-  const contentMatch = normalized.match(
-    /<div\b[^>]*id=["']content["'][^>]*>([\s\S]*?)<\/div>/i
-  );
-  if (!contentMatch) {
+    const decoded = decodeURIComponent(match[1]);
+    return parseEntityId(decoded);
+  } catch {
     return null;
   }
-
-  const body = decodeHtml(contentMatch[1] ?? "").trim();
-  return { metadata, body };
 };
 
-const parseSearchContent = (value: string | null): ParsedSearchContent | null => {
-  if (!value) {
-    return null;
+const loadPostsById = async (env: TypedEnv, ids: string[]) => {
+  const uniqueIds = Array.from(new Set(ids));
+  if (uniqueIds.length === 0) {
+    return new Map<string, SearchPostRow>();
   }
 
-  const parsedDocument = parseAiHtmlDocument(value);
-  if (!parsedDocument) {
-    return null;
+  const db = getDb(env);
+  const records = await db
+    .select()
+    .from(posts)
+    .where(inArray(posts.id, uniqueIds));
+
+  const postById = new Map<string, SearchPostRow>();
+  for (const record of records) {
+    const normalized = normalizePostRow(record);
+    postById.set(normalized.id, normalized);
   }
 
-  const title = asString(parsedDocument.metadata.get("ai:title"));
-  const id = asString(parsedDocument.metadata.get("ai:id"));
-  const author = asString(parsedDocument.metadata.get("ai:author"));
-  const category = parseCategory(parsedDocument.metadata.get("ai:category"));
-  const publishedAt = parseDate(parsedDocument.metadata.get("ai:published-at"));
-  const comments = parseNumber(parsedDocument.metadata.get("ai:comment-count"));
+  return postById;
+};
 
-  if (!id || !title || !author || !category || !publishedAt || comments === null) {
+const fallbackParsedContent = (snippet: string | null): ParsedSearchContent | null => {
+  if (!snippet) {
     return null;
   }
 
   return {
-    id,
-    title,
-    author,
-    content: asString(parsedDocument.body),
-    source: normalizeUrl(parsedDocument.metadata.get("ai:source")),
-    category,
-    publishedAt,
-    comments,
+    id: null,
+    title: null,
+    author: null,
+    content: snippet,
+    source: null,
+    category: null,
+    publishedAt: null,
+    comments: null,
   };
 };
+
+const parsedFromPost = (
+  post: SearchPostRow,
+  snippet: string | null,
+): ParsedSearchContent => ({
+  id: post.id,
+  title: post.title,
+  author: post.author,
+  content: snippet ?? asString(post.body),
+  source: normalizeUrl(post.url),
+  category: parseCategory(post.category),
+  publishedAt: post.createdAt,
+  comments: post.commentCount,
+});
 
 const normalizeResult = (
   raw: AutoRagSearchDataItem,
   index: number,
+  postById: Map<string, SearchPostRow>,
 ): SearchResultItem | null => {
   const attributes = asRecord(raw.attributes);
-  const url =
-    normalizeUrl(raw.filename) ??
-    normalizeUrl(attributes?.url) ??
-    normalizeUrl(attributes?.source_url);
+  const url = resultUrl(raw);
 
   if (!url) {
     return null;
   }
 
   const fallbackHost = hostnameFromUrl(url);
-  const plainContent = contentSnippet(raw);
-  const parsed = parseSearchContent(plainContent);
+  const snippet = contentSnippet(raw);
+  const postId = itemIdFromUrl(url);
+  const matchedPost = postId ? postById.get(postId) ?? null : null;
+  const parsed = matchedPost
+    ? parsedFromPost(matchedPost, snippet)
+    : fallbackParsedContent(snippet);
+
   const parsedSourceHost = parsed?.source ? hostnameFromUrl(parsed.source) : null;
+
   const title =
+    matchedPost?.title ??
     asString(attributes?.title) ??
     asString(attributes?.name) ??
-    parsed?.title ??
     asString(raw.filename) ??
     fallbackHost ??
     "Untitled result";
@@ -348,8 +348,16 @@ export const GET: APIRoute = async ({ request, locals, cookies }) => {
   try {
     const result = await env.AI.autorag(aiSearchInstance).search(aiSearchRequest);
 
+    const candidatePostIds = result.data
+      .map((entry) => resultUrl(entry))
+      .filter((entry): entry is string => Boolean(entry))
+      .map((entry) => itemIdFromUrl(entry))
+      .filter((entry): entry is string => Boolean(entry));
+
+    const postById = await loadPostsById(env, candidatePostIds);
+
     const items = result.data
-      .map((entry, index) => normalizeResult(entry, index))
+      .map((entry, index) => normalizeResult(entry, index, postById))
       .filter((entry): entry is SearchResultItem => Boolean(entry));
 
     const responseBody: SearchResult = {
