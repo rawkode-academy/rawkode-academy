@@ -13,7 +13,7 @@ const segments = path ? path.split("/") : [];
 const [segment, subSegment] = segments;
 
 const asFeedCategory = (value: string | undefined): FeedCategory | null => {
-	if (!value || !["new", "rka", "show", "ask"].includes(value)) {
+	if (!value || !["new", "rka", "news", "show", "ask"].includes(value)) {
 		return null;
 	}
 
@@ -27,13 +27,17 @@ const feedMeta: Record<FeedCategory, { title: string; description: string }> = {
 		title: "New",
 		description: "Latest signals from the Rawkode News community.",
 	},
+	news: {
+		title: "News",
+		description: "General news and updates from across the broader ecosystem.",
+	},
 	rka: {
 		title: "RKA",
 		description: "Deep engineering topics curated by the Rawkode Academy community.",
 	},
 	show: {
 		title: "Show",
-		description: "Projects, releases, and technical demos shared by the community.",
+		description: "Personal projects, launches, and demos shared directly by their builders.",
 	},
 	ask: {
 		title: "Ask",

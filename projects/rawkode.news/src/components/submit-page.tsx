@@ -10,13 +10,17 @@ import { useSession } from "@/components/session";
 import { cn } from "@/lib/utils";
 
 const categoryCopy: Record<PostCategory, { title: string; detail: string }> = {
+  news: {
+    title: "News",
+    detail: "Relevant news and updates from across the broader ecosystem.",
+  },
   rka: {
     title: "RKA",
     detail: "In-depth engineering content connected to Rawkode Academy topics.",
   },
   show: {
     title: "Show",
-    detail: "Projects, releases, and demos with practical technical value.",
+    detail: "Share something of your own: a project, release, or demo you want people to see.",
   },
   ask: {
     title: "Ask",
@@ -28,7 +32,7 @@ export default function SubmitPage() {
   const [title, setTitle] = React.useState("");
   const [url, setUrl] = React.useState("");
   const [notes, setNotes] = React.useState("");
-  const [category, setCategory] = React.useState<PostCategory>("rka");
+  const [category, setCategory] = React.useState<PostCategory>("news");
   const location = useLocation();
   const navigation = useNavigation();
   const actionData = useActionData() as { error?: string } | undefined;
@@ -53,7 +57,7 @@ export default function SubmitPage() {
 
   React.useEffect(() => {
     if (!allowedCategories.includes(category)) {
-      setCategory(allowedCategories[0] ?? "show");
+      setCategory(allowedCategories[0] ?? "news");
     }
   }, [allowedCategories, category]);
 
@@ -114,7 +118,7 @@ export default function SubmitPage() {
 
             <fieldset className="space-y-2">
               <legend className="text-sm font-semibold text-foreground">Category</legend>
-              <div className="grid gap-2 sm:grid-cols-3">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {allowedCategories.map((item) => {
                   const inputId = `category-${item}`;
                   const isSelected = category === item;

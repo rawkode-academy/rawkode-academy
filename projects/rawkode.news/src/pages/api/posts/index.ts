@@ -8,7 +8,7 @@ import { createEntityId } from "@/lib/ids";
 import { getPermissions } from "@/lib/permissions";
 import type { TypedEnv } from "@/types/service-bindings";
 
-const categories = new Set(["rka", "show", "ask"]);
+const categories = new Set(["rka", "news", "show", "ask"]);
 type CreatePostPayload = {
   title?: unknown;
   category?: unknown;

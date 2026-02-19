@@ -8,6 +8,13 @@ export const categoryTone = {
     hover: "hover:border-slate-300 hover:bg-slate-100/80",
     ring: "ring-primary/35",
   },
+  news: {
+    badge: "border-cyan-200 bg-cyan-100/70 text-cyan-800",
+    text: "text-cyan-800",
+    active: "border-primary/35 bg-primary/10 text-foreground",
+    hover: "hover:border-cyan-300 hover:bg-cyan-100/70",
+    ring: "ring-primary/35",
+  },
   rka: {
     badge: "border-emerald-200 bg-emerald-100/70 text-emerald-800",
     text: "text-emerald-800",
