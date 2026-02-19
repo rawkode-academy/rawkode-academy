@@ -2,8 +2,8 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import Fuse from "fuse.js";
 import { useSearchParams } from "react-router-dom";
-import { formatRelativeTime, type ApiPost } from "@/components/app-data";
-import { getCategoryTextClass } from "@/components/category-styles";
+import { type ApiPost } from "@/components/app-data";
+import { PostRow } from "@/components/post-row";
 import { Input } from "@/components/ui/input";
 
 const SEARCH_DEBOUNCE_MS = 350;
@@ -27,42 +27,6 @@ const fetchSearchPosts = async (signal?: AbortSignal) => {
     throw new Error("Invalid search index response");
   }
   return data as ApiPost[];
-};
-
-const formatCommentCount = (count: number) =>
-  `${count} comment${count === 1 ? "" : "s"}`;
-
-const sourceDomain = (value: string | null) => {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    return new URL(value).hostname.replace(/^www\./, "");
-  } catch {
-    return null;
-  }
-};
-
-const stripMarkdown = (value: string) =>
-  value
-    .replace(/!\[[^\]]*]\([^)]*\)/g, " ")
-    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
-    .replace(/`{1,3}[^`]*`{1,3}/g, " ")
-    .replace(/[#>*_~|-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const searchSnippet = (post: FuseSearchPost) => {
-  const body = post.body?.trim();
-  if (body) {
-    const plain = stripMarkdown(body);
-    if (plain) {
-      return plain.slice(0, 220);
-    }
-  }
-
-  return sourceDomain(post.url);
 };
 
 const includesQuery = (value: string | null | undefined, query: string) => {
@@ -242,45 +206,12 @@ export function SearchPage() {
               </p>
             ) : null}
 
-            {results.map((post, index) => {
-              const hasSource = Boolean(post.url);
-              const source = sourceDomain(post.url);
-              const snippet = searchSnippet(post);
-
-              return (
-                <React.Fragment key={post.id}>
-                  <article className="px-5 py-4">
-                    <a
-                      href={`/item/${post.id}`}
-                      className="group block space-y-1.5"
-                    >
-                      <h2 className="text-[0.96rem] leading-6 font-semibold text-foreground transition-colors group-hover:text-primary">
-                        {post.title}
-                      </h2>
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                        <span className={`font-semibold uppercase ${getCategoryTextClass(post.category)}`}>
-                          {post.category}
-                        </span>
-                        <span>•</span>
-                        <span>{formatRelativeTime(post.createdAt)}</span>
-                        <span>•</span>
-                        <span>{formatCommentCount(post.commentCount)}</span>
-                        {hasSource && source ? (
-                          <>
-                            <span>•</span>
-                            <span className="font-mono">{source}</span>
-                          </>
-                        ) : null}
-                      </div>
-                      {snippet ? (
-                        <p className="text-sm text-muted-foreground">{snippet}</p>
-                      ) : null}
-                    </a>
-                  </article>
-                  {index < results.length - 1 ? <hr className="border-border/75" /> : null}
-                </React.Fragment>
-              );
-            })}
+            {results.map((post, index) => (
+              <React.Fragment key={post.id}>
+                <PostRow post={post} showCategoryBadge />
+                {index < results.length - 1 ? <hr className="border-border/75" /> : null}
+              </React.Fragment>
+            ))}
           </div>
         ) : null}
       </section>
