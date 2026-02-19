@@ -6,7 +6,10 @@ const parseQuality = (value: string) => {
   return Math.max(0, Math.min(1, parsed));
 };
 
-export const acceptsMarkdown = (request: Request) => {
+const isJsonMediaType = (mediaType: string) =>
+  mediaType === "application/json" || mediaType.endsWith("+json");
+
+export const acceptsJson = (request: Request) => {
   const accept = request.headers.get("accept");
   if (!accept) {
     return false;
@@ -15,7 +18,7 @@ export const acceptsMarkdown = (request: Request) => {
   for (const rawPart of accept.split(",")) {
     const [mediaTypePart, ...params] = rawPart.split(";");
     const mediaType = mediaTypePart.trim().toLowerCase();
-    if (mediaType !== "text/markdown") {
+    if (!isJsonMediaType(mediaType)) {
       continue;
     }
 

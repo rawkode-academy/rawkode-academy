@@ -13,7 +13,7 @@ type SearchResultItem = {
   id: string;
   title: string;
   url: string;
-  snippet: string | null;
+  parsed: ParsedSearchContent | null;
   source: string | null;
 };
 
@@ -21,6 +21,12 @@ type SearchResult = {
   items: SearchResultItem[];
   total: number;
   nextCursor: string | null;
+};
+
+type ParsedSearchContent = {
+  title: string | null;
+  content: string | null;
+  source: string | null;
 };
 
 const parseLimit = (value: string | null) => {
@@ -99,24 +105,72 @@ const contentSnippet = (value: AutoRagSearchDataItem) => {
     return null;
   }
 
-  return parts.join(" ").replace(/\s+/g, " ").trim();
+  return parts
+    .join("\n\n")
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 };
 
-const excerpt = (value: string | null, maxLength = 280) => {
+const parseJsonCandidate = (value: string) => {
+  try {
+    return asRecord(JSON.parse(value));
+  } catch {
+    return null;
+  }
+};
+
+const extractJsonObject = (value: string) => {
+  const direct = parseJsonCandidate(value);
+  if (direct) {
+    return direct;
+  }
+
+  const start = value.indexOf("{");
+  const end = value.lastIndexOf("}");
+  if (start < 0 || end <= start) {
+    return null;
+  }
+
+  return parseJsonCandidate(value.slice(start, end + 1));
+};
+
+const parseSearchContent = (value: string | null): ParsedSearchContent | null => {
   if (!value) {
     return null;
   }
 
-  const normalized = value.replace(/\s+/g, " ").trim();
+  const normalized = value
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
   if (!normalized) {
     return null;
   }
 
-  if (normalized.length <= maxLength) {
-    return normalized;
+  const parsedObject = extractJsonObject(normalized);
+  if (!parsedObject) {
+    return {
+      title: null,
+      content: normalized,
+      source: null,
+    };
   }
 
-  return `${normalized.slice(0, maxLength - 1).trim()}…`;
+  return {
+    title: asString(parsedObject.title) ?? null,
+    content:
+      asString(parsedObject.body) ??
+      asString(parsedObject.content) ??
+      asString(parsedObject.description) ??
+      null,
+    source:
+      normalizeUrl(parsedObject.url) ??
+      normalizeUrl(parsedObject.source) ??
+      normalizeUrl(parsedObject.source_url),
+  };
 };
 
 const normalizeResult = (
@@ -134,26 +188,29 @@ const normalizeResult = (
   }
 
   const fallbackHost = hostnameFromUrl(url);
+  const plainContent = contentSnippet(raw);
+  const parsed = parseSearchContent(plainContent);
+  const parsedSourceHost = parsed?.source ? hostnameFromUrl(parsed.source) : null;
   const title =
     asString(attributes?.title) ??
     asString(attributes?.name) ??
+    parsed?.title ??
     asString(raw.filename) ??
     fallbackHost ??
     "Untitled result";
-
-  const snippet = excerpt(contentSnippet(raw));
 
   const source =
     asString(attributes?.source) ??
     asString(attributes?.site) ??
     asString(attributes?.host) ??
+    parsedSourceHost ??
     fallbackHost;
 
   return {
     id: `${url}#${index}`,
     title,
     url,
-    snippet,
+    parsed,
     source,
   };
 };
@@ -217,22 +274,25 @@ export const GET: APIRoute = async ({ request, locals, cookies }) => {
   const limit = parseLimit(url.searchParams.get("limit"));
   const aiSearchInstance =
     env.AI_SEARCH_INSTANCE?.trim() || DEFAULT_AI_SEARCH_INSTANCE;
+  const aiSearchRequest = {
+    query,
+    max_num_results: limit,
+  };
 
   try {
-    const result = await env.AI.autorag(aiSearchInstance).search({
-      query,
-      max_num_results: limit,
-    });
+    const result = await env.AI.autorag(aiSearchInstance).search(aiSearchRequest);
 
     const items = result.data
       .map((entry, index) => normalizeResult(entry, index))
       .filter((entry): entry is SearchResultItem => Boolean(entry));
 
-    return json({
+    const responseBody: SearchResult = {
       items,
       total: result.data.length,
       nextCursor: result.next_page,
-    });
+    };
+
+    return json(responseBody);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const lowered = message.toLowerCase();
@@ -246,7 +306,6 @@ export const GET: APIRoute = async ({ request, locals, cookies }) => {
       return new Response("Search provider timed out", { status: 504 });
     }
 
-    console.error("[ai-search] request failed", error);
     return new Response("Search provider unavailable", { status: 502 });
   }
 };
