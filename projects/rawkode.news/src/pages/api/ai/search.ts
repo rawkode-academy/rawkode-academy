@@ -158,81 +158,52 @@ const contentSnippet = (value: AutoRagSearchDataItem) => {
     .trim();
 };
 
-const FRONTMATTER_START = "---\n";
-const FRONTMATTER_END = "\n---";
+const decodeHtml = (value: string) =>
+  value
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
 
-const parseFrontmatterValue = (rawValue: string) => {
-  const value = rawValue.trim();
-  if (!value) {
+const getHtmlAttribute = (tag: string, attribute: string) => {
+  const pattern = new RegExp(
+    `${attribute}\\s*=\\s*(\"([^\"]*)\"|'([^']*)')`,
+    "i"
+  );
+  const match = tag.match(pattern);
+  if (!match) {
     return null;
   }
-
-  if (
-    (value.startsWith("\"") && value.endsWith("\"")) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
-    if (value.startsWith("'")) {
-      return value.slice(1, -1);
-    }
-    try {
-      return JSON.parse(value);
-    } catch {
-      return value.slice(1, -1);
-    }
-  }
-
-  if (/^-?\d+(?:\.\d+)?$/.test(value)) {
-    return Number(value);
-  }
-
-  if (value === "true") return true;
-  if (value === "false") return false;
-  if (value === "null") return null;
-
-  return value;
+  return decodeHtml(match[2] ?? match[3] ?? "");
 };
 
-const parseFrontmatterMarkdown = (value: string) => {
+const parseAiHtmlDocument = (value: string) => {
   const normalized = value.replace(/\r\n?/g, "\n").trim();
-  if (!normalized.startsWith(FRONTMATTER_START)) {
+  if (!/^<!doctype html>/i.test(normalized) || !/<html[\s>]/i.test(normalized)) {
     return null;
   }
 
-  const endIndex = normalized.indexOf(FRONTMATTER_END, FRONTMATTER_START.length);
-  if (endIndex < 0) {
-    return null;
-  }
-
-  const metaSection = normalized.slice(FRONTMATTER_START.length, endIndex);
-  const bodySection = normalized
-    .slice(endIndex + FRONTMATTER_END.length)
-    .replace(/^\n/, "");
-
-  const metadata: Record<string, unknown> = {};
-  for (const line of metaSection.split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) {
+  const metadata = new Map<string, string>();
+  const metaTags = normalized.match(/<meta\b[^>]*>/gi) ?? [];
+  for (const tag of metaTags) {
+    const name = getHtmlAttribute(tag, "name");
+    const content = getHtmlAttribute(tag, "content");
+    if (!name || content === null) {
       continue;
     }
-
-    const separatorIndex = trimmed.indexOf(":");
-    if (separatorIndex < 0) {
-      return null;
-    }
-
-    const key = trimmed.slice(0, separatorIndex).trim();
-    const rawValue = trimmed.slice(separatorIndex + 1);
-    if (!key) {
-      return null;
-    }
-
-    metadata[key] = parseFrontmatterValue(rawValue);
+    metadata.set(name.toLowerCase(), content);
   }
 
-  return {
-    metadata,
-    body: bodySection.trim(),
-  };
+  const contentMatch = normalized.match(
+    /<div\b[^>]*id=["']content["'][^>]*>([\s\S]*?)<\/div>/i
+  );
+  if (!contentMatch) {
+    return null;
+  }
+
+  const body = decodeHtml(contentMatch[1] ?? "").trim();
+  return { metadata, body };
 };
 
 const parseSearchContent = (value: string | null): ParsedSearchContent | null => {
@@ -240,17 +211,17 @@ const parseSearchContent = (value: string | null): ParsedSearchContent | null =>
     return null;
   }
 
-  const parsedDocument = parseFrontmatterMarkdown(value);
+  const parsedDocument = parseAiHtmlDocument(value);
   if (!parsedDocument) {
     return null;
   }
 
-  const title = asString(parsedDocument.metadata.title);
-  const id = asString(parsedDocument.metadata.id);
-  const author = asString(parsedDocument.metadata.author);
-  const category = parseCategory(parsedDocument.metadata.category);
-  const publishedAt = parseDate(parsedDocument.metadata.publishedAt);
-  const comments = parseNumber(parsedDocument.metadata.commentCount);
+  const title = asString(parsedDocument.metadata.get("ai:title"));
+  const id = asString(parsedDocument.metadata.get("ai:id"));
+  const author = asString(parsedDocument.metadata.get("ai:author"));
+  const category = parseCategory(parsedDocument.metadata.get("ai:category"));
+  const publishedAt = parseDate(parsedDocument.metadata.get("ai:published-at"));
+  const comments = parseNumber(parsedDocument.metadata.get("ai:comment-count"));
 
   if (!id || !title || !author || !category || !publishedAt || comments === null) {
     return null;
@@ -261,7 +232,7 @@ const parseSearchContent = (value: string | null): ParsedSearchContent | null =>
     title,
     author,
     content: asString(parsedDocument.body),
-    source: normalizeUrl(parsedDocument.metadata.source),
+    source: normalizeUrl(parsedDocument.metadata.get("ai:source")),
     category,
     publishedAt,
     comments,
