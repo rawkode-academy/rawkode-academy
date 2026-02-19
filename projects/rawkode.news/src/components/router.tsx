@@ -169,6 +169,18 @@ export const router = createBrowserRouter([
         element: <FeedPage type="ask" />,
         hydrateFallbackElement: routeFallback,
       },
+      {
+        path: "announce",
+        loader: feedLoader("announce"),
+        element: <FeedPage type="announce" />,
+        hydrateFallbackElement: routeFallback,
+      },
+      {
+        path: "links",
+        loader: feedLoader("links"),
+        element: <FeedPage type="links" />,
+        hydrateFallbackElement: routeFallback,
+      },
       { path: "search", element: <SearchPage />, hydrateFallbackElement: routeFallback },
       { path: "profile", loader: profileLoader, element: <ProfilePage />, hydrateFallbackElement: routeFallback },
       {

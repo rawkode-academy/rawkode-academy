@@ -13,7 +13,7 @@ const segments = path ? path.split("/") : [];
 const [segment, subSegment] = segments;
 
 const asFeedCategory = (value: string | undefined): FeedCategory | null => {
-	if (!value || !["new", "rka", "show", "ask"].includes(value)) {
+	if (!value || !["new", "rka", "show", "ask", "announce", "links"].includes(value)) {
 		return null;
 	}
 
@@ -38,6 +38,14 @@ const feedMeta: Record<FeedCategory, { title: string; description: string }> = {
 	ask: {
 		title: "Ask",
 		description: "Practical questions with discussion from engineers in the field.",
+	},
+	announce: {
+		title: "Announce",
+		description: "General updates, launches, events, and community notices.",
+	},
+	links: {
+		title: "Links",
+		description: "Interesting articles, tools, and resources shared by the community.",
 	},
 };
 

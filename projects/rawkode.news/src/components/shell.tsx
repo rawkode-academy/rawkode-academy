@@ -13,6 +13,8 @@ const navItems: NavItem[] = [
   { label: "RKA", to: "/rka" },
   { label: "Show", to: "/show" },
   { label: "Ask", to: "/ask" },
+  { label: "Announce", to: "/announce" },
+  { label: "Links", to: "/links" },
   { label: "Search", to: "/search" },
 ];
 

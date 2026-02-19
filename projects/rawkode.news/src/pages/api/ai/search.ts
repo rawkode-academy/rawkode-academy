@@ -12,7 +12,7 @@ const MAX_QUERY_LENGTH = 200;
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 20;
 const DEFAULT_AI_SEARCH_INSTANCE = "rawkode-news";
-const VALID_CATEGORIES = new Set(["new", "rka", "show", "ask"]);
+const VALID_CATEGORIES = new Set(["new", "rka", "show", "ask", "announce", "links"]);
 const ITEM_PATH_PATTERN = /^\/item\/([^/]+)\/?$/;
 
 type SearchResultItem = {

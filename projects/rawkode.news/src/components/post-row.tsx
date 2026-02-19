@@ -2,7 +2,7 @@ import * as React from "react";
 import { ExternalLink } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { ApiPost } from "@/components/app-data";
-import { formatRelativeTime, postPath } from "@/components/app-data";
+import { formatCategoryLabel, formatRelativeTime, postPath } from "@/components/app-data";
 import { MarkdownInline } from "@/components/markdown";
 import { getCategoryTextClass } from "@/components/category-styles";
 import { getExternalDomainLabel } from "@/lib/domain-label";
@@ -73,7 +73,9 @@ export function PostRow({
             {showCategoryBadge ? (
               <>
                 <span>•</span>
-                <span className={`${getCategoryTextClass(post.category)} font-semibold`}>{post.category}</span>
+                <span className={`${getCategoryTextClass(post.category)} font-semibold`}>
+                  {formatCategoryLabel(post.category)}
+                </span>
               </>
             ) : null}
             <span>•</span>

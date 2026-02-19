@@ -16,11 +16,19 @@ const categoryCopy: Record<PostCategory, { title: string; detail: string }> = {
   },
   show: {
     title: "Show",
-    detail: "Projects, releases, and demos with practical technical value.",
+    detail: "Things you built: projects, releases, demos, and implementation write-ups.",
   },
   ask: {
     title: "Ask",
     detail: "Concrete questions that invite useful, experience-driven replies.",
+  },
+  announce: {
+    title: "Announce",
+    detail: "General updates, launches, events, and community notices.",
+  },
+  links: {
+    title: "Links",
+    detail: "Interesting articles, tools, and resources with your context.",
   },
 };
 
@@ -28,7 +36,7 @@ export default function SubmitPage() {
   const [title, setTitle] = React.useState("");
   const [url, setUrl] = React.useState("");
   const [notes, setNotes] = React.useState("");
-  const [category, setCategory] = React.useState<PostCategory>("rka");
+  const [category, setCategory] = React.useState<PostCategory>("show");
   const location = useLocation();
   const navigation = useNavigation();
   const actionData = useActionData() as { error?: string } | undefined;
@@ -114,7 +122,7 @@ export default function SubmitPage() {
 
             <fieldset className="space-y-2">
               <legend className="text-sm font-semibold text-foreground">Category</legend>
-              <div className="grid gap-2 sm:grid-cols-3">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {allowedCategories.map((item) => {
                   const inputId = `category-${item}`;
                   const isSelected = category === item;

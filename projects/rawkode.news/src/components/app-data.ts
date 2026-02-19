@@ -1,8 +1,19 @@
-export const feedCategories = ["new", "rka", "show", "ask"] as const;
-export const postCategories = ["rka", "show", "ask"] as const;
+export const feedCategories = ["new", "rka", "show", "ask", "announce", "links"] as const;
+export const postCategories = ["rka", "show", "ask", "announce", "links"] as const;
 
 export type FeedCategory = (typeof feedCategories)[number];
 export type PostCategory = (typeof postCategories)[number];
+
+export const categoryLabels: Record<FeedCategory, string> = {
+  new: "New",
+  rka: "RKA",
+  show: "Show",
+  ask: "Ask",
+  announce: "Announce",
+  links: "Links",
+};
+
+export const formatCategoryLabel = (category: FeedCategory) => categoryLabels[category];
 
 export type ApiPost = {
   id: string;

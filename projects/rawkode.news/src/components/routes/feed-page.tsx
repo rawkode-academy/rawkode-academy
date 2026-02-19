@@ -20,12 +20,22 @@ const feedMeta: Record<FeedCategory, { title: string; strapline: string; detail:
   show: {
     title: "Show",
     strapline: "What people are building",
-    detail: "Projects, releases, and technical demos worth a look.",
+    detail: "Things built by community members: projects, releases, demos, and implementation notes.",
   },
   ask: {
     title: "Ask",
     strapline: "Questions for experienced builders",
     detail: "Practical questions with discussion from engineers in the field.",
+  },
+  announce: {
+    title: "Announce",
+    strapline: "Community updates and notices",
+    detail: "Share updates, launches, events, and announcements that the community should see.",
+  },
+  links: {
+    title: "Links",
+    strapline: "Interesting things worth sharing",
+    detail: "Drop useful articles, tools, and references with context on why they matter.",
   },
 };
 

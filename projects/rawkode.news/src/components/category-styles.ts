@@ -29,6 +29,20 @@ export const categoryTone = {
     hover: "hover:border-amber-300 hover:bg-amber-100/80",
     ring: "ring-primary/35",
   },
+  announce: {
+    badge: "border-rose-200 bg-rose-100/70 text-rose-800",
+    text: "text-rose-800",
+    active: "border-primary/35 bg-primary/10 text-foreground",
+    hover: "hover:border-rose-300 hover:bg-rose-100/70",
+    ring: "ring-primary/35",
+  },
+  links: {
+    badge: "border-cyan-200 bg-cyan-100/70 text-cyan-800",
+    text: "text-cyan-800",
+    active: "border-primary/35 bg-primary/10 text-foreground",
+    hover: "hover:border-cyan-300 hover:bg-cyan-100/70",
+    ring: "ring-primary/35",
+  },
 } as const satisfies Record<
   FeedCategory,
   { badge: string; text: string; active: string; hover: string; ring: string }

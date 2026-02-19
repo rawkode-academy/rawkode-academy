@@ -7,7 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { ApiComment, ApiPost, CommentNode, Paginated } from "@/components/app-data";
-import { buildCommentTree, commentAnchor, formatRelativeTime, postPath } from "@/components/app-data";
+import {
+  buildCommentTree,
+  commentAnchor,
+  formatCategoryLabel,
+  formatRelativeTime,
+  postPath,
+} from "@/components/app-data";
 import { getCategoryBadgeClass } from "@/components/category-styles";
 import { commentsQueryOptions, postQueryOptions } from "@/components/query-client";
 import { useSession } from "@/components/session";
@@ -301,7 +307,7 @@ export function PostPage() {
         <section className="rkn-panel space-y-5 p-5 sm:p-6">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline" className={getCategoryBadgeClass(post.category)}>
-              {post.category}
+              {formatCategoryLabel(post.category)}
             </Badge>
             <span>posted {formatRelativeTime(post.createdAt)}</span>
           </div>
