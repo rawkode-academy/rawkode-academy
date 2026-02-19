@@ -10,6 +10,7 @@ const SEARCH_DEBOUNCE_MS = 350;
 const MIN_QUERY_LENGTH = 2;
 const MAX_QUERY_LENGTH = 200;
 const SEARCH_RESULT_LIMIT = 40;
+const SHORT_QUERY_MAX_LENGTH = 5;
 
 type FuseSearchPost = ApiPost;
 
@@ -64,6 +65,11 @@ const searchSnippet = (post: FuseSearchPost) => {
   return sourceDomain(post.url);
 };
 
+const includesQuery = (value: string | null | undefined, query: string) => {
+  if (!value) return false;
+  return value.toLowerCase().includes(query);
+};
+
 export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryFromUrl = normalizeSearchQuery(searchParams.get("q") ?? "");
@@ -109,33 +115,73 @@ export function SearchPage() {
     refetchOnWindowFocus: false,
   });
 
-  const fuseIndex = React.useMemo(() => {
+  const fuseIndexes = React.useMemo(() => {
     if (!postsQuery.data || postsQuery.data.length === 0) {
       return null;
     }
 
-    return new Fuse<FuseSearchPost>(postsQuery.data, {
-      includeScore: true,
-      threshold: 0.4,
-      ignoreLocation: true,
-      minMatchCharLength: MIN_QUERY_LENGTH,
-      keys: [
-        { name: "title", weight: 0.5 },
-        { name: "body", weight: 0.3 },
-        { name: "author", weight: 0.12 },
-        { name: "url", weight: 0.08 },
-      ],
-    });
+    return {
+      // Short queries should be strict and avoid noisy body matches.
+      short: new Fuse<FuseSearchPost>(postsQuery.data, {
+        includeScore: true,
+        threshold: 0.22,
+        ignoreLocation: true,
+        minMatchCharLength: MIN_QUERY_LENGTH,
+        keys: [
+          { name: "title", weight: 0.68 },
+          { name: "author", weight: 0.2 },
+          { name: "url", weight: 0.12 },
+        ],
+      }),
+      // Longer queries can search body text with a looser threshold.
+      full: new Fuse<FuseSearchPost>(postsQuery.data, {
+        includeScore: true,
+        threshold: 0.32,
+        ignoreLocation: true,
+        minMatchCharLength: MIN_QUERY_LENGTH,
+        keys: [
+          { name: "title", weight: 0.5 },
+          { name: "body", weight: 0.3 },
+          { name: "author", weight: 0.12 },
+          { name: "url", weight: 0.08 },
+        ],
+      }),
+    };
   }, [postsQuery.data]);
 
   const results = React.useMemo(() => {
-    if (!fuseIndex || !canSearch) {
+    if (!fuseIndexes || !canSearch || !postsQuery.data) {
       return [] as FuseSearchPost[];
     }
-    return fuseIndex
-      .search(debouncedQuery, { limit: SEARCH_RESULT_LIMIT })
+
+    const normalizedQuery = debouncedQuery.toLowerCase();
+    const useShortIndex = normalizedQuery.length <= SHORT_QUERY_MAX_LENGTH;
+    const index = useShortIndex ? fuseIndexes.short : fuseIndexes.full;
+    const maxScore = useShortIndex ? 0.19 : normalizedQuery.length <= 8 ? 0.28 : 0.35;
+
+    const directMatches = postsQuery.data.filter((post) => (
+      includesQuery(post.title, normalizedQuery) ||
+      includesQuery(post.author, normalizedQuery) ||
+      includesQuery(post.url, normalizedQuery)
+    ));
+
+    const fuzzyMatches = index
+      .search(normalizedQuery, { limit: SEARCH_RESULT_LIMIT * 4 })
+      .filter((entry) => (entry.score ?? 1) <= maxScore)
       .map((entry) => entry.item);
-  }, [canSearch, debouncedQuery, fuseIndex]);
+
+    const deduped: FuseSearchPost[] = [];
+    const seenIds = new Set<string>();
+
+    for (const post of [...directMatches, ...fuzzyMatches]) {
+      if (seenIds.has(post.id)) continue;
+      seenIds.add(post.id);
+      deduped.push(post);
+      if (deduped.length >= SEARCH_RESULT_LIMIT) break;
+    }
+
+    return deduped;
+  }, [canSearch, debouncedQuery, fuseIndexes, postsQuery.data]);
 
   return (
     <main className="space-y-4 py-7">
