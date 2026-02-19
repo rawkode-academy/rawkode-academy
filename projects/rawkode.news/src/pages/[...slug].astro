@@ -1,20 +1,50 @@
 ---
 import { QueryClient, dehydrate } from "@tanstack/react-query";
 import App from "@/components/app";
+import type { ApiPost, FeedCategory } from "@/components/app-data";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { buildCanonicalPath, stripMarkdownToText, truncateDescription } from "@/lib/seo";
 
 const queryClient = new QueryClient();
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
 const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 const path = Astro.url.pathname.replace(/^\/+|\/+$/g, "");
-const [segment] = path.split("/");
-const feedCategory = ["new", "rka", "show", "ask"].includes(segment)
-	? segment
-	: null;
+const segments = path ? path.split("/") : [];
+const [segment, subSegment] = segments;
+
+const asFeedCategory = (value: string | undefined): FeedCategory | null => {
+	if (!value || !["new", "rka", "show", "ask"].includes(value)) {
+		return null;
+	}
+
+	return value as FeedCategory;
+};
+
+const feedCategory = segments.length === 1 ? asFeedCategory(segment) : null;
+
+const feedMeta: Record<FeedCategory, { title: string; description: string }> = {
+	new: {
+		title: "New",
+		description: "Latest signals from the Rawkode News community.",
+	},
+	rka: {
+		title: "RKA",
+		description: "Deep engineering topics curated by the Rawkode Academy community.",
+	},
+	show: {
+		title: "Show",
+		description: "Projects, releases, and technical demos shared by the community.",
+	},
+	ask: {
+		title: "Ask",
+		description: "Practical questions with discussion from engineers in the field.",
+	},
+};
 
 if (feedCategory) {
+	const feedRoute = feedCategory === "new" ? "new" : feedCategory;
 	const response = await fetch(
-		`${Astro.url.origin}/api/posts?category=${feedCategory}&page=${page}`
+		`${Astro.url.origin}/api/posts?category=${feedRoute}&page=${page}`
 	);
 	if (response.ok) {
 		const data = await response.json();
@@ -22,9 +52,93 @@ if (feedCategory) {
 	}
 }
 
+type RouteMeta = {
+	title: string;
+	description: string;
+	canonicalPath?: string;
+	robots: "index, follow" | "noindex, nofollow";
+	ogType: "website" | "article";
+};
+
+const noIndexMeta = (title: string, description: string): RouteMeta => ({
+	title,
+	description,
+	robots: "noindex, nofollow",
+	ogType: "website",
+});
+
+let routeMeta: RouteMeta = noIndexMeta(
+	"Page not found | Rawkode News",
+	"The page you requested does not exist or may have moved."
+);
+
+if (feedCategory) {
+	const meta = feedMeta[feedCategory];
+	const canonicalBasePath = feedCategory === "new" ? "/" : `/${feedCategory}`;
+	routeMeta = {
+		title: `${meta.title} | Rawkode News`,
+		description: meta.description,
+		canonicalPath: buildCanonicalPath(canonicalBasePath, Astro.url.searchParams, ["page"]),
+		robots: "index, follow",
+		ogType: "website",
+	};
+} else if (segment === "item" && subSegment && segments.length === 2) {
+	let post: ApiPost | null = null;
+	try {
+		const response = await fetch(
+			`${Astro.url.origin}/api/posts/${encodeURIComponent(subSegment)}`
+		);
+		if (response.ok) {
+			post = (await response.json()) as ApiPost;
+		}
+	} catch {
+		// Leave post as null and fall back to noindex metadata.
+	}
+
+	if (post) {
+		const bodyText = post.body ? stripMarkdownToText(post.body) : "";
+		const fallbackDescription = `Discussion on "${post.title}" by ${post.author} in ${post.category}.`;
+		routeMeta = {
+			title: `${post.title} | Rawkode News`,
+			description: bodyText
+				? truncateDescription(bodyText, 180)
+				: fallbackDescription,
+			canonicalPath: `/item/${post.id}`,
+			robots: "index, follow",
+			ogType: "article",
+		};
+	} else {
+		routeMeta = noIndexMeta(
+			"Post not found | Rawkode News",
+			"The requested post does not exist or could not be loaded."
+		);
+	}
+} else if (segment === "search" && segments.length === 1) {
+	routeMeta = noIndexMeta(
+		"Search | Rawkode News",
+		"Search posts across Rawkode News."
+	);
+} else if (segment === "profile" && segments.length === 1) {
+	routeMeta = noIndexMeta(
+		"Profile | Rawkode News",
+		"Your profile and submissions on Rawkode News."
+	);
+} else if (segment === "submit" && segments.length === 1) {
+	routeMeta = noIndexMeta(
+		"Submit | Rawkode News",
+		"Create a post for the Rawkode News community."
+	);
+}
+
 const dehydratedState = dehydrate(queryClient);
 ---
 
-<BaseLayout title="Rawkode News">
+<BaseLayout
+	title={routeMeta.title}
+	description={routeMeta.description}
+	canonicalPath={routeMeta.canonicalPath}
+	robots={routeMeta.robots}
+	ogType={routeMeta.ogType}
+>
 	<App client:only="react" dehydratedState={dehydratedState} />
 </BaseLayout>
