@@ -24,11 +24,15 @@ export const GET: APIRoute = async (context) => {
     .limit(100);
 
   const site = context.site ?? new URL(context.url.origin);
+  const selfHref = new URL("/rss.xml", site).href;
 
   return rss({
     title: "Rawkode News",
     description: "Latest posts from the Rawkode News community.",
     site,
+    xmlns: {
+      atom: "http://www.w3.org/2005/Atom",
+    },
     items: items.map((post) => ({
       title: post.title,
       description:
@@ -37,6 +41,6 @@ export const GET: APIRoute = async (context) => {
       link: `/item/${post.id}`,
       pubDate: toDate(post.createdAt),
     })),
-    customData: "<language>en-us</language>",
+    customData: `<language>en-us</language><atom:link href="${selfHref}" rel="self" type="application/rss+xml" />`,
   });
 };

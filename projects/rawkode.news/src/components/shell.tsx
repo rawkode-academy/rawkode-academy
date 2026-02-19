@@ -257,10 +257,16 @@ export function Shell() {
       </div>
 
       <footer className="border-t border-border/80 bg-background/85">
-        <div className="rkn-container py-5 text-xs text-muted-foreground">
-          powered by{" "}
-          <a href="https://rawkode.academy" className="font-medium text-foreground/80 hover:text-foreground">
-            Rawkode Academy
+        <div className="rkn-container flex flex-wrap items-center gap-2 py-5 text-xs text-muted-foreground">
+          <span>
+            powered by{" "}
+            <a href="https://rawkode.academy" className="font-medium text-foreground/80 hover:text-foreground">
+              Rawkode Academy
+            </a>
+          </span>
+          <span aria-hidden="true">•</span>
+          <a href="/rss.xml" className="text-[11px] font-bold uppercase tracking-wide hover:text-foreground">
+            RSS
           </a>
         </div>
       </footer>
