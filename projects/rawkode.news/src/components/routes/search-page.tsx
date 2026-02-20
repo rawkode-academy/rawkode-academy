@@ -206,12 +206,14 @@ export function SearchPage() {
               </p>
             ) : null}
 
-            {results.map((post, index) => (
-              <React.Fragment key={post.id}>
-                <PostRow post={post} showCategoryBadge />
-                {index < results.length - 1 ? <hr className="border-border/75" /> : null}
-              </React.Fragment>
-            ))}
+            <div className="rkn-post-list">
+              {results.map((post, index) => (
+                <React.Fragment key={post.id}>
+                  <PostRow post={post} showCategoryBadge />
+                  {index < results.length - 1 ? <hr className="rkn-post-row-separator border-border/75" /> : null}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         ) : null}
       </section>

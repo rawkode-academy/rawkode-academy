@@ -50,51 +50,51 @@ export function PostRow({
   );
 
   return (
-    <article>
-      <div className="grid md:grid-cols-[minmax(0,1fr)_auto] md:items-stretch">
-        <div
-          className="min-w-0 space-y-1.5 cursor-pointer px-5 py-4 transition-colors hover:bg-muted/25"
-          onClick={handleLeftColumnClick}
-        >
-          <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-            <h2 className="min-w-0 text-[0.96rem] leading-6 font-semibold text-foreground">{post.title}</h2>
-          </div>
-
-          {summary ? (
-            <div className="text-sm text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
-              <MarkdownInline source={summary} />
-            </div>
-          ) : null}
-
-          <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-            <span>by {post.author}</span>
-            <span>•</span>
-            <span>{formatRelativeTime(post.createdAt)}</span>
-            {showCategoryBadge ? (
-              <>
-                <span>•</span>
-                <span className={`${getCategoryTextClass(post.category)} font-semibold`}>{post.category}</span>
-              </>
-            ) : null}
-            <span>•</span>
-            <span>{post.commentCount} comments</span>
-          </div>
+    <article className="rkn-post-row">
+      <div
+        className={`min-w-0 space-y-1.5 cursor-pointer px-5 py-4 transition-colors hover:bg-muted/25 ${
+          !hasExternalLink ? "md:col-span-2" : ""
+        }`}
+        onClick={handleLeftColumnClick}
+      >
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+          <h2 className="min-w-0 text-[0.96rem] leading-6 font-semibold text-foreground">{post.title}</h2>
         </div>
-        {hasExternalLink ? (
-          <div className="border-t border-border md:relative md:border-t-0 md:before:absolute md:before:top-4 md:before:bottom-4 md:before:left-0 md:before:border-l md:before:border-border md:before:content-['']">
-            <a
-              href={postUrl}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex h-full min-h-10 w-full items-center justify-center gap-1.5 bg-transparent px-4 py-4 text-xs font-medium text-foreground hover:bg-muted/25 md:min-w-36"
-              aria-label={`Open external source: ${externalDomainLabel}`}
-            >
-              <span className="font-mono tracking-wide">{externalDomainLabel}</span>
-              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-            </a>
+
+        {summary ? (
+          <div className="text-sm text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
+            <MarkdownInline source={summary} />
           </div>
         ) : null}
+
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+          <span>by {post.author}</span>
+          <span>•</span>
+          <span>{formatRelativeTime(post.createdAt)}</span>
+          {showCategoryBadge ? (
+            <>
+              <span>•</span>
+              <span className={`${getCategoryTextClass(post.category)} font-semibold`}>{post.category}</span>
+            </>
+          ) : null}
+          <span>•</span>
+          <span>{post.commentCount} comments</span>
+        </div>
       </div>
+      {hasExternalLink ? (
+        <div className="border-t border-border md:relative md:border-t-0 md:before:absolute md:before:top-4 md:before:bottom-4 md:before:left-0 md:before:border-l md:before:border-border md:before:content-['']">
+          <a
+            href={postUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="inline-flex h-full min-h-10 w-full items-center justify-center gap-1.5 bg-transparent px-4 py-4 text-xs font-medium text-foreground hover:bg-muted/25 md:min-w-36"
+            aria-label={`Open external source: ${externalDomainLabel}`}
+          >
+            <span className="font-mono tracking-wide">{externalDomainLabel}</span>
+            <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+          </a>
+        </div>
+      ) : null}
     </article>
   );
 }
