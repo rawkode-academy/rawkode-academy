@@ -116,7 +116,22 @@ export const createAuth = async (env: AuthEnv) => {
 						disabled: false,
 						skipConsent: true,
 						metadata: null,
-					},					
+					},
+					{
+						clientId: "rawkode-chat",
+						name: "Rawkode Chat",
+						type: "public",
+						// Workaround for https://github.com/better-auth/better-auth/issues/6651
+						// Better Auth incorrectly requires a secret for ID token signing even for public clients
+						clientSecret: "pkce-public-client-placeholder",
+						redirectUrls: [
+							"https://rawkode.chat/api/auth/callback/rawkode",
+							"http://localhost:3000/api/auth/callback/rawkode",
+						],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
 				],
 			}),
 			organization({
@@ -162,6 +177,8 @@ export const createAuth = async (env: AuthEnv) => {
 			"http://localhost:4321",
 			"https://klustered.dev",
 			"http://localhost:4322",
+			"https://rawkode.chat",
+			"http://localhost:3000",
 		],
 
 		databaseHooks: {
