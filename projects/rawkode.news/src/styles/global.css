@@ -138,6 +138,21 @@ a {
   background: var(--card);
 }
 
+@media (min-width: 768px) {
+  .rkn-post-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
+
+  .rkn-post-row {
+    display: contents;
+  }
+
+  .rkn-post-row-separator {
+    grid-column: 1 / -1;
+  }
+}
+
 .rkn-kicker {
   font-family: var(--font-mono-family);
   font-size: 0.72rem;
