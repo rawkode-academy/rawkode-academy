@@ -125,8 +125,7 @@ export const createAuth = async (env: AuthEnv) => {
 						// Better Auth incorrectly requires a secret for ID token signing even for public clients
 						clientSecret: "pkce-public-client-placeholder",
 						redirectUrls: [
-							"https://rawkode.chat/api/auth/callback/rawkode",
-							"http://localhost:3000/api/auth/callback/rawkode",
+							"https://rawkode.chat/api/auth/callback",
 						],
 						disabled: false,
 						skipConsent: true,

@@ -7,7 +7,7 @@ VALUES (
   'Rawkode Chat',
   'rawkode-chat',
   'pkce-public-client-placeholder',
-  '["https://rawkode.chat/api/auth/callback/rawkode","http://localhost:3000/api/auth/callback/rawkode"]',
+  '["https://rawkode.chat/api/auth/callback"]',
   'public',
   0,
   unixepoch() * 1000,
