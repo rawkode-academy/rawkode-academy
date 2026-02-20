@@ -54,6 +54,13 @@
     {
       "idx": 7,
       "version": "6",
+      "when": 1737300000000,
+      "tag": "0008_add_username",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
       "when": 1740048000000,
       "tag": "0009_add_rawkode_chat_oauth",
       "breakpoints": true
