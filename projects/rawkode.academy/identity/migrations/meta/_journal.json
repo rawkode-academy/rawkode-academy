@@ -50,6 +50,13 @@
       "when": 1734540000000,
       "tag": "0006_add_rawkode_news_oauth",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1740048000000,
+      "tag": "0009_add_rawkode_chat_oauth",
+      "breakpoints": true
     }
   ]
 }
