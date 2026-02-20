@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { oidcProvider, organization } from "better-auth/plugins";
+import { jwt, oidcProvider, organization } from "better-auth/plugins";
 import { eq, and, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
@@ -69,8 +69,17 @@ export const createAuth = async (env: AuthEnv) => {
 		},
 
 		plugins: [
+			jwt({
+				jwks: {
+					keyPairConfig: {
+						alg: "RS256",
+						modulusLength: 2048,
+					},
+				},
+			}),
 			oidcProvider({
 				loginPage: "/auth/sign-in/social",
+				useJWTPlugin: true,
 				trustedClients: [
 					{
 						clientId: "rawkode-academy-website",
