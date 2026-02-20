@@ -21,8 +21,6 @@
 		{ "pattern": "cloudnativecompass.fm/*", "zone_name": "cloudnativecompass.fm" },
 		{ "pattern": "klustered.live", "custom_domain": true },
 		{ "pattern": "klustered.live/*", "zone_name": "klustered.live" },
-    { "pattern": "rawkode.chat", "custom_domain": true },
-    { "pattern": "rawkode.chat/*", "zone_name": "rawkode.chat" },
     { "pattern": "rawkode.community", "custom_domain": true },
     { "pattern": "rawkode.community/*", "zone_name": "rawkode.community" },
     { "pattern": "rawkode.link", "custom_domain": true },
