@@ -1,5 +1,5 @@
 [build]
-dockerImage = "ghcr.io/waddle-social/waddle-server:main"
+dockerImage = "ghcr.io/waddle-social/waddle:main"
 
 [deploy]
 healthcheckPath = "/health"
