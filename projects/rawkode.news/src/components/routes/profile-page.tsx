@@ -99,12 +99,14 @@ export function ProfilePage() {
             <p className="px-5 py-6 text-sm text-muted-foreground">You have not submitted anything yet.</p>
           ) : null}
 
-          {submissions.map((post, index) => (
-            <React.Fragment key={post.id}>
-              <PostRow post={post} />
-              {index < submissions.length - 1 ? <hr className="border-border/75" /> : null}
-            </React.Fragment>
-          ))}
+          <div className="rkn-post-list">
+            {submissions.map((post, index) => (
+              <React.Fragment key={post.id}>
+                <PostRow post={post} />
+                {index < submissions.length - 1 ? <hr className="rkn-post-row-separator border-border/75" /> : null}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </section>
 
