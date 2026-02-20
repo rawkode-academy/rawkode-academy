@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(/opt/homebrew/bin/railway whoami:*)",
+      "Bash(/opt/homebrew/bin/railway project list:*)",
+      "Bash(/opt/homebrew/bin/railway:*)",
+      "mcp__Railway__list-deployments"
+    ]
+  }
+}
