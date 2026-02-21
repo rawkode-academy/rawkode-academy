@@ -7,7 +7,7 @@ auth_service:
   listen_addr: 0.0.0.0:3025
   cluster_name: {{ pillar['teleport']['cluster_name'] }}
   authentication:
-    type: oidc
+    type: {{ pillar['teleport'].get('auth_type', 'github') }}
 ssh_service:
   enabled: true
   labels:
