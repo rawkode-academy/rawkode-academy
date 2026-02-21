@@ -8,6 +8,11 @@ output "control_plane_server_id" {
   value       = scaleway_baremetal_server.control_plane.id
 }
 
+output "control_plane_private_ipv4" {
+  description = "Control plane private IPv4 used by minions to reach Salt master"
+  value       = one([for ip in scaleway_baremetal_server.control_plane.private_ips : ip.address if can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}$", ip.address))])
+}
+
 output "minion_server_ids" {
   description = "Minion bare metal server IDs keyed by minion name"
   value       = { for name, server in scaleway_baremetal_server.minion : name => server.id }
@@ -15,7 +20,7 @@ output "minion_server_ids" {
 
 output "infisical_project_id" {
   description = "Infisical project ID"
-  value       = infisical_project.rawkode_cloud.id
+  value       = data.infisical_projects.rawkode_academy.id
 }
 
 output "infisical_identity_id" {
