@@ -708,7 +708,7 @@ write_files:
       #!/usr/bin/env bash
       set -euo pipefail
 
-      ACTION="${1:-}"
+      ACTION="$${1:-}"
       LOCK_FILE="/run/lock/salt-maintenance.lock"
 
       case "$ACTION" in
