@@ -36,7 +36,7 @@ tasks: {
 
 	apply: {
 		command: "tofu"
-		args: ["-chdir=tofu", "apply"]
+		args: ["-chdir=tofu", "apply", "-auto-approve"]
 		dependsOn: [tasks.init]
 	}
 }

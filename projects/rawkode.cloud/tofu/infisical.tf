@@ -33,6 +33,7 @@ resource "infisical_identity_universal_auth" "runtime" {
 
 resource "infisical_identity_universal_auth_client_secret" "runtime" {
   identity_id = infisical_identity.rawkode_cloud.id
+  depends_on  = [infisical_identity_universal_auth.runtime]
 }
 
 # --- Project membership ---
@@ -48,24 +49,7 @@ resource "infisical_project_identity" "rawkode_cloud" {
 
 # --- Project access policies ---
 
-# Policy: Bootstrap — read secrets from /bootstrap
-resource "infisical_project_identity_specific_privilege" "bootstrap" {
-  identity_id  = infisical_project_identity.rawkode_cloud.identity_id
-  project_slug = infisical_project.rawkode_cloud.slug
-
-  permissions_v2 = [
-    {
-      subject = "secrets"
-      action  = ["read"]
-      conditions = jsonencode({
-        environment = { "$eq" = "prod" }
-        secretPath  = { "$eq" = "/bootstrap" }
-      })
-    }
-  ]
-}
-
-# Policy: Runtime — read secrets from /salt-master
+# Policy: read secrets from /projects/rawkode-cloud
 resource "infisical_project_identity_specific_privilege" "runtime" {
   identity_id  = infisical_project_identity.rawkode_cloud.identity_id
   project_slug = infisical_project.rawkode_cloud.slug
@@ -76,20 +60,30 @@ resource "infisical_project_identity_specific_privilege" "runtime" {
       action  = ["read"]
       conditions = jsonencode({
         environment = { "$eq" = "prod" }
-        secretPath  = { "$eq" = "/salt-master" }
+        secretPath  = { "$eq" = "/projects/rawkode-cloud" }
       })
     }
   ]
 }
 
-# --- Secrets: /bootstrap folder ---
+# --- Secret folder ---
+
+resource "infisical_secret_folder" "rawkode_cloud" {
+  name             = "rawkode-cloud"
+  environment_slug = "prod"
+  folder_path      = "/projects"
+  project_id       = infisical_project.rawkode_cloud.id
+}
+
+# --- Secrets: /projects/rawkode-cloud folder ---
 
 resource "infisical_secret" "bootstrap_client_id" {
   name         = "INFISICAL_CLIENT_ID"
   value        = infisical_identity_universal_auth_client_secret.runtime.client_id
   env_slug     = "prod"
   workspace_id = infisical_project.rawkode_cloud.id
-  folder_path  = "/bootstrap"
+  folder_path  = "/projects/rawkode-cloud"
+  depends_on   = [infisical_secret_folder.rawkode_cloud]
 }
 
 resource "infisical_secret" "bootstrap_client_secret" {
@@ -97,17 +91,17 @@ resource "infisical_secret" "bootstrap_client_secret" {
   value        = infisical_identity_universal_auth_client_secret.runtime.client_secret
   env_slug     = "prod"
   workspace_id = infisical_project.rawkode_cloud.id
-  folder_path  = "/bootstrap"
+  folder_path  = "/projects/rawkode-cloud"
+  depends_on   = [infisical_secret_folder.rawkode_cloud]
 }
-
-# --- Secrets: /salt-master folder ---
 
 resource "infisical_secret" "scaleway_access_key" {
   name         = "SCW_ACCESS_KEY"
   value        = scaleway_iam_api_key.salt_master.access_key
   env_slug     = "prod"
   workspace_id = infisical_project.rawkode_cloud.id
-  folder_path  = "/salt-master"
+  folder_path  = "/projects/rawkode-cloud"
+  depends_on   = [infisical_secret_folder.rawkode_cloud]
 }
 
 resource "infisical_secret" "scaleway_secret_key" {
@@ -115,7 +109,8 @@ resource "infisical_secret" "scaleway_secret_key" {
   value        = scaleway_iam_api_key.salt_master.secret_key
   env_slug     = "prod"
   workspace_id = infisical_project.rawkode_cloud.id
-  folder_path  = "/salt-master"
+  folder_path  = "/projects/rawkode-cloud"
+  depends_on   = [infisical_secret_folder.rawkode_cloud]
 }
 
 resource "infisical_secret" "scaleway_project_id" {
@@ -123,5 +118,6 @@ resource "infisical_secret" "scaleway_project_id" {
   value        = local.scaleway_project_id
   env_slug     = "prod"
   workspace_id = infisical_project.rawkode_cloud.id
-  folder_path  = "/salt-master"
+  folder_path  = "/projects/rawkode-cloud"
+  depends_on   = [infisical_secret_folder.rawkode_cloud]
 }

@@ -10,9 +10,24 @@ resource "scaleway_vpc_private_network" "cluster" {
   tags   = var.tags
 }
 
+data "scaleway_baremetal_offer" "node" {
+  zone = var.scaleway_zone
+  name = var.baremetal_offer
+}
+
+data "scaleway_baremetal_os" "node" {
+  zone    = var.scaleway_zone
+  name    = var.baremetal_os
+  version = var.baremetal_os_version
+}
+
 data "scaleway_baremetal_option" "private_network" {
   zone = var.scaleway_zone
   name = "Private Network"
+}
+
+data "scaleway_iam_ssh_key" "rawkode" {
+  ssh_key_id = "4c5f5dfa-37fa-4a36-ba7a-f9572c934ad9"
 }
 
 resource "scaleway_baremetal_server" "node" {
@@ -20,19 +35,11 @@ resource "scaleway_baremetal_server" "node" {
 
   zone  = var.scaleway_zone
   name  = each.key
-  offer = var.baremetal_offer
-  os    = var.baremetal_os
+  offer = data.scaleway_baremetal_offer.node.id
+  os    = data.scaleway_baremetal_os.node.id
   tags  = concat(var.tags, ["node:${each.key}", "cluster:${var.cluster_name}"])
 
-  cloud_init = each.key == var.salt_master_node ? templatefile(
-    "${path.module}/templates/cloud-init-salt-master.yaml.tftpl",
-    {
-      bootstrap_token      = infisical_identity_token_auth_token.bootstrap.token
-      infisical_project_id = infisical_project.rawkode_cloud.id
-      region               = var.scaleway_region
-      zone                 = var.scaleway_zone
-    }
-  ) : null
+  ssh_key_ids = [data.scaleway_iam_ssh_key.rawkode.id]
 
   options {
     id = data.scaleway_baremetal_option.private_network.option_id
@@ -43,5 +50,54 @@ resource "scaleway_baremetal_server" "node" {
   private_network {
     id = scaleway_vpc_private_network.cluster.id
   }
+
+  connection {
+    type  = "ssh"
+    user  = "ubuntu"
+    host  = one([for ip in self.ips : ip.address if ip.version == "IPv4"])
+    agent = true
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mkdir -p /etc/salt/credentials",
+      "sudo chmod 700 /etc/salt/credentials",
+    ]
+  }
+
+  provisioner "file" {
+    content = jsonencode({
+      client_id     = infisical_identity_universal_auth_client_secret.runtime.client_id
+      client_secret = infisical_identity_universal_auth_client_secret.runtime.client_secret
+      project_id    = infisical_project.rawkode_cloud.id
+    })
+    destination = "/tmp/infisical.json"
+  }
+
+  provisioner "file" {
+    content = jsonencode({
+      access_key = scaleway_iam_api_key.salt_master.access_key
+      secret_key = scaleway_iam_api_key.salt_master.secret_key
+      project_id = local.scaleway_project_id
+      region     = var.scaleway_region
+      zone       = var.scaleway_zone
+    })
+    destination = "/tmp/scaleway-api.json"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mv /tmp/infisical.json /etc/salt/credentials/infisical.json",
+      "sudo mv /tmp/scaleway-api.json /etc/salt/credentials/scaleway-api.json",
+      "sudo chmod 600 /etc/salt/credentials/*.json",
+      "sudo chown -R root:root /etc/salt/credentials",
+    ]
+  }
+
+  depends_on = [
+    infisical_secret.scaleway_access_key,
+    infisical_secret.scaleway_secret_key,
+    infisical_secret.scaleway_project_id,
+  ]
 }
 
