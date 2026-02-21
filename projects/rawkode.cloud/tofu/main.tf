@@ -1,8 +1,14 @@
 locals {
-  scaleway_project_id = "6f6da5bd-f7a3-45ac-b0f1-3aae5bd0f436"
-  infisical_org_id    = "ceffb723-21f4-4452-beea-56d25ed1f9d9"
-  minion_names        = [for idx in range(var.minion_replica_count) : format("%s-%02d", var.minion_name_prefix, idx + 1)]
-  minion_nodes        = { for name in local.minion_names : name => name }
+  scaleway_project_id          = "6f6da5bd-f7a3-45ac-b0f1-3aae5bd0f436"
+  infisical_org_id             = "ceffb723-21f4-4452-beea-56d25ed1f9d9"
+  minion_names                 = [for idx in range(var.minion_replica_count) : format("%s-%02d", var.minion_name_prefix, idx + 1)]
+  minion_nodes                 = { for name in local.minion_names : name => name }
+  control_plane_private_ipv4s  = [for ip in scaleway_baremetal_server.control_plane.private_ips : ip.address if can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}$", ip.address))]
+  derived_salt_master_private_ip = (
+    length(trimspace(var.salt_master_private_ip)) > 0
+    ? trimspace(var.salt_master_private_ip)
+    : one(local.control_plane_private_ipv4s)
+  )
 }
 
 resource "scaleway_vpc_private_network" "cluster" {
@@ -47,19 +53,8 @@ resource "scaleway_baremetal_server" "control_plane" {
       infisical_credentials_json = jsonencode({
         client_id     = infisical_identity_universal_auth_client_secret.runtime.client_id
         client_secret = infisical_identity_universal_auth_client_secret.runtime.client_secret
-        project_id    = infisical_project.rawkode_cloud.id
+        project_id    = data.infisical_projects.rawkode_academy.id
       })
-      scaleway_credentials_json = jsonencode({
-        access_key = scaleway_iam_api_key.salt_master.access_key
-        secret_key = scaleway_iam_api_key.salt_master.secret_key
-        project_id = local.scaleway_project_id
-        region     = var.scaleway_region
-        zone       = var.scaleway_zone
-      })
-      salt_master_private_key          = tls_private_key.salt_master.private_key_pem
-      salt_master_public_key           = tls_private_key.salt_master.public_key_pem
-      control_plane_minion_private_key = tls_private_key.control_plane_minion.private_key_pem
-      control_plane_minion_public_key  = tls_private_key.control_plane_minion.public_key_pem
       teleport_auth_type               = var.teleport_auth_type
       teleport_github_org              = var.teleport_github_org
       teleport_github_team             = var.teleport_github_team
@@ -69,6 +64,7 @@ resource "scaleway_baremetal_server" "control_plane" {
       salt_pillar_runtime_client_id_key = var.salt_pillar_runtime_client_id_key
       salt_pillar_runtime_client_secret_key = var.salt_pillar_runtime_client_secret_key
       salt_pillar_runtime_project_id_key = var.salt_pillar_runtime_project_id_key
+      scaleway_zone                   = var.scaleway_zone
       private_network_interface        = var.private_network_interface
     }
   )
@@ -110,7 +106,7 @@ resource "scaleway_baremetal_server" "minion" {
     "${path.module}/templates/cloud-init-salt-minion.yaml.tftpl",
     {
       private_network_interface = var.private_network_interface
-      salt_master_private_ip    = var.salt_master_private_ip
+      salt_master_private_ip    = local.derived_salt_master_private_ip
       minion_id                 = each.key
     }
   )

@@ -55,7 +55,7 @@ variable "private_network_interface" {
 variable "minion_replica_count" {
   description = "Number of minion bare metal servers to provision"
   type        = number
-  default     = 1
+  default     = 0
 
   validation {
     condition     = var.minion_replica_count >= 0 && var.minion_replica_count == floor(var.minion_replica_count)
@@ -70,14 +70,9 @@ variable "minion_name_prefix" {
 }
 
 variable "salt_master_private_ip" {
-  description = "Salt master private-network address that minions should connect to"
+  description = "Optional override for Salt master private-network IPv4; auto-discovered from control plane private_ips when empty"
   type        = string
   default     = ""
-
-  validation {
-    condition     = var.minion_replica_count == 0 || length(trimspace(var.salt_master_private_ip)) > 0
-    error_message = "salt_master_private_ip must be set when minion_replica_count is greater than 0."
-  }
 }
 
 variable "teleport_auth_type" {
@@ -124,19 +119,19 @@ variable "teleport_github_client_secret_key" {
 variable "salt_pillar_runtime_client_id_key" {
   description = "Infisical secret key name that stores the runtime Salt pillar Infisical client ID"
   type        = string
-  default     = "SALT_PILLAR_CLIENT_ID"
+  default     = "SALT_PILLAR_INFISICAL_CLIENT_ID"
 }
 
 variable "salt_pillar_runtime_client_secret_key" {
   description = "Infisical secret key name that stores the runtime Salt pillar Infisical client secret"
   type        = string
-  default     = "SALT_PILLAR_CLIENT_SECRET"
+  default     = "SALT_PILLAR_INFISICAL_CLIENT_SECRET"
 }
 
 variable "salt_pillar_runtime_project_id_key" {
   description = "Infisical secret key name that stores the runtime Salt pillar Infisical project ID"
   type        = string
-  default     = "SALT_PILLAR_PROJECT_ID"
+  default     = "SALT_PILLAR_INFISICAL_PROJECT_ID"
 }
 
 variable "tags" {
