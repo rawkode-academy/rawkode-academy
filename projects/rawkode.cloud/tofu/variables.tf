@@ -52,9 +52,95 @@ variable "private_network_interface" {
   default     = "enp6s0"
 }
 
+variable "minion_replica_count" {
+  description = "Number of minion bare metal servers to provision"
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.minion_replica_count >= 0 && var.minion_replica_count == floor(var.minion_replica_count)
+    error_message = "minion_replica_count must be a whole number greater than or equal to 0."
+  }
+}
+
+variable "minion_name_prefix" {
+  description = "Prefix used to build minion hostnames (for example production-minion-01)"
+  type        = string
+  default     = "production-minion"
+}
+
+variable "salt_master_private_ip" {
+  description = "Salt master private-network address that minions should connect to"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.minion_replica_count == 0 || length(trimspace(var.salt_master_private_ip)) > 0
+    error_message = "salt_master_private_ip must be set when minion_replica_count is greater than 0."
+  }
+}
+
+variable "teleport_auth_type" {
+  description = "Teleport authentication type (use github for OSS)"
+  type        = string
+  default     = "github"
+
+  validation {
+    condition     = contains(["local", "github"], var.teleport_auth_type)
+    error_message = "teleport_auth_type must be either 'local' or 'github'."
+  }
+}
+
+variable "teleport_github_org" {
+  description = "GitHub organization allowed to authenticate to Teleport"
+  type        = string
+  default     = "rawkode-academy"
+}
+
+variable "teleport_github_team" {
+  description = "GitHub team allowed to authenticate to Teleport"
+  type        = string
+  default     = "platform"
+}
+
+variable "teleport_github_roles" {
+  description = "Teleport roles mapped from the configured GitHub team"
+  type        = list(string)
+  default     = ["access", "editor"]
+}
+
+variable "teleport_github_client_id_key" {
+  description = "Infisical secret key name used for Teleport GitHub client ID"
+  type        = string
+  default     = "GITHUB_CLIENT_ID"
+}
+
+variable "teleport_github_client_secret_key" {
+  description = "Infisical secret key name used for Teleport GitHub client secret"
+  type        = string
+  default     = "GITHUB_CLIENT_SECRET"
+}
+
+variable "salt_pillar_runtime_client_id_key" {
+  description = "Infisical secret key name that stores the runtime Salt pillar Infisical client ID"
+  type        = string
+  default     = "SALT_PILLAR_CLIENT_ID"
+}
+
+variable "salt_pillar_runtime_client_secret_key" {
+  description = "Infisical secret key name that stores the runtime Salt pillar Infisical client secret"
+  type        = string
+  default     = "SALT_PILLAR_CLIENT_SECRET"
+}
+
+variable "salt_pillar_runtime_project_id_key" {
+  description = "Infisical secret key name that stores the runtime Salt pillar Infisical project ID"
+  type        = string
+  default     = "SALT_PILLAR_PROJECT_ID"
+}
+
 variable "tags" {
   description = "Tags applied to resources"
   type        = list(string)
   default     = ["rawkode-cloud", "kubernetes"]
 }
-
