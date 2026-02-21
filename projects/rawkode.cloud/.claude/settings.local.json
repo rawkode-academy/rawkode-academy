@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:registry.terraform.io)",
+      "WebFetch(domain:developer.1password.com)",
+      "WebFetch(domain:infisical.com)"
+    ]
+  }
+}
