@@ -6,3 +6,7 @@ provider "scaleway" {
 provider "infisical" {
   host = "https://app.infisical.com"
 }
+
+provider "tls" {}
+
+provider "cloudflare" {}

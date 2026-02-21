@@ -1,0 +1,19 @@
+kind: oidc
+version: v3
+metadata:
+  name: rawkode-academy
+spec:
+  issuer_url: https://id.rawkode.academy
+  client_id: {{ pillar['teleport']['oidc']['client_id'] }}
+  client_secret: {{ pillar['teleport']['oidc']['client_secret'] }}
+  redirect_url: https://rawkode.cloud/v1/webapi/oidc/callback
+  scope:
+    - openid
+    - profile
+    - email
+  claims_to_roles:
+    - claim: email
+      value: david@rawkode.com
+      roles:
+        - access
+        - editor

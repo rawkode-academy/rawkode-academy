@@ -1,81 +1,141 @@
 #cloud-config
 write_files:
-  - path: /usr/local/sbin/fetch-salt-credentials.sh
-    permissions: "0700"
+  - path: /etc/salt/credentials/infisical.json
+    permissions: "0600"
+    owner: root:root
+    content: |
+      ${infisical_credentials_json}
+
+  - path: /etc/salt/credentials/scaleway-api.json
+    permissions: "0600"
+    owner: root:root
+    content: |
+      ${scaleway_credentials_json}
+
+  - path: /etc/salt/pki/master/master.pem
+    permissions: "0600"
+    owner: root:root
+    content: |
+      ${indent(6, salt_master_private_key)}
+
+  - path: /etc/salt/pki/master/master.pub
+    permissions: "0644"
+    owner: root:root
+    content: |
+      ${indent(6, salt_master_public_key)}
+
+  - path: /etc/salt/master.d/gitfs.conf
+    permissions: "0644"
+    owner: root:root
+    content: |
+      fileserver_backend:
+        - gitfs
+
+      gitfs_remotes:
+        - https://github.com/rawkode-academy/rawkode-academy.git:
+          - root: projects/rawkode.cloud/salt/states
+          - base: main
+
+      gitfs_provider: pygit2
+
+  - path: /etc/salt/master.d/pillar.conf
+    permissions: "0644"
+    owner: root:root
+    content: |
+      pillar_roots:
+        base:
+          - /srv/pillar
+
+  - path: /etc/salt/master.d/reactor.conf
+    permissions: "0644"
+    owner: root:root
+    content: |
+      reactor:
+        - 'salt/auth':
+          - /srv/reactor/verify_scaleway.sls
+
+  - path: /srv/reactor/verify_scaleway.sls
+    permissions: "0644"
+    owner: root:root
+    content: |
+      {%- if data['act'] == 'pend' %}
+      verify_minion:
+        local.cmd.run:
+          - tgt: salt-call
+          - arg:
+            - /usr/local/bin/salt-verify-minion.sh {{ data['id'] }}
+      {%- endif %}
+
+  - path: /usr/local/bin/salt-verify-minion.sh
+    permissions: "0755"
     owner: root:root
     content: |
       #!/usr/bin/env bash
       set -euo pipefail
 
-      BOOTSTRAP_TOKEN="${bootstrap_token}"
-      INFISICAL_PROJECT_ID="${infisical_project_id}"
-      INFISICAL_HOST="https://app.infisical.com"
+      MINION_ID="$1"
 
-      SECRET_DIR="/etc/salt/credentials"
-      mkdir -p "$SECRET_DIR"
-      chmod 700 "$SECRET_DIR"
+      if [ -z "$MINION_ID" ]; then
+        echo "Usage: $0 <minion-id>"
+        exit 1
+      fi
 
-      # --- Phase 1: Bootstrap ---
-      # Use short-lived token auth token to fetch universal auth credentials
-      BOOTSTRAP_SECRETS=$(curl -sS -f \
-        "$INFISICAL_HOST/api/v3/secrets/raw?workspaceId=$INFISICAL_PROJECT_ID&environment=prod&secretPath=/projects/rawkode-cloud" \
-        -H "Authorization: Bearer $BOOTSTRAP_TOKEN")
+      CREDS_FILE="/etc/salt/credentials/scaleway-api.json"
+      ACCESS_KEY=$(jq -r '.access_key' "$CREDS_FILE")
+      SECRET_KEY=$(jq -r '.secret_key' "$CREDS_FILE")
+      ZONE=$(jq -r '.zone' "$CREDS_FILE")
 
-      INFISICAL_CLIENT_ID=$(python3 -c "
-      import sys, json
-      data = json.load(sys.stdin)
-      secrets = {s['secretKey']: s['secretValue'] for s in data['secrets']}
-      print(secrets['INFISICAL_CLIENT_ID'])
-      " <<< "$BOOTSTRAP_SECRETS")
+      RESPONSE=$(curl -s -H "X-Auth-Token: $SECRET_KEY" \
+        "https://api.scaleway.com/baremetal/v1/zones/$ZONE/servers")
 
-      INFISICAL_CLIENT_SECRET=$(python3 -c "
-      import sys, json
-      data = json.load(sys.stdin)
-      secrets = {s['secretKey']: s['secretValue'] for s in data['secrets']}
-      print(secrets['INFISICAL_CLIENT_SECRET'])
-      " <<< "$BOOTSTRAP_SECRETS")
+      SERVER_MATCH=$(echo "$RESPONSE" | jq -r --arg name "$MINION_ID" \
+        '.servers[] | select(.name == $name) | .name')
 
-      # --- Phase 2: Runtime ---
-      # Authenticate with universal auth using the fetched credentials
-      RUNTIME_TOKEN=$(curl -sS -f -X POST \
-        "$INFISICAL_HOST/api/v1/auth/universal-auth/login" \
-        -H "Content-Type: application/json" \
-        -d "{\"clientId\":\"$INFISICAL_CLIENT_ID\",\"clientSecret\":\"$INFISICAL_CLIENT_SECRET\"}" \
-        | python3 -c "import sys,json; print(json.load(sys.stdin)['accessToken'])")
+      if [ "$SERVER_MATCH" = "$MINION_ID" ]; then
+        echo "Verified: server '$MINION_ID' exists in Scaleway zone $ZONE"
+        salt-key -ya "$MINION_ID"
+      else
+        echo "Rejected: no server named '$MINION_ID' found in Scaleway zone $ZONE"
+        exit 1
+      fi
 
-      # Fetch operational secrets from /salt-master
-      SECRETS=$(curl -sS -f \
-        "$INFISICAL_HOST/api/v3/secrets/raw?workspaceId=$INFISICAL_PROJECT_ID&environment=prod&secretPath=/projects/rawkode-cloud" \
-        -H "Authorization: Bearer $RUNTIME_TOKEN")
+  - path: /etc/salt/minion.d/local.conf
+    permissions: "0644"
+    owner: root:root
+    content: |
+      master: 127.0.0.1
+      id: production-control-plane
 
-      # Write Scaleway credential file for Salt
-      python3 -c "
-      import sys, json
-      data = json.load(sys.stdin)
-      secrets = {s['secretKey']: s['secretValue'] for s in data['secrets']}
-      json.dump({
-          'access_key': secrets['SCW_ACCESS_KEY'],
-          'secret_key': secrets['SCW_SECRET_KEY'],
-          'project_id': secrets['SCW_PROJECT_ID'],
-          'region': '${region}',
-          'zone': '${zone}'
-      }, open('$SECRET_DIR/scaleway-api.json', 'w'), indent=2)
-      " <<< "$SECRETS"
+  - path: /srv/pillar/top.sls
+    permissions: "0644"
+    owner: root:root
+    content: |
+      base:
+        'production-control-plane':
+          - teleport
 
-      chmod 600 "$SECRET_DIR/scaleway-api.json"
-
-      # Persist universal auth credentials for ongoing Salt use
-      python3 -c "
-      import json
-      json.dump({
-          'client_id': '$INFISICAL_CLIENT_ID',
-          'client_secret': '$INFISICAL_CLIENT_SECRET',
-          'project_id': '$INFISICAL_PROJECT_ID'
-      }, open('$SECRET_DIR/infisical.json', 'w'), indent=2)
-      "
-
-      chmod 600 "$SECRET_DIR/infisical.json"
-      chown -R root:root "$SECRET_DIR"
+  - path: /srv/pillar/teleport/init.sls
+    permissions: "0644"
+    owner: root:root
+    content: |
+      teleport:
+        cluster_name: rawkode.cloud
+        public_addr: rawkode.cloud:443
+        acme_email: david@rawkode.com
+        oidc:
+          issuer_url: https://id.rawkode.academy
+          client_id: ${teleport_oidc_client_id}
+          client_secret: ${teleport_oidc_client_secret}
 
 runcmd:
-  - /usr/local/sbin/fetch-salt-credentials.sh
+  - chmod 700 /etc/salt/credentials
+  - chmod 700 /etc/salt/pki/master
+  - chmod +x /usr/local/bin/salt-verify-minion.sh
+  - mkdir -p /srv/pillar/teleport /srv/reactor
+  - curl -o /tmp/bootstrap-salt.sh -L https://bootstrap.saltproject.io
+  - sh /tmp/bootstrap-salt.sh -M
+  - apt-get install -y python3-pygit2
+  - systemctl enable salt-master salt-minion
+  - systemctl restart salt-master
+  - sleep 10
+  - systemctl restart salt-minion
