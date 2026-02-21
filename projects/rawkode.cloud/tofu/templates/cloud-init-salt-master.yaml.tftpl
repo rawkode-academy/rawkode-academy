@@ -18,7 +18,7 @@ write_files:
       # --- Phase 1: Bootstrap ---
       # Use short-lived token auth token to fetch universal auth credentials
       BOOTSTRAP_SECRETS=$(curl -sS -f \
-        "$INFISICAL_HOST/api/v3/secrets/raw?workspaceId=$INFISICAL_PROJECT_ID&environment=prod&secretPath=/bootstrap" \
+        "$INFISICAL_HOST/api/v3/secrets/raw?workspaceId=$INFISICAL_PROJECT_ID&environment=prod&secretPath=/projects/rawkode-cloud" \
         -H "Authorization: Bearer $BOOTSTRAP_TOKEN")
 
       INFISICAL_CLIENT_ID=$(python3 -c "
@@ -45,7 +45,7 @@ write_files:
 
       # Fetch operational secrets from /salt-master
       SECRETS=$(curl -sS -f \
-        "$INFISICAL_HOST/api/v3/secrets/raw?workspaceId=$INFISICAL_PROJECT_ID&environment=prod&secretPath=/salt-master" \
+        "$INFISICAL_HOST/api/v3/secrets/raw?workspaceId=$INFISICAL_PROJECT_ID&environment=prod&secretPath=/projects/rawkode-cloud" \
         -H "Authorization: Bearer $RUNTIME_TOKEN")
 
       # Write Scaleway credential file for Salt
