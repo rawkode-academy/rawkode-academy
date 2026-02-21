@@ -12,6 +12,140 @@ write_files:
     content: |
       ${scaleway_credentials_json}
 
+  - path: /usr/local/bin/seed-infisical-runtime-credentials.py
+    permissions: "0700"
+    owner: root:root
+    content: |
+      #!/usr/bin/env python3
+      import json
+      import os
+      import urllib.parse
+      import urllib.request
+
+      BOOTSTRAP_CREDENTIALS_FILE = "/etc/salt/credentials/infisical.json"
+      RUNTIME_CREDENTIALS_FILE = "/etc/salt/credentials/infisical-runtime.json"
+      HOST = "https://app.infisical.com"
+      ENV_SLUG = "prod"
+      SECRET_PATH = "/projects/rawkode-cloud"
+      CLIENT_ID_KEY = "${salt_pillar_runtime_client_id_key}"
+      CLIENT_SECRET_KEY = "${salt_pillar_runtime_client_secret_key}"
+      PROJECT_ID_KEY = "${salt_pillar_runtime_project_id_key}"
+
+
+      def _request_json(method, url, headers=None, payload=None, timeout=10):
+          data = None
+          request_headers = dict(headers or {})
+
+          if payload is not None:
+              data = json.dumps(payload).encode("utf-8")
+              request_headers["Content-Type"] = "application/json"
+
+          request = urllib.request.Request(
+              url,
+              data=data,
+              headers=request_headers,
+              method=method,
+          )
+
+          with urllib.request.urlopen(request, timeout=timeout) as response:
+              body = response.read().decode("utf-8")
+
+          return json.loads(body or "{}")
+
+
+      def _login(host, client_id, client_secret):
+          login_url = f"{host.rstrip('/')}/api/v1/auth/universal-auth/login"
+          payload = {
+              "clientId": client_id,
+              "clientSecret": client_secret,
+          }
+          response = _request_json("POST", login_url, payload=payload)
+          return response.get("accessToken")
+
+
+      def _read_secret(host, access_token, workspace_id, env_slug, secret_path, secret_name):
+          encoded_name = urllib.parse.quote(secret_name, safe="")
+          query = urllib.parse.urlencode(
+              {
+                  "workspaceId": workspace_id,
+                  "environment": env_slug,
+                  "secretPath": secret_path,
+              }
+          )
+          url = f"{host.rstrip('/')}/api/v3/secrets/raw/{encoded_name}?{query}"
+          response = _request_json(
+              "GET",
+              url,
+              headers={"Authorization": f"Bearer {access_token}"},
+          )
+          secret = response.get("secret", {})
+          return secret.get("secretValue")
+
+
+      def main():
+          with open(BOOTSTRAP_CREDENTIALS_FILE, encoding="utf-8") as f:
+              bootstrap = json.load(f)
+
+          bootstrap_client_id = bootstrap.get("client_id")
+          bootstrap_client_secret = bootstrap.get("client_secret")
+          workspace_id = bootstrap.get("project_id")
+
+          if not bootstrap_client_id or not bootstrap_client_secret or not workspace_id:
+              raise RuntimeError("Bootstrap Infisical credentials are missing required keys")
+
+          access_token = _login(HOST, bootstrap_client_id, bootstrap_client_secret)
+          if not access_token:
+              raise RuntimeError("Failed to obtain Infisical access token using bootstrap credentials")
+
+          runtime_client_id = _read_secret(
+              HOST,
+              access_token,
+              workspace_id,
+              ENV_SLUG,
+              SECRET_PATH,
+              CLIENT_ID_KEY,
+          )
+          runtime_client_secret = _read_secret(
+              HOST,
+              access_token,
+              workspace_id,
+              ENV_SLUG,
+              SECRET_PATH,
+              CLIENT_SECRET_KEY,
+          )
+          runtime_project_id = _read_secret(
+              HOST,
+              access_token,
+              workspace_id,
+              ENV_SLUG,
+              SECRET_PATH,
+              PROJECT_ID_KEY,
+          )
+
+          if not runtime_client_id or not runtime_client_secret or not runtime_project_id:
+              raise RuntimeError(
+                  "Missing runtime pillar credentials in Infisical "
+                  f"({CLIENT_ID_KEY}, {CLIENT_SECRET_KEY}, {PROJECT_ID_KEY})"
+              )
+
+          payload = {
+              "client_id": runtime_client_id,
+              "client_secret": runtime_client_secret,
+              "project_id": runtime_project_id,
+          }
+
+          os.makedirs(os.path.dirname(RUNTIME_CREDENTIALS_FILE), exist_ok=True)
+          temp_path = f"{RUNTIME_CREDENTIALS_FILE}.tmp"
+          with open(temp_path, "w", encoding="utf-8") as f:
+              json.dump(payload, f)
+              f.write("\n")
+          os.chmod(temp_path, 0o600)
+          os.replace(temp_path, RUNTIME_CREDENTIALS_FILE)
+
+
+      if __name__ == "__main__":
+          main()
+
   - path: /etc/netplan/60-private-network.yaml
     permissions: "0644"
     owner: root:root
@@ -36,6 +170,24 @@ write_files:
     content: |
       ${indent(6, salt_master_public_key)}
 
+  - path: /etc/salt/pki/minion/minion.pem
+    permissions: "0600"
+    owner: root:root
+    content: |
+      ${indent(6, control_plane_minion_private_key)}
+
+  - path: /etc/salt/pki/minion/minion.pub
+    permissions: "0644"
+    owner: root:root
+    content: |
+      ${indent(6, control_plane_minion_public_key)}
+
+  - path: /etc/salt/pki/master/minions/production-control-plane
+    permissions: "0600"
+    owner: root:root
+    content: |
+      ${indent(6, control_plane_minion_public_key)}
+
   - path: /etc/salt/master.d/gitfs.conf
     permissions: "0644"
     owner: root:root
@@ -48,7 +200,7 @@ write_files:
           - root: projects/rawkode.cloud/salt/states
           - base: main
 
-      gitfs_provider: pygit2
+      gitfs_provider: gitpython
 
   - path: /etc/salt/master.d/pillar.conf
     permissions: "0644"
@@ -58,23 +210,20 @@ write_files:
         base:
           - /srv/pillar
 
-  - path: /etc/salt/master.d/autosign.conf
-    permissions: "0644"
-    owner: root:root
-    content: |
-      autosign_grains_dir: /etc/salt/autosign_grains
-
-  - path: /etc/salt/autosign_grains/id
-    permissions: "0600"
-    owner: root:root
-    content: |
-      production-control-plane
-
-  - path: /etc/salt/autosign_grains/master
-    permissions: "0600"
-    owner: root:root
-    content: |
-      127.0.0.1
+      ext_pillar:
+        - infisical_runtime:
+            host: https://app.infisical.com
+            credentials_file: /etc/salt/credentials/infisical-runtime.json
+            env_slug: prod
+            secret_path: /projects/rawkode-cloud
+            github_client_id_key: ${teleport_github_client_id_key}
+            github_client_secret_key: ${teleport_github_client_secret_key}
+            github_org: ${teleport_github_org}
+            github_team: ${teleport_github_team}
+            github_roles:
+%{ for role in teleport_github_roles ~}
+              - ${role}
+%{ endfor ~}
 
   - path: /etc/salt/master.d/reactor.conf
     permissions: "0644"
@@ -88,13 +237,12 @@ write_files:
     permissions: "0644"
     owner: root:root
     content: |
-      {# Auto-accept is handled by autosign_grains for the control plane. #}
-      {# This reactor verifies non-control-plane minions against Scaleway API. #}
-      {%- if data['act'] == 'pend' and data['id'] != 'production-control-plane' %}
+      {# Control-plane key is preseeded and is never dynamically accepted. #}
+      {%- if data.get('act') == 'pend' and data.get('id') and data.get('id') != 'production-control-plane' %}
       verify_and_accept:
         runner.verify_scaleway.accept:
-          - args:
-            - minion_id: {{ data['id'] }}
+          - arg:
+            - '{{ data.get("id") }}'
       {%- endif %}
 
   - path: /var/cache/salt/master/extmods/runners/verify_scaleway.py
@@ -102,71 +250,448 @@ write_files:
     owner: root:root
     content: |
       import json
-      import subprocess
-      import urllib.request
       import logging
+      import os
+      import re
+      import subprocess
+      import time
+      import urllib.parse
+      import urllib.request
 
       log = logging.getLogger(__name__)
 
-      def accept(minion_id):
-          creds_file = "/etc/salt/credentials/scaleway-api.json"
-          with open(creds_file) as f:
-              creds = json.load(f)
+      CREDS_FILE = "/etc/salt/credentials/scaleway-api.json"
+      ATTEMPT_CACHE_FILE = "/var/cache/salt/master/verify_scaleway/attempts.json"
+      ATTEMPT_COOLDOWN_SECONDS = 30
+      MINION_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{1,62}$")
+      CONTROL_PLANE_MINION_ID = "production-control-plane"
 
-          secret_key = creds["secret_key"]
-          zone = creds["zone"]
 
-          url = f"https://api.scaleway.com/baremetal/v1/zones/{zone}/servers"
-          req = urllib.request.Request(url, headers={"X-Auth-Token": secret_key})
+      def _run(cmd):
+          return subprocess.run(cmd, check=False, capture_output=True, text=True)
+
+
+      def _safe_read_json(path, default):
+          try:
+              with open(path, encoding="utf-8") as f:
+                  return json.load(f)
+          except Exception:
+              return default
+
+
+      def _safe_write_json(path, payload):
+          os.makedirs(os.path.dirname(path), exist_ok=True)
+          temp_path = f"{path}.tmp"
+          with open(temp_path, "w", encoding="utf-8") as f:
+              json.dump(payload, f)
+          os.replace(temp_path, path)
+
+
+      def _should_back_off(minion_id):
+          attempts = _safe_read_json(ATTEMPT_CACHE_FILE, {})
+          now = int(time.time())
+          last_attempt = attempts.get(minion_id)
+
+          if isinstance(last_attempt, (int, float)) and (now - int(last_attempt)) < ATTEMPT_COOLDOWN_SECONDS:
+              return True
+
+          attempts[minion_id] = now
+          _safe_write_json(ATTEMPT_CACHE_FILE, attempts)
+          return False
+
+
+      def _pending_keys():
+          proc = _run(["salt-key", "--list=pre", "--out=json"])
+          if proc.returncode != 0:
+              proc = _run(["salt-key", "-l", "pre", "--out=json"])
+
+          if proc.returncode != 0:
+              log.error("Failed to list pending keys: %s", (proc.stderr or "").strip())
+              return set()
 
           try:
-              with urllib.request.urlopen(req) as resp:
-                  data = json.loads(resp.read())
-          except Exception as e:
-              log.error("Failed to query Scaleway API: %s", e)
+              payload = json.loads(proc.stdout or "{}")
+          except json.JSONDecodeError:
+              log.error("Unable to parse pending key list output")
+              return set()
+
+          return set(payload.get("minions_pre", []))
+
+
+      def _load_scaleway_credentials():
+          creds = _safe_read_json(CREDS_FILE, {})
+          if not all(k in creds for k in ("secret_key", "zone")):
+              return None
+          return creds
+
+
+      def _fetch_scaleway_server(minion_id, creds):
+          query = {"name": minion_id}
+          project_id = creds.get("project_id")
+          if project_id:
+              query["project_id"] = project_id
+
+          url = (
+              f"https://api.scaleway.com/baremetal/v1/zones/{creds['zone']}/servers"
+              f"?{urllib.parse.urlencode(query)}"
+          )
+          req = urllib.request.Request(
+              url,
+              headers={
+                  "X-Auth-Token": creds["secret_key"],
+                  "Accept": "application/json",
+              },
+          )
+
+          try:
+              with urllib.request.urlopen(req, timeout=5) as response:
+                  payload = json.loads(response.read())
+          except Exception as exc:
+              log.error("Failed to query Scaleway API: %s", exc)
+              return None
+
+          for server in payload.get("servers", []):
+              if server.get("name") != minion_id:
+                  continue
+
+              if project_id and server.get("project_id") != project_id:
+                  continue
+
+              return server
+
+          return None
+
+
+      def _accept_key(minion_id):
+          proc = _run(["salt-key", "-ya", minion_id])
+          if proc.returncode != 0:
+              log.error("Failed to accept key for '%s': %s", minion_id, (proc.stderr or "").strip())
+              return False
+          return True
+
+
+      def _delete_key(minion_id):
+          proc = _run(["salt-key", "-yd", minion_id])
+          if proc.returncode != 0:
+              log.warning("Failed to delete key for '%s': %s", minion_id, (proc.stderr or "").strip())
+
+
+      def _query_grains(minion_id):
+          proc = _run([
+              "salt",
+              "--timeout=10",
+              "--out=json",
+              minion_id,
+              "grains.item",
+              "id",
+              "scw_instance_id",
+          ])
+
+          if proc.returncode != 0:
+              log.warning("Grain query failed for '%s': %s", minion_id, (proc.stderr or "").strip())
+              return None
+
+          try:
+              payload = json.loads(proc.stdout or "{}")
+          except json.JSONDecodeError:
+              log.warning("Unable to parse grain query output for '%s'", minion_id)
+              return None
+
+          grains = payload.get(minion_id)
+          return grains if isinstance(grains, dict) else None
+
+
+      def accept(minion_id):
+          if not isinstance(minion_id, str):
+              log.warning("Rejected non-string minion id: %r", minion_id)
               return False
 
-          server_names = [s["name"] for s in data.get("servers", [])]
+          minion_id = minion_id.strip()
 
-          if minion_id in server_names:
-              log.info("Verified: server '%s' exists in Scaleway zone %s", minion_id, zone)
-              subprocess.run(["salt-key", "-ya", minion_id], check=True)
-              return True
-          else:
-              log.warning("Rejected: no server named '%s' found in Scaleway zone %s", minion_id, zone)
+          if minion_id == CONTROL_PLANE_MINION_ID:
+              log.warning("Rejected dynamic acceptance for control-plane id '%s'", minion_id)
               return False
 
-  - path: /usr/local/bin/salt-verify-minion.sh
-    permissions: "0755"
+          if not MINION_ID_PATTERN.fullmatch(minion_id):
+              log.warning("Rejected invalid minion id format: '%s'", minion_id)
+              return False
+
+          if _should_back_off(minion_id):
+              log.info("Skipping '%s' due to cooldown", minion_id)
+              return False
+
+          if minion_id not in _pending_keys():
+              log.info("No pending key found for '%s'", minion_id)
+              return False
+
+          creds = _load_scaleway_credentials()
+          if not creds:
+              log.error("Missing required Scaleway credentials")
+              return False
+
+          server = _fetch_scaleway_server(minion_id, creds)
+          if not server:
+              log.warning("Rejected '%s': no matching Scaleway server", minion_id)
+              return False
+
+          expected_instance_id = server.get("id")
+          if not expected_instance_id:
+              log.warning("Rejected '%s': Scaleway server has no instance id", minion_id)
+              return False
+
+          if not _accept_key(minion_id):
+              return False
+
+          grains = None
+          for _ in range(3):
+              time.sleep(2)
+              grains = _query_grains(minion_id)
+              if grains:
+                  break
+
+          actual_id = grains.get("id") if grains else None
+          actual_instance_id = grains.get("scw_instance_id") if grains else None
+
+          if actual_id != minion_id or actual_instance_id != expected_instance_id:
+              log.warning(
+                  "Rejected '%s': grain mismatch (id=%r scw_instance_id=%r expected=%r)",
+                  minion_id,
+                  actual_id,
+                  actual_instance_id,
+                  expected_instance_id,
+              )
+              _delete_key(minion_id)
+              return False
+
+          log.info(
+              "Accepted '%s': verified with Scaleway instance id '%s'",
+              minion_id,
+              expected_instance_id,
+          )
+          return True
+
+  - path: /var/cache/salt/master/extmods/pillar/infisical_runtime.py
+    permissions: "0644"
     owner: root:root
     content: |
-      #!/usr/bin/env bash
-      set -euo pipefail
+      import json
+      import logging
+      import urllib.error
+      import urllib.parse
+      import urllib.request
+      try:
+          from infisical_sdk import InfisicalSDKClient
+      except Exception:
+          InfisicalSDKClient = None
 
-      MINION_ID="$1"
+      log = logging.getLogger(__name__)
 
-      if [ -z "$MINION_ID" ]; then
-        echo "Usage: $0 <minion-id>"
-        exit 1
-      fi
+      CONTROL_PLANE_MINION_ID = "production-control-plane"
 
-      CREDS_FILE="/etc/salt/credentials/scaleway-api.json"
-      SECRET_KEY=$(jq -r '.secret_key' "$CREDS_FILE")
-      ZONE=$(jq -r '.zone' "$CREDS_FILE")
 
-      RESPONSE=$(curl -s -H "X-Auth-Token: $SECRET_KEY" \
-        "https://api.scaleway.com/baremetal/v1/zones/$ZONE/servers")
+      def _request_json(method, url, headers=None, payload=None, timeout=10):
+          data = None
+          request_headers = dict(headers or {})
 
-      SERVER_MATCH=$(echo "$RESPONSE" | jq -r --arg name "$MINION_ID" \
-        '.servers[] | select(.name == $name) | .name')
+          if payload is not None:
+              data = json.dumps(payload).encode("utf-8")
+              request_headers["Content-Type"] = "application/json"
 
-      if [ "$SERVER_MATCH" = "$MINION_ID" ]; then
-        echo "Verified: server '$MINION_ID' exists in Scaleway zone $ZONE"
-        salt-key -ya "$MINION_ID"
-      else
-        echo "Rejected: no server named '$MINION_ID' found in Scaleway zone $ZONE"
-        exit 1
-      fi
+          request = urllib.request.Request(
+              url,
+              data=data,
+              headers=request_headers,
+              method=method,
+          )
+
+          with urllib.request.urlopen(request, timeout=timeout) as response:
+              body = response.read().decode("utf-8")
+
+          return json.loads(body or "{}")
+
+
+      def _login(host, client_id, client_secret):
+          login_url = f"{host.rstrip('/')}/api/v1/auth/universal-auth/login"
+          payload = {
+              "clientId": client_id,
+              "clientSecret": client_secret,
+          }
+
+          response = _request_json("POST", login_url, payload=payload)
+          return response.get("accessToken")
+
+
+      def _extract_secret_value(secret):
+          if secret is None:
+              return None
+          if isinstance(secret, dict):
+              return secret.get("secretValue") or secret.get("secret_value") or secret.get("value")
+          return (
+              getattr(secret, "secretValue", None)
+              or getattr(secret, "secret_value", None)
+              or getattr(secret, "value", None)
+          )
+
+
+      def _extract_secret_key(secret):
+          if secret is None:
+              return None
+          if isinstance(secret, dict):
+              return secret.get("secretKey") or secret.get("secret_key") or secret.get("key")
+          return (
+              getattr(secret, "secretKey", None)
+              or getattr(secret, "secret_key", None)
+              or getattr(secret, "key", None)
+          )
+
+
+      def _extract_secret_items(payload):
+          if payload is None:
+              return []
+
+          if isinstance(payload, list):
+              return payload
+
+          if isinstance(payload, dict):
+              for key in ("secrets", "items", "data"):
+                  value = payload.get(key)
+                  if isinstance(value, list):
+                      return value
+              if _extract_secret_key(payload):
+                  return [payload]
+              return []
+
+          for key in ("secrets", "items", "data"):
+              value = getattr(payload, key, None)
+              if isinstance(value, list):
+                  return value
+
+          return []
+
+
+      def _to_secret_map(payload):
+          values = {}
+          for secret in _extract_secret_items(payload):
+              key = _extract_secret_key(secret)
+              value = _extract_secret_value(secret)
+              if key and value is not None:
+                  values[str(key)] = value
+          return values
+
+
+      def _list_secrets_api(host, access_token, workspace_id, env_slug, secret_path):
+          query = urllib.parse.urlencode(
+              {
+                  "workspaceId": workspace_id,
+                  "environment": env_slug,
+                  "secretPath": secret_path,
+                  "includeImports": "true",
+                  "recursive": "false",
+              }
+          )
+          url = f"{host.rstrip('/')}/api/v3/secrets/raw?{query}"
+          response = _request_json(
+              "GET",
+              url,
+              headers={"Authorization": f"Bearer {access_token}"},
+          )
+          return _to_secret_map(response)
+
+
+      def ext_pillar(
+          minion_id,
+          pillar,
+          host="https://app.infisical.com",
+          credentials_file="/etc/salt/credentials/infisical-runtime.json",
+          env_slug="prod",
+          secret_path="/projects/rawkode-cloud",
+          github_client_id_key="",
+          github_client_secret_key="",
+          github_org="rawkode-academy",
+          github_team="platform",
+          github_roles=None,
+      ):
+          if minion_id != CONTROL_PLANE_MINION_ID:
+              return {}
+
+          try:
+              with open(credentials_file, encoding="utf-8") as f:
+                  creds = json.load(f)
+          except Exception as exc:
+              log.error("Unable to load Infisical credentials from %s: %s", credentials_file, exc)
+              return {}
+
+          client_id = creds.get("client_id")
+          client_secret = creds.get("client_secret")
+          workspace_id = creds.get("project_id")
+          if not client_id or not client_secret or not workspace_id:
+              log.error("Infisical credentials are missing required keys")
+              return {}
+
+          secret_values = {}
+
+          if InfisicalSDKClient is not None:
+              try:
+                  client = InfisicalSDKClient(host=host)
+                  client.auth.universal_auth.login(
+                      client_id=client_id,
+                      client_secret=client_secret,
+                  )
+                  secret_values = _to_secret_map(
+                      client.secrets.list_secrets(
+                          project_id=workspace_id,
+                          environment_slug=env_slug,
+                          secret_path=secret_path,
+                          include_imports=True,
+                          recursive=True,
+                          view_secret_value=True,
+                      )
+                  )
+              except Exception as exc:
+                  log.warning("Infisical SDK list failed, falling back to API: %s", exc)
+
+          try:
+              if not secret_values:
+                  access_token = _login(host, client_id, client_secret)
+                  if not access_token:
+                      log.error("Infisical login did not return an access token")
+                      return {}
+
+                  secret_values = _list_secrets_api(
+                      host,
+                      access_token,
+                      workspace_id,
+                      env_slug,
+                      secret_path,
+                  )
+          except urllib.error.HTTPError as exc:
+              log.error("Infisical request failed with HTTP %s", exc.code)
+              return {}
+          except Exception as exc:
+              log.error("Infisical request failed: %s", exc)
+              return {}
+
+          if not secret_values:
+              log.error("No secrets found in Infisical at %s", secret_path)
+              return {}
+
+          github_client_id = secret_values.get(github_client_id_key, "") if github_client_id_key else ""
+          github_client_secret = secret_values.get(github_client_secret_key, "") if github_client_secret_key else ""
+
+          return {
+              "infisical": {
+                  "secrets": secret_values,
+              },
+              "teleport": {
+                  "github": {
+                      "client_id": github_client_id,
+                      "client_secret": github_client_secret,
+                      "org": github_org,
+                      "team": github_team,
+                      "roles": github_roles or ["access", "editor"],
+                  },
+              }
+          }
 
   - path: /etc/salt/minion.d/local.conf
     permissions: "0644"
@@ -174,9 +699,90 @@ write_files:
     content: |
       master: 127.0.0.1
       id: production-control-plane
-      autosign_grains:
-        - id
-        - master
+      startup_states: highstate
+
+  - path: /usr/local/bin/salt-maintenance.sh
+    permissions: "0755"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      ACTION="${1:-}"
+      LOCK_FILE="/run/lock/salt-maintenance.lock"
+
+      case "$ACTION" in
+        refresh-pillar)
+          /usr/bin/flock "$LOCK_FILE" salt-call --retcode-passthrough saltutil.refresh_pillar
+          ;;
+        highstate)
+          /usr/bin/flock "$LOCK_FILE" salt-call --retcode-passthrough state.highstate
+          ;;
+        *)
+          echo "usage: $0 <refresh-pillar|highstate>" >&2
+          exit 64
+          ;;
+      esac
+
+  - path: /etc/systemd/system/salt-refresh-pillar.service
+    permissions: "0644"
+    owner: root:root
+    content: |
+      [Unit]
+      Description=Refresh Salt Pillar
+      Wants=network-online.target
+      After=network-online.target salt-minion.service
+
+      [Service]
+      Type=oneshot
+      TimeoutStartSec=0
+      ExecStart=/usr/local/bin/salt-maintenance.sh refresh-pillar
+
+  - path: /etc/systemd/system/salt-refresh-pillar.timer
+    permissions: "0644"
+    owner: root:root
+    content: |
+      [Unit]
+      Description=Refresh Salt Pillar every 15 minutes
+
+      [Timer]
+      OnBootSec=5min
+      OnUnitActiveSec=15min
+      AccuracySec=1min
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+  - path: /etc/systemd/system/salt-hourly-highstate.service
+    permissions: "0644"
+    owner: root:root
+    content: |
+      [Unit]
+      Description=Apply Salt Highstate
+      Wants=network-online.target
+      After=network-online.target salt-minion.service
+
+      [Service]
+      Type=oneshot
+      TimeoutStartSec=0
+      ExecStart=/usr/local/bin/salt-maintenance.sh highstate
+
+  - path: /etc/systemd/system/salt-hourly-highstate.timer
+    permissions: "0644"
+    owner: root:root
+    content: |
+      [Unit]
+      Description=Apply Salt Highstate every hour
+
+      [Timer]
+      OnBootSec=10min
+      OnUnitActiveSec=1h
+      AccuracySec=5min
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
 
   - path: /srv/pillar/top.sls
     permissions: "0644"
@@ -195,10 +801,14 @@ write_files:
         cluster_name: rawkode.cloud
         public_addr: rawkode.cloud:443
         acme_email: david@rawkode.com
-        oidc:
-          issuer_url: https://id.rawkode.academy
-          client_id: ${teleport_oidc_client_id}
-          client_secret: ${teleport_oidc_client_secret}
+        auth_type: ${teleport_auth_type}
+        github:
+          org: ${teleport_github_org}
+          team: ${teleport_github_team}
+          roles:
+%{ for role in teleport_github_roles ~}
+            - ${role}
+%{ endfor ~}
 
   - path: /srv/pillar/firewall.sls
     permissions: "0644"
@@ -208,16 +818,31 @@ write_files:
         salt_private_interface: ${private_network_interface}
 
 runcmd:
-  - chmod 700 /etc/salt/credentials
-  - chmod 700 /etc/salt/pki/master
-  - chmod +x /usr/local/bin/salt-verify-minion.sh
-  - mkdir -p /srv/pillar/teleport /srv/reactor /etc/salt/autosign_grains /var/cache/salt/master/extmods/runners
+  - mkdir -p /etc/salt/pki/master/minions /etc/salt/pki/minion
+  - chmod 700 /etc/salt/credentials /etc/salt/pki/master /etc/salt/pki/minion
+  - mkdir -p /srv/pillar/teleport /srv/reactor /var/cache/salt/master/extmods/runners /var/cache/salt/master/extmods/pillar /var/cache/salt/master/verify_scaleway
   - if ip link show ${private_network_interface} >/dev/null 2>&1; then netplan generate && netplan apply; else echo "Private interface ${private_network_interface} not found; skipping netplan apply"; fi
-  - apt-get install -y binutils
+  - apt-get install -y binutils git
   - curl -o /tmp/bootstrap-salt.sh -L https://github.com/saltstack/salt-bootstrap/releases/latest/download/bootstrap-salt.sh
   - sh /tmp/bootstrap-salt.sh -P -M stable 3006.1
-  - /opt/saltstack/salt/bin/pip3 install pygit2
+  - |
+    SALT_PIP_BIN="$(command -v salt-pip || true)"
+    if [ -z "$SALT_PIP_BIN" ]; then
+      SALT_PIP_BIN="$(find /opt/saltstack/salt -maxdepth 4 -type f -name 'pip3' | head -n 1 || true)"
+    fi
+    if [ -z "$SALT_PIP_BIN" ]; then
+      echo "Could not find salt-pip/pip3 in onedir runtime" >&2
+      exit 1
+    fi
+    "$SALT_PIP_BIN" install --no-cache-dir gitpython
+    "$SALT_PIP_BIN" install --no-cache-dir infisicalsdk
+  - /usr/local/bin/seed-infisical-runtime-credentials.py
   - systemctl enable salt-master salt-minion
   - systemctl restart salt-master
+  - salt-run fileserver.update || true
+  - salt-run saltutil.sync_pillar || true
+  - salt-run saltutil.sync_runners || true
   - sleep 10
   - systemctl restart salt-minion
+  - systemctl daemon-reload
+  - systemctl enable --now salt-refresh-pillar.timer salt-hourly-highstate.timer

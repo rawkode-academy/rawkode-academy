@@ -1,3 +1,10 @@
+{% set teleport_auth_type = salt['pillar.get']('teleport:auth_type', 'github') %}
+{% set gh = salt['pillar.get']('teleport:github', {}) %}
+{% set gh_client_id = gh.get('client_id', '') %}
+{% set gh_client_secret = gh.get('client_secret', '') %}
+{% set gh_org = gh.get('org', '') %}
+{% set gh_team = gh.get('team', '') %}
+
 teleport_repo_key:
   cmd.run:
     - name: |
@@ -47,10 +54,24 @@ teleport_service:
       - pkg: teleport_installed
       - file: teleport_data_dir
 
-teleport_oidc_connector:
+teleport_auth_ready:
+  cmd.run:
+    - name: |
+        for _ in $(seq 1 30); do
+          if tctl --config=/etc/teleport.yaml status >/dev/null 2>&1; then
+            exit 0
+          fi
+          sleep 2
+        done
+        tctl --config=/etc/teleport.yaml status
+    - require:
+      - service: teleport_service
+
+{% if teleport_auth_type == 'github' and gh_client_id and gh_client_secret and gh_org and gh_team %}
+teleport_github_connector:
   file.managed:
-    - name: /etc/teleport/oidc-connector.yaml
-    - source: salt://teleport/files/oidc-connector.yaml.jinja
+    - name: /etc/teleport/github-connector.yaml
+    - source: salt://teleport/files/github-connector.yaml.jinja
     - template: jinja
     - user: root
     - group: root
@@ -59,10 +80,25 @@ teleport_oidc_connector:
     - require:
       - pkg: teleport_installed
 
-teleport_apply_oidc_connector:
+teleport_ensure_github_connector_present:
   cmd.run:
-    - name: tctl create -f /etc/teleport/oidc-connector.yaml
-    - onchanges:
-      - file: teleport_oidc_connector
+    - name: tctl --config=/etc/teleport.yaml create -f /etc/teleport/github-connector.yaml
+    - unless: tctl --config=/etc/teleport.yaml get github/github >/dev/null 2>&1
     - require:
-      - service: teleport_service
+      - cmd: teleport_auth_ready
+      - file: teleport_github_connector
+
+teleport_update_github_connector:
+  cmd.run:
+    - name: |
+        tctl --config=/etc/teleport.yaml rm github/github >/dev/null 2>&1 || true
+        tctl --config=/etc/teleport.yaml create -f /etc/teleport/github-connector.yaml
+    - onchanges:
+      - file: teleport_github_connector
+    - require:
+      - cmd: teleport_auth_ready
+{% else %}
+teleport_github_connector_not_configured:
+  test.show_notification:
+    - text: Teleport GitHub connector skipped (set teleport.auth_type=github and github client_id/client_secret/org/team in pillar).
+{% endif %}
