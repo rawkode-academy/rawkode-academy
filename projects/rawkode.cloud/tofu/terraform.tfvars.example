@@ -1,0 +1,13 @@
+# Required variables (scaleway_project_id, infisical_org_id) and credentials
+# are set via TF_VAR_ environment variables through cuenv.
+# Run: cuenv task plan
+
+# Override defaults here if needed:
+# scaleway_region      = "fr-par"
+# scaleway_zone        = "fr-par-2"
+# cluster_name         = "rawkode-cloud"
+# node_names           = ["rkc01"]
+# baremetal_offer      = "EM-A115X-SATA"
+# baremetal_os         = "ubuntu_jammy"
+# private_network_name = "rawkode-cloud-private"
+# tags                 = ["rawkode-cloud", "kubernetes"]
