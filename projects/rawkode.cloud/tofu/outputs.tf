@@ -3,11 +3,9 @@ output "private_network_id" {
   value       = scaleway_vpc_private_network.cluster.id
 }
 
-output "baremetal_server_ids" {
-  description = "Bare metal server IDs keyed by node name"
-  value = {
-    for name, server in scaleway_baremetal_server.node : name => server.id
-  }
+output "control_plane_server_id" {
+  description = "Control plane bare metal server ID"
+  value       = scaleway_baremetal_server.control_plane.id
 }
 
 output "infisical_project_id" {
