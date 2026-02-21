@@ -32,14 +32,14 @@ tofu apply
   - Required template vars: `private_network_interface`, `salt_master_private_ip`, `minion_id`.
   - `minion_id` can be empty to default to Scaleway metadata hostname.
 - Minions are provisioned via `for_each` in `tofu/main.tf`.
-  - Configure `minion_replica_count` (default: `1`) and `minion_name_prefix`.
-  - Set `salt_master_private_ip` to the control-plane private-network address when minions are enabled.
+  - Configure `minion_replica_count` (default: `0`) and `minion_name_prefix`.
+  - `salt_master_private_ip` is optional; when unset, minions use the control-plane private IPv4 discovered from `private_ips`.
 - Teleport OSS uses GitHub auth in this stack.
   - Set `teleport_auth_type = "github"` (default).
   - Set `teleport_github_org` and `teleport_github_team` (defaults: `rawkode-academy` / `platform`).
-  - Salt ext_pillar fetches all secrets at runtime from Infisical path `/projects/rawkode-cloud` in `prod` and exposes them as `infisical:secrets`.
+  - Salt ext_pillar fetches all secrets at runtime from Infisical path `/projects/rawkode-cloud` in `production` and exposes them as `infisical:secrets`.
   - Teleport maps key names from `teleport_github_client_id_key` and `teleport_github_client_secret_key` (defaults: `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`).
 - Infisical credentials are two-stage.
   - Bootstrap credentials are injected by cloud-init and only used to fetch runtime credentials from Infisical.
-  - Terraform creates runtime machine-identity credentials and stores them as secrets (`SALT_PILLAR_CLIENT_ID`, `SALT_PILLAR_CLIENT_SECRET`, `SALT_PILLAR_PROJECT_ID` by default).
+  - Terraform creates runtime machine-identity credentials and stores them as secrets (`SALT_PILLAR_INFISICAL_CLIENT_ID`, `SALT_PILLAR_INFISICAL_CLIENT_SECRET`, `SALT_PILLAR_INFISICAL_PROJECT_ID` by default).
   - Salt ext_pillar uses `/etc/salt/credentials/infisical-runtime.json` for steady-state reads.
