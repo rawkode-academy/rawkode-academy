@@ -1,0 +1,81 @@
+#cloud-config
+write_files:
+  - path: /usr/local/sbin/fetch-salt-credentials.sh
+    permissions: "0700"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      BOOTSTRAP_TOKEN="${bootstrap_token}"
+      INFISICAL_PROJECT_ID="${infisical_project_id}"
+      INFISICAL_HOST="https://app.infisical.com"
+
+      SECRET_DIR="/etc/salt/credentials"
+      mkdir -p "$SECRET_DIR"
+      chmod 700 "$SECRET_DIR"
+
+      # --- Phase 1: Bootstrap ---
+      # Use short-lived token auth token to fetch universal auth credentials
+      BOOTSTRAP_SECRETS=$(curl -sS -f \
+        "$INFISICAL_HOST/api/v3/secrets/raw?workspaceId=$INFISICAL_PROJECT_ID&environment=prod&secretPath=/bootstrap" \
+        -H "Authorization: Bearer $BOOTSTRAP_TOKEN")
+
+      INFISICAL_CLIENT_ID=$(python3 -c "
+      import sys, json
+      data = json.load(sys.stdin)
+      secrets = {s['secretKey']: s['secretValue'] for s in data['secrets']}
+      print(secrets['INFISICAL_CLIENT_ID'])
+      " <<< "$BOOTSTRAP_SECRETS")
+
+      INFISICAL_CLIENT_SECRET=$(python3 -c "
+      import sys, json
+      data = json.load(sys.stdin)
+      secrets = {s['secretKey']: s['secretValue'] for s in data['secrets']}
+      print(secrets['INFISICAL_CLIENT_SECRET'])
+      " <<< "$BOOTSTRAP_SECRETS")
+
+      # --- Phase 2: Runtime ---
+      # Authenticate with universal auth using the fetched credentials
+      RUNTIME_TOKEN=$(curl -sS -f -X POST \
+        "$INFISICAL_HOST/api/v1/auth/universal-auth/login" \
+        -H "Content-Type: application/json" \
+        -d "{\"clientId\":\"$INFISICAL_CLIENT_ID\",\"clientSecret\":\"$INFISICAL_CLIENT_SECRET\"}" \
+        | python3 -c "import sys,json; print(json.load(sys.stdin)['accessToken'])")
+
+      # Fetch operational secrets from /salt-master
+      SECRETS=$(curl -sS -f \
+        "$INFISICAL_HOST/api/v3/secrets/raw?workspaceId=$INFISICAL_PROJECT_ID&environment=prod&secretPath=/salt-master" \
+        -H "Authorization: Bearer $RUNTIME_TOKEN")
+
+      # Write Scaleway credential file for Salt
+      python3 -c "
+      import sys, json
+      data = json.load(sys.stdin)
+      secrets = {s['secretKey']: s['secretValue'] for s in data['secrets']}
+      json.dump({
+          'access_key': secrets['SCW_ACCESS_KEY'],
+          'secret_key': secrets['SCW_SECRET_KEY'],
+          'project_id': secrets['SCW_PROJECT_ID'],
+          'region': '${region}',
+          'zone': '${zone}'
+      }, open('$SECRET_DIR/scaleway-api.json', 'w'), indent=2)
+      " <<< "$SECRETS"
+
+      chmod 600 "$SECRET_DIR/scaleway-api.json"
+
+      # Persist universal auth credentials for ongoing Salt use
+      python3 -c "
+      import json
+      json.dump({
+          'client_id': '$INFISICAL_CLIENT_ID',
+          'client_secret': '$INFISICAL_CLIENT_SECRET',
+          'project_id': '$INFISICAL_PROJECT_ID'
+      }, open('$SECRET_DIR/infisical.json', 'w'), indent=2)
+      "
+
+      chmod 600 "$SECRET_DIR/infisical.json"
+      chown -R root:root "$SECRET_DIR"
+
+runcmd:
+  - /usr/local/sbin/fetch-salt-credentials.sh
