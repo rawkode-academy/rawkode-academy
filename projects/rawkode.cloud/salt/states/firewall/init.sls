@@ -1,3 +1,5 @@
+{% set salt_private_interface = salt['pillar.get']('firewall:salt_private_interface', 'enp6s0') %}
+
 ufw_installed:
   pkg.installed:
     - name: ufw
@@ -23,12 +25,19 @@ ufw_allow_ssh:
     - require:
       - cmd: ufw_default_deny_incoming
 
-ufw_allow_salt:
+ufw_remove_public_salt_rule:
   cmd.run:
-    - name: ufw allow 4505:4506/tcp
-    - unless: ufw status | grep -q "4505:4506/tcp"
+    - name: ufw --force delete allow 4505:4506/tcp
+    - onlyif: ufw status | grep -qE '^[[:space:]]*4505:4506/tcp[[:space:]]+ALLOW IN[[:space:]]+Anywhere$'
     - require:
       - cmd: ufw_default_deny_incoming
+
+ufw_allow_salt:
+  cmd.run:
+    - name: ufw allow in on {{ salt_private_interface }} to any port 4505:4506 proto tcp
+    - unless: ufw status | grep -qE "4505:4506/tcp on {{ salt_private_interface }}[[:space:]]+ALLOW IN"
+    - require:
+      - cmd: ufw_remove_public_salt_rule
 
 ufw_allow_https:
   cmd.run:

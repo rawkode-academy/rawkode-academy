@@ -46,26 +46,15 @@ variable "private_network_name" {
   default     = "rawkode-cloud-private"
 }
 
+variable "private_network_interface" {
+  description = "Linux interface name attached to the Scaleway private network"
+  type        = string
+  default     = "enp6s0"
+}
+
 variable "tags" {
   description = "Tags applied to resources"
   type        = list(string)
   default     = ["rawkode-cloud", "kubernetes"]
-}
-
-variable "cloudflare_zone_id" {
-  description = "Cloudflare zone ID for rawkode.cloud"
-  type        = string
-}
-
-variable "teleport_oidc_client_id" {
-  description = "OIDC client ID for Teleport authentication"
-  type        = string
-  sensitive   = true
-}
-
-variable "teleport_oidc_client_secret" {
-  description = "OIDC client secret for Teleport authentication"
-  type        = string
-  sensitive   = true
 }
 
