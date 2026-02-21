@@ -56,8 +56,9 @@ resource "scaleway_baremetal_server" "control_plane" {
       })
       salt_master_private_key     = tls_private_key.salt_master.private_key_pem
       salt_master_public_key      = tls_private_key.salt_master.public_key_pem
-      teleport_oidc_client_id     = var.teleport_oidc_client_id
-      teleport_oidc_client_secret = var.teleport_oidc_client_secret
+      teleport_oidc_client_id     = "rawkode-cloud"
+      teleport_oidc_client_secret = "pkce-public-client-placeholder"
+      private_network_interface   = var.private_network_interface
     }
   )
 
@@ -77,8 +78,5 @@ resource "scaleway_baremetal_server" "control_plane" {
     infisical_secret.scaleway_project_id,
     infisical_secret.salt_master_private_key,
     infisical_secret.salt_master_public_key,
-    infisical_secret.teleport_oidc_client_id,
-    infisical_secret.teleport_oidc_client_secret,
   ]
 }
-

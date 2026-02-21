@@ -12,6 +12,18 @@ write_files:
     content: |
       ${scaleway_credentials_json}
 
+  - path: /etc/netplan/60-private-network.yaml
+    permissions: "0644"
+    owner: root:root
+    content: |
+      network:
+        version: 2
+        ethernets:
+          ${private_network_interface}:
+            dhcp4: true
+            dhcp6: false
+            optional: true
+
   - path: /etc/salt/pki/master/master.pem
     permissions: "0600"
     owner: root:root
@@ -46,6 +58,24 @@ write_files:
         base:
           - /srv/pillar
 
+  - path: /etc/salt/master.d/autosign.conf
+    permissions: "0644"
+    owner: root:root
+    content: |
+      autosign_grains_dir: /etc/salt/autosign_grains
+
+  - path: /etc/salt/autosign_grains/id
+    permissions: "0600"
+    owner: root:root
+    content: |
+      production-control-plane
+
+  - path: /etc/salt/autosign_grains/master
+    permissions: "0600"
+    owner: root:root
+    content: |
+      127.0.0.1
+
   - path: /etc/salt/master.d/reactor.conf
     permissions: "0644"
     owner: root:root
@@ -58,13 +88,53 @@ write_files:
     permissions: "0644"
     owner: root:root
     content: |
-      {%- if data['act'] == 'pend' %}
-      verify_minion:
-        local.cmd.run:
-          - tgt: salt-call
-          - arg:
-            - /usr/local/bin/salt-verify-minion.sh {{ data['id'] }}
+      {# Auto-accept is handled by autosign_grains for the control plane. #}
+      {# This reactor verifies non-control-plane minions against Scaleway API. #}
+      {%- if data['act'] == 'pend' and data['id'] != 'production-control-plane' %}
+      verify_and_accept:
+        runner.verify_scaleway.accept:
+          - args:
+            - minion_id: {{ data['id'] }}
       {%- endif %}
+
+  - path: /var/cache/salt/master/extmods/runners/verify_scaleway.py
+    permissions: "0644"
+    owner: root:root
+    content: |
+      import json
+      import subprocess
+      import urllib.request
+      import logging
+
+      log = logging.getLogger(__name__)
+
+      def accept(minion_id):
+          creds_file = "/etc/salt/credentials/scaleway-api.json"
+          with open(creds_file) as f:
+              creds = json.load(f)
+
+          secret_key = creds["secret_key"]
+          zone = creds["zone"]
+
+          url = f"https://api.scaleway.com/baremetal/v1/zones/{zone}/servers"
+          req = urllib.request.Request(url, headers={"X-Auth-Token": secret_key})
+
+          try:
+              with urllib.request.urlopen(req) as resp:
+                  data = json.loads(resp.read())
+          except Exception as e:
+              log.error("Failed to query Scaleway API: %s", e)
+              return False
+
+          server_names = [s["name"] for s in data.get("servers", [])]
+
+          if minion_id in server_names:
+              log.info("Verified: server '%s' exists in Scaleway zone %s", minion_id, zone)
+              subprocess.run(["salt-key", "-ya", minion_id], check=True)
+              return True
+          else:
+              log.warning("Rejected: no server named '%s' found in Scaleway zone %s", minion_id, zone)
+              return False
 
   - path: /usr/local/bin/salt-verify-minion.sh
     permissions: "0755"
@@ -81,7 +151,6 @@ write_files:
       fi
 
       CREDS_FILE="/etc/salt/credentials/scaleway-api.json"
-      ACCESS_KEY=$(jq -r '.access_key' "$CREDS_FILE")
       SECRET_KEY=$(jq -r '.secret_key' "$CREDS_FILE")
       ZONE=$(jq -r '.zone' "$CREDS_FILE")
 
@@ -105,6 +174,9 @@ write_files:
     content: |
       master: 127.0.0.1
       id: production-control-plane
+      autosign_grains:
+        - id
+        - master
 
   - path: /srv/pillar/top.sls
     permissions: "0644"
@@ -113,6 +185,7 @@ write_files:
       base:
         'production-control-plane':
           - teleport
+          - firewall
 
   - path: /srv/pillar/teleport/init.sls
     permissions: "0644"
@@ -127,14 +200,23 @@ write_files:
           client_id: ${teleport_oidc_client_id}
           client_secret: ${teleport_oidc_client_secret}
 
+  - path: /srv/pillar/firewall.sls
+    permissions: "0644"
+    owner: root:root
+    content: |
+      firewall:
+        salt_private_interface: ${private_network_interface}
+
 runcmd:
   - chmod 700 /etc/salt/credentials
   - chmod 700 /etc/salt/pki/master
   - chmod +x /usr/local/bin/salt-verify-minion.sh
-  - mkdir -p /srv/pillar/teleport /srv/reactor
-  - curl -o /tmp/bootstrap-salt.sh -L https://bootstrap.saltproject.io
-  - sh /tmp/bootstrap-salt.sh -M
-  - apt-get install -y python3-pygit2
+  - mkdir -p /srv/pillar/teleport /srv/reactor /etc/salt/autosign_grains /var/cache/salt/master/extmods/runners
+  - if ip link show ${private_network_interface} >/dev/null 2>&1; then netplan generate && netplan apply; else echo "Private interface ${private_network_interface} not found; skipping netplan apply"; fi
+  - apt-get install -y binutils
+  - curl -o /tmp/bootstrap-salt.sh -L https://github.com/saltstack/salt-bootstrap/releases/latest/download/bootstrap-salt.sh
+  - sh /tmp/bootstrap-salt.sh -P -M stable 3006.1
+  - /opt/saltstack/salt/bin/pip3 install pygit2
   - systemctl enable salt-master salt-minion
   - systemctl restart salt-master
   - sleep 10

@@ -10,4 +10,5 @@
 # baremetal_offer      = "EM-A115X-SATA"
 # baremetal_os         = "ubuntu_jammy"
 # private_network_name = "rawkode-cloud-private"
+# private_network_interface = "enp6s0"
 # tags                 = ["rawkode-cloud", "kubernetes"]

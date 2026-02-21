@@ -120,23 +120,3 @@ resource "infisical_secret" "salt_master_public_key" {
   folder_path  = "/projects/rawkode-cloud"
   depends_on   = [infisical_secret_folder.rawkode_cloud]
 }
-
-# --- Teleport OIDC credentials ---
-
-resource "infisical_secret" "teleport_oidc_client_id" {
-  name         = "TELEPORT_OIDC_CLIENT_ID"
-  value        = var.teleport_oidc_client_id
-  env_slug     = "prod"
-  workspace_id = infisical_project.rawkode_cloud.id
-  folder_path  = "/projects/rawkode-cloud"
-  depends_on   = [infisical_secret_folder.rawkode_cloud]
-}
-
-resource "infisical_secret" "teleport_oidc_client_secret" {
-  name         = "TELEPORT_OIDC_CLIENT_SECRET"
-  value        = var.teleport_oidc_client_secret
-  env_slug     = "prod"
-  workspace_id = infisical_project.rawkode_cloud.id
-  folder_path  = "/projects/rawkode-cloud"
-  depends_on   = [infisical_secret_folder.rawkode_cloud]
-}
