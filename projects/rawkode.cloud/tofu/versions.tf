@@ -25,5 +25,20 @@ terraform {
       source  = "Infisical/infisical"
       version = ">= 0.16.4"
     }
+
+    tls = {
+      source  = "hashicorp/tls"
+      version = ">= 4.0.0"
+    }
+
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.12.0"
+    }
+
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = ">= 5.0.0"
+    }
   }
 }

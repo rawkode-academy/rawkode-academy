@@ -7,7 +7,7 @@ variable "scaleway_region" {
 variable "scaleway_zone" {
   description = "Scaleway zone for zonal resources"
   type        = string
-  default     = "fr-par-2"
+  default     = "fr-par-1"
 }
 
 variable "cluster_name" {
@@ -16,16 +16,16 @@ variable "cluster_name" {
   default     = "rawkode-cloud"
 }
 
-variable "node_names" {
-  description = "Bare metal node names"
-  type        = list(string)
-  default     = ["production-01"]
-}
-
 variable "baremetal_offer" {
   description = "Scaleway Elastic Metal offer name"
   type        = string
-  default     = "EM-A315X-SSD"
+  default     = "EM-A610R-NVME"
+}
+
+variable "baremetal_subscription_period" {
+  description = "Billing period for the Elastic Metal offer"
+  type        = string
+  default     = "hourly"
 }
 
 variable "baremetal_os" {
@@ -46,15 +46,26 @@ variable "private_network_name" {
   default     = "rawkode-cloud-private"
 }
 
-variable "salt_master_node" {
-  description = "Node name that runs the Salt master"
-  type        = string
-  default     = "production-01"
-}
-
 variable "tags" {
   description = "Tags applied to resources"
   type        = list(string)
   default     = ["rawkode-cloud", "kubernetes"]
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone ID for rawkode.cloud"
+  type        = string
+}
+
+variable "teleport_oidc_client_id" {
+  description = "OIDC client ID for Teleport authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "teleport_oidc_client_secret" {
+  description = "OIDC client secret for Teleport authentication"
+  type        = string
+  sensitive   = true
 }
 
