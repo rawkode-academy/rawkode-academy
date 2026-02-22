@@ -64,8 +64,12 @@ func WaitForMaintenanceMode(ctx context.Context, ip string, timeout time.Duratio
 func ApplyConfig(ctx context.Context, ip string, genCfg *GeneratedConfig) error {
 	address := net.JoinHostPort(ip, "50000")
 
-	conn, err := grpc.DialContext(ctx, address,
+	dialCtx, dialCancel := context.WithTimeout(ctx, 10*time.Second)
+	defer dialCancel()
+
+	conn, err := grpc.DialContext(dialCtx, address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
 	)
 	if err != nil {
 		return fmt.Errorf("connect to talos: %w", err)
@@ -88,7 +92,7 @@ func ApplyConfig(ctx context.Context, ip string, genCfg *GeneratedConfig) error 
 	}
 
 	slog.Info("configuration applied, node will reboot into cluster mode",
-		"phase", "4",
+		"phase", "5",
 		"ip", ip,
 	)
 	return nil
@@ -118,7 +122,7 @@ func BootstrapCluster(ctx context.Context, ip string, genCfg *GeneratedConfig) e
 		return fmt.Errorf("bootstrap etcd: %w", err)
 	}
 
-	slog.Info("etcd bootstrap initiated", "phase", "4", "ip", ip)
+	slog.Info("etcd bootstrap initiated", "phase", "5", "ip", ip)
 
 	if err := waitForKubernetesReady(ctx, c, 10*time.Minute); err != nil {
 		return fmt.Errorf("kubernetes readiness: %w", err)
@@ -146,7 +150,7 @@ func waitForTalosAPI(ctx context.Context, c *talosclient.Client, timeout time.Du
 				slog.Debug("waiting for Talos API with mTLS", "error", err)
 				continue
 			}
-			slog.Info("Talos API available with mTLS", "phase", "4")
+			slog.Info("Talos API available with mTLS", "phase", "5")
 			return nil
 		}
 	}
@@ -200,7 +204,7 @@ func waitForKubernetesReady(ctx context.Context, c *talosclient.Client, timeout 
 			}
 
 			if allHealthy {
-				slog.Info("all Talos services healthy", "phase", "4")
+				slog.Info("all Talos services healthy", "phase", "5")
 				return nil
 			}
 		}
