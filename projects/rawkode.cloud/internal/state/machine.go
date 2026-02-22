@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rawkode-academy/rawkode-cloud/internal/cloudflare"
 	"github.com/rawkode-academy/rawkode-cloud/internal/infisical"
 	"github.com/rawkode-academy/rawkode-cloud/internal/scaleway"
 	"github.com/rawkode-academy/rawkode-cloud/internal/talos"
@@ -32,6 +33,11 @@ type Config struct {
 	ScalewayAccessKey string
 	ScalewaySecretKey string
 
+	// Cloudflare DNS — for setting A record after server IP is known
+	CloudflareAPIToken string
+	CloudflareZoneID   string
+	CloudflareDNSName  string
+
 	// Infisical connection — used to fetch all other secrets
 	InfisicalURL          string
 	InfisicalClientID     string
@@ -41,16 +47,25 @@ type Config struct {
 	InfisicalSecretPath   string
 
 	// InfisicalClusterClientID and InfisicalClusterClientSecret are the machine
-	// identity credentials for the cluster's dedicated Infisical identity. At
-	// provisioning time, the CLI uses these to mint a fresh, short-lived bootstrap
-	// token that gets injected into the cluster. This keeps provisioning-level
-	// Infisical access separate from runtime cluster access.
-	// Fetched from INFISICAL_CLUSTER_CLIENT_ID and INFISICAL_CLUSTER_CLIENT_SECRET.
+	// identity credentials for the cluster's dedicated Infisical identity. These
+	// are injected directly into the cluster as a Kubernetes secret — no need for
+	// a short-lived bootstrap token since the CLI orchestrates the entire flow.
 	InfisicalClusterClientID     string
 	InfisicalClusterClientSecret string
 }
 
-// Run executes the 5-phase provisioning pipeline.
+// Run executes the 7-phase provisioning pipeline.
+//
+// Phases:
+//
+//	0: Resolve secrets from Infisical
+//	1: Order bare metal server with OS install (single API call)
+//	2: Wait for install + Talos boot
+//	3: Update Cloudflare DNS
+//	4: Generate config (tokens, certs, manifests)
+//	5: Bootstrap cluster
+//	6: Verify Teleport, then lockdown
+//
 // Each phase has clear entry/exit conditions. If any phase fails,
 // cleanup runs in reverse order (LIFO).
 func Run(ctx context.Context, cfg Config) error {
@@ -69,13 +84,10 @@ func Run(ctx context.Context, cfg Config) error {
 	// ── Phase 0: Resolve secrets from Infisical ──
 	// Infisical is the single source of truth for all secret material.
 	// If we have Infisical credentials, authenticate and fetch any missing values.
-	var infClient *infisical.Client
-
 	if cfg.InfisicalURL != "" && cfg.InfisicalClientID != "" && cfg.InfisicalClientSecret != "" {
 		slog.Info("authenticating with Infisical", "url", cfg.InfisicalURL)
 
-		var err error
-		infClient, err = infisical.NewClient(ctx, cfg.InfisicalURL, cfg.InfisicalClientID, cfg.InfisicalClientSecret)
+		infClient, err := infisical.NewClient(ctx, cfg.InfisicalURL, cfg.InfisicalClientID, cfg.InfisicalClientSecret)
 		if err != nil {
 			return fmt.Errorf("infisical auth: %w", err)
 		}
@@ -111,10 +123,18 @@ func Run(ctx context.Context, cfg Config) error {
 		return fmt.Errorf("init scaleway: %w", err)
 	}
 
-	// ── Phase 1: Order bare metal server ──
-	slog.Info("starting phase 1: bare metal provisioning", "phase", "1")
+	// ── Phase 1: Order bare metal server with OS install ──
+	// Combined into a single API call — Scaleway starts OS installation
+	// automatically once hardware is allocated. No more waiting for hardware
+	// ready before triggering a separate install.
+	slog.Info("starting phase 1: bare metal provisioning with OS install", "phase", "1")
 
-	server, err := scaleway.OrderServer(ctx, scwAPI, cfg.OfferID, cfg.Zone)
+	server, err := scaleway.OrderServer(ctx, scwAPI, scaleway.ProvisionParams{
+		OfferID:      cfg.OfferID,
+		Zone:         cfg.Zone,
+		OSID:         cfg.OSID,
+		TalosVersion: cfg.TalosVersion,
+	})
 	if err != nil {
 		return fmt.Errorf("phase 1 failed: %w", err)
 	}
@@ -132,9 +152,12 @@ func Run(ctx context.Context, cfg Config) error {
 		}
 	})
 
+	// ── Phase 2: Wait for install completion + Talos boot ──
+	slog.Info("starting phase 2: waiting for install and Talos boot", "phase", "2")
+
 	server, err = scaleway.WaitForReady(ctx, scwAPI, serverID, cfg.Zone)
 	if err != nil {
-		return fmt.Errorf("phase 1 (wait) failed: %w", err)
+		return fmt.Errorf("phase 2 (install wait) failed: %w", err)
 	}
 
 	// Extract the server's public IP
@@ -144,20 +167,7 @@ func Run(ctx context.Context, cfg Config) error {
 		break
 	}
 	if publicIP == "" {
-		return fmt.Errorf("phase 1 failed: server has no public IP")
-	}
-
-	// ── Phase 2: Install OS with Talos pivot ──
-	slog.Info("starting phase 2: OS pivot", "phase", "2")
-
-	err = scaleway.InstallOS(ctx, scwAPI, serverID, cfg.Zone, cfg.OSID, cfg.TalosVersion)
-	if err != nil {
-		return fmt.Errorf("phase 2 failed: %w", err)
-	}
-
-	err = scaleway.WaitForInstall(ctx, scwAPI, serverID, cfg.Zone)
-	if err != nil {
-		return fmt.Errorf("phase 2 (install wait) failed: %w", err)
+		return fmt.Errorf("phase 2 failed: server has no public IP")
 	}
 
 	err = talos.WaitForMaintenanceMode(ctx, publicIP, 20*time.Minute)
@@ -165,70 +175,69 @@ func Run(ctx context.Context, cfg Config) error {
 		return fmt.Errorf("phase 2 (talos boot) failed: %w", err)
 	}
 
-	// ── Phase 3: Generate config (tokens, certs, manifests) ──
+	// ── Phase 3: Update Cloudflare DNS ──
+	// Point the DNS record at the new server so Teleport can reach it.
+	if cfg.CloudflareAPIToken != "" && cfg.CloudflareZoneID != "" && cfg.CloudflareDNSName != "" {
+		slog.Info("starting phase 3: DNS update", "phase", "3")
+
+		err = cloudflare.UpsertARecord(ctx, cfg.CloudflareAPIToken, cfg.CloudflareZoneID, cfg.CloudflareDNSName, publicIP)
+		if err != nil {
+			return fmt.Errorf("phase 3 (dns) failed: %w", err)
+		}
+	} else {
+		slog.Warn("skipping phase 3: Cloudflare DNS not configured", "phase", "3")
+	}
+
+	// ── Phase 4: Generate config (tokens, certs, manifests) ──
 	// Happens AFTER ordering because tokens have limited lifetimes.
-	slog.Info("starting phase 3: configuration generation", "phase", "3")
+	slog.Info("starting phase 4: configuration generation", "phase", "4")
 
 	operatorIP, err := GetOperatorIP(ctx)
 	if err != nil {
-		return fmt.Errorf("phase 3 (operator IP) failed: %w", err)
+		return fmt.Errorf("phase 4 (operator IP) failed: %w", err)
 	}
 
 	teleportToken, err := teleport.GenerateJoinToken(ctx, cfg.TeleportProxy, 30*time.Minute)
 	if err != nil {
-		return fmt.Errorf("phase 3 (teleport token) failed: %w", err)
+		return fmt.Errorf("phase 4 (teleport token) failed: %w", err)
 	}
 
-	// Mint a fresh, short-lived Infisical bootstrap token for the cluster's own
-	// machine identity. The CLI authenticates as the cluster identity using its
-	// dedicated clientID/clientSecret (stored as secrets in Infisical) to obtain
-	// this token. This keeps the CLI's provisioning-level access fully separate
-	// from the cluster's runtime access.
-	var infisicalBootstrapToken string
+	// Validate Infisical cluster identity: both must be set or both absent.
 	clusterIDSet := cfg.InfisicalClusterClientID != ""
 	clusterSecretSet := cfg.InfisicalClusterClientSecret != ""
 	if clusterIDSet != clusterSecretSet {
-		return fmt.Errorf("phase 3: INFISICAL_CLUSTER_CLIENT_ID and INFISICAL_CLUSTER_CLIENT_SECRET must both be set or both be absent")
-	}
-	if infClient != nil && clusterIDSet {
-		infisicalBootstrapToken, err = infClient.CreateClusterBootstrapToken(
-			ctx,
-			cfg.InfisicalClusterClientID,
-			cfg.InfisicalClusterClientSecret,
-		)
-		if err != nil {
-			return fmt.Errorf("phase 3 (infisical bootstrap token) failed: %w", err)
-		}
+		return fmt.Errorf("phase 4: INFISICAL_CLUSTER_CLIENT_ID and INFISICAL_CLUSTER_CLIENT_SECRET must both be set or both be absent")
 	}
 
 	talosConfig, err := talos.GenerateConfig(talos.ClusterConfig{
-		ClusterName:       cfg.ClusterName,
-		ServerPublicIP:    publicIP,
-		TeleportToken:     teleportToken,
-		TeleportProxyAddr: cfg.TeleportProxy,
-		InfisicalToken:    infisicalBootstrapToken,
-		OperatorIP:        operatorIP,
-		KubernetesVersion: cfg.KubernetesVersion,
+		ClusterName:                  cfg.ClusterName,
+		ServerPublicIP:               publicIP,
+		TeleportToken:                teleportToken,
+		TeleportProxyAddr:            cfg.TeleportProxy,
+		InfisicalClusterClientID:     cfg.InfisicalClusterClientID,
+		InfisicalClusterClientSecret: cfg.InfisicalClusterClientSecret,
+		OperatorIP:                   operatorIP,
+		KubernetesVersion:            cfg.KubernetesVersion,
 	})
 	if err != nil {
-		return fmt.Errorf("phase 3 (talos config) failed: %w", err)
+		return fmt.Errorf("phase 4 (talos config) failed: %w", err)
 	}
 
-	// ── Phase 4: Bootstrap cluster ──
-	slog.Info("starting phase 4: cluster bootstrap", "phase", "4")
+	// ── Phase 5: Bootstrap cluster ──
+	slog.Info("starting phase 5: cluster bootstrap", "phase", "5")
 
 	err = talos.ApplyConfig(ctx, publicIP, talosConfig)
 	if err != nil {
-		return fmt.Errorf("phase 4 (apply config) failed: %w", err)
+		return fmt.Errorf("phase 5 (apply config) failed: %w", err)
 	}
 
 	err = talos.BootstrapCluster(ctx, publicIP, talosConfig)
 	if err != nil {
-		return fmt.Errorf("phase 4 (bootstrap) failed: %w", err)
+		return fmt.Errorf("phase 5 (bootstrap) failed: %w", err)
 	}
 
-	// ── Phase 5: Verify Teleport, then lockdown ──
-	slog.Info("starting phase 5: verify and lockdown", "phase", "5")
+	// ── Phase 6: Verify Teleport, then lockdown ──
+	slog.Info("starting phase 6: verify and lockdown", "phase", "6")
 
 	err = teleport.WaitForAgent(ctx, cfg.TeleportProxy, cfg.ClusterName, 10*time.Minute)
 	if err != nil {
@@ -239,12 +248,12 @@ func Run(ctx context.Context, cfg Config) error {
 			"server_ip", publicIP,
 		)
 		skipCleanup = true
-		return fmt.Errorf("phase 5 (teleport verify) failed — server left running for manual debug: %w", err)
+		return fmt.Errorf("phase 6 (teleport verify) failed — server left running for manual debug: %w", err)
 	}
 
 	err = talos.LockdownFirewall(ctx, publicIP, talosConfig)
 	if err != nil {
-		return fmt.Errorf("phase 5 (lockdown) failed: %w", err)
+		return fmt.Errorf("phase 6 (lockdown) failed: %w", err)
 	}
 
 	// Success — skip cleanup so we don't delete the working server
@@ -260,18 +269,6 @@ func Run(ctx context.Context, cfg Config) error {
 }
 
 // backfillFromSecrets fills in any missing Config fields from Infisical secrets.
-// Secret keys map to config fields by convention:
-//
-//	SCW_ACCESS_KEY                  -> ScalewayAccessKey
-//	SCW_SECRET_KEY                  -> ScalewaySecretKey
-//	TELEPORT_PROXY                  -> TeleportProxy
-//	SCALEWAY_OFFER_ID               -> OfferID
-//	SCALEWAY_OS_ID                  -> OSID
-//	CLUSTER_NAME                    -> ClusterName
-//	TALOS_VERSION                   -> TalosVersion
-//	KUBERNETES_VERSION              -> KubernetesVersion
-//	INFISICAL_CLUSTER_CLIENT_ID     -> InfisicalClusterClientID
-//	INFISICAL_CLUSTER_CLIENT_SECRET -> InfisicalClusterClientSecret
 func backfillFromSecrets(cfg *Config, secrets map[string]string) {
 	backfill := func(target *string, keys ...string) {
 		if *target != "" {
@@ -296,6 +293,9 @@ func backfillFromSecrets(cfg *Config, secrets map[string]string) {
 	backfill(&cfg.KubernetesVersion, "KUBERNETES_VERSION")
 	backfill(&cfg.InfisicalClusterClientID, "INFISICAL_CLUSTER_CLIENT_ID")
 	backfill(&cfg.InfisicalClusterClientSecret, "INFISICAL_CLUSTER_CLIENT_SECRET")
+	backfill(&cfg.CloudflareAPIToken, "CLOUDFLARE_API_TOKEN", "CF_API_TOKEN")
+	backfill(&cfg.CloudflareZoneID, "CLOUDFLARE_ZONE_ID", "CF_ZONE_ID")
+	backfill(&cfg.CloudflareDNSName, "CLOUDFLARE_DNS_NAME", "CF_DNS_NAME")
 }
 
 // validateConfig checks that all required fields are present after resolution.

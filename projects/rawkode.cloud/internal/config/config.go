@@ -28,6 +28,11 @@ type Config struct {
 	// Teleport settings
 	TeleportProxy string `mapstructure:"teleport_proxy"`
 
+	// Cloudflare DNS settings — for pointing rawkode.cloud at the server
+	CloudflareAPIToken string `mapstructure:"cloudflare_api_token"`
+	CloudflareZoneID   string `mapstructure:"cloudflare_zone_id"`
+	CloudflareDNSName  string `mapstructure:"cloudflare_dns_name"`
+
 	// Infisical settings — these bootstrap everything else.
 	// The URL, client ID, and client secret are the minimum needed to
 	// authenticate. Once authenticated, all other secrets (Scaleway creds,
@@ -69,6 +74,11 @@ func InitViper(configFile string) {
 	// for backwards compatibility with the Scaleway SDK convention.
 	_ = viper.BindEnv("scaleway_access_key", "RAWKODE_CLOUD_SCALEWAY_ACCESS_KEY", "SCW_ACCESS_KEY")
 	_ = viper.BindEnv("scaleway_secret_key", "RAWKODE_CLOUD_SCALEWAY_SECRET_KEY", "SCW_SECRET_KEY")
+
+	// Support CF_API_TOKEN, CF_ZONE_ID, CF_DNS_NAME without prefix
+	_ = viper.BindEnv("cloudflare_api_token", "RAWKODE_CLOUD_CLOUDFLARE_API_TOKEN", "CF_API_TOKEN")
+	_ = viper.BindEnv("cloudflare_zone_id", "RAWKODE_CLOUD_CLOUDFLARE_ZONE_ID", "CF_ZONE_ID")
+	_ = viper.BindEnv("cloudflare_dns_name", "RAWKODE_CLOUD_CLOUDFLARE_DNS_NAME", "CF_DNS_NAME")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
