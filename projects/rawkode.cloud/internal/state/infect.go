@@ -2,47 +2,42 @@ package state
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
-	"io"
 	"log/slog"
-	"net"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/rawkode-academy/rawkode-cloud/internal/cloudflare"
 	"github.com/rawkode-academy/rawkode-cloud/internal/flatcar"
 	"github.com/rawkode-academy/rawkode-cloud/internal/infisical"
-	"github.com/rawkode-academy/rawkode-cloud/internal/scaleway"
 	"github.com/rawkode-academy/rawkode-cloud/internal/ssh"
 	"github.com/rawkode-academy/rawkode-cloud/internal/teleport"
-	scw "github.com/scaleway/scaleway-sdk-go/scw"
 )
 
-// Config holds all parameters needed for a full provisioning run.
-// Values may come from config file, env vars, CLI flags, or Infisical.
-type Config struct {
+// InfectConfig holds all parameters for infecting an existing Ubuntu host.
+type InfectConfig struct {
+	// Target host
+	Host           string // IP or hostname of existing Ubuntu 24 server
+	SSHPort        string // SSH port (default "22")
+	SSHUser        string // SSH user for initial connection (default "root")
+	SSHKeyPath     string // Path to SSH private key for initial connection
+	SSHAgentSocket string // Explicit SSH agent socket (overrides SSH_AUTH_SOCK)
+
+	// Cluster settings
 	ClusterName       string
-	OfferID           string
-	Zone              scw.Zone
-	OSID              string
-	FlatcarChannel    string
 	Role              string // "control-plane" or "worker"
-	TeleportProxy     string
+	FlatcarChannel    string
 	KubernetesVersion string
 	CiliumVersion     string
+	TeleportProxy     string
 
-	// Scaleway credentials — fetched from Infisical or env vars
-	ScalewayAccessKey string
-	ScalewaySecretKey string
-
-	// Cloudflare DNS — for setting A record after server IP is known
+	// Cloudflare DNS
 	CloudflareAPIToken  string
 	CloudflareAccountID string
 	CloudflareZoneID    string
 	CloudflareDNSName   string
 
-	// Infisical connection — used to fetch all other secrets
+	// Infisical
 	InfisicalURL          string
 	InfisicalClientID     string
 	InfisicalClientSecret string
@@ -50,43 +45,26 @@ type Config struct {
 	InfisicalEnvironment  string
 	InfisicalSecretPath   string
 
-	// InfisicalClusterClientID and InfisicalClusterClientSecret are the machine
-	// identity credentials for the cluster's dedicated Infisical identity. These
-	// are injected directly into the cluster as a Kubernetes secret — no need for
-	// a short-lived bootstrap token since the CLI orchestrates the entire flow.
+	// Infisical cluster identity
 	InfisicalClusterClientID     string
 	InfisicalClusterClientSecret string
 }
 
-// Run executes the provisioning pipeline for Flatcar + kubeadm.
+// RunInfect executes the infect pipeline: SSH to existing Ubuntu host,
+// install Flatcar, reboot, then proceed with the same kubeadm bootstrap
+// as the provision command.
 //
 // Phases:
 //
 //	0: Resolve secrets from Infisical + load JoinInfo
-//	Pre-provision: Detect operator IP, generate Ignition config
-//	1: Order bare metal server with OS install (single API call)
-//	2: Wait for install + SSH reachable
+//	1: SSH to existing host, generate Ignition, run flatcar-install, reboot
+//	2: Wait for Flatcar boot + SSH reachable (new SSH key)
 //	3: Update Cloudflare DNS (init only)
-//	4: SSH in, wait for kubeadm to complete
+//	4: Wait for kubeadm to complete
 //	5: [init] Generate Teleport token (proxy now reachable), apply manifests, extract+store join info
 //	   [join] Verify node joined
 //	6: Verify Teleport agent, then lockdown firewall
-//
-// Each phase has clear entry/exit conditions. If any phase fails,
-// cleanup runs in reverse order (LIFO).
-func Run(ctx context.Context, cfg Config) error {
-	var cleanup []func()
-	skipCleanup := false
-
-	defer func() {
-		if skipCleanup {
-			return
-		}
-		for i := len(cleanup) - 1; i >= 0; i-- {
-			cleanup[i]()
-		}
-	}()
-
+func RunInfect(ctx context.Context, cfg InfectConfig, existingSSHKey []byte) error {
 	// ── Phase 0: Resolve secrets from Infisical ──
 	var infClient *infisical.Client
 	var joinInfo *flatcar.JoinInfo
@@ -112,9 +90,8 @@ func Run(ctx context.Context, cfg Config) error {
 				return fmt.Errorf("fetch secrets from infisical: %w", err)
 			}
 
-			backfillFromSecrets(&cfg, secrets)
+			backfillInfectFromSecrets(&cfg, secrets)
 
-			// Load join info to determine init vs join
 			joinSecretPath := clusterSecretPath(baseSecretPath, cfg.ClusterName)
 			joinInfo, err = flatcar.LoadJoinInfo(ctx, infClient, cfg.InfisicalProjectID, env, joinSecretPath)
 			if err != nil {
@@ -126,26 +103,26 @@ func Run(ctx context.Context, cfg Config) error {
 	isInit := joinInfo == nil
 	teleportEnabled := cfg.TeleportProxy != ""
 
-	if err := validateConfig(&cfg); err != nil {
+	if err := validateInfectConfig(&cfg); err != nil {
 		return fmt.Errorf("config validation: %w", err)
 	}
 
-	// ── Pre-provision: Generate Ignition config ──
-	slog.Info("pre-provision: generating configuration",
+	slog.Info("infect: starting",
+		"host", cfg.Host,
 		"role", cfg.Role,
 		"init", isInit,
 	)
 
 	operatorIP, err := GetOperatorIP(ctx)
 	if err != nil {
-		return fmt.Errorf("pre-provision (operator IP) failed: %w", err)
+		return fmt.Errorf("operator IP detection failed: %w", err)
 	}
 
-	// Validate Infisical cluster identity: both must be set or both absent.
+	// Validate Infisical cluster identity
 	clusterIDSet := cfg.InfisicalClusterClientID != ""
 	clusterSecretSet := cfg.InfisicalClusterClientSecret != ""
 	if clusterIDSet != clusterSecretSet {
-		return fmt.Errorf("pre-provision: INFISICAL_CLUSTER_CLIENT_ID and INFISICAL_CLUSTER_CLIENT_SECRET must both be set or both be absent")
+		return fmt.Errorf("INFISICAL_CLUSTER_CLIENT_ID and INFISICAL_CLUSTER_CLIENT_SECRET must both be set or both be absent")
 	}
 
 	// For join nodes, check Teleport availability now.
@@ -169,9 +146,11 @@ func Run(ctx context.Context, cfg Config) error {
 		teleportProxy = cfg.TeleportProxy
 	}
 
+	// Generate Ignition config with the target host's IP
 	nodeCfg := flatcar.NodeConfig{
 		Role:                         cfg.Role,
 		ClusterName:                  cfg.ClusterName,
+		ServerPublicIP:               cfg.Host,
 		KubernetesVersion:            cfg.KubernetesVersion,
 		CiliumVersion:                cfg.CiliumVersion,
 		OperatorIP:                   operatorIP,
@@ -188,112 +167,81 @@ func Run(ctx context.Context, cfg Config) error {
 		nodeCfg.ControlPlaneEndpoint = joinInfo.ControlPlaneEndpoint
 	}
 
-	// ServerPublicIP will be set after server is provisioned — we leave it empty
-	// for now and set it in the Ignition config. For init nodes, the IP is used
-	// as the control-plane endpoint. We'll regenerate after we know the IP.
-
-	// Initialize Scaleway client
-	scwAPI, err := scaleway.NewClient(cfg.ScalewayAccessKey, cfg.ScalewaySecretKey)
-	if err != nil {
-		return fmt.Errorf("init scaleway: %w", err)
-	}
-
-	// ── Phase 1: Order bare metal server with OS install ──
-	slog.Info("starting phase 1: bare metal provisioning with OS install", "phase", "1")
-
-	// We need the server IP for the Ignition config, but we don't have it yet.
-	// Use a placeholder and regenerate after we know the IP.
-	// For join nodes, we already have the control-plane endpoint from join info.
-	// For init nodes, we'll use the server's public IP.
-	nodeCfg.ServerPublicIP = "0.0.0.0" // placeholder
-
 	genCfg, err := flatcar.GenerateIgnitionConfig(nodeCfg)
 	if err != nil {
-		return fmt.Errorf("phase 1 (ignition gen placeholder) failed: %w", err)
+		return fmt.Errorf("ignition config generation failed: %w", err)
 	}
 
-	server, err := scaleway.OrderServer(ctx, scwAPI, scaleway.ProvisionParams{
-		OfferID:        cfg.OfferID,
-		Zone:           cfg.Zone,
-		OSID:           cfg.OSID,
-		FlatcarChannel: cfg.FlatcarChannel,
-		IgnitionJSON:   genCfg.IgnitionJSON,
-	})
+	// ── Phase 1: SSH to existing host, install Flatcar, reboot ──
+	slog.Info("starting phase 1: connecting to existing host", "phase", "1", "host", cfg.Host)
+
+	sshPort := cfg.SSHPort
+	if sshPort == "" {
+		sshPort = "22"
+	}
+	sshUser := cfg.SSHUser
+	if sshUser == "" {
+		sshUser = "root"
+	}
+
+	ubuntuSSH, err := ssh.Connect(ctx, ssh.Config{
+		Host:        cfg.Host,
+		Port:        sshPort,
+		User:        sshUser,
+		PrivateKey:  existingSSHKey,
+		AgentSocket: cfg.SSHAgentSocket,
+	}, 2*time.Minute)
 	if err != nil {
-		return fmt.Errorf("phase 1 failed: %w", err)
+		return fmt.Errorf("phase 1 (SSH connect) failed: %w", err)
 	}
 
-	serverID := server.ID
-	cleanup = append(cleanup, func() {
-		slog.Warn("CLEANUP: deleting server", "server_id", serverID)
-		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-		defer cancel()
-		if err := scaleway.DeleteServer(cleanupCtx, scwAPI.Baremetal, serverID, cfg.Zone); err != nil {
-			slog.Error("CLEANUP FAILED: server not deleted, manual cleanup required",
-				"server_id", serverID,
-				"error", err,
-			)
+	// Verify this is an Ubuntu host
+	osRelease, err := ubuntuSSH.Run(ctx, "cat /etc/os-release 2>/dev/null | head -1 || true")
+	if err != nil {
+		ubuntuSSH.Close()
+		return fmt.Errorf("phase 1 (verify OS) failed: %w", err)
+	}
+	slog.Info("target host OS", "os_release", osRelease)
+
+	// Write Ignition config and run flatcar-install
+	ignitionB64 := base64.StdEncoding.EncodeToString(genCfg.IgnitionJSON)
+	pivotScript := buildInfectScript(cfg.FlatcarChannel, ignitionB64)
+
+	slog.Info("installing Flatcar on target host", "phase", "1", "channel", cfg.FlatcarChannel)
+
+	_, err = ubuntuSSH.RunWithStdin(ctx, "bash -s", []byte(pivotScript))
+	if err != nil {
+		// The reboot at the end of the script will kill the SSH connection.
+		// That's expected. Check if the error looks like a connection drop.
+		if isConnectionDropError(err) {
+			slog.Info("host is rebooting into Flatcar", "phase", "1")
+		} else {
+			ubuntuSSH.Close()
+			return fmt.Errorf("phase 1 (flatcar install) failed: %w", err)
 		}
-	})
-
-	// ── Phase 2: Wait for install completion + SSH reachable ──
-	slog.Info("starting phase 2: waiting for install and Flatcar boot", "phase", "2")
-
-	server, err = scaleway.WaitForReady(ctx, scwAPI, serverID, cfg.Zone)
-	if err != nil {
-		return fmt.Errorf("phase 2 (install wait) failed: %w", err)
 	}
+	ubuntuSSH.Close()
 
-	var publicIP string
-	for _, ip := range server.IPs {
-		publicIP = ip.Address.String()
-		break
-	}
-	if publicIP == "" {
-		return fmt.Errorf("phase 2 failed: server has no public IP")
-	}
+	// ── Phase 2: Wait for Flatcar boot + SSH reachable ──
+	slog.Info("starting phase 2: waiting for Flatcar boot", "phase", "2")
 
-	// Now that we have the real IP, regenerate ignition with correct control-plane endpoint
-	nodeCfg.ServerPublicIP = publicIP
-	genCfg, err = flatcar.GenerateIgnitionConfig(nodeCfg)
-	if err != nil {
-		return fmt.Errorf("phase 2 (ignition regen) failed: %w", err)
-	}
-
-	// Note: The Ignition config was already baked into the cloud-init with the
-	// placeholder IP. For init nodes, kubeadm will use the config file which
-	// has the placeholder. We'll need to update the kubeadm config after SSH.
-	// Actually, the flatcar-install already ran with the placeholder Ignition.
-	// We need to update the kubeadm config on disk before kubeadm runs.
-	// Since kubeadm.service has ConditionPathExists=!/etc/kubernetes/kubelet.conf,
-	// it won't have run yet on a fresh boot.
-
-	sshCfg := ssh.Config{
-		Host:       publicIP,
+	flatcarSSHCfg := ssh.Config{
+		Host:       cfg.Host,
 		Port:       "22",
 		User:       "core",
 		PrivateKey: genCfg.SSHPrivateKey,
 	}
 
-	// Wait for SSH to become reachable
-	err = ssh.WaitForSSH(ctx, sshCfg, 20*time.Minute)
+	err = ssh.WaitForSSH(ctx, flatcarSSHCfg, 20*time.Minute)
 	if err != nil {
 		return fmt.Errorf("phase 2 (SSH wait) failed: %w", err)
 	}
 
-	// Connect SSH for remaining phases
-	sshClient, err := ssh.Connect(ctx, sshCfg, 2*time.Minute)
+	sshClient, err := ssh.Connect(ctx, flatcarSSHCfg, 2*time.Minute)
 	if err != nil {
 		return fmt.Errorf("phase 2 (SSH connect) failed: %w", err)
 	}
 	defer sshClient.Close()
-
-	// Update kubeadm config with real IP before kubeadm runs
-	slog.Info("updating kubeadm config with real server IP", "ip", publicIP)
-	_, err = sshClient.Run(ctx, fmt.Sprintf("sudo sed -i 's/0\\.0\\.0\\.0/%s/g' /etc/kubeadm-config.yaml", publicIP))
-	if err != nil {
-		return fmt.Errorf("phase 2 (update kubeadm config) failed: %w", err)
-	}
 
 	// ── Phase 3: Update Cloudflare DNS (init only) ──
 	zoneID, err := resolveCloudflareZoneID(ctx, cfg.CloudflareAPIToken, cfg.CloudflareZoneID, cfg.CloudflareAccountID, cfg.CloudflareDNSName)
@@ -304,7 +252,7 @@ func Run(ctx context.Context, cfg Config) error {
 	if isInit && cfg.CloudflareAPIToken != "" && zoneID != "" && cfg.CloudflareDNSName != "" {
 		slog.Info("starting phase 3: DNS update", "phase", "3")
 
-		err = cloudflare.UpsertARecord(ctx, cfg.CloudflareAPIToken, zoneID, cfg.CloudflareDNSName, publicIP)
+		err = cloudflare.UpsertARecord(ctx, cfg.CloudflareAPIToken, zoneID, cfg.CloudflareDNSName, cfg.Host)
 		if err != nil {
 			return fmt.Errorf("phase 3 (dns) failed: %w", err)
 		}
@@ -315,7 +263,6 @@ func Run(ctx context.Context, cfg Config) error {
 	// ── Phase 4: Wait for kubeadm to complete ──
 	slog.Info("starting phase 4: waiting for kubeadm", "phase", "4")
 
-	// Ensure sysext + kubeadm service starts (it may be waiting for the service ordering)
 	_, _ = sshClient.Run(ctx, "sudo systemctl start sysext-install.service 2>/dev/null || true")
 	_, _ = sshClient.Run(ctx, "sudo systemctl start kubeadm.service 2>/dev/null || true")
 
@@ -324,8 +271,9 @@ func Run(ctx context.Context, cfg Config) error {
 
 	if isInit {
 		if teleportEnabled {
-			// DNS + kubeadm are done. NOW the Teleport proxy is reachable
-			// (it's this cluster at the DNS name we just set up).
+			// For init nodes: kubeadm + DNS are done. NOW we can reach the Teleport
+			// proxy (it's this cluster at rawkode.cloud, which DNS just pointed here).
+			// Generate the Teleport token and deploy all manifests.
 			slog.Info("generating Teleport join token (post-DNS)", "proxy", cfg.TeleportProxy)
 			teleportToken, err = teleport.GenerateJoinToken(ctx, cfg.TeleportProxy, 30*time.Minute)
 			if err != nil {
@@ -352,12 +300,11 @@ func Run(ctx context.Context, cfg Config) error {
 			InfisicalClusterClientSecret: cfg.InfisicalClusterClientSecret,
 		})
 
-		extractedJoinInfo, err := flatcar.BootstrapInit(ctx, sshClient, manifests, publicIP)
+		extractedJoinInfo, err := flatcar.BootstrapInit(ctx, sshClient, manifests, cfg.Host)
 		if err != nil {
 			return fmt.Errorf("phase 5 (init bootstrap) failed: %w", err)
 		}
 
-		// Store join info to Infisical for subsequent nodes
 		if infClient != nil && cfg.InfisicalProjectID != "" {
 			env := cfg.InfisicalEnvironment
 			if env == "" {
@@ -392,10 +339,9 @@ func Run(ctx context.Context, cfg Config) error {
 			if err != nil {
 				slog.Error("Teleport agent verification failed — firewall NOT locked",
 					"error", err,
-					"server_ip", publicIP,
+					"host", cfg.Host,
 				)
-				skipCleanup = true
-				return fmt.Errorf("phase 6 (teleport verify) failed — server left running for manual debug: %w", err)
+				return fmt.Errorf("phase 6 (teleport verify) failed — host left running for manual debug: %w", err)
 			}
 		}
 
@@ -410,17 +356,14 @@ func Run(ctx context.Context, cfg Config) error {
 		)
 	}
 
-	skipCleanup = true
-
 	accessMethod := "ssh-operator-ip-only"
 	if teleportEnabled {
 		accessMethod = "teleport"
 	}
 
-	slog.Info("provisioning complete",
+	slog.Info("infect complete",
 		"cluster", cfg.ClusterName,
-		"server_id", serverID,
-		"server_ip", publicIP,
+		"host", cfg.Host,
 		"role", cfg.Role,
 		"init", isInit,
 		"access", accessMethod,
@@ -428,8 +371,114 @@ func Run(ctx context.Context, cfg Config) error {
 	return nil
 }
 
-// backfillFromSecrets fills in any missing Config fields from Infisical secrets.
-func backfillFromSecrets(cfg *Config, secrets map[string]string) {
+// buildInfectScript generates the bash script run on the existing Ubuntu host
+// to install Flatcar. Same logic as the cloud-init pivot but without the
+// Scaleway-specific logging path.
+func buildInfectScript(flatcarChannel, ignitionB64 string) string {
+	return fmt.Sprintf(`#!/bin/bash
+set -euo pipefail
+
+echo "Starting Flatcar infect at $(date)"
+
+# Step 0: Install dependencies
+echo "Installing dependencies..."
+sudo apt-get update -qq && sudo apt-get install -y -qq bzip2 > /dev/null
+
+# Step 1: Write Ignition config
+echo "Writing Ignition config..."
+echo "%s" | base64 -d > /tmp/ignition.json
+
+# Step 2: Detect the boot disk
+echo "Detecting boot disk..."
+TARGET_DISK=""
+ROOT_SOURCE=$(findmnt -n -o SOURCE / 2>/dev/null || echo "")
+if [ -b "$ROOT_SOURCE" ]; then
+    PKNAME=$(lsblk -ndo PKNAME "$ROOT_SOURCE" 2>/dev/null || true)
+    if [ -n "$PKNAME" ] && [ -b "/dev/$PKNAME" ]; then
+        TARGET_DISK="/dev/$PKNAME"
+    fi
+fi
+if [ -z "$TARGET_DISK" ]; then
+    TARGET_DISK=$(lsblk -dnpo NAME -e 7,11 | head -1)
+fi
+if [ -z "$TARGET_DISK" ]; then
+    TARGET_DISK="/dev/sda"
+fi
+echo "Target disk: $TARGET_DISK"
+
+# Step 3: Download and decompress Flatcar image to RAM
+# We decompress to a file so we can inject the Ignition config into the
+# OEM partition BEFORE writing to disk. This avoids the blockdev --rereadpt
+# failure that happens when flatcar-install writes to a mounted boot disk.
+CHANNEL="%s"
+echo "Downloading Flatcar ${CHANNEL} image..."
+BASEURL="https://${CHANNEL}.release.flatcar-linux.net/amd64-usr/current"
+mkdir -p /dev/shm/flatcar-infect
+wget --retry-connrefused --waitretry=5 --tries=5 --no-verbose \
+    -O /dev/shm/flatcar-infect/flatcar.bin.bz2 "${BASEURL}/flatcar_production_image.bin.bz2"
+
+echo "Decompressing image..."
+bzcat /dev/shm/flatcar-infect/flatcar.bin.bz2 > /dev/shm/flatcar-infect/flatcar.bin
+rm -f /dev/shm/flatcar-infect/flatcar.bin.bz2
+
+# Step 4: Inject Ignition config into the OEM partition (partition 6) of the image
+echo "Injecting Ignition config into image..."
+LOOP=$(sudo losetup --find --show --partscan /dev/shm/flatcar-infect/flatcar.bin)
+echo "Loop device: $LOOP"
+
+# Wait for partition devices to appear
+sleep 1
+sudo udevadm settle 2>/dev/null || true
+
+OEM_PART="${LOOP}p6"
+if [ -b "$OEM_PART" ]; then
+    sudo mkdir -p /tmp/oem
+    sudo mount "$OEM_PART" /tmp/oem
+    sudo cp /tmp/ignition.json /tmp/oem/config.ign
+    sudo umount /tmp/oem
+    echo "Ignition config injected into OEM partition"
+else
+    echo "ERROR: OEM partition $OEM_PART not found" >&2
+    sudo losetup -d "$LOOP"
+    exit 1
+fi
+sudo losetup -d "$LOOP"
+
+# Step 5: Write the modified image to disk
+echo "Writing Flatcar image to ${TARGET_DISK}..."
+sudo dd if=/dev/shm/flatcar-infect/flatcar.bin of="${TARGET_DISK}" bs=4M status=progress
+sudo sync
+rm -rf /dev/shm/flatcar-infect
+
+echo "Infect complete. Rebooting into Flatcar at $(date)"
+sudo reboot
+`, ignitionB64, flatcarChannel)
+}
+
+func isConnectionDropError(err error) bool {
+	msg := err.Error()
+	return contains(msg, "connection reset") ||
+		contains(msg, "broken pipe") ||
+		contains(msg, "EOF") ||
+		contains(msg, "connection refused") ||
+		contains(msg, "remote end closed")
+}
+
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && searchString(s, substr)
+}
+
+func searchString(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
+}
+
+// backfillInfectFromSecrets fills missing InfectConfig fields from Infisical.
+func backfillInfectFromSecrets(cfg *InfectConfig, secrets map[string]string) {
 	backfill := func(target *string, keys ...string) {
 		if *target != "" {
 			return
@@ -443,11 +492,7 @@ func backfillFromSecrets(cfg *Config, secrets map[string]string) {
 		}
 	}
 
-	backfill(&cfg.ScalewayAccessKey, "SCW_ACCESS_KEY", "SCALEWAY_ACCESS_KEY")
-	backfill(&cfg.ScalewaySecretKey, "SCW_SECRET_KEY", "SCALEWAY_SECRET_KEY")
 	backfill(&cfg.TeleportProxy, "TELEPORT_PROXY", "TELEPORT_PROXY_ADDR")
-	backfill(&cfg.OfferID, "SCALEWAY_OFFER_ID", "SCW_OFFER_ID")
-	backfill(&cfg.OSID, "SCALEWAY_OS_ID", "SCW_OS_ID")
 	backfill(&cfg.ClusterName, "CLUSTER_NAME")
 	backfill(&cfg.FlatcarChannel, "FLATCAR_CHANNEL")
 	backfill(&cfg.KubernetesVersion, "KUBERNETES_VERSION")
@@ -460,8 +505,8 @@ func backfillFromSecrets(cfg *Config, secrets map[string]string) {
 	backfill(&cfg.CloudflareDNSName, "CLOUDFLARE_DNS_NAME", "CF_DNS_NAME")
 }
 
-// validateConfig checks that all required fields are present after resolution.
-func validateConfig(cfg *Config) error {
+// validateInfectConfig checks required fields for the infect command.
+func validateInfectConfig(cfg *InfectConfig) error {
 	var missing []string
 	check := func(val, name string) {
 		if val == "" {
@@ -469,9 +514,8 @@ func validateConfig(cfg *Config) error {
 		}
 	}
 
+	check(cfg.Host, "host")
 	check(cfg.ClusterName, "cluster-name")
-	check(cfg.OfferID, "offer-id")
-	check(cfg.OSID, "os-id")
 	check(cfg.Role, "role")
 	check(cfg.KubernetesVersion, "kubernetes-version")
 	check(cfg.CiliumVersion, "cilium-version")
@@ -481,91 +525,18 @@ func validateConfig(cfg *Config) error {
 	}
 
 	if len(missing) > 0 {
-		return fmt.Errorf("missing required config: %s (set via config file, env vars, CLI flags, or Infisical)", strings.Join(missing, ", "))
+		return fmt.Errorf("missing required config: %s", joinStrings(missing, ", "))
 	}
 	return nil
 }
 
-// GetOperatorIP determines the public IP of the machine running the CLI.
-// This is used to scope temporary firewall rules to the operator's IP only.
-// It tries multiple services with retries so a single unavailable endpoint
-// does not abort the provisioning run.
-func GetOperatorIP(ctx context.Context) (string, error) {
-	endpoints := []string{
-		"https://checkip.amazonaws.com",
-		"https://ifconfig.me/ip",
-		"https://icanhazip.com",
+func joinStrings(ss []string, sep string) string {
+	if len(ss) == 0 {
+		return ""
 	}
-
-	const (
-		maxAttempts = 3
-		baseBackoff = 500 * time.Millisecond
-	)
-
-	var lastErr error
-
-	for _, endpoint := range endpoints {
-		for attempt := 0; attempt < maxAttempts; attempt++ {
-			select {
-			case <-ctx.Done():
-				if lastErr != nil {
-					return "", fmt.Errorf("context cancelled while determining operator IP (last error: %w)", lastErr)
-				}
-				return "", ctx.Err()
-			default:
-			}
-
-			ip, err := fetchIP(ctx, endpoint)
-			if err == nil {
-				slog.Info("detected operator public IP", "ip", ip, "endpoint", endpoint)
-				return ip, nil
-			}
-
-			lastErr = err
-			slog.Debug("failed to determine operator IP", "endpoint", endpoint, "attempt", attempt+1, "error", err)
-
-			if attempt < maxAttempts-1 {
-				backoff := baseBackoff * time.Duration(1<<attempt)
-				timer := time.NewTimer(backoff)
-				select {
-				case <-ctx.Done():
-					timer.Stop()
-					return "", fmt.Errorf("context cancelled while determining operator IP (last error: %w)", lastErr)
-				case <-timer.C:
-				}
-			}
-		}
+	result := ss[0]
+	for _, s := range ss[1:] {
+		result += sep + s
 	}
-
-	return "", fmt.Errorf("could not determine operator IP after trying all endpoints: %w", lastErr)
-}
-
-// fetchIP fetches the public IP from a single endpoint and validates the result.
-func fetchIP(ctx context.Context, endpoint string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
-	if err != nil {
-		return "", fmt.Errorf("build request for %s: %w", endpoint, err)
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("request to %s failed: %w", endpoint, err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("non-200 status from %s: %s", endpoint, resp.Status)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("read response from %s: %w", endpoint, err)
-	}
-
-	ip := strings.TrimSpace(string(body))
-	if net.ParseIP(ip) == nil {
-		return "", fmt.Errorf("invalid IP address returned from %s: %q", endpoint, ip)
-	}
-
-	return ip, nil
+	return result
 }

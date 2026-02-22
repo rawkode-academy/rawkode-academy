@@ -16,7 +16,9 @@ type Config struct {
 	// Cluster settings
 	ClusterName       string `mapstructure:"cluster_name"`
 	KubernetesVersion string `mapstructure:"kubernetes_version"`
-	TalosVersion      string `mapstructure:"talos_version"`
+	FlatcarChannel    string `mapstructure:"flatcar_channel"`
+	Role              string `mapstructure:"role"`
+	CiliumVersion     string `mapstructure:"cilium_version"`
 
 	// Scaleway settings
 	ScalewayAccessKey string `mapstructure:"scaleway_access_key"`
@@ -29,9 +31,10 @@ type Config struct {
 	TeleportProxy string `mapstructure:"teleport_proxy"`
 
 	// Cloudflare DNS settings — for pointing rawkode.cloud at the server
-	CloudflareAPIToken string `mapstructure:"cloudflare_api_token"`
-	CloudflareZoneID   string `mapstructure:"cloudflare_zone_id"`
-	CloudflareDNSName  string `mapstructure:"cloudflare_dns_name"`
+	CloudflareAPIToken  string `mapstructure:"cloudflare_api_token"`
+	CloudflareAccountID string `mapstructure:"cloudflare_account_id"`
+	CloudflareZoneID    string `mapstructure:"cloudflare_zone_id"`
+	CloudflareDNSName   string `mapstructure:"cloudflare_dns_name"`
 
 	// Infisical settings — these bootstrap everything else.
 	// The URL, client ID, and client secret are the minimum needed to
@@ -43,6 +46,13 @@ type Config struct {
 	InfisicalProjectID    string `mapstructure:"infisical_project_id"`
 	InfisicalEnvironment  string `mapstructure:"infisical_environment"`
 	InfisicalSecretPath   string `mapstructure:"infisical_secret_path"`
+
+	// Infisical cluster identity — injected into the cluster as a K8s secret
+	InfisicalClusterClientID     string `mapstructure:"infisical_cluster_client_id"`
+	InfisicalClusterClientSecret string `mapstructure:"infisical_cluster_client_secret"`
+
+	// SSH
+	SSHAgentSocket string `mapstructure:"ssh_agent"`
 
 	// Runtime
 	Verbose bool `mapstructure:"verbose"`
@@ -75,10 +85,11 @@ func InitViper(configFile string) {
 	_ = viper.BindEnv("scaleway_access_key", "RAWKODE_CLOUD_SCALEWAY_ACCESS_KEY", "SCW_ACCESS_KEY")
 	_ = viper.BindEnv("scaleway_secret_key", "RAWKODE_CLOUD_SCALEWAY_SECRET_KEY", "SCW_SECRET_KEY")
 
-	// Support CF_API_TOKEN, CF_ZONE_ID, CF_DNS_NAME without prefix
-	_ = viper.BindEnv("cloudflare_api_token", "RAWKODE_CLOUD_CLOUDFLARE_API_TOKEN", "CF_API_TOKEN")
-	_ = viper.BindEnv("cloudflare_zone_id", "RAWKODE_CLOUD_CLOUDFLARE_ZONE_ID", "CF_ZONE_ID")
-	_ = viper.BindEnv("cloudflare_dns_name", "RAWKODE_CLOUD_CLOUDFLARE_DNS_NAME", "CF_DNS_NAME")
+	// Support legacy/non-prefixed Cloudflare env names.
+	_ = viper.BindEnv("cloudflare_api_token", "RAWKODE_CLOUD_CLOUDFLARE_API_TOKEN", "CLOUDFLARE_API_TOKEN", "CF_API_TOKEN")
+	_ = viper.BindEnv("cloudflare_account_id", "RAWKODE_CLOUD_CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_ACCOUNT_ID", "CF_ACCOUNT_ID")
+	_ = viper.BindEnv("cloudflare_zone_id", "RAWKODE_CLOUD_CLOUDFLARE_ZONE_ID", "CLOUDFLARE_ZONE_ID", "CF_ZONE_ID")
+	_ = viper.BindEnv("cloudflare_dns_name", "RAWKODE_CLOUD_CLOUDFLARE_DNS_NAME", "CLOUDFLARE_DNS_NAME", "CF_DNS_NAME")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
