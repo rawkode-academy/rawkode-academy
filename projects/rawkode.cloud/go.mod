@@ -43,7 +43,7 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charlievieth/strcase v0.0.5 // indirect
-	github.com/cloudflare/circl v1.5.0 // indirect
+	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/containerd/go-cni v1.1.10 // indirect
 	github.com/containernetworking/cni v1.2.3 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
