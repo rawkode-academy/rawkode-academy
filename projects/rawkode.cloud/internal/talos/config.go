@@ -161,6 +161,103 @@ stringData:
 		InlineManifestContents: teleportSecret,
 	})
 
+	// Teleport Kubernetes agent — the workload that consumes the join token
+	// and registers this cluster with Teleport for zero-trust access.
+	teleportRBAC := `apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: teleport-kube-agent
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: teleport-kube-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: teleport-kube-agent
+  namespace: kube-system
+`
+
+	manifests = append(manifests, v1alpha1.ClusterInlineManifest{
+		InlineManifestName:     "teleport-kube-agent-rbac",
+		InlineManifestContents: teleportRBAC,
+	})
+
+	teleportConfig := fmt.Sprintf(`apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: teleport-kube-agent
+  namespace: kube-system
+data:
+  teleport.yaml: |
+    version: v3
+    teleport:
+      join_params:
+        method: token
+        token_name: /etc/teleport-secrets/token
+      proxy_server: %s
+    kubernetes_service:
+      enabled: true
+      kube_cluster_name: %s
+`, cfg.TeleportProxyAddr, cfg.ClusterName)
+
+	manifests = append(manifests, v1alpha1.ClusterInlineManifest{
+		InlineManifestName:     "teleport-kube-agent-config",
+		InlineManifestContents: teleportConfig,
+	})
+
+	teleportDeployment := `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teleport-kube-agent
+  namespace: kube-system
+  labels:
+    app: teleport-kube-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: teleport-kube-agent
+  template:
+    metadata:
+      labels:
+        app: teleport-kube-agent
+    spec:
+      serviceAccountName: teleport-kube-agent
+      containers:
+      - name: teleport
+        image: public.ecr.aws/gravitational/teleport-distroless:17
+        args: ["start", "--config=/etc/teleport/teleport.yaml"]
+        volumeMounts:
+        - name: config
+          mountPath: /etc/teleport
+          readOnly: true
+        - name: join-token
+          mountPath: /etc/teleport-secrets
+          readOnly: true
+        - name: data
+          mountPath: /var/lib/teleport
+      volumes:
+      - name: config
+        configMap:
+          name: teleport-kube-agent
+      - name: join-token
+        secret:
+          secretName: teleport-join-token
+      - name: data
+        emptyDir: {}
+`
+
+	manifests = append(manifests, v1alpha1.ClusterInlineManifest{
+		InlineManifestName:     "teleport-kube-agent-deployment",
+		InlineManifestContents: teleportDeployment,
+	})
+
 	config.ClusterConfig.ClusterInlineManifests = append(
 		config.ClusterConfig.ClusterInlineManifests,
 		manifests...,
@@ -183,10 +280,15 @@ stringData:
 // operator's IP only. All other sources are implicitly denied by Talos's
 // default-deny firewall behaviour when rules are present.
 func buildProviderWithFirewall(base coreconfig.Provider, operatorIP string) (coreconfig.Provider, error) {
-	operatorPrefix, err := netip.ParsePrefix(operatorIP + "/32")
+	addr, err := netip.ParseAddr(operatorIP)
 	if err != nil {
-		return nil, fmt.Errorf("parse operator IP as CIDR: %w", err)
+		return nil, fmt.Errorf("parse operator IP: %w", err)
 	}
+	bits := 32
+	if addr.Is6() {
+		bits = 128
+	}
+	operatorPrefix := netip.PrefixFrom(addr, bits)
 
 	talosRule := network.NewRuleConfigV1Alpha1()
 	talosRule.MetaName = "operator-talos-api"

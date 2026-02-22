@@ -31,6 +31,6 @@ func GenerateJoinToken(ctx context.Context, proxyAddr string, ttl time.Duration)
 		return "", fmt.Errorf("create join token: %w", err)
 	}
 
-	slog.Info("teleport join token generated", "phase", "3", "ttl", ttl, "token_name", tokenName)
+	slog.Info("teleport join token generated", "phase", "4", "ttl", ttl, "token_name", tokenName)
 	return tokenName, nil
 }
