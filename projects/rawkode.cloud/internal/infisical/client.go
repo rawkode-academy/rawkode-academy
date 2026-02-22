@@ -2,10 +2,13 @@ package infisical
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	infisicalsdk "github.com/infisical/go-sdk"
+	sdkerrors "github.com/infisical/go-sdk/packages/errors"
 )
 
 // Client is an authenticated Infisical client for fetching secrets.
@@ -46,6 +49,34 @@ func (c *Client) GetSecret(_ context.Context, projectID, environment, secretPath
 	return secret.SecretValue, nil
 }
 
+// SetSecret creates or updates a single secret in a given project/environment/path.
+func (c *Client) SetSecret(_ context.Context, projectID, environment, secretPath, key, value string) error {
+	// Try to create first; if it already exists, update it.
+	_, err := c.sdk.Secrets().Create(infisicalsdk.CreateSecretOptions{
+		SecretKey:   key,
+		SecretValue: value,
+		ProjectID:   projectID,
+		Environment: environment,
+		SecretPath:  secretPath,
+	})
+	if err != nil {
+		// If create failed (likely already exists), try update
+		_, updateErr := c.sdk.Secrets().Update(infisicalsdk.UpdateSecretOptions{
+			SecretKey:      key,
+			NewSecretValue: value,
+			ProjectID:      projectID,
+			Environment:    environment,
+			SecretPath:     secretPath,
+		})
+		if updateErr != nil {
+			return fmt.Errorf("set secret %s (create: %w, update: %w)", key, err, updateErr)
+		}
+	}
+
+	slog.Debug("secret set in infisical", "key", key)
+	return nil
+}
+
 // GetSecrets fetches all secrets from a given project/environment/path.
 func (c *Client) GetSecrets(_ context.Context, projectID, environment, secretPath string) (map[string]string, error) {
 	list, err := c.sdk.Secrets().List(infisicalsdk.ListSecretsOptions{
@@ -70,4 +101,41 @@ func (c *Client) GetSecrets(_ context.Context, projectID, environment, secretPat
 	)
 
 	return secrets, nil
+}
+
+// EnsureSecretPath creates every folder segment in secretPath if missing.
+// Existing folders are left untouched.
+func (c *Client) EnsureSecretPath(_ context.Context, projectID, environment, secretPath string) error {
+	cleanPath := strings.TrimSpace(secretPath)
+	if cleanPath == "" || cleanPath == "/" {
+		return nil
+	}
+
+	segments := strings.Split(strings.Trim(cleanPath, "/"), "/")
+	currentPath := "/"
+
+	for _, segment := range segments {
+		_, err := c.sdk.Folders().Create(infisicalsdk.CreateFolderOptions{
+			ProjectID:   projectID,
+			Environment: environment,
+			Name:        segment,
+			Path:        currentPath,
+		})
+		if err != nil {
+			var apiErr *sdkerrors.APIError
+			if errors.As(err, &apiErr) && apiErr.StatusCode == 409 {
+				// Folder already exists.
+			} else {
+				return fmt.Errorf("ensure folder %q at %q: %w", segment, currentPath, err)
+			}
+		}
+
+		if currentPath == "/" {
+			currentPath = "/" + segment
+		} else {
+			currentPath = currentPath + "/" + segment
+		}
+	}
+
+	return nil
 }
