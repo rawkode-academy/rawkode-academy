@@ -163,12 +163,12 @@ failed provisioning runs.`,
 				zone = "fr-par-2"
 			}
 
-			api, err := scaleway.NewClient(cfg.ScalewayAccessKey, cfg.ScalewaySecretKey)
+			client, err := scaleway.NewClient(cfg.ScalewayAccessKey, cfg.ScalewaySecretKey)
 			if err != nil {
 				return err
 			}
 
-			return scaleway.DeleteServer(cmd.Context(), api, serverID, scw.Zone(zone))
+			return scaleway.DeleteServer(cmd.Context(), client.Baremetal, serverID, scw.Zone(zone))
 		},
 	}
 

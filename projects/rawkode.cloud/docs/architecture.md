@@ -18,10 +18,11 @@ stateDiagram-v2
     Phase0 --> Phase1
 
     state "Phase 1: Order Server + Install" as Phase1 {
-        [*] --> CreateServer: Single API call
+        [*] --> ListSSHKeys: IAM API
+        ListSSHKeys --> CreateServer: SSH key IDs (required by Scaleway)
         note right of CreateServer
             CreateServerRequest includes:
-            - Install{OsID, Hostname}
+            - Install{OsID, Hostname, SSHKeyIDs}
             - UserData (cloud-init bytes)
             Scaleway auto-starts OS install
             when hardware is allocated.
@@ -153,7 +154,9 @@ sequenceDiagram
     Inf-->>CLI: map[string]string (backfill config)
 
     Note over CLI: Phase 1 — Order Server + Install
-    CLI->>SCW: CreateServer(offer, install{osID}, userData{cloud-init})
+    CLI->>SCW: IAM ListSSHKeys()
+    SCW-->>CLI: SSH key IDs (required for install)
+    CLI->>SCW: CreateServer(offer, install{osID, sshKeyIDs}, userData{cloud-init})
     SCW-->>CLI: Server{ID, status: delivering}
 
     Note over CLI: Phase 2 — Wait + Talos Boot
