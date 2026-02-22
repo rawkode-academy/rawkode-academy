@@ -40,11 +40,14 @@ type Config struct {
 	InfisicalEnvironment  string
 	InfisicalSecretPath   string
 
-	// InfisicalClusterToken is a dedicated machine identity token for the cluster
-	// at runtime. It must be separate from the CLI bootstrap token (InfisicalClientID/Secret)
-	// so that cluster compromise does not grant provisioning-level access.
-	// Fetched from the INFISICAL_CLUSTER_TOKEN secret in Infisical.
-	InfisicalClusterToken string
+	// InfisicalClusterClientID and InfisicalClusterClientSecret are the machine
+	// identity credentials for the cluster's dedicated Infisical identity. At
+	// provisioning time, the CLI uses these to mint a fresh, short-lived bootstrap
+	// token that gets injected into the cluster. This keeps provisioning-level
+	// Infisical access separate from runtime cluster access.
+	// Fetched from INFISICAL_CLUSTER_CLIENT_ID and INFISICAL_CLUSTER_CLIENT_SECRET.
+	InfisicalClusterClientID     string
+	InfisicalClusterClientSecret string
 }
 
 // Run executes the 5-phase provisioning pipeline.
@@ -176,16 +179,34 @@ func Run(ctx context.Context, cfg Config) error {
 		return fmt.Errorf("phase 3 (teleport token) failed: %w", err)
 	}
 
-	// Use the dedicated cluster machine identity token that was fetched from
-	// Infisical as INFISICAL_CLUSTER_TOKEN. This is separate from the CLI's
-	// bootstrap token to honour the principle of least privilege: a compromised
-	// cluster cannot gain provisioning-level Infisical access.
+	// Mint a fresh, short-lived Infisical bootstrap token for the cluster's own
+	// machine identity. The CLI authenticates as the cluster identity using its
+	// dedicated clientID/clientSecret (stored as secrets in Infisical) to obtain
+	// this token. This keeps the CLI's provisioning-level access fully separate
+	// from the cluster's runtime access.
+	var infisicalBootstrapToken string
+	clusterIDSet := cfg.InfisicalClusterClientID != ""
+	clusterSecretSet := cfg.InfisicalClusterClientSecret != ""
+	if clusterIDSet != clusterSecretSet {
+		return fmt.Errorf("phase 3: INFISICAL_CLUSTER_CLIENT_ID and INFISICAL_CLUSTER_CLIENT_SECRET must both be set or both be absent")
+	}
+	if infClient != nil && clusterIDSet {
+		infisicalBootstrapToken, err = infClient.CreateClusterBootstrapToken(
+			ctx,
+			cfg.InfisicalClusterClientID,
+			cfg.InfisicalClusterClientSecret,
+		)
+		if err != nil {
+			return fmt.Errorf("phase 3 (infisical bootstrap token) failed: %w", err)
+		}
+	}
+
 	talosConfig, err := talos.GenerateConfig(talos.ClusterConfig{
 		ClusterName:       cfg.ClusterName,
 		ServerPublicIP:    publicIP,
 		TeleportToken:     teleportToken,
 		TeleportProxyAddr: cfg.TeleportProxy,
-		InfisicalToken:    cfg.InfisicalClusterToken,
+		InfisicalToken:    infisicalBootstrapToken,
 		OperatorIP:        operatorIP,
 		KubernetesVersion: cfg.KubernetesVersion,
 	})
@@ -241,15 +262,16 @@ func Run(ctx context.Context, cfg Config) error {
 // backfillFromSecrets fills in any missing Config fields from Infisical secrets.
 // Secret keys map to config fields by convention:
 //
-//	SCW_ACCESS_KEY            -> ScalewayAccessKey
-//	SCW_SECRET_KEY            -> ScalewaySecretKey
-//	TELEPORT_PROXY            -> TeleportProxy
-//	SCALEWAY_OFFER_ID         -> OfferID
-//	SCALEWAY_OS_ID            -> OSID
-//	CLUSTER_NAME              -> ClusterName
-//	TALOS_VERSION             -> TalosVersion
-//	KUBERNETES_VERSION        -> KubernetesVersion
-//	INFISICAL_CLUSTER_TOKEN   -> InfisicalClusterToken
+//	SCW_ACCESS_KEY                  -> ScalewayAccessKey
+//	SCW_SECRET_KEY                  -> ScalewaySecretKey
+//	TELEPORT_PROXY                  -> TeleportProxy
+//	SCALEWAY_OFFER_ID               -> OfferID
+//	SCALEWAY_OS_ID                  -> OSID
+//	CLUSTER_NAME                    -> ClusterName
+//	TALOS_VERSION                   -> TalosVersion
+//	KUBERNETES_VERSION              -> KubernetesVersion
+//	INFISICAL_CLUSTER_CLIENT_ID     -> InfisicalClusterClientID
+//	INFISICAL_CLUSTER_CLIENT_SECRET -> InfisicalClusterClientSecret
 func backfillFromSecrets(cfg *Config, secrets map[string]string) {
 	backfill := func(target *string, keys ...string) {
 		if *target != "" {
@@ -272,7 +294,8 @@ func backfillFromSecrets(cfg *Config, secrets map[string]string) {
 	backfill(&cfg.ClusterName, "CLUSTER_NAME")
 	backfill(&cfg.TalosVersion, "TALOS_VERSION")
 	backfill(&cfg.KubernetesVersion, "KUBERNETES_VERSION")
-	backfill(&cfg.InfisicalClusterToken, "INFISICAL_CLUSTER_TOKEN")
+	backfill(&cfg.InfisicalClusterClientID, "INFISICAL_CLUSTER_CLIENT_ID")
+	backfill(&cfg.InfisicalClusterClientSecret, "INFISICAL_CLUSTER_CLIENT_SECRET")
 }
 
 // validateConfig checks that all required fields are present after resolution.
