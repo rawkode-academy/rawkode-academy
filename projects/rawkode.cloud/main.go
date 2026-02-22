@@ -1,17 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 
+	"github.com/rawkode-academy/rawkode-cloud/internal/config"
 	"github.com/rawkode-academy/rawkode-cloud/internal/scaleway"
 	"github.com/rawkode-academy/rawkode-cloud/internal/state"
 	"github.com/rawkode-academy/rawkode-cloud/pkg/logging"
 	scw "github.com/scaleway/scaleway-sdk-go/scw"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const defaultTalosVersion = "v1.9.5"
+
+var configFile string
 
 func main() {
 	logging.Setup(slog.LevelInfo)
@@ -23,8 +28,19 @@ func main() {
 pivots them to Talos Linux, bootstraps a Kubernetes cluster, and secures
 access through Teleport — all with a single command.
 
-No SSH. No local state. No YAML files. Verify-then-lockdown.`,
+No SSH. No local state. Verify-then-lockdown.
+
+Configuration sources (in precedence order, lowest to highest):
+  1. Config file  (~/.rawkode-cloud.yaml or --config path)
+  2. Environment   (RAWKODE_CLOUD_* or SCW_ACCESS_KEY/SCW_SECRET_KEY)
+  3. CLI flags
+  4. Infisical      (secrets fetched at runtime backfill missing values)`,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			config.InitViper(configFile)
+		},
 	}
+
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "Config file path (default: .rawkode-cloud.yaml)")
 
 	provisionCmd := buildProvisionCommand()
 	destroyCmd := buildDestroyCommand()
@@ -38,20 +54,6 @@ No SSH. No local state. No YAML files. Verify-then-lockdown.`,
 }
 
 func buildProvisionCommand() *cobra.Command {
-	var (
-		clusterName       string
-		offerID           string
-		zone              string
-		osID              string
-		talosVersion      string
-		teleportProxy     string
-		infisicalURL      string
-		infisicalClientID string
-		infisicalSecret   string
-		kubeVersion       string
-		verbose           bool
-	)
-
 	cmd := &cobra.Command{
 		Use:   "provision",
 		Short: "Provision a bare metal Kubernetes cluster",
@@ -59,76 +61,103 @@ func buildProvisionCommand() *cobra.Command {
 generates cluster configuration in memory, bootstraps Kubernetes,
 verifies Teleport connectivity, and locks down the firewall.
 
-Required environment variables:
-  SCW_ACCESS_KEY    - Scaleway access key
-  SCW_SECRET_KEY    - Scaleway secret key`,
+All settings can come from a config file, environment variables, CLI flags,
+or Infisical. At minimum, provide Infisical credentials and a project ID
+to have everything resolved automatically.`,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			config.BindFlags(cmd)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if verbose {
+			if viper.GetBool("verbose") {
 				logging.Setup(slog.LevelDebug)
 			}
 
-			cfg := state.Config{
-				ClusterName:       clusterName,
-				OfferID:           offerID,
-				Zone:              scw.Zone(zone),
-				OSID:              osID,
-				TalosVersion:      talosVersion,
-				TeleportProxy:     teleportProxy,
-				InfisicalURL:      infisicalURL,
-				InfisicalClientID: infisicalClientID,
-				InfisicalSecret:   infisicalSecret,
-				KubernetesVersion: kubeVersion,
+			cfg, err := config.Resolve()
+			if err != nil {
+				return err
 			}
 
-			return state.Run(cmd.Context(), cfg)
+			zone := cfg.ScalewayZone
+			if zone == "" {
+				zone = "fr-par-2"
+			}
+
+			talosVersion := cfg.TalosVersion
+			if talosVersion == "" {
+				talosVersion = defaultTalosVersion
+			}
+
+			return state.Run(cmd.Context(), state.Config{
+				ClusterName:           cfg.ClusterName,
+				OfferID:               cfg.ScalewayOfferID,
+				Zone:                  scw.Zone(zone),
+				OSID:                  cfg.ScalewayOSID,
+				TalosVersion:          talosVersion,
+				TeleportProxy:         cfg.TeleportProxy,
+				KubernetesVersion:     cfg.KubernetesVersion,
+				ScalewayAccessKey:     cfg.ScalewayAccessKey,
+				ScalewaySecretKey:     cfg.ScalewaySecretKey,
+				InfisicalURL:          cfg.InfisicalURL,
+				InfisicalClientID:     cfg.InfisicalClientID,
+				InfisicalClientSecret: cfg.InfisicalClientSecret,
+				InfisicalProjectID:    cfg.InfisicalProjectID,
+				InfisicalEnvironment:  cfg.InfisicalEnvironment,
+				InfisicalSecretPath:   cfg.InfisicalSecretPath,
+			})
 		},
 	}
 
-	cmd.Flags().StringVar(&clusterName, "cluster-name", "", "Name for the Kubernetes cluster (required)")
-	cmd.Flags().StringVar(&offerID, "offer-id", "", "Scaleway bare metal offer UUID (required)")
-	cmd.Flags().StringVar(&zone, "zone", "fr-par-2", "Scaleway zone")
-	cmd.Flags().StringVar(&osID, "os-id", "", "Scaleway OS UUID for Ubuntu 24.04 (required)")
-	cmd.Flags().StringVar(&talosVersion, "talos-version", defaultTalosVersion, "Talos Linux release version")
-	cmd.Flags().StringVar(&teleportProxy, "teleport-proxy", "", "Teleport proxy address (required)")
-	cmd.Flags().StringVar(&infisicalURL, "infisical-url", "", "Infisical instance URL (required)")
-	cmd.Flags().StringVar(&infisicalClientID, "infisical-client-id", "", "Infisical client ID for machine token generation (required)")
-	cmd.Flags().StringVar(&infisicalSecret, "infisical-client-secret", "", "Infisical client secret for machine token generation (required)")
-	cmd.Flags().StringVar(&kubeVersion, "kubernetes-version", "", "Kubernetes version (default: Talos SDK default)")
-	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable debug logging")
-
-	_ = cmd.MarkFlagRequired("cluster-name")
-	_ = cmd.MarkFlagRequired("offer-id")
-	_ = cmd.MarkFlagRequired("os-id")
-	_ = cmd.MarkFlagRequired("teleport-proxy")
-	_ = cmd.MarkFlagRequired("infisical-url")
-	_ = cmd.MarkFlagRequired("infisical-client-id")
-	_ = cmd.MarkFlagRequired("infisical-client-secret")
+	// All flags are optional — values can come from config file, env vars, or Infisical
+	cmd.Flags().String("cluster-name", "", "Name for the Kubernetes cluster")
+	cmd.Flags().String("scaleway-offer-id", "", "Scaleway bare metal offer UUID")
+	cmd.Flags().String("scaleway-zone", "fr-par-2", "Scaleway zone")
+	cmd.Flags().String("scaleway-os-id", "", "Scaleway OS UUID for Ubuntu 24.04")
+	cmd.Flags().String("scaleway-access-key", "", "Scaleway access key")
+	cmd.Flags().String("scaleway-secret-key", "", "Scaleway secret key")
+	cmd.Flags().String("talos-version", defaultTalosVersion, "Talos Linux release version")
+	cmd.Flags().String("teleport-proxy", "", "Teleport proxy address")
+	cmd.Flags().String("infisical-url", "", "Infisical instance URL")
+	cmd.Flags().String("infisical-client-id", "", "Infisical client ID")
+	cmd.Flags().String("infisical-client-secret", "", "Infisical client secret")
+	cmd.Flags().String("infisical-project-id", "", "Infisical project ID for secret fetching")
+	cmd.Flags().String("infisical-environment", "production", "Infisical environment")
+	cmd.Flags().String("infisical-secret-path", "/", "Infisical secret path")
+	cmd.Flags().String("kubernetes-version", "", "Kubernetes version (default: Talos SDK default)")
+	cmd.Flags().BoolP("verbose", "v", false, "Enable debug logging")
 
 	return cmd
 }
 
 func buildDestroyCommand() *cobra.Command {
-	var (
-		serverID string
-		zone     string
-		verbose  bool
-	)
-
 	cmd := &cobra.Command{
 		Use:   "destroy",
 		Short: "Destroy a previously provisioned server",
 		Long: `Deletes a Scaleway bare metal server by ID. Useful for cleaning up
-failed provisioning runs.
-
-Required environment variables:
-  SCW_ACCESS_KEY    - Scaleway access key
-  SCW_SECRET_KEY    - Scaleway secret key`,
+failed provisioning runs.`,
+		PreRun: func(cmd *cobra.Command, args []string) {
+			config.BindFlags(cmd)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if verbose {
+			if viper.GetBool("verbose") {
 				logging.Setup(slog.LevelDebug)
 			}
 
-			api, err := scaleway.NewClient()
+			cfg, err := config.Resolve()
+			if err != nil {
+				return err
+			}
+
+			serverID := viper.GetString("server_id")
+			if serverID == "" {
+				return fmt.Errorf("--server-id is required")
+			}
+
+			zone := cfg.ScalewayZone
+			if zone == "" {
+				zone = "fr-par-2"
+			}
+
+			api, err := scaleway.NewClient(cfg.ScalewayAccessKey, cfg.ScalewaySecretKey)
 			if err != nil {
 				return err
 			}
@@ -137,11 +166,11 @@ Required environment variables:
 		},
 	}
 
-	cmd.Flags().StringVar(&serverID, "server-id", "", "Server ID to destroy (required)")
-	cmd.Flags().StringVar(&zone, "zone", "fr-par-2", "Scaleway zone")
-	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable debug logging")
-
-	_ = cmd.MarkFlagRequired("server-id")
+	cmd.Flags().String("server-id", "", "Server ID to destroy (required)")
+	cmd.Flags().String("scaleway-zone", "fr-par-2", "Scaleway zone")
+	cmd.Flags().String("scaleway-access-key", "", "Scaleway access key")
+	cmd.Flags().String("scaleway-secret-key", "", "Scaleway secret key")
+	cmd.Flags().BoolP("verbose", "v", false, "Enable debug logging")
 
 	return cmd
 }
