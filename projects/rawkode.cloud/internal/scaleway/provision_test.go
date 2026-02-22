@@ -53,7 +53,8 @@ func TestBuildCloudInit_HasChecksumVerification(t *testing.T) {
 func TestBuildCloudInit_HasDDCommand(t *testing.T) {
 	script := BuildCloudInit("v1.9.5")
 
-	if !strings.Contains(script, "dd if=/tmp/talos.raw of=/dev/sda") {
+	if !strings.Contains(script, "dd if=/tmp/talos.raw of=${TARGET_DISK}") &&
+		!strings.Contains(script, `dd if=/tmp/talos.raw of="${TARGET_DISK}"`) {
 		t.Error("cloud-init script must write Talos image to disk")
 	}
 }
@@ -93,5 +94,17 @@ func TestBuildCloudInit_HasBlockSize(t *testing.T) {
 
 	if !strings.Contains(script, "bs=4M") {
 		t.Error("cloud-init script should use bs=4M for efficient disk writes")
+	}
+}
+
+func TestBuildCloudInit_HasBootDiskDetection(t *testing.T) {
+	script := BuildCloudInit("v1.9.5")
+
+	if !strings.Contains(script, "findmnt") {
+		t.Error("cloud-init script should detect boot disk using findmnt")
+	}
+
+	if !strings.Contains(script, "TARGET_DISK") {
+		t.Error("cloud-init script should use TARGET_DISK variable for disk detection")
 	}
 }

@@ -25,9 +25,13 @@ type ClusterConfig struct {
 	ServerPublicIP    string
 	TeleportToken     string
 	TeleportProxyAddr string
-	InfisicalToken    string
 	OperatorIP        string
 	KubernetesVersion string
+
+	// Infisical cluster identity — injected directly as long-lived credentials.
+	// The cluster uses these to authenticate with Infisical at runtime.
+	InfisicalClusterClientID     string
+	InfisicalClusterClientSecret string
 }
 
 // GeneratedConfig holds the results of Talos config generation.
@@ -38,7 +42,7 @@ type GeneratedConfig struct {
 	// It includes temporary ingress firewall rules scoped to the operator's IP.
 	MachineConfig coreconfig.Provider
 	// LockdownConfigBytes is the serialised machine config without the temporary
-	// firewall rules. Applied in Phase 5 after Teleport connectivity is confirmed.
+	// firewall rules. Applied in Phase 6 after Teleport connectivity is confirmed.
 	LockdownConfigBytes []byte
 	// TalosConfig is the client configuration with PKI credentials for mTLS.
 	TalosConfig *clientconfig.Config
@@ -82,14 +86,14 @@ func GenerateConfig(cfg ClusterConfig) (*GeneratedConfig, error) {
 		return nil, fmt.Errorf("patch config: %w", err)
 	}
 
-	// Serialize the config without firewall rules for use during lockdown (Phase 5).
+	// Serialize the config without firewall rules for use during lockdown (Phase 6).
 	lockdownBytes, err := provider.Bytes()
 	if err != nil {
 		return nil, fmt.Errorf("serialize lockdown config: %w", err)
 	}
 
 	// Build the full config with temporary ingress firewall rules added as
-	// separate NetworkRuleConfig documents. These are removed in Phase 5
+	// separate NetworkRuleConfig documents. These are removed in Phase 6
 	// by re-applying the lockdown bytes (which contain only the v1alpha1 config).
 	fullProvider, err := buildProviderWithFirewall(provider, cfg.OperatorIP)
 	if err != nil {
@@ -103,7 +107,7 @@ func GenerateConfig(cfg ClusterConfig) (*GeneratedConfig, error) {
 	}
 
 	slog.Info("talos config generated in memory",
-		"phase", "3",
+		"phase", "4",
 		"cluster", cfg.ClusterName,
 		"endpoint", cfg.ServerPublicIP,
 	)
@@ -118,15 +122,28 @@ func GenerateConfig(cfg ClusterConfig) (*GeneratedConfig, error) {
 // injectInlineManifests adds Kubernetes resources that Talos applies during bootstrap.
 // The Teleport agent and Infisical secret are the first things running in the cluster.
 func injectInlineManifests(config *v1alpha1.Config, cfg ClusterConfig) {
-	infisicalSecret := fmt.Sprintf(`apiVersion: v1
+	var manifests []v1alpha1.ClusterInlineManifest
+
+	// Inject Infisical machine identity with long-lived credentials.
+	// The cluster authenticates directly with these — no short-lived bootstrap
+	// token needed since the CLI controls the entire provisioning flow.
+	if cfg.InfisicalClusterClientID != "" && cfg.InfisicalClusterClientSecret != "" {
+		infisicalSecret := fmt.Sprintf(`apiVersion: v1
 kind: Secret
 metadata:
   name: infisical-machine-identity
   namespace: kube-system
 type: Opaque
 stringData:
-  token: "%s"
-`, cfg.InfisicalToken)
+  clientId: "%s"
+  clientSecret: "%s"
+`, cfg.InfisicalClusterClientID, cfg.InfisicalClusterClientSecret)
+
+		manifests = append(manifests, v1alpha1.ClusterInlineManifest{
+			InlineManifestName:     "infisical-machine-identity",
+			InlineManifestContents: infisicalSecret,
+		})
+	}
 
 	teleportSecret := fmt.Sprintf(`apiVersion: v1
 kind: Secret
@@ -139,21 +156,24 @@ stringData:
   proxy: "%s"
 `, cfg.TeleportToken, cfg.TeleportProxyAddr)
 
+	manifests = append(manifests, v1alpha1.ClusterInlineManifest{
+		InlineManifestName:     "teleport-join-token",
+		InlineManifestContents: teleportSecret,
+	})
+
 	config.ClusterConfig.ClusterInlineManifests = append(
 		config.ClusterConfig.ClusterInlineManifests,
-		v1alpha1.ClusterInlineManifest{
-			InlineManifestName:     "infisical-machine-identity",
-			InlineManifestContents: infisicalSecret,
-		},
-		v1alpha1.ClusterInlineManifest{
-			InlineManifestName:     "teleport-join-token",
-			InlineManifestContents: teleportSecret,
-		},
+		manifests...,
 	)
 
+	manifestNames := make([]string, len(manifests))
+	for i, m := range manifests {
+		manifestNames[i] = m.InlineManifestName
+	}
+
 	slog.Info("inline manifests injected",
-		"phase", "3",
-		"manifests", []string{"infisical-machine-identity", "teleport-join-token"},
+		"phase", "4",
+		"manifests", manifestNames,
 	)
 }
 
@@ -191,7 +211,7 @@ func buildProviderWithFirewall(base coreconfig.Provider, operatorIP string) (cor
 	}
 
 	slog.Info("temporary firewall rules added",
-		"phase", "3",
+		"phase", "4",
 		"allowed_source", operatorIP,
 		"ports", "50000/TCP, 6443/TCP",
 	)

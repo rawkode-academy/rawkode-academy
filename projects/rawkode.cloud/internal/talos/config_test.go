@@ -1,17 +1,19 @@
 package talos
 
 import (
+	"strings"
 	"testing"
 )
 
 func TestGenerateConfig_Success(t *testing.T) {
 	cfg := ClusterConfig{
-		ClusterName:       "test-cluster",
-		ServerPublicIP:    "1.2.3.4",
-		TeleportToken:     "test-token-abc",
-		TeleportProxyAddr: "teleport.example.com:443",
-		InfisicalToken:    "inf-token-xyz",
-		OperatorIP:        "5.6.7.8",
+		ClusterName:                  "test-cluster",
+		ServerPublicIP:               "1.2.3.4",
+		TeleportToken:                "test-token-abc",
+		TeleportProxyAddr:            "teleport.example.com:443",
+		InfisicalClusterClientID:     "inf-client-id",
+		InfisicalClusterClientSecret: "inf-client-secret",
+		OperatorIP:                   "5.6.7.8",
 	}
 
 	genCfg, err := GenerateConfig(cfg)
@@ -30,12 +32,13 @@ func TestGenerateConfig_Success(t *testing.T) {
 
 func TestGenerateConfig_ContainsInlineManifests(t *testing.T) {
 	cfg := ClusterConfig{
-		ClusterName:       "test-cluster",
-		ServerPublicIP:    "1.2.3.4",
-		TeleportToken:     "test-token-abc",
-		TeleportProxyAddr: "teleport.example.com:443",
-		InfisicalToken:    "inf-token-xyz",
-		OperatorIP:        "5.6.7.8",
+		ClusterName:                  "test-cluster",
+		ServerPublicIP:               "1.2.3.4",
+		TeleportToken:                "test-token-abc",
+		TeleportProxyAddr:            "teleport.example.com:443",
+		InfisicalClusterClientID:     "inf-client-id",
+		InfisicalClusterClientSecret: "inf-client-secret",
+		OperatorIP:                   "5.6.7.8",
 	}
 
 	genCfg, err := GenerateConfig(cfg)
@@ -60,6 +63,16 @@ func TestGenerateConfig_ContainsInlineManifests(t *testing.T) {
 		switch m.InlineManifestName {
 		case "infisical-machine-identity":
 			foundInfisical = true
+			// Verify it contains clientId and clientSecret, not token
+			if !strings.Contains(m.InlineManifestContents, "clientId") {
+				t.Error("infisical manifest should contain clientId field")
+			}
+			if !strings.Contains(m.InlineManifestContents, "clientSecret") {
+				t.Error("infisical manifest should contain clientSecret field")
+			}
+			if strings.Contains(m.InlineManifestContents, "token:") {
+				t.Error("infisical manifest should NOT contain token field (use clientId/clientSecret)")
+			}
 		case "teleport-join-token":
 			foundTeleport = true
 		}
@@ -73,14 +86,51 @@ func TestGenerateConfig_ContainsInlineManifests(t *testing.T) {
 	}
 }
 
-func TestGenerateConfig_Serializable(t *testing.T) {
+func TestGenerateConfig_InfisicalOptional(t *testing.T) {
 	cfg := ClusterConfig{
 		ClusterName:       "test-cluster",
 		ServerPublicIP:    "1.2.3.4",
 		TeleportToken:     "test-token",
 		TeleportProxyAddr: "teleport.example.com:443",
-		InfisicalToken:    "inf-token",
 		OperatorIP:        "5.6.7.8",
+		// No Infisical credentials
+	}
+
+	genCfg, err := GenerateConfig(cfg)
+	if err != nil {
+		t.Fatalf("GenerateConfig failed: %v", err)
+	}
+
+	v1cfg := genCfg.MachineConfig.RawV1Alpha1()
+	manifests := v1cfg.ClusterConfig.ClusterInlineManifests
+
+	for _, m := range manifests {
+		if m.InlineManifestName == "infisical-machine-identity" {
+			t.Error("infisical-machine-identity manifest should NOT be present when credentials are empty")
+		}
+	}
+
+	// Teleport manifest should still be present
+	foundTeleport := false
+	for _, m := range manifests {
+		if m.InlineManifestName == "teleport-join-token" {
+			foundTeleport = true
+		}
+	}
+	if !foundTeleport {
+		t.Error("teleport-join-token manifest should always be present")
+	}
+}
+
+func TestGenerateConfig_Serializable(t *testing.T) {
+	cfg := ClusterConfig{
+		ClusterName:                  "test-cluster",
+		ServerPublicIP:               "1.2.3.4",
+		TeleportToken:                "test-token",
+		TeleportProxyAddr:            "teleport.example.com:443",
+		InfisicalClusterClientID:     "inf-client-id",
+		InfisicalClusterClientSecret: "inf-client-secret",
+		OperatorIP:                   "5.6.7.8",
 	}
 
 	genCfg, err := GenerateConfig(cfg)

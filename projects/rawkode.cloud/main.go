@@ -97,6 +97,9 @@ to have everything resolved automatically.`,
 				KubernetesVersion:     cfg.KubernetesVersion,
 				ScalewayAccessKey:     cfg.ScalewayAccessKey,
 				ScalewaySecretKey:     cfg.ScalewaySecretKey,
+				CloudflareAPIToken:    cfg.CloudflareAPIToken,
+				CloudflareZoneID:      cfg.CloudflareZoneID,
+				CloudflareDNSName:     cfg.CloudflareDNSName,
 				InfisicalURL:          cfg.InfisicalURL,
 				InfisicalClientID:     cfg.InfisicalClientID,
 				InfisicalClientSecret: cfg.InfisicalClientSecret,
@@ -123,6 +126,9 @@ to have everything resolved automatically.`,
 	cmd.Flags().String("infisical-environment", "production", "Infisical environment")
 	cmd.Flags().String("infisical-secret-path", "/", "Infisical secret path")
 	cmd.Flags().String("kubernetes-version", "", "Kubernetes version (default: Talos SDK default)")
+	cmd.Flags().String("cloudflare-api-token", "", "Cloudflare API token for DNS management")
+	cmd.Flags().String("cloudflare-zone-id", "", "Cloudflare zone ID for DNS record")
+	cmd.Flags().String("cloudflare-dns-name", "", "DNS record name to point at the server (e.g. rawkode.cloud)")
 	cmd.Flags().BoolP("verbose", "v", false, "Enable debug logging")
 
 	return cmd

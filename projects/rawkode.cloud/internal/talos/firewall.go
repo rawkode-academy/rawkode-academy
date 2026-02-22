@@ -38,7 +38,7 @@ func LockdownFirewall(ctx context.Context, ip string, genCfg *GeneratedConfig) e
 	}
 
 	slog.Info("firewall lockdown applied",
-		"phase", "5",
+		"phase", "6",
 		"blocked_ports", "50000, 6443",
 		"access_method", "teleport-only",
 	)
