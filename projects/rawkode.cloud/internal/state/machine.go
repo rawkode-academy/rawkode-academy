@@ -144,7 +144,7 @@ func Run(ctx context.Context, cfg Config) error {
 		slog.Warn("CLEANUP: deleting server", "server_id", serverID)
 		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
-		if err := scaleway.DeleteServer(cleanupCtx, scwAPI, serverID, cfg.Zone); err != nil {
+		if err := scaleway.DeleteServer(cleanupCtx, scwAPI.Baremetal, serverID, cfg.Zone); err != nil {
 			slog.Error("CLEANUP FAILED: server not deleted, manual cleanup required",
 				"server_id", serverID,
 				"error", err,
