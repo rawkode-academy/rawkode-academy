@@ -17,6 +17,7 @@ import (
 )
 
 // Config holds all parameters needed for a full provisioning run.
+// Values may come from config file, env vars, CLI flags, or Infisical.
 type Config struct {
 	ClusterName       string
 	OfferID           string
@@ -24,10 +25,19 @@ type Config struct {
 	OSID              string
 	TalosVersion      string
 	TeleportProxy     string
-	InfisicalURL      string
-	InfisicalClientID string
-	InfisicalSecret   string
 	KubernetesVersion string
+
+	// Scaleway credentials — fetched from Infisical or env vars
+	ScalewayAccessKey string
+	ScalewaySecretKey string
+
+	// Infisical connection — used to fetch all other secrets
+	InfisicalURL          string
+	InfisicalClientID     string
+	InfisicalClientSecret string
+	InfisicalProjectID    string
+	InfisicalEnvironment  string
+	InfisicalSecretPath   string
 }
 
 // Run executes the 5-phase provisioning pipeline.
@@ -42,8 +52,47 @@ func Run(ctx context.Context, cfg Config) error {
 		}
 	}()
 
-	// Initialize Scaleway client
-	scwAPI, err := scaleway.NewClient()
+	// ── Phase 0: Resolve secrets from Infisical ──
+	// Infisical is the single source of truth for all secret material.
+	// If we have Infisical credentials, authenticate and fetch any missing values.
+	var infClient *infisical.Client
+
+	if cfg.InfisicalURL != "" && cfg.InfisicalClientID != "" && cfg.InfisicalClientSecret != "" {
+		slog.Info("authenticating with Infisical", "url", cfg.InfisicalURL)
+
+		var err error
+		infClient, err = infisical.NewClient(ctx, cfg.InfisicalURL, cfg.InfisicalClientID, cfg.InfisicalClientSecret)
+		if err != nil {
+			return fmt.Errorf("infisical auth: %w", err)
+		}
+
+		// Fetch all secrets from the configured path and backfill any missing config values
+		if cfg.InfisicalProjectID != "" {
+			env := cfg.InfisicalEnvironment
+			if env == "" {
+				env = "production"
+			}
+			path := cfg.InfisicalSecretPath
+			if path == "" {
+				path = "/"
+			}
+
+			secrets, err := infClient.GetSecrets(ctx, cfg.InfisicalProjectID, env, path)
+			if err != nil {
+				return fmt.Errorf("fetch secrets from infisical: %w", err)
+			}
+
+			backfillFromSecrets(&cfg, secrets)
+		}
+	}
+
+	// Validate required fields after secret resolution
+	if err := validateConfig(&cfg); err != nil {
+		return fmt.Errorf("config validation: %w", err)
+	}
+
+	// Initialize Scaleway client with resolved credentials
+	scwAPI, err := scaleway.NewClient(cfg.ScalewayAccessKey, cfg.ScalewaySecretKey)
 	if err != nil {
 		return fmt.Errorf("init scaleway: %w", err)
 	}
@@ -114,9 +163,12 @@ func Run(ctx context.Context, cfg Config) error {
 		return fmt.Errorf("phase 3 (teleport token) failed: %w", err)
 	}
 
-	infisicalToken, err := infisical.GenerateMachineToken(ctx, cfg.InfisicalURL, cfg.InfisicalClientID, cfg.InfisicalSecret)
-	if err != nil {
-		return fmt.Errorf("phase 3 (infisical token) failed: %w", err)
+	// Use the Infisical client's access token as the machine identity token
+	// that gets injected into the cluster. This token is scoped to what the
+	// cluster needs via Infisical's machine identity permissions.
+	var infisicalMachineToken string
+	if infClient != nil {
+		infisicalMachineToken = infClient.AccessToken()
 	}
 
 	talosConfig, err := talos.GenerateConfig(talos.ClusterConfig{
@@ -124,7 +176,7 @@ func Run(ctx context.Context, cfg Config) error {
 		ServerPublicIP:    publicIP,
 		TeleportToken:     teleportToken,
 		TeleportProxyAddr: cfg.TeleportProxy,
-		InfisicalToken:    infisicalToken,
+		InfisicalToken:    infisicalMachineToken,
 		OperatorIP:        operatorIP,
 		KubernetesVersion: cfg.KubernetesVersion,
 	})
@@ -174,6 +226,61 @@ func Run(ctx context.Context, cfg Config) error {
 		"server_ip", publicIP,
 		"access", "teleport",
 	)
+	return nil
+}
+
+// backfillFromSecrets fills in any missing Config fields from Infisical secrets.
+// Secret keys map to config fields by convention:
+//
+//	SCW_ACCESS_KEY       -> ScalewayAccessKey
+//	SCW_SECRET_KEY       -> ScalewaySecretKey
+//	TELEPORT_PROXY       -> TeleportProxy
+//	SCALEWAY_OFFER_ID    -> OfferID
+//	SCALEWAY_OS_ID       -> OSID
+//	CLUSTER_NAME         -> ClusterName
+//	TALOS_VERSION        -> TalosVersion
+//	KUBERNETES_VERSION   -> KubernetesVersion
+func backfillFromSecrets(cfg *Config, secrets map[string]string) {
+	backfill := func(target *string, keys ...string) {
+		if *target != "" {
+			return
+		}
+		for _, key := range keys {
+			if v, ok := secrets[key]; ok && v != "" {
+				*target = v
+				slog.Debug("backfilled config from infisical", "key", key)
+				return
+			}
+		}
+	}
+
+	backfill(&cfg.ScalewayAccessKey, "SCW_ACCESS_KEY", "SCALEWAY_ACCESS_KEY")
+	backfill(&cfg.ScalewaySecretKey, "SCW_SECRET_KEY", "SCALEWAY_SECRET_KEY")
+	backfill(&cfg.TeleportProxy, "TELEPORT_PROXY", "TELEPORT_PROXY_ADDR")
+	backfill(&cfg.OfferID, "SCALEWAY_OFFER_ID", "SCW_OFFER_ID")
+	backfill(&cfg.OSID, "SCALEWAY_OS_ID", "SCW_OS_ID")
+	backfill(&cfg.ClusterName, "CLUSTER_NAME")
+	backfill(&cfg.TalosVersion, "TALOS_VERSION")
+	backfill(&cfg.KubernetesVersion, "KUBERNETES_VERSION")
+}
+
+// validateConfig checks that all required fields are present after resolution.
+func validateConfig(cfg *Config) error {
+	var missing []string
+	check := func(val, name string) {
+		if val == "" {
+			missing = append(missing, name)
+		}
+	}
+
+	check(cfg.ClusterName, "cluster-name")
+	check(cfg.OfferID, "offer-id")
+	check(cfg.OSID, "os-id")
+	check(cfg.TeleportProxy, "teleport-proxy")
+
+	if len(missing) > 0 {
+		return fmt.Errorf("missing required config: %s (set via config file, env vars, CLI flags, or Infisical)", strings.Join(missing, ", "))
+	}
 	return nil
 }
 

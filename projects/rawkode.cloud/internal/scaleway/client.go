@@ -7,13 +7,22 @@ import (
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
-// NewClient creates a Scaleway bare metal API client from environment variables.
-// Reads SCW_ACCESS_KEY, SCW_SECRET_KEY, and SCW_DEFAULT_ZONE from the environment.
-// Credentials never appear in code, config files, or CLI flags.
-func NewClient() (*baremetal.API, error) {
-	client, err := scw.NewClient(
+// NewClient creates a Scaleway bare metal API client.
+// If accessKey and secretKey are provided, they are used directly.
+// Otherwise, falls back to environment variables (SCW_ACCESS_KEY, SCW_SECRET_KEY).
+func NewClient(accessKey, secretKey string) (*baremetal.API, error) {
+	opts := []scw.ClientOption{
 		scw.WithEnv(),
-	)
+	}
+
+	// Explicit credentials override environment variables.
+	if accessKey != "" && secretKey != "" {
+		opts = append(opts,
+			scw.WithAuth(accessKey, secretKey),
+		)
+	}
+
+	client, err := scw.NewClient(opts...)
 	if err != nil {
 		return nil, fmt.Errorf("scaleway client init: %w", err)
 	}
