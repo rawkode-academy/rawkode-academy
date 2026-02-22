@@ -1,2 +1,4 @@
-__pycache__/
-*.pyc
+rawkode-cloud
+*.exe
+.envrc
+.env
