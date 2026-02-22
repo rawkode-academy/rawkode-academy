@@ -8,6 +8,7 @@ import (
 	"time"
 
 	baremetal "github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
+	iam "github.com/scaleway/scaleway-sdk-go/api/iam/v1alpha1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
@@ -23,19 +24,28 @@ type ProvisionParams struct {
 // installation with a Talos pivot cloud-init script in a single API call.
 // This eliminates the need to wait for hardware allocation before triggering
 // install — Scaleway starts the OS install automatically once hardware is ready.
-func OrderServer(ctx context.Context, api *baremetal.API, params ProvisionParams) (*baremetal.Server, error) {
+//
+// Scaleway requires SSH key IDs for OS installation even though the Talos pivot
+// will overwrite Ubuntu. We list the org's SSH keys and pass them through.
+func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*baremetal.Server, error) {
+	sshKeyIDs, err := listSSHKeyIDs(client.IAM)
+	if err != nil {
+		return nil, fmt.Errorf("list SSH keys: %w", err)
+	}
+
 	cloudInit := BuildCloudInit(params.TalosVersion)
 	cloudInitBytes := []byte(cloudInit)
 
 	suffix := rand.Intn(99999) //nolint:gosec // non-cryptographic, used only for unique naming
-	server, err := api.CreateServer(&baremetal.CreateServerRequest{
+	server, err := client.Baremetal.CreateServer(&baremetal.CreateServerRequest{
 		Zone:        params.Zone,
 		OfferID:     params.OfferID,
 		Name:        fmt.Sprintf("rawkode-%s-%05d", time.Now().Format("20060102-150405"), suffix),
 		Description: "Provisioned by rawkode-cloud CLI",
 		Install: &baremetal.CreateServerRequestInstall{
-			OsID:     params.OSID,
-			Hostname: "talos-pivot",
+			OsID:      params.OSID,
+			Hostname:  "talos-pivot",
+			SSHKeyIDs: sshKeyIDs,
 		},
 		UserData: &cloudInitBytes,
 	})
@@ -50,15 +60,41 @@ func OrderServer(ctx context.Context, api *baremetal.API, params ProvisionParams
 		"os", params.OSID,
 		"talos_version", params.TalosVersion,
 		"zone", params.Zone,
+		"ssh_keys", len(sshKeyIDs),
 	)
 
 	return server, nil
 }
 
+// listSSHKeyIDs fetches all SSH key IDs from the Scaleway org.
+// These are required by the install API even though the Talos pivot overwrites the OS.
+func listSSHKeyIDs(iamAPI *iam.API) ([]string, error) {
+	resp, err := iamAPI.ListSSHKeys(&iam.ListSSHKeysRequest{})
+	if err != nil {
+		return nil, fmt.Errorf("list ssh keys: %w", err)
+	}
+
+	if len(resp.SSHKeys) == 0 {
+		return nil, fmt.Errorf("no SSH keys found in Scaleway org — at least one is required for bare metal OS install")
+	}
+
+	ids := make([]string, len(resp.SSHKeys))
+	for i, key := range resp.SSHKeys {
+		ids[i] = key.ID
+	}
+
+	slog.Info("fetched SSH keys from Scaleway",
+		"phase", "1",
+		"count", len(ids),
+	)
+
+	return ids, nil
+}
+
 // WaitForReady polls Scaleway until the server reaches a terminal state.
 // With combined create+install, this waits for both hardware allocation AND
 // OS installation to complete. Bare metal provisioning can take 15-30 minutes.
-func WaitForReady(ctx context.Context, api *baremetal.API, serverID string, zone scw.Zone) (*baremetal.Server, error) {
+func WaitForReady(ctx context.Context, client *Client, serverID string, zone scw.Zone) (*baremetal.Server, error) {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 
@@ -71,7 +107,7 @@ func WaitForReady(ctx context.Context, api *baremetal.API, serverID string, zone
 		case <-timeout:
 			return nil, fmt.Errorf("server %s did not become ready within 45 minutes", serverID)
 		case <-ticker.C:
-			server, err := api.GetServer(&baremetal.GetServerRequest{
+			server, err := client.Baremetal.GetServer(&baremetal.GetServerRequest{
 				Zone:     zone,
 				ServerID: serverID,
 			})
