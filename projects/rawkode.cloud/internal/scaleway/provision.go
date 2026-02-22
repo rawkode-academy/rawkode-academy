@@ -5,53 +5,71 @@ import (
 	"fmt"
 	"log/slog"
 	"math/rand"
-	"strings"
 	"time"
 
 	baremetal "github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
-// OrderServer creates a new bare metal server with Scaleway.
-// The server name includes a timestamp and random suffix to uniquely identify
-// each provisioning run even if two runs start in the same second.
-func OrderServer(ctx context.Context, api *baremetal.API, offerID string, zone scw.Zone) (*baremetal.Server, error) {
+// ProvisionParams holds all parameters for creating a server with OS install.
+type ProvisionParams struct {
+	OfferID      string
+	Zone         scw.Zone
+	OSID         string
+	TalosVersion string
+}
+
+// OrderServer creates a new bare metal server with Scaleway and triggers OS
+// installation with a Talos pivot cloud-init script in a single API call.
+// This eliminates the need to wait for hardware allocation before triggering
+// install — Scaleway starts the OS install automatically once hardware is ready.
+func OrderServer(ctx context.Context, api *baremetal.API, params ProvisionParams) (*baremetal.Server, error) {
+	cloudInit := BuildCloudInit(params.TalosVersion)
+	cloudInitBytes := []byte(cloudInit)
+
 	suffix := rand.Intn(99999) //nolint:gosec // non-cryptographic, used only for unique naming
 	server, err := api.CreateServer(&baremetal.CreateServerRequest{
-		Zone:        zone,
-		OfferID:     offerID,
+		Zone:        params.Zone,
+		OfferID:     params.OfferID,
 		Name:        fmt.Sprintf("rawkode-%s-%05d", time.Now().Format("20060102-150405"), suffix),
 		Description: "Provisioned by rawkode-cloud CLI",
+		Install: &baremetal.CreateServerRequestInstall{
+			OsID:     params.OSID,
+			Hostname: "talos-pivot",
+		},
+		UserData: &cloudInitBytes,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create server: %w", err)
 	}
 
-	slog.Info("server ordered",
+	slog.Info("server ordered with OS install",
 		"phase", "1",
 		"server_id", server.ID,
-		"offer", offerID,
-		"zone", zone,
+		"offer", params.OfferID,
+		"os", params.OSID,
+		"talos_version", params.TalosVersion,
+		"zone", params.Zone,
 	)
 
 	return server, nil
 }
 
 // WaitForReady polls Scaleway until the server reaches a terminal state.
-// Bare metal provisioning can take 15-30 minutes — this is physical hardware allocation.
-// Poll errors are logged but not fatal; only terminal states (error, locked) cause failure.
+// With combined create+install, this waits for both hardware allocation AND
+// OS installation to complete. Bare metal provisioning can take 15-30 minutes.
 func WaitForReady(ctx context.Context, api *baremetal.API, serverID string, zone scw.Zone) (*baremetal.Server, error) {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 
-	timeout := time.After(30 * time.Minute)
+	timeout := time.After(45 * time.Minute)
 
 	for {
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		case <-timeout:
-			return nil, fmt.Errorf("server %s did not become ready within 30 minutes", serverID)
+			return nil, fmt.Errorf("server %s did not become ready within 45 minutes", serverID)
 		case <-ticker.C:
 			server, err := api.GetServer(&baremetal.GetServerRequest{
 				Zone:     zone,
@@ -133,72 +151,4 @@ sync
 echo "Pivot complete. Rebooting into Talos at $(date)"
 reboot
 `, talosVersion, imageURL, checksumURL)
-}
-
-// InstallOS triggers a Scaleway OS installation with a cloud-init script
-// that pivots the machine from Ubuntu to Talos Linux.
-func InstallOS(ctx context.Context, api *baremetal.API, serverID string, zone scw.Zone, osID string, talosVersion string) error {
-	cloudInit := BuildCloudInit(talosVersion)
-
-	hostname := "talos-pivot"
-
-	_, err := api.InstallServer(&baremetal.InstallServerRequest{
-		Zone:     zone,
-		ServerID: serverID,
-		OsID:     osID,
-		Hostname: hostname,
-		UserData: &scw.File{
-			Name:        "cloud-init",
-			ContentType: "text/x-shellscript",
-			Content:     strings.NewReader(cloudInit),
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("install OS: %w", err)
-	}
-
-	slog.Info("OS installation started with Talos pivot cloud-init",
-		"phase", "2",
-		"server_id", serverID,
-		"talos_version", talosVersion,
-	)
-
-	return nil
-}
-
-// WaitForInstall polls until the server installation completes.
-func WaitForInstall(ctx context.Context, api *baremetal.API, serverID string, zone scw.Zone) error {
-	ticker := time.NewTicker(30 * time.Second)
-	defer ticker.Stop()
-
-	timeout := time.After(30 * time.Minute)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-timeout:
-			return fmt.Errorf("server %s install did not complete within 30 minutes", serverID)
-		case <-ticker.C:
-			server, err := api.GetServer(&baremetal.GetServerRequest{
-				Zone:     zone,
-				ServerID: serverID,
-			})
-			if err != nil {
-				slog.Warn("install poll failed, retrying", "phase", "2", "error", err)
-				continue
-			}
-
-			slog.Info("install status", "phase", "2", "status", server.Status, "server_id", serverID)
-
-			switch server.Status {
-			case baremetal.ServerStatusReady:
-				return nil
-			case baremetal.ServerStatusError:
-				return fmt.Errorf("server installation failed: %s", serverID)
-			default:
-				continue
-			}
-		}
-	}
 }
