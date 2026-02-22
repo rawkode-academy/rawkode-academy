@@ -36,21 +36,21 @@ func WaitForAgent(ctx context.Context, proxyAddr, clusterName string, timeout ti
 		case <-ticker.C:
 			servers, err := clt.GetKubernetesServers(ctx)
 			if err != nil {
-				slog.Warn("teleport query failed, retrying", "phase", "5", "error", err)
+				slog.Warn("teleport query failed, retrying", "phase", "6", "error", err)
 				continue
 			}
 
 			for _, server := range servers {
 				if server.GetName() == clusterName {
 					slog.Info("teleport agent confirmed",
-						"phase", "5",
+						"phase", "6",
 						"cluster", clusterName,
 					)
 					return nil
 				}
 			}
 
-			slog.Debug("waiting for teleport agent", "phase", "5", "cluster", clusterName)
+			slog.Debug("waiting for teleport agent", "phase", "6", "cluster", clusterName)
 		}
 	}
 }
