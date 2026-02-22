@@ -36,15 +36,16 @@ func WaitForMaintenanceMode(ctx context.Context, ip string, timeout time.Duratio
 				grpc.WithTransportCredentials(insecure.NewCredentials()),
 				grpc.WithBlock(),
 			)
-			cancel()
 			if err != nil {
+				cancel()
 				slog.Debug("waiting for Talos maintenance mode", "address", address, "error", err)
 				continue
 			}
 
 			machineClient := machine.NewMachineServiceClient(conn)
-			_, err = machineClient.Version(ctx, &emptypb.Empty{})
+			_, err = machineClient.Version(dialCtx, &emptypb.Empty{})
 			conn.Close()
+			cancel()
 
 			if err != nil {
 				slog.Debug("Talos port open but API not ready yet", "error", err)
