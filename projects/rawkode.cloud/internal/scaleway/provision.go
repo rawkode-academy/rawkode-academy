@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -12,12 +13,14 @@ import (
 )
 
 // OrderServer creates a new bare metal server with Scaleway.
-// The server name includes a timestamp for easy identification of failed runs.
+// The server name includes a timestamp and random suffix to uniquely identify
+// each provisioning run even if two runs start in the same second.
 func OrderServer(ctx context.Context, api *baremetal.API, offerID string, zone scw.Zone) (*baremetal.Server, error) {
+	suffix := rand.Intn(99999) //nolint:gosec // non-cryptographic, used only for unique naming
 	server, err := api.CreateServer(&baremetal.CreateServerRequest{
 		Zone:        zone,
 		OfferID:     offerID,
-		Name:        fmt.Sprintf("rawkode-%s", time.Now().Format("20060102-150405")),
+		Name:        fmt.Sprintf("rawkode-%s-%05d", time.Now().Format("20060102-150405"), suffix),
 		Description: "Provisioned by rawkode-cloud CLI",
 	})
 	if err != nil {
@@ -105,8 +108,7 @@ wget --retry-connrefused --waitretry=5 --tries=5 \
 echo "Verifying checksum..."
 wget --retry-connrefused --waitretry=5 --tries=5 \
     -O /tmp/sha256sum.txt "%s"
-cd /tmp && grep "metal-amd64.raw.xz" sha256sum.txt | sha256sum -c -
-if [ $? -ne 0 ]; then
+if ! ( cd /tmp && grep "metal-amd64.raw.xz" sha256sum.txt | sha256sum -c - ); then
     echo "FATAL: Checksum verification failed. Aborting."
     exit 1
 fi
@@ -115,9 +117,17 @@ fi
 echo "Decompressing..."
 xz -d /tmp/talos.raw.xz
 
-# Step 4: Write to disk — point of no return
-echo "Writing Talos to /dev/sda..."
-dd if=/tmp/talos.raw of=/dev/sda bs=4M status=progress
+# Step 4: Detect the boot disk to avoid writing to the wrong device
+echo "Detecting boot disk..."
+ROOT_SOURCE=$(findmnt -n -o SOURCE / 2>/dev/null || echo "")
+if [ -b "$ROOT_SOURCE" ]; then
+    DISK_NAME=$(lsblk -no PKNAME "$ROOT_SOURCE" 2>/dev/null || basename "$ROOT_SOURCE")
+    TARGET_DISK="/dev/${DISK_NAME}"
+else
+    TARGET_DISK="/dev/sda"
+fi
+echo "Writing Talos to ${TARGET_DISK}..."
+dd if=/tmp/talos.raw of="${TARGET_DISK}" bs=4M status=progress
 sync
 
 echo "Pivot complete. Rebooting into Talos at $(date)"

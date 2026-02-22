@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -38,6 +39,12 @@ type Config struct {
 	InfisicalProjectID    string
 	InfisicalEnvironment  string
 	InfisicalSecretPath   string
+
+	// InfisicalClusterToken is a dedicated machine identity token for the cluster
+	// at runtime. It must be separate from the CLI bootstrap token (InfisicalClientID/Secret)
+	// so that cluster compromise does not grant provisioning-level access.
+	// Fetched from the INFISICAL_CLUSTER_TOKEN secret in Infisical.
+	InfisicalClusterToken string
 }
 
 // Run executes the 5-phase provisioning pipeline.
@@ -45,8 +52,12 @@ type Config struct {
 // cleanup runs in reverse order (LIFO).
 func Run(ctx context.Context, cfg Config) error {
 	var cleanup []func()
+	skipCleanup := false
 
 	defer func() {
+		if skipCleanup {
+			return
+		}
 		for i := len(cleanup) - 1; i >= 0; i-- {
 			cleanup[i]()
 		}
@@ -108,7 +119,9 @@ func Run(ctx context.Context, cfg Config) error {
 	serverID := server.ID
 	cleanup = append(cleanup, func() {
 		slog.Warn("CLEANUP: deleting server", "server_id", serverID)
-		if err := scaleway.DeleteServer(ctx, scwAPI, serverID, cfg.Zone); err != nil {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+		if err := scaleway.DeleteServer(cleanupCtx, scwAPI, serverID, cfg.Zone); err != nil {
 			slog.Error("CLEANUP FAILED: server not deleted, manual cleanup required",
 				"server_id", serverID,
 				"error", err,
@@ -163,20 +176,16 @@ func Run(ctx context.Context, cfg Config) error {
 		return fmt.Errorf("phase 3 (teleport token) failed: %w", err)
 	}
 
-	// Use the Infisical client's access token as the machine identity token
-	// that gets injected into the cluster. This token is scoped to what the
-	// cluster needs via Infisical's machine identity permissions.
-	var infisicalMachineToken string
-	if infClient != nil {
-		infisicalMachineToken = infClient.AccessToken()
-	}
-
+	// Use the dedicated cluster machine identity token that was fetched from
+	// Infisical as INFISICAL_CLUSTER_TOKEN. This is separate from the CLI's
+	// bootstrap token to honour the principle of least privilege: a compromised
+	// cluster cannot gain provisioning-level Infisical access.
 	talosConfig, err := talos.GenerateConfig(talos.ClusterConfig{
 		ClusterName:       cfg.ClusterName,
 		ServerPublicIP:    publicIP,
 		TeleportToken:     teleportToken,
 		TeleportProxyAddr: cfg.TeleportProxy,
-		InfisicalToken:    infisicalMachineToken,
+		InfisicalToken:    cfg.InfisicalClusterToken,
 		OperatorIP:        operatorIP,
 		KubernetesVersion: cfg.KubernetesVersion,
 	})
@@ -208,7 +217,7 @@ func Run(ctx context.Context, cfg Config) error {
 			"error", err,
 			"server_ip", publicIP,
 		)
-		cleanup = cleanup[:0]
+		skipCleanup = true
 		return fmt.Errorf("phase 5 (teleport verify) failed — server left running for manual debug: %w", err)
 	}
 
@@ -217,8 +226,8 @@ func Run(ctx context.Context, cfg Config) error {
 		return fmt.Errorf("phase 5 (lockdown) failed: %w", err)
 	}
 
-	// Success — remove cleanup so we don't delete the working server
-	cleanup = cleanup[:0]
+	// Success — skip cleanup so we don't delete the working server
+	skipCleanup = true
 
 	slog.Info("provisioning complete",
 		"cluster", cfg.ClusterName,
@@ -232,14 +241,15 @@ func Run(ctx context.Context, cfg Config) error {
 // backfillFromSecrets fills in any missing Config fields from Infisical secrets.
 // Secret keys map to config fields by convention:
 //
-//	SCW_ACCESS_KEY       -> ScalewayAccessKey
-//	SCW_SECRET_KEY       -> ScalewaySecretKey
-//	TELEPORT_PROXY       -> TeleportProxy
-//	SCALEWAY_OFFER_ID    -> OfferID
-//	SCALEWAY_OS_ID       -> OSID
-//	CLUSTER_NAME         -> ClusterName
-//	TALOS_VERSION        -> TalosVersion
-//	KUBERNETES_VERSION   -> KubernetesVersion
+//	SCW_ACCESS_KEY            -> ScalewayAccessKey
+//	SCW_SECRET_KEY            -> ScalewaySecretKey
+//	TELEPORT_PROXY            -> TeleportProxy
+//	SCALEWAY_OFFER_ID         -> OfferID
+//	SCALEWAY_OS_ID            -> OSID
+//	CLUSTER_NAME              -> ClusterName
+//	TALOS_VERSION             -> TalosVersion
+//	KUBERNETES_VERSION        -> KubernetesVersion
+//	INFISICAL_CLUSTER_TOKEN   -> InfisicalClusterToken
 func backfillFromSecrets(cfg *Config, secrets map[string]string) {
 	backfill := func(target *string, keys ...string) {
 		if *target != "" {
@@ -262,6 +272,7 @@ func backfillFromSecrets(cfg *Config, secrets map[string]string) {
 	backfill(&cfg.ClusterName, "CLUSTER_NAME")
 	backfill(&cfg.TalosVersion, "TALOS_VERSION")
 	backfill(&cfg.KubernetesVersion, "KUBERNETES_VERSION")
+	backfill(&cfg.InfisicalClusterToken, "INFISICAL_CLUSTER_TOKEN")
 }
 
 // validateConfig checks that all required fields are present after resolution.
@@ -286,24 +297,84 @@ func validateConfig(cfg *Config) error {
 
 // GetOperatorIP determines the public IP of the machine running the CLI.
 // This is used to scope temporary firewall rules to the operator's IP only.
+// It tries multiple services with retries so a single unavailable endpoint
+// does not abort the provisioning run.
 func GetOperatorIP(ctx context.Context) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://checkip.amazonaws.com", nil)
+	endpoints := []string{
+		"https://checkip.amazonaws.com",
+		"https://ifconfig.me/ip",
+		"https://icanhazip.com",
+	}
+
+	const (
+		maxAttempts = 3
+		baseBackoff = 500 * time.Millisecond
+	)
+
+	var lastErr error
+
+	for _, endpoint := range endpoints {
+		for attempt := 0; attempt < maxAttempts; attempt++ {
+			select {
+			case <-ctx.Done():
+				if lastErr != nil {
+					return "", fmt.Errorf("context cancelled while determining operator IP (last error: %w)", lastErr)
+				}
+				return "", ctx.Err()
+			default:
+			}
+
+			ip, err := fetchIP(ctx, endpoint)
+			if err == nil {
+				slog.Info("detected operator public IP", "ip", ip, "endpoint", endpoint)
+				return ip, nil
+			}
+
+			lastErr = err
+			slog.Debug("failed to determine operator IP", "endpoint", endpoint, "attempt", attempt+1, "error", err)
+
+			if attempt < maxAttempts-1 {
+				backoff := baseBackoff * time.Duration(1<<attempt)
+				timer := time.NewTimer(backoff)
+				select {
+				case <-ctx.Done():
+					timer.Stop()
+					return "", fmt.Errorf("context cancelled while determining operator IP (last error: %w)", lastErr)
+				case <-timer.C:
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("could not determine operator IP after trying all endpoints: %w", lastErr)
+}
+
+// fetchIP fetches the public IP from a single endpoint and validates the result.
+func fetchIP(ctx context.Context, endpoint string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
-		return "", fmt.Errorf("build request: %w", err)
+		return "", fmt.Errorf("build request for %s: %w", endpoint, err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("could not determine operator IP: %w", err)
+		return "", fmt.Errorf("request to %s failed: %w", endpoint, err)
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("non-200 status from %s: %s", endpoint, resp.Status)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("read operator IP response: %w", err)
+		return "", fmt.Errorf("read response from %s: %w", endpoint, err)
 	}
 
 	ip := strings.TrimSpace(string(body))
-	slog.Info("detected operator public IP", "ip", ip)
+	if net.ParseIP(ip) == nil {
+		return "", fmt.Errorf("invalid IP address returned from %s: %q", endpoint, ip)
+	}
+
 	return ip, nil
 }
