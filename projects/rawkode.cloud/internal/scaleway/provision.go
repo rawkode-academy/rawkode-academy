@@ -2,9 +2,11 @@ package scaleway
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log/slog"
 	"math/rand"
+	"strings"
 	"time"
 
 	baremetal "github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
@@ -14,26 +16,27 @@ import (
 
 // ProvisionParams holds all parameters for creating a server with OS install.
 type ProvisionParams struct {
-	OfferID      string
-	Zone         scw.Zone
-	OSID         string
-	TalosVersion string
+	OfferID        string
+	Zone           scw.Zone
+	OSID           string
+	FlatcarChannel string
+	IgnitionJSON   []byte
 }
 
 // OrderServer creates a new bare metal server with Scaleway and triggers OS
-// installation with a Talos pivot cloud-init script in a single API call.
-// This eliminates the need to wait for hardware allocation before triggering
-// install — Scaleway starts the OS install automatically once hardware is ready.
+// installation with a Flatcar install cloud-init script in a single API call.
+// The cloud-init script downloads flatcar-install, writes the Ignition config,
+// and installs Flatcar Container Linux to disk.
 //
-// Scaleway requires SSH key IDs for OS installation even though the Talos pivot
-// will overwrite Ubuntu. We list the org's SSH keys and pass them through.
+// Scaleway requires SSH key IDs for OS installation even though the Flatcar
+// install will overwrite Ubuntu. We list the org's SSH keys and pass them through.
 func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*baremetal.Server, error) {
 	sshKeyIDs, err := listSSHKeyIDs(client.IAM)
 	if err != nil {
 		return nil, fmt.Errorf("list SSH keys: %w", err)
 	}
 
-	cloudInit := BuildCloudInit(params.TalosVersion)
+	cloudInit := BuildCloudInit(params.FlatcarChannel, params.IgnitionJSON)
 	cloudInitBytes := []byte(cloudInit)
 
 	suffix := rand.Intn(99999) //nolint:gosec // non-cryptographic, used only for unique naming
@@ -44,7 +47,7 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 		Description: "Provisioned by rawkode-cloud CLI",
 		Install: &baremetal.CreateServerRequestInstall{
 			OsID:      params.OSID,
-			Hostname:  "talos-pivot",
+			Hostname:  "flatcar-pivot",
 			SSHKeyIDs: sshKeyIDs,
 		},
 		UserData: &cloudInitBytes,
@@ -58,7 +61,7 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 		"server_id", server.ID,
 		"offer", params.OfferID,
 		"os", params.OSID,
-		"talos_version", params.TalosVersion,
+		"flatcar_channel", params.FlatcarChannel,
 		"zone", params.Zone,
 		"ssh_keys", len(sshKeyIDs),
 	)
@@ -67,7 +70,7 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 }
 
 // listSSHKeyIDs fetches all SSH key IDs from the Scaleway org.
-// These are required by the install API even though the Talos pivot overwrites the OS.
+// These are required by the install API even though the Flatcar install overwrites the OS.
 func listSSHKeyIDs(iamAPI *iam.API) ([]string, error) {
 	resp, err := iamAPI.ListSSHKeys(&iam.ListSSHKeysRequest{})
 	if err != nil {
@@ -132,59 +135,101 @@ func WaitForReady(ctx context.Context, client *Client, serverID string, zone scw
 	}
 }
 
-// BuildCloudInit generates a bash script that downloads a Talos Linux image,
-// verifies its checksum, and writes it to disk. On reboot, the machine boots
-// into Talos instead of Ubuntu. This is the OS pivot — a one-way door.
-func BuildCloudInit(talosVersion string) string {
-	imageURL := fmt.Sprintf(
-		"https://github.com/siderolabs/talos/releases/download/%s/metal-amd64.raw.xz",
-		talosVersion,
-	)
-	checksumURL := fmt.Sprintf(
-		"https://github.com/siderolabs/talos/releases/download/%s/sha256sum.txt",
-		talosVersion,
-	)
+// BuildCloudInit generates a bash script that downloads flatcar-install from
+// GitHub, writes the Ignition config to disk, and installs Flatcar Container
+// Linux. On reboot, the machine boots into Flatcar with the Ignition config
+// applied. This is the OS pivot — a one-way door.
+func BuildCloudInit(flatcarChannel string, ignitionJSON []byte) string {
+	ignitionB64 := wrapString(base64.StdEncoding.EncodeToString(ignitionJSON), 76)
 
-	return fmt.Sprintf(`#!/bin/bash
+	pivotScript := fmt.Sprintf(`#!/bin/bash
 set -euo pipefail
+set -x
+echo "Starting Flatcar pivot at $(date)"
 
-# Log everything for debugging via Scaleway's console output
-exec > /var/log/talos-pivot.log 2>&1
-echo "Starting Talos pivot at $(date)"
+# Step 0: Install dependencies required by flatcar-install
+echo "Installing dependencies..."
+apt-get update -qq
+apt-get install -y -qq bzip2 > /dev/null
 
-# Step 1: Download the Talos disk image
-echo "Downloading Talos %s..."
+# Step 1: Write Ignition config
+echo "Writing Ignition config..."
+cat >/tmp/ignition.b64 <<'__IGNITION_B64__'
+%s
+__IGNITION_B64__
+base64 -d /tmp/ignition.b64 > /tmp/ignition.json
+rm -f /tmp/ignition.b64
+
+# Step 2: Download flatcar-install
+echo "Downloading flatcar-install..."
 wget --retry-connrefused --waitretry=5 --tries=5 \
-    -O /tmp/talos.raw.xz "%s"
+    -O /tmp/flatcar-install "https://raw.githubusercontent.com/flatcar/init/flatcar-master/bin/flatcar-install"
+chmod +x /tmp/flatcar-install
 
-# Step 2: Download and verify checksum
-# A corrupted image + dd = a bricked machine with no recovery
-echo "Verifying checksum..."
-wget --retry-connrefused --waitretry=5 --tries=5 \
-    -O /tmp/sha256sum.txt "%s"
-if ! ( cd /tmp && grep "metal-amd64.raw.xz" sha256sum.txt | sha256sum -c - ); then
-    echo "FATAL: Checksum verification failed. Aborting."
-    exit 1
-fi
-
-# Step 3: Decompress
-echo "Decompressing..."
-xz -d /tmp/talos.raw.xz
-
-# Step 4: Detect the boot disk to avoid writing to the wrong device
+# Step 3: Detect the boot disk to avoid writing to the wrong device
 echo "Detecting boot disk..."
+TARGET_DISK=""
 ROOT_SOURCE=$(findmnt -n -o SOURCE / 2>/dev/null || echo "")
 if [ -b "$ROOT_SOURCE" ]; then
-    DISK_NAME=$(lsblk -no PKNAME "$ROOT_SOURCE" 2>/dev/null || basename "$ROOT_SOURCE")
-    TARGET_DISK="/dev/${DISK_NAME}"
-else
+    PKNAME=$(lsblk -ndo PKNAME "$ROOT_SOURCE" 2>/dev/null || true)
+    if [ -n "$PKNAME" ] && [ -b "/dev/$PKNAME" ]; then
+        TARGET_DISK="/dev/$PKNAME"
+    fi
+fi
+if [ -z "$TARGET_DISK" ]; then
+    TARGET_DISK=$(lsblk -dnpo NAME -e 7,11 | head -1)
+fi
+if [ -z "$TARGET_DISK" ]; then
     TARGET_DISK="/dev/sda"
 fi
-echo "Writing Talos to ${TARGET_DISK}..."
-dd if=/tmp/talos.raw of="${TARGET_DISK}" bs=4M status=progress
+
+# Step 4: Install Flatcar to disk
+echo "Installing Flatcar (%s channel) to ${TARGET_DISK}..."
+/tmp/flatcar-install -d "${TARGET_DISK}" -C %s -i /tmp/ignition.json
 sync
 
-echo "Pivot complete. Rebooting into Talos at $(date)"
+echo "Pivot complete. Rebooting into Flatcar at $(date)"
 reboot
-`, talosVersion, imageURL, checksumURL)
+`, ignitionB64, flatcarChannel, flatcarChannel)
+
+	pivotScriptB64 := wrapString(base64.StdEncoding.EncodeToString([]byte(pivotScript)), 76)
+
+	return fmt.Sprintf(`#cloud-config
+write_files:
+  - path: /usr/local/bin/rawkode-flatcar-pivot.sh
+    owner: root:root
+    permissions: "0755"
+    encoding: b64
+    content: |
+%s
+runcmd:
+  - [ bash, -lc, "/usr/local/bin/rawkode-flatcar-pivot.sh" ]
+`, indentLines(pivotScriptB64, "      "))
+}
+
+func wrapString(s string, width int) string {
+	if width <= 0 || len(s) <= width {
+		return s
+	}
+
+	var b strings.Builder
+	for start := 0; start < len(s); start += width {
+		end := start + width
+		if end > len(s) {
+			end = len(s)
+		}
+		b.WriteString(s[start:end])
+		if end < len(s) {
+			b.WriteByte('\n')
+		}
+	}
+	return b.String()
+}
+
+func indentLines(s, prefix string) string {
+	lines := strings.Split(s, "\n")
+	for i := range lines {
+		lines[i] = prefix + lines[i]
+	}
+	return strings.Join(lines, "\n")
 }

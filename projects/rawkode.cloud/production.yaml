@@ -1,0 +1,33 @@
+# rkc config file
+# Loaded by default from ~/.rawkode-cloud.yaml, or explicitly via --config production.yaml
+
+# Required after resolution (direct values or Infisical backfill):
+cluster_name: "production"
+teleport_proxy: "rawkode.cloud"
+
+# Scaleway — EM-A610R-NVME in fr-par-2
+scaleway_zone: "fr-par-2"
+scaleway_offer_id: "e1680dec-52aa-4cbc-b70c-ef32d863fdb0"
+scaleway_os_id: "7d1914e1-f4ab-47fc-bd8c-b3a23143e87a"
+
+# Flatcar / Kubernetes
+flatcar_channel: "stable"
+kubernetes_version: "1.35.1"
+cilium_version: "1.19.1"
+role: "control-plane"
+
+# Optional Cloudflare DNS (phase 3 skipped if left empty)
+cloudflare_dns_name: "rawkode.cloud"
+# cloudflare_zone_id: ""
+# cloudflare_account_id: ""
+
+# Optional Infisical bootstrap (used to backfill missing values)
+# These correspond to the old env names:
+# - INFISICAL_UNIVERSAL_AUTH_CLIENT_ID     -> infisical_client_id
+# - INFISICAL_UNIVERSAL_AUTH_CLIENT_SECRET -> infisical_client_secret
+infisical_environment: "production"
+infisical_secret_path: "/projects/rawkode-cloud"
+
+ssh_agent: "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+
+verbose: false

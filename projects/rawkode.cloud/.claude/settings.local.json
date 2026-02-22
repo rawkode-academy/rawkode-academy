@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.flatcar.org)",
+      "WebFetch(domain:deepwiki.com)",
+      "Bash(go vet:*)",
+      "Bash(go build:*)",
+      "Bash(echo All checks passed:*)",
+      "Bash(go run:*)"
+    ]
+  }
+}
