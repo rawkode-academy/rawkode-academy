@@ -71,9 +71,3 @@ func (c *Client) GetSecrets(_ context.Context, projectID, environment, secretPat
 
 	return secrets, nil
 }
-
-// AccessToken returns the raw access token for injection into the cluster.
-// This is the machine identity token that gets embedded as a Kubernetes secret.
-func (c *Client) AccessToken() string {
-	return c.sdk.Auth().GetAccessToken()
-}

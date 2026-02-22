@@ -3,14 +3,19 @@ package talos
 import (
 	"fmt"
 	"log/slog"
+	"net/netip"
 	"net/url"
 
-	"github.com/siderolabs/talos/pkg/machinery/config"
+	coreconfig "github.com/siderolabs/talos/pkg/machinery/config"
+	"github.com/siderolabs/talos/pkg/machinery/config/config"
+	"github.com/siderolabs/talos/pkg/machinery/config/container"
 	"github.com/siderolabs/talos/pkg/machinery/config/generate"
 	"github.com/siderolabs/talos/pkg/machinery/config/machine"
+	"github.com/siderolabs/talos/pkg/machinery/config/types/network"
 	"github.com/siderolabs/talos/pkg/machinery/config/types/v1alpha1"
 	clientconfig "github.com/siderolabs/talos/pkg/machinery/client/config"
 	"github.com/siderolabs/talos/pkg/machinery/constants"
+	"github.com/siderolabs/talos/pkg/machinery/nethelpers"
 )
 
 // ClusterConfig holds all parameters needed to generate a Talos machine configuration.
@@ -30,7 +35,11 @@ type ClusterConfig struct {
 // needed for authenticated API access after bootstrap.
 type GeneratedConfig struct {
 	// MachineConfig is the complete machine configuration to push to the node.
-	MachineConfig config.Provider
+	// It includes temporary ingress firewall rules scoped to the operator's IP.
+	MachineConfig coreconfig.Provider
+	// LockdownConfigBytes is the serialised machine config without the temporary
+	// firewall rules. Applied in Phase 5 after Teleport connectivity is confirmed.
+	LockdownConfigBytes []byte
 	// TalosConfig is the client configuration with PKI credentials for mTLS.
 	TalosConfig *clientconfig.Config
 }
@@ -64,15 +73,27 @@ func GenerateConfig(cfg ClusterConfig) (*GeneratedConfig, error) {
 		return nil, fmt.Errorf("generate controlplane config: %w", err)
 	}
 
-	// Patch the v1alpha1 config to inject inline manifests and firewall rules.
-	// PatchV1Alpha1 gives us mutable access while preserving other config documents.
+	// Inject inline manifests into the v1alpha1 config.
 	provider, err = provider.PatchV1Alpha1(func(v1cfg *v1alpha1.Config) error {
 		injectInlineManifests(v1cfg, cfg)
-		setTemporaryFirewall(v1cfg, cfg.OperatorIP)
 		return nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("patch config: %w", err)
+	}
+
+	// Serialize the config without firewall rules for use during lockdown (Phase 5).
+	lockdownBytes, err := provider.Bytes()
+	if err != nil {
+		return nil, fmt.Errorf("serialize lockdown config: %w", err)
+	}
+
+	// Build the full config with temporary ingress firewall rules added as
+	// separate NetworkRuleConfig documents. These are removed in Phase 5
+	// by re-applying the lockdown bytes (which contain only the v1alpha1 config).
+	fullProvider, err := buildProviderWithFirewall(provider, cfg.OperatorIP)
+	if err != nil {
+		return nil, fmt.Errorf("add firewall rules: %w", err)
 	}
 
 	// Generate the talosconfig (client credentials) for mTLS API access
@@ -88,8 +109,9 @@ func GenerateConfig(cfg ClusterConfig) (*GeneratedConfig, error) {
 	)
 
 	return &GeneratedConfig{
-		MachineConfig: provider,
-		TalosConfig:   talosConfig,
+		MachineConfig:       fullProvider,
+		LockdownConfigBytes: lockdownBytes,
+		TalosConfig:         talosConfig,
 	}, nil
 }
 
@@ -135,19 +157,44 @@ stringData:
 	)
 }
 
-// setTemporaryFirewall configures Talos network rules to allow only the operator's
-// IP on ports 50000 (Talos API) and 6443 (Kubernetes API). Everything else is
-// default deny. These rules are removed in Phase 5 after Teleport is verified.
-func setTemporaryFirewall(config *v1alpha1.Config, operatorIP string) {
-	// Talos uses networkd-based firewall configuration through the machine config.
-	// The NetworkRules field controls ingress filtering.
-	config.MachineConfig.MachineNetwork = &v1alpha1.NetworkConfig{
-		NetworkInterfaces: []*v1alpha1.Device{},
+// buildProviderWithFirewall creates a new config container that includes the
+// base provider documents plus two NetworkRuleConfig documents that restrict
+// ingress on the Talos API port (50000) and Kubernetes API port (6443) to the
+// operator's IP only. All other sources are implicitly denied by Talos's
+// default-deny firewall behaviour when rules are present.
+func buildProviderWithFirewall(base coreconfig.Provider, operatorIP string) (coreconfig.Provider, error) {
+	operatorPrefix, err := netip.ParsePrefix(operatorIP + "/32")
+	if err != nil {
+		return nil, fmt.Errorf("parse operator IP as CIDR: %w", err)
 	}
 
-	slog.Info("temporary firewall configured",
+	talosRule := network.NewRuleConfigV1Alpha1()
+	talosRule.MetaName = "operator-talos-api"
+	talosRule.PortSelector.Protocol = nethelpers.ProtocolTCP
+	talosRule.PortSelector.Ports = network.PortRanges{{Lo: 50000, Hi: 50000}}
+	talosRule.Ingress = network.IngressConfig{{Subnet: operatorPrefix}}
+
+	kubeRule := network.NewRuleConfigV1Alpha1()
+	kubeRule.MetaName = "operator-kube-api"
+	kubeRule.PortSelector.Protocol = nethelpers.ProtocolTCP
+	kubeRule.PortSelector.Ports = network.PortRanges{{Lo: 6443, Hi: 6443}}
+	kubeRule.Ingress = network.IngressConfig{{Subnet: operatorPrefix}}
+
+	docs := base.Documents()
+	allDocs := make([]config.Document, 0, len(docs)+2)
+	allDocs = append(allDocs, docs...)
+	allDocs = append(allDocs, talosRule, kubeRule)
+
+	provider, err := container.New(allDocs...)
+	if err != nil {
+		return nil, fmt.Errorf("build config container with firewall rules: %w", err)
+	}
+
+	slog.Info("temporary firewall rules added",
 		"phase", "3",
 		"allowed_source", operatorIP,
-		"ports", "50000, 6443",
+		"ports", "50000/TCP, 6443/TCP",
 	)
+
+	return provider, nil
 }
