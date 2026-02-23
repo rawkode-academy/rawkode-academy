@@ -50,3 +50,8 @@ export const comments = sqliteTable(
     index("comments_post_id_created_at_idx").on(table.postId, table.createdAt),
   ],
 );
+
+export const roles = sqliteTable("roles", {
+  id: text("id").primaryKey().notNull(),
+  role: text("role").notNull(),
+});
