@@ -23,6 +23,9 @@ export const GET: APIRoute = async (context) => {
     return new Response(null, { status: 204 });
   }
 
-  const permissions = getPermissions(session.user);
+  const permissions = await getPermissions(
+    context.locals.runtime.env,
+    session.user.id,
+  );
   return Response.json({ user: session.user, permissions });
 };

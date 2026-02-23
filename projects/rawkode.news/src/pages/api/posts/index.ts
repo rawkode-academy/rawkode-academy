@@ -181,7 +181,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
   }
 
   if (category === "rka") {
-    const permissions = getPermissions(session.user);
+    const permissions = await getPermissions(env, session.user.id);
     if (!permissions.canSubmitRka) {
       return new Response("Not authorized to post in RKA", { status: 403 });
     }
