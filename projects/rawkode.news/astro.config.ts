@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { defineConfig, envField, fontProviders } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 
@@ -11,16 +11,6 @@ export default defineConfig({
   output: "server",
   adapter: cloudflare({ imageService: "compile" }),
   integrations: [react()],
-  env: {
-    schema: {
-      RKA_ALLOWED_NAMES: envField.string({
-        context: "server",
-        access: "secret",
-        optional: true,
-        default: "Stefan Ruzitschka,David Flanagan",
-      }),
-    },
-  },
   server: {
     port: 4321,
   },
