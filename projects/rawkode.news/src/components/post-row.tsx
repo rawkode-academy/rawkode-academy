@@ -4,16 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { ApiPost } from "@/components/app-data";
 import { formatRelativeTime, postPath } from "@/components/app-data";
 import { MarkdownInline } from "@/components/markdown";
-import { getCategoryTextClass } from "@/components/category-styles";
 import { getExternalDomainLabel } from "@/lib/domain-label";
 
-export function PostRow({
-  post,
-  showCategoryBadge = false,
-}: {
-  post: ApiPost;
-  showCategoryBadge?: boolean;
-}) {
+export function PostRow({ post }: { post: ApiPost }) {
   const location = useLocation();
   const navigate = useNavigate();
   const postUrl = post.url ?? undefined;
@@ -39,46 +32,57 @@ export function PostRow({
       const target = event.target;
       if (target instanceof Element) {
         const interactive = target.closest(
-          "a,button,input,select,textarea,label,[role='button'],[role='link']"
+          "a,button,input,select,textarea,label,[role='button'],[role='link']",
         );
         if (interactive) return;
       }
 
       navigateToDetails();
     },
-    [navigateToDetails]
+    [navigateToDetails],
   );
 
   return (
     <article className="rkn-post-row">
       <div
-        className={`min-w-0 space-y-1.5 cursor-pointer px-5 py-4 transition-colors hover:bg-muted/25 ${
+        className={`min-w-0 cursor-pointer px-5 py-4 transition-colors hover:bg-muted/25 ${
           !hasExternalLink ? "md:col-span-2" : ""
         }`}
         onClick={handleLeftColumnClick}
       >
-        <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-          <h2 className="min-w-0 text-[0.96rem] leading-6 font-semibold text-foreground">{post.title}</h2>
-        </div>
-
-        {summary ? (
-          <div className="text-sm text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
-            <MarkdownInline source={summary} />
+        <div className="min-w-0 space-y-1.5">
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+            <h2 className="min-w-0 text-[0.96rem] leading-6 font-semibold text-foreground">{post.title}</h2>
           </div>
-        ) : null}
 
-        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-          <span>by {post.author}</span>
-          <span>•</span>
-          <span>{formatRelativeTime(post.createdAt)}</span>
-          {showCategoryBadge ? (
-            <>
-              <span>•</span>
-              <span className={`${getCategoryTextClass(post.category)} font-semibold`}>{post.category}</span>
-            </>
+          {summary ? (
+            <div className="text-sm text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
+              <MarkdownInline source={summary} />
+            </div>
           ) : null}
-          <span>•</span>
-          <span>{post.commentCount} comments</span>
+
+          <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+            <span>by {post.author}</span>
+            <span>•</span>
+            <span>{formatRelativeTime(post.createdAt)}</span>
+            <span>•</span>
+            <span>{post.commentCount} comments</span>
+            {post.tags.length > 0 ? (
+              <>
+                <span>•</span>
+                <span className="flex flex-wrap items-center gap-1">
+                  {post.tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="inline-flex items-center rounded-md border border-border bg-muted px-1 py-0 text-xs leading-4 font-medium text-foreground"
+                    >
+                      {tag.slug}
+                    </span>
+                  ))}
+                </span>
+              </>
+            ) : null}
+          </div>
         </div>
       </div>
       {hasExternalLink ? (

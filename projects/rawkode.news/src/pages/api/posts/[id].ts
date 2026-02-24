@@ -2,9 +2,10 @@ import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
 
 import { getDb, type Env } from "../../../db";
-import { posts } from "../../../db/schema";
+import { postTags, posts, tags } from "../../../db/schema";
 import { acceptsArticleHtml } from "@/lib/content-negotiation";
 import { parseEntityId } from "@/lib/ids";
+import type { TagKind } from "@/lib/tags";
 
 const normalizeTimestamp = (value: Date | number) => {
   const date = value instanceof Date ? value : new Date(value);
@@ -16,7 +17,7 @@ const escapeHtml = (value: string) =>
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
+    .replace(/\"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
 const formatPublishedLabel = (value: string) => {
@@ -47,10 +48,28 @@ const renderBodyHtml = (value: string | null) => {
   return paragraphs.join("\n      ");
 };
 
+type SerializedTag = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  kind: TagKind;
+};
+
+const sortTags = (items: SerializedTag[]) => {
+  return [...items].sort((left, right) => {
+    if (left.kind !== right.kind) {
+      return left.kind === "mandatory" ? -1 : 1;
+    }
+
+    return left.slug.localeCompare(right.slug);
+  });
+};
+
 const toArticleHtmlDocument = (post: {
   id: string;
   title: string;
-  category: string;
+  tags: SerializedTag[];
   url: string | null;
   body: string | null;
   author: string;
@@ -60,6 +79,9 @@ const toArticleHtmlDocument = (post: {
   const title = post.title.replace(/\s+/g, " ").trim();
   const createdAtLabel = formatPublishedLabel(post.createdAt);
   const sourceUrl = post.url ? escapeHtml(post.url) : null;
+  const tagLabel = post.tags.length > 0
+    ? post.tags.map((tag) => tag.slug).join(", ")
+    : "none";
   const lines = [
     "<!doctype html>",
     "<html lang=\"en\">",
@@ -76,16 +98,16 @@ const toArticleHtmlDocument = (post: {
   lines.push("      <header>");
   lines.push(`        <h1>${escapeHtml(title)}</h1>`);
   lines.push("        <p>");
-  lines.push(`          <strong>Category:</strong> ${escapeHtml(post.category)} |`);
+  lines.push(`          <strong>Tags:</strong> ${escapeHtml(tagLabel)} |`);
   lines.push(`          <strong>Author:</strong> ${escapeHtml(post.author)} |`);
   lines.push(
-    `          <strong>Published:</strong> <time datetime="${escapeHtml(post.createdAt)}">${escapeHtml(createdAtLabel)}</time> |`,
+    `          <strong>Published:</strong> <time datetime=\"${escapeHtml(post.createdAt)}\">${escapeHtml(createdAtLabel)}</time> |`,
   );
   lines.push(`          <strong>Comments:</strong> ${post.commentCount}`);
   lines.push("        </p>");
   if (sourceUrl) {
     lines.push("        <p>");
-    lines.push(`          <strong>Source:</strong> <a href="${sourceUrl}">${sourceUrl}</a>`);
+    lines.push(`          <strong>Source:</strong> <a href=\"${sourceUrl}\">${sourceUrl}</a>`);
     lines.push("        </p>");
   }
   lines.push("      </header>");
@@ -118,10 +140,23 @@ export const GET: APIRoute = async ({ params, locals, request }) => {
     return new Response("Post not found", { status: 404 });
   }
 
+  const tagRows = await db
+    .select({
+      id: tags.id,
+      slug: tags.slug,
+      name: tags.name,
+      description: tags.description,
+      kind: tags.kind,
+    })
+    .from(postTags)
+    .innerJoin(tags, eq(postTags.tagId, tags.id))
+    .where(eq(postTags.postId, id));
+
   const serialized = {
     ...post,
     id: String(post.id),
     createdAt: normalizeTimestamp(post.createdAt),
+    tags: sortTags(tagRows),
   };
 
   if (acceptsArticleHtml(request)) {

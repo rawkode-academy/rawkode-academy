@@ -1,8 +1,8 @@
 import type { APIRoute, AstroCookies } from "astro";
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 import { getDb } from "@/db";
-import { posts } from "@/db/schema";
+import { postTags, posts, tags } from "@/db/schema";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
 import { parseEntityId } from "@/lib/ids";
 import type { TypedEnv } from "@/types/service-bindings";
@@ -12,7 +12,6 @@ const MAX_QUERY_LENGTH = 200;
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 20;
 const DEFAULT_AI_SEARCH_INSTANCE = "rawkode-news";
-const VALID_CATEGORIES = new Set(["new", "rka", "news", "show", "ask"]);
 const ITEM_PATH_PATTERN = /^\/item\/([^/]+)\/?$/;
 
 type SearchResultItem = {
@@ -35,7 +34,7 @@ type ParsedSearchContent = {
   author: string | null;
   content: string | null;
   source: string | null;
-  category: string | null;
+  tags: string[] | null;
   publishedAt: string | null;
   comments: number | null;
 };
@@ -43,7 +42,7 @@ type ParsedSearchContent = {
 type SearchPostRow = {
   id: string;
   title: string;
-  category: string;
+  tags: string[];
   url: string | null;
   body: string | null;
   author: string;
@@ -76,7 +75,7 @@ const normalizeTimestamp = (value: Date | number) => {
 const normalizePostRow = (value: typeof posts.$inferSelect): SearchPostRow => ({
   id: value.id,
   title: value.title,
-  category: value.category,
+  tags: [],
   url: value.url,
   body: value.body,
   author: value.author,
@@ -114,16 +113,6 @@ const normalizeUrl = (value: unknown) => {
   } catch {
     return null;
   }
-};
-
-const parseCategory = (value: unknown) => {
-  const candidate = asString(value);
-  if (!candidate) {
-    return null;
-  }
-
-  const normalized = candidate.toLowerCase();
-  return VALID_CATEGORIES.has(normalized) ? normalized : null;
 };
 
 const hostnameFromUrl = (value: string) => {
@@ -195,9 +184,28 @@ const loadPostsById = async (env: TypedEnv, ids: string[]) => {
     .from(posts)
     .where(inArray(posts.id, uniqueIds));
 
+  const tagRows = await db
+    .select({
+      postId: postTags.postId,
+      slug: tags.slug,
+    })
+    .from(postTags)
+    .innerJoin(tags, eq(postTags.tagId, tags.id))
+    .where(inArray(postTags.postId, uniqueIds));
+
+  const tagsByPostId = new Map<string, string[]>();
+  for (const row of tagRows) {
+    if (!tagsByPostId.has(row.postId)) {
+      tagsByPostId.set(row.postId, [row.slug]);
+      continue;
+    }
+    tagsByPostId.get(row.postId)!.push(row.slug);
+  }
+
   const postById = new Map<string, SearchPostRow>();
   for (const record of records) {
     const normalized = normalizePostRow(record);
+    normalized.tags = tagsByPostId.get(normalized.id) ?? [];
     postById.set(normalized.id, normalized);
   }
 
@@ -215,7 +223,7 @@ const fallbackParsedContent = (snippet: string | null): ParsedSearchContent | nu
     author: null,
     content: snippet,
     source: null,
-    category: null,
+    tags: null,
     publishedAt: null,
     comments: null,
   };
@@ -230,7 +238,7 @@ const parsedFromPost = (
   author: post.author,
   content: snippet ?? asString(post.body),
   source: normalizeUrl(post.url),
-  category: parseCategory(post.category),
+  tags: post.tags,
   publishedAt: post.createdAt,
   comments: post.commentCount,
 });
