@@ -1,10 +1,12 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/rawkode-academy/rawkode-cloud3/internal/infisical"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,11 +21,13 @@ type Config struct {
 	Infisical   InfisicalConfig  `yaml:"infisical"`
 	Flux        FluxConfig       `yaml:"flux"`
 
-	// Credentials populated from environment variables, never serialized.
-	scwAccessKey       string
-	scwSecretKey       string
-	cloudflareAPIToken string
-	cloudflareAccount  string
+	// Runtime credentials loaded from secret providers, never serialized.
+	scwAccessKey               string
+	scwSecretKey               string
+	teleportGitHubClientID     string
+	teleportGitHubClientSecret string
+	cloudflareAPIToken         string
+	cloudflareAccount          string
 }
 
 // ClusterConfig holds Kubernetes/Talos version info.
@@ -35,9 +39,8 @@ type ClusterConfig struct {
 
 // ScalewayConfig holds Scaleway infrastructure settings (no credentials).
 type ScalewayConfig struct {
-	VPCName            string `yaml:"vpc_name"`
-	PrivateNetworkName string `yaml:"private_network_name"`
-	Zone               string `yaml:"zone"`
+	ProjectID      string `yaml:"projectId"`
+	OrganizationID string `yaml:"organizationId"`
 }
 
 // StateConfig holds S3 state storage settings.
@@ -49,12 +52,14 @@ type StateConfig struct {
 
 // NodePoolConfig describes a group of nodes sharing the same hardware/disk layout.
 type NodePoolConfig struct {
-	Name         string     `yaml:"name"`
-	Type         string     `yaml:"type"`
-	Size         int        `yaml:"size"`
-	Offer        string     `yaml:"offer"`
-	BillingCycle string     `yaml:"billing_cycle"`
-	Disks        DiskConfig `yaml:"disks"`
+	Name               string     `yaml:"name"`
+	Type               string     `yaml:"type"`
+	Zone               string     `yaml:"zone"`
+	Size               int        `yaml:"size"`
+	Offer              string     `yaml:"offer"`
+	BillingCycle       string     `yaml:"billing_cycle"`
+	Disks              DiskConfig `yaml:"disks"`
+	ReservedPrivateIPs []string   `yaml:"reserved_private_ips"`
 }
 
 const (
@@ -70,7 +75,21 @@ type DiskConfig struct {
 
 // TeleportConfig holds Teleport proxy settings.
 type TeleportConfig struct {
-	Domain string `yaml:"domain"`
+	Domain string               `yaml:"domain"`
+	Mode   string               `yaml:"mode"`
+	GitHub TeleportGitHubConfig `yaml:"github"`
+}
+
+const (
+	TeleportModeSelfHosted = "self_hosted"
+	TeleportModeExternal   = "external"
+	TeleportModeDisabled   = "disabled"
+)
+
+// TeleportGitHubConfig holds Teleport GitHub connector settings.
+type TeleportGitHubConfig struct {
+	Organization string   `yaml:"organization"`
+	Teams        []string `yaml:"teams"`
 }
 
 // InfisicalConfig holds secrets management settings.
@@ -87,6 +106,13 @@ type InfisicalConfig struct {
 type FluxConfig struct {
 	OCIRepo string `yaml:"oci_repo"`
 }
+
+const (
+	infisicalSCWAccessKeyKey       = "SCW_ACCESS_KEY"
+	infisicalSCWSecretKeyKey       = "SCW_SECRET_KEY"
+	infisicalGitHubClientIDKey     = "GITHUB_CLIENT_ID"
+	infisicalGitHubClientSecretKey = "GITHUB_CLIENT_SECRET"
+)
 
 // Load reads and parses a cluster configuration YAML file.
 // Environment variables override YAML values for sensitive fields.
@@ -106,12 +132,6 @@ func Load(path string) (*Config, error) {
 	}
 
 	// Environment variable overrides for sensitive values
-	if v := os.Getenv("SCW_ACCESS_KEY"); v != "" {
-		cfg.scwAccessKey = v
-	}
-	if v := os.Getenv("SCW_SECRET_KEY"); v != "" {
-		cfg.scwSecretKey = v
-	}
 	if v := os.Getenv("CLOUDFLARE_API_TOKEN"); v != "" {
 		cfg.cloudflareAPIToken = v
 	}
@@ -128,6 +148,108 @@ func Load(path string) (*Config, error) {
 	return &cfg, nil
 }
 
+// LoadRuntimeSecrets fetches operational credentials from Infisical.
+func (c *Config) LoadRuntimeSecrets(ctx context.Context) error {
+	if c == nil {
+		return fmt.Errorf("config is required")
+	}
+
+	if strings.TrimSpace(c.Infisical.SiteURL) == "" {
+		return fmt.Errorf("infisical.site_url is required")
+	}
+	if strings.TrimSpace(c.Infisical.ProjectID) == "" {
+		return fmt.Errorf("infisical.project_id is required")
+	}
+	if strings.TrimSpace(c.Infisical.Environment) == "" {
+		return fmt.Errorf("infisical.environment is required")
+	}
+	if strings.TrimSpace(c.Infisical.SecretPath) == "" {
+		return fmt.Errorf("infisical.secret_path is required")
+	}
+	if strings.TrimSpace(c.Infisical.ClientID) == "" || strings.TrimSpace(c.Infisical.ClientSecret) == "" {
+		return fmt.Errorf("INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET are required")
+	}
+
+	client, err := infisical.NewClient(ctx, c.Infisical.SiteURL, c.Infisical.ClientID, c.Infisical.ClientSecret)
+	if err != nil {
+		return fmt.Errorf("create infisical client: %w", err)
+	}
+
+	return c.LoadRuntimeSecretsWithClient(ctx, client)
+}
+
+// LoadRuntimeSecretsWithClient fetches operational credentials from Infisical using a caller-managed client.
+func (c *Config) LoadRuntimeSecretsWithClient(ctx context.Context, client *infisical.Client) error {
+	if c == nil {
+		return fmt.Errorf("config is required")
+	}
+	if client == nil {
+		return fmt.Errorf("infisical client is required")
+	}
+
+	if strings.TrimSpace(c.Infisical.ProjectID) == "" {
+		return fmt.Errorf("infisical.project_id is required")
+	}
+	if strings.TrimSpace(c.Infisical.Environment) == "" {
+		return fmt.Errorf("infisical.environment is required")
+	}
+	if strings.TrimSpace(c.Infisical.SecretPath) == "" {
+		return fmt.Errorf("infisical.secret_path is required")
+	}
+	var err error
+	c.scwAccessKey, err = requiredInfisicalSecret(
+		ctx, client, c.Infisical.ProjectID, c.Infisical.Environment, c.Infisical.SecretPath, infisicalSCWAccessKeyKey,
+	)
+	if err != nil {
+		return err
+	}
+
+	c.scwSecretKey, err = requiredInfisicalSecret(
+		ctx, client, c.Infisical.ProjectID, c.Infisical.Environment, c.Infisical.SecretPath, infisicalSCWSecretKeyKey,
+	)
+	if err != nil {
+		return err
+	}
+
+	if c.Teleport.EffectiveMode() == TeleportModeSelfHosted {
+		c.teleportGitHubClientID, err = requiredInfisicalSecret(
+			ctx, client, c.Infisical.ProjectID, c.Infisical.Environment, c.Infisical.SecretPath, infisicalGitHubClientIDKey,
+		)
+		if err != nil {
+			return err
+		}
+
+		c.teleportGitHubClientSecret, err = requiredInfisicalSecret(
+			ctx, client, c.Infisical.ProjectID, c.Infisical.Environment, c.Infisical.SecretPath, infisicalGitHubClientSecretKey,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func requiredInfisicalSecret(
+	ctx context.Context,
+	client *infisical.Client,
+	projectID,
+	environment,
+	secretPath,
+	key string,
+) (string, error) {
+	value, err := client.GetSecret(ctx, projectID, environment, secretPath, key)
+	if err != nil {
+		return "", fmt.Errorf("load %s from infisical path %s: %w", key, secretPath, err)
+	}
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return "", fmt.Errorf("%s is empty in infisical path %s", key, secretPath)
+	}
+
+	return trimmed, nil
+}
+
 // Save writes the configuration back to a YAML file.
 func Save(path string, cfg *Config) error {
 	data, err := yaml.Marshal(cfg)
@@ -142,9 +264,14 @@ func Save(path string, cfg *Config) error {
 	return nil
 }
 
-// ScalewayCredentials returns the Scaleway credentials loaded from environment variables.
+// ScalewayCredentials returns the Scaleway credentials loaded from Infisical.
 func (c *Config) ScalewayCredentials() (accessKey, secretKey string) {
 	return c.scwAccessKey, c.scwSecretKey
+}
+
+// TeleportGitHubCredentials returns Teleport GitHub OAuth credentials loaded from Infisical.
+func (c *Config) TeleportGitHubCredentials() (clientID, clientSecret string) {
+	return c.teleportGitHubClientID, c.teleportGitHubClientSecret
 }
 
 // CloudflareAPIToken returns the Cloudflare API token loaded from environment variables.
@@ -208,6 +335,35 @@ func (p NodePoolConfig) DesiredSize() int {
 	return p.Size
 }
 
+// EffectiveZone returns the node pool zone value with surrounding whitespace removed.
+func (p NodePoolConfig) EffectiveZone() string {
+	return strings.TrimSpace(p.Zone)
+}
+
+// ScalewayVPCName derives the shared VPC name from the cluster/environment name.
+func (c *Config) ScalewayVPCName() (string, error) {
+	if c == nil {
+		return "", fmt.Errorf("config is required")
+	}
+
+	name := strings.TrimSpace(c.Environment)
+	if name == "" {
+		return "", fmt.Errorf("environment is required to derive scaleway vpc name")
+	}
+
+	return name, nil
+}
+
+// ScalewayPrivateNetworkName derives the shared private network name from the cluster name.
+func (c *Config) ScalewayPrivateNetworkName() (string, error) {
+	vpcName, err := c.ScalewayVPCName()
+	if err != nil {
+		return "", err
+	}
+
+	return vpcName + "-private", nil
+}
+
 // NormalizeNodePoolType normalizes user-facing type variants.
 func NormalizeNodePoolType(value string) string {
 	switch strings.ToLower(strings.TrimSpace(value)) {
@@ -215,6 +371,28 @@ func NormalizeNodePoolType(value string) string {
 		return NodeTypeControlPlane
 	case "worker":
 		return NodeTypeWorker
+	default:
+		return ""
+	}
+}
+
+// EffectiveMode returns the normalized Teleport mode with a default.
+func (c TeleportConfig) EffectiveMode() string {
+	if normalized := NormalizeTeleportMode(c.Mode); normalized != "" {
+		return normalized
+	}
+	return TeleportModeSelfHosted
+}
+
+// NormalizeTeleportMode normalizes user-facing Teleport mode variants.
+func NormalizeTeleportMode(value string) string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "", "self_hosted", "self-hosted", "selfhosted":
+		return TeleportModeSelfHosted
+	case "external":
+		return TeleportModeExternal
+	case "disabled", "off":
+		return TeleportModeDisabled
 	default:
 		return ""
 	}

@@ -35,10 +35,11 @@ func NewClient(ctx context.Context, siteURL, clientID, clientSecret string) (*Cl
 // GetSecret fetches a single secret by key.
 func (c *Client) GetSecret(_ context.Context, projectID, environment, secretPath, key string) (string, error) {
 	secret, err := c.sdk.Secrets().Retrieve(infisicalsdk.RetrieveSecretOptions{
-		ProjectID:   projectID,
-		Environment: environment,
-		SecretPath:  secretPath,
-		SecretKey:   key,
+		ProjectID:              projectID,
+		Environment:            environment,
+		SecretPath:             secretPath,
+		SecretKey:              key,
+		ExpandSecretReferences: true,
 	})
 	if err != nil {
 		return "", fmt.Errorf("fetch secret %s: %w", key, err)
@@ -75,9 +76,10 @@ func (c *Client) SetSecret(_ context.Context, projectID, environment, secretPath
 // GetSecrets fetches all secrets from a given path.
 func (c *Client) GetSecrets(_ context.Context, projectID, environment, secretPath string) (map[string]string, error) {
 	list, err := c.sdk.Secrets().List(infisicalsdk.ListSecretsOptions{
-		ProjectID:   projectID,
-		Environment: environment,
-		SecretPath:  secretPath,
+		ProjectID:              projectID,
+		Environment:            environment,
+		SecretPath:             secretPath,
+		ExpandSecretReferences: true,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("fetch secrets: %w", err)
