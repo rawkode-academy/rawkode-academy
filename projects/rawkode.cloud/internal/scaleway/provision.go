@@ -12,6 +12,7 @@ import (
 	"time"
 
 	baremetal "github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
+	baremetalv3 "github.com/scaleway/scaleway-sdk-go/api/baremetal/v3"
 	iam "github.com/scaleway/scaleway-sdk-go/api/iam/v1alpha1"
 	ipam "github.com/scaleway/scaleway-sdk-go/api/ipam/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
@@ -20,6 +21,10 @@ import (
 const defaultGitHubSSHKeyUser = "rawkode"
 
 var githubKeysFetcher = fetchGitHubUserPublicKeys
+var privateNetworkIPIDLookup = findPrivateNetworkIPIDByAddress
+var addServerPrivateNetworkWithIPAMIDs = func(ctx context.Context, client *Client, req *baremetalv3.PrivateNetworkAPIAddServerPrivateNetworkRequest) (*baremetalv3.ServerPrivateNetwork, error) {
+	return baremetalv3.NewPrivateNetworkAPI(client.Core).AddServerPrivateNetwork(req, scw.WithContext(ctx))
+}
 
 // ProvisionParams holds all parameters for creating a server with OS install.
 type ProvisionParams struct {
@@ -124,7 +129,7 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 
 	if privateNetworkID != "" {
 		if strings.TrimSpace(params.PrivateNetworkReservedIP) != "" {
-			_, err = addServerPrivateNetworkWithReservedIP(ctx, client, params.Zone, server.ID, privateNetworkID, params.PrivateNetworkReservedIP)
+			err = addServerPrivateNetworkWithReservedIP(ctx, client, params.Zone, server.ID, privateNetworkID, params.PrivateNetworkReservedIP)
 		} else {
 			_, err = client.BaremetalPrivateNetwork.AddServerPrivateNetwork(&baremetal.PrivateNetworkAPIAddServerPrivateNetworkRequest{
 				Zone:             params.Zone,
@@ -467,49 +472,37 @@ func listSSHKeyIDs(iamAPI *iam.API) ([]string, error) {
 	return ids, nil
 }
 
-type addServerPrivateNetworkRequest struct {
-	PrivateNetworkID string   `json:"private_network_id"`
-	IPAMIPIDs        []string `json:"ipam_ip_ids,omitempty"`
-}
-
-func addServerPrivateNetworkWithReservedIP(ctx context.Context, client *Client, zone scw.Zone, serverID, privateNetworkID, reservedIP string) (*baremetal.ServerPrivateNetwork, error) {
+func addServerPrivateNetworkWithReservedIP(ctx context.Context, client *Client, zone scw.Zone, serverID, privateNetworkID, reservedIP string) error {
 	reservedIP = strings.TrimSpace(reservedIP)
 	if reservedIP == "" {
-		return nil, fmt.Errorf("reserved private IP cannot be empty")
+		return fmt.Errorf("reserved private IP cannot be empty")
 	}
 	if parsed := net.ParseIP(reservedIP); parsed == nil || parsed.To4() == nil {
-		return nil, fmt.Errorf("reserved private IP must be a valid IPv4 address, got %q", reservedIP)
+		return fmt.Errorf("reserved private IP must be a valid IPv4 address, got %q", reservedIP)
 	}
 
 	region, err := zone.Region()
 	if err != nil {
-		return nil, fmt.Errorf("derive region from zone %q: %w", zone, err)
+		return fmt.Errorf("derive region from zone %q: %w", zone, err)
 	}
 
-	reservedIPID, err := findPrivateNetworkIPIDByAddress(ctx, client.IPAM, region, privateNetworkID, reservedIP)
+	reservedIPID, err := privateNetworkIPIDLookup(ctx, client.IPAM, region, privateNetworkID, reservedIP)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	req := &addServerPrivateNetworkRequest{
+	req := &baremetalv3.PrivateNetworkAPIAddServerPrivateNetworkRequest{
+		Zone:             zone,
+		ServerID:         serverID,
 		PrivateNetworkID: privateNetworkID,
-		IPAMIPIDs:        []string{reservedIPID},
+		IpamIPIDs:        []string{reservedIPID},
 	}
 
-	scwReq := &scw.ScalewayRequest{
-		Method: "POST",
-		Path:   "/baremetal/v1/zones/" + fmt.Sprint(zone) + "/servers/" + fmt.Sprint(serverID) + "/private-networks",
-	}
-	if err := scwReq.SetBody(req); err != nil {
-		return nil, fmt.Errorf("encode private network attach payload: %w", err)
+	if _, err := addServerPrivateNetworkWithIPAMIDs(ctx, client, req); err != nil {
+		return fmt.Errorf("attach reserved private IP %s via baremetal v3: %w", reservedIP, err)
 	}
 
-	var resp baremetal.ServerPrivateNetwork
-	if err := client.Core.Do(scwReq, &resp, scw.WithContext(ctx)); err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
+	return nil
 }
 
 func findPrivateNetworkIPIDByAddress(ctx context.Context, ipamAPI *ipam.API, region scw.Region, privateNetworkID, targetIPv4 string) (string, error) {
