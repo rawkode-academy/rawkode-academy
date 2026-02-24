@@ -2,6 +2,7 @@ package scaleway
 
 import (
 	"fmt"
+	"strings"
 
 	baremetal "github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
 	iam "github.com/scaleway/scaleway-sdk-go/api/iam/v1alpha1"
@@ -22,17 +23,21 @@ type Client struct {
 }
 
 // NewClient creates a Scaleway client with access to bare metal and IAM APIs.
-// If accessKey and secretKey are provided, they are used directly.
-// Otherwise, falls back to environment variables (SCW_ACCESS_KEY, SCW_SECRET_KEY).
-func NewClient(accessKey, secretKey string) (*Client, error) {
-	opts := []scw.ClientOption{
-		scw.WithEnv(),
+func NewClient(accessKey, secretKey, projectID, organizationID string) (*Client, error) {
+	accessKey = strings.TrimSpace(accessKey)
+	secretKey = strings.TrimSpace(secretKey)
+	if accessKey == "" || secretKey == "" {
+		return nil, fmt.Errorf("scaleway credentials are required")
 	}
 
-	if accessKey != "" && secretKey != "" {
-		opts = append(opts,
-			scw.WithAuth(accessKey, secretKey),
-		)
+	opts := []scw.ClientOption{
+		scw.WithAuth(accessKey, secretKey),
+	}
+	if trimmed := strings.TrimSpace(projectID); trimmed != "" {
+		opts = append(opts, scw.WithDefaultProjectID(trimmed))
+	}
+	if trimmed := strings.TrimSpace(organizationID); trimmed != "" {
+		opts = append(opts, scw.WithDefaultOrganizationID(trimmed))
 	}
 
 	client, err := scw.NewClient(opts...)

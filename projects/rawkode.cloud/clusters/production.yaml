@@ -10,21 +10,30 @@ cluster:
   talos_schematic: 8a286c8c4c0697d0be932714af929c56dc55dc4d3deb9cc00aa3663c46c7738a
 
 scaleway:
-  vpc_name: rawkode-cloud
-  private_network_name: rawkode-cloud
-  zone: fr-par-1
+  organizationId: b07462e9-1a00-43b4-a6a8-6e3004a31984
+  projectId: 6f6da5bd-f7a3-45ac-b0f1-3aae5bd0f436
 
 nodePools:
-  - name: main
-    type: controlplane
+  - name: control-plane
+    type: control-plane
+    zone: fr-par-1
     offer: EM-A610R-NVMe
     billing_cycle: hourly
+    reserved_private_ips:
+      - 172.16.16.16
+      - 172.16.16.17
+      - 172.16.16.18
     disks:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
 
 teleport:
   domain: rawkode.cloud
+  mode: self_hosted
+  github:
+    organization: rawkode-academy
+    teams:
+      - platform
 
 infisical:
   site_url: https://app.infisical.com

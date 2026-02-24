@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"strings"
+	"sync"
 
 	"github.com/rawkode-academy/rawkode-cloud3/internal/cilium"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/cloudflare"
@@ -33,6 +35,12 @@ const (
 	infisicalTalosWorkerKey       = "TALOS_WORKER_CONFIG_YAML"
 	infisicalTalosConfigKey       = "TALOSCONFIG_YAML"
 )
+
+var infisicalClientCache struct {
+	mu     sync.Mutex
+	key    string
+	client *infisical.Client
+}
 
 var clusterCreateCmd = &cobra.Command{
 	Use:   "create",
@@ -70,7 +78,7 @@ func init() {
 
 	clusterCreateCmd.Flags().StringP("environment", "e", "", "Cluster/environment name")
 	clusterCreateCmd.Flags().StringP("file", "f", "", "Path to cluster config YAML")
-	clusterCreateCmd.Flags().String("node-name", "cp-1", "Name for the first control plane node")
+	clusterCreateCmd.Flags().String("node-name", "", "Deprecated: control-plane names are now auto-generated from the pool")
 	clusterCreateCmd.Flags().String("pool", "", "Node pool name (defaults to first controlplane pool)")
 
 	clusterStatusCmd.Flags().String("config", "", "Path to cluster config YAML")
@@ -94,7 +102,7 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	clusterName, _ := cmd.Flags().GetString("environment")
 	cfgPathFlag, _ := cmd.Flags().GetString("file")
-	nodeName, _ := cmd.Flags().GetString("node-name")
+	nodeNameFlag, _ := cmd.Flags().GetString("node-name")
 	poolName, _ := cmd.Flags().GetString("pool")
 
 	cfg, cfgPath, err := loadConfigForClusterOrFile(clusterName, cfgPathFlag)
@@ -109,6 +117,15 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 
 	if pool.EffectiveType() != config.NodeTypeControlPlane {
 		return fmt.Errorf("cluster create currently supports controlplane pools only (pool %q is %q)", pool.Name, pool.EffectiveType())
+	}
+	if strings.TrimSpace(nodeNameFlag) != "" {
+		return fmt.Errorf("--node-name is no longer supported; first control-plane node will be %q", controlPlaneNodeName(pool.Name, 1))
+	}
+
+	nodeName := controlPlaneNodeName(pool.Name, 1)
+	privateIP, err := controlPlaneReservedIPForSlot(pool, 1)
+	if err != nil {
+		return err
 	}
 
 	scwAccessKey, scwSecretKey := cfg.ScalewayCredentials()
@@ -134,7 +151,7 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 	var op *operation.Operation
 	if existing != nil {
 		op = existing
-		if err := ensureCreateOperationContext(op, nodeName, pool); err != nil {
+		if err := ensureCreateOperationContext(op, nodeName, pool, privateIP); err != nil {
 			return err
 		}
 		if err := store.Save(op); err != nil {
@@ -145,6 +162,10 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 		op.SetContext("nodeName", nodeName)
 		op.SetContext("role", pool.EffectiveType())
 		op.SetContext("poolName", pool.Name)
+		op.SetContext("controlPlaneSlot", "1")
+		if privateIP != "" {
+			op.SetContext("privateIP", privateIP)
+		}
 		if err := store.Save(op); err != nil {
 			return fmt.Errorf("save new operation: %w", err)
 		}
@@ -249,7 +270,7 @@ func phaseInit(ctx context.Context, op *operation.Operation, cfg *config.Config)
 		return err
 	}
 
-	op.SetContext("secretsPath", cfg.Infisical.SecretPath)
+	op.SetContext("secretsPath", infisicalSecretPathForCluster(cfg))
 	return nil
 }
 
@@ -283,6 +304,19 @@ func phaseOrderServer(
 	if role == "" {
 		role = pool.EffectiveType()
 	}
+	privateIP := strings.TrimSpace(op.GetContextString("privateIP"))
+	if privateIP == "" && role == config.NodeTypeControlPlane {
+		if slot, ok := parseControlPlaneSlot(pool.Name, nodeName); ok {
+			reserved, err := controlPlaneReservedIPForSlot(pool, slot)
+			if err != nil {
+				return err
+			}
+			privateIP = strings.TrimSpace(reserved)
+			if privateIP != "" {
+				op.SetContext("privateIP", privateIP)
+			}
+		}
+	}
 
 	// Check if server already exists from a previous run
 	if serverID := op.GetContextString("serverId"); serverID != "" {
@@ -302,12 +336,22 @@ func phaseOrderServer(
 	slog.Info("phase order-server: ordering Scaleway bare metal")
 
 	scwAccessKey, scwSecretKey := cfg.ScalewayCredentials()
-	scwClient, err := scaleway.NewClient(scwAccessKey, scwSecretKey)
+	scwClient, err := scaleway.NewClient(
+		scwAccessKey,
+		scwSecretKey,
+		cfg.Scaleway.ProjectID,
+		cfg.Scaleway.OrganizationID,
+	)
 	if err != nil {
 		return fmt.Errorf("create scaleway client: %w", err)
 	}
 
-	zone := scw.Zone(cfg.Scaleway.Zone)
+	zoneValue := pool.EffectiveZone()
+	if zoneValue == "" {
+		return fmt.Errorf("node pool %q must define zone", pool.Name)
+	}
+	op.SetContext("zone", zoneValue)
+	zone := scw.Zone(zoneValue)
 
 	// Resolve offer and OS
 	offerID, _, err := scaleway.ResolveOfferForBillingCycle(ctx, scwClient, zone, pool.Offer, pool.BillingCycle)
@@ -322,10 +366,18 @@ func phaseOrderServer(
 
 	// Ensure network foundation
 	region, _ := zone.Region()
+	vpcName, err := cfg.ScalewayVPCName()
+	if err != nil {
+		return err
+	}
+	privateNetworkName, err := cfg.ScalewayPrivateNetworkName()
+	if err != nil {
+		return err
+	}
 	network, err := scaleway.EnsureNetworkFoundation(ctx, scwClient, scaleway.NetworkFoundationParams{
 		Region:             region,
-		VPCName:            cfg.Scaleway.VPCName,
-		PrivateNetworkName: cfg.Scaleway.PrivateNetworkName,
+		VPCName:            vpcName,
+		PrivateNetworkName: privateNetworkName,
 	})
 	if err != nil {
 		return fmt.Errorf("ensure network: %w", err)
@@ -341,15 +393,16 @@ func phaseOrderServer(
 
 	// Order the server
 	server, err := scaleway.OrderServer(ctx, scwClient, scaleway.ProvisionParams{
-		OfferID:          offerID,
-		Zone:             zone,
-		OSID:             osID,
-		PrivateNetworkID: network.PrivateNetworkID,
-		BillingCycle:     pool.BillingCycle,
-		CloudInitScript:  cloudInit,
-		SSHKeyGitHubUser: "", // uses Scaleway API keys, falls back to default
-		PivotOSDisk:      pool.Disks.OS,
-		PivotDataDisk:    pool.Disks.Data,
+		OfferID:                  offerID,
+		Zone:                     zone,
+		OSID:                     osID,
+		PrivateNetworkID:         network.PrivateNetworkID,
+		PrivateNetworkReservedIP: privateIP,
+		BillingCycle:             pool.BillingCycle,
+		CloudInitScript:          cloudInit,
+		SSHKeyGitHubUser:         "", // uses Scaleway API keys, falls back to default
+		PivotOSDisk:              pool.Disks.OS,
+		PivotDataDisk:            pool.Disks.Data,
 	})
 	if err != nil {
 		return fmt.Errorf("order server: %w", err)
@@ -390,13 +443,30 @@ func phaseWaitServer(
 
 	slog.Info("phase wait-server: waiting for bare metal provisioning", "server_id", serverID)
 
+	pool, err := poolForOperation(cfg, op)
+	if err != nil {
+		return fmt.Errorf("resolve node pool: %w", err)
+	}
+
 	scwAccessKey, scwSecretKey := cfg.ScalewayCredentials()
-	scwClient, err := scaleway.NewClient(scwAccessKey, scwSecretKey)
+	scwClient, err := scaleway.NewClient(
+		scwAccessKey,
+		scwSecretKey,
+		cfg.Scaleway.ProjectID,
+		cfg.Scaleway.OrganizationID,
+	)
 	if err != nil {
 		return fmt.Errorf("create scaleway client: %w", err)
 	}
 
-	zone := scw.Zone(cfg.Scaleway.Zone)
+	zoneValue := strings.TrimSpace(op.GetContextString("zone"))
+	if zoneValue == "" {
+		zoneValue = pool.EffectiveZone()
+	}
+	if zoneValue == "" {
+		return fmt.Errorf("node pool %q must define zone", pool.Name)
+	}
+	zone := scw.Zone(zoneValue)
 	server, err := scaleway.WaitForReady(ctx, scwClient, serverID, zone)
 	if err != nil {
 		return fmt.Errorf("wait for server ready: %w", err)
@@ -404,16 +474,20 @@ func phaseWaitServer(
 
 	// Extract IPs
 	for _, ip := range server.IPs {
-		if ip.Version == "IPv4" {
-			op.SetContext("publicIP", ip.Address.String())
-			slog.Info("server ready", "public_ip", ip.Address.String())
-			break
+		addr := ip.Address.String()
+		parsed := net.ParseIP(addr)
+		if parsed != nil && parsed.IsPrivate() {
+			if strings.TrimSpace(op.GetContextString("privateIP")) == "" {
+				op.SetContext("privateIP", addr)
+				slog.Info("server ready", "private_ip", addr)
+			}
+			continue
 		}
-	}
 
-	pool, err := poolForOperation(cfg, op)
-	if err != nil {
-		return fmt.Errorf("resolve node pool: %w", err)
+		if ip.Version == "IPv4" {
+			op.SetContext("publicIP", addr)
+			slog.Info("server ready", "public_ip", addr)
+		}
 	}
 
 	role := op.GetContextString("role")
@@ -452,7 +526,7 @@ func phaseApplyConfig(ctx context.Context, op *operation.Operation, cfg *config.
 		return fmt.Errorf("no public IP in operation context")
 	}
 
-	endpoint := controlPlaneEndpoint(cfg, publicIP)
+	endpoint := controlPlaneEndpoint(op.GetContextString("privateIP"), publicIP)
 	op.SetContext("controlPlaneEndpoint", endpoint)
 
 	client, err := newInfisicalClient(ctx, cfg)
@@ -486,7 +560,7 @@ func phaseBootstrap(ctx context.Context, op *operation.Operation, cfg *config.Co
 
 	endpoint := op.GetContextString("controlPlaneEndpoint")
 	if endpoint == "" {
-		endpoint = controlPlaneEndpoint(cfg, publicIP)
+		endpoint = controlPlaneEndpoint(op.GetContextString("privateIP"), publicIP)
 	}
 
 	client, err := newInfisicalClient(ctx, cfg)
@@ -569,19 +643,68 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		slog.Warn("flux bootstrap failed", "error", err)
 	}
 
-	// Deploy Teleport agent
-	if cfg.Teleport.Domain != "" {
+	switch cfg.Teleport.EffectiveMode() {
+	case config.TeleportModeDisabled:
+		slog.Info("skipping teleport (mode disabled)")
+	case config.TeleportModeExternal:
+		if strings.TrimSpace(cfg.Teleport.Domain) == "" {
+			slog.Info("skipping external teleport agent (domain not configured)")
+			return nil
+		}
+
 		joinToken, err := teleport.GenerateJoinToken(ctx, cfg.Teleport.Domain, 30*time.Minute)
 		if err != nil {
 			slog.Warn("teleport join token generation failed", "error", err)
 			return nil
 		}
 
-		manifest := teleport.KubeAgentManifest(cfg.Teleport.Domain, cfg.Environment, joinToken)
-		_ = manifest
-		slog.Info("teleport agent manifest generated", "cluster", cfg.Environment)
-	} else {
-		slog.Info("skipping teleport agent (domain not configured)")
+		if err := teleport.DeployKubeAgent(ctx, teleport.DeployKubeAgentParams{
+			ProxyAddr:   cfg.Teleport.Domain,
+			ClusterName: cfg.Environment,
+			JoinToken:   joinToken,
+		}); err != nil {
+			slog.Warn("teleport agent deployment failed", "error", err)
+		}
+	case config.TeleportModeSelfHosted:
+		if strings.TrimSpace(cfg.Teleport.Domain) == "" {
+			slog.Warn("skipping self-hosted teleport deployment (teleport.domain not configured)")
+			return nil
+		}
+
+		teams := make([]string, 0, len(cfg.Teleport.GitHub.Teams))
+		for _, team := range cfg.Teleport.GitHub.Teams {
+			if trimmed := strings.TrimSpace(team); trimmed != "" {
+				teams = append(teams, trimmed)
+			}
+		}
+		if strings.TrimSpace(cfg.Teleport.GitHub.Organization) == "" || len(teams) == 0 {
+			slog.Warn("skipping self-hosted teleport deployment (teleport.github.organization/teams are required)")
+			return nil
+		}
+
+		clientID, clientSecret := cfg.TeleportGitHubCredentials()
+		clientID = strings.TrimSpace(clientID)
+		clientSecret = strings.TrimSpace(clientSecret)
+		if clientID == "" || clientSecret == "" {
+			slog.Warn("skipping self-hosted teleport deployment (missing GitHub OAuth secrets from Infisical)",
+				"secret_path", cfg.Infisical.SecretPath,
+				"required_keys", "GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET",
+			)
+			return nil
+		}
+
+		if err := teleport.DeploySelfHosted(ctx, teleport.DeploySelfHostedParams{
+			ClusterName:        cfg.Environment,
+			Domain:             cfg.Teleport.Domain,
+			GitHubOrganization: strings.TrimSpace(cfg.Teleport.GitHub.Organization),
+			GitHubTeams:        teams,
+			GitHubClientID:     clientID,
+			GitHubClientSecret: clientSecret,
+		}); err != nil {
+			slog.Warn("self-hosted teleport deployment failed", "error", err)
+		}
+	default:
+		slog.Warn("skipping teleport deployment (unsupported teleport.mode)", "mode", cfg.Teleport.Mode)
 	}
 
 	return nil
@@ -593,7 +716,11 @@ func phaseVerify(ctx context.Context, op *operation.Operation, cfg *config.Confi
 
 	nodeName := op.GetContextString("nodeName")
 	if nodeName == "" {
-		nodeName = "cp-1"
+		poolName := strings.TrimSpace(op.GetContextString("poolName"))
+		if poolName == "" {
+			poolName = "controlplane"
+		}
+		nodeName = controlPlaneNodeName(poolName, 1)
 	}
 
 	fmt.Printf("\nCluster %q created successfully!\n", cfg.Environment)
@@ -627,11 +754,8 @@ func selectCreatePool(cfg *config.Config, poolName string) (*config.NodePoolConf
 	return pool, nil
 }
 
-func ensureCreateOperationContext(op *operation.Operation, requestedNodeName string, pool *config.NodePoolConfig) error {
+func ensureCreateOperationContext(op *operation.Operation, requestedNodeName string, pool *config.NodePoolConfig, requestedPrivateIP string) error {
 	existingNodeName := op.GetContextString("nodeName")
-	if existingNodeName != "" && requestedNodeName != "" && requestedNodeName != existingNodeName {
-		return fmt.Errorf("operation already tracks node %q, cannot switch to %q", existingNodeName, requestedNodeName)
-	}
 	if existingNodeName == "" {
 		op.SetContext("nodeName", requestedNodeName)
 	}
@@ -651,6 +775,17 @@ func ensureCreateOperationContext(op *operation.Operation, requestedNodeName str
 	}
 	if existingRole == "" {
 		op.SetContext("role", role)
+	}
+
+	existingPrivateIP := strings.TrimSpace(op.GetContextString("privateIP"))
+	if existingPrivateIP == "" && strings.TrimSpace(requestedPrivateIP) != "" {
+		op.SetContext("privateIP", strings.TrimSpace(requestedPrivateIP))
+	}
+
+	if op.GetContextString("controlPlaneSlot") == "" {
+		if slot, ok := parseControlPlaneSlot(pool.Name, op.GetContextString("nodeName")); ok {
+			op.SetContext("controlPlaneSlot", fmt.Sprintf("%d", slot))
+		}
 	}
 
 	return nil
@@ -674,7 +809,11 @@ func nodeNameForOperation(op *operation.Operation) string {
 	if nodeName := op.GetContextString("nodeName"); strings.TrimSpace(nodeName) != "" {
 		return nodeName
 	}
-	return "cp-1"
+	poolName := strings.TrimSpace(op.GetContextString("poolName"))
+	if poolName == "" {
+		poolName = "controlplane"
+	}
+	return controlPlaneNodeName(poolName, 1)
 }
 
 func markNodeFailed(ctx context.Context, nodeStore *clusterstate.NodeStore, op *operation.Operation) error {
@@ -698,14 +837,28 @@ func markNodeFailed(ctx context.Context, nodeStore *clusterstate.NodeStore, op *
 	})
 }
 
-func controlPlaneEndpoint(cfg *config.Config, publicIP string) string {
-	if dns := strings.TrimSpace(cfg.Teleport.Domain); dns != "" {
-		return dns
+func controlPlaneEndpoint(privateIP, publicIP string) string {
+	if ip := strings.TrimSpace(privateIP); ip != "" {
+		return ip
 	}
-	return publicIP
+	return strings.TrimSpace(publicIP)
 }
 
 func newInfisicalClient(ctx context.Context, cfg *config.Config) (*infisical.Client, error) {
+	client, err := getOrCreateInfisicalClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	secretPath := infisicalSecretPathForCluster(cfg)
+	if err := client.EnsureSecretPath(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath); err != nil {
+		return nil, fmt.Errorf("ensure infisical secret path: %w", err)
+	}
+
+	return client, nil
+}
+
+func getOrCreateInfisicalClient(ctx context.Context, cfg *config.Config) (*infisical.Client, error) {
 	if strings.TrimSpace(cfg.Infisical.SiteURL) == "" {
 		return nil, fmt.Errorf("infisical.site_url is required")
 	}
@@ -722,20 +875,31 @@ func newInfisicalClient(ctx context.Context, cfg *config.Config) (*infisical.Cli
 		return nil, fmt.Errorf("INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET are required")
 	}
 
-	client, err := infisical.NewClient(ctx, cfg.Infisical.SiteURL, cfg.Infisical.ClientID, cfg.Infisical.ClientSecret)
-	if err != nil {
-		return nil, fmt.Errorf("create infisical client: %w", err)
+	cacheKey := strings.TrimSpace(cfg.Infisical.SiteURL) + "|" +
+		strings.TrimSpace(cfg.Infisical.ClientID) + "|" +
+		strings.TrimSpace(cfg.Infisical.ClientSecret)
+
+	infisicalClientCache.mu.Lock()
+	defer infisicalClientCache.mu.Unlock()
+
+	if infisicalClientCache.client != nil && infisicalClientCache.key == cacheKey {
+		return infisicalClientCache.client, nil
 	}
 
-	if err := client.EnsureSecretPath(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, cfg.Infisical.SecretPath); err != nil {
-		return nil, fmt.Errorf("ensure infisical secret path: %w", err)
+	client, err := infisical.NewClient(ctx, cfg.Infisical.SiteURL, cfg.Infisical.ClientID, cfg.Infisical.ClientSecret)
+	if err != nil {
+		return nil, err
 	}
+
+	infisicalClientCache.client = client
+	infisicalClientCache.key = cacheKey
 
 	return client, nil
 }
 
 func ensureTalosSecretsYAML(ctx context.Context, cfg *config.Config, client *infisical.Client) ([]byte, error) {
-	all, err := client.GetSecrets(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, cfg.Infisical.SecretPath)
+	secretPath := infisicalSecretPathForCluster(cfg)
+	all, err := client.GetSecrets(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath)
 	if err != nil {
 		return nil, fmt.Errorf("load infisical secrets: %w", err)
 	}
@@ -750,7 +914,7 @@ func ensureTalosSecretsYAML(ctx context.Context, cfg *config.Config, client *inf
 		return nil, fmt.Errorf("generate talos secrets: %w", err)
 	}
 
-	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, cfg.Infisical.SecretPath, infisicalTalosSecretsKey, string(secretsYAML)); err != nil {
+	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosSecretsKey, string(secretsYAML)); err != nil {
 		return nil, fmt.Errorf("store talos secrets in infisical: %w", err)
 	}
 
@@ -781,13 +945,14 @@ func ensureTalosAssets(ctx context.Context, cfg *config.Config, endpoint string,
 		return nil, fmt.Errorf("generate talos assets: %w", err)
 	}
 
-	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, cfg.Infisical.SecretPath, infisicalTalosControlPlaneKey, string(assets.ControlPlane)); err != nil {
+	secretPath := infisicalSecretPathForCluster(cfg)
+	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosControlPlaneKey, string(assets.ControlPlane)); err != nil {
 		return nil, fmt.Errorf("store controlplane config in infisical: %w", err)
 	}
-	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, cfg.Infisical.SecretPath, infisicalTalosWorkerKey, string(assets.Worker)); err != nil {
+	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosWorkerKey, string(assets.Worker)); err != nil {
 		return nil, fmt.Errorf("store worker config in infisical: %w", err)
 	}
-	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, cfg.Infisical.SecretPath, infisicalTalosConfigKey, string(assets.Talosconfig)); err != nil {
+	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosConfigKey, string(assets.Talosconfig)); err != nil {
 		return nil, fmt.Errorf("store talosconfig in infisical: %w", err)
 	}
 

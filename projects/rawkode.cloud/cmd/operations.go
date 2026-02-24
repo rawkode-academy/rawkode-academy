@@ -37,9 +37,9 @@ var opsListCmd = &cobra.Command{
 	Short: "List in-progress and incomplete operations",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfgPath, _ := cmd.Flags().GetString("config")
-		cfg, err := config.Load(cfgPath)
+		cfg, _, err := loadConfigForClusterOrFile("", cfgPath)
 		if err != nil {
-			return fmt.Errorf("load config: %w", err)
+			return err
 		}
 
 		store, err := newOperationStore(cfg)
@@ -170,7 +170,7 @@ func runOpsAbort(cmd *cobra.Command, args []string) error {
 		}
 
 		accessKey, secretKey := cfg.ScalewayCredentials()
-		scwClient, err := scaleway.NewClient(accessKey, secretKey)
+		scwClient, err := scaleway.NewClient(accessKey, secretKey, cfg.Scaleway.ProjectID, cfg.Scaleway.OrganizationID)
 		if err != nil {
 			return fmt.Errorf("create scaleway client: %w", err)
 		}
