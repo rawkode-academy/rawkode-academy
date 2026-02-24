@@ -1,13 +1,13 @@
 environment: production
 
 state:
-  bucket: rawkode-cloud
+  bucket: rawkode.cloud
   region: fr-par
 
 cluster:
-  talos_version: v1.12.4
+  talos_version: v1.12.3
   kubernetes_version: v1.35.0
-  talos_schematic: bbee607bf6403d5c0096e256283eeedf5a032d78be72de51c0fe495fcaf89733
+  talos_schematic: 8a286c8c4c0697d0be932714af929c56dc55dc4d3deb9cc00aa3663c46c7738a
 
 scaleway:
   vpc_name: rawkode-cloud
@@ -17,22 +17,12 @@ scaleway:
 nodePools:
   - name: main
     type: controlplane
-    #type: worker
-    size: 3
     offer: EM-A610R-NVMe
     billing_cycle: hourly
     disks:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
-    # This is state, store in S3?
-    # nodes:
-    #   - name: cp-1
-    #     role: controlplane
-    #     public_ip: ""
-    #     private_ip: ""
-    #     server_id: ""
 
-# cloudflare not needed, we can infer.
 teleport:
   domain: rawkode.cloud
 
@@ -41,6 +31,3 @@ infisical:
   project_id: 6575a392d7a5ef0555ade86b
   environment: production
   secret_path: /projects/rawkode-cloud
-
-flux:
-  oci_repo: ""

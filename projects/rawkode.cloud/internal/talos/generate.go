@@ -29,6 +29,7 @@ type GenConfigParams struct {
 	TalosVersion      string
 	TalosSchematic    string
 	KubernetesVersion string
+	InstallDisk       string
 	SecretsYAML       []byte
 }
 
@@ -93,6 +94,7 @@ func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResu
 	if kubernetesVersion == "" {
 		kubernetesVersion = talosconstants.DefaultKubernetesVersion
 	}
+	installDisk := resolveInstallDisk(params.InstallDisk)
 
 	_, talosEndpoint, err := normalizeTalosEndpoint(params.Endpoint)
 	if err != nil {
@@ -105,6 +107,7 @@ func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResu
 		talosgenerate.WithEndpointList([]string{talosEndpoint}),
 		talosgenerate.WithClusterCNIConfig(&v1alpha1.CNIConfig{CNIName: "none"}),
 		talosgenerate.WithAllowSchedulingOnControlPlanes(true),
+		talosgenerate.WithInstallDisk(installDisk),
 	}
 
 	if installImage := buildInstallerImage(params.TalosVersion, params.TalosSchematic); installImage != "" {
@@ -182,4 +185,12 @@ func normalizeClusterEndpoint(endpoint string) string {
 		return "https://" + trimmed
 	}
 	return "https://" + trimmed + ":6443"
+}
+
+func resolveInstallDisk(configuredDisk string) string {
+	if disk := strings.TrimSpace(configuredDisk); disk != "" {
+		return disk
+	}
+
+	return defaultOSDisk
 }
