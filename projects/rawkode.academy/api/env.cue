@@ -21,7 +21,7 @@ ci: pipelines: {
 }
 
 tasks: {
-	"collect-schemas": {
+	collectSchemas: {
 		command: "bun"
 		args: ["run", "scripts/collect-schemas.ts"]
 
@@ -38,7 +38,7 @@ tasks: {
 	compose: {
 		command: "bun"
 		args: ["run", "scripts/compose.ts"]
-		dependsOn: [_t["collect-schemas"]]
+		dependsOn: [_t.collectSchemas]
 
 		inputs: [
 			"scripts/compose.ts",
