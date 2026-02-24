@@ -9,11 +9,6 @@ name: "rawkode-cloud"
 config: infisical: defaultEnvironment: "development"
 
 env: {
-  // When no environment set, use the configured Infisical default env. But if someone uses cuenv -e production we use the production env.
-  A_KEY: schema.#InfisicalSecret & { path: "/path/to/secret", environment: "production" }
-  // force staging for all cuenv environments
-  SOME_KEY: schema.#InfisicalSecret & { path: "/path/to/secret", environment: "staging" }
-
 	environment: production: {
 		// Infisical bootstrap. `rkc` uses these to backfill missing values
 		// such as SCW keys, cluster name, offer ID, OS ID, and teleport proxy.
