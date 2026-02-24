@@ -1,15 +1,29 @@
 import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
 import MDEditor from "@uiw/react-md-editor/nohighlight";
 import MarkdownPreview from "@uiw/react-markdown-preview/nohighlight";
 import { Form, useActionData, useLocation, useNavigation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { type PostCategory, postCategories } from "@/components/app-data";
-import { getCategoryRingClass } from "@/components/category-styles";
+import {
+  mandatoryTagSlugs,
+  type MandatoryTagSlug,
+} from "@/components/app-data";
+import { tagsQueryOptions } from "@/components/query-client";
 import { useSession } from "@/components/session";
-import { cn } from "@/lib/utils";
+import { MAX_OPTIONAL_TAGS } from "@/lib/tags";
 
-const categoryCopy: Record<PostCategory, { title: string; detail: string }> = {
+const TAG_GRID_COLUMNS = 8;
+const TAGS_PER_ROW = TAG_GRID_COLUMNS - 1;
+const TAG_SLOTS_WITHOUT_SHOW_ALL = TAGS_PER_ROW;
+const TAG_SLOTS_WITH_SHOW_ALL = TAGS_PER_ROW - 1;
+
+const pillBaseClass =
+  "inline-flex h-9 w-full min-w-0 cursor-pointer items-center justify-center gap-1 rounded-md border px-2 text-xs font-semibold disabled:cursor-not-allowed";
+const pillSelectClass =
+  "h-9 w-full min-w-0 cursor-pointer rounded-md border border-primary/40 bg-primary/10 px-2 pr-7 text-xs font-semibold text-foreground appearance-none hover:bg-primary/15";
+
+const mandatoryCopy: Record<MandatoryTagSlug, { title: string; detail: string }> = {
   news: {
     title: "News",
     detail: "Relevant news and updates from across the broader ecosystem.",
@@ -20,7 +34,7 @@ const categoryCopy: Record<PostCategory, { title: string; detail: string }> = {
   },
   show: {
     title: "Show",
-    detail: "Share something of your own: a project, release, or demo you want people to see.",
+    detail: "Share something of your own: a project, release, or demo.",
   },
   ask: {
     title: "Ask",
@@ -32,14 +46,18 @@ export default function SubmitPage() {
   const [title, setTitle] = React.useState("");
   const [url, setUrl] = React.useState("");
   const [notes, setNotes] = React.useState("");
-  const [category, setCategory] = React.useState<PostCategory>("news");
+  const [mandatoryTag, setMandatoryTag] = React.useState<MandatoryTagSlug>("news");
+  const [optionalTags, setOptionalTags] = React.useState<string[]>([]);
+  const [showMore, setShowMore] = React.useState(false);
   const location = useLocation();
   const navigation = useNavigation();
   const actionData = useActionData() as { error?: string } | undefined;
   const error = actionData?.error ?? null;
   const sessionQuery = useSession();
+  const tagsQuery = useQuery(tagsQueryOptions());
   const user = sessionQuery.data?.user ?? null;
-  const allowedCategories = sessionQuery.data?.permissions?.allowedCategories ?? postCategories;
+  const allowedMandatoryTags =
+    sessionQuery.data?.permissions?.allowedMandatoryTags ?? mandatoryTagSlugs;
   const isAuthReady = !sessionQuery.isLoading;
   const returnTo = React.useMemo(() => {
     const next = `${location.pathname}${location.search}${location.hash}`;
@@ -50,16 +68,67 @@ export default function SubmitPage() {
   const isSubmitting = navigation.state === "submitting";
   const canSubmit = Boolean(title.trim()) && !isSubmitting;
 
+  const optionalTagOptions = React.useMemo(
+    () => (tagsQuery.data ?? []).filter((tag) => tag.kind === "optional"),
+    [tagsQuery.data],
+  );
+  const optionalTagSet = React.useMemo(
+    () => new Set(optionalTags),
+    [optionalTags],
+  );
+  const canExpand = optionalTagOptions.length > TAG_SLOTS_WITHOUT_SHOW_ALL;
+  const collapsedVisibleTagCount = canExpand ? TAG_SLOTS_WITH_SHOW_ALL : TAG_SLOTS_WITHOUT_SHOW_ALL;
+  const hiddenTagCount = Math.max(0, optionalTagOptions.length - collapsedVisibleTagCount);
+  const visibleOptionalTags = showMore
+    ? optionalTagOptions
+    : optionalTagOptions.slice(0, collapsedVisibleTagCount);
+  const visibleOptionalTagRows = React.useMemo(() => {
+    const rows = [] as typeof optionalTagOptions[];
+    for (let index = 0; index < visibleOptionalTags.length; index += TAGS_PER_ROW) {
+      rows.push(visibleOptionalTags.slice(index, index + TAGS_PER_ROW));
+    }
+
+    return rows.length > 0 ? rows : [[]];
+  }, [visibleOptionalTags]);
+
+  const submittedTags = React.useMemo(
+    () => JSON.stringify([mandatoryTag, ...optionalTags]),
+    [mandatoryTag, optionalTags],
+  );
+
   React.useEffect(() => {
     void import("@uiw/react-md-editor/markdown-editor.css");
     void import("@uiw/react-markdown-preview/markdown.css");
   }, []);
 
   React.useEffect(() => {
-    if (!allowedCategories.includes(category)) {
-      setCategory(allowedCategories[0] ?? "news");
+    if (!allowedMandatoryTags.includes(mandatoryTag)) {
+      setMandatoryTag(allowedMandatoryTags[0] ?? "news");
     }
-  }, [allowedCategories, category]);
+  }, [allowedMandatoryTags, mandatoryTag]);
+
+  React.useEffect(() => {
+    if (!canExpand && showMore) {
+      setShowMore(false);
+    }
+  }, [canExpand, showMore]);
+
+  const toggleOptionalTag = React.useCallback(
+    (slug: string) => {
+      setOptionalTags((current) => {
+        if (current.includes(slug)) {
+          return current.filter((item) => item !== slug);
+        }
+
+        if (current.length >= MAX_OPTIONAL_TAGS) {
+          return current;
+        }
+
+        return [...current, slug];
+      });
+    },
+    [],
+  );
 
   if (!isAuthReady) {
     return (
@@ -116,40 +185,87 @@ export default function SubmitPage() {
               />
             </div>
 
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-semibold text-foreground">Category</legend>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                {allowedCategories.map((item) => {
-                  const inputId = `category-${item}`;
-                  const isSelected = category === item;
-                  return (
-                    <div key={item} className="relative">
-                      <input
-                        id={inputId}
-                        type="radio"
-                        name="category"
-                        value={item}
-                        checked={isSelected}
-                        onChange={() => setCategory(item)}
-                        className="sr-only"
-                      />
-                      <label
-                        htmlFor={inputId}
-                        className={cn(
-                          "block cursor-pointer rounded-none border border-border bg-card px-3 py-3 text-left",
-                          "hover:border-primary/35 hover:bg-accent/60",
-                          isSelected &&
-                            `border-primary/45 bg-primary/10 ring-2 ring-offset-2 ring-offset-background ${getCategoryRingClass(item)}`
-                        )}
-                      >
-                        <span className="block text-sm font-semibold text-foreground">{categoryCopy[item].title}</span>
-                        <span className="mt-1 block text-xs text-muted-foreground">{categoryCopy[item].detail}</span>
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">Tags</label>
+              <div className="space-y-2">
+                {visibleOptionalTagRows.map((row, rowIndex) => (
+                  <div key={`submit-tag-row-${rowIndex}`} className="grid grid-cols-8 gap-2">
+                    {rowIndex === 0 ? (
+                      <label className="relative block">
+                        <span className="sr-only">Mandatory tag</span>
+                        <select
+                          id="submit-mandatory-tag"
+                          aria-label="Mandatory tag"
+                          value={mandatoryTag}
+                          onChange={(event) => setMandatoryTag(event.target.value as MandatoryTagSlug)}
+                          className={pillSelectClass}
+                        >
+                          {allowedMandatoryTags.map((slug) => (
+                            <option key={slug} value={slug}>
+                              {mandatoryCopy[slug].title}
+                            </option>
+                          ))}
+                        </select>
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[10px] text-foreground/70"
+                        >
+                          ▾
+                        </span>
                       </label>
-                    </div>
-                  );
-                })}
+                    ) : (
+                      <span aria-hidden="true" className="h-9" />
+                    )}
+
+                    {row.map((tag) => {
+                      const selected = optionalTagSet.has(tag.slug);
+                      const disableAdd = !selected && optionalTags.length >= MAX_OPTIONAL_TAGS;
+
+                      return (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => toggleOptionalTag(tag.slug)}
+                          disabled={disableAdd}
+                          title={
+                            disableAdd
+                              ? `You can select up to ${MAX_OPTIONAL_TAGS} optional tags`
+                              : selected
+                                ? `Remove ${tag.slug}`
+                                : tag.description ?? undefined
+                          }
+                          className={
+                            selected
+                              ? `${pillBaseClass} border-primary/40 bg-primary/10 text-foreground`
+                              : `${pillBaseClass} border-border text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50`
+                          }
+                        >
+                          <span className="min-w-0 truncate">{tag.name || tag.slug}</span>
+                        </button>
+                      );
+                    })}
+
+                    {rowIndex === 0 && canExpand && !showMore ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowMore(true)}
+                        className={`${pillBaseClass} border-border bg-card text-foreground hover:bg-muted`}
+                      >
+                        {`Show all (${hiddenTagCount})`}
+                      </button>
+                    ) : null}
+                  </div>
+                ))}
               </div>
-            </fieldset>
+
+              {optionalTags.length >= MAX_OPTIONAL_TAGS ? (
+                <p className="text-xs text-muted-foreground">
+                  You can select up to {MAX_OPTIONAL_TAGS} optional tags.
+                </p>
+              ) : null}
+            </div>
+
+            <input type="hidden" name="tags" value={submittedTags} />
 
             <div className="space-y-2">
               <label htmlFor="submit-url" className="text-sm font-semibold text-foreground">
@@ -238,29 +354,6 @@ export default function SubmitPage() {
             font-family: var(--font-body-family);
             font-size: 0.9rem;
             line-height: 1.58;
-            color: var(--foreground);
-          }
-
-          .rkn-md-editor .w-md-editor-preview,
-          .rkn-md-editor .wmde-markdown,
-          .rkn-md-editor .w-md-editor-text-pre {
-            background-color: transparent;
-          }
-
-          .rkn-md-editor .wmde-markdown pre,
-          .rkn-md-editor .wmde-markdown code {
-            background-color: var(--muted);
-          }
-
-          .rkn-md-editor .wmde-markdown pre {
-            border: 1px solid var(--border);
-            border-radius: 0;
-            padding: 0.75rem;
-          }
-
-          .rkn-md-editor .w-md-editor-content {
-            border-bottom-left-radius: 0;
-            border-bottom-right-radius: 0;
           }
         `}</style>
       </section>

@@ -11,18 +11,21 @@ import { RouteErrorPage } from "@/components/routes/route-error-page";
 import { SearchPage } from "@/components/routes/search-page";
 import {
   getPageFromRequest,
+  parseTagsFromSearch,
   postsQueryOptions,
   queryClient,
+  tagsQueryOptions,
 } from "@/components/query-client";
 import { sessionQueryOptions } from "@/components/session";
 
 const PostPage = lazy(() =>
   import("@/components/routes/post-page").then((module) => ({
     default: module.PostPage,
-  }))
+  })),
 );
 
 const SubmitPage = lazy(() => import("@/components/submit-page"));
+const AdminTagsPage = lazy(() => import("@/components/routes/admin-tags-page"));
 
 const routeFallback = (
   <main className="flex w-full flex-col gap-6 py-6">
@@ -40,11 +43,14 @@ const redirectToRoot = (request: Request) => {
 };
 
 const feedLoader =
-  (category: FeedCategory) =>
+  (feed: FeedCategory) =>
   async ({ request }: LoaderFunctionArgs) => {
     const page = getPageFromRequest(request);
-    await queryClient.ensureQueryData(postsQueryOptions({ category, page }));
-    return { page };
+    const url = new URL(request.url);
+    const tags = parseTagsFromSearch(url.searchParams.get("tags"));
+
+    await queryClient.ensureQueryData(postsQueryOptions({ feed, tags, page }));
+    return { page, tags };
   };
 
 const profileLoader = async ({ request }: LoaderFunctionArgs) => {
@@ -58,6 +64,17 @@ const profileLoader = async ({ request }: LoaderFunctionArgs) => {
 
 const submitLoader = async () => {
   await queryClient.ensureQueryData(sessionQueryOptions());
+  await queryClient.ensureQueryData(tagsQueryOptions());
+  return null;
+};
+
+const adminTagsLoader = async () => {
+  const session = await queryClient.ensureQueryData(sessionQueryOptions());
+  if (!session?.permissions?.isAdmin) {
+    throw new Response("Not found", { status: 404 });
+  }
+
+  await queryClient.ensureQueryData(tagsQueryOptions());
   return null;
 };
 
@@ -108,7 +125,17 @@ const submitAction = async ({ request }: ActionFunctionArgs) => {
   const title = String(formData.get("title") ?? "").trim();
   const url = String(formData.get("url") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim();
-  const category = String(formData.get("category") ?? "").trim().toLowerCase();
+  const rawTags = String(formData.get("tags") ?? "[]");
+
+  let parsedTags: string[] = [];
+  try {
+    const maybeTags = JSON.parse(rawTags) as unknown;
+    if (Array.isArray(maybeTags)) {
+      parsedTags = maybeTags.filter((value): value is string => typeof value === "string");
+    }
+  } catch {
+    parsedTags = [];
+  }
 
   const response = await fetch("/api/posts", {
     method: "POST",
@@ -119,7 +146,7 @@ const submitAction = async ({ request }: ActionFunctionArgs) => {
       title,
       url: url || null,
       body: body || null,
-      category,
+      tags: parsedTags,
     }),
   });
 
@@ -177,6 +204,12 @@ export const router = createBrowserRouter([
       },
       { path: "search", element: <SearchPage />, hydrateFallbackElement: routeFallback },
       { path: "profile", loader: profileLoader, element: <ProfilePage />, hydrateFallbackElement: routeFallback },
+      {
+        path: "admin/tags",
+        loader: adminTagsLoader,
+        element: withSuspense(<AdminTagsPage />),
+        hydrateFallbackElement: routeFallback,
+      },
       {
         path: "submit",
         loader: submitLoader,
