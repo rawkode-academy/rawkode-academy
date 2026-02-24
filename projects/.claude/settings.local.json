@@ -8,7 +8,13 @@
       "Bash(/opt/homebrew/bin/railway whoami:*)",
       "Bash(/opt/homebrew/bin/railway project list:*)",
       "Bash(/opt/homebrew/bin/railway:*)",
-      "mcp__Railway__list-deployments"
+      "mcp__Railway__list-deployments",
+      "WebSearch",
+      "Bash(cd /Users/rawkode/Code/src/github.com/rawkode-academy/rawkode-academy/projects/rawkode.cloud3 && go mod tidy 2>&1)",
+      "Bash(go build:*)",
+      "Bash(cd /Users/rawkode/Code/src/github.com/rawkode-academy/rawkode-academy/projects/rawkode.cloud && go mod tidy 2>&1)",
+      "Bash(go test:*)",
+      "Bash(go run:*)"
     ]
   }
 }

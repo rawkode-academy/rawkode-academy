@@ -12,7 +12,6 @@ import (
 	"strings"
 )
 
-// dnsRecord represents a Cloudflare DNS record from the API response.
 type dnsRecord struct {
 	ID      string `json:"id"`
 	Type    string `json:"type"`
@@ -41,7 +40,6 @@ type mutateResponse struct {
 }
 
 // ResolveZoneID resolves a zone ID from a Cloudflare account ID and DNS name.
-// It tries progressively shorter DNS suffixes until a zone match is found.
 func ResolveZoneID(ctx context.Context, apiToken, accountID, dnsName string) (string, string, error) {
 	if apiToken == "" {
 		return "", "", fmt.Errorf("cloudflare API token is required")
@@ -69,8 +67,6 @@ func ResolveZoneID(ctx context.Context, apiToken, accountID, dnsName string) (st
 }
 
 // UpsertARecord creates or updates an A record in Cloudflare DNS.
-// If a record with the given name already exists, it is updated.
-// Otherwise, a new record is created.
 func UpsertARecord(ctx context.Context, apiToken, zoneID, recordName, ip string) error {
 	existing, err := findARecord(ctx, apiToken, zoneID, recordName)
 	if err != nil {
@@ -79,46 +75,26 @@ func UpsertARecord(ctx context.Context, apiToken, zoneID, recordName, ip string)
 
 	if existing != nil {
 		if existing.Content == ip {
-			slog.Info("DNS record already points to correct IP",
-				"phase", "3",
-				"name", recordName,
-				"ip", ip,
-			)
+			slog.Info("DNS record already points to correct IP", "name", recordName, "ip", ip)
 			return nil
 		}
-
 		if err := updateRecord(ctx, apiToken, zoneID, existing.ID, recordName, ip); err != nil {
 			return fmt.Errorf("update DNS record: %w", err)
 		}
-
-		slog.Info("DNS A record updated",
-			"phase", "3",
-			"name", recordName,
-			"old_ip", existing.Content,
-			"new_ip", ip,
-		)
+		slog.Info("DNS A record updated", "name", recordName, "old_ip", existing.Content, "new_ip", ip)
 		return nil
 	}
 
 	if err := createRecord(ctx, apiToken, zoneID, recordName, ip); err != nil {
 		return fmt.Errorf("create DNS record: %w", err)
 	}
-
-	slog.Info("DNS A record created",
-		"phase", "3",
-		"name", recordName,
-		"ip", ip,
-	)
+	slog.Info("DNS A record created", "name", recordName, "ip", ip)
 	return nil
 }
 
 func findARecord(ctx context.Context, apiToken, zoneID, name string) (*dnsRecord, error) {
-	url := fmt.Sprintf(
-		"https://api.cloudflare.com/client/v4/zones/%s/dns_records?type=A&name=%s",
-		zoneID, name,
-	)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	reqURL := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records?type=A&name=%s", zoneID, name)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +110,6 @@ func findARecord(ctx context.Context, apiToken, zoneID, name string) (*dnsRecord
 	if err != nil {
 		return nil, err
 	}
-
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("cloudflare API returned %s: %s", resp.Status, body)
 	}
@@ -143,30 +118,20 @@ func findARecord(ctx context.Context, apiToken, zoneID, name string) (*dnsRecord
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
-
 	if !result.Success {
 		return nil, fmt.Errorf("cloudflare API error: %s", body)
 	}
-
 	if len(result.Result) == 0 {
 		return nil, nil
 	}
-
 	return &result.Result[0], nil
 }
 
 func createRecord(ctx context.Context, apiToken, zoneID, name, ip string) error {
-	url := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records", zoneID)
+	reqURL := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records", zoneID)
+	payload, _ := json.Marshal(map[string]any{"type": "A", "name": name, "content": ip, "ttl": 60, "proxied": false})
 
-	payload, _ := json.Marshal(map[string]any{
-		"type":    "A",
-		"name":    name,
-		"content": ip,
-		"ttl":     60,
-		"proxied": false,
-	})
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, reqURL, bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
@@ -183,7 +148,6 @@ func createRecord(ctx context.Context, apiToken, zoneID, name, ip string) error 
 	if err != nil {
 		return err
 	}
-
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("cloudflare API returned %s: %s", resp.Status, body)
 	}
@@ -192,29 +156,17 @@ func createRecord(ctx context.Context, apiToken, zoneID, name, ip string) error 
 	if err := json.Unmarshal(body, &result); err != nil {
 		return fmt.Errorf("decode response: %w", err)
 	}
-
 	if !result.Success {
 		return fmt.Errorf("cloudflare API error: %s", body)
 	}
-
 	return nil
 }
 
 func updateRecord(ctx context.Context, apiToken, zoneID, recordID, name, ip string) error {
-	url := fmt.Sprintf(
-		"https://api.cloudflare.com/client/v4/zones/%s/dns_records/%s",
-		zoneID, recordID,
-	)
+	reqURL := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/dns_records/%s", zoneID, recordID)
+	payload, _ := json.Marshal(map[string]any{"type": "A", "name": name, "content": ip, "ttl": 60, "proxied": false})
 
-	payload, _ := json.Marshal(map[string]any{
-		"type":    "A",
-		"name":    name,
-		"content": ip,
-		"ttl":     60,
-		"proxied": false,
-	})
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewReader(payload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, reqURL, bytes.NewReader(payload))
 	if err != nil {
 		return err
 	}
@@ -231,7 +183,6 @@ func updateRecord(ctx context.Context, apiToken, zoneID, recordID, name, ip stri
 	if err != nil {
 		return err
 	}
-
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("cloudflare API returned %s: %s", resp.Status, body)
 	}
@@ -240,11 +191,9 @@ func updateRecord(ctx context.Context, apiToken, zoneID, recordID, name, ip stri
 	if err := json.Unmarshal(body, &result); err != nil {
 		return fmt.Errorf("decode response: %w", err)
 	}
-
 	if !result.Success {
 		return fmt.Errorf("cloudflare API error: %s", body)
 	}
-
 	return nil
 }
 
@@ -253,7 +202,6 @@ func findZoneIDByName(ctx context.Context, apiToken, accountID, zoneName string)
 	if err != nil {
 		return "", err
 	}
-
 	q := baseURL.Query()
 	q.Set("name", zoneName)
 	q.Set("account.id", accountID)
@@ -276,7 +224,6 @@ func findZoneIDByName(ctx context.Context, apiToken, accountID, zoneName string)
 	if err != nil {
 		return "", err
 	}
-
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("cloudflare API returned %s while resolving zone %q: %s", resp.Status, zoneName, body)
 	}
@@ -285,15 +232,12 @@ func findZoneIDByName(ctx context.Context, apiToken, accountID, zoneName string)
 	if err := json.Unmarshal(body, &result); err != nil {
 		return "", fmt.Errorf("decode response: %w", err)
 	}
-
 	if !result.Success {
 		return "", fmt.Errorf("cloudflare API error while resolving zone %q: %s", zoneName, body)
 	}
-
 	if len(result.Result) == 0 {
 		return "", nil
 	}
-
 	return result.Result[0].ID, nil
 }
 
@@ -302,16 +246,13 @@ func zoneNameCandidates(dnsName string) []string {
 	if clean == "" {
 		return nil
 	}
-
 	parts := strings.Split(clean, ".")
 	if len(parts) < 2 {
 		return []string{clean}
 	}
-
 	candidates := make([]string, 0, len(parts)-1)
 	for i := 0; i <= len(parts)-2; i++ {
 		candidates = append(candidates, strings.Join(parts[i:], "."))
 	}
-
 	return candidates
 }
