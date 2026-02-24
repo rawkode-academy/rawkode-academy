@@ -151,7 +151,6 @@ export function SearchPage() {
     <main className="space-y-4 py-7">
       <section className="space-y-4">
         <header className="space-y-2">
-          <p className="rkn-kicker">Search</p>
           <h1 className="rkn-page-title">Find posts across Rawkode News</h1>
           <p className="max-w-[70ch] text-sm text-muted-foreground">
             Client-side fuzzy search across published posts.
@@ -209,7 +208,7 @@ export function SearchPage() {
             <div className="rkn-post-list">
               {results.map((post, index) => (
                 <React.Fragment key={post.id}>
-                  <PostRow post={post} showCategoryBadge />
+                  <PostRow post={post} />
                   {index < results.length - 1 ? <hr className="rkn-post-row-separator border-border/75" /> : null}
                 </React.Fragment>
               ))}

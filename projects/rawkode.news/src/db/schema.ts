@@ -2,8 +2,10 @@ import { sql } from "drizzle-orm";
 import {
   index,
   integer,
+  primaryKey,
   sqliteTable,
   text,
+  uniqueIndex,
   type AnySQLiteColumn,
 } from "drizzle-orm/sqlite-core";
 
@@ -12,7 +14,6 @@ export const posts = sqliteTable(
   {
     id: text("id").primaryKey(),
     title: text("title").notNull(),
-    category: text("category").notNull(),
     url: text("url"),
     body: text("body"),
     author: text("author").notNull(),
@@ -21,10 +22,45 @@ export const posts = sqliteTable(
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),
   },
+  (table) => [index("posts_created_at_idx").on(table.createdAt)],
+);
+
+export const tags = sqliteTable(
+  "tags",
+  {
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    kind: text("kind", { enum: ["mandatory", "optional"] }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
   (table) => [
-    index("posts_created_at_idx").on(table.createdAt),
-    index("posts_category_idx").on(table.category),
-    index("posts_category_created_at_idx").on(table.category, table.createdAt),
+    uniqueIndex("tags_slug_idx").on(table.slug),
+    index("tags_kind_idx").on(table.kind),
+    index("tags_created_at_idx").on(table.createdAt),
+  ],
+);
+
+export const postTags = sqliteTable(
+  "post_tags",
+  {
+    postId: text("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.postId, table.tagId],
+      name: "post_tags_post_id_tag_id_pk",
+    }),
+    index("post_tags_post_id_idx").on(table.postId),
+    index("post_tags_tag_id_idx").on(table.tagId),
   ],
 );
 

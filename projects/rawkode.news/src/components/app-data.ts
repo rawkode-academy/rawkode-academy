@@ -1,18 +1,35 @@
-export const feedCategories = ["new", "rka", "news", "show", "ask"] as const;
-export const postCategories = ["rka", "news", "show", "ask"] as const;
+import {
+  coreTagSlugs,
+  feedTypes,
+  type CoreTagSlug,
+  type FeedType,
+  type TagKind,
+} from "@/lib/tags";
 
-export type FeedCategory = (typeof feedCategories)[number];
-export type PostCategory = (typeof postCategories)[number];
+export const feedCategories = feedTypes;
+export const mandatoryTagSlugs = coreTagSlugs;
+
+export type FeedCategory = FeedType;
+export type MandatoryTagSlug = CoreTagSlug;
+
+export type ApiTag = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  kind: TagKind;
+  usageCount?: number;
+};
 
 export type ApiPost = {
   id: string;
   title: string;
-  category: FeedCategory;
   url: string | null;
   body: string | null;
   author: string;
   commentCount: number;
   createdAt: string;
+  tags: ApiTag[];
 };
 
 export type ApiComment = {
@@ -44,8 +61,9 @@ export type ApiSession = {
     identity?: unknown;
   };
   permissions?: {
+    isAdmin: boolean;
     canSubmitRka: boolean;
-    allowedCategories: PostCategory[];
+    allowedMandatoryTags: MandatoryTagSlug[];
   };
 };
 
