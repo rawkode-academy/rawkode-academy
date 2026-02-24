@@ -40,16 +40,42 @@ func TestControlPlaneReservedIPForSlot(t *testing.T) {
 	}
 }
 
+func TestControlPlaneNodeName(t *testing.T) {
+	got := controlPlaneNodeName("production", "control-plane", 1)
+	want := "production-control-plane-01"
+	if got != want {
+		t.Fatalf("controlPlaneNodeName() = %q, want %q", got, want)
+	}
+}
+
+func TestParseControlPlaneSlot(t *testing.T) {
+	slot, ok := parseControlPlaneSlot("production", "control-plane", "production-control-plane-03")
+	if !ok {
+		t.Fatalf("parseControlPlaneSlot() expected success for new format")
+	}
+	if slot != 3 {
+		t.Fatalf("parseControlPlaneSlot() = %d, want %d", slot, 3)
+	}
+
+	legacySlot, legacyOK := parseControlPlaneSlot("production", "control-plane", "control-plane-02")
+	if !legacyOK {
+		t.Fatalf("parseControlPlaneSlot() expected success for legacy format")
+	}
+	if legacySlot != 2 {
+		t.Fatalf("parseControlPlaneSlot() legacy = %d, want %d", legacySlot, 2)
+	}
+}
+
 func TestNextControlPlaneSlot(t *testing.T) {
 	state := &clusterstate.NodesState{
 		Nodes: []clusterstate.NodeState{
-			{Name: "main-01", Role: config.NodeTypeControlPlane, Pool: "main", Status: clusterstate.NodeStatusReady},
-			{Name: "main-02", Role: config.NodeTypeControlPlane, Pool: "main", Status: clusterstate.NodeStatusDeleted},
+			{Name: "production-main-01", Role: config.NodeTypeControlPlane, Pool: "main", Status: clusterstate.NodeStatusReady},
+			{Name: "production-main-02", Role: config.NodeTypeControlPlane, Pool: "main", Status: clusterstate.NodeStatusDeleted},
 			{Name: "workers-01", Role: config.NodeTypeWorker, Pool: "workers", Status: clusterstate.NodeStatusReady},
 		},
 	}
 
-	if got := nextControlPlaneSlot(state, "main"); got != 2 {
+	if got := nextControlPlaneSlot(state, "production", "main"); got != 2 {
 		t.Fatalf("nextControlPlaneSlot() = %d, want %d", got, 2)
 	}
 }
@@ -58,11 +84,11 @@ func TestNextControlPlaneSlotReservesLegacyUnnamedSlots(t *testing.T) {
 	state := &clusterstate.NodesState{
 		Nodes: []clusterstate.NodeState{
 			{Name: "legacy-cp", Role: config.NodeTypeControlPlane, Pool: "main", Status: clusterstate.NodeStatusReady},
-			{Name: "main-01", Role: config.NodeTypeControlPlane, Pool: "main", Status: clusterstate.NodeStatusReady},
+			{Name: "production-main-01", Role: config.NodeTypeControlPlane, Pool: "main", Status: clusterstate.NodeStatusReady},
 		},
 	}
 
-	if got := nextControlPlaneSlot(state, "main"); got != 3 {
+	if got := nextControlPlaneSlot(state, "production", "main"); got != 3 {
 		t.Fatalf("nextControlPlaneSlot() = %d, want %d", got, 3)
 	}
 }
@@ -71,7 +97,7 @@ func TestControlPlaneEndpointFromStatePrefersPrivateIP(t *testing.T) {
 	state := &clusterstate.NodesState{
 		Nodes: []clusterstate.NodeState{
 			{
-				Name:      "main-01",
+				Name:      "production-main-01",
 				Role:      config.NodeTypeControlPlane,
 				Pool:      "main",
 				Status:    clusterstate.NodeStatusReady,

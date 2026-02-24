@@ -150,27 +150,43 @@ func infisicalSecretPathForCluster(cfg *config.Config) string {
 	return strings.TrimRight(base, "/") + "/" + cluster
 }
 
-func controlPlaneNodeName(poolName string, slot int) string {
-	return fmt.Sprintf("%s-%02d", strings.TrimSpace(poolName), slot)
+func controlPlaneNodeName(environment, poolName string, slot int) string {
+	namePrefix := strings.TrimSpace(poolName)
+	if env := strings.TrimSpace(environment); env != "" {
+		namePrefix = env + "-" + namePrefix
+	}
+
+	return fmt.Sprintf("%s-%02d", namePrefix, slot)
 }
 
-func parseControlPlaneSlot(poolName, nodeName string) (int, bool) {
-	prefix := strings.TrimSpace(poolName) + "-"
-	if !strings.HasPrefix(nodeName, prefix) {
-		return 0, false
+func parseControlPlaneSlot(environment, poolName, nodeName string) (int, bool) {
+	nodeName = strings.TrimSpace(nodeName)
+	poolName = strings.TrimSpace(poolName)
+
+	prefixes := make([]string, 0, 2)
+	if env := strings.TrimSpace(environment); env != "" {
+		prefixes = append(prefixes, env+"-"+poolName+"-")
+	}
+	// Backward compatibility for existing nodes named as "<pool>-NN".
+	prefixes = append(prefixes, poolName+"-")
+
+	for _, prefix := range prefixes {
+		if !strings.HasPrefix(nodeName, prefix) {
+			continue
+		}
+
+		suffix := strings.TrimPrefix(nodeName, prefix)
+		if len(suffix) != 2 {
+			continue
+		}
+
+		slot, err := strconv.Atoi(suffix)
+		if err == nil && slot > 0 {
+			return slot, true
+		}
 	}
 
-	suffix := strings.TrimPrefix(nodeName, prefix)
-	if len(suffix) != 2 {
-		return 0, false
-	}
-
-	slot, err := strconv.Atoi(suffix)
-	if err != nil || slot <= 0 {
-		return 0, false
-	}
-
-	return slot, true
+	return 0, false
 }
 
 func controlPlaneReservedIPForSlot(pool *config.NodePoolConfig, slot int) (string, error) {
@@ -192,7 +208,7 @@ func controlPlaneReservedIPForSlot(pool *config.NodePoolConfig, slot int) (strin
 	return strings.TrimSpace(pool.ReservedPrivateIPs[slot-1]), nil
 }
 
-func nextControlPlaneSlot(state *clusterstate.NodesState, poolName string) int {
+func nextControlPlaneSlot(state *clusterstate.NodesState, environment, poolName string) int {
 	occupied := make(map[int]struct{})
 	unknownNamedNodes := 0
 
@@ -203,7 +219,7 @@ func nextControlPlaneSlot(state *clusterstate.NodesState, poolName string) int {
 		if node.Status == clusterstate.NodeStatusDeleted {
 			continue
 		}
-		slot, ok := parseControlPlaneSlot(poolName, node.Name)
+		slot, ok := parseControlPlaneSlot(environment, poolName, node.Name)
 		if !ok {
 			unknownNamedNodes++
 			continue

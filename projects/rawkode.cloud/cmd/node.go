@@ -71,11 +71,11 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("--name is no longer supported for controlplane nodes; names are auto-generated from pool %q", pool.Name)
 		}
 
-		slot := nextControlPlaneSlot(state, pool.Name)
+		slot := nextControlPlaneSlot(state, cfg.Environment, pool.Name)
 		if slot > 99 {
 			return fmt.Errorf("no available control-plane naming slot for pool %q", pool.Name)
 		}
-		name = controlPlaneNodeName(pool.Name, slot)
+		name = controlPlaneNodeName(cfg.Environment, pool.Name, slot)
 		privateIP, err = controlPlaneReservedIPForSlot(pool, slot)
 		if err != nil {
 			return err
@@ -141,6 +141,7 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 		OfferID:                  offerID,
 		Zone:                     zone,
 		OSID:                     osID,
+		Name:                     name,
 		PrivateNetworkID:         network.PrivateNetworkID,
 		PrivateNetworkReservedIP: privateIP,
 		BillingCycle:             pool.BillingCycle,

@@ -18,7 +18,7 @@ import (
 // InstallParams holds parameters for Cilium CNI installation.
 type InstallParams struct {
 	Kubeconfig string
-	Version    string // e.g. "1.17.0"
+	Version    string // e.g. "v1.19.0"
 	Hubble     bool
 }
 

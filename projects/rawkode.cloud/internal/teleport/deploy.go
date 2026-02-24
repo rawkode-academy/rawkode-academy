@@ -30,6 +30,7 @@ type DeployKubeAgentParams struct {
 	ProxyAddr   string
 	ClusterName string
 	JoinToken   string
+	Version     string
 }
 
 // DeploySelfHostedParams defines parameters for deploying self-hosted Teleport.
@@ -41,6 +42,7 @@ type DeploySelfHostedParams struct {
 	GitHubTeams        []string
 	GitHubClientID     string
 	GitHubClientSecret string
+	Version            string
 }
 
 // DeployKubeAgent applies the Teleport kube-agent manifests for external Teleport mode.
@@ -59,6 +61,7 @@ func DeployKubeAgent(ctx context.Context, params DeployKubeAgentParams) error {
 		strings.TrimSpace(params.ProxyAddr),
 		strings.TrimSpace(params.ClusterName),
 		strings.TrimSpace(params.JoinToken),
+		strings.TrimSpace(params.Version),
 	))
 }
 
@@ -90,6 +93,7 @@ func DeploySelfHosted(ctx context.Context, params DeploySelfHostedParams) error 
 	manifest := SelfHostedManifest(
 		strings.TrimSpace(params.ClusterName),
 		strings.TrimSpace(params.Domain),
+		strings.TrimSpace(params.Version),
 		strings.TrimSpace(params.GitHubOrganization),
 		teams,
 		strings.TrimSpace(params.GitHubClientID),

@@ -99,3 +99,36 @@ func TestNodePoolEffectiveZone(t *testing.T) {
 		t.Fatalf("NodePoolConfig.EffectiveZone() = %q, want %q", got, "fr-par-1")
 	}
 }
+
+func TestClusterEffectiveCiliumVersion(t *testing.T) {
+	if got := (ClusterConfig{}).EffectiveCiliumVersion(); got != defaultCiliumVersion {
+		t.Fatalf("ClusterConfig{}.EffectiveCiliumVersion() = %q, want %q", got, defaultCiliumVersion)
+	}
+
+	cfg := ClusterConfig{CiliumVersion: "v1.18.6"}
+	if got := cfg.EffectiveCiliumVersion(); got != "v1.18.6" {
+		t.Fatalf("ClusterConfig{CiliumVersion: v1.18.6}.EffectiveCiliumVersion() = %q, want %q", got, "v1.18.6")
+	}
+}
+
+func TestClusterEffectiveFluxVersion(t *testing.T) {
+	if got := (ClusterConfig{}).EffectiveFluxVersion(); got != defaultFluxVersion {
+		t.Fatalf("ClusterConfig{}.EffectiveFluxVersion() = %q, want %q", got, defaultFluxVersion)
+	}
+
+	cfg := ClusterConfig{FluxVersion: "v2.8.0"}
+	if got := cfg.EffectiveFluxVersion(); got != "v2.8.0" {
+		t.Fatalf("ClusterConfig{FluxVersion: v2.8.0}.EffectiveFluxVersion() = %q, want %q", got, "v2.8.0")
+	}
+}
+
+func TestClusterEffectiveTeleportVersion(t *testing.T) {
+	if got := (ClusterConfig{}).EffectiveTeleportVersion(); got != defaultTeleportVersion {
+		t.Fatalf("ClusterConfig{}.EffectiveTeleportVersion() = %q, want %q", got, defaultTeleportVersion)
+	}
+
+	cfg := ClusterConfig{TeleportVersion: "18"}
+	if got := cfg.EffectiveTeleportVersion(); got != "18" {
+		t.Fatalf("ClusterConfig{TeleportVersion: 18}.EffectiveTeleportVersion() = %q, want %q", got, "18")
+	}
+}
