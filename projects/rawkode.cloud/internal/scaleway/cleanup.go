@@ -10,9 +10,7 @@ import (
 )
 
 // DeleteServer removes a bare metal server from Scaleway.
-// Used for cleanup on failure and for the `destroy` CLI command.
-// Accepts either a *Client or *baremetal.API for backwards compatibility
-// with the destroy command.
+// Used for rollback cleanup in failed provisioning runs.
 func DeleteServer(ctx context.Context, api *baremetal.API, serverID string, zone scw.Zone) error {
 	_, err := api.DeleteServer(&baremetal.DeleteServerRequest{
 		Zone:     zone,

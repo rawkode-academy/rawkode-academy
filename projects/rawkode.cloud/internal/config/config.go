@@ -2,120 +2,220 @@ package config
 
 import (
 	"fmt"
-	"log/slog"
+	"os"
 	"strings"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
-// Config holds all resolved configuration for the CLI.
-// Resolution order: config file < environment variables < CLI flags.
+// Config is the top-level cluster configuration loaded from YAML.
 type Config struct {
-	// Cluster settings
-	ClusterName       string `mapstructure:"cluster_name"`
-	KubernetesVersion string `mapstructure:"kubernetes_version"`
-	FlatcarChannel    string `mapstructure:"flatcar_channel"`
-	Role              string `mapstructure:"role"`
-	CiliumVersion     string `mapstructure:"cilium_version"`
+	Environment string           `yaml:"environment"`
+	State       StateConfig      `yaml:"state"`
+	Cluster     ClusterConfig    `yaml:"cluster"`
+	Scaleway    ScalewayConfig   `yaml:"scaleway"`
+	NodePools   []NodePoolConfig `yaml:"nodePools"`
+	Teleport    TeleportConfig   `yaml:"teleport"`
+	Infisical   InfisicalConfig  `yaml:"infisical"`
+	Flux        FluxConfig       `yaml:"flux"`
 
-	// Scaleway settings
-	ScalewayAccessKey string `mapstructure:"scaleway_access_key"`
-	ScalewaySecretKey string `mapstructure:"scaleway_secret_key"`
-	ScalewayZone      string `mapstructure:"scaleway_zone"`
-	ScalewayOfferID   string `mapstructure:"scaleway_offer_id"`
-	ScalewayOSID      string `mapstructure:"scaleway_os_id"`
-
-	// Teleport settings
-	TeleportProxy string `mapstructure:"teleport_proxy"`
-
-	// Cloudflare DNS settings — for pointing rawkode.cloud at the server
-	CloudflareAPIToken  string `mapstructure:"cloudflare_api_token"`
-	CloudflareAccountID string `mapstructure:"cloudflare_account_id"`
-	CloudflareZoneID    string `mapstructure:"cloudflare_zone_id"`
-	CloudflareDNSName   string `mapstructure:"cloudflare_dns_name"`
-
-	// Infisical settings — these bootstrap everything else.
-	// The URL, client ID, and client secret are the minimum needed to
-	// authenticate. Once authenticated, all other secrets (Scaleway creds,
-	// Teleport proxy address, etc.) can be fetched from Infisical.
-	InfisicalURL          string `mapstructure:"infisical_url"`
-	InfisicalClientID     string `mapstructure:"infisical_client_id"`
-	InfisicalClientSecret string `mapstructure:"infisical_client_secret"`
-	InfisicalProjectID    string `mapstructure:"infisical_project_id"`
-	InfisicalEnvironment  string `mapstructure:"infisical_environment"`
-	InfisicalSecretPath   string `mapstructure:"infisical_secret_path"`
-
-	// Infisical cluster identity — injected into the cluster as a K8s secret
-	InfisicalClusterClientID     string `mapstructure:"infisical_cluster_client_id"`
-	InfisicalClusterClientSecret string `mapstructure:"infisical_cluster_client_secret"`
-
-	// SSH
-	SSHAgentSocket string `mapstructure:"ssh_agent"`
-
-	// Runtime
-	Verbose bool `mapstructure:"verbose"`
+	// Credentials populated from environment variables, never serialized.
+	scwAccessKey       string
+	scwSecretKey       string
+	cloudflareAPIToken string
+	cloudflareAccount  string
 }
 
-// InitViper sets up viper with the config file, environment variable, and
-// CLI flag precedence chain.
-//
-// Precedence (lowest to highest):
-//  1. Config file (~/.rawkode-cloud.yaml or --config path)
-//  2. Environment variables (RAWKODE_CLOUD_*)
-//  3. CLI flags
-func InitViper(configFile string) {
-	if configFile != "" {
-		viper.SetConfigFile(configFile)
-	} else {
-		viper.SetConfigName(".rawkode-cloud")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath(".")
-		viper.AddConfigPath("$HOME")
+// ClusterConfig holds Kubernetes/Talos version info.
+type ClusterConfig struct {
+	TalosVersion      string `yaml:"talos_version"`
+	KubernetesVersion string `yaml:"kubernetes_version"`
+	TalosSchematic    string `yaml:"talos_schematic"`
+}
+
+// ScalewayConfig holds Scaleway infrastructure settings (no credentials).
+type ScalewayConfig struct {
+	VPCName            string `yaml:"vpc_name"`
+	PrivateNetworkName string `yaml:"private_network_name"`
+	Zone               string `yaml:"zone"`
+}
+
+// StateConfig holds S3 state storage settings.
+type StateConfig struct {
+	Bucket   string `yaml:"bucket"`
+	Region   string `yaml:"region"`
+	Endpoint string `yaml:"endpoint"`
+}
+
+// NodePoolConfig describes a group of nodes sharing the same hardware/disk layout.
+type NodePoolConfig struct {
+	Name         string     `yaml:"name"`
+	Type         string     `yaml:"type"`
+	Size         int        `yaml:"size"`
+	Offer        string     `yaml:"offer"`
+	BillingCycle string     `yaml:"billing_cycle"`
+	Disks        DiskConfig `yaml:"disks"`
+}
+
+const (
+	NodeTypeControlPlane = "controlplane"
+	NodeTypeWorker       = "worker"
+)
+
+// DiskConfig holds disk device paths.
+type DiskConfig struct {
+	OS   string `yaml:"os"`
+	Data string `yaml:"data"`
+}
+
+// TeleportConfig holds Teleport proxy settings.
+type TeleportConfig struct {
+	Domain string `yaml:"domain"`
+}
+
+// InfisicalConfig holds secrets management settings.
+type InfisicalConfig struct {
+	SiteURL      string `yaml:"site_url"`
+	ProjectID    string `yaml:"project_id"`
+	Environment  string `yaml:"environment"`
+	SecretPath   string `yaml:"secret_path"`
+	ClientID     string `yaml:"client_id"`
+	ClientSecret string `yaml:"client_secret"`
+}
+
+// FluxConfig holds FluxCD configuration.
+type FluxConfig struct {
+	OCIRepo string `yaml:"oci_repo"`
+}
+
+// Load reads and parses a cluster configuration YAML file.
+// Environment variables override YAML values for sensitive fields.
+func Load(path string) (*Config, error) {
+	if path == "" {
+		return nil, fmt.Errorf("config path is required")
 	}
 
-	// Environment variables: RAWKODE_CLOUD_CLUSTER_NAME, etc.
-	viper.SetEnvPrefix("RAWKODE_CLOUD")
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
-	viper.AutomaticEnv()
-
-	// Also support SCW_ACCESS_KEY and SCW_SECRET_KEY without prefix
-	// for backwards compatibility with the Scaleway SDK convention.
-	_ = viper.BindEnv("scaleway_access_key", "RAWKODE_CLOUD_SCALEWAY_ACCESS_KEY", "SCW_ACCESS_KEY")
-	_ = viper.BindEnv("scaleway_secret_key", "RAWKODE_CLOUD_SCALEWAY_SECRET_KEY", "SCW_SECRET_KEY")
-
-	// Support legacy/non-prefixed Cloudflare env names.
-	_ = viper.BindEnv("cloudflare_api_token", "RAWKODE_CLOUD_CLOUDFLARE_API_TOKEN", "CLOUDFLARE_API_TOKEN", "CF_API_TOKEN")
-	_ = viper.BindEnv("cloudflare_account_id", "RAWKODE_CLOUD_CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_ACCOUNT_ID", "CF_ACCOUNT_ID")
-	_ = viper.BindEnv("cloudflare_zone_id", "RAWKODE_CLOUD_CLOUDFLARE_ZONE_ID", "CLOUDFLARE_ZONE_ID", "CF_ZONE_ID")
-	_ = viper.BindEnv("cloudflare_dns_name", "RAWKODE_CLOUD_CLOUDFLARE_DNS_NAME", "CLOUDFLARE_DNS_NAME", "CF_DNS_NAME")
-
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			slog.Warn("error reading config file", "error", err)
-		}
-	} else {
-		slog.Info("using config file", "path", viper.ConfigFileUsed())
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read config %s: %w", path, err)
 	}
-}
 
-// BindFlags binds cobra flags to viper keys so CLI flags override
-// config file and env var values. Flag names use kebab-case; viper
-// keys use snake_case.
-func BindFlags(cmd *cobra.Command) {
-	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		viperKey := strings.ReplaceAll(f.Name, "-", "_")
-		_ = viper.BindPFlag(viperKey, f)
-	})
-}
-
-// Resolve reads the final merged configuration from viper.
-// At this point, all sources (config file, env vars, flags) have been loaded.
-func Resolve() (*Config, error) {
 	var cfg Config
-	if err := viper.Unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("unmarshal config: %w", err)
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("parse config %s: %w", path, err)
 	}
+
+	// Environment variable overrides for sensitive values
+	if v := os.Getenv("SCW_ACCESS_KEY"); v != "" {
+		cfg.scwAccessKey = v
+	}
+	if v := os.Getenv("SCW_SECRET_KEY"); v != "" {
+		cfg.scwSecretKey = v
+	}
+	if v := os.Getenv("CLOUDFLARE_API_TOKEN"); v != "" {
+		cfg.cloudflareAPIToken = v
+	}
+	if v := os.Getenv("CLOUDFLARE_ACCOUNT_ID"); v != "" {
+		cfg.cloudflareAccount = v
+	}
+	if v := os.Getenv("INFISICAL_CLIENT_ID"); v != "" && cfg.Infisical.ClientID == "" {
+		cfg.Infisical.ClientID = v
+	}
+	if v := os.Getenv("INFISICAL_CLIENT_SECRET"); v != "" && cfg.Infisical.ClientSecret == "" {
+		cfg.Infisical.ClientSecret = v
+	}
+
 	return &cfg, nil
+}
+
+// Save writes the configuration back to a YAML file.
+func Save(path string, cfg *Config) error {
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("marshal config: %w", err)
+	}
+
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		return fmt.Errorf("write config %s: %w", path, err)
+	}
+
+	return nil
+}
+
+// ScalewayCredentials returns the Scaleway credentials loaded from environment variables.
+func (c *Config) ScalewayCredentials() (accessKey, secretKey string) {
+	return c.scwAccessKey, c.scwSecretKey
+}
+
+// CloudflareAPIToken returns the Cloudflare API token loaded from environment variables.
+func (c *Config) CloudflareAPIToken() string {
+	return c.cloudflareAPIToken
+}
+
+// CloudflareAccountID returns the Cloudflare account ID from environment variables.
+func (c *Config) CloudflareAccountID() string {
+	return c.cloudflareAccount
+}
+
+// FindNodePool returns the NodePoolConfig with the given name, or an error.
+func (c *Config) FindNodePool(name string) (*NodePoolConfig, error) {
+	for i := range c.NodePools {
+		if c.NodePools[i].Name == name {
+			return &c.NodePools[i], nil
+		}
+	}
+	return nil, fmt.Errorf("node pool %q not found in config", name)
+}
+
+// DefaultNodePool returns the first node pool, or an error if none exist.
+func (c *Config) DefaultNodePool() (*NodePoolConfig, error) {
+	if len(c.NodePools) == 0 {
+		return nil, fmt.Errorf("no node pools defined in config")
+	}
+	return &c.NodePools[0], nil
+}
+
+// FirstNodePoolByType returns the first pool matching a normalized type.
+func (c *Config) FirstNodePoolByType(poolType string) (*NodePoolConfig, error) {
+	normalized := NormalizeNodePoolType(poolType)
+	if normalized == "" {
+		return nil, fmt.Errorf("invalid node pool type %q", poolType)
+	}
+
+	for i := range c.NodePools {
+		if c.NodePools[i].EffectiveType() == normalized {
+			return &c.NodePools[i], nil
+		}
+	}
+
+	return nil, fmt.Errorf("no node pool with type %q found", normalized)
+}
+
+// EffectiveType returns the normalized pool type, defaulting to controlplane.
+func (p NodePoolConfig) EffectiveType() string {
+	if normalized := NormalizeNodePoolType(p.Type); normalized != "" {
+		return normalized
+	}
+	return NodeTypeControlPlane
+}
+
+// DesiredSize returns the configured pool size with a sane default.
+func (p NodePoolConfig) DesiredSize() int {
+	if p.Size <= 0 {
+		return 1
+	}
+
+	return p.Size
+}
+
+// NormalizeNodePoolType normalizes user-facing type variants.
+func NormalizeNodePoolType(value string) string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "", "controlplane", "control-plane", "control_plane", "cp":
+		return NodeTypeControlPlane
+	case "worker":
+		return NodeTypeWorker
+	default:
+		return ""
+	}
 }

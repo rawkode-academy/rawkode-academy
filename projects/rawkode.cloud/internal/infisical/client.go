@@ -16,8 +16,7 @@ type Client struct {
 	sdk infisicalsdk.InfisicalClientInterface
 }
 
-// NewClient authenticates with Infisical using Universal Auth and returns
-// a client that can fetch secrets.
+// NewClient authenticates with Infisical using Universal Auth.
 func NewClient(ctx context.Context, siteURL, clientID, clientSecret string) (*Client, error) {
 	sdk := infisicalsdk.NewInfisicalClient(ctx, infisicalsdk.Config{
 		SiteUrl:          siteURL,
@@ -30,11 +29,10 @@ func NewClient(ctx context.Context, siteURL, clientID, clientSecret string) (*Cl
 	}
 
 	slog.Info("infisical client authenticated")
-
 	return &Client{sdk: sdk}, nil
 }
 
-// GetSecret fetches a single secret by key from a given project/environment/path.
+// GetSecret fetches a single secret by key.
 func (c *Client) GetSecret(_ context.Context, projectID, environment, secretPath, key string) (string, error) {
 	secret, err := c.sdk.Secrets().Retrieve(infisicalsdk.RetrieveSecretOptions{
 		ProjectID:   projectID,
@@ -45,13 +43,11 @@ func (c *Client) GetSecret(_ context.Context, projectID, environment, secretPath
 	if err != nil {
 		return "", fmt.Errorf("fetch secret %s: %w", key, err)
 	}
-
 	return secret.SecretValue, nil
 }
 
-// SetSecret creates or updates a single secret in a given project/environment/path.
+// SetSecret creates or updates a single secret.
 func (c *Client) SetSecret(_ context.Context, projectID, environment, secretPath, key, value string) error {
-	// Try to create first; if it already exists, update it.
 	_, err := c.sdk.Secrets().Create(infisicalsdk.CreateSecretOptions{
 		SecretKey:   key,
 		SecretValue: value,
@@ -60,7 +56,6 @@ func (c *Client) SetSecret(_ context.Context, projectID, environment, secretPath
 		SecretPath:  secretPath,
 	})
 	if err != nil {
-		// If create failed (likely already exists), try update
 		_, updateErr := c.sdk.Secrets().Update(infisicalsdk.UpdateSecretOptions{
 			SecretKey:      key,
 			NewSecretValue: value,
@@ -77,7 +72,7 @@ func (c *Client) SetSecret(_ context.Context, projectID, environment, secretPath
 	return nil
 }
 
-// GetSecrets fetches all secrets from a given project/environment/path.
+// GetSecrets fetches all secrets from a given path.
 func (c *Client) GetSecrets(_ context.Context, projectID, environment, secretPath string) (map[string]string, error) {
 	list, err := c.sdk.Secrets().List(infisicalsdk.ListSecretsOptions{
 		ProjectID:   projectID,
@@ -92,19 +87,10 @@ func (c *Client) GetSecrets(_ context.Context, projectID, environment, secretPat
 	for _, s := range list {
 		secrets[s.SecretKey] = s.SecretValue
 	}
-
-	slog.Info("fetched secrets from infisical",
-		"project", projectID,
-		"environment", environment,
-		"path", secretPath,
-		"count", len(secrets),
-	)
-
 	return secrets, nil
 }
 
 // EnsureSecretPath creates every folder segment in secretPath if missing.
-// Existing folders are left untouched.
 func (c *Client) EnsureSecretPath(_ context.Context, projectID, environment, secretPath string) error {
 	cleanPath := strings.TrimSpace(secretPath)
 	if cleanPath == "" || cleanPath == "/" {

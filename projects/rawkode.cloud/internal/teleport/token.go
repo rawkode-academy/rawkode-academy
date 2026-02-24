@@ -10,8 +10,6 @@ import (
 )
 
 // GenerateJoinToken creates a short-lived Teleport join token for a Kubernetes agent.
-// The token is scoped to the "Kube" role and has a limited TTL (typically 30 minutes).
-// Generated AFTER the machine is ordered to maximize the usable lifetime window.
 func GenerateJoinToken(ctx context.Context, proxyAddr string, ttl time.Duration) (string, error) {
 	clt, err := newClient(ctx, proxyAddr)
 	if err != nil {
@@ -31,6 +29,6 @@ func GenerateJoinToken(ctx context.Context, proxyAddr string, ttl time.Duration)
 		return "", fmt.Errorf("create join token: %w", err)
 	}
 
-	slog.Info("teleport join token generated", "phase", "4", "ttl", ttl, "token_name", tokenName)
+	slog.Info("teleport join token generated", "ttl", ttl, "token_name", tokenName)
 	return tokenName, nil
 }
