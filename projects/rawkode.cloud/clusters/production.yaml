@@ -8,6 +8,9 @@ cluster:
   talos_version: v1.12.3
   kubernetes_version: v1.35.0
   talos_schematic: 8a286c8c4c0697d0be932714af929c56dc55dc4d3deb9cc00aa3663c46c7738a
+  cilium_version: v1.19.0
+  flux_version: latest
+  teleport_version: "17"
 
 scaleway:
   organizationId: b07462e9-1a00-43b4-a6a8-6e3004a31984

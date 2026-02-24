@@ -26,6 +26,7 @@ type ProvisionParams struct {
 	OfferID                  string
 	Zone                     scw.Zone
 	OSID                     string
+	Name                     string
 	PrivateNetworkID         string
 	BillingCycle             string
 	CloudInitScript          string // Talos pivot cloud-init script
@@ -49,6 +50,29 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 	if err != nil {
 		return nil, fmt.Errorf("resolve offer for billing cycle: %w", err)
 	}
+	privateNetworkID := strings.TrimSpace(params.PrivateNetworkID)
+	privateNetworkOptionIDs := []string(nil)
+	if privateNetworkID != "" {
+		offer, err := client.Baremetal.GetOffer(&baremetal.GetOfferRequest{
+			Zone:    params.Zone,
+			OfferID: effectiveOfferID,
+		}, scw.WithContext(ctx))
+		if err != nil {
+			return nil, fmt.Errorf("get offer %s: %w", effectiveOfferID, err)
+		}
+
+		optionIDs, optionAlreadyEnabled, err := privateNetworkOptionIDsForOffer(offer, effectiveSubscriptionPeriod)
+		if err != nil {
+			return nil, fmt.Errorf("resolve private-network option for offer %s: %w", effectiveOfferID, err)
+		}
+		privateNetworkOptionIDs = optionIDs
+
+		if optionAlreadyEnabled {
+			slog.Info("offer already includes private-network option", "offer_id", effectiveOfferID)
+		} else {
+			slog.Info("enabling private-network option during server order", "offer_id", effectiveOfferID, "option_ids", optionIDs)
+		}
+	}
 
 	osInfo, err := client.Baremetal.GetOS(&baremetal.GetOSRequest{
 		Zone: params.Zone,
@@ -66,13 +90,16 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 		return nil, fmt.Errorf("build install partitioning schema: %w", err)
 	}
 
-	suffix := rand.Intn(99999) //nolint:gosec
-	serverName := fmt.Sprintf("rawkode-%s-%05d", time.Now().Format("20060102-150405"), suffix)
+	serverName := strings.TrimSpace(params.Name)
+	if serverName == "" {
+		suffix := rand.Intn(99999) //nolint:gosec
+		serverName = fmt.Sprintf("rawkode-%s-%05d", time.Now().Format("20060102-150405"), suffix)
+	}
 
 	server, err := client.Baremetal.CreateServer(&baremetal.CreateServerRequest{
-		Zone:    params.Zone,
-		OfferID: effectiveOfferID,
-		Name:    serverName,
+		Zone:        params.Zone,
+		OfferID:     effectiveOfferID,
+		Name:        serverName,
 		Description: "Provisioned by rawkode-cloud3 CLI (Talos)",
 		Install: &baremetal.CreateServerRequestInstall{
 			OsID:               params.OSID,
@@ -80,7 +107,8 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 			SSHKeyIDs:          sshKeyIDs,
 			PartitioningSchema: partitioningSchema,
 		},
-		UserData: &cloudInitBytes,
+		OptionIDs: privateNetworkOptionIDs,
+		UserData:  &cloudInitBytes,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create server: %w", err)
@@ -94,20 +122,20 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 		"zone", params.Zone,
 	)
 
-	if params.PrivateNetworkID != "" {
+	if privateNetworkID != "" {
 		if strings.TrimSpace(params.PrivateNetworkReservedIP) != "" {
-			_, err = addServerPrivateNetworkWithReservedIP(ctx, client, params.Zone, server.ID, params.PrivateNetworkID, params.PrivateNetworkReservedIP)
+			_, err = addServerPrivateNetworkWithReservedIP(ctx, client, params.Zone, server.ID, privateNetworkID, params.PrivateNetworkReservedIP)
 		} else {
 			_, err = client.BaremetalPrivateNetwork.AddServerPrivateNetwork(&baremetal.PrivateNetworkAPIAddServerPrivateNetworkRequest{
 				Zone:             params.Zone,
 				ServerID:         server.ID,
-				PrivateNetworkID: params.PrivateNetworkID,
+				PrivateNetworkID: privateNetworkID,
 			}, scw.WithContext(ctx))
 		}
 		if err != nil {
 			return nil, fmt.Errorf("attach server to private network: %w", err)
 		}
-		slog.Info("server attached to private network", "server_id", server.ID, "private_network_id", params.PrivateNetworkID)
+		slog.Info("server attached to private network", "server_id", server.ID, "private_network_id", privateNetworkID)
 	}
 
 	return server, nil
@@ -381,6 +409,47 @@ func normalizeOfferName(value string) string {
 		}
 	}
 	return b.String()
+}
+
+func privateNetworkOptionIDsForOffer(offer *baremetal.Offer, period baremetal.OfferSubscriptionPeriod) ([]string, bool, error) {
+	if offer == nil {
+		return nil, false, fmt.Errorf("offer is required")
+	}
+
+	var candidates []*baremetal.OfferOptionOffer
+	for _, option := range offer.Options {
+		if option == nil || option.PrivateNetwork == nil {
+			continue
+		}
+		if period != baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod &&
+			option.SubscriptionPeriod != baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod &&
+			option.SubscriptionPeriod != period {
+			continue
+		}
+		candidates = append(candidates, option)
+	}
+	if len(candidates) == 0 {
+		return nil, false, fmt.Errorf("offer %s (%s) does not expose a private-network option", offer.Name, offer.ID)
+	}
+
+	for _, option := range candidates {
+		if option.Enabled {
+			return nil, true, nil
+		}
+	}
+
+	for _, option := range candidates {
+		if !option.Manageable {
+			continue
+		}
+		optionID := strings.TrimSpace(option.ID)
+		if optionID == "" {
+			continue
+		}
+		return []string{optionID}, false, nil
+	}
+
+	return nil, false, fmt.Errorf("offer %s (%s) has no manageable private-network option to enable", offer.Name, offer.ID)
 }
 
 func listSSHKeyIDs(iamAPI *iam.API) ([]string, error) {
