@@ -15,10 +15,11 @@ import {
   tagsQueryOptions,
 } from "@/components/query-client";
 
-const TAG_GRID_COLUMNS = 8;
-const TAGS_PER_ROW = TAG_GRID_COLUMNS - 1;
-const TAG_SLOTS_WITHOUT_SHOW_ALL = TAGS_PER_ROW;
-const TAG_SLOTS_WITH_SHOW_ALL = TAGS_PER_ROW - 1;
+const MOBILE_TAG_GRID_COLUMNS = 4;
+const DESKTOP_TAG_GRID_COLUMNS = 8;
+const RESERVED_FILTER_COLUMN_COUNT = 1;
+const MOBILE_TAGS_PER_ROW = MOBILE_TAG_GRID_COLUMNS - RESERVED_FILTER_COLUMN_COUNT;
+const DESKTOP_TAGS_PER_ROW = DESKTOP_TAG_GRID_COLUMNS - RESERVED_FILTER_COLUMN_COUNT;
 const mandatoryOrder = new Map<string, number>(
   mandatoryTagSlugs.map((slug, index) => [slug, index]),
 );
@@ -82,6 +83,11 @@ type FilterGridCell =
       key: "reset";
       label: string;
     };
+
+type TagLayout = {
+  rows: FilterGridCell[][];
+  canExpand: boolean;
+};
 
 export function FeedPage({ type }: { type: FeedCategory }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -156,13 +162,15 @@ export function FeedPage({ type }: { type: FeedCategory }) {
     () => new Set(activeSelectedTags),
     [activeSelectedTags],
   );
-  const canExpand = filterTags.length > TAG_SLOTS_WITHOUT_SHOW_ALL;
-  const collapsedVisibleTagCount = canExpand ? TAG_SLOTS_WITH_SHOW_ALL : TAG_SLOTS_WITHOUT_SHOW_ALL;
-  const hiddenTagCount = Math.max(0, filterTags.length - collapsedVisibleTagCount);
-  const visibleTags = showMore
-    ? filterTags
-    : filterTags.slice(0, collapsedVisibleTagCount);
-  const visibleCells = React.useMemo<FilterGridCell[]>(() => {
+  const buildTagLayout = React.useCallback((tagsPerRow: number): TagLayout => {
+    const tagSlotsWithoutShowAll = tagsPerRow;
+    const tagSlotsWithShowAll = Math.max(1, tagsPerRow - 1);
+    const canExpand = filterTags.length > tagSlotsWithoutShowAll;
+    const collapsedVisibleTagCount = canExpand ? tagSlotsWithShowAll : tagSlotsWithoutShowAll;
+    const hiddenTagCount = Math.max(0, filterTags.length - collapsedVisibleTagCount);
+    const visibleTags = showMore
+      ? filterTags
+      : filterTags.slice(0, collapsedVisibleTagCount);
     const tagCells: FilterGridCell[] = visibleTags.map((tag) => ({
       kind: "tag",
       key: tag.key,
@@ -170,28 +178,33 @@ export function FeedPage({ type }: { type: FeedCategory }) {
       label: tag.label,
       description: tag.description,
     }));
-
-    if (!canExpand) {
-      return tagCells;
-    }
-
-    if (showMore) {
-      return [...tagCells, { kind: "reset", key: "reset", label: "Reset" }];
-    }
-
-    return [
-      ...tagCells,
-      { kind: "show-all", key: "show-all", label: `Show all (${hiddenTagCount})` },
-    ];
-  }, [canExpand, hiddenTagCount, showMore, visibleTags]);
-  const visibleTagRows = React.useMemo(() => {
+    const visibleCells: FilterGridCell[] = !canExpand
+      ? tagCells
+      : showMore
+        ? [...tagCells, { kind: "reset" as const, key: "reset" as const, label: "Reset" }]
+        : [
+            ...tagCells,
+            { kind: "show-all" as const, key: "show-all" as const, label: `Show all (${hiddenTagCount})` },
+          ];
     const rows: FilterGridCell[][] = [];
-    for (let index = 0; index < visibleCells.length; index += TAGS_PER_ROW) {
-      rows.push(visibleCells.slice(index, index + TAGS_PER_ROW));
+    for (let index = 0; index < visibleCells.length; index += tagsPerRow) {
+      rows.push(visibleCells.slice(index, index + tagsPerRow));
     }
 
-    return rows.length > 0 ? rows : [[]];
-  }, [visibleCells]);
+    return {
+      rows: rows.length > 0 ? rows : [[]],
+      canExpand,
+    };
+  }, [filterTags, showMore]);
+  const mobileTagLayout = React.useMemo(
+    () => buildTagLayout(MOBILE_TAGS_PER_ROW),
+    [buildTagLayout],
+  );
+  const desktopTagLayout = React.useMemo(
+    () => buildTagLayout(DESKTOP_TAGS_PER_ROW),
+    [buildTagLayout],
+  );
+  const canExpand = mobileTagLayout.canExpand || desktopTagLayout.canExpand;
 
   const postsQuery = useQuery({
     ...postsQueryOptions({ feed: type, tags: activeSelectedTags, page }),
@@ -236,6 +249,71 @@ export function FeedPage({ type }: { type: FeedCategory }) {
     setShowMore(false);
     updateSelectedTags([]);
   }, [updateSelectedTags]);
+  const renderFilterRows = React.useCallback(
+    (rows: FilterGridCell[][], keyPrefix: string, gridColumnsClass: string) =>
+      rows.map((row, rowIndex) => (
+        <div key={`${keyPrefix}-filter-row-${rowIndex}`} className={`grid ${gridColumnsClass} gap-2`}>
+          {rowIndex === 0 ? (
+            <span
+              aria-hidden="true"
+              className="inline-flex h-9 w-full min-w-0 items-center justify-center px-2 text-xs font-bold uppercase tracking-wide text-foreground"
+            >
+              Filter
+            </span>
+          ) : (
+            <span aria-hidden="true" className="h-9" />
+          )}
+
+          {row.map((cell) => {
+            if (cell.kind === "tag") {
+              const selected = activeSelectedTagSet.has(cell.slug);
+              return (
+                <button
+                  key={cell.key}
+                  type="button"
+                  onClick={() => toggleTag(cell.slug)}
+                  title={selected ? `Remove ${cell.slug}` : cell.description ?? undefined}
+                  className={
+                    selected
+                      ? `${pillBaseClass} border-primary/40 bg-primary/10 text-foreground`
+                      : `${pillBaseClass} border-border text-muted-foreground hover:bg-muted hover:text-foreground`
+                  }
+                >
+                  <span className="min-w-0 truncate">
+                    {cell.label}
+                  </span>
+                </button>
+              );
+            }
+
+            if (cell.kind === "show-all") {
+              return (
+                <button
+                  key={cell.key}
+                  type="button"
+                  onClick={() => setShowMore(true)}
+                  className={`${pillBaseClass} border-border bg-card text-foreground hover:bg-muted`}
+                >
+                  <span className="min-w-0 truncate">{cell.label}</span>
+                </button>
+              );
+            }
+
+            return (
+              <button
+                key={cell.key}
+                type="button"
+                onClick={resetFilters}
+                className={`${pillBaseClass} border-border bg-card text-foreground hover:bg-muted`}
+              >
+                <span className="min-w-0 truncate">{cell.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )),
+    [activeSelectedTagSet, resetFilters, toggleTag],
+  );
 
   React.useEffect(() => {
     if (previousTypeRef.current === type) return;
@@ -279,68 +357,11 @@ export function FeedPage({ type }: { type: FeedCategory }) {
         </header>
 
         <section className="space-y-3">
-          <div className="space-y-2">
-            {visibleTagRows.map((row, rowIndex) => (
-              <div key={`filter-row-${rowIndex}`} className="grid grid-cols-8 gap-2">
-                {rowIndex === 0 ? (
-                  <span
-                    aria-hidden="true"
-                    className="inline-flex h-9 w-full min-w-0 items-center justify-center px-2 text-xs font-bold uppercase tracking-wide text-foreground"
-                  >
-                    Filter
-                  </span>
-                ) : (
-                  <span aria-hidden="true" className="h-9" />
-                )}
-
-                {row.map((cell) => {
-                  if (cell.kind === "tag") {
-                    const selected = activeSelectedTagSet.has(cell.slug);
-                    return (
-                      <button
-                        key={cell.key}
-                        type="button"
-                        onClick={() => toggleTag(cell.slug)}
-                        title={selected ? `Remove ${cell.slug}` : cell.description ?? undefined}
-                        className={
-                          selected
-                            ? `${pillBaseClass} border-primary/40 bg-primary/10 text-foreground`
-                            : `${pillBaseClass} border-border text-muted-foreground hover:bg-muted hover:text-foreground`
-                        }
-                      >
-                        <span className="min-w-0 truncate">
-                          {cell.label}
-                        </span>
-                      </button>
-                    );
-                  }
-
-                  if (cell.kind === "show-all") {
-                    return (
-                      <button
-                        key={cell.key}
-                        type="button"
-                        onClick={() => setShowMore(true)}
-                        className={`${pillBaseClass} border-border bg-card text-foreground hover:bg-muted`}
-                      >
-                        {cell.label}
-                      </button>
-                    );
-                  }
-
-                  return (
-                    <button
-                      key={cell.key}
-                      type="button"
-                      onClick={resetFilters}
-                      className={`${pillBaseClass} border-border bg-card text-foreground hover:bg-muted`}
-                    >
-                      {cell.label}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+          <div className="space-y-2 sm:hidden">
+            {renderFilterRows(mobileTagLayout.rows, "mobile", "grid-cols-4")}
+          </div>
+          <div className="hidden space-y-2 sm:block">
+            {renderFilterRows(desktopTagLayout.rows, "desktop", "grid-cols-8")}
           </div>
         </section>
 

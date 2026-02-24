@@ -7,16 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   mandatoryTagSlugs,
+  type ApiTag,
   type MandatoryTagSlug,
 } from "@/components/app-data";
 import { tagsQueryOptions } from "@/components/query-client";
 import { useSession } from "@/components/session";
 import { MAX_OPTIONAL_TAGS } from "@/lib/tags";
 
-const TAG_GRID_COLUMNS = 8;
-const TAGS_PER_ROW = TAG_GRID_COLUMNS - 1;
-const TAG_SLOTS_WITHOUT_SHOW_ALL = TAGS_PER_ROW;
-const TAG_SLOTS_WITH_SHOW_ALL = TAGS_PER_ROW - 1;
+const MOBILE_TAG_GRID_COLUMNS = 4;
+const DESKTOP_TAG_GRID_COLUMNS = 8;
+const RESERVED_FILTER_COLUMN_COUNT = 1;
+const MOBILE_TAGS_PER_ROW = MOBILE_TAG_GRID_COLUMNS - RESERVED_FILTER_COLUMN_COUNT;
+const DESKTOP_TAGS_PER_ROW = DESKTOP_TAG_GRID_COLUMNS - RESERVED_FILTER_COLUMN_COUNT;
 
 const pillBaseClass =
   "inline-flex h-9 w-full min-w-0 cursor-pointer items-center justify-center gap-1 rounded-md border px-2 text-xs font-semibold disabled:cursor-not-allowed";
@@ -40,6 +42,12 @@ const mandatoryCopy: Record<MandatoryTagSlug, { title: string; detail: string }>
     title: "Ask",
     detail: "Concrete questions that invite useful, experience-driven replies.",
   },
+};
+
+type OptionalTagLayout = {
+  rows: ApiTag[][];
+  canExpand: boolean;
+  hiddenTagCount: number;
 };
 
 export default function SubmitPage() {
@@ -76,20 +84,35 @@ export default function SubmitPage() {
     () => new Set(optionalTags),
     [optionalTags],
   );
-  const canExpand = optionalTagOptions.length > TAG_SLOTS_WITHOUT_SHOW_ALL;
-  const collapsedVisibleTagCount = canExpand ? TAG_SLOTS_WITH_SHOW_ALL : TAG_SLOTS_WITHOUT_SHOW_ALL;
-  const hiddenTagCount = Math.max(0, optionalTagOptions.length - collapsedVisibleTagCount);
-  const visibleOptionalTags = showMore
-    ? optionalTagOptions
-    : optionalTagOptions.slice(0, collapsedVisibleTagCount);
-  const visibleOptionalTagRows = React.useMemo(() => {
-    const rows = [] as typeof optionalTagOptions[];
-    for (let index = 0; index < visibleOptionalTags.length; index += TAGS_PER_ROW) {
-      rows.push(visibleOptionalTags.slice(index, index + TAGS_PER_ROW));
+  const buildOptionalTagLayout = React.useCallback((tagsPerRow: number): OptionalTagLayout => {
+    const tagSlotsWithoutShowAll = tagsPerRow;
+    const tagSlotsWithShowAll = Math.max(1, tagsPerRow - 1);
+    const canExpand = optionalTagOptions.length > tagSlotsWithoutShowAll;
+    const collapsedVisibleTagCount = canExpand ? tagSlotsWithShowAll : tagSlotsWithoutShowAll;
+    const hiddenTagCount = Math.max(0, optionalTagOptions.length - collapsedVisibleTagCount);
+    const visibleOptionalTags = showMore
+      ? optionalTagOptions
+      : optionalTagOptions.slice(0, collapsedVisibleTagCount);
+    const rows: ApiTag[][] = [];
+    for (let index = 0; index < visibleOptionalTags.length; index += tagsPerRow) {
+      rows.push(visibleOptionalTags.slice(index, index + tagsPerRow));
     }
 
-    return rows.length > 0 ? rows : [[]];
-  }, [visibleOptionalTags]);
+    return {
+      rows: rows.length > 0 ? rows : [[]],
+      canExpand,
+      hiddenTagCount,
+    };
+  }, [optionalTagOptions, showMore]);
+  const mobileTagLayout = React.useMemo(
+    () => buildOptionalTagLayout(MOBILE_TAGS_PER_ROW),
+    [buildOptionalTagLayout],
+  );
+  const desktopTagLayout = React.useMemo(
+    () => buildOptionalTagLayout(DESKTOP_TAGS_PER_ROW),
+    [buildOptionalTagLayout],
+  );
+  const canExpand = mobileTagLayout.canExpand || desktopTagLayout.canExpand;
 
   const submittedTags = React.useMemo(
     () => JSON.stringify([mandatoryTag, ...optionalTags]),
@@ -128,6 +151,84 @@ export default function SubmitPage() {
       });
     },
     [],
+  );
+  const renderOptionalTagRows = React.useCallback(
+    (
+      rows: ApiTag[][],
+      keyPrefix: string,
+      gridColumnsClass: string,
+      hiddenTagCount: number,
+      canExpandForLayout: boolean,
+    ) =>
+      rows.map((row, rowIndex) => (
+        <div key={`${keyPrefix}-submit-tag-row-${rowIndex}`} className={`grid ${gridColumnsClass} gap-2`}>
+          {rowIndex === 0 ? (
+            <label className="relative block">
+              <span className="sr-only">Mandatory tag</span>
+              <select
+                id={`${keyPrefix}-submit-mandatory-tag`}
+                aria-label="Mandatory tag"
+                value={mandatoryTag}
+                onChange={(event) => setMandatoryTag(event.target.value as MandatoryTagSlug)}
+                className={pillSelectClass}
+              >
+                {allowedMandatoryTags.map((slug) => (
+                  <option key={slug} value={slug}>
+                    {mandatoryCopy[slug].title}
+                  </option>
+                ))}
+              </select>
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[10px] text-foreground/70"
+              >
+                ▾
+              </span>
+            </label>
+          ) : (
+            <span aria-hidden="true" className="h-9" />
+          )}
+
+          {row.map((tag) => {
+            const selected = optionalTagSet.has(tag.slug);
+            const disableAdd = !selected && optionalTags.length >= MAX_OPTIONAL_TAGS;
+
+            return (
+              <button
+                key={tag.id}
+                type="button"
+                onClick={() => toggleOptionalTag(tag.slug)}
+                disabled={disableAdd}
+                title={
+                  disableAdd
+                    ? `You can select up to ${MAX_OPTIONAL_TAGS} optional tags`
+                    : selected
+                      ? `Remove ${tag.slug}`
+                      : tag.description ?? undefined
+                }
+                className={
+                  selected
+                    ? `${pillBaseClass} border-primary/40 bg-primary/10 text-foreground`
+                    : `${pillBaseClass} border-border text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50`
+                }
+              >
+                <span className="min-w-0 truncate">{tag.name || tag.slug}</span>
+              </button>
+            );
+          })}
+
+          {rowIndex === 0 && canExpandForLayout && !showMore ? (
+            <button
+              type="button"
+              onClick={() => setShowMore(true)}
+              className={`${pillBaseClass} border-border bg-card text-foreground hover:bg-muted`}
+            >
+              <span className="min-w-0 truncate">{`Show all (${hiddenTagCount})`}</span>
+            </button>
+          ) : null}
+        </div>
+      )),
+    [allowedMandatoryTags, mandatoryTag, optionalTagSet, optionalTags.length, showMore, toggleOptionalTag],
   );
 
   if (!isAuthReady) {
@@ -187,75 +288,23 @@ export default function SubmitPage() {
 
             <div className="space-y-3">
               <label className="text-sm font-semibold text-foreground">Tags</label>
-              <div className="space-y-2">
-                {visibleOptionalTagRows.map((row, rowIndex) => (
-                  <div key={`submit-tag-row-${rowIndex}`} className="grid grid-cols-8 gap-2">
-                    {rowIndex === 0 ? (
-                      <label className="relative block">
-                        <span className="sr-only">Mandatory tag</span>
-                        <select
-                          id="submit-mandatory-tag"
-                          aria-label="Mandatory tag"
-                          value={mandatoryTag}
-                          onChange={(event) => setMandatoryTag(event.target.value as MandatoryTagSlug)}
-                          className={pillSelectClass}
-                        >
-                          {allowedMandatoryTags.map((slug) => (
-                            <option key={slug} value={slug}>
-                              {mandatoryCopy[slug].title}
-                            </option>
-                          ))}
-                        </select>
-                        <span
-                          aria-hidden="true"
-                          className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[10px] text-foreground/70"
-                        >
-                          ▾
-                        </span>
-                      </label>
-                    ) : (
-                      <span aria-hidden="true" className="h-9" />
-                    )}
-
-                    {row.map((tag) => {
-                      const selected = optionalTagSet.has(tag.slug);
-                      const disableAdd = !selected && optionalTags.length >= MAX_OPTIONAL_TAGS;
-
-                      return (
-                        <button
-                          key={tag.id}
-                          type="button"
-                          onClick={() => toggleOptionalTag(tag.slug)}
-                          disabled={disableAdd}
-                          title={
-                            disableAdd
-                              ? `You can select up to ${MAX_OPTIONAL_TAGS} optional tags`
-                              : selected
-                                ? `Remove ${tag.slug}`
-                                : tag.description ?? undefined
-                          }
-                          className={
-                            selected
-                              ? `${pillBaseClass} border-primary/40 bg-primary/10 text-foreground`
-                              : `${pillBaseClass} border-border text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50`
-                          }
-                        >
-                          <span className="min-w-0 truncate">{tag.name || tag.slug}</span>
-                        </button>
-                      );
-                    })}
-
-                    {rowIndex === 0 && canExpand && !showMore ? (
-                      <button
-                        type="button"
-                        onClick={() => setShowMore(true)}
-                        className={`${pillBaseClass} border-border bg-card text-foreground hover:bg-muted`}
-                      >
-                        {`Show all (${hiddenTagCount})`}
-                      </button>
-                    ) : null}
-                  </div>
-                ))}
+              <div className="space-y-2 sm:hidden">
+                {renderOptionalTagRows(
+                  mobileTagLayout.rows,
+                  "mobile",
+                  "grid-cols-4",
+                  mobileTagLayout.hiddenTagCount,
+                  mobileTagLayout.canExpand,
+                )}
+              </div>
+              <div className="hidden space-y-2 sm:block">
+                {renderOptionalTagRows(
+                  desktopTagLayout.rows,
+                  "desktop",
+                  "grid-cols-8",
+                  desktopTagLayout.hiddenTagCount,
+                  desktopTagLayout.canExpand,
+                )}
               </div>
 
               {optionalTags.length >= MAX_OPTIONAL_TAGS ? (
