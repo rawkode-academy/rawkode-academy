@@ -35,6 +35,9 @@ type ClusterConfig struct {
 	TalosVersion      string `yaml:"talos_version"`
 	KubernetesVersion string `yaml:"kubernetes_version"`
 	TalosSchematic    string `yaml:"talos_schematic"`
+	CiliumVersion     string `yaml:"cilium_version"`
+	FluxVersion       string `yaml:"flux_version"`
+	TeleportVersion   string `yaml:"teleport_version"`
 }
 
 // ScalewayConfig holds Scaleway infrastructure settings (no credentials).
@@ -65,6 +68,12 @@ type NodePoolConfig struct {
 const (
 	NodeTypeControlPlane = "controlplane"
 	NodeTypeWorker       = "worker"
+)
+
+const (
+	defaultCiliumVersion   = "v1.19.0"
+	defaultFluxVersion     = "latest"
+	defaultTeleportVersion = "17"
 )
 
 // DiskConfig holds disk device paths.
@@ -338,6 +347,33 @@ func (p NodePoolConfig) DesiredSize() int {
 // EffectiveZone returns the node pool zone value with surrounding whitespace removed.
 func (p NodePoolConfig) EffectiveZone() string {
 	return strings.TrimSpace(p.Zone)
+}
+
+// EffectiveCiliumVersion returns the Cilium version with a default fallback.
+func (c ClusterConfig) EffectiveCiliumVersion() string {
+	if version := strings.TrimSpace(c.CiliumVersion); version != "" {
+		return version
+	}
+
+	return defaultCiliumVersion
+}
+
+// EffectiveFluxVersion returns the Flux version with a default fallback.
+func (c ClusterConfig) EffectiveFluxVersion() string {
+	if version := strings.TrimSpace(c.FluxVersion); version != "" {
+		return version
+	}
+
+	return defaultFluxVersion
+}
+
+// EffectiveTeleportVersion returns the Teleport image tag with a default fallback.
+func (c ClusterConfig) EffectiveTeleportVersion() string {
+	if version := strings.TrimSpace(c.TeleportVersion); version != "" {
+		return version
+	}
+
+	return defaultTeleportVersion
 }
 
 // ScalewayVPCName derives the shared VPC name from the cluster/environment name.

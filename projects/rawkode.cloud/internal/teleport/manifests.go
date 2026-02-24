@@ -5,8 +5,10 @@ import (
 	"strings"
 )
 
+const defaultTeleportImageTag = "17"
+
 // KubeAgentManifest generates the Kubernetes YAML for a Teleport kube agent deployment.
-func KubeAgentManifest(proxyAddr, clusterName, joinToken string) string {
+func KubeAgentManifest(proxyAddr, clusterName, joinToken, version string) string {
 	return fmt.Sprintf(`apiVersion: v1
 kind: Namespace
 metadata:
@@ -47,7 +49,7 @@ spec:
       serviceAccountName: teleport-kube-agent
       containers:
         - name: teleport
-          image: public.ecr.aws/gravitational/teleport-distroless:17
+          image: %s
           args:
             - --config=/etc/teleport/teleport.yaml
           volumeMounts:
@@ -81,11 +83,11 @@ subjects:
   - kind: ServiceAccount
     name: teleport-kube-agent
     namespace: teleport-agent
-`, proxyAddr, joinToken, clusterName)
+`, proxyAddr, joinToken, clusterName, teleportImage(version))
 }
 
 // SelfHostedManifest generates Kubernetes YAML for a single-node self-hosted Teleport deployment.
-func SelfHostedManifest(clusterName, domain, githubOrganization string, githubTeams []string, githubClientID, githubClientSecret string) string {
+func SelfHostedManifest(clusterName, domain, version, githubOrganization string, githubTeams []string, githubClientID, githubClientSecret string) string {
 	return fmt.Sprintf(`apiVersion: v1
 kind: Namespace
 metadata:
@@ -169,7 +171,7 @@ spec:
       serviceAccountName: teleport
       containers:
         - name: teleport
-          image: public.ecr.aws/gravitational/teleport-distroless:17
+          image: %s
           args:
             - --config=/etc/teleport/teleport.yaml
           ports:
@@ -189,7 +191,7 @@ spec:
             secretName: teleport-config
         - name: data
           emptyDir: {}
-`, clusterName, clusterName, githubClientID, githubClientSecret, fmt.Sprintf("https://%s/v1/webapi/github/callback", domain), githubTeamsToLoginsYAML(githubOrganization, githubTeams), fmt.Sprintf("%s:443", domain), clusterName)
+`, clusterName, clusterName, githubClientID, githubClientSecret, fmt.Sprintf("https://%s/v1/webapi/github/callback", domain), githubTeamsToLoginsYAML(githubOrganization, githubTeams), fmt.Sprintf("%s:443", domain), clusterName, teleportImage(version))
 }
 
 func githubTeamsToLoginsYAML(organization string, teams []string) string {
@@ -207,4 +209,13 @@ func githubTeamsToLoginsYAML(organization string, teams []string) string {
 	}
 
 	return b.String()
+}
+
+func teleportImage(version string) string {
+	tag := strings.TrimSpace(version)
+	if tag == "" {
+		tag = defaultTeleportImageTag
+	}
+
+	return fmt.Sprintf("public.ecr.aws/gravitational/teleport-distroless:%s", tag)
 }

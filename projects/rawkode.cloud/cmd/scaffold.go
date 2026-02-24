@@ -19,6 +19,9 @@ cluster:
   talos_version: v1.12.4
   kubernetes_version: v1.35.0
   talos_schematic: ""
+  cilium_version: v1.19.0
+  flux_version: latest
+  teleport_version: "17"
 
 scaleway:
   projectId: ""

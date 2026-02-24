@@ -61,6 +61,9 @@ var clusterStatusCmd = &cobra.Command{
 		fmt.Printf("Cluster: %s\n", cfg.Environment)
 		fmt.Printf("Talos:   %s\n", cfg.Cluster.TalosVersion)
 		fmt.Printf("K8s:     %s\n", cfg.Cluster.KubernetesVersion)
+		fmt.Printf("Cilium:  %s\n", cfg.Cluster.EffectiveCiliumVersion())
+		fmt.Printf("Flux:    %s\n", cfg.Cluster.EffectiveFluxVersion())
+		fmt.Printf("Teleport: %s\n", cfg.Cluster.EffectiveTeleportVersion())
 		fmt.Printf("Pools:   %d\n", len(cfg.NodePools))
 
 		for _, pool := range cfg.NodePools {
@@ -119,10 +122,13 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("cluster create currently supports controlplane pools only (pool %q is %q)", pool.Name, pool.EffectiveType())
 	}
 	if strings.TrimSpace(nodeNameFlag) != "" {
-		return fmt.Errorf("--node-name is no longer supported; first control-plane node will be %q", controlPlaneNodeName(pool.Name, 1))
+		return fmt.Errorf(
+			"--node-name is no longer supported; first control-plane node will be %q",
+			controlPlaneNodeName(cfg.Environment, pool.Name, 1),
+		)
 	}
 
-	nodeName := controlPlaneNodeName(pool.Name, 1)
+	nodeName := controlPlaneNodeName(cfg.Environment, pool.Name, 1)
 	privateIP, err := controlPlaneReservedIPForSlot(pool, 1)
 	if err != nil {
 		return err
@@ -151,7 +157,7 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 	var op *operation.Operation
 	if existing != nil {
 		op = existing
-		if err := ensureCreateOperationContext(op, nodeName, pool, privateIP); err != nil {
+		if err := ensureCreateOperationContext(op, nodeName, pool, privateIP, cfg.Environment); err != nil {
 			return err
 		}
 		if err := store.Save(op); err != nil {
@@ -242,7 +248,7 @@ func executeCreateCluster(
 		if phaseErr != nil {
 			_ = op.FailPhase(phase, phaseErr)
 			_ = store.Save(op)
-			if err := markNodeFailed(ctx, nodeStore, op); err != nil {
+			if err := markNodeFailed(ctx, nodeStore, op, cfg.Environment); err != nil {
 				slog.Warn("failed to persist failed node state", "error", err)
 			}
 			return fmt.Errorf("phase %s failed: %w", phase, phaseErr)
@@ -299,14 +305,14 @@ func phaseOrderServer(
 		return fmt.Errorf("resolve node pool: %w", err)
 	}
 
-	nodeName := nodeNameForOperation(op)
+	nodeName := nodeNameForOperation(op, cfg.Environment)
 	role := op.GetContextString("role")
 	if role == "" {
 		role = pool.EffectiveType()
 	}
 	privateIP := strings.TrimSpace(op.GetContextString("privateIP"))
 	if privateIP == "" && role == config.NodeTypeControlPlane {
-		if slot, ok := parseControlPlaneSlot(pool.Name, nodeName); ok {
+		if slot, ok := parseControlPlaneSlot(cfg.Environment, pool.Name, nodeName); ok {
 			reserved, err := controlPlaneReservedIPForSlot(pool, slot)
 			if err != nil {
 				return err
@@ -396,6 +402,7 @@ func phaseOrderServer(
 		OfferID:                  offerID,
 		Zone:                     zone,
 		OSID:                     osID,
+		Name:                     nodeName,
 		PrivateNetworkID:         network.PrivateNetworkID,
 		PrivateNetworkReservedIP: privateIP,
 		BillingCycle:             pool.BillingCycle,
@@ -496,7 +503,7 @@ func phaseWaitServer(
 	}
 
 	if err := nodeStore.Upsert(ctx, clusterstate.NodeState{
-		Name:      nodeNameForOperation(op),
+		Name:      nodeNameForOperation(op, cfg.Environment),
 		Role:      role,
 		Pool:      pool.Name,
 		ServerID:  serverID,
@@ -631,7 +638,8 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 
 	// Install Cilium CNI
 	if err := cilium.Install(ctx, cilium.InstallParams{
-		Hubble: true,
+		Version: cfg.Cluster.EffectiveCiliumVersion(),
+		Hubble:  true,
 	}); err != nil {
 		slog.Warn("cilium install failed", "error", err)
 	}
@@ -639,6 +647,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 	// Install FluxCD (and optionally configure OCI source).
 	if err := flux.Bootstrap(ctx, flux.BootstrapParams{
 		OCIRepo: cfg.Flux.OCIRepo,
+		Version: cfg.Cluster.EffectiveFluxVersion(),
 	}); err != nil {
 		slog.Warn("flux bootstrap failed", "error", err)
 	}
@@ -662,6 +671,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 			ProxyAddr:   cfg.Teleport.Domain,
 			ClusterName: cfg.Environment,
 			JoinToken:   joinToken,
+			Version:     cfg.Cluster.EffectiveTeleportVersion(),
 		}); err != nil {
 			slog.Warn("teleport agent deployment failed", "error", err)
 		}
@@ -700,6 +710,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 			GitHubTeams:        teams,
 			GitHubClientID:     clientID,
 			GitHubClientSecret: clientSecret,
+			Version:            cfg.Cluster.EffectiveTeleportVersion(),
 		}); err != nil {
 			slog.Warn("self-hosted teleport deployment failed", "error", err)
 		}
@@ -720,7 +731,7 @@ func phaseVerify(ctx context.Context, op *operation.Operation, cfg *config.Confi
 		if poolName == "" {
 			poolName = "controlplane"
 		}
-		nodeName = controlPlaneNodeName(poolName, 1)
+		nodeName = controlPlaneNodeName(cfg.Environment, poolName, 1)
 	}
 
 	fmt.Printf("\nCluster %q created successfully!\n", cfg.Environment)
@@ -754,7 +765,7 @@ func selectCreatePool(cfg *config.Config, poolName string) (*config.NodePoolConf
 	return pool, nil
 }
 
-func ensureCreateOperationContext(op *operation.Operation, requestedNodeName string, pool *config.NodePoolConfig, requestedPrivateIP string) error {
+func ensureCreateOperationContext(op *operation.Operation, requestedNodeName string, pool *config.NodePoolConfig, requestedPrivateIP, environment string) error {
 	existingNodeName := op.GetContextString("nodeName")
 	if existingNodeName == "" {
 		op.SetContext("nodeName", requestedNodeName)
@@ -783,7 +794,7 @@ func ensureCreateOperationContext(op *operation.Operation, requestedNodeName str
 	}
 
 	if op.GetContextString("controlPlaneSlot") == "" {
-		if slot, ok := parseControlPlaneSlot(pool.Name, op.GetContextString("nodeName")); ok {
+		if slot, ok := parseControlPlaneSlot(environment, pool.Name, op.GetContextString("nodeName")); ok {
 			op.SetContext("controlPlaneSlot", fmt.Sprintf("%d", slot))
 		}
 	}
@@ -805,7 +816,7 @@ func poolForOperation(cfg *config.Config, op *operation.Operation) (*config.Node
 	return pool, nil
 }
 
-func nodeNameForOperation(op *operation.Operation) string {
+func nodeNameForOperation(op *operation.Operation, environment string) string {
 	if nodeName := op.GetContextString("nodeName"); strings.TrimSpace(nodeName) != "" {
 		return nodeName
 	}
@@ -813,15 +824,15 @@ func nodeNameForOperation(op *operation.Operation) string {
 	if poolName == "" {
 		poolName = "controlplane"
 	}
-	return controlPlaneNodeName(poolName, 1)
+	return controlPlaneNodeName(environment, poolName, 1)
 }
 
-func markNodeFailed(ctx context.Context, nodeStore *clusterstate.NodeStore, op *operation.Operation) error {
+func markNodeFailed(ctx context.Context, nodeStore *clusterstate.NodeStore, op *operation.Operation, environment string) error {
 	if nodeStore == nil {
 		return nil
 	}
 
-	nodeName := nodeNameForOperation(op)
+	nodeName := nodeNameForOperation(op, environment)
 	if nodeName == "" {
 		return nil
 	}
