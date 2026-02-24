@@ -73,7 +73,6 @@ export function ProfilePage() {
         <div className="space-y-1">
           <p className="rkn-kicker">Profile</p>
           <h1 className="rkn-page-title">{displayName}</h1>
-          <p className="text-sm text-muted-foreground">Signed in and ready to publish.</p>
         </div>
         <Button size="sm" asChild>
           <a href="/submit">Create post</a>
