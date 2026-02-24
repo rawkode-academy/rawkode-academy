@@ -7,9 +7,7 @@ import (
 	"time"
 )
 
-// WaitForAgent polls the Teleport cluster until a Kubernetes agent with the
-// expected cluster name has registered. This confirms the zero-trust access
-// path is functional before we lock the firewall.
+// WaitForAgent polls until a Kubernetes agent with the expected cluster name registers.
 func WaitForAgent(ctx context.Context, proxyAddr, clusterName string, timeout time.Duration) error {
 	clt, err := newClient(ctx, proxyAddr)
 	if err != nil {
@@ -27,30 +25,23 @@ func WaitForAgent(ctx context.Context, proxyAddr, clusterName string, timeout ti
 			return ctx.Err()
 		case <-deadline:
 			return fmt.Errorf(
-				"teleport agent for cluster %q not detected within %s — "+
-					"DO NOT lock the firewall. Debug the Teleport agent first. "+
-					"Check: is the join token correct? Is the proxy address reachable "+
-					"from the server? Is the Teleport pod running?",
+				"teleport agent for cluster %q not detected within %s",
 				clusterName, timeout,
 			)
 		case <-ticker.C:
 			servers, err := clt.GetKubernetesServers(ctx)
 			if err != nil {
-				slog.Warn("teleport query failed, retrying", "phase", "6", "error", err)
+				slog.Warn("teleport query failed, retrying", "error", err)
 				continue
 			}
 
 			for _, server := range servers {
 				if server.GetName() == clusterName {
-					slog.Info("teleport agent confirmed",
-						"phase", "6",
-						"cluster", clusterName,
-					)
+					slog.Info("teleport agent confirmed", "cluster", clusterName)
 					return nil
 				}
 			}
-
-			slog.Debug("waiting for teleport agent", "phase", "6", "cluster", clusterName)
+			slog.Debug("waiting for teleport agent", "cluster", clusterName)
 		}
 	}
 }

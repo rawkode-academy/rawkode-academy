@@ -2,53 +2,83 @@ package scaleway
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
+	"io"
 	"log/slog"
 	"math/rand"
+	"net"
+	"net/http"
 	"strings"
 	"time"
 
 	baremetal "github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
 	iam "github.com/scaleway/scaleway-sdk-go/api/iam/v1alpha1"
+	ipam "github.com/scaleway/scaleway-sdk-go/api/ipam/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
+const defaultGitHubSSHKeyUser = "rawkode"
+
+var githubKeysFetcher = fetchGitHubUserPublicKeys
+
 // ProvisionParams holds all parameters for creating a server with OS install.
 type ProvisionParams struct {
-	OfferID        string
-	Zone           scw.Zone
-	OSID           string
-	FlatcarChannel string
-	IgnitionJSON   []byte
+	OfferID                  string
+	Zone                     scw.Zone
+	OSID                     string
+	PrivateNetworkID         string
+	BillingCycle             string
+	CloudInitScript          string // Talos pivot cloud-init script
+	SSHKeyGitHubUser         string
+	PivotOSDisk              string
+	PivotDataDisk            string
+	PrivateNetworkReservedIP string
 }
 
 // OrderServer creates a new bare metal server with Scaleway and triggers OS
-// installation with a Flatcar install cloud-init script in a single API call.
-// The cloud-init script downloads flatcar-install, writes the Ignition config,
-// and installs Flatcar Container Linux to disk.
-//
-// Scaleway requires SSH key IDs for OS installation even though the Flatcar
-// install will overwrite Ubuntu. We list the org's SSH keys and pass them through.
+// installation with a Talos pivot cloud-init script.
 func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*baremetal.Server, error) {
 	sshKeyIDs, err := listSSHKeyIDs(client.IAM)
 	if err != nil {
 		return nil, fmt.Errorf("list SSH keys: %w", err)
 	}
 
-	cloudInit := BuildCloudInit(params.FlatcarChannel, params.IgnitionJSON)
-	cloudInitBytes := []byte(cloudInit)
+	cloudInitBytes := []byte(params.CloudInitScript)
 
-	suffix := rand.Intn(99999) //nolint:gosec // non-cryptographic, used only for unique naming
+	effectiveOfferID, effectiveSubscriptionPeriod, err := resolveOfferForBillingCycle(ctx, client, params.Zone, params.OfferID, params.BillingCycle)
+	if err != nil {
+		return nil, fmt.Errorf("resolve offer for billing cycle: %w", err)
+	}
+
+	osInfo, err := client.Baremetal.GetOS(&baremetal.GetOSRequest{
+		Zone: params.Zone,
+		OsID: params.OSID,
+	}, scw.WithContext(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("get OS %s: %w", params.OSID, err)
+	}
+	if !osInfo.CustomPartitioningSupported {
+		return nil, fmt.Errorf("OS %s (%s) does not support custom partitioning", osInfo.Name, osInfo.ID)
+	}
+
+	partitioningSchema, err := buildInstallPartitioningSchema(params)
+	if err != nil {
+		return nil, fmt.Errorf("build install partitioning schema: %w", err)
+	}
+
+	suffix := rand.Intn(99999) //nolint:gosec
+	serverName := fmt.Sprintf("rawkode-%s-%05d", time.Now().Format("20060102-150405"), suffix)
+
 	server, err := client.Baremetal.CreateServer(&baremetal.CreateServerRequest{
-		Zone:        params.Zone,
-		OfferID:     params.OfferID,
-		Name:        fmt.Sprintf("rawkode-%s-%05d", time.Now().Format("20060102-150405"), suffix),
-		Description: "Provisioned by rawkode-cloud CLI",
+		Zone:    params.Zone,
+		OfferID: effectiveOfferID,
+		Name:    serverName,
+		Description: "Provisioned by rawkode-cloud3 CLI (Talos)",
 		Install: &baremetal.CreateServerRequestInstall{
-			OsID:      params.OSID,
-			Hostname:  "flatcar-pivot",
-			SSHKeyIDs: sshKeyIDs,
+			OsID:               params.OSID,
+			Hostname:           "talos-pivot",
+			SSHKeyIDs:          sshKeyIDs,
+			PartitioningSchema: partitioningSchema,
 		},
 		UserData: &cloudInitBytes,
 	})
@@ -57,46 +87,33 @@ func OrderServer(ctx context.Context, client *Client, params ProvisionParams) (*
 	}
 
 	slog.Info("server ordered with OS install",
-		"phase", "1",
 		"server_id", server.ID,
-		"offer", params.OfferID,
+		"offer", effectiveOfferID,
+		"billing_cycle", effectiveSubscriptionPeriod,
 		"os", params.OSID,
-		"flatcar_channel", params.FlatcarChannel,
 		"zone", params.Zone,
-		"ssh_keys", len(sshKeyIDs),
 	)
+
+	if params.PrivateNetworkID != "" {
+		if strings.TrimSpace(params.PrivateNetworkReservedIP) != "" {
+			_, err = addServerPrivateNetworkWithReservedIP(ctx, client, params.Zone, server.ID, params.PrivateNetworkID, params.PrivateNetworkReservedIP)
+		} else {
+			_, err = client.BaremetalPrivateNetwork.AddServerPrivateNetwork(&baremetal.PrivateNetworkAPIAddServerPrivateNetworkRequest{
+				Zone:             params.Zone,
+				ServerID:         server.ID,
+				PrivateNetworkID: params.PrivateNetworkID,
+			}, scw.WithContext(ctx))
+		}
+		if err != nil {
+			return nil, fmt.Errorf("attach server to private network: %w", err)
+		}
+		slog.Info("server attached to private network", "server_id", server.ID, "private_network_id", params.PrivateNetworkID)
+	}
 
 	return server, nil
 }
 
-// listSSHKeyIDs fetches all SSH key IDs from the Scaleway org.
-// These are required by the install API even though the Flatcar install overwrites the OS.
-func listSSHKeyIDs(iamAPI *iam.API) ([]string, error) {
-	resp, err := iamAPI.ListSSHKeys(&iam.ListSSHKeysRequest{})
-	if err != nil {
-		return nil, fmt.Errorf("list ssh keys: %w", err)
-	}
-
-	if len(resp.SSHKeys) == 0 {
-		return nil, fmt.Errorf("no SSH keys found in Scaleway org — at least one is required for bare metal OS install")
-	}
-
-	ids := make([]string, len(resp.SSHKeys))
-	for i, key := range resp.SSHKeys {
-		ids[i] = key.ID
-	}
-
-	slog.Info("fetched SSH keys from Scaleway",
-		"phase", "1",
-		"count", len(ids),
-	)
-
-	return ids, nil
-}
-
 // WaitForReady polls Scaleway until the server reaches a terminal state.
-// With combined create+install, this waits for both hardware allocation AND
-// OS installation to complete. Bare metal provisioning can take 15-30 minutes.
 func WaitForReady(ctx context.Context, client *Client, serverID string, zone scw.Zone) (*baremetal.Server, error) {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
@@ -115,11 +132,11 @@ func WaitForReady(ctx context.Context, client *Client, serverID string, zone scw
 				ServerID: serverID,
 			})
 			if err != nil {
-				slog.Warn("poll failed, retrying", "phase", "1", "error", err)
+				slog.Warn("poll failed, retrying", "error", err)
 				continue
 			}
 
-			slog.Info("server status", "phase", "1", "status", server.Status, "server_id", serverID)
+			slog.Info("server status", "status", server.Status, "server_id", serverID)
 
 			switch server.Status {
 			case baremetal.ServerStatusReady:
@@ -135,101 +152,357 @@ func WaitForReady(ctx context.Context, client *Client, serverID string, zone scw
 	}
 }
 
-// BuildCloudInit generates a bash script that downloads flatcar-install from
-// GitHub, writes the Ignition config to disk, and installs Flatcar Container
-// Linux. On reboot, the machine boots into Flatcar with the Ignition config
-// applied. This is the OS pivot — a one-way door.
-func BuildCloudInit(flatcarChannel string, ignitionJSON []byte) string {
-	ignitionB64 := wrapString(base64.StdEncoding.EncodeToString(ignitionJSON), 76)
-
-	pivotScript := fmt.Sprintf(`#!/bin/bash
-set -euo pipefail
-set -x
-echo "Starting Flatcar pivot at $(date)"
-
-# Step 0: Install dependencies required by flatcar-install
-echo "Installing dependencies..."
-apt-get update -qq
-apt-get install -y -qq bzip2 > /dev/null
-
-# Step 1: Write Ignition config
-echo "Writing Ignition config..."
-cat >/tmp/ignition.b64 <<'__IGNITION_B64__'
-%s
-__IGNITION_B64__
-base64 -d /tmp/ignition.b64 > /tmp/ignition.json
-rm -f /tmp/ignition.b64
-
-# Step 2: Download flatcar-install
-echo "Downloading flatcar-install..."
-wget --retry-connrefused --waitretry=5 --tries=5 \
-    -O /tmp/flatcar-install "https://raw.githubusercontent.com/flatcar/init/flatcar-master/bin/flatcar-install"
-chmod +x /tmp/flatcar-install
-
-# Step 3: Detect the boot disk to avoid writing to the wrong device
-echo "Detecting boot disk..."
-TARGET_DISK=""
-ROOT_SOURCE=$(findmnt -n -o SOURCE / 2>/dev/null || echo "")
-if [ -b "$ROOT_SOURCE" ]; then
-    PKNAME=$(lsblk -ndo PKNAME "$ROOT_SOURCE" 2>/dev/null || true)
-    if [ -n "$PKNAME" ] && [ -b "/dev/$PKNAME" ]; then
-        TARGET_DISK="/dev/$PKNAME"
-    fi
-fi
-if [ -z "$TARGET_DISK" ]; then
-    TARGET_DISK=$(lsblk -dnpo NAME -e 7,11 | head -1)
-fi
-if [ -z "$TARGET_DISK" ]; then
-    TARGET_DISK="/dev/sda"
-fi
-
-# Step 4: Install Flatcar to disk
-echo "Installing Flatcar (%s channel) to ${TARGET_DISK}..."
-/tmp/flatcar-install -d "${TARGET_DISK}" -C %s -i /tmp/ignition.json
-sync
-
-echo "Pivot complete. Rebooting into Flatcar at $(date)"
-reboot
-`, ignitionB64, flatcarChannel, flatcarChannel)
-
-	pivotScriptB64 := wrapString(base64.StdEncoding.EncodeToString([]byte(pivotScript)), 76)
-
-	return fmt.Sprintf(`#cloud-config
-write_files:
-  - path: /usr/local/bin/rawkode-flatcar-pivot.sh
-    owner: root:root
-    permissions: "0755"
-    encoding: b64
-    content: |
-%s
-runcmd:
-  - [ bash, -lc, "/usr/local/bin/rawkode-flatcar-pivot.sh" ]
-`, indentLines(pivotScriptB64, "      "))
-}
-
-func wrapString(s string, width int) string {
-	if width <= 0 || len(s) <= width {
-		return s
+func buildInstallPartitioningSchema(params ProvisionParams) (*baremetal.Schema, error) {
+	osDisk := strings.TrimSpace(params.PivotOSDisk)
+	if osDisk == "" {
+		return nil, fmt.Errorf("pivot_os_disk is required for custom partitioning")
 	}
 
-	var b strings.Builder
-	for start := 0; start < len(s); start += width {
-		end := start + width
-		if end > len(s) {
-			end = len(s)
+	dataDisk := strings.TrimSpace(params.PivotDataDisk)
+	if dataDisk == osDisk {
+		return nil, fmt.Errorf("pivot_data_disk must differ from pivot_os_disk")
+	}
+
+	const (
+		uefiSizeBytes = 512 * 1024 * 1024
+		swapSizeBytes = 4 * 1024 * 1024 * 1024
+		bootSizeBytes = 512 * 1024 * 1024
+		rootSizeBytes = 1018839433216
+	)
+
+	disks := []*baremetal.SchemaDisk{
+		{
+			Device: osDisk,
+			Partitions: []*baremetal.SchemaPartition{
+				{Label: baremetal.SchemaPartitionLabelUefi, Number: 1, Size: scw.Size(uefiSizeBytes)},
+				{Label: baremetal.SchemaPartitionLabelSwap, Number: 2, Size: scw.Size(swapSizeBytes)},
+				{Label: baremetal.SchemaPartitionLabelBoot, Number: 3, Size: scw.Size(bootSizeBytes)},
+				{Label: baremetal.SchemaPartitionLabelRoot, Number: 4, Size: scw.Size(rootSizeBytes)},
+			},
+		},
+	}
+
+	filesystems := []*baremetal.SchemaFilesystem{
+		{Device: partitionDeviceForInstall(osDisk, 1), Format: baremetal.SchemaFilesystemFormatFat32, Mountpoint: "/boot/efi"},
+		{Device: partitionDeviceForInstall(osDisk, 3), Format: baremetal.SchemaFilesystemFormatExt4, Mountpoint: "/boot"},
+		{Device: partitionDeviceForInstall(osDisk, 4), Format: baremetal.SchemaFilesystemFormatExt4, Mountpoint: "/"},
+	}
+
+	if dataDisk != "" {
+		disks = append(disks, &baremetal.SchemaDisk{
+			Device: dataDisk,
+			Partitions: []*baremetal.SchemaPartition{
+				{Label: baremetal.SchemaPartitionLabelData, Number: 1, Size: scw.Size(rootSizeBytes)},
+			},
+		})
+	}
+
+	return &baremetal.Schema{
+		Disks:       disks,
+		Filesystems: filesystems,
+		Raids:       []*baremetal.SchemaRAID{},
+		Zfs: &baremetal.SchemaZFS{
+			Pools: []*baremetal.SchemaPool{},
+		},
+	}, nil
+}
+
+func partitionDeviceForInstall(disk string, number uint32) string {
+	if strings.HasPrefix(disk, "/dev/nvme") || strings.HasPrefix(disk, "/dev/mmcblk") {
+		return fmt.Sprintf("%sp%d", disk, number)
+	}
+	return fmt.Sprintf("%s%d", disk, number)
+}
+
+func resolveOfferForBillingCycle(ctx context.Context, client *Client, zone scw.Zone, offerID, billingCycle string) (string, baremetal.OfferSubscriptionPeriod, error) {
+	offerID = strings.TrimSpace(offerID)
+	if offerID == "" {
+		return "", baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod, fmt.Errorf("offer ID/name is required")
+	}
+
+	cycle := strings.TrimSpace(strings.ToLower(billingCycle))
+	if cycle == "" {
+		cycle = "hourly"
+	}
+
+	if !isLikelyUUID(offerID) {
+		var period baremetal.OfferSubscriptionPeriod
+		switch cycle {
+		case "hourly":
+			period = baremetal.OfferSubscriptionPeriodHourly
+		case "monthly":
+			period = baremetal.OfferSubscriptionPeriodMonthly
+		default:
+			return "", baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod, fmt.Errorf("invalid billing cycle %q", billingCycle)
 		}
-		b.WriteString(s[start:end])
-		if end < len(s) {
-			b.WriteByte('\n')
+		resolvedID, err := resolveOfferIDFromNameByPeriod(ctx, client, zone, offerID, period)
+		if err != nil {
+			return "", baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod, err
+		}
+		return resolvedID, period, nil
+	}
+
+	offer, err := client.Baremetal.GetOffer(&baremetal.GetOfferRequest{
+		Zone:    zone,
+		OfferID: offerID,
+	}, scw.WithContext(ctx))
+	if err != nil {
+		return "", baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod, fmt.Errorf("get offer %s: %w", offerID, err)
+	}
+
+	switch cycle {
+	case "hourly":
+		if offer.SubscriptionPeriod == baremetal.OfferSubscriptionPeriodHourly {
+			return offer.ID, offer.SubscriptionPeriod, nil
+		}
+		hourlyOfferID, err := resolveOfferIDByNameAndPeriod(ctx, client, zone, offer, baremetal.OfferSubscriptionPeriodHourly)
+		if err != nil {
+			return "", baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod, err
+		}
+		return hourlyOfferID, baremetal.OfferSubscriptionPeriodHourly, nil
+	case "monthly":
+		if offer.SubscriptionPeriod == baremetal.OfferSubscriptionPeriodMonthly {
+			return offer.ID, offer.SubscriptionPeriod, nil
+		}
+		if offer.MonthlyOfferID != nil && *offer.MonthlyOfferID != "" {
+			return *offer.MonthlyOfferID, baremetal.OfferSubscriptionPeriodMonthly, nil
+		}
+		monthlyOfferID, err := resolveOfferIDByNameAndPeriod(ctx, client, zone, offer, baremetal.OfferSubscriptionPeriodMonthly)
+		if err != nil {
+			return "", baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod, err
+		}
+		return monthlyOfferID, baremetal.OfferSubscriptionPeriodMonthly, nil
+	default:
+		return "", baremetal.OfferSubscriptionPeriodUnknownSubscriptionPeriod, fmt.Errorf("invalid billing cycle %q", billingCycle)
+	}
+}
+
+func resolveOfferIDFromNameByPeriod(ctx context.Context, client *Client, zone scw.Zone, offerName string, period baremetal.OfferSubscriptionPeriod) (string, error) {
+	trimmedName := strings.TrimSpace(offerName)
+	resp, err := client.Baremetal.ListOffers(&baremetal.ListOffersRequest{
+		Zone:               zone,
+		SubscriptionPeriod: period,
+		Name:               &trimmedName,
+	}, scw.WithAllPages(), scw.WithContext(ctx))
+	if err != nil {
+		return "", fmt.Errorf("list offers for %q (%s): %w", offerName, period, err)
+	}
+
+	if len(resp.Offers) == 0 {
+		return "", fmt.Errorf("no %s offer found matching %q", period, offerName)
+	}
+
+	normalizedQuery := normalizeOfferName(offerName)
+	for _, offer := range resp.Offers {
+		if offer == nil || offer.ID == "" {
+			continue
+		}
+		if strings.EqualFold(offer.Name, trimmedName) {
+			return offer.ID, nil
+		}
+	}
+	for _, offer := range resp.Offers {
+		if offer == nil || offer.ID == "" {
+			continue
+		}
+		if normalizeOfferName(offer.Name) == normalizedQuery {
+			return offer.ID, nil
+		}
+	}
+	for _, offer := range resp.Offers {
+		if offer == nil || offer.ID == "" {
+			continue
+		}
+		return offer.ID, nil
+	}
+
+	return "", fmt.Errorf("no usable %s offer found for %q", period, offerName)
+}
+
+func resolveOfferIDByNameAndPeriod(ctx context.Context, client *Client, zone scw.Zone, baseOffer *baremetal.Offer, period baremetal.OfferSubscriptionPeriod) (string, error) {
+	if baseOffer == nil {
+		return "", fmt.Errorf("base offer is nil")
+	}
+
+	name := baseOffer.Name
+	resp, err := client.Baremetal.ListOffers(&baremetal.ListOffersRequest{
+		Zone:               zone,
+		SubscriptionPeriod: period,
+		Name:               &name,
+	}, scw.WithAllPages(), scw.WithContext(ctx))
+	if err != nil {
+		return "", fmt.Errorf("list %s offers for %q: %w", period, baseOffer.Name, err)
+	}
+
+	for _, candidate := range resp.Offers {
+		if candidate == nil || candidate.ID == "" || candidate.ID == baseOffer.ID {
+			continue
+		}
+		if candidate.Name == baseOffer.Name {
+			return candidate.ID, nil
+		}
+	}
+	for _, candidate := range resp.Offers {
+		if candidate == nil || candidate.ID == "" || candidate.ID == baseOffer.ID {
+			continue
+		}
+		return candidate.ID, nil
+	}
+
+	return "", fmt.Errorf("could not find %s variant for offer %q (%s)", period, baseOffer.Name, baseOffer.ID)
+}
+
+func isLikelyUUID(value string) bool {
+	if len(value) != 36 {
+		return false
+	}
+	for i, ch := range value {
+		switch i {
+		case 8, 13, 18, 23:
+			if ch != '-' {
+				return false
+			}
+		default:
+			if (ch < '0' || ch > '9') && (ch < 'a' || ch > 'f') && (ch < 'A' || ch > 'F') {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func normalizeOfferName(value string) string {
+	trimmed := strings.TrimSpace(strings.ToLower(value))
+	var b strings.Builder
+	b.Grow(len(trimmed))
+	for _, ch := range trimmed {
+		if (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') {
+			b.WriteRune(ch)
 		}
 	}
 	return b.String()
 }
 
-func indentLines(s, prefix string) string {
-	lines := strings.Split(s, "\n")
-	for i := range lines {
-		lines[i] = prefix + lines[i]
+func listSSHKeyIDs(iamAPI *iam.API) ([]string, error) {
+	resp, err := iamAPI.ListSSHKeys(&iam.ListSSHKeysRequest{})
+	if err != nil {
+		return nil, fmt.Errorf("list ssh keys: %w", err)
 	}
-	return strings.Join(lines, "\n")
+	if len(resp.SSHKeys) == 0 {
+		return nil, fmt.Errorf("no SSH keys found in Scaleway org")
+	}
+	ids := make([]string, len(resp.SSHKeys))
+	for i, key := range resp.SSHKeys {
+		ids[i] = key.ID
+	}
+	return ids, nil
+}
+
+type addServerPrivateNetworkRequest struct {
+	PrivateNetworkID string   `json:"private_network_id"`
+	IPAMIPIDs        []string `json:"ipam_ip_ids,omitempty"`
+}
+
+func addServerPrivateNetworkWithReservedIP(ctx context.Context, client *Client, zone scw.Zone, serverID, privateNetworkID, reservedIP string) (*baremetal.ServerPrivateNetwork, error) {
+	reservedIP = strings.TrimSpace(reservedIP)
+	if reservedIP == "" {
+		return nil, fmt.Errorf("reserved private IP cannot be empty")
+	}
+	if parsed := net.ParseIP(reservedIP); parsed == nil || parsed.To4() == nil {
+		return nil, fmt.Errorf("reserved private IP must be a valid IPv4 address, got %q", reservedIP)
+	}
+
+	region, err := zone.Region()
+	if err != nil {
+		return nil, fmt.Errorf("derive region from zone %q: %w", zone, err)
+	}
+
+	reservedIPID, err := findPrivateNetworkIPIDByAddress(ctx, client.IPAM, region, privateNetworkID, reservedIP)
+	if err != nil {
+		return nil, err
+	}
+
+	req := &addServerPrivateNetworkRequest{
+		PrivateNetworkID: privateNetworkID,
+		IPAMIPIDs:        []string{reservedIPID},
+	}
+
+	scwReq := &scw.ScalewayRequest{
+		Method: "POST",
+		Path:   "/baremetal/v1/zones/" + fmt.Sprint(zone) + "/servers/" + fmt.Sprint(serverID) + "/private-networks",
+	}
+	if err := scwReq.SetBody(req); err != nil {
+		return nil, fmt.Errorf("encode private network attach payload: %w", err)
+	}
+
+	var resp baremetal.ServerPrivateNetwork
+	if err := client.Core.Do(scwReq, &resp, scw.WithContext(ctx)); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func findPrivateNetworkIPIDByAddress(ctx context.Context, ipamAPI *ipam.API, region scw.Region, privateNetworkID, targetIPv4 string) (string, error) {
+	resp, err := ipamAPI.ListIPs(&ipam.ListIPsRequest{
+		Region:           region,
+		PrivateNetworkID: &privateNetworkID,
+	}, scw.WithAllPages(), scw.WithContext(ctx))
+	if err != nil {
+		return "", fmt.Errorf("list ipam ips for private network %s: %w", privateNetworkID, err)
+	}
+
+	for _, candidate := range resp.IPs {
+		if candidate == nil || candidate.Address.IP == nil || candidate.Address.IP.To4() == nil {
+			continue
+		}
+		if candidate.Address.IP.String() != targetIPv4 {
+			continue
+		}
+		if candidate.Resource != nil && candidate.Resource.ID != "" {
+			return "", fmt.Errorf("reserved ip %s (%s) is already attached to resource %s (%s)", targetIPv4, candidate.ID, candidate.Resource.ID, candidate.Resource.Type)
+		}
+		return candidate.ID, nil
+	}
+
+	return "", fmt.Errorf("reserved ip %s was not found in private network %s", targetIPv4, privateNetworkID)
+}
+
+func fetchGitHubUserPublicKeys(ctx context.Context, username string) ([]string, error) {
+	url := fmt.Sprintf("https://github.com/%s.keys", username)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build github keys request: %w", err)
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("fetch github keys: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("fetch github keys: unexpected status %s", resp.Status)
+	}
+
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	if err != nil {
+		return nil, fmt.Errorf("read github keys response: %w", err)
+	}
+
+	lines := strings.Split(string(body), "\n")
+	var keys []string
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed != "" && (strings.HasPrefix(trimmed, "ssh-") || strings.HasPrefix(trimmed, "ecdsa-") || strings.HasPrefix(trimmed, "sk-")) {
+			keys = append(keys, trimmed)
+		}
+	}
+
+	if len(keys) == 0 {
+		return nil, fmt.Errorf("no SSH public keys found for %s", username)
+	}
+
+	return keys, nil
 }

@@ -14,13 +14,12 @@ import (
 )
 
 // Config holds SSH connection parameters.
-// If PrivateKey is nil, the SSH agent is used. AgentSocket overrides SSH_AUTH_SOCK.
 type Config struct {
 	Host        string
 	Port        string
 	User        string
-	PrivateKey  []byte // nil = use SSH agent
-	AgentSocket string // explicit agent socket path; falls back to SSH_AUTH_SOCK
+	PrivateKey  []byte
+	AgentSocket string
 }
 
 // Client wraps an SSH connection for executing commands on remote hosts.
@@ -28,8 +27,6 @@ type Client struct {
 	conn *ssh.Client
 }
 
-// buildAuthMethods returns SSH auth methods from a private key or an agent.
-// agentSocket overrides SSH_AUTH_SOCK when set.
 func buildAuthMethods(privateKey []byte, agentSocket string) ([]ssh.AuthMethod, error) {
 	if len(privateKey) > 0 {
 		signer, err := ssh.ParsePrivateKey(privateKey)
@@ -39,18 +36,12 @@ func buildAuthMethods(privateKey []byte, agentSocket string) ([]ssh.AuthMethod, 
 		return []ssh.AuthMethod{ssh.PublicKeys(signer)}, nil
 	}
 
-	// Fall back to SSH agent
 	sock := agentSocket
 	if sock == "" {
 		sock = os.Getenv("SSH_AUTH_SOCK")
 	}
-	if len(sock) > 1 && sock[0] == '~' {
-		if home, err := os.UserHomeDir(); err == nil {
-			sock = home + sock[1:]
-		}
-	}
 	if sock == "" {
-		return nil, fmt.Errorf("no SSH private key provided and no agent socket available (set --ssh-agent or SSH_AUTH_SOCK)")
+		return nil, fmt.Errorf("no SSH private key provided and no agent socket available")
 	}
 
 	conn, err := net.Dial("unix", sock)
@@ -59,7 +50,6 @@ func buildAuthMethods(privateKey []byte, agentSocket string) ([]ssh.AuthMethod, 
 	}
 
 	agentClient := agent.NewClient(conn)
-	slog.Debug("using SSH agent for authentication", "socket", sock)
 	return []ssh.AuthMethod{ssh.PublicKeysCallback(agentClient.Signers)}, nil
 }
 
@@ -73,7 +63,7 @@ func Connect(ctx context.Context, cfg Config, timeout time.Duration) (*Client, e
 	sshConfig := &ssh.ClientConfig{
 		User:            cfg.User,
 		Auth:            authMethods,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(), //nolint:gosec // ephemeral server, no known_hosts
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(), //nolint:gosec
 		Timeout:         10 * time.Second,
 	}
 
@@ -160,7 +150,7 @@ func (c *Client) RunWithStdin(ctx context.Context, cmd string, stdin []byte) (st
 	}
 }
 
-// Upload writes content to a remote file by piping through cat.
+// Upload writes content to a remote file by piping through tee.
 func (c *Client) Upload(ctx context.Context, remotePath string, content []byte, mode string) error {
 	cmd := fmt.Sprintf("sudo tee %s > /dev/null && sudo chmod %s %s", remotePath, mode, remotePath)
 	_, err := c.RunWithStdin(ctx, cmd, content)

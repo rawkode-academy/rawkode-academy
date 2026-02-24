@@ -5,14 +5,20 @@ import (
 
 	baremetal "github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
 	iam "github.com/scaleway/scaleway-sdk-go/api/iam/v1alpha1"
+	ipam "github.com/scaleway/scaleway-sdk-go/api/ipam/v1"
+	vpc "github.com/scaleway/scaleway-sdk-go/api/vpc/v2"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
-// Client wraps a Scaleway client, providing access to both the bare metal
-// and IAM APIs from a single set of credentials.
+// Client wraps a Scaleway client, providing access to bare metal,
+// IAM, IPAM, and VPC APIs from a single set of credentials.
 type Client struct {
-	Baremetal *baremetal.API
-	IAM       *iam.API
+	Core                    *scw.Client
+	Baremetal               *baremetal.API
+	BaremetalPrivateNetwork *baremetal.PrivateNetworkAPI
+	IAM                     *iam.API
+	IPAM                    *ipam.API
+	VPC                     *vpc.API
 }
 
 // NewClient creates a Scaleway client with access to bare metal and IAM APIs.
@@ -23,7 +29,6 @@ func NewClient(accessKey, secretKey string) (*Client, error) {
 		scw.WithEnv(),
 	}
 
-	// Explicit credentials override environment variables.
 	if accessKey != "" && secretKey != "" {
 		opts = append(opts,
 			scw.WithAuth(accessKey, secretKey),
@@ -36,7 +41,11 @@ func NewClient(accessKey, secretKey string) (*Client, error) {
 	}
 
 	return &Client{
-		Baremetal: baremetal.NewAPI(client),
-		IAM:       iam.NewAPI(client),
+		Core:                    client,
+		Baremetal:               baremetal.NewAPI(client),
+		BaremetalPrivateNetwork: baremetal.NewPrivateNetworkAPI(client),
+		IAM:                     iam.NewAPI(client),
+		IPAM:                    ipam.NewAPI(client),
+		VPC:                     vpc.NewAPI(client),
 	}, nil
 }
