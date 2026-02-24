@@ -1,6 +1,9 @@
 package teleport
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // KubeAgentManifest generates the Kubernetes YAML for a Teleport kube agent deployment.
 func KubeAgentManifest(proxyAddr, clusterName, joinToken string) string {
@@ -79,4 +82,129 @@ subjects:
     name: teleport-kube-agent
     namespace: teleport-agent
 `, proxyAddr, joinToken, clusterName)
+}
+
+// SelfHostedManifest generates Kubernetes YAML for a single-node self-hosted Teleport deployment.
+func SelfHostedManifest(clusterName, domain, githubOrganization string, githubTeams []string, githubClientID, githubClientSecret string) string {
+	return fmt.Sprintf(`apiVersion: v1
+kind: Namespace
+metadata:
+  name: teleport
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: teleport-config
+  namespace: teleport
+type: Opaque
+stringData:
+  teleport.yaml: |
+    version: v3
+    teleport:
+      nodename: %q
+      data_dir: /var/lib/teleport
+      log:
+        output: stderr
+        severity: INFO
+    auth_service:
+      enabled: "yes"
+      cluster_name: %q
+      authentication:
+        type: github
+      connectors:
+        - type: github
+          id: github
+          name: GitHub
+          client_id: %q
+          client_secret: %q
+          redirect_url: %q
+          teams_to_logins:
+%s
+    proxy_service:
+      enabled: "yes"
+      web_listen_addr: 0.0.0.0:443
+      public_addr: %q
+    kubernetes_service:
+      enabled: "yes"
+      kube_cluster_name: %q
+    ssh_service:
+      enabled: "no"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: teleport
+  namespace: teleport
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: teleport
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: teleport
+    namespace: teleport
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teleport
+  namespace: teleport
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: teleport
+  template:
+    metadata:
+      labels:
+        app: teleport
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: teleport
+      containers:
+        - name: teleport
+          image: public.ecr.aws/gravitational/teleport-distroless:17
+          args:
+            - --config=/etc/teleport/teleport.yaml
+          ports:
+            - name: web
+              containerPort: 443
+              hostPort: 443
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/teleport
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/teleport
+      volumes:
+        - name: config
+          secret:
+            secretName: teleport-config
+        - name: data
+          emptyDir: {}
+`, clusterName, clusterName, githubClientID, githubClientSecret, fmt.Sprintf("https://%s/v1/webapi/github/callback", domain), githubTeamsToLoginsYAML(githubOrganization, githubTeams), fmt.Sprintf("%s:443", domain), clusterName)
+}
+
+func githubTeamsToLoginsYAML(organization string, teams []string) string {
+	organization = strings.TrimSpace(organization)
+	var b strings.Builder
+
+	for _, team := range teams {
+		trimmed := strings.TrimSpace(team)
+		if trimmed == "" {
+			continue
+		}
+		fmt.Fprintf(&b, "            - organization: %q\n", organization)
+		fmt.Fprintf(&b, "              team: %q\n", trimmed)
+		fmt.Fprintln(&b, `              logins: ["root"]`)
+	}
+
+	return b.String()
 }

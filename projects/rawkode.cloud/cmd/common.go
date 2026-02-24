@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	clusterstate "github.com/rawkode-academy/rawkode-cloud3/internal/cluster"
@@ -22,6 +23,14 @@ func loadConfigForClusterOrFile(clusterName, filePath string) (*config.Config, s
 	cfg, err := config.Load(resolved)
 	if err != nil {
 		return nil, "", fmt.Errorf("load config %s: %w", resolved, err)
+	}
+
+	infClient, err := getOrCreateInfisicalClient(context.Background(), cfg)
+	if err != nil {
+		return nil, "", fmt.Errorf("create infisical client: %w", err)
+	}
+	if err := cfg.LoadRuntimeSecretsWithClient(context.Background(), infClient); err != nil {
+		return nil, "", fmt.Errorf("load runtime secrets: %w", err)
 	}
 
 	return cfg, resolved, nil
@@ -95,35 +104,126 @@ func firstActiveNodeByRole(state *clusterstate.NodesState, role string) (*cluste
 		if node.Status == clusterstate.NodeStatusDeleted || node.Status == clusterstate.NodeStatusFailed {
 			continue
 		}
-		if strings.TrimSpace(node.PublicIP) == "" {
+		if strings.TrimSpace(node.PublicIP) == "" && strings.TrimSpace(node.PrivateIP) == "" {
 			continue
 		}
 		return node, nil
 	}
 
-	return nil, fmt.Errorf("no active %s node with public IP found in state", role)
+	return nil, fmt.Errorf("no active %s node with reachable IP found in state", role)
 }
 
 func loadTalosconfigFromInfisical(ctx context.Context, cfg *config.Config, client *infisical.Client) ([]byte, error) {
-	value, err := client.GetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, cfg.Infisical.SecretPath, infisicalTalosConfigKey)
+	secretPath := infisicalSecretPathForCluster(cfg)
+	value, err := client.GetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosConfigKey)
 	if err != nil {
 		return nil, fmt.Errorf("load %s from infisical: %w", infisicalTalosConfigKey, err)
 	}
 	if strings.TrimSpace(value) == "" {
-		return nil, fmt.Errorf("%s is empty in infisical path %s", infisicalTalosConfigKey, cfg.Infisical.SecretPath)
+		return nil, fmt.Errorf("%s is empty in infisical path %s", infisicalTalosConfigKey, secretPath)
 	}
 
 	return []byte(value), nil
 }
 
-func controlPlaneEndpointFromState(cfg *config.Config, state *clusterstate.NodesState) (string, error) {
-	if dns := strings.TrimSpace(cfg.Teleport.Domain); dns != "" {
-		return dns, nil
-	}
-
+func controlPlaneEndpointFromState(state *clusterstate.NodesState) (string, error) {
 	node, err := firstActiveNodeByRole(state, config.NodeTypeControlPlane)
 	if err != nil {
 		return "", err
 	}
+	if privateIP := strings.TrimSpace(node.PrivateIP); privateIP != "" {
+		return privateIP, nil
+	}
 	return node.PublicIP, nil
+}
+
+func infisicalSecretPathForCluster(cfg *config.Config) string {
+	base := strings.TrimSpace(cfg.Infisical.SecretPath)
+	cluster := strings.TrimSpace(cfg.Environment)
+
+	if cluster == "" {
+		return base
+	}
+	if base == "" || base == "/" {
+		return "/" + cluster
+	}
+	return strings.TrimRight(base, "/") + "/" + cluster
+}
+
+func controlPlaneNodeName(poolName string, slot int) string {
+	return fmt.Sprintf("%s-%02d", strings.TrimSpace(poolName), slot)
+}
+
+func parseControlPlaneSlot(poolName, nodeName string) (int, bool) {
+	prefix := strings.TrimSpace(poolName) + "-"
+	if !strings.HasPrefix(nodeName, prefix) {
+		return 0, false
+	}
+
+	suffix := strings.TrimPrefix(nodeName, prefix)
+	if len(suffix) != 2 {
+		return 0, false
+	}
+
+	slot, err := strconv.Atoi(suffix)
+	if err != nil || slot <= 0 {
+		return 0, false
+	}
+
+	return slot, true
+}
+
+func controlPlaneReservedIPForSlot(pool *config.NodePoolConfig, slot int) (string, error) {
+	if pool == nil {
+		return "", fmt.Errorf("node pool is required")
+	}
+
+	if len(pool.ReservedPrivateIPs) == 0 {
+		return "", nil
+	}
+
+	if slot <= 0 || slot > len(pool.ReservedPrivateIPs) {
+		return "", fmt.Errorf(
+			"control-plane slot %d exceeds reserved_private_ips for pool %q (defined=%d)",
+			slot, pool.Name, len(pool.ReservedPrivateIPs),
+		)
+	}
+
+	return strings.TrimSpace(pool.ReservedPrivateIPs[slot-1]), nil
+}
+
+func nextControlPlaneSlot(state *clusterstate.NodesState, poolName string) int {
+	occupied := make(map[int]struct{})
+	unknownNamedNodes := 0
+
+	for _, node := range state.Nodes {
+		if node.Role != config.NodeTypeControlPlane || node.Pool != poolName {
+			continue
+		}
+		if node.Status == clusterstate.NodeStatusDeleted {
+			continue
+		}
+		slot, ok := parseControlPlaneSlot(poolName, node.Name)
+		if !ok {
+			unknownNamedNodes++
+			continue
+		}
+		occupied[slot] = struct{}{}
+	}
+
+	for slot := 1; slot <= 99 && unknownNamedNodes > 0; slot++ {
+		if _, used := occupied[slot]; used {
+			continue
+		}
+		occupied[slot] = struct{}{}
+		unknownNamedNodes--
+	}
+
+	for slot := 1; slot <= 99; slot++ {
+		if _, used := occupied[slot]; !used {
+			return slot
+		}
+	}
+
+	return 100
 }

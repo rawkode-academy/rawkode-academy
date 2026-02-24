@@ -125,7 +125,7 @@ func runUpgradeK8s(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	endpoint, err := controlPlaneEndpointFromState(cfg, state)
+	endpoint, err := controlPlaneEndpointFromState(state)
 	if err != nil {
 		return err
 	}

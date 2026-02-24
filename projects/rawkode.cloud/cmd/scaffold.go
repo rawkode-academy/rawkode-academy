@@ -21,28 +21,36 @@ cluster:
   talos_schematic: ""
 
 scaleway:
-  vpc_name: %s
-  private_network_name: %s
-  zone: fr-par-1
+  projectId: ""
+  organizationId: ""
 
 nodePools:
   - name: main
-    type: controlplane
+    type: control-plane
+    zone: fr-par-1
     size: 1
     offer: ""
     billing_cycle: hourly
+    reserved_private_ips:
+      - 172.16.16.16
+      - 172.16.16.17
+      - 172.16.16.18
     disks:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
 
 teleport:
   domain: ""
+  mode: self_hosted
+  github:
+    organization: ""
+    teams: []
 
 infisical:
   site_url: https://app.infisical.com
   project_id: ""
   environment: production
-  secret_path: /%s
+  secret_path: /%s # shared secrets live here; cluster secrets use <secret_path>/<environment>
 
 flux:
   oci_repo: ""
@@ -79,7 +87,7 @@ func runClusterScaffold(environment, outputFile string) error {
 		outputFile = environment + ".yaml"
 	}
 
-	content := fmt.Sprintf(scaffoldTemplate, environment, environment, environment, environment)
+	content := fmt.Sprintf(scaffoldTemplate, environment, environment)
 
 	dir := filepath.Dir(outputFile)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
