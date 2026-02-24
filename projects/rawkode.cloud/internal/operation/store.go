@@ -13,22 +13,23 @@ import (
 	"strings"
 	"time"
 
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go"
 )
 
 var ErrNotFound = errors.New("object not found")
 
 // Store manages operation state persistence in an S3-compatible bucket.
 type Store struct {
-	endpoint  string
-	bucket    string
-	region    string
-	accessKey string
-	secretKey string
-	prefix    string
-	client    *http.Client
+	endpoint string
+	bucket   string
+	region   string
+	prefix   string
+	client   *s3.Client
 }
 
 // StoreConfig holds S3 configuration for the operation store.
@@ -42,6 +43,12 @@ type StoreConfig struct {
 
 // NewStore creates a new S3-backed operation store.
 func NewStore(cfg StoreConfig) (*Store, error) {
+	cfg.Bucket = strings.TrimSpace(cfg.Bucket)
+	cfg.Region = strings.TrimSpace(cfg.Region)
+	cfg.Endpoint = strings.TrimSpace(cfg.Endpoint)
+	cfg.AccessKey = strings.TrimSpace(cfg.AccessKey)
+	cfg.SecretKey = strings.TrimSpace(cfg.SecretKey)
+
 	if cfg.Bucket == "" {
 		return nil, fmt.Errorf("state bucket is required")
 	}
@@ -55,14 +62,36 @@ func NewStore(cfg StoreConfig) (*Store, error) {
 		return nil, fmt.Errorf("S3 access key and secret key are required for state storage")
 	}
 
+	endpoint := strings.TrimRight(cfg.Endpoint, "/")
+	awsCfg := aws.Config{
+		Region: cfg.Region,
+		Credentials: aws.NewCredentialsCache(
+			credentials.NewStaticCredentialsProvider(cfg.AccessKey, cfg.SecretKey, ""),
+		),
+		HTTPClient: &http.Client{Timeout: 30 * time.Second},
+		EndpointResolverWithOptions: aws.EndpointResolverWithOptionsFunc(
+			func(service, region string, _ ...interface{}) (aws.Endpoint, error) {
+				if service == s3.ServiceID {
+					return aws.Endpoint{
+						URL:               endpoint,
+						SigningRegion:     cfg.Region,
+						HostnameImmutable: true,
+					}, nil
+				}
+				return aws.Endpoint{}, &aws.EndpointNotFoundError{}
+			},
+		),
+	}
+
 	return &Store{
-		endpoint:  strings.TrimRight(cfg.Endpoint, "/"),
-		bucket:    cfg.Bucket,
-		region:    cfg.Region,
-		accessKey: cfg.AccessKey,
-		secretKey: cfg.SecretKey,
-		prefix:    "operations/",
-		client:    &http.Client{Timeout: 30 * time.Second},
+		endpoint: endpoint,
+		bucket:   cfg.Bucket,
+		region:   cfg.Region,
+		prefix:   "operations/",
+		client: s3.NewFromConfig(awsCfg, func(o *s3.Options) {
+			// Scaleway object storage works reliably with path-style requests.
+			o.UsePathStyle = true
+		}),
 	}, nil
 }
 
@@ -191,178 +220,164 @@ func (s *Store) GetJSON(key string, dst any) error {
 	return nil
 }
 
-// S3 primitives using AWS Signature V4
+// S3 primitives via AWS SDK v2
 
 func (s *Store) putObject(ctx context.Context, key string, data []byte) error {
-	url := fmt.Sprintf("%s/%s/%s", s.endpoint, s.bucket, key)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewReader(data))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	s.signRequest(req, data)
+	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(s.bucket),
+		Key:         aws.String(key),
+		Body:        bytes.NewReader(data),
+		ContentType: aws.String("application/json"),
+	})
+	if err != nil && isBucketNotFound(err) {
+		if ensureErr := s.ensureBucket(ctx); ensureErr != nil {
+			return fmt.Errorf("ensure state bucket %s: %w", s.bucket, ensureErr)
+		}
 
-	resp, err := s.client.Do(req)
+		_, err = s.client.PutObject(ctx, &s3.PutObjectInput{
+			Bucket:      aws.String(s.bucket),
+			Key:         aws.String(key),
+			Body:        bytes.NewReader(data),
+			ContentType: aws.String("application/json"),
+		})
+	}
 	if err != nil {
-		return err
+		return fmt.Errorf("S3 PUT %s: %w", key, err)
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode >= 300 {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("S3 PUT %s: %s %s", key, resp.Status, string(body))
-	}
 	return nil
 }
 
 func (s *Store) getObject(ctx context.Context, key string) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s/%s", s.endpoint, s.bucket, key)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	resp, err := s.client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(key),
+	})
 	if err != nil {
-		return nil, err
-	}
-	s.signRequest(req, nil)
-
-	resp, err := s.client.Do(req)
-	if err != nil {
-		return nil, err
+		if isObjectNotFound(err) || isBucketNotFound(err) {
+			return nil, fmt.Errorf("%w: %s", ErrNotFound, key)
+		}
+		return nil, fmt.Errorf("S3 GET %s: %w", key, err)
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode == 404 {
-		return nil, fmt.Errorf("%w: %s", ErrNotFound, key)
-	}
-	if resp.StatusCode >= 300 {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("S3 GET %s: %s %s", key, resp.Status, string(body))
-	}
 
 	return io.ReadAll(resp.Body)
 }
 
 func (s *Store) deleteObject(ctx context.Context, key string) error {
-	url := fmt.Sprintf("%s/%s/%s", s.endpoint, s.bucket, key)
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
+	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(key),
+	})
 	if err != nil {
-		return err
+		// DELETE is idempotent; treat missing objects as success.
+		if isObjectNotFound(err) || isBucketNotFound(err) {
+			return nil
+		}
+		return fmt.Errorf("S3 DELETE %s: %w", key, err)
 	}
-	s.signRequest(req, nil)
 
-	resp, err := s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 300 && resp.StatusCode != 404 {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("S3 DELETE %s: %s %s", key, resp.Status, string(body))
-	}
 	return nil
 }
 
 func (s *Store) listObjects(ctx context.Context, prefix string) ([]string, error) {
-	url := fmt.Sprintf("%s/%s?list-type=2&prefix=%s", s.endpoint, s.bucket, prefix)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	s.signRequest(req, nil)
+	paginator := s3.NewListObjectsV2Paginator(s.client, &s3.ListObjectsV2Input{
+		Bucket: aws.String(s.bucket),
+		Prefix: aws.String(prefix),
+	})
 
-	resp, err := s.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 300 {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("S3 LIST %s: %s %s", prefix, resp.Status, string(body))
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return parseS3ListKeys(body), nil
-}
-
-// parseS3ListKeys extracts <Key> elements from ListObjectsV2 XML response.
-func parseS3ListKeys(xmlBody []byte) []string {
 	var keys []string
-	content := string(xmlBody)
-	for {
-		start := strings.Index(content, "<Key>")
-		if start == -1 {
-			break
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			if isBucketNotFound(err) {
+				// First run: bucket not created yet means there are no operations.
+				return []string{}, nil
+			}
+			return nil, fmt.Errorf("S3 LIST %s: %w", prefix, err)
 		}
-		start += len("<Key>")
-		end := strings.Index(content[start:], "</Key>")
-		if end == -1 {
-			break
+
+		for _, object := range page.Contents {
+			if object.Key == nil {
+				continue
+			}
+			keys = append(keys, *object.Key)
 		}
-		keys = append(keys, content[start:start+end])
-		content = content[start+end:]
-	}
-	return keys
-}
-
-// signRequest applies AWS Signature V4 to an HTTP request.
-func (s *Store) signRequest(req *http.Request, payload []byte) {
-	now := time.Now().UTC()
-	datestamp := now.Format("20060102")
-	amzDate := now.Format("20060102T150405Z")
-
-	req.Header.Set("x-amz-date", amzDate)
-	req.Header.Set("Host", req.URL.Host)
-
-	payloadHash := sha256Hex(payload)
-	req.Header.Set("x-amz-content-sha256", payloadHash)
-
-	canonicalHeaders := fmt.Sprintf("host:%s\nx-amz-content-sha256:%s\nx-amz-date:%s\n",
-		req.URL.Host, payloadHash, amzDate)
-	signedHeaders := "host;x-amz-content-sha256;x-amz-date"
-
-	if ct := req.Header.Get("Content-Type"); ct != "" {
-		canonicalHeaders = fmt.Sprintf("content-type:%s\nhost:%s\nx-amz-content-sha256:%s\nx-amz-date:%s\n",
-			ct, req.URL.Host, payloadHash, amzDate)
-		signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date"
 	}
 
-	canonicalURI := req.URL.Path
-	canonicalQueryString := req.URL.RawQuery
-
-	canonicalRequest := fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s",
-		req.Method, canonicalURI, canonicalQueryString,
-		canonicalHeaders, signedHeaders, payloadHash)
-
-	scope := fmt.Sprintf("%s/%s/s3/aws4_request", datestamp, s.region)
-	stringToSign := fmt.Sprintf("AWS4-HMAC-SHA256\n%s\n%s\n%s",
-		amzDate, scope, sha256Hex([]byte(canonicalRequest)))
-
-	signingKey := deriveSigningKey(s.secretKey, datestamp, s.region, "s3")
-	signature := hex.EncodeToString(hmacSHA256(signingKey, []byte(stringToSign)))
-
-	authHeader := fmt.Sprintf("AWS4-HMAC-SHA256 Credential=%s/%s, SignedHeaders=%s, Signature=%s",
-		s.accessKey, scope, signedHeaders, signature)
-	req.Header.Set("Authorization", authHeader)
+	return keys, nil
 }
 
-func sha256Hex(data []byte) string {
-	h := sha256.Sum256(data)
-	return hex.EncodeToString(h[:])
+func (s *Store) ensureBucket(ctx context.Context) error {
+	_, err := s.client.HeadBucket(ctx, &s3.HeadBucketInput{
+		Bucket: aws.String(s.bucket),
+	})
+	if err == nil {
+		return nil
+	}
+	if !isBucketNotFound(err) {
+		return err
+	}
+
+	_, err = s.client.CreateBucket(ctx, &s3.CreateBucketInput{
+		Bucket: aws.String(s.bucket),
+		CreateBucketConfiguration: &types.CreateBucketConfiguration{
+			LocationConstraint: types.BucketLocationConstraint(s.region),
+		},
+	})
+	if err == nil || isBucketAlreadyExists(err) {
+		return nil
+	}
+
+	return err
 }
 
-func hmacSHA256(key, data []byte) []byte {
-	h := hmac.New(sha256.New, key)
-	h.Write(data)
-	return h.Sum(nil)
+func isObjectNotFound(err error) bool {
+	var noSuchKey *types.NoSuchKey
+	if errors.As(err, &noSuchKey) {
+		return true
+	}
+
+	var apiErr smithy.APIError
+	if errors.As(err, &apiErr) {
+		switch apiErr.ErrorCode() {
+		case "NoSuchKey", "NotFound":
+			return true
+		}
+	}
+
+	var respErr *awshttp.ResponseError
+	return errors.As(err, &respErr) && respErr.HTTPStatusCode() == http.StatusNotFound
 }
 
-func deriveSigningKey(secretKey, datestamp, region, service string) []byte {
-	kDate := hmacSHA256([]byte("AWS4"+secretKey), []byte(datestamp))
-	kRegion := hmacSHA256(kDate, []byte(region))
-	kService := hmacSHA256(kRegion, []byte(service))
-	return hmacSHA256(kService, []byte("aws4_request"))
+func isBucketNotFound(err error) bool {
+	var noSuchBucket *types.NoSuchBucket
+	if errors.As(err, &noSuchBucket) {
+		return true
+	}
+
+	var apiErr smithy.APIError
+	if errors.As(err, &apiErr) {
+		switch apiErr.ErrorCode() {
+		case "NoSuchBucket", "NotFound":
+			return true
+		}
+	}
+
+	var respErr *awshttp.ResponseError
+	return errors.As(err, &respErr) && respErr.HTTPStatusCode() == http.StatusNotFound
+}
+
+func isBucketAlreadyExists(err error) bool {
+	var apiErr smithy.APIError
+	if !errors.As(err, &apiErr) {
+		return false
+	}
+
+	switch apiErr.ErrorCode() {
+	case "BucketAlreadyOwnedByYou", "BucketAlreadyExists":
+		return true
+	default:
+		return false
+	}
 }

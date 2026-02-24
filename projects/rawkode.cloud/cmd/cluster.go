@@ -556,29 +556,17 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 	slog.Info("phase post-bootstrap: best-effort install of Cilium, FluxCD, and Teleport")
 
 	// Install Cilium CNI
-	if !cilium.IsInstalled() {
-		slog.Info("skipping cilium install (CLI not found in PATH)")
-	} else {
-		if err := cilium.Install(ctx, cilium.InstallParams{
-			Hubble: true,
-		}); err != nil {
-			slog.Warn("cilium install failed", "error", err)
-		}
+	if err := cilium.Install(ctx, cilium.InstallParams{
+		Hubble: true,
+	}); err != nil {
+		slog.Warn("cilium install failed", "error", err)
 	}
 
-	// Install FluxCD with OCI repo
-	if cfg.Flux.OCIRepo != "" {
-		if !flux.IsInstalled() {
-			slog.Info("skipping flux bootstrap (flux CLI not found in PATH)")
-		} else {
-			if err := flux.Bootstrap(ctx, flux.BootstrapParams{
-				OCIRepo: cfg.Flux.OCIRepo,
-			}); err != nil {
-				slog.Warn("flux bootstrap failed", "error", err)
-			}
-		}
-	} else {
-		slog.Info("skipping flux bootstrap (no OCI repo configured)")
+	// Install FluxCD (and optionally configure OCI source).
+	if err := flux.Bootstrap(ctx, flux.BootstrapParams{
+		OCIRepo: cfg.Flux.OCIRepo,
+	}); err != nil {
+		slog.Warn("flux bootstrap failed", "error", err)
 	}
 
 	// Deploy Teleport agent
@@ -775,12 +763,18 @@ func ensureTalosAssets(ctx context.Context, cfg *config.Config, endpoint string,
 		return nil, err
 	}
 
+	installDisk := ""
+	if controlPlanePool, err := cfg.FirstNodePoolByType(config.NodeTypeControlPlane); err == nil {
+		installDisk = strings.TrimSpace(controlPlanePool.Disks.OS)
+	}
+
 	assets, err := talos.GenerateConfig(ctx, talos.GenConfigParams{
 		ClusterName:       cfg.Environment,
 		Endpoint:          endpoint,
 		TalosVersion:      cfg.Cluster.TalosVersion,
 		TalosSchematic:    cfg.Cluster.TalosSchematic,
 		KubernetesVersion: cfg.Cluster.KubernetesVersion,
+		InstallDisk:       installDisk,
 		SecretsYAML:       secretsYAML,
 	})
 	if err != nil {
