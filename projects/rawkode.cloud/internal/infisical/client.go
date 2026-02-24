@@ -108,8 +108,7 @@ func (c *Client) EnsureSecretPath(_ context.Context, projectID, environment, sec
 			Path:        currentPath,
 		})
 		if err != nil {
-			var apiErr *sdkerrors.APIError
-			if errors.As(err, &apiErr) && apiErr.StatusCode == 409 {
+			if isFolderAlreadyExistsError(err) {
 				// Folder already exists.
 			} else {
 				return fmt.Errorf("ensure folder %q at %q: %w", segment, currentPath, err)
@@ -124,4 +123,21 @@ func (c *Client) EnsureSecretPath(_ context.Context, projectID, environment, sec
 	}
 
 	return nil
+}
+
+func isFolderAlreadyExistsError(err error) bool {
+	var apiErr *sdkerrors.APIError
+	if !errors.As(err, &apiErr) {
+		return false
+	}
+
+	if apiErr.StatusCode == 409 {
+		return true
+	}
+
+	if apiErr.StatusCode == 400 && strings.Contains(strings.ToLower(apiErr.ErrorMessage), "already exists") {
+		return true
+	}
+
+	return false
 }
