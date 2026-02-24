@@ -3,12 +3,10 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import MarkdownPreview from "@uiw/react-markdown-preview/nohighlight";
 import { CornerDownRight, ExternalLink, Link2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { ApiComment, ApiPost, CommentNode, Paginated } from "@/components/app-data";
 import { buildCommentTree, commentAnchor, formatRelativeTime, postPath } from "@/components/app-data";
-import { getCategoryBadgeClass } from "@/components/category-styles";
 import { commentsQueryOptions, postQueryOptions } from "@/components/query-client";
 import { useSession } from "@/components/session";
 import { cn } from "@/lib/utils";
@@ -299,11 +297,22 @@ export function PostPage() {
 
       <article>
         <section className="rkn-panel space-y-5 p-5 sm:p-6">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className={getCategoryBadgeClass(post.category)}>
-              {post.category}
-            </Badge>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,52%)] items-center gap-x-2 text-xs text-muted-foreground">
             <span>posted {formatRelativeTime(post.createdAt)}</span>
+            {post.tags.length > 0 ? (
+              <span className="min-w-0 self-center justify-self-end">
+                <span className="flex max-w-full flex-wrap items-center justify-end gap-1">
+                  {post.tags.map((tag) => (
+                    <span
+                      key={tag.id}
+                      className="inline-flex h-5 shrink-0 items-center rounded-md border border-border bg-muted px-1.5 text-[10px] leading-none font-semibold uppercase tracking-wide text-foreground"
+                    >
+                      {tag.slug}
+                    </span>
+                  ))}
+                </span>
+              </span>
+            ) : null}
           </div>
 
           <h1 className="text-[clamp(1.4rem,2.6vw,2rem)] font-semibold leading-[1.2] tracking-tight">{post.title}</h1>

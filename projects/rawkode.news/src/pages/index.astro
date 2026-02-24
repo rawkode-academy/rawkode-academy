@@ -8,11 +8,11 @@ const queryClient = new QueryClient();
 const pageParam = Number(Astro.url.searchParams.get("page") ?? "1");
 const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 const response = await fetch(
-	`${Astro.url.origin}/api/posts?category=new&page=${page}`
+  `${Astro.url.origin}/api/posts?feed=new&page=${page}`,
 );
 if (response.ok) {
-	const data = await response.json();
-	queryClient.setQueryData(["posts", "new", page], data);
+  const data = await response.json();
+  queryClient.setQueryData(["posts", "new", page, "all"], data);
 }
 const dehydratedState = dehydrate(queryClient);
 const canonicalPath = buildCanonicalPath("/", Astro.url.searchParams, ["page"]);
@@ -20,11 +20,11 @@ const title = page > 1 ? `Rawkode News — Page ${page}` : "Rawkode News";
 ---
 
 <BaseLayout
-	title={title}
-	description="Latest signals from the Rawkode News community."
-	canonicalPath={canonicalPath}
-	robots="index, follow"
-	ogType="website"
+  title={title}
+  description="Latest signals from the Rawkode News community."
+  canonicalPath={canonicalPath}
+  robots="index, follow"
+  ogType="website"
 >
-	<App client:only="react" dehydratedState={dehydratedState} />
+  <App client:only="react" dehydratedState={dehydratedState} />
 </BaseLayout>

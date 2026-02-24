@@ -28,9 +28,11 @@ const navLinkClass = (isActive: boolean) =>
 function ProfileMenu({
   user,
   signOutUrl,
+  isAdmin,
 }: {
   user: ApiSession["user"];
   signOutUrl: string;
+  isAdmin: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -110,6 +112,14 @@ function ProfileMenu({
             >
               Profile
             </Link>
+            {isAdmin ? (
+              <Link
+                to="/admin/tags"
+                className="block rounded-none px-3 py-2 text-foreground/80 hover:bg-accent hover:text-foreground"
+              >
+                Admin tags
+              </Link>
+            ) : null}
             <a
               href={signOutUrl}
               className="block rounded-none px-3 py-2 text-foreground/80 hover:bg-accent hover:text-foreground"
@@ -139,6 +149,7 @@ export function Shell() {
   const signOutUrl = `/api/auth/sign-out?returnTo=${encodeURIComponent(returnTo)}`;
   const sessionQuery = useSession();
   const user = sessionQuery.data?.user ?? null;
+  const isAdmin = Boolean(sessionQuery.data?.permissions?.isAdmin);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -178,7 +189,7 @@ export function Shell() {
                       Create post
                     </Link>
                   </Button>
-                  <ProfileMenu user={user} signOutUrl={signOutUrl} />
+                  <ProfileMenu user={user} signOutUrl={signOutUrl} isAdmin={isAdmin} />
                 </>
               ) : (
                 <Button variant="secondary" size="sm" asChild>
@@ -235,6 +246,14 @@ export function Shell() {
                   >
                     Profile
                   </NavLink>
+                  {isAdmin ? (
+                    <NavLink
+                      to="/admin/tags"
+                      className="inline-flex h-10 items-center rounded-none px-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      Admin tags
+                    </NavLink>
+                  ) : null}
                   <Button variant="secondary" size="sm" asChild>
                     <a href={signOutUrl}>Sign out</a>
                   </Button>
