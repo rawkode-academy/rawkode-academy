@@ -98,7 +98,6 @@ type TeleportConfig struct {
 
 const (
 	TeleportModeSelfHosted = "self_hosted"
-	TeleportModeExternal   = "external"
 	TeleportModeDisabled   = "disabled"
 )
 
@@ -443,12 +442,16 @@ func NormalizeNodePoolType(value string) string {
 	}
 }
 
-// EffectiveMode returns the normalized Teleport mode with a default.
+// EffectiveMode returns the normalized Teleport mode.
+// Empty mode defaults to self_hosted; unsupported non-empty values return empty.
 func (c TeleportConfig) EffectiveMode() string {
 	if normalized := NormalizeTeleportMode(c.Mode); normalized != "" {
 		return normalized
 	}
-	return TeleportModeSelfHosted
+	if strings.TrimSpace(c.Mode) == "" {
+		return TeleportModeSelfHosted
+	}
+	return ""
 }
 
 // EffectiveEnabled returns whether Teleport native ACME is enabled.
@@ -492,8 +495,6 @@ func NormalizeTeleportMode(value string) string {
 	switch strings.ToLower(strings.TrimSpace(value)) {
 	case "", "self_hosted", "self-hosted", "selfhosted":
 		return TeleportModeSelfHosted
-	case "external":
-		return TeleportModeExternal
 	case "disabled", "off":
 		return TeleportModeDisabled
 	default:

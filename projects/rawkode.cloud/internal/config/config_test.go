@@ -55,7 +55,6 @@ func TestNormalizeTeleportMode(t *testing.T) {
 		{input: "", want: TeleportModeSelfHosted},
 		{input: "self-hosted", want: TeleportModeSelfHosted},
 		{input: "self_hosted", want: TeleportModeSelfHosted},
-		{input: "external", want: TeleportModeExternal},
 		{input: "disabled", want: TeleportModeDisabled},
 		{input: "unknown", want: ""},
 	}
@@ -70,6 +69,13 @@ func TestNormalizeTeleportMode(t *testing.T) {
 func TestTeleportEffectiveModeDefaultsToSelfHosted(t *testing.T) {
 	if got := (TeleportConfig{}).EffectiveMode(); got != TeleportModeSelfHosted {
 		t.Fatalf("TeleportConfig{}.EffectiveMode() = %q, want %q", got, TeleportModeSelfHosted)
+	}
+}
+
+func TestTeleportEffectiveModeRejectsUnsupportedExplicitMode(t *testing.T) {
+	cfg := TeleportConfig{Mode: "external"}
+	if got := cfg.EffectiveMode(); got != "" {
+		t.Fatalf("TeleportConfig{Mode: external}.EffectiveMode() = %q, want empty", got)
 	}
 }
 
