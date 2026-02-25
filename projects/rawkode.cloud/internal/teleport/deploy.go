@@ -24,15 +24,6 @@ import (
 
 const teleportFieldManager = "rawkode-cloud3-teleport"
 
-// DeployKubeAgentParams defines parameters for deploying the external Teleport kube agent.
-type DeployKubeAgentParams struct {
-	Kubeconfig  string
-	ProxyAddr   string
-	ClusterName string
-	JoinToken   string
-	Version     string
-}
-
 // DeploySelfHostedParams defines parameters for deploying self-hosted Teleport.
 type DeploySelfHostedParams struct {
 	Kubeconfig         string
@@ -49,26 +40,6 @@ type DeploySelfHostedParams struct {
 	ACMEEmail          string
 	ACMEURI            string
 	Version            string
-}
-
-// DeployKubeAgent applies the Teleport kube-agent manifests for external Teleport mode.
-func DeployKubeAgent(ctx context.Context, params DeployKubeAgentParams) error {
-	if strings.TrimSpace(params.ProxyAddr) == "" {
-		return fmt.Errorf("proxy address is required")
-	}
-	if strings.TrimSpace(params.ClusterName) == "" {
-		return fmt.Errorf("cluster name is required")
-	}
-	if strings.TrimSpace(params.JoinToken) == "" {
-		return fmt.Errorf("join token is required")
-	}
-
-	return applyKubernetesManifest(ctx, strings.TrimSpace(params.Kubeconfig), KubeAgentManifest(
-		strings.TrimSpace(params.ProxyAddr),
-		strings.TrimSpace(params.ClusterName),
-		strings.TrimSpace(params.JoinToken),
-		strings.TrimSpace(params.Version),
-	))
 }
 
 // DeploySelfHosted applies a single-node self-hosted Teleport deployment with GitHub auth.

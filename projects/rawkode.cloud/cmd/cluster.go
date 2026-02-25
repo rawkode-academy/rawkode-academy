@@ -114,10 +114,7 @@ var createClusterPhases = []string{
 var (
 	ciliumInstallFn                         = cilium.Install
 	fluxBootstrapFn                         = flux.Bootstrap
-	teleportGenerateJoinTokenFn             = teleport.GenerateJoinToken
-	teleportDeployKubeAgentFn               = teleport.DeployKubeAgent
 	teleportDeploySelfHostedFn              = teleport.DeploySelfHosted
-	teleportEnsureAdminAccessFn             = teleport.EnsureAdminAccess
 	postBootstrapKubeconfigPathFn           = postBootstrapKubeconfigPath
 	postBootstrapKubeconfigRetryInterval    = 15 * time.Second
 	postBootstrapKubeconfigRetryTimeout     = 30 * time.Minute
@@ -911,85 +908,9 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		bootstrapErrors = append(bootstrapErrors, fmt.Errorf("bootstrap flux: %w", err))
 	}
 
-	ensureTeleportAdminAccess := func(strict bool) error {
-		organization := strings.TrimSpace(cfg.Teleport.GitHub.Organization)
-		adminTeams := cfg.Teleport.EffectiveAdminTeams()
-		kubernetesUsers := cfg.Teleport.EffectiveKubernetesUsers()
-		kubernetesGroups := cfg.Teleport.EffectiveKubernetesGroups()
-
-		if organization == "" || len(adminTeams) == 0 {
-			slog.Warn(
-				"skipping teleport access reconciliation (teleport.github.organization and admin teams are required)",
-				"organization", organization,
-				"admin_teams", adminTeams,
-			)
-			return nil
-		}
-
-		slog.Info(
-			"ensuring teleport kubernetes admin access",
-			"organization", organization,
-			"admin_teams", adminTeams,
-			"kubernetes_users", kubernetesUsers,
-			"kubernetes_groups", kubernetesGroups,
-		)
-
-		err := teleportEnsureAdminAccessFn(ctx, teleport.EnsureAccessParams{
-			ProxyAddr:        strings.TrimSpace(cfg.Teleport.Domain),
-			Organization:     organization,
-			AdminTeams:       adminTeams,
-			KubernetesUsers:  kubernetesUsers,
-			KubernetesGroups: kubernetesGroups,
-		})
-		if err == nil {
-			slog.Info("teleport kubernetes admin access ensured")
-			return nil
-		}
-		if strict {
-			return fmt.Errorf("ensure teleport admin access: %w", err)
-		}
-
-		slog.Warn("teleport admin access reconciliation failed (continuing in best-effort mode)", "error", err)
-		return nil
-	}
-
 	switch cfg.Teleport.EffectiveMode() {
 	case config.TeleportModeDisabled:
 		slog.Info("skipping teleport (mode disabled)")
-	case config.TeleportModeExternal:
-		if strings.TrimSpace(cfg.Teleport.Domain) == "" {
-			slog.Info("skipping external teleport agent (domain not configured)")
-			break
-		}
-
-		joinToken, err := teleportGenerateJoinTokenFn(ctx, cfg.Teleport.Domain, 30*time.Minute)
-		if err != nil {
-			slog.Warn("teleport join token generation failed", "error", err)
-			bootstrapErrors = append(bootstrapErrors, fmt.Errorf("generate teleport join token: %w", err))
-			break
-		}
-
-		slog.Info("deploying teleport kube agent",
-			"proxy_addr", cfg.Teleport.Domain,
-			"cluster", cfg.Environment,
-			"version", cfg.Cluster.EffectiveTeleportVersion(),
-		)
-
-		if err := teleportDeployKubeAgentFn(ctx, teleport.DeployKubeAgentParams{
-			Kubeconfig:  kubeconfigPath,
-			ProxyAddr:   cfg.Teleport.Domain,
-			ClusterName: cfg.Environment,
-			JoinToken:   joinToken,
-			Version:     cfg.Cluster.EffectiveTeleportVersion(),
-		}); err != nil {
-			slog.Warn("teleport agent deployment failed", "error", err)
-			bootstrapErrors = append(bootstrapErrors, fmt.Errorf("deploy teleport kube agent: %w", err))
-		} else {
-			slog.Info("teleport kube agent deployed successfully")
-			if err := ensureTeleportAdminAccess(false); err != nil {
-				bootstrapErrors = append(bootstrapErrors, err)
-			}
-		}
 	case config.TeleportModeSelfHosted:
 		if strings.TrimSpace(cfg.Teleport.Domain) == "" {
 			slog.Warn("skipping self-hosted teleport deployment (teleport.domain not configured)")
@@ -1053,10 +974,6 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 			bootstrapErrors = append(bootstrapErrors, fmt.Errorf("deploy self-hosted teleport: %w", err))
 		} else {
 			slog.Info("self-hosted teleport deployed successfully")
-			if err := ensureTeleportAdminAccess(true); err != nil {
-				slog.Warn("self-hosted teleport access reconciliation failed", "error", err)
-				bootstrapErrors = append(bootstrapErrors, err)
-			}
 		}
 	default:
 		slog.Warn("skipping teleport deployment (unsupported teleport.mode)", "mode", cfg.Teleport.Mode)
