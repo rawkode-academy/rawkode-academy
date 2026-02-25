@@ -25,6 +25,12 @@ import (
 
 const talosAPIDefaultPort = "50000"
 
+var (
+	waitForMaintenancePollInterval = 15 * time.Second
+	waitForMaintenanceProbeTimeout = 5 * time.Second
+	waitForMaintenanceProbeFn      = probeTalosMaintenance
+)
+
 // Client wraps Talos operations over the Talos gRPC API.
 type Client struct {
 	targetNode string
@@ -319,30 +325,49 @@ func (c *Client) Reset(ctx context.Context) error {
 	return nil
 }
 
+func probeTalosMaintenance(ctx context.Context, endpoint string) error {
+	client, err := NewInsecureClient(endpoint)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	if _, err := client.machine.Version(ctx, &emptypb.Empty{}); err != nil {
+		return fmt.Errorf("query talos version: %w", err)
+	}
+
+	return nil
+}
+
 // WaitForMaintenance polls until the Talos API is reachable in maintenance mode.
 func WaitForMaintenance(ctx context.Context, ip string, timeout time.Duration) error {
 	target := net.JoinHostPort(ip, talosAPIDefaultPort)
-	deadline := time.After(timeout)
-	ticker := time.NewTicker(15 * time.Second)
+	deadline := time.NewTimer(timeout)
+	defer deadline.Stop()
+	ticker := time.NewTicker(waitForMaintenancePollInterval)
 	defer ticker.Stop()
 
 	slog.Info("waiting for talos maintenance mode", "target", target)
 
+	attempt := 0
 	for {
+		attempt++
+		probeCtx, cancel := context.WithTimeout(ctx, waitForMaintenanceProbeTimeout)
+		err := waitForMaintenanceProbeFn(probeCtx, ip)
+		cancel()
+		if err == nil {
+			slog.Info("talos maintenance mode reachable", "target", target)
+			return nil
+		}
+
+		slog.Debug("talos not yet reachable", "target", target, "attempt", attempt, "error", err)
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-deadline:
+		case <-deadline.C:
 			return fmt.Errorf("talos maintenance mode not reachable at %s within %s", target, timeout)
 		case <-ticker.C:
-			conn, err := net.DialTimeout("tcp", target, 5*time.Second)
-			if err != nil {
-				slog.Debug("talos not yet reachable", "target", target, "error", err)
-				continue
-			}
-			conn.Close()
-			slog.Info("talos maintenance mode reachable", "target", target)
-			return nil
 		}
 	}
 }
