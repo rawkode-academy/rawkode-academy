@@ -5,7 +5,8 @@ import (
 	"strings"
 )
 
-const defaultTeleportImageTag = "17"
+const defaultTeleportImageTag = "18"
+const defaultTeleportBootstrapRole = "kube-admin"
 
 // KubeAgentManifest generates the Kubernetes YAML for a Teleport kube agent deployment.
 func KubeAgentManifest(proxyAddr, clusterName, joinToken, version string) string {
@@ -87,11 +88,29 @@ subjects:
 }
 
 // SelfHostedManifest generates Kubernetes YAML for a single-node self-hosted Teleport deployment.
-func SelfHostedManifest(clusterName, domain, version, githubOrganization string, githubTeams []string, githubClientID, githubClientSecret string) string {
+func SelfHostedManifest(
+	clusterName,
+	domain,
+	version,
+	githubOrganization string,
+	githubTeams []string,
+	githubClientID,
+	githubClientSecret string,
+	acmeEnabled bool,
+	acmeEmail,
+	acmeURI string,
+) string {
 	return fmt.Sprintf(`apiVersion: v1
 kind: Namespace
 metadata:
   name: teleport
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: privileged
+    pod-security.kubernetes.io/warn-version: latest
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/audit-version: latest
 ---
 apiVersion: v1
 kind: Secret
@@ -111,26 +130,46 @@ stringData:
     auth_service:
       enabled: "yes"
       cluster_name: %q
+      proxy_listener_mode: multiplex
       authentication:
         type: github
-      connectors:
-        - type: github
-          id: github
-          name: GitHub
-          client_id: %q
-          client_secret: %q
-          redirect_url: %q
-          teams_to_logins:
-%s
+        connector_name: github
     proxy_service:
       enabled: "yes"
       web_listen_addr: 0.0.0.0:443
-      public_addr: %q
+      public_addr: %q%s
     kubernetes_service:
       enabled: "yes"
+      listen_addr: 0.0.0.0:3026
       kube_cluster_name: %q
     ssh_service:
       enabled: "no"
+  bootstrap-resources.yaml: |
+    kind: github
+    version: v3
+    metadata:
+      name: github
+    spec:
+      client_id: %q
+      client_secret: %q
+      display: GitHub
+      redirect_url: %q
+      teams_to_roles:
+%s
+    ---
+    kind: role
+    version: v8
+    metadata:
+      name: %q
+    spec:
+      allow:
+        kubernetes_labels:
+          '*': '*'
+        kubernetes_groups:
+          - system:masters
+        kubernetes_users:
+          - teleport-admin
+      deny: {}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -174,6 +213,7 @@ spec:
           image: %s
           args:
             - --config=/etc/teleport/teleport.yaml
+            - --bootstrap=/etc/teleport/bootstrap-resources.yaml
           ports:
             - name: web
               containerPort: 443
@@ -191,10 +231,10 @@ spec:
             secretName: teleport-config
         - name: data
           emptyDir: {}
-`, clusterName, clusterName, githubClientID, githubClientSecret, fmt.Sprintf("https://%s/v1/webapi/github/callback", domain), githubTeamsToLoginsYAML(githubOrganization, githubTeams), fmt.Sprintf("%s:443", domain), clusterName, teleportImage(version))
+`, clusterName, clusterName, fmt.Sprintf("%s:443", domain), proxyACMEYAML(acmeEnabled, acmeEmail, acmeURI), clusterName, githubClientID, githubClientSecret, fmt.Sprintf("https://%s/v1/webapi/github/callback", domain), githubTeamsToRolesYAML(githubOrganization, githubTeams), defaultTeleportBootstrapRole, teleportImage(version))
 }
 
-func githubTeamsToLoginsYAML(organization string, teams []string) string {
+func githubTeamsToRolesYAML(organization string, teams []string) string {
 	organization = strings.TrimSpace(organization)
 	var b strings.Builder
 
@@ -203,9 +243,28 @@ func githubTeamsToLoginsYAML(organization string, teams []string) string {
 		if trimmed == "" {
 			continue
 		}
-		fmt.Fprintf(&b, "            - organization: %q\n", organization)
-		fmt.Fprintf(&b, "              team: %q\n", trimmed)
-		fmt.Fprintln(&b, `              logins: ["root"]`)
+		fmt.Fprintf(&b, "        - organization: %q\n", organization)
+		fmt.Fprintf(&b, "          team: %q\n", trimmed)
+		fmt.Fprintf(&b, "          roles: [%q]\n", defaultTeleportBootstrapRole)
+	}
+
+	return b.String()
+}
+
+func proxyACMEYAML(enabled bool, email, uri string) string {
+	if !enabled {
+		return ""
+	}
+
+	var b strings.Builder
+	b.WriteString("\n      acme:\n")
+	b.WriteString("        enabled: yes")
+
+	if trimmed := strings.TrimSpace(email); trimmed != "" {
+		fmt.Fprintf(&b, "\n        email: %q", trimmed)
+	}
+	if trimmed := strings.TrimSpace(uri); trimmed != "" {
+		fmt.Fprintf(&b, "\n        uri: %q", trimmed)
 	}
 
 	return b.String()

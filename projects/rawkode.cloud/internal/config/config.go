@@ -38,6 +38,9 @@ type ClusterConfig struct {
 	CiliumVersion     string `yaml:"cilium_version"`
 	FluxVersion       string `yaml:"flux_version"`
 	TeleportVersion   string `yaml:"teleport_version"`
+	// ControlPlaneTaints controls whether control-plane NoSchedule taints are kept.
+	// true keeps taints (isolated control-plane), false removes them (schedulable).
+	ControlPlaneTaints *bool `yaml:"controlPlaneTaints"`
 }
 
 // ScalewayConfig holds Scaleway infrastructure settings (no credentials).
@@ -73,7 +76,7 @@ const (
 const (
 	defaultCiliumVersion   = "v1.19.0"
 	defaultFluxVersion     = "latest"
-	defaultTeleportVersion = "17"
+	defaultTeleportVersion = "18"
 )
 
 // DiskConfig holds disk device paths.
@@ -86,6 +89,7 @@ type DiskConfig struct {
 type TeleportConfig struct {
 	Domain string               `yaml:"domain"`
 	Mode   string               `yaml:"mode"`
+	ACME   TeleportACMEConfig   `yaml:"acme"`
 	GitHub TeleportGitHubConfig `yaml:"github"`
 }
 
@@ -94,6 +98,13 @@ const (
 	TeleportModeExternal   = "external"
 	TeleportModeDisabled   = "disabled"
 )
+
+// TeleportACMEConfig holds Teleport native ACME settings.
+type TeleportACMEConfig struct {
+	Enabled *bool  `yaml:"enabled"`
+	Email   string `yaml:"email"`
+	URI     string `yaml:"uri"`
+}
 
 // TeleportGitHubConfig holds Teleport GitHub connector settings.
 type TeleportGitHubConfig struct {
@@ -376,6 +387,16 @@ func (c ClusterConfig) EffectiveTeleportVersion() string {
 	return defaultTeleportVersion
 }
 
+// EffectiveControlPlaneTaints returns whether control-plane NoSchedule taints should be kept.
+// Defaults to true to preserve control-plane isolation when unset.
+func (c ClusterConfig) EffectiveControlPlaneTaints() bool {
+	if c.ControlPlaneTaints == nil {
+		return true
+	}
+
+	return *c.ControlPlaneTaints
+}
+
 // ScalewayVPCName derives the shared VPC name from the cluster/environment name.
 func (c *Config) ScalewayVPCName() (string, error) {
 	if c == nil {
@@ -418,6 +439,15 @@ func (c TeleportConfig) EffectiveMode() string {
 		return normalized
 	}
 	return TeleportModeSelfHosted
+}
+
+// EffectiveEnabled returns whether Teleport native ACME is enabled.
+func (c TeleportACMEConfig) EffectiveEnabled() bool {
+	if c.Enabled == nil {
+		return false
+	}
+
+	return *c.Enabled
 }
 
 // NormalizeTeleportMode normalizes user-facing Teleport mode variants.

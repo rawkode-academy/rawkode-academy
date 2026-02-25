@@ -42,6 +42,9 @@ type DeploySelfHostedParams struct {
 	GitHubTeams        []string
 	GitHubClientID     string
 	GitHubClientSecret string
+	ACMEEnabled        bool
+	ACMEEmail          string
+	ACMEURI            string
 	Version            string
 }
 
@@ -98,6 +101,9 @@ func DeploySelfHosted(ctx context.Context, params DeploySelfHostedParams) error 
 		teams,
 		strings.TrimSpace(params.GitHubClientID),
 		strings.TrimSpace(params.GitHubClientSecret),
+		params.ACMEEnabled,
+		strings.TrimSpace(params.ACMEEmail),
+		strings.TrimSpace(params.ACMEURI),
 	)
 
 	return applyKubernetesManifest(ctx, strings.TrimSpace(params.Kubeconfig), manifest)

@@ -73,6 +73,22 @@ func TestTeleportEffectiveModeDefaultsToSelfHosted(t *testing.T) {
 	}
 }
 
+func TestTeleportACMEEffectiveEnabled(t *testing.T) {
+	if got := (TeleportACMEConfig{}).EffectiveEnabled(); got {
+		t.Fatalf("TeleportACMEConfig{}.EffectiveEnabled() = %t, want false", got)
+	}
+
+	enabled := true
+	if got := (TeleportACMEConfig{Enabled: &enabled}).EffectiveEnabled(); !got {
+		t.Fatalf("TeleportACMEConfig{Enabled:true}.EffectiveEnabled() = %t, want true", got)
+	}
+
+	disabled := false
+	if got := (TeleportACMEConfig{Enabled: &disabled}).EffectiveEnabled(); got {
+		t.Fatalf("TeleportACMEConfig{Enabled:false}.EffectiveEnabled() = %t, want false", got)
+	}
+}
+
 func TestScalewayNetworkNameDerivation(t *testing.T) {
 	cfg := &Config{Environment: "rawkode-cloud"}
 
@@ -130,5 +146,23 @@ func TestClusterEffectiveTeleportVersion(t *testing.T) {
 	cfg := ClusterConfig{TeleportVersion: "18"}
 	if got := cfg.EffectiveTeleportVersion(); got != "18" {
 		t.Fatalf("ClusterConfig{TeleportVersion: 18}.EffectiveTeleportVersion() = %q, want %q", got, "18")
+	}
+}
+
+func TestClusterEffectiveControlPlaneTaints(t *testing.T) {
+	if got := (ClusterConfig{}).EffectiveControlPlaneTaints(); !got {
+		t.Fatalf("ClusterConfig{}.EffectiveControlPlaneTaints() = %t, want true", got)
+	}
+
+	keepTaints := true
+	cfgKeep := ClusterConfig{ControlPlaneTaints: &keepTaints}
+	if got := cfgKeep.EffectiveControlPlaneTaints(); !got {
+		t.Fatalf("ClusterConfig{ControlPlaneTaints:true}.EffectiveControlPlaneTaints() = %t, want true", got)
+	}
+
+	removeTaints := false
+	cfgRemove := ClusterConfig{ControlPlaneTaints: &removeTaints}
+	if got := cfgRemove.EffectiveControlPlaneTaints(); got {
+		t.Fatalf("ClusterConfig{ControlPlaneTaints:false}.EffectiveControlPlaneTaints() = %t, want false", got)
 	}
 }

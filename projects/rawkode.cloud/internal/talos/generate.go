@@ -24,13 +24,14 @@ type GenConfigResult struct {
 
 // GenConfigParams holds generation inputs for Talos configuration generation.
 type GenConfigParams struct {
-	ClusterName       string
-	Endpoint          string
-	TalosVersion      string
-	TalosSchematic    string
-	KubernetesVersion string
-	InstallDisk       string
-	SecretsYAML       []byte
+	ClusterName        string
+	Endpoint           string
+	TalosVersion       string
+	TalosSchematic     string
+	KubernetesVersion  string
+	InstallDisk        string
+	ControlPlaneTaints bool
+	SecretsYAML        []byte
 }
 
 // GenerateSecretsYAML generates a Talos secrets document via Talos Go APIs.
@@ -106,7 +107,7 @@ func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResu
 		talosgenerate.WithSecretsBundle(secretsBundle),
 		talosgenerate.WithEndpointList([]string{talosEndpoint}),
 		talosgenerate.WithClusterCNIConfig(&v1alpha1.CNIConfig{CNIName: "none"}),
-		talosgenerate.WithAllowSchedulingOnControlPlanes(true),
+		talosgenerate.WithAllowSchedulingOnControlPlanes(allowSchedulingOnControlPlanes(params.ControlPlaneTaints)),
 		talosgenerate.WithInstallDisk(installDisk),
 	}
 
@@ -193,4 +194,8 @@ func resolveInstallDisk(configuredDisk string) string {
 	}
 
 	return defaultOSDisk
+}
+
+func allowSchedulingOnControlPlanes(controlPlaneTaints bool) bool {
+	return !controlPlaneTaints
 }

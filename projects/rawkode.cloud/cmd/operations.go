@@ -2,16 +2,14 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	clusterstate "github.com/rawkode-academy/rawkode-cloud3/internal/cluster"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/config"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
-	"github.com/rawkode-academy/rawkode-cloud3/internal/scaleway"
-	scw "github.com/scaleway/scaleway-sdk-go/scw"
 	"github.com/spf13/cobra"
 )
 
@@ -85,6 +83,7 @@ func runOpsResume(cmd *cobra.Command, args []string) error {
 	if strings.TrimSpace(cfgPathFlag) == "" {
 		return fmt.Errorf("--config is required")
 	}
+	fromPhase, _ := cmd.Flags().GetString("from-phase")
 
 	cfg, cfgPath, err := loadConfigForClusterOrFile("", cfgPathFlag)
 	if err != nil {
@@ -99,6 +98,16 @@ func runOpsResume(cmd *cobra.Command, args []string) error {
 	op, err := store.Load(args[0])
 	if err != nil {
 		return fmt.Errorf("load operation: %w", err)
+	}
+
+	if strings.TrimSpace(fromPhase) != "" {
+		if err := resetOperationFromPhase(op, fromPhase); err != nil {
+			return err
+		}
+		if err := store.Save(op); err != nil {
+			return fmt.Errorf("save reset operation: %w", err)
+		}
+		fmt.Printf("Reset operation %s from phase %q.\n", op.ID, strings.TrimSpace(fromPhase))
 	}
 
 	if op.IsComplete() {
@@ -129,9 +138,48 @@ func runOpsResume(cmd *cobra.Command, args []string) error {
 	}
 }
 
-type cleanupDeleteServer struct {
-	ServerID string `json:"serverId"`
-	Zone     string `json:"zone"`
+func resetOperationFromPhase(op *operation.Operation, fromPhase string) error {
+	if op == nil {
+		return fmt.Errorf("operation is required")
+	}
+
+	target := strings.TrimSpace(fromPhase)
+	if target == "" {
+		return fmt.Errorf("from phase is required")
+	}
+
+	startIdx := -1
+	for i, phaseName := range op.PhaseOrder {
+		if phaseName == target {
+			startIdx = i
+			break
+		}
+	}
+	if startIdx < 0 {
+		return fmt.Errorf("phase %q not found in operation %s", target, op.ID)
+	}
+
+	for i, phaseName := range op.PhaseOrder {
+		if i < startIdx {
+			continue
+		}
+
+		phase, ok := op.Phases[phaseName]
+		if !ok || phase == nil {
+			phase = &operation.Phase{}
+			op.Phases[phaseName] = phase
+		}
+
+		phase.Status = operation.PhasePending
+		phase.StartedAt = nil
+		phase.CompletedAt = nil
+		phase.Error = ""
+		phase.Data = nil
+	}
+
+	op.CurrentPhase = target
+	op.UpdatedAt = time.Now().UTC()
+	return nil
 }
 
 func runOpsAbort(cmd *cobra.Command, args []string) error {
@@ -156,27 +204,7 @@ func runOpsAbort(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("load operation: %w", err)
 	}
 
-	registry := operation.NewCleanupRegistry()
-	registry.Register("delete-server", func(ctx context.Context, data json.RawMessage) error {
-		var payload cleanupDeleteServer
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return fmt.Errorf("decode cleanup payload: %w", err)
-		}
-		if strings.TrimSpace(payload.ServerID) == "" {
-			return fmt.Errorf("cleanup payload missing serverId")
-		}
-		if strings.TrimSpace(payload.Zone) == "" {
-			return fmt.Errorf("cleanup payload missing zone")
-		}
-
-		accessKey, secretKey := cfg.ScalewayCredentials()
-		scwClient, err := scaleway.NewClient(accessKey, secretKey, cfg.Scaleway.ProjectID, cfg.Scaleway.OrganizationID)
-		if err != nil {
-			return fmt.Errorf("create scaleway client: %w", err)
-		}
-
-		return scaleway.DeleteServer(ctx, scwClient.Baremetal, payload.ServerID, scw.Zone(payload.Zone))
-	})
+	registry := newCreateCleanupRegistry(cfg)
 
 	fmt.Printf("Aborting operation %s, executing %d cleanup actions...\n", op.ID, len(op.Cleanup))
 	errs := registry.ExecuteLIFO(ctx, op.Cleanup)
@@ -205,4 +233,5 @@ func init() {
 	for _, c := range []*cobra.Command{opsListCmd, opsResumeCmd, opsAbortCmd} {
 		c.Flags().String("config", "", "Path to cluster config YAML")
 	}
+	opsResumeCmd.Flags().String("from-phase", "", "Reset operation status from this phase onward before resuming")
 }
