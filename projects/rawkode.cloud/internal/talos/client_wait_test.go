@@ -6,6 +6,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestWaitForMaintenanceRetriesUntilProbeSucceeds(t *testing.T) {
@@ -69,5 +72,26 @@ func TestWaitForMaintenanceTimesOutWhenProbeNeverSucceeds(t *testing.T) {
 	}
 	if attempts == 0 {
 		t.Fatal("expected at least one probe attempt")
+	}
+}
+
+func TestIsMaintenanceModeVersionUnimplementedError(t *testing.T) {
+	err := status.Error(codes.Unimplemented, "API is not implemented in maintenance mode")
+	if !isMaintenanceModeVersionUnimplementedError(err) {
+		t.Fatal("expected maintenance-mode unimplemented error to be treated as reachable")
+	}
+}
+
+func TestIsMaintenanceModeVersionUnimplementedErrorRejectsOtherErrors(t *testing.T) {
+	cases := []error{
+		status.Error(codes.Unimplemented, "unknown service"),
+		status.Error(codes.Unavailable, "API is not implemented in maintenance mode"),
+		errors.New("not a grpc status error"),
+	}
+
+	for _, err := range cases {
+		if isMaintenanceModeVersionUnimplementedError(err) {
+			t.Fatalf("error %q should not be treated as maintenance-mode success", err)
+		}
 	}
 }

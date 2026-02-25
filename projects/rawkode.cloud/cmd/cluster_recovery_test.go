@@ -16,15 +16,15 @@ func TestShouldCleanupIncompleteCreateOperation(t *testing.T) {
 		}
 	})
 
-	t.Run("pre talos phase cleans up", func(t *testing.T) {
+	t.Run("pre talos phase resumes by default", func(t *testing.T) {
 		op := operation.New("op-2", operation.TypeCreateCluster, "production", createClusterPhases)
 		if err := op.CompletePhase("init", nil); err != nil {
 			t.Fatalf("complete init: %v", err)
 		}
 
 		shouldCleanup, _ := shouldCleanupIncompleteCreateOperation(op, false)
-		if !shouldCleanup {
-			t.Fatalf("expected cleanup for pre-Talos phase %q", op.ResumePhase())
+		if shouldCleanup {
+			t.Fatalf("did not expect cleanup for pre-Talos phase %q", op.ResumePhase())
 		}
 	})
 

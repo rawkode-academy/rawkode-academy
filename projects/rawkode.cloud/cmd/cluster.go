@@ -20,6 +20,7 @@ import (
 	"github.com/rawkode-academy/rawkode-cloud3/internal/scaleway"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/talos"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/teleport"
+	"github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
 	scw "github.com/scaleway/scaleway-sdk-go/scw"
 	"github.com/spf13/cobra"
 
@@ -109,16 +110,22 @@ var createClusterPhases = []string{
 }
 
 var (
-	ciliumInstallFn                         = cilium.Install
-	fluxBootstrapFn                         = flux.Bootstrap
-	teleportGenerateJoinTokenFn             = teleport.GenerateJoinToken
-	teleportDeployKubeAgentFn               = teleport.DeployKubeAgent
-	teleportDeploySelfHostedFn              = teleport.DeploySelfHosted
-	teleportEnsureAdminAccessFn             = teleport.EnsureAdminAccess
-	postBootstrapKubeconfigPathFn           = postBootstrapKubeconfigPath
-	postBootstrapKubeconfigRetryInterval    = 15 * time.Second
-	postBootstrapKubeconfigRetryTimeout     = 10 * time.Minute
-	scalewayNewClientFn                     = scaleway.NewClient
+	ciliumInstallFn                      = cilium.Install
+	fluxBootstrapFn                      = flux.Bootstrap
+	teleportGenerateJoinTokenFn          = teleport.GenerateJoinToken
+	teleportDeployKubeAgentFn            = teleport.DeployKubeAgent
+	teleportDeploySelfHostedFn           = teleport.DeploySelfHosted
+	teleportEnsureAdminAccessFn          = teleport.EnsureAdminAccess
+	postBootstrapKubeconfigPathFn        = postBootstrapKubeconfigPath
+	postBootstrapKubeconfigRetryInterval = 15 * time.Second
+	postBootstrapKubeconfigRetryTimeout  = 30 * time.Minute
+	scalewayNewClientFn                  = scaleway.NewClient
+	scalewayGetServerFn                  = func(ctx context.Context, client *scaleway.Client, zone scw.Zone, serverID string) (*baremetal.Server, error) {
+		return client.Baremetal.GetServer(&baremetal.GetServerRequest{
+			Zone:     zone,
+			ServerID: serverID,
+		}, scw.WithContext(ctx))
+	}
 	scalewayEnsureNetworkFoundationFn       = scaleway.EnsureNetworkFoundation
 	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
 )
@@ -265,12 +272,8 @@ func shouldCleanupIncompleteCreateOperation(op *operation.Operation, forceCleanu
 		return false, "Talos activation detected"
 	}
 
-	resumePhase := op.ResumePhase()
-	if isCreatePreTalosPhase(resumePhase) {
-		return true, fmt.Sprintf("operation is pre-Talos activation (phase %q)", resumePhase)
-	}
-
-	return false, ""
+	// Default to resume for incomplete operations; cleanup is opt-in via --cleanup.
+	return false, "resume by default (use --cleanup to force replacement)"
 }
 
 func hasTalosActivationEvidence(op *operation.Operation) bool {
@@ -300,15 +303,6 @@ func hasTalosActivationEvidence(op *operation.Operation) bool {
 	}
 
 	return false
-}
-
-func isCreatePreTalosPhase(phase string) bool {
-	switch strings.TrimSpace(phase) {
-	case "init", "generate-config", "order-server", "wait-server", "wait-talos":
-		return true
-	default:
-		return false
-	}
 }
 
 func cleanupIncompleteCreateOperation(
@@ -650,22 +644,14 @@ func phaseWaitServer(
 		return fmt.Errorf("wait for server ready: %w", err)
 	}
 
-	// Extract IPs
-	for _, ip := range server.IPs {
-		addr := ip.Address.String()
-		parsed := net.ParseIP(addr)
-		if parsed != nil && parsed.IsPrivate() {
-			if strings.TrimSpace(op.GetContextString("privateIP")) == "" {
-				op.SetContext("privateIP", addr)
-				slog.Info("server ready", "private_ip", addr)
-			}
-			continue
-		}
-
-		if ip.Version == "IPv4" {
-			op.SetContext("publicIP", addr)
-			slog.Info("server ready", "public_ip", addr)
-		}
+	publicIP, discoveredPrivateIP := extractServerIPs(server)
+	if strings.TrimSpace(op.GetContextString("privateIP")) == "" && discoveredPrivateIP != "" {
+		op.SetContext("privateIP", discoveredPrivateIP)
+		slog.Info("server ready", "private_ip", discoveredPrivateIP)
+	}
+	if publicIP != "" {
+		op.SetContext("publicIP", publicIP)
+		slog.Info("server ready", "public_ip", publicIP)
 	}
 
 	role := op.GetContextString("role")
@@ -1095,6 +1081,8 @@ func prepareBootstrapKubeconfigWithRetry(
 	var lastErr error
 	for {
 		attempt++
+		maybeRefreshOperationServerIPs(ctx, op, cfg)
+
 		kubeconfigPath, cleanup, err := postBootstrapKubeconfigPathFn(ctx, op, cfg)
 		if err == nil {
 			return kubeconfigPath, cleanup, nil
@@ -1215,6 +1203,83 @@ func postBootstrapKubeconfigPath(ctx context.Context, op *operation.Operation, c
 	}
 
 	return tempFile.Name(), cleanup, nil
+}
+
+func maybeRefreshOperationServerIPs(ctx context.Context, op *operation.Operation, cfg *config.Config) {
+	if op == nil || cfg == nil {
+		return
+	}
+
+	serverID := strings.TrimSpace(op.GetContextString("serverId"))
+	zoneValue := strings.TrimSpace(op.GetContextString("zone"))
+	if serverID == "" || zoneValue == "" {
+		return
+	}
+
+	zone := scw.Zone(zoneValue)
+	scwAccessKey, scwSecretKey := cfg.ScalewayCredentials()
+	scwClient, err := scalewayNewClientFn(
+		scwAccessKey,
+		scwSecretKey,
+		cfg.Scaleway.ProjectID,
+		cfg.Scaleway.OrganizationID,
+	)
+	if err != nil {
+		slog.Debug("skipping server IP refresh (create scaleway client failed)", "error", err)
+		return
+	}
+
+	server, err := scalewayGetServerFn(ctx, scwClient, zone, serverID)
+	if err != nil {
+		slog.Debug("skipping server IP refresh (load server failed)", "server_id", serverID, "zone", zoneValue, "error", err)
+		return
+	}
+
+	publicIP, privateIP := extractServerIPs(server)
+	currentPublic := strings.TrimSpace(op.GetContextString("publicIP"))
+	currentPrivate := strings.TrimSpace(op.GetContextString("privateIP"))
+
+	updated := false
+	if publicIP != "" && publicIP != currentPublic {
+		op.SetContext("publicIP", publicIP)
+		updated = true
+	}
+	if privateIP != "" && privateIP != currentPrivate {
+		op.SetContext("privateIP", privateIP)
+		updated = true
+	}
+	if !updated {
+		return
+	}
+
+	slog.Info("refreshed control-plane IPs from scaleway",
+		"server_id", serverID,
+		"public_ip", op.GetContextString("publicIP"),
+		"private_ip", op.GetContextString("privateIP"),
+	)
+}
+
+func extractServerIPs(server *baremetal.Server) (publicIP, privateIP string) {
+	if server == nil {
+		return "", ""
+	}
+
+	for _, ip := range server.IPs {
+		addr := ip.Address.String()
+		parsed := net.ParseIP(addr)
+		if parsed != nil && parsed.IsPrivate() {
+			if privateIP == "" {
+				privateIP = addr
+			}
+			continue
+		}
+
+		if ip.Version == "IPv4" && publicIP == "" {
+			publicIP = addr
+		}
+	}
+
+	return publicIP, privateIP
 }
 
 func phaseVerify(ctx context.Context, op *operation.Operation, cfg *config.Config) error {
