@@ -1,5 +1,6 @@
 ---
 import { Font } from "astro:assets";
+import { ClientRouter } from "astro:transitions";
 import "@/styles/global.css";
 
 type Props = {
@@ -36,8 +37,8 @@ const ogImageUrl = ogImagePath
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<Font cssVariable="--font-sora" preload />
-		<Font cssVariable="--font-ibm-plex-sans" preload />
+		<Font cssVariable="--font-sora" />
+		<Font cssVariable="--font-ibm-plex-sans" />
 		<Font cssVariable="--font-monaspace-neon" />
 		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -63,6 +64,7 @@ const ogImageUrl = ogImagePath
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:url" content={pageUrl} />
 		{ogImageUrl ? <meta name="twitter:image" content={ogImageUrl} /> : null}
+		<ClientRouter />
 		<title>{title}</title>
 	</head>
 	<body>

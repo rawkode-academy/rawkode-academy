@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig, fontProviders } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
-import react from "@astrojs/react";
+import svelte from "@astrojs/svelte";
 
 import tailwindcss from "@tailwindcss/vite";
 
@@ -10,42 +10,17 @@ export default defineConfig({
   site: "https://rawkode.news",
   output: "server",
   adapter: cloudflare({ imageService: "compile" }),
-  integrations: [react()],
+  integrations: [svelte()],
   server: {
     port: 4321,
   },
   vite: {
+    ssr: {
+      external: ["node:async_hooks"],
+    },
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),
-      },
-    },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (!id.includes("node_modules")) {
-              return;
-            }
-            if (
-              id.includes("@uiw/react-md-editor") ||
-              id.includes("@uiw/react-markdown-preview")
-            ) {
-              return "uiw";
-            }
-            if (
-              id.includes("react-markdown") ||
-              id.includes("remark-") ||
-              id.includes("rehype-") ||
-              id.includes("unified")
-            ) {
-              return "markdown";
-            }
-            if (id.includes("prismjs")) {
-              return "prism";
-            }
-          },
-        },
       },
     },
     plugins: [tailwindcss()],
