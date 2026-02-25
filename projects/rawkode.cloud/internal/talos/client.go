@@ -18,7 +18,9 @@ import (
 
 	machineapi "github.com/siderolabs/talos/pkg/machinery/api/machine"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gopkg.in/yaml.v3"
 )
@@ -333,10 +335,24 @@ func probeTalosMaintenance(ctx context.Context, endpoint string) error {
 	defer client.Close()
 
 	if _, err := client.machine.Version(ctx, &emptypb.Empty{}); err != nil {
+		if isMaintenanceModeVersionUnimplementedError(err) {
+			return nil
+		}
 		return fmt.Errorf("query talos version: %w", err)
 	}
 
 	return nil
+}
+
+func isMaintenanceModeVersionUnimplementedError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if status.Code(err) != codes.Unimplemented {
+		return false
+	}
+
+	return strings.Contains(strings.ToLower(err.Error()), "maintenance mode")
 }
 
 // WaitForMaintenance polls until the Talos API is reachable in maintenance mode.

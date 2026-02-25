@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"net"
 	"strings"
 	"testing"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/scaleway"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/teleport"
+	"github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
 	scw "github.com/scaleway/scaleway-sdk-go/scw"
 )
 
@@ -27,8 +29,14 @@ func restorePostBootstrapFns() {
 		return "", func() {}, nil
 	}
 	postBootstrapKubeconfigRetryInterval = 15 * time.Second
-	postBootstrapKubeconfigRetryTimeout = 10 * time.Minute
+	postBootstrapKubeconfigRetryTimeout = 30 * time.Minute
 	scalewayNewClientFn = scaleway.NewClient
+	scalewayGetServerFn = func(ctx context.Context, client *scaleway.Client, zone scw.Zone, serverID string) (*baremetal.Server, error) {
+		return client.Baremetal.GetServer(&baremetal.GetServerRequest{
+			Zone:     zone,
+			ServerID: serverID,
+		}, scw.WithContext(ctx))
+	}
 	scalewayEnsureNetworkFoundationFn = scaleway.EnsureNetworkFoundation
 	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
 }
@@ -500,5 +508,42 @@ func TestPhasePostBootstrapRecoversMissingPrivateNetworkIDFromScaleway(t *testin
 	}
 	if got := op.GetContextString("privateNetworkID"); got != "pn-recovered" {
 		t.Fatalf("operation privateNetworkID context = %q, want %q", got, "pn-recovered")
+	}
+}
+
+func TestMaybeRefreshOperationServerIPsUpdatesContext(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	op := operation.New("op-test", operation.TypeCreateCluster, "production", []string{"post-bootstrap"})
+	op.SetContext("serverId", "srv-123")
+	op.SetContext("zone", string(scw.ZoneFrPar1))
+	op.SetContext("publicIP", "51.15.0.10")
+	op.SetContext("privateIP", "172.16.16.10")
+
+	scalewayNewClientFn = func(string, string, string, string) (*scaleway.Client, error) {
+		return &scaleway.Client{}, nil
+	}
+	scalewayGetServerFn = func(context.Context, *scaleway.Client, scw.Zone, string) (*baremetal.Server, error) {
+		return &baremetal.Server{
+			IPs: []*baremetal.IP{
+				{Address: net.ParseIP("172.16.16.16"), Version: "IPv4"},
+				{Address: net.ParseIP("51.159.1.2"), Version: "IPv4"},
+			},
+		}, nil
+	}
+
+	maybeRefreshOperationServerIPs(context.Background(), op, &config.Config{
+		Scaleway: config.ScalewayConfig{
+			ProjectID:      "project-id",
+			OrganizationID: "org-id",
+		},
+	})
+
+	if got := op.GetContextString("publicIP"); got != "51.159.1.2" {
+		t.Fatalf("publicIP = %q, want %q", got, "51.159.1.2")
+	}
+	if got := op.GetContextString("privateIP"); got != "172.16.16.16" {
+		t.Fatalf("privateIP = %q, want %q", got, "172.16.16.16")
 	}
 }
