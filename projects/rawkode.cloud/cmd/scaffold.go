@@ -46,6 +46,12 @@ nodePools:
 teleport:
   domain: ""
   mode: self_hosted
+  access:
+    admin_teams: []
+    kubernetes_users:
+      - teleport-admin
+    kubernetes_groups:
+      - system:masters
   acme:
     enabled: false
     email: ""
