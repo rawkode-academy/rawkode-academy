@@ -42,7 +42,7 @@ type BootstrapParams struct {
 
 const (
 	fluxNamespace      = "flux-system"
-	clusterConfigName  = "cluster-config"
+	clusterConfigName  = "bootstrap"
 	fluxFieldManager   = "rawkode-cloud3"
 	readyConditionType = "Ready"
 )
