@@ -1,0 +1,68 @@
+---
+import Pagination from "@/components/common/Pagination.astro";
+import PostRowSvelte from "@/components/feed/PostRowSvelte.svelte";
+import TagFilterGrid from "@/components/feed/TagFilterGrid.astro";
+import type { ApiTag, Paginated, ApiPost } from "@/lib/contracts";
+
+type Props = {
+  title: string;
+  strapline?: string;
+  detail?: string;
+  posts: Paginated<ApiPost>;
+  tags: ApiTag[];
+  selectedTagSlugs: string[];
+  searchParams: URLSearchParams;
+  fromPath: string;
+};
+
+const {
+  title,
+  strapline,
+  detail,
+  posts,
+  tags,
+  selectedTagSlugs,
+  searchParams,
+  fromPath,
+} = Astro.props as Props;
+
+const items = posts.items;
+---
+
+<main class="space-y-4 py-7">
+  <section class="space-y-4">
+    <header class="space-y-2">
+      <h1 class="rkn-page-title">{strapline || title}</h1>
+      {detail ? <p class="max-w-[70ch] text-sm text-muted-foreground">{detail}</p> : null}
+    </header>
+
+    <section class="space-y-3">
+      <TagFilterGrid tags={tags} selectedTagSlugs={selectedTagSlugs} searchParams={searchParams} />
+    </section>
+
+    <div class="rkn-panel overflow-hidden">
+      {
+        items.length === 0 ? (
+          <p class="px-5 py-6 text-sm text-muted-foreground">No posts yet. Be the first to share something useful.</p>
+        ) : null
+      }
+      <div class="rkn-post-list">
+        {
+          items.map((post, index) => (
+            <>
+              <PostRowSvelte post={post} from={fromPath} />
+              {index < items.length - 1 ? <hr class="rkn-post-row-separator border-border/75" /> : null}
+            </>
+          ))
+        }
+      </div>
+    </div>
+
+    <Pagination
+      page={posts.page}
+      totalPages={posts.totalPages}
+      hasMore={posts.hasMore}
+      searchParams={searchParams}
+    />
+  </section>
+</main>

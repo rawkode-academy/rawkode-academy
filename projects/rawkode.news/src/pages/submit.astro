@@ -1,0 +1,231 @@
+---
+import { actions } from "astro:actions";
+import AppShell from "@/components/layout/AppShell.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { mandatoryTagSlugs } from "@/lib/contracts";
+import { buttonPrimaryLgClass, buttonSecondarySmClass, inputClass, textareaClass } from "@/lib/ui-classes";
+import { getSessionWithPermissions } from "@/lib/server/session";
+import { listTags } from "@/lib/server/tags";
+import type { TypedEnv } from "@/types/service-bindings";
+
+const env = Astro.locals.runtime.env as TypedEnv;
+const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
+const createPostResult = Astro.getActionResult(actions.createPost);
+if (createPostResult?.data?.redirectTo) {
+  return Astro.redirect(createPostResult.data.redirectTo, 303);
+}
+
+const user = session?.user ?? null;
+const allowedMandatoryTags = permissions?.allowedMandatoryTags ?? mandatoryTagSlugs.filter((slug) => slug !== "rka");
+const defaultMandatoryTag = allowedMandatoryTags[0] ?? "news";
+const optionalTags = (await listTags(env, "optional")).sort((left, right) =>
+  left.slug.localeCompare(right.slug),
+);
+
+const firstRowOptionalTags = optionalTags.slice(0, 7);
+const remainingOptionalTags = optionalTags.slice(7);
+const rows: typeof optionalTags[] = [firstRowOptionalTags];
+for (let i = 0; i < remainingOptionalTags.length; i += 8) {
+  rows.push(remainingOptionalTags.slice(i, i + 8));
+}
+if (rows.length === 0) {
+  rows.push([]);
+}
+
+const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
+  `${Astro.url.pathname}${Astro.url.search}`,
+)}`;
+---
+
+<BaseLayout
+  title="Submit | Rawkode News"
+  description="Create a post for the Rawkode News community."
+  robots="noindex, nofollow"
+  ogType="website"
+>
+  <AppShell
+    pathname={Astro.url.pathname}
+    search={Astro.url.search}
+    user={user}
+    isAdmin={Boolean(permissions?.isAdmin)}
+  >
+    <main class="space-y-5 py-7">
+      {
+        !user ? (
+          <section class="rkn-panel space-y-3 p-5">
+            <p class="rkn-kicker">Submit</p>
+            <h1 class="rkn-page-title">Sign in to create a post</h1>
+            <p class="text-sm text-muted-foreground">
+              Posts work best when they include clear context and a concrete reason to discuss.
+            </p>
+            <div>
+              <a
+                href={signInUrl}
+                data-astro-prefetch="false"
+                data-astro-reload
+                class={buttonSecondarySmClass}
+              >
+                Sign in
+              </a>
+            </div>
+          </section>
+        ) : (
+          <>
+            <header class="space-y-2">
+              <p class="rkn-kicker">Submit</p>
+              <h1 class="rkn-page-title">Create a post</h1>
+              <p class="max-w-[72ch] text-sm text-muted-foreground">
+                Share a link or write-up with enough context that an engineer can understand it quickly.
+              </p>
+            </header>
+
+            <section class="rkn-panel overflow-hidden">
+              <form method="POST" action={actions.createPost} class="space-y-6 p-5">
+                <fieldset class="space-y-6">
+                  <div class="space-y-2">
+                    <label for="submit-title" class="text-sm font-semibold text-foreground">
+                      Title
+                    </label>
+                    <input
+                      id="submit-title"
+                      name="title"
+                      required
+                      placeholder="A clear, specific title"
+                      class={inputClass}
+                    />
+                  </div>
+
+                  <div class="space-y-3">
+                    <label class="text-sm font-semibold text-foreground">Tags</label>
+                    <div class="space-y-2">
+                      {
+                        rows.map((row, rowIndex) => (
+                          <div class="grid grid-cols-8 gap-2">
+                            {rowIndex === 0 ? (
+                              <label class="relative block">
+                                <span class="sr-only">Mandatory tag</span>
+                                <select
+                                  id="submit-mandatory-tag"
+                                  name="mandatoryTag"
+                                  aria-label="Mandatory tag"
+                                  class="h-9 w-full min-w-0 cursor-pointer appearance-none rounded-md border border-primary/40 bg-primary/10 pl-7 pr-7 text-center text-xs font-semibold text-foreground [text-align-last:center] hover:bg-primary/15"
+                                >
+                                  {allowedMandatoryTags.map((slug) => (
+                                    <option value={slug} selected={slug === defaultMandatoryTag}>
+                                      {slug}
+                                    </option>
+                                  ))}
+                                </select>
+                                <span
+                                  aria-hidden="true"
+                                  class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[10px] text-foreground/70"
+                                >
+                                  ▾
+                                </span>
+                              </label>
+                            ) : null}
+
+                            {
+                              row.map((tag) => (
+                                <label
+                                  class="inline-flex h-9 w-full min-w-0 cursor-pointer items-center justify-center gap-1 rounded-md border px-2 text-xs font-semibold border-border text-muted-foreground hover:bg-muted hover:text-foreground has-[:checked]:border-primary/40 has-[:checked]:bg-primary/10 has-[:checked]:text-foreground"
+                                  title={tag.description ?? undefined}
+                                >
+                                  <input type="checkbox" name="optionalTag" value={tag.slug} class="peer sr-only" />
+                                  <span class="min-w-0 truncate">{tag.name || tag.slug}</span>
+                                </label>
+                              ))
+                            }
+                          </div>
+                        ))
+                      }
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label for="submit-url" class="text-sm font-semibold text-foreground">
+                      URL (optional)
+                    </label>
+                    <input
+                      id="submit-url"
+                      name="url"
+                      placeholder="https://..."
+                      class={inputClass}
+                    />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label for="submit-body" class="text-sm font-semibold text-foreground">Summary (Markdown)</label>
+                    <p class="text-xs text-muted-foreground">
+                      Add the key context, tradeoffs, and why this is worth reading.
+                    </p>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                      <textarea
+                        id="submit-body"
+                        name="body"
+                        class={`${textareaClass} min-h-[290px] leading-relaxed`}
+                        placeholder="What should engineers know before opening this?"
+                      />
+                      <div
+                        id="submit-body-preview"
+                        class="rkn-prose rkn-prose-editor min-h-[290px] overflow-y-auto rounded-none border border-input bg-white px-3 py-2"
+                      >
+                        <div class="text-sm text-muted-foreground">Live preview appears here.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {createPostResult?.error ? <p class="text-sm text-destructive">{createPostResult.error.message}</p> : null}
+
+                  <div class="rounded-none border border-border bg-card p-3">
+                    <div class="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="submit"
+                        class={buttonPrimaryLgClass}
+                      >
+                        Publish post
+                      </button>
+                      <p class="w-full text-right text-xs text-muted-foreground sm:w-auto">
+                        Posting as <span class="font-semibold text-foreground">{user.name || user.email}</span>
+                      </p>
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+            </section>
+          </>
+        )
+      }
+    </main>
+  </AppShell>
+</BaseLayout>
+
+<script>
+  import { renderMarkdownToHtml } from "@/lib/markdown";
+
+  const initSubmitPreview = () => {
+    const textarea = document.getElementById("submit-body");
+    const preview = document.getElementById("submit-body-preview");
+    if (!(textarea instanceof HTMLTextAreaElement) || !(preview instanceof HTMLElement)) {
+      return;
+    }
+
+    const render = () => {
+      const source = textarea.value.trim();
+      if (!source) {
+        preview.innerHTML = `<div class="text-sm text-muted-foreground">Live preview appears here.</div>`;
+        return;
+      }
+
+      preview.innerHTML = renderMarkdownToHtml(source);
+    };
+
+    textarea.addEventListener("input", render);
+    render();
+  };
+
+  if (!window.__rknSubmitPreviewBound) {
+    window.__rknSubmitPreviewBound = true;
+    document.addEventListener("astro:page-load", initSubmitPreview);
+  }
+</script>

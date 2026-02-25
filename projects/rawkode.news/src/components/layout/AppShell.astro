@@ -1,0 +1,217 @@
+---
+import type { StoredSession } from "@/lib/auth";
+import { buttonPrimarySmClass, buttonSecondarySmClass } from "@/lib/ui-classes";
+
+type Props = {
+  pathname: string;
+  search: string;
+  user: StoredSession["user"] | null;
+  isAdmin: boolean;
+};
+
+const { pathname, search, user, isAdmin } = Astro.props as Props;
+
+const navItems = [
+  { label: "New", href: "/" },
+  { label: "RKA", href: "/rka" },
+  { label: "News", href: "/news" },
+  { label: "Show", href: "/show" },
+  { label: "Ask", href: "/ask" },
+  { label: "Search", href: "/search" },
+];
+
+const isActive = (href: string) =>
+  href === "/" ? pathname === "/" : pathname === href;
+
+const returnTo = `${pathname}${search}`;
+const safeReturnTo = returnTo.startsWith("/") ? returnTo : "/";
+const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(safeReturnTo)}`;
+const signOutUrl = `/api/auth/sign-out?returnTo=${encodeURIComponent(safeReturnTo)}`;
+const displayName = user?.name || user?.email || "Profile";
+const displayInitials = displayName
+  .split(" ")
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((part) => part[0]?.toUpperCase() ?? "")
+  .join("");
+---
+
+<div class="flex min-h-screen flex-col">
+  <header class="rkn-shell-header sticky top-0 z-50">
+    <div class="rkn-container py-3.5">
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0 md:flex md:items-center md:gap-4">
+          <a href="/" class="inline-flex min-w-0 shrink-0 items-center gap-3">
+            <div class="grid h-10 w-12 shrink-0 place-items-center rounded-none bg-primary text-xs font-semibold tracking-wide text-primary-foreground">
+              RKN
+            </div>
+            <div class="min-w-0">
+              <p class="truncate font-display text-base leading-tight font-semibold">Rawkode News</p>
+            </div>
+          </a>
+
+          <nav class="hidden items-center gap-1 border-l border-border/80 pl-4 md:flex">
+            {
+              navItems.map((item) => (
+                <a
+                  href={item.href}
+                  class:list={[
+                    "rkn-nav-tab",
+                    isActive(item.href) && "border-primary/35 bg-primary/10 text-foreground",
+                  ]}
+                >
+                  {item.label}
+                </a>
+              ))
+            }
+          </nav>
+        </div>
+
+        <div class="hidden items-center gap-2 md:flex">
+          {user ? (
+            <>
+              <a
+                href="/submit"
+                class={`${buttonPrimarySmClass} h-10 min-w-36`}
+              >
+                Create post
+              </a>
+              <details class="relative">
+                <summary class="inline-flex h-10 min-w-36 cursor-pointer list-none items-center justify-between gap-2 rounded-none border border-border bg-card px-3 text-sm font-medium hover:border-primary/35 hover:bg-accent [&::-webkit-details-marker]:hidden">
+                  {user.image ? (
+                    <img src={user.image} alt={displayName} class="h-6 w-6 rounded-none object-cover" />
+                  ) : (
+                    <span class="grid h-6 w-6 place-items-center rounded-none bg-secondary text-[11px] font-semibold">
+                      {displayInitials || "ME"}
+                    </span>
+                  )}
+                  <span class="hidden truncate sm:inline">{displayName}</span>
+                  <span class="text-[10px] text-muted-foreground">▾</span>
+                </summary>
+                <div class="absolute right-0 mt-2 w-72 max-w-[92vw] overflow-hidden rounded-none border border-border bg-card">
+                  <div class="border-b border-border px-4 py-3">
+                    <p class="text-sm font-semibold text-foreground">{displayName}</p>
+                    {user.email ? <p class="break-all text-xs text-muted-foreground">{user.email}</p> : null}
+                  </div>
+                  <div class="p-1.5 text-sm">
+                    <a href="/profile" class="block rounded-none px-3 py-2 text-foreground/80 hover:bg-accent hover:text-foreground">
+                      Profile
+                    </a>
+                    {isAdmin ? (
+                      <a href="/admin/tags" class="block rounded-none px-3 py-2 text-foreground/80 hover:bg-accent hover:text-foreground">
+                        Admin tags
+                      </a>
+                    ) : null}
+                    <a
+                      href={signOutUrl}
+                      data-astro-prefetch="false"
+                      data-astro-reload
+                      class="block rounded-none px-3 py-2 text-foreground/80 hover:bg-accent hover:text-foreground"
+                    >
+                      Sign out
+                    </a>
+                  </div>
+                </div>
+              </details>
+            </>
+          ) : (
+            <a
+              href={signInUrl}
+              data-astro-prefetch="false"
+              data-astro-reload
+              class={buttonSecondarySmClass}
+            >
+              Sign in
+            </a>
+          )}
+        </div>
+
+        <details class="relative md:hidden">
+          <summary class="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-none border border-border bg-card text-muted-foreground hover:bg-accent [&::-webkit-details-marker]:hidden">
+            <span class="text-xs">☰</span>
+          </summary>
+          <div class="absolute right-0 mt-2 w-[min(22rem,90vw)] rounded-none border border-border bg-card">
+            <div class="rkn-container space-y-2 py-3">
+              <div class="grid gap-1.5">
+                {
+                  navItems.map((item) => (
+                    <a
+                      href={item.href}
+                      class:list={[
+                        "inline-flex h-10 items-center rounded-none px-3 text-sm font-semibold",
+                        isActive(item.href)
+                          ? "bg-primary/10 text-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                      ]}
+                    >
+                      {item.label}
+                    </a>
+                  ))
+                }
+              </div>
+
+              {user ? (
+                <div class="grid gap-2 border-t border-border pt-2">
+                  <a
+                    href="/submit"
+                    class={buttonPrimarySmClass}
+                  >
+                    Create post
+                  </a>
+                  <a href="/profile" class="inline-flex h-10 items-center rounded-none px-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground">
+                    Profile
+                  </a>
+                  {isAdmin ? (
+                    <a href="/admin/tags" class="inline-flex h-10 items-center rounded-none px-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground">
+                      Admin tags
+                    </a>
+                  ) : null}
+                  <a
+                    href={signOutUrl}
+                    data-astro-prefetch="false"
+                    data-astro-reload
+                    class={buttonSecondarySmClass}
+                  >
+                    Sign out
+                  </a>
+                </div>
+              ) : (
+                <div class="border-t border-border pt-2">
+                  <a
+                    href={signInUrl}
+                    data-astro-prefetch="false"
+                    data-astro-reload
+                    class={`${buttonSecondarySmClass} w-full`}
+                  >
+                    Sign in
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-1 flex-col">
+    <div class="rkn-container flex flex-1 flex-col">
+      <slot />
+    </div>
+  </div>
+
+  <footer class="border-t border-border/80 bg-background/85">
+    <div class="rkn-container flex flex-wrap items-center gap-2 py-5 text-xs text-muted-foreground">
+      <span>
+        powered by{" "}
+        <a href="https://rawkode.academy" class="font-medium text-foreground/80 hover:text-foreground">
+          Rawkode Academy
+        </a>
+      </span>
+      <span aria-hidden="true">•</span>
+      <a href="/rss.xml" class="text-[11px] font-bold uppercase tracking-wide hover:text-foreground">
+        RSS
+      </a>
+    </div>
+  </footer>
+</div>

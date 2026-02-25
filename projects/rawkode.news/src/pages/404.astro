@@ -1,0 +1,45 @@
+---
+import AppShell from "@/components/layout/AppShell.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { buttonPrimarySmClass } from "@/lib/ui-classes";
+import { getSessionWithPermissions } from "@/lib/server/session";
+import type { TypedEnv } from "@/types/service-bindings";
+
+const env = Astro.locals.runtime.env as TypedEnv;
+const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
+---
+
+<BaseLayout
+  title="Page not found | Rawkode News"
+  description="The page you requested does not exist or may have moved."
+  robots="noindex, nofollow"
+  ogType="website"
+>
+  <AppShell
+    pathname={Astro.url.pathname}
+    search={Astro.url.search}
+    user={session?.user ?? null}
+    isAdmin={Boolean(permissions?.isAdmin)}
+  >
+    <main class="py-7">
+      <section class="rkn-panel space-y-5 p-6 sm:p-7">
+        <div class="space-y-2">
+          <p class="rkn-kicker">404 Not Found</p>
+          <h1 class="rkn-page-title">Page not found</h1>
+          <p class="text-sm text-muted-foreground">The page you requested does not exist or may have moved.</p>
+        </div>
+
+        <p class="font-mono text-xs text-muted-foreground">Requested path: {Astro.url.pathname}</p>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <a
+            href="/"
+            class={buttonPrimarySmClass}
+          >
+            Go back to feed
+          </a>
+        </div>
+      </section>
+    </main>
+  </AppShell>
+</BaseLayout>

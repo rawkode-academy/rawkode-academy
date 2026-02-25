@@ -195,6 +195,14 @@ a {
   padding-left: 1.25rem;
 }
 
+.rkn-prose ul {
+  list-style: disc;
+}
+
+.rkn-prose ol {
+  list-style: decimal;
+}
+
 .rkn-prose li {
   margin: 0.4rem 0;
 }
@@ -204,6 +212,14 @@ a {
   border-left: 3px solid color-mix(in oklab, var(--primary) 44%, var(--border));
   padding-left: 0.9rem;
   color: color-mix(in oklab, var(--foreground) 75%, white);
+}
+
+.rkn-prose blockquote > :first-child {
+  margin-top: 0;
+}
+
+.rkn-prose blockquote > :last-child {
+  margin-bottom: 0;
 }
 
 .rkn-prose code {
@@ -236,6 +252,51 @@ a {
 
 .rkn-prose a:hover {
   text-decoration: underline;
+}
+
+.rkn-prose hr {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1px solid color-mix(in oklab, var(--border) 82%, white);
+}
+
+.rkn-prose table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.rkn-prose th,
+.rkn-prose td {
+  border: 1px solid color-mix(in oklab, var(--border) 82%, white);
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.rkn-prose thead th {
+  background: color-mix(in oklab, var(--muted) 72%, white);
+  font-weight: 600;
+}
+
+.rkn-prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+.rkn-prose-editor {
+  max-width: none;
+  font-size: 0.875rem;
+  line-height: 1.625rem;
+}
+
+.rkn-prose-editor > :first-child {
+  margin-top: 0;
+}
+
+.rkn-prose-editor > :last-child {
+  margin-bottom: 0;
 }
 
 .rkn-meta {
