@@ -192,10 +192,14 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	nodeStore := clusterstate.NewNodeStore(store, cfg.Environment)
+	state, err := nodeStore.Load(ctx)
+	if err != nil {
+		return fmt.Errorf("load node state: %w", err)
+	}
 
 	if existing != nil {
 		resumePhase := existing.ResumePhase()
-		shouldCleanup, reason := shouldCleanupIncompleteCreateOperation(existing, cleanupRequested)
+		shouldCleanup, reason := shouldCleanupIncompleteCreateOperation(existing, cleanupRequested, state)
 		if shouldCleanup {
 			slog.Warn("incomplete create-cluster operation will be cleaned up before retry",
 				"operation", existing.ID,
@@ -263,12 +267,16 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 	return executeCreateCluster(ctx, op, store, nodeStore, cfg)
 }
 
-func shouldCleanupIncompleteCreateOperation(op *operation.Operation, forceCleanup bool) (bool, string) {
+func shouldCleanupIncompleteCreateOperation(op *operation.Operation, forceCleanup bool, state *clusterstate.NodesState) (bool, string) {
 	if op == nil {
 		return false, ""
 	}
 	if forceCleanup {
 		return true, "--cleanup requested"
+	}
+
+	if hasTalosActivationEvidence(op) && state != nil && !operationHasActiveNodeInState(op, state) {
+		return true, "stale operation with no active node in state"
 	}
 
 	if hasTalosActivationEvidence(op) {
@@ -301,6 +309,42 @@ func hasTalosActivationEvidence(op *operation.Operation) bool {
 			continue
 		}
 		if p.Status != operation.PhasePending {
+			return true
+		}
+	}
+
+	return false
+}
+
+func operationHasActiveNodeInState(op *operation.Operation, state *clusterstate.NodesState) bool {
+	if op == nil || state == nil {
+		return false
+	}
+
+	serverID := strings.TrimSpace(op.GetContextString("serverId"))
+	nodeName := strings.TrimSpace(op.GetContextString("nodeName"))
+
+	for _, node := range state.Nodes {
+		if node.Status == clusterstate.NodeStatusDeleted || node.Status == clusterstate.NodeStatusFailed {
+			continue
+		}
+
+		if serverID != "" && strings.TrimSpace(node.ServerID) == serverID {
+			return true
+		}
+		if nodeName != "" && strings.TrimSpace(node.Name) == nodeName {
+			return true
+		}
+	}
+
+	if serverID == "" && nodeName == "" {
+		for _, node := range state.Nodes {
+			if node.Role != config.NodeTypeControlPlane {
+				continue
+			}
+			if node.Status == clusterstate.NodeStatusDeleted || node.Status == clusterstate.NodeStatusFailed {
+				continue
+			}
 			return true
 		}
 	}
@@ -704,6 +748,11 @@ func phaseApplyConfig(ctx context.Context, op *operation.Operation, cfg *config.
 	if err != nil {
 		return err
 	}
+	nodeName := nodeNameForOperation(op, cfg.Environment)
+	nodeConfig, err := talos.WithNodeName(assets.ControlPlane, nodeName)
+	if err != nil {
+		return fmt.Errorf("render node-specific Talos config for %q: %w", nodeName, err)
+	}
 
 	talosClient, err := talos.NewInsecureClient(publicIP)
 	if err != nil {
@@ -711,8 +760,8 @@ func phaseApplyConfig(ctx context.Context, op *operation.Operation, cfg *config.
 	}
 	defer talosClient.Close()
 
-	slog.Info("phase apply-config: applying Talos controlplane config", "ip", publicIP, "endpoint", endpoint)
-	if err := talosClient.ApplyConfig(ctx, assets.ControlPlane); err != nil {
+	slog.Info("phase apply-config: applying Talos controlplane config", "ip", publicIP, "endpoint", endpoint, "node", nodeName)
+	if err := talosClient.ApplyConfig(ctx, nodeConfig); err != nil {
 		return err
 	}
 	op.SetContext("talosActivated", true)

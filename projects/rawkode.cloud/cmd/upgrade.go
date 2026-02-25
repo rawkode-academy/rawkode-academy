@@ -164,9 +164,13 @@ func runUpgradeK8s(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, node := range orderedNodes {
-		nodeConfig := assets.Worker
+		baseConfig := assets.Worker
 		if node.Role == config.NodeTypeControlPlane {
-			nodeConfig = assets.ControlPlane
+			baseConfig = assets.ControlPlane
+		}
+		nodeConfig, err := talos.WithNodeName(baseConfig, node.Name)
+		if err != nil {
+			return fmt.Errorf("render node-specific Talos config for node %s: %w", node.Name, err)
 		}
 
 		client, err := talos.NewClient(node.PublicIP, assets.Talosconfig)
