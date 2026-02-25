@@ -13,6 +13,10 @@ export interface User {
 type Runtime = import("@astrojs/cloudflare").Runtime<TypedEnv>;
 
 declare global {
+  interface Window {
+    __rknSubmitPreviewBound?: boolean;
+  }
+
   namespace App {
     interface Locals extends Runtime {
       user?: User;

@@ -11,25 +11,25 @@ import type { TypedEnv } from "@/types/service-bindings";
 const env = Astro.locals.runtime.env as TypedEnv;
 const page = parsePageValue(Astro.url.searchParams.get("page")) ?? 1;
 const requestedTagSlugs = parseTagSearchParam(Astro.url.searchParams.get("tags"));
-const allTags = await listTags(env);
-const filterTags = allTags;
-const filterTagSet = new Set(filterTags.map((tag) => tag.slug));
-const selectedTagSlugs = requestedTagSlugs.filter((slug) => filterTagSet.has(slug));
+const optionalTags = (await listTags(env, "optional")).sort((left, right) =>
+  left.slug.localeCompare(right.slug),
+);
+const optionalSet = new Set(optionalTags.map((tag) => tag.slug));
+const selectedTagSlugs = requestedTagSlugs.filter((slug) => optionalSet.has(slug));
 const posts = await listPosts(env, {
-  feed: "new",
+  feed: "rka",
   requestedTagSlugs: selectedTagSlugs,
   page,
   pageSize: 10,
   paginate: true,
 });
-const canonicalPath = buildCanonicalPath("/", Astro.url.searchParams, ["page", "tags"]);
-const title = page > 1 ? `Rawkode News — Page ${page}` : "Rawkode News";
+const canonicalPath = buildCanonicalPath("/rka", Astro.url.searchParams, ["page", "tags"]);
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
 ---
 
 <BaseLayout
-  title={title}
-  description="Latest signals from the Rawkode News community."
+  title={page > 1 ? `RKA | Rawkode News — Page ${page}` : "RKA | Rawkode News"}
+  description="Deep engineering topics curated by the Rawkode Academy community."
   canonicalPath={canonicalPath}
   robots="index, follow"
   ogType="website"
@@ -41,10 +41,9 @@ const { session, permissions } = await getSessionWithPermissions(env, Astro.cook
     isAdmin={Boolean(permissions?.isAdmin)}
   >
     <FeedPage
-      title="New"
-      strapline="Latest news from the community"
+      title="RKA"
       posts={posts}
-      tags={filterTags}
+      tags={optionalTags}
       selectedTagSlugs={selectedTagSlugs}
       searchParams={Astro.url.searchParams}
       fromPath={`${Astro.url.pathname}${Astro.url.search}`}

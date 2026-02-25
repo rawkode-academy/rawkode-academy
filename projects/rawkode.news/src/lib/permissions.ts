@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import type { MandatoryTagSlug } from "@/components/app-data";
-import { mandatoryTagSlugs } from "@/components/app-data";
+import type { MandatoryTagSlug } from "@/lib/contracts";
+import { mandatoryTagSlugs } from "@/lib/contracts";
 import { getDb } from "@/db";
 import { roles } from "@/db/schema";
 import type { TypedEnv } from "@/types/service-bindings";

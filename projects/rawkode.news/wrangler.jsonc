@@ -12,12 +12,6 @@
 		"directory": "./dist",
 		"run_worker_first": true
 	},
-	"ai": {
-		"binding": "AI"
-	},
-	"vars": {
-		"AI_SEARCH_INSTANCE": "rawkode-news"
-	},
 	"workers_dev": true,
 	"preview_urls": true,
 	"observability": {

@@ -1,0 +1,35 @@
+---
+import SearchPanel from "@/components/search/SearchPanel.svelte";
+import AppShell from "@/components/layout/AppShell.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getSessionWithPermissions } from "@/lib/server/session";
+import type { TypedEnv } from "@/types/service-bindings";
+
+const env = Astro.locals.runtime.env as TypedEnv;
+const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
+---
+
+<BaseLayout
+  title="Search | Rawkode News"
+  description="Search posts across Rawkode News."
+  robots="noindex, nofollow"
+  ogType="website"
+>
+  <AppShell
+    pathname={Astro.url.pathname}
+    search={Astro.url.search}
+    user={session?.user ?? null}
+    isAdmin={Boolean(permissions?.isAdmin)}
+  >
+    <main class="space-y-4 py-7">
+      <section class="space-y-4">
+        <header class="space-y-2">
+          <h1 class="rkn-page-title">Find posts across Rawkode News</h1>
+          <p class="max-w-[70ch] text-sm text-muted-foreground">Client-side fuzzy search across published posts.</p>
+        </header>
+
+        <SearchPanel client:load initialQuery={Astro.url.searchParams.get("q") ?? ""} />
+      </section>
+    </main>
+  </AppShell>
+</BaseLayout>

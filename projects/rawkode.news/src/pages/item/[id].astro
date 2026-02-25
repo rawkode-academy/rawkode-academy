@@ -1,0 +1,153 @@
+---
+import CommentsPanel from "@/components/post/CommentsPanel.svelte";
+import AppShell from "@/components/layout/AppShell.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { formatRelativeTime } from "@/lib/contracts";
+import { parseEntityId } from "@/lib/ids";
+import { renderMarkdownToHtml } from "@/lib/markdown";
+import { buildCanonicalPath, stripMarkdownToText, truncateDescription } from "@/lib/seo";
+import { buttonPrimarySmClass } from "@/lib/ui-classes";
+import { getPostById, listCommentsByPostId } from "@/lib/server/posts";
+import { getSessionWithPermissions } from "@/lib/server/session";
+import type { TypedEnv } from "@/types/service-bindings";
+
+const env = Astro.locals.runtime.env as TypedEnv;
+
+const postId = parseEntityId(Astro.params.id);
+if (!postId) {
+  Astro.response.status = 400;
+}
+
+const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
+const post = postId ? await getPostById(env, postId) : null;
+const comments = postId ? await listCommentsByPostId(env, postId) : [];
+const markdownHtml = post?.body ? renderMarkdownToHtml(post.body) : "";
+
+const returnPathParam = Astro.url.searchParams.get("from");
+const returnPath = returnPathParam?.startsWith("/") && !returnPathParam.startsWith("/item/")
+  ? returnPathParam
+  : "/";
+const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
+  `${Astro.url.pathname}${Astro.url.search}`,
+)}`;
+
+const title = post
+  ? `${post.title} | Rawkode News`
+  : postId
+    ? "Post not found | Rawkode News"
+    : "Invalid post | Rawkode News";
+const description = post?.body
+  ? truncateDescription(stripMarkdownToText(post.body), 180)
+  : "The requested post does not exist or could not be loaded.";
+const canonicalPath = post ? buildCanonicalPath(`/item/${post.id}`) : undefined;
+const robots = post ? "index, follow" : "noindex, nofollow";
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  robots={robots}
+  ogType={post ? "article" : "website"}
+>
+  <AppShell
+    pathname={Astro.url.pathname}
+    search={Astro.url.search}
+    user={session?.user ?? null}
+    isAdmin={Boolean(permissions?.isAdmin)}
+  >
+    {
+      !post ? (
+        <main class="py-7">
+          <section class="rkn-panel space-y-5 p-6 sm:p-7">
+            <div class="space-y-2">
+              <p class="rkn-kicker">{postId ? "404 Not Found" : "Invalid request"}</p>
+              <h1 class="rkn-page-title">{postId ? "Post not found" : "That request could not be processed"}</h1>
+              <p class="text-sm text-muted-foreground">
+                {postId
+                  ? "That post does not exist anymore or the link is invalid."
+                  : "The post id in this URL is malformed."}
+              </p>
+            </div>
+            <a
+              href="/"
+              class={buttonPrimarySmClass}
+            >
+              Go back to feed
+            </a>
+          </section>
+        </main>
+      ) : (
+        <main class="space-y-6 py-7">
+          <div class="flex items-center">
+            <a href={returnPath} class="inline-flex h-9 items-center justify-center rounded-none px-3 text-[0.83rem] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground">
+              Back to feed
+            </a>
+          </div>
+
+          <article>
+            <section class="rkn-panel space-y-5 p-5 sm:p-6">
+              <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,52%)] items-center gap-x-2 text-xs text-muted-foreground">
+                <span>posted {formatRelativeTime(post.createdAt)}</span>
+                {
+                  post.tags.length > 0 ? (
+                    <span class="min-w-0 self-center justify-self-end">
+                      <span class="flex max-w-full flex-wrap items-center justify-end gap-1">
+                        {post.tags.map((tag) => (
+                          <span class="inline-flex h-5 shrink-0 items-center rounded-md border border-border bg-muted px-1.5 text-[10px] leading-none font-semibold uppercase tracking-wide text-foreground">
+                            {tag.slug}
+                          </span>
+                        ))}
+                      </span>
+                    </span>
+                  ) : null
+                }
+              </div>
+
+              <h1 class="text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.2] font-semibold tracking-tight">{post.title}</h1>
+
+              <p class="text-sm text-muted-foreground">
+                Shared by <span class="font-semibold text-foreground">{post.author}</span>
+              </p>
+
+              {post.url ? (
+                <a
+                  href={post.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                >
+                  Open original source
+                  <span class="text-muted-foreground">↗</span>
+                </a>
+              ) : null}
+
+              {
+                post.body ? (
+                  <div class="rkn-prose max-w-none" set:html={markdownHtml} />
+                ) : null
+              }
+            </section>
+          </article>
+
+          <section id="discussion" class="rkn-panel space-y-5 p-5 sm:p-6">
+            <header class="space-y-1">
+              <p class="rkn-kicker">Discussion</p>
+              <h2 class="font-display text-xl font-semibold">Community thread</h2>
+              <p class="text-sm text-muted-foreground">Be clear, be respectful, and cite what matters.</p>
+            </header>
+
+            <CommentsPanel
+              client:load
+              postId={post.id}
+              returnTo={`/item/${post.id}`}
+              canReply={Boolean(session?.user)}
+              signInUrl={signInUrl}
+              initialComments={comments}
+            />
+          </section>
+        </main>
+      )
+    }
+  </AppShell>
+</BaseLayout>
