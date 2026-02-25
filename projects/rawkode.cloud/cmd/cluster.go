@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -83,6 +84,7 @@ func init() {
 	clusterCreateCmd.Flags().StringP("file", "f", "", "Path to cluster config YAML")
 	clusterCreateCmd.Flags().String("node-name", "", "Deprecated: control-plane names are now auto-generated from the pool")
 	clusterCreateCmd.Flags().String("pool", "", "Node pool name (defaults to first controlplane pool)")
+	clusterCreateCmd.Flags().Bool("cleanup", false, "Force cleanup of incomplete provisioned resources before creating the cluster")
 
 	clusterStatusCmd.Flags().String("config", "", "Path to cluster config YAML")
 }
@@ -101,12 +103,24 @@ var createClusterPhases = []string{
 	"verify",
 }
 
+var (
+	ciliumInstallFn                         = cilium.Install
+	fluxBootstrapFn                         = flux.Bootstrap
+	teleportGenerateJoinTokenFn             = teleport.GenerateJoinToken
+	teleportDeployKubeAgentFn               = teleport.DeployKubeAgent
+	teleportDeploySelfHostedFn              = teleport.DeploySelfHosted
+	scalewayNewClientFn                     = scaleway.NewClient
+	scalewayEnsureNetworkFoundationFn       = scaleway.EnsureNetworkFoundation
+	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
+)
+
 func runClusterCreate(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 	clusterName, _ := cmd.Flags().GetString("environment")
 	cfgPathFlag, _ := cmd.Flags().GetString("file")
 	nodeNameFlag, _ := cmd.Flags().GetString("node-name")
 	poolName, _ := cmd.Flags().GetString("pool")
+	cleanupRequested, _ := cmd.Flags().GetBool("cleanup")
 
 	cfg, cfgPath, err := loadConfigForClusterOrFile(clusterName, cfgPathFlag)
 	if err != nil {
@@ -148,10 +162,45 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("init operation store: %w", err)
 	}
 
-	// Check for incomplete operations to resume
-	existing, err := operation.CheckResume(store, operation.TypeCreateCluster, cfg.Environment)
+	// Check for incomplete operations to resume or cleanup.
+	incomplete, err := store.FindIncomplete(operation.TypeCreateCluster, cfg.Environment)
 	if err != nil {
 		return fmt.Errorf("check resume: %w", err)
+	}
+	var existing *operation.Operation
+	if len(incomplete) > 0 {
+		existing = incomplete[0]
+	}
+
+	nodeStore := clusterstate.NewNodeStore(store, cfg.Environment)
+
+	if existing != nil {
+		resumePhase := existing.ResumePhase()
+		shouldCleanup, reason := shouldCleanupIncompleteCreateOperation(existing, cleanupRequested)
+		if shouldCleanup {
+			slog.Warn("incomplete create-cluster operation will be cleaned up before retry",
+				"operation", existing.ID,
+				"cluster", existing.Cluster,
+				"resume_phase", resumePhase,
+				"reason", reason,
+			)
+			fmt.Printf("Found incomplete operation %s (type=%s, phase=%s)\n", existing.ID, existing.Type, resumePhase)
+			fmt.Printf("Cleaning up incomplete operation before create: %s\n", reason)
+			if err := cleanupIncompleteCreateOperation(ctx, cfg, store, nodeStore, existing, reason); err != nil {
+				return err
+			}
+			existing = nil
+		} else {
+			slog.Info("found incomplete create-cluster operation eligible for resume",
+				"id", existing.ID,
+				"type", existing.Type,
+				"cluster", existing.Cluster,
+				"resume_phase", resumePhase,
+				"updated_at", existing.UpdatedAt,
+			)
+			fmt.Printf("Found incomplete operation %s (type=%s, phase=%s)\n", existing.ID, existing.Type, resumePhase)
+			fmt.Printf("Resuming from phase: %s\n", resumePhase)
+		}
 	}
 
 	var op *operation.Operation
@@ -192,8 +241,120 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 		"resume_from", resumePhase,
 	)
 
-	nodeStore := clusterstate.NewNodeStore(store, cfg.Environment)
 	return executeCreateCluster(ctx, op, store, nodeStore, cfg)
+}
+
+func shouldCleanupIncompleteCreateOperation(op *operation.Operation, forceCleanup bool) (bool, string) {
+	if op == nil {
+		return false, ""
+	}
+	if forceCleanup {
+		return true, "--cleanup requested"
+	}
+
+	if hasTalosActivationEvidence(op) {
+		return false, "Talos activation detected"
+	}
+
+	resumePhase := op.ResumePhase()
+	if isCreatePreTalosPhase(resumePhase) {
+		return true, fmt.Sprintf("operation is pre-Talos activation (phase %q)", resumePhase)
+	}
+
+	return false, ""
+}
+
+func hasTalosActivationEvidence(op *operation.Operation) bool {
+	if op == nil {
+		return false
+	}
+
+	if activatedRaw, ok := op.GetContext("talosActivated"); ok {
+		if activated, ok := activatedRaw.(bool); ok && activated {
+			return true
+		}
+	}
+
+	phase, ok := op.Phases["apply-config"]
+	if ok && phase != nil && phase.Status == operation.PhaseCompleted {
+		return true
+	}
+
+	for _, name := range []string{"bootstrap", "dns", "post-bootstrap", "verify"} {
+		p, ok := op.Phases[name]
+		if !ok || p == nil {
+			continue
+		}
+		if p.Status != operation.PhasePending {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isCreatePreTalosPhase(phase string) bool {
+	switch strings.TrimSpace(phase) {
+	case "init", "generate-config", "order-server", "wait-server", "wait-talos":
+		return true
+	default:
+		return false
+	}
+}
+
+func cleanupIncompleteCreateOperation(
+	ctx context.Context,
+	cfg *config.Config,
+	store *operation.Store,
+	nodeStore *clusterstate.NodeStore,
+	op *operation.Operation,
+	reason string,
+) error {
+	if op == nil {
+		return nil
+	}
+
+	registry := newCreateCleanupRegistry(cfg)
+	errs := registry.ExecuteLIFO(ctx, op.Cleanup)
+	hasDeleteServerCleanup := false
+	for _, action := range op.Cleanup {
+		if action.Type == "delete-server" {
+			hasDeleteServerCleanup = true
+			break
+		}
+	}
+
+	// Best-effort fallback for operations that have server context but no cleanup stack.
+	if !hasDeleteServerCleanup {
+		if serverID := strings.TrimSpace(op.GetContextString("serverId")); serverID != "" {
+			if zone := strings.TrimSpace(op.GetContextString("zone")); zone != "" {
+				err := runDeleteServerCleanupAction(ctx, cfg, cleanupDeleteServer{
+					ServerID: serverID,
+					Zone:     zone,
+				})
+				if err != nil {
+					errs = append(errs, fmt.Errorf("fallback delete-server cleanup: %w", err))
+				}
+			}
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("cleanup incomplete operation %s: %w", op.ID, errors.Join(errs...))
+	}
+
+	if strings.TrimSpace(op.GetContextString("serverId")) != "" {
+		if err := markNodeDeleted(ctx, nodeStore, op, cfg.Environment); err != nil {
+			slog.Warn("failed to persist deleted node state after cleanup", "error", err)
+		}
+	}
+
+	if err := store.Delete(op.ID); err != nil {
+		return fmt.Errorf("remove cleaned operation %s from store: %w", op.ID, err)
+	}
+
+	slog.Info("cleaned incomplete create operation", "operation", op.ID, "reason", reason)
+	return nil
 }
 
 func executeCreateCluster(
@@ -342,7 +503,7 @@ func phaseOrderServer(
 	slog.Info("phase order-server: ordering Scaleway bare metal")
 
 	scwAccessKey, scwSecretKey := cfg.ScalewayCredentials()
-	scwClient, err := scaleway.NewClient(
+	scwClient, err := scalewayNewClientFn(
 		scwAccessKey,
 		scwSecretKey,
 		cfg.Scaleway.ProjectID,
@@ -388,6 +549,7 @@ func phaseOrderServer(
 	if err != nil {
 		return fmt.Errorf("ensure network: %w", err)
 	}
+	op.SetContext("privateNetworkID", network.PrivateNetworkID)
 
 	// Build Talos pivot cloud-init
 	cloudInit := talos.BuildCloudInit(talos.PivotParams{
@@ -555,6 +717,7 @@ func phaseApplyConfig(ctx context.Context, op *operation.Operation, cfg *config.
 	if err := talosClient.ApplyConfig(ctx, assets.ControlPlane); err != nil {
 		return err
 	}
+	op.SetContext("talosActivated", true)
 
 	return nil
 }
@@ -633,23 +796,103 @@ func phaseDNS(ctx context.Context, op *operation.Operation, cfg *config.Config) 
 }
 
 func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *config.Config) error {
-	_ = op
-	slog.Info("phase post-bootstrap: best-effort install of Cilium, FluxCD, and Teleport")
+	if op == nil {
+		return fmt.Errorf("operation context is required for post-bootstrap")
+	}
+
+	zoneValue := strings.TrimSpace(op.GetContextString("zone"))
+	if zoneValue == "" {
+		return fmt.Errorf("missing zone in operation context")
+	}
+
+	zone := scw.Zone(zoneValue)
+	region, err := zone.Region()
+	if err != nil {
+		return fmt.Errorf("derive region from zone %q: %w", zoneValue, err)
+	}
+
+	preferredPrivateIP := strings.TrimSpace(op.GetContextString("privateIP"))
+
+	scwAccessKey, scwSecretKey := cfg.ScalewayCredentials()
+	scwClient, err := scalewayNewClientFn(
+		scwAccessKey,
+		scwSecretKey,
+		cfg.Scaleway.ProjectID,
+		cfg.Scaleway.OrganizationID,
+	)
+	if err != nil {
+		return fmt.Errorf("create scaleway client: %w", err)
+	}
+
+	privateNetworkID := strings.TrimSpace(op.GetContextString("privateNetworkID"))
+	if privateNetworkID == "" {
+		vpcName, err := cfg.ScalewayVPCName()
+		if err != nil {
+			return fmt.Errorf("resolve missing privateNetworkID context: %w", err)
+		}
+		privateNetworkName, err := cfg.ScalewayPrivateNetworkName()
+		if err != nil {
+			return fmt.Errorf("resolve missing privateNetworkID context: %w", err)
+		}
+
+		network, err := scalewayEnsureNetworkFoundationFn(ctx, scwClient, scaleway.NetworkFoundationParams{
+			Region:             region,
+			VPCName:            vpcName,
+			PrivateNetworkName: privateNetworkName,
+		})
+		if err != nil {
+			return fmt.Errorf("resolve missing privateNetworkID context: %w", err)
+		}
+
+		privateNetworkID = strings.TrimSpace(network.PrivateNetworkID)
+		if privateNetworkID == "" {
+			return fmt.Errorf("resolve missing privateNetworkID context: resolved empty private network ID")
+		}
+		op.SetContext("privateNetworkID", privateNetworkID)
+		slog.Info("resolved missing private network id from scaleway network foundation",
+			"private_network_id", privateNetworkID,
+			"vpc", vpcName,
+			"private_network", privateNetworkName,
+		)
+	}
+
+	ipv4NativeRoutingCIDR, err := scalewayResolvePrivateNetworkIPv4CIDRFn(
+		ctx,
+		scwClient,
+		region,
+		privateNetworkID,
+		preferredPrivateIP,
+	)
+	if err != nil {
+		return fmt.Errorf("resolve cilium ipv4 native routing cidr: %w", err)
+	}
+	op.SetContext("ipv4NativeRoutingCIDR", ipv4NativeRoutingCIDR)
+
+	slog.Info("phase post-bootstrap: installing Cilium, FluxCD, and Teleport")
+	slog.Info("resolved cilium native routing cidr",
+		"private_network_id", privateNetworkID,
+		"preferred_private_ip", preferredPrivateIP,
+		"cidr", ipv4NativeRoutingCIDR,
+	)
+	var bootstrapErrors []error
 
 	// Install Cilium CNI
-	if err := cilium.Install(ctx, cilium.InstallParams{
-		Version: cfg.Cluster.EffectiveCiliumVersion(),
-		Hubble:  true,
+	if err := ciliumInstallFn(ctx, cilium.InstallParams{
+		Version:               cfg.Cluster.EffectiveCiliumVersion(),
+		Hubble:                true,
+		IPv4NativeRoutingCIDR: ipv4NativeRoutingCIDR,
 	}); err != nil {
 		slog.Warn("cilium install failed", "error", err)
+		bootstrapErrors = append(bootstrapErrors, fmt.Errorf("install cilium: %w", err))
 	}
 
 	// Install FluxCD (and optionally configure OCI source).
-	if err := flux.Bootstrap(ctx, flux.BootstrapParams{
+	if err := fluxBootstrapFn(ctx, flux.BootstrapParams{
 		OCIRepo: cfg.Flux.OCIRepo,
 		Version: cfg.Cluster.EffectiveFluxVersion(),
 	}); err != nil {
 		slog.Warn("flux bootstrap failed", "error", err)
+		bootstrapErrors = append(bootstrapErrors, fmt.Errorf("bootstrap flux: %w", err))
 	}
 
 	switch cfg.Teleport.EffectiveMode() {
@@ -658,27 +901,37 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 	case config.TeleportModeExternal:
 		if strings.TrimSpace(cfg.Teleport.Domain) == "" {
 			slog.Info("skipping external teleport agent (domain not configured)")
-			return nil
+			break
 		}
 
-		joinToken, err := teleport.GenerateJoinToken(ctx, cfg.Teleport.Domain, 30*time.Minute)
+		joinToken, err := teleportGenerateJoinTokenFn(ctx, cfg.Teleport.Domain, 30*time.Minute)
 		if err != nil {
 			slog.Warn("teleport join token generation failed", "error", err)
-			return nil
+			bootstrapErrors = append(bootstrapErrors, fmt.Errorf("generate teleport join token: %w", err))
+			break
 		}
 
-		if err := teleport.DeployKubeAgent(ctx, teleport.DeployKubeAgentParams{
+		slog.Info("deploying teleport kube agent",
+			"proxy_addr", cfg.Teleport.Domain,
+			"cluster", cfg.Environment,
+			"version", cfg.Cluster.EffectiveTeleportVersion(),
+		)
+
+		if err := teleportDeployKubeAgentFn(ctx, teleport.DeployKubeAgentParams{
 			ProxyAddr:   cfg.Teleport.Domain,
 			ClusterName: cfg.Environment,
 			JoinToken:   joinToken,
 			Version:     cfg.Cluster.EffectiveTeleportVersion(),
 		}); err != nil {
 			slog.Warn("teleport agent deployment failed", "error", err)
+			bootstrapErrors = append(bootstrapErrors, fmt.Errorf("deploy teleport kube agent: %w", err))
+		} else {
+			slog.Info("teleport kube agent deployed successfully")
 		}
 	case config.TeleportModeSelfHosted:
 		if strings.TrimSpace(cfg.Teleport.Domain) == "" {
 			slog.Warn("skipping self-hosted teleport deployment (teleport.domain not configured)")
-			return nil
+			break
 		}
 
 		teams := make([]string, 0, len(cfg.Teleport.GitHub.Teams))
@@ -689,7 +942,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		}
 		if strings.TrimSpace(cfg.Teleport.GitHub.Organization) == "" || len(teams) == 0 {
 			slog.Warn("skipping self-hosted teleport deployment (teleport.github.organization/teams are required)")
-			return nil
+			break
 		}
 
 		clientID, clientSecret := cfg.TeleportGitHubCredentials()
@@ -700,22 +953,45 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 				"secret_path", cfg.Infisical.SecretPath,
 				"required_keys", "GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET",
 			)
-			return nil
+			break
 		}
 
-		if err := teleport.DeploySelfHosted(ctx, teleport.DeploySelfHostedParams{
+		acmeEnabled := cfg.Teleport.ACME.EffectiveEnabled()
+		acmeEmail := strings.TrimSpace(cfg.Teleport.ACME.Email)
+		acmeURI := strings.TrimSpace(cfg.Teleport.ACME.URI)
+		if acmeEnabled && acmeEmail == "" {
+			slog.Warn("teleport ACME enabled without email; registration may fail depending on CA policy")
+		}
+
+		slog.Info("deploying self-hosted teleport",
+			"domain", cfg.Teleport.Domain,
+			"cluster", cfg.Environment,
+			"version", cfg.Cluster.EffectiveTeleportVersion(),
+		)
+
+		if err := teleportDeploySelfHostedFn(ctx, teleport.DeploySelfHostedParams{
 			ClusterName:        cfg.Environment,
 			Domain:             cfg.Teleport.Domain,
 			GitHubOrganization: strings.TrimSpace(cfg.Teleport.GitHub.Organization),
 			GitHubTeams:        teams,
 			GitHubClientID:     clientID,
 			GitHubClientSecret: clientSecret,
+			ACMEEnabled:        acmeEnabled,
+			ACMEEmail:          acmeEmail,
+			ACMEURI:            acmeURI,
 			Version:            cfg.Cluster.EffectiveTeleportVersion(),
 		}); err != nil {
 			slog.Warn("self-hosted teleport deployment failed", "error", err)
+			bootstrapErrors = append(bootstrapErrors, fmt.Errorf("deploy self-hosted teleport: %w", err))
+		} else {
+			slog.Info("self-hosted teleport deployed successfully")
 		}
 	default:
 		slog.Warn("skipping teleport deployment (unsupported teleport.mode)", "mode", cfg.Teleport.Mode)
+	}
+
+	if len(bootstrapErrors) > 0 {
+		return fmt.Errorf("post-bootstrap component installation failed: %w", errors.Join(bootstrapErrors...))
 	}
 
 	return nil
@@ -848,6 +1124,27 @@ func markNodeFailed(ctx context.Context, nodeStore *clusterstate.NodeStore, op *
 	})
 }
 
+func markNodeDeleted(ctx context.Context, nodeStore *clusterstate.NodeStore, op *operation.Operation, environment string) error {
+	if nodeStore == nil {
+		return nil
+	}
+
+	nodeName := nodeNameForOperation(op, environment)
+	if nodeName == "" {
+		return nil
+	}
+
+	return nodeStore.Upsert(ctx, clusterstate.NodeState{
+		Name:      nodeName,
+		Role:      op.GetContextString("role"),
+		Pool:      op.GetContextString("poolName"),
+		ServerID:  op.GetContextString("serverId"),
+		PublicIP:  op.GetContextString("publicIP"),
+		PrivateIP: op.GetContextString("privateIP"),
+		Status:    clusterstate.NodeStatusDeleted,
+	})
+}
+
 func controlPlaneEndpoint(privateIP, publicIP string) string {
 	if ip := strings.TrimSpace(privateIP); ip != "" {
 		return ip
@@ -944,13 +1241,14 @@ func ensureTalosAssets(ctx context.Context, cfg *config.Config, endpoint string,
 	}
 
 	assets, err := talos.GenerateConfig(ctx, talos.GenConfigParams{
-		ClusterName:       cfg.Environment,
-		Endpoint:          endpoint,
-		TalosVersion:      cfg.Cluster.TalosVersion,
-		TalosSchematic:    cfg.Cluster.TalosSchematic,
-		KubernetesVersion: cfg.Cluster.KubernetesVersion,
-		InstallDisk:       installDisk,
-		SecretsYAML:       secretsYAML,
+		ClusterName:        cfg.Environment,
+		Endpoint:           endpoint,
+		TalosVersion:       cfg.Cluster.TalosVersion,
+		TalosSchematic:     cfg.Cluster.TalosSchematic,
+		KubernetesVersion:  cfg.Cluster.KubernetesVersion,
+		InstallDisk:        installDisk,
+		ControlPlaneTaints: cfg.Cluster.EffectiveControlPlaneTaints(),
+		SecretsYAML:        secretsYAML,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("generate talos assets: %w", err)

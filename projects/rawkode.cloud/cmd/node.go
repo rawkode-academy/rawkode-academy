@@ -292,8 +292,8 @@ func runNodeRemove(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("node pool %q must define zone", pool.Name)
 		}
 
-		if err := scaleway.DeleteServer(ctx, scwClient.Baremetal, node.ServerID, scw.Zone(zoneValue)); err != nil {
-			return fmt.Errorf("delete server %s: %w", node.ServerID, err)
+		if err := scaleway.CleanupProvisionedServer(ctx, scwClient, node.ServerID, scw.Zone(zoneValue)); err != nil {
+			return fmt.Errorf("cleanup server %s: %w", node.ServerID, err)
 		}
 	}
 

@@ -38,3 +38,30 @@ func TestResolveInstallDisk(t *testing.T) {
 		})
 	}
 }
+
+func TestAllowSchedulingOnControlPlanes(t *testing.T) {
+	tests := []struct {
+		name               string
+		controlPlaneTaints bool
+		want               bool
+	}{
+		{
+			name:               "taints enabled keeps control plane isolated",
+			controlPlaneTaints: true,
+			want:               false,
+		},
+		{
+			name:               "taints disabled allows control plane scheduling",
+			controlPlaneTaints: false,
+			want:               true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := allowSchedulingOnControlPlanes(tt.controlPlaneTaints); got != tt.want {
+				t.Fatalf("allowSchedulingOnControlPlanes(%t) = %t, want %t", tt.controlPlaneTaints, got, tt.want)
+			}
+		})
+	}
+}
