@@ -116,6 +116,8 @@ var (
 	teleportDeploySelfHostedFn              = teleport.DeploySelfHosted
 	teleportEnsureAdminAccessFn             = teleport.EnsureAdminAccess
 	postBootstrapKubeconfigPathFn           = postBootstrapKubeconfigPath
+	postBootstrapKubeconfigRetryInterval    = 15 * time.Second
+	postBootstrapKubeconfigRetryTimeout     = 10 * time.Minute
 	scalewayNewClientFn                     = scaleway.NewClient
 	scalewayEnsureNetworkFoundationFn       = scaleway.EnsureNetworkFoundation
 	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
@@ -882,7 +884,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		"cidr", ipv4NativeRoutingCIDR,
 	)
 
-	kubeconfigPath, cleanupKubeconfig, err := postBootstrapKubeconfigPathFn(ctx, op, cfg)
+	kubeconfigPath, cleanupKubeconfig, err := prepareBootstrapKubeconfigWithRetry(ctx, op, cfg)
 	if err != nil {
 		return fmt.Errorf("prepare bootstrap kubeconfig: %w", err)
 	}
@@ -1069,6 +1071,53 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 	}
 
 	return nil
+}
+
+func prepareBootstrapKubeconfigWithRetry(
+	ctx context.Context,
+	op *operation.Operation,
+	cfg *config.Config,
+) (string, func(), error) {
+	timeout := postBootstrapKubeconfigRetryTimeout
+	if timeout <= 0 {
+		timeout = time.Second
+	}
+
+	interval := postBootstrapKubeconfigRetryInterval
+	if interval <= 0 {
+		interval = time.Second
+	}
+
+	deadline := time.NewTimer(timeout)
+	defer deadline.Stop()
+
+	attempt := 0
+	var lastErr error
+	for {
+		attempt++
+		kubeconfigPath, cleanup, err := postBootstrapKubeconfigPathFn(ctx, op, cfg)
+		if err == nil {
+			return kubeconfigPath, cleanup, nil
+		}
+
+		lastErr = err
+		slog.Info("waiting to retry bootstrap kubeconfig preparation",
+			"attempt", attempt,
+			"interval", interval,
+			"error", err,
+		)
+
+		select {
+		case <-ctx.Done():
+			return "", nil, ctx.Err()
+		case <-deadline.C:
+			if lastErr == nil {
+				lastErr = fmt.Errorf("unknown talos connectivity error")
+			}
+			return "", nil, fmt.Errorf("bootstrap kubeconfig not ready after %s: %w", timeout, lastErr)
+		case <-time.After(interval):
+		}
+	}
 }
 
 func postBootstrapKubeconfigPath(ctx context.Context, op *operation.Operation, cfg *config.Config) (string, func(), error) {
