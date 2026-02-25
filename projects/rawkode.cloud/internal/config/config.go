@@ -74,9 +74,11 @@ const (
 )
 
 const (
-	defaultCiliumVersion   = "v1.19.0"
-	defaultFluxVersion     = "latest"
-	defaultTeleportVersion = "18"
+	defaultCiliumVersion     = "v1.19.0"
+	defaultFluxVersion       = "latest"
+	defaultTeleportVersion   = "18"
+	defaultTeleportKubeUser  = "teleport-admin"
+	defaultTeleportKubeGroup = "system:masters"
 )
 
 // DiskConfig holds disk device paths.
@@ -91,6 +93,7 @@ type TeleportConfig struct {
 	Mode   string               `yaml:"mode"`
 	ACME   TeleportACMEConfig   `yaml:"acme"`
 	GitHub TeleportGitHubConfig `yaml:"github"`
+	Access TeleportAccessConfig `yaml:"access"`
 }
 
 const (
@@ -110,6 +113,13 @@ type TeleportACMEConfig struct {
 type TeleportGitHubConfig struct {
 	Organization string   `yaml:"organization"`
 	Teams        []string `yaml:"teams"`
+}
+
+// TeleportAccessConfig holds Teleport RBAC bootstrap settings.
+type TeleportAccessConfig struct {
+	AdminTeams       []string `yaml:"admin_teams"`
+	KubernetesUsers  []string `yaml:"kubernetes_users"`
+	KubernetesGroups []string `yaml:"kubernetes_groups"`
 }
 
 // InfisicalConfig holds secrets management settings.
@@ -450,6 +460,33 @@ func (c TeleportACMEConfig) EffectiveEnabled() bool {
 	return *c.Enabled
 }
 
+// EffectiveAdminTeams returns Teleport admin teams from access config with a github-team fallback.
+func (c TeleportConfig) EffectiveAdminTeams() []string {
+	if teams := normalizedDistinctStrings(c.Access.AdminTeams); len(teams) > 0 {
+		return teams
+	}
+
+	return normalizedDistinctStrings(c.GitHub.Teams)
+}
+
+// EffectiveKubernetesUsers returns Teleport kubernetes users with defaults.
+func (c TeleportConfig) EffectiveKubernetesUsers() []string {
+	if users := normalizedDistinctStrings(c.Access.KubernetesUsers); len(users) > 0 {
+		return users
+	}
+
+	return []string{defaultTeleportKubeUser}
+}
+
+// EffectiveKubernetesGroups returns Teleport kubernetes groups with defaults.
+func (c TeleportConfig) EffectiveKubernetesGroups() []string {
+	if groups := normalizedDistinctStrings(c.Access.KubernetesGroups); len(groups) > 0 {
+		return groups
+	}
+
+	return []string{defaultTeleportKubeGroup}
+}
+
 // NormalizeTeleportMode normalizes user-facing Teleport mode variants.
 func NormalizeTeleportMode(value string) string {
 	switch strings.ToLower(strings.TrimSpace(value)) {
@@ -462,4 +499,27 @@ func NormalizeTeleportMode(value string) string {
 	default:
 		return ""
 	}
+}
+
+func normalizedDistinctStrings(values []string) []string {
+	if len(values) == 0 {
+		return nil
+	}
+
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		key := strings.ToLower(trimmed)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, trimmed)
+	}
+
+	return out
 }

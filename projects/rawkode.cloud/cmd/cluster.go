@@ -109,6 +109,7 @@ var (
 	teleportGenerateJoinTokenFn             = teleport.GenerateJoinToken
 	teleportDeployKubeAgentFn               = teleport.DeployKubeAgent
 	teleportDeploySelfHostedFn              = teleport.DeploySelfHosted
+	teleportEnsureAdminAccessFn             = teleport.EnsureAdminAccess
 	scalewayNewClientFn                     = scaleway.NewClient
 	scalewayEnsureNetworkFoundationFn       = scaleway.EnsureNetworkFoundation
 	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
@@ -895,6 +896,48 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		bootstrapErrors = append(bootstrapErrors, fmt.Errorf("bootstrap flux: %w", err))
 	}
 
+	ensureTeleportAdminAccess := func(strict bool) error {
+		organization := strings.TrimSpace(cfg.Teleport.GitHub.Organization)
+		adminTeams := cfg.Teleport.EffectiveAdminTeams()
+		kubernetesUsers := cfg.Teleport.EffectiveKubernetesUsers()
+		kubernetesGroups := cfg.Teleport.EffectiveKubernetesGroups()
+
+		if organization == "" || len(adminTeams) == 0 {
+			slog.Warn(
+				"skipping teleport access reconciliation (teleport.github.organization and admin teams are required)",
+				"organization", organization,
+				"admin_teams", adminTeams,
+			)
+			return nil
+		}
+
+		slog.Info(
+			"ensuring teleport kubernetes admin access",
+			"organization", organization,
+			"admin_teams", adminTeams,
+			"kubernetes_users", kubernetesUsers,
+			"kubernetes_groups", kubernetesGroups,
+		)
+
+		err := teleportEnsureAdminAccessFn(ctx, teleport.EnsureAccessParams{
+			ProxyAddr:        strings.TrimSpace(cfg.Teleport.Domain),
+			Organization:     organization,
+			AdminTeams:       adminTeams,
+			KubernetesUsers:  kubernetesUsers,
+			KubernetesGroups: kubernetesGroups,
+		})
+		if err == nil {
+			slog.Info("teleport kubernetes admin access ensured")
+			return nil
+		}
+		if strict {
+			return fmt.Errorf("ensure teleport admin access: %w", err)
+		}
+
+		slog.Warn("teleport admin access reconciliation failed (continuing in best-effort mode)", "error", err)
+		return nil
+	}
+
 	switch cfg.Teleport.EffectiveMode() {
 	case config.TeleportModeDisabled:
 		slog.Info("skipping teleport (mode disabled)")
@@ -927,6 +970,9 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 			bootstrapErrors = append(bootstrapErrors, fmt.Errorf("deploy teleport kube agent: %w", err))
 		} else {
 			slog.Info("teleport kube agent deployed successfully")
+			if err := ensureTeleportAdminAccess(false); err != nil {
+				bootstrapErrors = append(bootstrapErrors, err)
+			}
 		}
 	case config.TeleportModeSelfHosted:
 		if strings.TrimSpace(cfg.Teleport.Domain) == "" {
@@ -934,14 +980,12 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 			break
 		}
 
-		teams := make([]string, 0, len(cfg.Teleport.GitHub.Teams))
-		for _, team := range cfg.Teleport.GitHub.Teams {
-			if trimmed := strings.TrimSpace(team); trimmed != "" {
-				teams = append(teams, trimmed)
-			}
-		}
-		if strings.TrimSpace(cfg.Teleport.GitHub.Organization) == "" || len(teams) == 0 {
-			slog.Warn("skipping self-hosted teleport deployment (teleport.github.organization/teams are required)")
+		organization := strings.TrimSpace(cfg.Teleport.GitHub.Organization)
+		adminTeams := cfg.Teleport.EffectiveAdminTeams()
+		kubernetesUsers := cfg.Teleport.EffectiveKubernetesUsers()
+		kubernetesGroups := cfg.Teleport.EffectiveKubernetesGroups()
+		if organization == "" || len(adminTeams) == 0 {
+			slog.Warn("skipping self-hosted teleport deployment (teleport.github.organization and admin teams are required)")
 			break
 		}
 
@@ -967,13 +1011,20 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 			"domain", cfg.Teleport.Domain,
 			"cluster", cfg.Environment,
 			"version", cfg.Cluster.EffectiveTeleportVersion(),
+			"organization", organization,
+			"admin_teams", adminTeams,
+			"kubernetes_users", kubernetesUsers,
+			"kubernetes_groups", kubernetesGroups,
 		)
 
 		if err := teleportDeploySelfHostedFn(ctx, teleport.DeploySelfHostedParams{
 			ClusterName:        cfg.Environment,
 			Domain:             cfg.Teleport.Domain,
-			GitHubOrganization: strings.TrimSpace(cfg.Teleport.GitHub.Organization),
-			GitHubTeams:        teams,
+			GitHubOrganization: organization,
+			GitHubTeams:        adminTeams,
+			AdminTeams:         adminTeams,
+			KubernetesUsers:    kubernetesUsers,
+			KubernetesGroups:   kubernetesGroups,
 			GitHubClientID:     clientID,
 			GitHubClientSecret: clientSecret,
 			ACMEEnabled:        acmeEnabled,
@@ -985,6 +1036,10 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 			bootstrapErrors = append(bootstrapErrors, fmt.Errorf("deploy self-hosted teleport: %w", err))
 		} else {
 			slog.Info("self-hosted teleport deployed successfully")
+			if err := ensureTeleportAdminAccess(true); err != nil {
+				slog.Warn("self-hosted teleport access reconciliation failed", "error", err)
+				bootstrapErrors = append(bootstrapErrors, err)
+			}
 		}
 	default:
 		slog.Warn("skipping teleport deployment (unsupported teleport.mode)", "mode", cfg.Teleport.Mode)

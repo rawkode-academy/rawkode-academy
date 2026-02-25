@@ -40,6 +40,9 @@ type DeploySelfHostedParams struct {
 	Domain             string
 	GitHubOrganization string
 	GitHubTeams        []string
+	AdminTeams         []string
+	KubernetesUsers    []string
+	KubernetesGroups   []string
 	GitHubClientID     string
 	GitHubClientSecret string
 	ACMEEnabled        bool
@@ -83,14 +86,20 @@ func DeploySelfHosted(ctx context.Context, params DeploySelfHostedParams) error 
 		return fmt.Errorf("github client credentials are required")
 	}
 
-	teams := make([]string, 0, len(params.GitHubTeams))
-	for _, team := range params.GitHubTeams {
-		if trimmed := strings.TrimSpace(team); trimmed != "" {
-			teams = append(teams, trimmed)
-		}
+	teams := uniqueNonEmptyStrings(params.AdminTeams)
+	if len(teams) == 0 {
+		teams = uniqueNonEmptyStrings(params.GitHubTeams)
 	}
 	if len(teams) == 0 {
 		return fmt.Errorf("at least one github team is required")
+	}
+	kubernetesUsers := uniqueNonEmptyStrings(params.KubernetesUsers)
+	if len(kubernetesUsers) == 0 {
+		return fmt.Errorf("at least one kubernetes user is required")
+	}
+	kubernetesGroups := uniqueNonEmptyStrings(params.KubernetesGroups)
+	if len(kubernetesGroups) == 0 {
+		return fmt.Errorf("at least one kubernetes group is required")
 	}
 
 	manifest := SelfHostedManifest(
@@ -99,6 +108,8 @@ func DeploySelfHosted(ctx context.Context, params DeploySelfHostedParams) error 
 		strings.TrimSpace(params.Version),
 		strings.TrimSpace(params.GitHubOrganization),
 		teams,
+		kubernetesUsers,
+		kubernetesGroups,
 		strings.TrimSpace(params.GitHubClientID),
 		strings.TrimSpace(params.GitHubClientSecret),
 		params.ACMEEnabled,
@@ -226,4 +237,27 @@ func kubeConfig(kubeconfig string) (*rest.Config, error) {
 
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, &clientcmd.ConfigOverrides{}).ClientConfig()
+}
+
+func uniqueNonEmptyStrings(values []string) []string {
+	if len(values) == 0 {
+		return nil
+	}
+
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		key := strings.ToLower(trimmed)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, trimmed)
+	}
+
+	return out
 }

@@ -93,7 +93,9 @@ func SelfHostedManifest(
 	domain,
 	version,
 	githubOrganization string,
-	githubTeams []string,
+	adminTeams []string,
+	kubernetesUsers []string,
+	kubernetesGroups []string,
 	githubClientID,
 	githubClientSecret string,
 	acmeEnabled bool,
@@ -166,9 +168,9 @@ stringData:
         kubernetes_labels:
           '*': '*'
         kubernetes_groups:
-          - system:masters
+%s
         kubernetes_users:
-          - teleport-admin
+%s
       deny: {}
 ---
 apiVersion: v1
@@ -231,24 +233,11 @@ spec:
             secretName: teleport-config
         - name: data
           emptyDir: {}
-`, clusterName, clusterName, fmt.Sprintf("%s:443", domain), proxyACMEYAML(acmeEnabled, acmeEmail, acmeURI), clusterName, githubClientID, githubClientSecret, fmt.Sprintf("https://%s/v1/webapi/github/callback", domain), githubTeamsToRolesYAML(githubOrganization, githubTeams), defaultTeleportBootstrapRole, teleportImage(version))
+`, clusterName, clusterName, fmt.Sprintf("%s:443", domain), proxyACMEYAML(acmeEnabled, acmeEmail, acmeURI), clusterName, githubClientID, githubClientSecret, fmt.Sprintf("https://%s/v1/webapi/github/callback", domain), githubTeamsToRolesYAML(githubOrganization, adminTeams), defaultTeleportBootstrapRole, yamlStringList(kubernetesGroups, "          "), yamlStringList(kubernetesUsers, "          "), teleportImage(version))
 }
 
 func githubTeamsToRolesYAML(organization string, teams []string) string {
-	organization = strings.TrimSpace(organization)
-	var b strings.Builder
-
-	for _, team := range teams {
-		trimmed := strings.TrimSpace(team)
-		if trimmed == "" {
-			continue
-		}
-		fmt.Fprintf(&b, "        - organization: %q\n", organization)
-		fmt.Fprintf(&b, "          team: %q\n", trimmed)
-		fmt.Fprintf(&b, "          roles: [%q]\n", defaultTeleportBootstrapRole)
-	}
-
-	return b.String()
+	return teamRolesYAML(strings.TrimSpace(organization), teams, defaultTeleportBootstrapRole)
 }
 
 func proxyACMEYAML(enabled bool, email, uri string) string {
@@ -277,4 +266,30 @@ func teleportImage(version string) string {
 	}
 
 	return fmt.Sprintf("public.ecr.aws/gravitational/teleport-distroless:%s", tag)
+}
+
+func yamlStringList(values []string, indent string) string {
+	var b strings.Builder
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		fmt.Fprintf(&b, "%s- %s\n", indent, trimmed)
+	}
+	return b.String()
+}
+
+func teamRolesYAML(organization string, teams []string, roleName string) string {
+	var b strings.Builder
+	for _, team := range teams {
+		trimmed := strings.TrimSpace(team)
+		if trimmed == "" {
+			continue
+		}
+		fmt.Fprintf(&b, "        - organization: %q\n", organization)
+		fmt.Fprintf(&b, "          team: %q\n", trimmed)
+		fmt.Fprintf(&b, "          roles: [%q]\n", roleName)
+	}
+	return b.String()
 }

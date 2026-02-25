@@ -22,6 +22,7 @@ func restorePostBootstrapFns() {
 	teleportGenerateJoinTokenFn = teleport.GenerateJoinToken
 	teleportDeployKubeAgentFn = teleport.DeployKubeAgent
 	teleportDeploySelfHostedFn = teleport.DeploySelfHosted
+	teleportEnsureAdminAccessFn = teleport.EnsureAdminAccess
 	scalewayNewClientFn = scaleway.NewClient
 	scalewayEnsureNetworkFoundationFn = scaleway.EnsureNetworkFoundation
 	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
@@ -107,6 +108,115 @@ func TestPhasePostBootstrapExternalJoinTokenFailureFailsPhase(t *testing.T) {
 	}
 	if !errors.Is(err, errJoin) {
 		t.Fatalf("expected join token error to be included: %v", err)
+	}
+}
+
+func TestPhasePostBootstrapExternalEnsuresTeleportAdminAccessFromConfig(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	ciliumInstallFn = func(context.Context, cilium.InstallParams) error {
+		return nil
+	}
+	fluxBootstrapFn = func(context.Context, flux.BootstrapParams) error {
+		return nil
+	}
+	teleportGenerateJoinTokenFn = func(context.Context, string, time.Duration) (string, error) {
+		return "join-token", nil
+	}
+	teleportDeployKubeAgentFn = func(context.Context, teleport.DeployKubeAgentParams) error {
+		return nil
+	}
+	scalewayNewClientFn = func(string, string, string, string) (*scaleway.Client, error) {
+		return &scaleway.Client{}, nil
+	}
+	scalewayResolvePrivateNetworkIPv4CIDRFn = func(context.Context, *scaleway.Client, scw.Region, string, string) (string, error) {
+		return "172.16.16.0/22", nil
+	}
+
+	var gotEnsureParams teleport.EnsureAccessParams
+	teleportEnsureAdminAccessFn = func(_ context.Context, params teleport.EnsureAccessParams) error {
+		gotEnsureParams = params
+		return nil
+	}
+
+	cfg := &config.Config{
+		Environment: "production",
+		Teleport: config.TeleportConfig{
+			Mode:   config.TeleportModeExternal,
+			Domain: "teleport.example.com",
+			GitHub: config.TeleportGitHubConfig{
+				Organization: "rawkode-academy",
+				Teams:        []string{"legacy-team"},
+			},
+			Access: config.TeleportAccessConfig{
+				AdminTeams:       []string{"platform"},
+				KubernetesUsers:  []string{"teleport-admin"},
+				KubernetesGroups: []string{"system:masters"},
+			},
+		},
+	}
+
+	if err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg); err != nil {
+		t.Fatalf("phasePostBootstrap returned error: %v", err)
+	}
+
+	if gotEnsureParams.ProxyAddr != "teleport.example.com" {
+		t.Fatalf("ensure access proxy addr = %q, want %q", gotEnsureParams.ProxyAddr, "teleport.example.com")
+	}
+	if gotEnsureParams.Organization != "rawkode-academy" {
+		t.Fatalf("ensure access organization = %q, want %q", gotEnsureParams.Organization, "rawkode-academy")
+	}
+	if len(gotEnsureParams.AdminTeams) != 1 || gotEnsureParams.AdminTeams[0] != "platform" {
+		t.Fatalf("ensure access admin teams = %v, want [platform]", gotEnsureParams.AdminTeams)
+	}
+	if len(gotEnsureParams.KubernetesUsers) != 1 || gotEnsureParams.KubernetesUsers[0] != "teleport-admin" {
+		t.Fatalf("ensure access kubernetes users = %v, want [teleport-admin]", gotEnsureParams.KubernetesUsers)
+	}
+	if len(gotEnsureParams.KubernetesGroups) != 1 || gotEnsureParams.KubernetesGroups[0] != "system:masters" {
+		t.Fatalf("ensure access kubernetes groups = %v, want [system:masters]", gotEnsureParams.KubernetesGroups)
+	}
+}
+
+func TestPhasePostBootstrapExternalAccessReconcileIsBestEffort(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	ciliumInstallFn = func(context.Context, cilium.InstallParams) error {
+		return nil
+	}
+	fluxBootstrapFn = func(context.Context, flux.BootstrapParams) error {
+		return nil
+	}
+	teleportGenerateJoinTokenFn = func(context.Context, string, time.Duration) (string, error) {
+		return "join-token", nil
+	}
+	teleportDeployKubeAgentFn = func(context.Context, teleport.DeployKubeAgentParams) error {
+		return nil
+	}
+	teleportEnsureAdminAccessFn = func(context.Context, teleport.EnsureAccessParams) error {
+		return errors.New("teleport access denied")
+	}
+	scalewayNewClientFn = func(string, string, string, string) (*scaleway.Client, error) {
+		return &scaleway.Client{}, nil
+	}
+	scalewayResolvePrivateNetworkIPv4CIDRFn = func(context.Context, *scaleway.Client, scw.Region, string, string) (string, error) {
+		return "172.16.16.0/22", nil
+	}
+
+	err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), &config.Config{
+		Environment: "production",
+		Teleport: config.TeleportConfig{
+			Mode:   config.TeleportModeExternal,
+			Domain: "teleport.example.com",
+			GitHub: config.TeleportGitHubConfig{
+				Organization: "rawkode-academy",
+				Teams:        []string{"platform"},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected best-effort external access reconcile to continue, got error: %v", err)
 	}
 }
 
