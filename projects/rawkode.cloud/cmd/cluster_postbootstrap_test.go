@@ -193,6 +193,7 @@ func TestPhasePostBootstrapPassesPreparedKubeconfigToComponents(t *testing.T) {
 	t.Cleanup(restorePostBootstrapFns)
 
 	const kubeconfigPath = "/tmp/bootstrap-kubeconfig"
+	const ociRepo = "oci://ghcr.io/rawkode-academy/rawkode-academy/gitops"
 
 	postBootstrapKubeconfigPathFn = func(context.Context, *operation.Operation, *config.Config) (string, func(), error) {
 		return kubeconfigPath, func() {}, nil
@@ -218,6 +219,9 @@ func TestPhasePostBootstrapPassesPreparedKubeconfigToComponents(t *testing.T) {
 	}
 
 	cfg := &config.Config{
+		Flux: config.FluxConfig{
+			OCIRepo: ociRepo,
+		},
 		Teleport: config.TeleportConfig{
 			Mode: config.TeleportModeDisabled,
 		},
@@ -232,6 +236,48 @@ func TestPhasePostBootstrapPassesPreparedKubeconfigToComponents(t *testing.T) {
 	}
 	if gotFluxParams.Kubeconfig != kubeconfigPath {
 		t.Fatalf("flux bootstrap kubeconfig = %q, want %q", gotFluxParams.Kubeconfig, kubeconfigPath)
+	}
+	if gotFluxParams.OCIRepo != ociRepo {
+		t.Fatalf("flux bootstrap OCI repo = %q, want %q", gotFluxParams.OCIRepo, ociRepo)
+	}
+}
+
+func TestPhasePostBootstrapContinuesWhenFluxOCIRepoIsEmpty(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	var fluxCalled bool
+	fluxBootstrapFn = func(_ context.Context, params flux.BootstrapParams) error {
+		fluxCalled = true
+		if params.OCIRepo != "" {
+			t.Fatalf("flux bootstrap OCI repo = %q, want empty", params.OCIRepo)
+		}
+		return nil
+	}
+	ciliumInstallFn = func(context.Context, cilium.InstallParams) error {
+		return nil
+	}
+	scalewayNewClientFn = func(string, string, string, string) (*scaleway.Client, error) {
+		return &scaleway.Client{}, nil
+	}
+	scalewayResolvePrivateNetworkIPv4CIDRFn = func(context.Context, *scaleway.Client, scw.Region, string, string) (string, error) {
+		return "172.16.16.0/22", nil
+	}
+
+	cfg := &config.Config{
+		Flux: config.FluxConfig{
+			OCIRepo: "   ",
+		},
+		Teleport: config.TeleportConfig{
+			Mode: config.TeleportModeDisabled,
+		},
+	}
+
+	if err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg); err != nil {
+		t.Fatalf("phasePostBootstrap returned error: %v", err)
+	}
+	if !fluxCalled {
+		t.Fatal("expected flux bootstrap to run")
 	}
 }
 

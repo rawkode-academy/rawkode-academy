@@ -898,10 +898,15 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		bootstrapErrors = append(bootstrapErrors, fmt.Errorf("install cilium: %w", err))
 	}
 
+	ociRepo := strings.TrimSpace(cfg.Flux.OCIRepo)
+	if ociRepo == "" {
+		slog.Warn("flux.oci_repo is empty; skipping GitOps OCI source configuration during bootstrap (can be configured manually later)")
+	}
+
 	// Install FluxCD (and optionally configure OCI source).
 	if err := fluxBootstrapFn(ctx, flux.BootstrapParams{
 		Kubeconfig: kubeconfigPath,
-		OCIRepo:    cfg.Flux.OCIRepo,
+		OCIRepo:    ociRepo,
 		Version:    cfg.Cluster.EffectiveFluxVersion(),
 	}); err != nil {
 		slog.Warn("flux bootstrap failed", "error", err)
