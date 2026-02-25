@@ -67,7 +67,7 @@ infisical:
   secret_path: /%s # shared secrets live here; cluster secrets use <secret_path>/<environment>
 
 flux:
-  oci_repo: ""
+  oci_repo: "oci://ghcr.io/rawkode-academy/rawkode-academy/gitops"
 `
 
 var clusterScaffoldCmd = &cobra.Command{

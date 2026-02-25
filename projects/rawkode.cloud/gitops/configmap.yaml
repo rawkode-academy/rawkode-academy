@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rawkode-cloud-example
+  namespace: default
+data:
+  message: "Hello from projects/rawkode.cloud GitOps OCI source."

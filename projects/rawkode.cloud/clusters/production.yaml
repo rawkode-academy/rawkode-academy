@@ -54,3 +54,6 @@ infisical:
   project_id: 6575a392d7a5ef0555ade86b
   environment: production
   secret_path: /projects/rawkode-cloud
+
+flux:
+  oci_repo: oci://ghcr.io/rawkode-academy/rawkode-academy/gitops
