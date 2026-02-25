@@ -34,6 +34,13 @@ nodePools:
 teleport:
   domain: rawkode.cloud
   mode: self_hosted
+  access:
+    admin_teams:
+      - platform
+    kubernetes_users:
+      - teleport-admin
+    kubernetes_groups:
+      - system:masters
   acme:
     enabled: true
     email: support@rawkode.academy

@@ -89,6 +89,93 @@ func TestTeleportACMEEffectiveEnabled(t *testing.T) {
 	}
 }
 
+func TestTeleportEffectiveAdminTeams(t *testing.T) {
+	cfg := TeleportConfig{
+		GitHub: TeleportGitHubConfig{
+			Teams: []string{"legacy-team"},
+		},
+		Access: TeleportAccessConfig{
+			AdminTeams: []string{" platform ", "Platform", "ops"},
+		},
+	}
+
+	got := cfg.EffectiveAdminTeams()
+	want := []string{"platform", "ops"}
+	if len(got) != len(want) {
+		t.Fatalf("TeleportConfig.EffectiveAdminTeams() len = %d, want %d (%v)", len(got), len(want), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("TeleportConfig.EffectiveAdminTeams()[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
+func TestTeleportEffectiveAdminTeamsFallsBackToGitHubTeams(t *testing.T) {
+	cfg := TeleportConfig{
+		GitHub: TeleportGitHubConfig{
+			Teams: []string{"platform"},
+		},
+	}
+
+	got := cfg.EffectiveAdminTeams()
+	if len(got) != 1 || got[0] != "platform" {
+		t.Fatalf("TeleportConfig.EffectiveAdminTeams() = %v, want [platform]", got)
+	}
+}
+
+func TestTeleportEffectiveKubernetesUsers(t *testing.T) {
+	cfg := TeleportConfig{
+		Access: TeleportAccessConfig{
+			KubernetesUsers: []string{"ops-admin", " ops-admin ", "breakglass"},
+		},
+	}
+
+	got := cfg.EffectiveKubernetesUsers()
+	want := []string{"ops-admin", "breakglass"}
+	if len(got) != len(want) {
+		t.Fatalf("TeleportConfig.EffectiveKubernetesUsers() len = %d, want %d (%v)", len(got), len(want), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("TeleportConfig.EffectiveKubernetesUsers()[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
+func TestTeleportEffectiveKubernetesUsersDefaults(t *testing.T) {
+	got := (TeleportConfig{}).EffectiveKubernetesUsers()
+	if len(got) != 1 || got[0] != "teleport-admin" {
+		t.Fatalf("TeleportConfig{}.EffectiveKubernetesUsers() = %v, want [teleport-admin]", got)
+	}
+}
+
+func TestTeleportEffectiveKubernetesGroups(t *testing.T) {
+	cfg := TeleportConfig{
+		Access: TeleportAccessConfig{
+			KubernetesGroups: []string{"system:masters", " SYSTEM:MASTERS ", "platform-admins"},
+		},
+	}
+
+	got := cfg.EffectiveKubernetesGroups()
+	want := []string{"system:masters", "platform-admins"}
+	if len(got) != len(want) {
+		t.Fatalf("TeleportConfig.EffectiveKubernetesGroups() len = %d, want %d (%v)", len(got), len(want), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("TeleportConfig.EffectiveKubernetesGroups()[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
+func TestTeleportEffectiveKubernetesGroupsDefaults(t *testing.T) {
+	got := (TeleportConfig{}).EffectiveKubernetesGroups()
+	if len(got) != 1 || got[0] != "system:masters" {
+		t.Fatalf("TeleportConfig{}.EffectiveKubernetesGroups() = %v, want [system:masters]", got)
+	}
+}
+
 func TestScalewayNetworkNameDerivation(t *testing.T) {
 	cfg := &Config{Environment: "rawkode-cloud"}
 

@@ -12,6 +12,8 @@ func TestSelfHostedManifestSetsPrivilegedPodSecurityLabels(t *testing.T) {
 		"18",
 		"rawkode-academy",
 		[]string{"platform"},
+		[]string{"teleport-admin"},
+		[]string{"system:masters"},
 		"github-client-id",
 		"github-client-secret",
 		false,
@@ -42,6 +44,8 @@ func TestSelfHostedManifestUsesTeleport18CompatibleAuthConfig(t *testing.T) {
 		"18",
 		"rawkode-academy",
 		[]string{"platform"},
+		[]string{"teleport-admin"},
+		[]string{"system:masters"},
 		"github-client-id",
 		"github-client-secret",
 		false,
@@ -73,6 +77,8 @@ func TestSelfHostedManifestBootstrapsGitHubConnectorFromConfig(t *testing.T) {
 		"18",
 		"rawkode-academy",
 		[]string{"platform"},
+		[]string{"teleport-admin"},
+		[]string{"system:masters"},
 		"github-client-id",
 		"github-client-secret",
 		false,
@@ -116,6 +122,8 @@ func TestSelfHostedManifestConfiguresNativeACMEWhenEnabled(t *testing.T) {
 		"18",
 		"rawkode-academy",
 		[]string{"platform"},
+		[]string{"teleport-admin"},
+		[]string{"system:masters"},
 		"github-client-id",
 		"github-client-secret",
 		true,
@@ -142,6 +150,8 @@ func TestSelfHostedManifestOmitsACMEWhenDisabled(t *testing.T) {
 		"18",
 		"rawkode-academy",
 		[]string{"platform"},
+		[]string{"teleport-admin"},
+		[]string{"system:masters"},
 		"github-client-id",
 		"github-client-secret",
 		false,
@@ -151,5 +161,33 @@ func TestSelfHostedManifestOmitsACMEWhenDisabled(t *testing.T) {
 
 	if strings.Contains(manifest, "\n      acme:\n") {
 		t.Fatalf("self-hosted manifest should not include proxy_service.acme when ACME is disabled")
+	}
+}
+
+func TestSelfHostedManifestUsesConfiguredKubernetesSubjects(t *testing.T) {
+	manifest := SelfHostedManifest(
+		"production",
+		"rawkode.cloud",
+		"18",
+		"rawkode-academy",
+		[]string{"platform"},
+		[]string{"platform-admin"},
+		[]string{"platform:sre"},
+		"github-client-id",
+		"github-client-secret",
+		false,
+		"",
+		"",
+	)
+
+	for _, required := range []string{
+		"kubernetes_groups:",
+		"- platform:sre",
+		"kubernetes_users:",
+		"- platform-admin",
+	} {
+		if !strings.Contains(manifest, required) {
+			t.Fatalf("self-hosted manifest missing configured kubernetes subject fragment %q", required)
+		}
 	}
 }
