@@ -26,6 +26,8 @@ func restorePostBootstrapFns() {
 	postBootstrapKubeconfigPathFn = func(context.Context, *operation.Operation, *config.Config) (string, func(), error) {
 		return "", func() {}, nil
 	}
+	postBootstrapKubeconfigRetryInterval = 15 * time.Second
+	postBootstrapKubeconfigRetryTimeout = 10 * time.Minute
 	scalewayNewClientFn = scaleway.NewClient
 	scalewayEnsureNetworkFoundationFn = scaleway.EnsureNetworkFoundation
 	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
@@ -365,6 +367,61 @@ func TestPhasePostBootstrapPassesPreparedKubeconfigToComponents(t *testing.T) {
 	}
 	if gotFluxParams.Kubeconfig != kubeconfigPath {
 		t.Fatalf("flux bootstrap kubeconfig = %q, want %q", gotFluxParams.Kubeconfig, kubeconfigPath)
+	}
+}
+
+func TestPrepareBootstrapKubeconfigWithRetryRetriesUntilSuccess(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	postBootstrapKubeconfigRetryInterval = time.Millisecond
+	postBootstrapKubeconfigRetryTimeout = 100 * time.Millisecond
+
+	attempts := 0
+	postBootstrapKubeconfigPathFn = func(context.Context, *operation.Operation, *config.Config) (string, func(), error) {
+		attempts++
+		if attempts < 3 {
+			return "", nil, errors.New("talos api not ready")
+		}
+		return "/tmp/bootstrap-kubeconfig", func() {}, nil
+	}
+
+	path, cleanup, err := prepareBootstrapKubeconfigWithRetry(context.Background(), newPostBootstrapOperation(), &config.Config{})
+	if err != nil {
+		t.Fatalf("prepareBootstrapKubeconfigWithRetry returned error: %v", err)
+	}
+	if path != "/tmp/bootstrap-kubeconfig" {
+		t.Fatalf("kubeconfig path = %q, want %q", path, "/tmp/bootstrap-kubeconfig")
+	}
+	if cleanup == nil {
+		t.Fatal("expected cleanup function")
+	}
+	if attempts != 3 {
+		t.Fatalf("attempts = %d, want %d", attempts, 3)
+	}
+}
+
+func TestPrepareBootstrapKubeconfigWithRetryTimesOut(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	postBootstrapKubeconfigRetryInterval = time.Millisecond
+	postBootstrapKubeconfigRetryTimeout = 5 * time.Millisecond
+
+	errFetch := errors.New("dial timeout")
+	postBootstrapKubeconfigPathFn = func(context.Context, *operation.Operation, *config.Config) (string, func(), error) {
+		return "", nil, errFetch
+	}
+
+	_, _, err := prepareBootstrapKubeconfigWithRetry(context.Background(), newPostBootstrapOperation(), &config.Config{})
+	if err == nil {
+		t.Fatal("expected timeout error, got nil")
+	}
+	if !strings.Contains(err.Error(), "bootstrap kubeconfig not ready") {
+		t.Fatalf("expected timeout wrapper in error, got %q", err)
+	}
+	if !errors.Is(err, errFetch) {
+		t.Fatalf("expected wrapped fetch error, got %v", err)
 	}
 }
 
