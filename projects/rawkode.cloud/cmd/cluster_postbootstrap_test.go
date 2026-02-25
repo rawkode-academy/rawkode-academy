@@ -23,6 +23,9 @@ func restorePostBootstrapFns() {
 	teleportDeployKubeAgentFn = teleport.DeployKubeAgent
 	teleportDeploySelfHostedFn = teleport.DeploySelfHosted
 	teleportEnsureAdminAccessFn = teleport.EnsureAdminAccess
+	postBootstrapKubeconfigPathFn = func(context.Context, *operation.Operation, *config.Config) (string, func(), error) {
+		return "", func() {}, nil
+	}
 	scalewayNewClientFn = scaleway.NewClient
 	scalewayEnsureNetworkFoundationFn = scaleway.EnsureNetworkFoundation
 	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
@@ -315,6 +318,53 @@ func TestPhasePostBootstrapPassesDiscoveredCIDRToCilium(t *testing.T) {
 			gotInstallParams.IPv4NativeRoutingCIDR,
 			"172.16.16.0/22",
 		)
+	}
+}
+
+func TestPhasePostBootstrapPassesPreparedKubeconfigToComponents(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	const kubeconfigPath = "/tmp/bootstrap-kubeconfig"
+
+	postBootstrapKubeconfigPathFn = func(context.Context, *operation.Operation, *config.Config) (string, func(), error) {
+		return kubeconfigPath, func() {}, nil
+	}
+
+	var gotCiliumParams cilium.InstallParams
+	ciliumInstallFn = func(_ context.Context, params cilium.InstallParams) error {
+		gotCiliumParams = params
+		return nil
+	}
+
+	var gotFluxParams flux.BootstrapParams
+	fluxBootstrapFn = func(_ context.Context, params flux.BootstrapParams) error {
+		gotFluxParams = params
+		return nil
+	}
+
+	scalewayNewClientFn = func(string, string, string, string) (*scaleway.Client, error) {
+		return &scaleway.Client{}, nil
+	}
+	scalewayResolvePrivateNetworkIPv4CIDRFn = func(context.Context, *scaleway.Client, scw.Region, string, string) (string, error) {
+		return "172.16.16.0/22", nil
+	}
+
+	cfg := &config.Config{
+		Teleport: config.TeleportConfig{
+			Mode: config.TeleportModeDisabled,
+		},
+	}
+
+	if err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg); err != nil {
+		t.Fatalf("phasePostBootstrap returned error: %v", err)
+	}
+
+	if gotCiliumParams.Kubeconfig != kubeconfigPath {
+		t.Fatalf("cilium install kubeconfig = %q, want %q", gotCiliumParams.Kubeconfig, kubeconfigPath)
+	}
+	if gotFluxParams.Kubeconfig != kubeconfigPath {
+		t.Fatalf("flux bootstrap kubeconfig = %q, want %q", gotFluxParams.Kubeconfig, kubeconfigPath)
 	}
 }
 

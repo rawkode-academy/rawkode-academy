@@ -29,7 +29,7 @@ type accessClient interface {
 	UpsertRole(context.Context, types.Role) (types.Role, error)
 	GetGithubConnector(context.Context, string, bool) (types.GithubConnector, error)
 	UpsertGithubConnector(context.Context, types.GithubConnector) (types.GithubConnector, error)
-	Close()
+	Close() error
 }
 
 type accessClientFactory func(context.Context, string) (accessClient, error)

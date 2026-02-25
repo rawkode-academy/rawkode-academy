@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"os"
 	"strings"
 	"sync"
 
@@ -77,6 +78,7 @@ var clusterStatusCmd = &cobra.Command{
 
 func init() {
 	clusterCmd.AddCommand(clusterCreateCmd)
+	clusterCmd.AddCommand(clusterDeleteCmd)
 	clusterCmd.AddCommand(clusterStatusCmd)
 	clusterCmd.AddCommand(clusterScaffoldCmd)
 
@@ -85,6 +87,9 @@ func init() {
 	clusterCreateCmd.Flags().String("node-name", "", "Deprecated: control-plane names are now auto-generated from the pool")
 	clusterCreateCmd.Flags().String("pool", "", "Node pool name (defaults to first controlplane pool)")
 	clusterCreateCmd.Flags().Bool("cleanup", false, "Force cleanup of incomplete provisioned resources before creating the cluster")
+
+	clusterDeleteCmd.Flags().StringP("environment", "e", "", "Cluster/environment name")
+	clusterDeleteCmd.Flags().StringP("file", "f", "", "Path to cluster config YAML")
 
 	clusterStatusCmd.Flags().String("config", "", "Path to cluster config YAML")
 }
@@ -110,6 +115,7 @@ var (
 	teleportDeployKubeAgentFn               = teleport.DeployKubeAgent
 	teleportDeploySelfHostedFn              = teleport.DeploySelfHosted
 	teleportEnsureAdminAccessFn             = teleport.EnsureAdminAccess
+	postBootstrapKubeconfigPathFn           = postBootstrapKubeconfigPath
 	scalewayNewClientFn                     = scaleway.NewClient
 	scalewayEnsureNetworkFoundationFn       = scaleway.EnsureNetworkFoundation
 	scalewayResolvePrivateNetworkIPv4CIDRFn = scaleway.ResolvePrivateNetworkIPv4CIDR
@@ -875,10 +881,20 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		"preferred_private_ip", preferredPrivateIP,
 		"cidr", ipv4NativeRoutingCIDR,
 	)
+
+	kubeconfigPath, cleanupKubeconfig, err := postBootstrapKubeconfigPathFn(ctx, op, cfg)
+	if err != nil {
+		return fmt.Errorf("prepare bootstrap kubeconfig: %w", err)
+	}
+	if cleanupKubeconfig != nil {
+		defer cleanupKubeconfig()
+	}
+
 	var bootstrapErrors []error
 
 	// Install Cilium CNI
 	if err := ciliumInstallFn(ctx, cilium.InstallParams{
+		Kubeconfig:            kubeconfigPath,
 		Version:               cfg.Cluster.EffectiveCiliumVersion(),
 		Hubble:                true,
 		IPv4NativeRoutingCIDR: ipv4NativeRoutingCIDR,
@@ -889,8 +905,9 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 
 	// Install FluxCD (and optionally configure OCI source).
 	if err := fluxBootstrapFn(ctx, flux.BootstrapParams{
-		OCIRepo: cfg.Flux.OCIRepo,
-		Version: cfg.Cluster.EffectiveFluxVersion(),
+		Kubeconfig: kubeconfigPath,
+		OCIRepo:    cfg.Flux.OCIRepo,
+		Version:    cfg.Cluster.EffectiveFluxVersion(),
 	}); err != nil {
 		slog.Warn("flux bootstrap failed", "error", err)
 		bootstrapErrors = append(bootstrapErrors, fmt.Errorf("bootstrap flux: %w", err))
@@ -961,6 +978,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		)
 
 		if err := teleportDeployKubeAgentFn(ctx, teleport.DeployKubeAgentParams{
+			Kubeconfig:  kubeconfigPath,
 			ProxyAddr:   cfg.Teleport.Domain,
 			ClusterName: cfg.Environment,
 			JoinToken:   joinToken,
@@ -1018,6 +1036,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		)
 
 		if err := teleportDeploySelfHostedFn(ctx, teleport.DeploySelfHostedParams{
+			Kubeconfig:         kubeconfigPath,
 			ClusterName:        cfg.Environment,
 			Domain:             cfg.Teleport.Domain,
 			GitHubOrganization: organization,
@@ -1050,6 +1069,103 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 	}
 
 	return nil
+}
+
+func postBootstrapKubeconfigPath(ctx context.Context, op *operation.Operation, cfg *config.Config) (string, func(), error) {
+	publicIP := strings.TrimSpace(op.GetContextString("publicIP"))
+	if publicIP == "" {
+		return "", nil, fmt.Errorf("no public IP in operation context")
+	}
+
+	endpoint := strings.TrimSpace(op.GetContextString("controlPlaneEndpoint"))
+	if endpoint == "" {
+		endpoint = controlPlaneEndpoint(op.GetContextString("privateIP"), publicIP)
+	}
+
+	infClient, err := newInfisicalClient(ctx, cfg)
+	if err != nil {
+		return "", nil, err
+	}
+	assets, err := ensureTalosAssets(ctx, cfg, endpoint, infClient)
+	if err != nil {
+		return "", nil, err
+	}
+
+	candidates := []string{publicIP, strings.TrimSpace(op.GetContextString("privateIP"))}
+	seen := map[string]struct{}{}
+	var (
+		kubeconfig       []byte
+		selectedEndpoint string
+		lastErr          error
+	)
+
+	for _, candidate := range candidates {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "" {
+			continue
+		}
+		if _, ok := seen[candidate]; ok {
+			continue
+		}
+		seen[candidate] = struct{}{}
+
+		talosClient, err := talos.NewClient(candidate, assets.Talosconfig)
+		if err != nil {
+			lastErr = fmt.Errorf("create talos client via %s: %w", candidate, err)
+			continue
+		}
+
+		kubeconfig, err = talosClient.Kubeconfig(ctx)
+		closeErr := talosClient.Close()
+		if err == nil && closeErr == nil {
+			selectedEndpoint = candidate
+			break
+		}
+		if err != nil {
+			lastErr = fmt.Errorf("fetch kubeconfig via %s: %w", candidate, err)
+		} else {
+			lastErr = fmt.Errorf("close talos client via %s: %w", candidate, closeErr)
+		}
+	}
+
+	if selectedEndpoint == "" {
+		if lastErr == nil {
+			lastErr = fmt.Errorf("unknown talos connectivity error")
+		}
+		return "", nil, lastErr
+	}
+
+	rewrittenKubeconfig, err := rewriteKubeconfigServerIfNeeded(kubeconfig, selectedEndpoint)
+	if err != nil {
+		return "", nil, fmt.Errorf("rewrite kubeconfig server: %w", err)
+	}
+
+	tempFile, err := os.CreateTemp("", "rawkode-cloud3-kubeconfig-*.yaml")
+	if err != nil {
+		return "", nil, fmt.Errorf("create temporary kubeconfig: %w", err)
+	}
+
+	cleanup := func() {
+		if removeErr := os.Remove(tempFile.Name()); removeErr != nil && !errors.Is(removeErr, os.ErrNotExist) {
+			slog.Warn("failed to remove temporary bootstrap kubeconfig", "path", tempFile.Name(), "error", removeErr)
+		}
+	}
+
+	if _, err := tempFile.Write(rewrittenKubeconfig); err != nil {
+		_ = tempFile.Close()
+		cleanup()
+		return "", nil, fmt.Errorf("write temporary kubeconfig: %w", err)
+	}
+	if err := tempFile.Close(); err != nil {
+		cleanup()
+		return "", nil, fmt.Errorf("close temporary kubeconfig: %w", err)
+	}
+	if err := os.Chmod(tempFile.Name(), 0o600); err != nil {
+		cleanup()
+		return "", nil, fmt.Errorf("chmod temporary kubeconfig: %w", err)
+	}
+
+	return tempFile.Name(), cleanup, nil
 }
 
 func phaseVerify(ctx context.Context, op *operation.Operation, cfg *config.Config) error {

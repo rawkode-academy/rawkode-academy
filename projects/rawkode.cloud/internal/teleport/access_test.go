@@ -38,7 +38,7 @@ func (f *fakeAccessClient) UpsertGithubConnector(_ context.Context, connector ty
 	return connector, nil
 }
 
-func (f *fakeAccessClient) Close() {}
+func (f *fakeAccessClient) Close() error { return nil }
 
 func TestEnsureAdminAccessWithClientEnsuresRoleAndTeamMappings(t *testing.T) {
 	connector, err := types.NewGithubConnector("github", types.GithubConnectorSpecV3{
