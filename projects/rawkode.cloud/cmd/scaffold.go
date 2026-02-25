@@ -21,7 +21,8 @@ cluster:
   talos_schematic: ""
   cilium_version: v1.19.0
   flux_version: latest
-  teleport_version: "17"
+  teleport_version: "18"
+  controlPlaneTaints: true
 
 scaleway:
   projectId: ""
@@ -45,6 +46,10 @@ nodePools:
 teleport:
   domain: ""
   mode: self_hosted
+  acme:
+    enabled: false
+    email: ""
+    uri: ""
   github:
     organization: ""
     teams: []

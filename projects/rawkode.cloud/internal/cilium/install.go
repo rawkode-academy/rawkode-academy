@@ -17,9 +17,10 @@ import (
 
 // InstallParams holds parameters for Cilium CNI installation.
 type InstallParams struct {
-	Kubeconfig string
-	Version    string // e.g. "v1.19.0"
-	Hubble     bool
+	Kubeconfig            string
+	Version               string // e.g. "v1.19.0"
+	Hubble                bool
+	IPv4NativeRoutingCIDR string // e.g. "172.16.16.0/22"
 }
 
 const (
@@ -52,7 +53,7 @@ func Install(ctx context.Context, params InstallParams) error {
 		HelmReleaseName:          ciliumReleaseName,
 		HelmResetThenReuseValues: true,
 		HelmOpts: values.Options{
-			Values: installValues(params.Hubble),
+			Values: installValues(params.Hubble, params.IPv4NativeRoutingCIDR),
 		},
 	}
 
@@ -113,13 +114,20 @@ func Status(ctx context.Context, kubeconfig string) error {
 	return nil
 }
 
-func installValues(hubble bool) []string {
+func installValues(hubble bool, ipv4NativeRoutingCIDR string) []string {
 	values := []string{
 		"kubeProxyReplacement=true",
 		"ipam.mode=kubernetes",
-		"routingMode=native",
-		"autoDirectNodeRoutes=true",
-		"bpf.masquerade=true",
+		"k8sServiceHost=localhost",
+		"k8sServicePort=7445",
+		"cgroup.autoMount.enabled=false",
+		"cgroup.hostRoot=/sys/fs/cgroup",
+		"securityContext.capabilities.ciliumAgent={CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}",
+		"securityContext.capabilities.cleanCiliumState={NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}",
+	}
+
+	if cidr := strings.TrimSpace(ipv4NativeRoutingCIDR); cidr != "" {
+		values = append(values, fmt.Sprintf("ipv4NativeRoutingCIDR=%s", cidr))
 	}
 
 	if hubble {
