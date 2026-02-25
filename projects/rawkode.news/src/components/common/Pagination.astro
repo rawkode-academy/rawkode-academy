@@ -1,0 +1,118 @@
+---
+type Props = {
+  page: number;
+  totalPages: number;
+  hasMore: boolean;
+  searchParams: URLSearchParams;
+};
+
+const { page, totalPages, hasMore, searchParams } = Astro.props as Props;
+
+const pageCount = totalPages || (hasMore ? page + 1 : page);
+const shouldRender = pageCount > 1;
+const prevDisabled = page <= 1;
+const nextDisabled = page >= pageCount;
+
+const buildPageHref = (nextPage: number) => {
+  const next = new URLSearchParams(searchParams);
+  if (nextPage <= 1) {
+    next.delete("page");
+  } else {
+    next.set("page", String(nextPage));
+  }
+  const query = next.toString();
+  return query ? `?${query}` : "?";
+};
+
+const windowSize = 5;
+const halfWindow = Math.floor(windowSize / 2);
+let start = Math.max(1, page - halfWindow);
+let end = Math.min(pageCount, page + halfWindow);
+
+if (end - start + 1 < windowSize) {
+  if (start === 1) {
+    end = Math.min(pageCount, start + windowSize - 1);
+  } else if (end === pageCount) {
+    start = Math.max(1, end - windowSize + 1);
+  }
+}
+
+const pageItems: Array<number | "ellipsis-start" | "ellipsis-end"> = [];
+if (start > 1) {
+  pageItems.push(1);
+  if (start > 2) pageItems.push("ellipsis-start");
+}
+
+for (let i = start; i <= end; i += 1) {
+  pageItems.push(i);
+}
+
+if (end < pageCount) {
+  if (end < pageCount - 1) pageItems.push("ellipsis-end");
+  pageItems.push(pageCount);
+}
+---
+
+{
+  shouldRender ? (
+    <nav
+      aria-label="Pagination"
+      class="flex flex-wrap items-center justify-between gap-3 border-t border-border/75 px-1 pt-3 text-xs text-muted-foreground"
+    >
+      <div class="flex flex-wrap items-center gap-1.5">
+        {
+          prevDisabled ? (
+            <span class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold opacity-45">Previous</span>
+          ) : (
+            <a
+              href={buildPageHref(page - 1)}
+              rel="prev"
+              class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              Previous
+            </a>
+          )
+        }
+
+        {
+          pageItems.map((item) =>
+            typeof item !== "number" ? (
+              <span aria-hidden="true" class="px-1 text-muted-foreground/75">
+                …
+              </span>
+            ) : item === page ? (
+              <span aria-current="page" class="inline-flex h-9 items-center rounded-none bg-secondary px-3 text-[0.83rem] font-semibold text-foreground">
+                {item}
+              </span>
+            ) : (
+              <a
+                href={buildPageHref(item)}
+                class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                {item}
+              </a>
+            ),
+          )
+        }
+
+        {
+          nextDisabled ? (
+            <span class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold opacity-45">Next</span>
+          ) : (
+            <a
+              href={buildPageHref(page + 1)}
+              rel="next"
+              class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              Next
+            </a>
+          )
+        }
+      </div>
+
+      <span>
+        Page {page} of {pageCount}
+      </span>
+    </nav>
+  ) : null
+}

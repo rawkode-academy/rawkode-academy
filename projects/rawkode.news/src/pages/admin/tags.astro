@@ -1,0 +1,60 @@
+---
+import TagsAdminPanel from "@/components/admin/TagsAdminPanel.svelte";
+import AppShell from "@/components/layout/AppShell.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { parsePageValue } from "@/components/admin/tags/shared";
+import { getSessionWithPermissions } from "@/lib/server/session";
+import { listTags } from "@/lib/server/tags";
+import type { TypedEnv } from "@/types/service-bindings";
+
+const env = Astro.locals.runtime.env as TypedEnv;
+const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
+const user = session?.user ?? null;
+const isAdmin = Boolean(permissions?.isAdmin);
+
+const allTags = isAdmin ? await listTags(env) : [];
+const initialPage = parsePageValue(Astro.url.searchParams.get("page"));
+const initialEditSlug = Astro.url.searchParams.get("edit")?.trim().toLowerCase() ?? null;
+const initialConfirmSlug = Astro.url.searchParams.get("confirm")?.trim().toLowerCase() ?? null;
+---
+
+<BaseLayout
+  title="Admin Tags | Rawkode News"
+  description="Manage tags used for Rawkode News posts."
+  robots="noindex, nofollow"
+  ogType="website"
+>
+  <AppShell
+    pathname={Astro.url.pathname}
+    search={Astro.url.search}
+    user={user}
+    isAdmin={isAdmin}
+  >
+    <main class="space-y-5 py-7">
+      {
+        !isAdmin ? (
+          <section class="rkn-panel p-5 text-sm text-muted-foreground">Admin role required.</section>
+        ) : (
+          <>
+            <header class="space-y-2">
+              <p class="rkn-kicker">Admin</p>
+              <h1 class="rkn-page-title">Manage tags</h1>
+              <p class="text-sm text-muted-foreground">
+                Core tags are immutable. Optional tags can be created, edited, and deleted when unused.
+              </p>
+            </header>
+
+            <TagsAdminPanel
+              client:load
+              initialTags={allTags}
+              initialPage={initialPage}
+              initialEditSlug={initialEditSlug}
+              initialConfirmSlug={initialConfirmSlug}
+              pageSize={10}
+            />
+          </>
+        )
+      }
+    </main>
+  </AppShell>
+</BaseLayout>
