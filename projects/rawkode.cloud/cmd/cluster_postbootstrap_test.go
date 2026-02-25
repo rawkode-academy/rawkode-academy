@@ -30,6 +30,12 @@ func restorePostBootstrapFns() {
 	}
 	postBootstrapKubeconfigRetryInterval = 15 * time.Second
 	postBootstrapKubeconfigRetryTimeout = 30 * time.Minute
+	postBootstrapKubernetesAPIProbeFn = postBootstrapKubernetesAPIReachable
+	postBootstrapKubernetesAPIWaitFn = func(context.Context, string) error {
+		return nil
+	}
+	postBootstrapKubernetesAPIRetryInterval = 5 * time.Second
+	postBootstrapKubernetesAPIRetryTimeout = 10 * time.Minute
 	scalewayNewClientFn = scaleway.NewClient
 	scalewayGetServerFn = func(ctx context.Context, client *scaleway.Client, zone scw.Zone, serverID string) (*baremetal.Server, error) {
 		return client.Baremetal.GetServer(&baremetal.GetServerRequest{
@@ -430,6 +436,95 @@ func TestPrepareBootstrapKubeconfigWithRetryTimesOut(t *testing.T) {
 	}
 	if !errors.Is(err, errFetch) {
 		t.Fatalf("expected wrapped fetch error, got %v", err)
+	}
+}
+
+func TestWaitForKubernetesAPIWithRetryRetriesUntilSuccess(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	postBootstrapKubernetesAPIRetryInterval = time.Millisecond
+	postBootstrapKubernetesAPIRetryTimeout = 100 * time.Millisecond
+
+	attempts := 0
+	postBootstrapKubernetesAPIProbeFn = func(context.Context, string) error {
+		attempts++
+		if attempts < 3 {
+			return errors.New("connection refused")
+		}
+		return nil
+	}
+
+	if err := waitForKubernetesAPIWithRetry(context.Background(), "/tmp/bootstrap-kubeconfig"); err != nil {
+		t.Fatalf("waitForKubernetesAPIWithRetry returned error: %v", err)
+	}
+	if attempts != 3 {
+		t.Fatalf("attempts = %d, want %d", attempts, 3)
+	}
+}
+
+func TestWaitForKubernetesAPIWithRetryTimesOut(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	postBootstrapKubernetesAPIRetryInterval = time.Millisecond
+	postBootstrapKubernetesAPIRetryTimeout = 5 * time.Millisecond
+
+	errProbe := errors.New("connection refused")
+	postBootstrapKubernetesAPIProbeFn = func(context.Context, string) error {
+		return errProbe
+	}
+
+	err := waitForKubernetesAPIWithRetry(context.Background(), "/tmp/bootstrap-kubeconfig")
+	if err == nil {
+		t.Fatal("expected timeout error, got nil")
+	}
+	if !strings.Contains(err.Error(), "kubernetes API not ready") {
+		t.Fatalf("expected timeout wrapper in error, got %q", err)
+	}
+	if !errors.Is(err, errProbe) {
+		t.Fatalf("expected wrapped probe error, got %v", err)
+	}
+}
+
+func TestPhasePostBootstrapFailsWhenKubernetesAPINotReachable(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	waitErr := errors.New("api not ready")
+	postBootstrapKubernetesAPIWaitFn = func(context.Context, string) error {
+		return waitErr
+	}
+	ciliumInstallFn = func(context.Context, cilium.InstallParams) error {
+		t.Fatal("cilium install should not run when kubernetes API is not reachable")
+		return nil
+	}
+	fluxBootstrapFn = func(context.Context, flux.BootstrapParams) error {
+		t.Fatal("flux bootstrap should not run when kubernetes API is not reachable")
+		return nil
+	}
+	scalewayNewClientFn = func(string, string, string, string) (*scaleway.Client, error) {
+		return &scaleway.Client{}, nil
+	}
+	scalewayResolvePrivateNetworkIPv4CIDRFn = func(context.Context, *scaleway.Client, scw.Region, string, string) (string, error) {
+		return "172.16.16.0/22", nil
+	}
+
+	cfg := &config.Config{
+		Teleport: config.TeleportConfig{
+			Mode: config.TeleportModeDisabled,
+		},
+	}
+
+	err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg)
+	if err == nil {
+		t.Fatal("expected kubernetes API readiness failure, got nil")
+	}
+	if !strings.Contains(err.Error(), "wait for kubernetes API readiness") {
+		t.Fatalf("expected wait wrapper in error, got %q", err)
+	}
+	if !errors.Is(err, waitErr) {
+		t.Fatalf("expected wrapped wait error, got %v", err)
 	}
 }
 

@@ -23,6 +23,8 @@ import (
 	"github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
 	scw "github.com/scaleway/scaleway-sdk-go/scw"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/tools/clientcmd"
 
 	"time"
 )
@@ -110,17 +112,21 @@ var createClusterPhases = []string{
 }
 
 var (
-	ciliumInstallFn                      = cilium.Install
-	fluxBootstrapFn                      = flux.Bootstrap
-	teleportGenerateJoinTokenFn          = teleport.GenerateJoinToken
-	teleportDeployKubeAgentFn            = teleport.DeployKubeAgent
-	teleportDeploySelfHostedFn           = teleport.DeploySelfHosted
-	teleportEnsureAdminAccessFn          = teleport.EnsureAdminAccess
-	postBootstrapKubeconfigPathFn        = postBootstrapKubeconfigPath
-	postBootstrapKubeconfigRetryInterval = 15 * time.Second
-	postBootstrapKubeconfigRetryTimeout  = 30 * time.Minute
-	scalewayNewClientFn                  = scaleway.NewClient
-	scalewayGetServerFn                  = func(ctx context.Context, client *scaleway.Client, zone scw.Zone, serverID string) (*baremetal.Server, error) {
+	ciliumInstallFn                         = cilium.Install
+	fluxBootstrapFn                         = flux.Bootstrap
+	teleportGenerateJoinTokenFn             = teleport.GenerateJoinToken
+	teleportDeployKubeAgentFn               = teleport.DeployKubeAgent
+	teleportDeploySelfHostedFn              = teleport.DeploySelfHosted
+	teleportEnsureAdminAccessFn             = teleport.EnsureAdminAccess
+	postBootstrapKubeconfigPathFn           = postBootstrapKubeconfigPath
+	postBootstrapKubeconfigRetryInterval    = 15 * time.Second
+	postBootstrapKubeconfigRetryTimeout     = 30 * time.Minute
+	postBootstrapKubernetesAPIProbeFn       = postBootstrapKubernetesAPIReachable
+	postBootstrapKubernetesAPIWaitFn        = waitForKubernetesAPIWithRetry
+	postBootstrapKubernetesAPIRetryInterval = 5 * time.Second
+	postBootstrapKubernetesAPIRetryTimeout  = 10 * time.Minute
+	scalewayNewClientFn                     = scaleway.NewClient
+	scalewayGetServerFn                     = func(ctx context.Context, client *scaleway.Client, zone scw.Zone, serverID string) (*baremetal.Server, error) {
 		return client.Baremetal.GetServer(&baremetal.GetServerRequest{
 			Zone:     zone,
 			ServerID: serverID,
@@ -878,6 +884,10 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		defer cleanupKubeconfig()
 	}
 
+	if err := postBootstrapKubernetesAPIWaitFn(ctx, kubeconfigPath); err != nil {
+		return fmt.Errorf("wait for kubernetes API readiness: %w", err)
+	}
+
 	var bootstrapErrors []error
 
 	// Install Cilium CNI
@@ -1054,6 +1064,72 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 
 	if len(bootstrapErrors) > 0 {
 		return fmt.Errorf("post-bootstrap component installation failed: %w", errors.Join(bootstrapErrors...))
+	}
+
+	return nil
+}
+
+func waitForKubernetesAPIWithRetry(ctx context.Context, kubeconfigPath string) error {
+	timeout := postBootstrapKubernetesAPIRetryTimeout
+	if timeout <= 0 {
+		timeout = time.Second
+	}
+
+	interval := postBootstrapKubernetesAPIRetryInterval
+	if interval <= 0 {
+		interval = time.Second
+	}
+
+	deadline := time.NewTimer(timeout)
+	defer deadline.Stop()
+
+	attempt := 0
+	var lastErr error
+	for {
+		attempt++
+
+		err := postBootstrapKubernetesAPIProbeFn(ctx, kubeconfigPath)
+		if err == nil {
+			if attempt > 1 {
+				slog.Info("kubernetes API server became reachable", "attempt", attempt)
+			}
+			return nil
+		}
+
+		lastErr = err
+		slog.Info("waiting for kubernetes API server readiness",
+			"attempt", attempt,
+			"interval", interval,
+			"error", err,
+		)
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-deadline.C:
+			if lastErr == nil {
+				lastErr = fmt.Errorf("unknown kubernetes API connectivity error")
+			}
+			return fmt.Errorf("kubernetes API not ready after %s: %w", timeout, lastErr)
+		case <-time.After(interval):
+		}
+	}
+}
+
+func postBootstrapKubernetesAPIReachable(ctx context.Context, kubeconfigPath string) error {
+	cfg, err := clientcmd.BuildConfigFromFlags("", strings.TrimSpace(kubeconfigPath))
+	if err != nil {
+		return fmt.Errorf("load kube config: %w", err)
+	}
+	cfg.Timeout = 10 * time.Second
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(cfg)
+	if err != nil {
+		return fmt.Errorf("create kubernetes discovery client: %w", err)
+	}
+
+	if _, err := discoveryClient.RESTClient().Get().AbsPath("/version").DoRaw(ctx); err != nil {
+		return fmt.Errorf("query kubernetes API server version: %w", err)
 	}
 
 	return nil
