@@ -48,6 +48,14 @@ func TestControlPlaneNodeName(t *testing.T) {
 	}
 }
 
+func TestPooledNodeName(t *testing.T) {
+	got := pooledNodeName("production", "worker", 4)
+	want := "production-worker-04"
+	if got != want {
+		t.Fatalf("pooledNodeName() = %q, want %q", got, want)
+	}
+}
+
 func TestParseControlPlaneSlot(t *testing.T) {
 	slot, ok := parseControlPlaneSlot("production", "control-plane", "production-control-plane-03")
 	if !ok {
@@ -63,6 +71,24 @@ func TestParseControlPlaneSlot(t *testing.T) {
 	}
 	if legacySlot != 2 {
 		t.Fatalf("parseControlPlaneSlot() legacy = %d, want %d", legacySlot, 2)
+	}
+}
+
+func TestParsePooledNodeSlotWorker(t *testing.T) {
+	slot, ok := parsePooledNodeSlot("production", "worker", "production-worker-03")
+	if !ok {
+		t.Fatalf("parsePooledNodeSlot() expected success for worker format")
+	}
+	if slot != 3 {
+		t.Fatalf("parsePooledNodeSlot() = %d, want %d", slot, 3)
+	}
+
+	legacySlot, legacyOK := parsePooledNodeSlot("production", "worker", "worker-02")
+	if !legacyOK {
+		t.Fatalf("parsePooledNodeSlot() expected success for legacy worker format")
+	}
+	if legacySlot != 2 {
+		t.Fatalf("parsePooledNodeSlot() legacy = %d, want %d", legacySlot, 2)
 	}
 }
 
@@ -90,6 +116,21 @@ func TestNextControlPlaneSlotReservesLegacyUnnamedSlots(t *testing.T) {
 
 	if got := nextControlPlaneSlot(state, "production", "main"); got != 3 {
 		t.Fatalf("nextControlPlaneSlot() = %d, want %d", got, 3)
+	}
+}
+
+func TestNextNodePoolSlotWorker(t *testing.T) {
+	state := &clusterstate.NodesState{
+		Nodes: []clusterstate.NodeState{
+			{Name: "production-worker-01", Role: config.NodeTypeWorker, Pool: "worker", Status: clusterstate.NodeStatusReady},
+			{Name: "legacy-worker-name", Role: config.NodeTypeWorker, Pool: "worker", Status: clusterstate.NodeStatusReady},
+			{Name: "production-worker-03", Role: config.NodeTypeWorker, Pool: "worker", Status: clusterstate.NodeStatusDeleted},
+			{Name: "production-control-plane-01", Role: config.NodeTypeControlPlane, Pool: "control-plane", Status: clusterstate.NodeStatusReady},
+		},
+	}
+
+	if got := nextNodePoolSlot(state, "production", "worker", config.NodeTypeWorker); got != 3 {
+		t.Fatalf("nextNodePoolSlot() = %d, want %d", got, 3)
 	}
 }
 

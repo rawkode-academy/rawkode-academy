@@ -150,7 +150,7 @@ func infisicalSecretPathForCluster(cfg *config.Config) string {
 	return strings.TrimRight(base, "/") + "/" + cluster
 }
 
-func controlPlaneNodeName(environment, poolName string, slot int) string {
+func pooledNodeName(environment, poolName string, slot int) string {
 	namePrefix := strings.TrimSpace(poolName)
 	if env := strings.TrimSpace(environment); env != "" {
 		namePrefix = env + "-" + namePrefix
@@ -159,7 +159,7 @@ func controlPlaneNodeName(environment, poolName string, slot int) string {
 	return fmt.Sprintf("%s-%02d", namePrefix, slot)
 }
 
-func parseControlPlaneSlot(environment, poolName, nodeName string) (int, bool) {
+func parsePooledNodeSlot(environment, poolName, nodeName string) (int, bool) {
 	nodeName = strings.TrimSpace(nodeName)
 	poolName = strings.TrimSpace(poolName)
 
@@ -189,6 +189,14 @@ func parseControlPlaneSlot(environment, poolName, nodeName string) (int, bool) {
 	return 0, false
 }
 
+func controlPlaneNodeName(environment, poolName string, slot int) string {
+	return pooledNodeName(environment, poolName, slot)
+}
+
+func parseControlPlaneSlot(environment, poolName, nodeName string) (int, bool) {
+	return parsePooledNodeSlot(environment, poolName, nodeName)
+}
+
 func controlPlaneReservedIPForSlot(pool *config.NodePoolConfig, slot int) (string, error) {
 	if pool == nil {
 		return "", fmt.Errorf("node pool is required")
@@ -208,18 +216,21 @@ func controlPlaneReservedIPForSlot(pool *config.NodePoolConfig, slot int) (strin
 	return strings.TrimSpace(pool.ReservedPrivateIPs[slot-1]), nil
 }
 
-func nextControlPlaneSlot(state *clusterstate.NodesState, environment, poolName string) int {
+func nextNodePoolSlot(state *clusterstate.NodesState, environment, poolName, role string) int {
 	occupied := make(map[int]struct{})
 	unknownNamedNodes := 0
 
 	for _, node := range state.Nodes {
-		if node.Role != config.NodeTypeControlPlane || node.Pool != poolName {
+		if node.Pool != poolName {
+			continue
+		}
+		if strings.TrimSpace(role) != "" && node.Role != role {
 			continue
 		}
 		if node.Status == clusterstate.NodeStatusDeleted {
 			continue
 		}
-		slot, ok := parseControlPlaneSlot(environment, poolName, node.Name)
+		slot, ok := parsePooledNodeSlot(environment, poolName, node.Name)
 		if !ok {
 			unknownNamedNodes++
 			continue
@@ -242,4 +253,8 @@ func nextControlPlaneSlot(state *clusterstate.NodesState, environment, poolName 
 	}
 
 	return 100
+}
+
+func nextControlPlaneSlot(state *clusterstate.NodesState, environment, poolName string) int {
+	return nextNodePoolSlot(state, environment, poolName, config.NodeTypeControlPlane)
 }

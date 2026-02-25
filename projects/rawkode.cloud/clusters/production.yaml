@@ -30,6 +30,14 @@ nodePools:
     disks:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
+  - name: worker
+    type: worker
+    zone: fr-par-1
+    offer: EM-A610R-NVMe
+    billing_cycle: hourly
+    disks:
+      os: /dev/nvme0n1
+      data: /dev/nvme1n1
 
 teleport:
   domain: rawkode.cloud

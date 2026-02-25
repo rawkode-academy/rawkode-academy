@@ -66,24 +66,20 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 		privateIP string
 	)
 
-	if role == config.NodeTypeControlPlane {
-		if strings.TrimSpace(nameFlag) != "" {
-			return fmt.Errorf("--name is no longer supported for controlplane nodes; names are auto-generated from pool %q", pool.Name)
-		}
+	if strings.TrimSpace(nameFlag) != "" {
+		return fmt.Errorf("--name is no longer supported; names are auto-generated from pool %q", pool.Name)
+	}
 
-		slot := nextControlPlaneSlot(state, cfg.Environment, pool.Name)
-		if slot > 99 {
-			return fmt.Errorf("no available control-plane naming slot for pool %q", pool.Name)
-		}
-		name = controlPlaneNodeName(cfg.Environment, pool.Name, slot)
+	slot := nextNodePoolSlot(state, cfg.Environment, pool.Name, role)
+	if slot > 99 {
+		return fmt.Errorf("no available naming slot for pool %q", pool.Name)
+	}
+	name = pooledNodeName(cfg.Environment, pool.Name, slot)
+
+	if role == config.NodeTypeControlPlane {
 		privateIP, err = controlPlaneReservedIPForSlot(pool, slot)
 		if err != nil {
 			return err
-		}
-	} else {
-		name = strings.TrimSpace(nameFlag)
-		if name == "" {
-			return fmt.Errorf("--name is required for worker nodes")
 		}
 	}
 
@@ -219,6 +215,10 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 	if role == config.NodeTypeControlPlane {
 		nodeConfig = assets.ControlPlane
 	}
+	nodeConfig, err = talos.WithNodeName(nodeConfig, name)
+	if err != nil {
+		return fmt.Errorf("render node-specific Talos config for %q: %w", name, err)
+	}
 
 	talosClient, err := talos.NewInsecureClient(publicIP)
 	if err != nil {
@@ -333,7 +333,7 @@ func init() {
 
 	nodeAddCmd.Flags().String("cluster", "", "Cluster/environment name")
 	nodeAddCmd.Flags().StringP("file", "f", "", "Path to cluster config YAML")
-	nodeAddCmd.Flags().String("name", "", "Node name (required for worker nodes)")
+	nodeAddCmd.Flags().String("name", "", "Node name (unsupported; names are auto-generated from pool slots)")
 	nodeAddCmd.Flags().String("pool", "", "Node pool name (optional)")
 	nodeAddCmd.Flags().String("role", "worker", "Node role (controlplane or worker)")
 
