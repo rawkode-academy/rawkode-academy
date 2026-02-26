@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -12,6 +13,16 @@ import (
 	"github.com/rawkode-academy/rawkode-cloud3/internal/config"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/infisical"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
+	"github.com/rawkode-academy/rawkode-cloud3/internal/talos"
+	"gopkg.in/yaml.v3"
+)
+
+const (
+	defaultTalosNodeFQDNSuffix       = "rka.internal"
+	defaultTalosAPINetbirdSubnet     = "100.64.0.0/10"
+	envTalosAllowedSubnets           = "TALOS_API_ALLOWED_SUBNETS"
+	infisicalNBSetupKeyPrimary       = "NB_SETUP_KEY"
+	infisicalNBSetupKeyCompatibility = "NETBIRD_SETUP_KEY"
 )
 
 func loadConfigForClusterOrFile(clusterName, filePath string) (*config.Config, string, error) {
@@ -148,6 +159,162 @@ func infisicalSecretPathForCluster(cfg *config.Config) string {
 		return "/" + cluster
 	}
 	return strings.TrimRight(base, "/") + "/" + cluster
+}
+
+func renderNodeTalosConfig(machineConfig []byte, nodeName string) ([]byte, error) {
+	rendered, err := talos.WithNodeName(machineConfig, nodeName)
+	if err != nil {
+		return nil, err
+	}
+
+	certSANs := nodeTalosCertSANs(nodeName)
+	if len(certSANs) == 0 {
+		return rendered, nil
+	}
+
+	rendered, err = talos.WithCertSANs(rendered, certSANs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return rendered, nil
+}
+
+func nodeTalosCertSANs(nodeName string) []string {
+	nodeName = strings.TrimSpace(nodeName)
+	if nodeName == "" {
+		return nil
+	}
+
+	suffix := strings.TrimSpace(os.Getenv("TALOS_NODE_FQDN_SUFFIX"))
+	if suffix == "" {
+		suffix = defaultTalosNodeFQDNSuffix
+	}
+	suffix = strings.Trim(strings.TrimSpace(suffix), ".")
+
+	sans := []string{nodeName}
+	if suffix != "" && !strings.Contains(nodeName, ".") {
+		sans = append(sans, nodeName+"."+suffix)
+	}
+
+	return sans
+}
+
+func loadOptionalNetbirdSetupKeyFromInfisical(ctx context.Context, cfg *config.Config, client *infisical.Client) (string, error) {
+	secretPath := infisicalSecretPathForCluster(cfg)
+	all, err := client.GetSecrets(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath)
+	if err != nil {
+		return "", fmt.Errorf("load infisical secrets: %w", err)
+	}
+
+	for _, key := range []string{infisicalNBSetupKeyPrimary, infisicalNBSetupKeyCompatibility} {
+		if value := strings.TrimSpace(all[key]); value != "" {
+			return value, nil
+		}
+	}
+
+	return "", nil
+}
+
+func appendNetbirdExtensionServiceConfig(machineConfig []byte, setupKey string) ([]byte, error) {
+	setupKey = strings.TrimSpace(setupKey)
+	if setupKey == "" {
+		return machineConfig, nil
+	}
+
+	doc := map[string]any{
+		"apiVersion": "v1alpha1",
+		"kind":       "ExtensionServiceConfig",
+		"name":       "netbird",
+		"environment": []string{
+			"NB_SETUP_KEY=" + setupKey,
+		},
+	}
+	rawDoc, err := yaml.Marshal(doc)
+	if err != nil {
+		return nil, fmt.Errorf("encode netbird extension service config: %w", err)
+	}
+
+	return appendTalosConfigDocuments(machineConfig, rawDoc)
+}
+
+func appendTalosAPIIngressRestriction(machineConfig []byte, allowedSubnets []string) ([]byte, error) {
+	allowedSubnets = normalizeNonEmptyStrings(allowedSubnets...)
+	if len(allowedSubnets) == 0 {
+		return machineConfig, nil
+	}
+
+	ingress := make([]map[string]string, 0, len(allowedSubnets))
+	for _, subnet := range allowedSubnets {
+		ingress = append(ingress, map[string]string{"subnet": subnet})
+	}
+
+	doc := map[string]any{
+		"apiVersion": "v1alpha1",
+		"kind":       "NetworkRuleConfig",
+		"name":       "ingress-apid",
+		"portSelector": map[string]any{
+			"ports":    []int{50000},
+			"protocol": "tcp",
+		},
+		"ingress": ingress,
+	}
+	rawDoc, err := yaml.Marshal(doc)
+	if err != nil {
+		return nil, fmt.Errorf("encode Talos API network rule config: %w", err)
+	}
+
+	return appendTalosConfigDocuments(machineConfig, rawDoc)
+}
+
+func talosAPIAllowedSubnets() []string {
+	if configured := strings.TrimSpace(os.Getenv(envTalosAllowedSubnets)); configured != "" {
+		parts := strings.Split(configured, ",")
+		return normalizeNonEmptyStrings(parts...)
+	}
+
+	return []string{defaultTalosAPINetbirdSubnet}
+}
+
+func appendTalosConfigDocuments(machineConfig []byte, docs ...[]byte) ([]byte, error) {
+	base := bytes.TrimSpace(machineConfig)
+	if len(base) == 0 {
+		return nil, fmt.Errorf("machine config is required")
+	}
+
+	var out bytes.Buffer
+	out.Write(base)
+	for _, doc := range docs {
+		trimmed := bytes.TrimSpace(doc)
+		if len(trimmed) == 0 {
+			continue
+		}
+
+		out.WriteString("\n---\n")
+		out.Write(trimmed)
+	}
+	out.WriteByte('\n')
+
+	return out.Bytes(), nil
+}
+
+func normalizeNonEmptyStrings(values ...string) []string {
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		if _, exists := seen[trimmed]; exists {
+			continue
+		}
+
+		seen[trimmed] = struct{}{}
+		out = append(out, trimmed)
+	}
+
+	return out
 }
 
 func pooledNodeName(environment, poolName string, slot int) string {

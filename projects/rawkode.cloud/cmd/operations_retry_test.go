@@ -9,7 +9,7 @@ import (
 func TestResetOperationFromPhase(t *testing.T) {
 	op := operation.New("op-1", operation.TypeCreateCluster, "production", createClusterPhases)
 
-	for _, phase := range []string{"init", "generate-config", "order-server", "wait-server", "wait-talos", "apply-config", "bootstrap", "dns", "post-bootstrap", "verify"} {
+	for _, phase := range []string{"init", "generate-config", "order-server", "wait-server", "wait-talos", "apply-config", "bootstrap", "dns", "post-bootstrap", "verify", "restrict-talos-api"} {
 		if err := op.CompletePhase(phase, map[string]string{"phase": phase}); err != nil {
 			t.Fatalf("complete %s: %v", phase, err)
 		}
@@ -25,7 +25,7 @@ func TestResetOperationFromPhase(t *testing.T) {
 		}
 	}
 
-	for _, phase := range []string{"post-bootstrap", "verify"} {
+	for _, phase := range []string{"post-bootstrap", "verify", "restrict-talos-api"} {
 		got := op.Phases[phase]
 		if got.Status != operation.PhasePending {
 			t.Fatalf("phase %s status = %s, want %s", phase, got.Status, operation.PhasePending)

@@ -109,6 +109,7 @@ var createClusterPhases = []string{
 	"dns",
 	"post-bootstrap",
 	"verify",
+	"restrict-talos-api",
 }
 
 var (
@@ -303,7 +304,7 @@ func hasTalosActivationEvidence(op *operation.Operation) bool {
 		return true
 	}
 
-	for _, name := range []string{"bootstrap", "dns", "post-bootstrap", "verify"} {
+	for _, name := range []string{"bootstrap", "dns", "post-bootstrap", "verify", "restrict-talos-api"} {
 		p, ok := op.Phases[name]
 		if !ok || p == nil {
 			continue
@@ -452,6 +453,8 @@ func executeCreateCluster(
 			phaseErr = phasePostBootstrap(ctx, op, cfg)
 		case "verify":
 			phaseErr = phaseVerify(ctx, op, cfg)
+		case "restrict-talos-api":
+			phaseErr = phaseRestrictTalosAPI(ctx, op, cfg)
 		default:
 			phaseErr = fmt.Errorf("unknown phase %q", phase)
 		}
@@ -749,9 +752,17 @@ func phaseApplyConfig(ctx context.Context, op *operation.Operation, cfg *config.
 		return err
 	}
 	nodeName := nodeNameForOperation(op, cfg.Environment)
-	nodeConfig, err := talos.WithNodeName(assets.ControlPlane, nodeName)
+	nodeConfig, err := renderNodeTalosConfig(assets.ControlPlane, nodeName)
 	if err != nil {
 		return fmt.Errorf("render node-specific Talos config for %q: %w", nodeName, err)
+	}
+	netbirdSetupKey, err := loadOptionalNetbirdSetupKeyFromInfisical(ctx, cfg, client)
+	if err != nil {
+		return fmt.Errorf("load netbird setup key: %w", err)
+	}
+	nodeConfig, err = appendNetbirdExtensionServiceConfig(nodeConfig, netbirdSetupKey)
+	if err != nil {
+		return fmt.Errorf("append netbird extension service config: %w", err)
 	}
 
 	talosClient, err := talos.NewInsecureClient(publicIP)
@@ -1350,6 +1361,72 @@ func phaseVerify(ctx context.Context, op *operation.Operation, cfg *config.Confi
 	if cfg.Teleport.Domain != "" {
 		fmt.Printf("  DNS:        %s\n", cfg.Teleport.Domain)
 	}
+
+	return nil
+}
+
+func phaseRestrictTalosAPI(ctx context.Context, op *operation.Operation, cfg *config.Config) error {
+	publicIP := strings.TrimSpace(op.GetContextString("publicIP"))
+	if publicIP == "" {
+		return fmt.Errorf("no public IP in operation context")
+	}
+
+	endpoint := strings.TrimSpace(op.GetContextString("controlPlaneEndpoint"))
+	if endpoint == "" {
+		endpoint = controlPlaneEndpoint(op.GetContextString("privateIP"), publicIP)
+	}
+
+	infClient, err := newInfisicalClient(ctx, cfg)
+	if err != nil {
+		return err
+	}
+
+	netbirdSetupKey, err := loadOptionalNetbirdSetupKeyFromInfisical(ctx, cfg, infClient)
+	if err != nil {
+		return fmt.Errorf("load netbird setup key: %w", err)
+	}
+	if netbirdSetupKey == "" {
+		slog.Info("phase restrict-talos-api: skipping (NB_SETUP_KEY not found in Infisical)")
+		return nil
+	}
+
+	assets, err := ensureTalosAssets(ctx, cfg, endpoint, infClient)
+	if err != nil {
+		return err
+	}
+
+	nodeName := nodeNameForOperation(op, cfg.Environment)
+	nodeConfig, err := renderNodeTalosConfig(assets.ControlPlane, nodeName)
+	if err != nil {
+		return fmt.Errorf("render node-specific Talos config for %q: %w", nodeName, err)
+	}
+	nodeConfig, err = appendNetbirdExtensionServiceConfig(nodeConfig, netbirdSetupKey)
+	if err != nil {
+		return fmt.Errorf("append netbird extension service config: %w", err)
+	}
+
+	allowedSubnets := talosAPIAllowedSubnets()
+	nodeConfig, err = appendTalosAPIIngressRestriction(nodeConfig, allowedSubnets)
+	if err != nil {
+		return fmt.Errorf("append Talos API ingress restriction: %w", err)
+	}
+
+	talosClient, err := talos.NewClient(publicIP, assets.Talosconfig)
+	if err != nil {
+		return fmt.Errorf("create talos client: %w", err)
+	}
+	defer talosClient.Close()
+
+	if err := talosClient.WaitForServiceRunning(ctx, "ext-netbird", 10*time.Minute); err != nil {
+		return fmt.Errorf("wait for netbird service: %w", err)
+	}
+
+	if err := talosClient.ApplyConfig(ctx, nodeConfig); err != nil {
+		return fmt.Errorf("apply Talos API ingress restriction: %w", err)
+	}
+
+	op.SetContext("talosAPIRestricted", true)
+	slog.Info("phase restrict-talos-api: applied ingress restriction for Talos API", "allowed_subnets", allowedSubnets)
 
 	return nil
 }
