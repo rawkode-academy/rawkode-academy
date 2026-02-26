@@ -24,6 +24,13 @@ var clusterAccessCmd = &cobra.Command{
 	RunE:  runClusterAccess,
 }
 
+type clusterAccessMaterials struct {
+	ConfigPath      string
+	TalosEndpoint   string
+	TalosconfigYAML []byte
+	KubeconfigYAML  []byte
+}
+
 func init() {
 	clusterCmd.AddCommand(clusterAccessCmd)
 
@@ -43,34 +50,67 @@ func runClusterAccess(cmd *cobra.Command, args []string) error {
 	kubeOutRaw, _ := cmd.Flags().GetString("kubeconfig-out")
 	overwrite, _ := cmd.Flags().GetBool("overwrite")
 
-	cfg, cfgPath, err := loadConfigForClusterOrFile(clusterName, cfgFile)
+	materials, err := buildClusterAccessMaterials(ctx, clusterName, cfgFile)
 	if err != nil {
 		return err
+	}
+
+	talosOut, err := expandLocalPath(talosOutRaw)
+	if err != nil {
+		return fmt.Errorf("resolve talosconfig path: %w", err)
+	}
+	kubeOut, err := expandLocalPath(kubeOutRaw)
+	if err != nil {
+		return fmt.Errorf("resolve kubeconfig path: %w", err)
+	}
+
+	if err := writeConfigFile(talosOut, materials.TalosconfigYAML, overwrite); err != nil {
+		return fmt.Errorf("write talosconfig: %w", err)
+	}
+	if err := writeConfigFile(kubeOut, materials.KubeconfigYAML, overwrite); err != nil {
+		return fmt.Errorf("write kubeconfig: %w", err)
+	}
+
+	fmt.Printf("Cluster access configured from %s\n", materials.ConfigPath)
+	fmt.Printf("  Talos API:   %s\n", materials.TalosEndpoint)
+	fmt.Printf("  TALOSCONFIG: %s\n", talosOut)
+	fmt.Printf("  KUBECONFIG:  %s\n", kubeOut)
+	fmt.Printf("\nExport for this shell session:\n")
+	fmt.Printf("  export TALOSCONFIG=%q\n", talosOut)
+	fmt.Printf("  export KUBECONFIG=%q\n", kubeOut)
+
+	return nil
+}
+
+func buildClusterAccessMaterials(ctx context.Context, clusterName, cfgFile string) (*clusterAccessMaterials, error) {
+	cfg, cfgPath, err := loadConfigForClusterOrFile(clusterName, cfgFile)
+	if err != nil {
+		return nil, err
 	}
 
 	infClient, err := getOrCreateInfisicalClient(ctx, cfg)
 	if err != nil {
-		return fmt.Errorf("create infisical client: %w", err)
+		return nil, fmt.Errorf("create infisical client: %w", err)
 	}
 
 	talosconfig, err := loadTalosconfigFromInfisical(ctx, cfg, infClient)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	state, err := loadNodeState(ctx, cfg)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	controlPlane, err := firstActiveNodeByRole(state, config.NodeTypeControlPlane)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	candidates := talosAccessEndpoints(controlPlane)
 	if len(candidates) == 0 {
-		return fmt.Errorf("no control-plane endpoint available in state")
+		return nil, fmt.Errorf("no control-plane endpoint available in state")
 	}
 
 	var (
@@ -101,43 +141,24 @@ func runClusterAccess(cmd *cobra.Command, args []string) error {
 		if lastErr == nil {
 			lastErr = fmt.Errorf("unknown talos connectivity error")
 		}
-		return lastErr
+		return nil, lastErr
 	}
 
 	rewrittenTalosconfig, err := rewriteTalosconfigEndpoint(talosconfig, selectedEndpoint)
 	if err != nil {
-		return fmt.Errorf("rewrite talosconfig endpoint: %w", err)
+		return nil, fmt.Errorf("rewrite talosconfig endpoint: %w", err)
 	}
 	rewrittenKubeconfig, err := rewriteKubeconfigServerIfNeeded(kubeconfig, selectedEndpoint)
 	if err != nil {
-		return fmt.Errorf("rewrite kubeconfig server: %w", err)
+		return nil, fmt.Errorf("rewrite kubeconfig server: %w", err)
 	}
 
-	talosOut, err := expandLocalPath(talosOutRaw)
-	if err != nil {
-		return fmt.Errorf("resolve talosconfig path: %w", err)
-	}
-	kubeOut, err := expandLocalPath(kubeOutRaw)
-	if err != nil {
-		return fmt.Errorf("resolve kubeconfig path: %w", err)
-	}
-
-	if err := writeConfigFile(talosOut, rewrittenTalosconfig, overwrite); err != nil {
-		return fmt.Errorf("write talosconfig: %w", err)
-	}
-	if err := writeConfigFile(kubeOut, rewrittenKubeconfig, overwrite); err != nil {
-		return fmt.Errorf("write kubeconfig: %w", err)
-	}
-
-	fmt.Printf("Cluster access configured from %s\n", cfgPath)
-	fmt.Printf("  Talos API:   %s\n", selectedEndpoint)
-	fmt.Printf("  TALOSCONFIG: %s\n", talosOut)
-	fmt.Printf("  KUBECONFIG:  %s\n", kubeOut)
-	fmt.Printf("\nExport for this shell session:\n")
-	fmt.Printf("  export TALOSCONFIG=%q\n", talosOut)
-	fmt.Printf("  export KUBECONFIG=%q\n", kubeOut)
-
-	return nil
+	return &clusterAccessMaterials{
+		ConfigPath:      cfgPath,
+		TalosEndpoint:   selectedEndpoint,
+		TalosconfigYAML: rewrittenTalosconfig,
+		KubeconfigYAML:  rewrittenKubeconfig,
+	}, nil
 }
 
 func talosAccessEndpoints(node *clusterstate.NodeState) []string {
@@ -146,7 +167,7 @@ func talosAccessEndpoints(node *clusterstate.NodeState) []string {
 	}
 
 	seen := map[string]struct{}{}
-	out := make([]string, 0, 2)
+	out := make([]string, 0, 4)
 
 	add := func(value string) {
 		value = strings.TrimSpace(value)
@@ -160,7 +181,24 @@ func talosAccessEndpoints(node *clusterstate.NodeState) []string {
 		out = append(out, value)
 	}
 
-	// Local access is generally from outside the private network, so prefer public first.
+	// Prefer Netbird/DNS-based control-plane names first; those are the primary
+	// path for local operator access in this environment.
+	if nodeName := strings.TrimSpace(node.Name); nodeName != "" {
+		if strings.Contains(nodeName, ".") {
+			add(nodeName)
+		} else {
+			suffix := strings.Trim(strings.TrimSpace(os.Getenv("TALOS_NODE_FQDN_SUFFIX")), ".")
+			if suffix == "" {
+				suffix = defaultTalosNodeFQDNSuffix
+			}
+			if suffix != "" {
+				add(nodeName + "." + suffix)
+			}
+			add(nodeName)
+		}
+	}
+
+	// Fallback to direct node IP access.
 	add(node.PublicIP)
 	add(node.PrivateIP)
 
