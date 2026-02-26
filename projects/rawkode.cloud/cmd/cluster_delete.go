@@ -2,14 +2,12 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
 	clusterstate "github.com/rawkode-academy/rawkode-cloud3/internal/cluster"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/config"
-	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
 	"github.com/spf13/cobra"
 )
 
@@ -29,17 +27,15 @@ func runClusterDelete(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, nodeStore, state, err := loadNodeState(ctx, cfg)
+	state, err := loadNodeState(ctx, cfg)
 	if err != nil {
 		return err
 	}
 
 	if len(state.Nodes) == 0 {
-		fmt.Printf("No tracked nodes found for cluster %q (config=%s)\n", cfg.Environment, cfgPath)
+		fmt.Printf("No nodes found in Scaleway inventory for cluster %q (config=%s)\n", cfg.Environment, cfgPath)
 		return nil
 	}
-
-	registry := newCreateCleanupRegistry(cfg)
 
 	deletedCount := 0
 	alreadyDeletedCount := 0
@@ -58,45 +54,22 @@ func runClusterDelete(cmd *cobra.Command, args []string) error {
 				continue
 			}
 
-			payload, err := json.Marshal(cleanupDeleteServer{
+			payload := cleanupDeleteServer{
 				ServerID: serverID,
 				Zone:     zone,
-			})
-			if err != nil {
-				errs = append(errs, fmt.Errorf("encode delete cleanup payload for node %q: %w", node.Name, err))
-				continue
 			}
 
-			cleanupErrs := registry.ExecuteLIFO(ctx, []operation.CleanupAction{
-				{
-					Type: "delete-server",
-					Data: payload,
-				},
-			})
-			if len(cleanupErrs) > 0 {
-				errs = append(errs, fmt.Errorf("cleanup server %s for node %q: %w", serverID, node.Name, errors.Join(cleanupErrs...)))
+			if err := runDeleteServerCleanupAction(ctx, cfg, payload); err != nil {
+				errs = append(errs, fmt.Errorf("cleanup server %s for node %q: %w", serverID, node.Name, err))
 				continue
 			}
-		}
-
-		if err := nodeStore.Upsert(ctx, clusterstate.NodeState{
-			Name:      node.Name,
-			Role:      node.Role,
-			Pool:      node.Pool,
-			ServerID:  node.ServerID,
-			PublicIP:  node.PublicIP,
-			PrivateIP: node.PrivateIP,
-			Status:    clusterstate.NodeStatusDeleted,
-		}); err != nil {
-			errs = append(errs, fmt.Errorf("persist deleted node state for %q: %w", node.Name, err))
-			continue
 		}
 
 		deletedCount++
 	}
 
 	if deletedCount == 0 && alreadyDeletedCount == len(state.Nodes) {
-		fmt.Printf("All tracked nodes for cluster %q are already marked deleted (config=%s)\n", cfg.Environment, cfgPath)
+		fmt.Printf("All discovered nodes for cluster %q are already deleting/deleted (config=%s)\n", cfg.Environment, cfgPath)
 		return nil
 	}
 

@@ -13,7 +13,6 @@ import (
 	"github.com/rawkode-academy/rawkode-cloud3/internal/flux"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/scaleway"
-	"github.com/rawkode-academy/rawkode-cloud3/internal/teleport"
 	"github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
 	scw "github.com/scaleway/scaleway-sdk-go/scw"
 )
@@ -21,7 +20,6 @@ import (
 func restorePostBootstrapFns() {
 	ciliumInstallFn = cilium.Install
 	fluxBootstrapFn = flux.Bootstrap
-	teleportDeploySelfHostedFn = teleport.DeploySelfHosted
 	postBootstrapKubeconfigPathFn = func(context.Context, *operation.Operation, *config.Config) (string, func(), error) {
 		return "", func() {}, nil
 	}
@@ -72,11 +70,7 @@ func TestPhasePostBootstrapAggregatesComponentErrors(t *testing.T) {
 		return "172.16.16.0/22", nil
 	}
 
-	cfg := &config.Config{
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
-		},
-	}
+	cfg := &config.Config{}
 
 	err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg)
 	if err == nil {
@@ -90,7 +84,7 @@ func TestPhasePostBootstrapAggregatesComponentErrors(t *testing.T) {
 	}
 }
 
-func TestPhasePostBootstrapSkipTeleportDoesNotMaskOtherFailures(t *testing.T) {
+func TestPhasePostBootstrapFailureDoesNotMaskOtherFailures(t *testing.T) {
 	restorePostBootstrapFns()
 	t.Cleanup(restorePostBootstrapFns)
 
@@ -111,9 +105,6 @@ func TestPhasePostBootstrapSkipTeleportDoesNotMaskOtherFailures(t *testing.T) {
 
 	err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), &config.Config{
 		Environment: "production",
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
-		},
 	})
 	if err == nil {
 		t.Fatalf("expected post-bootstrap failure, got nil")
@@ -140,11 +131,7 @@ func TestPhasePostBootstrapSucceedsWhenAllComponentsSucceed(t *testing.T) {
 		return "172.16.16.0/22", nil
 	}
 
-	cfg := &config.Config{
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
-		},
-	}
+	cfg := &config.Config{}
 
 	if err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg); err != nil {
 		t.Fatalf("expected post-bootstrap success, got error: %v", err)
@@ -170,11 +157,7 @@ func TestPhasePostBootstrapPassesDiscoveredCIDRToCilium(t *testing.T) {
 		return "172.16.16.0/22", nil
 	}
 
-	cfg := &config.Config{
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
-		},
-	}
+	cfg := &config.Config{}
 
 	if err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg); err != nil {
 		t.Fatalf("phasePostBootstrap returned error: %v", err)
@@ -222,9 +205,6 @@ func TestPhasePostBootstrapPassesPreparedKubeconfigToComponents(t *testing.T) {
 		Flux: config.FluxConfig{
 			OCIRepo: ociRepo,
 		},
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
-		},
 	}
 
 	if err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg); err != nil {
@@ -267,9 +247,6 @@ func TestPhasePostBootstrapContinuesWhenFluxOCIRepoIsEmpty(t *testing.T) {
 	cfg := &config.Config{
 		Flux: config.FluxConfig{
 			OCIRepo: "   ",
-		},
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
 		},
 	}
 
@@ -407,11 +384,7 @@ func TestPhasePostBootstrapFailsWhenKubernetesAPINotReachable(t *testing.T) {
 		return "172.16.16.0/22", nil
 	}
 
-	cfg := &config.Config{
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
-		},
-	}
+	cfg := &config.Config{}
 
 	err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg)
 	if err == nil {
@@ -443,11 +416,7 @@ func TestPhasePostBootstrapFailsWhenCIDRDiscoveryFails(t *testing.T) {
 		return "", errors.New("no discovered IPv4 CIDR contains preferred private IP")
 	}
 
-	cfg := &config.Config{
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
-		},
-	}
+	cfg := &config.Config{}
 
 	err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg)
 	if err == nil {
@@ -487,9 +456,6 @@ func TestPhasePostBootstrapRecoversMissingPrivateNetworkIDFromScaleway(t *testin
 
 	cfg := &config.Config{
 		Environment: "production",
-		Teleport: config.TeleportConfig{
-			Mode: config.TeleportModeDisabled,
-		},
 	}
 
 	if err := phasePostBootstrap(context.Background(), op, cfg); err != nil {

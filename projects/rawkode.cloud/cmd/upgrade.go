@@ -43,7 +43,7 @@ func runUpgradeTalos(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, _, state, err := loadNodeState(ctx, cfg)
+	state, err := loadNodeState(ctx, cfg)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func runUpgradeK8s(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, _, state, err := loadNodeState(ctx, cfg)
+	state, err := loadNodeState(ctx, cfg)
 	if err != nil {
 		return err
 	}

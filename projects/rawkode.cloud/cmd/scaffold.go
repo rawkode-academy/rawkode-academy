@@ -11,17 +11,12 @@ import (
 
 const scaffoldTemplate = `environment: %s
 
-state:
-  bucket: ""
-  region: fr-par
-
 cluster:
   talosVersion: v1.12.4
   kubernetesVersion: v1.35.0
   talosSchematic: ""
   ciliumVersion: v1.19.0
   fluxVersion: latest
-  teleportVersion: "18"
   controlPlaneTaints: true
 
 scaleway:
@@ -43,28 +38,14 @@ nodePools:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
 
-teleport:
-  domain: ""
-  mode: selfHosted
-  access:
-    adminTeams: []
-    kubernetesUsers:
-      - teleport-admin
-    kubernetesGroups:
-      - system:masters
-  acme:
-    enabled: false
-    email: ""
-    uri: ""
-  github:
-    organization: ""
-    teams: []
-
 infisical:
   siteUrl: https://app.infisical.com
   projectId: ""
   environment: production
   secretPath: /%s # shared secrets live here; cluster secrets use <secretPath>/<environment>
+  # Optional NetBird setup key lookup overrides:
+  # netbirdSecretPath: /projects/rawkode-cloud
+  # netbirdSecretKey: NETBIRD_SETUP_KEY
 
 flux:
   ociRepo: "oci://ghcr.io/rawkode-academy/rawkode-academy/gitops"
@@ -117,7 +98,7 @@ func runClusterScaffold(environment, outputFile string) error {
 	}
 
 	fmt.Printf("Scaffolded environment config: %s\n", outputFile)
-	fmt.Println("Edit the file to fill in your Scaleway, Teleport, and Infisical settings.")
+	fmt.Println("Edit the file to fill in your Scaleway and Infisical settings.")
 	return nil
 }
 

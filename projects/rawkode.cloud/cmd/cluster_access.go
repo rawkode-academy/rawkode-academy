@@ -58,7 +58,7 @@ func runClusterAccess(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, _, state, err := loadNodeState(ctx, cfg)
+	state, err := loadNodeState(ctx, cfg)
 	if err != nil {
 		return err
 	}
