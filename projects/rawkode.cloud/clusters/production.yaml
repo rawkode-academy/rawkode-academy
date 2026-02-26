@@ -5,12 +5,12 @@ state:
   region: fr-par
 
 cluster:
-  talos_version: v1.12.3
-  kubernetes_version: v1.35.0
-  talos_schematic: 8a286c8c4c0697d0be932714af929c56dc55dc4d3deb9cc00aa3663c46c7738a
-  cilium_version: v1.19.0
-  flux_version: latest
-  teleport_version: "18"
+  talosVersion: v1.12.0
+  kubernetesVersion: v1.35.0
+  talosSchematic: 81efb800f02421130d6f701caaae6f1cb182ef0e7631da1c801dfcb3699c86cd
+  ciliumVersion: v1.19.0
+  fluxVersion: latest
+  teleportVersion: "18"
   controlPlaneTaints: false
 
 scaleway:
@@ -22,11 +22,7 @@ nodePools:
     type: control-plane
     zone: fr-par-1
     offer: EM-A610R-NVMe
-    billing_cycle: hourly
-    reserved_private_ips:
-      - 172.16.16.16
-      - 172.16.16.17
-      - 172.16.16.18
+    billingCycle: hourly
     disks:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
@@ -34,20 +30,20 @@ nodePools:
     type: worker
     zone: fr-par-1
     offer: EM-A610R-NVMe
-    billing_cycle: hourly
+    billingCycle: hourly
     disks:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
 
 teleport:
   domain: rawkode.cloud
-  mode: self_hosted
+  mode: selfHosted
   access:
-    admin_teams:
+    adminTeams:
       - platform
-    kubernetes_users:
+    kubernetesUsers:
       - teleport-admin
-    kubernetes_groups:
+    kubernetesGroups:
       - system:masters
   acme:
     enabled: true
@@ -58,10 +54,10 @@ teleport:
       - platform
 
 infisical:
-  site_url: https://app.infisical.com
-  project_id: 6575a392d7a5ef0555ade86b
+  siteUrl: https://app.infisical.com
+  projectId: 6575a392d7a5ef0555ade86b
   environment: production
-  secret_path: /projects/rawkode-cloud
+  secretPath: /projects/rawkode-cloud
 
 flux:
-  oci_repo: oci://ghcr.io/rawkode-academy/rawkode-academy/gitops
+  ociRepo: oci://ghcr.io/rawkode-academy/rawkode-academy/gitops

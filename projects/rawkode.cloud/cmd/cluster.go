@@ -36,7 +36,7 @@ var clusterCmd = &cobra.Command{
 
 const (
 	infisicalTalosSecretsKey      = "TALOS_SECRETS_YAML"
-	infisicalTalosControlPlaneKey = "TALOS_CONTROLPLANE_CONFIG_YAML"
+	infisicalTalosControlPlaneKey = "TALOS_CONTROL_PLANE_CONFIG_YAML"
 	infisicalTalosWorkerKey       = "TALOS_WORKER_CONFIG_YAML"
 	infisicalTalosConfigKey       = "TALOSCONFIG_YAML"
 )
@@ -88,7 +88,7 @@ func init() {
 	clusterCreateCmd.Flags().StringP("environment", "e", "", "Cluster/environment name")
 	clusterCreateCmd.Flags().StringP("file", "f", "", "Path to cluster config YAML")
 	clusterCreateCmd.Flags().String("node-name", "", "Deprecated: control-plane names are now auto-generated from the pool")
-	clusterCreateCmd.Flags().String("pool", "", "Node pool name (defaults to first controlplane pool)")
+	clusterCreateCmd.Flags().String("pool", "", "Node pool name (defaults to first control-plane pool)")
 	clusterCreateCmd.Flags().Bool("cleanup", false, "Force cleanup of incomplete provisioned resources before creating the cluster")
 
 	clusterDeleteCmd.Flags().StringP("environment", "e", "", "Cluster/environment name")
@@ -152,7 +152,7 @@ func runClusterCreate(cmd *cobra.Command, args []string) error {
 	}
 
 	if pool.EffectiveType() != config.NodeTypeControlPlane {
-		return fmt.Errorf("cluster create currently supports controlplane pools only (pool %q is %q)", pool.Name, pool.EffectiveType())
+		return fmt.Errorf("cluster create currently supports control-plane pools only (pool %q is %q)", pool.Name, pool.EffectiveType())
 	}
 	if strings.TrimSpace(nodeNameFlag) != "" {
 		return fmt.Errorf(
@@ -760,7 +760,7 @@ func phaseApplyConfig(ctx context.Context, op *operation.Operation, cfg *config.
 	}
 	defer talosClient.Close()
 
-	slog.Info("phase apply-config: applying Talos controlplane config", "ip", publicIP, "endpoint", endpoint, "node", nodeName)
+	slog.Info("phase apply-config: applying Talos control-plane config", "ip", publicIP, "endpoint", endpoint, "node", nodeName)
 	if err := talosClient.ApplyConfig(ctx, nodeConfig); err != nil {
 		return err
 	}
@@ -949,7 +949,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 
 	ociRepo := strings.TrimSpace(cfg.Flux.OCIRepo)
 	if ociRepo == "" {
-		slog.Warn("flux.oci_repo is empty; skipping GitOps OCI source configuration during bootstrap (can be configured manually later)")
+		slog.Warn("flux.ociRepo is empty; skipping GitOps OCI source configuration during bootstrap (can be configured manually later)")
 	}
 
 	// Install FluxCD (and optionally configure OCI source).
@@ -985,7 +985,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		clientSecret = strings.TrimSpace(clientSecret)
 		if clientID == "" || clientSecret == "" {
 			slog.Warn("skipping self-hosted teleport deployment (missing GitHub OAuth secrets from Infisical)",
-				"secret_path", cfg.Infisical.SecretPath,
+				"secretPath", cfg.Infisical.SecretPath,
 				"required_keys", "GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET",
 			)
 			break
@@ -1003,9 +1003,9 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 			"cluster", cfg.Environment,
 			"version", cfg.Cluster.EffectiveTeleportVersion(),
 			"organization", organization,
-			"admin_teams", adminTeams,
-			"kubernetes_users", kubernetesUsers,
-			"kubernetes_groups", kubernetesGroups,
+			"adminTeams", adminTeams,
+			"kubernetesUsers", kubernetesUsers,
+			"kubernetesGroups", kubernetesGroups,
 		)
 
 		if err := teleportDeploySelfHostedFn(ctx, teleport.DeploySelfHostedParams{
@@ -1337,7 +1337,7 @@ func phaseVerify(ctx context.Context, op *operation.Operation, cfg *config.Confi
 	if nodeName == "" {
 		poolName := strings.TrimSpace(op.GetContextString("poolName"))
 		if poolName == "" {
-			poolName = "controlplane"
+			poolName = "control-plane"
 		}
 		nodeName = controlPlaneNodeName(cfg.Environment, poolName, 1)
 	}
@@ -1368,7 +1368,7 @@ func selectCreatePool(cfg *config.Config, poolName string) (*config.NodePoolConf
 
 	pool, err := cfg.FirstNodePoolByType(config.NodeTypeControlPlane)
 	if err != nil {
-		return nil, fmt.Errorf("select default controlplane pool: %w", err)
+		return nil, fmt.Errorf("select default control-plane pool: %w", err)
 	}
 	return pool, nil
 }
@@ -1430,7 +1430,7 @@ func nodeNameForOperation(op *operation.Operation, environment string) string {
 	}
 	poolName := strings.TrimSpace(op.GetContextString("poolName"))
 	if poolName == "" {
-		poolName = "controlplane"
+		poolName = "control-plane"
 	}
 	return controlPlaneNodeName(environment, poolName, 1)
 }
@@ -1500,16 +1500,16 @@ func newInfisicalClient(ctx context.Context, cfg *config.Config) (*infisical.Cli
 
 func getOrCreateInfisicalClient(ctx context.Context, cfg *config.Config) (*infisical.Client, error) {
 	if strings.TrimSpace(cfg.Infisical.SiteURL) == "" {
-		return nil, fmt.Errorf("infisical.site_url is required")
+		return nil, fmt.Errorf("infisical.siteUrl is required")
 	}
 	if strings.TrimSpace(cfg.Infisical.ProjectID) == "" {
-		return nil, fmt.Errorf("infisical.project_id is required")
+		return nil, fmt.Errorf("infisical.projectId is required")
 	}
 	if strings.TrimSpace(cfg.Infisical.Environment) == "" {
 		return nil, fmt.Errorf("infisical.environment is required")
 	}
 	if strings.TrimSpace(cfg.Infisical.SecretPath) == "" {
-		return nil, fmt.Errorf("infisical.secret_path is required")
+		return nil, fmt.Errorf("infisical.secretPath is required")
 	}
 	if strings.TrimSpace(cfg.Infisical.ClientID) == "" || strings.TrimSpace(cfg.Infisical.ClientSecret) == "" {
 		return nil, fmt.Errorf("INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET are required")
@@ -1588,7 +1588,7 @@ func ensureTalosAssets(ctx context.Context, cfg *config.Config, endpoint string,
 
 	secretPath := infisicalSecretPathForCluster(cfg)
 	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosControlPlaneKey, string(assets.ControlPlane)); err != nil {
-		return nil, fmt.Errorf("store controlplane config in infisical: %w", err)
+		return nil, fmt.Errorf("store control-plane config in infisical: %w", err)
 	}
 	if err := client.SetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosWorkerKey, string(assets.Worker)); err != nil {
 		return nil, fmt.Errorf("store worker config in infisical: %w", err)
