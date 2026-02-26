@@ -13,21 +13,17 @@ import (
 // Config is the top-level cluster configuration loaded from YAML.
 type Config struct {
 	Environment string           `yaml:"environment"`
-	State       StateConfig      `yaml:"state"`
 	Cluster     ClusterConfig    `yaml:"cluster"`
 	Scaleway    ScalewayConfig   `yaml:"scaleway"`
 	NodePools   []NodePoolConfig `yaml:"nodePools"`
-	Teleport    TeleportConfig   `yaml:"teleport"`
 	Infisical   InfisicalConfig  `yaml:"infisical"`
 	Flux        FluxConfig       `yaml:"flux"`
 
 	// Runtime credentials loaded from secret providers, never serialized.
-	scwAccessKey               string
-	scwSecretKey               string
-	teleportGitHubClientID     string
-	teleportGitHubClientSecret string
-	cloudflareAPIToken         string
-	cloudflareAccount          string
+	scwAccessKey       string
+	scwSecretKey       string
+	cloudflareAPIToken string
+	cloudflareAccount  string
 }
 
 // ClusterConfig holds Kubernetes/Talos version info.
@@ -37,7 +33,6 @@ type ClusterConfig struct {
 	TalosSchematic    string `yaml:"talosSchematic"`
 	CiliumVersion     string `yaml:"ciliumVersion"`
 	FluxVersion       string `yaml:"fluxVersion"`
-	TeleportVersion   string `yaml:"teleportVersion"`
 	// ControlPlaneTaints controls whether control-plane NoSchedule taints are kept.
 	// true keeps taints (isolated control-plane), false removes them (schedulable).
 	ControlPlaneTaints *bool `yaml:"controlPlaneTaints"`
@@ -47,13 +42,6 @@ type ClusterConfig struct {
 type ScalewayConfig struct {
 	ProjectID      string `yaml:"projectId"`
 	OrganizationID string `yaml:"organizationId"`
-}
-
-// StateConfig holds S3 state storage settings.
-type StateConfig struct {
-	Bucket   string `yaml:"bucket"`
-	Region   string `yaml:"region"`
-	Endpoint string `yaml:"endpoint"`
 }
 
 // NodePoolConfig describes a group of nodes sharing the same hardware/disk layout.
@@ -74,11 +62,8 @@ const (
 )
 
 const (
-	defaultCiliumVersion     = "v1.19.0"
-	defaultFluxVersion       = "latest"
-	defaultTeleportVersion   = "18"
-	defaultTeleportKubeUser  = "teleport-admin"
-	defaultTeleportKubeGroup = "system:masters"
+	defaultCiliumVersion = "v1.19.0"
+	defaultFluxVersion   = "latest"
 )
 
 // DiskConfig holds disk device paths.
@@ -87,48 +72,16 @@ type DiskConfig struct {
 	Data string `yaml:"data"`
 }
 
-// TeleportConfig holds Teleport proxy settings.
-type TeleportConfig struct {
-	Domain string               `yaml:"domain"`
-	Mode   string               `yaml:"mode"`
-	ACME   TeleportACMEConfig   `yaml:"acme"`
-	GitHub TeleportGitHubConfig `yaml:"github"`
-	Access TeleportAccessConfig `yaml:"access"`
-}
-
-const (
-	TeleportModeSelfHosted = "selfHosted"
-	TeleportModeDisabled   = "disabled"
-)
-
-// TeleportACMEConfig holds Teleport native ACME settings.
-type TeleportACMEConfig struct {
-	Enabled *bool  `yaml:"enabled"`
-	Email   string `yaml:"email"`
-	URI     string `yaml:"uri"`
-}
-
-// TeleportGitHubConfig holds Teleport GitHub connector settings.
-type TeleportGitHubConfig struct {
-	Organization string   `yaml:"organization"`
-	Teams        []string `yaml:"teams"`
-}
-
-// TeleportAccessConfig holds Teleport RBAC bootstrap settings.
-type TeleportAccessConfig struct {
-	AdminTeams       []string `yaml:"adminTeams"`
-	KubernetesUsers  []string `yaml:"kubernetesUsers"`
-	KubernetesGroups []string `yaml:"kubernetesGroups"`
-}
-
 // InfisicalConfig holds secrets management settings.
 type InfisicalConfig struct {
-	SiteURL      string `yaml:"siteUrl"`
-	ProjectID    string `yaml:"projectId"`
-	Environment  string `yaml:"environment"`
-	SecretPath   string `yaml:"secretPath"`
-	ClientID     string `yaml:"clientId"`
-	ClientSecret string `yaml:"clientSecret"`
+	SiteURL           string `yaml:"siteUrl"`
+	ProjectID         string `yaml:"projectId"`
+	Environment       string `yaml:"environment"`
+	SecretPath        string `yaml:"secretPath"`
+	NetbirdSecretPath string `yaml:"netbirdSecretPath"`
+	NetbirdSecretKey  string `yaml:"netbirdSecretKey"`
+	ClientID          string `yaml:"clientId"`
+	ClientSecret      string `yaml:"clientSecret"`
 }
 
 // FluxConfig holds FluxCD configuration.
@@ -137,10 +90,8 @@ type FluxConfig struct {
 }
 
 const (
-	infisicalSCWAccessKeyKey       = "SCW_ACCESS_KEY"
-	infisicalSCWSecretKeyKey       = "SCW_SECRET_KEY"
-	infisicalGitHubClientIDKey     = "GITHUB_CLIENT_ID"
-	infisicalGitHubClientSecretKey = "GITHUB_CLIENT_SECRET"
+	infisicalSCWAccessKeyKey = "SCW_ACCESS_KEY"
+	infisicalSCWSecretKeyKey = "SCW_SECRET_KEY"
 )
 
 // Load reads and parses a cluster configuration YAML file.
@@ -240,22 +191,6 @@ func (c *Config) LoadRuntimeSecretsWithClient(ctx context.Context, client *infis
 		return err
 	}
 
-	if c.Teleport.EffectiveMode() == TeleportModeSelfHosted {
-		c.teleportGitHubClientID, err = requiredInfisicalSecret(
-			ctx, client, c.Infisical.ProjectID, c.Infisical.Environment, c.Infisical.SecretPath, infisicalGitHubClientIDKey,
-		)
-		if err != nil {
-			return err
-		}
-
-		c.teleportGitHubClientSecret, err = requiredInfisicalSecret(
-			ctx, client, c.Infisical.ProjectID, c.Infisical.Environment, c.Infisical.SecretPath, infisicalGitHubClientSecretKey,
-		)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -296,11 +231,6 @@ func Save(path string, cfg *Config) error {
 // ScalewayCredentials returns the Scaleway credentials loaded from Infisical.
 func (c *Config) ScalewayCredentials() (accessKey, secretKey string) {
 	return c.scwAccessKey, c.scwSecretKey
-}
-
-// TeleportGitHubCredentials returns Teleport GitHub OAuth credentials loaded from Infisical.
-func (c *Config) TeleportGitHubCredentials() (clientID, clientSecret string) {
-	return c.teleportGitHubClientID, c.teleportGitHubClientSecret
 }
 
 // CloudflareAPIToken returns the Cloudflare API token loaded from environment variables.
@@ -387,15 +317,6 @@ func (c ClusterConfig) EffectiveFluxVersion() string {
 	return defaultFluxVersion
 }
 
-// EffectiveTeleportVersion returns the Teleport image tag with a default fallback.
-func (c ClusterConfig) EffectiveTeleportVersion() string {
-	if version := strings.TrimSpace(c.TeleportVersion); version != "" {
-		return version
-	}
-
-	return defaultTeleportVersion
-}
-
 // EffectiveControlPlaneTaints returns whether control-plane NoSchedule taints should be kept.
 // Defaults to true to preserve control-plane isolation when unset.
 func (c ClusterConfig) EffectiveControlPlaneTaints() bool {
@@ -443,91 +364,7 @@ func NormalizeNodePoolType(value string) string {
 	}
 }
 
-// EffectiveMode returns the normalized Teleport mode.
-// Empty mode defaults to selfHosted; unsupported non-empty values return empty.
-func (c TeleportConfig) EffectiveMode() string {
-	if normalized := NormalizeTeleportMode(c.Mode); normalized != "" {
-		return normalized
-	}
-	if strings.TrimSpace(c.Mode) == "" {
-		return TeleportModeSelfHosted
-	}
-	return ""
-}
-
-// EffectiveEnabled returns whether Teleport native ACME is enabled.
-func (c TeleportACMEConfig) EffectiveEnabled() bool {
-	if c.Enabled == nil {
-		return false
-	}
-
-	return *c.Enabled
-}
-
-// EffectiveAdminTeams returns Teleport admin teams from access config with a github-team fallback.
-func (c TeleportConfig) EffectiveAdminTeams() []string {
-	if teams := normalizedDistinctStrings(c.Access.AdminTeams); len(teams) > 0 {
-		return teams
-	}
-
-	return normalizedDistinctStrings(c.GitHub.Teams)
-}
-
-// EffectiveKubernetesUsers returns Teleport kubernetes users with defaults.
-func (c TeleportConfig) EffectiveKubernetesUsers() []string {
-	if users := normalizedDistinctStrings(c.Access.KubernetesUsers); len(users) > 0 {
-		return users
-	}
-
-	return []string{defaultTeleportKubeUser}
-}
-
-// EffectiveKubernetesGroups returns Teleport kubernetes groups with defaults.
-func (c TeleportConfig) EffectiveKubernetesGroups() []string {
-	if groups := normalizedDistinctStrings(c.Access.KubernetesGroups); len(groups) > 0 {
-		return groups
-	}
-
-	return []string{defaultTeleportKubeGroup}
-}
-
-// NormalizeTeleportMode normalizes user-facing Teleport mode variants.
-func NormalizeTeleportMode(value string) string {
-	normalized := compactLower(value)
-	switch normalized {
-	case "", strings.ToLower(TeleportModeSelfHosted):
-		return TeleportModeSelfHosted
-	case TeleportModeDisabled, "off":
-		return TeleportModeDisabled
-	default:
-		return ""
-	}
-}
-
 func compactLower(value string) string {
 	trimmed := strings.ToLower(strings.TrimSpace(value))
 	return strings.NewReplacer("-", "", "_", "").Replace(trimmed)
-}
-
-func normalizedDistinctStrings(values []string) []string {
-	if len(values) == 0 {
-		return nil
-	}
-
-	seen := make(map[string]struct{}, len(values))
-	out := make([]string, 0, len(values))
-	for _, value := range values {
-		trimmed := strings.TrimSpace(value)
-		if trimmed == "" {
-			continue
-		}
-		key := strings.ToLower(trimmed)
-		if _, ok := seen[key]; ok {
-			continue
-		}
-		seen[key] = struct{}{}
-		out = append(out, trimmed)
-	}
-
-	return out
 }

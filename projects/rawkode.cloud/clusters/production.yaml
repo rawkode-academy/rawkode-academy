@@ -1,16 +1,11 @@
 environment: production
 
-state:
-  bucket: rawkode.cloud
-  region: fr-par
-
 cluster:
   talosVersion: v1.12.0
   kubernetesVersion: v1.35.0
   talosSchematic: 81efb800f02421130d6f701caaae6f1cb182ef0e7631da1c801dfcb3699c86cd
   ciliumVersion: v1.19.0
   fluxVersion: latest
-  teleportVersion: "18"
   controlPlaneTaints: false
 
 scaleway:
@@ -35,29 +30,12 @@ nodePools:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
 
-teleport:
-  domain: rawkode.cloud
-  mode: selfHosted
-  access:
-    adminTeams:
-      - platform
-    kubernetesUsers:
-      - teleport-admin
-    kubernetesGroups:
-      - system:masters
-  acme:
-    enabled: true
-    email: support@rawkode.academy
-  github:
-    organization: rawkode-academy
-    teams:
-      - platform
-
 infisical:
   siteUrl: https://app.infisical.com
   projectId: 6575a392d7a5ef0555ade86b
   environment: production
   secretPath: /projects/rawkode-cloud
+  netbirdSecretKey: NETBIRD_SETUP_KEY
 
 flux:
   ociRepo: oci://ghcr.io/rawkode-academy/rawkode-academy/gitops
