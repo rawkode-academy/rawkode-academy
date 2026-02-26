@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"strings"
 	"testing"
 
 	clusterstate "github.com/rawkode-academy/rawkode-cloud3/internal/cluster"
@@ -154,5 +155,44 @@ func TestControlPlaneEndpointFromStatePrefersPrivateIP(t *testing.T) {
 	}
 	if endpoint != "172.16.16.16" {
 		t.Fatalf("controlPlaneEndpointFromState() = %q, want %q", endpoint, "172.16.16.16")
+	}
+}
+
+func TestAppendTalosConfigDocuments(t *testing.T) {
+	base := []byte("version: v1alpha1\nmachine: {}\n")
+	doc := []byte("apiVersion: v1alpha1\nkind: ExtensionServiceConfig\nname: netbird\n")
+
+	out, err := appendTalosConfigDocuments(base, doc)
+	if err != nil {
+		t.Fatalf("appendTalosConfigDocuments returned error: %v", err)
+	}
+
+	encoded := string(out)
+	if !strings.Contains(encoded, "version: v1alpha1") {
+		t.Fatalf("expected base config in output, got:\n%s", encoded)
+	}
+	if !strings.Contains(encoded, "---\napiVersion: v1alpha1\nkind: ExtensionServiceConfig\nname: netbird") {
+		t.Fatalf("expected appended document separator and document, got:\n%s", encoded)
+	}
+}
+
+func TestTalosAPIAllowedSubnetsDefault(t *testing.T) {
+	t.Setenv(envTalosAllowedSubnets, "")
+
+	got := talosAPIAllowedSubnets()
+	if len(got) != 1 || got[0] != defaultTalosAPINetbirdSubnet {
+		t.Fatalf("talosAPIAllowedSubnets() = %v, want [%q]", got, defaultTalosAPINetbirdSubnet)
+	}
+}
+
+func TestTalosAPIAllowedSubnetsEnv(t *testing.T) {
+	t.Setenv(envTalosAllowedSubnets, "100.64.0.0/10, fd00::/8, 100.64.0.0/10")
+
+	got := talosAPIAllowedSubnets()
+	if len(got) != 2 {
+		t.Fatalf("talosAPIAllowedSubnets() length = %d, want 2 (got %v)", len(got), got)
+	}
+	if got[0] != "100.64.0.0/10" || got[1] != "fd00::/8" {
+		t.Fatalf("talosAPIAllowedSubnets() = %v, want [100.64.0.0/10 fd00::/8]", got)
 	}
 }
