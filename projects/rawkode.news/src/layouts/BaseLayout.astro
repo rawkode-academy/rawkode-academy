@@ -14,9 +14,32 @@ type Props = {
 	twitterCard?: "summary" | "summary_large_image";
 };
 
+const DEFAULT_DESCRIPTION = "Rawkode News community links, discussions, and engineering write-ups.";
+const SOCIAL_DESCRIPTION_MAX = 200;
+
+const normalizeMetaText = (value: string) => value.replace(/\s+/g, " ").trim();
+
+const truncateMetaText = (value: string, max: number) => {
+	if (value.length <= max) return value;
+	return `${value.slice(0, max - 1).trimEnd()}…`;
+};
+
+const withSiteContext = (value: string, siteName: string) => {
+	const normalizedValue = normalizeMetaText(value);
+	const normalizedSiteName = normalizeMetaText(siteName);
+	if (!normalizedValue || !normalizedSiteName) {
+		return normalizedValue;
+	}
+
+	const includesSiteName = normalizedValue
+		.toLowerCase()
+		.includes(normalizedSiteName.toLowerCase());
+	return includesSiteName ? normalizedValue : `${normalizedValue} — ${normalizedSiteName}`;
+};
+
 const {
 	title = "Rawkode News",
-	description = "Rawkode News community links, discussions, and engineering write-ups.",
+	description,
 	canonicalPath,
 	robots = "index, follow",
 	ogType = "website",
@@ -24,6 +47,12 @@ const {
 	ogImagePath = "/og.webp",
 	twitterCard = ogImagePath ? "summary_large_image" : "summary",
 } = Astro.props as Props;
+
+const resolvedDescription = normalizeMetaText(description ?? "") || DEFAULT_DESCRIPTION;
+const socialDescription = truncateMetaText(
+	withSiteContext(resolvedDescription, siteName),
+	SOCIAL_DESCRIPTION_MAX,
+);
 
 const canonicalHref = canonicalPath
 	? new URL(canonicalPath, Astro.site ?? Astro.url).toString()
@@ -48,12 +77,12 @@ const ogImageUrl = ogImagePath
 		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<meta name="description" content={description} />
+		<meta name="description" content={resolvedDescription} />
 		<meta name="robots" content={robots} />
 		{canonicalHref ? <link rel="canonical" href={canonicalHref} /> : null}
 		<meta property="og:type" content={ogType} />
 		<meta property="og:title" content={title} />
-		<meta property="og:description" content={description} />
+		<meta property="og:description" content={socialDescription} />
 		<meta property="og:url" content={pageUrl} />
 		<meta property="og:site_name" content={siteName} />
 		<meta property="og:locale" content="en_US" />
@@ -61,7 +90,7 @@ const ogImageUrl = ogImagePath
 		{ogImageUrl ? <meta property="og:image:alt" content={`${siteName} social preview`} /> : null}
 		<meta name="twitter:card" content={twitterCard} />
 		<meta name="twitter:title" content={title} />
-		<meta name="twitter:description" content={description} />
+		<meta name="twitter:description" content={socialDescription} />
 		<meta name="twitter:url" content={pageUrl} />
 		{ogImageUrl ? <meta name="twitter:image" content={ogImageUrl} /> : null}
 		<ClientRouter />
