@@ -141,6 +141,10 @@ func runUpgradeK8s(cmd *cobra.Command, args []string) error {
 	if len(assets.Talosconfig) == 0 {
 		return fmt.Errorf("generated talosconfig is empty")
 	}
+	netbirdSetupKey, err := loadOptionalNetbirdSetupKeyFromInfisical(ctx, cfg, infClient)
+	if err != nil {
+		return fmt.Errorf("load netbird setup key: %w", err)
+	}
 
 	orderedNodes := make([]cluster.NodeState, 0, len(state.Nodes))
 	for _, node := range state.Nodes {
@@ -168,9 +172,13 @@ func runUpgradeK8s(cmd *cobra.Command, args []string) error {
 		if node.Role == config.NodeTypeControlPlane {
 			baseConfig = assets.ControlPlane
 		}
-		nodeConfig, err := talos.WithNodeName(baseConfig, node.Name)
+		nodeConfig, err := renderNodeTalosConfig(baseConfig, node.Name)
 		if err != nil {
 			return fmt.Errorf("render node-specific Talos config for node %s: %w", node.Name, err)
+		}
+		nodeConfig, err = appendNetbirdExtensionServiceConfig(nodeConfig, netbirdSetupKey)
+		if err != nil {
+			return fmt.Errorf("append netbird extension service config for node %s: %w", node.Name, err)
 		}
 
 		client, err := talos.NewClient(node.PublicIP, assets.Talosconfig)
