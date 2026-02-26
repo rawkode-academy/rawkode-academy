@@ -5,7 +5,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { formatRelativeTime } from "@/lib/contracts";
 import { parseEntityId } from "@/lib/ids";
 import { renderMarkdownToHtml } from "@/lib/markdown";
-import { buildCanonicalPath, stripMarkdownToText, truncateDescription } from "@/lib/seo";
+import { buildCanonicalPath, getPostMeta, postUnavailableCopy } from "@/lib/seo";
 import { buttonPrimarySmClass } from "@/lib/ui-classes";
 import { getPostById, listCommentsByPostId } from "@/lib/server/posts";
 import { getSessionWithPermissions } from "@/lib/server/session";
@@ -31,24 +31,16 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
   `${Astro.url.pathname}${Astro.url.search}`,
 )}`;
 
-const title = post
-  ? `${post.title} | Rawkode News`
-  : postId
-    ? "Post not found | Rawkode News"
-    : "Invalid post | Rawkode News";
-const description = post?.body
-  ? truncateDescription(stripMarkdownToText(post.body), 180)
-  : "The requested post does not exist or could not be loaded.";
+const meta = getPostMeta(post);
 const canonicalPath = post ? buildCanonicalPath(`/item/${post.id}`) : undefined;
-const robots = post ? "index, follow" : "noindex, nofollow";
 ---
 
 <BaseLayout
-  title={title}
-  description={description}
+  title={meta.title}
+  description={meta.description}
   canonicalPath={canonicalPath}
-  robots={robots}
-  ogType={post ? "article" : "website"}
+  robots={meta.robots}
+  ogType={meta.ogType}
 >
   <AppShell
     pathname={Astro.url.pathname}
@@ -61,12 +53,10 @@ const robots = post ? "index, follow" : "noindex, nofollow";
         <main class="py-7">
           <section class="rkn-panel space-y-5 p-6 sm:p-7">
             <div class="space-y-2">
-              <p class="rkn-kicker">{postId ? "404 Not Found" : "Invalid request"}</p>
-              <h1 class="rkn-page-title">{postId ? "Post not found" : "That request could not be processed"}</h1>
+              <p class="rkn-kicker">{postUnavailableCopy.kicker}</p>
+              <h1 class="rkn-page-title">{postUnavailableCopy.heading}</h1>
               <p class="text-sm text-muted-foreground">
-                {postId
-                  ? "That post does not exist anymore or the link is invalid."
-                  : "The post id in this URL is malformed."}
+                {postUnavailableCopy.detail}
               </p>
             </div>
             <a
