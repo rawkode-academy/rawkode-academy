@@ -1,16 +1,6 @@
 package cluster
 
-import (
-	"context"
-	"errors"
-	"fmt"
-	"os"
-	"time"
-
-	"github.com/rawkode-academy/rawkode-cloud3/internal/config"
-	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
-	"gopkg.in/yaml.v3"
-)
+import "time"
 
 type NodeStatus string
 
@@ -21,7 +11,7 @@ const (
 	NodeStatusDeleted      NodeStatus = "deleted"
 )
 
-// NodeState describes a node's runtime state (stored in S3, not config YAML).
+// NodeState describes a node's runtime state.
 type NodeState struct {
 	Name      string     `json:"name" yaml:"name"`
 	Role      string     `json:"role" yaml:"role"`
@@ -39,74 +29,6 @@ type NodesState struct {
 	Environment string      `json:"environment" yaml:"environment"`
 	UpdatedAt   time.Time   `json:"updated_at" yaml:"updated_at"`
 	Nodes       []NodeState `json:"nodes" yaml:"nodes"`
-}
-
-// NodeStore persists and loads cluster node state in the shared S3 bucket.
-type NodeStore struct {
-	operationStore *operation.Store
-	environment    string
-	key            string
-}
-
-// NewNodeStore creates a cluster node-state store.
-func NewNodeStore(operationStore *operation.Store, environment string) *NodeStore {
-	return &NodeStore{
-		operationStore: operationStore,
-		environment:    environment,
-		key:            fmt.Sprintf("clusters/%s/nodes.json", environment),
-	}
-}
-
-// Load fetches current node inventory, returning an empty state if none exists.
-func (s *NodeStore) Load(_ context.Context) (*NodesState, error) {
-	var state NodesState
-	if err := s.operationStore.GetJSON(s.key, &state); err != nil {
-		if errors.Is(err, operation.ErrNotFound) {
-			return &NodesState{
-				Environment: s.environment,
-				Nodes:       []NodeState{},
-			}, nil
-		}
-		return nil, fmt.Errorf("load node state: %w", err)
-	}
-
-	if state.Environment == "" {
-		state.Environment = s.environment
-	}
-	if state.Nodes == nil {
-		state.Nodes = []NodeState{}
-	}
-
-	return &state, nil
-}
-
-// Save writes the full inventory document.
-func (s *NodeStore) Save(_ context.Context, state *NodesState) error {
-	state.Environment = s.environment
-	state.UpdatedAt = time.Now().UTC()
-	if state.Nodes == nil {
-		state.Nodes = []NodeState{}
-	}
-
-	if err := s.operationStore.PutJSON(s.key, state); err != nil {
-		return fmt.Errorf("save node state: %w", err)
-	}
-	return nil
-}
-
-// Upsert merges a node record and persists the updated state.
-func (s *NodeStore) Upsert(ctx context.Context, patch NodeState) error {
-	if patch.Name == "" {
-		return fmt.Errorf("node name is required")
-	}
-
-	state, err := s.Load(ctx)
-	if err != nil {
-		return err
-	}
-
-	upsertNode(state, patch)
-	return s.Save(ctx, state)
 }
 
 func upsertNode(state *NodesState, patch NodeState) {
@@ -161,19 +83,4 @@ func upsertNode(state *NodesState, patch NodeState) {
 		newNode.CreatedAt = now
 	}
 	state.Nodes = append(state.Nodes, newNode)
-}
-
-// ReadConfig loads a cluster config from a YAML file.
-func ReadConfig(path string) (*config.Config, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("read cluster config %s: %w", path, err)
-	}
-
-	var cfg config.Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("parse cluster config %s: %w", path, err)
-	}
-
-	return &cfg, nil
 }

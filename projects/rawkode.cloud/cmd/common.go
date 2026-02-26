@@ -8,12 +8,15 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	clusterstate "github.com/rawkode-academy/rawkode-cloud3/internal/cluster"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/config"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/infisical"
-	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
+	"github.com/rawkode-academy/rawkode-cloud3/internal/scaleway"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/talos"
+	baremetal "github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
+	scw "github.com/scaleway/scaleway-sdk-go/scw"
 	"gopkg.in/yaml.v3"
 )
 
@@ -74,27 +77,122 @@ func resolveConfigPath(clusterName, filePath string) (string, error) {
 	return "", fmt.Errorf("could not find config for cluster %q (checked %s)", clusterName, strings.Join(candidates, ", "))
 }
 
-func newNodeStore(cfg *config.Config) (*operation.Store, *clusterstate.NodeStore, error) {
-	store, err := newOperationStore(cfg)
-	if err != nil {
-		return nil, nil, err
+func loadNodeState(ctx context.Context, cfg *config.Config) (*clusterstate.NodesState, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("config is required")
 	}
 
-	return store, clusterstate.NewNodeStore(store, cfg.Environment), nil
+	accessKey, secretKey := cfg.ScalewayCredentials()
+	scwClient, err := scaleway.NewClient(accessKey, secretKey, cfg.Scaleway.ProjectID, cfg.Scaleway.OrganizationID)
+	if err != nil {
+		return nil, fmt.Errorf("create scaleway client: %w", err)
+	}
+
+	now := time.Now().UTC()
+	seen := map[string]struct{}{}
+	nodes := make([]clusterstate.NodeState, 0, len(cfg.NodePools))
+	for i := range cfg.NodePools {
+		pool := &cfg.NodePools[i]
+		zoneValue := strings.TrimSpace(pool.EffectiveZone())
+		if zoneValue == "" {
+			return nil, fmt.Errorf("node pool %q must define zone", pool.Name)
+		}
+
+		req := &baremetal.ListServersRequest{
+			Zone: scw.Zone(zoneValue),
+		}
+		if projectID := strings.TrimSpace(cfg.Scaleway.ProjectID); projectID != "" {
+			req.ProjectID = &projectID
+		}
+
+		resp, err := scwClient.Baremetal.ListServers(req, scw.WithAllPages(), scw.WithContext(ctx))
+		if err != nil {
+			return nil, fmt.Errorf("list scaleway servers for pool %q in zone %q: %w", pool.Name, zoneValue, err)
+		}
+
+		for _, server := range resp.Servers {
+			if server == nil {
+				continue
+			}
+			if !serverBelongsToPool(cfg.Environment, pool, server.Name) {
+				continue
+			}
+			if strings.TrimSpace(server.ID) == "" {
+				continue
+			}
+			if _, exists := seen[server.ID]; exists {
+				continue
+			}
+			seen[server.ID] = struct{}{}
+
+			publicIP, privateIP := extractServerIPs(server)
+			status := nodeStatusFromServerStatus(server.Status)
+			nodes = append(nodes, clusterstate.NodeState{
+				Name:      strings.TrimSpace(server.Name),
+				Role:      pool.EffectiveType(),
+				Pool:      pool.Name,
+				PublicIP:  publicIP,
+				PrivateIP: privateIP,
+				ServerID:  strings.TrimSpace(server.ID),
+				Status:    status,
+				CreatedAt: now,
+				UpdatedAt: now,
+			})
+		}
+	}
+
+	return &clusterstate.NodesState{
+		Environment: cfg.Environment,
+		UpdatedAt:   now,
+		Nodes:       nodes,
+	}, nil
 }
 
-func loadNodeState(ctx context.Context, cfg *config.Config) (*operation.Store, *clusterstate.NodeStore, *clusterstate.NodesState, error) {
-	store, nodeStore, err := newNodeStore(cfg)
-	if err != nil {
-		return nil, nil, nil, err
+func serverBelongsToPool(environment string, pool *config.NodePoolConfig, nodeName string) bool {
+	if pool == nil {
+		return false
 	}
 
-	state, err := nodeStore.Load(ctx)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("load node state: %w", err)
+	nodeName = strings.TrimSpace(nodeName)
+	if nodeName == "" {
+		return false
 	}
 
-	return store, nodeStore, state, nil
+	if _, ok := parsePooledNodeSlot(environment, pool.Name, nodeName); ok {
+		return true
+	}
+
+	poolName := strings.TrimSpace(pool.Name)
+	if poolName == "" {
+		return false
+	}
+
+	prefixes := make([]string, 0, 2)
+	if env := strings.TrimSpace(environment); env != "" {
+		prefixes = append(prefixes, env+"-"+poolName+"-")
+	}
+	prefixes = append(prefixes, poolName+"-")
+
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(nodeName, prefix) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func nodeStatusFromServerStatus(status baremetal.ServerStatus) clusterstate.NodeStatus {
+	switch status {
+	case baremetal.ServerStatusReady:
+		return clusterstate.NodeStatusReady
+	case baremetal.ServerStatusDeleting:
+		return clusterstate.NodeStatusDeleted
+	case baremetal.ServerStatusError, baremetal.ServerStatusLocked, baremetal.ServerStatusOutOfStock:
+		return clusterstate.NodeStatusFailed
+	default:
+		return clusterstate.NodeStatusProvisioning
+	}
 }
 
 func findNodeByName(state *clusterstate.NodesState, name string) (*clusterstate.NodeState, bool) {
@@ -121,7 +219,7 @@ func firstActiveNodeByRole(state *clusterstate.NodesState, role string) (*cluste
 		return node, nil
 	}
 
-	return nil, fmt.Errorf("no active %s node with reachable IP found in state", role)
+	return nil, fmt.Errorf("no active %s node with reachable IP found in Scaleway inventory", role)
 }
 
 func loadTalosconfigFromInfisical(ctx context.Context, cfg *config.Config, client *infisical.Client) ([]byte, error) {
@@ -200,20 +298,53 @@ func nodeTalosCertSANs(nodeName string) []string {
 	return sans
 }
 
-func loadOptionalNetbirdSetupKeyFromInfisical(ctx context.Context, cfg *config.Config, client *infisical.Client) (string, error) {
-	secretPath := infisicalSecretPathForCluster(cfg)
+func netbirdSetupKeyLookupTargets(cfg *config.Config, secretPathOverride, secretKeyOverride string) (string, []string) {
+	secretPath := strings.TrimSpace(secretPathOverride)
+	if secretPath == "" && cfg != nil {
+		secretPath = strings.TrimSpace(cfg.Infisical.NetbirdSecretPath)
+	}
+	if secretPath == "" && cfg != nil {
+		secretPath = strings.TrimSpace(cfg.Infisical.SecretPath)
+	}
+	if secretPath == "" {
+		secretPath = infisicalSecretPathForCluster(cfg)
+	}
+
+	secretKey := strings.TrimSpace(secretKeyOverride)
+	if secretKey == "" && cfg != nil {
+		secretKey = strings.TrimSpace(cfg.Infisical.NetbirdSecretKey)
+	}
+	if secretKey != "" {
+		return secretPath, []string{secretKey}
+	}
+
+	return secretPath, []string{infisicalNBSetupKeyPrimary, infisicalNBSetupKeyCompatibility}
+}
+
+func loadOptionalNetbirdSetupKeyFromInfisicalWithOverrides(
+	ctx context.Context,
+	cfg *config.Config,
+	client *infisical.Client,
+	secretPathOverride,
+	secretKeyOverride string,
+) (string, error) {
+	secretPath, keyCandidates := netbirdSetupKeyLookupTargets(cfg, secretPathOverride, secretKeyOverride)
 	all, err := client.GetSecrets(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath)
 	if err != nil {
 		return "", fmt.Errorf("load infisical secrets: %w", err)
 	}
 
-	for _, key := range []string{infisicalNBSetupKeyPrimary, infisicalNBSetupKeyCompatibility} {
+	for _, key := range keyCandidates {
 		if value := strings.TrimSpace(all[key]); value != "" {
 			return value, nil
 		}
 	}
 
 	return "", nil
+}
+
+func loadOptionalNetbirdSetupKeyFromInfisical(ctx context.Context, cfg *config.Config, client *infisical.Client) (string, error) {
+	return loadOptionalNetbirdSetupKeyFromInfisicalWithOverrides(ctx, cfg, client, "", "")
 }
 
 func appendNetbirdExtensionServiceConfig(machineConfig []byte, setupKey string) ([]byte, error) {

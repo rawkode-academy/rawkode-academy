@@ -23,6 +23,61 @@ func TestInfisicalSecretPathForCluster(t *testing.T) {
 	}
 }
 
+func TestNetbirdSetupKeyLookupTargetsDefaults(t *testing.T) {
+	cfg := &config.Config{
+		Environment: "production",
+		Infisical: config.InfisicalConfig{
+			SecretPath: "/projects/rawkode-cloud",
+		},
+	}
+
+	path, candidates := netbirdSetupKeyLookupTargets(cfg, "", "")
+	if path != "/projects/rawkode-cloud" {
+		t.Fatalf("netbirdSetupKeyLookupTargets() path = %q, want %q", path, "/projects/rawkode-cloud")
+	}
+	if len(candidates) != 2 {
+		t.Fatalf("netbirdSetupKeyLookupTargets() candidates length = %d, want 2", len(candidates))
+	}
+	if candidates[0] != infisicalNBSetupKeyPrimary || candidates[1] != infisicalNBSetupKeyCompatibility {
+		t.Fatalf("netbirdSetupKeyLookupTargets() candidates = %v, want [%q %q]", candidates, infisicalNBSetupKeyPrimary, infisicalNBSetupKeyCompatibility)
+	}
+}
+
+func TestNetbirdSetupKeyLookupTargetsOverrides(t *testing.T) {
+	cfg := &config.Config{
+		Environment: "production",
+		Infisical: config.InfisicalConfig{
+			SecretPath: "/projects/rawkode-cloud",
+		},
+	}
+
+	path, candidates := netbirdSetupKeyLookupTargets(cfg, " /apps/shared/netbird ", " CUSTOM_NETBIRD_KEY ")
+	if path != "/apps/shared/netbird" {
+		t.Fatalf("netbirdSetupKeyLookupTargets() path = %q, want %q", path, "/apps/shared/netbird")
+	}
+	if len(candidates) != 1 || candidates[0] != "CUSTOM_NETBIRD_KEY" {
+		t.Fatalf("netbirdSetupKeyLookupTargets() candidates = %v, want [%q]", candidates, "CUSTOM_NETBIRD_KEY")
+	}
+}
+
+func TestNetbirdSetupKeyLookupTargetsConfigDefaults(t *testing.T) {
+	cfg := &config.Config{
+		Environment: "production",
+		Infisical: config.InfisicalConfig{
+			SecretPath:       "/projects/rawkode-cloud",
+			NetbirdSecretKey: "NETBIRD_SETUP_KEY",
+		},
+	}
+
+	path, candidates := netbirdSetupKeyLookupTargets(cfg, "", "")
+	if path != "/projects/rawkode-cloud" {
+		t.Fatalf("netbirdSetupKeyLookupTargets() path = %q, want %q", path, "/projects/rawkode-cloud")
+	}
+	if len(candidates) != 1 || candidates[0] != "NETBIRD_SETUP_KEY" {
+		t.Fatalf("netbirdSetupKeyLookupTargets() candidates = %v, want [%q]", candidates, "NETBIRD_SETUP_KEY")
+	}
+}
+
 func TestControlPlaneReservedIPForSlot(t *testing.T) {
 	pool := &config.NodePoolConfig{
 		Name: "main",

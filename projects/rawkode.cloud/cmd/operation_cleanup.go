@@ -2,12 +2,10 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/rawkode-academy/rawkode-cloud3/internal/config"
-	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/scaleway"
 	scw "github.com/scaleway/scaleway-sdk-go/scw"
 )
@@ -15,18 +13,6 @@ import (
 type cleanupDeleteServer struct {
 	ServerID string `json:"serverId"`
 	Zone     string `json:"zone"`
-}
-
-func newCreateCleanupRegistry(cfg *config.Config) *operation.CleanupRegistry {
-	registry := operation.NewCleanupRegistry()
-	registry.Register("delete-server", func(ctx context.Context, data json.RawMessage) error {
-		var payload cleanupDeleteServer
-		if err := json.Unmarshal(data, &payload); err != nil {
-			return fmt.Errorf("decode cleanup payload: %w", err)
-		}
-		return runDeleteServerCleanupAction(ctx, cfg, payload)
-	})
-	return registry
 }
 
 func runDeleteServerCleanupAction(ctx context.Context, cfg *config.Config, payload cleanupDeleteServer) error {

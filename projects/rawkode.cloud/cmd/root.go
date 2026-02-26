@@ -19,5 +19,4 @@ func init() {
 	rootCmd.AddCommand(nodeCmd)
 	rootCmd.AddCommand(upgradeCmd)
 	rootCmd.AddCommand(etcdCmd)
-	rootCmd.AddCommand(opsCmd)
 }

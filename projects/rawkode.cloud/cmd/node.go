@@ -51,7 +51,7 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, nodeStore, state, err := loadNodeState(ctx, cfg)
+	state, err := loadNodeState(ctx, cfg)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 	}
 
 	if existing, ok := findNodeByName(state, name); ok && existing.Status != clusterstate.NodeStatusDeleted {
-		return fmt.Errorf("node %q already exists in state with status=%s", name, existing.Status)
+		return fmt.Errorf("node %q already exists in Scaleway inventory with status=%s", name, existing.Status)
 	}
 
 	accessKey, secretKey := cfg.ScalewayCredentials()
@@ -149,17 +149,6 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("order server: %w", err)
 	}
 
-	if err := nodeStore.Upsert(ctx, clusterstate.NodeState{
-		Name:      name,
-		Role:      role,
-		Pool:      pool.Name,
-		ServerID:  server.ID,
-		PrivateIP: privateIP,
-		Status:    clusterstate.NodeStatusProvisioning,
-	}); err != nil {
-		return fmt.Errorf("persist provisioning node state: %w", err)
-	}
-
 	serverReady, err := scaleway.WaitForReady(ctx, scwClient, server.ID, zone)
 	if err != nil {
 		return fmt.Errorf("wait for server ready: %w", err)
@@ -179,18 +168,6 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 	}
 	if strings.TrimSpace(publicIP) == "" {
 		return fmt.Errorf("server %s has no public IPv4", server.ID)
-	}
-
-	if err := nodeStore.Upsert(ctx, clusterstate.NodeState{
-		Name:      name,
-		Role:      role,
-		Pool:      pool.Name,
-		ServerID:  server.ID,
-		PublicIP:  publicIP,
-		PrivateIP: privateIP,
-		Status:    clusterstate.NodeStatusProvisioning,
-	}); err != nil {
-		return fmt.Errorf("persist node IP state: %w", err)
 	}
 
 	if err := talos.WaitForMaintenance(ctx, publicIP, 30*time.Minute); err != nil {
@@ -238,18 +215,6 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("apply node config: %w", err)
 	}
 
-	if err := nodeStore.Upsert(ctx, clusterstate.NodeState{
-		Name:      name,
-		Role:      role,
-		Pool:      pool.Name,
-		ServerID:  server.ID,
-		PublicIP:  publicIP,
-		PrivateIP: privateIP,
-		Status:    clusterstate.NodeStatusReady,
-	}); err != nil {
-		return fmt.Errorf("persist ready node state: %w", err)
-	}
-
 	fmt.Printf("Added %s node %q to cluster %q (config=%s, server=%s, public_ip=%s, private_ip=%s)\n", role, name, cfg.Environment, cfgPath, server.ID, publicIP, privateIP)
 	return nil
 }
@@ -270,14 +235,14 @@ func runNodeRemove(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	_, nodeStore, state, err := loadNodeState(ctx, cfg)
+	state, err := loadNodeState(ctx, cfg)
 	if err != nil {
 		return err
 	}
 
 	node, ok := findNodeByName(state, name)
 	if !ok {
-		return fmt.Errorf("node %q not found in cluster state", name)
+		return fmt.Errorf("node %q not found in Scaleway inventory", name)
 	}
 	if node.Status == clusterstate.NodeStatusDeleted {
 		fmt.Printf("Node %q is already marked deleted.\n", name)
@@ -303,17 +268,6 @@ func runNodeRemove(cmd *cobra.Command, args []string) error {
 		if err := scaleway.CleanupProvisionedServer(ctx, scwClient, node.ServerID, scw.Zone(zoneValue)); err != nil {
 			return fmt.Errorf("cleanup server %s: %w", node.ServerID, err)
 		}
-	}
-
-	if err := nodeStore.Upsert(ctx, clusterstate.NodeState{
-		Name:     node.Name,
-		Role:     node.Role,
-		Pool:     node.Pool,
-		ServerID: node.ServerID,
-		PublicIP: node.PublicIP,
-		Status:   clusterstate.NodeStatusDeleted,
-	}); err != nil {
-		return fmt.Errorf("persist deleted node state: %w", err)
 	}
 
 	fmt.Printf("Removed node %q from cluster %q (config=%s)\n", name, cfg.Environment, cfgPath)
