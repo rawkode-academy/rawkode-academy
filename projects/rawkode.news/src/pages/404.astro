@@ -10,8 +10,8 @@ const { session, permissions } = await getSessionWithPermissions(env, Astro.cook
 ---
 
 <BaseLayout
-  title="Page not found | Rawkode News"
-  description="The page you requested does not exist or may have moved."
+  title="Page unavailable | Rawkode News"
+  description="This page is not available right now. Explore the latest posts on Rawkode News."
   robots="noindex, nofollow"
   ogType="website"
 >
@@ -24,9 +24,9 @@ const { session, permissions } = await getSessionWithPermissions(env, Astro.cook
     <main class="py-7">
       <section class="rkn-panel space-y-5 p-6 sm:p-7">
         <div class="space-y-2">
-          <p class="rkn-kicker">404 Not Found</p>
-          <h1 class="rkn-page-title">Page not found</h1>
-          <p class="text-sm text-muted-foreground">The page you requested does not exist or may have moved.</p>
+          <p class="rkn-kicker">Page unavailable</p>
+          <h1 class="rkn-page-title">This page is unavailable</h1>
+          <p class="text-sm text-muted-foreground">The link may be outdated, or the page may have moved.</p>
         </div>
 
         <p class="font-mono text-xs text-muted-foreground">Requested path: {Astro.url.pathname}</p>

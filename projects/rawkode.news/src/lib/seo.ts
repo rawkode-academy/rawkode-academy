@@ -1,5 +1,20 @@
 const normalizeWhitespace = (value: string) => value.replace(/\s+/g, " ").trim();
 
+const POST_DESCRIPTION_MAX = 180;
+
+export const postUnavailableMeta = {
+  title: "Post unavailable | Rawkode News",
+  description: "This post is not available right now. Browse the latest discussions on Rawkode News.",
+  robots: "noindex, nofollow" as const,
+  ogType: "website" as const,
+};
+
+export const postUnavailableCopy = {
+  kicker: "Post unavailable",
+  heading: "This post is unavailable",
+  detail: "The link may be outdated, or the post may have been removed.",
+};
+
 export const stripMarkdownToText = (input: string) =>
   normalizeWhitespace(
     input
@@ -16,6 +31,31 @@ export const truncateDescription = (input: string, max = 160) => {
   }
 
   return `${normalized.slice(0, max - 1).trimEnd()}…`;
+};
+
+type PostSeoInput = {
+  title: string;
+  author: string;
+  body?: string | null;
+};
+
+export const getPostDescription = (post: PostSeoInput, max = POST_DESCRIPTION_MAX) => {
+  const source = stripMarkdownToText(post.body ?? "");
+  const fallback = `${post.title} — ${post.author}`;
+  return truncateDescription(source || fallback, max);
+};
+
+export const getPostMeta = (post: PostSeoInput | null) => {
+  if (!post) {
+    return postUnavailableMeta;
+  }
+
+  return {
+    title: `${post.title} | Rawkode News`,
+    description: getPostDescription(post),
+    robots: "index, follow" as const,
+    ogType: "article" as const,
+  };
 };
 
 export const buildCanonicalPath = (
