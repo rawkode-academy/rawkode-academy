@@ -10,7 +10,7 @@ func TestUpsertNodeCreatesAndMerges(t *testing.T) {
 
 	upsertNode(state, NodeState{
 		Name:     "cp-1",
-		Role:     "controlplane",
+		Role:     "control-plane",
 		Pool:     "main",
 		ServerID: "server-1",
 		Status:   NodeStatusProvisioning,

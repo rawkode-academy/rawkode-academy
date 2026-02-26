@@ -43,7 +43,7 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 
 	role := config.NormalizeNodePoolType(roleRaw)
 	if role == "" {
-		return fmt.Errorf("--role must be one of: controlplane, worker")
+		return fmt.Errorf("--role must be one of: control-plane, worker")
 	}
 
 	cfg, cfgPath, err := loadConfigForClusterOrFile(clusterName, cfgFile)
@@ -335,7 +335,7 @@ func init() {
 	nodeAddCmd.Flags().StringP("file", "f", "", "Path to cluster config YAML")
 	nodeAddCmd.Flags().String("name", "", "Node name (unsupported; names are auto-generated from pool slots)")
 	nodeAddCmd.Flags().String("pool", "", "Node pool name (optional)")
-	nodeAddCmd.Flags().String("role", "worker", "Node role (controlplane or worker)")
+	nodeAddCmd.Flags().String("role", "worker", "Node role (control-plane or worker)")
 
 	nodeRemoveCmd.Flags().String("cluster", "", "Cluster/environment name")
 	nodeRemoveCmd.Flags().StringP("file", "f", "", "Path to cluster config YAML")

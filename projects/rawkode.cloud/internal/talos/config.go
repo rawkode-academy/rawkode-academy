@@ -4,7 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siderolabs/talos/pkg/machinery/config/machine"
 	"gopkg.in/yaml.v3"
+)
+
+const (
+	roleControlPlane = "control-plane"
+	roleWorker       = "worker"
 )
 
 // MachineConfigParams holds parameters for generating Talos machine configs.
@@ -13,7 +19,7 @@ type MachineConfigParams struct {
 	TalosVersion      string
 	KubernetesVersion string
 	TalosSchematic    string
-	Role              string // "controlplane" or "worker"
+	Role              string // "control-plane" or "worker"
 	Endpoint          string // control plane endpoint (IP or DNS)
 	OSDisk            string
 }
@@ -21,26 +27,26 @@ type MachineConfigParams struct {
 // SecretsBundle holds the Talos secrets needed to generate machine configs.
 // This is stored in Infisical.
 type SecretsBundle struct {
-	ClusterSecret    string `yaml:"clusterSecret" json:"clusterSecret"`
-	ClusterCA        string `yaml:"clusterCA" json:"clusterCA"`
-	ClusterCAKey     string `yaml:"clusterCAKey" json:"clusterCAKey"`
-	MachineToken     string `yaml:"machineToken" json:"machineToken"`
-	MachineCA        string `yaml:"machineCA" json:"machineCA"`
-	MachineCAKey     string `yaml:"machineCAKey" json:"machineCAKey"`
-	BootstrapToken   string `yaml:"bootstrapToken" json:"bootstrapToken"`
-	AESCBCKey        string `yaml:"aesCBCKey" json:"aesCBCKey"`
-	EtcdCA           string `yaml:"etcdCA" json:"etcdCA"`
-	EtcdCAKey        string `yaml:"etcdCAKey" json:"etcdCAKey"`
-	TalosToken       string `yaml:"talosToken" json:"talosToken"`
-	TalosCA          string `yaml:"talosCA" json:"talosCA"`
-	TalosCAKey       string `yaml:"talosCAKey" json:"talosCAKey"`
+	ClusterSecret  string `yaml:"clusterSecret" json:"clusterSecret"`
+	ClusterCA      string `yaml:"clusterCA" json:"clusterCA"`
+	ClusterCAKey   string `yaml:"clusterCAKey" json:"clusterCAKey"`
+	MachineToken   string `yaml:"machineToken" json:"machineToken"`
+	MachineCA      string `yaml:"machineCA" json:"machineCA"`
+	MachineCAKey   string `yaml:"machineCAKey" json:"machineCAKey"`
+	BootstrapToken string `yaml:"bootstrapToken" json:"bootstrapToken"`
+	AESCBCKey      string `yaml:"aesCBCKey" json:"aesCBCKey"`
+	EtcdCA         string `yaml:"etcdCA" json:"etcdCA"`
+	EtcdCAKey      string `yaml:"etcdCAKey" json:"etcdCAKey"`
+	TalosToken     string `yaml:"talosToken" json:"talosToken"`
+	TalosCA        string `yaml:"talosCA" json:"talosCA"`
+	TalosCAKey     string `yaml:"talosCAKey" json:"talosCAKey"`
 }
 
 // GenerateMachineConfig builds a Talos machine configuration YAML.
 // Uses the raw YAML approach for maximum control over the output.
 func GenerateMachineConfig(params MachineConfigParams, secrets *SecretsBundle) ([]byte, error) {
-	if params.Role != "controlplane" && params.Role != "worker" {
-		return nil, fmt.Errorf("invalid role %q, must be controlplane or worker", params.Role)
+	if params.Role != roleControlPlane && params.Role != roleWorker {
+		return nil, fmt.Errorf("invalid role %q, must be %s or %s", params.Role, roleControlPlane, roleWorker)
 	}
 	if params.Endpoint == "" {
 		return nil, fmt.Errorf("control plane endpoint is required")
@@ -64,8 +70,13 @@ func GenerateMachineConfig(params MachineConfigParams, secrets *SecretsBundle) (
 }
 
 func buildMachineSection(params MachineConfigParams, secrets *SecretsBundle, installImage, osDisk string) map[string]any {
+	machineType := machine.TypeControlPlane.String()
+	if params.Role == roleWorker {
+		machineType = machine.TypeWorker.String()
+	}
+
 	machine := map[string]any{
-		"type":  params.Role,
+		"type":  machineType,
 		"token": secrets.MachineToken,
 		"ca": map[string]any{
 			"crt": secrets.MachineCA,
@@ -98,7 +109,7 @@ func buildMachineSection(params MachineConfigParams, secrets *SecretsBundle, ins
 		},
 	}
 
-	if params.Role == "worker" {
+	if params.Role == roleWorker {
 		// Workers don't need the CA key
 		machine["ca"] = map[string]any{
 			"crt": secrets.MachineCA,
@@ -148,7 +159,7 @@ func buildClusterSection(params MachineConfigParams, secrets *SecretsBundle) map
 		},
 	}
 
-	if params.Role == "controlplane" {
+	if params.Role == roleControlPlane {
 		cluster["allowSchedulingOnControlPlanes"] = true
 
 		kubeletVersion := strings.TrimPrefix(params.KubernetesVersion, "v")
@@ -163,12 +174,12 @@ func buildClusterSection(params MachineConfigParams, secrets *SecretsBundle) map
 						"apiVersion": "pod-security.admission.config.k8s.io/v1",
 						"kind":       "PodSecurityConfiguration",
 						"defaults": map[string]any{
-							"enforce":        "baseline",
+							"enforce":         "baseline",
 							"enforce-version": "latest",
-							"audit":          "restricted",
-							"audit-version":  "latest",
-							"warn":           "restricted",
-							"warn-version":   "latest",
+							"audit":           "restricted",
+							"audit-version":   "latest",
+							"warn":            "restricted",
+							"warn-version":    "latest",
 						},
 						"exemptions": map[string]any{
 							"namespaces": []string{"kube-system"},

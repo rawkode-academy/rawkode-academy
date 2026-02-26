@@ -8,8 +8,9 @@ func TestNormalizeNodePoolType(t *testing.T) {
 		want  string
 	}{
 		{input: "", want: NodeTypeControlPlane},
-		{input: "controlplane", want: NodeTypeControlPlane},
 		{input: "control-plane", want: NodeTypeControlPlane},
+		{input: "controlPlane", want: NodeTypeControlPlane},
+		{input: "CONTROL_PLANE", want: NodeTypeControlPlane},
 		{input: "cp", want: NodeTypeControlPlane},
 		{input: "worker", want: NodeTypeWorker},
 		{input: "unknown", want: ""},
@@ -26,16 +27,16 @@ func TestFirstNodePoolByType(t *testing.T) {
 	cfg := &Config{
 		NodePools: []NodePoolConfig{
 			{Name: "workers", Type: "worker"},
-			{Name: "cp-main", Type: "controlplane"},
+			{Name: "cp-main", Type: "control-plane"},
 		},
 	}
 
 	cp, err := cfg.FirstNodePoolByType(NodeTypeControlPlane)
 	if err != nil {
-		t.Fatalf("FirstNodePoolByType(controlplane) returned error: %v", err)
+		t.Fatalf("FirstNodePoolByType(control-plane) returned error: %v", err)
 	}
 	if cp.Name != "cp-main" {
-		t.Fatalf("FirstNodePoolByType(controlplane) returned %q, want %q", cp.Name, "cp-main")
+		t.Fatalf("FirstNodePoolByType(control-plane) returned %q, want %q", cp.Name, "cp-main")
 	}
 
 	worker, err := cfg.FirstNodePoolByType(NodeTypeWorker)
@@ -53,6 +54,7 @@ func TestNormalizeTeleportMode(t *testing.T) {
 		want  string
 	}{
 		{input: "", want: TeleportModeSelfHosted},
+		{input: "selfHosted", want: TeleportModeSelfHosted},
 		{input: "self-hosted", want: TeleportModeSelfHosted},
 		{input: "self_hosted", want: TeleportModeSelfHosted},
 		{input: "disabled", want: TeleportModeDisabled},

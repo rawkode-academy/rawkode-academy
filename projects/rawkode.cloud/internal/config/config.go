@@ -32,12 +32,12 @@ type Config struct {
 
 // ClusterConfig holds Kubernetes/Talos version info.
 type ClusterConfig struct {
-	TalosVersion      string `yaml:"talos_version"`
-	KubernetesVersion string `yaml:"kubernetes_version"`
-	TalosSchematic    string `yaml:"talos_schematic"`
-	CiliumVersion     string `yaml:"cilium_version"`
-	FluxVersion       string `yaml:"flux_version"`
-	TeleportVersion   string `yaml:"teleport_version"`
+	TalosVersion      string `yaml:"talosVersion"`
+	KubernetesVersion string `yaml:"kubernetesVersion"`
+	TalosSchematic    string `yaml:"talosSchematic"`
+	CiliumVersion     string `yaml:"ciliumVersion"`
+	FluxVersion       string `yaml:"fluxVersion"`
+	TeleportVersion   string `yaml:"teleportVersion"`
 	// ControlPlaneTaints controls whether control-plane NoSchedule taints are kept.
 	// true keeps taints (isolated control-plane), false removes them (schedulable).
 	ControlPlaneTaints *bool `yaml:"controlPlaneTaints"`
@@ -63,13 +63,13 @@ type NodePoolConfig struct {
 	Zone               string     `yaml:"zone"`
 	Size               int        `yaml:"size"`
 	Offer              string     `yaml:"offer"`
-	BillingCycle       string     `yaml:"billing_cycle"`
+	BillingCycle       string     `yaml:"billingCycle"`
 	Disks              DiskConfig `yaml:"disks"`
-	ReservedPrivateIPs []string   `yaml:"reserved_private_ips"`
+	ReservedPrivateIPs []string   `yaml:"reservedPrivateIPs"`
 }
 
 const (
-	NodeTypeControlPlane = "controlplane"
+	NodeTypeControlPlane = "control-plane"
 	NodeTypeWorker       = "worker"
 )
 
@@ -97,7 +97,7 @@ type TeleportConfig struct {
 }
 
 const (
-	TeleportModeSelfHosted = "self_hosted"
+	TeleportModeSelfHosted = "selfHosted"
 	TeleportModeDisabled   = "disabled"
 )
 
@@ -116,24 +116,24 @@ type TeleportGitHubConfig struct {
 
 // TeleportAccessConfig holds Teleport RBAC bootstrap settings.
 type TeleportAccessConfig struct {
-	AdminTeams       []string `yaml:"admin_teams"`
-	KubernetesUsers  []string `yaml:"kubernetes_users"`
-	KubernetesGroups []string `yaml:"kubernetes_groups"`
+	AdminTeams       []string `yaml:"adminTeams"`
+	KubernetesUsers  []string `yaml:"kubernetesUsers"`
+	KubernetesGroups []string `yaml:"kubernetesGroups"`
 }
 
 // InfisicalConfig holds secrets management settings.
 type InfisicalConfig struct {
-	SiteURL      string `yaml:"site_url"`
-	ProjectID    string `yaml:"project_id"`
+	SiteURL      string `yaml:"siteUrl"`
+	ProjectID    string `yaml:"projectId"`
 	Environment  string `yaml:"environment"`
-	SecretPath   string `yaml:"secret_path"`
-	ClientID     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"`
+	SecretPath   string `yaml:"secretPath"`
+	ClientID     string `yaml:"clientId"`
+	ClientSecret string `yaml:"clientSecret"`
 }
 
 // FluxConfig holds FluxCD configuration.
 type FluxConfig struct {
-	OCIRepo string `yaml:"oci_repo"`
+	OCIRepo string `yaml:"ociRepo"`
 }
 
 const (
@@ -184,16 +184,16 @@ func (c *Config) LoadRuntimeSecrets(ctx context.Context) error {
 	}
 
 	if strings.TrimSpace(c.Infisical.SiteURL) == "" {
-		return fmt.Errorf("infisical.site_url is required")
+		return fmt.Errorf("infisical.siteUrl is required")
 	}
 	if strings.TrimSpace(c.Infisical.ProjectID) == "" {
-		return fmt.Errorf("infisical.project_id is required")
+		return fmt.Errorf("infisical.projectId is required")
 	}
 	if strings.TrimSpace(c.Infisical.Environment) == "" {
 		return fmt.Errorf("infisical.environment is required")
 	}
 	if strings.TrimSpace(c.Infisical.SecretPath) == "" {
-		return fmt.Errorf("infisical.secret_path is required")
+		return fmt.Errorf("infisical.secretPath is required")
 	}
 	if strings.TrimSpace(c.Infisical.ClientID) == "" || strings.TrimSpace(c.Infisical.ClientSecret) == "" {
 		return fmt.Errorf("INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET are required")
@@ -217,13 +217,13 @@ func (c *Config) LoadRuntimeSecretsWithClient(ctx context.Context, client *infis
 	}
 
 	if strings.TrimSpace(c.Infisical.ProjectID) == "" {
-		return fmt.Errorf("infisical.project_id is required")
+		return fmt.Errorf("infisical.projectId is required")
 	}
 	if strings.TrimSpace(c.Infisical.Environment) == "" {
 		return fmt.Errorf("infisical.environment is required")
 	}
 	if strings.TrimSpace(c.Infisical.SecretPath) == "" {
-		return fmt.Errorf("infisical.secret_path is required")
+		return fmt.Errorf("infisical.secretPath is required")
 	}
 	var err error
 	c.scwAccessKey, err = requiredInfisicalSecret(
@@ -347,7 +347,7 @@ func (c *Config) FirstNodePoolByType(poolType string) (*NodePoolConfig, error) {
 	return nil, fmt.Errorf("no node pool with type %q found", normalized)
 }
 
-// EffectiveType returns the normalized pool type, defaulting to controlplane.
+// EffectiveType returns the normalized pool type, defaulting to control-plane.
 func (p NodePoolConfig) EffectiveType() string {
 	if normalized := NormalizeNodePoolType(p.Type); normalized != "" {
 		return normalized
@@ -432,10 +432,11 @@ func (c *Config) ScalewayPrivateNetworkName() (string, error) {
 
 // NormalizeNodePoolType normalizes user-facing type variants.
 func NormalizeNodePoolType(value string) string {
-	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "", "controlplane", "control-plane", "control_plane", "cp":
+	normalized := compactLower(value)
+	switch normalized {
+	case "", strings.ReplaceAll(NodeTypeControlPlane, "-", ""), "cp":
 		return NodeTypeControlPlane
-	case "worker":
+	case NodeTypeWorker:
 		return NodeTypeWorker
 	default:
 		return ""
@@ -443,7 +444,7 @@ func NormalizeNodePoolType(value string) string {
 }
 
 // EffectiveMode returns the normalized Teleport mode.
-// Empty mode defaults to self_hosted; unsupported non-empty values return empty.
+// Empty mode defaults to selfHosted; unsupported non-empty values return empty.
 func (c TeleportConfig) EffectiveMode() string {
 	if normalized := NormalizeTeleportMode(c.Mode); normalized != "" {
 		return normalized
@@ -492,14 +493,20 @@ func (c TeleportConfig) EffectiveKubernetesGroups() []string {
 
 // NormalizeTeleportMode normalizes user-facing Teleport mode variants.
 func NormalizeTeleportMode(value string) string {
-	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "", "self_hosted", "self-hosted", "selfhosted":
+	normalized := compactLower(value)
+	switch normalized {
+	case "", strings.ToLower(TeleportModeSelfHosted):
 		return TeleportModeSelfHosted
-	case "disabled", "off":
+	case TeleportModeDisabled, "off":
 		return TeleportModeDisabled
 	default:
 		return ""
 	}
+}
+
+func compactLower(value string) string {
+	trimmed := strings.ToLower(strings.TrimSpace(value))
+	return strings.NewReplacer("-", "", "_", "").Replace(trimmed)
 }
 
 func normalizedDistinctStrings(values []string) []string {

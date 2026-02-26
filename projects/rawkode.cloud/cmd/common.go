@@ -208,7 +208,7 @@ func controlPlaneReservedIPForSlot(pool *config.NodePoolConfig, slot int) (strin
 
 	if slot <= 0 || slot > len(pool.ReservedPrivateIPs) {
 		return "", fmt.Errorf(
-			"control-plane slot %d exceeds reserved_private_ips for pool %q (defined=%d)",
+			"control-plane slot %d exceeds reservedPrivateIPs for pool %q (defined=%d)",
 			slot, pool.Name, len(pool.ReservedPrivateIPs),
 		)
 	}

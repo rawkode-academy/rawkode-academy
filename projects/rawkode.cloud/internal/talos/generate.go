@@ -56,7 +56,7 @@ func GenerateSecretsYAML(ctx context.Context) ([]byte, error) {
 	return output, nil
 }
 
-// GenerateConfig renders controlplane/worker config + talosconfig using a persisted secrets document.
+// GenerateConfig renders control-plane/worker config + talosconfig using a persisted secrets document.
 func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResult, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -127,11 +127,11 @@ func GenerateConfig(ctx context.Context, params GenConfigParams) (*GenConfigResu
 
 	controlPlaneConfig, err := input.Config(machine.TypeControlPlane)
 	if err != nil {
-		return nil, fmt.Errorf("generate controlplane config: %w", err)
+		return nil, fmt.Errorf("generate control-plane config: %w", err)
 	}
 	controlPlane, err := controlPlaneConfig.Bytes()
 	if err != nil {
-		return nil, fmt.Errorf("encode controlplane config: %w", err)
+		return nil, fmt.Errorf("encode control-plane config: %w", err)
 	}
 
 	workerConfig, err := input.Config(machine.TypeWorker)

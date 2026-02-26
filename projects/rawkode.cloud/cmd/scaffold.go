@@ -16,12 +16,12 @@ state:
   region: fr-par
 
 cluster:
-  talos_version: v1.12.4
-  kubernetes_version: v1.35.0
-  talos_schematic: ""
-  cilium_version: v1.19.0
-  flux_version: latest
-  teleport_version: "18"
+  talosVersion: v1.12.4
+  kubernetesVersion: v1.35.0
+  talosSchematic: ""
+  ciliumVersion: v1.19.0
+  fluxVersion: latest
+  teleportVersion: "18"
   controlPlaneTaints: true
 
 scaleway:
@@ -34,8 +34,8 @@ nodePools:
     zone: fr-par-1
     size: 1
     offer: ""
-    billing_cycle: hourly
-    reserved_private_ips:
+    billingCycle: hourly
+    reservedPrivateIPs:
       - 172.16.16.16
       - 172.16.16.17
       - 172.16.16.18
@@ -45,12 +45,12 @@ nodePools:
 
 teleport:
   domain: ""
-  mode: self_hosted
+  mode: selfHosted
   access:
-    admin_teams: []
-    kubernetes_users:
+    adminTeams: []
+    kubernetesUsers:
       - teleport-admin
-    kubernetes_groups:
+    kubernetesGroups:
       - system:masters
   acme:
     enabled: false
@@ -61,13 +61,13 @@ teleport:
     teams: []
 
 infisical:
-  site_url: https://app.infisical.com
-  project_id: ""
+  siteUrl: https://app.infisical.com
+  projectId: ""
   environment: production
-  secret_path: /%s # shared secrets live here; cluster secrets use <secret_path>/<environment>
+  secretPath: /%s # shared secrets live here; cluster secrets use <secretPath>/<environment>
 
 flux:
-  oci_repo: "oci://ghcr.io/rawkode-academy/rawkode-academy/gitops"
+  ociRepo: "oci://ghcr.io/rawkode-academy/rawkode-academy/gitops"
 `
 
 var clusterScaffoldCmd = &cobra.Command{
