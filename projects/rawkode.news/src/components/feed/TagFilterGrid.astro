@@ -14,42 +14,55 @@ type Cell =
 
 const { tags, selectedTagSlugs, searchParams } = Astro.props as Props;
 
-const TAG_GRID_COLUMNS = 8;
-const TAGS_PER_ROW = TAG_GRID_COLUMNS - 1;
-const TAG_SLOTS_WITHOUT_SHOW_ALL = TAGS_PER_ROW;
-const TAG_SLOTS_WITH_SHOW_ALL = TAGS_PER_ROW - 1;
+const MOBILE_TAG_GRID_COLUMNS = 4;
+const DESKTOP_TAG_GRID_COLUMNS = 8;
+const RESERVED_FILTER_COLUMN_COUNT = 1;
+const MOBILE_TAGS_PER_ROW = MOBILE_TAG_GRID_COLUMNS - RESERVED_FILTER_COLUMN_COUNT;
+const DESKTOP_TAGS_PER_ROW = DESKTOP_TAG_GRID_COLUMNS - RESERVED_FILTER_COLUMN_COUNT;
 
 const normalizedSelected = Array.from(
   new Set(selectedTagSlugs.map((slug) => slug.trim().toLowerCase()).filter(Boolean)),
 );
 const selectedSet = new Set(normalizedSelected);
 const showAll = searchParams.get("expanded") === "1";
-const canExpand = tags.length > TAG_SLOTS_WITHOUT_SHOW_ALL;
-const collapsedVisibleTagCount = canExpand
-  ? TAG_SLOTS_WITH_SHOW_ALL
-  : TAG_SLOTS_WITHOUT_SHOW_ALL;
 
-const hiddenCount = Math.max(0, tags.length - collapsedVisibleTagCount);
-const visibleTags = showAll ? tags : tags.slice(0, collapsedVisibleTagCount);
+type TagLayout = {
+  rows: Cell[][];
+  canExpand: boolean;
+};
 
-const cells: Cell[] = [
-  ...visibleTags.map((tag) => ({ kind: "tag", tag }) as const),
-];
+const buildTagLayout = (tagsPerRow: number): TagLayout => {
+  const tagSlotsWithoutShowAll = tagsPerRow;
+  const tagSlotsWithShowAll = Math.max(1, tagsPerRow - 1);
+  const canExpand = tags.length > tagSlotsWithoutShowAll;
+  const collapsedVisibleTagCount = canExpand
+    ? tagSlotsWithShowAll
+    : tagSlotsWithoutShowAll;
+  const hiddenCount = Math.max(0, tags.length - collapsedVisibleTagCount);
+  const visibleTags = showAll ? tags : tags.slice(0, collapsedVisibleTagCount);
+  const cells: Cell[] = [...visibleTags.map((tag) => ({ kind: "tag", tag }) as const)];
 
-if (canExpand && !showAll) {
-  cells.push({ kind: "show-all", hiddenCount });
-}
-if (canExpand && showAll) {
-  cells.push({ kind: "reset" });
-}
+  if (canExpand && !showAll) {
+    cells.push({ kind: "show-all", hiddenCount });
+  }
+  if (canExpand && showAll) {
+    cells.push({ kind: "reset" });
+  }
 
-const rows: Cell[][] = [];
-for (let i = 0; i < cells.length; i += TAGS_PER_ROW) {
-  rows.push(cells.slice(i, i + TAGS_PER_ROW));
-}
-if (rows.length === 0) {
-  rows.push([]);
-}
+  const rows: Cell[][] = [];
+  for (let index = 0; index < cells.length; index += tagsPerRow) {
+    rows.push(cells.slice(index, index + tagsPerRow));
+  }
+
+  return {
+    rows: rows.length > 0 ? rows : [[]],
+    canExpand,
+  };
+};
+
+const mobileTagLayout = buildTagLayout(MOBILE_TAGS_PER_ROW);
+const desktopTagLayout = buildTagLayout(DESKTOP_TAGS_PER_ROW);
+const canExpand = mobileTagLayout.canExpand || desktopTagLayout.canExpand;
 
 const baseParams = new URLSearchParams(searchParams);
 const buildHref = (next: URLSearchParams) => {
@@ -104,8 +117,62 @@ const pillBaseClass =
 ---
 
 <section class="space-y-2">
-  {
-    rows.map((row, rowIndex) => (
+  <div class="space-y-2 md:hidden">
+    {mobileTagLayout.rows.map((row, rowIndex) => (
+      <div class="grid grid-cols-4 gap-2">
+        {rowIndex === 0 ? (
+          <span
+            aria-hidden="true"
+            class="inline-flex h-9 w-full min-w-0 items-center justify-center px-2 text-xs font-bold uppercase tracking-wide text-foreground"
+          >
+            Filter
+          </span>
+        ) : (
+          <span aria-hidden="true" class="h-9" />
+        )}
+
+        {row.map((cell) => {
+          if (cell.kind === "tag") {
+            const selected = selectedSet.has(cell.tag.slug);
+            return (
+              <a
+                href={buildToggleHref(cell.tag.slug)}
+                class:list={[
+                  pillBaseClass,
+                  selected
+                    ? "border-primary/40 bg-primary/10 text-foreground"
+                    : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+                ]}
+                title={selected ? `Remove ${cell.tag.slug}` : cell.tag.description ?? undefined}
+              >
+                <span class="min-w-0 truncate">{cell.tag.name || cell.tag.slug}</span>
+              </a>
+            );
+          }
+
+          if (cell.kind === "show-all") {
+            return (
+              <a
+                href={buildShowAllHref()}
+                class:list={[pillBaseClass, "border-border bg-card text-foreground hover:bg-muted"]}
+              >
+                Show all ({cell.hiddenCount})
+              </a>
+            );
+          }
+
+          return (
+            <a href={buildResetHref()} class:list={[pillBaseClass, "border-border bg-card text-foreground hover:bg-muted"]}>
+              Reset
+            </a>
+          );
+        })}
+      </div>
+    ))}
+  </div>
+
+  <div class="hidden space-y-2 md:block">
+    {desktopTagLayout.rows.map((row, rowIndex) => (
       <div class="grid grid-cols-8 gap-2">
         {rowIndex === 0 ? (
           <span
@@ -155,6 +222,6 @@ const pillBaseClass =
           );
         })}
       </div>
-    ))
-  }
+    ))}
+  </div>
 </section>
