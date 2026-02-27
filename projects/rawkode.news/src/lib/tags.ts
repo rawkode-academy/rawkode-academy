@@ -10,7 +10,7 @@ export const feedTypes = ["new", ...coreTagSlugs] as const;
 
 export type FeedType = (typeof feedTypes)[number];
 
-export const MAX_OPTIONAL_TAGS = 5;
+export const MAX_OPTIONAL_TAGS = 4;
 
 const tagSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 

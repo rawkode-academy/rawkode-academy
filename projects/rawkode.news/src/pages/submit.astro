@@ -6,6 +6,7 @@ import { mandatoryTagSlugs } from "@/lib/contracts";
 import { buttonPrimaryLgClass, buttonSecondarySmClass, inputClass, textareaClass } from "@/lib/ui-classes";
 import { getSessionWithPermissions } from "@/lib/server/session";
 import { listTags } from "@/lib/server/tags";
+import { MAX_OPTIONAL_TAGS } from "@/lib/tags";
 import type { TypedEnv } from "@/types/service-bindings";
 
 const env = Astro.locals.runtime.env as TypedEnv;
@@ -16,21 +17,15 @@ if (createPostResult?.data?.redirectTo) {
 }
 
 const user = session?.user ?? null;
-const allowedMandatoryTags = permissions?.allowedMandatoryTags ?? mandatoryTagSlugs.filter((slug) => slug !== "rka");
+const mandatoryTagOrder = ["news", "rka", "show", "ask"] as const;
+const allowedMandatoryTagSet = new Set(
+  permissions?.allowedMandatoryTags ?? mandatoryTagSlugs.filter((slug) => slug !== "rka"),
+);
+const allowedMandatoryTags = mandatoryTagOrder.filter((slug) => allowedMandatoryTagSet.has(slug));
 const defaultMandatoryTag = allowedMandatoryTags[0] ?? "news";
 const optionalTags = (await listTags(env, "optional")).sort((left, right) =>
   left.slug.localeCompare(right.slug),
 );
-
-const firstRowOptionalTags = optionalTags.slice(0, 7);
-const remainingOptionalTags = optionalTags.slice(7);
-const rows: typeof optionalTags[] = [firstRowOptionalTags];
-for (let i = 0; i < remainingOptionalTags.length; i += 8) {
-  rows.push(remainingOptionalTags.slice(i, i + 8));
-}
-if (rows.length === 0) {
-  rows.push([]);
-}
 
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
   `${Astro.url.pathname}${Astro.url.search}`,
@@ -98,47 +93,48 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                   <div class="space-y-3">
                     <label class="text-sm font-semibold text-foreground">Tags</label>
                     <div class="space-y-2">
-                      {
-                        rows.map((row, rowIndex) => (
-                          <div class="grid grid-cols-8 gap-2">
-                            {rowIndex === 0 ? (
-                              <label class="relative block">
-                                <span class="sr-only">Mandatory tag</span>
-                                <select
-                                  id="submit-mandatory-tag"
-                                  name="mandatoryTag"
-                                  aria-label="Mandatory tag"
-                                  class="h-9 w-full min-w-0 cursor-pointer appearance-none rounded-md border border-primary/40 bg-primary/10 pl-7 pr-7 text-center text-xs font-semibold text-foreground [text-align-last:center] hover:bg-primary/15"
-                                >
-                                  {allowedMandatoryTags.map((slug) => (
-                                    <option value={slug} selected={slug === defaultMandatoryTag}>
-                                      {slug}
-                                    </option>
-                                  ))}
-                                </select>
-                                <span
-                                  aria-hidden="true"
-                                  class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[10px] text-foreground/70"
-                                >
-                                  ▾
-                                </span>
-                              </label>
-                            ) : null}
+                      <div class="grid grid-cols-4 gap-2 md:grid-cols-8">
+                        <label class="relative block">
+                          <span class="sr-only">Mandatory tag</span>
+                          <select
+                            id="submit-mandatory-tag"
+                            name="mandatoryTag"
+                            aria-label="Mandatory tag"
+                            class="h-9 w-full min-w-0 cursor-pointer appearance-none rounded-md border border-primary/40 bg-primary/10 pl-7 pr-7 text-center text-xs font-semibold text-foreground [text-align-last:center] hover:bg-primary/15"
+                          >
+                            {allowedMandatoryTags.map((slug) => (
+                              <option value={slug} selected={slug === defaultMandatoryTag}>
+                                {slug}
+                              </option>
+                            ))}
+                          </select>
+                          <span
+                            aria-hidden="true"
+                            class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[10px] text-foreground/70"
+                          >
+                            ▾
+                          </span>
+                        </label>
 
-                            {
-                              row.map((tag) => (
-                                <label
-                                  class="inline-flex h-9 w-full min-w-0 cursor-pointer items-center justify-center gap-1 rounded-md border px-2 text-xs font-semibold border-border text-muted-foreground hover:bg-muted hover:text-foreground has-[:checked]:border-primary/40 has-[:checked]:bg-primary/10 has-[:checked]:text-foreground"
-                                  title={tag.description ?? undefined}
-                                >
-                                  <input type="checkbox" name="optionalTag" value={tag.slug} class="peer sr-only" />
-                                  <span class="min-w-0 truncate">{tag.name || tag.slug}</span>
-                                </label>
-                              ))
-                            }
-                          </div>
-                        ))
-                      }
+                        {
+                          optionalTags.map((tag) => (
+                            <label
+                              class="inline-flex h-9 w-full min-w-0 cursor-pointer items-center justify-center gap-1 rounded-md border px-2 text-xs font-semibold border-border text-muted-foreground hover:bg-muted hover:text-foreground has-[:checked]:border-primary/40 has-[:checked]:bg-primary/10 has-[:checked]:text-foreground"
+                              title={tag.description ?? undefined}
+                            >
+                              <input type="checkbox" name="optionalTag" value={tag.slug} class="peer sr-only" />
+                              <span class="min-w-0 truncate">{tag.name || tag.slug}</span>
+                            </label>
+                          ))
+                        }
+                      </div>
+                      <p
+                        id="submit-optional-tag-limit"
+                        data-limit={MAX_OPTIONAL_TAGS}
+                        class="text-xs text-muted-foreground"
+                      >
+                        Select up to {MAX_OPTIONAL_TAGS} optional tags.
+                      </p>
                     </div>
                   </div>
 
@@ -224,8 +220,55 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
     render();
   };
 
-  if (!window.__rknSubmitPreviewBound) {
-    window.__rknSubmitPreviewBound = true;
-    document.addEventListener("astro:page-load", initSubmitPreview);
+  const initOptionalTagLimit = () => {
+    const limitText = document.getElementById("submit-optional-tag-limit");
+    const maxOptionalTags = Number(limitText?.getAttribute("data-limit") ?? "4");
+    const optionalTagInputs = Array.from(
+      document.querySelectorAll<HTMLInputElement>("input[name='optionalTag']"),
+    );
+
+    if (!(limitText instanceof HTMLElement) || optionalTagInputs.length === 0 || !Number.isFinite(maxOptionalTags)) {
+      return;
+    }
+
+    const apply = () => {
+      const checkedCount = optionalTagInputs.filter((input) => input.checked).length;
+      const atLimit = checkedCount >= maxOptionalTags;
+
+      optionalTagInputs.forEach((input) => {
+        const shouldDisable = atLimit && !input.checked;
+        input.disabled = shouldDisable;
+
+        const label = input.closest("label");
+        if (label instanceof HTMLElement) {
+          label.classList.toggle("cursor-not-allowed", shouldDisable);
+          label.classList.toggle("opacity-60", shouldDisable);
+        }
+      });
+
+      if (atLimit) {
+        limitText.textContent = `${checkedCount}/${maxOptionalTags} optional tags selected (limit reached)`;
+        limitText.classList.add("text-destructive");
+        limitText.classList.remove("text-muted-foreground");
+      } else {
+        limitText.textContent = `${checkedCount}/${maxOptionalTags} optional tags selected`;
+        limitText.classList.remove("text-destructive");
+        limitText.classList.add("text-muted-foreground");
+      }
+    };
+
+    optionalTagInputs.forEach((input) => input.addEventListener("change", apply));
+    apply();
+  };
+
+  const initSubmitPage = () => {
+    initSubmitPreview();
+    initOptionalTagLimit();
+  };
+
+  const submitEnhancementsBoundAttr = "data-rkn-submit-enhancements-bound";
+  if (!document.documentElement.hasAttribute(submitEnhancementsBoundAttr)) {
+    document.documentElement.setAttribute(submitEnhancementsBoundAttr, "1");
+    document.addEventListener("astro:page-load", initSubmitPage);
   }
 </script>

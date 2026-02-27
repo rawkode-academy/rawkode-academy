@@ -10,7 +10,7 @@ import {
   deleteOptionalTag,
   updateOptionalTag,
 } from "@/lib/server/tags";
-import { normalizeTagSlugs } from "@/lib/tags";
+import { MAX_OPTIONAL_TAGS, normalizeTagSlugs } from "@/lib/tags";
 import type { TypedEnv } from "@/types/service-bindings";
 
 const raiseActionError = (error: unknown): never => {
@@ -46,7 +46,7 @@ export const server = {
       url: z.string().optional(),
       body: z.string().optional(),
       mandatoryTag: z.string().min(1),
-      optionalTag: z.array(z.string()).default([]),
+      optionalTag: z.array(z.string()).max(MAX_OPTIONAL_TAGS).default([]),
     }),
     handler: async (input, context) => {
       try {
