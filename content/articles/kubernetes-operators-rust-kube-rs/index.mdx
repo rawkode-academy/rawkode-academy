@@ -9,7 +9,7 @@ slug: kubernetes-operators-rust-kube-rs
 cover:
   image: "./cover.png"
   alt: "Stylized illustration showing the Rust crab mascot Ferris interacting with Kubernetes pods and controllers, with flowing lines representing reconciliation loops on a dark gradient background."
-publishedAt: 2026-02-28
+publishedAt: 2026-02-27
 isDraft: true
 authors:
   - rawkode
@@ -25,7 +25,7 @@ Enter **kube-rs**: a mature, production-ready Rust client for Kubernetes that pr
 
 ## Why Rust for Kubernetes Operators?
 
-Before we dive into code, let's address the obvious question: why would you choose Rust over Go for something so deeply embedded in the Go ecosystem?
+The obvious question: why choose Rust over Go for something so deeply embedded in the Go ecosystem?
 
 ### Memory Safety Without a Garbage Collector
 
@@ -35,7 +35,7 @@ More importantly, Rust's ownership model eliminates entire classes of bugs at co
 
 ### Type System as Documentation and Guardrail
 
-Go's type system is intentionally simple. Rust's is intentionally expressive. When you're defining Custom Resource Definitions (CRDs), Rust's type system—with enums, pattern matching, and trait-based generics—lets you model your domain with precision that Go's structs and interfaces simply can't match.
+Go's type system is intentionally simple. Rust's is intentionally expressive. When you're defining Custom Resource Definitions (CRDs), Rust's type system—with enums, pattern matching, and trait-based generics—lets you model your domain with precision that Go's structs and interfaces can't match.
 
 Consider modeling the state of a managed database:
 
@@ -43,13 +43,13 @@ Consider modeling the state of a managed database:
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub enum DatabasePhase {
     Provisioning {
-        started_at: DateTime<Utc>,
+        started_at: String,
         progress: ProvisioningStep,
     },
     Running {
         endpoint: String,
         version: String,
-        last_backup: Option<DateTime<Utc>>,
+        last_backup: Option<String>,
     },
     Upgrading {
         from_version: String,
@@ -58,13 +58,13 @@ pub enum DatabasePhase {
     },
     Failed {
         reason: String,
-        last_healthy_at: DateTime<Utc>,
+        last_healthy_at: String,
         recovery_attempts: u32,
     },
 }
 ```
 
-In Go, you'd likely represent this as a string phase field with a collection of optional fields—losing the compiler's ability to enforce that you handle every state transition correctly. In Rust, a `match` on `DatabasePhase` forces you to handle every variant, making it impossible to forget an edge case.
+In Go, you'd represent this as a string phase field with a collection of optional fields—losing the compiler's ability to enforce that you handle every state transition correctly. In Rust, a `match` on `DatabasePhase` forces you to handle every variant, making it impossible to forget an edge case.
 
 ### Resource Efficiency
 
@@ -85,9 +85,9 @@ Add the essential dependencies to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-kube = { version = "0.98", features = ["runtime", "derive"] }
-k8s-openapi = { version = "0.23", features = ["latest"] }
-schemars = "0.8"
+kube = { version = "3.0", features = ["runtime", "derive"] }
+k8s-openapi = { version = "0.27", features = ["latest", "schemars"] }
+schemars = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
@@ -164,7 +164,7 @@ fn default_replicas() -> i32 { 3 }
 fn default_port() -> i32 { 8080 }
 ```
 
-That `#[derive(CustomResource)]` macro generates a complete `WebApp` struct with metadata, spec, and status—plus methods to generate the CRD YAML. Run `WebApp::crd()` and you get a fully-typed `CustomResourceDefinition` ready to apply to your cluster.
+That `#[derive(CustomResource)]` macro generates a complete `WebApp` struct with metadata, spec, and status—plus methods to generate the CRD YAML. Call `WebApp::crd()` and you get a fully-typed `CustomResourceDefinition` ready to apply to your cluster.
 
 ### The Reconciliation Loop
 
@@ -222,7 +222,7 @@ fn error_policy(
     _ctx: Arc<Context>,
 ) -> Action {
     tracing::error!(%error, "Reconciliation failed");
-    // Exponential backoff on errors, starting at 10 seconds
+    // Fixed retry interval of 10 seconds
     Action::requeue(Duration::from_secs(10))
 }
 ```
@@ -258,7 +258,9 @@ async fn reconcile_deployment(
             name: Some(name.clone()),
             namespace: Some(namespace.clone()),
             labels: Some(labels.clone()),
-            owner_references: Some(vec![webapp.controller_owner_ref(&())]),
+            owner_references: Some(
+                webapp.controller_owner_ref(&()).into_iter().collect()
+            ),
             ..Default::default()
         },
         spec: Some(DeploymentSpec {
@@ -302,7 +304,7 @@ async fn reconcile_deployment(
 }
 ```
 
-Notice the `owner_references` line. This sets up Kubernetes garbage collection so that when a `WebApp` is deleted, its Deployment is automatically cleaned up. kube-rs provides `controller_owner_ref` as a convenience method—no manual UID wrangling required.
+Notice the `owner_references` line. This sets up Kubernetes garbage collection so that when a `WebApp` is deleted, its Deployment is automatically cleaned up. kube-rs provides `controller_owner_ref` as a convenience method that returns an `Option<OwnerReference>`—the `.into_iter().collect()` pattern cleanly converts it into the `Vec` that `owner_references` expects.
 
 ## Architecture: How It All Fits Together
 
@@ -352,9 +354,9 @@ user -> apiserver: kubectl apply WebApp
 apiserver -> webapp_crd: stores
 apiserver -> operator.watcher: watch events
 operator.reconciler -> apiserver: create/update resources
-apiserver -> deployment: manages
-apiserver -> service: manages
-apiserver -> ingress: manages (if hostname set)
+apiserver -> deployment: stores
+apiserver -> service: stores
+apiserver -> ingress: stores (if hostname set)
 ```
 
 The operator watches for changes to `WebApp` custom resources. When a change is detected, the watcher enqueues a reconciliation event. The reconciler then ensures the actual state (Deployments, Services, Ingresses) matches the desired state defined in the `WebApp` spec. This is the standard level-triggered reconciliation pattern—the same pattern that powers every built-in Kubernetes controller.
@@ -410,7 +412,7 @@ mod tests {
 
 ### Integration Testing
 
-For integration tests, kube-rs works seamlessly with tools like `k3d` or `kind`. You can spin up an ephemeral cluster in CI:
+For integration tests, kube-rs works seamlessly with tools like `k3d` or `kind`. Spin up an ephemeral cluster in CI:
 
 ```rust
 #[tokio::test]
@@ -488,7 +490,7 @@ The `.owns(deployments, Default::default())` call is crucial—it tells the cont
 Rust's static compilation story makes containerization trivial. Here's a multi-stage Dockerfile:
 
 ```dockerfile
-FROM rust:1.84 AS builder
+FROM rust:1.93 AS builder
 WORKDIR /build
 COPY . .
 RUN cargo build --release
@@ -517,14 +519,14 @@ Let's be pragmatic. Rust isn't always the right choice for every operator:
 - You need deep integration with controller-runtime's ecosystem (e.g., Kubebuilder scaffolding)
 - The operator is simple enough that Go's simplicity is an advantage
 
-The ecosystem around kube-rs is growing rapidly. Projects like **Krator** (Krustlet's actor-based operator framework) and **kopium** (which generates Rust types from existing CRDs) are filling gaps and reducing boilerplate. The community is smaller than Go's operator ecosystem, but it's active and welcoming.
+The ecosystem around kube-rs is growing steadily. **kopium** generates Rust types from existing CRDs, and the broader kube-rs project—a CNCF Sandbox project—continues to add tooling that reduces boilerplate. The community is smaller than Go's operator ecosystem, but it's active, welcoming, and shipping real production software.
 
 ## Production Readiness Checklist
 
 Before shipping your Rust operator to production, ensure you've covered these essentials:
 
 - [ ] **RBAC manifests**: Generate ClusterRole/ClusterRoleBinding with minimum required permissions
-- [ ] **Leader election**: Use kube-rs's `LeaderElection` to prevent split-brain in HA deployments
+- [ ] **Leader election**: Use a leader election crate such as `kube-leader-election` or `kube-coordinate` to prevent split-brain in HA deployments
 - [ ] **Metrics endpoint**: Expose Prometheus metrics for reconciliation duration, queue depth, and errors
 - [ ] **Health probes**: Implement `/healthz` and `/readyz` endpoints for Kubernetes liveness and readiness checks
 - [ ] **Graceful shutdown**: Handle SIGTERM to complete in-flight reconciliations before exiting
