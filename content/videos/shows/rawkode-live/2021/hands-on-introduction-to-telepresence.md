@@ -69,5 +69,8 @@ chapters:
   - startTime: 3870
     title: Summary & Closing Remarks
 duration: 4039
+guests:
+  - daniel-bryant
+  - peter-o-neill
 ---
 
