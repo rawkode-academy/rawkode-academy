@@ -99,5 +99,8 @@ chapters:
   - startTime: 7157
     title: Final Remarks and Sign Off
 duration: 7204
+guests:
+  - connor-hicks
+  - francis-gulotta
 ---
 
