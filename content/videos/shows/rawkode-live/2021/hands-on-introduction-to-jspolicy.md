@@ -79,5 +79,8 @@ chapters:
   - startTime: 4098
     title: Closing Remarks
 duration: 4266
+guests:
+  - rich-burroughs
+  - lukas-gentele
 ---
 
