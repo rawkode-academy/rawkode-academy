@@ -75,5 +75,8 @@ chapters:
   - startTime: 4947
     title: Conclusion
 duration: 4990
+guests:
+  - deepthi-sigireddi
+  - alkin-tezuysal
 ---
 
