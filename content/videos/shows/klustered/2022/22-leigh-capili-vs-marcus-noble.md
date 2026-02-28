@@ -90,5 +90,8 @@ chapters:
   - startTime: 6460
     title: T-Shirt Giveaway
 duration: 6577
+guests:
+  - leigh-capili
+  - marcus-noble
 ---
 
