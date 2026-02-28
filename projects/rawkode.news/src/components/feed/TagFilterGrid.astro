@@ -7,62 +7,33 @@ type Props = {
   searchParams: URLSearchParams;
 };
 
-type Cell =
-  | { kind: "tag"; tag: ApiTag }
-  | { kind: "show-all"; hiddenCount: number }
-  | { kind: "reset" };
+type VisibleTagLayout = {
+  visibleTags: ApiTag[];
+  hiddenCount: number;
+};
 
 const { tags, selectedTagSlugs, searchParams } = Astro.props as Props;
 
-const MOBILE_TAG_GRID_COLUMNS = 4;
-const DESKTOP_TAG_GRID_COLUMNS = 8;
-const RESERVED_FILTER_COLUMN_COUNT = 1;
-const MOBILE_TAGS_PER_ROW = MOBILE_TAG_GRID_COLUMNS - RESERVED_FILTER_COLUMN_COUNT;
-const DESKTOP_TAGS_PER_ROW = DESKTOP_TAG_GRID_COLUMNS - RESERVED_FILTER_COLUMN_COUNT;
+const MOBILE_VISIBLE_TAG_COUNT = 8;
+const DESKTOP_VISIBLE_TAG_COUNT = 16;
 
 const normalizedSelected = Array.from(
   new Set(selectedTagSlugs.map((slug) => slug.trim().toLowerCase()).filter(Boolean)),
 );
 const selectedSet = new Set(normalizedSelected);
+const hasSelectedTags = normalizedSelected.length > 0;
 const showAll = searchParams.get("expanded") === "1";
 
-type TagLayout = {
-  rows: Cell[][];
-  canExpand: boolean;
-};
-
-const buildTagLayout = (tagsPerRow: number): TagLayout => {
-  const tagSlotsWithoutShowAll = tagsPerRow;
-  const tagSlotsWithShowAll = Math.max(1, tagsPerRow - 1);
-  const canExpand = tags.length > tagSlotsWithoutShowAll;
-  const collapsedVisibleTagCount = canExpand
-    ? tagSlotsWithShowAll
-    : tagSlotsWithoutShowAll;
-  const hiddenCount = Math.max(0, tags.length - collapsedVisibleTagCount);
-  const visibleTags = showAll ? tags : tags.slice(0, collapsedVisibleTagCount);
-  const cells: Cell[] = [...visibleTags.map((tag) => ({ kind: "tag", tag }) as const)];
-
-  if (canExpand && !showAll) {
-    cells.push({ kind: "show-all", hiddenCount });
-  }
-  if (canExpand && showAll) {
-    cells.push({ kind: "reset" });
-  }
-
-  const rows: Cell[][] = [];
-  for (let index = 0; index < cells.length; index += tagsPerRow) {
-    rows.push(cells.slice(index, index + tagsPerRow));
-  }
-
+const buildVisibleTagLayout = (initialVisibleCount: number): VisibleTagLayout => {
+  const visibleCount = showAll ? tags.length : Math.min(tags.length, initialVisibleCount);
   return {
-    rows: rows.length > 0 ? rows : [[]],
-    canExpand,
+    visibleTags: tags.slice(0, visibleCount),
+    hiddenCount: Math.max(0, tags.length - visibleCount),
   };
 };
 
-const mobileTagLayout = buildTagLayout(MOBILE_TAGS_PER_ROW);
-const desktopTagLayout = buildTagLayout(DESKTOP_TAGS_PER_ROW);
-const canExpand = mobileTagLayout.canExpand || desktopTagLayout.canExpand;
+const mobileTagLayout = buildVisibleTagLayout(MOBILE_VISIBLE_TAG_COUNT);
+const desktopTagLayout = buildVisibleTagLayout(DESKTOP_VISIBLE_TAG_COUNT);
 
 const baseParams = new URLSearchParams(searchParams);
 const buildHref = (next: URLSearchParams) => {
@@ -70,10 +41,10 @@ const buildHref = (next: URLSearchParams) => {
   return query ? `?${query}` : "?";
 };
 
-const buildToggleHref = (slug: string) => {
+const buildSelectionHref = (slug: string, mode: "add" | "remove") => {
   const next = new URLSearchParams(baseParams);
   const selected = new Set(normalizedSelected);
-  if (selected.has(slug)) {
+  if (mode === "remove") {
     selected.delete(slug);
   } else {
     selected.add(slug);
@@ -89,139 +60,135 @@ const buildToggleHref = (slug: string) => {
     next.delete("tags");
   }
   next.delete("page");
-  if (!showAll) {
+  if (showAll) {
+    next.set("expanded", "1");
+  } else {
     next.delete("expanded");
-  } else if (canExpand) {
+  }
+  return buildHref(next);
+};
+
+const buildSelectHref = (slug: string) => buildSelectionHref(slug, "add");
+const buildRemoveHref = (slug: string) => buildSelectionHref(slug, "remove");
+
+const buildToggleExpandedHref = () => {
+  const next = new URLSearchParams(baseParams);
+  if (showAll) {
+    next.delete("expanded");
+  } else {
     next.set("expanded", "1");
   }
   return buildHref(next);
 };
 
-const buildShowAllHref = () => {
-  const next = new URLSearchParams(baseParams);
-  next.set("expanded", "1");
-  next.delete("page");
-  return buildHref(next);
-};
-
-const buildResetHref = () => {
+const buildClearHref = () => {
   const next = new URLSearchParams(baseParams);
   next.delete("tags");
-  next.delete("expanded");
-  next.delete("page");
   return buildHref(next);
 };
 
-const pillBaseClass =
-  "inline-flex h-9 w-full min-w-0 cursor-pointer items-center justify-center gap-1 rounded-md border px-2 text-xs font-semibold disabled:cursor-not-allowed";
+const chipBaseClass = "inline-flex h-9 max-w-full min-w-0 items-center gap-1 rounded-full border px-3 text-xs font-semibold";
+const tagClass = "border-border text-muted-foreground hover:bg-muted hover:text-foreground";
+const selectedTagClass = "border-primary/40 bg-primary/10 text-foreground";
+const showMoreClass = "border-primary/55 bg-primary/20 text-foreground hover:bg-primary/30";
+const clearFiltersLinkClass =
+  "inline-flex items-center text-xs font-semibold underline-offset-4 hover:underline";
+const removeTagLinkClass =
+  "inline-flex h-4 w-4 items-center justify-center rounded-sm text-[10px] leading-none text-muted-foreground hover:bg-background hover:text-foreground";
 ---
 
 <section class="space-y-2">
+  <header class="flex items-center gap-2 text-xs font-semibold text-foreground">
+    <span>FILTER</span>
+    <span aria-hidden="true" class="text-muted-foreground">
+      •
+    </span>
+    {hasSelectedTags ? (
+      <a href={buildClearHref()} class:list={[clearFiltersLinkClass, "text-destructive"]}>
+        Clear selection
+      </a>
+    ) : (
+      <span aria-disabled="true" class="inline-flex items-center text-xs font-semibold text-muted-foreground/60 cursor-not-allowed">
+        Clear selection
+      </span>
+    )}
+  </header>
+
   <div class="space-y-2 md:hidden">
-    {mobileTagLayout.rows.map((row, rowIndex) => (
-      <div class="grid grid-cols-4 gap-2">
-        {rowIndex === 0 ? (
-          <span
-            aria-hidden="true"
-            class="inline-flex h-9 w-full min-w-0 items-center justify-center px-2 text-xs font-bold uppercase tracking-wide text-foreground"
-          >
-            Filter
-          </span>
-        ) : (
-          <span aria-hidden="true" class="h-9" />
-        )}
-
-        {row.map((cell) => {
-          if (cell.kind === "tag") {
-            const selected = selectedSet.has(cell.tag.slug);
-            return (
-              <a
-                href={buildToggleHref(cell.tag.slug)}
-                class:list={[
-                  pillBaseClass,
-                  selected
-                    ? "border-primary/40 bg-primary/10 text-foreground"
-                    : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
-                ]}
-                title={selected ? `Remove ${cell.tag.slug}` : cell.tag.description ?? undefined}
-              >
-                <span class="min-w-0 truncate">{cell.tag.name || cell.tag.slug}</span>
-              </a>
-            );
-          }
-
-          if (cell.kind === "show-all") {
-            return (
-              <a
-                href={buildShowAllHref()}
-                class:list={[pillBaseClass, "border-border bg-card text-foreground hover:bg-muted"]}
-              >
-                Show all ({cell.hiddenCount})
-              </a>
-            );
-          }
-
+    <div class="flex flex-wrap items-center gap-2">
+      {mobileTagLayout.visibleTags.map((tag) => {
+        const selected = selectedSet.has(tag.slug);
+        if (selected) {
           return (
-            <a href={buildResetHref()} class:list={[pillBaseClass, "border-border bg-card text-foreground hover:bg-muted"]}>
-              Reset
-            </a>
+            <span class:list={[chipBaseClass, selectedTagClass]} title={`Selected ${tag.slug}`}>
+              <span class="min-w-0 truncate">{tag.name || tag.slug}</span>
+              <a href={buildRemoveHref(tag.slug)} class={removeTagLinkClass} aria-label={`Remove ${tag.slug}`}>
+                x
+              </a>
+            </span>
           );
-        })}
-      </div>
-    ))}
+        }
+
+        return (
+          <a
+            href={buildSelectHref(tag.slug)}
+            class:list={[chipBaseClass, tagClass]}
+            title={tag.description ?? undefined}
+          >
+            <span class="min-w-0 truncate">{tag.name || tag.slug}</span>
+          </a>
+        );
+      })}
+
+      {mobileTagLayout.hiddenCount > 0 ? (
+        <a
+          href={buildToggleExpandedHref()}
+          aria-expanded={showAll ? "true" : "false"}
+          class:list={[chipBaseClass, showMoreClass]}
+          title={`Show ${mobileTagLayout.hiddenCount} more tags`}
+        >
+          +{mobileTagLayout.hiddenCount}
+        </a>
+      ) : null}
+    </div>
   </div>
 
   <div class="hidden space-y-2 md:block">
-    {desktopTagLayout.rows.map((row, rowIndex) => (
-      <div class="grid grid-cols-8 gap-2">
-        {rowIndex === 0 ? (
-          <span
-            aria-hidden="true"
-            class="inline-flex h-9 w-full min-w-0 items-center justify-center px-2 text-xs font-bold uppercase tracking-wide text-foreground"
-          >
-            Filter
-          </span>
-        ) : (
-          <span aria-hidden="true" class="h-9" />
-        )}
-
-        {row.map((cell) => {
-          if (cell.kind === "tag") {
-            const selected = selectedSet.has(cell.tag.slug);
-            return (
-              <a
-                href={buildToggleHref(cell.tag.slug)}
-                class:list={[
-                  pillBaseClass,
-                  selected
-                    ? "border-primary/40 bg-primary/10 text-foreground"
-                    : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
-                ]}
-                title={selected ? `Remove ${cell.tag.slug}` : cell.tag.description ?? undefined}
-              >
-                <span class="min-w-0 truncate">{cell.tag.name || cell.tag.slug}</span>
-              </a>
-            );
-          }
-
-          if (cell.kind === "show-all") {
-            return (
-              <a
-                href={buildShowAllHref()}
-                class:list={[pillBaseClass, "border-border bg-card text-foreground hover:bg-muted"]}
-              >
-                Show all ({cell.hiddenCount})
-              </a>
-            );
-          }
-
+    <div class="flex flex-wrap items-center gap-2">
+      {desktopTagLayout.visibleTags.map((tag) => {
+        const selected = selectedSet.has(tag.slug);
+        if (selected) {
           return (
-            <a href={buildResetHref()} class:list={[pillBaseClass, "border-border bg-card text-foreground hover:bg-muted"]}>
-              Reset
-            </a>
+            <span class:list={[chipBaseClass, selectedTagClass]} title={`Selected ${tag.slug}`}>
+              <span class="min-w-0 truncate">{tag.name || tag.slug}</span>
+              <a href={buildRemoveHref(tag.slug)} class={removeTagLinkClass} aria-label={`Remove ${tag.slug}`}>
+                x
+              </a>
+            </span>
           );
-        })}
-      </div>
-    ))}
+        }
+
+        return (
+          <a
+            href={buildSelectHref(tag.slug)}
+            class:list={[chipBaseClass, tagClass]}
+            title={tag.description ?? undefined}
+          >
+            <span class="min-w-0 truncate">{tag.name || tag.slug}</span>
+          </a>
+        );
+      })}
+
+      {desktopTagLayout.hiddenCount > 0 ? (
+        <a
+          href={buildToggleExpandedHref()}
+          aria-expanded={showAll ? "true" : "false"}
+          class:list={[chipBaseClass, showMoreClass]}
+          title={`Show ${desktopTagLayout.hiddenCount} more tags`}
+        >
+          +{desktopTagLayout.hiddenCount}
+        </a>
+      ) : null}
+    </div>
   </div>
 </section>
