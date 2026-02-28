@@ -85,5 +85,8 @@ chapters:
   - startTime: 3672
     title: Conclusion & Thank You
 duration: 3735
+guests:
+  - radu-weiss
+  - gabriel-ionescu
 ---
 
