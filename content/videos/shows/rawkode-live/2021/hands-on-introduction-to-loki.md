@@ -63,5 +63,7 @@ chapters:
   - startTime: 5497
     title: Conclusion and Wrap-up
 duration: 5627
+guests:
+  - cyril-tovena
 ---
 
