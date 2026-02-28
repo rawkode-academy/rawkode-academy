@@ -11,5 +11,7 @@ technologies:
   - timoni
 show: rawkode-live
 duration: 7580
+guests:
+  - stefan-prodan
 ---
 

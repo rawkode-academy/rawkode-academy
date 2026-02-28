@@ -77,5 +77,7 @@ chapters:
   - startTime: 4426
     title: Conclusion and Call to Action
 duration: 4744
+guests:
+  - alexander-block
 ---
 
