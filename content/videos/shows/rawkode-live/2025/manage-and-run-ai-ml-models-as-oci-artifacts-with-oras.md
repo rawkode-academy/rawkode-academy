@@ -35,5 +35,8 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 3995
+guests:
+  - josh-duffney
+  - feynman-zhou
 ---
 

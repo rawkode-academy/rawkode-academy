@@ -9,5 +9,8 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 4036
+guests:
+  - pierre-tachoire
+  - katie-hallett
 ---
 

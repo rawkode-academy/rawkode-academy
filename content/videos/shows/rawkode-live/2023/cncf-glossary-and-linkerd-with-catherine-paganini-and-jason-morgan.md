@@ -17,7 +17,8 @@ description: >-
 publishedAt: 2023-03-07T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - linkerd
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -51,5 +52,8 @@ chapters:
   - startTime: 1414
     title: Conclusion & Thank You
 duration: 1432
+guests:
+  - catherine-paganini
+  - jason-morgan
 ---
 

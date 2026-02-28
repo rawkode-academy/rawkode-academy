@@ -92,5 +92,7 @@ chapters:
   - startTime: 5433
     title: Conclusion and Farewell
 duration: 5700
+guests:
+  - kat-cosgrove
 ---
 

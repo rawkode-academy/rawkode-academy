@@ -63,5 +63,7 @@ chapters:
   - startTime: 4985
     title: Conclusion and Future Plans
 duration: 5104
+guests:
+  - tanay-pant
 ---
 

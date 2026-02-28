@@ -87,5 +87,7 @@ chapters:
   - startTime: 3140
     title: Outro
 duration: 3163
+guests:
+  - lukas-gentele
 ---
 

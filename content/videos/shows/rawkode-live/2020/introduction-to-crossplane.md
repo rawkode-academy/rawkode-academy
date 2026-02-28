@@ -69,5 +69,8 @@ chapters:
   - startTime: 4598
     title: Conclusion and Future Plans
 duration: 4725
+guests:
+  - daniel-mangum
+  - marques-johansson
 ---
 

@@ -25,5 +25,7 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 4849
+guests:
+  - thorsten-hans
 ---
 
