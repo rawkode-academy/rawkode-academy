@@ -83,5 +83,7 @@ chapters:
   - startTime: 5349
     title: Conclusion and Recap
 duration: 5536
+guests:
+  - matt-jarvis
 ---
 
