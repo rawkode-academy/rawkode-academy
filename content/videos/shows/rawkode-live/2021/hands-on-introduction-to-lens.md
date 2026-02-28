@@ -87,5 +87,7 @@ chapters:
   - startTime: 3511
     title: Final Farewell
 duration: 3567
+guests:
+  - edward-ionel
 ---
 
