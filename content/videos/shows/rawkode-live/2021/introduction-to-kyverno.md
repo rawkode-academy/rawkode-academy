@@ -89,5 +89,9 @@ chapters:
   - startTime: 4578
     title: Conclusion & Community Resources
 duration: 4695
+guests:
+  - jim-bugwadia
+  - founder-at-nirmata
+  - shuting-zhao
 ---
 
