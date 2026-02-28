@@ -87,5 +87,8 @@ chapters:
   - startTime: 4808
     title: 'Conclusion, Thanks & Future Episodes'
 duration: 4891
+guests:
+  - noel-georgi
+  - RussellWaite
 ---
 

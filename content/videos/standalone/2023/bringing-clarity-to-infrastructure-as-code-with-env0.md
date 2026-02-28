@@ -63,5 +63,6 @@ chapters:
   - startTime: 1459
     title: Conclusion & Resources
 duration: 1479
+guests: []
 ---
 

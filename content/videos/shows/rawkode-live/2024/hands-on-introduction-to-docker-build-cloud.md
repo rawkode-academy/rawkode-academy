@@ -38,5 +38,7 @@ chapters:
   - startTime: 1128
     title: Q&A Period / Technical Difficulties
 duration: 1590
+guests:
+  - michael-irwin
 ---
 

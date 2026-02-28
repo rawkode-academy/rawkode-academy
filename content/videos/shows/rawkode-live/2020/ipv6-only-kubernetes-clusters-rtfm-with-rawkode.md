@@ -35,5 +35,7 @@ chapters:
   - startTime: 4276
     title: Announcing Kubernetes service IPv6 addresses with BGP
 duration: 6790
+guests:
+  - arian-van-putten
 ---
 
