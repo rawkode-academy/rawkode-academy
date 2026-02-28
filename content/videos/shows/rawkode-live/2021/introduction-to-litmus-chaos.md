@@ -103,5 +103,8 @@ chapters:
   - startTime: 5229
     title: Conclusion and Farewell
 duration: 5350
+guests:
+  - umasankar-mukkara
+  - karthik-satchitanand
 ---
 
