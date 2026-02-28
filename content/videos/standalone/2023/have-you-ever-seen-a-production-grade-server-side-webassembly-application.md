@@ -24,5 +24,6 @@ chapters:
   - startTime: 41
     title: Watch the Full Video
 duration: 43
+guests: []
 ---
 

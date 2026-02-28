@@ -20,5 +20,6 @@ category: tutorial
 technologies:
   - kubescape
 duration: 966
+guests: []
 ---
 
