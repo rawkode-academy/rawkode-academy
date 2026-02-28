@@ -63,5 +63,7 @@ chapters:
   - startTime: 17880
     title: Outro
 duration: 5280
+guests:
+  - lee-briggs
 ---
 
