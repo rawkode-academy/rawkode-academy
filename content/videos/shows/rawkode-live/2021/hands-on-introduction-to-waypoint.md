@@ -107,5 +107,7 @@ chapters:
   - startTime: 4500
     title: Conclusion
 duration: 4552
+guests:
+  - taylor-dolezal
 ---
 
