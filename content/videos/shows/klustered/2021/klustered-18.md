@@ -92,5 +92,8 @@ chapters:
   - startTime: 4210
     title: Conclusion
 duration: 4306
+guests:
+  - eric-smalling
+  - carlos-santana
 ---
 
