@@ -37,5 +37,7 @@ chapters:
   - startTime: 1670
     title: Creating the Kubernetes cluster
 duration: 4110
+guests:
+  - jason-detiberus
 ---
 
