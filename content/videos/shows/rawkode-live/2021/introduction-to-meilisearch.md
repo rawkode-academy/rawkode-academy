@@ -73,5 +73,8 @@ chapters:
   - startTime: 3894
     title: Conclusion and Community
 duration: 3995
+guests:
+  - frederic-harper
+  - carolina-ferreira
 ---
 
