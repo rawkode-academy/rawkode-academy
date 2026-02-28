@@ -37,5 +37,7 @@ chapters:
   - startTime: 3950
     title: DaemonSets
 duration: 4398
+guests:
+  - david-simmons
 ---
 

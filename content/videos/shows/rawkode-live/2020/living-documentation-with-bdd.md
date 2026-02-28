@@ -44,5 +44,7 @@ chapters:
   - startTime: 4836
     title: Conclusion and Next Steps
 duration: 5010
+guests:
+  - ciaran-mcnulty
 ---
 

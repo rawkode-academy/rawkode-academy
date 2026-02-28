@@ -97,5 +97,7 @@ chapters:
   - startTime: 5175
     title: Final Wrap-up
 duration: 5295
+guests:
+  - bartlomiej-plotka
 ---
 

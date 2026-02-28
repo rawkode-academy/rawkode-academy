@@ -57,5 +57,6 @@ chapters:
   - startTime: 7008
     title: Part 2 Result and Wrap Up
 duration: 7115
+guests: []
 ---
 

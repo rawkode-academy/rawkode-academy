@@ -65,5 +65,7 @@ chapters:
   - startTime: 5205
     title: Provisioning all our machines with SSH keys from our custom grain data
 duration: 6520
+guests:
+  - edward-vielmetti
 ---
 

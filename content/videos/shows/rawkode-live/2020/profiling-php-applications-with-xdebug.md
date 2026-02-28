@@ -32,5 +32,7 @@ chapters:
   - startTime: 4380
     title: Profiling our complex composer configuration with much gains
 duration: 5372
+guests:
+  - derick-rethans
 ---
 

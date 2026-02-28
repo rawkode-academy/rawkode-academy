@@ -79,5 +79,8 @@ chapters:
   - startTime: 8227
     title: Conclusion and Future Outlook
 duration: 4955
+guests:
+  - kiran-mova
+  - jeffry-molanus
 ---
 

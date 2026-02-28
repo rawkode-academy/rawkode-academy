@@ -69,5 +69,7 @@ chapters:
   - startTime: 4376
     title: Conclusion and Thanks
 duration: 4450
+guests:
+  - torin-sandall
 ---
 

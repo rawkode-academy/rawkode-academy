@@ -59,5 +59,7 @@ chapters:
   - startTime: 2819
     title: Conclusion
 duration: 2868
+guests:
+  - dennis-kelly
 ---
 

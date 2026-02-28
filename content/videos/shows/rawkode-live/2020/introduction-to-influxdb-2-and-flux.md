@@ -85,5 +85,7 @@ chapters:
   - startTime: 3746
     title: 'Getting Help (Slack, Community Forum)'
 duration: 3834
+guests:
+  - anais-dotis-georgiou
 ---
 

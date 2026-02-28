@@ -31,5 +31,8 @@ chapters:
   - startTime: 4170
     title: Using podman to generate seccomp profiles
 duration: 5032
+guests:
+  - daniel-mangum
+  - sascha-grunert
 ---
 
