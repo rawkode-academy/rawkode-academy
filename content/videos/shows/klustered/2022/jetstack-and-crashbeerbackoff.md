@@ -6,7 +6,8 @@ description: "#KubernetesTutorial\n\n⭐️ This episode was sponsored by Telepo
 publishedAt: 2022-08-12T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
 show: klustered
 chapters:
   - startTime: 0

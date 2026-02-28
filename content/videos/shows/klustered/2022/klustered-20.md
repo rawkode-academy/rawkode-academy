@@ -6,7 +6,8 @@ description: "#Klustered Live #Kubernetes Debugging\n\n#KubernetesTutorial\n\nâ­
 publishedAt: 2022-02-04T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
 show: klustered
 chapters:
   - startTime: 0
@@ -98,5 +99,8 @@ chapters:
   - startTime: 6047
     title: Reaction and Wrap Up
 duration: 6164
+guests:
+  - russellwaite
+  - marek-counts
 ---
 

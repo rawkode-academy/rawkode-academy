@@ -6,7 +6,8 @@ description: "#Klustered Live #Kubernetes Debugging\n\n#KubernetesTutorial\n\nâ­
 publishedAt: 2022-03-11T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
 show: klustered
 chapters:
   - startTime: 0
@@ -98,5 +99,8 @@ chapters:
   - startTime: 14689
     title: 'Debugging V1 Database Connection: Checking Postgres Deployment'
 duration: 2978
+guests:
+  - borko-djurkovic
+  - bojan-djurkovic
 ---
 

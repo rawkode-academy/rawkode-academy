@@ -6,7 +6,8 @@ description: "#Klustered Live #Kubernetes Debugging\n\n#KubernetesTutorial\n\nâ­
 publishedAt: 2022-04-14T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
 show: klustered
 chapters:
   - startTime: 0
