@@ -68,5 +68,7 @@ chapters:
   - startTime: 1294
     title: Discussion and Conclusion
 duration: 1345
+guests:
+  - brian-ketelsen
 ---
 

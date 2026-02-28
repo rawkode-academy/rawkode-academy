@@ -93,5 +93,6 @@ chapters:
   - startTime: 1232
     title: Conclusion and Next Steps
 duration: 1271
+guests: []
 ---
 

@@ -34,5 +34,6 @@ chapters:
   - startTime: 551
     title: 'Conclusion: Benefits of Slim Toolkit'
 duration: 580
+guests: []
 ---
 
