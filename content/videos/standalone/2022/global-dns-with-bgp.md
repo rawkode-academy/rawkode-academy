@@ -8,7 +8,9 @@ description: >-
 publishedAt: 2022-08-11T17:00:00.000Z
 type: recorded
 category: tutorial
-technologies: []
+technologies:
+  - coredns
+  - pulumi
 chapters:
   - startTime: 0
     title: Introduction
@@ -109,5 +111,6 @@ chapters:
   - startTime: 3509
     title: Conclusion and Outro
 duration: 3555
+guests: []
 ---
 

@@ -98,5 +98,6 @@ chapters:
   - startTime: 2812
     title: Conclusion & Preview of Next Workshop
 duration: 2884
+guests: []
 ---
 

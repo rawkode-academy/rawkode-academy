@@ -12,6 +12,7 @@ type: recorded
 category: tutorial
 technologies:
   - influxdb
+  - telegraf
 chapters:
   - startTime: 0
     title: Introduction
@@ -38,5 +39,6 @@ chapters:
   - startTime: 673
     title: Summary and Conclusion
 duration: 718
+guests: []
 ---
 
