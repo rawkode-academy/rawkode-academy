@@ -59,5 +59,7 @@ chapters:
   - startTime: 3480
     title: Restoring a Backup
 duration: 4345
+guests:
+  - carlisia-thompson
 ---
 
