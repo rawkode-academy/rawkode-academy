@@ -92,5 +92,8 @@ chapters:
   - startTime: 8666
     title: Pod Still Creating & Admission Denied (LimitRange forbidden)
 duration: 5770
+guests:
+  - walid-shaari
+  - noel-georgi
 ---
 
