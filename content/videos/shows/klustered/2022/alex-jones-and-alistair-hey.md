@@ -100,5 +100,8 @@ chapters:
   - startTime: 4471
     title: Thank You & Wrap-up
 duration: 4621
+guests:
+  - alex-jones
+  - alistair-hey
 ---
 

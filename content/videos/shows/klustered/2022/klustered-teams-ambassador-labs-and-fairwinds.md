@@ -6,7 +6,8 @@ description: "#Klustered Live #Kubernetes Debugging\n\n#KubernetesTutorial\n\nâ­
 publishedAt: 2022-03-04T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
 show: klustered
 chapters:
   - startTime: 0
@@ -126,5 +127,10 @@ chapters:
   - startTime: 4879
     title: Conclusion & Thanks
 duration: 4990
+guests:
+  - daniel-bryant
+  - edidiong-asikpo
+  - alexandre-gervais
+  - andy-suderman
 ---
 

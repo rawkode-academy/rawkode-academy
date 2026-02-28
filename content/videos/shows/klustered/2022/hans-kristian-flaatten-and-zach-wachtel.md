@@ -98,5 +98,8 @@ chapters:
   - startTime: 5205
     title: Conclusion and Thanks
 duration: 5313
+guests:
+  - hans-kristian-flaatten
+  - zach-wachtel
 ---
 
