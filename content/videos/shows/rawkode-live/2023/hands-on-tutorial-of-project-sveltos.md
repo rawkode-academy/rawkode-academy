@@ -58,5 +58,7 @@ chapters:
   - startTime: 4267
     title: Conclusion & Goodbye
 duration: 4339
+guests:
+  - gianluca-mardente
 ---
 

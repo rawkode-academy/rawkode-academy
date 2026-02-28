@@ -65,5 +65,8 @@ chapters:
   - startTime: 3438
     title: Conclusion & Wrap-up
 duration: 3571
+guests:
+  - eyal-bukchin
+  - tal-zwick
 ---
 
