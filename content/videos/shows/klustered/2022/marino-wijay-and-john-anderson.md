@@ -170,5 +170,8 @@ chapters:
   - startTime: 5824
     title: Closing Remarks & Thanks
 duration: 5965
+guests:
+  - marino-wijay
+  - john-anderson
 ---
 
