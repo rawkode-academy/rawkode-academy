@@ -114,5 +114,7 @@ chapters:
   - startTime: 4800
     title: Conclusion and Farewell
 duration: 4880
+guests:
+  - ben-hirschberg
 ---
 

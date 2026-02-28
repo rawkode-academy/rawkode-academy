@@ -95,5 +95,7 @@ chapters:
   - startTime: 4257
     title: Conclusion and Edge/IoT Discussion
 duration: 4433
+guests:
+  - adriano-pezzuto
 ---
 

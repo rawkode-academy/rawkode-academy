@@ -47,5 +47,6 @@ chapters:
   - startTime: 842
     title: Conclusion and Summary
 duration: 923
+guests: []
 ---
 
