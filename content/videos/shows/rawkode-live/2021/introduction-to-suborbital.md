@@ -87,5 +87,7 @@ chapters:
   - startTime: 4957
     title: Conclusion and Thanks
 duration: 5020
+guests:
+  - connor-hicks
 ---
 
