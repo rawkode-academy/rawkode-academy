@@ -73,5 +73,7 @@ chapters:
   - startTime: 4937
     title: Conclusion and Wrap-up
 duration: 5063
+guests:
+  - senyo-simpson
 ---
 
