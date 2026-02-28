@@ -155,5 +155,13 @@ chapters:
   - startTime: 23508
     title: Outro and Sponsor Thanks
 duration: 7050
+guests:
+  - billie-cleek
+  - collin-shoop
+  - jeremy-morris
+  - shahar-levy
+  - guy-templeton
+  - matteo-ruina
+  - alex-williams
 ---
 
