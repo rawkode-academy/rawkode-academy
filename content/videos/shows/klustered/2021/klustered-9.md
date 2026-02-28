@@ -92,5 +92,7 @@ chapters:
   - startTime: 5238
     title: Wrap-up & Thank You
 duration: 5373
+guests:
+  - marcos-nils
 ---
 
