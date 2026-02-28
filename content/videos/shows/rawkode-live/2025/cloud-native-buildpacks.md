@@ -23,5 +23,7 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 5583
+guests:
+  - terence-lee
 ---
 

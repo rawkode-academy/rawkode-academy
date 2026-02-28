@@ -13,5 +13,8 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 5369
+guests:
+  - mauro-morales
+  - ettore-giacinto
 ---
 
