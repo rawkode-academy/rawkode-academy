@@ -42,5 +42,6 @@ chapters:
   - startTime: 1654
     title: Farewell
 duration: 1698
+guests: []
 ---
 

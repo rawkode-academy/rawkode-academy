@@ -119,5 +119,7 @@ chapters:
   - startTime: 5497
     title: Conclusion
 duration: 5556
+guests:
+  - alexander-block
 ---
 

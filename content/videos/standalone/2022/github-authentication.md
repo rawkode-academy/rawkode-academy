@@ -37,5 +37,6 @@ chapters:
   - startTime: 1241
     title: Conclusion & Wrap-up
 duration: 1289
+guests: []
 ---
 

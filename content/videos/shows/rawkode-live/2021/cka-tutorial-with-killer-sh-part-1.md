@@ -53,5 +53,6 @@ chapters:
   - startTime: 3657
     title: Conclusion & Outro
 duration: 3728
+guests: []
 ---
 

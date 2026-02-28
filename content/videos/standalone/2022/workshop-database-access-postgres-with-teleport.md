@@ -76,5 +76,6 @@ chapters:
   - startTime: 3520
     title: Conclusion and Upcoming Workshops
 duration: 3603
+guests: []
 ---
 

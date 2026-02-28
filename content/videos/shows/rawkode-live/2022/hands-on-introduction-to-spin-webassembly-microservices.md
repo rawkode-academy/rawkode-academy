@@ -47,5 +47,6 @@ chapters:
   - startTime: 2811
     title: Final Q&A and Conclusion
 duration: 2981
+guests: []
 ---
 

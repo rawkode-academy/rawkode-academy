@@ -120,5 +120,7 @@ chapters:
   - startTime: 5075
     title: Conclusion & Call to Action
 duration: 5142
+guests:
+  - frederic-branczyk
 ---
 

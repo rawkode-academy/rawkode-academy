@@ -143,5 +143,7 @@ chapters:
   - startTime: 3973
     title: Farewell & Sign-off
 duration: 4073
+guests:
+  - rohit-ghumare
 ---
 

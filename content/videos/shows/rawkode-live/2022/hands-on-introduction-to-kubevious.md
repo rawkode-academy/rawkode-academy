@@ -144,5 +144,7 @@ chapters:
   - startTime: 5341
     title: Conclusion
 duration: 5432
+guests:
+  - ruben-hakopian
 ---
 

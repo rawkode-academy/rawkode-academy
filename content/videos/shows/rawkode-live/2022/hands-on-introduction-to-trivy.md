@@ -90,5 +90,7 @@ chapters:
   - startTime: 3992
     title: Conclusion & Farewell
 duration: 4105
+guests:
+  - rory-mccune
 ---
 

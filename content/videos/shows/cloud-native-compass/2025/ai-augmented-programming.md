@@ -47,4 +47,5 @@ technologies: []
 show: cloud-native-compass
 duration: 2518
 audioFileSize: 60425030
+guests: []
 ---

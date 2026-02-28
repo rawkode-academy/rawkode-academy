@@ -94,5 +94,7 @@ chapters:
   - startTime: 2814
     title: Audit Events
 duration: 2923
+guests:
+  - ben-abbott
 ---
 
