@@ -156,5 +156,7 @@ chapters:
   - startTime: 7913
     title: Wrap-up and Thanks
 duration: 8015
+guests:
+  - duffie-cooley
 ---
 
