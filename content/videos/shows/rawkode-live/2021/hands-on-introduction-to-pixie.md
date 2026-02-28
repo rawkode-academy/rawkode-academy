@@ -93,5 +93,7 @@ chapters:
   - startTime: 3998
     title: Conclusion and Farewell
 duration: 4066
+guests:
+  - natalie-serrino
 ---
 
