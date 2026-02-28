@@ -84,5 +84,8 @@ chapters:
   - startTime: 4630
     title: Conclusion
 duration: 4709
+guests:
+  - adam-szucs-matyas
+  - william-lightning
 ---
 
