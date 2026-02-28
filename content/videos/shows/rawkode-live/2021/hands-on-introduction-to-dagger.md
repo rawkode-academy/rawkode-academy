@@ -65,5 +65,8 @@ chapters:
   - startTime: 5207
     title: Conclusion and Call to Action
 duration: 5335
+guests:
+  - solomon-hykes
+  - cofounder-of-docker
 ---
 
