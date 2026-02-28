@@ -51,5 +51,8 @@ chapters:
   - startTime: 1414
     title: Conclusion & Thank You
 duration: 1432
+guests:
+  - catherine-paganini
+  - jason-morgan
 ---
 
