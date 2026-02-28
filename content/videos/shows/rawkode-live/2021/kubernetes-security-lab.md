@@ -151,5 +151,7 @@ chapters:
   - startTime: 5017
     title: Outro
 duration: 5064
+guests:
+  - rory-mccune
 ---
 
