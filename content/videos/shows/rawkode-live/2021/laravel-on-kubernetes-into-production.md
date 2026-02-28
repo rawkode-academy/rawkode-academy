@@ -87,5 +87,7 @@ chapters:
   - startTime: 5196
     title: Conclusion
 duration: 5259
+guests:
+  - alex-bowers
 ---
 
