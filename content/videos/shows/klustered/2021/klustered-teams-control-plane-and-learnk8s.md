@@ -174,5 +174,7 @@ chapters:
   - startTime: 7628
     title: Conclusion & Farewell
 duration: 4132
+guests:
+  - control-plane
 ---
 
