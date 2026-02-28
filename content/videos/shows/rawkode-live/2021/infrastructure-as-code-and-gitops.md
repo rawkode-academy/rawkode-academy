@@ -100,5 +100,7 @@ chapters:
   - startTime: 5299
     title: Conclusion and Thanks
 duration: 5375
+guests:
+  - steven-wade
 ---
 
