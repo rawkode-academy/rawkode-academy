@@ -214,5 +214,7 @@ chapters:
   - startTime: 7170
     title: Conclusion & Thanks
 duration: 7245
+guests:
+  - jason-detiberus
 ---
 
