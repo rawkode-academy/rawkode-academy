@@ -53,5 +53,6 @@ chapters:
   - startTime: 931
     title: Conclusion
 duration: 945
+guests: []
 ---
 
