@@ -81,5 +81,10 @@ chapters:
   - startTime: 5540
     title: Conclusion & Thank You
 duration: 5620
+guests:
+  - anup-dhamala
+  - darach-ennis
+  - heinz-gies
+  - matthias-wahl
 ---
 
