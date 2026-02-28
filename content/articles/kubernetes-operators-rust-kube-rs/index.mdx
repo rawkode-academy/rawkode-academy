@@ -4,24 +4,26 @@ description: "A practical guide to building production-grade Kubernetes operator
 type: article
 openGraph:
   title: "Kubernetes Operators in Rust with kube-rs"
-  subtitle: "Memory-safe, blazing-fast controllers for the cloud native era"
+  subtitle: "Why I'm building my next controller in Rust"
 slug: kubernetes-operators-rust-kube-rs
 cover:
   image: "./cover.png"
   alt: "Stylized illustration showing the Rust crab mascot Ferris interacting with Kubernetes pods and controllers, with flowing lines representing reconciliation loops on a dark gradient background."
-publishedAt: 2026-02-27
+publishedAt: 2026-02-28
 isDraft: true
 authors:
   - rawkode
 ---
 
-The Kubernetes operator pattern has become the standard way to extend Kubernetes with domain-specific automation. Since CoreOS introduced the concept in 2016, operators have proliferated across the ecosystem—managing databases, message queues, certificates, and increasingly complex stateful workloads.
+Look, I love Rust. I'm always talking about Rust. So today, we're talking about Rust.
 
-Almost all of them are written in Go.
+I've been building Kubernetes operators for years, mostly in Go. It's the obvious choice: Kubernetes itself is written in Go, and `controller-runtime` and `kubebuilder` make scaffolding easy. But "path of least resistance" and "best tool for the job" aren't always the same thing.
 
-This isn't surprising. Kubernetes itself is written in Go, and the official `controller-runtime` and `kubebuilder` frameworks make Go the path of least resistance. But "path of least resistance" and "best tool for the job" aren't always the same thing. As operators become more critical to production infrastructure, the language they're written in matters more than ever.
+Since CoreOS introduced the operator pattern in 2016, operators have proliferated across the ecosystem, managing databases, message queues, certificates, and increasingly complex stateful workloads. As they become more critical to production infrastructure, the language they're written in matters more than ever.
 
-Enter **kube-rs**: a mature, production-ready Rust client for Kubernetes that provides everything you need to build operators with Rust's guarantees of memory safety, zero-cost abstractions, and fearless concurrency. If you're building controllers that need to be reliable, efficient, and correct, it's time to look beyond Go.
+I recently joined CoreWeave, and I'm thinking a lot about how operators scale when you're managing GPU infrastructure across hundreds of clusters. Rust's memory efficiency and safety guarantees aren't nice-to-haves at that scale. They're operational necessities.
+
+**kube-rs** is a mature, production-ready Rust client for Kubernetes. It gives you everything you need to build operators with Rust's memory safety, zero-cost abstractions, and fearless concurrency. The type system catches so many bugs that would be runtime panics in Go. If you're building controllers that need to be reliable, efficient, and correct, it's time to look beyond Go.
 
 ## Why Rust for Kubernetes Operators?
 
@@ -29,13 +31,13 @@ The obvious question: why choose Rust over Go for something so deeply embedded i
 
 ### Memory Safety Without a Garbage Collector
 
-Go's garbage collector is good, but it introduces latency spikes. For most applications, this is irrelevant. For a controller reconciling thousands of resources under pressure during a cluster incident, those pauses matter. Rust gives you deterministic memory management with zero garbage collection pauses—your controller's performance is predictable under load.
+Go's garbage collector is good, but it introduces latency spikes. For most applications, this is irrelevant. For a controller reconciling thousands of resources under pressure during a cluster incident, those pauses matter. Rust gives you deterministic memory management with zero garbage collection pauses. Your controller's performance is predictable under load.
 
-More importantly, Rust's ownership model eliminates entire classes of bugs at compile time. No null pointer dereferences. No data races. No use-after-free. When your operator is managing production databases or handling secrets rotation, these guarantees aren't academic—they're operational necessities.
+More importantly, Rust's ownership model eliminates entire classes of bugs at compile time. No null pointer dereferences. No data races. No use-after-free. When your operator is managing production databases or handling secrets rotation, these guarantees aren't academic. They're operational necessities.
 
 ### Type System as Documentation and Guardrail
 
-Go's type system is intentionally simple. Rust's is intentionally expressive. When you're defining Custom Resource Definitions (CRDs), Rust's type system—with enums, pattern matching, and trait-based generics—lets you model your domain with precision that Go's structs and interfaces can't match.
+Go's type system is intentionally simple. Rust's is intentionally expressive. When you're defining Custom Resource Definitions (CRDs), Rust's type system (with enums, pattern matching, and trait-based generics) lets you model your domain with precision that Go's structs and interfaces can't match.
 
 Consider modeling the state of a managed database:
 
@@ -64,15 +66,15 @@ pub enum DatabasePhase {
 }
 ```
 
-In Go, you'd represent this as a string phase field with a collection of optional fields—losing the compiler's ability to enforce that you handle every state transition correctly. In Rust, a `match` on `DatabasePhase` forces you to handle every variant, making it impossible to forget an edge case.
+In Go, you'd represent this as a string phase field with a collection of optional fields, losing the compiler's ability to enforce that you handle every state transition correctly. In Rust, a `match` on `DatabasePhase` forces you to handle every variant. You can't forget an edge case.
 
 ### Resource Efficiency
 
-Rust binaries are small and start fast. A typical kube-rs operator compiles to a static binary under 10 MB, starts in milliseconds, and uses a fraction of the memory of its Go equivalent. When you're running operators across hundreds of clusters, this efficiency compounds into real cost savings.
+Rust binaries are compact and start fast. A typical kube-rs operator compiles to a binary often under 20 MB with release optimizations, starts in milliseconds, and uses a fraction of the memory of its Go equivalent. When you're running operators across hundreds of clusters, this efficiency compounds into real cost savings.
 
 ## Getting Started with kube-rs
 
-Let's build a practical operator from scratch. We'll create a controller that manages a custom `WebApp` resource—a simplified abstraction that creates and manages a Deployment, Service, and optionally an Ingress for web applications.
+I'm going to walk you through building a real operator. We'll create a controller that manages a custom `WebApp` resource: a simplified abstraction that creates and manages a Deployment, Service, and optionally an Ingress for web applications.
 
 ### Project Setup
 
@@ -164,7 +166,7 @@ fn default_replicas() -> i32 { 3 }
 fn default_port() -> i32 { 8080 }
 ```
 
-That `#[derive(CustomResource)]` macro generates a complete `WebApp` struct with metadata, spec, and status—plus methods to generate the CRD YAML. Call `WebApp::crd()` and you get a fully-typed `CustomResourceDefinition` ready to apply to your cluster.
+That `#[derive(CustomResource)]` macro generates a complete `WebApp` struct with metadata, spec, and status, plus methods to generate the CRD YAML. Call `WebApp::crd()` and you get a fully-typed `CustomResourceDefinition` ready to apply to your cluster.
 
 ### The Reconciliation Loop
 
@@ -229,7 +231,7 @@ fn error_policy(
 
 ### Building the Deployment
 
-Here's where Rust's type safety pays off. Instead of constructing untyped JSON objects, you build fully-typed Kubernetes resources:
+This is where Rust's type safety pays off. Instead of constructing untyped JSON objects, you build fully-typed Kubernetes resources:
 
 ```rust
 use k8s_openapi::api::apps::v1::{Deployment, DeploymentSpec};
@@ -304,13 +306,13 @@ async fn reconcile_deployment(
 }
 ```
 
-Notice the `owner_references` line. This sets up Kubernetes garbage collection so that when a `WebApp` is deleted, its Deployment is automatically cleaned up. kube-rs provides `controller_owner_ref` as a convenience method that returns an `Option<OwnerReference>`—the `.into_iter().collect()` pattern cleanly converts it into the `Vec` that `owner_references` expects.
+Notice the `owner_references` line. This sets up Kubernetes garbage collection so that when a `WebApp` is deleted, its Deployment is automatically cleaned up. kube-rs provides `controller_owner_ref` as a convenience method that returns an `Option<OwnerReference>`. The `.into_iter().collect()` pattern cleanly converts it into the `Vec` that `owner_references` expects.
 
 ## Architecture: How It All Fits Together
 
 Here's how the operator interacts with the Kubernetes API and manages its resources:
 
-```d2
+```d2 sketch
 direction: right
 
 user: User {
@@ -359,7 +361,7 @@ apiserver -> service: stores
 apiserver -> ingress: stores (if hostname set)
 ```
 
-The operator watches for changes to `WebApp` custom resources. When a change is detected, the watcher enqueues a reconciliation event. The reconciler then ensures the actual state (Deployments, Services, Ingresses) matches the desired state defined in the `WebApp` spec. This is the standard level-triggered reconciliation pattern—the same pattern that powers every built-in Kubernetes controller.
+The operator watches for changes to `WebApp` custom resources. When a change is detected, the watcher enqueues a reconciliation event. The reconciler then ensures the actual state (Deployments, Services, Ingresses) matches the desired state defined in the `WebApp` spec. This is the standard level-triggered reconciliation pattern, the same one that powers every built-in Kubernetes controller.
 
 ## Testing Your Operator
 
@@ -412,7 +414,7 @@ mod tests {
 
 ### Integration Testing
 
-For integration tests, kube-rs works seamlessly with tools like `k3d` or `kind`. Spin up an ephemeral cluster in CI:
+For integration tests, kube-rs works well with tools like `k3d` or `kind`. Spin up an ephemeral cluster in CI:
 
 ```rust
 #[tokio::test]
@@ -483,11 +485,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-The `.owns(deployments, Default::default())` call is crucial—it tells the controller to also watch Deployments and trigger reconciliation of the owning `WebApp` if a managed Deployment changes. This is how your operator detects drift: if someone manually edits a Deployment, the controller immediately reconciles it back to the desired state.
+The `.owns(deployments, Default::default())` call is crucial. It tells the controller to also watch Deployments and trigger reconciliation of the owning `WebApp` if a managed Deployment changes. This is how your operator detects drift: if someone manually edits a Deployment, the controller immediately reconciles it back to the desired state.
 
 ## Containerizing and Deploying
 
-Rust's static compilation story makes containerization trivial. Here's a multi-stage Dockerfile:
+Rust's compilation model makes containerization straightforward. Here's a multi-stage Dockerfile:
 
 ```dockerfile
 FROM rust:1.93 AS builder
@@ -500,11 +502,11 @@ COPY --from=builder /build/target/release/webapp-operator /
 ENTRYPOINT ["/webapp-operator"]
 ```
 
-The final image is typically under 30 MB. Compare this to Go operator images that often include debugging tools and land around 50-100 MB, or Java-based operators (yes, they exist) that can exceed 300 MB.
+The final image is typically under 30 MB. Compare this to Go operator images, which with similar distroless builds land around 30-50 MB, or larger when you start including debugging tools. Java-based operators (yes, they exist) can exceed 300 MB.
 
 ## When to Choose Rust Over Go
 
-Let's be pragmatic. Rust isn't always the right choice for every operator:
+I want to be straight with you. Rust isn't always the right choice for every operator.
 
 **Choose Rust when:**
 - Your operator manages security-sensitive resources (secrets, certificates, network policies)
@@ -519,14 +521,14 @@ Let's be pragmatic. Rust isn't always the right choice for every operator:
 - You need deep integration with controller-runtime's ecosystem (e.g., Kubebuilder scaffolding)
 - The operator is simple enough that Go's simplicity is an advantage
 
-The ecosystem around kube-rs is growing steadily. **kopium** generates Rust types from existing CRDs, and the broader kube-rs project—a CNCF Sandbox project—continues to add tooling that reduces boilerplate. The community is smaller than Go's operator ecosystem, but it's active, welcoming, and shipping real production software.
+The ecosystem around kube-rs is growing steadily. **kopium** generates Rust types from existing CRDs, and the broader kube-rs project (a CNCF Sandbox project) continues to add tooling that reduces boilerplate. The community is smaller than Go's operator ecosystem, but it's active, welcoming, and shipping real production software.
 
 ## Production Readiness Checklist
 
-Before shipping your Rust operator to production, ensure you've covered these essentials:
+Before shipping your Rust operator to production, make sure you've covered these essentials:
 
 - [ ] **RBAC manifests**: Generate ClusterRole/ClusterRoleBinding with minimum required permissions
-- [ ] **Leader election**: Use a leader election crate such as `kube-leader-election` or `kube-coordinate` to prevent split-brain in HA deployments
+- [ ] **Leader election**: Use a leader election crate such as `kube-leader-election`, `kube-coordinate`, or `kube-lease-manager` to prevent split-brain in HA deployments
 - [ ] **Metrics endpoint**: Expose Prometheus metrics for reconciliation duration, queue depth, and errors
 - [ ] **Health probes**: Implement `/healthz` and `/readyz` endpoints for Kubernetes liveness and readiness checks
 - [ ] **Graceful shutdown**: Handle SIGTERM to complete in-flight reconciliations before exiting
@@ -540,10 +542,10 @@ Before shipping your Rust operator to production, ensure you've covered these es
 
 ## The Bigger Picture
 
-The Kubernetes operator ecosystem is maturing. We're past the phase where "it works" is sufficient—operators now need to be secure, efficient, and maintainable over years of production use. Rust's guarantees align perfectly with these requirements.
+We're past the point where "it works" is good enough for operators. They need to be secure, efficient, and maintainable over years of production use. Rust's guarantees align perfectly with those requirements.
 
-kube-rs has proven itself in production at scale. It's maintained by an active community, has excellent documentation, and is backed by a growing ecosystem of tools and libraries. If you've been curious about Rust but haven't found the right project to start with, a Kubernetes operator is an excellent choice—you get practical Rust experience while building something genuinely useful for your infrastructure.
+kube-rs has proven itself in production at scale. It's maintained by an active community, has excellent documentation, and the tooling ecosystem keeps growing. If you've been curious about Rust but haven't found the right project to start with, a Kubernetes operator is a great place to begin. You get practical Rust experience while building something genuinely useful for your infrastructure.
 
-The cloud native ecosystem doesn't have to be a Go monoculture. Diversity in implementation languages leads to diversity in ideas, approaches, and ultimately better software for everyone. Your next operator might just be your first Rust project.
+The cloud native world doesn't have to be a Go monoculture. Diversity in implementation languages leads to diversity in ideas and approaches. Your next operator might just be your first Rust project.
 
 Give it a try. Your future on-call self will thank you.
