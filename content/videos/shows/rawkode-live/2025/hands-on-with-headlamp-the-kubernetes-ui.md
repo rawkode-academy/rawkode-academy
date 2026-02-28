@@ -27,5 +27,8 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 3547
+guests:
+  - oleksandr-dubenko
+  - will-case
 ---
 

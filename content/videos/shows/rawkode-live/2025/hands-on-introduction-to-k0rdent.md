@@ -10,5 +10,8 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 6422
+guests:
+  - martin-sadler
+  - karthik-satchitanand
 ---
 

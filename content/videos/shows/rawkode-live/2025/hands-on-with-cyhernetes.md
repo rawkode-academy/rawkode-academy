@@ -19,5 +19,7 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 4057
+guests:
+  - avital-tamir
 ---
 

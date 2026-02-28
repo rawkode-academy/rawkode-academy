@@ -21,5 +21,7 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 4318
+guests:
+  - nicolas-takashi
 ---
 
