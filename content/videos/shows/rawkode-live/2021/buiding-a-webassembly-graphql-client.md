@@ -8,6 +8,7 @@ type: live
 category: tutorial
 technologies:
   - suborbital
+  - webassembly
 show: rawkode-live
 chapters:
   - startTime: 0

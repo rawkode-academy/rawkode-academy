@@ -6,7 +6,8 @@ description: "In this episode, we build a kubectl plugin from scratch. We aim to
 publishedAt: 2021-01-13T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
