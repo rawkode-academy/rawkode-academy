@@ -39,5 +39,7 @@ chapters:
   - startTime: 3780
     title: Can I proxy / pull through cache other registries with containerd?
 duration: 4025
+guests:
+  - phil-estes
 ---
 

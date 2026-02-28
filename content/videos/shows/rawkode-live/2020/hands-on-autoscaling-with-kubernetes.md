@@ -47,5 +47,7 @@ chapters:
   - startTime: 5756
     title: Conclusion & Community
 duration: 6125
+guests:
+  - guy-templeton
 ---
 
