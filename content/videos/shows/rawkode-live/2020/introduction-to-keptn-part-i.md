@@ -3,11 +3,11 @@ id: emlycwa6qjji1saoicrkwbpr
 slug: introduction-to-keptn-part-i
 title: Introduction to Keptn (Part I)
 description: "In this episode, we take a look at on-boarding and deploying our first Keptn managed service to our Kubernetes clusters, using Prometheus to provide safety for continuous delivery through progressive delivery.\n\n\nThis episode is part of the Guide to Keptn series.\n  -- Introduction to Keptn (Part I) - This Video\n  -- Introduction to Keptn (Part II) - https://youtu.be/pMkjE_uvJoo\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding screen\n00:15 - Introductions\n02:22 - What is Keptn?\n21:50 - Installing Istio\n25:45 - Installing Keptn\n32:00 - Setting up our Keptn repository\n43:20 - Onboarding our first service\n51:00 - Deploying our first service\n1:12:00 - Adding Prometheus\n1:16:40 - Progressive delivery\n\n\U0001F465 About the Guests\n\nJürgen Etzlstorfer\n\nJürgen is a maintainer of the Keptn open-source project since its beginning. He also takes care of its community and ecosystem and loves to welcome new contributors. Join him! :)\n\n\U0001F426 https://twitter.com/jetzlstorfer\n\U0001F9E9 https://github.com/jetzlstorfer\n\n\n\n\U0001F528 About the Technologies\n\nKeptn\n\nKeptn is a control-plane for DevOps automation of cloud-native applications. Keptn uses a declarative approach to build scalable automation for delivery and operations which can be scaled to a large number of services.\n\n\U0001F30F https://keptn.sh\n\U0001F426 https://twitter.com/keptnProject\n\U0001F9E9 https://github.com/keptn/keptn"
-publishedAt: 2020-12-03T17:00:00.000Z
+publishedAt: 2020-12-02T14:00:00.000Z
 type: live
 category: tutorial
 technologies:
-  - kpt
+  - keptn
 show: rawkode-live
 chapters:
   - startTime: 0
