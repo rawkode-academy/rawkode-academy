@@ -99,5 +99,7 @@ chapters:
   - startTime: 7629
     title: Farewell
 duration: 7705
+guests:
+  - suhail-patel
 ---
 
