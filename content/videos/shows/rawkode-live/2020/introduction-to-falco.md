@@ -93,5 +93,8 @@ chapters:
   - startTime: 4730
     title: Conclusion and Thank You
 duration: 4850
+guests:
+  - leo-di-donato
+  - lorenzo-fontana
 ---
 

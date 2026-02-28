@@ -44,5 +44,7 @@ chapters:
   - startTime: 6000
     title: Deploying to Kubernetes
 duration: 9800
+guests:
+  - ciaran-mcnulty
 ---
 

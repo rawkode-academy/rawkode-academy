@@ -85,5 +85,7 @@ chapters:
   - startTime: 4222
     title: Conclusion and Wrap-up
 duration: 4348
+guests:
+  - ilya-dmitrichenko
 ---
 

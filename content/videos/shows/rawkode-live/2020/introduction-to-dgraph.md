@@ -63,5 +63,7 @@ chapters:
   - startTime: 4687
     title: Conclusion
 duration: 4700
+guests:
+  - xuanyi-chew
 ---
 

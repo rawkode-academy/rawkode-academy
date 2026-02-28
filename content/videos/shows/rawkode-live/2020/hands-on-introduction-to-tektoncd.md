@@ -63,5 +63,7 @@ chapters:
   - startTime: 4595
     title: Conclusion
 duration: 4640
+guests:
+  - kevin-mcdermott
 ---
 

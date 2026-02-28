@@ -122,5 +122,6 @@ chapters:
   - startTime: 5237
     title: Conclusion & Farewell
 duration: 5299
+guests: []
 ---
 

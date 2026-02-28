@@ -28,5 +28,7 @@ chapters:
       Making asset / nodejs asset compilation a better experience for local
       development
 duration: 5184
+guests:
+  - ciaran-mcnulty
 ---
 

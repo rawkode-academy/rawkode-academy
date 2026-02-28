@@ -38,5 +38,7 @@ chapters:
   - startTime: 5340
     title: Deploying our application to Kubernetes
 duration: 6270
+guests:
+  - ciaran-mcnulty
 ---
 

@@ -75,5 +75,7 @@ chapters:
   - startTime: 3500
     title: Closing
 duration: 3618
+guests:
+  - marcus-olsson
 ---
 

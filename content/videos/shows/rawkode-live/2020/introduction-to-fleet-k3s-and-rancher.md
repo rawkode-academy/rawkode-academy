@@ -91,5 +91,7 @@ chapters:
   - startTime: 8114
     title: Summary & Wrap-up
 duration: 4706
+guests:
+  - bastian-hofmann
 ---
 
