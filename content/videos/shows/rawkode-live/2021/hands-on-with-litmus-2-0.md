@@ -105,5 +105,7 @@ chapters:
   - startTime: 5139
     title: Conclusion & Thank You
 duration: 5279
+guests:
+  - karthik-satchitanand
 ---
 
