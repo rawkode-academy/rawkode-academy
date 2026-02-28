@@ -113,9 +113,10 @@ chapters:
     title: Final Wrap-up
 duration: 4880
 guests:
-  - container-solutions
-  - team-members
-  - civo-cloud
+  - adrian-mouat
+  - charlotte-mach
+  - ricardo-torres-da-costa
+  - saiyam-pathak
   - dinesh-majrekar
   - david-fogle
 ---
