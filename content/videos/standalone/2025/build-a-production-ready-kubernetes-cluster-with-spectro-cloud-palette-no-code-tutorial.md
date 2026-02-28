@@ -43,7 +43,13 @@ description: >-
 publishedAt: 2025-07-07T17:00:00.000Z
 type: recorded
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
+  - cilium
+  - prometheus
+  - grafana
+  - helm
 duration: 987
+guests: []
 ---
 

@@ -21,7 +21,10 @@ description: >-
 publishedAt: 2025-07-23T17:00:00.000Z
 type: recorded
 category: tutorial
-technologies: []
+technologies:
+  - ngrok
+  - kubernetes
 duration: 888
+guests: []
 ---
 

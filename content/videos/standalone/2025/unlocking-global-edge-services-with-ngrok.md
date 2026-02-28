@@ -58,5 +58,6 @@ chapters:
   - startTime: 226
     title: Conclusion and Final Call to Action
 duration: 235
+guests: []
 ---
 

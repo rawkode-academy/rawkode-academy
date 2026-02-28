@@ -23,7 +23,9 @@ description: >-
 publishedAt: 2025-03-27T17:00:00.000Z
 type: recorded
 category: tutorial
-technologies: []
+technologies:
+  - ngrok
 duration: 624
+guests: []
 ---
 

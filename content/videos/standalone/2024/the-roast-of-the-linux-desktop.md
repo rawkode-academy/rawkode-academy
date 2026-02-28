@@ -59,5 +59,6 @@ chapters:
   - startTime: 211260
     title: Microsoft's Engagement with Open Source
 duration: 5350
+guests: []
 ---
 

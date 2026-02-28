@@ -65,5 +65,7 @@ chapters:
   - startTime: 6791
     title: Outro
 duration: 6936
+guests:
+  - marc-boorshtein
 ---
 

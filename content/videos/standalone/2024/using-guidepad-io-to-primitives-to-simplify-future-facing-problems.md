@@ -82,5 +82,6 @@ chapters:
   - startTime: 1169
     title: Conclusion & Final Thoughts
 duration: 1193
+guests: []
 ---
 
