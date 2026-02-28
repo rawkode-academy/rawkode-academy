@@ -121,5 +121,8 @@ chapters:
   - startTime: 5986
     title: Wrap-up
 duration: 6051
+guests:
+  - budha-bhattacharya
+  - andy-smith
 ---
 
