@@ -31,4 +31,5 @@ technologies:
   - minio
   - seaweedfs
 duration: 369
+guests: []
 ---

@@ -40,6 +40,7 @@ technologies:
   - syft
   - grype
 duration: 1117
+guests: []
 chapters:
   - startTime: 0
     title: "Intro: Keeping your cluster secure Day 2 and beyond"
