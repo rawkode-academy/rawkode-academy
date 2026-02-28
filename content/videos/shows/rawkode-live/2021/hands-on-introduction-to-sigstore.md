@@ -81,5 +81,7 @@ chapters:
   - startTime: 4036
     title: Conclusion
 duration: 4098
+guests:
+  - dan-lorenc
 ---
 
