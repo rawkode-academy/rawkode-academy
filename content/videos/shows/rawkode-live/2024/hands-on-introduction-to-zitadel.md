@@ -115,5 +115,7 @@ chapters:
   - startTime: 4492
     title: 'Conclusion and Call to Action (Community, Free Tier)'
 duration: 4674
+guests:
+  - florian-forster
 ---
 

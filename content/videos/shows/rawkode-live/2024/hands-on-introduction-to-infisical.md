@@ -67,5 +67,7 @@ chapters:
   - startTime: 3087
     title: Conclusion and Call to Action
 duration: 3202
+guests:
+  - vlad-matsiiako
 ---
 

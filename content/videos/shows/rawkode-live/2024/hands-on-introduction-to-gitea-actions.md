@@ -102,5 +102,7 @@ chapters:
   - startTime: 2979
     title: Conclusion and Thank You
 duration: 3066
+guests:
+  - matti-ranta
 ---
 

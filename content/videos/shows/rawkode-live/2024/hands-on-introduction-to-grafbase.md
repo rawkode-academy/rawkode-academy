@@ -46,5 +46,7 @@ chapters:
   - startTime: 5012
     title: Conclusion and Farewell
 duration: 5093
+guests:
+  - fredrik-bjork
 ---
 

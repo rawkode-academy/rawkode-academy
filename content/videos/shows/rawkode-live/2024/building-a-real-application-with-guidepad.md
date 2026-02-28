@@ -59,5 +59,8 @@ chapters:
   - startTime: 6118
     title: Final Thoughts and Farewell
 duration: 6263
+guests:
+  - reginald-wilkerson
+  - mathew-citarella
 ---
 

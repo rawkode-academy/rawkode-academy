@@ -56,5 +56,7 @@ chapters:
   - startTime: 2204
     title: Final Q&A & Conclusion
 duration: 2397
+guests:
+  - michael-irwin
 ---
 
