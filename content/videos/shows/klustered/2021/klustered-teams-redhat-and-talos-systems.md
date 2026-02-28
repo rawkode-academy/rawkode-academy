@@ -92,5 +92,7 @@ chapters:
   - startTime: 6490
     title: Post-Challenge Discussion and Wrap-up
 duration: 6609
+guests:
+  - talos-systems
 ---
 
