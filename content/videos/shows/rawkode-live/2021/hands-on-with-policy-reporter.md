@@ -7,6 +7,7 @@ publishedAt: 2021-04-08T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - kyverno
   - policy-reporter
 show: rawkode-live
 chapters:

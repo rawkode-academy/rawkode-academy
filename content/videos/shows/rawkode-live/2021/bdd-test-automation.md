@@ -6,7 +6,8 @@ description: "In this episode, we'll take a look at writing acceptance tests, in
 publishedAt: 2021-01-19T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - rust
 show: rawkode-live
 chapters:
   - startTime: 0
