@@ -91,5 +91,7 @@ chapters:
   - startTime: 4340
     title: Farewell
 duration: 4373
+guests:
+  - sy-brand
 ---
 
