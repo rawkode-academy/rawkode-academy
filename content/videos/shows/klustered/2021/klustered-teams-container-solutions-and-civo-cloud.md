@@ -112,5 +112,11 @@ chapters:
   - startTime: 4814
     title: Final Wrap-up
 duration: 4880
+guests:
+  - container-solutions
+  - team-members
+  - civo-cloud
+  - dinesh-majrekar
+  - david-fogle
 ---
 
