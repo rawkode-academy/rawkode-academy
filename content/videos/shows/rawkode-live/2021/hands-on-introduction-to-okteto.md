@@ -63,5 +63,7 @@ chapters:
   - startTime: 3496
     title: Conclusion & Community Call to Action
 duration: 3565
+guests:
+  - ramiro-berrelleza
 ---
 
