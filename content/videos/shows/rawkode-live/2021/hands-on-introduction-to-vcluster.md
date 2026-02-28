@@ -71,5 +71,8 @@ chapters:
   - startTime: 3955
     title: Conclusion and Final Remarks
 duration: 4078
+guests:
+  - rich-burroughs
+  - lukas-gentele
 ---
 
