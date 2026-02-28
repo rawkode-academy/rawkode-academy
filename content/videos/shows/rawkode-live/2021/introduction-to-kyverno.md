@@ -89,5 +89,8 @@ chapters:
   - startTime: 4578
     title: Conclusion & Community Resources
 duration: 4695
+guests:
+  - jim-bugwadia
+  - shuting-zhao
 ---
 
