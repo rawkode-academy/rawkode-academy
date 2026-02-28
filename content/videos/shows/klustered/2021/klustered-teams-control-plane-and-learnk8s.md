@@ -175,6 +175,9 @@ chapters:
     title: Conclusion & Farewell
 duration: 4132
 guests:
-  - control-plane
+  - andrew-martin
+  - lewis-denham-parry
+  - chris-nesbitt-smith
+  - salman-iqbal
 ---
 
