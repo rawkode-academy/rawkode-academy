@@ -51,5 +51,7 @@ chapters:
   - startTime: 2705
     title: Community & Closing
 duration: 2831
+guests:
+  - frank-jogeleit
 ---
 
