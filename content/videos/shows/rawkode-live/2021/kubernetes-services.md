@@ -77,5 +77,8 @@ chapters:
   - startTime: 3104
     title: Conclusion
 duration: 3154
+guests:
+  - anais-urlichs
+  - philipp-strube
 ---
 
