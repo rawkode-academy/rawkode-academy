@@ -38,4 +38,5 @@ category: editorial
 technologies:
   - terraform
 duration: 403
+guests: []
 ---
