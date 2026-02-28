@@ -117,5 +117,6 @@ chapters:
   - startTime: 490
     title: Conclusion & What's Next
 duration: 512
+guests: []
 ---
 
