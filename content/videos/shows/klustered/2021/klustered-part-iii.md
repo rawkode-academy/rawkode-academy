@@ -72,5 +72,7 @@ chapters:
   - startTime: 5639
     title: Final Wrap-up
 duration: 5765
+guests:
+  - michael-hausenblas
 ---
 
