@@ -90,5 +90,7 @@ chapters:
   - startTime: 5257
     title: Q&A and Conclusion
 duration: 5436
+guests:
+  - tnis-tiigi
 ---
 
