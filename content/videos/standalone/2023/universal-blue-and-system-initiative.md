@@ -61,5 +61,7 @@ chapters:
   - startTime: 1259
     title: Conclusion & Wrap-up
 duration: 1283
+guests:
+  - brian-ketelsen
 ---
 
