@@ -126,5 +126,8 @@ chapters:
   - startTime: 4522
     title: Checking Containerd and Kubelet Status/Logs
 duration: 4350
+guests:
+  - thom-crowe
+  - jeremy-tanner
 ---
 
