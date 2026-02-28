@@ -81,5 +81,8 @@ chapters:
   - startTime: 6598
     title: Conclusion & Wrap-up
 duration: 6965
+guests:
+  - ciaran-mcnulty
+  - alex-bowers
 ---
 
