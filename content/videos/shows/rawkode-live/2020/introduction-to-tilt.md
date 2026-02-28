@@ -55,5 +55,7 @@ chapters:
   - startTime: 3720
     title: Looking at the available build-in functions
 duration: 4185
+guests:
+  - dan-bentley
 ---
 
