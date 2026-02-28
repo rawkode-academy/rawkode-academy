@@ -117,5 +117,7 @@ chapters:
   - startTime: 6564
     title: Closing Remarks & Thanks
 duration: 6650
+guests:
+  - jurgen-etzlstorfer
 ---
 
