@@ -69,5 +69,7 @@ chapters:
   - startTime: 3911
     title: Conclusion & Resources
 duration: 4005
+guests:
+  - dmitriy-kalinin
 ---
 

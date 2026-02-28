@@ -63,5 +63,7 @@ chapters:
   - startTime: 4031
     title: Final Thoughts and Conclusion
 duration: 4145
+guests:
+  - ganesh-vernekar
 ---
 

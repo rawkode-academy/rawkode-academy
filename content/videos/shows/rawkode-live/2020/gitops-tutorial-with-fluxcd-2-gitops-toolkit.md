@@ -101,5 +101,7 @@ chapters:
   - startTime: 4506
     title: Summary and Conclusion
 duration: 4575
+guests:
+  - stefan-prodan
 ---
 

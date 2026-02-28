@@ -109,5 +109,7 @@ chapters:
   - startTime: 5251
     title: Conclusion and Future Steps (Addressing Remaining Issues)
 duration: 5382
+guests:
+  - ilya-dmitrichenko
 ---
 

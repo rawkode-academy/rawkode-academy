@@ -170,5 +170,7 @@ chapters:
   - startTime: 5198
     title: Wrap-up and Thank You
 duration: 5264
+guests:
+  - alex-ellis
 ---
 

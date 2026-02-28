@@ -140,5 +140,8 @@ chapters:
   - startTime: 5498
     title: Conclusion
 duration: 5535
+guests:
+  - ciaran-mcnulty
+  - alex-bowers
 ---
 
