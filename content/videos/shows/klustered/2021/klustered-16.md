@@ -198,5 +198,9 @@ chapters:
   - startTime: 9732
     title: Discussion and Conclusion
 duration: 6325
+guests:
+  - rachel-leekin
+  - andy-holtzmann
+  - software-math-guy
 ---
 
