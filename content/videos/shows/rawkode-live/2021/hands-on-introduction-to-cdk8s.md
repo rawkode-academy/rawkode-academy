@@ -87,5 +87,7 @@ chapters:
   - startTime: 4308
     title: Conclusion and Farewell
 duration: 4359
+guests:
+  - elad-ben-israel
 ---
 
