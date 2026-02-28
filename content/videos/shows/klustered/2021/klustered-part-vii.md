@@ -98,5 +98,7 @@ chapters:
   - startTime: 8341
     title: Conclusion and Thanks
 duration: 8440
+guests:
+  - guinevere-saenger
 ---
 
