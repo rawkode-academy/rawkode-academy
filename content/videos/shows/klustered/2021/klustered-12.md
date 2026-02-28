@@ -94,5 +94,8 @@ chapters:
   - startTime: 5850
     title: Conclusion & Wrap Up
 duration: 5935
+guests:
+  - jeffrey-sica
+  - chris-carty
 ---
 
