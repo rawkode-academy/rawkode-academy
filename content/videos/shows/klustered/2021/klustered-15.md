@@ -92,5 +92,8 @@ chapters:
   - startTime: 5732
     title: Wrap Up & Conclusion
 duration: 5872
+guests:
+  - marek-counts
+  - abdellfetah-sghiouar
 ---
 
