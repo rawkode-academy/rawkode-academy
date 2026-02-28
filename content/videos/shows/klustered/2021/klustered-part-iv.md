@@ -74,5 +74,7 @@ chapters:
   - startTime: 5593
     title: Conclusion
 duration: 5695
+guests:
+  - lee-briggs
 ---
 
