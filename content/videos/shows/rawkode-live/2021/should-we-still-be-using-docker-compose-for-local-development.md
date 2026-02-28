@@ -84,5 +84,7 @@ chapters:
   - startTime: 6069
     title: Conclusion and Wrap-up
 duration: 6114
+guests:
+  - bret-fisher
 ---
 
