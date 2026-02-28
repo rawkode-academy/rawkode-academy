@@ -52,5 +52,7 @@ chapters:
   - startTime: 5676
     title: Cluster Fixed & Conclusion
 duration: 5756
+guests:
+  - noel-georgi
 ---
 
