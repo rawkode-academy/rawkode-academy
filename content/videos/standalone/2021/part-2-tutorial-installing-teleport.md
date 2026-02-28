@@ -63,5 +63,6 @@ chapters:
   - startTime: 804
     title: Conclusion and Next Steps (Workshop)
 duration: 842
+guests: []
 ---
 

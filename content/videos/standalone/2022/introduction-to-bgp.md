@@ -96,5 +96,7 @@ chapters:
   - startTime: 3204
     title: Conclusion & Preview of Next Session
 duration: 3299
+guests:
+  - jeremy-tanner
 ---
 

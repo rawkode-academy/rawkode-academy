@@ -169,5 +169,7 @@ chapters:
   - startTime: 5613
     title: Conclusion and Thanks
 duration: 5674
+guests:
+  - brian-grant
 ---
 

@@ -147,5 +147,7 @@ chapters:
   - startTime: 5124
     title: Conclusion and Farewell
 duration: 5208
+guests:
+  - darren-shepherd
 ---
 

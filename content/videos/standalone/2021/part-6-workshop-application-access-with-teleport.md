@@ -72,5 +72,6 @@ chapters:
   - startTime: 3847
     title: A Cli Command To Check the Version of the Client and Server
 duration: 3954
+guests: []
 ---
 

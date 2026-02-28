@@ -67,5 +67,7 @@ chapters:
   - startTime: 4362
     title: Conclusion and Thank You
 duration: 4453
+guests:
+  - ariadne-conill
 ---
 

@@ -123,5 +123,6 @@ chapters:
   - startTime: 3004
     title: Closing Remarks
 duration: 3038
+guests: []
 ---
 

@@ -169,5 +169,7 @@ chapters:
   - startTime: 4268
     title: Community Involvement & Conclusion
 duration: 4346
+guests:
+  - mark-campbell
 ---
 
