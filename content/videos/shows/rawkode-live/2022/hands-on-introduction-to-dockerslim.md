@@ -87,5 +87,8 @@ chapters:
   - startTime: 5105
     title: Wrap Up and Community
 duration: 5261
+guests:
+  - kyle-quest
+  - ivan-velichko
 ---
 

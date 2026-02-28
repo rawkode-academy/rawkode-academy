@@ -93,5 +93,7 @@ chapters:
   - startTime: 5835
     title: Conclusion & Future Outlook
 duration: 5967
+guests:
+  - hugo-santos
 ---
 

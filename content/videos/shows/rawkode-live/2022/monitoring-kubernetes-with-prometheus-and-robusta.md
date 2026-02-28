@@ -53,5 +53,7 @@ chapters:
   - startTime: 4485
     title: Conclusion and Farewell
 duration: 4716
+guests:
+  - natan-yellin
 ---
 

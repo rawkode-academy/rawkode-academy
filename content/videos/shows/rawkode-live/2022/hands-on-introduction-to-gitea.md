@@ -145,5 +145,7 @@ chapters:
   - startTime: 3431
     title: Final Remarks & Advanced Features Recap
 duration: 3590
+guests:
+  - matti-ranta
 ---
 

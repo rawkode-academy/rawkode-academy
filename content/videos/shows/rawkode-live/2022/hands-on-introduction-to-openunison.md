@@ -60,5 +60,7 @@ chapters:
   - startTime: 6223
     title: Conclusion
 duration: 6446
+guests:
+  - marc-boorshtein
 ---
 
