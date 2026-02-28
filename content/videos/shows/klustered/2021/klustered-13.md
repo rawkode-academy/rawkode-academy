@@ -78,5 +78,8 @@ chapters:
   - startTime: 21483
     title: Investigating Persistent Honk Image Issue (Static Pod Manifest)
 duration: 4953
+guests:
+  - marques-johansson
+  - mahmoud-saada
 ---
 
