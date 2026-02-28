@@ -81,5 +81,6 @@ chapters:
   - startTime: 527
     title: Closing
 duration: 582
+guests: []
 ---
 

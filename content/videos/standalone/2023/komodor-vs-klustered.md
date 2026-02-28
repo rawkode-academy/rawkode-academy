@@ -56,5 +56,6 @@ chapters:
   - startTime: 1769
     title: Recap and Final Thoughts
 duration: 1815
+guests: []
 ---
 

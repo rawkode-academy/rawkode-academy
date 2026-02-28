@@ -41,5 +41,6 @@ chapters:
   - startTime: 523
     title: Summary and Next Steps
 duration: 560
+guests: []
 ---
 

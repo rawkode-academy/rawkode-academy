@@ -60,5 +60,7 @@ chapters:
   - startTime: 905
     title: Conclusion
 duration: 914
+guests:
+  - brian-ketelsen
 ---
 
