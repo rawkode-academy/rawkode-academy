@@ -113,5 +113,12 @@ chapters:
   - startTime: 4814
     title: Final Wrap-up
 duration: 4880
+guests:
+  - adrian-mouat
+  - charlotte-mach
+  - ricardo-torres-da-costa
+  - saiyam-pathak
+  - dinesh-majrekar
+  - david-fogle
 ---
 

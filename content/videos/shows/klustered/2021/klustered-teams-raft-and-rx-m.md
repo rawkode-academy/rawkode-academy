@@ -125,5 +125,10 @@ chapters:
   - startTime: 4738
     title: Outro and Thanks
 duration: 4833
+guests:
+  - christian-laxina
+  - christopher-hansen
+  - ron-petty
+  - hitesh-sharma
 ---
 

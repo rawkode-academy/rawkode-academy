@@ -175,5 +175,10 @@ chapters:
   - startTime: 7628
     title: Conclusion & Farewell
 duration: 4132
+guests:
+  - andrew-martin
+  - lewis-denham-parry
+  - chris-nesbitt-smith
+  - salman-iqbal
 ---
 

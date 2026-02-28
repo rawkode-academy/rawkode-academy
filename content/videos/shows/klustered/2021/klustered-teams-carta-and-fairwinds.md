@@ -77,5 +77,12 @@ chapters:
   - startTime: 5847
     title: Wrap-up & Conclusion
 duration: 5929
+guests:
+  - mahmoud-saada
+  - mario-loria
+  - rachel-sweeney
+  - andy-suderman
+  - luke-reed
+  - raf-nijskens
 ---
 
