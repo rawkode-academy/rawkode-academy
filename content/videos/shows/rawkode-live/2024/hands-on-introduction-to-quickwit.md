@@ -84,5 +84,7 @@ chapters:
   - startTime: 4708
     title: Conclusion and Wrap-up
 duration: 4754
+guests:
+  - francois-massot
 ---
 

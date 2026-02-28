@@ -82,5 +82,7 @@ chapters:
   - startTime: 3291
     title: Farewell / Outro
 duration: 3360
+guests:
+  - ivan-burazin
 ---
 

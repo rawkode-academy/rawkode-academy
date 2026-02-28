@@ -75,5 +75,7 @@ chapters:
   - startTime: 8931
     title: Conclusion and Planning Part Two
 duration: 5470
+guests:
+  - jack-kleeman
 ---
 

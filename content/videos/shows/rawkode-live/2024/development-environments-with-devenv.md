@@ -63,5 +63,7 @@ chapters:
   - startTime: 4112
     title: Conclusion and Resources
 duration: 4213
+guests:
+  - domen-kozar
 ---
 

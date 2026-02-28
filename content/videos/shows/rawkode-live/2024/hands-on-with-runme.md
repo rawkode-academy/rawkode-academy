@@ -65,5 +65,7 @@ chapters:
   - startTime: 5302
     title: Conclusion and Call to Action
 duration: 5435
+guests:
+  - sebastian-tiedtke
 ---
 

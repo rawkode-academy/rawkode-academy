@@ -72,5 +72,7 @@ chapters:
   - startTime: 8058
     title: Conclusion and Farewell
 duration: 4628
+guests:
+  - romaric-philogene
 ---
 
