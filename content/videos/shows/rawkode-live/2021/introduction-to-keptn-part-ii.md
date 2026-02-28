@@ -77,5 +77,7 @@ chapters:
   - startTime: 4875
     title: Conclusion and Farewell
 duration: 4940
+guests:
+  - jurgen-etzlstorfer
 ---
 
