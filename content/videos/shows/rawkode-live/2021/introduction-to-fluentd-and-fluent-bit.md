@@ -108,5 +108,8 @@ chapters:
   - startTime: 5696
     title: Conclusion & Project Announcements
 duration: 5940
+guests:
+  - anurag-gupta
+  - eduardo-silva
 ---
 
