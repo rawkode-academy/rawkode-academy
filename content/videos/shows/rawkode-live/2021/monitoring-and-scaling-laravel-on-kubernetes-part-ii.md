@@ -67,5 +67,8 @@ chapters:
   - startTime: 4301
     title: Observing Pod Scale Down & Conclusion
 duration: 4580
+guests:
+  - alex-bowers
+  - leo-sjoberg
 ---
 
