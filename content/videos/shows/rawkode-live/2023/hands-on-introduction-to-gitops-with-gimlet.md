@@ -44,5 +44,7 @@ chapters:
   - startTime: 3761
     title: Conclusion
 duration: 3822
+guests:
+  - laszlo-fogas
 ---
 

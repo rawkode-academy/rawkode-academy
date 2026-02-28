@@ -106,5 +106,7 @@ chapters:
   - startTime: 3188
     title: Conclusion
 duration: 3267
+guests:
+  - natan-yellin
 ---
 

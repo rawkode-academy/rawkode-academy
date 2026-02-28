@@ -62,5 +62,8 @@ chapters:
   - startTime: 2828
     title: Conclusion and Get Involved
 duration: 2955
+guests:
+  - noel-georgi
+  - philipp-strube
 ---
 

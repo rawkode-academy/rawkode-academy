@@ -87,5 +87,7 @@ chapters:
   - startTime: 4521
     title: Conclusion and Call to Action
 duration: 4632
+guests:
+  - mark-fussell
 ---
 

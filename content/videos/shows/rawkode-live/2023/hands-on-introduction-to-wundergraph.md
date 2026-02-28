@@ -102,5 +102,7 @@ chapters:
   - startTime: 5354
     title: Conclusion and Final Remarks
 duration: 5582
+guests:
+  - jens-neuse
 ---
 

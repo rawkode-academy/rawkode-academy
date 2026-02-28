@@ -24,7 +24,8 @@ description: >-
 publishedAt: 2023-03-09T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - opa
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -116,5 +117,7 @@ chapters:
   - startTime: 6840
     title: Custom File Permissions Check Example (Using State)
 duration: 4281
+guests:
+  - barak-brudo
 ---
 
