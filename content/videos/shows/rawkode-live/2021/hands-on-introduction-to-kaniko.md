@@ -93,5 +93,7 @@ chapters:
   - startTime: 3101
     title: Conclusion & Farewell
 duration: 3200
+guests:
+  - tejal-desai
 ---
 
