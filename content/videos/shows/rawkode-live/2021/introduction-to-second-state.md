@@ -37,5 +37,7 @@ chapters:
   - startTime: 3480
     title: Permanent and ephemeral storage / state / persistence
 duration: 5210
+guests:
+  - tim-mccallum
 ---
 
