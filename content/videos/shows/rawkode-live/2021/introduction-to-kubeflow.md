@@ -51,5 +51,7 @@ chapters:
   - startTime: 7679
     title: Conclusion and Wrap-up
 duration: 7820
+guests:
+  - michael-tanenbaum
 ---
 
