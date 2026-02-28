@@ -82,5 +82,8 @@ chapters:
   - startTime: 5674
     title: Final Words & Thanks
 duration: 5734
+guests:
+  - borko-djurkovic
+  - matt-turner
 ---
 
