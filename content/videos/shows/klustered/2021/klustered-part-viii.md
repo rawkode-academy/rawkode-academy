@@ -208,5 +208,7 @@ chapters:
   - startTime: 5771
     title: Force Deleting Postgres Pod
 duration: 5811
+guests:
+  - noel-georgi
 ---
 
