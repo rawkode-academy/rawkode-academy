@@ -35,5 +35,7 @@ chapters:
   - startTime: 3810
     title: Seccomp Demo
 duration: 4405
+guests:
+  - taylor-dolezal
 ---
 

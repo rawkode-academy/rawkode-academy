@@ -29,5 +29,7 @@ chapters:
       Load balancing Kubernetes services using a LoadBalancer service (DHCP and
       BGP)
 duration: 3078
+guests:
+  - dan-finneran
 ---
 

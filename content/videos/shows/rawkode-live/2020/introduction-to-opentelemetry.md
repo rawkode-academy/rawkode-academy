@@ -63,5 +63,8 @@ chapters:
   - startTime: 5110
     title: Conclusion and Q&A
 duration: 5212
+guests:
+  - amy-tobey
+  - liz-fong-jones
 ---
 
