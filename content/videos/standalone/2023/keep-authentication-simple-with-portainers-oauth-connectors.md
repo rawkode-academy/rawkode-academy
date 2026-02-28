@@ -46,5 +46,6 @@ chapters:
   - startTime: 528
     title: 'What''s Next: Advanced OAuth Configuration'
 duration: 546
+guests: []
 ---
 
