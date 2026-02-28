@@ -97,5 +97,7 @@ chapters:
   - startTime: 5133
     title: Conclusion & Final Q&A
 duration: 5328
+guests:
+  - marcel-van-lohuizen
 ---
 
