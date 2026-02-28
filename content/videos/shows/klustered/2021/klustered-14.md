@@ -96,5 +96,7 @@ chapters:
   - startTime: 6103
     title: Explanation of Cluster 2 Brokenness & Conclusion
 duration: 6357
+guests:
+  - sid-palas
 ---
 
