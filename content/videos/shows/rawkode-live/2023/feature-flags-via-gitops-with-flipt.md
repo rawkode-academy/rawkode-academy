@@ -53,5 +53,8 @@ chapters:
   - startTime: 4055
     title: Conclusion and Farewell
 duration: 4088
+guests:
+  - mark-phelps
+  - george-macrorie
 ---
 
