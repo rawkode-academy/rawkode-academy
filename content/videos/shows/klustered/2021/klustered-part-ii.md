@@ -110,5 +110,7 @@ chapters:
   - startTime: 6978
     title: Conclusion and Wrap-up
 duration: 7085
+guests:
+  - dan-finneran
 ---
 
