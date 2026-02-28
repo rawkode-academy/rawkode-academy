@@ -77,5 +77,8 @@ chapters:
   - startTime: 7962
     title: Conclusion & How to Get Involved
 duration: 4461
+guests:
+  - vineeth-pothulapati
+  - mat-arye
 ---
 
