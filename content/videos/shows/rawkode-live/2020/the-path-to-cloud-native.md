@@ -64,5 +64,7 @@ chapters:
   - startTime: 2616
     title: Conclusion
 duration: 2710
+guests:
+  - ihor-dvoretskyi
 ---
 

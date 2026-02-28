@@ -82,5 +82,7 @@ chapters:
   - startTime: 5264
     title: Conclusion
 duration: 5335
+guests:
+  - julius-volz
 ---
 

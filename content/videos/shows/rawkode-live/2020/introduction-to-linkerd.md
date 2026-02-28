@@ -115,5 +115,7 @@ chapters:
   - startTime: 7789
     title: Conclusion & Thanks
 duration: 4276
+guests:
+  - thomas-rampelberg
 ---
 

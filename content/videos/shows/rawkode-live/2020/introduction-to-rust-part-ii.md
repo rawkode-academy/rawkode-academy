@@ -113,5 +113,7 @@ chapters:
   - startTime: 8445
     title: Conclusion & Thanks
 duration: 4918
+guests:
+  - manish-goregaokar
 ---
 

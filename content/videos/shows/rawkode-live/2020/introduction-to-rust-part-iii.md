@@ -87,5 +87,7 @@ chapters:
   - startTime: 5537
     title: Conclusion
 duration: 5615
+guests:
+  - jane-lusby
 ---
 
