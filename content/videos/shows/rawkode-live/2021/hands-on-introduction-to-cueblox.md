@@ -51,5 +51,7 @@ chapters:
   - startTime: 4021
     title: Conclusion and Call to Action
 duration: 4335
+guests:
+  - brian-ketelsen
 ---
 
