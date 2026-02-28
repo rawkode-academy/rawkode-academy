@@ -73,5 +73,7 @@ chapters:
   - startTime: 3823
     title: Conclusion and Wrap-up
 duration: 3913
+guests:
+  - jussi-nummelin
 ---
 
