@@ -73,5 +73,7 @@ chapters:
   - startTime: 4677
     title: Conclusion and Farewell
 duration: 4745
+guests:
+  - steve-klabnik
 ---
 

@@ -123,5 +123,7 @@ chapters:
   - startTime: 3937
     title: Conclusion
 duration: 4030
+guests:
+  - kevin-hoffman
 ---
 
