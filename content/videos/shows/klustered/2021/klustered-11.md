@@ -56,5 +56,8 @@ chapters:
   - startTime: 4601
     title: Challenge 2 Fixed & Wrap Up
 duration: 4919
+guests:
+  - thomas-stromberg
+  - kris-nova
 ---
 
