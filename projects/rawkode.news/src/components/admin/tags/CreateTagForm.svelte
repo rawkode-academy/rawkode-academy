@@ -1,4 +1,9 @@
 <script lang="ts">
+  import {
+    TAG_DESCRIPTION_MAX_LENGTH,
+    TAG_NAME_MAX_LENGTH,
+    TAG_SLUG_MAX_LENGTH,
+  } from "@/lib/input-limits";
   import { buttonPrimaryMdClass, inputClass } from "@/lib/ui-classes";
 
   export let createName = "";
@@ -13,8 +18,8 @@
   export let onCreate: () => void = () => {};
 </script>
 
-<section class="rkn-panel space-y-3 p-5">
-  <h2 class="text-sm font-semibold text-foreground">Create optional tag</h2>
+<section class="space-y-3 border-y border-border/75 bg-muted/15 p-5">
+  <h2 class="text-sm font-semibold text-foreground">Create optional topic tag</h2>
 
   <div class="grid gap-3 md:grid-cols-2">
     <div class="space-y-2">
@@ -24,6 +29,7 @@
       <input
         id="create-tag-name"
         value={createName}
+        maxlength={TAG_NAME_MAX_LENGTH}
         on:input={(event) => {
           const target = event.currentTarget;
           if (target instanceof HTMLInputElement) {
@@ -42,6 +48,7 @@
       <input
         id="create-tag-slug"
         value={createSlug}
+        maxlength={TAG_SLUG_MAX_LENGTH}
         on:input={(event) => {
           const target = event.currentTarget;
           if (target instanceof HTMLInputElement) {
@@ -51,7 +58,7 @@
         placeholder="kubernetes"
         class={inputClass}
       />
-      <p class="text-xs text-muted-foreground">Derived from name by default. You can edit it.</p>
+      <p class="text-xs text-muted-foreground">Auto-generated from the name. Edit only if needed.</p>
     </div>
   </div>
 
@@ -62,6 +69,7 @@
     <input
       id="create-tag-description"
       value={createDescription}
+      maxlength={TAG_DESCRIPTION_MAX_LENGTH}
       on:input={(event) => {
         const target = event.currentTarget;
         if (target instanceof HTMLInputElement) {
@@ -74,7 +82,7 @@
   </div>
 
   {#if createError}
-    <p class="text-sm text-destructive">{createError}</p>
+    <p role="alert" class="text-sm text-destructive">{createError}</p>
   {/if}
 
   <button
@@ -83,6 +91,6 @@
     disabled={createPending || !createName.trim()}
     on:click={onCreate}
   >
-    {createPending ? "Creating..." : "Create tag"}
+    {createPending ? "Creating tag..." : "Create topic tag"}
   </button>
 </section>

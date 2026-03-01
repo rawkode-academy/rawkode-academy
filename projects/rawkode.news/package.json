@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "qa:headless": "node scripts/qa/headless-qa.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
@@ -18,14 +19,16 @@
     "drizzle-orm": "^0.45.1",
     "fuse.js": "^7.1.0",
     "marked": "^17.0.3",
-    "svelte": "^5.53.5",
+    "svelte": "^5.53.6",
     "tailwindcss": "^4.2.1",
     "tldts": "^7.0.23"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
     "@cloudflare/workers-types": "^4.20260304.0",
+    "axe-core": "^4.11.0",
     "drizzle-kit": "^0.31.9",
+    "playwright": "^1.56.1",
     "typescript": "^5.9.3"
   }
 }

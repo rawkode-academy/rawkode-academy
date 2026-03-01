@@ -3,6 +3,12 @@ import { getDb } from "@/db";
 import { comments, postTags, posts, tags } from "@/db/schema";
 import type { ApiComment, ApiPost, ApiTag, FeedType, Paginated } from "@/lib/contracts";
 import { createEntityId } from "@/lib/ids";
+import {
+  COMMENT_BODY_MAX_LENGTH,
+  POST_BODY_MAX_LENGTH,
+  POST_TITLE_MAX_LENGTH,
+  POST_URL_MAX_LENGTH,
+} from "@/lib/input-limits";
 import { getPermissions } from "@/lib/permissions";
 import { RequestError } from "@/lib/server/errors";
 import {
@@ -19,11 +25,47 @@ import type { TypedEnv } from "@/types/service-bindings";
 const CORE_TAG_RANK = new Map<string, number>(
   coreTagSlugs.map((slug, index) => [slug, index]),
 );
+const ALLOWED_POST_URL_PROTOCOLS = new Set(["http:", "https:"]);
+const SEARCH_QUERY_MIN_LENGTH = 2;
+const SEARCH_QUERY_MAX_LENGTH = 200;
+const SEARCH_RESULTS_LIMIT_MAX = 40;
+const SEARCH_BODY_PREVIEW_MAX = 600;
+
+const normalizePostUrl = (value: string | null) => {
+  if (!value) {
+    return null;
+  }
+  if (value.length > POST_URL_MAX_LENGTH) {
+    throw new RequestError(
+      `URL must be ${POST_URL_MAX_LENGTH} characters or fewer`,
+      400,
+    );
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (!ALLOWED_POST_URL_PROTOCOLS.has(parsed.protocol)) {
+      throw new RequestError("URL must use http:// or https://", 400);
+    }
+    return parsed.toString();
+  } catch (error) {
+    if (error instanceof RequestError) {
+      throw error;
+    }
+    throw new RequestError("URL is invalid", 400);
+  }
+};
 
 const normalizeTimestamp = (value: Date | number) => {
   const date = value instanceof Date ? value : new Date(value);
   return date.toISOString();
 };
+
+const normalizeSearchQuery = (value: string) =>
+  value
+    .trim()
+    .slice(0, SEARCH_QUERY_MAX_LENGTH)
+    .toLowerCase();
 
 const sortApiTags = (items: ApiTag[]) => {
   return [...items].sort((left, right) => {
@@ -293,6 +335,12 @@ export const createPost = async (
   if (!title) {
     throw new RequestError("Title is required", 400);
   }
+  if (title.length > POST_TITLE_MAX_LENGTH) {
+    throw new RequestError(
+      `Title must be ${POST_TITLE_MAX_LENGTH} characters or fewer`,
+      400,
+    );
+  }
 
   const normalizedTagSlugs = normalizeTagSlugs(input.tagSlugs);
   if (normalizedTagSlugs.length === 0) {
@@ -344,8 +392,14 @@ export const createPost = async (
     }
   }
 
-  const url = input.url?.trim() || null;
+  const url = normalizePostUrl(input.url?.trim() || null);
   const body = input.body?.trim() || null;
+  if (body && body.length > POST_BODY_MAX_LENGTH) {
+    throw new RequestError(
+      `Summary must be ${POST_BODY_MAX_LENGTH} characters or fewer`,
+      400,
+    );
+  }
   const postId = createEntityId();
 
   await db.insert(posts).values({
@@ -390,6 +444,37 @@ export const createComment = async (
   if (!body) {
     throw new RequestError("Comment body is required", 400);
   }
+  if (body.length > COMMENT_BODY_MAX_LENGTH) {
+    throw new RequestError(
+      `Comment must be ${COMMENT_BODY_MAX_LENGTH} characters or fewer`,
+      400,
+    );
+  }
+
+  const [targetPost] = await db
+    .select({ id: posts.id })
+    .from(posts)
+    .where(eq(posts.id, input.postId))
+    .limit(1);
+
+  if (!targetPost) {
+    throw new RequestError("Post not found", 404);
+  }
+
+  if (input.parentId) {
+    const [parent] = await db
+      .select({ id: comments.id, postId: comments.postId })
+      .from(comments)
+      .where(eq(comments.id, input.parentId))
+      .limit(1);
+
+    if (!parent) {
+      throw new RequestError("Parent comment not found", 404);
+    }
+    if (parent.postId !== input.postId) {
+      throw new RequestError("Parent comment must belong to the same post", 400);
+    }
+  }
 
   const [created] = await db
     .insert(comments)
@@ -418,3 +503,42 @@ export const createComment = async (
 
 export const parseTagSearchParam = (value: string | null) =>
   parseTagSlugs(value);
+
+export const searchPosts = async (
+  env: TypedEnv,
+  query: string,
+  limit = SEARCH_RESULTS_LIMIT_MAX,
+) => {
+  const normalizedQuery = normalizeSearchQuery(query);
+  if (normalizedQuery.length < SEARCH_QUERY_MIN_LENGTH) {
+    return [] as ApiPost[];
+  }
+
+  const db = getDb(env);
+  const safeLimit = Math.max(1, Math.min(Math.floor(limit), SEARCH_RESULTS_LIMIT_MAX));
+  const containsMatch = `%${normalizedQuery}%`;
+  const prefixMatch = `${normalizedQuery}%`;
+
+  const scoreExpr = sql<number>`
+    (
+      CASE WHEN lower(${posts.title}) LIKE ${prefixMatch} THEN 6 ELSE 0 END +
+      CASE WHEN lower(${posts.title}) LIKE ${containsMatch} THEN 4 ELSE 0 END +
+      CASE WHEN lower(COALESCE(${posts.author}, '')) LIKE ${containsMatch} THEN 2 ELSE 0 END +
+      CASE WHEN lower(COALESCE(${posts.url}, '')) LIKE ${containsMatch} THEN 2 ELSE 0 END +
+      CASE WHEN lower(COALESCE(${posts.body}, '')) LIKE ${containsMatch} THEN 1 ELSE 0 END
+    )
+  `;
+
+  const rows = await db
+    .select()
+    .from(posts)
+    .where(sql`${scoreExpr} > 0`)
+    .orderBy(desc(scoreExpr), desc(posts.createdAt))
+    .limit(safeLimit);
+
+  const serialized = await serializePosts(env, rows);
+  return serialized.map((item) => ({
+    ...item,
+    body: item.body?.slice(0, SEARCH_BODY_PREVIEW_MAX) ?? null,
+  }));
+};

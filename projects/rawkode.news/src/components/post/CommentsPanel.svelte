@@ -1,6 +1,7 @@
 <script lang="ts">
   import { actions } from "astro:actions";
   import { buildCommentTree, commentAnchor, type ApiComment, type CommentNode } from "@/lib/contracts";
+  import { COMMENT_BODY_MAX_LENGTH } from "@/lib/input-limits";
   import { buttonPrimarySmClass, buttonSecondarySmClass, textareaClass } from "@/lib/ui-classes";
   import CommentBranch from "@/components/post/CommentBranch.svelte";
   import { onMount, tick } from "svelte";
@@ -87,6 +88,13 @@
       }
 
       return true;
+    } catch (error) {
+      if (error instanceof Error && error.message.trim()) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = "Could not post comment. Check your connection and try again.";
+      }
+      return false;
     } finally {
       isSubmitting = false;
     }
@@ -107,13 +115,19 @@
 </script>
 
 {#if canReply}
-  <div class="space-y-3 rounded-none border border-border bg-muted/30 p-4">
+  <div class="space-y-3 border-y border-border/70 bg-muted/15 px-4 py-4">
     <textarea
       bind:value={newComment}
-      placeholder="Add context, pushback, or supporting links."
+      placeholder="Share your take, include evidence, and link sources when helpful."
+      maxlength={COMMENT_BODY_MAX_LENGTH}
+      aria-describedby="comment-body-hint"
+      dir="auto"
       class={`${textareaClass} min-h-[120px]`}
       disabled={isSubmitting}
     ></textarea>
+    <p id="comment-body-hint" class="text-xs text-muted-foreground">
+      Up to {COMMENT_BODY_MAX_LENGTH} characters. Keep it concrete and respectful.
+    </p>
     <div class="flex items-center justify-start">
       <button
         type="button"
@@ -121,13 +135,13 @@
         disabled={isSubmitting || !newComment.trim()}
         on:click={submitTopLevel}
       >
-        {isSubmitting ? "Posting..." : "Post comment"}
+        {isSubmitting ? "Posting comment…" : "Add comment"}
       </button>
     </div>
   </div>
 {:else}
-  <div class="rounded-none border border-border bg-muted/25 p-4 text-sm text-muted-foreground">
-    <p>Sign in to join the discussion.</p>
+  <div class="border-y border-border/70 bg-muted/15 px-4 py-4 text-sm text-muted-foreground">
+    <p>Sign in to add a comment.</p>
     <div class="mt-3">
       <a
         href={signInUrl}
@@ -135,19 +149,19 @@
         data-astro-reload
         class={buttonSecondarySmClass}
       >
-        Sign in
+        Sign in to comment
       </a>
     </div>
   </div>
 {/if}
 
 {#if errorMessage}
-  <p class="text-sm text-destructive">{errorMessage}</p>
+  <p role="alert" class="text-sm text-destructive">{errorMessage}</p>
 {/if}
 
-<div class="mt-2 space-y-4">
+<div class="mt-3 space-y-3">
   {#if thread.length === 0}
-    <p class="text-sm text-muted-foreground">No comments yet.</p>
+    <p class="text-sm text-muted-foreground">No comments yet. Start the discussion.</p>
   {/if}
 
   {#each thread as comment (comment.id)}

@@ -113,20 +113,76 @@ export const postPath = (post: { id: string }) => `/item/${post.id}`;
 
 export const commentAnchor = (comment: ApiComment) => `c-${comment.id}`;
 
-export const formatRelativeTime = (value: string | number) => {
+const numberFormatters = new Map<string, Intl.NumberFormat>();
+const relativeTimeFormatters = new Map<string, Intl.RelativeTimeFormat>();
+
+const getNumberFormatter = (locale?: string) => {
+  const key = locale || "default";
+  if (!numberFormatters.has(key)) {
+    numberFormatters.set(key, new Intl.NumberFormat(locale));
+  }
+  return numberFormatters.get(key)!;
+};
+
+const getRelativeTimeFormatter = (locale?: string) => {
+  const key = locale || "default";
+  if (!relativeTimeFormatters.has(key)) {
+    relativeTimeFormatters.set(
+      key,
+      new Intl.RelativeTimeFormat(locale, { numeric: "auto" }),
+    );
+  }
+  return relativeTimeFormatters.get(key)!;
+};
+
+const normalizeCount = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.max(0, Math.floor(value));
+};
+
+export const formatInteger = (value: number, locale?: string) =>
+  getNumberFormatter(locale).format(normalizeCount(value));
+
+export const formatCountLabel = (
+  value: number,
+  singular: string,
+  plural: string,
+  locale?: string,
+) => {
+  const count = normalizeCount(value);
+  const word = count === 1 ? singular : plural;
+  return `${formatInteger(count, locale)} ${word}`;
+};
+
+export const formatRelativeTime = (value: string | number, locale?: string) => {
   const timestamp = typeof value === "string" ? Date.parse(value) : Number(value);
   if (!Number.isFinite(timestamp)) {
     return "just now";
   }
-  const diff = Date.now() - timestamp;
+
+  const deltaMs = timestamp - Date.now();
+  const absDeltaMs = Math.abs(deltaMs);
   const minute = 60_000;
   const hour = 60 * minute;
   const day = 24 * hour;
 
-  if (diff < minute) return "just now";
-  if (diff < hour) return `${Math.floor(diff / minute)}m ago`;
-  if (diff < day) return `${Math.floor(diff / hour)}h ago`;
-  return `${Math.floor(diff / day)}d ago`;
+  const formatter = getRelativeTimeFormatter(locale);
+
+  if (absDeltaMs < minute) {
+    return formatter.format(0, "second");
+  }
+
+  if (absDeltaMs < hour) {
+    return formatter.format(Math.round(deltaMs / minute), "minute");
+  }
+
+  if (absDeltaMs < day) {
+    return formatter.format(Math.round(deltaMs / hour), "hour");
+  }
+
+  return formatter.format(Math.round(deltaMs / day), "day");
 };
 
 export const buildCommentTree = (items: ApiComment[]): CommentNode[] => {

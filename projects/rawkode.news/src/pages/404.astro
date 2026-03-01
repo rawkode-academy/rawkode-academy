@@ -25,18 +25,18 @@ const { session, permissions } = await getSessionWithPermissions(env, Astro.cook
       <section class="rkn-panel space-y-5 p-6 sm:p-7">
         <div class="space-y-2">
           <p class="rkn-kicker">Page unavailable</p>
-          <h1 class="rkn-page-title">This page is unavailable</h1>
+          <h1 class="rkn-page-title">We couldn't find that page</h1>
           <p class="text-sm text-muted-foreground">The link may be outdated, or the page may have moved.</p>
         </div>
 
-        <p class="font-mono text-xs text-muted-foreground">Requested path: {Astro.url.pathname}</p>
+        <p class="break-all font-mono text-xs text-muted-foreground">Requested path: {Astro.url.pathname}</p>
 
         <div class="flex flex-wrap items-center gap-2">
           <a
             href="/"
             class={buttonPrimarySmClass}
           >
-            Go back to feed
+            Go to latest posts
           </a>
         </div>
       </section>

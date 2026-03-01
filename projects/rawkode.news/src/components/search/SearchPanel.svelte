@@ -1,13 +1,18 @@
 <script lang="ts">
-  import Fuse, { type FuseResult } from "fuse.js";
   import { onMount } from "svelte";
-  import PostRowSvelte from "@/components/feed/PostRowSvelte.svelte";
-  import { parseApiPostList, type ApiPost } from "@/lib/contracts";
-  import { inputClass } from "@/lib/ui-classes";
+  import { formatInteger, parseApiPostList, type ApiPost } from "@/lib/contracts";
+  import {
+    buttonGhostSmClass,
+    buttonPrimarySmClass,
+    buttonSecondarySmClass,
+    inputClass,
+  } from "@/lib/ui-classes";
 
   type SearchPost = ApiPost;
+  type SearchStatusTone = "idle" | "loading" | "success" | "warning" | "error";
 
   const SEARCH_DEBOUNCE_MS = 350;
+  const SEARCH_REQUEST_TIMEOUT_MS = 8_000;
   const MIN_QUERY_LENGTH = 2;
   const MAX_QUERY_LENGTH = 200;
   const SEARCH_RESULT_LIMIT = 40;
@@ -17,17 +22,32 @@
 
   let query = "";
   let debouncedQuery = "";
-  let statusMessage = "Type a query to start searching.";
+  let statusMessage = "";
+  let statusTone: SearchStatusTone = "idle";
+  let hasRecoverableError = false;
   let results: SearchPost[] = [];
+  let noResultsQuery = "";
   let fromPath = "/search";
+  let isSearching = false;
+  let PostRowComponent: (typeof import("@/components/feed/PostRowSvelte.svelte"))["default"] | null = null;
 
-  let loadingIndex = false;
-  let indexReady = false;
-  let fuse: Fuse<SearchPost> | null = null;
-
+  let activeController: AbortController | null = null;
+  let activeRequestToken = 0;
   let timer = 0;
+  let postRowLoader: Promise<void> | null = null;
 
   const normalizeQuery = (value: string) => value.trim().slice(0, MAX_QUERY_LENGTH);
+  const isOffline = () => typeof navigator !== "undefined" && !navigator.onLine;
+
+  const setStatus = (
+    message: string,
+    tone: SearchStatusTone = "idle",
+    recoverable = false,
+  ) => {
+    statusMessage = message;
+    statusTone = tone;
+    hasRecoverableError = recoverable;
+  };
 
   const updateLocation = (nextQuery: string) => {
     const next = new URLSearchParams(window.location.search);
@@ -43,76 +63,150 @@
     fromPath = `${window.location.pathname}${window.location.search}`;
   };
 
-  const ensureIndex = async () => {
-    if (indexReady || loadingIndex) {
+  const getApiErrorMessage = (status: number) => {
+    if (status === 401) return "Sign in to search posts.";
+    if (status === 403) return "Your account does not have access to search.";
+    if (status === 429) return "Too many search requests. Wait a few seconds and try again.";
+    if (status >= 500) return "Search is temporarily unavailable. Please try again.";
+    return `Search failed (${status}). Please try again.`;
+  };
+
+  const ensurePostRowComponent = async () => {
+    if (PostRowComponent) {
+      return;
+    }
+    if (!postRowLoader) {
+      postRowLoader = import("@/components/feed/PostRowSvelte.svelte")
+        .then((module) => {
+          PostRowComponent = module.default;
+        })
+        .finally(() => {
+          postRowLoader = null;
+        });
+    }
+    await postRowLoader;
+  };
+
+  const runSearch = async () => {
+    const token = ++activeRequestToken;
+    const nextQuery = normalizeQuery(debouncedQuery);
+    updateLocation(nextQuery);
+    results = [];
+    noResultsQuery = "";
+
+    if (!nextQuery) {
+      setStatus("", "idle");
       return;
     }
 
-    loadingIndex = true;
-    statusMessage = "Loading search index...";
+    if (nextQuery.length < MIN_QUERY_LENGTH) {
+      setStatus(`Use at least ${MIN_QUERY_LENGTH} characters to search.`, "warning");
+      return;
+    }
+
+    if (isOffline()) {
+      setStatus("You're offline. Reconnect, then run search again.", "error", true);
+      return;
+    }
+
+    activeController?.abort("superseded");
+    const controller = new AbortController();
+    activeController = controller;
+    isSearching = true;
+    setStatus("Searching…", "loading");
+
+    let timeoutId = 0;
 
     try {
-      const response = await fetch(searchIndexEndpoint, { headers: { Accept: "application/json" } });
+      timeoutId = window.setTimeout(() => {
+        controller.abort("timeout");
+      }, SEARCH_REQUEST_TIMEOUT_MS);
+
+      const response = await fetch(
+        `${searchIndexEndpoint}?q=${encodeURIComponent(nextQuery)}&limit=${SEARCH_RESULT_LIMIT}`,
+        {
+          headers: { Accept: "application/json" },
+          signal: controller.signal,
+        },
+      );
+
+      if (token !== activeRequestToken) {
+        return;
+      }
+
       if (!response.ok) {
-        throw new Error("Failed to load search index");
+        setStatus(getApiErrorMessage(response.status), "error", true);
+        return;
       }
 
       const payload = await response.json();
       const posts = parseApiPostList(payload);
       if (!posts) {
-        throw new Error("Invalid search index response");
+        setStatus("Search returned an unexpected response. Please try again.", "error", true);
+        return;
       }
-      fuse = new Fuse(posts, {
-        includeScore: true,
-        threshold: 0.32,
-        ignoreLocation: true,
-        minMatchCharLength: MIN_QUERY_LENGTH,
-        keys: [
-          { name: "title", weight: 0.5 },
-          { name: "body", weight: 0.3 },
-          { name: "author", weight: 0.12 },
-          { name: "url", weight: 0.08 },
-        ],
-      });
 
-      indexReady = true;
-    } catch {
-      statusMessage = "Could not load search data. Try again shortly.";
+      if (posts.length === 0) {
+        noResultsQuery = nextQuery;
+        setStatus(`No posts matched “${nextQuery}”.`, "warning");
+        return;
+      }
+
+      if (!PostRowComponent) {
+        void ensurePostRowComponent();
+      }
+      results = posts;
+      setStatus("", "success");
+    } catch (error) {
+      if (token !== activeRequestToken) {
+        return;
+      }
+
+      if (error instanceof DOMException && error.name === "AbortError") {
+        if (isOffline()) {
+          setStatus("Connection dropped while searching. Check your network and try again.", "error", true);
+        } else if (controller.signal.reason === "timeout") {
+          setStatus("Search took too long. Please try again.", "error", true);
+        }
+        return;
+      }
+
+      setStatus("Search failed. Please try again.", "error", true);
     } finally {
-      loadingIndex = false;
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+      if (activeController === controller) {
+        activeController = null;
+      }
+      if (token === activeRequestToken) {
+        isSearching = false;
+      }
     }
   };
 
-  const runSearch = async () => {
-    const nextQuery = normalizeQuery(debouncedQuery);
-    updateLocation(nextQuery);
+  const retrySearch = async () => {
+    await runSearch();
+  };
+
+  const commitSearch = () => {
+    window.clearTimeout(timer);
+    debouncedQuery = normalizeQuery(query);
+    void runSearch();
+  };
+
+  const clearSearch = () => {
+    window.clearTimeout(timer);
+    activeRequestToken += 1;
+    activeController?.abort("cleared");
+    activeController = null;
+    isSearching = false;
+    query = "";
+    debouncedQuery = "";
     results = [];
-
-    if (!nextQuery) {
-      statusMessage = "Type a query to start searching.";
-      return;
-    }
-
-    if (nextQuery.length < MIN_QUERY_LENGTH) {
-      statusMessage = `Type at least ${MIN_QUERY_LENGTH} characters to search.`;
-      return;
-    }
-
-    if (!fuse) {
-      await ensureIndex();
-      if (!fuse) {
-        return;
-      }
-    }
-
-    const matches = fuse.search(nextQuery, { limit: SEARCH_RESULT_LIMIT });
-    if (matches.length === 0) {
-      statusMessage = `No matches for “${nextQuery}”.`;
-      return;
-    }
-
-    results = matches.map((entry: FuseResult<SearchPost>) => entry.item);
-    statusMessage = `${results.length} results`;
+    noResultsQuery = "";
+    updateLocation("");
+    setStatus("", "idle");
   };
 
   const handleInput = (event: Event) => {
@@ -130,45 +224,122 @@
   };
 
   onMount(() => {
+    const handleOffline = () => {
+      setStatus("You're offline. Search is unavailable until you're back online.", "error", true);
+    };
+    const handleOnline = () => {
+      if (hasRecoverableError && normalizeQuery(query).length >= MIN_QUERY_LENGTH) {
+        setStatus("You're back online. Run search again.", "warning", true);
+      }
+    };
+
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+
     const params = new URLSearchParams(window.location.search);
     query = normalizeQuery(params.get("q") ?? initialQuery);
     debouncedQuery = query;
     fromPath = `${window.location.pathname}${window.location.search}`;
-    void runSearch();
+    if (debouncedQuery.length >= MIN_QUERY_LENGTH) {
+      void runSearch();
+    }
 
     return () => {
       window.clearTimeout(timer);
+      activeController?.abort("component-unmounted");
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
     };
   });
 </script>
 
-<div class="rkn-panel space-y-3 p-5">
-  <div class="space-y-2">
-    <label for="search-posts-input" class="text-sm font-semibold text-foreground">
-      Query
-    </label>
-    <input
-      id="search-posts-input"
-      value={query}
-      class={inputClass}
-      placeholder="Search by title, topic, author, or source"
-      autocomplete="off"
-      on:input={handleInput}
-    />
-  </div>
+<div class="space-y-3 border-b border-border/75 pb-4">
+  <form class="space-y-3" on:submit|preventDefault={commitSearch}>
+    <div class="space-y-2">
+      <label for="search-posts-input" class="text-sm font-semibold text-foreground">
+        Search posts
+      </label>
+      <input
+        id="search-posts-input"
+        value={query}
+        maxlength={MAX_QUERY_LENGTH}
+        aria-describedby={statusMessage ? "search-hint search-status" : "search-hint"}
+        class={inputClass}
+        placeholder="Try: kubernetes scheduler, cilium, platform engineering"
+        autocomplete="off"
+        on:input={handleInput}
+      />
+    </div>
 
-  <p id="search-status" class="text-sm text-muted-foreground">{statusMessage}</p>
+    <div class="text-xs text-muted-foreground">
+      <p id="search-hint">Search across titles, summaries, authors, and source domains.</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button
+        type="submit"
+        class={buttonPrimarySmClass}
+        disabled={isSearching || normalizeQuery(query).length === 0}
+      >
+        {isSearching ? "Searching…" : "Search"}
+      </button>
+      {#if query || debouncedQuery || results.length > 0}
+        <button
+          type="button"
+          class={buttonGhostSmClass}
+          on:click={clearSearch}
+        >
+          Clear
+        </button>
+      {/if}
+      {#if hasRecoverableError}
+        <button type="button" class={buttonSecondarySmClass} on:click={retrySearch}>
+          Retry
+        </button>
+      {/if}
+    </div>
+
+    {#if statusMessage}
+      <p
+        id="search-status"
+        role={statusTone === "error" ? "alert" : "status"}
+        aria-live={statusTone === "error" ? "assertive" : "polite"}
+        class={statusTone === "error" ? "text-sm text-destructive" : "text-sm text-muted-foreground"}
+      >
+        {statusMessage}
+      </p>
+    {/if}
+  </form>
 </div>
 
+<div class="rkn-panel mt-2 overflow-hidden" aria-busy={isSearching ? "true" : "false"}>
 {#if results.length > 0}
-  <div class="rkn-panel mt-2 overflow-hidden">
-    <div id="search-results" class="rkn-post-list">
-      {#each results as post, index (post.id)}
-        <PostRowSvelte post={post} from={fromPath} />
-        {#if index < results.length - 1}
-          <hr class="rkn-post-row-separator border-border/75" />
-        {/if}
-      {/each}
+    {#if PostRowComponent}
+      <div id="search-results" class="rkn-post-list">
+        {#each results as post, index (post.id)}
+          <svelte:component this={PostRowComponent} post={post} from={fromPath} />
+          {#if index < results.length - 1}
+            <hr class="rkn-post-row-separator border-border/75" />
+          {/if}
+        {/each}
+      </div>
+    {:else}
+      <div class="space-y-2 px-[clamp(1rem,2.1vw,1.25rem)] py-6 text-sm text-muted-foreground">
+        <p>Loading results…</p>
+      </div>
+    {/if}
+  {:else if hasRecoverableError}
+    <div class="space-y-2 px-[clamp(1rem,2.1vw,1.25rem)] py-6 text-sm text-destructive">
+      <p>Use Retry above to run this search again.</p>
     </div>
-  </div>
-{/if}
+  {:else if noResultsQuery}
+    <div class="space-y-2 px-[clamp(1rem,2.1vw,1.25rem)] py-6 text-sm text-muted-foreground">
+      <p class="text-xs">Try broader keywords or search by author/source domain.</p>
+    </div>
+  {:else}
+    <div class="space-y-2 px-[clamp(1rem,2.1vw,1.25rem)] py-6 text-sm text-muted-foreground">
+      <p>Search by keyword, author, or source domain.</p>
+      <p class="text-xs">Results are limited to the top {formatInteger(SEARCH_RESULT_LIMIT)} matches.</p>
+    </div>
+  {/if}
+</div>

@@ -1,6 +1,13 @@
 ---
 import type { StoredSession } from "@/lib/auth";
-import { buttonPrimarySmClass, buttonSecondarySmClass } from "@/lib/ui-classes";
+import {
+  buttonPrimarySmClass,
+  buttonSecondarySmClass,
+  interactiveControlClass,
+  menuPanelItemClass,
+  shellNavItemSmClass,
+  shellNavStrongItemSmClass,
+} from "@/lib/ui-classes";
 
 type Props = {
   pathname: string;
@@ -37,27 +44,27 @@ const displayInitials = displayName
 ---
 
 <div class="flex min-h-screen flex-col">
-  <header class="rkn-shell-header sticky top-0 z-50">
+  <header class="rkn-shell-header rkn-no-print sticky top-0 z-50">
     <div class="rkn-container py-3.5">
       <div class="flex items-center justify-between gap-3">
         <div class="min-w-0 md:flex md:items-center md:gap-4">
-          <a href="/" class="inline-flex min-w-0 shrink-0 items-center gap-3">
-            <div class="grid h-10 w-12 shrink-0 place-items-center rounded-none bg-primary text-xs font-semibold tracking-wide text-primary-foreground">
-              RKN
+          <a href="/" class="rkn-brand-link inline-flex min-w-0 shrink-0 items-center gap-3 rounded-none outline-none transition-[transform,opacity] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 focus-visible:ring-ring/60">
+            <div class="rkn-brand-block grid h-[var(--rkn-control-md-height)] min-w-[3.2rem] shrink-0 place-items-center rounded-none px-1">
+              <span class="rkn-brand-mark" aria-hidden="true">RKN</span>
             </div>
             <div class="min-w-0">
               <p class="truncate font-display text-base leading-tight font-semibold">Rawkode News</p>
             </div>
           </a>
 
-          <nav class="hidden items-center gap-1 border-l border-border/80 pl-4 md:flex">
+          <nav class="hidden items-center gap-1 rkn-nav-divider md:flex">
             {
               navItems.map((item) => (
                 <a
                   href={item.href}
                   class:list={[
                     "rkn-nav-tab",
-                    isActive(item.href) && "border-primary/35 bg-primary/10 text-foreground",
+                    isActive(item.href) && "rkn-nav-tab-active",
                   ]}
                 >
                   {item.label}
@@ -72,33 +79,44 @@ const displayInitials = displayName
             <>
               <a
                 href="/submit"
-                class={`${buttonPrimarySmClass} h-10 min-w-36`}
+                class={`${buttonPrimarySmClass} min-w-[11rem]`}
               >
-                Create post
+                Create a post
               </a>
               <details class="relative">
-                <summary class="inline-flex h-10 min-w-36 cursor-pointer list-none items-center justify-between gap-2 rounded-none border border-border bg-card px-3 text-sm font-medium hover:border-primary/35 hover:bg-accent [&::-webkit-details-marker]:hidden">
+                <summary aria-label="Open profile menu" class={`inline-flex h-[var(--rkn-control-md-height)] min-w-[11rem] cursor-pointer list-none items-center justify-between gap-2 rounded-none border border-border bg-card px-[var(--rkn-control-inline-padding)] text-sm font-medium ${interactiveControlClass} hover:border-primary/35 hover:bg-accent [&::-webkit-details-marker]:hidden`}>
                   {user.image ? (
-                    <img src={user.image} alt={displayName} class="h-6 w-6 rounded-none object-cover" />
+                    <img
+                      src={user.image}
+                      alt={displayName}
+                      width="24"
+                      height="24"
+                      loading="lazy"
+                      decoding="async"
+                      class="h-6 w-6 rounded-none object-cover"
+                    />
                   ) : (
                     <span class="grid h-6 w-6 place-items-center rounded-none bg-secondary text-[11px] font-semibold">
                       {displayInitials || "ME"}
                     </span>
                   )}
-                  <span class="hidden truncate sm:inline">{displayName}</span>
+                  <span class="hidden truncate sm:inline" dir="auto">{displayName}</span>
                   <span class="text-[10px] text-muted-foreground">▾</span>
                 </summary>
-                <div class="absolute right-0 mt-2 w-72 max-w-[92vw] overflow-hidden rounded-none border border-border bg-card">
+                <div
+                  class="absolute mt-2 w-72 max-w-[92vw] overflow-hidden rounded-none border border-border bg-card"
+                  style="inset-inline-end: 0"
+                >
                   <div class="border-b border-border px-4 py-3">
-                    <p class="text-sm font-semibold text-foreground">{displayName}</p>
+                    <p class="text-sm font-semibold text-foreground" dir="auto">{displayName}</p>
                     {user.email ? <p class="break-all text-xs text-muted-foreground">{user.email}</p> : null}
                   </div>
                   <div class="p-1.5 text-sm">
-                    <a href="/profile" class="block rounded-none px-3 py-2 text-foreground/80 hover:bg-accent hover:text-foreground">
+                    <a href="/profile" class={menuPanelItemClass}>
                       Profile
                     </a>
                     {isAdmin ? (
-                      <a href="/admin/tags" class="block rounded-none px-3 py-2 text-foreground/80 hover:bg-accent hover:text-foreground">
+                      <a href="/admin/tags" class={menuPanelItemClass}>
                         Admin tags
                       </a>
                     ) : null}
@@ -106,7 +124,7 @@ const displayInitials = displayName
                       href={signOutUrl}
                       data-astro-prefetch="false"
                       data-astro-reload
-                      class="block rounded-none px-3 py-2 text-foreground/80 hover:bg-accent hover:text-foreground"
+                      class={menuPanelItemClass}
                     >
                       Sign out
                     </a>
@@ -127,10 +145,13 @@ const displayInitials = displayName
         </div>
 
         <details class="relative md:hidden">
-          <summary class="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-none border border-border bg-card text-muted-foreground hover:bg-accent [&::-webkit-details-marker]:hidden">
+          <summary aria-label="Open navigation menu" class={`grid size-[var(--rkn-control-md-height)] cursor-pointer list-none place-items-center rounded-none border border-border bg-card text-muted-foreground ${interactiveControlClass} hover:bg-accent [&::-webkit-details-marker]:hidden`}>
             <span class="text-xs">☰</span>
           </summary>
-          <div class="absolute right-0 mt-2 w-[min(22rem,90vw)] rounded-none border border-border bg-card">
+          <div
+            class="absolute mt-2 w-[min(22rem,90vw)] rounded-none border border-border bg-card"
+            style="inset-inline-end: 0"
+          >
             <div class="rkn-container space-y-2 py-3">
               <div class="grid gap-1.5">
                 {
@@ -138,9 +159,9 @@ const displayInitials = displayName
                     <a
                       href={item.href}
                       class:list={[
-                        "inline-flex h-10 items-center rounded-none px-3 text-sm font-semibold",
+                        shellNavStrongItemSmClass,
                         isActive(item.href)
-                          ? "bg-primary/10 text-foreground"
+                          ? "rkn-nav-tab-active"
                           : "text-muted-foreground hover:bg-accent hover:text-foreground",
                       ]}
                     >
@@ -156,13 +177,13 @@ const displayInitials = displayName
                     href="/submit"
                     class={buttonPrimarySmClass}
                   >
-                    Create post
+                    Create a post
                   </a>
-                  <a href="/profile" class="inline-flex h-10 items-center rounded-none px-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground">
+                  <a href="/profile" class={shellNavItemSmClass}>
                     Profile
                   </a>
                   {isAdmin ? (
-                    <a href="/admin/tags" class="inline-flex h-10 items-center rounded-none px-3 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground">
+                    <a href="/admin/tags" class={shellNavItemSmClass}>
                       Admin tags
                     </a>
                   ) : null}
@@ -200,16 +221,16 @@ const displayInitials = displayName
     </div>
   </div>
 
-  <footer class="border-t border-border/80 bg-background/85">
+  <footer class="rkn-no-print border-t border-border/80 bg-background/85">
     <div class="rkn-container flex flex-wrap items-center gap-2 py-5 text-xs text-muted-foreground">
       <span>
         powered by{" "}
-        <a href="https://rawkode.academy" class="font-medium text-foreground/80 hover:text-foreground">
+        <a href="https://rawkode.academy" class="font-medium text-foreground/80 outline-none transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60">
           Rawkode Academy
         </a>
       </span>
       <span aria-hidden="true">•</span>
-      <a href="/rss.xml" class="text-[11px] font-bold uppercase tracking-wide hover:text-foreground">
+      <a href="/rss.xml" class="text-[11px] font-bold uppercase tracking-wide outline-none transition-colors duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60">
         RSS
       </a>
     </div>
