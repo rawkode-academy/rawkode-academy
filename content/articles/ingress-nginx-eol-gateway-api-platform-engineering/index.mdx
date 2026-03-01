@@ -1,6 +1,6 @@
 ---
 title: "The Ingress NGINX Funeral Is This Month: Why Your Migration to Gateway API Is a Platform Engineering Win"
-description: "Ingress NGINX is being retired in March 2026, affecting roughly half of all Kubernetes clusters. Rather than treating this as a migration crisis, this article shows how the shift to Kubernetes Gateway API is an opportunity to adopt proper role-based network architecture — and why that matters especially for teams running AI workloads."
+description: "Ingress NGINX is being retired in March 2026, affecting roughly half of all Kubernetes clusters. Rather than treating this as a migration crisis, this article shows how the shift to Kubernetes Gateway API is an opportunity to adopt proper role-based network architecture, and why that matters especially for teams running AI workloads."
 type: article
 openGraph:
   title: "Ingress NGINX Is Dead. Gateway API Is the Upgrade You Actually Needed."
@@ -23,7 +23,7 @@ Let me explain why.
 
 ## What's Actually Dying (And What Isn't)
 
-First, let's be precise, because the panic-inducing headlines have muddied the waters.
+Before anything else, a few things need clarifying, because the panic-inducing headlines have muddied the waters.
 
 The **Kubernetes Ingress API resource** is not going away. Your existing `kind: Ingress` YAML is still valid. The Kubernetes API server will still accept it. The `Ingress` type is part of the core Kubernetes API and isn't being removed.
 
@@ -31,7 +31,7 @@ What's dying is the **community-maintained controller** that lives at `kubernete
 
 Why did it come to this? Honestly, the signals were there for years. The project accumulated 50+ contributors over its lifetime, but active maintainership has been thin for a long time. The CVE history is not pretty (including some critical ones in 2021 and 2022 that required emergency patches). And the annotation sprawl became genuinely unmanageable.
 
-That last point is the one I want to focus on, because it's not an `ingress-nginx` specific problem. It's an Ingress API problem.
+That last point is worth dwelling on. The annotation chaos isn't an `ingress-nginx` quirk. The Ingress API itself caused this.
 
 ## Why Ingress Was Always the Wrong Abstraction
 
@@ -51,7 +51,7 @@ Gateway API fixes all of this. It redesigns the abstraction from scratch, withou
 
 ## Gateway API: The Role-Based Networking Model
 
-The key insight behind Gateway API is that networking in a Kubernetes cluster involves three distinct roles with different responsibilities:
+Gateway API is built around a simple observation: networking in a Kubernetes cluster involves three distinct roles with different responsibilities.
 
 1. **Infrastructure Provider**: The team or vendor that sets up the actual load balancer and network infrastructure. They configure `GatewayClass` objects that define what kind of gateway implementation is available.
 2. **Platform Team**: Your internal team that provisions gateway capacity for applications. They own `Gateway` resources that reference a `GatewayClass` and define listeners (ports, protocols, TLS).
@@ -116,21 +116,21 @@ My recommendation here is not subtle: **run Cilium, and use Cilium's Gateway API
 
 I've been running Cilium since June 2020. It's the CNI I reach for on every cluster I touch, and it's been my answer to almost every Kubernetes networking conversation since. eBPF-powered networking that replaces kube-proxy, incredible observability through Hubble, service mesh capabilities without sidecars, and now a first-class Gateway API implementation that runs directly in the data plane. The future of Kubernetes networking has been Cilium for a while now.
 
-Cilium's Gateway API implementation doesn't add a new pod or a new process. You configure the network fabric you already have. That's a fundamentally different architectural position from controllers that sit in front of your traffic. For teams running at high traffic volumes, this isn't academic — it's measurable.
+Cilium's Gateway API implementation doesn't add a new pod or a new process. You configure the network fabric you already have. That's a fundamentally different architectural position from controllers that sit in front of your traffic. For teams running at high traffic volumes, you'll see it in your latency numbers.
 
 If you're still running Calico as your CNI and treating this migration as just a swap from `ingress-nginx` to some Gateway API controller, I'd challenge you to look at what you're leaving on the table. Performance, observability, identity-based policy, sidecar-free service mesh. The `ingress-nginx` retirement is a natural forcing function to revisit the whole stack.
 
-That said, I understand not everyone is in a position to replace their CNI at the same time as their ingress controller. (And I'd actually tell you not to — see the migration checklist below.) So here's where the other options fit:
+That said, I understand not everyone is in a position to replace their CNI at the same time as their ingress controller. I'd actually tell you not to: see the migration checklist below. So here's where the other options fit:
 
 **Envoy Gateway** is the right call for teams who aren't yet on Cilium and want to start fresh. It's CNCF-backed, built on Envoy Proxy, and has serious ecosystem momentum. The policy extensions (BackendTrafficPolicy, SecurityPolicy, ClientTrafficPolicy) give you a solid configuration surface without annotation hell. If you're already running Istio, you're already running Envoy under the hood, so it fits naturally.
 
-**Traefik v3** makes sense if your team already lives in the Traefik ecosystem and you want the most familiar migration path. Full Gateway API support landed in v3, and the developer experience is good. Don't use it as a reason to stay stuck — but if your team knows Traefik inside out, this migration will be the least disruptive.
+**Traefik v3** makes sense if your team already lives in the Traefik ecosystem and you want the most familiar migration path. Full Gateway API support landed in v3, and the developer experience is good. Don't use it as a reason to stay stuck. If your team knows Traefik inside out, this migration will be the least disruptive.
 
 For managed Kubernetes: check if your provider has a first-party Gateway API implementation. AKS's App Routing add-on is getting an extended bridge to November 2026 (more on that below). GKE's Gateway controller is mature and production-ready. Both are reasonable for teams on those platforms who want to avoid managing the control plane themselves.
 
 ## Hands-On: Migrating to Gateway API
 
-Let me walk through a real migration. We'll take a typical `ingress-nginx` setup and convert it to Envoy Gateway — this walkthrough is for teams who aren't yet on Cilium. If you are on Cilium, skip step 1: Cilium's Gateway API support is enabled with a single Helm flag (`gatewayAPI.enabled=true`) and you're done. The `GatewayClass`, `Gateway`, `HTTPRoute`, and `GRPCRoute` YAML in the steps below is identical regardless of which implementation you use.
+Let me walk through a real migration. We'll take a typical `ingress-nginx` setup and convert it to Envoy Gateway. This walkthrough is for teams who aren't yet on Cilium. If you are on Cilium, skip step 1: Cilium's Gateway API support is enabled with a single Helm flag (`gatewayAPI.enabled=true`) and you're done. The `GatewayClass`, `Gateway`, `HTTPRoute`, and `GRPCRoute` YAML in the steps below is identical regardless of which implementation you use.
 
 **Step 1: Install Envoy Gateway** (skip if you're on Cilium)
 
@@ -269,7 +269,7 @@ For rate limiting, you'd use a `BackendTrafficPolicy` as well, rather than tryin
 
 This is the part I'm most excited about right now, given what I'm working on at CoreWeave.
 
-The `Ingress` spec was designed for HTTP/1.1. It has no native understanding of gRPC, streaming, or long-lived connections. Take Triton Inference Server: it exposes a gRPC interface natively on port 8001, using the Open Inference Protocol. Routing that through `ingress-nginx` meant diving into annotations and hoping they played nicely with HTTP/2. vLLM, for what it's worth, serves its OpenAI-compatible API over HTTP on port 8000, so it doesn't need gRPC routing. But even there, the `Ingress` spec gives you no way to do traffic weighting in-spec for canary deployments across model versions.
+The `Ingress` spec was designed for HTTP/1.1. It has no native understanding of gRPC, streaming, or long-lived connections. Take Triton Inference Server: it exposes a gRPC interface natively on port 8001, using the Open Inference Protocol. Routing that through `ingress-nginx` meant digging through annotations and hoping they played nicely with HTTP/2. vLLM, for what it's worth, serves its OpenAI-compatible API over HTTP on port 8000, so it doesn't need gRPC routing. But even there, the `Ingress` spec gives you no way to do traffic weighting in-spec for canary deployments across model versions.
 
 Gateway API v1 includes `GRPCRoute` as a stable API. Here's what routing to a Triton inference endpoint actually looks like:
 
@@ -325,7 +325,7 @@ The WG Serving work from the Kubernetes community, which recently concluded and 
 
 ## Your Migration Checklist and Timeline
 
-Alright. Let's be practical.
+Alright. Here's how to do this.
 
 **First, audit what you have:**
 
@@ -352,7 +352,7 @@ kubectl get ingress --all-namespaces \
 
 **Then follow this approach:**
 
-1. **Choose your implementation.** If you're on Cilium (and you should be), use Cilium Gateway API — it's a Helm flag away. If you're on GKE or AKS with first-party support, use that. Otherwise, Envoy Gateway. And if you're not on Cilium yet, strongly consider making this migration a two-step process: CNI first, then gateway controller. Your future self will thank you.
+1. **Choose your implementation.** If you're on Cilium (and you should be), use Cilium Gateway API: it's a Helm flag away. If you're on GKE or AKS with first-party support, use that. Otherwise, Envoy Gateway. And if you're not on Cilium yet, strongly consider making this migration a two-step process: CNI first, then gateway controller. Your future self will thank you.
 
 2. **Run both controllers in parallel during migration.** There is no reason to do a cutover all at once. Install your new gateway controller alongside `ingress-nginx`. Start migrating one application at a time, testing each one before moving to the next.
 
@@ -368,6 +368,6 @@ kubectl get ingress --all-namespaces \
 
 The ingress-nginx retirement is happening whether we like it or not. But the replacement is genuinely better. Gateway API gives you proper role separation, portable configuration, native gRPC support, and a foundation that the Kubernetes community is actively building on, including for AI inference workloads.
 
-The teams that treat this as a crisis are going to scramble through a copy-paste migration and end up with the same architectural problems they had before, just with different YAML. The teams that treat it as a forcing function to adopt proper platform engineering patterns are going to come out the other side with a networking model that actually fits how their organizations work.
+Teams that treat this as a crisis will scramble through a copy-paste migration and end up with the same architectural problems they had before, just with different YAML. Teams that treat it as a forcing function to adopt proper platform engineering patterns will come out the other side with a networking model that actually fits how their organizations work.
 
 You've got the rest of March. Start with the audit, pick your implementation, and migrate one application at a time. You'll be done before the panic subsides.
