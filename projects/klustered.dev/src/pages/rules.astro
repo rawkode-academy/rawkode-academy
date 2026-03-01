@@ -1,0 +1,374 @@
+---
+export const prerender = true;
+
+import { css } from "styled-system/css";
+import "../styles/global.css";
+
+const pageStyles = css({
+	minHeight: "100vh",
+	background: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)",
+	position: "relative",
+	overflow: "hidden",
+});
+
+const gridOverlay = css({
+	position: "fixed",
+	inset: 0,
+	backgroundImage: `
+		linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px)
+	`,
+	backgroundSize: "60px 60px",
+	pointerEvents: "none",
+	zIndex: 0,
+});
+
+const containerStyles = css({
+	position: "relative",
+	zIndex: 10,
+	maxWidth: "800px",
+	marginInline: "auto",
+	paddingBlock: "2rem 4rem",
+	paddingInline: "1rem",
+});
+
+const backLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.5rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	textDecoration: "none",
+	fontSize: "0.875rem",
+	marginBottom: "1.5rem",
+	transition: "color 0.2s",
+	"&:hover": {
+		color: "white",
+	},
+});
+
+const headerStyles = css({
+	marginBottom: "2.5rem",
+});
+
+const titleStyles = css({
+	fontSize: "clamp(2rem, 5vw, 3rem)",
+	fontWeight: 700,
+	color: "white",
+	marginBottom: "0.5rem",
+});
+
+const subtitleStyles = css({
+	fontSize: "1rem",
+	color: "rgba(255, 255, 255, 0.6)",
+});
+
+const contentStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "2rem",
+});
+
+const sectionStyles = css({
+	padding: "1.5rem",
+	background: "rgba(255, 255, 255, 0.03)",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+	borderRadius: "0.75rem",
+});
+
+const sectionTitleStyles = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "0.75rem",
+	fontSize: "1.25rem",
+	fontWeight: 600,
+	color: "white",
+	marginBottom: "1rem",
+});
+
+const iconWrapperStyles = css({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	width: "2rem",
+	height: "2rem",
+	background: "rgba(139, 92, 246, 0.2)",
+	borderRadius: "0.5rem",
+	color: "#a78bfa",
+});
+
+const listStyles = css({
+	listStyle: "none",
+	padding: 0,
+	margin: 0,
+	display: "flex",
+	flexDirection: "column",
+	gap: "0.75rem",
+});
+
+const listItemStyles = css({
+	display: "flex",
+	alignItems: "flex-start",
+	gap: "0.75rem",
+	color: "rgba(255, 255, 255, 0.8)",
+	fontSize: "0.9375rem",
+	lineHeight: 1.6,
+});
+
+const bulletStyles = css({
+	flexShrink: 0,
+	marginTop: "0.375rem",
+	width: "6px",
+	height: "6px",
+	background: "#8b5cf6",
+	borderRadius: "50%",
+});
+
+const paragraphStyles = css({
+	color: "rgba(255, 255, 255, 0.8)",
+	fontSize: "0.9375rem",
+	lineHeight: 1.7,
+	margin: 0,
+});
+
+const highlightBoxStyles = css({
+	marginTop: "1rem",
+	padding: "1rem",
+	background: "rgba(251, 191, 36, 0.1)",
+	border: "1px solid rgba(251, 191, 36, 0.3)",
+	borderRadius: "0.5rem",
+	color: "#fde047",
+	fontSize: "0.875rem",
+});
+
+const navLinksStyles = css({
+	display: "flex",
+	gap: "1rem",
+	marginTop: "2rem",
+	flexWrap: "wrap",
+});
+
+const navLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.375rem",
+	padding: "0.5rem 0.875rem",
+	background: "rgba(255, 255, 255, 0.05)",
+	border: "1px solid rgba(255, 255, 255, 0.15)",
+	borderRadius: "0.5rem",
+	color: "rgba(255, 255, 255, 0.8)",
+	fontSize: "0.8125rem",
+	textDecoration: "none",
+	transition: "all 0.2s",
+	"&:hover": {
+		background: "rgba(139, 92, 246, 0.15)",
+		borderColor: "rgba(139, 92, 246, 0.4)",
+		color: "white",
+	},
+});
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Competition Rules - Klustered '26</title>
+		<meta name="description" content="Official rules and format for Klustered '26 competition. Learn about match structure, requirements, and fair play guidelines." />
+	</head>
+	<body>
+		<main class={pageStyles}>
+			<div class={gridOverlay}></div>
+
+			<div class={containerStyles}>
+				<a href="/" class={backLinkStyles}>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+					</svg>
+					Back to Home
+				</a>
+
+				<header class={headerStyles}>
+					<h1 class={titleStyles}>Competition Rules</h1>
+					<p class={subtitleStyles}>
+						Everything you need to know before competing in Klustered '26
+					</p>
+				</header>
+
+				<div class={contentStyles}>
+					<section class={sectionStyles}>
+						<h2 class={sectionTitleStyles}>
+							<span class={iconWrapperStyles}>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<circle cx="12" cy="12" r="10" />
+									<path d="M12 6v6l4 2" />
+								</svg>
+							</span>
+							Competition Format
+						</h2>
+						<ul class={listStyles}>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Single elimination bracket tournament</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Each match is streamed live on the Klustered channel</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Competitors are given a sabotaged Kubernetes cluster to debug</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Time limit per match: 60 minutes (subject to change)</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Winner is determined by completing objectives or most progress</span>
+							</li>
+						</ul>
+					</section>
+
+					<section class={sectionStyles}>
+						<h2 class={sectionTitleStyles}>
+							<span class={iconWrapperStyles}>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+									<polyline points="22 4 12 14.01 9 11.01" />
+								</svg>
+							</span>
+							Technical Requirements
+						</h2>
+						<ul class={listStyles}>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Stable internet connection for the duration of your match</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Working microphone and webcam (webcam optional but recommended)</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>SSH client and basic terminal access</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Discord account for coordination</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Be available 15 minutes before your scheduled match time</span>
+							</li>
+						</ul>
+					</section>
+
+					<section class={sectionStyles}>
+						<h2 class={sectionTitleStyles}>
+							<span class={iconWrapperStyles}>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+								</svg>
+							</span>
+							Fair Play Guidelines
+						</h2>
+						<ul class={listStyles}>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>No outside assistance during matches (no team chat, no asking friends)</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>AI assistants (ChatGPT, Copilot, etc.) are allowed - it's a real-world scenario</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Documentation and search engines are allowed</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Be respectful to hosts, opponents, and viewers</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Decisions by the hosts are final</span>
+							</li>
+						</ul>
+						<div class={highlightBoxStyles}>
+							<strong>Note:</strong> Klustered is meant to be fun and educational. We want everyone to have a good time, regardless of the outcome.
+						</div>
+					</section>
+
+					<section class={sectionStyles}>
+						<h2 class={sectionTitleStyles}>
+							<span class={iconWrapperStyles}>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+									<circle cx="9" cy="7" r="4" />
+									<path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+									<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+								</svg>
+							</span>
+							Team Competition (if applicable)
+						</h2>
+						<ul class={listStyles}>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Teams form externally and register as a single unit</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Maximum 2-3 members per team</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>All team members must be present during the match</span>
+							</li>
+							<li class={listItemStyles}>
+								<span class={bulletStyles}></span>
+								<span>Team communication is allowed during the match</span>
+							</li>
+						</ul>
+					</section>
+
+					<section class={sectionStyles}>
+						<h2 class={sectionTitleStyles}>
+							<span class={iconWrapperStyles}>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+								</svg>
+							</span>
+							Communication
+						</h2>
+						<p class={paragraphStyles}>
+							All competition updates, match notifications, and important announcements
+							will be communicated via Discord. Make sure you've joined the server and
+							have notifications enabled for competition channels.
+						</p>
+					</section>
+				</div>
+
+				<nav class={navLinksStyles}>
+					<a href="/schedule" class={navLinkStyles}>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+							<line x1="16" y1="2" x2="16" y2="6" />
+							<line x1="8" y1="2" x2="8" y2="6" />
+							<line x1="3" y1="10" x2="21" y2="10" />
+						</svg>
+						View Schedule
+					</a>
+					<a href="/faq" class={navLinkStyles}>
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						FAQ
+					</a>
+				</nav>
+			</div>
+		</main>
+	</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(xargs ls:*)",
+      "Bash(bun install:*)",
+      "Bash(bun run:*)",
+      "Bash(deno task:*)",
+      "Bash(deno:*)",
+      "Bash(ls:*)",
+      "Bash(cuenv task build:*)"
+    ]
+  }
+}

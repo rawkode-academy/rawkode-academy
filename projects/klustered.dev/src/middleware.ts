@@ -6,7 +6,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 	if (sessionId) {
 		try {
-			const sessionData = (await context.locals.runtime.env.SESSION.get(
+			const env = context.locals.runtime.env;
+			const sessionData = (await env.SESSION.get(
 				`session:${sessionId}`,
 				"json",
 			)) as StoredSession | null;
@@ -15,7 +16,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 				context.locals.user = sessionData.user;
 			} else if (sessionData) {
 				// Session expired, clean up
-				await context.locals.runtime.env.SESSION.delete(
+				await env.SESSION.delete(
 					`session:${sessionId}`,
 				);
 				context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });

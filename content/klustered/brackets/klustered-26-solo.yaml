@@ -1,0 +1,59 @@
+id: klustered-26-solo
+name: "Klustered '26 Solo"
+slug: klustered-26-solo
+type: solo
+status: active
+description: "Solo bracket for Klustered '26 competitors."
+createdAt: "2026-01-05T00:00:00Z"
+startedAt: "2026-01-10T18:00:00Z"
+competitors:
+  - id: rawkode
+    name: Rawkode
+    displayName: "Rawkode"
+    imageUrl: null
+    seed: 1
+    confirmed: true
+  - id: liz-rice
+    name: "Liz Rice"
+    displayName: "Liz Rice"
+    imageUrl: null
+    seed: 4
+    confirmed: true
+  - id: kat-cosgrove
+    name: "Kat Cosgrove"
+    displayName: "Kat Cosgrove"
+    imageUrl: null
+    seed: 2
+    confirmed: true
+  - id: james-le-cuirot
+    name: "James Le Cuirot"
+    displayName: "James Le Cuirot"
+    imageUrl: null
+    seed: 3
+    confirmed: true
+matches:
+  - id: kl26-solo-r1-m1
+    round: 1
+    position: 1
+    competitor1Id: rawkode
+    competitor2Id: liz-rice
+    winnerId: rawkode
+    status: completed
+    scheduledAt: "2026-01-10T18:00:00Z"
+    completedAt: "2026-01-10T18:45:00Z"
+    vodUrl: "https://rawkode.academy/watch/klustered-part-i"
+  - id: kl26-solo-r1-m2
+    round: 1
+    position: 2
+    competitor1Id: kat-cosgrove
+    competitor2Id: james-le-cuirot
+    status: live
+    scheduledAt: "2026-01-10T19:00:00Z"
+    streamUrl: "https://rawkode.academy/live/klustered"
+  - id: kl26-solo-r2-m1
+    round: 2
+    position: 1
+    competitor1Id: rawkode
+    competitor2Id: null
+    status: pending
+    scheduledAt: "2026-01-10T20:00:00Z"

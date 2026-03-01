@@ -1,0 +1,68 @@
+---
+export const prerender = false;
+
+import { css } from "styled-system/css";
+import "../../styles/global.css";
+
+const pageStyles = css({
+	minHeight: "100vh",
+	background: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)",
+	paddingBlock: "4rem",
+	paddingInline: "1rem",
+});
+
+const containerStyles = css({
+	maxWidth: "720px",
+	marginInline: "auto",
+	textAlign: "center",
+	background: "rgba(255, 255, 255, 0.03)",
+	borderRadius: "1rem",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+	padding: "3rem 2rem",
+});
+
+const titleStyles = css({
+	fontSize: "clamp(1.75rem, 5vw, 2.5rem)",
+	fontWeight: 700,
+	color: "white",
+	marginBottom: "1rem",
+});
+
+const textStyles = css({
+	fontSize: "1rem",
+	color: "rgba(255, 255, 255, 0.7)",
+	lineHeight: 1.6,
+	marginBottom: "2rem",
+});
+
+const linkStyles = css({
+	color: "#a78bfa",
+	fontWeight: 600,
+	textDecoration: "none",
+	fontSize: "0.95rem",
+	"&:hover": {
+		textDecoration: "underline",
+	},
+});
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Confirm Participation - Klustered '26</title>
+	</head>
+	<body>
+		<main class={pageStyles}>
+			<div class={containerStyles}>
+				<h1 class={titleStyles}>Participation Confirmations Paused</h1>
+				<p class={textStyles}>
+					Bracket participation is now managed in YAML content files, so confirmations are
+					no longer required here. Check the live brackets for the latest roster updates.
+				</p>
+				<a href="/bracket" class={linkStyles}>View current brackets</a>
+			</div>
+		</main>
+	</body>
+</html>

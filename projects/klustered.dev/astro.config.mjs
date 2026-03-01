@@ -10,6 +10,9 @@ export default defineConfig({
 		sessionKVBindingName: "SESSION",
 		platformProxy: {
 			enabled: true,
+			persist: {
+				path: ".wrangler/state/v3",
+			},
 		},
 	}),
 	integrations: [vue()],
