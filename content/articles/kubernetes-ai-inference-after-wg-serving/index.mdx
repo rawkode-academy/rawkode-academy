@@ -1,0 +1,433 @@
+---
+title: "WG Serving Is Dead, Long Live llm-d: What Kubernetes' AI Inference Graduation Means for Your Stack"
+description: "Kubernetes Working Group Serving just concluded, declaring mission accomplished for AI inference on Kubernetes. But the real work is only beginning. This article maps the post-WG-Serving landscape: llm-d for distributed inference, Gateway API Inference Extension for model-aware routing, and the emerging patterns that will define production LLM serving in 2026."
+type: article
+openGraph:
+  title: "WG Serving Is Dead, Long Live llm-d"
+  subtitle: "The Kubernetes AI inference stack just graduated. Here's what replaces it."
+slug: kubernetes-ai-inference-after-wg-serving
+cover:
+  image: "./cover.png"
+  alt: "A Kubernetes ship wheel transitioning into an AI neural network, symbolizing the handoff from WG Serving to the next generation of AI inference tools on Kubernetes"
+publishedAt: 2026-02-28
+isDraft: true
+authors:
+  - rawkode
+---
+
+Two days ago, Kubernetes Working Group Serving officially disbanded. If you missed the announcement, I don't blame you. It landed quietly, a brief CNCF blog post on February 26th, signed by Yuan Tang on behalf of the co-chairs. No fanfare. No "end of an era" retrospectives. Just: "The goal has been accomplished. The working group is now being disbanded."
+
+And that's the part most people are going to get wrong. WG Serving didn't die because it failed. It died because it *succeeded*.
+
+If you're running AI inference on Kubernetes today (and increasingly, who isn't?), the governance landscape underneath your stack just shifted significantly. The working group that was driving requirements, coordinating across SIGs, and shepherding projects like the inference gateway and AIBrix? That coordination layer is gone. Its work has graduated into the permanent structures of Kubernetes itself, and into two projects you need to be watching closely: **llm-d** and the **Gateway API Inference Extension**.
+
+I work at CoreWeave as a Solutions Engineer, and I see teams every week deploying inference workloads on Kubernetes. The most common pattern I encounter? Hand-rolled vLLM deployments with a basic `Service` and `HorizontalPodAutoscaler`. That worked in 2024. In 2026, you're leaving serious performance on the table, not because you're missing some magic component, but because that architecture is fundamentally unaware of how inference actually works.
+
+Here's what just happened, where everything lives now, and what a production inference stack on Kubernetes actually looks like today.
+
+## WG Serving's Mission-Accomplished Moment
+
+WG Serving was created with a clear mandate: make Kubernetes the orchestration platform of choice for inference workloads. Full stop. Not training. Not data pipelines. Inference, the thing that actually faces users and costs real money per token.
+
+Here's what the working group actually produced during its lifetime:
+
+- **The inference gateway concept** was adopted as a request scheduler. This eventually became the Gateway API Inference Extension, now sponsored by SIG Network.
+- **Standardized AI gateway functionality** was defined across multiple groups. The early participants from the inference gateway work went on to seed the agent networking efforts in SIG Network.
+- **AIBrix** was informed by the use cases and problem statements WG Serving collected from model servers, hardware vendors, and inference providers.
+- **Kubernetes AI Conformance** requirements were developed, giving vendors and platforms a standard to implement against.
+- **llm-d** picked up the unresolved problems in distributed inference, especially benchmarking and production best practices.
+
+The reason disbanding is a maturity signal and not an abandonment is structural. Working groups in Kubernetes are designed to be temporary. They exist to coordinate cross-cutting concerns that don't fit neatly into a single SIG. Once the work lands in the right places, the working group's job is done. That's exactly what happened here.
+
+## The New Map: Where AI Inference Work Lives Now
+
+This is the part that matters for your day-to-day. If you were tracking WG Serving for updates on inference capabilities, you now need to track multiple SIGs. Here's the migration map:
+
+```d2 sketch
+direction: right
+
+wg: WG Serving (Concluded) {
+  style: {
+    fill: "#2d2d2d"
+    stroke: "#ff6b6b"
+    font-color: "#ff6b6b"
+  }
+}
+
+sig-network: SIG Network {
+  gw: Gateway API Inference Extension
+  agent: Agent Networking
+  style: {
+    fill: "#1a3a1a"
+    stroke: "#4ecdc4"
+    font-color: "#4ecdc4"
+  }
+}
+
+sig-node: SIG Node / SIG Scheduling {
+  auto: Autoscaling & Fast Bootstrap
+  orch: Orchestration
+  style: {
+    fill: "#1a2a3a"
+    stroke: "#45b7d1"
+    font-color: "#45b7d1"
+  }
+}
+
+sig-apps: SIG Apps {
+  lws: LeaderWorkerSet (LWS)
+  multi: Multi-Host Inference
+  style: {
+    fill: "#2a1a3a"
+    stroke: "#96c93d"
+    font-color: "#96c93d"
+  }
+}
+
+wg-device: WG Device Management {
+  dra: Dynamic Resource Allocation
+  style: {
+    fill: "#3a2a1a"
+    stroke: "#f7dc6f"
+    font-color: "#f7dc6f"
+  }
+}
+
+sig-scale: SIG Scalability {
+  perf: Inference Perf
+  style: {
+    fill: "#1a3a3a"
+    stroke: "#bb8fce"
+    font-color: "#bb8fce"
+  }
+}
+
+wg -> sig-network: Inference Gateway\nAI Gateway Work
+wg -> sig-node: Autoscaling\nOrchestration
+wg -> sig-apps: Multi-Host\nLWS
+wg -> wg-device: DRA\nRequirements
+wg -> sig-scale: Benchmarking
+```
+
+The key takeaway: AI inference on Kubernetes is no longer a "special interest" coordinated by a single group. It's baked into the core SIG structure. Gateway routing lives in SIG Network. GPU scheduling lives in SIG Scheduling and WG Device Management. Multi-node inference lives in SIG Apps. This is what mainstreaming looks like.
+
+## llm-d: The Distributed Inference Framework That Picked Up the Baton
+
+I'll be upfront about what llm-d is and what it isn't. It is **not** the "official successor" to WG Serving. It's not a Kubernetes sub-project. It's an open-source framework, backed by Red Hat, IBM, Google, CoreWeave, and NVIDIA, that provides composable, well-lit paths for achieving state-of-the-art inference on Kubernetes.
+
+llm-d solves the problems WG Serving identified but couldn't address within Kubernetes governance: the deep integration between inference scheduling, model server behavior, and Kubernetes primitives.
+
+### What v0.5 Brings to the Table
+
+The v0.5 release, which landed recently, is focused on sustaining performance at scale. Not peak benchmarks on a single node, but real production behavior under load. Here's what matters:
+
+**Hierarchical KV Offloading (GPU → CPU → Disk)**
+
+This is the feature I'm most excited about. In transformer-based inference, your KV-cache is the bottleneck. It lives in GPU HBM, and once that's saturated, performance falls off a cliff. The standard deployment just starts recomputing prefills, which is expensive.
+
+llm-d v0.5 introduces a three-tier storage hierarchy: GPU HBM, CPU DRAM, and a shared filesystem. The shared filesystem tier is the clever part. New replicas can "hydrate" their cache from the shared tier immediately instead of warming up from scratch. In their benchmarks on Llama-3.1-70B with 4x H100s, the storage-backed configuration sustained ~185k tokens/sec as concurrency scaled, while GPU-only collapsed once HBM was saturated. That's a 13.9x improvement at 250 concurrent users.
+
+**Cache-Aware LoRA Routing**
+
+If you're serving multiple fine-tuned models via LoRA adapters (and you should be for multi-tenant workloads), naive round-robin load balancing creates a thundering herd problem. Every replica tries to load every adapter. llm-d's scheduler now routes based on LoRA adapter locality, so requests for a specific adapter go to the replica that already has it cached.
+
+**UCCL Resilient Networking**
+
+In disaggregated prefill/decode architectures, KV-cache transfers between nodes are the critical path for tail latency. llm-d v0.5 integrates UCCL (Unified Collective Communication Library), which manages transport logic on the CPU instead of relying on hardware offload. Under network congestion, UCCL showed 7.1% latency degradation versus 17.1% for baseline UCX. That's 2.4x more resilient to network contention.
+
+**Scale-to-Zero Autoscaling**
+
+For cost-sensitive environments (dev clusters, internal RAG applications that don't need 24/7 GPU allocation), llm-d now supports scaling inference pools to zero during idle periods with a specialized activator that handles cold-start without dropping requests.
+
+### Why the Performance Gains Are Real
+
+I want to be precise about the performance claims here, because "2x improvement" without context is meaningless. The real story is architectural.
+
+A naive Kubernetes deployment for inference, `Deployment` + `Service` + `HPA`, ignores four things that fundamentally determine inference performance:
+
+1. **Cache locality**: Round-robin routing destroys prefix cache hit rates. If a request with a shared system prompt lands on a different replica each time, you recompute the prefill every time.
+2. **Token-aware routing**: Standard load balancers don't know that one request is generating 10 tokens and another is generating 10,000. They can't account for queue depth or KV-cache pressure on individual pods.
+3. **Disaggregated prefill/decode**: Prefill (processing the input) and decode (generating tokens) have fundamentally different compute profiles. Running them on the same GPU wastes resources in both directions.
+4. **GPU bin-packing**: HPA doesn't understand GPU memory utilization, KV-cache saturation, or model-specific scaling thresholds.
+
+The delta between naive and optimized doesn't come from swapping in a magic component. It comes from an architecture that's aware of how inference actually works. In llm-d's benchmarks on Qwen3-32B with 8 vLLM pods on 16x H100s, inference scheduling delivered up to 109% higher throughput and 99% lower TTFT (time to first token) versus a baseline Kubernetes service.
+
+Those numbers are dramatic, but they're also reproducible. llm-d v0.5 ships with in-guide benchmark configurations for every "well-lit path" so you can validate the claims yourself.
+
+### llm-d vs. AIBrix: Different Goals, Not Competitors
+
+I want to be careful here. It's tempting to bundle llm-d and AIBrix together as "the new stack," but that's misleading.
+
+**llm-d** provides composable building blocks: well-lit paths that you integrate into your existing inference platform. It's opinionated about the patterns (disaggregated serving, cache-aware routing, hierarchical offloading) but flexible about how you assemble them.
+
+**AIBrix** provides a complete platform solution for cost-efficient LLM inference. It's a higher-level abstraction. Different niche, different audience.
+
+Both projects emerged from problems WG Serving identified, and both are feeding requirements back into Kubernetes SIGs. But they're not a package deal, and treating them as one misrepresents the ecosystem.
+
+## Gateway API Inference Extension: The Control Plane Evolution
+
+Here's some timing that's too good to be coincidental: Ingress NGINX is retiring in March 2026. The community has been pushing teams toward Gateway API for years, and now there's a hard deadline. If you're migrating your ingress infrastructure anyway, you might as well get inference-aware routing in the bargain.
+
+The Gateway API Inference Extension, sponsored by SIG Network, adds the **InferencePool** CRD (now GA at v1) and a routing extension that transforms any compatible gateway into an inference gateway. Experimental CRDs like **InferenceObjective** (which replaced the earlier InferenceModel concept) define serving goals and model routing policies, while additional experimental resources like InferenceModelRewrite and InferencePoolImport are taking shape in the `inference.networking.x-k8s.io` API group.
+
+### InferencePool: Your Model Server Fleet
+
+An `InferencePool` defines a group of pods that share the same compute configuration, accelerator type, base model, and model server. Think of it as a `Service` that actually understands what it's load-balancing.
+
+```yaml
+apiVersion: inference.networking.k8s.io/v1
+kind: InferencePool
+metadata:
+  name: vllm-qwen3-32b
+spec:
+  targetPorts:
+    - number: 8000
+  selector:
+    matchLabels:
+      app: vllm-qwen3-32b
+  endpointPickerRef:
+    name: vllm-qwen3-32b-epp
+    port:
+      number: 9002
+    failureMode: FailOpen
+```
+
+The `endpointPickerRef` points to the Endpoint Picker (EPP), which is where the intelligence lives. The EPP tracks metrics from each model server pod: KV-cache utilization, queue depth, active LoRA adapters, pending requests. When a new inference request arrives, the EPP makes a routing decision based on this real-time state. Not round-robin. Not random. Not least-connections.
+
+### How the Endpoint Picker Routes Requests
+
+The EPP is the component that closes the gap between "Kubernetes networking" and "inference-aware networking." Here's how it makes routing decisions:
+
+```d2 sketch
+direction: right
+
+client: Client Request {
+  style: {
+    fill: "#1a1a2e"
+    stroke: "#e94560"
+    font-color: "#e94560"
+  }
+}
+
+gateway: Gateway (Envoy/Istio/kgateway) {
+  style: {
+    fill: "#16213e"
+    stroke: "#0f3460"
+    font-color: "#e94560"
+  }
+}
+
+epp: Endpoint Picker (EPP) {
+  metrics: Collects Metrics
+  decide: Routing Decision
+  style: {
+    fill: "#1a3a2a"
+    stroke: "#4ecdc4"
+    font-color: "#4ecdc4"
+  }
+}
+
+pool: InferencePool {
+  pod1: vLLM Pod 1\n(KV: 45%, Queue: 2)
+  pod2: vLLM Pod 2\n(KV: 82%, Queue: 7)
+  pod3: vLLM Pod 3\n(KV: 23%, Queue: 0, LoRA: customer-A)
+  style: {
+    fill: "#2a1a3a"
+    stroke: "#bb8fce"
+    font-color: "#bb8fce"
+  }
+}
+
+client -> gateway: POST /v1/completions\nmodel: customer-A-ft
+gateway -> epp: ext-proc: pick endpoint
+epp -> pool.pod1: scrape metrics
+epp -> pool.pod2: scrape metrics
+epp -> pool.pod3: scrape metrics
+epp -> gateway: Route to Pod 3\n(LoRA cached, low KV)
+gateway -> pool.pod3: Forward request
+```
+
+The EPP uses Envoy's External Processing (ext-proc) filter, which means it works with any Gateway API implementation that supports ext-proc: Envoy Gateway, Istio, kgateway, NGINX Gateway Fabric, and GKE's gateway. You're not locked into a vendor. You're extending whatever gateway you already run.
+
+### Setting It Up with Istio
+
+Here's what a real deployment looks like. If you're already running Istio (which many teams at this scale are), enabling inference extension support is a flag:
+
+```bash
+# Install Istio with inference extension enabled
+ISTIO_VERSION=1.28.0
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${ISTIO_VERSION} sh -
+./istio-$ISTIO_VERSION/bin/istioctl install \
+    --set values.pilot.env.ENABLE_GATEWAY_API_INFERENCE_EXTENSION=true
+
+# Install the Inference Extension CRDs
+kubectl apply -k \
+    https://github.com/kubernetes-sigs/gateway-api-inference-extension/config/crd
+
+# Deploy the Gateway
+kubectl apply -f \
+    https://github.com/kubernetes-sigs/gateway-api-inference-extension/raw/main/config/manifests/gateway/istio/gateway.yaml
+
+# Deploy InferencePool + EPP via Helm
+export GATEWAY_PROVIDER=istio
+export MODEL_SERVER=vllm
+helm install ${MODEL_SERVER}-qwen3-32b \
+    --dependency-update \
+    --set inferencePool.modelServers.matchLabels.app=${MODEL_SERVER}-qwen3-32b \
+    --set provider.name=$GATEWAY_PROVIDER \
+    --set inferencePool.modelServerType=${MODEL_SERVER} \
+    --set experimentalHttpRoute.enabled=true \
+    --version v0 \
+    oci://us-central1-docker.pkg.dev/k8s-staging-images/gateway-api-inference-extension/charts/inferencepool
+```
+
+Once deployed, you send standard OpenAI-compatible requests to the gateway, and the EPP handles endpoint selection transparently:
+
+```bash
+IP=$(kubectl get gateway/inference-gateway \
+    -o jsonpath='{.status.addresses[0].value}')
+
+curl ${IP}:80/v1/completions \
+    -H 'Content-Type: application/json' \
+    -d '{
+        "model": "Qwen/Qwen3-32B",
+        "prompt": "Explain Kubernetes inference scheduling",
+        "max_tokens": 200,
+        "temperature": 0
+    }'
+```
+
+The `InferencePool` API graduated to v1, by the way. This isn't experimental anymore.
+
+## Putting It Together: A Reference Architecture for Production LLM Serving
+
+This is what a production inference stack looks like when you combine these pieces. Not theoretical. These are the patterns I'm seeing teams adopt successfully.
+
+```d2 sketch
+direction: down
+
+ingress: External Traffic {
+  style: {
+    fill: "#1a1a2e"
+    stroke: "#e94560"
+    font-color: "#e94560"
+  }
+}
+
+gateway-layer: Gateway Layer {
+  gw: Gateway API\n(Envoy/Istio)
+  bbr: Body-Based Router\n(model selection)
+  style: {
+    fill: "#16213e"
+    stroke: "#0f3460"
+    font-color: "#45b7d1"
+  }
+}
+
+scheduling-layer: Scheduling Layer {
+  epp: EPP\n(Endpoint Picker)
+  llmd-sched: llm-d Scheduler\n(cache-aware routing)
+  style: {
+    fill: "#1a3a2a"
+    stroke: "#4ecdc4"
+    font-color: "#4ecdc4"
+  }
+}
+
+serving-layer: Serving Layer {
+  prefill: Prefill Pods\n(vLLM, high compute)
+  decode: Decode Pods\n(vLLM, high memory)
+  kv: Hierarchical KV Store\n(GPU → CPU → Disk)
+  style: {
+    fill: "#2a1a3a"
+    stroke: "#bb8fce"
+    font-color: "#bb8fce"
+  }
+}
+
+platform-layer: Platform Layer {
+  kueue: Kueue\n(GPU quota mgmt)
+  dra: DRA\n(GPU allocation)
+  lws: LeaderWorkerSet\n(multi-node)
+  style: {
+    fill: "#3a2a1a"
+    stroke: "#f7dc6f"
+    font-color: "#f7dc6f"
+  }
+}
+
+ingress -> gateway-layer
+gateway-layer -> scheduling-layer
+scheduling-layer -> serving-layer
+serving-layer -> platform-layer: Managed by
+serving-layer.prefill <-> serving-layer.decode: KV transfer\n(NIXL/UCCL)
+serving-layer.prefill -> serving-layer.kv: Offload
+serving-layer.decode -> serving-layer.kv: Hydrate
+```
+
+### Layer by Layer
+
+**Gateway Layer**: Gateway API with the Inference Extension. The Body-Based Router extracts the model name from the OpenAI-compatible request body and routes to the correct `InferencePool`. If you're serving multiple models (or multiple LoRA adapters of the same base model), this is where model selection happens.
+
+**Scheduling Layer**: The EPP makes per-request endpoint decisions within an `InferencePool`. For llm-d deployments, the llm-d scheduler provides cache-aware routing, prefix matching, and LoRA affinity. It dynamically discovers vLLM pods and tracks their state via ZeroMQ subscriptions.
+
+**Serving Layer**: vLLM pods with prefill/decode disaggregation. Prefill pods are compute-heavy (processing input tokens). Decode pods are memory-heavy (generating output tokens). KV-cache transfers between them use NIXL with the UCCL backend for congestion-resilient transport. The hierarchical KV store provides overflow and cross-replica cache sharing.
+
+**Platform Layer**: Kueue manages GPU quotas and fair scheduling across teams. DRA (Dynamic Resource Allocation) handles fine-grained GPU allocation, including MIG partitioning and time-slicing. LeaderWorkerSet coordinates multi-node inference for models that don't fit on a single node.
+
+### What to Monitor
+
+The metrics that matter for inference are different from standard web services:
+
+| Metric | What It Tells You | Alert Threshold |
+|--------|-------------------|-----------------| 
+| **TTFT** (Time to First Token) | User-perceived latency for the first response | > 500ms for interactive, > 2s for batch |
+| **TPOT** (Time Per Output Token) | Decode speed per token | Model and hardware dependent |
+| **KV-cache pressure** | How close you are to falling off the performance cliff | > 85% utilization |
+| **Queue depth per pod** | Whether individual replicas are overloaded | Sudden spikes indicate routing issues |
+| **Prefix cache hit rate** | How well your routing preserves cache locality | < 60% means your routing is wasting compute |
+
+If you're not tracking TTFT, TPOT, and KV-cache pressure today, you're flying blind on inference performance. Standard CPU and memory metrics tell you almost nothing about whether your users are getting fast responses.
+
+## What's Next: The AI Gateway Working Group and the Road to v0.6
+
+The Kubernetes community isn't slowing down. Here's what's coming:
+
+### The AI Gateway Working Group
+
+A new working group, WG AI Gateway, has been stood up to standardize agent networking and AI gateway patterns in Kubernetes. This is the next frontier: how do AI agents discover each other, how does traffic between agents get governed, and how do you enforce policy on AI traffic (token-based rate limiting, payload inspection, guardrails)?
+
+The working group is actively prototyping. If you're building agentic systems on Kubernetes, this is the community to watch. Weekly meetings are Thursdays at 2PM ET, and you can find proposals and prototypes at [github.com/kubernetes-sigs/wg-ai-gateway](https://github.com/kubernetes-sigs/wg-ai-gateway).
+
+### Kubernetes AI Conformance
+
+The [K8s AI Conformance program](https://github.com/cncf/k8s-ai-conformance) is maturing. llm-d is already using multiple components from the conformance profile (Kueue, inference gateway, LWS, DRA), and widely adopted patterns are expected to feed back into the program. For platform teams, this means a clear standard for what "production-ready AI inference on Kubernetes" looks like.
+
+### llm-d v0.6 Roadmap
+
+The next llm-d release is targeting four areas:
+
+1. **Predictive latency-aware routing**: Moving from queue-depth-based to TTFT/TPOT-target-based routing decisions.
+2. **Semantic caching**: Proactive state management APIs that can "pin" critical context blocks and cache based on semantic similarity.
+3. **SLO-driven autoscaling**: Pluggable optimizers that use queuing theory and ML for predictive scaling tied directly to latency SLOs.
+4. **End-to-end distributed tracing**: From gateway through scheduler to engine, exposing granular latency bottlenecks in disaggregated architectures.
+
+### KubeCon EU 2026 Amsterdam
+
+KubeCon EU runs March 23-26 in Amsterdam. If you're attending, look for sessions on the Gateway API Inference Extension, llm-d, and the AI Gateway Working Group. This is where the next wave of decisions will be made.
+
+## The Bottom Line
+
+Here's my take: if you're still running inference workloads on Kubernetes with a basic `Service`, round-robin load balancing, and CPU/memory-based HPA, you're operating at infrastructure v1 while the ecosystem has moved to model-aware routing and inference-native control planes.
+
+The dissolution of WG Serving isn't the end of AI inference innovation on Kubernetes. It's the beginning of AI inference being a first-class citizen across the entire Kubernetes project. The patterns are proven. The projects are maturing. The conformance standards are forming.
+
+**Your action items:**
+
+1. **If you haven't migrated off Ingress NGINX**, start now. It retires in March. Move to Gateway API and add the Inference Extension while you're at it.
+2. **Deploy the Gateway API Inference Extension** in your inference clusters. The InferencePool API is GA (v1). The EPP works with Envoy, Istio, kgateway, and NGINX Gateway Fabric today.
+3. **Evaluate llm-d's well-lit paths** for your workload. Start with the inference scheduling guide if you're doing multi-tenant serving with shared contexts.
+4. **Track the right SIGs**. If you're in this space, subscribe to SIG Network (for gateway and routing), SIG Scheduling (for autoscaling), and WG Device Management (for DRA and GPU allocation).
+5. **Instrument your inference metrics**. TTFT, TPOT, KV-cache utilization, and prefix cache hit rate. If you're not measuring these, you can't improve them.
+
+The cost-per-token race is the infrastructure challenge of our generation. The Kubernetes ecosystem just took a significant step toward making that race winnable. Don't sit it out.
