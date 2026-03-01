@@ -6,7 +6,7 @@ import { formatRelativeTime } from "@/lib/contracts";
 import { parseEntityId } from "@/lib/ids";
 import { renderMarkdownToHtml } from "@/lib/markdown";
 import { buildCanonicalPath, getPostMeta, postUnavailableCopy } from "@/lib/seo";
-import { buttonPrimarySmClass } from "@/lib/ui-classes";
+import { buttonPrimarySmClass, inlineBackLinkSmClass, inlinePrimaryLinkClass } from "@/lib/ui-classes";
 import { getPostById, listCommentsByPostId } from "@/lib/server/posts";
 import { getSessionWithPermissions } from "@/lib/server/session";
 import type { TypedEnv } from "@/types/service-bindings";
@@ -63,68 +63,76 @@ const canonicalPath = post ? buildCanonicalPath(`/item/${post.id}`) : undefined;
               href="/"
               class={buttonPrimarySmClass}
             >
-              Go back to feed
+              Go to latest posts
             </a>
           </section>
         </main>
       ) : (
         <main class="space-y-6 py-7">
           <div class="flex items-center">
-            <a href={returnPath} class="inline-flex h-9 items-center justify-center rounded-none px-3 text-[0.83rem] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground">
+            <a href={returnPath} class={inlineBackLinkSmClass}>
               Back to feed
             </a>
           </div>
 
-          <article>
-            <section class="rkn-panel space-y-5 p-5 sm:p-6">
-              <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,52%)] items-center gap-x-2 text-xs text-muted-foreground">
-                <span>posted {formatRelativeTime(post.createdAt)}</span>
+          <article class="space-y-6 border-b border-border/75 pb-6 sm:pb-7">
+            <header class="rkn-view-header space-y-3">
+              <p class="rkn-kicker">Post</p>
+              <h1 class="rkn-page-title break-words" dir="auto">
+                {post.title}
+              </h1>
+
+              <div class="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                <span>Posted {formatRelativeTime(post.createdAt)}</span>
+                <span>•</span>
+                <span>
+                  Shared by <span class="break-words font-semibold text-foreground" dir="auto">{post.author}</span>
+                </span>
                 {
                   post.tags.length > 0 ? (
-                    <span class="min-w-0 self-center justify-self-end">
-                      <span class="flex max-w-full flex-wrap items-center justify-end gap-1">
+                    <>
+                      <span>•</span>
+                      <span class="flex max-w-full flex-wrap items-center gap-1">
                         {post.tags.map((tag) => (
-                          <span class="inline-flex h-5 shrink-0 items-center rounded-md border border-border bg-muted px-1.5 text-[10px] leading-none font-semibold uppercase tracking-wide text-foreground">
+                          <span
+                            class="inline-flex h-5 max-w-full items-center rounded-md border border-border bg-muted px-1.5 text-[10px] leading-none font-semibold uppercase tracking-wide text-foreground"
+                            title={tag.slug}
+                            dir="auto"
+                          >
                             {tag.slug}
                           </span>
                         ))}
                       </span>
-                    </span>
+                    </>
                   ) : null
                 }
               </div>
-
-              <h1 class="text-[clamp(1.4rem,2.6vw,2rem)] leading-[1.2] font-semibold tracking-tight">{post.title}</h1>
-
-              <p class="text-sm text-muted-foreground">
-                Shared by <span class="font-semibold text-foreground">{post.author}</span>
-              </p>
 
               {post.url ? (
                 <a
                   href={post.url}
                   target="_blank"
                   rel="noreferrer"
-                  class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                  class={inlinePrimaryLinkClass}
                 >
-                  Open original source
+                  Open source link
                   <span class="text-muted-foreground">↗</span>
                 </a>
               ) : null}
+            </header>
 
-              {
-                post.body ? (
-                  <div class="rkn-prose max-w-none" set:html={markdownHtml} />
-                ) : null
-              }
-            </section>
+            {
+              post.body ? (
+                <div class="rkn-prose max-w-none" set:html={markdownHtml} />
+              ) : null
+            }
           </article>
 
-          <section id="discussion" class="rkn-panel space-y-5 p-5 sm:p-6">
+          <section id="discussion" class="space-y-5">
             <header class="space-y-1">
               <p class="rkn-kicker">Discussion</p>
-              <h2 class="font-display text-xl font-semibold">Community thread</h2>
-              <p class="text-sm text-muted-foreground">Be clear, be respectful, and cite what matters.</p>
+              <h2 class="font-display text-xl font-semibold">Discuss this post</h2>
+              <p class="text-sm text-muted-foreground">Share concrete points, disagree respectfully, and cite sources when useful.</p>
             </header>
 
             <CommentsPanel

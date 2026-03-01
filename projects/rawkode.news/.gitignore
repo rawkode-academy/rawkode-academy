@@ -27,3 +27,6 @@ pnpm-debug.log*
 .idea/
 
 .vscode/
+
+# headless QA artifacts
+qa/results/
