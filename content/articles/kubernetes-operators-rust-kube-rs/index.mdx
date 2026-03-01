@@ -1,0 +1,551 @@
+---
+title: "Building Kubernetes Operators in Rust with kube-rs: Why Your Next Controller Shouldn't Be Written in Go"
+description: "A practical guide to building production-grade Kubernetes operators in Rust using kube-rs. Learn why Rust's memory safety, performance, and type system make it an excellent choice for the next generation of cloud native controllers."
+type: article
+openGraph:
+  title: "Kubernetes Operators in Rust with kube-rs"
+  subtitle: "Why I'm building my next controller in Rust"
+slug: kubernetes-operators-rust-kube-rs
+cover:
+  image: "./cover.png"
+  alt: "Stylized illustration showing the Rust crab mascot Ferris interacting with Kubernetes pods and controllers, with flowing lines representing reconciliation loops on a dark gradient background."
+publishedAt: 2026-02-28
+isDraft: true
+authors:
+  - rawkode
+---
+
+Look, I love Rust. I'm always talking about Rust. So today, we're talking about Rust.
+
+I've been building Kubernetes operators for years, mostly in Go. It's the obvious choice: Kubernetes itself is written in Go, and `controller-runtime` and `kubebuilder` make scaffolding easy. But "path of least resistance" and "best tool for the job" aren't always the same thing.
+
+Since CoreOS introduced the operator pattern in 2016, operators have proliferated across the ecosystem, managing databases, message queues, certificates, and increasingly complex stateful workloads. As they become more critical to production infrastructure, the language they're written in matters more than ever.
+
+I recently joined CoreWeave, and I'm thinking a lot about how operators scale when you're managing GPU infrastructure across hundreds of clusters. Rust's memory efficiency and safety guarantees aren't nice-to-haves at that scale. They're operational necessities.
+
+**kube-rs** is a mature, production-ready Rust client for Kubernetes. It gives you everything you need to build operators with Rust's memory safety, zero-cost abstractions, and fearless concurrency. The type system catches so many bugs that would be runtime panics in Go. If you're building controllers that need to be reliable, efficient, and correct, it's time to look beyond Go.
+
+## Why Rust for Kubernetes Operators?
+
+The obvious question: why choose Rust over Go for something so deeply embedded in the Go ecosystem?
+
+### Memory Safety Without a Garbage Collector
+
+Go's garbage collector is good, but it introduces latency spikes. For most applications, this is irrelevant. For a controller reconciling thousands of resources under pressure during a cluster incident, those pauses matter. Rust gives you deterministic memory management with zero garbage collection pauses. Your controller's performance is predictable under load.
+
+More importantly, Rust's ownership model eliminates entire classes of bugs at compile time. No null pointer dereferences. No data races. No use-after-free. When your operator is managing production databases or handling secrets rotation, these guarantees aren't academic. They're operational necessities.
+
+### Type System as Documentation and Guardrail
+
+Go's type system is intentionally simple. Rust's is intentionally expressive. When you're defining Custom Resource Definitions (CRDs), Rust's type system (with enums, pattern matching, and trait-based generics) lets you model your domain with precision that Go's structs and interfaces can't match.
+
+Consider modeling the state of a managed database:
+
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub enum DatabasePhase {
+    Provisioning {
+        started_at: String,
+        progress: ProvisioningStep,
+    },
+    Running {
+        endpoint: String,
+        version: String,
+        last_backup: Option<String>,
+    },
+    Upgrading {
+        from_version: String,
+        to_version: String,
+        rollback_snapshot: String,
+    },
+    Failed {
+        reason: String,
+        last_healthy_at: String,
+        recovery_attempts: u32,
+    },
+}
+```
+
+In Go, you'd represent this as a string phase field with a collection of optional fields, losing the compiler's ability to enforce that you handle every state transition correctly. In Rust, a `match` on `DatabasePhase` forces you to handle every variant. You can't forget an edge case.
+
+### Resource Efficiency
+
+Rust binaries are compact and start fast. A typical kube-rs operator compiles to a binary often under 20 MB with release optimizations, starts in milliseconds, and uses a fraction of the memory of its Go equivalent. When you're running operators across hundreds of clusters, this efficiency compounds into real cost savings.
+
+## Getting Started with kube-rs
+
+I'm going to walk you through building a real operator. We'll create a controller that manages a custom `WebApp` resource: a simplified abstraction that creates and manages a Deployment, Service, and optionally an Ingress for web applications.
+
+### Project Setup
+
+```bash
+cargo init webapp-operator
+cd webapp-operator
+```
+
+Add the essential dependencies to your `Cargo.toml`:
+
+```toml
+[dependencies]
+kube = { version = "3.0", features = ["runtime", "derive"] }
+k8s-openapi = { version = "0.27", features = ["latest", "schemars"] }
+schemars = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = "2"
+futures = "0.3"
+```
+
+### Defining Your Custom Resource
+
+The CRD is where Rust's type system really shines. kube-rs uses derive macros to generate the full CRD schema from your Rust types:
+
+```rust
+use kube::CustomResource;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+#[derive(CustomResource, Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[kube(
+    group = "apps.rawkode.academy",
+    version = "v1",
+    kind = "WebApp",
+    plural = "webapps",
+    status = "WebAppStatus",
+    namespaced,
+    printcolumn = r#"{"name":"Phase","type":"string","jsonPath":".status.phase"}"#,
+    printcolumn = r#"{"name":"Replicas","type":"integer","jsonPath":".spec.replicas"}"#
+)]
+pub struct WebAppSpec {
+    /// Container image to deploy
+    pub image: String,
+
+    /// Number of replicas
+    #[serde(default = "default_replicas")]
+    pub replicas: i32,
+
+    /// Port the application listens on
+    #[serde(default = "default_port")]
+    pub port: i32,
+
+    /// Optional hostname for Ingress creation
+    pub hostname: Option<String>,
+
+    /// Environment variables to inject
+    #[serde(default)]
+    pub env: Vec<EnvVar>,
+
+    /// Resource requirements
+    pub resources: Option<ResourceRequirements>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct EnvVar {
+    pub name: String,
+    pub value: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ResourceRequirements {
+    pub cpu: String,
+    pub memory: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct WebAppStatus {
+    pub phase: String,
+    pub ready_replicas: i32,
+    pub message: Option<String>,
+    pub last_reconciled: Option<String>,
+}
+
+fn default_replicas() -> i32 { 3 }
+fn default_port() -> i32 { 8080 }
+```
+
+That `#[derive(CustomResource)]` macro generates a complete `WebApp` struct with metadata, spec, and status, plus methods to generate the CRD YAML. Call `WebApp::crd()` and you get a fully-typed `CustomResourceDefinition` ready to apply to your cluster.
+
+### The Reconciliation Loop
+
+The heart of any operator is its reconciliation function. kube-rs provides a `Controller` runtime that handles watch events, requeueing, and error backoff. Your job is to implement the reconcile function:
+
+```rust
+use kube::{
+    api::{Api, Patch, PatchParams, ResourceExt},
+    runtime::controller::{Action, Controller},
+    Client, Resource,
+};
+use std::sync::Arc;
+use tokio::time::Duration;
+
+// Shared state for the controller
+struct Context {
+    client: Client,
+}
+
+async fn reconcile(
+    webapp: Arc<WebApp>,
+    ctx: Arc<Context>,
+) -> Result<Action, Error> {
+    let client = &ctx.client;
+    let name = webapp.name_any();
+    let namespace = webapp.namespace().unwrap_or_default();
+
+    tracing::info!(
+        name = %name,
+        namespace = %namespace,
+        "Reconciling WebApp"
+    );
+
+    // Step 1: Ensure the Deployment exists and is up-to-date
+    reconcile_deployment(client, &webapp).await?;
+
+    // Step 2: Ensure the Service exists
+    reconcile_service(client, &webapp).await?;
+
+    // Step 3: If hostname is specified, ensure Ingress exists
+    if webapp.spec.hostname.is_some() {
+        reconcile_ingress(client, &webapp).await?;
+    }
+
+    // Step 4: Update status
+    update_status(client, &webapp).await?;
+
+    // Re-reconcile every 5 minutes to catch drift
+    Ok(Action::requeue(Duration::from_secs(300)))
+}
+
+fn error_policy(
+    _webapp: Arc<WebApp>,
+    error: &Error,
+    _ctx: Arc<Context>,
+) -> Action {
+    tracing::error!(%error, "Reconciliation failed");
+    // Fixed retry interval of 10 seconds
+    Action::requeue(Duration::from_secs(10))
+}
+```
+
+### Building the Deployment
+
+This is where Rust's type safety pays off. Instead of constructing untyped JSON objects, you build fully-typed Kubernetes resources:
+
+```rust
+use k8s_openapi::api::apps::v1::{Deployment, DeploymentSpec};
+use k8s_openapi::api::core::v1::{
+    Container, ContainerPort, PodSpec, PodTemplateSpec,
+};
+use k8s_openapi::apimachinery::pkg::apis::meta::v1::LabelSelector;
+use std::collections::BTreeMap;
+
+async fn reconcile_deployment(
+    client: &Client,
+    webapp: &WebApp,
+) -> Result<(), Error> {
+    let namespace = webapp.namespace().unwrap_or_default();
+    let name = webapp.name_any();
+    let deployments: Api<Deployment> =
+        Api::namespaced(client.clone(), &namespace);
+
+    let labels: BTreeMap<String, String> = BTreeMap::from([
+        ("app.kubernetes.io/name".into(), name.clone()),
+        ("app.kubernetes.io/managed-by".into(), "webapp-operator".into()),
+    ]);
+
+    let deployment = Deployment {
+        metadata: kube::api::ObjectMeta {
+            name: Some(name.clone()),
+            namespace: Some(namespace.clone()),
+            labels: Some(labels.clone()),
+            owner_references: Some(
+                webapp.controller_owner_ref(&()).into_iter().collect()
+            ),
+            ..Default::default()
+        },
+        spec: Some(DeploymentSpec {
+            replicas: Some(webapp.spec.replicas),
+            selector: LabelSelector {
+                match_labels: Some(labels.clone()),
+                ..Default::default()
+            },
+            template: PodTemplateSpec {
+                metadata: Some(kube::api::ObjectMeta {
+                    labels: Some(labels),
+                    ..Default::default()
+                }),
+                spec: Some(PodSpec {
+                    containers: vec![Container {
+                        name: "app".into(),
+                        image: Some(webapp.spec.image.clone()),
+                        ports: Some(vec![ContainerPort {
+                            container_port: webapp.spec.port,
+                            ..Default::default()
+                        }]),
+                        ..Default::default()
+                    }],
+                    ..Default::default()
+                }),
+            },
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+
+    deployments
+        .patch(
+            &name,
+            &PatchParams::apply("webapp-operator"),
+            &Patch::Apply(deployment),
+        )
+        .await?;
+
+    Ok(())
+}
+```
+
+Notice the `owner_references` line. This sets up Kubernetes garbage collection so that when a `WebApp` is deleted, its Deployment is automatically cleaned up. kube-rs provides `controller_owner_ref` as a convenience method that returns an `Option<OwnerReference>`. The `.into_iter().collect()` pattern cleanly converts it into the `Vec` that `owner_references` expects.
+
+## Architecture: How It All Fits Together
+
+Here's how the operator interacts with the Kubernetes API and manages its resources:
+
+```d2 sketch
+direction: right
+
+user: User {
+  shape: person
+}
+
+apiserver: Kubernetes API Server {
+  style.fill: "#326CE5"
+  style.font-color: "#ffffff"
+}
+
+operator: WebApp Operator {
+  style.fill: "#CE412B"
+  style.font-color: "#ffffff"
+
+  watcher: Watch Stream
+  reconciler: Reconcile Loop
+  queue: Work Queue
+
+  watcher -> queue: enqueue events
+  queue -> reconciler: dequeue
+}
+
+webapp_crd: WebApp CR {
+  style.fill: "#DEA584"
+}
+
+deployment: Deployment {
+  style.fill: "#4A9BD9"
+}
+
+service: Service {
+  style.fill: "#4A9BD9"
+}
+
+ingress: Ingress {
+  style.fill: "#4A9BD9"
+}
+
+user -> apiserver: kubectl apply WebApp
+apiserver -> webapp_crd: stores
+apiserver -> operator.watcher: watch events
+operator.reconciler -> apiserver: create/update resources
+apiserver -> deployment: stores
+apiserver -> service: stores
+apiserver -> ingress: stores (if hostname set)
+```
+
+The operator watches for changes to `WebApp` custom resources. When a change is detected, the watcher enqueues a reconciliation event. The reconciler then ensures the actual state (Deployments, Services, Ingresses) matches the desired state defined in the `WebApp` spec. This is the standard level-triggered reconciliation pattern, the same one that powers every built-in Kubernetes controller.
+
+## Testing Your Operator
+
+One of kube-rs's underrated strengths is its testing story. The library provides utilities for both unit testing with mocked API responses and integration testing against real clusters.
+
+### Unit Testing with Mocked Responses
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use kube::api::ObjectMeta;
+
+    fn test_webapp() -> WebApp {
+        WebApp {
+            metadata: ObjectMeta {
+                name: Some("test-app".into()),
+                namespace: Some("default".into()),
+                ..Default::default()
+            },
+            spec: WebAppSpec {
+                image: "nginx:latest".into(),
+                replicas: 2,
+                port: 80,
+                hostname: Some("test.example.com".into()),
+                env: vec![],
+                resources: None,
+            },
+            status: None,
+        }
+    }
+
+    #[test]
+    fn test_crd_generation() {
+        // Verify CRD schema is valid
+        let crd = WebApp::crd();
+        assert_eq!(crd.metadata.name, Some("webapps.apps.rawkode.academy".into()));
+    }
+
+    #[test]
+    fn test_default_values() {
+        let spec: WebAppSpec = serde_json::from_str(r#"{
+            "image": "nginx:latest"
+        }"#).unwrap();
+        assert_eq!(spec.replicas, 3);
+        assert_eq!(spec.port, 8080);
+    }
+}
+```
+
+### Integration Testing
+
+For integration tests, kube-rs works well with tools like `k3d` or `kind`. Spin up an ephemeral cluster in CI:
+
+```rust
+#[tokio::test]
+#[ignore = "requires cluster"]
+async fn test_full_reconciliation() {
+    let client = Client::try_default().await.unwrap();
+    let webapps: Api<WebApp> = Api::namespaced(client.clone(), "default");
+
+    // Create a WebApp
+    let webapp = WebApp::new("integration-test", WebAppSpec {
+        image: "nginx:latest".into(),
+        replicas: 1,
+        port: 80,
+        hostname: None,
+        env: vec![],
+        resources: None,
+    });
+
+    webapps.create(&Default::default(), &webapp).await.unwrap();
+
+    // Wait for reconciliation
+    tokio::time::sleep(Duration::from_secs(5)).await;
+
+    // Verify Deployment was created
+    let deployments: Api<Deployment> =
+        Api::namespaced(client.clone(), "default");
+    let deploy = deployments.get("integration-test").await.unwrap();
+    assert_eq!(
+        deploy.spec.unwrap().replicas,
+        Some(1)
+    );
+}
+```
+
+## The Main Function: Wiring It All Together
+
+Here's the complete entrypoint that starts the controller:
+
+```rust
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt()
+        .with_env_filter("webapp_operator=info,kube=info")
+        .json()
+        .init();
+
+    let client = Client::try_default().await?;
+
+    // Ensure CRD exists (or apply it separately)
+    let webapps: Api<WebApp> = Api::all(client.clone());
+    let deployments: Api<Deployment> = Api::all(client.clone());
+
+    tracing::info!("Starting WebApp operator");
+
+    Controller::new(webapps, Default::default())
+        // Watch owned Deployments for changes
+        .owns(deployments, Default::default())
+        .run(reconcile, error_policy, Arc::new(Context { client }))
+        .for_each(|result| async move {
+            match result {
+                Ok(obj) => tracing::info!(resource = ?obj, "Reconciled"),
+                Err(err) => tracing::error!(%err, "Reconciliation error"),
+            }
+        })
+        .await;
+
+    Ok(())
+}
+```
+
+The `.owns(deployments, Default::default())` call is crucial. It tells the controller to also watch Deployments and trigger reconciliation of the owning `WebApp` if a managed Deployment changes. This is how your operator detects drift: if someone manually edits a Deployment, the controller immediately reconciles it back to the desired state.
+
+## Containerizing and Deploying
+
+Rust's compilation model makes containerization straightforward. Here's a multi-stage Dockerfile:
+
+```dockerfile
+FROM rust:1.93 AS builder
+WORKDIR /build
+COPY . .
+RUN cargo build --release
+
+FROM gcr.io/distroless/cc-debian12:nonroot
+COPY --from=builder /build/target/release/webapp-operator /
+ENTRYPOINT ["/webapp-operator"]
+```
+
+The final image is typically under 30 MB. Compare this to Go operator images, which with similar distroless builds land around 30-50 MB, or larger when you start including debugging tools. Java-based operators (yes, they exist) can exceed 300 MB.
+
+## When to Choose Rust Over Go
+
+I want to be straight with you. Rust isn't always the right choice for every operator.
+
+**Choose Rust when:**
+- Your operator manages security-sensitive resources (secrets, certificates, network policies)
+- You need predictable, low-latency reconciliation under high load
+- Your team already has Rust experience
+- You're building a long-lived project where compile-time correctness pays dividends
+- Resource efficiency matters (edge deployments, large-scale multi-cluster)
+
+**Stick with Go when:**
+- You're prototyping and need maximum iteration speed
+- Your team is Go-native and switching would slow delivery
+- You need deep integration with controller-runtime's ecosystem (e.g., Kubebuilder scaffolding)
+- The operator is simple enough that Go's simplicity is an advantage
+
+The ecosystem around kube-rs is growing steadily. **kopium** generates Rust types from existing CRDs, and the broader kube-rs project (a CNCF Sandbox project) continues to add tooling that reduces boilerplate. The community is smaller than Go's operator ecosystem, but it's active, welcoming, and shipping real production software.
+
+## Production Readiness Checklist
+
+Before shipping your Rust operator to production, make sure you've covered these essentials:
+
+- [ ] **RBAC manifests**: Generate ClusterRole/ClusterRoleBinding with minimum required permissions
+- [ ] **Leader election**: Use a leader election crate such as `kube-leader-election`, `kube-coordinate`, or `kube-lease-manager` to prevent split-brain in HA deployments
+- [ ] **Metrics endpoint**: Expose Prometheus metrics for reconciliation duration, queue depth, and errors
+- [ ] **Health probes**: Implement `/healthz` and `/readyz` endpoints for Kubernetes liveness and readiness checks
+- [ ] **Graceful shutdown**: Handle SIGTERM to complete in-flight reconciliations before exiting
+- [ ] **Finalizers**: Add finalizers to handle custom cleanup logic when resources are deleted
+- [ ] **Status subresource**: Always write meaningful status conditions so users can `kubectl get webapps` and understand state
+- [ ] **Owner references**: Set owner references on all created resources for automatic garbage collection
+- [ ] **Event recording**: Emit Kubernetes Events so `kubectl describe` shows what the operator is doing
+- [ ] **E2E tests in CI**: Run integration tests against an ephemeral cluster (k3d/kind) on every PR
+- [ ] **CRD versioning strategy**: Plan for how you'll handle CRD schema evolution (conversion webhooks if needed)
+- [ ] **Container image signing**: Sign images with cosign and publish SBOMs for supply chain security
+
+## The Bigger Picture
+
+We're past the point where "it works" is good enough for operators. They need to be secure, efficient, and maintainable over years of production use. Rust's guarantees align perfectly with those requirements.
+
+kube-rs has proven itself in production at scale. It's maintained by an active community, has excellent documentation, and the tooling ecosystem keeps growing. If you've been curious about Rust but haven't found the right project to start with, a Kubernetes operator is a great place to begin. You get practical Rust experience while building something genuinely useful for your infrastructure.
+
+The cloud native world doesn't have to be a Go monoculture. Diversity in implementation languages leads to diversity in ideas and approaches. Your next operator might just be your first Rust project.
+
+Give it a try. Your future on-call self will thank you.
