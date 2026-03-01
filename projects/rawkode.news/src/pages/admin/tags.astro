@@ -33,10 +33,12 @@ const initialConfirmSlug = Astro.url.searchParams.get("confirm")?.trim().toLower
     <main class="space-y-5 py-7">
       {
         !isAdmin ? (
-          <section class="rkn-panel p-5 text-sm text-muted-foreground">Admin role required.</section>
+          <section class="border-y border-border/70 bg-muted/15 px-5 py-5 text-sm text-muted-foreground">
+            Admin role required.
+          </section>
         ) : (
           <>
-            <header class="space-y-2">
+            <header class="rkn-view-header space-y-2">
               <p class="rkn-kicker">Admin</p>
               <h1 class="rkn-page-title">Manage tags</h1>
               <p class="text-sm text-muted-foreground">

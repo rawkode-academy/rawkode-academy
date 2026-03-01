@@ -41,3 +41,36 @@ PRs should include:
 - Use the Astro CLI for integrations: `bunx astro add <integration>`.
 - Use the shadcn CLI for UI components: `bunx shadcn@latest add <component>`.
 - Use `bunx drizzle-kit generate` to create D1 migrations from `src/db/schema.ts`.
+
+## Design Context
+
+### Users
+- Curious people from the tech space.
+- Typical context: scanning and sharing useful, high-signal information throughout the day.
+- Primary job to be done: act as an interactive newsletter for `rawkode.academy`, helping people discover insightful information about CNCF and broader tech topics quickly.
+
+### Brand Personality
+- 3-word personality: nerdy, experienced, seniority.
+- Emotional goals: confidence, focus, and curiosity.
+- Voice/tone: direct, informed, and practical; avoid hype and fluff.
+
+### Aesthetic Direction
+- Core direction: content-first and information-dense, with clean hierarchy and restrained visual noise.
+- Keep and reinforce existing product cues already present in code:
+  - square/low-radius controls and panels
+  - strong typography hierarchy (Sora display, IBM Plex Sans body, Monaspace for utility/meta)
+  - calm, technical palette anchored by the existing teal primary token
+- Reference qualities:
+  - `news.ycombinator.com`: simplicity and minimal friction
+  - `lobste.rs`: information clarity and density
+- Anti-reference:
+  - `techcrunch.com`: avoid overloaded, promotional, or cluttered layouts
+- Theme support: both light and dark modes.
+- Accessibility baseline: WCAG 2.2 AA.
+
+### Design Principles
+- Prioritize signal over decoration: every element should improve scanning, comprehension, or actionability.
+- Design for fast technical reading: clear hierarchy, concise metadata, and predictable interaction patterns.
+- Maintain calm density: support rich information without visual overload.
+- Build trust through clarity: plain language, explicit states, and consistent affordances.
+- Meet WCAG 2.2 AA in both light and dark themes, including reduced-motion-friendly behavior.

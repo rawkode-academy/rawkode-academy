@@ -51,6 +51,16 @@
   let pagedTags: ApiTag[] = [];
   let pageItems: PageItem[] = [];
 
+  const getAsyncErrorMessage = (error: unknown, fallback: string) => {
+    if (error instanceof Error && error.message.trim()) {
+      return error.message;
+    }
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      return "You appear to be offline. Reconnect and try again.";
+    }
+    return fallback;
+  };
+
   const readLocationState = () => {
     if (typeof window === "undefined") {
       return {
@@ -281,6 +291,11 @@
       confirmSlug = null;
       syncLocation({ hash: rowAnchor(created.id) });
       scrollToAnchor(rowAnchor(created.id));
+    } catch (error) {
+      createError = getAsyncErrorMessage(
+        error,
+        "Could not create tag right now. Please try again.",
+      );
     } finally {
       createPending = false;
     }
@@ -322,6 +337,11 @@
       editing = null;
       syncLocation({ hash: rowAnchor(updated.id) });
       scrollToAnchor(rowAnchor(updated.id));
+    } catch (error) {
+      editError = getAsyncErrorMessage(
+        error,
+        "Could not save tag changes right now. Please try again.",
+      );
     } finally {
       updatePending = false;
     }
@@ -367,6 +387,11 @@
 
       syncLocation({ hash: rowAnchor(fallback.id) });
       scrollToAnchor(rowAnchor(fallback.id));
+    } catch (error) {
+      deleteError = getAsyncErrorMessage(
+        error,
+        "Could not delete tag right now. Please try again.",
+      );
     } finally {
       deletePending = false;
     }

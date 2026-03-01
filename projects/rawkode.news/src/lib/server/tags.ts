@@ -3,6 +3,11 @@ import { getDb } from "@/db";
 import { postTags, tags } from "@/db/schema";
 import type { ApiTag } from "@/lib/contracts";
 import { createEntityId } from "@/lib/ids";
+import {
+  TAG_DESCRIPTION_MAX_LENGTH,
+  TAG_NAME_MAX_LENGTH,
+  TAG_SLUG_MAX_LENGTH,
+} from "@/lib/input-limits";
 import { RequestError } from "@/lib/server/errors";
 import {
   coreTagSlugs,
@@ -127,6 +132,12 @@ export const createOptionalTag = async (
   if (!name) {
     throw new RequestError("Tag name is required", 400);
   }
+  if (name.length > TAG_NAME_MAX_LENGTH) {
+    throw new RequestError(
+      `Tag name must be ${TAG_NAME_MAX_LENGTH} characters or fewer`,
+      400,
+    );
+  }
 
   const slugCandidate = input.slug?.trim()
     ? input.slug.trim().toLowerCase()
@@ -134,6 +145,12 @@ export const createOptionalTag = async (
 
   if (!slugCandidate) {
     throw new RequestError("Tag slug is required", 400);
+  }
+  if (slugCandidate.length > TAG_SLUG_MAX_LENGTH) {
+    throw new RequestError(
+      `Tag slug must be ${TAG_SLUG_MAX_LENGTH} characters or fewer`,
+      400,
+    );
   }
   if (!isValidTagSlug(slugCandidate)) {
     throw new RequestError("Invalid tag slug", 400);
@@ -143,6 +160,12 @@ export const createOptionalTag = async (
   }
 
   const description = input.description?.trim() || null;
+  if (description && description.length > TAG_DESCRIPTION_MAX_LENGTH) {
+    throw new RequestError(
+      `Tag description must be ${TAG_DESCRIPTION_MAX_LENGTH} characters or fewer`,
+      400,
+    );
+  }
   const db = getDb(env);
 
   try {
@@ -208,6 +231,12 @@ export const updateOptionalTag = async (
   if (!nextName) {
     throw new RequestError("Tag name cannot be empty", 400);
   }
+  if (nextName.length > TAG_NAME_MAX_LENGTH) {
+    throw new RequestError(
+      `Tag name must be ${TAG_NAME_MAX_LENGTH} characters or fewer`,
+      400,
+    );
+  }
 
   const nextSlug = input.slug?.trim()
     ? input.slug.trim().toLowerCase()
@@ -215,6 +244,12 @@ export const updateOptionalTag = async (
 
   if (!nextSlug) {
     throw new RequestError("Tag slug is required", 400);
+  }
+  if (nextSlug.length > TAG_SLUG_MAX_LENGTH) {
+    throw new RequestError(
+      `Tag slug must be ${TAG_SLUG_MAX_LENGTH} characters or fewer`,
+      400,
+    );
   }
   if (!isValidTagSlug(nextSlug)) {
     throw new RequestError("Invalid tag slug", 400);
@@ -226,6 +261,12 @@ export const updateOptionalTag = async (
   const nextDescription = input.description == null
     ? undefined
     : input.description.trim() || null;
+  if (nextDescription && nextDescription.length > TAG_DESCRIPTION_MAX_LENGTH) {
+    throw new RequestError(
+      `Tag description must be ${TAG_DESCRIPTION_MAX_LENGTH} characters or fewer`,
+      400,
+    );
+  }
 
   try {
     await db

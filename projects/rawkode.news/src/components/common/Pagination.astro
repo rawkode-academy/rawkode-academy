@@ -1,4 +1,6 @@
 ---
+import { paginationControlClass } from "@/lib/ui-classes";
+
 type Props = {
   page: number;
   totalPages: number;
@@ -57,17 +59,17 @@ if (end < pageCount) {
   shouldRender ? (
     <nav
       aria-label="Pagination"
-      class="flex flex-wrap items-center justify-between gap-3 border-t border-border/75 px-1 pt-3 text-xs text-muted-foreground"
+      class="rkn-no-print flex flex-wrap items-center justify-between gap-3 border-t border-border/75 px-1 pt-3 text-xs text-muted-foreground"
     >
       <div class="flex flex-wrap items-center gap-1.5">
         {
           prevDisabled ? (
-            <span class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold opacity-45">Previous</span>
+            <span class:list={[paginationControlClass, "cursor-default text-muted-foreground"]}>Previous</span>
           ) : (
             <a
               href={buildPageHref(page - 1)}
               rel="prev"
-              class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground"
+              class:list={[paginationControlClass, "text-muted-foreground hover:bg-accent hover:text-foreground"]}
             >
               Previous
             </a>
@@ -81,13 +83,13 @@ if (end < pageCount) {
                 …
               </span>
             ) : item === page ? (
-              <span aria-current="page" class="inline-flex h-9 items-center rounded-none bg-secondary px-3 text-[0.83rem] font-semibold text-foreground">
+              <span aria-current="page" class:list={[paginationControlClass, "bg-secondary text-foreground"]}>
                 {item}
               </span>
             ) : (
               <a
                 href={buildPageHref(item)}
-                class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground"
+                class:list={[paginationControlClass, "text-muted-foreground hover:bg-accent hover:text-foreground"]}
               >
                 {item}
               </a>
@@ -97,12 +99,12 @@ if (end < pageCount) {
 
         {
           nextDisabled ? (
-            <span class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold opacity-45">Next</span>
+            <span class:list={[paginationControlClass, "cursor-default text-muted-foreground"]}>Next</span>
           ) : (
             <a
               href={buildPageHref(page + 1)}
               rel="next"
-              class="inline-flex h-9 items-center rounded-none px-3 text-[0.83rem] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground"
+              class:list={[paginationControlClass, "text-muted-foreground hover:bg-accent hover:text-foreground"]}
             >
               Next
             </a>
