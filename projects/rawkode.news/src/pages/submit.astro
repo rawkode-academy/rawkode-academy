@@ -3,7 +3,18 @@ import { actions } from "astro:actions";
 import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { mandatoryTagSlugs } from "@/lib/contracts";
-import { buttonPrimaryLgClass, buttonSecondarySmClass, inputClass, textareaClass } from "@/lib/ui-classes";
+import {
+  POST_BODY_MAX_LENGTH,
+  POST_TITLE_MAX_LENGTH,
+  POST_URL_MAX_LENGTH,
+} from "@/lib/input-limits";
+import {
+  buttonPrimaryLgClass,
+  buttonSecondarySmClass,
+  checkboxPillSmClass,
+  inputClass,
+  textareaClass,
+} from "@/lib/ui-classes";
 import { getSessionWithPermissions } from "@/lib/server/session";
 import { listTags } from "@/lib/server/tags";
 import { MAX_OPTIONAL_TAGS } from "@/lib/tags";
@@ -48,10 +59,9 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
       {
         !user ? (
           <section class="rkn-panel space-y-3 p-5">
-            <p class="rkn-kicker">Submit</p>
-            <h1 class="rkn-page-title">Sign in to create a post</h1>
+            <h1 class="rkn-page-title">Sign in to publish a post</h1>
             <p class="text-sm text-muted-foreground">
-              Posts work best when they include clear context and a concrete reason to discuss.
+              Share a link or write-up with enough context to evaluate quickly.
             </p>
             <div>
               <a
@@ -60,22 +70,21 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                 data-astro-reload
                 class={buttonSecondarySmClass}
               >
-                Sign in
+                Sign in to continue
               </a>
             </div>
           </section>
         ) : (
           <>
-            <header class="space-y-2">
-              <p class="rkn-kicker">Submit</p>
+            <header class="rkn-view-header space-y-2">
               <h1 class="rkn-page-title">Create a post</h1>
               <p class="max-w-[72ch] text-sm text-muted-foreground">
-                Share a link or write-up with enough context that an engineer can understand it quickly.
+                Share a link or write-up, then explain why it matters.
               </p>
             </header>
 
             <section class="rkn-panel overflow-hidden">
-              <form method="POST" action={actions.createPost} class="space-y-6 p-5">
+              <form id="submit-post-form" method="POST" action={actions.createPost} class="space-y-6 p-5">
                 <fieldset class="space-y-6">
                   <div class="space-y-2">
                     <label for="submit-title" class="text-sm font-semibold text-foreground">
@@ -85,9 +94,15 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                       id="submit-title"
                       name="title"
                       required
-                      placeholder="A clear, specific title"
+                      maxlength={POST_TITLE_MAX_LENGTH}
+                      aria-describedby="submit-title-hint"
+                      dir="auto"
+                      placeholder="What changed in Kubernetes scheduling?"
                       class={inputClass}
                     />
+                    <p id="submit-title-hint" class="text-xs text-muted-foreground">
+                      Be specific. Up to {POST_TITLE_MAX_LENGTH} characters.
+                    </p>
                   </div>
 
                   <div class="space-y-3">
@@ -95,12 +110,13 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                     <div class="space-y-2">
                       <div class="grid grid-cols-4 gap-2 md:grid-cols-8">
                         <label class="relative block">
-                          <span class="sr-only">Mandatory tag</span>
+                          <span class="sr-only">Primary feed tag</span>
                           <select
                             id="submit-mandatory-tag"
                             name="mandatoryTag"
-                            aria-label="Mandatory tag"
-                            class="h-9 w-full min-w-0 cursor-pointer appearance-none rounded-md border border-primary/40 bg-primary/10 pl-7 pr-7 text-center text-xs font-semibold text-foreground [text-align-last:center] hover:bg-primary/15"
+                            aria-label="Primary feed tag"
+                            class="h-[var(--rkn-control-sm-height)] w-full min-w-0 cursor-pointer appearance-none rounded-md border border-input bg-card text-center text-xs font-medium text-foreground outline-none [text-align-last:center] transition-[border-color,box-shadow,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:border-primary/70 focus-visible:ring-[3px] focus-visible:ring-primary/20 hover:bg-muted"
+                            style="padding-inline: 1.75rem"
                           >
                             {allowedMandatoryTags.map((slug) => (
                               <option value={slug} selected={slug === defaultMandatoryTag}>
@@ -110,7 +126,8 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                           </select>
                           <span
                             aria-hidden="true"
-                            class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[10px] text-foreground/70"
+                            class="pointer-events-none absolute top-1/2 -translate-y-1/2 text-[10px] text-foreground/70"
+                            style="inset-inline-end: 0.5rem"
                           >
                             ▾
                           </span>
@@ -119,11 +136,11 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                         {
                           optionalTags.map((tag) => (
                             <label
-                              class="inline-flex h-9 w-full min-w-0 cursor-pointer items-center justify-center gap-1 rounded-md border px-2 text-xs font-semibold border-border text-muted-foreground hover:bg-muted hover:text-foreground has-[:checked]:border-primary/40 has-[:checked]:bg-primary/10 has-[:checked]:text-foreground"
+                              class={checkboxPillSmClass}
                               title={tag.description ?? undefined}
                             >
                               <input type="checkbox" name="optionalTag" value={tag.slug} class="peer sr-only" />
-                              <span class="min-w-0 truncate">{tag.name || tag.slug}</span>
+                              <span class="min-w-0 truncate" dir="auto">{tag.name || tag.slug}</span>
                             </label>
                           ))
                         }
@@ -131,60 +148,69 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                       <p
                         id="submit-optional-tag-limit"
                         data-limit={MAX_OPTIONAL_TAGS}
+                        aria-live="polite"
                         class="text-xs text-muted-foreground"
                       >
-                        Select up to {MAX_OPTIONAL_TAGS} optional tags.
+                        0/{MAX_OPTIONAL_TAGS} optional tags selected.
                       </p>
                     </div>
                   </div>
 
                   <div class="space-y-2">
                     <label for="submit-url" class="text-sm font-semibold text-foreground">
-                      URL (optional)
+                      Source URL (optional)
                     </label>
                     <input
                       id="submit-url"
                       name="url"
+                      type="url"
+                      inputmode="url"
+                      maxlength={POST_URL_MAX_LENGTH}
+                      aria-describedby="submit-url-hint"
                       placeholder="https://..."
                       class={inputClass}
                     />
+                    <p id="submit-url-hint" class="text-xs text-muted-foreground">
+                      Optional. Use http:// or https://.
+                    </p>
                   </div>
 
                   <div class="space-y-2">
-                    <label for="submit-body" class="text-sm font-semibold text-foreground">Summary (Markdown)</label>
-                    <p class="text-xs text-muted-foreground">
-                      Add the key context, tradeoffs, and why this is worth reading.
+                    <label for="submit-body" class="text-sm font-semibold text-foreground">Summary (Markdown, optional)</label>
+                    <p id="submit-body-hint" class="text-xs text-muted-foreground">
+                      Optional. Add context and tradeoffs. Up to {POST_BODY_MAX_LENGTH} characters.
                     </p>
                     <div class="grid gap-4 lg:grid-cols-2">
                       <textarea
                         id="submit-body"
                         name="body"
+                        maxlength={POST_BODY_MAX_LENGTH}
+                        aria-describedby="submit-body-hint"
+                        dir="auto"
                         class={`${textareaClass} min-h-[290px] leading-relaxed`}
-                        placeholder="What should engineers know before opening this?"
+                        placeholder="What should readers know before opening this?"
                       />
                       <div
                         id="submit-body-preview"
-                        class="rkn-prose rkn-prose-editor min-h-[290px] overflow-y-auto rounded-none border border-input bg-white px-3 py-2"
+                        class="rkn-prose rkn-prose-editor min-h-[290px] overflow-y-auto rounded-none border border-input bg-card px-3 py-2"
                       >
-                        <div class="text-sm text-muted-foreground">Live preview appears here.</div>
+                        <div class="text-sm text-muted-foreground">Preview</div>
                       </div>
                     </div>
                   </div>
 
-                  {createPostResult?.error ? <p class="text-sm text-destructive">{createPostResult.error.message}</p> : null}
+                  {createPostResult?.error ? <p role="alert" class="text-sm text-destructive">Could not publish post. {createPostResult.error.message}</p> : null}
 
-                  <div class="rounded-none border border-border bg-card p-3">
-                    <div class="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <button
-                        type="submit"
-                        class={buttonPrimaryLgClass}
-                      >
-                        Publish post
-                      </button>
-                      <p class="w-full text-right text-xs text-muted-foreground sm:w-auto">
-                        Posting as <span class="font-semibold text-foreground">{user.name || user.email}</span>
-                      </p>
-                    </div>
+                  <div>
+                    <button
+                      id="submit-post-button"
+                      type="submit"
+                      data-idle-label="Publish"
+                      data-pending-label="Publishing…"
+                      class={buttonPrimaryLgClass}
+                    >
+                      <span data-submit-label>Publish</span>
+                    </button>
                   </div>
                 </fieldset>
               </form>
@@ -197,7 +223,12 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
 </BaseLayout>
 
 <script>
-  import { renderMarkdownToHtml } from "@/lib/markdown";
+
+  const PREVIEW_DEBOUNCE_MS = 120;
+  const getMarkdownRenderer = async () => {
+    const module = await import("@/lib/markdown");
+    return module.renderMarkdownToHtml;
+  };
 
   const initSubmitPreview = () => {
     const textarea = document.getElementById("submit-body");
@@ -206,18 +237,44 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
       return;
     }
 
-    const render = () => {
+    let previewTimer = 0;
+    let renderToken = 0;
+    let lastRenderedSource = "";
+
+    const render = async () => {
+      const token = ++renderToken;
       const source = textarea.value.trim();
+      if (source === lastRenderedSource) {
+        return;
+      }
+      lastRenderedSource = source;
       if (!source) {
-        preview.innerHTML = `<div class="text-sm text-muted-foreground">Live preview appears here.</div>`;
+        preview.innerHTML = `<div class="text-sm text-muted-foreground">Preview</div>`;
         return;
       }
 
-      preview.innerHTML = renderMarkdownToHtml(source);
+      preview.innerHTML = `<div class="text-sm text-muted-foreground">Rendering preview…</div>`;
+      try {
+        const renderMarkdownToHtml = await getMarkdownRenderer();
+        if (token !== renderToken) {
+          return;
+        }
+        preview.innerHTML = renderMarkdownToHtml(source);
+      } catch {
+        if (token !== renderToken) {
+          return;
+        }
+        preview.innerHTML = `<div class="text-sm text-destructive">Preview unavailable right now.</div>`;
+      }
     };
 
-    textarea.addEventListener("input", render);
-    render();
+    textarea.addEventListener("input", () => {
+      window.clearTimeout(previewTimer);
+      previewTimer = window.setTimeout(() => {
+        void render();
+      }, PREVIEW_DEBOUNCE_MS);
+    });
+    void render();
   };
 
   const initOptionalTagLimit = () => {
@@ -247,11 +304,11 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
       });
 
       if (atLimit) {
-        limitText.textContent = `${checkedCount}/${maxOptionalTags} optional tags selected (limit reached)`;
+        limitText.textContent = `${checkedCount}/${maxOptionalTags} optional tags selected. Remove one to choose another.`;
         limitText.classList.add("text-destructive");
         limitText.classList.remove("text-muted-foreground");
       } else {
-        limitText.textContent = `${checkedCount}/${maxOptionalTags} optional tags selected`;
+        limitText.textContent = `${checkedCount}/${maxOptionalTags} optional tags selected.`;
         limitText.classList.remove("text-destructive");
         limitText.classList.add("text-muted-foreground");
       }
@@ -261,9 +318,37 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
     apply();
   };
 
+  const initSubmitPendingState = () => {
+    const form = document.getElementById("submit-post-form");
+    const button = document.getElementById("submit-post-button");
+    const label = document.querySelector<HTMLElement>("#submit-post-button [data-submit-label]");
+
+    if (!(form instanceof HTMLFormElement) || !(button instanceof HTMLButtonElement) || !(label instanceof HTMLElement)) {
+      return;
+    }
+    if (form.dataset.pendingBound === "1") {
+      return;
+    }
+
+    form.dataset.pendingBound = "1";
+    const idleLabel = button.getAttribute("data-idle-label") ?? "Publish";
+    const pendingLabel = button.getAttribute("data-pending-label") ?? "Publishing…";
+    label.textContent = idleLabel;
+
+    form.addEventListener("submit", () => {
+      if (button.disabled) {
+        return;
+      }
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+      label.textContent = pendingLabel;
+    });
+  };
+
   const initSubmitPage = () => {
     initSubmitPreview();
     initOptionalTagLimit();
+    initSubmitPendingState();
   };
 
   const submitEnhancementsBoundAttr = "data-rkn-submit-enhancements-bound";

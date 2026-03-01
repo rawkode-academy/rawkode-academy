@@ -2,6 +2,15 @@ import { type ActionAPIContext, ActionError, defineAction } from "astro:actions"
 import { z } from "astro:schema";
 import { commentAnchor, postPath } from "@/lib/contracts";
 import { parseEntityId } from "@/lib/ids";
+import {
+  COMMENT_BODY_MAX_LENGTH,
+  POST_BODY_MAX_LENGTH,
+  POST_TITLE_MAX_LENGTH,
+  POST_URL_MAX_LENGTH,
+  TAG_DESCRIPTION_MAX_LENGTH,
+  TAG_NAME_MAX_LENGTH,
+  TAG_SLUG_MAX_LENGTH,
+} from "@/lib/input-limits";
 import { createComment, createPost } from "@/lib/server/posts";
 import { asRequestError, RequestError } from "@/lib/server/errors";
 import { getSessionWithPermissions } from "@/lib/server/session";
@@ -42,19 +51,20 @@ export const server = {
   createPost: defineAction({
     accept: "form",
     input: z.object({
-      title: z.string().min(1),
-      url: z.string().optional(),
-      body: z.string().optional(),
+      title: z.string().trim().min(1).max(POST_TITLE_MAX_LENGTH),
+      url: z.string().trim().max(POST_URL_MAX_LENGTH).optional(),
+      body: z.string().trim().max(POST_BODY_MAX_LENGTH).optional(),
       mandatoryTag: z.string().min(1),
       optionalTag: z.array(z.string()).max(MAX_OPTIONAL_TAGS).default([]),
     }),
     handler: async (input, context) => {
       try {
         const { env, session } = await requireSession(context);
+        const author = session.user.name?.trim() || session.user.email?.trim() || "";
         const tagSlugs = normalizeTagSlugs([input.mandatoryTag, ...input.optionalTag]);
         const post = await createPost(env, {
           userId: session.user.id,
-          author: session.user.name || "",
+          author,
           title: input.title,
           url: input.url ?? null,
           body: input.body ?? null,
@@ -70,13 +80,14 @@ export const server = {
     accept: "form",
     input: z.object({
       postId: z.string().min(1),
-      body: z.string().min(1),
+      body: z.string().trim().min(1).max(COMMENT_BODY_MAX_LENGTH),
       parentId: z.string().optional(),
       returnTo: z.string().optional(),
     }),
     handler: async (input, context) => {
       try {
         const { env, session } = await requireSession(context);
+        const author = session.user.name?.trim() || session.user.email?.trim() || "";
         const postId = parseEntityId(input.postId);
         if (!postId) {
           throw new RequestError("Invalid post id", 400);
@@ -91,7 +102,7 @@ export const server = {
           postId,
           body: input.body,
           parentId,
-          author: session.user.name || "",
+          author,
         });
 
         const targetPath = input.returnTo?.startsWith("/item/")
@@ -110,10 +121,10 @@ export const server = {
   createTag: defineAction({
     accept: "form",
     input: z.object({
-      name: z.string().min(1),
-      slug: z.string().optional(),
+      name: z.string().trim().min(1).max(TAG_NAME_MAX_LENGTH),
+      slug: z.string().trim().max(TAG_SLUG_MAX_LENGTH).optional(),
       returnTo: z.string().optional(),
-      description: z.string().optional(),
+      description: z.string().trim().max(TAG_DESCRIPTION_MAX_LENGTH).optional(),
     }),
     handler: async (input, context) => {
       try {
@@ -132,11 +143,11 @@ export const server = {
   updateTag: defineAction({
     accept: "form",
     input: z.object({
-      originalSlug: z.string().min(1),
-      name: z.string().min(1),
-      slug: z.string().optional(),
+      originalSlug: z.string().trim().min(1).max(TAG_SLUG_MAX_LENGTH),
+      name: z.string().trim().min(1).max(TAG_NAME_MAX_LENGTH),
+      slug: z.string().trim().max(TAG_SLUG_MAX_LENGTH).optional(),
       returnTo: z.string().optional(),
-      description: z.string().optional(),
+      description: z.string().trim().max(TAG_DESCRIPTION_MAX_LENGTH).optional(),
     }),
     handler: async (input, context) => {
       try {

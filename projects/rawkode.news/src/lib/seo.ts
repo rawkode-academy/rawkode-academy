@@ -11,7 +11,7 @@ export const postUnavailableMeta = {
 
 export const postUnavailableCopy = {
   kicker: "Post unavailable",
-  heading: "This post is unavailable",
+  heading: "We couldn't load this post",
   detail: "The link may be outdated, or the post may have been removed.",
 };
 
