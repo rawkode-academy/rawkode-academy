@@ -112,21 +112,27 @@ That's a proper networking model. Three tiers, clear ownership, portable across 
 
 ## Picking Your Implementation
 
-The good news: you have real choices here, and the right one depends on your existing stack.
+My recommendation here is not subtle: **run Cilium, and use Cilium's Gateway API implementation.**
 
-**Envoy Gateway** is my recommendation for most teams starting fresh or migrating from `ingress-nginx`. It's CNCF-backed, built on Envoy Proxy (which is rock-solid and battle-tested), and the project has serious momentum. If you're already running a service mesh like Istio, you're already running Envoy under the hood, so Envoy Gateway fits naturally into your mental model. The policy extensions (BackendTrafficPolicy, SecurityPolicy, ClientTrafficPolicy) give you a rich configuration surface without going back to annotation hell.
+I've been running Cilium since June 2020. It's the CNI I reach for on every cluster I touch, and it's been my answer to almost every Kubernetes networking conversation since. eBPF-powered networking that replaces kube-proxy, incredible observability through Hubble, service mesh capabilities without sidecars, and now a first-class Gateway API implementation that runs directly in the data plane. The future of Kubernetes networking has been Cilium for a while now.
 
-**Cilium Gateway API** is the right call if you're already using Cilium as your CNI. Cilium's Gateway API implementation runs directly in the eBPF data plane with no additional components. You don't add another pod to the cluster; you configure the network fabric you already have. For teams running at high traffic volumes, this is worth benchmarking.
+Cilium's Gateway API implementation doesn't add a new pod or a new process. You configure the network fabric you already have. That's a fundamentally different architectural position from controllers that sit in front of your traffic. For teams running at high traffic volumes, this isn't academic — it's measurable.
 
-**Traefik v3** makes sense if your team already lives in the Traefik ecosystem. They've added full Gateway API support in v3, and the developer experience is excellent. If your developers are used to Traefik's dashboard and middleware concepts, the migration to Traefik v3 Gateway API will feel familiar.
+If you're still running Calico as your CNI and treating this migration as just a swap from `ingress-nginx` to some Gateway API controller, I'd challenge you to look at what you're leaving on the table. Performance, observability, identity-based policy, sidecar-free service mesh. The `ingress-nginx` retirement is a natural forcing function to revisit the whole stack.
 
-Decision matrix: If you're on a managed Kubernetes service like GKE or AKS, check if your provider has a first-party Gateway API implementation first. AKS's App Routing add-on is getting an extended bridge to November 2026, which buys you time, but you should still plan the migration. GKE's Gateway controller is mature and production-ready.
+That said, I understand not everyone is in a position to replace their CNI at the same time as their ingress controller. (And I'd actually tell you not to — see the migration checklist below.) So here's where the other options fit:
 
-## Hands-On: Migrating to Envoy Gateway
+**Envoy Gateway** is the right call for teams who aren't yet on Cilium and want to start fresh. It's CNCF-backed, built on Envoy Proxy, and has serious ecosystem momentum. The policy extensions (BackendTrafficPolicy, SecurityPolicy, ClientTrafficPolicy) give you a solid configuration surface without annotation hell. If you're already running Istio, you're already running Envoy under the hood, so it fits naturally.
 
-Let me walk through a real migration. We'll take a typical `ingress-nginx` setup and convert it to Envoy Gateway.
+**Traefik v3** makes sense if your team already lives in the Traefik ecosystem and you want the most familiar migration path. Full Gateway API support landed in v3, and the developer experience is good. Don't use it as a reason to stay stuck — but if your team knows Traefik inside out, this migration will be the least disruptive.
 
-**Step 1: Install Envoy Gateway**
+For managed Kubernetes: check if your provider has a first-party Gateway API implementation. AKS's App Routing add-on is getting an extended bridge to November 2026 (more on that below). GKE's Gateway controller is mature and production-ready. Both are reasonable for teams on those platforms who want to avoid managing the control plane themselves.
+
+## Hands-On: Migrating to Gateway API
+
+Let me walk through a real migration. We'll take a typical `ingress-nginx` setup and convert it to Envoy Gateway — this walkthrough is for teams who aren't yet on Cilium. If you are on Cilium, skip step 1: Cilium's Gateway API support is enabled with a single Helm flag (`gatewayAPI.enabled=true`) and you're done. The `GatewayClass`, `Gateway`, `HTTPRoute`, and `GRPCRoute` YAML in the steps below is identical regardless of which implementation you use.
+
+**Step 1: Install Envoy Gateway** (skip if you're on Cilium)
 
 ```shell
 # Install Gateway API CRDs and Envoy Gateway via Helm
@@ -346,7 +352,7 @@ kubectl get ingress --all-namespaces \
 
 **Then follow this approach:**
 
-1. **Choose your implementation.** Use the decision matrix above. If you're already on Cilium, use Cilium Gateway API. If you're on GKE or AKS with first-party support, use that. Otherwise, Envoy Gateway.
+1. **Choose your implementation.** If you're on Cilium (and you should be), use Cilium Gateway API — it's a Helm flag away. If you're on GKE or AKS with first-party support, use that. Otherwise, Envoy Gateway. And if you're not on Cilium yet, strongly consider making this migration a two-step process: CNI first, then gateway controller. Your future self will thank you.
 
 2. **Run both controllers in parallel during migration.** There is no reason to do a cutover all at once. Install your new gateway controller alongside `ingress-nginx`. Start migrating one application at a time, testing each one before moving to the next.
 
