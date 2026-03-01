@@ -1,0 +1,48 @@
+[package]
+name = "rka"
+version = "0.1.0"
+edition = "2021"
+authors = ["Rawkode Academy"]
+description = "Rawkode Academy CLI for managing local playground environments"
+license = "MIT"
+repository = "https://github.com/rawkode-academy/rka"
+
+[[bin]]
+name = "rka"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive", "env", "wrap_help"] }
+clap_complete = "4.5"
+tokio = { version = "1.36", features = ["full"] }
+anyhow = "1.0"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+graphql_client = { version = "0.13", features = ["reqwest"] }
+directories = "5.0"
+indicatif = "0.17"
+colored = "2.1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.7", features = ["v4", "serde"] }
+which = "6.0"
+tempfile = "3.10"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+base64 = "0.22"
+handlebars = "5.1"
+async-trait = "0.1"
+num_cpus = "1.16"
+
+[dev-dependencies]
+mockito = "1.4"
+assert_cmd = "2.0"
+predicates = "3.1"
+tempfile = "3.10"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true
