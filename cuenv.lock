@@ -46,3 +46,50 @@ path = "bun-linux-x64/bun"
 repo = "oven-sh/bun"
 tag = "bun-v1.3.5"
 type = "github"
+
+[tools.d2]
+version = "0.7.1"
+
+[tools.d2.platforms.darwin-arm64]
+provider = "github"
+digest = "sha256:37ae12dc43d00971a716a233c26a5cfaa8d5d0a6d4a8de3fb0bff3028e007b3f"
+
+[tools.d2.platforms.darwin-arm64.source]
+asset = "d2-v0.7.1-macos-arm64.tar.gz"
+path = "d2-v0.7.1/bin/d2"
+repo = "terrastruct/d2"
+tag = "v0.7.1"
+type = "github"
+
+[tools.d2.platforms.darwin-x86_64]
+provider = "github"
+digest = "sha256:dd6b57a755bd39cbcbc189fdc7145bae9986f0be09ad02ecc7853178e89ec0d6"
+
+[tools.d2.platforms.darwin-x86_64.source]
+asset = "d2-v0.7.1-macos-amd64.tar.gz"
+path = "d2-v0.7.1/bin/d2"
+repo = "terrastruct/d2"
+tag = "v0.7.1"
+type = "github"
+
+[tools.d2.platforms.linux-arm64]
+provider = "github"
+digest = "sha256:b808c5ce544d12db6376b57ce38a12a1c1604b7185a0b2d599184956aae2f756"
+
+[tools.d2.platforms.linux-arm64.source]
+asset = "d2-v0.7.1-linux-arm64.tar.gz"
+path = "d2-v0.7.1/bin/d2"
+repo = "terrastruct/d2"
+tag = "v0.7.1"
+type = "github"
+
+[tools.d2.platforms.linux-x86_64]
+provider = "github"
+digest = "sha256:4e20547ac243a97e4ff7dbe8c8a5a5747a6bf0b3d80591258fa3a94363c92955"
+
+[tools.d2.platforms.linux-x86_64.source]
+asset = "d2-v0.7.1-linux-amd64.tar.gz"
+path = "d2-v0.7.1/bin/d2"
+repo = "terrastruct/d2"
+tag = "v0.7.1"
+type = "github"
