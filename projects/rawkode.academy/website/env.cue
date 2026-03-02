@@ -2,11 +2,19 @@ package cuenv
 
 import "github.com/cuenv/cuenv/schema"
 
+import xTools "github.com/cuenv/cuenv/contrib/tools"
+
 schema.#Project
 
 name: "rawkode-academy-website"
 
 hooks: onEnter: devenv: schema.#Devenv
+
+runtime: schema.#ToolsRuntime & {
+	tools: {
+		d2: xTools.#D2 & {version: "0.7.1"}
+	}
+}
 
 let _t = tasks
 
