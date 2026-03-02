@@ -15,14 +15,14 @@
 
   packages = with pkgs; [
     biome
-    d2
     influxdb2
     nixfmt-rfc-style
   ];
 
   enterShell = ''
     bun install
-  '' + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+  ''
+  + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
     export LD_LIBRARY_PATH=${pkgs.libgccjit}/lib:$LD_LIBRARY_PATH
 
     __patchTarget="./node_modules/@cloudflare/workerd-linux-64/bin/workerd"
@@ -31,4 +31,3 @@
     fi
   '';
 }
-
