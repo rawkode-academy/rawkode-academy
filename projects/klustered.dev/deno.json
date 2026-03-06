@@ -1,0 +1,31 @@
+{
+	"$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+	"imports": {
+		"@astrojs/cloudflare": "npm:@astrojs/cloudflare@^12.6.5",
+		"@astrojs/vue": "npm:@astrojs/vue@^5.0.4",
+		"@pandacss/dev": "npm:@pandacss/dev@^1.7.1",
+		"@paralleldrive/cuid2": "npm:@paralleldrive/cuid2@^2.2.2",
+		"@rawkodeacademy/content": "../../content/src/index.ts",
+		"astro": "npm:astro@^5.7.0",
+		"dotenv": "npm:dotenv@^16.4.5",
+		"drizzle-kit": "npm:drizzle-kit@^0.30.0",
+		"drizzle-orm": "npm:drizzle-orm@^0.38.0",
+		"drizzle-orm/d1": "npm:drizzle-orm@^0.38.0/d1",
+		"drizzle-orm/sqlite-core": "npm:drizzle-orm@^0.38.0/sqlite-core",
+		"postcss": "npm:postcss@^8.5.6",
+		"vue": "npm:vue@^3.5.19",
+		"wrangler": "npm:wrangler@^4.32.0",
+		"zod": "npm:zod@^3.25.56"
+	},
+	"tasks": {
+		"build": "deno run -A --node-modules-dir=auto npm:wrangler@^4.32.0 types && deno run -A --node-modules-dir=auto npm:astro@^5.7.0 build",
+		"codegen": "deno run -A --node-modules-dir=auto npm:@pandacss/dev@^1.7.1 codegen",
+		"dev": "deno run -A --node-modules-dir=auto npm:wrangler@^4.32.0 types && deno run -A --node-modules-dir=auto npm:astro@^5.7.0 dev --port 4322",
+		"preview": "deno run -A --node-modules-dir=auto npm:astro@^5.7.0 preview",
+		"db:generate": "deno run -A --node-modules-dir=auto npm:drizzle-kit@^0.30.0 generate",
+		"db:migrate:local": "deno run -A --node-modules-dir=auto npm:wrangler@^4.32.0 d1 migrations apply klustered-brackets --local",
+		"db:migrate:remote": "deno run -A --node-modules-dir=auto npm:wrangler@^4.32.0 d1 migrations apply klustered-brackets --remote",
+		"db:studio": "deno run -A --node-modules-dir=auto npm:drizzle-kit@^0.30.0 studio",
+		"db:seed": "deno run -A --node-modules-dir=auto ./scripts/seed.ts"
+	}
+}
