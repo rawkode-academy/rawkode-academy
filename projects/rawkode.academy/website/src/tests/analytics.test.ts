@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import {
+	parseCampaignAttribution,
+	serializeCampaignAttribution,
+} from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
 import { getAttributionFromSource } from "@/server/analytics";
 
@@ -42,6 +46,25 @@ describe("server analytics helpers", () => {
 			source_context: "complete-guide-zitadel",
 			page_path: "/courses/complete-guide-zitadel",
 		});
+	});
+
+	it("parses and serializes campaign attribution payloads safely", () => {
+		const serialized = serializeCampaignAttribution({
+			landing_page: "/watch/kubernetes?utm_source=linkedin",
+			initial_referrer: "https://www.linkedin.com/",
+			utm_source: "linkedin",
+			utm_medium: "social",
+			utm_campaign: "q1-launch",
+		});
+
+		expect(parseCampaignAttribution(serialized)).toEqual({
+			landing_page: "/watch/kubernetes?utm_source=linkedin",
+			initial_referrer: "https://www.linkedin.com/",
+			utm_source: "linkedin",
+			utm_medium: "social",
+			utm_campaign: "q1-launch",
+		});
+		expect(parseCampaignAttribution("not-json")).toEqual({});
 	});
 
 	it("exposes canonical growth event names for newsletter, lead magnets, and activation", () => {

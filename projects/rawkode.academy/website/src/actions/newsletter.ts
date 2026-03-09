@@ -1,5 +1,6 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { parseCampaignAttribution } from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
 import {
 	captureServerEvent,
@@ -56,6 +57,7 @@ type NewsletterAnalyticsOptions = {
 	audience: string;
 	channel: string;
 	source?: string;
+	campaignAttribution?: string | undefined;
 	status?: "subscribed" | "unsubscribed";
 	isAuthenticated: boolean;
 	alreadySubscribed?: boolean;
@@ -66,12 +68,14 @@ async function captureActivatedUserFromNewsletter({
 	audience,
 	channel,
 	source,
+	campaignAttribution,
 	isAuthenticated,
 	alreadySubscribed,
 }: Omit<NewsletterAnalyticsOptions, "event" | "status">): Promise<void> {
 	if (alreadySubscribed) return;
 
 	const attribution = getAttributionFromSource(source);
+	const campaign = parseCampaignAttribution(campaignAttribution);
 	if (attribution.source_surface !== "lead-magnet") return;
 
 	await captureServerEvent(
@@ -89,6 +93,7 @@ async function captureActivatedUserFromNewsletter({
 					? { activation_context: attribution.source_context }
 					: {}),
 				...attribution,
+				...campaign,
 			},
 		},
 		getAnalyticsBinding(context),
@@ -101,10 +106,13 @@ async function captureNewsletterAnalytics({
 	audience,
 	channel,
 	source,
+	campaignAttribution,
 	status,
 	isAuthenticated,
 	alreadySubscribed,
 }: NewsletterAnalyticsOptions): Promise<void> {
+	const campaign = parseCampaignAttribution(campaignAttribution);
+
 	await captureServerEvent(
 		{
 			event,
@@ -119,6 +127,7 @@ async function captureNewsletterAnalytics({
 					? { already_subscribed: alreadySubscribed }
 					: {}),
 				...getAttributionFromSource(source),
+				...campaign,
 			},
 		},
 		getAnalyticsBinding(context),
@@ -131,6 +140,7 @@ export const newsletter = {
 			audience: z.string().default("academy"),
 			channel: z.string().default("newsletter"),
 			source: z.string().optional(),
+			attribution: z.string().optional(),
 		}),
 		handler: async (input, context) => {
 			if (!context.locals.user) {
@@ -157,6 +167,7 @@ export const newsletter = {
 				audience: input.audience,
 				channel: input.channel,
 				source,
+				campaignAttribution: input.attribution,
 				status: "subscribed",
 				isAuthenticated: true,
 				alreadySubscribed: result.alreadySubscribed,
@@ -166,6 +177,7 @@ export const newsletter = {
 				audience: input.audience,
 				channel: input.channel,
 				source,
+				campaignAttribution: input.attribution,
 				isAuthenticated: true,
 				alreadySubscribed: result.alreadySubscribed,
 			});
@@ -180,6 +192,7 @@ export const newsletter = {
 		input: z.object({
 			audience: z.string().default("academy"),
 			source: z.string().optional(),
+			attribution: z.string().optional(),
 		}),
 		handler: async (input, context) => {
 			if (!context.locals.user) {
@@ -206,6 +219,7 @@ export const newsletter = {
 				audience: input.audience,
 				channel: "newsletter",
 				source,
+				campaignAttribution: input.attribution,
 				status: "unsubscribed",
 				isAuthenticated: true,
 				alreadySubscribed: result.alreadySubscribed,
@@ -223,6 +237,7 @@ export const newsletter = {
 			audience: z.string().default("academy"),
 			subscribed: z.boolean(),
 			source: z.string().optional(),
+			attribution: z.string().optional(),
 		}),
 		handler: async (input, context) => {
 			if (!context.locals.user) {
@@ -250,6 +265,7 @@ export const newsletter = {
 				audience: input.audience,
 				channel: input.channel,
 				source,
+				campaignAttribution: input.attribution,
 				status,
 				isAuthenticated: true,
 				alreadySubscribed: result.alreadySubscribed,
@@ -264,6 +280,7 @@ export const newsletter = {
 	unsubscribeAll: defineAction({
 		input: z.object({
 			source: z.string().optional(),
+			attribution: z.string().optional(),
 		}),
 		handler: async (input, context) => {
 			if (!context.locals.user) {
@@ -299,6 +316,7 @@ export const newsletter = {
 				audience: "all",
 				channel: "all",
 				source,
+				campaignAttribution: input.attribution,
 				status: "unsubscribed",
 				isAuthenticated: true,
 			});
@@ -315,6 +333,7 @@ export const newsletter = {
 			audience: z.string().default("academy"),
 			channel: z.string().default("newsletter"),
 			source: z.string().optional(),
+			attribution: z.string().optional(),
 		}),
 		handler: async (input, context) => {
 			const email = input.email.toLowerCase().trim();
@@ -339,6 +358,7 @@ export const newsletter = {
 				audience: input.audience,
 				channel: input.channel,
 				source,
+				campaignAttribution: input.attribution,
 				status: "subscribed",
 				isAuthenticated,
 				alreadySubscribed: result.alreadySubscribed,
@@ -348,6 +368,7 @@ export const newsletter = {
 				audience: input.audience,
 				channel: input.channel,
 				source,
+				campaignAttribution: input.attribution,
 				isAuthenticated,
 				alreadySubscribed: result.alreadySubscribed,
 			});
@@ -372,6 +393,7 @@ export const newsletter = {
 			email: z.string().email("Please enter a valid email address"),
 			audience: z.string().default("academy"),
 			source: z.string().optional(),
+			attribution: z.string().optional(),
 		}),
 		handler: async (input, context) => {
 			const email = input.email.toLowerCase().trim();
@@ -396,6 +418,7 @@ export const newsletter = {
 				audience: input.audience,
 				channel: "newsletter",
 				source,
+				campaignAttribution: input.attribution,
 				status: "unsubscribed",
 				isAuthenticated,
 				alreadySubscribed: result.alreadySubscribed,

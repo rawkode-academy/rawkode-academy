@@ -3,6 +3,10 @@ import { ref, computed, onMounted } from "vue";
 import { actions } from "astro:actions";
 import Card from "@/components/ui/Card.vue";
 import {
+	getSessionCampaignAttribution,
+	serializeCampaignAttribution,
+} from "@/lib/analytics/attribution";
+import {
 	GROWTH_EVENTS,
 	captureGrowthClientEvent,
 } from "@/lib/analytics/growth";
@@ -122,6 +126,10 @@ function createSource(): string {
 	return `website:lead-magnet:k8s-1-35:${props.pagePath}`;
 }
 
+function createAttributionPayload(): string | undefined {
+	return serializeCampaignAttribution(getSessionCampaignAttribution());
+}
+
 function getBaseGrowthProperties(
 	method?: "learner" | "sign_in" | "view_asset",
 ): Record<string, unknown> {
@@ -202,6 +210,7 @@ const subscribeAsLearner = async () => {
 			audience: AUDIENCE,
 			channel: CHANNEL,
 			source: createSource(),
+			attribution: createAttributionPayload(),
 		});
 		if (actionError) throw new Error(actionError.message);
 		if (data?.success) {

@@ -2,6 +2,10 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { actions } from "astro:actions";
 import {
+	getSessionCampaignAttribution,
+	serializeCampaignAttribution,
+} from "@/lib/analytics/attribution";
+import {
 	GROWTH_EVENTS,
 	captureGrowthClientEvent,
 } from "@/lib/analytics/growth";
@@ -27,6 +31,10 @@ const emailInput = ref<HTMLInputElement | null>(null);
 
 function createSource(): string {
 	return `website:newsletter:${props.pagePath}`;
+}
+
+function createAttributionPayload(): string | undefined {
+	return serializeCampaignAttribution(getSessionCampaignAttribution());
 }
 
 function getBaseGrowthProperties(
@@ -102,6 +110,7 @@ const subscribeAsLearner = async () => {
 		const { data, error: actionError } = await actions.newsletter.subscribe({
 			audience,
 			source: createSource(),
+			attribution: createAttributionPayload(),
 		});
 		if (actionError) throw new Error(actionError.message);
 		if (data?.success) isSuccess.value = true;
@@ -132,6 +141,7 @@ const subscribeWithEmail = async () => {
 				email: email.value.trim(),
 				audience,
 				source: createSource(),
+				attribution: createAttributionPayload(),
 			});
 		if (actionError) throw new Error(actionError.message);
 		if (data?.success) {
