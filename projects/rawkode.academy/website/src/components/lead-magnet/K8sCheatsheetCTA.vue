@@ -2,15 +2,10 @@
 import { ref, computed, onMounted } from "vue";
 import { actions } from "astro:actions";
 import Card from "@/components/ui/Card.vue";
-
-// Track analytics events client-side
-const trackEvent = (event: string, properties?: Record<string, unknown>) => {
-	try {
-		(window as any).posthog?.capture(event, properties);
-	} catch {
-		// Ignore tracking errors
-	}
-};
+import {
+	GROWTH_EVENTS,
+	captureGrowthClientEvent,
+} from "@/lib/analytics/growth";
 
 const props = defineProps<{
 	isSignedIn: boolean;
@@ -127,6 +122,21 @@ function createSource(): string {
 	return `website:lead-magnet:k8s-1-35:${props.pagePath}`;
 }
 
+function getBaseGrowthProperties(
+	method?: "learner" | "sign_in" | "view_asset",
+): Record<string, unknown> {
+	return {
+		lead_magnet: "k8s-1-35-cheatsheet",
+		audience: AUDIENCE,
+		channel: CHANNEL,
+		page_path: props.pagePath,
+		source: createSource(),
+		is_authenticated: props.isSignedIn,
+		already_subscribed: hasCookieSubscription.value,
+		...(method ? { method } : {}),
+	};
+}
+
 function checkCheatsheetCookie(): boolean {
 	try {
 		const cookies = document.cookie;
@@ -148,21 +158,42 @@ onMounted(() => {
 	hasCookieSubscription.value =
 		hasCookieSubscription.value || checkCheatsheetCookie();
 
-	// Track lead magnet viewed
-	trackEvent("lead_magnet_viewed", {
-		lead_magnet: "k8s-1-35-cheatsheet",
-		page_path: props.pagePath,
-		is_signed_in: props.isSignedIn,
-		already_subscribed: hasCookieSubscription.value,
-	});
+	captureGrowthClientEvent(
+		GROWTH_EVENTS.LEAD_MAGNET_VIEWED,
+		getBaseGrowthProperties(),
+	);
 });
 
 const showSuccessState = computed(() => {
 	return isSuccess.value || hasCookieSubscription.value;
 });
 
+const trackSignInClick = () => {
+	captureGrowthClientEvent(
+		GROWTH_EVENTS.LEAD_MAGNET_CLICKED,
+		getBaseGrowthProperties("sign_in"),
+	);
+};
+
+const trackViewAssetClick = () => {
+	captureGrowthClientEvent(
+		GROWTH_EVENTS.LEAD_MAGNET_CLICKED,
+		getBaseGrowthProperties("view_asset"),
+	);
+};
+
 const subscribeAsLearner = async () => {
 	if (isLoading.value) return;
+
+	captureGrowthClientEvent(
+		GROWTH_EVENTS.LEAD_MAGNET_CLICKED,
+		getBaseGrowthProperties("learner"),
+	);
+	captureGrowthClientEvent(
+		GROWTH_EVENTS.LEAD_MAGNET_SUBMISSION_ATTEMPTED,
+		getBaseGrowthProperties("learner"),
+	);
+
 	isLoading.value = true;
 	error.value = null;
 
@@ -175,12 +206,10 @@ const subscribeAsLearner = async () => {
 		if (actionError) throw new Error(actionError.message);
 		if (data?.success) {
 			isSuccess.value = true;
-			// Track lead magnet signup
-			trackEvent("lead_magnet_signup", {
-				lead_magnet: "k8s-1-35-cheatsheet",
-				page_path: props.pagePath,
-				audience: AUDIENCE,
-			});
+			captureGrowthClientEvent(
+				GROWTH_EVENTS.LEAD_MAGNET_SIGNUP,
+				getBaseGrowthProperties("learner"),
+			);
 		}
 	} catch (err: unknown) {
 		error.value =
@@ -191,7 +220,6 @@ const subscribeAsLearner = async () => {
 		isLoading.value = false;
 	}
 };
-
 </script>
 
 <template>
@@ -326,6 +354,7 @@ const subscribeAsLearner = async () => {
 							</p>
 							<a
 								href="/resources/kubernetes/1.35-cheatsheet"
+								@click="trackViewAssetClick"
 								class="btn-solid flex items-center justify-center w-full py-2.5 sm:py-3 px-4 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl"
 							>
 								<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -393,6 +422,7 @@ const subscribeAsLearner = async () => {
 								</p>
 								<a
 									:href="signInUrl"
+									@click="trackSignInClick"
 									class="btn-solid flex items-center justify-center w-full py-2.5 sm:py-3 px-4 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl min-h-[44px] sm:min-h-[48px]"
 								>
 									<svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
