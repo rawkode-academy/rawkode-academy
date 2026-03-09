@@ -127,7 +127,10 @@ export const signupForCourseUpdates = defineAction({
 						allow_sponsor_contact: !!allowSponsorContact,
 						is_authenticated: !!ctx.locals.user,
 						activation_trigger: GROWTH_EVENTS.COURSE_SIGNUP,
-						activation_surface: "course_signup",
+						activation_surface: attribution.source_surface ?? "course-signup",
+						...(attribution.source_context
+							? { activation_context: attribution.source_context }
+							: {}),
 						...(source ? { source } : {}),
 						...attribution,
 					},
