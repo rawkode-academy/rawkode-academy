@@ -95,6 +95,7 @@ import { actions } from "astro:actions";
 interface Props {
 	courseId: string;
 	courseTitle: string;
+	pagePath: string;
 	signupConfig: {
 		audienceId: string;
 		sponsor?: string;
@@ -138,6 +139,10 @@ onMounted(async () => {
 	}
 });
 
+function createSource(): string {
+	return `website:course-signup:${props.courseId}:${props.pagePath}`;
+}
+
 async function submitForm() {
 	error.value = "";
 	loading.value = true;
@@ -148,6 +153,7 @@ async function submitForm() {
 		formData.append("audienceId", props.signupConfig.audienceId);
 		formData.append("email", email.value || props.userEmail || "");
 		formData.append("allowSponsorContact", sponsorConsent.value.toString());
+		formData.append("source", createSource());
 		if (props.signupConfig.sponsorAudienceId) {
 			formData.append(
 				"sponsorAudienceId",
