@@ -91,6 +91,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { actions } from "astro:actions";
+import {
+	getSessionCampaignAttribution,
+	serializeCampaignAttribution,
+} from "@/lib/analytics/attribution";
 
 interface Props {
 	courseId: string;
@@ -143,6 +147,10 @@ function createSource(): string {
 	return `website:course-signup:${props.courseId}:${props.pagePath}`;
 }
 
+function createAttributionPayload(): string | undefined {
+	return serializeCampaignAttribution(getSessionCampaignAttribution());
+}
+
 async function submitForm() {
 	error.value = "";
 	loading.value = true;
@@ -154,6 +162,10 @@ async function submitForm() {
 		formData.append("email", email.value || props.userEmail || "");
 		formData.append("allowSponsorContact", sponsorConsent.value.toString());
 		formData.append("source", createSource());
+		const attribution = createAttributionPayload();
+		if (attribution) {
+			formData.append("attribution", attribution);
+		}
 		if (props.signupConfig.sponsorAudienceId) {
 			formData.append(
 				"sponsorAudienceId",
