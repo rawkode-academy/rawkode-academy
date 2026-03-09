@@ -3,6 +3,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
 import { Resend } from "resend";
+import { parseCampaignAttribution } from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
 import {
 	captureServerEvent,
@@ -16,13 +17,20 @@ const SignupSchema = z.object({
 	sponsorAudienceId: z.string().optional(),
 	allowSponsorContact: z.boolean().optional().default(false),
 	source: z.string().optional(),
+	attribution: z.string().optional(),
 });
 
 export const signupForCourseUpdates = defineAction({
 	input: SignupSchema,
 	accept: "form",
 	handler: async (data, ctx) => {
-		const { audienceId, sponsorAudienceId, allowSponsorContact, source } = data;
+		const {
+			audienceId,
+			sponsorAudienceId,
+			allowSponsorContact,
+			source,
+			attribution: campaignAttribution,
+		} = data;
 
 		// Get email: prefer authenticated user email over form input to prevent misuse
 		const email = ctx.locals?.user?.email || data.email;
@@ -104,6 +112,7 @@ export const signupForCourseUpdates = defineAction({
 			const runtime = (ctx as any).locals?.runtime;
 			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
 			const attribution = getAttributionFromSource(source);
+			const campaign = parseCampaignAttribution(campaignAttribution);
 			await captureServerEvent(
 				{
 					event: GROWTH_EVENTS.COURSE_SIGNUP,
@@ -114,6 +123,7 @@ export const signupForCourseUpdates = defineAction({
 						is_authenticated: !!ctx.locals.user,
 						...(source ? { source } : {}),
 						...attribution,
+						...campaign,
 					},
 				},
 				analytics,
@@ -133,6 +143,7 @@ export const signupForCourseUpdates = defineAction({
 							: {}),
 						...(source ? { source } : {}),
 						...attribution,
+						...campaign,
 					},
 				},
 				analytics,

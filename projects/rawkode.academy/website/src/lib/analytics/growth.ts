@@ -1,3 +1,5 @@
+import { getSessionCampaignAttribution } from "@/lib/analytics/attribution";
+
 export const GROWTH_EVENTS = {
 	ACTIVATED_USER: "activated_user",
 	COURSE_SIGNUP: "course_signup",
@@ -21,6 +23,7 @@ export function captureGrowthClientEvent(
 	properties?: Record<string, unknown>,
 ): void {
 	try {
+		const campaignAttribution = getSessionCampaignAttribution();
 		(
 			window as Window & {
 				posthog?: {
@@ -30,7 +33,10 @@ export function captureGrowthClientEvent(
 					) => void;
 				};
 			}
-		).posthog?.capture?.(event, properties);
+		).posthog?.capture?.(event, {
+			...campaignAttribution,
+			...properties,
+		});
 	} catch {
 		// Ignore tracking errors on the client.
 	}

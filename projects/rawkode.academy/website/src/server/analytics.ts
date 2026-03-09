@@ -188,6 +188,13 @@ export async function captureServerEvent(
 		"page_path",
 		"source_surface",
 		"source_system",
+		"landing_page",
+		"initial_referrer",
+		"utm_source",
+		"utm_medium",
+		"utm_campaign",
+		"utm_term",
+		"utm_content",
 	];
 
 	if (analytics) {
