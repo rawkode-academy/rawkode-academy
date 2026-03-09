@@ -4,20 +4,25 @@ import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
 import { Resend } from "resend";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
-import { captureServerEvent, getDistinctId } from "../server/analytics";
+import {
+	captureServerEvent,
+	getAttributionFromSource,
+	getDistinctId,
+} from "../server/analytics";
 
 const SignupSchema = z.object({
 	email: z.string().email("Please enter a valid email address").optional(),
 	audienceId: z.string().min(1, "Audience ID is required"),
 	sponsorAudienceId: z.string().optional(),
 	allowSponsorContact: z.boolean().optional().default(false),
+	source: z.string().optional(),
 });
 
 export const signupForCourseUpdates = defineAction({
 	input: SignupSchema,
 	accept: "form",
 	handler: async (data, ctx) => {
-		const { audienceId, sponsorAudienceId, allowSponsorContact } = data;
+		const { audienceId, sponsorAudienceId, allowSponsorContact, source } = data;
 
 		// Get email: prefer authenticated user email over form input to prevent misuse
 		const email = ctx.locals?.user?.email || data.email;
@@ -98,6 +103,7 @@ export const signupForCourseUpdates = defineAction({
 			const distinctId = getDistinctId(ctx);
 			const runtime = (ctx as any).locals?.runtime;
 			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+			const attribution = getAttributionFromSource(source);
 			await captureServerEvent(
 				{
 					event: GROWTH_EVENTS.COURSE_SIGNUP,
@@ -106,6 +112,24 @@ export const signupForCourseUpdates = defineAction({
 						audience_id: audienceId,
 						allow_sponsor_contact: !!allowSponsorContact,
 						is_authenticated: !!ctx.locals.user,
+						...(source ? { source } : {}),
+						...attribution,
+					},
+				},
+				analytics,
+			);
+			await captureServerEvent(
+				{
+					event: GROWTH_EVENTS.ACTIVATED_USER,
+					distinctId,
+					properties: {
+						audience_id: audienceId,
+						allow_sponsor_contact: !!allowSponsorContact,
+						is_authenticated: !!ctx.locals.user,
+						activation_trigger: GROWTH_EVENTS.COURSE_SIGNUP,
+						activation_surface: "course_signup",
+						...(source ? { source } : {}),
+						...attribution,
 					},
 				},
 				analytics,
