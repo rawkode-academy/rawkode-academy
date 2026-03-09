@@ -3,10 +3,30 @@ import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("analytics");
 
-type CaptureOptions = {
+export const GROWTH_EVENTS = {
+	COURSE_SIGNUP: "course_signup",
+	LEAD_MAGNET_VIEWED: "lead_magnet_viewed",
+	LEAD_MAGNET_SIGNUP: "lead_magnet_signup",
+	NEWSLETTER_SUBSCRIBED: "newsletter_subscribed",
+	NEWSLETTER_UNSUBSCRIBED: "newsletter_unsubscribed",
+	NEWSLETTER_PREFERENCE_UPDATED: "newsletter_preference_updated",
+	NEWSLETTER_UNSUBSCRIBE_ALL: "newsletter_unsubscribe_all",
+} as const;
+
+export type GrowthEvent = (typeof GROWTH_EVENTS)[keyof typeof GROWTH_EVENTS];
+
+export type CaptureOptions = {
 	event: string;
 	properties?: Record<string, unknown> | undefined;
 	distinctId?: string | undefined;
+};
+
+export type AnalyticsAttribution = {
+	source?: string;
+	source_system?: string;
+	source_surface?: string;
+	source_context?: string;
+	page_path?: string;
 };
 
 /**
@@ -39,6 +59,25 @@ export function getDistinctId(ctx: {
 		(ctx.request ? getAnonDistinctIdFromCookies(ctx.request) : undefined) ||
 		undefined
 	);
+}
+
+export function getAttributionFromSource(
+	source?: string,
+): AnalyticsAttribution {
+	if (!source) return {};
+
+	const [sourceSystem, sourceSurface, ...rest] = source.split(":");
+	const lastSegment = rest.at(-1);
+	const pagePath = lastSegment?.startsWith("/") ? lastSegment : undefined;
+	const sourceContext = pagePath ? rest.slice(0, -1).join(":") : rest.join(":");
+
+	return {
+		source,
+		...(sourceSystem ? { source_system: sourceSystem } : {}),
+		...(sourceSurface ? { source_surface: sourceSurface } : {}),
+		...(sourceContext ? { source_context: sourceContext } : {}),
+		...(pagePath ? { page_path: pagePath } : {}),
+	};
 }
 
 /**
@@ -87,6 +126,10 @@ export async function captureServerEvent(
 		course_signup: "course.signup",
 		lead_magnet_viewed: "lead_magnet.viewed",
 		lead_magnet_signup: "lead_magnet.signup",
+		newsletter_subscribed: "newsletter.subscribed",
+		newsletter_unsubscribed: "newsletter.unsubscribed",
+		newsletter_preference_updated: "newsletter.preference_updated",
+		newsletter_unsubscribe_all: "newsletter.unsubscribe_all",
 		// Auth events
 		sign_in_initiated: "auth.sign_in_initiated",
 		sign_out_completed: "auth.sign_out_completed",
@@ -120,7 +163,22 @@ export async function captureServerEvent(
 	});
 
 	// Determine which attributes to promote to PostHog properties
-	const attributesToPromote = ["distinct_id", "video_id", "content_id"];
+	const attributesToPromote = [
+		"distinct_id",
+		"video_id",
+		"content_id",
+		"audience",
+		"channel",
+		"status",
+		"subscriber_type",
+		"already_subscribed",
+		"is_authenticated",
+		"source",
+		"source_context",
+		"page_path",
+		"source_surface",
+		"source_system",
+	];
 
 	if (analytics) {
 		// Use service binding via fetch to POST /track endpoint
