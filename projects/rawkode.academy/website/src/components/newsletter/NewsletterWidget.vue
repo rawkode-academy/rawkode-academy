@@ -34,6 +34,7 @@ function getBaseGrowthProperties(
 ): Record<string, unknown> {
 	return {
 		audience,
+		channel: "newsletter",
 		page_path: props.pagePath,
 		source: createSource(),
 		is_authenticated: props.isSignedIn,
