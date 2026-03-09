@@ -278,6 +278,7 @@ export const newsletter = {
 			const email = input.email.toLowerCase().trim();
 			const prefixedUserId = createEmailId(email);
 			const source = input.source || `website:${input.channel}:unknown`;
+			const isAuthenticated = Boolean(context.locals.user);
 
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
@@ -297,7 +298,7 @@ export const newsletter = {
 				channel: input.channel,
 				source,
 				status: "subscribed",
-				isAuthenticated: false,
+				isAuthenticated,
 				alreadySubscribed: result.alreadySubscribed,
 			});
 
@@ -326,6 +327,7 @@ export const newsletter = {
 			const email = input.email.toLowerCase().trim();
 			const prefixedUserId = createEmailId(email);
 			const source = input.source || "website:newsletter:unknown";
+			const isAuthenticated = Boolean(context.locals.user);
 
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
@@ -345,7 +347,7 @@ export const newsletter = {
 				channel: "newsletter",
 				source,
 				status: "unsubscribed",
-				isAuthenticated: false,
+				isAuthenticated,
 				alreadySubscribed: result.alreadySubscribed,
 			});
 
