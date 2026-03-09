@@ -3,7 +3,11 @@ import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
 import { Resend } from "resend";
-import { captureServerEvent, getDistinctId } from "../server/analytics";
+import {
+	captureServerEvent,
+	getDistinctId,
+	GROWTH_EVENTS,
+} from "../server/analytics";
 
 const SignupSchema = z.object({
 	email: z.string().email("Please enter a valid email address").optional(),
@@ -99,7 +103,7 @@ export const signupForCourseUpdates = defineAction({
 			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
 			await captureServerEvent(
 				{
-					event: "course_signup",
+					event: GROWTH_EVENTS.COURSE_SIGNUP,
 					distinctId,
 					properties: {
 						audience_id: audienceId,
