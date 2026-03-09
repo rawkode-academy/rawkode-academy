@@ -29,7 +29,23 @@ describe("server analytics helpers", () => {
 		});
 	});
 
-	it("exposes canonical growth event names for newsletter and lead magnets", () => {
+	it("extracts course signup context and landing page attribution", () => {
+		expect(
+			getAttributionFromSource(
+				"website:course-signup:complete-guide-zitadel:/courses/complete-guide-zitadel",
+			),
+		).toEqual({
+			source:
+				"website:course-signup:complete-guide-zitadel:/courses/complete-guide-zitadel",
+			source_system: "website",
+			source_surface: "course-signup",
+			source_context: "complete-guide-zitadel",
+			page_path: "/courses/complete-guide-zitadel",
+		});
+	});
+
+	it("exposes canonical growth event names for newsletter, lead magnets, and activation", () => {
+		expect(GROWTH_EVENTS.ACTIVATED_USER).toBe("activated_user");
 		expect(GROWTH_EVENTS.NEWSLETTER_CTA_IMPRESSION).toBe(
 			"newsletter_cta_impression",
 		);

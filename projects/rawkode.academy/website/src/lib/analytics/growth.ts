@@ -1,4 +1,5 @@
 export const GROWTH_EVENTS = {
+	ACTIVATED_USER: "activated_user",
 	COURSE_SIGNUP: "course_signup",
 	LEAD_MAGNET_VIEWED: "lead_magnet_viewed",
 	LEAD_MAGNET_CLICKED: "lead_magnet_clicked",

@@ -30,6 +30,7 @@ const user = Astro.locals?.user;
 
 const { audienceId, sponsor, sponsorAudienceId, allowSponsorContact } =
 	signupConfig;
+const pagePath = Astro.url.pathname;
 
 // If deferred, don't check on server - let client handle it
 // Short-circuit: if parent already determined user is subscribed, skip expensive checks
@@ -48,6 +49,7 @@ if (!deferSubscriptionCheck && !isAlreadySubscribed) {
 <CourseSignupFormCompactVue
 	courseId={courseId}
 	courseTitle={courseTitle}
+	pagePath={pagePath}
 	signupConfig={{ audienceId, allowSponsorContact, ...(sponsor && { sponsor }), ...(sponsorAudienceId && { sponsorAudienceId }) }}
 	userEmail={userEmail || user?.email}
 	isAlreadySubscribed={isAlreadySubscribed}

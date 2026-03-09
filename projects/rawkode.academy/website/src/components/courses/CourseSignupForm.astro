@@ -26,6 +26,7 @@ const user = Astro.locals?.user;
 
 const { audienceId, sponsor, sponsorAudienceId, allowSponsorContact } =
 	signupConfig;
+const pagePath = Astro.url.pathname;
 
 // Check if user is already subscribed using the shared helper (unless deferred to client)
 let isAlreadySubscribed: boolean | undefined;
@@ -42,6 +43,7 @@ if (!deferSubscriptionCheck) {
 	courseId={courseId}
 	courseTitle={courseTitle}
 	audienceId={audienceId}
+	pagePath={pagePath}
 	sponsor={sponsor}
 	sponsorAudienceId={sponsorAudienceId}
 	allowSponsorContact={allowSponsorContact}

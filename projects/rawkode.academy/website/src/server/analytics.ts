@@ -99,6 +99,8 @@ export async function captureServerEvent(
 
 	// Map event names to CloudEvent types (domain events only, prefix added by observability-collector)
 	const eventTypeMap: Record<string, string> = {
+		// Growth events
+		activated_user: "growth.activated_user",
 		// Video events
 		video_play: "video.play",
 		video_pause: "video.pause",
@@ -125,6 +127,7 @@ export async function captureServerEvent(
 		newsletter_unsubscribe_all: "newsletter.unsubscribe_all",
 		// Auth events
 		sign_in_initiated: "auth.sign_in_initiated",
+		sign_in_completed: "auth.sign_in_completed",
 		sign_out_completed: "auth.sign_out_completed",
 		// Search events
 		search_performed: "search.performed",
@@ -165,6 +168,7 @@ export async function captureServerEvent(
 		"video_id",
 		"content_id",
 		"audience",
+		"audience_id",
 		"channel",
 		"status",
 		"subscriber_type",
@@ -173,6 +177,12 @@ export async function captureServerEvent(
 		"entry_point",
 		"lead_magnet",
 		"method",
+		"auth_method",
+		"return_to",
+		"allow_sponsor_contact",
+		"activation_trigger",
+		"activation_surface",
+		"activation_context",
 		"source",
 		"source_context",
 		"page_path",

@@ -61,6 +61,40 @@ type NewsletterAnalyticsOptions = {
 	alreadySubscribed?: boolean;
 };
 
+async function captureActivatedUserFromNewsletter({
+	context,
+	audience,
+	channel,
+	source,
+	isAuthenticated,
+	alreadySubscribed,
+}: Omit<NewsletterAnalyticsOptions, "event" | "status">): Promise<void> {
+	if (alreadySubscribed) return;
+
+	const attribution = getAttributionFromSource(source);
+	if (attribution.source_surface !== "lead-magnet") return;
+
+	await captureServerEvent(
+		{
+			event: GROWTH_EVENTS.ACTIVATED_USER,
+			distinctId: getDistinctId(context),
+			properties: {
+				audience,
+				channel,
+				is_authenticated: isAuthenticated,
+				subscriber_type: isAuthenticated ? "learner" : "email_only",
+				activation_trigger: GROWTH_EVENTS.LEAD_MAGNET_SIGNUP,
+				activation_surface: attribution.source_surface,
+				...(attribution.source_context
+					? { activation_context: attribution.source_context }
+					: {}),
+				...attribution,
+			},
+		},
+		getAnalyticsBinding(context),
+	);
+}
+
 async function captureNewsletterAnalytics({
 	event,
 	context,
@@ -124,6 +158,14 @@ export const newsletter = {
 				channel: input.channel,
 				source,
 				status: "subscribed",
+				isAuthenticated: true,
+				alreadySubscribed: result.alreadySubscribed,
+			});
+			await captureActivatedUserFromNewsletter({
+				context,
+				audience: input.audience,
+				channel: input.channel,
+				source,
 				isAuthenticated: true,
 				alreadySubscribed: result.alreadySubscribed,
 			});
@@ -298,6 +340,14 @@ export const newsletter = {
 				channel: input.channel,
 				source,
 				status: "subscribed",
+				isAuthenticated,
+				alreadySubscribed: result.alreadySubscribed,
+			});
+			await captureActivatedUserFromNewsletter({
+				context,
+				audience: input.audience,
+				channel: input.channel,
+				source,
 				isAuthenticated,
 				alreadySubscribed: result.alreadySubscribed,
 			});

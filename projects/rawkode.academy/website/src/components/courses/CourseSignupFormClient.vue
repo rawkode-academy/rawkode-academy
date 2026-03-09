@@ -109,6 +109,7 @@ interface Props {
 	courseId: string;
 	courseTitle: string;
 	audienceId: string;
+	pagePath: string;
 	sponsor?: string | undefined;
 	sponsorAudienceId?: string | undefined;
 	allowSponsorContact: boolean;
@@ -153,6 +154,10 @@ onMounted(async () => {
 	}
 });
 
+function createSource(): string {
+	return `website:course-signup:${props.courseId}:${props.pagePath}`;
+}
+
 async function submitForm() {
 	error.value = "";
 	submitting.value = true;
@@ -163,6 +168,7 @@ async function submitForm() {
 		formData.append("audienceId", props.audienceId);
 		formData.append("email", email.value || props.userEmail || "");
 		formData.append("allowSponsorContact", sponsorContact.value.toString());
+		formData.append("source", createSource());
 		if (props.sponsorAudienceId) {
 			formData.append("sponsorAudienceId", props.sponsorAudienceId);
 		}
