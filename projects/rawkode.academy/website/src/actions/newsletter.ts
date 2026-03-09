@@ -1,5 +1,11 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import {
+	captureServerEvent,
+	getAttributionFromSource,
+	getDistinctId,
+	GROWTH_EVENTS,
+} from "@/server/analytics";
 
 /**
  * Helper to create a prefixed user ID for email preferences.
@@ -20,6 +26,71 @@ function getNewsletterCookieName(audience: string): string {
 	return `newsletter:${audience}:updates`;
 }
 
+function getAnalyticsBinding(context: {
+	locals?: {
+		runtime?: {
+			env?: {
+				ANALYTICS?: Fetcher;
+			};
+		};
+	};
+}): Fetcher | undefined {
+	return context.locals?.runtime?.env?.ANALYTICS;
+}
+
+type NewsletterAnalyticsContext = {
+	locals: {
+		user?: { id: string };
+		runtime?: {
+			env?: {
+				ANALYTICS?: Fetcher;
+			};
+		};
+	};
+	request?: Request;
+};
+
+type NewsletterAnalyticsOptions = {
+	event: string;
+	context: NewsletterAnalyticsContext;
+	audience: string;
+	channel: string;
+	source?: string;
+	status?: "subscribed" | "unsubscribed";
+	isAuthenticated: boolean;
+	alreadySubscribed?: boolean;
+};
+
+async function captureNewsletterAnalytics({
+	event,
+	context,
+	audience,
+	channel,
+	source,
+	status,
+	isAuthenticated,
+	alreadySubscribed,
+}: NewsletterAnalyticsOptions): Promise<void> {
+	await captureServerEvent(
+		{
+			event,
+			distinctId: getDistinctId(context),
+			properties: {
+				audience,
+				channel,
+				is_authenticated: isAuthenticated,
+				subscriber_type: isAuthenticated ? "learner" : "email_only",
+				...(status ? { status } : {}),
+				...(typeof alreadySubscribed === "boolean"
+					? { already_subscribed: alreadySubscribed }
+					: {}),
+				...getAttributionFromSource(source),
+			},
+		},
+		getAnalyticsBinding(context),
+	);
+}
+
 export const newsletter = {
 	subscribe: defineAction({
 		input: z.object({
@@ -33,6 +104,7 @@ export const newsletter = {
 			}
 
 			const prefixedUserId = createLearnerId(context.locals.user.id);
+			const source = input.source || `website:${input.channel}:unknown`;
 
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
@@ -41,9 +113,20 @@ export const newsletter = {
 						audience: input.audience,
 						channel: input.channel,
 						status: "subscribed",
-						source: input.source || `website:${input.channel}:unknown`,
+						source,
 					},
 				);
+
+			await captureNewsletterAnalytics({
+				event: GROWTH_EVENTS.NEWSLETTER_SUBSCRIBED,
+				context,
+				audience: input.audience,
+				channel: input.channel,
+				source,
+				status: "subscribed",
+				isAuthenticated: true,
+				alreadySubscribed: result.alreadySubscribed,
+			});
 
 			return {
 				...result,
@@ -62,6 +145,7 @@ export const newsletter = {
 			}
 
 			const prefixedUserId = createLearnerId(context.locals.user.id);
+			const source = input.source || "website:newsletter:unknown";
 
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
@@ -70,9 +154,20 @@ export const newsletter = {
 						audience: input.audience,
 						channel: "newsletter",
 						status: "unsubscribed",
-						source: input.source || "website:newsletter:unknown",
+						source,
 					},
 				);
+
+			await captureNewsletterAnalytics({
+				event: GROWTH_EVENTS.NEWSLETTER_UNSUBSCRIBED,
+				context,
+				audience: input.audience,
+				channel: "newsletter",
+				source,
+				status: "unsubscribed",
+				isAuthenticated: true,
+				alreadySubscribed: result.alreadySubscribed,
+			});
 
 			return {
 				...result,
@@ -93,6 +188,8 @@ export const newsletter = {
 			}
 
 			const prefixedUserId = createLearnerId(context.locals.user.id);
+			const source = input.source || "website:settings";
+			const status = input.subscribed ? "subscribed" : "unsubscribed";
 
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
@@ -100,10 +197,21 @@ export const newsletter = {
 					{
 						audience: input.audience,
 						channel: input.channel,
-						status: input.subscribed ? "subscribed" : "unsubscribed",
-						source: input.source || "website:settings",
+						status,
+						source,
 					},
 				);
+
+			await captureNewsletterAnalytics({
+				event: GROWTH_EVENTS.NEWSLETTER_PREFERENCE_UPDATED,
+				context,
+				audience: input.audience,
+				channel: input.channel,
+				source,
+				status,
+				isAuthenticated: true,
+				alreadySubscribed: result.alreadySubscribed,
+			});
 
 			return {
 				...result,
@@ -143,6 +251,16 @@ export const newsletter = {
 
 			await Promise.all(unsubscribePromises);
 
+			await captureNewsletterAnalytics({
+				event: GROWTH_EVENTS.NEWSLETTER_UNSUBSCRIBE_ALL,
+				context,
+				audience: "all",
+				channel: "all",
+				source,
+				status: "unsubscribed",
+				isAuthenticated: true,
+			});
+
 			return {
 				success: true,
 				unsubscribedCount: allPrefs.length,
@@ -159,6 +277,7 @@ export const newsletter = {
 		handler: async (input, context) => {
 			const email = input.email.toLowerCase().trim();
 			const prefixedUserId = createEmailId(email);
+			const source = input.source || `website:${input.channel}:unknown`;
 
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
@@ -167,9 +286,20 @@ export const newsletter = {
 						audience: input.audience,
 						channel: input.channel,
 						status: "subscribed",
-						source: input.source || `website:${input.channel}:unknown`,
+						source,
 					},
 				);
+
+			await captureNewsletterAnalytics({
+				event: GROWTH_EVENTS.NEWSLETTER_SUBSCRIBED,
+				context,
+				audience: input.audience,
+				channel: input.channel,
+				source,
+				status: "subscribed",
+				isAuthenticated: false,
+				alreadySubscribed: result.alreadySubscribed,
+			});
 
 			// Set cookie for anonymous users to suppress CTA in future visits
 			context.cookies.set(getNewsletterCookieName(input.audience), "true", {
@@ -195,6 +325,7 @@ export const newsletter = {
 		handler: async (input, context) => {
 			const email = input.email.toLowerCase().trim();
 			const prefixedUserId = createEmailId(email);
+			const source = input.source || "website:newsletter:unknown";
 
 			const result =
 				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
@@ -203,9 +334,20 @@ export const newsletter = {
 						audience: input.audience,
 						channel: "newsletter",
 						status: "unsubscribed",
-						source: input.source || "website:newsletter:unknown",
+						source,
 					},
 				);
+
+			await captureNewsletterAnalytics({
+				event: GROWTH_EVENTS.NEWSLETTER_UNSUBSCRIBED,
+				context,
+				audience: input.audience,
+				channel: "newsletter",
+				source,
+				status: "unsubscribed",
+				isAuthenticated: false,
+				alreadySubscribed: result.alreadySubscribed,
+			});
 
 			// Clear the newsletter cookie on unsubscribe
 			context.cookies.delete(getNewsletterCookieName(input.audience), {
