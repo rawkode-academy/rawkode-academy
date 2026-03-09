@@ -1,8 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	getSessionCampaignAttribution,
+	parseCampaignAttribution,
+	serializeCampaignAttribution,
+} from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
 import { getAttributionFromSource } from "@/server/analytics";
 
 describe("server analytics helpers", () => {
+	beforeEach(() => {
+		vi.unstubAllGlobals();
+	});
 	it("extracts newsletter page attribution from source strings", () => {
 		expect(
 			getAttributionFromSource("website:newsletter:/watch/kubernetes"),
@@ -42,6 +50,77 @@ describe("server analytics helpers", () => {
 			source_context: "complete-guide-zitadel",
 			page_path: "/courses/complete-guide-zitadel",
 		});
+	});
+
+	it("parses and serializes campaign attribution payloads safely", () => {
+		const serialized = serializeCampaignAttribution({
+			landing_page: "/watch/kubernetes?utm_source=linkedin",
+			initial_referrer: "https://www.linkedin.com/",
+			utm_source: "linkedin",
+			utm_medium: "social",
+			utm_campaign: "q1-launch",
+		});
+
+		expect(parseCampaignAttribution(serialized)).toEqual({
+			landing_page: "/watch/kubernetes?utm_source=linkedin",
+			initial_referrer: "https://www.linkedin.com/",
+			utm_source: "linkedin",
+			utm_medium: "social",
+			utm_campaign: "q1-launch",
+		});
+		expect(parseCampaignAttribution("not-json")).toEqual({});
+	});
+
+	it("sanitizes landing page query params and keeps only UTM params", () => {
+		vi.stubGlobal("window", {
+			location: {
+				href: "https://rawkode.academy/unsubscribe?email=david@example.com&utm_source=linkedin&utm_campaign=q1-launch",
+			},
+			sessionStorage: {
+				getItem: () => null,
+				setItem: () => undefined,
+			},
+		});
+		vi.stubGlobal("document", {
+			referrer: "https://www.linkedin.com/",
+		});
+
+		expect(getSessionCampaignAttribution()).toEqual({
+			landing_page: "/unsubscribe?utm_source=linkedin&utm_campaign=q1-launch",
+			initial_referrer: "https://www.linkedin.com/",
+			utm_source: "linkedin",
+			utm_campaign: "q1-launch",
+		});
+	});
+
+	it("treats UTM values as an atomic set when a new campaign arrives", () => {
+		const setItem = vi.fn();
+		vi.stubGlobal("window", {
+			location: {
+				href: "https://rawkode.academy/watch/kubernetes?utm_source=youtube",
+			},
+			sessionStorage: {
+				getItem: () =>
+					JSON.stringify({
+						landing_page: "/technology/matrix?utm_source=linkedin&utm_medium=social&utm_campaign=q1-launch",
+						initial_referrer: "https://www.google.com/",
+						utm_source: "linkedin",
+						utm_medium: "social",
+						utm_campaign: "q1-launch",
+					}),
+				setItem,
+			},
+		});
+		vi.stubGlobal("document", {
+			referrer: "",
+		});
+
+		expect(getSessionCampaignAttribution()).toEqual({
+			landing_page: "/technology/matrix?utm_source=linkedin&utm_medium=social&utm_campaign=q1-launch",
+			initial_referrer: "https://www.google.com/",
+			utm_source: "youtube",
+		});
+		expect(setItem).toHaveBeenCalledOnce();
 	});
 
 	it("exposes canonical growth event names for newsletter, lead magnets, and activation", () => {
