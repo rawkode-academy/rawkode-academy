@@ -3,18 +3,6 @@ import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("analytics");
 
-export const GROWTH_EVENTS = {
-	COURSE_SIGNUP: "course_signup",
-	LEAD_MAGNET_VIEWED: "lead_magnet_viewed",
-	LEAD_MAGNET_SIGNUP: "lead_magnet_signup",
-	NEWSLETTER_SUBSCRIBED: "newsletter_subscribed",
-	NEWSLETTER_UNSUBSCRIBED: "newsletter_unsubscribed",
-	NEWSLETTER_PREFERENCE_UPDATED: "newsletter_preference_updated",
-	NEWSLETTER_UNSUBSCRIBE_ALL: "newsletter_unsubscribe_all",
-} as const;
-
-export type GrowthEvent = (typeof GROWTH_EVENTS)[keyof typeof GROWTH_EVENTS];
-
 export type CaptureOptions = {
 	event: string;
 	properties?: Record<string, unknown> | undefined;
@@ -125,7 +113,12 @@ export async function captureServerEvent(
 		// Course/signup events
 		course_signup: "course.signup",
 		lead_magnet_viewed: "lead_magnet.viewed",
+		lead_magnet_clicked: "lead_magnet.clicked",
+		lead_magnet_submission_attempted: "lead_magnet.submission_attempted",
 		lead_magnet_signup: "lead_magnet.signup",
+		newsletter_cta_impression: "newsletter.cta_impression",
+		newsletter_cta_clicked: "newsletter.cta_clicked",
+		newsletter_submission_attempted: "newsletter.submission_attempted",
 		newsletter_subscribed: "newsletter.subscribed",
 		newsletter_unsubscribed: "newsletter.unsubscribed",
 		newsletter_preference_updated: "newsletter.preference_updated",
@@ -157,10 +150,14 @@ export async function captureServerEvent(
 
 	const cloudEventType = eventTypeMap[event] || `custom.${event}`;
 
-	const cloudEvent = createCloudEvent(cloudEventType, "rawkode-academy-website", {
-		...properties,
-		distinct_id: distinctId ?? "anonymous",
-	});
+	const cloudEvent = createCloudEvent(
+		cloudEventType,
+		"rawkode-academy-website",
+		{
+			...properties,
+			distinct_id: distinctId ?? "anonymous",
+		},
+	);
 
 	// Determine which attributes to promote to PostHog properties
 	const attributesToPromote = [
@@ -173,6 +170,9 @@ export async function captureServerEvent(
 		"subscriber_type",
 		"already_subscribed",
 		"is_authenticated",
+		"entry_point",
+		"lead_magnet",
+		"method",
 		"source",
 		"source_context",
 		"page_path",

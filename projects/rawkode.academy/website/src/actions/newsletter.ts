@@ -1,10 +1,10 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { GROWTH_EVENTS } from "@/lib/analytics/growth";
 import {
 	captureServerEvent,
 	getAttributionFromSource,
 	getDistinctId,
-	GROWTH_EVENTS,
 } from "@/server/analytics";
 
 /**

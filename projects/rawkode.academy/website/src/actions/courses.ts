@@ -3,11 +3,8 @@ import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
 import { z } from "astro:schema";
 import { Resend } from "resend";
-import {
-	captureServerEvent,
-	getDistinctId,
-	GROWTH_EVENTS,
-} from "../server/analytics";
+import { GROWTH_EVENTS } from "@/lib/analytics/growth";
+import { captureServerEvent, getDistinctId } from "../server/analytics";
 
 const SignupSchema = z.object({
 	email: z.string().email("Please enter a valid email address").optional(),
