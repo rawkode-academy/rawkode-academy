@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: infisical-operator
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: infisical-operator
+  targetNamespace: infisical-operator-system
+  chart:
+    spec:
+      chart: secrets-operator
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: infisical-charts
+        namespace: flux-system
+      version: "0.10.26"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
