@@ -21,6 +21,11 @@ spec:
       to that agent via A2A. Otherwise, help directly.
 
       Keep responses concise and actionable.
+    tools:
+      - type: RemoteAgent
+        remoteAgent:
+          name: software-developer
+          namespace: rocko
     a2aConfig:
       skills:
         - id: executive-assistant
