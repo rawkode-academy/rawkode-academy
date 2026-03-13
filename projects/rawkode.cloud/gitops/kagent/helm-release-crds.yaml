@@ -15,7 +15,7 @@ spec:
         kind: HelmRepository
         name: kagent
         namespace: flux-system
-      version: "*"
+      version: "0.7.23"
   install:
     createNamespace: true
     remediation:

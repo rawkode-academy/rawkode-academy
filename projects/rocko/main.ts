@@ -24,32 +24,46 @@ interface A2AResponse {
 }
 
 async function sendToAgent(text: string): Promise<string> {
-	const response = await fetch(`${KAGENT_A2A_URL}`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			jsonrpc: "2.0",
-			id: crypto.randomUUID(),
-			method: "tasks/send",
-			params: {
+	let response: Response;
+	try {
+		response = await fetch(KAGENT_A2A_URL, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				jsonrpc: "2.0",
 				id: crypto.randomUUID(),
-				message: {
-					role: "user",
-					parts: [{ text }],
+				method: "tasks/send",
+				params: {
+					id: crypto.randomUUID(),
+					message: {
+						role: "user",
+						parts: [{ text }],
+					},
 				},
-			},
-		}),
-	});
+			}),
+		});
+	} catch (err) {
+		return `Failed to reach agent: ${err instanceof Error ? err.message : String(err)}`;
+	}
 
-	const data: A2AResponse = await response.json();
+	if (!response.ok) {
+		return `Agent returned HTTP ${response.status}: ${response.statusText}`;
+	}
+
+	let data: A2AResponse;
+	try {
+		data = await response.json();
+	} catch {
+		return "Agent returned invalid JSON response.";
+	}
 
 	if (data.error) {
-		return `Error: ${data.error.message}`;
+		return `Agent error: ${data.error.message}`;
 	}
 
 	const parts = data.result?.artifacts?.flatMap((a) => a.parts) ?? [];
-	const text_parts = parts.map((p) => p.text).filter(Boolean);
-	return text_parts.join("\n") || "No response from agent.";
+	const textParts = parts.map((p) => p.text).filter(Boolean);
+	return textParts.join("\n") || "No response from agent.";
 }
 
 app.event("app_mention", async ({ event, say }) => {
