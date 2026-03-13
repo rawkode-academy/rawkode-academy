@@ -5,10 +5,12 @@ import textwrap
 
 from google.adk import Agent
 from google.adk.tools.tool_context import ToolContext
+from kagent.adk.models import OpenAI
 
 WORKSPACE_DIR = os.environ.get("WORKSPACE_DIR", "/workspace")
 ZOT_REGISTRY = os.environ.get("ZOT_REGISTRY", "zot.zot.svc.cluster.local:5000")
 DEPLOY_NAMESPACE = os.environ.get("DEPLOY_NAMESPACE", "apps")
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o")
 
 
 def _run(cmd: list[str], cwd: str | None = None) -> str:
@@ -193,7 +195,11 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
 
 
 root_agent = Agent(
-    model="gpt-5.4",
+    model=OpenAI(
+        model=OPENAI_MODEL,
+        type="openai",
+        api_key=os.environ["OPENAI_API_KEY"],
+    ),
     name="software_developer",
     description="Generates TypeScript web applications, builds OCI images with Nix, and deploys to Kubernetes.",
     instruction=textwrap.dedent("""\
