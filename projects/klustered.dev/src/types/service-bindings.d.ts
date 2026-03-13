@@ -29,4 +29,5 @@ export interface TypedEnv {
 	IDENTITY: Fetcher;
 	ASSETS: Fetcher;
 	EMAIL_PREFERENCES: EmailPreferencesRPC;
+	DB: D1Database;
 }

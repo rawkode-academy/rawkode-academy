@@ -1,0 +1,223 @@
+---
+export const prerender = false;
+
+import { css } from "styled-system/css";
+import "../../styles/global.css";
+import { getBracketBySlug } from "@/lib/klustered-brackets";
+import BracketViewer from "@/components/bracket/BracketViewer.vue";
+
+const { slug } = Astro.params;
+
+if (!slug) {
+	return Astro.redirect("/bracket");
+}
+
+const bracketData = getBracketBySlug(slug);
+
+if (!bracketData) {
+	return Astro.redirect("/bracket");
+}
+
+const { competitors, matches } = bracketData;
+const bracket = bracketData;
+
+const pageStyles = css({
+	minHeight: "100vh",
+	background: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)",
+	paddingBlock: "2rem",
+	paddingInline: "1rem",
+});
+
+const containerStyles = css({
+	maxWidth: "1400px",
+	marginInline: "auto",
+});
+
+const backLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.5rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	textDecoration: "none",
+	fontSize: "0.875rem",
+	marginBottom: "2rem",
+	transition: "color 0.2s",
+	"&:hover": {
+		color: "white",
+	},
+});
+
+const headerStyles = css({
+	display: "flex",
+	justifyContent: "space-between",
+	alignItems: "flex-start",
+	marginBottom: "2rem",
+	flexWrap: "wrap",
+	gap: "1rem",
+});
+
+const titleGroupStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "0.5rem",
+});
+
+const titleStyles = css({
+	fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
+	fontWeight: 700,
+	color: "white",
+	display: "flex",
+	alignItems: "center",
+	gap: "0.75rem",
+	flexWrap: "wrap",
+});
+
+const badgeStyles = css({
+	display: "inline-block",
+	padding: "0.25rem 0.75rem",
+	fontSize: "0.75rem",
+	fontWeight: 600,
+	textTransform: "uppercase",
+	borderRadius: "9999px",
+});
+
+const descriptionStyles = css({
+	fontSize: "1rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	maxWidth: "600px",
+});
+
+const statsStyles = css({
+	display: "flex",
+	gap: "1.5rem",
+	flexWrap: "wrap",
+});
+
+const statStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
+	padding: "1rem 1.5rem",
+	background: "rgba(255, 255, 255, 0.03)",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+	borderRadius: "0.75rem",
+});
+
+const statValueStyles = css({
+	fontSize: "1.5rem",
+	fontWeight: 700,
+	color: "white",
+});
+
+const statLabelStyles = css({
+	fontSize: "0.75rem",
+	color: "rgba(255, 255, 255, 0.5)",
+	textTransform: "uppercase",
+});
+
+const bracketSectionStyles = css({
+	background: "rgba(255, 255, 255, 0.02)",
+	border: "1px solid rgba(255, 255, 255, 0.05)",
+	borderRadius: "1rem",
+	padding: "2rem",
+});
+
+const refreshNoticeStyles = css({
+	textAlign: "center",
+	padding: "0.75rem",
+	fontSize: "0.75rem",
+	color: "rgba(255, 255, 255, 0.4)",
+	borderTop: "1px solid rgba(255, 255, 255, 0.05)",
+	marginTop: "2rem",
+});
+
+function getTypeColor(type: string) {
+	return type === "solo"
+		? "background: rgba(99, 102, 241, 0.2); color: #a5b4fc;"
+		: "background: rgba(168, 85, 247, 0.2); color: #d8b4fe;";
+}
+
+function getStatusColor(status: string) {
+	switch (status) {
+		case "active": return "background: rgba(34, 197, 94, 0.2); color: #86efac;";
+		case "completed": return "background: rgba(99, 102, 241, 0.2); color: #a5b4fc;";
+		default: return "background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6);";
+	}
+}
+
+const confirmedCompetitors = competitors.filter((c) => c.confirmed);
+const completedMatches = matches.filter((m) => m.status === "completed");
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{bracket.name} - Klustered '26</title>
+		<meta name="description" content={bracket.description || `Watch the ${bracket.name} bracket competition at Klustered '26`} />
+	</head>
+	<body>
+		<main class={pageStyles}>
+			<div class={containerStyles}>
+				<a href="/bracket" class={backLinkStyles}>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+					</svg>
+					All Brackets
+				</a>
+
+				<header class={headerStyles}>
+					<div class={titleGroupStyles}>
+						<h1 class={titleStyles}>
+							{bracket.name}
+							<span class={badgeStyles} style={getTypeColor(bracket.type)}>
+								{bracket.type}
+							</span>
+							<span class={badgeStyles} style={getStatusColor(bracket.status)}>
+								{bracket.status}
+							</span>
+						</h1>
+						{bracket.description && (
+							<p class={descriptionStyles}>{bracket.description}</p>
+						)}
+					</div>
+
+					<div class={statsStyles}>
+						<div class={statStyles}>
+							<span class={statValueStyles}>{confirmedCompetitors.length}</span>
+							<span class={statLabelStyles}>Competitors</span>
+						</div>
+						<div class={statStyles}>
+							<span class={statValueStyles}>{completedMatches.length} / {matches.length}</span>
+							<span class={statLabelStyles}>Matches</span>
+						</div>
+					</div>
+				</header>
+
+				<section class={bracketSectionStyles}>
+					<BracketViewer
+						client:load
+						bracket={bracket}
+						competitors={competitors}
+						matches={matches}
+					/>
+
+					{bracket.status === "active" && (
+						<p class={refreshNoticeStyles}>
+							Page auto-refreshes every 30 seconds during live competition
+						</p>
+					)}
+				</section>
+			</div>
+		</main>
+
+		{bracket.status === "active" && (
+			<script>
+				setTimeout(() => {
+					window.location.reload();
+				}, 30000);
+			</script>
+		)}
+	</body>
+</html>
