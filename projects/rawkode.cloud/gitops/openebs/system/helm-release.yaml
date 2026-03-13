@@ -37,10 +37,10 @@ spec:
           enabled: true
     mayastor:
       etcd:
-        replicaCount: 2
+        replicaCount: 1
       nats:
         cluster:
-          replicas: 2
+          replicas: 1
       storageClass:
         enabled: true
         default: true
