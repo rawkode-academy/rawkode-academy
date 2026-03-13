@@ -8,5 +8,4 @@ resources:
   - infisical-csi-provider
   - netbird-operator
   - kagent
-  - kagent-agents
   - rocko
