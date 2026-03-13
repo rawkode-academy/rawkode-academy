@@ -58,6 +58,12 @@ def _require_current_app(tool_context: ToolContext) -> tuple[str, Path]:
     return app_name, app_dir
 
 
+def _reset_build_state(tool_context: ToolContext) -> None:
+    # google.adk State is mapping-like but does not implement pop/delete.
+    tool_context.state["image_path"] = None
+    tool_context.state["image_ref"] = None
+
+
 def _prepare_docker_archive(image_path: str) -> tuple[str, Path | None]:
     source_path = Path(image_path)
     if source_path.suffix != ".gz":
@@ -117,8 +123,7 @@ def select_app(app_name: str, tool_context: ToolContext) -> str:
 
     tool_context.state["current_app"] = app_name
     tool_context.state["app_dir"] = str(app_dir)
-    tool_context.state.pop("image_path", None)
-    tool_context.state.pop("image_ref", None)
+    _reset_build_state(tool_context)
     return f"Selected existing app {app_name} at {app_dir}"
 
 
@@ -197,8 +202,7 @@ def generate_app(app_name: str, description: str, tool_context: ToolContext) -> 
 
     tool_context.state["current_app"] = app_name
     tool_context.state["app_dir"] = str(app_dir)
-    tool_context.state.pop("image_path", None)
-    tool_context.state.pop("image_ref", None)
+    _reset_build_state(tool_context)
 
     return f"App directory created at {app_dir} with flake.nix template. Write the TypeScript source files to {src_dir}/main.ts using the write_file tool."
 
@@ -225,8 +229,7 @@ def write_file(file_path: str, content: str, tool_context: ToolContext) -> str:
     with open(full_path, "w") as f:
         f.write(content)
 
-    tool_context.state.pop("image_path", None)
-    tool_context.state.pop("image_ref", None)
+    _reset_build_state(tool_context)
     return f"Wrote {len(content)} bytes to {full_path}"
 
 
