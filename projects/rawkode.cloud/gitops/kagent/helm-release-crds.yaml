@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kagent-crds
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: kagent-crds
+  targetNamespace: kagent
+  chart:
+    spec:
+      chart: kagent-crds
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: kagent
+        namespace: flux-system
+      version: "*"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3

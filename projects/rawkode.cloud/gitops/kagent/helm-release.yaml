@@ -1,0 +1,35 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kagent
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: kagent
+  targetNamespace: kagent
+  dependsOn:
+    - name: kagent-crds
+  chart:
+    spec:
+      chart: kagent
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: kagent
+        namespace: flux-system
+      version: "*"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  valuesFrom:
+    - kind: Secret
+      name: kagent-openai
+      valuesKey: apiKey
+      targetPath: providers.openai.apiKey
+  values:
+    providers:
+      default: openai

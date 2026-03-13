@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rocko
+  namespace: kagent
+  labels:
+    app.kubernetes.io/name: rocko
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rocko
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rocko
+    spec:
+      containers:
+        - name: rocko
+          image: ghcr.io/rawkode-academy/rocko:latest
+          env:
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rocko
+                  key: SLACK_BOT_TOKEN
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rocko
+                  key: SLACK_APP_TOKEN
+            - name: KAGENT_A2A_URL
+              value: "http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/executive-assistant/"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"

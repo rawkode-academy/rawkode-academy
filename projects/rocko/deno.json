@@ -1,0 +1,10 @@
+{
+	"tasks": {
+		"dev": "deno run --allow-net --allow-env main.ts",
+		"start": "deno run --allow-net --allow-env main.ts"
+	},
+	"imports": {
+		"@slack/bolt": "npm:@slack/bolt@^4",
+		"@slack/socket-mode": "npm:@slack/socket-mode@^2"
+	}
+}
