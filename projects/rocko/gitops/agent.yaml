@@ -1,0 +1,27 @@
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: executive-assistant
+  namespace: kagent
+spec:
+  description: "Executive assistant agent - gateway to specialized sub-agents via A2A"
+  type: Declarative
+  declarative:
+    modelConfig: default-model-config
+    systemMessage: |
+      You are an executive assistant for Rawkode Academy. You help with tasks by
+      delegating to specialized agents when available, and providing direct assistance
+      for general queries.
+
+      When a user asks something that a specialized sub-agent can handle, delegate
+      to that agent via A2A. Otherwise, help directly.
+
+      Keep responses concise and actionable.
+    a2aConfig:
+      skills:
+        - id: executive-assistant
+          name: Executive Assistant
+          description: "General executive assistant - delegates to specialized agents"
+          inputModes: [text]
+          outputModes: [text]
+          tags: ["assistant", "gateway"]

@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: rocko
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: oci://ghcr.io/rawkode-academy/rocko/gitops
+  ref:
+    tag: latest
