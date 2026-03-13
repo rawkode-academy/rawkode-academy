@@ -311,7 +311,7 @@ func infisicalSecretPathReadCandidates(cfg *config.Config) []string {
 	return candidates
 }
 
-func renderNodeTalosConfig(machineConfig []byte, nodeName string) ([]byte, error) {
+func renderNodeTalosConfig(cfg *config.Config, machineConfig []byte, nodeName, nodeRole string) ([]byte, error) {
 	rendered, err := talos.WithNodeName(machineConfig, nodeName)
 	if err != nil {
 		return nil, err
@@ -323,6 +323,24 @@ func renderNodeTalosConfig(machineConfig []byte, nodeName string) ([]byte, error
 	}
 
 	rendered, err = talos.WithCertSANs(rendered, certSANs...)
+	if err != nil {
+		return nil, err
+	}
+
+	if cfg == nil || !cfg.MayastorEnabled() {
+		return rendered, nil
+	}
+
+	rendered, err = talos.WithMayastorNode(rendered)
+	if err != nil {
+		return nil, err
+	}
+
+	if nodeRole != config.NodeTypeControlPlane {
+		return rendered, nil
+	}
+
+	rendered, err = talos.WithMayastorControlPlane(rendered)
 	if err != nil {
 		return nil, err
 	}
