@@ -1,0 +1,8 @@
+[project]
+name = "software-developer"
+version = "0.1.0"
+description = "BYO kagent agent that generates, builds, and deploys TypeScript web applications"
+readme = "README.md"
+dependencies = [
+    "google-adk>=1.8.0",
+]

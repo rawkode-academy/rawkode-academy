@@ -1,10 +1,20 @@
-FROM nixpkgs/nix-flakes
+FROM nixpkgs/nix-flakes AS nix-tools
 
-RUN nix profile install nixpkgs#kubectl nixpkgs#crane nixpkgs#deno nixpkgs#git
+# Build standalone tool binaries we need
+RUN nix-env -iA nixpkgs.kubectl nixpkgs.crane nixpkgs.deno nixpkgs.git
 
-WORKDIR /workspace
+FROM ghcr.io/kagent-dev/kagent/kagent-adk:latest
 
-# Copy the template flake for app image builds
+# Copy nix-installed tools from builder
+COPY --from=nix-tools /nix /nix
+ENV PATH="/nix/var/nix/profiles/default/bin:${PATH}"
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY software_developer/ software_developer/
 COPY flake.nix /opt/templates/flake.nix
 
-CMD ["sleep", "infinity"]
+RUN uv sync --refresh
+
+CMD ["software-developer"]
