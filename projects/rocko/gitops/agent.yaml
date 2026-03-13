@@ -2,7 +2,7 @@ apiVersion: kagent.dev/v1alpha2
 kind: Agent
 metadata:
   name: executive-assistant
-  namespace: kagent
+  namespace: rocko
 spec:
   description: "Executive assistant agent - gateway to specialized sub-agents via A2A"
   type: Declarative
