@@ -8,8 +8,10 @@ RUN mkdir -p /etc/nix && \
 		'sandbox = false' \
 	>> /etc/nix/nix.conf
 
-# Install kubectl and crane via nix profile (flake-based, no channels)
-RUN nix profile install nixpkgs#kubectl nixpkgs#crane nixpkgs#deno nixpkgs#git
+# Install tools via nix-env with pinned channel
+RUN nix-channel --add https://nixos.org/channels/nixos-25.05 nixpkgs && \
+	nix-channel --update && \
+	nix-env -iA nixpkgs.kubectl nixpkgs.crane nixpkgs.deno nixpkgs.git
 
 WORKDIR /workspace
 
