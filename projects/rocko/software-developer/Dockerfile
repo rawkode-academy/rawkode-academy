@@ -7,7 +7,7 @@ RUN nix profile install --profile /nix/var/nix/profiles/default \
   nixpkgs#deno \
   nixpkgs#git
 
-FROM ghcr.io/kagent-dev/kagent/kagent-adk:latest
+FROM ghcr.io/kagent-dev/kagent/kagent-adk:0.7.23
 
 # Copy nix-installed tools from builder
 COPY --from=nix-tools /nix /nix
