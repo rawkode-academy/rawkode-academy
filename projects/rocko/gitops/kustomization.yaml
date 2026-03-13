@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - external-secret.yaml
+  - model-config.yaml
   - agent.yaml
   - deployment.yaml
