@@ -1,6 +1,6 @@
 FROM nixpkgs/nix-flakes
 
-RUN nix-env -iA nixpkgs.kubectl nixpkgs.crane nixpkgs.deno nixpkgs.git
+RUN nix profile install nixpkgs#kubectl nixpkgs#crane nixpkgs#deno nixpkgs#git
 
 WORKDIR /workspace
 
