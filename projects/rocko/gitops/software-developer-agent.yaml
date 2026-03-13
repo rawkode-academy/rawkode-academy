@@ -4,7 +4,7 @@ metadata:
   name: software-developer
   namespace: rocko
 spec:
-  description: "Software developer agent - generates, builds, and deploys TypeScript web applications"
+  description: "Software developer agent - creates, debugs, fixes, improves, builds, and deploys TypeScript web applications"
   type: BYO
   byo:
     deployment:
