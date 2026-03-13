@@ -21,4 +21,4 @@ COPY flake.nix /opt/templates/flake.nix
 
 RUN uv sync --refresh
 
-CMD ["software-developer"]
+CMD ["software_developer"]
