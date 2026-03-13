@@ -8,4 +8,4 @@ COPY main.ts .
 RUN deno install
 RUN deno cache main.ts
 
-CMD ["deno", "run", "--allow-net", "--allow-env", "--cached-only", "main.ts"]
+CMD ["deno", "run", "--allow-net", "--allow-env", "--allow-sys=osRelease", "--cached-only", "main.ts"]
