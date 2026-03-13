@@ -33,3 +33,24 @@ spec:
         model: gpt-4.1-mini
         apiKeySecretRef: kagent-openai
         apiKeySecretKey: OPENAI_API_KEY
+    agents:
+      k8s-agent:
+        enabled: false
+      kgateway-agent:
+        enabled: false
+      istio-agent:
+        enabled: false
+      promql-agent:
+        enabled: false
+      observability-agent:
+        enabled: false
+      argo-rollouts-agent:
+        enabled: false
+      helm-agent:
+        enabled: false
+      cilium-policy-agent:
+        enabled: false
+      cilium-manager-agent:
+        enabled: false
+      cilium-debug-agent:
+        enabled: false
