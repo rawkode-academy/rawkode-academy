@@ -7,6 +7,8 @@ spec:
   interval: 30m
   releaseName: zot
   targetNamespace: zot
+  dependsOn:
+    - name: openebs
   chart:
     spec:
       chart: zot
@@ -32,6 +34,7 @@ spec:
     pvc:
       create: true
       storage: 50Gi
+      storageClassName: openebs-single-replica
     strategy:
       type: Recreate
     mountConfig: true

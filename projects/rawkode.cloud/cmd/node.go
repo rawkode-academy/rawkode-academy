@@ -192,7 +192,7 @@ func runNodeAdd(cmd *cobra.Command, args []string) error {
 	if role == config.NodeTypeControlPlane {
 		nodeConfig = assets.ControlPlane
 	}
-	nodeConfig, err = renderNodeTalosConfig(nodeConfig, name)
+	nodeConfig, err = renderNodeTalosConfig(cfg, nodeConfig, name, role)
 	if err != nil {
 		return fmt.Errorf("render node-specific Talos config for %q: %w", name, err)
 	}

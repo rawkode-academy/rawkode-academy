@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: rawkode-cloud-gitops
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: oci://ghcr.io/rawkode-academy/rawkode-academy/gitops
+  ref:
+    tag: latest

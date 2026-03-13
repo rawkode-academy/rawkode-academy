@@ -30,6 +30,10 @@ nodePools:
       os: /dev/nvme0n1
       data: /dev/nvme1n1
 
+storage:
+  mayastor:
+    enabled: true
+
 infisical:
   siteUrl: https://app.infisical.com
   projectId: 6575a392d7a5ef0555ade86b

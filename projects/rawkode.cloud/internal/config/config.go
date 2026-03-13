@@ -16,6 +16,7 @@ type Config struct {
 	Cluster     ClusterConfig    `yaml:"cluster"`
 	Scaleway    ScalewayConfig   `yaml:"scaleway"`
 	NodePools   []NodePoolConfig `yaml:"nodePools"`
+	Storage     StorageConfig    `yaml:"storage"`
 	Infisical   InfisicalConfig  `yaml:"infisical"`
 	Flux        FluxConfig       `yaml:"flux"`
 
@@ -70,6 +71,16 @@ const (
 type DiskConfig struct {
 	OS   string `yaml:"os"`
 	Data string `yaml:"data"`
+}
+
+// StorageConfig holds optional storage platform settings.
+type StorageConfig struct {
+	Mayastor MayastorConfig `yaml:"mayastor"`
+}
+
+// MayastorConfig enables Talos prerequisites for OpenEBS Replicated PV Mayastor.
+type MayastorConfig struct {
+	Enabled bool `yaml:"enabled"`
 }
 
 // InfisicalConfig holds secrets management settings.
@@ -298,6 +309,15 @@ func (p NodePoolConfig) DesiredSize() int {
 // EffectiveZone returns the node pool zone value with surrounding whitespace removed.
 func (p NodePoolConfig) EffectiveZone() string {
 	return strings.TrimSpace(p.Zone)
+}
+
+// MayastorEnabled reports whether Talos configs should include Mayastor prerequisites.
+func (c *Config) MayastorEnabled() bool {
+	if c == nil {
+		return false
+	}
+
+	return c.Storage.Mayastor.Enabled
 }
 
 // EffectiveCiliumVersion returns the Cilium version with a default fallback.

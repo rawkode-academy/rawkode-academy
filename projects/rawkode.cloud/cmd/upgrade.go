@@ -172,7 +172,7 @@ func runUpgradeK8s(cmd *cobra.Command, args []string) error {
 		if node.Role == config.NodeTypeControlPlane {
 			baseConfig = assets.ControlPlane
 		}
-		nodeConfig, err := renderNodeTalosConfig(baseConfig, node.Name)
+		nodeConfig, err := renderNodeTalosConfig(cfg, baseConfig, node.Name, node.Role)
 		if err != nil {
 			return fmt.Errorf("render node-specific Talos config for node %s: %w", node.Name, err)
 		}

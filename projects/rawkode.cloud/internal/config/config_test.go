@@ -75,6 +75,22 @@ func TestNodePoolEffectiveZone(t *testing.T) {
 	}
 }
 
+func TestConfigMayastorEnabled(t *testing.T) {
+	if got := ((*Config)(nil)).MayastorEnabled(); got {
+		t.Fatalf("(*Config)(nil).MayastorEnabled() = %t, want false", got)
+	}
+
+	cfg := &Config{}
+	if got := cfg.MayastorEnabled(); got {
+		t.Fatalf("Config{}.MayastorEnabled() = %t, want false", got)
+	}
+
+	cfg.Storage.Mayastor.Enabled = true
+	if got := cfg.MayastorEnabled(); !got {
+		t.Fatalf("Config{Storage.Mayastor.Enabled:true}.MayastorEnabled() = %t, want true", got)
+	}
+}
+
 func TestClusterEffectiveCiliumVersion(t *testing.T) {
 	if got := (ClusterConfig{}).EffectiveCiliumVersion(); got != defaultCiliumVersion {
 		t.Fatalf("ClusterConfig{}.EffectiveCiliumVersion() = %q, want %q", got, defaultCiliumVersion)
