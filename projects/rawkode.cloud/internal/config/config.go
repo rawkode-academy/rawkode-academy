@@ -76,6 +76,7 @@ type DiskConfig struct {
 type InfisicalConfig struct {
 	SiteURL           string `yaml:"siteUrl"`
 	ProjectID         string `yaml:"projectId"`
+	ProjectSlug       string `yaml:"projectSlug"`
 	Environment       string `yaml:"environment"`
 	SecretPath        string `yaml:"secretPath"`
 	NetbirdSecretPath string `yaml:"netbirdSecretPath"`
