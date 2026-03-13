@@ -1,0 +1,25 @@
+apiVersion: kagent.dev/v1alpha2
+kind: RemoteMCPServer
+metadata:
+  name: nango-calendar
+  namespace: rocko
+spec:
+  description: "Google Calendar integration via Nango Cloud MCP"
+  url: https://api.nango.dev/mcp
+  protocol: STREAMABLE_HTTP
+  timeout: 30s
+  sseReadTimeout: 300s
+  terminateOnClose: true
+  headersFrom:
+    - name: Authorization
+      valueFrom:
+        type: Secret
+        name: nango
+        key: NANGO_AUTH_HEADER
+    - name: connection-id
+      valueFrom:
+        type: Secret
+        name: nango
+        key: NANGO_CONNECTION_ID
+    - name: provider-config-key
+      value: google-calendar

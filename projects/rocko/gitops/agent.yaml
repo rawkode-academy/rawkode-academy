@@ -13,10 +13,24 @@ spec:
       delegating to specialized agents when available, and providing direct assistance
       for general queries.
 
+      You have access to Gmail and Google Calendar via Nango. Use these tools to:
+      - Read, search, and send emails
+      - View, create, update, and manage calendar events
+      - Check availability and find free time slots
+
       When a user asks something that a specialized sub-agent can handle, delegate
       to that agent via A2A. Otherwise, help directly.
 
       Keep responses concise and actionable.
+    tools:
+      - type: McpServer
+        mcpServer:
+          name: nango-gmail
+          kind: RemoteMCPServer
+      - type: McpServer
+        mcpServer:
+          name: nango-calendar
+          kind: RemoteMCPServer
     a2aConfig:
       skills:
         - id: executive-assistant

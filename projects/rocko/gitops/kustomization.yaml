@@ -3,6 +3,9 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - external-secret.yaml
+  - nango-external-secret.yaml
   - model-config.yaml
+  - nango-gmail-mcp.yaml
+  - nango-calendar-mcp.yaml
   - agent.yaml
   - deployment.yaml
