@@ -27,6 +27,8 @@ spec:
           value: "zot.zot.svc.cluster.local:5000"
         - name: DEPLOY_NAMESPACE
           value: "apps"
+        - name: DEPLOY_RUNTIME_IMAGE
+          value: "ghcr.io/rawkode-academy/rocko-software-developer:latest"
         - name: WORKSPACE_DIR
           value: "/workspace"
         - name: NIX_CONFIG

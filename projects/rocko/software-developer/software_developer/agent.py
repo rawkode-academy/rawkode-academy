@@ -1,9 +1,12 @@
+import base64
 import gzip
+import io
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import tarfile
 import tempfile
 import textwrap
 
@@ -14,6 +17,10 @@ from kagent.adk.models import OpenAI
 WORKSPACE_DIR = os.environ.get("WORKSPACE_DIR", "/workspace")
 ZOT_REGISTRY = os.environ.get("ZOT_REGISTRY", "zot.zot.svc.cluster.local:5000")
 DEPLOY_NAMESPACE = os.environ.get("DEPLOY_NAMESPACE", "apps")
+DEPLOY_RUNTIME_IMAGE = os.environ.get(
+    "DEPLOY_RUNTIME_IMAGE",
+    "ghcr.io/rawkode-academy/rocko-software-developer:latest",
+)
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o")
 
 
@@ -36,6 +43,17 @@ def _prepare_docker_archive(image_path: str) -> tuple[str, Path | None]:
         shutil.copyfileobj(source_file, archive_file)
 
     return str(temporary_path), temporary_path
+
+
+def _build_source_archive(app_dir: str) -> str:
+    app_path = Path(app_dir)
+    archive_buffer = io.BytesIO()
+
+    with tarfile.open(fileobj=archive_buffer, mode="w:gz") as archive:
+        for path in sorted(app_path.rglob("*")):
+            archive.add(path, arcname=path.relative_to(app_path))
+
+    return base64.b64encode(archive_buffer.getvalue()).decode("ascii")
 
 
 def generate_app(app_name: str, description: str, tool_context: ToolContext) -> str:
@@ -161,7 +179,9 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
     """Deploy the application to Kubernetes with NetBird exposure.
 
     Creates a Deployment and Service in the apps namespace.
-    The Service is annotated with netbird.io/expose for network access.
+    The source tree is bundled into a Secret and unpacked by an init container
+    so nodes can run the app from a public runtime image instead of pulling the
+    in-cluster Zot image directly.
 
     Args:
         port: The port the application listens on.
@@ -174,7 +194,20 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
     if not app_name or not image_ref:
         return "Error: no image ref. Call push_image first."
 
+    app_dir = tool_context.state.get("app_dir", os.path.join(WORKSPACE_DIR, app_name))
+    source_archive = _build_source_archive(app_dir)
+    source_secret_name = f"{app_name}-source"
+
     manifest = textwrap.dedent(f"""\
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: {source_secret_name}
+          namespace: {DEPLOY_NAMESPACE}
+        type: Opaque
+        data:
+          src.tar.gz: {source_archive}
+        ---
         apiVersion: apps/v1
         kind: Deployment
         metadata:
@@ -192,11 +225,66 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
               labels:
                 app: {app_name}
             spec:
+              securityContext:
+                fsGroup: 1001
+                runAsGroup: 1001
+                runAsNonRoot: true
+                runAsUser: 1001
+                seccompProfile:
+                  type: RuntimeDefault
+              initContainers:
+                - name: unpack-source
+                  image: {DEPLOY_RUNTIME_IMAGE}
+                  command:
+                    - sh
+                    - -lc
+                    - mkdir -p /app && tar -xzf /source/src.tar.gz -C /app
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 1001
+                    runAsNonRoot: true
+                    runAsUser: 1001
+                    seccompProfile:
+                      type: RuntimeDefault
+                  volumeMounts:
+                    - name: source
+                      mountPath: /source
+                    - name: app
+                      mountPath: /app
               containers:
                 - name: {app_name}
-                  image: {image_ref}
+                  image: {DEPLOY_RUNTIME_IMAGE}
+                  command:
+                    - deno
+                    - run
+                    - --allow-net
+                    - --allow-env
+                    - --allow-read
+                    - /app/src/main.ts
                   ports:
                     - containerPort: {port}
+                  securityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 1001
+                    runAsNonRoot: true
+                    runAsUser: 1001
+                    seccompProfile:
+                      type: RuntimeDefault
+                  volumeMounts:
+                    - name: app
+                      mountPath: /app
+              volumes:
+                - name: source
+                  secret:
+                    secretName: {source_secret_name}
+                - name: app
+                  emptyDir: {{}}
         ---
         apiVersion: v1
         kind: Service
@@ -225,7 +313,11 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
     if result.returncode != 0:
         return f"Deploy failed:\n{result.stderr}"
 
-    return f"Deployed {app_name} to namespace {DEPLOY_NAMESPACE}. Service exposed via NetBird."
+    return (
+        f"Deployed {app_name} to namespace {DEPLOY_NAMESPACE} using runtime image "
+        f"{DEPLOY_RUNTIME_IMAGE}. Built image remains available at {image_ref}. "
+        "Service exposed via NetBird."
+    )
 
 
 root_agent = Agent(
