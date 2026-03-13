@@ -1,3 +1,4 @@
 __all__ = ["agent", "lifespan"]
 
-from software_developer import agent, lifespan
+from . import agent
+from .lifespan import lifespan
