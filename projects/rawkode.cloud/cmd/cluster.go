@@ -106,6 +106,7 @@ var createClusterPhases = []string{
 	"apply-config",
 	"bootstrap",
 	"post-bootstrap",
+	"bootstrap-secrets",
 	"verify",
 	"restrict-talos-api",
 }
@@ -244,6 +245,8 @@ func executeCreateCluster(
 			phaseErr = phaseBootstrap(ctx, op, cfg)
 		case "post-bootstrap":
 			phaseErr = phasePostBootstrap(ctx, op, cfg)
+		case "bootstrap-secrets":
+			phaseErr = phaseBootstrapSecrets(ctx, op, cfg)
 		case "verify":
 			phaseErr = phaseVerify(ctx, op, cfg)
 		case "restrict-talos-api":
@@ -1186,13 +1189,21 @@ func getOrCreateInfisicalClient(ctx context.Context, cfg *config.Config) (*infis
 
 func ensureTalosSecretsYAML(ctx context.Context, cfg *config.Config, client *infisical.Client) ([]byte, error) {
 	secretPath := infisicalSecretPathForCluster(cfg)
-	all, err := client.GetSecrets(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath)
-	if err != nil {
-		return nil, fmt.Errorf("load infisical secrets: %w", err)
-	}
+	for _, candidatePath := range infisicalSecretPathReadCandidates(cfg) {
+		all, err := client.GetSecrets(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, candidatePath)
+		if err != nil {
+			if infisical.IsNotFound(err) {
+				continue
+			}
+			return nil, fmt.Errorf("load infisical secrets from %s: %w", candidatePath, err)
+		}
 
-	if existing := strings.TrimSpace(all[infisicalTalosSecretsKey]); existing != "" {
-		return []byte(existing), nil
+		if existing := strings.TrimSpace(all[infisicalTalosSecretsKey]); existing != "" {
+			if candidatePath != secretPath {
+				slog.Warn("using legacy infisical talos secrets path", "path", candidatePath)
+			}
+			return []byte(existing), nil
+		}
 	}
 
 	slog.Info("no Talos secrets found in Infisical; generating new secrets")

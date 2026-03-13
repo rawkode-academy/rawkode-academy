@@ -33,6 +33,7 @@ nodePools:
 infisical:
   siteUrl: https://app.infisical.com
   projectId: 6575a392d7a5ef0555ade86b
+  projectSlug: rawkode-academy
   environment: production
   secretPath: /projects/rawkode-cloud
   netbirdSecretKey: NETBIRD_SETUP_KEY

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"strings"
 
 	infisicalsdk "github.com/infisical/go-sdk"
@@ -13,11 +14,15 @@ import (
 
 // Client is an authenticated Infisical client for fetching secrets.
 type Client struct {
-	sdk infisicalsdk.InfisicalClientInterface
+	sdk            infisicalsdk.InfisicalClientInterface
+	siteURL        string
+	httpClient     *http.Client
+	getAccessToken func() string
 }
 
 // NewClient authenticates with Infisical using Universal Auth.
 func NewClient(ctx context.Context, siteURL, clientID, clientSecret string) (*Client, error) {
+	siteURL = normalizeSiteURL(siteURL)
 	sdk := infisicalsdk.NewInfisicalClient(ctx, infisicalsdk.Config{
 		SiteUrl:          siteURL,
 		AutoTokenRefresh: true,
@@ -29,7 +34,14 @@ func NewClient(ctx context.Context, siteURL, clientID, clientSecret string) (*Cl
 	}
 
 	slog.Info("infisical client authenticated")
-	return &Client{sdk: sdk}, nil
+	return &Client{
+		sdk:        sdk,
+		siteURL:    siteURL,
+		httpClient: &http.Client{},
+		getAccessToken: func() string {
+			return sdk.Auth().GetAccessToken()
+		},
+	}, nil
 }
 
 // GetSecret fetches a single secret by key.
@@ -142,4 +154,11 @@ func isFolderAlreadyExistsError(err error) bool {
 	}
 
 	return false
+}
+
+func normalizeSiteURL(siteURL string) string {
+	siteURL = strings.TrimSpace(siteURL)
+	siteURL = strings.TrimRight(siteURL, "/")
+	siteURL = strings.TrimSuffix(siteURL, "/api")
+	return strings.TrimRight(siteURL, "/")
 }
