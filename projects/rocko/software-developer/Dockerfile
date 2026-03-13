@@ -1,19 +1,20 @@
-FROM nixos/nix:2.28.3
+FROM nixpkgs/nix-flakes AS nix-tools
 
-# Enable flakes and disable sandbox (required inside Docker)
-RUN mkdir -p /etc/nix && \
-	printf '%s\n' \
-		'experimental-features = nix-command flakes' \
-		'filter-syscalls = false' \
-		'sandbox = false' \
-	>> /etc/nix/nix.conf
+# Build standalone tool binaries we need
+RUN nix-env -iA nixpkgs.kubectl nixpkgs.crane nixpkgs.deno nixpkgs.git
 
-# Install kubectl and crane via nix profile (flake-based, no channels)
-RUN nix profile install nixpkgs#kubectl nixpkgs#crane nixpkgs#deno nixpkgs#git
+FROM ghcr.io/kagent-dev/kagent/kagent-adk:latest
 
-WORKDIR /workspace
+# Copy nix-installed tools from builder
+COPY --from=nix-tools /nix /nix
+ENV PATH="/nix/var/nix/profiles/default/bin:${PATH}"
 
-# Copy the template flake for app image builds
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY software_developer/ software_developer/
 COPY flake.nix /opt/templates/flake.nix
 
-CMD ["sleep", "infinity"]
+RUN uv sync --refresh
+
+CMD ["software-developer"]
