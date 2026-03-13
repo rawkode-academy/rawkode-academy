@@ -29,6 +29,8 @@ spec:
           value: "apps"
         - name: WORKSPACE_DIR
           value: "/workspace"
+        - name: NIX_CONFIG
+          value: "experimental-features = nix-command flakes"
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
