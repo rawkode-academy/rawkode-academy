@@ -1,0 +1,10 @@
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: default-model-config
+  namespace: rocko
+spec:
+  provider: OpenAI
+  model: gpt-4.1-mini
+  apiKeySecret: rocko
+  apiKeySecretKey: OPENAI_API_KEY
