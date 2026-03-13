@@ -1,0 +1,72 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: netbird-operator
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: netbird-operator
+  targetNamespace: netbird
+  dependsOn:
+    - name: cert-manager
+  chart:
+    spec:
+      chart: kubernetes-operator
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: netbirdio
+        namespace: flux-system
+      version: "0.2.2"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    netbirdAPI:
+      keyFromSecret:
+        name: netbird-mgmt-api-key
+        key: NB_API_KEY
+    ingress:
+      enabled: true
+      allowAutomaticPolicyCreation: true
+    cluster:
+      name: rawkode-cloud
+      dns: svc.cluster.local
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: netbird-operator-config
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: netbird-operator-config
+  targetNamespace: netbird
+  dependsOn:
+    - name: netbird-operator
+  chart:
+    spec:
+      chart: netbird-operator-config
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: netbirdio
+        namespace: flux-system
+      version: "0.1.0"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    cluster:
+      name: rawkode-cloud
+      dns: svc.cluster.local
+    router:
+      enabled: true
