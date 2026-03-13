@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: infisical-csi-provider
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: infisical-csi-provider
+  targetNamespace: infisical-system
+  chart:
+    spec:
+      chart: infisical-csi-provider
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: infisical-charts
+        namespace: flux-system
+      version: "0.2.1"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    namespace: infisical-system
+    tolerations:
+      - operator: Exists

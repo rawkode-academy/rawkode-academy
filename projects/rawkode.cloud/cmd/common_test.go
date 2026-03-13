@@ -17,9 +17,29 @@ func TestInfisicalSecretPathForCluster(t *testing.T) {
 	}
 
 	got := infisicalSecretPathForCluster(cfg)
-	want := "/projects/rawkode-cloud/production"
+	want := "/projects/rawkode-cloud"
 	if got != want {
 		t.Fatalf("infisicalSecretPathForCluster() = %q, want %q", got, want)
+	}
+}
+
+func TestInfisicalSecretPathReadCandidates(t *testing.T) {
+	cfg := &config.Config{
+		Environment: "production",
+		Infisical: config.InfisicalConfig{
+			SecretPath: "/projects/rawkode-cloud",
+		},
+	}
+
+	got := infisicalSecretPathReadCandidates(cfg)
+	if len(got) != 2 {
+		t.Fatalf("infisicalSecretPathReadCandidates() length = %d, want 2", len(got))
+	}
+	if got[0] != "/projects/rawkode-cloud" {
+		t.Fatalf("first path = %q, want %q", got[0], "/projects/rawkode-cloud")
+	}
+	if got[1] != "/projects/rawkode-cloud/production" {
+		t.Fatalf("second path = %q, want %q", got[1], "/projects/rawkode-cloud/production")
 	}
 }
 

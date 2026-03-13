@@ -25,4 +25,7 @@ func TestRunClusterScaffoldDefaultsFluxOCIRepo(t *testing.T) {
 	) {
 		t.Fatalf("scaffolded config missing default flux ociRepo:\n%s", string(content))
 	}
+	if !strings.Contains(string(content), `projectSlug: ""`) {
+		t.Fatalf("scaffolded config missing infisical projectSlug:\n%s", string(content))
+	}
 }

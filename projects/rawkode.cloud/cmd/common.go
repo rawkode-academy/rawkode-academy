@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -223,16 +224,24 @@ func firstActiveNodeByRole(state *clusterstate.NodesState, role string) (*cluste
 }
 
 func loadTalosconfigFromInfisical(ctx context.Context, cfg *config.Config, client *infisical.Client) ([]byte, error) {
-	secretPath := infisicalSecretPathForCluster(cfg)
-	value, err := client.GetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosConfigKey)
-	if err != nil {
-		return nil, fmt.Errorf("load %s from infisical: %w", infisicalTalosConfigKey, err)
-	}
-	if strings.TrimSpace(value) == "" {
-		return nil, fmt.Errorf("%s is empty in infisical path %s", infisicalTalosConfigKey, secretPath)
+	for _, secretPath := range infisicalSecretPathReadCandidates(cfg) {
+		value, err := client.GetSecret(ctx, cfg.Infisical.ProjectID, cfg.Infisical.Environment, secretPath, infisicalTalosConfigKey)
+		if err != nil {
+			if infisical.IsNotFound(err) {
+				continue
+			}
+			return nil, fmt.Errorf("load %s from infisical path %s: %w", infisicalTalosConfigKey, secretPath, err)
+		}
+		if strings.TrimSpace(value) == "" {
+			continue
+		}
+		if secretPath != infisicalSecretPathForCluster(cfg) {
+			slog.Warn("using legacy infisical talosconfig path", "path", secretPath)
+		}
+		return []byte(value), nil
 	}
 
-	return []byte(value), nil
+	return nil, fmt.Errorf("%s was not found in infisical paths %s", infisicalTalosConfigKey, strings.Join(infisicalSecretPathReadCandidates(cfg), ", "))
 }
 
 func controlPlaneEndpointFromState(state *clusterstate.NodesState) (string, error) {
@@ -247,16 +256,59 @@ func controlPlaneEndpointFromState(state *clusterstate.NodesState) (string, erro
 }
 
 func infisicalSecretPathForCluster(cfg *config.Config) string {
-	base := strings.TrimSpace(cfg.Infisical.SecretPath)
-	cluster := strings.TrimSpace(cfg.Environment)
+	if cfg == nil {
+		return ""
+	}
 
-	if cluster == "" {
+	base := strings.TrimSpace(cfg.Infisical.SecretPath)
+	switch base {
+	case "":
+		return ""
+	case "/":
+		return "/"
+	default:
+		return strings.TrimRight(base, "/")
+	}
+}
+
+func legacyInfisicalSecretPathForCluster(cfg *config.Config) string {
+	if cfg == nil {
+		return ""
+	}
+
+	base := infisicalSecretPathForCluster(cfg)
+	cluster := strings.TrimSpace(cfg.Environment)
+	switch {
+	case cluster == "":
 		return base
-	}
-	if base == "" || base == "/" {
+	case base == "":
 		return "/" + cluster
+	case base == "/":
+		return "/" + cluster
+	default:
+		return base + "/" + cluster
 	}
-	return strings.TrimRight(base, "/") + "/" + cluster
+}
+
+func infisicalSecretPathReadCandidates(cfg *config.Config) []string {
+	primary := infisicalSecretPathForCluster(cfg)
+	legacy := legacyInfisicalSecretPathForCluster(cfg)
+
+	candidates := make([]string, 0, 2)
+	seen := map[string]struct{}{}
+	for _, candidate := range []string{primary, legacy} {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "" {
+			continue
+		}
+		if _, ok := seen[candidate]; ok {
+			continue
+		}
+		seen[candidate] = struct{}{}
+		candidates = append(candidates, candidate)
+	}
+
+	return candidates
 }
 
 func renderNodeTalosConfig(machineConfig []byte, nodeName string) ([]byte, error) {
