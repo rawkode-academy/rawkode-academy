@@ -5,6 +5,6 @@ metadata:
   namespace: rocko
 spec:
   provider: OpenAI
-  model: gpt-4.1-mini
+  model: gpt-5.4
   apiKeySecret: rocko
   apiKeySecretKey: OPENAI_API_KEY
