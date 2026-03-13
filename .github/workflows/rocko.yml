@@ -50,6 +50,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Pin deployment image to SHA tag
+        run: |
+          sed -i 's|ghcr.io/rawkode-academy/rocko:latest|ghcr.io/rawkode-academy/rocko:${{ github.sha }}|' \
+            ./projects/rocko/gitops/deployment.yaml
+
       - name: Install Flux CLI
         run: curl -s https://fluxcd.io/install.sh | sudo bash
 
@@ -62,7 +67,9 @@ jobs:
 
       - name: Push GitOps OCI artifact
         run: |
-          flux push artifact oci://ghcr.io/rawkode-academy/rocko/gitops:latest \
+          flux push artifact oci://ghcr.io/rawkode-academy/rocko/gitops:${{ github.sha }} \
             --path="./projects/rocko/gitops" \
             --source="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             --revision="${GITHUB_REF_NAME}@sha1:${GITHUB_SHA}"
+          flux tag artifact oci://ghcr.io/rawkode-academy/rocko/gitops:${{ github.sha }} \
+            --tag=latest
