@@ -66,7 +66,7 @@ jobs:
           sed -i 's|ghcr.io/rawkode-academy/rocko:latest|ghcr.io/rawkode-academy/rocko:${{ github.sha }}|' \
             ./projects/rocko/gitops/deployment.yaml
           sed -i 's|ghcr.io/rawkode-academy/rocko-software-developer:latest|ghcr.io/rawkode-academy/rocko-software-developer:${{ github.sha }}|' \
-            ./projects/rocko/gitops/software-developer-deployment.yaml
+            ./projects/rocko/gitops/software-developer-agent.yaml
 
       - name: Install Flux CLI
         run: curl -s https://fluxcd.io/install.sh | sudo bash

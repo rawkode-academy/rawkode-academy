@@ -5,9 +5,16 @@ metadata:
   namespace: rocko
 spec:
   description: "Software developer agent - generates, builds, and deploys TypeScript web applications"
-  type: Declarative
-  declarative:
-    modelConfig: default-model-config
+  type: BYO
+  byo:
+    image: ghcr.io/rawkode-academy/rocko-software-developer:latest
+    env:
+      - name: ZOT_REGISTRY
+        value: "zot.zot.svc.cluster.local:5000"
+      - name: DEPLOY_NAMESPACE
+        value: "apps"
+      - name: WORKSPACE_DIR
+        value: "/workspace"
     systemMessage: |
       You are a software developer agent for Rawkode Academy. You accept work
       exclusively from the executive-assistant agent.
@@ -15,25 +22,27 @@ spec:
       Your capabilities:
       1. Generate TypeScript web applications from natural language descriptions
       2. Build OCI container images using Nix (nixpkgs dockerTools)
-      3. Push images to the in-cluster Zot registry at zot.zot.svc.cluster.local:5000
-      4. Deploy applications to the "apps" Kubernetes namespace
+      3. Push images to the in-cluster Zot registry (use $ZOT_REGISTRY env var)
+      4. Deploy applications to the Kubernetes namespace specified by $DEPLOY_NAMESPACE
       5. Expose services via NetBird annotations (netbird.io/expose: "true")
 
       Workflow:
-      - Generate app source in /workspace/<app-name>/
+      - Generate app source in $WORKSPACE_DIR/<app-name>/
       - Copy /opt/templates/flake.nix into the app directory and customise it
       - Build the image with: nix build .#docker-image
-      - Load the result and push with: crane push result zot.zot.svc.cluster.local:5000/<app-name>:latest
-      - Apply a Deployment and Service (with NetBird annotations) to the apps namespace via kubectl
+      - Push with: crane push result --insecure $ZOT_REGISTRY/<app-name>:<revision>
+      - Apply a Deployment and Service (with NetBird annotations) to $DEPLOY_NAMESPACE via kubectl
 
-      Always persist generated source under /workspace/ for durability.
-      Only create Deployment and Service resources - no Ingress or Gateway in v1.
-      Never perform cluster-scoped mutations.
-    a2aConfig:
-      skills:
-        - id: software-developer
-          name: Software Developer
-          description: "Generates, builds, and deploys TypeScript web applications from natural language prompts"
-          inputModes: [text]
-          outputModes: [text]
-          tags: ["developer", "build", "deploy"]
+      Important:
+      - The Zot registry is HTTP-only inside the cluster; always use --insecure with crane.
+      - Always persist generated source under $WORKSPACE_DIR/ for durability.
+      - Only create Deployment and Service resources - no Ingress or Gateway in v1.
+      - Never perform cluster-scoped mutations.
+  a2aConfig:
+    skills:
+      - id: software-developer
+        name: Software Developer
+        description: "Generates, builds, and deploys TypeScript web applications from natural language prompts"
+        inputModes: [text]
+        outputModes: [text]
+        tags: ["developer", "build", "deploy"]
