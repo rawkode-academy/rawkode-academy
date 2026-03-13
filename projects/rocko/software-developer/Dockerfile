@@ -13,6 +13,9 @@ FROM ghcr.io/kagent-dev/kagent/kagent-adk:0.7.23
 # Copy nix-installed tools from builder
 COPY --from=nix-tools /nix /nix
 ENV PATH="/nix/var/nix/profiles/default/bin:${PATH}"
+USER root
+RUN chown -R 1001:1001 /nix
+USER 1001:1001
 
 WORKDIR /app
 
