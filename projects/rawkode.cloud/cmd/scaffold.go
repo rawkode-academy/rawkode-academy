@@ -41,8 +41,9 @@ nodePools:
 infisical:
   siteUrl: https://app.infisical.com
   projectId: ""
+  projectSlug: ""
   environment: production
-  secretPath: /%s # shared secrets live here; cluster secrets use <secretPath>/<environment>
+  secretPath: /%s # exact Infisical path; environment selection comes from infisical.environment
   # Optional NetBird setup key lookup overrides:
   # netbirdSecretPath: /projects/rawkode-cloud
   # netbirdSecretKey: NETBIRD_SETUP_KEY
