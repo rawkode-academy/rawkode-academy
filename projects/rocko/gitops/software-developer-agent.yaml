@@ -10,6 +10,18 @@ spec:
     deployment:
       image: ghcr.io/rawkode-academy/rocko-software-developer:latest
       serviceAccountName: software-developer
+      podSecurityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1001
+        runAsNonRoot: true
+        runAsUser: 1001
+        supplementalGroups:
+          - 1001
+      securityContext:
+        runAsGroup: 1001
+        runAsNonRoot: true
+        runAsUser: 1001
       env:
         - name: ZOT_REGISTRY
           value: "zot.zot.svc.cluster.local:5000"
