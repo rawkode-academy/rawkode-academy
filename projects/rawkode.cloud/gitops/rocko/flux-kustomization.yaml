@@ -4,8 +4,6 @@ metadata:
   name: rocko
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: bootstrap
   interval: 5m
   path: ./
   prune: true

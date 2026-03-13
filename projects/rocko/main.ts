@@ -1,11 +1,12 @@
-import App from "@slack/bolt";
+import { App, type SlackEventMiddlewareArgs } from "@slack/bolt";
 
-const KAGENT_A2A_URL = Deno.env.get("KAGENT_A2A_URL");
-if (!KAGENT_A2A_URL) {
+const kagentA2AUrl = Deno.env.get("KAGENT_A2A_URL");
+if (!kagentA2AUrl) {
 	throw new Error("KAGENT_A2A_URL environment variable is required");
 }
+const KAGENT_A2A_URL = kagentA2AUrl;
 
-const app = new App.default({
+const app = new App({
 	token: Deno.env.get("SLACK_BOT_TOKEN"),
 	appToken: Deno.env.get("SLACK_APP_TOKEN"),
 	socketMode: true,
@@ -66,7 +67,7 @@ async function sendToAgent(text: string): Promise<string> {
 	return textParts.join("\n") || "No response from agent.";
 }
 
-app.event("app_mention", async ({ event, say }) => {
+app.event("app_mention", async ({ event, say }: SlackEventMiddlewareArgs<"app_mention">) => {
 	const text = event.text.replace(/<@[A-Z0-9]+>/g, "").trim();
 	if (!text) {
 		await say({ text: "Hey! How can I help?", thread_ts: event.ts });
@@ -77,7 +78,7 @@ app.event("app_mention", async ({ event, say }) => {
 	await say({ text: reply, thread_ts: event.ts });
 });
 
-app.event("message", async ({ event, say }) => {
+app.event("message", async ({ event, say }: SlackEventMiddlewareArgs<"message">) => {
 	if (event.channel_type !== "im") return;
 	if ("bot_id" in event) return;
 
