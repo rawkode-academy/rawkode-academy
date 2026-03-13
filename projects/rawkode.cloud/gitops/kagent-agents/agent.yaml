@@ -13,8 +13,6 @@ spec:
       delegating to specialized agents when available, and providing direct assistance
       for general queries.
 
-      You can send messages to Slack channels to communicate results and updates.
-
       When a user asks something that a specialized sub-agent can handle, delegate
       to that agent via A2A. Otherwise, help directly.
 
@@ -23,14 +21,7 @@ spec:
       skills:
         - id: executive-assistant
           name: Executive Assistant
-          description: "General executive assistant - delegates to specialized agents and communicates via Slack"
+          description: "General executive assistant - delegates to specialized agents"
           inputModes: [text]
           outputModes: [text]
           tags: ["assistant", "gateway"]
-    tools:
-      - type: McpServer
-        mcpServer:
-          name: slack-mcp
-          kind: MCPServer
-          toolNames:
-            - send_message_to_slack
