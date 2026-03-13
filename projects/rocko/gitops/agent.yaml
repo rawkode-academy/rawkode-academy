@@ -7,7 +7,7 @@ spec:
   description: "Executive assistant agent - gateway to specialized sub-agents via A2A"
   type: Declarative
   declarative:
-    modelConfig: default-model-config
+    modelConfig: kagent/default-model-config
     systemMessage: |
       You are an executive assistant for Rawkode Academy. You help with tasks by
       delegating to specialized agents when available, and providing direct assistance
