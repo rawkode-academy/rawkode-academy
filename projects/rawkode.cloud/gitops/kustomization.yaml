@@ -5,3 +5,4 @@ resources:
   - external-secrets
   - secrets-store-csi-driver
   - infisical-csi-provider
+  - netbird-operator

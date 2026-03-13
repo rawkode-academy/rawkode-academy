@@ -1,0 +1,30 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: netbird-operator-config
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: netbird-operator-config
+  targetNamespace: netbird
+  chart:
+    spec:
+      chart: netbird-operator-config
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: netbirdio
+        namespace: flux-system
+      version: "0.1.0"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    cluster:
+      name: rawkode-cloud-production
+    router:
+      enabled: true

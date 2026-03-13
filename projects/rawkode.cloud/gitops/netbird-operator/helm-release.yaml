@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: netbird-operator
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: netbird-operator
+  targetNamespace: netbird
+  chart:
+    spec:
+      chart: kubernetes-operator
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: netbirdio
+        namespace: flux-system
+      version: "0.2.2"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    ingress:
+      enabled: true
+    cluster:
+      name: rawkode-cloud-production
+    netbirdAPI:
+      keyFromSecret:
+        name: netbird-mgmt-api-key
+        key: NB_API_KEY
