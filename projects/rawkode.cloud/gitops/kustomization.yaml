@@ -8,5 +8,6 @@ resources:
   - infisical-csi-provider
   - netbird-operator
   - kagent
+  - openebs
   - zot
   - rocko

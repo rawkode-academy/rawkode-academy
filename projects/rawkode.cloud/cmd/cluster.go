@@ -497,7 +497,7 @@ func phaseApplyConfig(ctx context.Context, op *operation.Operation, cfg *config.
 		return err
 	}
 	nodeName := nodeNameForOperation(op, cfg.Environment)
-	nodeConfig, err := renderNodeTalosConfig(assets.ControlPlane, nodeName)
+	nodeConfig, err := renderNodeTalosConfig(cfg, assets.ControlPlane, nodeName, config.NodeTypeControlPlane)
 	if err != nil {
 		return fmt.Errorf("render node-specific Talos config for %q: %w", nodeName, err)
 	}
@@ -1048,7 +1048,7 @@ func phaseRestrictTalosAPI(ctx context.Context, op *operation.Operation, cfg *co
 	}
 
 	nodeName := nodeNameForOperation(op, cfg.Environment)
-	nodeConfig, err := renderNodeTalosConfig(assets.ControlPlane, nodeName)
+	nodeConfig, err := renderNodeTalosConfig(cfg, assets.ControlPlane, nodeName, config.NodeTypeControlPlane)
 	if err != nil {
 		return fmt.Errorf("render node-specific Talos config for %q: %w", nodeName, err)
 	}
