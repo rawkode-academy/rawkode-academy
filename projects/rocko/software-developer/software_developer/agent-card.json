@@ -1,0 +1,19 @@
+{
+	"name": "software-developer",
+	"description": "Generates TypeScript web applications, builds OCI images with Nix, and deploys to Kubernetes",
+	"url": "localhost:8080",
+	"version": "0.1.0",
+	"capabilities": {
+		"streaming": true
+	},
+	"defaultInputModes": ["text"],
+	"defaultOutputModes": ["text"],
+	"skills": [
+		{
+			"id": "software-developer",
+			"name": "Software Developer",
+			"description": "Generates, builds, and deploys TypeScript web applications from natural language prompts",
+			"tags": ["developer", "build", "deploy"]
+		}
+	]
+}
