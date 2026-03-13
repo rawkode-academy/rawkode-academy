@@ -9,6 +9,7 @@ spec:
   byo:
     deployment:
       image: ghcr.io/rawkode-academy/rocko-software-developer:latest
+      serviceAccountName: software-developer
       env:
         - name: ZOT_REGISTRY
           value: "zot.zot.svc.cluster.local:5000"
@@ -21,3 +22,10 @@ spec:
             secretKeyRef:
               name: rocko
               key: OPENAI_API_KEY
+      volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+      volumes:
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: software-developer-workspace
