@@ -21,11 +21,3 @@ spec:
             secretKeyRef:
               name: rocko
               key: OPENAI_API_KEY
-  a2aConfig:
-    skills:
-      - id: software-developer
-        name: Software Developer
-        description: "Generates, builds, and deploys TypeScript web applications from natural language prompts"
-        inputModes: [text]
-        outputModes: [text]
-        tags: ["developer", "build", "deploy"]
