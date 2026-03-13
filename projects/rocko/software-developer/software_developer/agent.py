@@ -1,6 +1,10 @@
+import gzip
 import json
 import os
+from pathlib import Path
+import shutil
 import subprocess
+import tempfile
 import textwrap
 
 from google.adk import Agent
@@ -18,6 +22,20 @@ def _run(cmd: list[str], cwd: str | None = None) -> str:
     if result.returncode != 0:
         return f"Command failed (exit {result.returncode}):\n{result.stderr}"
     return result.stdout
+
+
+def _prepare_docker_archive(image_path: str) -> tuple[str, Path | None]:
+    source_path = Path(image_path)
+    if source_path.suffix != ".gz":
+        return str(source_path), None
+
+    with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as temporary_archive:
+        temporary_path = Path(temporary_archive.name)
+
+    with gzip.open(source_path, "rb") as source_file, temporary_path.open("wb") as archive_file:
+        shutil.copyfileobj(source_file, archive_file)
+
+    return str(temporary_path), temporary_path
 
 
 def generate_app(app_name: str, description: str, tool_context: ToolContext) -> str:
@@ -102,8 +120,9 @@ def build_image(tool_context: ToolContext) -> str:
 def push_image(tool_context: ToolContext) -> str:
     """Push the built OCI image to the in-cluster Zot registry.
 
-    Uses crane to push the Nix-built image to the Zot registry.
-    The --insecure flag is used because Zot runs HTTP inside the cluster.
+    Nix dockerTools emits a Docker archive tarball. Zot accepts that archive
+    when it is uploaded through skopeo, which can also read the compressed
+    `.tar.gz` output after a temporary decompression step.
 
     Returns:
         The full image reference or an error message.
@@ -114,7 +133,22 @@ def push_image(tool_context: ToolContext) -> str:
         return "Error: no image to push. Call build_image first."
 
     image_ref = f"{ZOT_REGISTRY}/{app_name}:latest"
-    output = _run(["crane", "push", image_path, image_ref, "--insecure"])
+    archive_path, temporary_archive = _prepare_docker_archive(image_path)
+
+    try:
+        output = _run(
+            [
+                "skopeo",
+                "copy",
+                "--insecure-policy",
+                "--dest-tls-verify=false",
+                f"docker-archive:{archive_path}",
+                f"docker://{image_ref}",
+            ]
+        )
+    finally:
+        if temporary_archive is not None:
+            temporary_archive.unlink(missing_ok=True)
 
     if "Command failed" in output:
         return f"Push failed:\n{output}"

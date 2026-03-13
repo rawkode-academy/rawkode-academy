@@ -5,6 +5,7 @@ RUN nix profile install --profile /nix/var/nix/profiles/default \
   nixpkgs#nix \
   nixpkgs#kubectl \
   nixpkgs#crane \
+  nixpkgs#skopeo \
   nixpkgs#deno \
   nixpkgs#git
 
