@@ -31,6 +31,33 @@ def _run(cmd: list[str], cwd: str | None = None) -> str:
     return result.stdout
 
 
+def _workspace_path() -> Path:
+    return Path(WORKSPACE_DIR)
+
+
+def _app_path(app_name: str) -> Path:
+    return _workspace_path() / app_name
+
+
+def _validate_relative_path(path: str) -> Path:
+    relative_path = Path(path)
+    if relative_path.is_absolute() or ".." in relative_path.parts:
+        raise ValueError("Paths must stay within the current app directory.")
+    return relative_path
+
+
+def _require_current_app(tool_context: ToolContext) -> tuple[str, Path]:
+    app_name = tool_context.state.get("current_app")
+    if not app_name:
+        raise ValueError("No app context. Call select_app or generate_app first.")
+
+    app_dir = Path(tool_context.state.get("app_dir", os.path.join(WORKSPACE_DIR, app_name)))
+    if not app_dir.exists() or not app_dir.is_dir():
+        raise ValueError(f"App directory does not exist: {app_dir}")
+
+    return app_name, app_dir
+
+
 def _prepare_docker_archive(image_path: str) -> tuple[str, Path | None]:
     source_path = Path(image_path)
     if source_path.suffix != ".gz":
@@ -56,6 +83,87 @@ def _build_source_archive(app_dir: str) -> str:
     return base64.b64encode(archive_buffer.getvalue()).decode("ascii")
 
 
+def list_apps() -> str:
+    """List application directories currently available in the workspace."""
+    workspace = _workspace_path()
+    if not workspace.exists():
+        return f"Workspace directory does not exist: {workspace}"
+
+    apps: list[str] = []
+    for path in sorted(workspace.iterdir()):
+        if not path.is_dir():
+            continue
+
+        summary: list[str] = []
+        if (path / "src" / "main.ts").exists():
+            summary.append("src/main.ts")
+        if (path / "flake.nix").exists():
+            summary.append("flake.nix")
+
+        details = ", ".join(summary) if summary else "directory"
+        apps.append(f"- {path.name} ({details})")
+
+    if not apps:
+        return f"No apps found in {workspace}"
+
+    return "Available apps:\n" + "\n".join(apps)
+
+
+def select_app(app_name: str, tool_context: ToolContext) -> str:
+    """Select an existing application in the workspace for inspection or editing."""
+    app_dir = _app_path(app_name)
+    if not app_dir.exists() or not app_dir.is_dir():
+        return f"Error: app {app_name!r} does not exist in {WORKSPACE_DIR}. Call list_apps first."
+
+    tool_context.state["current_app"] = app_name
+    tool_context.state["app_dir"] = str(app_dir)
+    tool_context.state.pop("image_path", None)
+    tool_context.state.pop("image_ref", None)
+    return f"Selected existing app {app_name} at {app_dir}"
+
+
+def list_files(subdirectory: str = ".", tool_context: ToolContext | None = None) -> str:
+    """List files within the current application's directory."""
+    try:
+        if tool_context is None:
+            raise ValueError("No tool context available.")
+        app_name, app_dir = _require_current_app(tool_context)
+        relative_path = _validate_relative_path(subdirectory)
+    except ValueError as error:
+        return f"Error: {error}"
+
+    target_dir = app_dir / relative_path
+    if not target_dir.exists():
+        return f"Error: path does not exist: {target_dir}"
+    if not target_dir.is_dir():
+        return f"Error: path is not a directory: {target_dir}"
+
+    paths = [
+        path.relative_to(app_dir).as_posix()
+        for path in sorted(target_dir.rglob("*"))
+        if path.is_file()
+    ]
+    if not paths:
+        return f"No files found in {target_dir}"
+
+    return f"Files for {app_name}:\n" + "\n".join(f"- {path}" for path in paths[:200])
+
+
+def read_file(file_path: str, tool_context: ToolContext) -> str:
+    """Read a file from the current application's directory."""
+    try:
+        _, app_dir = _require_current_app(tool_context)
+        relative_path = _validate_relative_path(file_path)
+    except ValueError as error:
+        return f"Error: {error}"
+
+    full_path = app_dir / relative_path
+    if not full_path.exists() or not full_path.is_file():
+        return f"Error: file does not exist: {full_path}"
+
+    return full_path.read_text()
+
+
 def generate_app(app_name: str, description: str, tool_context: ToolContext) -> str:
     """Generate a TypeScript web application from a description.
 
@@ -69,20 +177,28 @@ def generate_app(app_name: str, description: str, tool_context: ToolContext) -> 
     Returns:
         A summary of the generated files and their locations.
     """
-    app_dir = os.path.join(WORKSPACE_DIR, app_name)
-    src_dir = os.path.join(app_dir, "src")
-    os.makedirs(src_dir, exist_ok=True)
+    app_dir = _app_path(app_name)
+    if app_dir.exists() and any(app_dir.iterdir()):
+        return (
+            f"Error: app {app_name!r} already exists at {app_dir}. "
+            "Use select_app to modify it instead of generating a new app."
+        )
+
+    src_dir = app_dir / "src"
+    src_dir.mkdir(parents=True, exist_ok=True)
 
     # Copy the template flake.nix
     template_flake = "/opt/templates/flake.nix"
     if os.path.exists(template_flake):
         with open(template_flake) as f:
             flake_content = f.read()
-        with open(os.path.join(app_dir, "flake.nix"), "w") as f:
+        with open(app_dir / "flake.nix", "w") as f:
             f.write(flake_content)
 
     tool_context.state["current_app"] = app_name
-    tool_context.state["app_dir"] = app_dir
+    tool_context.state["app_dir"] = str(app_dir)
+    tool_context.state.pop("image_path", None)
+    tool_context.state.pop("image_ref", None)
 
     return f"App directory created at {app_dir} with flake.nix template. Write the TypeScript source files to {src_dir}/main.ts using the write_file tool."
 
@@ -97,17 +213,20 @@ def write_file(file_path: str, content: str, tool_context: ToolContext) -> str:
     Returns:
         Confirmation of the file write.
     """
-    app_name = tool_context.state.get("current_app")
-    if not app_name:
-        return "Error: no app context. Call generate_app first."
+    try:
+        _, app_dir = _require_current_app(tool_context)
+        relative_path = _validate_relative_path(file_path)
+    except ValueError as error:
+        return f"Error: {error}"
 
-    app_dir = tool_context.state.get("app_dir", os.path.join(WORKSPACE_DIR, app_name))
-    full_path = os.path.join(app_dir, file_path)
-    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    full_path = app_dir / relative_path
+    full_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(full_path, "w") as f:
         f.write(content)
 
+    tool_context.state.pop("image_path", None)
+    tool_context.state.pop("image_ref", None)
     return f"Wrote {len(content)} bytes to {full_path}"
 
 
@@ -120,12 +239,12 @@ def build_image(tool_context: ToolContext) -> str:
     Returns:
         The path to the built image or an error message.
     """
-    app_name = tool_context.state.get("current_app")
-    if not app_name:
-        return "Error: no app context. Call generate_app first."
+    try:
+        app_name, app_dir = _require_current_app(tool_context)
+    except ValueError as error:
+        return f"Error: {error}"
 
-    app_dir = tool_context.state.get("app_dir", os.path.join(WORKSPACE_DIR, app_name))
-    output = _run(["nix", "build", ".#docker-image", "--no-link", "--print-out-paths"], cwd=app_dir)
+    output = _run(["nix", "build", ".#docker-image", "--no-link", "--print-out-paths"], cwd=str(app_dir))
 
     if "Command failed" in output:
         return f"Build failed:\n{output}"
@@ -327,20 +446,41 @@ root_agent = Agent(
         api_key=os.environ["OPENAI_API_KEY"],
     ),
     name="software_developer",
-    description="Generates TypeScript web applications, builds OCI images with Nix, and deploys to Kubernetes.",
+    description="Creates, debugs, fixes, improves, builds, and deploys TypeScript web applications.",
     instruction=textwrap.dedent("""\
         You are a software developer agent for Rawkode Academy.
 
-        Your workflow for creating and deploying an application:
+        You can either create a new application or modify an existing one.
+
+        For a new application:
         1. Call generate_app with the app name and description to set up the workspace.
-        2. Call write_file to create src/main.ts (and any other source files) with the TypeScript code.
+        2. Call write_file to create src/main.ts and any other source files.
         3. Call build_image to build the OCI container image using Nix.
         4. Call push_image to push the image to the Zot registry.
-        5. Call deploy_app with the port the app listens on to deploy to Kubernetes.
+        5. Call deploy_app with the port the app listens on.
 
-        Always follow these steps in order. Each step depends on the previous one.
+        For debugging, fixing, refactoring, or improving an existing application:
+        1. Call list_apps if you need to discover or confirm the app name.
+        2. Call select_app to work inside the existing app directory.
+        3. Call list_files and read_file to inspect the current implementation.
+        4. Call write_file to update the relevant files in place.
+        5. Rebuild, push, and deploy only when the user asks for verification or rollout.
+
+        Do not call generate_app when the user asked to debug, fix, improve, or modify an existing app.
+        Prefer updating the existing app in place unless the user explicitly asks for a rewrite.
+        If the target app cannot be identified from the request, ask a concise follow-up question.
         Generate clean, working Deno TypeScript code.
         Only create Deployment and Service resources - no Ingress or Gateway.
     """),
-    tools=[generate_app, write_file, build_image, push_image, deploy_app],
+    tools=[
+        list_apps,
+        select_app,
+        list_files,
+        read_file,
+        generate_app,
+        write_file,
+        build_image,
+        push_image,
+        deploy_app,
+    ],
 )

@@ -8,7 +8,14 @@ const KAGENT_A2A_URL = kagentA2AUrl;
 const DEBUG_ENABLED = isDebugEnabled(Deno.env.get("DEBUG"));
 const SLACK_BOT_TOKEN = Deno.env.get("SLACK_BOT_TOKEN");
 const SLACK_APP_TOKEN = Deno.env.get("SLACK_APP_TOKEN");
-const REQUIRED_BOT_SCOPES = ["chat:write", "app_mentions:read", "im:history"];
+const REQUIRED_BOT_SCOPES = [
+  "chat:write",
+  "app_mentions:read",
+  "channels:history",
+  "groups:history",
+  "im:history",
+];
+let slackBotUserId = "";
 
 const app = new App({
   token: SLACK_BOT_TOKEN,
@@ -98,6 +105,24 @@ interface SlackAuthTestResponse {
   url?: string;
 }
 
+interface SlackConversationReplyMessage {
+  ts?: string;
+  user?: string;
+}
+
+interface SlackSayResult {
+  ts?: string;
+}
+
+interface SlackRequestParams {
+  channel: string;
+  contextId: string;
+  say: (message: { text: string; thread_ts?: string }) => Promise<SlackSayResult>;
+  text: string;
+  threadTs?: string;
+  userId: string;
+}
+
 function isDebugEnabled(value: string | undefined): boolean {
   if (!value) return false;
   return !["0", "false", "off", "no"].includes(value.toLowerCase());
@@ -106,6 +131,10 @@ function isDebugEnabled(value: string | undefined): boolean {
 function truncate(text: string, maxLength = 200): string {
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength)}...`;
+}
+
+function normalizeSlackText(text: string): string {
+  return text.replace(/<@[A-Z0-9]+>/g, "").trim();
 }
 
 function unique(values: string[]): string[] {
@@ -125,6 +154,11 @@ function debugLog(message: string, details?: Record<string, unknown>): void {
 
 function buildSlackUserId(userId: string | undefined): string {
   return userId ? `slack:${userId}` : "slack:unknown";
+}
+
+function mentionsSlackBot(text: string): boolean {
+  if (!slackBotUserId) return false;
+  return text.includes(`<@${slackBotUserId}>`);
 }
 
 function buildContextId(channel: string, threadTs?: string): string {
@@ -310,6 +344,8 @@ async function logSlackConfiguration(): Promise<void> {
     return;
   }
 
+  slackBotUserId = payload.user_id ?? "";
+
   console.log("Slack auth ok", {
     team: payload.team ?? null,
     teamId: payload.team_id ?? null,
@@ -323,14 +359,72 @@ async function logSlackConfiguration(): Promise<void> {
     !scopes.includes(scope)
   );
   if (missingScopes.length > 0) {
-    console.error(
-      "Slack bot token is missing required scopes for mentions/DMs",
-      {
-        currentScopes: scopes,
-        missingScopes,
-      },
-    );
+    console.error("Slack bot token is missing required scopes", {
+      currentScopes: scopes,
+      missingScopes,
+    });
   }
+}
+
+async function isTrackedSlackThread(
+  channel: string,
+  currentMessageTs: string,
+  threadTs: string,
+): Promise<boolean> {
+  if (!slackBotUserId) return false;
+
+  try {
+    const response = await app.client.conversations.replies({
+      channel,
+      limit: 100,
+      ts: threadTs,
+    });
+    const messages = (response.messages ?? []) as SlackConversationReplyMessage[];
+    return messages.some((message) =>
+      message.ts !== currentMessageTs && message.user === slackBotUserId
+    );
+  } catch (error) {
+    debugLog("Failed to inspect Slack thread", {
+      channel,
+      error: error instanceof Error ? error.message : String(error),
+      threadTs,
+    });
+    return false;
+  }
+}
+
+async function handleSlackRequest(
+  { channel, contextId, say, text, threadTs, userId }: SlackRequestParams,
+): Promise<string> {
+  const progress = await say({
+    text: "Submitted to the executive assistant.",
+    thread_ts: threadTs,
+  });
+  const reply = await sendToAgent({
+    contextId,
+    onProgress: async (progressText) => {
+      if (!progress.ts) return;
+      await app.client.chat.update({
+        channel,
+        text: progressText,
+        ts: progress.ts,
+      });
+    },
+    text,
+    userId,
+  });
+
+  if (progress.ts) {
+    await app.client.chat.update({
+      channel,
+      text: truncate(reply, 3000),
+      ts: progress.ts,
+    });
+  } else {
+    await say({ text: reply, thread_ts: threadTs });
+  }
+
+  return reply;
 }
 
 async function sendToAgent(
@@ -465,7 +559,9 @@ async function sendToAgent(
   return reply;
 }
 
-app.use(async ({ body, next }) => {
+app.use(async (
+  { body, next }: { body: unknown; next: () => Promise<void> },
+) => {
   debugLog("Received Slack envelope", {
     type: typeof body === "object" && body !== null && "type" in body
       ? body.type
@@ -485,7 +581,7 @@ app.use(async ({ body, next }) => {
 app.event(
   "app_mention",
   async ({ event, say }: SlackEventMiddlewareArgs<"app_mention">) => {
-    const text = event.text.replace(/<@[A-Z0-9]+>/g, "").trim();
+    const text = normalizeSlackText(event.text);
     const threadTs = getReplyThreadTs(event);
     const userId = buildSlackUserId(event.user);
     const contextId = buildContextId(event.channel, threadTs);
@@ -507,33 +603,14 @@ app.event(
       return;
     }
 
-    const progress = await say({
-      text: "Submitted to the executive assistant.",
-      thread_ts: threadTs,
-    });
-    const reply = await sendToAgent({
+    const reply = await handleSlackRequest({
+      channel: event.channel,
       contextId,
-      onProgress: async (progressText) => {
-        if (!progress.ts) return;
-        await app.client.chat.update({
-          channel: event.channel,
-          text: progressText,
-          ts: progress.ts,
-        });
-      },
+      say,
       text,
+      threadTs,
       userId,
     });
-
-    if (progress.ts) {
-      await app.client.chat.update({
-        channel: event.channel,
-        text: truncate(reply, 3000),
-        ts: progress.ts,
-      });
-    } else {
-      await say({ text: reply, thread_ts: threadTs });
-    }
 
     debugLog("Sent Slack reply for app mention", {
       channel: event.channel,
@@ -547,17 +624,8 @@ app.event(
 app.event(
   "message",
   async ({ event, say }: SlackEventMiddlewareArgs<"message">) => {
-    if (event.channel_type !== "im") {
-      debugLog("Ignored non-DM Slack message", {
-        channel: event.channel,
-        channelType: event.channel_type,
-        ts: event.ts,
-      });
-      return;
-    }
-
     if ("bot_id" in event) {
-      debugLog("Ignored bot-authored Slack DM", {
+      debugLog("Ignored bot-authored Slack message", {
         botId: event.bot_id,
         channel: event.channel,
         ts: event.ts,
@@ -565,61 +633,93 @@ app.event(
       return;
     }
 
-    const text = "text" in event ? (event.text ?? "") : "";
+    if ("subtype" in event && event.subtype) {
+      debugLog("Ignored Slack message subtype", {
+        channel: event.channel,
+        subtype: event.subtype,
+        ts: event.ts,
+      });
+      return;
+    }
+
+    const isDirectMessage = event.channel_type === "im";
+    const threadTs = "thread_ts" in event ? event.thread_ts : undefined;
+    const rawText = "text" in event ? (event.text ?? "") : "";
+
+    if (!isDirectMessage && mentionsSlackBot(rawText)) {
+      debugLog("Ignored threaded Slack message because app mention handler will process it", {
+        channel: event.channel,
+        threadTs: threadTs ?? null,
+        ts: event.ts,
+      });
+      return;
+    }
+
+    if (!isDirectMessage) {
+      if (!threadTs) {
+        debugLog("Ignored non-thread Slack message", {
+          channel: event.channel,
+          channelType: event.channel_type,
+          ts: event.ts,
+        });
+        return;
+      }
+
+      const trackedThread = await isTrackedSlackThread(
+        event.channel,
+        event.ts,
+        threadTs,
+      );
+      if (!trackedThread) {
+        debugLog("Ignored Slack thread reply without Rocko participation", {
+          channel: event.channel,
+          threadTs,
+          ts: event.ts,
+        });
+        return;
+      }
+    }
+
+    const text = normalizeSlackText(rawText);
     const userId = buildSlackUserId("user" in event ? event.user : undefined);
-    const contextId = buildContextId(event.channel);
-    debugLog("Received Slack DM", {
+    const contextId = buildContextId(event.channel, isDirectMessage ? undefined : threadTs);
+    debugLog(isDirectMessage ? "Received Slack DM" : "Received Slack thread reply", {
       channel: event.channel,
       contextId,
+      threadTs: threadTs ?? null,
       ts: event.ts,
       user: "user" in event ? event.user : null,
       text: truncate(text),
     });
 
     if (!text) {
-      debugLog("Ignored empty Slack DM", {
+      debugLog("Ignored empty Slack message", {
         channel: event.channel,
+        threadTs: threadTs ?? null,
         ts: event.ts,
       });
       return;
     }
 
-    const progress = await say({
-      text: "Submitted to the executive assistant.",
-    });
-    const reply = await sendToAgent({
+    const reply = await handleSlackRequest({
+      channel: event.channel,
       contextId,
-      onProgress: async (progressText) => {
-        if (!progress.ts) return;
-        await app.client.chat.update({
-          channel: event.channel,
-          text: progressText,
-          ts: progress.ts,
-        });
-      },
+      say,
       text,
+      threadTs,
       userId,
     });
 
-    if (progress.ts) {
-      await app.client.chat.update({
-        channel: event.channel,
-        text: truncate(reply, 3000),
-        ts: progress.ts,
-      });
-    } else {
-      await say({ text: reply });
-    }
-
-    debugLog("Sent Slack reply for DM", {
+    debugLog(isDirectMessage ? "Sent Slack reply for DM" : "Sent Slack reply for thread", {
       channel: event.channel,
       contextId,
+      threadTs: threadTs ?? null,
       reply: truncate(reply),
     });
   },
 );
 
-app.error(async (error) => {
+app.error(async (error: Error) => {
   console.error("Slack app error", error);
 });
 

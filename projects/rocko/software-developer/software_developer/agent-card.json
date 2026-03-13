@@ -1,6 +1,6 @@
 {
   "name": "software-developer",
-  "description": "Generates TypeScript web applications, builds OCI images with Nix, and deploys to Kubernetes",
+  "description": "Creates, debugs, fixes, improves, builds, and deploys TypeScript web applications",
   "url": "http://software-developer.rocko.svc.cluster.local:8080",
   "version": "0.1.0",
   "capabilities": {
@@ -12,8 +12,8 @@
     {
       "id": "software-developer",
       "name": "Software Developer",
-      "description": "Generates, builds, and deploys TypeScript web applications from natural language prompts",
-      "tags": ["developer", "build", "deploy"]
+      "description": "Creates, debugs, fixes, improves, builds, and deploys TypeScript web applications from natural language prompts",
+      "tags": ["developer", "debug", "fix", "improve", "build", "deploy"]
     }
   ]
 }
