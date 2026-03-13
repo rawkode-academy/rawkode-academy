@@ -18,12 +18,14 @@ spec:
         Delegate to this agent when users ask to create, build, or deploy web applications.
 
       When a user asks something that a specialized sub-agent can handle, delegate
-      to that agent via A2A. Otherwise, help directly.
+      to that agent. Otherwise, help directly.
 
       Keep responses concise and actionable.
     tools:
-      - type: RemoteAgent
-        remoteAgent:
+      - type: Agent
+        agent:
+          apiGroup: kagent.dev
+          kind: Agent
           name: software-developer
           namespace: rocko
     a2aConfig:
