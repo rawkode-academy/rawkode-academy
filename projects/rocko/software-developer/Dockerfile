@@ -1,7 +1,11 @@
 FROM nixpkgs/nix-flakes AS nix-tools
 
 # Build standalone tool binaries we need
-RUN nix-env -iA nixpkgs.kubectl nixpkgs.crane nixpkgs.deno nixpkgs.git
+RUN nix profile install --profile /nix/var/nix/profiles/default \
+  nixpkgs#kubectl \
+  nixpkgs#crane \
+  nixpkgs#deno \
+  nixpkgs#git
 
 FROM ghcr.io/kagent-dev/kagent/kagent-adk:latest
 
