@@ -2,6 +2,7 @@ FROM nixpkgs/nix-flakes AS nix-tools
 
 # Build standalone tool binaries we need
 RUN nix profile install --profile /nix/var/nix/profiles/default \
+  nixpkgs#nix \
   nixpkgs#kubectl \
   nixpkgs#crane \
   nixpkgs#deno \
