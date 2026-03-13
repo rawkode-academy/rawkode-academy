@@ -31,6 +31,8 @@ spec:
                   key: SLACK_APP_TOKEN
             - name: KAGENT_A2A_URL
               value: "http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/rocko/executive-assistant/"
+            - name: DEBUG
+              value: "false"
           resources:
             requests:
               memory: "128Mi"
