@@ -21,7 +21,7 @@ DEPLOY_RUNTIME_IMAGE = os.environ.get(
     "DEPLOY_RUNTIME_IMAGE",
     "ghcr.io/rawkode-academy/rocko-software-developer:latest",
 )
-OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o")
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-5.4")
 
 
 def _run(cmd: list[str], cwd: str | None = None) -> str:
@@ -29,6 +29,29 @@ def _run(cmd: list[str], cwd: str | None = None) -> str:
     if result.returncode != 0:
         return f"Command failed (exit {result.returncode}):\n{result.stderr}"
     return result.stdout
+
+
+def bash(command: str, tool_context: ToolContext, cwd: str | None = None) -> str:
+    """Run a shell command inside the developer container."""
+    working_dir = cwd or tool_context.state.get("app_dir") or WORKSPACE_DIR
+    result = subprocess.run(
+        ["bash", "-lc", command],
+        capture_output=True,
+        text=True,
+        cwd=working_dir,
+        timeout=600,
+    )
+    output = result.stdout
+    if result.stderr:
+        output = f"{output}\n{result.stderr}" if output else result.stderr
+
+    if result.returncode != 0:
+        return (
+            f"Command failed (exit {result.returncode}) in {working_dir}:\n"
+            f"{output.strip()}"
+        )
+
+    return f"Command succeeded in {working_dir}:\n{output.strip()}"
 
 
 def _workspace_path() -> Path:
@@ -449,33 +472,49 @@ root_agent = Agent(
         api_key=os.environ["OPENAI_API_KEY"],
     ),
     name="software_developer",
-    description="Creates, debugs, fixes, improves, builds, and deploys TypeScript web applications.",
+    description="Builds new software and modifies, fixes, debugs, and deploys existing software using bash, Nix, and kubectl.",
     instruction=textwrap.dedent("""\
-        You are a software developer agent for Rawkode Academy.
+        You are a pragmatic software developer agent for Rawkode Academy.
 
-        You can either create a new application or modify an existing one.
+        Environment:
+        - You have a bash tool and may use it freely for inspection, testing, formatting,
+          debugging, git, nix, kubectl, curl, and general software engineering work.
+        - Nix is installed.
+        - kubectl is installed and configured for the current cluster.
+        - Your shared workspace root is /workspace.
+        - Existing app directories live under /workspace.
+        - New or updated applications are deployed into the Kubernetes namespace apps.
+        - Built images are pushed to the internal registry zot.zot.svc.cluster.local:5000.
+        - The runtime image used for deployed apps is provided via DEPLOY_RUNTIME_IMAGE.
 
-        For a new application:
-        1. Call generate_app with the app name and description to set up the workspace.
-        2. Call write_file to create src/main.ts and any other source files.
-        3. Call build_image to build the OCI container image using Nix.
-        4. Call push_image to push the image to the Zot registry.
-        5. Call deploy_app with the port the app listens on.
+        Your job:
+        - Build new software when asked.
+        - Modify, fix, debug, and improve existing software when asked.
+        - Use the existing app in place unless the user explicitly asks to rebuild from scratch.
+        - Verify your work with bash whenever practical instead of guessing.
 
-        For debugging, fixing, refactoring, or improving an existing application:
+        Preferred workflow for existing software:
         1. Call list_apps if you need to discover or confirm the app name.
         2. Call select_app to work inside the existing app directory.
-        3. Call list_files and read_file to inspect the current implementation.
-        4. Call write_file to update the relevant files in place.
-        5. Rebuild, push, and deploy only when the user asks for verification or rollout.
+        3. Inspect with list_files, read_file, and bash.
+        4. Update files in place with write_file or use bash for broader edits.
+        5. Validate with bash.
+        6. Build, push, and deploy when the user asks for rollout or when deployment verification is part of the request.
 
-        Do not call generate_app when the user asked to debug, fix, improve, or modify an existing app.
-        Prefer updating the existing app in place unless the user explicitly asks for a rewrite.
-        If the target app cannot be identified from the request, ask a concise follow-up question.
-        Generate clean, working Deno TypeScript code.
-        Only create Deployment and Service resources - no Ingress or Gateway.
+        Preferred workflow for new software:
+        1. Call generate_app to create the workspace scaffold.
+        2. Create or refine files with write_file and bash.
+        3. Validate with bash.
+        4. Call build_image, push_image, and deploy_app when needed.
+
+        Important rules:
+        - Do not default to generating a new app when the request is about fixing or changing an existing one.
+        - Ask a concise follow-up question only when the target app or desired outcome is genuinely ambiguous.
+        - Prefer concrete execution and verification over high-level plans.
+        - Keep deployed workloads simple: Deployment and Service resources only unless the user explicitly asks otherwise.
     """),
     tools=[
+        bash,
         list_apps,
         select_app,
         list_files,
