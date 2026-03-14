@@ -4,7 +4,7 @@ metadata:
   name: software-developer
   namespace: rocko
 spec:
-  description: "Software developer agent - creates, debugs, fixes, improves, builds, and deploys TypeScript web applications"
+  description: "Software developer agent - builds new software and modifies, fixes, debugs, and deploys existing software using bash, Nix, and kubectl"
   type: BYO
   byo:
     deployment:
@@ -38,6 +38,8 @@ spec:
             secretKeyRef:
               name: rocko
               key: OPENAI_API_KEY
+        - name: OPENAI_MODEL
+          value: "gpt-5.4"
       volumeMounts:
         - name: workspace
           mountPath: /workspace
