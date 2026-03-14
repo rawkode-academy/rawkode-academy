@@ -90,8 +90,11 @@ interface AgentStreamSnapshot {
   finalReply: string;
   lastAssistantText: string;
   lastProgressText: string;
+  activeToolName: string;
+  progressStep: number;
   state: string;
   toolNames: string[];
+  userRequestText: string;
 }
 
 interface SlackAuthTestResponse {
@@ -117,7 +120,9 @@ interface SlackSayResult {
 interface SlackRequestParams {
   channel: string;
   contextId: string;
-  say: (message: { text: string; thread_ts?: string }) => Promise<SlackSayResult>;
+  say: (
+    message: { text: string; thread_ts?: string },
+  ) => Promise<SlackSayResult>;
   text: string;
   threadTs?: string;
   userId: string;
@@ -139,6 +144,67 @@ function normalizeSlackText(text: string): string {
 
 function unique(values: string[]): string[] {
   return [...new Set(values)];
+}
+
+function normalizeToolName(name: string): string {
+  return name.replace(/.*__NS__/, "");
+}
+
+function titleCaseWords(value: string): string {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function humanizeToolName(name: string): string {
+  const normalized = normalizeToolName(name);
+  const knownLabels: Record<string, string> = {
+    "executive-assistant": "Executive Assistant",
+    executive_assistant: "Executive Assistant",
+    "software-developer": "Software Development",
+    software_developer: "Software Development",
+  };
+
+  return knownLabels[normalized] ??
+    titleCaseWords(normalized.replace(/[-_]+/g, " ").trim());
+}
+
+function getWorkingEmoji(step: number): string {
+  const frames = ["🛠️", "⚙️", "💻", "🔧"];
+  return frames[step % frames.length] ?? "⏳";
+}
+
+function normalizeComparableText(text: string): string {
+  return text.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function shouldIncludeProgressDetail(
+  detail: string,
+  userRequestText: string,
+): boolean {
+  if (!detail) return false;
+  return normalizeComparableText(detail) !==
+    normalizeComparableText(userRequestText);
+}
+
+function buildAgentWorkingHeadline(snapshot: AgentStreamSnapshot): string {
+  const label = humanizeToolName(snapshot.activeToolName);
+  const emoji = getWorkingEmoji(snapshot.progressStep);
+  const noun = /\bagent$/i.test(label) ? label : `${label} agent`;
+  return `${emoji} The ${noun} is working...`;
+}
+
+function buildStateHeadline(snapshot: AgentStreamSnapshot): string {
+  switch (snapshot.state) {
+    case "submitted":
+      return "📨 Handing this off to the Executive Assistant...";
+    case "failed":
+      return "⚠️ The agent hit a problem...";
+    default:
+      return "🧭 The Executive Assistant is coordinating this request...";
+  }
 }
 
 function debugLog(message: string, details?: Record<string, unknown>): void {
@@ -226,22 +292,18 @@ function extractToolNames(parts: A2APart[] | undefined): string[] {
 }
 
 function buildProgressMessage(snapshot: AgentStreamSnapshot): string {
-  const lines: string[] = [];
-  const stateLabel = snapshot.state || "working";
+  const lines = [
+    snapshot.activeToolName
+      ? buildAgentWorkingHeadline(snapshot)
+      : buildStateHeadline(snapshot),
+  ];
 
-  if (snapshot.toolNames.length > 0) {
-    lines.push(
-      `Working via ${
-        snapshot.toolNames.map((name) => `\`${name}\``).join(", ")
-      }.`,
-    );
-  } else if (stateLabel === "submitted") {
-    lines.push("Submitted to the executive assistant.");
-  } else {
-    lines.push(`State: ${stateLabel}.`);
-  }
-
-  if (snapshot.lastAssistantText) {
+  if (
+    shouldIncludeProgressDetail(
+      snapshot.lastAssistantText,
+      snapshot.userRequestText,
+    )
+  ) {
     lines.push(snapshot.lastAssistantText);
   }
 
@@ -379,7 +441,8 @@ async function isTrackedSlackThread(
       limit: 100,
       ts: threadTs,
     });
-    const messages = (response.messages ?? []) as SlackConversationReplyMessage[];
+    const messages =
+      (response.messages ?? []) as SlackConversationReplyMessage[];
     return messages.some((message) =>
       message.ts !== currentMessageTs && message.user === slackBotUserId
     );
@@ -397,7 +460,7 @@ async function handleSlackRequest(
   { channel, contextId, say, text, threadTs, userId }: SlackRequestParams,
 ): Promise<string> {
   const progress = await say({
-    text: "Submitted to the executive assistant.",
+    text: "📨 Handing this off to the Executive Assistant...",
     thread_ts: threadTs,
   });
   const reply = await sendToAgent({
@@ -483,11 +546,14 @@ async function sendToAgent(
   }
 
   const snapshot: AgentStreamSnapshot = {
+    activeToolName: "",
     finalReply: "",
     lastAssistantText: "",
     lastProgressText: "",
+    progressStep: 0,
     state: "submitted",
     toolNames: [],
+    userRequestText: text,
   };
 
   for await (const event of parseSSEStream(response.body)) {
@@ -508,6 +574,7 @@ async function sendToAgent(
     });
 
     if (isStatusUpdateEvent(event)) {
+      snapshot.progressStep += 1;
       snapshot.state = event.status?.state ?? snapshot.state;
 
       const statusText = extractTextFromParts(event.status?.message?.parts);
@@ -515,22 +582,25 @@ async function sendToAgent(
         snapshot.lastAssistantText = statusText;
       }
 
-      snapshot.toolNames = unique([
-        ...snapshot.toolNames,
-        ...extractToolNames(event.status?.message?.parts),
-      ]);
+      const toolNames = extractToolNames(event.status?.message?.parts);
+      if (toolNames.length > 0) {
+        snapshot.activeToolName = toolNames[toolNames.length - 1] ?? "";
+      }
+      snapshot.toolNames = unique([...snapshot.toolNames, ...toolNames]);
     }
 
     if (isArtifactUpdateEvent(event)) {
+      snapshot.progressStep += 1;
       const artifactText = extractTextFromParts(event.artifact?.parts);
       if (artifactText) {
         snapshot.finalReply = artifactText;
       }
 
-      snapshot.toolNames = unique([
-        ...snapshot.toolNames,
-        ...extractToolNames(event.artifact?.parts),
-      ]);
+      const toolNames = extractToolNames(event.artifact?.parts);
+      if (toolNames.length > 0) {
+        snapshot.activeToolName = toolNames[toolNames.length - 1] ?? "";
+      }
+      snapshot.toolNames = unique([...snapshot.toolNames, ...toolNames]);
     }
 
     const progressMessage = buildProgressMessage(snapshot);
@@ -647,11 +717,14 @@ app.event(
     const rawText = "text" in event ? (event.text ?? "") : "";
 
     if (!isDirectMessage && mentionsSlackBot(rawText)) {
-      debugLog("Ignored threaded Slack message because app mention handler will process it", {
-        channel: event.channel,
-        threadTs: threadTs ?? null,
-        ts: event.ts,
-      });
+      debugLog(
+        "Ignored threaded Slack message because app mention handler will process it",
+        {
+          channel: event.channel,
+          threadTs: threadTs ?? null,
+          ts: event.ts,
+        },
+      );
       return;
     }
 
@@ -682,15 +755,21 @@ app.event(
 
     const text = normalizeSlackText(rawText);
     const userId = buildSlackUserId("user" in event ? event.user : undefined);
-    const contextId = buildContextId(event.channel, isDirectMessage ? undefined : threadTs);
-    debugLog(isDirectMessage ? "Received Slack DM" : "Received Slack thread reply", {
-      channel: event.channel,
-      contextId,
-      threadTs: threadTs ?? null,
-      ts: event.ts,
-      user: "user" in event ? event.user : null,
-      text: truncate(text),
-    });
+    const contextId = buildContextId(
+      event.channel,
+      isDirectMessage ? undefined : threadTs,
+    );
+    debugLog(
+      isDirectMessage ? "Received Slack DM" : "Received Slack thread reply",
+      {
+        channel: event.channel,
+        contextId,
+        threadTs: threadTs ?? null,
+        ts: event.ts,
+        user: "user" in event ? event.user : null,
+        text: truncate(text),
+      },
+    );
 
     if (!text) {
       debugLog("Ignored empty Slack message", {
@@ -710,12 +789,17 @@ app.event(
       userId,
     });
 
-    debugLog(isDirectMessage ? "Sent Slack reply for DM" : "Sent Slack reply for thread", {
-      channel: event.channel,
-      contextId,
-      threadTs: threadTs ?? null,
-      reply: truncate(reply),
-    });
+    debugLog(
+      isDirectMessage
+        ? "Sent Slack reply for DM"
+        : "Sent Slack reply for thread",
+      {
+        channel: event.channel,
+        contextId,
+        threadTs: threadTs ?? null,
+        reply: truncate(reply),
+      },
+    );
   },
 );
 
