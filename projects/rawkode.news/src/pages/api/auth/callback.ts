@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import {
   createSession,
   exchangeCodeForTokens,
@@ -48,8 +49,7 @@ export const GET: APIRoute = async (context) => {
 
   const sessionId = crypto.randomUUID();
   const session = createSession(userInfo);
-
-  await context.locals.runtime.env.SESSION.put(
+  await env.SESSION.put(
     `session:${sessionId}`,
     JSON.stringify(session),
     { expirationTtl: SESSION_DURATION_SECONDS },

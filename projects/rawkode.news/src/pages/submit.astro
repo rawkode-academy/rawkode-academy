@@ -18,9 +18,8 @@ import {
 import { getSessionWithPermissions } from "@/lib/server/session";
 import { listTags } from "@/lib/server/tags";
 import { MAX_OPTIONAL_TAGS } from "@/lib/tags";
-import type { TypedEnv } from "@/types/service-bindings";
+import { env } from "cloudflare:workers";
 
-const env = Astro.locals.runtime.env as TypedEnv;
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
 const createPostResult = Astro.getActionResult(actions.createPost);
 if (createPostResult?.data?.redirectTo) {

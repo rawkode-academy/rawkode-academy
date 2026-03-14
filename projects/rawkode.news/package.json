@@ -2,33 +2,40 @@
   "name": "rawkode-news",
   "type": "module",
   "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "types:cf": "wrangler types worker-configuration.d.ts --env-interface Env",
     "qa:headless": "node scripts/qa/headless-qa.mjs"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^12.6.12",
-    "@astrojs/rss": "^4.0.15",
-    "@astrojs/svelte": "^7.2.5",
+    "@astrojs/cloudflare": "^13.1.1",
+    "@astrojs/rss": "^4.0.17",
+    "@astrojs/svelte": "^8.0.0",
     "@paralleldrive/cuid2": "^3.3.0",
     "@tailwindcss/vite": "^4.2.1",
-    "astro": "^5.18.0",
+    "astro": "^6.0.4",
     "drizzle-orm": "^0.45.1",
     "fuse.js": "^7.1.0",
-    "marked": "^17.0.3",
-    "svelte": "^5.53.6",
+    "marked": "^17.0.4",
+    "sharp": "^0.34.5",
+    "svelte": "^5.53.12",
     "tailwindcss": "^4.2.1",
-    "tldts": "^7.0.23"
+    "tldts": "^7.0.25"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.6",
-    "@cloudflare/workers-types": "^4.20260304.0",
-    "axe-core": "^4.11.0",
+    "@astrojs/check": "^0.9.7",
+    "@cloudflare/workers-types": "^4.20260313.1",
+    "axe-core": "^4.11.1",
     "drizzle-kit": "^0.31.9",
-    "playwright": "^1.56.1",
-    "typescript": "^5.9.3"
+    "playwright": "^1.58.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "wrangler": "^4.73.0"
   }
 }
