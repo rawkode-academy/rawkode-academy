@@ -53,6 +53,7 @@ tasks: {
 			"package.json",
 			"public/**",
 			"src/**",
+			"wrangler.jsonc",
 		]
 	}
 
@@ -65,23 +66,24 @@ tasks: {
 			"package.json",
 			"public/**",
 			"src/**",
+			"wrangler.jsonc",
 		]
 		outputs: [
 			"dist/**",
 		]
 	}
 
-		deploy: {
-			type: "group"
-			main: {
-				command: "bun"
-				args: ["x", "wrangler", "deploy"]
-				dependsOn: [_t.build]
-			}
-			preview: {
-				command: "bun"
-				args: ["x", "wrangler", "versions", "upload"]
-				dependsOn: [_t.build]
-			}
+	deploy: {
+		type: "group"
+		main: {
+			command: "bun"
+			args: ["x", "wrangler", "deploy"]
+			dependsOn: [_t.build]
+		}
+		preview: {
+			command: "bun"
+			args: ["x", "wrangler", "versions", "upload"]
+			dependsOn: [_t.build]
 		}
 	}
+}
