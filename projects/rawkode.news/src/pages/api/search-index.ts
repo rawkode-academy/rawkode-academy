@@ -1,9 +1,8 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import { searchPosts } from "@/lib/server/posts";
-import type { TypedEnv } from "@/types/service-bindings";
 
-export const GET: APIRoute = async ({ request, locals }) => {
-  const env = locals.runtime.env as TypedEnv;
+export const GET: APIRoute = async ({ request }) => {
   const requestUrl = new URL(request.url);
   const query = requestUrl.searchParams.get("q") ?? "";
   const limitParam = Number(requestUrl.searchParams.get("limit") ?? "40");

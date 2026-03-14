@@ -1,11 +1,12 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import { SESSION_COOKIE_NAME } from "@/lib/auth";
 
 export const GET: APIRoute = async (context) => {
   const sessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value;
 
   if (sessionId) {
-    await context.locals.runtime.env.SESSION.delete(`session:${sessionId}`);
+    await env.SESSION.delete(`session:${sessionId}`);
   }
 
   context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });

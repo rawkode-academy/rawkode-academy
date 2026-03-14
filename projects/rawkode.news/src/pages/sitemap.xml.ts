@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import { desc } from "drizzle-orm";
 import { getDb } from "@/db";
 import { posts } from "@/db/schema";
-import type { TypedEnv } from "@/types/service-bindings";
 
 const escapeXml = (value: string) =>
   value
@@ -17,8 +17,8 @@ const formatLastMod = (value: Date | number) => {
   return date.toISOString();
 };
 
-export const GET: APIRoute = async ({ locals, site, url }) => {
-  const db = getDb(locals.runtime.env as TypedEnv);
+export const GET: APIRoute = async ({ site, url }) => {
+  const db = getDb(env);
   const baseUrl = site ?? new URL(url.origin);
 
   const entries = await db

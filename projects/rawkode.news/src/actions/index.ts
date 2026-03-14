@@ -1,5 +1,6 @@
 import { type ActionAPIContext, ActionError, defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { env } from "cloudflare:workers";
 import { commentAnchor, postPath } from "@/lib/contracts";
 import { parseEntityId } from "@/lib/ids";
 import {
@@ -20,7 +21,6 @@ import {
   updateOptionalTag,
 } from "@/lib/server/tags";
 import { MAX_OPTIONAL_TAGS, normalizeTagSlugs } from "@/lib/tags";
-import type { TypedEnv } from "@/types/service-bindings";
 
 const raiseActionError = (error: unknown): never => {
   const requestError = asRequestError(error);
@@ -31,7 +31,6 @@ const raiseActionError = (error: unknown): never => {
 };
 
 const requireSession = async (context: ActionAPIContext) => {
-  const env = context.locals.runtime.env as TypedEnv;
   const { session, permissions } = await getSessionWithPermissions(env, context.cookies);
   if (!session || !permissions) {
     throw new RequestError("Sign in required", 401);

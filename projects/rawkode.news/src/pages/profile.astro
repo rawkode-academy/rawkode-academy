@@ -6,9 +6,8 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { buttonPrimarySmClass, buttonSecondarySmClass } from "@/lib/ui-classes";
 import { listPosts, parsePageValue } from "@/lib/server/posts";
 import { getSessionWithPermissions } from "@/lib/server/session";
-import type { TypedEnv } from "@/types/service-bindings";
+import { env } from "cloudflare:workers";
 
-const env = Astro.locals.runtime.env as TypedEnv;
 const page = parsePageValue(Astro.url.searchParams.get("page")) ?? 1;
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
 const user = session?.user ?? null;

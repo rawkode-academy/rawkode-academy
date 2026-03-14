@@ -23,31 +23,29 @@ export default defineConfig({
         "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
     },
-    plugins: [tailwindcss()],
+    plugins: tailwindcss(),
   },
-  experimental: {
-    fonts: [
-      {
-        provider: fontProviders.google(),
-        name: "Sora",
-        cssVariable: "--font-sora",
-        weights: ["500", "600", "700"],
-        styles: ["normal"],
-      },
-      {
-        provider: fontProviders.google(),
-        name: "IBM Plex Sans",
-        cssVariable: "--font-ibm-plex-sans",
-        weights: ["400", "500", "600"],
-        styles: ["normal"],
-      },
-      {
-        provider: fontProviders.fontsource(),
-        name: "Monaspace Neon",
-        cssVariable: "--font-monaspace-neon",
-        weights: ["400"],
-        styles: ["normal"],
-      },
-    ],
-  },
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: "Sora",
+      cssVariable: "--font-sora",
+      weights: ["500", "600", "700"],
+      styles: ["normal"],
+    },
+    {
+      provider: fontProviders.google(),
+      name: "IBM Plex Sans",
+      cssVariable: "--font-ibm-plex-sans",
+      weights: ["400", "500", "600"],
+      styles: ["normal"],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: "Monaspace Neon",
+      cssVariable: "--font-monaspace-neon",
+      weights: ["400"],
+      styles: ["normal"],
+    },
+  ],
 });

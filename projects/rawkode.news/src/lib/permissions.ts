@@ -1,9 +1,8 @@
 import { eq } from "drizzle-orm";
 import type { MandatoryTagSlug } from "@/lib/contracts";
 import { mandatoryTagSlugs } from "@/lib/contracts";
-import { getDb } from "@/db";
+import { getDb, type DatabaseEnv } from "@/db";
 import { roles } from "@/db/schema";
-import type { TypedEnv } from "@/types/service-bindings";
 
 const ADMIN_ROLE = "admin";
 
@@ -14,7 +13,7 @@ export type Permissions = {
 };
 
 export const getPermissions = async (
-  env: TypedEnv,
+  env: DatabaseEnv,
   userId: string,
 ): Promise<Permissions> => {
   const db = getDb(env);

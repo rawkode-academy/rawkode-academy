@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
-import { getDb } from "@/db";
+import { getDb, type DatabaseEnv } from "@/db";
 import { comments, postTags, posts, tags } from "@/db/schema";
 import type { ApiComment, ApiPost, ApiTag, FeedType, Paginated } from "@/lib/contracts";
 import { createEntityId } from "@/lib/ids";
@@ -20,7 +20,6 @@ import {
   normalizeTagSlugs,
   parseTagSlugs,
 } from "@/lib/tags";
-import type { TypedEnv } from "@/types/service-bindings";
 
 const CORE_TAG_RANK = new Map<string, number>(
   coreTagSlugs.map((slug, index) => [slug, index]),
@@ -83,7 +82,7 @@ const sortApiTags = (items: ApiTag[]) => {
   });
 };
 
-const loadTagsByPostIds = async (env: TypedEnv, postIds: string[]) => {
+const loadTagsByPostIds = async (env: DatabaseEnv, postIds: string[]) => {
   const uniquePostIds = Array.from(new Set(postIds));
   if (uniquePostIds.length === 0) {
     return new Map<string, ApiTag[]>();
@@ -130,7 +129,7 @@ const loadTagsByPostIds = async (env: TypedEnv, postIds: string[]) => {
 };
 
 const serializePosts = async (
-  env: TypedEnv,
+  env: DatabaseEnv,
   rows: (typeof posts.$inferSelect)[],
 ): Promise<ApiPost[]> => {
   const tagMap = await loadTagsByPostIds(
@@ -170,7 +169,7 @@ type ListPostsOptions = {
 };
 
 const resolveFilterTags = async (
-  env: TypedEnv,
+  env: DatabaseEnv,
   feed: FeedType | undefined,
   requestedTagSlugs: string[],
 ) => {
@@ -198,15 +197,15 @@ const resolveFilterTags = async (
 };
 
 export function listPosts(
-  env: TypedEnv,
+  env: DatabaseEnv,
   options: ListPostsOptions & { paginate: false },
 ): Promise<ApiPost[]>;
 export function listPosts(
-  env: TypedEnv,
+  env: DatabaseEnv,
   options?: ListPostsOptions & { paginate?: true },
 ): Promise<Paginated<ApiPost>>;
 export async function listPosts(
-  env: TypedEnv,
+  env: DatabaseEnv,
   {
     feed,
     mineAuthor,
@@ -285,7 +284,7 @@ export async function listPosts(
   return payload;
 }
 
-export const getPostById = async (env: TypedEnv, id: string) => {
+export const getPostById = async (env: DatabaseEnv, id: string) => {
   const db = getDb(env);
   const [post] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
 
@@ -297,7 +296,7 @@ export const getPostById = async (env: TypedEnv, id: string) => {
   return serialized ?? null;
 };
 
-export const listCommentsByPostId = async (env: TypedEnv, postId: string) => {
+export const listCommentsByPostId = async (env: DatabaseEnv, postId: string) => {
   const db = getDb(env);
   const rows = await db
     .select()
@@ -315,7 +314,7 @@ export const listCommentsByPostId = async (env: TypedEnv, postId: string) => {
 };
 
 export const createPost = async (
-  env: TypedEnv,
+  env: DatabaseEnv,
   input: {
     userId: string;
     author: string;
@@ -426,7 +425,7 @@ export const createPost = async (
 };
 
 export const createComment = async (
-  env: TypedEnv,
+  env: DatabaseEnv,
   input: {
     postId: string;
     author: string;
@@ -505,7 +504,7 @@ export const parseTagSearchParam = (value: string | null) =>
   parseTagSlugs(value);
 
 export const searchPosts = async (
-  env: TypedEnv,
+  env: DatabaseEnv,
   query: string,
   limit = SEARCH_RESULTS_LIMIT_MAX,
 ) => {

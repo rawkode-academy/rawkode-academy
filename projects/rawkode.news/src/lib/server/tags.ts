@@ -1,5 +1,5 @@
 import { asc, desc, eq, inArray, sql } from "drizzle-orm";
-import { getDb } from "@/db";
+import { getDb, type DatabaseEnv } from "@/db";
 import { postTags, tags } from "@/db/schema";
 import type { ApiTag } from "@/lib/contracts";
 import { createEntityId } from "@/lib/ids";
@@ -16,7 +16,6 @@ import {
   isValidTagSlug,
   type TagKind,
 } from "@/lib/tags";
-import type { TypedEnv } from "@/types/service-bindings";
 
 const coreTagRank = new Map<string, number>(
   coreTagSlugs.map((slug, index) => [slug, index]),
@@ -52,7 +51,7 @@ export const sortTags = (items: ApiTag[]) =>
     return left.slug.localeCompare(right.slug);
   });
 
-export const listTags = async (env: TypedEnv, kind?: TagKind) => {
+export const listTags = async (env: DatabaseEnv, kind?: TagKind) => {
   const db = getDb(env);
   const whereExpr = kind ? eq(tags.kind, kind) : undefined;
 
@@ -74,7 +73,7 @@ export const listTags = async (env: TypedEnv, kind?: TagKind) => {
   return sortTags(rows.map(normalizeTag));
 };
 
-export const getTagsBySlugs = async (env: TypedEnv, slugs: string[]) => {
+export const getTagsBySlugs = async (env: DatabaseEnv, slugs: string[]) => {
   const normalized = Array.from(
     new Set(slugs.map((slug) => slug.trim().toLowerCase()).filter(Boolean)),
   );
@@ -97,7 +96,7 @@ export const getTagsBySlugs = async (env: TypedEnv, slugs: string[]) => {
   return sortTags(rows.map((row) => ({ ...row })));
 };
 
-export const getTagBySlug = async (env: TypedEnv, slug: string) => {
+export const getTagBySlug = async (env: DatabaseEnv, slug: string) => {
   const db = getDb(env);
   const normalizedSlug = slug.trim().toLowerCase();
   const [row] = await db
@@ -125,7 +124,7 @@ export const getTagBySlug = async (env: TypedEnv, slug: string) => {
 };
 
 export const createOptionalTag = async (
-  env: TypedEnv,
+  env: DatabaseEnv,
   input: { name: string; description?: string | null; slug?: string | null },
 ) => {
   const name = input.name.trim();
@@ -202,7 +201,7 @@ export const createOptionalTag = async (
 };
 
 export const updateOptionalTag = async (
-  env: TypedEnv,
+  env: DatabaseEnv,
   existingSlug: string,
   input: { name?: string | null; description?: string | null; slug?: string | null },
 ) => {
@@ -288,7 +287,7 @@ export const updateOptionalTag = async (
   return updated;
 };
 
-export const deleteOptionalTag = async (env: TypedEnv, slug: string) => {
+export const deleteOptionalTag = async (env: DatabaseEnv, slug: string) => {
   const db = getDb(env);
   const normalizedSlug = slug.trim().toLowerCase();
   const [target] = await db
