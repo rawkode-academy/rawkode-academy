@@ -158,17 +158,6 @@ def _extract_gzip_tar_bytes(compressed_archive: bytes, destination: Path) -> Non
         _extract_archive(archive, destination)
 
 
-def _create_source_layer(app_dir: Path) -> Path:
-    with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as temporary_archive:
-        archive_path = Path(temporary_archive.name)
-
-    with tarfile.open(archive_path, "w:") as archive:
-        for path in sorted(app_dir.rglob("*")):
-            archive.add(path, arcname=path.relative_to(app_dir), recursive=False)
-
-    return archive_path
-
-
 def _prepare_app_dir(app_name: str) -> Path:
     app_dir = _app_path(app_name)
     if app_dir.exists():
@@ -251,39 +240,6 @@ def _restore_legacy_source_secret(app_name: str, destination: Path) -> None:
         raise RuntimeError("Legacy source secret is missing src.tar.gz")
 
     _extract_gzip_tar_bytes(base64.b64decode(encoded_archive), destination)
-
-
-def _publish_source_image(app_name: str, app_dir: Path) -> tuple[str, str]:
-    source_image_ref = _source_image_ref(app_name)
-    archive_path = _create_source_layer(app_dir)
-
-    try:
-        output = _run(
-            [
-                "crane",
-                "append",
-                "--insecure",
-                "--oci-empty-base",
-                "--new_layer",
-                str(archive_path),
-                "--new_tag",
-                source_image_ref,
-            ],
-            timeout=300,
-        )
-        if output.startswith("Command failed"):
-            raise RuntimeError(output)
-
-        digest_output = _run(
-            ["crane", "digest", "--insecure", source_image_ref],
-            timeout=60,
-        )
-        if digest_output.startswith("Command failed"):
-            raise RuntimeError(digest_output)
-    finally:
-        archive_path.unlink(missing_ok=True)
-
-    return source_image_ref, digest_output.strip()
 
 
 def list_apps() -> str:
@@ -506,160 +462,6 @@ def push_image(tool_context: ToolContext) -> str:
     return f"Image pushed to {image_ref}"
 
 
-def deploy_app(port: int, tool_context: ToolContext) -> str:
-    """Persist app source to OCI and deploy the app into Kubernetes."""
-    try:
-        app_name, app_dir = _require_current_app(tool_context)
-    except ValueError as error:
-        return f"Error: {error}"
-
-    try:
-        source_image_ref, source_digest = _publish_source_image(app_name, app_dir)
-    except RuntimeError as error:
-        return f"Deploy failed while publishing source image:\n{error}"
-
-    manifest = textwrap.dedent(
-        f"""\
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: {app_name}
-          namespace: {DEPLOY_NAMESPACE}
-          labels:
-            app: {app_name}
-          annotations:
-            {SOURCE_IMAGE_ANNOTATION}: "{source_image_ref}"
-            {SOURCE_STORAGE_ANNOTATION}: "oci"
-            {SOURCE_DIGEST_ANNOTATION}: "{source_digest}"
-        spec:
-          replicas: 1
-          selector:
-            matchLabels:
-              app: {app_name}
-          template:
-            metadata:
-              labels:
-                app: {app_name}
-              annotations:
-                {SOURCE_IMAGE_ANNOTATION}: "{source_image_ref}"
-                {SOURCE_STORAGE_ANNOTATION}: "oci"
-                {SOURCE_DIGEST_ANNOTATION}: "{source_digest}"
-            spec:
-              securityContext:
-                fsGroup: 1001
-                runAsGroup: 1001
-                runAsNonRoot: true
-                runAsUser: 1001
-                seccompProfile:
-                  type: RuntimeDefault
-              initContainers:
-                - name: pull-source
-                  image: {DEPLOY_RUNTIME_IMAGE}
-                  env:
-                    - name: SOURCE_IMAGE
-                      value: "{source_image_ref}"
-                  command:
-                    - sh
-                    - -lc
-                    - mkdir -p /app && crane export --insecure "$SOURCE_IMAGE" - | tar -xf - -C /app
-                  securityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                      drop:
-                        - ALL
-                    runAsGroup: 1001
-                    runAsNonRoot: true
-                    runAsUser: 1001
-                    seccompProfile:
-                      type: RuntimeDefault
-                  volumeMounts:
-                    - name: app
-                      mountPath: /app
-              containers:
-                - name: {app_name}
-                  image: {DEPLOY_RUNTIME_IMAGE}
-                  command:
-                    - deno
-                    - run
-                    - --allow-net
-                    - --allow-env
-                    - --allow-read
-                    - /app/src/main.ts
-                  ports:
-                    - containerPort: {port}
-                  securityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                      drop:
-                        - ALL
-                    runAsGroup: 1001
-                    runAsNonRoot: true
-                    runAsUser: 1001
-                    seccompProfile:
-                      type: RuntimeDefault
-                  volumeMounts:
-                    - name: app
-                      mountPath: /app
-              volumes:
-                - name: app
-                  emptyDir: {{}}
-        ---
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: {app_name}
-          namespace: {DEPLOY_NAMESPACE}
-          annotations:
-            netbird.io/expose: "true"
-        spec:
-          type: ClusterIP
-          selector:
-            app: {app_name}
-          ports:
-            - port: 80
-              targetPort: {port}
-        """
-    )
-
-    apply_output = _run(
-        ["kubectl", "apply", "-f", "-"],
-        input_text=manifest,
-        timeout=120,
-    )
-    if apply_output.startswith("Command failed"):
-        return f"Deploy failed:\n{apply_output}"
-
-    delete_secret_output = _run(
-        [
-            "kubectl",
-            "delete",
-            "secret",
-            _legacy_source_secret_name(app_name),
-            "-n",
-            DEPLOY_NAMESPACE,
-            "--ignore-not-found",
-        ],
-        timeout=60,
-    )
-    if delete_secret_output.startswith("Command failed"):
-        return (
-            f"Deployed {app_name}, but failed to clean up the legacy source secret:\n"
-            f"{delete_secret_output}"
-        )
-
-    image_ref = tool_context.state.get("image_ref")
-    _set_current_app(tool_context, app_name, app_dir)
-
-    message = (
-        f"Persisted source for {app_name} to {source_image_ref} "
-        f"({source_digest}) and deployed it to namespace {DEPLOY_NAMESPACE} "
-        f"using runtime image {DEPLOY_RUNTIME_IMAGE}. Service exposed via NetBird."
-    )
-    if image_ref:
-        message += f" Built OCI image remains available at {image_ref}."
-    return message
-
-
 root_agent = Agent(
     model=OpenAI(
         model=OPENAI_MODEL,
@@ -669,10 +471,10 @@ root_agent = Agent(
     name="software_developer",
     description=(
         "Stateless software developer that restores deployed apps from OCI source "
-        "images, then builds, fixes, debugs, and deploys them using bash, Nix, and kubectl."
+        "images, then builds, fixes, debugs, and deploys them using bash, Nix, kubectl, and OCI tooling."
     ),
     instruction=textwrap.dedent(
-        """\
+        f"""\
         You are a pragmatic software developer agent for Rawkode Academy.
 
         Environment:
@@ -680,6 +482,7 @@ root_agent = Agent(
           debugging, git, nix, kubectl, curl, and general software engineering work.
         - Nix is installed.
         - kubectl is installed and configured for the current cluster.
+        - OCI tooling including crane and skopeo is installed.
         - Your workspace root is /workspace, and it is ephemeral.
         - Durable source for deployed apps lives in the internal registry as OCI source images.
         - Deployed app source is restored into /workspace on demand when you call select_app.
@@ -700,20 +503,35 @@ root_agent = Agent(
         3. Inspect with list_files, read_file, and bash.
         4. Update files in place with write_file or use bash for broader edits.
         5. Validate with bash.
-        6. Call deploy_app when the user wants rollout or when your changes should become durable.
+        6. Use bash to publish durable source artifacts and apply Kubernetes manifests when the user wants rollout or when your changes should become durable.
 
         Preferred workflow for new software:
         1. Call generate_app to create the ephemeral draft scaffold.
         2. Create or refine files with write_file and bash.
         3. Validate with bash.
-        4. Call deploy_app when the app should become durable and live.
+        4. Use bash to make the app durable and live.
         5. Call build_image and push_image only when the user explicitly wants a standalone app image artifact.
+
+        Deployment requirements when using bash:
+        - Persist app source into {SOURCE_IMAGE_PREFIX}/<app>:latest and capture its digest before applying a Deployment.
+        - Keep source provenance on the Deployment metadata and pod template metadata with:
+          - {SOURCE_IMAGE_ANNOTATION}
+          - {SOURCE_STORAGE_ANNOTATION}=oci
+          - {SOURCE_DIGEST_ANNOTATION}
+        - Keep deployed workloads simple: Deployment and Service resources only unless the user explicitly asks otherwise.
+        - For internal NetBird exposure, the Service must include:
+          - netbird.io/expose: "true"
+          - netbird.io/policy: "local-access"
+          - netbird.io/policy-source-groups: "All"
+          - netbird.io/policy-name: "local-access:Local access from NetBird All group"
+        - netbird.io/expose: "true" alone only creates an NBResource. Without the policy annotations above, NetBird will not create an NBPolicy, and clients will not be able to resolve or reach <app>.apps.svc.cluster.local over NetBird.
+        - Cluster prerequisites for *.svc.cluster.local access are managed outside per-app manifests: the NetBird routing peers need DNS for svc.cluster.local and cluster.local, and the netbird namespace must allow the router pods to run with privileged Pod Security labels.
 
         Important rules:
         - Do not default to generating a new app when the request is about fixing or changing an existing one.
         - Ask a concise follow-up question only when the target app or desired outcome is genuinely ambiguous.
         - Prefer concrete execution and verification over high-level plans.
-        - Keep deployed workloads simple: Deployment and Service resources only unless the user explicitly asks otherwise.
+        - Use bash for deployment work instead of relying on a dedicated deploy tool.
         """
     ),
     tools=[
@@ -726,6 +544,5 @@ root_agent = Agent(
         write_file,
         build_image,
         push_image,
-        deploy_app,
     ],
 )
