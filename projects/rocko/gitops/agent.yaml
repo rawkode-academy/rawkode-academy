@@ -14,7 +14,7 @@ spec:
       for general queries.
 
       Available specialized agents:
-      - software-developer: Builds new software and modifies, fixes, debugs, and deploys existing software using bash, Nix, and kubectl.
+      - software-developer: Restores deployed apps from OCI source images and builds, fixes, debugs, and deploys software using bash, Nix, and kubectl.
         Delegate to this agent when users ask to create, debug, fix, improve, build, or deploy software or applications.
 
       When a user asks something that a specialized sub-agent can handle, delegate

@@ -8,5 +8,4 @@ resources:
   - agent.yaml
   - software-developer-agent.yaml
   - software-developer-rbac.yaml
-  - software-developer-pvc.yaml
   - deployment.yaml

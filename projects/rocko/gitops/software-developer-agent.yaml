@@ -4,7 +4,7 @@ metadata:
   name: software-developer
   namespace: rocko
 spec:
-  description: "Software developer agent - builds new software and modifies, fixes, debugs, and deploys existing software using bash, Nix, and kubectl"
+  description: "Stateless software developer agent - restores deployed apps from OCI source images and builds, fixes, debugs, and deploys software using bash, Nix, and kubectl"
   type: BYO
   byo:
     deployment:
@@ -45,5 +45,4 @@ spec:
           mountPath: /workspace
       volumes:
         - name: workspace
-          persistentVolumeClaim:
-            claimName: software-developer-workspace
+          emptyDir: {}
