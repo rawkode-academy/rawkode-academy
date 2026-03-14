@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import { eq } from "drizzle-orm";
 
-import { getDb, type Env } from "../../../db";
+import { getDb } from "../../../db";
 import { postTags, posts, tags } from "../../../db/schema";
 import { acceptsArticleHtml } from "@/lib/content-negotiation";
 import { parseEntityId } from "@/lib/ids";
@@ -125,8 +126,7 @@ const toArticleHtmlDocument = (post: {
   return lines.join("\n");
 };
 
-export const GET: APIRoute = async ({ params, locals, request }) => {
-  const env = locals.runtime.env as Env;
+export const GET: APIRoute = async ({ params, request }) => {
   const db = getDb(env);
   const id = parseEntityId(params.id);
 

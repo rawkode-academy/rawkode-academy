@@ -9,9 +9,7 @@ import { buildCanonicalPath, getPostMeta, postUnavailableCopy } from "@/lib/seo"
 import { buttonPrimarySmClass, inlineBackLinkSmClass, inlinePrimaryLinkClass } from "@/lib/ui-classes";
 import { getPostById, listCommentsByPostId } from "@/lib/server/posts";
 import { getSessionWithPermissions } from "@/lib/server/session";
-import type { TypedEnv } from "@/types/service-bindings";
-
-const env = Astro.locals.runtime.env as TypedEnv;
+import { env } from "cloudflare:workers";
 
 const postId = parseEntityId(Astro.params.id);
 if (!postId) {

@@ -1,9 +1,8 @@
 import type { AstroCookies } from "astro";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
 import { getPermissions, type Permissions } from "@/lib/permissions";
-import type { TypedEnv } from "@/types/service-bindings";
 
-export const getSession = async (env: TypedEnv, cookies: AstroCookies) => {
+export const getSession = async (env: Pick<Env, "SESSION">, cookies: AstroCookies) => {
   const sessionId = cookies.get(SESSION_COOKIE_NAME)?.value;
   if (!sessionId) {
     return null;
@@ -28,7 +27,7 @@ export const getSession = async (env: TypedEnv, cookies: AstroCookies) => {
 };
 
 export const getSessionWithPermissions = async (
-  env: TypedEnv,
+  env: Pick<Env, "DB" | "SESSION">,
   cookies: AstroCookies,
 ): Promise<{ session: StoredSession | null; permissions: Permissions | null }> => {
   const session = await getSession(env, cookies);
