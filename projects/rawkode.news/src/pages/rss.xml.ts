@@ -1,15 +1,15 @@
 import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import { desc } from "drizzle-orm";
 import { getDb } from "@/db";
 import { posts } from "@/db/schema";
-import type { TypedEnv } from "@/types/service-bindings";
 
 const toDate = (value: Date | number) =>
   value instanceof Date ? value : new Date(value);
 
 export const GET: APIRoute = async (context) => {
-  const db = getDb(context.locals.runtime.env as TypedEnv);
+  const db = getDb(env);
   const items = await db
     .select({
       id: posts.id,

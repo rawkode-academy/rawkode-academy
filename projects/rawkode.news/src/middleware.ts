@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import { env } from "cloudflare:workers";
 import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
 import { acceptsArticleHtml } from "@/lib/content-negotiation";
 
@@ -24,7 +25,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   if (sessionId) {
     try {
-      const session = (await context.locals.runtime.env.SESSION.get(
+      const session = (await env.SESSION.get(
         `session:${sessionId}`,
         "json",
       )) as StoredSession | null;
@@ -32,7 +33,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       if (session && session.expiresAt > Date.now()) {
         context.locals.user = session.user;
       } else if (session) {
-        await context.locals.runtime.env.SESSION.delete(`session:${sessionId}`);
+        await env.SESSION.delete(`session:${sessionId}`);
         context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
       }
     } catch {

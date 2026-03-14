@@ -1,8 +1,6 @@
 /// <reference types="astro/client" />
 /// <reference types="@cloudflare/workers-types" />
 
-import type { TypedEnv } from "./types/service-bindings";
-
 export interface User {
   id: string;
   email: string;
@@ -10,7 +8,7 @@ export interface User {
   image: string | null;
 }
 
-type Runtime = import("@astrojs/cloudflare").Runtime<TypedEnv>;
+type Runtime = import("@astrojs/cloudflare").Runtime;
 
 declare global {
   interface Window {
@@ -20,9 +18,6 @@ declare global {
   namespace App {
     interface Locals extends Runtime {
       user?: User;
-      runtime: {
-        env: TypedEnv;
-      };
     }
   }
 }

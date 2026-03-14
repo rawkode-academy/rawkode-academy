@@ -6,9 +6,8 @@ import { buildCanonicalPath } from "@/lib/seo";
 import { listPosts, parsePageValue, parseTagSearchParam } from "@/lib/server/posts";
 import { getSessionWithPermissions } from "@/lib/server/session";
 import { listTags } from "@/lib/server/tags";
-import type { TypedEnv } from "@/types/service-bindings";
+import { env } from "cloudflare:workers";
 
-const env = Astro.locals.runtime.env as TypedEnv;
 const page = parsePageValue(Astro.url.searchParams.get("page")) ?? 1;
 const requestedTagSlugs = parseTagSearchParam(Astro.url.searchParams.get("tags"));
 const allTags = await listTags(env);

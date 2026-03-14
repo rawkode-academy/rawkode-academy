@@ -5,9 +5,8 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { parsePageValue } from "@/components/admin/tags/shared";
 import { getSessionWithPermissions } from "@/lib/server/session";
 import { listTags } from "@/lib/server/tags";
-import type { TypedEnv } from "@/types/service-bindings";
+import { env } from "cloudflare:workers";
 
-const env = Astro.locals.runtime.env as TypedEnv;
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
 const user = session?.user ?? null;
 const isAdmin = Boolean(permissions?.isAdmin);

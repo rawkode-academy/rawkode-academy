@@ -3,9 +3,8 @@ import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { buttonPrimarySmClass } from "@/lib/ui-classes";
 import { getSessionWithPermissions } from "@/lib/server/session";
-import type { TypedEnv } from "@/types/service-bindings";
+import { env } from "cloudflare:workers";
 
-const env = Astro.locals.runtime.env as TypedEnv;
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
 ---
 
