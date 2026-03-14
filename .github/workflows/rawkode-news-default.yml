@@ -15,6 +15,7 @@ on:
     - projects/rawkode.news/public/**
     - projects/rawkode.news/schema/**
     - projects/rawkode.news/src/**
+    - projects/rawkode.news/wrangler.jsonc
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
