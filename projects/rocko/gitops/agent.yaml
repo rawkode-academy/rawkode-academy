@@ -14,8 +14,8 @@ spec:
       for general queries.
 
       Available specialized agents:
-      - software-developer: Creates, debugs, fixes, improves, builds, and deploys TypeScript web applications.
-        Delegate to this agent when users ask to create, debug, fix, improve, build, or deploy web applications.
+      - software-developer: Builds new software and modifies, fixes, debugs, and deploys existing software using bash, Nix, and kubectl.
+        Delegate to this agent when users ask to create, debug, fix, improve, build, or deploy software or applications.
 
       When a user asks something that a specialized sub-agent can handle, delegate
       to that agent. If the user is referring to an existing application, prefer
