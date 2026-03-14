@@ -23,12 +23,38 @@ DEPLOY_RUNTIME_IMAGE = os.environ.get(
 )
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-5.4")
 
+SOURCE_IMAGE_PREFIX = f"{ZOT_REGISTRY}/source"
+SOURCE_IMAGE_ANNOTATION = "rawkode.academy/source-image"
+SOURCE_STORAGE_ANNOTATION = "rawkode.academy/source-storage"
+SOURCE_DIGEST_ANNOTATION = "rawkode.academy/source-digest"
+LEGACY_SOURCE_SECRET_SUFFIX = "-source"
 
-def _run(cmd: list[str], cwd: str | None = None) -> str:
-    result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd, timeout=300)
+
+def _run(
+    cmd: list[str],
+    cwd: str | None = None,
+    input_text: str | None = None,
+    timeout: int = 300,
+) -> str:
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        cwd=cwd,
+        input=input_text,
+        timeout=timeout,
+    )
     if result.returncode != 0:
-        return f"Command failed (exit {result.returncode}):\n{result.stderr}"
+        output = result.stderr.strip() or result.stdout.strip()
+        return f"Command failed (exit {result.returncode}):\n{output}"
     return result.stdout
+
+
+def _run_json(cmd: list[str], cwd: str | None = None, timeout: int = 300) -> dict:
+    output = _run(cmd, cwd=cwd, timeout=timeout)
+    if output.startswith("Command failed"):
+        raise RuntimeError(output)
+    return json.loads(output)
 
 
 def bash(command: str, tool_context: ToolContext, cwd: str | None = None) -> str:
@@ -60,6 +86,14 @@ def _workspace_path() -> Path:
 
 def _app_path(app_name: str) -> Path:
     return _workspace_path() / app_name
+
+
+def _source_image_ref(app_name: str) -> str:
+    return f"{SOURCE_IMAGE_PREFIX}/{app_name}:latest"
+
+
+def _legacy_source_secret_name(app_name: str) -> str:
+    return f"{app_name}{LEGACY_SOURCE_SECRET_SUFFIX}"
 
 
 def _validate_relative_path(path: str) -> Path:
@@ -101,53 +135,227 @@ def _prepare_docker_archive(image_path: str) -> tuple[str, Path | None]:
     return str(temporary_path), temporary_path
 
 
-def _build_source_archive(app_dir: str) -> str:
-    app_path = Path(app_dir)
-    archive_buffer = io.BytesIO()
+def _extract_archive(archive: tarfile.TarFile, destination: Path) -> None:
+    destination.mkdir(parents=True, exist_ok=True)
+    destination_root = destination.resolve()
 
-    with tarfile.open(fileobj=archive_buffer, mode="w:gz") as archive:
-        for path in sorted(app_path.rglob("*")):
-            archive.add(path, arcname=path.relative_to(app_path))
+    for member in archive.getmembers():
+        member_path = (destination / member.name).resolve()
+        if member_path != destination_root and destination_root not in member_path.parents:
+            raise ValueError(f"Archive contained unsafe path: {member.name}")
 
-    return base64.b64encode(archive_buffer.getvalue()).decode("ascii")
+    archive.extractall(destination)
+
+
+def _extract_tar_file(archive_path: Path, destination: Path) -> None:
+    with tarfile.open(archive_path, "r:") as archive:
+        _extract_archive(archive, destination)
+
+
+def _extract_gzip_tar_bytes(compressed_archive: bytes, destination: Path) -> None:
+    archive_bytes = gzip.decompress(compressed_archive)
+    with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:") as archive:
+        _extract_archive(archive, destination)
+
+
+def _create_source_layer(app_dir: Path) -> Path:
+    with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as temporary_archive:
+        archive_path = Path(temporary_archive.name)
+
+    with tarfile.open(archive_path, "w:") as archive:
+        for path in sorted(app_dir.rglob("*")):
+            archive.add(path, arcname=path.relative_to(app_dir), recursive=False)
+
+    return archive_path
+
+
+def _prepare_app_dir(app_name: str) -> Path:
+    app_dir = _app_path(app_name)
+    if app_dir.exists():
+        shutil.rmtree(app_dir)
+    app_dir.mkdir(parents=True, exist_ok=True)
+    return app_dir
+
+
+def _set_current_app(tool_context: ToolContext, app_name: str, app_dir: Path) -> None:
+    tool_context.state["current_app"] = app_name
+    tool_context.state["app_dir"] = str(app_dir)
+    tool_context.state["source_image_ref"] = _source_image_ref(app_name)
+    _reset_build_state(tool_context)
+
+
+def _source_image_exists(app_name: str) -> bool:
+    result = subprocess.run(
+        ["crane", "digest", "--insecure", _source_image_ref(app_name)],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    return result.returncode == 0
+
+
+def _deployment_exists(app_name: str) -> bool:
+    result = subprocess.run(
+        ["kubectl", "get", "deployment", app_name, "-n", DEPLOY_NAMESPACE],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    return result.returncode == 0
+
+
+def _get_deployment(app_name: str) -> dict | None:
+    result = subprocess.run(
+        ["kubectl", "get", "deployment", app_name, "-n", DEPLOY_NAMESPACE, "-o", "json"],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    if result.returncode != 0:
+        return None
+    return json.loads(result.stdout)
+
+
+def _restore_source_image(app_name: str, destination: Path) -> None:
+    source_image_ref = _source_image_ref(app_name)
+    with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as temporary_archive:
+        archive_path = Path(temporary_archive.name)
+
+    try:
+        output = _run(
+            ["crane", "export", "--insecure", source_image_ref, str(archive_path)],
+            timeout=300,
+        )
+        if output.startswith("Command failed"):
+            raise RuntimeError(output)
+        _extract_tar_file(archive_path, destination)
+    finally:
+        archive_path.unlink(missing_ok=True)
+
+
+def _restore_legacy_source_secret(app_name: str, destination: Path) -> None:
+    secret = _run_json(
+        [
+            "kubectl",
+            "get",
+            "secret",
+            _legacy_source_secret_name(app_name),
+            "-n",
+            DEPLOY_NAMESPACE,
+            "-o",
+            "json",
+        ]
+    )
+    encoded_archive = secret.get("data", {}).get("src.tar.gz")
+    if not encoded_archive:
+        raise RuntimeError("Legacy source secret is missing src.tar.gz")
+
+    _extract_gzip_tar_bytes(base64.b64decode(encoded_archive), destination)
+
+
+def _publish_source_image(app_name: str, app_dir: Path) -> tuple[str, str]:
+    source_image_ref = _source_image_ref(app_name)
+    archive_path = _create_source_layer(app_dir)
+
+    try:
+        output = _run(
+            [
+                "crane",
+                "append",
+                "--insecure",
+                "--oci-empty-base",
+                "--new_layer",
+                str(archive_path),
+                "--new_tag",
+                source_image_ref,
+            ],
+            timeout=300,
+        )
+        if output.startswith("Command failed"):
+            raise RuntimeError(output)
+
+        digest_output = _run(
+            ["crane", "digest", "--insecure", source_image_ref],
+            timeout=60,
+        )
+        if digest_output.startswith("Command failed"):
+            raise RuntimeError(digest_output)
+    finally:
+        archive_path.unlink(missing_ok=True)
+
+    return source_image_ref, digest_output.strip()
 
 
 def list_apps() -> str:
-    """List application directories currently available in the workspace."""
-    workspace = _workspace_path()
-    if not workspace.exists():
-        return f"Workspace directory does not exist: {workspace}"
+    """List deployed applications that can be restored into the ephemeral workspace."""
+    try:
+        deployments = _run_json(
+            ["kubectl", "get", "deployments", "-n", DEPLOY_NAMESPACE, "-o", "json"]
+        )
+        secrets = _run_json(
+            ["kubectl", "get", "secrets", "-n", DEPLOY_NAMESPACE, "-o", "json"]
+        )
+    except RuntimeError as error:
+        return f"Error: {error}"
+
+    legacy_secret_names = {
+        item["metadata"]["name"]
+        for item in secrets.get("items", [])
+        if item["metadata"]["name"].endswith(LEGACY_SOURCE_SECRET_SUFFIX)
+    }
 
     apps: list[str] = []
-    for path in sorted(workspace.iterdir()):
-        if not path.is_dir():
-            continue
+    for item in sorted(deployments.get("items", []), key=lambda entry: entry["metadata"]["name"]):
+        app_name = item["metadata"]["name"]
+        annotations = item["metadata"].get("annotations", {})
+        if annotations.get(SOURCE_STORAGE_ANNOTATION) == "oci":
+            source_mode = "source=oci"
+        elif _legacy_source_secret_name(app_name) in legacy_secret_names:
+            source_mode = "source=legacy-secret"
+        else:
+            source_mode = "source=unknown"
 
-        summary: list[str] = []
-        if (path / "src" / "main.ts").exists():
-            summary.append("src/main.ts")
-        if (path / "flake.nix").exists():
-            summary.append("flake.nix")
-
-        details = ", ".join(summary) if summary else "directory"
-        apps.append(f"- {path.name} ({details})")
+        apps.append(f"- {app_name} ({source_mode})")
 
     if not apps:
-        return f"No apps found in {workspace}"
+        return f"No deployed apps found in namespace {DEPLOY_NAMESPACE}"
 
-    return "Available apps:\n" + "\n".join(apps)
+    return "Available deployed apps:\n" + "\n".join(apps)
 
 
 def select_app(app_name: str, tool_context: ToolContext) -> str:
-    """Select an existing application in the workspace for inspection or editing."""
-    app_dir = _app_path(app_name)
-    if not app_dir.exists() or not app_dir.is_dir():
-        return f"Error: app {app_name!r} does not exist in {WORKSPACE_DIR}. Call list_apps first."
+    """Restore a deployed app into the ephemeral workspace for inspection or editing."""
+    local_app_dir = _app_path(app_name)
+    if local_app_dir.exists() and not _deployment_exists(app_name) and not _source_image_exists(app_name):
+        _set_current_app(tool_context, app_name, local_app_dir)
+        return (
+            f"Selected local draft app {app_name} at {local_app_dir}. "
+            "This draft is not durable until you deploy it."
+        )
 
-    tool_context.state["current_app"] = app_name
-    tool_context.state["app_dir"] = str(app_dir)
-    _reset_build_state(tool_context)
-    return f"Selected existing app {app_name} at {app_dir}"
+    deployment = _get_deployment(app_name)
+    if deployment is None and not _source_image_exists(app_name):
+        return (
+            f"Error: app {app_name!r} is not deployed in {DEPLOY_NAMESPACE} and has no "
+            "durable source artifact. Call list_apps first."
+        )
+
+    app_dir = _prepare_app_dir(app_name)
+    restored_from: str | None = None
+
+    try:
+        if _source_image_exists(app_name):
+            _restore_source_image(app_name, app_dir)
+            restored_from = "OCI source image"
+        else:
+            _restore_legacy_source_secret(app_name, app_dir)
+            restored_from = "legacy source secret"
+    except (RuntimeError, ValueError) as error:
+        shutil.rmtree(app_dir, ignore_errors=True)
+        return f"Error: failed to restore app {app_name!r}: {error}"
+
+    _set_current_app(tool_context, app_name, app_dir)
+    return f"Selected app {app_name} at {app_dir}, restored from {restored_from}."
 
 
 def list_files(subdirectory: str = ".", tool_context: ToolContext | None = None) -> str:
@@ -193,18 +401,7 @@ def read_file(file_path: str, tool_context: ToolContext) -> str:
 
 
 def generate_app(app_name: str, description: str, tool_context: ToolContext) -> str:
-    """Generate a TypeScript web application from a description.
-
-    Creates a Deno-based TypeScript web app in the workspace directory,
-    including a main.ts entry point and a Nix flake for building an OCI image.
-
-    Args:
-        app_name: Name of the application (used as directory and image name).
-        description: Natural language description of what the app should do.
-
-    Returns:
-        A summary of the generated files and their locations.
-    """
+    """Generate a new TypeScript app in the ephemeral workspace."""
     app_dir = _app_path(app_name)
     if app_dir.exists() and any(app_dir.iterdir()):
         return (
@@ -212,34 +409,33 @@ def generate_app(app_name: str, description: str, tool_context: ToolContext) -> 
             "Use select_app to modify it instead of generating a new app."
         )
 
+    if _deployment_exists(app_name) or _source_image_exists(app_name):
+        return (
+            f"Error: app {app_name!r} already exists as a durable app. "
+            "Use select_app to modify it instead of generating a new app."
+        )
+
     src_dir = app_dir / "src"
     src_dir.mkdir(parents=True, exist_ok=True)
 
-    # Copy the template flake.nix
     template_flake = "/opt/templates/flake.nix"
     if os.path.exists(template_flake):
-        with open(template_flake) as f:
-            flake_content = f.read()
-        with open(app_dir / "flake.nix", "w") as f:
-            f.write(flake_content)
+        with open(template_flake) as source_file:
+            flake_content = source_file.read()
+        with open(app_dir / "flake.nix", "w") as target_file:
+            target_file.write(flake_content)
 
-    tool_context.state["current_app"] = app_name
-    tool_context.state["app_dir"] = str(app_dir)
-    _reset_build_state(tool_context)
+    _set_current_app(tool_context, app_name, app_dir)
 
-    return f"App directory created at {app_dir} with flake.nix template. Write the TypeScript source files to {src_dir}/main.ts using the write_file tool."
+    return (
+        f"App directory created at {app_dir} with flake.nix template. "
+        f"Write the TypeScript source files to {src_dir}/main.ts using the write_file tool. "
+        "This app remains an ephemeral draft until you deploy it."
+    )
 
 
 def write_file(file_path: str, content: str, tool_context: ToolContext) -> str:
-    """Write content to a file in the current app's workspace.
-
-    Args:
-        file_path: Path relative to the app's source directory (e.g. "src/main.ts").
-        content: The file content to write.
-
-    Returns:
-        Confirmation of the file write.
-    """
+    """Write content to a file in the current application's workspace."""
     try:
         _, app_dir = _require_current_app(tool_context)
         relative_path = _validate_relative_path(file_path)
@@ -249,30 +445,27 @@ def write_file(file_path: str, content: str, tool_context: ToolContext) -> str:
     full_path = app_dir / relative_path
     full_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(full_path, "w") as f:
-        f.write(content)
+    with open(full_path, "w") as file_handle:
+        file_handle.write(content)
 
     _reset_build_state(tool_context)
     return f"Wrote {len(content)} bytes to {full_path}"
 
 
 def build_image(tool_context: ToolContext) -> str:
-    """Build an OCI container image for the current app using Nix.
-
-    Uses the flake.nix in the app directory to build a container image
-    via nixpkgs dockerTools.
-
-    Returns:
-        The path to the built image or an error message.
-    """
+    """Build an OCI container image for the current app using Nix."""
     try:
-        app_name, app_dir = _require_current_app(tool_context)
+        _, app_dir = _require_current_app(tool_context)
     except ValueError as error:
         return f"Error: {error}"
 
-    output = _run(["nix", "build", ".#docker-image", "--no-link", "--print-out-paths"], cwd=str(app_dir))
+    output = _run(
+        ["nix", "build", ".#docker-image", "--no-link", "--print-out-paths"],
+        cwd=str(app_dir),
+        timeout=600,
+    )
 
-    if "Command failed" in output:
+    if output.startswith("Command failed"):
         return f"Build failed:\n{output}"
 
     image_path = output.strip()
@@ -281,15 +474,7 @@ def build_image(tool_context: ToolContext) -> str:
 
 
 def push_image(tool_context: ToolContext) -> str:
-    """Push the built OCI image to the in-cluster Zot registry.
-
-    Nix dockerTools emits a Docker archive tarball. Zot accepts that archive
-    when it is uploaded through skopeo, which can also read the compressed
-    `.tar.gz` output after a temporary decompression step.
-
-    Returns:
-        The full image reference or an error message.
-    """
+    """Push the built OCI image to the in-cluster Zot registry."""
     app_name = tool_context.state.get("current_app")
     image_path = tool_context.state.get("image_path")
     if not app_name or not image_path:
@@ -307,13 +492,14 @@ def push_image(tool_context: ToolContext) -> str:
                 "--dest-tls-verify=false",
                 f"docker-archive:{archive_path}",
                 f"docker://{image_ref}",
-            ]
+            ],
+            timeout=600,
         )
     finally:
         if temporary_archive is not None:
             temporary_archive.unlink(missing_ok=True)
 
-    if "Command failed" in output:
+    if output.startswith("Command failed"):
         return f"Push failed:\n{output}"
 
     tool_context.state["image_ref"] = image_ref
@@ -321,38 +507,19 @@ def push_image(tool_context: ToolContext) -> str:
 
 
 def deploy_app(port: int, tool_context: ToolContext) -> str:
-    """Deploy the application to Kubernetes with NetBird exposure.
+    """Persist app source to OCI and deploy the app into Kubernetes."""
+    try:
+        app_name, app_dir = _require_current_app(tool_context)
+    except ValueError as error:
+        return f"Error: {error}"
 
-    Creates a Deployment and Service in the apps namespace.
-    The source tree is bundled into a Secret and unpacked by an init container
-    so nodes can run the app from a public runtime image instead of pulling the
-    in-cluster Zot image directly.
+    try:
+        source_image_ref, source_digest = _publish_source_image(app_name, app_dir)
+    except RuntimeError as error:
+        return f"Deploy failed while publishing source image:\n{error}"
 
-    Args:
-        port: The port the application listens on.
-
-    Returns:
-        Confirmation of the deployment or an error message.
-    """
-    app_name = tool_context.state.get("current_app")
-    image_ref = tool_context.state.get("image_ref")
-    if not app_name or not image_ref:
-        return "Error: no image ref. Call push_image first."
-
-    app_dir = tool_context.state.get("app_dir", os.path.join(WORKSPACE_DIR, app_name))
-    source_archive = _build_source_archive(app_dir)
-    source_secret_name = f"{app_name}-source"
-
-    manifest = textwrap.dedent(f"""\
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: {source_secret_name}
-          namespace: {DEPLOY_NAMESPACE}
-        type: Opaque
-        data:
-          src.tar.gz: {source_archive}
-        ---
+    manifest = textwrap.dedent(
+        f"""\
         apiVersion: apps/v1
         kind: Deployment
         metadata:
@@ -360,6 +527,10 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
           namespace: {DEPLOY_NAMESPACE}
           labels:
             app: {app_name}
+          annotations:
+            {SOURCE_IMAGE_ANNOTATION}: "{source_image_ref}"
+            {SOURCE_STORAGE_ANNOTATION}: "oci"
+            {SOURCE_DIGEST_ANNOTATION}: "{source_digest}"
         spec:
           replicas: 1
           selector:
@@ -369,6 +540,10 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
             metadata:
               labels:
                 app: {app_name}
+              annotations:
+                {SOURCE_IMAGE_ANNOTATION}: "{source_image_ref}"
+                {SOURCE_STORAGE_ANNOTATION}: "oci"
+                {SOURCE_DIGEST_ANNOTATION}: "{source_digest}"
             spec:
               securityContext:
                 fsGroup: 1001
@@ -378,12 +553,15 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
                 seccompProfile:
                   type: RuntimeDefault
               initContainers:
-                - name: unpack-source
+                - name: pull-source
                   image: {DEPLOY_RUNTIME_IMAGE}
+                  env:
+                    - name: SOURCE_IMAGE
+                      value: "{source_image_ref}"
                   command:
                     - sh
                     - -lc
-                    - mkdir -p /app && tar -xzf /source/src.tar.gz -C /app
+                    - mkdir -p /app && crane export --insecure "$SOURCE_IMAGE" - | tar -xf - -C /app
                   securityContext:
                     allowPrivilegeEscalation: false
                     capabilities:
@@ -395,8 +573,6 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
                     seccompProfile:
                       type: RuntimeDefault
                   volumeMounts:
-                    - name: source
-                      mountPath: /source
                     - name: app
                       mountPath: /app
               containers:
@@ -425,9 +601,6 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
                     - name: app
                       mountPath: /app
               volumes:
-                - name: source
-                  secret:
-                    secretName: {source_secret_name}
                 - name: app
                   emptyDir: {{}}
         ---
@@ -445,24 +618,46 @@ def deploy_app(port: int, tool_context: ToolContext) -> str:
           ports:
             - port: 80
               targetPort: {port}
-    """)
+        """
+    )
 
-    result = subprocess.run(
+    apply_output = _run(
         ["kubectl", "apply", "-f", "-"],
-        input=manifest,
-        capture_output=True,
-        text=True,
+        input_text=manifest,
+        timeout=120,
+    )
+    if apply_output.startswith("Command failed"):
+        return f"Deploy failed:\n{apply_output}"
+
+    delete_secret_output = _run(
+        [
+            "kubectl",
+            "delete",
+            "secret",
+            _legacy_source_secret_name(app_name),
+            "-n",
+            DEPLOY_NAMESPACE,
+            "--ignore-not-found",
+        ],
         timeout=60,
     )
+    if delete_secret_output.startswith("Command failed"):
+        return (
+            f"Deployed {app_name}, but failed to clean up the legacy source secret:\n"
+            f"{delete_secret_output}"
+        )
 
-    if result.returncode != 0:
-        return f"Deploy failed:\n{result.stderr}"
+    image_ref = tool_context.state.get("image_ref")
+    _set_current_app(tool_context, app_name, app_dir)
 
-    return (
-        f"Deployed {app_name} to namespace {DEPLOY_NAMESPACE} using runtime image "
-        f"{DEPLOY_RUNTIME_IMAGE}. Built image remains available at {image_ref}. "
-        "Service exposed via NetBird."
+    message = (
+        f"Persisted source for {app_name} to {source_image_ref} "
+        f"({source_digest}) and deployed it to namespace {DEPLOY_NAMESPACE} "
+        f"using runtime image {DEPLOY_RUNTIME_IMAGE}. Service exposed via NetBird."
     )
+    if image_ref:
+        message += f" Built OCI image remains available at {image_ref}."
+    return message
 
 
 root_agent = Agent(
@@ -472,8 +667,12 @@ root_agent = Agent(
         api_key=os.environ["OPENAI_API_KEY"],
     ),
     name="software_developer",
-    description="Builds new software and modifies, fixes, debugs, and deploys existing software using bash, Nix, and kubectl.",
-    instruction=textwrap.dedent("""\
+    description=(
+        "Stateless software developer that restores deployed apps from OCI source "
+        "images, then builds, fixes, debugs, and deploys them using bash, Nix, and kubectl."
+    ),
+    instruction=textwrap.dedent(
+        """\
         You are a pragmatic software developer agent for Rawkode Academy.
 
         Environment:
@@ -481,10 +680,11 @@ root_agent = Agent(
           debugging, git, nix, kubectl, curl, and general software engineering work.
         - Nix is installed.
         - kubectl is installed and configured for the current cluster.
-        - Your shared workspace root is /workspace.
-        - Existing app directories live under /workspace.
+        - Your workspace root is /workspace, and it is ephemeral.
+        - Durable source for deployed apps lives in the internal registry as OCI source images.
+        - Deployed app source is restored into /workspace on demand when you call select_app.
         - New or updated applications are deployed into the Kubernetes namespace apps.
-        - Built images are pushed to the internal registry zot.zot.svc.cluster.local:5000.
+        - Built images may be pushed to the internal registry zot.zot.svc.cluster.local:5000.
         - The runtime image used for deployed apps is provided via DEPLOY_RUNTIME_IMAGE.
 
         Your job:
@@ -492,27 +692,30 @@ root_agent = Agent(
         - Modify, fix, debug, and improve existing software when asked.
         - Use the existing app in place unless the user explicitly asks to rebuild from scratch.
         - Verify your work with bash whenever practical instead of guessing.
+        - Remember that undeployed draft changes are not durable across pod restarts.
 
         Preferred workflow for existing software:
-        1. Call list_apps if you need to discover or confirm the app name.
-        2. Call select_app to work inside the existing app directory.
+        1. Call list_apps if you need to discover or confirm the deployed app name.
+        2. Call select_app to restore the app into the ephemeral workspace.
         3. Inspect with list_files, read_file, and bash.
         4. Update files in place with write_file or use bash for broader edits.
         5. Validate with bash.
-        6. Build, push, and deploy when the user asks for rollout or when deployment verification is part of the request.
+        6. Call deploy_app when the user wants rollout or when your changes should become durable.
 
         Preferred workflow for new software:
-        1. Call generate_app to create the workspace scaffold.
+        1. Call generate_app to create the ephemeral draft scaffold.
         2. Create or refine files with write_file and bash.
         3. Validate with bash.
-        4. Call build_image, push_image, and deploy_app when needed.
+        4. Call deploy_app when the app should become durable and live.
+        5. Call build_image and push_image only when the user explicitly wants a standalone app image artifact.
 
         Important rules:
         - Do not default to generating a new app when the request is about fixing or changing an existing one.
         - Ask a concise follow-up question only when the target app or desired outcome is genuinely ambiguous.
         - Prefer concrete execution and verification over high-level plans.
         - Keep deployed workloads simple: Deployment and Service resources only unless the user explicitly asks otherwise.
-    """),
+        """
+    ),
     tools=[
         bash,
         list_apps,

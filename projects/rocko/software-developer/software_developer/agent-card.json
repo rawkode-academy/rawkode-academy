@@ -1,6 +1,6 @@
 {
   "name": "software-developer",
-  "description": "Builds new software and modifies, fixes, debugs, and deploys existing software using bash, Nix, and kubectl",
+  "description": "Stateless software developer that restores deployed apps from OCI source images, then builds, fixes, debugs, and deploys them using bash, Nix, and kubectl",
   "url": "http://software-developer.rocko.svc.cluster.local:8080",
   "version": "0.1.0",
   "capabilities": {
@@ -12,8 +12,8 @@
     {
       "id": "software-developer",
       "name": "Software Developer",
-      "description": "Builds new software and modifies, fixes, debugs, and deploys existing software from natural language prompts using bash, Nix, and kubectl",
-      "tags": ["developer", "bash", "nix", "kubectl", "debug", "fix", "improve", "build", "deploy"]
+      "description": "Restores deployed apps from OCI source images and builds, fixes, debugs, and deploys software from natural language prompts using bash, Nix, and kubectl",
+      "tags": ["developer", "stateless", "oci", "bash", "nix", "kubectl", "debug", "fix", "improve", "build", "deploy"]
     }
   ]
 }
