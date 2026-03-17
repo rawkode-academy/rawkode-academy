@@ -1,0 +1,40 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: teleport
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: teleport
+  targetNamespace: teleport
+  chart:
+    spec:
+      chart: teleport-cluster
+      interval: 1h
+      sourceRef:
+        kind: HelmRepository
+        name: teleport
+        namespace: flux-system
+      version: "18.7.3"
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    clusterName: teleport.rawkode.cloud
+    proxyListenerMode: multiplex
+    acme: true
+    acmeEmail: david@rawkode.academy
+    proxyProtocol: "off"
+    chartMode: standalone
+    persistence:
+      enabled: true
+      storageClassName: openebs-single-replica
+      volumeSize: 10Gi
+    highAvailability:
+      replicaCount: 1
+    service:
+      type: ClusterIP

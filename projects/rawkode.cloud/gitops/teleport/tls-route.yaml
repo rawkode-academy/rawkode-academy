@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TLSRoute
+metadata:
+  name: teleport
+  namespace: teleport
+spec:
+  parentRefs:
+    - name: rawkode-cloud
+      namespace: gateway
+      sectionName: teleport-passthrough
+  rules:
+    - backendRefs:
+        - name: teleport
+          port: 443
