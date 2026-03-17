@@ -58,6 +58,9 @@ func TestInstallValuesEnablesGatewayAPIWhenRequested(t *testing.T) {
 	for _, expected := range []string{
 		"gatewayAPI.enabled=true",
 		"gatewayAPI.hostNetwork.enabled=true",
+		"envoy.enabled=true",
+		"envoy.securityContext.capabilities.envoy={NET_ADMIN,SYS_ADMIN,NET_BIND_SERVICE}",
+		"envoy.securityContext.capabilities.keepCapNetBindService=true",
 	} {
 		if !containsValue(values, expected) {
 			t.Fatalf("missing expected Gateway API value %q", expected)

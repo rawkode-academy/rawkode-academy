@@ -143,6 +143,10 @@ func installValues(hubble, gatewayAPI bool, ipv4NativeRoutingCIDR string) []stri
 		values = append(values,
 			"gatewayAPI.enabled=true",
 			"gatewayAPI.hostNetwork.enabled=true",
+			"envoy.enabled=true",
+			"envoy.securityContext.capabilities.envoy={NET_ADMIN,SYS_ADMIN,NET_BIND_SERVICE}",
+			"envoy.securityContext.capabilities.keepCapNetBindService=true",
+			"securityContext.capabilities.ciliumAgent={CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID,NET_BIND_SERVICE}",
 		)
 	}
 
