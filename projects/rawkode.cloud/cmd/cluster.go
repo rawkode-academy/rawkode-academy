@@ -13,6 +13,7 @@ import (
 	"github.com/rawkode-academy/rawkode-cloud3/internal/cilium"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/config"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/flux"
+	"github.com/rawkode-academy/rawkode-cloud3/internal/gatewayapi"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/infisical"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/scaleway"
@@ -112,6 +113,7 @@ var createClusterPhases = []string{
 }
 
 var (
+	gatewayAPIInstallCRDsFn                 = gatewayapi.InstallCRDs
 	ciliumInstallFn                         = cilium.Install
 	fluxBootstrapFn                         = flux.Bootstrap
 	postBootstrapKubeconfigPathFn           = postBootstrapKubeconfigPath
@@ -663,6 +665,15 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		return fmt.Errorf("wait for kubernetes API readiness: %w", err)
 	}
 
+	// Install Gateway API CRDs before Cilium — Cilium with gatewayAPI.enabled=true
+	// requires these CRDs to be present or it will fail to start.
+	if err := gatewayAPIInstallCRDsFn(ctx, gatewayapi.InstallCRDsParams{
+		Kubeconfig:        kubeconfigPath,
+		GatewayAPIVersion: gatewayapi.DefaultGatewayAPIVersion,
+	}); err != nil {
+		return fmt.Errorf("install gateway API CRDs: %w", err)
+	}
+
 	var bootstrapErrors []error
 
 	// Install Cilium CNI
@@ -670,6 +681,7 @@ func phasePostBootstrap(ctx context.Context, op *operation.Operation, cfg *confi
 		Kubeconfig:            kubeconfigPath,
 		Version:               cfg.Cluster.EffectiveCiliumVersion(),
 		Hubble:                true,
+		GatewayAPI:            true,
 		IPv4NativeRoutingCIDR: ipv4NativeRoutingCIDR,
 	}); err != nil {
 		slog.Warn("cilium install failed", "error", err)
