@@ -5,8 +5,8 @@ metadata:
   namespace: teleport
 spec:
   display: GitHub
-  client_id: teleport-github-oauth/client-id
-  client_secret: teleport-github-oauth/client-secret
+  client_id: Ov23lipzv41E9HYrXX7c
+  client_secret: secret://teleport-github-oauth/client-secret
   redirect_url: https://teleport.rawkode.cloud/v1/webapi/github/callback
   teams_to_roles:
     - organization: rawkode-academy
