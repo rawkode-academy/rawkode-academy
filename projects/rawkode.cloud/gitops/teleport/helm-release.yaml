@@ -36,5 +36,7 @@ spec:
       volumeSize: 10Gi
     highAvailability:
       replicaCount: 1
+    operator:
+      enabled: true
     service:
       type: ClusterIP
