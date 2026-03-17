@@ -20,6 +20,7 @@ type InstallParams struct {
 	Kubeconfig            string
 	Version               string // e.g. "v1.19.0"
 	Hubble                bool
+	GatewayAPI            bool
 	IPv4NativeRoutingCIDR string // e.g. "172.16.16.0/22"
 }
 
@@ -53,7 +54,7 @@ func Install(ctx context.Context, params InstallParams) error {
 		HelmReleaseName:          ciliumReleaseName,
 		HelmResetThenReuseValues: true,
 		HelmOpts: values.Options{
-			Values: installValues(params.Hubble, params.IPv4NativeRoutingCIDR),
+			Values: installValues(params.Hubble, params.GatewayAPI, params.IPv4NativeRoutingCIDR),
 		},
 	}
 
@@ -114,7 +115,7 @@ func Status(ctx context.Context, kubeconfig string) error {
 	return nil
 }
 
-func installValues(hubble bool, ipv4NativeRoutingCIDR string) []string {
+func installValues(hubble, gatewayAPI bool, ipv4NativeRoutingCIDR string) []string {
 	values := []string{
 		"kubeProxyReplacement=true",
 		"ipam.mode=kubernetes",
@@ -135,6 +136,13 @@ func installValues(hubble bool, ipv4NativeRoutingCIDR string) []string {
 			"hubble.enabled=true",
 			"hubble.relay.enabled=true",
 			"hubble.ui.enabled=true",
+		)
+	}
+
+	if gatewayAPI {
+		values = append(values,
+			"gatewayAPI.enabled=true",
+			"gatewayAPI.hostNetwork.enabled=true",
 		)
 	}
 

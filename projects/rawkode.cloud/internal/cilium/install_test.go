@@ -6,7 +6,7 @@ import (
 )
 
 func TestInstallValuesTalosSafeDefaults(t *testing.T) {
-	values := installValues(false, "")
+	values := installValues(false, false, "")
 
 	for _, required := range []string{
 		"kubeProxyReplacement=true",
@@ -25,7 +25,7 @@ func TestInstallValuesTalosSafeDefaults(t *testing.T) {
 }
 
 func TestInstallValuesOmitsSYSMODULECapability(t *testing.T) {
-	values := installValues(false, "")
+	values := installValues(false, false, "")
 	for _, value := range values {
 		if strings.HasPrefix(value, "securityContext.capabilities.") && strings.Contains(value, "SYS_MODULE") {
 			t.Fatalf("install values must not include SYS_MODULE capability: %q", value)
@@ -34,7 +34,7 @@ func TestInstallValuesOmitsSYSMODULECapability(t *testing.T) {
 }
 
 func TestInstallValuesEnablesHubbleWhenRequested(t *testing.T) {
-	values := installValues(true, "")
+	values := installValues(true, false, "")
 	for _, expected := range []string{
 		"hubble.enabled=true",
 		"hubble.relay.enabled=true",
@@ -47,9 +47,30 @@ func TestInstallValuesEnablesHubbleWhenRequested(t *testing.T) {
 }
 
 func TestInstallValuesIncludesIPv4NativeRoutingCIDRWhenProvided(t *testing.T) {
-	values := installValues(false, "172.16.16.0/22")
+	values := installValues(false, false, "172.16.16.0/22")
 	if !containsValue(values, "ipv4NativeRoutingCIDR=172.16.16.0/22") {
 		t.Fatalf("missing ipv4 native routing cidr install value")
+	}
+}
+
+func TestInstallValuesEnablesGatewayAPIWhenRequested(t *testing.T) {
+	values := installValues(false, true, "")
+	for _, expected := range []string{
+		"gatewayAPI.enabled=true",
+		"gatewayAPI.hostNetwork.enabled=true",
+	} {
+		if !containsValue(values, expected) {
+			t.Fatalf("missing expected Gateway API value %q", expected)
+		}
+	}
+}
+
+func TestInstallValuesOmitsGatewayAPIWhenDisabled(t *testing.T) {
+	values := installValues(false, false, "")
+	for _, value := range values {
+		if strings.HasPrefix(value, "gatewayAPI.") {
+			t.Fatalf("install values should not include Gateway API values when disabled: %q", value)
+		}
 	}
 }
 

@@ -10,4 +10,5 @@ resources:
   - kagent
   - openebs
   - zot
+  - gateway
   - rocko

@@ -11,6 +11,7 @@ import (
 	"github.com/rawkode-academy/rawkode-cloud3/internal/cilium"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/config"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/flux"
+	"github.com/rawkode-academy/rawkode-cloud3/internal/gatewayapi"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/operation"
 	"github.com/rawkode-academy/rawkode-cloud3/internal/scaleway"
 	"github.com/scaleway/scaleway-sdk-go/api/baremetal/v1"
@@ -18,6 +19,9 @@ import (
 )
 
 func restorePostBootstrapFns() {
+	gatewayAPIInstallCRDsFn = func(context.Context, gatewayapi.InstallCRDsParams) error {
+		return nil
+	}
 	ciliumInstallFn = cilium.Install
 	fluxBootstrapFn = flux.Bootstrap
 	postBootstrapKubeconfigPathFn = func(context.Context, *operation.Operation, *config.Config) (string, func(), error) {
@@ -466,6 +470,72 @@ func TestPhasePostBootstrapRecoversMissingPrivateNetworkIDFromScaleway(t *testin
 	}
 	if got := op.GetContextString("privateNetworkID"); got != "pn-recovered" {
 		t.Fatalf("operation privateNetworkID context = %q, want %q", got, "pn-recovered")
+	}
+}
+
+func TestPhasePostBootstrapFailsWhenGatewayAPICRDInstallFails(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	errCRDs := errors.New("CRD install failed")
+	gatewayAPIInstallCRDsFn = func(context.Context, gatewayapi.InstallCRDsParams) error {
+		return errCRDs
+	}
+	ciliumInstallFn = func(context.Context, cilium.InstallParams) error {
+		t.Fatal("cilium install should not run when Gateway API CRD install fails")
+		return nil
+	}
+	fluxBootstrapFn = func(context.Context, flux.BootstrapParams) error {
+		t.Fatal("flux bootstrap should not run when Gateway API CRD install fails")
+		return nil
+	}
+	scalewayNewClientFn = func(string, string, string, string) (*scaleway.Client, error) {
+		return &scaleway.Client{}, nil
+	}
+	scalewayResolvePrivateNetworkIPv4CIDRFn = func(context.Context, *scaleway.Client, scw.Region, string, string) (string, error) {
+		return "172.16.16.0/22", nil
+	}
+
+	cfg := &config.Config{}
+
+	err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg)
+	if err == nil {
+		t.Fatal("expected Gateway API CRD install failure, got nil")
+	}
+	if !strings.Contains(err.Error(), "install gateway API CRDs") {
+		t.Fatalf("expected gateway API CRD error wrapper, got %q", err)
+	}
+	if !errors.Is(err, errCRDs) {
+		t.Fatalf("expected wrapped CRD error, got %v", err)
+	}
+}
+
+func TestPhasePostBootstrapPassesGatewayAPITrueToCilium(t *testing.T) {
+	restorePostBootstrapFns()
+	t.Cleanup(restorePostBootstrapFns)
+
+	var gotInstallParams cilium.InstallParams
+	ciliumInstallFn = func(_ context.Context, params cilium.InstallParams) error {
+		gotInstallParams = params
+		return nil
+	}
+	fluxBootstrapFn = func(context.Context, flux.BootstrapParams) error {
+		return nil
+	}
+	scalewayNewClientFn = func(string, string, string, string) (*scaleway.Client, error) {
+		return &scaleway.Client{}, nil
+	}
+	scalewayResolvePrivateNetworkIPv4CIDRFn = func(context.Context, *scaleway.Client, scw.Region, string, string) (string, error) {
+		return "172.16.16.0/22", nil
+	}
+
+	cfg := &config.Config{}
+
+	if err := phasePostBootstrap(context.Background(), newPostBootstrapOperation(), cfg); err != nil {
+		t.Fatalf("phasePostBootstrap returned error: %v", err)
+	}
+	if !gotInstallParams.GatewayAPI {
+		t.Fatal("expected cilium install to receive GatewayAPI=true")
 	}
 }
 
