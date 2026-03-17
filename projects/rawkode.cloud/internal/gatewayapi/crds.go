@@ -34,10 +34,12 @@ type InstallCRDsParams struct {
 	GatewayAPIVersion string // e.g. "v1.4.1"
 }
 
-// crdURL returns the download URL for the standard Gateway API CRD bundle.
+// crdURL returns the download URL for the experimental Gateway API CRD bundle.
+// The experimental bundle includes TLSRoute, TCPRoute, and UDPRoute CRDs
+// required for TLS passthrough (e.g. Teleport ACME TLS-ALPN-01).
 func crdURL(version string) string {
 	return fmt.Sprintf(
-		"https://github.com/kubernetes-sigs/gateway-api/releases/download/%s/standard-install.yaml",
+		"https://github.com/kubernetes-sigs/gateway-api/releases/download/%s/experimental-install.yaml",
 		version,
 	)
 }
