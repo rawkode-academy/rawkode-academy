@@ -14,11 +14,7 @@ spec:
       roles:
         - access
         - editor
-      kubernetes_groups:
-        - system:masters
     - organization: rawkode-academy
       team: "*"
       roles:
         - access
-      kubernetes_groups:
-        - teleport-viewers
