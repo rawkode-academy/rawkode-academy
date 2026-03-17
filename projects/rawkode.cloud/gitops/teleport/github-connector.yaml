@@ -1,0 +1,24 @@
+apiVersion: resources.teleport.dev/v3
+kind: TeleportGithubConnector
+metadata:
+  name: github
+  namespace: teleport
+spec:
+  display: GitHub
+  client_id: teleport-github-oauth/client-id
+  client_secret: teleport-github-oauth/client-secret
+  redirect_url: https://teleport.rawkode.cloud/v1/webapi/github/callback
+  teams_to_roles:
+    - organization: rawkode-academy
+      team: platform
+      roles:
+        - access
+        - editor
+      kubernetes_groups:
+        - system:masters
+    - organization: rawkode-academy
+      team: "*"
+      roles:
+        - access
+      kubernetes_groups:
+        - teleport-viewers

@@ -6,3 +6,6 @@ resources:
   - helm-release.yaml
   - tls-route.yaml
   - reference-grant.yaml
+  - external-secret.yaml
+  - github-connector.yaml
+  - viewer-clusterrolebinding.yaml
