@@ -1,0 +1,17 @@
+apiVersion: resources.teleport.dev/v1
+kind: TeleportRoleV8
+metadata:
+  name: editor
+  namespace: teleport
+spec:
+  allow:
+    kubernetes_groups:
+      - system:masters
+    kubernetes_labels:
+      "*": "*"
+    kubernetes_resources:
+      - kind: "*"
+        namespace: "*"
+        name: "*"
+        verbs:
+          - "*"
