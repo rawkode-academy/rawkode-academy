@@ -34,3 +34,12 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: teleport-grpc-passthrough
+      protocol: TLS
+      port: 443
+      hostname: "*.teleport.cluster.local"
+      tls:
+        mode: Passthrough
+      allowedRoutes:
+        namespaces:
+          from: All
