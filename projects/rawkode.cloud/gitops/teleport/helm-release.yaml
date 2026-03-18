@@ -38,5 +38,8 @@ spec:
       replicaCount: 1
     operator:
       enabled: true
+    teleportConfig:
+      proxy_service:
+        kube_listen_addr: "0.0.0.0:3026"
     service:
       type: ClusterIP
