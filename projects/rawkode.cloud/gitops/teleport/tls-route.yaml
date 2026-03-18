@@ -11,6 +11,9 @@ spec:
     - name: rawkode-cloud
       namespace: gateway
       sectionName: teleport-grpc-passthrough
+    - name: rawkode-cloud
+      namespace: gateway
+      sectionName: teleport-kube-passthrough
   rules:
     - backendRefs:
         - name: teleport

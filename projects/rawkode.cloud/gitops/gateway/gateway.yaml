@@ -43,3 +43,12 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: teleport-kube-passthrough
+      protocol: TLS
+      port: 443
+      hostname: "*.teleport.rawkode.cloud"
+      tls:
+        mode: Passthrough
+      allowedRoutes:
+        namespaces:
+          from: All
