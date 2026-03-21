@@ -1,0 +1,525 @@
+---
+title: "Kubernetes DRA Is GA: Stop Wasting GPUs and Start Sharing Them Like a Platform Engineer"
+description: "Dynamic Resource Allocation (DRA) graduated to GA in Kubernetes 1.34, finally giving platform teams a proper primitive for GPU sharing, MIG partitioning, and topology-aware scheduling. This article cuts through the confusion and shows how to configure DRA with the NVIDIA driver to stop over-provisioning GPUs in your multi-tenant AI cluster."
+type: article
+openGraph:
+  title: "Kubernetes DRA Is GA: Stop Wasting GPUs and Start Sharing Them Like a Platform Engineer"
+  subtitle: "How platform engineers should rethink GPU allocation for AI workloads"
+slug: kubernetes-dra-gpu-sharing-platform-engineering
+cover:
+  image: "./cover.png"
+  alt: "A Kubernetes cluster diagram showing multiple pods efficiently sharing a single GPU using DRA, with utilisation gauges in the green zone instead of the typical near-empty red"
+publishedAt: 2026-03-05
+isDraft: true
+authors:
+  - rawkode
+---
+
+Here's a number that should bother you: 20–30% average GPU utilisation across a Kubernetes cluster is considered normal.
+
+I work with AI infrastructure every day now at CoreWeave, and this number comes up constantly. Teams are sitting on idle H100s that cost thousands of dollars per month per node, and the reason is almost always the same: every pod is claiming a whole GPU whether it needs one or not. An LLM inference service serving modest traffic gets an A100 all to itself. A fine-tuning job that runs for an hour a day holds its GPU allocation around the clock. It's not laziness; it's that Kubernetes, until very recently, gave you no good alternative.
+
+That changed with Kubernetes 1.34, which shipped on August 27, 2025. Dynamic Resource Allocation (DRA) graduated to GA, and the `resource.k8s.io/v1` API is now stable. If you're a platform engineer running AI workloads and you haven't looked at DRA yet, this is the article I wish had existed when I was digging through KEPs and GitHub issues trying to figure it all out.
+
+Your GPU budget is worth fixing. Here's how.
+
+## The GPU Waste Problem No One Talks About
+
+The traditional path to GPUs in Kubernetes is the device plugin model. You install the NVIDIA device plugin, it exposes `nvidia.com/gpu` as an extended resource, and pods request GPUs the same way they request CPU and memory:
+
+```yaml
+resources:
+  limits:
+    nvidia.com/gpu: 1
+```
+
+Simple, but brutally coarse-grained. You get a whole GPU or you get nothing.
+
+The problem is that inference workloads don't usually need a whole GPU. A vLLM instance serving a 7B parameter model with moderate traffic might use 15–25% of an A100's compute and 40% of its memory at peak. The rest is just sitting there. The business is paying for 100% of the GPU and getting 25% of the value.
+
+Why did everyone accept this? A few reasons:
+
+The device plugin model was good enough for batch training jobs that actually needed a whole GPU. GPU virtualisation options (NVIDIA MIG, time-slicing) existed, but wiring them up to Kubernetes was painful and required a lot of operator-level configuration that teams didn't want to manage. And multi-tenancy on GPUs is genuinely hard: memory isolation, compute isolation, topology awareness. Device plugins have no framework for expressing any of this.
+
+Here's what the old model looks like in practice:
+
+```d2 sketch
+direction: right
+
+node: "Worker Node" {
+  gpu: "A100 (80GB VRAM)"
+
+  pod_a: "Pod A\n(inference)\nUsing: 18GB / 25% compute" {
+    style.fill: "#e8f4f8"
+  }
+
+  pod_a -> gpu: "requests: nvidia.com/gpu: 1\n(gets ENTIRE GPU)"
+
+  wasted: "Wasted\n62GB VRAM\n75% compute" {
+    style.fill: "#fde8e8"
+    style.font-color: "#cc0000"
+  }
+
+  gpu -> wasted: "idle"
+}
+
+budget: "Monthly GPU Cost\n$3,000+" {
+  style.fill: "#fff3cd"
+}
+
+budget -> node.pod_a: "100% cost"
+budget -> node.wasted: "also paying for this"
+```
+
+That diagram is not hypothetical. It's the default state of most AI clusters I've seen. The device plugin model has no concept of fractions. It allocates atomically.
+
+## What DRA Actually Is (and Isn't)
+
+DRA is best understood as the Persistent Volume API, but for arbitrary devices.
+
+When Kubernetes introduced PersistentVolumes, it gave storage a proper abstraction layer: administrators define storage classes with capabilities, users create claims against those classes, and the scheduler and provisioner wire everything together. DRA does the same thing for hardware devices. Drivers advertise resources; platform engineers define device classes; application teams write claims.
+
+The stable `resource.k8s.io/v1` API has four core objects you need to understand:
+
+**ResourceSlice**: Created and maintained by the DRA driver running on each node. It advertises what devices are available: their attributes, capacity, and which nodes can access them. You don't write these yourself; the driver does.
+
+**DeviceClass**: Defined by platform admins. This is where you categorise devices: "an A100 MIG 1g.10gb slice," "a full H100," "any GPU with more than 40GB memory." You use CEL expressions to define the selection criteria.
+
+**ResourceClaim**: The per-workload request. A pod references a ResourceClaim to say "I need a device matching this class." Multiple containers in the same pod can share a single claim, which is how you finally get two processes legitimately sharing one GPU.
+
+**ResourceClaimTemplate**: Like a ResourceClaim, but Kubernetes generates a unique per-pod claim from the template automatically. This is what you use in Deployments and StatefulSets.
+
+Here's what a `DeviceClass` looks like in the stable v1 API:
+
+```yaml
+apiVersion: resource.k8s.io/v1
+kind: DeviceClass
+metadata:
+  name: nvidia-gpu-a100-1g10gb
+spec:
+  selectors:
+  - cel:
+      expression: |
+        device.driver == "gpu.nvidia.com" &&
+        device.attributes["gpu.nvidia.com"].type == "mig" &&
+        device.attributes["gpu.nvidia.com"].profile == "1g.10gb"
+```
+
+And here's a `ResourceClaimTemplate` for a deployment that needs one of those slices:
+
+```yaml
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: mig-1g10gb-claim
+  namespace: team-alpha
+spec:
+  spec:
+    devices:
+      requests:
+      - name: gpu
+        exactly:
+          deviceClassName: nvidia-gpu-a100-1g10gb
+```
+
+A pod references it like this:
+
+```yaml
+spec:
+  resourceClaims:
+  - name: gpu
+    resourceClaimTemplateName: mig-1g10gb-claim
+  containers:
+  - name: inference
+    image: vllm/vllm-openai:latest
+    resources:
+      claims:
+      - name: gpu
+```
+
+One critical thing DRA does NOT do: it is not a GPU virtualisation layer. DRA is a scheduling and allocation API. The actual hardware partitioning, whether that's MIG, time-slicing, or something else, is handled by the driver and the underlying hardware. DRA gives Kubernetes the primitives to express and enforce device allocation; the driver makes it real.
+
+## The NVIDIA DRA Driver: MIG, Time-Slicing, and Topology Awareness
+
+The reference NVIDIA DRA driver lives at [github.com/NVIDIA/k8s-dra-driver-gpu](https://github.com/NVIDIA/k8s-dra-driver-gpu). It's under active development and currently ships two kubelet plugins: one for GPU allocation and one for ComputeDomains (NVIDIA's multi-node NVLink abstraction for GB200-class systems).
+
+Good news on production readiness: v25.12.0 (released February 2026) marks the general availability of the GPU kubelet plugin. It's now officially production-supported. Sub-features like dynamic MIG are still alpha, so check the [release notes](https://github.com/NVIDIA/k8s-dra-driver-gpu/releases) for the status of whatever specific feature you're planning to use.
+
+Install via Helm:
+
+```bash
+helm install nvidia-dra-driver-gpu \
+  oci://ghcr.io/nvidia/k8s-dra-driver-gpu/charts/nvidia-dra-driver-gpu \
+  --version v25.12.0 \
+  --namespace nvidia-dra-driver-gpu \
+  --create-namespace \
+  --set gpuKubeletPlugin.enabled=true
+```
+
+Note that `gpuKubeletPlugin.enabled=true` is required because it's off by default. Once installed, the driver creates `ResourceSlice` objects for each GPU (or MIG device) it discovers. You can inspect them:
+
+```bash
+kubectl get resourceslices -o wide
+```
+
+```
+NAME                          POOL              DRIVER            AGE
+node-01-gpu-0                 node-01           gpu.nvidia.com    2m
+node-01-gpu-0-mig-1g.10gb-0   node-01-mig       gpu.nvidia.com    2m
+node-01-gpu-0-mig-1g.10gb-1   node-01-mig       gpu.nvidia.com    2m
+```
+
+### MIG vs Time-Slicing: Pick the Right Tool
+
+A100 and H100 GPUs support MIG (Multi-Instance GPU), which carves the physical GPU into isolated hardware partitions. Each partition has dedicated VRAM, compute engines, and L2 cache. Memory from one MIG instance cannot bleed into another. This is the right choice when you care about isolation and predictable performance: multi-tenant inference serving, compliance workloads, anything where one team's job shouldn't degrade another's.
+
+Time-slicing is the older approach. Multiple processes share the full GPU by taking turns on the hardware in rapid succession. No memory isolation whatsoever. The full VRAM is visible to everyone (you just can't use it all simultaneously in practice). For development environments or workloads where isolation isn't a concern, time-slicing is simpler and works on older GPUs that don't support MIG.
+
+| Property | MIG | Time-Slicing |
+|---|---|---|
+| Memory isolation | Yes, hardware enforced | No |
+| Predictable latency | Yes | No (contention) |
+| GPU families | A30, A100, H100, H200 and newer data center GPUs | Any NVIDIA GPU |
+| Fixed slice sizes | Yes (defined profiles) | Configurable |
+| Good for | Multi-tenant inference | Dev environments |
+
+For a real multi-tenant AI platform, use MIG when you have the hardware for it. Time-slicing is a workaround.
+
+The NVIDIA DRA driver recently introduced dynamic MIG device management: MIG devices can be created and destroyed on demand as claims are allocated and released, rather than requiring static pre-configuration at node startup. This was a major pain point with the old GPU operator approach.
+
+One catch: dynamic MIG is alpha in v25.12.0 and currently requires H100 or newer hardware. If you're on A100s (like the examples later in this article), you're still using static MIG, where slice configurations are set at node startup. It's still a significant improvement over the old device plugin approach; you just don't get fully on-demand partition creation yet.
+
+### NVLink Topology Awareness
+
+Here's something the device plugin model absolutely cannot do: topology-aware scheduling for multi-GPU jobs.
+
+If you have a node with eight H100s connected over NVLink, and a training job needs four of them, you want four GPUs that are NVLink-connected to each other. The device plugin model will happily give you four GPUs with no awareness of which ones are on the same NVLink fabric. With DRA and the NVIDIA driver, the ComputeDomain abstraction handles this. The driver publishes topology information in the ResourceSlice attributes, and the scheduler can use CEL expressions to filter for devices that meet the topology requirements.
+
+For AMD users: the ROCm team maintains a DRA driver at [github.com/ROCm/k8s-gpu-dra-driver](https://github.com/ROCm/k8s-gpu-dra-driver). It follows the same pattern and the API surface is identical since it's all standard `resource.k8s.io/v1`. The driver is currently experimental, so check the README for current supported GPU models (MI-series GPUs are the target) before running it in production.
+
+## A Real Multi-Tenant AI Cluster Setup with DRA
+
+Here's a realistic setup. Say you have a platform team running a shared inference cluster with A100 GPUs, and you need to serve multiple product teams without letting any single team monopolise the hardware.
+
+The strategy: expose MIG 1g.10gb slices for small inference jobs, 3g.40gb slices for larger models, and full GPUs for training jobs that actually need them. Because A100 uses static MIG, you'll configure the slice layout at node startup. DRA then handles the allocation and scheduling on top of that.
+
+### DeviceClass Definitions
+
+First, platform admin creates the device classes:
+
+```yaml
+apiVersion: resource.k8s.io/v1
+kind: DeviceClass
+metadata:
+  name: gpu-a100-small
+  # 1g.10gb: 1/7 of compute, ~10GB VRAM, good for 7B param models
+spec:
+  selectors:
+  - cel:
+      expression: |
+        device.driver == "gpu.nvidia.com" &&
+        device.attributes["gpu.nvidia.com"].type == "mig" &&
+        device.attributes["gpu.nvidia.com"].profile == "1g.10gb"
+---
+apiVersion: resource.k8s.io/v1
+kind: DeviceClass
+metadata:
+  name: gpu-a100-medium
+  # 3g.40gb: 3/7 of compute, ~40GB VRAM, good for 13B-34B param models
+spec:
+  selectors:
+  - cel:
+      expression: |
+        device.driver == "gpu.nvidia.com" &&
+        device.attributes["gpu.nvidia.com"].type == "mig" &&
+        device.attributes["gpu.nvidia.com"].profile == "3g.40gb"
+---
+apiVersion: resource.k8s.io/v1
+kind: DeviceClass
+metadata:
+  name: gpu-a100-full
+  # Full GPU: 80GB VRAM, for training workloads
+spec:
+  selectors:
+  - cel:
+      expression: |
+        device.driver == "gpu.nvidia.com" &&
+        device.attributes["gpu.nvidia.com"].type == "gpu"
+```
+
+These go in once. Platform team owns them. Dev teams never touch them.
+
+### ResourceClaimTemplates in a Helm Chart
+
+In your platform Helm chart, add these templates to the namespace you provision for each tenant:
+
+```yaml
+# templates/dra-claim-templates.yaml
+{{- range .Values.gpuProfiles }}
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: gpu-{{ .name }}
+  namespace: {{ $.Values.tenantNamespace }}
+spec:
+  spec:
+    devices:
+      requests:
+      - name: gpu
+        exactly:
+          deviceClassName: gpu-a100-{{ .name }}
+{{- end }}
+```
+
+With `values.yaml`:
+
+```yaml
+tenantNamespace: team-alpha
+gpuProfiles:
+  - name: small
+  - name: medium
+  - name: full
+```
+
+Now `team-alpha` has three claim templates ready to use without cluster-admin involvement. Self-service GPU slices.
+
+### Wiring Into a vLLM Deployment
+
+Here's how a team deploys vLLM serving Llama 3.1 8B with a `small` GPU slice:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-3-8b-inference
+  namespace: team-alpha
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: llama-3-8b
+  template:
+    metadata:
+      labels:
+        app: llama-3-8b
+    spec:
+      # Reference the claim template: each pod gets its own MIG slice
+      resourceClaims:
+      - name: gpu
+        resourceClaimTemplateName: gpu-small
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:v0.7.3
+        args:
+        - "--model"
+        - "meta-llama/Llama-3.1-8B-Instruct"
+        - "--max-model-len"
+        - "8192"
+        resources:
+          claims:
+          - name: gpu
+          requests:
+            memory: "16Gi"
+            cpu: "4"
+        env:
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+        ports:
+        - containerPort: 8000
+```
+
+Four replicas, four MIG slices, one A100. Previously this would have needed four A100s with the device plugin model. That's the difference.
+
+### Namespace Isolation and Governance
+
+DRA integrates cleanly with existing Kubernetes RBAC and resource governance. A few patterns worth setting up:
+
+**ResourceQuotas for GPU claims**: You can't quota on DRA devices directly with core Kubernetes ResourceQuota yet (that's coming), but you can limit the number of pods via standard quotas and use your Helm chart to enforce claim template access.
+
+**LimitRanges for sanity**: Even though claims handle GPU allocation, your pods still have CPU and memory. Set sensible defaults:
+
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: gpu-workload-defaults
+  namespace: team-alpha
+spec:
+  limits:
+  - type: Container
+    default:
+      memory: "8Gi"
+      cpu: "4"
+    defaultRequest:
+      memory: "4Gi"
+      cpu: "2"
+```
+
+**Namespace admin access control**: The `adminAccess` field in ResourceClaims (which allows accessing in-use devices for debugging) is gated in 1.34 by the `resource.kubernetes.io/admin-access: "true"` namespace label. Don't apply that label to tenant namespaces:
+
+```bash
+# This is for platform admin namespaces only
+kubectl label namespace platform-ops \
+  resource.kubernetes.io/admin-access=true
+```
+
+Here's how the multi-tenant architecture looks end to end:
+
+```d2 sketch
+direction: down
+
+platform_admin: "Platform Admin" {
+  device_classes: "DeviceClasses\n(gpu-a100-small/medium/full)" {
+    style.fill: "#e8f4f8"
+  }
+  helm: "Helm Chart\n(provisions namespaces + claim templates)" {
+    style.fill: "#e8f4f8"
+  }
+}
+
+cluster: "Kubernetes Cluster (1.34+)" {
+  dra_driver: "NVIDIA DRA Driver\n(gpu-kubelet-plugin)" {
+    style.fill: "#f0f0f0"
+  }
+
+  node: "Worker Node: A100 x8" {
+    resource_slices: "ResourceSlices\n(1g.10gb, 3g.40gb, full GPU)" {
+      style.fill: "#d4edda"
+    }
+    scheduler: "Scheduler + DRA Plugin" {
+      style.fill: "#f0f0f0"
+    }
+  }
+
+  ns_alpha: "team-alpha namespace" {
+    claim_templates: "ResourceClaimTemplates\n(gpu-small, gpu-medium, gpu-full)"
+    pods: "Pods (vLLM x4)\nEach with own MIG slice"
+    pods -> claim_templates: "references"
+  }
+
+  ns_beta: "team-beta namespace" {
+    claim_templates_b: "ResourceClaimTemplates\n(gpu-small, gpu-medium)"
+    pods_b: "Pods (inference)\nSharing GPU slices"
+    pods_b -> claim_templates_b: "references"
+  }
+}
+
+platform_admin.device_classes -> cluster.node.resource_slices: "defines categories"
+platform_admin.helm -> cluster.ns_alpha: "provisions"
+platform_admin.helm -> cluster.ns_beta: "provisions"
+cluster.dra_driver -> cluster.node.resource_slices: "publishes"
+cluster.node.scheduler -> cluster.node.resource_slices: "allocates from"
+cluster.node.scheduler -> cluster.ns_alpha.pods: "schedules"
+cluster.node.scheduler -> cluster.ns_beta.pods_b: "schedules"
+```
+
+## Observing GPU Utilisation After the Switch
+
+Allocating MIG slices correctly is one thing. Verifying that you're actually getting better utilisation is another. You need metrics.
+
+[DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter) is the standard tool here. It surfaces NVIDIA DCGM metrics as Prometheus metrics. The key ones for utilisation tracking:
+
+```
+# GPU utilisation: what fraction of SM time is active
+DCGM_FI_DEV_GPU_UTIL
+
+# VRAM usage
+DCGM_FI_DEV_FB_USED
+DCGM_FI_DEV_FB_FREE
+
+# MIG-specific SM activity (requires the DCGM profiling module)
+# When DCGM_EXPORTER_WATCH_MIG=true, this is reported per MIG instance
+DCGM_FI_PROF_GR_ENGINE_ACTIVE
+
+# MIG memory: DCGM_FI_DEV_FB_USED is reported per MIG instance
+# when the exporter is configured with DCGM_EXPORTER_WATCH_MIG=true
+```
+
+With DRA and MIG, DCGM reports metrics per MIG instance, not just per physical GPU. That means you can track utilisation per slice and per tenant.
+
+Install DCGM Exporter with MIG awareness enabled:
+
+```bash
+helm install dcgm-exporter \
+  gpu-helm-charts/dcgm-exporter \
+  --namespace monitoring \
+  --set arguments[0]="-f" \
+  --set arguments[1]="/etc/dcgm-exporter/dcp-metrics-included.csv" \
+  --set extraEnv[0].name=DCGM_EXPORTER_WATCH_MIG \
+  --set extraEnv[0].value="true"
+```
+
+A useful Prometheus recording rule for tracking cluster-level GPU waste:
+
+```yaml
+# prometheus-rules.yaml
+groups:
+- name: gpu_utilisation
+  interval: 60s
+  rules:
+  - record: cluster:gpu_utilisation:avg5m
+    expr: |
+      avg(
+        avg_over_time(DCGM_FI_DEV_GPU_UTIL[5m])
+      )
+
+  - record: cluster:mig_utilisation:avg5m
+    expr: |
+      avg(
+        avg_over_time(DCGM_FI_PROF_GR_ENGINE_ACTIVE[5m])
+      )
+
+  # Alert if average GPU util drops below 40% for 30 minutes
+  # This is your waste detector
+  - alert: LowGPUUtilisation
+    expr: cluster:gpu_utilisation:avg5m < 40
+    for: 30m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Cluster GPU utilisation below 40% for 30 minutes"
+      description: |
+        Average GPU utilisation is {{ $value | humanizePercentage }}.
+        Consider reviewing workload scheduling or claim sizing.
+```
+
+The numbers improve significantly after switching to DRA plus MIG. Teams I've spoken to who have migrated from the device plugin model to DRA with MIG partitioning report cluster-level GPU utilisation climbing from the low 20s into the 60–70% range. The reason is straightforward: more pods can actually run per node, and since each pod gets exactly the slice size it needs rather than a full GPU it mostly wastes, the GPU is doing real work more of the time.
+
+You're not magically making workloads more efficient. You're just stopping them from sitting on hardware they aren't using.
+
+## What's Next: DRA in 1.35 and Beyond
+
+DRA is GA but the ecosystem is moving fast. A few things worth watching.
+
+**Consumable capacity (alpha in 1.34)**: This is the feature that allows truly flexible sharing without pre-defined partitions. Instead of "here are 7 fixed MIG slice sizes," you describe a pool of capacity (say, 80GB of VRAM) and claims consume from it dynamically. Multiple claims, multiple pods, all drawing from the same pool with the scheduler enforcing the total. This is the foundation for more sophisticated GPU fractioning and is still alpha, but it's the direction things are heading.
+
+**Partitionable devices (alpha in 1.33)**: Logical devices that consume overlapping resources from underlying physical devices. The scheduler handles exclusion. This is how you'll model more complex sharing scenarios without needing the driver to pre-carve everything.
+
+**PrioritizedList (beta in 1.34, enabled by default)**: Claims can now specify a list of acceptable device configurations in priority order. "Give me a 3g.40gb MIG slice if available; otherwise give me two 1g.10gb slices." The scheduler tries options in order. This is a huge quality-of-life improvement for workloads that can run with different resource configurations.
+
+**DRA and llm-d**: If you're following the WG Serving work that has been landing in the inference ecosystem, DRA is one of the foundational primitives that inference-native schedulers need. Proper GPU allocation at the Kubernetes layer unlocks smarter decisions at the inference layer: cache-locality-aware routing, disaggregated prefill/decode scheduling, GPU bin-packing. None of that works well when your scheduler thinks every GPU is the same undifferentiated unit.
+
+**When to keep the device plugin model**: Not every cluster should migrate today. If you're running Kubernetes older than 1.32, stick with device plugins. If your GPU workloads are exclusively batch training jobs that genuinely need full GPUs, the migration cost won't pay off immediately. If you're on older hardware that doesn't support MIG (V100, T4), time-slicing via DRA is still valuable but requires careful latency testing for your workloads. Start with dev/staging clusters.
+
+## Making the Switch: A Checklist
+
+If I were starting from scratch on a new cluster, this is how I'd approach it:
+
+1. **Kubernetes 1.32 minimum, 1.34 preferred**: DRA was first introduced as alpha in 1.26, went through a major redesign in 1.31, and reached beta in 1.32. The stable v1 API landed in 1.34. Don't build on moving sand.
+
+2. **Install the NVIDIA DRA driver alongside your existing GPU operator**: They can coexist. You don't have to blow up your existing setup on day one. Enable the GPU kubelet plugin, watch your ResourceSlices appear, verify the driver is discovering your hardware correctly.
+
+3. **Start with DeviceClasses for your common slice sizes**: Map out what your workloads actually need. Pull 30 days of DCGM metrics and look at p95 GPU utilisation by workload type. That data tells you what slice sizes to define.
+
+4. **Migrate one team's workloads first**: Pick a non-critical namespace. Create the claim templates, update their Helm charts to use claims instead of `nvidia.com/gpu: 1`. Measure GPU utilisation before and after.
+
+5. **Set up DCGM Exporter with MIG awareness and add the recording rules**: You need to see the numbers change. Infra teams that can't prove the impact of their work don't get investment for more of it.
+
+6. **Add LimitRanges and claim template governance to your namespace provisioning**: Don't let this become the wild west. If teams can request any claim template, they will.
+
+7. **Monitor the DRA driver releases**: The GPU kubelet plugin is now GA as of v25.12.0, but sub-features like dynamic MIG are still moving quickly. Follow the `NVIDIA/k8s-dra-driver-gpu` releases.
+
+The GPU waste problem is a solved problem at the platform layer now. Kubernetes has the primitives. NVIDIA has a driver. The missing piece is usually just platform teams actually deploying it.
+
+Stop leaving GPUs idle. Your finance team will thank you.
