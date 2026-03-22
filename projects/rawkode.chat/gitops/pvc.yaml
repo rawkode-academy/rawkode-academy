@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rawkode-chat-data
+  namespace: rawkode-chat
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: zfs-iscsi
+  resources:
+    requests:
+      storage: 10Gi
