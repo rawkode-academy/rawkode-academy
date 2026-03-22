@@ -10,6 +10,7 @@ devenv.local.nix
 
 # direnv
 .direnv
+.envrc
 
 # NodeJS
 node_modules
