@@ -6,7 +6,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: zfs-iscsi
+  storageClassName: openebs-single-replica
   resources:
     requests:
       storage: 10Gi
