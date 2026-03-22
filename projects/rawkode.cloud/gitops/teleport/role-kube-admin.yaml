@@ -1,12 +1,12 @@
 apiVersion: resources.teleport.dev/v1
 kind: TeleportRoleV8
 metadata:
-  name: access
+  name: kube-admin
   namespace: teleport
 spec:
   allow:
     kubernetes_groups:
-      - teleport-viewers
+      - system:masters
     kubernetes_labels:
       "*": "*"
     kubernetes_resources:
@@ -14,6 +14,4 @@ spec:
         namespace: "*"
         name: "*"
         verbs:
-          - get
-          - list
-          - watch
+          - "*"
