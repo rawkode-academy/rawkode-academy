@@ -1,7 +1,7 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "klustered-dev-website",
-	"main": "./dist/_worker.js/index.js",
+	"main": "@astrojs/cloudflare/entrypoints/server",
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
@@ -19,6 +19,14 @@
 		"directory": "./dist",
 		"run_worker_first": true
 	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "klustered-brackets",
+			"database_id": "REPLACE_WITH_DATABASE_ID",
+			"migrations_dir": "./src/db/migrations"
+		}
+	],
 	"kv_namespaces": [
 		{
 			"binding": "SESSION",

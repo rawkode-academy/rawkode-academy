@@ -26,9 +26,10 @@ let isSubscribed = false;
 
 if (user) {
 	try {
+		const env = Astro.locals.runtime.env;
 		const prefixedUserId = createLearnerId(user.id);
 		const prefs =
-			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+			await env.EMAIL_PREFERENCES.getPreferences(
 				prefixedUserId,
 				"newsletter",
 				audience,

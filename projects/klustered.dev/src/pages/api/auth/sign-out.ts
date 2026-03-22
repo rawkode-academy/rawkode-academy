@@ -6,7 +6,8 @@ export const GET: APIRoute = async (context) => {
 
 	if (sessionId) {
 		// Delete session from KV
-		await context.locals.runtime.env.SESSION.delete(`session:${sessionId}`);
+		const env = context.locals.runtime.env;
+		await env.SESSION.delete(`session:${sessionId}`);
 	}
 
 	// Clear session cookie

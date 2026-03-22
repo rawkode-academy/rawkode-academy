@@ -17,14 +17,15 @@ let isTeamRegistered = false;
 
 if (user) {
 	try {
+		const env = Astro.locals.runtime.env;
 		const prefixedUserId = createLearnerId(user.id);
 		const [soloPrefs, teamPrefs] = await Promise.all([
-			Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+			env.EMAIL_PREFERENCES.getPreferences(
 				prefixedUserId,
 				"newsletter",
 				"klustered-solo",
 			),
-			Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+			env.EMAIL_PREFERENCES.getPreferences(
 				prefixedUserId,
 				"newsletter",
 				"klustered-team",

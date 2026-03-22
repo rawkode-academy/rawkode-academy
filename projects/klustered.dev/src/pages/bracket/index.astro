@@ -1,0 +1,192 @@
+---
+export const prerender = false;
+
+import { css } from "styled-system/css";
+import "../../styles/global.css";
+import { getActiveBrackets } from "@/lib/klustered-brackets";
+
+const brackets = getActiveBrackets();
+
+const pageStyles = css({
+	minHeight: "100vh",
+	background: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)",
+	paddingBlock: "4rem",
+	paddingInline: "1rem",
+});
+
+const containerStyles = css({
+	maxWidth: "800px",
+	marginInline: "auto",
+});
+
+const backLinkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "0.5rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	textDecoration: "none",
+	fontSize: "0.875rem",
+	marginBottom: "2rem",
+	transition: "color 0.2s",
+	"&:hover": {
+		color: "white",
+	},
+});
+
+const headerStyles = css({
+	textAlign: "center",
+	marginBottom: "3rem",
+});
+
+const titleStyles = css({
+	fontSize: "clamp(2rem, 5vw, 3rem)",
+	fontWeight: 700,
+	color: "white",
+	marginBottom: "0.5rem",
+});
+
+const subtitleStyles = css({
+	fontSize: "1rem",
+	color: "rgba(255, 255, 255, 0.6)",
+});
+
+const gridStyles = css({
+	display: "grid",
+	gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+	gap: "1.5rem",
+});
+
+const cardStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	background: "linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05))",
+	border: "1px solid rgba(99, 102, 241, 0.2)",
+	borderRadius: "1rem",
+	padding: "1.5rem",
+	textDecoration: "none",
+	transition: "all 0.2s",
+	"&:hover": {
+		transform: "translateY(-4px)",
+		borderColor: "rgba(139, 92, 246, 0.4)",
+		boxShadow: "0 20px 40px -10px rgba(139, 92, 246, 0.2)",
+	},
+});
+
+const cardTitleStyles = css({
+	fontSize: "1.25rem",
+	fontWeight: 600,
+	color: "white",
+	marginBottom: "0.5rem",
+});
+
+const badgeContainerStyles = css({
+	display: "flex",
+	gap: "0.5rem",
+	marginBottom: "1rem",
+});
+
+const badgeStyles = css({
+	display: "inline-block",
+	padding: "0.25rem 0.5rem",
+	fontSize: "0.625rem",
+	fontWeight: 600,
+	textTransform: "uppercase",
+	borderRadius: "9999px",
+});
+
+const descriptionStyles = css({
+	fontSize: "0.875rem",
+	color: "rgba(255, 255, 255, 0.6)",
+	lineHeight: 1.5,
+	marginBottom: "1rem",
+	flex: 1,
+});
+
+const viewLinkStyles = css({
+	fontSize: "0.875rem",
+	color: "#a78bfa",
+	fontWeight: 500,
+});
+
+const emptyStyles = css({
+	textAlign: "center",
+	padding: "4rem 2rem",
+	background: "rgba(255, 255, 255, 0.03)",
+	borderRadius: "1rem",
+	border: "1px solid rgba(255, 255, 255, 0.1)",
+});
+
+const emptyTitleStyles = css({
+	fontSize: "1.25rem",
+	fontWeight: 600,
+	color: "white",
+	marginBottom: "0.5rem",
+});
+
+const emptyTextStyles = css({
+	color: "rgba(255, 255, 255, 0.5)",
+});
+
+function getTypeColor(type: string) {
+	return type === "solo"
+		? "background: rgba(99, 102, 241, 0.2); color: #a5b4fc;"
+		: "background: rgba(168, 85, 247, 0.2); color: #d8b4fe;";
+}
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Active Brackets - Klustered '26</title>
+	</head>
+	<body>
+		<main class={pageStyles}>
+			<div class={containerStyles}>
+				<a href="/" class={backLinkStyles}>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+					</svg>
+					Back to Home
+				</a>
+
+				<header class={headerStyles}>
+					<h1 class={titleStyles}>Active Brackets</h1>
+					<p class={subtitleStyles}>
+						Watch the competition unfold in real-time
+					</p>
+				</header>
+
+				{brackets && brackets.length > 0 ? (
+					<div class={gridStyles}>
+						{brackets.map((b) => (
+							<a href={`/bracket/${b.slug}`} class={cardStyles}>
+								<h2 class={cardTitleStyles}>{b.name}</h2>
+								<div class={badgeContainerStyles}>
+									<span class={badgeStyles} style={getTypeColor(b.type)}>
+										{b.type}
+									</span>
+									<span class={badgeStyles} style="background: rgba(34, 197, 94, 0.2); color: #86efac;">
+										Live
+									</span>
+								</div>
+								{b.description && (
+									<p class={descriptionStyles}>{b.description}</p>
+								)}
+								<span class={viewLinkStyles}>View Bracket &rarr;</span>
+							</a>
+						))}
+					</div>
+				) : (
+					<div class={emptyStyles}>
+						<h2 class={emptyTitleStyles}>No Active Brackets</h2>
+						<p class={emptyTextStyles}>
+							Check back soon for upcoming competitions!
+						</p>
+					</div>
+				)}
+			</div>
+		</main>
+	</body>
+</html>
