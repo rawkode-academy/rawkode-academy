@@ -25,6 +25,17 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-rawkode-chat
+      protocol: HTTPS
+      port: 443
+      hostname: rawkode.chat
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: rawkode-chat-tls
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: teleport-passthrough
       protocol: TLS
       port: 443

@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: rawkode-chat
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: oci://ghcr.io/rawkode-academy/rawkode-chat/gitops
+  ref:
+    tag: latest

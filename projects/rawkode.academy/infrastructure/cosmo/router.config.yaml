@@ -1,0 +1,12 @@
+version: "1"
+log_level: debug
+authentication:
+  providers:
+    - name: Zitadel
+      jwks:
+        url: "https://zitadel.rawkode.academy/oauth/v2/keys"
+headers:
+  all:
+    request:
+      - op: propagate
+        named: Authorization

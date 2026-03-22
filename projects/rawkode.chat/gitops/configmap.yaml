@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rawkode-chat
+  namespace: rawkode-chat
+data:
+  WADDLE_MODE: homeserver
+  WADDLE_BASE_URL: https://rawkode.chat
+  WADDLE_CORS_ORIGINS: https://rawkode.chat
+  WADDLE_XMPP_ENABLED: "true"
+  WADDLE_XMPP_DOMAIN: rawkode.chat
+  WADDLE_XMPP_PORT: "5222"
+  WADDLE_XMPP_C2S_ADDR: 0.0.0.0:5222
+  WADDLE_XMPP_S2S_ENABLED: "false"
+  WADDLE_NATIVE_AUTH_ENABLED: "true"
+  WADDLE_REGISTRATION_ENABLED: "false"
+  WADDLE_AUTH_PROVIDERS_JSON: >-
+    [{"id":"rawkode-chat","display_name":"Rawkode Chat","kind":"oidc","issuer":"https://id.rawkode.academy/auth","client_id":"rawkode-chat","token_endpoint_auth_method":"none","scopes":["openid","profile","email"],"subject_claim":"sub","username_claim":"preferred_username","email_claim":"email"}]
+  RUST_LOG: info

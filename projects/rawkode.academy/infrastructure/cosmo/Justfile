@@ -1,0 +1,123 @@
+set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
+
+@default:
+	just --list
+
+# Start the WunderGraph Cosmo router locally using the published container image.
+#
+# The execution config defaults to the ConfigMap embedded in `cosmo-router.yaml`.
+# Provide control-plane credentials (e.g. router token) through environment variables
+# or via an env-file referenced by `COSMO_ROUTER_ENV_FILE`.
+#
+# Optional environment variables:
+#   COSMO_ROUTER_IMAGE          - Container image to run (default ghcr.io/wundergraph/cosmo/router:latest)
+#   COSMO_ROUTER_CONTAINER_BIN  - Container runtime (default docker)
+#   COSMO_ROUTER_NAME           - Container name (default cosmo-router-dev)
+#   COSMO_ROUTER_CONTAINER_PORT - Internal router port (default 3002)
+#   COSMO_ROUTER_DEV_MODE       - Value for DEV_MODE env (default true)
+#   COSMO_ROUTER_ENV_FILE       - Path to a file consumed via --env-file
+#   COSMO_ROUTER_RUN_ARGS       - Extra args appended to the container run command
+router PORT="3002" CONFIG="router.config.yaml" EXEC_CONFIG="":
+	#!/usr/bin/env bash
+	set -euo pipefail
+
+	container_bin="${COSMO_ROUTER_CONTAINER_BIN:-docker}"
+	image="${COSMO_ROUTER_IMAGE:-ghcr.io/wundergraph/cosmo/router:latest}"
+	container_name="${COSMO_ROUTER_NAME:-cosmo-router-dev}"
+	container_port="${COSMO_ROUTER_CONTAINER_PORT:-3002}"
+	dev_mode="${COSMO_ROUTER_DEV_MODE:-true}"
+	env_file="${COSMO_ROUTER_ENV_FILE:-}"
+
+	if ! command -v "${container_bin}" >/dev/null 2>&1; then
+		echo "Container runtime '${container_bin}' not found. Override COSMO_ROUTER_CONTAINER_BIN." >&2
+		exit 1
+	fi
+
+	config_path="{{CONFIG}}"
+	if [[ ! -f "${config_path}" ]]; then
+		if [[ "${config_path}" == "router.config.yaml" ]]; then
+			if [[ ! -f "cosmo-router.yaml" ]]; then
+				echo "Router config '${config_path}' not found and cosmo-router.yaml is missing; cannot derive config." >&2
+				exit 1
+			fi
+			echo "Deriving '${config_path}' from ConfigMap in cosmo-router.yaml"
+			tmp_config="$(mktemp)"
+			awk '
+				/^[[:space:]]+config.yaml: \|/ { in_block=1; next }
+				/^---/ && in_block { exit }
+				in_block {
+					sub(/^[[:space:]]{4}/, "", $0)
+					print
+				}
+			' cosmo-router.yaml > "${tmp_config}"
+			{
+				awk '!/^[[:space:]]*#/' "${tmp_config}"
+			} > "${config_path}"
+			rm -f "${tmp_config}"
+		else
+			echo "Router config '${config_path}' not found. Override CONFIG or create the file." >&2
+			exit 1
+		fi
+	fi
+
+	if [[ "${config_path}" != /* ]]; then
+		config_path="$PWD/${config_path}"
+	fi
+
+	# Determine execution config (JSON). If not provided and Cosmo creds
+	# are available, fetch the latest from control plane.
+	exec_config_path="{{EXEC_CONFIG}}"
+	if [[ -z "${exec_config_path}" ]]; then
+		if [[ -n "${COSMO_GRAPH:-}" && -n "${COSMO_NAMESPACE:-}" && -n "${COSMO_API_KEY:-}" ]]; then
+			mkdir -p .runtime
+			exec_config_path="$PWD/.runtime/execution-config.json"
+			echo "Fetching execution config for graph '${COSMO_GRAPH}' (namespace '${COSMO_NAMESPACE}')"
+			DISABLE_UPDATE_CHECK=true COSMO_TELEMETRY_DISABLED=true COSMO_API_KEY="${COSMO_API_KEY}" \
+				bunx --bun wgc router fetch "${COSMO_GRAPH}" --namespace "${COSMO_NAMESPACE}" --out "${exec_config_path}"
+		fi
+	fi
+	if [[ -n "${exec_config_path}" && "${exec_config_path}" != /* ]]; then
+		exec_config_path="$PWD/${exec_config_path}"
+	fi
+
+	docker_run_args=()
+	if [[ -n "${env_file}" ]]; then
+		if [[ ! -f "${env_file}" ]]; then
+			echo "Env file '${env_file}' (COSMO_ROUTER_ENV_FILE) not found." >&2
+			exit 1
+		fi
+		docker_run_args+=(--env-file "${env_file}")
+	fi
+
+	if [[ -n "${COSMO_ROUTER_RUN_ARGS:-}" ]]; then
+		read -r -a extra_args <<<"${COSMO_ROUTER_RUN_ARGS}"
+		docker_run_args+=("${extra_args[@]}")
+	fi
+
+	echo "Starting Cosmo router container '${container_name}' on port ${PORT} (container port ${container_port})"
+
+	mount_args=(
+		-v "${config_path}:/config/config.yaml:ro"
+	)
+	if [[ -n "${exec_config_path}" && -f "${exec_config_path}" ]]; then
+		mount_args+=( -v "${exec_config_path}:/config/config.json:ro" )
+		exec_env=(-e EXECUTION_CONFIG_FILE_PATH=/config/config.json)
+	else
+		exec_env=()
+		if [[ -z "${ROUTER_TOKEN:-}" && -z "${COSMO_API_KEY:-}" ]]; then
+			echo "Note: no EXEC_CONFIG provided and no token/API key detected; the router will not have an execution config." >&2
+			echo "      Provide EXEC_CONFIG=.json or set COSMO_GRAPH/COSMO_NAMESPACE/COSMO_API_KEY to auto-fetch, or set ROUTER_TOKEN via COSMO_ROUTER_ENV_FILE." >&2
+		fi
+	fi
+
+	"${container_bin}" run \
+		--rm \
+		--name "${container_name}" \
+		-p "${PORT}:${container_port}" \
+		"${mount_args[@]}" \
+		"${exec_env[@]}" \
+		-e ROUTER_CONFIG_FILE_PATH=/config/config.yaml \
+		-e DEV_MODE="${dev_mode}" \
+		-e LISTEN_ADDR="0.0.0.0:${container_port}" \
+		"${docker_run_args[@]}" \
+		"${image}"
