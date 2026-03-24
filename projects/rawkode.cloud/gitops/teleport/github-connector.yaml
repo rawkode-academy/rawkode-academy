@@ -12,9 +12,9 @@ spec:
     - organization: rawkode-academy
       team: platform
       roles:
-        - kube-viewer
-        - kube-admin
+        - academy-viewer
+        - academy-admin
     - organization: rawkode-academy
       team: "*"
       roles:
-        - kube-viewer
+        - academy-viewer
