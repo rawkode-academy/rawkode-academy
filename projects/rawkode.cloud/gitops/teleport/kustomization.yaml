@@ -7,7 +7,7 @@ resources:
   - tls-route.yaml
   - reference-grant.yaml
   - external-secret.yaml
-  - role-kube-admin.yaml
-  - role-kube-viewer.yaml
+  - role-academy-admin.yaml
+  - role-academy-viewer.yaml
   - github-connector.yaml
   - viewer-clusterrolebinding.yaml
