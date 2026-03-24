@@ -1,0 +1,45 @@
+---
+title: "Just-in-Time Access for Incidents"
+slug: "just-in-time-access"
+description: |
+  Implement just-in-time access requests so nobody has standing admin privileges — when paged at 3 AM, engineers request temporary elevated access that is peer-reviewed and time-bounded.
+course: "teleport-for-kubernetes"
+section: "Advanced Features"
+order: 5
+publishedAt: 2026-03-23
+draft: false
+authors:
+  - rawkode
+video:
+  id: "c94kkvztdlqc5vvil0c91p95"
+  thumbnailUrl: "https://content.rawkode.academy/videos/c94kkvztdlqc5vvil0c91p95/thumbnail.jpg"
+resources:
+  - title: "Teleport Access Requests"
+    description: "Just-in-time access request documentation"
+    type: "url"
+    url: "https://goteleport.com/docs/access-controls/access-requests/"
+    category: "documentation"
+---
+
+## The Problem with Standing Privileges
+
+Role-based access control is a great foundation, but on-call engineers need the ability to respond to incidents at 3 AM. The traditional approach gives them permanent cluster admin access — a security liability. If credentials are compromised, the attacker inherits everything. From a compliance perspective, frameworks like SOC 2, FedRAMP, and ISO 27001 increasingly expect least privilege with time-bounded access.
+
+## Just-in-Time Access
+
+The idea is simple: nobody has admin access by default. When paged, you submit a request, explain why you need it, it gets peer-reviewed, and you get temporary access. Fix the issue, go back to bed.
+
+Teleport calls these access requests — a first-class feature built into the platform. No external ticketing system required, no custom code or scripts.
+
+## Implementation
+
+We modify the existing dev team and prod team roles to add access request capabilities, plus create a new elevated `kube-admin` role with a one-hour TTL:
+
+1. **Add `allow.request`** to existing roles so users can request the `kube-admin` role
+2. **Create the `kube-admin` role** with system:masters access and a short TTL
+3. **Request flow**: `tsh request create --roles=kube-admin --reason="debugging production for client XYZ"`
+4. **Approval**: Admin approves via `tctl request approve`
+5. **Login with elevated access**: `tsh login --request-id=<id>`
+6. **Drop privileges**: `tsh request drop` returns to normal access
+
+The one-hour TTL means even in the worst case, the window of elevated privilege is time-bounded. Tune this to your organization's needs — 15 minutes, 30 minutes, or 6 hours for a maintenance period.

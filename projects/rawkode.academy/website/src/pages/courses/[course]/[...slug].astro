@@ -203,7 +203,7 @@ const nextModule =
 						<VideoPlayer
 							video={module.data.video.id}
 							thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
-							client:load
+							client:only="vue"
 							isAuthenticated={false}
 						/>
 					</div>

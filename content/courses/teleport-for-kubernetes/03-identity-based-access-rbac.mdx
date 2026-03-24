@@ -1,0 +1,50 @@
+---
+title: "Identity-Based User Access & RBAC"
+slug: "identity-based-access-rbac"
+description: |
+  Replace manually configured users with GitHub SSO authentication, map GitHub teams to Teleport roles, and access your Kubernetes clusters with short-lived certificates tied to real identities.
+course: "teleport-for-kubernetes"
+section: "Access Control"
+order: 3
+publishedAt: 2026-03-23
+draft: false
+authors:
+  - rawkode
+video:
+  id: "s7mhnkw81wdgfe5tc4a2ky18"
+  thumbnailUrl: "https://content.rawkode.academy/videos/s7mhnkw81wdgfe5tc4a2ky18/thumbnail.jpg"
+resources:
+  - title: "Teleport GitHub SSO Guide"
+    description: "Configure GitHub as an identity provider for Teleport"
+    type: "url"
+    url: "https://goteleport.com/docs/access-controls/sso/github-sso/"
+    category: "documentation"
+---
+
+## Moving Beyond Manual Users
+
+In the last video, we deployed Teleport and created a manual admin user. That's fine for development, but not for production. Today we're setting up GitHub as our identity provider so every user authenticates through SSO and gets a short-lived certificate tied to their real identity.
+
+## GitHub SSO with Teleport
+
+For the Teleport Community Edition, the supported provider is GitHub — perfect for developers. Enterprise users can also use OIDC and SAML connectors for Okta, Azure AD, Google Workspace, and other identity providers.
+
+The flow is simple:
+1. User runs `tsh login` to authenticate with Teleport
+2. It opens a browser for GitHub authentication
+3. Teleport issues a short-lived certificate
+4. User can `tsh kube ls` to list available clusters and start working
+
+## GitOps Configuration
+
+We configure everything the GitOps way using Teleport's operator and custom resource definitions:
+
+- **Enable the Teleport operator** in the Helm release
+- **Create a GitHub connector** CRD with client ID, secret, and team-to-role mappings
+- **Define Teleport roles** (access and editor) as custom resources
+
+GitHub teams map directly to Teleport roles — anyone in the Rawkode Academy organization gets read access, platform team members get editor access.
+
+## CLI Access
+
+Once configured, `tsh login --proxy=rawkode.cloud --auth github` authenticates via browser, and you're in. `tsh kube ls` shows available clusters, and kubectl works seamlessly through Teleport's proxy — no kubeconfig files needed.

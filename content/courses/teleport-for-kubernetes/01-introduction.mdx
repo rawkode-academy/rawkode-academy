@@ -1,0 +1,57 @@
+---
+title: "Introduction to Teleport for Kubernetes"
+slug: "introduction"
+description: |
+  Understand the problem with default Kubernetes access — long-lived credentials, no revocation, and audit gaps — and how Teleport solves it with short-lived certificates, real identities, and full audit logging.
+course: "teleport-for-kubernetes"
+section: "Getting Started"
+order: 1
+publishedAt: 2026-03-23
+draft: false
+authors:
+  - rawkode
+video:
+  id: "qhc6jajwhi2ul563ncovdrg9"
+  thumbnailUrl: "https://content.rawkode.academy/videos/qhc6jajwhi2ul563ncovdrg9/thumbnail.jpg"
+resources:
+  - title: "Teleport Documentation"
+    description: "Official Teleport documentation"
+    type: "url"
+    url: "https://goteleport.com/docs/"
+    category: "documentation"
+  - title: "Teleport GitHub Repository"
+    description: "Source code and community edition"
+    type: "url"
+    url: "https://github.com/gravitational/teleport"
+    category: "code"
+---
+
+## Welcome to Teleport for Kubernetes
+
+Over the next six videos, we go from zero to a fully working setup — identity-based access, role-based controls, just-in-time privilege escalation, and full audit logging. Everything you need to lock down Kubernetes access the right way.
+
+## The Problem
+
+If you've been working with Kubernetes, you're familiar with kubeconfig files. The standard way to authenticate with any Kubernetes cluster — you get the file, drop it into `~/.kube/config`, and off you go. But have you ever looked inside a kubeconfig file?
+
+Typically, your kubeconfig contains a long-lived secret. These certificates live for months or years with no ability to revoke them unless you rotate the entire certificate authority of your cluster. The subject is always generic — `kubernetes-admin` — because Kubernetes has no real concept of users.
+
+This creates audit gaps: when everyone shares the same identity, it's hard to tell who did what. And in our AI landscape, your AI agents potentially have access to all of your clusters with the same permissions you have.
+
+## The Solution: Teleport
+
+Teleport is an infrastructure access platform that sits in front of your Kubernetes clusters, SSH servers, databases, and web applications. It provides a single unified layer for authentication and authorization with complete audit capabilities.
+
+Instead of handing out long-lived credentials, Teleport acts as your certificate authority. When you authenticate through your company's SSO — Okta, Google Workspace, or GitHub — Teleport issues you a short-lived x509 certificate containing your real identity, roles, and an expiration time. By default, certificates are valid for around 12 hours.
+
+## How Teleport Works
+
+Under the hood, there are three core services:
+
+1. **Auth Service** — The brain of Teleport. It runs a certificate authority, stores cluster state, users, roles, connectors, and writes to the audit log.
+2. **Proxy Service** — Your public-facing gateway. It handles protocol detection and routing — the same port can serve the web UI, SSH connections, Kubernetes API requests, and database connections through Multiplex Mode.
+3. **Kubernetes Service** — The agent that connects Teleport to your Kubernetes cluster's API server. It maintains a reverse tunnel back to the proxy, meaning your API server never needs to be exposed to the internet.
+
+## What's Ahead
+
+In this course, we'll walk through deploying Teleport with Helm, setting up GitHub SSO, building fine-grained RBAC with defense in depth, implementing just-in-time access requests, and exploring audit logging and session recording. Every video includes runnable demo scripts you can execute on your own machine.
