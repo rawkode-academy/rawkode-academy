@@ -1,0 +1,61 @@
+---
+title: "Auditing and Session Recording"
+slug: "auditing-and-session-recording"
+description: |
+  Explore Teleport's audit logging, session recording, and live session joining — every kubectl command, every exec session, tied to a real identity with full playback capabilities.
+course: "teleport-for-kubernetes"
+section: "Advanced Features"
+order: 6
+publishedAt: 2026-03-23
+draft: false
+authors:
+  - rawkode
+video:
+  id: "twq63ce7cr33d3nn6olb2aa2"
+  thumbnailUrl: "https://content.rawkode.academy/videos/twq63ce7cr33d3nn6olb2aa2/thumbnail.jpg"
+resources:
+  - title: "Teleport Audit Log"
+    description: "Teleport audit logging and session recording documentation"
+    type: "url"
+    url: "https://goteleport.com/docs/reference/audit/"
+    category: "documentation"
+---
+
+## The Missing Piece: Auditing
+
+We've deployed Teleport, wired up GitHub for SSO, built fine-grained RBAC with deny rules, and set up just-in-time access requests. The final piece of the puzzle is auditing.
+
+Every time someone runs a kubectl command through Teleport, an audit event is created. Every login, every API call, every session start and end — it's all recorded and tied to a real human identity from your SSO provider.
+
+## The Audit Log
+
+Teleport's audit log captures everything happening within your cluster:
+- Certificate issuance events with SSO login details
+- Every Kubernetes API call with the user who made it
+- Access request creation and approval events
+- Failed login attempts and MFA failures
+
+## Session Recording
+
+When someone runs `kubectl exec` into a pod, Teleport records the entire session. You can play it back with `tsh play <session-id>` to see exactly what commands were executed — invaluable for incident response and compliance.
+
+## Live Session Joining
+
+Active sessions can be joined in real-time:
+- **Observer mode** (default): Watch someone else's session without being able to type
+- **Peer mode**: Join as a collaborator and take over typing — perfect for pair debugging production issues
+
+This is a feature we used every week when filming Klustered.
+
+## Course Summary
+
+Over these six videos, we've gone from a blank slate to a fully functional Teleport deployment with:
+- Identity-based access via GitHub SSO
+- Fine-grained RBAC with defense in depth
+- Just-in-time access requests
+- Audit logging and session recording
+- Live session joining and peer programming
+
+Everything was built on the Teleport Community Edition, which is free and open source. There are several features worth exploring further — OIDC and SAML integration, SSH proxying, database connections, application proxying, and Windows desktop access — all through the same unified access plane with the same audit trail.
+
+Check out the documentation at goteleport.com/docs to keep going.

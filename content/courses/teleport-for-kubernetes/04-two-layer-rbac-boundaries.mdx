@@ -1,0 +1,47 @@
+---
+title: "Two-Layer RBAC with Teleport Boundaries"
+slug: "two-layer-rbac-boundaries"
+description: |
+  Build a two-layer RBAC model where Teleport controls which Kubernetes groups a user's certificate carries, and Kubernetes RBAC controls what those groups can do — with deny rules creating hard security boundaries.
+course: "teleport-for-kubernetes"
+section: "Access Control"
+order: 4
+publishedAt: 2026-03-23
+draft: false
+authors:
+  - rawkode
+video:
+  id: "h1qevuz6tezzpolx3afeo0r2"
+  thumbnailUrl: "https://content.rawkode.academy/videos/h1qevuz6tezzpolx3afeo0r2/thumbnail.jpg"
+resources:
+  - title: "Teleport RBAC Documentation"
+    description: "Configure role-based access control in Teleport"
+    type: "url"
+    url: "https://goteleport.com/docs/access-controls/guides/role-templates/"
+    category: "documentation"
+---
+
+## The Principle of Least Privilege
+
+Having identity-based access is a massive improvement, but if every authenticated user has full cluster admin access, we still have a problem. Overprivileged access is one of the most common root causes in Kubernetes security incidents — the problem is the process, not the developer.
+
+## Two-Layer RBAC Model
+
+We build a defense-in-depth model with two independent layers:
+
+1. **Teleport roles** determine which Kubernetes groups are embedded in the user's certificate, which clusters and namespaces the user can reach, and hard deny rules that override everything else
+2. **Kubernetes RBAC** (roles and role bindings) controls what those groups are actually allowed to do within specific namespaces
+
+## Namespace Boundaries
+
+We create development and production namespaces with corresponding Kubernetes roles:
+- **Dev viewers** get read-only access (get, list, watch) to pods, services, config maps, and deployments in the development namespace
+- **Prod admins** get full access to all resources in the production namespace
+
+## Teleport Deny Rules
+
+The most important part: deny rules under `spec.deny` explicitly block resources in specific namespaces. Deny rules in Teleport always take precedence over allow rules — there is no way to override them. This creates a hard security boundary even if someone misconfigures the Kubernetes side.
+
+## Defense in Depth
+
+Both layers enforce the same boundary independently. If someone creates a Kubernetes cluster role binding that accidentally grants broader access, the Teleport deny rule still holds. If someone modifies the Teleport role but forgets Kubernetes, the namespace-scoped role still holds. Two independent layers, each capable of blocking unauthorized access on its own.
