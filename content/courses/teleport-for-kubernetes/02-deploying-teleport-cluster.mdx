@@ -1,0 +1,44 @@
+---
+title: "Deploying a Teleport Cluster on Kubernetes"
+slug: "deploying-teleport-cluster"
+description: |
+  Deploy a working Teleport cluster on Kubernetes using Helm, with TLS certificates via cert-manager and an admin user ready to log in.
+course: "teleport-for-kubernetes"
+section: "Getting Started"
+order: 2
+publishedAt: 2026-03-23
+draft: false
+authors:
+  - rawkode
+video:
+  id: "bx2e90jd6p1u2pkvgj1wo6b7"
+  thumbnailUrl: "https://content.rawkode.academy/videos/bx2e90jd6p1u2pkvgj1wo6b7/thumbnail.jpg"
+resources:
+  - title: "Teleport Helm Chart Documentation"
+    description: "Official Teleport Helm chart installation guide"
+    type: "url"
+    url: "https://goteleport.com/docs/deploy-a-cluster/helm-deployments/"
+    category: "documentation"
+---
+
+## Getting Hands On
+
+Time to get our hands on the keyboard and actually deploy our first Teleport cluster. By the end of this video, you will have a working Teleport cluster running on Kubernetes with TLS certificates and an admin user ready to log in.
+
+## Prerequisites
+
+You'll need Kind (Kubernetes in Docker), Helm, and kubectl. No cloud account required — everything runs locally. The only dependency is cert-manager, which is just one `helm install` away.
+
+## Deployment Steps
+
+We walk through the demo scripts step by step:
+
+1. **Check prerequisites** — Verify Kind, Helm, and kubectl are installed
+2. **Create a Kind cluster** — A simple single control-plane configuration
+3. **Deploy cert-manager** — Add the Jetstack Helm repository, install cert-manager with CRDs, create a self-signed issuer and root certificate
+4. **Configure Teleport values** — Standalone chart mode, Multiplex proxy listener, and cert-manager integration
+5. **Helm install** — Use `envsubst` for values templating, then `helm upgrade --install`
+
+## Production Comparison
+
+We also take a look at a real production deployment running on rawkode.cloud using Flux CD, with ACME-managed TLS certificates, Mayastor storage, and Gateway API via Cilium. The production setup isn't that dissimilar from the local Kind deployment — just a few tweaks for your specific infrastructure.
