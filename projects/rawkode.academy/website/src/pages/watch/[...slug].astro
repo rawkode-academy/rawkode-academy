@@ -13,6 +13,12 @@ import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
+import {
+	buildTranscriptExcerpt,
+	groupTranscriptParagraphs,
+	parseWebVTT,
+	transcriptParagraphToText,
+} from "@/utils/video-transcript";
 
 export const prerender = false;
 
@@ -105,7 +111,9 @@ const showId =
 const showEntry = showId ? await getEntry("shows", showId) : null;
 
 // Normalize technology references (handles both string IDs and Astro reference objects)
-const normalizedTechIds = normalizeTechnologyReferences(video.data.technologies);
+const normalizedTechIds = normalizeTechnologyReferences(
+	video.data.technologies,
+);
 const techEntries = (
 	await Promise.all(
 		normalizedTechIds.map(async (id) => {
@@ -123,9 +131,7 @@ const videosPerTechnology = await Promise.all(
 	techEntries.map(async (tech) => {
 		const techId = tech.id.replace(/\/index$/, "");
 		const allVideos = await getVideosForTechnology(techId);
-		const filteredVideos = allVideos
-			.filter((v) => v.slug !== slug)
-			.slice(0, 3);
+		const filteredVideos = allVideos.filter((v) => v.slug !== slug).slice(0, 3);
 		return {
 			technology: tech,
 			videos: filteredVideos,
@@ -138,19 +144,20 @@ const technologiesWithVideos = videosPerTechnology.filter(
 	(t) => t.videos.length > 0,
 );
 
-const hostEntries = showEntry && Array.isArray(showEntry.data.hosts)
-	? (
-			await Promise.all(
-				(showEntry.data.hosts).map(async (hostRef) => {
-					try {
-						return await getEntry("people", hostRef.id);
-					} catch {
-						return null;
-					}
-				}),
-			)
-		).filter((h): h is NonNullable<typeof h> => Boolean(h))
-	: [];
+const hostEntries =
+	showEntry && Array.isArray(showEntry.data.hosts)
+		? (
+				await Promise.all(
+					showEntry.data.hosts.map(async (hostRef) => {
+						try {
+							return await getEntry("people", hostRef.id);
+						} catch {
+							return null;
+						}
+					}),
+				)
+			).filter((h): h is NonNullable<typeof h> => Boolean(h))
+		: [];
 
 const guestEntries = Array.isArray(video.data.guests)
 	? (
@@ -181,6 +188,33 @@ const breadcrumbElements = showEntry
 
 const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
+const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
+
+let transcriptCues = parseWebVTT("");
+let transcriptParagraphs = groupTranscriptParagraphs(transcriptCues);
+let transcriptExcerpt = "";
+
+try {
+	const transcriptResponse = await fetch(captionUrl, {
+		headers: {
+			Accept: "text/vtt,text/plain;q=0.9,*/*;q=0.1",
+		},
+	});
+
+	if (transcriptResponse.ok) {
+		const transcriptVtt = await transcriptResponse.text();
+		transcriptCues = parseWebVTT(transcriptVtt);
+		transcriptParagraphs = groupTranscriptParagraphs(transcriptCues);
+		transcriptExcerpt = buildTranscriptExcerpt(transcriptParagraphs);
+	}
+} catch {
+	// Rendering the watch page should not fail if captions are temporarily unavailable.
+}
+
+const transcriptPreviewParagraphs = transcriptParagraphs
+	.slice(0, 2)
+	.map((paragraph) => transcriptParagraphToText(paragraph))
+	.filter((paragraph) => paragraph.length > 0);
 
 // Get user authentication status and watch position
 const user = Astro.locals.user;
@@ -203,7 +237,7 @@ if (isAuthenticated && user?.id) {
 				variables: { userId: user.id, videoId: video.data.id },
 			}),
 		});
-		const result = await response.json() as {
+		const result = (await response.json()) as {
 			data?: { getWatchPosition?: { positionSeconds?: number } };
 		};
 		initialPosition = result?.data?.getWatchPosition?.positionSeconds ?? 0;
@@ -227,6 +261,11 @@ if (isAuthenticated && user?.id) {
 		publishedAt={(video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt))}
 		duration={durationSec ?? 0}
 		streamUrl={streamUrl}
+		captionUrl={transcriptParagraphs.length > 0 ? captionUrl : undefined}
+		transcript={transcriptExcerpt || undefined}
+		keywords={techEntries.map((tech) => tech.data.name)}
+		isLiveBroadcast={video.data.type === "live"}
+		category={video.data.category}
 		clips={clips}
 	/>
 	<div class="min-h-screen">
@@ -307,11 +346,46 @@ if (isAuthenticated && user?.id) {
 				{/* Newsletter Signup - High Value Placement */}
 				<NewsletterCTA class="!my-0" />
 
+				{/* Server-rendered transcript excerpt for crawlability */}
+				{transcriptPreviewParagraphs.length > 0 && (
+					<section
+						class="glass-card-shimmer p-4 sm:p-6"
+						aria-labelledby="transcript-preview-heading"
+					>
+						<div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+							<div class="space-y-1">
+								<h2
+									id="transcript-preview-heading"
+									class="text-xl font-semibold text-primary-content"
+								>
+									Transcript Preview
+								</h2>
+								<p class="text-sm text-muted">
+									Server-rendered from the English captions file so the spoken
+									content is present in the initial HTML.
+								</p>
+							</div>
+						</div>
+						<div class="prose prose-lg mt-6 max-w-none dark:prose-invert">
+							{transcriptPreviewParagraphs.map((paragraph) => (
+								<p>{paragraph}</p>
+							))}
+						</div>
+						{transcriptParagraphs.length > 2 && (
+							<p class="mt-4 text-sm text-muted">
+								Open the Transcript tab below to search the full caption text.
+							</p>
+						)}
+					</section>
+				)}
+
 				{/* Tabbed Content: Description & Transcript */}
 				<VideoContentTabs
 					client:idle
 					descriptionHtml={renderedDescriptionHtml}
 					videoId={video.data.id}
+					initialCues={transcriptCues}
+					initialParagraphs={transcriptParagraphs}
 				/>
 
 				{/* More Videos by Technology */}
