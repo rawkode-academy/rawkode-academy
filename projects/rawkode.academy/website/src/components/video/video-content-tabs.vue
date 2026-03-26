@@ -68,6 +68,8 @@
         <VideoTranscript
           :video-id="videoId"
           :is-active="activeTab === 'transcript'"
+          :initial-cues="initialCues"
+          :initial-paragraphs="initialParagraphs"
         />
       </div>
 
@@ -127,6 +129,14 @@ export default {
 		videoId: {
 			type: String,
 			required: true,
+		},
+		initialCues: {
+			type: Array,
+			default: () => [],
+		},
+		initialParagraphs: {
+			type: Array,
+			default: () => [],
 		},
 	},
 	data() {
