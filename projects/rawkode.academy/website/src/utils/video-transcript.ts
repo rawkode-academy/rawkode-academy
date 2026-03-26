@@ -97,9 +97,11 @@ export function groupTranscriptParagraphs(
 export function transcriptParagraphToText(
 	paragraph: TranscriptParagraph,
 ): string {
-	return paragraph.map((cue) => cue.text).join(" ");
-	replace(/\s+/g, " ");
-	trim();
+	return paragraph
+		.map((cue) => cue.text)
+		.join(" ")
+		.replace(/\s+/g, " ")
+		.trim();
 }
 
 export function buildTranscriptExcerpt(
