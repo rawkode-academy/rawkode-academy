@@ -68,10 +68,6 @@ type AstroVitePlugins = NonNullable<
 const asAstroVitePlugins = (plugins: unknown[]): AstroVitePlugins =>
 	plugins as unknown as AstroVitePlugins;
 
-const disablePlatformProxy =
-	process.env.VITEST === "true" ||
-	process.env.DISABLE_CLOUDFLARE_PLATFORM_PROXY === "true";
-
 // Check if D2 is available (used for diagram rendering)
 let d2Available = false;
 try {
@@ -113,17 +109,6 @@ export default defineConfig({
 	adapter: cloudflare({
 		imageService: "cloudflare",
 		sessionKVBindingName: "SESSION",
-		platformProxy: {
-			enabled: !disablePlatformProxy,
-		},
-		routes: {
-			extend: {
-				include: [
-					// Auth callback routes for OAuth
-					{ pattern: "/auth/callback/*" },
-				],
-			},
-		},
 	}),
 	trailingSlash: "never",
 	integrations: [
@@ -192,6 +177,9 @@ export default defineConfig({
 				: {},
 		},
 		ssr: {
+			optimizeDeps: {
+				include: ["picomatch"],
+			},
 			external: [
 				"node:process",
 				"node:fs/promises",
@@ -241,29 +229,27 @@ export default defineConfig({
 			],
 		],
 	},
-	experimental: {
-		fonts: [
-			{
-				provider: fontProviders.google(),
-				name: "Quicksand",
-				cssVariable: "--font-quicksand",
-				weights: ["400", "700"],
-				styles: ["normal"],
-			},
-			{
-				provider: fontProviders.google(),
-				name: "Poppins",
-				cssVariable: "--font-poppins",
-				weights: ["400", "600"],
-				styles: ["normal"],
-			},
-			{
-				provider: fontProviders.fontsource(),
-				name: "Monaspace Neon",
-				cssVariable: "--font-monaspace-neon",
-				weights: ["400"],
-				styles: ["normal"],
-			},
-		],
-	},
+	fonts: [
+		{
+			provider: fontProviders.google(),
+			name: "Quicksand",
+			cssVariable: "--font-quicksand",
+			weights: ["400", "700"],
+			styles: ["normal"],
+		},
+		{
+			provider: fontProviders.google(),
+			name: "Poppins",
+			cssVariable: "--font-poppins",
+			weights: ["400", "600"],
+			styles: ["normal"],
+		},
+		{
+			provider: fontProviders.fontsource(),
+			name: "Monaspace Neon",
+			cssVariable: "--font-monaspace-neon",
+			weights: ["400"],
+			styles: ["normal"],
+		},
+	],
 });

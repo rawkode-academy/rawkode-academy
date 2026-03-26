@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import { env } from "cloudflare:workers";
 import {
 	getSession,
 	getLocalSession,
@@ -14,12 +15,17 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
 		return next();
 	}
 
-	try {
-		const env = context.locals.runtime?.env;
+	// Service bindings to remote workers hang in local dev (workerd).
+	// Use `"remote": true` in wrangler.jsonc services to enable remote proxy,
+	// or skip auth entirely in dev.
+	if (import.meta.env.DEV || process.env.NODE_ENV !== "production") {
+		return next();
+	}
 
+	try {
 		// First, check for local session (OIDC flow)
 		const localSessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value;
-		if (localSessionId && env?.SESSION) {
+		if (localSessionId && env.SESSION) {
 			const localSession = await getLocalSession(
 				localSessionId,
 				env.SESSION as KVNamespace,

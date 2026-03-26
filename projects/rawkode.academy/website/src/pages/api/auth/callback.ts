@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import {
 	parseState,
 	exchangeCodeForTokens,
@@ -16,8 +17,7 @@ export const GET: APIRoute = async (context) => {
 	const error = context.url.searchParams.get("error");
 	const codeVerifier = context.cookies.get(PKCE_COOKIE_NAME)?.value;
 
-	const runtime = context.locals.runtime;
-	const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+	const analytics = env.ANALYTICS as Fetcher | undefined;
 
 	if (error) {
 		console.error("[callback] OAuth error from provider:", error);
@@ -110,7 +110,7 @@ export const GET: APIRoute = async (context) => {
 		expiresAt: Date.now() + SESSION_DURATION_SECONDS * 1000,
 	};
 
-	const sessionKv = runtime?.env?.SESSION as KVNamespace | undefined;
+	const sessionKv = env.SESSION as KVNamespace | undefined;
 	if (sessionKv) {
 		await sessionKv.put(`session:${sessionId}`, JSON.stringify(session), {
 			expirationTtl: SESSION_DURATION_SECONDS,

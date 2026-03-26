@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 
 export const POST: APIRoute = async ({ locals, request }) => {
 	const user = locals.user;
@@ -27,8 +28,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 			);
 		}
 
-		const runtime = locals.runtime;
-		if (!runtime?.env?.WATCH_HISTORY) {
+		if (!env.WATCH_HISTORY) {
 			return new Response(
 				JSON.stringify({ error: "Watch history service not configured" }),
 				{
@@ -38,7 +38,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 			);
 		}
 
-		const response = await runtime.env.WATCH_HISTORY.fetch(
+		const response = await env.WATCH_HISTORY.fetch(
 			new Request("https://watch-history.internal/", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },

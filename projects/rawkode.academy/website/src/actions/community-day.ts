@@ -1,11 +1,11 @@
 import process from "node:process";
 import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
 import { Resend } from "resend";
 
 const SignupSchema = z.object({
-	email: z.string().email("Please enter a valid email address"),
+	email: z.email("Please enter a valid email address"),
 });
 
 export const signupForCommunityDay = defineAction({
