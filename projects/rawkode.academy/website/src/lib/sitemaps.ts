@@ -28,6 +28,11 @@ export interface SitemapIndexEntry {
 	lastmod?: Date;
 }
 
+export interface SitemapDefinition {
+	path: string;
+	getEntries: () => Promise<SitemapUrlEntry[]>;
+}
+
 type StaticPageDefinition = {
 	path: string;
 	source: string;
@@ -481,7 +486,7 @@ export async function getAdrSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	return sortByPath(entries);
 }
 
-export const sitemapDefinitions = [
+export const sitemapDefinitions: readonly SitemapDefinition[] = [
 	{
 		path: "/sitemaps/pages.xml",
 		getEntries: getPagesSitemapEntries,
@@ -524,21 +529,22 @@ export const sitemapDefinitions = [
 	},
 ] as const;
 
+export async function buildSitemapIndexEntries(
+	definitions: readonly SitemapDefinition[],
+): Promise<SitemapIndexEntry[]> {
+	const sitemapEntries = await Promise.all(
+		definitions.map(async (definition) => {
+			const entries = await definition.getEntries();
+			return {
+				path: definition.path,
+				lastmod: getLatestLastmod(entries),
+			};
+		}),
+	);
+
+	return sitemapEntries.sort((a, b) => a.path.localeCompare(b.path));
+}
+
 export async function getSitemapIndexEntries(): Promise<SitemapIndexEntry[]> {
-	const sitemapEntries: SitemapIndexEntry[] = [];
-
-	for (const definition of sitemapDefinitions) {
-		const entries = await definition.getEntries();
-		const lastmod = getLatestLastmod(entries);
-		if (!lastmod) {
-			continue;
-		}
-
-		sitemapEntries.push({
-			path: definition.path,
-			lastmod,
-		});
-	}
-
-	return sitemapEntries;
+	return buildSitemapIndexEntries(sitemapDefinitions);
 }
