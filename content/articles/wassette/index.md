@@ -13,6 +13,9 @@ cover:
 isDraft: false
 authors:
   - rawkode
+technologies:
+  - webassembly
+  - docker
 resources:
   - id: "1"
     title: "Wassette GitHub Repository"
