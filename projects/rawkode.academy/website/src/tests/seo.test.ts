@@ -11,7 +11,7 @@ import {
 } from "@/utils/video-transcript";
 
 const TESTS_DIR = dirname(fileURLToPath(import.meta.url));
-const VIDEO_CONTENT_DIR = resolve(TESTS_DIR, "../../../../content/videos");
+const VIDEO_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/videos");
 
 function readVideoFrontmatterFiles() {
 	return globSync("**/*.{md,mdx}", {
