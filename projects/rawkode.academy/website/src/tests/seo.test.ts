@@ -12,6 +12,11 @@ import {
 
 const TESTS_DIR = dirname(fileURLToPath(import.meta.url));
 const VIDEO_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/videos");
+const ARTICLE_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/articles");
+const TECHNOLOGY_CONTENT_DIR = resolve(
+	TESTS_DIR,
+	"../../../../../content/technologies",
+);
 
 function readVideoFrontmatterFiles() {
 	return globSync("**/*.{md,mdx}", {
@@ -24,6 +29,27 @@ function readVideoFrontmatterFiles() {
 			unknown
 		>,
 	}));
+}
+
+function readArticleFrontmatterFiles() {
+	return globSync("**/*.{md,mdx}", {
+		cwd: ARTICLE_CONTENT_DIR,
+		absolute: true,
+	}).map((filePath) => ({
+		filePath,
+		data: matter(readFileSync(filePath, "utf-8")).data as Record<
+			string,
+			unknown
+		>,
+	}));
+}
+
+function readTechnologyIds() {
+	return new Set(
+		globSync("*/index.{md,mdx}", {
+			cwd: TECHNOLOGY_CONTENT_DIR,
+		}).map((path) => path.split("/")[0]),
+	);
 }
 
 // Minimal mock types for content collections used in SEO tests
@@ -40,7 +66,7 @@ interface MockArticleData {
 	cover?: {
 		alt: string;
 	};
-	technologies?: string[];
+	technologies: string[];
 }
 
 interface MockArticleEntry {
@@ -152,10 +178,53 @@ describe("SEO Validation", () => {
 			)) as MockArticleEntry[];
 
 			for (const article of articles) {
-				// Technology tags are optional but when present should be valid
-				if (article.data.technologies) {
-					expect(Array.isArray(article.data.technologies)).toBe(true);
-					expect(article.data.technologies.length).toBeGreaterThan(0);
+				expect(Array.isArray(article.data.technologies)).toBe(true);
+				expect(article.data.technologies.length).toBeGreaterThan(0);
+			}
+		});
+	});
+
+	describe("Article Taxonomy Guard", () => {
+		it("all article frontmatter files include valid non-empty technologies taxonomy", () => {
+			const articles = readArticleFrontmatterFiles();
+			const technologyIds = readTechnologyIds();
+
+			expect(articles.length).toBeGreaterThan(0);
+			expect(technologyIds.size).toBeGreaterThan(0);
+
+			for (const { filePath, data } of articles) {
+				expect(
+					Array.isArray(data.technologies),
+					`${filePath} is missing technologies taxonomy`,
+				).toBe(true);
+
+				const technologies = Array.isArray(data.technologies)
+					? data.technologies
+					: [];
+
+				expect(
+					technologies.length,
+					`${filePath} must contain at least one technology`,
+				).toBeGreaterThan(0);
+
+				const seen = new Set<string>();
+				for (const technologyId of technologies) {
+					expect(
+						typeof technologyId,
+						`${filePath} has a non-string technology value`,
+					).toBe("string");
+
+					if (typeof technologyId === "string") {
+						expect(
+							technologyIds.has(technologyId),
+							`${filePath} references unknown technology '${technologyId}'`,
+						).toBe(true);
+						expect(
+							seen.has(technologyId),
+							`${filePath} repeats technology '${technologyId}'`,
+						).toBe(false);
+						seen.add(technologyId);
+					}
 				}
 			}
 		});
@@ -200,8 +269,8 @@ describe("SEO Validation", () => {
 
 	describe("URL Structure", () => {
 		it("all article URLs should be SEO-friendly", async () => {
-			getCollection.mockResolvedValue([
-				{
+				getCollection.mockResolvedValue([
+					{
 					id: "test-article-seo-friendly-url",
 					data: {
 						title: "SEO Friendly URL Article",
@@ -213,6 +282,7 @@ describe("SEO Validation", () => {
 						publishedAt: new Date(),
 						authors: ["test-author"],
 						isDraft: false,
+						technologies: ["kubernetes"],
 					},
 				},
 			]);
@@ -246,10 +316,11 @@ describe("SEO Validation", () => {
 						publishedAt: new Date(),
 						authors: ["test-author"],
 						isDraft: false,
+						technologies: ["kubernetes"],
 					},
 					body: "This is a sufficiently long body of content to satisfy the minimal length check for the SEO content structure test. It intentionally exceeds one hundred characters.",
 				},
-			]);
+				]);
 
 			const articles = (await getCollection(
 				"articles",

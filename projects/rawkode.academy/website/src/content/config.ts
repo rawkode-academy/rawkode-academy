@@ -211,7 +211,9 @@ const articles = defineCollection({
 				.enum(["tutorial", "article", "guide", "news"])
 				.default("tutorial"),
 			series: reference("series").optional(),
-			technologies: z.array(z.string()).optional(),
+			technologies: z
+				.array(z.string().min(1))
+				.nonempty("At least one technology is required for each article"),
 			openGraph: z
 				.object({
 					title: z.string(),
