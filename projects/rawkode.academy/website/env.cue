@@ -32,6 +32,10 @@ ci: pipelines: {
 			pullRequest: true
 		}
 		tasks: [_t.deploy.preview]
+		annotations: "Preview URL": schema.#TaskCaptureRef & {
+			cuenvTask:    "deploy.preview"
+			cuenvCapture: "previewUrl"
+		}
 	}
 }
 
@@ -75,6 +79,9 @@ tasks: {
 			command: "bun"
 			args: ["x", "wrangler", "versions", "upload"]
 			dependsOn: [_t.build]
+			captures: previewUrl: {
+				pattern: "Version Preview URL: (.+)"
+			}
 		}
 	}
 }
