@@ -2,12 +2,23 @@ package cuenv
 
 import (
 	"github.com/cuenv/cuenv/schema"
+	xBun "github.com/cuenv/cuenv/contrib/bun"
 	c "github.com/cuenv/cuenv/contrib/contributors"
 )
 
 schema.#Base
 
-hooks: onEnter: devenv: schema.#Devenv
+runtime: schema.#ToolsRuntime & {
+	platforms: ["darwin-arm64", "darwin-x86_64", "linux-x86_64", "linux-arm64"]
+	tools: {
+		bun: xBun.#Bun & {version: "1.3.10"}
+	}
+}
+
+hooks: onEnter: {
+	tools:  schema.#ToolsActivate
+	devenv: schema.#Devenv
+}
 
 ci: providers: ["github"]
 ci: contributors: [
