@@ -11,6 +11,8 @@
     package = pkgs.nodejs_22;
   };
 
+  packages = [ pkgs.bun ];
+
   enterShell = ''
     bun install
   ''
