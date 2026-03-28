@@ -6,6 +6,7 @@ schema.#Project
 
 name: "rawkode-academy-website"
 
+runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
 
 let _t = tasks

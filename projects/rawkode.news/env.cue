@@ -8,20 +8,6 @@ name: "rawkode-news"
 
 let _t = tasks
 
-runtime: schema.#ToolsRuntime & {
-	flakes: {
-		nixpkgs: "github:NixOS/nixpkgs/nixos-25.05"
-	}
-	tools: {
-		node: {
-			version: "22.12.0"
-			source: schema.#Nix & {
-				flake:   "nixpkgs"
-				package: "nodejs_22"
-			}
-		}
-	}
-}
 
 ci: pipelines: {
 	default: {
