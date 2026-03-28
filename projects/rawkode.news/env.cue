@@ -6,6 +6,9 @@ schema.#Project
 
 name: "rawkode-news"
 
+runtime: schema.#DevenvRuntime
+hooks: onEnter: devenv: schema.#Devenv
+
 let _t = tasks
 
 
