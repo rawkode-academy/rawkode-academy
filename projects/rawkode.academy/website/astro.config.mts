@@ -177,6 +177,7 @@ export default defineConfig({
 				: {},
 		},
 		ssr: {
+			noExternal: ["picomatch"],
 			optimizeDeps: {
 				include: ["picomatch"],
 			},
