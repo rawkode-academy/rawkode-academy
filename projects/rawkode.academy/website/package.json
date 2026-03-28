@@ -141,7 +141,8 @@
 	"overrides": {
 		"vite": "^7",
 		"react": "^19.2.4",
-		"react-dom": "^19.2.4"
+		"react-dom": "^19.2.4",
+		"picomatch": "^3.0.2"
 	},
 	"trustedDependencies": [
 		"@tailwindcss/oxide",

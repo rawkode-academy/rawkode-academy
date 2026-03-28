@@ -177,10 +177,6 @@ export default defineConfig({
 				: {},
 		},
 		ssr: {
-			noExternal: ["picomatch"],
-			optimizeDeps: {
-				include: ["picomatch"],
-			},
 			external: [
 				"node:process",
 				"node:fs/promises",
