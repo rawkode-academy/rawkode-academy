@@ -1,6 +1,21 @@
 import type { APIRoute } from "astro";
 
-const getRobotsTxt = (sitemapIndexURL: URL) => `
+const DEFAULT_SITE_URL = "https://rawkode.academy";
+
+export const ROBOTS_SITEMAP_PATH = "/sitemap-index.xml";
+
+export const ROBOTS_DISALLOWS = [
+	"/admin/",
+	"/private/",
+	"/settings/",
+	"/confirm-subscription",
+	"/unsubscribe",
+	"/_server-islands/",
+	"/api/",
+	"/graphql",
+] as const;
+
+export const getRobotsTxt = (sitemapIndexURL: URL) => `
 # Host directive to specify canonical domain
 Host: rawkode.academy
 
@@ -9,24 +24,22 @@ User-agent: *
 Allow: /
 
 # Keep private areas out of search
-Disallow: /admin/
-Disallow: /private/
-Disallow: /settings/
-Disallow: /api/auth/
-Disallow: /api/comments/
-Disallow: /api/watch-position
-Disallow: /api/subscriptions/
-Disallow: /graphql
+${ROBOTS_DISALLOWS.map((path) => `Disallow: ${path}`).join("\n")}
 
 # Sitemap locations
 Sitemap: ${sitemapIndexURL.href}
 `;
 
 export const GET: APIRoute = ({ site }) => {
-	const siteUrl = site ?? new URL("https://rawkode.academy");
-	const sitemapIndexURL = new URL("sitemap-index.xml", siteUrl);
+	const siteUrl = site ?? new URL(DEFAULT_SITE_URL);
+	const sitemapIndexURL = new URL(ROBOTS_SITEMAP_PATH, siteUrl);
 
-	return new Response(getRobotsTxt(sitemapIndexURL));
+	return new Response(getRobotsTxt(sitemapIndexURL), {
+		headers: {
+			"Content-Type": "text/plain; charset=utf-8",
+			"Cache-Control": "public, max-age=3600",
+		},
+	});
 };
 
 export const prerender = true;

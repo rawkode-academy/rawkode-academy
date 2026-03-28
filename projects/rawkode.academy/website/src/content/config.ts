@@ -12,13 +12,13 @@ const videos = defineCollection({
 		base: resolveContentDirSync("videos"),
 	}),
 	schema: z.object({
-		id: z.string(), // video asset ID (used for CDN URLs, PostHog events)
-		slug: z.string(), // human-readable URL identifier
-		title: z.string(),
+		id: z.string().trim().min(1), // video asset ID (used for CDN URLs, PostHog events)
+		slug: z.string().trim().min(1), // human-readable URL identifier
+		title: z.string().trim().min(5),
 		subtitle: z.string().optional(),
-		description: z.string(),
+		description: z.string().trim().min(20),
 		publishedAt: z.coerce.date(),
-		duration: z.number().nonnegative().optional(),
+		duration: z.number().positive(),
 		audioFileSize: z.number().positive().optional(), // bytes, for podcast enclosure
 		type: z.enum(["live", "recorded"]).optional(),
 		category: z
@@ -211,7 +211,9 @@ const articles = defineCollection({
 				.enum(["tutorial", "article", "guide", "news"])
 				.default("tutorial"),
 			series: reference("series").optional(),
-			technologies: z.array(z.string()).optional(),
+			technologies: z
+				.array(z.string().min(1))
+				.nonempty("At least one technology is required for each article"),
 			openGraph: z
 				.object({
 					title: z.string(),

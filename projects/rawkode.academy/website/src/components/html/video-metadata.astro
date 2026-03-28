@@ -7,6 +7,11 @@ interface Props {
 	duration?: number;
 	streamUrl?: string;
 	embedUrl?: string; // Only when a true embeddable player URL (e.g., YouTube/Vimeo)
+	captionUrl?: string;
+	transcript?: string;
+	keywords?: string[];
+	isLiveBroadcast?: boolean;
+	category?: string;
 	isVideoList?: boolean;
 	clips?: Array<{ name: string; startOffset: number; endOffset?: number }>;
 }
@@ -19,6 +24,11 @@ const {
 	duration,
 	streamUrl,
 	embedUrl,
+	captionUrl,
+	transcript,
+	keywords = [],
+	isLiveBroadcast = false,
+	category,
 	isVideoList = false,
 	clips = [],
 } = Astro.props;
@@ -60,6 +70,11 @@ const computedEmbedUrl = (() => {
 	return undefined; // Avoid using HLS/MP4 as embedUrl
 })();
 
+const clipBaseUrl = `${Astro.url.origin}${Astro.url.pathname}`;
+const normalizedKeywords = keywords
+	.map((keyword) => keyword.trim())
+	.filter((keyword) => keyword.length > 0);
+
 const structuredData = isVideoList
 	? {
 			"@context": "https://schema.org",
@@ -73,12 +88,13 @@ const structuredData = isVideoList
 			"@type": "VideoObject",
 			name: title,
 			description: description,
-			thumbnailUrl: thumbnailUrl,
+			thumbnailUrl: thumbnailUrl ? [thumbnailUrl] : undefined,
 			uploadDate: publishedAt,
 			duration: formattedDuration,
 			contentUrl: streamUrl,
 			...(computedEmbedUrl ? { embedUrl: computedEmbedUrl } : {}),
 			url: Astro.url.href,
+			mainEntityOfPage: Astro.url.href,
 			potentialAction: {
 				"@type": "SeekToAction",
 				target: `${Astro.url.origin}${Astro.url.pathname}?t={seek_to_second_number}`,
@@ -100,21 +116,37 @@ const structuredData = isVideoList
 				name: "David McKay",
 				url: "https://rawkode.academy",
 			},
-			expires: null, // Videos don't expire
 			hasPart: clips?.length
 				? clips.map((c) => ({
 						"@type": "Clip",
 						name: c.name,
 						startOffset: c.startOffset,
+						url: `${clipBaseUrl}?t=${c.startOffset}`,
 						...(typeof c.endOffset === "number"
 							? { endOffset: c.endOffset }
 							: {}),
 					}))
 				: undefined,
 			isAccessibleForFree: true,
-			isLiveBroadcast: false,
+			requiresSubscription: false,
+			isLiveBroadcast,
 			isFamilyFriendly: true,
 			inLanguage: "en-US",
+			genre: category,
+			keywords:
+				normalizedKeywords.length > 0
+					? normalizedKeywords.join(", ")
+					: undefined,
+			caption: captionUrl
+				? {
+						"@type": "MediaObject",
+						contentUrl: captionUrl,
+						encodingFormat: "text/vtt",
+						inLanguage: "en-US",
+						name: `${title} captions`,
+					}
+				: undefined,
+			transcript: transcript,
 			// Video quality information
 			videoFrameSize: "1920x1080",
 			videoQuality: "HD",

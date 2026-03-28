@@ -1,4 +1,56 @@
-import { describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { globSync } from "glob";
+import matter from "gray-matter";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+	buildTranscriptExcerpt,
+	groupTranscriptParagraphs,
+	parseWebVTT,
+} from "@/utils/video-transcript";
+
+const TESTS_DIR = dirname(fileURLToPath(import.meta.url));
+const VIDEO_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/videos");
+const ARTICLE_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/articles");
+const TECHNOLOGY_CONTENT_DIR = resolve(
+	TESTS_DIR,
+	"../../../../../content/technologies",
+);
+
+function readVideoFrontmatterFiles() {
+	return globSync("**/*.{md,mdx}", {
+		cwd: VIDEO_CONTENT_DIR,
+		absolute: true,
+	}).map((filePath) => ({
+		filePath,
+		data: matter(readFileSync(filePath, "utf-8")).data as Record<
+			string,
+			unknown
+		>,
+	}));
+}
+
+function readArticleFrontmatterFiles() {
+	return globSync("**/*.{md,mdx}", {
+		cwd: ARTICLE_CONTENT_DIR,
+		absolute: true,
+	}).map((filePath) => ({
+		filePath,
+		data: matter(readFileSync(filePath, "utf-8")).data as Record<
+			string,
+			unknown
+		>,
+	}));
+}
+
+function readTechnologyIds() {
+	return new Set(
+		globSync("*/index.{md,mdx}", {
+			cwd: TECHNOLOGY_CONTENT_DIR,
+		}).map((path) => path.split("/")[0]),
+	);
+}
 
 // Minimal mock types for content collections used in SEO tests
 interface MockArticleData {
@@ -14,7 +66,7 @@ interface MockArticleData {
 	cover?: {
 		alt: string;
 	};
-	technologies?: string[];
+	technologies: string[];
 }
 
 interface MockArticleEntry {
@@ -126,10 +178,53 @@ describe("SEO Validation", () => {
 			)) as MockArticleEntry[];
 
 			for (const article of articles) {
-				// Technology tags are optional but when present should be valid
-				if (article.data.technologies) {
-					expect(Array.isArray(article.data.technologies)).toBe(true);
-					expect(article.data.technologies.length).toBeGreaterThan(0);
+				expect(Array.isArray(article.data.technologies)).toBe(true);
+				expect(article.data.technologies.length).toBeGreaterThan(0);
+			}
+		});
+	});
+
+	describe("Article Taxonomy Guard", () => {
+		it("all article frontmatter files include valid non-empty technologies taxonomy", () => {
+			const articles = readArticleFrontmatterFiles();
+			const technologyIds = readTechnologyIds();
+
+			expect(articles.length).toBeGreaterThan(0);
+			expect(technologyIds.size).toBeGreaterThan(0);
+
+			for (const { filePath, data } of articles) {
+				expect(
+					Array.isArray(data.technologies),
+					`${filePath} is missing technologies taxonomy`,
+				).toBe(true);
+
+				const technologies = Array.isArray(data.technologies)
+					? data.technologies
+					: [];
+
+				expect(
+					technologies.length,
+					`${filePath} must contain at least one technology`,
+				).toBeGreaterThan(0);
+
+				const seen = new Set<string>();
+				for (const technologyId of technologies) {
+					expect(
+						typeof technologyId,
+						`${filePath} has a non-string technology value`,
+					).toBe("string");
+
+					if (typeof technologyId === "string") {
+						expect(
+							technologyIds.has(technologyId),
+							`${filePath} references unknown technology '${technologyId}'`,
+						).toBe(true);
+						expect(
+							seen.has(technologyId),
+							`${filePath} repeats technology '${technologyId}'`,
+						).toBe(false);
+						seen.add(technologyId);
+					}
 				}
 			}
 		});
@@ -174,8 +269,8 @@ describe("SEO Validation", () => {
 
 	describe("URL Structure", () => {
 		it("all article URLs should be SEO-friendly", async () => {
-			getCollection.mockResolvedValue([
-				{
+				getCollection.mockResolvedValue([
+					{
 					id: "test-article-seo-friendly-url",
 					data: {
 						title: "SEO Friendly URL Article",
@@ -187,6 +282,7 @@ describe("SEO Validation", () => {
 						publishedAt: new Date(),
 						authors: ["test-author"],
 						isDraft: false,
+						technologies: ["kubernetes"],
 					},
 				},
 			]);
@@ -220,10 +316,11 @@ describe("SEO Validation", () => {
 						publishedAt: new Date(),
 						authors: ["test-author"],
 						isDraft: false,
+						technologies: ["kubernetes"],
 					},
 					body: "This is a sufficiently long body of content to satisfy the minimal length check for the SEO content structure test. It intentionally exceeds one hundred characters.",
 				},
-			]);
+				]);
 
 			const articles = (await getCollection(
 				"articles",
@@ -241,7 +338,342 @@ describe("SEO Validation", () => {
 	});
 });
 
+describe("Video SEO", () => {
+	it("all videos expose the metadata required by watch pages and video structured data", () => {
+		const videos = readVideoFrontmatterFiles();
+
+		expect(videos.length).toBeGreaterThan(0);
+
+		for (const { filePath, data } of videos) {
+			expect(typeof data.id, `${filePath} is missing id`).toBe("string");
+			expect(
+				String(data.id).trim().length,
+				`${filePath} has an empty id`,
+			).toBeGreaterThan(0);
+
+			expect(typeof data.slug, `${filePath} is missing slug`).toBe("string");
+			expect(
+				String(data.slug).trim().length,
+				`${filePath} has an empty slug`,
+			).toBeGreaterThan(0);
+
+			expect(typeof data.title, `${filePath} is missing title`).toBe("string");
+			expect(
+				String(data.title).trim().length,
+				`${filePath} has a too-short title`,
+			).toBeGreaterThanOrEqual(5);
+
+			expect(
+				typeof data.description,
+				`${filePath} is missing description`,
+			).toBe("string");
+			expect(
+				String(data.description).trim().length,
+				`${filePath} has a too-short description`,
+			).toBeGreaterThanOrEqual(20);
+
+			expect(
+				Boolean(data.publishedAt),
+				`${filePath} is missing publishedAt`,
+			).toBe(true);
+			expect(typeof data.duration, `${filePath} is missing duration`).toBe(
+				"number",
+			);
+			expect(
+				Number(data.duration),
+				`${filePath} has a non-positive duration`,
+			).toBeGreaterThan(0);
+		}
+	});
+
+	it("parses WebVTT into crawlable transcript paragraphs and excerpts", () => {
+		const vtt = `WEBVTT
+
+00:00:00.000 --> 00:00:04.000
+Hello <c.green>cloud native</c> world.
+
+00:00:04.000 --> 00:00:08.000
+We are testing transcript indexing.
+
+00:00:08.000 --> 00:00:12.000
+Search engines should see this text.`;
+
+		const cues = parseWebVTT(vtt);
+		const paragraphs = groupTranscriptParagraphs(cues, 8);
+		const excerpt = buildTranscriptExcerpt(paragraphs, 120);
+
+		expect(cues).toEqual([
+			{
+				start: "00:00:00.000",
+				end: "00:00:04.000",
+				text: "Hello cloud native world.",
+			},
+			{
+				start: "00:00:04.000",
+				end: "00:00:08.000",
+				text: "We are testing transcript indexing.",
+			},
+			{
+				start: "00:00:08.000",
+				end: "00:00:12.000",
+				text: "Search engines should see this text.",
+			},
+		]);
+		expect(paragraphs.length).toBeGreaterThan(1);
+		expect(excerpt).toContain("Hello cloud native world.");
+		expect(excerpt).toContain("Search engines should see this text.");
+	});
+});
+
+describe("Crawlability and Sitemaps", () => {
+	afterEach(() => {
+		vi.resetModules();
+		vi.doUnmock("astro:content");
+		vi.doUnmock("@/lib/content");
+		vi.doUnmock("@rawkodeacademy/content/utils");
+		vi.doUnmock("glob");
+		vi.doUnmock("node:fs/promises");
+	});
+
+	it("renders robots.txt with private routes blocked and the sitemap index declared", async () => {
+		const { GET, ROBOTS_DISALLOWS, ROBOTS_SITEMAP_PATH } = await import(
+			"../pages/robots.txt.ts"
+		);
+
+		const response = GET({
+			site: new URL("https://rawkode.academy"),
+		} as never);
+		const body = await response.text();
+
+		expect(response.headers.get("content-type")).toContain("text/plain");
+		expect(body).toContain("User-agent: *");
+		expect(body).toContain(
+			`Sitemap: https://rawkode.academy${ROBOTS_SITEMAP_PATH}`,
+		);
+
+		for (const path of ROBOTS_DISALLOWS) {
+			expect(body).toContain(`Disallow: ${path}`);
+		}
+	});
+
+	it("keeps all intended sitemap sections in the index, even if a section is empty", async () => {
+		vi.doMock("astro:content", () => ({
+			getCollection: vi.fn(),
+		}));
+		vi.doMock("@/lib/content", () => ({
+			getPublishedVideos: vi.fn(),
+		}));
+		vi.doMock("@rawkodeacademy/content/utils", () => ({
+			resolveContentDirSync: vi.fn(),
+		}));
+		vi.doMock("glob", () => ({
+			glob: vi.fn(),
+		}));
+		vi.doMock("node:fs/promises", () => ({
+			stat: vi.fn(),
+		}));
+
+		const { buildSitemapIndexEntries, sitemapDefinitions } = await import(
+			"../lib/sitemaps.ts"
+		);
+
+		const entries = await buildSitemapIndexEntries([
+			{
+				path: "/sitemaps/pages.xml",
+				getEntries: async () => [
+					{
+						path: "/watch",
+						lastmod: new Date("2026-03-26T12:00:00.000Z"),
+						changefreq: "daily" as const,
+					},
+				],
+			},
+			{
+				path: "/video-sitemap.xml",
+				getEntries: async () => [],
+			},
+		]);
+
+		expect(entries).toHaveLength(2);
+		expect(entries[0]?.path).toBe("/sitemaps/pages.xml");
+		expect(entries[0]?.lastmod?.toISOString()).toBe("2026-03-26T12:00:00.000Z");
+		expect(entries[1]?.path).toBe("/video-sitemap.xml");
+		expect(entries[1]?.lastmod).toBeUndefined();
+
+		const sitemapPaths = sitemapDefinitions.map(
+			(definition) => definition.path,
+		);
+		expect(sitemapPaths).toContain("/video-sitemap.xml");
+		expect(sitemapPaths).toContain("/sitemaps/pages.xml");
+		expect(sitemapPaths).toContain("/sitemaps/articles.xml");
+		expect(
+			sitemapPaths.some(
+				(path) =>
+					path.startsWith("/api/") ||
+					path.startsWith("/settings") ||
+					path.startsWith("/private"),
+			),
+		).toBe(false);
+	});
+
+	it("renders video sitemap durations as bounded integer seconds", async () => {
+		const mockGetCollection = vi.fn().mockResolvedValue([
+			{
+				id: "kubernetes",
+				data: {
+					name: "Kubernetes",
+				},
+			},
+		]);
+		const mockGetPublishedVideos = vi.fn().mockResolvedValue([
+			{
+				data: {
+					id: "video-1",
+					slug: "seo-hardening",
+					title: "SEO Hardening",
+					description: "Hardening sitemap output for search engines.",
+					duration: 1439.8,
+					publishedAt: "2026-03-25T10:00:00.000Z",
+					technologies: ["kubernetes"],
+				},
+			},
+			{
+				data: {
+					id: "video-2",
+					slug: "too-long-duration",
+					title: "Too Long",
+					description: "This should omit the duration field.",
+					duration: 28_801,
+					publishedAt: "2026-03-24T10:00:00.000Z",
+					technologies: [],
+				},
+			},
+		]);
+
+		vi.doMock("astro:content", () => ({
+			getCollection: mockGetCollection,
+		}));
+		vi.doMock("@/lib/content", () => ({
+			getPublishedVideos: mockGetPublishedVideos,
+		}));
+
+		const { GET, toVideoDurationValue } = await import(
+			"../pages/video-sitemap.xml.ts"
+		);
+
+		expect(toVideoDurationValue(1439.8)).toBe("1439");
+		expect(toVideoDurationValue(0)).toBeUndefined();
+		expect(toVideoDurationValue(28_801)).toBeUndefined();
+
+		const response = await GET({
+			site: new URL("https://rawkode.academy"),
+		} as never);
+		const xml = await response.text();
+
+		expect(xml).toContain("<video:duration>1439</video:duration>");
+		expect(xml).not.toContain("<video:duration>PT");
+		expect(xml).not.toContain("<video:duration>28801</video:duration>");
+	});
+
+	it("defines supplemental canonical checks for paginated watch pages", async () => {
+		const {
+			REQUIRED_SITEMAP_PATHS,
+			SUPPLEMENTAL_URL_CHECKS,
+			buildSupplementalUrlChecks,
+		} = await import("../../scripts/check-sitemap.ts");
+
+		expect(REQUIRED_SITEMAP_PATHS).toContain("/video-sitemap.xml");
+		expect(SUPPLEMENTAL_URL_CHECKS).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					path: "/watch",
+					expectedCanonicalPath: "/watch",
+				}),
+				expect.objectContaining({
+					path: "/watch?page=2",
+					expectedCanonicalPath: "/watch",
+					expectedRobots: "noindex,follow",
+				}),
+			]),
+		);
+
+		expect(buildSupplementalUrlChecks("https://rawkode.academy")).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					url: "https://rawkode.academy/watch?page=2",
+					expectedCanonical: "https://rawkode.academy/watch",
+					expectedRobots: "noindex,follow",
+				}),
+			]),
+		);
+	});
+});
+
 describe("Structured Data Validation", () => {
+	it("should model VideoObject JSON-LD with clip urls, captions, and transcript text", () => {
+		const videoJsonLd = {
+			"@context": "https://schema.org",
+			"@type": "VideoObject",
+			name: "Hands-on with Kubernetes",
+			description: "A practical Kubernetes walkthrough with clip markers.",
+			thumbnailUrl: [
+				"https://content.rawkode.academy/videos/video-1/thumbnail.jpg",
+			],
+			uploadDate: "2026-03-26T10:00:00.000Z",
+			duration: "PT37M12S",
+			contentUrl: "https://content.rawkode.academy/videos/video-1/stream.m3u8",
+			url: "https://rawkode.academy/watch/hands-on-with-kubernetes",
+			mainEntityOfPage:
+				"https://rawkode.academy/watch/hands-on-with-kubernetes",
+			caption: {
+				"@type": "MediaObject",
+				contentUrl:
+					"https://content.rawkode.academy/videos/video-1/captions/en.vtt",
+				encodingFormat: "text/vtt",
+				inLanguage: "en-US",
+			},
+			transcript:
+				"Kubernetes gives you declarative deployment, service discovery, and scaling primitives.",
+			hasPart: [
+				{
+					"@type": "Clip",
+					name: "Introduction",
+					startOffset: 0,
+					url: "https://rawkode.academy/watch/hands-on-with-kubernetes?t=0",
+				},
+				{
+					"@type": "Clip",
+					name: "Scaling",
+					startOffset: 900,
+					endOffset: 1320,
+					url: "https://rawkode.academy/watch/hands-on-with-kubernetes?t=900",
+				},
+			],
+			isAccessibleForFree: true,
+			requiresSubscription: false,
+		};
+
+		expect(videoJsonLd["@type"]).toBe("VideoObject");
+		expect(videoJsonLd.name).toBeDefined();
+		expect(videoJsonLd.thumbnailUrl).toHaveLength(1);
+		expect(videoJsonLd.uploadDate).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+		expect(videoJsonLd.duration).toMatch(/^PT/);
+		expect(videoJsonLd.contentUrl).toContain("/stream.m3u8");
+		expect(videoJsonLd.mainEntityOfPage).toBe(videoJsonLd.url);
+		expect(videoJsonLd.caption.encodingFormat).toBe("text/vtt");
+		expect(videoJsonLd.transcript.length).toBeGreaterThan(20);
+		expect(videoJsonLd.hasPart).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					"@type": "Clip",
+					url: expect.stringContaining("?t="),
+				}),
+			]),
+		);
+		expect(videoJsonLd.requiresSubscription).toBe(false);
+		expect(() => JSON.stringify(videoJsonLd)).not.toThrow();
+	});
+
 	it("should have valid Course JSON-LD with required fields", () => {
 		// Mock course data
 		const mockCourse = {

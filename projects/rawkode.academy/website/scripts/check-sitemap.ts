@@ -1,16 +1,73 @@
 #!/usr/bin/env bun
 /*
-  Check sitemap URLs for status 200 and correct canonical.
+  Check sitemap URLs for status 200 and canonical correctness.
   Usage: bun scripts/check-sitemap.ts --base https://rawkode.academy [--limit 400] [--concurrency 10]
 */
-
-import { parse } from "node-html-parser";
 
 type Args = {
 	base: string;
 	limit: number;
 	concurrency: number;
 };
+
+type SitemapFetchResult = {
+	indexUrl: string;
+	sitemapLocs: string[];
+	pageUrls: string[];
+};
+
+type UrlExpectation = {
+	url: string;
+	expectedCanonical: string;
+	expectedRobots?: string;
+};
+
+type UrlCheckResult = {
+	url: string;
+	ok: boolean;
+	canonical: string | null;
+	canonicalOk: boolean;
+	hostOk: boolean;
+	robots: string | null;
+	robotsOk: boolean;
+	status: number;
+};
+
+export const REQUIRED_SITEMAP_PATHS = [
+	"/sitemaps/pages.xml",
+	"/sitemaps/articles.xml",
+	"/sitemaps/technologies.xml",
+	"/video-sitemap.xml",
+	"/sitemaps/courses.xml",
+	"/sitemaps/learning-paths.xml",
+	"/sitemaps/people.xml",
+	"/sitemaps/shows.xml",
+	"/sitemaps/series.xml",
+	"/sitemaps/adrs.xml",
+] as const;
+
+export const DISALLOWED_SITEMAP_PATH_PREFIXES = [
+	"/admin",
+	"/private",
+	"/settings",
+	"/confirm-subscription",
+	"/unsubscribe",
+	"/_server-islands/",
+	"/api/",
+	"/graphql",
+] as const;
+
+export const SUPPLEMENTAL_URL_CHECKS = [
+	{
+		path: "/watch",
+		expectedCanonicalPath: "/watch",
+	},
+	{
+		path: "/watch?page=2",
+		expectedCanonicalPath: "/watch",
+		expectedRobots: "noindex,follow",
+	},
+] as const;
 
 function parseArgs(): Args {
 	const argv = process.argv.slice(2);
@@ -25,132 +82,310 @@ function parseArgs(): Args {
 }
 
 async function fetchText(url: string) {
-	const r = await fetch(url, { headers: { Accept: "*/*" } });
-	if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-	return await r.text();
+	const response = await fetch(url, { headers: { Accept: "*/*" } });
+	if (!response.ok) {
+		throw new Error(`${response.status} ${response.statusText}`);
+	}
+	return await response.text();
 }
 
-function extractLocsFromXml(xml: string): string[] {
+export function extractLocsFromXml(xml: string): string[] {
 	const locs: string[] = [];
 	const re = /<loc>\s*([^<]+?)\s*<\/loc>/gi;
-	let m: RegExpExecArray | null;
-	while ((m = re.exec(xml))) {
-		const loc = m[1];
+	let match: RegExpExecArray | null;
+
+	while ((match = re.exec(xml))) {
+		const loc = match[1];
 		if (typeof loc === "string") {
 			locs.push(loc.trim());
 		}
 	}
+
 	return locs;
 }
 
-function normalize(url: string) {
-	const u = new URL(url);
-	let p = u.pathname;
-	if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
-	return `${u.protocol}//${u.host}${p}`;
+function extractTagAttribute(
+	html: string,
+	tagName: string,
+	requiredAttributes: Record<string, string>,
+	targetAttribute: string,
+): string | null {
+	const tagPattern = new RegExp(`<${tagName}\\b[^>]*>`, "gi");
+
+	for (const match of html.matchAll(tagPattern)) {
+		const tag = match[0];
+		const hasRequiredAttributes = Object.entries(requiredAttributes).every(
+			([name, value]) => {
+				const attributePattern = new RegExp(
+					`${name}\\s*=\\s*["']${value}["']`,
+					"i",
+				);
+				return attributePattern.test(tag);
+			},
+		);
+
+		if (!hasRequiredAttributes) {
+			continue;
+		}
+
+		const targetMatch = tag.match(
+			new RegExp(`${targetAttribute}\\s*=\\s*["']([^"']+)["']`, "i"),
+		);
+		if (targetMatch?.[1]) {
+			return targetMatch[1];
+		}
+	}
+
+	return null;
 }
 
-async function getAllSitemapUrls(base: string): Promise<string[]> {
-	// Try index first, fallback to /sitemap.xml
+function normalizeUrl(url: string): string {
+	const parsed = new URL(url);
+	let pathname = parsed.pathname;
+	if (pathname.length > 1 && pathname.endsWith("/")) {
+		pathname = pathname.slice(0, -1);
+	}
+	return `${parsed.protocol}//${parsed.host}${pathname}`;
+}
+
+function normalizeRobots(robots: string | null): string | null {
+	return robots?.replace(/\s+/g, "").toLowerCase() ?? null;
+}
+
+export function buildSupplementalUrlChecks(base: string): UrlExpectation[] {
+	return SUPPLEMENTAL_URL_CHECKS.map((check) => ({
+		url: new URL(check.path, base).href,
+		expectedCanonical: new URL(check.expectedCanonicalPath, base).href,
+		expectedRobots: check.expectedRobots,
+	}));
+}
+
+async function getSitemapFetchResult(base: string): Promise<SitemapFetchResult> {
 	const candidates = [
 		new URL("/sitemap-index.xml", base).href,
 		new URL("/sitemap.xml", base).href,
 	];
 
-	for (const sm of candidates) {
+	for (const sitemapUrl of candidates) {
 		try {
-			const xml = await fetchText(sm);
+			const xml = await fetchText(sitemapUrl);
 			const locs = extractLocsFromXml(xml);
-			if (locs.length === 0) continue;
+			if (locs.length === 0) {
+				continue;
+			}
 
-			// If file appears to be an index (contains sitemap URLs), fetch each and collect page URLs
 			const looksLikeIndex =
 				xml.includes("<sitemapindex") ||
-				locs.some((l) => /sitemap.*\.xml/i.test(l));
-			if (looksLikeIndex) {
-				const all: string[] = [];
-				for (const loc of locs) {
-					try {
-						const childXml = await fetchText(loc);
-						const childLocs = extractLocsFromXml(childXml);
-						all.push(...childLocs);
-					} catch (e) {
-						console.warn(`Failed to read child sitemap ${loc}:`, e);
-					}
-				}
-				return Array.from(new Set(all));
+				locs.some((loc) => /sitemap.*\.xml/i.test(loc));
+			if (!looksLikeIndex) {
+				return {
+					indexUrl: sitemapUrl,
+					sitemapLocs: [sitemapUrl],
+					pageUrls: Array.from(new Set(locs)),
+				};
 			}
-			return Array.from(new Set(locs));
+
+			const sitemapLocs = Array.from(new Set(locs));
+			const pageUrls: string[] = [];
+
+			for (const loc of sitemapLocs) {
+				try {
+					const childXml = await fetchText(loc);
+					pageUrls.push(...extractLocsFromXml(childXml));
+				} catch (error) {
+					console.warn(`Failed to read child sitemap ${loc}:`, error);
+				}
+			}
+
+			return {
+				indexUrl: sitemapUrl,
+				sitemapLocs,
+				pageUrls: Array.from(new Set(pageUrls)),
+			};
 		} catch {
-			// try next candidate
+			// Try the next candidate.
 		}
 	}
+
 	throw new Error("Could not fetch sitemap index or sitemap.xml");
 }
 
-async function checkUrl(url: string, apexHost: string) {
-	const res = await fetch(url, { headers: { Accept: "text/html" } });
-	const ok = res.status === 200;
-	const ct = res.headers.get("content-type") || "";
+async function checkUrl(
+	url: string,
+	apexHost: string,
+	expectation?: UrlExpectation,
+): Promise<UrlCheckResult> {
+	const response = await fetch(url, { headers: { Accept: "text/html" } });
+	const ok = response.status === 200;
+	const contentType = response.headers.get("content-type") || "";
+
 	let canonical: string | null = null;
 	let canonicalOk = false;
 	let hostOk = false;
-	if (ok && ct.includes("text/html")) {
-		const html = await res.text();
-		const dom = parse(html);
-		const link = dom.querySelector('link[rel="canonical"]');
-		canonical = link?.getAttribute("href") || null;
+	let robots: string | null = null;
+	let robotsOk = expectation?.expectedRobots == null;
+
+	if (ok && contentType.includes("text/html")) {
+		const html = await response.text();
+		canonical = extractTagAttribute(
+			html,
+			"link",
+			{ rel: "canonical" },
+			"href",
+		);
+		robots = extractTagAttribute(
+			html,
+			"meta",
+			{ name: "robots" },
+			"content",
+		);
+
+		const expectedCanonical = expectation?.expectedCanonical ?? url;
 		if (canonical) {
-			canonicalOk = normalize(canonical) === normalize(url);
-			hostOk = new URL(canonical).hostname === apexHost;
+			canonicalOk =
+				normalizeUrl(canonical) === normalizeUrl(expectedCanonical);
+			hostOk =
+				new URL(canonical).hostname.replace(/^www\./, "") === apexHost;
+		}
+
+		if (expectation?.expectedRobots) {
+			robotsOk =
+				normalizeRobots(robots) === normalizeRobots(expectation.expectedRobots);
 		}
 	}
-	return { url, ok, canonical, canonicalOk, hostOk, status: res.status };
+
+	return {
+		url,
+		ok,
+		canonical,
+		canonicalOk,
+		hostOk,
+		robots,
+		robotsOk,
+		status: response.status,
+	};
 }
 
-async function run() {
+export async function run() {
 	const { base, limit, concurrency } = parseArgs();
 	const apexHost = new URL(base).hostname.replace(/^www\./, "");
+
 	console.log(
 		`Checking sitemap for ${base} (limit=${limit}, concurrency=${concurrency})`,
 	);
-	const urls = (await getAllSitemapUrls(base)).slice(0, limit);
-	console.log(`Found ${urls.length} URLs from sitemap`);
 
-	const results: Awaited<ReturnType<typeof checkUrl>>[] = [];
-	let i = 0;
+	const { indexUrl, sitemapLocs, pageUrls } = await getSitemapFetchResult(base);
+	const limitedPageUrls = pageUrls.slice(0, limit);
+	console.log(`Fetched sitemap index: ${indexUrl}`);
+	console.log(`Found ${sitemapLocs.length} child sitemaps and ${pageUrls.length} URLs`);
+
+	const sitemapPaths = new Set(sitemapLocs.map((loc) => new URL(loc).pathname));
+	const missingSitemaps = REQUIRED_SITEMAP_PATHS.filter(
+		(path) => !sitemapPaths.has(path),
+	);
+	const disallowedSitemapUrls = pageUrls.filter((url) => {
+		const pathname = new URL(url).pathname;
+		return DISALLOWED_SITEMAP_PATH_PREFIXES.some((prefix) =>
+			pathname.startsWith(prefix),
+		);
+	});
+
+	const pageResults: UrlCheckResult[] = [];
+	let pageErrorCount = 0;
+	let pageIndex = 0;
+
 	async function worker() {
-		while (i < urls.length) {
-			const idx = i++;
-			const u = urls[idx];
-			if (!u) continue; // noUncheckedIndexedAccess safety
+		while (pageIndex < limitedPageUrls.length) {
+			const currentIndex = pageIndex++;
+			const url = limitedPageUrls[currentIndex];
+			if (!url) {
+				continue;
+			}
+
 			try {
-				const r = await checkUrl(u, apexHost);
-				results.push(r);
-				const emoji = r.ok && r.canonicalOk && r.hostOk ? "✅" : "⚠️";
-				console.log(`${emoji} ${u} [${r.status}]`);
-			} catch (e) {
-				console.log(`❌ ${u} -> ${e}`);
+				const result = await checkUrl(url, apexHost);
+				pageResults.push(result);
+				const indicator =
+					result.ok && result.canonicalOk && result.hostOk ? "OK" : "WARN";
+				console.log(`${indicator} ${url} [${result.status}]`);
+			} catch (error) {
+				pageErrorCount += 1;
+				console.log(`FAIL ${url} -> ${error}`);
 			}
 		}
 	}
+
 	await Promise.all(Array.from({ length: concurrency }, worker));
 
-	const failures = results.filter((r) => !r.ok || !r.canonicalOk || !r.hostOk);
-	const non200 = results.filter((r) => !r.ok);
-	const badCanon = results.filter((r) => r.ok && !r.canonicalOk);
-	const badHost = results.filter((r) => r.ok && r.canonicalOk && !r.hostOk);
+	const supplementalChecks = buildSupplementalUrlChecks(base);
+	const supplementalResults = await Promise.all(
+		supplementalChecks.map((check) =>
+			checkUrl(check.url, apexHost, check).then((result) => ({
+				...result,
+				expectedRobots: check.expectedRobots ?? null,
+			})),
+		),
+	);
+
+	const pageFailures = pageResults.filter(
+		(result) => !result.ok || !result.canonicalOk || !result.hostOk,
+	);
+	const supplementalFailures = supplementalResults.filter(
+		(result) =>
+			!result.ok || !result.canonicalOk || !result.hostOk || !result.robotsOk,
+	);
 
 	console.log("\nSummary:");
-	console.log(`  Total checked: ${results.length}`);
-	console.log(`  Non-200:       ${non200.length}`);
-	console.log(`  Canonical mismatches: ${badCanon.length}`);
-	console.log(`  Canonical host not apex: ${badHost.length}`);
+	console.log(`  Total sitemap URLs checked: ${pageResults.length}`);
+	console.log(`  Required sitemap files missing: ${missingSitemaps.length}`);
+	console.log(`  Disallowed URLs in sitemap set: ${disallowedSitemapUrls.length}`);
+	console.log(`  Canonical/page failures: ${pageFailures.length}`);
+	console.log(`  Page fetch errors: ${pageErrorCount}`);
+	console.log(`  Supplemental URL failures: ${supplementalFailures.length}`);
 
-	if (failures.length > 0) process.exit(2);
+	if (missingSitemaps.length > 0) {
+		console.log("\nMissing required sitemap files:");
+		for (const path of missingSitemaps) {
+			console.log(`  - ${path}`);
+		}
+	}
+
+	if (disallowedSitemapUrls.length > 0) {
+		console.log("\nDisallowed URLs present in sitemap set:");
+		for (const url of disallowedSitemapUrls) {
+			console.log(`  - ${url}`);
+		}
+	}
+
+	if (supplementalResults.length > 0) {
+		console.log("\nSupplemental checks:");
+		for (const result of supplementalResults) {
+			const indicator =
+				result.ok && result.canonicalOk && result.hostOk && result.robotsOk
+					? "OK"
+					: "WARN";
+			console.log(
+				`  ${indicator} ${result.url} [${result.status}] canonical=${result.canonical ?? "missing"} robots=${result.robots ?? "missing"}`,
+			);
+		}
+	}
+
+	if (
+		missingSitemaps.length > 0 ||
+		disallowedSitemapUrls.length > 0 ||
+		pageFailures.length > 0 ||
+		pageErrorCount > 0 ||
+		supplementalFailures.length > 0
+	) {
+		process.exit(2);
+	}
 }
 
-run().catch((e) => {
-	console.error("Failed:", e);
-	process.exit(1);
-});
+const isMainModule = process.argv[1]?.endsWith("check-sitemap.ts");
+
+if (isMainModule) {
+	run().catch((error) => {
+		console.error("Failed:", error);
+		process.exit(1);
+	});
+}
