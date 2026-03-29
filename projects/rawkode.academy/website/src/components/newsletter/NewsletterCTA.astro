@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 
+import { env } from "cloudflare:workers";
 import NewsletterWidget from "./NewsletterWidget.vue";
 import { createLearnerId } from "@/actions/newsletter";
 
@@ -23,15 +24,10 @@ const {
 const user = Astro.locals.user;
 let isSubscribed = false;
 
-if (user) {
+if (user && import.meta.env.PROD) {
 	try {
 		const prefixedUserId = createLearnerId(user.id);
-		const prefs =
-			await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
-				prefixedUserId,
-				"newsletter",
-				audience,
-			);
+		const prefs = await env.EMAIL_PREFERENCES.getPreferences(prefixedUserId, "newsletter", audience);
 		isSubscribed = prefs.length > 0;
 	} catch (e) {
 		console.error("Failed to fetch preferences", e);

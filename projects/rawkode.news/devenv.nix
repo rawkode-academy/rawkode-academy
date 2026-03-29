@@ -1,25 +1,17 @@
 { pkgs, ... }:
 {
-  name = "web.rawkode.academy";
+  name = "rawkode-news";
 
   dotenv.disableHint = true;
 
   cachix.enable = false;
 
-  languages.nix.enable = true;
-
   languages.javascript = {
     enable = true;
-    package = pkgs.nodejs_24;
+    package = pkgs.nodejs_22;
   };
-  languages.typescript.enable = true;
 
-  packages = with pkgs; [
-    biome
-    bun
-    d2
-    nixfmt-rfc-style
-  ];
+  packages = [ pkgs.bun ];
 
   enterShell = ''
     bun install

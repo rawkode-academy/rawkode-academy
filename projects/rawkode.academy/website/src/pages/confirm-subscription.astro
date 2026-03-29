@@ -1,4 +1,5 @@
 ---
+import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import { createLearnerId } from "@/actions/newsletter";
 
@@ -11,7 +12,7 @@ if (!user) {
 const prefixedUserId = createLearnerId(user.id);
 
 // Auto-subscribe the user
-await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
 	audience: "academy",
 	channel: "newsletter",
 	status: "subscribed",

@@ -2,6 +2,8 @@
 {
   languages.javascript.bun.enable = true;
 
+  packages = [ pkgs.bun ];
+
   # Nix is added as a dependency because,
   # we need it to work with VSCode and editing this file.
   languages.nix = {

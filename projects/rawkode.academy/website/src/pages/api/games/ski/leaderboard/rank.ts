@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 
 type ScoreType = "fastest_breach" | "win_streak" | "total_wins" | "enemies_defeated";
 
@@ -23,7 +24,6 @@ export const GET: APIRoute = async ({ url, locals }) => {
 		});
 	}
 
-	const env = locals.runtime.env;
 	const personId = user.id;
 
 	const type = url.searchParams.get("type") as ScoreType | null;

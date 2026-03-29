@@ -1,6 +1,7 @@
-import { defineCollection, reference, z } from "astro:content";
+import { defineCollection, reference } from "astro:content";
+import { z } from "astro/zod";
 import { glob } from "astro/loaders";
-import { createTechnologySchema } from "@rawkodeacademy/content";
+import { createTechnologySchema, type TechnologyData } from "@rawkodeacademy/content";
 import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 
 // Local, file-based content collections for videos, shows, and technologies.
@@ -69,20 +70,20 @@ const shows = defineCollection({
 				.optional(),
 			podcast: z
 				.object({
-					guid: z.string().uuid().optional(),
-					email: z.string().email(),
+					guid: z.uuid().optional(),
+					email: z.email(),
 					category: z.string(),
 					subcategory: z.string().optional(),
 					explicit: z.boolean().default(false),
 					copyright: z.string().optional(),
-					artworkUrl: z.string().url().optional(),
+					artworkUrl: z.url().optional(),
 				})
 				.optional(),
 			subscribeLinks: z
 				.array(
 					z.object({
 						platform: z.string(),
-						url: z.string().url(),
+						url: z.url(),
 						icon: z
 							.enum([
 								"apple-podcasts",
@@ -109,7 +110,7 @@ const resourceSchema = z.object({
 	title: z.string(),
 	description: z.string().optional(),
 	type: z.enum(["url", "file", "embed"]),
-	url: z.union([z.string().url(), z.string().startsWith("/")]).optional(),
+	url: z.union([z.url(), z.string().startsWith("/")]).optional(),
 	filePath: z.string().optional(),
 	embedConfig: z
 		.object({
@@ -117,7 +118,7 @@ const resourceSchema = z.object({
 			src: z.string(),
 			height: z.string().default("600px"),
 			width: z.string().default("100%"),
-			files: z.record(z.string()).optional(), // For WebContainer file system
+			files: z.record(z.string(), z.string()).optional(), // For WebContainer file system
 			import: z
 				.object({
 					localDir: z.string(), // Path relative to the content file
@@ -142,17 +143,17 @@ const people = defineCollection({
 		github: z.string().optional(),
 		twitter: z.string().optional(),
 		bluesky: z.string().optional(),
-		mastodon: z.string().url().optional(),
+		mastodon: z.url().optional(),
 		linkedin: z.string().optional(),
-		website: z.string().url().optional(),
-		youtube: z.string().url().optional(),
+		website: z.url().optional(),
+		youtube: z.url().optional(),
 		forename: z.string().optional(),
 		surname: z.string().optional(),
 		// biography: z.string().optional(), // Moved to MDX body
 		links: z
 			.array(
 				z.object({
-					url: z.string().url(),
+					url: z.url(),
 					name: z.string(),
 				}),
 			)
@@ -194,10 +195,10 @@ const articles = defineCollection({
 			title: z.string(),
 			publishedAt: z.coerce.date(),
 			updatedAt: z.coerce.date().optional(),
-			// canonicalUrl: z.string().url().optional(),
+			// canonicalUrl: z.url().optional(),
 			subtitle: z.string().optional(),
 			description: z.string(),
-			authors: z.array(reference("people")).default(["rawkode"]),
+			authors: z.array(reference("people")).default(["rawkode"] as any),
 			categories: z.array(z.string()).default([]),
 			draft: z.boolean().default(false),
 			cover: z
@@ -235,7 +236,8 @@ const technologies = defineCollection({
 		pattern: ["**/*.{md,mdx}"],
 		base: resolveContentDirSync("technologies"),
 	}),
-	schema: () => createTechnologySchema(z),
+	// createTechnologySchema uses zod@3.25 types; cast output for Astro's zod@4 inference
+	schema: () => createTechnologySchema(z as any) as unknown as import("astro/zod").ZodType<TechnologyData>,
 });
 
 const series = defineCollection({
@@ -264,7 +266,7 @@ const adrs = defineCollection({
 		z.object({
 			title: z.string(),
 			adoptedAt: z.coerce.date(),
-			authors: z.array(reference("people")).default(["rawkode"]),
+			authors: z.array(reference("people")).default(["rawkode"] as any),
 		}),
 });
 
@@ -302,7 +304,7 @@ const courses = defineCollection({
 				.optional(),
 			publishedAt: z.coerce.date(),
 			updatedAt: z.coerce.date().optional(),
-			authors: z.array(reference("people")).default(["rawkode"]),
+			authors: z.array(reference("people")).default(["rawkode"] as any),
 			difficulty: z.enum(["beginner", "intermediate", "advanced"]),
 			learningPath: z.array(z.string()).default([]),
 			technologies: z
@@ -334,6 +336,7 @@ const courseModules = defineCollection({
 	loader: glob({
 		pattern: ["*/*.mdx", "*/*.md"],
 		base: resolveContentDirSync("courses"),
+		generateId: ({ entry }) => entry.replace(/\.mdx?$/, ""),
 	}),
 	schema: ({ image }) =>
 		z.object({
@@ -362,7 +365,7 @@ const courseModules = defineCollection({
 			updatedAt: z.coerce.date().optional(),
 			draft: z.boolean().default(true),
 			difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
-			authors: z.array(reference("people")).default(["rawkode"]),
+			authors: z.array(reference("people")).default(["rawkode"] as any),
 			resources: z.array(resourceSchema).optional(),
 		}),
 });
@@ -395,7 +398,7 @@ const learningPaths = defineCollection({
 		prerequisites: z.array(z.string()).default([]),
 		technologies: z.array(z.string()),
 		publishedAt: z.coerce.date(),
-		authors: z.array(reference("people")).default(["rawkode"]),
+		authors: z.array(reference("people")).default(["rawkode"] as any),
 	}),
 });
 

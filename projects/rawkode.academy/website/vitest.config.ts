@@ -1,8 +1,6 @@
 /// <reference types="vitest" />
 import { getViteConfig } from "astro/config";
-import type { ViteUserConfig } from "vitest/config";
 
-// Use type assertion to work around the UserConfig type issue
 export default getViteConfig({
 	test: {
 		include: ["src/**/*.{spec,test}.{ts,tsx}"],
@@ -22,4 +20,4 @@ export default getViteConfig({
 		},
 		setupFiles: ["./src/tests/setup.ts"],
 	},
-} as ViteUserConfig);
+} as any);

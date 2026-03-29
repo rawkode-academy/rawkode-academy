@@ -1,4 +1,5 @@
 ---
+import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.vue";
 import { createLearnerId } from "@/actions/newsletter";
@@ -27,7 +28,7 @@ let hasNewsletterSubscription = false;
 if (user) {
 	try {
 		const prefixedUserId = createLearnerId(user.id);
-		const allPrefs = await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(prefixedUserId);
+		const allPrefs = await env.EMAIL_PREFERENCES.getPreferences(prefixedUserId);
 		hasNewsletterSubscription = allPrefs.some(
 			(pref: { channel: string; audience: string }) =>
 				pref.channel === "newsletter" && pref.audience === "kubernetes-release-updates"
