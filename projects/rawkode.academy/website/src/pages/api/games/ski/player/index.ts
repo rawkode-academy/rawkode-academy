@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 
 /**
  * GET /api/games/ski/player
@@ -14,7 +15,6 @@ export const GET: APIRoute = async ({ locals }) => {
 		});
 	}
 
-	const env = locals.runtime.env;
 	const personId = user.id;
 
 	try {

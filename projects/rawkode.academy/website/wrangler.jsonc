@@ -1,13 +1,12 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "rawkode-academy-website",
-	"main": "./dist/_worker.js/index.js",
-	"compatibility_date": "2025-05-05",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"compatibility_date": "2026-03-12",
 	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
 		"binding": "ASSETS",
-		"directory": "./dist",
-		"run_worker_first": true
+		"directory": "./dist"
 	},
 	"workers_dev": true,
 	"preview_urls": true,

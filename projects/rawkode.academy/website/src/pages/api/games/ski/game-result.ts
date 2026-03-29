@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 
 interface GameResultPayload {
 	won: boolean;
@@ -22,7 +23,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		});
 	}
 
-	const env = locals.runtime.env;
 	const personId = user.id;
 
 	let payload: GameResultPayload;

@@ -17,10 +17,9 @@
 		],
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
-		"baseUrl": ".",
 		"types": ["vidstack/vue"],
 		"paths": {
-			"@/*": ["src/*"],
+			"@/*": ["./src/*"],
 			"@games/*": ["../games/*"]
 		},
 		"moduleResolution": "bundler",
@@ -31,7 +30,5 @@
 		"strict": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true
 	}
 }

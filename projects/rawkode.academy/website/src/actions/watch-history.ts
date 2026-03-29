@@ -1,5 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { env } from "cloudflare:workers";
 import { captureServerEvent, getDistinctId } from "../server/analytics";
 
 const WatchPositionSchema = z.object({
@@ -20,16 +21,7 @@ export const updateWatchPosition = defineAction({
 				});
 			}
 
-			// Access the runtime environment through locals
-			const runtime = ctx.locals.runtime;
-			if (!runtime || !runtime.env.WATCH_HISTORY) {
-				console.error("Runtime debug info:", {
-					hasRuntime: !!runtime,
-					hasLocals: !!ctx.locals,
-					localsKeys: ctx.locals ? Object.keys(ctx.locals) : [],
-					runtimeKeys: runtime ? Object.keys(runtime) : [],
-				});
-
+			if (!env.WATCH_HISTORY) {
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Watch history service not configured",
@@ -37,7 +29,7 @@ export const updateWatchPosition = defineAction({
 			}
 
 			// Call the watch history service via service binding
-			const response = await runtime.env.WATCH_HISTORY.fetch(
+			const response = await env.WATCH_HISTORY.fetch(
 				new Request("https://watch-history.internal/", {
 					method: "POST",
 					headers: {
@@ -62,7 +54,7 @@ export const updateWatchPosition = defineAction({
 			const result = (await response.json()) as Record<string, unknown>;
 
 			// Track the event for analytics
-			const analytics = runtime.env.ANALYTICS;
+			const analytics = env.ANALYTICS;
 			const distinctId = getDistinctId(ctx);
 			await captureServerEvent(
 				{

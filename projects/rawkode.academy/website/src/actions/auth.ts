@@ -1,5 +1,6 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { env } from "cloudflare:workers";
 import {
 	signOut as serverSignOut,
 	SESSION_COOKIE_NAME,
@@ -13,14 +14,12 @@ export const auth = {
 			const userId = context.locals.user?.id;
 
 			// Best-effort call to identity service to invalidate server-side session
-			await serverSignOut(cookies, context.locals.runtime?.env);
+			await serverSignOut(cookies, env);
 
 			// Clear local OIDC session cookie
 			const localSessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value;
 			if (localSessionId) {
-				const sessionKv = context.locals.runtime?.env?.SESSION as
-					| KVNamespace
-					| undefined;
+				const sessionKv = env.SESSION as KVNamespace | undefined;
 				if (sessionKv) {
 					await sessionKv.delete(`session:${localSessionId}`);
 				}
@@ -38,8 +37,7 @@ export const auth = {
 				domain: ".rawkode.academy",
 			});
 
-			const runtime = context.locals.runtime;
-			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+			const analytics = env.ANALYTICS as Fetcher | undefined;
 			await captureServerEvent(
 				{
 					event: "sign_out_completed",

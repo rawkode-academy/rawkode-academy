@@ -12,20 +12,11 @@ const preview: Preview = {
 		layout: "centered",
 		backgrounds: {
 			default: "light",
-			values: [
-				{
-					name: "light",
-					value: "#ffffff",
-				},
-				{
-					name: "dark",
-					value: "#0a0a0a",
-				},
-				{
-					name: "rawkode-dark",
-					value: "#1a1a2e",
-				},
-			],
+			options: {
+				light: { name: "light", value: "#ffffff" },
+				dark: { name: "dark", value: "#0a0a0a" },
+				"rawkode-dark": { name: "rawkode-dark", value: "#1a1a2e" },
+			},
 		},
 	},
 };

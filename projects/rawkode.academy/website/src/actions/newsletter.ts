@@ -1,5 +1,6 @@
 import { defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { env } from "cloudflare:workers";
 import { parseCampaignAttribution } from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
 import {
@@ -27,26 +28,13 @@ function getNewsletterCookieName(audience: string): string {
 	return `newsletter:${audience}:updates`;
 }
 
-function getAnalyticsBinding(context: {
-	locals?: {
-		runtime?: {
-			env?: {
-				ANALYTICS?: Fetcher;
-			};
-		};
-	};
-}): Fetcher | undefined {
-	return context.locals?.runtime?.env?.ANALYTICS;
+function getAnalyticsBinding(): Fetcher | undefined {
+	return env.ANALYTICS;
 }
 
 type NewsletterAnalyticsContext = {
 	locals: {
 		user?: { id: string };
-		runtime?: {
-			env?: {
-				ANALYTICS?: Fetcher;
-			};
-		};
 	};
 	request?: Request;
 };
@@ -96,7 +84,7 @@ async function captureActivatedUserFromNewsletter({
 				...campaign,
 			},
 		},
-		getAnalyticsBinding(context),
+		getAnalyticsBinding(),
 	);
 }
 
@@ -130,7 +118,7 @@ async function captureNewsletterAnalytics({
 				...campaign,
 			},
 		},
-		getAnalyticsBinding(context),
+		getAnalyticsBinding(),
 	);
 }
 
@@ -151,7 +139,7 @@ export const newsletter = {
 			const source = input.source || `website:${input.channel}:unknown`;
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience: input.audience,
@@ -203,7 +191,7 @@ export const newsletter = {
 			const source = input.source || "website:newsletter:unknown";
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience: input.audience,
@@ -249,7 +237,7 @@ export const newsletter = {
 			const status = input.subscribed ? "subscribed" : "unsubscribed";
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience: input.audience,
@@ -291,13 +279,13 @@ export const newsletter = {
 			const source = input.source || "website:settings:unsubscribe-all";
 
 			const allPrefs =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+				await env.EMAIL_PREFERENCES.getPreferences(
 					prefixedUserId,
 				);
 
 			const unsubscribePromises = allPrefs.map(
 				(pref: { channel: string; audience: string }) =>
-					context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+					env.EMAIL_PREFERENCES.setPreference(
 						prefixedUserId,
 						{
 							audience: pref.audience,
@@ -329,7 +317,7 @@ export const newsletter = {
 	}),
 	subscribeWithEmail: defineAction({
 		input: z.object({
-			email: z.string().email("Please enter a valid email address"),
+			email: z.email("Please enter a valid email address"),
 			audience: z.string().default("academy"),
 			channel: z.string().default("newsletter"),
 			source: z.string().optional(),
@@ -342,7 +330,7 @@ export const newsletter = {
 			const isAuthenticated = Boolean(context.locals.user);
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience: input.audience,
@@ -390,7 +378,7 @@ export const newsletter = {
 	}),
 	unsubscribeWithEmail: defineAction({
 		input: z.object({
-			email: z.string().email("Please enter a valid email address"),
+			email: z.email("Please enter a valid email address"),
 			audience: z.string().default("academy"),
 			source: z.string().optional(),
 			attribution: z.string().optional(),
@@ -402,7 +390,7 @@ export const newsletter = {
 			const isAuthenticated = Boolean(context.locals.user);
 
 			const result =
-				await context.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+				await env.EMAIL_PREFERENCES.setPreference(
 					prefixedUserId,
 					{
 						audience: input.audience,

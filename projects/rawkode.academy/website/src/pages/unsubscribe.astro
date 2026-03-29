@@ -1,4 +1,5 @@
 ---
+import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import { createEmailId, createLearnerId } from "@/actions/newsletter";
 import { createLogger } from "@/lib/logger";
@@ -27,7 +28,7 @@ if (Astro.request.method === "POST" && !user) {
 	if (submittedEmail) {
 		try {
 			const prefixedUserId = createEmailId(submittedEmail);
-			await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+			await env.EMAIL_PREFERENCES.setPreference(
 				prefixedUserId,
 				{
 					audience: "academy",
@@ -62,7 +63,7 @@ if (Astro.request.method === "POST" && !user) {
 if (Astro.request.method === "POST" && user) {
 	try {
 		const prefixedUserId = createLearnerId(user.id);
-		await Astro.locals.runtime.env.EMAIL_PREFERENCES.setPreference(
+		await env.EMAIL_PREFERENCES.setPreference(
 			prefixedUserId,
 			{
 				audience: "academy",

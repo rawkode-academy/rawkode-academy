@@ -1,5 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { env } from "cloudflare:workers";
 import { captureServerEvent, getDistinctId } from "../server/analytics";
 
 const ReactionSchema = z.object({
@@ -21,17 +22,7 @@ export const addReaction = defineAction({
 				});
 			}
 
-			// Access the runtime environment through locals
-			const runtime = ctx.locals.runtime;
-			if (!runtime || !runtime.env.EMOJI_REACTIONS) {
-				// Log debugging information
-				console.error("Runtime debug info:", {
-					hasRuntime: !!runtime,
-					hasLocals: !!ctx.locals,
-					localsKeys: ctx.locals ? Object.keys(ctx.locals) : [],
-					runtimeKeys: runtime ? Object.keys(runtime) : [],
-				});
-
+			if (!env.EMOJI_REACTIONS) {
 				throw new ActionError({
 					code: "INTERNAL_SERVER_ERROR",
 					message: "Emoji reactions service not configured",
@@ -44,7 +35,7 @@ export const addReaction = defineAction({
 			// and new Better Auth UUIDs transparently. Service binding requests are internal
 			// (no Origin/Authorization headers), so the emoji-reactions service skips auth validation.
 			// See platform/emoji-reactions/IDENTITY_MIGRATION.md for details on identity continuity.
-			const response = await runtime.env.EMOJI_REACTIONS.fetch(
+			const response = await env.EMOJI_REACTIONS.fetch(
 				new Request("https://emoji-reactions.internal/", {
 					method: "POST",
 					headers: {
@@ -70,7 +61,7 @@ export const addReaction = defineAction({
 			const result = (await response.json()) as Record<string, unknown>;
 
 			// Track the reaction event
-			const analytics = runtime.env.ANALYTICS;
+			const analytics = env.ANALYTICS;
 			const distinctId = getDistinctId(ctx);
 			await captureServerEvent(
 				{
@@ -102,9 +93,7 @@ export const addReaction = defineAction({
 export const removeReaction = defineAction({
 	input: ReactionSchema,
 	handler: async ({ contentId, emoji }, ctx) => {
-		// Get analytics service binding from runtime
-		const runtime = ctx.locals.runtime;
-		const analytics = runtime?.env?.ANALYTICS;
+		const analytics = env.ANALYTICS;
 
 		// Track the reaction removal event
 		const distinctId = getDistinctId(ctx);

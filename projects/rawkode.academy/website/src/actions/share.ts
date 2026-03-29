@@ -1,5 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { env } from "cloudflare:workers";
 import { captureServerEvent, getDistinctId } from "../server/analytics";
 
 const ShareEventSchema = z.object({
@@ -14,9 +15,7 @@ export const trackShareEvent = defineAction({
 	input: ShareEventSchema,
 	handler: async (event, ctx) => {
 		try {
-			// Get analytics service binding from runtime
-			const runtime = ctx.locals.runtime;
-			const analytics = runtime?.env?.ANALYTICS;
+			const analytics = env.ANALYTICS;
 
 			const distinctId = getDistinctId(ctx);
 

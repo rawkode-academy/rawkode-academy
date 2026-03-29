@@ -1,7 +1,8 @@
 import process from "node:process";
 import { ActionError, defineAction } from "astro:actions";
 import { getSecret } from "astro:env/server";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { env } from "cloudflare:workers";
 import { Resend } from "resend";
 import { parseCampaignAttribution } from "@/lib/analytics/attribution";
 import { GROWTH_EVENTS } from "@/lib/analytics/growth";
@@ -12,7 +13,7 @@ import {
 } from "../server/analytics";
 
 const SignupSchema = z.object({
-	email: z.string().email("Please enter a valid email address").optional(),
+	email: z.email("Please enter a valid email address").optional(),
 	audienceId: z.string().min(1, "Audience ID is required"),
 	sponsorAudienceId: z.string().optional(),
 	allowSponsorContact: z.boolean().optional().default(false),
@@ -109,8 +110,7 @@ export const signupForCourseUpdates = defineAction({
 
 			// Analytics: capture course signup (without sending PII)
 			const distinctId = getDistinctId(ctx);
-			const runtime = (ctx as any).locals?.runtime;
-			const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+			const analytics = env.ANALYTICS as Fetcher | undefined;
 			const attribution = getAttributionFromSource(source);
 			const campaign = parseCampaignAttribution(campaignAttribution);
 			await captureServerEvent(

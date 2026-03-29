@@ -1,5 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
-import { z } from "astro:schema";
+import { z } from "astro/zod";
+import { env } from "cloudflare:workers";
 import { captureServerEvent, getDistinctId } from "../server/analytics";
 
 const VideoEventSchema = z.discriminatedUnion("action", [
@@ -33,9 +34,7 @@ export const trackVideoEvent = defineAction({
 	input: VideoEventSchema,
 	handler: async (event, ctx) => {
 		try {
-			// Get analytics service binding from runtime
-			const runtime = ctx.locals.runtime;
-			const analytics = runtime?.env?.ANALYTICS;
+			const analytics = env.ANALYTICS;
 
 			// Map the action to the appropriate analytics method
 			let success = false;
