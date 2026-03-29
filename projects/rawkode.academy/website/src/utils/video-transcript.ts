@@ -119,7 +119,7 @@ export function buildTranscriptExcerpt(
 
 		const separatorLength = excerptParts.length > 0 ? 2 : 0;
 		if (length + separatorLength + text.length > maxChars) {
-			const remaining = maxChars - length - separatorLength;
+			const remaining = maxChars - length - separatorLength - 3; // reserve 3 for "..."
 			if (remaining > 80) {
 				const truncated = text
 					.slice(0, remaining)

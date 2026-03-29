@@ -19,17 +19,20 @@ const articleTechnologyIds =
 const articleTechnologySet = new Set(articleTechnologyIds);
 
 const normalizeTechnologyId = (value: unknown): string | null => {
-	if (typeof value === "string" && value.length > 0) return value;
-	if (
+	let raw: string | null = null;
+	if (typeof value === "string" && value.length > 0) {
+		raw = value;
+	} else if (
 		value &&
 		typeof value === "object" &&
 		"id" in value &&
 		typeof (value as { id?: unknown }).id === "string" &&
 		(value as { id: string }).id.length > 0
 	) {
-		return (value as { id: string }).id;
+		raw = (value as { id: string }).id;
 	}
-	return null;
+	if (!raw) return null;
+	return raw.replace(/\/index$/, "");
 };
 
 const getArticlePublishedAt = (entry: CollectionEntry<"articles">): number =>

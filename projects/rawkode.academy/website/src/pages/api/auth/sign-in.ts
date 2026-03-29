@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import { buildAuthorizationUrl, PKCE_COOKIE_NAME } from "@/lib/auth/server";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 
@@ -24,8 +25,7 @@ export const GET: APIRoute = async (context) => {
 
 	const origin = context.url.origin;
 
-	const runtime = context.locals.runtime;
-	const analytics = runtime?.env?.ANALYTICS as Fetcher | undefined;
+	const analytics = env.ANALYTICS as Fetcher | undefined;
 
 	await captureServerEvent(
 		{

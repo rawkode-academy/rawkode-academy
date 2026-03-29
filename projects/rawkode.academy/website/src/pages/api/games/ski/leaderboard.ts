@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 
 type ScoreType = "fastest_breach" | "win_streak" | "total_wins" | "enemies_defeated";
 
@@ -13,9 +14,7 @@ const validScoreTypes: ScoreType[] = [
  * GET /api/games/ski/leaderboard
  * Get leaderboard entries for a score type
  */
-export const GET: APIRoute = async ({ url, locals }) => {
-	const env = locals.runtime.env;
-
+export const GET: APIRoute = async ({ url }) => {
 	const type = url.searchParams.get("type") as ScoreType | null;
 	const limitParam = url.searchParams.get("limit");
 	const limit = limitParam ? Number.parseInt(limitParam, 10) : 100;

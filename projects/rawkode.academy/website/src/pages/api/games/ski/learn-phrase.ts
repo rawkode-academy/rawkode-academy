@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 
 interface LearnPhrasePayload {
 	type: "insult" | "comeback";
@@ -19,7 +20,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		});
 	}
 
-	const env = locals.runtime.env;
 	const personId = user.id;
 
 	let payload: LearnPhrasePayload;

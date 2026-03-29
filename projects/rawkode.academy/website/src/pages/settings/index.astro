@@ -1,4 +1,5 @@
 ---
+import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import EmailPreferences from "@/components/settings/EmailPreferences.vue";
 import TestEmailButton from "@/components/settings/TestEmailButton.vue";
@@ -29,7 +30,7 @@ let technologySubscriptions: string[] = [];
 
 try {
 	const allPrefs: EmailPreference[] =
-		await Astro.locals.runtime.env.EMAIL_PREFERENCES.getPreferences(
+		await env.EMAIL_PREFERENCES.getPreferences(
 			prefixedUserId,
 		);
 

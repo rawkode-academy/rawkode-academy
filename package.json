@@ -15,5 +15,8 @@
   },
   "scripts": {
     "knip": "knip"
+  },
+  "overrides": {
+    "picomatch": "^3.0.2"
   }
 }
