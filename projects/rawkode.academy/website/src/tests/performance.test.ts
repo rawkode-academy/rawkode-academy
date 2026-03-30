@@ -63,4 +63,13 @@ describe("Core Web Vitals Guardrails", () => {
 		expect(source).toContain('@reference "@/styles/global.css";');
 		expect(source).not.toContain('@import "@/styles/global.css";');
 	});
+
+	it("keeps transcript payloads out of the idle watch-page island", () => {
+		const source = readProjectFile("src/pages/watch/[...slug].astro");
+
+		expect(source).toContain("<VideoContentTabs");
+		expect(source).toContain("client:idle");
+		expect(source).not.toContain("initialCues={");
+		expect(source).not.toContain("initialParagraphs={");
+	});
 });

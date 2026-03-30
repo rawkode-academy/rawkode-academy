@@ -235,7 +235,7 @@ if (isAuthenticated && user?.id) {
 		publishedAt={(video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt))}
 		duration={durationSec ?? 0}
 		streamUrl={streamUrl}
-		captionUrl={watchVideoSeoText.captionUrl}
+		captionUrl={captionUrl}
 		transcript={watchVideoSeoText.transcriptExcerpt}
 		keywords={techEntries.map((tech) => tech.data.name)}
 		isLiveBroadcast={video.data.type === "live"}
@@ -344,8 +344,7 @@ if (isAuthenticated && user?.id) {
 								<p>{paragraph}</p>
 							))}
 						</div>
-						{watchVideoSeoText.textSource === "transcript" &&
-							watchVideoSeoText.initialParagraphs.length > 2 && (
+						{watchVideoSeoText.textSource === "transcript" && (
 							<p class="mt-4 text-sm text-muted">
 								Open the Transcript tab below to search the full caption text.
 							</p>
@@ -354,13 +353,11 @@ if (isAuthenticated && user?.id) {
 				)}
 
 				{/* Tabbed Content: Description & Transcript */}
-					<VideoContentTabs
-						client:idle
-						descriptionHtml={renderedDescriptionHtml}
-						videoId={video.data.id}
-						initialCues={watchVideoSeoText.initialCues}
-						initialParagraphs={watchVideoSeoText.initialParagraphs}
-					/>
+				<VideoContentTabs
+					client:idle
+					descriptionHtml={renderedDescriptionHtml}
+					videoId={video.data.id}
+				/>
 
 				{/* More Videos by Technology */}
 				{technologiesWithVideos.map(({ technology, videos, totalVideos }) => (

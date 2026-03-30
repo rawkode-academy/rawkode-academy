@@ -82,32 +82,15 @@ export default {
 			type: Boolean,
 			default: false,
 		},
-		initialCues: {
-			type: Array,
-			default: () => [],
-		},
-		initialParagraphs: {
-			type: Array,
-			default: () => [],
-		},
 	},
 	data() {
-		const initialCues = Array.isArray(this.initialCues)
-			? [...this.initialCues]
-			: [];
-		const initialParagraphs = Array.isArray(this.initialParagraphs)
-			? this.initialParagraphs
-			: [];
-
 		return {
 			loading: false,
 			error: false,
 			errorMessage: "Failed to load transcript. Please try again later.",
-			transcriptLoaded: initialParagraphs.length > 0 || initialCues.length > 0,
-			cues: initialCues,
-			paragraphs: initialParagraphs.length
-				? initialParagraphs
-				: groupTranscriptParagraphs(initialCues),
+			transcriptLoaded: false,
+			cues: [],
+			paragraphs: [],
 			searchQuery: "",
 			matchCount: 0,
 		};

@@ -3,8 +3,6 @@ import {
 	groupTranscriptParagraphs,
 	parseWebVTT,
 	transcriptParagraphToText,
-	type TranscriptCue,
-	type TranscriptParagraph,
 } from "@/utils/video-transcript";
 
 export type WatchVideoSeoTextSource = "transcript" | "summary" | "none";
@@ -14,10 +12,7 @@ export interface WatchVideoSeoTextState {
 	previewHeading: string;
 	previewDescription: string;
 	previewParagraphs: string[];
-	initialCues: TranscriptCue[];
-	initialParagraphs: TranscriptParagraph[];
 	transcriptExcerpt?: string;
-	captionUrl?: string;
 }
 
 type ChapterLike = {
@@ -30,6 +25,7 @@ interface BuildWatchVideoSeoTextOptions {
 	description: string;
 	chapters?: ChapterLike[];
 	fetchImpl?: typeof fetch;
+	timeoutMs?: number;
 }
 
 const TRANSCRIPT_PREVIEW_HEADING = "Transcript Preview";
@@ -38,6 +34,7 @@ const TRANSCRIPT_PREVIEW_DESCRIPTION =
 const SUMMARY_PREVIEW_HEADING = "Video Summary";
 const SUMMARY_PREVIEW_DESCRIPTION =
 	"Server-rendered from the description and chapter titles so the page keeps indexable explanatory text even when captions are unavailable.";
+const DEFAULT_CAPTION_FETCH_TIMEOUT_MS = 2_000;
 
 function normalizeWhitespace(text: string): string {
 	return text.replace(/\s+/g, " ").trim();
@@ -78,24 +75,53 @@ export function buildVideoSummaryParagraphs(
 	return summaryParagraphs.slice(0, maxParagraphs);
 }
 
+function buildSummaryState(
+	description: string,
+	chapters: readonly ChapterLike[],
+): WatchVideoSeoTextState {
+	const previewParagraphs = buildVideoSummaryParagraphs(description, chapters);
+	if (previewParagraphs.length > 0) {
+		return {
+			textSource: "summary",
+			previewHeading: SUMMARY_PREVIEW_HEADING,
+			previewDescription: SUMMARY_PREVIEW_DESCRIPTION,
+			previewParagraphs,
+		};
+	}
+
+	return {
+		textSource: "none",
+		previewHeading: "",
+		previewDescription: "",
+		previewParagraphs: [],
+	};
+}
+
 export async function buildWatchVideoSeoText({
 	captionUrl,
 	description,
 	chapters = [],
 	fetchImpl = fetch,
+	timeoutMs = DEFAULT_CAPTION_FETCH_TIMEOUT_MS,
 }: BuildWatchVideoSeoTextOptions): Promise<WatchVideoSeoTextState> {
+	const abortController = new AbortController();
+	const timeoutId = setTimeout(() => {
+		abortController.abort();
+	}, timeoutMs);
+
 	try {
 		const transcriptResponse = await fetchImpl(captionUrl, {
 			headers: {
 				Accept: "text/vtt,text/plain;q=0.9,*/*;q=0.1",
 			},
+			signal: abortController.signal,
 		});
 
 		if (transcriptResponse.ok) {
 			const transcriptVtt = await transcriptResponse.text();
-			const initialCues = parseWebVTT(transcriptVtt);
-			const initialParagraphs = groupTranscriptParagraphs(initialCues);
-			const previewParagraphs = initialParagraphs
+			const transcriptCues = parseWebVTT(transcriptVtt);
+			const transcriptParagraphs = groupTranscriptParagraphs(transcriptCues);
+			const previewParagraphs = transcriptParagraphs
 				.slice(0, 2)
 				.map((paragraph) => transcriptParagraphToText(paragraph))
 				.filter((paragraph) => paragraph.length > 0);
@@ -106,35 +132,15 @@ export async function buildWatchVideoSeoText({
 					previewHeading: TRANSCRIPT_PREVIEW_HEADING,
 					previewDescription: TRANSCRIPT_PREVIEW_DESCRIPTION,
 					previewParagraphs,
-					initialCues,
-					initialParagraphs,
-					transcriptExcerpt: buildTranscriptExcerpt(initialParagraphs),
-					captionUrl,
+					transcriptExcerpt: buildTranscriptExcerpt(transcriptParagraphs),
 				};
 			}
 		}
 	} catch {
 		// Fall back to a server-rendered summary when captions are unavailable.
+	} finally {
+		clearTimeout(timeoutId);
 	}
 
-	const previewParagraphs = buildVideoSummaryParagraphs(description, chapters);
-	if (previewParagraphs.length > 0) {
-		return {
-			textSource: "summary",
-			previewHeading: SUMMARY_PREVIEW_HEADING,
-			previewDescription: SUMMARY_PREVIEW_DESCRIPTION,
-			previewParagraphs,
-			initialCues: [],
-			initialParagraphs: [],
-		};
-	}
-
-	return {
-		textSource: "none",
-		previewHeading: "",
-		previewDescription: "",
-		previewParagraphs: [],
-		initialCues: [],
-		initialParagraphs: [],
-	};
+	return buildSummaryState(description, chapters);
 }

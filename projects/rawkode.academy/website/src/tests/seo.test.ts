@@ -460,9 +460,6 @@ Search engines should see this text.`;
 		expect(state.textSource).toBe("transcript");
 		expect(state.previewHeading).toBe("Transcript Preview");
 		expect(state.previewParagraphs[0]).toContain("Hello cloud native world.");
-		expect(state.captionUrl).toContain("/captions/en.vtt");
-		expect(state.initialCues).toHaveLength(3);
-		expect(state.initialParagraphs.length).toBeGreaterThan(0);
 		expect(state.transcriptExcerpt).toContain(
 			"Search engines should see this text.",
 		);
@@ -496,10 +493,53 @@ Search engines should see this text.`;
 			description,
 			"Key moments: Why crawlable summaries matter; Keeping chapter context in the HTML.",
 		]);
-		expect(state.initialCues).toEqual([]);
-		expect(state.initialParagraphs).toEqual([]);
-		expect(state.captionUrl).toBeUndefined();
 		expect(state.transcriptExcerpt).toBeUndefined();
+	});
+
+	it("falls back to a server-rendered summary when captions time out", async () => {
+		vi.useFakeTimers();
+
+		const description =
+			"Teams still need stable watch pages when the captions service slows down during server rendering.";
+		const chapters = [{ title: "SSR fallback path", startTime: 0 }];
+		const fetchImpl = vi.fn(
+			(_input: RequestInfo | URL, init?: RequestInit) =>
+				new Promise<Response>((_resolve, reject) => {
+					init?.signal?.addEventListener(
+						"abort",
+						() => {
+							const abortError = new Error("The operation was aborted.");
+							abortError.name = "AbortError";
+							reject(abortError);
+						},
+						{ once: true },
+					);
+				}),
+		);
+
+		try {
+			const statePromise = buildWatchVideoSeoText({
+				captionUrl:
+					"https://content.rawkode.academy/videos/video-1/captions/en.vtt",
+				description,
+				chapters,
+				fetchImpl,
+				timeoutMs: 25,
+			});
+
+			await vi.advanceTimersByTimeAsync(25);
+			const state = await statePromise;
+
+			expect(state.textSource).toBe("summary");
+			expect(state.previewParagraphs).toEqual([
+				description,
+				"Key moments: SSR fallback path.",
+			]);
+			expect(state.transcriptExcerpt).toBeUndefined();
+			expect(fetchImpl).toHaveBeenCalledTimes(1);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 });
 
