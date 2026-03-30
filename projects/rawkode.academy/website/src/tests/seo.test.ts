@@ -9,6 +9,10 @@ import {
 	groupTranscriptParagraphs,
 	parseWebVTT,
 } from "@/utils/video-transcript";
+import {
+	buildVideoSummaryParagraphs,
+	buildWatchVideoSeoText,
+} from "@/utils/watch-video-seo";
 
 const TESTS_DIR = dirname(fileURLToPath(import.meta.url));
 const VIDEO_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/videos");
@@ -422,6 +426,80 @@ Search engines should see this text.`;
 		expect(paragraphs.length).toBeGreaterThan(1);
 		expect(excerpt).toContain("Hello cloud native world.");
 		expect(excerpt).toContain("Search engines should see this text.");
+	});
+
+	it("builds transcript-backed watch page SEO state from captions", async () => {
+		const vtt = `WEBVTT
+
+00:00:00.000 --> 00:00:04.000
+Hello cloud native world.
+
+00:00:04.000 --> 00:00:08.000
+We are testing transcript indexing.
+
+00:00:08.000 --> 00:00:12.000
+Search engines should see this text.`;
+
+		const fetchImpl = vi.fn().mockResolvedValue(
+			new Response(vtt, {
+				status: 200,
+				headers: {
+					"Content-Type": "text/vtt; charset=utf-8",
+				},
+			}),
+		);
+
+		const state = await buildWatchVideoSeoText({
+			captionUrl:
+				"https://content.rawkode.academy/videos/video-1/captions/en.vtt",
+			description: "Fallback description that should not be used.",
+			chapters: [{ title: "Introduction", startTime: 0 }],
+			fetchImpl,
+		});
+
+		expect(state.textSource).toBe("transcript");
+		expect(state.previewHeading).toBe("Transcript Preview");
+		expect(state.previewParagraphs[0]).toContain("Hello cloud native world.");
+		expect(state.captionUrl).toContain("/captions/en.vtt");
+		expect(state.initialCues).toHaveLength(3);
+		expect(state.initialParagraphs.length).toBeGreaterThan(0);
+		expect(state.transcriptExcerpt).toContain(
+			"Search engines should see this text.",
+		);
+		expect(fetchImpl).toHaveBeenCalledTimes(1);
+	});
+
+	it("falls back to a server-rendered summary when captions are unavailable", async () => {
+		const description =
+			"Platform engineering teams need descriptive HTML even when the captions service is temporarily unavailable.";
+		const chapters = [
+			{ title: "Why crawlable summaries matter", startTime: 0 },
+			{ title: "Keeping chapter context in the HTML", startTime: 120 },
+		];
+
+		expect(buildVideoSummaryParagraphs(description, chapters)).toEqual([
+			description,
+			"Key moments: Why crawlable summaries matter; Keeping chapter context in the HTML.",
+		]);
+
+		const state = await buildWatchVideoSeoText({
+			captionUrl:
+				"https://content.rawkode.academy/videos/video-1/captions/en.vtt",
+			description,
+			chapters,
+			fetchImpl: vi.fn().mockRejectedValue(new Error("captions unavailable")),
+		});
+
+		expect(state.textSource).toBe("summary");
+		expect(state.previewHeading).toBe("Video Summary");
+		expect(state.previewParagraphs).toEqual([
+			description,
+			"Key moments: Why crawlable summaries matter; Keeping chapter context in the HTML.",
+		]);
+		expect(state.initialCues).toEqual([]);
+		expect(state.initialParagraphs).toEqual([]);
+		expect(state.captionUrl).toBeUndefined();
+		expect(state.transcriptExcerpt).toBeUndefined();
 	});
 });
 

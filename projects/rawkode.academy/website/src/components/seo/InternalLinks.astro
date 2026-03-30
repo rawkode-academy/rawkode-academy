@@ -9,15 +9,6 @@ interface Props {
 
 const { article, limitSideways = 2, limitDown = 2 } = Astro.props;
 
-const articleTechnologyIds =
-	Array.isArray(article.data.technologies)
-		? article.data.technologies.filter(
-				(techId): techId is string =>
-					typeof techId === "string" && techId.length > 0,
-			)
-		: [];
-const articleTechnologySet = new Set(articleTechnologyIds);
-
 const normalizeTechnologyId = (value: unknown): string | null => {
 	let raw: string | null = null;
 	if (typeof value === "string" && value.length > 0) {
@@ -35,6 +26,14 @@ const normalizeTechnologyId = (value: unknown): string | null => {
 	return raw.replace(/\/index$/, "");
 };
 
+const articleTechnologyIds =
+	Array.isArray(article.data.technologies)
+		? article.data.technologies
+				.map(normalizeTechnologyId)
+				.filter((techId): techId is string => Boolean(techId))
+		: [];
+const articleTechnologySet = new Set(articleTechnologyIds);
+
 const getArticlePublishedAt = (entry: CollectionEntry<"articles">): number =>
 	new Date(entry.data.publishedAt).getTime();
 
@@ -47,7 +46,10 @@ const sortArticlesByDateThenTitle = (
 
 const allTechnologies = await getCollection("technologies");
 const technologyNameById = new Map(
-	allTechnologies.map((technology) => [technology.id, technology.data.name]),
+	allTechnologies.map((technology) => [
+		normalizeTechnologyId(technology.id) ?? technology.id,
+		technology.data.name,
+	]),
 );
 
 // Up (hub) links
@@ -78,12 +80,20 @@ if (sideways.length < limitSideways && articleTechnologySet.size > 0) {
 				a.id !== article.id &&
 				!sideways.some((s) => s.id === a.id),
 		)
-		.map((candidate) => ({
-			article: candidate,
-			sharedTechnologyCount: (candidate.data.technologies ?? []).filter(
-				(technologyId: string) => articleTechnologySet.has(technologyId),
-			).length,
-		}))
+		.map((candidate) => {
+			const normalizedTechnologyIds = (candidate.data.technologies ?? [])
+				.map(normalizeTechnologyId)
+				.filter(
+					(technologyId): technologyId is string => Boolean(technologyId),
+				);
+
+			return {
+				article: candidate,
+				sharedTechnologyCount: normalizedTechnologyIds.filter((technologyId) =>
+					articleTechnologySet.has(technologyId),
+				).length,
+			};
+		})
 		.filter((candidate) => candidate.sharedTechnologyCount > 0)
 		.sort((left, right) => {
 			if (left.sharedTechnologyCount !== right.sharedTechnologyCount) {
