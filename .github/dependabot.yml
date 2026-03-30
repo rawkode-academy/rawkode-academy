@@ -1,0 +1,117 @@
+version: 2
+
+updates:
+  - package-ecosystem: "bun"
+    directories:
+      - "/"
+      - "/config"
+      - "/dagger/bun"
+      - "/dagger/cloudflare"
+      - "/dagger/deno"
+      - "/dagger/github"
+      - "/dagger/gitlab"
+      - "/dagger/nodejs"
+      - "/dagger/onepassword"
+      - "/dagger/restate"
+      - "/dagger/sops"
+      - "/dagger/sqld"
+      - "/dagger/sqld/tests"
+      - "/dagger/wundergraph"
+      - "/infrastructure/cloud.rawkode.tfstate/cloudflare-worker"
+      - "/infrastructure/cloud.rawkode.tfstate/infrastructure"
+      - "/infrastructure/dns"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      bun-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        group-by: "dependency-name"
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/dagger/terraform-cdk/dagger"
+      - "/presentations/cloud-native-2.0"
+      - "/presentations/cloud-native-2.0/demo/set_url"
+      - "/presentations/lets-meet-cdktf-python"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      npm-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        group-by: "dependency-name"
+
+  - package-ecosystem: "gomod"
+    directory: "/projects/rawkode.cloud"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    allow:
+      - dependency-type: "all"
+    groups:
+      gomod-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "uv"
+    directories:
+      - "/projects/rawkode.academy/tasks/video-importer"
+      - "/projects/rocko/software-developer"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    allow:
+      - dependency-type: "all"
+    groups:
+      uv-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        group-by: "dependency-name"
+
+  - package-ecosystem: "cargo"
+    directories:
+      - "/presentations/cloud-native-2.0/demo"
+      - "/projects/rawkode.academy/platform/search"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    allow:
+      - dependency-type: "all"
+    groups:
+      cargo-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        group-by: "dependency-name"
