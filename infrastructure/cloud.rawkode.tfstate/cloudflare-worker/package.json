@@ -7,7 +7,7 @@
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20230628.0",
 		"esbuild": "^0.18.11",
-		"wrangler": "^3.1.2"
+		"wrangler": "^4.78.0"
 	},
 	"scripts": {
 		"build": "node build.mjs",
