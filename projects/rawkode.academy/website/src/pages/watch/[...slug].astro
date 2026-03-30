@@ -283,6 +283,22 @@ if (isAuthenticated && user?.id) {
 					videoId={video.data.slug}
 				/>
 
+				{/* Server-rendered episode description for UX and crawlability */}
+				<section class="glass-card-shimmer p-4 sm:p-6">
+					<div class="space-y-1">
+						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+							Overview
+						</p>
+						<h2 class="text-xl font-semibold text-primary-content">
+							About this video
+						</h2>
+					</div>
+					<div
+						class="prose prose-lg mt-6 max-w-none dark:prose-invert"
+						set:html={renderedDescriptionHtml}
+					/>
+				</section>
+
 				{/* Technologies Section */}
 				{techEntries.length > 0 && (
 					<div>
@@ -319,43 +335,9 @@ if (isAuthenticated && user?.id) {
 
 				{/* Newsletter Signup - High Value Placement */}
 				<NewsletterCTA class="!my-0" />
-
-				{/* Server-rendered video text for crawlability */}
-				{watchVideoSeoText.previewParagraphs.length > 0 && (
-					<section
-						class="glass-card-shimmer p-4 sm:p-6"
-						aria-labelledby="transcript-preview-heading"
-					>
-						<div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-							<div class="space-y-1">
-								<h2
-									id="transcript-preview-heading"
-									class="text-xl font-semibold text-primary-content"
-								>
-									{watchVideoSeoText.previewHeading}
-								</h2>
-								<p class="text-sm text-muted">
-									{watchVideoSeoText.previewDescription}
-								</p>
-							</div>
-						</div>
-						<div class="prose prose-lg mt-6 max-w-none dark:prose-invert">
-							{watchVideoSeoText.previewParagraphs.map((paragraph) => (
-								<p>{paragraph}</p>
-							))}
-						</div>
-						{watchVideoSeoText.textSource === "transcript" && (
-							<p class="mt-4 text-sm text-muted">
-								Open the Transcript tab below to search the full caption text.
-							</p>
-						)}
-					</section>
-				)}
-
-				{/* Tabbed Content: Description & Transcript */}
+				{/* Tabbed Content: Transcript, Comments & Resources */}
 				<VideoContentTabs
 					client:idle
-					descriptionHtml={renderedDescriptionHtml}
 					videoId={video.data.id}
 				/>
 
