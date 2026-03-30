@@ -24,16 +24,19 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "chore"
       include: "scope"
     groups:
-      bun-minor-and-patch:
+      dependencies:
         patterns:
           - "*"
         update-types:
           - "minor"
           - "patch"
-        group-by: "dependency-name"
+      security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
 
   - package-ecosystem: "npm"
     directories:
@@ -45,16 +48,19 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "chore"
       include: "scope"
     groups:
-      npm-minor-and-patch:
+      dependencies:
         patterns:
           - "*"
         update-types:
           - "minor"
           - "patch"
-        group-by: "dependency-name"
+      security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
 
   - package-ecosystem: "gomod"
     directory: "/projects/rawkode.cloud"
@@ -62,56 +68,96 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "chore"
       include: "scope"
-    allow:
-      - dependency-type: "all"
     groups:
-      gomod-minor-and-patch:
+      dependencies:
         patterns:
           - "*"
         update-types:
           - "minor"
           - "patch"
+      security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
 
   - package-ecosystem: "uv"
-    directories:
-      - "/projects/rawkode.academy/tasks/video-importer"
-      - "/projects/rocko/software-developer"
+    directory: "/projects/rawkode.academy/tasks/video-importer"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "chore"
       include: "scope"
-    allow:
-      - dependency-type: "all"
     groups:
-      uv-minor-and-patch:
+      dependencies:
         patterns:
           - "*"
         update-types:
           - "minor"
           - "patch"
-        group-by: "dependency-name"
+      security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
+
+  - package-ecosystem: "uv"
+    directory: "/projects/rocko/software-developer"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
 
   - package-ecosystem: "cargo"
-    directories:
-      - "/presentations/cloud-native-2.0/demo"
-      - "/projects/rawkode.academy/platform/search"
+    directory: "/presentations/cloud-native-2.0/demo"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "chore(deps)"
+      prefix: "chore"
       include: "scope"
-    allow:
-      - dependency-type: "all"
     groups:
-      cargo-minor-and-patch:
+      dependencies:
         patterns:
           - "*"
         update-types:
           - "minor"
           - "patch"
-        group-by: "dependency-name"
+      security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
+
+  - package-ecosystem: "cargo"
+    directory: "/projects/rawkode.academy/platform/search"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
