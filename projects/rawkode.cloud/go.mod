@@ -60,7 +60,7 @@ require (
 	github.com/chai2010/gettext-go v1.0.2 // indirect
 	github.com/cilium/charts v0.0.0-20260204005309-730e56e57a21 // indirect
 	github.com/cilium/ebpf v0.20.1-0.20260108141042-f7e80f49188b // indirect
-	github.com/cilium/hive v0.0.1 // indirect
+	github.com/cilium/hive v1.0.1 // indirect
 	github.com/cilium/proxy v0.0.0-20250623105955-2136f59a4ea1 // indirect
 	github.com/cilium/statedb v0.6.3 // indirect
 	github.com/cilium/stream v0.0.1 // indirect
