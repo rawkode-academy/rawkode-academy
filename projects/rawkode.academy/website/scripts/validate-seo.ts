@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { glob } from "glob";
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 
 interface ValidationError {
@@ -145,7 +145,7 @@ async function main() {
 	console.log("🔍 Validating SEO requirements...\n");
 
 	const validationErrors: ValidationError[] = [];
-	const contentRoot = resolve(import.meta.dir, "../../../../content");
+	const contentRoot = fileURLToPath(new URL("../../../../content", import.meta.url));
 
 	// Validate articles
 	const articleFiles = await glob(`${contentRoot}/articles/**/*.{md,mdx}`);

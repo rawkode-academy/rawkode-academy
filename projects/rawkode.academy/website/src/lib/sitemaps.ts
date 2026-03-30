@@ -535,10 +535,15 @@ export async function buildSitemapIndexEntries(
 	const sitemapEntries = await Promise.all(
 		definitions.map(async (definition) => {
 			const entries = await definition.getEntries();
-			return {
-				path: definition.path,
-				lastmod: getLatestLastmod(entries),
-			};
+			const lastmod = getLatestLastmod(entries);
+			return lastmod
+				? {
+						path: definition.path,
+						lastmod,
+					}
+				: {
+						path: definition.path,
+					};
 		}),
 	);
 

@@ -7,11 +7,11 @@ interface Props {
 	duration?: number;
 	streamUrl?: string;
 	embedUrl?: string; // Only when a true embeddable player URL (e.g., YouTube/Vimeo)
-	captionUrl?: string;
-	transcript?: string;
+	captionUrl?: string | undefined;
+	transcript?: string | undefined;
 	keywords?: string[];
 	isLiveBroadcast?: boolean;
-	category?: string;
+	category?: string | undefined;
 	isVideoList?: boolean;
 	clips?: Array<{ name: string; startOffset: number; endOffset?: number }>;
 }

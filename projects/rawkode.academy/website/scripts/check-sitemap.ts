@@ -22,6 +22,12 @@ type UrlExpectation = {
 	expectedRobots?: string;
 };
 
+type SupplementalUrlCheck = {
+	path: string;
+	expectedCanonicalPath: string;
+	expectedRobots?: string;
+};
+
 type UrlCheckResult = {
 	url: string;
 	ok: boolean;
@@ -57,7 +63,7 @@ export const DISALLOWED_SITEMAP_PATH_PREFIXES = [
 	"/graphql",
 ] as const;
 
-export const SUPPLEMENTAL_URL_CHECKS = [
+export const SUPPLEMENTAL_URL_CHECKS: readonly SupplementalUrlCheck[] = [
 	{
 		path: "/watch",
 		expectedCanonicalPath: "/watch",
@@ -156,7 +162,11 @@ export function buildSupplementalUrlChecks(base: string): UrlExpectation[] {
 	return SUPPLEMENTAL_URL_CHECKS.map((check) => ({
 		url: new URL(check.path, base).href,
 		expectedCanonical: new URL(check.expectedCanonicalPath, base).href,
-		expectedRobots: check.expectedRobots,
+		...(check.expectedRobots
+			? {
+					expectedRobots: check.expectedRobots,
+				}
+			: {}),
 	}));
 }
 

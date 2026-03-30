@@ -440,7 +440,7 @@ describe("Crawlability and Sitemaps", () => {
 			"../pages/robots.txt.ts"
 		);
 
-		const response = GET({
+		const response = await GET({
 			site: new URL("https://rawkode.academy"),
 		} as never);
 		const body = await response.text();
