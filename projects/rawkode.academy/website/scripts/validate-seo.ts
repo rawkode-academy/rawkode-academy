@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { glob } from "glob";
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 
 interface ValidationError {
@@ -106,13 +107,48 @@ async function validateCourse(filePath: string): Promise<string[]> {
 	return errors;
 }
 
+async function validateVideo(filePath: string): Promise<string[]> {
+	const errors: string[] = [];
+	const content = await readFile(filePath, "utf-8");
+	const { data } = matter(content);
+
+	if (!data.id || String(data.id).trim().length === 0) {
+		errors.push("Missing video id");
+	}
+
+	if (!data.slug || String(data.slug).trim().length === 0) {
+		errors.push("Missing slug");
+	}
+
+	if (!data.title || String(data.title).trim().length < 5) {
+		errors.push("Missing or too-short title");
+	}
+
+	if (!data.description) {
+		errors.push("Missing description");
+	} else if (String(data.description).trim().length < 20) {
+		errors.push("Description too short (min 20 chars)");
+	}
+
+	if (!data.publishedAt) {
+		errors.push("Missing publishedAt date");
+	}
+
+	if (typeof data.duration !== "number" || data.duration <= 0) {
+		errors.push("Missing or invalid duration");
+	}
+
+	return errors;
+}
+
 async function main() {
 	console.log("🔍 Validating SEO requirements...\n");
 
 	const validationErrors: ValidationError[] = [];
+	const contentRoot = fileURLToPath(new URL("../../../../content", import.meta.url));
 
 	// Validate articles
-	const articleFiles = await glob("content/articles/**/*.{md,mdx}");
+	const articleFiles = await glob(`${contentRoot}/articles/**/*.{md,mdx}`);
 	for (const file of articleFiles) {
 		const errors = await validateArticle(file);
 		if (errors.length > 0) {
@@ -121,9 +157,18 @@ async function main() {
 	}
 
 	// Validate courses
-	const courseFiles = await glob("content/courses/**/*.{md,mdx}");
+	const courseFiles = await glob(`${contentRoot}/courses/**/*.{md,mdx}`);
 	for (const file of courseFiles) {
 		const errors = await validateCourse(file);
+		if (errors.length > 0) {
+			validationErrors.push({ file, errors });
+		}
+	}
+
+	// Validate videos
+	const videoFiles = await glob(`${contentRoot}/videos/**/*.{md,mdx}`);
+	for (const file of videoFiles) {
+		const errors = await validateVideo(file);
 		if (errors.length > 0) {
 			validationErrors.push({ file, errors });
 		}

@@ -29,7 +29,6 @@
             activeTab === tab.id
               ? 'border-primary text-primary dark:text-primary'
               : 'border-transparent text-muted hover:text-primary-content',
-            { 'sm:ml-auto': tab.id === 'transcript' },
           ]"
           role="tab"
           :aria-selected="activeTab === tab.id"
@@ -43,19 +42,14 @@
 
     <!-- Tab Content -->
     <div class="p-4 sm:p-6 relative z-10">
-      <!-- Description Panel -->
+      <!-- Comments Panel -->
       <div
-        v-show="activeTab === 'description'"
-        id="video-panel-description"
+        v-show="activeTab === 'comments'"
+        id="video-panel-comments"
         role="tabpanel"
-        aria-labelledby="video-tab-description"
+        aria-labelledby="video-tab-comments"
       >
-        <div
-          v-if="descriptionHtml"
-          class="prose prose-lg dark:prose-invert max-w-none"
-          v-html="descriptionHtml"
-        ></div>
-        <div v-else class="text-muted">Loading description...</div>
+        <VideoComments :video-id="videoId" />
       </div>
 
       <!-- Transcript Panel -->
@@ -85,16 +79,6 @@
           </p>
         </div>
       </div>
-
-      <!-- Comments Panel -->
-      <div
-        v-show="activeTab === 'comments'"
-        id="video-panel-comments"
-        role="tabpanel"
-        aria-labelledby="video-tab-comments"
-      >
-        <VideoComments :video-id="videoId" />
-      </div>
     </div>
   </div>
 </template>
@@ -119,11 +103,6 @@ export default {
 		VideoComments,
 	},
 	props: {
-		descriptionHtml: {
-			type: String,
-			required: true,
-			default: "",
-		},
 		videoId: {
 			type: String,
 			required: true,
@@ -131,12 +110,11 @@ export default {
 	},
 	data() {
 		return {
-			activeTab: "description",
+			activeTab: "comments",
 			tabs: [
-				{ id: "description", label: "Description" },
 				{ id: "comments", label: "Comments" },
-				{ id: "resources", label: "Resources" },
 				{ id: "transcript", label: "Transcript" },
+				{ id: "resources", label: "Resources" },
 			],
 		};
 	},

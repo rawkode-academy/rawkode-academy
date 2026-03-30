@@ -9,15 +9,56 @@ interface Props {
 
 const { article, limitSideways = 2, limitDown = 2 } = Astro.props;
 
-// Helper to pick first technology if present
-const primaryTechId: string | undefined =
-	Array.isArray(article.data.technologies) &&
-	article.data.technologies.length > 0
-		? article.data.technologies[0]
-		: undefined;
+const normalizeTechnologyId = (value: unknown): string | null => {
+	let raw: string | null = null;
+	if (typeof value === "string" && value.length > 0) {
+		raw = value;
+	} else if (
+		value &&
+		typeof value === "object" &&
+		"id" in value &&
+		typeof (value as { id?: unknown }).id === "string" &&
+		(value as { id: string }).id.length > 0
+	) {
+		raw = (value as { id: string }).id;
+	}
+	if (!raw) return null;
+	return raw.replace(/\/index$/, "");
+};
+
+const articleTechnologyIds =
+	Array.isArray(article.data.technologies)
+		? article.data.technologies
+				.map(normalizeTechnologyId)
+				.filter((techId): techId is string => Boolean(techId))
+		: [];
+const articleTechnologySet = new Set(articleTechnologyIds);
+
+const getArticlePublishedAt = (entry: CollectionEntry<"articles">): number =>
+	new Date(entry.data.publishedAt).getTime();
+
+const sortArticlesByDateThenTitle = (
+	left: CollectionEntry<"articles">,
+	right: CollectionEntry<"articles">,
+): number =>
+	getArticlePublishedAt(right) - getArticlePublishedAt(left) ||
+	left.data.title.localeCompare(right.data.title);
+
+const allTechnologies = await getCollection("technologies");
+const technologyNameById = new Map(
+	allTechnologies.map((technology) => [
+		normalizeTechnologyId(technology.id) ?? technology.id,
+		technology.data.name,
+	]),
+);
 
 // Up (hub) links
-const upLinks: { href: string; label: string }[] = [];
+const upLinks: { href: string; label: string }[] = articleTechnologyIds
+	.slice(0, 2)
+	.map((technologyId) => ({
+		href: `/technology/${technologyId}`,
+		label: technologyNameById.get(technologyId) ?? technologyId,
+	}));
 
 // Sideways (peers)
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);
@@ -28,46 +69,76 @@ if (article.data.series) {
 			(a) =>
 				a.id !== article.id && a.data.series?.id === article.data.series?.id,
 		)
+		.sort(sortArticlesByDateThenTitle)
 		.slice(0, limitSideways);
 }
-if (
-	sideways.length < limitSideways &&
-	Array.isArray(article.data.technologies) &&
-	article.data.technologies.length > 0
-) {
+if (sideways.length < limitSideways && articleTechnologySet.size > 0) {
 	const remaining = limitSideways - sideways.length;
-	const techSet = new Set(article.data.technologies);
 	const techPeers = allArticles
 		.filter(
 			(a) =>
 				a.id !== article.id &&
-				a.data.technologies?.some((t: string) => techSet.has(t)),
+				!sideways.some((s) => s.id === a.id),
 		)
-		.filter((a) => !sideways.find((s) => s.id === a.id))
+		.map((candidate) => {
+			const normalizedTechnologyIds = (candidate.data.technologies ?? [])
+				.map(normalizeTechnologyId)
+				.filter(
+					(technologyId): technologyId is string => Boolean(technologyId),
+				);
+
+			return {
+				article: candidate,
+				sharedTechnologyCount: normalizedTechnologyIds.filter((technologyId) =>
+					articleTechnologySet.has(technologyId),
+				).length,
+			};
+		})
+		.filter((candidate) => candidate.sharedTechnologyCount > 0)
+		.sort((left, right) => {
+			if (left.sharedTechnologyCount !== right.sharedTechnologyCount) {
+				return right.sharedTechnologyCount - left.sharedTechnologyCount;
+			}
+			return sortArticlesByDateThenTitle(left.article, right.article);
+		})
 		.slice(0, remaining);
-	sideways = [...sideways, ...techPeers];
+	sideways = [...sideways, ...techPeers.map((candidate) => candidate.article)];
 }
 
 // Down (deep guides) – prefer videos for the same technology
 let downLinks: { href: string; label: string }[] = [];
 try {
 	const videos = await getCollection("videos");
-	if (primaryTechId) {
+	if (articleTechnologySet.size > 0) {
 		const deepVideos = videos
-			.filter((v) =>
-				v.data.technologies?.some(
-					(t: { id: string }) => t.id === primaryTechId,
-				),
-			)
-			.sort(
-				(a, b) =>
-					new Date(b.data.publishedAt).getTime() -
-					new Date(a.data.publishedAt).getTime(),
-			)
+			.map((video) => {
+				const technologyIds = (video.data.technologies ?? [])
+					.map(normalizeTechnologyId)
+					.filter((technologyId): technologyId is string =>
+						Boolean(technologyId),
+					);
+
+				const sharedTechnologyCount = technologyIds.filter((technologyId) =>
+					articleTechnologySet.has(technologyId),
+				).length;
+
+				return { video, sharedTechnologyCount };
+			})
+			.filter((item) => item.sharedTechnologyCount > 0)
+			.sort((left, right) => {
+				if (left.sharedTechnologyCount !== right.sharedTechnologyCount) {
+					return right.sharedTechnologyCount - left.sharedTechnologyCount;
+				}
+				return (
+					new Date(right.video.data.publishedAt).getTime() -
+						new Date(left.video.data.publishedAt).getTime() ||
+					left.video.data.title.localeCompare(right.video.data.title)
+				);
+			})
 			.slice(0, limitDown);
-		downLinks = deepVideos.map((v) => ({
-			href: `/watch/${v.data.slug}`,
-			label: v.data.title,
+		downLinks = deepVideos.map((item) => ({
+			href: `/watch/${item.video.data.slug}`,
+			label: item.video.data.title,
 		}));
 	}
 } catch {
@@ -118,4 +189,3 @@ const hasLinks = Boolean(upLinks.length || sideways.length || downLinks.length);
     </div>
   </aside>
 )}
-
