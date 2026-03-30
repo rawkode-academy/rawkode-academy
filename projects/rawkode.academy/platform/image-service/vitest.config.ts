@@ -5,4 +5,4 @@ export default getViteConfig({
   test: {
     teardownTimeout: 1_000,
   },
-});
+} as any);

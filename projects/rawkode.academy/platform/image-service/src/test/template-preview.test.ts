@@ -35,11 +35,8 @@ const templateModules = import.meta.glob<{ template: any }>(
 
 // Extract template names (without .ts extension)
 const templateNames = Object.keys(templateModules)
-  .map(path => {
-    const match = path.match(/\/([^\/]+)\.ts$/);
-    return match ? match[1] : "";
-  })
-  .filter(name => name && name !== "README");
+  .map(path => path.match(/\/([^\/]+)\.ts$/)?.[1])
+  .filter((name): name is string => Boolean(name) && name !== "README");
 
 // Sample text to use for all templates
 const SAMPLE_TEXT = "This is a preview of the template";
@@ -61,8 +58,8 @@ describe("Template Previews", () => {
         JSON.stringify({
           text: SAMPLE_TEXT,
           template: templateName,
-          format: "png"
-        })
+          format: "png",
+        }),
       );
 
       // Generate the image
@@ -85,7 +82,7 @@ describe("Template Previews", () => {
       // Add to preview data
       previewData.push({
         name: templateName,
-        imageUrl
+        imageUrl,
       });
     });
   }

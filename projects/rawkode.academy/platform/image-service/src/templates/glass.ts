@@ -24,11 +24,6 @@ export const template: Template = {
       <path d="M50 25H100" stroke="white" stroke-width="2" stroke-linecap="round"/>
     </svg>`;
 
-    // Background pattern
-    const pattern = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="10" cy="10" r="1" fill="rgba(255, 255, 255, 0.1)"/>
-    </svg>`;
-
     return html(`
       <div style="display: flex; flex-direction: column; width: 1200px; height: 630px; background: linear-gradient(125deg, #0F172A 0%, #1E293B 100%); color: white; font-family: Inter;">
         <div style="display: flex; padding: 60px; flex-direction: column; height: 100%;">
