@@ -64,6 +64,10 @@
 
 <script>
 import SkeletonTranscript from "@/components/common/SkeletonTranscript.vue";
+import {
+	groupTranscriptParagraphs,
+	parseWebVTT,
+} from "@/utils/video-transcript";
 
 export default {
 	components: {
@@ -117,14 +121,14 @@ export default {
 				}
 
 				const vttText = await response.text();
-				this.cues = this.parseWebVTT(vttText);
+				this.cues = parseWebVTT(vttText);
 
 				if (this.cues.length === 0) {
 					throw new Error("No transcript content found");
 				}
 
 				// Group cues into paragraphs
-				this.paragraphs = this.groupIntoParagraphs(this.cues);
+				this.paragraphs = groupTranscriptParagraphs(this.cues);
 				this.transcriptLoaded = true;
 			} catch (error) {
 				console.error("Failed to load transcript:", error);
@@ -135,71 +139,6 @@ export default {
 			} finally {
 				this.loading = false;
 			}
-		},
-
-		parseWebVTT(vttText) {
-			const lines = vttText.split("\n");
-			const cues = [];
-			let currentCue = null;
-
-			for (let i = 0; i < lines.length; i++) {
-				const line = lines[i].trim();
-
-				// Skip empty lines and WEBVTT header
-				if (!line || line === "WEBVTT") continue;
-
-				// Check if line contains timestamp
-				const timestampMatch = line.match(
-					/^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})/,
-				);
-
-				if (timestampMatch) {
-					// If we have a previous cue, add it to the array
-					if (currentCue?.text.trim()) {
-						cues.push(currentCue);
-					}
-
-					// Start a new cue
-					currentCue = {
-						start: timestampMatch[1],
-						end: timestampMatch[2],
-						text: "",
-					};
-				} else if (currentCue && line && !line.startsWith("NOTE")) {
-					// Add text to current cue (skip NOTE lines)
-					if (currentCue.text) {
-						currentCue.text += " ";
-					}
-					currentCue.text += line;
-				}
-			}
-
-			// Add the last cue
-			if (currentCue?.text.trim()) {
-				cues.push(currentCue);
-			}
-
-			return cues;
-		},
-
-		groupIntoParagraphs(cues) {
-			const paragraphs = [];
-			let currentParagraph = [];
-			let wordCount = 0;
-
-			cues.forEach((cue, index) => {
-				currentParagraph.push(cue);
-				wordCount += cue.text.split(" ").length;
-
-				// Create new paragraph every ~100 words or at natural breaks
-				if (wordCount > 100 || index === cues.length - 1) {
-					paragraphs.push(currentParagraph);
-					currentParagraph = [];
-					wordCount = 0;
-				}
-			});
-
-			return paragraphs;
 		},
 
 		highlightText(text) {
@@ -227,9 +166,12 @@ export default {
 		},
 
 		escapeHtml(text) {
-			const div = document.createElement("div");
-			div.textContent = text;
-			return div.innerHTML;
+			return String(text)
+				.replaceAll("&", "&amp;")
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				.replaceAll('"', "&quot;")
+				.replaceAll("'", "&#39;");
 		},
 
 		escapeRegExp(string) {

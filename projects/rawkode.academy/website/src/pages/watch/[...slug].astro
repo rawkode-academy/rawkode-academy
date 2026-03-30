@@ -13,6 +13,7 @@ import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
+import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 
 export const prerender = false;
 
@@ -105,7 +106,9 @@ const showId =
 const showEntry = showId ? await getEntry("shows", showId) : null;
 
 // Normalize technology references (handles both string IDs and Astro reference objects)
-const normalizedTechIds = normalizeTechnologyReferences(video.data.technologies);
+const normalizedTechIds = normalizeTechnologyReferences(
+	video.data.technologies,
+);
 const techEntries = (
 	await Promise.all(
 		normalizedTechIds.map(async (id) => {
@@ -123,9 +126,7 @@ const videosPerTechnology = await Promise.all(
 	techEntries.map(async (tech) => {
 		const techId = tech.id.replace(/\/index$/, "");
 		const allVideos = await getVideosForTechnology(techId);
-		const filteredVideos = allVideos
-			.filter((v) => v.slug !== slug)
-			.slice(0, 3);
+		const filteredVideos = allVideos.filter((v) => v.slug !== slug).slice(0, 3);
 		return {
 			technology: tech,
 			videos: filteredVideos,
@@ -138,19 +139,20 @@ const technologiesWithVideos = videosPerTechnology.filter(
 	(t) => t.videos.length > 0,
 );
 
-const hostEntries = showEntry && Array.isArray(showEntry.data.hosts)
-	? (
-			await Promise.all(
-				(showEntry.data.hosts).map(async (hostRef) => {
-					try {
-						return await getEntry("people", hostRef.id);
-					} catch {
-						return null;
-					}
-				}),
-			)
-		).filter((h): h is NonNullable<typeof h> => Boolean(h))
-	: [];
+const hostEntries =
+	showEntry && Array.isArray(showEntry.data.hosts)
+		? (
+				await Promise.all(
+					showEntry.data.hosts.map(async (hostRef) => {
+						try {
+							return await getEntry("people", hostRef.id);
+						} catch {
+							return null;
+						}
+					}),
+				)
+			).filter((h): h is NonNullable<typeof h> => Boolean(h))
+		: [];
 
 const guestEntries = Array.isArray(video.data.guests)
 	? (
@@ -181,6 +183,12 @@ const breadcrumbElements = showEntry
 
 const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
+const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
+const watchVideoSeoText = await buildWatchVideoSeoText({
+	captionUrl,
+	description: processedDescription,
+	chapters: chapterSource,
+});
 
 // Get user authentication status and watch position
 const user = Astro.locals.user;
@@ -203,7 +211,7 @@ if (isAuthenticated && user?.id) {
 				variables: { userId: user.id, videoId: video.data.id },
 			}),
 		});
-		const result = await response.json() as {
+		const result = (await response.json()) as {
 			data?: { getWatchPosition?: { positionSeconds?: number } };
 		};
 		initialPosition = result?.data?.getWatchPosition?.positionSeconds ?? 0;
@@ -227,6 +235,11 @@ if (isAuthenticated && user?.id) {
 		publishedAt={(video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt))}
 		duration={durationSec ?? 0}
 		streamUrl={streamUrl}
+		captionUrl={captionUrl}
+		transcript={watchVideoSeoText.transcriptExcerpt}
+		keywords={techEntries.map((tech) => tech.data.name)}
+		isLiveBroadcast={video.data.type === "live"}
+		category={video.data.category}
 		clips={clips}
 	/>
 	<div class="min-h-screen">
@@ -270,6 +283,22 @@ if (isAuthenticated && user?.id) {
 					videoId={video.data.slug}
 				/>
 
+				{/* Server-rendered episode description for UX and crawlability */}
+				<section class="glass-card-shimmer p-4 sm:p-6">
+					<div class="space-y-1">
+						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+							Overview
+						</p>
+						<h2 class="text-xl font-semibold text-primary-content">
+							About this video
+						</h2>
+					</div>
+					<div
+						class="prose prose-lg mt-6 max-w-none dark:prose-invert"
+						set:html={renderedDescriptionHtml}
+					/>
+				</section>
+
 				{/* Technologies Section */}
 				{techEntries.length > 0 && (
 					<div>
@@ -306,11 +335,9 @@ if (isAuthenticated && user?.id) {
 
 				{/* Newsletter Signup - High Value Placement */}
 				<NewsletterCTA class="!my-0" />
-
-				{/* Tabbed Content: Description & Transcript */}
+				{/* Tabbed Content: Transcript, Comments & Resources */}
 				<VideoContentTabs
 					client:idle
-					descriptionHtml={renderedDescriptionHtml}
 					videoId={video.data.id}
 				/>
 

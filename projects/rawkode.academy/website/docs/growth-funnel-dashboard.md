@@ -2,6 +2,9 @@
 
 This PR defines the first practical `activated_user` event for the website analytics layer and prepares the first PostHog dashboard around it.
 
+For visitor baselines, use `page_view` as the canonical website traffic event.
+The source-of-truth rules for `page_view` versus `$pageview` live in `docs/seo-analytics-source-of-truth.md`.
+
 ## First practical activation definition
 
 For this first slice, treat a user as **activated** when they complete a high-intent learning conversion on the website:

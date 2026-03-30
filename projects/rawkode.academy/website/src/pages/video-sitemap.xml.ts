@@ -2,23 +2,20 @@ import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 import { getPublishedVideos } from "@/lib/content";
 
-// Format duration from seconds to ISO 8601
-function formatDuration(seconds: number): string {
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const remainingSeconds = Math.floor(seconds % 60);
+const DEFAULT_SITE_URL = "https://rawkode.academy";
+const MAX_VIDEO_DURATION_SECONDS = 28_800;
 
-	let result = "PT";
-	if (hours > 0) {
-		result += `${hours}H`;
+export function toVideoDurationValue(duration: unknown): string | undefined {
+	if (typeof duration !== "number" || !Number.isFinite(duration)) {
+		return undefined;
 	}
-	if (minutes > 0) {
-		result += `${minutes}M`;
+
+	const seconds = Math.floor(duration);
+	if (seconds < 1 || seconds > MAX_VIDEO_DURATION_SECONDS) {
+		return undefined;
 	}
-	if (remainingSeconds > 0 || (hours === 0 && minutes === 0)) {
-		result += `${remainingSeconds}S`;
-	}
-	return result;
+
+	return String(seconds);
 }
 
 // Escape XML entities
@@ -46,13 +43,13 @@ function escapeXml(value: unknown): string {
 export const GET: APIRoute = async ({ site }) => {
 	const videos = await getPublishedVideos();
 	const technologies = await getCollection("technologies");
-	const siteUrl = site ?? new URL("https://rawkode.academy");
+	const siteUrl = site ?? new URL(DEFAULT_SITE_URL);
 	const techName = new Map(
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
 
 	// Sort videos by publishedAt date (newest first)
-	const sortedVideos = videos.sort((a, b) => {
+	const sortedVideos = [...videos].sort((a, b) => {
 		const dateA = new Date(a.data.publishedAt);
 		const dateB = new Date(b.data.publishedAt);
 		return dateB.getTime() - dateA.getTime();
@@ -66,9 +63,7 @@ ${sortedVideos
 		const videoUrl = new URL(`/watch/${video.data.slug}`, siteUrl).href;
 		const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
 		const contentUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
-		const durationSeconds =
-			typeof video.data.duration === "number" ? video.data.duration : 0;
-		const duration = formatDuration(durationSeconds);
+		const duration = toVideoDurationValue(video.data.duration);
 		const publishedDate = new Date(video.data.publishedAt).toISOString();
 
 		// Create tags from technologies
@@ -85,6 +80,9 @@ ${sortedVideos
 					.map((tag) => `<video:tag>${escapeXml(tag)}</video:tag>`)
 					.join("\n      ")
 			: "";
+		const durationXml = duration
+			? `\n      <video:duration>${duration}</video:duration>`
+			: "";
 
 		return `  <url>
     <loc>${videoUrl}</loc>
@@ -97,7 +95,7 @@ ${sortedVideos
 				video.data.description,
 			)}</video:description>
       <video:content_loc>${escapeXml(contentUrl)}</video:content_loc>
-      <video:duration>${duration}</video:duration>
+      ${durationXml}
       <video:publication_date>${publishedDate}</video:publication_date>
       <video:family_friendly>yes</video:family_friendly>
       <video:live>no</video:live>

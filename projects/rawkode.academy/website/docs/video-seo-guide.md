@@ -34,6 +34,12 @@ appear in Google Video Search results.
 - Smart matching based on technologies
 - Improves internal linking between videos
 
+### 5. Crawlable Transcript Excerpts (✅ Completed)
+
+- Watch pages now fetch `content.rawkode.academy/videos/<id>/captions/en.vtt` on the server
+- The page renders a transcript preview in the initial HTML so crawlers can index spoken content without waiting for client-side transcript loading
+- The transcript tab reuses the same parsed caption data when available, and only falls back to client fetching if server-side captions were unavailable
+
 ## Google Video Search Requirements
 
 ### Required Properties:
@@ -49,6 +55,8 @@ appear in Google Video Search results.
 
 - ✅ **publisher** - Organization info
 - ✅ **creator** - Person who created the video
+- ✅ **caption** - Linked English VTT captions when available
+- ✅ **transcript** - Excerpt from the caption track for richer page understanding
 - ✅ **videoQuality** - HD indicator
 - ✅ **videoFrameSize** - Resolution
 - ✅ **inLanguage** - Language code
@@ -117,8 +125,16 @@ Track these metrics in Google Search Console:
    - Implement interactionStatistic with real analytics (currently removed)
 
 3. **Transcript/Captions**
-   - Already implemented in player
-   - Could add transcript schema for better indexing
+   - Keep `captions/en.vtt` published for each video id
+   - Watch pages now expose a transcript preview from the caption file in server-rendered HTML
+   - Missing video metadata is checked via `bun run test:seo` and `bun run validate:seo`
+
+## Content Operations Checklist
+
+- Every video entry must provide `id`, `slug`, `title`, `description`, `publishedAt`, and `duration`
+- Keep `description` unique and meaningful; it is reused in `VideoObject` structured data
+- Publish `captions/en.vtt` alongside the video asset if you want transcript text indexed on the watch page
+- Keep chapter titles clean because they are exposed as `Clip` labels in structured data and deep-link with `?t=<seconds>`
 
 4. **Live Stream Support**
    - Update isLiveBroadcast for live content
