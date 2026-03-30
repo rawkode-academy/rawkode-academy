@@ -5,7 +5,7 @@
 	"module": "dist/index.mjs",
 	"version": "0.0.0",
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20230628.0",
+		"@cloudflare/workers-types": "^4.20260329.1",
 		"esbuild": "^0.18.11",
 		"wrangler": "^3.1.2"
 	},
