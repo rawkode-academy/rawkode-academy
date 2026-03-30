@@ -35,13 +35,19 @@ export function parseWebVTT(vttText: string): TranscriptCue[] {
 
 		const timestampMatch = line.match(TIMESTAMP_PATTERN);
 		if (timestampMatch) {
+			const start = timestampMatch[1];
+			const end = timestampMatch[2];
+			if (!start || !end) {
+				continue;
+			}
+
 			if (currentCue?.text.trim()) {
 				cues.push(currentCue);
 			}
 
 			currentCue = {
-				start: timestampMatch[1],
-				end: timestampMatch[2],
+				start,
+				end,
 				text: "",
 			};
 			continue;
