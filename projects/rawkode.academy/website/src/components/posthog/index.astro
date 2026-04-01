@@ -16,6 +16,19 @@ const { userId } = Astro.props;
 	let pageExitHandlerAttached = false;
 	let pageStartTime = Date.now();
 
+	const getPostHogScriptUrl = (apiHost) => {
+		const normalizedHost = (apiHost || "").replace(/\/+$/, "");
+		if (!normalizedHost) return null;
+
+		// PostHog serves the JS bundle from region-specific asset hosts (eu-assets.i.posthog.com, us-assets.i.posthog.com).
+		// Rewrite ingestion hosts so the loader fetches from the correct CDN domain.
+		if (normalizedHost.includes(".i.posthog.com")) {
+			return `${normalizedHost.replace(".i.posthog.com", "-assets.i.posthog.com")}/static/array.js`;
+		}
+
+		return `${normalizedHost}/static/array.js`;
+	};
+
 	const getConsent = () => {
 		try {
 			return localStorage.getItem(CONSENT_KEY);
@@ -65,26 +78,29 @@ const { userId } = Astro.props;
 			e.init = function (i, s, a) {
 				function g(target, fn) {
 					const parts = fn.split(".");
-					if (parts.length === 2) {
-						target = target[parts[0]];
-						fn = parts[1];
-					}
-					target[fn] = function () {
-						target.push(
-							[fn].concat(Array.prototype.slice.call(arguments, 0)),
-						);
-					};
+				if (parts.length === 2) {
+					target = target[parts[0]];
+					fn = parts[1];
 				}
-				p = t.createElement("script");
-				p.type = "text/javascript";
-				p.crossOrigin = "anonymous";
-				p.async = true;
-				p.src = `${s.api_host}/static/array.js`;
-				r = t.getElementsByTagName("script")[0];
-				if (r?.parentNode) {
-					r.parentNode.insertBefore(p, r);
-				} else {
-					document.head.appendChild(p);
+				target[fn] = function () {
+					target.push(
+						[fn].concat(Array.prototype.slice.call(arguments, 0)),
+					);
+				};
+			}
+			const posthogScriptSrc = getPostHogScriptUrl(s.api_host);
+			p = t.createElement("script");
+			p.type = "text/javascript";
+			p.crossOrigin = "anonymous";
+			p.async = true;
+			p.src =
+				posthogScriptSrc ||
+				`${(s.api_host || "").replace(/\/+$/, "")}/static/array.js`;
+			r = t.getElementsByTagName("script")[0];
+			if (r?.parentNode) {
+				r.parentNode.insertBefore(p, r);
+			} else {
+				document.head.appendChild(p);
 				}
 				let u = e;
 				if (a !== undefined) {
