@@ -24,11 +24,7 @@ const { userId } = Astro.props;
 		}
 	};
 
-	const checkDoNotTrack = () =>
-		navigator.doNotTrack === "1" || window.doNotTrack === "1";
-
-	const shouldEnableTracking = () =>
-		getConsent() === "granted" && !checkDoNotTrack();
+	const shouldEnableTracking = () => getConsent() === "granted";
 
 	const getUtmParams = () => {
 		try {
@@ -137,11 +133,7 @@ const { userId } = Astro.props;
 					maskAllInputs: true,
 					sampling: { rate: 0 },
 				},
-				loaded: function (ph) {
-					try {
-						ph.opt_in_capturing();
-					} catch {}
-				},
+				loaded: function () {},
 			});
 
 			const utm = getUtmParams();
@@ -157,6 +149,7 @@ const { userId } = Astro.props;
 				path: location.pathname,
 				referrer: document.referrer || "",
 				title: document.title,
+				source: "client",
 			});
 
 			if (!pageExitHandlerAttached) {
@@ -184,13 +177,7 @@ const { userId } = Astro.props;
 
 	const schedulePostHogEnable = () => {
 		if (!shouldEnableTracking()) return;
-
-		const start = () => enablePostHogNow();
-		if ("requestIdleCallback" in window) {
-			window.requestIdleCallback(start, { timeout: 3000 });
-			return;
-		}
-		window.setTimeout(start, 1500);
+		enablePostHogNow();
 	};
 
 	// Called by consent banner after user grants consent.

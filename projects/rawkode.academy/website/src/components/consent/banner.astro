@@ -64,7 +64,7 @@
 
     const decline = () => {
       try{ localStorage.setItem(KEY, 'denied'); }catch{}
-      // No need to explicitly disable - PostHog won't capture without consent
+      try{ window.posthog?.opt_out_capturing?.(); }catch{}
       banner?.classList.add('hidden');
     };
 

@@ -99,6 +99,9 @@ export async function captureServerEvent(
 
 	// Map event names to CloudEvent types (domain events only, prefix added by observability-collector)
 	const eventTypeMap: Record<string, string> = {
+		// Page events
+		page_view: "page.view",
+		page_exit: "page.exit",
 		// Growth events
 		activated_user: "growth.activated_user",
 		// Video events

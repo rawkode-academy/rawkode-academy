@@ -10,12 +10,11 @@ const readProjectFile = (relativePath: string): string =>
 	readFileSync(resolve(PROJECT_ROOT, relativePath), "utf-8");
 
 describe("Core Web Vitals Guardrails", () => {
-	it("loads PostHog only after consent and idle time", () => {
+	it("loads PostHog only after consent", () => {
 		const source = readProjectFile("src/components/posthog/index.astro");
 
 		expect(source).toContain("window.enablePostHog");
 		expect(source).toContain("consent_analytics");
-		expect(source).toContain("requestIdleCallback");
 		expect(source).toContain("shouldEnableTracking()");
 		expect(source).not.toContain("type=\"text/partytown\"");
 	});
