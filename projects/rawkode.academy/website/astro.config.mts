@@ -3,7 +3,6 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import vue from "@astrojs/vue";
 import faroUploader from "@grafana/faro-rollup-plugin";
-import pandacss from "@pandacss/astro";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
@@ -112,7 +111,6 @@ export default defineConfig({
 	}),
 	trailingSlash: "never",
 	integrations: [
-		pandacss(),
 		...(d2Available ? [d2()] : []),
 		expressiveCode({
 			themes: ["catppuccin-mocha", "catppuccin-latte"],

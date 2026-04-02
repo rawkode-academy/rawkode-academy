@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 
+import { css } from "../../../../styled-system/css";
 import { getCollection } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
@@ -93,9 +94,9 @@ const totalTechnologies = normalizedTechnologies.length;
 				<h1 class="hero-title">
 					<span class="title-accent">Advanced</span> Mode
 				</h1>
-				<p class="hero-subtitle text-secondary-content">
+				<p class="hero-subtitle" style="color: var(--text-secondary-content);">
 					Interactive visualization of cloud native technologies.
-					<br class="hidden md:block" />
+					<br class={css({ display: { base: "none", md: "block" } })} />
 					Filter, group, and explore by any dimension.
 				</p>
 			</div>

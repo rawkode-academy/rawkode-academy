@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 
+import { css } from "../../../styled-system/css";
 import { getCollection } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
@@ -206,9 +207,9 @@ const graveyardTechnologies = allTechnologies
 				<h1 class="hero-title">
 					Technology <span class="title-accent">Matrix</span>
 				</h1>
-				<p class="hero-subtitle text-secondary-content">
+				<p class="hero-subtitle" style="color: var(--text-secondary-content);">
 					My opinionated journey through cloud native technologies.
-					<br class="hidden md:block" />
+					<br class={css({ display: { base: "none", md: "block" } })} />
 					From first glance to full advocacy.
 				</p>
 
@@ -292,7 +293,7 @@ const graveyardTechnologies = allTechnologies
 		<!-- Matrix Updates CTA -->
 		<NewsletterCTA
 			server:defer
-			class="mb-8"
+			class={css({ marginBottom: "2rem" })}
 			audience="matrix"
 			badge="Matrix updates in your inbox"
 			headline="Track my technology journey"
@@ -324,7 +325,7 @@ const graveyardTechnologies = allTechnologies
 							<div class="lane-tab">
 								<span class="lane-icon">{lane.icon}</span>
 								<span class="lane-title">{lane.label}</span>
-								<span class="lane-desc text-muted">— {lane.description}</span>
+								<span class="lane-desc" style="color: var(--text-muted);">— {lane.description}</span>
 							</div>
 						</div>
 						<div class="lane glass-card">
@@ -382,7 +383,7 @@ const graveyardTechnologies = allTechnologies
 					<div class="other-header">
 						<div class="other-title-group">
 							<h2 class="other-title">Not in Active Rotation</h2>
-							<p class="other-subtitle text-muted">Technologies I'm skipping or have moved on from</p>
+							<p class="other-subtitle" style="color: var(--text-muted);">Technologies I'm skipping or have moved on from</p>
 						</div>
 						<a href="/technology/matrix/advanced" class="other-advanced-link">
 							<span>Explore in Advanced Mode</span>

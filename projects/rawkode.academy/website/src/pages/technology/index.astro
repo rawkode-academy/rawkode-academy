@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 
+import { css } from "../../../styled-system/css";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -41,84 +42,100 @@ try {
 	title="Technologies"
 	description="Explore the various technologies covered on Rawkode Academy."
 >
-	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
+	<div class={css({ display: "flex", flexDirection: "column", gap: "stack-lg", paddingBlock: "section", paddingInline: "page", paddingTop: "0" })}>
 		<!-- Hero Section -->
-		<section class="w-full">
-			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
-				<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-					<!-- Hero Copy -->
-					<div class="flex-1 space-y-4">
-						<span class="glass-chip">
-							<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-							</svg>
-							Technology Hub
-						</span>
-						<h1 class="text-3xl md:text-4xl font-extrabold text-primary-content">
-							Explore technologies
-						</h1>
-						<p class="text-gray-600 dark:text-gray-300 max-w-xl">
-							Browse Rawkode Academy's catalogue of tools and platforms. Start typing to find what you're looking for.
-						</p>
-					</div>
-
-					<!-- Search Controls -->
-					<div class="w-full lg:w-96 space-y-3">
-						<label for="technology-search" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-							Search technologies
-						</label>
-						<div class="relative">
-							<svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-							</svg>
-							<input
-								id="technology-search"
-								type="search"
-								placeholder="e.g. Grafana, Crossplane, Kubernetes..."
-								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-primary-content placeholder-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
-								autocomplete="off"
-							/>
+		<section class={css({ width: "100%" })}>
+			<div class={css({ maxWidth: "80rem", marginInline: "auto" })} >
+				<div class="glass-panel" style="border-radius: 1.5rem; padding: 1.5rem;">
+					<div class={css({ display: "flex", flexDirection: "column", gap: "2rem", lg: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" } })} style="padding: 0.5rem;">
+						<!-- Hero Copy -->
+						<div class={css({ flex: "1", display: "flex", flexDirection: "column", gap: "1rem" })}>
+							<span class="glass-chip">
+								<svg class={css({ width: "1rem", height: "1rem", marginRight: "0.375rem" })} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+								</svg>
+								Technology Hub
+							</span>
+							<h1 class={css({ fontSize: { base: "1.875rem", md: "2.25rem" }, fontWeight: "800" })} style="color: var(--text-primary-content, rgb(17 24 39));">
+								Explore technologies
+							</h1>
+							<p class={css({ maxWidth: "36rem", color: { base: "gray.600", _dark: "gray.300" } })}>
+								Browse Rawkode Academy's catalogue of tools and platforms. Start typing to find what you're looking for.
+							</p>
 						</div>
-						<p class="text-sm text-gray-500 dark:text-gray-400">
-							Showing <span class="font-medium text-gray-700 dark:text-gray-200" data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies
-						</p>
+
+						<!-- Search Controls -->
+						<div class={css({ width: { base: "100%", lg: "24rem" }, display: "flex", flexDirection: "column", gap: "0.75rem" })}>
+							<label for="technology-search" class={css({ display: "block", fontSize: "0.875rem", fontWeight: "500", color: { base: "gray.700", _dark: "gray.200" } })}>
+								Search technologies
+							</label>
+							<div class={css({ position: "relative" })}>
+								<svg class={css({ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", width: "1.25rem", height: "1.25rem", color: "gray.400" })} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+								</svg>
+								<input
+									id="technology-search"
+									type="search"
+									placeholder="e.g. Grafana, Crossplane, Kubernetes..."
+									class={css({
+										width: "100%",
+										borderRadius: "xl",
+										paddingBlock: "0.75rem",
+										paddingLeft: "3rem",
+										paddingRight: "1rem",
+										fontSize: "1rem",
+										backdropFilter: "blur(4px)",
+										border: "1px solid",
+										borderColor: { base: "rgba(255, 255, 255, 0.4)", _dark: "rgba(75, 85, 99, 0.5)" },
+										backgroundColor: { base: "rgba(255, 255, 255, 0.6)", _dark: "rgba(31, 41, 55, 0.6)" },
+										transition: "all 0.15s ease",
+										_focus: { outline: "none", ringWidth: "2px", ringColor: "teal.400", borderColor: "teal.400" },
+									})}
+									style="color: var(--text-primary-content, rgb(17 24 39));"
+									autocomplete="off"
+								/>
+							</div>
+							<p class={css({ fontSize: "0.875rem", color: { base: "gray.500", _dark: "gray.400" } })}>
+								Showing <span class={css({ fontWeight: "500", color: { base: "gray.700", _dark: "gray.200" } })} data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
 		</section>
 
 		<!-- Technologies Grid -->
-		<section id="technologies" class="w-full">
-			<div class="max-w-7xl mx-auto">
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+		<section id="technologies" class={css({ width: "100%" })}>
+			<div class={css({ maxWidth: "80rem", marginInline: "auto" })}>
+				<div class={css({ display: "grid", gridTemplateColumns: { base: "1", sm: "2", lg: "3" }, gap: "1.5rem" })}>
 					{
 						technologies.map((tech) => {
 							const searchKeywords = tech.name.toLowerCase();
-							
+
 							return (
 								<a
 									href={`/technology/${tech.id}`}
-									class="tech-card-link glass-card-shimmer card-hover flex flex-col overflow-hidden"
+									class:list={["tech-card-link", "glass-card-shimmer", "card-hover", css({ display: "flex", flexDirection: "column", overflow: "hidden" })]}
 									data-keywords={searchKeywords}
 								>
 									{/* Logo Container */}
-									<div class="glass-media-brand h-36 flex items-center justify-center p-6">
+									<div class:list={["glass-media-brand", css({ height: "9rem", display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem" })]}>
 										<img
 											src={tech.logo ?? '/apple-touch-icon.png'}
 											alt={`${tech.name} Logo`}
-											class="w-20 h-20 object-contain drop-shadow-lg"
+											class={css({ width: "5rem", height: "5rem", objectFit: "contain", filter: "drop-shadow(0 10px 8px rgb(0 0 0 / 0.04)) drop-shadow(0 4px 3px rgb(0 0 0 / 0.1))" })}
 											onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
 										/>
 									</div>
-									
+
 									{/* Content */}
-									<div class="flex-1 p-5 flex flex-col gap-3 relative z-10">
-										<h3 class="text-lg font-bold text-primary-content">
+									<div class={css({ flex: "1", padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem", position: "relative", zIndex: "10" })}>
+										<h3 class={css({ fontSize: "1.125rem", fontWeight: "700" })} style="color: var(--text-primary-content, rgb(17 24 39));">
 											{tech.name}
 										</h3>
-										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
+										<span class={css({ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.875rem", fontWeight: "500", color: "teal.600", marginTop: "auto" })}>
 											Learn more
-											<svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+											<svg class={css({ width: "1rem", height: "1rem", transition: "transform 0.15s ease" })} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
 												<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
 											</svg>
 										</span>
@@ -128,15 +145,15 @@ try {
 						})
 					}
 				</div>
-				
+
 				<!-- Empty State -->
 				<div id="technology-empty-state" class="hidden">
-					<div class="glass-card-shimmer rounded-2xl p-12 text-center max-w-md mx-auto">
-						<svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+					<div class={css({ borderRadius: "1rem", padding: "3rem", textAlign: "center", maxWidth: "28rem", marginInline: "auto" })} style="background: var(--surface-card);">
+						<svg class={css({ width: "3rem", height: "3rem", marginInline: "auto", marginBottom: "1rem", color: { base: "gray.400", _dark: "gray.500" } })} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 						</svg>
-						<p class="text-muted font-medium">No technologies match your search</p>
-						<p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different term</p>
+						<p class="text-muted" style="font-weight: 500;">No technologies match your search</p>
+						<p class={css({ fontSize: "0.875rem", color: { base: "gray.500", _dark: "gray.500" }, marginTop: "0.25rem" })}>Try a different term</p>
 					</div>
 				</div>
 			</div>
