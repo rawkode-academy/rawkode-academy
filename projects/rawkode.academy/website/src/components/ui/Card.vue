@@ -6,15 +6,15 @@
 		v-bind="$attrs"
 	>
 		<!-- Badge overlay (top-left) -->
-		<div v-if="$slots.badge" class="absolute top-3 left-3 z-20">
+		<div v-if="$slots.badge" :class="css({ position: 'absolute', top: '3', left: '3', zIndex: 20 })">
 			<slot name="badge" />
 		</div>
 
 		<!-- Media/Cover slot -->
-		<div v-if="$slots.media" class="relative">
+		<div v-if="$slots.media" :class="css({ position: 'relative' })">
 			<slot name="media" />
 			<!-- Overlay slot (for gradients over media) -->
-			<div v-if="$slots.overlay" class="absolute inset-0">
+			<div v-if="$slots.overlay" :class="css({ position: 'absolute', inset: '0' })">
 				<slot name="overlay" />
 			</div>
 		</div>
@@ -38,6 +38,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	variant?: "glass" | "solid" | "gradient" | "bordered" | "flat";
@@ -63,67 +64,95 @@ const props = withDefaults(defineProps<Props>(), {
 
 const tag = computed(() => (props.href ? "a" : "div"));
 
-const baseClasses = "relative overflow-hidden flex flex-col h-full";
+const baseStyles = css({
+	position: "relative",
+	overflow: "hidden",
+	display: "flex",
+	flexDirection: "column",
+	height: "full",
+});
 
-const variantClasses = {
-	glass: "card-base backdrop-blur-2xl",
-	solid:
-		"bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
-	gradient: "bg-gradient-card border-glass",
-	bordered: "bg-transparent border-glass-strong",
-	flat: "bg-gray-50 dark:bg-gray-900",
+const variantStyles = {
+	glass: cx(
+		"glass-card",
+		css({ backdropFilter: "blur(40px)" }),
+	),
+	solid: css({
+		bg: { base: "white", _dark: "gray.800" },
+		border: "1px solid",
+		borderColor: { base: "gray.200", _dark: "gray.700" },
+	}),
+	gradient: cx(
+		"bg-gradient-card",
+		css({ border: "1px solid", borderColor: "var(--surface-border)" }),
+	),
+	bordered: css({
+		bg: "transparent",
+		border: "1px solid",
+		borderColor: "var(--surface-border-strong)",
+	}),
+	flat: css({ bg: { base: "gray.50", _dark: "gray.900" } }),
 };
 
-const paddingClasses = {
-	none: "p-0",
-	sm: "p-3",
-	md: "p-6",
-	lg: "p-8",
+const paddingStyles = {
+	none: css({ p: "0" }),
+	sm: css({ p: "3" }),
+	md: css({ p: "6" }),
+	lg: css({ p: "8" }),
 };
 
-const roundedClasses = {
-	none: "rounded-none",
-	sm: "rounded-sm",
-	md: "rounded-md",
-	lg: "rounded-lg",
-	xl: "rounded-xl",
-	"2xl": "rounded-2xl",
-	"3xl": "rounded-3xl",
+const roundedStyles = {
+	none: css({ borderRadius: "none" }),
+	sm: css({ borderRadius: "sm" }),
+	md: css({ borderRadius: "md" }),
+	lg: css({ borderRadius: "lg" }),
+	xl: css({ borderRadius: "xl" }),
+	"2xl": css({ borderRadius: "2xl" }),
+	"3xl": css({ borderRadius: "3xl" }),
 };
 
-const shadowClasses = {
+const shadowStyles = {
 	none: "",
-	sm: "shadow-sm",
-	md: "card-shadow",
-	lg: "shadow-lg",
-	elevated: "card-shadow-elevated",
+	sm: css({ shadow: "sm" }),
+	md: css({ boxShadow: "var(--surface-shadow)" }),
+	lg: css({ shadow: "lg" }),
+	elevated: css({ boxShadow: "var(--surface-shadow-strong)" }),
 };
 
 const cardClasses = computed(() => {
-	const classes = [
-		baseClasses,
-		variantClasses[props.variant],
-		roundedClasses[props.rounded],
-		shadowClasses[props.shadow],
-		props.hover && "card-hover cursor-pointer",
+	return cx(
+		baseStyles,
+		variantStyles[props.variant],
+		roundedStyles[props.rounded],
+		shadowStyles[props.shadow],
+		props.hover
+			? css({
+					cursor: "pointer",
+					transition: "all",
+					transitionDuration: "300ms",
+					_hover: { transform: "translateY(-2px)", boxShadow: "var(--surface-shadow-strong)" },
+				})
+			: undefined,
 		props.class,
-	].filter(Boolean);
-
-	return classes.join(" ");
+	);
 });
 
 const headerClasses = computed(() => {
-	return paddingClasses[props.headerPadding];
+	return paddingStyles[props.headerPadding];
 });
 
 const contentClasses = computed(() => {
-	return [paddingClasses[props.padding], "flex flex-col grow"].join(" ");
+	return cx(paddingStyles[props.padding], css({ display: "flex", flexDirection: "column", flexGrow: 1 }));
 });
 
 const footerClasses = computed(() => {
-	return [
-		paddingClasses[props.footerPadding],
-		"mt-auto border-t border-glass-subtle",
-	].join(" ");
+	return cx(
+		paddingStyles[props.footerPadding],
+		css({
+			mt: "auto",
+			borderTop: "1px solid",
+			borderColor: { base: "rgba(255, 255, 255, 0.2)", _dark: "rgba(107, 114, 128, 0.5)" },
+		}),
+	);
 });
 </script>

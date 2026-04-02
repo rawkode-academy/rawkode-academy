@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { computed, useAttrs } from "vue";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	variant?:
@@ -30,65 +31,122 @@ const props = withDefaults(defineProps<Props>(), {
 	outline: false,
 });
 
-const baseClasses =
-	"inline-flex items-center font-semibold transition-all duration-200 backdrop-blur-md shadow-sm";
+const sizeMap = {
+	xs: { px: "2", py: "0.5", fontSize: "xs" },
+	sm: { px: "2.5", py: "0.5", fontSize: "sm" },
+	md: { px: "3", py: "1", fontSize: "sm" },
+	lg: { px: "4", py: "1.5", fontSize: "base" },
+} as const;
 
-const variantClasses = {
-	default: props.outline
-		? "border border-gray-300/50 text-gray-700 dark:border-gray-500/60 dark:text-gray-100 bg-white/30 dark:bg-gray-700/40"
-		: "bg-gray-500/20 text-gray-800 dark:bg-gray-600/40 dark:text-gray-100 border border-gray-400/30 dark:border-gray-500/50",
-	primary: props.outline
-		? "border border-primary/50 text-primary dark:text-white bg-white/30 dark:bg-primary/40"
-		: "bg-primary/20 text-primary dark:bg-primary/40 dark:text-white border border-primary/30 dark:border-primary/50",
-	secondary: props.outline
-		? "border border-secondary/50 text-secondary dark:text-white bg-white/30 dark:bg-secondary/40"
-		: "bg-secondary/20 text-secondary dark:bg-secondary/40 dark:text-white border border-secondary/30 dark:border-secondary/50",
-	tertiary: props.outline
-		? "border border-tertiary/50 text-tertiary dark:text-white bg-white/30 dark:bg-tertiary/40"
-		: "bg-tertiary/20 text-tertiary dark:bg-tertiary/40 dark:text-white border border-tertiary/30 dark:border-tertiary/50",
-	success: props.outline
-		? "border border-green-600/50 text-green-600 dark:border-green-400/60 dark:text-green-300 bg-white/30 dark:bg-green-700/40"
-		: "bg-green-500/20 text-green-700 dark:bg-green-600/40 dark:text-green-200 border border-green-500/30 dark:border-green-500/50",
-	warning: props.outline
-		? "border border-yellow-600/50 text-yellow-600 dark:border-yellow-400/60 dark:text-yellow-300 bg-white/30 dark:bg-yellow-700/40"
-		: "bg-yellow-500/20 text-yellow-700 dark:bg-yellow-600/40 dark:text-yellow-200 border border-yellow-500/30 dark:border-yellow-500/50",
-	danger: props.outline
-		? "border border-red-600/50 text-red-600 dark:border-red-400/60 dark:text-red-300 bg-white/30 dark:bg-red-700/40"
-		: "bg-red-500/20 text-red-700 dark:bg-red-600/40 dark:text-red-200 border border-red-500/30 dark:border-red-500/50",
-	info: props.outline
-		? "border border-primary/50 text-primary dark:border-primary/60 dark:text-primary bg-white/30 dark:bg-primary/20"
-		: "bg-primary/20 text-primary dark:bg-primary/20 dark:text-primary border border-primary/30 dark:border-primary/50",
+// Shared brand variant used by primary, secondary, tertiary, and info
+const brandOutline = {
+	border: "1px solid",
+	borderColor: "brandAccent.border",
+	color: "brandAccent.text",
+	bg: { base: "rgba(255, 255, 255, 0.3)", _dark: "brandAccent.subtle" },
 };
 
-const sizeClasses = {
-	xs: "px-2 py-0.5 text-xs",
-	sm: "px-2.5 py-0.5 text-sm",
-	md: "px-3 py-1 text-sm",
-	lg: "px-4 py-1.5 text-base",
+const brandSolid = {
+	bg: "brandAccent.subtle",
+	color: "brandAccent.text",
+	border: "1px solid",
+	borderColor: "brandAccent.border",
 };
 
-const roundedClasses = {
-	none: "rounded-none",
-	sm: "rounded-sm",
-	md: "rounded-md",
-	lg: "rounded-lg",
-	full: "rounded-full",
-};
+function colorVariant(
+	outline: boolean,
+	outlineBorder: Record<string, any>,
+	outlineColor: Record<string, any>,
+	outlineBg: Record<string, any>,
+	solidBg: Record<string, any>,
+	solidColor: Record<string, any>,
+	solidBorder: Record<string, any>,
+): Record<string, any> {
+	return outline
+		? { border: "1px solid", borderColor: outlineBorder, color: outlineColor, bg: outlineBg }
+		: { bg: solidBg, color: solidColor, border: "1px solid", borderColor: solidBorder };
+}
+
+const variantStyles = computed(() => {
+	const o = props.outline;
+
+	const styles: Record<string, Record<string, any>> = {
+		default: colorVariant(
+			o,
+			{ base: "rgba(209, 213, 219, 0.5)", _dark: "rgba(107, 114, 128, 0.6)" },
+			{ base: "gray.700", _dark: "gray.100" },
+			{ base: "rgba(255, 255, 255, 0.3)", _dark: "rgba(55, 65, 81, 0.4)" },
+			{ base: "rgba(107, 114, 128, 0.2)", _dark: "rgba(75, 85, 99, 0.4)" },
+			{ base: "gray.800", _dark: "gray.100" },
+			{ base: "rgba(156, 163, 175, 0.3)", _dark: "rgba(107, 114, 128, 0.5)" },
+		),
+		primary: o ? brandOutline : brandSolid,
+		secondary: o ? brandOutline : brandSolid,
+		tertiary: o ? brandOutline : brandSolid,
+		success: colorVariant(
+			o,
+			{ base: "rgba(22, 163, 74, 0.5)", _dark: "rgba(74, 222, 128, 0.6)" },
+			{ base: "green.600", _dark: "green.300" },
+			{ base: "rgba(255, 255, 255, 0.3)", _dark: "rgba(21, 128, 61, 0.4)" },
+			{ base: "rgba(34, 197, 94, 0.2)", _dark: "rgba(22, 163, 74, 0.4)" },
+			{ base: "green.700", _dark: "green.200" },
+			{ base: "rgba(34, 197, 94, 0.3)", _dark: "rgba(34, 197, 94, 0.5)" },
+		),
+		warning: colorVariant(
+			o,
+			{ base: "rgba(202, 138, 4, 0.5)", _dark: "rgba(250, 204, 21, 0.6)" },
+			{ base: "yellow.600", _dark: "yellow.300" },
+			{ base: "rgba(255, 255, 255, 0.3)", _dark: "rgba(161, 98, 7, 0.4)" },
+			{ base: "rgba(234, 179, 8, 0.2)", _dark: "rgba(202, 138, 4, 0.4)" },
+			{ base: "yellow.700", _dark: "yellow.200" },
+			{ base: "rgba(234, 179, 8, 0.3)", _dark: "rgba(234, 179, 8, 0.5)" },
+		),
+		danger: colorVariant(
+			o,
+			{ base: "rgba(220, 38, 38, 0.5)", _dark: "rgba(248, 113, 113, 0.6)" },
+			{ base: "red.600", _dark: "red.300" },
+			{ base: "rgba(255, 255, 255, 0.3)", _dark: "rgba(185, 28, 28, 0.4)" },
+			{ base: "rgba(239, 68, 68, 0.2)", _dark: "rgba(220, 38, 38, 0.4)" },
+			{ base: "red.700", _dark: "red.200" },
+			{ base: "rgba(239, 68, 68, 0.3)", _dark: "rgba(239, 68, 68, 0.5)" },
+		),
+		info: o
+			? {
+					border: "1px solid",
+					borderColor: "brandAccent.border",
+					color: "brandAccent.text",
+					bg: { base: "rgba(255, 255, 255, 0.3)", _dark: "brandAccent.subtle" },
+				}
+			: {
+					bg: "brandAccent.subtle",
+					color: "brandAccent.text",
+					border: "1px solid",
+					borderColor: "brandAccent.border",
+				},
+	};
+
+	return styles[props.variant] || styles.default;
+});
 
 const attrs = useAttrs();
 
-const badgeClasses = computed(() => {
-	return [
-		baseClasses,
-		variantClasses[props.variant],
-		sizeClasses[props.size],
-		roundedClasses[props.rounded],
-	].join(" ");
-});
-
 const computedClasses = computed(() => {
-	return [badgeClasses.value, props.class || attrs.class]
-		.filter(Boolean)
-		.join(" ");
+	const size = sizeMap[props.size];
+	const baseClass = css({
+		display: "inline-flex",
+		alignItems: "center",
+		fontWeight: "semibold",
+		transition: "all",
+		transitionDuration: "200ms",
+		backdropFilter: "blur(12px)",
+		shadow: "sm",
+		borderRadius: props.rounded,
+		px: size.px,
+		py: size.py,
+		fontSize: size.fontSize,
+		...variantStyles.value,
+	});
+
+	return cx(baseClass, props.class || (attrs.class as string));
 });
 </script>

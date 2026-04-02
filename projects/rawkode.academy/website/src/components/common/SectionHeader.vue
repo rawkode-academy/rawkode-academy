@@ -1,26 +1,50 @@
 <template>
-  <div :class="[wrapperClasses, className]">
-    <div class="h-10 w-1 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+  <div :class="cx(wrapperClasses, className)">
+    <div
+      :class="css({
+        height: '10',
+        width: '1',
+        backgroundImage: 'linear-gradient(to bottom, rgb(var(--brand-primary)), rgb(var(--brand-secondary)))',
+        borderRadius: 'full',
+      })"
+    ></div>
     <div :class="textClasses">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+      <h2
+        :class="css({
+          fontSize: { base: '2xl', md: '3xl' },
+          fontWeight: 'bold',
+          color: 'fg.default',
+        })"
+      >
         {{ title }}
       </h2>
       <p
         v-if="subtitle"
-        class="text-base text-gray-600 dark:text-gray-300 mt-2 max-w-2xl"
+        :class="css({
+          fontSize: 'base',
+          color: 'fg.subtle',
+          mt: '2',
+          maxWidth: '2xl',
+        })"
       >
         {{ subtitle }}
       </p>
     </div>
     <div
       v-if="showSeparator"
-      class="ml-4 h-px grow bg-gradient-to-r from-primary/30 to-transparent"
+      :class="css({
+        ml: '4',
+        height: '1px',
+        flexGrow: 1,
+        backgroundImage: 'linear-gradient(to right, rgb(var(--brand-primary) / 0.3), transparent)',
+      })"
     ></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	title: string;
@@ -37,25 +61,22 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const className = props.class;
-const wrapperClasses = computed(() => [
-	"flex items-start gap-3 mb-8",
-	props.centered ? "justify-center text-center" : "",
-]);
-const textClasses = computed(() => [
-	"flex flex-col",
-	props.centered ? "items-center text-center" : "",
-]);
-const subtitle = props.subtitle;
-const showSeparator = props.showSeparator;
-const title = props.title;
+
+const wrapperClasses = computed(() =>
+	css({
+		display: "flex",
+		alignItems: "flex-start",
+		gap: "3",
+		mb: "8",
+		...(props.centered ? { justifyContent: "center", textAlign: "center" } : {}),
+	}),
+);
+
+const textClasses = computed(() =>
+	css({
+		display: "flex",
+		flexDirection: "column",
+		...(props.centered ? { alignItems: "center", textAlign: "center" } : {}),
+	}),
+);
 </script>
-
-<style scoped>
-.bg-gradient-to-b {
-  background-image: linear-gradient(to bottom, var(--primary), var(--secondary));
-}
-
-.bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--primary), transparent);
-}
-</style>

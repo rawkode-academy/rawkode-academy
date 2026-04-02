@@ -1,12 +1,15 @@
 ---
+import { css } from "styled-system/css";
 export const prerender = false;
 
 import { env } from "cloudflare:workers";
 import NewsletterWidget from "./NewsletterWidget.vue";
 import { createLearnerId } from "@/actions/newsletter";
+import { withTimeout } from "@/utils/timeout";
 
 interface Props {
 	class?: string;
+	style?: string;
 	badge?: string;
 	headline?: string;
 	subtitle?: string;
@@ -15,6 +18,7 @@ interface Props {
 
 const {
 	class: className,
+	style: inlineStyle,
 	badge = "Weekly Cloud Native insights",
 	headline = "Stay ahead in cloud native",
 	subtitle = "Tutorials, deep dives, and curated events—no fluff.",
@@ -27,7 +31,13 @@ let isSubscribed = false;
 if (user && import.meta.env.PROD) {
 	try {
 		const prefixedUserId = createLearnerId(user.id);
-		const prefs = await env.EMAIL_PREFERENCES.getPreferences(prefixedUserId, "newsletter", audience);
+		const prefs = await withTimeout(
+			() => env.EMAIL_PREFERENCES.getPreferences(prefixedUserId, "newsletter", audience),
+			{
+				timeoutMs: 3000,
+				label: "Newsletter preference lookup",
+			},
+		);
 		isSubscribed = prefs.length > 0;
 	} catch (e) {
 		console.error("Failed to fetch preferences", e);
@@ -43,36 +53,56 @@ const hasNewsletterCookie =
 
 // For anonymous users with the cookie, hide the CTA entirely
 const shouldHide = !user && hasNewsletterCookie;
+
+const sectionStyle = css({ w: 'full', py: '12', pos: 'relative', zIndex: '10' });
+const cardWrapper = css({ p: { base: '4', sm: '6' } });
+const flexRow = css({
+	display: 'flex',
+	flexDir: { base: 'column', sm: 'row' },
+	alignItems: { sm: 'center' },
+	gap: { base: '4', sm: '6' },
+});
+const contentCol = css({ flex: '1', minW: '0', display: 'flex', flexDir: 'column', gap: '1' });
+const badgeRow = css({ display: 'flex', alignItems: 'center', gap: '2' });
+const badgeDot = css({ h: '2', w: '2', rounded: 'full', bg: 'primary' });
+const badgeText = css({ fontSize: 'xs', fontWeight: 'medium', color: 'primary' });
+const headlineStyle = css({
+	fontSize: { base: 'lg', sm: 'xl' },
+	fontFamily: 'display',
+	fontWeight: 'semibold',
+	letterSpacing: 'tight',
+});
+const widgetCol = css({ w: { sm: '64' }, flexShrink: '0' });
 ---
 
 {!shouldHide && (
-<section class:list={["w-full py-12 relative z-10", className]}>
-        <div class="glass-card bg-gradient-card card-shadow p-4 sm:p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                        <div class="flex-1 min-w-0 space-y-1">
-                                <div class="flex items-center gap-2">
-                                        <span class="h-2 w-2 rounded-full bg-primary"></span>
-                                        <span class="text-xs font-medium text-primary">{badge}</span>
-                                </div>
-                                <h2 class="text-lg sm:text-xl font-display font-semibold tracking-tight text-primary-content">
-                                        {headline}
-                                </h2>
-                                <p class="text-sm text-muted">
-                                        {subtitle}
-                                </p>
-                        </div>
+<section class:list={[sectionStyle, className]} style={inlineStyle}>
+	<div class:list={["glass-card bg-gradient-card card-shadow", cardWrapper]}>
+		<div class={flexRow}>
+			<div class={contentCol}>
+				<div class={badgeRow}>
+					<span class={badgeDot}></span>
+					<span class={badgeText}>{badge}</span>
+				</div>
+				<h2 class:list={["text-primary-content", headlineStyle]}>
+					{headline}
+				</h2>
+				<p class:list={["text-muted", css({ fontSize: 'sm' })]}>
+					{subtitle}
+				</p>
+			</div>
 
-                        <div class="sm:w-64 flex-shrink-0">
-                                <NewsletterWidget
-                                        client:visible
-                                        isSignedIn={!!user}
-                                        isSubscribed={isSubscribed}
-                                        signInUrl={signInUrl}
-                                        pagePath={pagePath}
-                                        audience={audience}
-                                />
-                        </div>
-                </div>
-        </div>
+			<div class={widgetCol}>
+				<NewsletterWidget
+					client:visible
+					isSignedIn={!!user}
+					isSubscribed={isSubscribed}
+					signInUrl={signInUrl}
+					pagePath={pagePath}
+					audience={audience}
+				/>
+			</div>
+		</div>
+	</div>
 </section>
 )}

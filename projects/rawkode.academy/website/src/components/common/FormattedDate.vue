@@ -1,9 +1,9 @@
 <template>
-  <div :class="['flex items-center space-x-2', className]">
+  <div :class="cx(css({ display: 'flex', alignItems: 'center', gap: '2' }), className)">
     <svg
       v-if="showIcon"
       xmlns="http://www.w3.org/2000/svg"
-      class="h-4 w-4 text-secondary"
+      :class="css({ height: '4', width: '4', color: 'brandAccent.text' })"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -17,7 +17,11 @@
     </svg>
     <time
       :datetime="date.toISOString()"
-      class="text-xs font-normal text-gray-500 dark:text-gray-400"
+      :class="css({
+        fontSize: 'xs',
+        fontWeight: 'normal',
+        color: 'fg.subtle',
+      })"
     >
       {{ formattedDate }}
     </time>
@@ -26,6 +30,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	date: Date;

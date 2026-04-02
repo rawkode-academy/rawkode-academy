@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 export const prerender = true;
 
 import { getCollection } from "astro:content";
@@ -95,7 +96,12 @@ const totalTechnologies = normalizedTechnologies.length;
 				</h1>
 				<p class="hero-subtitle text-secondary-content">
 					Interactive visualization of cloud native technologies.
-					<br class="hidden md:block" />
+					<br class={css({
+	display: 'none',
+	md: {
+		display: 'block',
+	},
+})} />
 					Filter, group, and explore by any dimension.
 				</p>
 			</div>

@@ -1,13 +1,6 @@
 <template>
-  <section
-    :class="[
-      'w-full',
-      paddingClass,
-      backgroundClass,
-      className
-    ]"
-  >
-    <div :class="containerClass">
+  <section :class="cx(sectionClasses, className)">
+    <div :class="containerClasses">
       <slot />
     </div>
   </section>
@@ -15,6 +8,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	padding?: "none" | "sm" | "md" | "lg" | "xl";
@@ -30,39 +24,46 @@ const props = withDefaults(defineProps<Props>(), {
 	class: "",
 });
 
-const paddingClass = computed(() => {
-	const paddingClasses: Record<string, string> = {
-		none: "",
-		sm: "py-8 px-4",
-		md: "py-12 px-4",
-		lg: "py-16 px-4 md:py-20",
-		xl: "py-20 px-4 md:py-24 lg:py-32",
-	};
-	return paddingClasses[props.padding];
-});
+const paddingStyles: Record<string, Record<string, any>> = {
+	none: {},
+	sm: { py: "8", px: "4" },
+	md: { py: "12", px: "4" },
+	lg: { py: { base: "16", md: "20" }, px: "4" },
+	xl: { py: { base: "20", md: "24", lg: "32" }, px: "4" },
+};
 
-const backgroundClass = computed(() => {
-	const backgroundClasses: Record<string, string> = {
-		none: "",
-		gray: "bg-gray-50 dark:bg-gray-900",
-		gradient:
-			"bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
-		dots: "relative overflow-hidden",
-	};
-	return backgroundClasses[props.background];
-});
+const backgroundStyles: Record<string, Record<string, any>> = {
+	none: {},
+	gray: { bg: { base: "gray.50", _dark: "gray.900" } },
+	gradient: {
+		backgroundImage: {
+			base: "linear-gradient(to bottom, var(--colors-gray-50), white)",
+			_dark: "linear-gradient(to bottom, var(--colors-gray-900), var(--colors-gray-800))",
+		},
+	},
+	dots: { position: "relative", overflow: "hidden" },
+};
 
-const containerClass = computed(() => {
-	const containerClasses: Record<string, string> = {
-		none: "",
-		sm: "max-w-2xl mx-auto",
-		md: "max-w-4xl mx-auto",
-		lg: "max-w-6xl mx-auto",
-		xl: "max-w-7xl mx-auto",
-		full: "w-full",
-	};
-	return containerClasses[props.container];
-});
+const containerStyles: Record<string, Record<string, any>> = {
+	none: {},
+	sm: { maxWidth: "2xl", mx: "auto" },
+	md: { maxWidth: "4xl", mx: "auto" },
+	lg: { maxWidth: "6xl", mx: "auto" },
+	xl: { maxWidth: "7xl", mx: "auto" },
+	full: { width: "full" },
+};
+
+const sectionClasses = computed(() =>
+	css({
+		width: "full",
+		...paddingStyles[props.padding],
+		...backgroundStyles[props.background],
+	}),
+);
+
+const containerClasses = computed(() =>
+	css(containerStyles[props.container]),
+);
 
 const className = props.class;
 </script>

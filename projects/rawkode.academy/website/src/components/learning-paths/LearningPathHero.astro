@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 import AuthorAvatarGroup from "@/components/common/AuthorAvatarGroup.vue";
 import Badge from "@/components/common/Badge.vue";
 import Button from "@/components/common/Button.astro";
@@ -46,38 +47,155 @@ const difficultyLabel =
 	difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
 const hasTechnologies = technologies.length > 0;
 const hasPrerequisites = prerequisites.length > 0;
+
+const sectionStyle = css({
+	position: 'relative',
+	overflow: 'hidden',
+	rounded: '3xl',
+	borderWidth: '1px',
+	borderColor: { base: 'gray.200', _dark: 'gray.800' },
+	bg: { base: 'white', _dark: 'gray.900' },
+});
+const bgOverlayStyle = css({
+	position: 'absolute',
+	inset: '0',
+	bgGradient: 'to-br',
+	gradientFrom: { base: 'primary/10', _dark: 'primary/20' },
+	gradientVia: 'transparent',
+	gradientTo: { base: 'secondary/20', _dark: 'secondary/30' },
+});
+const innerStyle = css({
+	position: 'relative',
+	zIndex: '10',
+	px: { base: '6', md: '10', lg: '16' },
+	py: { base: '12', lg: '16' },
+});
+const layoutStyle = css({
+	display: 'flex',
+	flexDirection: { base: 'column', lg: 'row' },
+	gap: '8',
+	lg: { alignItems: 'flex-start', justifyContent: 'space-between' },
+});
+const mainContentStyle = css({ maxW: '3xl' });
+const badgeWrapStyle = css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: '3',
+	mb: '6',
+});
+const badgeExtraStyle = css({ shadow: 'sm', backdropFilter: 'blur(4px)' });
+const titleStyle = css({
+	fontSize: { base: '3xl', md: '4xl' },
+	fontWeight: 'extrabold',
+	letterSpacing: 'tight',
+	color: { base: 'gray.900', _dark: 'white' },
+	mb: '4',
+});
+const descStyle = css({
+	fontSize: 'lg',
+	color: { base: 'gray.600', _dark: 'gray.300' },
+	lineHeight: 'relaxed',
+	mb: '6',
+});
+const techLabelStyle = css({
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	textTransform: 'uppercase',
+	letterSpacing: 'wide',
+	color: { base: 'gray.500', _dark: 'gray.400' },
+	mb: '2',
+});
+const techListStyle = css({ display: 'flex', flexWrap: 'wrap', gap: '2' });
+const sidebarStyle = css({
+	w: 'full',
+	maxW: 'sm',
+	lg: { w: 'auto', minW: '280px' },
+});
+const sidebarCardStyle = css({
+	rounded: '2xl',
+	borderWidth: '1px',
+	borderColor: { base: 'gray.200', _dark: 'gray.800' },
+	bg: { base: 'white/80', _dark: 'gray.900/70' },
+	backdropFilter: 'blur(4px)',
+	p: '6',
+	shadow: 'lg',
+});
+const sidebarHeaderStyle = css({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	mb: '4',
+});
+const sidebarLabelStyle = css({
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	textTransform: 'uppercase',
+	letterSpacing: 'wide',
+	color: { base: 'gray.500', _dark: 'gray.400' },
+});
+const ctaWrapStyle = css({ mt: '6' });
+const prereqWrapStyle = css({ mt: '6' });
+const prereqLabelStyle = css({
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	textTransform: 'uppercase',
+	letterSpacing: 'wide',
+	color: { base: 'gray.500', _dark: 'gray.400' },
+	mb: '2',
+});
+const prereqListStyle = css({
+	display: 'flex',
+	flexDirection: 'column',
+	gap: '2',
+	fontSize: 'sm',
+	color: { base: 'gray.600', _dark: 'gray.300' },
+});
+const prereqItemStyle = css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+});
+const prereqDotStyle = css({
+	mt: '1',
+	display: 'inline-flex',
+	h: '1.5',
+	w: '1.5',
+	rounded: 'full',
+	bg: 'primary',
+});
 ---
 
-<section class="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-	<div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 dark:from-primary/20 dark:to-secondary/30"></div>
-	<div class="relative z-10 px-6 py-12 md:px-10 lg:px-16 lg:py-16">
-		<div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-			<div class="max-w-3xl">
-				<div class="flex flex-wrap items-center gap-3 mb-6">
+<section class={sectionStyle}>
+	<div class={bgOverlayStyle}></div>
+	<div class={innerStyle}>
+		<div class={layoutStyle}>
+			<div class={mainContentStyle}>
+				<div class={badgeWrapStyle}>
 					<Badge
 						variant={getDifficultyVariant(difficulty)}
 						size="sm"
-						class="shadow-sm backdrop-blur"
+						class={badgeExtraStyle}
 					>
 						{difficultyLabel}
 					</Badge>
-					<Badge variant="info" size="sm" class="shadow-sm backdrop-blur">
+					<Badge variant="info" size="sm" class={badgeExtraStyle}>
 						{durationLabel}
 					</Badge>
 				</div>
-				<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-4">
+				<h1 class={titleStyle}>
 					{title}
 				</h1>
-				<p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+				<p class={descStyle}>
 					{description}
 				</p>
 
 				{hasTechnologies && (
 					<div>
-						<h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+						<h2 class={techLabelStyle}>
 							Technologies Covered
 						</h2>
-						<div class="flex flex-wrap gap-2">
+						<div class={techListStyle}>
 							{technologies.map((technology) => (
 								<Badge variant="secondary" size="xs">
 									{technology}
@@ -88,16 +206,16 @@ const hasPrerequisites = prerequisites.length > 0;
 				)}
 			</div>
 
-			<div class="w-full max-w-sm lg:w-auto lg:min-w-[280px]">
-				<div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/70 backdrop-blur p-6 shadow-lg">
-					<div class="flex items-center justify-between mb-4">
-						<h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+			<div class={sidebarStyle}>
+				<div class={sidebarCardStyle}>
+					<div class={sidebarHeaderStyle}>
+						<h2 class={sidebarLabelStyle}>
 							Your Guides
 						</h2>
 						<FormattedDate date={publishedAt} format="long" />
 					</div>
 					<AuthorAvatarGroup authors={authors} showActiveIndicator={false} />
-					<div class="mt-6">
+					<div class={ctaWrapStyle}>
 						<slot name="cta">
 							<Button href="#learning-path-content" size="md" fullWidth>
 								Start Learning
@@ -105,14 +223,14 @@ const hasPrerequisites = prerequisites.length > 0;
 						</slot>
 					</div>
 					{hasPrerequisites && (
-						<div class="mt-6">
-							<h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+						<div class={prereqWrapStyle}>
+							<h3 class={prereqLabelStyle}>
 								Prerequisites
 							</h3>
-							<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+							<ul class={prereqListStyle}>
 								{prerequisites.map((item) => (
-									<li class="flex items-start gap-2">
-										<span class="mt-1 inline-flex h-1.5 w-1.5 rounded-full bg-primary"></span>
+									<li class={prereqItemStyle}>
+										<span class={prereqDotStyle}></span>
 										<span>{item}</span>
 									</li>
 								))}

@@ -1,17 +1,17 @@
 <template>
   <div class="transcript-wrapper">
     <!-- Search bar -->
-    <div v-if="transcriptLoaded && !error" class="mb-4">
-      <div class="relative">
+    <div v-if="transcriptLoaded && !error" :class="css({ mb: '4' })">
+      <div :class="css({ pos: 'relative' })">
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Search transcript..."
           aria-label="Search transcript"
-          class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent"
+          :class="css({ w: 'full', px: '4', py: '2', pl: '10', borderWidth: '1px', borderColor: 'gray.300', _dark: { borderColor: 'gray.700' }, rounded: 'lg', bg: 'white', _dark: { bg: 'gray.800' }, color: 'gray.900', _dark: { color: 'gray.100' }, _focus: { ringWidth: '2px', ringColor: 'primary', borderColor: 'transparent' } })"
         />
         <svg
-          class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+          :class="css({ pos: 'absolute', left: '3', top: '2.5', w: '5', h: '5', color: 'gray.400' })"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -24,7 +24,7 @@
           ></path>
         </svg>
       </div>
-      <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+      <div v-if="searchQuery.length >= 2" :class="css({ mt: '2', fontSize: 'sm', color: 'gray.600', _dark: { color: 'gray.400' } })">
         <span>{{ searchResultsText }}</span>
       </div>
     </div>
@@ -33,8 +33,8 @@
     <SkeletonTranscript v-if="loading" />
 
     <!-- Error state -->
-    <div v-if="error" class="text-center py-8">
-      <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+    <div v-if="error" :class="css({ textAlign: 'center', py: '8' })">
+      <p :class="css({ color: 'red.600', _dark: { color: 'red.400' } })">{{ errorMessage }}</p>
     </div>
 
     <!-- Transcript content with scrollable container -->
@@ -42,12 +42,12 @@
       <div
         v-for="(paragraph, index) in paragraphs"
         :key="index"
-        class="transcript-paragraph mb-6"
+        :class="css({ mb: '6' })"
       >
-        <div class="text-sm text-primary dark:text-primary font-mono mb-2">
+        <div :class="css({ fontSize: 'sm', color: 'primary', _dark: { color: 'primary' }, fontFamily: 'mono', mb: '2' })">
           {{ paragraph[0].start }}
         </div>
-        <div class="text-gray-900 dark:text-gray-100 leading-relaxed">
+        <div :class="css({ color: 'gray.900', _dark: { color: 'gray.100' }, lineHeight: 'relaxed' })">
           <span
             v-for="(cue, cueIndex) in paragraph"
             :key="`${index}-${cueIndex}`"
@@ -63,6 +63,7 @@
 </template>
 
 <script>
+import { css } from "styled-system/css";
 import SkeletonTranscript from "@/components/common/SkeletonTranscript.vue";
 import {
 	groupTranscriptParagraphs,
@@ -72,6 +73,9 @@ import {
 export default {
 	components: {
 		SkeletonTranscript,
+	},
+	setup() {
+		return { css };
 	},
 	props: {
 		videoId: {

@@ -1,9 +1,9 @@
 import { getCollection } from "astro:content";
-import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 import { glob } from "glob";
 import { stat } from "node:fs/promises";
 import { join } from "node:path";
 import { getPublishedVideos } from "@/lib/content";
+import { resolveWebsiteContentDirSync } from "@/utils/content-dir";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const BUILD_TIME = new Date();
@@ -185,7 +185,7 @@ async function getContentMtimes(contentDir: string): Promise<Map<string, Date>> 
 		contentMtimeCache.set(
 			contentDir,
 			(async () => {
-				const baseDir = resolveContentDirSync(contentDir);
+				const baseDir = resolveWebsiteContentDirSync(contentDir);
 				const files = await glob("**/*.{md,mdx,yaml,yml}", {
 					cwd: baseDir,
 					nodir: true,

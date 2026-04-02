@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 export const prerender = false;
 
 import { getPublishedVideos } from "@/lib/content";
@@ -6,6 +7,7 @@ import FeaturedContent from "@/components/common/FeaturedContent.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
+import { fetchWithTimeout } from "@/utils/timeout";
 
 const user = Astro.locals.user;
 
@@ -49,22 +51,30 @@ const allVideos = (await getPublishedVideos()).map((v) => v.data);
 let watchPositionData: WatchPosition[] = [];
 if (user) {
 	try {
-		const response = await fetch("https://api.rawkode.academy/graphql", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				query: `
-					query ContinueWatching($userId: String!, $limit: Int) {
-						continueWatching(userId: $userId, limit: $limit) {
-							videoId
-							positionSeconds
-							updatedAt
+		const response = await fetchWithTimeout(
+			fetch,
+			"https://api.rawkode.academy/graphql",
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					query: `
+						query ContinueWatching($userId: String!, $limit: Int) {
+							continueWatching(userId: $userId, limit: $limit) {
+								videoId
+								positionSeconds
+								updatedAt
+							}
 						}
-					}
-				`,
-				variables: { userId: user.id, limit: 100 },
-			}),
-		});
+					`,
+					variables: { userId: user.id, limit: 100 },
+				}),
+			},
+			{
+				timeoutMs: 4000,
+				label: "Watch index continue watching query",
+			},
+		);
 		const json = (await response.json()) as {
 			data?: { continueWatching?: WatchPosition[] };
 		};
@@ -138,7 +148,10 @@ const hasNextPage = end < allVideos.length;
 		/>
 	)}
 
-	<div id="latest-videos" class="flex flex-col stack-gap-lg section-py">
+	<div id="latest-videos" class={css({
+	display: 'flex',
+	flexDir: 'column',
+}) + " stack-gap-lg section-py"}>
  		<VideoFeed
 			title={page === 1 ? "Latest Videos" : `Videos - Page ${page}`}
 			description={page === 1 ? "Stay up to date with our newest content" : "Browse our video collection"}
@@ -148,24 +161,49 @@ const hasNextPage = end < allVideos.length;
 		/>
 
 		{/* Pagination controls */}
-		<div class="flex justify-center items-center stack-gap-sm">
+		<div class={css({
+	display: 'flex',
+	justifyContent: 'center',
+	alignItems: 'center',
+}) + " stack-gap-sm"}>
 			{page > 1 && (
 				<a
 					href={page === 2 ? "/watch" : `/watch?page=${page - 1}`}
-					class="inline-block px-4 py-2 bg-gray-200 dark:bg-gray-700 text-secondary-content rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+					class={css({
+	display: 'inline-block',
+	px: '4',
+	py: '2',
+	bg: 'gray.200',
+	rounded: 'md',
+	_hover: {
+		bg: 'gray.300',
+	},
+}) + " dark:bg-gray-700 text-secondary-content dark:hover:bg-gray-600"}
 				>
 					← Previous
 				</a>
 			)}
 
-			<span class="px-4 py-2 text-secondary-content">
+			<span class={css({
+	px: '4',
+	py: '2',
+}) + " text-secondary-content"}>
 				Page {page}
 			</span>
 
 			{hasNextPage && (
 				<a
 					href={`/watch?page=${page + 1}`}
-					class="inline-block px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+					class={css({
+	display: 'inline-block',
+	px: '4',
+	py: '2',
+	color: 'white',
+	rounded: 'md',
+	_hover: {
+		bg: 'primary/90',
+	},
+}) + " bg-primary"}
 				>
 					Next →
 				</a>

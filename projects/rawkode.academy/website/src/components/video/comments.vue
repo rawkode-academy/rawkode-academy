@@ -1,86 +1,86 @@
 <template>
-  <div class="comments-section mt-8">
-    <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+  <div class="comments-section" :class="css({ mt: '8' })">
+    <h3 :class="css({ fontSize: 'xl', fontWeight: 'semibold', mb: '4', color: 'gray.900', _dark: { color: 'white' } })">
       Comments {{ !loading ? `(${comments.length})` : '' }}
     </h3>
 
-    <div v-if="loading" class="space-y-2">
+    <div v-if="loading" :class="css({ '& > * + *': { mt: '2' } })">
       <SkeletonComment v-for="i in 3" :key="i" :lines="2" />
     </div>
 
-    <ErrorState 
+    <ErrorState
       v-else-if="error"
       :message="error"
       :on-retry="fetchComments"
       retry-text="Retry loading comments"
     />
 
-    <div v-else-if="comments.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+    <div v-else-if="comments.length === 0" :class="css({ textAlign: 'center', py: '8', color: 'gray.500', _dark: { color: 'gray.400' } })">
       <p>No comments yet. Join the discussion on Discord!</p>
       <a
         v-if="discordInviteUrl"
         :href="discordInviteUrl"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center mt-2 text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
+        :class="css({ display: 'inline-flex', alignItems: 'center', mt: '2', color: 'primary', _hover: { color: 'primary/90' }, _dark: { color: 'primary', _hover: { color: 'primary/90' } } })"
       >
         Join the discussion on Discord
-        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg :class="css({ ml: '1', w: '4', h: '4' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
         </svg>
       </a>
     </div>
 
-    <div v-else class="space-y-4">
+    <div v-else :class="css({ '& > * + *': { mt: '4' } })">
       <div
         v-for="comment in comments"
         :key="comment.id"
-        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+        :class="css({ bg: 'white', _dark: { bg: 'gray.800' }, borderWidth: '1px', borderColor: 'gray.200', _dark: { borderColor: 'gray.700' }, rounded: 'lg', p: '4' })"
       >
-        <div class="flex items-start space-x-3">
-          <div class="flex-shrink-0">
+        <div :class="css({ display: 'flex', alignItems: 'flex-start', '& > * + *': { ml: '3' } })">
+          <div :class="css({ flexShrink: '0' })">
             <img
               v-if="comment.avatar_url"
               :src="comment.avatar_url"
               :alt="comment.author"
-              class="h-8 w-8 rounded-full"
+              :class="css({ h: '8', w: '8', rounded: 'full' })"
               loading="lazy"
             />
             <div
               v-else
-              class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-medium"
+              :class="css({ h: '8', w: '8', rounded: 'full', bg: 'primary', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 'sm', fontWeight: 'medium' })"
             >
               {{ comment.author.charAt(0).toUpperCase() }}
             </div>
           </div>
 
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center space-x-2 mb-1">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white">
+          <div :class="css({ flex: '1', minW: '0' })">
+            <div :class="css({ display: 'flex', alignItems: 'center', '& > * + *': { ml: '2' }, mb: '1' })">
+              <h4 :class="css({ fontSize: 'sm', fontWeight: 'medium', color: 'gray.900', _dark: { color: 'white' } })">
                 {{ comment.author }}
               </h4>
-              <span class="text-xs text-gray-500 dark:text-gray-400">
+              <span :class="css({ fontSize: 'xs', color: 'gray.500', _dark: { color: 'gray.400' } })">
                 {{ formatDate(comment.timestamp) }}
               </span>
             </div>
 
             <div
-              class="text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none dark:prose-invert"
+              :class="cx('prose', css({ fontSize: 'sm', color: 'gray.700', _dark: { color: 'gray.300' }, maxW: 'none' }))"
               v-html="formatContent(comment.content)"
             ></div>
           </div>
         </div>
       </div>
 
-      <div v-if="discordInviteUrl" class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div v-if="discordInviteUrl" :class="css({ textAlign: 'center', pt: '4', borderTopWidth: '1px', borderColor: 'gray.200', _dark: { borderColor: 'gray.700' } })">
         <a
           :href="discordInviteUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
+          :class="css({ display: 'inline-flex', alignItems: 'center', color: 'primary', _hover: { color: 'primary/90' }, _dark: { color: 'primary', _hover: { color: 'primary/90' } } })"
         >
           Want to share your thoughts? Join the discussion on Discord
-          <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg :class="css({ ml: '1', w: '4', h: '4' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
           </svg>
         </a>
@@ -90,6 +90,7 @@
 </template>
 
 <script setup lang="ts">
+import { css, cx } from "styled-system/css";
 import { onMounted, ref } from "vue";
 import SkeletonComment from "@/components/common/SkeletonComment.vue";
 import ErrorState from "@/components/common/ErrorState.vue";
@@ -161,14 +162,12 @@ const formatDate = (timestamp: string): string => {
 };
 
 const formatContent = (content: string): string => {
-	// Basic markdown to HTML conversion (keep lightweight for client)
-	// This is a simplified version - use a proper markdown parser if content expands
 	return content
 		.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
 		.replace(/\*(.*?)\*/g, "<em>$1</em>")
 		.replace(
 			/`(.*?)`/g,
-			'<code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">$1</code>',
+			'<code class="inline-code">$1</code>',
 		)
 		.replace(/\n/g, "<br>");
 };
@@ -184,7 +183,14 @@ onMounted(() => {
   max-width: 100%;
 }
 
-.prose code {
-  @apply bg-gray-100 dark:bg-gray-700 px-1 rounded text-sm;
+.prose :deep(.inline-code) {
+  background: var(--colors-gray-100);
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.dark .prose :deep(.inline-code) {
+  background: var(--colors-gray-700);
 }
 </style>

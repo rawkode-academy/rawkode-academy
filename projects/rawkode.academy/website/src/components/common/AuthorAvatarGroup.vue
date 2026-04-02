@@ -1,35 +1,76 @@
 <template>
-  <div class="flex items-center space-x-3">
-    <div class="flex -space-x-3">
+  <div :class="css({ display: 'flex', alignItems: 'center', gap: '3' })">
+    <div :class="css({ display: 'flex' })" style="margin-left: -0.75rem;">
       <div
         v-for="(author, index) in displayAuthors"
         :key="author.id"
-        class="relative"
-        :style="`z-index: ${10 - index}`"
+        :class="css({ position: 'relative' })"
+        :style="`z-index: ${10 - index}; margin-left: 0.75rem;`"
       >
         <img
-          class="w-10 h-10 rounded-full object-cover border-2 border-secondary p-0.5 bg-white dark:bg-gray-800"
+          :class="css({
+            width: '10',
+            height: '10',
+            borderRadius: 'full',
+            objectFit: 'cover',
+            borderWidth: '2px',
+            borderStyle: 'solid',
+            borderColor: 'brandAccent.border',
+            p: '0.5',
+            bg: { base: 'white', _dark: 'gray.800' },
+          })"
           :src="author.data.avatarUrl ?? '/apple-touch-icon.png'"
           :alt="`Profile picture of ${author.data.name}`"
           loading="lazy"
         />
         <span
           v-if="showActiveIndicator && index === 0"
-          class="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"
+          :class="css({
+            position: 'absolute',
+            bottom: '0',
+            right: '0',
+            height: '2.5',
+            width: '2.5',
+            bg: 'green.400',
+            borderRadius: 'full',
+            borderWidth: '2px',
+            borderStyle: 'solid',
+            borderColor: { base: 'white', _dark: 'gray.800' },
+          })"
         ></span>
       </div>
       <div
         v-if="remainingCount > 0"
-        class="relative"
-        style="z-index: 0;"
+        :class="css({ position: 'relative' })"
+        style="z-index: 0; margin-left: 0.75rem;"
       >
-        <div class="w-10 h-10 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-xs text-secondary dark:text-secondary font-medium">
+        <div
+          :class="css({
+            width: '10',
+            height: '10',
+            borderRadius: 'full',
+            bg: 'brandAccent.subtle',
+            borderWidth: '2px',
+            borderStyle: 'solid',
+            borderColor: 'brandAccent.border',
+            p: '0.5',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 'xs',
+            color: 'brandAccent.text',
+            fontWeight: 'medium',
+          })"
+        >
           +{{ remainingCount }}
         </div>
       </div>
     </div>
-    <div v-if="showNames" class="font-medium dark:text-white">
-      <div class="text-sm">{{ authorNames }}</div>
+    <div
+      v-if="showNames"
+      :class="css({ fontWeight: 'medium', color: 'fg.default' })"
+    >
+      <div :class="css({ fontSize: 'sm' })">{{ authorNames }}</div>
     </div>
   </div>
 </template>
@@ -37,6 +78,7 @@
 <script setup lang="ts">
 import type { CollectionEntry } from "astro:content";
 import { computed } from "vue";
+import { css } from "styled-system/css";
 
 interface Props {
 	authors: CollectionEntry<"people">[];

@@ -1,4 +1,5 @@
 ---
+import { css, cx } from "styled-system/css";
 import { getCollection, getEntries } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { createLogger } from "@/lib/logger";
@@ -49,52 +50,143 @@ const getAdrNumber = (id: string): string => {
 ---
 
 <Page title="Architecture Decision Records" subtitle="Documentation of architecture decisions">
-  <div class="max-w-(--breakpoint-xl) mx-auto">
-    <h1 class="text-5xl font-extrabold mb-6 text-primary-content">
+  <div class={css({
+	maxW: '(--breakpoint-xl)',
+	mx: 'auto',
+})}>
+    <h1 class={cx('text-primary-content', css({
+	fontSize: '5xl',
+	fontWeight: 'extrabold',
+	mb: '6',
+}))}>
       Architecture Decision Records
     </h1>
 
-    <p class="mb-10 text-lg text-gray-700 dark:text-gray-300">
+    <p class={css({
+	mb: '10',
+	fontSize: 'lg',
+	color: 'gray.700',
+	_dark: { color: 'gray.300' },
+})}>
       This page lists all architecture decisions made in this project. ADRs are a lightweight method to document architectural decisions including their context and consequences.
     </p>
 
-    <div class="grid gap-6 lg:gap-8">
+    <div class={css({
+	display: 'grid',
+	gap: '6',
+	lg: { gap: '8' },
+})}>
       {allAdrs.map((adr) => {
         const authorData = adrAuthors.find(a => a.id === adr.id);
         const authors = authorData?.authors || [];
         const adrNumber = getAdrNumber(adr.id);
 
         return (
-          <a href={`/adrs/${adr.id}`} class="block">
-            <div class="transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl rounded-xl overflow-hidden backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 shadow-md">
-              <div class="p-6">
-                <div class="flex items-center gap-4 mb-4">
-                  <h2 class="text-2xl font-bold text-primary-content my-auto">
-                    <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
+          <a href={`/adrs/${adr.id}`} class={css({
+	display: 'block',
+})}>
+            <div class={css({
+	transition: 'all',
+	transitionDuration: '300ms',
+	transitionTimingFunction: 'ease-in-out',
+	_hover: {
+		translateY: '-1',
+		shadow: 'xl',
+	},
+	rounded: 'xl',
+	overflow: 'hidden',
+	backdropBlur: 'sm',
+	bg: 'white/30',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+	shadow: 'md',
+	_dark: { bg: 'gray.800/30', borderColor: 'gray.700' },
+})}>
+              <div class={css({
+	p: '6',
+})}>
+                <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '4',
+	mb: '4',
+})}>
+                  <h2 class={cx('text-primary-content', css({
+	fontSize: '2xl',
+	fontWeight: 'bold',
+	my: 'auto',
+}))}>
+                    <span class={css({ color: 'secondary', _dark: { color: 'secondary' } })}>ADR-{adrNumber}:</span> {adr.data.title}
                   </h2>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-4 mt-2">
-                  <div class="flex items-center text-sm text-muted">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: '4',
+	mt: '2',
+})}>
+                  <div class={cx('text-muted', css({
+	display: 'flex',
+	alignItems: 'center',
+	fontSize: 'sm',
+}))}>
+                    <svg xmlns="http://www.w3.org/2000/svg" class={css({
+	h: '5',
+	w: '5',
+	mr: '1',
+	color: 'gray.500',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     {formatDate(adr.data.adoptedAt)}
                   </div>
 
-                  <div class="flex items-center">
-                    <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+})}>
+                    <span class={css({
+	px: '3',
+	py: '1',
+	fontSize: 'xs',
+	fontWeight: 'medium',
+	rounded: 'full',
+	bg: 'green.100',
+	color: 'green.800',
+	_dark: { bg: 'green.900', color: 'green.200' },
+})}>
                       Adopted
                     </span>
                   </div>
 
                   {authors.length > 0 && (
-                    <div class="flex items-center">
-                      <div class="flex -space-x-3 mr-2">
+                    <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+})}>
+                      <div class={css({
+	display: 'flex',
+	gap: '-3',
+	mr: '2',
+})}>
                         {authors.filter(author => author && author.data).slice(0, 3).map((author, index) => (
-                          <div class="relative" style={`z-index: ${10 - index}`}>
+                          <div class={css({
+	pos: 'relative',
+})} style={`z-index: ${10 - index}`}>
                             <img
-                              class="w-8 h-8 rounded-full object-cover border-2 border-secondary p-0.5 bg-white dark:bg-gray-800"
+                              class={css({
+	w: '8',
+	h: '8',
+	rounded: 'full',
+	objectFit: 'cover',
+	borderWidth: '2px',
+	borderColor: 'secondary',
+	p: '0.5',
+	bg: 'white',
+	_dark: { bg: 'gray.800' },
+})}
                               src={author.data.avatarUrl}
                               alt={`Profile picture of ${author.data.name}`}
                               title={author.data.name}
@@ -102,14 +194,34 @@ const getAdrNumber = (id: string): string => {
                           </div>
                         ))}
                         {authors.filter(author => author && author.data).length > 3 && (
-                          <div class="relative z-0">
-                            <div class="w-8 h-8 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-xs text-secondary dark:text-secondary font-medium">
+                          <div class={css({
+	pos: 'relative',
+	zIndex: '0',
+})}>
+                            <div class={css({
+	w: '8',
+	h: '8',
+	rounded: 'full',
+	bg: 'white',
+	borderWidth: '2px',
+	borderColor: 'secondary',
+	p: '0.5',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	fontSize: 'xs',
+	fontWeight: 'medium',
+	color: 'secondary',
+	_dark: { bg: 'gray.800', color: 'secondary' },
+})}>
                               +{authors.filter(author => author && author.data).length - 3}
                             </div>
                           </div>
                         )}
                       </div>
-                      <span class="text-sm text-muted">
+                      <span class={cx('text-muted', css({
+	fontSize: 'sm',
+}))}>
                         {authors.filter(author => author && author.data).map(author => author.data.name).join(", ")}
                       </span>
                     </div>

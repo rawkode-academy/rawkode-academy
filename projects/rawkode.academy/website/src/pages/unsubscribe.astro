@@ -1,8 +1,10 @@
 ---
+import { css } from "styled-system/css";
 import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import { createEmailId, createLearnerId } from "@/actions/newsletter";
 import { createLogger } from "@/lib/logger";
+import { withTimeout } from "@/utils/timeout";
 
 export const prerender = false;
 
@@ -28,13 +30,20 @@ if (Astro.request.method === "POST" && !user) {
 	if (submittedEmail) {
 		try {
 			const prefixedUserId = createEmailId(submittedEmail);
-			await env.EMAIL_PREFERENCES.setPreference(
-				prefixedUserId,
+			await withTimeout(
+				() =>
+					env.EMAIL_PREFERENCES.setPreference(
+						prefixedUserId,
+						{
+							audience: "academy",
+							channel: "newsletter",
+							status: "unsubscribed",
+							source: `website:newsletter:${pagePath}`,
+						},
+					),
 				{
-					audience: "academy",
-					channel: "newsletter",
-					status: "unsubscribed",
-					source: `website:newsletter:${pagePath}`,
+					timeoutMs: 4000,
+					label: "Anonymous unsubscribe preference update",
 				},
 			);
 
@@ -63,13 +72,20 @@ if (Astro.request.method === "POST" && !user) {
 if (Astro.request.method === "POST" && user) {
 	try {
 		const prefixedUserId = createLearnerId(user.id);
-		await env.EMAIL_PREFERENCES.setPreference(
-			prefixedUserId,
+		await withTimeout(
+			() =>
+				env.EMAIL_PREFERENCES.setPreference(
+					prefixedUserId,
+					{
+						audience: "academy",
+						channel: "newsletter",
+						status: "unsubscribed",
+						source: `website:newsletter:${pagePath}`,
+					},
+				),
 			{
-				audience: "academy",
-				channel: "newsletter",
-				status: "unsubscribed",
-				source: `website:newsletter:${pagePath}`,
+				timeoutMs: 4000,
+				label: "Authenticated unsubscribe preference update",
 			},
 		);
 
@@ -86,37 +102,90 @@ if (Astro.request.method === "POST" && user) {
 ---
 
 <Page title="Unsubscribe - Rawkode Academy" description="Unsubscribe from the Rawkode Academy newsletter.">
-	<div class="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
+	<div class={css({
+	minH: '60vh',
+	display: 'flex',
+	flexDir: 'column',
+	alignItems: 'center',
+	justifyContent: 'center',
+	px: '4',
+	textAlign: 'center',
+})}>
 		{success === "true" ? (
 			<>
-				<div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-8">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<div class={css({
+	w: '24',
+	h: '24',
+	bg: 'green.100',
+	rounded: 'full',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	mb: '8',
+}) + " dark:bg-green-900/30"}>
+					<svg xmlns="http://www.w3.org/2000/svg" class={css({
+	h: '12',
+	w: '12',
+	color: 'green.600',
+}) + " dark:text-green-400"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 					</svg>
 				</div>
 				
-				<h1 class="text-4xl font-bold text-primary-content mb-4">
+				<h1 class={css({
+	fontSize: '4xl',
+	fontWeight: 'bold',
+	mb: '4',
+}) + " text-primary-content"}>
 					Unsubscribed Successfully
 				</h1>
 				
-				<p class="text-xl text-muted max-w-2xl mb-8">
+				<p class={css({
+	fontSize: 'xl',
+	maxW: '2xl',
+	mb: '8',
+}) + " text-muted"}>
 					You have been unsubscribed from the Rawkode Academy newsletter. We're sorry to see you go!
 				</p>
 				
 				<a 
 					href="/"
-					class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
+					class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	px: '6',
+	py: '3',
+	borderWidth: '1px',
+	borderColor: 'transparent',
+	fontSize: 'base',
+	fontWeight: 'medium',
+	rounded: 'md',
+	color: 'white',
+	_hover: {
+		bg: 'primary/90',
+	},
+	transition: 'colors',
+}) + " bg-primary"}
 				>
 					Back to Home
 				</a>
 			</>
 		) : (
 			<>
-				<h1 class="text-4xl font-bold text-primary-content mb-4">
+				<h1 class={css({
+	fontSize: '4xl',
+	fontWeight: 'bold',
+	mb: '4',
+}) + " text-primary-content"}>
 					Unsubscribe from Newsletter
 				</h1>
 				
-				<p class="text-xl text-muted max-w-2xl mb-8">
+				<p class={css({
+	fontSize: 'xl',
+	maxW: '2xl',
+	mb: '8',
+}) + " text-muted"}>
 					{user 
 						? "Click the button below to unsubscribe from the Rawkode Academy newsletter."
 						: "Enter your email address to unsubscribe from the Rawkode Academy newsletter."
@@ -124,12 +193,23 @@ if (Astro.request.method === "POST" && user) {
 				</p>
 
 				{unsubscribeResult?.success === false && (
-					<div class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 max-w-md">
+					<div class={css({
+	mb: '6',
+	p: '4',
+	rounded: 'lg',
+	bg: 'red.50',
+	color: 'red.700',
+	maxW: 'md',
+}) + " dark:bg-red-900/20 dark:text-red-400"}>
 						{unsubscribeResult.message}
 					</div>
 				)}
 
-				<form method="POST" class="w-full max-w-md space-y-4">
+				<form method="POST" class={css({
+	w: 'full',
+	maxW: 'md',
+	gap: '4',
+})}>
 					{!user && (
 						<input
 							type="email"
@@ -137,20 +217,52 @@ if (Astro.request.method === "POST" && user) {
 							value={email || ""}
 							placeholder="Enter your email address"
 							required
-							class="w-full py-3 px-4 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+							class={css({
+	w: 'full',
+	py: '3',
+	px: '4',
+	rounded: 'lg',
+	borderWidth: '1px',
+	borderColor: 'neutral.200',
+	bg: 'white',
+	color: 'neutral.900',
+	_focus: {
+		ringWidth: '2',
+		borderColor: 'transparent',
+	},
+}) + " dark:border-neutral-700 dark:bg-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-primary"}
 						/>
 					)}
 					
 					<button
 						type="submit"
-						class="w-full py-3 px-6 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+						class={css({
+	w: 'full',
+	py: '3',
+	px: '6',
+	rounded: 'lg',
+	bg: 'red.600',
+	_hover: {
+		bg: 'red.700',
+	},
+	color: 'white',
+	fontWeight: 'medium',
+	transition: 'colors',
+})}
 					>
 						Unsubscribe
 					</button>
 				</form>
 
-				<p class="mt-8 text-sm text-muted">
-					Changed your mind? <a href="/" class="text-primary hover:underline">Go back home</a>
+				<p class={css({
+	mt: '8',
+	fontSize: 'sm',
+}) + " text-muted"}>
+					Changed your mind? <a href="/" class={css({
+	_hover: {
+		textDecoration: 'underline',
+	},
+}) + " text-primary"}>Go back home</a>
 				</p>
 			</>
 		)}

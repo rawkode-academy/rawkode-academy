@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { css, cx } from "styled-system/css";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 
 interface Props {
@@ -57,7 +58,7 @@ function formatDate(dateString: string): string {
 function formatDuration(seconds: string | undefined): string | undefined {
 	if (!seconds) return undefined;
 	const totalSeconds = parseInt(seconds);
-	if (isNaN(totalSeconds)) return seconds; // fallback if it's already formatted
+	if (isNaN(totalSeconds)) return seconds;
 
 	const hours = Math.floor(totalSeconds / 3600);
 	const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -86,35 +87,348 @@ const truncatedDescription = truncateDescription(
 	description,
 	isVideo ? 120 : 160,
 );
+
+/* ---- Panda styles ---- */
+
+const mobileLink = css({ display: { base: "block", lg: "none" } });
+const desktopLink = css({ display: { base: "none", lg: "block" } });
+
+const mobileCard = css({
+	overflow: "hidden",
+	borderRadius: "2xl",
+});
+
+const imageSection = css({
+	position: "relative",
+	aspectRatio: "16/9",
+	overflow: "hidden",
+});
+
+const imgFull = css({
+	width: "full",
+	height: "full",
+	objectFit: "cover",
+	transition: "transform",
+	transitionDuration: "500ms",
+});
+
+const gradientOverlay = css({
+	position: "absolute",
+	inset: "0",
+	backgroundImage: {
+		base: "linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent)",
+		_dark: "linear-gradient(to top, rgba(0,0,0,0.8), transparent, transparent)",
+	},
+});
+
+const badgePos = css({
+	position: "absolute",
+	top: "3",
+	left: "3",
+});
+
+const badgeStyle = css({
+	fontSize: "xs",
+	fontWeight: "semibold",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	backdropFilter: "blur(4px)",
+	shadow: "lg",
+});
+
+const durationBadge = css({
+	position: "absolute",
+	top: "3",
+	right: "3",
+	bg: "rgba(0,0,0,0.7)",
+	backdropFilter: "blur(12px)",
+	color: "white",
+	px: "2.5",
+	py: "1",
+	borderRadius: "lg",
+	fontSize: "xs",
+	fontWeight: "semibold",
+});
+
+const contentSection = css({
+	position: "relative",
+	p: "5",
+	display: "flex",
+	flexDirection: "column",
+	gap: "4",
+});
+
+const accentLine = css({
+	position: "absolute",
+	top: "0",
+	left: "5",
+	right: "5",
+	height: "1px",
+	backgroundImage: "linear-gradient(to right, rgb(var(--brand-primary)), rgb(var(--brand-secondary)), rgb(var(--brand-primary)))",
+	opacity: 0.5,
+});
+
+const featuredLabel = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	fontSize: "0.6rem",
+	textTransform: "uppercase",
+	letterSpacing: "0.2em",
+	color: "brandAccent.text",
+	fontWeight: "semibold",
+});
+
+const titleStyle = css({
+	fontSize: "xl",
+	fontWeight: "bold",
+	color: "fg.default",
+	lineHeight: "tight",
+	letterSpacing: "tight",
+});
+
+const descStyle = css({
+	color: "fg.muted",
+	fontSize: "sm",
+	lineHeight: "relaxed",
+	lineClamp: "2",
+	overflow: "hidden",
+});
+
+const metaRow = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "4",
+	fontSize: "xs",
+	color: "fg.subtle",
+	pt: "1",
+});
+
+const authorAvatar = css({
+	width: "6",
+	height: "6",
+	borderRadius: "full",
+	backgroundImage: "linear-gradient(to bottom right, rgb(var(--brand-primary)), rgb(var(--brand-secondary)))",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	color: "white",
+	fontSize: "0.6rem",
+	fontWeight: "bold",
+});
+
+const ctaBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	gap: "2",
+	width: "full",
+	px: "5",
+	py: "3",
+	backgroundImage:
+		"linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
+	color: "brandAccent.contrast",
+	fontSize: "sm",
+	fontWeight: "semibold",
+	borderRadius: "xl",
+	shadow: "lg",
+	border: "1px solid",
+	borderColor: "brandAccent.border",
+	_active: { transform: "scale(0.98)" },
+	transition: "transform",
+	transitionDuration: "200ms",
+});
+
+/* Desktop styles */
+const desktopCard = css({
+	display: "flex",
+	borderRadius: "2rem",
+	overflow: "hidden",
+	minHeight: { base: "400px", xl: "450px" },
+});
+
+const leftPanel = css({
+	position: "relative",
+	display: "flex",
+	flexDirection: "column",
+	justifyContent: "center",
+	p: { base: "8", xl: "12" },
+	bg: "surface.card/50",
+	width: { base: "40%", xl: "35%" },
+	flexShrink: 0,
+});
+
+const accentBar = css({
+	position: "absolute",
+	top: "0",
+	left: "0",
+	width: "1",
+	height: "full",
+	backgroundImage: "linear-gradient(to bottom, rgb(var(--brand-primary)), rgb(var(--brand-secondary)), rgb(var(--brand-primary) / 0.5))",
+});
+
+const dotsGrid = css({
+	position: "absolute",
+	top: "8",
+	right: "8",
+	display: "grid",
+	gridTemplateColumns: "repeat(3, 1fr)",
+	gap: "1.5",
+	opacity: 0.2,
+});
+
+const dotStyle = css({
+	width: "1.5",
+	height: "1.5",
+	borderRadius: "full",
+	bg: "currentColor",
+	color: "fg.default",
+});
+
+const leftContent = css({
+	position: "relative",
+	zIndex: 10,
+	display: "flex",
+	flexDirection: "column",
+	gap: "5",
+});
+
+const desktopTitle = css({
+	fontSize: { base: "xl", xl: "2xl", "2xl": "3xl" },
+	fontWeight: "bold",
+	color: "fg.default",
+	lineHeight: "tight",
+	letterSpacing: "tight",
+});
+
+const desktopDesc = css({
+	color: "fg.muted",
+	fontSize: { base: "sm", xl: "base" },
+	lineHeight: "relaxed",
+	lineClamp: "2",
+	overflow: "hidden",
+});
+
+const dividerLine = css({
+	width: "12",
+	height: "0.5",
+	backgroundImage: "linear-gradient(to right, rgb(var(--brand-primary)), rgb(var(--brand-secondary)))",
+	borderRadius: "full",
+});
+
+const desktopMeta = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "4",
+	fontSize: "sm",
+	color: "fg.subtle",
+});
+
+const desktopAuthorAvatar = css({
+	width: "7",
+	height: "7",
+	borderRadius: "full",
+	backgroundImage: "linear-gradient(to bottom right, rgb(var(--brand-primary)), rgb(var(--brand-secondary)))",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	color: "white",
+	fontSize: "xs",
+	fontWeight: "bold",
+	ringWidth: "2px",
+	ringColor: "surface.card",
+});
+
+const desktopCta = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "5",
+	py: "2.5",
+	backgroundImage:
+		"linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
+	color: "brandAccent.contrast",
+	fontSize: "sm",
+	fontWeight: "semibold",
+	borderRadius: "xl",
+	transition: "all",
+	transitionDuration: "300ms",
+	shadow: "lg",
+	border: "1px solid",
+	borderColor: "brandAccent.border",
+});
+
+const rightPanel = css({
+	position: "relative",
+	flex: "1",
+	overflow: "hidden",
+});
+
+const rightImg = css({
+	position: "absolute",
+	inset: "0",
+	width: "full",
+	height: "full",
+	objectFit: "cover",
+	transition: "transform",
+	transitionDuration: "700ms",
+	transitionTimingFunction: "ease-out",
+});
+
+const rightOverlay = css({
+	position: "absolute",
+	inset: "0",
+	transition: "colors",
+	transitionDuration: "500ms",
+});
+
+const desktopDuration = css({
+	position: "absolute",
+	top: "4",
+	right: "4",
+	bg: "rgba(0,0,0,0.7)",
+	backdropFilter: "blur(12px)",
+	color: "white",
+	px: "3",
+	py: "1.5",
+	borderRadius: "lg",
+	fontSize: "sm",
+	fontWeight: "semibold",
+	letterSpacing: "wide",
+	border: "1px solid",
+	borderColor: "rgba(255,255,255,0.1)",
+});
 ---
 
 <section class={`section-py-tight ${sectionClass}`.trim()}>
-	<!-- Mobile/Tablet layout - matches desktop aesthetic -->
-	<a href={href} class="lg:hidden block group">
-		<div class="glass-card-shimmer overflow-hidden rounded-2xl">
+	<!-- Mobile/Tablet layout -->
+	<a href={href} class={cx(mobileLink, "group")}>
+		<div class={cx("glass-card-shimmer", mobileCard)}>
 			<!-- Image section -->
-			<div class="relative aspect-[16/9] overflow-hidden">
+			<div class={imageSection}>
 				{typeof thumbnailUrl === "string" ? (
-					<img 
-						src={thumbnailUrl} 
-						alt={thumbnailAlt} 
-						class="w-full h-full object-cover transition-transform duration-500 group-active:scale-105" 
+					<img
+						src={thumbnailUrl}
+						alt={thumbnailAlt}
+						class={cx(imgFull, "group-active:scale-105")}
 					/>
 				) : (
-					<Image 
-						src={thumbnailUrl} 
-						alt={thumbnailAlt} 
-						class="w-full h-full object-cover transition-transform duration-500 group-active:scale-105" 
+					<Image
+						src={thumbnailUrl}
+						alt={thumbnailAlt}
+						class={cx(imgFull, "group-active:scale-105")}
 					/>
 				)}
-				
+
 				<!-- Gradient overlay -->
-				<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent dark:from-black/80"></div>
-				
+				<div class={gradientOverlay}></div>
+
 				<!-- Badge -->
 				{type === "article" && badgeConfig && (
-					<div class="absolute top-3 left-3">
-						<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-lg`}>
+					<div class={badgePos}>
+						<span class={cx(badgeStyle, badgeConfig.bg, badgeConfig.text)}>
 							{badgeConfig.label}
 						</span>
 					</div>
@@ -122,21 +436,21 @@ const truncatedDescription = truncateDescription(
 
 				<!-- Duration for videos -->
 				{formattedDuration && (
-					<div class="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-xs font-semibold">
+					<div class={durationBadge}>
 						{formattedDuration}
 					</div>
 				)}
 			</div>
 
 			<!-- Content section -->
-			<div class="relative p-5 space-y-4">
+			<div class={contentSection}>
 				<!-- Accent line -->
-				<div class="absolute top-0 left-5 right-5 h-px bg-gradient-to-r from-primary via-secondary to-primary opacity-50"></div>
+				<div class={accentLine}></div>
 
 				<!-- Featured label -->
-				<div class="flex items-center gap-2">
-					<span class="inline-flex items-center gap-1.5 text-[0.6rem] uppercase tracking-[0.2em] text-primary font-semibold">
-						<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+				<div class={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
+					<span class={featuredLabel}>
+						<svg class={css({ width: '3', height: '3' })} fill="currentColor" viewBox="0 0 24 24">
 							<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
 						</svg>
 						Featured
@@ -144,29 +458,29 @@ const truncatedDescription = truncateDescription(
 				</div>
 
 				<!-- Title -->
-				<h2 class="text-xl font-bold text-primary-content leading-tight tracking-tight">
+				<h2 class={titleStyle}>
 					{title}
 				</h2>
 
 				<!-- Description -->
 				{truncatedDescription && (
-					<p class="text-secondary-content text-sm leading-relaxed line-clamp-2">
+					<p class={descStyle}>
 						{truncatedDescription}
 					</p>
 				)}
 
 				<!-- Meta row -->
-				<div class="flex items-center gap-4 text-xs text-muted pt-1">
+				<div class={metaRow}>
 					{author && (
-						<div class="flex items-center gap-2">
-							<div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-[0.6rem] font-bold">
+						<div class={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
+							<div class={authorAvatar}>
 								{author.charAt(0)}
 							</div>
-							<span class="text-primary-content font-medium">{author}</span>
+							<span class={css({ color: 'fg.default', fontWeight: 'medium' })}>{author}</span>
 						</div>
 					)}
-					<div class="flex items-center gap-1.5 text-muted">
-						<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<div class={css({ display: 'flex', alignItems: 'center', gap: '1.5', color: 'fg.subtle' })}>
+						<svg class={css({ width: '3.5', height: '3.5' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 						</svg>
 						<span>{displayDate}</span>
@@ -174,19 +488,19 @@ const truncatedDescription = truncateDescription(
 				</div>
 
 				<!-- CTA Button -->
-				<div class="pt-2">
-					<span class="inline-flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary text-white text-sm font-semibold rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+				<div class={css({ pt: '2' })}>
+					<span class={ctaBtn}>
 						{isVideo ? (
-							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+							<svg class={css({ width: '4', height: '4' })} fill="currentColor" viewBox="0 0 24 24">
 								<path d="M8 5v14l11-7z" />
 							</svg>
 						) : (
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg class={css({ width: '4', height: '4' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
 							</svg>
 						)}
 						{ctaText}
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg class={css({ width: '4', height: '4' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
 						</svg>
 					</span>
@@ -195,72 +509,72 @@ const truncatedDescription = truncateDescription(
 		</div>
 	</a>
 
-	<!-- Hero layout for lg+ viewports: Side-by-side with prominent image -->
-	<a href={href} class="hidden lg:block group">
-		<div class="glass-card-shimmer flex rounded-[2rem] overflow-hidden min-h-[400px] xl:min-h-[450px]">
-			
+	<!-- Desktop layout -->
+	<a href={href} class={cx(desktopLink, "group")}>
+		<div class={cx("glass-card-shimmer", desktopCard)}>
+
 			<!-- Left: Content Panel -->
-			<div class="relative flex flex-col justify-center p-8 xl:p-12 bg-surface/50 w-[40%] xl:w-[35%] shrink-0">
+			<div class={leftPanel}>
 				<!-- Decorative accent line -->
-				<div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-secondary to-primary/50"></div>
-				
+				<div class={accentBar}></div>
+
 				<!-- Decorative dots pattern -->
-				<div class="absolute top-8 right-8 grid grid-cols-3 gap-1.5 opacity-20">
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
-					<div class="w-1.5 h-1.5 rounded-full bg-current text-primary-content"></div>
+				<div class={dotsGrid}>
+					<div class={dotStyle}></div>
+					<div class={dotStyle}></div>
+					<div class={dotStyle}></div>
+					<div class={dotStyle}></div>
+					<div class={dotStyle}></div>
+					<div class={dotStyle}></div>
+					<div class={dotStyle}></div>
+					<div class={dotStyle}></div>
+					<div class={dotStyle}></div>
 				</div>
 
 				<!-- Content -->
-				<div class="relative z-10 space-y-5">
+				<div class={leftContent}>
 					<!-- Featured label + Badge -->
-					<div class="flex items-center gap-3 flex-wrap">
-						<span class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-primary font-semibold">
-							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+					<div class={css({ display: 'flex', alignItems: 'center', gap: '3', flexWrap: 'wrap' })}>
+						<span class={cx(featuredLabel, css({ fontSize: 'xs', letterSpacing: '0.2em' }))}>
+							<svg class={css({ width: '4', height: '4' })} fill="currentColor" viewBox="0 0 24 24">
 								<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
 							</svg>
 							Featured
 						</span>
 						{type === "article" && badgeConfig && (
-							<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full`}>
+							<span class={cx(badgeStyle, badgeConfig.bg, badgeConfig.text)}>
 								{badgeConfig.label}
 							</span>
 						)}
 					</div>
 
 					<!-- Title -->
-					<h1 class="text-xl xl:text-2xl 2xl:text-3xl font-bold text-primary-content leading-tight tracking-tight">
+					<h1 class={desktopTitle}>
 						{title}
 					</h1>
 
 					<!-- Description -->
 					{truncatedDescription && (
-						<p class="text-secondary-content text-sm xl:text-base leading-relaxed line-clamp-2">
+						<p class={desktopDesc}>
 							{truncatedDescription}
 						</p>
 					)}
 
 					<!-- Divider -->
-					<div class="w-12 h-0.5 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
+					<div class={dividerLine}></div>
 
 					<!-- Meta info -->
-					<div class="flex flex-wrap items-center gap-4 text-sm text-muted">
+					<div class={desktopMeta}>
 						{author && (
-							<div class="flex items-center gap-2">
-								<div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold ring-2 ring-surface-card">
+							<div class={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
+								<div class={desktopAuthorAvatar}>
 									{author.charAt(0)}
 								</div>
-								<span class="font-medium text-primary-content">{author}</span>
+								<span class={css({ fontWeight: 'medium', color: 'fg.default' })}>{author}</span>
 							</div>
 						)}
-						<div class="flex items-center gap-1.5 text-muted">
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<div class={css({ display: 'flex', alignItems: 'center', gap: '1.5', color: 'fg.subtle' })}>
+							<svg class={css({ width: '4', height: '4' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 							</svg>
 							<span>{displayDate}</span>
@@ -268,19 +582,19 @@ const truncatedDescription = truncateDescription(
 					</div>
 
 					<!-- CTA Button -->
-					<div class="pt-1">
-						<span class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-primary/20 group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:translate-x-1">
+					<div class={css({ pt: '1' })}>
+						<span class={cx(desktopCta, "group-hover:shadow-xl group-hover:translate-x-1")}>
 							{isVideo ? (
-								<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+								<svg class={css({ width: '4', height: '4' })} fill="currentColor" viewBox="0 0 24 24">
 									<path d="M8 5v14l11-7z" />
 								</svg>
 							) : (
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<svg class={css({ width: '4', height: '4' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
 								</svg>
 							)}
 							{ctaText}
-							<svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg class={cx(css({ width: '4', height: '4', transition: 'transform', transitionDuration: '300ms' }), "group-hover:translate-x-1")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
 							</svg>
 						</span>
@@ -288,28 +602,28 @@ const truncatedDescription = truncateDescription(
 				</div>
 			</div>
 
-			<!-- Right: Image Panel - takes remaining space -->
-			<div class="relative flex-1 overflow-hidden">
+			<!-- Right: Image Panel -->
+			<div class={rightPanel}>
 				{typeof thumbnailUrl === "string" ? (
-					<img 
-						src={thumbnailUrl} 
-						alt={thumbnailAlt} 
-						class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+					<img
+						src={thumbnailUrl}
+						alt={thumbnailAlt}
+						class={cx(rightImg, "group-hover:scale-105")}
 					/>
 				) : (
-					<Image 
-						src={thumbnailUrl} 
-						alt={thumbnailAlt} 
-						class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+					<Image
+						src={thumbnailUrl}
+						alt={thumbnailAlt}
+						class={cx(rightImg, "group-hover:scale-105")}
 					/>
 				)}
-				
+
 				<!-- Subtle overlay on hover -->
-				<div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500"></div>
+				<div class={rightOverlay}></div>
 
 				<!-- Duration badge for videos -->
 				{formattedDuration && (
-					<div class="absolute top-4 right-4 bg-black/70 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-sm font-semibold tracking-wide border border-white/10">
+					<div class={desktopDuration}>
 						{formattedDuration}
 					</div>
 				)}

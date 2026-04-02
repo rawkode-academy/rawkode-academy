@@ -20,7 +20,8 @@
 		"types": ["vidstack/vue"],
 		"paths": {
 			"@/*": ["./src/*"],
-			"@games/*": ["../games/*"]
+			"@games/*": ["../games/*"],
+			"styled-system/*": ["./styled-system/*"]
 		},
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,

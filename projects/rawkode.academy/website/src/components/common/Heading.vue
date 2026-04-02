@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css } from "styled-system/css";
 
 interface Props {
 	as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
@@ -33,41 +34,24 @@ const defaultSizes = {
 
 const computedSize = computed(() => props.size || defaultSizes[props.as]);
 
-const sizeClasses = {
-	xs: "text-sm md:text-base",
-	sm: "text-base md:text-lg",
-	md: "text-lg md:text-xl",
-	lg: "text-xl md:text-2xl",
-	xl: "text-2xl md:text-3xl",
-	"2xl": "text-2xl md:text-3xl lg:text-4xl",
-	"3xl": "text-3xl md:text-4xl lg:text-5xl",
-	"4xl": "text-3xl md:text-4xl lg:text-5xl xl:text-6xl",
+const sizeStyles: Record<string, Record<string, any>> = {
+	xs: { fontSize: { base: "sm", md: "base" } },
+	sm: { fontSize: { base: "base", md: "lg" } },
+	md: { fontSize: { base: "lg", md: "xl" } },
+	lg: { fontSize: { base: "xl", md: "2xl" } },
+	xl: { fontSize: { base: "2xl", md: "3xl" } },
+	"2xl": { fontSize: { base: "2xl", md: "3xl", lg: "4xl" } },
+	"3xl": { fontSize: { base: "3xl", md: "4xl", lg: "5xl" } },
+	"4xl": { fontSize: { base: "3xl", md: "4xl", lg: "5xl", xl: "6xl" } },
 };
-
-const alignClasses = {
-	left: "text-left",
-	center: "text-center",
-	right: "text-right",
-};
-
-const weightClasses = {
-	normal: "font-normal",
-	medium: "font-medium",
-	semibold: "font-semibold",
-	bold: "font-bold",
-	extrabold: "font-extrabold",
-};
-
-const baseClasses = "text-gray-900 dark:text-white tracking-tight";
 
 const headingClasses = computed(() => {
-	const classes = [
-		baseClasses,
-		sizeClasses[computedSize.value],
-		alignClasses[props.align],
-		weightClasses[props.weight],
-	].filter(Boolean);
-
-	return classes.join(" ");
+	return css({
+		color: "fg.default",
+		letterSpacing: "tight",
+		textAlign: props.align,
+		fontWeight: props.weight,
+		...sizeStyles[computedSize.value],
+	});
 });
 </script>

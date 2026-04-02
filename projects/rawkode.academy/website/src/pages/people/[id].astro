@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 export const prerender = true;
 
 import Page from "@/wrappers/page.astro";
@@ -80,44 +81,121 @@ const socialLinks = [
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-    <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
+    <div class={css({
+	display: 'flex',
+	flexDir: 'column',
+}) + " stack-gap-lg section-py section-pt-0 page-px"}>
         <!-- Profile Header -->
-        <section class="w-full">
-            <div class="glass-panel rounded-3xl p-8 md:p-12 max-w-5xl mx-auto">
-                <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
+        <section class={css({
+	w: 'full',
+})}>
+            <div class={css({
+	rounded: '3xl',
+	p: '8',
+	md: {
+		p: '12',
+	},
+	maxW: '5xl',
+	mx: 'auto',
+}) + " glass-panel"}>
+                <div class={css({
+	display: 'flex',
+	flexDir: 'column',
+	md: {
+		flexDir: 'row',
+		alignItems: 'flex-start',
+		gap: '12',
+	},
+	alignItems: 'center',
+	gap: '8',
+})}>
                     <!-- Avatar -->
-                    <div class="flex-shrink-0">
-                        <div class="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/50 dark:border-gray-700/50 shadow-xl">
+                    <div class={css({
+	flexShrink: '0',
+})}>
+                        <div class={css({
+	w: '40',
+	h: '40',
+	md: {
+		w: '48',
+		h: '48',
+	},
+	rounded: 'full',
+	overflow: 'hidden',
+	borderWidth: '4px',
+	borderColor: 'white/50',
+	shadow: 'xl',
+}) + " dark:border-gray-700/50"}>
                             <img
                                 src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
                                 alt={person.data.name}
-                                class="w-full h-full object-cover"
+                                class={css({
+	w: 'full',
+	h: 'full',
+	objectFit: 'cover',
+})}
                                 onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
                             />
                         </div>
                     </div>
 
                     <!-- Info -->
-                    <div class="flex-1 text-center md:text-left space-y-6">
+                    <div class={css({
+	flex: '1',
+	textAlign: 'center',
+	md: {
+		textAlign: 'left',
+	},
+	gap: '6',
+})}>
                         <div>
-                            <h1 class="text-4xl md:text-5xl font-extrabold text-primary-content mb-2">
+                            <h1 class={css({
+	fontSize: '4xl',
+	md: {
+		fontSize: '5xl',
+	},
+	fontWeight: 'extrabold',
+	mb: '2',
+}) + " text-primary-content"}>
                                 {person.data.name}
                             </h1>
                             {person.data.handles.twitter && (
-                                <p class="text-lg text-primary font-medium">
+                                <p class={css({
+	fontSize: 'lg',
+	fontWeight: 'medium',
+}) + " text-primary"}>
                                     @{person.data.handles.twitter}
                                 </p>
                             )}
                         </div>
 
                         <!-- Social Links -->
-                        <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                        <div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	justifyContent: 'center',
+	md: {
+		justifyContent: 'flex-start',
+	},
+	gap: '4',
+})}>
                             {socialLinks.map((link: any) => (
                                 <a
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-muted hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
+                                    class={css({
+	p: '3',
+	rounded: 'full',
+	bg: 'gray.100',
+	_hover: {
+		color: 'white',
+		shadow: 'md',
+	},
+	transition: 'all',
+	transitionDuration: '300ms',
+	shadow: 'sm',
+}) + " dark:bg-gray-800 text-muted hover:bg-primary dark:hover:bg-primary dark:hover:text-white"}
                                     aria-label={link.name}
                                 >
                                     <svg
@@ -143,18 +221,50 @@ const socialLinks = [
 
         <!-- Hosted Shows -->
         {showSummaries.length > 0 && (
-            <section class="w-full max-w-7xl mx-auto">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2 rounded-lg bg-primary/10 text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <section class={css({
+	w: 'full',
+	maxW: '7xl',
+	mx: 'auto',
+})}>
+                <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+	mb: '8',
+})}>
+                    <div class={css({
+	p: '2',
+	rounded: 'lg',
+	bg: 'primary/10',
+}) + " text-primary"}>
+                        <svg xmlns="http://www.w3.org/2000/svg" class={css({
+	h: '6',
+	w: '6',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
                     </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
+                    <h2 class={css({
+	fontSize: '2xl',
+	md: {
+		fontSize: '3xl',
+	},
+	fontWeight: 'bold',
+}) + " text-primary-content"}>
                         Shows Hosted
                     </h2>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class={css({
+	display: 'grid',
+	gridTemplateColumns: '1fr',
+	md: {
+		gridTemplateColumns: 'repeat(2, 1fr)',
+	},
+	lg: {
+		gridTemplateColumns: 'repeat(3, 1fr)',
+	},
+	gap: '6',
+})}>
                     {showSummaries.map((show) => (
                         <ShowCard show={show} />
                     ))}
@@ -164,14 +274,36 @@ const socialLinks = [
 
         <!-- Guest Appearances -->
         {guestVideoFeed.length > 0 && (
-            <section class="w-full max-w-7xl mx-auto">
-                 <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2 rounded-lg bg-secondary/10 text-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <section class={css({
+	w: 'full',
+	maxW: '7xl',
+	mx: 'auto',
+})}>
+                 <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+	mb: '8',
+})}>
+                    <div class={css({
+	p: '2',
+	rounded: 'lg',
+	bg: 'secondary/10',
+}) + " text-secondary"}>
+                        <svg xmlns="http://www.w3.org/2000/svg" class={css({
+	h: '6',
+	w: '6',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
+                    <h2 class={css({
+	fontSize: '2xl',
+	md: {
+		fontSize: '3xl',
+	},
+	fontWeight: 'bold',
+}) + " text-primary-content"}>
                         Guest Appearances
                     </h2>
                 </div>

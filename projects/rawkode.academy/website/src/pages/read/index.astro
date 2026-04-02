@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 import { getCollection, getEntries } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import FeaturedContent from "@/components/common/FeaturedContent.astro";
@@ -31,98 +32,7 @@ const pageDescription =
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-  <style>
-    @reference "../../styles/global.css";
-
-    /* Core styles */
-    .primary-gradient {
-      @apply bg-linear-to-r from-primary to-secondary;
-    }
-
-    .text-gradient {
-      @apply bg-clip-text text-transparent bg-linear-to-r from-primary to-secondary;
-    }
-
-    .article-card {
-      @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-xl;
-    }
-
-    .terminal {
-      @apply font-mono rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700;
-    }
-
-    .terminal-header {
-      @apply flex items-center p-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700;
-    }
-
-    .terminal-body {
-      @apply p-4 bg-white dark:bg-gray-900;
-    }
-
-    .terminal-prompt::before {
-      content: "$ ";
-      @apply text-primary;
-    }
-
-    .terminal-output {
-      @apply pl-4 my-2;
-    }
-
-    /* Animation */
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
-    .animate-gradient {
-      background-size: 200% 200%;
-      animation: gradientShift 15s ease infinite;
-    }
-
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.5);
-      pointer-events: none;
-    }
-
-    /* Filter button styles */
-    .filter-btn {
-      @apply px-3 py-1 rounded-full text-sm font-medium transition-all duration-200;
-    }
-
-    .filter-btn:not(.active) {
-      @apply bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700;
-    }
-
-    .filter-btn.active {
-      @apply bg-primary text-white;
-    }
-
-    /* Scrolling animation */
-    .scroll-prompt {
-      animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-10px);
-      }
-      60% {
-        transform: translateY(-5px);
-      }
-    }
-  </style>
+  
 
   <!-- Featured Content Section -->
   {latestPost && (
@@ -141,15 +51,35 @@ const pageDescription =
   )}
 
   <!-- Main Content -->
-  <section class="py-16 bg-gray-50 dark:bg-gray-900">
-    <div class="container mx-auto px-4 md:px-6">
+  <section class={css({
+	py: '16',
+	bg: 'gray.50',
+}) + " dark:bg-gray-900"}>
+    <div class={css({
+	mx: 'auto',
+	px: '4',
+	md: {
+		px: '6',
+	},
+}) + " container"}>
       <!-- All Articles -->
       <div>
         <SectionHeader title="All Articles" />
 
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class={css({
+	display: 'grid',
+	gap: '6',
+	sm: {
+		gridTemplateColumns: 'repeat(2, 1fr)',
+	},
+	lg: {
+		gridTemplateColumns: 'repeat(3, 1fr)',
+	},
+})}>
           {remainingPosts.map(article => (
-            <div class="article-card h-full">
+            <div class={css({
+	h: 'full',
+}) + " article-card"}>
               <ArticleCard article={article} />
             </div>
           ))}

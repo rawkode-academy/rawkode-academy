@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	cols?: 1 | 2 | 3 | 4 | 5 | 6 | "auto-fit" | "auto-fill";
@@ -20,57 +21,45 @@ const props = withDefaults(defineProps<Props>(), {
 	gap: "md",
 });
 
-const baseClasses = "grid";
+function repeatCols(n: number) {
+	return `repeat(${n}, minmax(0, 1fr))`;
+}
 
-const colsClasses = {
-	1: "grid-cols-1",
-	2: "grid-cols-2",
-	3: "grid-cols-3",
-	4: "grid-cols-4",
-	5: "grid-cols-5",
-	6: "grid-cols-6",
-	"auto-fit": "grid-cols-[repeat(auto-fit,minmax(250px,1fr))]",
-	"auto-fill": "grid-cols-[repeat(auto-fill,minmax(250px,1fr))]",
+const colsMap: Record<string | number, string> = {
+	1: repeatCols(1),
+	2: repeatCols(2),
+	3: repeatCols(3),
+	4: repeatCols(4),
+	5: repeatCols(5),
+	6: repeatCols(6),
+	"auto-fit": "repeat(auto-fit, minmax(250px, 1fr))",
+	"auto-fill": "repeat(auto-fill, minmax(250px, 1fr))",
 };
 
-const colsMdClasses = {
-	1: "md:grid-cols-1",
-	2: "md:grid-cols-2",
-	3: "md:grid-cols-3",
-	4: "md:grid-cols-4",
-	5: "md:grid-cols-5",
-	6: "md:grid-cols-6",
-};
-
-const colsLgClasses = {
-	1: "lg:grid-cols-1",
-	2: "lg:grid-cols-2",
-	3: "lg:grid-cols-3",
-	4: "lg:grid-cols-4",
-	5: "lg:grid-cols-5",
-	6: "lg:grid-cols-6",
-};
-
-const gapClasses = {
-	none: "gap-0",
-	xs: "gap-2",
-	sm: "gap-3",
-	md: "gap-6",
-	lg: "gap-8",
-	xl: "gap-10",
-	"2xl": "gap-12",
+const gapMap = {
+	none: "0",
+	xs: "2",
+	sm: "3",
+	md: "6",
+	lg: "8",
+	xl: "10",
+	"2xl": "12",
 };
 
 const gridClasses = computed(() => {
-	return [
-		baseClasses,
-		colsClasses[props.cols],
-		props.colsMd && colsMdClasses[props.colsMd],
-		props.colsLg && colsLgClasses[props.colsLg],
-		gapClasses[props.gap],
-		props.class,
-	]
-		.filter(Boolean)
-		.join(" ");
+	const styleObj: Record<string, any> = {
+		display: "grid",
+		gridTemplateColumns: colsMap[props.cols],
+		gap: gapMap[props.gap],
+	};
+
+	if (props.colsMd) {
+		styleObj.md = { gridTemplateColumns: repeatCols(props.colsMd) };
+	}
+	if (props.colsLg) {
+		styleObj.lg = { gridTemplateColumns: repeatCols(props.colsLg) };
+	}
+
+	return cx(css(styleObj), props.class);
 });
 </script>

@@ -1,4 +1,5 @@
 ---
+import { css, cx } from "styled-system/css";
 import type { ShowSummary } from "@/types/show";
 import { Image } from "astro:assets";
 
@@ -36,40 +37,129 @@ const latestEpisodeDate = latestEpisodePublishedAt
 
 <a
         href={`/shows/${show.id}`}
-        class="group flex h-full flex-col overflow-hidden rounded-xl glass-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+        class={cx('glass-card', css({
+	display: 'flex',
+	h: 'full',
+	flexDir: 'column',
+	overflow: 'hidden',
+	rounded: 'xl',
+	transition: 'all',
+	transitionDuration: '200ms',
+	_hover: {
+		translateY: '-1',
+		shadow: 'lg',
+	},
+	_focusVisible: {
+		outline: 'none',
+		ringWidth: '2px',
+		ringColor: 'primary/50',
+		ringOffset: '2px',
+	},
+}))}
+        style="cursor:pointer"
 >
         {show.cover ? (
-                <div class="relative aspect-video w-full overflow-hidden" style="background: var(--surface-card-muted)">
+                <div class={css({
+	pos: 'relative',
+	aspectRatio: 'video',
+	w: 'full',
+	overflow: 'hidden',
+})} style="background: var(--surface-card-muted)">
                         <Image
                                 src={show.cover.image}
                                 alt={show.cover.alt}
-                                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+                                class={css({
+	h: 'full',
+	w: 'full',
+	objectFit: 'cover',
+	transition: 'transform',
+	transitionDuration: '200ms',
+	_groupHover: {
+		scale: '1.03',
+	},
+})}
                         />
                         {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                                <div class={css({
+	pos: 'absolute',
+	bottom: '2',
+	right: '2',
+	rounded: 'md',
+	bg: 'black/75',
+	px: '2',
+	py: '1',
+	fontSize: 'xs',
+	fontWeight: 'medium',
+	color: 'white',
+	backdropFilter: 'blur(4px)',
+})}>
                                         {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
                                 </div>
                         )}
                 </div>
         ) : thumbnailUrl ? (
-                <div class="relative aspect-video w-full overflow-hidden" style="background: var(--surface-card-muted)">
+                <div class={css({
+	pos: 'relative',
+	aspectRatio: 'video',
+	w: 'full',
+	overflow: 'hidden',
+})} style="background: var(--surface-card-muted)">
                         <img
                                 src={thumbnailUrl}
                                 alt={`Latest episode from ${show.name}`}
-                                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+                                class={css({
+	h: 'full',
+	w: 'full',
+	objectFit: 'cover',
+	transition: 'transform',
+	transitionDuration: '200ms',
+	_groupHover: {
+		scale: '1.03',
+	},
+})}
                                 loading="lazy"
                         />
                         {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                                <div class={css({
+	pos: 'absolute',
+	bottom: '2',
+	right: '2',
+	rounded: 'md',
+	bg: 'black/75',
+	px: '2',
+	py: '1',
+	fontSize: 'xs',
+	fontWeight: 'medium',
+	color: 'white',
+	backdropFilter: 'blur(4px)',
+})}>
                                         {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
                                 </div>
                         )}
                 </div>
         ) : (
-                <div class="relative aspect-video w-full bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20">
-                        <div class="flex h-full items-center justify-center">
+                <div class={css({
+	pos: 'relative',
+	aspectRatio: 'video',
+	w: 'full',
+	background: {
+		base: 'linear-gradient(135deg, rgb(var(--brand-primary) / 0.10) 0%, rgb(var(--brand-secondary) / 0.10) 100%)',
+		_dark: 'linear-gradient(135deg, rgb(var(--brand-primary) / 0.18) 0%, rgb(var(--brand-secondary) / 0.18) 100%)',
+	},
+})}>
+                        <div class={css({
+	display: 'flex',
+	h: 'full',
+	alignItems: 'center',
+	justifyContent: 'center',
+})}>
                                 <svg
-                                        class="h-16 w-16 text-primary/30 dark:text-primary/20"
+                                        class={css({
+	h: '16',
+	w: '16',
+	color: 'brandAccent.text',
+	opacity: '0.45',
+})}
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -84,28 +174,60 @@ const latestEpisodeDate = latestEpisodePublishedAt
                                 </svg>
                         </div>
                         {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                                <div class={css({
+	pos: 'absolute',
+	bottom: '2',
+	right: '2',
+	rounded: 'md',
+	bg: 'black/75',
+	px: '2',
+	py: '1',
+	fontSize: 'xs',
+	fontWeight: 'medium',
+	color: 'white',
+	backdropFilter: 'blur(4px)',
+})}>
                                         {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
                                 </div>
                         )}
                 </div>
         )}
-        <div class="flex flex-1 flex-col justify-between p-6">
-                <div class="space-y-2">
-                        <h3 class="line-clamp-2 text-xl font-semibold text-primary-content">
+        <div class={css({
+	display: 'flex',
+	flex: '1',
+	flexDir: 'column',
+	justifyContent: 'space-between',
+	p: '6',
+})}>
+                <div class={css({
+	'& > * + *': {
+		mt: '2',
+	},
+})}>
+                        <h3 class={cx('text-primary-content', css({
+	lineClamp: '2',
+	fontSize: 'xl',
+	fontWeight: 'semibold',
+}))}>
                                 {show.name}
                         </h3>
-                        <p class="line-clamp-2 text-sm text-muted">
+                        <p class={cx('text-muted', css({
+	lineClamp: '2',
+	fontSize: 'sm',
+}))}>
                                 {hostNames.length > 0 ? (
                                         <>
-                                                <span class="font-medium">Hosted by:</span> {hostNames.join(", ")}
+                                                <span class={css({ fontWeight: 'medium' })}>Hosted by:</span> {hostNames.join(", ")}
                                         </>
                                 ) : (
                                         "Hosts to be announced"
                                 )}
                         </p>
                         {latestEpisodeTitle && (
-                                <p class="line-clamp-2 text-xs text-muted">
+                                <p class={cx('text-muted', css({
+	lineClamp: '2',
+	fontSize: 'xs',
+}))}>
                                         Latest: {latestEpisodeTitle}
                                         {latestEpisodeDate && (
                                                 <>
@@ -116,10 +238,28 @@ const latestEpisodeDate = latestEpisodePublishedAt
                                 </p>
                         )}
                 </div>
-                <div class="mt-4 flex items-center text-sm font-medium text-primary dark:text-primary-300">
+                <div class={css({
+	mt: '4',
+	display: 'flex',
+	alignItems: 'center',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	color: 'primary',
+	_dark: {
+		color: 'primary.300',
+	},
+})}>
                         <span>View episodes</span>
                         <svg
-                                class="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
+                                class={css({
+	ml: '2',
+	h: '4',
+	w: '4',
+	transition: 'transform',
+	_groupHover: {
+		translateX: '1',
+	},
+})}
                                 viewBox="0 0 20 20"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"

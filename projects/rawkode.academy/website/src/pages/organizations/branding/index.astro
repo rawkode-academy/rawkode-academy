@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 import Page from "@/wrappers/page.astro";
 import { Hero } from "@/components/ui";
 import Button from "@/components/common/Button.vue";
@@ -17,7 +18,8 @@ const colorThemes = [
 		badge: "Default",
 		description:
 			"Everyday Rawkode Academy brand moments — content, docs, livestreams, and merch.",
-		gradient: "from-[#04B59C]/60 via-transparent to-[#85FF95]/50",
+		gradient:
+			"linear-gradient(135deg, rgba(4, 181, 156, 0.6), transparent, rgba(133, 255, 149, 0.5))",
 		colors: [
 			{
 				label: "Teal",
@@ -33,7 +35,8 @@ const colorThemes = [
 		badge: "System",
 		description:
 			"Use when we co-brand with developer tooling or infra partners who lean blue.",
-		gradient: "from-[#5F5ED7]/60 via-transparent to-[#00CEFF]/50",
+		gradient:
+			"linear-gradient(135deg, rgba(95, 94, 215, 0.6), transparent, rgba(0, 206, 255, 0.5))",
 		colors: [
 			{
 				label: "Purple",
@@ -50,7 +53,7 @@ const brandGradients = [
 	{
 		id: "academy",
 		name: "Rawkode Academy Gradient",
-		angleLabel: "45°",
+		angleLabel: "45deg",
 		angleDeg: 45,
 		description:
 			"Academy visuals run from teal into green (page 8), mirrored across hero cards and merch.",
@@ -65,7 +68,7 @@ const brandGradients = [
 	{
 		id: "core",
 		name: "Rawkode Core Gradient",
-		angleLabel: "45°",
+		angleLabel: "45deg",
 		angleDeg: 45,
 		description:
 			"Primary Rawkode lockups transition from purple into blue as documented in the PDF (page 5).",
@@ -85,7 +88,7 @@ const logoAssets = [
 		name: "Monogram",
 		description:
 			"Use for avatars, favicons, stickers, or anywhere the brand needs to fit in a square. Keep plenty of breathing room so the M shape stays crisp.",
-		previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
+		previewWrapper: css({ w: { base: '40', md: '48' }, h: { base: '40', md: '48' }, flexShrink: '0' }),
 		assetClass: "brand-logo--padded",
 		asset: monogramSvgRaw,
 		downloadUrl: monogramSvgFile,
@@ -101,7 +104,7 @@ const logoAssets = [
 		name: "Icon",
 		description:
 			"Square logo built for UI chrome, app tiles, or partner lockups that need a bold geometric mark.",
-		previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
+		previewWrapper: css({ w: { base: '40', md: '48' }, h: { base: '40', md: '48' }, flexShrink: '0' }),
 		assetClass: "",
 		asset: iconSvgRaw,
 		downloadUrl: iconSvgFile,
@@ -113,9 +116,9 @@ const logoAssets = [
 		name: "Wordmark",
 		description:
 			"Full logotype for hero sections, brochures, and anywhere legibility is critical. Only scale proportionally; never stretch.",
-		previewWrapper: "w-full h-24 md:h-28",
+		previewWrapper: css({ w: 'full', h: { base: '24', md: '28' } }),
 		assetClass: "brand-logo--wide",
-		cardClass: "md:min-w-[320px]",
+		cardClass: css({ md: { minW: '320px' } }),
 		asset: wordmarkSvgRaw,
 		downloadUrl: wordmarkSvgFile,
 		downloadName: "Rawkode-Academy-Wordmark.svg",
@@ -164,33 +167,97 @@ const defaultGradientId = brandGradients[0]?.id ?? null;
 const defaultLogoGradient =
 	brandGradients[0]?.background ??
 	"linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)";
+
+/* Shared styles */
+const sectionBg = css({ position: 'relative', py: '20', overflow: 'hidden' });
+const heading2 = css({ fontSize: '3xl', fontWeight: 'semibold', color: { base: 'gray.900', _dark: 'white' }, mb: '4' });
+const heading3 = css({ fontSize: 'lg', fontWeight: 'semibold', color: { base: 'gray.900', _dark: 'white' } });
+const bodyText = css({ color: { base: 'gray.600', _dark: 'white/70' } });
+const smallLabel = css({ fontSize: 'sm', fontWeight: 'semibold', textTransform: 'uppercase', letterSpacing: '0.2em', color: { base: 'gray.500', _dark: 'white/60' } });
+const codeInline = css({ bg: 'black/30', px: '1', rounded: 'sm', color: 'white' });
+
+const logoArticle = css({
+	position: 'relative',
+	overflow: 'hidden',
+	rounded: '2xl',
+	border: '1px solid',
+	borderColor: { base: 'gray.200/70', _dark: 'white/15' },
+	bg: { base: 'white/90', _dark: 'white/5' },
+	backdropFilter: 'blur(40px)',
+	p: '7',
+	display: 'flex',
+	flexDir: 'column',
+	gap: '6',
+	shadow: '0 18px 55px rgba(15,23,42,0.25)',
+});
+
+const previewBox = css({
+	p: '4',
+	rounded: '2xl',
+	bg: { base: 'white', _dark: 'white/5' },
+	border: '1px solid',
+	borderColor: { base: 'gray.100', _dark: 'white/20' },
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	overflow: 'hidden',
+	mx: 'auto',
+});
+
+const gradientArticle = css({
+	rounded: '2xl',
+	overflow: 'hidden',
+	border: '1px solid',
+	borderColor: { base: 'gray.200/60', _dark: 'white/15' },
+	shadow: '0 20px 60px rgba(15,23,42,0.2)',
+});
+
+const themeArticle = css({
+	position: 'relative',
+	rounded: '2xl',
+	overflow: 'hidden',
+	border: '1px solid',
+	borderColor: { base: 'gray.200/70', _dark: 'white/10' },
+	bg: { base: 'white/90', _dark: 'white/10' },
+	backdropFilter: 'blur(40px)',
+	p: '6',
+	shadow: '0 20px 60px rgba(4,181,156,0.2)',
+});
+
+const colorSwatch = css({
+	rounded: 'xl',
+	border: '1px solid',
+	borderColor: { base: 'gray.200', _dark: 'white/20' },
+	bg: { base: 'white', _dark: 'white/10' },
+	overflow: 'hidden',
+});
 ---
 
-<Page title="Branding | Rawkode Academy" description="Official Rawkode Academy brand assets — logos, colors, and usage guidelines for partners.">
+<Page title="Branding | Rawkode Academy" description="Official Rawkode Academy brand assets -- logos, colors, and usage guidelines for partners.">
   <Hero title="Branding Guidelines" subtitle="Our brand assets, color system, and recommended usage for partners" badge="Partner Resources" background="blobs" pattern="grid" wave={true} client:load>
     <Fragment slot="actions">
       <Button variant="primary" href="#assets">View Assets</Button>
     </Fragment>
   </Hero>
 
-  <section id="assets" class="relative py-20 overflow-hidden" style="background: var(--app-backdrop);">
-    <div class="pointer-events-none absolute inset-0">
-      <div class="absolute inset-0 bg-[rgba(255,255,255,0.82)] dark:bg-[rgba(2,8,23,0.9)] backdrop-blur-xl"></div>
-      <div class="absolute -left-20 top-0 w-[32rem] h-[32rem] blur-[140px]" style="background: rgba(var(--brand-primary), 0.22);"></div>
-      <div class="absolute right-[-8rem] bottom-[-6rem] w-[34rem] h-[34rem] blur-[140px]" style="background: rgba(var(--brand-secondary), 0.2);"></div>
+  <section id="assets" class={sectionBg} style="background: var(--app-backdrop);">
+    <div class={css({ pointerEvents: 'none', position: 'absolute', inset: '0' })}>
+      <div class={css({ position: 'absolute', inset: '0', bg: { base: 'rgba(255,255,255,0.82)', _dark: 'rgba(2,8,23,0.9)' }, backdropFilter: 'blur(40px)' })}></div>
+      <div class={css({ position: 'absolute', left: '-20', top: '0', w: '32rem', h: '32rem', blur: '140px' })} style="background: rgba(var(--brand-primary), 0.22);"></div>
+      <div class={css({ position: 'absolute', right: '-8rem', bottom: '-6rem', w: '34rem', h: '34rem', blur: '140px' })} style="background: rgba(var(--brand-secondary), 0.2);"></div>
     </div>
-    <div class="relative max-w-6xl mx-auto px-4">
-      <div class="max-w-3xl">
-        <h2 class="text-3xl font-semibold text-gray-900 dark:text-white mb-4">Logo assets</h2>
-        <p class="mb-8 text-gray-600 dark:text-white/70">Our master artwork ships in black so you can tint it for any surface. Inline the SVGs and apply <code class="bg-black/30 px-1 rounded text-white">currentColor</code> to match blue or green palettes without exporting variants.</p>
+    <div class={css({ position: 'relative', maxW: '6xl', mx: 'auto', px: '4' })}>
+      <div class={css({ maxW: '3xl' })}>
+        <h2 class={heading2}>Logo assets</h2>
+        <p class={css({ mb: '8', color: { base: 'gray.600', _dark: 'white/70' } })}>Our master artwork ships in black so you can tint it for any surface. Inline the SVGs and apply <code class={codeInline}>currentColor</code> to match blue or green palettes without exporting variants.</p>
       </div>
 
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div class="space-y-1">
-          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-white/60">Preview treatments</p>
-          <p class="text-sm text-gray-600 dark:text-white/70 max-w-xl">Toggle between the solid fill and official gradients to see how the lockups glow when you tint them.</p>
+      <div class={css({ display: 'flex', flexDir: { base: 'column', md: 'row' }, alignItems: { md: 'center' }, justifyContent: { md: 'space-between' }, gap: '4', mb: '6' })}>
+        <div class={css({ display: 'flex', flexDir: 'column', gap: '1' })}>
+          <p class={smallLabel}>Preview treatments</p>
+          <p class={css({ fontSize: 'sm', color: { base: 'gray.600', _dark: 'white/70' }, maxW: 'xl' })}>Toggle between the solid fill and official gradients to see how the lockups glow when you tint them.</p>
         </div>
-        <div class="flex flex-wrap gap-3" data-logo-preview-controls>
+        <div class={css({ display: 'flex', flexWrap: 'wrap', gap: '3' })} data-logo-preview-controls>
           <button type="button" class="logo-preview-toggle" data-preview-mode="solid" aria-pressed="true">Solid Fill</button>
           {brandGradients.map((gradient) => (
             <button
@@ -201,37 +268,37 @@ const defaultLogoGradient =
               data-gradient-style={gradient.background}
               aria-pressed="false"
             >
-              Gradient · {gradient.name}
+              Gradient &middot; {gradient.name}
             </button>
           ))}
         </div>
       </div>
 
       <div
-        class="grid md:grid-cols-3 gap-8 mb-14"
+        class={css({ display: 'grid', gridTemplateColumns: { md: 'repeat(3, 1fr)' }, gap: '8', mb: '14' })}
         data-logo-preview
         data-preview-mode="solid"
         data-active-gradient-id={defaultGradientId ?? ""}
         style={`--logo-preview-gradient:${defaultLogoGradient};`}
       >
         {logoPreviewAssets.map((logo) => (
-          <article class={`relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-white/15 bg-white/90 dark:bg-white/5 backdrop-blur-2xl p-7 flex flex-col gap-6 shadow-[0_18px_55px_rgba(15,23,42,0.25)] ${logo.cardClass ?? ""}`}>
-            <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-[#6B46FF]/10 dark:from-white/10 pointer-events-none"></div>
-            <div class="relative flex flex-col gap-6 items-center text-center">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{logo.name}</h3>
-              <div class="flex flex-col items-center gap-5 w-full">
-                <div class={`p-4 rounded-2xl bg-white border border-gray-100 dark:bg-white/5 dark:border-white/20 flex items-center justify-center overflow-hidden ${logo.previewWrapper} mx-auto`}>
+          <article class={`${logoArticle} ${logo.cardClass ?? ""}`}>
+            <div class={css({ position: 'absolute', inset: '0', backgroundImage: 'linear-gradient(to bottom right, white/60, transparent, #6B46FF/10)', pointerEvents: 'none', _dark: { backgroundImage: 'linear-gradient(to bottom right, white/10, transparent, transparent)' } })}></div>
+            <div class={css({ position: 'relative', display: 'flex', flexDir: 'column', gap: '6', alignItems: 'center', textAlign: 'center' })}>
+              <h3 class={css({ fontSize: 'lg', fontWeight: 'semibold', color: { base: 'gray.900', _dark: 'white' } })}>{logo.name}</h3>
+              <div class={css({ display: 'flex', flexDir: 'column', alignItems: 'center', gap: '5', w: 'full' })}>
+                <div class={`${previewBox} ${logo.previewWrapper}`}>
                   <div class={`brand-logo ${logo.assetClass ?? ""}`} style={`--logo-mask:${logo.maskUrl};`} set:html={logo.asset}></div>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-white/70 max-w-sm leading-relaxed mx-auto pb-1">{logo.description}</p>
+                <p class={css({ fontSize: 'sm', color: { base: 'gray.600', _dark: 'white/70' }, maxW: 'sm', lineHeight: 'relaxed', mx: 'auto', pb: '1' })}>{logo.description}</p>
                 <button type="button" class="logo-download-link" data-logo-download data-logo-slug={logo.slug}>
                   Download SVG
                 </button>
               </div>
-              <ul class="text-xs uppercase tracking-wide text-gray-500 dark:text-white/60 space-y-2 w-full text-center md:text-left pt-2">
+              <ul class={css({ fontSize: 'xs', textTransform: 'uppercase', letterSpacing: 'wide', color: { base: 'gray.500', _dark: 'white/60' }, display: 'flex', flexDir: 'column', gap: '2', w: 'full', textAlign: { base: 'center', md: 'left' }, pt: '2' })}>
                 {logo.useCases.map((useCase) => (
-                  <li class="flex items-center gap-2 justify-center md:justify-start">
-                    <span class="inline-flex w-2.5 h-2.5 rounded-full bg-gray-900 dark:bg-white/70"></span>
+                  <li class={css({ display: 'flex', alignItems: 'center', gap: '2', justifyContent: { base: 'center', md: 'flex-start' } })}>
+                    <span class={css({ display: 'inline-flex', w: '2.5', h: '2.5', rounded: 'full', bg: { base: 'gray.900', _dark: 'white/70' } })}></span>
                     {useCase}
                   </li>
                 ))}
@@ -241,59 +308,62 @@ const defaultLogoGradient =
         ))}
       </div>
 
-      <div class="space-y-4 mb-14">
-        <div class="flex flex-col gap-2">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Official gradients</h3>
-          <p class="text-gray-600 dark:text-white/70">The PDF mandates two gradients: purple→blue for Rawkode and teal→green for Rawkode Academy, both running on a 45° angle from top-left to bottom-right. Use these for hero panels, gradient logos, and any glowing dividers.</p>
+      <div class={css({ display: 'flex', flexDir: 'column', gap: '4', mb: '14' })}>
+        <div class={css({ display: 'flex', flexDir: 'column', gap: '2' })}>
+          <h3 class={heading3}>Official gradients</h3>
+          <p class={bodyText}>The PDF mandates two gradients: purple to blue for Rawkode and teal to green for Rawkode Academy, both running on a 45 degree angle from top-left to bottom-right. Use these for hero panels, gradient logos, and any glowing dividers.</p>
         </div>
-        <div class="grid md:grid-cols-2 gap-6">
+        <div class={css({ display: 'grid', gridTemplateColumns: { md: 'repeat(2, 1fr)' }, gap: '6' })}>
           {brandGradients.map((gradient) => (
-            <article class="rounded-2xl overflow-hidden border border-gray-200/60 dark:border-white/15 shadow-[0_20px_60px_rgba(15,23,42,0.2)]">
-              <div class="p-6 text-white" style={`background:${gradient.background}`}>
-                <div class="flex items-center justify-between gap-4 flex-wrap">
+            <article class={gradientArticle}>
+              <div class={css({ p: '6', color: 'white' })} style={`background:${gradient.background}`}>
+                <div class={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4', flexWrap: 'wrap' })}>
                   <div>
-                    <p class="text-xs tracking-[0.2em] uppercase text-white/80">{gradient.angleLabel} sweep</p>
-                    <h4 class="text-2xl font-semibold">{gradient.name}</h4>
+                    <p class={css({ fontSize: 'xs', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'white/80' })}>{gradient.angleLabel} sweep</p>
+                    <h4 class={css({ fontSize: '2xl', fontWeight: 'semibold' })}>{gradient.name}</h4>
                   </div>
-                  <div class="flex gap-3">
+                  <div class={css({ display: 'flex', gap: '3' })}>
                     {gradient.stops.map((stop) => (
-                      <div class="px-3 py-2 rounded-full bg-white/20 text-sm font-semibold">{stop.hex}</div>
+                      <div class={css({ px: '3', py: '2', rounded: 'full', bg: 'white/20', fontSize: 'sm', fontWeight: 'semibold' })}>{stop.hex}</div>
                     ))}
                   </div>
                 </div>
-                <p class="text-sm text-white/80 mt-4 max-w-2xl">{gradient.description}</p>
+                <p class={css({ fontSize: 'sm', color: 'white/80', mt: '4', maxW: '2xl' })}>{gradient.description}</p>
               </div>
-              <div class="bg-white/90 dark:bg-gray-900/70 p-4">
-                <p class="text-sm text-gray-700 dark:text-white/70">{gradient.usage}</p>
+              <div class={css({ bg: { base: 'white/90', _dark: 'gray.900/70' }, p: '4' })}>
+                <p class={css({ fontSize: 'sm', color: { base: 'gray.700', _dark: 'white/70' } })}>{gradient.usage}</p>
               </div>
             </article>
           ))}
         </div>
       </div>
 
-      <div class="space-y-4">
-        <div class="flex flex-col gap-2">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Core color palettes</h3>
-          <p class="text-gray-600 dark:text-white/70">Rawkode runs two first-class themes. Use the Green theme by default and switch to the Blue theme when a partner already leans blue. Partners must stick to one of these two treatments — no custom palettes.</p>
+      <div class={css({ display: 'flex', flexDir: 'column', gap: '4' })}>
+        <div class={css({ display: 'flex', flexDir: 'column', gap: '2' })}>
+          <h3 class={heading3}>Core color palettes</h3>
+          <p class={bodyText}>Rawkode runs two first-class themes. Use the Green theme by default and switch to the Blue theme when a partner already leans blue. Partners must stick to one of these two treatments -- no custom palettes.</p>
         </div>
-        <div class="grid md:grid-cols-2 gap-6">
+        <div class={css({ display: 'grid', gridTemplateColumns: { md: 'repeat(2, 1fr)' }, gap: '6' })}>
           {colorThemes.map((theme) => (
-            <article class="relative rounded-2xl overflow-hidden border border-gray-200/70 dark:border-white/10 bg-white/90 dark:bg-white/10 backdrop-blur-2xl p-6 shadow-[0_20px_60px_rgba(4,181,156,0.2)]">
-              <div class={`absolute inset-0 bg-gradient-to-br ${theme.gradient} opacity-70 pointer-events-none`}></div>
-              <div class="relative flex flex-col gap-5">
+            <article class={themeArticle}>
+              <div
+                class={css({ position: 'absolute', inset: '0', opacity: '0.7', pointerEvents: 'none' })}
+                style={`background:${theme.gradient}`}
+              ></div>
+              <div class={css({ position: 'relative', display: 'flex', flexDir: 'column', gap: '5' })}>
                 <div>
-                  <p class="text-xs tracking-[0.2em] uppercase text-gray-500 dark:text-white/70">{theme.badge}</p>
-                  <h4 class="text-2xl font-semibold text-gray-900 dark:text-white">{theme.name}</h4>
-                  <p class="text-sm text-gray-600 dark:text-white/70 mt-1">{theme.description}</p>
+                  <p class={css({ fontSize: 'xs', letterSpacing: '0.2em', textTransform: 'uppercase', color: { base: 'gray.500', _dark: 'white/70' } })}>{theme.badge}</p>
+                  <h4 class={css({ fontSize: '2xl', fontWeight: 'semibold', color: { base: 'gray.900', _dark: 'white' } })}>{theme.name}</h4>
+                  <p class={css({ fontSize: 'sm', color: { base: 'gray.600', _dark: 'white/70' }, mt: '1' })}>{theme.description}</p>
                 </div>
-                <div class="grid gap-4 sm:grid-cols-3">
+                <div class={css({ display: 'grid', gap: '4', gridTemplateColumns: { sm: 'repeat(3, 1fr)' } })}>
                   {theme.colors.map((color) => (
-                    <div class="rounded-xl border border-gray-200 dark:border-white/20 bg-white dark:bg-white/10 overflow-hidden">
-                      <div class="h-16" style={`background:${color.hex}`}></div>
-                      <div class="p-3">
-                        <div class="text-sm font-semibold text-gray-900 dark:text-white">{color.label}</div>
-                        <div class="text-xs text-gray-600 dark:text-white/70">{color.hex}</div>
-                        <p class="text-xs text-gray-500 dark:text-white/60 mt-1">{color.usage}</p>
+                    <div class={colorSwatch}>
+                      <div class={css({ h: '16' })} style={`background:${color.hex}`}></div>
+                      <div class={css({ p: '3' })}>
+                        <div class={css({ fontSize: 'sm', fontWeight: 'semibold', color: { base: 'gray.900', _dark: 'white' } })}>{color.label}</div>
+                        <div class={css({ fontSize: 'xs', color: { base: 'gray.600', _dark: 'white/70' } })}>{color.hex}</div>
+                        <p class={css({ fontSize: 'xs', color: { base: 'gray.500', _dark: 'white/60' }, mt: '1' })}>{color.usage}</p>
                       </div>
                     </div>
                   ))}
@@ -304,10 +374,10 @@ const defaultLogoGradient =
         </div>
       </div>
 
-      <h3 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">How to theme our black SVGs</h3>
-      <p class="mb-6 text-gray-600 dark:text-white/70">We keep only the black source file in the repo and theme it with CSS. Inline SVGs work best; when using an <code>&lt;img/&gt;</code>, use <code>filter</code> or CSS masking if needed. Prefer the following approach for inline SVGs:</p>
+      <h3 class={`${heading3} ${css({ mb: '3' })}`}>How to theme our black SVGs</h3>
+      <p class={css({ mb: '6', color: { base: 'gray.600', _dark: 'white/70' } })}>We keep only the black source file in the repo and theme it with CSS. Inline SVGs work best; when using an <code>&lt;img/&gt;</code>, use <code>filter</code> or CSS masking if needed. Prefer the following approach for inline SVGs:</p>
 
-      <pre class="bg-gray-100 dark:bg-gray-900 p-4 rounded-md overflow-x-auto"><code>{`/* Define colors as variables */
+      <pre class={css({ bg: { base: 'gray.100', _dark: 'gray.900' }, p: '4', rounded: 'md', overflowX: 'auto' })}><code>{`/* Define colors as variables */
 :root {
   --brand-primary: #6B46FF;
   --brand-on-surface: #23282D; /* base black */
@@ -323,8 +393,8 @@ const defaultLogoGradient =
 .brand-logo--primary { color: var(--brand-primary); }
 .brand-logo--dark { color: var(--brand-on-surface); }`}</code></pre>
 
-      <h3 class="text-lg font-semibold mt-10 text-gray-900 dark:text-white">Clearspace and sizing — rules</h3>
-      <ul class="list-disc pl-6 text-gray-600 dark:text-white/70">
+      <h3 class={`${heading3} ${css({ mt: '10' })}`}>Clearspace and sizing -- rules</h3>
+      <ul class={css({ listStyleType: 'disc', pl: '6', color: { base: 'gray.600', _dark: 'white/70' } })}>
         <li>Always maintain a minimum clearspace equal to the height of the monogram on all sides.</li>
         <li>Do not place the wordmark on low-contrast or busy patterns.</li>
         <li>For co-branding, use the black monogram with a white stroke on dark backgrounds or the black mark on light backgrounds.</li>
@@ -660,7 +730,4 @@ const defaultLogoGradient =
     mask-size: contain;
     -webkit-mask-size: contain;
   }
-
-
-
 </style>

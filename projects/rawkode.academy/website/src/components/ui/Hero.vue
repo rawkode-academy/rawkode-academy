@@ -1,21 +1,21 @@
 <template>
 	<section :class="sectionClasses">
 		<!-- Background decorations -->
-		<div v-if="background !== 'none'" class="absolute inset-0 pointer-events-none">
+		<div v-if="background !== 'none'" :class="css({ position: 'absolute', inset: '0', pointerEvents: 'none' })">
 			<!-- Gradient overlay -->
 			<div v-if="background === 'gradient'" :class="gradientClass"></div>
 
 			<!-- Blob decorations -->
-			<div v-if="background === 'blobs'" class="absolute inset-0">
-				<div class="absolute top-0 left-1/4 w-96 h-96 bg-secondary/20 dark:bg-secondary/20 rounded-full opacity-20 blur-3xl"></div>
-				<div class="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/20 dark:bg-primary/20 rounded-full opacity-20 blur-3xl"></div>
+			<div v-if="background === 'blobs'" :class="css({ position: 'absolute', inset: '0' })">
+				<div :class="css({ position: 'absolute', top: '0', left: '25%', w: '96', h: '96', borderRadius: 'full', opacity: 0.2, filter: 'blur(64px)', bg: 'rgb(var(--brand-secondary) / 0.2)' })"></div>
+				<div :class="css({ position: 'absolute', bottom: '0', right: '25%', w: '96', h: '96', borderRadius: 'full', opacity: 0.2, filter: 'blur(64px)', bg: 'rgb(var(--brand-primary) / 0.2)' })"></div>
 			</div>
 
 			<!-- Grid pattern -->
-			<div v-if="pattern === 'grid'" class="absolute inset-0 bg-grid-pattern opacity-5"></div>
+			<div v-if="pattern === 'grid'" :class="cx('bg-grid-pattern', css({ position: 'absolute', inset: '0', opacity: 0.05 }))"></div>
 
 			<!-- Dots pattern -->
-			<div v-if="pattern === 'dots'" class="absolute inset-0 bg-dots-pattern opacity-10"></div>
+			<div v-if="pattern === 'dots'" :class="cx('bg-dots-pattern', css({ position: 'absolute', inset: '0', opacity: 0.1 }))"></div>
 
 			<!-- Custom background slot -->
 			<slot name="background" />
@@ -27,12 +27,12 @@
 				<!-- Left/Main content -->
 				<div :class="contentAreaClasses">
 					<!-- Breadcrumb -->
-					<div v-if="$slots.breadcrumb" class="mb-6">
+					<div v-if="$slots.breadcrumb" :class="css({ mb: '6' })">
 						<slot name="breadcrumb" />
 					</div>
 
 					<!-- Badge -->
-					<div v-if="$slots.badge || badge" class="mb-4">
+					<div v-if="$slots.badge || badge" :class="css({ mb: '4' })">
 						<slot name="badge">
 							<Badge v-if="badge" :variant="badgeVariant" size="md">{{ badge }}</Badge>
 						</slot>
@@ -44,7 +44,7 @@
 						:size="titleSize"
 						:align="align"
 						weight="extrabold"
-						class="mb-6"
+						:class="css({ mb: '6' })"
 					>
 						<slot name="title">{{ title }}</slot>
 					</Heading>
@@ -60,11 +60,11 @@
 					</div>
 
 					<!-- Stats/Metadata -->
-					<div v-if="$slots.stats || (stats && stats.length > 0)" class="flex flex-wrap items-center justify-center gap-6 text-sm text-muted">
+					<div v-if="$slots.stats || (stats && stats.length > 0)" :class="cx(css({ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '6', fontSize: 'sm' }), 'text-muted')">
 						<slot name="stats">
 							<template v-if="stats">
-								<div v-for="(stat, index) in stats" :key="index" class="flex items-center gap-2">
-									<component v-if="stat.icon" :is="stat.icon" class="w-5 h-5" />
+								<div v-for="(stat, index) in stats" :key="index" :class="css({ display: 'flex', alignItems: 'center', gap: '2' })">
+									<component v-if="stat.icon" :is="stat.icon" :class="css({ w: '5', h: '5' })" />
 									<span>{{ stat.label }}</span>
 								</div>
 							</template>
@@ -72,22 +72,22 @@
 					</div>
 
 					<!-- Custom content -->
-					<div v-if="$slots.default" class="mt-8">
+					<div v-if="$slots.default" :class="css({ mt: '8' })">
 						<slot />
 					</div>
 				</div>
 
 				<!-- Right/Media content (for split layout) -->
-				<div v-if="layout === 'split' && $slots.media" class="relative">
+				<div v-if="layout === 'split' && $slots.media" :class="css({ position: 'relative' })">
 					<slot name="media" />
 				</div>
 			</div>
 		</div>
 
 		<!-- Bottom wave decoration -->
-		<div v-if="wave" class="absolute bottom-0 left-0 right-0">
+		<div v-if="wave" :class="css({ position: 'absolute', bottom: '0', left: '0', right: '0' })">
 			<svg
-				class="w-full h-8 md:h-16 text-white dark:text-gray-800"
+				:class="css({ w: 'full', h: '8', md: { h: '16' }, color: { base: 'white', _dark: 'gray.800' } })"
 				preserveAspectRatio="none"
 				viewBox="0 0 1440 64"
 				fill="currentColor"
@@ -101,6 +101,7 @@
 <script setup lang="ts">
 import type { Component } from "vue";
 import { computed } from "vue";
+import { css, cx } from "styled-system/css";
 import Badge from "../common/Badge.vue";
 import Heading from "../common/Heading.vue";
 
@@ -111,12 +112,7 @@ interface Stat {
 
 interface Props {
 	layout?: "centered" | "split" | "full-width";
-	background?:
-		| "none"
-		| "gradient"
-		| "gradient-hero"
-		| "gradient-hero-alt"
-		| "blobs";
+	background?: "none" | "gradient" | "gradient-hero" | "gradient-hero-alt" | "blobs";
 	pattern?: "none" | "grid" | "dots";
 	size?: "sm" | "md" | "lg" | "xl";
 	align?: "left" | "center" | "right";
@@ -125,14 +121,7 @@ interface Props {
 	title?: string;
 	subtitle?: string;
 	badge?: string;
-	badgeVariant?:
-		| "default"
-		| "primary"
-		| "secondary"
-		| "success"
-		| "warning"
-		| "danger"
-		| "info";
+	badgeVariant?: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | "info";
 	wave?: boolean;
 	stats?: Stat[];
 	class?: string;
@@ -151,84 +140,102 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const sectionClasses = computed(() => {
-	const baseClasses = "relative overflow-hidden";
-
-	const backgroundClasses: Record<string, string> = {
+	const backgroundStyles: Record<string, string> = {
 		none: "",
-		gradient:
-			"bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-primary/20 dark:via-gray-900 dark:to-secondary/20",
-		"gradient-hero": "bg-gradient-hero",
-		"gradient-hero-alt": "bg-gradient-hero-alt",
-		blobs:
-			"bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
+		gradient: css({
+			backgroundImage: {
+				base: "linear-gradient(to bottom right, rgb(var(--brand-primary) / 0.1), white, rgb(var(--brand-secondary) / 0.1))",
+				_dark: "linear-gradient(to bottom right, rgb(var(--brand-primary) / 0.2), var(--colors-gray-900), rgb(var(--brand-secondary) / 0.2))",
+			},
+		}),
+		"gradient-hero": css({
+			backgroundImage: {
+				base: "linear-gradient(to bottom right, oklch(0.985 0.002 247.839) 0%, oklch(0.967 0.003 264.542) 50%, oklch(0.928 0.006 264.531) 100%)",
+				_dark: "linear-gradient(145deg, rgb(8 14 31 / 0.92) 0%, rgb(12 20 40 / 0.94) 55%, rgb(17 24 39 / 0.96) 100%)",
+			},
+		}),
+		"gradient-hero-alt": css({
+			backgroundImage: {
+				base: "linear-gradient(to top left, oklch(0.985 0.002 247.839) 0%, oklch(0.967 0.003 264.542) 50%, oklch(0.928 0.006 264.531) 100%)",
+				_dark: "linear-gradient(145deg, rgb(8 14 31 / 0.92) 0%, rgb(12 20 40 / 0.94) 55%, rgb(17 24 39 / 0.96) 100%)",
+			},
+		}),
+		blobs: css({
+			backgroundImage: {
+				base: "linear-gradient(to bottom, var(--colors-gray-50, #f9fafb), white)",
+				_dark: "linear-gradient(to bottom, var(--colors-gray-900, #111827), var(--colors-gray-800, #1f2937))",
+			},
+		}),
 	};
 
-	return [baseClasses, backgroundClasses[props.background], props.class]
-		.filter(Boolean)
-		.join(" ");
+	return cx(
+		css({ position: "relative", overflow: "hidden" }),
+		backgroundStyles[props.background],
+		props.class,
+	);
 });
 
 const containerClasses = computed(() => {
-	const sizeClasses: Record<string, string> = {
-		sm: "py-8 px-4 md:py-12",
-		md: "py-12 px-4 md:py-16 lg:py-20",
-		lg: "py-16 px-4 md:py-20 lg:py-24",
-		xl: "py-20 px-4 md:py-24 lg:py-32",
+	const sizeMap: Record<string, Record<string, any>> = {
+		sm: { py: "8", px: "4", md: { py: "12" } },
+		md: { py: "12", px: "4", md: { py: "16" }, lg: { py: "20" } },
+		lg: { py: "16", px: "4", md: { py: "20" }, lg: { py: "24" } },
+		xl: { py: "20", px: "4", md: { py: "24" }, lg: { py: "32" } },
 	};
 
-	return ["relative z-10 container mx-auto", sizeClasses[props.size]].join(" ");
+	return cx(
+		css({ position: "relative", zIndex: 10, mx: "auto", ...sizeMap[props.size] }),
+		"container",
+	);
 });
 
 const layoutClasses = computed(() => {
-	const layoutStyles: Record<string, string> = {
-		centered: "max-w-4xl mx-auto text-center",
-		split: "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
-		"full-width": "w-full",
+	const layoutMap: Record<string, string> = {
+		centered: css({ maxWidth: "4xl", mx: "auto", textAlign: "center" }),
+		split: css({ display: "grid", gridTemplateColumns: { base: "1fr", lg: "repeat(2, minmax(0, 1fr))" }, gap: "12", alignItems: "center" }),
+		"full-width": css({ w: "full" }),
 	};
-
-	return layoutStyles[props.layout];
+	return layoutMap[props.layout];
 });
 
 const contentAreaClasses = computed(() => {
-	if (props.layout === "centered") {
-		return "";
-	}
-	return "flex flex-col justify-center";
+	if (props.layout === "centered") return "";
+	return css({ display: "flex", flexDirection: "column", justifyContent: "center" });
 });
 
 const gradientClass = computed(() => {
-	return "absolute inset-0 bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-primary/20 dark:via-gray-900 dark:to-secondary/20";
+	return css({
+		position: "absolute",
+		inset: "0",
+		backgroundImage: {
+			base: "linear-gradient(to bottom right, rgb(var(--brand-primary) / 0.1), white, rgb(var(--brand-secondary) / 0.1))",
+			_dark: "linear-gradient(to bottom right, rgb(var(--brand-primary) / 0.2), var(--colors-gray-900), rgb(var(--brand-secondary) / 0.2))",
+		},
+	});
 });
 
 const subtitleClasses = computed(() => {
-	const sizeClasses: Record<string, string> = {
-		sm: "text-base md:text-lg",
-		md: "text-lg md:text-xl",
-		lg: "text-xl md:text-2xl",
-		xl: "text-xl md:text-2xl lg:text-3xl",
+	const sizeMap: Record<string, Record<string, any>> = {
+		sm: { fontSize: { base: "base", md: "lg" } },
+		md: { fontSize: { base: "lg", md: "xl" } },
+		lg: { fontSize: { base: "xl", md: "2xl" } },
+		xl: { fontSize: { base: "xl", md: "2xl", lg: "3xl" } },
 	};
 
-	const alignClasses: Record<string, string> = {
-		left: "text-left",
-		center: "text-center",
-		right: "text-right",
-	};
-
-	return [
-		"text-secondary-content leading-relaxed mb-8",
-		sizeClasses[props.size],
-		alignClasses[props.align],
-	].join(" ");
+	return cx(
+		"text-secondary-content",
+		css({ lineHeight: "relaxed", mb: "8", textAlign: props.align, ...sizeMap[props.size] }),
+	);
 });
 
 const actionsClasses = computed(() => {
-	const alignClasses: Record<string, string> = {
-		left: "justify-start",
-		center: "justify-center",
-		right: "justify-end",
+	const justifyMap: Record<string, string> = {
+		left: "flex-start",
+		center: "center",
+		right: "flex-end",
 	};
 
-	return ["flex flex-wrap gap-4 mb-8", alignClasses[props.align]].join(" ");
+	return css({ display: "flex", flexWrap: "wrap", gap: "4", mb: "8", justifyContent: justifyMap[props.align] });
 });
 </script>
 

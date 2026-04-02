@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 import Badge from "@/components/common/Badge.vue";
 import Button from "@/components/common/Button.vue";
 import FeatureCard from "@/components/common/FeatureCard.vue";
@@ -7,6 +8,16 @@ import { Hero } from "@/components/ui";
 import FAQ from "@/components/faq/training-list.vue";
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import Page from "@/wrappers/page.astro";
+import {
+	sectionSep, sectionHighlight, sectionWhite,
+	heading, headingXl, subText, mutedText, secondaryContent,
+	serviceCard, serviceCardPopular, priceCard, stepCard,
+	iconBubble, svgIcon6, serviceTitle,
+	featureList, featureItem, checkIcon5, greenCheck,
+	stepNum, stepTitle,
+	priceValue, priceUnit, bookLink, popularTag,
+	ctaLink, ctaArrow, accentText, accentSubtleBg, accentSolidBg,
+} from "../_styles";
 
 export const prerender = true;
 
@@ -37,36 +48,18 @@ const trainingFAQs = [
 			"We'd be happy to discuss your specific training needs and answer any questions you may have. Schedule a consultation with our team to explore how we can help upskill your technical team.",
 	},
 ];
+
+const bubbleClass = `${iconBubble} ${accentSubtleBg}`;
+const serviceIconClass = `${svgIcon6} ${accentText}`;
+const stepNumClass = `${stepNum} ${accentSolidBg}`;
+
 ---
-
-<style>
-	@reference "../../../styles/global.css";
-
-	.section-separator {
-		@apply py-16 md:py-20;
-	}
-
-	.section-highlight {
-		@apply bg-gray-50 dark:bg-gray-900 relative overflow-hidden;
-	}
-
-	.section-highlight::before {
-		content: "";
-		@apply absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-secondary;
-	}
-
-	.section-highlight::after {
-		content: "";
-		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-linear-to-r from-primary/10 to-secondary/10 blur-2xl;
-	}
-</style>
 
 <Page
 	title="Technical Training Programs | Rawkode Academy"
 	description="Hands-on technical training programs for cloud native technologies, developer experience, and platform engineering to upskill your engineering teams."
 >
 	<FAQJsonLD questions={trainingFAQs} slot="head" />
-	<!-- Hero Section -->
 	<Hero
 		title="Professional Technical Training"
 		subtitle="Upskill your teams with hands-on, expert-led technical training designed for real-world applications."
@@ -87,8 +80,8 @@ const trainingFAQs = [
 		</Fragment>
 	</Hero>
 
-	<div class="max-w-5xl mx-auto mb-16 text-center pt-16">
-		<p class="text-xl text-gray-700 dark:text-gray-200 mb-8 leading-relaxed">
+	<div class={css({ maxW: '5xl', mx: 'auto', mb: '16', textAlign: 'center', pt: '16' })}>
+		<p class={css({ fontSize: 'xl', color: { base: 'gray.700', _dark: 'gray.200' }, mb: '8', lineHeight: 'relaxed' })}>
 			Rawkode Academy provides specialized technical training programs focused
 			on cloud native technologies, Kubernetes, platform engineering, and cloud
 			engineering. We help your engineering teams become proficient with
@@ -98,1161 +91,221 @@ const trainingFAQs = [
 		</p>
 
 		<GridLayout cols={{ default: 1, md: 3 }} gap={6} class="text-left mt-12">
-			<FeatureCard
-				title="Cloud Engineering Expertise"
-				description="Deep specialization in Terraform, Pulumi, Kubernetes, GitOps, SRE practices, and cloud-native observability with hands-on labs using your actual infrastructure."
-			>
-				<svg
-					slot="icon"
-					class="w-6 h-6 text-primary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-					></path>
+			<FeatureCard title="Cloud Engineering Expertise" description="Deep specialization in Terraform, Pulumi, Kubernetes, GitOps, SRE practices, and cloud-native observability with hands-on labs using your actual infrastructure.">
+				<svg slot="icon" class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
 				</svg>
 			</FeatureCard>
 
-			<FeatureCard
-				title="GitOps Workflows"
-				description="Master GitOps workflows with tools like Flux and ArgoCD, implementing declarative, git-based continuous delivery for your applications and infrastructure."
-				iconBgColor="bg-secondary/10"
-			>
-				<svg
-					slot="icon"
-					class="w-6 h-6 text-secondary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-					></path>
+			<FeatureCard title="GitOps Workflows" description="Master GitOps workflows with tools like Flux and ArgoCD, implementing declarative, git-based continuous delivery for your applications and infrastructure." iconBgColor="bg-secondary/10">
+				<svg slot="icon" class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
 				</svg>
 			</FeatureCard>
 
-			<FeatureCard
-				title="Platform Engineering"
-				description="Build internal developer platforms and establish platform engineering practices that improve developer productivity and operational excellence."
-				iconBgColor="bg-tertiary/10"
-			>
-				<svg
-					slot="icon"
-					class="w-6 h-6 text-tertiary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-					></path>
+			<FeatureCard title="Platform Engineering" description="Build internal developer platforms and establish platform engineering practices that improve developer productivity and operational excellence." iconBgColor="bg-tertiary/10">
+				<svg slot="icon" class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
 				</svg>
 			</FeatureCard>
 		</GridLayout>
 	</div>
 
-	<section id="training-programs" class="bg-white dark:bg-gray-800 py-16">
-		<div class="container mx-auto px-4">
-			<div class="max-w-(--breakpoint-md) mx-auto mb-12 text-center">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Our Training Programs
-				</h2>
-				<p class="text-lg text-muted">
-					Comprehensive training in today's most important technical disciplines
-				</p>
+	<section id="training-programs" class={`${sectionWhite} ${css({ py: '16' })}`}>
+		<div class={css({ maxW: 'container', mx: 'auto', px: '4' })}>
+			<div class={css({ maxW: 'breakpoint-md', mx: 'auto', mb: '12', textAlign: 'center' })}>
+				<h2 class={heading}>Our Training Programs</h2>
+				<p class={subText}>Comprehensive training in today's most important technical disciplines</p>
 			</div>
 
-			<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-				<!-- Training Program 1 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-primary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-primary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							Kubernetes for Developers and Operators
-						</h3>
+			<div class={css({ display: 'grid', gridTemplateColumns: { md: 'repeat(2, 1fr)' }, gap: '8', maxW: '5xl', mx: 'auto' })}>
+				{/* Training Program 1 */}
+				<div class={serviceCard}>
+					<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+						<div class={bubbleClass}><svg class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg></div>
+						<h3 class={serviceTitle}>Kubernetes for Developers and Operators</h3>
 					</div>
-					<p class="mb-4 text-muted">
-						Comprehensive Kubernetes training tailored to both application
-						developers and platform operators, covering everything from local
-						development to production-grade cluster management.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Developer-focused application deployment</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Operator patterns for platform teams</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Advanced networking and storage solutions</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Production-grade cluster management</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>Comprehensive Kubernetes training tailored to both application developers and platform operators, covering everything from local development to production-grade cluster management.</p>
+					<ul class={featureList}>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Developer-focused application deployment</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Operator patterns for platform teams</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Advanced networking and storage solutions</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Production-grade cluster management</span></li>
 					</ul>
 				</div>
 
-				<!-- Training Program 2 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-secondary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-secondary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							Infrastructure as Code
-						</h3>
+				{/* Training Program 2 - IaC */}
+				<div class={serviceCard}>
+					<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+						<div class={bubbleClass}><svg class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+						<h3 class={serviceTitle}>Infrastructure as Code</h3>
 					</div>
-					<p class="mb-4 text-muted">
-						Master infrastructure automation with Terraform and Pulumi, learning
-						how to design, implement, and maintain scalable infrastructure
-						across multiple cloud providers.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Terraform best practices and workflows</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Pulumi and programming language approaches</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Multi-cloud and hybrid infrastructure</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Testing and validation strategies</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>Master infrastructure automation with Terraform and Pulumi, learning how to design, implement, and maintain scalable infrastructure across multiple cloud providers.</p>
+					<ul class={featureList}>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Terraform best practices and workflows</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Pulumi and programming language approaches</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Multi-cloud and hybrid infrastructure</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Testing and validation strategies</span></li>
 					</ul>
 				</div>
 
-				<!-- Training Program 3 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-tertiary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-tertiary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							Cloud Engineering
-						</h3>
+				{/* Training Program 3 - Cloud Engineering */}
+				<div class={serviceCard}>
+					<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+						<div class={bubbleClass}><svg class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
+						<h3 class={serviceTitle}>Cloud Engineering</h3>
 					</div>
-					<p class="mb-4 text-muted">
-						Learn essential cloud engineering skills across major platforms like
-						AWS, Azure, and GCP with hands-on practices focused on automation,
-						security, and cost optimization.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Multi-cloud architecture strategies</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Cloud-native security and compliance</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Serverless and managed service integration</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Cost optimization techniques</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>Learn essential cloud engineering skills across major platforms like AWS, Azure, and GCP with hands-on practices focused on automation, security, and cost optimization.</p>
+					<ul class={featureList}>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Multi-cloud architecture strategies</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Cloud-native security and compliance</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Serverless and managed service integration</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Cost optimization techniques</span></li>
 					</ul>
 				</div>
 
-				<!-- Training Program 4 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-primary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-primary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							SRE and Observability
-						</h3>
+				{/* Training Program 4 - SRE */}
+				<div class={serviceCard}>
+					<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+						<div class={bubbleClass}><svg class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg></div>
+						<h3 class={serviceTitle}>SRE and Observability</h3>
 					</div>
-					<p class="mb-4 text-muted">
-						Build reliability into your systems with Site Reliability
-						Engineering practices and comprehensive observability solutions for
-						modern distributed applications.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>SLIs, SLOs, and Error Budgets</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Distributed tracing and metrics collection</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Alerting and on-call strategies</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Incident management and postmortems</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>Build reliability into your systems with Site Reliability Engineering practices and comprehensive observability solutions for modern distributed applications.</p>
+					<ul class={featureList}>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>SLIs, SLOs, and Error Budgets</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Distributed tracing and metrics collection</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Alerting and on-call strategies</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Incident management and postmortems</span></li>
 					</ul>
 				</div>
 
-				<!-- Training Program 5 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-secondary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-secondary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							GitOps and Continuous Delivery
-						</h3>
+				{/* Training Program 5 - GitOps */}
+				<div class={serviceCard}>
+					<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+						<div class={bubbleClass}><svg class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+						<h3 class={serviceTitle}>GitOps and Continuous Delivery</h3>
 					</div>
-					<p class="mb-4 text-muted">
-						Implement declarative, Git-based delivery pipelines for applications
-						and infrastructure with modern GitOps tools and methodologies.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Flux and ArgoCD implementation</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Continuous deployment patterns</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Progressive delivery techniques</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Multi-environment promotion strategies</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>Implement declarative, Git-based delivery pipelines for applications and infrastructure with modern GitOps tools and methodologies.</p>
+					<ul class={featureList}>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Flux and ArgoCD implementation</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Continuous deployment patterns</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Progressive delivery techniques</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Multi-environment promotion strategies</span></li>
 					</ul>
 				</div>
 
-				<!-- Training Program 6 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-tertiary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-tertiary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							Platform Engineering
-						</h3>
+				{/* Training Program 6 - Platform Engineering */}
+				<div class={serviceCard}>
+					<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+						<div class={bubbleClass}><svg class={serviceIconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg></div>
+						<h3 class={serviceTitle}>Platform Engineering</h3>
 					</div>
-					<p class="mb-4 text-muted">
-						Design and build effective internal developer platforms that improve
-						productivity, standardize workflows, and enable self-service
-						capabilities for engineering teams.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Internal Platform Architecture</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Self-service developer portals</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Developer experience optimization</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Platform team operating models</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>Design and build effective internal developer platforms that improve productivity, standardize workflows, and enable self-service capabilities for engineering teams.</p>
+					<ul class={featureList}>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Internal Platform Architecture</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Self-service developer portals</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Developer experience optimization</span></li>
+						<li class={featureItem}><svg class={checkIcon5} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Platform team operating models</span></li>
 					</ul>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-			<div class="text-center mb-10">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Training Delivery Options
-				</h2>
-				<p class="text-lg text-muted max-w-3xl mx-auto">
-					Flexible formats designed to meet your organization's learning needs
-					and logistical constraints
-				</p>
+	<section class={`${sectionHighlight} ${sectionSep}`}>
+		<div class={css({ py: '12', px: '4', mx: 'auto', maxW: 'breakpoint-xl', lg: { py: '16', px: '6' } })}>
+			<div class={css({ textAlign: 'center', mb: '10' })}>
+				<h2 class={heading}>Training Delivery Options</h2>
+				<p class={subText}>Flexible formats designed to meet your organization's learning needs and logistical constraints</p>
 			</div>
 
-			<div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-				<!-- Option 1 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300"
-				>
-					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-primary-content">
-							On-site Workshop
-						</h3>
+			<div class={css({ display: 'grid', gridTemplateColumns: { md: 'repeat(3, 1fr)' }, gap: '8', maxW: '6xl', mx: 'auto' })}>
+				{/* On-site */}
+				<div class={priceCard}>
+					<div class={css({ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: '4' })}>
+						<h3 class={serviceTitle}>On-site Workshop</h3>
 						<Badge variant="primary" size="sm">In-person</Badge>
 					</div>
-					<p class="mb-4 text-muted">
-						Immersive in-person training at your location. Our expert instructor
-						will travel to your office to deliver hands-on training tailored to
-						your team's needs.
-					</p>
-
-					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-primary-content"
-							>$15,000</span
-						>
-						<span class="text-gray-500 dark:text-gray-400">/day</span>
-					</div>
-
-					<ul class="space-y-2 mb-6">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Up to 20 participants</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Customized curriculum</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Hands-on exercises</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Direct interaction with instructor</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>All training materials included</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>Immersive in-person training at your location. Our expert instructor will travel to your office to deliver hands-on training tailored to your team's needs.</p>
+					<div class={css({ mt: '6', mb: '4' })}><span class={priceValue}>$15,000</span><span class={priceUnit}>/day</span></div>
+					<ul class={`${featureList} ${css({ mb: '6' })}`}>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Up to 20 participants</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Customized curriculum</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Hands-on exercises</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Direct interaction with instructor</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>All training materials included</span></li>
 					</ul>
-
-					<a
-						href="/organizations/lets-chat"
-						class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-lg transition-colors duration-300"
-					>
-						Inquire About On-site Training
-					</a>
+					<a href="/organizations/lets-chat" class={bookLink}>Inquire About On-site Training</a>
 				</div>
 
-				<!-- Option 2 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border-2 border-secondary dark:border-secondary shadow-md hover:shadow-xl transition-all duration-300 relative"
-				>
-					<div
-						class="absolute top-0 right-0 px-3 py-1 bg-secondary text-white text-xs font-semibold rounded-bl-lg rounded-tr-lg"
-					>
-						Popular Choice
-					</div>
-
-					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-primary-content">
-							Virtual Live Training
-						</h3>
+				{/* Virtual */}
+				<div class={serviceCardPopular}>
+					<div class={popularTag}>Popular Choice</div>
+					<div class={css({ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: '4' })}>
+						<h3 class={serviceTitle}>Virtual Live Training</h3>
 						<Badge variant="secondary" size="sm">Remote</Badge>
 					</div>
-					<p class="mb-4 text-muted">
-						Interactive, instructor-led remote training delivered via video
-						conference. Ideal for distributed teams or organizations looking to
-						minimize travel costs.
-					</p>
-
-					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-primary-content"
-							>$10,000</span
-						>
-						<span class="text-gray-500 dark:text-gray-400">/day</span>
-					</div>
-
-					<ul class="space-y-2 mb-6">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Up to 15 participants</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Customized curriculum</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Virtual lab environments</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Interactive breakout sessions</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Session recordings provided</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>Interactive, instructor-led remote training delivered via video conference. Ideal for distributed teams or organizations looking to minimize travel costs.</p>
+					<div class={css({ mt: '6', mb: '4' })}><span class={priceValue}>$10,000</span><span class={priceUnit}>/day</span></div>
+					<ul class={`${featureList} ${css({ mb: '6' })}`}>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Up to 15 participants</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Customized curriculum</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Virtual lab environments</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Interactive breakout sessions</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Session recordings provided</span></li>
 					</ul>
-
-					<a
-						href="/organizations/lets-chat"
-						class="block w-full text-center py-2 px-4 bg-secondary hover:bg-primary text-white rounded-lg transition-colors duration-300"
-					>
-						Schedule Virtual Training
-					</a>
+					<a href="/organizations/lets-chat" class={bookLink}>Schedule Virtual Training</a>
 				</div>
 
-				<!-- Option 3 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300"
-				>
-					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-primary-content">
-							Custom Program
-						</h3>
+				{/* Custom */}
+				<div class={priceCard}>
+					<div class={css({ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: '4' })}>
+						<h3 class={serviceTitle}>Custom Program</h3>
 						<Badge variant="tertiary" size="sm">Flexible</Badge>
 					</div>
-					<p class="mb-4 text-muted">
-						A fully customized training program designed to meet your specific
-						needs, combining different delivery formats and specialized content.
-					</p>
-
-					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-primary-content"
-							>Custom</span
-						>
-						<span class="text-gray-500 dark:text-gray-400"> pricing</span>
-					</div>
-
-					<ul class="space-y-2 mb-6">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Blended learning approaches</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Multi-week learning paths</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Integration with your tools/environment</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Custom labs and exercises</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Mentoring and follow-up support</span
-							>
-						</li>
+					<p class={`${mutedText} ${css({ mb: '4' })}`}>A fully customized training program designed to meet your specific needs, combining different delivery formats and specialized content.</p>
+					<div class={css({ mt: '6', mb: '4' })}><span class={priceValue}>Custom</span><span class={priceUnit}> pricing</span></div>
+					<ul class={`${featureList} ${css({ mb: '6' })}`}>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Blended learning approaches</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Multi-week learning paths</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Integration with your tools/environment</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Custom labs and exercises</span></li>
+						<li class={featureItem}><svg class={greenCheck} fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class={secondaryContent}>Mentoring and follow-up support</span></li>
 					</ul>
-
-					<a
-						href="/organizations/lets-chat"
-						class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-lg transition-colors duration-300"
-					>
-						Request Custom Program
-					</a>
+					<a href="/organizations/lets-chat" class={bookLink}>Request Custom Program</a>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="text-center mb-10">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Our Training Process
-				</h2>
-				<p class="text-lg text-muted max-w-3xl mx-auto">
-					A collaborative approach to ensure your team gets the most value from
-					our training programs
-				</p>
+	<section class={`${sectionWhite} ${sectionSep}`}>
+		<div class={css({ px: '4', py: '12', mx: 'auto', maxW: 'breakpoint-xl', lg: { py: '16' } })}>
+			<div class={css({ textAlign: 'center', mb: '10' })}>
+				<h2 class={heading}>Our Training Process</h2>
+				<p class={subText}>A collaborative approach to ensure your team gets the most value from our training programs</p>
 			</div>
 
-			<div class="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-				<!-- Step 1 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
-				>
-					<div
-						class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg"
-					>
-						1
-					</div>
-					<h3 class="text-lg font-bold text-primary-content mb-3 mt-2">
-						Assessment
-					</h3>
-					<p class="text-muted">
-						We start by understanding your team's current skill levels, learning
-						objectives, and technical environment.
-					</p>
-				</div>
-
-				<!-- Step 2 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
-				>
-					<div
-						class="absolute -top-4 -left-4 w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center font-bold text-lg"
-					>
-						2
-					</div>
-					<h3 class="text-lg font-bold text-primary-content mb-3 mt-2">
-						Customization
-					</h3>
-					<p class="text-muted">
-						We develop a tailored curriculum that aligns with your specific
-						technology stack and business challenges.
-					</p>
-				</div>
-
-				<!-- Step 3 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
-				>
-					<div
-						class="absolute -top-4 -left-4 w-10 h-10 bg-tertiary text-white rounded-full flex items-center justify-center font-bold text-lg"
-					>
-						3
-					</div>
-					<h3 class="text-lg font-bold text-primary-content mb-3 mt-2">
-						Delivery
-					</h3>
-					<p class="text-muted">
-						Our expert instructors deliver engaging, hands-on training that
-						balances theory with practical application.
-					</p>
-				</div>
-
-				<!-- Step 4 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
-				>
-					<div
-						class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg"
-					>
-						4
-					</div>
-					<h3 class="text-lg font-bold text-primary-content mb-3 mt-2">
-						Follow-up
-					</h3>
-					<p class="text-muted">
-						We provide resources and limited support after training to help
-						solidify learning and address questions that arise.
-					</p>
-				</div>
+			<div class={css({ display: 'grid', gridTemplateColumns: { md: 'repeat(4, 1fr)' }, gap: '6', maxW: '5xl', mx: 'auto' })}>
+				<div class={stepCard}><div class={stepNumClass}>1</div><h3 class={stepTitle}>Assessment</h3><p class={mutedText}>We start by understanding your team's current skill levels, learning objectives, and technical environment.</p></div>
+				<div class={stepCard}><div class={stepNumClass}>2</div><h3 class={stepTitle}>Customization</h3><p class={mutedText}>We develop a tailored curriculum that aligns with your specific technology stack and business challenges.</p></div>
+				<div class={stepCard}><div class={stepNumClass}>3</div><h3 class={stepTitle}>Delivery</h3><p class={mutedText}>Our expert instructors deliver engaging, hands-on training that balances theory with practical application.</p></div>
+				<div class={stepCard}><div class={stepNumClass}>4</div><h3 class={stepTitle}>Follow-up</h3><p class={mutedText}>We provide resources and limited support after training to help solidify learning and address questions that arise.</p></div>
 			</div>
 		</div>
 	</section>
 
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content"
-				>
-					Ready to Upskill Your Team?
-				</h2>
-				<p
-					class="mb-10 text-xl text-muted max-w-3xl mx-auto"
-				>
-					Schedule a consultation to discuss your team's training needs and how
-					we can help accelerate their technical capabilities
+	<section class={`${sectionWhite} ${sectionSep}`}>
+		<div class={css({ px: '4', py: '12', mx: 'auto', maxW: 'breakpoint-xl', lg: { py: '16' } })}>
+			<div class={css({ mx: 'auto', maxW: 'breakpoint-md', textAlign: 'center', mb: '8' })}>
+				<h2 class={heading}>Ready to Upskill Your Team?</h2>
+				<p class={css({ mb: '10', fontSize: 'xl', color: { base: 'gray.600', _dark: 'gray.400' }, maxW: '3xl', mx: 'auto' })}>
+					Schedule a consultation to discuss your team's training needs and how we can help accelerate their technical capabilities
 				</p>
-				<div class="flex flex-col sm:flex-row justify-center gap-4">
-					<a
-						href="/organizations/lets-chat"
-						class="inline-flex items-center justify-center px-6 py-4 text-base font-medium text-white bg-primary hover:bg-secondary rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
-					>
+				<div class={css({ display: 'flex', flexDir: { base: 'column', sm: 'row' }, justifyContent: 'center', gap: '4' })}>
+					<a href="/organizations/lets-chat" class={ctaLink}>
 						Schedule Your Consultation
-						<svg
-							class="w-5 h-5 ml-2"
-							fill="currentColor"
-							viewBox="0 0 20 20"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								fill-rule="evenodd"
-								d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-								clip-rule="evenodd"></path>
+						<svg class={ctaArrow} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+							<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
 						</svg>
 					</a>
 				</div>
@@ -1260,17 +313,11 @@ const trainingFAQs = [
 		</div>
 	</section>
 
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
-				<h2
-					class="mb-4 text-3xl tracking-tight font-extrabold text-primary-content"
-				>
-					Frequently Asked Questions
-				</h2>
-				<p class="text-lg text-muted">
-					Learn more about our training programs
-				</p>
+	<section class={`${sectionWhite} ${sectionSep}`}>
+		<div class={css({ px: '4', py: '12', mx: 'auto', maxW: 'breakpoint-xl', lg: { py: '16' } })}>
+			<div class={css({ mx: 'auto', maxW: 'breakpoint-md', textAlign: 'center', mb: '8' })}>
+				<h2 class={headingXl}>Frequently Asked Questions</h2>
+				<p class={subText}>Learn more about our training programs</p>
 			</div>
 			<FAQ client:load />
 		</div>

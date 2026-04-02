@@ -2,6 +2,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
 import { captureServerEvent, getDistinctId } from "../server/analytics";
+import { fetchWithTimeout } from "@/utils/timeout";
 
 const WatchPositionSchema = z.object({
 	videoId: z.string(),
@@ -29,7 +30,8 @@ export const updateWatchPosition = defineAction({
 			}
 
 			// Call the watch history service via service binding
-			const response = await env.WATCH_HISTORY.fetch(
+			const response = await fetchWithTimeout(
+				env.WATCH_HISTORY.fetch.bind(env.WATCH_HISTORY),
 				new Request("https://watch-history.internal/", {
 					method: "POST",
 					headers: {
@@ -41,6 +43,11 @@ export const updateWatchPosition = defineAction({
 						userId: user.id,
 					}),
 				}),
+				{},
+				{
+					timeoutMs: 4000,
+					label: "Watch history service",
+				},
 			);
 
 			if (!response.ok) {

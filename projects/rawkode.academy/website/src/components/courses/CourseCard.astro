@@ -1,4 +1,5 @@
 ---
+import { css, cx } from "styled-system/css";
 import { Image } from "astro:assets";
 import { type CollectionEntry, getCollection, getEntries } from "astro:content";
 import AuthorAvatarGroup from "../common/AuthorAvatarGroup.vue";
@@ -20,6 +21,37 @@ const courseModules = (await getCollection("courseModules")).filter(
 
 const totalModules = courseModules.length;
 
+const cardLinkStyle = css({
+	height: "full",
+	_hover: {
+		shadow: "xl",
+		transform: "scale(1.02)",
+	},
+});
+
+const coverImageStyle = css({
+	w: "full",
+	h: { base: "40", md: "36", lg: "32" },
+	objectFit: "cover",
+});
+
+const titleStyle = css({
+	mb: "3",
+	fontSize: "xl",
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: { base: "gray.900", _dark: "white" },
+	lineClamp: "2",
+});
+
+const descriptionStyle = css({
+	mb: "4",
+	fontWeight: "light",
+	color: { base: "gray.600", _dark: "gray.400" },
+	lineClamp: "3",
+	flexGrow: "1",
+});
+
 // Function to get difficulty badge variant
 function getDifficultyVariant(
 	difficulty: string,
@@ -37,52 +69,52 @@ function getDifficultyVariant(
 }
 ---
 
-<BaseCard href={`/courses/${course.id}`} class="hover:shadow-xl hover:scale-105">
+<BaseCard href={`/courses/${course.id}`} class={cardLinkStyle}>
 	<Fragment slot="cover">
-		<div class="absolute inset-0 bg-gradient-overlay z-10"></div>
+		<div class={cx(css({ position: 'absolute', inset: '0', zIndex: '10' }), 'bg-gradient-overlay')}></div>
 		{
 			course.data.cover ? (
 				<Image
-					class="w-full h-52 object-cover"
+					class={coverImageStyle}
 					src={course.data.cover.image}
 					alt={course.data.cover.alt}
 					loading="lazy"
 				/>
 			) : (
-				<div class="w-full h-52 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-					<svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class={css({ w: 'full', h: { base: '40', md: '36', lg: '32' }, background: 'linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' })}>
+					<svg class={css({ w: '16', h: '16', color: 'white' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
 					</svg>
 				</div>
 			)
 		}
-		<div class="absolute top-3 left-3 right-3 z-20 flex justify-between">
+		<div class={css({ position: 'absolute', top: '3', left: '3', right: '3', zIndex: '20', display: 'flex', justifyContent: 'space-between' })}>
 			<Badge
 				variant={getDifficultyVariant(course.data.difficulty)}
 				size="sm"
-				class="backdrop-blur-sm shadow-md"
+				class={css({ backdropFilter: 'blur(4px)', shadow: 'md' })}
 			>
 				{course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
 			</Badge>
 			<Badge
 				variant="default"
 				size="sm"
-				class="backdrop-blur-sm shadow-md bg-white/90 dark:bg-gray-800/90 text-secondary-content"
+				class={cx(css({ backdropFilter: 'blur(4px)', shadow: 'md', bg: { base: 'white/90', _dark: 'gray.800/90' } }), 'text-secondary-content')}
 			>
 				{totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}
 			</Badge>
 		</div>
 	</Fragment>
 	<Fragment slot="content">
-		<h2 class="mb-3 text-xl font-bold tracking-tight text-primary-content line-clamp-2">
+		<h2 class={titleStyle}>
 			{course.data.title}
 		</h2>
-		<p class="mb-4 font-light text-muted line-clamp-3 flex-grow">
+		<p class={descriptionStyle}>
 			{course.data.description}
 		</p>
 	</Fragment>
 	<Fragment slot="footer">
-		<div class="flex items-center justify-between">
+		<div class={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between' })}>
 			<AuthorAvatarGroup authors={authors} showActiveIndicator={false} />
 			<FormattedDate date={course.data.publishedAt} format="short" />
 		</div>

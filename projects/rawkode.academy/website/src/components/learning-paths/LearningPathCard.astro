@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 import { type CollectionEntry, getEntries } from "astro:content";
 import AuthorAvatarGroup from "@/components/common/AuthorAvatarGroup.vue";
 import Badge from "@/components/common/Badge.vue";
@@ -51,42 +52,51 @@ const difficultyLabel =
 	learningPath.data.difficulty.charAt(0).toUpperCase() +
 	learningPath.data.difficulty.slice(1);
 const technologies = learningPath.data.technologies.slice(0, 3);
+
+const cardStyle = css({ _hover: { shadow: 'xl', transform: 'scale(1.01)' }, transition: 'transform' });
+const badgeWrapStyle = css({ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '2', mb: '4' });
+const badgeExtraStyle = css({ backdropFilter: 'blur(4px)', shadow: 'sm' });
+const titleStyle = css({ mb: '3', fontSize: 'xl', fontWeight: 'bold', letterSpacing: 'tight', color: { base: 'gray.900', _dark: 'white' }, lineClamp: '2' });
+const descStyle = css({ mb: '4', fontWeight: 'light', color: { base: 'gray.600', _dark: 'gray.400' }, lineClamp: '3' });
+const techWrapStyle = css({ display: 'flex', flexWrap: 'wrap', gap: '2' });
+const techBadgeStyle = css({ bg: 'secondary/15', color: { base: 'secondary', _dark: 'secondary/90' } });
+const footerStyle = css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between' });
 ---
 
 <BaseCard
 	href={`/learning-paths/${slug}`}
-	class="hover:shadow-xl hover:scale-[1.01] transition-transform"
+	class={cardStyle}
 >
 	<Fragment slot="content">
-		<div class="flex flex-wrap items-center gap-2 mb-4">
+		<div class={badgeWrapStyle}>
 			<Badge
 				variant={getDifficultyVariant(learningPath.data.difficulty)}
 				size="sm"
-				class="backdrop-blur-sm shadow-sm"
+				class={badgeExtraStyle}
 			>
 				{difficultyLabel}
 			</Badge>
 			<Badge
 				variant="info"
 				size="sm"
-				class="backdrop-blur-sm shadow-sm"
+				class={badgeExtraStyle}
 			>
 				{formatDuration(learningPath.data.estimatedDuration)}
 			</Badge>
 		</div>
-		<h2 class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2">
+		<h2 class={titleStyle}>
 			{learningPath.data.title}
 		</h2>
-		<p class="mb-4 font-light text-gray-600 dark:text-gray-400 line-clamp-3">
+		<p class={descStyle}>
 			{learningPath.data.description}
 		</p>
 		{technologies.length > 0 && (
-			<div class="flex flex-wrap gap-2">
+			<div class={techWrapStyle}>
 				{technologies.map((technology) => (
 					<Badge
 						variant="secondary"
 						size="xs"
-						class="bg-secondary/15 text-secondary dark:text-secondary/90"
+						class={techBadgeStyle}
 					>
 						{technology}
 					</Badge>
@@ -95,7 +105,7 @@ const technologies = learningPath.data.technologies.slice(0, 3);
 		)}
 	</Fragment>
 	<Fragment slot="footer">
-		<div class="flex items-center justify-between">
+		<div class={footerStyle}>
 			<AuthorAvatarGroup authors={authors} showActiveIndicator={false} />
 			<FormattedDate date={learningPath.data.publishedAt} format="short" />
 		</div>

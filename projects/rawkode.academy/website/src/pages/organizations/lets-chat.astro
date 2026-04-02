@@ -1,66 +1,114 @@
 ---
+import { css } from "styled-system/css";
 import Page from "@/wrappers/page.astro";
+
+const pageTitle = css({
+	mt: '8',
+	mb: '4',
+	fontSize: '4xl',
+	letterSpacing: 'tight',
+	fontWeight: 'bold',
+	color: { base: 'gray.900', _dark: 'white' },
+});
+
+const card = css({
+	bg: { base: 'white', _dark: 'gray.800' },
+	rounded: 'lg',
+	shadow: 'md',
+	p: '6',
+	mb: '8',
+});
+
+const cardText = css({
+	fontSize: 'lg',
+	color: { base: 'gray.700', _dark: 'gray.300' },
+	mb: '4',
+});
+
+const cardHeading = css({
+	mt: '8',
+	mb: '4',
+	fontSize: '2xl',
+	fontWeight: 'semibold',
+	color: { base: 'gray.800', _dark: 'white' },
+});
+
+const benefitsList = css({
+	mt: '6',
+	display: 'flex',
+	flexDir: 'column',
+	gap: '4',
+});
+
+const benefitItem = css({
+	display: 'flex',
+	alignItems: 'flex-start',
+});
+
+const benefitIcon = css({
+	flexShrink: '0',
+	w: '5',
+	h: '5',
+	color: 'brandAccent.text',
+	mt: '1',
+	mr: '3',
+});
+
+const benefitText = css({
+	color: { base: 'gray.600', _dark: 'gray.300' },
+});
+
+const bookingSection = css({
+	bg: { base: 'gray.50', _dark: 'gray.700' },
+	rounded: 'lg',
+	p: '6',
+});
+
+const bookingHeading = css({
+	fontSize: '2xl',
+	fontWeight: 'semibold',
+	color: { base: 'gray.800', _dark: 'white' },
+	textAlign: 'center',
+	mb: '6',
+});
+
+const bookingFrame = css({
+	w: 'full',
+	minH: '600px',
+	overflow: 'hidden',
+});
+
+const linkStyle = css({
+	color: 'brandAccent.text',
+	_hover: { textDecoration: 'underline' },
+});
 ---
-
-<style>
-	@reference "../../styles/global.css";
-
-	h1,
-	h2,
-	h3 {
-		@apply mt-8 mb-4;
-	}
-
-	h1 {
-		@apply text-4xl tracking-tight font-bold text-gray-900 dark:text-white;
-	}
-
-	.benefits-list {
-		@apply mt-6 space-y-4;
-	}
-
-	.benefits-list li {
-		@apply flex items-start;
-	}
-
-	.benefits-list .icon {
-		@apply shrink-0 w-5 h-5 text-primary mt-1 mr-3;
-	}
-
-	.benefits-list .text {
-		@apply text-gray-600 dark:text-gray-300;
-	}
-
-	#booking-page {
-		@apply w-full min-h-[600px] overflow-hidden;
-	}
-</style>
 
 <Page
 	title="Schedule a Partnership Consultation"
 	description="Discuss how Rawkode Academy can help accelerate your developer marketing strategy and product adoption."
 >
-	<div class="max-w-4xl mx-auto">
-		<h1 class="text-center mb-6">Schedule Your Partnership Consultation</h1>
+	<div class={css({ maxW: '4xl', mx: 'auto' })}>
+		<h1 class={`${pageTitle} ${css({ textAlign: 'center', mb: '6' })}`}>Schedule Your Partnership Consultation</h1>
 
-		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-			<p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
+		<div class={card}>
+			<p class={cardText}>
 				Ready to explore how a <a
 					href="/organizations/partnerships"
-					class="text-primary hover:underline">Rawkode Academy partnership</a
+					class={linkStyle}>Rawkode Academy partnership</a
 				> can accelerate your developer marketing strategy and product adoption?
 				Schedule a consultation with our team to discuss your specific goals and
 				how we can help you achieve them.
 			</p>
 
-			<h2 class="text-2xl font-semibold text-gray-800 dark:text-white">
+			<h2 class={cardHeading}>
 				During our consultation, we'll discuss:
 			</h2>
 
-			<ul class="benefits-list">
-				<li>
+			<ul class={benefitsList}>
+				<li class={benefitItem}>
 					<svg
-						class="icon"
+						class={benefitIcon}
 						fill="currentColor"
 						viewBox="0 0 20 20"
 						xmlns="http://www.w3.org/2000/svg"
@@ -70,14 +118,14 @@ import Page from "@/wrappers/page.astro";
 							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 							clip-rule="evenodd"></path>
 					</svg>
-					<span class="text"
+					<span class={benefitText}
 						>Your product's unique value proposition and how to effectively
 						communicate it to developers</span
 					>
 				</li>
-				<li>
+				<li class={benefitItem}>
 					<svg
-						class="icon"
+						class={benefitIcon}
 						fill="currentColor"
 						viewBox="0 0 20 20"
 						xmlns="http://www.w3.org/2000/svg"
@@ -87,13 +135,13 @@ import Page from "@/wrappers/page.astro";
 							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 							clip-rule="evenodd"></path>
 					</svg>
-					<span class="text"
+					<span class={benefitText}
 						>Your current developer marketing challenges and opportunities</span
 					>
 				</li>
-				<li>
+				<li class={benefitItem}>
 					<svg
-						class="icon"
+						class={benefitIcon}
 						fill="currentColor"
 						viewBox="0 0 20 20"
 						xmlns="http://www.w3.org/2000/svg"
@@ -103,14 +151,14 @@ import Page from "@/wrappers/page.astro";
 							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 							clip-rule="evenodd"></path>
 					</svg>
-					<span class="text"
+					<span class={benefitText}
 						>Which partnership tier would best align with your business
 						objectives</span
 					>
 				</li>
-				<li>
+				<li class={benefitItem}>
 					<svg
-						class="icon"
+						class={benefitIcon}
 						fill="currentColor"
 						viewBox="0 0 20 20"
 						xmlns="http://www.w3.org/2000/svg"
@@ -120,14 +168,14 @@ import Page from "@/wrappers/page.astro";
 							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 							clip-rule="evenodd"></path>
 					</svg>
-					<span class="text"
+					<span class={benefitText}
 						>Potential content strategies and formats to showcase your
 						technology</span
 					>
 				</li>
-				<li>
+				<li class={benefitItem}>
 					<svg
-						class="icon"
+						class={benefitIcon}
 						fill="currentColor"
 						viewBox="0 0 20 20"
 						xmlns="http://www.w3.org/2000/svg"
@@ -137,7 +185,7 @@ import Page from "@/wrappers/page.astro";
 							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 							clip-rule="evenodd"></path>
 					</svg>
-					<span class="text"
+					<span class={benefitText}
 						>How we measure success and provide ongoing value throughout our
 						partnership</span
 					>
@@ -145,14 +193,12 @@ import Page from "@/wrappers/page.astro";
 			</ul>
 		</div>
 
-		<div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-			<h2
-				class="text-2xl font-semibold text-gray-800 dark:text-white text-center mb-6"
-			>
+		<div class={bookingSection}>
+			<h2 class={bookingHeading}>
 				Select a Time That Works for You
 			</h2>
 
-			<div id="booking-page">
+			<div id="booking-page" class={bookingFrame}>
 				<!-- this is where we will inject the interface -->
 			</div>
 
