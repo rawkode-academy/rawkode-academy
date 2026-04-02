@@ -149,12 +149,16 @@ const sectionClasses = computed(() => {
 			},
 		}),
 		"gradient-hero": css({
-			backgroundImage:
-				"linear-gradient(135deg, rgb(var(--brand-primary) / 0.15) 0%, rgb(var(--brand-secondary) / 0.1) 50%, rgb(var(--brand-primary) / 0.05) 100%)",
+			backgroundImage: {
+				base: "linear-gradient(to bottom right, oklch(0.985 0.002 247.839) 0%, oklch(0.967 0.003 264.542) 50%, oklch(0.928 0.006 264.531) 100%)",
+				_dark: "linear-gradient(145deg, rgb(8 14 31 / 0.92) 0%, rgb(12 20 40 / 0.94) 55%, rgb(17 24 39 / 0.96) 100%)",
+			},
 		}),
 		"gradient-hero-alt": css({
-			backgroundImage:
-				"linear-gradient(225deg, rgb(var(--brand-secondary) / 0.15) 0%, rgb(var(--brand-primary) / 0.1) 50%, rgb(var(--brand-secondary) / 0.05) 100%)",
+			backgroundImage: {
+				base: "linear-gradient(to top left, oklch(0.985 0.002 247.839) 0%, oklch(0.967 0.003 264.542) 50%, oklch(0.928 0.006 264.531) 100%)",
+				_dark: "linear-gradient(145deg, rgb(8 14 31 / 0.92) 0%, rgb(12 20 40 / 0.94) 55%, rgb(17 24 39 / 0.96) 100%)",
+			},
 		}),
 		blobs: css({
 			backgroundImage: {
