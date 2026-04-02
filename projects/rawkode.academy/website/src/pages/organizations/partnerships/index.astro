@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 import Button from "@/components/common/Button.vue";
 import { Hero } from "@/components/ui";
 import FAQ from "@/components/faq/list.vue";
@@ -11,6 +12,11 @@ import VsConference from "@/components/partner/vs-conference.astro";
 import Stats from "@/components/stats/simple.vue";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
 import Page from "@/wrappers/page.astro";
+import {
+	sectionSep, sectionHighlight,
+	heading as sectionHeading, headingXl as sectionHeadingXl,
+	subText, mutedText, iconBubble, svgIcon6, ctaLink, ctaArrow,
+} from "../_styles";
 
 export const prerender = true;
 
@@ -41,29 +47,21 @@ const partnershipFAQs = [
 			"We'd be happy to discuss your specific needs and answer any questions you may have. Schedule a consultation with our partnership team to explore how we can work together to achieve your developer marketing and education goals.",
 	},
 ];
+
+const sectionWhiteWithPy = css({ bg: { base: 'white', _dark: 'gray.800' }, py: '16' });
+
+const infoCard = css({
+	bg: { base: 'white', _dark: 'gray.800' },
+	p: '6',
+	rounded: 'lg',
+	shadow: 'sm',
+	border: '1px solid',
+	borderColor: { base: 'gray.100', _dark: 'gray.700' },
+});
+
+const cardTitle = css({ fontSize: 'lg', fontWeight: 'bold' });
+const subTextXl = css({ color: { base: 'gray.600', _dark: 'gray.400' }, fontSize: { sm: 'xl' }, maxW: '3xl', mx: 'auto' });
 ---
-
-<style>
-	@reference "../../../styles/global.css";
-
-	.section-separator {
-		@apply py-16 md:py-20;
-	}
-
-	.section-highlight {
-		@apply bg-gray-50 dark:bg-gray-900 relative overflow-hidden;
-	}
-
-	.section-highlight::before {
-		content: "";
-		@apply absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-secondary;
-	}
-
-	.section-highlight::after {
-		content: "";
-		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-linear-to-r from-primary/10 to-secondary/10 blur-2xl;
-	}
-</style>
 
 <Page
 	title="Strategic Technology Partnerships | Rawkode Academy"
@@ -91,21 +89,19 @@ const partnershipFAQs = [
 		</Fragment>
 	</Hero>
 
-	<div class="max-w-5xl mx-auto mb-16 text-center pt-16">
-		<p class="text-xl text-secondary-content mb-8 leading-relaxed">
+	<div class={css({ maxW: '5xl', mx: 'auto', mb: '16', textAlign: 'center', pt: '16' })}>
+		<p class={css({ fontSize: 'xl', color: { base: 'gray.700', _dark: 'gray.300' }, mb: '8', lineHeight: 'relaxed' })}>
 			At Rawkode Academy, we connect cutting-edge technologies with the
 			developers who bring them to life. Our expertise bridges the critical gap
 			between technical innovation and developer understanding.
 		</p>
 
-		<div class="grid md:grid-cols-3 gap-6 text-left mt-12">
-			<div
-				class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
-			>
-				<div class="flex items-center mb-4">
-					<div class="bg-primary/10 p-3 rounded-full mr-4">
+		<div class={css({ display: 'grid', gridTemplateColumns: { md: '3' }, gap: '6', textAlign: 'left', mt: '12' })}>
+			<div class={infoCard}>
+				<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+					<div class={`${iconBubble} ${css({ bg: 'colorPalette.default/10' })}`}>
 						<svg
-							class="w-6 h-6 text-primary"
+							class={`${svgIcon6} ${css({ color: 'colorPalette.default' })}`}
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -118,21 +114,19 @@ const partnershipFAQs = [
 								d="M13 10V3L4 14h7v7l9-11h-7z"></path>
 						</svg>
 					</div>
-					<h3 class="text-lg font-bold">Amplify Your Reach</h3>
+					<h3 class={cardTitle}>Amplify Your Reach</h3>
 				</div>
-				<p class="text-muted">
+				<p class={mutedText}>
 					Extend your message to our engaged community of developers and
 					technical decision-makers through authentic, expert-led content.
 				</p>
 			</div>
 
-			<div
-				class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
-			>
-				<div class="flex items-center mb-4">
-					<div class="bg-secondary/10 p-3 rounded-full mr-4">
+			<div class={infoCard}>
+				<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+					<div class={`${iconBubble} ${css({ bg: 'colorPalette.default/10' })}`}>
 						<svg
-							class="w-6 h-6 text-secondary"
+							class={`${svgIcon6} ${css({ color: 'colorPalette.default' })}`}
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -146,21 +140,19 @@ const partnershipFAQs = [
 							></path>
 						</svg>
 					</div>
-					<h3 class="text-lg font-bold">Accelerate Adoption</h3>
+					<h3 class={cardTitle}>Accelerate Adoption</h3>
 				</div>
-				<p class="text-muted">
+				<p class={mutedText}>
 					Remove barriers to entry through strategic educational content that
 					showcases your product's unique value and practical applications.
 				</p>
 			</div>
 
-			<div
-				class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
-			>
-				<div class="flex items-center mb-4">
-					<div class="bg-tertiary/10 p-3 rounded-full mr-4">
+			<div class={infoCard}>
+				<div class={css({ display: 'flex', alignItems: 'center', mb: '4' })}>
+					<div class={`${iconBubble} ${css({ bg: 'colorPalette.default/10' })}`}>
 						<svg
-							class="w-6 h-6 text-tertiary"
+							class={`${svgIcon6} ${css({ color: 'colorPalette.default' })}`}
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -174,9 +166,9 @@ const partnershipFAQs = [
 							></path>
 						</svg>
 					</div>
-					<h3 class="text-lg font-bold">Strategic Growth</h3>
+					<h3 class={cardTitle}>Strategic Growth</h3>
 				</div>
-				<p class="text-muted">
+				<p class={mutedText}>
 					Refine your developer experience and go-to-market approach with expert
 					guidance that drives measurable business outcomes.
 				</p>
@@ -184,19 +176,17 @@ const partnershipFAQs = [
 		</div>
 	</div>
 
-	<section id="benefits" class="bg-white dark:bg-gray-800 py-16">
+	<section id="benefits" class={sectionWhiteWithPy}>
 		<FeatureListIcons />
 	</section>
 
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-			<div class="text-center mb-10">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
+	<section class={`${sectionHighlight} ${sectionSep}`}>
+		<div class={css({ py: '12', px: '4', mx: 'auto', maxW: 'breakpoint-xl', lg: { py: '16', px: '6' } })}>
+			<div class={css({ textAlign: 'center', mb: '10' })}>
+				<h2 class={sectionHeading}>
 					Proven Developer Engagement
 				</h2>
-				<p class="text-lg text-muted max-w-3xl mx-auto">
+				<p class={subText}>
 					Our strategic partnerships deliver measurable results for technology
 					companies worldwide
 				</p>
@@ -226,51 +216,41 @@ const partnershipFAQs = [
 		</div>
 	</section>
 
-	<section
-		class="section-highlight section-separator bg-linear-to-b from-white to-gray-50 dark:from-gray-900 dark:to-black"
-	>
-		<div class="py-2 px-4 mx-auto lg:px-6 max-w-7xl">
-			<div class="mb-12 lg:mb-16 text-center">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Our <span class="text-primary">Trusted</span> Partners
+	<section class={`${sectionHighlight} ${sectionSep} ${css({ backgroundImage: { base: 'linear-gradient(to bottom, white, var(--colors-gray-50))', _dark: 'linear-gradient(to bottom, var(--colors-gray-900), black)' } })}`}>
+		<div class={css({ py: '2', px: '4', mx: 'auto', maxW: '7xl', lg: { px: '6' } })}>
+			<div class={css({ mb: { base: '12', lg: '16' }, textAlign: 'center' })}>
+				<h2 class={sectionHeading}>
+					Our <span class={css({ color: 'colorPalette.default' })}>Trusted</span> Partners
 				</h2>
-				<p
-					class="text-gray-600 sm:text-xl dark:text-gray-400 max-w-3xl mx-auto"
-				>
+				<p class={subTextXl}>
 					Join these innovative companies who trust Rawkode Academy to connect
 					their technologies with developers worldwide.
 				</p>
 			</div>
 
-			<div class="relative">
-				<div
-					class="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-secondary/5 rounded-xl"
-				>
+			<div class={css({ position: 'relative' })}>
+				<div class={css({ position: 'absolute', inset: '0', backgroundImage: 'linear-gradient(to right, token(colors.colorPalette.default/5), transparent, token(colors.colorPalette.default/5))', rounded: 'xl' })}>
 				</div>
-				<div class="relative">
+				<div class={css({ position: 'relative' })}>
 					<PartnerLogos />
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="bg-white dark:bg-gray-800 py-16">
-		<div class="container mx-auto px-4">
+	<section class={sectionWhiteWithPy}>
+		<div class={css({ containerType: 'inline-size', mx: 'auto', px: '4' })}>
 			<VsConference />
 		</div>
 	</section>
 
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-12">
-				<h2
-					class="mb-4 text-4xl tracking-tight font-extrabold text-primary-content"
-				>
+	<section class={`${sectionHighlight} ${sectionSep}`}>
+		<div class={css({ py: '12', px: '4', mx: 'auto', maxW: 'breakpoint-xl', lg: { py: '16', px: '6' } })}>
+			<div class={css({ mx: 'auto', maxW: 'breakpoint-md', textAlign: 'center', mb: '12' })}>
+				<h2 class={sectionHeadingXl}>
 					Partnership Tiers
 				</h2>
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
+				<p class={css({ mb: '5', color: { base: 'gray.600', _dark: 'gray.300' }, fontSize: { sm: 'xl' } })}>
 					Whether you're looking to increase brand awareness, educate developers
 					about your technology, or develop a comprehensive go-to-market
 					strategy, we offer flexible partnership options to meet your specific
@@ -278,29 +258,28 @@ const partnershipFAQs = [
 				</p>
 			</div>
 
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-10">
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
+			<div class={css({ mx: 'auto', maxW: 'breakpoint-md', textAlign: 'center', mb: '10' })}>
+				<p class={css({ mb: '5', color: { base: 'gray.600', _dark: 'gray.300' }, fontSize: { sm: 'xl' } })}>
 					The Rawkode Academy is proudly brought to you from Glasgow, Scotland.
 					Our partnership tiers are named after traditional Scottish whisky
 					measurements, reflecting our heritage of quality, craftsmanship, and
 					attention to detail.
 				</p>
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">🏴󠁧󠁢󠁳󠁣󠁴󠁿 🥃</p>
 			</div>
 
-			<div class="mx-auto max-w-6xl">
+			<div class={css({ mx: 'auto', maxW: '6xl' })}>
 				<Featured />
 				<Pricing />
 			</div>
 		</div>
 	</section>
 
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 mx-auto max-w-(--breakpoint-xl) lg:px-6">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center">
-				<div class="inline-block p-2 mb-6 bg-primary/10 rounded-full">
+	<section class={`${css({ bg: { base: 'white', _dark: 'gray.800' } })} ${sectionSep}`}>
+		<div class={css({ px: '4', mx: 'auto', maxW: 'breakpoint-xl', lg: { px: '6' } })}>
+			<div class={css({ mx: 'auto', maxW: 'breakpoint-md', textAlign: 'center' })}>
+				<div class={css({ display: 'inline-block', p: '2', mb: '6', bg: 'colorPalette.default/10', rounded: 'full' })}>
 					<svg
-						class="w-8 h-8 text-primary"
+						class={css({ w: '8', h: '8', color: 'colorPalette.default' })}
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -315,28 +294,22 @@ const partnershipFAQs = [
 					</svg>
 				</div>
 
-				<h2
-					class="mb-6 text-4xl tracking-tight font-extrabold text-primary-content"
-				>
-					Ready to Transform Your <span class="text-primary"
-						>Developer Strategy</span
-					>?
+				<h2 class={sectionHeadingXl}>
+					Ready to Transform Your <span class={css({ color: 'colorPalette.default' })}>Developer Strategy</span>?
 				</h2>
-				<p
-					class="mb-10 text-xl text-muted max-w-3xl mx-auto"
-				>
+				<p class={css({ mb: '10', fontSize: 'xl', color: { base: 'gray.600', _dark: 'gray.400' }, maxW: '3xl', mx: 'auto' })}>
 					Schedule a consultation to explore how a strategic partnership can
 					align with your specific business objectives and connect your
 					technology with our passionate developer community.
 				</p>
-				<div class="flex flex-col sm:flex-row justify-center gap-4">
+				<div class={css({ display: 'flex', flexDir: { base: 'column', sm: 'row' }, justifyContent: 'center', gap: '4' })}>
 					<a
 						href="/organizations/lets-chat"
-						class="inline-flex items-center justify-center px-6 py-4 text-base font-medium text-white bg-primary hover:bg-secondary rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+						class={ctaLink}
 					>
 						Schedule Your Consultation
 						<svg
-							class="w-5 h-5 ml-2"
+							class={ctaArrow}
 							fill="currentColor"
 							viewBox="0 0 20 20"
 							xmlns="http://www.w3.org/2000/svg"
@@ -352,15 +325,13 @@ const partnershipFAQs = [
 		</div>
 	</section>
 
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
-				<h2
-					class="mb-4 text-3xl tracking-tight font-extrabold text-primary-content"
-				>
+	<section class={`${css({ bg: { base: 'white', _dark: 'gray.800' } })} ${sectionSep}`}>
+		<div class={css({ px: '4', py: '12', mx: 'auto', maxW: 'breakpoint-xl', lg: { py: '16' } })}>
+			<div class={css({ mx: 'auto', maxW: 'breakpoint-md', textAlign: 'center', mb: '8' })}>
+				<h2 class={css({ mb: '4', fontSize: '3xl', letterSpacing: 'tight', fontWeight: 'extrabold', color: { base: 'gray.900', _dark: 'white' } })}>
 					Frequently Asked Questions
 				</h2>
-				<p class="text-lg text-muted">
+				<p class={subText}>
 					Learn more about partnering with Rawkode Academy
 				</p>
 			</div>
