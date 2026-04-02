@@ -77,33 +77,32 @@ const formatDuration = (seconds?: number | null) => {
 		highlight="hard"
 		logos={heroLogos}
 		primaryButton={{
-					text: "Get Weekly Insights",
-					link: "#newsletter-signup",
-				}}
-		secondaryButton={{
 			text: "Start Watching Free",
 			link: "/watch",
+		}}
+		secondaryButton={{
+			text: "Get Weekly Insights",
+			link: "#newsletter-signup",
 		}}
 		rotatedPrefixes={[
 			"Cloud Native",
 			"Kubernetes",
-			"Microservices",
-			"WebAssembly",
 			"Platform Engineering",
-			"SRE",
 			"Observability",
-			"DevOps",
-			"Infrastructure as Code",
+			"WebAssembly",
+			"GitOps",
+			"SRE",
+			"Microservices",
 		]}
 		suffix="may be complex, but it doesn't need to be hard."
 		socialProof={socialProofStats}
 	/>
 
-	<section id="newsletter-signup" class="px-4 pt-6 sm:pt-8">
+	<section id="newsletter-signup" class="page-px section-pt-0">
 		<div class="mx-auto max-w-3xl scroll-mt-24">
 			<NewsletterCTA
 				server:defer
-				class="mb-12"
+				class="mb-0"
 				badge="Weekly Cloud Native insights"
 				headline="Get cloud native insights weekly"
 				subtitle="Tutorials, deep dives, and curated events. No spam, unsubscribe anytime."
@@ -111,10 +110,9 @@ const formatDuration = (seconds?: number | null) => {
 		</div>
 	</section>
 
-	{/* Latest Content Section */}
-	<section class="py-16 px-4 sm:py-20">
+	<section class="page-px section-py">
 		<div class="mx-auto max-w-7xl">
-			<div class="text-center mb-12">
+			<div class="mb-14 space-y-3 text-center">
 				<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl mb-4">
 					Latest from the <span class="text-primary">Academy</span>
 				</h2>
@@ -123,53 +121,52 @@ const formatDuration = (seconds?: number | null) => {
 				</p>
 			</div>
 
-			{/* Latest Videos */}
-			<div class="mb-16">
-				<div class="flex items-center justify-between mb-8">
-					<h3 class="text-2xl font-bold text-primary-content flex items-center gap-2">
+			<div class="mb-16 space-y-6">
+				<div class="flex flex-wrap items-end justify-between gap-3">
+					<h3 class="flex items-center gap-2 text-xl font-semibold tracking-tight text-primary-content sm:text-2xl">
 						<span class="text-primary">📺</span> Latest Videos
 					</h3>
-					<a href="/watch" class="text-primary hover:text-secondary font-medium flex items-center transition-colors">
-						View All <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+					<a
+						href="/watch"
+						class="inline-flex min-h-11 items-center gap-1 rounded-full border border-white/60 bg-white/65 px-4 py-2 text-sm font-semibold text-primary shadow-sm backdrop-blur-md transition-colors hover:text-secondary dark:border-white/10 dark:bg-gray-900/55"
+					>
+						View all
+						<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
 					</a>
 				</div>
-				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
 					{latestVideos.slice(0, 3).map((video) => (
 						<a
 							href={`/watch/${video.data.slug}`}
-							class="group block bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700"
+							class="glass-card-shimmer group block overflow-hidden rounded-[1.5rem] border-white/50 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-[0_24px_50px_rgba(15,23,42,0.12)]"
 						>
-							{/* Thumbnail */}
-							<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
+							<div class="relative aspect-video overflow-hidden bg-surface">
 								<img
 									src={`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}
 									alt={video.data.title}
-									class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+									class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-105"
 									loading="lazy"
 								/>
-								{/* Duration badge */}
-								<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+								<div class="absolute bottom-3 right-3 rounded-full bg-black/75 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
 									{formatDuration(typeof video.data.duration === "number" ? video.data.duration : undefined)}
 								</div>
-								{/* Play overlay */}
-								<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-									<div class="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center text-primary shadow-lg transform scale-75 group-hover:scale-100 transition-transform duration-300">
+								<div class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 motion-safe:transition-opacity motion-safe:duration-300 group-hover:opacity-100">
+									<div class="flex h-12 w-12 scale-75 items-center justify-center rounded-full bg-white/90 text-primary shadow-lg motion-safe:transition-transform motion-safe:duration-300 group-hover:scale-100">
 										<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
 									</div>
 								</div>
 							</div>
 
-							{/* Content */}
-							<div class="p-5">
-								<h3 class="text-lg font-semibold text-primary-content line-clamp-2 group-hover:text-primary transition-colors mb-2">
+							<div class="p-5 sm:p-6">
+								<h3 class="mb-2 text-lg font-semibold tracking-tight text-primary-content line-clamp-2 transition-colors group-hover:text-primary">
 									{video.data.title}
 								</h3>
 
-								<div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-									<svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<div class="flex items-center text-sm text-muted">
+									<svg class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 									</svg>
-									{video.data.publishedAt.toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
+									{video.data.publishedAt.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
 								</div>
 							</div>
 						</a>
@@ -177,136 +174,108 @@ const formatDuration = (seconds?: number | null) => {
 				</div>
 			</div>
 
-			{/* Latest Articles */}
-			<div class="mb-16">
-				<div class="flex items-center justify-between mb-8">
-					<h3 class="text-2xl font-bold text-primary-content flex items-center gap-2">
+			<div class="mb-16 space-y-6">
+				<div class="flex flex-wrap items-end justify-between gap-3">
+					<h3 class="flex items-center gap-2 text-xl font-semibold tracking-tight text-primary-content sm:text-2xl">
 						<span class="text-primary">📝</span> Latest Articles
 					</h3>
-					<a href="/read" class="text-primary hover:text-secondary font-medium flex items-center transition-colors">
-						View All <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+					<a
+						href="/read"
+						class="inline-flex min-h-11 items-center gap-1 rounded-full border border-white/60 bg-white/65 px-4 py-2 text-sm font-semibold text-primary shadow-sm backdrop-blur-md transition-colors hover:text-secondary dark:border-white/10 dark:bg-gray-900/55"
+					>
+						View all
+						<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
 					</a>
 				</div>
-				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
 					{latestArticles.map((article) => (
 						<ArticleCard article={article} />
 					))}
 				</div>
 			</div>
 
-			{/* Featured Technologies Highlight */}
-			<div class="glass-panel rounded-3xl p-8">
-				<h3 class="text-2xl font-bold text-primary-content mb-6 text-center">
-					🚀 Featured Technology Guides
-				</h3>
-				<div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-					<a href="/technology/kubernetes" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">☸️</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">Kubernetes</span>
-					</a>
-					<a href="/technology/docker" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">🐳</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">Docker</span>
-					</a>
-					<a href="/technology/fluxcd" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">🔄</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">FluxCD</span>
-					</a>
-					<a href="/technology/cilium" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">🐝</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">Cilium</span>
-					</a>
-					<a href="/technology/dagger" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">⚡</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">Dagger</span>
-					</a>
-				</div>
-			</div>
 		</div>
 	</section>
 
 	<FeatureList
 		title="Our Learning Path & Values"
-		description="The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native and Kubernetes landscape."
+		description="We teach the way experienced engineers actually learn: in public, in context, and close to the sharp edges."
 		segments={[
 			{
 				title: "Authenticity",
 				emoji: "🎭",
 				description:
-					"The content we produce is authentic, and we don't shy away from the hard topics.",
+					"We show the trade-offs, the rough edges, and the decisions we'd make again.",
 			},
 			{
 				title: "Organic Content",
 				emoji: "🌱",
 				description:
-					"As we learn, you learn. You'll notice a lot of the more recent content features: us solving our own problems, building this platform, and the technologies we used.",
+					"Much of the curriculum comes from problems we're solving in public, not invented demos.",
 			},
 			{
 				title: "Embracing Failure",
 				emoji: "🤦",
 				description:
-					"Our live content won't be without mistakes. In fact, we encourage things to go wrong. We all learn through failures, why edit them out?",
+					"Mistakes stay in the session because the recovery is usually more useful than the perfect path.",
 			},
 			{
 				title: "Hands-On",
 				emoji: "⌨️",
 				description:
-					"Forget the slides, we're all about the hands-on keyboard experience. We'll be in the terminal, writing code, and building things together.",
+					"Less slideware, more terminal time, real code, and live builds you can follow end to end.",
 			},
 			{
 				title: "Forward-Facing, Forward-Thinking",
 				emoji: "🔭",
 				description:
-					"We're always looking for the greatest and latest technologies, and we're not afraid to dive in headfirst.",
+					"We test new tools early, evaluate them honestly, and show where they fit in practice.",
 			},
 			{
 				title: "Open & Closed Source",
 				emoji: "🔐",
 				description:
-					"There's a time to build and there's a time to buy. We'll cover both and do our best to explain when you should trade your money for time.",
+					"We cover open source and vendors with the same standard: what works, what costs, and what saves time.",
 			},
 		]}
 	/>
 
 	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-				<TestimonialSlider type="viewer" blurb="We're proud of the content we produce, but don't take our word for it. Here's what our viewers have to say about the Rawkode Academy." />
+		<div class="mx-auto max-w-(--breakpoint-xl) px-4 py-10 lg:px-6 lg:py-12">
+				<TestimonialSlider type="viewer" blurb="Straight from viewers learning in public with us." />
 		</div>
 	</section>
 
-	<section class="relative py-16 px-4 sm:py-20">
+	<section class="relative page-px section-py">
 		<div class="pointer-events-none absolute inset-0 flex justify-center">
 			<div class="h-full w-5/6 max-w-6xl rounded-[40px] bg-gradient-to-r from-primary/25 via-white/30 to-secondary/25 blur-[220px] opacity-40 dark:from-primary/40 dark:via-gray-900/40 dark:to-secondary/40"></div>
 		</div>
-		<div class="glass-panel relative mx-auto max-w-7xl rounded-[40px] overflow-hidden">
-			<div class="absolute inset-0 opacity-60">
-				<div class="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-primary/10 dark:from-gray-900/20"></div>
-				<div class="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-br from-secondary/40 to-primary/30 blur-3xl"></div>
-			</div>
-			<div class="relative px-6 py-12 sm:px-12 lg:px-16">
-				<div class="mb-10 lg:mb-14 text-center">
-					<h2 class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						Our <span class="text-primary">Trusted</span> Partners
+		<div class="relative mx-auto max-w-7xl">
+			<div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+				<div class="max-w-3xl">
+					<div class="glass-chip text-primary/85">Partners</div>
+					<h2 class="mt-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
+						Companies supporting <span class="text-primary">Rawkode Academy</span>
 					</h2>
-					<p class="text-gray-600 sm:text-xl dark:text-gray-300 max-w-3xl mx-auto">
-						The Rawkode Academy couldn't exist without the support of our partners. Visit their websites, contact them, and remember to let them know that you found them right here.
+					<p class="mt-4 max-w-[58ch] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
+						These companies help fund videos, tutorials, and hands-on coverage. We only partner with teams whose tools we can discuss honestly in public.
 					</p>
-					<div class="mt-6">
-						<a
-							href="/organizations/partnerships"
-							title="Become a Partner"
-							class="inline-flex items-center gap-2 px-6 py-3 text-base font-semibold text-white rounded-2xl border border-white/40 dark:border-white/10 bg-gradient-to-r from-primary to-secondary shadow-[0_15px_40px_rgba(99,102,241,0.35)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.6)] transition hover:scale-[1.02] hover:shadow-[0_20px_45px_rgba(99,102,241,0.45)]"
-						>
-							Become a Partner
-							<svg aria-hidden="true" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-								<path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-							</svg>
-						</a>
-					</div>
 				</div>
-				<div class="relative">
-					<PartnerLogos />
+				<div class="lg:pb-1">
+					<a
+						href="/organizations/partnerships"
+						title="Partner with Rawkode"
+						class="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-primary/20 bg-white/70 px-5 py-3 text-base font-semibold text-primary shadow-sm backdrop-blur-md motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-primary/35 motion-safe:hover:text-primary-content dark:border-white/10 dark:bg-gray-900/55"
+					>
+						Partner with Rawkode
+						<svg aria-hidden="true" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+							<path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+						</svg>
+					</a>
 				</div>
+			</div>
+			<div class="mt-10">
+				<PartnerLogos compact />
 			</div>
 		</div>
 	</section>
