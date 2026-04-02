@@ -7,8 +7,10 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { css } from "../../../styled-system/css";
 import { SkeletonList } from "@/components/common/SkeletonList";
 import { getCategoryIcon, GitHubIcon } from "./icons";
+import "./styles.css";
 import {
 	setTheme,
 	getTheme,
@@ -16,7 +18,6 @@ import {
 	ALL_THEMES,
 	type Theme,
 } from "@/lib/theme";
-import "./styles.css";
 
 interface NavigationItem {
 	id: string;
@@ -44,6 +45,246 @@ const trackEvent = (event: string, properties?: Record<string, unknown>) => {
 		// Ignore tracking errors
 	}
 };
+
+const overlayStyle = css({
+	position: "fixed",
+	top: "0",
+	left: "0",
+	right: "0",
+	bottom: "0",
+	bg: "rgba(17, 24, 39, 0.8)",
+	backdropFilter: "blur(8px)",
+	zIndex: "9999",
+	display: "flex",
+	alignItems: "flex-start",
+	justifyContent: "center",
+	pt: "15vh",
+	px: "4",
+	animation: "fadeIn 0.15s ease-out",
+	_dark: {
+		bg: "rgba(0, 0, 0, 0.8)",
+	},
+});
+
+const containerStyle = css({
+	w: "full",
+	maxW: "480px",
+	mx: "auto",
+	p: "0",
+	boxSizing: "border-box",
+	animation: "slideIn 0.15s ease-out",
+	lg: {
+		maxW: "600px",
+	},
+});
+
+const paletteStyle = css({
+	bg: "white",
+	rounded: "3xl",
+	shadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(229, 231, 235, 1), 0 8px 32px -8px rgba(95, 94, 215, 0.3)",
+	borderWidth: "1px",
+	borderColor: "rgba(229, 231, 235, 1)",
+	overflow: "hidden",
+	backdropFilter: "blur(20px)",
+	_dark: {
+		bg: "#0f172a",
+		borderColor: "#334155",
+		shadow: "0 32px 64px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(95, 94, 215, 0.2), 0 8px 32px -8px rgba(95, 94, 215, 0.3)",
+	},
+});
+
+const headerStyle = css({
+	display: "flex",
+	alignItems: "center",
+	p: "5",
+	borderBottomWidth: "1px",
+	borderColor: "rgba(229, 231, 235, 1)",
+	bg: "rgba(249, 250, 251, 0.8)",
+	backdropFilter: "blur(10px)",
+	_dark: {
+		bg: "rgba(15, 23, 42, 0.9)",
+		borderColor: "#334155",
+	},
+});
+
+const searchIconStyle = css({
+	w: "5",
+	h: "5",
+	color: "#6b7280",
+	mr: "3",
+	flexShrink: 0,
+	_dark: {
+		color: "#94a3b8",
+	},
+});
+
+const inputStyle = css({
+	flex: "1",
+	border: "none",
+	outline: "none",
+	bg: "transparent",
+	fontSize: "16px",
+	fontWeight: "medium",
+	color: "#111827",
+	textAlign: "left",
+	_placeholder: {
+		color: "#9ca3af",
+	},
+	_dark: {
+		color: "#f1f5f9",
+		_placeholder: {
+			color: "#64748b",
+		},
+	},
+});
+
+const kbdStyle = css({
+	bg: "#f3f4f6",
+	color: "#4b5563",
+	py: "1.5",
+	px: "2.5",
+	rounded: "lg",
+	fontSize: "12px",
+	fontWeight: "semibold",
+	borderWidth: "1px",
+	borderColor: "#d1d5db",
+	shadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+	_dark: {
+		bg: "#1e293b",
+		color: "#94a3b8",
+		borderColor: "#475569",
+		shadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
+	},
+});
+
+const listStyle = css({
+	maxH: "480px",
+	overflowY: "auto",
+	pt: "2",
+	pb: "4",
+	_scrollbar: {
+		width: "6px",
+	},
+	_scrollbarTrack: {
+		bg: "transparent",
+	},
+	_scrollbarThumb: {
+		bg: "#d1d5db",
+		rounded: "sm",
+	},
+	_dark: {
+		_scrollbarThumb: {
+			bg: "rgba(95, 94, 215, 0.4)",
+		},
+	},
+});
+
+const emptyStyle = css({
+	py: "8",
+	px: "4",
+	textAlign: "center",
+	color: "#6b7280",
+	fontSize: "14px",
+	_dark: {
+		color: "#94a3b8",
+	},
+});
+
+const groupStyle = css({
+	mb: "2",
+});
+
+const groupHeadingStyle = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "2",
+});
+
+const categoryIconStyle = css({
+	w: "4",
+	h: "4",
+	opacity: "0.8",
+	color: "#6b7280",
+	_dark: {
+		color: "#64748b",
+	},
+});
+
+const itemStyle = css({
+	display: "flex",
+	alignItems: "center",
+	py: "3",
+	px: "4",
+	cursor: "pointer",
+	border: "none",
+	bg: "none",
+	w: "calc(100% - 16px)",
+	textAlign: "left",
+	transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+	rounded: "xl",
+	my: "0.5",
+	mx: "2",
+	_hover: {
+		bg: "#f9fafb",
+		transform: "translateY(-0.5px)",
+	},
+	_dark: {
+		_hover: {
+			bg: "rgba(30, 41, 59, 0.5)",
+		},
+	},
+});
+
+const itemIconStyle = css({
+	w: "5",
+	h: "5",
+	mr: "4",
+	flexShrink: 0,
+	opacity: "0.8",
+	color: "#6b7280",
+	_dark: {
+		color: "#94a3b8",
+	},
+});
+
+const itemContentStyle = css({
+	flex: "1",
+	minW: "0",
+});
+
+const itemTitleStyle = css({
+	fontSize: "15px",
+	fontWeight: "semibold",
+	color: "#111827",
+	mb: "1",
+	lineHeight: "1.4",
+	_dark: {
+		color: "#f1f5f9",
+	},
+});
+
+const activeThemeBadge = css({
+	ml: "2",
+	fontSize: "xs",
+	color: "primary",
+});
+
+const loadingWrapperStyle = css({
+	p: "4",
+});
+
+const externalIconStyle = css({
+	w: "4",
+	h: "4",
+	color: "#9ca3af",
+	ml: "3",
+	flexShrink: 0,
+	opacity: "0.8",
+	_dark: {
+		color: "#00ceff",
+		opacity: "0.6",
+	},
+});
 
 export default function CommandPalette({
 	isOpen,
@@ -321,13 +562,13 @@ export default function CommandPalette({
 	);
 
 	return (
-		<div className="command-palette-overlay" onClick={onClose}>
+		<div className={overlayStyle} onClick={onClose}>
 			<div
-				className="command-palette-container"
+				className={containerStyle}
 				onClick={(e) => e.stopPropagation()}
 			>
-				<Command className="command-palette" filter={customFilter}>
-					<div className="command-palette-header">
+				<Command className={paletteStyle} filter={customFilter}>
+					<div className={headerStyle}>
 						<div
 							style={{
 								position: "relative",
@@ -337,7 +578,7 @@ export default function CommandPalette({
 							}}
 						>
 							<svg
-								className="command-palette-search-icon"
+								className={searchIconStyle}
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -366,7 +607,7 @@ export default function CommandPalette({
 								}
 								value={search}
 								onValueChange={setSearch}
-								className="command-palette-input"
+								className={inputStyle}
 								style={{
 									paddingLeft: "52px",
 									paddingRight: "70px",
@@ -374,7 +615,7 @@ export default function CommandPalette({
 								}}
 							/>
 							<kbd
-								className="command-palette-kbd"
+								className={kbdStyle}
 								style={{
 									position: "absolute",
 									right: "16px",
@@ -388,15 +629,14 @@ export default function CommandPalette({
 						</div>
 					</div>
 
-					<Command.List className="command-palette-list">
+					<Command.List className={listStyle}>
 						{isLoading && (
-							<div className="command-palette-loading">
+							<div className={loadingWrapperStyle}>
 								<SkeletonList
 									items={5}
 									showIcon={true}
 									iconSize="1.5rem"
 									showSubtitle={false}
-									className="command-palette-skeleton"
 								/>
 							</div>
 						)}
@@ -405,18 +645,17 @@ export default function CommandPalette({
 							isSearchingArticles &&
 							!isLoading &&
 							search.length >= 2 && (
-								<div className="command-palette-searching">
+								<div className={loadingWrapperStyle}>
 									<SkeletonList
 										items={3}
 										showIcon={true}
 										iconSize="1.5rem"
 										showSubtitle={true}
-										className="command-palette-skeleton"
 									/>
 								</div>
 							)}
 
-						<Command.Empty className="command-palette-empty">
+						<Command.Empty className={emptyStyle}>
 							{!isLoading &&
 								!isSearchingArticles &&
 								(activePage === "themes"
@@ -430,12 +669,12 @@ export default function CommandPalette({
 								<Command.Group
 									key={category}
 									heading={
-										<div className="flex items-center gap-2">
-											<CategoryIcon className="command-palette-category-icon" />
+										<div className={groupHeadingStyle}>
+											<CategoryIcon className={categoryIconStyle} />
 											{category}
 										</div>
 									}
-									className="command-palette-group"
+									className={groupStyle}
 								>
 									{items.map((item) => {
 										const ItemIcon = getItemIcon(item);
@@ -445,14 +684,14 @@ export default function CommandPalette({
 												key={item.id}
 												value={`${item.title} ${item.description || ""} ${item.keywords?.join(" ") || ""}`}
 												onSelect={() => handleSelect(item)}
-												className="command-palette-item"
+												className={itemStyle}
 											>
-												<ItemIcon className="command-palette-item-icon" />
-												<div className="command-palette-item-content">
-													<div className="command-palette-item-title">
+												<ItemIcon className={itemIconStyle} />
+												<div className={itemContentStyle}>
+													<div className={itemTitleStyle}>
 														{item.title}
 														{isCurrentTheme && (
-															<span className="ml-2 text-xs text-primary">
+															<span className={activeThemeBadge}>
 																(active)
 															</span>
 														)}
@@ -460,7 +699,7 @@ export default function CommandPalette({
 												</div>
 												{item.href && item.href.startsWith("http") && (
 													<svg
-														className="command-palette-external-icon"
+														className={externalIconStyle}
 														fill="none"
 														stroke="currentColor"
 														viewBox="0 0 24 24"

@@ -1,3 +1,5 @@
+import { css } from "../../../styled-system/css";
+
 export interface SkeletonListProps {
 	items?: number;
 	showIcon?: boolean;
@@ -7,6 +9,59 @@ export interface SkeletonListProps {
 	showAction?: boolean;
 	className?: string;
 }
+
+const rowStyle = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "3",
+	p: "3",
+	borderBottomWidth: "1px",
+	borderColor: {
+		base: "gray.100",
+		_dark: "gray.800",
+	},
+	_last: {
+		borderBottomWidth: "0",
+	},
+});
+
+const pulseBase = {
+	animation: "pulse",
+	bg: {
+		base: "gray.200",
+		_dark: "gray.700",
+	},
+} as const;
+
+const iconPulseRounded = css({ ...pulseBase, flexShrink: 0, rounded: "full" });
+const iconPulseSquare = css({ ...pulseBase, flexShrink: 0, rounded: "sm" });
+
+const contentStyle = css({
+	flex: "1",
+});
+
+const titleBarStyle = css({
+	...pulseBase,
+	rounded: "sm",
+	h: "4",
+	mb: "1",
+});
+
+const subtitleBarStyle = css({
+	...pulseBase,
+	rounded: "sm",
+	h: "3",
+});
+
+const actionStyle = css({
+	...pulseBase,
+	rounded: "sm",
+	flexShrink: 0,
+});
+
+const srOnlyStyle = css({
+	srOnly: true,
+});
 
 export function SkeletonList({
 	items = 5,
@@ -22,19 +77,19 @@ export function SkeletonList({
 		return widths[index % widths.length] || "70%";
 	};
 
+	const iconStyle = iconRounded ? iconPulseRounded : iconPulseSquare;
+
 	return (
-		<div className={className} role="status" aria-label="Loading list...">
-			<span className="sr-only">Loading list...</span>
+		<div className={className || undefined} role="status" aria-label="Loading list...">
+			<span className={srOnlyStyle}>Loading list...</span>
 			{Array.from({ length: items }).map((_, index) => (
 				<div
 					key={index}
-					className="flex items-center gap-3 p-3 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
+					className={rowStyle}
 				>
 					{showIcon && (
 						<div
-							className={`animate-pulse bg-gray-200 dark:bg-gray-700 shrink-0 ${
-								iconRounded ? "rounded-full" : "rounded"
-							}`}
+							className={iconStyle}
 							style={{
 								width: iconSize,
 								height: iconSize,
@@ -42,14 +97,14 @@ export function SkeletonList({
 						/>
 					)}
 
-					<div className="flex-1">
+					<div className={contentStyle}>
 						<div
-							className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-4 mb-1"
+							className={titleBarStyle}
 							style={{ width: getTitleWidth(index) }}
 						/>
 						{showSubtitle && (
 							<div
-								className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-3"
+								className={subtitleBarStyle}
 								style={{ width: "50%" }}
 							/>
 						)}
@@ -57,7 +112,7 @@ export function SkeletonList({
 
 					{showAction && (
 						<div
-							className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded shrink-0"
+							className={actionStyle}
 							style={{
 								width: "1.5rem",
 								height: "1.5rem",
