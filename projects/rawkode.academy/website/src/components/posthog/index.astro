@@ -63,7 +63,7 @@ const { userId } = Astro.props;
 				p.type = "text/javascript";
 				p.crossOrigin = "anonymous";
 				p.async = true;
-				p.src = `${s.api_host}/static/array.js`;
+				p.src = `${s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com")}/static/array.js`;
 				r = t.getElementsByTagName("script")[0];
 				if (r?.parentNode) {
 					r.parentNode.insertBefore(p, r);
