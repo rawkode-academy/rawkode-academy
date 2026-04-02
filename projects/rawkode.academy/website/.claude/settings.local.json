@@ -72,7 +72,10 @@
       "Bash(cuenv task:*)",
       "Bash(npx astro:*)",
       "Bash(gh pr:*)",
-      "Bash(pkill -f \"astro dev\")"
+      "Bash(pkill -f \"astro dev\")",
+      "WebSearch",
+      "WebFetch(domain:posthog.com)",
+      "Bash(gh search:*)"
     ],
     "deny": []
   }

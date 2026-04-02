@@ -63,10 +63,6 @@ const showsToRender: ShowSummary[] = await (async () => {
 })();
 
 const hasShows = showsToRender.length > 0;
-const isEmpty = showsToRender.length === 0;
-const isLoading = false;
-const errorMessage = null;
-const placeholderTiles = Array.from({ length: 6 }, (_, index) => index);
 ---
 
 <Page title="Shows">
@@ -74,7 +70,7 @@ const placeholderTiles = Array.from({ length: 6 }, (_, index) => index);
                 <!-- Background gradient -->
                 <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent dark:from-primary/10" aria-hidden="true"></div>
 
-                <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="relative mx-auto max-w-7xl content-px">
                         <!-- Header -->
                         <div class="mb-12 text-center">
                                 <div class="mb-4 inline-flex items-center justify-center rounded-full bg-primary/10 px-4 py-2 dark:bg-primary/20">
@@ -104,47 +100,16 @@ const placeholderTiles = Array.from({ length: 6 }, (_, index) => index);
 
                         <!-- Content -->
                         <div class="mt-16">
-                                {isLoading && (
+                                {hasShows ? (
                                         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                                                {placeholderTiles.map((placeholder) => (
-                                                        <div
-                                                                data-placeholder-index={placeholder}
-                                                                class="aspect-[4/3] animate-pulse rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"
-                                                                aria-hidden="true"
-                                                        />
+                                                {showsToRender.map((show) => (
+                                                        <ShowCard show={show} />
                                                 ))}
                                         </div>
-                                )}
-
-                                {errorMessage && (
-                                        <div class="mx-auto max-w-2xl rounded-2xl border-2 border-red-200 bg-red-50 p-8 text-center shadow-sm dark:border-red-900/60 dark:bg-red-900/30">
+                                ) : (
+                                        <div class="mx-auto max-w-2xl rounded-2xl glass-card p-12 text-center">
                                                 <svg
-                                                        class="mx-auto h-12 w-12 text-red-400 dark:text-red-500"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        aria-hidden="true"
-                                                >
-                                                        <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                                        />
-                                                </svg>
-                                                <p class="mt-4 text-base font-semibold text-red-700 dark:text-red-300">
-                                                        We couldn&apos;t load the shows right now
-                                                </p>
-                                                <p class="mt-2 text-sm text-red-600 dark:text-red-200">
-                                                        {errorMessage}
-                                                </p>
-                                        </div>
-                                )}
-
-                                {isEmpty && (
-                                        <div class="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-12 text-center shadow-sm dark:border-gray-800 dark:from-gray-900/40 dark:to-gray-900/20">
-                                                <svg
-                                                        class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600"
+                                                        class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
                                                         fill="none"
                                                         viewBox="0 0 24 24"
                                                         stroke="currentColor"
@@ -163,14 +128,6 @@ const placeholderTiles = Array.from({ length: 6 }, (_, index) => index);
                                                 <p class="mt-2 text-sm text-muted">
                                                         We're working on bringing you exciting new content. Check back soon!
                                                 </p>
-                                        </div>
-                                )}
-
-                                {hasShows && (
-                                        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                                                {showsToRender.map((show) => (
-                                                        <ShowCard show={show} />
-                                                ))}
                                         </div>
                                 )}
                         </div>
