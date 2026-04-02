@@ -75,7 +75,10 @@
       "Bash(pkill -f \"astro dev\")",
       "WebSearch",
       "WebFetch(domain:posthog.com)",
-      "Bash(gh search:*)"
+      "Bash(gh search:*)",
+      "Bash(jj status:*)",
+      "Bash(jj log:*)",
+      "Bash(jj diff:*)"
     ],
     "deny": []
   }
