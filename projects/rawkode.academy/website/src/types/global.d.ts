@@ -4,6 +4,7 @@ interface Window {
 		identify: (distinctId: string, properties?: Record<string, unknown>) => void;
 		register: (properties: Record<string, unknown>) => void;
 	};
+	enablePostHog?: () => void;
 	grafanaFaro?: {
 		api: {
 			pushEvent: (event: string, attributes?: Record<string, unknown>) => void;
@@ -11,4 +12,5 @@ interface Window {
 			setSession: (session: { attributes?: Record<string, unknown> }) => void;
 		};
 	} | null;
+	enableGrafanaFaro?: () => void;
 }

@@ -67,7 +67,8 @@
       "mcp__chrome-devtools__list_console_messages",
       "mcp__claude_ai_PostHog__projects-get",
       "mcp__claude_ai_PostHog__query-trends",
-      "mcp__claude_ai_PostHog__query-run"
+      "mcp__claude_ai_PostHog__query-run",
+      "Bash(bunx astro:*)"
     ],
     "deny": []
   }
