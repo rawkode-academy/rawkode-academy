@@ -1,11 +1,13 @@
 <template>
-	<div :class="panelClasses">
+	<div :class="panelClass">
 		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "../../../styled-system/css";
+import { paddingValues, roundedValues } from "./tokens";
 
 interface Props {
 	variant?: "light" | "medium" | "dark";
@@ -26,55 +28,51 @@ const props = withDefaults(defineProps<Props>(), {
 	shadow: true,
 });
 
-const baseClasses = "relative";
-
-const variantClasses = {
-	light: "bg-white/30 dark:bg-gray-800/30",
-	medium: "bg-white/50 dark:bg-gray-800/50",
-	dark: "bg-white/70 dark:bg-gray-800/70",
+const variantBg: Record<string, Record<string, string>> = {
+	light: { base: "rgba(255, 255, 255, 0.3)", _dark: "rgba(31, 41, 55, 0.3)" },
+	medium: { base: "rgba(255, 255, 255, 0.5)", _dark: "rgba(31, 41, 55, 0.5)" },
+	dark: { base: "rgba(255, 255, 255, 0.7)", _dark: "rgba(31, 41, 55, 0.7)" },
 };
 
-const blurClasses = {
-	sm: "backdrop-blur-sm",
-	md: "backdrop-blur-md",
-	lg: "backdrop-blur-lg",
-	xl: "backdrop-blur-xl",
-	"2xl": "backdrop-blur-2xl",
+const blurValues: Record<string, string> = {
+	sm: "4px",
+	md: "12px",
+	lg: "16px",
+	xl: "24px",
+	"2xl": "40px",
 };
 
-const paddingClasses = {
-	none: "p-0",
-	sm: "p-4",
-	md: "p-6",
-	lg: "p-8",
-	xl: "p-10",
-};
+const panelClass = computed(() => {
+	const bg = variantBg[props.variant];
+	const darkStyles: Record<string, unknown> = {
+		backgroundColor: bg._dark,
+	};
 
-const roundedClasses = {
-	none: "rounded-none",
-	sm: "rounded-sm",
-	md: "rounded-md",
-	lg: "rounded-lg",
-	xl: "rounded-xl",
-	"2xl": "rounded-2xl",
-	"3xl": "rounded-3xl",
-};
+	if (props.border) {
+		darkStyles.borderColor = "rgba(75, 85, 99, 0.5)";
+	}
+	if (props.shadow) {
+		darkStyles.boxShadow = "0 8px 32px 0 rgba(0, 0, 0, 0.6)";
+	}
 
-const borderClass = "border-glass";
-const shadowClass = "card-shadow";
-
-const panelClasses = computed(() => {
-	return [
-		baseClasses,
-		variantClasses[props.variant],
-		blurClasses[props.blur],
-		paddingClasses[props.padding],
-		roundedClasses[props.rounded],
-		props.border && borderClass,
-		props.shadow && shadowClass,
+	return cx(
+		css({
+			position: "relative",
+			backgroundColor: bg.base,
+			backdropFilter: `blur(${blurValues[props.blur]})`,
+			padding: paddingValues[props.padding],
+			borderRadius: roundedValues[props.rounded],
+			...(props.border && {
+				borderWidth: "1px",
+				borderStyle: "solid",
+				borderColor: "rgba(255, 255, 255, 0.4)",
+			}),
+			...(props.shadow && {
+				boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.12)",
+			}),
+			_dark: darkStyles,
+		}),
 		props.class,
-	]
-		.filter(Boolean)
-		.join(" ");
+	);
 });
 </script>

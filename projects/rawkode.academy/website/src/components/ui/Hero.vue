@@ -1,38 +1,38 @@
 <template>
-	<section :class="sectionClasses">
+	<section :class="sectionClass">
 		<!-- Background decorations -->
-		<div v-if="background !== 'none'" class="absolute inset-0 pointer-events-none">
+		<div v-if="background !== 'none'" :class="bgDecorationClass">
 			<!-- Gradient overlay -->
-			<div v-if="background === 'gradient'" :class="gradientClass"></div>
+			<div v-if="background === 'gradient'" :class="gradientOverlayClass"></div>
 
 			<!-- Blob decorations -->
-			<div v-if="background === 'blobs'" class="absolute inset-0">
-				<div class="absolute top-0 left-1/4 w-96 h-96 bg-secondary/20 dark:bg-secondary/20 rounded-full opacity-20 blur-3xl"></div>
-				<div class="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/20 dark:bg-primary/20 rounded-full opacity-20 blur-3xl"></div>
+			<div v-if="background === 'blobs'" :class="blobContainerClass">
+				<div :class="blobPrimaryClass"></div>
+				<div :class="blobSecondaryClass"></div>
 			</div>
 
 			<!-- Grid pattern -->
-			<div v-if="pattern === 'grid'" class="absolute inset-0 bg-grid-pattern opacity-5"></div>
+			<div v-if="pattern === 'grid'" class="bg-grid-pattern" :class="patternGridClass"></div>
 
 			<!-- Dots pattern -->
-			<div v-if="pattern === 'dots'" class="absolute inset-0 bg-dots-pattern opacity-10"></div>
+			<div v-if="pattern === 'dots'" class="bg-dots-pattern" :class="patternDotsClass"></div>
 
 			<!-- Custom background slot -->
 			<slot name="background" />
 		</div>
 
 		<!-- Content container -->
-		<div :class="containerClasses">
-			<div :class="layoutClasses">
+		<div :class="containerClass">
+			<div :class="layoutClass">
 				<!-- Left/Main content -->
-				<div :class="contentAreaClasses">
+				<div :class="contentAreaClass">
 					<!-- Breadcrumb -->
-					<div v-if="$slots.breadcrumb" class="mb-6">
+					<div v-if="$slots.breadcrumb" :class="breadcrumbClass">
 						<slot name="breadcrumb" />
 					</div>
 
 					<!-- Badge -->
-					<div v-if="$slots.badge || badge" class="mb-4">
+					<div v-if="$slots.badge || badge" :class="badgeContainerClass">
 						<slot name="badge">
 							<Badge v-if="badge" :variant="badgeVariant" size="md">{{ badge }}</Badge>
 						</slot>
@@ -44,27 +44,27 @@
 						:size="titleSize"
 						:align="align"
 						weight="extrabold"
-						class="mb-6"
+						:class="titleClass"
 					>
 						<slot name="title">{{ title }}</slot>
 					</Heading>
 
 					<!-- Subtitle -->
-					<p v-if="subtitle || $slots.subtitle" :class="subtitleClasses">
+					<p v-if="subtitle || $slots.subtitle" :class="subtitleClass">
 						<slot name="subtitle">{{ subtitle }}</slot>
 					</p>
 
 					<!-- Actions -->
-					<div v-if="$slots.actions" :class="actionsClasses">
+					<div v-if="$slots.actions" :class="actionsClass">
 						<slot name="actions" />
 					</div>
 
 					<!-- Stats/Metadata -->
-					<div v-if="$slots.stats || (stats && stats.length > 0)" class="flex flex-wrap items-center justify-center gap-6 text-sm text-muted">
+					<div v-if="$slots.stats || (stats && stats.length > 0)" :class="statsClass">
 						<slot name="stats">
 							<template v-if="stats">
-								<div v-for="(stat, index) in stats" :key="index" class="flex items-center gap-2">
-									<component v-if="stat.icon" :is="stat.icon" class="w-5 h-5" />
+								<div v-for="(stat, index) in stats" :key="index" :class="statItemClass">
+									<component v-if="stat.icon" :is="stat.icon" :class="statIconClass" />
 									<span>{{ stat.label }}</span>
 								</div>
 							</template>
@@ -72,22 +72,22 @@
 					</div>
 
 					<!-- Custom content -->
-					<div v-if="$slots.default" class="mt-8">
+					<div v-if="$slots.default" :class="customContentClass">
 						<slot />
 					</div>
 				</div>
 
 				<!-- Right/Media content (for split layout) -->
-				<div v-if="layout === 'split' && $slots.media" class="relative">
+				<div v-if="layout === 'split' && $slots.media" :class="mediaClass">
 					<slot name="media" />
 				</div>
 			</div>
 		</div>
 
 		<!-- Bottom wave decoration -->
-		<div v-if="wave" class="absolute bottom-0 left-0 right-0">
+		<div v-if="wave" :class="waveContainerClass">
 			<svg
-				class="w-full h-8 md:h-16 text-white dark:text-gray-800"
+				:class="waveSvgClass"
 				preserveAspectRatio="none"
 				viewBox="0 0 1440 64"
 				fill="currentColor"
@@ -101,6 +101,7 @@
 <script setup lang="ts">
 import type { Component } from "vue";
 import { computed } from "vue";
+import { css, cx } from "../../../styled-system/css";
 import Badge from "../common/Badge.vue";
 import Heading from "../common/Heading.vue";
 
@@ -150,85 +151,272 @@ const props = withDefaults(defineProps<Props>(), {
 	wave: false,
 });
 
-const sectionClasses = computed(() => {
-	const baseClasses = "relative overflow-hidden";
+const backgroundStyles: Record<string, Record<string, unknown>> = {
+	none: {},
+	gradient: {
+		backgroundImage: "linear-gradient(to bottom right, rgba(var(--brand-primary), 0.1), white, rgba(var(--brand-secondary), 0.1))",
+		_dark: {
+			backgroundImage: "linear-gradient(to bottom right, rgba(var(--brand-primary), 0.2), var(--colors-gray-900), rgba(var(--brand-secondary), 0.2))",
+		},
+	},
+	"gradient-hero": {
+		backgroundImage: "linear-gradient(to bottom right, var(--colors-gray-50, #f9fafb), var(--colors-gray-100, #f3f4f6), var(--colors-gray-200, #e5e7eb))",
+		_dark: {
+			backgroundImage: "linear-gradient(to bottom right, var(--colors-gray-900, #111827), var(--colors-gray-800, #1f2937), black)",
+		},
+	},
+	"gradient-hero-alt": {
+		backgroundImage: "linear-gradient(to bottom, var(--colors-gray-50, #f9fafb), white)",
+		_dark: {
+			backgroundImage: "linear-gradient(to bottom, var(--colors-gray-900, #111827), var(--colors-gray-800, #1f2937))",
+		},
+	},
+	blobs: {
+		backgroundImage: "linear-gradient(to bottom, var(--colors-gray-50, #f9fafb), white)",
+		_dark: {
+			backgroundImage: "linear-gradient(to bottom, var(--colors-gray-900, #111827), var(--colors-gray-800, #1f2937))",
+		},
+	},
+};
 
-	const backgroundClasses: Record<string, string> = {
-		none: "",
-		gradient:
-			"bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-primary/20 dark:via-gray-900 dark:to-secondary/20",
-		"gradient-hero": "bg-gradient-hero",
-		"gradient-hero-alt": "bg-gradient-hero-alt",
-		blobs:
-			"bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
-	};
-
-	return [baseClasses, backgroundClasses[props.background], props.class]
-		.filter(Boolean)
-		.join(" ");
+const sectionClass = computed(() => {
+	const base = css({
+		position: "relative",
+		overflow: "hidden",
+		...backgroundStyles[props.background],
+	});
+	return cx(base, props.class);
 });
 
-const containerClasses = computed(() => {
-	const sizeClasses: Record<string, string> = {
-		sm: "py-8 px-4 md:py-12",
-		md: "py-12 px-4 md:py-16 lg:py-20",
-		lg: "py-16 px-4 md:py-20 lg:py-24",
-		xl: "py-20 px-4 md:py-24 lg:py-32",
-	};
-
-	return ["relative z-10 container mx-auto", sizeClasses[props.size]].join(" ");
+const bgDecorationClass = css({
+	position: "absolute",
+	inset: 0,
+	pointerEvents: "none",
 });
 
-const layoutClasses = computed(() => {
-	const layoutStyles: Record<string, string> = {
-		centered: "max-w-4xl mx-auto text-center",
-		split: "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
-		"full-width": "w-full",
-	};
-
-	return layoutStyles[props.layout];
+const gradientOverlayClass = css({
+	position: "absolute",
+	inset: 0,
+	backgroundImage: "linear-gradient(to bottom right, rgba(var(--brand-primary), 0.1), white, rgba(var(--brand-secondary), 0.1))",
+	_dark: {
+		backgroundImage: "linear-gradient(to bottom right, rgba(var(--brand-primary), 0.2), var(--colors-gray-900, #111827), rgba(var(--brand-secondary), 0.2))",
+	},
 });
 
-const contentAreaClasses = computed(() => {
+const blobContainerClass = css({
+	position: "absolute",
+	inset: 0,
+});
+
+const blobPrimaryClass = css({
+	position: "absolute",
+	top: 0,
+	left: "25%",
+	width: "24rem",
+	height: "24rem",
+	backgroundColor: "rgba(var(--brand-secondary), 0.2)",
+	borderRadius: "9999px",
+	opacity: 0.2,
+	filter: "blur(48px)",
+});
+
+const blobSecondaryClass = css({
+	position: "absolute",
+	bottom: 0,
+	right: "25%",
+	width: "24rem",
+	height: "24rem",
+	backgroundColor: "rgba(var(--brand-primary), 0.2)",
+	borderRadius: "9999px",
+	opacity: 0.2,
+	filter: "blur(48px)",
+});
+
+const patternGridClass = css({
+	position: "absolute",
+	inset: 0,
+	opacity: 0.05,
+});
+
+const patternDotsClass = css({
+	position: "absolute",
+	inset: 0,
+	opacity: 0.1,
+});
+
+const sizeValues: Record<string, Record<string, unknown>> = {
+	sm: {
+		paddingBlock: "2rem",
+		paddingInline: "1rem",
+		md: { paddingBlock: "3rem" },
+	},
+	md: {
+		paddingBlock: "3rem",
+		paddingInline: "1rem",
+		md: { paddingBlock: "4rem" },
+		lg: { paddingBlock: "5rem" },
+	},
+	lg: {
+		paddingBlock: "4rem",
+		paddingInline: "1rem",
+		md: { paddingBlock: "5rem" },
+		lg: { paddingBlock: "6rem" },
+	},
+	xl: {
+		paddingBlock: "5rem",
+		paddingInline: "1rem",
+		md: { paddingBlock: "6rem" },
+		lg: { paddingBlock: "8rem" },
+	},
+};
+
+const containerClass = computed(() =>
+	css({
+		position: "relative",
+		zIndex: 10,
+		maxWidth: "80rem",
+		marginInline: "auto",
+		...sizeValues[props.size],
+	}),
+);
+
+const layoutStyles: Record<string, Record<string, unknown>> = {
+	centered: {
+		maxWidth: "56rem",
+		marginInline: "auto",
+		textAlign: "center",
+	},
+	split: {
+		display: "grid",
+		gridTemplateColumns: "1fr",
+		gap: "3rem",
+		alignItems: "center",
+		lg: {
+			gridTemplateColumns: "1fr 1fr",
+		},
+	},
+	"full-width": {
+		width: "100%",
+	},
+};
+
+const layoutClass = computed(() => css(layoutStyles[props.layout]));
+
+const contentAreaClass = computed(() => {
 	if (props.layout === "centered") {
 		return "";
 	}
-	return "flex flex-col justify-center";
+	return css({
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "center",
+	});
 });
 
-const gradientClass = computed(() => {
-	return "absolute inset-0 bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-primary/20 dark:via-gray-900 dark:to-secondary/20";
+const breadcrumbClass = css({ marginBottom: "1.5rem" });
+
+const badgeContainerClass = css({ marginBottom: "1rem" });
+
+const titleClass = css({ marginBottom: "1.5rem" });
+
+const subtitleSizeStyles: Record<string, Record<string, unknown>> = {
+	sm: {
+		fontSize: "1rem",
+		md: { fontSize: "1.125rem" },
+	},
+	md: {
+		fontSize: "1.125rem",
+		md: { fontSize: "1.25rem" },
+	},
+	lg: {
+		fontSize: "1.25rem",
+		md: { fontSize: "1.5rem" },
+	},
+	xl: {
+		fontSize: "1.25rem",
+		md: { fontSize: "1.5rem" },
+		lg: { fontSize: "1.875rem" },
+	},
+};
+
+const textAlignMap: Record<string, string> = {
+	left: "left",
+	center: "center",
+	right: "right",
+};
+
+const subtitleClass = computed(() =>
+	css({
+		color: "{colors.gray.700}",
+		lineHeight: 1.625,
+		marginBottom: "2rem",
+		textAlign: textAlignMap[props.align],
+		_dark: {
+			color: "{colors.gray.300}",
+		},
+		...subtitleSizeStyles[props.size],
+	}),
+);
+
+const justifyAlignMap: Record<string, string> = {
+	left: "flex-start",
+	center: "center",
+	right: "flex-end",
+};
+
+const actionsClass = computed(() =>
+	css({
+		display: "flex",
+		flexWrap: "wrap",
+		gap: "1rem",
+		marginBottom: "2rem",
+		justifyContent: justifyAlignMap[props.align],
+	}),
+);
+
+const statsClass = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	justifyContent: "center",
+	gap: "1.5rem",
+	fontSize: "0.875rem",
+	color: "{colors.gray.600}",
+	_dark: {
+		color: "{colors.gray.400}",
+	},
 });
 
-const subtitleClasses = computed(() => {
-	const sizeClasses: Record<string, string> = {
-		sm: "text-base md:text-lg",
-		md: "text-lg md:text-xl",
-		lg: "text-xl md:text-2xl",
-		xl: "text-xl md:text-2xl lg:text-3xl",
-	};
-
-	const alignClasses: Record<string, string> = {
-		left: "text-left",
-		center: "text-center",
-		right: "text-right",
-	};
-
-	return [
-		"text-secondary-content leading-relaxed mb-8",
-		sizeClasses[props.size],
-		alignClasses[props.align],
-	].join(" ");
+const statItemClass = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "0.5rem",
 });
 
-const actionsClasses = computed(() => {
-	const alignClasses: Record<string, string> = {
-		left: "justify-start",
-		center: "justify-center",
-		right: "justify-end",
-	};
+const statIconClass = css({
+	width: "1.25rem",
+	height: "1.25rem",
+});
 
-	return ["flex flex-wrap gap-4 mb-8", alignClasses[props.align]].join(" ");
+const customContentClass = css({ marginTop: "2rem" });
+
+const mediaClass = css({ position: "relative" });
+
+const waveContainerClass = css({
+	position: "absolute",
+	bottom: 0,
+	left: 0,
+	right: 0,
+});
+
+const waveSvgClass = css({
+	width: "100%",
+	height: "2rem",
+	color: "white",
+	md: { height: "4rem" },
+	_dark: {
+		color: "{colors.gray.800}",
+	},
 });
 </script>
 

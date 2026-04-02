@@ -3,7 +3,8 @@
 	"type": "module",
 	"scripts": {
 		"build-storybook": "storybook build",
-		"build": "astro check && astro build",
+		"build": "panda codegen --clean && astro check && astro build",
+		"panda:codegen": "panda codegen --clean",
 		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"dev:wrangler": "wrangler dev",
@@ -108,6 +109,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.9",
+		"@pandacss/dev": "^1.9.1",
 		"@graphql-codegen/cli": "^6.2.1",
 		"@graphql-codegen/client-preset": "^5.2.4",
 		"@graphql-codegen/introspection": "^5.0.1",
