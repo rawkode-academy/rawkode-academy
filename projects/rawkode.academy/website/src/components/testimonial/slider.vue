@@ -65,11 +65,6 @@ onBeforeUnmount(() => {
 	clearAutoplay();
 });
 
-const setActiveIndex = (index: number) => {
-	if (index < 0 || index >= testimonialCount.value) return;
-	activeIndex.value = index;
-};
-
 const nextTestimonial = () => {
 	if (!testimonialCount.value) return;
 	activeIndex.value = (activeIndex.value + 1) % testimonialCount.value;
@@ -93,6 +88,15 @@ const resumeAutoplay = () => {
 	startAutoplay();
 };
 
+const handleFocusOut = (event: FocusEvent) => {
+	const currentTarget = event.currentTarget as HTMLElement | null;
+	const nextTarget = event.relatedTarget as Node | null;
+	if (currentTarget && nextTarget && currentTarget.contains(nextTarget)) {
+		return;
+	}
+	resumeAutoplay();
+};
+
 const goNext = () => {
 	pauseAutoplay();
 	nextTestimonial();
@@ -114,36 +118,24 @@ const formattedPosition = computed(() => {
 </script>
 
 <template>
-	<div class="mt-8 md:mt-10 max-w-4xl mx-auto" v-if="activeTestimonial">
+	<div class="mx-auto mt-8 max-w-4xl md:mt-10" v-if="activeTestimonial">
 		<div
 			class="relative group"
 			@mouseenter="pauseAutoplay"
 			@mouseleave="resumeAutoplay"
+			@focusin="pauseAutoplay"
+			@focusout="handleFocusOut"
 			@touchstart.passive="pauseAutoplay"
 			@touchend.passive="resumeAutoplay"
 			@touchcancel.passive="resumeAutoplay"
 		>
-			<!-- Previous Button (Desktop) -->
-			<button
-				v-if="hasMultiple"
-				type="button"
-				class="hidden md:grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 h-12 w-12 place-items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 text-muted hover:border-primary hover:text-primary hover:bg-white dark:hover:bg-gray-900 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-				aria-label="Show previous testimonial"
-				@click="goPrev"
-			>
-				<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6">
-					<path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-				</svg>
-			</button>
-
 			<div class="w-full mx-auto">
 				<Transition name="fade" mode="out-in">
 					<article
 						:key="`${activeTestimonial.author.name}-${activeIndex}`"
-						class="relative rounded-3xl border border-gray-200/80 dark:border-gray-800/70 bg-white/95 dark:bg-gray-900/70 shadow-xl shadow-gray-200/70 dark:shadow-black/30 p-6 sm:p-10 overflow-hidden"
+						class="glass-card-shimmer relative overflow-hidden rounded-[2rem] p-5 sm:p-6 lg:px-8 lg:py-7"
 					>
-						<!-- Progress Bar -->
-						<div v-if="hasMultiple" class="absolute top-0 left-0 right-0 h-1 bg-gray-200/70 dark:bg-gray-800/70">
+						<div v-if="hasMultiple" class="absolute left-0 right-0 top-0 h-1 bg-white/60 dark:bg-white/10">
 							<div
 								:key="`progress-${progressKey}`"
 								class="progress-fill h-full w-full origin-left bg-linear-to-r from-primary to-secondary"
@@ -152,42 +144,43 @@ const formattedPosition = computed(() => {
 							></div>
 						</div>
 
-						<div class="flex flex-col items-center text-center">
-							<p class="mt-4 text-xs uppercase tracking-[0.4em] text-primary/70 font-semibold">
-								Featured Story
-							</p>
-							
-							<blockquote class="mt-6" aria-live="polite">
-								<p class="text-lg sm:text-2xl leading-relaxed text-gray-800 dark:text-gray-100 font-medium">
+						<div class="relative flex flex-col items-center text-center md:grid md:grid-cols-[minmax(0,1fr)_12rem] md:items-end md:gap-8 md:text-left">
+							<blockquote class="w-full" aria-live="polite">
+								<p class="text-pretty text-base font-medium leading-7 text-primary-content sm:text-[1.05rem] sm:leading-[1.65] lg:text-[1.16rem] lg:leading-[1.58]">
 									&ldquo;{{ activeTestimonial.quote }}&rdquo;
 								</p>
 							</blockquote>
 
-							<div class="mt-8 flex flex-col items-center gap-4">
-								<div v-if="activeTestimonial.author.image" class="shrink-0">
-									<img
-										:src="activeTestimonial.author.image"
-										:alt="`${activeTestimonial.author.name} profile picture`"
-										class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-md"
-										loading="lazy"
-									/>
-								</div>
-								<div>
-									<a
-										v-if="activeTestimonial.author.link"
-										:href="activeTestimonial.author.link"
-										target="_blank"
-										rel="noopener noreferrer"
-										class="text-lg font-bold text-primary-content hover:text-primary transition-colors"
-									>
-										{{ activeTestimonial.author.name }}
-									</a>
-									<p v-else class="text-lg font-bold text-primary-content">
-										{{ activeTestimonial.author.name }}
-									</p>
-									<p class="text-sm text-muted font-medium mt-1">
-										{{ activeTestimonial.author.title }}
-									</p>
+							<div class="mt-5 w-full border-t border-white/45 pt-4 dark:border-white/10 md:mt-0 md:max-w-[12rem] md:border-l md:border-t-0 md:pl-6 md:pt-0">
+								<div class="flex flex-col items-center gap-4 text-center md:items-start md:text-left">
+									<div v-if="activeTestimonial.author.image" class="shrink-0">
+										<img
+											:src="activeTestimonial.author.image"
+											:alt="`${activeTestimonial.author.name} profile picture`"
+											class="h-16 w-16 rounded-full border-4 border-white object-cover shadow-md dark:border-gray-800 sm:h-[4.5rem] sm:w-[4.5rem]"
+											loading="lazy"
+										/>
+									</div>
+									<div class="space-y-1">
+										<a
+											v-if="activeTestimonial.author.link"
+											:href="activeTestimonial.author.link"
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-lg font-bold text-primary-content transition-colors hover:text-primary"
+										>
+											{{ activeTestimonial.author.name }}
+										</a>
+										<p v-else class="text-lg font-bold text-primary-content">
+											{{ activeTestimonial.author.name }}
+										</p>
+										<p
+											v-if="activeTestimonial.author.title"
+											class="text-sm font-medium text-muted"
+										>
+											{{ activeTestimonial.author.title }}
+										</p>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -195,49 +188,37 @@ const formattedPosition = computed(() => {
 				</Transition>
 			</div>
 
-			<!-- Next Button (Desktop) -->
-			<button
-				v-if="hasMultiple"
-				type="button"
-				class="hidden md:grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 h-12 w-12 place-items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 text-muted hover:border-primary hover:text-primary hover:bg-white dark:hover:bg-gray-900 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-				aria-label="Show next testimonial"
-				@click="goNext"
-			>
-				<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6">
-					<path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-				</svg>
-			</button>
-
-			<!-- Mobile Controls -->
 			<div
 				v-if="hasMultiple"
-				class="md:hidden mt-6 flex items-center justify-center gap-6"
+				class="mt-5 flex justify-center"
 			>
-				<button
-					type="button"
-					class="h-12 w-12 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-muted grid place-items-center hover:border-primary hover:text-primary shadow-sm"
-					aria-label="Show previous testimonial"
-					@click="goPrev"
-				>
-					<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
-						<path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-					</svg>
-				</button>
-				
-				<span class="text-sm font-medium text-muted tabular-nums">
-					{{ formattedPosition }}
-				</span>
+				<div class="glass-card inline-flex min-h-12 items-center gap-1 rounded-full px-2 py-2 shadow-sm">
+					<button
+						type="button"
+						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors motion-safe:duration-200 hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+						aria-label="Show previous testimonial"
+						@click="goPrev"
+					>
+						<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
+							<path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+					</button>
 
-				<button
-					type="button"
-					class="h-12 w-12 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-muted grid place-items-center hover:border-primary hover:text-primary shadow-sm"
-					aria-label="Show next testimonial"
-					@click="goNext"
-				>
-					<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
-						<path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-					</svg>
-				</button>
+					<span class="min-w-[4.75rem] px-2 text-center text-sm font-medium text-muted tabular-nums">
+						{{ formattedPosition }}
+					</span>
+
+					<button
+						type="button"
+						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors motion-safe:duration-200 hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+						aria-label="Show next testimonial"
+						@click="goNext"
+					>
+						<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
+							<path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -249,7 +230,9 @@ const formattedPosition = computed(() => {
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-	transition: opacity 300ms ease, transform 300ms ease;
+	transition:
+		opacity 300ms cubic-bezier(0.22, 1, 0.36, 1),
+		transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .fade-enter-from {

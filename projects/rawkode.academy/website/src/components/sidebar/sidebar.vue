@@ -8,42 +8,86 @@ import {
 	VideoCameraIcon,
 	UsersIcon,
 } from "@heroicons/vue/24/outline";
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import NavItem from "./NavItem.vue";
 import type { NavItemData } from "./NavItem.vue";
 
-// Get the current path from the window location
+interface RawNavItem extends Omit<NavItemData, "current" | "children"> {
+	children?: RawNavItem[];
+}
+
 const currentPath = ref("");
 const isCollapsed = ref(false);
+const isMobileViewport = ref(false);
+const storageKey = "sidebar-collapsed";
+
+const baseItems: RawNavItem[] = [
+	{
+		name: "Videos",
+		href: "/watch",
+		icon: VideoCameraIcon,
+	},
+	{
+		name: "Articles",
+		href: "/read",
+		icon: NewspaperIcon,
+	},
+	{
+		name: "Learning Paths",
+		href: "/learning-paths",
+		icon: MapIcon,
+	},
+	{
+		name: "Courses",
+		href: "/courses",
+		icon: AcademicCapIcon,
+	},
+	{
+		name: "Shows",
+		href: "/shows",
+		icon: TvIcon,
+	},
+	{
+		name: "People",
+		href: "/people",
+		icon: UsersIcon,
+	},
+	{
+		name: "Technologies",
+		href: "/technology",
+		icon: CubeIcon,
+		children: [
+			{
+				name: "Matrix",
+				href: "/technology/matrix",
+				children: [
+					{
+						name: "Advanced",
+						href: "/technology/matrix/advanced",
+					},
+				],
+			},
+		],
+	},
+];
 
 onMounted(() => {
 	currentPath.value = window.location.pathname;
+	syncViewportState();
 
-	// Check if we're on mobile (window width < 768px which is md breakpoint)
-	const isMobile = window.innerWidth < 768;
-
-	// On mobile, always start collapsed (hidden)
-	// On desktop, check localStorage for collapse state
-	if (isMobile) {
-		isCollapsed.value = true;
-	} else {
-		const savedState = localStorage.getItem("sidebar-collapsed");
-		if (savedState === "true") {
-			isCollapsed.value = true;
-		}
+	if (!isMobileViewport.value) {
+		isCollapsed.value = localStorage.getItem(storageKey) === "true";
 	}
 
-	// Listen for toggle events from mobile menu button
-	window.addEventListener("toggle-sidebar", () => {
-		isCollapsed.value = !isCollapsed.value;
-		// Only save state on desktop
-		if (!isMobile) {
-			localStorage.setItem("sidebar-collapsed", String(isCollapsed.value));
-		}
-	});
+	window.addEventListener("toggle-sidebar", handleSidebarToggle);
+	window.addEventListener("resize", syncViewportState, { passive: true });
 });
 
-// Helper function to check if a path matches the current path
+onBeforeUnmount(() => {
+	window.removeEventListener("toggle-sidebar", handleSidebarToggle);
+	window.removeEventListener("resize", syncViewportState);
+});
+
 function isCurrentPath(itemPath: string) {
 	if (itemPath === "/" && currentPath.value === "/") {
 		return true;
@@ -51,130 +95,218 @@ function isCurrentPath(itemPath: string) {
 	return itemPath !== "/" && currentPath.value.startsWith(itemPath);
 }
 
-// Navigation items - grouped with separators
-const navItems = computed(() => [
-	{
-		name: "Videos",
-		href: "/watch",
-		icon: VideoCameraIcon,
-		current: isCurrentPath("/watch"),
-	},
-	{
-		name: "Articles",
-		href: "/read",
-		icon: NewspaperIcon,
-		current: isCurrentPath("/read"),
-	},
-	{ separator: true },
-	{
-		name: "Learning Paths",
-		href: "/learning-paths",
-		icon: MapIcon,
-		current: isCurrentPath("/learning-paths"),
-	},
-	{
-		name: "Courses",
-		href: "/courses",
-		icon: AcademicCapIcon,
-		current: isCurrentPath("/courses"),
-	},
-	{ separator: true },
-	{
-		name: "Shows",
-		href: "/shows",
-		icon: TvIcon,
-		current: isCurrentPath("/shows"),
-	},
-	{
-		name: "People",
-		href: "/people",
-		icon: UsersIcon,
-		current: isCurrentPath("/people"),
-	},
-	{
-		name: "Technologies",
-		href: "/technology",
-		icon: CubeIcon,
-		current: isCurrentPath("/technology"),
-		children: [
-			{
-				name: "Matrix",
-				href: "/technology/matrix",
-				current:
-					isCurrentPath("/technology/matrix") &&
-					!isCurrentPath("/technology/matrix/advanced"),
-				children: [
-					{
-						name: "Advanced",
-						href: "/technology/matrix/advanced",
-						current: isCurrentPath("/technology/matrix/advanced"),
-					},
-				],
-			},
-		],
-	},
-]);
+function hydrateNavItem(item: RawNavItem): NavItemData {
+	return {
+		...item,
+		current: isCurrentPath(item.href),
+		children: item.children?.map(hydrateNavItem),
+	};
+}
+
+const navItems = computed<NavItemData[]>(() => baseItems.map(hydrateNavItem));
+
+function syncViewportState() {
+	const nextIsMobile = window.innerWidth < 768;
+	const viewportChanged = nextIsMobile !== isMobileViewport.value;
+
+	isMobileViewport.value = nextIsMobile;
+
+	if (nextIsMobile) {
+		isCollapsed.value = true;
+		return;
+	}
+
+	if (viewportChanged) {
+		isCollapsed.value = localStorage.getItem(storageKey) === "true";
+	}
+}
+
+function persistCollapseState() {
+	if (!isMobileViewport.value) {
+		localStorage.setItem(storageKey, String(isCollapsed.value));
+	}
+}
+
+function handleSidebarToggle() {
+	isCollapsed.value = !isCollapsed.value;
+	persistCollapseState();
+}
 
 const toggleCollapse = () => {
 	isCollapsed.value = !isCollapsed.value;
-	localStorage.setItem("sidebar-collapsed", String(isCollapsed.value));
+	persistCollapseState();
 };
 
 const expandSidebar = () => {
 	isCollapsed.value = false;
-	localStorage.setItem("sidebar-collapsed", "false");
+	persistCollapseState();
 };
 </script>
 
 <template>
 	<aside
-		class="glass-panel"
+		class="glass-panel sidebar-shell"
 		:class="[
-			'fixed top-28 left-4 md:left-8 bottom-4 z-30 transition-all duration-300 ease-in-out',
-			'rounded-2xl',
-			// Desktop: always visible, toggles between collapsed/expanded
-			// Mobile: hidden by default (collapsed), shows when expanded (!isCollapsed)
-			isCollapsed ? 'hidden md:block md:w-[4.5rem]' : 'block w-64',
+			'fixed top-28 left-4 md:left-8 bottom-4 z-30 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+			'rounded-[2rem]',
+			isCollapsed ? 'hidden md:block md:w-[4.75rem]' : 'block w-64',
 		]"
 		aria-label="Sidebar navigation"
 	>
-		<div class="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none rounded-2xl" />
-		<div class="flex flex-col h-full relative z-10">
-			<!-- Navigation -->
-			<nav class="flex-1 overflow-y-auto py-4 px-3 scroll-fade">
-				<ul :class="['space-y-1', isCollapsed ? 'space-y-0.5 pr-1' : '']">
-					<template v-for="(item, index) in navItems" :key="'href' in item ? item.href : `sep-${index}`">
-						<!-- Separator -->
-						<li v-if="item.separator" :class="isCollapsed ? 'py-1' : 'py-2'">
-							<div class="border-t border-gray-200/50 dark:border-gray-700/50 mx-2"></div>
-						</li>
-						<!-- Navigation Item -->
-						<li v-else>
-							<NavItem
-								:item="item as NavItemData"
-								:isCollapsed="isCollapsed"
-								@expand="expandSidebar"
-							/>
-						</li>
-					</template>
+		<div class="relative z-10 flex h-full flex-col">
+			<nav class="sidebar-scroll flex-1 overflow-y-auto px-3 py-3">
+				<div v-if="isCollapsed" class="sidebar-rail-mark mb-3" aria-hidden="true">
+					<span class="sidebar-rail-bar sidebar-rail-bar-strong"></span>
+				</div>
+
+				<ul :class="isCollapsed ? 'space-y-2' : 'space-y-1.5'">
+					<li v-for="item in navItems" :key="item.href">
+						<NavItem
+							:item="item"
+							:isCollapsed="isCollapsed"
+							@expand="expandSidebar"
+						/>
+					</li>
 				</ul>
 			</nav>
 		</div>
 	</aside>
 
-	<!-- Mobile Overlay -->
 	<div
 		v-show="!isCollapsed"
-		class="fixed inset-0 bg-black/30 backdrop-blur-sm z-20 md:hidden"
+		class="fixed inset-0 z-20 bg-[rgb(15_23_42_/_0.18)] backdrop-blur-[2px] md:hidden"
 		@click="toggleCollapse"
 		aria-label="Close sidebar"
 	></div>
 </template>
 
 <style scoped>
-/* Subtle fade at top/bottom to hint scrollability */
-.scroll-fade {
+@reference "../../styles/global.css";
+
+.sidebar-shell {
+	isolation: isolate;
+	overflow: hidden;
+	border-color: rgb(255 255 255 / 0.58);
+	background:
+		radial-gradient(
+			circle at top left,
+			rgb(var(--brand-primary) / 0.12),
+			transparent 42%
+		),
+		radial-gradient(
+			circle at bottom right,
+			rgb(var(--brand-secondary) / 0.1),
+			transparent 38%
+		),
+		linear-gradient(
+			180deg,
+			rgb(255 255 255 / 0.88) 0%,
+			rgb(248 250 252 / 0.78) 100%
+		);
+	box-shadow:
+		0 24px 52px -36px rgb(15 23 42 / 0.4),
+		inset 0 1px 0 rgb(255 255 255 / 0.72);
+}
+
+.sidebar-shell::before,
+.sidebar-shell::after {
+	content: "";
+	position: absolute;
+	pointer-events: none;
+	inset: 0;
+}
+
+.sidebar-shell::before {
+	background: linear-gradient(
+		180deg,
+		rgb(255 255 255 / 0.42) 0%,
+		transparent 22%,
+		transparent 78%,
+		rgb(15 23 42 / 0.04) 100%
+	);
+	opacity: 0.78;
+}
+
+.sidebar-shell::after {
+	inset: 12px;
+	border-radius: 1.55rem;
+	border: 1px solid rgb(255 255 255 / 0.35);
+	opacity: 0.7;
+}
+
+html.dark .sidebar-shell {
+	border-color: rgb(148 163 184 / 0.16);
+	background:
+		radial-gradient(
+			circle at top left,
+			rgb(var(--brand-primary) / 0.16),
+			transparent 38%
+		),
+		radial-gradient(
+			circle at bottom right,
+			rgb(var(--brand-secondary) / 0.1),
+			transparent 38%
+		),
+		linear-gradient(
+			180deg,
+			rgb(6 11 24 / 0.92) 0%,
+			rgb(10 15 29 / 0.88) 100%
+		);
+	box-shadow:
+		0 28px 64px -38px rgb(2 6 23 / 0.88),
+		inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+html.dark .sidebar-shell::before {
+	background: linear-gradient(
+		180deg,
+		rgb(255 255 255 / 0.05) 0%,
+		transparent 22%,
+		transparent 82%,
+		rgb(255 255 255 / 0.02) 100%
+	);
+	opacity: 0.8;
+}
+
+html.dark .sidebar-shell::after {
+	border-color: rgb(255 255 255 / 0.06);
+}
+
+.sidebar-rail-mark {
+	display: grid;
+	justify-items: center;
+	gap: 0.45rem;
+}
+
+.sidebar-rail-bar {
+	width: 2rem;
+	height: 0.14rem;
+	border-radius: 999px;
+	background: rgb(var(--brand-primary) / 0.24);
+}
+
+.sidebar-rail-bar-strong {
+	width: 2.5rem;
+	background: linear-gradient(
+		90deg,
+		rgb(var(--brand-primary)) 0%,
+		rgb(var(--brand-secondary)) 100%
+	);
+}
+
+.sidebar-scroll {
 	-webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
 	mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+	scrollbar-width: thin;
+	scrollbar-color: rgb(var(--brand-primary) / 0.35) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+	width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+	border-radius: 999px;
+	background: rgb(var(--brand-primary) / 0.28);
 }
 </style>
