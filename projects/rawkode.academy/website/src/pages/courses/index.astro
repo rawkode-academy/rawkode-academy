@@ -1,6 +1,5 @@
 ---
 import { getCollection } from "astro:content";
-import { css } from "../../../styled-system/css";
 import CourseCard from "@/components/courses/CourseCard.astro";
 import CoursesHero from "@/components/courses/CoursesHero.vue";
 import Page from "@/wrappers/page.astro";
@@ -53,12 +52,12 @@ const pageDescription =
     />
   ) : (
     <!-- Fallback if no courses -->
-    <div class={css({ bgGradient: 'to-br', gradientFrom: { base: 'gray.50', _dark: 'gray.900' }, gradientVia: { base: 'gray.100', _dark: 'gray.800' }, gradientTo: { base: 'gray.200', _dark: 'black' }, color: 'fg.default' })}>
-      <div class={css({ maxW: 'breakpoint-xl', mx: 'auto', px: '4', py: '20', textAlign: 'center' })}>
-        <h1 class={css({ fontSize: { base: '4xl', md: '5xl' }, fontWeight: 'extrabold', mb: '6' })}>
+    <div class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-black text-primary-content">
+      <div class="container mx-auto px-4 py-20 text-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-6">
           Cloud Native Courses Coming Soon
         </h1>
-        <p class={css({ fontSize: 'xl', color: 'fg.muted', mb: '8', maxW: '2xl', mx: 'auto' })}>
+        <p class="text-xl text-secondary-content mb-8 max-w-2xl mx-auto">
           We're preparing comprehensive, hands-on courses to help you master cloud-native technologies.
         </p>
       </div>
@@ -66,14 +65,14 @@ const pageDescription =
   )}
 
   <!-- All courses section -->
-  <div id="all-courses" class={css({ bg: { base: 'gray.100', _dark: 'gray.900' } })}>
-    <div class={css({ py: { base: '16', lg: '20' }, px: { base: '4', lg: '6' }, mx: 'auto', maxW: 'breakpoint-xl' })}>
+  <div id="all-courses" class="bg-gray-100 dark:bg-gray-900">
+    <div class="py-16 px-4 mx-auto max-w-screen-xl lg:py-20 lg:px-6">
       {allCourses.length > 0 ? (
         <>
-          <h2 class={css({ fontSize: '3xl', fontWeight: 'bold', textAlign: 'center', mb: '12', color: 'fg.default' })}>
+          <h2 class="text-3xl font-bold text-center mb-12 text-primary-content">
             All Courses
           </h2>
-          <div class={allCourses.length === 1 ? css({ maxW: '4xl', mx: 'auto' }) : css({ display: 'grid', gridTemplateColumns: { base: 'repeat(1, minmax(0, 1fr))', md: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }, gap: '6' })}>
+          <div class={allCourses.length === 1 ? "max-w-4xl mx-auto" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
             {allCourses.map((course) => (
               <CourseCard course={course} />
             ))}
@@ -81,11 +80,11 @@ const pageDescription =
         </>
       ) : (
         <!-- No courses message -->
-        <div class={css({ textAlign: 'center', py: '16' })}>
-          <h2 class={css({ fontSize: '2xl', fontWeight: 'bold', color: 'fg.default', mb: '4' })}>
+        <div class="text-center py-16">
+          <h2 class="text-2xl font-bold text-primary-content mb-4">
             Courses launching soon!
           </h2>
-          <p class={css({ color: 'fg.subtle' })}>
+          <p class="text-muted">
             Stay tuned for our upcoming cloud-native courses.
           </p>
         </div>
@@ -94,28 +93,28 @@ const pageDescription =
   </div>
 
   <!-- Newsletter/Updates section -->
-  <div class={css({ bg: { base: 'gray.50', _dark: 'gray.800' } })}>
-    <div class={css({ py: { base: '16', lg: '20' }, px: { base: '4', lg: '6' }, mx: 'auto', maxW: 'breakpoint-xl' })}>
-      <div class={css({ maxW: '2xl', mx: 'auto', textAlign: 'center' })}>
-        <h3 class={css({ fontSize: '2xl', fontWeight: 'bold', mb: '4', color: 'fg.default' })}>
+  <div class="bg-gray-50 dark:bg-gray-800">
+    <div class="py-16 px-4 mx-auto max-w-screen-xl lg:py-20 lg:px-6">
+      <div class="max-w-2xl mx-auto text-center">
+        <h3 class="text-2xl font-bold mb-4 text-primary-content">
           Stay Updated
         </h3>
-        <p class={css({ color: 'fg.subtle', mb: '8' })}>
+        <p class="text-muted mb-8">
           Get notified when new courses and modules are released. Join our community of cloud-native learners.
         </p>
-        <div class={css({ display: 'flex', justifyContent: 'center', gap: '4' })}>
+        <div class="flex justify-center gap-4">
           <a
             href="/community"
-            class={css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', px: '6', py: '3', borderWidth: '1px', borderColor: 'transparent', fontSize: 'md', fontWeight: 'medium', borderRadius: 'md', color: 'white', bg: 'teal.500', transition: 'colors', cursor: 'pointer', _hover: { bg: 'teal.600' } })}
+            class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-dark transition-colors"
           >
             Join Community
           </a>
           <a
             href="https://github.com/rawkode-academy"
             target="_blank"
-            class={css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', px: '6', py: '3', borderWidth: '1px', borderColor: { base: 'gray.300', _dark: 'gray.600' }, fontSize: 'md', fontWeight: 'medium', borderRadius: 'md', color: 'fg.muted', bg: { base: 'white', _dark: 'gray.900' }, transition: 'colors', cursor: 'pointer', _hover: { bg: { base: 'gray.50', _dark: 'gray.700' } } })}
+            class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-secondary-content bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
-            <svg class={css({ w: '5', h: '5', mr: '2' })} fill="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
             </svg>
             Follow on GitHub

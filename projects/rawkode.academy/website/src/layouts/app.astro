@@ -5,24 +5,65 @@ import Footer from "@/components/footer/Footer.astro";
 import Sidebar from "@/components/sidebar/sidebar.vue";
 import SkipLink from "@/components/common/SkipLink.astro";
 import { ThemeToggle } from "@/components/ui";
+import { css, cx } from "../../styled-system/css";
+
+const toggleBtnBase = css({
+	p: '2',
+	color: { base: 'gray.600', _dark: 'gray.400' },
+	borderRadius: 'xl',
+	cursor: 'pointer',
+	_hover: {
+		color: { base: 'gray.900', _dark: 'white' },
+		bg: { base: 'rgba(255,255,255,0.5)', _dark: 'rgba(55,65,81,0.5)' },
+		backdropFilter: 'blur(12px)',
+		transform: 'scale(1.1)',
+	},
+	transition: 'all',
+	transitionDuration: '200ms',
+});
+
+const iconSm = css({ w: '5', h: '5' });
+const iconMd = css({ w: '6', h: '6' });
 ---
 
 <SkipLink />
 
-<div class="antialiased">
+<div class={css({ fontSmoothing: 'antialiased' })}>
 	<nav
-		class="glass-panel rounded-2xl px-4 py-2.5 fixed left-4 right-4 md:left-8 md:right-8 top-4 z-50 before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-60 dark:before:from-white/5 before:pointer-events-none before:rounded-2xl"
+		class={cx(
+			'glass-panel',
+			css({
+				borderRadius: '2xl',
+				px: '4',
+				py: '2.5',
+				position: 'fixed',
+				left: '4',
+				right: '4',
+				top: '4',
+				zIndex: '50',
+				md: { left: '8', right: '8' },
+				_before: {
+					content: '""',
+					position: 'absolute',
+					inset: '0',
+					backgroundImage: 'linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)',
+					opacity: '0.6',
+					pointerEvents: 'none',
+					borderRadius: '2xl',
+				},
+			})
+		)}
 	>
-		<div class="relative z-10 flex items-center justify-between gap-4">
+		<div class={css({ position: 'relative', zIndex: '10', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4' })}>
 			<!-- Left section - Logo and Sidebar Toggle -->
-			<div class="flex items-center gap-3">
+			<div class={css({ display: 'flex', alignItems: 'center', gap: '3' })}>
 				<button
-					class="p-2 text-gray-600 rounded-xl cursor-pointer hover:text-gray-900 hover:bg-white/50 dark:hover:bg-gray-700/50 hover:backdrop-blur-md dark:text-gray-400 dark:hover:text-white transition-all duration-200 hover:scale-110 hidden md:block"
+					class={cx(toggleBtnBase, css({ display: { base: 'none', md: 'block' } }))}
 					id="sidebar-toggle-btn"
 					aria-label="Toggle sidebar"
 				>
 					<svg
-						class="w-5 h-5"
+						class={iconSm}
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -37,12 +78,12 @@ import { ThemeToggle } from "@/components/ui";
 				</button>
 
 				<button
-					class="p-2 text-gray-600 rounded-xl cursor-pointer md:hidden hover:text-gray-900 hover:bg-white/50 dark:hover:bg-gray-700/50 hover:backdrop-blur-md dark:text-gray-400 dark:hover:text-white transition-all duration-200 hover:scale-110"
+					class={cx(toggleBtnBase, css({ display: { base: 'block', md: 'none' } }))}
 					id="mobile-sidebar-btn"
 					aria-label="Toggle mobile menu"
 				>
 					<svg
-						class="w-6 h-6"
+						class={iconMd}
 						fill="currentColor"
 						viewBox="0 0 20 20"
 					>
@@ -54,9 +95,9 @@ import { ThemeToggle } from "@/components/ui";
 					</svg>
 				</button>
 
-				<a href="/" aria-label="return to the home page" class="flex">
+				<a href="/" aria-label="return to the home page" class={css({ display: 'flex' })}>
 					<svg
-						class="fill-black dark:fill-white h-7"
+						class={css({ fill: { base: 'black', _dark: 'white' }, h: '7' })}
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 559.671 143.20864"
 					>
@@ -71,15 +112,15 @@ import { ThemeToggle } from "@/components/ui";
 			<form
 				action="/search"
 				method="GET"
-				class="hidden md:flex flex-1 max-w-xl mx-4"
+				class={css({ display: { base: 'none', md: 'flex' }, flex: '1', maxW: 'xl', mx: '4' })}
 			>
-				<label for="topbar-search" class="sr-only">Search</label>
-				<div class="relative w-full">
+				<label for="topbar-search" class={css({ srOnly: true })}>Search</label>
+				<div class={css({ position: 'relative', w: 'full' })}>
 					<div
-						class="flex absolute inset-y-0 left-0 items-center pl-4 pointer-events-none"
+						class={css({ display: 'flex', position: 'absolute', top: '0', bottom: '0', left: '0', alignItems: 'center', pl: '4', pointerEvents: 'none' })}
 					>
 						<svg
-							class="w-4 h-4 text-gray-400"
+							class={css({ w: '4', h: '4', color: 'gray.400' })}
 							fill="currentColor"
 							viewBox="0 0 20 20"
 						>
@@ -94,25 +135,58 @@ import { ThemeToggle } from "@/components/ui";
 						type="text"
 						name="q"
 						id="topbar-search"
-						class="bg-white/30 dark:bg-gray-700/50 backdrop-blur-md border border-white/30 dark:border-gray-500/50 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-primary focus:border-primary/50 block w-full pl-10 pr-20 py-2 placeholder-gray-400 dark:placeholder-gray-300 cursor-pointer shadow-inner transition-all duration-200 hover:bg-white/40 dark:hover:bg-gray-600/60"
+						class={css({
+							bg: { base: 'rgba(255,255,255,0.3)', _dark: 'rgba(55,65,81,0.5)' },
+							backdropFilter: 'blur(12px)',
+							border: '1px solid',
+							borderColor: { base: 'rgba(255,255,255,0.3)', _dark: 'rgba(107,114,128,0.5)' },
+							color: { base: 'gray.900', _dark: 'white' },
+							fontSize: 'sm',
+							borderRadius: 'xl',
+							_focus: { ringWidth: '2', ringColor: 'teal.500', borderColor: 'teal.500/50' },
+							display: 'block',
+							w: 'full',
+							pl: '10',
+							pr: '20',
+							py: '2',
+							cursor: 'pointer',
+							shadow: 'inner',
+							transition: 'all',
+							transitionDuration: '200ms',
+							_hover: { bg: { base: 'rgba(255,255,255,0.4)', _dark: 'rgba(75,85,99,0.6)' } },
+						})}
 						placeholder="Search videos, articles, technologies..."
 						readonly
 					/>
 					<div
-						class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
+						class={css({ position: 'absolute', top: '0', bottom: '0', right: '0', display: 'flex', alignItems: 'center', pr: '3', pointerEvents: 'none' })}
 					>
 						<kbd
-							class="hidden sm:inline-flex items-center px-2 py-1 text-xs font-semibold text-gray-500 bg-white/50 dark:bg-gray-600/70 backdrop-blur-md border border-white/30 dark:border-gray-500/50 rounded-md shadow-sm dark:text-gray-200"
+							class={css({
+								display: { base: 'none', sm: 'inline-flex' },
+								alignItems: 'center',
+								px: '2',
+								py: '1',
+								fontSize: 'xs',
+								fontWeight: 'semibold',
+								color: { base: 'gray.500', _dark: 'gray.200' },
+								bg: { base: 'rgba(255,255,255,0.5)', _dark: 'rgba(75,85,99,0.7)' },
+								backdropFilter: 'blur(12px)',
+								border: '1px solid',
+								borderColor: { base: 'rgba(255,255,255,0.3)', _dark: 'rgba(107,114,128,0.5)' },
+								borderRadius: 'md',
+								shadow: 'sm',
+							})}
 							id="command-shortcut"
 						>
-							⌘K
+							&#x2318;K
 						</kbd>
 					</div>
 				</div>
 			</form>
 
 			<!-- Right section - Theme Toggle & Profile -->
-			<div class="flex items-center gap-2">
+			<div class={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
 				<ThemeToggle client:load variant="icon" size="md" />
 				<UserHeader server:defer />
 			</div>
@@ -121,13 +195,13 @@ import { ThemeToggle } from "@/components/ui";
 
 	<Sidebar client:only="vue" />
 
-	<div class="flex flex-col min-h-screen">
-		<div class="flex overflow-hidden flex-1">
-			<main id="main-content" class="w-full h-auto pt-28 page-px md:ml-72 overflow-x-hidden transition-all duration-300">
-                                <slot />
-                        </main>
-                </div>
-		<div id="footer-container" class="md:ml-72 transition-all duration-300">
+	<div class={css({ display: 'flex', flexDir: 'column', minH: 'screen' })}>
+		<div class={css({ display: 'flex', overflow: 'hidden', flex: '1' })}>
+			<main id="main-content" class={cx('page-px', css({ w: 'full', h: 'auto', pt: '28', overflowX: 'hidden', transition: 'all', transitionDuration: '300ms' }))}>
+				<slot />
+			</main>
+		</div>
+		<div id="footer-container" class={css({ transition: 'all', transitionDuration: '300ms' })}>
 			<Footer />
 		</div>
 	</div>
@@ -137,10 +211,31 @@ import { ThemeToggle } from "@/components/ui";
 	<!-- Floating Action Button for mobile search -->
 	<button
 		id="fab-search"
-		class="md:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-primary/90 to-secondary/90 backdrop-blur-xl text-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.4)] transform hover:scale-105 transition-all duration-200 flex items-center justify-center border border-white/20"
+		class={css({
+			display: { base: 'flex', md: 'none' },
+			position: 'fixed',
+			bottom: '6',
+			right: '6',
+			zIndex: '50',
+			w: '14',
+			h: '14',
+			bgGradient: 'to-r',
+			gradientFrom: 'teal.500/90',
+			gradientTo: 'green.400/90',
+			backdropFilter: 'blur(24px)',
+			color: 'white',
+			borderRadius: 'full',
+			shadow: '0 8px 32px rgba(0,0,0,0.3)',
+			_hover: { shadow: '0 12px 48px rgba(0,0,0,0.4)', transform: 'scale(1.05)' },
+			transition: 'all',
+			transitionDuration: '200ms',
+			alignItems: 'center',
+			justifyContent: 'center',
+			border: '1px solid rgba(255,255,255,0.2)',
+		})}
 		aria-label="Open search"
 	>
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<svg class={iconMd} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
 				stroke-linecap="round"
 				stroke-linejoin="round"
@@ -154,7 +249,7 @@ import { ThemeToggle } from "@/components/ui";
 		const isMac = navigator.userAgent.toLowerCase().includes("mac");
 		const shortcutElement = document.getElementById("command-shortcut");
 		if (shortcutElement) {
-			shortcutElement.textContent = isMac ? "⌘K" : "Ctrl+K";
+			shortcutElement.textContent = isMac ? "\u2318K" : "Ctrl+K";
 		}
 
 		// Function to open command palette
@@ -188,29 +283,23 @@ import { ThemeToggle } from "@/components/ui";
 		}
 
 		// Function to update main content margin based on sidebar state
+		const mdBreakpoint = 768;
 		function updateMainContentMargin() {
 			const mainContent = document.getElementById("main-content");
 			const footerContainer = document.getElementById("footer-container");
 			const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
+			const isDesktop = window.innerWidth >= mdBreakpoint;
+
+			const margin = isDesktop
+				? isCollapsed ? "6rem" : "18rem"
+				: "0";
 
 			if (mainContent) {
-				if (isCollapsed) {
-					mainContent.classList.remove("md:ml-72");
-					mainContent.classList.add("md:ml-24");
-				} else {
-					mainContent.classList.remove("md:ml-24");
-					mainContent.classList.add("md:ml-72");
-				}
+				mainContent.style.marginLeft = margin;
 			}
 
 			if (footerContainer) {
-				if (isCollapsed) {
-					footerContainer.classList.remove("md:ml-72");
-					footerContainer.classList.add("md:ml-24");
-				} else {
-					footerContainer.classList.remove("md:ml-24");
-					footerContainer.classList.add("md:ml-72");
-				}
+				footerContainer.style.marginLeft = margin;
 			}
 		}
 
@@ -244,5 +333,8 @@ import { ThemeToggle } from "@/components/ui";
 				updateMainContentMargin();
 			}
 		});
+
+		// Update margins on resize
+		window.addEventListener("resize", updateMainContentMargin);
 	</script>
 </div>

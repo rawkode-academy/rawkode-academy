@@ -2,7 +2,6 @@
 import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import ArticleCard from "../ArticleCard.astro";
-import { css } from "../../../../styled-system/css";
 
 type Props = {
 	series: CollectionEntry<"series">;
@@ -14,27 +13,15 @@ const articles = (await getCollection("articles"))
 	.filter((article) => article.data.series?.id === series.id)
 	.filter((article) => !article.data.draft)
 	.sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
-
-const emptyStyle = css({
-	color: 'fg.subtle',
-});
-
-const gridStyle = css({
-	display: 'grid',
-	gap: '8',
-	pt: '4',
-	sm: { gridTemplateColumns: 'repeat(2, 1fr)' },
-	lg: { gridTemplateColumns: 'repeat(3, 1fr)' },
-});
 ---
 
 {
 	articles.length === 0 ? (
-		<p class={emptyStyle}>
+		<p class="text-gray-500 dark:text-gray-400">
 			No articles found for this series.
 		</p>
 	) : (
-		<div class={gridStyle}>
+		<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 pt-4">
 			{articles.map((article) => (
 				<ArticleCard article={article} />
 			))}

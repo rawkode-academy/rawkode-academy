@@ -4,7 +4,6 @@ import AuthorAvatarGroup from "@/components/common/AuthorAvatarGroup.vue";
 import Badge from "@/components/common/Badge.vue";
 import BaseCard from "@/components/common/BaseCard.vue";
 import FormattedDate from "@/components/common/FormattedDate.vue";
-import { css } from "../../../styled-system/css";
 
 type Props = {
 	learningPath: CollectionEntry<"learningPaths">;
@@ -56,58 +55,38 @@ const technologies = learningPath.data.technologies.slice(0, 3);
 
 <BaseCard
 	href={`/learning-paths/${slug}`}
-	class={css({
-		_hover: { shadow: "xl", transform: "scale(1.01)" },
-		transition: "transform",
-	})}
+	class="hover:shadow-xl hover:scale-[1.01] transition-transform"
 >
 	<Fragment slot="content">
-		<div class={css({
-			display: "flex",
-			flexWrap: "wrap",
-			alignItems: "center",
-			gap: "2",
-			mb: "4",
-		})}>
+		<div class="flex flex-wrap items-center gap-2 mb-4">
 			<Badge
 				variant={getDifficultyVariant(learningPath.data.difficulty)}
 				size="sm"
-				class={css({ backdropFilter: "blur(4px)", shadow: "sm" })}
+				class="backdrop-blur-sm shadow-sm"
 			>
 				{difficultyLabel}
 			</Badge>
 			<Badge
 				variant="info"
 				size="sm"
-				class={css({ backdropFilter: "blur(4px)", shadow: "sm" })}
+				class="backdrop-blur-sm shadow-sm"
 			>
 				{formatDuration(learningPath.data.estimatedDuration)}
 			</Badge>
 		</div>
-		<h2 class={css({
-			mb: "3",
-			fontSize: "xl",
-			fontWeight: "bold",
-			letterSpacing: "tight",
-			color: "fg.default",
-			lineClamp: 2,
-		})}>
+		<h2 class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2">
 			{learningPath.data.title}
 		</h2>
-		<p class={css({
-			mb: "4",
-			fontWeight: "light",
-			color: "fg.muted",
-			lineClamp: 3,
-		})}>
+		<p class="mb-4 font-light text-gray-600 dark:text-gray-400 line-clamp-3">
 			{learningPath.data.description}
 		</p>
 		{technologies.length > 0 && (
-			<div class={css({ display: "flex", flexWrap: "wrap", gap: "2" })}>
+			<div class="flex flex-wrap gap-2">
 				{technologies.map((technology) => (
 					<Badge
 						variant="secondary"
 						size="xs"
+						class="bg-secondary/15 text-secondary dark:text-secondary/90"
 					>
 						{technology}
 					</Badge>
@@ -116,11 +95,7 @@ const technologies = learningPath.data.technologies.slice(0, 3);
 		)}
 	</Fragment>
 	<Fragment slot="footer">
-		<div class={css({
-			display: "flex",
-			alignItems: "center",
-			justifyContent: "space-between",
-		})}>
+		<div class="flex items-center justify-between">
 			<AuthorAvatarGroup authors={authors} showActiveIndicator={false} />
 			<FormattedDate date={learningPath.data.publishedAt} format="short" />
 		</div>

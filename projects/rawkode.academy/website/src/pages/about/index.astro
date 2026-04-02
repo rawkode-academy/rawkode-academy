@@ -2,7 +2,6 @@
 import Button from "@/components/common/Button.vue";
 import { Hero } from "@/components/ui";
 import Page from "@/wrappers/page.astro";
-import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
@@ -104,260 +103,226 @@ const signatureFormats = [
 		chips: ["Self-paced", "Curated resources", "Actionable outcomes"],
 	},
 ];
-
-const sectionShell = css({
-	position: "relative",
-	py: { base: "16", md: "24" },
-});
-
-const sectionShellBefore = css({
-	pointerEvents: "none",
-	position: "absolute",
-	inset: "0",
-	mx: "auto",
-	maxW: "6xl",
-	borderRadius: "48px",
-	backgroundImage: "linear-gradient(to right, token(colors.teal.500/10), transparent, token(colors.green.500/10))",
-	filter: "blur(140px)",
-	opacity: "0.6",
-});
-
-const timelineLineStyle = css({
-	position: "absolute",
-	left: { base: "5", md: "50%" },
-	h: "full",
-	w: "1px",
-	transform: "translateX(-50%)",
-	backgroundImage: { base: "linear-gradient(to bottom, token(colors.teal.500/60), token(colors.white/40), token(colors.green.500/60))", _dark: "linear-gradient(to bottom, token(colors.teal.500/60), token(colors.gray.800/60), token(colors.green.500/60))" },
-});
-
-const timelineItemStyle = css({
-	position: "relative",
-	display: "flex",
-	flexDirection: "column",
-	gap: "3",
-	borderRadius: "3xl",
-	bg: { base: "white/60", _dark: "gray.900/60" },
-	p: "6",
-	textAlign: "left",
-	color: { base: "gray.700", _dark: "gray.200" },
-	shadow: "0 20px 60px rgba(15,23,42,0.15)",
-	borderWidth: "1px",
-	borderColor: { base: "white/25", _dark: "white/8" },
-	backdropFilter: "blur(22px)",
-});
 ---
 
+<style>
+        @reference "../../styles/global.css";
+
+        .section-shell {
+                @apply relative py-16 md:py-24;
+        }
+
+        .section-shell::before {
+                content: "";
+                @apply pointer-events-none absolute inset-0 mx-auto max-w-6xl rounded-[48px] bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 blur-[140px] opacity-60;
+        }
+
+        .timeline-line {
+                @apply absolute left-5 md:left-1/2 h-full w-px -translate-x-1/2 bg-gradient-to-b from-primary/60 via-white/40 to-secondary/60 dark:via-gray-800/60;
+        }
+
+        .timeline-item {
+                @apply relative flex flex-col gap-3 rounded-3xl bg-white/60 p-6 text-left text-gray-700 shadow-[0_20px_60px_rgba(15,23,42,0.15)] dark:bg-gray-900/60 dark:text-gray-200;
+                border: 1px solid rgb(255 255 255 / 0.25);
+                backdrop-filter: blur(22px);
+        }
+
+        .dark .timeline-item {
+                border-color: rgb(255 255 255 / 0.08);
+        }
+</style>
+
 <Page title="About Rawkode Academy" description="Get to know the story, mission, and formats behind Rawkode Academy.">
-	<Hero
-		background="gradient-hero"
-		pattern="dots"
-		size="xl"
-		align="center"
-		badge="Our Story"
-		title="Cloud Native education built in public"
-		subtitle="We document the wins, losses, and aha moments that come from exploring the rapidly changing infrastructure landscape."
-	>
-		<Fragment slot="actions">
-			<div class={css({ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "4" })}>
-				<Button href="/shows" variant="primary" size="lg">Explore our shows</Button>
-				<Button href="/watch" variant="ghost" size="lg">Catch the latest episode</Button>
-			</div>
-		</Fragment>
-		<Fragment slot="stats">
-			<span>Founded in 2019</span>
-			<span class={css({ display: "inline-flex", alignItems: "center", gap: "1", color: "teal.500" })}>
-				<span class={css({ h: "2", w: "2", borderRadius: "full", bg: "teal.500" })}></span>
-				Independent & community-funded
-			</span>
-		</Fragment>
-	</Hero>
+        <Hero
+                background="gradient-hero"
+                pattern="dots"
+                size="xl"
+                align="center"
+                badge="Our Story"
+                title="Cloud Native education built in public"
+                subtitle="We document the wins, losses, and aha moments that come from exploring the rapidly changing infrastructure landscape."
+        >
+                <Fragment slot="actions">
+                        <div class="flex flex-wrap items-center justify-center gap-4">
+                                <Button href="/shows" variant="primary" size="lg">Explore our shows</Button>
+                                <Button href="/watch" variant="ghost" size="lg">Catch the latest episode</Button>
+                        </div>
+                </Fragment>
+                <Fragment slot="stats">
+                        <span>Founded in 2019</span>
+                        <span class="inline-flex items-center gap-1 text-primary">
+                                <span class="h-2 w-2 rounded-full bg-primary"></span>
+                                Independent & community-funded
+                        </span>
+                </Fragment>
+        </Hero>
 
-	<section class={sectionShell}>
-		<div class={sectionShellBefore} aria-hidden="true"></div>
-		<div class={css({ position: "relative", zIndex: "10", mx: "auto", display: "grid", maxW: "6xl", gap: "10", px: "4", lg: { gridTemplateColumns: "1.1fr 0.9fr" } })}>
-			<div class={"glass-panel " + css({ borderRadius: "32px", p: "8", shadow: { base: "0 25px 60px rgba(14,30,37,0.15)", _dark: "0 25px 60px rgba(0,0,0,0.65)" } })}>
-				<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.2em", color: "teal.500" })}>Mission</p>
-				<h2 class={css({ mt: "4", fontSize: "3xl", fontWeight: "semibold", color: "fg.default" })}>Empower developers to navigate constant change</h2>
-				<p class={css({ mt: "4", fontSize: "lg", color: "fg.muted" })}>
-					Rawkode Academy exists to make complex cloud native topics approachable without sanding off the hard edges. We combine
-					research, real production experience, and a lot of humility to show exactly how we learn.
-				</p>
-				<p class={css({ mt: "6", color: "fg.muted" })}>
-					Whether you're a solo builder trying to keep up or leading a platform team, we want you to feel like you have a front-row seat to
-					every experiment, refactor, and architectural debate.
-				</p>
-			</div>
-			<div class={css({ display: "flex", flexDirection: "column", gap: "6" })}>
-				{missionPillars.map((pillar) => (
-					<div class={"glass-panel " + css({ borderRadius: "28px", p: "6" })}>
-						<h3 class={css({ fontSize: "xl", fontWeight: "semibold", color: "fg.default" })}>{pillar.title}</h3>
-						<p class={css({ mt: "2", color: "fg.muted" })}>{pillar.description}</p>
-					</div>
-				))}
-			</div>
-		</div>
-	</section>
+        <section class="section-shell">
+                <div class="relative z-10 mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1.1fr_0.9fr]">
+                        <div class="glass-panel rounded-[32px] p-8 shadow-[0_25px_60px_rgba(14,30,37,0.15)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.65)]">
+                                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Mission</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">Empower developers to navigate constant change</h2>
+                                <p class="mt-4 text-lg text-muted">
+                                        Rawkode Academy exists to make complex cloud native topics approachable without sanding off the hard edges. We combine
+                                        research, real production experience, and a lot of humility to show exactly how we learn.
+                                </p>
+                                <p class="mt-6 text-muted">
+                                        Whether you're a solo builder trying to keep up or leading a platform team, we want you to feel like you have a front-row seat to
+                                        every experiment, refactor, and architectural debate.
+                                </p>
+                        </div>
+                        <div class="space-y-6">
+                                {missionPillars.map((pillar) => (
+                                        <div class="glass-panel rounded-[28px] p-6">
+                                                <h3 class="text-xl font-semibold text-primary-content">{pillar.title}</h3>
+                                                <p class="mt-2 text-muted">{pillar.description}</p>
+                                        </div>
+                                ))}
+                        </div>
+                </div>
+        </section>
 
-	<section class={css({ py: { base: "16", sm: "20" } })}>
-		<div class={css({ mx: "auto", maxW: "6xl", px: "4" })}>
-			<div class={css({ textAlign: "center" })}>
-				<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.3em", color: "teal.500" })}>Impact</p>
-				<h2 class={css({ mt: "4", fontSize: "3xl", fontWeight: "semibold", color: "fg.default" })}>Proof that curiosity scales</h2>
-				<p class={css({ mt: "3", fontSize: "lg", color: "fg.muted" })}>
-					We obsess over doing the work in public—these numbers are a snapshot of what that persistence has unlocked so far.
-				</p>
-			</div>
-			<div class={css({ mt: "12", display: "grid", gap: "6", md: { gridTemplateColumns: "repeat(3, 1fr)" } })}>
-				{stats.map((stat) => (
-					<div class={"glass-panel " + css({ borderRadius: "28px", p: "8", textAlign: "center" })}>
-						<p class={css({ fontSize: "4xl", fontWeight: "semibold", color: "fg.default" })}>{stat.value}</p>
-						<p class={css({ mt: "2", fontSize: "lg", fontWeight: "medium", color: "fg.muted" })}>{stat.label}</p>
-						<p class={css({ mt: "3", fontSize: "sm", color: "fg.muted" })}>{stat.description}</p>
-					</div>
-				))}
-			</div>
-		</div>
-	</section>
+        <section class="py-16 sm:py-20">
+                <div class="mx-auto max-w-6xl px-4">
+                        <div class="text-center">
+                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Impact</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">Proof that curiosity scales</h2>
+                                <p class="mt-3 text-lg text-muted">
+                                        We obsess over doing the work in public—these numbers are a snapshot of what that persistence has unlocked so far.
+                                </p>
+                        </div>
+                        <div class="mt-12 grid gap-6 md:grid-cols-3">
+                                {stats.map((stat) => (
+                                        <div class="glass-panel rounded-[28px] p-8 text-center">
+                                                <p class="text-4xl font-semibold text-primary-content">{stat.value}</p>
+                                                <p class="mt-2 text-lg font-medium text-secondary-content">{stat.label}</p>
+                                                <p class="mt-3 text-sm text-muted">{stat.description}</p>
+                                        </div>
+                                ))}
+                        </div>
+                </div>
+        </section>
 
-	<section class={css({
-		position: "relative",
-		overflow: "hidden",
-		backgroundImage: "linear-gradient(to bottom, transparent, token(colors.teal.500/5), transparent)",
-		py: "20",
-	})}>
-		<div class={css({ mx: "auto", maxW: "5xl", px: "4" })}>
-			<div class={css({ textAlign: "center" })}>
-				<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.3em", color: "teal.500" })}>Founder's journey</p>
-				<h2 class={css({ mt: "4", fontSize: "3xl", fontWeight: "semibold", color: "fg.default" })}>Two decades of building, sharing, and mentoring</h2>
-				<p class={css({ mt: "3", fontSize: "lg", color: "fg.muted" })}>
-					Every experiment inside Rawkode Academy is rooted in lessons learned from running production systems, leading teams, and collaborating with
-					the maintainers who shape our industry.
-				</p>
-			</div>
-			<div class={css({ mt: "12", position: "relative" })}>
-				<div class={timelineLineStyle}></div>
-				<div class={css({ display: "flex", flexDirection: "column", gap: "10" })}>
-					{timeline.map((item) => (
-						<div class={css({ position: "relative", display: "grid", gap: "4", md: { gridTemplateColumns: "repeat(2, 1fr)", alignItems: "center" } })}>
-							<div class={css({ order: { base: "2", md: "1" }, md: { pr: "8" } })}>
-								<div class={timelineItemStyle}>
-									<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.3em", color: "teal.500" })}>{item.period}</p>
-									<h3 class={css({ fontSize: "2xl", fontWeight: "semibold", color: "fg.default" })}>{item.title}</h3>
-									<p class={css({ color: "fg.muted" })}>{item.description}</p>
-								</div>
-							</div>
-							<div class={css({ order: { base: "1", md: "2" } })}>
-								<div class={css({ display: "flex", alignItems: "center", justifyContent: "center" })}>
-									<div class={css({ display: { base: "none", md: "block" }, h: "4", w: "4", borderRadius: "full", backgroundImage: "linear-gradient(to bottom right, token(colors.teal.500), token(colors.green.500))", shadow: "lg" })}></div>
-								</div>
-							</div>
-						</div>
-					))}
-				</div>
-			</div>
-		</div>
-	</section>
+        <section class="relative overflow-hidden bg-gradient-to-b from-transparent via-primary/5 to-transparent py-20">
+                <div class="mx-auto max-w-5xl px-4">
+                        <div class="text-center">
+                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Founder's journey</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">Two decades of building, sharing, and mentoring</h2>
+                                <p class="mt-3 text-lg text-muted">
+                                        Every experiment inside Rawkode Academy is rooted in lessons learned from running production systems, leading teams, and collaborating with
+                                        the maintainers who shape our industry.
+                                </p>
+                        </div>
+                        <div class="mt-12 relative">
+                                <div class="timeline-line"></div>
+                                <div class="space-y-10">
+                                        {timeline.map((item) => (
+                                                <div class="relative grid gap-4 md:grid-cols-2 md:items-center">
+                                                        <div class="order-2 md:order-1 md:pr-8">
+                                                                <div class="timeline-item">
+                                                                        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">{item.period}</p>
+                                                                        <h3 class="text-2xl font-semibold text-primary-content">{item.title}</h3>
+                                                                        <p class="text-muted">{item.description}</p>
+                                                                </div>
+                                                        </div>
+                                                        <div class="order-1 md:order-2">
+                                                                <div class="flex items-center justify-center">
+                                                                        <div class="hidden h-4 w-4 rounded-full bg-gradient-to-br from-primary to-secondary shadow-lg md:block"></div>
+                                                                </div>
+                                                        </div>
+                                                </div>
+                                        ))}
+                                </div>
+                        </div>
+                </div>
+        </section>
 
-	<section class={css({ py: "20" })}>
-		<div class={css({ mx: "auto", maxW: "6xl", px: "4" })}>
-			<div class={css({ textAlign: "center" })}>
-				<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.3em", color: "teal.500" })}>Signature formats</p>
-				<h2 class={css({ mt: "4", fontSize: "3xl", fontWeight: "semibold", color: "fg.default" })}>Where experimentation meets entertainment</h2>
-				<p class={css({ mt: "3", fontSize: "lg", color: "fg.muted" })}>
-					We mix long-running shows with limited series to meet people where they learn best.
-				</p>
-			</div>
-			<div class={css({ mt: "12", display: "grid", gap: "6", md: { gridTemplateColumns: "repeat(3, 1fr)" } })}>
-				{signatureFormats.map((format) => (
-					<div class={"glass-panel " + css({ display: "flex", h: "full", flexDirection: "column", borderRadius: "28px", p: "6" })}>
-						<div class={css({ flex: "1" })}>
-							<h3 class={css({ fontSize: "xl", fontWeight: "semibold", color: "fg.default" })}>{format.title}</h3>
-							<p class={css({ mt: "3", color: "fg.muted" })}>{format.description}</p>
-						</div>
-						<div class={css({ mt: "4", display: "flex", flexWrap: "wrap", gap: "2" })}>
-							{format.chips.map((chip) => (
-								<span class={"glass-chip " + css({ fontSize: "xs", fontWeight: "medium", color: "fg.muted" })}>{chip}</span>
-							))}
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	</section>
+        <section class="py-20">
+                <div class="mx-auto max-w-6xl px-4">
+                        <div class="text-center">
+                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Signature formats</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">Where experimentation meets entertainment</h2>
+                                <p class="mt-3 text-lg text-muted">
+                                        We mix long-running shows with limited series to meet people where they learn best.
+                                </p>
+                        </div>
+                        <div class="mt-12 grid gap-6 md:grid-cols-3">
+                                {signatureFormats.map((format) => (
+                                        <div class="glass-panel flex h-full flex-col rounded-[28px] p-6">
+                                                <div class="flex-1">
+                                                        <h3 class="text-xl font-semibold text-primary-content">{format.title}</h3>
+                                                        <p class="mt-3 text-muted">{format.description}</p>
+                                                </div>
+                                                <div class="mt-4 flex flex-wrap gap-2">
+                                                        {format.chips.map((chip) => (
+                                                                <span class="glass-chip text-xs font-medium text-secondary-content">{chip}</span>
+                                                        ))}
+                                                </div>
+                                        </div>
+                                ))}
+                        </div>
+                </div>
+        </section>
 
-	<section class={sectionShell}>
-		<div class={sectionShellBefore} aria-hidden="true"></div>
-		<div class={css({ position: "relative", zIndex: "10", mx: "auto", maxW: "6xl", px: "4" })}>
-			<div class={css({ textAlign: "center" })}>
-				<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.3em", color: "teal.500" })}>Moments we love</p>
-				<h2 class={css({ mt: "4", fontSize: "3xl", fontWeight: "semibold", color: "fg.default" })}>The clips that started it all</h2>
-				<p class={css({ mt: "3", fontSize: "lg", color: "fg.muted" })}>
-					These two episodes capture the spirit of Rawkode Academy—curiosity, collaboration, and just enough chaos to keep everyone honest.
-				</p>
-			</div>
-			<div class={css({ mt: "12", display: "grid", gap: "8", md: { gridTemplateColumns: "repeat(2, 1fr)" } })}>
-				<div class={"glass-panel " + css({ overflow: "hidden", borderRadius: "32px", p: "0" })}>
-					<div class={css({ aspectRatio: "16/9" })}>
-						<iframe
-							class={css({ h: "full", w: "full" })}
-							src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
-							title="Last Week in Kubernetes"
-							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-							allowfullscreen
-						></iframe>
-					</div>
-					<div class={css({ p: "6" })}>
-						<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.3em", color: "teal.500" })}>2019</p>
-						<h3 class={css({ mt: "2", fontSize: "2xl", fontWeight: "semibold", color: "fg.default" })}>Last Week in Kubernetes</h3>
-						<p class={css({ mt: "2", color: "fg.muted" })}>The pilot episode that proved live, unfiltered exploration resonated with our audience.</p>
-					</div>
-				</div>
-				<div class={"glass-panel " + css({ overflow: "hidden", borderRadius: "32px", p: "0" })}>
-					<div class={css({ aspectRatio: "16/9" })}>
-						<iframe
-							class={css({ h: "full", w: "full" })}
-							src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
-							title="Klustered Episode One"
-							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-							allowfullscreen
-						></iframe>
-					</div>
-					<div class={css({ p: "6" })}>
-						<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.3em", color: "teal.500" })}>2021</p>
-						<h3 class={css({ mt: "2", fontSize: "2xl", fontWeight: "semibold", color: "fg.default" })}>Klustered with Walid Shaari</h3>
-						<p class={css({ mt: "2", color: "fg.muted" })}>A bold game show experiment that turned Kubernetes troubleshooting into an adrenaline rush.</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
+        <section class="section-shell">
+                <div class="relative z-10 mx-auto max-w-6xl px-4">
+                        <div class="text-center">
+                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Moments we love</p>
+                                <h2 class="mt-4 text-3xl font-semibold text-primary-content">The clips that started it all</h2>
+                                <p class="mt-3 text-lg text-muted">
+                                        These two episodes capture the spirit of Rawkode Academy—curiosity, collaboration, and just enough chaos to keep everyone honest.
+                                </p>
+                        </div>
+                        <div class="mt-12 grid gap-8 md:grid-cols-2">
+                                <div class="glass-panel overflow-hidden rounded-[32px] p-0">
+                                        <div class="aspect-video">
+                                                <iframe
+                                                        class="h-full w-full"
+                                                        src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
+                                                        title="Last Week in Kubernetes"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                        allowfullscreen
+                                                ></iframe>
+                                        </div>
+                                        <div class="p-6">
+                                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">2019</p>
+                                                <h3 class="mt-2 text-2xl font-semibold text-primary-content">Last Week in Kubernetes</h3>
+                                                <p class="mt-2 text-muted">The pilot episode that proved live, unfiltered exploration resonated with our audience.</p>
+                                        </div>
+                                </div>
+                                <div class="glass-panel overflow-hidden rounded-[32px] p-0">
+                                        <div class="aspect-video">
+                                                <iframe
+                                                        class="h-full w-full"
+                                                        src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
+                                                        title="Klustered Episode One"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                        allowfullscreen
+                                                ></iframe>
+                                        </div>
+                                        <div class="p-6">
+                                                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">2021</p>
+                                                <h3 class="mt-2 text-2xl font-semibold text-primary-content">Klustered with Walid Shaari</h3>
+                                                <p class="mt-2 text-muted">A bold game show experiment that turned Kubernetes troubleshooting into an adrenaline rush.</p>
+                                        </div>
+                                </div>
+                        </div>
+                </div>
+        </section>
 
-	<section class={css({ position: "relative", isolation: "isolate", overflow: "hidden", py: "20" })}>
-		<div class={css({ pointerEvents: "none", position: "absolute", inset: "0", backgroundImage: "linear-gradient(to bottom right, token(colors.teal.500/30), token(colors.green.500/20), transparent)", opacity: "0.5", filter: "blur(48px)" })}></div>
-		<div class={css({
-			position: "relative",
-			mx: "auto",
-			maxW: "5xl",
-			borderRadius: "40px",
-			borderWidth: "1px",
-			borderColor: { base: "white/30", _dark: "white/10" },
-			bg: { base: "white/80", _dark: "gray.900/80" },
-			px: "8",
-			py: "12",
-			textAlign: "center",
-			shadow: { base: "0 40px 120px rgba(14,30,37,0.35)", _dark: "0 40px 120px rgba(0,0,0,0.65)" },
-		})}>
-			<p class={css({ fontSize: "sm", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "0.3em", color: "teal.500" })}>Join the community</p>
-			<h2 class={css({ mt: "4", fontSize: "3xl", fontWeight: "semibold", color: "fg.default" })}>Bring Rawkode Academy into your week</h2>
-			<p class={css({ mt: "3", fontSize: "lg", color: "fg.muted" })}>
-				Subscribe to our shows, share your projects, or invite us to collaborate with your engineering organization. Together we'll keep the
-				Cloud Native ecosystem open, welcoming, and practical.
-			</p>
-			<div class={css({ mt: "8", display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4" })}>
-				<Button href="/shows" variant="primary" size="lg">See upcoming shows</Button>
-				<Button href="/maintainers/share-your-project" variant="ghost" size="lg">Share your project</Button>
-			</div>
-		</div>
-	</section>
+        <section class="relative isolate overflow-hidden py-20">
+                <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary/20 to-transparent opacity-50 blur-3xl"></div>
+                <div class="relative mx-auto max-w-5xl rounded-[40px] border border-white/30 bg-white/80 px-8 py-12 text-center shadow-[0_40px_120px_rgba(14,30,37,0.35)] dark:border-white/10 dark:bg-gray-900/80">
+                        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Join the community</p>
+                        <h2 class="mt-4 text-3xl font-semibold text-primary-content">Bring Rawkode Academy into your week</h2>
+                        <p class="mt-3 text-lg text-muted">
+                                Subscribe to our shows, share your projects, or invite us to collaborate with your engineering organization. Together we'll keep the
+                                Cloud Native ecosystem open, welcoming, and practical.
+                        </p>
+                        <div class="mt-8 flex flex-wrap justify-center gap-4">
+                                <Button href="/shows" variant="primary" size="lg">See upcoming shows</Button>
+                                <Button href="/maintainers/share-your-project" variant="ghost" size="lg">Share your project</Button>
+                        </div>
+                </div>
+        </section>
 </Page>

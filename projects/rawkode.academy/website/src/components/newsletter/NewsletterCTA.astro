@@ -4,7 +4,6 @@ export const prerender = false;
 import { env } from "cloudflare:workers";
 import NewsletterWidget from "./NewsletterWidget.vue";
 import { createLearnerId } from "@/actions/newsletter";
-import { css } from "../../../styled-system/css";
 
 interface Props {
 	class?: string;
@@ -47,33 +46,33 @@ const shouldHide = !user && hasNewsletterCookie;
 ---
 
 {!shouldHide && (
-<section class:list={[css({ w: "full", py: "12", position: "relative", zIndex: "10" }), className]}>
-	<div class={css({ border: "1px solid var(--surface-border)", backdropFilter: "blur(20px)", borderRadius: "xl", bg: "var(--surface-card)", boxShadow: "var(--surface-shadow)", background: "linear-gradient(135deg, rgba(var(--brand-primary), 0.05), rgba(var(--brand-secondary), 0.03))", p: { base: "4", sm: "6" } })}>
-		<div class={css({ display: "flex", flexDir: { base: "column", sm: "row" }, sm: { alignItems: "center" }, gap: { base: "4", sm: "6" } })}>
-			<div class={css({ flex: "1", minW: "0", display: "flex", flexDir: "column", gap: "1" })}>
-				<div class={css({ display: "flex", alignItems: "center", gap: "2" })}>
-					<span class={css({ h: "2", w: "2", borderRadius: "full", bg: "rgb(var(--brand-primary))" })}></span>
-					<span class={css({ fontSize: "xs", fontWeight: "medium", color: "rgb(var(--brand-primary))" })}>{badge}</span>
-				</div>
-				<h2 class={css({ fontSize: { base: "lg", sm: "xl" }, fontFamily: "display", fontWeight: "semibold", letterSpacing: "tight", color: { base: "gray.900", _dark: "white" } })}>
-					{headline}
-				</h2>
-				<p class={css({ fontSize: "sm", color: { base: "gray.600", _dark: "gray.400" } })}>
-					{subtitle}
-				</p>
-			</div>
+<section class:list={["w-full py-12 relative z-10", className]}>
+        <div class="glass-card bg-gradient-card card-shadow p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                        <div class="flex-1 min-w-0 space-y-1">
+                                <div class="flex items-center gap-2">
+                                        <span class="h-2 w-2 rounded-full bg-primary"></span>
+                                        <span class="text-xs font-medium text-primary">{badge}</span>
+                                </div>
+                                <h2 class="text-lg sm:text-xl font-display font-semibold tracking-tight text-primary-content">
+                                        {headline}
+                                </h2>
+                                <p class="text-sm text-muted">
+                                        {subtitle}
+                                </p>
+                        </div>
 
-			<div class={css({ sm: { w: "64" }, flexShrink: "0" })}>
-				<NewsletterWidget
-					client:visible
-					isSignedIn={!!user}
-					isSubscribed={isSubscribed}
-					signInUrl={signInUrl}
-					pagePath={pagePath}
-					audience={audience}
-				/>
-			</div>
-		</div>
-	</div>
+                        <div class="sm:w-64 flex-shrink-0">
+                                <NewsletterWidget
+                                        client:visible
+                                        isSignedIn={!!user}
+                                        isSubscribed={isSubscribed}
+                                        signInUrl={signInUrl}
+                                        pagePath={pagePath}
+                                        audience={audience}
+                                />
+                        </div>
+                </div>
+        </div>
 </section>
 )}

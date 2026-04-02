@@ -15,7 +15,6 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { css, cx } from "../../../styled-system/css";
 
 interface Props {
 	variant?: "primary" | "secondary" | "ghost" | "danger";
@@ -37,91 +36,36 @@ const props = withDefaults(defineProps<Props>(), {
 
 const tag = computed(() => (props.href ? "a" : "button"));
 
-const variantStyles = {
-	primary: {
-		color: "white",
-		backgroundImage: "linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
-		_hover: { filter: "brightness(1.1)" },
-		_focus: { ringWidth: "4px", ringColor: "colorPalette.default/50" },
-		border: "1px solid",
-		borderColor: { base: "colorPalette.default/30", _dark: "colorPalette.default/50" },
-	},
-	secondary: {
-		color: { base: "gray.900", _dark: "white" },
-		bg: { base: "rgba(255, 255, 255, 0.5)", _dark: "rgba(55, 65, 81, 0.6)" },
-		backdropFilter: "blur(16px)",
-		border: "1px solid",
-		borderColor: { base: "rgba(255, 255, 255, 0.5)", _dark: "rgba(107, 114, 128, 0.6)" },
-		_hover: {
-			bg: { base: "rgba(255, 255, 255, 0.7)", _dark: "rgba(75, 85, 99, 0.7)" },
-		},
-		_focus: {
-			ringWidth: "4px",
-			ringColor: { base: "rgba(229, 231, 235, 0.5)", _dark: "rgba(107, 114, 128, 0.5)" },
-		},
-	},
-	ghost: {
-		color: { base: "gray.700", _dark: "gray.200" },
-		border: "1px solid transparent",
-		_hover: {
-			color: { base: "gray.900", _dark: "white" },
-			bg: { base: "rgba(255, 255, 255, 0.6)", _dark: "rgba(75, 85, 99, 0.6)" },
-			borderColor: { base: "rgba(255, 255, 255, 0.3)", _dark: "rgba(107, 114, 128, 0.4)" },
-		},
-		_focus: {
-			ringWidth: "4px",
-			ringColor: { base: "rgba(229, 231, 235, 0.5)", _dark: "rgba(75, 85, 99, 0.5)" },
-		},
-	},
-	danger: {
-		color: "white",
-		backgroundImage: {
-			base: "linear-gradient(to right, rgba(220, 38, 38, 0.9), rgba(185, 28, 28, 0.9))",
-			_dark: "linear-gradient(to right, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9))",
-		},
-		border: "1px solid",
-		borderColor: { base: "rgba(239, 68, 68, 0.3)", _dark: "rgba(248, 113, 113, 0.5)" },
-		_hover: {
-			backgroundImage: {
-				base: "linear-gradient(to right, rgba(185, 28, 28, 0.95), rgba(153, 27, 27, 0.95))",
-				_dark: "linear-gradient(to right, rgba(220, 38, 38, 0.95), rgba(185, 28, 28, 0.95))",
-			},
-		},
-		_focus: {
-			ringWidth: "4px",
-			ringColor: { base: "rgba(252, 165, 165, 0.5)", _dark: "rgba(248, 113, 113, 0.5)" },
-		},
-	},
-} as const;
+const baseClasses =
+	"inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 backdrop-blur-md shadow-md hover:shadow-lg hover:scale-105";
 
-const sizeStyles = {
-	sm: { fontSize: "sm", px: "3", py: "2" },
-	md: { fontSize: "base", px: "5", py: "2.5" },
-	lg: { fontSize: "lg", px: "6", py: "3" },
-} as const;
+const variantClasses = {
+	primary:
+		"text-white bg-gradient-primary hover:brightness-110 focus:ring-primary/50 border border-primary/30 dark:bg-gradient-primary dark:border-primary/50",
+	secondary:
+		"text-gray-900 bg-white/50 dark:bg-gray-700/60 backdrop-blur-lg border border-white/50 dark:border-gray-500/60 hover:bg-white/70 dark:hover:bg-gray-600/70 focus:ring-gray-200/50 dark:text-white dark:focus:ring-gray-500/50",
+	ghost:
+		"text-gray-700 hover:text-gray-900 hover:bg-white/60 dark:hover:bg-gray-600/60 focus:ring-gray-200/50 dark:text-gray-200 dark:hover:text-white dark:focus:ring-gray-600/50 border border-transparent hover:border-white/30 dark:hover:border-gray-500/40",
+	danger:
+		"text-white bg-gradient-to-r from-red-600/90 to-red-700/90 hover:from-red-700/95 hover:to-red-800/95 focus:ring-red-300/50 border border-red-500/30 dark:from-red-500/90 dark:to-red-600/90 dark:hover:from-red-600/95 dark:hover:to-red-700/95 dark:focus:ring-red-400/50 dark:border-red-400/50",
+};
+
+const sizeClasses = {
+	sm: "text-sm px-3 py-2",
+	md: "text-base px-5 py-2.5",
+	lg: "text-lg px-6 py-3",
+};
 
 const buttonClasses = computed(() => {
-	const base = css({
-		display: "inline-flex",
-		alignItems: "center",
-		justifyContent: "center",
-		fontWeight: "medium",
-		borderRadius: "xl",
-		transition: "all",
-		transitionDuration: "200ms",
-		outline: "none",
-		backdropFilter: "blur(12px)",
-		shadow: "md",
-		_hover: {
-			shadow: "lg",
-			transform: "scale(1.05)",
-		},
-		...sizeStyles[props.size],
-		...variantStyles[props.variant],
-		...(props.disabled ? { opacity: 0.5, cursor: "not-allowed" } : {}),
-		...(props.fullWidth ? { width: "full" } : {}),
-	});
+	const classes = [
+		baseClasses,
+		variantClasses[props.variant],
+		sizeClasses[props.size],
+		props.disabled && "opacity-50 cursor-not-allowed",
+		props.fullWidth && "w-full",
+		props.class,
+	].filter(Boolean);
 
-	return cx(base, props.class);
+	return classes.join(" ");
 });
 </script>

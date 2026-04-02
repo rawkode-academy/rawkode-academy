@@ -6,7 +6,6 @@ import BaseCard from "../common/BaseCard.vue";
 import FormattedDate from "../common/FormattedDate.vue";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
-import { css } from "../../../styled-system/css";
 
 type Props = {
 	article: CollectionEntry<"articles">;
@@ -18,89 +17,22 @@ const readingTime = calculateReadingTime(article.body || "");
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
-
-const overlayStyle = css({
-	position: 'absolute',
-	inset: '0',
-	bgGradient: 'to-tr',
-	gradientFrom: 'brand.primary/30',
-	gradientTo: 'brand.secondary/30',
-	mixBlendMode: 'multiply',
-	zIndex: '10',
-});
-
-const imgStyle = css({
-	w: 'full',
-	h: '52',
-	objectFit: 'cover',
-});
-
-const badgeStyle = css({
-	fontSize: 'xs',
-	fontWeight: '600',
-	px: '2.5',
-	py: '1',
-	rounded: 'full',
-	backdropFilter: 'blur(4px)',
-	shadow: 'md',
-});
-
-const titleStyle = css({
-	mb: '3',
-	fontSize: 'xl',
-	fontWeight: 'bold',
-	letterSpacing: 'tight',
-	color: 'fg.default',
-	lineClamp: '2',
-});
-
-const subtitleStyle = css({
-	mb: '4',
-	fontWeight: '300',
-	color: 'fg.subtle',
-	lineClamp: '3',
-});
-
-const footerStyle = css({
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-});
-
-const metaStyle = css({
-	display: 'flex',
-	alignItems: 'center',
-	gap: '3',
-	fontSize: 'sm',
-	color: 'fg.subtle',
-});
-
-const iconTextStyle = css({
-	display: 'flex',
-	alignItems: 'center',
-	gap: '1',
-});
-
-const iconStyle = css({
-	h: '4',
-	w: '4',
-});
 ---
 
 <BaseCard href={`/read/${article.id}`}>
 	<Fragment slot="cover">
-		<div class={overlayStyle}></div>
+		<div class="absolute inset-0 bg-linear-to-tr from-primary/30 to-secondary/30 mix-blend-multiply z-10"></div>
 		{
 			article.data.cover ? (
 				<Image
-					class={imgStyle}
+					class="w-full h-52 object-cover"
 					src={article.data.cover.image}
 					alt={article.data.cover.alt}
 					loading="lazy"
 				/>
 			) : (
 				<img
-					class={imgStyle}
+					class="w-full h-52 object-cover"
 					src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
 					alt="Default placeholder image for article without custom cover"
 					loading="lazy"
@@ -109,26 +41,26 @@ const iconStyle = css({
 		}
 	</Fragment>
 	<Fragment slot="badge">
-		<span class={`${badgeConfig.bg} ${badgeConfig.text} ${badgeStyle}`}>
+		<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-md`}>
 			{badgeConfig.label}
 		</span>
 	</Fragment>
 	<Fragment slot="content">
-		<h2 class={titleStyle}>
+		<h2 class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2">
 			{article.data.title}
 		</h2>
 		{article.data.openGraph?.subtitle && (
-			<p class={subtitleStyle}>
+			<p class="mb-4 font-light text-gray-500 dark:text-gray-400 line-clamp-3">
 				{article.data.openGraph?.subtitle}
 			</p>
 		)}
 	</Fragment>
 	<Fragment slot="footer">
-		<div class={footerStyle}>
+		<div class="flex items-center justify-between">
 			<AuthorAvatarGroup authors={authors} />
-			<div class={metaStyle}>
-				<span class={iconTextStyle}>
-					<svg xmlns="http://www.w3.org/2000/svg" class={iconStyle} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+				<span class="flex items-center gap-1">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
 					</svg>
 					{readingTime.text}

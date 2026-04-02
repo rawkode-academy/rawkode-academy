@@ -1,6 +1,4 @@
 ---
-import { css, cx } from "../../../styled-system/css";
-
 type Props = {
 	variant?: "primary" | "secondary" | "ghost" | "danger";
 	size?: "sm" | "md" | "lg";
@@ -21,68 +19,39 @@ const {
 	fullWidth = false,
 } = Astro.props;
 
-const variantStyles: Record<string, Record<string, any>> = {
-	primary: {
-		color: "white",
-		bg: "colorPalette.default",
-		_hover: { bg: "colorPalette.default/90" },
-		_focus: { ringWidth: "4px", ringColor: "colorPalette.default" },
-	},
-	secondary: {
-		color: { base: "gray.900", _dark: "white" },
-		bg: { base: "white", _dark: "gray.800" },
-		border: "1px solid",
-		borderColor: { base: "gray.300", _dark: "gray.600" },
-		_hover: {
-			bg: { base: "gray.100", _dark: "gray.700" },
-		},
-		_focus: {
-			ringWidth: "4px",
-			ringColor: { base: "gray.200", _dark: "gray.700" },
-		},
-	},
-	ghost: {
-		color: { base: "gray.700", _dark: "gray.300" },
-		_hover: {
-			color: { base: "gray.900", _dark: "white" },
-			bg: { base: "gray.100", _dark: "gray.700" },
-		},
-		_focus: {
-			ringWidth: "4px",
-			ringColor: { base: "gray.200", _dark: "gray.700" },
-		},
-	},
-	danger: {
-		color: "white",
-		bg: { base: "red.600", _dark: "red.500" },
-		_hover: { bg: { base: "red.700", _dark: "red.600" } },
-		_focus: { ringWidth: "4px", ringColor: { base: "red.300", _dark: "red.800" } },
-	},
+const baseClasses =
+	"inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-4";
+
+const variantClasses = {
+	primary:
+		"text-white bg-primary hover:bg-primary/90 focus:ring-primary dark:bg-primary/20 dark:hover:bg-primary/90 dark:focus:ring-primary",
+	secondary:
+		"text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700",
+	ghost:
+		"text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:ring-gray-200 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700",
+	danger:
+		"text-white bg-red-600 hover:bg-red-700 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800",
 };
 
-const sizeStyles: Record<string, Record<string, any>> = {
-	sm: { fontSize: "sm", px: "3", py: "2" },
-	md: { fontSize: "base", px: "5", py: "2.5" },
-	lg: { fontSize: "lg", px: "6", py: "3" },
+const sizeClasses = {
+	sm: "text-sm px-3 py-2",
+	md: "text-base px-5 py-2.5",
+	lg: "text-lg px-6 py-3",
 };
 
-const classes = cx(
-	css({
-		display: "inline-flex",
-		alignItems: "center",
-		justifyContent: "center",
-		fontWeight: "medium",
-		borderRadius: "lg",
-		transition: "all",
-		transitionDuration: "200ms",
-		outline: "none",
-		...sizeStyles[size],
-		...variantStyles[variant],
-		...(disabled ? { opacity: 0.5, cursor: "not-allowed" } : {}),
-		...(fullWidth ? { width: "full" } : {}),
-	}),
+const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "";
+const widthClasses = fullWidth ? "w-full" : "";
+
+const classes = [
+	baseClasses,
+	variantClasses[variant],
+	sizeClasses[size],
+	disabledClasses,
+	widthClasses,
 	className,
-);
+]
+	.filter(Boolean)
+	.join(" ");
 
 const Tag = href ? "a" : "button";
 const props = href

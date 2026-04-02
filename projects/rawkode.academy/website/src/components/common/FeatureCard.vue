@@ -1,66 +1,27 @@
 <template>
   <div
-    :class="cx(
-      'glass-card-shimmer',
-      css({
-        p: '6',
-        shadow: 'surface',
-        _hover: { shadow: 'surfaceStrong', transform: 'translateY(-2px)' },
-        transition: 'all',
-        transitionDuration: '300ms',
-      }),
-      className,
-    )"
+    :class="[
+      'glass-card-shimmer card-shadow card-hover p-6',
+      className
+    ]"
   >
-    <div
-      :class="css({
-        display: 'flex',
-        alignItems: 'center',
-        mb: '4',
-        position: 'relative',
-        zIndex: 10,
-      })"
-    >
+    <div class="flex items-center mb-4 relative z-10">
       <div
         v-if="$slots.icon"
-        :class="cx(
-          iconBgClass,
-          css({ p: '3', borderRadius: 'full', mr: '4' }),
-        )"
+        :class="[iconBgColor, 'p-3 rounded-full mr-4']"
       >
         <slot name="icon" />
       </div>
-      <h3
-        :class="css({
-          fontSize: 'lg',
-          fontWeight: 'bold',
-          color: 'fg.default',
-        })"
-      >
-        {{ title }}
-      </h3>
+      <h3 class="text-lg font-bold text-primary-content">{{ title }}</h3>
     </div>
-    <p
-      :class="css({
-        color: 'fg.muted',
-        position: 'relative',
-        zIndex: 10,
-      })"
-    >
-      {{ description }}
-    </p>
-    <div
-      v-if="$slots.footer"
-      :class="css({ mt: '4', position: 'relative', zIndex: 10 })"
-    >
+    <p class="text-secondary-content relative z-10">{{ description }}</p>
+    <div v-if="$slots.footer" class="mt-4 relative z-10">
       <slot name="footer" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { css, cx } from "../../../styled-system/css";
-
 interface Props {
 	title: string;
 	description: string;
@@ -69,10 +30,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-	iconBgColor: "",
+	iconBgColor: "bg-primary/10",
 	class: "",
 });
 
-const iconBgClass = props.iconBgColor || css({ bg: "colorPalette.default/10" });
 const className = props.class;
 </script>

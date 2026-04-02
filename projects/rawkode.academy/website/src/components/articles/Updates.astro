@@ -1,6 +1,4 @@
 ---
-import { css } from "../../../styled-system/css";
-
 interface Update {
 	date: Date;
 	description: string;
@@ -19,55 +17,19 @@ const formatDate = (date: Date) => {
 		day: "numeric",
 	}).format(date);
 };
-
-const wrapperStyle = css({
-	mb: '4',
-	fontSize: 'sm',
-	color: 'fg.subtle',
-	bg: 'bg.subtle',
-	rounded: 'md',
-	px: '3',
-	py: '2',
-	borderWidth: '1px',
-	borderStyle: 'solid',
-	borderColor: 'border.subtle',
-});
-
-const flexStyle = css({
-	display: 'flex',
-	alignItems: 'flex-start',
-	gap: '2',
-});
-
-const iconStyle = css({
-	w: '4',
-	h: '4',
-	mt: '0.5',
-	flexShrink: '0',
-	color: 'fg.subtle',
-});
-
-const labelStyle = css({
-	fontWeight: '500',
-	color: 'fg.default',
-});
-
-const separatorStyle = css({
-	color: { base: 'gray.400', _dark: 'gray.600' },
-});
 ---
 
 {
 	updates && updates.length > 0 && (
-		<div class={wrapperStyle}>
-			<div class={flexStyle}>
+		<div class="mb-4 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 rounded-md px-3 py-2 border border-gray-200 dark:border-gray-800">
+			<div class="flex items-start gap-2">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke-width="1.5"
 					stroke="currentColor"
-					class={iconStyle}
+					class="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-500"
 				>
 					<path
 						stroke-linecap="round"
@@ -75,12 +37,12 @@ const separatorStyle = css({
 						d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
 					/>
 				</svg>
-				<div class={css({ flex: '1' })}>
-					<span class={labelStyle}>Updated:</span>
+				<div class="flex-1">
+					<span class="font-medium text-gray-700 dark:text-gray-300">Updated:</span>
 					{updates.map((update, index) => (
-						<span class={css({ ml: '1' })}>
+						<span class="ml-1">
 							{formatDate(update.date)} - {update.description}
-							{index < updates.length - 1 && <span class={separatorStyle}> &bull; </span>}
+							{index < updates.length - 1 && <span class="text-gray-400 dark:text-gray-600"> • </span>}
 						</span>
 					))}
 				</div>

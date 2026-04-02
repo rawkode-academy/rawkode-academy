@@ -1,6 +1,4 @@
 ---
-import { css } from "../../../styled-system/css";
-
 export interface Props {
 	lightSrc: ImageMetadata;
 	darkSrc: ImageMetadata;
@@ -18,15 +16,9 @@ const {
 	class: className = "",
 	loading = "lazy",
 } = Astro.props;
-
-const wrapperClass = css({
-	position: "relative",
-	width: "full",
-	height: "auto",
-});
 ---
 
-<div class={`${wrapperClass} ${className}`}>
+<div class={`theme-aware-image ${className}`}>
 	<Image
 		src={lightSrc}
 		alt={alt}
@@ -42,6 +34,12 @@ const wrapperClass = css({
 </div>
 
 <style>
+	.theme-aware-image {
+		position: relative;
+		width: 100%;
+		height: auto;
+	}
+
 	/* Display light image by default and hide dark image */
 	.theme-light-only {
 		display: block;
