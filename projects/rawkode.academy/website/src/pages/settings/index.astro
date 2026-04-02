@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import EmailPreferences from "@/components/settings/EmailPreferences.vue";
@@ -58,36 +59,84 @@ try {
 ---
 
 <Page title="Settings - Rawkode Academy" description="Manage your account settings and email preferences.">
-	<div class="max-w-3xl mx-auto py-8 px-4">
-		<h1 class="text-3xl font-bold text-neutral-900 dark:text-white mb-8">
+	<div class={css({
+	maxW: '3xl',
+	mx: 'auto',
+	py: '8',
+	px: '4',
+})}>
+		<h1 class={css({
+	fontSize: '3xl',
+	fontWeight: 'bold',
+	color: 'neutral.900',
+	mb: '8',
+}) + " dark:text-white"}>
 			Settings
 		</h1>
 
-		<div class="space-y-8">
+		<div class={css({
+	gap: '8',
+})}>
 			<!-- Profile Section -->
-			<section class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-				<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-					<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+			<section class={css({
+	rounded: '2xl',
+	bg: 'white',
+	borderWidth: '1px',
+	borderColor: 'neutral.200',
+	overflow: 'hidden',
+}) + " dark:bg-neutral-900 dark:border-neutral-800"}>
+				<div class={css({
+	px: '6',
+	py: '4',
+	borderBottomWidth: '1px',
+	borderColor: 'neutral.200',
+}) + " dark:border-neutral-800"}>
+					<h2 class={css({
+	fontSize: 'lg',
+	fontWeight: 'semibold',
+	color: 'neutral.900',
+}) + " dark:text-white"}>
 						Profile
 					</h2>
 				</div>
-				<div class="p-6">
-					<div class="flex items-center gap-4">
+				<div class={css({
+	p: '6',
+})}>
+					<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '4',
+})}>
 						{user.image ? (
 							<img 
 								src={user.image} 
 								alt={`Profile picture for ${user.name || 'user'}`}
-								class="w-16 h-16 rounded-full"
+								class={css({
+	w: '16',
+	h: '16',
+	rounded: 'full',
+})}
 								loading="lazy"
 							/>
 						) : (
-							<Avatar client:load name={user.name || ""} variant="pixel" class="w-16 h-16 rounded-full" />
+							<Avatar client:load name={user.name || ""} variant="pixel" class={css({
+	w: '16',
+	h: '16',
+	rounded: 'full',
+})} />
 						)}
 						<div>
-							<p class="text-lg font-medium text-neutral-900 dark:text-white">
+							<p class={css({
+	fontSize: 'lg',
+	fontWeight: 'medium',
+	color: 'neutral.900',
+}) + " dark:text-white"}>
 								{user.name}
 							</p>
-							<p class="text-sm text-neutral-500 dark:text-neutral-400">
+							<p class={css({
+	fontSize: 'sm',
+	color: 'neutral.500',
+}) + " dark:text-neutral-400"}>
 								{user.email}
 							</p>
 						</div>
@@ -96,16 +145,37 @@ try {
 			</section>
 
 			<!-- Email Preferences Section -->
-				<section class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-					<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+				<section class={css({
+	rounded: '2xl',
+	bg: 'white',
+	borderWidth: '1px',
+	borderColor: 'neutral.200',
+	overflow: 'hidden',
+}) + " dark:bg-neutral-900 dark:border-neutral-800"}>
+					<div class={css({
+	px: '6',
+	py: '4',
+	borderBottomWidth: '1px',
+	borderColor: 'neutral.200',
+}) + " dark:border-neutral-800"}>
+						<h2 class={css({
+	fontSize: 'lg',
+	fontWeight: 'semibold',
+	color: 'neutral.900',
+}) + " dark:text-white"}>
 							Email Preferences
 						</h2>
-					<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+					<p class={css({
+	fontSize: 'sm',
+	color: 'neutral.500',
+	mt: '1',
+}) + " dark:text-neutral-400"}>
 						Manage what emails you receive from Rawkode Academy.
 					</p>
 				</div>
-					<div class="p-6">
+					<div class={css({
+	p: '6',
+})}>
 						<EmailPreferences
 							client:load
 							academyNewsletter={academyNewsletter}
@@ -119,16 +189,37 @@ try {
 				</section>
 
 				<!-- Email Tools -->
-				<section class="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-					<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+				<section class={css({
+	rounded: '2xl',
+	bg: 'white',
+	borderWidth: '1px',
+	borderColor: 'neutral.200',
+	overflow: 'hidden',
+}) + " dark:bg-neutral-900 dark:border-neutral-800"}>
+					<div class={css({
+	px: '6',
+	py: '4',
+	borderBottomWidth: '1px',
+	borderColor: 'neutral.200',
+}) + " dark:border-neutral-800"}>
+						<h2 class={css({
+	fontSize: 'lg',
+	fontWeight: 'semibold',
+	color: 'neutral.900',
+}) + " dark:text-white"}>
 							Email Tools
 						</h2>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+						<p class={css({
+	fontSize: 'sm',
+	color: 'neutral.500',
+	mt: '1',
+}) + " dark:text-neutral-400"}>
 							Send yourself a quick test message to confirm email delivery works.
 						</p>
 					</div>
-					<div class="p-6">
+					<div class={css({
+	p: '6',
+})}>
 						<TestEmailButton client:load />
 					</div>
 				</section>

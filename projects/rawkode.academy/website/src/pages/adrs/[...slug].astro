@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getCollection, getEntries, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import Page from "@/wrappers/page.astro";
@@ -52,73 +53,193 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 ---
 
 <Page title={`ADR-${adrNumber}: ${adr.data.title}`} description={`Architecture Decision Record: ${adr.data.title}`}>
-  <h1 class="text-5xl font-extrabold dark:text-white">
+  <h1 class={css({
+	fontSize: '5xl',
+	fontWeight: 'extrabold',
+}) + " dark:text-white"}>
     <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
   </h1>
 
-  <div class="relative max-w-full overflow-x-hidden">
-    <article class="format prose dark:format-invert w-full max-w-full">
-      <header class="mb-8 lg:mb-10 not-format">
+  <div class={css({
+	pos: 'relative',
+	maxW: 'full',
+	overflowX: 'hidden',
+})}>
+    <article class={css({
+	w: 'full',
+	maxW: 'full',
+}) + " format prose dark:format-invert"}>
+      <header class={css({
+	mb: '8',
+	lg: {
+		mb: '10',
+	},
+}) + " not-format"}>
         <!-- Metadata card with glass morphism effect -->
         <div
-          class="relative backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg"
+          class={css({
+	pos: 'relative',
+	backdropBlur: 'sm',
+	bg: 'white/30',
+	rounded: 'xl',
+	p: '6',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+	shadow: 'lg',
+}) + " dark:bg-gray-800/30 dark:border-gray-700"}
         >
-          <div class="flex flex-col gap-4">
+          <div class={css({
+	display: 'flex',
+	flexDir: 'column',
+	gap: '4',
+})}>
             <!-- Author section -->
             {authors.length > 0 && (
-              <div class="flex flex-col">
-                <div class="flex flex-wrap gap-2 mb-2">
-                  <div class="flex -space-x-4">
+              <div class={css({
+	display: 'flex',
+	flexDir: 'column',
+})}>
+                <div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	gap: '2',
+	mb: '2',
+})}>
+                  <div class={css({
+	display: 'flex',
+	gap: '-4',
+})}>
                     {authors.filter(author => author && author.data).slice(0, 4).map((author, index) => (
-                      <div class="relative" style={`z-index: ${10 - index}`}>
+                      <div class={css({
+	pos: 'relative',
+})} style={`z-index: ${10 - index}`}>
                         <img
-                          class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-secondary bg-white dark:bg-gray-800"
+                          class={css({
+	w: '16',
+	h: '16',
+	minW: '16',
+	rounded: 'full',
+	objectFit: 'cover',
+	borderWidth: '2px',
+	bg: 'white',
+}) + " border-secondary dark:bg-gray-800"}
                           src={author.data.avatarUrl}
                           alt={`Profile picture of ${author.data.name}`}
                         />
                         {index === 0 && (
-                          <span class="absolute bottom-0 right-0 h-4 w-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"></span>
+                          <span class={css({
+	pos: 'absolute',
+	bottom: '0',
+	right: '0',
+	h: '4',
+	w: '4',
+	bg: 'green.400',
+	rounded: 'full',
+	borderWidth: '2px',
+}) + " border-white dark:border-gray-800"}></span>
                         )}
                       </div>
                     ))}
                     {authors.filter(author => author && author.data).length > 4 && (
-                      <div class="relative z-0">
-                        <div class="w-16 h-16 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary bg-white dark:bg-gray-800 flex items-center justify-center text-sm text-secondary dark:text-secondary font-medium">
+                      <div class={css({
+	pos: 'relative',
+	zIndex: '0',
+})}>
+                        <div class={css({
+	w: '16',
+	h: '16',
+	rounded: 'full',
+	bg: 'white',
+	borderWidth: '2px',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+}) + " dark:bg-secondary/20 border-secondary dark:bg-gray-800 text-secondary dark:text-secondary"}>
                           +{authors.filter(author => author && author.data).length - 4}
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
-                <div class="flex flex-wrap gap-2 mt-2">
+                <div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	gap: '2',
+	mt: '2',
+})}>
                   {authors.filter(author => author && author.data).map((author) => (
-                    <div class="inline-flex items-center bg-primary/10 dark:bg-primary/20 rounded-full px-3 py-1">
+                    <div class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	bg: 'primary/10',
+	rounded: 'full',
+	px: '3',
+	py: '1',
+}) + " dark:bg-primary/20"}>
                       <a
                         href={author.data.github}
                         target="_blank"
                         rel="author noopener noreferrer"
-                        class="text-sm font-medium text-secondary dark:text-secondary hover:text-secondary/90 dark:hover:text-secondary/90 transition-colors"
+                        class={css({
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	_hover: {
+		color: 'secondary/90',
+	},
+	transition: 'colors',
+}) + " text-secondary dark:text-secondary dark:hover:text-secondary/90"}
                       >
                         {author.data.name}
                       </a>
-                      <span class="mx-1 text-secondary dark:text-secondary">•</span>
-                      <span class="text-xs text-secondary dark:text-secondary">@{author.id}</span>
+                      <span class={css({
+	mx: '1',
+}) + " text-secondary dark:text-secondary"}>•</span>
+                      <span class={css({
+	fontSize: 'xs',
+}) + " text-secondary dark:text-secondary"}>@{author.id}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {authors.length > 0 && <div class="w-full h-px bg-gray-200 dark:bg-gray-700 my-2"></div>}
+            {authors.length > 0 && <div class={css({
+	w: 'full',
+	h: 'px',
+	bg: 'gray.200',
+	my: '2',
+}) + " dark:bg-gray-700"}></div>}
 
             <!-- Status section -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div class="mt-2 md:mt-0">
+            <div class={css({
+	display: 'flex',
+	flexDir: 'column',
+	md: {
+		flexDir: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	},
+})}>
+              <div class={css({
+	mt: '2',
+	md: {
+		mt: '0',
+	},
+})}>
                 {adr.data.adoptedAt ? (
-                  <div class="flex items-center">
+                  <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+})}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-green-500"
+                      class={css({
+	h: '5',
+	w: '5',
+	color: 'green.500',
+})}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -130,15 +251,27 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span class="ml-2 text-sm font-medium text-green-700 dark:text-green-400">
+                    <span class={css({
+	ml: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	color: 'green.700',
+}) + " dark:text-green-400"}>
                       Adopted on {formatDate(adr.data.adoptedAt)}
                     </span>
                   </div>
                 ) : (
-                  <div class="flex items-center">
+                  <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+})}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-yellow-500"
+                      class={css({
+	h: '5',
+	w: '5',
+	color: 'yellow.500',
+})}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -151,7 +284,12 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                       />
                     </svg>
 
-                    <span class="ml-2 text-sm font-medium text-yellow-700 dark:text-yellow-400">
+                    <span class={css({
+	ml: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	color: 'yellow.700',
+}) + " dark:text-yellow-400"}>
                       Adopted on {formatDate(adr.data.adoptedAt)}
                     </span>
                   </div>
@@ -162,7 +300,9 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
         </div>
       </header>
 
-      <div class="prose dark:prose-invert max-w-none">
+      <div class={css({
+	maxW: 'none',
+}) + " prose dark:prose-invert"}>
         <Content />
       </div>
     </article>

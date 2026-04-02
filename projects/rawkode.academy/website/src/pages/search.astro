@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../styled-system/css";
 import { getCollection } from "astro:content";
 import { env } from "cloudflare:workers";
 import VideoFeed from "@/components/video/video-feed.astro";
@@ -56,11 +57,19 @@ const feedVideos = results
 
 <Page title={searchQuery ? `${searchQuery} Search Results` : "Search"}>
 	{searchQuery.length === 0 ? (
-		<p class="text-center text-gray-500 dark:text-gray-400 py-16">
+		<p class={css({
+	textAlign: 'center',
+	color: 'gray.500',
+	py: '16',
+}) + " dark:text-gray-400"}>
 			Enter a search term to find videos.
 		</p>
 	) : feedVideos.length === 0 ? (
-		<p class="text-center text-gray-500 dark:text-gray-400 py-16">
+		<p class={css({
+	textAlign: 'center',
+	color: 'gray.500',
+	py: '16',
+}) + " dark:text-gray-400"}>
 			No videos matched "{searchQuery}".
 		</p>
 	) : (

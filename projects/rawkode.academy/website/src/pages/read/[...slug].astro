@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getImage } from "astro:assets";
 import { getEntry } from "astro:content";
 import {
@@ -155,7 +156,9 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 			<article class="prose">
 				<Updates updates={article.data.updates} />
 				<Content />
-				<NewsletterCTA class="my-12 not-prose" />
+				<NewsletterCTA class={css({
+	my: '12',
+}) + " not-prose"} />
 				<Resources resources={article.data.resources} />
 				<RelatedArticles currentArticle={article} limit={3} />
 			</article>

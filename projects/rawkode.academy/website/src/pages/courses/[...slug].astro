@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getImage } from "astro:assets";
 import {
 	type CollectionEntry,
@@ -132,10 +133,21 @@ const formattedAuthors = authors.map((author) => ({
 		</Fragment>
 	</CourseDetailHero>
 
-	<div class="bg-gray-100 dark:bg-gray-900">
+	<div class={css({
+	bg: 'gray.100',
+}) + " dark:bg-gray-900"}>
 		<!-- Main Content -->
-		<div class="py-16 px-4 mx-auto max-w-screen-xl">
-			<div class="mb-16 max-w-3xl mx-auto">
+		<div class={css({
+	py: '16',
+	px: '4',
+	mx: 'auto',
+	maxW: 'screen-xl',
+})}>
+			<div class={css({
+	mb: '16',
+	maxW: '3xl',
+	mx: 'auto',
+})}>
 				<NewsletterCTA
 					server:defer
 					audience={`course:${course.id}`}
@@ -147,31 +159,70 @@ const formattedAuthors = authors.map((author) => ({
 
 			<!-- Course Overview Content -->
 			{Content && (
-				<div class="mb-16">
-					<h2 class="text-3xl font-bold text-primary-content mb-8">Course Overview</h2>
-					<article class="prose prose-lg dark:prose-invert max-w-none">
+				<div class={css({
+	mb: '16',
+})}>
+					<h2 class={css({
+	fontSize: '3xl',
+	fontWeight: 'bold',
+	mb: '8',
+}) + " text-primary-content"}>Course Overview</h2>
+					<article class={css({
+	maxW: 'none',
+}) + " prose prose-lg dark:prose-invert"}>
 						<Content />
 					</article>
 				</div>
 			)}
 
 			<!-- Course Modules -->
-			<div id="course-content" class="mb-16 scroll-mt-20">
-				<h2 class="text-3xl font-bold text-primary-content mb-8">Course Content</h2>
+			<div id="course-content" class={css({
+	mb: '16',
+	scrollMarginTop: '20',
+})}>
+				<h2 class={css({
+	fontSize: '3xl',
+	fontWeight: 'bold',
+	mb: '8',
+}) + " text-primary-content"}>Course Content</h2>
 				<CourseModules course={course} />
 			</div>
 
 			<!-- Resources -->
 			{course.data.resources && course.data.resources.length > 0 && (
-				<div class="mb-16">
-					<h2 class="text-3xl font-bold text-primary-content mb-8">Course Resources</h2>
-					<div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+				<div class={css({
+	mb: '16',
+})}>
+					<h2 class={css({
+	fontSize: '3xl',
+	fontWeight: 'bold',
+	mb: '8',
+}) + " text-primary-content"}>Course Resources</h2>
+					<div class={css({
+	bg: 'white',
+	rounded: 'lg',
+	p: '6',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+}) + " dark:bg-gray-800 dark:border-gray-700"}>
 						{course.data.resources.map((resource) => (
-							<div class="flex items-start gap-4 mb-4 last:mb-0">
-								<div class="flex-1">
-									<h3 class="font-semibold text-primary-content">{resource.title}</h3>
+							<div class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '4',
+	mb: '4',
+}) + " last:mb-0"}>
+								<div class={css({
+	flex: '1',
+})}>
+									<h3 class={css({
+	fontWeight: 'semibold',
+}) + " text-primary-content"}>{resource.title}</h3>
 									{resource.description && (
-										<p class="text-muted text-sm mt-1">{resource.description}</p>
+										<p class={css({
+	fontSize: 'sm',
+	mt: '1',
+}) + " text-muted"}>{resource.description}</p>
 									)}
 								</div>
 								{resource.type === "url" && resource.url && (
@@ -179,9 +230,14 @@ const formattedAuthors = authors.map((author) => ({
 										href={resource.url}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="text-primary hover:text-primary-dark transition-colors"
+										class={css({
+	transition: 'colors',
+}) + " text-primary hover:text-primary-dark"}
 									>
-										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg class={css({
+	w: '5',
+	h: '5',
+})} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
 										</svg>
 									</a>
