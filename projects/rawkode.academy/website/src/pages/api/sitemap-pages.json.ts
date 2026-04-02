@@ -125,12 +125,6 @@ async function generateNavigationItems(
 			description: "Recent updates and changes",
 		},
 		{
-			href: "/community-day",
-			title: "Community Day",
-			category: "Community",
-			description: "Community events and meetups",
-		},
-		{
 			href: "/search",
 			title: "Search",
 			category: "Tools",
