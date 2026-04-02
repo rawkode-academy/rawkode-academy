@@ -2,29 +2,29 @@
 	just --list
 
 dev:
-	deno run dev
+	bun run dev
 
 format:
 	nixfmt .
-	deno fmt .
+	bun run format
 
 build:
-	deno run --allow-all npm:astro check
-	deno run --allow-all npm:astro build
+	bun run build
 
 test:
-	deno run test
+	bun run test
 
 test-with-logs:
-	deno run --allow-all npm:vitest --reporter=default --no-file-parallelism --disable-console-intercept
+	bun run test --reporter=default --no-file-parallelism --disable-console-intercept
 
 deploy:
 	#!/usr/bin/env bash
 	dagger call deploy --git-head $(git rev-parse --abbrev-ref HEAD) --cloudflare-api-token op://sa.rawkode.academy/cloudflare/password
 
 preview:
-	deno run --allow-all npm:astro preview
+	bun run preview
 
+codegen:
 	bun run graphql-codegen --config graphql-codegen.ts
 
 # Invalidate the videos-latest cache tag on Cloudflare
@@ -45,4 +45,3 @@ generate-subgraph-sdl:
 	set -euo pipefail
 	bun run subgraph:sdl
 	echo "SDL generated at subgraph/schema.gql"
-

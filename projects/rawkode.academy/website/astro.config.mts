@@ -152,6 +152,11 @@ export default defineConfig({
 					]
 				: []),
 		]),
+		optimizeDeps: {
+			// Cloudflare's SSR module runner can lose the optimized `marked` bundle in
+			// `.vite/deps_ssr`, so load it directly from node_modules in dev.
+			exclude: ["marked"],
+		},
 		server: {
 			fs: {
 				// Keep Vite's default workspace root allow-list and add our external content dir.

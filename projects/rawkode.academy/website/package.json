@@ -6,7 +6,6 @@
 		"build": "astro check && astro build",
 		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
-		"dev:wrangler": "wrangler dev",
 		"dev": "astro dev",
 		"format": "biome format --write",
 		"preview": "astro preview",
