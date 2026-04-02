@@ -89,10 +89,10 @@ const normalizedTitle = baseTitle.toLowerCase().includes(BRAND_NAME.toLowerCase(
 
 	<link rel="sitemap" href="/sitemap-index.xml" />
 
-	<!-- PostHog analytics (loaded lazily after consent) -->
+	<!-- PostHog analytics (loaded lazily, respects DNT) -->
 	<PostHog userId={userId} />
 
-	<!-- Grafana Faro observability (loaded lazily after consent) -->
+	<!-- Grafana Faro observability (loaded lazily, skips localhost) -->
 	<Grafana />
 
 	<!-- Initial theme script: respects saved preference or OS setting; avoids FOUC -->

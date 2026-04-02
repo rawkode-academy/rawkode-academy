@@ -9,26 +9,10 @@ const { userId } = Astro.props;
 <script define:vars={{ userId }}>
 	const PH_KEY = "phc_8BUP734dzskih8urQFkFL1qxT5veRDm6zzXwROZND4M";
 	const PH_HOST = "https://eu.i.posthog.com";
-	const CONSENT_KEY = "consent_analytics";
-
 	let posthogInitialized = false;
 	let enableInFlight = false;
 	let pageExitHandlerAttached = false;
 	let pageStartTime = Date.now();
-
-	const getConsent = () => {
-		try {
-			return localStorage.getItem(CONSENT_KEY);
-		} catch {
-			return null;
-		}
-	};
-
-	const checkDoNotTrack = () =>
-		navigator.doNotTrack === "1" || window.doNotTrack === "1";
-
-	const shouldEnableTracking = () =>
-		getConsent() === "granted" && !checkDoNotTrack();
 
 	const getUtmParams = () => {
 		try {
@@ -120,7 +104,7 @@ const { userId } = Astro.props;
 	};
 
 	const enablePostHogNow = () => {
-		if (posthogInitialized || enableInFlight || !shouldEnableTracking()) {
+		if (posthogInitialized || enableInFlight) {
 			return;
 		}
 		enableInFlight = true;
@@ -131,16 +115,10 @@ const { userId } = Astro.props;
 				api_host: PH_HOST,
 				autocapture: true,
 				capture_pageview: false,
-				opt_out_capturing_by_default: false,
 				respect_dnt: true,
 				session_recording: {
 					maskAllInputs: true,
 					sampling: { rate: 0 },
-				},
-				loaded: function (ph) {
-					try {
-						ph.opt_in_capturing();
-					} catch {}
 				},
 			});
 
@@ -183,8 +161,6 @@ const { userId } = Astro.props;
 	};
 
 	const schedulePostHogEnable = () => {
-		if (!shouldEnableTracking()) return;
-
 		const start = () => enablePostHogNow();
 		if ("requestIdleCallback" in window) {
 			window.requestIdleCallback(start, { timeout: 3000 });
@@ -193,17 +169,10 @@ const { userId } = Astro.props;
 		window.setTimeout(start, 1500);
 	};
 
-	// Called by consent banner after user grants consent.
-	window.enablePostHog = () => {
+	// Initialize PostHog lazily after page load.
+	if (document.readyState === "complete") {
 		schedulePostHogEnable();
-	};
-
-	// Returning visitors with existing consent should initialize analytics lazily.
-	if (shouldEnableTracking()) {
-		if (document.readyState === "complete") {
-			schedulePostHogEnable();
-		} else {
-			window.addEventListener("load", schedulePostHogEnable, { once: true });
-		}
+	} else {
+		window.addEventListener("load", schedulePostHogEnable, { once: true });
 	}
 </script>
