@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import ArticleCard from "./ArticleCard.astro";
+import { css } from "../../../styled-system/css";
 
 interface Props {
 	currentArticle: CollectionEntry<"articles">;
@@ -47,14 +48,18 @@ if (relatedArticles.length < limit) {
 
 // Limit to requested number
 const finalRelatedArticles = relatedArticles.slice(0, limit);
+
+const sectionStyle = css({ mt: '16', pt: '16', borderTopWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } });
+const headingStyle = css({ fontSize: '2xl', fontWeight: 'bold', color: { base: 'gray.900', _dark: 'white' }, mb: '8' });
+const gridStyle = css({ display: 'grid', gap: '8', gridTemplateColumns: { md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' } });
 ---
 
 {finalRelatedArticles.length > 0 && (
-	<section class="mt-16 pt-16 border-t border-gray-200 dark:border-gray-700">
-		<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+	<section class={sectionStyle}>
+		<h2 class={headingStyle}>
 			Related Articles
 		</h2>
-		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+		<div class={gridStyle}>
 			{finalRelatedArticles.map((article) => (
 				<ArticleCard article={article} />
 			))}

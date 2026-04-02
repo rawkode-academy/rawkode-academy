@@ -90,6 +90,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import { onMounted, ref } from "vue";
 import SkeletonComment from "@/components/common/SkeletonComment.vue";
 import ErrorState from "@/components/common/ErrorState.vue";

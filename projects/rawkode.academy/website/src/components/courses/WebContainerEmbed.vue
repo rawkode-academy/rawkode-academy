@@ -129,6 +129,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { WebContainer } from "@webcontainer/api";
 

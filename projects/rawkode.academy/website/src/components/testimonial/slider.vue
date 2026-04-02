@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { Testimonial } from "@/types/testimonial";
 

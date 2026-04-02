@@ -5,6 +5,7 @@ import {
 	InformationCircleIcon,
 	LightBulbIcon,
 } from "@heroicons/vue/24/outline";
+import { css } from "../../styled-system/css";
 
 interface Props {
 	variant: "tip" | "caution" | "danger" | "info";
@@ -12,64 +13,58 @@ interface Props {
 
 const { variant } = Astro.props as Props;
 
-// Define styles based on variant
-const styles = {
-	container: "",
-	icon: "",
-	iconBg: "",
-	border: "",
-	glow: "",
+const variantStyles = {
+	tip: {
+		container: css({ bgGradient: 'to-r', gradientFrom: { base: 'green.50', _dark: 'green.950/40' }, gradientTo: { base: 'emerald.50', _dark: 'emerald.950/40' }, color: { base: 'green.900', _dark: 'green.100' } }),
+		icon: css({ color: { base: 'green.700', _dark: 'green.300' } }),
+		iconBg: css({ bg: { base: 'green.100', _dark: 'green.900/50' } }),
+		border: css({ borderColor: { base: 'green.200', _dark: 'green.800' } }),
+	},
+	caution: {
+		container: css({ bgGradient: 'to-r', gradientFrom: { base: 'amber.50', _dark: 'amber.950/40' }, gradientTo: { base: 'yellow.50', _dark: 'yellow.950/40' }, color: { base: 'amber.900', _dark: 'amber.100' } }),
+		icon: css({ color: { base: 'amber.700', _dark: 'amber.300' } }),
+		iconBg: css({ bg: { base: 'amber.100', _dark: 'amber.900/50' } }),
+		border: css({ borderColor: { base: 'amber.200', _dark: 'amber.800' } }),
+	},
+	danger: {
+		container: css({ bgGradient: 'to-r', gradientFrom: { base: 'red.50', _dark: 'red.950/40' }, gradientTo: { base: 'rose.50', _dark: 'rose.950/40' }, color: { base: 'red.900', _dark: 'red.100' } }),
+		icon: css({ color: { base: 'red.700', _dark: 'red.300' } }),
+		iconBg: css({ bg: { base: 'red.100', _dark: 'red.900/50' } }),
+		border: css({ borderColor: { base: 'red.200', _dark: 'red.800' } }),
+	},
+	info: {
+		container: css({ bgGradient: 'to-r', gradientFrom: { base: 'colorPalette.default/5', _dark: 'colorPalette.default/20' }, gradientTo: { base: 'colorPalette.default/10', _dark: 'colorPalette.default/30' }, color: 'colorPalette.default' }),
+		icon: css({ color: 'colorPalette.default' }),
+		iconBg: css({ bg: { base: 'colorPalette.default/10', _dark: 'colorPalette.default/20' } }),
+		border: css({ borderColor: { base: 'colorPalette.default/20', _dark: 'colorPalette.default/60' } }),
+	},
 };
 
-switch (variant) {
-	case "tip":
-		styles.container =
-			"bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 text-green-900 dark:text-green-100";
-		styles.icon = "text-green-700 dark:text-green-300";
-		styles.iconBg = "bg-green-100 dark:bg-green-900/50";
-		styles.border = "border-green-200 dark:border-green-800";
-		styles.glow = "shadow-green-100 dark:shadow-green-900/20";
-		break;
-	case "caution":
-		styles.container =
-			"bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-950/40 text-amber-900 dark:text-amber-100";
-		styles.icon = "text-amber-700 dark:text-amber-300";
-		styles.iconBg = "bg-amber-100 dark:bg-amber-900/50";
-		styles.border = "border-amber-200 dark:border-amber-800";
-		styles.glow = "shadow-amber-100 dark:shadow-amber-900/20";
-		break;
-	case "danger":
-		styles.container =
-			"bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/40 text-red-900 dark:text-red-100";
-		styles.icon = "text-red-700 dark:text-red-300";
-		styles.iconBg = "bg-red-100 dark:bg-red-900/50";
-		styles.border = "border-red-200 dark:border-red-800";
-		styles.glow = "shadow-red-100 dark:shadow-red-900/20";
-		break;
-	case "info":
-		styles.container =
-			"bg-gradient-to-r from-primary/5 to-secondary/10 dark:from-primary/20 dark:to-secondary/30 text-primary dark:text-primary";
-		styles.icon = "text-primary dark:text-primary";
-		styles.iconBg = "bg-primary/10 dark:bg-primary/20";
-		styles.border = "border-primary/20 dark:border-primary/60";
-		styles.glow = "shadow-primary/10 dark:shadow-primary/20";
-		break;
-}
+const styles = variantStyles[variant];
+
+const wrapperStyle = css({ my: '3', borderRadius: 'lg', borderWidth: '1px', px: '4', py: '3', position: 'relative', overflow: 'hidden', transition: 'all', transitionDuration: '200ms', _hover: { shadow: 'md' } });
+const accentLineStyle = css({ position: 'absolute', left: '0', top: '0', bottom: '0', w: '0.5', opacity: '0.6', _groupHover: { opacity: '1' }, transition: 'opacity', transitionDuration: '200ms' });
+const contentWrapStyle = css({ display: 'flex', alignItems: 'flex-start', gap: '3' });
+const iconWrapStyle = css({ p: '1.5', borderRadius: 'md', flexShrink: '0', transition: 'transform', transitionDuration: '200ms', _groupHover: { transform: 'scale(1.05)' } });
+const svgStyle = css({ h: '4', w: '4' });
+const bodyStyle = css({ flex: '1', minW: '0', mt: '-0.5' });
+const labelWrapStyle = css({ display: 'flex', alignItems: 'center', gap: '2', mb: '1' });
+const labelStyle = css({ fontSize: '10px', fontWeight: 'semibold', letterSpacing: 'wider', opacity: '0.6', textTransform: 'uppercase' });
 ---
 
 <div
-	class={`aside my-3 rounded-lg border ${styles.border} ${styles.container} px-4 py-3 relative overflow-hidden transition-all duration-200 hover:shadow-md group ${styles.glow}`}
+	class={`aside group ${wrapperStyle} ${styles.border} ${styles.container}`}
 >
 	<!-- Subtle accent line -->
-	<div class={`absolute left-0 top-0 bottom-0 w-0.5 ${styles.iconBg} opacity-60 group-hover:opacity-100 transition-opacity duration-200`}></div>
-	
+	<div class={`${accentLineStyle} ${styles.iconBg}`}></div>
+
 	<!-- Content with inline icon -->
-	<div class="flex items-start gap-3">
-		<div class={`${styles.iconBg} ${styles.icon} p-1.5 rounded-md flex-shrink-0 transition-transform duration-200 group-hover:scale-105`}>
+	<div class={contentWrapStyle}>
+		<div class={`${iconWrapStyle} ${styles.iconBg} ${styles.icon}`}>
 			{
 				variant === "tip" && (
 					<LightBulbIcon
-						class="h-4 w-4"
+						class={svgStyle}
 						aria-hidden="true"
 						client:only="vue"
 					/>
@@ -78,7 +73,7 @@ switch (variant) {
 			{
 				variant === "caution" && (
 					<ExclamationTriangleIcon
-						class="h-4 w-4"
+						class={svgStyle}
 						aria-hidden="true"
 						client:only="vue"
 					/>
@@ -87,7 +82,7 @@ switch (variant) {
 			{
 				variant === "danger" && (
 					<FireIcon
-						class="h-4 w-4"
+						class={svgStyle}
 						aria-hidden="true"
 						client:only="vue"
 					/>
@@ -96,16 +91,16 @@ switch (variant) {
 			{
 				variant === "info" && (
 					<InformationCircleIcon
-						class="h-4 w-4"
+						class={svgStyle}
 						aria-hidden="true"
 						client:only="vue"
 					/>
 				)
 			}
 		</div>
-		<div class="flex-1 min-w-0 prose-p:my-0 -mt-0.5">
-			<div class="flex items-center gap-2 mb-1">
-				<span class="text-[10px] font-semibold tracking-wider opacity-60 uppercase">
+		<div class={bodyStyle}>
+			<div class={labelWrapStyle}>
+				<span class={labelStyle}>
 					{variant}
 				</span>
 			</div>
@@ -115,40 +110,22 @@ switch (variant) {
 </div>
 
 <style>
-	@reference "../styles/global.css";
-
 	/* Ensure proper prose spacing */
 	.aside :global(p) {
-		@apply leading-relaxed;
+		line-height: 1.625;
 	}
 
 	.aside :global(p:not(:first-child)) {
-		@apply mt-2;
+		margin-top: 0.5rem;
 	}
 
 	/* Refined link styling */
 	.aside :global(a) {
-		@apply font-medium underline decoration-1 underline-offset-2 transition-all duration-200;
-	}
-
-	.aside.border-green-200 :global(a) {
-		@apply text-green-700 decoration-green-500/50 hover:text-green-800 hover:decoration-green-600;
-		@apply dark:text-green-300 dark:decoration-green-400/50 dark:hover:text-green-200 dark:hover:decoration-green-300;
-	}
-
-	.aside.border-amber-200 :global(a) {
-		@apply text-amber-700 decoration-amber-500/50 hover:text-amber-800 hover:decoration-amber-600;
-		@apply dark:text-amber-300 dark:decoration-amber-400/50 dark:hover:text-amber-200 dark:hover:decoration-amber-300;
-	}
-
-	.aside.border-red-200 :global(a) {
-		@apply text-red-700 decoration-red-500/50 hover:text-red-800 hover:decoration-red-600;
-		@apply dark:text-red-300 dark:decoration-red-400/50 dark:hover:text-red-200 dark:hover:decoration-red-300;
-	}
-
-	.aside.border-primary\/20 :global(a) {
-		@apply text-primary decoration-primary/50 hover:text-primary/90 hover:decoration-primary;
-		@apply dark:text-primary dark:decoration-primary/50 dark:hover:text-primary/90 dark:hover:decoration-primary;
+		font-weight: 500;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 2px;
+		transition: all 200ms;
 	}
 
 	/* Subtle shadow on hover */

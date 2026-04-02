@@ -144,6 +144,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import Button from "../common/Button.vue";
 
 interface Props {

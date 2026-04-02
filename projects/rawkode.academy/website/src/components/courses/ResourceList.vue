@@ -80,6 +80,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import { ref, computed } from "vue";
 import EmbeddedAppModal from "./EmbeddedAppModal.vue";
 
