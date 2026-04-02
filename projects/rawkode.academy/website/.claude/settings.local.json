@@ -69,7 +69,10 @@
       "mcp__claude_ai_PostHog__query-trends",
       "mcp__claude_ai_PostHog__query-run",
       "Bash(bunx astro:*)",
-      "Bash(cuenv task:*)"
+      "Bash(cuenv task:*)",
+      "Bash(npx astro:*)",
+      "Bash(gh pr:*)",
+      "Bash(pkill -f \"astro dev\")"
     ],
     "deny": []
   }
