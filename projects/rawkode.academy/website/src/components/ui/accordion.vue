@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { reactive } from "vue";
+import { ref } from "vue";
+import { AccordionRoot, AccordionItem, AccordionItemTrigger, AccordionItemContent, AccordionItemIndicator } from "@ark-ui/vue/accordion";
+import { css } from "../../../styled-system/css";
 
-// Track analytics events client-side
 const trackEvent = (event: string, properties?: Record<string, unknown>) => {
 	try {
 		(window as any).posthog?.capture(event, properties);
@@ -10,53 +11,118 @@ const trackEvent = (event: string, properties?: Record<string, unknown>) => {
 	}
 };
 
-interface AccordionItem {
+interface AccordionItemData {
 	id: string;
 	question: string;
 	answer?: string;
 }
 
 interface Props {
-	items: AccordionItem[];
+	items: AccordionItemData[];
 	defaultOpenId?: string;
 }
 
 const props = defineProps<Props>();
 
-// Use reactive state instead of Set for better reactivity
-const openItems = reactive<Record<string, boolean>>(
-	props.defaultOpenId ? { [props.defaultOpenId]: true } : {},
+const expandedValues = ref<string[]>(
+	props.defaultOpenId ? [props.defaultOpenId] : [],
 );
 
-const toggleItem = (id: string) => {
-	const wasOpen = openItems[id];
-	openItems[id] = !openItems[id];
-	// Track accordion toggle
-	trackEvent("accordion_toggled", {
-		item_id: id,
-		action: wasOpen ? "collapsed" : "expanded",
-	});
+const handleValueChange = (details: { value: string[] }) => {
+	const previousValues = expandedValues.value;
+	expandedValues.value = details.value;
+
+	const newlyExpanded = details.value.filter((v) => !previousValues.includes(v));
+	const newlyCollapsed = previousValues.filter((v) => !details.value.includes(v));
+
+	for (const id of newlyExpanded) {
+		trackEvent("accordion_toggled", { item_id: id, action: "expanded" });
+	}
+	for (const id of newlyCollapsed) {
+		trackEvent("accordion_toggled", { item_id: id, action: "collapsed" });
+	}
 };
 
-const isOpen = (id: string) => !!openItems[id];
+const rootStyles = css({ w: "full" });
+
+const triggerStyles = css({
+	display: "flex",
+	justifyContent: "space-between",
+	alignItems: "center",
+	py: "5",
+	px: "4",
+	w: "full",
+	fontWeight: "medium",
+	textAlign: "left",
+	borderBottomWidth: "1px",
+	borderColor: "border.subtle",
+	transition: "all",
+	transitionDuration: "200ms",
+	borderTopRadius: "xl",
+	cursor: "pointer",
+	_hover: {
+		bg: { base: "rgba(255,255,255,0.4)", _dark: "rgba(31,41,55,0.4)" },
+		backdropFilter: "blur(12px)",
+	},
+});
+
+const triggerOpenStyles = css({
+	color: { base: "gray.900", _dark: "white" },
+	bg: { base: "rgba(255,255,255,0.3)", _dark: "rgba(31,41,55,0.3)" },
+	backdropFilter: "blur(12px)",
+});
+
+const triggerClosedStyles = css({
+	color: { base: "gray.500", _dark: "gray.400" },
+});
+
+const indicatorStyles = css({
+	transition: "transform",
+	transitionDuration: "200ms",
+	flexShrink: "0",
+	"& svg": {
+		w: "6",
+		h: "6",
+	},
+	_open: {
+		transform: "rotate(180deg)",
+	},
+});
+
+const contentStyles = css({
+	overflow: "hidden",
+});
+
+const contentInnerStyles = css({
+	py: "5",
+	px: "4",
+	borderBottomWidth: "1px",
+	borderColor: "border.subtle",
+	bg: { base: "rgba(255,255,255,0.2)", _dark: "rgba(31,41,55,0.2)" },
+	backdropFilter: "blur(4px)",
+	color: { base: "gray.600", _dark: "gray.300" },
+});
 </script>
 
 <template>
-	<div class="w-full">
-		<div v-for="item in items" :key="item.id">
-			<h2 :id="`accordion-heading-${item.id}`">
-				<button
-					type="button"
-					class="flex justify-between items-center py-5 px-4 w-full font-medium text-left border-b border-white/20 dark:border-gray-700/40 transition-all duration-200 rounded-t-xl hover:bg-white/40 dark:hover:bg-gray-800/40 hover:backdrop-blur-md"
-					:class="isOpen(item.id) ? 'text-gray-900 dark:text-white bg-white/30 dark:bg-gray-800/30 backdrop-blur-md' : 'text-gray-500 dark:text-gray-400'"
-					@click="toggleItem(item.id)"
-					:aria-expanded="isOpen(item.id)"
-					:aria-controls="`accordion-body-${item.id}`"
-				>
-					<span>{{ item.question }}</span>
+	<AccordionRoot
+		:class="rootStyles"
+		multiple
+		collapsible
+		:model-value="expandedValues"
+		@value-change="handleValueChange"
+	>
+		<AccordionItem
+			v-for="item in items"
+			:key="item.id"
+			:value="item.id"
+		>
+			<AccordionItemTrigger
+				:class="[triggerStyles, expandedValues.includes(item.id) ? triggerOpenStyles : triggerClosedStyles]"
+			>
+				<span>{{ item.question }}</span>
+				<AccordionItemIndicator :class="indicatorStyles">
 					<svg
-						class="w-6 h-6 shrink-0 transition-transform duration-200"
-						:class="{ 'rotate-180': isOpen(item.id) }"
 						fill="currentColor"
 						viewBox="0 0 20 20"
 						xmlns="http://www.w3.org/2000/svg"
@@ -67,32 +133,15 @@ const isOpen = (id: string) => !!openItems[id];
 							clip-rule="evenodd"
 						></path>
 					</svg>
-				</button>
-			</h2>
-			<Transition
-				enter-active-class="transition-all duration-200 ease-out"
-				leave-active-class="transition-all duration-200 ease-out"
-				enter-from-class="opacity-0 max-h-0"
-				enter-to-class="opacity-100 max-h-screen"
-				leave-from-class="opacity-100 max-h-screen"
-				leave-to-class="opacity-0 max-h-0"
-			>
-				<div
-					v-show="isOpen(item.id)"
-					:id="`accordion-body-${item.id}`"
-					:aria-labelledby="`accordion-heading-${item.id}`"
-					role="region"
-					class="overflow-hidden"
-				>
-					<div class="py-5 px-4 border-b border-white/20 dark:border-gray-700/40 bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm">
-						<div class="text-gray-600 dark:text-gray-300">
-							<slot :name="`answer-${item.id}`">
-								{{ item.answer }}
-							</slot>
-						</div>
-					</div>
+				</AccordionItemIndicator>
+			</AccordionItemTrigger>
+			<AccordionItemContent :class="contentStyles">
+				<div :class="contentInnerStyles">
+					<slot :name="`answer-${item.id}`">
+						{{ item.answer }}
+					</slot>
 				</div>
-			</Transition>
-		</div>
-	</div>
+			</AccordionItemContent>
+		</AccordionItem>
+	</AccordionRoot>
 </template>

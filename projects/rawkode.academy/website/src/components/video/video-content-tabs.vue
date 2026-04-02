@@ -1,173 +1,190 @@
 <template>
-  <div class="glass-card-shimmer">
-    <!-- Tab Navigation -->
-    <div class="border-b border-subtle relative z-10">
-      <!-- Dropdown for Mobile -->
-      <div class="sm:hidden px-2 pt-2 pb-3">
-        <label for="tabs-mobile" class="sr-only">Select a tab</label>
-        <select
-          id="tabs-mobile"
-          name="tabs-mobile"
-          class="glass-interactive block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm text-primary-content"
-          :value="activeTab"
-          @change="setActiveTab($event.target.value)"
-        >
-          <option v-for="tab in tabs" :key="tab.id" :value="tab.id">
-            {{ tab.label }}
-          </option>
-        </select>
-      </div>
+	<div :class="wrapperStyles">
+		<!-- Mobile dropdown (sm:hidden) -->
+		<div :class="mobileDropdownContainer">
+			<label for="tabs-mobile" class="sr-only">Select a tab</label>
+			<select
+				id="tabs-mobile"
+				name="tabs-mobile"
+				:class="mobileSelectStyles"
+				:value="activeTab"
+				@change="setActiveTab(($event.target as HTMLSelectElement).value)"
+			>
+				<option v-for="tab in tabs" :key="tab.id" :value="tab.id">
+					{{ tab.label }}
+				</option>
+			</select>
+		</div>
 
-      <!-- Tab bar for sm and up -->
-      <nav class="hidden sm:flex -mb-px overflow-x-auto" role="tablist">
-        <button
-          v-for="tab in tabs"
-          :key="tab.id"
-          :id="`video-tab-${tab.id}`"
-          :class="[
-            'tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
-            activeTab === tab.id
-              ? 'border-primary text-primary dark:text-primary'
-              : 'border-transparent text-muted hover:text-primary-content',
-          ]"
-          role="tab"
-          :aria-selected="activeTab === tab.id"
-          :aria-controls="`video-panel-${tab.id}`"
-          @click="setActiveTab(tab.id)"
-        >
-          {{ tab.label }}
-        </button>
-      </nav>
-    </div>
+		<!-- Ark UI Tabs for sm and up -->
+		<TabsRoot
+			:class="tabsRootStyles"
+			:model-value="activeTab"
+			@value-change="handleTabChange"
+		>
+			<TabList :class="tabListStyles">
+				<TabTrigger
+					v-for="tab in tabs"
+					:key="tab.id"
+					:value="tab.id"
+					:class="tabTriggerStyles"
+				>
+					{{ tab.label }}
+				</TabTrigger>
+				<TabIndicator :class="tabIndicatorStyles" />
+			</TabList>
 
-    <!-- Tab Content -->
-    <div class="p-4 sm:p-6 relative z-10">
-      <!-- Comments Panel -->
-      <div
-        v-show="activeTab === 'comments'"
-        id="video-panel-comments"
-        role="tabpanel"
-        aria-labelledby="video-tab-comments"
-      >
-        <VideoComments :video-id="videoId" />
-      </div>
+			<TabContent value="comments" :class="tabContentStyles">
+				<VideoComments :video-id="videoId" />
+			</TabContent>
 
-      <!-- Transcript Panel -->
-      <div
-        v-show="activeTab === 'transcript'"
-        id="video-panel-transcript"
-        role="tabpanel"
-        aria-labelledby="video-tab-transcript"
-      >
-        <VideoTranscript
-          :video-id="videoId"
-          :is-active="activeTab === 'transcript'"
-        />
-      </div>
+			<TabContent value="transcript" :class="tabContentStyles">
+				<VideoTranscript
+					:video-id="videoId"
+					:is-active="activeTab === 'transcript'"
+				/>
+			</TabContent>
 
-      <!-- Resources Panel -->
-      <div
-        v-show="activeTab === 'resources'"
-        id="video-panel-resources"
-        role="tabpanel"
-        aria-labelledby="video-tab-resources"
-      >
-        <div class="prose prose-lg dark:prose-invert max-w-none">
-          <p class="text-muted">
-            Resources related to this video will be displayed here, including
-            links, downloads, and additional materials.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+			<TabContent value="resources" :class="tabContentStyles">
+				<div :class="proseStyles">
+					<p>
+						Resources related to this video will be displayed here, including
+						links, downloads, and additional materials.
+					</p>
+				</div>
+			</TabContent>
+		</TabsRoot>
+	</div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref } from "vue";
+import { TabsRoot, TabList, TabTrigger, TabContent, TabIndicator } from "@ark-ui/vue/tabs";
 import VideoComments from "./comments.vue";
 import VideoTranscript from "./transcript.vue";
+import { css } from "../../../styled-system/css";
 
-// Track analytics events client-side
-const trackEvent = (event, properties) => {
+const trackEvent = (event: string, properties?: Record<string, unknown>) => {
 	try {
-		window.posthog?.capture(event, properties);
+		(window as any).posthog?.capture(event, properties);
 	} catch {
 		// Ignore tracking errors
 	}
 };
 
-export default {
-	name: "VideoContentTabs",
-	components: {
-		VideoTranscript,
-		VideoComments,
-	},
-	props: {
-		videoId: {
-			type: String,
-			required: true,
-		},
-	},
-	data() {
-		return {
-			activeTab: "comments",
-			tabs: [
-				{ id: "comments", label: "Comments" },
-				{ id: "transcript", label: "Transcript" },
-				{ id: "resources", label: "Resources" },
-			],
-		};
-	},
-	methods: {
-		setActiveTab(tabId) {
-			const previousTab = this.activeTab;
-			this.activeTab = tabId;
-			// Track tab view
-			trackEvent("video_tab_viewed", {
-				tab_id: tabId,
-				previous_tab: previousTab,
-				video_id: this.videoId,
-			});
-		},
-	},
+const props = defineProps<{
+	videoId: string;
+}>();
+
+// activeTab: "comments" is the default selected tab
+const activeTab = ref("comments");
+
+const tabs = [
+	{ id: "comments", label: "Comments" },
+	{ id: "transcript", label: "Transcript" },
+	{ id: "resources", label: "Resources" },
+];
+
+const setActiveTab = (tabId: string) => {
+	const previousTab = activeTab.value;
+	activeTab.value = tabId;
+	trackEvent("video_tab_viewed", {
+		tab_id: tabId,
+		previous_tab: previousTab,
+		video_id: props.videoId,
+	});
 };
+
+const handleTabChange = (details: { value: string }) => {
+	setActiveTab(details.value);
+};
+
+const wrapperStyles = css({
+	position: "relative",
+});
+
+const mobileDropdownContainer = css({
+	display: "block",
+	px: "2",
+	pt: "2",
+	pb: "3",
+	sm: { display: "none" },
+});
+
+const mobileSelectStyles = css({
+	display: "block",
+	w: "full",
+	pl: "3",
+	pr: "10",
+	py: "2",
+	fontSize: "base",
+	color: { base: "gray.900", _dark: "white" },
+	bg: { base: "rgba(255,255,255,0.4)", _dark: "rgba(31,41,55,0.6)" },
+	backdropFilter: "blur(8px)",
+	borderWidth: "1px",
+	borderColor: "border.subtle",
+	rounded: "lg",
+	_focus: {
+		outline: "2px solid",
+		outlineColor: "primary",
+		outlineOffset: "2px",
+	},
+});
+
+const tabsRootStyles = css({
+	display: "none",
+	sm: { display: "block" },
+});
+
+const tabListStyles = css({
+	display: "flex",
+	borderBottomWidth: "1px",
+	borderColor: "border.subtle",
+	position: "relative",
+	overflowX: "auto",
+	/* Hide scrollbar */
+	scrollbarWidth: "none",
+	"&::-webkit-scrollbar": { display: "none" },
+});
+
+const tabTriggerStyles = css({
+	flexShrink: "0",
+	px: "6",
+	py: "3",
+	borderBottomWidth: "2px",
+	borderColor: "transparent",
+	fontWeight: "medium",
+	fontSize: "sm",
+	whiteSpace: "nowrap",
+	transition: "colors",
+	transitionDuration: "200ms",
+	cursor: "pointer",
+	color: { base: "gray.500", _dark: "gray.400" },
+	_hover: {
+		color: { base: "gray.900", _dark: "white" },
+	},
+	_selected: {
+		borderColor: "primary",
+		color: "primary",
+	},
+});
+
+const tabIndicatorStyles = css({
+	h: "0.5",
+	bg: "primary",
+	rounded: "full",
+});
+
+const tabContentStyles = css({
+	p: "4",
+	sm: { p: "6" },
+	position: "relative",
+	zIndex: "10",
+});
+
+const proseStyles = css({
+	color: { base: "gray.500", _dark: "gray.400" },
+	maxW: "none",
+	fontSize: "lg",
+});
 </script>
-
-<style scoped>
-/* Hide scrollbar on tab navigation */
-nav::-webkit-scrollbar {
-  display: none;
-}
-
-nav {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Additional spacing for prose paragraphs */
-.prose :deep(p) {
-  margin-bottom: 1.5rem;
-}
-
-/* Clean, professional link styles */
-.prose :deep(a) {
-  color: rgb(59 130 246);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-  transition: all 0.2s ease;
-}
-
-.prose :deep(a:hover) {
-  color: rgb(37 99 235);
-  text-decoration-thickness: 2px;
-}
-
-.dark .prose :deep(a) {
-  color: rgb(96 165 250);
-}
-
-.dark .prose :deep(a:hover) {
-  color: rgb(147 197 253);
-}
-</style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FaqAccordion from "./accordion-wrapper.vue";
+import { sectionStyles, containerStyles, innerStyles } from "./styles";
 
 const faqItems = [
 	{
@@ -45,9 +46,9 @@ const faqItems = [
 </script>
 
 <template>
-	<section class="bg-white dark:bg-gray-900">
-		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
-			<div class="mx-auto max-w-(--breakpoint-md)">
+	<section :class="sectionStyles">
+		<div :class="containerStyles">
+			<div :class="innerStyles">
 				<FaqAccordion :items="faqItems" default-open-id="1" />
 			</div>
 		</div>

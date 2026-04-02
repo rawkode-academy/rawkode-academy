@@ -31,3 +31,6 @@ worker-configuration.d.ts
 
 # Website subgraph SDL (generated)
 subgraph/schema.gql
+
+# PandaCSS generated
+styled-system/

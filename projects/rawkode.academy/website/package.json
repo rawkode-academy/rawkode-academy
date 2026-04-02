@@ -63,6 +63,8 @@
 		"cmdk": "^1.1.1",
 		"drizzle-orm": "^0.45.1",
 		"email-preferences": "workspace:*",
+		"@ark-ui/vue": "^5.6.1",
+		"@pandacss/dev": "^0.53.3",
 		"feedsmith": "^2.9.1",
 		"graphql": "^16.13.2",
 		"graphql-request": "^7.4.0",

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Accordion from "../ui/accordion.vue";
+import { css } from "../../../styled-system/css";
+import { sectionStyles, containerStyles, innerStyles } from "./styles";
 
 interface FAQItem {
 	question: string;
@@ -22,17 +24,26 @@ const faqItems = props.items.map((item, index) => ({
 	question: item.question,
 	answer: item.answer,
 }));
+
+const headingStyles = css({
+	mb: "6",
+	lg: { mb: "8" },
+	fontSize: "3xl",
+	lg: { fontSize: "4xl" },
+	letterSpacing: "tight",
+	fontWeight: "extrabold",
+	textAlign: "center",
+	color: { base: "gray.900", _dark: "white" },
+});
 </script>
 
 <template>
-	<section class="bg-white dark:bg-gray-900">
-		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
-			<h2
-				class="mb-6 lg:mb-8 text-3xl lg:text-4xl tracking-tight font-extrabold text-center text-gray-900 dark:text-white"
-			>
+	<section :class="sectionStyles">
+		<div :class="containerStyles">
+			<h2 :class="headingStyles">
 				{{ title }}
 			</h2>
-			<div class="mx-auto max-w-(--breakpoint-md)">
+			<div :class="innerStyles">
 				<Accordion :items="faqItems" default-open-id="1" />
 			</div>
 		</div>

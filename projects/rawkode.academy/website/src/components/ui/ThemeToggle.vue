@@ -9,7 +9,7 @@
 		<transition name="fade" mode="out-in">
 			<svg
 				:key="currentTheme"
-				class="w-5 h-5"
+				:class="iconStyles"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -20,7 +20,7 @@
 			</svg>
 		</transition>
 
-		<span v-if="showLabel" class="ml-2 text-sm font-medium">
+		<span v-if="showLabel" :class="labelStyles">
 			{{ themeDisplayName }}
 		</span>
 	</button>
@@ -34,8 +34,8 @@ import {
 	getThemeDisplayName,
 	type Theme,
 } from "../../lib/theme";
+import { css, cx } from "../../../styled-system/css";
 
-// Track analytics events client-side
 const trackEvent = (event: string, properties?: Record<string, unknown>) => {
 	try {
 		(window as any).posthog?.capture(event, properties);
@@ -90,27 +90,61 @@ const handleToggle = () => {
 	});
 };
 
+const baseStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	transition: "all",
+	transitionDuration: "200ms",
+	cursor: "pointer",
+	_focus: {
+		outline: "2px solid",
+		outlineColor: "primary",
+		outlineOffset: "2px",
+	},
+});
+
+const iconVariantStyles = css({
+	rounded: "full",
+	_hover: {
+		bg: { base: "gray.100", _dark: "gray.800" },
+	},
+});
+
+const buttonVariantStyles = css({
+	rounded: "lg",
+	borderWidth: "1px",
+	borderColor: "border.subtle",
+	_hover: {
+		bg: { base: "rgba(255,255,255,0.6)", _dark: "rgba(55,65,81,0.7)" },
+	},
+});
+
+const sizeMap = {
+	icon: {
+		sm: css({ p: "2" }),
+		md: css({ p: "2.5" }),
+		lg: css({ p: "3" }),
+	},
+	button: {
+		sm: css({ px: "3", py: "2" }),
+		md: css({ px: "4", py: "2.5" }),
+		lg: css({ px: "5", py: "3" }),
+	},
+};
+
 const buttonClasses = computed(() => {
-	const baseClasses =
-		"inline-flex items-center justify-center transition-smooth focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
+	const variantStyle = props.variant === "icon" ? iconVariantStyles : buttonVariantStyles;
+	const sizeStyle = sizeMap[props.variant][props.size];
+	return cx(baseStyles, variantStyle, sizeStyle);
+});
 
-	const variantClasses = {
-		icon: "rounded-full hover:bg-gray-100 dark:hover:bg-gray-800",
-		button:
-			"rounded-lg border border-glass hover:bg-white/60 dark:hover:bg-gray-700/70",
-	};
+const iconStyles = css({ w: "5", h: "5" });
 
-	const sizeClasses = {
-		sm: props.variant === "button" ? "px-3 py-2" : "p-2",
-		md: props.variant === "button" ? "px-4 py-2.5" : "p-2.5",
-		lg: props.variant === "button" ? "px-5 py-3" : "p-3",
-	};
-
-	return [
-		baseClasses,
-		variantClasses[props.variant],
-		sizeClasses[props.size],
-	].join(" ");
+const labelStyles = css({
+	ml: "2",
+	fontSize: "sm",
+	fontWeight: "medium",
 });
 </script>
 
