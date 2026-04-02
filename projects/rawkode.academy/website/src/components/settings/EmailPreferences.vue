@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { actions } from "astro:actions";
+import { css } from "../../../styled-system/css";
 
 const props = defineProps<{
 	academyNewsletter: boolean;
@@ -136,27 +137,85 @@ const formatTechName = (id: string) => {
 		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 		.join(" ");
 };
+
+const sectionTitleStyle = css({
+	fontSize: "sm",
+	fontWeight: "semibold",
+	color: { base: "neutral.700", _dark: "neutral.300" },
+	textTransform: "uppercase",
+	letterSpacing: "wide",
+	mb: "3",
+});
+
+const prefRowStyle = css({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	p: "4",
+	borderRadius: "xl",
+	bg: { base: "white/50", _dark: "white/5" },
+	border: "1px solid",
+	borderColor: { base: "neutral.200", _dark: "neutral.800" },
+});
+
+const prefTitleStyle = css({
+	fontSize: "base",
+	fontWeight: "medium",
+	color: { base: "neutral.900", _dark: "white" },
+});
+
+const prefDescStyle = css({
+	fontSize: "sm",
+	color: { base: "neutral.500", _dark: "neutral.400" },
+	mt: "1",
+});
+
+const toggleBaseStyle = css({
+	position: "relative",
+	display: "inline-flex",
+	h: "6",
+	w: "11",
+	flexShrink: "0",
+	cursor: "pointer",
+	borderRadius: "full",
+	border: "2px solid transparent",
+	transition: "colors",
+	transitionDuration: "200ms",
+	transitionTimingFunction: "ease-in-out",
+	_focus: { outline: "none", ring: "2px solid", ringColor: "rgb(var(--brand-primary))", ringOffset: "2px" },
+});
+
+const toggleKnobStyle = css({
+	pointerEvents: "none",
+	display: "inline-block",
+	h: "5",
+	w: "5",
+	transform: "translateX(0)",
+	borderRadius: "full",
+	bg: "white",
+	shadow: "sm",
+	ring: "0",
+	transition: "transform",
+	transitionDuration: "200ms",
+	transitionTimingFunction: "ease-in-out",
+});
 </script>
 
 <template>
-	<div class="space-y-8">
+	<div :class="css({ display: 'flex', flexDir: 'column', gap: '8' })">
 		<!-- Newsletters Section -->
 		<div>
-			<h3
-				class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide mb-3"
-			>
+			<h3 :class="sectionTitleStyle">
 				Newsletters
 			</h3>
-			<div class="space-y-3">
+			<div :class="css({ display: 'flex', flexDir: 'column', gap: '3' })">
 				<!-- Academy Newsletter -->
-				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
-				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
+				<div :class="prefRowStyle">
+					<div :class="css({ flex: '1', pr: '4' })">
+						<h4 :class="prefTitleStyle">
 							Academy Newsletter
 						</h4>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+						<p :class="prefDescStyle">
 							Updates about new courses, videos, articles, and cloud native
 							content.
 						</p>
@@ -168,36 +227,34 @@ const formatTechName = (id: string) => {
 							togglePreference('academyNewsletter', 'newsletter', 'academy')
 						"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-neutral-900',
+							toggleBaseStyle,
 							preferences.academyNewsletter
-								? 'bg-primary'
-								: 'bg-neutral-300 dark:bg-neutral-700',
-							isLoading === 'academyNewsletter' ? 'opacity-50 cursor-wait' : '',
+								? css({ bg: 'rgb(var(--brand-primary))' })
+								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
+							isLoading === 'academyNewsletter' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.academyNewsletter"
 					>
-						<span class="sr-only">Toggle academy newsletter</span>
+						<span :class="css({ srOnly: true })">Toggle academy newsletter</span>
 						<span
 							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+								toggleKnobStyle,
 								preferences.academyNewsletter
-									? 'translate-x-5'
-									: 'translate-x-0',
+									? css({ transform: 'translateX(1.25rem)' })
+									: css({ transform: 'translateX(0)' }),
 							]"
 						/>
 					</button>
 				</div>
 
 				<!-- Technology Matrix Updates -->
-				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
-				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
+				<div :class="prefRowStyle">
+					<div :class="css({ flex: '1', pr: '4' })">
+						<h4 :class="prefTitleStyle">
 							Technology Matrix Updates
 						</h4>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+						<p :class="prefDescStyle">
 							Get notified when technologies move through the matrix or new
 							opinions are added.
 						</p>
@@ -209,36 +266,34 @@ const formatTechName = (id: string) => {
 							togglePreference('matrixNewsletter', 'newsletter', 'matrix')
 						"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-neutral-900',
+							toggleBaseStyle,
 							preferences.matrixNewsletter
-								? 'bg-primary'
-								: 'bg-neutral-300 dark:bg-neutral-700',
-							isLoading === 'matrixNewsletter' ? 'opacity-50 cursor-wait' : '',
+								? css({ bg: 'rgb(var(--brand-primary))' })
+								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
+							isLoading === 'matrixNewsletter' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.matrixNewsletter"
 					>
-						<span class="sr-only">Toggle matrix updates</span>
+						<span :class="css({ srOnly: true })">Toggle matrix updates</span>
 						<span
 							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+								toggleKnobStyle,
 								preferences.matrixNewsletter
-									? 'translate-x-5'
-									: 'translate-x-0',
+									? css({ transform: 'translateX(1.25rem)' })
+									: css({ transform: 'translateX(0)' }),
 							]"
 						/>
 					</button>
 				</div>
 
 				<!-- Kubernetes Release Updates -->
-				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
-				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
+				<div :class="prefRowStyle">
+					<div :class="css({ flex: '1', pr: '4' })">
+						<h4 :class="prefTitleStyle">
 							Kubernetes Release Updates
 						</h4>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+						<p :class="prefDescStyle">
 							Get notified about new Kubernetes releases, cheat sheets, and
 							upgrade guides.
 						</p>
@@ -250,22 +305,22 @@ const formatTechName = (id: string) => {
 							togglePreference('kubernetesReleaseUpdates', 'newsletter', 'kubernetes-release-updates')
 						"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-neutral-900',
+							toggleBaseStyle,
 							preferences.kubernetesReleaseUpdates
-								? 'bg-primary'
-								: 'bg-neutral-300 dark:bg-neutral-700',
-							isLoading === 'kubernetesReleaseUpdates' ? 'opacity-50 cursor-wait' : '',
+								? css({ bg: 'rgb(var(--brand-primary))' })
+								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
+							isLoading === 'kubernetesReleaseUpdates' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.kubernetesReleaseUpdates"
 					>
-						<span class="sr-only">Toggle Kubernetes release updates</span>
+						<span :class="css({ srOnly: true })">Toggle Kubernetes release updates</span>
 						<span
 							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+								toggleKnobStyle,
 								preferences.kubernetesReleaseUpdates
-									? 'translate-x-5'
-									: 'translate-x-0',
+									? css({ transform: 'translateX(1.25rem)' })
+									: css({ transform: 'translateX(0)' }),
 							]"
 						/>
 					</button>
@@ -275,25 +330,23 @@ const formatTechName = (id: string) => {
 
 		<!-- Technology-Specific Subscriptions -->
 		<div v-if="techSubs.length > 0">
-			<h3
-				class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide mb-3"
-			>
+			<h3 :class="sectionTitleStyle">
 				Technology Updates
 			</h3>
-			<div class="space-y-2">
+			<div :class="css({ display: 'flex', flexDir: 'column', gap: '2' })">
 				<div
 					v-for="techId in techSubs"
 					:key="techId"
-					class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
+					:class="css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: '3', borderRadius: 'lg', bg: { base: 'white/50', _dark: 'white/5' }, border: '1px solid', borderColor: { base: 'neutral.200', _dark: 'neutral.800' } })"
 				>
-					<span class="text-sm font-medium text-neutral-900 dark:text-white">
+					<span :class="css({ fontSize: 'sm', fontWeight: 'medium', color: { base: 'neutral.900', _dark: 'white' } })">
 						{{ formatTechName(techId) }}
 					</span>
 					<button
 						type="button"
 						:disabled="isLoading === `tech-${techId}`"
 						@click="unsubscribeTechnology(techId)"
-						class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium disabled:opacity-50"
+						:class="css({ fontSize: 'sm', color: { base: 'red.600', _dark: 'red.400' }, fontWeight: 'medium', _hover: { color: { base: 'red.700', _dark: 'red.300' } }, _disabled: { opacity: '0.5' } })"
 					>
 						{{ isLoading === `tech-${techId}` ? "..." : "Unsubscribe" }}
 					</button>
@@ -303,21 +356,17 @@ const formatTechName = (id: string) => {
 
 		<!-- Communication Preferences Section -->
 		<div>
-			<h3
-				class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide mb-3"
-			>
+			<h3 :class="sectionTitleStyle">
 				Communication Preferences
 			</h3>
-			<div class="space-y-3">
+			<div :class="css({ display: 'flex', flexDir: 'column', gap: '3' })">
 				<!-- Marketing Emails -->
-				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
-				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
+				<div :class="prefRowStyle">
+					<div :class="css({ flex: '1', pr: '4' })">
+						<h4 :class="prefTitleStyle">
 							Marketing Emails
 						</h4>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+						<p :class="prefDescStyle">
 							Product announcements, promotions, and partner offers.
 						</p>
 					</div>
@@ -328,34 +377,32 @@ const formatTechName = (id: string) => {
 							togglePreference('marketingEmails', 'marketing', 'academy')
 						"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-neutral-900',
+							toggleBaseStyle,
 							preferences.marketingEmails
-								? 'bg-primary'
-								: 'bg-neutral-300 dark:bg-neutral-700',
-							isLoading === 'marketingEmails' ? 'opacity-50 cursor-wait' : '',
+								? css({ bg: 'rgb(var(--brand-primary))' })
+								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
+							isLoading === 'marketingEmails' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.marketingEmails"
 					>
-						<span class="sr-only">Toggle marketing emails</span>
+						<span :class="css({ srOnly: true })">Toggle marketing emails</span>
 						<span
 							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-								preferences.marketingEmails ? 'translate-x-5' : 'translate-x-0',
+								toggleKnobStyle,
+								preferences.marketingEmails ? css({ transform: 'translateX(1.25rem)' }) : css({ transform: 'translateX(0)' }),
 							]"
 						/>
 					</button>
 				</div>
 
 				<!-- Service Notifications -->
-				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
-				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
+				<div :class="prefRowStyle">
+					<div :class="css({ flex: '1', pr: '4' })">
+						<h4 :class="prefTitleStyle">
 							Service Notifications
 						</h4>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+						<p :class="prefDescStyle">
 							Account-related notifications like login alerts and security
 							notices.
 						</p>
@@ -365,20 +412,20 @@ const formatTechName = (id: string) => {
 						:disabled="isLoading === 'serviceEmails'"
 						@click="togglePreference('serviceEmails', 'service', 'academy')"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-neutral-900',
+							toggleBaseStyle,
 							preferences.serviceEmails
-								? 'bg-primary'
-								: 'bg-neutral-300 dark:bg-neutral-700',
-							isLoading === 'serviceEmails' ? 'opacity-50 cursor-wait' : '',
+								? css({ bg: 'rgb(var(--brand-primary))' })
+								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
+							isLoading === 'serviceEmails' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.serviceEmails"
 					>
-						<span class="sr-only">Toggle service notifications</span>
+						<span :class="css({ srOnly: true })">Toggle service notifications</span>
 						<span
 							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-								preferences.serviceEmails ? 'translate-x-5' : 'translate-x-0',
+								toggleKnobStyle,
+								preferences.serviceEmails ? css({ transform: 'translateX(1.25rem)' }) : css({ transform: 'translateX(0)' }),
 							]"
 						/>
 					</button>
@@ -389,10 +436,10 @@ const formatTechName = (id: string) => {
 		<!-- Success Message -->
 		<div
 			v-if="showSuccess"
-			class="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm"
+			:class="css({ display: 'flex', alignItems: 'center', gap: '2', p: '3', borderRadius: 'lg', bg: { base: 'green.50', _dark: 'green.900/20' }, color: { base: 'green.700', _dark: 'green.400' }, fontSize: 'sm' })"
 		>
 			<svg
-				class="w-5 h-5 flex-shrink-0"
+				:class="css({ w: '5', h: '5', flexShrink: '0' })"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -410,10 +457,10 @@ const formatTechName = (id: string) => {
 		<!-- Error Message -->
 		<div
 			v-if="error"
-			class="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm"
+			:class="css({ display: 'flex', alignItems: 'center', gap: '2', p: '3', borderRadius: 'lg', bg: { base: 'red.50', _dark: 'red.900/20' }, color: { base: 'red.700', _dark: 'red.400' }, fontSize: 'sm' })"
 		>
 			<svg
-				class="w-5 h-5 flex-shrink-0"
+				:class="css({ w: '5', h: '5', flexShrink: '0' })"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -430,32 +477,32 @@ const formatTechName = (id: string) => {
 
 		<!-- Unsubscribe from All Section -->
 		<div
-			class="pt-6 border-t border-neutral-200 dark:border-neutral-800"
+			:class="css({ pt: '6', borderTop: '1px solid', borderColor: { base: 'neutral.200', _dark: 'neutral.800' } })"
 			v-if="hasAnySubscription"
 		>
 			<div v-if="!showUnsubscribeConfirm">
 				<button
 					type="button"
 					@click="showUnsubscribeConfirm = true"
-					class="text-sm text-neutral-500 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+					:class="css({ fontSize: 'sm', color: { base: 'neutral.500', _dark: 'neutral.400' }, transition: 'colors', _hover: { color: { base: 'red.600', _dark: 'red.400' } } })"
 				>
 					Unsubscribe from all emails
 				</button>
 			</div>
 			<div
 				v-else
-				class="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+				:class="css({ p: '4', borderRadius: 'xl', bg: { base: 'red.50', _dark: 'red.900/20' }, border: '1px solid', borderColor: { base: 'red.200', _dark: 'red.800' } })"
 			>
-				<p class="text-sm text-red-700 dark:text-red-300 mb-3">
+				<p :class="css({ fontSize: 'sm', color: { base: 'red.700', _dark: 'red.300' }, mb: '3' })">
 					Are you sure you want to unsubscribe from all emails? You will stop
 					receiving all newsletters and notifications from Rawkode Academy.
 				</p>
-				<div class="flex gap-3">
+				<div :class="css({ display: 'flex', gap: '3' })">
 					<button
 						type="button"
 						:disabled="isUnsubscribingAll"
 						@click="unsubscribeFromAll"
-						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50 disabled:cursor-wait"
+						:class="css({ px: '4', py: '2', fontSize: 'sm', fontWeight: 'medium', color: 'white', bg: 'red.600', borderRadius: 'lg', _hover: { bg: 'red.700' }, _disabled: { opacity: '0.5', cursor: 'wait' } })"
 					>
 						{{ isUnsubscribingAll ? "Unsubscribing..." : "Yes, unsubscribe" }}
 					</button>
@@ -463,7 +510,7 @@ const formatTechName = (id: string) => {
 						type="button"
 						:disabled="isUnsubscribingAll"
 						@click="showUnsubscribeConfirm = false"
-						class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg"
+						:class="css({ px: '4', py: '2', fontSize: 'sm', fontWeight: 'medium', color: { base: 'neutral.700', _dark: 'neutral.300' }, borderRadius: 'lg', _hover: { bg: { base: 'neutral.100', _dark: 'neutral.800' } } })"
 					>
 						Cancel
 					</button>
@@ -474,12 +521,12 @@ const formatTechName = (id: string) => {
 		<!-- No Subscriptions Message -->
 		<div
 			v-if="!hasAnySubscription"
-			class="text-center py-4 text-neutral-500 dark:text-neutral-400"
+			:class="css({ textAlign: 'center', py: '4', color: { base: 'neutral.500', _dark: 'neutral.400' } })"
 		>
-			<p class="text-sm">You are not subscribed to any emails.</p>
+			<p :class="css({ fontSize: 'sm' })">You are not subscribed to any emails.</p>
 			<a
 				href="/"
-				class="text-sm text-primary hover:underline mt-1 inline-block"
+				:class="css({ fontSize: 'sm', color: 'rgb(var(--brand-primary))', _hover: { textDecoration: 'underline' }, mt: '1', display: 'inline-block' })"
 			>
 				Explore content and subscribe
 			</a>
