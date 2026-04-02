@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
+
 interface Props {
 	title: string;
 	stats: Stat[];
@@ -13,16 +15,16 @@ defineProps<Props>();
 </script>
 
 <template>
-	<section class="bg-white dark:bg-gray-900">
-		<div class="px-4 mx-auto max-w-(--breakpoint-xl) lg:px-6 xl:px-0">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center">
-				<h2 class="text-3xl tracking-tight font-extrabold text-gray-900 md:text-4xl dark:text-white">{{ title }}</h2>
+	<section :class="css({ bg: { base: 'white', _dark: 'gray.900' } })">
+		<div :class="css({ px: { base: '4', lg: '6' }, mx: 'auto', maxW: '7xl', xl: { px: '0' } })">
+			<div :class="css({ mx: 'auto', maxW: '3xl', textAlign: 'center' })">
+				<h2 :class="css({ fontSize: { base: '3xl', md: '4xl' }, letterSpacing: 'tight', fontWeight: 'extrabold', color: { base: 'gray.900', _dark: 'white' } })">{{ title }}</h2>
 			</div>
-			<div class="max-w-(--breakpoint-xl) px-4 mx-auto text-center lg:py-16 lg:px-6">
-				<dl class="grid max-w-(--breakpoint-md) gap-8 mx-auto text-gray-900 sm:grid-cols-3 dark:text-white">
-					<div v-for="stat in stats" class="flex flex-col items-center justify-center">
-						<dt class="mb-2 text-4xl md:text-5xl font-extrabold">{{ stat.value }}</dt>
-						<dd class="font-light text-gray-500 dark:text-gray-400">{{ stat.label }}</dd>
+			<div :class="css({ maxW: '7xl', px: '4', mx: 'auto', textAlign: 'center', lg: { py: '16', px: '6' } })">
+				<dl :class="css({ display: 'grid', maxW: '3xl', gap: '8', mx: 'auto', color: { base: 'gray.900', _dark: 'white' }, sm: { gridTemplateColumns: 'repeat(3, 1fr)' } })">
+					<div v-for="stat in stats" :class="css({ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' })">
+						<dt :class="css({ mb: '2', fontSize: { base: '4xl', md: '5xl' }, fontWeight: 'extrabold' })">{{ stat.value }}</dt>
+						<dd :class="css({ fontWeight: 'light', color: { base: 'gray.500', _dark: 'gray.400' } })">{{ stat.label }}</dd>
 					</div>
 				</dl>
 			</div>

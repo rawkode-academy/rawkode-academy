@@ -1,4 +1,6 @@
 ---
+import { css } from "../../../styled-system/css";
+
 interface Logo {
 	image: typeof import("*?raw");
 	fillLight: string;
@@ -161,15 +163,15 @@ const previousPartners: Partners = [
 ];
 ---
 
-<div class="partner-showcase space-y-12">
-	<div class="partner-intro text-center max-w-3xl mx-auto">
-		<p class="text-lg text-gray-600 dark:text-gray-300">
+<div class={css({ display: "flex", flexDirection: "column", gap: "12" })}>
+	<div class={css({ textAlign: "center", maxW: "3xl", mx: "auto" })}>
+		<p class={css({ fontSize: "lg", color: { base: "gray.600", _dark: "gray.300" } })}>
 			We collaborate with engineering-first companies that share our obsession with developer experience.
 			Each partnership helps us tell richer stories, build better tooling, and push the Cloud Native ecosystem forward.
 		</p>
 	</div>
 
-	<div class="grid gap-6 sm:gap-8 md:grid-cols-2 xl:grid-cols-3">
+	<div class={css({ display: "grid", gap: { base: "6", sm: "8" }, gridTemplateColumns: { md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" } })}>
 		{currentPartners.map((partner) => (
 			<article
 				class="partner-card group"
@@ -190,17 +192,17 @@ const previousPartners: Partners = [
 					</div>
 				</div>
 
-				<div class="space-y-3">
+				<div class={css({ display: "flex", flexDirection: "column", gap: "3" })}>
 					<div>
-						<h3 class="text-xl font-semibold text-white">{partner.name}</h3>
+						<h3 class={css({ fontSize: "xl", fontWeight: "semibold", color: "white" })}>{partner.name}</h3>
 						{partner.industry && (
-							<p class="text-xs uppercase tracking-[0.2em] text-white/70">
+							<p class={css({ fontSize: "xs", textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(255,255,255,0.7)" })}>
 								{partner.industry}
 							</p>
 						)}
 					</div>
 					{partner.description && (
-						<p class="text-sm leading-relaxed text-white/85">
+						<p class={css({ fontSize: "sm", lineHeight: "relaxed", color: "rgba(255,255,255,0.85)" })}>
 							{partner.description}
 						</p>
 					)}
@@ -211,12 +213,12 @@ const previousPartners: Partners = [
 					title={`Visit ${partner.name} website`}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="partner-link inline-flex items-center gap-2 text-sm font-semibold"
+					class={`partner-link ${css({ display: "inline-flex", alignItems: "center", gap: "2", fontSize: "sm", fontWeight: "semibold" })}`}
 				>
 					Visit {partner.name}
 					<svg
 						aria-hidden="true"
-						class="w-4 h-4"
+						class={css({ w: "4", h: "4" })}
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 20 20"
 						fill="currentColor"
@@ -229,13 +231,13 @@ const previousPartners: Partners = [
 		))}
 	</div>
 
-	<div class="partner-wall rounded-[28px] p-6 sm:p-8">
-		<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+	<div class={`partner-wall ${css({ rounded: "3xl", p: { base: "6", sm: "8" } })}`}>
+		<div class={css({ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "4", mb: "6" })}>
 			<div>
-				<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+				<h3 class={css({ fontSize: "xl", fontWeight: "semibold", color: { base: "gray.900", _dark: "white" } })}>
 					Previous Partners
 				</h3>
-				<p class="text-sm text-gray-600 dark:text-gray-300 max-w-2xl">
+				<p class={css({ fontSize: "sm", color: { base: "gray.600", _dark: "gray.300" }, maxW: "2xl" })}>
 					Thank you to the teams who trusted us to tell their story and educate developers around the world.
 				</p>
 			</div>
@@ -244,7 +246,7 @@ const previousPartners: Partners = [
 			</span>
 		</div>
 
-		<div class="partner-wall-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+		<div class={`partner-wall-grid ${css({ display: "grid", gridTemplateColumns: { base: "repeat(2, 1fr)", sm: "repeat(3, 1fr)", md: "repeat(4, 1fr)" }, gap: "6" })}`}>
 			{previousPartners.map((partner) => (
 				<a
 					href={withUtm(partner.url)}

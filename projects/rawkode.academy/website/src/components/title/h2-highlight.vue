@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import WordHighlighter from "vue-word-highlighter";
 
 interface Props {
@@ -11,17 +12,18 @@ defineProps<Props>();
 </script>
 
 <style>
-@reference "../../styles/global.css";
-
 mark {
-	@apply bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent;
+	background-image: linear-gradient(to bottom right, rgb(var(--brand-primary)), rgb(var(--brand-secondary)));
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
 }
 </style>
 
 <template>
-	<section class="overflow-hidden">
-		<div class="container px-4 mx-auto">
-			<h2 class="text-3xl md:text-4xl xl:text-6xl font-bold font-heading text-center tracking-px-n leading-none">
+	<section :class="css({ overflow: 'hidden' })">
+		<div :class="css({ maxW: '7xl', px: '4', mx: 'auto' })">
+			<h2 :class="css({ fontSize: { base: '3xl', md: '4xl', xl: '6xl' }, fontWeight: 'bold', fontFamily: 'display', textAlign: 'center', letterSpacing: 'tight', lineHeight: 'none' })">
 				<WordHighlighter :split-by-space=true :query=highlightWords>{{ title }}
 				</WordHighlighter>
 			</h2>

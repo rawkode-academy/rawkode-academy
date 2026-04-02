@@ -1,4 +1,5 @@
 ---
+import { css } from "../../styled-system/css";
 import FeatureList from "@/components/feature/list.vue";
 import HeroTypewriter from "@/components/hero/typewriter.tsx";
 import PartnerLogos from "@/components/partner/logos.astro";
@@ -69,6 +70,18 @@ const formatDuration = (seconds?: number | null) => {
 	}
 	return `${minutes}:${secs.toString().padStart(2, "0")}`;
 };
+
+const featuredTechnologies = [
+	{ slug: "kubernetes", emoji: "☸️", label: "Kubernetes" },
+	{ slug: "docker", emoji: "🐳", label: "Docker" },
+	{ slug: "fluxcd", emoji: "🔄", label: "FluxCD" },
+	{ slug: "cilium", emoji: "🐝", label: "Cilium" },
+	{ slug: "dagger", emoji: "⚡", label: "Dagger" },
+];
+
+const sectionHeadingStyle = css({ fontSize: "2xl", fontWeight: "bold", color: { base: "gray.900", _dark: "white" }, display: "flex", alignItems: "center", gap: "2" });
+const viewAllLinkStyle = css({ color: "rgb(var(--brand-primary))", fontWeight: "medium", display: "flex", alignItems: "center", transition: "colors", transitionDuration: "200ms", _hover: { color: "rgb(var(--brand-secondary))" } });
+const techLinkStyle = css({ display: "flex", flexDirection: "column", alignItems: "center", p: "4", rounded: "xl", transition: "colors", transitionDuration: "200ms", _hover: { bg: "rgba(var(--brand-primary),0.1)" } });
 ---
 
 <Page title={pageTitle} description={pageDescription}>
@@ -99,11 +112,11 @@ const formatDuration = (seconds?: number | null) => {
 		socialProof={socialProofStats}
 	/>
 
-	<section id="newsletter-signup" class="px-4 pt-6 sm:pt-8">
-		<div class="mx-auto max-w-3xl scroll-mt-24">
+	<section id="newsletter-signup" class={css({ px: "4", pt: { base: "6", sm: "8" } })}>
+		<div class={css({ mx: "auto", maxW: "3xl", scrollMarginTop: "6" })}>
 			<NewsletterCTA
 				server:defer
-				class="mb-12"
+				class={css({ mb: "12" })}
 				badge="Weekly Cloud Native insights"
 				headline="Get cloud native insights weekly"
 				subtitle="Tutorials, deep dives, and curated events. No spam, unsubscribe anytime."
@@ -112,61 +125,73 @@ const formatDuration = (seconds?: number | null) => {
 	</section>
 
 	{/* Latest Content Section */}
-	<section class="py-16 px-4 sm:py-20">
-		<div class="mx-auto max-w-7xl">
-			<div class="text-center mb-12">
-				<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl mb-4">
-					Latest from the <span class="text-primary">Academy</span>
+	<section class={css({ py: { base: "16", sm: "20" }, px: "4" })}>
+		<div class={css({ mx: "auto", maxW: "7xl" })}>
+			<div class={css({ textAlign: "center", mb: "12" })}>
+				<h2 class={css({ fontSize: { base: "3xl", md: "4xl" }, fontWeight: "bold", letterSpacing: "tight", color: { base: "gray.900", _dark: "white" }, mb: "4" })}>
+					Latest from the <span class={css({ color: "rgb(var(--brand-primary))" })}>Academy</span>
 				</h2>
-				<p class="text-muted text-lg max-w-3xl mx-auto">
+				<p class={css({ color: { base: "gray.500", _dark: "gray.400" }, fontSize: "lg", maxW: "3xl", mx: "auto" })}>
 					Fresh content to keep you ahead in the cloud-native landscape
 				</p>
 			</div>
 
 			{/* Latest Videos */}
-			<div class="mb-16">
-				<div class="flex items-center justify-between mb-8">
-					<h3 class="text-2xl font-bold text-primary-content flex items-center gap-2">
-						<span class="text-primary">📺</span> Latest Videos
+			<div class={css({ mb: "16" })}>
+				<div class={css({ display: "flex", alignItems: "center", justifyContent: "space-between", mb: "8" })}>
+					<h3 class={sectionHeadingStyle}>
+						<span class={css({ color: "rgb(var(--brand-primary))" })}>📺</span> Latest Videos
 					</h3>
-					<a href="/watch" class="text-primary hover:text-secondary font-medium flex items-center transition-colors">
-						View All <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+					<a href="/watch" class={viewAllLinkStyle}>
+						View All <svg class={css({ w: "4", h: "4", ml: "1" })} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
 					</a>
 				</div>
-				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div class={css({ display: "grid", gap: "6", gridTemplateColumns: { md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" } })}>
 					{latestVideos.slice(0, 3).map((video) => (
 						<a
 							href={`/watch/${video.data.slug}`}
-							class="group block bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700"
+							data-group
+							class={css({
+								display: "block",
+								bg: { base: "white", _dark: "gray.800" },
+								rounded: "2xl",
+								shadow: "sm",
+								transition: "all",
+								transitionDuration: "300ms",
+								overflow: "hidden",
+								border: "1px solid",
+								borderColor: { base: "gray.100", _dark: "gray.700" },
+								_hover: { shadow: "xl" },
+							})}
 						>
 							{/* Thumbnail */}
-							<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
+							<div class={css({ position: "relative", aspectRatio: "16/9", overflow: "hidden", bg: { base: "gray.100", _dark: "gray.700" } })}>
 								<img
 									src={`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}
 									alt={video.data.title}
-									class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+									class={css({ w: "full", h: "full", objectFit: "cover", transition: "transform", transitionDuration: "500ms", _groupHover: { transform: "scale(1.05)" } })}
 									loading="lazy"
 								/>
 								{/* Duration badge */}
-								<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+								<div class={css({ position: "absolute", bottom: "2", right: "2", bg: "rgba(0,0,0,0.8)", color: "white", fontSize: "xs", px: "2", py: "1", rounded: "md", backdropFilter: "blur(4px)" })}>
 									{formatDuration(typeof video.data.duration === "number" ? video.data.duration : undefined)}
 								</div>
 								{/* Play overlay */}
-								<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20">
-									<div class="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center text-primary shadow-lg transform scale-75 group-hover:scale-100 transition-transform duration-300">
-										<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+								<div class={css({ position: "absolute", inset: "0", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0, transition: "opacity", transitionDuration: "300ms", bg: "rgba(0,0,0,0.2)", _groupHover: { opacity: 1 } })}>
+									<div class={css({ w: "12", h: "12", rounded: "full", bg: "rgba(255,255,255,0.9)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgb(var(--brand-primary))", shadow: "lg", transform: "scale(0.75)", transition: "transform", transitionDuration: "300ms", _groupHover: { transform: "scale(1)" } })}>
+										<svg class={css({ w: "6", h: "6", ml: "1" })} fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
 									</div>
 								</div>
 							</div>
 
 							{/* Content */}
-							<div class="p-5">
-								<h3 class="text-lg font-semibold text-primary-content line-clamp-2 group-hover:text-primary transition-colors mb-2">
+							<div class={css({ p: "5" })}>
+								<h3 class={css({ fontSize: "lg", fontWeight: "semibold", color: { base: "gray.900", _dark: "white" }, lineClamp: 2, transition: "colors", transitionDuration: "200ms", mb: "2", _groupHover: { color: "rgb(var(--brand-primary))" } })}>
 									{video.data.title}
 								</h3>
 
-								<div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-									<svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<div class={css({ display: "flex", alignItems: "center", fontSize: "sm", color: { base: "gray.500", _dark: "gray.400" } })}>
+									<svg class={css({ w: "4", h: "4", mr: "1" })} fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
 									</svg>
 									{video.data.publishedAt.toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -178,16 +203,16 @@ const formatDuration = (seconds?: number | null) => {
 			</div>
 
 			{/* Latest Articles */}
-			<div class="mb-16">
-				<div class="flex items-center justify-between mb-8">
-					<h3 class="text-2xl font-bold text-primary-content flex items-center gap-2">
-						<span class="text-primary">📝</span> Latest Articles
+			<div class={css({ mb: "16" })}>
+				<div class={css({ display: "flex", alignItems: "center", justifyContent: "space-between", mb: "8" })}>
+					<h3 class={sectionHeadingStyle}>
+						<span class={css({ color: "rgb(var(--brand-primary))" })}>📝</span> Latest Articles
 					</h3>
-					<a href="/read" class="text-primary hover:text-secondary font-medium flex items-center transition-colors">
-						View All <svg class="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+					<a href="/read" class={viewAllLinkStyle}>
+						View All <svg class={css({ w: "4", h: "4", ml: "1" })} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
 					</a>
 				</div>
-				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div class={css({ display: "grid", gap: "6", gridTemplateColumns: { md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" } })}>
 					{latestArticles.map((article) => (
 						<ArticleCard article={article} />
 					))}
@@ -195,31 +220,17 @@ const formatDuration = (seconds?: number | null) => {
 			</div>
 
 			{/* Featured Technologies Highlight */}
-			<div class="glass-panel rounded-3xl p-8">
-				<h3 class="text-2xl font-bold text-primary-content mb-6 text-center">
+			<div class={`glass-panel ${css({ rounded: "3xl", p: "8" })}`}>
+				<h3 class={css({ fontSize: "2xl", fontWeight: "bold", color: { base: "gray.900", _dark: "white" }, mb: "6", textAlign: "center" })}>
 					🚀 Featured Technology Guides
 				</h3>
-				<div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-					<a href="/technology/kubernetes" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">☸️</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">Kubernetes</span>
-					</a>
-					<a href="/technology/docker" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">🐳</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">Docker</span>
-					</a>
-					<a href="/technology/fluxcd" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">🔄</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">FluxCD</span>
-					</a>
-					<a href="/technology/cilium" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">🐝</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">Cilium</span>
-					</a>
-					<a href="/technology/dagger" class="group flex flex-col items-center p-4 rounded-xl hover:bg-primary/10 transition-colors">
-						<div class="text-4xl mb-2">⚡</div>
-						<span class="text-sm font-medium text-primary-content group-hover:text-primary">Dagger</span>
-					</a>
+				<div class={css({ display: "grid", gridTemplateColumns: { base: "repeat(2, 1fr)", md: "repeat(5, 1fr)" }, gap: "4" })}>
+					{featuredTechnologies.map((tech) => (
+						<a href={`/technology/${tech.slug}`} class={techLinkStyle}>
+							<div class={css({ fontSize: "4xl", mb: "2" })}>{tech.emoji}</div>
+							<span class={css({ fontSize: "sm", fontWeight: "medium", color: { base: "gray.900", _dark: "white" } })}>{tech.label}</span>
+						</a>
+					))}
 				</div>
 			</div>
 		</div>
@@ -268,43 +279,66 @@ const formatDuration = (seconds?: number | null) => {
 		]}
 	/>
 
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
+	<section class={css({ bg: { base: "gray.50", _dark: "gray.900/50" } })}>
+		<div class={css({ py: "12", px: "4", mx: "auto", maxW: "7xl", lg: { py: "16", px: "6" } })}>
 				<TestimonialSlider type="viewer" blurb="We're proud of the content we produce, but don't take our word for it. Here's what our viewers have to say about the Rawkode Academy." />
 		</div>
 	</section>
 
-	<section class="relative py-16 px-4 sm:py-20">
-		<div class="pointer-events-none absolute inset-0 flex justify-center">
-			<div class="h-full w-5/6 max-w-6xl rounded-[40px] bg-gradient-to-r from-primary/25 via-white/30 to-secondary/25 blur-[220px] opacity-40 dark:from-primary/40 dark:via-gray-900/40 dark:to-secondary/40"></div>
+	<section class={css({ position: "relative", py: { base: "16", sm: "20" }, px: "4" })}>
+		<div class={css({ pointerEvents: "none", position: "absolute", inset: "0", display: "flex", justifyContent: "center" })}>
+			<div class={css({ h: "full", w: "5/6", maxW: "6xl", rounded: "3xl", background: "linear-gradient(to right, rgba(var(--brand-primary),0.25), rgba(255,255,255,0.3), rgba(var(--brand-secondary),0.25))", filter: "blur(220px)", opacity: 0.4, _dark: { background: "linear-gradient(to right, rgba(var(--brand-primary),0.4), rgba(17,24,39,0.4), rgba(var(--brand-secondary),0.4))" } })}></div>
 		</div>
-		<div class="glass-panel relative mx-auto max-w-7xl rounded-[40px] overflow-hidden">
-			<div class="absolute inset-0 opacity-60">
-				<div class="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-primary/10 dark:from-gray-900/20"></div>
-				<div class="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-br from-secondary/40 to-primary/30 blur-3xl"></div>
+		<div class={`glass-panel ${css({ position: "relative", mx: "auto", maxW: "7xl", rounded: "3xl", overflow: "hidden" })}`}>
+			<div class={css({ position: "absolute", inset: "0", opacity: 0.6 })}>
+				<div class={css({ position: "absolute", inset: "0", background: "linear-gradient(to bottom right, rgba(255,255,255,0.3), transparent, rgba(var(--brand-primary),0.1))", _dark: { background: "linear-gradient(to bottom right, rgba(17,24,39,0.2), transparent, transparent)" } })}></div>
+				<div class={css({ position: "absolute", top: "-6", right: "-6", h: "72", w: "72", rounded: "full", background: "linear-gradient(to bottom right, rgba(var(--brand-secondary),0.4), rgba(var(--brand-primary),0.3))", filter: "blur(48px)" })}></div>
 			</div>
-			<div class="relative px-6 py-12 sm:px-12 lg:px-16">
-				<div class="mb-10 lg:mb-14 text-center">
-					<h2 class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						Our <span class="text-primary">Trusted</span> Partners
+			<div class={css({ position: "relative", px: { base: "6", sm: "12", lg: "16" }, py: "12" })}>
+				<div class={css({ mb: { base: "10", lg: "14" }, textAlign: "center" })}>
+					<h2 class={css({ mb: "4", fontSize: { base: "3xl", md: "4xl" }, fontWeight: "bold", letterSpacing: "tight", color: { base: "gray.900", _dark: "white" } })}>
+						Our <span class={css({ color: "rgb(var(--brand-primary))" })}>Trusted</span> Partners
 					</h2>
-					<p class="text-gray-600 sm:text-xl dark:text-gray-300 max-w-3xl mx-auto">
+					<p class={css({ color: { base: "gray.600", _dark: "gray.300" }, fontSize: { sm: "xl" }, maxW: "3xl", mx: "auto" })}>
 						The Rawkode Academy couldn't exist without the support of our partners. Visit their websites, contact them, and remember to let them know that you found them right here.
 					</p>
-					<div class="mt-6">
+					<div class={css({ mt: "6" })}>
 						<a
 							href="/organizations/partnerships"
 							title="Become a Partner"
-							class="inline-flex items-center gap-2 px-6 py-3 text-base font-semibold text-white rounded-2xl border border-white/40 dark:border-white/10 bg-gradient-to-r from-primary to-secondary shadow-[0_15px_40px_rgba(99,102,241,0.35)] dark:shadow-[0_30px_70px_rgba(0,0,0,0.6)] transition hover:scale-[1.02] hover:shadow-[0_20px_45px_rgba(99,102,241,0.45)]"
+							class={css({
+								display: "inline-flex",
+								alignItems: "center",
+								gap: "2",
+								px: "6",
+								py: "3",
+								fontSize: "base",
+								fontWeight: "semibold",
+								color: "white",
+								rounded: "2xl",
+								border: "1px solid",
+								borderColor: { base: "rgba(255,255,255,0.4)", _dark: "rgba(255,255,255,0.1)" },
+								background: "linear-gradient(to right, rgb(var(--brand-primary)), rgb(var(--brand-secondary)))",
+								shadow: "0 15px 40px rgba(99,102,241,0.35)",
+								transition: "all",
+								transitionDuration: "200ms",
+								_hover: {
+									transform: "scale(1.02)",
+									shadow: "0 20px 45px rgba(99,102,241,0.45)",
+								},
+								_dark: {
+									shadow: "0 30px 70px rgba(0,0,0,0.6)",
+								},
+							})}
 						>
 							Become a Partner
-							<svg aria-hidden="true" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+							<svg aria-hidden="true" class={css({ w: "5", h: "5" })} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
 								<path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
 							</svg>
 						</a>
 					</div>
 				</div>
-				<div class="relative">
+				<div class={css({ position: "relative" })}>
 					<PartnerLogos />
 				</div>
 			</div>
