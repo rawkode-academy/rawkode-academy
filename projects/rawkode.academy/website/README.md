@@ -22,36 +22,39 @@ We're still considering how to best support this for everyone.
 We use [Flox](https://flox.dev) and their hierarchical activations.
 
 ```shell
-deno run dev
+cuenv task dev
 ```
 
 ### Without Nix
 
-If you wanna get up and running, you just need to install
-[Deno](https://deno.com).
+If you want to get up and running manually, install Bun and the workspace
+dependencies first.
 
 ```shell {"name": "install"}
-deno install
+bun install
 ```
 
-...finally, run the local dev server
+Then start the local dev server:
 
 ```shell {"name": "dev"}
-deno run dev
+bun run dev
 ```
+
+`astro dev` already runs through Cloudflare's native Vite plugin and `workerd`
+via `@astrojs/cloudflare`, so there is no separate `wrangler dev` workflow to
+maintain here.
 
 ## Checks, Linting, & Formatting
 
 ```shell {"name": "check"}
-deno fmt .
-deno lint .
-deno run --allow-all npm:astro check
+bun run format
+bun run build
 ```
 
 ## Testing
 
 ```shell {"name": "test"}
-deno run test
+bun run test
 ```
 
 ## Core Web Vitals Monitoring
@@ -74,7 +77,7 @@ bun run test \
 ## Deploy
 
 ```shell {"name": "deploy"}
-op run -- bunx wrangler pages deploy --branch main dist
+op run -- bunx wrangler deploy
 ```
 
 ## Analytics
