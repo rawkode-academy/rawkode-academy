@@ -1,5 +1,5 @@
 ---
-import { css } from "../../../../styled-system/css";
+import { css, cx } from "../../../../styled-system/css";
 import { getCollection, getEntries } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { createLogger } from "@/lib/logger";
@@ -54,11 +54,11 @@ const getAdrNumber = (id: string): string => {
 	maxW: '(--breakpoint-xl)',
 	mx: 'auto',
 })}>
-    <h1 class={css({
+    <h1 class={cx('text-primary-content', css({
 	fontSize: '5xl',
 	fontWeight: 'extrabold',
 	mb: '6',
-}) + " text-primary-content"}>
+}))}>
       Architecture Decision Records
     </h1>
 
@@ -66,16 +66,15 @@ const getAdrNumber = (id: string): string => {
 	mb: '10',
 	fontSize: 'lg',
 	color: 'gray.700',
-}) + " dark:text-gray-300"}>
+	_dark: { color: 'gray.300' },
+})}>
       This page lists all architecture decisions made in this project. ADRs are a lightweight method to document architectural decisions including their context and consequences.
     </p>
 
     <div class={css({
 	display: 'grid',
 	gap: '6',
-	lg: {
-		gap: '8',
-	},
+	lg: { gap: '8' },
 })}>
       {allAdrs.map((adr) => {
         const authorData = adrAuthors.find(a => a.id === adr.id);
@@ -101,7 +100,8 @@ const getAdrNumber = (id: string): string => {
 	borderWidth: '1px',
 	borderColor: 'gray.200',
 	shadow: 'md',
-}) + " transform dark:bg-gray-800/30 dark:border-gray-700"}>
+	_dark: { bg: 'gray.800/30', borderColor: 'gray.700' },
+})}>
               <div class={css({
 	p: '6',
 })}>
@@ -111,12 +111,12 @@ const getAdrNumber = (id: string): string => {
 	gap: '4',
 	mb: '4',
 })}>
-                  <h2 class={css({
+                  <h2 class={cx('text-primary-content', css({
 	fontSize: '2xl',
 	fontWeight: 'bold',
 	my: 'auto',
-}) + " text-primary-content"}>
-                    <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
+}))}>
+                    <span class={css({ color: 'secondary', _dark: { color: 'secondary' } })}>ADR-{adrNumber}:</span> {adr.data.title}
                   </h2>
                 </div>
 
@@ -127,11 +127,11 @@ const getAdrNumber = (id: string): string => {
 	gap: '4',
 	mt: '2',
 })}>
-                  <div class={css({
+                  <div class={cx('text-muted', css({
 	display: 'flex',
 	alignItems: 'center',
 	fontSize: 'sm',
-}) + " text-muted"}>
+}))}>
                     <svg xmlns="http://www.w3.org/2000/svg" class={css({
 	h: '5',
 	w: '5',
@@ -155,7 +155,8 @@ const getAdrNumber = (id: string): string => {
 	rounded: 'full',
 	bg: 'green.100',
 	color: 'green.800',
-}) + " dark:bg-green-900 dark:text-green-200"}>
+	_dark: { bg: 'green.900', color: 'green.200' },
+})}>
                       Adopted
                     </span>
                   </div>
@@ -181,9 +182,11 @@ const getAdrNumber = (id: string): string => {
 	rounded: 'full',
 	objectFit: 'cover',
 	borderWidth: '2px',
+	borderColor: 'secondary',
 	p: '0.5',
 	bg: 'white',
-}) + " border-secondary dark:bg-gray-800"}
+	_dark: { bg: 'gray.800' },
+})}
                               src={author.data.avatarUrl}
                               alt={`Profile picture of ${author.data.name}`}
                               title={author.data.name}
@@ -201,21 +204,24 @@ const getAdrNumber = (id: string): string => {
 	rounded: 'full',
 	bg: 'white',
 	borderWidth: '2px',
+	borderColor: 'secondary',
 	p: '0.5',
 	display: 'flex',
 	alignItems: 'center',
 	justifyContent: 'center',
 	fontSize: 'xs',
 	fontWeight: 'medium',
-}) + " dark:bg-secondary/20 border-secondary dark:bg-gray-800 text-secondary dark:text-secondary"}>
+	color: 'secondary',
+	_dark: { bg: 'gray.800', color: 'secondary' },
+})}>
                               +{authors.filter(author => author && author.data).length - 3}
                             </div>
                           </div>
                         )}
                       </div>
-                      <span class={css({
+                      <span class={cx('text-muted', css({
 	fontSize: 'sm',
-}) + " text-muted"}>
+}))}>
                         {authors.filter(author => author && author.data).map(author => author.data.name).join(", ")}
                       </span>
                     </div>

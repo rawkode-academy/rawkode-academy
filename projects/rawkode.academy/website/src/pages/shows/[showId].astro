@@ -1,5 +1,5 @@
 ---
-import { css } from "../../../../styled-system/css";
+import { css, cx } from "../../../../styled-system/css";
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
@@ -134,20 +134,22 @@ function formatDuration(seconds: number) {
 	gradientFrom: 'primary/10',
 	gradientVia: 'transparent',
 	gradientTo: 'secondary/5',
-}) + " dark:from-primary/20 dark:to-secondary/10"} aria-hidden="true"></div>
+	_dark: { gradientFrom: 'primary/20', gradientTo: 'secondary/10' },
+})} aria-hidden="true"></div>
                 <div class={css({
 	pos: 'absolute',
 	inset: '0',
 	bg: 'radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.15),transparent)',
-}) + " dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.25),transparent)]"} aria-hidden="true"></div>
+	_dark: { bg: 'radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.25),transparent)' },
+})} aria-hidden="true"></div>
 
-                <div class={css({
+                <div class={cx('content-px', css({
 	pos: 'relative',
 	mx: 'auto',
 	maxW: '7xl',
 	pb: '12',
 	pt: '8',
-}) + " content-px"}>
+}))}>
                         <Breadcrumb elements={breadcrumbElements} />
 
                         <div class={css({
@@ -174,30 +176,30 @@ function formatDuration(seconds: number) {
 	bg: 'primary/10',
 	px: '3',
 	py: '1',
-}) + " dark:bg-primary/20"}>
+	_dark: { bg: 'primary/20' },
+})}>
                                                 <svg class={css({
 	h: '4',
 	w: '4',
-}) + " text-primary"} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+	color: 'primary',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />
                                                 </svg>
                                                 <span class={css({
 	fontSize: 'sm',
 	fontWeight: 'semibold',
-}) + " text-primary dark:text-primary-300"}>Show</span>
+	color: 'primary',
+	_dark: { color: 'primary.300' },
+})}>Show</span>
                                         </div>
 
-                                        <h1 class={css({
+                                        <h1 class={cx('text-primary-content', css({
 	fontSize: '4xl',
 	fontWeight: 'extrabold',
 	letterSpacing: 'tight',
-	sm: {
-		fontSize: '5xl',
-	},
-	lg: {
-		fontSize: '6xl',
-	},
-}) + " text-primary-content"}>
+	sm: { fontSize: '5xl' },
+	lg: { fontSize: '6xl' },
+}))}>
                                                 {showEntry.data.name}
                                         </h1>
 
@@ -208,36 +210,36 @@ function formatDuration(seconds: number) {
 	alignItems: 'center',
 	gap: '2',
 })}>
-                                                        <span class={css({
+                                                        <span class={cx('text-muted', css({
 	fontSize: 'sm',
-}) + " text-muted"}>Hosted by</span>
+}))}>Hosted by</span>
                                                         {hostNames.map((host) => (
-                                                                <span class={css({
+                                                                <span class={cx('glass-chip', 'text-primary-content', css({
 	fontSize: 'sm',
 	fontWeight: 'medium',
-}) + " glass-chip text-primary-content"}>
+}))}>
                                                                         {host}
                                                                 </span>
                                                         ))}
                                                 </div>
                                         )}
 
-                                        <p class={css({
+                                        <p class={cx('text-secondary-content', css({
 	maxW: '2xl',
 	fontSize: 'lg',
 	lineHeight: 'relaxed',
-}) + " text-secondary-content"}>
+}))}>
                                                 {showDescription}
                                         </p>
 
                                         {feedVideos.length > 0 && (
-                                                <div class={css({
+                                                <div class={cx('text-muted', css({
 	display: 'flex',
 	flexWrap: 'wrap',
 	alignItems: 'center',
 	gap: '4',
 	fontSize: 'sm',
-}) + " text-muted"}>
+}))}>
                                                         <div class={css({
 	display: 'flex',
 	alignItems: 'center',
@@ -277,9 +279,7 @@ function formatDuration(seconds: number) {
                                         <div class={css({
 	flexShrink: '0',
 	w: 'full',
-	lg: {
-		w: '2/5',
-	},
+	lg: { w: '2/5' },
 	maxW: 'md',
 })}>
                                                 <div class={css({
@@ -302,14 +302,12 @@ function formatDuration(seconds: number) {
                                         <div class={css({
 	flexShrink: '0',
 	w: 'full',
-	lg: {
-		w: '2/5',
-	},
+	lg: { w: '2/5' },
 	maxW: 'md',
 })}>
                                                 <a href={`/watch/${latestEpisode.slug}`} class={css({
 	display: 'block',
-}) + " group"}>
+})}>
                                                         <div class={css({
 	pos: 'relative',
 	overflow: 'hidden',
@@ -325,9 +323,7 @@ function formatDuration(seconds: number) {
 	objectFit: 'cover',
 	transition: 'transform',
 	transitionDuration: '200ms',
-	_groupHover: {
-		scale: '1.03',
-	},
+	_groupHover: { scale: '1.03' },
 })}
                                                                         loading="eager"
                                                                 />
@@ -347,9 +343,7 @@ function formatDuration(seconds: number) {
 	justifyContent: 'center',
 	opacity: '0',
 	transition: 'opacity',
-	_groupHover: {
-		opacity: '1',
-	},
+	_groupHover: { opacity: '1' },
 })}>
                                                                         <div class={css({
 	display: 'flex',
@@ -416,7 +410,7 @@ function formatDuration(seconds: number) {
 	mt: '8',
 })}>
                                 <NewsletterCTA
-                                        class="!py-0"
+                                        style="padding-top:0;padding-bottom:0"
                                         audience={`show:${showEntry.data.id}`}
                                         badge="Get notified of new episodes"
                                         headline={`Subscribe to ${showEntry.data.name}`}
@@ -428,13 +422,13 @@ function formatDuration(seconds: number) {
 
         <!-- Episodes -->
         <section class="section-py" style="background: var(--surface-base)">
-                <div class={css({
+                <div class={cx('content-px', css({
 	mx: 'auto',
 	display: 'flex',
 	maxW: '7xl',
 	flexDir: 'column',
 	gap: '10',
-}) + " content-px"}>
+}))}>
                         {feedVideos.length > 0 ? (
                                 <VideoFeed
                                         title="Episodes"
@@ -442,20 +436,21 @@ function formatDuration(seconds: number) {
                                         videos={feedVideos}
                                 />
                         ) : (
-                                <div class={css({
+                                <div class={cx('glass-card', css({
 	mx: 'auto',
 	maxW: '2xl',
 	rounded: '2xl',
 	p: '12',
 	textAlign: 'center',
-}) + " glass-card"}>
+}))}>
                                         <svg
                                                 class={css({
 	mx: 'auto',
 	h: '16',
 	w: '16',
 	color: 'primary/30',
-}) + " dark:text-primary/20"}
+	_dark: { color: 'primary/20' },
+})}
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -468,17 +463,17 @@ function formatDuration(seconds: number) {
                                                         d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
                                                 />
                                         </svg>
-                                        <p class={css({
+                                        <p class={cx('text-secondary-content', css({
 	mt: '4',
 	fontSize: 'lg',
 	fontWeight: 'medium',
-}) + " text-secondary-content"}>
+}))}>
                                                 No episodes yet
                                         </p>
-                                        <p class={css({
+                                        <p class={cx('text-muted', css({
 	mt: '2',
 	fontSize: 'sm',
-}) + " text-muted"}>
+}))}>
                                                 Episodes for this show are coming soon. Check back later!
                                         </p>
                                 </div>

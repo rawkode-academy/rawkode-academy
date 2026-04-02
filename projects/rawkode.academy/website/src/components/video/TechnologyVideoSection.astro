@@ -1,5 +1,5 @@
 ---
-import { css } from "../../../styled-system/css";
+import { css, cx } from "../../../styled-system/css";
 import type { CollectionEntry } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
@@ -39,53 +39,54 @@ const hasMoreVideos = totalVideos && totalVideos > videos.length;
 ---
 
 {videos.length > 0 && (
-	<section class="mt-8">
-		<div class="flex items-center justify-between mb-4">
-			<div class="flex items-center gap-3">
+	<section class={css({ mt: '8' })}>
+		<div class={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: '4' })}>
+			<div class={css({ display: 'flex', alignItems: 'center', gap: '3' })}>
 				{iconUrl && (
-					<div class="w-6 h-6 relative overflow-hidden rounded">
+					<div class={css({ w: '6', h: '6', pos: 'relative', overflow: 'hidden', rounded: 'base' })}>
 						<img
 							src={iconUrl}
 							alt={techName}
-							class="w-full h-full object-contain"
+							class={css({ w: 'full', h: 'full', objectFit: 'contain' })}
 							onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
 						/>
 					</div>
 				)}
-				<h3 class="text-lg font-semibold text-primary-content">
+				<h3 class={cx('text-primary-content', css({ fontSize: 'lg', fontWeight: 'semibold' }))}>
 					More about {techName}
 				</h3>
 			</div>
 			<a
 				href={`/technology/${techId}`}
-				class="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+				class={css({ fontSize: 'sm', color: 'primary', _hover: { color: 'primary/80' }, transition: 'colors', display: 'flex', alignItems: 'center', gap: '1' })}
 			>
 				{hasMoreVideos ? `View all ${totalVideos} videos` : "View technology"}
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class={css({ w: '4', h: '4' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>
 			</a>
 		</div>
 
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<div class={css({ display: 'grid', gap: '4', sm: { gridTemplateColumns: '2' }, lg: { gridTemplateColumns: '3' } })}>
 			{videos.map((video) => (
 				<a
 					href={`/watch/${video.slug}`}
-					class="group block glass-interactive rounded-lg overflow-hidden"
+					class={cx('glass-interactive', css({ display: 'block', rounded: 'lg', overflow: 'hidden' }))}
+					style="cursor:pointer"
 				>
-					<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
+					<div class={css({ pos: 'relative', aspectRatio: 'video', overflow: 'hidden', bg: 'gray.100', _dark: { bg: 'gray.800' } })}>
 						<img
 							src={video.thumbnailUrl}
 							alt={video.title}
-							class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+							class={css({ w: 'full', h: 'full', objectFit: 'cover', _groupHover: { scale: '1.05' }, transition: 'transform', transitionDuration: '200ms' })}
 							loading="lazy"
 						/>
-						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+						<div class={css({ pos: 'absolute', bottom: '2', right: '2', bg: 'black/80', color: 'white', fontSize: 'xs', px: '2', py: '1', rounded: 'base' })}>
 							{formatDuration(video.duration)}
 						</div>
 					</div>
-					<div class="p-3">
-						<h4 class="font-medium text-secondary-content group-hover:text-primary-content line-clamp-2 transition-colors text-sm">
+					<div class={css({ p: '3' })}>
+						<h4 class={cx('text-secondary-content', css({ fontWeight: 'medium', _groupHover: { color: 'primary' }, lineClamp: '2', transition: 'colors', fontSize: 'sm' }))}>
 							{video.title}
 						</h4>
 					</div>

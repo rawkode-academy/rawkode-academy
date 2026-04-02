@@ -200,10 +200,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div class="w-full aspect-video">
+	<div :class="css({ w: 'full', aspectRatio: 'video' })">
 		<media-player
 			:autoplay="!!autoPlay"
-			class="w-full h-full"
+			:class="css({ w: 'full', h: 'full' })"
 			playsinline
 		>
 			<media-provider>
@@ -234,7 +234,7 @@ onUnmounted(() => {
 	:deep(video::-webkit-media-controls-fullscreen-button) {
 		display: inline-block !important;
 	}
-	
+
 	:deep(.vds-fullscreen) {
 		position: relative !important;
 	}

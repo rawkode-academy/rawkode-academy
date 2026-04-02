@@ -19,8 +19,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const containerClass = computed(() =>
 	props.overlay
-		? "absolute bottom-0 left-0 right-0 overflow-hidden rounded-b-lg"
-		: "w-full overflow-hidden",
+		? css({ pos: 'absolute', bottom: '0', left: '0', right: '0', overflow: 'hidden', roundedBottom: 'lg' })
+		: css({ w: 'full', overflow: 'hidden' }),
 );
 
 const clampedProgress = computed(() =>
@@ -31,20 +31,20 @@ const widthStyle = computed(() => ({ width: `${clampedProgress.value}%` }));
 
 const heightClass = computed(() => {
 	const heights: Record<string, string> = {
-		sm: "h-1",
-		md: "h-1.5",
-		lg: "h-2",
+		sm: css({ h: '1' }),
+		md: css({ h: '1.5' }),
+		lg: css({ h: '2' }),
 	};
-	return heights[props.height] || "h-1";
+	return heights[props.height] || css({ h: '1' });
 });
 
 const colorClass = computed(() => {
 	const colors: Record<string, string> = {
-		default: "bg-[rgb(var(--brand-primary))]",
-		subtle: "bg-gray-400 dark:bg-gray-500",
-		accent: "bg-[rgb(var(--brand-secondary))]",
+		default: css({ bg: '[rgb(var(--brand-primary))]' }),
+		subtle: css({ bg: 'gray.400', _dark: { bg: 'gray.500' } }),
+		accent: css({ bg: '[rgb(var(--brand-secondary))]' }),
 	};
-	return colors[props.variant] || "bg-[rgb(var(--brand-primary))]";
+	return colors[props.variant] || css({ bg: '[rgb(var(--brand-primary))]' });
 });
 
 const ariaLabel = computed(
@@ -62,11 +62,11 @@ const ariaLabel = computed(
 		:aria-label="ariaLabel"
 	>
 		<div
-			:class="['w-full bg-black/40 backdrop-blur-sm dark:bg-black/60', heightClass]"
+			:class="[css({ w: 'full', bg: 'black/40', backdropFilter: 'blur(4px)', _dark: { bg: 'black/60' } }), heightClass]"
 		>
 			<div
 				:class="[
-					'transition-[width] duration-300 ease-out',
+					css({ transition: 'all', transitionDuration: '300ms', transitionTimingFunction: 'ease-out' }),
 					heightClass,
 					colorClass,
 				]"
@@ -75,7 +75,7 @@ const ariaLabel = computed(
 		</div>
 		<span
 			v-if="showLabel && clampedProgress > 5"
-			class="absolute right-1 top-1/2 -translate-y-1/2 text-xs text-white drop-shadow-md"
+			:class="css({ pos: 'absolute', right: '1', top: '50%', translateY: '-50%', fontSize: 'xs', color: 'white', filter: 'drop-shadow(0 1px 2px rgb(0 0 0 / 0.1))' })"
 		>
 			{{ Math.round(clampedProgress) }}%
 		</span>

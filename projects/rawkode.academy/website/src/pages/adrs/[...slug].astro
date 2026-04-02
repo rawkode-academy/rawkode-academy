@@ -1,5 +1,5 @@
 ---
-import { css } from "../../../../styled-system/css";
+import { css, cx } from "../../../../styled-system/css";
 import { getCollection, getEntries, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import Page from "@/wrappers/page.astro";
@@ -56,8 +56,9 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
   <h1 class={css({
 	fontSize: '5xl',
 	fontWeight: 'extrabold',
-}) + " dark:text-white"}>
-    <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
+	_dark: { color: 'white' },
+})}>
+    <span class={css({ color: 'secondary', _dark: { color: 'secondary' } })}>ADR-{adrNumber}:</span> {adr.data.title}
   </h1>
 
   <div class={css({
@@ -65,16 +66,15 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	maxW: 'full',
 	overflowX: 'hidden',
 })}>
-    <article class={css({
+    <article class={cx('prose', css({
 	w: 'full',
 	maxW: 'full',
-}) + " format prose dark:format-invert"}>
+	_dark: { '& *': {} },
+}))}>
       <header class={css({
 	mb: '8',
-	lg: {
-		mb: '10',
-	},
-}) + " not-format"}>
+	lg: { mb: '10' },
+})}>
         <!-- Metadata card with glass morphism effect -->
         <div
           class={css({
@@ -86,7 +86,8 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	borderWidth: '1px',
 	borderColor: 'gray.200',
 	shadow: 'lg',
-}) + " dark:bg-gray-800/30 dark:border-gray-700"}
+	_dark: { bg: 'gray.800/30', borderColor: 'gray.700' },
+})}
         >
           <div class={css({
 	display: 'flex',
@@ -121,8 +122,10 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	rounded: 'full',
 	objectFit: 'cover',
 	borderWidth: '2px',
+	borderColor: 'secondary',
 	bg: 'white',
-}) + " border-secondary dark:bg-gray-800"}
+	_dark: { bg: 'gray.800' },
+})}
                           src={author.data.avatarUrl}
                           alt={`Profile picture of ${author.data.name}`}
                         />
@@ -136,7 +139,9 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	bg: 'green.400',
 	rounded: 'full',
 	borderWidth: '2px',
-}) + " border-white dark:border-gray-800"}></span>
+	borderColor: 'white',
+	_dark: { borderColor: 'gray.800' },
+})}></span>
                         )}
                       </div>
                     ))}
@@ -151,12 +156,15 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	rounded: 'full',
 	bg: 'white',
 	borderWidth: '2px',
+	borderColor: 'secondary',
 	display: 'flex',
 	alignItems: 'center',
 	justifyContent: 'center',
 	fontSize: 'sm',
 	fontWeight: 'medium',
-}) + " dark:bg-secondary/20 border-secondary dark:bg-gray-800 text-secondary dark:text-secondary"}>
+	color: 'secondary',
+	_dark: { bg: 'gray.800', color: 'secondary' },
+})}>
                           +{authors.filter(author => author && author.data).length - 4}
                         </div>
                       </div>
@@ -177,7 +185,8 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	rounded: 'full',
 	px: '3',
 	py: '1',
-}) + " dark:bg-primary/20"}>
+	_dark: { bg: 'primary/20' },
+})}>
                       <a
                         href={author.data.github}
                         target="_blank"
@@ -185,20 +194,24 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
                         class={css({
 	fontSize: 'sm',
 	fontWeight: 'medium',
-	_hover: {
-		color: 'secondary/90',
-	},
+	color: 'secondary',
+	_hover: { color: 'secondary/90' },
+	_dark: { color: 'secondary', _hover: { color: 'secondary/90' } },
 	transition: 'colors',
-}) + " text-secondary dark:text-secondary dark:hover:text-secondary/90"}
+})}
                       >
                         {author.data.name}
                       </a>
                       <span class={css({
 	mx: '1',
-}) + " text-secondary dark:text-secondary"}>•</span>
+	color: 'secondary',
+	_dark: { color: 'secondary' },
+})}>&#8226;</span>
                       <span class={css({
 	fontSize: 'xs',
-}) + " text-secondary dark:text-secondary"}>@{author.id}</span>
+	color: 'secondary',
+	_dark: { color: 'secondary' },
+})}>@{author.id}</span>
                     </div>
                   ))}
                 </div>
@@ -210,7 +223,8 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	h: 'px',
 	bg: 'gray.200',
 	my: '2',
-}) + " dark:bg-gray-700"}></div>}
+	_dark: { bg: 'gray.700' },
+})}></div>}
 
             <!-- Status section -->
             <div class={css({
@@ -224,9 +238,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 })}>
               <div class={css({
 	mt: '2',
-	md: {
-		mt: '0',
-	},
+	md: { mt: '0' },
 })}>
                 {adr.data.adoptedAt ? (
                   <div class={css({
@@ -256,7 +268,8 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	fontSize: 'sm',
 	fontWeight: 'medium',
 	color: 'green.700',
-}) + " dark:text-green-400"}>
+	_dark: { color: 'green.400' },
+})}>
                       Adopted on {formatDate(adr.data.adoptedAt)}
                     </span>
                   </div>
@@ -289,7 +302,8 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 	fontSize: 'sm',
 	fontWeight: 'medium',
 	color: 'yellow.700',
-}) + " dark:text-yellow-400"}>
+	_dark: { color: 'yellow.400' },
+})}>
                       Adopted on {formatDate(adr.data.adoptedAt)}
                     </span>
                   </div>
@@ -300,9 +314,9 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
         </div>
       </header>
 
-      <div class={css({
+      <div class={cx('prose', css({
 	maxW: 'none',
-}) + " prose dark:prose-invert"}>
+}))}>
         <Content />
       </div>
     </article>
