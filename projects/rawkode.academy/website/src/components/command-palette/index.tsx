@@ -16,6 +16,7 @@ import {
 	ALL_THEMES,
 	type Theme,
 } from "@/lib/theme";
+import { css } from "../../../styled-system/css";
 import "./styles.css";
 
 interface NavigationItem {
@@ -430,7 +431,7 @@ export default function CommandPalette({
 								<Command.Group
 									key={category}
 									heading={
-										<div className="flex items-center gap-2">
+										<div className={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
 											<CategoryIcon className="command-palette-category-icon" />
 											{category}
 										</div>
@@ -452,7 +453,7 @@ export default function CommandPalette({
 													<div className="command-palette-item-title">
 														{item.title}
 														{isCurrentTheme && (
-															<span className="ml-2 text-xs text-primary">
+															<span className={css({ ml: '2', fontSize: 'xs', color: 'colorPalette.default' })}>
 																(active)
 															</span>
 														)}

@@ -1,8 +1,8 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getCollection } from "astro:content";
 import LearningPathCard from "@/components/learning-paths/LearningPathCard.astro";
 import Page from "@/wrappers/page.astro";
-import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
@@ -17,61 +17,79 @@ const pageDescription =
 
 <Page title={pageTitle} description={pageDescription}>
 	<section class={css({
-		position: "relative",
-		overflow: "hidden",
-		borderRadius: "3xl",
-		borderWidth: "1px",
-		borderColor: { base: "gray.200", _dark: "gray.800" },
-		bg: { base: "white", _dark: "gray.900" },
-	})}>
+	pos: 'relative',
+	overflow: 'hidden',
+	rounded: '3xl',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+	bg: 'white',
+}) + " dark:border-gray-800 dark:bg-gray-900"}>
 		<div class={css({
-			position: "absolute",
-			inset: "0",
-			backgroundImage: { base: "linear-gradient(to bottom right, token(colors.teal.500/10), transparent, token(colors.green.500/20))", _dark: "linear-gradient(to bottom right, token(colors.teal.500/20), transparent, token(colors.green.500/30))" },
-		})}></div>
+	pos: 'absolute',
+	inset: '0',
+	bgGradient: 'to-br',
+	gradientFrom: 'primary/10',
+	gradientVia: 'transparent',
+	gradientTo: 'secondary/20',
+}) + " dark:from-primary/20 dark:to-secondary/30"}></div>
 		<div class={css({
-			position: "relative",
-			zIndex: "10",
-			px: { base: "6", md: "10", lg: "16" },
-			py: "16",
-		})}>
-			<div class={css({ maxW: "3xl" })}>
+	pos: 'relative',
+	zIndex: '10',
+	px: '6',
+	py: '16',
+	md: {
+		px: '10',
+	},
+	lg: {
+		px: '16',
+	},
+})}>
+			<div class={css({
+	maxW: '3xl',
+})}>
 				<p class={css({
-					fontSize: "sm",
-					fontWeight: "semibold",
-					textTransform: "uppercase",
-					letterSpacing: "0.3em",
-					color: "teal.500",
-					mb: "4",
-				})}>
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	textTransform: 'uppercase',
+	letterSpacing: '0.3em',
+	mb: '4',
+}) + " text-primary"}>
 					Guided Learning
 				</p>
 				<h1 class={css({
-					fontSize: { base: "3xl", md: "4xl" },
-					fontWeight: "extrabold",
-					letterSpacing: "tight",
-					color: "fg.default",
-					mb: "4",
-				})}>
+	fontSize: '3xl',
+	md: {
+		fontSize: '4xl',
+	},
+	fontWeight: 'extrabold',
+	letterSpacing: 'tight',
+	mb: '4',
+}) + " text-primary-content"}>
 					Learning Paths
 				</h1>
 				<p class={css({
-					fontSize: "lg",
-					color: "fg.muted",
-					lineHeight: "relaxed",
-				})}>
+	fontSize: 'lg',
+	lineHeight: 'relaxed',
+}) + " text-muted"}>
 					Each path bundles Rawkode Academy videos into a focused curriculum with clear outcomes, prerequisites, and the context you need to succeed. Start with the challenge you're facing and follow along step-by-step.
 				</p>
 			</div>
 		</div>
 	</section>
 
-	<section class={css({ mt: "12" })}>
+	<section class={css({
+	mt: '12',
+})}>
 		<div class={css({
-			display: "grid",
-			gap: "6",
-			gridTemplateColumns: { sm: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" },
-		})}>
+	display: 'grid',
+	gap: '6',
+	sm: {
+		gridTemplateColumns: '2',
+	},
+	xl: {
+		gridTemplateColumns: '3',
+	},
+})}>
 			{learningPaths.map((learningPath) => (
 				<LearningPathCard learningPath={learningPath} />
 			))}

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 interface Props {
 	title: string;
 	description: string;

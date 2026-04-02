@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 export const prerender = true;
 
 import Page from "@/wrappers/page.astro";
@@ -12,46 +13,123 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 	title="People"
 	description="Meet the people behind Rawkode Academy."
 >
-	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
+	<div class={css({
+	display: 'flex',
+	flexDir: 'column',
+}) + " stack-gap-lg section-py section-pt-0 page-px"}>
 		<!-- Hero Section -->
-		<section class="w-full">
-			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
-				<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+		<section class={css({
+	w: 'full',
+})}>
+			<div class={css({
+	rounded: '3xl',
+	p: '6',
+	md: {
+		p: '8',
+	},
+	maxW: '7xl',
+	mx: 'auto',
+}) + " glass-panel"}>
+				<div class={css({
+	display: 'flex',
+	flexDir: 'column',
+	lg: {
+		flexDir: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	},
+	gap: '8',
+})}>
 					<!-- Hero Copy -->
-					<div class="flex-1 space-y-4">
+					<div class={css({
+	flex: '1',
+	gap: '4',
+})}>
 						<span class="glass-chip">
-							<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<svg class={css({
+	w: '4',
+	h: '4',
+	mr: '1.5',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
 							</svg>
 							Community
 						</span>
-						<h1 class="text-3xl md:text-4xl font-extrabold text-primary-content">
+						<h1 class={css({
+	fontSize: '3xl',
+	md: {
+		fontSize: '4xl',
+	},
+	fontWeight: 'extrabold',
+}) + " text-primary-content"}>
 							Meet the People
 						</h1>
-						<p class="text-muted max-w-xl">
+						<p class={css({
+	maxW: 'xl',
+}) + " text-muted"}>
 							Hosts, guests, and contributors who make Rawkode Academy possible.
 						</p>
 					</div>
 
 					<!-- Search Controls -->
-					<div class="w-full lg:w-96 space-y-3">
-						<label for="people-search" class="block text-sm font-medium text-secondary-content">
+					<div class={css({
+	w: 'full',
+	lg: {
+		w: '96',
+	},
+	gap: '3',
+})}>
+						<label for="people-search" class={css({
+	display: 'block',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+}) + " text-secondary-content"}>
 							Search people
 						</label>
-						<div class="relative">
-							<svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+						<div class={css({
+	pos: 'relative',
+})}>
+							<svg class={css({
+	pos: 'absolute',
+	left: '4',
+	top: '1/2',
+	translateY: '-1/2',
+	w: '5',
+	h: '5',
+	color: 'gray.400',
+})} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 							</svg>
 							<input
 								id="people-search"
 								type="search"
 								placeholder="e.g. Rawkode, Guests..."
-								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-primary-content placeholder-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
+								class={css({
+	w: 'full',
+	rounded: 'xl',
+	py: '3',
+	pl: '12',
+	pr: '4',
+	fontSize: 'base',
+	bg: 'white/60',
+	backdropBlur: 'sm',
+	borderWidth: '1px',
+	borderColor: 'white/40',
+	_focus: {
+		ringWidth: '2',
+		borderColor: 'primary/40',
+	},
+	transition: 'all',
+}) + " text-primary-content placeholder-gray-400 dark:bg-gray-800/60 dark:border-gray-600/50 focus:outline-none focus:ring-primary/40"}
 								autocomplete="off"
 							/>
 						</div>
-						<p class="text-sm text-muted">
-							Showing <span class="font-medium text-secondary-content" data-people-visible-count>{people.length}</span> of {people.length} people
+						<p class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>
+							Showing <span class={css({
+	fontWeight: 'medium',
+}) + " text-secondary-content"} data-people-visible-count>{people.length}</span> of {people.length} people
 						</p>
 					</div>
 				</div>
@@ -59,9 +137,27 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 		</section>
 
 		<!-- People Grid -->
-		<section id="people" class="w-full">
-			<div class="max-w-7xl mx-auto">
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+		<section id="people" class={css({
+	w: 'full',
+})}>
+			<div class={css({
+	maxW: '7xl',
+	mx: 'auto',
+})}>
+				<div class={css({
+	display: 'grid',
+	gridTemplateColumns: '1',
+	sm: {
+		gridTemplateColumns: '2',
+	},
+	lg: {
+		gridTemplateColumns: '3',
+	},
+	xl: {
+		gridTemplateColumns: '4',
+	},
+	gap: '6',
+})}>
 					{
 						sortedPeople.map((person) => {
 							const searchKeywords = person.data.name.toLowerCase();
@@ -69,26 +165,61 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 							return (
 								<a
 									href={`/people/${person.data.id}`}
-									class="people-card-link glass-card-shimmer card-hover flex flex-col overflow-hidden items-center text-center p-6"
+									class={css({
+	display: 'flex',
+	flexDir: 'column',
+	overflow: 'hidden',
+	alignItems: 'center',
+	textAlign: 'center',
+	p: '6',
+}) + " people-card-link glass-card-shimmer card-hover"}
 									data-keywords={searchKeywords}
 								>
 									{/* Avatar */}
-									<div class="relative w-24 h-24 mb-4">
+									<div class={css({
+	pos: 'relative',
+	w: '24',
+	h: '24',
+	mb: '4',
+})}>
 										<img
 											src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
 											alt={`${person.data.name}`}
-											class="w-full h-full object-cover rounded-full shadow-md border-2 border-white/50 dark:border-gray-700/50"
+											class={css({
+	w: 'full',
+	h: 'full',
+	objectFit: 'cover',
+	rounded: 'full',
+	shadow: 'md',
+	borderWidth: '2px',
+	borderColor: 'white/50',
+}) + " dark:border-gray-700/50"}
 											onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
 										/>
 									</div>
 									
 									{/* Content */}
-									<div class="flex-1 flex flex-col gap-2 relative z-10 w-full">
-										<h3 class="text-lg font-bold text-primary-content truncate">
+									<div class={css({
+	flex: '1',
+	display: 'flex',
+	flexDir: 'column',
+	gap: '2',
+	pos: 'relative',
+	zIndex: '10',
+	w: 'full',
+})}>
+										<h3 class={css({
+	fontSize: 'lg',
+	fontWeight: 'bold',
+	truncate: 'true',
+}) + " text-primary-content"}>
 											{person.data.name}
 										</h3>
                                         {person.data.twitter && (
-                                            <span class="text-sm text-muted truncate">@{person.data.twitter.split('/').pop()}</span>
+                                            <span class={css({
+	fontSize: 'sm',
+	truncate: 'true',
+}) + " text-muted"}>@{person.data.twitter.split('/').pop()}</span>
                                         )}
 									</div>
 								</a>
@@ -98,13 +229,33 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 				</div>
 				
 				<!-- Empty State -->
-				<div id="people-empty-state" class="hidden">
-					<div class="glass-card-shimmer rounded-2xl p-12 text-center max-w-md mx-auto">
-						<svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+				<div id="people-empty-state" class={css({
+	display: 'none',
+})}>
+					<div class={css({
+	rounded: '2xl',
+	p: '12',
+	textAlign: 'center',
+	maxW: 'md',
+	mx: 'auto',
+}) + " glass-card-shimmer"}>
+						<svg class={css({
+	w: '12',
+	h: '12',
+	mx: 'auto',
+	color: 'gray.400',
+	mb: '4',
+}) + " dark:text-gray-500"} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 						</svg>
-						<p class="text-muted font-medium">No people match your search</p>
-						<p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different name</p>
+						<p class={css({
+	fontWeight: 'medium',
+}) + " text-muted"}>No people match your search</p>
+						<p class={css({
+	fontSize: 'sm',
+	color: 'gray.500',
+	mt: '1',
+}) + " dark:text-gray-500"}>Try a different name</p>
 					</div>
 				</div>
 			</div>

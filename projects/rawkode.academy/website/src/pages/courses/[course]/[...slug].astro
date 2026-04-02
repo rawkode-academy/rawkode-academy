@@ -1,8 +1,8 @@
 ---
+import { css } from "../../../../../styled-system/css";
 import { getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import { join, dirname } from "node:path";
-import { css } from "../../../../styled-system/css";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import ResourceList from "@/components/courses/ResourceList.vue";
@@ -137,25 +137,71 @@ const nextModule =
 	description={module.data.description}
 	image={imageUrl ? { image: imageUrl.startsWith('http') ? new URL(imageUrl) : new URL(imageUrl, Astro.site || "https://rawkode.academy"), text: module.data.title, format: "png" as const } : undefined}
 >
-	<section id="article" class={css({ pt: { base: '4', sm: '8' } })}>
-		<div class={css({ maxW: '6xl', mx: 'auto', px: { base: '4', sm: '6', lg: '8' } })}>
+	<section id="article" class={css({
+	pt: '4',
+	sm: {
+		pt: '8',
+	},
+})}>
+		<div class={css({
+	maxW: '6xl',
+	mx: 'auto',
+	px: '4',
+	sm: {
+		px: '6',
+	},
+	lg: {
+		px: '8',
+	},
+})}>
 			<Breadcrumb elements={breadcrumbElements} />
 
 			<!-- Module Header -->
-			<div class={css({ mb: '8', bg: { base: 'gray.50', _dark: 'gray.800' }, borderRadius: 'lg', p: '6' })}>
+			<div class={css({
+	mb: '8',
+	bg: 'gray.50',
+	rounded: 'lg',
+	p: '6',
+}) + " dark:bg-gray-800"}>
 				<h1
-					class={css({ fontSize: { base: '3xl', sm: '4xl' }, fontWeight: 'bold', color: { base: 'gray.900', _dark: 'white' }, mb: '4' })}
+					class={css({
+	fontSize: '3xl',
+	sm: {
+		fontSize: '4xl',
+	},
+	fontWeight: 'bold',
+	color: 'gray.900',
+	mb: '4',
+}) + " dark:text-white"}
 				>
 					{module.data.title}
 				</h1>
-				<p class={css({ fontSize: 'lg', color: { base: 'gray.600', _dark: 'gray.300' }, mb: '4' })}>
+				<p class={css({
+	fontSize: 'lg',
+	color: 'gray.600',
+	mb: '4',
+}) + " dark:text-gray-300"}>
 					{module.data.description}
 				</p>
-				<div class={css({ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4', fontSize: 'sm' })}>
+				<div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: '4',
+	fontSize: 'sm',
+})}>
 					{module.data.duration && module.data.duration > 0 && (
-						<div class={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
+						<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+})}>
 							<svg
-								class={css({ w: '5', h: '5', color: 'gray.500' })}
+								class={css({
+	w: '5',
+	h: '5',
+	color: 'gray.500',
+})}
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -166,7 +212,9 @@ const nextModule =
 									stroke-width="2"
 									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 							</svg>
-							<span class={css({ color: { base: 'gray.600', _dark: 'gray.400' } })}>
+							<span class={css({
+	color: 'gray.600',
+}) + " dark:text-gray-400"}>
 								{Math.floor(module.data.duration / 60) > 0 && `${Math.floor(module.data.duration / 60)}h `}
 								{module.data.duration % 60 > 0 && `${module.data.duration % 60}m`}
 							</span>
@@ -174,9 +222,17 @@ const nextModule =
 					)}
 					{
 						module.data.difficulty && (
-							<div class={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
+							<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+})}>
 								<svg
-									class={css({ w: '5', h: '5', color: 'gray.500' })}
+									class={css({
+	w: '5',
+	h: '5',
+	color: 'gray.500',
+})}
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
@@ -188,7 +244,10 @@ const nextModule =
 										d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
 									/>
 								</svg>
-								<span class={css({ color: { base: 'gray.600', _dark: 'gray.400' }, textTransform: 'capitalize' })}>
+								<span class={css({
+	color: 'gray.600',
+	textTransform: 'capitalize',
+}) + " dark:text-gray-400"}>
 									{module.data.difficulty}
 								</span>
 							</div>
@@ -200,7 +259,9 @@ const nextModule =
 			<!-- Video Player (if video exists) -->
 			{
 				module.data.video && (
-					<div class={css({ mb: '8' })}>
+					<div class={css({
+	mb: '8',
+})}>
 						<VideoPlayer
 							video={module.data.video.id}
 							thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
@@ -213,7 +274,9 @@ const nextModule =
 
 			<!-- Course Content -->
 			<div
-				class="prose dark:prose-dark max-w-none prose-headings:scroll-mt-20"
+				class={css({
+	maxW: 'none',
+}) + " prose dark:prose-dark prose-headings:scroll-mt-20"}
 			>
 				<Content />
 			</div>
@@ -221,22 +284,39 @@ const nextModule =
 			<!-- Resources Section -->
 			{
 				processedResources && processedResources.length > 0 && (
-					<div class={css({ mt: '12' })}>
+					<div class={css({
+	mt: '12',
+})}>
 						<ResourceList resources={processedResources} client:load />
 					</div>
 				)
 			}
 
 			<!-- Navigation -->
-			<div class={css({ mt: '12', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: '1px', pt: '8' })}>
+			<div class={css({
+	mt: '12',
+	display: 'flex',
+	justifyContent: 'space-between',
+	alignItems: 'center',
+	borderTopWidth: '1px',
+	pt: '8',
+})}>
 				{
 					previousModule && (
 						<a
 							href={`/courses/${course.id}/${previousModule.id}`}
-							class={css({ display: 'flex', alignItems: 'center', gap: '2', color: 'teal.500', transition: 'colors', _hover: { color: 'teal.600' } })}
+							class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	transition: 'colors',
+}) + " text-primary hover:text-primary-dark"}
 						>
 							<svg
-								class={css({ w: '5', h: '5' })}
+								class={css({
+	w: '5',
+	h: '5',
+})}
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -256,11 +336,20 @@ const nextModule =
 					nextModule && (
 						<a
 							href={`/courses/${course.id}/${nextModule.id}`}
-							class={css({ display: 'flex', alignItems: 'center', gap: '2', color: 'teal.500', transition: 'colors', ml: 'auto', _hover: { color: 'teal.600' } })}
+							class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	transition: 'colors',
+	ml: 'auto',
+}) + " text-primary hover:text-primary-dark"}
 						>
 							<span>{nextModule.data.title}</span>
 							<svg
-								class={css({ w: '5', h: '5' })}
+								class={css({
+	w: '5',
+	h: '5',
+})}
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -279,7 +368,9 @@ const nextModule =
 
 			<!-- Course Signup -->
 			{course.data.signupConfig && (
-				<div class={css({ mt: '12' })}>
+				<div class={css({
+	mt: '12',
+})}>
 					<CourseSignupForm
 						courseId={course.id}
 						courseTitle={course.data.title}

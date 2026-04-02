@@ -1,9 +1,9 @@
 ---
+import { css } from "../../../styled-system/css";
 import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import { createEmailId, createLearnerId } from "@/actions/newsletter";
 import { createLogger } from "@/lib/logger";
-import { css } from "../../styled-system/css";
 
 export const prerender = false;
 
@@ -87,50 +87,114 @@ if (Astro.request.method === "POST" && user) {
 ---
 
 <Page title="Unsubscribe - Rawkode Academy" description="Unsubscribe from the Rawkode Academy newsletter.">
-	<div class={css({ minH: "60vh", display: "flex", flexDir: "column", alignItems: "center", justifyContent: "center", px: "4", textAlign: "center" })}>
+	<div class={css({
+	minH: '60vh',
+	display: 'flex',
+	flexDir: 'column',
+	alignItems: 'center',
+	justifyContent: 'center',
+	px: '4',
+	textAlign: 'center',
+})}>
 		{success === "true" ? (
 			<>
-				<div class={css({ w: "24", h: "24", bg: { base: "green.100", _dark: "green.900/30" }, borderRadius: "full", display: "flex", alignItems: "center", justifyContent: "center", mb: "8" })}>
-					<svg xmlns="http://www.w3.org/2000/svg" class={css({ h: "12", w: "12", color: { base: "green.600", _dark: "green.400" } })} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<div class={css({
+	w: '24',
+	h: '24',
+	bg: 'green.100',
+	rounded: 'full',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	mb: '8',
+}) + " dark:bg-green-900/30"}>
+					<svg xmlns="http://www.w3.org/2000/svg" class={css({
+	h: '12',
+	w: '12',
+	color: 'green.600',
+}) + " dark:text-green-400"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 					</svg>
 				</div>
-
-				<h1 class={css({ fontSize: "4xl", fontWeight: "bold", color: { base: "gray.900", _dark: "white" }, mb: "4" })}>
+				
+				<h1 class={css({
+	fontSize: '4xl',
+	fontWeight: 'bold',
+	mb: '4',
+}) + " text-primary-content"}>
 					Unsubscribed Successfully
 				</h1>
-
-				<p class={css({ fontSize: "xl", color: { base: "gray.600", _dark: "gray.400" }, maxW: "2xl", mb: "8" })}>
+				
+				<p class={css({
+	fontSize: 'xl',
+	maxW: '2xl',
+	mb: '8',
+}) + " text-muted"}>
 					You have been unsubscribed from the Rawkode Academy newsletter. We're sorry to see you go!
 				</p>
-
-				<a
+				
+				<a 
 					href="/"
-					class={css({ display: "inline-flex", alignItems: "center", justifyContent: "center", px: "6", py: "3", border: "1px solid transparent", fontSize: "base", fontWeight: "medium", borderRadius: "md", color: "white", bg: "rgb(var(--brand-primary))", transition: "colors", _hover: { opacity: "0.9" } })}
+					class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	px: '6',
+	py: '3',
+	borderWidth: '1px',
+	borderColor: 'transparent',
+	fontSize: 'base',
+	fontWeight: 'medium',
+	rounded: 'md',
+	color: 'white',
+	_hover: {
+		bg: 'primary/90',
+	},
+	transition: 'colors',
+}) + " bg-primary"}
 				>
 					Back to Home
 				</a>
 			</>
 		) : (
 			<>
-				<h1 class={css({ fontSize: "4xl", fontWeight: "bold", color: { base: "gray.900", _dark: "white" }, mb: "4" })}>
+				<h1 class={css({
+	fontSize: '4xl',
+	fontWeight: 'bold',
+	mb: '4',
+}) + " text-primary-content"}>
 					Unsubscribe from Newsletter
 				</h1>
-
-				<p class={css({ fontSize: "xl", color: { base: "gray.600", _dark: "gray.400" }, maxW: "2xl", mb: "8" })}>
-					{user
+				
+				<p class={css({
+	fontSize: 'xl',
+	maxW: '2xl',
+	mb: '8',
+}) + " text-muted"}>
+					{user 
 						? "Click the button below to unsubscribe from the Rawkode Academy newsletter."
 						: "Enter your email address to unsubscribe from the Rawkode Academy newsletter."
 					}
 				</p>
 
 				{unsubscribeResult?.success === false && (
-					<div class={css({ mb: "6", p: "4", borderRadius: "lg", bg: { base: "red.50", _dark: "red.900/20" }, color: { base: "red.700", _dark: "red.400" }, maxW: "md" })}>
+					<div class={css({
+	mb: '6',
+	p: '4',
+	rounded: 'lg',
+	bg: 'red.50',
+	color: 'red.700',
+	maxW: 'md',
+}) + " dark:bg-red-900/20 dark:text-red-400"}>
 						{unsubscribeResult.message}
 					</div>
 				)}
 
-				<form method="POST" class={css({ w: "full", maxW: "md", display: "flex", flexDir: "column", gap: "4" })}>
+				<form method="POST" class={css({
+	w: 'full',
+	maxW: 'md',
+	gap: '4',
+})}>
 					{!user && (
 						<input
 							type="email"
@@ -138,20 +202,52 @@ if (Astro.request.method === "POST" && user) {
 							value={email || ""}
 							placeholder="Enter your email address"
 							required
-							class={css({ w: "full", py: "3", px: "4", borderRadius: "lg", border: "1px solid", borderColor: { base: "neutral.200", _dark: "neutral.700" }, bg: { base: "white", _dark: "neutral.800" }, color: { base: "neutral.900", _dark: "white" }, _placeholder: { color: { base: "neutral.400", _dark: "neutral.500" } }, _focus: { outline: "none", ring: "2px solid", ringColor: "rgb(var(--brand-primary))", borderColor: "transparent" } })}
+							class={css({
+	w: 'full',
+	py: '3',
+	px: '4',
+	rounded: 'lg',
+	borderWidth: '1px',
+	borderColor: 'neutral.200',
+	bg: 'white',
+	color: 'neutral.900',
+	_focus: {
+		ringWidth: '2',
+		borderColor: 'transparent',
+	},
+}) + " dark:border-neutral-700 dark:bg-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-primary"}
 						/>
 					)}
-
+					
 					<button
 						type="submit"
-						class={css({ w: "full", py: "3", px: "6", borderRadius: "lg", bg: "red.600", color: "white", fontWeight: "medium", transition: "colors", _hover: { bg: "red.700" } })}
+						class={css({
+	w: 'full',
+	py: '3',
+	px: '6',
+	rounded: 'lg',
+	bg: 'red.600',
+	_hover: {
+		bg: 'red.700',
+	},
+	color: 'white',
+	fontWeight: 'medium',
+	transition: 'colors',
+})}
 					>
 						Unsubscribe
 					</button>
 				</form>
 
-				<p class={css({ mt: "8", fontSize: "sm", color: { base: "gray.600", _dark: "gray.400" } })}>
-					Changed your mind? <a href="/" class={css({ color: "rgb(var(--brand-primary))", _hover: { textDecoration: "underline" } })}>Go back home</a>
+				<p class={css({
+	mt: '8',
+	fontSize: 'sm',
+}) + " text-muted"}>
+					Changed your mind? <a href="/" class={css({
+	_hover: {
+		textDecoration: 'underline',
+	},
+}) + " text-primary"}>Go back home</a>
 				</p>
 			</>
 		)}

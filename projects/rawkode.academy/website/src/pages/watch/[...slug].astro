@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getCollection, getEntry } from "astro:content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
@@ -242,8 +243,18 @@ if (isAuthenticated && user?.id) {
 		category={video.data.category}
 		clips={clips}
 	/>
-	<div class="min-h-screen">
-		<div class="container-content content-px py-4 sm:py-6 lg:py-8">
+	<div class={css({
+	minH: '100vh',
+})}>
+		<div class={css({
+	py: '4',
+	sm: {
+		py: '6',
+	},
+	lg: {
+		py: '8',
+	},
+}) + " container-content content-px"}>
 			{/* Breadcrumb */}
 			<div class="section-mb">
 				<Breadcrumb elements={breadcrumbElements} />
@@ -251,15 +262,47 @@ if (isAuthenticated && user?.id) {
 
 			{/* Hero Section with Title */}
 			<div class="section-mb">
-				<h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-primary-content mb-2 sm:mb-3 tracking-tight">{video.data.title}</h1>
-				<div class="flex flex-wrap items-center card-gap text-sm text-muted">
-					<time datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)} class="flex items-center gap-1.5 sm:gap-2">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<h1 class={css({
+	fontSize: '2xl',
+	sm: {
+		fontSize: '3xl',
+		mb: '3',
+	},
+	lg: {
+		fontSize: '4xl',
+	},
+	xl: {
+		fontSize: '5xl',
+	},
+	fontWeight: 'bold',
+	mb: '2',
+	letterSpacing: 'tight',
+}) + " text-primary-content"}>{video.data.title}</h1>
+				<div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	fontSize: 'sm',
+}) + " card-gap text-muted"}>
+					<time datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)} class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '1.5',
+	sm: {
+		gap: '2',
+	},
+})}>
+						<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
 						</svg>
 						{formatDate(video.data.publishedAt)}
 					</time>
-					<span class="opacity-50">•</span>
+					<span class={css({
+	opacity: '0.5',
+})}>•</span>
 					<span>{Math.floor((durationSec ?? 0) / 60)} min watch</span>
 				</div>
 			</div>
@@ -267,7 +310,13 @@ if (isAuthenticated && user?.id) {
 			{/* Main Content */}
 			<div class="section-gap">
 				{/* Video Player */}
-				<div class="relative w-full aspect-video rounded-xl overflow-hidden card-shadow-elevated">
+				<div class={css({
+	pos: 'relative',
+	w: 'full',
+	aspectRatio: 'video',
+	rounded: 'xl',
+	overflow: 'hidden',
+}) + " card-shadow-elevated"}>
 					<VideoPlayer
 						client:only="vue"
 						video={video.data.id}
@@ -284,17 +333,35 @@ if (isAuthenticated && user?.id) {
 				/>
 
 				{/* Server-rendered episode description for UX and crawlability */}
-				<section class="glass-card-shimmer p-4 sm:p-6">
-					<div class="space-y-1">
-						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+				<section class={css({
+	p: '4',
+	sm: {
+		p: '6',
+	},
+}) + " glass-card-shimmer"}>
+					<div class={css({
+	gap: '1',
+})}>
+						<p class={css({
+	fontSize: 'xs',
+	fontWeight: 'semibold',
+	textTransform: 'uppercase',
+	letterSpacing: '0.18em',
+}) + " text-muted"}>
 							Overview
 						</p>
-						<h2 class="text-xl font-semibold text-primary-content">
+						<h2 class={css({
+	fontSize: 'xl',
+	fontWeight: 'semibold',
+}) + " text-primary-content"}>
 							About this video
 						</h2>
 					</div>
 					<div
-						class="prose prose-lg mt-6 max-w-none dark:prose-invert"
+						class={css({
+	mt: '6',
+	maxW: 'none',
+}) + " prose prose-lg dark:prose-invert"}
 						set:html={renderedDescriptionHtml}
 					/>
 				</section>
@@ -302,26 +369,62 @@ if (isAuthenticated && user?.id) {
 				{/* Technologies Section */}
 				{techEntries.length > 0 && (
 					<div>
-						<h3 class="text-base font-medium text-secondary-content mb-3">Technologies featured in this video</h3>
-						<div class="flex flex-wrap gap-2">
+						<h3 class={css({
+	fontSize: 'base',
+	fontWeight: 'medium',
+	mb: '3',
+}) + " text-secondary-content"}>Technologies featured in this video</h3>
+						<div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	gap: '2',
+})}>
 							{techEntries.map((tech) => (
 								<a
 									Astro.key={tech.id}
 									href={`/technology/${tech.id.replace(/\/index$/, '')}`}
-									class="glass-interactive inline-flex items-center gap-2 px-3 py-2 group"
+									class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '2',
+}) + " glass-interactive group"}
 								>
-									<div class="w-5 h-5 sm:w-6 sm:h-6 relative overflow-hidden rounded">
+									<div class={css({
+	w: '5',
+	h: '5',
+	sm: {
+		w: '6',
+		h: '6',
+	},
+	pos: 'relative',
+	overflow: 'hidden',
+	rounded: 'md',
+})}>
 										<img
 											src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || '/apple-touch-icon.png'}
 											alt={tech.data.name}
-											class="w-full h-full object-contain"
+											class={css({
+	w: 'full',
+	h: 'full',
+	objectFit: 'contain',
+})}
 											onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
 										/>
 									</div>
-									<span class="text-sm font-medium text-secondary-content group-hover:text-primary-content transition-colors">
+									<span class={css({
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	transition: 'colors',
+}) + " text-secondary-content group-hover:text-primary-content"}>
 										{tech.data.name}
 									</span>
-									<svg class="w-4 h-4 text-muted group-hover:text-secondary-content transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<svg class={css({
+	w: '4',
+	h: '4',
+	transition: 'colors',
+}) + " text-muted group-hover:text-secondary-content"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 									</svg>
 								</a>

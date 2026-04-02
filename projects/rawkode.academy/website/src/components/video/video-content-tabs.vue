@@ -84,6 +84,7 @@
 </template>
 
 <script>
+import { css } from "../../../styled-system/css";
 import VideoComments from "./comments.vue";
 import VideoTranscript from "./transcript.vue";
 

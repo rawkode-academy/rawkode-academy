@@ -81,6 +81,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../../styled-system/css";
 import { computed, onMounted, onUnmounted } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { getDimensionLabel } from "@/lib/explorer/dimensions";

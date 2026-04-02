@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import SeriesArticles from "@/components/articles/series/SeriesArticles.astro";
@@ -46,14 +47,22 @@ const imageUrl = await computeImageUrl(series);
 ---
 
 <Page title={`${series.data.title} | Series`} image={{image: imageUrl }}>
-	<h1 class="text-5xl font-extrabold dark:text-white">
+	<h1 class={css({
+	fontSize: '5xl',
+	fontWeight: 'extrabold',
+}) + " dark:text-white"}>
 		{series.data.title}
 	</h1>
 
-	<article class="max-w-(--breakpoint-xl) format prose lg:prose-xl dark:format-invert">
+	<article class={css({
+	maxW: '(--breakpoint-xl)',
+}) + " format prose lg:prose-xl dark:format-invert"}>
 		<Content />
 
-		<h2 class="text-4xl font-bold dark:text-white">Articles</h2>
+		<h2 class={css({
+	fontSize: '4xl',
+	fontWeight: 'bold',
+}) + " dark:text-white"}>Articles</h2>
 
 		<div class="not-format">
 			<SeriesArticles series={series} />

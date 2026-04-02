@@ -95,7 +95,6 @@
 		"ski-player-learned-phrases": "workspace:*",
 		"ski-player-stats": "workspace:*",
 		"ski-share-cards": "workspace:*",
-		"tailwindcss": "^4.2.2",
 		"typescript": "^6.0.2",
 		"unified": "^11.0.5",
 		"unist-util-visit": "^5.1.0",

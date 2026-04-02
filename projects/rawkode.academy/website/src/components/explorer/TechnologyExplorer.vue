@@ -113,6 +113,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import { ref, computed, onMounted, provide } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { useExplorerState } from "@/composables/useExplorerState";

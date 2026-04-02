@@ -68,6 +68,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import { computed } from "vue";
 import type { ViewMode, ExplorerPreset } from "@/lib/explorer/presets";
 import { VIEW_MODES, getPresetsForPhase } from "@/lib/explorer/presets";

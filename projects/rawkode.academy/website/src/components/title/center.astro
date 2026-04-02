@@ -1,9 +1,14 @@
 ---
+import { css } from "../../../styled-system/css";
+
 const { title } = Astro.props;
+
+const sectionStyle = css({ overflow: 'hidden' });
+const containerStyle = css({ px: '4', mx: 'auto', textAlign: 'center' });
 ---
 
-<section class="overflow-hidden">
-	<div class="container px-4 mx-auto text-center">
+<section class={sectionStyle}>
+	<div class={containerStyle}>
 		<h1>{title}</h1>
 	</div>
 </section>

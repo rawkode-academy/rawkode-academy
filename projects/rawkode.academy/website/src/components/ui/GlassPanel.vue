@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "../../../styled-system/css";
 
 interface Props {
 	variant?: "light" | "medium" | "dark";
@@ -26,55 +27,48 @@ const props = withDefaults(defineProps<Props>(), {
 	shadow: true,
 });
 
-const baseClasses = "relative";
-
-const variantClasses = {
-	light: "bg-white/30 dark:bg-gray-800/30",
-	medium: "bg-white/50 dark:bg-gray-800/50",
-	dark: "bg-white/70 dark:bg-gray-800/70",
+const variantStyles = {
+	light: css({ bg: { base: "rgba(255, 255, 255, 0.3)", _dark: "rgba(31, 41, 55, 0.3)" } }),
+	medium: css({ bg: { base: "rgba(255, 255, 255, 0.5)", _dark: "rgba(31, 41, 55, 0.5)" } }),
+	dark: css({ bg: { base: "rgba(255, 255, 255, 0.7)", _dark: "rgba(31, 41, 55, 0.7)" } }),
 };
 
-const blurClasses = {
-	sm: "backdrop-blur-sm",
-	md: "backdrop-blur-md",
-	lg: "backdrop-blur-lg",
-	xl: "backdrop-blur-xl",
-	"2xl": "backdrop-blur-2xl",
+const blurStyles = {
+	sm: css({ backdropFilter: "blur(4px)" }),
+	md: css({ backdropFilter: "blur(12px)" }),
+	lg: css({ backdropFilter: "blur(16px)" }),
+	xl: css({ backdropFilter: "blur(24px)" }),
+	"2xl": css({ backdropFilter: "blur(40px)" }),
 };
 
-const paddingClasses = {
-	none: "p-0",
-	sm: "p-4",
-	md: "p-6",
-	lg: "p-8",
-	xl: "p-10",
+const paddingStyles = {
+	none: css({ p: "0" }),
+	sm: css({ p: "4" }),
+	md: css({ p: "6" }),
+	lg: css({ p: "8" }),
+	xl: css({ p: "10" }),
 };
 
-const roundedClasses = {
-	none: "rounded-none",
-	sm: "rounded-sm",
-	md: "rounded-md",
-	lg: "rounded-lg",
-	xl: "rounded-xl",
-	"2xl": "rounded-2xl",
-	"3xl": "rounded-3xl",
+const roundedStyles = {
+	none: css({ borderRadius: "none" }),
+	sm: css({ borderRadius: "sm" }),
+	md: css({ borderRadius: "md" }),
+	lg: css({ borderRadius: "lg" }),
+	xl: css({ borderRadius: "xl" }),
+	"2xl": css({ borderRadius: "2xl" }),
+	"3xl": css({ borderRadius: "3xl" }),
 };
-
-const borderClass = "border-glass";
-const shadowClass = "card-shadow";
 
 const panelClasses = computed(() => {
-	return [
-		baseClasses,
-		variantClasses[props.variant],
-		blurClasses[props.blur],
-		paddingClasses[props.padding],
-		roundedClasses[props.rounded],
-		props.border && borderClass,
-		props.shadow && shadowClass,
+	return cx(
+		css({ position: "relative" }),
+		variantStyles[props.variant],
+		blurStyles[props.blur],
+		paddingStyles[props.padding],
+		roundedStyles[props.rounded],
+		props.border ? css({ border: "1px solid", borderColor: "var(--surface-border)" }) : undefined,
+		props.shadow ? css({ boxShadow: "var(--surface-shadow)" }) : undefined,
 		props.class,
-	]
-		.filter(Boolean)
-		.join(" ");
+	);
 });
 </script>

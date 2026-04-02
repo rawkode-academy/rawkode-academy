@@ -1,8 +1,8 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getCollection, getEntries } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { createLogger } from "@/lib/logger";
-import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
@@ -50,120 +50,182 @@ const getAdrNumber = (id: string): string => {
 ---
 
 <Page title="Architecture Decision Records" subtitle="Documentation of architecture decisions">
-	<div class={css({ maxW: "breakpoint-xl", mx: "auto" })}>
-		<h1 class={css({ fontSize: "5xl", fontWeight: "extrabold", mb: "6", color: "fg.default" })}>
-			Architecture Decision Records
-		</h1>
+  <div class={css({
+	maxW: '(--breakpoint-xl)',
+	mx: 'auto',
+})}>
+    <h1 class={css({
+	fontSize: '5xl',
+	fontWeight: 'extrabold',
+	mb: '6',
+}) + " text-primary-content"}>
+      Architecture Decision Records
+    </h1>
 
-		<p class={css({ mb: "10", fontSize: "lg", color: "fg.muted" })}>
-			This page lists all architecture decisions made in this project. ADRs are a lightweight method to document architectural decisions including their context and consequences.
-		</p>
+    <p class={css({
+	mb: '10',
+	fontSize: 'lg',
+	color: 'gray.700',
+}) + " dark:text-gray-300"}>
+      This page lists all architecture decisions made in this project. ADRs are a lightweight method to document architectural decisions including their context and consequences.
+    </p>
 
-		<div class={css({ display: "grid", gap: { base: "6", lg: "8" } })}>
-			{allAdrs.map((adr) => {
-				const authorData = adrAuthors.find(a => a.id === adr.id);
-				const authors = authorData?.authors || [];
-				const validAuthors = validAuthors;
-				const adrNumber = getAdrNumber(adr.id);
+    <div class={css({
+	display: 'grid',
+	gap: '6',
+	lg: {
+		gap: '8',
+	},
+})}>
+      {allAdrs.map((adr) => {
+        const authorData = adrAuthors.find(a => a.id === adr.id);
+        const authors = authorData?.authors || [];
+        const adrNumber = getAdrNumber(adr.id);
 
-				return (
-					<a href={`/adrs/${adr.id}`} class={css({ display: "block" })}>
-						<div class={css({
-							transition: "all",
-							transitionDuration: "300ms",
-							transitionTimingFunction: "ease-in-out",
-							_hover: { transform: "translateY(-4px)", shadow: "xl" },
-							borderRadius: "xl",
-							overflow: "hidden",
-							backdropFilter: "blur(4px)",
-							bg: { base: "white/30", _dark: "gray.800/30" },
-							borderWidth: "1px",
-							borderColor: { base: "gray.200", _dark: "gray.700" },
-							shadow: "md",
-						})}>
-							<div class={css({ p: "6" })}>
-								<div class={css({ display: "flex", alignItems: "center", gap: "4", mb: "4" })}>
-									<h2 class={css({ fontSize: "2xl", fontWeight: "bold", color: "fg.default", my: "auto" })}>
-										<span class={css({ color: "green.500" })}>ADR-{adrNumber}:</span> {adr.data.title}
-									</h2>
-								</div>
+        return (
+          <a href={`/adrs/${adr.id}`} class={css({
+	display: 'block',
+})}>
+            <div class={css({
+	transition: 'all',
+	transitionDuration: '300ms',
+	transitionTimingFunction: 'ease-in-out',
+	_hover: {
+		translateY: '-1',
+		shadow: 'xl',
+	},
+	rounded: 'xl',
+	overflow: 'hidden',
+	backdropBlur: 'sm',
+	bg: 'white/30',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+	shadow: 'md',
+}) + " transform dark:bg-gray-800/30 dark:border-gray-700"}>
+              <div class={css({
+	p: '6',
+})}>
+                <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '4',
+	mb: '4',
+})}>
+                  <h2 class={css({
+	fontSize: '2xl',
+	fontWeight: 'bold',
+	my: 'auto',
+}) + " text-primary-content"}>
+                    <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
+                  </h2>
+                </div>
 
-								<div class={css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4", mt: "2" })}>
-									<div class={css({ display: "flex", alignItems: "center", fontSize: "sm", color: "fg.muted" })}>
-										<svg xmlns="http://www.w3.org/2000/svg" class={css({ h: "5", w: "5", mr: "1", color: "fg.subtle" })} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-										</svg>
-										{formatDate(adr.data.adoptedAt)}
-									</div>
+                <div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: '4',
+	mt: '2',
+})}>
+                  <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	fontSize: 'sm',
+}) + " text-muted"}>
+                    <svg xmlns="http://www.w3.org/2000/svg" class={css({
+	h: '5',
+	w: '5',
+	mr: '1',
+	color: 'gray.500',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {formatDate(adr.data.adoptedAt)}
+                  </div>
 
-									<div class={css({ display: "flex", alignItems: "center" })}>
-										<span class={css({
-											px: "3",
-											py: "1",
-											fontSize: "xs",
-											fontWeight: "medium",
-											borderRadius: "full",
-											bg: { base: "green.100", _dark: "green.900" },
-											color: { base: "green.800", _dark: "green.200" },
-										})}>
-											Adopted
-										</span>
-									</div>
+                  <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+})}>
+                    <span class={css({
+	px: '3',
+	py: '1',
+	fontSize: 'xs',
+	fontWeight: 'medium',
+	rounded: 'full',
+	bg: 'green.100',
+	color: 'green.800',
+}) + " dark:bg-green-900 dark:text-green-200"}>
+                      Adopted
+                    </span>
+                  </div>
 
-									{authors.length > 0 && (
-										<div class={css({ display: "flex", alignItems: "center" })}>
-											<div class={css({ display: "flex", mr: "2" })}>
-												{validAuthors.slice(0, 3).map((author, index) => (
-													<div class={css({ position: "relative", ml: index > 0 ? "-3" : "0" })} style={`z-index: ${10 - index}`}>
-														<img
-															class={css({
-																w: "8",
-																h: "8",
-																borderRadius: "full",
-																objectFit: "cover",
-																borderWidth: "2px",
-																borderColor: "green.500",
-																p: "0.5",
-																bg: { base: "white", _dark: "gray.800" },
-															})}
-															src={author.data.avatarUrl}
-															alt={`Profile picture of ${author.data.name}`}
-															title={author.data.name}
-														/>
-													</div>
-												))}
-												{validAuthors.length > 3 && (
-													<div class={css({ position: "relative", zIndex: "0", ml: "-3" })}>
-														<div class={css({
-															w: "8",
-															h: "8",
-															borderRadius: "full",
-															bg: { base: "green.500/10", _dark: "green.500/20" },
-															borderWidth: "2px",
-															borderColor: "green.500",
-															display: "flex",
-															alignItems: "center",
-															justifyContent: "center",
-															fontSize: "xs",
-															color: "green.500",
-															fontWeight: "medium",
-														})}>
-															+{validAuthors.length - 3}
-														</div>
-													</div>
-												)}
-											</div>
-											<span class={css({ fontSize: "sm", color: "fg.muted" })}>
-												{validAuthors.map(author => author.data.name).join(", ")}
-											</span>
-										</div>
-									)}
-								</div>
-							</div>
-						</div>
-					</a>
-				);
-			})}
-		</div>
-	</div>
+                  {authors.length > 0 && (
+                    <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+})}>
+                      <div class={css({
+	display: 'flex',
+	gap: '-3',
+	mr: '2',
+})}>
+                        {authors.filter(author => author && author.data).slice(0, 3).map((author, index) => (
+                          <div class={css({
+	pos: 'relative',
+})} style={`z-index: ${10 - index}`}>
+                            <img
+                              class={css({
+	w: '8',
+	h: '8',
+	rounded: 'full',
+	objectFit: 'cover',
+	borderWidth: '2px',
+	p: '0.5',
+	bg: 'white',
+}) + " border-secondary dark:bg-gray-800"}
+                              src={author.data.avatarUrl}
+                              alt={`Profile picture of ${author.data.name}`}
+                              title={author.data.name}
+                            />
+                          </div>
+                        ))}
+                        {authors.filter(author => author && author.data).length > 3 && (
+                          <div class={css({
+	pos: 'relative',
+	zIndex: '0',
+})}>
+                            <div class={css({
+	w: '8',
+	h: '8',
+	rounded: 'full',
+	bg: 'white',
+	borderWidth: '2px',
+	p: '0.5',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	fontSize: 'xs',
+	fontWeight: 'medium',
+}) + " dark:bg-secondary/20 border-secondary dark:bg-gray-800 text-secondary dark:text-secondary"}>
+                              +{authors.filter(author => author && author.data).length - 3}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <span class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>
+                        {authors.filter(author => author && author.data).map(author => author.data.name).join(", ")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  </div>
 </Page>

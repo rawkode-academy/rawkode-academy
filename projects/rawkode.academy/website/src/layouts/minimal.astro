@@ -1,5 +1,6 @@
 ---
 import "@/styles/global.css";
+import { css } from "../../styled-system/css";
 
 interface Props {
 	title: string;
@@ -33,7 +34,7 @@ const { title, description } = Astro.props;
       })();
     </script>
   </head>
-  <body class="h-full w-full bg-white dark:bg-black text-gray-900 dark:text-gray-100">
+  <body class={css({ h: 'full', w: 'full', bg: { base: 'white', _dark: 'black' }, color: { base: 'gray.900', _dark: 'gray.100' } })}>
     <slot />
   </body>
 </html>

@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getImage } from "astro:assets";
 import {
 	type CollectionEntry,
@@ -6,7 +7,6 @@ import {
 	getEntries,
 	render,
 } from "astro:content";
-import { css } from "../../../styled-system/css";
 import CourseModules from "@/components/courses/CourseModules.astro";
 import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
 import CourseDetailHero from "@/components/courses/CourseDetailHero.vue";
@@ -109,7 +109,7 @@ const formattedAuthors = authors.map((author) => ({
 			authors={authors}
 		/>
 	)}
-
+	
 	<!-- Hero Section with Signup Form -->
 	<CourseDetailHero
 		title={course.data.title}
@@ -122,21 +122,32 @@ const formattedAuthors = authors.map((author) => ({
 	>
 		<Fragment slot="signup-form">
 			{course.data.signupConfig && (
-				<CourseSignupFormCompact
+				<CourseSignupFormCompact 
 					courseId={course.id}
 					courseTitle={course.data.title}
 					signupConfig={course.data.signupConfig}
 					isAlreadySubscribed={false}
-					server:defer
+					server:defer 
 				/>
 			)}
 		</Fragment>
 	</CourseDetailHero>
 
-	<div class={css({ bg: { base: 'gray.100', _dark: 'gray.900' } })}>
+	<div class={css({
+	bg: 'gray.100',
+}) + " dark:bg-gray-900"}>
 		<!-- Main Content -->
-		<div class={css({ py: '16', px: '4', mx: 'auto', maxW: 'breakpoint-xl' })}>
-			<div class={css({ mb: '16', maxW: '3xl', mx: 'auto' })}>
+		<div class={css({
+	py: '16',
+	px: '4',
+	mx: 'auto',
+	maxW: 'screen-xl',
+})}>
+			<div class={css({
+	mb: '16',
+	maxW: '3xl',
+	mx: 'auto',
+})}>
 				<NewsletterCTA
 					server:defer
 					audience={`course:${course.id}`}
@@ -148,31 +159,70 @@ const formattedAuthors = authors.map((author) => ({
 
 			<!-- Course Overview Content -->
 			{Content && (
-				<div class={css({ mb: '16' })}>
-					<h2 class={css({ fontSize: '3xl', fontWeight: 'bold', color: 'fg.default', mb: '8' })}>Course Overview</h2>
-					<article class="prose prose-lg dark:prose-invert max-w-none">
+				<div class={css({
+	mb: '16',
+})}>
+					<h2 class={css({
+	fontSize: '3xl',
+	fontWeight: 'bold',
+	mb: '8',
+}) + " text-primary-content"}>Course Overview</h2>
+					<article class={css({
+	maxW: 'none',
+}) + " prose prose-lg dark:prose-invert"}>
 						<Content />
 					</article>
 				</div>
 			)}
 
 			<!-- Course Modules -->
-			<div id="course-content" class={css({ mb: '16', scrollMarginTop: '20' })}>
-				<h2 class={css({ fontSize: '3xl', fontWeight: 'bold', color: 'fg.default', mb: '8' })}>Course Content</h2>
+			<div id="course-content" class={css({
+	mb: '16',
+	scrollMarginTop: '20',
+})}>
+				<h2 class={css({
+	fontSize: '3xl',
+	fontWeight: 'bold',
+	mb: '8',
+}) + " text-primary-content"}>Course Content</h2>
 				<CourseModules course={course} />
 			</div>
 
 			<!-- Resources -->
 			{course.data.resources && course.data.resources.length > 0 && (
-				<div class={css({ mb: '16' })}>
-					<h2 class={css({ fontSize: '3xl', fontWeight: 'bold', color: 'fg.default', mb: '8' })}>Course Resources</h2>
-					<div class={css({ bg: { base: 'white', _dark: 'gray.800' }, borderRadius: 'lg', p: '6', borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } })}>
+				<div class={css({
+	mb: '16',
+})}>
+					<h2 class={css({
+	fontSize: '3xl',
+	fontWeight: 'bold',
+	mb: '8',
+}) + " text-primary-content"}>Course Resources</h2>
+					<div class={css({
+	bg: 'white',
+	rounded: 'lg',
+	p: '6',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+}) + " dark:bg-gray-800 dark:border-gray-700"}>
 						{course.data.resources.map((resource) => (
-							<div class={css({ display: 'flex', alignItems: 'flex-start', gap: '4', mb: '4', _last: { mb: '0' } })}>
-								<div class={css({ flex: '1' })}>
-									<h3 class={css({ fontWeight: 'semibold', color: 'fg.default' })}>{resource.title}</h3>
+							<div class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '4',
+	mb: '4',
+}) + " last:mb-0"}>
+								<div class={css({
+	flex: '1',
+})}>
+									<h3 class={css({
+	fontWeight: 'semibold',
+}) + " text-primary-content"}>{resource.title}</h3>
 									{resource.description && (
-										<p class={css({ color: 'fg.subtle', fontSize: 'sm', mt: '1' })}>{resource.description}</p>
+										<p class={css({
+	fontSize: 'sm',
+	mt: '1',
+}) + " text-muted"}>{resource.description}</p>
 									)}
 								</div>
 								{resource.type === "url" && resource.url && (
@@ -180,9 +230,14 @@ const formattedAuthors = authors.map((author) => ({
 										href={resource.url}
 										target="_blank"
 										rel="noopener noreferrer"
-										class={css({ color: 'teal.500', transition: 'colors', _hover: { color: 'teal.600' } })}
+										class={css({
+	transition: 'colors',
+}) + " text-primary hover:text-primary-dark"}
 									>
-										<svg class={css({ w: '5', h: '5' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<svg class={css({
+	w: '5',
+	h: '5',
+})} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
 										</svg>
 									</a>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 interface Offering {
 	title: string;
 	color: string;

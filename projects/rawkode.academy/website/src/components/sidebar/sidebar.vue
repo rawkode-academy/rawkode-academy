@@ -11,6 +11,7 @@ import {
 import { computed, onMounted, ref } from "vue";
 import NavItem from "./NavItem.vue";
 import type { NavItemData } from "./NavItem.vue";
+import { css, cx } from "../../../styled-system/css";
 
 // Get the current path from the window location
 const currentPath = ref("");
@@ -124,29 +125,92 @@ const expandSidebar = () => {
 	isCollapsed.value = false;
 	localStorage.setItem("sidebar-collapsed", "false");
 };
+
+const asideBaseStyles = css({
+	position: 'fixed',
+	top: '28',
+	left: '4',
+	bottom: '4',
+	zIndex: '30',
+	transition: 'all',
+	transitionDuration: '300ms',
+	transitionTimingFunction: 'ease-in-out',
+	borderRadius: '2xl',
+	md: { left: '8' },
+});
+
+const overlayStyles = css({
+	position: 'absolute',
+	inset: '0',
+	backgroundImage: {
+		base: 'linear-gradient(to bottom right, rgba(255,255,255,0.6), rgba(4,181,156,0.1), transparent)',
+		_dark: 'linear-gradient(to bottom right, rgba(17,24,39,0.6), rgba(4,181,156,0.2), transparent)',
+	},
+	opacity: '0.7',
+	pointerEvents: 'none',
+	borderRadius: '2xl',
+});
+
+const innerWrapperStyles = css({
+	display: 'flex',
+	flexDir: 'column',
+	h: 'full',
+	position: 'relative',
+	zIndex: '10',
+});
+
+const navStyles = css({
+	flex: '1',
+	overflowY: 'auto',
+	py: '4',
+	px: '3',
+});
+
+const separatorStyles = css({
+	borderTopWidth: '1px',
+	borderColor: { base: 'rgba(229,231,235,0.5)', _dark: 'rgba(55,65,81,0.5)' },
+	mx: '2',
+});
+
+const mobileOverlayStyles = css({
+	position: 'fixed',
+	inset: '0',
+	bg: 'rgba(0,0,0,0.3)',
+	backdropFilter: 'blur(4px)',
+	zIndex: '20',
+	display: { md: 'none' },
+});
+
+// Pre-computed styles for template conditionals (avoid css() calls inside render)
+const asideCollapsed = css({ display: { base: 'none', md: 'block' }, w: { md: '18' } });
+const asideExpanded = css({ display: 'block', w: '64' });
+const listSpacing = css({ spaceY: '1' });
+const listSpacingCollapsed = css({ spaceY: '0.5', pr: '1' });
+const separatorPyCollapsed = css({ py: '1' });
+const separatorPyExpanded = css({ py: '2' });
 </script>
 
 <template>
 	<aside
-		class="glass-panel"
 		:class="[
-			'fixed top-28 left-4 md:left-8 bottom-4 z-30 transition-all duration-300 ease-in-out',
-			'rounded-2xl',
-			// Desktop: always visible, toggles between collapsed/expanded
-			// Mobile: hidden by default (collapsed), shows when expanded (!isCollapsed)
-			isCollapsed ? 'hidden md:block md:w-[4.5rem]' : 'block w-64',
+			'glass-panel',
+			asideBaseStyles,
+			isCollapsed ? asideCollapsed : asideExpanded,
 		]"
 		aria-label="Sidebar navigation"
 	>
-		<div class="absolute inset-0 bg-gradient-to-br from-white/60 via-primary/10 to-transparent dark:from-gray-900/60 dark:via-primary/20 opacity-70 pointer-events-none rounded-2xl" />
-		<div class="flex flex-col h-full relative z-10">
+		<div :class="overlayStyles" />
+		<div :class="innerWrapperStyles">
 			<!-- Navigation -->
-			<nav class="flex-1 overflow-y-auto py-4 px-3 scroll-fade">
-				<ul :class="['space-y-1', isCollapsed ? 'space-y-0.5 pr-1' : '']">
+			<nav :class="[navStyles, 'scroll-fade']">
+				<ul :class="[
+					listSpacing,
+					isCollapsed ? listSpacingCollapsed : '',
+				]">
 					<template v-for="(item, index) in navItems" :key="'href' in item ? item.href : `sep-${index}`">
 						<!-- Separator -->
-						<li v-if="item.separator" :class="isCollapsed ? 'py-1' : 'py-2'">
-							<div class="border-t border-gray-200/50 dark:border-gray-700/50 mx-2"></div>
+						<li v-if="item.separator" :class="isCollapsed ? separatorPyCollapsed : separatorPyExpanded">
+							<div :class="separatorStyles"></div>
 						</li>
 						<!-- Navigation Item -->
 						<li v-else>
@@ -165,7 +229,7 @@ const expandSidebar = () => {
 	<!-- Mobile Overlay -->
 	<div
 		v-show="!isCollapsed"
-		class="fixed inset-0 bg-black/30 backdrop-blur-sm z-20 md:hidden"
+		:class="mobileOverlayStyles"
 		@click="toggleCollapse"
 		aria-label="Close sidebar"
 	></div>

@@ -134,7 +134,7 @@ export default defineConfig({
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
-			// PandaCSS is integrated via the @pandacss/astro integration above
+			// PandaCSS via PostCSS (see postcss.config.cjs)
 			...(process.env.NODE_ENV === "production" && process.env.GRAFANA_SOURCEMAP_API_KEY
 				? [
 						faroUploader({

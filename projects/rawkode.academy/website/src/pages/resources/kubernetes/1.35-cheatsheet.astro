@@ -1,9 +1,9 @@
 ---
+import { css } from "../../../../../styled-system/css";
 import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.vue";
 import { createLearnerId } from "@/actions/newsletter";
-import { css } from "../../../../styled-system/css";
 
 export const prerender = false;
 
@@ -45,54 +45,170 @@ const hasAccess = hasNewsletterSubscription || hasCheatsheetCookie || Astro.url.
 const pageTitle = "Kubernetes 1.35 Cheat Sheet | Rawkode Academy";
 const pageDescription =
 	"Your comprehensive guide to Kubernetes 1.35 - breaking changes, new GA features, AI/ML scheduler primitives, and migration checklist. Free for cloud native engineers.";
-
-const codeStyle = css({ bg: { base: "gray.200", _dark: "gray.700" }, px: "1", borderRadius: "xs", fontSize: "xs" });
-const sectionBoxBase = { borderRadius: { base: "lg", sm: "xl" } as const, p: { base: "4", sm: "6" } as const, border: "1px solid" as const };
-const sectionBox = (color: string, extra?: Record<string, unknown>) => css({ ...sectionBoxBase, bg: { base: `${color}.50`, _dark: `${color}.900/20` }, borderColor: { base: `${color}.200`, _dark: `${color}.800/50` }, ...extra });
-const sectionBoxRed = sectionBox("red", { display: "flex", flexDir: "column", gap: { base: "5", sm: "6" } });
-const sectionBoxGreen = sectionBox("green");
-const sectionBoxPurple = sectionBox("purple");
-const sectionBoxBlue = sectionBox("blue");
-const codeBlockStyle = css({ bg: "gray.900", borderRadius: "lg", p: { base: "3", sm: "4" }, fontFamily: "mono", fontSize: { base: "xs", sm: "sm" }, overflowX: "auto" });
-const headingStyle = css({ fontSize: { base: "lg", sm: "xl" }, fontWeight: "semibold", color: { base: "gray.900", _dark: "white" }, mb: { base: "3", sm: "4" }, display: "flex", alignItems: "center", gap: "2" });
-const subHeadingStyle = css({ fontWeight: "semibold", color: { base: "gray.900", _dark: "white" }, mb: "2", fontSize: { base: "sm", sm: "base" } });
-const badgeBase = { px: "2" as const, borderRadius: "xs" as const, fontSize: "xs" as const, fontWeight: "medium" as const, py: { base: "0.5", sm: "1" } as const };
-const featureGateBadge = (color: string) => css({ ...badgeBase, bg: { base: `${color}.100`, _dark: `${color}.900/30` }, color: { base: `${color}.600`, _dark: `${color}.400` } });
-const featureGateBadgeGA = featureGateBadge("green");
-const featureGateBadgeBeta = featureGateBadge("blue");
 ---
 
 <Page title={pageTitle} description={pageDescription}>
 	{hasAccess ? (
 		<!-- Cheatsheet Content for Subscribed Users -->
-		<section class={css({ py: { base: "12", sm: "16", lg: "20" }, px: "4" })}>
-			<div class={css({ mx: "auto", maxW: "4xl", w: "full" })}>
+		<section class={css({
+	py: '12',
+	px: '4',
+	sm: {
+		py: '16',
+	},
+	lg: {
+		py: '20',
+	},
+})}>
+			<div class={css({
+	mx: 'auto',
+	maxW: '4xl',
+	w: 'full',
+})}>
 				<!-- Success Header -->
-				<div class={css({ textAlign: "center", mb: { base: "8", sm: "12" } })}>
-					<div class={css({ display: "inline-flex", alignItems: "center", justifyContent: "center", w: { base: "16", sm: "20" }, h: { base: "16", sm: "20" }, borderRadius: "full", bg: { base: "green.100", _dark: "green.900/30" }, mb: { base: "4", sm: "6" } })}>
-						<svg class={css({ w: { base: "8", sm: "10" }, h: { base: "8", sm: "10" }, color: "green.500" })} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+				<div class={css({
+	textAlign: 'center',
+	mb: '8',
+	sm: {
+		mb: '12',
+	},
+})}>
+					<div class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	w: '16',
+	h: '16',
+	sm: {
+		w: '20',
+		h: '20',
+		mb: '6',
+	},
+	rounded: 'full',
+	bg: 'green.100',
+	mb: '4',
+}) + " dark:bg-green-900/30"}>
+						<svg class={css({
+	w: '8',
+	h: '8',
+	sm: {
+		w: '10',
+		h: '10',
+	},
+	color: 'green.500',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 						</svg>
 					</div>
-					<h1 class={css({ fontSize: { base: "2xl", sm: "3xl", md: "4xl" }, fontWeight: "bold", color: { base: "gray.900", _dark: "white" }, mb: { base: "3", sm: "4" } })}>
+					<h1 class={css({
+	fontSize: '2xl',
+	sm: {
+		fontSize: '3xl',
+		mb: '4',
+	},
+	md: {
+		fontSize: '4xl',
+	},
+	fontWeight: 'bold',
+	mb: '3',
+}) + " text-primary-content"}>
 						Your Kubernetes 1.35 Cheat Sheet
 					</h1>
-					<p class={css({ fontSize: { base: "base", sm: "lg" }, color: { base: "gray.600", _dark: "gray.400" }, maxW: "2xl", mx: "auto", px: "2" })}>
+					<p class={css({
+	fontSize: 'base',
+	sm: {
+		fontSize: 'lg',
+	},
+	maxW: '2xl',
+	mx: 'auto',
+	px: '2',
+}) + " text-muted"}>
 						Thank you for joining the Rawkode Academy community. Here's everything you need to know about Kubernetes 1.35.
 					</p>
 				</div>
 
 				<!-- Release Info Banner -->
-				<div class={css({ background: "linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1))", borderRadius: { base: "xl", sm: "2xl" }, p: { base: "4", sm: "6" }, mb: { base: "6", sm: "8" }, border: "1px solid", borderColor: { base: "blue.200", _dark: "blue.800/50" } })}>
-					<div class={css({ display: "flex", flexDir: { base: "column", sm: "row" }, sm: { alignItems: "center", justifyContent: "space-between" }, gap: { base: "3", sm: "4" } })}>
+				<div class={css({
+	bgGradient: 'to-r',
+	gradientFrom: 'blue.500/10',
+	gradientTo: 'purple.500/10',
+	rounded: 'xl',
+	sm: {
+		rounded: '2xl',
+		p: '6',
+		mb: '8',
+	},
+	p: '4',
+	mb: '6',
+	borderWidth: '1px',
+	borderColor: 'blue.200',
+}) + " dark:border-blue-800/50"}>
+					<div class={css({
+	display: 'flex',
+	flexDir: 'column',
+	sm: {
+		flexDir: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: '4',
+	},
+	gap: '3',
+})}>
 						<div>
-							<h2 class={css({ fontSize: { base: "base", sm: "lg" }, fontWeight: "semibold", color: { base: "gray.900", _dark: "white" } })}>Release Date: December 17, 2025</h2>
-							<p class={css({ fontSize: { base: "xs", sm: "sm" }, color: { base: "gray.600", _dark: "gray.400" } })}>Cycle started September 15, 2025 - Code Freeze: November 6, 2025</p>
+							<h2 class={css({
+	fontSize: 'base',
+	sm: {
+		fontSize: 'lg',
+	},
+	fontWeight: 'semibold',
+}) + " text-primary-content"}>Release Date: December 17, 2025</h2>
+							<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+}) + " text-muted"}>Cycle started September 15, 2025 - Code Freeze: November 6, 2025</p>
 						</div>
-						<div class={css({ display: "flex", alignItems: "center", gap: "2", px: "3", py: "1", borderRadius: "full", bg: { base: "blue.100", _dark: "blue.900/30" }, color: { base: "blue.600", _dark: "blue.400" }, fontSize: { base: "xs", sm: "sm" }, fontWeight: "medium", w: "fit-content" })}>
-							<span class={css({ position: "relative", display: "flex", h: "2", w: "2" })}>
-								<span class={css({ animation: "ping", position: "absolute", display: "inline-flex", h: "full", w: "full", borderRadius: "full", bg: "blue.400", opacity: "0.75" })}></span>
-								<span class={css({ position: "relative", display: "inline-flex", borderRadius: "full", h: "2", w: "2", bg: "blue.500" })}></span>
+						<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '1',
+	rounded: 'full',
+	bg: 'blue.100',
+	color: 'blue.600',
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	fontWeight: 'medium',
+	w: 'fit',
+}) + " dark:bg-blue-900/30 dark:text-blue-400"}>
+							<span class={css({
+	pos: 'relative',
+	display: 'flex',
+	h: '2',
+	w: '2',
+})}>
+								<span class={css({
+	animation: 'ping',
+	pos: 'absolute',
+	display: 'inline-flex',
+	h: 'full',
+	w: 'full',
+	rounded: 'full',
+	bg: 'blue.400',
+	opacity: '0.75',
+})}></span>
+								<span class={css({
+	pos: 'relative',
+	display: 'inline-flex',
+	rounded: 'full',
+	h: '2',
+	w: '2',
+	bg: 'blue.500',
+})}></span>
 							</span>
 							~60 Enhancements
 						</div>
@@ -100,71 +216,310 @@ const featureGateBadgeBeta = featureGateBadge("blue");
 				</div>
 
 				<!-- Cheatsheet Content Card -->
-				<div class={css({ borderRadius: { base: "2xl", sm: "3xl" }, p: { base: "4", sm: "6", md: "8", lg: "12" }, mb: { base: "8", sm: "12" }, border: "1px solid", borderColor: "var(--surface-border)", backdropFilter: "blur(40px)", bg: "var(--surface-card)", boxShadow: "var(--surface-shadow)" })}>
-					<h2 class={css({ fontSize: { base: "xl", sm: "2xl" }, fontWeight: "bold", color: { base: "gray.900", _dark: "white" }, mb: { base: "6", sm: "8" } })}>
+				<div class={css({
+	rounded: '2xl',
+	sm: {
+		rounded: '3xl',
+		p: '6',
+		mb: '12',
+	},
+	p: '4',
+	md: {
+		p: '8',
+	},
+	lg: {
+		p: '12',
+	},
+	mb: '8',
+}) + " glass-panel"}>
+					<h2 class={css({
+	fontSize: 'xl',
+	sm: {
+		fontSize: '2xl',
+		mb: '8',
+	},
+	fontWeight: 'bold',
+	mb: '6',
+}) + " text-primary-content"}>
 						What's New in Kubernetes 1.35
 					</h2>
 
-					<div class={css({ display: "flex", flexDir: "column", gap: { base: "8", sm: "10" } })}>
+					<div class={css({
+	gap: '8',
+	sm: {
+		gap: '10',
+	},
+})}>
 						<!-- Breaking Changes -->
 						<div>
-							<h3 class={headingStyle}>
-								<span class={css({ color: "red.500" })}>🚨</span> Breaking Changes (Action Required!)
+							<h3 class={css({
+	fontSize: 'lg',
+	sm: {
+		fontSize: 'xl',
+		mb: '4',
+	},
+	fontWeight: 'semibold',
+	mb: '3',
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+}) + " text-primary-content"}>
+								<span class={css({
+	color: 'red.500',
+})}>🚨</span> Breaking Changes (Action Required!)
 							</h3>
-							<div class={sectionBoxRed}>
+							<div class={css({
+	bg: 'red.50',
+	rounded: 'lg',
+	sm: {
+		rounded: 'xl',
+		p: '6',
+		gap: '6',
+	},
+	p: '4',
+	borderWidth: '1px',
+	borderColor: 'red.200',
+	gap: '5',
+}) + " dark:bg-red-900/20 dark:border-red-800/50"}>
+
 								<!-- cgroup v1 -->
 								<div>
-									<h4 class={subHeadingStyle}>cgroup v1 Support Disabled by Default</h4>
-									<p class={css({ color: { base: "gray.600", _dark: "gray.400" }, fontSize: { base: "xs", sm: "sm" }, mb: "3" })}>The Kubelet config <code class={codeStyle}>failCgroupV1</code> now defaults to <code class={codeStyle}>true</code>. If a node boots with legacy cgroup v1 hierarchy, the Kubelet <strong>crashes immediately on startup</strong>.</p>
-									<div class={css({ bg: "gray.900", borderRadius: "lg", p: { base: "3", sm: "4" }, fontFamily: "mono", fontSize: { base: "xs", sm: "sm" }, overflowX: "auto", display: "flex", flexDir: "column", gap: { base: "1", sm: "2" } })}>
+									<h4 class={css({
+	fontWeight: 'semibold',
+	mb: '2',
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+}) + " text-primary-content"}>cgroup v1 Support Disabled by Default</h4>
+									<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mb: '3',
+}) + " text-muted"}>The Kubelet config <code class={css({
+	bg: 'gray.200',
+	px: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+}) + " dark:bg-gray-700"}>failCgroupV1</code> now defaults to <code class={css({
+	bg: 'gray.200',
+	px: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+}) + " dark:bg-gray-700"}>true</code>. If a node boots with legacy cgroup v1 hierarchy, the Kubelet <strong>crashes immediately on startup</strong>.</p>
+									<div class={css({
+	bg: 'gray.900',
+	rounded: 'lg',
+	p: '3',
+	sm: {
+		p: '4',
+		fontSize: 'sm',
+		gap: '2',
+	},
+	fontFamily: 'mono',
+	fontSize: 'xs',
+	overflowX: 'auto',
+	gap: '1',
+})}>
 										<div>
-											<p class={css({ color: "gray.400" })}># Check if your nodes use cgroups v2</p>
-											<p class={css({ color: "green.400", overflowWrap: "break-word" })}>stat -fc %T /sys/fs/cgroup/</p>
-											<p class={css({ color: "gray.400" })}># Returns: cgroup2fs (v2) or tmpfs (v1 - WILL FAIL!)</p>
+											<p class={css({
+	color: 'gray.400',
+})}># Check if your nodes use cgroups v2</p>
+											<p class={css({
+	color: 'green.400',
+	wordBreak: 'break-all',
+})}>stat -fc %T /sys/fs/cgroup/</p>
+											<p class={css({
+	color: 'gray.400',
+})}># Returns: cgroup2fs (v2) or tmpfs (v1 - WILL FAIL!)</p>
 										</div>
 									</div>
 								</div>
 
 								<!-- containerd -->
 								<div>
-									<h4 class={subHeadingStyle}>containerd 1.x End of Support</h4>
-									<p class={css({ color: { base: "gray.600", _dark: "gray.400" }, fontSize: { base: "xs", sm: "sm" }, mb: "3" })}>Kubernetes 1.35 is the <strong>last version</strong> to support containerd 1.7. You must upgrade to containerd 2.0+ before upgrading to Kubernetes 1.36.</p>
-									<div class={codeBlockStyle}>
-										<p class={css({ color: "gray.400" })}># Monitor affected nodes with this metric</p>
-										<p class={css({ color: "green.400" })}>kubelet_cri_losing_support</p>
+									<h4 class={css({
+	fontWeight: 'semibold',
+	mb: '2',
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+}) + " text-primary-content"}>containerd 1.x End of Support</h4>
+									<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mb: '3',
+}) + " text-muted"}>Kubernetes 1.35 is the <strong>last version</strong> to support containerd 1.7. You must upgrade to containerd 2.0+ before upgrading to Kubernetes 1.36.</p>
+									<div class={css({
+	bg: 'gray.900',
+	rounded: 'lg',
+	p: '3',
+	sm: {
+		p: '4',
+		fontSize: 'sm',
+	},
+	fontFamily: 'mono',
+	fontSize: 'xs',
+	overflowX: 'auto',
+})}>
+										<p class={css({
+	color: 'gray.400',
+})}># Monitor affected nodes with this metric</p>
+										<p class={css({
+	color: 'green.400',
+})}>kubelet_cri_losing_support</p>
 									</div>
 								</div>
 
 								<!-- Image Pull -->
 								<div>
-									<h4 class={subHeadingStyle}>Image Pull Credential Verification (Enabled by Default)</h4>
-									<p class={css({ color: { base: "gray.600", _dark: "gray.400" }, fontSize: { base: "xs", sm: "sm" }, mb: "3" })}>The <code class={codeStyle}>KubeletEnsureSecretPulledImages</code> feature is now enabled. Pods must have valid credentials for cached images.</p>
+									<h4 class={css({
+	fontWeight: 'semibold',
+	mb: '2',
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+}) + " text-primary-content"}>Image Pull Credential Verification (Enabled by Default)</h4>
+									<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mb: '3',
+}) + " text-muted"}>The <code class={css({
+	bg: 'gray.200',
+	px: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+}) + " dark:bg-gray-700"}>KubeletEnsureSecretPulledImages</code> feature is now enabled. Pods must have valid credentials for cached images.</p>
 								</div>
 							</div>
 						</div>
 
 						<!-- GA Features -->
 						<div>
-							<h3 class={headingStyle}>
-								<span class={css({ color: "green.500" })}>🎓</span> Graduating to Stable (GA)
+							<h3 class={css({
+	fontSize: 'lg',
+	sm: {
+		fontSize: 'xl',
+		mb: '4',
+	},
+	fontWeight: 'semibold',
+	mb: '3',
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+}) + " text-primary-content"}>
+								<span class={css({
+	color: 'green.500',
+})}>🎓</span> Graduating to Stable (GA)
 							</h3>
-							<div class={sectionBoxGreen}>
-								<ul class={css({ display: "flex", flexDir: "column", gap: "4", color: { base: "gray.900", _dark: "white" } })}>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<span class={css({ color: "green.500", mt: { base: "0.5", sm: "1" }, fontWeight: "bold", flexShrink: "0" })}>✓</span>
-										<div class={css({ minW: "0" })}>
-											<strong class={css({ fontSize: { base: "sm", sm: "base" } })}>In-place Pod Resource Updates</strong>
-											<p class={css({ fontSize: { base: "xs", sm: "sm" }, color: { base: "gray.600", _dark: "gray.400" }, mt: "1" })}>Adjust CPU and memory without restarting pods! No more recreating stateful workloads for vertical scaling.</p>
-											<div class={css({ bg: "gray.900", borderRadius: "lg", p: { base: "2", sm: "3" }, mt: "2", fontFamily: "mono", fontSize: { base: "2.5", sm: "xs" }, overflowX: "auto" })}>
-												<p class={css({ color: "green.400", whiteSpace: "nowrap" })}>kubectl patch pod my-pod --subresource='resize' -p '&#123;"spec":&#123;"containers":[&#123;"name":"app","resources":&#123;"requests":&#123;"memory":"512Mi"&#125;&#125;&#125;]&#125;&#125;'</p>
+							<div class={css({
+	bg: 'green.50',
+	rounded: 'lg',
+	sm: {
+		rounded: 'xl',
+		p: '6',
+	},
+	p: '4',
+	borderWidth: '1px',
+	borderColor: 'green.200',
+}) + " dark:bg-green-900/20 dark:border-green-800/50"}>
+								<ul class={css({
+	gap: '4',
+}) + " text-primary-content"}>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<span class={css({
+	color: 'green.500',
+	mt: '0.5',
+	sm: {
+		mt: '1',
+	},
+	fontWeight: 'bold',
+	flexShrink: '0',
+})}>✓</span>
+										<div class={css({
+	minW: '0',
+})}>
+											<strong class={css({
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+})}>In-place Pod Resource Updates</strong>
+											<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mt: '1',
+}) + " text-muted"}>Adjust CPU and memory without restarting pods! No more recreating stateful workloads for vertical scaling.</p>
+											<div class={css({
+	bg: 'gray.900',
+	rounded: 'lg',
+	p: '2',
+	sm: {
+		p: '3',
+		fontSize: 'xs',
+	},
+	mt: '2',
+	fontFamily: 'mono',
+	color: '10px',
+	overflowX: 'auto',
+})}>
+												<p class={css({
+	color: 'green.400',
+	whiteSpace: 'nowrap',
+})}>kubectl patch pod my-pod --subresource='resize' -p '&#123;"spec":&#123;"containers":[&#123;"name":"app","resources":&#123;"requests":&#123;"memory":"512Mi"&#125;&#125;&#125;]&#125;&#125;'</p>
 											</div>
 										</div>
 									</li>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<span class={css({ color: "green.500", mt: { base: "0.5", sm: "1" }, fontWeight: "bold", flexShrink: "0" })}>✓</span>
-										<div class={css({ minW: "0" })}>
-											<strong class={css({ fontSize: { base: "sm", sm: "base" } })}>Structured Authentication Configuration</strong>
-											<p class={css({ fontSize: { base: "xs", sm: "sm" }, color: { base: "gray.600", _dark: "gray.400" }, mt: "1" })}>Configure multiple OIDC providers via file, not flags. Hot-reload without API server restarts.</p>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<span class={css({
+	color: 'green.500',
+	mt: '0.5',
+	sm: {
+		mt: '1',
+	},
+	fontWeight: 'bold',
+	flexShrink: '0',
+})}>✓</span>
+										<div class={css({
+	minW: '0',
+})}>
+											<strong class={css({
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+})}>Structured Authentication Configuration</strong>
+											<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mt: '1',
+}) + " text-muted"}>Configure multiple OIDC providers via file, not flags. Hot-reload without API server restarts.</p>
 										</div>
 									</li>
 								</ul>
@@ -173,23 +528,104 @@ const featureGateBadgeBeta = featureGateBadge("blue");
 
 						<!-- AI/ML Features -->
 						<div>
-							<h3 class={headingStyle}>
-								<span class={css({ color: "purple.500" })}>🤖</span> AI/ML & Scheduler Enhancements
+							<h3 class={css({
+	fontSize: 'lg',
+	sm: {
+		fontSize: 'xl',
+		mb: '4',
+	},
+	fontWeight: 'semibold',
+	mb: '3',
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+}) + " text-primary-content"}>
+								<span class={css({
+	color: 'purple.500',
+})}>🤖</span> AI/ML & Scheduler Enhancements
 							</h3>
-							<div class={sectionBoxPurple}>
-								<ul class={css({ display: "flex", flexDir: "column", gap: "4", color: { base: "gray.900", _dark: "white" } })}>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<span class={css({ color: "purple.500", mt: { base: "0.5", sm: "1" }, fontWeight: "bold", flexShrink: "0" })}>α</span>
-										<div class={css({ minW: "0" })}>
-											<strong class={css({ fontSize: { base: "sm", sm: "base" } })}>Gang Scheduling (PodGroup)</strong>
-											<p class={css({ fontSize: { base: "xs", sm: "sm" }, color: { base: "gray.600", _dark: "gray.400" }, mt: "1" })}>Native "all-or-nothing" scheduling for distributed training. If a job needs 16 GPUs and only 10 are free, the scheduler waits for all 16.</p>
+							<div class={css({
+	bg: 'purple.50',
+	rounded: 'lg',
+	sm: {
+		rounded: 'xl',
+		p: '6',
+	},
+	p: '4',
+	borderWidth: '1px',
+	borderColor: 'purple.200',
+}) + " dark:bg-purple-900/20 dark:border-purple-800/50"}>
+								<ul class={css({
+	gap: '4',
+}) + " text-primary-content"}>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<span class={css({
+	color: 'purple.500',
+	mt: '0.5',
+	sm: {
+		mt: '1',
+	},
+	fontWeight: 'bold',
+	flexShrink: '0',
+})}>α</span>
+										<div class={css({
+	minW: '0',
+})}>
+											<strong class={css({
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+})}>Gang Scheduling (PodGroup)</strong>
+											<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mt: '1',
+}) + " text-muted"}>Native "all-or-nothing" scheduling for distributed training. If a job needs 16 GPUs and only 10 are free, the scheduler waits for all 16.</p>
 										</div>
 									</li>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<span class={css({ color: "purple.500", mt: { base: "0.5", sm: "1" }, fontWeight: "bold", flexShrink: "0" })}>β</span>
-										<div class={css({ minW: "0" })}>
-											<strong class={css({ fontSize: { base: "sm", sm: "base" } })}>DRA Binding Conditions</strong>
-											<p class={css({ fontSize: { base: "xs", sm: "sm" }, color: { base: "gray.600", _dark: "gray.400" }, mt: "1" })}>Dynamic Resource Allocation now waits for hardware initialization. GPUs and FPGAs that take seconds to configure won't cause pod failures.</p>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<span class={css({
+	color: 'purple.500',
+	mt: '0.5',
+	sm: {
+		mt: '1',
+	},
+	fontWeight: 'bold',
+	flexShrink: '0',
+})}>β</span>
+										<div class={css({
+	minW: '0',
+})}>
+											<strong class={css({
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+})}>DRA Binding Conditions</strong>
+											<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mt: '1',
+}) + " text-muted"}>Dynamic Resource Allocation now waits for hardware initialization. GPUs and FPGAs that take seconds to configure won't cause pod failures.</p>
 										</div>
 									</li>
 								</ul>
@@ -198,23 +634,109 @@ const featureGateBadgeBeta = featureGateBadge("blue");
 
 						<!-- Security -->
 						<div>
-							<h3 class={headingStyle}>
-								<span class={css({ color: "blue.500" })}>🔐</span> Security
+							<h3 class={css({
+	fontSize: 'lg',
+	sm: {
+		fontSize: 'xl',
+		mb: '4',
+	},
+	fontWeight: 'semibold',
+	mb: '3',
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+}) + " text-primary-content"}>
+								<span class={css({
+	color: 'blue.500',
+})}>🔐</span> Security
 							</h3>
-							<div class={sectionBoxBlue}>
-								<ul class={css({ display: "flex", flexDir: "column", gap: "4", color: { base: "gray.900", _dark: "white" } })}>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<span class={css({ color: "blue.500", mt: { base: "0.5", sm: "1" }, fontWeight: "bold", flexShrink: "0" })}>β</span>
-										<div class={css({ minW: "0" })}>
-											<strong class={css({ fontSize: { base: "sm", sm: "base" } })}>User Namespaces Support</strong>
-											<p class={css({ fontSize: { base: "xs", sm: "sm" }, color: { base: "gray.600", _dark: "gray.400" }, mt: "1" })}>Run containers as UID 0 inside, but unprivileged on the host. Set <code class={codeStyle}>hostUsers: false</code> in your pod spec.</p>
+							<div class={css({
+	bg: 'blue.50',
+	rounded: 'lg',
+	sm: {
+		rounded: 'xl',
+		p: '6',
+	},
+	p: '4',
+	borderWidth: '1px',
+	borderColor: 'blue.200',
+}) + " dark:bg-blue-900/20 dark:border-blue-800/50"}>
+								<ul class={css({
+	gap: '4',
+}) + " text-primary-content"}>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<span class={css({
+	color: 'blue.500',
+	mt: '0.5',
+	sm: {
+		mt: '1',
+	},
+	fontWeight: 'bold',
+	flexShrink: '0',
+})}>β</span>
+										<div class={css({
+	minW: '0',
+})}>
+											<strong class={css({
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+})}>User Namespaces Support</strong>
+											<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mt: '1',
+}) + " text-muted"}>Run containers as UID 0 inside, but unprivileged on the host. Set <code class={css({
+	bg: 'gray.200',
+	px: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+}) + " dark:bg-gray-700"}>hostUsers: false</code> in your pod spec.</p>
 										</div>
 									</li>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<span class={css({ color: "blue.500", mt: { base: "0.5", sm: "1" }, fontWeight: "bold", flexShrink: "0" })}>α</span>
-										<div class={css({ minW: "0" })}>
-											<strong class={css({ fontSize: { base: "sm", sm: "base" } })}>Constrained Impersonation</strong>
-											<p class={css({ fontSize: { base: "xs", sm: "sm" }, color: { base: "gray.600", _dark: "gray.400" }, mt: "1" })}>When impersonating another user, you can't escalate beyond your own privileges.</p>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<span class={css({
+	color: 'blue.500',
+	mt: '0.5',
+	sm: {
+		mt: '1',
+	},
+	fontWeight: 'bold',
+	flexShrink: '0',
+})}>α</span>
+										<div class={css({
+	minW: '0',
+})}>
+											<strong class={css({
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+	},
+})}>Constrained Impersonation</strong>
+											<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+	mt: '1',
+}) + " text-muted"}>When impersonating another user, you can't escalate beyond your own privileges.</p>
 										</div>
 									</li>
 								</ul>
@@ -223,30 +745,196 @@ const featureGateBadgeBeta = featureGateBadge("blue");
 
 						<!-- Migration Checklist -->
 						<div>
-							<h3 class={headingStyle}>
-								<span class={css({ color: "purple.500" })}>✓</span> Migration Checklist
+							<h3 class={css({
+	fontSize: 'lg',
+	sm: {
+		fontSize: 'xl',
+		mb: '4',
+	},
+	fontWeight: 'semibold',
+	mb: '3',
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+}) + " text-primary-content"}>
+								<span class={css({
+	color: 'purple.500',
+})}>✓</span> Migration Checklist
 							</h3>
-							<div class={sectionBoxPurple}>
-								<ul class={css({ display: "flex", flexDir: "column", gap: "3" })}>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<input type="checkbox" class={css({ w: { base: "4", sm: "5" }, h: { base: "4", sm: "5" }, borderRadius: "sm", borderColor: "gray.300", mt: "0.5", flexShrink: "0" })} />
-										<span class={css({ color: { base: "gray.900", _dark: "white" }, fontSize: { base: "xs", sm: "sm" } })}><strong>Verify cgroups v2</strong> - Run <code class={codeStyle}>stat -fc %T /sys/fs/cgroup/</code> on all nodes</span>
+							<div class={css({
+	bg: 'purple.50',
+	rounded: 'lg',
+	sm: {
+		rounded: 'xl',
+		p: '6',
+	},
+	p: '4',
+	borderWidth: '1px',
+	borderColor: 'purple.200',
+}) + " dark:bg-purple-900/20 dark:border-purple-800/50"}>
+								<ul class={css({
+	gap: '3',
+})}>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<input type="checkbox" class={css({
+	w: '4',
+	h: '4',
+	sm: {
+		w: '5',
+		h: '5',
+	},
+	rounded: 'md',
+	borderColor: 'gray.300',
+	color: 'purple.600',
+	_focus: {
+		ringColor: 'purple.500',
+	},
+	mt: '0.5',
+	flexShrink: '0',
+})} />
+										<span class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+}) + " text-primary-content"}><strong>Verify cgroups v2</strong> - Run <code class={css({
+	bg: 'gray.200',
+	px: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+	wordBreak: 'break-all',
+}) + " dark:bg-gray-700"}>stat -fc %T /sys/fs/cgroup/</code> on all nodes</span>
 									</li>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<input type="checkbox" class={css({ w: { base: "4", sm: "5" }, h: { base: "4", sm: "5" }, borderRadius: "sm", borderColor: "gray.300", mt: "0.5", flexShrink: "0" })} />
-										<span class={css({ color: { base: "gray.900", _dark: "white" }, fontSize: { base: "xs", sm: "sm" } })}><strong>Check containerd version</strong> - Must be 1.7+ (2.0+ recommended)</span>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<input type="checkbox" class={css({
+	w: '4',
+	h: '4',
+	sm: {
+		w: '5',
+		h: '5',
+	},
+	rounded: 'md',
+	borderColor: 'gray.300',
+	color: 'purple.600',
+	_focus: {
+		ringColor: 'purple.500',
+	},
+	mt: '0.5',
+	flexShrink: '0',
+})} />
+										<span class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+}) + " text-primary-content"}><strong>Check containerd version</strong> - Must be 1.7+ (2.0+ recommended)</span>
 									</li>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<input type="checkbox" class={css({ w: { base: "4", sm: "5" }, h: { base: "4", sm: "5" }, borderRadius: "sm", borderColor: "gray.300", mt: "0.5", flexShrink: "0" })} />
-										<span class={css({ color: { base: "gray.900", _dark: "white" }, fontSize: { base: "xs", sm: "sm" } })}><strong>Verify image pull secrets</strong> - Pods need valid credentials for cached images</span>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<input type="checkbox" class={css({
+	w: '4',
+	h: '4',
+	sm: {
+		w: '5',
+		h: '5',
+	},
+	rounded: 'md',
+	borderColor: 'gray.300',
+	color: 'purple.600',
+	_focus: {
+		ringColor: 'purple.500',
+	},
+	mt: '0.5',
+	flexShrink: '0',
+})} />
+										<span class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+}) + " text-primary-content"}><strong>Verify image pull secrets</strong> - Pods need valid credentials for cached images</span>
 									</li>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<input type="checkbox" class={css({ w: { base: "4", sm: "5" }, h: { base: "4", sm: "5" }, borderRadius: "sm", borderColor: "gray.300", mt: "0.5", flexShrink: "0" })} />
-										<span class={css({ color: { base: "gray.900", _dark: "white" }, fontSize: { base: "xs", sm: "sm" } })}><strong>Test in staging</strong> - Upgrade staging cluster first</span>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<input type="checkbox" class={css({
+	w: '4',
+	h: '4',
+	sm: {
+		w: '5',
+		h: '5',
+	},
+	rounded: 'md',
+	borderColor: 'gray.300',
+	color: 'purple.600',
+	_focus: {
+		ringColor: 'purple.500',
+	},
+	mt: '0.5',
+	flexShrink: '0',
+})} />
+										<span class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+}) + " text-primary-content"}><strong>Test in staging</strong> - Upgrade staging cluster first</span>
 									</li>
-									<li class={css({ display: "flex", alignItems: "flex-start", gap: { base: "2", sm: "3" } })}>
-										<input type="checkbox" class={css({ w: { base: "4", sm: "5" }, h: { base: "4", sm: "5" }, borderRadius: "sm", borderColor: "gray.300", mt: "0.5", flexShrink: "0" })} />
-										<span class={css({ color: { base: "gray.900", _dark: "white" }, fontSize: { base: "xs", sm: "sm" } })}><strong>Backup etcd</strong> - Always before any upgrade</span>
+									<li class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	sm: {
+		gap: '3',
+	},
+})}>
+										<input type="checkbox" class={css({
+	w: '4',
+	h: '4',
+	sm: {
+		w: '5',
+		h: '5',
+	},
+	rounded: 'md',
+	borderColor: 'gray.300',
+	color: 'purple.600',
+	_focus: {
+		ringColor: 'purple.500',
+	},
+	mt: '0.5',
+	flexShrink: '0',
+})} />
+										<span class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+}) + " text-primary-content"}><strong>Backup etcd</strong> - Always before any upgrade</span>
 									</li>
 								</ul>
 							</div>
@@ -254,70 +942,300 @@ const featureGateBadgeBeta = featureGateBadge("blue");
 
 						<!-- Feature Gates -->
 						<div>
-							<h3 class={headingStyle}>
-								<span class={css({ color: "gray.500" })}>⚙️</span> Key Feature Gates
+							<h3 class={css({
+	fontSize: 'lg',
+	sm: {
+		fontSize: 'xl',
+		mb: '4',
+	},
+	fontWeight: 'semibold',
+	mb: '3',
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+}) + " text-primary-content"}>
+								<span class={css({
+	color: 'gray.500',
+})}>⚙️</span> Key Feature Gates
 							</h3>
 							<!-- Mobile: Card view -->
-							<div class={css({ display: { base: "block", sm: "none" }, "& > * + *": { mt: "3" } })}>
-								<div class={css({ bg: { base: "gray.50", _dark: "gray.800/50" }, borderRadius: "lg", p: "3", border: "1px solid", borderColor: { base: "gray.200", _dark: "gray.700" } })}>
-									<div class={css({ display: "flex", alignItems: "center", justifyContent: "space-between", mb: "1" })}>
-										<span class={featureGateBadgeGA}>GA</span>
-										<span class={css({ fontSize: "xs", color: { base: "gray.600", _dark: "gray.400" } })}>true (locked)</span>
+							<div class={css({
+	display: 'block',
+	sm: {
+		display: 'none',
+	},
+	gap: '3',
+})}>
+								<div class={css({
+	bg: 'gray.50',
+	rounded: 'lg',
+	p: '3',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+}) + " dark:bg-gray-800/50 dark:border-gray-700"}>
+									<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	mb: '1',
+})}>
+										<span class={css({
+	px: '2',
+	py: '0.5',
+	rounded: 'md',
+	fontSize: 'xs',
+	bg: 'green.100',
+	color: 'green.600',
+	fontWeight: 'medium',
+}) + " dark:bg-green-900/30 dark:text-green-400"}>GA</span>
+										<span class={css({
+	fontSize: 'xs',
+}) + " text-muted"}>true (locked)</span>
 									</div>
-									<p class={css({ fontFamily: "mono", fontSize: "xs", color: { base: "gray.900", _dark: "white" }, overflowWrap: "break-word" })}>InPlacePodVerticalScaling</p>
+									<p class={css({
+	fontFamily: 'mono',
+	fontSize: 'xs',
+	wordBreak: 'break-all',
+}) + " text-primary-content"}>InPlacePodVerticalScaling</p>
 								</div>
-								<div class={css({ bg: { base: "gray.50", _dark: "gray.800/50" }, borderRadius: "lg", p: "3", border: "1px solid", borderColor: { base: "gray.200", _dark: "gray.700" } })}>
-									<div class={css({ display: "flex", alignItems: "center", justifyContent: "space-between", mb: "1" })}>
-										<span class={featureGateBadgeGA}>GA</span>
-										<span class={css({ fontSize: "xs", color: { base: "gray.600", _dark: "gray.400" } })}>true (locked)</span>
+								<div class={css({
+	bg: 'gray.50',
+	rounded: 'lg',
+	p: '3',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+}) + " dark:bg-gray-800/50 dark:border-gray-700"}>
+									<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	mb: '1',
+})}>
+										<span class={css({
+	px: '2',
+	py: '0.5',
+	rounded: 'md',
+	fontSize: 'xs',
+	bg: 'green.100',
+	color: 'green.600',
+	fontWeight: 'medium',
+}) + " dark:bg-green-900/30 dark:text-green-400"}>GA</span>
+										<span class={css({
+	fontSize: 'xs',
+}) + " text-muted"}>true (locked)</span>
 									</div>
-									<p class={css({ fontFamily: "mono", fontSize: "xs", color: { base: "gray.900", _dark: "white" }, overflowWrap: "break-word" })}>StructuredAuthenticationConfiguration</p>
+									<p class={css({
+	fontFamily: 'mono',
+	fontSize: 'xs',
+	wordBreak: 'break-all',
+}) + " text-primary-content"}>StructuredAuthenticationConfiguration</p>
 								</div>
-								<div class={css({ bg: { base: "gray.50", _dark: "gray.800/50" }, borderRadius: "lg", p: "3", border: "1px solid", borderColor: { base: "gray.200", _dark: "gray.700" } })}>
-									<div class={css({ display: "flex", alignItems: "center", justifyContent: "space-between", mb: "1" })}>
-										<span class={featureGateBadgeBeta}>Beta</span>
-										<span class={css({ fontSize: "xs", color: { base: "gray.600", _dark: "gray.400" } })}>true</span>
+								<div class={css({
+	bg: 'gray.50',
+	rounded: 'lg',
+	p: '3',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+}) + " dark:bg-gray-800/50 dark:border-gray-700"}>
+									<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	mb: '1',
+})}>
+										<span class={css({
+	px: '2',
+	py: '0.5',
+	rounded: 'md',
+	fontSize: 'xs',
+	bg: 'blue.100',
+	color: 'blue.600',
+	fontWeight: 'medium',
+}) + " dark:bg-blue-900/30 dark:text-blue-400"}>Beta</span>
+										<span class={css({
+	fontSize: 'xs',
+}) + " text-muted"}>true</span>
 									</div>
-									<p class={css({ fontFamily: "mono", fontSize: "xs", color: { base: "gray.900", _dark: "white" }, overflowWrap: "break-word" })}>UserNamespacesSupport</p>
+									<p class={css({
+	fontFamily: 'mono',
+	fontSize: 'xs',
+	wordBreak: 'break-all',
+}) + " text-primary-content"}>UserNamespacesSupport</p>
 								</div>
-								<div class={css({ bg: { base: "gray.50", _dark: "gray.800/50" }, borderRadius: "lg", p: "3", border: "1px solid", borderColor: { base: "gray.200", _dark: "gray.700" } })}>
-									<div class={css({ display: "flex", alignItems: "center", justifyContent: "space-between", mb: "1" })}>
-										<span class={featureGateBadgeBeta}>Beta</span>
-										<span class={css({ fontSize: "xs", color: { base: "gray.600", _dark: "gray.400" } })}>true</span>
+								<div class={css({
+	bg: 'gray.50',
+	rounded: 'lg',
+	p: '3',
+	borderWidth: '1px',
+	borderColor: 'gray.200',
+}) + " dark:bg-gray-800/50 dark:border-gray-700"}>
+									<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	mb: '1',
+})}>
+										<span class={css({
+	px: '2',
+	py: '0.5',
+	rounded: 'md',
+	fontSize: 'xs',
+	bg: 'blue.100',
+	color: 'blue.600',
+	fontWeight: 'medium',
+}) + " dark:bg-blue-900/30 dark:text-blue-400"}>Beta</span>
+										<span class={css({
+	fontSize: 'xs',
+}) + " text-muted"}>true</span>
 									</div>
-									<p class={css({ fontFamily: "mono", fontSize: "xs", color: { base: "gray.900", _dark: "white" }, overflowWrap: "break-word" })}>KubeletEnsureSecretPulledImages</p>
+									<p class={css({
+	fontFamily: 'mono',
+	fontSize: 'xs',
+	wordBreak: 'break-all',
+}) + " text-primary-content"}>KubeletEnsureSecretPulledImages</p>
 								</div>
 							</div>
 							<!-- Desktop: Table view -->
-							<div class={css({ display: { base: "none", sm: "block" }, overflowX: "auto" })}>
-								<table class={css({ w: "full", fontSize: "sm", minW: "500px" })}>
+							<div class={css({
+	display: 'none',
+	sm: {
+		display: 'block',
+		mx: '0',
+	},
+	overflowX: 'auto',
+	mx: '-4',
+})}>
+								<table class={css({
+	w: 'full',
+	fontSize: 'sm',
+	minW: '500px',
+})}>
 									<thead>
-										<tr class={css({ borderBottom: "1px solid", borderColor: { base: "gray.200", _dark: "gray.700" } })}>
-											<th class={css({ textAlign: "left", py: "3", px: "4", color: { base: "gray.900", _dark: "white" } })}>Feature Gate</th>
-											<th class={css({ textAlign: "left", py: "3", px: "4", color: { base: "gray.900", _dark: "white" } })}>Stage</th>
-											<th class={css({ textAlign: "left", py: "3", px: "4", color: { base: "gray.900", _dark: "white" } })}>Default</th>
+										<tr class={css({
+	borderBottomWidth: '1px',
+	borderColor: 'gray.200',
+}) + " dark:border-gray-700"}>
+											<th class={css({
+	textAlign: 'left',
+	py: '3',
+	px: '4',
+}) + " text-primary-content"}>Feature Gate</th>
+											<th class={css({
+	textAlign: 'left',
+	py: '3',
+	px: '4',
+}) + " text-primary-content"}>Stage</th>
+											<th class={css({
+	textAlign: 'left',
+	py: '3',
+	px: '4',
+}) + " text-primary-content"}>Default</th>
 										</tr>
 									</thead>
-									<tbody class={css({ color: { base: "gray.600", _dark: "gray.400" } })}>
-										<tr class={css({ borderBottom: "1px solid", borderColor: { base: "gray.100", _dark: "gray.800" } })}>
-											<td class={css({ py: "3", px: "4", fontFamily: "mono", fontSize: "xs" })}>InPlacePodVerticalScaling</td>
-											<td class={css({ py: "3", px: "4" })}><span class={featureGateBadgeGA}>GA</span></td>
-											<td class={css({ py: "3", px: "4" })}>true (locked)</td>
+									<tbody class="text-muted">
+										<tr class={css({
+	borderBottomWidth: '1px',
+	borderColor: 'gray.100',
+}) + " dark:border-gray-800"}>
+											<td class={css({
+	py: '3',
+	px: '4',
+	fontFamily: 'mono',
+	fontSize: 'xs',
+})}>InPlacePodVerticalScaling</td>
+											<td class={css({
+	py: '3',
+	px: '4',
+})}><span class={css({
+	px: '2',
+	py: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+	bg: 'green.100',
+	color: 'green.600',
+}) + " dark:bg-green-900/30 dark:text-green-400"}>GA</span></td>
+											<td class={css({
+	py: '3',
+	px: '4',
+})}>true (locked)</td>
 										</tr>
-										<tr class={css({ borderBottom: "1px solid", borderColor: { base: "gray.100", _dark: "gray.800" } })}>
-											<td class={css({ py: "3", px: "4", fontFamily: "mono", fontSize: "xs" })}>StructuredAuthenticationConfiguration</td>
-											<td class={css({ py: "3", px: "4" })}><span class={featureGateBadgeGA}>GA</span></td>
-											<td class={css({ py: "3", px: "4" })}>true (locked)</td>
+										<tr class={css({
+	borderBottomWidth: '1px',
+	borderColor: 'gray.100',
+}) + " dark:border-gray-800"}>
+											<td class={css({
+	py: '3',
+	px: '4',
+	fontFamily: 'mono',
+	fontSize: 'xs',
+})}>StructuredAuthenticationConfiguration</td>
+											<td class={css({
+	py: '3',
+	px: '4',
+})}><span class={css({
+	px: '2',
+	py: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+	bg: 'green.100',
+	color: 'green.600',
+}) + " dark:bg-green-900/30 dark:text-green-400"}>GA</span></td>
+											<td class={css({
+	py: '3',
+	px: '4',
+})}>true (locked)</td>
 										</tr>
-										<tr class={css({ borderBottom: "1px solid", borderColor: { base: "gray.100", _dark: "gray.800" } })}>
-											<td class={css({ py: "3", px: "4", fontFamily: "mono", fontSize: "xs" })}>UserNamespacesSupport</td>
-											<td class={css({ py: "3", px: "4" })}><span class={featureGateBadgeBeta}>Beta</span></td>
-											<td class={css({ py: "3", px: "4" })}>true</td>
+										<tr class={css({
+	borderBottomWidth: '1px',
+	borderColor: 'gray.100',
+}) + " dark:border-gray-800"}>
+											<td class={css({
+	py: '3',
+	px: '4',
+	fontFamily: 'mono',
+	fontSize: 'xs',
+})}>UserNamespacesSupport</td>
+											<td class={css({
+	py: '3',
+	px: '4',
+})}><span class={css({
+	px: '2',
+	py: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+	bg: 'blue.100',
+	color: 'blue.600',
+}) + " dark:bg-blue-900/30 dark:text-blue-400"}>Beta</span></td>
+											<td class={css({
+	py: '3',
+	px: '4',
+})}>true</td>
 										</tr>
-										<tr class={css({ borderBottom: "1px solid", borderColor: { base: "gray.100", _dark: "gray.800" } })}>
-											<td class={css({ py: "3", px: "4", fontFamily: "mono", fontSize: "xs" })}>KubeletEnsureSecretPulledImages</td>
-											<td class={css({ py: "3", px: "4" })}><span class={featureGateBadgeBeta}>Beta</span></td>
-											<td class={css({ py: "3", px: "4" })}>true</td>
+										<tr class={css({
+	borderBottomWidth: '1px',
+	borderColor: 'gray.100',
+}) + " dark:border-gray-800"}>
+											<td class={css({
+	py: '3',
+	px: '4',
+	fontFamily: 'mono',
+	fontSize: 'xs',
+})}>KubeletEnsureSecretPulledImages</td>
+											<td class={css({
+	py: '3',
+	px: '4',
+})}><span class={css({
+	px: '2',
+	py: '1',
+	rounded: 'md',
+	fontSize: 'xs',
+	bg: 'blue.100',
+	color: 'blue.600',
+}) + " dark:bg-blue-900/30 dark:text-blue-400"}>Beta</span></td>
+											<td class={css({
+	py: '3',
+	px: '4',
+})}>true</td>
 										</tr>
 									</tbody>
 								</table>
@@ -327,24 +1245,97 @@ const featureGateBadgeBeta = featureGateBadge("blue");
 				</div>
 
 				<!-- CTA -->
-				<div class={css({ textAlign: "center" })}>
-					<div class={css({ borderRadius: { base: "xl", sm: "2xl" }, p: { base: "5", sm: "8" }, border: "1px solid", borderColor: "var(--surface-border)", backdropFilter: "blur(40px)", bg: "var(--surface-card)", boxShadow: "var(--surface-shadow)" })}>
-						<h3 class={css({ fontSize: { base: "lg", sm: "xl" }, fontWeight: "semibold", color: { base: "gray.900", _dark: "white" }, mb: "2" })}>
+				<div class={css({
+	textAlign: 'center',
+})}>
+					<div class={css({
+	rounded: 'xl',
+	sm: {
+		rounded: '2xl',
+		p: '8',
+	},
+	p: '5',
+}) + " glass-panel"}>
+						<h3 class={css({
+	fontSize: 'lg',
+	sm: {
+		fontSize: 'xl',
+	},
+	fontWeight: 'semibold',
+	mb: '2',
+}) + " text-primary-content"}>
 							Continue Your Cloud Native Journey
 						</h3>
-						<p class={css({ fontSize: { base: "sm", sm: "base" }, color: { base: "gray.600", _dark: "gray.400" }, mb: { base: "5", sm: "6" } })}>
+						<p class={css({
+	fontSize: 'sm',
+	sm: {
+		fontSize: 'base',
+		mb: '6',
+	},
+	mb: '5',
+}) + " text-muted"}>
 							Watch our hands-on Kubernetes tutorials and stay up-to-date with the latest cloud native content.
 						</p>
-						<div class={css({ display: "flex", flexDir: { base: "column", sm: "row" }, gap: { base: "3", sm: "4" }, justifyContent: "center" })}>
+						<div class={css({
+	display: 'flex',
+	flexDir: 'column',
+	sm: {
+		flexDir: 'row',
+		gap: '4',
+	},
+	gap: '3',
+	justifyContent: 'center',
+})}>
 							<a
 								href="/"
-								class={css({ display: "inline-flex", alignItems: "center", justifyContent: "center", px: { base: "5", sm: "6" }, py: { base: "2.5", sm: "3" }, borderRadius: { base: "lg", sm: "xl" }, bg: "rgb(var(--brand-primary))", color: "white", fontSize: { base: "sm", sm: "base" }, fontWeight: "semibold", transition: "colors", _hover: { opacity: "0.9" } })}
+								class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	px: '5',
+	sm: {
+		px: '6',
+		py: '3',
+		rounded: 'xl',
+		fontSize: 'base',
+	},
+	py: '2.5',
+	rounded: 'lg',
+	color: 'white',
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	_hover: {
+		bg: 'primary/90',
+	},
+	transition: 'colors',
+}) + " bg-primary"}
 							>
 								Back to Academy
 							</a>
 							<a
 								href="/watch"
-								class={css({ display: "inline-flex", alignItems: "center", justifyContent: "center", px: { base: "5", sm: "6" }, py: { base: "2.5", sm: "3" }, borderRadius: { base: "lg", sm: "xl" }, border: "2px solid", borderColor: { base: "gray.200", _dark: "gray.700" }, color: { base: "gray.900", _dark: "white" }, fontSize: { base: "sm", sm: "base" }, fontWeight: "semibold", transition: "colors", _hover: { bg: { base: "gray.100", _dark: "gray.800" } } })}
+								class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	px: '5',
+	sm: {
+		px: '6',
+		py: '3',
+		rounded: 'xl',
+		fontSize: 'base',
+	},
+	py: '2.5',
+	rounded: 'lg',
+	borderWidth: '2px',
+	borderColor: 'gray.200',
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	_hover: {
+		bg: 'gray.100',
+	},
+	transition: 'colors',
+}) + " dark:border-gray-700 text-primary-content dark:hover:bg-gray-800"}
 							>
 								Watch Kubernetes Videos
 							</a>
@@ -355,17 +1346,66 @@ const featureGateBadgeBeta = featureGateBadge("blue");
 		</section>
 	) : (
 		<!-- Lead Magnet CTA for Non-Subscribers -->
-		<section class={css({ py: { base: "10", sm: "12", md: "16", lg: "20" }, px: "4" })}>
-			<div class={css({ mx: "auto", maxW: "4xl", textAlign: "center", mb: { base: "8", sm: "12" } })}>
-				<h1 class={css({ fontSize: { base: "2xl", sm: "3xl", md: "4xl", lg: "5xl" }, fontWeight: "bold", color: { base: "gray.900", _dark: "white" }, mb: { base: "4", sm: "6" }, fontFamily: "display", px: "2" })}>
-					Be Ready for <span class={css({ color: "rgb(var(--brand-primary))" })}>Kubernetes 1.35</span>
+		<section class={css({
+	py: '10',
+	px: '4',
+	sm: {
+		py: '12',
+	},
+	md: {
+		py: '16',
+	},
+	lg: {
+		py: '20',
+	},
+})}>
+			<div class={css({
+	mx: 'auto',
+	maxW: '4xl',
+	textAlign: 'center',
+	mb: '8',
+	sm: {
+		mb: '12',
+	},
+})}>
+				<h1 class={css({
+	fontSize: '2xl',
+	sm: {
+		fontSize: '3xl',
+		mb: '6',
+	},
+	md: {
+		fontSize: '4xl',
+	},
+	lg: {
+		fontSize: '5xl',
+	},
+	fontWeight: 'bold',
+	mb: '4',
+	px: '2',
+}) + " text-primary-content font-display"}>
+					Be Ready for <span class="text-primary">Kubernetes 1.35</span>
 				</h1>
-				<p class={css({ fontSize: { base: "base", sm: "lg", md: "xl" }, color: { base: "gray.700", _dark: "gray.300" }, maxW: "2xl", mx: "auto", px: "2" })}>
+				<p class={css({
+	fontSize: 'base',
+	sm: {
+		fontSize: 'lg',
+	},
+	md: {
+		fontSize: 'xl',
+	},
+	maxW: '2xl',
+	mx: 'auto',
+	px: '2',
+}) + " text-secondary-content"}>
 					The biggest Kubernetes release of 2025 is coming. Don't get caught off guard by breaking changes.
 				</p>
 			</div>
 
-			<div class={css({ mx: "auto", maxW: "7xl" })}>
+			<div class={css({
+	mx: 'auto',
+	maxW: '7xl',
+})}>
 				<K8sCheatsheetCTA
 					client:visible
 					isSignedIn={!!user}
@@ -376,33 +1416,120 @@ const featureGateBadgeBeta = featureGateBadge("blue");
 			</div>
 
 			<!-- Additional context -->
-			<div class={css({ mx: "auto", maxW: "4xl", mt: { base: "10", sm: "12", md: "16" } })}>
-				<div class={css({ borderRadius: { base: "xl", sm: "2xl" }, p: { base: "5", sm: "6", md: "8" }, border: "1px solid", borderColor: "var(--surface-border)", backdropFilter: "blur(40px)", bg: "var(--surface-card)", boxShadow: "var(--surface-shadow)" })}>
-					<h2 class={css({ fontSize: { base: "lg", sm: "xl" }, fontWeight: "semibold", color: { base: "gray.900", _dark: "white" }, mb: "4" })}>
+			<div class={css({
+	mx: 'auto',
+	maxW: '4xl',
+	mt: '10',
+	sm: {
+		mt: '12',
+	},
+	md: {
+		mt: '16',
+	},
+})}>
+				<div class={css({
+	rounded: 'xl',
+	sm: {
+		rounded: '2xl',
+		p: '6',
+	},
+	p: '5',
+	md: {
+		p: '8',
+	},
+}) + " glass-panel"}>
+					<h2 class={css({
+	fontSize: 'lg',
+	sm: {
+		fontSize: 'xl',
+	},
+	fontWeight: 'semibold',
+	mb: '4',
+}) + " text-primary-content"}>
 						Why You Need This Cheat Sheet
 					</h2>
-					<div class={css({ display: "grid", gridTemplateColumns: { base: "1fr", sm: "repeat(2, 1fr)" }, gap: { base: "4", sm: "6" }, color: { base: "gray.700", _dark: "gray.300" } })}>
+					<div class={css({
+	display: 'grid',
+	gridTemplateColumns: '1',
+	sm: {
+		gridTemplateColumns: '2',
+		gap: '6',
+	},
+	gap: '4',
+}) + " text-secondary-content"}>
 						<div>
-							<h3 class={css({ fontWeight: "medium", color: { base: "gray.900", _dark: "white" }, mb: { base: "1", sm: "2" }, fontSize: { base: "sm", sm: "base" } })}>Breaking Changes</h3>
-							<p class={css({ fontSize: { base: "xs", sm: "sm" } })}>
+							<h3 class={css({
+	fontWeight: 'medium',
+	mb: '1',
+	sm: {
+		mb: '2',
+		fontSize: 'base',
+	},
+	fontSize: 'sm',
+}) + " text-primary-content"}>Breaking Changes</h3>
+							<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+})}>
 								cgroup v1 is disabled by default - kubelet will crash on older nodes. containerd 1.x support ends. Know what to fix before you upgrade.
 							</p>
 						</div>
 						<div>
-							<h3 class={css({ fontWeight: "medium", color: { base: "gray.900", _dark: "white" }, mb: { base: "1", sm: "2" }, fontSize: { base: "sm", sm: "base" } })}>New GA Features</h3>
-							<p class={css({ fontSize: { base: "xs", sm: "sm" } })}>
+							<h3 class={css({
+	fontWeight: 'medium',
+	mb: '1',
+	sm: {
+		mb: '2',
+		fontSize: 'base',
+	},
+	fontSize: 'sm',
+}) + " text-primary-content"}>New GA Features</h3>
+							<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+})}>
 								In-place pod scaling is finally stable. Resize CPU and memory without restarts. Structured authentication enables hot-swap OIDC.
 							</p>
 						</div>
 						<div>
-							<h3 class={css({ fontWeight: "medium", color: { base: "gray.900", _dark: "white" }, mb: { base: "1", sm: "2" }, fontSize: { base: "sm", sm: "base" } })}>AI/ML Scheduling</h3>
-							<p class={css({ fontSize: { base: "xs", sm: "sm" } })}>
+							<h3 class={css({
+	fontWeight: 'medium',
+	mb: '1',
+	sm: {
+		mb: '2',
+		fontSize: 'base',
+	},
+	fontSize: 'sm',
+}) + " text-primary-content"}>AI/ML Scheduling</h3>
+							<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+})}>
 								Native gang scheduling for distributed training. DRA binding conditions for GPU initialization. Built for expensive hardware.
 							</p>
 						</div>
 						<div>
-							<h3 class={css({ fontWeight: "medium", color: { base: "gray.900", _dark: "white" }, mb: { base: "1", sm: "2" }, fontSize: { base: "sm", sm: "base" } })}>Migration Checklist</h3>
-							<p class={css({ fontSize: { base: "xs", sm: "sm" } })}>
+							<h3 class={css({
+	fontWeight: 'medium',
+	mb: '1',
+	sm: {
+		mb: '2',
+		fontSize: 'base',
+	},
+	fontSize: 'sm',
+}) + " text-primary-content"}>Migration Checklist</h3>
+							<p class={css({
+	fontSize: 'xs',
+	sm: {
+		fontSize: 'sm',
+	},
+})}>
 								Step-by-step checklist to prepare your clusters. kubectl commands to verify compatibility. Feature gate reference table.
 							</p>
 						</div>

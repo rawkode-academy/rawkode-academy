@@ -21,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
 	faSpotify,

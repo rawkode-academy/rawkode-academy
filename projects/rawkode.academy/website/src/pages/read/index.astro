@@ -1,10 +1,10 @@
 ---
+import { css } from "../../../../styled-system/css";
 import { getCollection, getEntries } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import FeaturedContent from "@/components/common/FeaturedContent.astro";
 import SectionHeader from "@/components/common/SectionHeader.vue";
 import Page from "@/wrappers/page.astro";
-import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
@@ -29,37 +29,11 @@ const remainingPosts = allArticles.slice(1);
 const pageTitle = "Cloud Native & Kubernetes Articles | Rawkode Academy";
 const pageDescription =
 	"Deep dive into cloud native technologies, Kubernetes, observability, and more. Articles written by practitioners for practitioners at Rawkode Academy.";
-
-const sectionStyle = css({
-	py: '16',
-	bg: 'bg.subtle',
-});
-
-const containerStyle = css({
-	maxW: 'breakpoint-xl',
-	mx: 'auto',
-	px: '4',
-	md: { px: '6' },
-});
-
-const gridStyle = css({
-	display: 'grid',
-	gap: '6',
-	sm: { gridTemplateColumns: 'repeat(2, 1fr)' },
-	lg: { gridTemplateColumns: 'repeat(3, 1fr)' },
-});
-
-const articleCardStyle = css({
-	transition: 'all 0.3s',
-	h: 'full',
-	_hover: {
-		transform: 'translateY(-0.5rem)',
-		shadow: 'xl',
-	},
-});
 ---
 
 <Page title={pageTitle} description={pageDescription}>
+  
+
   <!-- Featured Content Section -->
   {latestPost && (
     <FeaturedContent
@@ -77,15 +51,35 @@ const articleCardStyle = css({
   )}
 
   <!-- Main Content -->
-  <section class={sectionStyle}>
-    <div class={containerStyle}>
+  <section class={css({
+	py: '16',
+	bg: 'gray.50',
+}) + " dark:bg-gray-900"}>
+    <div class={css({
+	mx: 'auto',
+	px: '4',
+	md: {
+		px: '6',
+	},
+}) + " container"}>
       <!-- All Articles -->
       <div>
         <SectionHeader title="All Articles" />
 
-        <div class={gridStyle}>
+        <div class={css({
+	display: 'grid',
+	gap: '6',
+	sm: {
+		gridTemplateColumns: '2',
+	},
+	lg: {
+		gridTemplateColumns: '3',
+	},
+})}>
           {remainingPosts.map(article => (
-            <div class={articleCardStyle}>
+            <div class={css({
+	h: 'full',
+}) + " article-card"}>
               <ArticleCard article={article} />
             </div>
           ))}

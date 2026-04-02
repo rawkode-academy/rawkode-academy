@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import FaqAccordion from "./accordion-wrapper.vue";
+import { css } from "../../../styled-system/css";
 
 const faqItems = [
 	{
@@ -33,12 +34,16 @@ const faqItems = [
 			'<p class="mb-2">We\'d be happy to discuss your specific training needs and answer any questions you may have. <a class="text-primary font-medium hover:underline" href="/organizations/lets-chat">Schedule a consultation</a> with our team to explore how we can help upskill your technical team.</p>',
 	},
 ];
+
+const sectionStyle = css({ bg: { base: 'white', _dark: 'gray.900' } });
+const containerStyle = css({ py: { base: '8', sm: '16' }, px: { base: '4', lg: '6' }, mx: 'auto', maxW: 'breakpoint-xl' });
+const innerStyle = css({ mx: 'auto', maxW: 'breakpoint-md' });
 </script>
 
 <template>
-	<section class="bg-white dark:bg-gray-900">
-		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
-			<div class="mx-auto max-w-(--breakpoint-md)">
+	<section :class="sectionStyle">
+		<div :class="containerStyle">
+			<div :class="innerStyle">
 				<FaqAccordion :items="faqItems" default-open-id="1" />
 			</div>
 		</div>

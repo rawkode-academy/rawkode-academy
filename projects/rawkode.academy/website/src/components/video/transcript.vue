@@ -63,6 +63,7 @@
 </template>
 
 <script>
+import { css } from "../../../styled-system/css";
 import SkeletonTranscript from "@/components/common/SkeletonTranscript.vue";
 import {
 	groupTranscriptParagraphs,

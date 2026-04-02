@@ -15,17 +15,8 @@ const articles = (await getCollection("articles"))
 	.filter((article) => !article.data.draft)
 	.sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
 
-const emptyStyle = css({
-	color: 'fg.subtle',
-});
-
-const gridStyle = css({
-	display: 'grid',
-	gap: '8',
-	pt: '4',
-	sm: { gridTemplateColumns: 'repeat(2, 1fr)' },
-	lg: { gridTemplateColumns: 'repeat(3, 1fr)' },
-});
+const emptyStyle = css({ color: { base: 'gray.500', _dark: 'gray.400' } });
+const gridStyle = css({ display: 'grid', gap: '8', gridTemplateColumns: { sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, pt: '4' });
 ---
 
 {

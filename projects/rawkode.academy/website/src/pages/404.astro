@@ -1,6 +1,6 @@
 ---
+import { css } from "../../../styled-system/css";
 import MinimalLayout from "@/layouts/minimal.astro";
-import { css } from "../../styled-system/css";
 
 export const prerender = true;
 
@@ -42,83 +42,298 @@ const supportLinks = [
 ---
 
 <MinimalLayout title="404 – Rawkode Academy" description="We couldn't find that page, but here are a few quick ways to get back on course.">
-	<main class={css({ position: "relative", isolation: "isolate", minH: "100vh", overflow: "hidden", bg: "slate.950", color: "slate.100" })}>
-		<div class={css({ pointerEvents: "none", position: "absolute", inset: "0" })}>
-			<div class={css({ position: "absolute", top: "-8rem", left: "50%", h: "20rem", w: "20rem", transform: "translateX(-50%)", borderRadius: "full", bg: "rgba(var(--brand-primary), 0.3)", filter: "blur(48px)" })}></div>
-			<div class={css({ position: "absolute", bottom: "0", left: "0", right: "0", h: "10rem", background: "linear-gradient(to top, rgb(2 6 23), rgba(2, 6, 23, 0.7), transparent)" })}></div>
-			<div class={css({ position: "absolute", inset: "0", background: "radial-gradient(circle at top, rgba(148,163,184,0.12), transparent 55%)" })}></div>
+	<main class={css({
+	pos: 'relative',
+	isolation: 'isolate',
+	minH: '100vh',
+	overflow: 'hidden',
+	bg: 'slate.950',
+	color: 'slate.100',
+})}>
+		<div class={css({
+	pointerEvents: 'none',
+	pos: 'absolute',
+	inset: '0',
+})}>
+			<div class={css({
+	pos: 'absolute',
+	top: '-32',
+	left: '1/2',
+	h: '80',
+	w: '80',
+	translateX: '-1/2',
+	rounded: 'full',
+	bg: 'primary/30',
+	blur: '3xl',
+})}></div>
+			<div class={css({
+	pos: 'absolute',
+	bottom: '0',
+	left: '0',
+	right: '0',
+	h: '40',
+	bgGradient: 'to-t',
+	gradientFrom: 'slate.950',
+	gradientVia: 'slate.950/70',
+	gradientTo: 'transparent',
+})}></div>
+			<div class={css({
+	pos: 'absolute',
+	inset: '0',
+	bg: 'radial-gradient(circle_at_top,_rgba(148,163,184,0.12),_transparent_55%)',
+})}></div>
 		</div>
 
-		<section class={css({ position: "relative", zIndex: "10", px: "6", py: { base: "24", sm: "32" } })}>
-			<div class={css({ mx: "auto", display: "flex", maxW: "4xl", flexDir: "column", alignItems: "center", textAlign: "center" })}>
-				<p class={css({ fontSize: "xs", textTransform: "uppercase", letterSpacing: "0.4em", color: "rgba(var(--brand-primary), 0.7)" })}>Lost in the cluster</p>
-				<h1 class={css({ mt: "6", fontSize: { base: "4xl", sm: "5xl" }, fontWeight: "semibold", lineHeight: "tight", color: "white" })}>
+		<section class={css({
+	pos: 'relative',
+	zIndex: '10',
+	px: '6',
+	py: '24',
+	sm: {
+		py: '32',
+	},
+})}>
+			<div class={css({
+	mx: 'auto',
+	display: 'flex',
+	maxW: '4xl',
+	flexDir: 'column',
+	alignItems: 'center',
+	textAlign: 'center',
+})}>
+				<p class={css({
+	fontSize: 'xs',
+	textTransform: 'uppercase',
+	letterSpacing: '0.4em',
+	color: 'primary/70',
+})}>Lost in the cluster</p>
+				<h1 class={css({
+	mt: '6',
+	fontSize: '4xl',
+	fontWeight: 'semibold',
+	lineHeight: 'tight',
+	color: 'white',
+	sm: {
+		fontSize: '5xl',
+	},
+})}>
 					We couldn't route that request.
 				</h1>
-				<p class={css({ mt: "4", fontSize: "lg", color: "slate.300" })}>
+				<p class={css({
+	mt: '4',
+	fontSize: 'lg',
+	color: 'slate.300',
+})}>
 					The page you're looking for may have moved, or the URL has a typo. Let's get you
 					back to shipping something great.
 				</p>
-				<div class={css({ mt: "10", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "4" })}>
+				<div class={css({
+	mt: '10',
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	justifyContent: 'center',
+	gap: '4',
+})}>
 					<a
 						href="/"
-						class={css({ display: "inline-flex", alignItems: "center", gap: "2", borderRadius: "2xl", background: "linear-gradient(to right, rgb(var(--brand-primary)), rgb(var(--brand-secondary)))", px: "6", py: "3", fontSize: "base", fontWeight: "semibold", color: "white", boxShadow: "0 10px 15px -3px rgba(var(--brand-primary), 0.3)", transition: "all", _hover: { transform: "scale(1.01)" } })}
+						class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	rounded: '2xl',
+	bgGradient: 'to-r',
+	gradientFrom: 'primary',
+	gradientTo: 'secondary',
+	px: '6',
+	py: '3',
+	fontSize: 'base',
+	fontWeight: 'semibold',
+	color: 'white',
+	shadow: 'lg',
+	transition: 'all',
+	_hover: {
+		scale: '1.01',
+	},
+}) + " shadow-primary/30"}
 					>
 						<span>Back to homepage</span>
-						<svg class={css({ h: "5", w: "5" })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg class={css({
+	h: '5',
+	w: '5',
+})} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
 						</svg>
 					</a>
 					<a
 						href="https://github.com/rawkode-academy/rawkode-academy/issues/new/choose"
-						class={css({ display: "inline-flex", alignItems: "center", gap: "2", borderRadius: "2xl", border: "1px solid rgba(255, 255, 255, 0.2)", px: "6", py: "3", fontSize: "base", fontWeight: "semibold", color: "rgba(255, 255, 255, 0.9)", transition: "all", _hover: { borderColor: "rgba(255, 255, 255, 0.4)" } })}
+						class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	rounded: '2xl',
+	borderWidth: '1px',
+	borderColor: 'white/20',
+	px: '6',
+	py: '3',
+	fontSize: 'base',
+	fontWeight: 'semibold',
+	color: 'white/90',
+	transition: 'all',
+	_hover: {
+		borderColor: 'white/40',
+	},
+})}
 						target="_blank"
 						rel="noopener noreferrer"
 					>
 						Report an issue
-						<svg class={css({ h: "5", w: "5" })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<svg class={css({
+	h: '5',
+	w: '5',
+})} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4l-5 5m-1 6a9 9 0 110-18 9 9 0 010 18z" />
 						</svg>
 					</a>
 				</div>
 			</div>
 
-			<form action="/search" method="get" class={css({ mx: "auto", mt: "12", display: "flex", maxW: "3xl", alignItems: "center", justifyContent: "space-between", gap: "2", borderRadius: "3xl", border: "1px solid rgba(255, 255, 255, 0.1)", bg: "rgba(255, 255, 255, 0.05)", px: "4", py: "3", textAlign: "left", backdropFilter: "blur(12px)" })}>
-				<div class={css({ display: "flex", flex: "1", flexDir: "column" })}>
-					<label for="not-found-search" class={css({ fontSize: "xs", textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(255, 255, 255, 0.6)" })}>Search everything</label>
+			<form action="/search" method="get" class={css({
+	mx: 'auto',
+	mt: '12',
+	display: 'flex',
+	maxW: '3xl',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	gap: '2',
+	rounded: '3xl',
+	borderWidth: '1px',
+	borderColor: 'white/10',
+	bg: 'white/5',
+	px: '4',
+	py: '3',
+	textAlign: 'left',
+	backdropFilter: 'auto',
+})}>
+				<div class={css({
+	display: 'flex',
+	flex: '1',
+	flexDir: 'column',
+})}>
+					<label for="not-found-search" class={css({
+	fontSize: 'xs',
+	textTransform: 'uppercase',
+	letterSpacing: '0.3em',
+	color: 'white/60',
+})}>Search everything</label>
 					<input
 						type="search"
 						name="q"
 						id="not-found-search"
 						placeholder="Videos, docs, workshops, experiments..."
-						class={css({ mt: "2", bg: "transparent", fontSize: "base", color: "white", outline: "none", _placeholder: { color: "slate.400" } })}
+						class={css({
+	mt: '2',
+	bg: 'transparent',
+	fontSize: 'base',
+	color: 'white',
+}) + " placeholder:text-slate-400 focus:outline-none"}
 						required
 					/>
 				</div>
 				<button
 					type="submit"
-					class={css({ display: "inline-flex", h: "12", w: "12", alignItems: "center", justifyContent: "center", borderRadius: "2xl", bg: "rgba(255, 255, 255, 0.1)", color: "white", transition: "all", _hover: { bg: "rgba(255, 255, 255, 0.2)" } })}
+					class={css({
+	display: 'inline-flex',
+	h: '12',
+	w: '12',
+	alignItems: 'center',
+	justifyContent: 'center',
+	rounded: '2xl',
+	bg: 'white/10',
+	color: 'white',
+	transition: 'all',
+	_hover: {
+		bg: 'white/20',
+	},
+})}
 					aria-label="Search"
 				>
-					<svg class={css({ h: "5", w: "5" })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg class={css({
+	h: '5',
+	w: '5',
+})} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
 					</svg>
 				</button>
 			</form>
 
-			<div class={css({ mx: "auto", mt: "16", display: "grid", maxW: "5xl", gap: "6", gridTemplateColumns: { md: "repeat(2, 1fr)" } })}>
+			<div class={css({
+	mx: 'auto',
+	mt: '16',
+	display: 'grid',
+	maxW: '5xl',
+	gap: '6',
+	md: {
+		gridTemplateColumns: '2',
+	},
+})}>
 				{quickLinks.map((link) => (
 					<a
 						href={link.href}
-						class={css({ position: "relative", overflow: "hidden", borderRadius: "3xl", border: "1px solid rgba(255, 255, 255, 0.1)", bg: "rgba(255, 255, 255, 0.05)", p: "6", textAlign: "left", backdropFilter: "blur(12px)", transition: "all", _hover: { borderColor: "rgba(255, 255, 255, 0.3)", bg: "rgba(255, 255, 255, 0.1)" } })}
+						class={css({
+	pos: 'relative',
+	overflow: 'hidden',
+	rounded: '3xl',
+	borderWidth: '1px',
+	borderColor: 'white/10',
+	bg: 'white/5',
+	p: '6',
+	textAlign: 'left',
+	backdropFilter: 'auto',
+	transition: 'all',
+	_hover: {
+		borderColor: 'white/30',
+		bg: 'white/10',
+	},
+}) + " group"}
 					>
-						<div class={css({ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6" })}>
+						<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	gap: '6',
+})}>
 							<div>
-								<p class={css({ fontSize: "sm", textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(var(--brand-primary), 0.8)" })}>{link.title}</p>
-								<p class={css({ mt: "3", fontSize: "base", color: "slate.200" })}>{link.description}</p>
+								<p class={css({
+	fontSize: 'sm',
+	textTransform: 'uppercase',
+	letterSpacing: '0.3em',
+	color: 'primary/80',
+})}>{link.title}</p>
+								<p class={css({
+	mt: '3',
+	fontSize: 'base',
+	color: 'slate.200',
+})}>{link.description}</p>
 							</div>
-							<div class={css({ display: "flex", h: "12", w: "12", alignItems: "center", justifyContent: "center", borderRadius: "2xl", bg: "rgba(255, 255, 255, 0.1)", color: "white", transition: "all", "& a:hover > &, .group:hover &": { transform: "translateX(4px)" } })}>
-								<svg class={css({ h: "5", w: "5" })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<div class={css({
+	display: 'flex',
+	h: '12',
+	w: '12',
+	alignItems: 'center',
+	justifyContent: 'center',
+	rounded: '2xl',
+	bg: 'white/10',
+	color: 'white',
+	transition: 'all',
+	_groupHover: {
+		translateX: '1',
+	},
+})}>
+								<svg class={css({
+	h: '5',
+	w: '5',
+})} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 								</svg>
 							</div>
@@ -127,17 +342,60 @@ const supportLinks = [
 				))}
 			</div>
 
-			<div class={css({ mx: "auto", mt: "16", display: "grid", maxW: "4xl", gap: "6", gridTemplateColumns: { md: "repeat(2, 1fr)" } })}>
+			<div class={css({
+	mx: 'auto',
+	mt: '16',
+	display: 'grid',
+	maxW: '4xl',
+	gap: '6',
+	md: {
+		gridTemplateColumns: '2',
+	},
+})}>
 				{supportLinks.map((link) => (
 					<a
 						href={link.href}
-						class={css({ display: "flex", flexDir: "column", gap: "3", borderRadius: "3xl", border: "1px solid rgba(255, 255, 255, 0.1)", bg: "rgba(255, 255, 255, 0.05)", p: "6", textAlign: "left", backdropFilter: "blur(12px)", transition: "all", _hover: { borderColor: "rgba(255, 255, 255, 0.3)", bg: "rgba(255, 255, 255, 0.1)" } })}
+						class={css({
+	display: 'flex',
+	flexDir: 'column',
+	gap: '3',
+	rounded: '3xl',
+	borderWidth: '1px',
+	borderColor: 'white/10',
+	bg: 'white/5',
+	p: '6',
+	textAlign: 'left',
+	backdropFilter: 'auto',
+	transition: 'all',
+	_hover: {
+		borderColor: 'white/30',
+		bg: 'white/10',
+	},
+}) + " group"}
 					>
-						<p class={css({ fontSize: "sm", fontWeight: "semibold", letterSpacing: "wide", color: "rgba(255, 255, 255, 0.8)" })}>{link.title}</p>
-						<p class={css({ fontSize: "base", color: "slate.300" })}>{link.description}</p>
-						<span class={css({ display: "inline-flex", alignItems: "center", gap: "2", fontSize: "sm", fontWeight: "semibold", color: "rgba(var(--brand-primary), 0.8)" })}>
+						<p class={css({
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	letterSpacing: 'wide',
+	color: 'white/80',
+})}>{link.title}</p>
+						<p class={css({
+	fontSize: 'base',
+	color: 'slate.300',
+})}>{link.description}</p>
+						<span class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	color: 'primary/80',
+})}>
 							<span>Open</span>
-							<svg class={css({ h: "4", w: "4" })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg class={css({
+	h: '4',
+	w: '4',
+})} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
 							</svg>
 						</span>

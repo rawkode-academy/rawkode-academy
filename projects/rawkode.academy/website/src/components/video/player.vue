@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { css } from "../../../styled-system/css";
 import "vidstack/bundle";
 import { actions } from "astro:actions";
 import { onMounted, onUnmounted, ref } from "vue";

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { css } from "../../../../styled-system/css";
+
 interface PricingFeature {
 	text: string;
 	description?: string;
@@ -91,40 +93,113 @@ const pricingPlans: PricingPlan[] = [
 		],
 	},
 ];
+
+const gridStyle = css({
+	display: 'flex',
+	flexDir: 'column',
+	gap: '8',
+	lg: {
+		display: 'grid',
+		gridTemplateColumns: '3',
+	},
+	sm: { gap: '6' },
+	xl: { gap: '10' },
+});
+
+const cardBase = css({
+	display: 'flex',
+	flexDir: 'column',
+	p: { base: '6', xl: '8' },
+	mx: 'auto',
+	maxW: 'lg',
+	textAlign: 'center',
+	color: { base: 'gray.900', _dark: 'white' },
+	bg: { base: 'white', _dark: 'gray.800' },
+	rounded: 'lg',
+	border: '1px solid',
+	borderColor: { base: 'gray.100', _dark: 'gray.600' },
+	shadow: 'sm',
+	transition: 'all',
+	transitionDuration: '300ms',
+	_hover: { shadow: 'xl', transform: 'scale(1.02)' },
+});
+
+const cardPopular = css({
+	borderColor: 'colorPalette.default',
+	borderWidth: '2px',
+	position: 'relative',
+});
+
+const popularBadge = css({
+	position: 'absolute',
+	top: '0',
+	right: '0',
+	px: '3',
+	py: '1',
+	bg: 'colorPalette.default',
+	color: 'white',
+	fontSize: 'xs',
+	fontWeight: 'semibold',
+	roundedBottomLeft: 'lg',
+	roundedTopRight: 'lg',
+});
+
+const planTitle = css({ mb: '4', fontSize: '2xl', fontWeight: 'semibold' });
+const planDesc = css({ minH: '24', fontWeight: 'light', color: { base: 'gray.500', _dark: 'gray.400' }, fontSize: { sm: 'lg' } });
+const priceWrap = css({ display: 'grid', justifyContent: 'center', my: '8' });
+const priceValue = css({ fontSize: '5xl', fontWeight: 'extrabold' });
+const priceLabel = css({ color: { base: 'gray.500', _dark: 'gray.400' } });
+const featureList = css({ mb: '8', display: 'flex', flexDir: 'column', gap: '4', textAlign: 'left', minH: '64' });
+const featureItem = css({ display: 'flex', alignItems: 'flex-start', gap: '3', mb: '4' });
+const featureIcon = css({ flexShrink: '0', w: '5', h: '5', mt: '1', color: { base: 'green.500', _dark: 'green.400' } });
+const featureTitle = css({ fontWeight: 'medium', color: { base: 'gray.800', _dark: 'gray.200' } });
+const featureDesc = css({ fontSize: 'sm', color: { base: 'gray.500', _dark: 'gray.400' }, mt: '1' });
+const ctaButton = css({
+	color: 'white',
+	bg: 'colorPalette.default',
+	_hover: { bg: 'colorPalette.default' },
+	focusRing: '4px',
+	fontWeight: 'medium',
+	rounded: 'lg',
+	fontSize: 'sm',
+	px: '5',
+	py: '2.5',
+	textAlign: 'center',
+	mt: 'auto',
+});
 </script>
 
 <template>
-	<div class="space-y-8 lg:grid lg:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
+	<div :class="gridStyle">
 		<div v-for="plan in pricingPlans"
-			class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-800 dark:text-white transition-all duration-300 hover:shadow-xl hover:drop-shadow-xl hover:scale-[1.02]"
-			:class="{ 'border-secondary dark:border-secondary border-2 relative': plan.popular }">
+			:class="[cardBase, plan.popular ? cardPopular : '']">
 
 			<div v-if="plan.popular"
-				class="absolute top-0 right-0 px-3 py-1 bg-secondary text-white text-xs font-semibold rounded-bl-lg rounded-tr-lg">
+				:class="popularBadge">
 				Popular Choice
 			</div>
 
-			<h3 class="mb-4 text-2xl font-semibold">{{ plan.title }}</h3>
-			<p class="min-h-24 font-light text-gray-500 sm:text-lg dark:text-gray-400">{{
+			<h3 :class="planTitle">{{ plan.title }}</h3>
+			<p :class="planDesc">{{
 				plan.description }}</p>
-			<div class="grid justify-center my-8">
-				<div class="text-5xl font-extrabold">{{ plan.price }}</div>
-				<div class="text-gray-500 dark:text-gray-400">USD / annually</div>
+			<div :class="priceWrap">
+				<div :class="priceValue">{{ plan.price }}</div>
+				<div :class="priceLabel">USD / annually</div>
 			</div>
 
 			<!-- List -->
-			<ul role="list" class="mb-8 space-y-4 text-left min-h-64">
-				<li v-for="feature in plan.features" class="flex items-start space-x-3 mb-4">
+			<ul role="list" :class="featureList">
+				<li v-for="feature in plan.features" :class="featureItem">
 					<!-- Icon -->
-					<svg class="shrink-0 w-5 h-5 mt-1 text-green-500 dark:text-green-400" fill="currentColor"
+					<svg :class="featureIcon" fill="currentColor"
 						viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
 						<path fill-rule="evenodd"
 							d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
 							clip-rule="evenodd"></path>
 					</svg>
 					<div>
-						<span class="font-medium text-gray-800 dark:text-gray-200">{{ feature.text }}</span>
-						<p v-if="feature.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+						<span :class="featureTitle">{{ feature.text }}</span>
+						<p v-if="feature.description" :class="featureDesc">
 							{{ feature.description }}
 						</p>
 					</div>
@@ -132,7 +207,7 @@ const pricingPlans: PricingPlan[] = [
 			</ul>
 
 			<a href="/organizations/lets-chat"
-				class="text-white bg-primary hover:bg-secondary focus:ring-4 focus:ring-primary/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white dark:focus:ring-primary/30 mt-auto">
+				:class="ctaButton">
 				{{ plan.ctaText }}
 			</a>
 		</div>
