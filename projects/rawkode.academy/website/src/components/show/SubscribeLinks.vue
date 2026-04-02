@@ -1,19 +1,19 @@
 <template>
-	<div v-if="links.length > 0" class="flex flex-col gap-3">
-		<p class="text-sm font-semibold uppercase tracking-wide text-muted">
+	<div v-if="links.length > 0" :class="wrapperStyles">
+		<p :class="labelStyles">
 			Subscribe
 		</p>
-		<div class="flex flex-wrap gap-2">
+		<div :class="linksContainerStyles">
 			<a
 				v-for="link in links"
 				:key="link.url"
 				:href="link.url"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="glass-chip gap-2 rounded-lg px-4 py-2 text-sm font-medium text-secondary-content transition-all duration-200 hover:shadow-md hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+				:class="linkStyles"
 				@click="handleSubscribeClick(link)"
 			>
-				<font-awesome-icon :icon="getIcon(link.icon)" class="h-4 w-4" />
+				<font-awesome-icon :icon="getIcon(link.icon)" :class="iconStyles" />
 				{{ link.platform }}
 			</a>
 		</div>
@@ -30,6 +30,7 @@ import {
 } from "@fortawesome/free-brands-svg-icons";
 import { faPodcast, faRss, faLink } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { css } from "../../../styled-system/css";
 
 library.add(faSpotify, faYoutube, faApple, faAmazon, faPodcast, faRss, faLink);
 
@@ -80,4 +81,56 @@ function getIcon(iconType: string): string | [string, string] {
 			return "link";
 	}
 }
+
+const wrapperStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+});
+
+const labelStyles = css({
+	fontSize: "sm",
+	fontWeight: "semibold",
+	textTransform: "uppercase",
+	letterSpacing: "wide",
+	color: "fg.muted",
+});
+
+const linksContainerStyles = css({
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "2",
+});
+
+const linkStyles = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	borderRadius: "lg",
+	px: "4",
+	py: "2",
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "fg.default",
+	bg: "bg.subtle",
+	border: "1px solid",
+	borderColor: "border.subtle",
+	transition: "all",
+	transitionDuration: "200ms",
+	_hover: {
+		shadow: "md",
+		transform: "scale(1.02)",
+	},
+	_focusVisible: {
+		outline: "none",
+		ring: "2px",
+		ringColor: "colorPalette.default",
+		ringOffset: "2px",
+	},
+});
+
+const iconStyles = css({
+	h: "4",
+	w: "4",
+});
 </script>

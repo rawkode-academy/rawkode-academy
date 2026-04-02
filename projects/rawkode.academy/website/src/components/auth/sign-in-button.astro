@@ -1,6 +1,37 @@
-<a href="/api/auth/sign-in" class="inline-flex">
+---
+import { css } from "../../../styled-system/css";
+---
+
+<a href="/api/auth/sign-in" class={css({ display: "inline-flex" })}>
 	<button
-		class="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide text-white bg-gradient-primary shadow-lg hover:shadow-xl border border-white/40 dark:border-white/10 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary/60 focus-visible:ring-offset-white dark:focus-visible:ring-offset-transparent transition-all duration-200"
+		class={css({
+			display: "inline-flex",
+			alignItems: "center",
+			justifyContent: "center",
+			borderRadius: "xl",
+			px: "5",
+			py: "2.5",
+			fontSize: "sm",
+			fontWeight: "semibold",
+			letterSpacing: "wide",
+			color: "white",
+			background: "linear-gradient(45deg, rgb(var(--brand-primary)), rgb(var(--brand-secondary)))",
+			shadow: "lg",
+			border: "1px solid",
+			borderColor: { base: "rgba(255, 255, 255, 0.4)", _dark: "rgba(255, 255, 255, 0.1)" },
+			transition: "all",
+			transitionDuration: "200ms",
+			_hover: {
+				shadow: "xl",
+				transform: "translateY(-2px)",
+			},
+			_focusVisible: {
+				outline: "none",
+				ring: "2px",
+				ringOffset: "2px",
+				ringColor: "colorPalette.default",
+			},
+		})}
 	>
 		Sign in
 	</button>

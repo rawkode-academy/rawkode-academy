@@ -1,6 +1,7 @@
 ---
 import type { ShowSummary } from "@/types/show";
 import { Image } from "astro:assets";
+import { css, cx } from "../../../styled-system/css";
 
 interface Props {
 	show: ShowSummary;
@@ -32,107 +33,229 @@ const latestEpisodeDate = latestEpisodePublishedAt
 			new Date(latestEpisodePublishedAt),
 		)
 	: null;
+
+const cardLinkStyles = css({
+	display: "flex",
+	h: "full",
+	flexDirection: "column",
+	overflow: "hidden",
+	borderRadius: "xl",
+	transition: "all",
+	transitionDuration: "200ms",
+	_hover: {
+		transform: "translateY(-4px)",
+		shadow: "lg",
+	},
+	_focusVisible: {
+		outline: "none",
+		ring: "2px",
+		ringColor: "colorPalette.default",
+		ringOffset: "2px",
+	},
+});
+
+const thumbnailContainerStyles = css({
+	position: "relative",
+	aspectRatio: "16/9",
+	w: "full",
+	overflow: "hidden",
+});
+
+const thumbnailImgStyles = css({
+	h: "full",
+	w: "full",
+	objectFit: "cover",
+	transition: "transform",
+	transitionDuration: "200ms",
+	_groupHover: {
+		transform: "scale(1.03)",
+	},
+});
+
+const episodeBadgeStyles = css({
+	position: "absolute",
+	bottom: "2",
+	right: "2",
+	borderRadius: "md",
+	bg: "rgba(0, 0, 0, 0.75)",
+	px: "2",
+	py: "1",
+	fontSize: "xs",
+	fontWeight: "medium",
+	color: "white",
+	backdropFilter: "blur(4px)",
+});
+
+const placeholderStyles = css({
+	position: "relative",
+	aspectRatio: "16/9",
+	w: "full",
+	background: { base: "linear-gradient(to bottom right, rgba(var(--brand-primary), 0.1), rgba(var(--brand-secondary), 0.1))", _dark: "linear-gradient(to bottom right, rgba(var(--brand-primary), 0.2), rgba(var(--brand-secondary), 0.2))" },
+});
+
+const placeholderIconStyles = css({
+	display: "flex",
+	h: "full",
+	alignItems: "center",
+	justifyContent: "center",
+});
+
+const svgPlaceholderStyles = css({
+	h: "16",
+	w: "16",
+	color: { base: "rgba(var(--brand-primary), 0.3)", _dark: "rgba(var(--brand-primary), 0.2)" },
+});
+
+const contentStyles = css({
+	display: "flex",
+	flex: "1",
+	flexDirection: "column",
+	justifyContent: "space-between",
+	p: "6",
+});
+
+const titleStyles = css({
+	lineClamp: 2,
+	fontSize: "xl",
+	fontWeight: "semibold",
+	color: "fg.default",
+});
+
+const hostTextStyles = css({
+	lineClamp: 2,
+	fontSize: "sm",
+	color: "fg.muted",
+});
+
+const hostLabelStyles = css({
+	fontWeight: "medium",
+});
+
+const latestEpStyles = css({
+	lineClamp: 2,
+	fontSize: "xs",
+	color: "fg.muted",
+});
+
+const viewLinkStyles = css({
+	mt: "4",
+	display: "flex",
+	alignItems: "center",
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "colorPalette.default",
+});
+
+const arrowStyles = css({
+	ml: "2",
+	h: "4",
+	w: "4",
+	transition: "transform",
+	_groupHover: {
+		transform: "translateX(4px)",
+	},
+});
 ---
 
 <a
-        href={`/shows/${show.id}`}
-        class="group flex h-full flex-col overflow-hidden rounded-xl glass-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+	href={`/shows/${show.id}`}
+	class={cx("group glass-card", cardLinkStyles)}
 >
-        {show.cover ? (
-                <div class="relative aspect-video w-full overflow-hidden" style="background: var(--surface-card-muted)">
-                        <Image
-                                src={show.cover.image}
-                                alt={show.cover.alt}
-                                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-                        />
-                        {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                                        {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
-                                </div>
-                        )}
-                </div>
-        ) : thumbnailUrl ? (
-                <div class="relative aspect-video w-full overflow-hidden" style="background: var(--surface-card-muted)">
-                        <img
-                                src={thumbnailUrl}
-                                alt={`Latest episode from ${show.name}`}
-                                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-                                loading="lazy"
-                        />
-                        {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                                        {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
-                                </div>
-                        )}
-                </div>
-        ) : (
-                <div class="relative aspect-video w-full bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20">
-                        <div class="flex h-full items-center justify-center">
-                                <svg
-                                        class="h-16 w-16 text-primary/30 dark:text-primary/20"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                >
-                                        <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="1.5"
-                                                d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
-                                        />
-                                </svg>
-                        </div>
-                        {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                                        {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
-                                </div>
-                        )}
-                </div>
-        )}
-        <div class="flex flex-1 flex-col justify-between p-6">
-                <div class="space-y-2">
-                        <h3 class="line-clamp-2 text-xl font-semibold text-primary-content">
-                                {show.name}
-                        </h3>
-                        <p class="line-clamp-2 text-sm text-muted">
-                                {hostNames.length > 0 ? (
-                                        <>
-                                                <span class="font-medium">Hosted by:</span> {hostNames.join(", ")}
-                                        </>
-                                ) : (
-                                        "Hosts to be announced"
-                                )}
-                        </p>
-                        {latestEpisodeTitle && (
-                                <p class="line-clamp-2 text-xs text-muted">
-                                        Latest: {latestEpisodeTitle}
-                                        {latestEpisodeDate && (
-                                                <>
-                                                        {" "}
-                                                        <span aria-hidden="true">·</span> {latestEpisodeDate}
-                                                </>
-                                        )}
-                                </p>
-                        )}
-                </div>
-                <div class="mt-4 flex items-center text-sm font-medium text-primary dark:text-primary-300">
-                        <span>View episodes</span>
-                        <svg
-                                class="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                aria-hidden="true"
-                        >
-                                <path
-                                        d="M7.5 5L12.5 10L7.5 15"
-                                        stroke="currentColor"
-                                        stroke-width="1.5"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                />
-                        </svg>
-                </div>
-        </div>
+	{show.cover ? (
+		<div class={thumbnailContainerStyles} style="background: var(--surface-card-muted)">
+			<Image
+				src={show.cover.image}
+				alt={show.cover.alt}
+				class={thumbnailImgStyles}
+			/>
+			{episodes.length > 0 && (
+				<div class={episodeBadgeStyles}>
+					{episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
+				</div>
+			)}
+		</div>
+	) : thumbnailUrl ? (
+		<div class={thumbnailContainerStyles} style="background: var(--surface-card-muted)">
+			<img
+				src={thumbnailUrl}
+				alt={`Latest episode from ${show.name}`}
+				class={thumbnailImgStyles}
+				loading="lazy"
+			/>
+			{episodes.length > 0 && (
+				<div class={episodeBadgeStyles}>
+					{episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
+				</div>
+			)}
+		</div>
+	) : (
+		<div class={placeholderStyles}>
+			<div class={placeholderIconStyles}>
+				<svg
+					class={svgPlaceholderStyles}
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					aria-hidden="true"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
+					/>
+				</svg>
+			</div>
+			{episodes.length > 0 && (
+				<div class={episodeBadgeStyles}>
+					{episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
+				</div>
+			)}
+		</div>
+	)}
+	<div class={contentStyles}>
+		<div class={css({ display: "flex", flexDirection: "column", gap: "2" })}>
+			<h3 class={titleStyles}>
+				{show.name}
+			</h3>
+			<p class={hostTextStyles}>
+				{hostNames.length > 0 ? (
+					<>
+						<span class={hostLabelStyles}>Hosted by:</span> {hostNames.join(", ")}
+					</>
+				) : (
+					"Hosts to be announced"
+				)}
+			</p>
+			{latestEpisodeTitle && (
+				<p class={latestEpStyles}>
+					Latest: {latestEpisodeTitle}
+					{latestEpisodeDate && (
+						<>
+							{" "}
+							<span aria-hidden="true">&middot;</span> {latestEpisodeDate}
+						</>
+					)}
+				</p>
+			)}
+		</div>
+		<div class={viewLinkStyles}>
+			<span>View episodes</span>
+			<svg
+				class={arrowStyles}
+				viewBox="0 0 20 20"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+				aria-hidden="true"
+			>
+				<path
+					d="M7.5 5L12.5 10L7.5 15"
+					stroke="currentColor"
+					stroke-width="1.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+		</div>
+	</div>
 </a>

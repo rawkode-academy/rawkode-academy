@@ -6,6 +6,7 @@ import { getCollection, getEntries } from "astro:content";
 import VideoFeed from "@/components/video/video-feed.astro";
 import ShowCard from "@/components/show/ShowCard.astro";
 import type { ShowSummary } from "@/types/show";
+import { css, cx } from "../../../styled-system/css";
 
 export async function getStaticPaths() {
 	const people = await getCollection("people");
@@ -77,110 +78,239 @@ const socialLinks = [
     person.data.website && { name: "Website", url: person.data.website, icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" },
 ].filter(Boolean);
 
+const pageWrapperStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "stack-lg",
+	py: "section",
+	pt: "0",
+});
+
+const profilePanelStyles = css({
+	borderRadius: "3xl",
+	p: { base: "8", md: "12" },
+	maxW: "5xl",
+	mx: "auto",
+});
+
+const profileFlexStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	md: { flexDirection: "row", alignItems: "flex-start" },
+	alignItems: "center",
+	gap: { base: "8", md: "12" },
+});
+
+const avatarOuterStyles = css({
+	flexShrink: 0,
+});
+
+const avatarWrapperStyles = css({
+	w: { base: "40", md: "48" },
+	h: { base: "40", md: "48" },
+	borderRadius: "full",
+	overflow: "hidden",
+	border: "4px solid",
+	borderColor: { base: "rgba(255, 255, 255, 0.5)", _dark: "rgba(55, 65, 81, 0.5)" },
+	shadow: "xl",
+});
+
+const avatarImgStyles = css({
+	w: "full",
+	h: "full",
+	objectFit: "cover",
+});
+
+const infoStyles = css({
+	flex: "1",
+	textAlign: { base: "center", md: "left" },
+	display: "flex",
+	flexDirection: "column",
+	gap: "6",
+});
+
+const nameStyles = css({
+	fontSize: { base: "4xl", md: "5xl" },
+	fontWeight: "extrabold",
+	color: "fg.default",
+	mb: "2",
+});
+
+const handleStyles = css({
+	fontSize: "lg",
+	color: "colorPalette.default",
+	fontWeight: "medium",
+});
+
+const socialFlexStyles = css({
+	display: "flex",
+	flexWrap: "wrap",
+	justifyContent: { base: "center", md: "flex-start" },
+	gap: "4",
+});
+
+const socialLinkStyles = css({
+	p: "3",
+	borderRadius: "full",
+	bg: { base: "gray.100", _dark: "gray.800" },
+	color: "fg.muted",
+	shadow: "sm",
+	transition: "all",
+	transitionDuration: "300ms",
+	_hover: {
+		bg: "colorPalette.default",
+		color: "white",
+		shadow: "md",
+	},
+});
+
+const sectionHeadingContainerStyles = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "3",
+	mb: "8",
+});
+
+const sectionIconStyles = css({
+	p: "2",
+	borderRadius: "lg",
+	color: "colorPalette.default",
+});
+
+const sectionIconPrimaryBg = css({
+	bg: { base: "rgba(var(--brand-primary), 0.1)", _dark: "rgba(var(--brand-primary), 0.2)" },
+});
+
+const sectionIconSecondaryBg = css({
+	bg: { base: "rgba(var(--brand-secondary), 0.1)", _dark: "rgba(var(--brand-secondary), 0.2)" },
+});
+
+const sectionTitleStyles = css({
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	color: "fg.default",
+});
+
+const showGridStyles = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" },
+	gap: "6",
+});
+
+const sectionContainerStyles = css({
+	w: "full",
+	maxW: "7xl",
+	mx: "auto",
+});
+
+const svgIconStyles = css({
+	h: "6",
+	w: "6",
+});
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-    <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
-        <!-- Profile Header -->
-        <section class="w-full">
-            <div class="glass-panel rounded-3xl p-8 md:p-12 max-w-5xl mx-auto">
-                <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
-                    <!-- Avatar -->
-                    <div class="flex-shrink-0">
-                        <div class="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/50 dark:border-gray-700/50 shadow-xl">
-                            <img
-                                src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
-                                alt={person.data.name}
-                                class="w-full h-full object-cover"
-                                onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
-                            />
-                        </div>
-                    </div>
+	<div class:list={[pageWrapperStyles, "page-px"]}>
+		<!-- Profile Header -->
+		<section class={css({ w: "full" })}>
+			<div class:list={["glass-panel", profilePanelStyles]}>
+				<div class={profileFlexStyles}>
+					<!-- Avatar -->
+					<div class={avatarOuterStyles}>
+						<div class={avatarWrapperStyles}>
+							<img
+								src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
+								alt={person.data.name}
+								class={avatarImgStyles}
+								onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
+							/>
+						</div>
+					</div>
 
-                    <!-- Info -->
-                    <div class="flex-1 text-center md:text-left space-y-6">
-                        <div>
-                            <h1 class="text-4xl md:text-5xl font-extrabold text-primary-content mb-2">
-                                {person.data.name}
-                            </h1>
-                            {person.data.handles.twitter && (
-                                <p class="text-lg text-primary font-medium">
-                                    @{person.data.handles.twitter}
-                                </p>
-                            )}
-                        </div>
+					<!-- Info -->
+					<div class={infoStyles}>
+						<div>
+							<h1 class={nameStyles}>
+								{person.data.name}
+							</h1>
+							{person.data.handles.twitter && (
+								<p class={handleStyles}>
+									@{person.data.handles.twitter}
+								</p>
+							)}
+						</div>
 
-                        <!-- Social Links -->
-                        <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                            {socialLinks.map((link: any) => (
-                                <a
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-muted hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
-                                    aria-label={link.name}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <path d={link.icon} />
-                                    </svg>
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+						<!-- Social Links -->
+						<div class={socialFlexStyles}>
+							{socialLinks.map((link: any) => (
+								<a
+									href={link.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									class={socialLinkStyles}
+									aria-label={link.name}
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<path d={link.icon} />
+									</svg>
+								</a>
+							))}
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
 
-        <!-- Hosted Shows -->
-        {showSummaries.length > 0 && (
-            <section class="w-full max-w-7xl mx-auto">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2 rounded-lg bg-primary/10 text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
-                        Shows Hosted
-                    </h2>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {showSummaries.map((show) => (
-                        <ShowCard show={show} />
-                    ))}
-                </div>
-            </section>
-        )}
+		<!-- Hosted Shows -->
+		{showSummaries.length > 0 && (
+			<section class={sectionContainerStyles}>
+				<div class={sectionHeadingContainerStyles}>
+					<div class={cx(sectionIconStyles, sectionIconPrimaryBg)}>
+						<svg xmlns="http://www.w3.org/2000/svg" class={svgIconStyles} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+						</svg>
+					</div>
+					<h2 class={sectionTitleStyles}>
+						Shows Hosted
+					</h2>
+				</div>
+				<div class={showGridStyles}>
+					{showSummaries.map((show) => (
+						<ShowCard show={show} />
+					))}
+				</div>
+			</section>
+		)}
 
-        <!-- Guest Appearances -->
-        {guestVideoFeed.length > 0 && (
-            <section class="w-full max-w-7xl mx-auto">
-                 <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2 rounded-lg bg-secondary/10 text-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
-                        Guest Appearances
-                    </h2>
-                </div>
-                <VideoFeed
-                    title=""
-                    description=""
-                    videos={guestVideoFeed}
-                />
-            </section>
-        )}
-    </div>
+		<!-- Guest Appearances -->
+		{guestVideoFeed.length > 0 && (
+			<section class={sectionContainerStyles}>
+				<div class={sectionHeadingContainerStyles}>
+					<div class={cx(sectionIconStyles, sectionIconSecondaryBg)}>
+						<svg xmlns="http://www.w3.org/2000/svg" class={svgIconStyles} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+						</svg>
+					</div>
+					<h2 class={sectionTitleStyles}>
+						Guest Appearances
+					</h2>
+				</div>
+				<VideoFeed
+					title=""
+					description=""
+					videos={guestVideoFeed}
+				/>
+			</section>
+		)}
+	</div>
 </Page>

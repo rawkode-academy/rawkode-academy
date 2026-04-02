@@ -3,55 +3,256 @@ export const prerender = true;
 
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
+import { css, cx } from "../../../styled-system/css";
 
 const people = await getCollection("people");
 const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name));
+
+const pageContainerStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "stack-lg",
+	py: "section",
+	pt: "0",
+});
+
+const glassPanelStyles = css({
+	borderRadius: "3xl",
+	p: { base: "6", md: "8" },
+	maxW: "7xl",
+	mx: "auto",
+});
+
+const heroFlexStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	lg: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+	},
+	gap: "8",
+});
+
+const heroCopyStyles = css({
+	flex: "1",
+	display: "flex",
+	flexDirection: "column",
+	gap: "4",
+});
+
+const chipIconStyles = css({
+	w: "4",
+	h: "4",
+	mr: "1.5",
+});
+
+const titleStyles = css({
+	fontSize: { base: "3xl", md: "4xl" },
+	fontWeight: "extrabold",
+	color: "fg.default",
+});
+
+const subtitleStyles = css({
+	color: "fg.muted",
+	maxW: "xl",
+});
+
+const searchContainerStyles = css({
+	w: "full",
+	lg: { w: "96" },
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+});
+
+const searchLabelStyles = css({
+	display: "block",
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "fg.default",
+});
+
+const searchWrapperStyles = css({
+	position: "relative",
+});
+
+const searchIconStyles = css({
+	position: "absolute",
+	left: "4",
+	top: "50%",
+	transform: "translateY(-50%)",
+	w: "5",
+	h: "5",
+	color: "fg.subtle",
+});
+
+const searchInputStyles = css({
+	w: "full",
+	borderRadius: "xl",
+	py: "3",
+	pl: "12",
+	pr: "4",
+	fontSize: "base",
+	color: "fg.default",
+	bg: { base: "rgba(255, 255, 255, 0.6)", _dark: "rgba(31, 41, 55, 0.6)" },
+	backdropFilter: "blur(4px)",
+	border: "1px solid",
+	borderColor: { base: "rgba(255, 255, 255, 0.4)", _dark: "rgba(75, 85, 99, 0.5)" },
+	transition: "all",
+	_focus: {
+		outline: "none",
+		ring: "2px",
+		ringColor: "colorPalette.default",
+		borderColor: "colorPalette.default",
+	},
+	_placeholder: {
+		color: "fg.subtle",
+	},
+});
+
+const searchCountStyles = css({
+	fontSize: "sm",
+	color: "fg.muted",
+});
+
+const searchCountValueStyles = css({
+	fontWeight: "medium",
+	color: "fg.default",
+});
+
+const gridStyles = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1", sm: "repeat(2, 1fr)", lg: "repeat(3, 1fr)", xl: "repeat(4, 1fr)" },
+	gap: "6",
+});
+
+const maxContainerStyles = css({
+	maxW: "7xl",
+	mx: "auto",
+});
+
+const cardStyles = css({
+	display: "flex",
+	flexDirection: "column",
+	overflow: "hidden",
+	alignItems: "center",
+	textAlign: "center",
+	p: "6",
+});
+
+const avatarWrapperStyles = css({
+	position: "relative",
+	w: "24",
+	h: "24",
+	mb: "4",
+});
+
+const avatarImgStyles = css({
+	w: "full",
+	h: "full",
+	objectFit: "cover",
+	borderRadius: "full",
+	shadow: "md",
+	border: "2px solid",
+	borderColor: { base: "rgba(255, 255, 255, 0.5)", _dark: "rgba(55, 65, 81, 0.5)" },
+});
+
+const cardContentStyles = css({
+	flex: "1",
+	display: "flex",
+	flexDirection: "column",
+	gap: "2",
+	position: "relative",
+	zIndex: "10",
+	w: "full",
+});
+
+const cardNameStyles = css({
+	fontSize: "lg",
+	fontWeight: "bold",
+	color: "fg.default",
+	truncate: true,
+});
+
+const cardHandleStyles = css({
+	fontSize: "sm",
+	color: "fg.muted",
+	truncate: true,
+});
+
+const emptyStateContainerStyles = css({
+	borderRadius: "2xl",
+	p: "12",
+	textAlign: "center",
+	maxW: "md",
+	mx: "auto",
+});
+
+const emptyIconStyles = css({
+	w: "12",
+	h: "12",
+	mx: "auto",
+	color: "fg.subtle",
+	mb: "4",
+});
+
+const emptyTextStyles = css({
+	color: "fg.muted",
+	fontWeight: "medium",
+});
+
+const emptySubtextStyles = css({
+	fontSize: "sm",
+	color: "fg.subtle",
+	mt: "1",
+});
 ---
 
 <Page
 	title="People"
 	description="Meet the people behind Rawkode Academy."
 >
-	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
+	<div class:list={[pageContainerStyles, "page-px"]}>
 		<!-- Hero Section -->
-		<section class="w-full">
-			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
-				<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+		<section class={css({ w: "full" })}>
+			<div class:list={["glass-panel", glassPanelStyles]}>
+				<div class={heroFlexStyles}>
 					<!-- Hero Copy -->
-					<div class="flex-1 space-y-4">
+					<div class={heroCopyStyles}>
 						<span class="glass-chip">
-							<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<svg class={chipIconStyles} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
 							</svg>
 							Community
 						</span>
-						<h1 class="text-3xl md:text-4xl font-extrabold text-primary-content">
+						<h1 class={titleStyles}>
 							Meet the People
 						</h1>
-						<p class="text-muted max-w-xl">
+						<p class={subtitleStyles}>
 							Hosts, guests, and contributors who make Rawkode Academy possible.
 						</p>
 					</div>
 
 					<!-- Search Controls -->
-					<div class="w-full lg:w-96 space-y-3">
-						<label for="people-search" class="block text-sm font-medium text-secondary-content">
+					<div class={searchContainerStyles}>
+						<label for="people-search" class={searchLabelStyles}>
 							Search people
 						</label>
-						<div class="relative">
-							<svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+						<div class={searchWrapperStyles}>
+							<svg class={searchIconStyles} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 							</svg>
 							<input
 								id="people-search"
 								type="search"
 								placeholder="e.g. Rawkode, Guests..."
-								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-primary-content placeholder-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
+								class={searchInputStyles}
 								autocomplete="off"
 							/>
 						</div>
-						<p class="text-sm text-muted">
-							Showing <span class="font-medium text-secondary-content" data-people-visible-count>{people.length}</span> of {people.length} people
+						<p class={searchCountStyles}>
+							Showing <span class={searchCountValueStyles} data-people-visible-count>{people.length}</span> of {people.length} people
 						</p>
 					</div>
 				</div>
@@ -59,52 +260,52 @@ const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name
 		</section>
 
 		<!-- People Grid -->
-		<section id="people" class="w-full">
-			<div class="max-w-7xl mx-auto">
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+		<section id="people" class={css({ w: "full" })}>
+			<div class={maxContainerStyles}>
+				<div class={gridStyles}>
 					{
 						sortedPeople.map((person) => {
 							const searchKeywords = person.data.name.toLowerCase();
-							
+
 							return (
 								<a
 									href={`/people/${person.data.id}`}
-									class="people-card-link glass-card-shimmer card-hover flex flex-col overflow-hidden items-center text-center p-6"
+									class={cx("people-card-link glass-card-shimmer card-hover", cardStyles)}
 									data-keywords={searchKeywords}
 								>
 									{/* Avatar */}
-									<div class="relative w-24 h-24 mb-4">
+									<div class={avatarWrapperStyles}>
 										<img
 											src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
 											alt={`${person.data.name}`}
-											class="w-full h-full object-cover rounded-full shadow-md border-2 border-white/50 dark:border-gray-700/50"
+											class={avatarImgStyles}
 											onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
 										/>
 									</div>
-									
+
 									{/* Content */}
-									<div class="flex-1 flex flex-col gap-2 relative z-10 w-full">
-										<h3 class="text-lg font-bold text-primary-content truncate">
+									<div class={cardContentStyles}>
+										<h3 class={cardNameStyles}>
 											{person.data.name}
 										</h3>
-                                        {person.data.twitter && (
-                                            <span class="text-sm text-muted truncate">@{person.data.twitter.split('/').pop()}</span>
-                                        )}
+										{person.data.twitter && (
+											<span class={cardHandleStyles}>@{person.data.twitter.split('/').pop()}</span>
+										)}
 									</div>
 								</a>
 							);
 						})
 					}
 				</div>
-				
+
 				<!-- Empty State -->
 				<div id="people-empty-state" class="hidden">
-					<div class="glass-card-shimmer rounded-2xl p-12 text-center max-w-md mx-auto">
-						<svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+					<div class:list={["glass-card-shimmer", emptyStateContainerStyles]}>
+						<svg class={emptyIconStyles} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 						</svg>
-						<p class="text-muted font-medium">No people match your search</p>
-						<p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different name</p>
+						<p class={emptyTextStyles}>No people match your search</p>
+						<p class={emptySubtextStyles}>Try a different name</p>
 					</div>
 				</div>
 			</div>
