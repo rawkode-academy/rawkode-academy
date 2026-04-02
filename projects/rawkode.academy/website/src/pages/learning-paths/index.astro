@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import LearningPathCard from "@/components/learning-paths/LearningPathCard.astro";
 import Page from "@/wrappers/page.astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
@@ -15,25 +16,62 @@ const pageDescription =
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<section class="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-		<div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 dark:from-primary/20 dark:to-secondary/30"></div>
-		<div class="relative z-10 px-6 py-16 md:px-10 lg:px-16">
-			<div class="max-w-3xl">
-				<p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary mb-4">
+	<section class={css({
+		position: "relative",
+		overflow: "hidden",
+		borderRadius: "3xl",
+		borderWidth: "1px",
+		borderColor: { base: "gray.200", _dark: "gray.800" },
+		bg: { base: "white", _dark: "gray.900" },
+	})}>
+		<div class={css({
+			position: "absolute",
+			inset: "0",
+			backgroundImage: { base: "linear-gradient(to bottom right, token(colors.teal.500/10), transparent, token(colors.green.500/20))", _dark: "linear-gradient(to bottom right, token(colors.teal.500/20), transparent, token(colors.green.500/30))" },
+		})}></div>
+		<div class={css({
+			position: "relative",
+			zIndex: "10",
+			px: { base: "6", md: "10", lg: "16" },
+			py: "16",
+		})}>
+			<div class={css({ maxW: "3xl" })}>
+				<p class={css({
+					fontSize: "sm",
+					fontWeight: "semibold",
+					textTransform: "uppercase",
+					letterSpacing: "0.3em",
+					color: "teal.500",
+					mb: "4",
+				})}>
 					Guided Learning
 				</p>
-				<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-primary-content mb-4">
+				<h1 class={css({
+					fontSize: { base: "3xl", md: "4xl" },
+					fontWeight: "extrabold",
+					letterSpacing: "tight",
+					color: "fg.default",
+					mb: "4",
+				})}>
 					Learning Paths
 				</h1>
-				<p class="text-lg text-muted leading-relaxed">
+				<p class={css({
+					fontSize: "lg",
+					color: "fg.muted",
+					lineHeight: "relaxed",
+				})}>
 					Each path bundles Rawkode Academy videos into a focused curriculum with clear outcomes, prerequisites, and the context you need to succeed. Start with the challenge you're facing and follow along step-by-step.
 				</p>
 			</div>
 		</div>
 	</section>
 
-	<section class="mt-12">
-		<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+	<section class={css({ mt: "12" })}>
+		<div class={css({
+			display: "grid",
+			gap: "6",
+			gridTemplateColumns: { sm: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" },
+		})}>
 			{learningPaths.map((learningPath) => (
 				<LearningPathCard learningPath={learningPath} />
 			))}

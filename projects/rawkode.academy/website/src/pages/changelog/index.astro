@@ -4,6 +4,7 @@ import Button from "@/components/common/Button.vue";
 import { Hero } from "@/components/ui";
 import { marked } from "marked";
 import PageWrapper from "../../wrappers/page.astro";
+import { css } from "../../../styled-system/css";
 
 // Configure marked for better GitLab-style rendering
 marked.setOptions({
@@ -38,13 +39,12 @@ const processedChangelog = await Promise.all(
 	}),
 );
 
-const typeColors = {
-	feature: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-	fix: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-	chore: "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary",
-	docs: "bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary",
-	breaking:
-		"bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+const typeColors: Record<string, string> = {
+	feature: css({ bg: { base: "green.100", _dark: "green.900" }, color: { base: "green.800", _dark: "green.300" } }),
+	fix: css({ bg: { base: "red.100", _dark: "red.900" }, color: { base: "red.800", _dark: "red.300" } }),
+	chore: css({ bg: { base: "teal.500/10", _dark: "teal.500/20" }, color: "teal.500" }),
+	docs: css({ bg: { base: "green.500/10", _dark: "green.500/20" }, color: "green.500" }),
+	breaking: css({ bg: { base: "orange.100", _dark: "orange.900" }, color: { base: "orange.800", _dark: "orange.300" } }),
 };
 ---
 
@@ -73,40 +73,54 @@ const typeColors = {
 		</Fragment>
 	</Hero>
 
-	<div id="latest" class="max-w-4xl mx-auto px-4 py-8">
-
+	<div id="latest" class={css({ maxW: "4xl", mx: "auto", px: "4", py: "8" })}>
 		{
 			processedChangelog.length === 0 ? (
-				<div class="text-center py-12">
-					<p class="text-gray-500 dark:text-gray-400">
+				<div class={css({ textAlign: "center", py: "12" })}>
+					<p class={css({ color: "fg.subtle" })}>
 						No changelog entries found.
 					</p>
 				</div>
 			) : (
-				<div class="space-y-8">
+				<div class={css({ display: "flex", flexDirection: "column", gap: "8" })}>
 					{processedChangelog.map((entry) => (
-						<article class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-							<div class="flex items-start justify-between mb-4">
-								<div class="flex-1">
-									<div class="flex items-center gap-3 mb-2">
+						<article class={css({
+							bg: { base: "white", _dark: "gray.800" },
+							borderRadius: "lg",
+							shadow: "md",
+							p: "6",
+							borderWidth: "1px",
+							borderColor: { base: "gray.200", _dark: "gray.700" },
+						})}>
+							<div class={css({ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: "4" })}>
+								<div class={css({ flex: "1" })}>
+									<div class={css({ display: "flex", alignItems: "center", gap: "3", mb: "2" })}>
 										<span
-											class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeColors[entry.type as keyof typeof typeColors] || typeColors.chore}`}
+											class={css({
+												display: "inline-flex",
+												alignItems: "center",
+												px: "2.5",
+												py: "0.5",
+												borderRadius: "full",
+												fontSize: "xs",
+												fontWeight: "medium",
+											}) + " " + (typeColors[entry.type as string] || typeColors.chore)}
 										>
 											{entry.type}
 										</span>
 									</div>
-									<h2 class="text-xl font-semibold text-primary-content mb-2">
+									<h2 class={css({ fontSize: "xl", fontWeight: "semibold", color: "fg.default", mb: "2" })}>
 										{entry.title}
 									</h2>
 									<div
-										class="text-muted mb-3 prose prose-sm dark:prose-invert max-w-none [&>p]:mb-4 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>li]:mb-1"
+										class={css({ color: "fg.muted", mb: "3" }) + " prose prose-sm dark:prose-invert max-w-none [&>p]:mb-4 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>li]:mb-1"}
 										set:html={entry.renderedContent}
 									/>
 								</div>
 							</div>
 
-							<div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-								<div class="flex items-center gap-4">
+							<div class={css({ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "sm", color: "fg.subtle" })}>
+								<div class={css({ display: "flex", alignItems: "center", gap: "4" })}>
 									<time datetime={entry.date.toISOString()}>
 										{entry.date.toLocaleDateString("en-US", {
 											year: "numeric",
@@ -114,11 +128,11 @@ const typeColors = {
 											day: "numeric",
 										})}
 									</time>
-									<div class="flex items-center gap-2">
+									<div class={css({ display: "flex", alignItems: "center", gap: "2" })}>
 										<img
 											src={entry.author.avatar_url}
 											alt={entry.author.name}
-											class="w-5 h-5 rounded-full"
+											class={css({ w: "5", h: "5", borderRadius: "full" })}
 										/>
 										<span>by {entry.author.name}</span>
 									</div>
