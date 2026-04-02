@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { computed, useAttrs } from "vue";
+import { css, cx } from "../../../styled-system/css";
 
 interface Props {
 	cols?: {
@@ -28,51 +29,59 @@ const props = withDefaults(defineProps<Props>(), {
 	justify: "start",
 });
 
+const justifyMap = {
+	start: "flex-start",
+	center: "center",
+	end: "flex-end",
+	between: "space-between",
+	around: "space-around",
+	evenly: "space-evenly",
+} as const;
+
+const alignMap = {
+	start: "start",
+	center: "center",
+	end: "end",
+	stretch: "stretch",
+} as const;
+
+function repeatCols(n: number) {
+	return `repeat(${n}, minmax(0, 1fr))`;
+}
+
 const gridClasses = computed(() => {
-	const classes = ["grid"];
+	const colStyles: Record<string, any> = {};
 
-	// Column classes
-	if (props.cols.default) classes.push(`grid-cols-${props.cols.default}`);
-	if (props.cols.sm) classes.push(`sm:grid-cols-${props.cols.sm}`);
-	if (props.cols.md) classes.push(`md:grid-cols-${props.cols.md}`);
-	if (props.cols.lg) classes.push(`lg:grid-cols-${props.cols.lg}`);
-	if (props.cols.xl) classes.push(`xl:grid-cols-${props.cols.xl}`);
-
-	// Gap classes
-	if (typeof props.gap === "number") {
-		classes.push(`gap-${props.gap}`);
-	} else {
-		classes.push(props.gap);
+	if (props.cols.default) {
+		colStyles.gridTemplateColumns = repeatCols(props.cols.default);
+	}
+	if (props.cols.sm) {
+		colStyles.sm = { gridTemplateColumns: repeatCols(props.cols.sm) };
+	}
+	if (props.cols.md) {
+		colStyles.md = { gridTemplateColumns: repeatCols(props.cols.md) };
+	}
+	if (props.cols.lg) {
+		colStyles.lg = { gridTemplateColumns: repeatCols(props.cols.lg) };
+	}
+	if (props.cols.xl) {
+		colStyles.xl = { gridTemplateColumns: repeatCols(props.cols.xl) };
 	}
 
-	// Alignment classes
-	const alignMap = {
-		start: "items-start",
-		center: "items-center",
-		end: "items-end",
-		stretch: "items-stretch",
-	};
-	classes.push(alignMap[props.align]);
+	const gapValue = typeof props.gap === "number" ? `${props.gap}` : props.gap;
 
-	// Justify classes
-	const justifyMap = {
-		start: "justify-start",
-		center: "justify-center",
-		end: "justify-end",
-		between: "justify-between",
-		around: "justify-around",
-		evenly: "justify-evenly",
-	};
-	classes.push(justifyMap[props.justify]);
-
-	return classes.join(" ");
+	return css({
+		display: "grid",
+		gap: gapValue,
+		alignItems: alignMap[props.align],
+		justifyContent: justifyMap[props.justify],
+		...colStyles,
+	});
 });
 
 const attrs = useAttrs();
 
 const computedClasses = computed(() => {
-	return [gridClasses.value, props.class || attrs.class]
-		.filter(Boolean)
-		.join(" ");
+	return cx(gridClasses.value, props.class || (attrs.class as string));
 });
 </script>
