@@ -1,5 +1,5 @@
 ---
-import { css } from "../../../styled-system/css";
+import { css, cx } from "../../../styled-system/css";
 export const prerender = false;
 
 import { env } from "cloudflare:workers";
@@ -47,23 +47,23 @@ const shouldHide = !user && hasNewsletterCookie;
 ---
 
 {!shouldHide && (
-<section class:list={["w-full py-12 relative z-10", className]}>
-        <div class="glass-card bg-gradient-card card-shadow p-4 sm:p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                        <div class="flex-1 min-w-0 space-y-1">
-                                <div class="flex items-center gap-2">
-                                        <span class="h-2 w-2 rounded-full bg-primary"></span>
-                                        <span class="text-xs font-medium text-primary">{badge}</span>
+<section class:list={[css({ w: 'full', py: '12', pos: 'relative', zIndex: '10' }), className]}>
+        <div class={cx("glass-card", css({ p: { base: '4', sm: '6' } })) + " bg-gradient-card card-shadow"}>
+                <div class={css({ display: 'flex', flexDir: { base: 'column', sm: 'row' }, alignItems: { sm: 'center' }, gap: { base: '4', sm: '6' } })}>
+                        <div class={css({ flex: '1', minW: '0', display: 'flex', flexDir: 'column', gap: '1' })}>
+                                <div class={css({ display: 'flex', alignItems: 'center', gap: '2' })}>
+                                        <span class={css({ h: '2', w: '2', rounded: 'full', bg: 'primary' })}></span>
+                                        <span class={css({ fontSize: 'xs', fontWeight: 'medium', color: 'primary' })}>{badge}</span>
                                 </div>
-                                <h2 class="text-lg sm:text-xl font-display font-semibold tracking-tight text-primary-content">
+                                <h2 class={cx("text-primary-content", css({ fontSize: { base: 'lg', sm: 'xl' }, fontFamily: 'var(--font-display)', fontWeight: 'semibold', letterSpacing: 'tight' }))}>
                                         {headline}
                                 </h2>
-                                <p class="text-sm text-muted">
+                                <p class={cx("text-muted", css({ fontSize: 'sm' }))}>
                                         {subtitle}
                                 </p>
                         </div>
 
-                        <div class="sm:w-64 flex-shrink-0">
+                        <div class={css({ w: { sm: '64' }, flexShrink: '0' })}>
                                 <NewsletterWidget
                                         client:visible
                                         isSignedIn={!!user}

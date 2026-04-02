@@ -1,135 +1,135 @@
 <template>
-  <section class="relative overflow-hidden bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-black">
+  <section :class="css({ pos: 'relative', overflow: 'hidden', bgGradient: 'to-br', gradientFrom: { base: 'gray.50', _dark: 'gray.900' }, gradientVia: { base: 'gray.100', _dark: 'gray.800' }, gradientTo: { base: 'gray.200', _dark: 'black' } })">
     <!-- Animated background pattern -->
-    <div class="absolute inset-0 opacity-10 dark:opacity-10">
+    <div :class="css({ pos: 'absolute', inset: '0', opacity: '0.1' })">
       <div class="absolute inset-0 bg-grid-pattern"></div>
     </div>
-    
-    <div class="relative z-10 container mx-auto px-4 py-6 md:py-8 lg:py-12">
+
+    <div :class="css({ pos: 'relative', zIndex: '10', mx: 'auto', px: '4', py: { base: '6', md: '8', lg: '12' }, maxW: 'breakpoint-xl' })">
       <!-- Compact title section -->
-      <div class="text-center mb-8">
+      <div :class="css({ textAlign: 'center', mb: '8' })">
         <!-- Badge -->
-        <div class="inline-flex items-center gap-2 mb-4 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-sm">
-          <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+        <div :class="css({ display: 'inline-flex', alignItems: 'center', gap: '2', mb: '4', px: '3', py: '1', bg: 'green.500/20', borderWidth: '1px', borderColor: 'green.500/30', rounded: 'full', fontSize: 'sm' })">
+          <svg :class="css({ w: '4', h: '4', color: { base: 'green.600', _dark: 'green.400' } })" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
           </svg>
-          <span class="text-green-700 dark:text-green-300 font-medium">Free & Open Source Course</span>
+          <span :class="css({ color: { base: 'green.700', _dark: 'green.300' }, fontWeight: 'medium' })">Free & Open Source Course</span>
         </div>
 
         <!-- Main headline -->
-        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight max-w-4xl mx-auto">
+        <h1 :class="css({ fontSize: { base: '2xl', sm: '3xl', md: '4xl', lg: '5xl' }, fontWeight: 'extrabold', color: { base: 'gray.900', _dark: 'white' }, lineHeight: 'tight', maxW: '4xl', mx: 'auto' })">
           {{ title }}
         </h1>
       </div>
-      
+
       <!-- Content split 50/50 -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+      <div :class="css({ display: 'grid', gridTemplateColumns: { base: '1', lg: '2' }, gap: { base: '6', lg: '8' }, alignItems: 'start' })">
         <!-- Left content - Compact version -->
-        <div class="space-y-6">
+        <div :class="css({ display: 'flex', flexDir: 'column', gap: '6' })">
           <!-- Description -->
-          <p class="text-base sm:text-lg text-gray-700 dark:text-gray-200 leading-relaxed">
+          <p :class="css({ fontSize: { base: 'base', sm: 'lg' }, color: { base: 'gray.700', _dark: 'gray.200' }, lineHeight: 'relaxed' })">
             {{ description }}
           </p>
-          
+
           <!-- Compact Stats Row -->
-          <div class="flex flex-col sm:flex-row gap-4">
-            <div class="flex-1 bg-white/50 dark:bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-200 dark:border-gray-700/50">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div :class="css({ display: 'flex', flexDir: { base: 'column', sm: 'row' }, gap: '4' })">
+            <div :class="css({ flex: '1', bg: { base: 'rgba(255,255,255,0.5)', _dark: 'rgba(31,41,55,0.3)' }, backdropFilter: 'blur(4px)', rounded: 'lg', p: '4', borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700/50' } })">
+              <div :class="css({ display: 'flex', alignItems: 'center', gap: '3' })">
+                <div :class="css({ w: '10', h: '10', bg: 'yellow.500/20', rounded: 'lg', display: 'flex', alignItems: 'center', justifyContent: 'center' })">
+                  <svg :class="css({ w: '5', h: '5', color: { base: 'yellow.600', _dark: 'yellow.400' } })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                   </svg>
                 </div>
-                <div class="min-w-0">
-                  <div class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">{{ moduleCount }}</div>
-                  <div class="text-xs text-gray-600 dark:text-gray-400">Modules</div>
+                <div :class="css({ minW: '0' })">
+                  <div :class="css({ fontSize: { base: 'lg', sm: 'xl' }, fontWeight: 'bold', color: { base: 'gray.900', _dark: 'white' } })">{{ moduleCount }}</div>
+                  <div :class="css({ fontSize: 'xs', color: { base: 'gray.600', _dark: 'gray.400' } })">Modules</div>
                 </div>
               </div>
             </div>
 
-            <div class="flex-1 bg-white/50 dark:bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-200 dark:border-gray-700/50">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-secondary dark:text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div :class="css({ flex: '1', bg: { base: 'rgba(255,255,255,0.5)', _dark: 'rgba(31,41,55,0.3)' }, backdropFilter: 'blur(4px)', rounded: 'lg', p: '4', borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700/50' } })">
+              <div :class="css({ display: 'flex', alignItems: 'center', gap: '3' })">
+                <div :class="css({ w: '10', h: '10', bg: 'secondary/20', rounded: 'lg', display: 'flex', alignItems: 'center', justifyContent: 'center' })">
+                  <svg :class="css({ w: '5', h: '5', color: 'secondary' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                   </svg>
                 </div>
-                <div class="min-w-0">
-                  <div class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white capitalize truncate">{{ difficulty }}</div>
-                  <div class="text-xs text-gray-600 dark:text-gray-400">Level</div>
+                <div :class="css({ minW: '0' })">
+                  <div :class="css({ fontSize: { base: 'lg', sm: 'xl' }, fontWeight: 'bold', color: { base: 'gray.900', _dark: 'white' }, textTransform: 'capitalize', truncate: true })">{{ difficulty }}</div>
+                  <div :class="css({ fontSize: 'xs', color: { base: 'gray.600', _dark: 'gray.400' } })">Level</div>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <!-- Compact Learning Path -->
           <div
             v-if="learningPath.length > 0"
-            class="bg-white/50 dark:bg-gray-800/20 rounded-lg p-4 border border-gray-200 dark:border-gray-700/30"
+            :class="css({ bg: { base: 'rgba(255,255,255,0.5)', _dark: 'rgba(31,41,55,0.2)' }, rounded: 'lg', p: '4', borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700/30' } })"
           >
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <svg class="w-4 h-4 text-primary dark:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h3 :class="css({ fontSize: 'sm', fontWeight: 'semibold', color: { base: 'gray.900', _dark: 'white' }, mb: '3', display: 'flex', alignItems: 'center', gap: '2' })">
+              <svg :class="css({ w: '4', h: '4', color: 'primary' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
               </svg>
               Your Learning Path
             </h3>
-            <div class="grid grid-cols-1 gap-2 text-sm">
+            <div :class="css({ display: 'grid', gridTemplateColumns: '1', gap: '2', fontSize: 'sm' })">
               <div
                 v-for="(step, index) in learningPath"
                 :key="`${index}-${step}`"
-                class="flex items-center gap-2"
+                :class="css({ display: 'flex', alignItems: 'center', gap: '2' })"
               >
-                <div class="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-primary dark:text-primary text-xs font-semibold">{{ index + 1 }}</span>
+                <div :class="css({ w: '6', h: '6', bg: 'primary/20', rounded: 'full', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0' })">
+                  <span :class="css({ color: 'primary', fontSize: 'xs', fontWeight: 'semibold' })">{{ index + 1 }}</span>
                 </div>
-                <p class="text-gray-700 dark:text-gray-300">{{ step }}</p>
+                <p :class="css({ color: { base: 'gray.700', _dark: 'gray.300' } })">{{ step }}</p>
               </div>
             </div>
           </div>
-          
+
           <!-- Instructor & CTA Row -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-3">
+          <div :class="css({ display: 'flex', flexDir: { base: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: { sm: 'space-between' }, gap: '4' })">
+            <div :class="css({ display: 'flex', alignItems: 'center', gap: '3' })">
               <img
                 v-for="author in authors"
                 :key="author.name"
                 :src="author.avatarUrl"
                 :alt="author.name"
-                class="w-10 h-10 rounded-full ring-2 ring-gray-300 dark:ring-gray-700"
+                :class="css({ w: '10', h: '10', rounded: 'full', ringWidth: '2px', ringColor: { base: 'gray.300', _dark: 'gray.700' } })"
                 loading="lazy"
               />
-              <div class="min-w-0">
-                <p class="text-xs text-gray-600 dark:text-gray-400">Taught by</p>
-                <div class="text-sm text-gray-900 dark:text-white font-medium truncate">
+              <div :class="css({ minW: '0' })">
+                <p :class="css({ fontSize: 'xs', color: { base: 'gray.600', _dark: 'gray.400' } })">Taught by</p>
+                <div :class="css({ fontSize: 'sm', color: { base: 'gray.900', _dark: 'white' }, fontWeight: 'medium', truncate: true })">
                   {{ authors.map(a => a.name).join(', ') }}
                 </div>
               </div>
             </div>
-            
-            <Button 
-              href="#course-content" 
-              variant="primary" 
+
+            <Button
+              href="#course-content"
+              variant="primary"
               size="md"
-              class="bg-primary hover:bg-primary-dark text-white font-semibold w-full sm:w-auto"
+              :class="css({ bg: 'primary', color: 'white', fontWeight: 'semibold', w: { base: 'full', sm: 'auto' }, _hover: { bg: 'primary/90' } })"
             >
               Start Learning
-              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg :class="css({ w: '4', h: '4', ml: '2' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </Button>
           </div>
         </div>
-        
+
         <!-- Right content - Signup form (more compact) -->
-        <div class="relative">
+        <div :class="css({ pos: 'relative' })">
           <!-- Decorative element -->
-          <div class="absolute -top-4 -right-4 w-48 h-48 bg-yellow-500 rounded-full opacity-5 blur-3xl"></div>
-          
+          <div :class="css({ pos: 'absolute', top: '-4', right: '-4', w: '48', h: '48', bg: 'yellow.500', rounded: 'full', opacity: '0.05', filter: 'blur(48px)' })"></div>
+
           <!-- Signup card -->
-          <div class="relative bg-white/50 dark:bg-gray-800/50 backdrop-blur-lg rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-            <div class="text-center mb-4">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Get Course Updates</h3>
-              <p class="text-gray-600 dark:text-gray-400 text-sm">
+          <div :class="css({ pos: 'relative', bg: { base: 'rgba(255,255,255,0.5)', _dark: 'rgba(31,41,55,0.5)' }, backdropFilter: 'blur(16px)', rounded: 'xl', p: '6', borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } })">
+            <div :class="css({ textAlign: 'center', mb: '4' })">
+              <h3 :class="css({ fontSize: 'xl', fontWeight: 'bold', color: { base: 'gray.900', _dark: 'white' }, mb: '1' })">Get Course Updates</h3>
+              <p :class="css({ color: { base: 'gray.600', _dark: 'gray.400' }, fontSize: 'sm' })">
                 Be the first to know when new modules are released
               </p>
             </div>
@@ -138,29 +138,29 @@
             <slot name="signup-form" />
 
             <!-- Benefits -->
-            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3">What you'll get:</h4>
-              <ul class="space-y-2 text-xs text-gray-600 dark:text-gray-400">
-                <li class="flex items-start gap-2">
-                  <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div :class="css({ mt: '4', pt: '4', borderTopWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } })">
+              <h4 :class="css({ fontSize: 'xs', fontWeight: 'semibold', color: { base: 'gray.700', _dark: 'gray.300' }, mb: '3' })">What you'll get:</h4>
+              <ul :class="css({ display: 'flex', flexDir: 'column', gap: '2', fontSize: 'xs', color: { base: 'gray.600', _dark: 'gray.400' } })">
+                <li :class="css({ display: 'flex', alignItems: 'start', gap: '2' })">
+                  <svg :class="css({ w: '4', h: '4', color: { base: 'green.600', _dark: 'green.400' }, mt: '0.5', flexShrink: '0' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Instant notifications for new modules</span>
                 </li>
-                <li class="flex items-start gap-2">
-                  <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <li :class="css({ display: 'flex', alignItems: 'start', gap: '2' })">
+                  <svg :class="css({ w: '4', h: '4', color: { base: 'green.600', _dark: 'green.400' }, mt: '0.5', flexShrink: '0' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Access to course source code</span>
                 </li>
-                <li class="flex items-start gap-2">
-                  <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <li :class="css({ display: 'flex', alignItems: 'start', gap: '2' })">
+                  <svg :class="css({ w: '4', h: '4', color: { base: 'green.600', _dark: 'green.400' }, mt: '0.5', flexShrink: '0' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Exclusive tips and best practices</span>
                 </li>
-                <li class="flex items-start gap-2">
-                  <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <li :class="css({ display: 'flex', alignItems: 'start', gap: '2' })">
+                  <svg :class="css({ w: '4', h: '4', color: { base: 'green.600', _dark: 'green.400' }, mt: '0.5', flexShrink: '0' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <span>Community support and Q&A</span>

@@ -1,27 +1,26 @@
 <template>
-  <div v-if="resources && resources.length > 0" class="space-y-6">
-    <div class="bg-gradient-to-r from-primary to-secondary text-white rounded-xl p-6 shadow-lg">
-      <h3 class="text-2xl font-bold flex items-center gap-3">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div v-if="resources && resources.length > 0" :class="css({ display: 'flex', flexDir: 'column', gap: '6' })">
+    <div :class="css({ bgGradient: 'to-r', gradientFrom: 'primary', gradientTo: 'secondary', color: 'white', rounded: 'xl', p: '6', shadow: 'lg' })">
+      <h3 :class="css({ fontSize: '2xl', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3' })">
+        <svg :class="css({ w: '6', h: '6' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
         </svg>
         Resources
       </h3>
-      <p class="text-sm mt-2 text-secondary/80">Supporting materials for this module</p>
+      <p :class="css({ fontSize: 'sm', mt: '2', color: 'secondary/80' })">Supporting materials for this module</p>
     </div>
-    
-    <div class="space-y-4">
-      <div v-for="[category, categoryResources] in Object.entries(groupedResources)" :key="category" 
-           class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-        <h4 class="text-sm font-semibold uppercase tracking-wider flex items-center gap-2 mb-4"
-            :class="getCategoryColorClass(category)">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+    <div :class="css({ display: 'flex', flexDir: 'column', gap: '4' })">
+      <div v-for="[category, categoryResources] in Object.entries(groupedResources)" :key="category"
+           :class="css({ bg: { base: 'white', _dark: 'gray.800' }, rounded: 'xl', p: '5', shadow: 'sm', borderWidth: '1px', borderColor: { base: 'gray.100', _dark: 'gray.700' } })">
+        <h4 :class="[css({ fontSize: 'sm', fontWeight: 'semibold', textTransform: 'uppercase', letterSpacing: 'wider', display: 'flex', alignItems: 'center', gap: '2', mb: '4' }), getCategoryColorClass(category)]">
+          <svg :class="css({ w: '4', h: '4' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getCategoryIconPath(category)"/>
           </svg>
           {{ categoryLabels[category] }}
         </h4>
-        
-        <div class="space-y-3">
+
+        <div :class="css({ display: 'flex', flexDir: 'column', gap: '3' })">
           <component
             v-for="(resource, index) in categoryResources"
             :key="index"
@@ -30,37 +29,34 @@
             :target="resource.type === 'url' ? '_blank' : undefined"
             :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
             @click="resource.type === 'embed' && openEmbedModal(resource)"
-            class="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group cursor-pointer text-left w-full"
+            :class="css({ display: 'flex', alignItems: 'start', gap: '3', p: '4', bg: { base: 'gray.50', _dark: 'gray.900' }, rounded: 'lg', transition: 'all', cursor: 'pointer', textAlign: 'left', w: 'full', _hover: { bg: { base: 'gray.100', _dark: 'gray.800' } } }) + ' group'"
           >
-            <div class="flex-shrink-0 p-2 rounded-lg transition-colors"
-                 :class="getResourceIconClass(resource.type)">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path 
-                  stroke-linecap="round" 
-                  stroke-linejoin="round" 
-                  stroke-width="2" 
+            <div :class="[css({ flexShrink: '0', p: '2', rounded: 'lg', transition: 'colors' }), getResourceIconClass(resource.type)]">
+              <svg :class="css({ w: '5', h: '5' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
                   :d="getResourceIconPath(resource.type)"
                 />
               </svg>
             </div>
-            
-            <div class="flex-1 min-w-0">
-              <h5 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors">
+
+            <div :class="css({ flex: '1', minW: '0' })">
+              <h5 :class="css({ fontWeight: 'semibold', color: { base: 'gray.900', _dark: 'white' }, transition: 'colors' }) + ' group-hover:text-primary'">
                 {{ resource.title }}
               </h5>
-              <p v-if="resource.description" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p v-if="resource.description" :class="css({ fontSize: 'sm', color: { base: 'gray.600', _dark: 'gray.400' }, mt: '1' })">
                 {{ resource.description }}
               </p>
-              <div class="flex items-center gap-3 mt-3">
-                <span class="text-xs font-medium px-2 py-1 rounded-full"
-                      :class="getResourceTypeBadgeClass(resource.type)">
+              <div :class="css({ display: 'flex', alignItems: 'center', gap: '3', mt: '3' })">
+                <span :class="[css({ fontSize: 'xs', fontWeight: 'medium', px: '2', py: '1', rounded: 'full' }), getResourceTypeBadgeClass(resource.type)]">
                   {{ getResourceTypeLabel(resource.type) }}
                 </span>
-                <svg v-if="resource.type === 'url' || resource.type === 'embed'" 
-                     class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                     :class="resource.type === 'url' ? 'text-primary' : 'text-secondary'"
+                <svg v-if="resource.type === 'url' || resource.type === 'embed'"
+                     :class="[css({ w: '4', h: '4', opacity: '0', transition: 'opacity' }) + ' group-hover:opacity-100', resource.type === 'url' ? css({ color: 'primary' }) : css({ color: 'secondary' })]"
                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         :d="resource.type === 'url' ? 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14' : 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'"></path>
                 </svg>
               </div>
@@ -155,15 +151,15 @@ const getCategoryIconPath = (category: string) => {
 const getCategoryColorClass = (category: string) => {
 	switch (category) {
 		case "slides":
-			return "text-orange-600 dark:text-orange-400";
+			return css({ color: { base: 'orange.600', _dark: 'orange.400' } });
 		case "code":
-			return "text-primary dark:text-primary";
+			return css({ color: 'primary' });
 		case "documentation":
-			return "text-green-600 dark:text-green-400";
+			return css({ color: { base: 'green.600', _dark: 'green.400' } });
 		case "demos":
-			return "text-secondary dark:text-secondary";
+			return css({ color: 'secondary' });
 		default:
-			return "text-gray-600 dark:text-gray-400";
+			return css({ color: { base: 'gray.600', _dark: 'gray.400' } });
 	}
 };
 
@@ -183,26 +179,26 @@ const getResourceIconPath = (type: string) => {
 const getResourceIconClass = (type: string) => {
 	switch (type) {
 		case "url":
-			return "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary";
+			return css({ bg: { base: 'primary/10', _dark: 'primary/20' }, color: 'primary' });
 		case "file":
-			return "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400";
+			return css({ bg: { base: 'green.100', _dark: 'green.900/30' }, color: { base: 'green.600', _dark: 'green.400' } });
 		case "embed":
-			return "bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-secondary";
+			return css({ bg: { base: 'secondary/10', _dark: 'secondary/20' }, color: 'secondary' });
 		default:
-			return "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400";
+			return css({ bg: { base: 'gray.100', _dark: 'gray.800' }, color: { base: 'gray.600', _dark: 'gray.400' } });
 	}
 };
 
 const getResourceTypeBadgeClass = (type: string) => {
 	switch (type) {
 		case "url":
-			return "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary";
+			return css({ bg: { base: 'primary/10', _dark: 'primary/20' }, color: 'primary' });
 		case "file":
-			return "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300";
+			return css({ bg: { base: 'green.100', _dark: 'green.900/30' }, color: { base: 'green.700', _dark: 'green.300' } });
 		case "embed":
-			return "bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-secondary";
+			return css({ bg: { base: 'secondary/10', _dark: 'secondary/20' }, color: 'secondary' });
 		default:
-			return "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300";
+			return css({ bg: { base: 'gray.100', _dark: 'gray.800' }, color: { base: 'gray.700', _dark: 'gray.300' } });
 	}
 };
 

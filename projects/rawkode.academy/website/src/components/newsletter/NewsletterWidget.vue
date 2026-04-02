@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { css } from "../../../styled-system/css";
+import { css, cx } from "../../../styled-system/css";
 import { ref, computed, onMounted, nextTick } from "vue";
 import { actions } from "astro:actions";
 import {
@@ -188,7 +188,7 @@ const trackSignInClick = () => {
 
 <template>
 	<template v-if="!shouldHide">
-		<div class="w-full">
+		<div :class="css({ w: 'full' })">
 			<!-- Success State -->
 			<Transition
 				enter-active-class="transition duration-300 ease-out"
@@ -197,19 +197,19 @@ const trackSignInClick = () => {
 			>
 				<div
 					v-if="showSubscribedState"
-					class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20"
+					:class="css({ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2', py: '2.5', px: '4', rounded: 'xl', bgGradient: 'to-r', gradientFrom: 'green.500/10', gradientTo: 'emerald.500/10', borderWidth: '1px', borderColor: 'green.500/20' })"
 				>
-					<svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<svg :class="css({ w: '5', h: '5', color: 'green.500' })" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 					</svg>
-					<span class="text-sm font-medium text-green-700 dark:text-green-300">
+					<span :class="css({ fontSize: 'sm', fontWeight: 'medium', color: { base: 'green.700', _dark: 'green.300' } })">
 						{{ isSuccess ? "You're in!" : "Subscribed" }}
 					</span>
 				</div>
 			</Transition>
 
 			<!-- Main CTA -->
-			<div v-if="!showSubscribedState" class="w-full">
+			<div v-if="!showSubscribedState" :class="css({ w: 'full' })">
 				<!-- Error State -->
 				<Transition
 					enter-active-class="transition duration-200 ease-out"
@@ -221,9 +221,9 @@ const trackSignInClick = () => {
 				>
 					<div
 						v-if="error"
-						class="mb-2 p-2.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 text-xs flex items-center gap-2"
+						:class="css({ mb: '2', p: '2.5', rounded: 'lg', bg: { base: 'red.50', _dark: 'red.900/20' }, borderWidth: '1px', borderColor: { base: 'red.200', _dark: 'red.800/50' }, color: { base: 'red.600', _dark: 'red.400' }, fontSize: 'xs', display: 'flex', alignItems: 'center', gap: '2' })"
 					>
-						<svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<svg :class="css({ w: '4', h: '4', flexShrink: '0' })" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 						</svg>
 						{{ error }}
@@ -235,14 +235,14 @@ const trackSignInClick = () => {
 					<button
 						@click="subscribeAsLearner"
 						:disabled="isLoading"
-						class="group w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-primary text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-wait disabled:hover:translate-y-0 disabled:hover:shadow-none"
+						:class="css({ w: 'full', py: '2.5', px: '4', rounded: 'xl', fontSize: 'sm', fontWeight: 'semibold', transition: 'all', transitionDuration: '200ms', bg: 'primary', color: 'white', _hover: { shadow: 'lg', shadowColor: 'primary/25', transform: 'translateY(-2px)' }, _active: { transform: 'translateY(0)' }, _disabled: { opacity: '0.7', cursor: 'wait', _hover: { transform: 'translateY(0)', shadow: 'none' } } }) + ' group'"
 					>
-						<span class="flex items-center justify-center gap-2">
-							<svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+						<span :class="css({ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2' })">
+							<svg v-if="isLoading" :class="css({ w: '4', h: '4', animation: 'spin' })" fill="none" viewBox="0 0 24 24">
+								<circle :class="css({ opacity: '0.25' })" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+								<path :class="css({ opacity: '0.75' })" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
 							</svg>
-							<svg v-else class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<svg v-else :class="css({ w: '4', h: '4', transition: 'transform' }) + ' group-hover:scale-110'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
 							</svg>
 							{{ isLoading ? "Subscribing..." : "Subscribe" }}
@@ -265,10 +265,10 @@ const trackSignInClick = () => {
 						<button
 							v-if="!isExpanded"
 							@click="expandForm"
-							class="group w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-primary text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0"
+							:class="css({ w: 'full', py: '2.5', px: '4', rounded: 'xl', fontSize: 'sm', fontWeight: 'semibold', transition: 'all', transitionDuration: '200ms', bg: 'primary', color: 'white', _hover: { shadow: 'lg', shadowColor: 'primary/25', transform: 'translateY(-2px)' }, _active: { transform: 'translateY(0)' } }) + ' group'"
 						>
-							<span class="flex items-center justify-center gap-2">
-								<svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<span :class="css({ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2' })">
+								<svg :class="css({ w: '4', h: '4', transition: 'transform' }) + ' group-hover:scale-110'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
 								</svg>
 								Subscribe
@@ -276,9 +276,9 @@ const trackSignInClick = () => {
 						</button>
 
 						<!-- Expanded form -->
-						<form v-else @submit.prevent="handleSubmit" class="space-y-2">
+						<form v-else @submit.prevent="handleSubmit" :class="css({ display: 'flex', flexDir: 'column', gap: '2' })">
 							<!-- Email input with integrated submit -->
-							<div class="relative">
+							<div :class="css({ pos: 'relative' })">
 								<input
 									ref="emailInput"
 									v-model="email"
@@ -286,35 +286,35 @@ const trackSignInClick = () => {
 									placeholder="you@example.com"
 									required
 									:disabled="isLoading"
-									class="w-full py-2.5 pl-4 pr-12 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/80 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+									:class="css({ w: 'full', py: '2.5', pl: '4', pr: '12', rounded: 'xl', borderWidth: '2px', borderColor: { base: 'neutral.200', _dark: 'neutral.700' }, bg: { base: 'white', _dark: 'neutral.800/80' }, color: { base: 'neutral.900', _dark: 'white' }, _placeholder: { color: 'neutral.400' }, fontSize: 'sm', transition: 'all', transitionDuration: '200ms', _focus: { outline: 'none', borderColor: 'primary', ringWidth: '2px', ringColor: 'primary/20' }, _disabled: { opacity: '0.6' } })"
 								/>
 								<button
 									type="submit"
 									:disabled="isLoading || !email.trim()"
-									class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-primary text-white transition-all duration-200 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+									:class="css({ pos: 'absolute', right: '1.5', top: '50%', transform: 'translateY(-50%)', p: '1.5', rounded: 'lg', bg: 'primary', color: 'white', transition: 'all', transitionDuration: '200ms', _hover: { bg: 'primary/90' }, _disabled: { opacity: '0.5', cursor: 'not-allowed' } })"
 									:title="isLoading ? 'Subscribing...' : 'Subscribe'"
 								>
-									<svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+									<svg v-if="isLoading" :class="css({ w: '4', h: '4', animation: 'spin' })" fill="none" viewBox="0 0 24 24">
+										<circle :class="css({ opacity: '0.25' })" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+										<path :class="css({ opacity: '0.75' })" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
 									</svg>
-									<svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+									<svg v-else :class="css({ w: '4', h: '4' })" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
 									</svg>
 								</button>
 							</div>
 
 							<!-- Sign in option -->
-							<div class="flex items-center gap-2">
-								<div class="flex-1 h-px bg-neutral-200 dark:bg-neutral-700"></div>
-								<span class="text-xs text-neutral-400 dark:text-neutral-500">or</span>
-								<div class="flex-1 h-px bg-neutral-200 dark:bg-neutral-700"></div>
+							<div :class="css({ display: 'flex', alignItems: 'center', gap: '2' })">
+								<div :class="css({ flex: '1', h: '1px', bg: { base: 'neutral.200', _dark: 'neutral.700' } })"></div>
+								<span :class="css({ fontSize: 'xs', color: { base: 'neutral.400', _dark: 'neutral.500' } })">or</span>
+								<div :class="css({ flex: '1', h: '1px', bg: { base: 'neutral.200', _dark: 'neutral.700' } })"></div>
 							</div>
 
 							<a
 								:href="signInUrl"
 								@click="trackSignInClick"
-								class="inline-flex items-center justify-center w-full rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide text-white bg-gradient-primary shadow-lg hover:shadow-xl border border-white/40 dark:border-white/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+								:class="css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', w: 'full', rounded: 'xl', px: '5', py: '2.5', fontSize: 'sm', fontWeight: 'semibold', letterSpacing: 'wide', color: 'white', shadow: 'lg', borderWidth: '1px', borderColor: { base: 'white/40', _dark: 'white/10' }, transition: 'all', transitionDuration: '200ms', _hover: { shadow: 'xl', transform: 'translateY(-2px)' }, _active: { transform: 'translateY(0)' } }) + ' bg-gradient-primary'"
 							>
 								Continue with Sign in
 							</a>
