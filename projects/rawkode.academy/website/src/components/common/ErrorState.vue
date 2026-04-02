@@ -1,24 +1,40 @@
 <template>
 	<div
-		:class="[
-			'flex flex-col items-center justify-center p-8',
-			centered ? 'min-h-[400px]' : '',
-		]"
+		:class="css({
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+			justifyContent: 'center',
+			p: '8',
+			...(centered ? { minHeight: '400px' } : {}),
+		})"
 	>
 		<div
-			:class="[
-				'rounded-lg p-6 w-full',
-				variant === 'error'
-					? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-					: 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800',
-				maxWidth,
-			]"
+			:class="css({
+				borderRadius: 'lg',
+				p: '6',
+				width: 'full',
+				maxWidth: maxWidth === 'max-w-md' ? 'md' : maxWidth === 'max-w-lg' ? 'lg' : 'md',
+				border: '1px solid',
+				...(variant === 'error'
+					? {
+							bg: { base: 'red.50', _dark: 'rgba(127, 29, 29, 0.2)' },
+							borderColor: { base: 'red.200', _dark: 'red.800' },
+						}
+					: {
+							bg: { base: 'yellow.50', _dark: 'rgba(113, 63, 18, 0.2)' },
+							borderColor: { base: 'yellow.200', _dark: 'yellow.800' },
+						}),
+			})"
 		>
 			<!-- Icon -->
-			<div v-if="showIcon" class="flex justify-center mb-4">
+			<div
+				v-if="showIcon"
+				:class="css({ display: 'flex', justifyContent: 'center', mb: '4' })"
+			>
 				<svg
 					v-if="variant === 'error'"
-					class="w-12 h-12 text-red-500 dark:text-red-400"
+					:class="css({ width: '12', height: '12', color: { base: 'red.500', _dark: 'red.400' } })"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -32,7 +48,7 @@
 				</svg>
 				<svg
 					v-else
-					class="w-12 h-12 text-yellow-500 dark:text-yellow-400"
+					:class="css({ width: '12', height: '12', color: { base: 'yellow.500', _dark: 'yellow.400' } })"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -48,43 +64,62 @@
 
 			<!-- Title -->
 			<h3
-				:class="[
-					'text-lg font-semibold mb-2 text-center',
-					variant === 'error'
-						? 'text-red-800 dark:text-red-200'
-						: 'text-yellow-800 dark:text-yellow-200',
-				]"
+				:class="css({
+					fontSize: 'lg',
+					fontWeight: 'semibold',
+					mb: '2',
+					textAlign: 'center',
+					color: variant === 'error'
+						? { base: 'red.800', _dark: 'red.200' }
+						: { base: 'yellow.800', _dark: 'yellow.200' },
+				})"
 			>
 				{{ title }}
 			</h3>
 
 			<!-- Message -->
 			<p
-				:class="[
-					'text-sm mb-4 text-center',
-					variant === 'error'
-						? 'text-red-700 dark:text-red-300'
-						: 'text-yellow-700 dark:text-yellow-300',
-				]"
+				:class="css({
+					fontSize: 'sm',
+					mb: '4',
+					textAlign: 'center',
+					color: variant === 'error'
+						? { base: 'red.700', _dark: 'red.300' }
+						: { base: 'yellow.700', _dark: 'yellow.300' },
+				})"
 			>
 				{{ message }}
 			</p>
 
 			<!-- Actions -->
-			<div v-if="$slots.actions" class="flex justify-center gap-3">
+			<div
+				v-if="$slots.actions"
+				:class="css({ display: 'flex', justifyContent: 'center', gap: '3' })"
+			>
 				<slot name="actions" />
 			</div>
 
 			<!-- Default retry button -->
-			<div v-else-if="onRetry" class="flex justify-center">
+			<div
+				v-else-if="onRetry"
+				:class="css({ display: 'flex', justifyContent: 'center' })"
+			>
 				<button
 					@click="onRetry"
-					:class="[
-						'px-4 py-2 rounded-md text-sm font-medium transition-colors',
-						variant === 'error'
-							? 'bg-red-600 hover:bg-red-700 text-white'
-							: 'bg-yellow-600 hover:bg-yellow-700 text-white',
-					]"
+					:class="css({
+						px: '4',
+						py: '2',
+						borderRadius: 'md',
+						fontSize: 'sm',
+						fontWeight: 'medium',
+						transition: 'colors',
+						transitionDuration: '200ms',
+						color: 'white',
+						bg: variant === 'error' ? 'red.600' : 'yellow.600',
+						_hover: {
+							bg: variant === 'error' ? 'red.700' : 'yellow.700',
+						},
+					})"
 				>
 					{{ retryText }}
 				</button>
@@ -94,6 +129,8 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
+
 interface Props {
 	variant?: "error" | "warning";
 	title?: string;

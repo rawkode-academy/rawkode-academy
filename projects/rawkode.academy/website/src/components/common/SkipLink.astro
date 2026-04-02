@@ -1,21 +1,43 @@
 ---
+import { css } from "../../../styled-system/css";
+
 export interface Props {
 	href?: string;
 	text?: string;
 }
 
 const { href = "#main-content", text = "Skip to main content" } = Astro.props;
+
+const skipLinkClass = css({
+	srOnly: true,
+	_focus: {
+		srOnly: false,
+		position: "absolute",
+		top: "4",
+		left: "4",
+		zIndex: 50,
+		px: "4",
+		py: "2",
+		bg: "colorPalette.default",
+		color: "white",
+		borderRadius: "md",
+		outline: "none",
+		ringWidth: "2px",
+		ringOffset: "2px",
+		ringColor: "colorPalette.default",
+	},
+});
 ---
 
 <a
 	href={href}
-	class="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+	class={skipLinkClass}
 >
 	{text}
 </a>
 
 <style>
-	.skip-link:focus {
+	a:focus {
 		clip: auto;
 		clip-path: none;
 		height: auto;
